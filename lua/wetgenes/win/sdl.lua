@@ -664,6 +664,17 @@ sdl.cursor=function(s,dat,px,py)
 end
 
 
+-- show/hide onscreen keyboard
+function sdl.StartTextInput(...)
+	return SDL.startTextInput(...)
+end
+function sdl.StopTextInput(...)
+	return SDL.stopTextInput(...)
+end
+function sdl.GetPrefPath(...)
+	return SDL.getPrefPath(...)
+end
+
 sdl.platform=SDL.getPlatform() -- remember platform
 
 return sdl

@@ -180,6 +180,8 @@ function wmaster.setup(widget,def)
 
 					if master.active and master.active.can_focus then
 						master.set_focus(master.active)
+					else
+						master.set_focus(nil)
 					end
 
 					master.over:set_dirty()
@@ -393,6 +395,9 @@ function wmaster.setup(widget,def)
 				widget.edit=edit
 				master.edit:call_hook_later("focus_edit")
 			end
+			wwin.StartTextInput()
+		else
+			wwin.StopTextInput()
 		end
 	end
 	
@@ -412,8 +417,12 @@ function wmaster.setup(widget,def)
 				if focus.class=="textedit" then -- also set edit focus
 					master.set_focus_edit(focus)
 --print("edit focus",tostring(focus),focus and focus.class)
+				else
+					master.set_focus_edit(nil)
 				end
 			end
+		else
+			master.set_focus_edit(nil)
 		end
 	
 	end

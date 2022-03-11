@@ -20,6 +20,7 @@ possible ENV settings
 
 ]]
 
+local wpath=require("wetgenes.path")
 local wpackage=require("wetgenes.package")
 local wzips=require("wetgenes.zips")
 local wsbox=require("wetgenes.sandbox")
@@ -126,6 +127,14 @@ if wwin.flavour=="emcc" then sniff_homedir=false end -- the homedir is a lie and
 if sniff_homedir then -- smart setup to save files into some sort of user file area depending on OS
 
 	local homedir
+
+	if not homedir and wwin.sdl_platform=="Android" then
+		homedir=wwin.GetPrefPath("wetgenes","gamecake")
+		if homedir then
+			wwin.files_prefix=wpath.resolve(homedir)
+			wwin.cache_prefix=wpath.resolve(homedir,"../cache/")
+		end
+	end
 
 	if not homedir and (wwin.flavour=="win" or wwin.sdl_platform=="Windows" ) then
 	
