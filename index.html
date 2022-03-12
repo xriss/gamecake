@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -8,6 +9,11 @@
 * {
   margin: 0;
   padding: 0;
+}
+
+html {
+	height: 100%;
+	width: 100%;
 }
 
 .split {
@@ -84,6 +90,9 @@
 	};
 
 	var msg={}
+	
+	msg.cakefile="./game.cake"; 
+	
 	str_to_msg( window.location.search.substring(1) , msg )
 	str_to_msg( window.location.hash.substring(1) , msg )
 

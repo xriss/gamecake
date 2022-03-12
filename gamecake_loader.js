@@ -146,7 +146,7 @@ gamecake_loader=function(opts)
 	
 	if(!sharedarraybuffer_support())
 	{
-		warning+='<br/>SharedArrayBuffer is missing! <br/> <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer/Planned_changes">Would you like to know more?</a><br/><br/>';
+		warning+='<br/>SharedArrayBuffer is missing! <br/> Make sure you are using a https url. <br/> <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer/Planned_changes">Would you like to know more?</a><br/><br/>';
 	}
 
 	if(!webgl_support())
@@ -224,6 +224,8 @@ gamecake_loader=function(opts)
 
 		var w=parseFloat(window.getComputedStyle(e).width);
 		var h=parseFloat(window.getComputedStyle(e).height);
+
+console.log(w,h)
 		
 		if(!isFullscreen) // it seems better not to call this when fullscreen
 		{
@@ -255,22 +257,27 @@ gamecake_loader=function(opts)
 
 		gamecake.canvas.focus()
 		
-		FS.mkdir('/files');
+/*
+		var BFS = new BrowserFS.EmscriptenFS();
+  		FS.mkdir('/files');
+		FS.mount(BFS, {root: '/'}, '/files');
+*/
+
+  		FS.mkdir('/files');
 		FS.mount(IDBFS, {}, '/files');
 
 		FS.syncfs(true, function (err) {
 			if(err) { console.log(err); }
 
 			let syncfs ; syncfs=function(){
-				console.log("syncing FS")
+//				console.log("Syncing IDBFS")
 				FS.syncfs(false, function (err) {
 					if(err) { console.log(err); }
 				});
-				setTimeout(syncfs, 60000);
+				setTimeout(syncfs, 10000);
 			} ; syncfs()
 
 		}); // this probably works but is all rather squiffy for now
-
 
 
 		if(opts.cakefile)
