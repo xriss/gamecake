@@ -562,7 +562,7 @@ static int lua_gles_BufferSubData (lua_State *l)
 // Stubs2
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-#if defined(LUA_GLES_GLES2) || defined(LUA_GLES_GL)
+#if defined(LUA_GLES_GLES2) || defined(LUA_GLES_GLES3) || defined(LUA_GLES_GL)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -1931,7 +1931,7 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 #endif
 
 // programable pipeline
-#if defined(LUA_GLES_GLES2) || defined(LUA_GLES_GL)
+#if defined(LUA_GLES_GLES3) || defined(LUA_GLES_GLES2) || defined(LUA_GLES_GL)
 
 		{"CreateShader",			lua_gles_CreateShader},
 		{"DeleteShader",			lua_gles_DeleteShader},
@@ -2065,12 +2065,17 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 	lua_newtable(l);
 	luaL_openlib(l, NULL, lib, 0);
 
+#if defined(LUA_GLES_GLES3)
+	lua_pushboolean(l,1);
+	lua_setfield(l,-2,"GLES3");
+#endif
+
 #if defined(LUA_GLES_GLES2)
 	lua_pushboolean(l,1);
 	lua_setfield(l,-2,"GLES2");
 #endif
 
-#if defined(LUA_GLES_GLES2) || defined(LUA_GLES_GL)
+#if defined(LUA_GLES_GLES3) || defined(LUA_GLES_GLES2) || defined(LUA_GLES_GL)
 	lua_pushboolean(l,1);
 	lua_setfield(l,-2,"programmable_pipeline_available");
 #endif
