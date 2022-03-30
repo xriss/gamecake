@@ -44,7 +44,7 @@ wtree.refresh=function(widget,items)
 				hy=ss,
 				size="fullx",
 				text="",
-				text_align="left_center",
+				text_align="left",
 				user=it,
 				color=0,
 			}

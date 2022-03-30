@@ -103,7 +103,7 @@ function wmenuitem.menu_add(widget,opts)
 
 		it.class="menuitem"
 		it.draw_text=it.draw_text or opts.draw_text or md.draw_text
-		it.text_align=it.text_align or "left_center"
+		it.text_align=it.text_align or "left"
 		it.hooks=it.hooks or opts.hooks     or md.hooks
 		it.hide_when_clicked=it.hide_when_clicked or true
 		it.color     = it.color       or opts.color     or md.color     or 0

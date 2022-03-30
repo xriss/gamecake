@@ -23,7 +23,7 @@ function wthree.draw(widget)
 end
 
 -- this is a magic layout that *assumes* only three children
--- 1st is placed on the left, 3rd is placed on the right and the 2nd takes up what is left
+-- 1st is placed on the left, 3rd is placed on the right and the 2nd(middle) one takes up all the space remaining in the middle
 -- useful for left/right aligning content and can also be used vertically
 
 function wthree.layout(widget)
@@ -98,7 +98,7 @@ function wthree.setup(widget,def)
 
 	widget.class="three"
 	
-	widget.three_axis =def.three_axis  or "x" 	-- or "y"		three across x or y axis
+	widget.three_axis=def.three_axis  or "x" 	-- or "y"		three across x or y axis
 	
 	widget.update=wthree.update
 	widget.draw=wthree.draw

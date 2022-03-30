@@ -83,7 +83,7 @@ wdialogs.show=function(dialogs,opts)
 	window.close_request=function(id)
 		dialogs:hide_overlay()
 		master:layout() -- need to layout at least once to get everything in the right place
-		if id and opts[id] then (opts[id])() end
+		if id and opts[id] then (opts[id])(window) end
 	end
 
 	canvas:add({hx=hz*16.5,hy=hz*0.25})
@@ -116,17 +116,20 @@ wdialogs.show=function(dialogs,opts)
 			window.close_request(w.id)
 		end
 	end
-	if opts.sorry then
-		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="sorry",text="Sorry",hx=hz*16})
+	if opts.no then
+		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="no",text="No"})
 	end
-	if opts.yes then
-		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="yes",text="Yes"})
+	if opts.cancel then
+		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="cancel",text="Cancel"})
 	end
 	if opts.ok then
 		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="ok",text="OK"})
 	end
-	if opts.no then
-		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="no",text="No"})
+	if opts.yes then
+		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="yes",text="Yes"})
+	end
+	if opts.sorry then
+		def_button(inside,{hooks=opts.hooks or clickhooks,class="button",id="sorry",text="Sorry",hx=hz*16})
 	end
 
 	canvas:add({hx=hz*16.5,hy=hz*0.25})
