@@ -243,7 +243,7 @@ oven.preloader("font",name)
 
 			if gl then --gl mode
 			
-				local bfontgrd=require("wetgenes.gamecake.fun.bitdown_font").build_grd(8,16)
+				local bfontgrd=require("wetgenes.gamecake.fun.bitdown_font").build_grd(8,16,"r")
 			
 				t={}
 				t.filename=filename
