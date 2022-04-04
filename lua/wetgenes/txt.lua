@@ -566,7 +566,11 @@ cut out the text in the marked area (if marked) and set the cursor to this locat
 
 			end
 			
-			if s=="" then s=nil end
+			if s=="" then
+				s=nil
+			else
+				hook("changed")
+			end
 
 			return s
 		end
