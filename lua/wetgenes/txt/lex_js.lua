@@ -36,8 +36,9 @@ local MAP=M.MAP
 M.wild_tokens={
 	"^[0-9a-zA-Z_]+",						-- a variable or function name
 	"^[0-9a-zA-Z_]+%.[0-9a-zA-Z_]+",		-- a variable or function name containing a single .
-	"^%s+",									-- multiple white space
-	"^%d+%.?%d*[eE%+%-]*%d*",				-- floating point number
+	"^[ \t]+",								-- multiple tabs or spaces but not newlines
+	"^%d+%.?%d*[eE][%+%-]?%d*",				-- floating point number with exponent
+	"^%d+%.?%d*",							-- floating point number or int
 	"^0x[0-9a-fA-F]+",						-- hex number
 }
 -- test if a pattern matches entire string
@@ -332,7 +333,11 @@ M.parse=function(state,input,output)
 		end
 		
 		local check_number=function()
-			if fullmatch(token,"^%d+%.?%d*[eE%+%-]*%d*") then-- float or int
+			if fullmatch(token,"^%d+%.?%d*[eE][%+%-]?%d*") then-- float or int with exponent
+				poke(state.stack,MAP.number)
+				return true
+			end
+			if fullmatch(token,"^%d+%.?%d*") then-- float or int
 				poke(state.stack,MAP.number)
 				return true
 			end
