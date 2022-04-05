@@ -133,8 +133,10 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 		end
 		
 		local pan=widget.scroll_widget.pan
-		pan.hx_max=(widget.txt.hx+widget.gutter+1)*8
+		pan.hx_max=(widget.txt.hx+widget.gutter+2)*8
 		pan.hy_max=widget.txt.hy*16
+		
+		if widget.opts.word_wrap then pan.hx_max=0 end -- no x scroll when word wrapping
 	
 		if widget.data then -- auto set data if txt changes
 			local sa=widget.txt.get_text()
@@ -419,9 +421,9 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 --		print("dec",d)
 		pan.parent.daty:dec(16*d)
 
-	elseif dy>hy-4 then
+	elseif dy>hy-3 then
 
-		local d=(dy-hy+4)
+		local d=(dy-hy+3)
 --		print("inc",d)
 		pan.parent.daty:inc(16*d)
 
