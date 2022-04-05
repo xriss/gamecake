@@ -675,7 +675,7 @@ eg too the end of a line
 			return
 		end
 
-		if y>txt.hy then y=txt.hy end
+		if y>txt.hy then y=txt.hy x=txt.get_hx(y)+1 end
 		if y<1 then y=1 end
 
 		local hx=txt.get_hx(y)

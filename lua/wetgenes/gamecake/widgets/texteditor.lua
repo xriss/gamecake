@@ -315,19 +315,16 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	end
 
 	local texteditor=pan.texteditor
-	local txt=texteditor.txt
-	local px=-math.floor(pan.pan_px/8)
-	local py=math.floor(pan.pan_py/16)
-	
+	local txt=texteditor.txt	
 	local x,y=pan:mousexy(_x,_y)
 
-
-	local dx,dy=math.floor(x/8),math.floor(y/16)
+	local dx,dy=math.floor(x/8-0.5),math.floor(y/16)
 	
-	dx=dx-texteditor.gutter+1
-	dy=dy+1
+	dx=dx-texteditor.gutter+1-texteditor.cx
+	dy=dy+1-texteditor.cy
 
-	local line=pan.lines[ dy - texteditor.cy]
+	local line=pan.lines[ dy ]
+	
 	if line then
 		dy=line.y
 		dx=line.x+dx
@@ -413,7 +410,7 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 	local dx=cx-texteditor.cx
 	local dy=cy-texteditor.cy
 	
-	local hx=math.floor(texteditor.scroll_widget.pan.hx/8)
+	local hx=math.floor(texteditor.scroll_widget.pan.hx/8)-texteditor.gutter+1
 	local hy=math.floor(texteditor.scroll_widget.pan.hy/16)
 	
 	if dy<4 then
@@ -429,7 +426,15 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 		pan.parent.daty:inc(16*d)
 
 	end
-	
+
+	local edge=math.floor(hx/3)
+	if edge>8 then edge=8 end
+	if edge<1 then edge=1 end
+	if dx<edge+1 then
+		pan.parent.datx:dec(8*(edge+1-dx))
+	elseif dx>hx-edge then
+		pan.parent.datx:inc(8*(dx-(hx-edge)))
+	end
 	
 end
 
@@ -708,6 +713,8 @@ function wtexteditor.setup(widget,def)
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles",color=widget.color})
 
+	widget.scroll_widget.datx.step=8
+	widget.scroll_widget.daty.step=16
 
 	widget.set_txt=function(txt)
 		if widget.txt then -- remove old hooks
