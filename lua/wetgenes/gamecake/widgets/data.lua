@@ -135,7 +135,7 @@ adjust number (may trigger hook)
 
 ]]
 wdata.data_inc=function(dat,step,nohook)
-	step=step or dat.step
+	step=step or dat.scroll or dat.step
 	if step==0 then step=1 end
 	return dat:value(dat.num+step,nohook)
 end
@@ -145,7 +145,7 @@ adjust number (may trigger hook)
 
 ]]
 wdata.data_dec=function(dat,step,nohook)
-	step=step or dat.step
+	step=step or dat.scroll or dat.step
 	if step==0 then step=1 end
 	return dat:value(dat.num-step,nohook)
 end

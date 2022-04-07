@@ -116,7 +116,9 @@ function wscroll.setup(widget,def)
 	widget.solid=true
 	
 	widget.datx.step=1
+	widget.datx.scroll=32
 	widget.daty.step=1
+	widget.daty.scroll=32
 	
 	widget.color=widget.color or 0
 	

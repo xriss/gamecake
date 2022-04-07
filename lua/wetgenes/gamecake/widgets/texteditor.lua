@@ -717,7 +717,9 @@ function wtexteditor.setup(widget,def)
 
 	widget.scroll_widget.datx.step=8
 	widget.scroll_widget.daty.step=16
-
+	widget.scroll_widget.datx.scroll=1
+	widget.scroll_widget.daty.scroll=1
+	
 	widget.set_txt=function(txt)
 		if widget.txt then -- remove old hooks
 			widget.txt.hooks.changed=nil
