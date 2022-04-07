@@ -306,38 +306,56 @@ auto select an entire word or line depending on number of clicks
 
 		txt.mark(fy,fx,fy,fx)
 
+		local cache=txt.get_cache_lex(txt.cy)
+
 		local s=txt.get_string(txt.cy) or ""
+		local sl=wutf.length(s)
+		local toke=function(x)
+			if cache.tokens then
+				local t=string.sub(cache.tokens,x,x)
+				if t=="c" then
+					if (wutf.ncode( s , x ) or 0) <= 32 then t="w" end
+				end
+				return t
+			else
+				local t="c"
+				if (wutf.ncode( s , x ) or 0) <= 32 then t="w" end
+				return t
+			end
+		end
+		local lx=txt.fx-1+1
+		local hx=txt.fx-1-1
 
-		if clicks==2 then -- select word
-		
-			local sl=wutf.length(s)
-			local lx=txt.cx-1
-			local hx=txt.cx-1
+		for i=2,clicks do
 
-			local c = wutf.ncode( s , lx )
+			local lc = toke(lx-1)
+			local hc = toke(hx+1)
 
-			if c and c > 32 then -- solid
-				
-				while ( (wutf.ncode( s , lx-1 ) or 0) > 32 ) do lx=lx-1 end
-				while ( (wutf.ncode( s , hx+1 ) or 0) > 32 ) do hx=hx+1 end
-
-				txt.mark(fy,lx,fy,hx+1)
-			
-			elseif c and c <= 32 then -- White
-
-				while ( (wutf.ncode( s , lx-1 ) or 33) <= 32 ) do lx=lx-1 end
-				while ( (wutf.ncode( s , hx+1 ) or 33) <= 32 ) do hx=hx+1 end
-
-				txt.mark(fy,lx,fy,hx+1)
-
+			if lc and lc~="w" or ( lc==hc or not hc ) then
+				while lx>0    and toke(lx-1)==lc do lx=lx-1 end
+				if lc=="w" and lc==hc  then -- greedy white
+					local c = toke(lx-1)
+					while lx>0    and toke(lx-1)==c do lx=lx-1 end
+				end
 			end
 
-		elseif clicks>=3 then -- select line
-			txt.mark(fy,0,fy+1,0)
+			if hc and hc~="w" or ( lc==hc or not lc ) then
+				while hx<sl-1 and toke(hx+1)==hc do hx=hx+1 end
+				if hc=="w" and lc==hc then -- greedy white
+					local c = toke(hx+1)
+					while hx<sl-1 and toke(hx+1)==c do hx=hx+1 end
+				end
+			end
+
+		end
+
+		if lx==hx and clicks>=2 then
+			txt.mark(fy,lx,fy,hx+1)
+		elseif lx<hx then
+			txt.mark(fy,lx,fy,hx+1)
 		end
 
 	end
-	
 
 --[[
 
