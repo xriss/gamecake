@@ -237,12 +237,12 @@ wtexteditor.texteditor_refresh=function(widget)
 				ps[pl+3]=1
 				ps[pl+4]=0
 				
-				if     toke=="k" then	ps[pl+3]=7  ps[pl+4]=6	-- keyword
-				elseif toke=="g" then	ps[pl+3]=9  ps[pl+4]=8	-- global
-				elseif toke=="c" then	ps[pl+3]=11 ps[pl+4]=10	-- comment
-				elseif toke=="s" then	ps[pl+3]=13	ps[pl+4]=12	-- string
-				elseif toke=="0" then	ps[pl+3]=15	ps[pl+4]=14 -- number
---				elseif toke=="p" then	ps[pl+3]=0x05	-- punctuation
+				if     toke=="k" then	ps[pl+3]=6  -- keyword
+				elseif toke=="g" then	ps[pl+3]=7  -- global
+				elseif toke=="c" then	ps[pl+3]=8  -- comment
+				elseif toke=="s" then	ps[pl+3]=9  -- string
+				elseif toke=="0" then	ps[pl+3]=10 -- number
+				elseif toke=="p" then	ps[pl+3]=11 -- punctuation
 				end
 
 				
@@ -773,21 +773,31 @@ function wtexteditor.setup(widget,def)
 			0xff444444,0xffaaaaaa,	-- text			0,1
 			0xff555555,0xff333333,	-- gutter		2,3
 			0xff333333,0xffbbbbbb,	-- hilite		4,5
-			0xff444444,0xffdd7733,	-- keyword		6,7
-			0xff444444,0xffddaa33,	-- global		8,9
-			0xff444444,0xff888888,	-- comment		10,11
-			0xff444444,0xff66aa33,	-- string		12,13
-			0xff444444,0xff5599cc,	-- number		14,15
+			0xffdd7733,	-- keyword		0,6
+			0xffddaa33,	-- global		0,7
+			0xff888888,	-- comment		0,8
+			0xff66aa33,	-- string		0,9
+			0xff5599cc,	-- number		0,10
+			0xff999999,	-- punctuation	0,11
+			0xff000000,	-- 	0,12
+			0xff000000,	-- 	0,13
+			0xff000000,	-- 	0,14
+			0xff000000,	-- 	0,15
 		},
 		lite={
 			0xffaaaaaa,0xff444444,	-- text			0,1
 			0xff777777,0xff999999,	-- gutter		2,3
 			0xffbbbbbb,0xff333333,	-- hilite		4,5
-			0xffaaaaaa,0xffaa6622,	-- keyword		6,7
-			0xffaaaaaa,0xffcc9922,	-- global		8,9
-			0xffaaaaaa,0xff777777,	-- comment		10,11
-			0xffaaaaaa,0xff559922,	-- string		12,13
-			0xffaaaaaa,0xff4488bb,	-- number		14,15
+			0xffaa6622,	-- keyword		0,6
+			0xffcc9922,	-- global		0,7
+			0xff777777,	-- comment		0,8
+			0xff559922,	-- string		0,9
+			0xff4488bb,	-- number		0,10
+			0xff666666,	-- punctuation	0,11
+			0xff000000,	-- 	0,12
+			0xff000000,	-- 	0,13
+			0xff000000,	-- 	0,14
+			0xff000000,	-- 	0,15
 		},
 	}
 
