@@ -690,6 +690,8 @@ eg too the end of a line
 	
 		if not x then
 			txt.cy,txt.cx=txt.clip(txt.cy,txt.cx)
+			txt.fy,txt.ty=txt.cy
+			txt.fx,txt.tx=txt.cx
 			return
 		end
 
