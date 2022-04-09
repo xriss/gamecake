@@ -12,6 +12,7 @@ local wwin=require("wetgenes.win")
 local wstring=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local wutf=require("wetgenes.txt.utf")
+local wjson=require("wetgenes.json")
 
 local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
@@ -184,9 +185,21 @@ wtexteditor.texteditor_refresh=function(widget)
 		local ps={}
 		local pl=0
 		local sx=cx
-
+		local fakeline
 		local cache=widget.txt.get_cache_lex(y)
 		if cache then
+
+			if cache.tokens and string.sub(cache.tokens,1,1)=="c" then -- line comment , could be a special swed trigger
+				local sj
+				if     string.sub(cache.string,3,7)=="SWED+" then sj=string.sub(cache.string,7)
+				elseif string.sub(cache.string,2,6)=="SWED+" then sj=string.sub(cache.string,6) end
+				if sj then -- found start, try and parse json
+					local j=wjson.decode(sj)
+					if j then -- we have a SWED+{} line, make some space for a special UI
+						fakeline=4
+					end
+				end
+			end
 
 			if not widget.opts.gutter_disable then
 
@@ -215,6 +228,32 @@ wtexteditor.texteditor_refresh=function(widget)
 
 			end
 
+
+			if fakeline then
+
+				for i=2,fakeline do
+				
+					if pl==0 then
+						if not widget.opts.gutter_disable then
+							for i=1,widget.gutter do
+								ps[pl+1]=32
+								ps[pl+2]=0
+								ps[pl+3]=1
+								ps[pl+4]=0
+								pl=pl+4
+							end
+						end
+					end
+				
+					local s=string.char(unpack(ps))
+					pan.lines[wy]={text=v,s=s,y=y,x=sx}
+					wy=wy+1
+
+					ps={}
+					pl=0
+
+				end
+			else
 			for x=cx,cx+512 do
 
 				if cursor_x-1 == x and cursor_y == y then
@@ -281,6 +320,7 @@ wtexteditor.texteditor_refresh=function(widget)
 					end
 				end
 
+			end
 			end
 		end
 		local s=string.char(unpack(ps))
