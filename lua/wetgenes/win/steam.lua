@@ -69,7 +69,7 @@ bool SteamAPI_ISteamUserStats_ClearAchievement(void *_p, const char * pchName);
 bool SteamAPI_ISteamUserStats_IndicateAchievementProgress(void *_p, const char * pchName, uint32_t nCurProgress, uint32_t nMaxProgress);
 
 
-
+bool SteamAPI_IsSteamRunning();
 bool SteamAPI_Init();
 bool InitSafe();
 
@@ -97,8 +97,10 @@ struct LeaderboardScoreUploaded_t
 
 -- try a few ways to initalise
 local steam_active=false
+if lib.SteamAPI_IsSteamRunning() then -- try not to spam logs if there is no steam
 if not steam_active then pcall(function() if lib.InitSafe      and lib.InitSafe()      then steam_active=true end end) end
 if not steam_active then pcall(function() if lib.SteamAPI_Init and lib.SteamAPI_Init() then steam_active=true end end) end
+end
 if not steam_active then return steam end
 
 --print("STEAM","Init")
