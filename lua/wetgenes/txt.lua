@@ -81,6 +81,9 @@ M.construct=function(txt)
 
 	txt.del_cache=function(idx)
 		txt.caches[idx]=nil
+		if (idx-1)%txt.permacache_ratio == 0 then
+			txt.permacaches[1+math.floor((idx-1)/txt.permacache_ratio)]=nil
+		end
 	end
 
 	txt.get_cache=function(idx)

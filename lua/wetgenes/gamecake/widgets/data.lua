@@ -106,7 +106,7 @@ wdata.data_value=function(dat,val,nohook)
 				master.dirty_by_data(dat)
 			else
 				if not nohook then -- disable hooks
-					dat:call_hook_later("click") -- call click hook if value did not change
+--					dat:call_hook_later("click1") -- call click hook if value did not change
 				end
 			end
 		end 
@@ -121,7 +121,7 @@ wdata.data_value=function(dat,val,nohook)
 				master.dirty_by_data(dat)
 			else
 				if not nohook then -- disable hooks
-					dat:call_hook_later("click") -- call click hook if value did not change
+--					dat:call_hook_later("click2") -- call click hook if value did not change
 				end
 			end
 		end

@@ -168,10 +168,43 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed)
 	local py=(swed.idx-widget.cy-1)*sy
 							
 	if not swed.data then -- reuse old data
-		swed.data=wdata.new_data({max=100,min=0,num=0,step=1,master=widget.master})
+		swed.data={}
+		swed.data.hooks=function(hook,data)
+			if hook=="value" then
+				local n=data:value()
+				local cy=swed.idx+1
+				local c=widget.txt.get_cache( cy )
+				
+				if c.tokens and c.string then
+				
+					local ca,cb=string.find(c.tokens,"0+") -- string location of first number
+					local ba,bb=c.cb[ca],c.cb[cb]
+										
+					local sa=c.string:sub(1,ba-1)
+					local sb=c.string:sub(bb+1)
+					local sn=string.format("%.2f",n)
+--					local sn=tostring(n)
+					if not string.find(sn,"%.") then sn=sn.."." end -- must have a .
+--					print(xa,ca,ca,cb)
+--					print(n,c.string,c.tokens,c.string:sub(ba,bb))
+
+					widget.txt.del_cache(cy)
+					widget.txt.strings[cy]=sa..sn..sb
+					widget.txt.get_cache_lex(cy)
+
+					widget.txt_dirty=true
+
+--					widget.txt.mark(cy,ca,cy,cb)
+--					widget.txt.insert(""..n)
+				
+				end
+			end
+		end
+		
+		swed.data[1]=wdata.new_data({max=1,min=0,num=0,step=0.01,master=widget.master,hooks=swed.data.hooks})
 	end
 	
-	widget.over:add{class="slide",hx=sx*16,hy=sy*2,px=px+0,py=py+0,color=0,datx=swed.data,data=swed.data}
+	widget.over:add{class="slide",hx=sx*32,hy=sy*2,px=px+0,py=py+0,color=0,datx=swed.data[1],data="datx"}
 
 --	dump(pan)
 end
