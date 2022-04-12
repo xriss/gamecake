@@ -152,7 +152,34 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 --print(act,w and w.id)
 end
 
+wtexteditor.texteditor_refresh_swed=function(widget,swed)
+
+	swed.fakeline=2 -- hide text and leave space for this many lines
+
+	local sx=math.floor((widget.sx or 1)*8)
+	local sy=math.floor((widget.sy or 1)*16)
+	widget.over.text_size=sy
+
+
+	local px=0
+	if not widget.opts.gutter_disable then
+		px=widget.gutter*sx
+	end
+	local py=(swed.idx-widget.cy-1)*sy
+							
+	if not swed.data then -- reuse old data
+		swed.data=wdata.new_data({max=100,min=0,num=0,step=1,master=widget.master})
+	end
+	
+	widget.over:add{class="slide",hx=sx*16,hy=sy*2,px=px+0,py=py+0,color=0,datx=swed.data,data=swed.data}
+
+--	dump(pan)
+end
+
+
 wtexteditor.texteditor_refresh=function(widget)
+
+	widget.over:clean_all()
 
 	widget.cursor_cx=nil
 	widget.cursor_cy=nil
@@ -189,16 +216,9 @@ wtexteditor.texteditor_refresh=function(widget)
 		local cache=widget.txt.get_cache_lex(y)
 		if cache then
 
-			if cache.tokens and string.sub(cache.tokens,1,1)=="c" then -- line comment , could be a special swed trigger
-				local sj
-				if     string.sub(cache.string,3,7)=="SWED+" then sj=string.sub(cache.string,7)
-				elseif string.sub(cache.string,2,6)=="SWED+" then sj=string.sub(cache.string,6) end
-				if sj then -- found start, try and parse json
-					local j=wjson.decode(sj)
-					if j then -- we have a SWED+{} line, make some space for a special UI
-						fakeline=4
-					end
-				end
+			if cache.swed then
+				wtexteditor.texteditor_refresh_swed(widget,cache.swed)
+				fakeline=cache.swed.fakeline
 			end
 
 			if not widget.opts.gutter_disable then
@@ -333,17 +353,22 @@ end
 function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 	if pan.meta.mouse(pan,act,_x,_y,keyname) then -- let children have precedence
-		if pan.master.over ~= pan then
-			return true
-		end
+		return
 	end
-	
+
+-- ignore clicks when we are not focused?
+--[[
+	print(pan.master.focus == pan,pan.master.active == pan,pan.master.over == pan)
+	if pan.master.focus ~= pan and pan.master.active ~= pan then
+		return true
+	end
+]]	
 	if keyname=="right" and act==1 then
 		log("texteditor","righty clicky")
 		pan.master.later_append(function()
 			log("texteditor","righty clicky later")
 		end)
-		return true
+		return
 	end
 	
 	if pan.master.old_over==pan and pan.parent.daty and pan.parent.daty.class=="number" then
@@ -730,6 +755,7 @@ end
 
 function wtexteditor.setup(widget,def)
 
+	widget.over=widget.parent:add({px=widget.px,py=widget.py,hx=widget.hx,hy=widget.hy,size="full",fbo=true})
 
 -- options about how we behave
 

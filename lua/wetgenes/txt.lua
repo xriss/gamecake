@@ -3,6 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
 
 local wstring=require("wetgenes.string")
 local wutf=require("wetgenes.txt.utf")
@@ -12,6 +13,7 @@ local wtxtdiff=require("wetgenes.txt.diff")
 local wtxtlex =require("wetgenes.txt.lex")
 
 local wpath=require("wetgenes.path")
+local wjson=require("wetgenes.json")
 
 -- manage the text data part of a text editor
 
@@ -94,7 +96,9 @@ M.construct=function(txt)
 
 -- just one meta for the caches
 	txt.caches_meta={}
-	txt.caches_meta.__mode="v"
+-- I'm not sure this will really help, maybe it will?
+-- need to run tests with huge files but for now can just leave it off
+--	txt.caches_meta.__mode="v"
 
 	txt.permacache_ratio=128
 	txt.clear_caches=function()
@@ -1015,6 +1019,19 @@ get the lexxer cache for the given line
 		cache.lex=wtxtlex.save(state)
 		cache.tokens=table.concat(tokens)
 --print("tokens",cache.tokens)
+
+		if string.sub(cache.tokens,1,7)=="ccccccc" then -- must have at least this much comment to be valid
+			if string.sub(cache.string,3,7)=="SWED+" then -- must have this magic string to be a tweakable value
+				-- we can disable by changing from SWED+ to SWED- in code so we can easily be reenabled by hand
+				local config ; pcall(function() config=wjson.decode( string.sub(cache.string,8) ) end)
+				-- this is config state that must be preserved in the text
+				if config then -- there should be valid json after the SWED+
+					local swed={config=config,idx=idx} -- the full state that can be calculated from this data
+					cache.swed=swed
+				end
+			end
+		end
+
 
 		return cache
 	end
