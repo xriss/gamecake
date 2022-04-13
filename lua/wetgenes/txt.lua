@@ -79,6 +79,25 @@ M.construct=function(txt)
 		txt.clear_caches()
 	end
 
+-- replace the text on line idx between fx and tx inclusive with the given string
+-- this *MUST* be a like for like hacky replacement as far as the lexer is concerned
+-- as we are trying not to clear all caches, just slightly tweak this one line
+	txt.tweak_string=function(idx,fx,tx,str)
+
+		local c=txt.get_cache( idx )
+
+		local ba,bb=c.cb[fx],c.cb[tx]
+
+		local sa=c.string:sub(1,ba-1)
+		local sb=c.string:sub(bb+1)
+
+		txt.del_cache(idx)
+		txt.strings[idx]=sa..str..sb
+		txt.rebuild_permastart()
+		txt.get_cache_lex(idx)
+
+	end
+
 	txt.del_cache=function(idx)
 		txt.caches[idx]=nil
 		if (idx-1)%txt.permacache_ratio == 0 then
@@ -104,10 +123,7 @@ M.construct=function(txt)
 --	txt.caches_meta.__mode="v"
 
 	txt.permacache_ratio=128
-	txt.clear_caches=function()
-		txt.permacaches={}
-		txt.caches={}
-		setmetatable(txt.caches, txt.caches_meta)
+	txt.rebuild_permastart=function()
 		txt.permastart={} -- recalculate start indexs of each perma string
 		local start=0
 		for i,v in ipairs(txt.strings or {} ) do
@@ -117,6 +133,13 @@ M.construct=function(txt)
 			start=start+#v -- next index
 		end
 		txt.permastart[#txt.permastart+1]=start -- end of text
+	end
+	
+	txt.clear_caches=function()
+		txt.permacaches={}
+		txt.caches={}
+		setmetatable(txt.caches, txt.caches_meta)
+		txt.rebuild_permastart()
 	end
 	txt.clear_caches()
 --[[
@@ -1024,12 +1047,13 @@ get the lexxer cache for the given line
 --print("tokens",cache.tokens)
 
 		if string.sub(cache.tokens,1,7)=="ccccccc" then -- must have at least this much comment to be valid
-			if string.sub(cache.string,3,7)=="SWED+" then -- must have this magic string to be a tweakable value
+			if string.sub(cache.string,3,6)=="SWED" then -- must have this magic string to be a tweakable value
 				-- we can disable by changing from SWED+ to SWED- in code so we can easily be reenabled by hand
 				local config ; pcall(function() config=wjson.decode( string.sub(cache.string,8) ) end)
+				local mode=string.sub(cache.string,7,7) 
 				-- this is config state that must be preserved in the text
-				if config then -- there should be valid json after the SWED+
-					local swed={config=config,idx=idx} -- the full state that can be calculated from this data
+				if config and ( mode=="+" or mode=="-" ) then -- there should be valid json after the SWED+
+					local swed={config=config,idx=idx,mode=mode} -- the full state that can be calculated from this data
 					cache.swed=swed
 				end
 			end
