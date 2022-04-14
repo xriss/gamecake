@@ -340,6 +340,10 @@ local put_indent=function(s)
 		put(string.rep(opts.pretty,indent))
 	elseif opts.pretty then
 		put(string.rep(" ",indent))
+	elseif type(opts.white)=="string" then
+		put(opts.white)
+	elseif opts.white then
+		put(" ")
 	end
 	if s then put(s) end
 end
@@ -403,16 +407,35 @@ local encode_tab
 		else
 			put("{")
 			indent_add()
-			for i,v in pairs(vv) do
-				put(comma and ",") comma=true
-				put_newline()
-				put_indent(encode_it(i)) -- allow numbers or strings
-				put(":")
-				t=type(v)
-				if t=="table" then
-					encode_tab(v,is_array(v))
-				else
-					put(encode_it(v,t))
+			if opts.sort then -- sorted by keys
+				local names={}
+				for i,v in pairs(vv) do names[#names+1]=i end
+				table.sort(names) -- might need to fix the compare function?
+				for _,i in ipairs(names) do
+					local v=vv[i]
+					put(comma and ",") comma=true
+					put_newline()
+					put_indent(encode_it(i)) -- allow numbers or strings
+					put(":")
+					t=type(v)
+					if t=="table" then
+						encode_tab(v,is_array(v))
+					else
+						put(encode_it(v,t))
+					end
+				end
+			else
+				for i,v in pairs(vv) do
+					put(comma and ",") comma=true
+					put_newline()
+					put_indent(encode_it(i)) -- allow numbers or strings
+					put(":")
+					t=type(v)
+					if t=="table" then
+						encode_tab(v,is_array(v))
+					else
+						put(encode_it(v,t))
+					end
 				end
 			end
 			indent_sub()
