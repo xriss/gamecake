@@ -1052,7 +1052,17 @@ get the lexxer cache for the given line
 				local config ; pcall(function() config=wjson.decode( string.sub(cache.string,8) ) end)
 				local mode=string.sub(cache.string,7,7) 
 				-- this is config state that must be preserved in the text
-				if config and ( mode=="+" or mode=="-" ) then -- there should be valid json after the SWED+
+				if type(config)=="table" and ( mode=="+" or mode=="-" ) then -- there should be valid json after the SWED+
+					for n,v in pairs{ -- provide defaults if not set
+							class="number",
+							min=0,
+							max=1,
+							step=0.01,
+							fmt="%.2f",
+							vec=1,
+						} do
+						if not config[n] then config[n]=v end
+					end
 					local swed={config=config,idx=idx,mode=mode} -- the full state that can be calculated from this data
 					cache.swed=swed
 				end
