@@ -152,10 +152,26 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 --print(act,w and w.id)
 end
 
+
 wtexteditor.texteditor_refresh_swed=function(widget,swed)
 
+	local tokefind=function(i,c,p)
+		if c.tokens and c.string then
+			local start=1
+			local idx=1
+			while true do
+				local s,e=string.find(c.tokens,p,start)
+				if not s then break end
+				if idx==i then return c.cb[s],c.cb[e] end
+				idx=idx+1
+				start=e+1
+			end
+		end
+	end
+
+
 	if swed.mode=="+" then
-		swed.fakeline=2 -- hide text and leave space for this many lines
+		swed.fakeline=4 -- hide text and leave space for this many lines
 	end
 	
 	local sx=math.floor((widget.sx or 1)*8)
@@ -178,20 +194,12 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed)
 				local n=data:value()
 				local cy=swed.idx+1
 				local c=widget.txt.get_cache( cy )
-				
-				if c.tokens and c.string then
-				
-					local fc,tc=string.find(c.tokens,"0+") -- character location of first number
-					local fb,tb=c.cb[fc],c.cb[tc]
-
-										
+				local fb,tb=tokefind(data.user,c,"0+")
+				if fb and tb then
 					local sn=string.format("%.2f",n)
---					local sn=tostring(n)
 					if not string.find(sn,"%.") then sn=sn.."." end -- must have a .
-
 					widget.txt.tweak_string(cy,fb,tb,sn)
 					widget.txt_dirty=true
-				
 				end
 			end
 		end
@@ -201,7 +209,7 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed)
 				if data:value()==0 then swed.mode="-" else swed.mode="+" end
 				if oldmode~=swed.mode then
 					local c=widget.txt.get_cache( swed.idx )
-					local xe=c.cx[#c.cx] -- end of line
+					local xe=#c.string
 					local es=wjson.encode(swed.config,{sort=true,white=" "})
 					widget.txt.tweak_string(swed.idx,7,xe, swed.mode .. es .. widget.txt.endline )
 					widget.txt_dirty=true
@@ -209,18 +217,22 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed)
 			end
 		end
 		swed.data.show=wdata.new_data({max=1,min=0,num=(swed.mode=="+") and 1 or 0,step=1,master=widget.master,hooks=swed.data.hook_show})
-		swed.data[1]=wdata.new_data({max=1,min=0,num=0,step=0.01,master=widget.master,hooks=swed.data.hook_slide})
+		for i=1,4 do
+		swed.data[i]=wdata.new_data({user=i,max=1,min=0,num=0,step=0.01,master=widget.master,hooks=swed.data.hook_slide})
+		end
 	end
 	
 -- basic container widgets
-	swed.wgutter = widget.over:add{class="fill",hx=gx,   hy=sy*2,px=0, py=py}
-	swed.wtext   = widget.over:add{class="fill",hx=hx-px,hy=sy*2,px=px,py=py}
+	swed.wgutter = widget.over:add{class="fill",hx=gx,   hy=sy*4,px=0, py=py}
+	swed.wtext   = widget.over:add{class="fill",hx=hx-px,hy=sy*4,px=px,py=py}
 	
 	swed.wgutter:add{hx=gx-sx*2,hy=sy*1}
 	swed.wgutter:add{class="checkbox",hx=sx*2,hy=sy*1,color=0,text_false="+",text_true="-",data=swed.data.show}
 
 	if swed.mode=="+" then
-		swed.wtext:add{class="slide",hx=sx*32,hy=sy*2,color=0,datx=swed.data[1],data="datx"}
+		for i=1,4 do
+		swed.wtext:add{class="slide",hx=sx*32,hy=sy*2,color=0,datx=swed.data[i],data="datx"}
+		end
 	end
 	
 	widget.over:layout()
