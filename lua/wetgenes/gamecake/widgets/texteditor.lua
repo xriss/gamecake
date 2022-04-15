@@ -181,13 +181,15 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed)
 				
 				if c.tokens and c.string then
 				
-					local ca,cb=string.find(c.tokens,"0+") -- character location of first number
+					local fc,tc=string.find(c.tokens,"0+") -- character location of first number
+					local fb,tb=c.cb[fc],c.cb[tc]
+
 										
 					local sn=string.format("%.2f",n)
 --					local sn=tostring(n)
 					if not string.find(sn,"%.") then sn=sn.."." end -- must have a .
 
-					widget.txt.tweak_string(cy,ca,cb,sn)
+					widget.txt.tweak_string(cy,fb,tb,sn)
 					widget.txt_dirty=true
 				
 				end

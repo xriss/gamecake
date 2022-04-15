@@ -79,17 +79,15 @@ M.construct=function(txt)
 		txt.clear_caches()
 	end
 
--- replace the text on line idx between fx and tx inclusive with the given string
+-- replace the text on line idx between fb and tb (bytes) inclusive with the given string
 -- this *MUST* be a like for like hacky replacement as far as the lexer is concerned
 -- as we are trying not to clear all caches, just slightly tweak this one line
-	txt.tweak_string=function(idx,fx,tx,str)
+	txt.tweak_string=function(idx,fb,tb,str)
 
 		local c=txt.get_cache( idx )
 
-		local ba,bb=c.cb[fx],c.cb[tx]
-
-		local sa=c.string:sub(1,ba-1)
-		local sb=c.string:sub(bb+1)
+		local sa=c.string:sub(1,fb-1)
+		local sb=c.string:sub(tb+1)
 
 		txt.del_cache(idx)
 		txt.strings[idx]=sa..str..sb
@@ -273,7 +271,7 @@ or japanese double glyphs. Its a complicated mapping so it is precalculated
 		
 		cache.codes={}
 
--- x xpos is the screen space offset, so a tab would be 8 and a space 1.
+-- x xpos is the screen space offset, so a tab will be wider than a space
 -- b byte is the byte offset into the string
 -- c code is the code offset into the string (unicode character)
 
