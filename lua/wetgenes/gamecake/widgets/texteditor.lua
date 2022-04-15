@@ -200,7 +200,10 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed)
 				local oldmode=swed.mode
 				if data:value()==0 then swed.mode="-" else swed.mode="+" end
 				if oldmode~=swed.mode then
-					widget.txt.tweak_string(swed.idx,7,7,swed.mode)
+					local c=widget.txt.get_cache( swed.idx )
+					local xe=c.cx[#c.cx] -- end of line
+					local es=wjson.encode(swed.config,{sort=true,white=" "})
+					widget.txt.tweak_string(swed.idx,7,xe, swed.mode .. es .. widget.txt.endline )
 					widget.txt_dirty=true
 				end
 			end

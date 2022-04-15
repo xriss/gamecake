@@ -27,6 +27,7 @@ M.construct=function(txt)
 	
 	txt.lexer="text"
 	txt.tabsize=4
+	txt.endline="\n"
 
 	txt.hooks={} -- user call backs	
 	local hook=function(name) local f=txt.hooks[name] if f then return f(txt) end end
@@ -811,7 +812,7 @@ insert a new line
 		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
 		local sc=txt.get_string_sub(txt.cy,txt.cx)
 		
-		txt.set_string(txt.cy,sb.."\n")
+		txt.set_string(txt.cy,sb..txt.endline)
 
 		txt.cy=txt.cy+1
 		txt.cx=1
@@ -831,7 +832,7 @@ insert any string, which will be broken down by newlines
 	txt.insert=function(s)
 
 		local split=function(s,d)
-			d=d or "\n"
+			d=d or txt.endline
 			local ss={} -- output table
 			local ti=1  -- table index
 			local si=1  -- string index
@@ -847,7 +848,7 @@ insert any string, which will be broken down by newlines
 			return ss
 		end
 
-		local lines=split(s,"\n")
+		local lines=split(s,txt.endline)
 		
 		for idx,line in ipairs(lines) do
 
@@ -1051,15 +1052,23 @@ get the lexxer cache for the given line
 				local mode=string.sub(cache.string,7,7) 
 				-- this is config state that must be preserved in the text
 				if type(config)=="table" and ( mode=="+" or mode=="-" ) then -- there should be valid json after the SWED+
-					for n,v in pairs{ -- provide defaults if not set
+					if not config.class then config.class="number" end -- probably a number
+					local def={}
+					if config.class=="number" then
+						def={ -- provide defaults and valid options
 							class="number",
 							min=0,
 							max=1,
 							step=0.01,
 							fmt="%.2f",
 							vec=1,
-						} do
-						if not config[n] then config[n]=v end
+						}
+					end
+					for n,v in pairs(def) do
+						if not config[n] then config[n]=v end -- defaults
+					end
+					for n,v in pairs(config) do
+						if not def[n] then config[n]=nil end -- cleanup data so unknown junk is removed
 					end
 					local swed={config=config,idx=idx,mode=mode} -- the full state that can be calculated from this data
 					cache.swed=swed
@@ -1076,7 +1085,7 @@ get the lexxer cache for the given line
 	wtxtundo.construct({},txt)
 
 
-	txt.set_text("\n","")
+	txt.set_text(txt.endline,"")
 	txt.set_lexer()
 	return txt
 end
