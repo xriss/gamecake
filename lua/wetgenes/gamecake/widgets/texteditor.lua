@@ -169,6 +169,12 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed)
 		end
 	end
 
+	local tokefindstr=function(i,c,p)
+		local s,e=tokefind(i,c,p)
+		if s then
+			return string.sub( c.string , s , e )
+		end
+	end
 
 	if swed.mode=="+" then
 		swed.fakeline=4 -- hide text and leave space for this many lines
