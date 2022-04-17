@@ -176,73 +176,93 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed)
 		end
 	end
 
-	if swed.mode=="+" then
-		swed.fakeline=4 -- hide text and leave space for this many lines
-	end
-	
-	local sx=math.floor((widget.sx or 1)*8)
-	local sy=math.floor((widget.sy or 1)*16)
-	widget.over.text_size=sy
+	if swed.config.class=="number" then -- number tweak, read inputs and sanatise them
 
-
-	local hx=widget.hx-8
-	local gx=0
-	if not widget.opts.gutter_disable then
-		gx=widget.gutter*sx
-	end
-	local px=gx
-	local py=(swed.idx-widget.cy-1)*sy
+		local min  =tonumber(swed.config.min)  or 0
+		local max  =tonumber(swed.config.max)  or 1
+		local step =tonumber(swed.config.step) or 0.01
+		local fmt  =tostring(swed.config.fmt)  or "%.2f"
+		local vec  =tonumber(swed.config.vec)  or 1		
 							
-	if not swed.data then -- reuse old data
-		swed.data={}
-		swed.data.hook_slide=function(hook,data)
-			if hook=="value" then
-				local n=data:value()
-				local cy=swed.idx+1
-				local c=widget.txt.get_cache( cy )
-				local fb,tb=tokefind(data.user,c,"0+")
-				if fb and tb then
-					local sn=string.format("%.2f",n)
-					if not string.find(sn,"%.") then sn=sn.."." end -- must have a .
-					widget.txt.tweak_string(cy,fb,tb,sn)
-					widget.txt_dirty=true
+		if swed.mode=="+" then
+			swed.fakeline=math.ceil(vec/2)*2 -- hide text and leave space for this many lines
+		end
+		
+		local sx=math.floor((widget.sx or 1)*8)
+		local sy=math.floor((widget.sy or 1)*16)
+		widget.over.text_size=sy
+
+
+		local hx=widget.hx-8
+		local gx=0
+		if not widget.opts.gutter_disable then
+			gx=widget.gutter*sx
+		end
+		local px=gx
+		local py=(swed.idx-widget.cy-1)*sy
+								
+		if not swed.data then -- reuse old data
+			swed.data={}
+			swed.data.hook_slide=function(hook,data)
+				if hook=="value" then
+					local n=data:value()
+					local cy=swed.idx+1
+					local c=widget.txt.get_cache( cy )
+					local fb,tb=tokefind(data.user,c,"0+")
+					if fb and tb then
+						local sn=string.format(fmt,n)
+						if not string.find(sn,"%.") then sn=sn.."." end -- must have a .
+						widget.txt.tweak_string(cy,fb,tb,sn)
+						widget.txt_dirty=true
+					end
 				end
 			end
-		end
-		swed.data.hook_show=function(hook,data)
-			if hook=="value" then
-				local oldmode=swed.mode
-				if data:value()==0 then swed.mode="-" else swed.mode="+" end
-				if oldmode~=swed.mode then
-					local c=widget.txt.get_cache( swed.idx )
-					local xe=#c.string
-					local es=wjson.encode(swed.config,{sort=true,white=" "})
-					widget.txt.tweak_string(swed.idx,7,xe, swed.mode .. es .. widget.txt.endline )
-					widget.txt_dirty=true
+			swed.data.hook_show=function(hook,data)
+				if hook=="value" then
+					local oldmode=swed.mode
+					if data:value()==0 then swed.mode="-" else swed.mode="+" end
+					if oldmode~=swed.mode then
+						local c=widget.txt.get_cache( swed.idx )
+						local xe=#c.string
+						local es=wjson.encode(swed.config,{sort=true,white=" "})
+						widget.txt.tweak_string(swed.idx,7,xe, swed.mode .. es .. widget.txt.endline )
+						widget.txt_dirty=true
+					end
 				end
 			end
+			swed.data.show=wdata.new_data({max=1,min=0,num=(swed.mode=="+") and 1 or 0,step=1,master=widget.master,hooks=swed.data.hook_show})
+			local c=widget.txt.get_cache( swed.idx+1 )
+			for i=1,vec do
+				local s=tokefindstr(i,c,"0+")
+				local n=tonumber(s) or 0
+				swed.data[i]=wdata.new_data({user=i,max=max,min=min,num=n,step=step,master=widget.master,hooks=swed.data.hook_slide})
+			end
 		end
-		swed.data.show=wdata.new_data({max=1,min=0,num=(swed.mode=="+") and 1 or 0,step=1,master=widget.master,hooks=swed.data.hook_show})
-		for i=1,4 do
-		swed.data[i]=wdata.new_data({user=i,max=1,min=0,num=0,step=0.01,master=widget.master,hooks=swed.data.hook_slide})
+
+		for i=1,vec do
+			local c=widget.txt.get_cache( swed.idx+1 )
+			local s=tokefindstr(i,c,"0+")
+			if not tonumber(s) then swed.fakeline=nil end
 		end
+		
+	-- basic container widgets
+		swed.wgutter = widget.over:add{class="fill",hx=gx,   hy=sy*(swed.fakeline or 1),px=0, py=py}
+		swed.wtext   = widget.over:add{class="fill",hx=sx*80,hy=sy*(swed.fakeline or 1),px=px,py=py}
+		
+		swed.wgutter:add{hx=gx-sx*2,hy=sy*1}
+		swed.wgutter:add{class="checkbox",hx=sx*2,hy=sy*1,color=0,text_false="+",text_true="-",data=swed.data.show}
+
+		if swed.mode=="+" and swed.fakeline then
+			for i=1,vec do
+				swed.wtext:add{class="slide",hx=sx*32,hy=sy*2,color=0,datx=swed.data[i],data="datx"}
+				swed.wtext:add{hx=sx*8,hy=sy*1}
+			end
+		end
+		
+		widget.over:layout()
+
 	end
 	
--- basic container widgets
-	swed.wgutter = widget.over:add{class="fill",hx=gx,   hy=sy*4,px=0, py=py}
-	swed.wtext   = widget.over:add{class="fill",hx=hx-px,hy=sy*4,px=px,py=py}
-	
-	swed.wgutter:add{hx=gx-sx*2,hy=sy*1}
-	swed.wgutter:add{class="checkbox",hx=sx*2,hy=sy*1,color=0,text_false="+",text_true="-",data=swed.data.show}
-
-	if swed.mode=="+" then
-		for i=1,4 do
-		swed.wtext:add{class="slide",hx=sx*32,hy=sy*2,color=0,datx=swed.data[i],data="datx"}
-		end
-	end
-	
-	widget.over:layout()
-
 --	dump(pan)
 end
 
