@@ -1045,13 +1045,14 @@ get the lexxer cache for the given line
 		cache.tokens=table.concat(tokens)
 --print("tokens",cache.tokens)
 
-		if string.sub(cache.tokens,1,7)=="ccccccc" then -- must have at least this much comment to be valid
-			if string.sub(cache.string,3,6)=="SWED" then -- must have this magic string to be a tweakable value
-				-- we can disable by changing from SWED+ to SWED- in code so we can easily be reenabled by hand
+		if string.sub(cache.tokens,1,8)=="cccccccc" then -- must have at least this much comment to be valid
+			local t=string.sub(cache.string,3,8) -- first two chars can be any single line comment starter
+			if t=="SWED+{" or "SWED-{" then -- must have this magic string to be a tweakable value
+				-- we can disable display by changing from SWED+{ to SWED-{ in code so we can easily be reenabled by hand
 				local config ; pcall(function() config=wjson.decode( string.sub(cache.string,8) ) end)
 				local mode=string.sub(cache.string,7,7) 
 				-- this is config state that must be preserved in the text
-				if type(config)=="table" and ( mode=="+" or mode=="-" ) then -- there should be valid json after the SWED+
+				if type(config)=="table" then -- there should be valid json after the SWED+
 					if not config.class then config.class="number" end -- probably a number
 					local def={}
 					if config.class=="number" then

@@ -153,7 +153,7 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 end
 
 
-wtexteditor.texteditor_refresh_swed=function(widget,swed)
+wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 
 	local tokefind=function(i,c,p)
 		if c.tokens and c.string then
@@ -199,7 +199,7 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed)
 			gx=widget.gutter*sx
 		end
 		local px=gx
-		local py=(swed.idx-widget.cy-1)*sy
+		local py=(y-1)*sy
 								
 		if not swed.data then -- reuse old data
 			swed.data={}
@@ -307,7 +307,7 @@ wtexteditor.texteditor_refresh=function(widget)
 		if cache then
 
 			if cache.swed then
-				wtexteditor.texteditor_refresh_swed(widget,cache.swed)
+				wtexteditor.texteditor_refresh_swed(widget,cache.swed,wy)
 				fakeline=cache.swed.fakeline
 			end
 
