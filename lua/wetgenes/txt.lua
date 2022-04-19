@@ -332,10 +332,18 @@ auto select an entire word or line depending on number of clicks
 
 ]]
 	txt.markauto=function(fy,fx,clicks)
-
+	
 		txt.mark(fy,fx,fy,fx)
 
 		local cache=txt.get_cache_lex(txt.cy)
+
+		if txt.fx==1 then -- simply select full line if double clicking at start
+			local l=cache.tokens and #cache.tokens
+			if l then
+				txt.mark(fy,fx,fy,fx+l)
+				return
+			end
+		end
 
 		local s=txt.get_string(txt.cy) or ""
 		local sl=wutf.length(s)

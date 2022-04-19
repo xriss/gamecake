@@ -207,11 +207,11 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 				if hook=="value" then
 					local n=data:value()
 					local cy=swed.idx+1
-					local c=widget.txt.get_cache( cy )
+					local c=widget.txt.get_cache_lex( cy )
 					local fb,tb=tokefind(data.user,c,"0+")
 					if fb and tb then
 						local sn=string.format(fmt,n)
-						if not string.find(sn,"%.") then sn=sn.."." end -- must have a .
+--						if not string.find(sn,"%.") then sn=sn.."." end -- must have a .
 						widget.txt.tweak_string(cy,fb,tb,sn)
 						widget.txt_dirty=true
 					end
@@ -222,7 +222,7 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 					local oldmode=swed.mode
 					if data:value()==0 then swed.mode="-" else swed.mode="+" end
 					if oldmode~=swed.mode then
-						local c=widget.txt.get_cache( swed.idx )
+						local c=widget.txt.get_cache_lex( swed.idx )
 						local xe=#c.string
 						local es=wjson.encode(swed.config,{sort=true,white=" "})
 						widget.txt.tweak_string(swed.idx,7,xe, swed.mode .. es .. widget.txt.endline )
@@ -231,7 +231,7 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 				end
 			end
 			swed.data.show=wdata.new_data({max=1,min=0,num=(swed.mode=="+") and 1 or 0,step=1,master=widget.master,hooks=swed.data.hook_show})
-			local c=widget.txt.get_cache( swed.idx+1 )
+			local c=widget.txt.get_cache_lex( swed.idx+1 )
 			for i=1,vec do
 				local s=tokefindstr(i,c,"0+")
 				local n=tonumber(s) or 0
@@ -240,7 +240,7 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 		end
 
 		for i=1,vec do
-			local c=widget.txt.get_cache( swed.idx+1 )
+			local c=widget.txt.get_cache_lex( swed.idx+1 )
 			local s=tokefindstr(i,c,"0+")
 			if not tonumber(s) then swed.fakeline=nil end
 		end
