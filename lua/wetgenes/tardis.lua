@@ -2428,6 +2428,24 @@ function q4.rotate(it,degrees,v3a,r)
 	return tardis.q4_product_q4(it,q4a,r)
 end
 
+
+--[[#lua.wetgenes.tardis.q4.prerotate
+
+	q4 = q4:prerotate(degrees,v3a)
+	q4 = q4:prerotate(degrees,v3a,r)
+
+Pre apply a degree rotation to this quaternion.
+
+If r is provided then the result is written into r and returned 
+otherwise q4 is modified and returned.
+
+]]
+function q4.prerotate(it,degrees,v3a,r)
+	local q4a=q4.new():setrot(degrees,v3a)
+	return tardis.q4_product_q4(q4a,it,r or it)
+end
+
+
 --[[#lua.wetgenes.tardis.q4.rrotate
 
 	q4 = q4:rrotate(radians,v3a)
@@ -2442,6 +2460,23 @@ otherwise q4 is modified and returned.
 function q4.rrotate(it,radians,v3a,r)
 	local q4a=q4.new():setrrot(radians,v3a)
 	return tardis.q4_product_q4(it,q4a,r)
+end
+
+
+--[[#lua.wetgenes.tardis.q4.prerrotate
+
+	q4 = q4:prerrotate(radians,v3a)
+	q4 = q4:prerrotate(radians,v3a,r)
+
+Pre apply a radian rotation to this quaternion.
+
+If r is provided then the result is written into r and returned 
+otherwise q4 is modified and returned.
+
+]]
+function q4.prerrotate(it,radians,v3a,r)
+	local q4a=q4.new():setrrot(radians,v3a)
+	return tardis.q4_product_q4(q4a,it,r or it)
 end
 
 
