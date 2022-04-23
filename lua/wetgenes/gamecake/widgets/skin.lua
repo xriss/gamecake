@@ -518,11 +518,11 @@ else -- we can only draw once
 			local ht=#t
 			
 			local r,g,b,a=gl.color_get_rgba()
-			local v1=gl.apply_modelview( {0,			0,				0,1} )
-			local v2=gl.apply_modelview( {widget.fbo.w,	0,				0,1} )
-			local v3=gl.apply_modelview( {0,			widget.fbo.h,	0,1} )
-			local v4=gl.apply_modelview( {widget.fbo.w,	widget.fbo.h,	0,1} )
-
+			local v1=gl.apply_modelview( {0,			0,			0,1} )
+			local v2=gl.apply_modelview( {widget.hx,	0,			0,1} )
+			local v3=gl.apply_modelview( {0,			widget.hy,	0,1} )
+			local v4=gl.apply_modelview( {widget.hx,	widget.hy,	0,1} )
+			
 			for i,v in ipairs{
 				v1[1],	v1[2],	v1[3],	0,				widget.fbo.uvh,	r,g,b,a,	-- doubletap hack
 				v1[1],	v1[2],	v1[3],	0,				widget.fbo.uvh,	r,g,b,a,

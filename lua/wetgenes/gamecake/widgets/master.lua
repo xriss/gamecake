@@ -311,9 +311,11 @@ function wmaster.setup(widget,def)
 
 	mark_dirty_fbos=function(widget)
 		if widget.fbo then
-			if widget.fbo.w~=widget.hx or widget.fbo.h~=widget.hy then -- resize so we need a new fbo
+			local hx=math.ceil(widget.hx)
+			local hy=math.ceil(widget.hy)
+			if widget.fbo.w~=hx or widget.fbo.h~=hy then -- resize so we need a new fbo
 --print("resize fbo",widget.hx,widget.hy)
-				widget.fbo:resize(widget.hx,widget.hy,widget.hz or 0)
+				widget.fbo:resize(hx,hy,widget.hz or 0)
 				widget:set_dirty() -- flag redraw
 			end				
 		end
