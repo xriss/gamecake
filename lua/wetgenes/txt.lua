@@ -336,13 +336,11 @@ auto select an entire word or line depending on number of clicks
 		txt.mark(fy,fx,fy,fx)
 
 		local cache=txt.get_cache_lex(txt.cy)
+		local l=cache.tokens and #cache.tokens or 1
 
-		if txt.fx==1 then -- simply select full line if double clicking at start
-			local l=cache.tokens and #cache.tokens
-			if l then
-				txt.mark(fy,fx,fy,fx+l)
-				return
-			end
+		if clicks>=2 and ( txt.fx==1 or txt.fx==l ) then -- simply select full line if double clicking at start or end
+			txt.mark(fy,1,fy+1,1)
+			return
 		end
 
 		local s=txt.get_string(txt.cy) or ""
