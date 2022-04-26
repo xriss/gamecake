@@ -1,7 +1,7 @@
-name: GitHub Actions Demo
+name: Build Plated Pages
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  Build-Plated-Pages:
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -15,5 +15,7 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
-      - run: git status
+      - name: Do stuff
+        run: |
+          git status
 
