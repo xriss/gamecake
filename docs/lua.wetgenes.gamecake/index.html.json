@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 413,
+   "count": 508,
    "name": "lua"
   },
   {
@@ -54,15 +54,15 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 407,
+   "count": 502,
    "name": "lua.wetgenes"
   },
   {
-   "count": 25,
+   "count": 26,
    "name": "lua.wetgenes.bullet"
   },
   {
-   "count": 24,
+   "count": 25,
    "name": "lua.wetgenes.bullet.world"
   },
   {
@@ -136,6 +136,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.mesh.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.ray_test"
   },
   {
    "count": 1,
@@ -422,7 +426,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 68,
+   "count": 126,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -606,19 +610,239 @@
    "name": "lua.wetgenes.gamecake.oven.bake"
   },
   {
-   "count": 2,
+   "count": 57,
    "name": "lua.wetgenes.gamecake.widgets"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.gamecake.widgets.button"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.button.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.button.update"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.gamecake.widgets.center"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.center.layout"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.center.setup"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.class_hooks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.update"
+  },
+  {
+   "count": 17,
+   "name": "lua.wetgenes.gamecake.widgets.data"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.add_class_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.call_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.call_hook_later"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_dec"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_get_pos"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_get_size"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_inc"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_snap"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber_from_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tostring"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tostring_from_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.del_class_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.new_data"
+  },
+  {
+   "count": 12,
+   "name": "lua.wetgenes.gamecake.widgets.datas"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.del"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_number"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_string"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.new_datas"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_infos"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_string"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_value"
+  },
+  {
+   "count": 7,
+   "name": "lua.wetgenes.gamecake.widgets.defs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.add_border"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.copy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.reset"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.set"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.hide_overlay"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.show"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.show_overlay"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.widgets.drag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.drag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.update"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 20,
+   "count": 23,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "count": 19,
+   "count": 20,
    "name": "lua.wetgenes.gamecake.zone.scene"
   },
   {
@@ -674,6 +898,10 @@
    "name": "lua.wetgenes.gamecake.zone.scene.sortby_update"
   },
   {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.status"
+  },
+  {
    "count": 4,
    "name": "lua.wetgenes.gamecake.zone.scene.systems"
   },
@@ -692,6 +920,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.scene.uids"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.zone.system"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.system.items"
   },
   {
    "count": 37,
@@ -954,7 +1190,7 @@
    "name": "lua.wetgenes.package.reload"
   },
   {
-   "count": 10,
+   "count": 15,
    "name": "lua.wetgenes.path"
   },
   {
@@ -963,7 +1199,23 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.path.dir"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.ext"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.folder"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.path.join"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.name"
   },
   {
    "count": 1,
@@ -984,6 +1236,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.path.resolve"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.root"
   },
   {
    "count": 1,
@@ -1011,6 +1267,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.rnd64k"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.safecall"
   },
   {
@@ -1026,7 +1286,7 @@
    "name": "lua.wetgenes.snippets"
   },
   {
-   "count": 140,
+   "count": 149,
    "name": "lua.wetgenes.tardis"
   },
   {
@@ -1254,7 +1514,7 @@
    "name": "lua.wetgenes.tardis.m3.v3"
   },
   {
-   "count": 29,
+   "count": 32,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -1319,6 +1579,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prerrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.prescale"
   },
   {
@@ -1339,6 +1603,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.rrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.scale"
   },
   {
@@ -1348,6 +1616,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.setrrot"
   },
   {
    "count": 1,
@@ -1382,7 +1654,7 @@
    "name": "lua.wetgenes.tardis.plane.new"
   },
   {
-   "count": 6,
+   "count": 11,
    "name": "lua.wetgenes.tardis.q4"
   },
   {
@@ -1399,11 +1671,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.q4.prerotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.prerrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.q4.rotate"
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.q4.rrotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.set"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.q4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.setrrot"
   },
   {
    "count": 1,
@@ -1474,12 +1766,16 @@
    "name": "lua.wetgenes.tardis.v2.sub"
   },
   {
-   "count": 14,
+   "count": 15,
    "name": "lua.wetgenes.tardis.v3"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v3.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.angle"
   },
   {
    "count": 1,
@@ -1584,6 +1880,90 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.to_v3"
+  },
+  {
+   "count": 21,
+   "name": "lua.wetgenes.tasks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_id"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.create_colinda"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_id"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.delete"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.http"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.http_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.receive"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.run_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.send"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.sqlite"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.sqlite_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.test"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.update"
   },
   {
    "count": 5,
@@ -1728,7 +2108,7 @@
  "_list": [
   {
    "body": "",
-   "count": 68,
+   "count": 126,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -1747,42 +2127,42 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.chat"
   },
   {
-   "body": "<pre><code>tag_value = chat:get_tag(tag_name)</code></pre><p>The same as chats:get_tag but the subject of this chat is the \ndefault root.</p>\n",
+   "body": "<pre><code>tag_value = chat:get_tag(tag_name)\n</code></pre>\n<p>The same as chats:get_tag but the subject of this chat is the \ndefault root.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 276,
+   "line": 278,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chat.get_tag",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>output = chat:replace_tags(input)</code></pre><p>The same as chats:replace_tags but the subject of this chat is the \ndefault root.</p>\n",
+   "body": "<pre><code>output = chat:replace_tags(input)\n</code></pre>\n<p>The same as chats:replace_tags but the subject of this chat is the \ndefault root.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 304,
+   "line": 306,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chat.replace_tags",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>tag_value = chat:set_tag(tag_name,tag_value)</code></pre><p>The same as chats:set_tag but the subject of this chat is the \ndefault root.</p>\n",
+   "body": "<pre><code>tag_value = chat:set_tag(tag_name,tag_value)\n</code></pre>\n<p>The same as chats:set_tag but the subject of this chat is the \ndefault root.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 290,
+   "line": 292,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_tag",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat:set_tags(tags)</code></pre><p>Set all the values in the given table of {tag_name=tag_value} pairs.</p>\n",
+   "body": "<pre><code>chat:set_tags(tags)\n</code></pre>\n<p>Set all the values in the given table of {tag_name=tag_value} pairs.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 318,
+   "line": 320,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_tags",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat:set_topic(topic_name)</code></pre><p>Set the current topic for this chat object, information about this \ntopic and its gotos are built from and stored in this chat object.</p>\n<pre><code>chat.topic_name</code></pre><p>Will be set to the given topic name.</p>\n<p>We merge all gotos found in this topic and all topic parents by \niterating over the dotnames. We only use add each topic once and each \ntopic may have a bit of logic that decides if it should be displayed.</p>\n<pre><code>&lt;topic_name?logic_test</code></pre><p>So this would goto the topic_name if the logic_test passes. The logic \ntest is written simmilar to a url query after the question mark comes a \nnumber of tests that are then &amp; or | together in left to right order \n(no operator precedence).</p>\n<pre><code>&lt;topic_name?count&lt;10&amp;seen==false</code></pre><p>So this would display the goto option if count is less than 10 and seen \nis set to false. These variables we are testing are tag_names and \ndefault to the current subject chat but could reference other subjects \nby explicitly including a root.</p>\n<p>Available logic tests are</p>\n<pre><code>name==value\nname=value</code></pre><p>True if the tag is set to this value.</p>\n<pre><code>name!=value</code></pre><p>True if the tag is not set to this value.</p>\n<pre><code>name&lt;value</code></pre><p>True if the tag is less than this value (numeric test).</p>\n<pre><code>name&gt;value</code></pre><p>True if the tag is more than this value (numeric test).</p>\n<pre><code>name&lt;=value</code></pre><p>True if the tag is less than or equal to this value (numeric test).</p>\n<pre><code>name&gt;=value</code></pre><p>True if the tag is more than or equal to  this value (numeric test).</p>\n<p>All of these tests can be preceded by a ! to negate them so</p>\n<pre><code>name!=vale\n!name==value</code></pre><p>Are both a test for inequality.</p>\n<p>Multiple tests can be joined together by &amp; (and) or | (or) this logic \nwill be applied to a running total moving from left to right as the \nvalues are evaluated with the final value deciding if this goto will be \ndisplayed.</p>\n",
+   "body": "<pre><code>chat:set_topic(topic_name)\n</code></pre>\n<p>Set the current topic for this chat object, information about this \ntopic and its gotos are built from and stored in this chat object.</p>\n<pre><code>chat.topic_name\n</code></pre>\n<p>Will be set to the given topic name.</p>\n<p>We merge all gotos found in this topic and all topic parents by \niterating over the dotnames. We only use add each topic once and each \ntopic may have a bit of logic that decides if it should be displayed.</p>\n<pre><code>&lt;topic_name?logic_test\n</code></pre>\n<p>So this would goto the topic_name if the logic_test passes. The logic \ntest is written simmilar to a url query after the question mark comes a \nnumber of tests that are then &amp; or | together in left to right order \n(no operator precedence).</p>\n<pre><code>&lt;topic_name?count&lt;10&amp;seen==false\n</code></pre>\n<p>So this would display the goto option if count is less than 10 and seen \nis set to false. These variables we are testing are tag_names and \ndefault to the current subject chat but could reference other subjects \nby explicitly including a root.</p>\n<p>Available logic tests are</p>\n<pre><code>name==value\nname=value\n</code></pre>\n<p>True if the tag is set to this value.</p>\n<pre><code>name!=value\n</code></pre>\n<p>True if the tag is not set to this value.</p>\n<pre><code>name&lt;value\n</code></pre>\n<p>True if the tag is less than this value (numeric test).</p>\n<pre><code>name&gt;value\n</code></pre>\n<p>True if the tag is more than this value (numeric test).</p>\n<pre><code>name&lt;=value\n</code></pre>\n<p>True if the tag is less than or equal to this value (numeric test).</p>\n<pre><code>name&gt;=value\n</code></pre>\n<p>True if the tag is more than or equal to  this value (numeric test).</p>\n<p>All of these tests can be preceded by a ! to negate them so</p>\n<pre><code>name!=vale\n!name==value\n</code></pre>\n<p>Are both a test for inequality.</p>\n<p>Multiple tests can be joined together by &amp; (and) or | (or) this logic \nwill be applied to a running total moving from left to right as the \nvalues are evaluated with the final value deciding if this goto will be \ndisplayed.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 333,
+   "line": 335,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chat.set_topic",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
@@ -1792,90 +2172,90 @@
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats"
   },
   {
-   "body": "<pre><code>chats.changes(chat,change,...)\n\nchats.changes(chat,&quot;subject&quot;)\nchats.changes(chat,&quot;topic&quot;,topic)\nchats.changes(chat,&quot;goto&quot;,goto)\nchats.changes(chat,&quot;tag&quot;,tag_name,tag_value)</code></pre><p>This is a callback hook, replace to be notified of changes and possibly \nalter then, by default we print debuging information. Replace this \nfunction with an empty function to prevent this eg</p>\n<pre><code>chats.changes=function()end</code></pre>",
+   "body": "<pre><code>chats.changes(chat,change,...)\n\nchats.changes(chat,&quot;subject&quot;)\nchats.changes(chat,&quot;topic&quot;,topic)\nchats.changes(chat,&quot;goto&quot;,goto)\nchats.changes(chat,&quot;tag&quot;,tag_name,tag_value)\n</code></pre>\n<p>This is a callback hook, replace to be notified of changes and possibly \nalter then, by default we print debuging information. Replace this \nfunction with an empty function to prevent this eg</p>\n<pre><code>chats.changes=function()end\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 669,
+   "line": 671,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.changes",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat = chats:get_subject(subject_name)\nchat = chats:get_subject()</code></pre><p>Get the chat for the given subject or the chat for the last subject \nselected with set_subject if no subject_name is given.</p>\n",
+   "body": "<pre><code>chat = chats:get_subject(subject_name)\nchat = chats:get_subject()\n</code></pre>\n<p>Get the chat for the given subject or the chat for the last subject \nselected with set_subject if no subject_name is given.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 561,
+   "line": 563,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_subject",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>tag_value = chats:get_tag(tag_name,subject_name)</code></pre><p>Get the tag_value for the given tag_name which can either be \n&quot;tag_root/tag_name&quot; or &quot;tag_name&quot;. The subject_name is the default root \nto use if no tag_root is given in the tag_name.</p>\n",
+   "body": "<pre><code>tag_value = chats:get_tag(tag_name,subject_name)\n</code></pre>\n<p>Get the tag_value for the given tag_name which can either be \n&quot;tag_root/tag_name&quot; or &quot;tag_name&quot;. The subject_name is the default root \nto use if no tag_root is given in the tag_name.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 576,
+   "line": 578,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.get_tag",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>output = chats:replace_tags(input,subject_name)</code></pre><p>Tags in the input text can be wrapped in {tag_name} and will be \nreplaced with the appropriate tag_value. This is done recursively so \ntag_values can contain references to other tags. If a tag does not \nexist then it will not expand and {tag_name} will remain in the output \ntext.</p>\n<p>Again if any tag name does not contain an explicit root then \nsubject_name will be used as the default chat subject.</p>\n",
+   "body": "<pre><code>output = chats:replace_tags(input,subject_name)\n</code></pre>\n<p>Tags in the input text can be wrapped in {tag_name} and will be \nreplaced with the appropriate tag_value. This is done recursively so \ntag_values can contain references to other tags. If a tag does not \nexist then it will not expand and {tag_name} will remain in the output \ntext.</p>\n<p>Again if any tag name does not contain an explicit root then \nsubject_name will be used as the default chat subject.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 637,
+   "line": 639,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.replace_tags",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat = chats:set_subject(subject_name)</code></pre><p>Set the current subject for this chats object, this subject becomes the \nchat that you will get if you call get_subject with no arguments.</p>\n",
+   "body": "<pre><code>chat = chats:set_subject(subject_name)\n</code></pre>\n<p>Set the current subject for this chats object, this subject becomes the \nchat that you will get if you call get_subject with no arguments.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 544,
+   "line": 546,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_subject",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>tag_value = chats:set_tag(tag_name,tag_value,subject_name)</code></pre><p>Alter the value of the given tag_name. If the value string begins with \na &quot;+&quot; or a &quot;-&quot; Then the values will be treated as numbers and added or \nsubtracted from the current value. This allows for simple incremental \nflag values.</p>\n<p>Again if the tag name does not contain an explicit  root then \nsubject_name will be used as the default chat subject.</p>\n",
+   "body": "<pre><code>tag_value = chats:set_tag(tag_name,tag_value,subject_name)\n</code></pre>\n<p>Alter the value of the given tag_name. If the value string begins with \na &quot;+&quot; or a &quot;-&quot; Then the values will be treated as numbers and added or \nsubtracted from the current value. This allows for simple incremental \nflag values.</p>\n<p>Again if the tag name does not contain an explicit  root then \nsubject_name will be used as the default chat subject.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 594,
+   "line": 596,
    "name": "lua.wetgenes.gamecake.fun.chatdown.chats.set_tag",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>for part_name in chatdown.dotnames(full_name) do\n    print(part_name)\nend</code></pre><p>Iterate all dotnames so if given &quot;aa.bb.cc&quot; we would iterate through \n&quot;aa.bb.cc&quot; , &quot;aa.bb&quot; and &quot;aa&quot;. This is used to inherit data using just \na naming convention.</p>\n",
+   "body": "<pre><code>for part_name in chatdown.dotnames(full_name) do\n    print(part_name)\nend\n</code></pre>\n<p>Iterate all dotnames so if given &quot;aa.bb.cc&quot; we would iterate through \n&quot;aa.bb.cc&quot; , &quot;aa.bb&quot; and &quot;aa&quot;. This is used to inherit data using just \na naming convention.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 253,
+   "line": 255,
    "name": "lua.wetgenes.gamecake.fun.chatdown.dotnames",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>rawsubjects = chatdown.parse(text)</code></pre><p>Parse text from flat text chatdown format into heirachical chat data, \nwhich we refer to as rawsubjects, something that can be output easily \nas json.</p>\n<p>This gives us a readonly rawsubjects structure that can be used to control \nwhat text is displayed during a chat session.</p>\n<p>This is intended to be descriptive and logic less, any real logic \nshould be added using a real language that operates on this rawsubjects and \ngets triggered by the names used. EG, filter out gotos unless certain \ncomplicated conditions are met or change topics to redirect to an \nalternative.</p>\n<p>A self documented example of chatdown formated text can be found in \nlua.wetgenes.gamecake.fun.chatdown.text</p>\n",
+   "body": "<pre><code>rawsubjects = chatdown.parse(text)\n</code></pre>\n<p>Parse text from flat text chatdown format into heirachical chat data, \nwhich we refer to as rawsubjects, something that can be output easily \nas json.</p>\n<p>This gives us a readonly rawsubjects structure that can be used to control \nwhat text is displayed during a chat session.</p>\n<p>This is intended to be descriptive and logic less, any real logic \nshould be added using a real language that operates on this rawsubjects and \ngets triggered by the names used. EG, filter out gotos unless certain \ncomplicated conditions are met or change topics to redirect to an \nalternative.</p>\n<p>A self documented example of chatdown formated text can be found in \nlua.wetgenes.gamecake.fun.chatdown.text</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 17,
+   "line": 19,
    "name": "lua.wetgenes.gamecake.fun.chatdown.parse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chats = chatdown.setup_chats(chat_text,changes)</code></pre><p>parse and initialise state data for every subjects chunk creating a \nglobal chats with a chat object for each subject.</p>\n",
+   "body": "<pre><code>chats = chatdown.setup_chats(chat_text,changes)\n</code></pre>\n<p>parse and initialise state data for every subjects chunk creating a \nglobal chats with a chat object for each subject.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 698,
+   "line": 700,
    "name": "lua.wetgenes.gamecake.fun.chatdown.setup",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<pre><code>chat = chatdown.setup_chat(chats,subject_name)</code></pre><p>Setup the initial chat state for a subject. This is called \nautomatically by chatdown.setup and probably should not be used \nelsewhere.</p>\n",
+   "body": "<pre><code>chat = chatdown.setup_chat(chats,subject_name)\n</code></pre>\n<p>Setup the initial chat state for a subject. This is called \nautomatically by chatdown.setup and probably should not be used \nelsewhere.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 506,
+   "line": 508,
    "name": "lua.wetgenes.gamecake.fun.chatdown.setup_chat",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
   {
-   "body": "<p>Here is some example chatdown formatted text full of useful \ninformation, it it is intended to be a self documented example.</p>\n<pre><code>\n- This is a single line comment\n-- This is the start of a multi-line comment\n\nAll lines are now comment lines until we see a line that begins with a \ncontrol character leading white space is ignored. If for some reason \nyou need to start a text line with a special character then it can be \nescaped by preceding it with a #\n\nWhat follows is a list of these characters and a brief description \nabout the parser state they switch to.\n\n    1. - (text to ignore)\n\n        A single line comment that does not change parser state and \n        only this line will be ignored so it can be inserted inside \n        other chunks without losing our place.\n\n    2. -- (text to ignore)\n\n        Begin a comment chunk, this line and all lines that follow this \n        line will be considered comments and ignored until we switch to \n        a new parser state.\n\n    3. #subject_name\n\n        Begin a new subject chunk, all future topic,goto or tag chunks will \n        belong to this subject.\n\n        The text that follows this until the next chunk is the long \n        description intended for when you examine the character.\n\n        Although it makes sense for a subject chunk to belong to one \n        character it could also a group conversation with tags being \n        set to change the current talker as the conversation flows.\n\n        subject names have simple cascading inheritance according to their \n        name with each level separated by a dot. A chunk named a.b.c \n        will inherit data from any chunks defined for a.b and a in that \n        order of priority.\n\n    4. &gt;topic_name\n\n        Begin a topic chunk, all future goto or tag chunks will belong \n        to this topic, the lines that follow are how the character \n        responds when questioned about this topic followed by one or \n        more gotos as possible responses that will lead you onto \n        another topic.\n\n        Topics can be broken into parts, to create a pause, by using an \n        unnamed goto followed by an unnamed topic which will both \n        automatically be given the same generated name and hence linked \n        together.\n\n    5. &lt;goto_topic_name\n\n        Begin a goto chunk, all future tag chunks will belong to this \n        goto, this is probably best thought of as a question that will \n        get a reply from the character. This is a choice made by the \n        player that causes a logical jump to another topic.\n\n        Essentially this means GOTO another topic and there can be \n        multiple GOTO options associated with each topic which the \n        reader is expected to choose between.\n\n    6. =set_tag_name to this value\n\n        If there is any text on the rest of this line then it will be \n        assigned to the tag without changing the current parse state so \n        it can be used in the middle of another chunk without losing \n        our place.\n\n        This single line tag assignment is usually all you need. \n        Alternatively, if there is no text on the rest of this first \n        line, only white space, then the parse state will change and \n        text on all following lines will be assigned to the named tag.\n\n        This assignment can happen at various places, for instance if \n        it is part of the subject then it will be the starting \n        value for a tag but if it is linked to a topic or goto then the \n        value will be a change as the conversation happens. In all \n        cases the tags are set in a single batch as the state changes \n        so the placement and order makes no difference.\n\n        Tags can be used inside text chunks or even GOTO labels by \n        tightly wrapping with {} eg {name} would be replaced with the \n        value of name. Tags from other subjects can be referenced by \n        prefixing the tag name with the subject name followed by a forward \n        slash like so {subject/tag}\n\n\nThe hierarchy of these chunks can be expressed by indentation as all \nwhite space is ignored and combined into a single space. Each SUBJECT will \nhave multiple TOPICs associated with it and each TOPIC will have \nmultiple GOTOs as options to jump between TOPICs. TAGs can be \nassociated with any of these 3 levels and will be evaluated as the \nconversation flows through these points.\n\nSo the chunk hierarchy expressed using indentation to denote children \nof.\n\n    SUBJECT\n        TAG\n        GOTO\n            TAG\n        TOPIC\n            TAG\n            GOTO\n                TAG\n\nThe GOTO chunks in the root SUBJECT chunk are used as prototypes so if a \nGOTO is used in multiple topics its text can be placed within a GOTO \ninside the main SUBJECT chunk rather than repeated constantly. This will \nthen be inherited by a GOTO with no text. An alternative to this \nshorthand is to assign an oft-used piece of text to a tag and reference \nthat in each topic instead.\n\nSUBJECTs and TOPICs also have simple inheritance based on their names this \nenables the building of a prototype which is later expanded. Each \ninheritance level is separated by a dot so aa.bb.cc will inherit from \naa.bb and aa with the data in the longer names having precedence. This \ninheritance is additive only so for instance a TAG can not be unset and \nwould have to be changed to another value by aa.bb.cc if it existed in \naa.bb or aa.\n\nIn practise this means\n&lt;br/&gt;\n&lt;br/&gt;\n</code></pre>",
+   "body": "<p>Here is some example chatdown formatted text full of useful \ninformation, it it is intended to be a self documented example.</p>\n<pre><code>\n- This is a single line comment\n-- This is the start of a multi-line comment\n\nAll lines are now comment lines until we see a line that begins with a \ncontrol character leading white space is ignored. If for some reason \nyou need to start a text line with a special character then it can be \nescaped by preceding it with a #\n\nWhat follows is a list of these characters and a brief description \nabout the parser state they switch to.\n\n    1. - (text to ignore)\n    \n        A single line comment that does not change parser state and \n        only this line will be ignored so it can be inserted inside \n        other chunks without losing our place.\n\n    2. -- (text to ignore)\n    \n        Begin a comment chunk, this line and all lines that follow this \n        line will be considered comments and ignored until we switch to \n        a new parser state.\n\n    3. #subject_name\n\n        Begin a new subject chunk, all future topic,goto or tag chunks will \n        belong to this subject.\n        \n        The text that follows this until the next chunk is the long \n        description intended for when you examine the character.\n        \n        Although it makes sense for a subject chunk to belong to one \n        character it could also a group conversation with tags being \n        set to change the current talker as the conversation flows.\n        \n        subject names have simple cascading inheritance according to their \n        name with each level separated by a dot. A chunk named a.b.c \n        will inherit data from any chunks defined for a.b and a in that \n        order of priority.\n\n    4. &gt;topic_name\n    \n        Begin a topic chunk, all future goto or tag chunks will belong \n        to this topic, the lines that follow are how the character \n        responds when questioned about this topic followed by one or \n        more gotos as possible responses that will lead you onto \n        another topic.\n        \n        Topics can be broken into parts, to create a pause, by using an \n        unnamed goto followed by an unnamed topic which will both \n        automatically be given the same generated name and hence linked \n        together.\n        \n    5. &lt;goto_topic_name\n    \n        Begin a goto chunk, all future tag chunks will belong to this \n        goto, this is probably best thought of as a question that will \n        get a reply from the character. This is a choice made by the \n        player that causes a logical jump to another topic.\n        \n        Essentially this means GOTO another topic and there can be \n        multiple GOTO options associated with each topic which the \n        reader is expected to choose between.\n        \n    6. =set_tag_name to this value\n    \n        If there is any text on the rest of this line then it will be \n        assigned to the tag without changing the current parse state so \n        it can be used in the middle of another chunk without losing \n        our place.\n        \n        This single line tag assignment is usually all you need. \n        Alternatively, if there is no text on the rest of this first \n        line, only white space, then the parse state will change and \n        text on all following lines will be assigned to the named tag.\n        \n        This assignment can happen at various places, for instance if \n        it is part of the subject then it will be the starting \n        value for a tag but if it is linked to a topic or goto then the \n        value will be a change as the conversation happens. In all \n        cases the tags are set in a single batch as the state changes \n        so the placement and order makes no difference.\n        \n        Tags can be used inside text chunks or even GOTO labels by \n        tightly wrapping with {} eg {name} would be replaced with the \n        value of name. Tags from other subjects can be referenced by \n        prefixing the tag name with the subject name followed by a forward \n        slash like so {subject/tag}\n                \n\nThe hierarchy of these chunks can be expressed by indentation as all \nwhite space is ignored and combined into a single space. Each SUBJECT will \nhave multiple TOPICs associated with it and each TOPIC will have \nmultiple GOTOs as options to jump between TOPICs. TAGs can be \nassociated with any of these 3 levels and will be evaluated as the \nconversation flows through these points.\n\nSo the chunk hierarchy expressed using indentation to denote children \nof.\n\n    SUBJECT\n        TAG\n        GOTO\n            TAG\n        TOPIC\n            TAG\n            GOTO\n                TAG\n\nThe GOTO chunks in the root SUBJECT chunk are used as prototypes so if a \nGOTO is used in multiple topics its text can be placed within a GOTO \ninside the main SUBJECT chunk rather than repeated constantly. This will \nthen be inherited by a GOTO with no text. An alternative to this \nshorthand is to assign an oft-used piece of text to a tag and reference \nthat in each topic instead.\n\nSUBJECTs and TOPICs also have simple inheritance based on their names this \nenables the building of a prototype which is later expanded. Each \ninheritance level is separated by a dot so aa.bb.cc will inherit from \naa.bb and aa with the data in the longer names having precedence. This \ninheritance is additive only so for instance a TAG can not be unset and \nwould have to be changed to another value by aa.bb.cc if it existed in \naa.bb or aa.\n\nIn practise this means\n&lt;br/&gt;\n&lt;br/&gt;\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/chatdown.lua",
-   "line": 729,
+   "line": 731,
    "name": "lua.wetgenes.gamecake.fun.chatdown.text",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/chatdown.lua"
   },
@@ -1885,7 +2265,7 @@
    "name": "lua.wetgenes.gamecake.fun.yarn"
   },
   {
-   "body": "<pre><code>cells = require(&quot;wetgenes.gamecake.fun.yarn.cells&quot;).create(items)</code></pre><p>This module contains only one function which can be used to create an \ncells instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
+   "body": "<pre><code>cells = require(&quot;wetgenes.gamecake.fun.yarn.cells&quot;).create(items)\n</code></pre>\n<p>This module contains only one function which can be used to create an \ncells instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/cells.lua",
    "line": 6,
@@ -1893,7 +2273,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/cells.lua"
   },
   {
-   "body": "<pre><code>items = require(&quot;wetgenes.gamecake.fun.yarn.items&quot;).create()</code></pre><p>This module contains only one function which can be used to create an \nitems instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
+   "body": "<pre><code>items = require(&quot;wetgenes.gamecake.fun.yarn.items&quot;).create()\n</code></pre>\n<p>This module contains only one function which can be used to create an \nitems instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
    "count": 14,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 6,
@@ -1901,7 +2281,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>items.cells</code></pre><p>We automatically create a cells object bound to this set of items, this \ncells object should be used to define all your custom game cells.</p>\n",
+   "body": "<pre><code>items.cells\n</code></pre>\n<p>We automatically create a cells object bound to this set of items, this \ncells object should be used to define all your custom game cells.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 259,
@@ -1909,7 +2289,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>item = items.create()\nitem = items.create({})\nitem = items.create({},metatable)</code></pre><p>Create a single item, optionally pass in a base item table that will be \nturned into a proper item (using setmetatable to add methods). This \nshould always be a new table and will also be returned. If no \nmetatable is provided then items.metatable will be used.</p>\n",
+   "body": "<pre><code>item = items.create()\nitem = items.create({})\nitem = items.create({},metatable)\n</code></pre>\n<p>Create a single item, optionally pass in a base item table that will be \nturned into a proper item (using setmetatable to add methods). This \nshould always be a new table and will also be returned. If no \nmetatable is provided then items.metatable will be used.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 73,
@@ -1917,7 +2297,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>items.pages</code></pre><p>We automatically create a pages object bound to this set of items, this \npages object should be used to define all your custom game pages.</p>\n<p>This can be considered a level and you may need multiple pages which \nare moved in and out of items.pages</p>\n",
+   "body": "<pre><code>items.pages\n</code></pre>\n<p>We automatically create a pages object bound to this set of items, this \npages object should be used to define all your custom game pages.</p>\n<p>This can be considered a level and you may need multiple pages which \nare moved in and out of items.pages</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 271,
@@ -1925,7 +2305,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>item = items.destroy(item)\nitem = item:destroy()</code></pre><p>Destroy an item, remove it from the master table dump so it will be \ngarbage collected.</p>\n",
+   "body": "<pre><code>item = items.destroy(item)\nitem = item:destroy()\n</code></pre>\n<p>Destroy an item, remove it from the master table dump so it will be \ngarbage collected.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 101,
@@ -1933,7 +2313,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>child_item = item:find(keyname)</code></pre><p>Get the first child item that has a [keyname] value in it. All child \nitems are searched, but this is not recursive.</p>\n<p>returns nil if no child item is found.</p>\n",
+   "body": "<pre><code>child_item = item:find(keyname)\n</code></pre>\n<p>Get the first child item that has a [keyname] value in it. All child \nitems are searched, but this is not recursive.</p>\n<p>returns nil if no child item is found.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 215,
@@ -1941,7 +2321,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>big_item = item:get_big()</code></pre><p>Get the first big item from this container, returns nil if we do not \ncontain a big item.</p>\n",
+   "body": "<pre><code>big_item = item:get_big()\n</code></pre>\n<p>Get the first big item from this container, returns nil if we do not \ncontain a big item.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 199,
@@ -1949,7 +2329,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>item = item:insert(parent)</code></pre><p>Insert this item into the given parent. Item will automatically be \nremoved from its current parent. If the item is_big then it will be \ninserted into the front of the list otherwise it will go at the end. \nThis is to help with finding big items, since there should only be one \nper container we only have to check the first child.</p>\n",
+   "body": "<pre><code>item = item:insert(parent)\n</code></pre>\n<p>Insert this item into the given parent. Item will automatically be \nremoved from its current parent. If the item is_big then it will be \ninserted into the front of the list otherwise it will go at the end. \nThis is to help with finding big items, since there should only be one \nper container we only have to check the first child.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 173,
@@ -1957,7 +2337,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>for name,tail in items.iterate_dotnames(names) do ... end</code></pre><p>Iterator over a names string, start with the full string and cut off \nthe tail on each iteration. This is used for simple inheritance merging \nof named prefabs and rules or anything else.</p>\n<p>Second return value is the tail of the string or the string if not \ntail.</p>\n<p>for example the following input string</p>\n<pre><code>&quot;one.two.three.four&quot;</code></pre><p>would get you the following iteration loops, one line per loop</p>\n<pre><code>&quot;one.two.three.four&quot; , &quot;four&quot;\n&quot;one.two.three&quot;      , &quot;three&quot;\n&quot;one.two&quot;            , &quot;two&quot;\n&quot;one&quot;                , &quot;one&quot;</code></pre>",
+   "body": "<pre><code>for name,tail in items.iterate_dotnames(names) do ... end\n</code></pre>\n<p>Iterator over a names string, start with the full string and cut off \nthe tail on each iteration. This is used for simple inheritance merging \nof named prefabs and rules or anything else.</p>\n<p>Second return value is the tail of the string or the string if not \ntail.</p>\n<p>for example the following input string</p>\n<pre><code>&quot;one.two.three.four&quot;\n</code></pre>\n<p>would get you the following iteration loops, one line per loop</p>\n<pre><code>&quot;one.two.three.four&quot; , &quot;four&quot;\n&quot;one.two.three&quot;      , &quot;three&quot;\n&quot;one.two&quot;            , &quot;two&quot;\n&quot;one&quot;                , &quot;one&quot;\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 24,
@@ -1965,7 +2345,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>for it in item:iterate_parents() do\n    ...\nend</code></pre><p>Iterate over the parent chain going upwards. The first iteration is the \nparent of this object and so on.</p>\n",
+   "body": "<pre><code>for it in item:iterate_parents() do\n    ...\nend\n</code></pre>\n<p>Iterate over the parent chain going upwards. The first iteration is the \nparent of this object and so on.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 128,
@@ -1973,7 +2353,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>items.metatable</code></pre><p>Expose the item metatable so more methods can easily be added.</p>\n",
+   "body": "<pre><code>items.metatable\n</code></pre>\n<p>Expose the item metatable so more methods can easily be added.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 59,
@@ -1981,7 +2361,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>items.prefabs</code></pre><p>We automatically create a prefabs object bound to this set of items, this \nprefabs object should be used to define all your custom game prefabs.</p>\n",
+   "body": "<pre><code>items.prefabs\n</code></pre>\n<p>We automatically create a prefabs object bound to this set of items, this \nprefabs object should be used to define all your custom game prefabs.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 247,
@@ -1989,7 +2369,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>item = item:remove()</code></pre><p>Remove this item from its parents table or do nothing if the item does \nnot have a parent.</p>\n",
+   "body": "<pre><code>item = item:remove()\n</code></pre>\n<p>Remove this item from its parents table or do nothing if the item does \nnot have a parent.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 146,
@@ -1997,7 +2377,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>items.rules</code></pre><p>We automatically create a rules object bound to this set of items, this \nrules object should be used to define all your custom game rules.</p>\n",
+   "body": "<pre><code>items.rules\n</code></pre>\n<p>We automatically create a rules object bound to this set of items, this \nrules object should be used to define all your custom game rules.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/items.lua",
    "line": 235,
@@ -2005,7 +2385,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/items.lua"
   },
   {
-   "body": "<pre><code>pages = require(&quot;wetgenes.gamecake.fun.yarn.pages&quot;).create(items)</code></pre><p>This module contains only one function which can be used to create an \npages instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
+   "body": "<pre><code>pages = require(&quot;wetgenes.gamecake.fun.yarn.pages&quot;).create(items)\n</code></pre>\n<p>This module contains only one function which can be used to create an \npages instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/pages.lua",
    "line": 8,
@@ -2013,7 +2393,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/pages.lua"
   },
   {
-   "body": "<pre><code>prefabs = require(&quot;wetgenes.gamecake.fun.yarn.prefabs&quot;).create(items)</code></pre><p>This module contains only one function which can be used to create an \nprefabs instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
+   "body": "<pre><code>prefabs = require(&quot;wetgenes.gamecake.fun.yarn.prefabs&quot;).create(items)\n</code></pre>\n<p>This module contains only one function which can be used to create an \nprefabs instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
    "count": 2,
    "file": "../lua/wetgenes/gamecake/fun/yarn/prefabs.lua",
    "line": 7,
@@ -2021,7 +2401,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua"
   },
   {
-   "body": "<pre><code>prefab = prefabs:get(name)\nprefab = prefabs:get(name,prefab)</code></pre><p>Build and return a table with all prefab values inherited from all its \nparents. Optionally pass in a prefab to override values and also have \nit returned.</p>\n<p>If name doesn&#39;t exist at any level and a table is not passed in then nil \nwill be returned.</p>\n<p>Names are hierarchical, separated by dots, see items.iterate_dotnames</p>\n",
+   "body": "<pre><code>prefab = prefabs:get(name)\nprefab = prefabs:get(name,prefab)\n</code></pre>\n<p>Build and return a table with all prefab values inherited from all its \nparents. Optionally pass in a prefab to override values and also have \nit returned.</p>\n<p>If name doesn&#39;t exist at any level and a table is not passed in then nil \nwill be returned.</p>\n<p>Names are hierarchical, separated by dots, see items.iterate_dotnames</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/prefabs.lua",
    "line": 44,
@@ -2029,7 +2409,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/prefabs.lua"
   },
   {
-   "body": "<pre><code>rules = require(&quot;wetgenes.gamecake.fun.yarn.rules&quot;).create(items)</code></pre><p>This module contains only one function which can be used to create an \nrules instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
+   "body": "<pre><code>rules = require(&quot;wetgenes.gamecake.fun.yarn.rules&quot;).create(items)\n</code></pre>\n<p>This module contains only one function which can be used to create an \nrules instance and the rest of this documentation concerns the return \nfrom this create function, not the module itself.</p>\n",
    "count": 4,
    "file": "../lua/wetgenes/gamecake/fun/yarn/rules.lua",
    "line": 6,
@@ -2037,7 +2417,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua"
   },
   {
-   "body": "<pre><code>item = rules.apply(item,method,...)</code></pre><p>item.rules must be a list of rule names and the order in which they should \nbe applied to this item.</p>\n<p>Call the given method in each rule with the item and the remaining arguments.</p>\n<p>If the method returns a value then no more methods will be applied even \nif more rules are listed.</p>\n<p>We always return the passed in item so that calls can be chained.</p>\n<pre><code>item = item:apply(method,...)</code></pre><p>This function is inserted into the items.metatable so it can be called \ndirectly from an item.</p>\n",
+   "body": "<pre><code>item = rules.apply(item,method,...)\n</code></pre>\n<p>item.rules must be a list of rule names and the order in which they should \nbe applied to this item.</p>\n<p>Call the given method in each rule with the item and the remaining arguments.</p>\n<p>If the method returns a value then no more methods will be applied even \nif more rules are listed.</p>\n<p>We always return the passed in item so that calls can be chained.</p>\n<pre><code>item = item:apply(method,...)\n</code></pre>\n<p>This function is inserted into the items.metatable so it can be called \ndirectly from an item.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/rules.lua",
    "line": 62,
@@ -2045,7 +2425,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua"
   },
   {
-   "body": "<pre><code>yes = rules.can(item,method)</code></pre><p>Returns true if any rule in this item has the given method.</p>\n<pre><code>yes = item:can(method)</code></pre><p>This function is inserted into the items.metatable so it can be called \ndirectly from an item.</p>\n",
+   "body": "<pre><code>yes = rules.can(item,method)\n</code></pre>\n<p>Returns true if any rule in this item has the given method.</p>\n<pre><code>yes = item:can(method)\n</code></pre>\n<p>This function is inserted into the items.metatable so it can be called \ndirectly from an item.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/rules.lua",
    "line": 96,
@@ -2053,7 +2433,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua"
   },
   {
-   "body": "<pre><code>rule = rules.set(rule)</code></pre><p>Set this base rule into the name space using rule.name which must \nbe a string.</p>\n<p>Multiple rules can be applied to an item and each rule will be applied \nin the order listed.</p>\n<p>A rule is a table of named functions that can be applied to an item.</p>\n<pre><code>rule.setup(item)</code></pre><p>Must setup the item so that it is safe to call the other rules on it.</p>\n<pre><code>rule.clean(item)</code></pre><p>Should cleanup anything that needs cleaning.</p>\n<pre><code>rule.tick(item)</code></pre><p>Should perform a single time tick update on the item.\n<br/>\n<br/></p>\n",
+   "body": "<pre><code>rule = rules.set(rule)\n</code></pre>\n<p>Set this base rule into the name space using rule.name which must \nbe a string.</p>\n<p>Multiple rules can be applied to an item and each rule will be applied \nin the order listed.</p>\n<p>A rule is a table of named functions that can be applied to an item.</p>\n<pre><code>rule.setup(item)\n</code></pre>\n<p>Must setup the item so that it is safe to call the other rules on it.</p>\n<pre><code>rule.clean(item)\n</code></pre>\n<p>Should cleanup anything that needs cleaning.</p>\n<pre><code>rule.tick(item)\n</code></pre>\n<p>Should perform a single time tick update on the item.\n<br/>\n<br/></p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/fun/yarn/rules.lua",
    "line": 28,
@@ -2061,31 +2441,471 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/yarn/rules.lua"
   },
   {
-   "body": "<pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)</code></pre><p>The oven module must be baked so only exposes a bake function.</p>\n<p>All the other functions are returned from within the bake function.</p>\n<p>possible ENV settings</p>\n<pre><code>gamecake_tongue=english\ngamecake_flavour=sdl</code></pre>",
+   "body": "<pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)\n</code></pre>\n<p>The oven module must be baked so only exposes a bake function.</p>\n<p>All the other functions are returned from within the bake function.</p>\n<p>possible ENV settings</p>\n<pre><code>gamecake_tongue=english\ngamecake_flavour=sdl\n</code></pre>\n",
    "count": 2,
    "file": "../lua/wetgenes/gamecake/oven.lua",
-   "line": 6,
+   "line": 8,
    "name": "lua.wetgenes.gamecake.oven",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
   },
   {
-   "body": "<pre><code>oven=wetgenes.gamecake.oven.bake(opts)</code></pre><p>Bake creates an instance of a lua module bound to a state. Here we \nare creating the main state that other modules will then bind to.</p>\n<p>We call each state an OVEN to fit into the gamecake naming scheme \nthen we bake a module in this oven to bind them to the common state.</p>\n<p>Think of it as a sub version of require, so require gets the global \npointer for a module and bake is used to get the a module bound to \nan oven.</p>\n<p>By using this bound state we reduce the verbosity of connecting \nmodules and sharing state between them.</p>\n",
+   "body": "<pre><code>oven=wetgenes.gamecake.oven.bake(opts)\n</code></pre>\n<p>Bake creates an instance of a lua module bound to a state. Here we \nare creating the main state that other modules will then bind to.</p>\n<p>We call each state an OVEN to fit into the gamecake naming scheme \nthen we bake a module in this oven to bind them to the common state.</p>\n<p>Think of it as a sub version of require, so require gets the global \npointer for a module and bake is used to get the a module bound to \nan oven.</p>\n<p>By using this bound state we reduce the verbosity of connecting \nmodules and sharing state between them.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/oven.lua",
-   "line": 44,
+   "line": 47,
    "name": "lua.wetgenes.gamecake.oven.bake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
   },
   {
-   "body": "<pre><code>local widgets=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;)</code></pre><p>A collection of widgets, rendered using gles2 code and controlled \nusing the mouse, keyboard or a joystick. EG click fire and move \nleft/right to adjust a slider value.</p>\n<p>Widgets must be created and bound to an oven, using the \noven.rebake function.</p>\n<p>This has undergone a number of rewrites as we try to simplify the \nwidget creation and layout process. Eventually we ended up with a \nfixed size system of widget placement so every widget must have a \nknown size in advance, however we allow scaling to occur so for \ninstance building a 256x256 widget does not mean that it has to be \ndisplayed at 256x256 it just means it will be square.</p>\n<p>The basic layout just lets you place these widgets in other widgets \nas left to right lines. So as long as you get your sizes right you \ncan easily place things just using a list and without keeping track \nof the current position.</p>\n<p>Other layout options are available, such as absolute positioning for \nfull control and we have simple custom skin versions of the buttons \nas well rather than the built in skins.</p>\n<p>All value data is handled by data structures that contain ranges and \nresolutions for data allowing the same data to be bound to multiple \ndisplay widgets. For instance the same data can be linked to the \nposition of a slider as well as the content of a text display. I \nthink the kids call this sort of thing an MVC pattern but that&#39;s a \nterribly dull name.</p>\n<p>Swanky paint is probably the most advanced used of the widgets so far\nbut I suspect we will be making a simple text editor in the near \nfuture. Designed for advanced in game tweaking of text files.</p>\n",
-   "count": 2,
+   "body": "<pre><code>local widgets=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;)\n</code></pre>\n<p>A collection of widgets, rendered using gles2 code and controlled \nusing the mouse, keyboard or a joystick. EG click fire and move \nleft/right to adjust a slider value.</p>\n<p>Widgets must be created and bound to an oven, using the \noven.rebake function.</p>\n<p>This has undergone a number of rewrites as we try to simplify the \nwidget creation and layout process. Eventually we ended up with a \nfixed size system of widget placement so every widget must have a \nknown size in advance, however we allow scaling to occur so for \ninstance building a 256x256 widget does not mean that it has to be \ndisplayed at 256x256 it just means it will be square.</p>\n<p>The basic layout just lets you place these widgets in other widgets \nas left to right lines. So as long as you get your sizes right you \ncan easily place things just using a list and without keeping track \nof the current position.</p>\n<p>Other layout options are available, such as absolute positioning for \nfull control and we have simple custom skin versions of the buttons \nas well rather than the built in skins.</p>\n<p>All value data is handled by data structures that contain ranges and \nresolutions for data allowing the same data to be bound to multiple \ndisplay widgets. For instance the same data can be linked to the \nposition of a slider as well as the content of a text display. I \nthink the kids call this sort of thing an MVC pattern but that&#39;s a \nterribly dull name.</p>\n<p>Swanky paint is probably the most advanced used of the widgets so far\nbut I suspect we will be making a simple text editor in the near \nfuture. Designed for advanced in game tweaking of text files.</p>\n",
+   "count": 57,
    "file": "../lua/wetgenes/gamecake/widgets/init.lua",
    "line": 13,
    "name": "lua.wetgenes.gamecake.widgets",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/init.lua"
   },
   {
-   "body": "<pre><code>master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()\n\nmaster=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup(\n    {font=&quot;Vera&quot;,text_size=16,grid_size=32,skin=0} )</code></pre><p>Create a master widget, this widget which is considered the root of \nyour GUI. It will be filled with functions/data and should contain all \nthe functions you need to add data and widgets.</p>\n<p>You can pass in these configuration values in a table, the example \nshown above has soom good defaults.</p>\n<pre><code>font=&quot;Vera&quot;</code></pre><p>The default font to use, this must have already been loaded via \nwetgenes.gamecake.fonts functions.</p>\n<pre><code>text_size=16</code></pre><p>The default pixel height to render text at.</p>\n<pre><code>grid_size=32</code></pre><p>The size in pixels that we try and create buttons at.</p>\n",
+   "body": "<pre><code>local master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()\nlocal widget=master:add{class=&quot;button&quot;,...}\n</code></pre>\n<p>A button for pressing and such.</p>\n",
+   "count": 3,
+   "file": "../lua/wetgenes/gamecake/widgets/button.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gamecake.widgets.button",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/button.lua"
+  },
+  {
+   "body": "<pre><code>see lua.wetgenes.gamecake.widgets.meta.setup for generic options\n</code></pre>\n<p>As a button we always need to be solid so this is forced to true.</p>\n<p>Also cursor will be set to &quot;hand&quot; if it is not already set so you can \ntell it is a button when you hover over it.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/button.lua",
+   "line": 37,
+   "name": "lua.wetgenes.gamecake.widgets.button.setup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/button.lua"
+  },
+  {
+   "body": "<pre><code>this function will also call lua.wetgenes.gamecake.widgets.meta.update\n</code></pre>\n<p>If we have a data assigned to this button then make sure that the \ndisplayed text is up to date. We should really hook into the data so \nany change there is copied here instead?</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/button.lua",
+   "line": 19,
+   "name": "lua.wetgenes.gamecake.widgets.button.update",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/button.lua"
+  },
+  {
+   "body": "<pre><code>local master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()\nlocal widget=master:add{class=&quot;center&quot;,...}\n</code></pre>\n<p>A layout class for very centered children.</p>\n",
+   "count": 3,
+   "file": "../lua/wetgenes/gamecake/widgets/center.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gamecake.widgets.center",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/center.lua"
+  },
+  {
+   "body": "<pre><code>this function will also call lua.wetgenes.gamecake.widgets.meta.layout\n</code></pre>\n<p>Place any children in the center of this widget. Multiple children will \noverlap so probably best to only have one child.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/center.lua",
+   "line": 19,
+   "name": "lua.wetgenes.gamecake.widgets.center.layout",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/center.lua"
+  },
+  {
+   "body": "<pre><code>see lua.wetgenes.gamecake.widgets.meta.setup for generic options\n</code></pre>\n<p>If not explicetly set we will use a size of &quot;full&quot; ie the size of \nparent as that is probably how this class will always be used.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/center.lua",
+   "line": 41,
+   "name": "lua.wetgenes.gamecake.widgets.center.setup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/center.lua"
+  },
+  {
+   "body": "<pre><code>local master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()\nlocal widget=master:add{class=&quot;checkbox&quot;,...}\n</code></pre>\n<p>A button that can be used to display and toggle a single bit of data.</p>\n",
+   "count": 4,
+   "file": "../lua/wetgenes/gamecake/widgets/checkbox.lua",
+   "line": 10,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/checkbox.lua"
+  },
+  {
+   "body": "<p>We catch and react to the click hook as we can toggle the data_mask bit \nin the data.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/checkbox.lua",
+   "line": 45,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.class_hooks",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/checkbox.lua"
+  },
+  {
+   "body": "<pre><code>see lua.wetgenes.gamecake.widgets.meta.setup for generic options\n</code></pre>\n<p>As a button we always need to be solid so this is forced to true.</p>\n<p>cursor will be set to &quot;hand&quot; if it is not already set so you can \ntell it is a button when you hover over it.</p>\n<p>data_mask defaults to 1 and represents the bit (or bits) that should be \ntested and toggled in the data. The default of 1 and assuming your data \nstarts at 0 means that the data will toggle between 0 and 1 using this \ncheckbox.</p>\n<p>text_false defaults to &quot; &quot; and is the text that will be displayed when \na data_mask test is false.</p>\n<p>text_true defaults to &quot;X&quot; and is the text that will be displayed when \na data_mask test is true.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/checkbox.lua",
+   "line": 60,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.setup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/checkbox.lua"
+  },
+  {
+   "body": "<pre><code>this function will also call lua.wetgenes.gamecake.widgets.meta.update\n</code></pre>\n<p>If we have a data assigned to this checkbox then make sure that the \ndisplayed text is up to date. We should really hook into the data so \nany change there is copied here instead?</p>\n<p>We use data_mask to check a single bit and then set the text to either \ntext_false or text_true depending on the result.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/checkbox.lua",
+   "line": 22,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.update",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/checkbox.lua"
+  },
+  {
+   "body": "<pre><code>local master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()\nlocal data=master.new_data{}\n</code></pre>\n<p>A number or string that can be shared between multiple widgets given \nbasic limits and watched for changes.</p>\n<p>This alows the same data to be linked and displayed in multiple widgets \nsimultaneously.</p>\n",
+   "count": 17,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gamecake.widgets.data",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 58,
+   "name": "lua.wetgenes.gamecake.widgets.data.add_class_hook",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 40,
+   "name": "lua.wetgenes.gamecake.widgets.data.call_hook",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 26,
+   "name": "lua.wetgenes.gamecake.widgets.data.call_hook_later",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>adjust number (may trigger hook)</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 142,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_dec",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>get display pos, given the size of the parent and our size?</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 223,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_get_pos",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>how wide or tall should the handle be given the size of the parent?</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 203,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_get_size",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>adjust number (may trigger hook)</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 132,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_inc",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>set a number value and min/max range probably without any triggers</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 153,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_set",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>given the parents size and our relative position/size within it update \ndat.num and return a new position (for snapping)</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 244,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_snap",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>get a number from the string</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 184,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 192,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber_from_list",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>get a string from the number</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 168,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tostring",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 176,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tostring_from_list",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>set number (may trigger hook unless nohook is set)</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 78,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_value",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 65,
+   "name": "lua.wetgenes.gamecake.widgets.data.del_class_hook",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 282,
+   "name": "lua.wetgenes.gamecake.widgets.data.new_data",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>Handle a collection of data (IE in the master widget)</p>\n",
+   "count": 12,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gamecake.widgets.datas",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 46,
+   "name": "lua.wetgenes.gamecake.widgets.datas.del",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 60,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 95,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_number",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 75,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_string",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 67,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_value",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 53,
+   "name": "lua.wetgenes.gamecake.widgets.datas.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 23,
+   "name": "lua.wetgenes.gamecake.widgets.datas.new_datas",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 39,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 118,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_infos",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 83,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_string",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datas.lua",
+   "line": 103,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_value",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "<p>Helpers to define defaults for each class of widget </p>\n",
+   "count": 7,
+   "file": "../lua/wetgenes/gamecake/widgets/defs.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gamecake.widgets.defs",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/defs.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/defs.lua",
+   "line": 69,
+   "name": "lua.wetgenes.gamecake.widgets.defs.add",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/defs.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/defs.lua",
+   "line": 76,
+   "name": "lua.wetgenes.gamecake.widgets.defs.add_border",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/defs.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/defs.lua",
+   "line": 48,
+   "name": "lua.wetgenes.gamecake.widgets.defs.copy",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/defs.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/defs.lua",
+   "line": 19,
+   "name": "lua.wetgenes.gamecake.widgets.defs.create",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/defs.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/defs.lua",
+   "line": 40,
+   "name": "lua.wetgenes.gamecake.widgets.defs.reset",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/defs.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/defs.lua",
+   "line": 30,
+   "name": "lua.wetgenes.gamecake.widgets.defs.set",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/defs.lua"
+  },
+  {
+   "body": "<p>handle a collection of dialogs that all live in the same place</p>\n",
+   "count": 5,
+   "file": "../lua/wetgenes/gamecake/widgets/dialogs.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/dialogs.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/dialogs.lua",
+   "line": 31,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.hide_overlay",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/dialogs.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/dialogs.lua",
+   "line": 145,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.setup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/dialogs.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/dialogs.lua",
+   "line": 40,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.show",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/dialogs.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/dialogs.lua",
+   "line": 22,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.show_overlay",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/dialogs.lua"
+  },
+  {
+   "body": "<pre><code>local master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()\nlocal widget=master:add{class=&quot;drag&quot;,...}\n</code></pre>\n<p>A button to drag arround.</p>\n",
+   "count": 4,
+   "file": "../lua/wetgenes/gamecake/widgets/drag.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gamecake.widgets.drag",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/drag.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/drag.lua",
+   "line": 22,
+   "name": "lua.wetgenes.gamecake.widgets.drag.drag",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/drag.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/drag.lua",
+   "line": 68,
+   "name": "lua.wetgenes.gamecake.widgets.drag.setup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/drag.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/drag.lua",
+   "line": 55,
+   "name": "lua.wetgenes.gamecake.widgets.drag.update",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/drag.lua"
+  },
+  {
+   "body": "<pre><code>master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()\n\nmaster=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup(\n    {font=&quot;Vera&quot;,text_size=16,grid_size=32,skin=0} )\n</code></pre>\n<p>Create a master widget, this widget which is considered the root of \nyour GUI. It will be filled with functions/data and should contain all \nthe functions you need to add data and widgets.</p>\n<p>You can pass in these configuration values in a table, the example \nshown above has soom good defaults.</p>\n<pre><code>font=&quot;Vera&quot;\n</code></pre>\n<p>The default font to use, this must have already been loaded via \nwetgenes.gamecake.fonts functions.</p>\n<pre><code>text_size=16\n</code></pre>\n<p>The default pixel height to render text at.</p>\n<pre><code>grid_size=32\n</code></pre>\n<p>The size in pixels that we try and create buttons at.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/init.lua",
    "line": 79,
@@ -2094,43 +2914,43 @@
   },
   {
    "body": "",
-   "count": 20,
+   "count": 23,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "body": "<pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)</code></pre><p>Manage a simple structure to help group, update and draw discrete game objects.</p>\n<p>This module contains only one function which can be used to create a scene\ninstance and the rest of this documentation concerns the return from this\ncreate function, not the module</p>\n<pre><code>scene = zone_scene.create()\nscene = zone_scene.create( { sortby={&quot;first&quot;,&quot;second&quot;,...} } )</code></pre><p>Create and return a scene object. A base object can be passed in and will\nbe filled in and returned. This can used to supply a sortby table to help\ncontrol the order of updates of different castes.</p>\n<p>If passed in sortby is a table of [caste_name]=weight values to help control\nthe order of updates by caste and make it consistent. For instance you might\nfind it useful to force monsters to update before the player.</p>\n",
-   "count": 19,
+   "body": "<pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)\n</code></pre>\n<p>Manage a simple structure to help group, update and draw discrete game objects.</p>\n<p>This module contains only one function which can be used to create a scene\ninstance and the rest of this documentation concerns the return from this\ncreate function, not the module</p>\n<pre><code>scene = zone_scene.create()\nscene = zone_scene.create( { sortby={&quot;first&quot;,&quot;second&quot;,...} } )\n</code></pre>\n<p>Create and return a scene object. A base object can be passed in and will\nbe filled in and returned. This can used to supply a sortby table to help\ncontrol the order of updates of different castes.</p>\n<p>If passed in sortby is a table of [caste_name]=weight values to help control\nthe order of updates by caste and make it consistent. For instance you might\nfind it useful to force monsters to update before the player.</p>\n",
+   "count": 20,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 6,
    "name": "lua.wetgenes.gamecake.zone.scene",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.add(it,caste)\nscene.add(it)</code></pre><p>Add a new entity of caste or it.caste to the list of things to update.</p>\n",
+   "body": "<pre><code>scene.add(it,caste)\nscene.add(it)\n</code></pre>\n<p>Add a new item of caste or it.caste to the list of things to update.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 258,
+   "line": 262,
    "name": "lua.wetgenes.gamecake.zone.scene.add",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.call(fname,...)</code></pre><p>If fname is a string then that method will be invoked for every item where it\nexists like so.</p>\n<pre><code>if it[fname] then it[fname](it,...) end</code></pre><p>if fname is a function then it will result in every item geting called with\nthat function like so.</p>\n<pre><code>fname(it,...)</code></pre><p>The calls are always made backwards through the table so that an item can\nchoose to delete itself.</p>\n<p>Finally we return the number of calls we made so you can keep track of\ncurrently active items.</p>\n",
+   "body": "<pre><code>scene.call(fname,...)\n</code></pre>\n<p>If fname is a string then that method will be invoked for every item where it\nexists like so.</p>\n<pre><code>if it[fname] then it[fname](it,...) end\n</code></pre>\n<p>if fname is a function then it will result in every item geting called with\nthat function like so.</p>\n<pre><code>fname(it,...)\n</code></pre>\n<p>The calls are always made backwards through the table so that an item can\nchoose to delete itself.</p>\n<p>Finally we return the number of calls we made so you can keep track of\ncurrently active items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 306,
+   "line": 310,
    "name": "lua.wetgenes.gamecake.zone.scene.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.caste(caste)</code></pre><p>Get the list of scene of a given caste, eg &quot;bullets&quot; or &quot;enemies&quot;</p>\n<p>This list will be created if it does not already exist.</p>\n<p>scene.sortby is used to keep this list in order.</p>\n",
+   "body": "<pre><code>scene.caste(caste)\n</code></pre>\n<p>Get the list of items of a given caste, eg &quot;bullets&quot; or &quot;enemies&quot;</p>\n<p>This list will be created if it does not already exist.</p>\n<p>scene.sortby is used to keep this list in order.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 231,
+   "line": 235,
    "name": "lua.wetgenes.gamecake.zone.scene.caste",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>local it = scene.find_uid( uid )</code></pre><p>Return the item with the given uid or nil if no such item has been remembered.</p>\n",
+   "body": "<pre><code>local it = scene.find_uid( uid )\n</code></pre>\n<p>Return the item with the given uid or nil if no such item has been remembered.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 112,
@@ -2138,7 +2958,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>local it = scene.forget_uid( {uid=uid} )</code></pre><p>Remove the item from the map of uids. Returns the item or nil if uid was\ninvalid unset or our map was not pointing to the correct item.</p>\n<pre><code>local it = scene.forget_uid( scene.find_uid( uid ) )</code></pre><p>Chain with find_uid to forget an item by uid and this is safe even if the item\ndoes not exist.</p>\n",
+   "body": "<pre><code>local it = scene.forget_uid( {uid=uid} )\n</code></pre>\n<p>Remove the item from the map of uids. Returns the item or nil if uid was\ninvalid unset or our map was not pointing to the correct item.</p>\n<pre><code>local it = scene.forget_uid( scene.find_uid( uid ) )\n</code></pre>\n<p>Chain with find_uid to forget an item by uid and this is safe even if the item\ndoes not exist.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 91,
@@ -2146,7 +2966,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>local uid = scene.generate_uid()</code></pre><p>Create a &quot;reasonably&quot; unique id number and return it. we are only expecting\nuniqueness within this program but we will probably be OK with other ids\nprovided they are not generated by a program starting at exactly the same time.\nThese are very simple time based uids that offer no security.</p>\n<p>The point of uids is so we can refer to and lazy link items as weak values\nmaking it easy to delete an item without worrying too much about where it has\nbeen used. So instead of putting the item table inside another item table we\ncan use a uid reference instead.</p>\n<p>Good for serialising data as well.</p>\n",
+   "body": "<pre><code>local uid = scene.generate_uid()\n</code></pre>\n<p>Create a &quot;reasonably&quot; unique id number and return it. we are only expecting\nuniqueness within this program but we will probably be OK with other ids\nprovided they are not generated by a program starting at exactly the same time.\nThese are very simple time based uids that offer no security.</p>\n<p>The point of uids is so we can refer to and lazy link items as weak values\nmaking it easy to delete an item without worrying too much about where it has\nbeen used. So instead of putting the item table inside another item table we\ncan use a uid reference instead.</p>\n<p>Good for serialising data as well.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 53,
@@ -2154,23 +2974,23 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.get(name)</code></pre><p>get a value previously saved, this is an easy way to find a unique entity, eg\nthe global space but it can be used to save any values you wish not just to\nbookmark unique scene.</p>\n",
+   "body": "<pre><code>scene.get(name)\n</code></pre>\n<p>get a value previously saved, this is an easy way to find a unique entity, eg\nthe global space but it can be used to save any values you wish not just to\nbookmark unique items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 354,
+   "line": 358,
    "name": "lua.wetgenes.gamecake.zone.scene.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.manifest(name,value)</code></pre><p>get a value previously saved, or initalize it to the given value if it does not\nalready exist. The default value is {} as this is intended for lists.</p>\n",
+   "body": "<pre><code>scene.manifest(name,value)\n</code></pre>\n<p>get a value previously saved, or initalize it to the given value if it does not\nalready exist. The default value is {} as this is intended for lists.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 381,
+   "line": 385,
    "name": "lua.wetgenes.gamecake.zone.scene.manifest",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>local it = scene.remember_uid( {} )</code></pre><p>Remember an item in the uids table, generating a uid and setting it.uid to this\nvalue if one does not already exist.</p>\n",
+   "body": "<pre><code>local it = scene.remember_uid( {} )\n</code></pre>\n<p>Remember an item in the uids table, generating a uid and setting it.uid to this\nvalue if one does not already exist.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 76,
@@ -2178,39 +2998,47 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.remove(it)</code></pre><p>Remove this entity, this is slightly expensive as we need to search in a table\nto find it before calling table.remove which then has to shuffle the table to\nfill in the hole.</p>\n<p>With very dynamic items it can be faster to allocate all the items you need at\nthe start and then flag them on/off rather than add and remove dynamically.</p>\n<p>It may make more sense to create an entity which handles its own list of\nobjects, such as particles. Then only use the entity system to keep track of a\nmaster particles item that contains many particles and can add/remove/recycle\nas it sees fit.</p>\n",
+   "body": "<pre><code>scene.remove(it)\n</code></pre>\n<p>Remove this item, this is slightly expensive as we need to search in a table\nto find it before calling table.remove which then has to shuffle the table to\nfill in the hole.</p>\n<p>With very dynamic items it can be faster to allocate all the items you need at\nthe start and then flag them on/off rather than add and remove dynamically.</p>\n<p>It may make more sense to create a system which handles its own list of\nobjects, such as particles. Then only use the items to keep track of a\nmaster particles item that contains many particles and can add/remove/recycle\nas it sees fit.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 277,
+   "line": 281,
    "name": "lua.wetgenes.gamecake.zone.scene.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.reset()</code></pre><p>Empty the list of scene to update and draw, this does not reset the systems\ntable that should be modified with the insert and remove functions.</p>\n",
+   "body": "<pre><code>scene.reset()\n</code></pre>\n<p>Empty the list of items to update and draw, this does not reset the systems\ntable that should be modified with the insert and remove functions.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 215,
+   "line": 219,
    "name": "lua.wetgenes.gamecake.zone.scene.reset",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.set(name,value)</code></pre><p>save a value by a unique name</p>\n",
+   "body": "<pre><code>scene.set(name,value)\n</code></pre>\n<p>save a value by a unique name</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 368,
+   "line": 372,
    "name": "lua.wetgenes.gamecake.zone.scene.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.sortby_update()</code></pre><p>A function that takes the array part of scene.sortby and reverses the\nkey=value so a simple order list can be provided without any explicit weights.\nThe first caste name in the array gets a weight of 1, second 2 and so on.</p>\n",
+   "body": "<pre><code>scene.sortby_update()\n</code></pre>\n<p>A function that takes the array part of scene.sortby and reverses the\nkey=value so a simple order list can be provided without any explicit weights.\nThe first caste name in the array gets a weight of 1, second 2 and so on.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 200,
+   "line": 204,
    "name": "lua.wetgenes.gamecake.zone.scene.sortby_update",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.systems={name=system,[1]=system}</code></pre><p>A sorted table and lookup by caste name of each system. Table is sorted so it\nwill be traversed backwards, backwards traversal allows the current item to\ndelete itself.</p>\n",
+   "body": "<pre><code>print( scene.status() )\n</code></pre>\n<p>Return a debug string giving details about the system order and current number\nof items of each caste.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 400,
+   "name": "lua.wetgenes.gamecake.zone.scene.status",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>scene.systems={name=system,[1]=system}\n</code></pre>\n<p>A sorted table and lookup by caste name of each system. Table is sorted so it\nwill be traversed backwards, backwards traversal allows the current item to\ndelete itself.</p>\n",
    "count": 4,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 32,
@@ -2218,15 +3046,15 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.systems.call(fname,...)</code></pre><p>For every system call the function called fname like so.</p>\n<pre><code>system[fname](system,...)</code></pre><p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
+   "body": "<pre><code>scene.systems.call(fname,...)\n</code></pre>\n<p>For every system call the function called fname like so.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 172,
+   "line": 176,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.systems.insert(system)</code></pre><p>Insert a new system replacing any system of the same caste. system.caste should\nbe set to the caste of the system for this to work. As we also keep some\nfunctions in this table, the names &quot;insert&quot;, &quot;remove&quot; and &quot;call&quot; are not\navailable as caste names.</p>\n",
+   "body": "<pre><code>scene.systems.insert(system)\n</code></pre>\n<p>Insert a new system replacing any system of the same caste. system.caste should\nbe set to the caste of the system for this to work. As we also keep some\nfunctions in this table, the names &quot;insert&quot;, &quot;remove&quot; and &quot;call&quot; are not\navailable as caste names.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 141,
@@ -2234,7 +3062,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>system = scene.systems.remove(caste)</code></pre><p>Remove and return the system of the given caste.</p>\n",
+   "body": "<pre><code>system = scene.systems.remove(caste)\n</code></pre>\n<p>Remove and return the system of the given caste.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 124,
@@ -2242,12 +3070,25 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.uids={[uid]=item,...}</code></pre><p>A map of currently remembered uids to items.</p>\n",
+   "body": "<pre><code>scene.uids={[uid]=item,...}\n</code></pre>\n<p>A map of currently remembered uids to items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 43,
    "name": "lua.wetgenes.gamecake.zone.scene.uids",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "",
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.zone.system"
+  },
+  {
+   "body": "<p>Generic game objects, IE things that exist in game and can be interacted with \nby the players.</p>\n<p>Some times these exist in world, sometimes they exist in bags or inventory etc \nso are not visible world objects.</p>\n<p>As such this item <em>always</em> exists here and will be moved in and out of world \nobjects as necessary.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/system/items.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gamecake.zone.system.items",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/system/items.lua"
   }
  ],
  "_output_chunkname": "html",

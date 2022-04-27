@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 413,
+   "count": 508,
    "name": "lua"
   },
   {
@@ -54,15 +54,15 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 407,
+   "count": 502,
    "name": "lua.wetgenes"
   },
   {
-   "count": 25,
+   "count": 26,
    "name": "lua.wetgenes.bullet"
   },
   {
-   "count": 24,
+   "count": 25,
    "name": "lua.wetgenes.bullet.world"
   },
   {
@@ -136,6 +136,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.mesh.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.ray_test"
   },
   {
    "count": 1,
@@ -422,7 +426,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 68,
+   "count": 126,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -606,19 +610,239 @@
    "name": "lua.wetgenes.gamecake.oven.bake"
   },
   {
-   "count": 2,
+   "count": 57,
    "name": "lua.wetgenes.gamecake.widgets"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.gamecake.widgets.button"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.button.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.button.update"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.gamecake.widgets.center"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.center.layout"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.center.setup"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.class_hooks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.update"
+  },
+  {
+   "count": 17,
+   "name": "lua.wetgenes.gamecake.widgets.data"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.add_class_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.call_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.call_hook_later"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_dec"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_get_pos"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_get_size"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_inc"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_snap"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber_from_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tostring"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tostring_from_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.del_class_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.new_data"
+  },
+  {
+   "count": 12,
+   "name": "lua.wetgenes.gamecake.widgets.datas"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.del"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_number"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_string"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.new_datas"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_infos"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_string"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_value"
+  },
+  {
+   "count": 7,
+   "name": "lua.wetgenes.gamecake.widgets.defs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.add_border"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.copy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.reset"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.set"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.hide_overlay"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.show"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.show_overlay"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.widgets.drag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.drag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.update"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 20,
+   "count": 23,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "count": 19,
+   "count": 20,
    "name": "lua.wetgenes.gamecake.zone.scene"
   },
   {
@@ -674,6 +898,10 @@
    "name": "lua.wetgenes.gamecake.zone.scene.sortby_update"
   },
   {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.status"
+  },
+  {
    "count": 4,
    "name": "lua.wetgenes.gamecake.zone.scene.systems"
   },
@@ -692,6 +920,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.scene.uids"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.zone.system"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.system.items"
   },
   {
    "count": 37,
@@ -954,7 +1190,7 @@
    "name": "lua.wetgenes.package.reload"
   },
   {
-   "count": 10,
+   "count": 15,
    "name": "lua.wetgenes.path"
   },
   {
@@ -963,7 +1199,23 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.path.dir"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.ext"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.folder"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.path.join"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.name"
   },
   {
    "count": 1,
@@ -984,6 +1236,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.path.resolve"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.root"
   },
   {
    "count": 1,
@@ -1011,6 +1267,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.rnd64k"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.safecall"
   },
   {
@@ -1026,7 +1286,7 @@
    "name": "lua.wetgenes.snippets"
   },
   {
-   "count": 140,
+   "count": 149,
    "name": "lua.wetgenes.tardis"
   },
   {
@@ -1254,7 +1514,7 @@
    "name": "lua.wetgenes.tardis.m3.v3"
   },
   {
-   "count": 29,
+   "count": 32,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -1319,6 +1579,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prerrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.prescale"
   },
   {
@@ -1339,6 +1603,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.rrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.scale"
   },
   {
@@ -1348,6 +1616,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.setrrot"
   },
   {
    "count": 1,
@@ -1382,7 +1654,7 @@
    "name": "lua.wetgenes.tardis.plane.new"
   },
   {
-   "count": 6,
+   "count": 11,
    "name": "lua.wetgenes.tardis.q4"
   },
   {
@@ -1399,11 +1671,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.q4.prerotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.prerrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.q4.rotate"
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.q4.rrotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.set"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.q4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.setrrot"
   },
   {
    "count": 1,
@@ -1474,12 +1766,16 @@
    "name": "lua.wetgenes.tardis.v2.sub"
   },
   {
-   "count": 14,
+   "count": 15,
    "name": "lua.wetgenes.tardis.v3"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v3.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.angle"
   },
   {
    "count": 1,
@@ -1584,6 +1880,90 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.to_v3"
+  },
+  {
+   "count": 21,
+   "name": "lua.wetgenes.tasks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_id"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.create_colinda"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_id"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.delete"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.http"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.http_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.receive"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.run_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.send"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.sqlite"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.sqlite_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.test"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.update"
   },
   {
    "count": 5,
@@ -1727,119 +2107,119 @@
  },
  "_list": [
   {
-   "body": "<pre><code>world=bullet.world()</code></pre><p>Create the world you will be simulating physics in.</p>\n",
-   "count": 24,
+   "body": "<pre><code>world=bullet.world()\n</code></pre>\n<p>Create the world you will be simulating physics in.</p>\n",
+   "count": 25,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 45,
    "name": "lua.wetgenes.bullet.world",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body = world:body(&quot;rigid&quot;,shape,mass,x,y,z)</code></pre><p>Create a body.</p>\n",
+   "body": "<pre><code>body = world:body(&quot;rigid&quot;,shape,mass,x,y,z)\n</code></pre>\n<p>Create a body.</p>\n",
    "count": 13,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 256,
+   "line": 284,
    "name": "lua.wetgenes.bullet.world.body",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>b = body:active( true )\nb = body:active( false )\nb = body:active()</code></pre><p>get/set the active state of an object</p>\n",
+   "body": "<pre><code>b = body:active( true )\nb = body:active( false )\nb = body:active()\n</code></pre>\n<p>get/set the active state of an object</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 371,
+   "line": 399,
    "name": "lua.wetgenes.bullet.world.body.active",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>x,y,z = body:angular_factor( x , y , z )\nx,y,z = body:angular_factor( r )\nr = ( body:angular_factor( r ) )</code></pre><p>get/set the angular factor of an object (which disables rotation when zero)</p>\n",
+   "body": "<pre><code>x,y,z = body:angular_factor( x , y , z )\nx,y,z = body:angular_factor( r )\nr = ( body:angular_factor( r ) )\n</code></pre>\n<p>get/set the angular factor of an object (which disables rotation when zero)</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 412,
+   "line": 440,
    "name": "lua.wetgenes.bullet.world.body.angular_factor",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>x,y,z = body:angular_velocity( x,y,z )\nx,y,z = body:angular_velocity()</code></pre><p>get/set the body angular velocity</p>\n",
+   "body": "<pre><code>x,y,z = body:angular_velocity( x,y,z )\nx,y,z = body:angular_velocity()\n</code></pre>\n<p>get/set the body angular velocity</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 399,
+   "line": 427,
    "name": "lua.wetgenes.bullet.world.body.angular_velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>r,t = body:ccd( radius,threshold )\nr,t = body:ccd()</code></pre><p>get/set the continuos collision detection radius,threshold values</p>\n",
+   "body": "<pre><code>r,t = body:ccd( radius,threshold )\nr,t = body:ccd()\n</code></pre>\n<p>get/set the continuos collision detection radius,threshold values</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 358,
+   "line": 386,
    "name": "lua.wetgenes.bullet.world.body.ccd",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>b = body:custom_material_callback( b )\nb = body:custom_material_callback()</code></pre><p>get/set the body custom_material_callback flag</p>\n<p>When set we run a custom callback to try and smooth mesh collisions.</p>\n",
+   "body": "<pre><code>b = body:custom_material_callback( b )\nb = body:custom_material_callback()\n</code></pre>\n<p>get/set the body custom_material_callback flag</p>\n<p>When set we run a custom callback to try and smooth mesh collisions.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 426,
+   "line": 454,
    "name": "lua.wetgenes.bullet.world.body.custom_material_callback",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>l,a = body:damping( linear , angular )\nl,a = body:damping()</code></pre><p>get/set the body damping</p>\n",
+   "body": "<pre><code>l,a = body:damping( linear , angular )\nl,a = body:damping()\n</code></pre>\n<p>get/set the body damping</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 332,
+   "line": 360,
    "name": "lua.wetgenes.bullet.world.body.damping",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body:destroy()</code></pre><p>Destroy body.</p>\n",
+   "body": "<pre><code>body:destroy()\n</code></pre>\n<p>Destroy body.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 277,
+   "line": 305,
    "name": "lua.wetgenes.bullet.world.body.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>x,y,z = body:factor( x , y , z )\nx,y,z = body:factor( r )\nr = ( body:factor( r ) )</code></pre><p>get/set the linear factor of an object (which disables movement when zero)</p>\n",
+   "body": "<pre><code>x,y,z = body:factor( x , y , z )\nx,y,z = body:factor( r )\nr = ( body:factor( r ) )\n</code></pre>\n<p>get/set the linear factor of an object (which disables movement when zero)</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 385,
+   "line": 413,
    "name": "lua.wetgenes.bullet.world.body.factor",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>l,a,s = body:friction( linear , angular , spinning )\nl,a,s = body:friction()</code></pre><p>get/set the body friction</p>\n",
+   "body": "<pre><code>l,a,s = body:friction( linear , angular , spinning )\nl,a,s = body:friction()\n</code></pre>\n<p>get/set the body friction</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 319,
+   "line": 347,
    "name": "lua.wetgenes.bullet.world.body.friction",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>r = body:transform( r )\nr = body:transform()</code></pre><p>get/set the body restitution</p>\n",
+   "body": "<pre><code>r = body:transform( r )\nr = body:transform()\n</code></pre>\n<p>get/set the body restitution</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 306,
+   "line": 334,
    "name": "lua.wetgenes.bullet.world.body.restitution",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>px,py,pz,qx,qy,qz,qw = body:transform()\npx,py,pz,qx,qy,qz,qw = body:transform(px,py,pz)\npx,py,pz,qx,qy,qz,qw = body:transform(px,py,pz,qx,qy,qz,qw)</code></pre><p>get/set the body transform. Position and Rotation Quaternion.</p>\n",
+   "body": "<pre><code>px,py,pz,qx,qy,qz,qw = body:transform()\npx,py,pz,qx,qy,qz,qw = body:transform(px,py,pz)\npx,py,pz,qx,qy,qz,qw = body:transform(px,py,pz,qx,qy,qz,qw)\n</code></pre>\n<p>get/set the body transform. Position and Rotation Quaternion.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 292,
+   "line": 320,
    "name": "lua.wetgenes.bullet.world.body.transform",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>x,y,z = body:velocity( x,y,z )\nx,y,z = body:velocity()</code></pre><p>get/set the body velocity</p>\n",
+   "body": "<pre><code>x,y,z = body:velocity( x,y,z )\nx,y,z = body:velocity()\n</code></pre>\n<p>get/set the body velocity</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 345,
+   "line": 373,
    "name": "lua.wetgenes.bullet.world.body.velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>world:destroy()</code></pre><p>Destroy the world and all associated data.</p>\n",
+   "body": "<pre><code>world:destroy()\n</code></pre>\n<p>Destroy the world and all associated data.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 71,
@@ -1847,7 +2227,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>world:get(name)</code></pre><p>Get a named mesh/body/shape</p>\n",
+   "body": "<pre><code>world:get(name)\n</code></pre>\n<p>Get a named mesh/body/shape</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 89,
@@ -1855,7 +2235,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>world:gravity(x,y,z)\n\nx,y,z = world:gravity()</code></pre><p>Set or get world gravity vector. Recommended gravity is 0,-10,0</p>\n",
+   "body": "<pre><code>world:gravity(x,y,z)\n\nx,y,z = world:gravity()\n</code></pre>\n<p>Set or get world gravity vector. Recommended gravity is 0,-10,0</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 123,
@@ -1863,23 +2243,31 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>mesh = world:mesh()</code></pre><p>Create a mesh.</p>\n",
+   "body": "<pre><code>mesh = world:mesh()\n</code></pre>\n<p>Create a mesh.</p>\n",
    "count": 2,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 168,
+   "line": 196,
    "name": "lua.wetgenes.bullet.world.mesh",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>mesh:destroy()</code></pre><p>Destroy mesh.</p>\n",
+   "body": "<pre><code>mesh:destroy()\n</code></pre>\n<p>Destroy mesh.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 191,
+   "line": 219,
    "name": "lua.wetgenes.bullet.world.mesh.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>world:set(name,it)</code></pre><p>Set a named mesh/body/shape</p>\n",
+   "body": "<pre><code>local test={\n    mode=&quot;closest&quot;,\n    ray={{0,0,0},{1,1,1}},\n}\ntest=world:ray_test(test)\n\nif world:ray_test(opts).hit then ... end\n</code></pre>\n<p>Perform a ray test between the two ray vectors provided in the test table. \nfills in hit={...} if we hit something with details of the hit.</p>\n<p>Always returns the test table that was passed in, with modifications that \nprovide the result. Be carefull about reusing this table it is safest to create \na new one for each ray_test call.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 168,
+   "name": "lua.wetgenes.bullet.world.ray_test",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
+   "body": "<pre><code>world:set(name,it)\n</code></pre>\n<p>Set a named mesh/body/shape</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 103,
@@ -1887,31 +2275,31 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>shape = world:shape()</code></pre><p>Create a shape.</p>\n",
+   "body": "<pre><code>shape = world:shape()\n</code></pre>\n<p>Create a shape.</p>\n",
    "count": 3,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 206,
+   "line": 234,
    "name": "lua.wetgenes.bullet.world.shape",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>shape:destroy()</code></pre><p>Destroy shape.</p>\n",
+   "body": "<pre><code>shape:destroy()\n</code></pre>\n<p>Destroy shape.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 228,
+   "line": 256,
    "name": "lua.wetgenes.bullet.world.shape.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>r = body:margin( radius )</code></pre><p>get/set the shapes margin size</p>\n",
+   "body": "<pre><code>r = body:margin( radius )\n</code></pre>\n<p>get/set the shapes margin size</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 243,
+   "line": 271,
    "name": "lua.wetgenes.bullet.world.shape.margin",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>world:step(seconds,maxsteps,fixedstep)\n\nworld:step(seconds,0,seconds)</code></pre><p>world.maxsteps and world.fixedstep will be used as defaults if the second and\nthird values are not provided.</p>\n<p>Move the physics forward in time by the given amount in seconds.</p>\n<p>maxsteps is maximum amount of steps to take during this call and defaults to 1.</p>\n<p>fixedstep is how many seconds to step forward at a time for stable simulation\nand defaults to 1/60</p>\n<p>To force a step forward of a given amount of time use a maxsteps of 0.</p>\n",
+   "body": "<pre><code>world:step(seconds,maxsteps,fixedstep)\n\nworld:step(seconds,0,seconds)\n</code></pre>\n<p>world.maxsteps and world.fixedstep will be used as defaults if the second and\nthird values are not provided.</p>\n<p>Move the physics forward in time by the given amount in seconds.</p>\n<p>maxsteps is maximum amount of steps to take during this call and defaults to 1.</p>\n<p>fixedstep is how many seconds to step forward at a time for stable simulation\nand defaults to 1/60</p>\n<p>To force a step forward of a given amount of time use a maxsteps of 0.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 141,

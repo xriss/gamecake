@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head><title>Building in boxes.</title>
 <meta name="theme-color" content="#2a3133">
@@ -285,7 +286,7 @@ of which are still experimental, eg. getting windows working well under
 Linux so I can try and step out of win32. Apart from these boxes which 
 are used for building releases, there has been some major cleanup in the 
 following public builds.</p>
-<p><em>* We have a docker *build</em> box. **</p>
+<p>** We have a docker <em>build</em> box. **</p>
 <p>This is ubuntu 16.04 with premake4, SDL2 and LuaJIT built from source; 
 we need to build them from source as the version you will find in apt 
 is often out of date especially when using an older version of Ubuntu.</p>
@@ -310,8 +311,7 @@ very well up-to-date. So instead we now just use a standard OpenResty.
 Extra libraries are made available to the nginx lua host as rocks so 
 this keeps us nicely up-to-date and gives us a reason to start 
 publishing rocks.</p>
-<p>** I&#39;ve decided to keep all of the libraries together in one rock.**  
-See <a href="https://luarocks.org/modules/xriss/gamecake">https://luarocks.org/modules/xriss/gamecake</a> for the rocks.</p>
+<p>** I&#39;ve decided to keep all of the libraries together in one rock.**<br>See <a href="https://luarocks.org/modules/xriss/gamecake">https://luarocks.org/modules/xriss/gamecake</a> for the rocks.</p>
 <p>For now, these are just the most essential ones to keep all our websites 
 running but eventually a luarocks install of gamecake will be the same 
 as downloading one of our prebuilt executables.</p>

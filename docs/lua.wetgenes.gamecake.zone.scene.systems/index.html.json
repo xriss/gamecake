@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 413,
+   "count": 508,
    "name": "lua"
   },
   {
@@ -54,15 +54,15 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 407,
+   "count": 502,
    "name": "lua.wetgenes"
   },
   {
-   "count": 25,
+   "count": 26,
    "name": "lua.wetgenes.bullet"
   },
   {
-   "count": 24,
+   "count": 25,
    "name": "lua.wetgenes.bullet.world"
   },
   {
@@ -136,6 +136,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.mesh.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.ray_test"
   },
   {
    "count": 1,
@@ -422,7 +426,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 68,
+   "count": 126,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -606,19 +610,239 @@
    "name": "lua.wetgenes.gamecake.oven.bake"
   },
   {
-   "count": 2,
+   "count": 57,
    "name": "lua.wetgenes.gamecake.widgets"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.gamecake.widgets.button"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.button.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.button.update"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.gamecake.widgets.center"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.center.layout"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.center.setup"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.class_hooks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.update"
+  },
+  {
+   "count": 17,
+   "name": "lua.wetgenes.gamecake.widgets.data"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.add_class_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.call_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.call_hook_later"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_dec"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_get_pos"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_get_size"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_inc"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_snap"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber_from_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tostring"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tostring_from_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.del_class_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.new_data"
+  },
+  {
+   "count": 12,
+   "name": "lua.wetgenes.gamecake.widgets.datas"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.del"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_number"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_string"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.new_datas"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_infos"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_string"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_value"
+  },
+  {
+   "count": 7,
+   "name": "lua.wetgenes.gamecake.widgets.defs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.add_border"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.copy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.reset"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.set"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.hide_overlay"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.show"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.show_overlay"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.widgets.drag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.drag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.update"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 20,
+   "count": 23,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "count": 19,
+   "count": 20,
    "name": "lua.wetgenes.gamecake.zone.scene"
   },
   {
@@ -674,6 +898,10 @@
    "name": "lua.wetgenes.gamecake.zone.scene.sortby_update"
   },
   {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.status"
+  },
+  {
    "count": 4,
    "name": "lua.wetgenes.gamecake.zone.scene.systems"
   },
@@ -692,6 +920,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.scene.uids"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.zone.system"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.system.items"
   },
   {
    "count": 37,
@@ -954,7 +1190,7 @@
    "name": "lua.wetgenes.package.reload"
   },
   {
-   "count": 10,
+   "count": 15,
    "name": "lua.wetgenes.path"
   },
   {
@@ -963,7 +1199,23 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.path.dir"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.ext"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.folder"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.path.join"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.name"
   },
   {
    "count": 1,
@@ -984,6 +1236,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.path.resolve"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.root"
   },
   {
    "count": 1,
@@ -1011,6 +1267,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.rnd64k"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.safecall"
   },
   {
@@ -1026,7 +1286,7 @@
    "name": "lua.wetgenes.snippets"
   },
   {
-   "count": 140,
+   "count": 149,
    "name": "lua.wetgenes.tardis"
   },
   {
@@ -1254,7 +1514,7 @@
    "name": "lua.wetgenes.tardis.m3.v3"
   },
   {
-   "count": 29,
+   "count": 32,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -1319,6 +1579,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prerrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.prescale"
   },
   {
@@ -1339,6 +1603,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.rrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.scale"
   },
   {
@@ -1348,6 +1616,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.setrrot"
   },
   {
    "count": 1,
@@ -1382,7 +1654,7 @@
    "name": "lua.wetgenes.tardis.plane.new"
   },
   {
-   "count": 6,
+   "count": 11,
    "name": "lua.wetgenes.tardis.q4"
   },
   {
@@ -1399,11 +1671,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.q4.prerotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.prerrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.q4.rotate"
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.q4.rrotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.set"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.q4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.setrrot"
   },
   {
    "count": 1,
@@ -1474,12 +1766,16 @@
    "name": "lua.wetgenes.tardis.v2.sub"
   },
   {
-   "count": 14,
+   "count": 15,
    "name": "lua.wetgenes.tardis.v3"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v3.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.angle"
   },
   {
    "count": 1,
@@ -1584,6 +1880,90 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.to_v3"
+  },
+  {
+   "count": 21,
+   "name": "lua.wetgenes.tasks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_id"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.create_colinda"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_id"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.delete"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.http"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.http_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.receive"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.run_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.send"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.sqlite"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.sqlite_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.test"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.update"
   },
   {
    "count": 5,
@@ -1727,7 +2107,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>scene.systems={name=system,[1]=system}</code></pre><p>A sorted table and lookup by caste name of each system. Table is sorted so it\nwill be traversed backwards, backwards traversal allows the current item to\ndelete itself.</p>\n",
+   "body": "<pre><code>scene.systems={name=system,[1]=system}\n</code></pre>\n<p>A sorted table and lookup by caste name of each system. Table is sorted so it\nwill be traversed backwards, backwards traversal allows the current item to\ndelete itself.</p>\n",
    "count": 4,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 32,
@@ -1735,15 +2115,15 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.systems.call(fname,...)</code></pre><p>For every system call the function called fname like so.</p>\n<pre><code>system[fname](system,...)</code></pre><p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
+   "body": "<pre><code>scene.systems.call(fname,...)\n</code></pre>\n<p>For every system call the function called fname like so.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 172,
+   "line": 176,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>scene.systems.insert(system)</code></pre><p>Insert a new system replacing any system of the same caste. system.caste should\nbe set to the caste of the system for this to work. As we also keep some\nfunctions in this table, the names &quot;insert&quot;, &quot;remove&quot; and &quot;call&quot; are not\navailable as caste names.</p>\n",
+   "body": "<pre><code>scene.systems.insert(system)\n</code></pre>\n<p>Insert a new system replacing any system of the same caste. system.caste should\nbe set to the caste of the system for this to work. As we also keep some\nfunctions in this table, the names &quot;insert&quot;, &quot;remove&quot; and &quot;call&quot; are not\navailable as caste names.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 141,
@@ -1751,7 +2131,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>system = scene.systems.remove(caste)</code></pre><p>Remove and return the system of the given caste.</p>\n",
+   "body": "<pre><code>system = scene.systems.remove(caste)\n</code></pre>\n<p>Remove and return the system of the given caste.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 124,

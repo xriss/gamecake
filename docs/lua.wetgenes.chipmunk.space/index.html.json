@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 413,
+   "count": 508,
    "name": "lua"
   },
   {
@@ -54,15 +54,15 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 407,
+   "count": 502,
    "name": "lua.wetgenes"
   },
   {
-   "count": 25,
+   "count": 26,
    "name": "lua.wetgenes.bullet"
   },
   {
-   "count": 24,
+   "count": 25,
    "name": "lua.wetgenes.bullet.world"
   },
   {
@@ -136,6 +136,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.mesh.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.ray_test"
   },
   {
    "count": 1,
@@ -422,7 +426,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 68,
+   "count": 126,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -606,19 +610,239 @@
    "name": "lua.wetgenes.gamecake.oven.bake"
   },
   {
-   "count": 2,
+   "count": 57,
    "name": "lua.wetgenes.gamecake.widgets"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.gamecake.widgets.button"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.button.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.button.update"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.gamecake.widgets.center"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.center.layout"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.center.setup"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.class_hooks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.checkbox.update"
+  },
+  {
+   "count": 17,
+   "name": "lua.wetgenes.gamecake.widgets.data"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.add_class_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.call_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.call_hook_later"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_dec"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_get_pos"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_get_size"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_inc"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_snap"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber_from_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tostring"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_tostring_from_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.del_class_hook"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.new_data"
+  },
+  {
+   "count": 12,
+   "name": "lua.wetgenes.gamecake.widgets.datas"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.del"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_number"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_string"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.get_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.new_datas"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_infos"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_string"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datas.set_value"
+  },
+  {
+   "count": 7,
+   "name": "lua.wetgenes.gamecake.widgets.defs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.add_border"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.copy"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.reset"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.defs.set"
+  },
+  {
+   "count": 5,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.hide_overlay"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.show"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.dialogs.show_overlay"
+  },
+  {
+   "count": 4,
+   "name": "lua.wetgenes.gamecake.widgets.drag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.drag"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.setup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.drag.update"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 20,
+   "count": 23,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "count": 19,
+   "count": 20,
    "name": "lua.wetgenes.gamecake.zone.scene"
   },
   {
@@ -674,6 +898,10 @@
    "name": "lua.wetgenes.gamecake.zone.scene.sortby_update"
   },
   {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.status"
+  },
+  {
    "count": 4,
    "name": "lua.wetgenes.gamecake.zone.scene.systems"
   },
@@ -692,6 +920,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.scene.uids"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.zone.system"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.system.items"
   },
   {
    "count": 37,
@@ -954,7 +1190,7 @@
    "name": "lua.wetgenes.package.reload"
   },
   {
-   "count": 10,
+   "count": 15,
    "name": "lua.wetgenes.path"
   },
   {
@@ -963,7 +1199,23 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.path.dir"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.ext"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.folder"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.path.join"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.name"
   },
   {
    "count": 1,
@@ -984,6 +1236,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.path.resolve"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.root"
   },
   {
    "count": 1,
@@ -1011,6 +1267,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.rnd64k"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.safecall"
   },
   {
@@ -1026,7 +1286,7 @@
    "name": "lua.wetgenes.snippets"
   },
   {
-   "count": 140,
+   "count": 149,
    "name": "lua.wetgenes.tardis"
   },
   {
@@ -1254,7 +1514,7 @@
    "name": "lua.wetgenes.tardis.m3.v3"
   },
   {
-   "count": 29,
+   "count": 32,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -1319,6 +1579,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.prerrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.prescale"
   },
   {
@@ -1339,6 +1603,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.rrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.scale"
   },
   {
@@ -1348,6 +1616,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.setrrot"
   },
   {
    "count": 1,
@@ -1382,7 +1654,7 @@
    "name": "lua.wetgenes.tardis.plane.new"
   },
   {
-   "count": 6,
+   "count": 11,
    "name": "lua.wetgenes.tardis.q4"
   },
   {
@@ -1399,11 +1671,31 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.q4.prerotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.prerrotate"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.q4.rotate"
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.q4.rrotate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.set"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.q4.setrot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.setrrot"
   },
   {
    "count": 1,
@@ -1474,12 +1766,16 @@
    "name": "lua.wetgenes.tardis.v2.sub"
   },
   {
-   "count": 14,
+   "count": 15,
    "name": "lua.wetgenes.tardis.v3"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v3.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.angle"
   },
   {
    "count": 1,
@@ -1584,6 +1880,90 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.to_v3"
+  },
+  {
+   "count": 21,
+   "name": "lua.wetgenes.tasks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_id"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.add_thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.create_colinda"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_id"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.del_thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.delete"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.http"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.http_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.receive"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.run_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.send"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.sqlite"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.sqlite_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.test"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.update"
   },
   {
    "count": 5,
@@ -1727,7 +2107,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>space=chipmunk.space()</code></pre><p>Create the space you will be simulating physics in.</p>\n",
+   "body": "<pre><code>space=chipmunk.space()\n</code></pre>\n<p>Create the space you will be simulating physics in.</p>\n",
    "count": 26,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 44,
@@ -1735,7 +2115,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>space:add(body)\nspace:add(shape)\nspace:add(constraint)</code></pre><p>Add a body/shape/constraint to the space.</p>\n",
+   "body": "<pre><code>space:add(body)\nspace:add(shape)\nspace:add(constraint)\n</code></pre>\n<p>Add a body/shape/constraint to the space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 372,
@@ -1743,7 +2123,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>space:add_handler(handler,id1,id2)\nspace:add_handler(handler,id1)\nspace:add_handler(handler)</code></pre><p>Add collision callback handler, for the given collision types.</p>\n<p>The handler table will have other values inserted in it and will be \nused as an arbiter table in callbacks. So <em>always</em> pass in a new one to \nthis function. There does not seem to be a way to free handlers so be \ncareful what you add.</p>\n<p>id1,id2 can be a string in which case it will be converted to a number \nvia the space:type function.</p>\n",
+   "body": "<pre><code>space:add_handler(handler,id1,id2)\nspace:add_handler(handler,id1)\nspace:add_handler(handler)\n</code></pre>\n<p>Add collision callback handler, for the given collision types.</p>\n<p>The handler table will have other values inserted in it and will be \nused as an arbiter table in callbacks. So <em>always</em> pass in a new one to \nthis function. There does not seem to be a way to free handlers so be \ncareful what you add.</p>\n<p>id1,id2 can be a string in which case it will be converted to a number \nvia the space:type function.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 345,
@@ -1751,7 +2131,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>space:body(...)</code></pre><p>Create and add this body to the space.</p>\n",
+   "body": "<pre><code>space:body(...)\n</code></pre>\n<p>Create and add this body to the space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 494,
@@ -1759,7 +2139,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=space:collision_bias()\nv=space:collision_bias(v)</code></pre><p>Get and/or Set the colision bias for this space.</p>\n",
+   "body": "<pre><code>v=space:collision_bias()\nv=space:collision_bias(v)\n</code></pre>\n<p>Get and/or Set the colision bias for this space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 299,
@@ -1767,7 +2147,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=space:collision_persistence()\nv=space:collision_persistence(v)</code></pre><p>Get and/or Set the collision persistence for this space.</p>\n",
+   "body": "<pre><code>v=space:collision_persistence()\nv=space:collision_persistence(v)\n</code></pre>\n<p>Get and/or Set the collision persistence for this space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 311,
@@ -1775,7 +2155,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=space:collision_slop()\nv=space:collision_slop(v)</code></pre><p>Get and/or Set the colision slop for this space.</p>\n",
+   "body": "<pre><code>v=space:collision_slop()\nv=space:collision_slop(v)\n</code></pre>\n<p>Get and/or Set the colision slop for this space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 287,
@@ -1783,7 +2163,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>space:constraint(...)</code></pre><p>Create and add this constraint to the space.</p>\n",
+   "body": "<pre><code>space:constraint(...)\n</code></pre>\n<p>Create and add this constraint to the space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 507,
@@ -1791,7 +2171,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>space:contains(body)\nspace:contains(shape)\nspace:contains(constraint)</code></pre><p>Does the space contain this body/shape/constraint, possibly superfluous \nas we can check our own records.</p>\n",
+   "body": "<pre><code>space:contains(body)\nspace:contains(shape)\nspace:contains(constraint)\n</code></pre>\n<p>Does the space contain this body/shape/constraint, possibly superfluous \nas we can check our own records.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 438,
@@ -1799,7 +2179,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=space:current_time_step()</code></pre><p>Get the current time step for this space.</p>\n",
+   "body": "<pre><code>v=space:current_time_step()\n</code></pre>\n<p>Get the current time step for this space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 323,
@@ -1807,7 +2187,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=space:damping()\nv=space:damping(v)</code></pre><p>Get and/or Set the damping for this space.</p>\n",
+   "body": "<pre><code>v=space:damping()\nv=space:damping(v)\n</code></pre>\n<p>Get and/or Set the damping for this space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 251,
@@ -1815,7 +2195,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>vx,vy=space:gravity()\nvx,vy=space:gravity(vx,vy)</code></pre><p>Get and/or Set the gravity vector for this space.</p>\n",
+   "body": "<pre><code>vx,vy=space:gravity()\nvx,vy=space:gravity(vx,vy)\n</code></pre>\n<p>Get and/or Set the gravity vector for this space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 239,
@@ -1823,7 +2203,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=space:idle_speed_threshold()\nv=space:idle_speed_threshold(v)</code></pre><p>Get and/or Set the idle speed threshold for this space.</p>\n",
+   "body": "<pre><code>v=space:idle_speed_threshold()\nv=space:idle_speed_threshold(v)\n</code></pre>\n<p>Get and/or Set the idle speed threshold for this space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 263,
@@ -1831,7 +2211,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=space:iterations()\nv=space:iterations(v)</code></pre><p>Get and/or Set the iterations for this space.</p>\n",
+   "body": "<pre><code>v=space:iterations()\nv=space:iterations(v)\n</code></pre>\n<p>Get and/or Set the iterations for this space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 227,
@@ -1839,7 +2219,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=space:locked()</code></pre><p>Get the locked state for this space, if true we cannot change shapes.</p>\n",
+   "body": "<pre><code>v=space:locked()\n</code></pre>\n<p>Get the locked state for this space, if true we cannot change shapes.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 334,
@@ -1847,7 +2227,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>array = space:query_bounding_box(lx,ly,hx,hy,group,categories,mask)</code></pre><p>Find the shapes that are within this bounding box (lx,ly) to (hx,hy).\nUse group,categories and mask to filter the results.</p>\n<p>Returns an array of shapes.</p>\n",
+   "body": "<pre><code>array = space:query_bounding_box(lx,ly,hx,hy,group,categories,mask)\n</code></pre>\n<p>Find the shapes that are within this bounding box (lx,ly) to (hx,hy).\nUse group,categories and mask to filter the results.</p>\n<p>Returns an array of shapes.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 663,
@@ -1855,7 +2235,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>array = space:query_point(x,y,d,group,categories,mask)</code></pre><p>Find the shapes that are within d distance from the point at x,y.\nUse group,categories and mask to filter the results.</p>\n<p>Returns an array of hit data, with each item containing the following.</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.distance        -- the distance to the point of contact\nit.gradient_x    -- the normalised vector to collision (x)\nit.gradient_y    -- the normalised vector to collision (y)</code></pre>",
+   "body": "<pre><code>array = space:query_point(x,y,d,group,categories,mask)\n</code></pre>\n<p>Find the shapes that are within d distance from the point at x,y.\nUse group,categories and mask to filter the results.</p>\n<p>Returns an array of hit data, with each item containing the following.</p>\n<pre><code>it.shape\t\t-- the shape\nit.point_x\t\t-- the point of contact (x)\nit.point_y\t\t-- the point of contact (y)\nit.distance\t\t-- the distance to the point of contact\nit.gradient_x\t-- the normalised vector to collision (x)\nit.gradient_y\t-- the normalised vector to collision (y)\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 531,
@@ -1863,7 +2243,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>item = space:query_point_nearest(x,y,d,group,categories,mask)</code></pre><p>Find the nearest shape that is within d distance from the point at x,y.\nUse group,categories and mask to filter the results.</p>\n<p>returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.distance        -- the distance to the point of contact\nit.gradient_x    -- the normalised vector to collision (x)\nit.gradient_y    -- the normalised vector to collision (y)</code></pre>",
+   "body": "<pre><code>item = space:query_point_nearest(x,y,d,group,categories,mask)\n</code></pre>\n<p>Find the nearest shape that is within d distance from the point at x,y.\nUse group,categories and mask to filter the results.</p>\n<p>returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape\t\t-- the shape\nit.point_x\t\t-- the point of contact (x)\nit.point_y\t\t-- the point of contact (y)\nit.distance\t\t-- the distance to the point of contact\nit.gradient_x\t-- the normalised vector to collision (x)\nit.gradient_y\t-- the normalised vector to collision (y)\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 565,
@@ -1871,7 +2251,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>array = space:query_segment(sx,sy,ex,ey,r,group,categories,mask)</code></pre><p>Find the shapes that are along this raycast segment, from (sx,sy) to \n(ex,ey) with a radius of r. Use group,categories and mask to filter the \nresults.</p>\n<p>Returns an array of hit data, with each item containing the following.</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.normal_x        -- the normal at contact (x)\nit.normal_y        -- the normal at contact (y)\nit.alpha        -- how far along the segment the contact happened (0 to 1)</code></pre>",
+   "body": "<pre><code>array = space:query_segment(sx,sy,ex,ey,r,group,categories,mask)\n</code></pre>\n<p>Find the shapes that are along this raycast segment, from (sx,sy) to \n(ex,ey) with a radius of r. Use group,categories and mask to filter the \nresults.</p>\n<p>Returns an array of hit data, with each item containing the following.</p>\n<pre><code>it.shape\t\t-- the shape\nit.point_x\t\t-- the point of contact (x)\nit.point_y\t\t-- the point of contact (y)\nit.normal_x\t\t-- the normal at contact (x)\nit.normal_y\t\t-- the normal at contact (y)\nit.alpha\t\t-- how far along the segment the contact happened (0 to 1)\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 596,
@@ -1879,7 +2259,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>it = space:query_segment_first(sx,sy,ex,ey,r,group,categories,mask)</code></pre><p>Find the shapes that are along this raycast segment, from (sx,sy) to \n(ex,ey) with a radius of r. Use group,categories and mask to filter the \nresults.</p>\n<p>Returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape        -- the shape\nit.point_x        -- the point of contact (x)\nit.point_y        -- the point of contact (y)\nit.normal_x        -- the normal at contact (x)\nit.normal_y        -- the normal at contact (y)\nit.alpha        -- how far along the segment the contact happened (0 to 1)</code></pre>",
+   "body": "<pre><code>it = space:query_segment_first(sx,sy,ex,ey,r,group,categories,mask)\n</code></pre>\n<p>Find the shapes that are along this raycast segment, from (sx,sy) to \n(ex,ey) with a radius of r. Use group,categories and mask to filter the \nresults.</p>\n<p>Returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape\t\t-- the shape\nit.point_x\t\t-- the point of contact (x)\nit.point_y\t\t-- the point of contact (y)\nit.normal_x\t\t-- the normal at contact (x)\nit.normal_y\t\t-- the normal at contact (y)\nit.alpha\t\t-- how far along the segment the contact happened (0 to 1)\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 631,
@@ -1887,7 +2267,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>array = space:query_shape(shape)</code></pre><p>Find the shapes that intersect with the given shape.</p>\n<p>Returns an array of hit data, with each item containing the following.</p>\n<pre><code>it.shape        -- the shape\nit.normal_x        -- the normal at contact (x)\nit.normal_y        -- the normal at contact (y)\nit.contacts        -- array of contact points -&gt; {ax,ay,bx,by,distance,etc...}</code></pre>",
+   "body": "<pre><code>array = space:query_shape(shape)\n</code></pre>\n<p>Find the shapes that intersect with the given shape.</p>\n<p>Returns an array of hit data, with each item containing the following.</p>\n<pre><code>it.shape\t\t-- the shape\nit.normal_x\t\t-- the normal at contact (x)\nit.normal_y\t\t-- the normal at contact (y)\nit.contacts\t\t-- array of contact points -&gt; {ax,ay,bx,by,distance,etc...}\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 682,
@@ -1895,7 +2275,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>space:reindex(shape)\nspace:reindex(body)\nspace:reindex()</code></pre><p>Reindex the shapes, either a specific shape, all the shapes in a body \nor just all the static shapes.</p>\n",
+   "body": "<pre><code>space:reindex(shape)\nspace:reindex(body)\nspace:reindex()\n</code></pre>\n<p>Reindex the shapes, either a specific shape, all the shapes in a body \nor just all the static shapes.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 466,
@@ -1903,7 +2283,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>space:remove(body)\nspace:remove(shape)\nspace:remove(constraint)</code></pre><p>Remove a body/shape/constraint from this space.</p>\n",
+   "body": "<pre><code>space:remove(body)\nspace:remove(shape)\nspace:remove(constraint)\n</code></pre>\n<p>Remove a body/shape/constraint from this space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 405,
@@ -1911,7 +2291,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>v=space:sleep_time_threshold()\nv=space:sleep_time_threshold(v)</code></pre><p>Get and/or Set the sleep time threshold for this space.</p>\n",
+   "body": "<pre><code>v=space:sleep_time_threshold()\nv=space:sleep_time_threshold(v)\n</code></pre>\n<p>Get and/or Set the sleep time threshold for this space.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 275,
@@ -1919,7 +2299,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>space:step(time)</code></pre><p>Run the simulation for time in seconds. EG 1/60.</p>\n",
+   "body": "<pre><code>space:step(time)\n</code></pre>\n<p>Run the simulation for time in seconds. EG 1/60.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 520,
@@ -1927,7 +2307,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>number = space:type(name)\nname = space:type(number)</code></pre><p>Manage collision types, pass in a string and always get a number out. \nThis number is consistent only for this space.</p>\n<p>Alternatively pass in a number and get a string or nil as a result.</p>\n",
+   "body": "<pre><code>number = space:type(name)\nname = space:type(number)\n</code></pre>\n<p>Manage collision types, pass in a string and always get a number out. \nThis number is consistent only for this space.</p>\n<p>Alternatively pass in a number and get a string or nil as a result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 70,
