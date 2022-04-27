@@ -1,0 +1,22 @@
+name: Build Plated Pages
+on: [push]
+jobs:
+  Build-Plated-Pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Build
+        run: |
+          plated/upgrade
+          plated/build
+        shell: bash
+      - name: Deploy
+        uses: Cecilapp/GitHub-Pages-deploy@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          email: plated@github.actions
+          build_dir: docs
+          jekyll: no
+
