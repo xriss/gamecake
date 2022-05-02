@@ -235,6 +235,8 @@ end
 
 system.draw=function()
 
+	local use_this_fbo=gl.Get(gl.FRAMEBUFFER_BINDING)
+
 	system.resume({draw=true})
 
 	local screen=system.components.screen
@@ -263,6 +265,7 @@ system.draw=function()
 	for idx=1,#screen.layers do screen.draw_layer(idx) end
 	screen.draw_into_screen_finish()
 	
+	gl.BindFramebuffer(gl.FRAMEBUFFER, use_this_fbo)
 	screen.draw_screen()
 
 --hax

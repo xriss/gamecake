@@ -198,6 +198,7 @@ function M.bake(oven,framebuffers)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     fbo.TEXTURE_WRAP_S     or framebuffers.TEXTURE_WRAP_S     or gl.CLAMP_TO_EDGE)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     fbo.TEXTURE_WRAP_T     or framebuffers.TEXTURE_WRAP_T     or gl.CLAMP_TO_EDGE)
 
+
 				if fbo.texture_format then
 					gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.texture_format[1], fbo.txw, fbo.txh, 0, fbo.texture_format[2], fbo.texture_format[3],nil)
 				else

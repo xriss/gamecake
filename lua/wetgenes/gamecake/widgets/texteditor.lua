@@ -188,8 +188,8 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 			swed.fakeline=math.ceil(vec/2)*2 -- hide text and leave space for this many lines
 		end
 		
-		local sx=math.floor((widget.sx or 1)*8)
-		local sy=math.floor((widget.sy or 1)*16)
+		local sx=8--math.floor((widget.sx or 1)*8)
+		local sy=16--math.floor((widget.sy or 1)*16)
 		widget.over.text_size=sy
 
 
@@ -839,13 +839,14 @@ function wtexteditor.layout(widget)
 	widget.scroll_widget.hx=widget.hx
 	widget.scroll_widget.hy=widget.hy
 
+	widget.over.hx=widget.hx
+	widget.over.hy=widget.hy
+
 	return widget.meta.layout(widget)
 end
 
 
 function wtexteditor.setup(widget,def)
-
-	widget.over=widget.parent:add({px=widget.px,py=widget.py,hx=widget.hx,hy=widget.hy,size="full",fbo=true})
 
 -- options about how we behave
 
@@ -869,7 +870,9 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_to_bottom		=	wtexteditor.scroll_to_bottom
 
 
-	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles",color=widget.color})
+	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",scroll_pan="tiles",color=widget.color})
+
+	widget.over=widget:add({px=widget.px,py=widget.py,hx=widget.hx,hy=widget.hy,id="overtest"})
 
 	widget.scroll_widget.datx.step=8
 	widget.scroll_widget.daty.step=16

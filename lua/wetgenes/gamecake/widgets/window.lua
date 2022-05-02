@@ -479,7 +479,6 @@ function wwindow.setup(window,def)
 				local bar_height=(window.flags.nobar and 0 or window.master.theme.grid_size)
 				it.hx=window.win_canvas.hx
 				it.hy=window.win_canvas.hy+bar_height
-
 			else -- or does the canvas fit the window
 				local bar_height=(window.flags.nobar and 0 or window.master.theme.grid_size)
 				it.hx=it.parent.hx
@@ -500,6 +499,7 @@ function wwindow.setup(window,def)
 		sy=1,
 		color=color,
 		fbo=true,
+		size="none",
 		style="flat",
 		highlight="none",
 		smode="topleft",

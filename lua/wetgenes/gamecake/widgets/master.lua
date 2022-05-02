@@ -314,7 +314,6 @@ function wmaster.setup(widget,def)
 			local hx=math.ceil(widget.hx)
 			local hy=math.ceil(widget.hy)
 			if widget.fbo.w~=hx or widget.fbo.h~=hy then -- resize so we need a new fbo
---print("resize fbo",widget.hx,widget.hy)
 				widget.fbo:resize(hx,hy,widget.hz or 0)
 				widget:set_dirty() -- flag redraw
 			end				
