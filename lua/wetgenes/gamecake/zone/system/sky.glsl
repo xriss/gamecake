@@ -38,11 +38,11 @@ vec4 sky(vec3 eye, vec4 blend)
 
 	vec3 color=color_horizon;
 	color=mix( color , color_sky   , pow( smoothstep(0.0,1.0, -eye.y) , 1.0 ) );
-	color=mix( color , color_floor , pow( smoothstep(0.0,0.1,  eye.y) , 1.0 ) );
+	color=mix( color , color_floor , pow( smoothstep(0.0,1.0,  eye.y) , 1.0 ) );
 	color=color*blend[1];
 	
-	color=mix( color , color_sun*blend[0]  , smoothstep( 0.950 , 1.000 , sunc  ) );
-	color=mix( color , color_moon*blend[0] , smoothstep( 0.990 , 0.991 , moonc ) );
+	color=mix( color , color_sun  , smoothstep( 0.950 , 1.000 , sunc  )*blend[0] );
+	color=mix( color , color_moon , smoothstep( 0.990 , 0.991 , moonc )*blend[0] );
 
 	return vec4( color , 1.0 );
 }
