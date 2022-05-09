@@ -57,6 +57,12 @@ M.token.string=keyval{"\\\\","\\\"","\"","'","`"}
 
 M.token.keyword=keyval{
 
+	"#if",
+	"#endif",
+	"#else",
+	"#ifdef",
+	"#define",
+
 	"precision",
 	"attribute",
 	"bool",
@@ -70,6 +76,7 @@ M.token.keyword=keyval{
 	"continue",
 	"discard",
 	"do",
+	"if",
 	"else",
 	"float",
 	"for",
