@@ -69,6 +69,24 @@ function M.bake(opts)
 	local oven={}
 	wwin.oven=wwin.oven or oven -- store a global oven on first use
 
+-- setup tasks early so we can use recipes.sqlite for data management and run loading tasks on another thread
+	oven.tasks=require("wetgenes.tasks").create()
+-- and http requests
+	oven.tasks:add_thread({
+		count=8,
+		id="http",
+		code=require("wetgenes.tasks").http_code,
+	})
+-- and sqlite requests to a default database
+	oven.tasks:add_thread({
+		count=1,
+		id="sqlite",
+		globals={sqlite_filename=wwin.files_prefix.."recipes.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
+		code=require("wetgenes.tasks").sqlite_code,
+	})
+-- so we can run off thread code and coroutines
+
+
 	if opts.hints then -- pass hints from opts to sdl
 		wwin.hints(opts.hints)
 	end
@@ -264,23 +282,6 @@ os.exit()
 					end
 				end
 			end
-
--- setup tasks
-			oven.tasks=require("wetgenes.tasks").create()
--- and http requests
-			oven.tasks:add_thread({
-				count=8,
-				id="http",
-				code=require("wetgenes.tasks").http_code,
-			})
--- and sqlite requests to a default database
-			oven.tasks:add_thread({
-				count=1,
-				id="sqlite",
-				globals={sqlite_filename=wwin.files_prefix.."recipes.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
-				code=require("wetgenes.tasks").sqlite_code,
-			})
--- so we can run off thread code and coroutines
 
 			oven.win=wwin.create(inf)
 			oven.win:context({})
