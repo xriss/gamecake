@@ -116,7 +116,7 @@ apps:
 
   gamecake:
 
-    command: usr/local/bin/gamecake
+    command: desktop-launch bin/gamecake
 
     plugs:
       - home
@@ -137,14 +137,14 @@ apps:
 
   grd:
 
-    command: usr/local/bin/gamecake -lcmd -- grd
+    command: bin/gamecake -lcmd -- grd
 
     environment:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
 
   midi:
 
-    command: usr/local/bin/gamecake -lcmd -- midi
+    command: bin/gamecake -lcmd -- midi
 
     environment:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
@@ -152,7 +152,7 @@ apps:
 
   jam:
 
-    command:usr/local/bin/gamecakejam
+    command: bin/gamecakejam
 
     environment:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
