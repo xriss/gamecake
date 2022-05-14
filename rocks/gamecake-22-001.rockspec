@@ -1,10 +1,10 @@
 
 package = "gamecake"
 
-version = "18-006"
+version = "22-001"
 
 source = {
-   url="src.zip",
+   url="/home/kriss/devcake/gamecake/rocks/src.zip",
 }
 
 description = {
@@ -29,12 +29,26 @@ external_dependencies = {
       header = "jpeglib.h",
       library = "libjpeg.a",
    },
+   ZZIP_LIB = {
+      header = "zzip.h",
+      library = "libzzip.a",
+   },
 }
 
 build = {
    type = "builtin",
    modules = {
 
+      zip = {
+         libraries = {
+            "zzip"
+         },
+         sources={
+            "lua_zip/src/luazip.c",
+            "lib_hacks/code/hacks.c",
+         },
+      },
+      
       ["wetgenes.pack"]="lua_src/wetgenes/pack.lua",
       ["wetgenes.pack.core"]={
          sources={

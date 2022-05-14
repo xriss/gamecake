@@ -13,6 +13,8 @@ local cmd=table.remove(arg,1)       -- check what cmd is asked for
 if cmd then
 	arg[0]="gamecake."..cmd           -- remember cmd name	
 	require("cmd."..cmd)              -- try and run the actual cmd
+else
+	require("cmd.help")              -- print help
 end
 
 -- this file has been required as a module on the command line

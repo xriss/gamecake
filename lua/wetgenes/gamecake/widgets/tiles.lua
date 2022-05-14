@@ -177,7 +177,6 @@ function wtiles.skin(widget)
 
 		end)
 
-
 	end
 end
 

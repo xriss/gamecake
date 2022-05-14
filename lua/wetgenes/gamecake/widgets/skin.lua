@@ -118,6 +118,12 @@ function wskin.setup(def)
 	local cache_binded=nil --images.get("wskins/soapbar")
 
 
+local cache_draw
+local cache_draw_custom
+local old_cache_draw_custom
+local font_cache_draw
+
+
 	local function cache_smart_bind(img)
 		if not img then
 			gl.BindTexture(gl.TEXTURE_2D, 0)
@@ -155,8 +161,10 @@ function wskin.setup(def)
 		return function()
 			gl.Color(1,1,1,1)
 			for i,n in ipairs(cache_arrays) do
-				cache_smart_bind(n)
-				flat.tristrip("rawuvrgba",cache_arrays[n])
+				if #cache_arrays[n]>0 then
+					cache_smart_bind(n)
+					flat.tristrip("rawuvrgba",cache_arrays[n])
+				end
 			end
 			cache_arrays=old
 			cache_bind(oldb)
@@ -221,7 +229,6 @@ function wskin.setup(def)
 	end
 
 	local function draw_quad(x1,y1,x2,y2,x3,y3,x4,y4)
-
 		local t=cache_array or {}
 	--	if cache_array then t=cache_array else t={} end
 		local function draw()
@@ -353,6 +360,51 @@ function wskin.setup(def)
 
 
 	end
+
+	wskin.dcs={}
+	local function start_drawcache(drawcache)
+	
+		drawcache=drawcache or {}
+
+		wskin.dcs[#wskin.dcs+1]=drawcache -- add to top
+
+		drawcache.old_cache_draw_custom=wskin.cache_draw_custom
+		drawcache.cache_draw_custom={}
+		wskin.cache_draw_custom=drawcache.cache_draw_custom
+
+		drawcache.cache_draw=cache_begin()
+		sheets.batch_start()
+		drawcache.font_cache_draw=font.cache_begin()
+
+		return drawcache
+	end
+	local function final_drawcache(drawcache)
+		if wskin.dcs[#wskin.dcs]==drawcache then -- remove from top
+			wskin.dcs[#wskin.dcs]=nil
+		end
+		
+		if drawcache.cache_draw then
+			drawcache.cache_draw()
+			sheets.batch_stop()
+			sheets.batch_draw()
+		end
+		if drawcache.cache_draw_custom then
+			for i,f in ipairs(drawcache.cache_draw_custom) do f() end
+			wskin.cache_draw_custom=drawcache.old_cache_draw_custom
+		end
+		if drawcache.font_cache_draw then
+			drawcache.font_cache_draw()
+		end
+		return drawcache
+	end
+	local function flush_drawcache(drawcache)
+		drawcache=drawcache or wskin.dcs[#wskin.dcs]
+
+		final_drawcache(drawcache)
+		start_drawcache(drawcache)
+		return drawcache
+	end
+
 		
 --
 -- display this widget and its sub widgets
@@ -410,10 +462,7 @@ function wskin.setup(def)
 
 if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
 
-local cache_draw
-local cache_draw_custom
-local old_cache_draw_custom
-local font_cache_draw
+local dc
 
 		if widget.fbo then
 			
@@ -440,17 +489,19 @@ local font_cache_draw
 			
 			gl.PushMatrix() -- put new base matrix onto stack so we can pop to restore?
 
-
 			if not widget.fbo_batch_draw_disable then
-
-				old_cache_draw_custom=wskin.cache_draw_custom
-				cache_draw_custom={}
-				wskin.cache_draw_custom=cache_draw_custom
-
-				cache_draw=cache_begin()
-				sheets.batch_start()
-				font_cache_draw=font.cache_begin()
+				dc=start_drawcache()
 			end
+		else
+			if #wskin.dcs==0 then
+				if not widget.fbo_batch_draw_disable then
+					dc=start_drawcache()
+				end
+			end
+		end
+		
+		if widget.flushcache then
+			flush_drawcache()
 		end
 
 		
@@ -476,25 +527,20 @@ local font_cache_draw
 
 			gl.PopMatrix()
 
-			if cache_draw then
-				cache_draw()
-				sheets.batch_stop()
-				sheets.batch_draw()
+			if dc then
+				final_drawcache(dc)
 			end
-			if cache_draw_custom then
-				for i,f in ipairs(cache_draw_custom) do f() end
-				wskin.cache_draw_custom=old_cache_draw_custom
-			end
-			if font_cache_draw then
-				font_cache_draw()
-			end
-
+			
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 			
 			views.pop_and_apply()
 			gl.state.pop()
 
 			widget.fbo:mipmap()
+		else
+			if dc then
+				final_drawcache(dc)
+			end
 		end
 		
 else -- we can only draw once
@@ -518,11 +564,11 @@ else -- we can only draw once
 			local ht=#t
 			
 			local r,g,b,a=gl.color_get_rgba()
-			local v1=gl.apply_modelview( {0,			0,				0,1} )
-			local v2=gl.apply_modelview( {widget.fbo.w,	0,				0,1} )
-			local v3=gl.apply_modelview( {0,			widget.fbo.h,	0,1} )
-			local v4=gl.apply_modelview( {widget.fbo.w,	widget.fbo.h,	0,1} )
-
+			local v1=gl.apply_modelview( {0,			0,			0,1} )
+			local v2=gl.apply_modelview( {widget.hx,	0,			0,1} )
+			local v3=gl.apply_modelview( {0,			widget.hy,	0,1} )
+			local v4=gl.apply_modelview( {widget.hx,	widget.hy,	0,1} )
+			
 			for i,v in ipairs{
 				v1[1],	v1[2],	v1[3],	0,				widget.fbo.uvh,	r,g,b,a,	-- doubletap hack
 				v1[1],	v1[2],	v1[3],	0,				widget.fbo.uvh,	r,g,b,a,
@@ -642,11 +688,14 @@ end
 			
 			elseif type(skin)=="function" then -- we have a skin drawing function, just call it to draw
 
+--[[
 				if wskin.cache_draw_custom then
 					wskin.cache_draw_custom[#wskin.cache_draw_custom+1]=skin(widget) -- return draw function for cache draw
-				else
-					(skin(widget))() -- draw now
+]]
+				if wskin.dcs and #wskin.dcs>0 then
+					flush_drawcache()
 				end
+				(skin(widget))() -- draw now, do not wait
 
 			elseif type(skin)=="string" then -- got some images to play with
 			

@@ -535,6 +535,7 @@ function wmeta.setup(def)
 		mini=mini or 0
 		for i,v in ipairs(widget) do if i>mini and v.size then
 		
+
 			for token in string.gmatch(v.size, "[^%s]+") do -- can contain multiple tokens
 			
 				if token=="full" then -- force full size

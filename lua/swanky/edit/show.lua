@@ -1,0 +1,214 @@
+--
+-- (C) 2021 Kriss@XIXs.com
+--
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+local tardis=require("wetgenes.tardis")
+local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
+
+local wstr=require("wetgenes.string")
+local function ls(...) print(wstr.dump({...})) end
+
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+
+
+-- keep track of all the open documents
+
+M.bake=function(oven,show)
+	local show=show or {}
+	show.oven=oven
+	
+	show.modname=M.modname
+
+	show.glsl=oven.rebake(M.modname.."_glsl")
+	show.fun64=oven.rebake(M.modname.."_fun64")
+
+	local gui=oven.rebake(oven.modname..".gui")
+
+	local gl=oven.gl
+
+	local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
+
+
+--	show.enabled="glsl"
+
+	show.setup=function()
+--		show.fbo=framebuffers.create( 0,0 , 0 , { no_uptwopow=true } )
+	end
+	
+	show.clean=function()
+	end
+	
+	show.cam=M4()
+	show.rot=V3()
+	show.pos=V3()
+	show.siz=V3(1,1,1)
+
+	show.cam2d=M4()
+	show.pos2d=V3()
+	show.siz2d=V3(1,1,1)
+
+	show.mouse=V4(0,0,0,0) -- shadertoy style mouse values
+	
+	show.widget_msg=function(widget,m)
+	
+		local buildcam
+
+
+	
+		if m.class~="mouse" then return end
+
+		if m.keyname=="middle" and m.action==-1 then -- toggle 3d 2d camerea mode
+		
+			show.mouse_start=nil
+			
+			show.cam:identity()
+			show.rot:set(0,0,0)
+			show.pos:set(0,0,0)
+
+			show.mouse_start2d=nil
+
+			show.cam2d:identity()
+			show.pos2d:set(0,0,0)
+			show.siz2d:set(1,1,1)
+			
+			buildcam=true
+
+		end
+	
+		if m.keyname=="left" then
+			if m.action ==  1 then show.mouse_start={"left",m.x,m.y,V3(show.rot)} end
+			if m.action == -1 then show.mouse_start=nil end
+		elseif m.keyname=="right" then
+			if m.action ==  1 then show.mouse_start={"right",m.x,m.y,V3(show.pos)} end
+			if m.action == -1 then show.mouse_start=nil end
+		elseif m.keyname=="middle" then
+			if m.action ==  1 then show.mouse_start={"middle",m.x,m.y,V3(show.pos)} end
+			if m.action == -1 then show.mouse_start=nil end
+		elseif m.keyname=="wheel_add" and m.action == -1 then
+			show.pos=show.pos + ( V3( show.cam[ 9],show.cam[10],show.cam[11]  ) * 100 )
+			buildcam=true
+		elseif m.keyname=="wheel_sub" and m.action == -1 then
+			show.pos=show.pos + ( V3( show.cam[ 9],show.cam[10],show.cam[11]  ) *-100 )
+			buildcam=true
+		end
+		
+		if m.keyname=="left" then
+			if m.action ==  1 then show.mouse_start2d={"left",m.x,m.y,V3(show.pos)} end
+			if m.action == -1 then show.mouse_start2d=nil end
+		elseif m.keyname=="right" then
+			if m.action ==  1 then show.mouse_start2d={"right",m.x,m.y,V3(show.siz)} end
+			if m.action == -1 then show.mouse_start2d=nil end
+		elseif m.keyname=="middle" then
+			if m.action ==  1 then show.mouse_start2d={"middle",m.x,m.y,V3(show.rot)} end
+			if m.action == -1 then show.mouse_start2d=nil end
+		elseif m.keyname=="wheel_add" and m.action == -1 then
+			show.siz2d:scale(7/8)
+			buildcam=true
+		elseif m.keyname=="wheel_sub" and m.action == -1 then
+			show.siz2d:scale(8/7)
+			buildcam=true
+		end
+		
+--		ls(m)
+		local x,y=widget:mousexy(m.x,m.y)
+		if m.keyname=="left" and m.action ==  1 then -- click remember
+			show.mouse=V4(x,widget.hy-y,-x,-(widget.hy-y)) -- shadertoy style mouse values
+		end
+		if show.mouse then
+			if show.mouse_start and show.mouse_start[1]=="left" then
+				show.mouse[1]= x
+				show.mouse[2]= widget.hy-y
+				show.mouse[3]= (math.abs(show.mouse[3]))
+			else
+				show.mouse[3]=-(math.abs(show.mouse[3]))
+			end
+		end
+
+		if show.mouse_start and widget.master.active==widget then
+		
+			if show.mouse_start[1]=="left" then
+				local ax=(m.x-show.mouse_start[2])/widget.hy
+				local ay=(m.y-show.mouse_start[3])/widget.hy
+				show.rot[1]=show.mouse_start[4][1]+(ax*90)
+				show.rot[2]=show.mouse_start[4][2]-(ay*90)
+				
+				show.rot[1]=show.rot[1]%360 -- wrap x
+				if show.rot[2]<-90 then show.rot[2]=-90 end -- clamp y
+				if show.rot[2]> 90 then show.rot[2]= 90 end
+
+			elseif show.mouse_start[1]=="right" then
+				local ax=(m.x-show.mouse_start[2])/widget.hy
+				local ay=(m.y-show.mouse_start[3])/widget.hy
+				show.mouse_start[2]=m.x
+				show.mouse_start[3]=m.y
+
+				show.pos=show.pos + ( V3( show.cam[ 1],show.cam[ 2],show.cam[ 3]  ) * ax*-1000 )
+								  + ( V3( show.cam[ 5],show.cam[ 6],show.cam[ 7]  ) * ay*-1000 )
+
+			elseif show.mouse_start[1]=="middle" then
+				local ax=(m.x-show.mouse_start[2])/widget.hy
+				local ay=(m.y-show.mouse_start[3])/widget.hy
+				show.mouse_start[2]=m.x
+				show.mouse_start[3]=m.y
+
+--				show.pos=show.pos + ( V3( show.cam[ 9],show.cam[10],show.cam[11]  ) * ay*-1000 )
+
+				local res=1.0-( math.abs(ax) + math.abs(ay) )
+				if res<0 then res=0 end
+				if res>1 then res=1 end
+				show.pos=show.pos * res
+
+			else
+				show.mouse_start=nil
+			end
+		
+		end
+			
+		if show.mouse_start2d and widget.master.active==widget then
+
+			if show.mouse_start2d[1]=="left" then
+				local ax=(m.x-show.mouse_start2d[2])/widget.hy
+				local ay=(m.y-show.mouse_start2d[3])/widget.hy
+				show.mouse_start2d[2]=m.x
+				show.mouse_start2d[3]=m.y
+				show.pos2d=show.pos2d + ( V3( ax*-1 , ay*-1 , 0) * (show.siz2d) )
+
+			elseif show.mouse_start2d[1]=="right" then
+
+			else
+				show.mouse_start2d=nil
+			end
+			
+			buildcam=true
+		end
+		
+		if buildcam then
+			local m=show.cam:identity()
+			m:translate(show.pos)
+			m:rotate( show.rot[1] , {0,1,0} )
+			m:rotate( show.rot[2] , {1,0,0} )
+
+			local m=show.cam2d:identity()
+			m:translate(show.pos2d)
+			m:scale(show.siz2d)
+		end
+	end
+
+	show.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
+
+		local d=gui.datas.get("run_mode")
+
+		local it=show[d.str]
+
+		if it then
+
+			it.widget_draw(px,py,hx,hy)
+
+		end
+		
+	end
+
+	return show
+end

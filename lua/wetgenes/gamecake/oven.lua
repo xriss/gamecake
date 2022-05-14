@@ -20,6 +20,7 @@ possible ENV settings
 
 ]]
 
+local wpath=require("wetgenes.path")
 local wpackage=require("wetgenes.package")
 local wzips=require("wetgenes.zips")
 local wsbox=require("wetgenes.sandbox")
@@ -67,6 +68,24 @@ function M.bake(opts)
 	
 	local oven={}
 	wwin.oven=wwin.oven or oven -- store a global oven on first use
+
+-- setup tasks early so we can use recipes.sqlite for data management and run loading tasks on another thread
+	oven.tasks=require("wetgenes.tasks").create()
+-- and http requests
+	oven.tasks:add_thread({
+		count=8,
+		id="http",
+		code=require("wetgenes.tasks").http_code,
+	})
+-- and sqlite requests to a default database
+	oven.tasks:add_thread({
+		count=1,
+		id="sqlite",
+		globals={sqlite_filename=wwin.files_prefix.."recipes.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
+		code=require("wetgenes.tasks").sqlite_code,
+	})
+-- so we can run off thread code and coroutines
+
 
 	if opts.hints then -- pass hints from opts to sdl
 		wwin.hints(opts.hints)
@@ -126,6 +145,14 @@ if wwin.flavour=="emcc" then sniff_homedir=false end -- the homedir is a lie and
 if sniff_homedir then -- smart setup to save files into some sort of user file area depending on OS
 
 	local homedir
+
+	if not homedir and wwin.sdl_platform=="Android" then
+		homedir=wwin.GetPrefPath("wetgenes","gamecake")
+		if homedir then
+			wwin.files_prefix=wpath.resolve(homedir)
+			wwin.cache_prefix=wpath.resolve(homedir,"../cache/")
+		end
+	end
 
 	if not homedir and (wwin.flavour=="win" or wwin.sdl_platform=="Windows" ) then
 	
@@ -255,23 +282,6 @@ os.exit()
 					end
 				end
 			end
-
--- setup tasks
-			oven.tasks=require("wetgenes.tasks").create()
--- and http requests
-			oven.tasks:add_thread({
-				count=8,
-				id="http",
-				code=require("wetgenes.tasks").http_code,
-			})
--- and sqlite requests to a default database
-			oven.tasks:add_thread({
-				count=1,
-				id="sqlite",
-				globals={sqlite_filename=wwin.files_prefix.."recipes.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
-				code=require("wetgenes.tasks").sqlite_code,
-			})
--- so we can run off thread code and coroutines
 
 			oven.win=wwin.create(inf)
 			oven.win:context({})

@@ -12,6 +12,7 @@ local wwin=require("wetgenes.win")
 local wstring=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local wutf=require("wetgenes.txt.utf")
+local wjson=require("wetgenes.json")
 
 local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
@@ -133,9 +134,10 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 		end
 		
 		local pan=widget.scroll_widget.pan
-		pan.hx_max=(widget.txt.hx+widget.gutter+1)*8
+		pan.hx_max=(widget.txt.hx+widget.gutter+2)*8
 		pan.hy_max=widget.txt.hy*16
-	
+		
+		if widget.opts.word_wrap then pan.hx_max=0 end -- no x scroll when word wrapping
 	
 		if widget.data then -- auto set data if txt changes
 			local sa=widget.txt.get_text()
@@ -150,7 +152,124 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 --print(act,w and w.id)
 end
 
+
+wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
+
+	local tokefind=function(i,c,p)
+		if c.tokens and c.string then
+			local start=1
+			local idx=1
+			while true do
+				local s,e=string.find(c.tokens,p,start)
+				if not s then break end
+				if idx==i then return c.cb[s],c.cb[e] end
+				idx=idx+1
+				start=e+1
+			end
+		end
+	end
+
+	local tokefindstr=function(i,c,p)
+		local s,e=tokefind(i,c,p)
+		if s then
+			return string.sub( c.string , s , e )
+		end
+	end
+
+	if swed.config.class=="number" then -- number tweak, read inputs and sanatise them
+
+		local min  =tonumber(swed.config.min)  or 0
+		local max  =tonumber(swed.config.max)  or 1
+		local step =tonumber(swed.config.step) or 0.01
+		local fmt  =tostring(swed.config.fmt)  or "%.2f"
+		local vec  =tonumber(swed.config.vec)  or 1		
+							
+		if swed.mode=="+" then
+			swed.fakeline=math.ceil(vec/2)*2 -- hide text and leave space for this many lines
+		end
+		
+		local sx=8--math.floor((widget.sx or 1)*8)
+		local sy=16--math.floor((widget.sy or 1)*16)
+		widget.over.text_size=sy
+
+
+		local hx=widget.hx-8
+		local gx=0
+		if not widget.opts.gutter_disable then
+			gx=widget.gutter*sx
+		end
+		local px=gx
+		local py=(y-1)*sy
+								
+		if not swed.data then -- reuse old data
+			swed.data={}
+			swed.data.hook_slide=function(hook,data)
+				if hook=="value" then
+					local n=data:value()
+					local cy=swed.idx+1
+					local c=widget.txt.get_cache_lex( cy )
+					local fb,tb=tokefind(data.user,c,"0+")
+					if fb and tb then
+						local sn=string.format(fmt,n)
+--						if not string.find(sn,"%.") then sn=sn.."." end -- must have a .
+						widget.txt.tweak_string(cy,fb,tb,sn)
+						widget.txt_dirty=true
+					end
+				end
+			end
+			swed.data.hook_show=function(hook,data)
+				if hook=="value" then
+					local oldmode=swed.mode
+					if data:value()==0 then swed.mode="-" else swed.mode="+" end
+					if oldmode~=swed.mode then
+						local c=widget.txt.get_cache_lex( swed.idx )
+						local xe=#c.string
+						local es=wjson.encode(swed.config,{sort=true,white=" "})
+						widget.txt.tweak_string(swed.idx,7,xe, swed.mode .. es .. widget.txt.endline )
+						widget.txt_dirty=true
+					end
+				end
+			end
+			swed.data.show=wdata.new_data({max=1,min=0,num=(swed.mode=="+") and 1 or 0,step=1,master=widget.master,hooks=swed.data.hook_show})
+			local c=widget.txt.get_cache_lex( swed.idx+1 )
+			for i=1,vec do
+				local s=tokefindstr(i,c,"0+")
+				local n=tonumber(s) or 0
+				swed.data[i]=wdata.new_data({user=i,max=max,min=min,num=n,step=step,master=widget.master,hooks=swed.data.hook_slide})
+			end
+		end
+
+		for i=1,vec do
+			local c=widget.txt.get_cache_lex( swed.idx+1 )
+			local s=tokefindstr(i,c,"0+")
+			if not tonumber(s) then swed.fakeline=nil end
+		end
+		
+	-- basic container widgets
+		swed.wgutter = widget.over:add{class="fill",hx=gx,   hy=sy*(swed.fakeline or 1),px=0, py=py}
+		swed.wtext   = widget.over:add{class="fill",hx=sx*80,hy=sy*(swed.fakeline or 1),px=px,py=py}
+		
+		swed.wgutter:add{hx=gx-sx*2,hy=sy*1}
+		swed.wgutter:add{class="checkbox",hx=sx*2,hy=sy*1,color=0,text_false="+",text_true="-",data=swed.data.show}
+
+		if swed.mode=="+" and swed.fakeline then
+			for i=1,vec do
+				swed.wtext:add{class="slide",hx=sx*32,hy=sy*2,color=0,datx=swed.data[i],data="datx"}
+				swed.wtext:add{hx=sx*8,hy=sy*1}
+			end
+		end
+		
+		widget.over:layout()
+
+	end
+	
+--	dump(pan)
+end
+
+
 wtexteditor.texteditor_refresh=function(widget)
+
+	widget.over:clean_all()
 
 	widget.cursor_cx=nil
 	widget.cursor_cy=nil
@@ -183,9 +302,14 @@ wtexteditor.texteditor_refresh=function(widget)
 		local ps={}
 		local pl=0
 		local sx=cx
-
+		local fakeline
 		local cache=widget.txt.get_cache_lex(y)
 		if cache then
+
+			if cache.swed then
+				wtexteditor.texteditor_refresh_swed(widget,cache.swed,wy)
+				fakeline=cache.swed.fakeline
+			end
 
 			if not widget.opts.gutter_disable then
 
@@ -214,6 +338,32 @@ wtexteditor.texteditor_refresh=function(widget)
 
 			end
 
+
+			if fakeline then
+
+				for i=2,fakeline do
+				
+					if pl==0 then
+						if not widget.opts.gutter_disable then
+							for i=1,widget.gutter do
+								ps[pl+1]=32
+								ps[pl+2]=0
+								ps[pl+3]=1
+								ps[pl+4]=0
+								pl=pl+4
+							end
+						end
+					end
+				
+					local s=string.char(unpack(ps))
+					pan.lines[wy]={text=v,s=s,y=y,x=sx}
+					wy=wy+1
+
+					ps={}
+					pl=0
+
+				end
+			else
 			for x=cx,cx+512 do
 
 				if cursor_x-1 == x and cursor_y == y then
@@ -236,12 +386,12 @@ wtexteditor.texteditor_refresh=function(widget)
 				ps[pl+3]=1
 				ps[pl+4]=0
 				
-				if     toke=="k" then	ps[pl+3]=7  ps[pl+4]=6	-- keyword
-				elseif toke=="g" then	ps[pl+3]=9  ps[pl+4]=8	-- global
-				elseif toke=="c" then	ps[pl+3]=11 ps[pl+4]=10	-- comment
-				elseif toke=="s" then	ps[pl+3]=13	ps[pl+4]=12	-- string
-				elseif toke=="0" then	ps[pl+3]=15	ps[pl+4]=14 -- number
---				elseif toke=="p" then	ps[pl+3]=0x05	-- punctuation
+				if     toke=="k" then	ps[pl+3]=6  -- keyword
+				elseif toke=="g" then	ps[pl+3]=7  -- global
+				elseif toke=="c" then	ps[pl+3]=8  -- comment
+				elseif toke=="s" then	ps[pl+3]=9  -- string
+				elseif toke=="0" then	ps[pl+3]=10 -- number
+				elseif toke=="p" then	ps[pl+3]=11 -- punctuation
 				end
 
 				
@@ -281,6 +431,7 @@ wtexteditor.texteditor_refresh=function(widget)
 				end
 
 			end
+			end
 		end
 		local s=string.char(unpack(ps))
 		pan.lines[wy]={text=v,s=s,y=y,x=sx}
@@ -292,64 +443,45 @@ end
 function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 	if pan.meta.mouse(pan,act,_x,_y,keyname) then -- let children have precedence
-		if pan.master.over ~= pan then
-			return true
-		end
+		return
 	end
-	
+
+-- ignore clicks when we are not focused?
+--[[
+	print(pan.master.focus == pan,pan.master.active == pan,pan.master.over == pan)
+	if pan.master.focus ~= pan and pan.master.active ~= pan then
+		return true
+	end
+]]	
 	if keyname=="right" and act==1 then
 		log("texteditor","righty clicky")
 		pan.master.later_append(function()
 			log("texteditor","righty clicky later")
 		end)
-		return true
-	end
-
-	local wheel_acc=function()
-
-		pan.wheel_speed=pan.wheel_speed or 1
-		pan.wheel_stamp=pan.wheel_stamp or 0
-
-		local t=wwin.time()
-		if pan.wheel_stamp+1 > t then
-			pan.wheel_speed=pan.wheel_speed+1
-		else
-			pan.wheel_speed=1
-		end
-		pan.wheel_stamp=t
+		return
 	end
 	
 	if pan.master.old_over==pan and pan.parent.daty and pan.parent.daty.class=="number" then
 		if keyname=="wheel_add" and act==-1 then
---			wheel_acc()
 			pan.parent.daty:dec(16*4)
 			return
 		elseif keyname=="wheel_sub" and act==-1  then
---			wheel_acc()
 			pan.parent.daty:inc(16*4)
 			return
 		end
 	end
---print(pan,act,pan.master.over==pan)
---	if key=="wheel_add" or key=="wheel_sub" then return end
-
---print(pan,key)
-
 
 	local texteditor=pan.texteditor
-	local txt=texteditor.txt
-	local px=-math.floor(pan.pan_px/8)
-	local py=math.floor(pan.pan_py/16)
-	
+	local txt=texteditor.txt	
 	local x,y=pan:mousexy(_x,_y)
 
-
-	local dx,dy=math.floor(x/8),math.floor(y/16)
+	local dx,dy=math.floor(x/8-0.5),math.floor(y/16)
 	
-	dx=dx-texteditor.gutter+1
-	dy=dy+1
+	dx=dx-texteditor.gutter+1-texteditor.cx
+	dy=dy+1-texteditor.cy
 
-	local line=pan.lines[ dy - texteditor.cy]
+	local line=pan.lines[ dy ]
+	
 	if line then
 		dy=line.y
 		dx=line.x+dx
@@ -435,7 +567,7 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 	local dx=cx-texteditor.cx
 	local dy=cy-texteditor.cy
 	
-	local hx=math.floor(texteditor.scroll_widget.pan.hx/8)
+	local hx=math.floor(texteditor.scroll_widget.pan.hx/8)-texteditor.gutter+1
 	local hy=math.floor(texteditor.scroll_widget.pan.hy/16)
 	
 	if dy<4 then
@@ -444,14 +576,22 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 --		print("dec",d)
 		pan.parent.daty:dec(16*d)
 
-	elseif dy>hy-4 then
+	elseif dy>hy-3 then
 
-		local d=(dy-hy+4)
+		local d=(dy-hy+3)
 --		print("inc",d)
 		pan.parent.daty:inc(16*d)
 
 	end
-	
+
+	local edge=math.floor(hx/3)
+	if edge>8 then edge=8 end
+	if edge<1 then edge=1 end
+	if dx<edge+1 then
+		pan.parent.datx:dec(8*(edge+1-dx))
+	elseif dx>hx-edge then
+		pan.parent.datx:inc(8*(dx-(hx-edge)))
+	end
 	
 end
 
@@ -699,12 +839,14 @@ function wtexteditor.layout(widget)
 	widget.scroll_widget.hx=widget.hx
 	widget.scroll_widget.hy=widget.hy
 
+	widget.over.hx=widget.hx
+	widget.over.hy=widget.hy
+
 	return widget.meta.layout(widget)
 end
 
 
 function wtexteditor.setup(widget,def)
-
 
 -- options about how we behave
 
@@ -728,9 +870,15 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_to_bottom		=	wtexteditor.scroll_to_bottom
 
 
-	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",size="full",scroll_pan="tiles",color=widget.color})
+	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",scroll_pan="tiles",color=widget.color})
 
+	widget.over=widget:add({px=widget.px,py=widget.py,hx=widget.hx,hy=widget.hy,id="overtest"})
 
+	widget.scroll_widget.datx.step=8
+	widget.scroll_widget.daty.step=16
+	widget.scroll_widget.datx.scroll=1
+	widget.scroll_widget.daty.scroll=1
+	
 	widget.set_txt=function(txt)
 		if widget.txt then -- remove old hooks
 			widget.txt.hooks.changed=nil
@@ -784,21 +932,31 @@ function wtexteditor.setup(widget,def)
 			0xff444444,0xffaaaaaa,	-- text			0,1
 			0xff555555,0xff333333,	-- gutter		2,3
 			0xff333333,0xffbbbbbb,	-- hilite		4,5
-			0xff444444,0xffdd7733,	-- keyword		6,7
-			0xff444444,0xffddaa33,	-- global		8,9
-			0xff444444,0xff888888,	-- comment		10,11
-			0xff444444,0xff66aa33,	-- string		12,13
-			0xff444444,0xff5599cc,	-- number		14,15
+			0xffdd7733,	-- keyword		0,6
+			0xffddaa33,	-- global		0,7
+			0xff888888,	-- comment		0,8
+			0xff66aa33,	-- string		0,9
+			0xff5599cc,	-- number		0,10
+			0xff999999,	-- punctuation	0,11
+			0xff000000,	-- 	0,12
+			0xff000000,	-- 	0,13
+			0xff000000,	-- 	0,14
+			0xff000000,	-- 	0,15
 		},
 		lite={
 			0xffaaaaaa,0xff444444,	-- text			0,1
 			0xff777777,0xff999999,	-- gutter		2,3
 			0xffbbbbbb,0xff333333,	-- hilite		4,5
-			0xffaaaaaa,0xffaa6622,	-- keyword		6,7
-			0xffaaaaaa,0xffcc9922,	-- global		8,9
-			0xffaaaaaa,0xff777777,	-- comment		10,11
-			0xffaaaaaa,0xff559922,	-- string		12,13
-			0xffaaaaaa,0xff4488bb,	-- number		14,15
+			0xffaa6622,	-- keyword		0,6
+			0xffcc9922,	-- global		0,7
+			0xff777777,	-- comment		0,8
+			0xff559922,	-- string		0,9
+			0xff4488bb,	-- number		0,10
+			0xff666666,	-- punctuation	0,11
+			0xff000000,	-- 	0,12
+			0xff000000,	-- 	0,13
+			0xff000000,	-- 	0,14
+			0xff000000,	-- 	0,15
 		},
 	}
 

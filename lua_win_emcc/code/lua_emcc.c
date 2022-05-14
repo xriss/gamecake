@@ -89,8 +89,8 @@ const char *s2=0;
 	if(s2)
 	{
 		EM_ASM_ARGS({
-			var s0=Pointer_stringify($0);
-			var s1=Pointer_stringify($1);
+			var s0=UTF8ToString($0);
+			var s1=UTF8ToString($1);
 			setTimeout(function(){
 				Module.msg(s0,s1);
 			},0);
@@ -99,7 +99,7 @@ const char *s2=0;
 	else
 	{
 		EM_ASM_ARGS({
-			var s0=Pointer_stringify($0);
+			var s0=UTF8ToString($0);
 			setTimeout(function(){
 				Module.msg(s0);
 			},0);
@@ -159,6 +159,46 @@ const char *result=0;
 	return 1;
 }
 
+/*+-----------------------------------------------------------------------------------------------------------------
+
+handle clipboard through javascript hacks
+
++-----------------------------------------------------------------------------------------------------------------+*/
+
+int lua_emcc_has_clipboard(lua_State *l)
+{
+	lua_pushboolean(l,1); // just say yes always
+	return 1;
+}
+
+EM_JS(void, lua_emcc_set_clipboard_js, (const char* data), {
+	var s0=UTF8ToString(data);
+	Module.gamecake.set_clipboard(s0);
+});
+
+int lua_emcc_set_clipboard(lua_State *l)
+{
+	lua_emcc_set_clipboard_js( lua_tostring(l,1) );
+	return 0;
+}
+
+EM_JS(char*, lua_emcc_get_clipboard_js, (), {
+	var jsString = Module.gamecake.get_clipboard();
+	var lengthBytes = lengthBytesUTF8(jsString)+1;
+	var stringOnWasmHeap = _malloc(lengthBytes);
+	stringToUTF8(jsString, stringOnWasmHeap, lengthBytes);
+	return stringOnWasmHeap;
+});
+
+int lua_emcc_get_clipboard(lua_State *l)
+{
+	char *s=lua_emcc_get_clipboard_js();
+	lua_pushstring(l,s);
+	free(s);
+	return 1;
+}
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -171,6 +211,10 @@ LUALIB_API int luaopen_wetgenes_win_emcc_core(lua_State *l)
 		
 		{	"js_post",						lua_emcc_js_post					},
 		{	"js_eval",						lua_emcc_js_eval					},
+
+		{	"has_clipboard",				lua_emcc_has_clipboard				},
+		{	"set_clipboard",				lua_emcc_set_clipboard				},
+		{	"get_clipboard",				lua_emcc_get_clipboard				},
 
 		{0,0}
 	};

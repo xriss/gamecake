@@ -43,16 +43,18 @@ wtree.refresh=function(widget,items)
 				hx=ss,
 				hy=ss,
 				size="fullx",
-				text="",
-				text_align="left_center",
+				text_align="left",
 				user=it,
 				color=0,
 			}
-			
-			opts.text=string.rep("    ",depth+1)..it.text
-		
-			pan:add(opts)
+			if it.refresh then
+				it.refresh(it,depth,opts)
+			end
+			if not opts.text then
+				opts.text=it.text and string.rep("  ",depth)..it.text
+			end
 
+			pan:add(opts)
 
 			if it[1] then -- children
 				recurse(it,depth+1)

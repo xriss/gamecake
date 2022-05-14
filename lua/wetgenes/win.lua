@@ -49,12 +49,12 @@ local hardcores={}
 for _,it in ipairs({
 		{name="sdl",		noblock=false,	posix=false,	}, -- we are probably using this one
 		{name="emcc",		noblock=true,	posix=false,	}, -- this is a slightly modified version of sdl
-		{name="nacl",		noblock=true,	posix=false,	}, -- the rest are old and probably broken
-		{name="android",	noblock=false,	posix=false,	},
-		{name="windows",	noblock=false,	posix=false,	},
-		{name="linux",		noblock=false,	posix=true,		},
-		{name="osx",		noblock=false,	posix=true,		},
-		{name="raspi",		noblock=false,	posix=true,		},
+--		{name="nacl",		noblock=true,	posix=false,	}, -- the rest are old and probably broken
+--		{name="android",	noblock=false,	posix=false,	},
+--		{name="windows",	noblock=false,	posix=false,	},
+--		{name="linux",		noblock=false,	posix=true,		},
+--		{name="osx",		noblock=false,	posix=true,		},
+--		{name="raspi",		noblock=false,	posix=true,		},
 	}) do
 	
 
@@ -590,3 +590,23 @@ function base.hints(...)
 		return hardcore.hints(...)
 	end
 end
+
+
+-- show/hide onscreen keyboard
+function base.StartTextInput(...)
+	if     hardcore and hardcore.StartTextInput then
+		return hardcore.StartTextInput(...)
+	end
+end
+function base.StopTextInput(...)
+	if     hardcore and hardcore.StopTextInput then
+		return hardcore.StopTextInput(...)
+	end
+end
+
+function base.GetPrefPath(...)
+	if     hardcore and hardcore.GetPrefPath then
+		return hardcore.GetPrefPath(...)
+	end
+end
+

@@ -104,6 +104,10 @@ wdata.data_value=function(dat,val,nohook)
 					dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
 				end
 				master.dirty_by_data(dat)
+			else
+				if not nohook then -- disable hooks
+--					dat:call_hook_later("click1") -- call click hook if value did not change
+				end
 			end
 		end 
 		return dat.num
@@ -115,6 +119,10 @@ wdata.data_value=function(dat,val,nohook)
 					dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
 				end
 				master.dirty_by_data(dat)
+			else
+				if not nohook then -- disable hooks
+--					dat:call_hook_later("click2") -- call click hook if value did not change
+				end
 			end
 		end
 		return dat.str
@@ -127,7 +135,7 @@ adjust number (may trigger hook)
 
 ]]
 wdata.data_inc=function(dat,step,nohook)
-	step=step or dat.step
+	step=step or dat.scroll or dat.step
 	if step==0 then step=1 end
 	return dat:value(dat.num+step,nohook)
 end
@@ -137,7 +145,7 @@ adjust number (may trigger hook)
 
 ]]
 wdata.data_dec=function(dat,step,nohook)
-	step=step or dat.step
+	step=step or dat.scroll or dat.step
 	if step==0 then step=1 end
 	return dat:value(dat.num-step,nohook)
 end

@@ -150,6 +150,7 @@ M.bake=function(args)
 	end
 
 	args.parse=function(args,arg)
+		arg=arg or {}
 		local data={}
 		args.raw=arg
 		args.data=data

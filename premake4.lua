@@ -636,8 +636,8 @@ if GAMECAKE_WIN_TYPE=="none" then GAMECAKE_WIN_TYPE=false end
 -- many many versions of GL to suport, these make this work -> #include INCLUDE_GLES_GL
 if EMCC or ANDROID then
 
-	defines{ "LUA_GLES_GLES2" }
-	defines{ "INCLUDE_GLES_GL=\\\"GLES2/gl2.h\\\"" }
+	defines{ "LUA_GLES_GLES3" }
+	defines{ "INCLUDE_GLES_GL=\\\"GLES3/gl3.h\\\"" }
 
 elseif WINDOWS then -- need windows GL hacks
 

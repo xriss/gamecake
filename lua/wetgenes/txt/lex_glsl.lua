@@ -35,8 +35,9 @@ local MAP=M.MAP
 -- these wild card tests for non explicit tokens should all be anchored at start of string by beginning with a ^
 M.wild_tokens={
 	"^[0-9a-zA-Z_]+",						-- a variable or function name
-	"^%s+",									-- multiple white space
-	"^%d+%.?%d*[eE%+%-]*%d*",				-- floating point number
+	"^[ \t]+",								-- multiple tabs or spaces but not newlines
+	"^%d+%.?%d*[eE][%+%-]?%d*",				-- floating point number with exponent
+	"^%d+%.?%d*",							-- floating point number or int
 	"^0x[0-9a-fA-F]+",						-- hex number
 }
 -- test if a pattern matches entire string
@@ -56,6 +57,12 @@ M.token.string=keyval{"\\\\","\\\"","\"","'","`"}
 
 M.token.keyword=keyval{
 
+	"#if",
+	"#endif",
+	"#else",
+	"#ifdef",
+	"#define",
+
 	"precision",
 	"attribute",
 	"bool",
@@ -69,6 +76,7 @@ M.token.keyword=keyval{
 	"continue",
 	"discard",
 	"do",
+	"if",
 	"else",
 	"float",
 	"for",
@@ -389,6 +397,13 @@ M.parse=function(state,input,output)
 			token=""
 		end
 
+		local check_hashbang=function() -- we do not need hashbang ?
+			token="" -- do not advance
+			poke(state.stack,MAP.white) -- switch to white space
+			return true
+		end
+
+
 		local check_token=function()
 			if M.token.keyword[token] then
 				poke(state.stack,MAP.keyword)
@@ -408,7 +423,11 @@ M.parse=function(state,input,output)
 		end
 		
 		local check_number=function()
-			if fullmatch(token,"^%d+%.?%d*[eE%+%-]*%d*") then-- float or int
+			if fullmatch(token,"^%d+%.?%d*[eE][%+%-]?%d*") then-- float or int with exponent
+				poke(state.stack,MAP.number)
+				return true
+			end
+			if fullmatch(token,"^%d+%.?%d*") then-- float or int
 				poke(state.stack,MAP.number)
 				return true
 			end
@@ -530,7 +549,7 @@ M.parse=function(state,input,output)
 				goto_none,
 			},
 			[MAP.first]={
-				goto_none,
+				check_hashbang,
 			},
 		}
 

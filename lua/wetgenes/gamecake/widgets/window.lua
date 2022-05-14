@@ -479,7 +479,6 @@ function wwindow.setup(window,def)
 				local bar_height=(window.flags.nobar and 0 or window.master.theme.grid_size)
 				it.hx=window.win_canvas.hx
 				it.hy=window.win_canvas.hy+bar_height
-
 			else -- or does the canvas fit the window
 				local bar_height=(window.flags.nobar and 0 or window.master.theme.grid_size)
 				it.hx=it.parent.hx
@@ -500,6 +499,7 @@ function wwindow.setup(window,def)
 		sy=1,
 		color=color,
 		fbo=true,
+		size="none",
 		style="flat",
 		highlight="none",
 		smode="topleft",
@@ -534,6 +534,24 @@ function wwindow.setup(window,def)
 		color=color,
 		highlight="none",
 	})
+	
+	
+	-- use this to recreate the magic top left windows icon/menu anywhere you want
+	window.win_menu_def={
+			class="menuitem",
+			top_only=true,
+			px=0,
+			py=0,
+			hx=ss,
+			hy=ss,
+			text="~",
+			color=color,
+			solid=true,
+			menu_data=window.menu_data,
+			cursor="hand",
+			id="win_menu",
+			hooks=window.window_hooks,
+		}
 
 	if bar_height>0 then -- add a bar
 	
@@ -548,21 +566,7 @@ function wwindow.setup(window,def)
 			class="three",
 		})
 
-		window.win_menu=window.win_three:add({
-			class="menuitem",
-			top_only=true,
-			px=0,
-			py=0,
-			hx=ss,
-			hy=ss,
-			text="~",
-			color=color,
-			solid=true,
-			menu_data=window.menu_data,
-			cursor="hand",
-			id="win_menu",
-			hooks=window.window_hooks,
-		})
+		window.win_menu=window.win_three:add(window.win_menu_def)
 
 		window.win_title=window.win_three:add({
 			px=0,

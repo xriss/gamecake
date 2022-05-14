@@ -180,6 +180,8 @@ function wmaster.setup(widget,def)
 
 					if master.active and master.active.can_focus then
 						master.set_focus(master.active)
+					else
+						master.set_focus(nil)
 					end
 
 					master.over:set_dirty()
@@ -309,9 +311,10 @@ function wmaster.setup(widget,def)
 
 	mark_dirty_fbos=function(widget)
 		if widget.fbo then
-			if widget.fbo.w~=widget.hx or widget.fbo.h~=widget.hy then -- resize so we need a new fbo
---print("resize fbo",widget.hx,widget.hy)
-				widget.fbo:resize(widget.hx,widget.hy,widget.hz or 0)
+			local hx=math.ceil(widget.hx)
+			local hy=math.ceil(widget.hy)
+			if widget.fbo.w~=hx or widget.fbo.h~=hy then -- resize so we need a new fbo
+				widget.fbo:resize(hx,hy,widget.hz or 0)
 				widget:set_dirty() -- flag redraw
 			end				
 		end
@@ -393,6 +396,9 @@ function wmaster.setup(widget,def)
 				widget.edit=edit
 				master.edit:call_hook_later("focus_edit")
 			end
+			wwin.StartTextInput()
+		else
+			wwin.StopTextInput()
 		end
 	end
 	
@@ -412,8 +418,12 @@ function wmaster.setup(widget,def)
 				if focus.class=="textedit" then -- also set edit focus
 					master.set_focus_edit(focus)
 --print("edit focus",tostring(focus),focus and focus.class)
+				else
+					master.set_focus_edit(nil)
 				end
 			end
+		else
+			master.set_focus_edit(nil)
 		end
 	
 	end

@@ -23,7 +23,6 @@ local wdrag=B
 
 ]]
 function wdrag.drag(widget,x,y)
-
 	local parent=widget.parent
 	local master=widget.master
 
@@ -50,6 +49,7 @@ function wdrag.drag(widget,x,y)
 	widget:set_dirty()
 	widget.master.request_layout=true
 	
+--print(x,y,widget.px,widget.py)
 end
 
 --[[#lua.wetgenes.gamecake.widgets.drag.update

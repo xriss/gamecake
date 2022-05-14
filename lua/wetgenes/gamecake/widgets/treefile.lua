@@ -59,9 +59,13 @@ function wtreefile.refresh_items(widget,items)
 		it.name=v.name
 
 		if it.mode=="directory" then
-			it.text=v.name.."/"
+			it.text=it.name.."/"
 		else
-			it.text=v.name
+			it.text=it.name
+		end
+
+		if widget.refresh_item then
+			it.refresh=widget.refresh_item
 		end
 
 		items[#items+1]=it

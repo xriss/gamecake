@@ -3,6 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
 
 local wstring=require("wetgenes.string")
 local wutf=require("wetgenes.txt.utf")
@@ -12,6 +13,7 @@ local wtxtdiff=require("wetgenes.txt.diff")
 local wtxtlex =require("wetgenes.txt.lex")
 
 local wpath=require("wetgenes.path")
+local wjson=require("wetgenes.json")
 
 -- manage the text data part of a text editor
 
@@ -25,6 +27,7 @@ M.construct=function(txt)
 	
 	txt.lexer="text"
 	txt.tabsize=4
+	txt.endline="\n"
 
 	txt.hooks={} -- user call backs	
 	local hook=function(name) local f=txt.hooks[name] if f then return f(txt) end end
@@ -77,8 +80,28 @@ M.construct=function(txt)
 		txt.clear_caches()
 	end
 
+-- replace the text on line idx between fb and tb (bytes) inclusive with the given string
+-- this *MUST* be a like for like hacky replacement as far as the lexer is concerned
+-- as we are trying not to clear all caches, just slightly tweak this one line
+	txt.tweak_string=function(idx,fb,tb,str)
+
+		local c=txt.get_cache( idx )
+
+		local sa=c.string:sub(1,fb-1)
+		local sb=c.string:sub(tb+1)
+
+		txt.del_cache(idx)
+		txt.strings[idx]=sa..str..sb
+		txt.rebuild_permastart()
+		txt.get_cache_lex(idx)
+
+	end
+
 	txt.del_cache=function(idx)
 		txt.caches[idx]=nil
+		if (idx-1)%txt.permacache_ratio == 0 then
+			txt.permacaches[1+math.floor((idx-1)/txt.permacache_ratio)]=nil
+		end
 	end
 
 	txt.get_cache=function(idx)
@@ -94,13 +117,12 @@ M.construct=function(txt)
 
 -- just one meta for the caches
 	txt.caches_meta={}
-	txt.caches_meta.__mode="v"
+-- I'm not sure this will really help, maybe it will?
+-- need to run tests with huge files but for now can just leave it off
+--	txt.caches_meta.__mode="v"
 
 	txt.permacache_ratio=128
-	txt.clear_caches=function()
-		txt.permacaches={}
-		txt.caches={}
-		setmetatable(txt.caches, txt.caches_meta)
+	txt.rebuild_permastart=function()
 		txt.permastart={} -- recalculate start indexs of each perma string
 		local start=0
 		for i,v in ipairs(txt.strings or {} ) do
@@ -110,6 +132,13 @@ M.construct=function(txt)
 			start=start+#v -- next index
 		end
 		txt.permastart[#txt.permastart+1]=start -- end of text
+	end
+	
+	txt.clear_caches=function()
+		txt.permacaches={}
+		txt.caches={}
+		setmetatable(txt.caches, txt.caches_meta)
+		txt.rebuild_permastart()
 	end
 	txt.clear_caches()
 --[[
@@ -243,7 +272,7 @@ or japanese double glyphs. Its a complicated mapping so it is precalculated
 		
 		cache.codes={}
 
--- x xpos is the screen space offset, so a tab would be 8 and a space 1.
+-- x xpos is the screen space offset, so a tab will be wider than a space
 -- b byte is the byte offset into the string
 -- c code is the code offset into the string (unicode character)
 
@@ -303,41 +332,65 @@ auto select an entire word or line depending on number of clicks
 
 ]]
 	txt.markauto=function(fy,fx,clicks)
-
+	
 		txt.mark(fy,fx,fy,fx)
 
+		local cache=txt.get_cache_lex(txt.cy)
+		local l=cache.tokens and #cache.tokens or 1
+
+		if clicks>=2 and ( txt.fx==1 or txt.fx==l ) then -- simply select full line if double clicking at start or end
+			txt.mark(fy,1,fy+1,1)
+			return
+		end
+
 		local s=txt.get_string(txt.cy) or ""
+		local sl=wutf.length(s)
+		local toke=function(x)
+			if cache.tokens then
+				local t=string.sub(cache.tokens,x,x)
+				if t=="c" then
+					if (wutf.ncode( s , x ) or 0) <= 32 then t="w" end
+				end
+				return t
+			else
+				local t="c"
+				if (wutf.ncode( s , x ) or 0) <= 32 then t="w" end
+				return t
+			end
+		end
+		local lx=txt.fx-1+1
+		local hx=txt.fx-1-1
 
-		if clicks==2 then -- select word
-		
-			local sl=wutf.length(s)
-			local lx=txt.cx-1
-			local hx=txt.cx-1
+		for i=2,clicks do
 
-			local c = wutf.ncode( s , lx )
+			local lc = toke(lx-1)
+			local hc = toke(hx+1)
 
-			if c and c > 32 then -- solid
-				
-				while ( (wutf.ncode( s , lx-1 ) or 0) > 32 ) do lx=lx-1 end
-				while ( (wutf.ncode( s , hx+1 ) or 0) > 32 ) do hx=hx+1 end
-
-				txt.mark(fy,lx,fy,hx+1)
-			
-			elseif c and c <= 32 then -- White
-
-				while ( (wutf.ncode( s , lx-1 ) or 33) <= 32 ) do lx=lx-1 end
-				while ( (wutf.ncode( s , hx+1 ) or 33) <= 32 ) do hx=hx+1 end
-
-				txt.mark(fy,lx,fy,hx+1)
-
+			if lc and lc~="w" or ( lc==hc or not hc ) then
+				while lx>0    and toke(lx-1)==lc do lx=lx-1 end
+				if lc=="w" and lc==hc  then -- greedy white
+					local c = toke(lx-1)
+					while lx>0    and toke(lx-1)==c do lx=lx-1 end
+				end
 			end
 
-		elseif clicks>=3 then -- select line
-			txt.mark(fy,0,fy+1,0)
+			if hc and hc~="w" or ( lc==hc or not lc ) then
+				while hx<sl-1 and toke(hx+1)==hc do hx=hx+1 end
+				if hc=="w" and lc==hc then -- greedy white
+					local c = toke(hx+1)
+					while hx<sl-1 and toke(hx+1)==c do hx=hx+1 end
+				end
+			end
+
+		end
+
+		if lx==hx and clicks>=2 then
+			txt.mark(fy,lx,fy,hx+1)
+		elseif lx<hx then
+			txt.mark(fy,lx,fy,hx+1)
 		end
 
 	end
-	
 
 --[[
 
@@ -566,7 +619,11 @@ cut out the text in the marked area (if marked) and set the cursor to this locat
 
 			end
 			
-			if s=="" then s=nil end
+			if s=="" then
+				s=nil
+			else
+				hook("changed")
+			end
 
 			return s
 		end
@@ -668,10 +725,12 @@ eg too the end of a line
 	
 		if not x then
 			txt.cy,txt.cx=txt.clip(txt.cy,txt.cx)
+			txt.fy,txt.ty=txt.cy
+			txt.fx,txt.tx=txt.cx
 			return
 		end
 
-		if y>txt.hy then y=txt.hy end
+		if y>txt.hy then y=txt.hy x=txt.get_hx(y)+1 end
 		if y<1 then y=1 end
 
 		local hx=txt.get_hx(y)
@@ -759,7 +818,7 @@ insert a new line
 		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
 		local sc=txt.get_string_sub(txt.cy,txt.cx)
 		
-		txt.set_string(txt.cy,sb.."\n")
+		txt.set_string(txt.cy,sb..txt.endline)
 
 		txt.cy=txt.cy+1
 		txt.cx=1
@@ -779,7 +838,7 @@ insert any string, which will be broken down by newlines
 	txt.insert=function(s)
 
 		local split=function(s,d)
-			d=d or "\n"
+			d=d or txt.endline
 			local ss={} -- output table
 			local ti=1  -- table index
 			local si=1  -- string index
@@ -795,7 +854,7 @@ insert any string, which will be broken down by newlines
 			return ss
 		end
 
-		local lines=split(s,"\n")
+		local lines=split(s,txt.endline)
 		
 		for idx,line in ipairs(lines) do
 
@@ -992,6 +1051,39 @@ get the lexxer cache for the given line
 		cache.tokens=table.concat(tokens)
 --print("tokens",cache.tokens)
 
+		if string.sub(cache.tokens,1,8)=="cccccccc" then -- must have at least this much comment to be valid
+			local t=string.sub(cache.string,3,8) -- first two chars can be any single line comment starter
+			if t=="SWED+{" or "SWED-{" then -- must have this magic string to be a tweakable value
+				-- we can disable display by changing from SWED+{ to SWED-{ in code so we can easily be reenabled by hand
+				local config ; pcall(function() config=wjson.decode( string.sub(cache.string,8) ) end)
+				local mode=string.sub(cache.string,7,7) 
+				-- this is config state that must be preserved in the text
+				if type(config)=="table" then -- there should be valid json after the SWED+
+					if not config.class then config.class="number" end -- probably a number
+					local def={}
+					if config.class=="number" then
+						def={ -- provide defaults and valid options
+							class="number",
+							min=0,
+							max=1,
+							step=0.01,
+							fmt="%.2f",
+							vec=1,
+						}
+					end
+					for n,v in pairs(def) do
+						if not config[n] then config[n]=v end -- defaults
+					end
+					for n,v in pairs(config) do
+						if not def[n] then config[n]=nil end -- cleanup data so unknown junk is removed
+					end
+					local swed={config=config,idx=idx,mode=mode} -- the full state that can be calculated from this data
+					cache.swed=swed
+				end
+			end
+		end
+
+
 		return cache
 	end
 
@@ -1000,7 +1092,7 @@ get the lexxer cache for the given line
 	wtxtundo.construct({},txt)
 
 
-	txt.set_text("\n","")
+	txt.set_text(txt.endline,"")
 	txt.set_lexer()
 	return txt
 end

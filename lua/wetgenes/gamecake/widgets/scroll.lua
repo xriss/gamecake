@@ -78,18 +78,16 @@ function wscroll.layout(widget)
 	
 	widget.pan:layout() -- creates hx_max,hy_max
 
-	widget.datx.max=widget.pan.hx_max-widget.pan.hx
-	if widget.datx.max<0 then widget.datx.max=0 end
+--	widget.datx.step= widget:bubble("text_size") or 16
+	widget.datx.max=math.ceil((widget.pan.hx_max-widget.pan.hx)/widget.datx.step)*widget.datx.step
+	if widget.datx.max<0 then widget.datx.max=0  end
 	widget.datx.size=widget.pan.hx/widget.pan.hx_max
-	widget.datx.step= widget:bubble("text_size") or 16 
-	widget.datx.max=widget.datx.max+widget.datx.step
 	widget.datx:value() -- clamp
 	
-	widget.daty.max=1+widget.pan.hy_max-widget.pan.hy
+--	widget.daty.step= widget:bubble("text_size") or 16
+	widget.daty.max=math.ceil((1+widget.pan.hy_max-widget.pan.hy)/widget.daty.step)*widget.daty.step
 	if widget.daty.max<0 then widget.daty.max=0 end
 	widget.daty.size=widget.pan.hy/widget.pan.hy_max
-	widget.daty.step= widget:bubble("text_size") or 16 	
-	widget.daty.max=widget.daty.max+widget.daty.step
 	widget.daty:value() -- clamp
 	
 --	widget.meta.layout(widget)
@@ -116,6 +114,11 @@ function wscroll.setup(widget,def)
 	widget.datx=widget_data.new_data{max=1,master=widget.master}
 	widget.daty=widget_data.new_data{max=1,master=widget.master}
 	widget.solid=true
+	
+	widget.datx.step=1
+	widget.datx.scroll=32
+	widget.daty.step=1
+	widget.daty.scroll=32
 	
 	widget.color=widget.color or 0
 	

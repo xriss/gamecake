@@ -56,6 +56,19 @@ sdl.video_init=function()
 		SDL.init{ SDL.flags.Video, SDL.flags.Joystick, SDL.flags.GameController, SDL.flags.Events, }
 --		SDL.init{ SDL.flags.Everything, }
 --		SDL.videoInit()
+
+--[[
+		local m=SDL.getDesktopDisplayMode(0)
+		if m and m.h and m.w then
+			m.w=1920
+			m.h=1080
+			local l=math.floor( ( math.log( math.sqrt((m.w*m.h)/(1920*1080)) ) / math.log(2) ) + 0.5 )
+			local scale=math.pow(2,l) -- double size when we are within 50% of a 4k screen and so on upwards
+			print(l,scale)
+			sdl.suggested_scale=scale
+		end
+]]
+
 	end
 end
 
@@ -663,6 +676,17 @@ sdl.cursor=function(s,dat,px,py)
 	
 end
 
+
+-- show/hide onscreen keyboard
+function sdl.StartTextInput(...)
+	return SDL.startTextInput(...)
+end
+function sdl.StopTextInput(...)
+	return SDL.stopTextInput(...)
+end
+function sdl.GetPrefPath(...)
+	return SDL.getPrefPath(...)
+end
 
 sdl.platform=SDL.getPlatform() -- remember platform
 

@@ -195,7 +195,7 @@ wfile.file_refresh=function(widget)
 --				print(wstr.dump(t))
 		table.sort(t)
 		for i,v in ipairs(t) do
-				pan:add({class="button",hx=pan.hx,hy=ss,text=v,text_align="left_center",hooks=widget.file_hooks,user=v,id="goto",
+				pan:add({class="button",hx=pan.hx,hy=ss,text=v,text_align="left",hooks=widget.file_hooks,user=v,id="goto",
 				color=0x1f000000,
 				})
 		end
@@ -204,11 +204,11 @@ wfile.file_refresh=function(widget)
 	
 		for i,t in ipairs(widget.files) do
 			if t.mode=="file" then
-				pan:add({class="button",hx=pan.hx,hy=ss,text=t.name,text_align="left_center",hooks=widget.file_hooks,user=t,
+				pan:add({class="button",hx=pan.hx,hy=ss,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
 				color=0,
 				})
 			elseif t.mode=="directory" then
-				pan:add({class="button",hx=pan.hx,hy=ss,text=t.name,text_align="left_center",hooks=widget.file_hooks,user=t,
+				pan:add({class="button",hx=pan.hx,hy=ss,text=t.name,text_align="left",hooks=widget.file_hooks,user=t,
 				color=0x1f000000,
 				})
 			end

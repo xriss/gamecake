@@ -56,14 +56,14 @@ function wwindows.layout(widget)
 		end
 
 	elseif widget.winmode=="drag" then
-	
+
 		local px=0
 		local py=0
 		local hx=0
 		local hy=0
 		for i,v in ipairs(widget) do
 			if v.px<px then px=v.px end
-			if v.py<py then px=v.py end
+			if v.py<py then py=v.py end
 			if v.px+v.hx>hx then hx=v.px+v.hx end
 			if v.py+v.hy>hy then hy=v.py+v.hy end
 		end
