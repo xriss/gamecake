@@ -1,0 +1,566 @@
+--
+-- (C) 2013 Kriss@XIXs.com
+--
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+local pack=require("wetgenes.pack")
+local wwin=require("wetgenes.win")
+local wstr=require("wetgenes.string")
+local tardis=require("wetgenes.tardis")	-- matrix/vector math
+local wgrd=require("wetgenes.grd")
+
+local function dprint(a) print(wstr.dump(a)) end
+
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+
+M.bake=function(oven,gui)
+	local gui=gui or {}
+	gui.oven=oven
+	
+	gui.modname=M.modname
+
+	local cake=oven.cake
+	local opts=oven.opts
+	local canvas=cake.canvas
+	local font=canvas.font
+	local flat=canvas.flat
+	local gl=oven.gl
+
+	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
+
+	local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
+
+	local docs=oven.rebake(oven.modname..".docs")
+	local show=oven.rebake(oven.modname..".show")
+
+	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=24,grid_size=32,skin=0})
+
+
+gui.loads=function()
+	oven.rebake("wetgenes.gamecake.widgets").loads()
+
+end
+
+gui.setup=function()
+
+	gui.loads()
+
+	gui.data_setup()
+
+	gui.plan_windows()
+	
+--	gui.data_load("all")
+--	gui.plan_windows_load()
+
+	return gui
+end
+
+gui.clean=function()
+end
+
+
+gui.msg=function(m)
+		
+	gui.master:msg(m)
+
+end
+
+
+gui.cursor=nil
+gui.update=function()
+
+--	local it=gui.texteditor
+--	print( gui.testa.hx ,  gui.testb.hx , it.parent.hx , it.hx , it.scroll_widget.hx , it.scroll_widget.pan.hx )
+
+	gui.master:update({hx=oven.win.width,hy=oven.win.height})
+
+-- display cursor	
+	if gui.cursor ~= gui.master.cursor then
+		gui.cursor = gui.master.cursor
+		wwin.cursor( gui.cursor or "arrow" )
+	end
+
+end
+
+gui.draw=function()
+	gl.PushMatrix()
+	gui.master:draw()		
+	gl.PopMatrix()
+end
+
+	local datas=gui.master.datas
+
+datas.set_infos({
+
+	{
+		id="test",
+		help="This is a test.",
+	},
+	
+})
+
+
+-- create data
+gui.data_setup=function()
+	if not gui.datas then -- only setup once
+	
+		gui.datas=datas
+
+		datas.new({id="list_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
+			{str="tree"},
+			{str="output"},
+		}})
+
+		datas.new({id="run_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
+			{str="none"},
+			{str="glsl"},
+			{str="fun64"},
+		}})
+
+		datas.new({id="run_play"  ,class="list",  hooks=gui.hooks,num=4,list={
+			{str="pause"},
+			{str="restart"},
+			{str="play"},
+			{str="autoplay"},
+		}})
+
+		datas.new({id="run_scale"  ,class="list",  hooks=gui.hooks,num=2,list={
+			{str="x1"},
+			{str="x2"},
+			{str="x4"},
+			{str="x8"},
+			{str="x16"},
+		}})
+	end
+end
+
+
+
+
+gui.widgets_of_dat_id=function(id)
+	local its={}
+	local idx=0
+	gui.master:call_descendents(function(w)
+		if	( w.data and w.data.id==id ) or
+			( w.datx and w.datx.id==id ) or
+			( w.daty and w.daty.id==id ) then
+			its[w]=w
+		end
+	end)
+	return pairs(its)
+end
+
+
+
+function gui.refresh_tree()
+	gui.master.ids.treefile.tree_widget:refresh()
+end
+
+function gui.hooks(act,w,dat)
+
+	if act=="file_name_click" then
+
+		local path=dat.path
+		w.master.later_append(function()
+		
+			docs.manifest(path):show()
+
+			gui.refresh_tree()
+		end)
+
+	elseif act=="click" then
+
+--print("CLICK",w.id)
+
+		if w.id=="font_size" then
+		
+			gui.font_size=w.user
+
+		elseif w.id=="quit" then
+		
+			oven.next=true
+		
+		elseif w.id=="load" then
+		
+			gui.screen.dialogs:show({
+				lines={"Load..."
+				},
+				file={},
+				cancel=function()end,
+				hooks=function(act,it)
+					local window=it ; while not window.close_request and window.parent~=window do window=window.parent end
+					if act=="file_name_click" then
+						local path=window.file:path()
+						req.master.later_append(function()
+							docs.manifest(path):show()
+						end)
+						window:close_request()
+					end
+					if act=="click" then
+						window.close_request(it.id)
+					end
+				end
+			})
+
+		elseif w.id=="save" then
+		
+			docs.doc:save()
+
+		elseif w.id=="saveas" then
+
+			gui.screen.dialogs:show({
+				lines={"Save..."
+				},
+				file={},
+				ok=function(window)
+					local path=window.file:path()
+					window.master.later_append(function()
+						docs.doc:save(path)
+					end)
+				end,
+				cancel=function()end,
+			})
+
+		elseif w.id=="dialog" then
+		
+			gui.screen.dialogs:show({
+				lines={"Save..."
+				},
+				file={},
+				sorry=function()end
+			})
+
+
+		elseif w.id=="run_play_restart" then
+
+			gui.master.ids.run_play_pause.state="none"
+			gui.master.ids.run_play_autoplay.state="none"
+
+			gui.datas.get("run_play"):value(2)
+
+		elseif w.id=="run_play_pause" then
+
+			local run_play=gui.datas.get("run_play")
+			if run_play.str=="pause" then run_play:value("play")
+			elseif run_play.str=="play" then run_play:value("pause")
+			elseif run_play.str=="autoplay" then run_play:value("pause")
+			else run_play:value("restart")
+			end
+
+			if run_play.str=="pause" then
+				gui.master.ids.run_play_pause.state="selected"
+				gui.master.ids.run_play_autoplay.state="none"
+			else
+				gui.master.ids.run_play_pause.state="none"
+				gui.master.ids.run_play_autoplay.state="none"
+			end
+
+		elseif w.id=="run_play_autoplay" then
+
+			gui.master.ids.run_play_pause.state="none"
+			gui.master.ids.run_play_autoplay.state="selected"
+
+			gui.datas.get("run_play"):value(4)
+
+		end
+
+
+	end
+
+
+	if act=="value" then
+
+		if w.id=="run_mode" then -- change
+
+			if w.str=="glsl" or  w.str=="fun64" then
+
+				local ss=math.pow(2,gui.master.datas.get_value("run_scale")-1)
+				
+				gui.master.ids.runscale.sx=ss
+				gui.master.ids.runscale.sy=ss
+
+				gui.master.ids.dock2.hy=math.floor(gui.master.ids.dock2.parent.hy/2)
+				gui.master:layout()
+
+			else
+
+				gui.master.ids.runscale.sx=1
+				gui.master.ids.runscale.sy=1
+
+				gui.master.ids.dock2.hy=0
+				gui.master:layout()
+			
+			end
+
+		elseif w.id=="list_mode" then -- change
+
+			if w.str=="tree" then
+
+				gui.master.ids.treefile.hidden=false
+				gui.master.ids.output.hidden=true
+
+			elseif w.str=="output" then
+
+				gui.master.ids.treefile.hidden=true
+				gui.master.ids.output.hidden=false
+
+			end
+
+		elseif w.id=="run_play" then -- change
+
+			print(w:value())
+
+		elseif w.id=="run_scale" then -- change
+	
+			local ss=math.pow(2,w:value()-1)
+			
+			gui.master.ids.runscale.sx=ss
+			gui.master.ids.runscale.sy=ss
+
+			gui.master:layout()
+		end
+
+--print("VALUE",w.id)
+
+	end
+
+	
+end
+
+	gui.plan_windows=function(master)	
+		master=master or gui.master
+
+		local gsiz=master.theme.grid_size
+
+local lay=
+{
+	id="screen",
+	size="full",class="screen",solid=true,
+	{
+		id="split",
+		class="split",size="full",split_axis="y",
+		{
+			id="top",
+			size="fullx fity",fbo=true,style="flat",highlight="none",color=0,
+			{
+				id="topbar",
+				size="minmax",smode="topleft",hx_min=gsiz*60,hy_max=gsiz*1,class="fill",
+				{
+					hx=gsiz*30,hy=gsiz*1,class="three",
+					{
+						hx=gsiz*4,hy=gsiz*1,class="menubar",id="menubar",always_draw=true,
+					},
+					{
+						hx=gsiz*1,hy=gsiz*1,text="Welcome to swanky edit (swed)",id="infobar",solid=true
+					},
+				},
+				{
+					px=0,py=0,hx=gsiz*30,hy=gsiz*1,class="fill",id="infobar_part2",
+				},
+			},
+		},
+		{
+			class="split_drag",split_axis="x",split_order=2,
+			{
+				id="edit",
+				style="flat",hx=400,highlight="none",color=0,
+				{
+					id="texteditor",
+					class="texteditor",color=0,fbo=true,hooks=gui.hooks,
+				}
+			},
+			{
+				class="split",split_axis="y",split_order=1,split_num=gsiz*1,hx=200,
+				{
+					id="bar1",class="fill",
+					style="flat",highlight="none",color=0,
+					{
+						class="menudrop",hx=gsiz*2,hy=gsiz,color=0,
+						data=gui.datas.get("list_mode"),
+					},
+				},
+				{
+					class="split",split_axis="y",split_order=2,split_num=gsiz*1,
+					{
+						id="dock_split",
+						class="split_drag",split_axis="y",split_order=2,--split_aspect=1.00,
+						{
+							id="dock1",
+							{
+								id="list",
+								size="full",style="flat",hx=200,highlight="none",color=0,
+								{
+									id="treefile",
+									color=0,fbo=true,class="treefile",size="full",hooks=gui.hooks,
+									refresh_item=docs.refresh_item
+								},
+								{
+									id="output",hidden=true,
+									class="texteditor",size="full",style="flat",color=0,
+									opts={readonly=true,gutter_disable=true,word_wrap=true},
+								},
+							},
+						},
+						{
+							id="dock2",
+							style="flat",highlight="none",color=0,
+							{
+								size="full",
+								{
+									id="runscale",
+									size="full",
+									sx=1,sy=1,
+									smode="topleft",
+									{
+										id="runfbo",
+										size="full",
+										fbo=true,
+										{
+											id="run",
+											size="full",
+											solid=true,
+											can_focus=true,
+										}
+									},
+								},
+								{
+									id="runtext",
+									class="texteditor",size="full",style="flat",color=0,
+									opts={readonly=true,gutter_disable=true,word_wrap=true},
+								},
+							}
+						},							
+					},
+					{
+						id="bar2",class="fill",
+						style="flat",highlight="none",color=0,
+						{
+							id="run_play_restart",hooks=gui.hooks,
+							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
+							text="<",
+						},
+						{
+							id="run_play_pause",hooks=gui.hooks,
+							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
+							text="||",
+						},
+						{
+							id="run_play_autoplay",hooks=gui.hooks,
+							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
+							text=">",
+						},
+						{
+							class="menudrop",hx=gsiz*2,hy=gsiz,color=0,
+							data=gui.datas.get("run_mode"),
+						},
+						{
+							class="menudrop",hx=gsiz,hy=gsiz,color=0,
+							data=gui.datas.get("run_scale"),
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
+		gui.screen=gui.master:add(lay)
+
+		gui.menu_datas={
+			font_size={
+				{id="font_size",user=1.00,text="Font Size 16px"},
+				{id="font_size",user=1.25,text="Font Size 20px"},
+				{id="font_size",user=1.50,text="Font Size 24px"},
+				{id="font_size",user=1.75,text="Font Size 28px"},
+				{id="font_size",user=2.00,text="Font Size 32px"},
+			},
+		}
+
+		widgets_menuitem.menu_add(gui.master.ids.menubar,{top=gui.master.ids.menubar,menu_data={
+			menu_px=0,menu_py=1,
+	--		func_text=func_text,
+			hooks=gui.hooks,
+			inherit=true,
+
+			{id="topmenu",text="File",top_only=true,menu_data={
+				{id="load",user="load",text="Load..."},
+				{id="save",user="save",text="Save"},
+				{id="saveas",user="saveas",text="Save as..."},
+				{id="quit",user="quit",text="Quit"},
+			}},
+			{id="topmenu",text="Windows",top_only=true,menu_data={
+				{id="dialog",user="1",text="Dialogue 1"},
+			}},
+			{id="topmenu",text="Font",top_only=true,menu_data=gui.menu_datas.font_size},
+--[[
+			{id="topmenu",text="Run",top_only=true,menu_data={
+				{id="run",user="hide",text="Hide"},
+				{id="run",user="glsl",text="GLSL"},
+			}},
+]]
+		}})
+
+
+
+--for n,v in pairs(gui.master.ids) do print(n) end
+
+-- special preview draw
+		gui.master.ids.run.draw=function(w)
+			show.widget_draw(w.px,w.py,w.hx,w.hy)
+		end
+		gui.master.ids.run.msg=function(widget,m)
+			show.widget_msg(widget,m)
+		end
+
+-- add super resize hook to top bar
+		do
+			local old=gui.master.ids.split.resize
+			gui.master.ids.split.resize=function(widget) -- super custom layout
+				local old_hx_min=gui.master.ids.topbar.hx_min
+				if gui.screen.hx < gsiz*24 then
+--print("double bar")
+					gui.master.ids.topbar.hx_min=gsiz*24
+					gui.master.ids.topbar.hy_max=gsiz*2
+				else
+--print("single bar")
+					gui.master.ids.topbar.hx_min=gsiz*48
+					gui.master.ids.topbar.hy_max=gsiz*1
+				end
+				if old_hx_min ~= gui.master.ids.topbar.hx_min then -- double call on state change
+					old(widget)
+				end
+				old(widget)
+			end
+		end
+
+-- font resize
+		gui.font_size=1.25
+		gui.master.ids.texteditor.hook_resize=function(it)
+			local ss=gui.font_size
+			it.smode="topleft"
+			it.hx=math.ceil(it.parent.hx/ss)
+			it.hy=math.ceil(it.parent.hy/ss)
+			it.sx=ss
+			it.sy=ss
+		end
+
+
+		oven.console.linehook=function(s)
+			gui.master.ids.output.txt.append_text(s)
+			gui.master.ids.output:layout()
+			gui.master.ids.output:scroll_to_bottom()
+		end
+
+
+
+
+--		docs.refresh()
+
+		gui.screen:windows_reset()
+
+	end
+
+
+	return gui
+end
