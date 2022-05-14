@@ -116,7 +116,7 @@ apps:
 
   gamecake:
 
-    command: desktop-launch $SNAP/bin/gamecake
+    command: gamecake
 
     plugs:
       - home
@@ -152,7 +152,7 @@ apps:
 
   jam:
 
-    command: desktop-launch gamecakejam
+    command: gamecakejam
 
     environment:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
