@@ -112,6 +112,7 @@ parts:
       - desktop-glib-only
       - alsa
 
+
 apps:
 
   gamecake:
@@ -135,16 +136,68 @@ apps:
     environment:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
 
+
   grd:
 
-    command: bin/gamecake -lcmd -- grd
+    command: bin/desktop-launch gamecake -lcmd -- grd
+
+    plugs:
+      - home
+      - x11
+      - opengl
+      - alsa
+      - pulseaudio
+      - network
+      - joystick
+      - hidraw
+      - desktop
+      - desktop-legacy
+      - wayland
+      - unity7
 
     environment:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
 
+
   midi:
 
-    command: bin/gamecake -lcmd -- midi
+    command: bin/desktop-launch gamecake -lcmd -- midi
+
+    plugs:
+      - home
+      - x11
+      - opengl
+      - alsa
+      - pulseaudio
+      - network
+      - joystick
+      - hidraw
+      - desktop
+      - desktop-legacy
+      - wayland
+      - unity7
+
+    environment:
+      ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
+
+
+  swed:
+
+    command: bin/desktop-launch gamecake -lcmd -- swed
+
+    plugs:
+      - home
+      - x11
+      - opengl
+      - alsa
+      - pulseaudio
+      - network
+      - joystick
+      - hidraw
+      - desktop
+      - desktop-legacy
+      - wayland
+      - unity7
 
     environment:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
@@ -152,7 +205,21 @@ apps:
 
   jam:
 
-    command: bin/gamecakejam
+    command: bin/desktop-launch gamecakejam
+
+    plugs:
+      - home
+      - x11
+      - opengl
+      - alsa
+      - pulseaudio
+      - network
+      - joystick
+      - hidraw
+      - desktop
+      - desktop-legacy
+      - wayland
+      - unity7
 
     environment:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
