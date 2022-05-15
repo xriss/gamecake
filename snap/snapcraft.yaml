@@ -116,7 +116,7 @@ apps:
 
   gamecake:
 
-    command: bin/desktop-launch bin/gamecake
+    command: bin/desktop-launch gamecake
 
     plugs:
       - home
