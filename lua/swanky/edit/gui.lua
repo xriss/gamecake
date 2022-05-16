@@ -8,6 +8,8 @@ local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local wgrd=require("wetgenes.grd")
+local wzips=require("wetgenes.zips")
+local wcsv=require("wetgenes.csv")
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -36,9 +38,14 @@ M.bake=function(oven,gui)
 
 	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=24,grid_size=32,skin=0})
 
-
+gui.loaded=false
 gui.loads=function()
+	if gui.loaded then return end gui.loaded=true
 	oven.rebake("wetgenes.gamecake.widgets").loads()
+
+	local filename="lua/swanky/edit/actions.csv"
+	local text=assert(wzips.readfile(filename),"file not found: "..filename)
+	local actions=wcsv.map(wcsv.parse(text))
 
 end
 

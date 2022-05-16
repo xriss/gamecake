@@ -1,0 +1,7 @@
+﻿id,user,text,help,key
+select_all,,Select All,Select all.,ctrl+a
+history_redo,,Redo,Redo last action.,ctrl+y
+history_undo,,Undo,Undo last action.,ctrl+z
+clip_cut,,Cut,Cut text.,ctrl+x
+clip_copy,,Copy,Copy text.,ctrl+c
+clip_paste,,Paste,Paste text.,ctrl+v
