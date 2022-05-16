@@ -9,4 +9,4 @@ history_redo,,Redo,Redo last action.,Ctrl+Y
 history_undo,,Undo,Undo last action.,Ctrl+Z
 clip_cut,,Cut,Cut text.,Ctrl+X
 clip_copy,,Copy,Copy text.,Ctrl+C
-clip_paste,,Paste,Paste text.,Ctrl+V
+clip_paste,,Paste,Paste text.,Ctrl+V Ctrl+P
