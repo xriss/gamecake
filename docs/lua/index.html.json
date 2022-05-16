@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 508,
+   "count": 516,
    "name": "lua"
   },
   {
@@ -54,7 +54,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 502,
+   "count": 510,
    "name": "lua.wetgenes"
   },
   {
@@ -416,6 +416,38 @@
   {
    "count": 1,
    "name": "lua.wetgenes.chipmunk.space.type"
+  },
+  {
+   "count": 8,
+   "name": "lua.wetgenes.csv"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.build"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.doesc"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.doquote"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.map"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.parse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.unesc"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.unquote"
   },
   {
    "count": 1,
@@ -2108,7 +2140,7 @@
  "_list": [
   {
    "body": "",
-   "count": 508,
+   "count": 516,
    "name": "lua"
   },
   {
@@ -2153,7 +2185,7 @@
   },
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 502,
+   "count": 510,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -2875,6 +2907,70 @@
    "line": 70,
    "name": "lua.wetgenes.chipmunk.space.type",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>local wcsv = require(&quot;wetgenes.csv&quot;)\n</code></pre>\n<p>Load and save csv, prefrably using tab sperators. </p>\n<p>The following need to be escaped with a \\ when used in each column.</p>\n<pre><code>\\n for newline,\n\\t for tab,\n\\r for carriage return,\n\\\\ for backslash.\n</code></pre>\n<p>and when using commas a , must be placed inside a quoted string with a \ndouble &quot;&quot; to escape &quot; within this string.</p>\n<p>This is intended for &quot;small&quot; csv files that fit in memory so does not \nstream or try and do anything clever to reduce memory overheads.</p>\n",
+   "count": 8,
+   "file": "../lua/wetgenes/csv.lua",
+   "line": 9,
+   "name": "lua.wetgenes.csv",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua"
+  },
+  {
+   "body": "<p>Build csv data into a string from a simple table of lines where each \nline is a table of cells.</p>\n<pre><code>text = wcsv.build(lines)\ntext = wcsv.build(lines,opts)\n</code></pre>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/csv.lua",
+   "line": 138,
+   "name": "lua.wetgenes.csv.build",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua"
+  },
+  {
+   "body": "<p>Escape special chars within a csv cell.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/csv.lua",
+   "line": 33,
+   "name": "lua.wetgenes.csv.doesc",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua"
+  },
+  {
+   "body": "<p>Wrap a string in quotes and escape any &quot; within that string using csv \nrules.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/csv.lua",
+   "line": 63,
+   "name": "lua.wetgenes.csv.doquote",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua"
+  },
+  {
+   "body": "<p>Use the first line to map all other lines into named keys, an empty \nstring will map to nil. This will return an array of items that is \nsmaller than the array of lines by at least one as we also trim \ntrailing empty objects.</p>\n<pre><code>items = wcsv.map(lines)\nitems = wcsv.map(wcsv.parse(text))\n</code></pre>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/csv.lua",
+   "line": 173,
+   "name": "lua.wetgenes.csv.map",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua"
+  },
+  {
+   "body": "<p>Parse csv data from a chunk of text. Returns a simple table of lines \nwhere each line is a table of cells. An empty or missing string \nindicates an empty cell. The second return can be ignored or used to \nbuild a csv in a similar format to the one we read.</p>\n<pre><code>lines,opts = wcsv.parse(text)\nlines,opts = wcsv.parse(text,opts)\n</code></pre>\n<p>Opts can be used to control how the parsing is performed pass in a \nseperator value to contol how a line is split.</p>\n<pre><code>lines,opts = wcsv.parse(text,{seperator=&quot;,&quot;})\n</code></pre>\n<p>Note that we also return the seperator we used within the second return \nand will guess the right one using the first line if one is not given.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/csv.lua",
+   "line": 88,
+   "name": "lua.wetgenes.csv.parse",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua"
+  },
+  {
+   "body": "<p>Unescape special chars within a csv cell.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/csv.lua",
+   "line": 48,
+   "name": "lua.wetgenes.csv.unesc",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua"
+  },
+  {
+   "body": "<p>Remove quotes from a strine and unescape any &quot;&quot; within that string. If \nthe string is not in quotes then we return it as is.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/csv.lua",
+   "line": 73,
+   "name": "lua.wetgenes.csv.unquote",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua"
   },
   {
    "body": "<pre><code>deepcopy(tab)\n</code></pre>\n<p>Create and return a new table containing the same data as the input. If any of\nthe table values (not keys) are tables then these are also duplicated,\nrecursively.</p>\n<p>If this is called with a value that is not a table then that value is just\nreturned so it&#39;s safe to call on values without checking them.</p>\n",

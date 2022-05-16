@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 508,
+   "count": 516,
    "name": "lua"
   },
   {
@@ -54,7 +54,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 502,
+   "count": 510,
    "name": "lua.wetgenes"
   },
   {
@@ -416,6 +416,38 @@
   {
    "count": 1,
    "name": "lua.wetgenes.chipmunk.space.type"
+  },
+  {
+   "count": 8,
+   "name": "lua.wetgenes.csv"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.build"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.doesc"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.doquote"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.map"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.parse"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.unesc"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.csv.unquote"
   },
   {
    "count": 1,

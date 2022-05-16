@@ -122,7 +122,15 @@
 <a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.remove"><span>/lua.wetgenes.chipmunk.space.remove</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.sleep_time_threshold"><span>/lua.wetgenes.chipmunk.space.sleep_time_threshold</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.step"><span>/lua.wetgenes.chipmunk.space.step</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.type"><span>/lua.wetgenes.chipmunk.space.type</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.chipmunk.space.type"><span>/lua.wetgenes.chipmunk.space.type</span></a><a class="par" href="../../docs/lua.wetgenes.csv"><span>/lua.wetgenes.csv</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.csv.build"><span>/lua.wetgenes.csv.build</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.csv.doesc"><span>/lua.wetgenes.csv.doesc</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.csv.doquote"><span>/lua.wetgenes.csv.doquote</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.csv.map"><span>/lua.wetgenes.csv.map</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.csv.parse"><span>/lua.wetgenes.csv.parse</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.csv.unesc"><span>/lua.wetgenes.csv.unesc</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.csv.unquote"><span>/lua.wetgenes.csv.unquote</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.deepcopy"><span>/lua.wetgenes.deepcopy</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.export"><span>/lua.wetgenes.export</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake"><span>/lua.wetgenes.gamecake</span></a>
 <a class="par" href="../../docs/lua.wetgenes.gamecake.fun"><span>/lua.wetgenes.gamecake.fun</span></a>
@@ -1613,6 +1621,98 @@ name = space:type(number)
 <p>Manage collision types, pass in a string and always get a number out. 
 This number is consistent only for this space.</p>
 <p>Alternatively pass in a number and get a string or nil as a result.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.csv">lua.wetgenes.csv</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua#L9">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua</a></div>
+<div><pre><code>local wcsv = require(&quot;wetgenes.csv&quot;)
+</code></pre>
+<p>Load and save csv, prefrably using tab sperators. </p>
+<p>The following need to be escaped with a \ when used in each column.</p>
+<pre><code>\n for newline,
+\t for tab,
+\r for carriage return,
+\\ for backslash.
+</code></pre>
+<p>and when using commas a , must be placed inside a quoted string with a 
+double &quot;&quot; to escape &quot; within this string.</p>
+<p>This is intended for &quot;small&quot; csv files that fit in memory so does not 
+stream or try and do anything clever to reduce memory overheads.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.csv.build">lua.wetgenes.csv.build</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua#L138">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua</a></div>
+<div><p>Build csv data into a string from a simple table of lines where each 
+line is a table of cells.</p>
+<pre><code>text = wcsv.build(lines)
+text = wcsv.build(lines,opts)
+</code></pre>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.csv.doesc">lua.wetgenes.csv.doesc</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua#L33">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua</a></div>
+<div><p>Escape special chars within a csv cell.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.csv.doquote">lua.wetgenes.csv.doquote</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua#L63">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua</a></div>
+<div><p>Wrap a string in quotes and escape any &quot; within that string using csv 
+rules.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.csv.map">lua.wetgenes.csv.map</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua#L173">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua</a></div>
+<div><p>Use the first line to map all other lines into named keys, an empty 
+string will map to nil. This will return an array of items that is 
+smaller than the array of lines by at least one as we also trim 
+trailing empty objects.</p>
+<pre><code>items = wcsv.map(lines)
+items = wcsv.map(wcsv.parse(text))
+</code></pre>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.csv.parse">lua.wetgenes.csv.parse</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua#L88">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua</a></div>
+<div><p>Parse csv data from a chunk of text. Returns a simple table of lines 
+where each line is a table of cells. An empty or missing string 
+indicates an empty cell. The second return can be ignored or used to 
+build a csv in a similar format to the one we read.</p>
+<pre><code>lines,opts = wcsv.parse(text)
+lines,opts = wcsv.parse(text,opts)
+</code></pre>
+<p>Opts can be used to control how the parsing is performed pass in a 
+seperator value to contol how a line is split.</p>
+<pre><code>lines,opts = wcsv.parse(text,{seperator=&quot;,&quot;})
+</code></pre>
+<p>Note that we also return the seperator we used within the second return 
+and will guess the right one using the first line if one is not given.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.csv.unesc">lua.wetgenes.csv.unesc</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua#L48">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua</a></div>
+<div><p>Unescape special chars within a csv cell.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.csv.unquote">lua.wetgenes.csv.unquote</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua#L73">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua</a></div>
+<div><p>Remove quotes from a strine and unescape any &quot;&quot; within that string. If 
+the string is not in quotes then we return it as is.</p>
 </div>
 </div>
 
