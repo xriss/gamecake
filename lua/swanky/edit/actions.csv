@@ -1,7 +1,12 @@
 ﻿id,user,text,help,key
-select_all,,Select All,Select all.,ctrl+a
-history_redo,,Redo,Redo last action.,ctrl+y
-history_undo,,Undo,Undo last action.,ctrl+z
-clip_cut,,Cut,Cut text.,ctrl+x
-clip_copy,,Copy,Copy text.,ctrl+c
-clip_paste,,Paste,Paste text.,ctrl+v
+file_quit,,Quit,Close application and Quit.,Ctrl+Q
+file_open,,Open,Open a new file.,Ctrl+O
+file_close,,Close,Close this file.,Ctrl+W
+file_save,,Save,Save this file.,Ctrl+S
+file_new,,New,Create a new file.,Ctrl+N
+select_all,,Select All,Select all text.,Ctrl+A
+history_redo,,Redo,Redo last action.,Ctrl+Y
+history_undo,,Undo,Undo last action.,Ctrl+Z
+clip_cut,,Cut,Cut text.,Ctrl+X
+clip_copy,,Copy,Copy text.,Ctrl+C
+clip_paste,,Paste,Paste text.,Ctrl+V

@@ -45,7 +45,17 @@ gui.loads=function()
 
 	local filename="lua/swanky/edit/actions.csv"
 	local text=assert(wzips.readfile(filename),"file not found: "..filename)
-	local actions=wcsv.map(wcsv.parse(text))
+	gui.actions=wcsv.map(wcsv.parse(text))
+	for i,v in ipairs(gui.actions) do
+		if v.id then -- allow quick lookup by id and possibly user
+			if v.user then
+				gui.actions[v.id]=gui.actions[v.id] or {}
+				gui.actions[v.id][v.user]=v
+			else
+				gui.actions[v.id]=v
+			end
+		end
+	end
 
 end
 
