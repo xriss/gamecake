@@ -45,35 +45,7 @@ gui.loads=function()
 
 	local filename="lua/swanky/edit/actions.csv"
 	local text=assert(wzips.readfile(filename),"file not found: "..filename)
-	gui.actions=wcsv.map(wcsv.parse(text))
-	gui.keys={}
-	for i,v in ipairs(gui.actions) do
-		if v.id then -- allow quick lookup by id and possibly user
-			if v.user then
-				gui.actions[v.id]=gui.actions[v.id] or {}
-				gui.actions[v.id][v.user]=v
-			else
-				gui.actions[v.id]=v
-			end
-		end
-		if v.key then -- map keys
-			for m in v.key:gmatch("[^ ]+") do
-				local ks=nil
-				for k in m:gmatch("[^+]+") do
-					k=k:lower()
-					if     k=="alt" then    ks="alt"
-					elseif k=="ctrl" then   ks=ks and ks.."_ctrl"  or "ctrl"
-					elseif k=="shift" then  ks=ks and ks.."_shift" or "shift"
-					else
-						ks=ks or "none"
-						gui.keys[ks]=gui.keys[ks] or {}
-						gui.keys[ks][k]=v
-					end
-				end
-			end
-		end
-	end
---	dprint(gui.keys)
+--	gui.master.load_actions(wcsv.map(wcsv.parse(text)))
 
 end
 
@@ -94,40 +66,7 @@ end
 gui.clean=function()
 end
 
-gui.keystate={}
-gui.keystate.alt=false
-gui.keystate.ctrl=false
-gui.keystate.shift=false
-gui.keystate.name="none"
-gui.keystate.update=function()
-	local ks=nil
-	if gui.keystate.alt   then  ks="alt"                          end
-	if gui.keystate.ctrl  then  ks=ks and ks.."_ctrl"  or "ctrl"  end
-	if gui.keystate.shift then  ks=ks and ks.."_shift" or "shift" end
-	gui.keystate.name=ks or "none"
-end
 gui.msg=function(m)
-
-	if m.class=="key" then
-		if     ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) then
-			if     m.action== 1 then gui.keystate.shift=true
-			elseif m.action==-1 then gui.keystate.shift=false end
-			gui.keystate.update()
-		elseif ( m.keyname=="control" or m.keyname=="control_l" or m.keyname=="control_r" ) then
-			if     m.action== 1 then gui.keystate.ctrl=true
-			elseif m.action==-1 then gui.keystate.ctrl=false end
-			gui.keystate.update()
-		elseif ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
-			if     m.action== 1 then gui.keystate.alt=true
-			elseif m.action==-1 then gui.keystate.alt=false end
-			gui.keystate.update()
-		end
-		local name=m.keyname
-		local action=(gui.keys[gui.keystate.name] or {})[name]
-		if m.action== 1 and action then -- do something
-			dprint(action)
-		end
-	end
 		
 	gui.master:msg(m)
 
