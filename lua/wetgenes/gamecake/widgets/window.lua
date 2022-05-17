@@ -574,12 +574,15 @@ function wwindow.setup(window,def)
 			hx=def.hx,
 			hy=ss,
 			text=def.title or "...",
-			draw_text=function(widget,txp,typ,fx) -- draw the text propperly centered in the entire window
+			draw_text=function(widget,opts) -- draw the text propperly centered in the entire window
+				if opts.size then
+					return font.width(widget.text) , widget.grid_size or font.size*1.5
+				end
 				local tx=(widget.hx+ss-font.width(widget.text))/2-ss
 				local ty=widget.hy/2
 				if tx<0 then tx=0 end
 				oven.gl.Color( unpack(widget.master.get_color(nil,widget.text_color)) )
-				font.set_xy(tx+txp,ty-fx+typ)
+				font.set_xy(tx+(opts.txp or 0),ty-(opts.fx or 0)+(opts.typ or 0))
 				font.draw(widget.text)
 			end,
 		})

@@ -815,7 +815,7 @@ end
 			
 			if widget.draw_text then -- draw special text using a function
 
-				widget.draw_text(widget,txp,typ,(fy*fontfix)) -- use canvas.font to draw the text, font and size will be set already add txp,typ to your draw position for hover text position fixes
+				widget.draw_text(widget,{txp=txp,typ=typ-(fy*fontfix)}) -- use canvas.font to draw the text, font and size will be set already add txp,typ to your draw position for hover text position fixes
 
 			else
 

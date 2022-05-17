@@ -658,6 +658,12 @@ function wmaster.setup(widget,def)
 		end)		
 	end
 
+	function master.get_action(id,user)
+		local action=master.actions[id]
+		if user and action then action=action[user] end
+		return action
+	end
+
 	function master.reset_actions()
 		master.keys={}
 		master.actions={}
@@ -719,9 +725,12 @@ function wmaster.setup(widget,def)
 
 --[[
 		if m.class=="action" then
+			local action=master.get_action(m.id,m.user)
 			dump(m)
+			dump(action)
 		end
-]]		
+]]
+
 		if m.class=="key" then
 			if     ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) then
 				if     m.action== 1 then master.keystate_shift=true

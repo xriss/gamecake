@@ -31,6 +31,43 @@ function wmenuitem.draw(widget)
 	return widget.meta.draw(widget)
 end
 
+function wmenuitem.draw_text(widget,opts)
+
+	local gl=oven.gl
+	local font=oven.cake.canvas.font
+
+	local text=widget.text or ( widget.action and widget.action.text ) or ""
+	local text_right=""
+
+	if widget.menu_data then
+		if widget.parent.class~="menubar" then
+			text_right="->"
+		end
+	elseif widget.action and widget.action.key then -- key
+		text_right=widget.action.key
+	end
+
+	if opts.size then
+		return font.width( text.."    "..text_right ) , widget.grid_size or widget.parent.grid_size or font.size*1.5
+	end
+
+	local w=font.width(text)
+	local tx=font.size*0.5
+	local ty=(widget.hy/2)+(opts.typ or 0)
+
+	gl.Color( unpack(widget.master.get_color(nil,widget.text_color)) )
+
+	font.set_xy(tx,ty)
+	font.draw(text)
+	
+	if text_right~="" then
+		local w=font.width(text_right)
+		font.set_xy(widget.hx-w-(font.size*0.5),ty)
+		font.draw(text_right)
+	end
+	
+end
+
 function wmenuitem.menu_add(widget,opts)
 	opts=opts or {}
 	if type(opts)=="function" then opts=opts() end
@@ -102,7 +139,8 @@ function wmenuitem.menu_add(widget,opts)
 		local it={} for a,b in pairs(v) do it[a]=b end
 
 		it.class="menuitem"
-		it.draw_text=it.draw_text or opts.draw_text or md.draw_text
+		it.action = it.action or widget.master.get_action(it.id,it.user) -- lookup action
+		it.draw_text=it.draw_text or opts.draw_text or md.draw_text or wmenuitem.draw_text
 		it.text_align=it.text_align or "left"
 		it.hooks=it.hooks or opts.hooks     or md.hooks
 		it.hide_when_clicked=it.hide_when_clicked or true

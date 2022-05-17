@@ -498,6 +498,11 @@ local lay=
 			{id="topmenu",text="Windows",top_only=true,menu_data={
 				{id="dialog",user="1",text="Dialogue 1"},
 			}},
+			{id="topmenu",text="Edit",top_only=true,menu_data={
+				{id="clip_copy"},
+				{id="clip_cut"},
+				{id="clip_paste"},
+			}},
 			{id="topmenu",text="Font",top_only=true,menu_data=gui.menu_datas.font_size},
 --[[
 			{id="topmenu",text="Run",top_only=true,menu_data={
