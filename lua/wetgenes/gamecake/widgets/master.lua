@@ -660,26 +660,29 @@ function wmaster.setup(widget,def)
 		end
 		
 		for i,v in ipairs(new_actions) do
-			if v.id then -- allow quick lookup by id and possibly user
-				if v.user then
-					master.actions[v.id]=master.actions[v.id] or {}
-					master.actions[v.id][v.user]=v
-				else
-					master.actions[v.id]=v
+			if tostring(v.id):sub(1,1)=="#" then -- ignore # comment at start of line assuming first column is id
+			else
+				if v.id then -- allow quick lookup by id and possibly user
+					if v.user then
+						master.actions[v.id]=master.actions[v.id] or {}
+						master.actions[v.id][v.user]=v
+					else
+						master.actions[v.id]=v
+					end
 				end
-			end
-			if v.key then -- map keys
-				for m in v.key:gmatch("[^ ]+") do
-					local ks=nil
-					for k in m:gmatch("[^+]+") do
-						k=k:lower()
-						if     k=="alt" then    ks="alt"
-						elseif k=="ctrl" then   ks=ks and ks.."_ctrl"  or "ctrl"
-						elseif k=="shift" then  ks=ks and ks.."_shift" or "shift"
-						elseif k~="" then
-							ks=ks or "none"
-							master.keys[ks]=master.keys[ks] or {}
-							master.keys[ks][k]=v
+				if v.key then -- map keys
+					for m in v.key:gmatch("[^ ]+") do
+						local ks=nil
+						for k in m:gmatch("[^+]+") do
+							k=k:lower()
+							if     k=="alt" then    ks="alt"
+							elseif k=="ctrl" then   ks=ks and ks.."_ctrl"  or "ctrl"
+							elseif k=="shift" then  ks=ks and ks.."_shift" or "shift"
+							elseif k~="" then
+								ks=ks or "none"
+								master.keys[ks]=master.keys[ks] or {}
+								master.keys[ks][k]=v
+							end
 						end
 					end
 				end
