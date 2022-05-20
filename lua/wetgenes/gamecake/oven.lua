@@ -291,11 +291,13 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 --wwin.hardcore.peek(oven.win[0])
 	
-			local doshow=opts.show or "win" -- default window display
+			local doshow=opts.args.show or opts.show or "win" -- default window display
+--[[
 			if opts.args.windowed   then doshow="win" end
 			if opts.args.borderless then doshow="less" end
 			if opts.args.fullscreen then doshow="full" end
 			if opts.args.maximised  then doshow="max" end
+]]
 			if doshow then oven.win:show(doshow) end
 
 

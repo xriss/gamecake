@@ -47,13 +47,19 @@ function wmenuitem.draw_text(widget,opts)
 		text_right=widget.action.key
 	end
 
+	local gs=widget.grid_size or widget.parent.grid_size or widget.master.grid_size or font.size*1.5
+
 	if opts.size then
-		return font.width( text.."    "..text_right ) , widget.grid_size or widget.parent.grid_size or font.size*1.5
+		local x=text_right~="" and gs*2 or gs*1
+		return font.width( text..text_right ) + x, gs
 	end
 
 	local w=font.width(text)
-	local tx=font.size*0.5
+	local tx=gs*0.5+(opts.txp or 0)
 	local ty=(widget.hy/2)+(opts.typ or 0)
+	if widget.parent.class=="menubar" then
+		tx=(widget.hx-w)*0.5+(opts.txp or 0)
+	end
 
 	gl.Color( unpack(widget.master.get_color(nil,widget.text_color)) )
 
@@ -61,8 +67,10 @@ function wmenuitem.draw_text(widget,opts)
 	font.draw(text)
 	
 	if text_right~="" then
+--		font.set_size(font.size*0.8,0)
 		local w=font.width(text_right)
-		font.set_xy(widget.hx-w-(font.size*0.5),ty)
+		local tx=widget.hx-w-(gs*0.5)+(opts.txp or 0)
+		font.set_xy(tx,ty)
 		font.draw(text_right)
 	end
 	

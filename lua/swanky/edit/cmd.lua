@@ -34,10 +34,21 @@ M.bake=function(oven,cmd)
 
 		local args=require("cmd.args").bake({inputs={
 
-			{	"swanky-edit",	false,	"force swanky.edit app.", },
-			{	"swanky-text",	false,	"force swanky.edit app.", },
+			{	"swanky-edit",	false,	"force swanky.edit app. When running a combined swanky app this forces edit mode.", },
 			{	"help",			false,	"Print help and exit.", },
 			{	"console",		false,	"Keep console open.", },
+			{	"logs",			false,	[[
+
+Choose log verbosity. Set to true to enable all logs or use a string of 
++- flags eg --logs=+this-that to enable and disable the given log 
+prefixes.
+
+]], },
+			{	"show",			"win",	[[
+
+Choose window mode. win|max|full for normal maximized or fullscreen.
+
+]], },
 			{	1,			"swanky.edit file.txt",	[[
 
 Load file.txt for editing.

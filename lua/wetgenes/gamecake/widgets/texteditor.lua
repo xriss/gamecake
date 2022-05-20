@@ -595,6 +595,36 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 	
 end
 
+function wtexteditor.msg(pan,m)
+	if m.class=="action" then -- only handle actions
+		local master=pan.master
+		local texteditor=pan.texteditor
+		local txt=texteditor.txt
+		if m.action==1 or m.action==0 then -- allow repeats
+			if m.id=="clip_copy" then
+				if m.action==1 then -- first press only
+					local s=txt.undo.copy()
+					if s then wwin.set_clipboard(s) end
+				end
+			elseif m.id=="clip_cut" then
+				if m.action==1 then -- first press only
+					local s=txt.undo.cut()
+					if s then wwin.set_clipboard(s) end
+					texteditor:scroll_to_view()
+				end
+			elseif m.id=="clip_paste" then
+				local s=wwin.get_clipboard() or ""
+				txt.undo.replace(s)
+				texteditor:scroll_to_view()
+			elseif m.id=="history_undo" then
+				txt.undo.undo()
+			elseif m.id=="history_redo" then
+				txt.undo.redo()
+			end
+		end
+	end
+end
+
 function wtexteditor.key(pan,ascii,key,act)
 --print("gotkey",ascii,act,key)
 
@@ -604,7 +634,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 
 	local cpre=function()
-		if master.key_shift then
+		if master.keystate_shift then
 			if not texteditor.mark_area then
 				texteditor.mark_area={txt.cy,txt.cx,txt.cy,txt.cx}
 			end
@@ -614,7 +644,7 @@ function wtexteditor.key(pan,ascii,key,act)
 		end
 	end
 	local cpost=function()
-		if master.key_shift and texteditor.mark_area then
+		if master.keystate_shift and texteditor.mark_area then
 				texteditor.mark_area[3]=txt.cy
 				texteditor.mark_area[4]=txt.cx
 				txt.mark(unpack(texteditor.mark_area))
@@ -711,7 +741,9 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			texteditor.txt_dirty=true
 
-			if master.key_control then
+			if not (master.keystate=="none" or master.keystate=="shift") then -- catch any special keys
+--[[
+			if master.keystate_control then
 			
 	--print(key)		
 				if key=="c" then	-- copy
@@ -745,7 +777,7 @@ function wtexteditor.key(pan,ascii,key,act)
 						txt.undo.redo()
 
 				end
-			
+]]			
 			elseif key=="enter" or key=="return" then
 
 				texteditor.float_cx=nil
@@ -784,7 +816,7 @@ function wtexteditor.key(pan,ascii,key,act)
 					if tx>1 then ty=ty+1 end
 					txt.mark(fy,0,ty,0)
 
-					if master.key_shift then
+					if master.keystate_shift then
 
 						local s=txt.undo.copy()
 						local ls=wstring.split_lines(s)
@@ -913,6 +945,7 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_widget.pan.solid=true
 	widget.scroll_widget.pan.can_focus=true
 
+	widget.scroll_widget.pan.msg=wtexteditor.msg
 	widget.scroll_widget.pan.key=wtexteditor.key
 	widget.scroll_widget.pan.mouse=wtexteditor.mouse
 

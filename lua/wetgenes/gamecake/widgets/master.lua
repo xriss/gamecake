@@ -438,24 +438,6 @@ function wmaster.setup(widget,def)
 --
 	function master.key(widget,ascii,key,act)
 
--- keep track of shift key states in master
-
-	if (act==1 or act==0) and ( not ascii or ascii=="" ) then
-
-		if     key=="shift_l"   or key=="shift_r"   then	widget.key_shift=true
-		elseif key=="control_l" or key=="control_r" then	widget.key_control=true
-		elseif key=="alt_l"     or key=="alt_r"     then	widget.key_alt=true
-		end
-
-	elseif act==-1 then
-
-		if     key=="shift_l"   or key=="shift_r"   then	widget.key_shift=false
-		elseif key=="control_l" or key=="control_r" then	widget.key_control=false
-		elseif key=="alt_l"     or key=="alt_r"     then	widget.key_alt=false
-		end	
-
-	end
-
 		if master.focus then -- key focus, steals all the key presses until we press enter again
 		
 			if master.focus.key then
