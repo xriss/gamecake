@@ -67,6 +67,10 @@ gui.clean=function()
 end
 
 gui.msg=function(m)
+
+	if m.class=="action" and m.action==1 then -- deal with actions
+		gui.action(m)
+	end
 		
 	gui.master:msg(m)
 
@@ -163,6 +167,63 @@ function gui.refresh_tree()
 	gui.master.ids.treefile.tree_widget:refresh()
 end
 
+function gui.action(m)
+
+	if m.id=="file_quit" then
+	
+		oven.next=true
+
+	elseif m.id=="file_open" then
+
+		gui.screen.dialogs:show({
+			lines={"Load..."
+			},
+			file={},
+			cancel=function()end,
+			hooks=function(act,it)
+				local window=it ; while not window.close_request and window.parent~=window do window=window.parent end
+				if act=="file_name_click" then
+					local path=window.file:path()
+					req.master.later_append(function()
+						docs.manifest(path):show()
+					end)
+					window:close_request()
+				end
+				if act=="click" then
+					window.close_request(it.id)
+				end
+			end
+		})
+
+	elseif m.id=="file_close" then
+
+	elseif m.id=="file_save" then
+
+		docs.doc:save()
+
+	elseif m.id=="file_saveall" then
+
+--			docs.doc:save()
+
+	elseif m.id=="file_saveas" then
+
+		gui.screen.dialogs:show({
+			lines={"Save..."
+			},
+			file={},
+			ok=function(window)
+				local path=window.file:path()
+				window.master.later_append(function()
+					docs.doc:save(path)
+				end)
+			end,
+			cancel=function()end,
+		})
+
+	end
+
+end
+
 function gui.hooks(act,w,dat)
 
 	if act=="file_name_click" then
@@ -176,7 +237,7 @@ function gui.hooks(act,w,dat)
 		end)
 
 	elseif act=="click" then
-	
+
 		if w.action then -- auto trigger action
 			gui.master.push_action_msg(w.id,w.user)
 		end
@@ -186,61 +247,6 @@ function gui.hooks(act,w,dat)
 		if w.id=="font_size" then
 		
 			gui.font_size=w.user
-
-		elseif w.id=="quit" then
-		
-			oven.next=true
-		
-		elseif w.id=="load" then
-		
-			gui.screen.dialogs:show({
-				lines={"Load..."
-				},
-				file={},
-				cancel=function()end,
-				hooks=function(act,it)
-					local window=it ; while not window.close_request and window.parent~=window do window=window.parent end
-					if act=="file_name_click" then
-						local path=window.file:path()
-						req.master.later_append(function()
-							docs.manifest(path):show()
-						end)
-						window:close_request()
-					end
-					if act=="click" then
-						window.close_request(it.id)
-					end
-				end
-			})
-
-		elseif w.id=="save" then
-		
-			docs.doc:save()
-
-		elseif w.id=="saveas" then
-
-			gui.screen.dialogs:show({
-				lines={"Save..."
-				},
-				file={},
-				ok=function(window)
-					local path=window.file:path()
-					window.master.later_append(function()
-						docs.doc:save(path)
-					end)
-				end,
-				cancel=function()end,
-			})
-
-		elseif w.id=="dialog" then
-		
-			gui.screen.dialogs:show({
-				lines={"Save..."
-				},
-				file={},
-				sorry=function()end
-			})
-
 
 		elseif w.id=="run_play_restart" then
 
@@ -498,6 +504,7 @@ local lay=
 				{id="file_close"},
 				{id="file_save"},
 				{id="file_saveas"},
+				{id="file_saveall"},
 				{id="file_quit"},
 			}},
 			{id="topmenu",text="Windows",top_only=true,menu_data={
