@@ -176,7 +176,7 @@ B.camera.update=function(camera)
 
 				do_orbit=true
 
-			elseif gui.master.over ~=  gui.master then -- ignore clicks on gui
+			elseif gui.master.over then -- ignore clicks on gui
 
 				do_orbit=false
 				do_zoom=false

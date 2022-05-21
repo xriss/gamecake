@@ -344,37 +344,23 @@ function wmeta.setup(def)
 	end
 	
 	function meta.mouse(widget,act,_x,_y,keyname)
-		
-		local x,y=widget:mousexy(_x,_y)
-
-		local tx=(x-(widget.pan_px or 0))
-		local ty=(y-(widget.pan_py or 0))
-		if widget==widget.master or ( tx>=0 and tx<widget.hx and ty>=0 and ty<widget.hy ) then
-
-			if widget.solid then
---				if (not widget.master.dragging()) --[[or widget.master.active==widget]] then
-					widget.master.over=widget
---				end
+		local old_over=widget.master.over
+		for i=#widget,1,-1 do -- children must be within parent bounds to catch clicks
+			local v=widget[i]
+			if not v.hidden then
+				local x,y=v:mousexy(_x,_y)
+				local tx=(x-(v.pan_px or 0))
+				local ty=(y-(v.pan_py or 0))
+				if tx>=0 and tx<v.hx and ty>=0 and ty<v.hy then
+--print(math.floor(tx),math.floor(ty),math.floor(v.hx),math.floor(v.hy),v.class,v.id,v.user,i)
+					if v.solid then
+						widget.master.over=v
+					end
+					v:mouse(act,_x,_y,keyname)
+					if widget.master.over~=old_over then break end -- we are over something new
+				end
 			end
-
---			if widget.master.active==widget then return true end -- *we* are getting dragged do not check children
-
-			for i=1,#widget do -- ,1,-1 do -- children must be within parent bounds to catch clicks
-				local v=widget[i] -- backwards so front has priority
---				if not v.hidden then if v:mouse(act,_x,_y,keyname) then return true end end
-				if not v.hidden then v:mouse(act,_x,_y,keyname) end
-			end
-			
---			if widget.master.over==widget then return true end
-
---		else
-		
---			if (not widget.master.dragging()) and widget.master.over==widget then
---				widget.master.over=nil
---			end
-
 		end
-	
 	end
 
 	function meta.parent_active(widget)
@@ -417,15 +403,12 @@ function wmeta.setup(def)
 --
 -- clean and remove all children of this widget
 --
-	function meta.clean_all(widget)
-	
-		for i,v in ipairs(widget) do
-			v:clean_all()
-		end
-		
+	function meta.clean_all(widget,start)
+		start=start or 1
 		local len=#widget
-		for i=1,len do
+		for i=len,start,-1 do
 			if widget[i] then
+				widget[i]:clean_all()
 				widget[i]:clean()
 				widget[i]=nil
 			end
@@ -464,7 +447,7 @@ function wmeta.setup(def)
 	meta.window_screen=function(it)
 		local window=it.window
 		local screen=it.screen or ( window and window.screen )
-		while it.parent ~= it do -- go searching
+		while it.parent ~= it and it.parent do -- go searching
 			window=it.window or window
 			screen=it.screen or screen
 			if it.class=="window" then window=it end -- found window

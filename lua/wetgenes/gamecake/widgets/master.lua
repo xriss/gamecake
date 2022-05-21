@@ -572,6 +572,7 @@ function wmaster.setup(widget,def)
 				master.active.mouse(master.active,act,x,y,keyname) -- cascade down into all widgets
 			end
 		else
+			master.over=nil
 			meta.mouse(widget,act,x,y,keyname) -- cascade down into all widgets
 		end
 		
@@ -644,6 +645,17 @@ function wmaster.setup(widget,def)
 		local action=master.actions[id]
 		if user and action then action=action[user] end
 		return action
+	end
+
+-- add a simple message to queue that will trigger action as if its key had been pressed
+	function master.push_action_msg(id,user)
+		oven.win:push_msg({
+			class="action",
+			action=1,
+			time=os.time(),
+			id=id,
+			user=user,
+		})
 	end
 
 	function master.reset_actions()

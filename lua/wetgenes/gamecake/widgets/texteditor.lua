@@ -190,7 +190,7 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 		
 		local sx=8--math.floor((widget.sx or 1)*8)
 		local sy=16--math.floor((widget.sy or 1)*16)
-		widget.over.text_size=sy
+		widget.scroll_widget.text_size=sy
 
 
 		local hx=widget.hx-8
@@ -246,8 +246,8 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 		end
 		
 	-- basic container widgets
-		swed.wgutter = widget.over:add{class="fill",hx=gx,   hy=sy*(swed.fakeline or 1),px=0, py=py}
-		swed.wtext   = widget.over:add{class="fill",hx=sx*80,hy=sy*(swed.fakeline or 1),px=px,py=py}
+		swed.wgutter = widget.scroll_widget:add{class="fill",hx=gx,   hy=sy*(swed.fakeline or 1),px=0, py=py}
+		swed.wtext   = widget.scroll_widget:add{class="fill",hx=sx*80,hy=sy*(swed.fakeline or 1),px=px,py=py}
 		
 		swed.wgutter:add{hx=gx-sx*2,hy=sy*1}
 		swed.wgutter:add{class="checkbox",hx=sx*2,hy=sy*1,color=0,text_false="+",text_true="-",data=swed.data.show}
@@ -259,7 +259,7 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 			end
 		end
 		
-		widget.over:layout()
+		widget.scroll_widget:resize_and_layout()
 
 	end
 	
@@ -269,7 +269,7 @@ end
 
 wtexteditor.texteditor_refresh=function(widget)
 
-	widget.over:clean_all()
+	widget.scroll_widget:clean_all(4)
 
 	widget.cursor_cx=nil
 	widget.cursor_cy=nil
@@ -442,17 +442,10 @@ end
 
 function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
-	if pan.meta.mouse(pan,act,_x,_y,keyname) then -- let children have precedence
-		return
-	end
+--	if pan.meta.mouse(pan,act,_x,_y,keyname) then -- let children have precedence
+--		return
+--	end
 
--- ignore clicks when we are not focused?
---[[
-	print(pan.master.focus == pan,pan.master.active == pan,pan.master.over == pan)
-	if pan.master.focus ~= pan and pan.master.active ~= pan then
-		return true
-	end
-]]	
 	if keyname=="right" and act==1 then
 		log("texteditor","righty clicky")
 		pan.master.later_append(function()
@@ -871,9 +864,6 @@ function wtexteditor.layout(widget)
 	widget.scroll_widget.hx=widget.hx
 	widget.scroll_widget.hy=widget.hy
 
-	widget.over.hx=widget.hx
-	widget.over.hy=widget.hy
-
 	return widget.meta.layout(widget)
 end
 
@@ -903,8 +893,6 @@ function wtexteditor.setup(widget,def)
 
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",scroll_pan="tiles",color=widget.color})
-
-	widget.over=widget:add({px=widget.px,py=widget.py,hx=widget.hx,hy=widget.hy,id="overtest"})
 
 	widget.scroll_widget.datx.step=8
 	widget.scroll_widget.daty.step=16

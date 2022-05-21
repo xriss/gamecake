@@ -176,6 +176,10 @@ function gui.hooks(act,w,dat)
 		end)
 
 	elseif act=="click" then
+	
+		if w.action then -- auto trigger action
+			gui.master.push_action_msg(w.id,w.user)
+		end
 
 --print("CLICK",w.id)
 
@@ -490,10 +494,11 @@ local lay=
 			inherit=true,
 
 			{id="topmenu",text="File",top_only=true,menu_data={
-				{id="load",user="load",text="Load..."},
-				{id="save",user="save",text="Save"},
-				{id="saveas",user="saveas",text="Save as..."},
-				{id="quit",user="quit",text="Quit"},
+				{id="file_open"},
+				{id="file_close"},
+				{id="file_save"},
+				{id="file_saveas"},
+				{id="file_quit"},
 			}},
 			{id="topmenu",text="Windows",top_only=true,menu_data={
 				{id="dialog",user="1",text="Dialogue 1"},
@@ -502,6 +507,8 @@ local lay=
 				{id="clip_copy"},
 				{id="clip_cut"},
 				{id="clip_paste"},
+				{id="history_undo"},
+				{id="history_redo"},
 			}},
 			{id="topmenu",text="Font",top_only=true,menu_data=gui.menu_datas.font_size},
 --[[
