@@ -76,12 +76,19 @@ function wmaster.setup(widget,def)
 
 -- built in color themes, 
 
-	master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, alpha=1, grid_size=40, text_size=20, }
-	master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, alpha=1, grid_size=40, text_size=20, }
+	master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, alpha=1, grid_size=40, text_size=24, }
+	master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, alpha=1, grid_size=40, text_size=24, }
 
 -- global GUI color theme
 	master.theme={}
-	for n,v in pairs(master.color_theme_dark) do master.theme[n]=v end
+	if def.theme=="bright" then
+		for n,v in pairs(master.color_theme_bright) do master.theme[n]=v end
+	else
+		for n,v in pairs(master.color_theme_dark) do master.theme[n]=v end
+	end
+	if def.text_size then master.theme.text_size=def.text_size end
+	if def.grid_size then master.theme.grid_size=def.grid_size end
+	
 
 
 -- get a color from a theme and optionally apply a tint

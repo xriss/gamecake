@@ -1,4 +1,5 @@
 id,user,text,help,key
+
 file_quit,,Quit,Close application and Quit.,Ctrl+Q
 file_open,,Open,Open a new file.,Ctrl+O
 file_close,,Close,Close this file.,Ctrl+W
@@ -6,9 +7,19 @@ file_save,,Save,Save this file.,Ctrl+S
 file_saveall,,Save all,Save all modified files.,Ctrl+Shift+S
 file_saveas,,Save as...,Show file save requester.,Alt+Ctrl+S
 file_new,,New,Create a new file.,Ctrl+N
+
 select_all,,Select All,Select all text.,Ctrl+A
+
 history_redo,,Redo,Redo last action.,Ctrl+Y
 history_undo,,Undo,Undo last action.,Ctrl+Z
+
 clip_cut,,Cut,Cut text.,Ctrl+X
 clip_copy,,Copy,Copy text.,Ctrl+C
 clip_paste,,Paste,Paste text.,Ctrl+V
+
+theme_24bright,,Bright 24px,Set theme to Bright 24px,
+theme_24dark,,Dark 24px,Set theme to Dark 24px,
+theme_40bright,,Bright 40px,Set theme to Bright 40px,
+theme_40dark,,Dark 40px,Set theme to Dark 40px,
+theme_64bright,,Bright 64px,Set theme to Bright 64px,
+theme_64dark,,Dark 64px,Set theme to Dark 64px,

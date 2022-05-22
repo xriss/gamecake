@@ -36,7 +36,9 @@ M.bake=function(oven,gui)
 	local docs=oven.rebake(oven.modname..".docs")
 	local show=oven.rebake(oven.modname..".show")
 
-	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=24,grid_size=32,skin=0})
+	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=16,grid_size=24,skin=0,theme="dark"})
+--	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=24,grid_size=40,skin=0})
+--	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=48,grid_size=64,skin=0})
 
 gui.loaded=false
 gui.loads=function()
