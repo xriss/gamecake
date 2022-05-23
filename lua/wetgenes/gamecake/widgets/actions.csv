@@ -17,9 +17,9 @@ clip_cut,,Cut,Cut text.,Ctrl+X
 clip_copy,,Copy,Copy text.,Ctrl+C
 clip_paste,,Paste,Paste text.,Ctrl+V
 
-theme_24bright,,Bright 24px,Set theme to Bright 24px,
-theme_24dark,,Dark 24px,Set theme to Dark 24px,
-theme_40bright,,Bright 40px,Set theme to Bright 40px,
-theme_40dark,,Dark 40px,Set theme to Dark 40px,
-theme_64bright,,Bright 64px,Set theme to Bright 64px,
-theme_64dark,,Dark 64px,Set theme to Dark 64px,
+theme_bright_small,,Bright Small,Set theme to Bright and Small,
+theme_bright_medium,,Bright Medium,Set theme to Bright and Medium,
+theme_bright_large,,Bright Large,Set theme to Bright and Large,
+theme_dark_small,,Dark Small,Set theme to Dark and Small,
+theme_dark_medium,,Dark Medium,Set theme to Dark and Medium,
+theme_dark_large,,Dark Large,Set theme to Dark and Large,

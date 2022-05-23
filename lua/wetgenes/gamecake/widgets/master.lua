@@ -72,24 +72,25 @@ function wmaster.setup(widget,def)
 	master.datas=master.datas or wdatas.new_datas({master=master})
 	master.new_data=function(dat) return master.datas.new_data(dat) end
 
+	function master.set_theme(master,def)
 
+	-- built in color themes, 
 
--- built in color themes, 
+		master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, alpha=1, grid_size=40, text_size=24, name="bright", }
+		master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, alpha=1, grid_size=40, text_size=24, name="dark",   }
 
-	master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, alpha=1, grid_size=40, text_size=24, }
-	master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, alpha=1, grid_size=40, text_size=24, }
+	-- global GUI color theme
+		master.theme={}
+		if def.theme=="bright" then
+			for n,v in pairs(master.color_theme_bright) do master.theme[n]=v end
+		else
+			for n,v in pairs(master.color_theme_dark) do master.theme[n]=v end
+		end
+		if def.text_size then master.theme.text_size=def.text_size end master.text_size=master.theme.text_size
+		if def.grid_size then master.theme.grid_size=def.grid_size end master.grid_size=master.theme.grid_size
 
--- global GUI color theme
-	master.theme={}
-	if def.theme=="bright" then
-		for n,v in pairs(master.color_theme_bright) do master.theme[n]=v end
-	else
-		for n,v in pairs(master.color_theme_dark) do master.theme[n]=v end
 	end
-	if def.text_size then master.theme.text_size=def.text_size end
-	if def.grid_size then master.theme.grid_size=def.grid_size end
-	
-
+	master:set_theme(def)
 
 -- get a color from a theme and optionally apply a tint
 	function master.get_color(val,tint)

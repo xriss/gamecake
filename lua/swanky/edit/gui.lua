@@ -222,10 +222,26 @@ function gui.action(m)
 			cancel=function()end,
 		})
 
-	elseif m.id=="theme_24bright" then
-
+	elseif m.id=="theme_bright_small" then
+		gui.theme({theme="bright",grid_size=24, text_size=16})
+	elseif m.id=="theme_bright_medium" then
+		gui.theme({theme="bright",grid_size=40, text_size=24})
+	elseif m.id=="theme_bright_large" then
+		gui.theme({theme="bright",grid_size=64, text_size=48})
+	elseif m.id=="theme_dark_small" then
+		gui.theme({theme="dark",grid_size=24, text_size=16})
+	elseif m.id=="theme_dark_medium" then
+		gui.theme({theme="dark",grid_size=40, text_size=24})
+	elseif m.id=="theme_dark_large" then
+		gui.theme({theme="dark",grid_size=64, text_size=48})
 	end
 
+end
+
+function gui.theme(def)
+		gui.master:clean_all()
+		gui.master:set_theme(def)
+		gui.plan_windows(gui.master)
 end
 
 function gui.hooks(act,w,dat)
@@ -511,18 +527,18 @@ local lay=
 				{id="file_saveas"},
 				{id="file_saveall"},
 				{id="menu_theme",text="Theme",menu_data={
-					{id="theme_24bright"},
-					{id="theme_24dark"},
-					{id="theme_40bright"},
-					{id="theme_40dark"},
-					{id="theme_64bright"},
-					{id="theme_64dark"},
+					{id="theme_dark_small"},
+					{id="theme_dark_medium"},
+					{id="theme_dark_large"},
+					{id="theme_bright_small"},
+					{id="theme_bright_medium"},
+					{id="theme_bright_large"},
 				}},
 				{id="file_quit"},
 			}},
-			{id="menu_window",text="Windows",top_menu=true,menu_data={
-				{id="dialog",user="1",text="Dialogue 1"},
-			}},
+--			{id="menu_window",text="Windows",top_menu=true,menu_data={
+--				{id="dialog",user="1",text="Dialogue 1"},
+--			}},
 			{id="menu_edit",text="Edit",top_menu=true,menu_data={
 				{id="clip_copy"},
 				{id="clip_cut"},
@@ -530,7 +546,7 @@ local lay=
 				{id="history_undo"},
 				{id="history_redo"},
 			}},
-			{id="menu_font",text="Font",top_menu=true,menu_data=gui.menu_datas.font_size},
+--			{id="menu_font",text="Font",top_menu=true,menu_data=gui.menu_datas.font_size},
 --[[
 			{id="topmenu",text="Run",top_menu=true,menu_data={
 				{id="run",user="hide",text="Hide"},
@@ -573,9 +589,12 @@ local lay=
 		end
 
 -- font resize
-		gui.font_size=1.25
+		gui.font_size=0
 		gui.master.ids.texteditor.hook_resize=function(it)
 			local ss=gui.font_size
+			if ss==0 then
+				ss=gui.master.text_size/16
+			end
 			it.smode="topleft"
 			it.hx=math.ceil(it.parent.hx/ss)
 			it.hy=math.ceil(it.parent.hy/ss)

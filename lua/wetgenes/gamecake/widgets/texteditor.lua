@@ -964,16 +964,16 @@ function wtexteditor.setup(widget,def)
 			0xff000000,	-- 	0,14
 			0xff000000,	-- 	0,15
 		},
-		lite={
-			0xffaaaaaa,0xff444444,	-- text			0,1
-			0xff777777,0xff999999,	-- gutter		2,3
-			0xffbbbbbb,0xff333333,	-- hilite		4,5
-			0xffaa6622,	-- keyword		0,6
-			0xffcc9922,	-- global		0,7
-			0xff777777,	-- comment		0,8
-			0xff559922,	-- string		0,9
-			0xff4488bb,	-- number		0,10
-			0xff666666,	-- punctuation	0,11
+		bright={
+			0xffaaaaaa,0xff000000,	-- text			0,1
+			0xff999999,0xff666666,	-- gutter		2,3
+			0xffbbbbbb,0xff222222,	-- hilite		4,5
+			0xff772200,	-- keyword		0,6
+			0xffaa6600,	-- global		0,7
+			0xff444444,	-- comment		0,8
+			0xff226600,	-- string		0,9
+			0xff006688,	-- number		0,10
+			0xff111111,	-- punctuation	0,11
 			0xff000000,	-- 	0,12
 			0xff000000,	-- 	0,13
 			0xff000000,	-- 	0,14
@@ -982,7 +982,13 @@ function wtexteditor.setup(widget,def)
 	}
 
 	local p={}
-	for i,v in ipairs(theme.dark) do
+
+	local t=theme.dark
+	if widget.master.theme and widget.master.theme.name and theme[widget.master.theme.name] then
+		t=theme[widget.master.theme.name]
+	end
+	
+	for i,v in ipairs(t) do
 		local l=#p
 		p[l+1],p[l+2],p[l+3],p[l+4]=pack.argb_pmb4(v)
 	end
