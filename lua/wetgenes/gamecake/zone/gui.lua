@@ -215,7 +215,7 @@ gui.plan_windows=function()
 		menu_px=0,menu_py=1,
 		hooks=gui.hooks,
 		inherit=true,
-		{id="topmenu",text=">",top_only=true,menu_data=function() return gui.screen:window_menu() end}, -- list all windows
+		{id="topmenu",text=">",top_menu=true,menu_data=function() return gui.screen:window_menu() end}, -- list all windows
 	}})
 
 

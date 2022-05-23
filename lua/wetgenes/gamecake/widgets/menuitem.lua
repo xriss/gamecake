@@ -88,7 +88,7 @@ function wmenuitem.menu_add(widget,opts)
 			for i,v in ipairs(md) do
 				if type(v.menu_data)=="table" then -- copy string values down into sub menu tables
 					for n,m in pairs(md) do
-						if type(n)=="string" then
+						if type(n)=="string" then -- skip top_* flags
 							if "top_"~=string.sub(1,4) then
 								v.menu_data[n]=v.menu_data[n] or m
 							end
@@ -184,7 +184,7 @@ local showmenu=function()
 
 	if widget.menu_data then -- add a sub menu using this data
 
-		if widget.top_only then -- hide all other menus first
+		if widget.top_menu then -- hide all other menus first
 			widget.master:call_descendents(function(w)
 				if w.menu then
 					w.menu.hidden=true
@@ -305,9 +305,14 @@ function wmenuitem.setup(widget,def)
 
 	widget.menu_add=wmenuitem.menu_add
 
-	widget.menu_px=def.menu_px or 1 -- where to display any sub menu
-	widget.menu_py=def.menu_py or 0
-
+	if def.top_menu then -- part of top menu bar
+		widget.menu_px=def.menu_px or 0 -- where to display any sub menu
+		widget.menu_py=def.menu_py or 1
+	else
+		widget.menu_px=def.menu_px or 1 -- where to display any sub menu
+		widget.menu_py=def.menu_py or 0
+	end
+	
 	widget.menu_data=def.menu_data
 
 	return widget

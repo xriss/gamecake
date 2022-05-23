@@ -539,7 +539,7 @@ function wwindow.setup(window,def)
 	-- use this to recreate the magic top left windows icon/menu anywhere you want
 	window.win_menu_def={
 			class="menuitem",
-			top_only=true,
+			topmenu=true,
 			px=0,
 			py=0,
 			hx=ss,

@@ -222,6 +222,8 @@ function gui.action(m)
 			cancel=function()end,
 		})
 
+	elseif m.id=="theme_24bright" then
+
 	end
 
 end
@@ -487,6 +489,7 @@ local lay=
 
 		gui.menu_datas={
 			font_size={
+				{id="font_size",user=0.00,text="Font Size from theme"},
 				{id="font_size",user=1.00,text="Font Size 16px"},
 				{id="font_size",user=1.25,text="Font Size 20px"},
 				{id="font_size",user=1.50,text="Font Size 24px"},
@@ -496,32 +499,40 @@ local lay=
 		}
 
 		widgets_menuitem.menu_add(gui.master.ids.menubar,{top=gui.master.ids.menubar,menu_data={
-			menu_px=0,menu_py=1,
+--			menu_px=0,menu_py=1,
 	--		func_text=func_text,
 			hooks=gui.hooks,
 			inherit=true,
 
-			{id="topmenu",text="File",top_only=true,menu_data={
+			{id="menu_file",text="File",top_menu=true,menu_data={
 				{id="file_open"},
 				{id="file_close"},
 				{id="file_save"},
 				{id="file_saveas"},
 				{id="file_saveall"},
+				{id="menu_theme",text="Theme",menu_data={
+					{id="theme_24bright"},
+					{id="theme_24dark"},
+					{id="theme_40bright"},
+					{id="theme_40dark"},
+					{id="theme_64bright"},
+					{id="theme_64dark"},
+				}},
 				{id="file_quit"},
 			}},
-			{id="topmenu",text="Windows",top_only=true,menu_data={
+			{id="menu_window",text="Windows",top_menu=true,menu_data={
 				{id="dialog",user="1",text="Dialogue 1"},
 			}},
-			{id="topmenu",text="Edit",top_only=true,menu_data={
+			{id="menu_edit",text="Edit",top_menu=true,menu_data={
 				{id="clip_copy"},
 				{id="clip_cut"},
 				{id="clip_paste"},
 				{id="history_undo"},
 				{id="history_redo"},
 			}},
-			{id="topmenu",text="Font",top_only=true,menu_data=gui.menu_datas.font_size},
+			{id="menu_font",text="Font",top_menu=true,menu_data=gui.menu_datas.font_size},
 --[[
-			{id="topmenu",text="Run",top_only=true,menu_data={
+			{id="topmenu",text="Run",top_menu=true,menu_data={
 				{id="run",user="hide",text="Hide"},
 				{id="run",user="glsl",text="GLSL"},
 			}},
