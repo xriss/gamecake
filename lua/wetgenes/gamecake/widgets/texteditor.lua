@@ -965,15 +965,15 @@ function wtexteditor.setup(widget,def)
 			0xff000000,	-- 	0,15
 		},
 		bright={
-			0xffaaaaaa,0xff000000,	-- text			0,1
-			0xff999999,0xff666666,	-- gutter		2,3
-			0xffbbbbbb,0xff222222,	-- hilite		4,5
-			0xff772200,	-- keyword		0,6
-			0xffaa6600,	-- global		0,7
-			0xff444444,	-- comment		0,8
-			0xff226600,	-- string		0,9
-			0xff006688,	-- number		0,10
-			0xff111111,	-- punctuation	0,11
+			0xffcccccc,0xff000000,	-- text			0,1
+			0xffbbbbbb,0xff666666,	-- gutter		2,3
+			0xffdddddd,0xff000000,	-- hilite		4,5
+			0xffff0000,	-- keyword		0,6
+			0xffff6600,	-- global		0,7
+			0xff666666,	-- comment		0,8
+			0xff44cc00,	-- string		0,9
+			0xff0044ff,	-- number		0,10
+			0xff222222,	-- punctuation	0,11
 			0xff000000,	-- 	0,12
 			0xff000000,	-- 	0,13
 			0xff000000,	-- 	0,14
