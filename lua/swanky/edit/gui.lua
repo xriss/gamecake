@@ -220,12 +220,6 @@ function gui.action(m)
 			cancel=function()end,
 		})
 
-	elseif m.id=="select_all" then
-
-		docs.doc.txt.mark(0,0,docs.doc.txt.hy+1,0)
-		gui.master.ids.texteditor.txt_dirty=true
-
-
 	elseif m.id=="theme_bright_small" then
 		gui.theme({theme="bright",grid_size=24, text_size=16})
 	elseif m.id=="theme_bright_medium" then
@@ -550,6 +544,7 @@ local lay=
 				{id="clip_copy"},
 				{id="clip_cut"},
 				{id="clip_paste"},
+				{id="clip_cutline"},
 				{id="history_undo"},
 				{id="history_redo"},
 			}},

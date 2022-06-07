@@ -596,12 +596,12 @@ function wtexteditor.msg(pan,m)
 		if m.action==1 or m.action==0 then -- allow repeats
 			if m.id=="clip_copy" then
 				if m.action==1 then -- first press only
-					local s=txt.undo.copy()
+					local s=txt.undo.copy() or ""
 					if s then wwin.set_clipboard(s) end
 				end
 			elseif m.id=="clip_cut" then
 				if m.action==1 then -- first press only
-					local s=txt.undo.cut()
+					local s=txt.undo.cut() or ""
 					if s then wwin.set_clipboard(s) end
 					texteditor:scroll_to_view()
 				end
@@ -613,6 +613,19 @@ function wtexteditor.msg(pan,m)
 				txt.undo.undo()
 			elseif m.id=="history_redo" then
 				txt.undo.redo()
+			elseif m.id=="select_all" then
+				txt.mark(0,0,txt.hy+1,0)
+				texteditor.txt_dirty=true
+				texteditor:scroll_to_view()
+			elseif m.id=="clip_cutline" then
+				txt.mark(txt.cy,0,txt.cy+1,0)
+				local u=wwin.get_clipboard()
+				local s=txt.undo.cut()
+				if u and u:sub(-1)=="\n" then -- merge full lines if we hit k repeatedly
+					s=u..s
+				end
+				if s then wwin.set_clipboard(s) end
+				texteditor:scroll_to_view()
 			end
 		end
 	end
