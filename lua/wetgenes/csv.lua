@@ -120,6 +120,23 @@ wcsv.parse=function(text,opts)
 	
 	for idx=1,#lines do
 		local line=wstring.split(lines[idx],opts.seperator)
+		if opts.seperator=="," then
+			for i=#line,2,-1 do
+				local c=line[i]
+				local _,ca=string.find(c,"^\"+")
+				local cb,_=string.find(c,"\"+$")
+				ca=ca or 0
+				cb=cb and 1+#c-cb or 0
+				if cb%2==1 then
+					if ca%2==1 then
+						-- this cell is enclosed in "
+					else
+						line[i-1]=line[i-1]..","..c -- merge cells as this , should be ignored
+						table.remove(line,i)
+					end
+				end
+			end
+		end
 		for i=1,#line do
 			local cell=line[i]
 			if opts.seperator~="\t" then

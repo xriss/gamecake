@@ -1,4 +1,4 @@
-id,user,text,help,key
+id,user,text,help,key,json
 
 file_quit,,Quit,Close application and Quit.,Ctrl+Q
 file_open,,Open,Open a new file.,Ctrl+O
@@ -17,9 +17,11 @@ clip_cut,,Cut,Cut text.,Ctrl+X
 clip_copy,,Copy,Copy text.,Ctrl+C
 clip_paste,,Paste,Paste text.,Ctrl+V
 
-theme_bright_small,,Bright Small,Set theme to Bright and Small,
-theme_bright_medium,,Bright Medium,Set theme to Bright and Medium,
-theme_bright_large,,Bright Large,Set theme to Bright and Large,
-theme_dark_small,,Dark Small,Set theme to Dark and Small,
-theme_dark_medium,,Dark Medium,Set theme to Dark and Medium,
-theme_dark_large,,Dark Large,Set theme to Dark and Large,
+theme_bright_small,,Bright Small,Set theme to Bright and Small,,"{theme=""bright"",grid_size=24,text_size=16}"
+theme_bright_medium,,Bright Medium,Set theme to Bright and Medium,,"{theme=""bright"",grid_size=40,text_size=24}"
+theme_bright_large,,Bright Large,Set theme to Bright and Large,,"{theme=""bright"",grid_size=64,text_size=48}"
+theme_dark_small,,Dark Small,Set theme to Dark and Small,,"{theme=""dark"",grid_size=24,text_size=16}"
+theme_dark_medium,,Dark Medium,Set theme to Dark and Medium,,"{theme=""dark"",grid_size=40,text_size=24}"
+theme_dark_large,,Dark Large,Set theme to Dark and Large,,"{theme=""dark"",grid_size=64,text_size=48}"
+
+

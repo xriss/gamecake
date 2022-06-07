@@ -18,6 +18,7 @@ local bit=require("bit")
 local wstr=require("wetgenes.string")
 local dprint=function(a) print(wstr.dump(a)) end
 
+local wjson=require("wetgenes.json")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -705,6 +706,11 @@ function wmaster.setup(widget,def)
 							end
 						end
 					end
+				end
+				if v.json then -- parse json data chunk
+--					print(v.json)
+					v.json=wjson.decode(v.json)
+--					dump(v)
 				end
 			end
 		end
