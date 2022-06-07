@@ -2150,7 +2150,7 @@
    "body": "<p>Build csv data into a string from a simple table of lines where each \nline is a table of cells.</p>\n<pre><code>text = wcsv.build(lines)\ntext = wcsv.build(lines,opts)\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/csv.lua",
-   "line": 138,
+   "line": 155,
    "name": "lua.wetgenes.csv.build",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua"
   },
@@ -2174,7 +2174,7 @@
    "body": "<p>Use the first line to map all other lines into named keys, an empty \nstring will map to nil. This will return an array of items that is \nsmaller than the array of lines by at least one as we also trim \ntrailing empty objects.</p>\n<pre><code>items = wcsv.map(lines)\nitems = wcsv.map(wcsv.parse(text))\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/csv.lua",
-   "line": 173,
+   "line": 190,
    "name": "lua.wetgenes.csv.map",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua"
   },
