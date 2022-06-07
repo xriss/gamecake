@@ -36,9 +36,7 @@ M.bake=function(oven,gui)
 	local docs=oven.rebake(oven.modname..".docs")
 	local show=oven.rebake(oven.modname..".show")
 
-	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=16,grid_size=24,skin=0,theme="dark"})
---	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=24,grid_size=40,skin=0})
---	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=48,grid_size=64,skin=0})
+	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,skin=0,theme="dark",grid_size=40,text_size=24})
 
 gui.loaded=false
 gui.loads=function()
@@ -221,6 +219,12 @@ function gui.action(m)
 			end,
 			cancel=function()end,
 		})
+
+	elseif m.id=="select_all" then
+
+		docs.doc.txt.mark(0,0,docs.doc.txt.hy+1,0)
+		gui.master.ids.texteditor.txt_dirty=true
+
 
 	elseif m.id=="theme_bright_small" then
 		gui.theme({theme="bright",grid_size=24, text_size=16})
@@ -503,6 +507,7 @@ local lay=
 
 		gui.screen=gui.master:add(lay)
 
+--[[
 		gui.menu_datas={
 			font_size={
 				{id="font_size",user=0.00,text="Font Size from theme"},
@@ -513,6 +518,7 @@ local lay=
 				{id="font_size",user=2.00,text="Font Size 32px"},
 			},
 		}
+]]
 
 		widgets_menuitem.menu_add(gui.master.ids.menubar,{top=gui.master.ids.menubar,menu_data={
 --			menu_px=0,menu_py=1,
@@ -540,6 +546,7 @@ local lay=
 --				{id="dialog",user="1",text="Dialogue 1"},
 --			}},
 			{id="menu_edit",text="Edit",top_menu=true,menu_data={
+				{id="select_all"},
 				{id="clip_copy"},
 				{id="clip_cut"},
 				{id="clip_paste"},
