@@ -36,7 +36,8 @@ M.bake=function(oven,gui)
 	local docs=oven.rebake(oven.modname..".docs")
 	local show=oven.rebake(oven.modname..".show")
 
-	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,skin=0,theme="dark",grid_size=40,text_size=24})
+	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,skin=0})
+	gui.master:set_theme(gui.master.actions.theme_dark_medium.json)
 
 gui.loaded=false
 gui.loads=function()
@@ -220,18 +221,9 @@ function gui.action(m)
 			cancel=function()end,
 		})
 
-	elseif m.id=="theme_bright_small" then
-		gui.theme({theme="bright",grid_size=24, text_size=16})
-	elseif m.id=="theme_bright_medium" then
-		gui.theme({theme="bright",grid_size=40, text_size=24})
-	elseif m.id=="theme_bright_large" then
-		gui.theme({theme="bright",grid_size=64, text_size=48})
-	elseif m.id=="theme_dark_small" then
-		gui.theme({theme="dark",grid_size=24, text_size=16})
-	elseif m.id=="theme_dark_medium" then
-		gui.theme({theme="dark",grid_size=40, text_size=24})
-	elseif m.id=="theme_dark_large" then
-		gui.theme({theme="dark",grid_size=64, text_size=48})
+	elseif m.id:sub(1,6)=="theme_" then -- all themes
+		local a=gui.master.actions[m.id]
+		if a then gui.theme(a.json) end
 	end
 
 end
