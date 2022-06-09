@@ -36,8 +36,11 @@ M.bake=function(oven,gui)
 	local docs=oven.rebake(oven.modname..".docs")
 	local show=oven.rebake(oven.modname..".show")
 
+	local ssettings=oven.rebake("wetgenes.gamecake.spew.settings")
+
 	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,skin=0})
-	gui.master:set_theme(gui.master.actions.theme_dark_medium.json)
+	local gui_theme=ssettings.get("gui_theme","theme_dark_medium")
+	gui.master:set_theme(gui.master.actions[gui_theme].json)
 
 gui.loaded=false
 gui.loads=function()
@@ -46,7 +49,7 @@ gui.loads=function()
 
 	local filename="lua/swanky/edit/actions.csv"
 	local text=assert(wzips.readfile(filename),"file not found: "..filename)
---	gui.master.load_actions(wcsv.map(wcsv.parse(text)))
+	gui.master.load_actions(wcsv.map(wcsv.parse(text)))
 
 end
 
@@ -223,7 +226,10 @@ function gui.action(m)
 
 	elseif m.id:sub(1,6)=="theme_" then -- all themes
 		local a=gui.master.actions[m.id]
-		if a then gui.theme(a.json) end
+		if a then
+			gui.theme(a.json)
+			ssettings.set("gui_theme",m.id)
+		end
 	end
 
 end
