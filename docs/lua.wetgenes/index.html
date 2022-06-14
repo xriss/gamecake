@@ -4442,12 +4442,29 @@ local spew=require(&quot;wetgenes.spew&quot;).connect(oven.tasks,host,port)
 <p>Create task and thread connection to the host. host and port 
 default to wetgenes.com and 5223 so can be left blank unless you want 
 to connect to a local host for debugging.</p>
+<p>There are now 3 ways to handle msgs</p>
+<pre><code>spew.push(msg)
+</code></pre>
+<p>To send a msg</p>
+<pre><code>local msg,s=spew.pull()
+</code></pre>
+<p>To receive a message, will return nil if no messages available. The 
+second return value is the input string packet for this decoded 
+message.</p>
+<pre><code>spew.hook=function(msg,s) print(msg) end
+</code></pre>
+<p>Set a hook functions to auto pull all available messages durring tasks 
+update. Note that if you do this spew.pull() will no longer work as all 
+messages are auto pulled and sent to this hook function.</p>
+<p>Note when receiving a msg you must not alter or cache the table you 
+are given as it is internal data and is reused. You must duplicate it 
+if you want to keep it arround.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.spew.test">lua.wetgenes.spew.test</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua#L145">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua#L164">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua</a></div>
 <div><p>test</p>
 </div>
 </div>
