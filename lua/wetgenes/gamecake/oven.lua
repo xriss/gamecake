@@ -75,14 +75,14 @@ function M.bake(opts)
 	oven.tasks:add_thread({
 		count=8,
 		id="http",
-		code=require("wetgenes.tasks").http_code,
+		code=oven.tasks.http_code,
 	})
 -- and sqlite requests to a default database
 	oven.tasks:add_thread({
 		count=1,
 		id="sqlite",
 		globals={sqlite_filename=wwin.files_prefix.."recipes.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
-		code=require("wetgenes.tasks").sqlite_code,
+		code=oven.tasks.sqlite_code,
 	})
 -- so we can run off thread code and coroutines
 

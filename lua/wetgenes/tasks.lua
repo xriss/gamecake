@@ -490,7 +490,7 @@ end
 A basic function to handle http memos.
 
 ]]
-M.http_code=function(linda,task_id,task_idx)
+M.tasks_functions.http_code=function(linda,task_id,task_idx)
 
 	local js_eval -- function call into javascript if we are an emcc build
 	do
@@ -667,7 +667,7 @@ more than one thread per database as they will just fight over file
 access.
 
 ]]
-M.sqlite_code=function(linda,task_id,task_idx)
+M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 
 	local sqlite3 = lanes.require("lsqlite3")
 
@@ -798,11 +798,86 @@ end
 
 
 
---[[#lua.wetgenes.tasks.test
+--[[#lua.wetgenes.tasks.client_code
 
-test
+A basic function to handle (web)socket client connection.
 
 ]]
+M.tasks_functions.client_code=function(linda,task_id,task_idx)
+
+	local socket = lanes.require("socket")
+	local err
+	local client
+	if client_host and client_port then -- auto open a client connection
+		client , err = socket.connect(client_host,client_port)
+		if client then client:settimeout(0.00001) end
+	end
+
+	local send=function(memo)
+
+		local ret={}
+	
+		if memo.cmd then -- this is a special cmd eg to close or open a socket
+			if     memo.cmd=="connect" and not client then
+				client , err = socket.connect(memo.host,memo.port)
+				if client then client:settimeout(0.00001) end
+				if err then		ret.error=err
+				else			ret.result=true
+				end
+			elseif memo.cmd=="close" and client then
+				client:close()
+				client=nil
+				ret.result=true
+			end
+		end
+
+		if memo.data then -- something to send
+			if not client then return {error=err or true} end
+			client:send(memo.data)
+		end
+		
+		if client then -- try and read some data from server
+			local part,e,part2=client:receive("*a")
+			if e=="timeout" then err=nil part=part or part2 end -- ignore timeouts, they are not errors just partial data
+			if part~="" then ret.data=part end
+			if e then ret.error=e end
+		end
+		
+		return ret
+	end
+	
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+		
+		if memo then
+			local ok,ret=pcall(function() return send(memo) end) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
+		end
+
+	end
+	
+end
+
+--[[#lua.wetgenes.tasks.client
+
+Send and/or recieve a (web)socket client memo result.
+
+]]
+M.tasks_functions.client=function(tasks,memo)
+
+	if type(memo) == "string" then memo={data=memo} end
+	memo=memo or {}
+	memo.task=memo.task or "client"
+	
+	tasks:receive(memo)
+
+	if memo.error then return nil,memo.error end
+	return memo.result
+end
+
+
 M.test=function()
 
 	print("testing tasks")
@@ -812,14 +887,14 @@ M.test=function()
 	tasks:add_thread({
 		count=8,
 		id="http",
-		code=M.http_code,
+		code=tasks.http_code,
 	})
 
 	tasks:add_thread({
 		count=1,
 		id="sqlite",
 		globals={sqlite_filename="test.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
-		code=M.sqlite_code,
+		code=tasks.sqlite_code,
 	})
 
 	local task=tasks:add_task({
