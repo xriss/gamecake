@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 516,
+   "count": 520,
    "name": "lua"
   },
   {
@@ -54,7 +54,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 510,
+   "count": 514,
    "name": "lua.wetgenes"
   },
   {
@@ -1318,6 +1318,18 @@
    "name": "lua.wetgenes.snippets"
   },
   {
+   "count": 3,
+   "name": "lua.wetgenes.spew"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.spew.connect"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.spew.test"
+  },
+  {
    "count": 149,
    "name": "lua.wetgenes.tardis"
   },
@@ -1914,7 +1926,7 @@
    "name": "lua.wetgenes.tardis.v4.to_v3"
   },
   {
-   "count": 21,
+   "count": 22,
    "name": "lua.wetgenes.tasks"
   },
   {
@@ -1932,6 +1944,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.add_thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.client"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.client_code"
   },
   {
    "count": 1,
@@ -1988,10 +2008,6 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.sqlite_code"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks.test"
   },
   {
    "count": 1,
@@ -2140,7 +2156,7 @@
  "_list": [
   {
    "body": "<pre><code>local tasks=require(&quot;wetgenes.tasks&quot;).create()\n</code></pre>\n<p>Manage tasks that should be performed on seperate threads so as not to block the main thread.</p>\n<p>Manage coroutines that can then easily call into these threads by yeilding</p>\n",
-   "count": 21,
+   "count": 22,
    "file": "../lua/wetgenes/tasks.lua",
    "line": 9,
    "name": "lua.wetgenes.tasks",
@@ -2176,6 +2192,22 @@
    "file": "../lua/wetgenes/tasks.lua",
    "line": 99,
    "name": "lua.wetgenes.tasks.add_thread",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
+  },
+  {
+   "body": "<p>Send and/or recieve a (web)socket client memo result.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tasks.lua",
+   "line": 863,
+   "name": "lua.wetgenes.tasks.client",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
+  },
+  {
+   "body": "<p>A basic function to handle (web)socket client connection.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tasks.lua",
+   "line": 801,
+   "name": "lua.wetgenes.tasks.client_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
   {
@@ -2288,14 +2320,6 @@
    "file": "../lua/wetgenes/tasks.lua",
    "line": 661,
    "name": "lua.wetgenes.tasks.sqlite_code",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
-  },
-  {
-   "body": "<p>test</p>\n",
-   "count": 1,
-   "file": "../lua/wetgenes/tasks.lua",
-   "line": 801,
-   "name": "lua.wetgenes.tasks.test",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
   {

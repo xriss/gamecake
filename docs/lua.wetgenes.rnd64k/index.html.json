@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 516,
+   "count": 520,
    "name": "lua"
   },
   {
@@ -54,7 +54,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 510,
+   "count": 514,
    "name": "lua.wetgenes"
   },
   {
@@ -1318,6 +1318,18 @@
    "name": "lua.wetgenes.snippets"
   },
   {
+   "count": 3,
+   "name": "lua.wetgenes.spew"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.spew.connect"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.spew.test"
+  },
+  {
    "count": 149,
    "name": "lua.wetgenes.tardis"
   },
@@ -1914,7 +1926,7 @@
    "name": "lua.wetgenes.tardis.v4.to_v3"
   },
   {
-   "count": 21,
+   "count": 22,
    "name": "lua.wetgenes.tasks"
   },
   {
@@ -1932,6 +1944,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.add_thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.client"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.client_code"
   },
   {
    "count": 1,
@@ -1988,10 +2008,6 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.sqlite_code"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks.test"
   },
   {
    "count": 1,

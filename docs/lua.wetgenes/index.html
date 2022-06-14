@@ -347,7 +347,10 @@
 <a class="sub" href="../../docs/lua.wetgenes.safecall"><span>/lua.wetgenes.safecall</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.safewrap"><span>/lua.wetgenes.safewrap</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.set_env"><span>/lua.wetgenes.set_env</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.snippets"><span>/lua.wetgenes.snippets</span></a><a class="par" href="../../docs/lua.wetgenes.tardis"><span>/lua.wetgenes.tardis</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.snippets"><span>/lua.wetgenes.snippets</span></a><a class="par" href="../../docs/lua.wetgenes.spew"><span>/lua.wetgenes.spew</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.spew.connect"><span>/lua.wetgenes.spew.connect</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.spew.test"><span>/lua.wetgenes.spew.test</span></a><a class="par" href="../../docs/lua.wetgenes.tardis"><span>/lua.wetgenes.tardis</span></a>
 <a class="par" href="../../docs/lua.wetgenes.tardis.array"><span>/lua.wetgenes.tardis.array</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.tardis.array.__add"><span>/lua.wetgenes.tardis.array.__add</span></a>
@@ -502,6 +505,8 @@
 <a class="sub" href="../../docs/lua.wetgenes.tasks.add_memo"><span>/lua.wetgenes.tasks.add_memo</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.add_task"><span>/lua.wetgenes.tasks.add_task</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.add_thread"><span>/lua.wetgenes.tasks.add_thread</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tasks.client"><span>/lua.wetgenes.tasks.client</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tasks.client_code"><span>/lua.wetgenes.tasks.client_code</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.create"><span>/lua.wetgenes.tasks.create</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.create_colinda"><span>/lua.wetgenes.tasks.create_colinda</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.del_id"><span>/lua.wetgenes.tasks.del_id</span></a>
@@ -516,7 +521,6 @@
 <a class="sub" href="../../docs/lua.wetgenes.tasks.send"><span>/lua.wetgenes.tasks.send</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.sqlite"><span>/lua.wetgenes.tasks.sqlite</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.sqlite_code"><span>/lua.wetgenes.tasks.sqlite_code</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.tasks.test"><span>/lua.wetgenes.tasks.test</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.update"><span>/lua.wetgenes.tasks.update</span></a><a class="par" href="../../docs/lua.wetgenes.tsv"><span>/lua.wetgenes.tsv</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.tsv.close"><span>/lua.wetgenes.tsv.close</span></a>
@@ -4413,6 +4417,42 @@ used when starting a new module.</p>
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.spew">lua.wetgenes.spew</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua#L9">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua</a></div>
+<div><pre><code>local spew=require(&quot;wetgenes.spew&quot;).connect(oven.tasks)
+</code></pre>
+<p>You must pass in a previously created tasks object that you will be 
+calling update on regually so that our coroutines can run. eg oven.tasks</p>
+<p>Connect and talk to the wetgenes spew server using wetgenes.tasks 
+task for meta state and a thread for lowlevel sockets.</p>
+<p>You push messages in and can pull messages out or, setup a hook 
+function to auto pull and process messages in our coroutine as they are 
+received.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.spew.connect">lua.wetgenes.spew.connect</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua#L30">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua</a></div>
+<div><pre><code>local spew=require(&quot;wetgenes.spew&quot;).connect(oven.tasks)
+local spew=require(&quot;wetgenes.spew&quot;).connect(oven.tasks,host)
+local spew=require(&quot;wetgenes.spew&quot;).connect(oven.tasks,host,port)
+</code></pre>
+<p>You must pass in an active tasks object.</p>
+<p>Create task and thread connection to the host. host and port 
+default to wetgenes.com and 5223 so can be left blank unless you want 
+to connect to a local host for debugging.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.spew.test">lua.wetgenes.spew.test</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua#L145">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua</a></div>
+<div><p>test</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis">lua.wetgenes.tardis</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L26">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><p>Time And Relative Dimensions In Space is of course the perfect name for 
@@ -6198,6 +6238,20 @@ which of the count threads we are (mostly for debugging)</p>
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.tasks.client">lua.wetgenes.tasks.client</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L863">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div><p>Send and/or recieve a (web)socket client memo result.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.tasks.client_code">lua.wetgenes.tasks.client_code</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L801">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div><p>A basic function to handle (web)socket client connection.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.create">lua.wetgenes.tasks.create</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L466">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><p>Create a tasks group to contain all associated threads and coroutines 
@@ -6354,13 +6408,6 @@ OK.</p>
 <p>As we are opening an sqlite database here it wont help much to have 
 more than one thread per database as they will just fight over file 
 access.</p>
-</div>
-</div>
-
-<div class="wrap">
-<h1><a href="../../docs/lua.wetgenes.tasks.test">lua.wetgenes.tasks.test</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L801">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
-<div><p>test</p>
 </div>
 </div>
 
