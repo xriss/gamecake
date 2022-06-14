@@ -39,6 +39,28 @@ Create task and thread connection to the host. host and port
 default to wetgenes.com and 5223 so can be left blank unless you want 
 to connect to a local host for debugging.
 
+There are now 3 ways to handle msgs
+
+	spew.push(msg)
+
+To send a msg
+
+	local msg,s=spew.pull()
+
+To receive a message, will return nil if no messages available. The 
+second return value is the input string packet for this decoded 
+message.
+
+	spew.hook=function(msg,s) print(msg) end
+
+Set a hook functions to auto pull all available messages durring tasks 
+update. Note that if you do this spew.pull() will no longer work as all 
+messages are auto pulled and sent to this hook function.
+
+Note when receiving a msg you must not alter or cache the table you 
+are given as it is internal data and is reused. You must duplicate it 
+if you want to keep it arround.
+
 ]]
 
 M.connect=function(tasks,host,port)
@@ -92,7 +114,7 @@ M.connect=function(tasks,host,port)
 				end
 			end
 
-			return spew.pull_state,cs
+			return spew.pull_state,cs -- return the current state and the string that triggered it
 		end
 	end
 
@@ -124,12 +146,9 @@ M.connect=function(tasks,host,port)
 				end
 				
 				if spew.hook then -- we will auto pull
-					repeat
-						local m,s=spew.pull()
-						if m then
-							spew.hook(spew,m,s)
-						end
-					until not m
+					for m,s in spew.pull do
+						spew.hook(spew,m,s)
+					end
 				end
 				
 				coroutine.yield()
