@@ -36,9 +36,11 @@ M.bake=function(oven,gui)
 	local docs=oven.rebake(oven.modname..".docs")
 	local show=oven.rebake(oven.modname..".show")
 
-	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=16,grid_size=24,skin=0,theme="dark"})
---	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=24,grid_size=40,skin=0})
---	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=48,grid_size=64,skin=0})
+	local ssettings=oven.rebake("wetgenes.gamecake.spew.settings")
+
+	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,skin=0})
+	local gui_theme=ssettings.get("gui_theme","theme_dark_medium")
+	gui.master:set_theme(gui.master.actions[gui_theme].json)
 
 gui.loaded=false
 gui.loads=function()
@@ -47,7 +49,7 @@ gui.loads=function()
 
 	local filename="lua/swanky/edit/actions.csv"
 	local text=assert(wzips.readfile(filename),"file not found: "..filename)
---	gui.master.load_actions(wcsv.map(wcsv.parse(text)))
+	gui.master.load_actions(wcsv.map(wcsv.parse(text)))
 
 end
 
@@ -222,18 +224,12 @@ function gui.action(m)
 			cancel=function()end,
 		})
 
-	elseif m.id=="theme_bright_small" then
-		gui.theme({theme="bright",grid_size=24, text_size=16})
-	elseif m.id=="theme_bright_medium" then
-		gui.theme({theme="bright",grid_size=40, text_size=24})
-	elseif m.id=="theme_bright_large" then
-		gui.theme({theme="bright",grid_size=64, text_size=48})
-	elseif m.id=="theme_dark_small" then
-		gui.theme({theme="dark",grid_size=24, text_size=16})
-	elseif m.id=="theme_dark_medium" then
-		gui.theme({theme="dark",grid_size=40, text_size=24})
-	elseif m.id=="theme_dark_large" then
-		gui.theme({theme="dark",grid_size=64, text_size=48})
+	elseif m.id:sub(1,6)=="theme_" then -- all themes
+		local a=gui.master.actions[m.id]
+		if a then
+			gui.theme(a.json)
+			ssettings.set("gui_theme",m.id)
+		end
 	end
 
 end
@@ -503,6 +499,7 @@ local lay=
 
 		gui.screen=gui.master:add(lay)
 
+--[[
 		gui.menu_datas={
 			font_size={
 				{id="font_size",user=0.00,text="Font Size from theme"},
@@ -513,6 +510,7 @@ local lay=
 				{id="font_size",user=2.00,text="Font Size 32px"},
 			},
 		}
+]]
 
 		widgets_menuitem.menu_add(gui.master.ids.menubar,{top=gui.master.ids.menubar,menu_data={
 --			menu_px=0,menu_py=1,
@@ -540,9 +538,11 @@ local lay=
 --				{id="dialog",user="1",text="Dialogue 1"},
 --			}},
 			{id="menu_edit",text="Edit",top_menu=true,menu_data={
+				{id="select_all"},
 				{id="clip_copy"},
 				{id="clip_cut"},
 				{id="clip_paste"},
+				{id="clip_cutline"},
 				{id="history_undo"},
 				{id="history_redo"},
 			}},

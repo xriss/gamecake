@@ -596,12 +596,12 @@ function wtexteditor.msg(pan,m)
 		if m.action==1 or m.action==0 then -- allow repeats
 			if m.id=="clip_copy" then
 				if m.action==1 then -- first press only
-					local s=txt.undo.copy()
+					local s=txt.undo.copy() or ""
 					if s then wwin.set_clipboard(s) end
 				end
 			elseif m.id=="clip_cut" then
 				if m.action==1 then -- first press only
-					local s=txt.undo.cut()
+					local s=txt.undo.cut() or ""
 					if s then wwin.set_clipboard(s) end
 					texteditor:scroll_to_view()
 				end
@@ -613,6 +613,19 @@ function wtexteditor.msg(pan,m)
 				txt.undo.undo()
 			elseif m.id=="history_redo" then
 				txt.undo.redo()
+			elseif m.id=="select_all" then
+				txt.mark(0,0,txt.hy+1,0)
+				texteditor.txt_dirty=true
+				texteditor:scroll_to_view()
+			elseif m.id=="clip_cutline" then
+				txt.mark(txt.cy,0,txt.cy+1,0)
+				local u=wwin.get_clipboard()
+				local s=txt.undo.cut()
+				if u and u:sub(-1)=="\n" then -- merge full lines if we hit k repeatedly
+					s=u..s
+				end
+				if s then wwin.set_clipboard(s) end
+				texteditor:scroll_to_view()
 			end
 		end
 	end
@@ -965,15 +978,15 @@ function wtexteditor.setup(widget,def)
 			0xff000000,	-- 	0,15
 		},
 		bright={
-			0xffaaaaaa,0xff000000,	-- text			0,1
-			0xff999999,0xff666666,	-- gutter		2,3
-			0xffbbbbbb,0xff222222,	-- hilite		4,5
-			0xff772200,	-- keyword		0,6
-			0xffaa6600,	-- global		0,7
-			0xff444444,	-- comment		0,8
-			0xff226600,	-- string		0,9
-			0xff006688,	-- number		0,10
-			0xff111111,	-- punctuation	0,11
+			0xffcccccc,0xff000000,	-- text			0,1
+			0xffbbbbbb,0xff666666,	-- gutter		2,3
+			0xffdddddd,0xff000000,	-- hilite		4,5
+			0xffff0000,	-- keyword		0,6
+			0xffff6600,	-- global		0,7
+			0xff666666,	-- comment		0,8
+			0xff44cc00,	-- string		0,9
+			0xff0044ff,	-- number		0,10
+			0xff222222,	-- punctuation	0,11
 			0xff000000,	-- 	0,12
 			0xff000000,	-- 	0,13
 			0xff000000,	-- 	0,14

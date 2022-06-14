@@ -13,9 +13,12 @@ wmenuitem=wmenuitem or {}
 
 function wmenuitem.update(widget)
 
+
 	if not widget.hidden then
 		if widget.hide_when_not and not widget.master.press then -- must stay over widget unless holding button
-			if not widget:isover(widget.hide_when_not) then
+			if widget:isover(widget.hide_when_not) then
+				widget.over_time=wwin.time()
+			elseif (not widget.over_time) or (wwin.time() >= widget.over_time+0.25) then -- delay hide
 				widget.hidden=true
 				widget.hide_when_not=nil
 				widget.master.request_layout=true
@@ -23,7 +26,7 @@ function wmenuitem.update(widget)
 			end
 		end
 	end
-	
+
 	return widget.meta.update(widget)
 end
 

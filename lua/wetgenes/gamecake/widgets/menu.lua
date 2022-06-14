@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local wwin=require("wetgenes.win")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -17,9 +19,12 @@ local wwindow=oven.rebake("wetgenes.gamecake.widgets.window")
 
 function wmenu.update(widget)
 
+
 	if not widget.hidden then
 		if widget.hide_when_not and not widget.master.press then -- must stay over widget unless holding button
-			if not widget:isover(widget.hide_when_not) then
+			if widget:isover(widget.hide_when_not) then
+				widget.over_time=wwin.time()
+			elseif (not widget.over_time) or (wwin.time() >= widget.over_time+0.25) then -- delay hide
 				widget.hidden=true
 				widget.hide_when_not=nil
 				widget.master.request_layout=true
