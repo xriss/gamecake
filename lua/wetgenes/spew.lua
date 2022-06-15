@@ -171,7 +171,7 @@ test
 M.test=function()
 
 	local tasks=require("wetgenes.tasks").create()
-	local spew=M.connect(tasks)
+	local spew=require("wetgenes.spew").connect(tasks)
 
 	spew.hook=function(spew,msg,str) -- will be called with new data from within the coroutine during tasks:update
 		print(str)
