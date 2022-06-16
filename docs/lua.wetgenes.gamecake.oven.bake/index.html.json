@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 520,
+   "count": 522,
    "name": "lua"
   },
   {
@@ -54,7 +54,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 514,
+   "count": 516,
    "name": "lua.wetgenes"
   },
   {
@@ -458,7 +458,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 126,
+   "count": 128,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -642,7 +642,7 @@
    "name": "lua.wetgenes.gamecake.oven.bake"
   },
   {
-   "count": 57,
+   "count": 59,
    "name": "lua.wetgenes.gamecake.widgets"
   },
   {
@@ -864,6 +864,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.widgets.drag.update"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.widgets.paragraph"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.paragraph.setup"
   },
   {
    "count": 1,
@@ -2158,7 +2166,7 @@
    "body": "<pre><code>oven=wetgenes.gamecake.oven.bake(opts)\n</code></pre>\n<p>Bake creates an instance of a lua module bound to a state. Here we \nare creating the main state that other modules will then bind to.</p>\n<p>We call each state an OVEN to fit into the gamecake naming scheme \nthen we bake a module in this oven to bind them to the common state.</p>\n<p>Think of it as a sub version of require, so require gets the global \npointer for a module and bake is used to get the a module bound to \nan oven.</p>\n<p>By using this bound state we reduce the verbosity of connecting \nmodules and sharing state between them.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/oven.lua",
-   "line": 47,
+   "line": 76,
    "name": "lua.wetgenes.gamecake.oven.bake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
   }

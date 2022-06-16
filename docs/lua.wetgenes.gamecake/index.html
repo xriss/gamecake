@@ -234,7 +234,9 @@
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.widgets.drag.drag"><span>/lua.wetgenes.gamecake.widgets.drag.drag</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.widgets.drag.setup"><span>/lua.wetgenes.gamecake.widgets.drag.setup</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.widgets.drag.update"><span>/lua.wetgenes.gamecake.widgets.drag.update</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.widgets.drag.update"><span>/lua.wetgenes.gamecake.widgets.drag.update</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.widgets.paragraph"><span>/lua.wetgenes.gamecake.widgets.paragraph</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.widgets.paragraph.setup"><span>/lua.wetgenes.gamecake.widgets.paragraph.setup</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.widgets.setup"><span>/lua.wetgenes.gamecake.widgets.setup</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.zone"><span>/lua.wetgenes.gamecake.zone</span></a>
 <a class="par" href="../../docs/lua.wetgenes.gamecake.zone.scene"><span>/lua.wetgenes.gamecake.zone.scene</span></a>
 
@@ -1233,7 +1235,7 @@ in the order listed.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.oven">lua.wetgenes.gamecake.oven</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L8">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L37">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
 <div><pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)
 </code></pre>
 <p>The oven module must be baked so only exposes a bake function.</p>
@@ -1247,7 +1249,7 @@ gamecake_flavour=sdl
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.oven.bake">lua.wetgenes.gamecake.oven.bake</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L47">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L76">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
 <div><pre><code>oven=wetgenes.gamecake.oven.bake(opts)
 </code></pre>
 <p>Bake creates an instance of a lua module bound to a state. Here we 
@@ -1701,6 +1703,28 @@ local widget=master:add{class=&quot;drag&quot;,...}
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.drag.update">lua.wetgenes.gamecake.widgets.drag.update</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/drag.lua#L55">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/drag.lua</a></div>
 <div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.widgets.paragraph">lua.wetgenes.gamecake.widgets.paragraph</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/paragraph.lua#L7">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/paragraph.lua</a></div>
+<div><pre><code>local master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()
+local widget=master:add{class=&quot;paragraph&quot;,...}
+</code></pre>
+<p>A layout class for a paragraph of wordwrapped text that ignores 
+quantity of whitespace and possibly child widgets insereted into the 
+text and apropriate control points.</p>
+<p>We will be the full width of our parent and as tall as we need to be to 
+fit the given text.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.widgets.paragraph.setup">lua.wetgenes.gamecake.widgets.paragraph.setup</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/paragraph.lua#L25">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/paragraph.lua</a></div>
+<div><pre><code>see lua.wetgenes.gamecake.widgets.meta.setup for generic options
+</code></pre>
+</div>
 </div>
 
 <div class="wrap">

@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 520,
+   "count": 522,
    "name": "lua"
   },
   {
@@ -54,7 +54,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 514,
+   "count": 516,
    "name": "lua.wetgenes"
   },
   {
@@ -458,7 +458,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 126,
+   "count": 128,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -642,7 +642,7 @@
    "name": "lua.wetgenes.gamecake.oven.bake"
   },
   {
-   "count": 57,
+   "count": 59,
    "name": "lua.wetgenes.gamecake.widgets"
   },
   {
@@ -864,6 +864,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.widgets.drag.update"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.widgets.paragraph"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.paragraph.setup"
   },
   {
    "count": 1,
@@ -2156,7 +2164,7 @@
  "_list": [
   {
    "body": "",
-   "count": 126,
+   "count": 128,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -2492,7 +2500,7 @@
    "body": "<pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)\n</code></pre>\n<p>The oven module must be baked so only exposes a bake function.</p>\n<p>All the other functions are returned from within the bake function.</p>\n<p>possible ENV settings</p>\n<pre><code>gamecake_tongue=english\ngamecake_flavour=sdl\n</code></pre>\n",
    "count": 2,
    "file": "../lua/wetgenes/gamecake/oven.lua",
-   "line": 8,
+   "line": 37,
    "name": "lua.wetgenes.gamecake.oven",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
   },
@@ -2500,13 +2508,13 @@
    "body": "<pre><code>oven=wetgenes.gamecake.oven.bake(opts)\n</code></pre>\n<p>Bake creates an instance of a lua module bound to a state. Here we \nare creating the main state that other modules will then bind to.</p>\n<p>We call each state an OVEN to fit into the gamecake naming scheme \nthen we bake a module in this oven to bind them to the common state.</p>\n<p>Think of it as a sub version of require, so require gets the global \npointer for a module and bake is used to get the a module bound to \nan oven.</p>\n<p>By using this bound state we reduce the verbosity of connecting \nmodules and sharing state between them.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/oven.lua",
-   "line": 47,
+   "line": 76,
    "name": "lua.wetgenes.gamecake.oven.bake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
   },
   {
    "body": "<pre><code>local widgets=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;)\n</code></pre>\n<p>A collection of widgets, rendered using gles2 code and controlled \nusing the mouse, keyboard or a joystick. EG click fire and move \nleft/right to adjust a slider value.</p>\n<p>Widgets must be created and bound to an oven, using the \noven.rebake function.</p>\n<p>This has undergone a number of rewrites as we try to simplify the \nwidget creation and layout process. Eventually we ended up with a \nfixed size system of widget placement so every widget must have a \nknown size in advance, however we allow scaling to occur so for \ninstance building a 256x256 widget does not mean that it has to be \ndisplayed at 256x256 it just means it will be square.</p>\n<p>The basic layout just lets you place these widgets in other widgets \nas left to right lines. So as long as you get your sizes right you \ncan easily place things just using a list and without keeping track \nof the current position.</p>\n<p>Other layout options are available, such as absolute positioning for \nfull control and we have simple custom skin versions of the buttons \nas well rather than the built in skins.</p>\n<p>All value data is handled by data structures that contain ranges and \nresolutions for data allowing the same data to be bound to multiple \ndisplay widgets. For instance the same data can be linked to the \nposition of a slider as well as the content of a text display. I \nthink the kids call this sort of thing an MVC pattern but that&#39;s a \nterribly dull name.</p>\n<p>Swanky paint is probably the most advanced used of the widgets so far\nbut I suspect we will be making a simple text editor in the near \nfuture. Designed for advanced in game tweaking of text files.</p>\n",
-   "count": 57,
+   "count": 59,
    "file": "../lua/wetgenes/gamecake/widgets/init.lua",
    "line": 13,
    "name": "lua.wetgenes.gamecake.widgets",
@@ -2951,6 +2959,22 @@
    "line": 55,
    "name": "lua.wetgenes.gamecake.widgets.drag.update",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/drag.lua"
+  },
+  {
+   "body": "<pre><code>local master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()\nlocal widget=master:add{class=&quot;paragraph&quot;,...}\n</code></pre>\n<p>A layout class for a paragraph of wordwrapped text that ignores \nquantity of whitespace and possibly child widgets insereted into the \ntext and apropriate control points.</p>\n<p>We will be the full width of our parent and as tall as we need to be to \nfit the given text.</p>\n",
+   "count": 2,
+   "file": "../lua/wetgenes/gamecake/widgets/paragraph.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gamecake.widgets.paragraph",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/paragraph.lua"
+  },
+  {
+   "body": "<pre><code>see lua.wetgenes.gamecake.widgets.meta.setup for generic options\n</code></pre>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/paragraph.lua",
+   "line": 25,
+   "name": "lua.wetgenes.gamecake.widgets.paragraph.setup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/paragraph.lua"
   },
   {
    "body": "<pre><code>master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()\n\nmaster=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup(\n    {font=&quot;Vera&quot;,text_size=16,grid_size=32,skin=0} )\n</code></pre>\n<p>Create a master widget, this widget which is considered the root of \nyour GUI. It will be filled with functions/data and should contain all \nthe functions you need to add data and widgets.</p>\n<p>You can pass in these configuration values in a table, the example \nshown above has soom good defaults.</p>\n<pre><code>font=&quot;Vera&quot;\n</code></pre>\n<p>The default font to use, this must have already been loaded via \nwetgenes.gamecake.fonts functions.</p>\n<pre><code>text_size=16\n</code></pre>\n<p>The default pixel height to render text at.</p>\n<pre><code>grid_size=32\n</code></pre>\n<p>The size in pixels that we try and create buttons at.</p>\n",
