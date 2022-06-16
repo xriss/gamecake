@@ -672,8 +672,8 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 	local sqlite3 = lanes.require("lsqlite3")
 
 	local db
-	
-	if sqlite_filename then	db = sqlite3.open(sqlite_filename) end -- auto open
+
+	if sqlite_filename then	db = assert(sqlite3.open(sqlite_filename)) end -- auto open
 	if sqlite_pragmas and db then db:exec(sqlite_pragmas) end -- auto configure
 
 	local function request(memo)

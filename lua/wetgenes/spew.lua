@@ -95,6 +95,9 @@ M.connect=function(tasks,host,port)
 		return s.."\0"
 	end
 
+	spew.connect=function(_host,_port)
+	end
+	
 	spew.push=function(m)
 		spew.push_stack[#spew.push_stack+1]=strmsg(m)
 	end
