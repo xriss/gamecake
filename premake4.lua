@@ -760,8 +760,9 @@ all_includes=all_includes or {
 	{"lua_pgsql",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil			or		nil			or	nil		},
 
-	{"lua_hid",			nil			or		NIX		or		nil			or		nil			or	nil		},
-	{"lib_hidapi",		nil			or		NIX		or		nil			or		nil			or	nil		},
+-- hid is now in SDL
+--	{"lua_hid",			nil			or		NIX		or		nil			or		nil			or	nil		},
+--	{"lib_hidapi",		nil			or		NIX		or		nil			or		nil			or	nil		},
 
 -- this is probably luajit but may be lua 5.1
 	{LIB_LUA,			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},

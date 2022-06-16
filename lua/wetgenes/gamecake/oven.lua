@@ -136,10 +136,10 @@ function M.bake(opts)
 	require("wetgenes.logs").setup(opts.args)
 
 if jit then -- now logs are setup, dump basic jit info
-	local t={jit.status()}
-	t[1]=tostring(t[1])
+	local t={jit.version,jit.status()}
+	t[2]=tostring(t[2])
 	t[#t+1]="jit_mcode_size="..jit_mcode_size.."k"
-	log( "jit" , table.concat(t,"\t") )
+	log( "oven" , table.concat(t,"\t") )
 end
 
 --print(wwin.flavour)
