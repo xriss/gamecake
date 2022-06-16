@@ -20,6 +20,7 @@ we try and do much else which usually sorts it out
 		while sm>8 do -- 8k minimum
 			local mi=0
 			require("jit.opt").start("sizemcode="..sm,"maxmcode="..sm)
+			jit.on()
 			jit.flush()
 			if not ju.tracemc(1) then -- not alloced ( because of flush )
 				for i=1,1000 do end -- this should force an allocation
@@ -27,7 +28,7 @@ we try and do much else which usually sorts it out
 			end
 			sm=sm/2
 		end
-		if sm>8 then jit_mcode_size=sm end
+		if sm>8 then jit_mcode_size=sm else jit.off() end -- auto turn jit off if alloc failed
 
 --		os.exit(1)
 	end
@@ -134,7 +135,12 @@ function M.bake(opts)
 
 	require("wetgenes.logs").setup(opts.args)
 
-	log( "oven" , "jit_mcode_size="..jit_mcode_size.."k" )
+if jit then -- now logs are setup, dump basic jit info
+	local t={jit.status()}
+	t[1]=tostring(t[1])
+	t[#t+1]="jit_mcode_size="..jit_mcode_size.."k"
+	log( "jit" , table.concat(t,"\t") )
+end
 
 --print(wwin.flavour)
 
