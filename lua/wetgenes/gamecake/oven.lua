@@ -5,6 +5,35 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local log,dump=require("wetgenes.logs"):export("log","dump")
 
+local jit_mcode_size=0
+--[[
+
+luajit can sometimes get stuck, this forces a large allocation before 
+we try and do much else which usually sorts it out
+
+]]
+	if jit then -- start by trying to force a jit memory allocation
+	
+		local ju=require("jit.util")
+		
+		local sm=1024
+		while sm>8 do -- 8k minimum
+			local mi=0
+			require("jit.opt").start("sizemcode="..sm,"maxmcode="..sm)
+			jit.flush()
+			if not ju.tracemc(1) then -- not alloced ( because of flush )
+				for i=1,1000 do end -- this should force an allocation
+				if ju.tracemc(1) then break end -- check if alloced 
+			end
+			sm=sm/2
+		end
+		if sm>8 then jit_mcode_size=sm end
+
+--		os.exit(1)
+	end
+
+
+
 --[[#lua.wetgenes.gamecake.oven
 
 	oven=require("wetgenes.gamecake.oven").bake(opts)
@@ -65,7 +94,7 @@ modules and sharing state between them.
 
 ]]
 function M.bake(opts)
-	
+
 	local oven={}
 	wwin.oven=wwin.oven or oven -- store a global oven on first use
 
@@ -104,6 +133,8 @@ function M.bake(opts)
 --dprint(opts)
 
 	require("wetgenes.logs").setup(opts.args)
+
+	log( "oven" , "jit_mcode_size="..jit_mcode_size.."k" )
 
 --print(wwin.flavour)
 
