@@ -72,7 +72,7 @@ function wthree.layout(widget)
 
 		else
 
-			v.px=widget[h1]-w3
+			v[p1]=widget[h1]-w3
 			v.py=0
 			v[h2]=widget[h2]
 			
@@ -83,8 +83,8 @@ function wthree.layout(widget)
 	local v=widget[2]
 	if v then
 		
-		v.px=w1
-		v.hx=widget[h1]-(w1+w3)
+		v[p1]=w1
+		v[h1]=widget[h1]-(w1+w3)
 		v[h2]=widget[h2]
 
 	end
