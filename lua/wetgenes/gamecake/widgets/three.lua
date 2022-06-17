@@ -73,7 +73,7 @@ function wthree.layout(widget)
 		else
 
 			v[p1]=widget[h1]-w3
-			v.py=0
+			v[p2]=0
 			v[h2]=widget[h2]
 			
 		end
@@ -84,6 +84,7 @@ function wthree.layout(widget)
 	if v then
 		
 		v[p1]=w1
+		v[p2]=0
 		v[h1]=widget[h1]-(w1+w3)
 		v[h2]=widget[h2]
 

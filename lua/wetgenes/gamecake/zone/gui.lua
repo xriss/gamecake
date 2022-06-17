@@ -6,6 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local wwin=require("wetgenes.win")
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -172,7 +173,10 @@ end
 
 gui.click={}
 gui.value={}
+gui.confirm={}
 function gui.hooks(act,w,dat)
+
+--log("dump",act,w.id)
 
 	if act=="click" then
 
@@ -188,6 +192,12 @@ function gui.hooks(act,w,dat)
 
 	end
 
+	if act=="confirm" then
+
+		local f=gui.confirm[w.id]
+		if f then f(w) end
+
+	end
 	
 end
 

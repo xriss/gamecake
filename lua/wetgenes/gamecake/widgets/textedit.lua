@@ -164,9 +164,6 @@ end
 
 function wtextedit.msg(widget,m)
 	if m.class=="action" then -- only handle actions
-		local master=widget.master
-		local texteditor=pan.texteditor
-		local txt=texteditor.txt
 		if m.action==1 or m.action==0 then -- allow repeats
 			if m.id=="clip_copy" then
 				if m.action==1 then -- first press only
