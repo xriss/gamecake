@@ -530,7 +530,7 @@ function wwindow.setup(window,def)
 --				py=bar_height,
 		hx=def.hx,
 		hy=def.hy,
-		size= (def.panel_mode=="fill") and "full" or "fit",
+		size= (def.panel_mode~="fill") and "fit",
 		color=color,
 		highlight="none",
 	})

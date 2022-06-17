@@ -22,6 +22,27 @@ fit the given text.
 local M={ modname = (...) } package.loaded[M.modname] = M function M.bake(oven,B) B = B or {}
 
 
+B.hook_resize=function(widget)
+
+	widget.hx=widget.parent.hx
+	widget.hy=32
+
+	local font=oven.cake.canvas.font
+
+	local fy=widget:bubble("text_size") or 16
+	local f=widget:bubble("font") or 4
+	local fontfix=0.6 -- this fixes the baseline
+	if type(f)=="number" then fontfix=0.4 end -- builtin fonts look better like this
+	font.set(oven.cake.fonts.get(f))
+	font.set_size(fy,0)
+	local s=widget.text
+	local lines=font.wrap(s,{w=widget.hx-fy}) -- break into lines
+	
+	widget.hy=(#lines+0.5)*fy
+					
+					
+end
+
 --[[#lua.wetgenes.gamecake.widgets.paragraph.setup
 
 	see lua.wetgenes.gamecake.widgets.meta.setup for generic options
@@ -30,6 +51,8 @@ local M={ modname = (...) } package.loaded[M.modname] = M function M.bake(oven,B
 function B.setup(widget)
 
 	widget.class="paragraph"
+	
+	widget.hook_resize=B.hook_resize
 	
 	return widget
 end

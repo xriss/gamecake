@@ -89,10 +89,6 @@ function wscroll.layout(widget)
 	if widget.daty.max<0 then widget.daty.max=0 end
 	widget.daty.size=widget.pan.hy/widget.pan.hy_max
 	widget.daty:value() -- clamp
-
-local last=widget.pan[#widget.pan]
-print("scroll hy",widget.pan.hy_max,widget.pan.hy,widget.daty.max,last and last.py+last.hy)
-print("scroll size",widget.parent.hy,widget.hy,widget.pan.hy)
 	
 --	widget.meta.layout(widget)
 --	widget.meta.build_m4(widget)
