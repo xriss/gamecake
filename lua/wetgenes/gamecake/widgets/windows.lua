@@ -62,10 +62,12 @@ function wwindows.layout(widget)
 		local hx=0
 		local hy=0
 		for i,v in ipairs(widget) do
-			if v.px<px then px=v.px end
-			if v.py<py then py=v.py end
-			if v.px+v.hx>hx then hx=v.px+v.hx end
-			if v.py+v.hy>hy then hy=v.py+v.hy end
+			if not v.hidden then
+				if v.px<px then px=v.px end
+				if v.py<py then py=v.py end
+				if v.px+v.hx>hx then hx=v.px+v.hx end
+				if v.py+v.hy>hy then hy=v.py+v.hy end
+			end
 		end
 
 --print("dock",px,py,hx,hy)

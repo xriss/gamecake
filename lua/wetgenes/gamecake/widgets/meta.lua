@@ -94,6 +94,23 @@ function wmeta.setup(def)
 	end
 	
 	function meta.call_hook(widget,hook,dat)
+	
+		if hook=="click" and widget.id then
+			local action=widget.master.actions[widget.id]
+			if action and widget.user then
+				action=action[widget.user]
+			end
+			if action then -- add an action message
+				oven.win:push_msg({
+					class="action",
+					action=1,
+					time=os.time(),
+					id=action.id,
+					user=action.user,
+				})
+			end
+		end
+	
 		if widget.class_hooks then
 			for _,ch in ipairs(widget.class_hooks) do
 				if ch(hook,widget,dat) then return end -- and it can eat the event if it returns true

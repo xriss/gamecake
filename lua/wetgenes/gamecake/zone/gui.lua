@@ -28,7 +28,7 @@ M.bake=function(oven,gui)
 
 -- create data
 gui.data_setup=function()
---	if not gui.datas then -- only setup once
+	if gui.datas then return end -- only setup once
 	
 	local datas=gui.master.datas
 	
@@ -108,12 +108,25 @@ end
 
 gui.loads=function()
 	oven.rebake("wetgenes.gamecake.widgets").loads()
+	oven.cake.fonts.loads({"Vera"})
 end
 
 
+gui.theme=function(def)
+	if not gui.master then gui.setup() end	
+	if type(def)=="string" then
+		def=gui.master.actions[def].json
+	end
+	gui.master:clean_all()
+	gui.master:set_theme(def)
+	gui.plan_windows(gui.master)
+end
+
 gui.setup=function()
 
-	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font="Vera",text_size=20,grid_size=40,skin=0,no_keymove=true})
+	if gui.master then return end -- only setuip once
+
+	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font="Vera",skin=0,no_keymove=true})
 
 	gui.loads()
 
@@ -201,6 +214,7 @@ function gui.hooks(act,w,dat)
 	
 end
 
+gui.plan_windows_list={}
 
 gui.plan_windows=function()
 	
@@ -257,6 +271,9 @@ gui.plan_windows=function()
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("shadow_mapsize"),color=0})
 	def.add(canvas,{text="Shadow Map Area"})
 	def.add(canvas,{class="slide",data="datx",datx=datas.get("shadow_maparea"),color=0})
+
+	-- call extra window planing
+	for n,v in pairs(gui.plan_windows_list) do v() end
 
 	gui.screen:windows_reset()
 

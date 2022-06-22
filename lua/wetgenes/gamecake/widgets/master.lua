@@ -89,7 +89,7 @@ function wmaster.setup(widget,def)
 		end
 		if def.text_size then master.theme.text_size=def.text_size end master.text_size=master.theme.text_size
 		if def.grid_size then master.theme.grid_size=def.grid_size end master.grid_size=master.theme.grid_size
-
+--print(master.grid_size,debug.traceback())
 	end
 	master:set_theme(def)
 

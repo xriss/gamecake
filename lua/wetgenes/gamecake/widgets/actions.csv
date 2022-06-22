@@ -25,4 +25,5 @@ theme_dark_small,,Dark Small,Set theme to Dark and Small,,"{theme=""dark"",grid_
 theme_dark_medium,,Dark Medium,Set theme to Dark and Medium,,"{theme=""dark"",grid_size=40,text_size=24}"
 theme_dark_large,,Dark Large,Set theme to Dark and Large,,"{theme=""dark"",grid_size=64,text_size=48}"
 
-
+layout_load,,Load Layout,Load position and size of windows
+layout_save,,Save Layout,Save position and size of windows
