@@ -95,6 +95,7 @@ function wmeta.setup(def)
 	
 	function meta.call_hook(widget,hook,dat)
 	
+--[[
 		if hook=="click" and widget.id then
 			local action=widget.master.actions[widget.id]
 			if action and widget.user then
@@ -110,7 +111,7 @@ function wmeta.setup(def)
 				})
 			end
 		end
-	
+]]	
 		if widget.class_hooks then
 			for _,ch in ipairs(widget.class_hooks) do
 				if ch(hook,widget,dat) then return end -- and it can eat the event if it returns true
