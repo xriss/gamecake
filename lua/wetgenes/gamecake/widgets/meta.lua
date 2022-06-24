@@ -224,10 +224,16 @@ function wmeta.setup(def)
 	
 		for a,b in pairs(def) do if type(a)=="string" then widget[a]=b end end -- shallow copy every string value
 
-		if widget.master.datas then -- auto lookup data by name
-			for _,n in ipairs({"data","datx","daty"}) do
-				if type(widget[n])=="string" then
-					widget[n]=widget.master.datas.get(widget[n])
+		for _,n in ipairs({"data","datx","daty"}) do
+			if type(widget[n])=="string" then
+				local it=n
+				while widget[it] do it=widget[it] end -- allow lookup
+				if type(it)=="string" then
+					if widget.master.datas then -- auto lookup data by name
+						widget[n]=widget.master.datas.get(it)
+					end
+				else
+					widget[n]=it
 				end
 			end
 		end

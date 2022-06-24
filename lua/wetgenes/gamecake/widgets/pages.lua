@@ -51,8 +51,6 @@ function wpages.setup(widget,def)
 	widget.draw=wpages.draw
 	widget.layout=wpages.layout
 	
-	widget.data=def.data
-
 	return widget
 end
 

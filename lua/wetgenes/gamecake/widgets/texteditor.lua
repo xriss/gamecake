@@ -956,8 +956,8 @@ function wtexteditor.setup(widget,def)
 --		widget.gutter=#(" 01   ")
 --	end
 
-	if def.data then -- set starting text
-		widget.txt.set_text( def.data:value() )
+	if widget.data then -- set starting text
+		widget.txt.set_text( widget.data:value() )
 	end
 
 -- background foreground colour pairs

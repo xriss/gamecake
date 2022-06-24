@@ -88,14 +88,14 @@ end
 function wwindows.setup(widget,def)
 
 	widget.class="windows"
-	widget.winmode=def.winmode or "drag" -- type of dock
+	widget.winmode=widget.winmode or "drag" -- type of dock
 -- "drag" is a collection of dragable windows
 -- "stack" is a stack of side by side windows
 
-	widget.stack_axis=def.stack_axis -- "x" or "y"
+--	widget.stack_axis=widget.stack_axis -- "x" or "y"
 	-- the axis along which the the windows stack
 	
-	widget.smode=def.smode or "topleft"
+	widget.smode=widget.smode or "topleft"
 
 	widget.update=wwindows.update
 	widget.draw=wwindows.draw

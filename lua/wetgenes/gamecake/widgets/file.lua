@@ -230,14 +230,14 @@ function wfile.setup(widget,def)
 	widget.draw=wfile.draw
 
 -- auto add the draging button as a child
-	widget.history=def.history or {}
+	widget.history=widget.history or {}
 	widget.files={}
 	widget.view="file"
 
 	widget.file_hooks		=	function(act,w) return wfile.file_hooks(widget,act,w) end
 
-	widget.data_dir  = def.data_dir  or wdata.new_data({class="string",str=wpath.currentdir(),master=widget.master,hooks=widget.file_hooks})
-	widget.data_name = def.data_name or wdata.new_data({class="string",str="",master=widget.master,hooks=widget.file_hooks})
+	widget.data_dir  = widget.data_dir  or wdata.new_data({class="string",str=wpath.currentdir(),master=widget.master,hooks=widget.file_hooks})
+	widget.data_name = widget.data_name or wdata.new_data({class="string",str="",master=widget.master,hooks=widget.file_hooks})
 
 	widget.history[ widget.data_dir:value() ]=true
 

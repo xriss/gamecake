@@ -90,9 +90,9 @@ function B.setup(widget,def)
 
 	widget.color=widget.color or 0
 
-	widget.data_mask=def.data_mask or 1
-	widget.text_false = (not def.text_false) and " " or def.text_false
-	widget.text_true  = (not def.text_true ) and "X" or def.text_true
+	widget.data_mask=widget.data_mask or 1
+	widget.text_false = (not widget.text_false) and " " or widget.text_false
+	widget.text_true  = (not widget.text_true ) and "X" or widget.text_true
 
 	widget.class_hooks={B.class_hooks}
 

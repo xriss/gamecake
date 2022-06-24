@@ -99,7 +99,7 @@ function wthree.setup(widget,def)
 
 	widget.class="three"
 	
-	widget.three_axis=def.three_axis  or "x" 	-- or "y"		three across x or y axis
+	widget.three_axis=widget.three_axis  or "x" 	-- or "y"		three across x or y axis
 	
 	widget.update=wthree.update
 	widget.draw=wthree.draw

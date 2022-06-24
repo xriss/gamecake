@@ -303,21 +303,19 @@ function wmenuitem.setup(widget,def)
 
 	widget.class_hooks={wmenuitem.hooks}
 	
-	widget.hide_when_clicked=def.hide_when_clicked
---	widget.remove_when_clicked=def.remove_when_clicked
+	widget.hide_when_clicked=widget.hide_when_clicked
+--	widget.remove_when_clicked=widget.remove_when_clicked
 
 	widget.menu_add=wmenuitem.menu_add
 
-	if def.top_menu then -- part of top menu bar
-		widget.menu_px=def.menu_px or 0 -- where to display any sub menu
-		widget.menu_py=def.menu_py or 1
+	if widget.top_menu then -- part of top menu bar
+		widget.menu_px=widget.menu_px or 0 -- where to display any sub menu
+		widget.menu_py=widget.menu_py or 1
 	else
-		widget.menu_px=def.menu_px or 1 -- where to display any sub menu
-		widget.menu_py=def.menu_py or 0
+		widget.menu_px=widget.menu_px or 1 -- where to display any sub menu
+		widget.menu_py=widget.menu_py or 0
 	end
 	
-	widget.menu_data=def.menu_data
-
 	return widget
 end
 

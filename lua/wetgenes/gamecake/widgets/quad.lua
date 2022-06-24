@@ -91,11 +91,8 @@ function wquad.setup(widget,def)
 	widget.draw=wquad.draw
 	widget.layout=wquad.layout
 	
-	widget.datx=def.datx or widget_data.new_data({max=1,num=0.5,master=widget.master})
-	widget.daty=def.daty or widget_data.new_data({max=1,num=0.5,master=widget.master})
-	widget.data=def.data -- or def.datx or def.daty
-	widget.datxrev=def.datxrev -- mirror the x location
-	widget.datyrev=def.datyrev -- mirror the y location
+	widget.datx=widget.datx or widget_data.new_data({max=1,num=0.5,master=widget.master})
+	widget.daty=widget.daty or widget_data.new_data({max=1,num=0.5,master=widget.master})
 
 	widget:add({})
 	widget:add({})

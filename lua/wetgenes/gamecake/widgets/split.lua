@@ -155,21 +155,23 @@ function wsplit.setup(widget,def)
 
 	widget.class="split"
 	
-	widget.split_axis =def.split_axis  or "x" 	-- or "y"		split across x or y axis
-	widget.split_order=def.split_order or 1 	-- or 2			control the size of the 1st or 2nd subwidget
+	widget.split_axis =widget.split_axis  or "x" 	-- or "y"		split across x or y axis
+	widget.split_order=widget.split_order or 1 	-- or 2			control the size of the 1st or 2nd subwidget
 	
+--[[
 -- size (in order of precedence if they exist otherwise we just use the given size of the child widget
-	widget.split_num  =def.split_num			-- fixed pixel size of split
-	widget.split_fit  =def.split_fit			-- desired aspect ratio of split , width*this == height or height*this=width
-	widget.split_fnum =def.split_fnum			-- fixed fractional size of split
-	widget.split_scale=def.split_scale			-- scale the fit by this amount (must be <=1)
-	widget.split_aspect=def.split_aspect		-- keep the height relative to the width or visa versa
+	widget.split_num  =widget.split_num			-- fixed pixel size of split
+	widget.split_fit  =widget.split_fit			-- desired aspect ratio of split , width*this == height or height*this=width
+	widget.split_fnum =widget.split_fnum			-- fixed fractional size of split
+	widget.split_scale=widget.split_scale			-- scale the fit by this amount (must be <=1)
+	widget.split_aspect=widget.split_aspect		-- keep the height relative to the width or visa versa
 
 -- limits
-	widget.split_min =def.split_min		-- minimum pixel size of split
-	widget.split_max =def.split_max		-- maximum pixel size of split
-	widget.split_fmin=def.split_fmin	-- minimum fractional size of split
-	widget.split_fmax=def.split_fmax	-- maximum fractional size of split
+	widget.split_min =widget.split_min		-- minimum pixel size of split
+	widget.split_max =widget.split_max		-- maximum pixel size of split
+	widget.split_fmin=widget.split_fmin	-- minimum fractional size of split
+	widget.split_fmax=widget.split_fmax	-- maximum fractional size of split
+]]
 
 	widget.update=wsplit.update
 	widget.draw=wsplit.draw

@@ -40,7 +40,7 @@ function wsplit_drag.setup(widget,def)
 
 	if widget.split.split_axis=="x" then
 
-		widget.drag=widget:add({style="button",class="drag",px=0,hx=8,size="fully",solid=true,cursor="sizewe",color=def.slide_color}) -- probably invisible
+		widget.drag=widget:add({style="button",class="drag",px=0,hx=8,size="fully",solid=true,cursor="sizewe",color=widget.slide_color}) -- probably invisible
 
 		local clampit=function()
 			local ws=widget.split[ widget.split.split_order ]
