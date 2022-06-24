@@ -57,15 +57,17 @@ B.setup=function(zgui)
 			hx=12,hy=8,
 			{
 				class="fill",size="fit",
+				
+				{class="text",hx=3,text="Layout",},
+				{class="button",hx=3,id="layout_save",text="Save",color=0},
+				{class="button",hx=3,id="layout_load",text="Load",color=0},
+				{class="button",hx=3,id="layout_reset",text="Reset",color=0},
+
 				{class="text",hx=6,text_align="right",text="Theme"},
 				{class="menudrop",hx=6,id="gui_theme_change",data="gui_theme_name",color=0},
-				
-				{class="button",hx=3,id="layout_load",text="Load",color=0},
-				{class="text",hx=6,text="Window Layout",},
-				{class="button",hx=3,id="layout_save",text="Save",color=0},
 
 				{hx=4},
-				{class="button",hx=4,id="file_quit",text="Quit",color=0xffff0000},
+				{class="button",hx=4,id="file_quit",text="Quit",color=0xcccc0000},
 				{hx=4},
 			},
 

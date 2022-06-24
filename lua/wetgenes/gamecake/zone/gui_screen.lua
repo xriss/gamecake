@@ -96,45 +96,48 @@ B.setup=function(zgui)
 	
 		local datas=zgui.master.datas
 
-		local gsiz=zgui.master.grid_size
-		
-		local def=require("wetgenes.gamecake.widgets.defs").create()
+		local def=require("wetgenes.gamecake.widgets.defs").create(zgui.master.grid_size)
 
 		def.set({
 			class="*",
 			hooks=zgui.hooks,
-			hx=gsiz*5,
-			hy=gsiz*1,
+			hx=6,
+			hy=1,
 		})
 
-		local canvas=def.add(zgui.screen.windows,{class="window",px=gsiz*1,py=gsiz*1,hx=gsiz*5,size="fit",id="window_screen",title="Screen",hidden=true}).win_canvas
+		local win=def.add(zgui.screen.windows,{
 
-		def.add(canvas,{text="Mode",hx=gsiz*3})
-		def.add(canvas,{class="button",hx=gsiz*2,id="screen_mode_change",data=datas.get("screen_mode"),color=0})
-		def.add(canvas,{text="Vertical FOV"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("camera_fov"),color=0})
-		def.add(canvas,{text="Screen Scale"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_scale"),color=0})
-		def.add(canvas,{text="Screen Gamma"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("screen_gamma"),color=0})
-		def.add(canvas,{text="Bloom Scale"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("bloom_scale"),color=0})
-		def.add(canvas,{text="Shadow Scale"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("shadow_scale"),color=0})
-		def.add(canvas,{text="AO Scale"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_scale"),color=0})
-		def.add(canvas,{text="AO Clip"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_clip"),color=0})
-		def.add(canvas,{text="AO Size"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_size"),color=0})
-		def.add(canvas,{text="AO Samples"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("ao_samples"),color=0})
-		def.add(canvas,{text="Shadow Samples"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("shadow_samples"),color=0})
-		def.add(canvas,{text="Shadow Map Size"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("shadow_mapsize"),color=0})
-		def.add(canvas,{text="Shadow Map Area"})
-		def.add(canvas,{class="slide",data="datx",datx=datas.get("shadow_maparea"),color=0})
+			class="window",px=1,py=1,id="window_screen",title="Screen",hidden=true,
+			hx=12,hy=1,size="fit",
+
+			{text="Mode"},
+			{class="button",id="screen_mode_change",data="screen_mode",color=0},
+			{text="Vertical FOV"},
+			{class="slide",data="camera_fov",datx="camera_fov",color=0},
+			{text="Screen Scale"},
+			{class="slide",data="screen_scale",datx="screen_scale",color=0},
+			{text="Screen Gamma"},
+			{class="slide",data="screen_gamma",datx="screen_gamma",color=0},
+			{text="Bloom Scale"},
+			{class="slide",data="bloom_scale",datx="bloom_scale",color=0},
+			{text="Shadow Scale"},
+			{class="slide",data="shadow_scale",datx="shadow_scale",color=0},
+			{text="AO Scale"},
+			{class="slide",data="ao_scale",datx="ao_scale",color=0},
+			{text="AO Clip"},
+			{class="slide",data="ao_clip",datx="ao_clip",color=0},
+			{text="AO Size"},
+			{class="slide",data="ao_size",datx="ao_size",color=0},
+			{text="AO Samples"},
+			{class="slide",data="ao_samples",datx="ao_samples",color=0},
+			{text="Shadow Samples"},
+			{class="slide",data="shadow_samples",datx="shadow_samples",color=0},
+			{text="Shadow Map Size"},
+			{class="slide",data="shadow_mapsize",datx="shadow_mapsize",color=0},
+			{text="Shadow Map Area"},
+			{class="slide",data="shadow_maparea",datx="shadow_maparea",color=0},
+
+		})
 
 	end
 

@@ -171,7 +171,7 @@ gui.plan_windows=function()
 		menu_px=0,menu_py=1,
 		hooks=gui.hooks,
 		inherit=true,
-		{id="topmenu",text=">",top_menu=true,menu_data=function() return gui.screen:window_menu() end}, -- list all windows
+		{id="topmenu",text=">",hy=gsiz,hx=gsiz,top_menu=true,menu_data=function() return gui.screen:window_menu() end}, -- list all windows
 	}})
 
 	-- call extra window planing
