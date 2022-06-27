@@ -14,6 +14,7 @@ local genes_api="https://wetgenes.com/genes/"
 
 
 B.setup=function(zgui)
+	log("setup",M.modname)
 	
 	local datas=zgui.master.datas
 

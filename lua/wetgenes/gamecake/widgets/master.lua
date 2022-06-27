@@ -74,6 +74,9 @@ function wmaster.setup(widget,def)
 	master.new_data=function(dat) return master.datas.new_data(dat) end
 
 	function master.set_theme(master,def)
+		if type(def)=="string" then
+			def=master.actions[def].json or {}
+		end
 
 	-- built in color themes, 
 

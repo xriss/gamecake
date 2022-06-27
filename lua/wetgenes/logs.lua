@@ -49,6 +49,7 @@ logs.allow=nil -- put a table here to enable
 
 logs.block={
 	oven=true,	-- reduce oven spam by default
+	setup=true,	-- do not usually need to know setup orderthis except when debugging strangeness
 }
 
 local wwin

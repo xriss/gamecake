@@ -12,6 +12,8 @@ local pack=require("wetgenes.pack")
 
 local snames=require("wetgenes.gamecake.spew.names")
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local XLT=require("wetgenes.tongues").translate
 
 --module
@@ -50,6 +52,7 @@ M.bake=function(oven,gui)
 	end
 
 	function gui.setup(parent)
+	log("setup",M.modname)
 		if parent then
 			gui.parent=parent
 			gui.master=parent.master

@@ -12,6 +12,7 @@ local log,dump=require("wetgenes.logs"):export("log","dump")
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.bake=function(oven,gui)
+
 	local gui=gui or {}
 	gui.oven=oven
 	
@@ -31,24 +32,20 @@ end
 
 gui.theme=function(def)
 	if not gui.master then gui.setup() end	
-	if type(def)=="string" then
-		def=gui.master.actions[def].json
-	end
 	gui.master:clean_all()
 	gui.master:set_theme(def)
 	gui.plan_windows(gui.master)
 end
 
 gui.setup=function()
+	log("setup",M.modname)
 
 	gui.loads()
 
 	if gui.master then return end -- only setuip once
 
 	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font="Vera",skin=0,no_keymove=true})
-
-	local ssettings=oven.rebake("wetgenes.gamecake.spew.settings")
-	gui.theme(ssettings.get("gui_theme","theme_dark_medium"))
+	gui.master:set_theme(oven.rebake("wetgenes.gamecake.spew.settings").get("gui_theme","theme_dark_medium"))
 
 	
 	oven.rebake("wetgenes.gamecake.zone.gui_options").setup(gui)
@@ -59,7 +56,7 @@ gui.setup=function()
 --	gui.data_setup()
 
 	gui.plan_windows()
-	
+
 	local datas=gui.master.datas
 	gui.master.ids.window_user.hidden=false
 	if #datas.get("user_session"):value() > 8 then -- try auto login

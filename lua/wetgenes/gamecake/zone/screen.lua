@@ -7,6 +7,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local wzips=require("wetgenes.zips")
 
 local wques=require("wetgenes.ques")
@@ -113,6 +115,7 @@ M.bake=function(oven,screen)
 	screen.occlusion_scale=1
 
 	screen.setup=function()
+	log("setup",M.modname)
 
 		screen.shader_args=""
 

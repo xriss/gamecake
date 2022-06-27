@@ -13,6 +13,7 @@ M.bake=function(oven,B) B=B or {} -- bound to oven for gl etc
 
 
 B.setup=function(zgui)
+	log("setup",M.modname)
 	
 	local datas=zgui.master.datas
 	

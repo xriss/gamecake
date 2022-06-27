@@ -9,6 +9,8 @@ local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
 local wzips=require("wetgenes.zips")
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -41,6 +43,7 @@ M.bake=function(oven,shadow)
 	end
 	
 	shadow.setup=function()
+	log("setup",M.modname)
 
 		shadow.loads()
 

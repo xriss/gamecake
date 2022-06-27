@@ -11,6 +11,7 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 
 local snames=require("wetgenes.gamecake.spew.names")
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -168,6 +169,7 @@ main.loads=function()
 end
 
 main.setup=function()
+	log("setup",M.modname)
 
 	if main.setup_done then return end -- warning, this is called repeatedly...
 

@@ -69,6 +69,7 @@ log("oven","Saving "..scores.filename)
 	end
 	
 	function scores.setup(max_up)
+	log("setup",M.modname,max_up)
 
 		scores.show_high=true
 

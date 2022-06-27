@@ -95,7 +95,7 @@ function wwindows.setup(widget,def)
 --	widget.stack_axis=widget.stack_axis -- "x" or "y"
 	-- the axis along which the the windows stack
 	
-	widget.smode=widget.smode or "topleft"
+	widget.smode="topleft"
 
 	widget.update=wwindows.update
 	widget.draw=wwindows.draw
