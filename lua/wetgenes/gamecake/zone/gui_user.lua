@@ -27,6 +27,7 @@ B.setup=function(zgui)
 		datas.get("user_email"):value( ssettings.get("wetgenes_user_email") )
 		datas.get("user_password"):value( ssettings.get("wetgenes_user_password") )
 		datas.get("user_password_remember"):value( ssettings.get("wetgenes_user_password_remember") )
+		datas.get("user_auto_login"):value( ssettings.get("wetgenes_user_auto_login") )
 		datas.get("user_session"):value( ssettings.get("wetgenes_user_session") )
 		datas.get("user_ip"):value( ssettings.get("wetgenes_user_ip") )
 	end
@@ -42,6 +43,7 @@ B.setup=function(zgui)
 			ssettings.set("wetgenes_user_password","" ) -- forget
 		end
 		ssettings.set("wetgenes_user_password_remember",datas.get("user_password_remember"):value() )
+		ssettings.set("user_auto_login",datas.get("user_auto_login"):value() )
 		ssettings.set("wetgenes_user_session",datas.get("user_session"):value() )
 		ssettings.set("wetgenes_user_ip",datas.get("user_ip"):value() )
 		ssettings.save()
@@ -53,6 +55,7 @@ B.setup=function(zgui)
 	datas.new({id="user_email",class="string",hooks=zgui.hooks,str=""})
 	datas.new({id="user_password",class="string",hooks=zgui.hooks,str=""})
 	datas.new({id="user_password_remember",class="number",hooks=zgui.hooks,num=0})
+	datas.new({id="user_auto_login",class="number",hooks=zgui.hooks,num=1})
 	datas.new({id="user_session",class="string",hooks=zgui.hooks,str=""})
 	datas.new({id="user_ip",class="string",hooks=zgui.hooks,str=""})
 	datas.new({id="user_flags",class="number",hooks=zgui.hooks,num=0})
@@ -162,7 +165,7 @@ B.setup=function(zgui)
 
 			login_foot(body)
 			
-			if mode=="autologin" then
+			if mode=="auto" then
 				refresh("Login")
 				zgui.master.ids.window_user.hidden=true
 			else
@@ -210,9 +213,10 @@ B.setup=function(zgui)
 							hy=6,class="fill",
 							{class="text",text="Locked to IP",text_align="left"},
 							{class="textedit",data="user_ip",color=0},
-							{},
 							{class="text",text="Session ID",text_align="left"},
 							{class="textedit",data="user_session",color=0},
+							{class="text",text="Auto Login?",hx=10},
+							{class="checkbox",data="user_auto_login",hx=2,text_false="no",text_true="yes"},
 							{class="button",id="user_login_session",text="Login with session",color=0},
 						}
 					}
@@ -255,6 +259,7 @@ B.setup=function(zgui)
 
 	zgui.plan_windows_list.user=plan_windows
 
+	
 end
 
 

@@ -734,6 +734,11 @@ function wwindow.setup(window,def)
 -- you should put your widgets here
 	window.children=window.win_canvas
 
+	window.reset_layout={}
+	for _,n in ipairs{"hidden","px","py","hx","hy"} do
+		window.reset_layout[n]=window[n]
+	end
+	
 	return window
 end
 

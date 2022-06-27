@@ -82,7 +82,6 @@ function B.setup(widget,def)
 
 	widget.class="checkbox"
 	
-	widget.key=key
 	widget.update=B.update
 
 	widget.solid=true

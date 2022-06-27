@@ -39,6 +39,48 @@ B.setup=function(zgui)
 		end
 		print(m.id)
 	end
+	
+	zgui.click["layout_save"]=function(it)
+		local windows=zgui.screen:get_windows()
+		local window_layout={}
+		for i,window in ipairs(windows) do
+			local layout={depth=i}
+			for _,n in ipairs{"id","hidden","px","py","hx","hy"} do
+				layout[n]=window[n]
+			end
+			window_layout[window.id]=layout
+		end
+		ssettings.set("window_layout",window_layout)
+	end
+	zgui.click["layout_load"]=function(it)
+		local windows=zgui.screen:get_windows()
+		local window_layout=ssettings.get("window_layout",{})
+		for i,window in ipairs(windows) do
+			local layout=window_layout[window.id]
+			if layout then
+				for _,n in ipairs{"hidden","px","py","hx","hy"} do
+					window[n]=layout[n]
+				end
+			end
+		end
+		zgui.master.request_layout=true
+	end
+	zgui.click["layout_reset"]=function(it)
+		local windows=zgui.screen:get_windows()
+		for i,window in ipairs(windows) do
+			local layout=window.reset_layout
+			if layout then
+				for _,n in ipairs{"hidden","px","py","hx","hy"} do
+					window[n]=layout[n]
+				end
+			end
+		end
+		zgui.master.request_layout=true
+	end
+
+	zgui.click["file_quit"]=function(it)
+		oven.next=true
+	end
 
 	local plan_windows=function()
 

@@ -63,7 +63,15 @@ gui.setup=function()
 	local datas=gui.master.datas
 	gui.master.ids.window_user.hidden=false
 	if #datas.get("user_session"):value() > 8 then -- try auto login
-		(gui.click["user_login_session"])(nil,"autologin")
+		if datas.get("user_auto_login"):value()~=0 then
+			if gui.click["user_login_session"] then
+				(gui.click["user_login_session"])(nil,"auto")
+			end
+		end
+	end
+
+	if gui.click["layout_load"] then
+		(gui.click["layout_load"])(nil,"auto")
 	end
 
 	return gui
