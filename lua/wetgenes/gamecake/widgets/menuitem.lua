@@ -262,7 +262,7 @@ end
 		end
 	end
 	
-	if hook=="click" then
+	if hook=="click" or hook=="release" then
 	
 		if widget.parent.class~="menubar" then
 	
@@ -303,7 +303,7 @@ function wmenuitem.setup(widget,def)
 
 	widget.class_hooks={wmenuitem.hooks}
 	
-	widget.hide_when_clicked=widget.hide_when_clicked
+--	widget.hide_when_clicked=widget.hide_when_clicked
 --	widget.remove_when_clicked=widget.remove_when_clicked
 
 	widget.menu_add=wmenuitem.menu_add

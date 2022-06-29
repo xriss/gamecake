@@ -233,7 +233,21 @@ function wmaster.setup(widget,def)
 					end
 					
 					master.over:set_dirty()
+				
+				elseif master.over and master.over~=master then -- mouse up but not mouse down ( ie we dragged and released )
+
+					if ups.button("mouse_left_clr")  then
+						master.over:call_hook_later("release",{keyname="mouse_left"}) -- its a left click
+					elseif ups.button("mouse_right_clr")  then
+						master.over:call_hook_later("release",{keyname="mouse_right"}) -- its a right click
+					elseif ups.button("mouse_middle_clr")  then
+						master.over:call_hook_later("release",{keyname="mouse_middle"}) -- its a middle click
+					else
+						master.over:call_hook_later("release") -- probably not a mouse click
+					end
 					
+					master.over:set_dirty()
+
 				end
 				
 				if master.active then

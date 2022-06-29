@@ -50,7 +50,7 @@ function wmenudrop.drop(widget)
 	if widget.data then -- build a menu for this data
 	
 		local hooks=function(hook,w,dat)
-			if hook=="click" then
+			if hook=="click" or hook=="release" then
 				widget.data:value(w.id)
 				widget:update()
 				widget:call_hook_later("menudrop",{value=widget.data:value()}) -- tell the master widget that we dropped and changed
@@ -76,8 +76,14 @@ end
 
 
 function wmenudrop.class_hooks(hook,widget,dat)
-	if hook=="active" or hook=="over" then
-		wmenudrop.drop(widget)
+	if widget.drop then
+		if hook==widget.drop then
+			wmenudrop.drop(widget)
+		end
+	else
+		if hook=="active" or hook=="over" then
+			wmenudrop.drop(widget)
+		end
 	end
 end
 

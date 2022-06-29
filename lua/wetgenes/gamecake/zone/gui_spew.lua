@@ -150,7 +150,7 @@ B.setup=function(zgui)
 			{
 				class="three",size="full",three_axis="y",
 				{ hy=1, size="fullx",
-					{class="menudrop",id="chat_display",data="chat_display",color=0,hx=5},
+					{class="menudrop",id="chat_display",data="chat_display",color=0,hx=5,drop="active"},
 				},
 				{ class="scroll",id="window_chat_scroll", },
 				{ hy=1, size="fullx",

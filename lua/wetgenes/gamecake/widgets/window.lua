@@ -281,7 +281,7 @@ wwindow.window_hooks=function(_window,act,widget)
 
 	local window,screen=(_window or widget):window_screen()
 
-	if act=="click" and window~=widget then -- turn a click into another act
+	if ( act=="click" or act=="release" ) and window~=widget then -- turn a click into another act
 		act=widget.id
 	end
 
