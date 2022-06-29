@@ -18,6 +18,12 @@ B.setup=function(zgui)
 	local datas=zgui.master.datas
 	
 	datas.new({id="chat_input",class="string",hooks=zgui.hooks,str=""})
+	local list={
+		{ str="Chat", },
+		{ str="Room", },
+	}
+	for i,v in ipairs(list) do v.num=i end
+	datas.new({id="chat_display",class="list",hooks=zgui.hooks,num=1,list=list})
 
 	zgui.confirm["window_chat_input"]=function(it)
 		local master=zgui.master
@@ -143,7 +149,8 @@ B.setup=function(zgui)
 			hy=16,
 			{
 				class="three",size="full",three_axis="y",
-				{ hy=0, size="fullx",
+				{ hy=1, size="fullx",
+					{class="menudrop",id="chat_display",data="chat_display",color=0,hx=5},
 				},
 				{ class="scroll",id="window_chat_scroll", },
 				{ hy=1, size="fullx",

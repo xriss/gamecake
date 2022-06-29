@@ -72,7 +72,11 @@ B.setup=function(zgui)
 			local layout=window.reset_layout
 			if layout then
 				for _,n in ipairs{"hidden","px","py","hx","hy"} do
-					window[n]=layout[n]
+					if window.id=="window_options" and n=="hidden" then
+						-- do not change hidden state of options window
+					else
+						window[n]=layout[n]
+					end
 				end
 			end
 		end

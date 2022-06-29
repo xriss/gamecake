@@ -209,7 +209,7 @@ function wmaster.setup(widget,def)
 
 				master.press=false
 
-				if master.over and master.over~=master --[[ and master.active==master.over ]] then -- no click if we drag away from button
+				if master.over and master.over~=master and master.active==master.over then -- no click if we drag away from button
 				
 					if not master.over.never_set_focus_edit then
 --print("active",master.active,master.active.class)
