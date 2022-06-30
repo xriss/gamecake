@@ -280,8 +280,10 @@ wwindow.window_hooks=function(_window,act,widget)
 --print(act,widget and widget.id)
 
 	local window,screen=(_window or widget):window_screen()
+	local old_act="click"
 
 	if ( act=="click" or act=="release" ) and window~=widget then -- turn a click into another act
+		old_act=act
 		act=widget.id
 	end
 
@@ -363,9 +365,13 @@ end
 
 	if act=="win_hide" or act=="win_menu" then -- clicking the win_menu button will also close the window
 	
-		window.hidden=true -- hide it
-		window.master:call_descendents(function(w) w:set_dirty() end)
-		window.master.request_layout=true
+		if act=="win_menu" and old_act=="release" then
+			-- do not hide
+		else
+			window.hidden=true -- hide it
+			window.master:call_descendents(function(w) w:set_dirty() end)
+			window.master.request_layout=true
+		end
 		
 	elseif act=="win_show" then
 	
@@ -745,11 +751,6 @@ function wwindow.setup(window,def)
 		window:resize()
 		window.reset_layout.hx=window.win_fbo.hx
 		window.reset_layout.hy=window.win_fbo.hy
---		window.hx=window.win_fbo.hx
---		window.hy=window.win_fbo.hy
---print(window.id,window.hx,window.hy,window.win_fbo.hx,window.win_fbo.hy)
---		window:resize()
---		window:layout()
 	end
 	
 	
