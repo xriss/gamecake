@@ -11,6 +11,8 @@ function M.bake(oven,wpages)
 
 wpages=wpages or {}
 
+local widget_data=oven.rebake("wetgenes.gamecake.widgets.data")
+
 function wpages.update(widget)
 	return widget.meta.update(widget)
 end
@@ -34,7 +36,7 @@ function wpages.layout(widget)
 
 		if widget.data and widget.data.num==i then
 			v.hidden=false
-		else
+		elseif widget.data then
 			v.hidden=true
 		end
 	end
@@ -47,6 +49,8 @@ function wpages.setup(widget,def)
 
 	widget.class="pages"
 	
+--	widget.data=widget.data or widget_data.new_data({master=widget.master})
+
 	widget.update=wpages.update
 	widget.draw=wpages.draw
 	widget.layout=wpages.layout

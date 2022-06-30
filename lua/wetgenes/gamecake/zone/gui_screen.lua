@@ -109,7 +109,7 @@ B.setup=function(zgui)
 		local win=def.add(zgui.screen.windows,{
 
 			class="window",px=1,py=1,id="window_screen",title="Screen",hidden=true,
-			hx=12,hy=1,size="fit",
+			hx=12,hy=13,size="fit",
 
 			{text="Mode"},
 			{class="button",id="screen_mode_change",data="screen_mode",color=0},

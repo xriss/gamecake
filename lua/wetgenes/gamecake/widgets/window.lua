@@ -255,8 +255,8 @@ wwindow.window_hooks_reset=function(widget)
 --	widget:resize()
 --	widget:layout()
 --print("window reset",widget.id,widget.hx,widget.hy,"...",widget.win_fbo.hx,widget.win_fbo.hy)
-	widget.hx=widget.win_fbo.hx
-	widget.hy=widget.win_fbo.hy
+	widget.hx=widget.reset_layout.hx
+	widget.hy=widget.reset_layout.hy
 	winclamp(widget)
 	widget:layout()
 	widget:build_m4()
@@ -538,7 +538,8 @@ function wwindow.setup(window,def)
 	
 	-- use this to recreate the magic top left windows icon/menu anywhere you want
 	window.win_menu_def={
-			class="menuitem",
+			class="menudrop",
+			drop="active",
 			topmenu=true,
 			px=0,
 			py=0,
@@ -738,6 +739,19 @@ function wwindow.setup(window,def)
 	for _,n in ipairs{"hidden","px","py","hx","hy"} do
 		window.reset_layout[n]=window[n]
 	end
+	window.reset_layout_resize=function()
+		window:resize()
+		window:layout()
+		window:resize()
+		window.reset_layout.hx=window.win_fbo.hx
+		window.reset_layout.hy=window.win_fbo.hy
+--		window.hx=window.win_fbo.hx
+--		window.hy=window.win_fbo.hy
+--print(window.id,window.hx,window.hy,window.win_fbo.hx,window.win_fbo.hy)
+--		window:resize()
+--		window:layout()
+	end
+	
 	
 	return window
 end

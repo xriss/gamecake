@@ -193,7 +193,7 @@ B.setup=function(zgui)
 
 		local win=def.add(zgui.screen.windows,{
 
-			class="window",px=2,py=2,size="fit",id="window_user",title="User",hidden=true,
+			class="window",px=2,py=2,hy=8,size="fit",id="window_user",title="User",hidden=true,
 			{
 				class="tabpages",hy=8,color=0,list={"Login","Create","Reset","Status"},id="window_user_pages",
 				{
