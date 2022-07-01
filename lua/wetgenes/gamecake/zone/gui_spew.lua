@@ -144,7 +144,7 @@ B.setup=function(zgui)
 
 		local win=def.add(zgui.screen.windows,{
 
-			class="window",px=16,py=2,id="window_chat",title="Chat",hidden=false,
+			class="window",px=16,py=2,id="window_chat",title="Chat",hidden=true,
 			panel_mode="fill",
 			hy=16,
 			{

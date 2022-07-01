@@ -60,7 +60,11 @@ B.setup=function(zgui)
 			local layout=window_layout[window.id]
 			if layout then
 				for _,n in ipairs{"hidden","px","py","hx","hy"} do
-					window[n]=layout[n]
+					if window.id=="window_options" and n=="hidden" then
+						-- do not change hidden state of options window
+					else
+						window[n]=layout[n]
+					end
 				end
 			end
 		end
@@ -68,8 +72,9 @@ B.setup=function(zgui)
 	end
 	zgui.click["layout_reset"]=function(it)
 		local windows=zgui.screen:get_windows()
+		local window_layout=zgui.master.window_layout -- default layout data that we can copy paste from settings file
 		for i,window in ipairs(windows) do
-			local layout=window.reset_layout
+			local layout=window_layout[window.id] or window.reset_layout
 			if layout then
 				for _,n in ipairs{"hidden","px","py","hx","hy"} do
 					if window.id=="window_options" and n=="hidden" then
@@ -100,7 +105,7 @@ B.setup=function(zgui)
 
 		local win=def.add(zgui.screen.windows,{
 
-			class="window",px=4,py=2,id="window_options",title="Options",hidden=false,
+			class="window",px=4,py=2,id="window_options",title="Options",hidden=true,
 			hx=12,hy=8,
 			{
 				class="fill",size="fit",
