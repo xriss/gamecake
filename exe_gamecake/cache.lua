@@ -24,6 +24,7 @@ end
 
 for i,v in ipairs( os.matchfiles("../lua/**.lua") or {} ) do dofilename(i,v) end
 for i,v in ipairs( os.matchfiles("../lua/**.glsl") or {} ) do dorawfilename(i,v) end
+for i,v in ipairs( os.matchfiles("../lua/**.csv") or {} ) do dorawfilename(i,v) end
 
 
 for i,v in ipairs( LUA_CACHE_FILES or {} ) do
