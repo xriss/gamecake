@@ -35,7 +35,7 @@ B.setup=function(zgui)
 	end
 
 	local spew_hook=function(spew,msg,str)
---		print(str)
+		print(str)
 --		dump(msg)
 --[[
 		local t={}

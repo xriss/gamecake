@@ -63,7 +63,7 @@ if you want to keep it arround.
 
 ]]
 
-M.connect=function(tasks,host,port)
+M.connect=function(tasks,host,port,url)
 
 	M.id=M.id+1
 
@@ -124,9 +124,78 @@ M.connect=function(tasks,host,port)
 	spew.thread=tasks:add_thread({
 		count=1,
 		id="spew_thread_"..spew.id,
-		globals={ client_host=(server or "wetgenes.com") , client_port=(port or 5223) },
+		globals={ client_host=(host or "wetgenes.com") , client_port=(port or 5223 ) , client_url=(url or "wss://wetgenes.com/_websocket") },
+--		globals={ client_host=(host or "wetgenes.com") , client_port=(port or 5223 ) , client_url=(url or "ws://localhost:5223") },
+--		globals={ client_host=(host or "wetgenes.com") , client_port=(port or 5223 ) , client_url=(url or "ws://localhost:7071") },
 		code=tasks.client_code,
 	})
+
+-- web sockets are behaving strange inside a webworker (seem to be a race condition maybe?) and just failing to connect
+-- but the same code works fine here on the main thread
+if false then
+	local wjson = require("wetgenes.json")
+	local js_eval -- function call into javascript if we are an emcc build
+	do
+		local ok,lib=pcall(function() return require("wetgenes.win.emcc") end )
+		if ok and lib then js_eval=lib.js_eval end
+	end
+	local js_call=function(script,opts)
+		local js=[[
+(function(opts){
+	var ret={};
+]]..script..[[
+	return JSON.stringify(ret);
+})(]]..wjson.encode(opts or {})..[[);
+]]
+		local rets=js_eval(js)
+		return wjson.decode( rets or "{}" ) or {}
+	end
+	
+print("starting test client code")
+
+	if js_eval then -- js mode
+print("starting test client code js on main thread")
+
+		js_call([[
+
+globalThis.wetgenes_tasks=globalThis.wetgenes_tasks || {};
+globalThis.wetgenes_tasks[opts.task_id]=globalThis.wetgenes_tasks[opts.task_id] || {};
+
+var data=globalThis.wetgenes_tasks[opts.task_id];
+data.send=[];
+data.recv=[];
+
+data.onmessage=function(e){
+	data.recv.push(e.data);
+}
+data.onopen=function(e){
+	console.log(e);
+}
+data.onclose=function(e){
+	console.log(e);
+}
+data.onerror=function(e){
+	console.log(e);
+}
+
+if(opts.url)
+{
+	data.sock=new WebSocket(opts.url);
+	data.sock.onmessage=data.onmessage;
+	data.sock.onopen=data.onopen;
+	data.sock.onclose=data.onclose;
+	data.sock.onerror=data.onerror;
+console.log(data.sock);
+}
+
+]],{task_id="test",url="ws://localhost:7071"})
+
+print("Main thread done")
+
+	end
+	
+end
+
 
 	spew.task=tasks:add_task({
 		code=function(linda,task_id,task_idx)

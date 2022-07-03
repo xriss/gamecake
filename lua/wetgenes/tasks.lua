@@ -494,8 +494,8 @@ M.tasks_functions.http_code=function(linda,task_id,task_idx)
 
 	local js_eval -- function call into javascript if we are an emcc build
 	do
-		local suc,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
-		if lib then js_eval=lib.js_eval end
+		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
+		if ok and lib then js_eval=lib.js_eval end
 	end
 
 	local http = lanes.require("socket.http")
@@ -804,17 +804,116 @@ A basic function to handle (web)socket client connection.
 
 ]]
 M.tasks_functions.client_code=function(linda,task_id,task_idx)
+print("starting client code")
+	set_debug_threadname(task_id)
 
+	local wjson = lanes.require("wetgenes.json")
+	local js_eval -- function call into javascript if we are an emcc build
+	do
+		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
+		if ok and lib then js_eval=lib.js_eval end
+	end
+	local js_call=function(script,opts)
+		local js=[[
+(function(opts){
+	var ret={};
+]]..script..[[
+	return JSON.stringify(ret);
+})(]]..wjson.encode(opts or {})..[[);
+]]
+		local rets=js_eval(js)
+		return wjson.decode( rets or "{}" ) or {}
+	end
+	
 	local socket = lanes.require("socket")
 	local err
 	local client
-	if client_host and client_port then -- auto open a client connection
-		client , err = socket.connect(client_host,client_port)
-		if client then client:settimeout(0.00001) end
+	if js_eval then -- js mode
+print("starting client code js")
+
+		js_call([[
+
+globalThis.wetgenes_tasks=globalThis.wetgenes_tasks || {};
+globalThis.wetgenes_tasks[opts.task_id]=globalThis.wetgenes_tasks[opts.task_id] || {};
+
+var data=globalThis.wetgenes_tasks[opts.task_id];
+data.send=[];
+data.recv=[];
+
+data.onmessage=function(e){
+	console.log("onmessage OK");
+	data.recv.push(e.data);
+}
+data.onopen=function(e){
+	console.log("onopen OK");
+	console.log(e);
+}
+data.onclose=function(e){
+	console.log("onclose OK");
+	console.log(e);
+}
+data.onerror=function(e){
+	console.log("onerror OK");
+	console.log(e);
+}
+
+if(opts.url)
+{
+	data.sock=new WebSocket(opts.url);
+	data.sock.onmessage=data.onmessage;
+	data.sock.onopen=data.onopen;
+	data.sock.onclose=data.onclose;
+	data.sock.onerror=data.onerror;
+console.log(data.sock);
+}
+
+]],{task_id=task_id,url=client_url})
+	else
+		if client_host and client_port then -- auto open a client connection
+			client , err = socket.connect(client_host,client_port)
+			if client then client:settimeout(0.00001) end
+		end
 	end
 
 	local send=function(memo)
+	
+		if js_eval then -- need js mode
+			local ret=js_call([[
 
+var data=globalThis.wetgenes_tasks[opts.task_id];
+
+if(opts.data)
+{
+console.log("QUEUE:"+opts.data);
+	data.send.push(opts.data);
+}
+
+if(data.sock)
+{
+	if(data.sock.readyState==1)
+	{
+		while(data.send.length>0)
+		{
+console.log("SEND:"+send[0]);
+			data.sock.send(data.send.shift());
+		}
+	}
+	else
+	{
+//console.log("SOCK:"+data.sock.readyState);
+	}
+}
+while(data.recv.length>0)
+{
+console.log("RECV:"+recv[0]);
+	ret.data=(ret.data || "")+data.recv.shift();
+}
+
+]],{task_id=task_id,data=memo.data})
+
+			return ret
+		end -- end js mode
+		
 		local ret={}
 	
 		if memo.cmd then -- this is a special cmd eg to close or open a socket

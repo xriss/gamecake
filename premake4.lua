@@ -253,6 +253,7 @@ if EMCC then
 --		"--emrun",
 		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 ",
 		"-s ALLOW_MEMORY_GROWTH=1",
+--		"-s TOTAL_MEMORY=1GB",
 		"-s \"BINARYEN_METHOD='native-wasm'\"",
 		"-s EXPORTED_RUNTIME_METHODS=\"['cwrap']\"",
 		"-s WASM=1",
