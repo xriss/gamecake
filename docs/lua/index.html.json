@@ -4722,7 +4722,7 @@
    "body": "<pre><code>local spew=require(&quot;wetgenes.spew&quot;).connect(oven.tasks)\n</code></pre>\n<p>You must pass in a previously created tasks object that you will be \ncalling update on regually so that our coroutines can run. eg oven.tasks</p>\n<p>Connect and talk to the wetgenes spew server using wetgenes.tasks \ntask for meta state and a thread for lowlevel sockets.</p>\n<p>You push messages in and can pull messages out or, setup a hook \nfunction to auto pull and process messages in our coroutine as they are \nreceived.</p>\n",
    "count": 3,
    "file": "../lua/wetgenes/spew.lua",
-   "line": 9,
+   "line": 11,
    "name": "lua.wetgenes.spew",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua"
   },
@@ -4730,7 +4730,7 @@
    "body": "<pre><code>local spew=require(&quot;wetgenes.spew&quot;).connect(oven.tasks)\nlocal spew=require(&quot;wetgenes.spew&quot;).connect(oven.tasks,host)\nlocal spew=require(&quot;wetgenes.spew&quot;).connect(oven.tasks,host,port)\n</code></pre>\n<p>You must pass in an active tasks object.</p>\n<p>Create task and thread connection to the host. host and port \ndefault to wetgenes.com and 5223 so can be left blank unless you want \nto connect to a local host for debugging.</p>\n<p>There are now 3 ways to handle msgs</p>\n<pre><code>spew.push(msg)\n</code></pre>\n<p>To send a msg</p>\n<pre><code>local msg,s=spew.pull()\n</code></pre>\n<p>To receive a message, will return nil if no messages available. The \nsecond return value is the input string packet for this decoded \nmessage.</p>\n<pre><code>spew.hook=function(msg,s) print(msg) end\n</code></pre>\n<p>Set a hook functions to auto pull all available messages durring tasks \nupdate. Note that if you do this spew.pull() will no longer work as all \nmessages are auto pulled and sent to this hook function.</p>\n<p>Note when receiving a msg you must not alter or cache the table you \nare given as it is internal data and is reused. You must duplicate it \nif you want to keep it arround.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/spew.lua",
-   "line": 30,
+   "line": 32,
    "name": "lua.wetgenes.spew.connect",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua"
   },
@@ -4738,7 +4738,7 @@
    "body": "<p>test</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/spew.lua",
-   "line": 236,
+   "line": 279,
    "name": "lua.wetgenes.spew.test",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua"
   },
