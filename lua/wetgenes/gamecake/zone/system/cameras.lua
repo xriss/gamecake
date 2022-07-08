@@ -18,7 +18,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.bake=function(oven,B) B=B or {} -- bound to oven for gl etc
 
 
-	local gui=oven.rebake(oven.modname..".gui")
+	local gui=oven.rebake("wetgenes.gamecake.zone.gui")
+--	local ok,gui=pcall(function() return oven.rebake(oven.modname..".gui") end)
 
 	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 
@@ -172,11 +173,11 @@ B.camera.update=function(camera)
 			local do_orbit=mouse_button
 			local do_zoom=true
 
-			if gui.master.hidden then -- no gui displayed
+			if gui and gui.master and gui.master.hidden then -- no gui displayed
 
 				do_orbit=true
 
-			elseif gui.master.over then -- ignore clicks on gui
+			elseif gui and gui.master and gui.master.over then -- ignore clicks on gui
 
 				do_orbit=false
 				do_zoom=false
