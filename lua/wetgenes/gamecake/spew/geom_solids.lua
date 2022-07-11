@@ -350,6 +350,62 @@ M.fill=function(geom)
 		return it
 	end
 
+-- create a floor/wall axis aligned quad grid, given number of divisions
+-- with 0 for a flat zero in that dimension
+	geom.trigrid=function(it,gx,gy,gz)
+		if type(gx)=="table" then gz=gx[3] gy=gx[2] gx=gx[1] end
+
+		it=geom.new(it)
+
+		it.verts={}
+		it.polys={}
+		
+		local vidx=0
+		local pidx=0
+		
+		local sx,sy,sz=((gx>0) and (1/gx) or 1),((gy>0) and (1/gy) or 1),((gz>0) and (1/gz) or 1)
+		local dx,dy,dz=gx+1,gy+1,gz+1
+		
+		for px=0,gx do
+			for py=0,gy do
+				for pz=0,gz do
+					vidx=vidx+1
+					it.verts[vidx]={px*sx,py*sy,pz*sz}
+				end
+			end
+		end
+		
+		-- flat dimension
+		if gx<=0 then	-- yz plane
+		
+		elseif gy<=0 then	-- xz plane
+		
+			for px=0,gx-1,1 do
+				local bx=dz*px+1
+				for pz=0,gz-1 do
+					local bz=bx+pz
+					if (px+pz)%2==0 then
+						pidx=pidx+1
+						it.polys[pidx]={ bz , bz+dz , bz+1 }
+						pidx=pidx+1
+						it.polys[pidx]={ bz+dz , bz+1+dz , bz+1 }
+					else
+						pidx=pidx+1
+						it.polys[pidx]={ bz , bz+dz , bz+1+dz }
+						pidx=pidx+1
+						it.polys[pidx]={ bz , bz+1+dz , bz+1 }
+					end
+				end
+			end
+			
+		elseif gz<=0 then	-- xy plane
+		
+		end
+		
+
+dprint(it)
+		return it
+	end
 
 			
 	return geom

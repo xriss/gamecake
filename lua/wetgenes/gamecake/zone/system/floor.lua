@@ -35,6 +35,7 @@ B.system=function(floors)
 
 	floors.caste="floor"
 	floors.time=0
+	floors.y=0
 
 	floors.RND=math.random()
 
@@ -45,9 +46,16 @@ B.floors.update=function(floors)
 	floors.time=(floors.time+(1/60))%120
 end
 
+--[[
+
+A *big* default floor centered on the camera unless disabled.
+
+]]
 B.floors.draw=function(floors)
 
-	local sky=floors.scene.systems.sky
+	if not floors.y then return end -- set to nil to disable
+
+--	local sky=floors.scene.systems.sky
 
 	gl.PushMatrix()
 
@@ -61,20 +69,74 @@ B.floors.draw=function(floors)
 		local z=(camera.mtx[11]*-s + camera.mtx[15])
 
 
-		gl.Uniform4f( p:uniform("offset") , x , 0 , z , 0 )
+		gl.Uniform4f( p:uniform("offset") , x , floors.y , z , 0 )
 
 		gl.Uniform4f( p:uniform("time") , floors.time,1,1,1 )
 
-		gl.Uniform4f( p:uniform("sun") , math.pi*2*(((sky.time)/60)%1) , 0 , 0.050 , 0.150 )
+--		gl.Uniform4f( p:uniform("sun") , math.pi*2*(((sky.time)/60)%1) , 0 , 0.050 , 0.150 )
 
-		local inverse_modelview=M4(gl.matrix(gl.MODELVIEW)):inverse()
-		local inverse_projection=M4(gl.matrix(gl.PROJECTION)):inverse()
+--		local inverse_modelview=M4(gl.matrix(gl.MODELVIEW)):inverse()
+--		local inverse_projection=M4(gl.matrix(gl.PROJECTION)):inverse()
 
-		gl.UniformMatrix4f(p:uniform("inverse_modelview"),  inverse_modelview )
-		gl.UniformMatrix4f(p:uniform("inverse_projection"), inverse_projection )
+--		gl.UniformMatrix4f(p:uniform("inverse_modelview"),  inverse_modelview )
+--		gl.UniformMatrix4f(p:uniform("inverse_projection"), inverse_projection )
 
 
 	end)
+
+	gl.PopMatrix()
+
+end
+
+B.floors.create=function(floors,boot)
+	local floor={}
+	floor.scene=floors.scene
+	floor.boot=boot
+	floor.caste=floors.caste
+
+	setmetatable(floor,B.floor_metatable)
+
+	floor.pos=V3( boot.pos or {  0,  0,  0} )
+	floor.siz=V3( boot.siz or {100,  1,100} )
+	floor.rez=V3( boot.rez or {100,  0,100} )
+
+	floor.geom=geom.trigrid({},floor.rez)
+--	floor.geom=geom.box({},{{-10,-10,-10},{10,10,10}})
+
+	for i,v in ipairs( floor.geom.verts ) do
+		v[2]=v[2]-math.random()
+	end
+	
+	local m=M4()
+	m:translate(floor.pos)
+	m:scale(floor.siz)
+	geom.adjust_by_m4(floor.geom,m)
+
+	local world=floors.scene.systems.physics.world
+	floor.bodys={}
+	local tp,tv=geom.get_colision_tables( floor.geom )
+	if #tp>0 then
+		local mesh=world:mesh( tp,tv )
+		local shape=world:shape("mesh",mesh,true)
+		local body=world:body( "rigid" , shape , 0,  0,0,0  )
+		floor.bodys[ #floor.bodys+1 ]=body
+		body:restitution( 1 )
+		body:friction( 0.8 , 0.1 , 0.1 )
+	end
+
+	return floor
+end
+
+B.floor.update=function(floor)
+
+end
+
+B.floor.draw=function(floor)
+
+	gl.PushMatrix()
+
+--	gl.Translate(floor.pos)
+	geom.draw(floor.geom,"xyz_normal_ntoon")
 
 	gl.PopMatrix()
 

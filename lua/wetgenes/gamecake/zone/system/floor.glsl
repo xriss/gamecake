@@ -15,8 +15,8 @@ uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
 
-uniform mat4 inverse_modelview;
-uniform mat4 inverse_projection;
+//uniform mat4 inverse_modelview;
+//uniform mat4 inverse_projection;
 
 uniform mat4 camera;
 uniform mat4 inverse_camera;
@@ -31,7 +31,7 @@ uniform vec4 offset; // center of grid
 
 in vec3 a_vertex;
 
-out vec2 xy;
+out vec3 xy;
 out vec3 eye;
 
 out vec4 pos;
@@ -39,7 +39,7 @@ out vec4 pos;
 void main()
 {
 	vec4 v=vec4(a_vertex.xyz + offset.xyz, 1.0);
-	xy=v.xz;
+	xy=vec3(v.xz,length(a_vertex.xz));
 
 	
 	gl_Position = projection * modelview * v;
@@ -56,15 +56,15 @@ void main()
 in vec4 pos;
 in vec3 eye;
 
-in vec2 xy;
+in vec3 xy;
 out vec4 FragColor;
 
 void main(void)
 {
-	float l=min( length(xy)/256.0 , 1.0  );
+	float l=min( xy.z/256.0 , 1.0  );
 	vec3 c1=mix( vec3( 0.5 , 0.5 , 0.5 ) , vec3( 0.5 , 0.5 , 0.5 ) , l );
 	vec3 c2=mix( vec3( 0.6 , 0.6 , 0.6 ) , vec3( 0.5 , 0.5 , 0.5 ) , l );
-	vec2 cheque=floor( (xy-vec2(2.5))/5.0 );
+	vec2 cheque=floor( (xy.xy-vec2(2.5))/5.0 );
 	float a=mod(cheque.x+cheque.y,2.0);
 
 	FragColor=vec4( mix(c1,c2,a) , 1.0 );
