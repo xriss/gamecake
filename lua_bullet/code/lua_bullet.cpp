@@ -315,6 +315,9 @@ double hmin,hmax;
 int axis,dtype,flip;
 int i;
 btStridingMeshInterface *mesh;
+btCollisionShape *shape;
+btTransform trans;
+btQuaternion quat;
 
 // create ptr ptr userdata
 	pp=(btCollisionShape**)lua_newuserdata(l, sizeof(btCollisionShape*));
@@ -477,6 +480,52 @@ btStridingMeshInterface *mesh;
 
 					gContactAddedCallback = gContactAddedCallback_smooth_mesh;
 				}
+		}
+		else
+		if(0==strcmp(tp,"compound"))
+		{
+			count=lua_objlen(l,2); // must be table
+			if( count>0 )
+			{
+				*pp = new btCompoundShape();
+				for(i=0;i<count;i+=1)
+				{
+					lua_rawgeti(l,2,i+1);
+					
+					length=lua_objlen(l,-1); // must be a child table { shape , px,py,pz, qx,qy,qz,qw }
+					
+					trans.setIdentity();
+			
+					lua_rawgeti(l,-1,1); lua_rawgeti(l,-1,0); shape=lua_bullet_shape_ptr(l,-1); lua_pop(l,2); // must have shape table with shape in [0]
+
+					if(length>=4) // have position
+					{
+						lua_rawgeti(l,-1,2); hx=luaL_checknumber(l,-1); lua_pop(l,1);
+						lua_rawgeti(l,-1,3); hy=luaL_checknumber(l,-1); lua_pop(l,1);
+						lua_rawgeti(l,-1,4); hz=luaL_checknumber(l,-1); lua_pop(l,1);
+
+						trans.setOrigin( btVector3(hx,hy,hz) );
+					}
+					
+					if(length>=8) // have rotation
+					{
+						lua_rawgeti(l,-1,5); qx=luaL_checknumber(l,-1); lua_pop(l,1);
+						lua_rawgeti(l,-1,6); qy=luaL_checknumber(l,-1); lua_pop(l,1);
+						lua_rawgeti(l,-1,7); qz=luaL_checknumber(l,-1); lua_pop(l,1);
+						lua_rawgeti(l,-1,8); qw=luaL_checknumber(l,-1); lua_pop(l,1);
+
+						trans.setRotation( btQuaternion(qx,qy,qz,qw) );
+					}
+
+					((btCompoundShape*)(*pp))->addChildShape( trans , shape );
+
+					lua_pop(l,1);
+				}
+			}
+			else
+			{
+				lua_pushstring(l,"missing table"); lua_error(l);
+			}
 		}
 		else
 		{
