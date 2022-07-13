@@ -402,8 +402,6 @@ M.fill=function(geom)
 		
 		end
 		
-
-dprint(it)
 		return it
 	end
 
