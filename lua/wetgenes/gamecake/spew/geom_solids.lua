@@ -352,8 +352,8 @@ M.fill=function(geom)
 
 -- create a floor/wall axis aligned quad grid, given number of divisions
 -- with 0 for a flat zero in that dimension
-	geom.trigrid=function(it,gx,gy,gz)
-		if type(gx)=="table" then gz=gx[3] gy=gx[2] gx=gx[1] end
+	geom.trigrid=function(it,gx,gy,gz,f)
+		if type(gx)=="table" then f=gy gz=gx[3] gy=gx[2] gx=gx[1] end -- alt call(it,gg,f)
 
 		it=geom.new(it)
 
@@ -369,8 +369,21 @@ M.fill=function(geom)
 		for px=0,gx do
 			for py=0,gy do
 				for pz=0,gz do
-					vidx=vidx+1
-					it.verts[vidx]={px*sx,py*sy,pz*sz}
+					if f then
+						if gx<=0 then	-- yz plane
+							vidx=vidx+1
+							it.verts[vidx]={f(py,pz),py*sy,pz*sz}
+						elseif gy<=0 then	-- xz plane
+							vidx=vidx+1
+							it.verts[vidx]={px*sx,f(px,pz),pz*sz}
+						elseif gz<=0 then	-- xy plane		
+							vidx=vidx+1
+							it.verts[vidx]={px*sx,py*sy,f(px,py)}
+						end
+					else
+						vidx=vidx+1
+						it.verts[vidx]={px*sx,py*sy,pz*sz}
+					end
 				end
 			end
 		end

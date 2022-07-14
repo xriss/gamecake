@@ -100,12 +100,38 @@ B.floors.create=function(floors,boot)
 	floor.siz=V3( boot.siz or {100,  1,100} )
 	floor.rez=V3( boot.rez or {100,  0,100} )
 
-	floor.geom=geom.trigrid({},floor.rez)
+do
+
+	local mix=function(a,b,c)
+		local d=1-c
+		return a*d+b*c
+	end
+	local goldie_noise=function(x,y)
+		local _,r=math.modf(math.tan(x*y))
+		return math.abs(r) -- !=r ? 0.0 : r; // replace nan with 0
+	end
+	local goldie_noises=function(x,y,s)
+		local xs,ys=x/s,y/s
+		local fx,fy=math.floor(xs),math.floor(ys)
+		local cx,cy=math.ceil(xs),math.ceil(ys)
+		local rx,ry=xs-fx,ys-fy
+		return mix(
+		   mix( goldie_noise(fx,fy) , goldie_noise(cx,fy) , rx ) ,
+		   mix( goldie_noise(fx,cy) , goldie_noise(cx,cy) , rx ) ,
+		   ry)
+	end
+
+	floor.geom=geom.trigrid({},floor.rez,function(x,y)
+		local r=0
+		for i=1,6 do
+			r=r+( goldie_noises(300+x,500+y,2^i) * (2^(i))/4 )
+		end
+		return 8-r
+	end)
 --	floor.geom=geom.box({},{{-10,-10,-10},{10,10,10}})
 
-	for i,v in ipairs( floor.geom.verts ) do
-		v[2]=v[2]-math.random()
-	end
+end
+
 	
 	local m=M4()
 	m:translate(floor.pos)
