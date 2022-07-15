@@ -126,6 +126,7 @@ do
 		for i=1,6 do
 			r=r+( goldie_noises(300+x,500+y,2^i) * (2^(i))/4 )
 		end
+		if x==0 or x==100 or y==0 or y==100 then r=-100 end -- edge
 		return 8-r
 	end)
 --	floor.geom=geom.box({},{{-10,-10,-10},{10,10,10}})
@@ -137,6 +138,7 @@ end
 	m:translate(floor.pos)
 	m:scale(floor.siz)
 	geom.adjust_by_m4(floor.geom,m)
+	floor.geom:build_normals()
 
 	local world=floors.scene.systems.physics.world
 	floor.bodys={}
@@ -162,7 +164,9 @@ B.floor.draw=function(floor)
 	gl.PushMatrix()
 
 --	gl.Translate(floor.pos)
-	geom.draw(floor.geom,"xyz_normal_ntoon")
+	gl.Color(4/8,7/8,4/8,1)
+	geom.draw(floor.geom,"gamecake_shader?XYZ&NORMAL&NTOON=0.5")
+	gl.Color(1,1,1,1)
 
 	gl.PopMatrix()
 
