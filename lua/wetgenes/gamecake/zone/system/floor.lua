@@ -164,7 +164,7 @@ B.floor.draw=function(floor)
 	gl.PushMatrix()
 
 --	gl.Translate(floor.pos)
-	gl.Color(4/8,7/8,4/8,1)
+	gl.Color(3/8,6/8,3/8,1)
 	geom.draw(floor.geom,"gamecake_shader?XYZ&NORMAL&NTOON=0.5")
 	gl.Color(1,1,1,1)
 
