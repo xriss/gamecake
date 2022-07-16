@@ -81,6 +81,9 @@ B.cameras.create=function(cameras,boot)
 	camera.cameras=cameras
 	setmetatable(camera,B.camera_metatable)
 
+	camera.scene.add( camera )
+	if boot.id then camera.scene.set( boot.id , camera ) end
+
 	camera.up=1
 
 	camera.mode="orbit"

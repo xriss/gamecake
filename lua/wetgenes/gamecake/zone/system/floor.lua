@@ -96,6 +96,9 @@ B.floors.create=function(floors,boot)
 
 	setmetatable(floor,B.floor_metatable)
 
+	floor.scene.add( floor )
+	if boot.id then floor.scene.set( boot.id , floor ) end
+
 	floor.pos=V3( boot.pos or {  0,  0,  0} )
 	floor.siz=V3( boot.siz or {100,  1,100} )
 	floor.rez=V3( boot.rez or {100,  0,100} )
