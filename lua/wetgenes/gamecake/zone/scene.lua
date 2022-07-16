@@ -261,15 +261,28 @@ scene.sortby is used to keep this list in order.
 
 --[[#lua.wetgenes.gamecake.zone.scene.add
 
+	scene.add(it,caste,boot)
 	scene.add(it,caste)
 	scene.add(it)
 
 Add a new item of caste or it.caste to the list of things to update.
 
+The optional boot table contains initialisation/reset values and will 
+be remembered in item.boot. If boot.id is given then we will remember 
+this item with a call to scene.set(id,it)
+
+The actual act of initalising the item from the boot table is left to 
+custom code.
+
 ]]
-	scene.add=function(it,caste)
+	scene.add=function(it,caste,boot)
 		scene.remember_uid(it)
-		caste=caste or it.caste -- probably from item
+
+		it.scene=scene
+		it.boot=boot
+		if boot and boot.id then scene.set( boot.id , it ) it.id=boot.id end
+
+		caste=caste or it.caste or (boot and boot.caste) -- probably from item
 		caste=caste or "generic"
 		it.caste=caste
 		local items=scene.caste(caste)

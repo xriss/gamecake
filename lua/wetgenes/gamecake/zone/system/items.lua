@@ -67,14 +67,9 @@ end
 
 B.items.create=function(items,boot)
 	local item={}
-	item.scene=items.scene
-	item.boot=boot
-	item.caste=items.caste
 	item.items=items
 	setmetatable(item,B.item_metatable)
-
-	item.scene.add( item )
-	if boot.id then item.scene.set( boot.id , item ) end
+	items.scene.add( item , items.caste , boot )
 	
 -- this table of functions represent things an item can do
 	item.can={} -- functions

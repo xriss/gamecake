@@ -90,14 +90,8 @@ end
 
 B.floors.create=function(floors,boot)
 	local floor={}
-	floor.scene=floors.scene
-	floor.boot=boot
-	floor.caste=floors.caste
-
 	setmetatable(floor,B.floor_metatable)
-
-	floor.scene.add( floor )
-	if boot.id then floor.scene.set( boot.id , floor ) end
+	floors.scene.add( floor , floors.caste , boot )
 
 	floor.pos=V3( boot.pos or {  0,  0,  0} )
 	floor.siz=V3( boot.siz or {100,  1,100} )

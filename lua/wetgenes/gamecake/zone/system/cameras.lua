@@ -75,14 +75,9 @@ end
 
 B.cameras.create=function(cameras,boot)
 	local camera={}
-	camera.scene=cameras.scene
-	camera.boot=boot
-	camera.caste=cameras.caste
 	camera.cameras=cameras
 	setmetatable(camera,B.camera_metatable)
-
-	camera.scene.add( camera )
-	if boot.id then camera.scene.set( boot.id , camera ) end
+	cameras.scene.add( camera , cameras.caste , boot )
 
 	camera.up=1
 
