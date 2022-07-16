@@ -118,10 +118,12 @@ do
 		   ry)
 	end
 
+	local xp=math.random()*1000
+	local yp=math.random()*1000
 	floor.geom=geom.trigrid({},floor.rez,function(x,y)
 		local r=0
 		for i=1,6 do
-			r=r+( goldie_noises(300+x,500+y,2^i) * (2^(i))/4 )
+			r=r+( goldie_noises(300+x+xp,500+y+yp,2^i) * (2^(i))/4 )
 		end
 		if x==0 or x==100 or y==0 or y==100 then r=-100 end -- edge
 		return 8-r
