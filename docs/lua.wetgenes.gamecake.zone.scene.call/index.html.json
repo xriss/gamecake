@@ -2166,7 +2166,7 @@
    "body": "<pre><code>scene.call(fname,...)\n</code></pre>\n<p>If fname is a string then that method will be invoked for every item where it\nexists like so.</p>\n<pre><code>if it[fname] then it[fname](it,...) end\n</code></pre>\n<p>if fname is a function then it will result in every item geting called with\nthat function like so.</p>\n<pre><code>fname(it,...)\n</code></pre>\n<p>The calls are always made backwards through the table so that an item can\nchoose to delete itself.</p>\n<p>Finally we return the number of calls we made so you can keep track of\ncurrently active items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 310,
+   "line": 323,
    "name": "lua.wetgenes.gamecake.zone.scene.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }

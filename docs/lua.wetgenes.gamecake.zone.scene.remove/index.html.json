@@ -2166,7 +2166,7 @@
    "body": "<pre><code>scene.remove(it)\n</code></pre>\n<p>Remove this item, this is slightly expensive as we need to search in a table\nto find it before calling table.remove which then has to shuffle the table to\nfill in the hole.</p>\n<p>With very dynamic items it can be faster to allocate all the items you need at\nthe start and then flag them on/off rather than add and remove dynamically.</p>\n<p>It may make more sense to create a system which handles its own list of\nobjects, such as particles. Then only use the items to keep track of a\nmaster particles item that contains many particles and can add/remove/recycle\nas it sees fit.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 281,
+   "line": 294,
    "name": "lua.wetgenes.gamecake.zone.scene.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
