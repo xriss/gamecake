@@ -926,7 +926,7 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isnumber(l,2) )
 	{
-		body->setDamping( lua_tonumber(l,2) , lua_tonumber(l,2) );
+		body->setDamping( lua_tonumber(l,2) , lua_tonumber(l,3) );
 	}
 
 	lua_pushnumber(l,body->getLinearDamping());
@@ -1062,6 +1062,28 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 	return 1;
 }
 
+/*+------------------------------------------------------------------+**
+
+get/set world gravity
+
+*/
+static int lua_bullet_body_gravity (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isnumber(l,2) )
+	{
+		body->setGravity(btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) ));
+	}
+
+	btVector3 v=body->getGravity();
+
+	lua_pushnumber(l,v.getX());
+	lua_pushnumber(l,v.getY());
+	lua_pushnumber(l,v.getZ());
+
+	return 3;
+}
 
 /*+------------------------------------------------------------------+**
 
@@ -1144,6 +1166,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_ccd",						lua_bullet_body_ccd},
 		{"body_active",						lua_bullet_body_active},
 		{"body_factor",						lua_bullet_body_factor},
+		{"body_gravity",					lua_bullet_body_gravity},
 
 		{"body_angular_velocity",			lua_bullet_body_angular_velocity},
 		{"body_angular_factor",				lua_bullet_body_angular_factor},

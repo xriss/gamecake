@@ -465,5 +465,25 @@ bullet.body_functions.custom_material_callback=function(body,b)
 	return core.body_custom_material_callback( body[0] , b )
 end
 
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.gravity
+
+	body:gravity(x,y,z)
+	
+	x,y,z = body:gravity()
+
+Set or get body gravity vector. Fidling with this may be the easiest 
+way for a player to move an object around, it certainly makes it easier 
+to create "magnetic fields" to hover objects above the ground.
+
+]]
+bullet.body_functions.gravity=function(body,vx,vy,vz)
+
+	local rx,ry,rz = core.body_gravity( body[0] , vx , vy , vz )
+
+	return rx,ry,rz
+
+end
+
 return bullet
 
