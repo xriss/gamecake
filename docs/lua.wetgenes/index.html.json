@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 522,
+   "count": 524,
    "name": "lua"
   },
   {
@@ -54,12 +54,20 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 516,
+   "count": 518,
    "name": "lua.wetgenes"
   },
   {
-   "count": 26,
+   "count": 28,
    "name": "lua.wetgenes.bullet"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.bullet.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.body.gravity"
   },
   {
    "count": 25,
@@ -2164,7 +2172,7 @@
  "_list": [
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 516,
+   "count": 518,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -2172,10 +2180,23 @@
   },
   {
    "body": "<pre><code>local bullet=require(&quot;wetgenes.bullet&quot;)\n</code></pre>\n<p>We use bullet as the local name of this library.</p>\n<p>A lua binding to the <a href=\"https://github.com/bulletphysics/bullet3\">Bullet \nPhysics</a> library</p>\n",
-   "count": 26,
+   "count": 28,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 14,
    "name": "lua.wetgenes.bullet",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
+   "body": "",
+   "count": 2,
+   "name": "lua.wetgenes.bullet.body"
+  },
+  {
+   "body": "<pre><code>body:gravity(x,y,z)\n\nx,y,z = body:gravity()\n</code></pre>\n<p>Set or get body gravity vector. Fidling with this may be the easiest \nway for a player to move an object around, it certainly makes it easier \nto create &quot;magnetic fields&quot; to hover objects above the ground.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 469,
+   "name": "lua.wetgenes.bullet.body.gravity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {

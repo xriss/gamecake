@@ -33,7 +33,9 @@
 <a class="sub" href="../../docs/lua.glslang.replace_include"><span>/lua.glslang.replace_include</span></a>
 <a class="sub" href="../../docs/lua.glslang.yank_shader_versions"><span>/lua.glslang.yank_shader_versions</span></a><a class="par" href="../../docs/lua.wetgenes"><span>/lua.wetgenes</span></a>
 <a class="par" href="../../docs/lua.wetgenes.bullet"><span>/lua.wetgenes.bullet</span></a>
-<a class="par" href="../../docs/lua.wetgenes.bullet.world"><span>/lua.wetgenes.bullet.world</span></a>
+<a class="par" href="../../docs/lua.wetgenes.bullet.body"><span>/lua.wetgenes.bullet.body</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.bullet.body.gravity"><span>/lua.wetgenes.bullet.body.gravity</span></a><a class="par" href="../../docs/lua.wetgenes.bullet.world"><span>/lua.wetgenes.bullet.world</span></a>
 <a class="par" href="../../docs/lua.wetgenes.bullet.world.body"><span>/lua.wetgenes.bullet.world.body</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.active"><span>/lua.wetgenes.bullet.world.body.active</span></a>
@@ -560,6 +562,25 @@
 <p>We use bullet as the local name of this library.</p>
 <p>A lua binding to the <a href="https://github.com/bulletphysics/bullet3">Bullet 
 Physics</a> library</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.bullet.body">lua.wetgenes.bullet.body</a></h1>
+<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
+<div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.bullet.body.gravity">lua.wetgenes.bullet.body.gravity</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L469">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div><pre><code>body:gravity(x,y,z)
+
+x,y,z = body:gravity()
+</code></pre>
+<p>Set or get body gravity vector. Fidling with this may be the easiest 
+way for a player to move an object around, it certainly makes it easier 
+to create &quot;magnetic fields&quot; to hover objects above the ground.</p>
 </div>
 </div>
 

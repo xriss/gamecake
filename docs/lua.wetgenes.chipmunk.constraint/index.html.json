@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 522,
+   "count": 524,
    "name": "lua"
   },
   {
@@ -54,12 +54,20 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 516,
+   "count": 518,
    "name": "lua.wetgenes"
   },
   {
-   "count": 26,
+   "count": 28,
    "name": "lua.wetgenes.bullet"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.bullet.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.body.gravity"
   },
   {
    "count": 25,
