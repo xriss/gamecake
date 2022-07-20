@@ -193,7 +193,7 @@ mat4 texbone(int bidx,int frame)
 
 mat4 fixbone(int bidx,int frame)
 {
-	return ( mat4(
+	return transpose( mat4(
 		texture(fixbones,vec2(bidx*3+0,frame)),
 		texture(fixbones,vec2(bidx*3+1,frame)),
 		texture(fixbones,vec2(bidx*3+2,frame)),
@@ -202,7 +202,7 @@ mat4 fixbone(int bidx,int frame)
 
 mat4 texbone(int bidx,int frame)
 {
-	return ( mat4(
+	return transpose( mat4(
 		texture(texbones,vec2(bidx*3+0,frame)),
 		texture(texbones,vec2(bidx*3+1,frame)),
 		texture(texbones,vec2(bidx*3+2,frame)),
@@ -224,8 +224,9 @@ mat4 getbone(int bidx)
 	mat4 md=fixbone( bidx , 1 );
 	mat4 me=fixbone( bidx , 2 );
 
-	mat4 mf=mat4( mat3(me)*mat3(mab) );
-	mf[3]=mab[3];
+//	mat4 mf=mat4( mat3(me)*mat3(mab) );
+//	mf[3]=mab[3];
+	mat4 mf=me*mab;
 	
 	mat4 mr=md*mc*mf;
 
