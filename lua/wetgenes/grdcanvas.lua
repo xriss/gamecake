@@ -155,7 +155,6 @@ grdcanvas.cmap_ramp=function(g,keys,opts)
 		end
 		
 	end
-	dprint(cs)
 	g:pixels(0,0,0,g.width,1,1,cs)
 	
 	return g

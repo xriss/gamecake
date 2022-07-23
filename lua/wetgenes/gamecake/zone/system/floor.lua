@@ -39,7 +39,6 @@ B.system=function(floors)
 	floors.y=0
 
 	floors.RND=math.random()
-	
 	floors.ramps=wgrdcanvas.ramps(16,{0x6666cc66,0x33663333})
 	floors.image=oven.cake.images.load("floors/"..tostring(floors),"floors/"..tostring(floors),function() return floors.ramps end)
 	floors.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
