@@ -154,13 +154,13 @@ available as caste names.
 			for i,v in ipairs(scene.systems) do
 				if v.caste==it.caste then -- replace
 					scene.systems[i]=it
-					if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then
+					if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then -- filter invalid system names
 						scene.systems[it.caste]=it
 					end
 					return
 				end
 			end
-			if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then
+			if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then -- filter invalid system names
 				scene.systems[it.caste]=it
 			end
 		end

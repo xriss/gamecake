@@ -39,16 +39,39 @@ B.system=function(floors)
 	floors.y=0
 
 	floors.RND=math.random()
-	floors.ramps=wgrdcanvas.ramps(16,{0x6666cc66,0x33663333})
+
+	return floors
+end
+
+B.floors.setup=function(floors)
+
+	floors.ramps=wgrdcanvas.ramps(16,{
+		{
+			{ argb=0xff669933, value=0.0 },
+			{ argb=0xff66cc66, value=0.5 },
+			{ argb=0xff99cc66, value=1.0 },
+		},
+		{
+			{ argb=0xff332222, value=0.0 },
+			{ argb=0xff663333, value=0.5 },
+			{ argb=0xff665555, value=1.0 },
+		},
+	})
+
 	floors.image=oven.cake.images.load("floors/"..tostring(floors),"floors/"..tostring(floors),function() return floors.ramps end)
 	floors.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
 	floors.image.TEXTURE_WRAP_T		=	gl.CLAMP_TO_EDGE
 	floors.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
 	floors.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
 
-
-	return floors
 end
+B.floors.clean=function(floors)
+	if floors.image then
+		oven.cake.images.delete( floors.image )
+		floors.image=nil
+	end
+end
+
 
 B.floors.update=function(floors)
 	floors.time=(floors.time+(1/60))%120
