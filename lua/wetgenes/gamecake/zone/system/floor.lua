@@ -23,6 +23,7 @@ local gl=oven.gl
 
 local geom=oven.rebake("wetgenes.gamecake.spew.geom")
 local geoms=oven.rebake("wetgenes.gamecake.spew.geoms")
+local wgrdcanvas=require("wetgenes.grdcanvas")
 
 
 B.geomfloor=geom.hexafloor({},8192,16)
@@ -38,6 +39,14 @@ B.system=function(floors)
 	floors.y=0
 
 	floors.RND=math.random()
+	
+	floors.ramps=wgrdcanvas.ramps(16,{0x6666cc66,0x33663333})
+	floors.image=oven.cake.images.load("floors/"..tostring(floors),"floors/"..tostring(floors),function() return floors.ramps end)
+	floors.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
+	floors.image.TEXTURE_WRAP_T		=	gl.CLAMP_TO_EDGE
+	floors.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
+	floors.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
+
 
 	return floors
 end
@@ -89,7 +98,7 @@ B.floors.draw=function(floors)
 end
 
 B.floors.create=function(floors,boot)
-	local floor={}
+	local floor={floors=floors}
 	setmetatable(floor,B.floor_metatable)
 	floors.scene.add( floor , floors.caste , boot )
 
@@ -138,6 +147,14 @@ end
 	m:scale(floor.siz)
 	geom.adjust_by_m4(floor.geom,m)
 	floor.geom:build_normals()
+	for i,v in ipairs(floor.geom.verts) do
+		local ny=1.0-(-v[5])
+		ny=ny*16
+		if ny<0 then ny=0 end
+		if ny>1 then ny=1 end
+		v[7]=0.5
+		v[8]=0.25 + (0.5*(ny))
+	end
 
 	local world=floors.scene.systems.physics.world
 	floor.bodys={}
@@ -160,14 +177,20 @@ end
 
 B.floor.draw=function(floor)
 
-	gl.PushMatrix()
+--	gl.PushMatrix()
 
 --	gl.Translate(floor.pos)
-	gl.Color(3/8,6/8,3/8,1)
-	geom.draw(floor.geom,"gamecake_shader?XYZ&NORMAL&NTOON=0.5")
-	gl.Color(1,1,1,1)
+--	gl.Color(3/8,6/8,3/8,1)
+	geom.draw(floor.geom,"gamecake_shader?XYZ&NORMAL&TEX&TEXNTOON=1.0",function(p)
+		gl.ActiveTexture(gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+		oven.cake.images.bind(floor.floors.image)
+		gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
+		gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+		gl.ActiveTexture( gl.TEXTURE0 )
+	end)
+--	gl.Color(1,1,1,1)
 
-	gl.PopMatrix()
+--	gl.PopMatrix()
 
 end
 

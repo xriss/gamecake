@@ -15,6 +15,7 @@ We use wgrdcanvas as the local name of this library.
 
 local wstr=require("wetgenes.string")
 local wgrd=require("wetgenes.grd")
+local wpack=require("wetgenes.pack")
 local bit=require("bit")
 
 local function dprint(a) print(wstr.dump(a)) end
@@ -24,10 +25,75 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 local grdcanvas=M
 
 
+-- createa a grd of ramps of the given width and #ramps height
+grdcanvas.ramps=function(w,rs)
+	local h=#rs
+	local g=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,w,h,1)
+	g:clear(0xffffffff)
+
+	for idx,v in ipairs(rs) do
+		grdcanvas.cmap_ramp( g:clip( 0,idx-1,0, w,1,1 ) , v )
+	end
+
+	return g
+end
+
+-- cmap_ramp but create keys from a very simple ramp
+grdcanvas.cmap_ramp_simple=function(g,cr,cg,cb,ca)
+
+	if not cg then -- rgba in 0xaarrggbb format
+		cr,cg,cb,ca=wpack.argb8_b4(cr) -- unpack it from ca only
+	end
+	
+-- ca is *not* alpha it is +- range of ramp
+
+	if cr<0   then cr=0   end
+	if cr>255 then cr=255 end
+	if cg<0   then cg=0   end
+	if cg>255 then cg=255 end
+	if cb<0   then cb=0   end
+	if cb>255 then cb=255 end
+	if ca<0   then ca=0   end
+	if ca>255 then ca=255 end
+
+	local crl=cr-ca
+	local cgl=cg-ca
+	local cbl=cb-ca
+	
+	if crl<0   then crl=0   end
+	if crl>255 then crl=255 end
+	if cgl<0   then cgl=0   end
+	if cgl>255 then cgl=255 end
+	if cbl<0   then cbl=0   end
+	if cbl>255 then cbl=255 end
+	
+	local crh=cr+ca
+	local cgh=cg+ca
+	local cbh=cb+ca
+	
+	if crh<0   then crh=0   end
+	if crh>255 then crh=255 end
+	if cgh<0   then cgh=0   end
+	if cgh>255 then cgh=255 end
+	if cbh<0   then cbh=0   end
+	if cbh>255 then cbh=255 end
+	
+	local keys={
+		{ argb=wpack.b4_argb8(crl,cgl,cbl,0xff), value=0.0 },
+		{ argb=wpack.b4_argb8(cr ,cg ,cb ,0xff), value=0.5 },
+		{ argb=wpack.b4_argb8(crh,cgh,cbh,0xff), value=1.0 },
+	}
+	
+	return grdcanvas.cmap_ramp(g,keys)
+end
 
 -- create a blended ramp of colors left to right in this single pixel high bitmap ( a cmap )
 grdcanvas.cmap_ramp=function(g,keys,opts)
 
+	if type(keys)=="number" then
+		return grdcanvas.cmap_ramp_simple(g,keys)
+	end
+	
 	opts=opts or {}
 
 	local idx=1
@@ -89,7 +155,7 @@ grdcanvas.cmap_ramp=function(g,keys,opts)
 		end
 		
 	end
-	
+	dprint(cs)
 	g:pixels(0,0,0,g.width,1,1,cs)
 	
 	return g
