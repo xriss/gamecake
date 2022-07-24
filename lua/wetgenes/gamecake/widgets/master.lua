@@ -186,9 +186,13 @@ function wmaster.setup(widget,def)
 						end
 
 						master.active=master.over
-						local axis=ups.axis()
-						local rx,ry=master.over.parent:mousexy(axis.mx,axis.my)
-						master.active_xy={rx-master.over.px,ry-master.over.py,mx=axis.mx,my=axis.my}
+
+						master.active=master.over
+						local p=master.last_mouse_position
+						if p then
+							local rx,ry=master.over.parent:mousexy(p[1],p[2])
+							master.active_xy={rx-master.over.px,ry-master.over.py,mx=p[1],my=p[2]}
+						end
 						
 						master.active:call_hook_later("active") -- an active widget is about to click (button down)
 					end
