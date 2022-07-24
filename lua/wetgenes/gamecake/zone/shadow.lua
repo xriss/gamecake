@@ -111,7 +111,7 @@ M.bake=function(oven,shadow)
 			
 			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..(0.04/sd)..","..(0.08/sd)..",0.0"
 
-			local r=sky.time
+			local r=(sky.time+360-90-5)%360
 
 			local  calculate_matrix=function()
 				shadow.mtx=M4{
