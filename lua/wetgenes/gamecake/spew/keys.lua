@@ -368,7 +368,7 @@ M.bake=function(oven,keys)
 					end
 
 
-					ups.set_axis({mx=m.x,my=m.y,mz=mz}) -- tell recap about the mouse positions, mx,my
+					ups.set_axis({mx=m.dx,my=m.dy,mz=mz}) -- tell recap about the mouse positions, mx,my
 
 					if m.action==1 then -- key set
 						if m.keyname then ups.set_button("mouse_"..m.keyname,true) end
