@@ -138,7 +138,9 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 	M.merge_from=function(dst,src)
 -- reset cache
-		dst:clear_predraw()
+		if dst.clear_predraw then
+			dst:clear_predraw()
+		end
 		
 		local remat={}
 -- copy mats
@@ -455,6 +457,34 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		end
 	
 	end
+
+-- unmerge the vertexs so they are unique per face and build normals so we get flat shading
+	M.build_flat_normals=function(it)
+	
+		local verts={}
+		local polys={}
+
+		local iv=0
+		local ip=0
+		for _,vp in ipairs(it.polys) do
+			ip=ip+1
+			polys[ip]={mat=vp.mat}
+			for i=1,#vp do
+				local v=it.verts[ vp[i] ]
+				iv=iv+1
+				verts[iv]={unpack(v)}
+				polys[ip][i]=iv
+			end
+		end
+		
+		it.verts=verts
+		it.polys=polys
+		
+		M.build_normals(it)
+
+		return it
+	end
+
 
 	M.build_normals=function(it)
 

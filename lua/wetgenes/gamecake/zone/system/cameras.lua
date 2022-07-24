@@ -146,8 +146,8 @@ B.camera.update=function(camera)
 			local rx=up.axisfixed("rx")
 			local ry=up.axisfixed("ry")
 			local r3=up.button("r3") or false
-			local mx=up.axis("mx") or 0
-			local my=up.axis("my") or 0
+			local mx=up.axis("mx") or 0 ; if mx>32768 then mx=mx-65536 end
+			local my=up.axis("my") or 0 ; if my>32768 then my=my-65536 end
 			local mz=up.axis("mz") or 0 ; if mz>32768 then mz=mz-65536 end
 
 			local rotfix=function(n)
