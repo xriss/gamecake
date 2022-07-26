@@ -29,12 +29,13 @@ uniform vec4 offset; // center of grid
 
 #ifdef VERTEX_SHADER
 
-in vec3 a_vertex;
+IN vec3 a_vertex;
 
-out vec3 xy;
-out vec3 eye;
+OUT vec4 v_color;
+OUT vec3 xy;
+OUT vec3 eye;
 
-out vec4 pos;
+OUT vec4 pos;
 
 void main()
 {
@@ -48,16 +49,20 @@ void main()
 
 	eye=normalize( ( modelview * camera * v ).xyz  - camera[3].xyz ) ;
 
+	v_color=color;
+
 }
 
 #endif
 #ifdef FRAGMENT_SHADER
 
-in vec4 pos;
-in vec3 eye;
+IN vec4 v_color;
 
-in vec3 xy;
-out vec4 FragColor;
+IN vec4 pos;
+IN vec3 eye;
+
+IN vec3 xy;
+OUT vec4 FragColor;
 
 void main(void)
 {
@@ -67,7 +72,7 @@ void main(void)
 	vec2 cheque=floor( (xy.xy-vec2(2.5))/5.0 );
 	float a=mod(cheque.x+cheque.y,2.0);
 
-	FragColor=vec4( mix(c1,c2,a) , 1.0 );
+	FragColor=vec4( mix(c1,c2,a) , 1.0 )*v_color;
 }
 
 #endif

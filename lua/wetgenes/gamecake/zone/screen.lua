@@ -201,9 +201,12 @@ M.bake=function(oven,screen)
 		oven.cake.views.push_and_apply(screen.view)
 		gl.state.push(gl.state_defaults)
 
+		gl.Color(1,1,1,0.25)
+
 		gl.state.set({
 			[gl.DEPTH_TEST]					=	gl.TRUE,
 			[gl.CULL_FACE]					=	gl.TRUE,
+			[gl.BLEND]						=	gl.FALSE,	-- we are using alpha for dark/bloom
 		})
 
 		gl.Clear(gl.DEPTH_BUFFER_BIT) -- we promise to draw to the entire screen
@@ -218,6 +221,8 @@ M.bake=function(oven,screen)
 		oven.cake.views.pop_and_apply()
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 		gl.PopMatrix()
+
+		gl.Color(1,1,1,1)
 
 	end
 

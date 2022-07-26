@@ -428,7 +428,7 @@ void main(void)
 	float l=max( 0.0, dot(n,s)*shadow_light.w );
 	vec2 uv=clamp( v_texcoord + vec2( pow( l , 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
 
-	FragColor = texture(tex, uv ).rgba;
+	FragColor = texture(tex, uv ).rgba * v_color;
 
 #else
 

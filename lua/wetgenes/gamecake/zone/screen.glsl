@@ -109,7 +109,9 @@ uniform vec4 day_night;
 
 void main(void)
 {
-	vec3 m = texture(tex0, v_texcoord).rgb ;
+	vec4  c4=texture(tex0,v_texcoord);
+	float d = min( 1.0 , 4.0*c4.a ) ; 
+	vec3 m = c4.rgb ;
 	vec4 s4 = texture(tex1, v_texcoord).rgba ;
 	vec3 b = texture(tex2, v_texcoord).rgb ;
 	float s=s4.a;
@@ -166,7 +168,7 @@ void main(void)
 
 #else
 
-	c= m * s + b;
+	c= m * s * d + b ;
 
 #endif
 
@@ -345,7 +347,7 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 
 	float shadow_value = 0.0; // max( 0.0 , shadow_uv.w );
 
-	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) && (shadow_uv.z > 0.0) && (shadow_uv.z < 1.0) )
+	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) ) //&& (shadow_uv.z > 0.0) && (shadow_uv.z < 1.0) )
 	{
 //		float shadow_min=1.0;
 		float shadow_add=0.0;
@@ -449,9 +451,9 @@ out vec4 FragColor;
 
 void main(void)
 {
-	vec3 m = texture(tex0, v_texcoord).rgb ;
+	vec4 m = texture(tex0, v_texcoord).rgba ;
 	float s = texture(tex1, v_texcoord).a ;
-	FragColor=vec4( pow( m*s , vec3(4.0) ) , 1.0 );
+	FragColor=vec4( m.rgb*s * (4.0*m.a-1.0) , 1.0 );
 }
 
 #endif

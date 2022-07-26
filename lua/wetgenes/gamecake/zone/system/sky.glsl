@@ -96,7 +96,7 @@ void main(void)
 {
 	vec3 v_eye = normalize( (inverse_modelview * inverse_projection * v_pos ).xyz ) ;
 	
-	FragColor=sky(v_eye,vec4(1.0));
+	FragColor=sky(v_eye,vec4(1.0))*color;
 }
 
 #endif
