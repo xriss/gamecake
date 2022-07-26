@@ -115,7 +115,7 @@ plated/watch
 
 plated/serv
 # Start a simple static server locally.
-# Visit http://0.0.0.0:8000/new-repo/ in your browser to view your site.
+# Visit http://0.0.0.0:8080/new-repo/ in your browser to view your site.
 # Optional if ```plated/start``` is running
 
 plated/publish
