@@ -24,16 +24,14 @@ _Commands above are for debian/ubuntu. For other operating systems, please the u
 1. Visit https://github.com/new/import
    - Paste `https://github.com/xriss/plated-example` into the URL
    - Create a name for your new repository and click **Begin import**
+   - Go to your new repository when it's ready
     
-2. Go to ![settings](https://cloud.githubusercontent.com/assets/1515961/25015092/dcf5b398-2069-11e7-9740-424784716088.png)
-    - Change the GitHub Pages source to use **master branch /docs folder**
-    - Save
-
-3. Woohoo! You should now have a brand new website.
+2. Woohoo! You should now have a brand new website.
     - Check your URL - http://username.github.io/new-repo
     - Your website should now work and contain the default plated-example landing page.
+    - You can start editing your site and the changes will automatically be published using Github Actions.
 
-4. Read [the next bit](#run-this-local) on how to push new changes to update your live website.
+3. Read [the next bit](#run-this-local) if you want to view your site locally before publishing.
     
 ---
 
