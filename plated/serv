@@ -5,7 +5,7 @@ cd `dirname $0`
 echo
 echo You may now view the plated web site locally at:
 echo
-echo http://0.0.0.0:8000$PLATED_ROOT
+echo http://0.0.0.0:8080$PLATED_ROOT
 echo
 
 ./node_modules/.bin/http-server $PLATED_OUTPUT $*
