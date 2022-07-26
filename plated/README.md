@@ -50,10 +50,10 @@ plated/build
 
 plated/start
 # Leave this running in a separate tab, it should watch and rebuild your new changes.
-# Make sure nothing else is using port http://0.0.0.0:8000.
+# Make sure nothing else is using port http://0.0.0.0:8080.
 
 
-# View your website in a browser at http://0.0.0.0:8000/new-repo
+# View your website in a browser at http://0.0.0.0:8080/new-repo
 # Make sure your browser is not caching content, otherwise your changes will not show up.
 
 
