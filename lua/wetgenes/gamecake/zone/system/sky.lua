@@ -74,6 +74,7 @@ B.sky.draw=function(sky)
 		[gl.DEPTH_FUNC]					=	gl.LEQUAL,
 	})
 
+	gl.Color(1,1,1,1)
 
 	local t={
 		-1,	-1,	1,	0,	0, 			
@@ -93,6 +94,8 @@ B.sky.draw=function(sky)
 		gl.Uniform3f( p:uniform("sun") , sky.sun )
 		gl.Uniform3f( p:uniform("moon") , sky.moon )
 	end)
+
+	gl.Color(1,1,1,0.25)
 
 	gl.state.pop()
 
