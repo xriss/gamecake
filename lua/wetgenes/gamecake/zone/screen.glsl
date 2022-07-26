@@ -452,8 +452,8 @@ out vec4 FragColor;
 void main(void)
 {
 	vec4 m = texture(tex0, v_texcoord).rgba ;
-	float s = texture(tex1, v_texcoord).a ;
-	FragColor=vec4( m.rgb*s * (4.0*m.a-1.0) , 1.0 );
+//	float s = texture(tex1, v_texcoord).a ;
+	FragColor=vec4( m.rgb * (4.0*m.a-1.0) + pow( m.rgb , vec3( 6.0-(4.0*m.a) ) ) , 1.0 );
 }
 
 #endif
