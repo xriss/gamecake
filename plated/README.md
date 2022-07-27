@@ -30,7 +30,7 @@ _Commands above are for debian/ubuntu. For other operating systems, please the u
     - Check your URL - http://username.github.io/new-repo
     - Your website should now work and contain the default plated-example landing page.
 
-3. Enable Github Actions https://github.com/notshi/tok/settings/actions
+3. Enable Github Actions https://github.com/username/new-repo/settings/actions
     - Choose **Allow all actions and reusable workflows**
     - You can start editing your site and the changes will automatically be published using Github Actions.
 
