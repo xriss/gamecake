@@ -31,7 +31,7 @@ _Commands above are for debian/ubuntu. For other operating systems, please the u
     - Your website should now work and contain the default plated-example landing page.
 
 3. Enable Github Actions https://github.com/username/new-repo/settings/actions
-    - Choose **Allow all actions and reusable workflows**
+    - Choose **Allow all actions and reusable workflows** and click **Save**
     - You can start editing your site and the changes will automatically be published using Github Actions.
 
 4. Read [the next bit](#run-this-local) if you want to view your site locally before publishing.
