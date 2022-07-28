@@ -461,8 +461,15 @@ void main(void)
 
 	vec3 n=normalize(v_normal);
 	vec3 s=shadow_light.xyz;
-	float l=max( 0.0, dot(n,s)*shadow_light.w );
-	FragColor= vec4(  c1.rgb*(NTOON+(l*(1.0-NTOON))) , c1.a ); 
+	float l=dot(n,s);
+	if(l>=0.0)
+	{
+		FragColor= vec4(  mix( c1.rgb , c1.rgb*(1.0+NTOON) , l ) , c1.a ); 
+	}
+	else
+	{
+		FragColor= vec4(  mix( c1.rgb*(1.0-NTOON) , c1.rgb , 1.0-l ) , c1.a ); 
+	}
 
 #endif
 
