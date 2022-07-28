@@ -104,7 +104,7 @@ M.bake=function(oven,shadow)
 		if camera then
 
 			local s=shadow.maparea -- 40*shadow.mapsize/1024
-			local sd=1024
+			local sd=1024*8
 			local x=(math.floor(camera.pos[1]))--*-1/s	-- swap z/y as rotation
 			local y=(math.floor(camera.pos[2]))--*-1/s
 			local z=(math.floor(camera.pos[3]))--*-1/s

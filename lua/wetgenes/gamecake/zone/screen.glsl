@@ -347,8 +347,11 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 
 	float shadow_value = 0.0; // max( 0.0 , shadow_uv.w );
 
-	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) ) //&& (shadow_uv.z > 0.0) && (shadow_uv.z < 1.0) )
+	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) && (shadow_uv.z > 0.0) && (shadow_uv.z < 1.0) )
 	{
+		vec3 sas=smoothstep( -1.00 , -0.90 , -abs( shadow_uv.xyz*2.0-1.0 )  );
+		float fade=sas.x*sas.y*sas.z;
+
 //		float shadow_min=1.0;
 		float shadow_add=0.0;
 		float shadow_tmp=0.0;
@@ -365,10 +368,11 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 			shadow_add += shadow_tmp ;
 //			shadow_min = min( shadow_min , shadow_tmp );
 		}
-		shadow_value = max( shadow_value , smoothstep(	shadow[1] ,	shadow[2] ,
+		shadow_value = fade*max( shadow_value , smoothstep(	shadow[1] ,	shadow[2] ,
 			shadow_uv.z - (shadow_add/float(SHADOW_SAMPLES))  ) );
+			
 	}
-	return ( ((1.0-shadow_value)*shadow_light.w)*shadow[0] + (1.0-shadow[0]) ) ;
+	return ( (1.0-shadow_value)*shadow[0] + (1.0-shadow[0]) ) ;
 }
 #endif
 

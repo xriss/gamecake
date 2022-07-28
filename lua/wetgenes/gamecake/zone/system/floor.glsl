@@ -10,7 +10,25 @@ precision highp float;
 precision mediump float;
 #endif
 #endif
-  
+#if VERSION>120
+
+#define IN in
+#define OUT out
+
+#else
+
+#ifdef VERTEX_SHADER
+#define IN attribute
+#else
+#define IN varying
+#endif
+
+#define OUT varying
+#define texture texture2D
+#define FragColor gl_FragColor
+
+#endif
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -31,7 +49,6 @@ uniform vec4 offset; // center of grid
 
 IN vec3 a_vertex;
 
-OUT vec4 v_color;
 OUT vec3 xy;
 OUT vec3 eye;
 
@@ -49,14 +66,10 @@ void main()
 
 	eye=normalize( ( modelview * camera * v ).xyz  - camera[3].xyz ) ;
 
-	v_color=color;
-
 }
 
 #endif
 #ifdef FRAGMENT_SHADER
-
-IN vec4 v_color;
 
 IN vec4 pos;
 IN vec3 eye;
@@ -72,7 +85,7 @@ void main(void)
 	vec2 cheque=floor( (xy.xy-vec2(2.5))/5.0 );
 	float a=mod(cheque.x+cheque.y,2.0);
 
-	FragColor=vec4( mix(c1,c2,a) , 1.0 )*v_color;
+	FragColor=vec4( mix(c1,c2,a) , 1.0 )*color;
 }
 
 #endif

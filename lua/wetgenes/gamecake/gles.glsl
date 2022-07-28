@@ -226,7 +226,8 @@ mat4 getbone(int bidx)
 
 //	mat4 mf=mat4( mat3(me)*mat3(mab) );
 //	mf[3]=mab[3];
-	mat4 mf=me*mab;
+	mat4 mf=mat4(mat3(me)*mat3(mab)); // tweak rot/scale should apply localy
+	mf[3].xyz=me[3].xyz+mab[3].xyz; // tweak pos should just be added in world space
 	
 	mat4 mr=md*mc*mf;
 
@@ -425,8 +426,8 @@ void main(void)
 
 	vec3 n=normalize(v_normal);
 	vec3 s=shadow_light.xyz;
-	float l=max( 0.0, dot(n,s)*shadow_light.w );
-	vec2 uv=clamp( v_texcoord + vec2( pow( l , 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
+//	vec2 uv=clamp( v_texcoord + vec2( dot(n,s)*0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
+	vec2 uv=v_texcoord + vec2( dot(n,s)*0.5 ,0.0) ;
 
 	FragColor = texture(tex, uv ).rgba * v_color;
 
