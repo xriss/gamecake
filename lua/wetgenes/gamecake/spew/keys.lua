@@ -164,6 +164,9 @@ M.bake=function(oven,keys)
 	end
 
 	function keys.update()
+		for i,up in ipairs(keys.up) do
+			up.update()
+		end
 		return recaps.step()
 	end
 
@@ -298,6 +301,7 @@ M.bake=function(oven,keys)
 						end
 					end
 					
+--[[
 					for n,a in ipairs{"lx","ly","lz","rx","ry","rz"} do -- check axis buttons and convert to axis movement
 						if ups.now[a.."0_set"] or ups.now[a.."0_clr"] or ups.now[a.."1_set"] or ups.now[a.."1_clr"] then
 							local v=0
@@ -309,6 +313,7 @@ M.bake=function(oven,keys)
 							ups.set_axis({[a]=v})
 						end
 					end
+]]
 				end
 
 			elseif m.class=="touch" then -- touch areas
@@ -368,7 +373,7 @@ M.bake=function(oven,keys)
 					end
 
 
-					ups.set_axis( {mx=m.dx,my=m.dy,mz=mz} ) -- tell recap about the mouse positions, mx,my
+					ups.set_axis_relative( {mx=m.dx,my=m.dy,mz=mz} ) -- tell recap about the mouse positions, mx,my
 
 					if m.action==1 then -- key set
 						if m.keyname then ups.set_button("mouse_"..m.keyname,true) end
@@ -539,7 +544,39 @@ M.bake=function(oven,keys)
 			
 			return used -- if we used the msg
 		end
-				
+		
+-- manage fake axis and decay from keypress states
+		key.update=function()
+			local ups=recaps.ups(key.idx)
+			for n,a in ipairs{"lx","ly","lz","rx","ry","rz"} do -- check axis buttons and convert to axis movement
+				local ak=a.."k"
+				local o=(ups.state_axis[ak] or 0)
+				local v=0
+				if     ups.state[a.."0"] then v=-32767 if(o>0) then o=0 end
+				elseif ups.state[a.."1"] then v= 32767 if(o<0) then o=0 end
+				end
+				if v==0 then
+					v=math.floor(o*0.8+v*0.2)
+				else
+					v=math.floor(o*0.95+v*0.05)
+				end
+				ups.set_axis({[ak]=v})
+			end
+			
+			-- pick best axis l/r axis
+			local lx ,ly ,lz =(ups.state_axis.lx  or 0),(ups.state_axis.ly  or 0),(ups.state_axis.lz  or 0)
+			local lxk,lyk,lzk=(ups.state_axis.lxk or 0),(ups.state_axis.lyk or 0),(ups.state_axis.lzk or 0)
+			if lxk*lxk+lyk*lyk+lzk*lzk > lx*lx+ly*ly+lz*lz then		ups.set_axis({lxb=lxk,lyb=lyk,lzb=lyk})
+			else													ups.set_axis({lxb=lx ,lyb=ly ,lzb=ly })
+			end
+			local rx ,ry ,rz =(ups.state_axis.rx  or 0),(ups.state_axis.ry  or 0),(ups.state_axis.rz  or 0)
+			local rxk,ryk,rzk=(ups.state_axis.rxk or 0),(ups.state_axis.ryk or 0),(ups.state_axis.rzk or 0)
+			if rxk*rxk+ryk*ryk+rzk*rzk > rx*rx+ry*ry+rz*rz then		ups.set_axis({rxb=rxk,ryb=ryk,rzb=ryk})
+			else													ups.set_axis({rxb=rx ,ryb=ry ,rzb=ry })
+			end
+--print(ups.state_axis.rxk)
+		end
+
 		return key
 	end
 
