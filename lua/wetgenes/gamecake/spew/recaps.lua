@@ -116,7 +116,7 @@ M.bake=function(oven,recaps)
 		end
 
 		local minzone=4095
-		local maxzone=32767
+		local maxzone=32767-4096
 		local fixaxis=function(n)
 			local fix=function(n)
 				local n=(n-minzone)/(maxzone-minzone)

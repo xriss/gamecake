@@ -141,8 +141,8 @@ B.camera.update=function(camera)
 
 			local mouse_middle=up.button("mouse_middle") or false
 			local mouse_button=up.button("mouse_right") or up.button("mouse_left") or false
-			local lx=up.axisfixed("lxb")
-			local ly=up.axisfixed("lyb")
+			local lx=up.axisfixed("lx")
+			local ly=up.axisfixed("ly")
 			local rx=up.axisfixed("rxb")
 			local ry=up.axisfixed("ryb")
 			local r3=up.button("r3") or false
