@@ -728,7 +728,7 @@ double x,y,z;
 //	closestResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
 
 
-	lua_pushstring(l,"cmask"); lua_gettable(l,-2);
+	lua_pushstring(l,"cmask"); lua_gettable(l,2);
 	if( lua_isnumber(l,-1) )
 	{
 		closestResults.m_collisionFilterMask=luaL_checknumber(l,-1);

@@ -184,7 +184,7 @@ end
 	if #tp>0 then
 		local mesh=world:mesh( tp,tv )
 		local shape=world:shape("mesh",mesh,true)
-		local body=world:body( "rigid" , shape , 0,  0,0,0  )
+		local body=world:body( "rigid" , shape , 0,  0,0,0  , 0x0001 )
 		floor.bodys[ #floor.bodys+1 ]=body
 		body:restitution( 1 )
 		body:friction( 0.8 , 0.1 , 0.1 )

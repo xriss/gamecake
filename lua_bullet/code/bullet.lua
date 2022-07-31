@@ -296,7 +296,7 @@ bullet.world_functions.body=function(world,name,shape,mass,x,y,z,cgroup,cmask)
 	
 	world.bodies[ body[0] ]=body
 
-	core.world_add_body( world[0] , body[0] , cgroup , cmask )
+	core.world_add_body( world[0] , body[0] , cgroup , cmask or -1 )
 
 	return body
 end
