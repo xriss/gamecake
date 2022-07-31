@@ -660,8 +660,17 @@ static int lua_bullet_world_add_body (lua_State *l)
 btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
 btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
 
-	world->addRigidBody(body);
-
+	if( lua_isnumber(l,3) )
+	{
+		int group=lua_tonumber(l,3);
+		int mask=lua_tonumber(l,4);
+		world->addRigidBody(body,group,mask);
+	}
+	else
+	{
+		world->addRigidBody(body);
+	}
+	
 	return 0;
 }
 
@@ -717,6 +726,15 @@ double x,y,z;
 
 	btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
 //	closestResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
+
+
+	lua_pushstring(l,"cmask"); lua_gettable(l,-2);
+	if( lua_isnumber(l,-1) )
+	{
+		closestResults.m_collisionFilterMask=luaL_checknumber(l,-1);
+	}
+	lua_pop(l,1);
+
 
 	world->rayTest(from, to, closestResults);
 
@@ -1064,7 +1082,7 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 
 /*+------------------------------------------------------------------+**
 
-get/set world gravity
+get/set body gravity
 
 */
 static int lua_bullet_body_gravity (lua_State *l)
@@ -1083,6 +1101,45 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 	lua_pushnumber(l,v.getZ());
 
 	return 3;
+}
+
+
+/*+------------------------------------------------------------------+**
+
+get/set body cgroup
+
+*/
+static int lua_bullet_body_cgroup (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btBroadphaseProxy *broad=body->getBroadphaseHandle();
+
+	if( lua_isnumber(l,2) )
+	{
+		broad->m_collisionFilterGroup=lua_tonumber(l,2);
+	}
+	lua_pushnumber(l,broad->m_collisionFilterGroup);
+
+	return 1;
+}
+
+/*+------------------------------------------------------------------+**
+
+get/set body cmask
+
+*/
+static int lua_bullet_body_cmask (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btBroadphaseProxy *broad=body->getBroadphaseHandle();
+
+	if( lua_isnumber(l,2) )
+	{
+		broad->m_collisionFilterMask=lua_tonumber(l,2);
+	}
+	lua_pushnumber(l,broad->m_collisionFilterMask);
+
+	return 1;
 }
 
 /*+------------------------------------------------------------------+**
@@ -1167,6 +1224,8 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_active",						lua_bullet_body_active},
 		{"body_factor",						lua_bullet_body_factor},
 		{"body_gravity",					lua_bullet_body_gravity},
+		{"body_cgroup",						lua_bullet_body_cgroup},
+		{"body_cmask",						lua_bullet_body_cmask},
 
 		{"body_angular_velocity",			lua_bullet_body_angular_velocity},
 		{"body_angular_factor",				lua_bullet_body_angular_factor},
