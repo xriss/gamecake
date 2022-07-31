@@ -35,6 +35,8 @@
 <a class="par" href="../../docs/lua.wetgenes.bullet"><span>/lua.wetgenes.bullet</span></a>
 <a class="par" href="../../docs/lua.wetgenes.bullet.body"><span>/lua.wetgenes.bullet.body</span></a>
 
+<a class="sub" href="../../docs/lua.wetgenes.bullet.body.cgroup"><span>/lua.wetgenes.bullet.body.cgroup</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.bullet.body.cmask"><span>/lua.wetgenes.bullet.body.cmask</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.body.gravity"><span>/lua.wetgenes.bullet.body.gravity</span></a><a class="par" href="../../docs/lua.wetgenes.bullet.world"><span>/lua.wetgenes.bullet.world</span></a>
 <a class="par" href="../../docs/lua.wetgenes.bullet.world.body"><span>/lua.wetgenes.bullet.world.body</span></a>
 
@@ -561,10 +563,39 @@
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.bullet.body.cgroup">lua.wetgenes.bullet.body.cgroup</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L488">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div><pre><code>body:cgroup(bits)
+bits=body:cgroup()
+</code></pre>
+<p>Set or get body cgroup bits. You have 31 bits, so use 0x7fffffff to set 
+all. These provide simple yes/no collision control between bodies.</p>
+<pre><code>cgroup bits are all the groups this body belongs to.
+cmask bits are all the groups this body colides with.
+</code></pre>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.bullet.body.cmask">lua.wetgenes.bullet.body.cmask</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L507">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div><pre><code>body:cmask(bits)
+bits=body:cmask()
+body:cmask(0x7fffffff)
+</code></pre>
+<p>Set or get body cmask bits. You have 31 bits, so use 0x7fffffff to set 
+all. This body will only colide with another body if the other bodys 
+cgroup has a bit set that is also set in our cmask.</p>
+<pre><code>cgroup bits are all the groups this body belongs to.
+cmask bits are all the groups this body colides with.
+</code></pre>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.body.gravity">lua.wetgenes.bullet.body.gravity</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L469">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>body:gravity(x,y,z)
-
 x,y,z = body:gravity()
 </code></pre>
 <p>Set or get body gravity vector. Fidling with this may be the easiest 

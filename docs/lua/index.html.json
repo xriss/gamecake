@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 524,
+   "count": 526,
    "name": "lua"
   },
   {
@@ -54,16 +54,24 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 518,
+   "count": 520,
    "name": "lua.wetgenes"
   },
   {
-   "count": 28,
+   "count": 30,
    "name": "lua.wetgenes.bullet"
   },
   {
-   "count": 2,
+   "count": 4,
    "name": "lua.wetgenes.bullet.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.body.cgroup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.body.cmask"
   },
   {
    "count": 1,
@@ -2172,7 +2180,7 @@
  "_list": [
   {
    "body": "",
-   "count": 524,
+   "count": 526,
    "name": "lua"
   },
   {
@@ -2217,7 +2225,7 @@
   },
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 518,
+   "count": 520,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -2225,7 +2233,7 @@
   },
   {
    "body": "<pre><code>local bullet=require(&quot;wetgenes.bullet&quot;)\n</code></pre>\n<p>We use bullet as the local name of this library.</p>\n<p>A lua binding to the <a href=\"https://github.com/bulletphysics/bullet3\">Bullet \nPhysics</a> library</p>\n",
-   "count": 28,
+   "count": 30,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 14,
    "name": "lua.wetgenes.bullet",
@@ -2233,11 +2241,27 @@
   },
   {
    "body": "",
-   "count": 2,
+   "count": 4,
    "name": "lua.wetgenes.bullet.body"
   },
   {
-   "body": "<pre><code>body:gravity(x,y,z)\n\nx,y,z = body:gravity()\n</code></pre>\n<p>Set or get body gravity vector. Fidling with this may be the easiest \nway for a player to move an object around, it certainly makes it easier \nto create &quot;magnetic fields&quot; to hover objects above the ground.</p>\n",
+   "body": "<pre><code>body:cgroup(bits)\nbits=body:cgroup()\n</code></pre>\n<p>Set or get body cgroup bits. You have 31 bits, so use 0x7fffffff to set \nall. These provide simple yes/no collision control between bodies.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 488,
+   "name": "lua.wetgenes.bullet.body.cgroup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
+   "body": "<pre><code>body:cmask(bits)\nbits=body:cmask()\nbody:cmask(0x7fffffff)\n</code></pre>\n<p>Set or get body cmask bits. You have 31 bits, so use 0x7fffffff to set \nall. This body will only colide with another body if the other bodys \ncgroup has a bit set that is also set in our cmask.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 507,
+   "name": "lua.wetgenes.bullet.body.cmask",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
+   "body": "<pre><code>body:gravity(x,y,z)\nx,y,z = body:gravity()\n</code></pre>\n<p>Set or get body gravity vector. Fidling with this may be the easiest \nway for a player to move an object around, it certainly makes it easier \nto create &quot;magnetic fields&quot; to hover objects above the ground.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 469,
@@ -2253,7 +2277,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body = world:body(&quot;rigid&quot;,shape,mass,x,y,z)\n</code></pre>\n<p>Create a body.</p>\n",
+   "body": "<pre><code>body = world:body(&quot;rigid&quot;,shape,mass,x,y,z,cgroup,cmask)\n</code></pre>\n<p>Create a body.</p>\n",
    "count": 13,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 284,

@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 524,
+   "count": 526,
    "name": "lua"
   },
   {
@@ -54,16 +54,24 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 518,
+   "count": 520,
    "name": "lua.wetgenes"
   },
   {
-   "count": 28,
+   "count": 30,
    "name": "lua.wetgenes.bullet"
   },
   {
-   "count": 2,
+   "count": 4,
    "name": "lua.wetgenes.bullet.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.body.cgroup"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.body.cmask"
   },
   {
    "count": 1,
@@ -2179,7 +2187,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body = world:body(&quot;rigid&quot;,shape,mass,x,y,z)\n</code></pre>\n<p>Create a body.</p>\n",
+   "body": "<pre><code>body = world:body(&quot;rigid&quot;,shape,mass,x,y,z,cgroup,cmask)\n</code></pre>\n<p>Create a body.</p>\n",
    "count": 13,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 284,
