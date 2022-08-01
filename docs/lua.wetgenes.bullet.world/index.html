@@ -569,6 +569,7 @@
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body">lua.wetgenes.bullet.world.body</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L284">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>body = world:body(&quot;rigid&quot;,shape,mass,x,y,z,cgroup,cmask)
+body = world:body({name=&quot;rigid&quot;,shape=shape,mass=mass.pos=V3(0)})
 </code></pre>
 <p>Create a body.</p>
 </div>
@@ -576,7 +577,7 @@
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.active">lua.wetgenes.bullet.world.body.active</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L399">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L415">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>b = body:active( true )
 b = body:active( false )
 b = body:active()
@@ -587,7 +588,7 @@ b = body:active()
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.angular_factor">lua.wetgenes.bullet.world.body.angular_factor</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L440">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L456">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>x,y,z = body:angular_factor( x , y , z )
 x,y,z = body:angular_factor( r )
 r = ( body:angular_factor( r ) )
@@ -598,7 +599,7 @@ r = ( body:angular_factor( r ) )
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.angular_velocity">lua.wetgenes.bullet.world.body.angular_velocity</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L427">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L443">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>x,y,z = body:angular_velocity( x,y,z )
 x,y,z = body:angular_velocity()
 </code></pre>
@@ -608,7 +609,7 @@ x,y,z = body:angular_velocity()
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.ccd">lua.wetgenes.bullet.world.body.ccd</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L386">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L402">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>r,t = body:ccd( radius,threshold )
 r,t = body:ccd()
 </code></pre>
@@ -618,7 +619,7 @@ r,t = body:ccd()
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.custom_material_callback">lua.wetgenes.bullet.world.body.custom_material_callback</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L454">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L470">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>b = body:custom_material_callback( b )
 b = body:custom_material_callback()
 </code></pre>
@@ -629,7 +630,7 @@ b = body:custom_material_callback()
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.damping">lua.wetgenes.bullet.world.body.damping</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L360">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L376">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>l,a = body:damping( linear , angular )
 l,a = body:damping()
 </code></pre>
@@ -639,7 +640,7 @@ l,a = body:damping()
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.destroy">lua.wetgenes.bullet.world.body.destroy</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L305">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L321">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>body:destroy()
 </code></pre>
 <p>Destroy body.</p>
@@ -648,7 +649,7 @@ l,a = body:damping()
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.factor">lua.wetgenes.bullet.world.body.factor</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L413">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L429">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>x,y,z = body:factor( x , y , z )
 x,y,z = body:factor( r )
 r = ( body:factor( r ) )
@@ -659,7 +660,7 @@ r = ( body:factor( r ) )
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.friction">lua.wetgenes.bullet.world.body.friction</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L347">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L363">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>l,a,s = body:friction( linear , angular , spinning )
 l,a,s = body:friction()
 </code></pre>
@@ -669,7 +670,7 @@ l,a,s = body:friction()
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.restitution">lua.wetgenes.bullet.world.body.restitution</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L334">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L350">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>r = body:transform( r )
 r = body:transform()
 </code></pre>
@@ -679,7 +680,7 @@ r = body:transform()
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.transform">lua.wetgenes.bullet.world.body.transform</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L320">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L336">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>px,py,pz,qx,qy,qz,qw = body:transform()
 px,py,pz,qx,qy,qz,qw = body:transform(px,py,pz)
 px,py,pz,qx,qy,qz,qw = body:transform(px,py,pz,qx,qy,qz,qw)
@@ -690,7 +691,7 @@ px,py,pz,qx,qy,qz,qw = body:transform(px,py,pz,qx,qy,qz,qw)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.velocity">lua.wetgenes.bullet.world.body.velocity</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L373">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L389">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>x,y,z = body:velocity( x,y,z )
 x,y,z = body:velocity()
 </code></pre>
