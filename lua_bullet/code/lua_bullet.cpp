@@ -584,30 +584,30 @@ btTransform trans;
 	lua_setmetatable(l, -2);
 
 // allocate cpbody
-		tp=luaL_checkstring(l,1);
-		if(0==strcmp(tp,"rigid"))
+	tp=luaL_checkstring(l,1);
+	if(0==strcmp(tp,"rigid"))
+	{
+		shape=lua_bullet_shape_ptr(l, 2 );
+
+		mass=lua_tonumber(l,3);
+
+		trans.setOrigin(btVector3( lua_tonumber(l,4) ,  lua_tonumber(l,5) , lua_tonumber(l,6) ));
+
+		btVector3 localInertia(0, 0, 0);
+		if(mass != 0.f)
 		{
-			shape=lua_bullet_shape_ptr(l, 2 );
-
-			mass=lua_tonumber(l,3);
-
-			trans.setOrigin(btVector3( lua_tonumber(l,4) ,  lua_tonumber(l,5) , lua_tonumber(l,6) ));
-
-			btVector3 localInertia(0, 0, 0);
-			if(mass != 0.f)
-			{
-				shape->calculateLocalInertia(mass, localInertia);
-			}
-
-			btDefaultMotionState* myMotionState = new btDefaultMotionState(trans);
-			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, shape, localInertia);
-			*pp = new btRigidBody(rbInfo);
-
+			shape->calculateLocalInertia(mass, localInertia);
 		}
-		else
-		{
-			lua_pushstring(l,"unknown body type"); lua_error(l);
-		}
+
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(trans);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, shape, localInertia);
+		*pp = new btRigidBody(rbInfo);
+
+	}
+	else
+	{
+		lua_pushstring(l,"unknown body type"); lua_error(l);
+	}
 
 	return 1;
 }
@@ -657,19 +657,29 @@ add body to world
 */
 static int lua_bullet_world_add_body (lua_State *l)
 {
+const char *tp;
 btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
-btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
 
-	if( lua_isnumber(l,3) )
+	tp=luaL_checkstring(l,2);
+	if(0==strcmp(tp,"rigid"))
 	{
-		int group=lua_tonumber(l,3);
-		int mask=lua_tonumber(l,4);
-		world->addRigidBody(body,group,mask);
+		btRigidBody             *body  = lua_bullet_body_ptr(l, 3 );
+		if( lua_isnumber(l,3) )
+		{
+			int group=lua_tonumber(l,3);
+			int mask=lua_tonumber(l,4);
+			world->addRigidBody(body,group,mask);
+		}
+		else
+		{
+			world->addRigidBody(body);
+		}
 	}
 	else
 	{
-		world->addRigidBody(body);
+		lua_pushstring(l,"unknown body type"); lua_error(l);
 	}
+
 	
 	return 0;
 }

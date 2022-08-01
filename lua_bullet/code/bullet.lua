@@ -284,19 +284,35 @@ end
 --[[#lua.wetgenes.bullet.world.body
 
 	body = world:body("rigid",shape,mass,x,y,z,cgroup,cmask)
+	body = world:body({name="rigid",shape=shape,mass=mass.pos=V3(0)})
 
 Create a body.
 
 ]]
 bullet.world_functions.body=function(world,name,shape,mass,x,y,z,cgroup,cmask)
+
+	local opts={}
+	if type(name)=="table" then
+		opts=name
+		name=nil
+	end
+	
+	opts.name=opts.name or name
+	opts.shape=opts.shape or shape
+	opts.mass=opts.mass or mass
+	opts.pos=opts.pos or {x or 0,y or 0,z or 0}
+	opts.cgroup=opts.cgroup or cgroup
+	opts.cmask=opts.cmask or cmask or -1
+
 	local body={}
 	setmetatable(body,bullet.body_metatable)
-	body[0]=core.body_create(name,shape[0],mass,x,y,z)
+	body[0]=core.body_create(opts.name,opts.shape[0],opts.mass,opts.pos[1],opts.pos[2],opts.pos[3])
 	body.world=world
+	body.name=name -- probably rigid or ghost
 	
 	world.bodies[ core.body_ptr(body[0]) ]=body
 
-	core.world_add_body( world[0] , body[0] , cgroup , cmask or -1 )
+	core.world_add_body( world[0] , name , body[0] , opts.cgroup , opts.cmask )
 
 	return body
 end
