@@ -312,7 +312,7 @@ bullet.world_functions.body=function(world,name,shape,mass,x,y,z,cgroup,cmask)
 	
 	world.bodies[ core.body_ptr(body[0]) ]=body
 
-	core.world_add_body( world[0] , name , body[0] , opts.cgroup , opts.cmask )
+	core.world_add_body( world[0] , opts.name , body[0] , opts.cgroup , opts.cmask )
 
 	return body
 end
