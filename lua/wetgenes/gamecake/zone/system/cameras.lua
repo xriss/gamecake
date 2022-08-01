@@ -234,18 +234,27 @@ B.camera.update=function(camera)
 		q:rotate( camera.rot[3] ,  {0,0,1} )
 		local d=V3(0,0,1):product(q)
 
-		local test=physics.world:ray_test({
-			ray={
-				camera.pos+V3(0,0,0),
-				camera.pos+(d*camera.dolly)+V3(0,0,0),
-			},
-		})
-		if test.hit then
-			camera.orbit.dolly = ( camera.orbit.dolly*3 + test.hit.fraction ) /4
-		else
-			camera.orbit.dolly = ( camera.orbit.dolly*3 + 1 ) /4
+		
+		local frac=1
+		
+		for yp=-3,3,3 do
+			local test=physics.world:ray_test({
+				ray={
+					camera.pos+V3(0,0,0),
+					camera.pos+(d*camera.dolly)+V3(0,0+yp,0),
+					cmask=0x00ff,
+				},
+			})
+			if test.hit then			
+				if test.hit.fraction < frac then
+					frac=test.hit.fraction
+				end
+			end
 		end
+--		camera.orbit.dolly = ( camera.orbit.dolly*3 + frac ) /4
+		camera.orbit.dolly = frac
 	end
+	
 
 
 
