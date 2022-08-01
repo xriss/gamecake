@@ -588,9 +588,7 @@ btTransform trans;
 	if(0==strcmp(tp,"rigid"))
 	{
 		shape=lua_bullet_shape_ptr(l, 2 );
-
 		mass=lua_tonumber(l,3);
-
 		trans.setOrigin(btVector3( lua_tonumber(l,4) ,  lua_tonumber(l,5) , lua_tonumber(l,6) ));
 
 		btVector3 localInertia(0, 0, 0);
@@ -608,8 +606,8 @@ btTransform trans;
 	if(0==strcmp(tp,"ghost"))
 	{
 		shape=lua_bullet_shape_ptr(l, 2 );
-
-		trans.setOrigin(btVector3( lua_tonumber(l,3) ,  lua_tonumber(l,4) , lua_tonumber(l,5) ));
+		mass=lua_tonumber(l,3);
+		trans.setOrigin(btVector3( lua_tonumber(l,4) ,  lua_tonumber(l,5) , lua_tonumber(l,6) ));
 
 		*pp = (btCollisionObject*) new btPairCachingGhostObject();
 		(*pp)->setCollisionShape(shape);
