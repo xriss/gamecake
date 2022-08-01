@@ -752,6 +752,8 @@ double x,y,z;
 		lua_pushnumber(l,3); lua_pushnumber(l, closestResults.m_hitNormalWorld.getZ() ); lua_settable(l,-3);
 		lua_pop(l,1);
 		
+		lua_pushstring(l,"body_ptr"); lua_pushlightuserdata(l, (void*)closestResults.m_collisionObject ); lua_settable(l,-3);
+		
 		lua_pop(l,1);
 	}
 	else
@@ -796,6 +798,19 @@ btCollisionShape *shape = lua_bullet_shape_ptr(l, 1 );
 }
 
 
+/*+------------------------------------------------------------------+**
+
+get shape pointer
+
+*/
+static int lua_bullet_shape_ptr (lua_State *l)
+{
+btCollisionShape *shape = lua_bullet_shape_ptr(l, 1 );
+
+	lua_pushlightuserdata(l,shape);
+
+	return 1;
+}
 
 /*+------------------------------------------------------------------+**
 
@@ -1144,6 +1159,20 @@ btBroadphaseProxy *broad=body->getBroadphaseHandle();
 
 /*+------------------------------------------------------------------+**
 
+get real body ptr
+
+*/
+static int lua_bullet_body_ptr (lua_State *l)
+{
+btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+
+	lua_pushlightuserdata(l,body);
+
+	return 1;
+}
+
+/*+------------------------------------------------------------------+**
+
 open library.
 
 */
@@ -1214,6 +1243,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"world_ray_test",					lua_bullet_world_ray_test},
 
 		{"shape_margin",					lua_bullet_shape_margin},
+		{"shape_ptr",						lua_bullet_shape_ptr},
 
 		{"body_transform",					lua_bullet_body_transform},
 		{"body_velocity",					lua_bullet_body_velocity},
@@ -1226,6 +1256,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_gravity",					lua_bullet_body_gravity},
 		{"body_cgroup",						lua_bullet_body_cgroup},
 		{"body_cmask",						lua_bullet_body_cmask},
+		{"body_ptr",						lua_bullet_body_ptr},
 
 		{"body_angular_velocity",			lua_bullet_body_angular_velocity},
 		{"body_angular_factor",				lua_bullet_body_angular_factor},

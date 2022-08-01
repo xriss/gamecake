@@ -247,7 +247,7 @@ bullet.world_functions.shape=function(world,name,a,...)
 	shape[0]=core.shape_create(name,a,...)
 	shape.world=world
 	
-	world.shapes[ shape[0] ]=shape
+	world.shapes[ core.shape_ptr(shape[0]) ]=shape
 
 	return shape
 end
@@ -264,7 +264,7 @@ bullet.shape_functions.destroy=function(shape)
 	local world=shape.world
 	if shape.name then world:set(shape.name) end
 	core.shape_destroy( shape[0] )
-	world.shapes[ shape[0] ]=nil
+	world.shapes[ core.shape_ptr(shape[0]) ]=nil
 end
 
 ------------------------------------------------------------------------
@@ -294,7 +294,7 @@ bullet.world_functions.body=function(world,name,shape,mass,x,y,z,cgroup,cmask)
 	body[0]=core.body_create(name,shape[0],mass,x,y,z)
 	body.world=world
 	
-	world.bodies[ body[0] ]=body
+	world.bodies[ core.body_ptr(body[0]) ]=body
 
 	core.world_add_body( world[0] , body[0] , cgroup , cmask or -1 )
 
@@ -313,7 +313,7 @@ bullet.body_functions.destroy=function(body)
 	local world=body.world
 	if body.name then world:set(body.name) end
 	core.body_destroy( body[0] )
-	world.bodies[ body[0] ]=nil
+	world.bodies[ core.body_ptr(body[0]) ]=nil
 end
 
 ------------------------------------------------------------------------

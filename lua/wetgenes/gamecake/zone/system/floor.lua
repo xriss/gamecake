@@ -188,6 +188,7 @@ end
 		floor.bodys[ #floor.bodys+1 ]=body
 		body:restitution( 1 )
 		body:friction( 0.8 , 0.1 , 0.1 )
+		body.item=floor -- backlink for collison
 	end
 
 	return floor
