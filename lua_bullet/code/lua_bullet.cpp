@@ -674,7 +674,7 @@ btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
 	if(0==strcmp(tp,"rigid"))
 	{
 		btRigidBody             *body  = (btRigidBody*)lua_bullet_body_ptr(l, 3 );
-		if( lua_isnumber(l,3) )
+		if( lua_isnumber(l,4) )
 		{
 			int group=lua_tonumber(l,4);
 			int mask=lua_tonumber(l,5);
