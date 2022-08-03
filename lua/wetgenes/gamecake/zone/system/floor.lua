@@ -47,14 +47,14 @@ B.floors.setup=function(floors)
 
 	floors.ramps=wgrdcanvas.ramps(16,{
 		{
-			{ argb=0xff669933, value=0.0 },
+			{ argb=0xff559933, value=0.0 },
 			{ argb=0xff66cc66, value=0.5 },
-			{ argb=0xff99cc66, value=1.0 },
+			{ argb=0xffaacc66, value=1.0 },
 		},
 		{
-			{ argb=0xff332222, value=0.0 },
+			{ argb=0xff330000, value=0.0 },
 			{ argb=0xff663333, value=0.5 },
-			{ argb=0xff665555, value=1.0 },
+			{ argb=0xff666633, value=1.0 },
 		},
 	})
 
@@ -204,13 +204,20 @@ B.floor.draw=function(floor)
 
 --	gl.Translate(floor.pos)
 --	gl.Color(3/8,6/8,3/8,1)
-	geom.draw(floor.geom,"gamecake_shader?XYZ&NORMAL&TEX&TEXNTOON=1.0",function(p)
+
+
+	geom.draw(floor.geom,"zone_floor_grass",function(p)
 		gl.ActiveTexture(gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 		oven.cake.images.bind(floor.floors.image)
 		gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
 		gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 		gl.ActiveTexture( gl.TEXTURE0 )
+		
+--		gl.Uniform1f( p:uniform("idx") , i )
+--		gl.Uniform4f( p:uniform("offset") , 0 , (-i/2)/4 , 0 , 0 )
+
 	end)
+	
 --	gl.Color(1,1,1,1)
 
 --	gl.PopMatrix()
