@@ -29,6 +29,7 @@ M.bake=function(oven,keys)
 		["left"]		=	{ "rx0" },
 		["down"]		=	{ "ry1" },
 		["right"]		=	{ "rx1" },
+--[[
 		["1"]			=	{ "pad_up"    },
 		["2"]			=	{ "pad_left"  },
 		["3"]			=	{ "pad_down"  },
@@ -39,6 +40,13 @@ M.bake=function(oven,keys)
 		["8"]			=	{ "b" , "fire"},
 		["9"]			=	"select",
 		["0"]			=	"start",
+]]
+		["keypad 8"]	=	{ "pad_up"    },
+		["keypad 4"]	=	{ "pad_left"  },
+		["keypad 2"]	=	{ "pad_down"  },
+		["keypad 6"]	=	{ "pad_right" },
+		["tab"]			=	"select",
+		["enter"]		=	"start",
 		["q"]			=	"l2",
 		["e"]			=	"r2",
 		["z"]			=	"l1",
