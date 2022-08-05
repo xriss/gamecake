@@ -54,6 +54,28 @@ M.cmap_swanky32={
 	[31]={bgra=0xffffffff,code="7 ",name="white"},
 }
 
+-- swanky32 base palette
+M.cmap_swanky16={
+	name="Swanky16",
+	[ 0]={bgra=0xff336622,code="g ",name="green_dark"},
+	[ 1]={bgra=0xff66aa33,code="d ",name="green_light"},
+	[ 2]={bgra=0xff66cccc,code="C ",name="cyan"},
+	[ 3]={bgra=0xff5577cc,code="B ",name="blue"},
+	[ 4]={bgra=0xff333366,code="I ",name="indigo"},
+	[ 5]={bgra=0xff442233,code="j ",name="brown_blue"},
+	[ 6]={bgra=0xff884433,code="F ",name="brown"},
+	[ 7]={bgra=0xffeeaa99,code="S ",name="brown_magenta"},
+
+	[ 8]={bgra=0xffcc3333,code="R ",name="red"},
+	[ 9]={bgra=0xffdd7733,code="O ",name="orange"},
+	[10]={bgra=0xffdddd44,code="Y ",name="yellow"},
+	[11]={bgra=0xff000000,code="0 ",name="black"},
+	[12]={bgra=0xff444444,code="2 ",name="grey_darker"},
+	[13]={bgra=0xff666666,code="3 ",name="grey_dark"},
+	[14]={bgra=0xffaaaaaa,code="5 ",name="grey_light"},
+	[15]={bgra=0xffffffff,code="7 ",name="white"},
+}
+
 M.cmap_build=function(cmap_data)
 	local cmap={}
 	cmap.name=cmap_data.name
@@ -82,6 +104,7 @@ M.cmap_build=function(cmap_data)
 	for i=0,255 do -- premultiply the colors as this is the data we actually need
 		local color=cmap[i]
 		if color.bgra then
+			color.argb=color.bgra --  either name
 			color[1],color[2],color[3],color[4]=wpack.argb_pmb4(color.bgra) -- wgrd style 4 byte array
 		end
 		color.r=color[1]/255 -- opengl style floats
@@ -105,6 +128,7 @@ M.cmap_build=function(cmap_data)
 end
 
 M.cmap_swanky32=M.cmap_build(M.cmap_swanky32) -- process
+M.cmap_swanky16=M.cmap_build(M.cmap_swanky16) -- process
 
 M.cmap=M.cmap_swanky32 -- set the default palette to swanky32
 -- this is the global default but you can pass in a different cmap to functions
