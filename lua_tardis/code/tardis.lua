@@ -2544,7 +2544,7 @@ Set a V3(roll,pitch,yaw) degree rotation into this quaternion
 
 ]]
 function q4.set_yaw_pitch_roll(it,v)
-	return q4.set_yaw_pitch_roll_in_radians(it,V3(v):scale(math.pi/180))
+	return q4.set_yaw_pitch_roll_in_radians(it,tardis.v3.new(v):scale(math.pi/180))
 end
 
 --[[#lua.wetgenes.tardis.q4.get_yaw_pitch_roll
@@ -2600,7 +2600,7 @@ otherwise a new v3 is created and returned.
 
 ]]
 function q4.get_yaw_pitch_roll_in_radians(q,r)
-	r=r or V3()
+	r=r or tardis.v3.new()
 
 -- roll (x-axis rotation)
 	local sinr_cosp =   2*(q[4] * q[1] + q[2] * q[3])
@@ -2621,7 +2621,7 @@ function q4.get_yaw_pitch_roll_in_radians(q,r)
 	local siny_cosp =   2*(q[4] * q[3] + q[1] * q[2])
 	local cosy_cosp = 1-2*(q[2] * q[2] + q[3] * q[3])
 	r[3] = math.atan2(siny_cosp, cosy_cosp)
-
+	
 	return r
 end
 
