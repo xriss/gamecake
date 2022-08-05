@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 526,
+   "count": 532,
    "name": "lua"
   },
   {
@@ -54,7 +54,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 520,
+   "count": 526,
    "name": "lua.wetgenes"
   },
   {
@@ -1354,7 +1354,7 @@
    "name": "lua.wetgenes.spew.test"
   },
   {
-   "count": 149,
+   "count": 155,
    "name": "lua.wetgenes.tardis"
   },
   {
@@ -1582,7 +1582,7 @@
    "name": "lua.wetgenes.tardis.m3.v3"
   },
   {
-   "count": 32,
+   "count": 34,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -1607,7 +1607,15 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.get_rotation_q4"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.get_scale_v3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.get_translation_v3"
   },
   {
    "count": 1,
@@ -1722,8 +1730,16 @@
    "name": "lua.wetgenes.tardis.plane.new"
   },
   {
-   "count": 11,
+   "count": 15,
    "name": "lua.wetgenes.tardis.q4"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.get_yaw_pitch_roll"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.get_yaw_pitch_roll_in_radians"
   },
   {
    "count": 1,
@@ -1756,6 +1772,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.q4.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.set_yaw_pitch_roll"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.set_yaw_pitch_roll_in_radians"
   },
   {
    "count": 1,
@@ -2180,7 +2204,7 @@
  "_list": [
   {
    "body": "",
-   "count": 526,
+   "count": 532,
    "name": "lua"
   },
   {
@@ -2225,7 +2249,7 @@
   },
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 520,
+   "count": 526,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -4789,7 +4813,7 @@
   },
   {
    "body": "<p>Time And Relative Dimensions In Space is of course the perfect name for \na library of matrix based math functions.</p>\n<pre><code>local tardis=require(&quot;wetgenes.tardis&quot;)\n</code></pre>\n<p>This tardis is a lua library for manipulating time and space with numbers.\nDesigned to work as pure lua but with a faster, but less accurate, f32 core by\ndefault. ( this core seems to be slightly faster/same speed as vanilla lua but\nslower than luajit , so is currently disabled )</p>\n<p>Recoil in terror as we use two glyph names for classes whilst typing in \nrandom strings of numbers and operators that may or may not contain \ntyops.</p>\n<pre><code>v# vector [#]\nm# matrix [#][#]\nq4 quaternion\n</code></pre>\n<p>Each class is a table of # values [1] to [#] the 2d number streams are \nformatted the same as opengl (row-major) and metatables are used to \nprovide methods.</p>\n<p>The easy way of remembering the opengl 4x4 matrix layout is that the\ntranslate x,y,z values sit at 13,14,15 and 4,8,12,16 is normally set\nto the constant 0,0,0,1 for most transforms.</p>\n<pre><code>     | 1  5  9  13 |\n     | 2  6  10 14 |\nm4 = | 3  7  11 15 |\n     | 4  8  12 16 |\n</code></pre>\n<p>This seems to be the simplest (programmer orientated) description of \nmost of the maths used here so go read it if you want to know what the \nfunny words mean.</p>\n<p><a href=\"http://www.j3d.org/matrix_faq/matrfaq_latest.html\">http://www.j3d.org/matrix_faq/matrfaq_latest.html</a></p>\n",
-   "count": 149,
+   "count": 155,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 26,
    "name": "lua.wetgenes.tardis",
@@ -5055,7 +5079,7 @@
    "body": "<p>A 3d space line class.</p>\n<p>[1]position , [2]normal</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
    "count": 2,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2483,
+   "line": 2628,
    "name": "lua.wetgenes.tardis.line",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5063,7 +5087,7 @@
    "body": "<pre><code>line = tardis.line.new(p,n)\n</code></pre>\n<p>Create a new line and optionally set it to the given values.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2495,
+   "line": 2640,
    "name": "lua.wetgenes.tardis.line.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5245,7 +5269,7 @@
   },
   {
    "body": "<p>The metatable for a 4x4 matrix class, use the new function to actually \ncreate an object.</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
-   "count": 32,
+   "count": 34,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 998,
    "name": "lua.wetgenes.tardis.m4",
@@ -5271,7 +5295,7 @@
    "body": "<pre><code>m4 = m4:arotate(degrees,v3a)\nm4 = m4:arotate(degrees,v3a,r)\n</code></pre>\n<p>Apply a rotation in degres around the given axis to this matrix.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1509,
+   "line": 1560,
    "name": "lua.wetgenes.tardis.m4.arotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5292,11 +5316,27 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
+   "body": "<pre><code>q4 = m4:get_rotation_q4(r)\n</code></pre>\n<p>Get quaternion rotation from a scale/rot/trans matrix. Note that scale \nis assumed to be uniform which it usually is. If that is not the case \nthen remove the scale first.</p>\n<p>If r is provided then the result is written into r and returned \notherwise a new q4 is created and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1452,
+   "name": "lua.wetgenes.tardis.m4.get_rotation_q4",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
    "body": "<pre><code>v3 = m4:get_scale_v3(r)\n</code></pre>\n<p>Get v3 scale from a scale/rot/trans matrix</p>\n<p>If r is provided then the result is written into r and returned \notherwise a new v3 is created and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1418,
+   "line": 1433,
    "name": "lua.wetgenes.tardis.m4.get_scale_v3",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = m4:get_translation_v3(r)\n</code></pre>\n<p>Get v3 translation from a scale/rot/trans matrix</p>\n<p>If r is provided then the result is written into r and returned \notherwise a new v3 is created and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 1418,
+   "name": "lua.wetgenes.tardis.m4.get_translation_v3",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
@@ -5351,7 +5391,7 @@
    "body": "<pre><code>m4 = m4:prearotate(degrees,v3a)\nm4 = m4:prearotate(degrees,v3a,r)\n</code></pre>\n<p>Pre apply a rotation in degrees around the given axis to this matrix.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1584,
+   "line": 1635,
    "name": "lua.wetgenes.tardis.m4.prearotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5359,7 +5399,7 @@
    "body": "<pre><code>m4 = m4:preqrotate(q)\nm4 = m4:preqrotate(q,r)\n</code></pre>\n<p>Pre apply a quaternion rotation to this matrix.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1616,
+   "line": 1667,
    "name": "lua.wetgenes.tardis.m4.preqrotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5367,7 +5407,7 @@
    "body": "<pre><code>m4 = m4:prerotate(degrees,v3a)\nm4 = m4:prerotate(degrees,v3a,r)\nm4 = m4:prerotate(degrees,x,y,z)\nm4 = m4:prerotate(degrees,x,y,z,r)\nm4 = m4:prerotate(q)\nm4 = m4:prerotate(q,r)\n</code></pre>\n<p>Pre apply quaternion or angle rotation to this matrix depending on \narguments provided.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1632,
+   "line": 1683,
    "name": "lua.wetgenes.tardis.m4.prerotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5375,7 +5415,7 @@
    "body": "<pre><code>m4 = m4:prerrotate(radians,v3a)\nm4 = m4:prerrotate(radians,v3a,r)\n</code></pre>\n<p>Pre apply a rotation in radians around the given axis to this matrix.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1600,
+   "line": 1651,
    "name": "lua.wetgenes.tardis.m4.prerrotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5407,7 +5447,7 @@
    "body": "<pre><code>m4 = m4:qrotate(q)\nm4 = m4:qrotate(q,r)\n</code></pre>\n<p>Apply a quaternion rotation to this matrix.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1541,
+   "line": 1592,
    "name": "lua.wetgenes.tardis.m4.qrotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5415,7 +5455,7 @@
    "body": "<pre><code>m4 = m4:rotate(degrees,v3a)\nm4 = m4:rotate(degrees,v3a,r)\nm4 = m4:rotate(degrees,x,y,z)\nm4 = m4:rotate(degrees,x,y,z,r)\nm4 = m4:rotate(q)\nm4 = m4:rotate(q,r)\n</code></pre>\n<p>Apply quaternion or angle rotation to this matrix depending on \narguments provided.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1557,
+   "line": 1608,
    "name": "lua.wetgenes.tardis.m4.rotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5423,7 +5463,7 @@
    "body": "<pre><code>m4 = m4:rrotate(radians,v3a)\nm4 = m4:rrotate(radians,v3a,r)\n</code></pre>\n<p>Apply a rotation in radians around the given axis to this matrix.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1525,
+   "line": 1576,
    "name": "lua.wetgenes.tardis.m4.rrotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5447,7 +5487,7 @@
    "body": "<pre><code>m4 = m4:setrot(degrees,v3a)\n</code></pre>\n<p>Set this matrix to a rotation matrix around the given normal by the given degrees.</p>\n<p>we will automatically normalise v3a if necessary.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1437,
+   "line": 1488,
    "name": "lua.wetgenes.tardis.m4.setrot",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5455,7 +5495,7 @@
    "body": "<pre><code>m4 = m4:setrrot(radians,v3a)\n</code></pre>\n<p>Set this matrix to a rotation matrix around the given normal by the given radians.</p>\n<p>we will automatically normalise v3a if necessary.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1473,
+   "line": 1524,
    "name": "lua.wetgenes.tardis.m4.setrrot",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5503,7 +5543,7 @@
    "body": "<pre><code>stack = tardis.m4_stack()\n</code></pre>\n<p>create an m4 stack that is very similar to an old school opengl transform\nstack.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2729,
+   "line": 2874,
    "name": "lua.wetgenes.tardis.m4_stack",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5511,7 +5551,7 @@
    "body": "<p>A 3d space plane class.</p>\n<p>[1]position , [2]normal</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
    "count": 2,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2504,
+   "line": 2649,
    "name": "lua.wetgenes.tardis.plane",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5519,23 +5559,39 @@
    "body": "<pre><code>plane = tardis.plane.new(p,n)\n</code></pre>\n<p>Create a new plane and optionally set it to the given values.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2516,
+   "line": 2661,
    "name": "lua.wetgenes.tardis.plane.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
    "body": "<p>The metatable for a quaternion class, use the new function to actually create an object.</p>\n<p>We also inherit all the functions from tardis.v4</p>\n",
-   "count": 11,
+   "count": 15,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2277,
+   "line": 2328,
    "name": "lua.wetgenes.tardis.q4",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = q4:get_yaw_pitch_roll()\n</code></pre>\n<p>Get a yaw,pitch,roll degree rotation from this quaternion</p>\n<p>If r is provided then the result is written into r and returned \notherwise a new v3 is created and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 2550,
+   "name": "lua.wetgenes.tardis.q4.get_yaw_pitch_roll",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>v3 = q4:get_yaw_pitch_roll_in_radians()\n</code></pre>\n<p>Get a yaw,pitch,roll degree rotation from this quaternion</p>\n<p>If r is provided then the result is written into r and returned \notherwise a new v3 is created and returned.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 2592,
+   "name": "lua.wetgenes.tardis.q4.get_yaw_pitch_roll_in_radians",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
    "body": "<pre><code>q4 = q4:identity()\n</code></pre>\n<p>Set this q4 to its 0,0,0,1 identity</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2361,
+   "line": 2412,
    "name": "lua.wetgenes.tardis.q4.identity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5543,7 +5599,7 @@
    "body": "<pre><code>q4 = q4:lerp(q4b,s)\nq4 = q4:lerp(q4b,s,r)\n</code></pre>\n<p>Nlerp from q4 to q4b by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise q4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2370,
+   "line": 2421,
    "name": "lua.wetgenes.tardis.q4.lerp",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5551,7 +5607,7 @@
    "body": "<pre><code>q4 = tardis.q4.new()\n</code></pre>\n<p>Create a new q4 and optionally set it to the given values, q4 methods \nusually return the input q4 for easy function chaining.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2351,
+   "line": 2402,
    "name": "lua.wetgenes.tardis.q4.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5559,7 +5615,7 @@
    "body": "<pre><code>q4 = q4:prerotate(degrees,v3a)\nq4 = q4:prerotate(degrees,v3a,r)\n</code></pre>\n<p>Pre apply a degree rotation to this quaternion.</p>\n<p>If r is provided then the result is written into r and returned \notherwise q4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2432,
+   "line": 2483,
    "name": "lua.wetgenes.tardis.q4.prerotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5567,7 +5623,7 @@
    "body": "<pre><code>q4 = q4:prerrotate(radians,v3a)\nq4 = q4:prerrotate(radians,v3a,r)\n</code></pre>\n<p>Pre apply a radian rotation to this quaternion.</p>\n<p>If r is provided then the result is written into r and returned \notherwise q4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2466,
+   "line": 2517,
    "name": "lua.wetgenes.tardis.q4.prerrotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5575,7 +5631,7 @@
    "body": "<pre><code>q4 = q4:rotate(degrees,v3a)\nq4 = q4:rotate(degrees,v3a,r)\n</code></pre>\n<p>Apply a degree rotation to this quaternion.</p>\n<p>If r is provided then the result is written into r and returned \notherwise q4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2415,
+   "line": 2466,
    "name": "lua.wetgenes.tardis.q4.rotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5583,7 +5639,7 @@
    "body": "<pre><code>q4 = q4:rrotate(radians,v3a)\nq4 = q4:rrotate(radians,v3a,r)\n</code></pre>\n<p>Apply a radian rotation to this quaternion.</p>\n<p>If r is provided then the result is written into r and returned \notherwise q4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2449,
+   "line": 2500,
    "name": "lua.wetgenes.tardis.q4.rrotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5591,15 +5647,31 @@
    "body": "<pre><code>q4 = tardis.q4.set(q4,{0,0,0,1})\nq4 = tardis.q4.set(q4,0,0,0,1)\nq4 = tardis.q4.set(q4,{&quot;xyz&quot;,0,90,0})\nq4 = tardis.q4.set(q4,&quot;xyz&quot;,0,90,0)\nq4 = tardis.q4.set(q4,&quot;xyz&quot;,{0,90,0})\n</code></pre>\n<p>If the first item in the stream is not a string then this is just a normal\narray.set style.</p>\n<p>If first parameter of the stream is a string then initialise the quaternion\nusing a simple axis rotation notation Where the string is a list of axis. This\nstring is lower case letters. x y or z and then the following numbers are\namount of rotation to apply around that axis in degrees. You should provide as\nmany numbers as letters.</p>\n<p>Essentially this gives you a way of initialising quaternion rotations in an\neasily readable way.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2286,
+   "line": 2337,
    "name": "lua.wetgenes.tardis.q4.set",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>q4 = q4:set_yaw_pitch_roll(v3)\nq4 = q4:set_yaw_pitch_roll({90,60,30})\t-- 30yaw 60pitch 90roll\n</code></pre>\n<p>Set a V3(roll,pitch,yaw) degree rotation into this quaternion</p>\n<pre><code>yaw   v[3] is rotation about the z axis and is applied first\npitch v[2] is rotation about the y axis and is applied second\nroll  v[1] is rotation about the z axis and is applied last\n</code></pre>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 2534,
+   "name": "lua.wetgenes.tardis.q4.set_yaw_pitch_roll",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>q4 = q4:set_yaw_pitch_roll_in_radians(v)\n</code></pre>\n<p>Set a V3(roll,pitch,yaw) radian rotation into this quaternion</p>\n<pre><code>yaw   v[3] is rotation about the z axis and is applied first\npitch v[2] is rotation about the y axis and is applied second\nroll  v[1] is rotation about the z axis and is applied last\n</code></pre>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 2564,
+   "name": "lua.wetgenes.tardis.q4.set_yaw_pitch_roll_in_radians",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
    "body": "<pre><code>q4 = q4:setrot(degrees,v3a)\n</code></pre>\n<p>Set this quaternion to a rotation around the given normal by the given degrees.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2389,
+   "line": 2440,
    "name": "lua.wetgenes.tardis.q4.setrot",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5607,7 +5679,7 @@
    "body": "<pre><code>q4 = q4:setrrot(radians,v3a)\n</code></pre>\n<p>Set this quaternion to a rotation around the given normal by the given radians.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2402,
+   "line": 2453,
    "name": "lua.wetgenes.tardis.q4.setrrot",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5615,7 +5687,7 @@
    "body": "<pre><code>f = tardis.step(edge1,edge2,num)\n</code></pre>\n<p>return 0 if num is bellow or equal to edge1. Return 1 if num is the same or\nhigher as edge2 and smoothly interpolate between 0 and 1 for all other values.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2538,
+   "line": 2683,
    "name": "lua.wetgenes.tardis.smoothstep",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5623,7 +5695,7 @@
    "body": "<pre><code>i = tardis.step(edge,num)\n</code></pre>\n<p>return 0 if num is bellow edge or 1 if num is the same or higher</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2527,
+   "line": 2672,
    "name": "lua.wetgenes.tardis.step",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5639,7 +5711,7 @@
    "body": "<p>The metatable for a 2d vector class, use the new function to actually \ncreate an object.</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
    "count": 14,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1659,
+   "line": 1710,
    "name": "lua.wetgenes.tardis.v2",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5647,7 +5719,7 @@
    "body": "<pre><code>v2 = v2:add(v2b)\nv2 = v2:add(v2b,r)\n</code></pre>\n<p>Add v2b to v2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1776,
+   "line": 1827,
    "name": "lua.wetgenes.tardis.v2.add",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5655,7 +5727,7 @@
    "body": "<pre><code>value = v2:cross(v2b)\n</code></pre>\n<p>Extend to 3d then only return z value as x and y are always 0</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1835,
+   "line": 1886,
    "name": "lua.wetgenes.tardis.v2.cross",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5663,7 +5735,7 @@
    "body": "<pre><code>value = a:distance(b)\n</code></pre>\n<p>Returns the length of the vector between a and b.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1712,
+   "line": 1763,
    "name": "lua.wetgenes.tardis.v2.distance",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5671,7 +5743,7 @@
    "body": "<pre><code>value = v2:dot(v2b)\n</code></pre>\n<p>Return the dot product of these two vectors.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1824,
+   "line": 1875,
    "name": "lua.wetgenes.tardis.v2.dot",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5679,7 +5751,7 @@
    "body": "<pre><code>v2 = v2:identity()\n</code></pre>\n<p>Set this v2 to all zeros.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1679,
+   "line": 1730,
    "name": "lua.wetgenes.tardis.v2.identity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5687,7 +5759,7 @@
    "body": "<pre><code>value = v2:len()\n</code></pre>\n<p>Returns the length of this vector.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1700,
+   "line": 1751,
    "name": "lua.wetgenes.tardis.v2.len",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5695,7 +5767,7 @@
    "body": "<pre><code>value = v2:lenlen()\n</code></pre>\n<p>Returns the length of this vector, squared, this is often all you need \nfor comparisons so lets us skip the sqrt.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1688,
+   "line": 1739,
    "name": "lua.wetgenes.tardis.v2.lenlen",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5703,7 +5775,7 @@
    "body": "<pre><code>v2 = v2:mul(v2b)\nv2 = v2:mul(v2b,r)\n</code></pre>\n<p>Multiply v2 by v2b.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1808,
+   "line": 1859,
    "name": "lua.wetgenes.tardis.v2.mul",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5711,7 +5783,7 @@
    "body": "<pre><code>v2 = tardis.v2.new()\n</code></pre>\n<p>Create a new v2 and optionally set it to the given values, v2 methods \nusually return the input v2 for easy function chaining.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1669,
+   "line": 1720,
    "name": "lua.wetgenes.tardis.v2.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5719,7 +5791,7 @@
    "body": "<pre><code>v2 = v2:normalize()\nv2 = v2:normalize(r)\n</code></pre>\n<p>Adjust the length of this vector to 1.</p>\n<p>An input length of 0 will remain at 0.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1757,
+   "line": 1808,
    "name": "lua.wetgenes.tardis.v2.normalize",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5727,7 +5799,7 @@
    "body": "<pre><code>v2 = v2:oo()\nv2 = v2:oo(r)\n</code></pre>\n<p>One Over value. Build the reciprocal of all elements. </p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1725,
+   "line": 1776,
    "name": "lua.wetgenes.tardis.v2.oo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5735,7 +5807,7 @@
    "body": "<pre><code>v2 = v2:scale(s)\nv2 = v2:scale(s,r)\n</code></pre>\n<p>Scale this v2 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1741,
+   "line": 1792,
    "name": "lua.wetgenes.tardis.v2.scale",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5743,7 +5815,7 @@
    "body": "<pre><code>v2 = v2:sub(v2b)\nv2 = v2:sub(v2b,r)\n</code></pre>\n<p>Subtract v2b from v2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1792,
+   "line": 1843,
    "name": "lua.wetgenes.tardis.v2.sub",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5751,7 +5823,7 @@
    "body": "<p>The metatable for a 3d vector class, use the new function to actually \ncreate an object.</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
    "count": 15,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1846,
+   "line": 1897,
    "name": "lua.wetgenes.tardis.v3",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5759,7 +5831,7 @@
    "body": "<pre><code>v3 = v3:add(v3b)\nv3 = v3:add(v3b,r)\n</code></pre>\n<p>Add v3b to v3.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1963,
+   "line": 2014,
    "name": "lua.wetgenes.tardis.v3.add",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5767,7 +5839,7 @@
    "body": "<pre><code>radians,axis = v3a:dot(v3b)\nradians,axis = v3a:dot(v3b,axis)\n</code></pre>\n<p>Return radians and axis of rotation between these two vectors. If axis is given \nthen it must represent a positive world aligned axis normal. So V3(1,0,0) or \nV3(0,1,0) or V3(0,0,1) only. The point of providing an axis allows the returned \nangle to be over a 360 degree range rather than flipping the axis after 180 \ndegrees this means the second axis returned value can be ignored as it will \nalways be the axis that is passed in.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2039,
+   "line": 2090,
    "name": "lua.wetgenes.tardis.v3.angle",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5775,7 +5847,7 @@
    "body": "<pre><code>v3 = v3:cross(v3b)\nv3 = v3:cross(v3b,r)\n</code></pre>\n<p>Return the cross product of these two vectors.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2022,
+   "line": 2073,
    "name": "lua.wetgenes.tardis.v3.cross",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5783,7 +5855,7 @@
    "body": "<pre><code>value = a:distance(b)\n</code></pre>\n<p>Returns the length of the vector between a and b.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1898,
+   "line": 1949,
    "name": "lua.wetgenes.tardis.v3.distance",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5791,7 +5863,7 @@
    "body": "<pre><code>value = v3:dot(v3b)\n</code></pre>\n<p>Return the dot product of these two vectors.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2011,
+   "line": 2062,
    "name": "lua.wetgenes.tardis.v3.dot",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5799,7 +5871,7 @@
    "body": "<pre><code>v3 = v3:identity()\n</code></pre>\n<p>Set this v3 to all zeros.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1866,
+   "line": 1917,
    "name": "lua.wetgenes.tardis.v3.identity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5807,7 +5879,7 @@
    "body": "<pre><code>value = v3:len()\n</code></pre>\n<p>Returns the length of this vector.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1887,
+   "line": 1938,
    "name": "lua.wetgenes.tardis.v3.len",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5815,7 +5887,7 @@
    "body": "<pre><code>value = v3:lenlen()\n</code></pre>\n<p>Returns the length of this vector, squared, this is often all you need \nfor comparisons so lets us skip the sqrt.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1875,
+   "line": 1926,
    "name": "lua.wetgenes.tardis.v3.lenlen",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5823,7 +5895,7 @@
    "body": "<pre><code>v3 = v3:mul(v3b)\nv3 = v3:mul(v3b,r)\n</code></pre>\n<p>Multiply v3 by v3b.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1995,
+   "line": 2046,
    "name": "lua.wetgenes.tardis.v3.mul",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5831,7 +5903,7 @@
    "body": "<pre><code>v3 = tardis.v3.new()\n</code></pre>\n<p>Create a new v3 and optionally set it to the given values, v3 methods \nusually return the input v3 for easy function chaining.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1856,
+   "line": 1907,
    "name": "lua.wetgenes.tardis.v3.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5839,7 +5911,7 @@
    "body": "<pre><code>v3 = v3:normalize()\nv3 = v3:normalize(r)\n</code></pre>\n<p>Adjust the length of this vector to 1.</p>\n<p>An input length of 0 will remain at 0.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1944,
+   "line": 1995,
    "name": "lua.wetgenes.tardis.v3.normalize",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5847,7 +5919,7 @@
    "body": "<pre><code>v3 = v3:oo()\nv3 = v3:oo(r)\n</code></pre>\n<p>One Over value. Build the reciprocal of all elements. </p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1912,
+   "line": 1963,
    "name": "lua.wetgenes.tardis.v3.oo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5855,7 +5927,7 @@
    "body": "<pre><code>v3 = v3:scale(s)\nv3 = v3:scale(s,r)\n</code></pre>\n<p>Scale this v3 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1928,
+   "line": 1979,
    "name": "lua.wetgenes.tardis.v3.scale",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5863,7 +5935,7 @@
    "body": "<pre><code>v3 = v3:sub(v3b)\nv3 = v3:sub(v3b,r)\n</code></pre>\n<p>Subtract v3b from v3.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v3 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1979,
+   "line": 2030,
    "name": "lua.wetgenes.tardis.v3.sub",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5871,7 +5943,7 @@
    "body": "<p>The metatable for a 4d vector class, use the new function to actually \ncreate an object.</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
    "count": 14,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2082,
+   "line": 2133,
    "name": "lua.wetgenes.tardis.v4",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5879,7 +5951,7 @@
    "body": "<pre><code>v4 = v4:add(v4b)\nv4 = v4:add(v4b,r)\n</code></pre>\n<p>Add v4b to v4.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2217,
+   "line": 2268,
    "name": "lua.wetgenes.tardis.v4.add",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5887,7 +5959,7 @@
    "body": "<pre><code>value = a:distance(b)\n</code></pre>\n<p>Returns the length of the vector between a and b.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2151,
+   "line": 2202,
    "name": "lua.wetgenes.tardis.v4.distance",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5895,7 +5967,7 @@
    "body": "<pre><code>value = v4:dot(v4b)\n</code></pre>\n<p>Return the dot product of these two vectors.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2265,
+   "line": 2316,
    "name": "lua.wetgenes.tardis.v4.dot",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5903,7 +5975,7 @@
    "body": "<pre><code>v4 = v4:identity()\n</code></pre>\n<p>Set this v4 to all zeros.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2102,
+   "line": 2153,
    "name": "lua.wetgenes.tardis.v4.identity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5911,7 +5983,7 @@
    "body": "<pre><code>value = v4:len()\n</code></pre>\n<p>Returns the length of this vector.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2140,
+   "line": 2191,
    "name": "lua.wetgenes.tardis.v4.len",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5919,7 +5991,7 @@
    "body": "<pre><code>value = v4:lenlen()\n</code></pre>\n<p>Returns the length of this vector, squared, this is often all you need \nfor comparisons so lets us skip the sqrt.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2128,
+   "line": 2179,
    "name": "lua.wetgenes.tardis.v4.lenlen",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5927,7 +5999,7 @@
    "body": "<pre><code>v4 = v4:mul(v4b)\nv4 = v4:mul(v4b,r)\n</code></pre>\n<p>Multiply v4 by v4b.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2249,
+   "line": 2300,
    "name": "lua.wetgenes.tardis.v4.mul",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5935,7 +6007,7 @@
    "body": "<pre><code>v4 = tardis.v4.new()\n</code></pre>\n<p>Create a new v4 and optionally set it to the given values, v4 methods \nusually return the input v4 for easy function chaining.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2092,
+   "line": 2143,
    "name": "lua.wetgenes.tardis.v4.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5943,7 +6015,7 @@
    "body": "<pre><code>v4 = v4:normalize()\nv4 = v4:normalize(r)\n</code></pre>\n<p>Adjust the length of this vector to 1.</p>\n<p>An input length of 0 will remain at 0.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2198,
+   "line": 2249,
    "name": "lua.wetgenes.tardis.v4.normalize",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5951,7 +6023,7 @@
    "body": "<pre><code>v4 = v4:oo()\nv4 = v4:oo(r)\n</code></pre>\n<p>One Over value. Build the reciprocal of all elements. </p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2166,
+   "line": 2217,
    "name": "lua.wetgenes.tardis.v4.oo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5959,7 +6031,7 @@
    "body": "<pre><code>v4 = v4:scale(s)\nv4 = v4:scale(s,r)\n</code></pre>\n<p>Scale this v4 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2182,
+   "line": 2233,
    "name": "lua.wetgenes.tardis.v4.scale",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5967,7 +6039,7 @@
    "body": "<pre><code>v4 = v4:sub(v4b)\nv4 = v4:sub(v4b,r)\n</code></pre>\n<p>Subtract v4b from v4.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2233,
+   "line": 2284,
    "name": "lua.wetgenes.tardis.v4.sub",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -5975,7 +6047,7 @@
    "body": "<pre><code>v3 = v4:to_v3()\nv3 = v4:to_v3(r)\n</code></pre>\n<p>scale [4] to 1 then throw it away so we have a v3 xyz</p>\n<p>If r is provided then the result is written into r and returned \notherwise a new v3 is created and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2111,
+   "line": 2162,
    "name": "lua.wetgenes.tardis.v4.to_v3",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },

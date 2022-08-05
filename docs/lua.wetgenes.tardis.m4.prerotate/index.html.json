@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 526,
+   "count": 532,
    "name": "lua"
   },
   {
@@ -54,7 +54,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 520,
+   "count": 526,
    "name": "lua.wetgenes"
   },
   {
@@ -1354,7 +1354,7 @@
    "name": "lua.wetgenes.spew.test"
   },
   {
-   "count": 149,
+   "count": 155,
    "name": "lua.wetgenes.tardis"
   },
   {
@@ -1582,7 +1582,7 @@
    "name": "lua.wetgenes.tardis.m3.v3"
   },
   {
-   "count": 32,
+   "count": 34,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -1607,7 +1607,15 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m4.get_rotation_q4"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m4.get_scale_v3"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.get_translation_v3"
   },
   {
    "count": 1,
@@ -1722,8 +1730,16 @@
    "name": "lua.wetgenes.tardis.plane.new"
   },
   {
-   "count": 11,
+   "count": 15,
    "name": "lua.wetgenes.tardis.q4"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.get_yaw_pitch_roll"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.get_yaw_pitch_roll_in_radians"
   },
   {
    "count": 1,
@@ -1756,6 +1772,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.q4.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.set_yaw_pitch_roll"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.set_yaw_pitch_roll_in_radians"
   },
   {
    "count": 1,
@@ -2182,7 +2206,7 @@
    "body": "<pre><code>m4 = m4:prerotate(degrees,v3a)\nm4 = m4:prerotate(degrees,v3a,r)\nm4 = m4:prerotate(degrees,x,y,z)\nm4 = m4:prerotate(degrees,x,y,z,r)\nm4 = m4:prerotate(q)\nm4 = m4:prerotate(q,r)\n</code></pre>\n<p>Pre apply quaternion or angle rotation to this matrix depending on \narguments provided.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1632,
+   "line": 1683,
    "name": "lua.wetgenes.tardis.m4.prerotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
