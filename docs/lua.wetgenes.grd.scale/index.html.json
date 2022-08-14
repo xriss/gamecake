@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 532,
+   "count": 552,
    "name": "lua"
   },
   {
@@ -54,7 +54,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 526,
+   "count": 546,
    "name": "lua.wetgenes"
   },
   {
@@ -474,8 +474,88 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 128,
+   "count": 148,
    "name": "lua.wetgenes.gamecake"
+  },
+  {
+   "count": 20,
+   "name": "lua.wetgenes.gamecake.framebuffers"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.create"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.dirty"
+  },
+  {
+   "count": 15,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.bind_depth"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.bind_frame"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.bind_texture"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.check"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.clean"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.download"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.free_depth"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.free_frame"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.free_texture"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.mipmap"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.mipmap_depth"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.mipmap_texture"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.pingpong"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.resize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.start"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.stop"
   },
   {
    "count": 43,
