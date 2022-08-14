@@ -407,7 +407,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 				end
 			
 				ret={modname=name}
-				oven.baked[name]=ret
+				oven.baked[name]=ret -- need to create and remember here so we can always rebake even if the result is not filled in yet
 				ret=assert(require(name)).bake(oven,ret)
 				
 --				print("REBAKED",name,ret)

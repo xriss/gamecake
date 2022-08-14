@@ -24,9 +24,9 @@ local glescode={}
 -- please pass in the gles base you wish to use, eg gles.gles2
 -- returns a state table with compiler functions and places to
 -- keep your source.
-function glescode.create(gl)
+function glescode.create(gl,code)
 
-	local code={}
+	code=code or {}
 	for n,v in pairs(gl) do code[n]=v end
 	
 -- manage cached and stacked version of 			elseif name==gl.enable and related state

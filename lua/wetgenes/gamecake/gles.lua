@@ -15,7 +15,7 @@ function M.bake(oven,gles)
 
 	if not oven.gl then -- need a gles2 wrapped in glescode
 	
-		oven.gl=require("glescode").create( require("gles") )
+		oven.gl=require("glescode").create( require("gles") , gles )
 		
 		oven.gl.GetExtensions()
 		
@@ -34,6 +34,6 @@ function M.bake(oven,gles)
 	gl.uniforms[ "projection" ] = function(u) gl.UniformMatrix4f(u, gl.matrix(gl.PROJECTION) ) end
 	gl.uniforms[ "color"      ] = function(u) gl.Uniform4f(u, gl.cache.color ) end
 
-	return gles
+	return oven.gl
 
 end
