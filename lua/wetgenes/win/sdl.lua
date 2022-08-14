@@ -118,6 +118,10 @@ sdl.create=function(t)
 		end
 	end
 
+	if t.hidden then -- allow hidden window for a fake headerless sort of thing
+		flags[#flags+1]=SDL.window.Hidden
+	end
+
 --[[
 	if     view=="full" then	 flags={SDL.window.Desktop,SDL.window.OpenGL}
 	elseif view=="max"  then	 flags={SDL.window.Maximized,SDL.window.OpenGL}
