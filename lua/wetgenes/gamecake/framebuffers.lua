@@ -510,6 +510,56 @@ the x,y location.
 	end
 
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.render_start
+
+	fbo:render_start()
+
+
+Start rendering into this fbo.
+
+Push old matrix and set the matrix mode to MODELVIEW
+
+Set fbo.view and reset the gl state.
+
+]]
+	framebuffers.render_start = function(fbo)
+	
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PushMatrix()
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PushMatrix()
+		views.push_and_apply(fbo.view)
+		gl.state.push(gl.state_defaults)
+		fbo:bind_frame()
+		
+	end
+
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.render_stop
+
+	fbo:render_stop()
+
+Stop rendering into this fbo. We bind framebuffer 0 so this is not a 
+pop operation and you can not nest these calls.
+
+Restore the old view and old gl state.
+
+Pop old matrix and set the matrix mode to MODELVIEW
+
+]]
+	framebuffers.render_stop = function(fbo)
+	
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+		gl.state.pop()
+		views.pop_and_apply()
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PopMatrix()
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PopMatrix()
+
+	end
+
+
+
 -- set some functions into the metatable of each fbo
 	for i,n in ipairs({
 		"clean",
@@ -525,10 +575,11 @@ the x,y location.
 		"free_depth",
 		"free_texture",
 		"free_frame",
+		"render_start",
+		"render_stop",
 		}) do
 		funcs[n]=framebuffers[n]
 	end
-
 
 --[[#lua.wetgenes.gamecake.framebuffers.fbo.pingpong
 
@@ -536,6 +587,13 @@ the x,y location.
 	framebuffers.pingpong({fbin1,fbin2},fbout,shadername,callback)
 
 Render from one or more fbos into another using a fullscreen shader.
+
+Sometime you need to repeatedly copy a texture back and though applying 
+a shader, this is the function for you.
+
+The textures will be bound to tex1,tex2,tex3,etc and the uvs supplied 
+in a_texcoord with a_vertex being set to screen coords so can be used 
+as is.
 
 ]]
 	framebuffers.pingpong = function(fbin,fbout,shadername,callback)
@@ -545,14 +603,8 @@ Render from one or more fbos into another using a fullscreen shader.
 	
 		if not fbin[1] then fbin={fbin} end -- upgrade input to array
 		
-		local view=views.create({
-			mode="fbo",
-			fbo=fbout,
-		})
+		fbout:render_start()
 
-		gl.PushMatrix()
-		views.push_and_apply(view)
-		gl.state.push(gl.state_defaults)
 		gl.state.set({
 			[gl.BLEND]						=	gl.FALSE,
 			[gl.CULL_FACE]					=	gl.FALSE,
@@ -560,7 +612,6 @@ Render from one or more fbos into another using a fullscreen shader.
 			[gl.DEPTH_WRITEMASK]			=	gl.FALSE,
 		})
 
-		fbout:bind_frame()
 
 		local v1=gl.apply_modelview( {fbout.w*-0,	fbout.h* 1,	0,1} )
 		local v2=gl.apply_modelview( {fbout.w*-0,	fbout.h*-0,	0,1} )
@@ -580,23 +631,12 @@ Render from one or more fbos into another using a fullscreen shader.
 				if u>=0 then 
 					gl.Uniform1i( u , i-1 )
 				end
-				if i==0 then
-					local u=p:uniform("tex")
-					if u>=0 then 
-						gl.Uniform1i( u , 0 )
-					end
-				end
 				fbin[i]:bind_texture()
 			end
 			if callback then callback(p) end
 		end)
 
-		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-
-		gl.state.pop()
-		views.pop_and_apply()
-		gl.PopMatrix()
-
+		fbout:render_stop()
 
 	end
 
