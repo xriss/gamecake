@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 552,
+   "count": 554,
    "name": "lua"
   },
   {
@@ -54,7 +54,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 546,
+   "count": 548,
    "name": "lua.wetgenes"
   },
   {
@@ -474,11 +474,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 148,
+   "count": 150,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 20,
+   "count": 22,
    "name": "lua.wetgenes.gamecake.framebuffers"
   },
   {
@@ -490,7 +490,7 @@
    "name": "lua.wetgenes.gamecake.framebuffers.dirty"
   },
   {
-   "count": 15,
+   "count": 17,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo"
   },
   {
@@ -544,6 +544,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.pingpong"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.render_start"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.render_stop"
   },
   {
    "count": 1,

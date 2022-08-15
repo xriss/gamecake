@@ -30,7 +30,7 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
-   "count": 552,
+   "count": 554,
    "name": "lua"
   },
   {
@@ -54,7 +54,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 546,
+   "count": 548,
    "name": "lua.wetgenes"
   },
   {
@@ -474,11 +474,11 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 148,
+   "count": 150,
    "name": "lua.wetgenes.gamecake"
   },
   {
-   "count": 20,
+   "count": 22,
    "name": "lua.wetgenes.gamecake.framebuffers"
   },
   {
@@ -490,7 +490,7 @@
    "name": "lua.wetgenes.gamecake.framebuffers.dirty"
   },
   {
-   "count": 15,
+   "count": 17,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo"
   },
   {
@@ -544,6 +544,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.pingpong"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.render_start"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.render_stop"
   },
   {
    "count": 1,
@@ -2284,7 +2292,7 @@
  "_list": [
   {
    "body": "<p>Deal with FrameBuffers as render targets and textures. Color and Depth \nbuffers need to be allocated and managed.</p>\n<p>So we need to be baked within an oven so we will talk about the return \nfrom the bake function rather than the module function.</p>\n<pre><code>local framebuffers=oven.rebake(&quot;wetgenes.gamecake.framebuffers&quot;)\n\nlocal fbo=framebuffers.create(256,256,0)\t-- a 256x256 texture only\nlocal fbo=framebuffers.create(256,256,-1)\t-- a 256x256 depth only\nlocal fbo=framebuffers.create(256,256,1)\t-- a 256x256 texture and depth\nlocal fbo=framebuffers.create()\t\t\t\t-- 0x0 and we will resize later\n</code></pre>\n",
-   "count": 20,
+   "count": 22,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
    "line": 10,
    "name": "lua.wetgenes.gamecake.framebuffers",
@@ -2308,7 +2316,7 @@
   },
   {
    "body": "",
-   "count": 15,
+   "count": 17,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo"
   },
   {
@@ -2408,11 +2416,27 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   },
   {
-   "body": "<pre><code>fbo:pingpong(fbout,shadername,callback)\nframebuffers.pingpong({fbin1,fbin2},fbout,shadername,callback)\n</code></pre>\n<p>Render from one or more fbos into another using a fullscreen shader.</p>\n",
+   "body": "<pre><code>fbo:pingpong(fbout,shadername,callback)\nframebuffers.pingpong({fbin1,fbin2},fbout,shadername,callback)\n</code></pre>\n<p>Render from one or more fbos into another using a fullscreen shader.</p>\n<p>Sometime you need to repeatedly copy a texture back and though applying \na shader, this is the function for you.</p>\n<p>The textures will be bound to tex1,tex2,tex3,etc and the uvs supplied \nin a_texcoord with a_vertex being set to screen coords so can be used \nas is.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
-   "line": 533,
+   "line": 584,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.pingpong",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
+  },
+  {
+   "body": "<pre><code>fbo:render_start()\n</code></pre>\n<br/>\n<br/>\n\n<p>Start rendering into this fbo.</p>\n<p>Push old matrix and set the matrix mode to MODELVIEW</p>\n<p>Set fbo.view and reset the gl state.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/framebuffers.lua",
+   "line": 513,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.render_start",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
+  },
+  {
+   "body": "<pre><code>fbo:render_stop()\n</code></pre>\n<p>Stop rendering into this fbo. We bind framebuffer 0 so this is not a \npop operation and you can not nest these calls.</p>\n<p>Restore the old view and old gl state.</p>\n<p>Pop old matrix and set the matrix mode to MODELVIEW</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/framebuffers.lua",
+   "line": 537,
+   "name": "lua.wetgenes.gamecake.framebuffers.fbo.render_stop",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   },
   {

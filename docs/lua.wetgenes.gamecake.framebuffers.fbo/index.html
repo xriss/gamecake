@@ -155,6 +155,8 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.mipmap_depth"><span>/lua.wetgenes.gamecake.framebuffers.fbo.mipmap_depth</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.mipmap_texture"><span>/lua.wetgenes.gamecake.framebuffers.fbo.mipmap_texture</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.pingpong"><span>/lua.wetgenes.gamecake.framebuffers.fbo.pingpong</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.render_start"><span>/lua.wetgenes.gamecake.framebuffers.fbo.render_start</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.render_stop"><span>/lua.wetgenes.gamecake.framebuffers.fbo.render_stop</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.resize"><span>/lua.wetgenes.gamecake.framebuffers.fbo.resize</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.framebuffers.start"><span>/lua.wetgenes.gamecake.framebuffers.start</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.framebuffers.stop"><span>/lua.wetgenes.gamecake.framebuffers.stop</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun"><span>/lua.wetgenes.gamecake.fun</span></a>
@@ -714,11 +716,42 @@ TEXTURE_MIN_FILTER to LINEAR_MIPMAP_LINEAR so it will be used.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.pingpong">lua.wetgenes.gamecake.framebuffers.fbo.pingpong</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L533">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L584">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:pingpong(fbout,shadername,callback)
 framebuffers.pingpong({fbin1,fbin2},fbout,shadername,callback)
 </code></pre>
 <p>Render from one or more fbos into another using a fullscreen shader.</p>
+<p>Sometime you need to repeatedly copy a texture back and though applying 
+a shader, this is the function for you.</p>
+<p>The textures will be bound to tex1,tex2,tex3,etc and the uvs supplied 
+in a_texcoord with a_vertex being set to screen coords so can be used 
+as is.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.render_start">lua.wetgenes.gamecake.framebuffers.fbo.render_start</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L513">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div><pre><code>fbo:render_start()
+</code></pre>
+<br/>
+<br/>
+
+<p>Start rendering into this fbo.</p>
+<p>Push old matrix and set the matrix mode to MODELVIEW</p>
+<p>Set fbo.view and reset the gl state.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.render_stop">lua.wetgenes.gamecake.framebuffers.fbo.render_stop</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L537">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div><pre><code>fbo:render_stop()
+</code></pre>
+<p>Stop rendering into this fbo. We bind framebuffer 0 so this is not a 
+pop operation and you can not nest these calls.</p>
+<p>Restore the old view and old gl state.</p>
+<p>Pop old matrix and set the matrix mode to MODELVIEW</p>
 </div>
 </div>
 
