@@ -2294,7 +2294,7 @@
    "body": "<pre><code>fbo:clean()\n</code></pre>\n<p>Free all the opengl buffers.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
-   "line": 219,
+   "line": 230,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.clean",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   }

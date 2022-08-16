@@ -2294,7 +2294,7 @@
    "body": "<pre><code>fbo:mipmap_texture()\n</code></pre>\n<p>Build mipmaps for our texture buffer if it exists and set \nTEXTURE_MIN_FILTER to LINEAR_MIPMAP_LINEAR so it will be used.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
-   "line": 429,
+   "line": 440,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.mipmap_texture",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   }

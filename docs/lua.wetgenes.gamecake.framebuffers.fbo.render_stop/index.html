@@ -586,11 +586,11 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.render_stop">lua.wetgenes.gamecake.framebuffers.fbo.render_stop</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L537">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L550">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:render_stop()
 </code></pre>
-<p>Stop rendering into this fbo. We bind framebuffer 0 so this is not a 
-pop operation and you can not nest these calls.</p>
+<p>Stop rendering into this fbo and restore the last fbo so these calls 
+can be nested.</p>
 <p>Restore the old view and old gl state.</p>
 <p>Pop old matrix and set the matrix mode to MODELVIEW</p>
 </div>

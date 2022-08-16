@@ -2294,7 +2294,7 @@
    "body": "<pre><code>fbo:bind_texture()\n</code></pre>\n<p>BindTexture the rgba texture part of this fbo.</p>\n<p>If there is no texture we will bind 0.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
-   "line": 235,
+   "line": 246,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.bind_texture",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   }

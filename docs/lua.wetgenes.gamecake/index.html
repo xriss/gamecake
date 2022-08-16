@@ -609,7 +609,7 @@ local fbo=framebuffers.create()				-- 0x0 and we will resize later
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.create">lua.wetgenes.gamecake.framebuffers.create</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L67">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L78">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>local fbo=framebuffers.dirty()
 local fbo=framebuffers.dirty(x,y)
 local fbo=framebuffers.dirty(x,y,framebuffers.NEED_TEXTURE_AND_DEPTH)
@@ -657,7 +657,7 @@ can call on the fbo returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.dirty">lua.wetgenes.gamecake.framebuffers.dirty</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L45">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L56">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>framebuffers.dirty()
 </code></pre>
 <p>Mark all framebuffer objects as dirty by setting fbo.dirty to be true. We do not 
@@ -674,7 +674,7 @@ a useful helper function to set the flag.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.bind_depth">lua.wetgenes.gamecake.framebuffers.fbo.bind_depth</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L252">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L263">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:bind_depth()
 </code></pre>
 <p>BindTexture the depth texture part of this fbo.</p>
@@ -684,7 +684,7 @@ a useful helper function to set the flag.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.bind_frame">lua.wetgenes.gamecake.framebuffers.fbo.bind_frame</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L269">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L280">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:bind_depth()
 </code></pre>
 <p>BindFramebuffer the framebuffer of this fbo.</p>
@@ -694,7 +694,7 @@ a useful helper function to set the flag.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.bind_texture">lua.wetgenes.gamecake.framebuffers.fbo.bind_texture</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L235">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L246">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:bind_texture()
 </code></pre>
 <p>BindTexture the rgba texture part of this fbo.</p>
@@ -704,7 +704,7 @@ a useful helper function to set the flag.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.check">lua.wetgenes.gamecake.framebuffers.fbo.check</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L286">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L297">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:check()
 </code></pre>
 <p>Check and allocatie if missing and needed (eg depth texture may not be 
@@ -714,7 +714,7 @@ needed) all our openGL buffers.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.clean">lua.wetgenes.gamecake.framebuffers.fbo.clean</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L219">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L230">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:clean()
 </code></pre>
 <p>Free all the opengl buffers.</p>
@@ -723,7 +723,7 @@ needed) all our openGL buffers.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.download">lua.wetgenes.gamecake.framebuffers.fbo.download</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L472">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L483">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:download()
 fbo:download(w,h,x,y)
 </code></pre>
@@ -736,7 +736,7 @@ the x,y location.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.free_depth">lua.wetgenes.gamecake.framebuffers.fbo.free_depth</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L174">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L185">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:free_depth()
 </code></pre>
 <p>Free the depth texture only, is safe to call if there is no depth 
@@ -746,7 +746,7 @@ buffer.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.free_frame">lua.wetgenes.gamecake.framebuffers.fbo.free_frame</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L204">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L215">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:free_frame()
 </code></pre>
 <p>Free the frame buffer only, is safe to call if there is no frame 
@@ -756,7 +756,7 @@ buffer.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.free_texture">lua.wetgenes.gamecake.framebuffers.fbo.free_texture</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L189">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L200">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:free_texture()
 </code></pre>
 <p>Free the rgba texture only, is safe to call if there is no rgba 
@@ -766,7 +766,7 @@ buffer.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.mipmap">lua.wetgenes.gamecake.framebuffers.fbo.mipmap</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L417">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L428">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:mipmap()
 </code></pre>
 <p>Build mipmaps for all existing texture buffers.</p>
@@ -775,7 +775,7 @@ buffer.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.mipmap_depth">lua.wetgenes.gamecake.framebuffers.fbo.mipmap_depth</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L445">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L456">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:mipmap_depth()
 </code></pre>
 <p>Build mipmaps for our depth buffer if it exists and set 
@@ -788,7 +788,7 @@ even trying in the future,</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.mipmap_texture">lua.wetgenes.gamecake.framebuffers.fbo.mipmap_texture</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L429">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L440">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:mipmap_texture()
 </code></pre>
 <p>Build mipmaps for our texture buffer if it exists and set 
@@ -798,7 +798,7 @@ TEXTURE_MIN_FILTER to LINEAR_MIPMAP_LINEAR so it will be used.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.pingpong">lua.wetgenes.gamecake.framebuffers.fbo.pingpong</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L584">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L600">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:pingpong(fbout,shadername,callback)
 framebuffers.pingpong({fbin1,fbin2},fbout,shadername,callback)
 </code></pre>
@@ -813,7 +813,7 @@ as is.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.render_start">lua.wetgenes.gamecake.framebuffers.fbo.render_start</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L513">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L524">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:render_start()
 </code></pre>
 <br/>
@@ -827,11 +827,11 @@ as is.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.render_stop">lua.wetgenes.gamecake.framebuffers.fbo.render_stop</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L537">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L550">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:render_stop()
 </code></pre>
-<p>Stop rendering into this fbo. We bind framebuffer 0 so this is not a 
-pop operation and you can not nest these calls.</p>
+<p>Stop rendering into this fbo and restore the last fbo so these calls 
+can be nested.</p>
 <p>Restore the old view and old gl state.</p>
 <p>Pop old matrix and set the matrix mode to MODELVIEW</p>
 </div>
@@ -839,7 +839,7 @@ pop operation and you can not nest these calls.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.resize">lua.wetgenes.gamecake.framebuffers.fbo.resize</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L298">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L309">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>fbo:resize(w,h,d)
 </code></pre>
 <p>Change the size of our buffers, which probably means free and then
@@ -850,7 +850,7 @@ reallocate them.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.start">lua.wetgenes.gamecake.framebuffers.start</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L144">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L155">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>framebuffers.start()
 </code></pre>
 <p>Called as part of the android life cycle, since we auto reallocate this 
@@ -861,7 +861,7 @@ the future if that turns out to be more hardware compatible.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.framebuffers.stop">lua.wetgenes.gamecake.framebuffers.stop</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L159">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua#L170">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua</a></div>
 <div><pre><code>framebuffers.stop()
 </code></pre>
 <p>Called as part of the android life cycle, we go through and call 

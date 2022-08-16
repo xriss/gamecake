@@ -2294,7 +2294,7 @@
    "body": "<pre><code>framebuffers.stop()\n</code></pre>\n<p>Called as part of the android life cycle, we go through and call \nfbo.clean on each fbo to free the opengl resources.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
-   "line": 159,
+   "line": 170,
    "name": "lua.wetgenes.gamecake.framebuffers.stop",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   }
