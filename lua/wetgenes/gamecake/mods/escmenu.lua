@@ -106,7 +106,7 @@ function M.bake(oven,escmenu)
 		escmenu.master:layout()
 
 		escmenu.view=cake.views.create({
-			parent=cake.views.get(),
+			parent=cake.views.peek(),
 			mode="full",
 			vx=480,
 			vy=480,

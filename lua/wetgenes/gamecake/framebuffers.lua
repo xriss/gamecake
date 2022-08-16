@@ -33,6 +33,17 @@ function M.bake(oven,framebuffers)
 	local images=oven.rebake("wetgenes.gamecake.images")
 	local views=oven.rebake("wetgenes.gamecake.views")
 	
+	framebuffers.stack={}
+	framebuffers.peek=function() return framebuffers.stack[#framebuffers.stack] end
+	framebuffers.push=function(fbo)
+		framebuffers.stack[#framebuffers.stack+1]=fbo
+	end
+	framebuffers.pop=function()
+		local fbo=framebuffers.peek()
+		framebuffers.stack[#framebuffers.stack]=nil
+		return fbo
+	end
+
 	local funcs={}
 	local metatable={__index=funcs}
 
@@ -524,6 +535,8 @@ Set fbo.view and reset the gl state.
 ]]
 	framebuffers.render_start = function(fbo)
 	
+		framebuffers.push(fbo)
+		
 		gl.MatrixMode(gl.PROJECTION)
 		gl.PushMatrix()
 		gl.MatrixMode(gl.MODELVIEW)
@@ -538,8 +551,8 @@ Set fbo.view and reset the gl state.
 
 	fbo:render_stop()
 
-Stop rendering into this fbo. We bind framebuffer 0 so this is not a 
-pop operation and you can not nest these calls.
+Stop rendering into this fbo and restore the last fbo so these calls 
+can be nested.
 
 Restore the old view and old gl state.
 
@@ -548,7 +561,10 @@ Pop old matrix and set the matrix mode to MODELVIEW
 ]]
 	framebuffers.render_stop = function(fbo)
 	
-		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+		local fbo=framebuffers.pop()
+		local oldfbo=framebuffers.peek() -- may be nil
+
+		gl.BindFramebuffer(gl.FRAMEBUFFER, oldfbo and oldfbo.frame or 0)
 		gl.state.pop()
 		views.pop_and_apply()
 		gl.MatrixMode(gl.PROJECTION)

@@ -92,7 +92,7 @@ function M.bake(oven,console)
 --print("console setup")
 
 		console.view=cake.views.create({
-			parent=cake.views.get(),
+			parent=cake.views.peek(),
 			mode="raw",
 		})
 
