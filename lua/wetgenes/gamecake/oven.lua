@@ -386,7 +386,11 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 
 			if opts.start then
-				oven.next=oven.rebake(opts.start)
+				if type(opts.start)=="string" then
+					oven.next=oven.rebake(opts.start)
+				else
+					oven.next=opts.start
+				end
 				oven.main=oven.next
 			end
 			
