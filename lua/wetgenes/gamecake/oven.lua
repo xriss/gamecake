@@ -133,6 +133,9 @@ function M.bake(opts)
 	end
 --dprint(opts)
 
+	opts.width=opts.width or 0
+	opts.height=opts.height or 0
+
 	require("wetgenes.logs").setup(opts.args)
 
 if jit then -- now logs are setup, dump basic jit info
@@ -288,6 +291,7 @@ os.exit()
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale,
 				console=opts.args.console,		-- use --console on commandline to keep console open
 				borderless=opts.args.borderless,
+				hidden=opts.hidden,
 				}
 --				border=opts.args.border}		-- use --border  on commandline to keep window borders
 			local screen=wwin.screen()
@@ -328,15 +332,10 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 --wwin.hardcore.peek(oven.win[0])
 	
-			local doshow=opts.args.show or opts.show or "win" -- default window display
---[[
-			if opts.args.windowed   then doshow="win" end
-			if opts.args.borderless then doshow="less" end
-			if opts.args.fullscreen then doshow="full" end
-			if opts.args.maximised  then doshow="max" end
-]]
-			if doshow then oven.win:show(doshow) end
-
+			if not inf.hidden then
+				local doshow=opts.args.show or opts.show or "win" -- default window display
+				if doshow then oven.win:show(doshow) end
+			end
 
 --			oven.win:show("full")
 --			oven.win:show("max")

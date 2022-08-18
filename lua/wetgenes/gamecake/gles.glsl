@@ -6,7 +6,11 @@ This is the default gamecake shader, which is controlled by a bunch of
 defines to enable various features.
 
 First we must describe what to do with xyz vertex attributes, only one 
-of RAW , XYZ and POS should be used at once.
+of SCR , RAW , XYZ and POS should be used at once.
+
+	SCR
+
+Screen space, no transforms applied.
 
 	RAW
 
@@ -248,8 +252,8 @@ void main(void)
 #endif
 
 
-#ifdef POS
-	vec4 v=vec4(a_vertex.xy, 0.0, 1.0);
+#ifdef SCR
+	vec4 v=vec4(a_vertex.xyz, 1.0);
 #endif
 #ifdef RAW
 	vec4 v=vec4(a_vertex.xyz, 1.0);
@@ -257,8 +261,8 @@ void main(void)
 #ifdef XYZ
 	vec4 v=vec4(a_vertex.xyz, 1.0);
 #endif
-#ifdef SCR
-	vec4 v=vec4(a_vertex.xyz, 1.0);
+#ifdef POS
+	vec4 v=vec4(a_vertex.xy, 0.0, 1.0);
 #endif
 
 #ifdef NORMAL
@@ -332,9 +336,8 @@ void main(void)
 #endif
 
 
-#ifdef POS
-	gl_Position = projection * modelview * v;
-	gl_Position.z+=a_vertex.z;
+#ifdef SCR
+	gl_Position = v;
 #endif
 #ifdef RAW
 	gl_Position = projection * v;
@@ -342,15 +345,9 @@ void main(void)
 #ifdef XYZ
 	gl_Position = projection * modelview * v;
 #endif
-#ifdef SCR
-	gl_Position = v;
-#endif
-
-#ifdef DRAW_SHADOW_SQUISH
-//	gl_Position.xy=clamp(gl_Position.xy,vec2(-1.0),vec2(1.0));
-//	gl_Position.xy=(sign(gl_Position.xy)*pow(abs(gl_Position.xy),vec2(DRAW_SHADOW_SQUISH)));
-//    gl_Position.xy=mix( gl_Position.xy*0.5 , gl_Position.xy*0.75 - (sign(gl_Position.xy)*0.125) , step(0.5,abs(gl_Position.xy)) );
-    gl_Position.xy=mix( gl_Position.xy*2.0 , gl_Position.xy*0.75/1.25 + (sign(gl_Position.xy)*0.35) , step(0.25,abs(gl_Position.xy)) );
+#ifdef POS
+	gl_Position = projection * modelview * v;
+	gl_Position.z+=a_vertex.z;
 #endif
 
 #ifdef SHADOW
@@ -411,10 +408,6 @@ IN vec4  shadow_uv;
 #endif
 
 
-//#if defined(GL_FRAGMENT_PRECISION_HIGH)
-//precision highp float; /* ask for better numbers if available */
-//#endif
-
 #ifdef MAIN
 void MAIN(void)
 #else
@@ -431,17 +424,25 @@ void main(void)
 
 	FragColor = texture(tex, uv ).rgba * v_color;
 
+//	FragColor=vec4(n,1.0) * v_color;
+
 #else
 
 #ifdef TEX
-	if( v_texcoord[0] <= -1.0 ) // special uv request to ignore the texture (use -2 as flag)
-	{
-		FragColor=v_color ;
-	}
-	else
-	{
+	#ifdef TEXHAX
+
+		if( v_texcoord[0] <= -1.0 ) // special uv request to ignore the texture (use -2 as flag) lets us mix textured and untextured polys
+		{
+			FragColor=v_color ;
+		}
+		else
+		{
+			FragColor=texture(tex, v_texcoord) * v_color ;
+		}
+
+	#else
 		FragColor=texture(tex, v_texcoord) * v_color ;
-	}
+	#endif
 #else
 	FragColor=v_color ;
 #endif
