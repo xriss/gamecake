@@ -53,10 +53,10 @@ B.cameras.draw_head=function(cameras)
 
 	if camera then
 
-		gl.MultMatrix(camera.inv)
+		gl.MultMatrix(camera.inv) -- remove camera transform
 
 		gl.uniforms.camera=function(u)
-			gl.UniformMatrix4f( u , camera.mtx )
+			gl.UniformMatrix4f( u , camera.mtx ) -- so we can apply it later
 		end
 
 	end
