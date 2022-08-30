@@ -12,7 +12,7 @@ sudo chpass -s /usr/local/bin/bash vagrant
 
 
 echo " fetching gamecake "
-su vagrant -c " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git  "
+su vagrant -c " cd gamecake && git pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git  "
 
 
 echo " installing gamecake dependencies "
