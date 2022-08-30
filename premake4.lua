@@ -209,6 +209,10 @@ elseif t:sub(1,3)=="osx" then
 elseif os.get() == "windows" then
 	TARGET="WINDOWS"
 	WINDOWS=true
+elseif os.get() == "macosx" then
+	TARGET="OSX"
+	OSX=true
+	CLANG=true
 else
 	TARGET="NIX"
 	NIX=true
