@@ -164,20 +164,13 @@ MINGW=false
 NIX=false
 CPU="NATIVE"
 TARGET="NIX"
+NIX=false
 GCC=false
 CLANG=false
 
 local t= _ARGS[1] or ""
 
-if os.get() == "windows" then
-	TARGET="WINDOWS"
-	WINDOWS=true
-elseif os.get() == "osx" then
-	TARGET="OSX"
-	CPU="-64"
-	OSX=true
-	CLANG=true
-elseif t:sub(1,4)=="emcc" then
+if t:sub(1,4)=="emcc" then
 	TARGET="EMCC"
 	CPU=t:sub(5)
 	EMCC=true
@@ -213,7 +206,6 @@ elseif t:sub(1,3)=="osx" then
 	TARGET="OSX"
 	CPU=t:sub(4)
 	OSX=true
-	GCC=true
 	CLANG=true
 else
 	TARGET="NIX"

@@ -3,8 +3,15 @@ cd `dirname $0`
 cd ..
 
 core_jobs=$(nproc||sysctl -n hw.logicalcpu||echo 1)
+set_gcc=gcc
+set_cpu=native
 
-arg_flags=("help debug release:1 clean gcc=gcc cpu=native win= openal=soft jobs=$core_jobs")
+if [ $(uname) = "Darwin" ] ; then
+set_gcc=osx
+set_cpu=x64
+fi
+
+arg_flags=("help debug release:1 clean gcc=$set_gcc cpu=$set_cpu win= openal=soft jobs=$core_jobs")
 
 arg_get() {
 key="$1"
@@ -131,6 +138,7 @@ Available options are :
 ./make --gcc=clang   # alternative nix build using clang
 ./make --gcc=emcc    # build using emscripten
 ./make --gcc=android # build using android
+./make --gcc=osx     # build using osx clang
 
 ./make --cpu=native  # use the host cpu (default)
 ./make --cpu=x32     # force a 32bit build
