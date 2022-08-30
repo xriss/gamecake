@@ -80,7 +80,7 @@ elseif OSX then
 
 	files { "./lua.c" }
 
-	libdirs { "/usr/local/64/lib/" }
+--	libdirs { "/usr/local/64/lib/" }
 	libdirs { "/usr/local/lib/" }
 
 	links { "SDL2" }	
