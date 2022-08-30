@@ -15,6 +15,6 @@ echo " fetching gamecake "
 su vagrant -c " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git  "
 
 
-#echo " installing gamecake dependencies "
-#su vagrant -c " /usr/local/bin/bash -c \"  gamecake/build/install  \" "
- 
+echo " installing gamecake dependencies "
+su vagrant -c " /usr/local/bin/bash -c \"  gamecake/build/install-osx  \" "
+
