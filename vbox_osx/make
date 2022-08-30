@@ -1,0 +1,14 @@
+cd `dirname $0`
+
+vagrant up
+
+vagrant ssh -c " rm -rf gamecake && git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
+
+vagrant ssh -c " gamecake/make --clean --gcc=osx "
+
+
+vagrant ssh-config > ./.vagrant.ssh.config
+scp -F ./.vagrant.ssh.config default:gamecake/exe/gamecake.osx ../exe/gamecake.osx
+rm .vagrant.ssh.config
+
+vagrant halt
