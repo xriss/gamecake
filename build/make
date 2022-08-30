@@ -1,8 +1,10 @@
-#!/bin/bash
+
 cd `dirname $0`
 cd ..
 
-arg_flags=("help debug release:1 clean gcc=gcc cpu=native win= openal=soft jobs=$(nproc||echo 1)")
+core_jobs=$(nproc||sysctl -n hw.logicalcpu||echo 1)
+
+arg_flags=("help debug release:1 clean gcc=gcc cpu=native win= openal=soft jobs=$core_jobs")
 
 arg_get() {
 key="$1"
