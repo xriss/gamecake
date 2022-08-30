@@ -168,7 +168,16 @@ GCC=false
 CLANG=false
 
 local t= _ARGS[1] or ""
-if t:sub(1,4)=="emcc" then
+
+if os.get() == "windows" then
+	TARGET="WINDOWS"
+	WINDOWS=true
+elseif os.get() == "macosx" then
+	TARGET="OSX"
+	CPU="x64"
+	OSX=true
+	CLANG=true
+elseif t:sub(1,4)=="emcc" then
 	TARGET="EMCC"
 	CPU=t:sub(5)
 	EMCC=true
@@ -205,13 +214,6 @@ elseif t:sub(1,3)=="osx" then
 	CPU=t:sub(4)
 	OSX=true
 	GCC=true
-	CLANG=true
-elseif os.get() == "windows" then
-	TARGET="WINDOWS"
-	WINDOWS=true
-elseif os.get() == "macosx" then
-	TARGET="OSX"
-	OSX=true
 	CLANG=true
 else
 	TARGET="NIX"
