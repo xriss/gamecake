@@ -174,7 +174,7 @@ if os.get() == "windows" then
 	WINDOWS=true
 elseif os.get() == "osx" then
 	TARGET="OSX"
-	CPU="x64"
+	CPU="-64"
 	OSX=true
 	CLANG=true
 elseif t:sub(1,4)=="emcc" then
