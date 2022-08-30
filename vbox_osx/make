@@ -1,14 +1,34 @@
 cd `dirname $0`
 
+SDL2_DYLIB=libSDL2-2.0.0.dylib
+LUAJIT_DYLIB=libluajit-5.1.2.dylib
+
+
 vagrant up
 
-vagrant ssh -c " rm -rf gamecake && git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
 
-vagrant ssh -c " gamecake/make --clean --gcc=osx "
+# update git
+vagrant ssh -c " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git  "
+
+# build
+#vagrant ssh -c " gamecake/make clean "
+vagrant ssh -c " gamecake/make "
 
 
+# adjust locations of dylibs
+vagrant ssh -c " cp /usr/local/opt/sdl2/lib/$SDL2_DYLIB gamecake/exe/osx/$SDL2_DYLIB "
+vagrant ssh -c " install_name_tool -change /usr/local/opt/sdl2/lib/$SDL2_DYLIB @executable_path/osx/$SDL2_DYLIB gamecake/exe/gamecake.osx "
+vagrant ssh -c " cp /usr/local/opt/luajit/lib/$LUAJIT_DYLIB gamecake/exe/osx/$LUAJIT_DYLIB "
+vagrant ssh -c " install_name_tool -change /usr/local/opt/luajit/lib/$LUAJIT_DYLIB @executable_path/osx/$LUAJIT_DYLIB gamecake/exe/gamecake.osx "
+vagrant ssh -c " otool -L gamecake/exe/gamecake.osx "
+
+
+# copy exe and dylib
 vagrant ssh-config > ./.vagrant.ssh.config
 scp -F ./.vagrant.ssh.config default:gamecake/exe/gamecake.osx ../exe/gamecake.osx
+scp -F ./.vagrant.ssh.config default:gamecake/exe/osx/$SDL2_DYLIB ../exe/osx/$SDL2_DYLIB
+scp -F ./.vagrant.ssh.config default:gamecake/exe/osx/$LUAJIT_DYLIB ../exe/osx/$LUAJIT_DYLIB
 rm .vagrant.ssh.config
 
-vagrant halt
+
+#vagrant halt

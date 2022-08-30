@@ -75,9 +75,6 @@ elseif WINDOWS then
 
 elseif OSX then
 
--- look around the exe for any dynamic code we might want	
---	linkoptions { "-Wl,-R\\$$ORIGIN/osx" } -- so much escape \\$$ -> $
-
 	files { "./lua.c" }
 
 --	libdirs { "/usr/local/64/lib/" }
