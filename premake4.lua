@@ -172,7 +172,7 @@ local t= _ARGS[1] or ""
 if os.get() == "windows" then
 	TARGET="WINDOWS"
 	WINDOWS=true
-elseif os.get() == "macosx" then
+elseif os.get() == "osx" then
 	TARGET="OSX"
 	CPU="x64"
 	OSX=true
