@@ -1,4 +1,7 @@
 
+OSX running inside a Vagrant VitualBox
+--------------------------------------
+
 Vagrant ssh access to this OSX box is working again so we can build 
 gamecake using clang. Note that SDL2 and LuaJIT are dylibs so I'm not 
 building a single file on OSX, which makes me sad but static linking 
