@@ -100,3 +100,19 @@ https://openresty.org/en/using-luarocks.html to install luarocks that
 openresty can see and then use that luarocks to install gamecake which 
 will get us all the gamecake libs inside an nginx lua environment.
 
+
+Finally some things you can try once you have a working gamecake 
+executable installed.
+
+	# run swanky edit our internal text editor and IDE
+	gamecake -lcmd -- swed
+
+	# run a fun64 demo ( from https://github.com/xriss/fun64/tree/master/fun )
+	gamecake -lfun -- lua/fun/heloworld
+	gamecake -lfun -- lua/fun/raymarch
+	gamecake -lfun -- lua/fun/palette
+	gamecake -lfun -- lua/fun/invaders
+	gamecake -lfun -- lua/fun/platform
+	gamecake -lfun -- lua/fun/overstep
+
+
