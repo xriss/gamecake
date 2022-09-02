@@ -30,6 +30,106 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
+   "count": 1,
+   "name": "draw"
+  },
+  {
+   "count": 21,
+   "name": "entities"
+  },
+  {
+   "count": 16,
+   "name": "entities.systems"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.bang"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.donut"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.horde"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.invader"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.item"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.level"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.menu"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.missile"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.npc"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.player"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.score"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.space"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.stars"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.tile"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.yarn"
+  },
+  {
+   "count": 4,
+   "name": "entities.tiles"
+  },
+  {
+   "count": 1,
+   "name": "entities.tiles.npc"
+  },
+  {
+   "count": 1,
+   "name": "entities.tiles.sprite"
+  },
+  {
+   "count": 1,
+   "name": "entities.tiles.start"
+  },
+  {
+   "count": 1,
+   "name": "graphics"
+  },
+  {
+   "count": 1,
+   "name": "hardware"
+  },
+  {
+   "count": 1,
+   "name": "levels"
+  },
+  {
    "count": 554,
    "name": "lua"
   },
@@ -2244,6 +2344,26 @@
   {
    "count": 1,
    "name": "lua.wetgenes.txt.utf.string"
+  },
+  {
+   "count": 1,
+   "name": "prefabs"
+  },
+  {
+   "count": 1,
+   "name": "rules"
+  },
+  {
+   "count": 1,
+   "name": "setup"
+  },
+  {
+   "count": 1,
+   "name": "setup_menu"
+  },
+  {
+   "count": 1,
+   "name": "update"
   }
  ],
  "_docs_json": {
@@ -2339,6 +2459,203 @@
    "line": 301,
    "name": "code.swankyquant.swanky_quant_remap",
    "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/swankyquant.h"
+  },
+  {
+   "body": "<pre><code>draw()\n</code></pre>\n<p>Draw called every frame, there may be any number of updates between \neach draw but hopefully we are looking at one update followed by a \ndraw, if you have an exceptionally fast computer then we may even get 0 \nupdates between some draws.</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 1987,
+   "name": "draw",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<pre><code>entities.reset()\n</code></pre>\n<p>empty the list of entites to update and draw</p>\n<pre><code>entities.caste(caste)\n</code></pre>\n<p>get the list of entities of a given caste, eg &quot;bullets&quot; or &quot;enemies&quot;</p>\n<pre><code>entities.add(it,caste)\nentities.add(it)\n</code></pre>\n<p>add a new entity of caste or it.caste to the list of things to update </p>\n<pre><code>entities.call(fname,...)\n</code></pre>\n<p>for every entity call the function named fname like so it<a href=\"it,...\">fname</a>\n<br/>\n<br/>\n<br/></p>\n<pre><code>entities.get(name)\n</code></pre>\n<p>get a value previously saved, this is an easy way to find a unique \nentity, eg the global space but it can be used to save any values you \nwish not just to bookmark unique entities.</p>\n<pre><code>entities.set(name,value)\n</code></pre>\n<p>save a value by a unique name</p>\n<pre><code>entities.manifest(name,value)\n</code></pre>\n<p>get a value previously saved, or initalize it to the given value if it \ndoes not already exist. The default value is {} as this is intended for \nlists.\n<br/>\n<br/>\n<br/></p>\n<pre><code>entities.systems\n</code></pre>\n<p>A table to register or find a global system, these are not cleared by \nreset and should not contain any state data, just functions to create \nthe actual entity or initialise data.\n<br/>\n<br/>\n<br/></p>\n<pre><code>entities.tiles\n</code></pre>\n<p>These functions are called as we generate a level from ascii, every \nvalue in the tile legend data is checked against all the strings in \nentities.tiles and if it matches it calls that function which is then \nresponsible for adding the appropriate collision and drawing code to \nmake that tile actually add something to the level.</p>\n<p>The basic values of tile.tile and tile.back are used to write graphics \ninto the two tile layers but could still be caught here if you need to.</p>\n<p>Multiple hooks may get called for a single tile, think of each string \nas a flag to signal that something happens and its value describes what \nhappens.</p>\n",
+   "count": 21,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 67,
+   "name": "entities",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<p>A global table for entity systems to live in.</p>\n<pre><code>entities.systems_call(fname,...)\n</code></pre>\n<p>Call the named function on any systems that currently exist. For \ninstance entities.systems_call(&quot;load&quot;) is used at the bottom \nof this file to prepare graphics of registered systems.</p>\n",
+   "count": 16,
+   "file": "../lua/fun/invaders.fun.lua",
+   "line": 205,
+   "name": "entities.systems",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/invaders.fun.lua"
+  },
+  {
+   "body": "<p>a bang</p>\n",
+   "count": 1,
+   "file": "../lua/fun/invaders.fun.lua",
+   "line": 798,
+   "name": "entities.systems.bang",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/invaders.fun.lua"
+  },
+  {
+   "body": "<pre><code>donut = entities.systems.donut.add(opts)\n</code></pre>\n<p>Add an donut.</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 1186,
+   "name": "entities.systems.donut",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<p>The invading horde</p>\n",
+   "count": 1,
+   "file": "../lua/fun/invaders.fun.lua",
+   "line": 527,
+   "name": "entities.systems.horde",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/invaders.fun.lua"
+  },
+  {
+   "body": "<p>an invader</p>\n",
+   "count": 1,
+   "file": "../lua/fun/invaders.fun.lua",
+   "line": 394,
+   "name": "entities.systems.invader",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/invaders.fun.lua"
+  },
+  {
+   "body": "<pre><code>item = entities.systems.item.add()\n</code></pre>\n<p>items, can be used for general things, EG physics shapes with no special actions</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 448,
+   "name": "entities.systems.item",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<pre><code>entities.systems.level.setup(level)\n</code></pre>\n<p>reset and setup everything for this level idx</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 1488,
+   "name": "entities.systems.level",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<pre><code>menu = entities.systems.menu.setup()\n</code></pre>\n<p>Create a displayable and controllable menu system that can be fed chat \ndata for user display.</p>\n<p>After setup, provide it with menu items to display using \nmenu.show(items) then call update and draw each frame.</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 1613,
+   "name": "entities.systems.menu",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<p>a missile</p>\n",
+   "count": 1,
+   "file": "../lua/fun/invaders.fun.lua",
+   "line": 659,
+   "name": "entities.systems.missile",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/invaders.fun.lua"
+  },
+  {
+   "body": "<pre><code>npc = entities.systems.npc.add(opts)\n</code></pre>\n<p>Add an npc.</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 987,
+   "name": "entities.systems.npc",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<pre><code>entities.systems.player.controls(it,fast)\n</code></pre>\n<p>Handle player style movement, so we can reuse this code for player \nstyle monsters. it is a player or monster, fast lets us tweak the speed \nand defaults to 1</p>\n<p>movement controls are set in it</p>\n<p>it.move which is &quot;left&quot; or &quot;right&quot; to move left or right\nit.jump which is true if we should jump</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 726,
+   "name": "entities.systems.player",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<pre><code>score = entities.systems.score.setup()\n</code></pre>\n<p>Create entity that handles the score hud update and display</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 513,
+   "name": "entities.systems.score",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<pre><code>space = entities.systems.space.setup()\n</code></pre>\n<p>Create the space that simulates all of the physics.</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 184,
+   "name": "entities.systems.space",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<p>The stars</p>\n",
+   "count": 1,
+   "file": "../lua/fun/invaders.fun.lua",
+   "line": 1039,
+   "name": "entities.systems.stars",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/invaders.fun.lua"
+  },
+  {
+   "body": "<p>setup background tile graphics</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 212,
+   "name": "entities.systems.tile",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<p>Handle the main yarn setup update and draw.</p>\n",
+   "count": 1,
+   "file": "../lua/fun/overstep.fun.lua",
+   "line": 4721,
+   "name": "entities.systems.yarn",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/overstep.fun.lua"
+  },
+  {
+   "body": "",
+   "count": 4,
+   "name": "entities.tiles"
+  },
+  {
+   "body": "<p>Display a npc</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 1345,
+   "name": "entities.tiles.npc",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<p>Display a sprite</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 1323,
+   "name": "entities.tiles.sprite",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<p>The player start point, just save the x,y</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 1312,
+   "name": "entities.tiles.start",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<p>define all graphics in this global, we will convert and upload to tiles \nat setup although you can change tiles during a game, we try and only \nupload graphics during initial setup so we have a nice looking sprite \nsheet to be edited by artists</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 27,
+   "name": "graphics",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<p>select the hardware we will need to run this code, eg layers of \ngraphics, colors to use, sprites, text, sound, etc etc.</p>\n<p>Here we have chosen the default 320x240 setup.</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 10,
+   "name": "hardware",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
+  },
+  {
+   "body": "<p>Design levels here</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platobj.fun.lua",
+   "line": 1361,
+   "name": "levels",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
   },
   {
    "body": "",
@@ -6726,6 +7043,46 @@
    "line": 50,
    "name": "lua.wetgenes.txt.utf.string",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/utf.lua"
+  },
+  {
+   "body": "<p>The yarn building blocks, recipes to build items from, multiple rules \ncan be assigned to each item.</p>\n",
+   "count": 1,
+   "file": "../lua/fun/overstep.fun.lua",
+   "line": 4389,
+   "name": "prefabs",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/overstep.fun.lua"
+  },
+  {
+   "body": "<p>How the yarn engine should behave</p>\n",
+   "count": 1,
+   "file": "../lua/fun/overstep.fun.lua",
+   "line": 4426,
+   "name": "rules",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/overstep.fun.lua"
+  },
+  {
+   "body": "<p>Called once to setup things in the first update loop after hardware has \nbeen initialised.</p>\n",
+   "count": 1,
+   "file": "../lua/fun/invaders.fun.lua",
+   "line": 1310,
+   "name": "setup",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/invaders.fun.lua"
+  },
+  {
+   "body": "<pre><code>menu = setup_menu()\n</code></pre>\n<p>Create a displayable and controllable menu system that can be fed chat \ndata for user display.</p>\n<p>After setup, provide it with menu items to display using \nmenu.show(items) then call update and draw each frame.</p>\n",
+   "count": 1,
+   "file": "../lua/fun/platchat.fun.lua",
+   "line": 1488,
+   "name": "setup_menu",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platchat.fun.lua"
+  },
+  {
+   "body": "<pre><code>update()\n</code></pre>\n<p>Update and draw loop, called every frame.</p>\n",
+   "count": 1,
+   "file": "../lua/fun/starfield.fun.lua",
+   "line": 23,
+   "name": "update",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/starfield.fun.lua"
   }
  ],
  "_output_chunkname": "css",

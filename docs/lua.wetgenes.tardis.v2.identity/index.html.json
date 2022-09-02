@@ -30,6 +30,106 @@
    "name": "code.swankyquant.swanky_quant_remap"
   },
   {
+   "count": 1,
+   "name": "draw"
+  },
+  {
+   "count": 21,
+   "name": "entities"
+  },
+  {
+   "count": 16,
+   "name": "entities.systems"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.bang"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.donut"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.horde"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.invader"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.item"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.level"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.menu"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.missile"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.npc"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.player"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.score"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.space"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.stars"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.tile"
+  },
+  {
+   "count": 1,
+   "name": "entities.systems.yarn"
+  },
+  {
+   "count": 4,
+   "name": "entities.tiles"
+  },
+  {
+   "count": 1,
+   "name": "entities.tiles.npc"
+  },
+  {
+   "count": 1,
+   "name": "entities.tiles.sprite"
+  },
+  {
+   "count": 1,
+   "name": "entities.tiles.start"
+  },
+  {
+   "count": 1,
+   "name": "graphics"
+  },
+  {
+   "count": 1,
+   "name": "hardware"
+  },
+  {
+   "count": 1,
+   "name": "levels"
+  },
+  {
    "count": 554,
    "name": "lua"
   },
@@ -2244,6 +2344,26 @@
   {
    "count": 1,
    "name": "lua.wetgenes.txt.utf.string"
+  },
+  {
+   "count": 1,
+   "name": "prefabs"
+  },
+  {
+   "count": 1,
+   "name": "rules"
+  },
+  {
+   "count": 1,
+   "name": "setup"
+  },
+  {
+   "count": 1,
+   "name": "setup_menu"
+  },
+  {
+   "count": 1,
+   "name": "update"
   }
  ],
  "_docs_json": {
