@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # first install a require script
 if ! [[ -x "$(command -v require.sh)" ]] ; then

@@ -11,8 +11,7 @@ vagrant up
 vagrant ssh -c " cd gamecake && git pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git  "
 
 # build
-#vagrant ssh -c " env bash -c gamecake/make clean "
-vagrant ssh -c " env bash -c gamecake/make "
+vagrant ssh -c " env bash -c gamecake/make $* "
 
 
 # adjust locations of dylibs
@@ -31,4 +30,5 @@ scp -F ./.vagrant.ssh.config default:gamecake/exe/osx/$LUAJIT_DYLIB ../exe/osx/$
 rm .vagrant.ssh.config
 
 
-#vagrant halt
+vagrant halt
+
