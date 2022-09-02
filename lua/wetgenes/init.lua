@@ -231,16 +231,9 @@ M.savescripts=function(basedir)
 	local wgc=require("wetgenes.gamecake.core")
 	local names=wgc.list_cache_strings()
 
-	for n,v in pairs(names) do
+	for n,fname in pairs(names) do
 
-		local fname
-		if "lua/"==v:sub(1,4) then -- these are extra files, eg .glsl code
-			fname=v
-		else -- these are modules, so need to be turned into files
-			fname="lua/"..v:gsub("%.","/")..".lua"
-		end
-
-		local data=wgc.get_cache_string(v)
+		local data=wgc.get_cache_string(fname)
 		
 		print( "saving" , #data , " bytes as ", basedir..fname )
 		
