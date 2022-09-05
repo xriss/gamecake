@@ -57,7 +57,7 @@ M.bake=function(oven,screen)
 
 		zone_screen_draw={
 			["DAYNIGHT(rgb,daynight)"]="( (rgb) * mix( vec3(1.0,1.0,1.0) , vec3(0.5,0.5,1.0) , daynight.x ) )",
-			GAMMA=1.0,
+			GAMMA=2.0,
 			BLOOM_SCALE=1,
 --			TWEAK=0,
 		},

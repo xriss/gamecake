@@ -7,6 +7,8 @@
 precision mediump float;
 #endif
 
+#include "gamecake_shader_funcs"
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -70,6 +72,8 @@ precision mediump float;
 precision mediump float;
 #endif
   
+#include "gamecake_shader_funcs"
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -111,7 +115,7 @@ void main(void)
 {
 	vec4  c4=texture(tex0,v_texcoord);
 	float d = min( 1.0 , 4.0*c4.a ) ; 
-	vec3 m = c4.rgb ;
+	vec3 m = SRGB(c4.rgb) ;
 	vec4 s4 = texture(tex1, v_texcoord).rgba ;
 	vec3 b = texture(tex2, v_texcoord).rgb ;
 	float s=s4.a;
@@ -180,11 +184,11 @@ void main(void)
 
 #ifdef GAMMA
 	c=pow(c,vec3(1.0/float( GAMMA )));
+#else
+	c=RGBS(c);
 #endif
 
-
 	FragColor=vec4( c , 1.0 );
-
 
 }
 
@@ -422,6 +426,8 @@ precision mediump float;
 #endif
 #endif
   
+#include "gamecake_shader_funcs"
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -455,9 +461,9 @@ out vec4 FragColor;
 
 void main(void)
 {
-	vec4 m = texture(tex0, v_texcoord).rgba ;
+	vec4 m = SRGB(texture(tex0, v_texcoord).rgba) ;
 //	float s = texture(tex1, v_texcoord).a ;
-	FragColor=vec4( (m.rgb + pow( m.rgb , vec3(4.0) ) ) * (4.0*m.a-1.0) , 1.0 );
+	FragColor=RGBS(vec4( (m.rgb + pow( m.rgb , vec3(4.0) ) ) * (4.0*m.a-1.0) , 1.0 ));
 }
 
 #endif
@@ -478,6 +484,8 @@ precision mediump float;
 #endif
 #endif
   
+#include "gamecake_shader_funcs"
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -526,81 +534,81 @@ void main(void)
 #if BLUR == -1
 
 	c= min( min(
-		texture(tex,tc             ) ,
-		texture(tex,tc+siz.xy*  1.0) ) ,
-		texture(tex,tc+siz.xy* -1.0) ) ;
+		SRGB(texture(tex,tc             )) ,
+		SRGB(texture(tex,tc+siz.xy*  1.0)) ) ,
+		SRGB(texture(tex,tc+siz.xy* -1.0)) ) ;
 
 #elif BLUR == 3
 
-	c =texture(tex,tc).rgba*(1.0/3.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(1.0/3.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(1.0/3.0);
+	c =SRGB(texture(tex,tc).rgba)*(1.0/3.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(1.0/3.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(1.0/3.0);
 
 #elif BLUR == 5
 
-	c =texture(tex,tc).rgba*(1.0/5.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(1.0/5.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(1.0/5.0);
-	c+=texture(tex,tc+siz.xy* 2.0).rgba*(1.0/5.0);
-	c+=texture(tex,tc+siz.xy*-2.0).rgba*(1.0/5.0);
+	c =SRGB(texture(tex,tc).rgba)*(1.0/5.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(1.0/5.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(1.0/5.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 2.0).rgba)*(1.0/5.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-2.0).rgba)*(1.0/5.0);
 
 #elif BLUR == 6
 
-	c =texture(tex,tc).rgba*(2.0/6.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(1.0/6.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(1.0/6.0);
-	c+=texture(tex,tc+siz.xy* 2.0).rgba*(1.0/6.0);
-	c+=texture(tex,tc+siz.xy*-2.0).rgba*(1.0/6.0);
+	c =SRGB(texture(tex,tc).rgba)*(2.0/6.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(1.0/6.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(1.0/6.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 2.0).rgba)*(1.0/6.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-2.0).rgba)*(1.0/6.0);
 
 #elif BLUR == 22
 
-	c =texture(tex,tc).rgba*(8.0/22.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(4.0/22.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(4.0/22.0);
-	c+=texture(tex,tc+siz.xy* 2.0).rgba*(2.0/22.0);
-	c+=texture(tex,tc+siz.xy*-2.0).rgba*(2.0/22.0);
-	c+=texture(tex,tc+siz.xy* 3.0).rgba*(1.0/22.0);
-	c+=texture(tex,tc+siz.xy*-3.0).rgba*(1.0/22.0);
+	c =SRGB(texture(tex,tc).rgba)*(8.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(4.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(4.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 2.0).rgba)*(2.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-2.0).rgba)*(2.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 3.0).rgba)*(1.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-3.0).rgba)*(1.0/22.0);
 
 #elif BLUR == 16
 
-	c =texture(tex,tc).rgba*(2.0/16.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 2.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-2.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 3.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-3.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 4.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-4.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 5.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-5.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 6.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-6.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 7.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-7.0).rgba*(1.0/16.0);
+	c =SRGB(texture(tex,tc).rgba)*(2.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 2.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-2.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 3.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-3.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 4.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-4.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 5.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-5.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 6.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-6.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 7.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-7.0).rgba)*(1.0/16.0);
 
 #elif BLUR_COUNT == 382
 
-	c =texture(tex,tc).rgba*(128.0/382.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(64.0/382.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(64.0/382.0);
-	c+=texture(tex,tc+siz.xy* 2.0).rgba*(32.0/382.0);
-	c+=texture(tex,tc+siz.xy*-2.0).rgba*(32.0/382.0);
-	c+=texture(tex,tc+siz.xy* 3.0).rgba*(16.0/382.0);
-	c+=texture(tex,tc+siz.xy*-3.0).rgba*(16.0/382.0);
-	c+=texture(tex,tc+siz.xy* 4.0).rgba*(8.0/382.0);
-	c+=texture(tex,tc+siz.xy*-4.0).rgba*(8.0/382.0);
-	c+=texture(tex,tc+siz.xy* 5.0).rgba*(4.0/382.0);
-	c+=texture(tex,tc+siz.xy*-5.0).rgba*(4.0/382.0);
-	c+=texture(tex,tc+siz.xy* 6.0).rgba*(2.0/382.0);
-	c+=texture(tex,tc+siz.xy*-6.0).rgba*(2.0/382.0);
-	c+=texture(tex,tc+siz.xy* 7.0).rgba*(1.0/382.0);
-	c+=texture(tex,tc+siz.xy*-7.0).rgba*(1.0/382.0);
+	c =SRGB(texture(tex,tc).rgba)*(128.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(64.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(64.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 2.0).rgba)*(32.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-2.0).rgba)*(32.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 3.0).rgba)*(16.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-3.0).rgba)*(16.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 4.0).rgba)*(8.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-4.0).rgba)*(8.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 5.0).rgba)*(4.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-5.0).rgba)*(4.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 6.0).rgba)*(2.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-6.0).rgba)*(2.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 7.0).rgba)*(1.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-7.0).rgba)*(1.0/382.0);
 
 #endif
 
-	FragColor=c.rgba;
+	FragColor=RGBS(c.rgba);
 
 }
 

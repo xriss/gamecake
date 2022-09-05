@@ -1,5 +1,18 @@
 
-	
+#header "gamecake_shader_funcs"
+
+#if 0 // !defined(SRGBGAMMA)
+vec4 SRGB(vec4 c){return c;}
+vec3 SRGB(vec3 c){return c;}
+vec4 RGBS(vec4 c){return c;}
+vec3 RGBS(vec3 c){return c;}
+#else
+vec4 SRGB(vec4 c){return pow(c,vec4(2.2,2.2,2.2,1.0));}
+vec3 SRGB(vec3 c){return pow(c,vec3(2.2));}
+vec4 RGBS(vec4 c){return pow(c,vec4(1.0/2.2,1.0/2.2,1.0/2.2,1.0));}
+vec3 RGBS(vec3 c){return pow(c,vec3(1.0/2.2));}
+#endif
+
 /*
 
 This is the default gamecake shader, which is controlled by a bunch of 
@@ -361,9 +374,9 @@ void main(void)
 #endif
 
 #ifdef COLOR
-	v_color=a_color*color;
+	v_color=SRGB(a_color)*SRGB(color);
 #else
-	v_color=color;
+	v_color=SRGB(color);
 #endif
 	
 #ifdef TEX
@@ -422,7 +435,7 @@ void main(void)
 //	vec2 uv=clamp( v_texcoord + vec2( dot(n,s)*0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
 	vec2 uv=v_texcoord + vec2( dot(n,s)*0.5 ,0.0) ;
 
-	FragColor = texture(tex, uv ).rgba * v_color;
+	FragColor = SRGB(texture(tex, uv ).rgba) * v_color;
 
 //	FragColor=vec4(n,1.0) * v_color;
 
@@ -437,11 +450,11 @@ void main(void)
 		}
 		else
 		{
-			FragColor=texture(tex, v_texcoord) * v_color ;
+			FragColor=SRGB(texture(tex, v_texcoord)) * v_color ;
 		}
 
 	#else
-		FragColor=texture(tex, v_texcoord) * v_color ;
+		FragColor=SRGB(texture(tex, v_texcoord)) * v_color ;
 	#endif
 #else
 	FragColor=v_color ;
@@ -451,11 +464,11 @@ void main(void)
 
 #ifdef MATIDX
 	float tex_mat_u=(v_matidx+0.5)/MATIDX;
-	vec4 c1=texture(tex_mat, vec2(tex_mat_u,0.25) );
-	vec4 c2=texture(tex_mat, vec2(tex_mat_u,0.75) );
+	vec4 c1=SRGB(texture(tex_mat, vec2(tex_mat_u,0.25) ));
+	vec4 c2=SRGB(texture(tex_mat, vec2(tex_mat_u,0.75) ));
 #else
 	vec4 c1=FragColor;
-	vec4 c2=vec4(1.0,1.0,1.0,16.0/255.0);
+	vec4 c2=SRGB(vec4(1.0,1.0,1.0,16.0/255.0));
 #endif
 
 #ifdef NTOON
@@ -527,6 +540,7 @@ void main(void)
 
 #endif
 
+	FragColor=RGBS(FragColor);
 }
 
 #endif
@@ -544,6 +558,9 @@ precision highp float;
 precision mediump float;
 #endif
 #endif
+
+
+#include "gamecake_shader_funcs"
 
 #include "gamecake_shader_head"
 #include "gamecake_shader_vertex"
