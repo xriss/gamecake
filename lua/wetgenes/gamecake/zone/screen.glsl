@@ -117,7 +117,7 @@ void main(void)
 	float d = 4.0*c4.a ; // may need to tweak this to change output brightness range
 	vec3 m = SRGB(c4.rgb)*d ;
 	vec4 s4 = texture(tex1, v_texcoord).rgba ;
-	vec3 b = texture(tex2, v_texcoord).rgb ;
+	vec3 b = SRGB(texture(tex2, v_texcoord).rgb) ;
 	float s=s4.a;
 	
 #ifdef COLOR_FIX
