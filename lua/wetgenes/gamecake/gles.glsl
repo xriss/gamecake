@@ -6,11 +6,16 @@ vec4 SRGB(vec4 c){return c;}
 vec3 SRGB(vec3 c){return c;}
 vec4 RGBS(vec4 c){return c;}
 vec3 RGBS(vec3 c){return c;}
+vec3 HRGB(vec4 c){return c.rgb;}
+vec4 RGBH(vec3 c){return vec4(c.rgb,0.25);}
 #else
 vec4 SRGB(vec4 c){return pow(c,vec4(2.2,2.2,2.2,1.0));}
 vec3 SRGB(vec3 c){return pow(c,vec3(2.2));}
-vec4 RGBS(vec4 c){return pow(c,vec4(1.0/2.2,1.0/2.2,1.0/2.2,1.0));}
-vec3 RGBS(vec3 c){return pow(c,vec3(1.0/2.2));}
+vec4 RGBS(vec4 c){return pow(c,vec4(0.45454545454,0.45454545454,0.45454545454,1.0));}
+vec3 RGBS(vec3 c){return pow(c,vec3(0.45454545454));}
+// fake HDR uses alpha as a floating point scalar in the range 0-4 with 8bit precision
+vec3 HRGB(vec4 c){return pow(c.rgb,vec3(2.2))*c.a*4.0;}
+vec4 RGBH(vec3 c){float a=max(0.02,max(max(c.r,c.g),c.b));return vec4(pow(c.rgb/a,vec3(0.45454545454)),a/4.0);}
 #endif
 
 /*

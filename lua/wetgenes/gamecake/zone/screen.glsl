@@ -114,8 +114,8 @@ uniform vec4 day_night;
 void main(void)
 {
 	vec4  c4=texture(tex0,v_texcoord);
-	float d = min( 1.0 , 4.0*c4.a ) ; 
-	vec3 m = SRGB(c4.rgb) ;
+	float d = 4.0*c4.a ; // may need to tweak this to change output brightness range
+	vec3 m = SRGB(c4.rgb)*d ;
 	vec4 s4 = texture(tex1, v_texcoord).rgba ;
 	vec3 b = texture(tex2, v_texcoord).rgb ;
 	float s=s4.a;
@@ -172,7 +172,7 @@ void main(void)
 
 #else
 
-	c= m * s * d + b ;
+	c= m * s + b ;
 
 #endif
 
@@ -461,9 +461,13 @@ out vec4 FragColor;
 
 void main(void)
 {
-	vec4 m = SRGB(texture(tex0, v_texcoord).rgba) ;
-//	float s = texture(tex1, v_texcoord).a ;
-	FragColor=RGBS(vec4( (m.rgb + pow( m.rgb , vec3(4.0) ) ) * (4.0*m.a-1.0) , 1.0 ));
+//	vec4 m = SRGB(texture(tex0, v_texcoord).rgba) ;
+//	FragColor=RGBS(vec4( (m.rgb + pow( m.rgb , vec3(4.0) ) ) * (4.0*m.a-1.0) , 1.0 ));
+
+	vec3 c = HRGB(texture(tex0, v_texcoord).rgba) ;
+	c=max(vec3(0.0),c-vec3(1.0));
+	c=(c+pow(c,vec3(4.0)));
+	FragColor=vec4(RGBS(c),1.0);
 }
 
 #endif

@@ -29,6 +29,8 @@ precision mediump float;
 
 #endif
 
+#include "gamecake_shader_funcs"
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -80,12 +82,12 @@ OUT vec4 FragColor;
 void main(void)
 {
 	float l=min( xy.z/256.0 , 1.0  );
-	vec3 c1=mix( vec3( 0.5 , 0.5 , 0.5 ) , vec3( 0.5 , 0.5 , 0.5 ) , l );
-	vec3 c2=mix( vec3( 0.6 , 0.6 , 0.6 ) , vec3( 0.5 , 0.5 , 0.5 ) , l );
+	vec3 c1=mix( SRGB(vec3( 0.5 , 0.5 , 0.5 )) , SRGB(vec3( 0.5 , 0.5 , 0.5 )) , l );
+	vec3 c2=mix( SRGB(vec3( 0.6 , 0.6 , 0.6 )) , SRGB(vec3( 0.5 , 0.5 , 0.5 )) , l );
 	vec2 cheque=floor( (xy.xy-vec2(2.5))/5.0 );
 	float a=mod(cheque.x+cheque.y,2.0);
 
-	FragColor=vec4( mix(c1,c2,a) , 1.0 )*color;
+	FragColor=RGBS(vec4( mix(c1,c2,a) , 1.0 )*SRGB(color));
 }
 
 #endif
@@ -119,6 +121,8 @@ precision mediump float;
 #define FragColor gl_FragColor
 
 #endif
+
+#include "gamecake_shader_funcs"
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -164,7 +168,6 @@ void main()
 IN vec4 v_position;
 IN vec4 v_relative;
 IN vec3 v_normal;
-IN vec4 v_color;
 IN vec2  v_texcoord;
 
 OUT vec4 FragColor;
@@ -201,7 +204,7 @@ void main(void)
 	float f=goldienoise(vec3(p.xz,64.0),1.0/16.0);
 	uv.x+=(f-0.5)*smoothstep( -128.0, 0.0 , -length(r) )*0.75;
 
-	FragColor = texture(tex, uv ).rgba * color;
+	FragColor = RGBS( SRGB(texture(tex, uv ).rgba) * SRGB(color) );
 
 }
 
