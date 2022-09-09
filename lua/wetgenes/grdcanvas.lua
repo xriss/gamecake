@@ -122,13 +122,13 @@ grdcanvas.cmap_ramp=function(g,keys,opts)
 		local b2=bit.band(nextkey.argb,0xff)
 
 		local a=a1*l + a2*f
-		local r=r1*l + r2*f
-		local g=g1*l + g2*f
-		local b=b1*l + b2*f
+		local r=math.pow(r1/255,2.2)*l + math.pow(r2/255,2.2)*f
+		local g=math.pow(g1/255,2.2)*l + math.pow(g2/255,2.2)*f
+		local b=math.pow(b1/255,2.2)*l + math.pow(b2/255,2.2)*f
 		
-		cs[x*4+1]=clamp(r)
-		cs[x*4+2]=clamp(g)
-		cs[x*4+3]=clamp(b)
+		cs[x*4+1]=clamp(math.pow(r,1/2.2)*255)
+		cs[x*4+2]=clamp(math.pow(g,1/2.2)*255)
+		cs[x*4+3]=clamp(math.pow(b,1/2.2)*255)
 		cs[x*4+4]=clamp(a)
 
 	end
