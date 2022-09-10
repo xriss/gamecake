@@ -63,11 +63,11 @@ M.bake=function(oven,screen)
 		},
 		
 		zone_screen_build_occlusion={
-			AO_SCALE=1,--3/4,
-			AO_CLIP=1,--1/2,
+			AO_SCALE=1,
+			AO_CLIP=1/2,
 			AO_SIZE=0.4,--1/8,
 			AO_SAMPLES=6,
-			SHADOW_SCALE=1/2,
+			SHADOW_SCALE=1,
 			SHADOW_SAMPLES=6,
 --			SHADOW=" 0.0 , 0.0 , 0.0 , 0.0 ",
 --			SHADOW_SQUISH=1,

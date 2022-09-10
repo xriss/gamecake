@@ -315,8 +315,7 @@ float ambient_occlusion( vec2 vv , vec3 nrm )
 		float r=ha+fa*rots;
 		vec2 cc=vec2(sin(r),cos(r))*aspect*dlen*(1.0-fa*dims);
 		vec3 ss=depth_to_view(cc+vv);
-		float zz=p1.z;
-		ac+=1.0-smoothstep( zz - slen , zz + slen , ss.z );
+		ac+=1.0-smoothstep( p1.z - slen , p1.z + slen , ss.z );
 	}
 	return (ac/float(AO_SAMPLES));
 
@@ -402,7 +401,7 @@ void main(void)
 	t=clamp( (1.0-((1.0-t)*float(AO_SCALE))) ,0.0,1.0);
 #endif
 	
-	FragColor=vec4( vec3(0.5)+(nrm.xyz*0.5) , s*t );
+	FragColor=vec4( vec3(0.5)+(nrm.xyz*0.5) , t*s );
 	
 }
 
