@@ -248,7 +248,9 @@ out vec4 FragColor;
 // convert a uv into view space by sampling z buffer
 vec3 depth_to_view(vec2 cc)
 {
-	vec4 p=inverse_projection * ( vec4( cc , float(texture(tex,cc)) , 1.0 )*2.0 - 1.0 );
+	vec4 t=vec4( cc , float(texture(tex,cc)) , 1.0 );
+	vec4 p=inverse_projection * ( t*2.0 - 1.0 );
+	if(abs(p.w)<0.001){p.w=0.001;} // sanity
 	return p.xyz/p.w;
 }
 
@@ -256,6 +258,7 @@ vec3 depth_to_view(vec2 cc)
 vec3 view_to_depth(vec3 vv)
 {
 	vec4 p=projection * vec4( vv , 1.0);
+	if(abs(p.w)<0.001){p.w=0.001;} // sanity
 	return (p.xyz/p.w)*0.5 + 0.5;
 }
 
@@ -304,20 +307,23 @@ float ambient_occlusion( vec2 vv , vec3 nrm )
 
 	vec3 p1=depth_to_view( vv );
 	vec3 p2=view_to_depth( p1+(vec3(slen,slen,0.0)) );
-	float dlen=length(p2.xy-vv.xy); // scale needed to adjust to depth
+	if(p1.z!=p1.z) { return 0.5; } // give up
+	float dlen=max(0.001,length(p2.xy-vv.xy)); // scale needed to adjust to depth
 
-	float rots=PI2/float(AO_SAMPLES);
-	float dims=0.5/float(AO_SAMPLES);
+	float rots=PI2/(sqrt(float(AO_SAMPLES))*2.0);
+	float dims=1.0/float(AO_SAMPLES);
 	float ac=0.0;
+	float dc=float(AO_SAMPLES);
 	for(int ia=0;ia<int(AO_SAMPLES);ia++)
 	{
 		float fa=float(ia);
 		float r=ha+fa*rots;
-		vec2 cc=vec2(sin(r),cos(r))*aspect*dlen*(1.0-fa*dims);
+		vec2 cc=vec2(sin(r),cos(r))*aspect*dlen*(1.0-pow(fa*dims,2.0));
 		vec3 ss=depth_to_view(cc+vv);
-		ac+=1.0-smoothstep( p1.z - slen , p1.z + slen , ss.z );
+		float d=(p1.z-ss.z)/(slen*2.0);
+		ac+=clamp(d,-2.0,2.0);//*smoothstep(-3.0,-1.0,-abs(d)) ;// 1.0-smoothstep( p1.z - slen , p1.z + slen , ss.z );
 	}
-	return (ac/float(AO_SAMPLES));
+	return smoothstep(-1.0,1.0,ac/dc);
 
 }
 
@@ -402,7 +408,7 @@ void main(void)
 #endif
 	
 	FragColor=vec4( vec3(0.5)+(nrm.xyz*0.5) , t*s );
-	
+
 }
 
 #endif
@@ -464,8 +470,7 @@ void main(void)
 //	FragColor=RGBS(vec4( (m.rgb + pow( m.rgb , vec3(4.0) ) ) * (4.0*m.a-1.0) , 1.0 ));
 
 	vec3 c = HRGB(texture(tex0, v_texcoord).rgba) ;
-	c=max(vec3(0.0),c-vec3(1.0));
-	c=(c+pow(c,vec3(4.0)));
+	c=pow(c/(c+vec3(1.0)),vec3(2.0));
 	FragColor=vec4(RGBS(c),1.0);
 }
 
