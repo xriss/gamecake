@@ -470,7 +470,7 @@ void main(void)
 //	FragColor=RGBS(vec4( (m.rgb + pow( m.rgb , vec3(4.0) ) ) * (4.0*m.a-1.0) , 1.0 ));
 
 	vec3 c = HRGB(texture(tex0, v_texcoord).rgba) ;
-	c=pow(c/(c+vec3(1.0)),vec3(2.0));
+	c=pow(c/vec3(2.0),vec3(2.0));
 	FragColor=vec4(RGBS(c),1.0);
 }
 
