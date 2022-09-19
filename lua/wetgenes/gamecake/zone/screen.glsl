@@ -439,6 +439,7 @@ uniform vec4 color;
 
 uniform sampler2D tex0;
 uniform sampler2D tex1;
+uniform sampler2D tex2;
 
 uniform mat4 inverse_projection;
 
@@ -471,7 +472,12 @@ void main(void)
 
 	vec3 c = HRGB(texture(tex0, v_texcoord).rgba) ;
 	c=pow(c/vec3(2.0),vec3(2.0));
+#ifdef BLOOM_FEEDBACK
+	vec3 o = SRGB(texture(tex2, v_texcoord).rgb) ; // last frame
+	FragColor=vec4(RGBS(mix(o,c,float(BLOOM_FEEDBACK))),1.0);
+#else
 	FragColor=vec4(RGBS(c),1.0);
+#endif
 }
 
 #endif

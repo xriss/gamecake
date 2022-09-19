@@ -78,6 +78,7 @@ M.bake=function(oven,screen)
 		},
 		
 		zone_screen_build_bloom_pick={
+			BLOOM_FEEDBACK=1/4,
 		},
 		
 		zone_screen_build_blur={
@@ -144,6 +145,7 @@ M.bake=function(oven,screen)
 		})
 
 		screen.fbo_bloom=framebuffers.create(0,0,0,{no_uptwopow=true , texture_format={gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE} })
+		screen.fbo_blur =framebuffers.create(0,0,0,{no_uptwopow=true , texture_format={gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE} })
 
 		screen.view_bloom=oven.cake.views.create({
 			mode="fbo",
@@ -152,9 +154,6 @@ M.bake=function(oven,screen)
 			fov=1/2,
 			cx=0.5,cy=0.5,cz=0.5,
 		})
-
-		screen.fbo_blur=framebuffers.create(0,0,0,{no_uptwopow=true , texture_format={gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE} })
-
 
 	end
 	
@@ -180,6 +179,7 @@ M.bake=function(oven,screen)
 			if bh>h then bh=h end
 
 			screen.fbo_bloom:resize( bw , bh , 0 )
+			screen.fbo_blur:resize( bw , bh , 0 )
 
 		end
 		
@@ -373,6 +373,9 @@ M.bake=function(oven,screen)
 
 	screen.build_bloom=function(scene)
 
+-- feedback last bloom into new bloom	
+		screen.fbo_blur , screen.fbo_bloom = screen.fbo_bloom , screen.fbo_blur
+
 		local t={
 			-1,	 1,	0,	0,	1,
 			-1,	-1,	0,	0,	0,
@@ -402,9 +405,12 @@ M.bake=function(oven,screen)
 				gl.Uniform1i( p:uniform("tex1"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
-		end)
+				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+				screen.fbo_blur:bind_texture()
+				gl.Uniform1i( p:uniform("tex2"), gl.NEXT_UNIFORM_TEXTURE )
+				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
-		screen.fbo_blur:resize( screen.fbo_bloom.w , screen.fbo_bloom.h , 0 )
+		end)
 
 		screen.fbo_blur:bind_frame()
 --		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=0&BLUR=22",function(p)
