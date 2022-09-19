@@ -78,11 +78,11 @@ M.bake=function(oven,screen)
 		},
 		
 		zone_screen_build_bloom_pick={
-			BLOOM_FEEDBACK=1/4,
+			BLOOM_FEEDBACK=4,
 		},
 		
 		zone_screen_build_blur={
-			BLUR=22,
+			BLUR=16,
 		},
 	}
 	

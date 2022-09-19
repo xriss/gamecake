@@ -474,7 +474,7 @@ void main(void)
 	c=pow(c/vec3(2.0),vec3(2.0));
 #ifdef BLOOM_FEEDBACK
 	vec3 o = SRGB(texture(tex2, v_texcoord).rgb) ; // last frame
-	FragColor=vec4(RGBS(mix(o,c,float(BLOOM_FEEDBACK))),1.0);
+	FragColor=vec4(RGBS(mix(o,c,1.0/float(BLOOM_FEEDBACK))),1.0);
 #else
 	FragColor=vec4(RGBS(c),1.0);
 #endif
