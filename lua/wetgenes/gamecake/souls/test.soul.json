@@ -1,93 +1,5 @@
 {
-	"tweaks":{
-	},
-	"parts":{
-		"hair":[
-			{
-				"name":"hair_base",
-				"flags":3
-			}
-		],
-		"eye":[
-			{
-				"name":"eye_base",
-				"flags":3
-			}
-		],
-		"item":{
-		},
-		"foot":[
-			{
-				"name":"foot_bare",
-				"flags":3
-			}
-		],
-		"ear":[
-			{
-				"name":"ear_base",
-				"flags":3
-			}
-		],
-		"eyebrow":[
-			{
-				"name":"eyebrow_base",
-				"flags":3
-			}
-		],
-		"eyeball":[
-			{
-				"name":"eyeball_base",
-				"flags":3
-			}
-		],
-		"head":[
-			{
-				"name":"head_base",
-				"flags":3
-			}
-		],
-		"tail":{
-		},
-		"hand":[
-			{
-				"name":"hand_base",
-				"flags":3
-			}
-		],
-		"nose":[
-			{
-				"name":"nose_base",
-				"flags":3
-			}
-		],
-		"eyewear":{
-		},
-		"mouth":[
-			{
-				"name":"mouth_base",
-				"flags":3
-			}
-		],
-		"body":[
-			{
-				"name":"body_belly",
-				"flags":3
-			}
-		],
-		"hat":{
-		},
-		"beard":{
-		}
-	},
-	"pose":"breath",
 	"materials":{
-		"white":{
-			"ramp":[
-				12303291,
-				2160905420,
-				4292730333
-			]
-		},
 		"eye":{
 			"ramp":[
 				12303291,
@@ -95,25 +7,11 @@
 				4292730333
 			]
 		},
-		"foot2":{
+		"grey":{
 			"ramp":[
-				12268339,
-				2160870468,
-				4292695381
-			]
-		},
-		"hand1":{
-			"ramp":[
-				12285815,
-				2160887944,
-				4292712857
-			]
-		},
-		"hand2":{
-			"ramp":[
-				7811891,
-				2156414020,
-				4288238933
+				7829367,
+				2156431496,
+				4288256409
 			]
 		},
 		"lips":{
@@ -121,6 +19,20 @@
 				13399927,
 				2162002056,
 				4293826969
+			]
+		},
+		"iris":{
+			"ramp":[
+				3355511,
+				2151957640,
+				4283782553
+			]
+		},
+		"head2":{
+			"ramp":[
+				3390259,
+				2151992388,
+				4283817301
 			]
 		},
 		"body1":{
@@ -144,39 +56,25 @@
 				4292712789
 			]
 		},
-		"body2":{
+		"foot2":{
 			"ramp":[
-				3355579,
-				2151957708,
-				4283782621
+				12268339,
+				2160870468,
+				4292695381
 			]
 		},
-		"skin":{
+		"hand1":{
 			"ramp":[
-				14518391,
-				2163120520,
-				4294945433
+				12285815,
+				2160887944,
+				4292712857
 			]
 		},
-		"head2":{
+		"hand2":{
 			"ramp":[
-				3390259,
-				2151992388,
-				4283817301
-			]
-		},
-		"grey":{
-			"ramp":[
-				7829367,
-				2156431496,
-				4288256409
-			]
-		},
-		"iris":{
-			"ramp":[
-				3355511,
-				2151957640,
-				4283782553
+				7811891,
+				2156414020,
+				4288238933
 			]
 		},
 		"black":{
@@ -186,6 +84,27 @@
 				4278190080
 			]
 		},
+		"white":{
+			"ramp":[
+				12303291,
+				2160905420,
+				4292730333
+			]
+		},
+		"skin":{
+			"ramp":[
+				11886671,
+				2163120520,
+				4294955713
+			]
+		},
+		"body2":{
+			"ramp":[
+				3355579,
+				2151957708,
+				4283782621
+			]
+		},
 		"hair":{
 			"ramp":[
 				7811891,
@@ -193,5 +112,86 @@
 				4288238933
 			]
 		}
+	},
+	"tweaks":{
+	},
+	"pose":"breath",
+	"parts":{
+		"eyebrow":[
+			{
+				"name":"eyebrow_base",
+				"flags":3
+			}
+		],
+		"head":[
+			{
+				"name":"head_base",
+				"flags":3
+			}
+		],
+		"hand":[
+			{
+				"name":"hand_base",
+				"flags":3
+			}
+		],
+		"tail":{
+		},
+		"foot":[
+			{
+				"name":"foot_bare",
+				"flags":3
+			}
+		],
+		"body":[
+			{
+				"name":"body_belly",
+				"flags":3
+			}
+		],
+		"mouth":[
+			{
+				"name":"mouth_base",
+				"flags":3
+			}
+		],
+		"ear":[
+			{
+				"name":"ear_base",
+				"flags":3
+			}
+		],
+		"nose":[
+			{
+				"name":"nose_base",
+				"flags":3
+			}
+		],
+		"hat":{
+		},
+		"eyewear":{
+		},
+		"beard":{
+		},
+		"eye":[
+			{
+				"name":"eye_base",
+				"flags":3
+			}
+		],
+		"item":{
+		},
+		"eyeball":[
+			{
+				"name":"eyeball_base",
+				"flags":3
+			}
+		],
+		"hair":[
+			{
+				"name":"hair_base",
+				"flags":3
+			}
+		]
 	}
 }
