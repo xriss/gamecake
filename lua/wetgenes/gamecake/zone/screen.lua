@@ -343,6 +343,33 @@ M.bake=function(oven,screen)
 
 --[[
 		screen.fbo_blur:resize( screen.fbo_occlusion.w , screen.fbo_occlusion.h , 0 )
+		screen.fbo_blur:bind_frame()
+		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=0&BLUR=5",function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{BLUR_AXIS=0}),function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_dark",{DARK=1}),function(p)
+
+				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+				screen.fbo_occlusion:bind_texture()
+				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
+				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+
+		end)
+
+		screen.fbo_occlusion:bind_frame()
+		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=1&BLUR=5",function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{BLUR_AXIS=1}),function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_dark",{DARK=2}),function(p)
+
+				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+				screen.fbo_blur:bind_texture()
+				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
+				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+
+		end)
+]]
+
+--[[
+		screen.fbo_blur:resize( screen.fbo_occlusion.w , screen.fbo_occlusion.h , 0 )
 
 		screen.fbo_blur:bind_frame()
 		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_dark",{DARK=1}),function(p)
@@ -372,6 +399,8 @@ M.bake=function(oven,screen)
 	end
 
 	screen.build_bloom=function(scene)
+
+		screen.fbo_blur:resize( screen.fbo_bloom.w , screen.fbo_bloom.h , 0 )
 
 -- feedback last bloom into new bloom	
 		screen.fbo_blur , screen.fbo_bloom = screen.fbo_bloom , screen.fbo_blur
@@ -406,12 +435,13 @@ M.bake=function(oven,screen)
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
-				screen.fbo_blur:bind_texture()
+				screen.fbo_blur:bind_texture() -- the old bloom
 				gl.Uniform1i( p:uniform("tex2"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
 		end)
 
+--		screen.fbo_blur:resize( screen.fbo_bloom.w , screen.fbo_bloom.h , 0 )
 		screen.fbo_blur:bind_frame()
 --		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=0&BLUR=22",function(p)
 		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{BLUR_AXIS=0}),function(p)
