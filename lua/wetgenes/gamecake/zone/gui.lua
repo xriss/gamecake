@@ -37,7 +37,7 @@ gui.theme=function(def)
 	gui.plan_windows(gui.master)
 end
 
-gui.setup=function()
+gui.setup=function(...)
 	log("setup",M.modname)
 
 	gui.loads()
@@ -52,6 +52,8 @@ gui.setup=function()
 	oven.rebake("wetgenes.gamecake.zone.gui_user").setup(gui)
 	oven.rebake("wetgenes.gamecake.zone.gui_spew").setup(gui)
 	oven.rebake("wetgenes.gamecake.zone.gui_screen").setup(gui)
+	
+	for i,v in ipairs({...}) do v.setup(gui) end -- user windows
 
 --	gui.data_setup()
 
