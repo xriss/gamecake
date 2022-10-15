@@ -236,16 +236,17 @@ B.camera.update=function(camera)
 
 		
 		local frac=1
-		
+	
 		for yp=-3,3,3 do
 			local test=physics.world:ray_test({
 				ray={
 					camera.pos+V3(0,0,0),
 					camera.pos+(d*camera.dolly)+V3(0,0+yp,0),
-					cmask=0x00ff,
 				},
+				cmask=0x00ff,
 			})
-			if test.hit then			
+			if test.hit then
+--				test.hit.body=physics.world.bodies[test.hit.body_ptr]
 				if test.hit.fraction < frac then
 					frac=test.hit.fraction
 				end
