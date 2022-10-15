@@ -9,4 +9,4 @@ mv bullet3/LICENSE.txt .
 
 rm -rf bullet3
 
-echo " also please make sure btDiscreteDynamicsWorld.cpp has the H4X we need... "
+echo " also please make sure src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.cpp has the H4X we need... "
