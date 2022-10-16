@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 554,
+   "count": 556,
    "name": "lua"
   },
   {
@@ -154,7 +154,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 548,
+   "count": 550,
    "name": "lua.wetgenes"
   },
   {
@@ -574,7 +574,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 150,
+   "count": 151,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -1082,11 +1082,11 @@
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 23,
+   "count": 24,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "count": 20,
+   "count": 21,
    "name": "lua.wetgenes.gamecake.zone.scene"
   },
   {
@@ -1146,12 +1146,16 @@
    "name": "lua.wetgenes.gamecake.zone.scene.status"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.wetgenes.gamecake.zone.scene.systems"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.systems.cocall"
   },
   {
    "count": 1,
@@ -2162,7 +2166,7 @@
    "name": "lua.wetgenes.tardis.v4.to_v3"
   },
   {
-   "count": 22,
+   "count": 23,
    "name": "lua.wetgenes.tasks"
   },
   {
@@ -2188,6 +2192,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.client_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.cocall"
   },
   {
    "count": 1,
@@ -2412,12 +2420,12 @@
  "_list": [
   {
    "body": "",
-   "count": 23,
+   "count": 24,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
    "body": "<pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)\n</code></pre>\n<p>Manage a simple structure to help group, update and draw discrete game objects.</p>\n<p>This module contains only one function which can be used to create a scene\ninstance and the rest of this documentation concerns the return from this\ncreate function, not the module</p>\n<pre><code>scene = zone_scene.create()\nscene = zone_scene.create( { sortby={&quot;first&quot;,&quot;second&quot;,...} } )\n</code></pre>\n<p>Create and return a scene object. A base object can be passed in and will\nbe filled in and returned. This can used to supply a sortby table to help\ncontrol the order of updates of different castes.</p>\n<p>If passed in sortby is a table of [caste_name]=weight values to help control\nthe order of updates by caste and make it consistent. For instance you might\nfind it useful to force monsters to update before the player.</p>\n",
-   "count": 20,
+   "count": 21,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 6,
    "name": "lua.wetgenes.gamecake.zone.scene",
@@ -2427,7 +2435,7 @@
    "body": "<pre><code>scene.add(it,caste,boot)\nscene.add(it,caste)\nscene.add(it)\n</code></pre>\n<p>Add a new item of caste or it.caste to the list of things to update.</p>\n<p>The optional boot table contains initialisation/reset values and will \nbe remembered in item.boot. If boot.id is given then we will remember \nthis item with a call to scene.set(id,it)</p>\n<p>The actual act of initalising the item from the boot table is left to \ncustom code.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 262,
+   "line": 293,
    "name": "lua.wetgenes.gamecake.zone.scene.add",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2435,7 +2443,7 @@
    "body": "<pre><code>scene.call(fname,...)\n</code></pre>\n<p>If fname is a string then that method will be invoked for every item where it\nexists like so.</p>\n<pre><code>if it[fname] then it[fname](it,...) end\n</code></pre>\n<p>if fname is a function then it will result in every item geting called with\nthat function like so.</p>\n<pre><code>fname(it,...)\n</code></pre>\n<p>The calls are always made backwards through the table so that an item can\nchoose to delete itself.</p>\n<p>Finally we return the number of calls we made so you can keep track of\ncurrently active items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 323,
+   "line": 354,
    "name": "lua.wetgenes.gamecake.zone.scene.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2443,7 +2451,7 @@
    "body": "<pre><code>scene.caste(caste)\n</code></pre>\n<p>Get the list of items of a given caste, eg &quot;bullets&quot; or &quot;enemies&quot;</p>\n<p>This list will be created if it does not already exist.</p>\n<p>scene.sortby is used to keep this list in order.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 235,
+   "line": 266,
    "name": "lua.wetgenes.gamecake.zone.scene.caste",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2475,7 +2483,7 @@
    "body": "<pre><code>scene.get(name)\n</code></pre>\n<p>get a value previously saved, this is an easy way to find a unique entity, eg\nthe global space but it can be used to save any values you wish not just to\nbookmark unique items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 371,
+   "line": 402,
    "name": "lua.wetgenes.gamecake.zone.scene.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2483,7 +2491,7 @@
    "body": "<pre><code>scene.manifest(name,value)\n</code></pre>\n<p>get a value previously saved, or initalize it to the given value if it does not\nalready exist. The default value is {} as this is intended for lists.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 398,
+   "line": 429,
    "name": "lua.wetgenes.gamecake.zone.scene.manifest",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2499,7 +2507,7 @@
    "body": "<pre><code>scene.remove(it)\n</code></pre>\n<p>Remove this item, this is slightly expensive as we need to search in a table\nto find it before calling table.remove which then has to shuffle the table to\nfill in the hole.</p>\n<p>With very dynamic items it can be faster to allocate all the items you need at\nthe start and then flag them on/off rather than add and remove dynamically.</p>\n<p>It may make more sense to create a system which handles its own list of\nobjects, such as particles. Then only use the items to keep track of a\nmaster particles item that contains many particles and can add/remove/recycle\nas it sees fit.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 294,
+   "line": 325,
    "name": "lua.wetgenes.gamecake.zone.scene.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2507,7 +2515,7 @@
    "body": "<pre><code>scene.reset()\n</code></pre>\n<p>Empty the list of items to update and draw, this does not reset the systems\ntable that should be modified with the insert and remove functions.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 219,
+   "line": 250,
    "name": "lua.wetgenes.gamecake.zone.scene.reset",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2515,7 +2523,7 @@
    "body": "<pre><code>scene.set(name,value)\n</code></pre>\n<p>save a value by a unique name</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 385,
+   "line": 416,
    "name": "lua.wetgenes.gamecake.zone.scene.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2523,7 +2531,7 @@
    "body": "<pre><code>scene.sortby_update()\n</code></pre>\n<p>A function that takes the array part of scene.sortby and reverses the\nkey=value so a simple order list can be provided without any explicit weights.\nThe first caste name in the array gets a weight of 1, second 2 and so on.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 204,
+   "line": 235,
    "name": "lua.wetgenes.gamecake.zone.scene.sortby_update",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2531,13 +2539,13 @@
    "body": "<pre><code>print( scene.status() )\n</code></pre>\n<p>Return a debug string giving details about the system order and current number\nof items of each caste.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 413,
+   "line": 444,
    "name": "lua.wetgenes.gamecake.zone.scene.status",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
    "body": "<pre><code>scene.systems={name=system,[1]=system}\n</code></pre>\n<p>A sorted table and lookup by caste name of each system. Table is sorted so it\nwill be traversed backwards, backwards traversal allows the current item to\ndelete itself.</p>\n",
-   "count": 4,
+   "count": 5,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 32,
    "name": "lua.wetgenes.gamecake.zone.scene.systems",
@@ -2549,6 +2557,14 @@
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 176,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>scene.systems.cocall(fname,...)\n</code></pre>\n<p>For every system call the function called fname inside a coroutine like \nso.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 200,
+   "name": "lua.wetgenes.gamecake.zone.scene.systems.cocall",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {

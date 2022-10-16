@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 554,
+   "count": 556,
    "name": "lua"
   },
   {
@@ -154,7 +154,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 548,
+   "count": 550,
    "name": "lua.wetgenes"
   },
   {
@@ -574,7 +574,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 150,
+   "count": 151,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -1082,11 +1082,11 @@
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 23,
+   "count": 24,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "count": 20,
+   "count": 21,
    "name": "lua.wetgenes.gamecake.zone.scene"
   },
   {
@@ -1146,12 +1146,16 @@
    "name": "lua.wetgenes.gamecake.zone.scene.status"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.wetgenes.gamecake.zone.scene.systems"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.systems.cocall"
   },
   {
    "count": 1,
@@ -2162,7 +2166,7 @@
    "name": "lua.wetgenes.tardis.v4.to_v3"
   },
   {
-   "count": 22,
+   "count": 23,
    "name": "lua.wetgenes.tasks"
   },
   {
@@ -2188,6 +2192,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.client_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.cocall"
   },
   {
    "count": 1,
@@ -2412,7 +2420,7 @@
  "_list": [
   {
    "body": "",
-   "count": 554,
+   "count": 556,
    "name": "lua"
   },
   {
@@ -2457,7 +2465,7 @@
   },
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 548,
+   "count": 550,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -3291,7 +3299,7 @@
   },
   {
    "body": "",
-   "count": 150,
+   "count": 151,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -4286,12 +4294,12 @@
   },
   {
    "body": "",
-   "count": 23,
+   "count": 24,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
    "body": "<pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)\n</code></pre>\n<p>Manage a simple structure to help group, update and draw discrete game objects.</p>\n<p>This module contains only one function which can be used to create a scene\ninstance and the rest of this documentation concerns the return from this\ncreate function, not the module</p>\n<pre><code>scene = zone_scene.create()\nscene = zone_scene.create( { sortby={&quot;first&quot;,&quot;second&quot;,...} } )\n</code></pre>\n<p>Create and return a scene object. A base object can be passed in and will\nbe filled in and returned. This can used to supply a sortby table to help\ncontrol the order of updates of different castes.</p>\n<p>If passed in sortby is a table of [caste_name]=weight values to help control\nthe order of updates by caste and make it consistent. For instance you might\nfind it useful to force monsters to update before the player.</p>\n",
-   "count": 20,
+   "count": 21,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 6,
    "name": "lua.wetgenes.gamecake.zone.scene",
@@ -4301,7 +4309,7 @@
    "body": "<pre><code>scene.add(it,caste,boot)\nscene.add(it,caste)\nscene.add(it)\n</code></pre>\n<p>Add a new item of caste or it.caste to the list of things to update.</p>\n<p>The optional boot table contains initialisation/reset values and will \nbe remembered in item.boot. If boot.id is given then we will remember \nthis item with a call to scene.set(id,it)</p>\n<p>The actual act of initalising the item from the boot table is left to \ncustom code.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 262,
+   "line": 293,
    "name": "lua.wetgenes.gamecake.zone.scene.add",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4309,7 +4317,7 @@
    "body": "<pre><code>scene.call(fname,...)\n</code></pre>\n<p>If fname is a string then that method will be invoked for every item where it\nexists like so.</p>\n<pre><code>if it[fname] then it[fname](it,...) end\n</code></pre>\n<p>if fname is a function then it will result in every item geting called with\nthat function like so.</p>\n<pre><code>fname(it,...)\n</code></pre>\n<p>The calls are always made backwards through the table so that an item can\nchoose to delete itself.</p>\n<p>Finally we return the number of calls we made so you can keep track of\ncurrently active items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 323,
+   "line": 354,
    "name": "lua.wetgenes.gamecake.zone.scene.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4317,7 +4325,7 @@
    "body": "<pre><code>scene.caste(caste)\n</code></pre>\n<p>Get the list of items of a given caste, eg &quot;bullets&quot; or &quot;enemies&quot;</p>\n<p>This list will be created if it does not already exist.</p>\n<p>scene.sortby is used to keep this list in order.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 235,
+   "line": 266,
    "name": "lua.wetgenes.gamecake.zone.scene.caste",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4349,7 +4357,7 @@
    "body": "<pre><code>scene.get(name)\n</code></pre>\n<p>get a value previously saved, this is an easy way to find a unique entity, eg\nthe global space but it can be used to save any values you wish not just to\nbookmark unique items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 371,
+   "line": 402,
    "name": "lua.wetgenes.gamecake.zone.scene.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4357,7 +4365,7 @@
    "body": "<pre><code>scene.manifest(name,value)\n</code></pre>\n<p>get a value previously saved, or initalize it to the given value if it does not\nalready exist. The default value is {} as this is intended for lists.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 398,
+   "line": 429,
    "name": "lua.wetgenes.gamecake.zone.scene.manifest",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4373,7 +4381,7 @@
    "body": "<pre><code>scene.remove(it)\n</code></pre>\n<p>Remove this item, this is slightly expensive as we need to search in a table\nto find it before calling table.remove which then has to shuffle the table to\nfill in the hole.</p>\n<p>With very dynamic items it can be faster to allocate all the items you need at\nthe start and then flag them on/off rather than add and remove dynamically.</p>\n<p>It may make more sense to create a system which handles its own list of\nobjects, such as particles. Then only use the items to keep track of a\nmaster particles item that contains many particles and can add/remove/recycle\nas it sees fit.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 294,
+   "line": 325,
    "name": "lua.wetgenes.gamecake.zone.scene.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4381,7 +4389,7 @@
    "body": "<pre><code>scene.reset()\n</code></pre>\n<p>Empty the list of items to update and draw, this does not reset the systems\ntable that should be modified with the insert and remove functions.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 219,
+   "line": 250,
    "name": "lua.wetgenes.gamecake.zone.scene.reset",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4389,7 +4397,7 @@
    "body": "<pre><code>scene.set(name,value)\n</code></pre>\n<p>save a value by a unique name</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 385,
+   "line": 416,
    "name": "lua.wetgenes.gamecake.zone.scene.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4397,7 +4405,7 @@
    "body": "<pre><code>scene.sortby_update()\n</code></pre>\n<p>A function that takes the array part of scene.sortby and reverses the\nkey=value so a simple order list can be provided without any explicit weights.\nThe first caste name in the array gets a weight of 1, second 2 and so on.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 204,
+   "line": 235,
    "name": "lua.wetgenes.gamecake.zone.scene.sortby_update",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4405,13 +4413,13 @@
    "body": "<pre><code>print( scene.status() )\n</code></pre>\n<p>Return a debug string giving details about the system order and current number\nof items of each caste.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 413,
+   "line": 444,
    "name": "lua.wetgenes.gamecake.zone.scene.status",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
    "body": "<pre><code>scene.systems={name=system,[1]=system}\n</code></pre>\n<p>A sorted table and lookup by caste name of each system. Table is sorted so it\nwill be traversed backwards, backwards traversal allows the current item to\ndelete itself.</p>\n",
-   "count": 4,
+   "count": 5,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 32,
    "name": "lua.wetgenes.gamecake.zone.scene.systems",
@@ -4423,6 +4431,14 @@
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 176,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>scene.systems.cocall(fname,...)\n</code></pre>\n<p>For every system call the function called fname inside a coroutine like \nso.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 200,
+   "name": "lua.wetgenes.gamecake.zone.scene.systems.cocall",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
@@ -6434,7 +6450,7 @@
   },
   {
    "body": "<pre><code>local tasks=require(&quot;wetgenes.tasks&quot;).create()\n</code></pre>\n<p>Manage tasks that should be performed on seperate threads so as not to block the main thread.</p>\n<p>Manage coroutines that can then easily call into these threads by yeilding</p>\n",
-   "count": 22,
+   "count": 23,
    "file": "../lua/wetgenes/tasks.lua",
    "line": 9,
    "name": "lua.wetgenes.tasks",
@@ -6444,7 +6460,7 @@
    "body": "<pre><code>tasks:add_id(it)\n</code></pre>\n<p>Internal function to manage creation of all objects with unique ids.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 38,
+   "line": 80,
    "name": "lua.wetgenes.tasks.add_id",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6452,7 +6468,7 @@
    "body": "<pre><code>local memo=tasks:add_memo({})\n</code></pre>\n<p>Create a memo with a unique auto generated numerical id for linda \ncomunication.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 71,
+   "line": 113,
    "name": "lua.wetgenes.tasks.add_memo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6460,7 +6476,7 @@
    "body": "<pre><code>local thread=tasks:add_task({\n    id=&quot;test&quot;,\n    code=function(linda,task_id,task_idx,task)\n        while true do\n            local _,memo= linda:receive( 0 , task_id )\n            if memo then\n                ...\n            end\n        end\n    end,\n})\n</code></pre>\n<p>Create a task with various preset values similar to a thread except \ninside a coroutine on the calling thread. As this function is inside a \ncoroutine you must yield regulary this yield will then continue on the \nnext update. Probably called once ever 60th of a second.</p>\n<pre><code>id\n</code></pre>\n<p>A unique id string to be used by lindas when sending messages into this \ntask. The function is expected to sit in an infinite loop testing \nthis linda socket and then yielding if there is nothing to do.</p>\n<pre><code>count\n</code></pre>\n<p>The number of tasks to create, they will all use the same instanced \ncode function so should be interchangable and it should not matter \nwhich task we are actually running code on. If you expect the task to \nmaintain some state between memos, then this must be 1 .</p>\n<pre><code>code\n</code></pre>\n<p>A lua function to run inside a coroutine, this function will recieve \ntasks.linda (which is a colinda) and the task.id for comunication and \nan index so we know which of the count tasks we are (mostly for \ndebugging) and finally the task table itself which make sense to share \nwith coroutines.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 162,
+   "line": 204,
    "name": "lua.wetgenes.tasks.add_task",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6468,7 +6484,7 @@
    "body": "<pre><code>local thread=tasks:add_thread({\n    id=&quot;test&quot;,\n    count=1,\n    code=function(linda,task_id,task_idx)\n        while true do\n            local _,memo= linda:receive( nil , task_id )\n            if memo then\n                ...\n            end\n        end\n    end,\n})\n</code></pre>\n<p>Create a thread with various preset values:</p>\n<pre><code>id\n</code></pre>\n<p>A unique id string to be used by lindas when sending messages into this \ntask. The function is expected to sit in an infinite loop waiting on \nthis linda socket.</p>\n<pre><code>count\n</code></pre>\n<p>The number of threads to create, they will all use the same instanced \ncode function so should be interchangable and it should not matter \nwhich thread we are actually running code on. If you expect the task to \nmaintain some state between memos, then this must be 1 .</p>\n<pre><code>code\n</code></pre>\n<p>A lua function to run inside each thread, this function will recieve \ntasks.linda and the task.id for comunication and an index so we know \nwhich of the count threads we are (mostly for debugging)</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 99,
+   "line": 141,
    "name": "lua.wetgenes.tasks.add_thread",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6476,7 +6492,7 @@
    "body": "<p>Send and/or recieve a (web)socket client memo result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 962,
+   "line": 1004,
    "name": "lua.wetgenes.tasks.client",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6484,15 +6500,23 @@
    "body": "<p>A basic function to handle (web)socket client connection.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 801,
+   "line": 843,
    "name": "lua.wetgenes.tasks.client_code",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
+  },
+  {
+   "body": "<pre><code>require(&quot;wetgenes.tasks&quot;).cocall(f1,f2,...)\nrequire(&quot;wetgenes.tasks&quot;).cocall({f1,f2,...})\n</code></pre>\n<p>Manage simple coroutines that can poll each others results and wait on \nthem.</p>\n<p>Turn a table of &quot;setup&quot; functions into a table of coroutines that can \nyield waiting for other coroutines to complete and run them all.</p>\n<p>You still need to be carefull with race conditions but it allows you to \nwrite code in such away that setup order is no longer important. Setup \nfunctions can coroutine.yield waiting for another setup to finish first.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tasks.lua",
+   "line": 32,
+   "name": "lua.wetgenes.tasks.cocall",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
   {
    "body": "<p>Create a tasks group to contain all associated threads and coroutines \nalong with their comunications.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 466,
+   "line": 508,
    "name": "lua.wetgenes.tasks.create",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6500,7 +6524,7 @@
    "body": "<pre><code>local colinda=require(&quot;wetgenes.tasks&quot;).colinda(linda)\n</code></pre>\n<p>Create a colinda which is a wrapper around a linda providing \nreplacement functions to be used inside a coroutine so it will yield \n(and assume it will be resumed) rather than wait.</p>\n<p>This should be a dropin replacement for a linda and will fallback to \nnormal linda use if not in a coroutine.</p>\n<p>If linda is nil then we will create one, the linda used in this colinda \ncan be found in colinda.linda if you need raw access.</p>\n<p>What we are doing here is wrapping the send/receive functions so that</p>\n<pre><code>colinda:send(time,...)\ncolinda:recieve(time,...)\n</code></pre>\n<p>will be replaced with functions that call</p>\n<pre><code>linda:send(0,...)\nlinda:recieve(0,...)\n</code></pre>\n<p>and use coroutines.yield to mimic the original timeout value without \nblocking.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 361,
+   "line": 403,
    "name": "lua.wetgenes.tasks.create_colinda",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6508,7 +6532,7 @@
    "body": "<pre><code>tasks:del_id(it)\n</code></pre>\n<p>Internal function to manage deletion of all objects with unique ids.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 53,
+   "line": 95,
    "name": "lua.wetgenes.tasks.del_id",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6516,7 +6540,7 @@
    "body": "<pre><code>tasks:del_memo(memo)\n</code></pre>\n<p>Delete a memo.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 87,
+   "line": 129,
    "name": "lua.wetgenes.tasks.del_memo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6524,7 +6548,7 @@
    "body": "<pre><code>tasks:del_thread(task)\n</code></pre>\n<p>Delete a task.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 256,
+   "line": 298,
    "name": "lua.wetgenes.tasks.del_task",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6532,7 +6556,7 @@
    "body": "<pre><code>tasks:del_thread(thread)\n</code></pre>\n<p>Delete a thread.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 150,
+   "line": 192,
    "name": "lua.wetgenes.tasks.del_thread",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6540,7 +6564,7 @@
    "body": "<pre><code>tasks:delete()\n</code></pre>\n<p>Force stop all threads and delete all data.</p>\n<p>Failure to call this will allow any created threads to continue to run \nuntil program termination.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 346,
+   "line": 388,
    "name": "lua.wetgenes.tasks.delete",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6548,7 +6572,7 @@
    "body": "<p>Create send and return a http memo result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 645,
+   "line": 687,
    "name": "lua.wetgenes.tasks.http",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6556,7 +6580,7 @@
    "body": "<p>A basic function to handle http memos.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 488,
+   "line": 530,
    "name": "lua.wetgenes.tasks.http_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6564,7 +6588,7 @@
    "body": "<pre><code>result = tasks:receive(memo,timeout)\nresult = tasks:receive(memo)\n</code></pre>\n<p>Recieve a memo with optional timeout.</p>\n<p>This is intended to be run from within a coroutine task on the main \nthread. It will work outside of a task but that will block the main \nthread waiting for a response.</p>\n<p>The memo will be deleted after being recieved (ie we will have called \ndel_memo) so as to free up its comunication id for another memo.</p>\n<p>if the memo has not yet been sent or even been through add_memo (we \ncheck state for &quot;setup&quot; or nil) then it will be autosent with the same \ntimeout before we try and receive it.</p>\n<p>After calling check if memo.error is nil then you will find the result in \nmemo.result</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 308,
+   "line": 350,
    "name": "lua.wetgenes.tasks.receive",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6572,7 +6596,7 @@
    "body": "<pre><code>tasks:run_task(task)\n</code></pre>\n<p>Resume all the coroutines in this task.</p>\n<p>Any errors will be logged with a backtrace.</p>\n<p>If the tasks have finished running (returned or crashed) then we will \ntasks:del_task(task) this task. Check task.id which will be nil after \nthis task has finished.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 221,
+   "line": 263,
    "name": "lua.wetgenes.tasks.run_task",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6580,7 +6604,7 @@
    "body": "<pre><code>memo = tasks:send(memo,timeout)\nmemo = tasks:send(memo)\n</code></pre>\n<p>Send a memo with optional timeout.</p>\n<p>This is intended to be run from within a coroutine task on the main \nthread. It will work outside of a task but that may block the main \nthread waiting to send.</p>\n<p>if memo.id is not set then we will auto call add_memo to create it.</p>\n<p>Check memo.error for posible error, this will be nil if everything went \nOK.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 281,
+   "line": 323,
    "name": "lua.wetgenes.tasks.send",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6588,7 +6612,7 @@
    "body": "<p>Create send and return a sqlite memo result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 783,
+   "line": 825,
    "name": "lua.wetgenes.tasks.sqlite",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6596,7 +6620,7 @@
    "body": "<p>A basic function to handle sqlite memos.</p>\n<p>As we are opening an sqlite database here it wont help much to have \nmore than one thread per database as they will just fight over file \naccess.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 661,
+   "line": 703,
    "name": "lua.wetgenes.tasks.sqlite_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6604,7 +6628,7 @@
    "body": "<pre><code>tasks:update()\n</code></pre>\n<p>Resume all current coroutines and wait for them to yield.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 268,
+   "line": 310,
    "name": "lua.wetgenes.tasks.update",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },

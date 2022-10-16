@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 554,
+   "count": 556,
    "name": "lua"
   },
   {
@@ -154,7 +154,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 548,
+   "count": 550,
    "name": "lua.wetgenes"
   },
   {
@@ -574,7 +574,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 150,
+   "count": 151,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -1082,11 +1082,11 @@
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 23,
+   "count": 24,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "count": 20,
+   "count": 21,
    "name": "lua.wetgenes.gamecake.zone.scene"
   },
   {
@@ -1146,12 +1146,16 @@
    "name": "lua.wetgenes.gamecake.zone.scene.status"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.wetgenes.gamecake.zone.scene.systems"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.systems.cocall"
   },
   {
    "count": 1,
@@ -2162,7 +2166,7 @@
    "name": "lua.wetgenes.tardis.v4.to_v3"
   },
   {
-   "count": 22,
+   "count": 23,
    "name": "lua.wetgenes.tasks"
   },
   {
@@ -2188,6 +2192,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.client_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.cocall"
   },
   {
    "count": 1,
@@ -2412,7 +2420,7 @@
  "_list": [
   {
    "body": "<pre><code>scene.systems={name=system,[1]=system}\n</code></pre>\n<p>A sorted table and lookup by caste name of each system. Table is sorted so it\nwill be traversed backwards, backwards traversal allows the current item to\ndelete itself.</p>\n",
-   "count": 4,
+   "count": 5,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 32,
    "name": "lua.wetgenes.gamecake.zone.scene.systems",
@@ -2424,6 +2432,14 @@
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 176,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>scene.systems.cocall(fname,...)\n</code></pre>\n<p>For every system call the function called fname inside a coroutine like \nso.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 200,
+   "name": "lua.wetgenes.gamecake.zone.scene.systems.cocall",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
