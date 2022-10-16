@@ -29,6 +29,48 @@ end
 -- module
 local M={ modname = (...) } package.loaded[M.modname] = M 
 
+--[[#lua.wetgenes.tasks.cocall
+
+	require("wetgenes.tasks").cocall(f1,f2,...)
+	require("wetgenes.tasks").cocall({f1,f2,...})
+
+Manage simple coroutines that can poll each others results and wait on 
+them.
+
+Turn a table of "setup" functions into a table of coroutines that can 
+yield waiting for other coroutines to complete and run them all.
+
+You still need to be carefull with race conditions but it allows you to 
+write code in such away that setup order is no longer important. Setup 
+functions can coroutine.yield waiting for another setup to finish first.
+
+]]
+
+M.cocall=function(...)
+	local functions={...}
+	if type(functions[1])=="table" then functions=functions[1] end -- a table of functions rather than a list
+
+	local coroutines={}
+
+	for n,f in pairs(functions) do
+		coroutines[n]=coroutine.create(f)
+	end
+
+	repeat
+		local runcount=0
+		for n,c in pairs(coroutines) do
+			if coroutine.status( c )=="suspended" then
+				runcount=runcount+1
+				local ok , err = coroutine.resume( c )
+				assert( ok , debug.traceback( c , err ) )
+			end
+		end
+	until runcount==0
+
+end
+
+
+
 M.tasks_functions={}
 M.tasks_metatable={__index=M.tasks_functions}
 

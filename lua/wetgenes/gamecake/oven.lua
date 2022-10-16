@@ -68,7 +68,7 @@ local function assert_resume(co)
 	
 	if a then return a,b end -- no error
 	
-	error( b.."\nin coroutine\n"..debug.traceback(co) ) -- error
+	error( tostring(b).."\nin coroutine\n"..debug.traceback(co) ) -- error
 end
 
 

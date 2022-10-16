@@ -197,6 +197,37 @@ an fname function to call.
 		return count -- number of systems called
 	end
 
+--[[#lua.wetgenes.gamecake.zone.scene.systems.cocall
+
+	scene.systems.cocall(fname,...)
+
+For every system call the function called fname inside a coroutine like 
+so.
+
+	system[fname](system,...)
+
+Returns the number of calls made, which will be the number of systems that had
+an fname function to call.
+
+]]
+	scene.systems.cocall=function(fname,...)
+		local functions={}
+		local count=0
+		for i=#scene.systems,1,-1 do -- call backwards so item can remove self
+			local system=scene.systems[i]
+			if system[fname] then
+				local fargs={system,...}
+				local fcall=system[fname]
+				functions[#functions+1]=function() fcall(unpack(fargs)) end
+				count=count+1
+			end
+		end
+		require("wetgenes.tasks").cocall(functions)
+		return count -- number of systems called
+	end
+
+
+
 
 	scene.sortby=scene.sortby or {} -- custom sort weights for update/draw order of each caste
 
