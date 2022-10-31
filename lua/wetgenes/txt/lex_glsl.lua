@@ -61,6 +61,7 @@ M.token.keyword=keyval{
 	"#endif",
 	"#else",
 	"#ifdef",
+	"#ifndef",
 	"#define",
 
 	"precision",
