@@ -1,7 +1,9 @@
 
 
-
-
+local tabassert=function(a,b)
+	for n,v in pairs(a) do assert(a[n]==b[n],a[n].."=="..b[n].." : "..n) end
+	for n,v in pairs(b) do assert(a[n]==b[n],a[n].."=="..b[n].." : "..n) end
+end
 
 
 module(...,package.seeall)
@@ -56,4 +58,24 @@ function test_serialize_tabs()
 	} )
 
 end
+
+
+function test_split_whitespace_quotes()
+
+--print( wetstr.dump( wetstr.split_whitespace_quotes("this is 'a test' ok") ) )
+--print( wetstr.dump( {"this"," ","is"," ","'a test'"," ","ok"} ) )
+
+tabassert( wetstr.split_whitespace_quotes("this is a test") , {"this"," ","is"," ","a"," ","test"} )
+
+tabassert( wetstr.split_whitespace_quotes("this is 'a test'") , {"this"," ","is"," ","'a test'"} )
+
+tabassert( wetstr.split_whitespace_quotes("this is 'a test' ok") , {"this"," ","is"," ","'a test'"," ","ok"} )
+
+tabassert( wetstr.split_whitespace_quotes("this is 'a \\' test' ok") , {"this"," ","is"," ","'a \\' test'"," ","ok"} )
+
+end
+
+
+
+
 

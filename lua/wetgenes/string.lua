@@ -419,6 +419,66 @@ end
 
 -----------------------------------------------------------------------------
 --
+-- split on transition to or from whitespace, include this white space in the table result
+--
+-- suport quoted strings ( " or ' ) containing whitespace and ignore backslashed quotes
+--
+-- such that a concat on the result would be a perfect reproduction of the original
+--
+-----------------------------------------------------------------------------
+wstr.split_whitespace_quotes = function(text)
+	local separator = "%s+"
+	
+	local isquote={["\""]=true,["'"]=true}
+	
+	local parts = {}  
+	local start = 1
+	
+	local split_start, split_end = text:find(separator, start)
+	
+	local quoted=nil
+	local quotestart=nil
+	
+	while split_start do
+		if not quoted and isquote[text:sub(start,start)] then -- found start quote
+			quoted=text:sub(start,start)
+			quotestart=start
+		end
+		if quoted then -- look for end quote
+			if split_start>1 then
+				if text:sub(split_start-1, split_start-1)==quoted then -- maybe end, need to count backslashes to be sure
+					local bc=0
+					for i=split_start-2,start,-1 do if text:sub(i,i)=="\\" then bc=bc+1 else break end end -- count backslashes
+					if bc%2==0 then -- not backslashed, so this is the end of the quote
+						table.insert(parts, text:sub(quotestart, split_start-1)) -- the quoted string
+						table.insert(parts, text:sub(split_start, split_end))	-- the white space
+						quoted=nil
+						quotestart=nil
+					end
+				end
+			end
+		else
+			if split_start>1 then table.insert(parts, text:sub(start, split_start-1)) end		-- the word
+			table.insert(parts, text:sub(split_start, split_end))	-- the white space
+		end
+		start = split_end + 1
+		split_start, split_end = text:find(separator, start)
+	end
+	
+	if quoted then -- no end quote
+		table.insert(parts, text:sub(quotestart) )
+	else
+		if text:sub(start)~="" then
+			table.insert(parts, text:sub(start) )
+		end
+	end
+	
+	return parts
+end
+
+
+-----------------------------------------------------------------------------
+--
 -- split a string in two on first = 
 --
 -----------------------------------------------------------------------------

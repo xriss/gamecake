@@ -8,6 +8,7 @@ local	coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- Generate textures using GLSL in a shadertoy like harness
 
 local wzips=require("wetgenes.zips")
+local wques=require("wetgenes.ques")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -37,6 +38,12 @@ texgenes.render=function(opts)
 	opts.height     = opts.height     or 256
 	opts.scale      = opts.scale      or 1
 	opts.shadername = opts.shadername or "texgenes_test"
+	opts.qs         = opts.qs         or {}
+
+	local qs={[0]=opts.shadername}
+	if string.find(opts.shadername, "?") then wques.parse(opts.shadername,qs) end -- options from string
+	for n,v in pairs(opts.qs) do qs[n]=v end -- overide options from table
+	local shadername = wques.build(qs) -- rebuild string
 
 	local fbo=framebuffers.create( opts.width*opts.scale , opts.height*opts.scale , 0 )
 	
@@ -55,12 +62,12 @@ texgenes.render=function(opts)
 	local v4=gl.apply_modelview( {fbo.w* 1,	fbo.h*-0,	0,1} )
 	local t={
 		v1[1],	v1[2],	v1[3],	0,			0, 			
-		v2[1],	v2[2],	v2[3],	0,			fbo.uvh,
-		v3[1],	v3[2],	v3[3],	fbo.uvw,	0, 			
-		v4[1],	v4[2],	v4[3],	fbo.uvw,	fbo.uvh,
+		v2[1],	v2[2],	v2[3],	0,			fbo.w,
+		v3[1],	v3[2],	v3[3],	fbo.h,		0, 			
+		v4[1],	v4[2],	v4[3],	fbo.h,		fbo.w,
 	}
 
-	oven.cake.canvas.flat.tristrip("rawuv",t,opts.shadername,function(p)
+	oven.cake.canvas.flat.tristrip("rawuv",t,shadername,function(p)
 
 		gl.Uniform3f( p:uniform("iResolution"), fbo.w,fbo.h,0 )
 		gl.Uniform1f( p:uniform("iTime"), 0 )
