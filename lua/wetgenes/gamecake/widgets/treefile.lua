@@ -76,28 +76,38 @@ end
 
 function wtreefile.refresh(treefile)
 
-	if not treefile.tree_widget.items.path then
+--	if not treefile.tree_widget.items.path then
 
 		local items={}
 
-		items.path=wpath.resolve(".")
+		items.path=wpath.resolve(treefile.data_dir:value())
 		items.mode="directory"
 		wtreefile.refresh_items(treefile,items)
 
 		treefile.tree_widget:refresh(items)
 
-	end
+--	end
 
 	treefile.tree_widget:refresh()
 end
 
 function wtreefile.class_hooks(hook,widget,dat)
+
+	if hook=="unfocus_edit" or hook=="timedelay" then
+		if widget.id=="dir" then
+			local treefile=widget
+			while treefile and treefile.parent~=treefile and treefile.class~="treefile" do treefile=treefile.parent end
+			if treefile.class=="treefile" then -- sanity
+				treefile:refresh()
+			end
+		end
+	end
+	
 	if hook=="click" and widget and widget.id=="files" then
 		local it=widget.user
 		local tree=widget ; while tree and tree.parent~=tree and tree.class~="tree" do tree=tree.parent end
-		local treefile=tree.parent
+		local treefile=tree.parent.parent
 		if treefile.class=="treefile" then -- sanity
-
 			if it.mode=="directory" then
 
 				if it[1] then
@@ -128,9 +138,19 @@ function wtreefile.setup(widget,def)
 	widget.refresh=wtreefile.refresh
 	widget.class_hooks={wtreefile.class_hooks}
 
+	local ss=widget.master.theme.grid_size
 
-	widget.tree_widget=widget:add({hx=widget.hx,hy=widget.hy,size="full",class="tree",id="files"})
+	widget.data_dir  = widget.data_dir  or wdata.new_data({class="string",str=wpath.currentdir(),master=widget.master,hooks=wtreefile.class_hooks})
+
+	widget.split_widget=widget:add({size="full",class="split",split_axis="y",split_order=1})
+
+	widget.dir_widget=widget.split_widget:add({hy=ss,class="textedit",color=0,data=widget.data_dir,clip2=true,hooks=wtreefile.class_hooks,id="dir"})
+	widget.tree_widget=widget.split_widget:add({class="tree",id="files"})
+	
 	widget.tree_widget.class_hooks={wtreefile.class_hooks}
+
+--	widget.tree_widget=widget:add({hx=widget.hx,hy=widget.hy,size="full",class="tree",id="files"})
+--	widget.tree_widget.class_hooks={wtreefile.class_hooks}
 
 	widget:refresh()
 

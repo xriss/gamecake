@@ -53,10 +53,12 @@ M.bake=function(oven,show)
 	show.mouse=V4(0,0,0,0) -- shadertoy style mouse values
 	
 	show.mode=nil
+	show.mode_height=nil
 	show.update=function()
 	
 		local mode=show.get_mode()
 		if mode~=show.mode then
+			show.mode=mode
 			if mode=="glsl" or  mode=="fun64" then
 
 				local ss=math.pow(2,gui.master.datas.get_value("run_scale")-1)
@@ -64,7 +66,13 @@ M.bake=function(oven,show)
 				gui.master.ids.runscale.sx=ss
 				gui.master.ids.runscale.sy=ss
 
-				gui.master.ids.dock2.hy=math.floor(gui.master.ids.dock2.parent.hy/2)
+				if gui.master.ids.dock2.hy > 0 then
+					show.mode_height=gui.master.ids.dock2.hy
+				end
+				if not show.mode_height or show.mode_height<ss or show.mode_height>gui.master.ids.dock2.parent.hy-ss then
+					show.mode_height = math.floor(gui.master.ids.dock2.parent.hy/2)
+				end
+				gui.master.ids.dock2.hy=show.mode_height
 				gui.master:layout()
 
 			else
@@ -72,6 +80,9 @@ M.bake=function(oven,show)
 				gui.master.ids.runscale.sx=1
 				gui.master.ids.runscale.sy=1
 
+				if gui.master.ids.dock2.hy > 0 then
+					show.mode_height=gui.master.ids.dock2.hy
+				end
 				gui.master.ids.dock2.hy=0
 				gui.master:layout()
 			
