@@ -126,8 +126,9 @@ gui.data_setup=function()
 			{str="output"},
 		}})
 
-		datas.new({id="run_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
+		datas.new({id="run_mode"  ,class="list",  hooks=gui.hooks,num=2,list={
 			{str="none"},
+			{str="auto"},
 			{str="glsl"},
 			{str="fun64"},
 		}})
@@ -139,7 +140,7 @@ gui.data_setup=function()
 			{str="autoplay"},
 		}})
 
-		datas.new({id="run_scale"  ,class="list",  hooks=gui.hooks,num=2,list={
+		datas.new({id="run_scale"  ,class="list",  hooks=gui.hooks,num=1,list={
 			{str="x1"},
 			{str="x2"},
 			{str="x4"},
@@ -303,29 +304,7 @@ function gui.hooks(act,w,dat)
 
 	if act=="value" then
 
-		if w.id=="run_mode" then -- change
-
-			if w.str=="glsl" or  w.str=="fun64" then
-
-				local ss=math.pow(2,gui.master.datas.get_value("run_scale")-1)
-				
-				gui.master.ids.runscale.sx=ss
-				gui.master.ids.runscale.sy=ss
-
-				gui.master.ids.dock2.hy=math.floor(gui.master.ids.dock2.parent.hy/2)
-				gui.master:layout()
-
-			else
-
-				gui.master.ids.runscale.sx=1
-				gui.master.ids.runscale.sy=1
-
-				gui.master.ids.dock2.hy=0
-				gui.master:layout()
-			
-			end
-
-		elseif w.id=="list_mode" then -- change
+		if w.id=="list_mode" then -- change
 
 			if w.str=="tree" then
 
