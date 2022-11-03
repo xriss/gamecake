@@ -55,6 +55,7 @@
 
 <a class="sub" href="../../docs/lua.glslang.lint_gles2"><span>/lua.glslang.lint_gles2</span></a>
 <a class="sub" href="../../docs/lua.glslang.parse_chunks"><span>/lua.glslang.parse_chunks</span></a>
+<a class="sub" href="../../docs/lua.glslang.pp"><span>/lua.glslang.pp</span></a>
 <a class="sub" href="../../docs/lua.glslang.replace_include"><span>/lua.glslang.replace_include</span></a>
 <a class="sub" href="../../docs/lua.glslang.yank_shader_versions"><span>/lua.glslang.yank_shader_versions</span></a><a class="par" href="../../docs/lua.wetgenes"><span>/lua.wetgenes</span></a>
 <a class="par" href="../../docs/lua.wetgenes.bullet"><span>/lua.wetgenes.bullet</span></a>
@@ -627,7 +628,7 @@ linking to any system dependent GL libs.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.glslang.lint_gles2">lua.glslang.lint_gles2</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/glslang.lua#L62">https://github.com/xriss/gamecake/blob/master/lua/glslang.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/glslang.lua#L79">https://github.com/xriss/gamecake/blob/master/lua/glslang.lua</a></div>
 <div><pre><code>verr,ferr = glslang.lint_gles2(vcode,fcode)
 </code></pre>
 <p>Try and compile a vertex/fragment shader pair and return any errors.</p>
@@ -640,7 +641,7 @@ gets up to but do not consider using this if speed is important.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.glslang.parse_chunks">lua.glslang.parse_chunks</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/glslang.lua#L89">https://github.com/xriss/gamecake/blob/master/lua/glslang.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/glslang.lua#L105">https://github.com/xriss/gamecake/blob/master/lua/glslang.lua</a></div>
 <div><pre><code>shaders=glslang.shader_chunks(text,filename,headers,flags)
 
     load multiple shader chunks from a single file and return a lookup
@@ -678,8 +679,18 @@ gets up to but do not consider using this if speed is important.</p>
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.glslang.pp">lua.glslang.pp</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/glslang.lua#L62">https://github.com/xriss/gamecake/blob/master/lua/glslang.lua</a></div>
+<div><pre><code>code,err = glslang.pp(code,err)
+</code></pre>
+<p>Preprocess a vertex/fragment and return the result.</p>
+<p>returns nil,error on error</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.glslang.replace_include">lua.glslang.replace_include</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/glslang.lua#L172">https://github.com/xriss/gamecake/blob/master/lua/glslang.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/glslang.lua#L188">https://github.com/xriss/gamecake/blob/master/lua/glslang.lua</a></div>
 <div><p>process #include statements in src with strings found in the headers table</p>
 </div>
 </div>

@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 556,
+   "count": 557,
    "name": "lua"
   },
   {
-   "count": 5,
+   "count": 6,
    "name": "lua.glslang"
   },
   {
@@ -144,6 +144,10 @@
   {
    "count": 1,
    "name": "lua.glslang.parse_chunks"
+  },
+  {
+   "count": 1,
+   "name": "lua.glslang.pp"
   },
   {
    "count": 1,

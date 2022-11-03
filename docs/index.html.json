@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 556,
+   "count": 557,
    "name": "lua"
   },
   {
-   "count": 5,
+   "count": 6,
    "name": "lua.glslang"
   },
   {
@@ -144,6 +144,10 @@
   {
    "count": 1,
    "name": "lua.glslang.parse_chunks"
+  },
+  {
+   "count": 1,
+   "name": "lua.glslang.pp"
   },
   {
    "count": 1,
@@ -2667,12 +2671,12 @@
   },
   {
    "body": "",
-   "count": 556,
+   "count": 557,
    "name": "lua"
   },
   {
    "body": "<p>Manage string embedding and the glsl compiler and language options.</p>\n<p>This is somewhat separate to the main GLES code and can be used without \nlinking to any system dependent GL libs.</p>\n",
-   "count": 5,
+   "count": 6,
    "file": "../lua/glslang.lua",
    "line": 4,
    "name": "lua.glslang",
@@ -2682,7 +2686,7 @@
    "body": "<pre><code>verr,ferr = glslang.lint_gles2(vcode,fcode)\n</code></pre>\n<p>Try and compile a vertex/fragment shader pair and return any errors.</p>\n<p>returns nil,nil on success or an error string if either shader fails to \ncompile.</p>\n<p>Note that the glslang compile step seems rather slow, not sure what it \ngets up to but do not consider using this if speed is important.</p>\n",
    "count": 1,
    "file": "../lua/glslang.lua",
-   "line": 62,
+   "line": 79,
    "name": "lua.glslang.lint_gles2",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/glslang.lua"
   },
@@ -2690,15 +2694,23 @@
    "body": "<pre><code>shaders=glslang.shader_chunks(text,filename,headers,flags)\n\n    load multiple shader chunks from a single file and return a lookup\n    table of name=code for each shader we just loaded. These can then be\n    compiled or whatever.\n    \n    set flags.headers_only to true if you only care about parsing headers\n    for later inclusion and do not want to parse shader chunks.\n    \n\n#SHADER &quot;nameofshader&quot;\n\n    is used at the start of a line to say which chunk the following text\n    should go into. This is technically the same as #header but makes it\n    explicit that this should be all the code for a shader rather than just\n    a piece.\n\n#HEADER &quot;nameofheader&quot;\n\n    can be used to define part of a shader, which can later be included in\n    another shader by using\n\n#INCLUDE &quot;nameofheader&quot;\n\n    Will insert the chunk of text previously defined as a #SHADER or #HEADER\n\n#SHADER or #HEADER\n\n    without a name can be used to ignore the next part of a file, any text\n    at the start of a file before the first #SHADER or #HEADER is also\n    ignored. This enables these chunks to exist inside comments in a lua or\n    whatever file.\n</code></pre>\n",
    "count": 1,
    "file": "../lua/glslang.lua",
-   "line": 89,
+   "line": 105,
    "name": "lua.glslang.parse_chunks",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/glslang.lua"
+  },
+  {
+   "body": "<pre><code>code,err = glslang.pp(code,err)\n</code></pre>\n<p>Preprocess a vertex/fragment and return the result.</p>\n<p>returns nil,error on error</p>\n",
+   "count": 1,
+   "file": "../lua/glslang.lua",
+   "line": 62,
+   "name": "lua.glslang.pp",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/glslang.lua"
   },
   {
    "body": "<p>process #include statements in src with strings found in the headers table</p>\n",
    "count": 1,
    "file": "../lua/glslang.lua",
-   "line": 172,
+   "line": 188,
    "name": "lua.glslang.replace_include",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/glslang.lua"
   },
