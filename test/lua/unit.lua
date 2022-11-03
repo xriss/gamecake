@@ -21,39 +21,20 @@ if arg[1] then
 
 else
 
-	lunatest.suite("unit.test_require")
+	local lfs=require("lfs")
 
-	lunatest.suite("unit.wetgenes_txt")
-	lunatest.suite("unit.wetgenes_txt_diff")
+	local units={}
+	local path="lua/unit"
+	for file in lfs.dir(path) do
+		if file:sub(-4)==".lua" then
+			units[#units+1] = "unit."..file:sub(1,-5)
+		end
+	end
 	
-	lunatest.suite("unit.test_zip")
-
-	lunatest.suite("unit.wetgenes_path")
-
---	lunatest.suite("unit.test_lanes")
-
-	lunatest.suite("unit.test_lua_al")
-	lunatest.suite("unit.test_lua_freetype")
-
-	lunatest.suite("unit.wetgenes_string")
-	lunatest.suite("unit.wetgenes_tardis")
-
-	lunatest.suite("unit.wetgenes_sod")
-	lunatest.suite("unit.wetgenes_ogg")
-
-	lunatest.suite("unit.wetgenes_pack")
-
-	lunatest.suite("unit.wetgenes_speak")
-
-	lunatest.suite("unit.wetgenes_grd")
-	lunatest.suite("unit.wetgenes_grdmap")
-	lunatest.suite("unit.wetgenes_grddiff")
-	lunatest.suite("unit.wetgenes_grdpaint")
-	lunatest.suite("unit.wetgenes_grdcanvas")
-
-	lunatest.suite("unit.wetgenes_win")
-
-	lunatest.suite("unit.wetgenes_chipmunk")
+	table.sort(units)
+	for _,name in ipairs(units) do
+		lunatest.suite(name)
+	end
 
 end
 
