@@ -205,7 +205,7 @@ makeopts="config=release_$( arg_get gcc )"
 
 if [[ -n "$( arg_get debug )" ]] ; then
 
-makeopts="config=debug_$gcc"
+makeopts="config=debug_$( arg_get gcc )"
 
 fi
 
@@ -240,6 +240,7 @@ $PUREMAKE_LUA build/puremake --openal=$( arg_get openal ) gmake $( arg_get gcc )
 # enter that directory
 cd ${buildhere}
 
+echo $makeopts
 
 if [[ -n "$( arg_get clean )" ]] ; then
 
