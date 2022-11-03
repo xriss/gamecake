@@ -28,6 +28,7 @@ extern "C" {
 
 
 #include "glslang/glslang/Public/ShaderLang.h"
+#include "glslang/glslang/Include/glslang_c_interface.h"
 
 #include "code/lua_glslang.h"
 

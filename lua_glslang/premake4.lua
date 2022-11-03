@@ -4,6 +4,7 @@ project "lua_glslang"
 language "C++"
 files {
 	"glslang/glslang/include/**" ,
+	"glslang/glslang/CInterface/**" ,
 	"glslang/glslang/GenericCodeGen/**" ,
 	"glslang/glslang/MachineIndependent/**" ,
 	"glslang/glslang/OSDependent/*" ,
@@ -19,7 +20,7 @@ files {
 files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 
 
-includedirs { "." }
+includedirs { "." , "./glslang" }
 
 
 buildoptions{"-std=c++11"}

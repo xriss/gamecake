@@ -7,31 +7,6 @@ https://opensource.org/licenses/MIT
 #include "all.h"
 
 
-/***************************************************************************
---[[#code.glslang.lua_glslang_lint_gles2
-
-	lua_glslang_lint_gles2(lua)
-
-	inputs
-		vertex code string
-		fragment code string
-		linker flag strinf
-
-	return
-		vertex error string
-		fragment error string
-		linker error string
-
-Compile a vertex shader and a fragment shader for GLES2, return 
-nil,nil,nil for no errors or an error string for either phase if 
-something went wrong.
-
-]]*/
-static int lua_glslang_lint_gles2(lua_State *l)
-{
-	ShHandle compilers[2];
-	ShHandle linker;
-//	TBuiltInResource Resources;
 	const TBuiltInResource Resources = {
     /* .MaxLights = */ 32,
     /* .MaxClipPlanes = */ 6,
@@ -138,7 +113,33 @@ static int lua_glslang_lint_gles2(lua_State *l)
         /* .generalVariableIndexing = */ 1,
         /* .generalConstantMatrixVectorIndexing = */ 1,
     }};
-    
+
+
+/***************************************************************************
+--[[#code.glslang.lua_glslang_lint_gles2
+
+	lua_glslang_lint_gles2(lua)
+
+	lua inputs
+		vertex code string
+		fragment code string
+		linker flag strinf
+
+	lua returns
+		vertex error string
+		fragment error string
+		linker error string
+
+Compile a vertex shader and a fragment shader for GLES2, return 
+nil,nil,nil for no errors or an error string for either phase if 
+something went wrong.
+
+]]*/
+static int lua_glslang_lint_gles2(lua_State *l)
+{
+	ShHandle compilers[2];
+	ShHandle linker;
+//	TBuiltInResource Resources;    
     
 	int count=0;
 	int ret;
@@ -187,6 +188,66 @@ static int lua_glslang_lint_gles2(lua_State *l)
 	return 3;
 }
 
+/***************************************************************************
+--[[#code.glslang.lua_glslang_pp
+
+	lua_glslang_cpp(lua)
+
+	lua inputs
+		code string
+
+	lua returns
+		preprocesed code string or nil
+		error string if code string is nil
+
+Run the preprocesor on the given code string.
+
+]]*/
+static int lua_glslang_pp(lua_State *l)
+{
+
+	const char* shaderCodeVertex = lua_tostring(l,1);
+
+	const glslang_input_t input =
+	{
+		.language = GLSLANG_SOURCE_GLSL,
+		.stage = GLSLANG_STAGE_VERTEX,
+		.client = GLSLANG_CLIENT_VULKAN,
+		.client_version = GLSLANG_TARGET_VULKAN_1_1,
+		.target_language = GLSLANG_TARGET_SPV,
+		.target_language_version = GLSLANG_TARGET_SPV_1_3,
+		.code = shaderCodeVertex,
+		.default_version = 100,
+		.default_profile = GLSLANG_NO_PROFILE,
+		.force_default_version_and_profile = false,
+		.forward_compatible = false,
+		.messages = GLSLANG_MSG_DEFAULT_BIT,
+		.resource = reinterpret_cast<const glslang_resource_t*>(&Resources),
+	};
+
+	glslang_shader_t* shader = glslang_shader_create( &input );
+	
+	if(!shader)
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,glslang_shader_get_info_debug_log(shader));
+		return 2;
+	}
+
+	if ( !glslang_shader_preprocess(shader, &input) )
+	{
+		lua_pushnil(l);
+		lua_pushstring(l,glslang_shader_get_info_debug_log(shader));
+		glslang_shader_delete( shader );
+		return 2;
+	}
+
+	lua_pushstring(l,glslang_shader_get_preprocessed_code(shader));
+
+	glslang_shader_delete( shader );
+	return 1;
+}
+
 
 /*
 
@@ -197,11 +258,14 @@ extern "C" int luaopen_glslang_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{
+		{"pp",	lua_glslang_pp},
+
 		{"lint_gles2",	lua_glslang_lint_gles2},
 
 		{0,0}
 	};
 
+	glslang_initialize_process();
 	ShInitialize();
 
 	lua_newtable(l);
