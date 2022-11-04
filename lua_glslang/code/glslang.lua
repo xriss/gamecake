@@ -69,10 +69,10 @@ returns nil,error on error
 
 ]]
 
-glslang.pp=function(code)
+glslang.pp=function(code,cbinc)
 	if not core then return "NOCORE","NOCORE" end
 
-	return core.pp(code)
+	return core.pp(code,cbinc)
 end
 
 

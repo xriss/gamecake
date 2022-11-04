@@ -6,6 +6,59 @@ https://opensource.org/licenses/MIT
 */
 #include "all.h"
 
+// HAX
+//#include "glslang/Include/glslang_c_interface.h"
+#include "StandAlone/DirStackFileIncluder.h"
+typedef struct glslang_shader_s {
+    glslang::TShader* shader;
+    std::string preprocessedGLSL;
+} glslang_shader_t;
+static EProfile c_shader_profile(glslang_profile_t profile)
+{
+    switch (profile) {
+    case GLSLANG_BAD_PROFILE:
+        return EBadProfile;
+    case GLSLANG_NO_PROFILE:
+        return ENoProfile;
+    case GLSLANG_CORE_PROFILE:
+        return ECoreProfile;
+    case GLSLANG_COMPATIBILITY_PROFILE:
+        return ECompatibilityProfile;
+    case GLSLANG_ES_PROFILE:
+        return EEsProfile;
+    case GLSLANG_PROFILE_COUNT: // Should not use this
+        break;
+    }
+
+    return EProfile();
+}
+static int c_shader_messages(glslang_messages_t messages)
+{
+#define CONVERT_MSG(in, out)                                                                                           \
+    if ((messages & in) == in)                                                                                         \
+        res |= out;
+
+    int res = 0;
+
+    CONVERT_MSG(GLSLANG_MSG_RELAXED_ERRORS_BIT, EShMsgRelaxedErrors);
+    CONVERT_MSG(GLSLANG_MSG_SUPPRESS_WARNINGS_BIT, EShMsgSuppressWarnings);
+    CONVERT_MSG(GLSLANG_MSG_AST_BIT, EShMsgAST);
+    CONVERT_MSG(GLSLANG_MSG_SPV_RULES_BIT, EShMsgSpvRules);
+    CONVERT_MSG(GLSLANG_MSG_VULKAN_RULES_BIT, EShMsgVulkanRules);
+    CONVERT_MSG(GLSLANG_MSG_ONLY_PREPROCESSOR_BIT, EShMsgOnlyPreprocessor);
+    CONVERT_MSG(GLSLANG_MSG_READ_HLSL_BIT, EShMsgReadHlsl);
+    CONVERT_MSG(GLSLANG_MSG_CASCADING_ERRORS_BIT, EShMsgCascadingErrors);
+    CONVERT_MSG(GLSLANG_MSG_KEEP_UNCALLED_BIT, EShMsgKeepUncalled);
+    CONVERT_MSG(GLSLANG_MSG_HLSL_OFFSETS_BIT, EShMsgHlslOffsets);
+    CONVERT_MSG(GLSLANG_MSG_DEBUG_INFO_BIT, EShMsgDebugInfo);
+    CONVERT_MSG(GLSLANG_MSG_HLSL_ENABLE_16BIT_TYPES_BIT, EShMsgHlslEnable16BitTypes);
+    CONVERT_MSG(GLSLANG_MSG_HLSL_LEGALIZATION_BIT, EShMsgHlslLegalization);
+    CONVERT_MSG(GLSLANG_MSG_HLSL_DX9_COMPATIBLE_BIT, EShMsgHlslDX9Compatible);
+    CONVERT_MSG(GLSLANG_MSG_BUILTIN_SYMBOL_TABLE_BIT, EShMsgBuiltinSymbolTable);
+    return res;
+#undef CONVERT_MSG
+}
+
 
 	const TBuiltInResource Resources = {
     /* .MaxLights = */ 32,
@@ -220,17 +273,17 @@ static int lua_glslang_pp(lua_State *l)
 	const glslang_input_t input =
 	{
 		.language = GLSLANG_SOURCE_GLSL,
-		.stage = GLSLANG_STAGE_VERTEX,
-		.client = GLSLANG_CLIENT_VULKAN,
-		.client_version = GLSLANG_TARGET_VULKAN_1_1,
-		.target_language = GLSLANG_TARGET_SPV,
-		.target_language_version = GLSLANG_TARGET_SPV_1_3,
+//		.stage = GLSLANG_STAGE_VERTEX,
+//		.client = GLSLANG_CLIENT_VULKAN,
+//		.client_version = GLSLANG_TARGET_VULKAN_1_1,
+//		.target_language = GLSLANG_TARGET_SPV,
+//		.target_language_version = GLSLANG_TARGET_SPV_1_3,
 		.code = shaderCodeVertex,
 		.default_version = 100,
 		.default_profile = GLSLANG_NO_PROFILE,
-		.force_default_version_and_profile = false,
-		.forward_compatible = false,
-		.messages = GLSLANG_MSG_DEFAULT_BIT,
+//		.force_default_version_and_profile = false,
+//		.forward_compatible = false,
+//		.messages = GLSLANG_MSG_DEFAULT_BIT,
 		.resource = reinterpret_cast<const glslang_resource_t*>(&Resources),
 	};
 
@@ -243,10 +296,26 @@ static int lua_glslang_pp(lua_State *l)
 		return 2;
 	}
 
-	if ( !glslang_shader_preprocess(shader, &input) )
+//	glslang_shader_preprocess(shader, &input)
+
+    DirStackFileIncluder Includer;
+    /* TODO: use custom callbacks if they are available in 'i->callbacks' */
+    bool ppok=shader->shader->preprocess(
+        reinterpret_cast<const TBuiltInResource*>(input.resource),
+        input.default_version,
+        c_shader_profile(input.default_profile),
+        input.force_default_version_and_profile != 0,
+        input.forward_compatible != 0,
+        (EShMessages)c_shader_messages(input.messages),
+        &shader->preprocessedGLSL,
+        Includer
+    );
+
+	if ( !ppok )
 	{
 		lua_pushnil(l);
-		lua_pushstring(l,glslang_shader_get_info_debug_log(shader));
+//		lua_pushstring(l,glslang_shader_get_info_debug_log(shader));
+		lua_pushstring(l,glslang_shader_get_info_log(shader));
 		glslang_shader_delete( shader );
 		return 2;
 	}

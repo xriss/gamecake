@@ -7,13 +7,17 @@ local glslang=require("glslang")
 
 function test_pp()
 
-	assert( glslang.pp([[
+	local o=assert( glslang.pp([[
 
-#define test poop
+#extension GL_GOOGLE_include_directive : enable
 
-print( test );
+#define test "poop"
+
+#include "unit"
 	
 ]]) )
+
+--print( tostring(o) )
 
 
 end
