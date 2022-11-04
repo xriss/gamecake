@@ -230,7 +230,7 @@ static int lua_glslang_pp(lua_State *l)
 	if(!shader)
 	{
 		lua_pushnil(l);
-		lua_pushstring(l,glslang_shader_get_info_debug_log(shader));
+		lua_pushstring(l,"failed to glslang_shader_create");
 		return 2;
 	}
 
