@@ -164,7 +164,7 @@ local function do_file_assert(g,name,test)
 	local fnamea,fnameb="dat/grd/"..name.."."..test..".out.png","dat/grd/"..name.."."..test..".chk.png"
 	local diff=do_file_compare(fnamea,fnameb)
 	if not diff then print("\n\nFILES DIFFER : "..fnamea.."   "..fnameb.."\n") end
-	assert_true( diff )
+	assert( diff )
 end
 
 function do_premult(name)
@@ -311,7 +311,7 @@ function do_gif_wmem(name)
 --	print(wstr.dump(g))
 	local d=assert( g:save({fmt="gif"}) )
 	do_file_write("dat/grd/"..name..".wmem.out.gif",d)
-	assert_true( do_file_compare("dat/grd/"..name..".wmem.out.gif","dat/grd/"..name..".wmem.chk.gif") )
+	assert( do_file_compare("dat/grd/"..name..".wmem.out.gif","dat/grd/"..name..".wmem.chk.gif") )
 end
 
 function do_gif_stream(name)
@@ -330,7 +330,7 @@ function do_gif_stream(name)
 	stream.write(g:clip(0,0,1,g.width,g.height,1))
 	stream.close(g)
 
-	assert_true( do_file_compare("dat/grd/"..name..".stream.out.gif","dat/grd/"..name..".stream.chk.gif") )
+	assert( do_file_compare("dat/grd/"..name..".stream.out.gif","dat/grd/"..name..".stream.chk.gif") )
 end
 
 function do_png_8_attr_redux(name)
@@ -350,7 +350,7 @@ function do_png_json(name)
 	assert( g:save({filename="dat/grd/"..name..".json.png",fmt="png",json=json}) )
 	local g=assert(grd.create("dat/grd/"..name..".json.png","png"))
 
-	assert_true( g.json ) -- check we got some json back
+	assert( g.json ) -- check we got some json back
 --	print(wstr.dump(g.json))
 end
 
