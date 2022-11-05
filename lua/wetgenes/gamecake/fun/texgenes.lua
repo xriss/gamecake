@@ -23,6 +23,8 @@ texgenes.load=function()
 
 	local filename="lua/"..(M.modname):gsub("%.","/")..".glsl"
 	gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
+	local filename="lua/"..(M.modname):gsub("%.","/").."_sketches.glsl"
+	gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
 
 	texgenes.loaded=true
 	return texgenes

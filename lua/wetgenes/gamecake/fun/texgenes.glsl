@@ -1,6 +1,6 @@
 
 
-#header "texgenes_head"
+#header "texgenes_shadertoy_head"
 
 #version 300 es
 #version 330
@@ -54,7 +54,7 @@ out vec4 FragColor;
 
 
 
-#header "texgenes_foot"
+#header "texgenes_shadertoy_foot"
 
 #ifdef FRAGMENT_SHADER
 
@@ -69,12 +69,12 @@ void main()
 
 #shader "texgenes_test"
 
-#include "texgenes_head"
+#include "texgenes_shadertoy_head"
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
 	fragColor=vec4(1.0,1.0,1.0,1.0);
 }
 
-#include "texgenes_foot"
+#include "texgenes_shadertoy_foot"
 
