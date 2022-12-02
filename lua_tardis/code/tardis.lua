@@ -220,6 +220,7 @@ end
 	a=a:set(1,2,3,4)
 	a=a:set({1,2,3,4})
 	a=a:set({1,2},{3,4})
+	a=a:set(function)
 
 Assign some numbers to an array, all the above examples will assign 1,2,3,4 to
 the first four slots in the given array, as you can see we allow one level of
@@ -233,11 +234,24 @@ if less numbers are given than the size of the array then the last number will
 be repeated.
 
 if no numbers are given then nothing will be done
+
+if a function is given it will be called with the index and should 
+return a number.
+
 ]]
 function array.set(it,...)
+
+	local aa={...}
+
+	if type(aa[1])=="function" then
+		local f=aa[1]
+		for i=1,#it do it[i]=f(i) end -- repeat last number
+		return it
+	end
+
 	local last
 	local n=1
-	for i,v in ipairs{...} do
+	for i,v in ipairs(aa) do
 		if not it[n] then return it end -- got all the data we need (#it)
 		if type(v)=="number" then
 			last=v
