@@ -2426,7 +2426,7 @@
    "body": "<pre><code>q4 = q4:setrot(degrees,v3a)\n</code></pre>\n<p>Set this quaternion to a rotation around the given normal by the given degrees.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2440,
+   "line": 2454,
    "name": "lua.wetgenes.tardis.q4.setrot",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

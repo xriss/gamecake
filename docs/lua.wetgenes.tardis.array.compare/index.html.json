@@ -2426,7 +2426,7 @@
    "body": "<pre><code>a=a:compare(b)\na=a:compare(1,2,3,4)\n</code></pre>\n<p>Are the numbers in b the same as the numbers in a, this function will \nreturn true if they are and false if they are not.</p>\n<p>If the arrays are of different lengths then this will return false.</p>\n<p>Numbers to test for can be given explicitly in the arguments and we \nfollow the same one level of tables rule as we do with array.set so any \nclass derived from array can be used.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 595,
+   "line": 609,
    "name": "lua.wetgenes.tardis.array.compare",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

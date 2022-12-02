@@ -2426,7 +2426,7 @@
    "body": "<pre><code>q4 = q4:set_yaw_pitch_roll_in_radians(v)\n</code></pre>\n<p>Set a V3(roll,pitch,yaw) radian rotation into this quaternion</p>\n<pre><code>yaw   v[3] is rotation about the z axis and is applied first\npitch v[2] is rotation about the y axis and is applied second\nroll  v[1] is rotation about the z axis and is applied last\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2564,
+   "line": 2578,
    "name": "lua.wetgenes.tardis.q4.set_yaw_pitch_roll_in_radians",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

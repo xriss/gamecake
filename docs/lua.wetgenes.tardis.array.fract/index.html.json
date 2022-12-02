@@ -2426,7 +2426,7 @@
    "body": "<pre><code>r=it:fract(r)\nr=it:fract(it.new())\n</code></pre>\n<p>Return the fractional part of each value using math.modf.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 338,
+   "line": 352,
    "name": "lua.wetgenes.tardis.array.fract",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

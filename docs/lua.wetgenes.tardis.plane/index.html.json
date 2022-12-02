@@ -2426,7 +2426,7 @@
    "body": "<p>A 3d space plane class.</p>\n<p>[1]position , [2]normal</p>\n<p>We also inherit all the functions from tardis.array</p>\n",
    "count": 2,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2649,
+   "line": 2663,
    "name": "lua.wetgenes.tardis.plane",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2434,7 +2434,7 @@
    "body": "<pre><code>plane = tardis.plane.new(p,n)\n</code></pre>\n<p>Create a new plane and optionally set it to the given values.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2661,
+   "line": 2675,
    "name": "lua.wetgenes.tardis.plane.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

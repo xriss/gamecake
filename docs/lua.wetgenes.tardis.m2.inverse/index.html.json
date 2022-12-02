@@ -2426,7 +2426,7 @@
    "body": "<pre><code>m2 = m2:inverse()\nm2 = m2:inverse(r)\n</code></pre>\n<p>Inverse this m2.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 793,
+   "line": 807,
    "name": "lua.wetgenes.tardis.m2.inverse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

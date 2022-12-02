@@ -2426,7 +2426,7 @@
    "body": "<pre><code>m4 = m4:identity()\n</code></pre>\n<p>Set this m4 to the identity matrix.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1018,
+   "line": 1032,
    "name": "lua.wetgenes.tardis.m4.identity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

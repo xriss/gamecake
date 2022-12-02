@@ -623,6 +623,7 @@
 <div><pre><code>a=a:set(1,2,3,4)
 a=a:set({1,2,3,4})
 a=a:set({1,2},{3,4})
+a=a:set(function)
 </code></pre>
 <p>Assign some numbers to an array, all the above examples will assign 1,2,3,4 to
 the first four slots in the given array, as you can see we allow one level of
@@ -633,6 +634,8 @@ ignored.</p>
 <p>if less numbers are given than the size of the array then the last number will
 be repeated.</p>
 <p>if no numbers are given then nothing will be done</p>
+<p>if a function is given it will be called with the index and should 
+return a number.</p>
 </div>
 </div>
 

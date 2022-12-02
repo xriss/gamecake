@@ -2426,7 +2426,7 @@
    "body": "<pre><code>m4 = m3:m4()\n</code></pre>\n<p>Expand an m3 matrix into an m4 matrix.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 841,
+   "line": 855,
    "name": "lua.wetgenes.tardis.m3.m4",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
