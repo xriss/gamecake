@@ -2,7 +2,7 @@ cd `dirname $0`
 
 vagrant up
 
-vagrant ssh -c " cd /gamecake ; build/make --cpu=x64 $* "
+vagrant ssh -c " cd /gamecake ; build/make --gcc=clang --cpu=x64 $* "
 
 vagrant halt
 
