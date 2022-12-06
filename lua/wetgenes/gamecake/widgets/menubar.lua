@@ -83,7 +83,7 @@ function wmenubar.setup(widget,def)
 	widget.draw=wmenubar.draw
 	widget.layout=wmenubar.layout
 
-	widget.always_draw=def.always_draw
+	widget.always_draw=widget.always_draw
 
 	widget.solid=true
 --	widget.can_focus=true

@@ -1,0 +1,29 @@
+id,user,text,help,key,json
+
+file_quit,,Quit,Close application and Quit.,Ctrl+Q
+file_open,,Open,Open a new file.,Ctrl+O
+file_close,,Close,Close this file.,Ctrl+W
+file_save,,Save,Save this file.,Ctrl+S
+file_saveall,,Save all,Save all modified files.,Ctrl+Shift+S
+file_saveas,,Save as...,Show file save requester.,Alt+Ctrl+S
+file_new,,New,Create a new file.,Ctrl+N
+
+select_all,,Select All,Select all text.,Ctrl+A
+
+history_redo,,Redo,Redo last action.,Ctrl+Y
+history_undo,,Undo,Undo last action.,Ctrl+Z
+
+clip_cut,,Cut,Cut text.,Ctrl+X
+clip_copy,,Copy,Copy text.,Ctrl+C
+clip_paste,,Paste,Paste text.,Ctrl+V
+clip_cutline,,Cut Line,Cut line and replace or append to clipboard.,Ctrl+K
+
+theme_bright_small,,Bright Small,Set theme to Bright and Small,,"{theme=""bright"",grid_size=24,text_size=16}"
+theme_bright_medium,,Bright Medium,Set theme to Bright and Medium,,"{theme=""bright"",grid_size=40,text_size=24}"
+theme_bright_large,,Bright Large,Set theme to Bright and Large,,"{theme=""bright"",grid_size=64,text_size=48}"
+theme_dark_small,,Dark Small,Set theme to Dark and Small,,"{theme=""dark"",grid_size=24,text_size=16}"
+theme_dark_medium,,Dark Medium,Set theme to Dark and Medium,,"{theme=""dark"",grid_size=40,text_size=24}"
+theme_dark_large,,Dark Large,Set theme to Dark and Large,,"{theme=""dark"",grid_size=64,text_size=48}"
+
+layout_load,,Load Layout,Load position and size of windows
+layout_save,,Save Layout,Save position and size of windows

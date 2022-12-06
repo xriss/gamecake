@@ -59,6 +59,23 @@ function glslang.yank_shader_versions(src,default_version)
 end
 
 
+--[[#lua.glslang.pp
+
+	code,err = glslang.pp(code,err)
+
+Preprocess a vertex/fragment and return the result.
+
+returns nil,error on error
+
+]]
+
+glslang.pp=function(code,cbinc)
+	if not core then return "NOCORE","NOCORE" end
+
+	return core.pp(code,cbinc)
+end
+
+
 --[[#lua.glslang.lint_gles2
 
 	verr,ferr = glslang.lint_gles2(vcode,fcode)
@@ -82,7 +99,6 @@ glslang.lint_gles2=function(vcode,fcode)
 
 	return verr,ferr,lerr
 end
-
 
 
 

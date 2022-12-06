@@ -23,11 +23,13 @@ if platform=="Android" then
 	
 	os.exit=function()print("os.exit() IN ANDROID IS DISABLED") return 1/0 end
 
+end
+
 	if jit then -- start by trying to force a jit memory allocation
-		print("LUAJIT",jit.status())
-		require("jit.opt").start("sizemcode=256","maxmcode=256")
-		for i=1,1000 do end
-		print("LUAJIT",jit.status())
+--		print("LUAJIT",jit.status())
+--		require("jit.opt").start("sizemcode=128","maxmcode=128")
+--		local t={} ; for i=1,1000 do t[#t+1]=i end
+--		print("LUAJIT",jit.status())
 
 --		if jit and jit.off then
 --			jit.off()
@@ -35,9 +37,6 @@ if platform=="Android" then
 --		end -- sometimes jit causes problems
 
   	end
-
-end
-
 
 
 -- strip some args before passing on to main code

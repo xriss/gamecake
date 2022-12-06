@@ -220,6 +220,7 @@ end
 	a=a:set(1,2,3,4)
 	a=a:set({1,2,3,4})
 	a=a:set({1,2},{3,4})
+	a=a:set(function)
 
 Assign some numbers to an array, all the above examples will assign 1,2,3,4 to
 the first four slots in the given array, as you can see we allow one level of
@@ -233,11 +234,24 @@ if less numbers are given than the size of the array then the last number will
 be repeated.
 
 if no numbers are given then nothing will be done
+
+if a function is given it will be called with the index and should 
+return a number.
+
 ]]
 function array.set(it,...)
+
+	local aa={...}
+
+	if type(aa[1])=="function" then
+		local f=aa[1]
+		for i=1,#it do it[i]=f(i) end -- repeat last number
+		return it
+	end
+
 	local last
 	local n=1
-	for i,v in ipairs{...} do
+	for i,v in ipairs(aa) do
 		if not it[n] then return it end -- got all the data we need (#it)
 		if type(v)=="number" then
 			last=v
@@ -1415,6 +1429,21 @@ function m4.prescale(it,a,b,c,d)
 	end
 end
 
+--[[#lua.wetgenes.tardis.m4.get_translation_v3
+
+	v3 = m4:get_translation_v3(r)
+
+Get v3 translation from a scale/rot/trans matrix
+
+If r is provided then the result is written into r and returned 
+otherwise a new v3 is created and returned.
+
+]]
+function m4.get_translation_v3(it,r)
+	r=r or tardis.v3.new()
+	return array.set(r,it[13],it[14],it[15])
+end
+
 --[[#lua.wetgenes.tardis.m4.get_scale_v3
 
 	v3 = m4:get_scale_v3(r)
@@ -1432,6 +1461,42 @@ function m4.get_scale_v3(it,r)
 		math.sqrt(it[2]*it[2]+it[6]*it[6]+it[10]*it[10]),
 		math.sqrt(it[3]*it[3]+it[7]*it[7]+it[11]*it[11])
 	)
+end
+
+--[[#lua.wetgenes.tardis.m4.get_rotation_q4
+
+	q4 = m4:get_rotation_q4(r)
+
+Get quaternion rotation from a scale/rot/trans matrix. Note that scale 
+is assumed to be uniform which it usually is. If that is not the case 
+then remove the scale first.
+
+If r is provided then the result is written into r and returned 
+otherwise a new q4 is created and returned.
+
+]]
+function m4.get_rotation_q4(it,r)
+	r=r or tardis.q4.new()
+	local q1,q2,q3,q4,t
+	if it[11] < 0 then
+		if it[ 1] > it[ 6] then
+			t = 1 + it[ 1] - it[ 6] - it[11]
+			q1=t ; q2=it[ 2]+it[ 5] ; q3=it[ 9]+it[ 3] ; q4=it[ 7]-it[10]
+		else
+			t = 1 - it[ 1] + it[ 6] - it[11]
+			q1=it[ 2]+it[ 5] ; q2=t ; q3=it[ 7]+t[10] ; q4=it[ 9]-it[ 3]
+		end
+	else
+		if it[ 1] < -it[ 6] then
+			t = 1 - it[ 1] - it[ 6] + it[11]
+			q1=it[ 9]+it[ 3] ; q2=it[ 7]+it[10] ; q3=t ; q4=it[ 2]-it[ 5]
+		else
+			t = 1 + it[ 1] + it[ 6] + it[11]
+			q1=it[ 7]-it[10] ; q2=it[ 9]-it[ 3] ; q3=it[ 2]-it[ 5] ; q4=t
+		end
+	end
+	t=0.5/math.sqrt(t)
+	return array.set(r,q1*t,q2*t,q3*t,q4*t)
 end
 
 --[[#lua.wetgenes.tardis.m4.setrot
@@ -2479,6 +2544,100 @@ function q4.prerrotate(it,radians,v3a,r)
 	return tardis.q4_product_q4(q4a,it,r or it)
 end
 
+
+--[[#lua.wetgenes.tardis.q4.set_yaw_pitch_roll
+
+	q4 = q4:set_yaw_pitch_roll(v3)
+	q4 = q4:set_yaw_pitch_roll({90,60,30})	-- 30yaw 60pitch 90roll
+
+Set a V3(roll,pitch,yaw) degree rotation into this quaternion
+
+	yaw   v[3] is rotation about the z axis and is applied first
+	pitch v[2] is rotation about the y axis and is applied second
+	roll  v[1] is rotation about the z axis and is applied last
+
+]]
+function q4.set_yaw_pitch_roll(it,v)
+	return q4.set_yaw_pitch_roll_in_radians(it,tardis.v3.new(v):scale(math.pi/180))
+end
+
+--[[#lua.wetgenes.tardis.q4.get_yaw_pitch_roll
+
+	v3 = q4:get_yaw_pitch_roll()
+
+Get a yaw,pitch,roll degree rotation from this quaternion
+
+If r is provided then the result is written into r and returned 
+otherwise a new v3 is created and returned.
+
+]]
+function q4.get_yaw_pitch_roll(it,r)
+	return q4.get_yaw_pitch_roll_in_radians(it,r):scale(180/math.pi)
+end
+
+--[[#lua.wetgenes.tardis.q4.set_yaw_pitch_roll_in_radians
+
+	q4 = q4:set_yaw_pitch_roll_in_radians(v)
+
+Set a V3(roll,pitch,yaw) radian rotation into this quaternion
+
+	yaw   v[3] is rotation about the z axis and is applied first
+	pitch v[2] is rotation about the y axis and is applied second
+	roll  v[1] is rotation about the z axis and is applied last
+
+]]
+function q4.set_yaw_pitch_roll_in_radians(q,v)
+
+	local cy = math.cos(v[3]*0.5)
+	local sy = math.sin(v[3]*0.5)
+	local cp = math.cos(v[2]*0.5)
+	local sp = math.sin(v[2]*0.5)
+	local cr = math.cos(v[1]*0.5)
+	local sr = math.sin(v[1]*0.5)
+
+	q[4] = cr * cp * cy + sr * sp * sy
+	q[1] = sr * cp * cy - cr * sp * sy
+	q[2] = cr * sp * cy + sr * cp * sy
+	q[3] = cr * cp * sy - sr * sp * cy
+
+	return q
+end
+
+--[[#lua.wetgenes.tardis.q4.get_yaw_pitch_roll_in_radians
+
+	v3 = q4:get_yaw_pitch_roll_in_radians()
+
+Get a yaw,pitch,roll degree rotation from this quaternion
+
+If r is provided then the result is written into r and returned 
+otherwise a new v3 is created and returned.
+
+]]
+function q4.get_yaw_pitch_roll_in_radians(q,r)
+	r=r or tardis.v3.new()
+
+-- roll (x-axis rotation)
+	local sinr_cosp =   2*(q[4] * q[1] + q[2] * q[3])
+	local cosr_cosp = 1-2*(q[1] * q[1] + q[2] * q[3])
+	r[1] = math.atan2(sinr_cosp, cosr_cosp)
+
+-- pitch (y-axis rotation)
+	local sinp = 2*(q[4] * q[2] - q[3] * q[1])
+	if sinp >= 1 then -- use +90 degrees if out of range
+		r[2]= math.pi/2
+	elseif sinp <= -1  then -- use -90 degrees if out of range
+		r[2]=-math.pi/2
+	else
+		r[2] = math.asin(sinp)
+	end
+	
+-- yaw (z-axis rotation)
+	local siny_cosp =   2*(q[4] * q[3] + q[1] * q[2])
+	local cosy_cosp = 1-2*(q[2] * q[2] + q[3] * q[3])
+	r[3] = math.atan2(siny_cosp, cosy_cosp)
+	
+	return r
+end
 
 --[[#lua.wetgenes.tardis.line
 

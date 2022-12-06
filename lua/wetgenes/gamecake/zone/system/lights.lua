@@ -38,10 +38,9 @@ end
 
 B.lights.create=function(lights,boot)
 	local light={}
-	light.boot=boot
-	light.caste=lights.caste
 	light.lights=lights
 	setmetatable(light,B.light_metatable)
+	item.scene.add( item , lights.caste , boot )
 
 	light:load(boot)
 

@@ -255,8 +255,8 @@ wwindow.window_hooks_reset=function(widget)
 --	widget:resize()
 --	widget:layout()
 --print("window reset",widget.id,widget.hx,widget.hy,"...",widget.win_fbo.hx,widget.win_fbo.hy)
-	widget.hx=widget.win_fbo.hx
-	widget.hy=widget.win_fbo.hy
+	widget.hx=widget.reset_layout.hx
+	widget.hy=widget.reset_layout.hy
 	winclamp(widget)
 	widget:layout()
 	widget:build_m4()
@@ -280,8 +280,10 @@ wwindow.window_hooks=function(_window,act,widget)
 --print(act,widget and widget.id)
 
 	local window,screen=(_window or widget):window_screen()
+	local old_act="click"
 
-	if act=="click" and window~=widget then -- turn a click into another act
+	if ( act=="click" or act=="release" ) and window~=widget then -- turn a click into another act
+		old_act=act
 		act=widget.id
 	end
 
@@ -363,9 +365,13 @@ end
 
 	if act=="win_hide" or act=="win_menu" then -- clicking the win_menu button will also close the window
 	
-		window.hidden=true -- hide it
-		window.master:call_descendents(function(w) w:set_dirty() end)
-		window.master.request_layout=true
+		if act=="win_menu" and old_act=="release" then
+			-- do not hide
+		else
+			window.hidden=true -- hide it
+			window.master:call_descendents(function(w) w:set_dirty() end)
+			window.master.request_layout=true
+		end
 		
 	elseif act=="win_show" then
 	
@@ -530,7 +536,7 @@ function wwindow.setup(window,def)
 --				py=bar_height,
 		hx=def.hx,
 		hy=def.hy,
-		size= (def.panel_mode=="fill") and "full" or "fit",
+		size= (def.panel_mode~="fill") and "fit",
 		color=color,
 		highlight="none",
 	})
@@ -538,8 +544,9 @@ function wwindow.setup(window,def)
 	
 	-- use this to recreate the magic top left windows icon/menu anywhere you want
 	window.win_menu_def={
-			class="menuitem",
-			top_only=true,
+			class="menudrop",
+			drop="active",
+			topmenu=true,
 			px=0,
 			py=0,
 			hx=ss,
@@ -574,12 +581,15 @@ function wwindow.setup(window,def)
 			hx=def.hx,
 			hy=ss,
 			text=def.title or "...",
-			draw_text=function(widget,txp,typ,fx) -- draw the text propperly centered in the entire window
+			draw_text=function(widget,opts) -- draw the text propperly centered in the entire window
+				if opts.size then
+					return font.width(widget.text) , widget.grid_size or font.size*1.5
+				end
 				local tx=(widget.hx+ss-font.width(widget.text))/2-ss
 				local ty=widget.hy/2
 				if tx<0 then tx=0 end
 				oven.gl.Color( unpack(widget.master.get_color(nil,widget.text_color)) )
-				font.set_xy(tx+txp,ty-fx+typ)
+				font.set_xy(tx+(opts.txp or 0),ty-(opts.fx or 0)+(opts.typ or 0))
 				font.draw(widget.text)
 			end,
 		})
@@ -731,6 +741,19 @@ function wwindow.setup(window,def)
 -- you should put your widgets here
 	window.children=window.win_canvas
 
+	window.reset_layout={}
+	for _,n in ipairs{"hidden","px","py","hx","hy"} do
+		window.reset_layout[n]=window[n]
+	end
+	window.reset_layout_resize=function()
+		window:resize()
+		window:layout()
+		window:resize()
+		window.reset_layout.hx=window.win_fbo.hx
+		window.reset_layout.hy=window.win_fbo.hy
+	end
+	
+	
 	return window
 end
 

@@ -35,9 +35,6 @@ function M.bake(oven,images)
 	images.prefix=opts.grdprefix or "data/"
 	images.postfix=opts.grdpostfix or { ".png" , ".jpg" }
 
-
-
-
 images.get=function(id)
 	return images.data[id]
 end
@@ -46,6 +43,19 @@ images.set=function(d,id)
 	images.data[id]=d
 end
 
+
+images.delete=function(id)
+	local t
+	if type(id)=="table" then
+		t=id
+	else
+		t=images.get(id)
+	end
+	if t then
+		images.unload(t)
+		images.data[t.id]=nil
+	end
+end
 
 --
 -- unload a previously loaded image

@@ -119,7 +119,7 @@ end
 --
 -----------------------------------------------------------------------------
 local function split(text)
-	local separator = "[\",:{}%[%]']"
+	local separator = "[\",:={}%[%]']"
 	
 	local parts = {}  
 	local start = 1
@@ -275,6 +275,7 @@ local t
 					val=nil
 				elseif l=="]" then
 					pop()
+				elseif l=="=" then
 				elseif l==":" then
 				elseif l=="," then
 				else

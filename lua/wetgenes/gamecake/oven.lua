@@ -5,6 +5,36 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local log,dump=require("wetgenes.logs"):export("log","dump")
 
+local jit_mcode_size=0
+--[[
+
+luajit can sometimes get stuck, this forces a large allocation before 
+we try and do much else which usually sorts it out
+
+]]
+	if jit then -- start by trying to force a jit memory allocation
+	
+		local ju=require("jit.util")
+		
+		local sm=1024
+		while sm>8 do -- 8k minimum
+			local mi=0
+			require("jit.opt").start("sizemcode="..sm,"maxmcode="..sm)
+			jit.on()
+			jit.flush()
+			if not ju.tracemc(1) then -- not alloced ( because of flush )
+				for i=1,1000 do end -- this should force an allocation
+				if ju.tracemc(1) then break end -- check if alloced 
+			end
+			sm=sm/2
+		end
+		if sm>8 then jit_mcode_size=sm else jit.off() end -- auto turn jit off if alloc failed
+
+--		os.exit(1)
+	end
+
+
+
 --[[#lua.wetgenes.gamecake.oven
 
 	oven=require("wetgenes.gamecake.oven").bake(opts)
@@ -38,7 +68,7 @@ local function assert_resume(co)
 	
 	if a then return a,b end -- no error
 	
-	error( b.."\nin coroutine\n"..debug.traceback(co) ) -- error
+	error( tostring(b).."\nin coroutine\n"..debug.traceback(co) ) -- error
 end
 
 
@@ -65,27 +95,9 @@ modules and sharing state between them.
 
 ]]
 function M.bake(opts)
-	
+
 	local oven={}
 	wwin.oven=wwin.oven or oven -- store a global oven on first use
-
--- setup tasks early so we can use recipes.sqlite for data management and run loading tasks on another thread
-	oven.tasks=require("wetgenes.tasks").create()
--- and http requests
-	oven.tasks:add_thread({
-		count=8,
-		id="http",
-		code=require("wetgenes.tasks").http_code,
-	})
--- and sqlite requests to a default database
-	oven.tasks:add_thread({
-		count=1,
-		id="sqlite",
-		globals={sqlite_filename=wwin.files_prefix.."recipes.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
-		code=require("wetgenes.tasks").sqlite_code,
-	})
--- so we can run off thread code and coroutines
-
 
 	if opts.hints then -- pass hints from opts to sdl
 		wwin.hints(opts.hints)
@@ -121,7 +133,17 @@ function M.bake(opts)
 	end
 --dprint(opts)
 
+	opts.width=opts.width or 0
+	opts.height=opts.height or 0
+
 	require("wetgenes.logs").setup(opts.args)
+
+if jit then -- now logs are setup, dump basic jit info
+	local t={jit.version,jit.status()}
+	t[2]=tostring(t[2])
+	t[#t+1]="jit_mcode_size="..jit_mcode_size.."k"
+	log( "oven" , table.concat(t,"\t") )
+end
 
 --print(wwin.flavour)
 
@@ -202,6 +224,24 @@ if wwin.steam then -- steamcloud prefers files in your app dir for easy sync bet
 end
 
 
+-- setup tasks early so we can use recipes.sqlite for data management and run loading tasks on another thread
+	oven.tasks=require("wetgenes.tasks").create()
+-- and http requests
+	oven.tasks:add_thread({
+		count=8,
+		id="http",
+		code=oven.tasks.http_code,
+	})
+-- and sqlite requests to a default database
+	oven.tasks:add_thread({
+		count=1,
+		id="sqlite",
+		globals={sqlite_filename=wwin.files_prefix.."recipes.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
+		code=oven.tasks.sqlite_code,
+	})
+-- so we can run off thread code and coroutines
+
+
 --[[
 print(wwin.files_prefix)
 print(wwin.cache_prefix)
@@ -251,6 +291,7 @@ os.exit()
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale,
 				console=opts.args.console,		-- use --console on commandline to keep console open
 				borderless=opts.args.borderless,
+				hidden=opts.hidden,
 				}
 --				border=opts.args.border}		-- use --border  on commandline to keep window borders
 			local screen=wwin.screen()
@@ -291,13 +332,10 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 --wwin.hardcore.peek(oven.win[0])
 	
-			local doshow=opts.show or "win" -- default window display
-			if opts.args.windowed   then doshow="win" end
-			if opts.args.borderless then doshow="less" end
-			if opts.args.fullscreen then doshow="full" end
-			if opts.args.maximised  then doshow="max" end
-			if doshow then oven.win:show(doshow) end
-
+			if not inf.hidden then
+				local doshow=opts.args.show or opts.show or "win" -- default window display
+				if doshow then oven.win:show(doshow) end
+			end
 
 --			oven.win:show("full")
 --			oven.win:show("max")
@@ -347,7 +385,11 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 
 			if opts.start then
-				oven.next=oven.rebake(opts.start)
+				if type(opts.start)=="string" then
+					oven.next=oven.rebake(opts.start)
+				else
+					oven.next=opts.start
+				end
 				oven.main=oven.next
 			end
 			
@@ -368,7 +410,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 				end
 			
 				ret={modname=name}
-				oven.baked[name]=ret
+				oven.baked[name]=ret -- need to create and remember here so we can always rebake even if the result is not filled in yet
 				ret=assert(require(name)).bake(oven,ret)
 				
 --				print("REBAKED",name,ret)

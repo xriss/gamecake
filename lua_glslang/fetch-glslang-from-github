@@ -1,0 +1,5 @@
+cd `dirname $0`
+
+rm -rf glslang
+git clone --depth 1 https://github.com/KhronosGroup/glslang.git
+rm -rf glslang/.git

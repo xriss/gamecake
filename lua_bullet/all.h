@@ -66,6 +66,9 @@ extern "C" {
 
 #include "src/btBulletDynamicsCommon.h"
 
+#include "src/BulletCollision/CollisionDispatch/btGhostObject.h"
+
+
 #include "src/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 #include "src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h"
 #include "src/BulletCollision/CollisionShapes/btTriangleIndexVertexMaterialArray.h"

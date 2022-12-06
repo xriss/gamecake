@@ -247,7 +247,7 @@ bullet.world_functions.shape=function(world,name,a,...)
 	shape[0]=core.shape_create(name,a,...)
 	shape.world=world
 	
-	world.shapes[ shape[0] ]=shape
+	world.shapes[ core.shape_ptr(shape[0]) ]=shape
 
 	return shape
 end
@@ -264,7 +264,7 @@ bullet.shape_functions.destroy=function(shape)
 	local world=shape.world
 	if shape.name then world:set(shape.name) end
 	core.shape_destroy( shape[0] )
-	world.shapes[ shape[0] ]=nil
+	world.shapes[ core.shape_ptr(shape[0]) ]=nil
 end
 
 ------------------------------------------------------------------------
@@ -283,20 +283,36 @@ end
 ------------------------------------------------------------------------
 --[[#lua.wetgenes.bullet.world.body
 
-	body = world:body("rigid",shape,mass,x,y,z)
+	body = world:body("rigid",shape,mass,x,y,z,cgroup,cmask)
+	body = world:body({name="rigid",shape=shape,mass=mass.pos=V3(0)})
 
 Create a body.
 
 ]]
-bullet.world_functions.body=function(world,name,shape,mass,x,y,z)
+bullet.world_functions.body=function(world,name,shape,mass,x,y,z,cgroup,cmask)
+
+	local opts={}
+	if type(name)=="table" then
+		opts=name
+		name=nil
+	end
+	
+	opts.name=opts.name or name
+	opts.shape=opts.shape or shape
+	opts.mass=opts.mass or mass
+	opts.pos=opts.pos or {x or 0,y or 0,z or 0}
+	opts.cgroup=opts.cgroup or cgroup
+	opts.cmask=opts.cmask or cmask or -1
+
 	local body={}
 	setmetatable(body,bullet.body_metatable)
-	body[0]=core.body_create(name,shape[0],mass,x,y,z)
+	body[0]=core.body_create(opts.name,opts.shape[0],opts.mass,opts.pos[1],opts.pos[2],opts.pos[3])
 	body.world=world
+	body.name=name -- probably rigid or ghost
 	
-	world.bodies[ body[0] ]=body
+	world.bodies[ core.body_ptr(body[0]) ]=body
 
-	core.world_add_body( world[0] , body[0] )
+	core.world_add_body( world[0] , opts.name , body[0] , opts.cgroup , opts.cmask )
 
 	return body
 end
@@ -313,7 +329,7 @@ bullet.body_functions.destroy=function(body)
 	local world=body.world
 	if body.name then world:set(body.name) end
 	core.body_destroy( body[0] )
-	world.bodies[ body[0] ]=nil
+	world.bodies[ core.body_ptr(body[0]) ]=nil
 end
 
 ------------------------------------------------------------------------
@@ -463,6 +479,65 @@ When set we run a custom callback to try and smooth mesh collisions.
 ]]
 bullet.body_functions.custom_material_callback=function(body,b)
 	return core.body_custom_material_callback( body[0] , b )
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.gravity
+
+	body:gravity(x,y,z)
+	x,y,z = body:gravity()
+
+Set or get body gravity vector. Fidling with this may be the easiest 
+way for a player to move an object around, it certainly makes it easier 
+to create "magnetic fields" to hover objects above the ground.
+
+]]
+bullet.body_functions.gravity=function(body,vx,vy,vz)
+
+	local rx,ry,rz = core.body_gravity( body[0] , vx , vy , vz )
+
+	return rx,ry,rz
+
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.cgroup
+
+	body:cgroup(bits)
+	bits=body:cgroup()
+
+Set or get body cgroup bits. You have 31 bits, so use 0x7fffffff to set 
+all. These provide simple yes/no collision control between bodies.
+
+	cgroup bits are all the groups this body belongs to.
+	cmask bits are all the groups this body colides with.
+
+]]
+bullet.body_functions.cgroup=function(body,bits)
+
+	return core.body_cgroup( body[0] , bits )
+
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.cmask
+
+	body:cmask(bits)
+	bits=body:cmask()
+	body:cmask(0x7fffffff)
+
+Set or get body cmask bits. You have 31 bits, so use 0x7fffffff to set 
+all. This body will only colide with another body if the other bodys 
+cgroup has a bit set that is also set in our cmask.
+
+	cgroup bits are all the groups this body belongs to.
+	cmask bits are all the groups this body colides with.
+
+]]
+bullet.body_functions.cmask=function(body,bits)
+
+	return core.body_cmask( body[0] , bits )
+
 end
 
 return bullet

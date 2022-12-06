@@ -1,12 +1,34 @@
 
-	
+#header "gamecake_shader_funcs"
+
+#if 0 // !defined(SRGBGAMMA)
+vec4 SRGB(vec4 c){return c;}
+vec3 SRGB(vec3 c){return c;}
+vec4 RGBS(vec4 c){return c;}
+vec3 RGBS(vec3 c){return c;}
+vec3 HRGB(vec4 c){return c.rgb;}
+vec4 RGBH(vec3 c){return vec4(c.rgb,0.25);}
+#else
+vec4 SRGB(vec4 c){return pow(c,vec4(2.2,2.2,2.2,1.0));}
+vec3 SRGB(vec3 c){return pow(c,vec3(2.2));}
+vec4 RGBS(vec4 c){return pow(c,vec4(0.45454545454,0.45454545454,0.45454545454,1.0));}
+vec3 RGBS(vec3 c){return pow(c,vec3(0.45454545454));}
+// fake HDR uses alpha as a floating point scalar in the range 0-4 with 8bit precision
+vec3 HRGB(vec4 c){return pow(c.rgb,vec3(2.2))*c.a*4.0;}
+vec4 RGBH(vec3 c){float a=max(0.02,max(max(c.r,c.g),c.b));return vec4(pow(c.rgb/a,vec3(0.45454545454)),a/4.0);}
+#endif
+
 /*
 
 This is the default gamecake shader, which is controlled by a bunch of 
 defines to enable various features.
 
 First we must describe what to do with xyz vertex attributes, only one 
-of RAW , XYZ and POS should be used at once.
+of SCR , RAW , XYZ and POS should be used at once.
+
+	SCR
+
+Screen space, no transforms applied.
 
 	RAW
 
@@ -193,7 +215,7 @@ mat4 texbone(int bidx,int frame)
 
 mat4 fixbone(int bidx,int frame)
 {
-	return ( mat4(
+	return transpose( mat4(
 		texture(fixbones,vec2(bidx*3+0,frame)),
 		texture(fixbones,vec2(bidx*3+1,frame)),
 		texture(fixbones,vec2(bidx*3+2,frame)),
@@ -202,7 +224,7 @@ mat4 fixbone(int bidx,int frame)
 
 mat4 texbone(int bidx,int frame)
 {
-	return ( mat4(
+	return transpose( mat4(
 		texture(texbones,vec2(bidx*3+0,frame)),
 		texture(texbones,vec2(bidx*3+1,frame)),
 		texture(texbones,vec2(bidx*3+2,frame)),
@@ -224,8 +246,10 @@ mat4 getbone(int bidx)
 	mat4 md=fixbone( bidx , 1 );
 	mat4 me=fixbone( bidx , 2 );
 
-	mat4 mf=mat4( mat3(me)*mat3(mab) );
-	mf[3]=mab[3];
+//	mat4 mf=mat4( mat3(me)*mat3(mab) );
+//	mf[3]=mab[3];
+	mat4 mf=mat4(mat3(me)*mat3(mab)); // tweak rot/scale should apply localy
+	mf[3].xyz=me[3].xyz+mab[3].xyz; // tweak pos should just be added in world space
 	
 	mat4 mr=md*mc*mf;
 
@@ -246,8 +270,8 @@ void main(void)
 #endif
 
 
-#ifdef POS
-	vec4 v=vec4(a_vertex.xy, 0.0, 1.0);
+#ifdef SCR
+	vec4 v=vec4(a_vertex.xyz, 1.0);
 #endif
 #ifdef RAW
 	vec4 v=vec4(a_vertex.xyz, 1.0);
@@ -255,8 +279,8 @@ void main(void)
 #ifdef XYZ
 	vec4 v=vec4(a_vertex.xyz, 1.0);
 #endif
-#ifdef SCR
-	vec4 v=vec4(a_vertex.xyz, 1.0);
+#ifdef POS
+	vec4 v=vec4(a_vertex.xy, 0.0, 1.0);
 #endif
 
 #ifdef NORMAL
@@ -330,9 +354,8 @@ void main(void)
 #endif
 
 
-#ifdef POS
-	gl_Position = projection * modelview * v;
-	gl_Position.z+=a_vertex.z;
+#ifdef SCR
+	gl_Position = v;
 #endif
 #ifdef RAW
 	gl_Position = projection * v;
@@ -340,15 +363,9 @@ void main(void)
 #ifdef XYZ
 	gl_Position = projection * modelview * v;
 #endif
-#ifdef SCR
-	gl_Position = v;
-#endif
-
-#ifdef DRAW_SHADOW_SQUISH
-//	gl_Position.xy=clamp(gl_Position.xy,vec2(-1.0),vec2(1.0));
-//	gl_Position.xy=(sign(gl_Position.xy)*pow(abs(gl_Position.xy),vec2(DRAW_SHADOW_SQUISH)));
-//    gl_Position.xy=mix( gl_Position.xy*0.5 , gl_Position.xy*0.75 - (sign(gl_Position.xy)*0.125) , step(0.5,abs(gl_Position.xy)) );
-    gl_Position.xy=mix( gl_Position.xy*2.0 , gl_Position.xy*0.75/1.25 + (sign(gl_Position.xy)*0.35) , step(0.25,abs(gl_Position.xy)) );
+#ifdef POS
+	gl_Position = projection * modelview * v;
+	gl_Position.z+=a_vertex.z;
 #endif
 
 #ifdef SHADOW
@@ -362,9 +379,9 @@ void main(void)
 #endif
 
 #ifdef COLOR
-	v_color=a_color*color;
+	v_color=SRGB(a_color)*SRGB(color);
 #else
-	v_color=color;
+	v_color=SRGB(color);
 #endif
 	
 #ifdef TEX
@@ -409,10 +426,6 @@ IN vec4  shadow_uv;
 #endif
 
 
-//#if defined(GL_FRAGMENT_PRECISION_HIGH)
-//precision highp float; /* ask for better numbers if available */
-//#endif
-
 #ifdef MAIN
 void MAIN(void)
 #else
@@ -424,22 +437,30 @@ void main(void)
 
 	vec3 n=normalize(v_normal);
 	vec3 s=shadow_light.xyz;
-	float l=max( 0.0, dot(n,s)*shadow_light.w );
-	vec2 uv=clamp( v_texcoord + vec2( pow( l , 4.0 )-0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
+//	vec2 uv=clamp( v_texcoord + vec2( dot(n,s)*0.5 ,0.0) , vec2(0.0,0.0) , vec2(1.0,1.0) ) ;
+	vec2 uv=v_texcoord + vec2( dot(n,s)*0.5 ,0.0) ;
 
-	FragColor = texture(tex, uv ).rgba;
+	FragColor = SRGB(texture(tex, uv ).rgba) * v_color;
+
+//	FragColor=vec4(n,1.0) * v_color;
 
 #else
 
 #ifdef TEX
-	if( v_texcoord[0] <= -1.0 ) // special uv request to ignore the texture (use -2 as flag)
-	{
-		FragColor=v_color ;
-	}
-	else
-	{
-		FragColor=texture(tex, v_texcoord) * v_color ;
-	}
+	#ifdef TEXHAX
+
+		if( v_texcoord[0] <= -1.0 ) // special uv request to ignore the texture (use -2 as flag) lets us mix textured and untextured polys
+		{
+			FragColor=v_color ;
+		}
+		else
+		{
+			FragColor=SRGB(texture(tex, v_texcoord)) * v_color ;
+		}
+
+	#else
+		FragColor=SRGB(texture(tex, v_texcoord)) * v_color ;
+	#endif
 #else
 	FragColor=v_color ;
 #endif
@@ -448,19 +469,26 @@ void main(void)
 
 #ifdef MATIDX
 	float tex_mat_u=(v_matidx+0.5)/MATIDX;
-	vec4 c1=texture(tex_mat, vec2(tex_mat_u,0.25) );
-	vec4 c2=texture(tex_mat, vec2(tex_mat_u,0.75) );
+	vec4 c1=SRGB(texture(tex_mat, vec2(tex_mat_u,0.25) ));
+	vec4 c2=SRGB(texture(tex_mat, vec2(tex_mat_u,0.75) ));
 #else
 	vec4 c1=FragColor;
-	vec4 c2=vec4(1.0,1.0,1.0,16.0/255.0);
+	vec4 c2=SRGB(vec4(1.0,1.0,1.0,16.0/255.0));
 #endif
 
 #ifdef NTOON
 
 	vec3 n=normalize(v_normal);
 	vec3 s=shadow_light.xyz;
-	float l=max( 0.0, dot(n,s)*shadow_light.w );
-	FragColor= vec4(  c1.rgb*(NTOON+(l*(1.0-NTOON))) , c1.a ); 
+	float l=dot(n,s);
+	if(l>=0.0)
+	{
+		FragColor= vec4(  mix( c1.rgb , c1.rgb*(1.0+NTOON) , l ) , c1.a ); 
+	}
+	else
+	{
+		FragColor= vec4(  mix( c1.rgb*(1.0-NTOON) , c1.rgb , 1.0-l ) , c1.a ); 
+	}
 
 #endif
 
@@ -517,6 +545,7 @@ void main(void)
 
 #endif
 
+	FragColor=RGBS(FragColor);
 }
 
 #endif
@@ -534,6 +563,9 @@ precision highp float;
 precision mediump float;
 #endif
 #endif
+
+
+#include "gamecake_shader_funcs"
 
 #include "gamecake_shader_head"
 #include "gamecake_shader_vertex"

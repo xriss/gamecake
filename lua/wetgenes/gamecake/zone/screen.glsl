@@ -7,6 +7,8 @@
 precision mediump float;
 #endif
 
+#include "gamecake_shader_funcs"
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -70,6 +72,8 @@ precision mediump float;
 precision mediump float;
 #endif
   
+#include "gamecake_shader_funcs"
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -109,9 +113,11 @@ uniform vec4 day_night;
 
 void main(void)
 {
-	vec3 m = texture(tex0, v_texcoord).rgb ;
+	vec4  c4=texture(tex0,v_texcoord);
+	float d = 4.0*c4.a ; // may need to tweak this to change output brightness range
+	vec3 m = SRGB(c4.rgb)*d ;
 	vec4 s4 = texture(tex1, v_texcoord).rgba ;
-	vec3 b = texture(tex2, v_texcoord).rgb ;
+	vec3 b = SRGB(texture(tex2, v_texcoord).rgb) ;
 	float s=s4.a;
 	
 #ifdef COLOR_FIX
@@ -166,7 +172,7 @@ void main(void)
 
 #else
 
-	c= m * s + b;
+	c= m * s + b ;
 
 #endif
 
@@ -178,11 +184,11 @@ void main(void)
 
 #ifdef GAMMA
 	c=pow(c,vec3(1.0/float( GAMMA )));
+#else
+	c=RGBS(c);
 #endif
 
-
 	FragColor=vec4( c , 1.0 );
-
 
 }
 
@@ -242,7 +248,9 @@ out vec4 FragColor;
 // convert a uv into view space by sampling z buffer
 vec3 depth_to_view(vec2 cc)
 {
-	vec4 p=inverse_projection * ( vec4( cc , float(texture(tex,cc)) , 1.0 )*2.0 - 1.0 );
+	vec4 t=vec4( cc , float(texture(tex,cc)) , 1.0 );
+	vec4 p=inverse_projection * ( t*2.0 - 1.0 );
+	if(abs(p.w)<0.001){p.w=0.001;} // sanity
 	return p.xyz/p.w;
 }
 
@@ -250,6 +258,7 @@ vec3 depth_to_view(vec2 cc)
 vec3 view_to_depth(vec3 vv)
 {
 	vec4 p=projection * vec4( vv , 1.0);
+	if(abs(p.w)<0.001){p.w=0.001;} // sanity
 	return (p.xyz/p.w)*0.5 + 0.5;
 }
 
@@ -298,21 +307,23 @@ float ambient_occlusion( vec2 vv , vec3 nrm )
 
 	vec3 p1=depth_to_view( vv );
 	vec3 p2=view_to_depth( p1+(vec3(slen,slen,0.0)) );
-	float dlen=length(p2.xy-vv.xy); // scale needed to adjust to depth
+	if(p1.z!=p1.z) { return 0.5; } // give up
+	float dlen=max(0.001,length(p2.xy-vv.xy)); // scale needed to adjust to depth
 
-	float rots=PI2/float(AO_SAMPLES);
-	float dims=0.5/float(AO_SAMPLES);
+	float rots=PI2/(sqrt(float(AO_SAMPLES))*2.0);
+	float dims=1.0/float(AO_SAMPLES);
 	float ac=0.0;
+	float dc=float(AO_SAMPLES);
 	for(int ia=0;ia<int(AO_SAMPLES);ia++)
 	{
 		float fa=float(ia);
 		float r=ha+fa*rots;
-		vec2 cc=vec2(sin(r),cos(r))*aspect*dlen*(1.0-fa*dims);
+		vec2 cc=vec2(sin(r),cos(r))*aspect*dlen*(1.0-pow(fa*dims,2.0));
 		vec3 ss=depth_to_view(cc+vv);
-		float zz=p1.z;
-		ac+=1.0-smoothstep( zz - slen , zz + slen , ss.z );
+		float d=(p1.z-ss.z)/(slen*2.0);
+		ac+=clamp(d,-2.0,2.0);//*smoothstep(-3.0,-1.0,-abs(d)) ;// 1.0-smoothstep( p1.z - slen , p1.z + slen , ss.z );
 	}
-	return (ac/float(AO_SAMPLES));
+	return smoothstep(-1.0,1.0,ac/dc);
 
 }
 
@@ -347,6 +358,9 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 
 	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) && (shadow_uv.z > 0.0) && (shadow_uv.z < 1.0) )
 	{
+		vec3 sas=smoothstep( -1.00 , -0.90 , -abs( shadow_uv.xyz*2.0-1.0 )  );
+		float fade=sas.x*sas.y*sas.z;
+
 //		float shadow_min=1.0;
 		float shadow_add=0.0;
 		float shadow_tmp=0.0;
@@ -363,10 +377,11 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 			shadow_add += shadow_tmp ;
 //			shadow_min = min( shadow_min , shadow_tmp );
 		}
-		shadow_value = max( shadow_value , smoothstep(	shadow[1] ,	shadow[2] ,
+		shadow_value = fade*max( shadow_value , smoothstep(	shadow[1] ,	shadow[2] ,
 			shadow_uv.z - (shadow_add/float(SHADOW_SAMPLES))  ) );
+			
 	}
-	return ( ((1.0-shadow_value)*shadow_light.w)*shadow[0] + (1.0-shadow[0]) ) ;
+	return ( (1.0-shadow_value)*shadow[0] + (1.0-shadow[0]) ) ;
 }
 #endif
 
@@ -392,8 +407,8 @@ void main(void)
 	t=clamp( (1.0-((1.0-t)*float(AO_SCALE))) ,0.0,1.0);
 #endif
 	
-	FragColor=vec4( vec3(0.5)+(nrm.xyz*0.5) , s*t );
-	
+	FragColor=vec4( vec3(0.5)+(nrm.xyz*0.5) , t*s );
+
 }
 
 #endif
@@ -416,12 +431,15 @@ precision mediump float;
 #endif
 #endif
   
+#include "gamecake_shader_funcs"
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
 
 uniform sampler2D tex0;
 uniform sampler2D tex1;
+uniform sampler2D tex2;
 
 uniform mat4 inverse_projection;
 
@@ -449,9 +467,17 @@ out vec4 FragColor;
 
 void main(void)
 {
-	vec3 m = texture(tex0, v_texcoord).rgb ;
-	float s = texture(tex1, v_texcoord).a ;
-	FragColor=vec4( pow( m*s , vec3(4.0) ) , 1.0 );
+//	vec4 m = SRGB(texture(tex0, v_texcoord).rgba) ;
+//	FragColor=RGBS(vec4( (m.rgb + pow( m.rgb , vec3(4.0) ) ) * (4.0*m.a-1.0) , 1.0 ));
+
+	vec3 c = HRGB(texture(tex0, v_texcoord).rgba) ;
+	c=pow(c/vec3(2.0),vec3(2.0));
+#ifdef BLOOM_FEEDBACK
+	vec3 o = SRGB(texture(tex2, v_texcoord).rgb) ; // last frame
+	FragColor=vec4(RGBS(mix(o,c,1.0/float(BLOOM_FEEDBACK))),1.0);
+#else
+	FragColor=vec4(RGBS(c),1.0);
+#endif
 }
 
 #endif
@@ -472,6 +498,8 @@ precision mediump float;
 #endif
 #endif
   
+#include "gamecake_shader_funcs"
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
@@ -520,81 +548,81 @@ void main(void)
 #if BLUR == -1
 
 	c= min( min(
-		texture(tex,tc             ) ,
-		texture(tex,tc+siz.xy*  1.0) ) ,
-		texture(tex,tc+siz.xy* -1.0) ) ;
+		SRGB(texture(tex,tc             )) ,
+		SRGB(texture(tex,tc+siz.xy*  1.0)) ) ,
+		SRGB(texture(tex,tc+siz.xy* -1.0)) ) ;
 
 #elif BLUR == 3
 
-	c =texture(tex,tc).rgba*(1.0/3.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(1.0/3.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(1.0/3.0);
+	c =SRGB(texture(tex,tc).rgba)*(1.0/3.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(1.0/3.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(1.0/3.0);
 
 #elif BLUR == 5
 
-	c =texture(tex,tc).rgba*(1.0/5.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(1.0/5.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(1.0/5.0);
-	c+=texture(tex,tc+siz.xy* 2.0).rgba*(1.0/5.0);
-	c+=texture(tex,tc+siz.xy*-2.0).rgba*(1.0/5.0);
+	c =SRGB(texture(tex,tc).rgba)*(1.0/5.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(1.0/5.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(1.0/5.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 2.0).rgba)*(1.0/5.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-2.0).rgba)*(1.0/5.0);
 
 #elif BLUR == 6
 
-	c =texture(tex,tc).rgba*(2.0/6.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(1.0/6.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(1.0/6.0);
-	c+=texture(tex,tc+siz.xy* 2.0).rgba*(1.0/6.0);
-	c+=texture(tex,tc+siz.xy*-2.0).rgba*(1.0/6.0);
+	c =SRGB(texture(tex,tc).rgba)*(2.0/6.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(1.0/6.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(1.0/6.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 2.0).rgba)*(1.0/6.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-2.0).rgba)*(1.0/6.0);
 
 #elif BLUR == 22
 
-	c =texture(tex,tc).rgba*(8.0/22.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(4.0/22.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(4.0/22.0);
-	c+=texture(tex,tc+siz.xy* 2.0).rgba*(2.0/22.0);
-	c+=texture(tex,tc+siz.xy*-2.0).rgba*(2.0/22.0);
-	c+=texture(tex,tc+siz.xy* 3.0).rgba*(1.0/22.0);
-	c+=texture(tex,tc+siz.xy*-3.0).rgba*(1.0/22.0);
+	c =SRGB(texture(tex,tc).rgba)*(8.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(4.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(4.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 2.0).rgba)*(2.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-2.0).rgba)*(2.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 3.0).rgba)*(1.0/22.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-3.0).rgba)*(1.0/22.0);
 
 #elif BLUR == 16
 
-	c =texture(tex,tc).rgba*(2.0/16.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 2.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-2.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 3.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-3.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 4.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-4.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 5.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-5.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 6.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-6.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy* 7.0).rgba*(1.0/16.0);
-	c+=texture(tex,tc+siz.xy*-7.0).rgba*(1.0/16.0);
+	c =SRGB(texture(tex,tc).rgba)*(2.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 2.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-2.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 3.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-3.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 4.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-4.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 5.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-5.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 6.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-6.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 7.0).rgba)*(1.0/16.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-7.0).rgba)*(1.0/16.0);
 
 #elif BLUR_COUNT == 382
 
-	c =texture(tex,tc).rgba*(128.0/382.0);
-	c+=texture(tex,tc+siz.xy* 1.0).rgba*(64.0/382.0);
-	c+=texture(tex,tc+siz.xy*-1.0).rgba*(64.0/382.0);
-	c+=texture(tex,tc+siz.xy* 2.0).rgba*(32.0/382.0);
-	c+=texture(tex,tc+siz.xy*-2.0).rgba*(32.0/382.0);
-	c+=texture(tex,tc+siz.xy* 3.0).rgba*(16.0/382.0);
-	c+=texture(tex,tc+siz.xy*-3.0).rgba*(16.0/382.0);
-	c+=texture(tex,tc+siz.xy* 4.0).rgba*(8.0/382.0);
-	c+=texture(tex,tc+siz.xy*-4.0).rgba*(8.0/382.0);
-	c+=texture(tex,tc+siz.xy* 5.0).rgba*(4.0/382.0);
-	c+=texture(tex,tc+siz.xy*-5.0).rgba*(4.0/382.0);
-	c+=texture(tex,tc+siz.xy* 6.0).rgba*(2.0/382.0);
-	c+=texture(tex,tc+siz.xy*-6.0).rgba*(2.0/382.0);
-	c+=texture(tex,tc+siz.xy* 7.0).rgba*(1.0/382.0);
-	c+=texture(tex,tc+siz.xy*-7.0).rgba*(1.0/382.0);
+	c =SRGB(texture(tex,tc).rgba)*(128.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 1.0).rgba)*(64.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-1.0).rgba)*(64.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 2.0).rgba)*(32.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-2.0).rgba)*(32.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 3.0).rgba)*(16.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-3.0).rgba)*(16.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 4.0).rgba)*(8.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-4.0).rgba)*(8.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 5.0).rgba)*(4.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-5.0).rgba)*(4.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 6.0).rgba)*(2.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-6.0).rgba)*(2.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy* 7.0).rgba)*(1.0/382.0);
+	c+=SRGB(texture(tex,tc+siz.xy*-7.0).rgba)*(1.0/382.0);
 
 #endif
 
-	FragColor=c.rgba;
+	FragColor=RGBS(c.rgba);
 
 }
 

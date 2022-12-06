@@ -22,6 +22,11 @@ echo build 32bit ubuntu 16.04 version
 ../vbox_1604_32/make $*
 
 
+echo build 64bit OSX 10.14 version
+
+../vbox_osx/make $*
+
+
 echo build arm/raspi
 
 ../vbox_arm/make $*

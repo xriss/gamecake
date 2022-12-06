@@ -1,8 +1,24 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+if [[ "${BASH_VERSINFO:-0}" -lt 4 ]]; then
+  echo "This script requires bash >= 4"
+  exit 1
+fi
+
+
 cd `dirname $0`
 cd ..
 
-arg_flags=("help debug release:1 clean gcc=gcc cpu=native win= openal=soft jobs=$(nproc||echo 1)")
+core_jobs=$(nproc||sysctl -n hw.logicalcpu||echo 1)
+set_gcc=gcc
+set_cpu=native
+
+if [ $(uname) = "Darwin" ] ; then
+set_gcc=osx
+set_cpu=x64
+fi
+
+arg_flags=("help debug release:1 clean gcc=$set_gcc cpu=$set_cpu win= openal=soft jobs=$core_jobs")
 
 arg_get() {
 key="$1"
@@ -129,6 +145,7 @@ Available options are :
 ./make --gcc=clang   # alternative nix build using clang
 ./make --gcc=emcc    # build using emscripten
 ./make --gcc=android # build using android
+./make --gcc=osx     # build using osx clang
 
 ./make --cpu=native  # use the host cpu (default)
 ./make --cpu=x32     # force a 32bit build
@@ -188,7 +205,7 @@ makeopts="config=release_$( arg_get gcc )"
 
 if [[ -n "$( arg_get debug )" ]] ; then
 
-makeopts="config=debug_$gcc"
+makeopts="config=debug_$( arg_get gcc )"
 
 fi
 
@@ -223,6 +240,7 @@ $PUREMAKE_LUA build/puremake --openal=$( arg_get openal ) gmake $( arg_get gcc )
 # enter that directory
 cd ${buildhere}
 
+echo $makeopts
 
 if [[ -n "$( arg_get clean )" ]] ; then
 

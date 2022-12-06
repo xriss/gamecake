@@ -30,13 +30,13 @@ vec4 sky(vec3 eye, vec4 blend)
 	
 	float daynight=smoothstep( -0.1 , 0.1 , sun.y );
 
-	vec3 color_sky=mix(     vec3( 0.0 , 0.2 , 0.7 ) , vec3( 0.0 , 0.0 , 0.1 ) , daynight );
-	vec3 color_horizon=mix( vec3( 0.2 , 0.2 , 0.5 ) , vec3( 0.0 , 0.0 , 0.2 ) , daynight );
-	vec3 color_floor=mix(   vec3( 0.0 , 0.0 , 0.0 ) , vec3( 0.0 , 0.0 , 0.0 ) , daynight );
-	vec3 color_sun=vec3( 1.0 , 0.8 , 0.4 );
-	vec3 color_moon=vec3( 0.75 , 0.75 , 0.75 );
+	vec4 color_sky=mix(     SRGB(vec4( 0.0 , 0.2 , 0.7 , 0.3 )) , SRGB(vec4( 0.0 , 0.0 , 0.1 , 0.3 )) , daynight );
+	vec4 color_horizon=mix( SRGB(vec4( 0.2 , 0.2 , 0.5 , 0.3 )) , SRGB(vec4( 0.0 , 0.0 , 0.2 , 0.3 )) , daynight );
+	vec4 color_floor=mix(   SRGB(vec4( 0.0 , 0.0 , 0.0 , 0.3 )) , SRGB(vec4( 0.0 , 0.0 , 0.0 , 0.3 )) , daynight );
+	vec4 color_sun=SRGB(vec4( 1.0 , 0.7 , 0.3 , 0.8 ));
+	vec4 color_moon=SRGB(vec4( 0.6 , 0.6 , 1.0 , 0.5 ));
 
-	vec3 color=color_horizon;
+	vec4 color=color_horizon;
 	color=mix( color , color_sky   , pow( smoothstep(0.0,1.0, -eye.y) , 1.0 ) );
 	color=mix( color , color_floor , pow( smoothstep(0.0,1.0,  eye.y) , 1.0 ) );
 	color=color*blend[1];
@@ -44,7 +44,7 @@ vec4 sky(vec3 eye, vec4 blend)
 	color=mix( color , color_sun  , smoothstep( 0.950 , 1.000 , sunc  )*blend[0] );
 	color=mix( color , color_moon , smoothstep( 0.990 , 0.991 , moonc )*blend[0] );
 
-	return vec4( color , 1.0 );
+	return vec4( color );
 }
 
 
@@ -59,6 +59,8 @@ precision highp float;
 precision mediump float;
 #endif
 #endif
+
+#include "gamecake_shader_funcs"
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -96,7 +98,7 @@ void main(void)
 {
 	vec3 v_eye = normalize( (inverse_modelview * inverse_projection * v_pos ).xyz ) ;
 	
-	FragColor=sky(v_eye,vec4(1.0));
+	FragColor=RGBS(sky(v_eye,vec4(1.0))*SRGB(color));
 }
 
 #endif

@@ -29,6 +29,48 @@ end
 -- module
 local M={ modname = (...) } package.loaded[M.modname] = M 
 
+--[[#lua.wetgenes.tasks.cocall
+
+	require("wetgenes.tasks").cocall(f1,f2,...)
+	require("wetgenes.tasks").cocall({f1,f2,...})
+
+Manage simple coroutines that can poll each others results and wait on 
+them.
+
+Turn a table of "setup" functions into a table of coroutines that can 
+yield waiting for other coroutines to complete and run them all.
+
+You still need to be carefull with race conditions but it allows you to 
+write code in such away that setup order is no longer important. Setup 
+functions can coroutine.yield waiting for another setup to finish first.
+
+]]
+
+M.cocall=function(...)
+	local functions={...}
+	if type(functions[1])=="table" then functions=functions[1] end -- a table of functions rather than a list
+
+	local coroutines={}
+
+	for n,f in pairs(functions) do
+		coroutines[n]=coroutine.create(f)
+	end
+
+	repeat
+		local runcount=0
+		for n,c in pairs(coroutines) do
+			if coroutine.status( c )=="suspended" then
+				runcount=runcount+1
+				local ok , err = coroutine.resume( c )
+				assert( ok , debug.traceback( c , err ) )
+			end
+		end
+	until runcount==0
+
+end
+
+
+
 M.tasks_functions={}
 M.tasks_metatable={__index=M.tasks_functions}
 
@@ -490,12 +532,12 @@ end
 A basic function to handle http memos.
 
 ]]
-M.http_code=function(linda,task_id,task_idx)
+M.tasks_functions.http_code=function(linda,task_id,task_idx)
 
 	local js_eval -- function call into javascript if we are an emcc build
 	do
-		local suc,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
-		if lib then js_eval=lib.js_eval end
+		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
+		if ok and lib then js_eval=lib.js_eval end
 	end
 
 	local http = lanes.require("socket.http")
@@ -667,13 +709,13 @@ more than one thread per database as they will just fight over file
 access.
 
 ]]
-M.sqlite_code=function(linda,task_id,task_idx)
+M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 
 	local sqlite3 = lanes.require("lsqlite3")
 
 	local db
-	
-	if sqlite_filename then	db = sqlite3.open(sqlite_filename) end -- auto open
+
+	if sqlite_filename then	db = assert(sqlite3.open(sqlite_filename)) end -- auto open
 	if sqlite_pragmas and db then db:exec(sqlite_pragmas) end -- auto configure
 
 	local function request(memo)
@@ -798,11 +840,185 @@ end
 
 
 
---[[#lua.wetgenes.tasks.test
+--[[#lua.wetgenes.tasks.client_code
 
-test
+A basic function to handle (web)socket client connection.
 
 ]]
+M.tasks_functions.client_code=function(linda,task_id,task_idx)
+print("starting client code")
+	set_debug_threadname(task_id)
+
+	local wjson = lanes.require("wetgenes.json")
+	local js_eval -- function call into javascript if we are an emcc build
+	do
+		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
+		if ok and lib then js_eval=lib.js_eval end
+	end
+	local js_call=function(script,opts)
+		local js=[[
+(function(opts){
+	var ret={};
+]]..script..[[
+	return JSON.stringify(ret);
+})(]]..wjson.encode(opts or {})..[[);
+]]
+		local rets=js_eval(js)
+		return wjson.decode( rets or "{}" ) or {}
+	end
+	
+	local socket = lanes.require("socket")
+	local err
+	local client
+	if js_eval then -- js mode
+print("starting client code js")
+
+		js_call([[
+
+globalThis.wetgenes_tasks=globalThis.wetgenes_tasks || {};
+globalThis.wetgenes_tasks[opts.task_id]=globalThis.wetgenes_tasks[opts.task_id] || {};
+
+var data=globalThis.wetgenes_tasks[opts.task_id];
+data.send=[];
+data.recv=[];
+
+data.onmessage=function(e){
+	console.log("onmessage OK");
+	data.recv.push(e.data);
+}
+data.onopen=function(e){
+	console.log("onopen OK");
+	console.log(e);
+}
+data.onclose=function(e){
+	console.log("onclose OK");
+	console.log(e);
+}
+data.onerror=function(e){
+	console.log("onerror OK");
+	console.log(e);
+}
+
+if(opts.url)
+{
+	data.sock=new WebSocket(opts.url);
+	data.sock.onmessage=data.onmessage;
+	data.sock.onopen=data.onopen;
+	data.sock.onclose=data.onclose;
+	data.sock.onerror=data.onerror;
+console.log(data.sock);
+}
+
+]],{task_id=task_id,url=client_url})
+	else
+		if client_host and client_port then -- auto open a client connection
+			client , err = socket.connect(client_host,client_port)
+			if client then client:settimeout(0.00001) end
+		end
+	end
+
+	local send=function(memo)
+	
+		if js_eval then -- need js mode
+			local ret=js_call([[
+
+var data=globalThis.wetgenes_tasks[opts.task_id];
+
+if(opts.data)
+{
+console.log("QUEUE:"+opts.data);
+	data.send.push(opts.data);
+}
+
+if(data.sock)
+{
+	if(data.sock.readyState==1)
+	{
+		while(data.send.length>0)
+		{
+console.log("SEND:"+send[0]);
+			data.sock.send(data.send.shift());
+		}
+	}
+	else
+	{
+//console.log("SOCK:"+data.sock.readyState);
+	}
+}
+while(data.recv.length>0)
+{
+console.log("RECV:"+recv[0]);
+	ret.data=(ret.data || "")+data.recv.shift();
+}
+
+]],{task_id=task_id,data=memo.data})
+
+			return ret
+		end -- end js mode
+		
+		local ret={}
+	
+		if memo.cmd then -- this is a special cmd eg to close or open a socket
+			if     memo.cmd=="connect" and not client then
+				client , err = socket.connect(memo.host,memo.port)
+				if client then client:settimeout(0.00001) end
+				if err then		ret.error=err
+				else			ret.result=true
+				end
+			elseif memo.cmd=="close" and client then
+				client:close()
+				client=nil
+				ret.result=true
+			end
+		end
+
+		if memo.data then -- something to send
+			if not client then return {error=err or true} end
+			client:send(memo.data)
+		end
+		
+		if client then -- try and read some data from server
+			local part,e,part2=client:receive("*a")
+			if e=="timeout" then err=nil part=part or part2 end -- ignore timeouts, they are not errors just partial data
+			if part~="" then ret.data=part end
+			if e then ret.error=e end
+		end
+		
+		return ret
+	end
+	
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+		
+		if memo then
+			local ok,ret=pcall(function() return send(memo) end) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
+		end
+
+	end
+	
+end
+
+--[[#lua.wetgenes.tasks.client
+
+Send and/or recieve a (web)socket client memo result.
+
+]]
+M.tasks_functions.client=function(tasks,memo)
+
+	if type(memo) == "string" then memo={data=memo} end
+	memo=memo or {}
+	memo.task=memo.task or "client"
+	
+	tasks:receive(memo)
+
+	if memo.error then return nil,memo.error end
+	return memo.result
+end
+
+
 M.test=function()
 
 	print("testing tasks")
@@ -812,14 +1028,14 @@ M.test=function()
 	tasks:add_thread({
 		count=8,
 		id="http",
-		code=M.http_code,
+		code=tasks.http_code,
 	})
 
 	tasks:add_thread({
 		count=1,
 		id="sqlite",
 		globals={sqlite_filename="test.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
-		code=M.sqlite_code,
+		code=tasks.sqlite_code,
 	})
 
 	local task=tasks:add_task({

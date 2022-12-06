@@ -190,7 +190,7 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 		
 		local sx=8--math.floor((widget.sx or 1)*8)
 		local sy=16--math.floor((widget.sy or 1)*16)
-		widget.over.text_size=sy
+		widget.scroll_widget.text_size=sy
 
 
 		local hx=widget.hx-8
@@ -246,8 +246,8 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 		end
 		
 	-- basic container widgets
-		swed.wgutter = widget.over:add{class="fill",hx=gx,   hy=sy*(swed.fakeline or 1),px=0, py=py}
-		swed.wtext   = widget.over:add{class="fill",hx=sx*80,hy=sy*(swed.fakeline or 1),px=px,py=py}
+		swed.wgutter = widget.scroll_widget:add{class="fill",hx=gx,   hy=sy*(swed.fakeline or 1),px=0, py=py}
+		swed.wtext   = widget.scroll_widget:add{class="fill",hx=sx*80,hy=sy*(swed.fakeline or 1),px=px,py=py}
 		
 		swed.wgutter:add{hx=gx-sx*2,hy=sy*1}
 		swed.wgutter:add{class="checkbox",hx=sx*2,hy=sy*1,color=0,text_false="+",text_true="-",data=swed.data.show}
@@ -259,7 +259,7 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 			end
 		end
 		
-		widget.over:layout()
+		widget.scroll_widget:resize_and_layout()
 
 	end
 	
@@ -269,7 +269,7 @@ end
 
 wtexteditor.texteditor_refresh=function(widget)
 
-	widget.over:clean_all()
+	widget.scroll_widget:clean_all(4)
 
 	widget.cursor_cx=nil
 	widget.cursor_cy=nil
@@ -442,17 +442,10 @@ end
 
 function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
-	if pan.meta.mouse(pan,act,_x,_y,keyname) then -- let children have precedence
-		return
-	end
+--	if pan.meta.mouse(pan,act,_x,_y,keyname) then -- let children have precedence
+--		return
+--	end
 
--- ignore clicks when we are not focused?
---[[
-	print(pan.master.focus == pan,pan.master.active == pan,pan.master.over == pan)
-	if pan.master.focus ~= pan and pan.master.active ~= pan then
-		return true
-	end
-]]	
 	if keyname=="right" and act==1 then
 		log("texteditor","righty clicky")
 		pan.master.later_append(function()
@@ -595,6 +588,49 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 	
 end
 
+function wtexteditor.msg(pan,m)
+	if m.class=="action" then -- only handle actions
+		local master=pan.master
+		local texteditor=pan.texteditor
+		local txt=texteditor.txt
+		if m.action==1 or m.action==0 then -- allow repeats
+			if m.id=="clip_copy" then
+				if m.action==1 then -- first press only
+					local s=txt.undo.copy() or ""
+					if s then wwin.set_clipboard(s) end
+				end
+			elseif m.id=="clip_cut" then
+				if m.action==1 then -- first press only
+					local s=txt.undo.cut() or ""
+					if s then wwin.set_clipboard(s) end
+					texteditor:scroll_to_view()
+				end
+			elseif m.id=="clip_paste" then
+				local s=wwin.get_clipboard() or ""
+				txt.undo.replace(s)
+				texteditor:scroll_to_view()
+			elseif m.id=="history_undo" then
+				txt.undo.undo()
+			elseif m.id=="history_redo" then
+				txt.undo.redo()
+			elseif m.id=="select_all" then
+				txt.mark(0,0,txt.hy+1,0)
+				texteditor.txt_dirty=true
+				texteditor:scroll_to_view()
+			elseif m.id=="clip_cutline" then
+				txt.mark(txt.cy,0,txt.cy+1,0)
+				local u=wwin.get_clipboard()
+				local s=txt.undo.cut()
+				if u and u:sub(-1)=="\n" then -- merge full lines if we hit k repeatedly
+					s=u..s
+				end
+				if s then wwin.set_clipboard(s) end
+				texteditor:scroll_to_view()
+			end
+		end
+	end
+end
+
 function wtexteditor.key(pan,ascii,key,act)
 --print("gotkey",ascii,act,key)
 
@@ -604,7 +640,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 
 	local cpre=function()
-		if master.key_shift then
+		if master.keystate_shift then
 			if not texteditor.mark_area then
 				texteditor.mark_area={txt.cy,txt.cx,txt.cy,txt.cx}
 			end
@@ -614,7 +650,7 @@ function wtexteditor.key(pan,ascii,key,act)
 		end
 	end
 	local cpost=function()
-		if master.key_shift and texteditor.mark_area then
+		if master.keystate_shift and texteditor.mark_area then
 				texteditor.mark_area[3]=txt.cy
 				texteditor.mark_area[4]=txt.cx
 				txt.mark(unpack(texteditor.mark_area))
@@ -711,7 +747,9 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			texteditor.txt_dirty=true
 
-			if master.key_control then
+			if not (master.keystate=="none" or master.keystate=="shift") then -- catch any special keys
+--[[
+			if master.keystate_control then
 			
 	--print(key)		
 				if key=="c" then	-- copy
@@ -745,7 +783,7 @@ function wtexteditor.key(pan,ascii,key,act)
 						txt.undo.redo()
 
 				end
-			
+]]			
 			elseif key=="enter" or key=="return" then
 
 				texteditor.float_cx=nil
@@ -784,7 +822,7 @@ function wtexteditor.key(pan,ascii,key,act)
 					if tx>1 then ty=ty+1 end
 					txt.mark(fy,0,ty,0)
 
-					if master.key_shift then
+					if master.keystate_shift then
 
 						local s=txt.undo.copy()
 						local ls=wstring.split_lines(s)
@@ -839,9 +877,6 @@ function wtexteditor.layout(widget)
 	widget.scroll_widget.hx=widget.hx
 	widget.scroll_widget.hy=widget.hy
 
-	widget.over.hx=widget.hx
-	widget.over.hy=widget.hy
-
 	return widget.meta.layout(widget)
 end
 
@@ -871,8 +906,6 @@ function wtexteditor.setup(widget,def)
 
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",scroll_pan="tiles",color=widget.color})
-
-	widget.over=widget:add({px=widget.px,py=widget.py,hx=widget.hx,hy=widget.hy,id="overtest"})
 
 	widget.scroll_widget.datx.step=8
 	widget.scroll_widget.daty.step=16
@@ -913,6 +946,7 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_widget.pan.solid=true
 	widget.scroll_widget.pan.can_focus=true
 
+	widget.scroll_widget.pan.msg=wtexteditor.msg
 	widget.scroll_widget.pan.key=wtexteditor.key
 	widget.scroll_widget.pan.mouse=wtexteditor.mouse
 
@@ -922,8 +956,8 @@ function wtexteditor.setup(widget,def)
 --		widget.gutter=#(" 01   ")
 --	end
 
-	if def.data then -- set starting text
-		widget.txt.set_text( def.data:value() )
+	if widget.data then -- set starting text
+		widget.txt.set_text( widget.data:value() )
 	end
 
 -- background foreground colour pairs
@@ -943,16 +977,16 @@ function wtexteditor.setup(widget,def)
 			0xff000000,	-- 	0,14
 			0xff000000,	-- 	0,15
 		},
-		lite={
-			0xffaaaaaa,0xff444444,	-- text			0,1
-			0xff777777,0xff999999,	-- gutter		2,3
-			0xffbbbbbb,0xff333333,	-- hilite		4,5
-			0xffaa6622,	-- keyword		0,6
-			0xffcc9922,	-- global		0,7
-			0xff777777,	-- comment		0,8
-			0xff559922,	-- string		0,9
-			0xff4488bb,	-- number		0,10
-			0xff666666,	-- punctuation	0,11
+		bright={
+			0xffcccccc,0xff000000,	-- text			0,1
+			0xffbbbbbb,0xff666666,	-- gutter		2,3
+			0xffdddddd,0xff000000,	-- hilite		4,5
+			0xffff0000,	-- keyword		0,6
+			0xffff6600,	-- global		0,7
+			0xff666666,	-- comment		0,8
+			0xff44cc00,	-- string		0,9
+			0xff0044ff,	-- number		0,10
+			0xff222222,	-- punctuation	0,11
 			0xff000000,	-- 	0,12
 			0xff000000,	-- 	0,13
 			0xff000000,	-- 	0,14
@@ -961,7 +995,13 @@ function wtexteditor.setup(widget,def)
 	}
 
 	local p={}
-	for i,v in ipairs(theme.dark) do
+
+	local t=theme.dark
+	if widget.master.theme and widget.master.theme.name and theme[widget.master.theme.name] then
+		t=theme[widget.master.theme.name]
+	end
+	
+	for i,v in ipairs(t) do
 		local l=#p
 		p[l+1],p[l+2],p[l+3],p[l+4]=pack.argb_pmb4(v)
 	end

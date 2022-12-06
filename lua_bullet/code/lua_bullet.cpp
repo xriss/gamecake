@@ -315,6 +315,9 @@ double hmin,hmax;
 int axis,dtype,flip;
 int i;
 btStridingMeshInterface *mesh;
+btCollisionShape *shape;
+btTransform trans;
+btQuaternion quat;
 
 // create ptr ptr userdata
 	pp=(btCollisionShape**)lua_newuserdata(l, sizeof(btCollisionShape*));
@@ -479,6 +482,52 @@ btStridingMeshInterface *mesh;
 				}
 		}
 		else
+		if(0==strcmp(tp,"compound"))
+		{
+			count=lua_objlen(l,2); // must be table
+			if( count>0 )
+			{
+				*pp = new btCompoundShape();
+				for(i=0;i<count;i+=1)
+				{
+					lua_rawgeti(l,2,i+1);
+					
+					length=lua_objlen(l,-1); // must be a child table { shape , px,py,pz, qx,qy,qz,qw }
+					
+					trans.setIdentity();
+			
+					lua_rawgeti(l,-1,1); lua_rawgeti(l,-1,0); shape=lua_bullet_shape_ptr(l,-1); lua_pop(l,2); // must have shape table with shape in [0]
+
+					if(length>=4) // have position
+					{
+						lua_rawgeti(l,-1,2); hx=luaL_checknumber(l,-1); lua_pop(l,1);
+						lua_rawgeti(l,-1,3); hy=luaL_checknumber(l,-1); lua_pop(l,1);
+						lua_rawgeti(l,-1,4); hz=luaL_checknumber(l,-1); lua_pop(l,1);
+
+						trans.setOrigin( btVector3(hx,hy,hz) );
+					}
+					
+					if(length>=8) // have rotation
+					{
+						lua_rawgeti(l,-1,5); qx=luaL_checknumber(l,-1); lua_pop(l,1);
+						lua_rawgeti(l,-1,6); qy=luaL_checknumber(l,-1); lua_pop(l,1);
+						lua_rawgeti(l,-1,7); qz=luaL_checknumber(l,-1); lua_pop(l,1);
+						lua_rawgeti(l,-1,8); qw=luaL_checknumber(l,-1); lua_pop(l,1);
+
+						trans.setRotation( btQuaternion(qx,qy,qz,qw) );
+					}
+
+					((btCompoundShape*)(*pp))->addChildShape( trans , shape );
+
+					lua_pop(l,1);
+				}
+			}
+			else
+			{
+				lua_pushstring(l,"missing table"); lua_error(l);
+			}
+		}
+		else
 		{
 			lua_pushstring(l,"unknown shape"); lua_error(l);
 		}
@@ -495,19 +544,19 @@ body
 
 const char *lua_bullet_body_meta_name="bullet_body*ptr";
 
-btRigidBody *  lua_bullet_body_ptr (lua_State *l,int idx)
+btCollisionObject *  lua_bullet_body_ptr (lua_State *l,int idx)
 {
-btRigidBody **pp=(btRigidBody**)luaL_checkudata(l, idx , lua_bullet_body_meta_name);
+btCollisionObject **pp=(btCollisionObject**)luaL_checkudata(l, idx , lua_bullet_body_meta_name);
 	if(!*pp) { luaL_error(l,"bullet body is null"); }
 	return *pp;
 }
 
 static int lua_bullet_body_destroy (lua_State *l)
 {	
-btRigidBody **pp=(btRigidBody**)luaL_checkudata(l, 1 , lua_bullet_body_meta_name);
+btCollisionObject **pp=(btCollisionObject**)luaL_checkudata(l, 1 , lua_bullet_body_meta_name);
 	if(*pp)
 	{
-		btMotionState * motion = (*pp)->getMotionState();
+		btMotionState * motion = ((btRigidBody*)(*pp))->getMotionState();
 		if( motion ) { delete motion; }
 		delete *pp;
 		(*pp)=0;
@@ -518,7 +567,7 @@ btRigidBody **pp=(btRigidBody**)luaL_checkudata(l, 1 , lua_bullet_body_meta_name
 static int lua_bullet_body_create (lua_State *l)
 {	
 const char *tp;
-btRigidBody **pp;
+btCollisionObject **pp;
 btCollisionShape *shape;
 double hx,hy,hz;
 int count;
@@ -529,36 +578,46 @@ btTransform trans;
 	trans.setIdentity();
 
 // create ptr ptr userdata
-	pp=(btRigidBody**)lua_newuserdata(l, sizeof(btRigidBody*));
+	pp=(btCollisionObject**)lua_newuserdata(l, sizeof(btRigidBody*));
 	(*pp)=0;
 	luaL_getmetatable(l, lua_bullet_body_meta_name);
 	lua_setmetatable(l, -2);
 
 // allocate cpbody
-		tp=luaL_checkstring(l,1);
-		if(0==strcmp(tp,"rigid"))
+	tp=luaL_checkstring(l,1);
+	if(0==strcmp(tp,"rigid"))
+	{
+		shape=lua_bullet_shape_ptr(l, 2 );
+		mass=lua_tonumber(l,3);
+		trans.setOrigin(btVector3( lua_tonumber(l,4) ,  lua_tonumber(l,5) , lua_tonumber(l,6) ));
+
+		btVector3 localInertia(0, 0, 0);
+		if(mass != 0.f)
 		{
-			shape=lua_bullet_shape_ptr(l, 2 );
-
-			mass=lua_tonumber(l,3);
-
-			trans.setOrigin(btVector3( lua_tonumber(l,4) ,  lua_tonumber(l,5) , lua_tonumber(l,6) ));
-
-			btVector3 localInertia(0, 0, 0);
-			if(mass != 0.f)
-			{
-				shape->calculateLocalInertia(mass, localInertia);
-			}
-
-			btDefaultMotionState* myMotionState = new btDefaultMotionState(trans);
-			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, shape, localInertia);
-			*pp = new btRigidBody(rbInfo);
-
+			shape->calculateLocalInertia(mass, localInertia);
 		}
-		else
-		{
-			lua_pushstring(l,"unknown body type"); lua_error(l);
-		}
+
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(trans);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, shape, localInertia);
+		*pp = new btRigidBody(rbInfo);
+
+	}
+	else
+	if(0==strcmp(tp,"ghost"))
+	{
+		shape=lua_bullet_shape_ptr(l, 2 );
+		mass=lua_tonumber(l,3);
+		trans.setOrigin(btVector3( lua_tonumber(l,4) ,  lua_tonumber(l,5) , lua_tonumber(l,6) ));
+
+		*pp = (btCollisionObject*) new btPairCachingGhostObject();
+		(*pp)->setCollisionShape(shape);
+		(*pp)->setWorldTransform(trans);
+
+	}
+	else
+	{
+		lua_pushstring(l,"unknown body type"); lua_error(l);
+	}
 
 	return 1;
 }
@@ -608,11 +667,45 @@ add body to world
 */
 static int lua_bullet_world_add_body (lua_State *l)
 {
+const char *tp;
 btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
-btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
 
-	world->addRigidBody(body);
+	tp=luaL_checkstring(l,2);
+	if(0==strcmp(tp,"rigid"))
+	{
+		btRigidBody             *body  = (btRigidBody*)lua_bullet_body_ptr(l, 3 );
+		if( lua_isnumber(l,4) )
+		{
+			int group=lua_tonumber(l,4);
+			int mask=lua_tonumber(l,5);
+			world->addRigidBody(body,group,mask);
+		}
+		else
+		{
+			world->addRigidBody(body);
+		}
+	}
+	else
+	if(0==strcmp(tp,"ghost"))
+	{
+		btGhostObject             *body  = (btGhostObject*)lua_bullet_body_ptr(l, 3 );
+		if( lua_isnumber(l,4) )
+		{
+			int group=lua_tonumber(l,4);
+			int mask=lua_tonumber(l,5);
+			world->addCollisionObject(body,group,mask);
+		}
+		else
+		{
+			world->addCollisionObject(body);
+		}
+	}
+	else
+	{
+		lua_pushstring(l,"unknown body type"); lua_error(l);
+	}
 
+	
 	return 0;
 }
 
@@ -624,7 +717,7 @@ remove body from world
 static int lua_bullet_world_remove_body (lua_State *l)
 {
 btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
-btRigidBody             *body  = lua_bullet_body_ptr(l, 2 );
+btRigidBody             *body  = (btRigidBody*)lua_bullet_body_ptr(l, 2 );
 
 	world->removeRigidBody(body);
 
@@ -669,6 +762,15 @@ double x,y,z;
 	btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
 //	closestResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
 
+
+	lua_pushstring(l,"cmask"); lua_gettable(l,2);
+	if( lua_isnumber(l,-1) )
+	{
+		closestResults.m_collisionFilterMask=luaL_checknumber(l,-1);
+	}
+	lua_pop(l,1);
+
+
 	world->rayTest(from, to, closestResults);
 
 	if(closestResults.hasHit())
@@ -679,11 +781,13 @@ double x,y,z;
 		lua_pushstring(l,"fraction"); lua_pushnumber(l, closestResults.m_closestHitFraction ); lua_settable(l,-3);
 
 		lua_newtable(l);
-		lua_pushstring(l,"normal"); lua_pushvalue(l, -2 ); lua_settable(l,-3);
+		lua_pushstring(l,"normal"); lua_pushvalue(l, -2 ); lua_settable(l,-4);
 		lua_pushnumber(l,1); lua_pushnumber(l, closestResults.m_hitNormalWorld.getX() ); lua_settable(l,-3);
 		lua_pushnumber(l,2); lua_pushnumber(l, closestResults.m_hitNormalWorld.getY() ); lua_settable(l,-3);
 		lua_pushnumber(l,3); lua_pushnumber(l, closestResults.m_hitNormalWorld.getZ() ); lua_settable(l,-3);
 		lua_pop(l,1);
+		
+		lua_pushstring(l,"body_ptr"); lua_pushlightuserdata(l, (void*)closestResults.m_collisionObject ); lua_settable(l,-3);
 		
 		lua_pop(l,1);
 	}
@@ -729,6 +833,19 @@ btCollisionShape *shape = lua_bullet_shape_ptr(l, 1 );
 }
 
 
+/*+------------------------------------------------------------------+**
+
+get shape pointer
+
+*/
+static int lua_bullet_shape_ptr (lua_State *l)
+{
+btCollisionShape *shape = lua_bullet_shape_ptr(l, 1 );
+
+	lua_pushlightuserdata(l,shape);
+
+	return 1;
+}
 
 /*+------------------------------------------------------------------+**
 
@@ -737,7 +854,7 @@ get body position and rotation ( 7 numbers )
 */
 static int lua_bullet_body_transform (lua_State *l)
 {
-btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btCollisionObject *body = (btCollisionObject*)lua_bullet_body_ptr(l, 1 );
 btTransform trans;
 
 	if( lua_isnumber(l,2) )
@@ -779,7 +896,7 @@ get/set body velocity
 */
 static int lua_bullet_body_velocity (lua_State *l)
 {
-btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isnumber(l,2) )
 	{
@@ -802,7 +919,7 @@ get/set body angular velocity
 */
 static int lua_bullet_body_angular_velocity (lua_State *l)
 {
-btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isnumber(l,2) )
 	{
@@ -825,7 +942,7 @@ get/set body restitution
 */
 static int lua_bullet_body_restitution (lua_State *l)
 {
-btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isnumber(l,2) )
 	{
@@ -844,7 +961,7 @@ get/set friction values linear,angular
 */
 static int lua_bullet_body_friction (lua_State *l)
 {
-btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isnumber(l,2) )
 	{
@@ -873,11 +990,11 @@ get/set damping values linear,angular
 */
 static int lua_bullet_body_damping (lua_State *l)
 {
-btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isnumber(l,2) )
 	{
-		body->setDamping( lua_tonumber(l,2) , lua_tonumber(l,2) );
+		body->setDamping( lua_tonumber(l,2) , lua_tonumber(l,3) );
 	}
 
 	lua_pushnumber(l,body->getLinearDamping());
@@ -895,7 +1012,7 @@ set both to 0 to disable CCD which is the starting default
 */
 static int lua_bullet_body_ccd (lua_State *l)
 {
-btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isnumber(l,2) )
 	{
@@ -916,7 +1033,7 @@ get/set active state
 */
 static int lua_bullet_body_active (lua_State *l)
 {
-btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isboolean(l,2) )
 	{
@@ -942,7 +1059,7 @@ get/set linear factor
 */
 static int lua_bullet_body_factor (lua_State *l)
 {
-btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isnumber(l,2) )
 	{
@@ -969,7 +1086,7 @@ surface.
 */
 static int lua_bullet_body_angular_factor (lua_State *l)
 {
-btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isnumber(l,2) )
 	{
@@ -994,7 +1111,7 @@ If set this enables the trimesh smoothing for this object.
 */
 static int lua_bullet_body_custom_material_callback (lua_State *l)
 {
-btRigidBody *body = lua_bullet_body_ptr(l, 1 );
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isboolean(l,2) )
 	{
@@ -1013,6 +1130,81 @@ btRigidBody *body = lua_bullet_body_ptr(l, 1 );
 	return 1;
 }
 
+/*+------------------------------------------------------------------+**
+
+get/set body gravity
+
+*/
+static int lua_bullet_body_gravity (lua_State *l)
+{
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isnumber(l,2) )
+	{
+		body->setGravity(btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) ));
+	}
+
+	btVector3 v=body->getGravity();
+
+	lua_pushnumber(l,v.getX());
+	lua_pushnumber(l,v.getY());
+	lua_pushnumber(l,v.getZ());
+
+	return 3;
+}
+
+
+/*+------------------------------------------------------------------+**
+
+get/set body cgroup
+
+*/
+static int lua_bullet_body_cgroup (lua_State *l)
+{
+btCollisionObject *body = lua_bullet_body_ptr(l, 1 );
+btBroadphaseProxy *broad=body->getBroadphaseHandle();
+
+	if( lua_isnumber(l,2) )
+	{
+		broad->m_collisionFilterGroup=lua_tonumber(l,2);
+	}
+	lua_pushnumber(l,broad->m_collisionFilterGroup);
+
+	return 1;
+}
+
+/*+------------------------------------------------------------------+**
+
+get/set body cmask
+
+*/
+static int lua_bullet_body_cmask (lua_State *l)
+{
+btCollisionObject *body = lua_bullet_body_ptr(l, 1 );
+btBroadphaseProxy *broad=body->getBroadphaseHandle();
+
+	if( lua_isnumber(l,2) )
+	{
+		broad->m_collisionFilterMask=lua_tonumber(l,2);
+	}
+	lua_pushnumber(l,broad->m_collisionFilterMask);
+
+	return 1;
+}
+
+/*+------------------------------------------------------------------+**
+
+get real body ptr
+
+*/
+static int lua_bullet_body_ptr (lua_State *l)
+{
+btCollisionObject *body = lua_bullet_body_ptr(l, 1 );
+
+	lua_pushlightuserdata(l,body);
+
+	return 1;
+}
 
 /*+------------------------------------------------------------------+**
 
@@ -1086,6 +1278,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"world_ray_test",					lua_bullet_world_ray_test},
 
 		{"shape_margin",					lua_bullet_shape_margin},
+		{"shape_ptr",						lua_bullet_shape_ptr},
 
 		{"body_transform",					lua_bullet_body_transform},
 		{"body_velocity",					lua_bullet_body_velocity},
@@ -1095,6 +1288,10 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_ccd",						lua_bullet_body_ccd},
 		{"body_active",						lua_bullet_body_active},
 		{"body_factor",						lua_bullet_body_factor},
+		{"body_gravity",					lua_bullet_body_gravity},
+		{"body_cgroup",						lua_bullet_body_cgroup},
+		{"body_cmask",						lua_bullet_body_cmask},
+		{"body_ptr",						lua_bullet_body_ptr},
 
 		{"body_angular_velocity",			lua_bullet_body_angular_velocity},
 		{"body_angular_factor",				lua_bullet_body_angular_factor},

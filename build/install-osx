@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+cd `dirname $0`
+
+
+# assuming we have brew and most basics otherwise we would not be here ..
+
+brew install luajit
+
+brew install sdl2
+

@@ -8,6 +8,8 @@ local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local wgrd=require("wetgenes.grd")
+local wzips=require("wetgenes.zips")
+local wcsv=require("wetgenes.csv")
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -34,11 +36,20 @@ M.bake=function(oven,gui)
 	local docs=oven.rebake(oven.modname..".docs")
 	local show=oven.rebake(oven.modname..".show")
 
-	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,text_size=24,grid_size=32,skin=0})
+	local ssettings=oven.rebake("wetgenes.gamecake.spew.settings")
 
+	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font=4,skin=0})
+	local gui_theme=ssettings.get("gui_theme","theme_dark_medium")
+	gui.master:set_theme(gui.master.actions[gui_theme].json)
 
+gui.loaded=false
 gui.loads=function()
+	if gui.loaded then return end gui.loaded=true
 	oven.rebake("wetgenes.gamecake.widgets").loads()
+
+	local filename="lua/swanky/edit/actions.csv"
+	local text=assert(wzips.readfile(filename),"file not found: "..filename)
+	gui.master.load_actions(wcsv.map(wcsv.parse(text)))
 
 end
 
@@ -59,8 +70,11 @@ end
 gui.clean=function()
 end
 
-
 gui.msg=function(m)
+
+	if m.class=="action" and m.action==1 then -- deal with actions
+		gui.action(m)
+	end
 		
 	gui.master:msg(m)
 
@@ -112,8 +126,9 @@ gui.data_setup=function()
 			{str="output"},
 		}})
 
-		datas.new({id="run_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
+		datas.new({id="run_mode"  ,class="list",  hooks=gui.hooks,num=2,list={
 			{str="none"},
+			{str="auto"},
 			{str="glsl"},
 			{str="fun64"},
 		}})
@@ -125,7 +140,7 @@ gui.data_setup=function()
 			{str="autoplay"},
 		}})
 
-		datas.new({id="run_scale"  ,class="list",  hooks=gui.hooks,num=2,list={
+		datas.new({id="run_scale"  ,class="list",  hooks=gui.hooks,num=1,list={
 			{str="x1"},
 			{str="x2"},
 			{str="x4"},
@@ -157,6 +172,75 @@ function gui.refresh_tree()
 	gui.master.ids.treefile.tree_widget:refresh()
 end
 
+function gui.action(m)
+
+	if m.id=="file_quit" then
+	
+		oven.next=true
+
+	elseif m.id=="file_open" then
+
+		gui.screen.dialogs:show({
+			lines={"Load..."
+			},
+			file={},
+			cancel=function()end,
+			hooks=function(act,it)
+				local window=it ; while not window.close_request and window.parent~=window do window=window.parent end
+				if act=="file_name_click" then
+					local path=window.file:path()
+					req.master.later_append(function()
+						docs.manifest(path):show()
+					end)
+					window:close_request()
+				end
+				if act=="click" then
+					window.close_request(it.id)
+				end
+			end
+		})
+
+	elseif m.id=="file_close" then
+
+	elseif m.id=="file_save" then
+
+		docs.doc:save()
+
+	elseif m.id=="file_saveall" then
+
+--			docs.doc:save()
+
+	elseif m.id=="file_saveas" then
+
+		gui.screen.dialogs:show({
+			lines={"Save..."
+			},
+			file={},
+			ok=function(window)
+				local path=window.file:path()
+				window.master.later_append(function()
+					docs.doc:save(path)
+				end)
+			end,
+			cancel=function()end,
+		})
+
+	elseif m.id:sub(1,6)=="theme_" then -- all themes
+		local a=gui.master.actions[m.id]
+		if a then
+			gui.theme(a.json)
+			ssettings.set("gui_theme",m.id)
+		end
+	end
+
+end
+
+function gui.theme(def)
+		gui.master:clean_all()
+		gui.master:set_theme(def)
+		gui.plan_windows(gui.master)
+end
+
 function gui.hooks(act,w,dat)
 
 	if act=="file_name_click" then
@@ -171,66 +255,15 @@ function gui.hooks(act,w,dat)
 
 	elseif act=="click" then
 
+		if w.action then -- auto trigger action
+			gui.master.push_action_msg(w.id,w.user)
+		end
+
 --print("CLICK",w.id)
 
 		if w.id=="font_size" then
 		
 			gui.font_size=w.user
-
-		elseif w.id=="quit" then
-		
-			oven.next=true
-		
-		elseif w.id=="load" then
-		
-			gui.screen.dialogs:show({
-				lines={"Load..."
-				},
-				file={},
-				cancel=function()end,
-				hooks=function(act,it)
-					local window=it ; while not window.close_request and window.parent~=window do window=window.parent end
-					if act=="file_name_click" then
-						local path=window.file:path()
-						req.master.later_append(function()
-							docs.manifest(path):show()
-						end)
-						window:close_request()
-					end
-					if act=="click" then
-						window.close_request(it.id)
-					end
-				end
-			})
-
-		elseif w.id=="save" then
-		
-			docs.doc:save()
-
-		elseif w.id=="saveas" then
-
-			gui.screen.dialogs:show({
-				lines={"Save..."
-				},
-				file={},
-				ok=function(window)
-					local path=window.file:path()
-					window.master.later_append(function()
-						docs.doc:save(path)
-					end)
-				end,
-				cancel=function()end,
-			})
-
-		elseif w.id=="dialog" then
-		
-			gui.screen.dialogs:show({
-				lines={"Save..."
-				},
-				file={},
-				sorry=function()end
-			})
-
 
 		elseif w.id=="run_play_restart" then
 
@@ -271,29 +304,7 @@ function gui.hooks(act,w,dat)
 
 	if act=="value" then
 
-		if w.id=="run_mode" then -- change
-
-			if w.str=="glsl" or  w.str=="fun64" then
-
-				local ss=math.pow(2,gui.master.datas.get_value("run_scale")-1)
-				
-				gui.master.ids.runscale.sx=ss
-				gui.master.ids.runscale.sy=ss
-
-				gui.master.ids.dock2.hy=math.floor(gui.master.ids.dock2.parent.hy/2)
-				gui.master:layout()
-
-			else
-
-				gui.master.ids.runscale.sx=1
-				gui.master.ids.runscale.sy=1
-
-				gui.master.ids.dock2.hy=0
-				gui.master:layout()
-			
-			end
-
-		elseif w.id=="list_mode" then -- change
+		if w.id=="list_mode" then -- change
 
 			if w.str=="tree" then
 
@@ -467,8 +478,10 @@ local lay=
 
 		gui.screen=gui.master:add(lay)
 
+--[[
 		gui.menu_datas={
 			font_size={
+				{id="font_size",user=0.00,text="Font Size from theme"},
 				{id="font_size",user=1.00,text="Font Size 16px"},
 				{id="font_size",user=1.25,text="Font Size 20px"},
 				{id="font_size",user=1.50,text="Font Size 24px"},
@@ -476,25 +489,45 @@ local lay=
 				{id="font_size",user=2.00,text="Font Size 32px"},
 			},
 		}
+]]
 
 		widgets_menuitem.menu_add(gui.master.ids.menubar,{top=gui.master.ids.menubar,menu_data={
-			menu_px=0,menu_py=1,
+--			menu_px=0,menu_py=1,
 	--		func_text=func_text,
 			hooks=gui.hooks,
 			inherit=true,
 
-			{id="topmenu",text="File",top_only=true,menu_data={
-				{id="load",user="load",text="Load..."},
-				{id="save",user="save",text="Save"},
-				{id="saveas",user="saveas",text="Save as..."},
-				{id="quit",user="quit",text="Quit"},
+			{id="menu_file",text="File",top_menu=true,menu_data={
+				{id="file_open"},
+				{id="file_close"},
+				{id="file_save"},
+				{id="file_saveas"},
+				{id="file_saveall"},
+				{id="menu_theme",text="Theme",menu_data={
+					{id="theme_dark_small"},
+					{id="theme_dark_medium"},
+					{id="theme_dark_large"},
+					{id="theme_bright_small"},
+					{id="theme_bright_medium"},
+					{id="theme_bright_large"},
+				}},
+				{id="file_quit"},
 			}},
-			{id="topmenu",text="Windows",top_only=true,menu_data={
-				{id="dialog",user="1",text="Dialogue 1"},
+--			{id="menu_window",text="Windows",top_menu=true,menu_data={
+--				{id="dialog",user="1",text="Dialogue 1"},
+--			}},
+			{id="menu_edit",text="Edit",top_menu=true,menu_data={
+				{id="select_all"},
+				{id="clip_copy"},
+				{id="clip_cut"},
+				{id="clip_paste"},
+				{id="clip_cutline"},
+				{id="history_undo"},
+				{id="history_redo"},
 			}},
-			{id="topmenu",text="Font",top_only=true,menu_data=gui.menu_datas.font_size},
+--			{id="menu_font",text="Font",top_menu=true,menu_data=gui.menu_datas.font_size},
 --[[
-			{id="topmenu",text="Run",top_only=true,menu_data={
+			{id="topmenu",text="Run",top_menu=true,menu_data={
 				{id="run",user="hide",text="Hide"},
 				{id="run",user="glsl",text="GLSL"},
 			}},
@@ -535,9 +568,12 @@ local lay=
 		end
 
 -- font resize
-		gui.font_size=1.25
+		gui.font_size=0
 		gui.master.ids.texteditor.hook_resize=function(it)
 			local ss=gui.font_size
+			if ss==0 then
+				ss=gui.master.text_size/16
+			end
 			it.smode="topleft"
 			it.hx=math.ceil(it.parent.hx/ss)
 			it.hy=math.ceil(it.parent.hy/ss)

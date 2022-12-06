@@ -28,7 +28,22 @@ extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 static unsigned char vb[SIZEOF_VB] __attribute__((aligned (16)));
 
 
-extern const char* wetgenes_cache_lua_mods[];
+extern const char* wetgenes_cache_lua_files[];
+
+static const char *wetgenes_cache_find_file(const char *name)
+{
+	const char *data=(const char *)0;
+	int i;
+	for(i=0;wetgenes_cache_lua_files[i];i+=2)
+	{
+		if(strcmp(name,wetgenes_cache_lua_files[i])==0)
+		{
+			data=wetgenes_cache_lua_files[i+1];
+			break;
+		}
+	}
+	return data;
+}
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -240,15 +255,14 @@ static int lua_gamecake_get_cache_string(lua_State *l)
 {
 	const char *name = (const char *)luaL_checkstring(l, 1);
 
-	int i;
-	for(i=0;wetgenes_cache_lua_mods[i];i+=2)
+	const char *data = wetgenes_cache_find_file(name);
+
+	if(data)
 	{
-		if(strcmp(name,wetgenes_cache_lua_mods[i])==0)
-		{
-			lua_pushstring(l,wetgenes_cache_lua_mods[i+1]);
-			return 1;
-		}
+		lua_pushstring(l,data);
+		return 1;
 	}
+	
 	return 0;
 }
 
@@ -262,9 +276,9 @@ static int lua_gamecake_list_cache_strings(lua_State *l)
 {
 	int i;
 	lua_newtable(l);
-	for(i=0;wetgenes_cache_lua_mods[i];i+=2)
+	for(i=0;wetgenes_cache_lua_files[i];i+=2)
 	{
-		lua_pushstring(l, wetgenes_cache_lua_mods[i] );
+		lua_pushstring(l, wetgenes_cache_lua_files[i] );
 		lua_rawseti(l,-2,1+(i/2));
 	}
 	return 1;

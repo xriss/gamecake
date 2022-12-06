@@ -6,6 +6,7 @@
 
 mod_files={}
 
+--[[
 function dofilename(i,v)
 	local m=v:sub(v:find("/lua/")+5,-1) -- strip upto this starting part of the path (mostly works)
 	m=m:sub(1,-5):gsub("/",".") -- remove tail and replace / with .
@@ -13,6 +14,7 @@ function dofilename(i,v)
 	mod_files[m]=v
 --	print(m,v)
 end
+]]
 
 
 function dorawfilename(i,v)
@@ -22,8 +24,7 @@ function dorawfilename(i,v)
 --	print(m,v)
 end
 
-for i,v in ipairs( os.matchfiles("../lua/**.lua") or {} ) do dofilename(i,v) end
-for i,v in ipairs( os.matchfiles("../lua/**.glsl") or {} ) do dorawfilename(i,v) end
+for i,v in ipairs( os.matchfiles("../lua/**") or {} ) do dorawfilename(i,v) end
 
 
 for i,v in ipairs( LUA_CACHE_FILES or {} ) do
@@ -96,11 +97,44 @@ end
 
 	put([[
 
-const char* wetgenes_cache_lua_mods[]={
+const char* wetgenes_cache_lua_modnames[]={
 
 ]])
 
-	for i,v in pairs(mod_files) do
+	for n,v in pairs(mod_files) do
+	
+	local m=n
+
+	if m:sub(-4)==".lua" then -- only lua files
+		local m=m:sub(m:find("lua/")+4,-1) -- strip upto this starting part of the path (mostly works)
+		m=m:sub(1,-5):gsub("/",".") -- remove tail and replace / with .
+		if m:sub(-5,-1)==".init" then m=m:sub(1,-6) end -- special init.lua case
+
+--print(m,n)
+
+
+		put(string.format([[
+%q,%q,
+
+]],m,n))
+		end
+
+	end
+
+	put([[
+
+0,0};
+
+]])
+
+
+	put([[
+
+const char* wetgenes_cache_lua_files[]={
+
+]])
+
+	for n,v in pairs(mod_files) do
 	
 	local d=readfile(v)
 
@@ -114,7 +148,7 @@ const char* wetgenes_cache_lua_mods[]={
 	put(string.format([[
 %q,"%s",
 
-]],i,d))
+]],n,d))
 
 	end
 

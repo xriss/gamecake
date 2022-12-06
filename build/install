@@ -1,3 +1,12 @@
+#!/usr/bin/env bash
+
+
+if [[ "${BASH_VERSINFO:-0}" -lt 4 ]]; then
+  echo "This script requires bash >= 4"
+  exit 1
+fi
+
+
 cd `dirname $0`
 
 trap ' trap - INT ;  kill -s INT "$$" ' INT
@@ -12,7 +21,7 @@ if ! [[ -x "$(command -v require.sh)" ]] ; then
 
 fi
 
-arg_flags=("luajit=git sdl2=2.0.16 help mingw android")
+arg_flags=("luajit=git sdl2=2.0.22 help mingw android")
 
 arg_get() {
 key="$1"

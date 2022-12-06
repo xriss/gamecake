@@ -222,9 +222,12 @@ end
 
 function base_sheet.batch_draw(sheet)
 
-	images.bind(sheet.img)
---	gl.BindTexture(gl.TEXTURE_2D,sheet.img.id)	
-	cake.canvas.flat.tristrip("rawuvrgba",sheet.batch)
+	cake.canvas.flat.tristrip("rawuvrgba",sheet.batch,nil,function(p)
+			gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+			images.bind(sheet.img)
+			gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
+			gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+	end)
 
 end
 

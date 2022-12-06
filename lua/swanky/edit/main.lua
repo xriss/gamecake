@@ -193,7 +193,10 @@ resultierendes Vergnügen?
 		
 		gui.update()
 		
+		show.update()
+
 		gui.master.ids.runfbo:set_dirty()
+
 
 	end
 

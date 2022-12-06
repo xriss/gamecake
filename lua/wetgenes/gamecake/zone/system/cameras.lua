@@ -18,7 +18,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.bake=function(oven,B) B=B or {} -- bound to oven for gl etc
 
 
-	local gui=oven.rebake(oven.modname..".gui")
+	local gui=oven.rebake("wetgenes.gamecake.zone.gui")
+--	local ok,gui=pcall(function() return oven.rebake(oven.modname..".gui") end)
 
 	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 
@@ -52,10 +53,10 @@ B.cameras.draw_head=function(cameras)
 
 	if camera then
 
-		gl.MultMatrix(camera.inv)
+		gl.MultMatrix(camera.inv) -- remove camera transform
 
 		gl.uniforms.camera=function(u)
-			gl.UniformMatrix4f( u , camera.mtx )
+			gl.UniformMatrix4f( u , camera.mtx ) -- so we can apply it later
 		end
 
 	end
@@ -74,11 +75,9 @@ end
 
 B.cameras.create=function(cameras,boot)
 	local camera={}
-	camera.scene=cameras.scene
-	camera.boot=boot
-	camera.caste=cameras.caste
 	camera.cameras=cameras
 	setmetatable(camera,B.camera_metatable)
+	cameras.scene.add( camera , cameras.caste , boot )
 
 	camera.up=1
 
@@ -144,13 +143,14 @@ B.camera.update=function(camera)
 			local mouse_button=up.button("mouse_right") or up.button("mouse_left") or false
 			local lx=up.axisfixed("lx")
 			local ly=up.axisfixed("ly")
-			local rx=up.axisfixed("rx")
-			local ry=up.axisfixed("ry")
+			local rx=up.axisfixed("rxb")
+			local ry=up.axisfixed("ryb")
 			local r3=up.button("r3") or false
-			local mx=up.axis("mx") or 0
-			local my=up.axis("my") or 0
+			local mx=up.axis("mx") or 0 ; if mx>32768 then mx=mx-65536 end
+			local my=up.axis("my") or 0 ; if my>32768 then my=my-65536 end
 			local mz=up.axis("mz") or 0 ; if mz>32768 then mz=mz-65536 end
 
+--print(rx,ry)
 			local rotfix=function(n)
 				local d=(n+180)/360
 				d=d-math.floor(d)
@@ -172,11 +172,11 @@ B.camera.update=function(camera)
 			local do_orbit=mouse_button
 			local do_zoom=true
 
-			if gui.master.hidden then -- no gui displayed
+			if gui and gui.master and gui.master.hidden then -- no gui displayed
 
 				do_orbit=true
 
-			elseif gui.master.over ~=  gui.master then -- ignore clicks on gui
+			elseif gui and gui.master and gui.master.over then -- ignore clicks on gui
 
 				do_orbit=false
 				do_zoom=false
@@ -234,18 +234,28 @@ B.camera.update=function(camera)
 		q:rotate( camera.rot[3] ,  {0,0,1} )
 		local d=V3(0,0,1):product(q)
 
-		local test=physics.world:ray_test({
-			ray={
-				camera.pos+V3(0,0,0),
-				camera.pos+(d*camera.dolly)+V3(0,0,0),
-			},
-		})
-		if test.hit then
-			camera.orbit.dolly = ( camera.orbit.dolly*3 + test.hit.fraction ) /4
-		else
-			camera.orbit.dolly = ( camera.orbit.dolly*3 + 1 ) /4
+		
+		local frac=1
+	
+		for yp=-3,3,3 do
+			local test=physics.world:ray_test({
+				ray={
+					camera.pos+V3(0,0,0),
+					camera.pos+(d*camera.dolly)+V3(0,0+yp,0),
+				},
+				cmask=0x00ff,
+			})
+			if test.hit then
+--				test.hit.body=physics.world.bodies[test.hit.body_ptr]
+				if test.hit.fraction < frac then
+					frac=test.hit.fraction
+				end
+			end
 		end
+--		camera.orbit.dolly = ( camera.orbit.dolly*3 + frac ) /4
+		camera.orbit.dolly = frac
 	end
+	
 
 
 

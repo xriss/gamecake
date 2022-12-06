@@ -154,13 +154,13 @@ available as caste names.
 			for i,v in ipairs(scene.systems) do
 				if v.caste==it.caste then -- replace
 					scene.systems[i]=it
-					if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then
+					if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then -- filter invalid system names
 						scene.systems[it.caste]=it
 					end
 					return
 				end
 			end
-			if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then
+			if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then -- filter invalid system names
 				scene.systems[it.caste]=it
 			end
 		end
@@ -196,6 +196,37 @@ an fname function to call.
 		end
 		return count -- number of systems called
 	end
+
+--[[#lua.wetgenes.gamecake.zone.scene.systems.cocall
+
+	scene.systems.cocall(fname,...)
+
+For every system call the function called fname inside a coroutine like 
+so.
+
+	system[fname](system,...)
+
+Returns the number of calls made, which will be the number of systems that had
+an fname function to call.
+
+]]
+	scene.systems.cocall=function(fname,...)
+		local functions={}
+		local count=0
+		for i=#scene.systems,1,-1 do -- call backwards so item can remove self
+			local system=scene.systems[i]
+			if system[fname] then
+				local fargs={system,...}
+				local fcall=system[fname]
+				functions[#functions+1]=function() fcall(unpack(fargs)) end
+				count=count+1
+			end
+		end
+		require("wetgenes.tasks").cocall(functions)
+		return count -- number of systems called
+	end
+
+
 
 
 	scene.sortby=scene.sortby or {} -- custom sort weights for update/draw order of each caste
@@ -261,15 +292,28 @@ scene.sortby is used to keep this list in order.
 
 --[[#lua.wetgenes.gamecake.zone.scene.add
 
+	scene.add(it,caste,boot)
 	scene.add(it,caste)
 	scene.add(it)
 
 Add a new item of caste or it.caste to the list of things to update.
 
+The optional boot table contains initialisation/reset values and will 
+be remembered in item.boot. If boot.id is given then we will remember 
+this item with a call to scene.set(id,it)
+
+The actual act of initalising the item from the boot table is left to 
+custom code.
+
 ]]
-	scene.add=function(it,caste)
+	scene.add=function(it,caste,boot)
 		scene.remember_uid(it)
-		caste=caste or it.caste -- probably from item
+
+		it.scene=scene
+		it.boot=boot
+		if boot and boot.id then scene.set( boot.id , it ) it.id=boot.id end
+
+		caste=caste or it.caste or (boot and boot.caste) -- probably from item
 		caste=caste or "generic"
 		it.caste=caste
 		local items=scene.caste(caste)

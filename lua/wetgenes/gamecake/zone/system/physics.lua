@@ -34,7 +34,7 @@ B.system=function(physics)
 	physics.world.maxsteps=16
 	physics.world.fixedstep=(1/60)
 
-	physics.world:gravity(0,20,0)
+	physics.world:gravity(0,100,0)
 
 	return physics
 end

@@ -7,6 +7,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local wzips=require("wetgenes.zips")
 
 local wques=require("wetgenes.ques")
@@ -55,17 +57,17 @@ M.bake=function(oven,screen)
 
 		zone_screen_draw={
 			["DAYNIGHT(rgb,daynight)"]="( (rgb) * mix( vec3(1.0,1.0,1.0) , vec3(0.5,0.5,1.0) , daynight.x ) )",
-			GAMMA=1.0,
-			BLOOM_SCALE=1,
+			GAMMA=2.2,
+			BLOOM_SCALE=2,
 --			TWEAK=0,
 		},
 		
 		zone_screen_build_occlusion={
-			AO_SCALE=3/4,
-			AO_CLIP=1/2,
-			AO_SIZE=1/8,
+			AO_SCALE=0.75,
+			AO_CLIP=0.75,
+			AO_SIZE=0.2,--1/8,
 			AO_SAMPLES=6,
-			SHADOW_SCALE=1/2,
+			SHADOW_SCALE=1,
 			SHADOW_SAMPLES=6,
 --			SHADOW=" 0.0 , 0.0 , 0.0 , 0.0 ",
 --			SHADOW_SQUISH=1,
@@ -76,10 +78,11 @@ M.bake=function(oven,screen)
 		},
 		
 		zone_screen_build_bloom_pick={
+			BLOOM_FEEDBACK=4,
 		},
 		
 		zone_screen_build_blur={
-			BLUR=22,
+			BLUR=16,
 		},
 	}
 	
@@ -113,6 +116,7 @@ M.bake=function(oven,screen)
 	screen.occlusion_scale=1
 
 	screen.setup=function()
+	log("setup",M.modname)
 
 		screen.shader_args=""
 
@@ -141,6 +145,7 @@ M.bake=function(oven,screen)
 		})
 
 		screen.fbo_bloom=framebuffers.create(0,0,0,{no_uptwopow=true , texture_format={gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE} })
+		screen.fbo_blur =framebuffers.create(0,0,0,{no_uptwopow=true , texture_format={gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE} })
 
 		screen.view_bloom=oven.cake.views.create({
 			mode="fbo",
@@ -149,9 +154,6 @@ M.bake=function(oven,screen)
 			fov=1/2,
 			cx=0.5,cy=0.5,cz=0.5,
 		})
-
-		screen.fbo_blur=framebuffers.create(0,0,0,{no_uptwopow=true , texture_format={gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE} })
-
 
 	end
 	
@@ -177,6 +179,7 @@ M.bake=function(oven,screen)
 			if bh>h then bh=h end
 
 			screen.fbo_bloom:resize( bw , bh , 0 )
+			screen.fbo_blur:resize( bw , bh , 0 )
 
 		end
 		
@@ -198,9 +201,12 @@ M.bake=function(oven,screen)
 		oven.cake.views.push_and_apply(screen.view)
 		gl.state.push(gl.state_defaults)
 
+		gl.Color(1,1,1,0.25)
+
 		gl.state.set({
 			[gl.DEPTH_TEST]					=	gl.TRUE,
 			[gl.CULL_FACE]					=	gl.TRUE,
+			[gl.BLEND]						=	gl.FALSE,	-- we are using alpha for dark/bloom
 		})
 
 		gl.Clear(gl.DEPTH_BUFFER_BIT) -- we promise to draw to the entire screen
@@ -215,6 +221,8 @@ M.bake=function(oven,screen)
 		oven.cake.views.pop_and_apply()
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 		gl.PopMatrix()
+
+		gl.Color(1,1,1,1)
 
 	end
 
@@ -335,6 +343,33 @@ M.bake=function(oven,screen)
 
 --[[
 		screen.fbo_blur:resize( screen.fbo_occlusion.w , screen.fbo_occlusion.h , 0 )
+		screen.fbo_blur:bind_frame()
+		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=0&BLUR=5",function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{BLUR_AXIS=0}),function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_dark",{DARK=1}),function(p)
+
+				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+				screen.fbo_occlusion:bind_texture()
+				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
+				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+
+		end)
+
+		screen.fbo_occlusion:bind_frame()
+		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=1&BLUR=5",function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{BLUR_AXIS=1}),function(p)
+--		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_dark",{DARK=2}),function(p)
+
+				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+				screen.fbo_blur:bind_texture()
+				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
+				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+
+		end)
+]]
+
+--[[
+		screen.fbo_blur:resize( screen.fbo_occlusion.w , screen.fbo_occlusion.h , 0 )
 
 		screen.fbo_blur:bind_frame()
 		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_dark",{DARK=1}),function(p)
@@ -365,6 +400,11 @@ M.bake=function(oven,screen)
 
 	screen.build_bloom=function(scene)
 
+		screen.fbo_blur:resize( screen.fbo_bloom.w , screen.fbo_bloom.h , 0 )
+
+-- feedback last bloom into new bloom	
+		screen.fbo_blur , screen.fbo_bloom = screen.fbo_bloom , screen.fbo_blur
+
 		local t={
 			-1,	 1,	0,	0,	1,
 			-1,	-1,	0,	0,	0,
@@ -394,10 +434,14 @@ M.bake=function(oven,screen)
 				gl.Uniform1i( p:uniform("tex1"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
+				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+				screen.fbo_blur:bind_texture() -- the old bloom
+				gl.Uniform1i( p:uniform("tex2"), gl.NEXT_UNIFORM_TEXTURE )
+				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+
 		end)
 
-		screen.fbo_blur:resize( screen.fbo_bloom.w , screen.fbo_bloom.h , 0 )
-
+--		screen.fbo_blur:resize( screen.fbo_bloom.w , screen.fbo_bloom.h , 0 )
 		screen.fbo_blur:bind_frame()
 --		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=0&BLUR=22",function(p)
 		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{BLUR_AXIS=0}),function(p)

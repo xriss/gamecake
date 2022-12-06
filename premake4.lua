@@ -164,10 +164,12 @@ MINGW=false
 NIX=false
 CPU="NATIVE"
 TARGET="NIX"
+NIX=false
 GCC=false
 CLANG=false
 
 local t= _ARGS[1] or ""
+
 if t:sub(1,4)=="emcc" then
 	TARGET="EMCC"
 	CPU=t:sub(5)
@@ -204,11 +206,7 @@ elseif t:sub(1,3)=="osx" then
 	TARGET="OSX"
 	CPU=t:sub(4)
 	OSX=true
-	GCC=true
 	CLANG=true
-elseif os.get() == "windows" then
-	TARGET="WINDOWS"
-	WINDOWS=true
 else
 	TARGET="NIX"
 	NIX=true
@@ -253,6 +251,7 @@ if EMCC then
 --		"--emrun",
 		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 ",
 		"-s ALLOW_MEMORY_GROWTH=1",
+--		"-s TOTAL_MEMORY=1GB",
 		"-s \"BINARYEN_METHOD='native-wasm'\"",
 		"-s EXPORTED_RUNTIME_METHODS=\"['cwrap']\"",
 		"-s WASM=1",
@@ -760,8 +759,9 @@ all_includes=all_includes or {
 	{"lua_pgsql",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil			or		nil			or	nil		},
 
-	{"lua_hid",			nil			or		NIX		or		nil			or		nil			or	nil		},
-	{"lib_hidapi",		nil			or		NIX		or		nil			or		nil			or	nil		},
+-- hid is now in SDL
+--	{"lua_hid",			nil			or		NIX		or		nil			or		nil			or	nil		},
+--	{"lib_hidapi",		nil			or		NIX		or		nil			or		nil			or	nil		},
 
 -- this is probably luajit but may be lua 5.1
 	{LIB_LUA,			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},

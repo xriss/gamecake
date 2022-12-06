@@ -149,7 +149,7 @@ function wdialogs.setup(widget,def)
 
 	widget.class="dialogs"
 	
-	widget.smode=def.smode or "topleft"
+	widget.smode=widget.smode or "topleft"
 	
 	
 -- copy all wdialogs functions

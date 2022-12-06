@@ -9,6 +9,8 @@ local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
 local wzips=require("wetgenes.zips")
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -41,6 +43,7 @@ M.bake=function(oven,shadow)
 	end
 	
 	shadow.setup=function()
+	log("setup",M.modname)
 
 		shadow.loads()
 
@@ -101,14 +104,14 @@ M.bake=function(oven,shadow)
 		if camera then
 
 			local s=shadow.maparea -- 40*shadow.mapsize/1024
-			local sd=1024
+			local sd=1024*8
 			local x=(math.floor(camera.pos[1]))--*-1/s	-- swap z/y as rotation
 			local y=(math.floor(camera.pos[2]))--*-1/s
 			local z=(math.floor(camera.pos[3]))--*-1/s
 			
 			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..(0.04/sd)..","..(0.08/sd)..",0.0"
 
-			local r=sky.time
+			local r=(sky.time+360-90-5)%360
 
 			local  calculate_matrix=function()
 				shadow.mtx=M4{

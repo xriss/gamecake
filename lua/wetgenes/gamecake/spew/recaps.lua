@@ -116,7 +116,7 @@ M.bake=function(oven,recaps)
 		end
 
 		local minzone=4095
-		local maxzone=32767
+		local maxzone=32767-4096
 		local fixaxis=function(n)
 			local fix=function(n)
 				local n=(n-minzone)/(maxzone-minzone)
@@ -136,13 +136,19 @@ M.bake=function(oven,recaps)
 		end
 
 		
--- use this to set a joysticks/mouse axis position
+-- use this to set a joysticks axis position
 		function recap.set_axis(m)
-			for _,n in ipairs{"lx","ly","lz","rx","ry","rz","dx","dy","mx","my","tx","ty"} do
-				if m[n] then recap.now_axis[n]=m[n] end
+			for n,v in pairs(m) do
+				recap.now_axis[n]=v
 			end
-			if m.mz then recap.now_axis.mz=( (recap.state_axis.mz or 0) + m.mz ) %65536 end
 		end
+-- use this to set a mouse axis relative movement
+		function recap.set_axis_relative(m)
+			for n,v in pairs(m) do
+				recap.now_axis[n]=((recap.state_axis[n] or 0)+v)%65536
+			end
+		end
+
 
 -- use this to set button flags, that may trigger a set/clr extra pulse state
 		function recap.set_button(nam,v)

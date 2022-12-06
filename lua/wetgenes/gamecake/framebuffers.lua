@@ -7,15 +7,43 @@ local wwin=require("wetgenes.win")
 local grd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 
+--[[#lua.wetgenes.gamecake.framebuffers
+
+Deal with FrameBuffers as render targets and textures. Color and Depth 
+buffers need to be allocated and managed.
+
+So we need to be baked within an oven so we will talk about the return 
+from the bake function rather than the module function.
+
+	local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
+
+	local fbo=framebuffers.create(256,256,0)	-- a 256x256 texture only
+	local fbo=framebuffers.create(256,256,-1)	-- a 256x256 depth only
+	local fbo=framebuffers.create(256,256,1)	-- a 256x256 texture and depth
+	local fbo=framebuffers.create()				-- 0x0 and we will resize later
+
+]]
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 function M.bake(oven,framebuffers)
 		
-	local gl=oven.gl
-	local cake=oven.cake
-	local images=cake.images
+	local gl=oven.rebake("wetgenes.gamecake.gles")
+	local images=oven.rebake("wetgenes.gamecake.images")
+	local views=oven.rebake("wetgenes.gamecake.views")
 	
+	framebuffers.stack={}
+	framebuffers.peek=function() return framebuffers.stack[#framebuffers.stack] end
+	framebuffers.push=function(fbo)
+		framebuffers.stack[#framebuffers.stack+1]=fbo
+	end
+	framebuffers.pop=function()
+		local fbo=framebuffers.peek()
+		framebuffers.stack[#framebuffers.stack]=nil
+		return fbo
+	end
+
 	local funcs={}
 	local metatable={__index=funcs}
 
@@ -24,6 +52,16 @@ function M.bake(oven,framebuffers)
 
 	framebuffers.data=setmetatable({}, { __mode = 'vk' })
 
+
+--[[#lua.wetgenes.gamecake.framebuffers.dirty
+
+	framebuffers.dirty()
+
+Mark all framebuffer objects as dirty by setting fbo.dirty to be true. We do not 
+do anything with this flag but it is used in external code and this is 
+a useful helper function to set the flag.
+
+]]
 	framebuffers.dirty = function()
 		for n,v in pairs(framebuffers.data) do
 			v.dirty=true
@@ -37,6 +75,58 @@ function M.bake(oven,framebuffers)
 	framebuffers.NEED_TEXTURE=0
 	framebuffers.NEED_TEXTURE_AND_DEPTH=1
 
+--[[#lua.wetgenes.gamecake.framebuffers.create
+
+	local fbo=framebuffers.dirty()
+	local fbo=framebuffers.dirty(x,y)
+	local fbo=framebuffers.dirty(x,y,framebuffers.NEED_TEXTURE_AND_DEPTH)
+	local fbo=framebuffers.dirty(0,0,0,{
+		depth_format={gl.DEPTH_COMPONENT32F,gl.DEPTH_COMPONENT,gl.FLOAT},
+		texture_format={gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE},
+		TEXTURE_MIN_FILTER=gl.LINEAR,
+		TEXTURE_MAG_FILTER=gl.LINEAR,
+		TEXTURE_WRAP_S=gl.CLAMP_TO_EDGE,
+		TEXTURE_WRAP_T=gl.CLAMP_TO_EDGE,
+	}) -- note this table will be returned as the fbo
+
+Create a new framebuffer object and optionally provide an inital size 
+and depth. The depth can use -1,0,1 or the following verbose flags 
+framebuffers.NEED_DEPTH,framebuffers.NEED_TEXTURE or 
+framebuffers.NEED_TEXTURE_AND_DEPTH to request a depth buffer(1,-1) or not(0). 
+
+Finally you can pass in a table to be returned as the fbo that contains 
+defaults or set defaults in the fbo that is returned.
+
+	fbo.depth_format={gl.DEPTH_COMPONENT32F,gl.DEPTH_COMPONENT,gl.FLOAT}
+
+Can be used to control exactly how a depth buffer is allocated with 
+gl.TexImage2D when you care about that sort of thing, IE hardware 
+issues.
+
+	fbo.texture_format={gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE}
+
+Can be used to control exactly how a texture buffer is allocated with 
+gl.TexImage2D when you care about that sort of thing, IE hardware 
+issues.
+
+	fbo.TEXTURE_MIN_FILTER=gl.LINEAR
+	fbo.TEXTURE_MAG_FILTER=gl.LINEAR
+	fbo.TEXTURE_WRAP_S=gl.CLAMP_TO_EDGE
+	fbo.TEXTURE_WRAP_T=gl.CLAMP_TO_EDGE
+
+These can be used to control default TexParameters in the fbo.
+
+	fbo.no_uptwopow=true
+	
+By deafult we will use power of 2 sizes for the fbo that fit the 
+requested size. This disables that and doing so will of course cause 
+problems with some hardware. Generally if you avoid mipmaps it probably 
+wont be a problem.
+
+See #lua.wetgenes.gamecake.framebuffers.fbo for all the functions you 
+can call on the fbo returned.
+
+]]
 	framebuffers.create = function(w,h,d,def)
 
 		local fbo=def or {} -- allow default settings on 4th param
@@ -50,18 +140,41 @@ function M.bake(oven,framebuffers)
 		framebuffers.data[fbo]=fbo
 		
 		setmetatable(fbo,metatable)
-		fbo.__gc=pack.alloc(1,{__gc=function() fbo:clean() end})
+		fbo[0]=pack.alloc(1,{__gc=function() fbo:clean() end}) -- force garbage with fake userdata
 		
+-- create an fbo view since we tend to need one
+		fbo.view=views.create({
+			mode="fbo",
+			fbo=fbo,
+		})
+
 		return fbo
 	end
 
 
+--[[#lua.wetgenes.gamecake.framebuffers.start
+
+	framebuffers.start()
+
+Called as part of the android life cycle, since we auto reallocate this 
+does not actually have to do anything. But may do a forced resize in 
+the future if that turns out to be more hardware compatible.
+
+]]
 	framebuffers.start = function()
-		for v,n in pairs(framebuffers.data) do
+--		for v,n in pairs(framebuffers.data) do
 --			framebuffers.resize(v,v.w,v.h,v.d) -- realloc
-		end
+--		end
 	end
 
+--[[#lua.wetgenes.gamecake.framebuffers.stop
+
+	framebuffers.stop()
+
+Called as part of the android life cycle, we go through and call 
+fbo.clean on each fbo to free the opengl resources.
+
+]]
 	framebuffers.stop = function()
 		for v,n in pairs(framebuffers.data) do
 			framebuffers.clean(v)
@@ -69,6 +182,14 @@ function M.bake(oven,framebuffers)
 
 	end
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.free_depth
+
+	fbo:free_depth()
+
+Free the depth texture only, is safe to call if there is no depth 
+buffer.
+
+]]
 	framebuffers.free_depth = function(fbo)
 		if fbo.depth then
 			gl.DeleteTexture(fbo.depth)
@@ -76,6 +197,14 @@ function M.bake(oven,framebuffers)
 		end
 	end
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.free_texture
+
+	fbo:free_texture()
+
+Free the rgba texture only, is safe to call if there is no rgba 
+buffer.
+
+]]
 	framebuffers.free_texture = function(fbo)
 		if fbo.texture then
 			gl.DeleteTexture(fbo.texture)
@@ -83,6 +212,14 @@ function M.bake(oven,framebuffers)
 		end
 	end
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.free_frame
+
+	fbo:free_frame()
+
+Free the frame buffer only, is safe to call if there is no frame 
+buffer.
+
+]]
 	framebuffers.free_frame = function(fbo)
 		if fbo.frame then
 			gl.DeleteFramebuffer(fbo.frame)
@@ -90,6 +227,13 @@ function M.bake(oven,framebuffers)
 		end
 	end
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.clean
+
+	fbo:clean()
+
+Free all the opengl buffers.
+
+]]
 	framebuffers.clean = function(fbo)
 		framebuffers.free_depth(fbo)
 		framebuffers.free_texture(fbo)
@@ -99,6 +243,15 @@ function M.bake(oven,framebuffers)
 		fbo.d=0
 	end
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.bind_texture
+
+	fbo:bind_texture()
+
+BindTexture the rgba texture part of this fbo.
+
+If there is no texture we will bind 0.
+
+]]
 	framebuffers.bind_texture = function(fbo)
 		if fbo and fbo.texture then
 			gl.BindTexture(gl.TEXTURE_2D, fbo.texture or 0)
@@ -107,6 +260,15 @@ function M.bake(oven,framebuffers)
 		end
 	end
 	
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.bind_depth
+
+	fbo:bind_depth()
+
+BindTexture the depth texture part of this fbo.
+
+If there is no texture we will bind 0.
+
+]]
 	framebuffers.bind_depth = function(fbo)
 		if fbo and fbo.depth then
 			gl.BindTexture(gl.TEXTURE_2D, fbo.depth or 0)
@@ -115,6 +277,15 @@ function M.bake(oven,framebuffers)
 		end
 	end
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.bind_frame
+
+	fbo:bind_depth()
+
+BindFramebuffer the framebuffer of this fbo.
+
+If there is no framebuffer we will bind 0.
+
+]]
 	framebuffers.bind_frame = function(fbo)
 		if fbo then
 			gl.BindFramebuffer(gl.FRAMEBUFFER, fbo.frame or 0)
@@ -123,10 +294,28 @@ function M.bake(oven,framebuffers)
 		end
 	end
 	
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.check
+
+	fbo:check()
+
+Check and allocatie if missing and needed (eg depth texture may not be 
+needed) all our openGL buffers.
+
+]]
 	framebuffers.check = function(fbo)
 		framebuffers.resize(fbo,fbo.w,fbo.h,fbo.d) -- realloc if we need to
 	end
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.resize
+
+	fbo:resize(w,h,d)
+
+Change the size of our buffers, which probably means free and then
+reallocate them.
+
+The w,h,d use the same rules as framebuffer.create
+
+]]
 	framebuffers.resize = function(fbo,w,h,d)
 --print("fbo resize",w,h,d)
 
@@ -236,11 +425,26 @@ function M.bake(oven,framebuffers)
 
 	end
 	
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.mipmap
+
+	fbo:mipmap()
+
+Build mipmaps for all existing texture buffers.
+
+]]
 	framebuffers.mipmap = function(fbo)
 		framebuffers.mipmap_texture(fbo)
 		framebuffers.mipmap_depth(fbo)
 	end
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.mipmap_texture
+
+	fbo:mipmap_texture()
+
+Build mipmaps for our texture buffer if it exists and set 
+TEXTURE_MIN_FILTER to LINEAR_MIPMAP_LINEAR so it will be used.
+
+]]
 	framebuffers.mipmap_texture = function(fbo) -- generate mipmaps and enable default mipmapping filter
 		if fbo.texture then
 			gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
@@ -249,6 +453,18 @@ function M.bake(oven,framebuffers)
 		end
 	end
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.mipmap_depth
+
+	fbo:mipmap_depth()
+
+Build mipmaps for our depth buffer if it exists and set 
+TEXTURE_MIN_FILTER to LINEAR_MIPMAP_LINEAR so it will be used.
+
+It is possible this may fail (hardware issues) and the 
+TEXTURE_MIN_FILTER be reset to gl.NEAREST along with a flag to stop us 
+even trying in the future,
+
+]]
 	framebuffers.mipmap_depth_broken=false
 	framebuffers.mipmap_depth = function(fbo) -- generate mipmaps and enable default mipmapping filter
 		if fbo.depth then
@@ -264,7 +480,18 @@ function M.bake(oven,framebuffers)
 		end
 	end
 
--- read back data from a framebuffer, return it in a grd object
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.download
+
+	fbo:download()
+	fbo:download(w,h,x,y)
+
+Read back color data from a framebuffer and return it in an RGBA 
+PREMULT grd object (which is probably what it is).
+
+If a width,height is given then we will read the given pixels only from 
+the x,y location.
+
+]]
 	framebuffers.download = function(fbo,w,h,x,y)
 --print("fbo download",w,h,x,y)
 	
@@ -294,6 +521,61 @@ function M.bake(oven,framebuffers)
 	end
 
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.render_start
+
+	fbo:render_start()
+
+
+Start rendering into this fbo.
+
+Push old matrix and set the matrix mode to MODELVIEW
+
+Set fbo.view and reset the gl state.
+
+]]
+	framebuffers.render_start = function(fbo)
+	
+		framebuffers.push(fbo)
+		
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PushMatrix()
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PushMatrix()
+		views.push_and_apply(fbo.view)
+		gl.state.push(gl.state_defaults)
+		fbo:bind_frame()
+		
+	end
+
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.render_stop
+
+	fbo:render_stop()
+
+Stop rendering into this fbo and restore the last fbo so these calls 
+can be nested.
+
+Restore the old view and old gl state.
+
+Pop old matrix and set the matrix mode to MODELVIEW
+
+]]
+	framebuffers.render_stop = function(fbo)
+	
+		local fbo=framebuffers.pop()
+		local oldfbo=framebuffers.peek() -- may be nil
+
+		gl.BindFramebuffer(gl.FRAMEBUFFER, oldfbo and oldfbo.frame or 0)
+		gl.state.pop()
+		views.pop_and_apply()
+		gl.MatrixMode(gl.PROJECTION)
+		gl.PopMatrix()
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.PopMatrix()
+
+	end
+
+
+
 -- set some functions into the metatable of each fbo
 	for i,n in ipairs({
 		"clean",
@@ -309,26 +591,36 @@ function M.bake(oven,framebuffers)
 		"free_depth",
 		"free_texture",
 		"free_frame",
+		"render_start",
+		"render_stop",
 		}) do
 		funcs[n]=framebuffers[n]
 	end
 
--- render from one or more fbos into another using a fullscreen shader
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.pingpong
 
+	fbo:pingpong(fbout,shadername,callback)
+	framebuffers.pingpong({fbin1,fbin2},fbout,shadername,callback)
+
+Render from one or more fbos into another using a fullscreen shader.
+
+Sometime you need to repeatedly copy a texture back and though applying 
+a shader, this is the function for you.
+
+The textures will be bound to tex1,tex2,tex3,etc and the uvs supplied 
+in a_texcoord with a_vertex being set to screen coords so can be used 
+as is.
+
+]]
 	framebuffers.pingpong = function(fbin,fbout,shadername,callback)
 	
-		local views=oven.cake.views
+		local canvas=oven.rebake("wetgenes.gamecake.canvas")
+		local views=oven.rebake("wetgenes.gamecake.views")
 	
 		if not fbin[1] then fbin={fbin} end -- upgrade input to array
 		
-		local view=views.create({
-			mode="fbo",
-			fbo=fbout,
-		})
+		fbout:render_start()
 
-		gl.PushMatrix()
-		views.push_and_apply(view)
-		gl.state.push(gl.state_defaults)
 		gl.state.set({
 			[gl.BLEND]						=	gl.FALSE,
 			[gl.CULL_FACE]					=	gl.FALSE,
@@ -336,7 +628,6 @@ function M.bake(oven,framebuffers)
 			[gl.DEPTH_WRITEMASK]			=	gl.FALSE,
 		})
 
-		fbout:bind_frame()
 
 		local v1=gl.apply_modelview( {fbout.w*-0,	fbout.h* 1,	0,1} )
 		local v2=gl.apply_modelview( {fbout.w*-0,	fbout.h*-0,	0,1} )
@@ -349,30 +640,19 @@ function M.bake(oven,framebuffers)
 			v4[1],	v4[2],	v4[3],	fbin[1].uvw,	fbin[1].uvh,
 		}
 
-		oven.cake.canvas.flat.tristrip("rawuv",t,shadername,function(p)
+		canvas.flat.tristrip("rawuv",t,shadername,function(p)
 			for i=#fbin,1,-1 do -- bind all textures in reverse order so we always end with texture0 as active
 				gl.ActiveTexture(gl.TEXTURE0+(i-1))
 				local u=p:uniform("tex"..i)
 				if u>=0 then 
 					gl.Uniform1i( u , i-1 )
 				end
-				if i==0 then
-					local u=p:uniform("tex")
-					if u>=0 then 
-						gl.Uniform1i( u , 0 )
-					end
-				end
 				fbin[i]:bind_texture()
 			end
 			if callback then callback(p) end
 		end)
 
-		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-
-		gl.state.pop()
-		views.pop_and_apply()
-		gl.PopMatrix()
-
+		fbout:render_stop()
 
 	end
 

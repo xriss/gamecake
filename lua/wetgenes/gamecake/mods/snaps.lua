@@ -138,7 +138,7 @@ log("snap","to create this "..wwin.files_prefix.."snaps/"..snaps.auto..".mp4")
 				if f then
 					f:write([[
 cd `dirname $0`
-ffmpeg -framerate 30 -i "]]..snaps.auto..[[/%04d.pam" -pix_fmt yuv420p -y ]]..snaps.auto..[[.mp4
+ffmpeg -framerate 30 -i "]]..snaps.auto..[[/%04d.pam" -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" -pix_fmt yuv420p -y ]]..snaps.auto..[[.mp4
 ]])
 					f:close()
 				end

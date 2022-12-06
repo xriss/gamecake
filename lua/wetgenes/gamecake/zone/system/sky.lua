@@ -30,8 +30,10 @@ B.system=function(sky)
 
 	sky.caste="sky"
 	sky.time_speed=1/60
-	sky.time_frac=45
-	sky.time=math.floor(0.5+sky.time_frac)
+	sky.time_snap=15
+	sky.time_frac=90+45
+	sky.time_dest=math.floor((0.5+sky.time_frac)/sky.time_snap)*sky.time_snap
+	sky.time=sky.time_dest
 
 	sky.sun=V3() -- the normal of the suns light direction
 	sky.moon=V3() -- the normal of the moons light direction
@@ -43,7 +45,21 @@ end
 
 B.sky.update=function(sky)
 	sky.time_frac=(sky.time_frac+sky.time_speed ) % (360)
-	sky.time=math.floor(0.5+sky.time_frac)
+	sky.time_dest=math.floor((0.5+sky.time_frac)/sky.time_snap)*sky.time_snap
+	local d=sky.time_dest-sky.time
+	if d> 180 then d=d-360 end
+	if d<-180 then d=d+360 end
+	sky.time=( sky.time+(d/32) ) % 360
+	
+	sky.time_hour=sky.time_frac/15
+	sky.time_minute=(60*(sky.time_hour-math.floor(sky.time_hour)))
+	sky.time_second=(60*(sky.time_minute-math.floor(sky.time_minute)))
+
+	sky.time_hour=math.floor(sky.time_hour)
+	sky.time_minute=math.floor(sky.time_minute)
+	sky.time_second=math.floor(sky.time_second)
+
+--	print( sky.time_hour , sky.time_minute , sky.time_second )
 end
 
 B.sky.draw=function(sky)
@@ -58,6 +74,7 @@ B.sky.draw=function(sky)
 		[gl.DEPTH_FUNC]					=	gl.LEQUAL,
 	})
 
+	gl.Color(1,1,1,1)
 
 	local t={
 		-1,	-1,	1,	0,	0, 			
@@ -77,6 +94,8 @@ B.sky.draw=function(sky)
 		gl.Uniform3f( p:uniform("sun") , sky.sun )
 		gl.Uniform3f( p:uniform("moon") , sky.moon )
 	end)
+
+	gl.Color(1,1,1,0.25)
 
 	gl.state.pop()
 

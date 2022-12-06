@@ -5,6 +5,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local log,dump=require("wetgenes.logs"):export("log","dump")
 
+local wzips=require("wetgenes.zips")
+local wcsv=require("wetgenes.csv")
+
 local wwin=require("wetgenes.win")
 local tardis=require("wetgenes.tardis")
 local bit=require("bit")
@@ -15,6 +18,7 @@ local bit=require("bit")
 local wstr=require("wetgenes.string")
 local dprint=function(a) print(wstr.dump(a)) end
 
+local wjson=require("wetgenes.json")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -69,17 +73,28 @@ function wmaster.setup(widget,def)
 	master.datas=master.datas or wdatas.new_datas({master=master})
 	master.new_data=function(dat) return master.datas.new_data(dat) end
 
+	function master.set_theme(master,def)
+		if type(def)=="string" then
+			def=master.actions[def].json or {}
+		end
 
+	-- built in color themes, 
 
--- built in color themes, 
+		master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, alpha=1, grid_size=40, text_size=24, name="bright", }
+		master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, alpha=1, grid_size=40, text_size=24, name="dark",   }
 
-	master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, alpha=1, grid_size=40, text_size=20, }
-	master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, alpha=1, grid_size=40, text_size=20, }
-
--- global GUI color theme
-	master.theme={}
-	for n,v in pairs(master.color_theme_dark) do master.theme[n]=v end
-
+	-- global GUI color theme
+		master.theme={}
+		if def.theme=="bright" then
+			for n,v in pairs(master.color_theme_bright) do master.theme[n]=v end
+		else
+			for n,v in pairs(master.color_theme_dark) do master.theme[n]=v end
+		end
+		if def.text_size then master.theme.text_size=def.text_size end master.text_size=master.theme.text_size
+		if def.grid_size then master.theme.grid_size=def.grid_size end master.grid_size=master.theme.grid_size
+--print(master.grid_size,debug.traceback())
+	end
+	master:set_theme(def)
 
 -- get a color from a theme and optionally apply a tint
 	function master.get_color(val,tint)
@@ -171,9 +186,13 @@ function wmaster.setup(widget,def)
 						end
 
 						master.active=master.over
-						local axis=ups.axis()
-						local rx,ry=master.over.parent:mousexy(axis.mx,axis.my)
-						master.active_xy={rx-master.over.px,ry-master.over.py,mx=axis.mx,my=axis.my}
+
+						master.active=master.over
+						local p=master.last_mouse_position
+						if p then
+							local rx,ry=master.over.parent:mousexy(p[1],p[2])
+							master.active_xy={rx-master.over.px,ry-master.over.py,mx=p[1],my=p[2]}
+						end
 						
 						master.active:call_hook_later("active") -- an active widget is about to click (button down)
 					end
@@ -194,7 +213,7 @@ function wmaster.setup(widget,def)
 
 				master.press=false
 
-				if master.over and master.over~=master --[[ and master.active==master.over ]] then -- no click if we drag away from button
+				if master.over and master.over~=master and master.active==master.over then -- no click if we drag away from button
 				
 					if not master.over.never_set_focus_edit then
 --print("active",master.active,master.active.class)
@@ -218,7 +237,21 @@ function wmaster.setup(widget,def)
 					end
 					
 					master.over:set_dirty()
+				
+				elseif master.over and master.over~=master then -- mouse up but not mouse down ( ie we dragged and released )
+
+					if ups.button("mouse_left_clr")  then
+						master.over:call_hook_later("release",{keyname="mouse_left"}) -- its a left click
+					elseif ups.button("mouse_right_clr")  then
+						master.over:call_hook_later("release",{keyname="mouse_right"}) -- its a right click
+					elseif ups.button("mouse_middle_clr")  then
+						master.over:call_hook_later("release",{keyname="mouse_middle"}) -- its a middle click
+					else
+						master.over:call_hook_later("release") -- probably not a mouse click
+					end
 					
+					master.over:set_dirty()
+
 				end
 				
 				if master.active then
@@ -358,6 +391,9 @@ function wmaster.setup(widget,def)
 	end
 	
 	function master.msg(widget,m)
+
+-- handle shift key states and sending of action msgs triggered by keys
+		master.keystate_msg(m)
 	
 		local fo=master.focus and master.focus.msg and master.focus
 		if fo and fo~=master then
@@ -431,24 +467,6 @@ function wmaster.setup(widget,def)
 -- handle key input
 --
 	function master.key(widget,ascii,key,act)
-
--- keep track of shift key states in master
-
-	if (act==1 or act==0) and ( not ascii or ascii=="" ) then
-
-		if     key=="shift_l"   or key=="shift_r"   then	widget.key_shift=true
-		elseif key=="control_l" or key=="control_r" then	widget.key_control=true
-		elseif key=="alt_l"     or key=="alt_r"     then	widget.key_alt=true
-		end
-
-	elseif act==-1 then
-
-		if     key=="shift_l"   or key=="shift_r"   then	widget.key_shift=false
-		elseif key=="control_l" or key=="control_r" then	widget.key_control=false
-		elseif key=="alt_l"     or key=="alt_r"     then	widget.key_alt=false
-		end	
-
-	end
 
 		if master.focus then -- key focus, steals all the key presses until we press enter again
 		
@@ -584,6 +602,7 @@ function wmaster.setup(widget,def)
 				master.active.mouse(master.active,act,x,y,keyname) -- cascade down into all widgets
 			end
 		else
+			master.over=nil
 			meta.mouse(widget,act,x,y,keyname) -- cascade down into all widgets
 		end
 		
@@ -650,6 +669,134 @@ function wmaster.setup(widget,def)
 				w:set_dirty()
 			end
 		end)		
+	end
+
+	function master.get_action(id,user)
+		local action=master.actions[id]
+		if user and action then action=action[user] end
+		return action
+	end
+
+-- add a simple message to queue that will trigger action as if its key had been pressed
+	function master.push_action_msg(id,user)
+		oven.win:push_msg({
+			class="action",
+			action=1,
+			time=os.time(),
+			id=id,
+			user=user,
+		})
+	end
+
+	function master.reset_actions()
+		master.keys={}
+		master.actions={}
+	end
+
+	function master.load_actions(new_actions)
+
+		if not new_actions then -- load default if no actions provided
+			local filename="lua/wetgenes/gamecake/widgets/actions.csv"
+			local text=assert(wzips.readfile(filename),"file not found: "..filename)
+			new_actions=wcsv.map(wcsv.parse(text))
+		end
+		
+		for i,v in ipairs(new_actions) do
+			if tostring(v.id):sub(1,1)=="#" then -- ignore # comment at start of line assuming first column is id
+			else
+				if v.id then -- allow quick lookup by id and possibly user
+					if v.user then
+						master.actions[v.id]=master.actions[v.id] or {}
+						master.actions[v.id][v.user]=v
+					else
+						master.actions[v.id]=v
+					end
+				end
+				if v.key then -- map keys
+					for m in v.key:gmatch("[^ ]+") do
+						local ks=nil
+						for k in m:gmatch("[^+]+") do
+							k=k:lower()
+							if     k=="alt" then    ks="alt"
+							elseif k=="ctrl" then   ks=ks and ks.."_ctrl"  or "ctrl"
+							elseif k=="shift" then  ks=ks and ks.."_shift" or "shift"
+							elseif k~="" then
+								ks=ks or "none"
+								master.keys[ks]=master.keys[ks] or {}
+								master.keys[ks][k]=v
+							end
+						end
+					end
+				end
+				if v.json then -- parse json data chunk
+--					print(v.json)
+					v.json=wjson.decode(v.json)
+--					dump(v)
+				end
+			end
+		end
+
+	end
+
+	master.keystate_reset=function()
+		master.keystate_alt=false
+		master.keystate_ctrl=false
+		master.keystate_shift=false
+		master.keystate="none"
+	end
+
+	master.keystate_update=function()
+		local ks=nil
+		if master.keystate_alt   then  ks="alt"                          end
+		if master.keystate_ctrl  then  ks=ks and ks.."_ctrl"  or "ctrl"  end
+		if master.keystate_shift then  ks=ks and ks.."_shift" or "shift" end
+		master.keystate=ks or "none"
+	end
+
+	master.keystate_msg=function(m)
+
+--[[
+		if m.class=="action" then
+			local action=master.get_action(m.id,m.user)
+			dump(m)
+			dump(action)
+		end
+]]
+
+		if m.class=="key" then
+			if     ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) then
+				if     m.action== 1 then master.keystate_shift=true
+				elseif m.action==-1 then master.keystate_shift=false end
+				master.keystate_update()
+			elseif ( m.keyname=="control" or m.keyname=="control_l" or m.keyname=="control_r" ) then
+				if     m.action== 1 then master.keystate_ctrl=true
+				elseif m.action==-1 then master.keystate_ctrl=false end
+				master.keystate_update()
+			elseif ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
+				if     m.action== 1 then master.keystate_alt=true
+				elseif m.action==-1 then master.keystate_alt=false end
+				master.keystate_update()
+			end
+			local name=(m.keyname or ""):lower()
+			local action=(master.keys[master.keystate] or {})[name]
+			if action then -- add an action message
+				oven.win:push_msg({
+					class="action",
+					action=m.action,
+					time=m.time,
+					id=action.id,
+					user=action.user,
+				})
+			end
+		end
+
+	end
+
+-- auto load default actions, call master.reset_actions() to remove these default actions
+	do
+		master.reset_actions()
+		master.load_actions()
+		master.keystate_reset()
 	end
 
 

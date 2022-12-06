@@ -163,7 +163,7 @@ local font_cache_draw
 			for i,n in ipairs(cache_arrays) do
 				if #cache_arrays[n]>0 then
 					cache_smart_bind(n)
-					flat.tristrip("rawuvrgba",cache_arrays[n])
+					flat.tristrip("rawuvrgba",cache_arrays[n],"gamecake_shader?RAW&TEX&COLOR&TEXHAX")
 				end
 			end
 			cache_arrays=old
@@ -180,7 +180,7 @@ local font_cache_draw
 
 		local function draw()
 			if cache_array then return end
-			flat.tristrip("rawuvrgba",t)
+			flat.tristrip("rawuvrgba",t,"gamecake_shader?RAW&TEX&COLOR&TEXHAX")
 		end
 
 		local c={}
@@ -235,7 +235,7 @@ local font_cache_draw
 			if cache_array then return end
 			local r,g,b,a=gl.Color() -- remember
 			gl.Color(1,1,1,1) -- we cached the set color and need this to be white
-			flat.tristrip("rawuvrgba",t)
+			flat.tristrip("rawuvrgba",t,"gamecake_shader?RAW&TEX&COLOR&TEXHAX")
 			gl.Color(r,g,b,a) -- restore
 		end
 		local ht=#t
@@ -310,7 +310,7 @@ local font_cache_draw
 				local t=cache_array or {}
 				local function drawbox() -- draw all 9 parts in one go
 					if cache_array then return end
-					flat.tristrip("rawuvrgba",t)
+					flat.tristrip("rawuvrgba",t,"gamecake_shader?RAW&TEX&COLOR&TEXHAX")
 				end
 				local function tdrawbox( tx,ty, vx,vy , txp,typ, vxp,vyp )
 				
@@ -581,7 +581,7 @@ else -- we can only draw once
 			end
 
 			if not cache_array then
-				flat.tristrip("rawuvrgba",t)
+				flat.tristrip("rawuvrgba",t,"gamecake_shader?RAW&TEX&COLOR&TEXHAX")
 			end
 			
 			gl.state.pop()
@@ -815,7 +815,7 @@ end
 			
 			if widget.draw_text then -- draw special text using a function
 
-				widget.draw_text(widget,txp,typ,(fy*fontfix)) -- use canvas.font to draw the text, font and size will be set already add txp,typ to your draw position for hover text position fixes
+				widget.draw_text(widget,{txp=txp,typ=typ-(fy*fontfix)}) -- use canvas.font to draw the text, font and size will be set already add txp,typ to your draw position for hover text position fixes
 
 			else
 

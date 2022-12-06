@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local wwin=require("wetgenes.win")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -17,9 +19,12 @@ local wwindow=oven.rebake("wetgenes.gamecake.widgets.window")
 
 function wmenu.update(widget)
 
+
 	if not widget.hidden then
 		if widget.hide_when_not and not widget.master.press then -- must stay over widget unless holding button
-			if not widget:isover(widget.hide_when_not) then
+			if widget:isover(widget.hide_when_not) then
+				widget.over_time=wwin.time()
+			elseif (not widget.over_time) or (wwin.time() >= widget.over_time+0.25) then -- delay hide
 				widget.hidden=true
 				widget.hide_when_not=nil
 				widget.master.request_layout=true
@@ -49,7 +54,13 @@ function wmenu.layout(widget)
 			if v[1] then -- we have sub widgets, assume layout will generate a size
 				v:layout()
 			else -- use text size
-				if v.text then
+				if v.draw_text then
+					local f=v:bubble("font") or 1
+					local fs=v:bubble("text_size") or 16
+					font.set(cake.fonts.get(f))
+					font.set_size(fs,0)
+					v.hx,v.hy=v:draw_text({size=true})
+				elseif v.text then
 					local f=v:bubble("font") or 1
 					local fs=v:bubble("text_size") or 16
 					v.hy=widget.grid_size or fs*1.5

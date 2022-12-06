@@ -92,8 +92,8 @@ log("oven","Saving "..settings.filename)
 	end
 	
 -- get a value from the current profile
-	function settings.get(name)
-		return ss[name]
+	function settings.get(name,value)
+		return ss[name] or value
 	end
 
 -- set a score in the current profile

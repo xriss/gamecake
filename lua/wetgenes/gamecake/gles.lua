@@ -15,7 +15,7 @@ function M.bake(oven,gles)
 
 	if not oven.gl then -- need a gles2 wrapped in glescode
 	
-		oven.gl=require("glescode").create( require("gles") )
+		oven.gl=require("glescode").create( require("gles") , gles )
 		
 		oven.gl.GetExtensions()
 		
@@ -29,11 +29,12 @@ function M.bake(oven,gles)
 	local filename="lua/"..(M.modname):gsub("%.","/")..".glsl"
 	gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
 
-
+	gl.camera=tardis.M4() -- no transform default camera for 2d
+	gl.uniforms[ "camera"     ] = function(u) gl.UniformMatrix4f(u, gl.camera ) end
 	gl.uniforms[ "modelview"  ] = function(u) gl.UniformMatrix4f(u, gl.matrix(gl.MODELVIEW) ) end
 	gl.uniforms[ "projection" ] = function(u) gl.UniformMatrix4f(u, gl.matrix(gl.PROJECTION) ) end
 	gl.uniforms[ "color"      ] = function(u) gl.Uniform4f(u, gl.cache.color ) end
 
-	return gles
+	return oven.gl
 
 end

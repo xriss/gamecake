@@ -72,8 +72,8 @@ function wthree.layout(widget)
 
 		else
 
-			v.px=widget[h1]-w3
-			v.py=0
+			v[p1]=widget[h1]-w3
+			v[p2]=0
 			v[h2]=widget[h2]
 			
 		end
@@ -83,8 +83,9 @@ function wthree.layout(widget)
 	local v=widget[2]
 	if v then
 		
-		v.px=w1
-		v.hx=widget[h1]-(w1+w3)
+		v[p1]=w1
+		v[p2]=0
+		v[h1]=widget[h1]-(w1+w3)
 		v[h2]=widget[h2]
 
 	end
@@ -98,7 +99,7 @@ function wthree.setup(widget,def)
 
 	widget.class="three"
 	
-	widget.three_axis=def.three_axis  or "x" 	-- or "y"		three across x or y axis
+	widget.three_axis=widget.three_axis  or "x" 	-- or "y"		three across x or y axis
 	
 	widget.update=wthree.update
 	widget.draw=wthree.draw

@@ -13,9 +13,12 @@ wmenuitem=wmenuitem or {}
 
 function wmenuitem.update(widget)
 
+
 	if not widget.hidden then
 		if widget.hide_when_not and not widget.master.press then -- must stay over widget unless holding button
-			if not widget:isover(widget.hide_when_not) then
+			if widget:isover(widget.hide_when_not) then
+				widget.over_time=wwin.time()
+			elseif (not widget.over_time) or (wwin.time() >= widget.over_time+0.25) then -- delay hide
 				widget.hidden=true
 				widget.hide_when_not=nil
 				widget.master.request_layout=true
@@ -23,12 +26,57 @@ function wmenuitem.update(widget)
 			end
 		end
 	end
-	
+
 	return widget.meta.update(widget)
 end
 
 function wmenuitem.draw(widget)
 	return widget.meta.draw(widget)
+end
+
+function wmenuitem.draw_text(widget,opts)
+
+	local gl=oven.gl
+	local font=oven.cake.canvas.font
+
+	local text=widget.text or ( widget.action and widget.action.text ) or ""
+	local text_right=""
+
+	if widget.menu_data then
+		if widget.parent.class~="menubar" then
+			text_right="->"
+		end
+	elseif widget.action and widget.action.key then -- key
+		text_right=widget.action.key
+	end
+
+	local gs=widget.grid_size or widget.parent.grid_size or widget.master.grid_size or font.size*1.5
+
+	if opts.size then
+		local x=text_right~="" and gs*2 or gs*1
+		return font.width( text..text_right ) + x, gs
+	end
+
+	local w=font.width(text)
+	local tx=gs*0.5+(opts.txp or 0)
+	local ty=(widget.hy/2)+(opts.typ or 0)
+	if widget.parent.class=="menubar" then
+		tx=(widget.hx-w)*0.5+(opts.txp or 0)
+	end
+
+	gl.Color( unpack(widget.master.get_color(nil,widget.text_color)) )
+
+	font.set_xy(tx,ty)
+	font.draw(text)
+	
+	if text_right~="" then
+--		font.set_size(font.size*0.8,0)
+		local w=font.width(text_right)
+		local tx=widget.hx-w-(gs*0.5)+(opts.txp or 0)
+		font.set_xy(tx,ty)
+		font.draw(text_right)
+	end
+	
 end
 
 function wmenuitem.menu_add(widget,opts)
@@ -43,7 +91,7 @@ function wmenuitem.menu_add(widget,opts)
 			for i,v in ipairs(md) do
 				if type(v.menu_data)=="table" then -- copy string values down into sub menu tables
 					for n,m in pairs(md) do
-						if type(n)=="string" then
+						if type(n)=="string" then -- skip top_* flags
 							if "top_"~=string.sub(1,4) then
 								v.menu_data[n]=v.menu_data[n] or m
 							end
@@ -102,7 +150,8 @@ function wmenuitem.menu_add(widget,opts)
 		local it={} for a,b in pairs(v) do it[a]=b end
 
 		it.class="menuitem"
-		it.draw_text=it.draw_text or opts.draw_text or md.draw_text
+		it.action = it.action or widget.master.get_action(it.id,it.user) -- lookup action
+		it.draw_text=it.draw_text or opts.draw_text or md.draw_text or wmenuitem.draw_text
 		it.text_align=it.text_align or "left"
 		it.hooks=it.hooks or opts.hooks     or md.hooks
 		it.hide_when_clicked=it.hide_when_clicked or true
@@ -138,7 +187,7 @@ local showmenu=function()
 
 	if widget.menu_data then -- add a sub menu using this data
 
-		if widget.top_only then -- hide all other menus first
+		if widget.top_menu then -- hide all other menus first
 			widget.master:call_descendents(function(w)
 				if w.menu then
 					w.menu.hidden=true
@@ -213,7 +262,7 @@ end
 		end
 	end
 	
-	if hook=="click" then
+	if hook=="click" or hook=="release" then
 	
 		if widget.parent.class~="menubar" then
 	
@@ -254,16 +303,19 @@ function wmenuitem.setup(widget,def)
 
 	widget.class_hooks={wmenuitem.hooks}
 	
-	widget.hide_when_clicked=def.hide_when_clicked
---	widget.remove_when_clicked=def.remove_when_clicked
+--	widget.hide_when_clicked=widget.hide_when_clicked
+--	widget.remove_when_clicked=widget.remove_when_clicked
 
 	widget.menu_add=wmenuitem.menu_add
 
-	widget.menu_px=def.menu_px or 1 -- where to display any sub menu
-	widget.menu_py=def.menu_py or 0
-
-	widget.menu_data=def.menu_data
-
+	if widget.top_menu then -- part of top menu bar
+		widget.menu_px=widget.menu_px or 0 -- where to display any sub menu
+		widget.menu_py=widget.menu_py or 1
+	else
+		widget.menu_px=widget.menu_px or 1 -- where to display any sub menu
+		widget.menu_py=widget.menu_py or 0
+	end
+	
 	return widget
 end
 
