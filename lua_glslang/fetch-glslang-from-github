@@ -1,5 +1,9 @@
 cd `dirname $0`
 
+mv glslang/glslang/Include/glslang/build_info.h ./build_info.h
+
 rm -rf glslang
 git clone --depth 1 https://github.com/KhronosGroup/glslang.git
 rm -rf glslang/.git
+
+mv ./build_info.h glslang/glslang/Include/glslang/build_info.h
