@@ -300,8 +300,8 @@ float ambient_occlusion( vec2 vv , vec3 nrm )
 	vec2 texel_size = vec2( textureSize(tex,0) ); // size of screen in pixels
 	vec2 aspect=vec2( texel_size.y/texel_size.x , 1.0 );
 	vec2 vp=vv*texel_size; // each unit is a pixel
-	vec2 hp=normalize((fract(vp/4.0)-0.5)*4.0); // a hash unit start vector
-	float ha=atan(hp.y,hp.x);
+	vec2 hp=fract(vp/2.0)-0.5; // a hash unit start vector
+	float ha=atan(hp.y,hp.x)+vv.x+vv.y;
 
 	float slen=float(AO_SIZE);
 
@@ -338,8 +338,8 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 
 	vec2 texel_size = vec2( textureSize(tex,0) ); // size of screen in pixels
 	vec2 vp=vv*texel_size; // each unit is a pixel
-	vec2 hp=((fract(vp/4.0)-0.5)*4.0); // a hash unit start vector
-	float ha=atan(hp.y,hp.x);
+	vec2 hp=fract(vp/2.0)-0.5; // a hash unit start vector
+	float ha=atan(hp.y,hp.x)+vv.x+vv.y;
 
 	vec3 v=depth_to_view( vv );
 

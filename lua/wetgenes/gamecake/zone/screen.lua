@@ -66,9 +66,9 @@ M.bake=function(oven,screen)
 			AO_SCALE=0.75,
 			AO_CLIP=0.75,
 			AO_SIZE=0.2,--1/8,
-			AO_SAMPLES=6,
+			AO_SAMPLES=3,
 			SHADOW_SCALE=1,
-			SHADOW_SAMPLES=6,
+			SHADOW_SAMPLES=3,
 --			SHADOW=" 0.0 , 0.0 , 0.0 , 0.0 ",
 --			SHADOW_SQUISH=1,
 
