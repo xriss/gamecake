@@ -236,7 +236,8 @@ if EMCC then
 		"-s USE_PTHREADS",
 	}
 	linkoptions{
-		"-s PROXY_TO_PTHREAD",
+		"-s PTHREAD_POOL_SIZE=8"
+--		"-s PROXY_TO_PTHREAD",
 	}
 
 

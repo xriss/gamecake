@@ -317,7 +317,7 @@ M.bake=function(oven,keys)
 
 					if m.action==1 then -- key set
 						if m.keyname then ups.set_button("mouse_"..m.keyname,true) end
-						if m.keyname=="left" or m.keyname=="right" or m.keyname=="middle" then
+						if m.keyname=="left" or m.keyname=="right" --[[or m.keyname=="middle"]] then
 							ups.set_button("fire",true)
 						end
 						used=true
@@ -326,7 +326,7 @@ M.bake=function(oven,keys)
 							ups.set_button("mouse_"..m.keyname,true)
 						end
 						if m.keyname then ups.set_button("mouse_"..m.keyname,false) end
-						if m.keyname=="left" or m.keyname=="right" or m.keyname=="middle" then
+						if m.keyname=="left" or m.keyname=="right" --[[or m.keyname=="middle"]] then
 							ups.set_button("fire",false)
 						end
 						used=true
