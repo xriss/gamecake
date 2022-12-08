@@ -297,7 +297,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 			end
 		end
 
-	local err=gl.GetError() ; assert( err==0 , gl.numtostring(err) ) -- well that went wrong
+--	local err=gl.GetError() ; assert( err==0 , gl.numtostring(err) ) -- well that went wrong
 
 		if cb then cb(p) end -- callback to fill in more uniforms before drawing
 

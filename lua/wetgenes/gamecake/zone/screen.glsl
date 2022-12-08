@@ -297,7 +297,7 @@ vec3 reconstruct_normal( vec2 vv )
 
 float ambient_occlusion( vec2 vv , vec3 nrm )
 {
-	if(float(texture(tex,vv))>=0.999) { return 0.5; }
+	if(float(texture(tex,vv))>=0.999) { return 0.5; } // disable when far far away
 	
 	vec2 texel_size = vec2( textureSize(tex,0) ); // size of screen in pixels
 	vec2 aspect=vec2( texel_size.y/texel_size.x , 1.0 );
