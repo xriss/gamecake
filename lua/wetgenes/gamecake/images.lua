@@ -145,8 +145,12 @@ images.prep_image=function(t)
 	
 			t.width=g.width
 			t.height=g.height
-			t.texture_width=t.width
-			t.texture_height=t.height
+			t.texture_width=images.uptwopow(t.width)
+			t.texture_height=images.uptwopow(t.height)
+
+			if t.texture_width~=g.width or t.texture_height~=g.height then 
+				g:resize(t.texture_width,t.texture_height,1) -- resize keeping the image in the topleft corner
+			end
 
 			t.max_mips=logmip(g.width,g.height)
 			if t.max_mips > images.max_mips then t.max_mips=images.max_mips end
