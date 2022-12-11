@@ -840,33 +840,6 @@ function gles.GetExtensions()
 			gles.extensions[s]=true -- skip the "GL_" at the start
 		end
 	end
-	
---[[
-	local t={}
-	for n,b in pairs(gles.extensions) do t[#t+1]=n end
-	for i=1,#t,4 do
-			print(string.format("GLEXT = %-32.32s %-32.32s %-32.32s %-32.32s",t[i] or "",t[i+1] or "",t[i+2] or "",t[i+3] or ""))
-		end
-	end
-
-	local s=gles.Get(gles.EXTENSIONS) or ""
-print("GLEXT ",s)
-	gles.GetError() -- ignore any errors here
-	local t={}
-	for w in s:gmatch("([^%s]+)") do
-		if w:sub(1,3)=="GL_" then
-			local s=w:sub(4)
-			t[#t+1]=s
-			gles.extensions[s]=true -- skip the "GL_" at the start
-		end
-	end
-	table.sort(t)
-	for i=1,#t,4 do
-		if gles.debug then -- only spew junk in debug mode
-			print(string.format("GLEXT = %-32.32s %-32.32s %-32.32s %-32.32s",t[i] or "",t[i+1] or "",t[i+2] or "",t[i+3] or ""))
-		end
-	end
-]]
 
 end
 

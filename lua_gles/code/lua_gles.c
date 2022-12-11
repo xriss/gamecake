@@ -1861,6 +1861,30 @@ int id=(int)luaL_checknumber(l,1);
 	return 0;
 }
 
+
+
+static int lua_gles_BlitFramebuffer (lua_State *l)
+{
+	int srcX0  =(int)luaL_checknumber(l,1);
+ 	int srcY0  =(int)luaL_checknumber(l,2);
+ 	int srcX1  =(int)luaL_checknumber(l,3);
+ 	int srcY1  =(int)luaL_checknumber(l,4);
+ 	int dstX0  =(int)luaL_checknumber(l,5);
+ 	int dstY0  =(int)luaL_checknumber(l,6);
+ 	int dstX1  =(int)luaL_checknumber(l,7);
+ 	int dstY1  =(int)luaL_checknumber(l,8);
+ 	int mask   =(int)luaL_checknumber(l,9);
+ 	int filter =(int)luaL_checknumber(l,10);
+
+	glBlitFramebuffer(
+		srcX0,srcY0,srcX1,srcY1,
+		dstX0,dstY0,dstX1,dstY1,
+		mask,filter
+	);
+
+	return 0;
+}
+
 #endif
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -2054,12 +2078,14 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"StencilOpSeparate",					lua_gles_StencilOpSeparate},
 #endif
 
-// GLES3 functions we need these for OSX to work
+// GLES3 ( should add all of them, at the moment is is cherry picked as needed )
 #if defined(LUA_GLES_GLES3) || defined(LUA_GLES_GL)
 
 		{"GenVertexArray",			lua_gles_GenVertexArray},
 		{"BindVertexArray",			lua_gles_BindVertexArray},
 		{"DeleteVertexArray",		lua_gles_DeleteVertexArray},
+
+		{"BlitFramebuffer",			lua_gles_BlitFramebuffer},
 
 #endif
 
