@@ -250,8 +250,18 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 	log( "oven","vendor",(gles.Get(gles.VENDOR) or ""))
 	log( "oven","render",(gles.Get(gles.RENDERER) or ""))
 	log( "oven","version",(gles.Get(gles.VERSION) or ""))
-	for w in (gles.Get(gles.EXTENSIONS) or ""):gmatch("([^%s]+)") do
-		log( "oven","glext",w)
+-- this is depreciated
+--	for w in (gles.Get(gles.EXTENSIONS) or ""):gmatch("([^%s]+)") do 
+--		log( "oven","glext",w)
+--	end
+-- need to do this
+	do
+		local t={}
+		for i=0,(gles.Get(gles.NUM_EXTENSIONS) or 0)-1 do
+			t[#t+1]=gles.Get(gles.EXTENSIONS,i)
+		end
+		table.sort(t)
+		for i,s in ipairs(t) do log( "oven","glext",s) end
 	end
 	
 	return it.ctx

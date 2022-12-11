@@ -161,7 +161,7 @@ function glescode.create(gl,code)
 				gl.FrontFace(value)
 
 			elseif name==gl.COLOR_WRITEMASK then
-				gl.ColorMask(value)
+				gl.ColorMask(value[1],value[2],value[3],value[4])
 
 			elseif name==gl.DEPTH_WRITEMASK then
 				gl.DepthMask(value)

@@ -166,8 +166,8 @@ available as caste names.
 		end
 		scene.systems[#scene.systems+1]=it
 		table.sort(scene.systems,function(a,b)
-			local av=scene.sortby[ a.caste ] or math.huge -- use caste to get sortby weight
-			local bv=scene.sortby[ b.caste ] or math.huge -- put items without a weight last
+			local av=scene.sortby[ a.caste ] or 0 -- use caste to get sortby weight
+			local bv=scene.sortby[ b.caste ] or 0 -- put items without a weight last
 			return ( av > bv ) -- sort backwards
 		end)
 	end
@@ -279,12 +279,6 @@ scene.sortby is used to keep this list in order.
 		if not scene.data[caste] then -- create on use
 			local items={caste=caste}
 			scene.data[caste]=items
-			scene.data[#scene.data+1]=items
-			table.sort(scene.data,function(a,b)
-				local av=scene.sortby[ a.caste ] or math.huge -- get caste then use caste to get sortby weight
-				local bv=scene.sortby[ b.caste ] or math.huge -- put items without a weight last
-				return ( av > bv )
-			end)
 		end
 		return scene.data[caste]
 	end
@@ -375,22 +369,32 @@ currently active items.
 	scene.call=function(fname,...)
 		local count=0
 		if type(fname)=="function" then
-			for i=#scene.data,1,-1 do
-				local items=scene.data[i]
-				for idx=#items,1,-1 do -- call backwards so item can remove self
-					local it=items[idx]
-					fname(it,...) -- call an explicit function
-					count=count+1
-				end	
+			for i=#scene.systems,1,-1 do
+				local sys=scene.systems[i]
+				local items=scene.data[ sys.caste ]
+				if items then
+					for idx=#items,1,-1 do -- call backwards so item can remove self
+						local it=items[idx]
+						fname(it,...) -- call an explicit function
+						count=count+1
+					end
+				end
 			end
 		else
-			for i=#scene.data,1,-1 do
-				local items=scene.data[i]
-				for idx=#items,1,-1 do -- call backwards so item can remove self
-					local it=items[idx]
-					if it[fname] then -- call a method, if it exists
-						it[fname](it,...)
-						count=count+1
+			for i=#scene.systems,1,-1 do
+				local sys=scene.systems[i]
+				local items=scene.data[ sys.caste ]
+				if sys and sys[fname] then -- call a system method, if it exists
+					sys[fname](sys,...)
+					count=count+1
+				end
+				if items then
+					for idx=#items,1,-1 do -- call backwards so item can remove self
+						local it=items[idx]
+						if it[fname] then -- call a method, if it exists
+							it[fname](it,...)
+							count=count+1
+						end
 					end
 				end
 			end
@@ -456,12 +460,6 @@ of items of each caste.
 			local datas=scene.data[ items.caste ]
 			local count=datas and #datas or 0
 			lines[#lines+1]=(items.caste or "").." : "..count
-		end
-		for i=#scene.data,1,-1 do
-			local items=scene.data[i]
-			if not scene.systems[ items.caste ] then -- not already done
-				lines[#lines+1]="item "..(items.caste or "").." : "..#items
-			end
 		end
 		for n,v in ipairs(scene.info) do
 			lines[#lines+1]=tostring(n).." = "..tostring(v)

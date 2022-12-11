@@ -116,7 +116,7 @@ float fv[16];
 int i;
 
 	def=luaL_checknumber(l,1);
-	
+		
 	lua_gles_get_prop_info(def, &v, &num);
 	
 	switch(v)
@@ -136,7 +136,11 @@ int i;
 			}
 		break;
 		case 's':
-			for(i=0;i<num;i++) // this should only ever be 1
+			if( lua_isnumber(l,2) ) // requesting string of given index
+			{
+				lua_pushstring(l, (const char *)glGetStringi(def , (int)luaL_checknumber(l,2) ) );
+			}
+			else
 			{
 				lua_pushstring(l, (const char *)glGetString(def) );
 			}
