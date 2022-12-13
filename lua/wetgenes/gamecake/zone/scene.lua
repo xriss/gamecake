@@ -124,11 +124,12 @@ Return the item with the given uid or nil if no such item has been remembered.
 --[[#lua.wetgenes.gamecake.zone.scene.systems.remove
 
 	system = scene.systems.remove(caste)
+	system = scene.systems_remove(caste)
 
 Remove and return the system of the given caste.
 
 ]]
-	scene.systems.remove=function(caste)
+	scene.systems_remove=function(caste)
 		scene.systems[caste]=nil
 		for i,v in ipairs(scene.systems) do
 			if v.caste==caste then
@@ -136,11 +137,13 @@ Remove and return the system of the given caste.
 			end
 		end
 	end
+	scene.systems.remove=scene.systems_remove
 	
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.insert
 
 	scene.systems.insert(system)
+	scene.systems_insert(system)
 
 Insert a new system replacing any system of the same caste. system.caste should
 be set to the caste of the system for this to work. As we also keep some
@@ -148,21 +151,17 @@ functions in this table, the names "insert", "remove" and "call" are not
 available as caste names.
 
 ]]
-	scene.systems.insert=function(it)
+	scene.systems_insert=function(it)
 		scene.remember_uid(it)
 		if it.caste then
 			for i,v in ipairs(scene.systems) do
 				if v.caste==it.caste then -- replace
 					scene.systems[i]=it
-					if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then -- filter invalid system names
-						scene.systems[it.caste]=it
-					end
+					scene.systems[it.caste]=it
 					return
 				end
 			end
-			if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then -- filter invalid system names
-				scene.systems[it.caste]=it
-			end
+			scene.systems[it.caste]=it
 		end
 		scene.systems[#scene.systems+1]=it
 		table.sort(scene.systems,function(a,b)
@@ -171,11 +170,13 @@ available as caste names.
 			return ( av > bv ) -- sort backwards
 		end)
 	end
+	scene.systems.insert=scene.systems_insert
 
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.call
 
 	scene.systems.call(fname,...)
+	scene.systems_call(fname,...)
 
 For every system call the function called fname like so.
 
@@ -185,7 +186,7 @@ Returns the number of calls made, which will be the number of systems that had
 an fname function to call.
 
 ]]
-	scene.systems.call=function(fname,...)
+	scene.systems_call=function(fname,...)
 		local count=0
 		for i=#scene.systems,1,-1 do -- call backwards so item can remove self
 			local system=scene.systems[i]
@@ -196,10 +197,12 @@ an fname function to call.
 		end
 		return count -- number of systems called
 	end
+	scene.systems.call=scene.systems_call
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.cocall
 
 	scene.systems.cocall(fname,...)
+	scene.systems_cocall(fname,...)
 
 For every system call the function called fname inside a coroutine like 
 so.
@@ -210,7 +213,7 @@ Returns the number of calls made, which will be the number of systems that had
 an fname function to call.
 
 ]]
-	scene.systems.cocall=function(fname,...)
+	scene.systems_cocall=function(fname,...)
 		local functions={}
 		local count=0
 		for i=#scene.systems,1,-1 do -- call backwards so item can remove self
@@ -225,7 +228,7 @@ an fname function to call.
 		require("wetgenes.tasks").cocall(functions)
 		return count -- number of systems called
 	end
-
+	scene.systems.cocall=scene.systems_cocall
 
 
 
@@ -271,12 +274,16 @@ Get the list of items of a given caste, eg "bullets" or "enemies"
 
 This list will be created if it does not already exist.
 
-scene.sortby is used to keep this list in order.
+scene.sortby is used to keep this list in order and an empty system 
+will be autocreated if needed.
 
 ]]
 	scene.caste=function(caste)
 		caste=caste or "generic"
 		if not scene.data[caste] then -- create on use
+			if not scene.systems[caste] then -- create system
+				scene.systems.insert({caste=caste})
+			end
 			local items={caste=caste}
 			scene.data[caste]=items
 		end
