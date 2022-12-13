@@ -2439,10 +2439,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>scene.systems.insert(system)\n</code></pre>\n<p>Insert a new system replacing any system of the same caste. system.caste should\nbe set to the caste of the system for this to work. As we also keep some\nfunctions in this table, the names &quot;insert&quot;, &quot;remove&quot; and &quot;call&quot; are not\navailable as caste names.</p>\n",
+   "body": "<pre><code>scene.systems.insert(system)\nscene.systems_insert(system)\n</code></pre>\n<p>Insert a new system replacing any system of the same caste. system.caste should\nbe set to the caste of the system for this to work. As we also keep some\nfunctions in this table, the names &quot;insert&quot;, &quot;remove&quot; and &quot;call&quot; are not\navailable as caste names.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 141,
+   "line": 143,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.insert",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
