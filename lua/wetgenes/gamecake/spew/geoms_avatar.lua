@@ -234,10 +234,12 @@ M.bake=function(oven,geoms_avatar)
 		geoms_avatar.gltf=wgeom_gltf.load(geoms_avatar.filename)
 		geoms_avatar.objs=wgeom_gltf.to_geoms(geoms_avatar.gltf)
 		
+--[[
 		log("avatar",#geoms_avatar.objs.anims)
 		for i,v in ipairs(geoms_avatar.objs.anims) do
 			log("avatar","anim",i,math.floor(v.min*24),math.floor(v.max*24),v.name)
 		end		
+]]
 
 		geoms_avatar.build_texture_anims()
 
@@ -644,7 +646,7 @@ void main(void)
 
 			end
 			
-			log("avatar",anim.name,#fs)
+--			log("avatar",anim.name,#fs)
 			
 			geoms_avatar.bonetexs[anim.name]=textures.create({
 				id="avatar/bonetexs/"..anim.name,

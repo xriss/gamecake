@@ -44,7 +44,7 @@ B.setup=function(zgui)
 			ssettings.set("wetgenes_user_password","" ) -- forget
 		end
 		ssettings.set("wetgenes_user_password_remember",datas.get("user_password_remember"):value() )
-		ssettings.set("user_auto_login",datas.get("user_auto_login"):value() )
+		ssettings.set("wetgenes_user_auto_login",datas.get("user_auto_login"):value() )
 		ssettings.set("wetgenes_user_session",datas.get("user_session"):value() )
 		ssettings.set("wetgenes_user_ip",datas.get("user_ip"):value() )
 		ssettings.save()

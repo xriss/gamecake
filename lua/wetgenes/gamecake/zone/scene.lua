@@ -123,7 +123,6 @@ Return the item with the given uid or nil if no such item has been remembered.
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.remove
 
-	system = scene.systems.remove(caste)
 	system = scene.systems_remove(caste)
 
 Remove and return the system of the given caste.
@@ -137,18 +136,14 @@ Remove and return the system of the given caste.
 			end
 		end
 	end
-	scene.systems.remove=scene.systems_remove
 	
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.insert
 
-	scene.systems.insert(system)
 	scene.systems_insert(system)
 
 Insert a new system replacing any system of the same caste. system.caste should
-be set to the caste of the system for this to work. As we also keep some
-functions in this table, the names "insert", "remove" and "call" are not
-available as caste names.
+be set to the caste of the system for this to work.
 
 ]]
 	scene.systems_insert=function(it)
@@ -170,12 +165,10 @@ available as caste names.
 			return ( av > bv ) -- sort backwards
 		end)
 	end
-	scene.systems.insert=scene.systems_insert
 
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.call
 
-	scene.systems.call(fname,...)
 	scene.systems_call(fname,...)
 
 For every system call the function called fname like so.
@@ -197,17 +190,19 @@ an fname function to call.
 		end
 		return count -- number of systems called
 	end
-	scene.systems.call=scene.systems_call
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.cocall
 
-	scene.systems.cocall(fname,...)
 	scene.systems_cocall(fname,...)
 
 For every system call the function called fname inside a coroutine like 
 so.
 
 	system[fname](system,...)
+	
+This function can yield and should do so if it is waiting for another 
+system to do something. All coroutines will be run in a round robin 
+style until they all complete.
 
 Returns the number of calls made, which will be the number of systems that had
 an fname function to call.
@@ -228,7 +223,6 @@ an fname function to call.
 		require("wetgenes.tasks").cocall(functions)
 		return count -- number of systems called
 	end
-	scene.systems.cocall=scene.systems_cocall
 
 
 
@@ -245,7 +239,7 @@ The first caste name in the array gets a weight of 1, second 2 and so on.
 
 ]]
 	scene.sortby_update=function()
-		for i,v in ipairs(scene.sortby) do scene.sortby[v]=i end
+		for i,v in pairs(scene.sortby) do if type(i)=="number" then scene.sortby[v]=scene.sortby[v] or i end end
 	end
 	scene.sortby_update()
 
@@ -472,6 +466,14 @@ of items of each caste.
 			lines[#lines+1]=tostring(n).." = "..tostring(v)
 		end
 		return table.concat(lines,"\n")
+	end
+
+-- hacks for old fun64 compat which expects these functions in the systems table
+	if scene.fun64 then
+		scene.systems.remove=scene.systems_remove
+		scene.systems.insert=scene.systems_insert
+		scene.systems.call=scene.systems_call
+		scene.systems.cocall=scene.systems_cocall
 	end
 
 -- reset and return the scene, creating the initial data and info tables
