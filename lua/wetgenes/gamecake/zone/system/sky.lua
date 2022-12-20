@@ -29,7 +29,7 @@ B.system=function(sky)
 	setmetatable(sky,B.sky_metatable)
 
 	sky.caste="sky"
-	sky.time_speed=1/60
+	sky.time_speed=1/60 -- 360/1200
 	sky.time_snap=15
 	sky.time_frac=90+45
 	sky.time_dest=math.floor((0.5+sky.time_frac)/sky.time_snap)*sky.time_snap
