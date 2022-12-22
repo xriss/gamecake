@@ -15,6 +15,16 @@ local ls=function(...)print(wstr.dump(...))end
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.bake=function(oven,B) B=B or {} -- bound to oven for gl etc
+	B.system=function(system) -- bound to zones for scene etc
+		local B={} -- fake bake
+		return M.bake_system(oven,B,system)
+	end
+	return B
+end
+
+M.bake_system=function(oven,B,system)
+local scene=system.scene
+local lights=system
 
 B.lights={}
 B.lights_metatable={__index=B.lights}
@@ -67,5 +77,5 @@ B.light.save=function(light,data)
 	return data
 end
 
-return B
+return B.system(system)
 end

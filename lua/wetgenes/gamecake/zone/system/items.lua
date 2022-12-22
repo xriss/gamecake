@@ -20,6 +20,16 @@ objects as necessary.
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.bake=function(oven,B) B=B or {} -- bound to oven for gl etc
+	B.system=function(system) -- bound to zones for scene etc
+		local B={} -- fake bake
+		return M.bake_system(oven,B,system)
+	end
+	return B
+end
+
+M.bake_system=function(oven,B,system)
+local scene=system.scene
+local items=system
 
 B.items={}
 B.items_metatable={__index=B.items}
@@ -125,5 +135,5 @@ B.item.save=function(item,data)
 	return data
 end
 
-return B
+return B.system(system)
 end
