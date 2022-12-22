@@ -81,6 +81,7 @@ uniform vec4 color;
 uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
+uniform sampler2D tex3;
 
 #ifdef VERTEX_SHADER
 
@@ -88,12 +89,14 @@ in vec3 a_vertex;
 in vec2 a_texcoord;
 
 out vec2 v_texcoord;
+out vec4 pos;
 
 void main()
 {
 	v_texcoord=a_texcoord;
 
 	gl_Position = vec4( a_vertex.xyz, 1.0 );
+	pos=gl_Position;
 }
 
 #endif
@@ -102,6 +105,8 @@ void main()
 #if defined(GL_FRAGMENT_PRECISION_HIGH) && defined(VERSION_ES)
 precision highp float;
 #endif
+
+in vec4 pos;
 
 in vec2 v_texcoord;
 
@@ -173,6 +178,18 @@ void main(void)
 #else
 
 	c= m * s + b ;
+
+#endif
+
+#ifdef FOG_COLOR
+	
+	vec3 luv=vec3(0.5)+((pos.xyz/pos.w)*0.5);	// read this pixel from last color/depth
+	float depth=float(texture(tex3,luv.xy)); // scene depth
+
+	const vec4 fog_color=vec4(FOG_COLOR);
+	const vec4 fog_config=vec4(FOG_CONFIG);
+	
+	c=mix(c,fog_color.rgb,fog_color.a*smoothstep(-fog_config[0],-fog_config[1],-depth));
 
 #endif
 
@@ -248,7 +265,7 @@ out vec4 FragColor;
 // convert a uv into view space by sampling z buffer
 vec3 depth_to_view(vec2 cc)
 {
-	vec4 t=vec4( cc , float(texture(tex,cc)) , 1.0 );
+	vec4 t=vec4( cc , 1.0-float(texture(tex,cc)) , 1.0 );
 	vec4 p=inverse_projection * ( t*2.0 - 1.0 );
 	if(abs(p.w)<0.001){p.w=0.001;} // sanity
 	return p.xyz/p.w;
@@ -375,7 +392,7 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 			float fa=float(ia);
 			float r=ha+fa*rots;
 			vec2 rr=vec2(sin(r),cos(r))*(1.0-fa*dims);
-			shadow_tmp = texture(shadow_map, shadow_uv.xy + rr*shadow_texel_size ).r ;
+			shadow_tmp = 1.0-texture(shadow_map, shadow_uv.xy + rr*shadow_texel_size ).r ;
 			shadow_add += shadow_tmp ;
 //			shadow_min = min( shadow_min , shadow_tmp );
 		}

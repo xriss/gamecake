@@ -81,7 +81,7 @@ B.sky.draw=function(sky)
 		[gl.CULL_FACE]					=	gl.FALSE,
 		[gl.DEPTH_TEST]					=	gl.TRUE,
 		[gl.DEPTH_WRITEMASK]			=	gl.FALSE,
-		[gl.DEPTH_FUNC]					=	gl.LEQUAL,
+		[gl.DEPTH_FUNC]					=	gl.GEQUAL,
 	})
 
 	gl.Color(1,1,1,1)
