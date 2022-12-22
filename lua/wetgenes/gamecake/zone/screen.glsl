@@ -189,7 +189,7 @@ void main(void)
 	const vec4 fog_color=vec4(FOG_COLOR);
 	const vec4 fog_config=vec4(FOG_CONFIG);
 	
-	c=mix(c,fog_color.rgb,fog_color.a*smoothstep(-fog_config[0],-fog_config[1],-depth));
+	c=mix(c,fog_color.rgb,fog_color.a*smoothstep(fog_config[0],fog_config[1],depth));
 
 #endif
 
@@ -265,7 +265,7 @@ out vec4 FragColor;
 // convert a uv into view space by sampling z buffer
 vec3 depth_to_view(vec2 cc)
 {
-	vec4 t=vec4( cc , 1.0-float(texture(tex,cc)) , 1.0 );
+	vec4 t=vec4( cc , float(texture(tex,cc)) , 1.0 );
 	vec4 p=inverse_projection * ( t*2.0 - 1.0 );
 	if(abs(p.w)<0.001){p.w=0.001;} // sanity
 	return p.xyz/p.w;
@@ -392,7 +392,7 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 			float fa=float(ia);
 			float r=ha+fa*rots;
 			vec2 rr=vec2(sin(r),cos(r))*(1.0-fa*dims);
-			shadow_tmp = 1.0-texture(shadow_map, shadow_uv.xy + rr*shadow_texel_size ).r ;
+			shadow_tmp = texture(shadow_map, shadow_uv.xy + rr*shadow_texel_size ).r ;
 			shadow_add += shadow_tmp ;
 //			shadow_min = min( shadow_min , shadow_tmp );
 		}

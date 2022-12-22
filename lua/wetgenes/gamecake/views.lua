@@ -285,9 +285,8 @@ min depth to behave like perspective
 z/w is in the 0.0 to 1.0 range so the depth buffer is in 0.5 to 1.0 we actually 
 bleed out of this range to near 0 since we cant clip at 0.5
 
-Looks like glDepthRange is OK to use, so this makes much more sense 
-with that used to also reverse a Z buffer and have it go from 1.0 to 
-0.0 in the distance.
+Ah mybad we can not use glDepthRange as WebGL hates the depth buffer 
+(in mmany ways), so back to the icky default way it is.
 
 ]]
 

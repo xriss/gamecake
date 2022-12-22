@@ -61,7 +61,7 @@ M.bake=function(oven,screen)
 			BLOOM_SCALE=2,
 --			TWEAK=0,
 --			FOG_COLOR= " 0.10 , 0.10 , 0.20 , 0.75 ",
---			FOG_CONFIG=" 0.01 , 0.00 , 0.00 , 0.00 ",
+--			FOG_CONFIG=" 0.99 , 1.00 , 0.00 , 0.00 ",
 		},
 		
 		zone_screen_build_occlusion={

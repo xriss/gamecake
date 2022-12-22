@@ -254,9 +254,9 @@ function glescode.create(gl,code)
 		[gl.COLOR_WRITEMASK]			=	V4(gl.TRUE,gl.TRUE,gl.TRUE,gl.TRUE),
 
 		[gl.DEPTH_WRITEMASK]			=	gl.TRUE,
-		[gl.DEPTH_FUNC]					=	gl.GREATER,
-		[gl.DEPTH_RANGE]				=	V2(1,0),
-		[gl.DEPTH_CLEAR_VALUE]			=	0,
+		[gl.DEPTH_FUNC]					=	gl.LESS,
+		[gl.DEPTH_RANGE]				=	V2(0,1),
+		[gl.DEPTH_CLEAR_VALUE]			=	1,
 		
 		[gl.POLYGON_OFFSET_FACTOR]		=	0,
 		[gl.POLYGON_OFFSET_UNITS]		=	0,
@@ -287,9 +287,9 @@ function glescode.create(gl,code)
 	-- fix initial values that deviate from opengl defaults
 	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	gl.Enable(gl.BLEND)
-	gl.DepthFunc(gl.GREATER)
-	gl.DepthRange(1,0)
-	gl.ClearDepth(0)
+--	gl.DepthFunc(gl.GREATER)
+--	gl.DepthRange(1,0)
+--	gl.ClearDepth(0)
 	
 	-- from this point on you must only use code.state.set function not gl.Enable / etc
 	-- or we will get out of sync
