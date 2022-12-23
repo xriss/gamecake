@@ -28,6 +28,9 @@ function glescode.create(gl,code)
 
 	code=code or {}
 	for n,v in pairs(gl) do code[n]=v end
+
+-- webgl prevents this from being on by default (maybe we should sniff that out)	
+	code.DEPTH_RANGE_REVERSE=false
 	
 -- manage cached and stacked version of 			elseif name==gl.enable and related state
 	code.state={}
@@ -278,6 +281,12 @@ function glescode.create(gl,code)
 
 	}
 
+if code.DEPTH_RANGE_REVERSE then
+	code.state_defaults[gl.DEPTH_FUNC]					=	gl.GREATER
+	code.state_defaults[gl.DEPTH_RANGE]					=	V2(1,0)
+	code.state_defaults[gl.DEPTH_CLEAR_VALUE]			=	0
+end
+
 	code.state.index=1
 	code.state[1]={}
 	for n,v in pairs(code.state_defaults) do
@@ -287,9 +296,12 @@ function glescode.create(gl,code)
 	-- fix initial values that deviate from opengl defaults
 	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	gl.Enable(gl.BLEND)
---	gl.DepthFunc(gl.GREATER)
---	gl.DepthRange(1,0)
---	gl.ClearDepth(0)
+
+if code.DEPTH_RANGE_REVERSE then
+	gl.DepthFunc(gl.GREATER)
+	gl.DepthRange(1,0)
+	gl.ClearDepth(0)
+end
 	
 	-- from this point on you must only use code.state.set function not gl.Enable / etc
 	-- or we will get out of sync

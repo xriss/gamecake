@@ -81,8 +81,17 @@ B.sky.draw=function(sky)
 		[gl.CULL_FACE]					=	gl.FALSE,
 		[gl.DEPTH_TEST]					=	gl.TRUE,
 		[gl.DEPTH_WRITEMASK]			=	gl.FALSE,
+	})
+
+if gl.DEPTH_RANGE_REVERSE then
+	gl.state.set({
+		[gl.DEPTH_FUNC]					=	gl.GEQUAL,
+	})
+else
+	gl.state.set({
 		[gl.DEPTH_FUNC]					=	gl.LEQUAL,
 	})
+end
 
 	gl.Color(1,1,1,1)
 
