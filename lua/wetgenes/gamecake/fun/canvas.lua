@@ -78,11 +78,7 @@ canvas.create=function(it,opts)
 		end
 	end
 
---local color=1
 	it.update=function()
---		it.grd:clear(color)
---		color=(color+1)%32
---		it.dirty(true)
 	end
 	
 	it.draw=function()
@@ -95,7 +91,7 @@ canvas.create=function(it,opts)
 			gl.TexImage2D(
 				gl.TEXTURE_2D,
 				0,
-				gl.LUMINANCE,
+				gl.RGB,			-- some stuff does not like luminance and want red others demand luminance RGB seems safe ish
 				it.grd.width,
 				it.grd.height,
 				0,
@@ -121,9 +117,9 @@ canvas.create=function(it,opts)
 		gl.DepthMask(gl.FALSE)
 		flat.tristrip("rawuv",t,"fun_draw_canvas",function(p)
 
---			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
+			gl.Uniform2f( p:uniform("projection_zxy"), it.screen.zx,it.screen.zy)
 
-			gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_cmap"), 2 )
+			gl.ActiveTexture(gl.TEXTURE1) gl.Uniform1i( p:uniform("tex_cmap"), 1 )
 			gl.BindTexture( gl.TEXTURE_2D , it.colors.cmap_tex )
 
 			gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex_canvas"), 0 )
