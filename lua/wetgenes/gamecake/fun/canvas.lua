@@ -91,11 +91,11 @@ canvas.create=function(it,opts)
 			gl.TexImage2D(
 				gl.TEXTURE_2D,
 				0,
-				gl.RGB,			-- some stuff does not like luminance and want red others demand luminance RGB seems safe ish
+				gl.RED,			-- some drivers do not like luminance and want red others demand luminance...
 				it.grd.width,
 				it.grd.height,
 				0,
-				gl.LUMINANCE,
+				gl.RED,
 				gl.UNSIGNED_BYTE,
 				it.grd.data )
 		end
