@@ -76,9 +76,10 @@ libraries from this repository embedded and ready to be required by
 your lua code.
 
 
-We are also setup to auto build snaps via 
-https://code.launchpad.net/~xriss/+snap/gamecake the following should 
-get you a snap install of gamecake.
+We are also setup to auto build snaps via https://snapcraft.io/gamecake the following
+should get you a snap install of gamecake.
+
+SnapCraft : [![gamecake](https://snapcraft.io/gamecake/badge.svg)](https://snapcraft.io/gamecake)
 
 	sudo snap install gamecake
 	sudo snap connect gamecake:joystick :joystick
