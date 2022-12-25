@@ -116,23 +116,17 @@ B.item.get=function(item,name)
 	end
 end
 
-B.item.load=function(item,data)
-	data=data or {}
 
---	item.rot=Q4( data.rot or {0,0,0,1} )
---	item.pos=V3( data.pos or {0,0,0} )
-
+-- generate any missing boot (json) data
+B.item.gene=function(item,boot)
+	boot=boot or {}
+	return boot
 end
 
-B.item.save=function(item,data)
-	data=data or {}
-
-	data[1]=item.caste
-
---	data.rot={ item.rot[1] , item.rot[2] , item.rot[3] ,  item.rot[4] }
---	data.pos={ item.pos[1] , item.pos[2] , item.pos[3] }
-
-	return data
+-- fill in a boot (json) with current state
+B.item.save=function(item,boot)
+	boot=boot or {}
+	return boot
 end
 
 return B.system(system)

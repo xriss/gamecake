@@ -39,7 +39,7 @@ B.system=function(sky)
 	setmetatable(sky,B.sky_metatable)
 
 	sky.caste="sky"
-	sky.time_speed=1/60 -- 360/1200
+	sky.time_speed=360/(20*60*60) -- 1/60 -- 360/1200
 	sky.time_snap=15
 	sky.time_frac=90+45
 	sky.time_dest=math.floor((0.5+sky.time_frac)/sky.time_snap)*sky.time_snap
@@ -119,6 +119,19 @@ end
 	gl.state.pop()
 
 
+end
+
+
+-- generate any missing boot (json) data
+B.sky.gene=function(sky,boot)
+	boot=boot or {}
+	return boot
+end
+
+-- fill in a boot (json) with current state
+B.sky.save=function(sky,boot)
+	boot=boot or {}
+	return boot
 end
 
 return B.system(system)

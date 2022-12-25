@@ -77,5 +77,19 @@ B.light.save=function(light,data)
 	return data
 end
 
+
+-- generate any missing boot (json) data
+B.light.gene=function(light,boot)
+	boot=boot or {}
+	return boot
+end
+
+-- fill in a boot (json) with current state
+B.light.save=function(light,boot)
+	boot=boot or {}
+	return boot
+end
+
+
 return B.system(system)
 end

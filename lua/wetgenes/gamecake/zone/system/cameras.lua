@@ -293,5 +293,19 @@ B.camera.update=function(camera)
 
 end
 
+
+-- generate any missing boot (json) data
+B.camera.gene=function(camera,boot)
+	boot=boot or {}
+	return boot
+end
+
+-- fill in a boot (json) with current state
+B.camera.save=function(camera,boot)
+	boot=boot or {}
+	return boot
+end
+
+
 return B.system(system)
 end
