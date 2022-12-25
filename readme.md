@@ -108,7 +108,7 @@ executable installed.
 	gamecake -lcmd -- swed
 
 	# run a fun64 demo ( https://github.com/xriss/fun64/tree/master/fun )
-	gamecake -lfun -- lua/fun/heloworld
+	gamecake -lfun -- lua/fun/helloworld
 	gamecake -lfun -- lua/fun/raymarch
 	gamecake -lfun -- lua/fun/palette
 	gamecake -lfun -- lua/fun/invaders
