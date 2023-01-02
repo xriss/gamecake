@@ -277,6 +277,8 @@ B.camera.update=function(camera)
 	camera.mtx:rotate( camera.rot[2] ,  0, 1, 0 )
 	camera.mtx:rotate( camera.rot[1] ,  1, 0, 0 )
 	camera.mtx:translate( 0,0, 0.0 + camera.dolly*camera.orbit.dolly )
+	
+	camera.pos=camera.mtx:get_translation_v3()
 
 --	if camera.floor then
 --		if camera.mtx[14] > camera.floor then camera.mtx[14]=camera.floor end -- keep above ground
