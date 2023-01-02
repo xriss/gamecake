@@ -61,7 +61,7 @@ out vec4 FragColor;
 
 void main(void)
 {
-	float t=texture(shadow_map, v_texcoord).r*256.0*256.0;
+	float t=texture(shadow_map, v_texcoord).r*256.0*2.0;
 
 	vec3 rgb=0.5+sin(t+vec3( 0.0 , 2.09439510239 , 4.18879020479 ))*0.5;
 	
