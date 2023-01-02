@@ -327,9 +327,11 @@ Destroy body.
 ]]
 bullet.body_functions.destroy=function(body)
 	local world=body.world
+	core.world_remove_body(world[0],body[0])
 	if body.name then world:set(body.name) end
+	local ptr=core.body_ptr(body[0])
 	core.body_destroy( body[0] )
-	world.bodies[ core.body_ptr(body[0]) ]=nil
+	world.bodies[ ptr ]=nil
 end
 
 ------------------------------------------------------------------------
