@@ -336,6 +336,7 @@ as it sees fit.
 ]]
 	scene.remove=function(it)
 		scene.forget_uid(it)
+		if it.id then scene.set( it.id ) end
 		local items=scene.caste(it.caste)
 		for idx=#items,1,-1 do -- search backwards
 			if items[idx]==it then
