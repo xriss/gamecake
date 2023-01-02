@@ -79,6 +79,7 @@ bullet.world_functions.destroy=function(world)
 
 	for i,body  in pairs(world.bodys)   do body:destroy() end
 	for i,shape in pairs(world.shapes)  do shape:destroy() end
+	for i,mesh  in pairs(world.meshes)  do mesh:destroy() end
 
 	core.world_destroy( world[0] )
 
@@ -226,8 +227,9 @@ Destroy mesh.
 bullet.mesh_functions.destroy=function(mesh)
 	local world=mesh.world
 	if mesh.name then world:set(mesh.name) end
+	local ptr=mesh[0]
 	core.mesh_destroy( mesh[0] )
-	world.meshes[ mesh[0] ]=nil
+	world.meshes[ ptr ]=nil
 end
 
 ------------------------------------------------------------------------
@@ -242,7 +244,7 @@ bullet.world_functions.shape=function(world,name,a,...)
 	local shape={}
 	setmetatable(shape,bullet.shape_metatable)
 
-	if name=="mesh" then a=a[0] end
+	if name=="mesh" then shape.mesh=a a=a[0] end
 
 	shape[0]=core.shape_create(name,a,...)
 	shape.world=world
@@ -263,8 +265,12 @@ Destroy shape.
 bullet.shape_functions.destroy=function(shape)
 	local world=shape.world
 	if shape.name then world:set(shape.name) end
+	local ptr=core.shape_ptr(shape[0])
 	core.shape_destroy( shape[0] )
-	world.shapes[ core.shape_ptr(shape[0]) ]=nil
+	world.shapes[ ptr ]=nil
+	if shape.mesh then
+		shape.mesh:destroy()
+	end
 end
 
 ------------------------------------------------------------------------
@@ -309,6 +315,7 @@ bullet.world_functions.body=function(world,name,shape,mass,x,y,z,cgroup,cmask)
 	body[0]=core.body_create(opts.name,opts.shape[0],opts.mass,opts.pos[1],opts.pos[2],opts.pos[3])
 	body.world=world
 	body.name=name -- probably rigid or ghost
+	body.shape=shape
 	
 	world.bodies[ core.body_ptr(body[0]) ]=body
 
@@ -332,6 +339,7 @@ bullet.body_functions.destroy=function(body)
 	local ptr=core.body_ptr(body[0])
 	core.body_destroy( body[0] )
 	world.bodies[ ptr ]=nil
+	body.shape:destroy()
 end
 
 ------------------------------------------------------------------------
