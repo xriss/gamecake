@@ -2463,7 +2463,7 @@
    "body": "<pre><code>scene.call(fname,...)\n</code></pre>\n<p>If fname is a string then that method will be invoked for every item where it\nexists like so.</p>\n<pre><code>if it[fname] then it[fname](it,...) end\n</code></pre>\n<p>if fname is a function then it will result in every item geting called with\nthat function like so.</p>\n<pre><code>fname(it,...)\n</code></pre>\n<p>The calls are always made backwards through the table so that an item can\nchoose to delete itself.</p>\n<p>Finally we return the number of calls we made so you can keep track of\ncurrently active items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 349,
+   "line": 350,
    "name": "lua.wetgenes.gamecake.zone.scene.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2503,7 +2503,7 @@
    "body": "<pre><code>scene.get(name)\n</code></pre>\n<p>get a value previously saved, this is an easy way to find a unique entity, eg\nthe global space but it can be used to save any values you wish not just to\nbookmark unique items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 407,
+   "line": 408,
    "name": "lua.wetgenes.gamecake.zone.scene.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2511,7 +2511,7 @@
    "body": "<pre><code>scene.manifest(name,value)\n</code></pre>\n<p>get a value previously saved, or initalize it to the given value if it does not\nalready exist. The default value is {} as this is intended for lists.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 434,
+   "line": 435,
    "name": "lua.wetgenes.gamecake.zone.scene.manifest",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2543,7 +2543,7 @@
    "body": "<pre><code>scene.set(name,value)\n</code></pre>\n<p>save a value by a unique name</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 421,
+   "line": 422,
    "name": "lua.wetgenes.gamecake.zone.scene.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2559,7 +2559,7 @@
    "body": "<pre><code>print( scene.status() )\n</code></pre>\n<p>Return a debug string giving details about the system order and current number\nof items of each caste.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 449,
+   "line": 450,
    "name": "lua.wetgenes.gamecake.zone.scene.status",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },

@@ -2442,7 +2442,7 @@
    "body": "<pre><code>scene.set(name,value)\n</code></pre>\n<p>save a value by a unique name</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 421,
+   "line": 422,
    "name": "lua.wetgenes.gamecake.zone.scene.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
