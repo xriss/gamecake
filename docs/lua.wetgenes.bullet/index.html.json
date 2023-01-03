@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 561,
+   "count": 562,
    "name": "lua"
   },
   {
@@ -158,15 +158,15 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 554,
+   "count": 555,
    "name": "lua.wetgenes"
   },
   {
-   "count": 30,
+   "count": 31,
    "name": "lua.wetgenes.bullet"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.wetgenes.bullet.body"
   },
   {
@@ -180,6 +180,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.body.gravity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.body.overlaps"
   },
   {
    "count": 25,
@@ -2440,7 +2444,7 @@
  "_list": [
   {
    "body": "<pre><code>local bullet=require(&quot;wetgenes.bullet&quot;)\n</code></pre>\n<p>We use bullet as the local name of this library.</p>\n<p>A lua binding to the <a href=\"https://github.com/bulletphysics/bullet3\">Bullet \nPhysics</a> library</p>\n",
-   "count": 30,
+   "count": 31,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 14,
    "name": "lua.wetgenes.bullet",
@@ -2448,7 +2452,7 @@
   },
   {
    "body": "",
-   "count": 4,
+   "count": 5,
    "name": "lua.wetgenes.bullet.body"
   },
   {
@@ -2473,6 +2477,14 @@
    "file": "../lua/wetgenes/bullet.lua",
    "line": 495,
    "name": "lua.wetgenes.bullet.body.gravity",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
+   "body": "<pre><code>body:overlaps()\n</code></pre>\n<p>Get list of bodys that overlap with a ghost body object.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 555,
+   "name": "lua.wetgenes.bullet.body.overlaps",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
