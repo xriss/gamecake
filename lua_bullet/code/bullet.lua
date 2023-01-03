@@ -226,7 +226,7 @@ Destroy mesh.
 ]]
 bullet.mesh_functions.destroy=function(mesh)
 	local world=mesh.world
-	if mesh.name then world:set(mesh.name) end
+--	if mesh.name then world:set(mesh.name) end
 	local ptr=mesh[0]
 	core.mesh_destroy( mesh[0] )
 	world.meshes[ ptr ]=nil
@@ -264,7 +264,7 @@ Destroy shape.
 ]]
 bullet.shape_functions.destroy=function(shape)
 	local world=shape.world
-	if shape.name then world:set(shape.name) end
+--	if shape.name then world:set(shape.name) end
 	local ptr=core.shape_ptr(shape[0])
 	core.shape_destroy( shape[0] )
 	world.shapes[ ptr ]=nil
@@ -307,8 +307,8 @@ bullet.world_functions.body=function(world,name,shape,mass,x,y,z,cgroup,cmask)
 	opts.shape=opts.shape or shape
 	opts.mass=opts.mass or mass
 	opts.pos=opts.pos or {x or 0,y or 0,z or 0}
-	opts.cgroup=opts.cgroup or cgroup
-	opts.cmask=opts.cmask or cmask or -1
+	opts.cgroup=opts.cgroup or cgroup or 0xffff
+	opts.cmask=opts.cmask or cmask or 0xffff
 
 	local body={}
 	setmetatable(body,bullet.body_metatable)
@@ -335,7 +335,7 @@ Destroy body.
 bullet.body_functions.destroy=function(body)
 	local world=body.world
 	core.world_remove_body(world[0],body[0])
-	if body.name then world:set(body.name) end
+--	if body.name then world:set(body.name) end
 	local ptr=core.body_ptr(body[0])
 	core.body_destroy( body[0] )
 	world.bodies[ ptr ]=nil
@@ -549,6 +549,30 @@ bullet.body_functions.cmask=function(body,bits)
 	return core.body_cmask( body[0] , bits )
 
 end
+
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.overlaps
+
+	body:overlaps()
+
+Get list of bodys that overlap with a ghost body object.
+
+]]
+bullet.body_functions.overlaps=function(body)
+
+	local world=body.world
+
+	local overlaps=core.body_overlaps( body[0] )
+
+	for i=1,#overlaps do
+		overlaps[i]=world.bodies[ overlaps[i] ]
+	end
+
+	return overlaps
+end
+
+
 
 return bullet
 

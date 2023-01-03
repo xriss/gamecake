@@ -37,6 +37,7 @@ const char *lua_bullet_world_meta_name="bullet_world*ptr";
 typedef struct {
 	btDefaultCollisionConfiguration     * config ;
 	btCollisionDispatcher               * dispatcher ;
+	btGhostPairCallback                 * ghost ;
 	btBroadphaseInterface               * phase ;
 	btSequentialImpulseConstraintSolver * solver ;
 	btDiscreteDynamicsWorld             * world ;
@@ -56,6 +57,7 @@ static void lua_bullet_world_delete (bullet_world *pp)
 	if(pp->config)     { delete pp->config;     pp->config=0;     }
 	if(pp->dispatcher) { delete pp->dispatcher; pp->dispatcher=0; }
 	if(pp->phase)      { delete pp->phase;      pp->phase=0;      }
+	if(pp->ghost)      { delete pp->ghost;      pp->ghost=0;      }
 	if(pp->solver)     { delete pp->solver;     pp->solver=0;     }
 }
 
@@ -88,6 +90,8 @@ bullet_world *pp;
 		pp->config     = new btDefaultCollisionConfiguration();
 		pp->dispatcher = new btCollisionDispatcher( pp->config );
 		pp->phase      = new btDbvtBroadphase();
+		pp->ghost      = new btGhostPairCallback();
+		pp->phase->getOverlappingPairCache()->setInternalGhostPairCallback(pp->ghost);
 		pp->solver     = new btSequentialImpulseConstraintSolver;
 		pp->world      = new btDiscreteDynamicsWorld( pp->dispatcher, pp->phase, pp->solver, pp->config );
 	}
@@ -556,10 +560,18 @@ static int lua_bullet_body_destroy (lua_State *l)
 btCollisionObject **pp=(btCollisionObject**)luaL_checkudata(l, 1 , lua_bullet_body_meta_name);
 	if(*pp)
 	{
-		btMotionState * motion = ((btRigidBody*)(*pp))->getMotionState();
-		if( motion ) { delete motion; }
-		delete *pp;
-		(*pp)=0;
+		if( (*pp)->getInternalType()==4 ) // is ghost?
+		{
+			delete *pp;
+			(*pp)=0;
+		}
+		else
+		{
+			btMotionState * motion = ((btRigidBody*)(*pp))->getMotionState();
+			if( motion ) { delete motion; }
+			delete *pp;
+			(*pp)=0;
+		}
 	}	
 	return 0;
 }
@@ -612,6 +624,8 @@ btTransform trans;
 		*pp = (btCollisionObject*) new btPairCachingGhostObject();
 		(*pp)->setCollisionShape(shape);
 		(*pp)->setWorldTransform(trans);
+
+		(*pp)->setCollisionFlags( (*pp)->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
 
 	}
 	else
@@ -1194,6 +1208,28 @@ btBroadphaseProxy *broad=body->getBroadphaseHandle();
 
 /*+------------------------------------------------------------------+**
 
+get ghost body overlaps
+
+*/
+static int lua_bullet_body_overlaps (lua_State *l)
+{
+btPairCachingGhostObject *ghost = (btPairCachingGhostObject *)lua_bullet_body_ptr(l, 1 );
+
+	lua_newtable(l); // return value
+
+	for( int i = 0; i < ghost->getNumOverlappingObjects(); i++ )
+	{
+		btCollisionObject *body = ghost->getOverlappingObject(i);
+		lua_pushnumber(l,i+1);
+		lua_pushlightuserdata(l,body);
+		lua_settable(l,-3);
+	}
+	
+	return 1;
+}
+
+/*+------------------------------------------------------------------+**
+
 get real body ptr
 
 */
@@ -1298,6 +1334,8 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 
 		{"body_custom_material_callback",	lua_bullet_body_custom_material_callback},
 		
+		{"body_overlaps",					lua_bullet_body_overlaps},
+
 		{0,0}
 	};
 
