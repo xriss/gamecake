@@ -307,8 +307,8 @@ bullet.world_functions.body=function(world,name,shape,mass,x,y,z,cgroup,cmask)
 	opts.shape=opts.shape or shape
 	opts.mass=opts.mass or mass
 	opts.pos=opts.pos or {x or 0,y or 0,z or 0}
-	opts.cgroup=opts.cgroup or cgroup or 0xffff
-	opts.cmask=opts.cmask or cmask or 0xffff
+	opts.cgroup=opts.cgroup or cgroup or -1
+	opts.cmask=opts.cmask or cmask or -1
 
 	local body={}
 	setmetatable(body,bullet.body_metatable)
