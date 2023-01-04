@@ -79,6 +79,7 @@ bullet.world_functions.destroy=function(world)
 
 	for i,body  in pairs(world.bodys)   do body:destroy() end
 	for i,shape in pairs(world.shapes)  do shape:destroy() end
+	for i,mesh  in pairs(world.meshes)  do mesh:destroy() end
 
 	core.world_destroy( world[0] )
 
@@ -225,9 +226,10 @@ Destroy mesh.
 ]]
 bullet.mesh_functions.destroy=function(mesh)
 	local world=mesh.world
-	if mesh.name then world:set(mesh.name) end
+--	if mesh.name then world:set(mesh.name) end
+	local ptr=mesh[0]
 	core.mesh_destroy( mesh[0] )
-	world.meshes[ mesh[0] ]=nil
+	world.meshes[ ptr ]=nil
 end
 
 ------------------------------------------------------------------------
@@ -242,7 +244,7 @@ bullet.world_functions.shape=function(world,name,a,...)
 	local shape={}
 	setmetatable(shape,bullet.shape_metatable)
 
-	if name=="mesh" then a=a[0] end
+	if name=="mesh" then shape.mesh=a a=a[0] end
 
 	shape[0]=core.shape_create(name,a,...)
 	shape.world=world
@@ -262,9 +264,13 @@ Destroy shape.
 ]]
 bullet.shape_functions.destroy=function(shape)
 	local world=shape.world
-	if shape.name then world:set(shape.name) end
+--	if shape.name then world:set(shape.name) end
+	local ptr=core.shape_ptr(shape[0])
 	core.shape_destroy( shape[0] )
-	world.shapes[ core.shape_ptr(shape[0]) ]=nil
+	world.shapes[ ptr ]=nil
+	if shape.mesh then
+		shape.mesh:destroy()
+	end
 end
 
 ------------------------------------------------------------------------
@@ -301,7 +307,7 @@ bullet.world_functions.body=function(world,name,shape,mass,x,y,z,cgroup,cmask)
 	opts.shape=opts.shape or shape
 	opts.mass=opts.mass or mass
 	opts.pos=opts.pos or {x or 0,y or 0,z or 0}
-	opts.cgroup=opts.cgroup or cgroup
+	opts.cgroup=opts.cgroup or cgroup or -1
 	opts.cmask=opts.cmask or cmask or -1
 
 	local body={}
@@ -309,6 +315,7 @@ bullet.world_functions.body=function(world,name,shape,mass,x,y,z,cgroup,cmask)
 	body[0]=core.body_create(opts.name,opts.shape[0],opts.mass,opts.pos[1],opts.pos[2],opts.pos[3])
 	body.world=world
 	body.name=name -- probably rigid or ghost
+	body.shape=shape
 	
 	world.bodies[ core.body_ptr(body[0]) ]=body
 
@@ -327,9 +334,12 @@ Destroy body.
 ]]
 bullet.body_functions.destroy=function(body)
 	local world=body.world
-	if body.name then world:set(body.name) end
+	core.world_remove_body(world[0],body[0])
+--	if body.name then world:set(body.name) end
+	local ptr=core.body_ptr(body[0])
 	core.body_destroy( body[0] )
-	world.bodies[ core.body_ptr(body[0]) ]=nil
+	world.bodies[ ptr ]=nil
+	body.shape:destroy()
 end
 
 ------------------------------------------------------------------------
@@ -539,6 +549,73 @@ bullet.body_functions.cmask=function(body,bits)
 	return core.body_cmask( body[0] , bits )
 
 end
+
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.overlaps
+
+	body:overlaps()
+
+Get list of bodys that overlap with a ghost body object.
+
+]]
+bullet.body_functions.overlaps=function(body)
+
+	local world=body.world
+
+	local overlaps=core.body_overlaps( body[0] )
+
+	for i=1,#overlaps do
+		overlaps[i]=world.bodies[ overlaps[i] ]
+	end
+
+	return overlaps
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.support
+
+	x,y,z=body:support(nx,ny,nz)
+
+Get world location of support point in given direction.
+
+EG the world location that is touching the floor when the 
+direction is up.
+
+]]
+bullet.body_functions.support=function(body,nx,ny,nz)
+	return core.body_support( body[0] , nx , ny , nz )
+end
+
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.force
+
+	body:force(fx,fy,fz)
+	body:force(fx,fy,fz,lx,ly,lz)
+
+Apply force fx,fy,fz at world relative location (subtract origin of 
+object) lx,ly,lz which will default to 0,0,0 if not given.
+
+]]
+bullet.body_functions.force=function(body,fx,fy,fz,lx,ly,lz)
+	return core.body_force( body[0] , fx,fy,fz , lx,ly,lz )
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.impulse
+
+	body:impulse(fx,fy,fz)
+	body:impulse(fx,fy,fz,lx,ly,lz)
+
+Apply impulse fx,fy,fz at world relative location (subtract origin of 
+object) lx,ly,lz which will default to 0,0,0 if not given.
+
+]]
+bullet.body_functions.impulse=function(body,fx,fy,fz,lx,ly,lz)
+	return core.body_impulse( body[0] , fx,fy,fz , lx,ly,lz )
+end
+
 
 return bullet
 

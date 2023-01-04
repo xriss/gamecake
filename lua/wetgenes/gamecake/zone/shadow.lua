@@ -113,7 +113,7 @@ M.bake=function(oven,shadow)
 
 			local r=(sky.time+360-90-5)%360
 
-			local  calculate_matrix=function()
+			local  calculate_matrix=function(ang,rot)
 				shadow.mtx=M4{
 					1,			0,			0,			0,
 					0,			1,			0,			0,
@@ -122,22 +122,23 @@ M.bake=function(oven,shadow)
 				}
 				shadow.mtx:scale(1/s,1/s,1/sd)
 				shadow.mtx:rotate( 90 , 1,0,0 ) -- top down
-				shadow.mtx:rotate( 35 , 1,0,0 ) -- hemasphere
-				shadow.mtx:rotate( -90 + r ,  0,0,1 ) -- time of day
+				shadow.mtx:rotate( ang , 1,0,0 ) -- hemasphere
+				shadow.mtx:rotate( -90 + r + rot ,  0,0,1 ) -- time of day
 				shadow.mtx:translate(-x,-y,-z)
 
 			end
 			
 			-- calculate light matrix
-			calculate_matrix()
-
+			calculate_matrix(35,0)
+			shadow.mtx_sun=shadow.mtx
 			-- remember light normal
 			sky.sun[1]=-shadow.mtx[3]
 			sky.sun[2]=-shadow.mtx[7]
 			sky.sun[3]=-shadow.mtx[11]
 			sky.sun:normalize()
 
-			shadow.mtx:rotate( 180 ,  0,0,1 ) -- time of day
+			calculate_matrix(0,180)
+			shadow.mtx_moon=shadow.mtx
 			-- remember light normal
 			sky.moon[1]=-shadow.mtx[3]
 			sky.moon[2]=-shadow.mtx[7]
@@ -159,10 +160,12 @@ M.bake=function(oven,shadow)
 				end
 			end
 
-			shadow.light=V3(sky.sun)
 			if r > 180 then -- moon or sun
-				r = r-180
+				shadow.mtx=shadow.mtx_moon
 				shadow.light=V3(sky.moon)
+			else
+				shadow.mtx=shadow.mtx_sun
+				shadow.light=V3(sky.sun)
 			end
 			
 			shadow.power=1
@@ -175,8 +178,6 @@ M.bake=function(oven,shadow)
 			end
 			
 
-			-- calculate shadow matrix
-			calculate_matrix()
 
 			gl.MatrixMode(gl.PROJECTION)
 			gl.LoadMatrix( shadow.mtx )

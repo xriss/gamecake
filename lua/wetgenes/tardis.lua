@@ -220,7 +220,7 @@ end
 	a=a:set(1,2,3,4)
 	a=a:set({1,2,3,4})
 	a=a:set({1,2},{3,4})
-	a=a:set(function)
+	a=a:set(function(i) return i end)
 
 Assign some numbers to an array, all the above examples will assign 1,2,3,4 to
 the first four slots in the given array, as you can see we allow one level of

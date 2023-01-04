@@ -2,7 +2,7 @@ cd `dirname $0`
 
 vagrant up
 
-vagrant ssh -c " cd /gamecake ; ./make --cpu=x32 $* "
+vagrant ssh -c " cd /gamecake ; ./make --gcc=clang --cpu=x32 $* "
 
 vagrant halt
 

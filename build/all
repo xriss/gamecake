@@ -32,6 +32,11 @@ echo build arm/raspi
 ../vbox_arm/make $*
 
 
+echo build android
+
+../vbox_android/make $*
+
+
 echo show status, this should list new versions of everything we just built
 
 cd ../exe

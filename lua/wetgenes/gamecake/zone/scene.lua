@@ -123,12 +123,12 @@ Return the item with the given uid or nil if no such item has been remembered.
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.remove
 
-	system = scene.systems.remove(caste)
+	system = scene.systems_remove(caste)
 
 Remove and return the system of the given caste.
 
 ]]
-	scene.systems.remove=function(caste)
+	scene.systems_remove=function(caste)
 		scene.systems[caste]=nil
 		for i,v in ipairs(scene.systems) do
 			if v.caste==caste then
@@ -140,34 +140,28 @@ Remove and return the system of the given caste.
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.insert
 
-	scene.systems.insert(system)
+	scene.systems_insert(system)
 
 Insert a new system replacing any system of the same caste. system.caste should
-be set to the caste of the system for this to work. As we also keep some
-functions in this table, the names "insert", "remove" and "call" are not
-available as caste names.
+be set to the caste of the system for this to work.
 
 ]]
-	scene.systems.insert=function(it)
+	scene.systems_insert=function(it)
 		scene.remember_uid(it)
 		if it.caste then
 			for i,v in ipairs(scene.systems) do
 				if v.caste==it.caste then -- replace
 					scene.systems[i]=it
-					if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then -- filter invalid system names
-						scene.systems[it.caste]=it
-					end
+					scene.systems[it.caste]=it
 					return
 				end
 			end
-			if it.caste~="insert" and it.caste~="remove" and it.caste~="call" then -- filter invalid system names
-				scene.systems[it.caste]=it
-			end
+			scene.systems[it.caste]=it
 		end
 		scene.systems[#scene.systems+1]=it
 		table.sort(scene.systems,function(a,b)
-			local av=scene.sortby[ a.caste ] or math.huge -- use caste to get sortby weight
-			local bv=scene.sortby[ b.caste ] or math.huge -- put items without a weight last
+			local av=scene.sortby[ a.caste ] or 0 -- use caste to get sortby weight
+			local bv=scene.sortby[ b.caste ] or 0 -- put items without a weight last
 			return ( av > bv ) -- sort backwards
 		end)
 	end
@@ -175,7 +169,7 @@ available as caste names.
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.call
 
-	scene.systems.call(fname,...)
+	scene.systems_call(fname,...)
 
 For every system call the function called fname like so.
 
@@ -185,7 +179,7 @@ Returns the number of calls made, which will be the number of systems that had
 an fname function to call.
 
 ]]
-	scene.systems.call=function(fname,...)
+	scene.systems_call=function(fname,...)
 		local count=0
 		for i=#scene.systems,1,-1 do -- call backwards so item can remove self
 			local system=scene.systems[i]
@@ -199,18 +193,22 @@ an fname function to call.
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.cocall
 
-	scene.systems.cocall(fname,...)
+	scene.systems_cocall(fname,...)
 
 For every system call the function called fname inside a coroutine like 
 so.
 
 	system[fname](system,...)
+	
+This function can yield and should do so if it is waiting for another 
+system to do something. All coroutines will be run in a round robin 
+style until they all complete.
 
 Returns the number of calls made, which will be the number of systems that had
 an fname function to call.
 
 ]]
-	scene.systems.cocall=function(fname,...)
+	scene.systems_cocall=function(fname,...)
 		local functions={}
 		local count=0
 		for i=#scene.systems,1,-1 do -- call backwards so item can remove self
@@ -228,7 +226,6 @@ an fname function to call.
 
 
 
-
 	scene.sortby=scene.sortby or {} -- custom sort weights for update/draw order of each caste
 
 
@@ -242,7 +239,7 @@ The first caste name in the array gets a weight of 1, second 2 and so on.
 
 ]]
 	scene.sortby_update=function()
-		for i,v in ipairs(scene.sortby) do scene.sortby[v]=i end
+		for i,v in pairs(scene.sortby) do if type(i)=="number" then scene.sortby[v]=scene.sortby[v] or i end end
 	end
 	scene.sortby_update()
 
@@ -271,20 +268,18 @@ Get the list of items of a given caste, eg "bullets" or "enemies"
 
 This list will be created if it does not already exist.
 
-scene.sortby is used to keep this list in order.
+scene.sortby is used to keep this list in order and an empty system 
+will be autocreated if needed.
 
 ]]
 	scene.caste=function(caste)
 		caste=caste or "generic"
 		if not scene.data[caste] then -- create on use
+			if not scene.systems[caste] then -- create system
+				scene.systems.insert({caste=caste})
+			end
 			local items={caste=caste}
 			scene.data[caste]=items
-			scene.data[#scene.data+1]=items
-			table.sort(scene.data,function(a,b)
-				local av=scene.sortby[ a.caste ] or math.huge -- get caste then use caste to get sortby weight
-				local bv=scene.sortby[ b.caste ] or math.huge -- put items without a weight last
-				return ( av > bv )
-			end)
 		end
 		return scene.data[caste]
 	end
@@ -341,6 +336,7 @@ as it sees fit.
 ]]
 	scene.remove=function(it)
 		scene.forget_uid(it)
+		if it.id then scene.set( it.id ) end
 		local items=scene.caste(it.caste)
 		for idx=#items,1,-1 do -- search backwards
 			if items[idx]==it then
@@ -375,22 +371,32 @@ currently active items.
 	scene.call=function(fname,...)
 		local count=0
 		if type(fname)=="function" then
-			for i=#scene.data,1,-1 do
-				local items=scene.data[i]
-				for idx=#items,1,-1 do -- call backwards so item can remove self
-					local it=items[idx]
-					fname(it,...) -- call an explicit function
-					count=count+1
-				end	
+			for i=#scene.systems,1,-1 do
+				local sys=scene.systems[i]
+				local items=scene.data[ sys.caste ]
+				if items then
+					for idx=#items,1,-1 do -- call backwards so item can remove self
+						local it=items[idx]
+						fname(it,...) -- call an explicit function
+						count=count+1
+					end
+				end
 			end
 		else
-			for i=#scene.data,1,-1 do
-				local items=scene.data[i]
-				for idx=#items,1,-1 do -- call backwards so item can remove self
-					local it=items[idx]
-					if it[fname] then -- call a method, if it exists
-						it[fname](it,...)
-						count=count+1
+			for i=#scene.systems,1,-1 do
+				local sys=scene.systems[i]
+				local items=scene.data[ sys.caste ]
+				if sys and sys[fname] then -- call a system method, if it exists
+					sys[fname](sys,...)
+					count=count+1
+				end
+				if items then
+					for idx=#items,1,-1 do -- call backwards so item can remove self
+						local it=items[idx]
+						if it[fname] then -- call a method, if it exists
+							it[fname](it,...)
+							count=count+1
+						end
 					end
 				end
 			end
@@ -457,16 +463,18 @@ of items of each caste.
 			local count=datas and #datas or 0
 			lines[#lines+1]=(items.caste or "").." : "..count
 		end
-		for i=#scene.data,1,-1 do
-			local items=scene.data[i]
-			if not scene.systems[ items.caste ] then -- not already done
-				lines[#lines+1]="item "..(items.caste or "").." : "..#items
-			end
-		end
 		for n,v in ipairs(scene.info) do
 			lines[#lines+1]=tostring(n).." = "..tostring(v)
 		end
 		return table.concat(lines,"\n")
+	end
+
+-- hacks for old fun64 compat which expects these functions in the systems table
+	if scene.fun64 then
+		scene.systems.remove=scene.systems_remove
+		scene.systems.insert=scene.systems_insert
+		scene.systems.call=scene.systems_call
+		scene.systems.cocall=scene.systems_cocall
 	end
 
 -- reset and return the scene, creating the initial data and info tables

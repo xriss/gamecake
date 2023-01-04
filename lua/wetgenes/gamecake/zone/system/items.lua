@@ -20,6 +20,16 @@ objects as necessary.
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.bake=function(oven,B) B=B or {} -- bound to oven for gl etc
+	B.system=function(system) -- bound to zones for scene etc
+		local B={} -- fake bake
+		return M.bake_system(oven,B,system)
+	end
+	return B
+end
+
+M.bake_system=function(oven,B,system)
+local scene=system.scene
+local items=system
 
 B.items={}
 B.items_metatable={__index=B.items}
@@ -106,24 +116,18 @@ B.item.get=function(item,name)
 	end
 end
 
-B.item.load=function(item,data)
-	data=data or {}
 
---	item.rot=Q4( data.rot or {0,0,0,1} )
---	item.pos=V3( data.pos or {0,0,0} )
-
+-- generate any missing boot (json) data
+B.item.gene=function(item,boot)
+	boot=boot or {}
+	return boot
 end
 
-B.item.save=function(item,data)
-	data=data or {}
-
-	data[1]=item.caste
-
---	data.rot={ item.rot[1] , item.rot[2] , item.rot[3] ,  item.rot[4] }
---	data.pos={ item.pos[1] , item.pos[2] , item.pos[3] }
-
-	return data
+-- fill in a boot (json) with current state
+B.item.save=function(item,boot)
+	boot=boot or {}
+	return boot
 end
 
-return B
+return B.system(system)
 end

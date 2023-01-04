@@ -632,6 +632,61 @@ system.configurator=function(opts)
 			opts=opts,
 		}
 	
+	elseif opts.mode=="swordstone" then -- text focused 256x128 screen with sprites ( 64x16 chars with 4x8 font )
+	
+		opts.cmap = opts.cmap or bitdown.cmap -- use default swanky32 colors
+		opts.hx  = opts.hx  or 256
+		opts.hy  = opts.hy  or 128
+		opts.ss  = opts.ss  or 4
+		opts.fps = opts.fps or 60
+		
+		hardware={
+			{
+				component="screen",
+				name="screen",
+				size={opts.hx,opts.hy},
+				bloom=fatpix and 0.75 or 0,
+				filter=fatpix and "scanline" or nil,
+				shadow=fatpix and "drop" or nil,
+				scale=opts.ss,
+				fps=opts.fps,
+				layers=1,
+			},
+			{
+				component="sfx",
+				name="sfx",
+			},
+			{
+				component="colors",
+				name="colors",
+				cmap=opts.cmap, -- swanky32 palette
+			},
+			{
+				component="tiles",
+				name="tiles",
+				tile_size={8,8},
+				bitmap_size={64,64},
+			},
+			{
+				component="tilemap",
+				name="text",
+				tiles="tiles",
+				tile_size={4,8}, -- use half width tiles for font
+				tilemap_size={math.ceil(opts.hx/4),math.ceil(opts.hy/8)},
+				layer=1,
+			},
+			{
+				component="sprites",
+				name="sprites",
+				tiles="tiles",
+				layer=1,
+			},
+			graphics={
+				{0x0000,"_font",0x0340}, -- pre-allocate the 4x8 and 8x8 font area
+			},
+			opts=opts,
+		}
+	
 	end
 	
 	for i,v in ipairs(hardware) do hardware[v.name]=v end -- for easy tweaking of options
@@ -688,30 +743,32 @@ system.configurator=function(opts)
 
 		if not need.setup then need=coroutine.yield() end -- wait for setup request (should always be first call)
 
-		-- copy font data tiles into top line
-		system.components.tiles.bitmap_grd:pixels(0,0 ,128*4,8, bitdown_font.build_grd(4,8):pixels(0,0,128*4,8,"") )
-		-- and 8x8 font 
-		system.components.tiles.bitmap_grd:pixels(0,8 ,64*8,8, bitdown_font.build_grd(8,8):pixels(0,   0,64*8,8,"") )
-		system.components.tiles.bitmap_grd:pixels(0,16,64*8,8, bitdown_font.build_grd(8,8):pixels(64*8,0,64*8,8,"") )
+		if system.components.tiles then
+			-- copy font data tiles into top line
+			system.components.tiles.bitmap_grd:pixels(0,0 ,128*4,8, bitdown_font.build_grd(4,8):pixels(0,0,128*4,8,"") )
+			-- and 8x8 font 
+			system.components.tiles.bitmap_grd:pixels(0,8 ,64*8,8, bitdown_font.build_grd(8,8):pixels(0,   0,64*8,8,"") )
+			system.components.tiles.bitmap_grd:pixels(0,16,64*8,8, bitdown_font.build_grd(8,8):pixels(64*8,0,64*8,8,"") )
 
-		-- and 8x16 font?
---			system.components.tiles.bitmap_grd:pixels(0,32,64*8,16, bitdown_font.build_grd(8,16):pixels(0,   0,64*8,16,"") )
---			system.components.tiles.bitmap_grd:pixels(0,48,64*8,16, bitdown_font.build_grd(8,16):pixels(64*8,0,64*8,16,"") )
-
-		-- upload graphics
-		local graphics=opts.graphics or hardware.graphics
-		if graphics then
-			if type(graphics)=="function" then graphics=graphics() end -- allow callback to grab value from other environment
-			system.components.tiles.upload_tiles( graphics )
+			-- upload graphics
+			local graphics=opts.graphics or hardware.graphics
+			if graphics then
+				if type(graphics)=="function" then graphics=graphics() end -- allow callback to grab value from other environment
+				system.components.tiles.upload_tiles( graphics )
+			end
 		end
 		
 		if opts.update then opts.update() end -- call update at least once
 
 		local reset_draw=opts.reset_draw or function()
-			system.components.text.dirty(true)
-			system.components.text.text_window()
-			system.components.text.text_clear(0x00000000)
-			system.components.sprites.list_reset()
+			if system.components.text then
+				system.components.text.dirty(true)
+				system.components.text.text_window()
+				system.components.text.text_clear(0x00000000)
+			end
+			if system.components.sprites then
+				system.components.sprites.list_reset()
+			end
 		end
 		
 		-- after setup we should yield and then perform updates only if requested from a yield

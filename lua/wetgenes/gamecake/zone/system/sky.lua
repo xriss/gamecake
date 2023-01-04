@@ -11,6 +11,16 @@ local deepcopy=require("wetgenes"):export("deepcopy")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.bake=function(oven,B) B=B or {} -- bound to oven for gl etc
+	B.system=function(system) -- bound to zones for scene etc
+		local B={} -- fake bake
+		return M.bake_system(oven,B,system)
+	end
+	return B
+end
+
+M.bake_system=function(oven,B,system)
+local scene=system.scene
+local sky=system
 
 
 B.sky={}
@@ -29,7 +39,7 @@ B.system=function(sky)
 	setmetatable(sky,B.sky_metatable)
 
 	sky.caste="sky"
-	sky.time_speed=1/60
+	sky.time_speed=360/(20*60*60) -- 1/60 -- 360/1200
 	sky.time_snap=15
 	sky.time_frac=90+45
 	sky.time_dest=math.floor((0.5+sky.time_frac)/sky.time_snap)*sky.time_snap
@@ -71,8 +81,17 @@ B.sky.draw=function(sky)
 		[gl.CULL_FACE]					=	gl.FALSE,
 		[gl.DEPTH_TEST]					=	gl.TRUE,
 		[gl.DEPTH_WRITEMASK]			=	gl.FALSE,
+	})
+
+if gl.DEPTH_RANGE_REVERSE then
+	gl.state.set({
+		[gl.DEPTH_FUNC]					=	gl.GEQUAL,
+	})
+else
+	gl.state.set({
 		[gl.DEPTH_FUNC]					=	gl.LEQUAL,
 	})
+end
 
 	gl.Color(1,1,1,1)
 
@@ -102,5 +121,18 @@ B.sky.draw=function(sky)
 
 end
 
-return B
+
+-- generate any missing boot (json) data
+B.sky.gene=function(sky,boot)
+	boot=boot or {}
+	return boot
+end
+
+-- fill in a boot (json) with current state
+B.sky.save=function(sky,boot)
+	boot=boot or {}
+	return boot
+end
+
+return B.system(system)
 end

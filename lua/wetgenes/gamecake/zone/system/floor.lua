@@ -11,6 +11,16 @@ local deepcopy=require("wetgenes"):export("deepcopy")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.bake=function(oven,B) B=B or {} -- bound to oven for gl etc
+	B.system=function(system) -- bound to zones for scene etc
+		local B={} -- fake bake
+		return M.bake_system(oven,B,system)
+	end
+	return B
+end
+
+M.bake_system=function(oven,B,system)
+local scene=system.scene
+local floors=system
 
 B.floors={}
 B.floors_metatable={__index=B.floors}
@@ -119,110 +129,19 @@ B.floors.draw=function(floors)
 
 end
 
-B.floors.create=function(floors,boot)
-	local floor={floors=floors}
-	setmetatable(floor,B.floor_metatable)
-	floors.scene.add( floor , floors.caste , boot )
 
-	floor.pos=V3( boot.pos or {  0,  0,  0} )
-	floor.siz=V3( boot.siz or {100,  1,100} )
-	floor.rez=V3( boot.rez or {100,  0,100} )
-
-do
-
-	local mix=function(a,b,c)
-		local d=1-c
-		return a*d+b*c
-	end
-	local goldie_noise=function(x,y)
-		local _,r=math.modf(math.tan(x*y))
-		return math.abs(r) -- !=r ? 0.0 : r; // replace nan with 0
-	end
-	local goldie_noises=function(x,y,s)
-		local xs,ys=x/s,y/s
-		local fx,fy=math.floor(xs),math.floor(ys)
-		local cx,cy=math.ceil(xs),math.ceil(ys)
-		local rx,ry=xs-fx,ys-fy
-		return mix(
-		   mix( goldie_noise(fx,fy) , goldie_noise(cx,fy) , rx ) ,
-		   mix( goldie_noise(fx,cy) , goldie_noise(cx,cy) , rx ) ,
-		   ry)
-	end
-
-	local xp=math.random()*1000
-	local yp=math.random()*1000
-	floor.geom=geom.trigrid({},floor.rez,function(x,y)
-		local r=0
-		for i=1,6 do
-			r=r+( goldie_noises(300+x+xp,500+y+yp,2^i) * (2^(i))/4 )
-		end
-		if x==0 or x==100 or y==0 or y==100 then r=-100 end -- edge
-		return 8-r
-	end)
---	floor.geom=geom.box({},{{-10,-10,-10},{10,10,10}})
-
+-- generate any missing boot (json) data
+B.floor.gene=function(floor,boot)
+	boot=boot or {}
+	return boot
 end
 
-	
-	local m=M4()
-	m:translate(floor.pos)
-	m:scale(floor.siz)
-	geom.adjust_by_m4(floor.geom,m)
-	floor.geom:build_normals()
-	for i,v in ipairs(floor.geom.verts) do
-		local ny=1.0-(-v[5])
-		ny=ny*16
-		if ny<0 then ny=0 end
-		if ny>1 then ny=1 end
-		v[7]=0.5
-		v[8]=0.25 + (0.5*(ny))
-	end
-
-	local world=floors.scene.systems.physics.world
-	floor.bodys={}
-	local tp,tv=geom.get_colision_tables( floor.geom )
-	if #tp>0 then
-		local mesh=world:mesh( tp,tv )
-		local shape=world:shape("mesh",mesh,true)
-		local body=world:body( "rigid" , shape , 0,  0,0,0  , 0x0001 )
-		floor.bodys[ #floor.bodys+1 ]=body
-		body:restitution( 1 )
-		body:friction( 0.8 , 0.1 , 0.1 )
-		body.item=floor -- backlink for collison
-	end
-
-	return floor
+-- fill in a boot (json) with current state
+B.floor.save=function(floor,boot)
+	boot=boot or {}
+	return boot
 end
 
-B.floor.update=function(floor)
 
-end
-
-B.floor.draw=function(floor)
-
---	gl.PushMatrix()
-
---	gl.Translate(floor.pos)
---	gl.Color(3/8,6/8,3/8,1)
-
-
-	geom.draw(floor.geom,"zone_floor_grass",function(p)
-		gl.ActiveTexture(gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
-		oven.cake.images.bind(floor.floors.image)
-		gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
-		gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
-		gl.ActiveTexture( gl.TEXTURE0 )
-		
---		gl.Uniform1f( p:uniform("idx") , i )
---		gl.Uniform4f( p:uniform("offset") , 0 , (-i/2)/4 , 0 , 0 )
-
-	end)
-	
---	gl.Color(1,1,1,1)
-
---	gl.PopMatrix()
-
-end
-
-return B
+return B.system(system)
 end

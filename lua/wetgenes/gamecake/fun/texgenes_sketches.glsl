@@ -109,4 +109,31 @@ else // lines
 #include "texgenes_shadertoy_foot"
 //END OF "texgenes_sketch_crosshair1"
 
-		
+
+#shader "texgenes_sketch_goldienoise"
+#include "texgenes_shadertoy_head"
+
+// (C) 2022 Kriss@XIXs.com and released under the MIT license.
+// This is a texgenes shader intended to create a static texture which is then downloaded for later use.
+// Options can be tweaked below or predefined in your shadertoy compatibility boilerplate
+
+// a noise that works on lower precision hardware (tested, but...)
+float goldienoise(vec3 p)
+{
+	p+=step(0.0,p)*46.0-23.0; // move away from origin to reduce obvious patern
+	float r=fract(tan(distance(p.xy*1.61803398874989484820459,p.xy)*p.z)*p.x);
+    return r!=r ? 0.0 : r; // replace nan with 0
+}
+// precalc a random texture
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    fragColor = vec4(
+        goldienoise(vec3(fragCoord/23.0,19.0)),
+        goldienoise(vec3(fragCoord/23.0,29.0)),
+        goldienoise(vec3(fragCoord/23.0,59.0)),
+        goldienoise(vec3(fragCoord/23.0,79.0))
+    );
+}
+
+#include "texgenes_shadertoy_foot"
+//END OF "texgenes_sketch_crosshair1"

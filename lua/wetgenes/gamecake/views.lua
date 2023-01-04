@@ -282,12 +282,11 @@ only use half the Z buffer and infinite perspective depth (no clip far and
 virtually no clip near) orthogonal uses the view.z as max depth and -view.z as 
 min depth to behave like perspective
 
-z/w is in the 1.0 to 0.0 range so the depth buffer is in 0.0 to 0.5 we actually 
-bleed out of this range since we cant clip at 0.
+z/w is in the 0.0 to 1.0 range so the depth buffer is in 0.5 to 1.0 we actually 
+bleed out of this range to near 0 since we cant clip at 0.5
 
-We could also use glClipControl for that but we do not have that in ES... and 
-we should reverse the depth map but again only ES3 lets you do that... so we 
-compromise.
+Ah mybad we can not use glDepthRange as WebGL hates the depth buffer 
+(in mmany ways), so back to the icky default way it is.
 
 ]]
 

@@ -115,14 +115,17 @@ M.bake=function(oven,recaps)
 			return recap.state_axis -- return all axis if no name given
 		end
 
-		local minzone=4095
-		local maxzone=32767-4096
+-- these should be configurable
+		local powzone=2				-- walk helper
+		local minzone=4095			-- deadzone
+		local maxzone=32767-4096	-- run helper
+
 		local fixaxis=function(n)
 			local fix=function(n)
 				local n=(n-minzone)/(maxzone-minzone)
 				if n<0 then return 0 end
 				if n>1 then return 1 end
-				return n
+				return math.pow(n,powzone)
 			end
 			n=n or 0
 			if n < 0 then

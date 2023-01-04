@@ -24,12 +24,15 @@ M.fill=function(oven,geom)
 	local getfmt=function(it,m)
 
 		local fmt={"xyz"}
-		if it.verts[1][4]  then fmt.nrm=true  fmt[#fmt+1]="nrm" end
-		if it.verts[1][7]  then fmt.uv=true   fmt[#fmt+1]="uv" end
+		if it.verts[1] then
+			if it.verts[1][4]  then fmt.nrm=true  fmt[#fmt+1]="nrm" end
+			if it.verts[1][7]  then fmt.uv=true   fmt[#fmt+1]="uv" end
+		end
 		if m               then fmt.m=true    fmt[#fmt+1]="m" end
-		if it.verts[1][9]  then fmt.tans=true fmt[#fmt+1]="tans" end
-		if it.verts[1][13] then fmt.bone=true fmt[#fmt+1]="bone" end
-
+		if it.verts[1] then
+			if it.verts[1][9]  then fmt.tans=true fmt[#fmt+1]="tans" end
+			if it.verts[1][13] then fmt.bone=true fmt[#fmt+1]="bone" end
+		end
 		return fmt
 	end
 
@@ -73,7 +76,7 @@ M.fill=function(oven,geom)
 -- make a predraw buffer to draw triangles
 	geom.predraw_polys=function(it)
 
-		local fmt=getfmt(it,it.polys[1].mat)
+		local fmt=getfmt(it,it.polys[1] and it.polys[1].mat)
 		local t={}
 		for i,p in ipairs(it.polys) do
 			for ti=0,(#p-3) do

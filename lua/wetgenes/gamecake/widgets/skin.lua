@@ -461,10 +461,12 @@ local font_cache_draw
 --widget.layout
 
 if ( not widget.fbo ) or widget.dirty then -- if no fbo and then we are always dirty... Dirty, dirty, dirty.
+		widget.dirty=false
 
 local dc
 
 		if widget.fbo then
+			widget.fbo.dirty=false
 			
 --print("into fbo"..wstr.dump(widget.fbo))
 
@@ -503,10 +505,6 @@ local dc
 		if widget.flushcache then
 			flush_drawcache()
 		end
-
-		
-		widget.dirty=nil
-
 		
 		if f then f(widget) end		-- this does the custom drawing
 		
@@ -545,7 +543,7 @@ local dc
 		
 else -- we can only draw once
 
-		widget.dirty=nil
+		widget.dirty=false
 
 		if widget.fbo then -- we need to draw our cached fbo
 		

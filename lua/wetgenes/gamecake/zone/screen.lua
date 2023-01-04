@@ -60,18 +60,21 @@ M.bake=function(oven,screen)
 			GAMMA=2.2,
 			BLOOM_SCALE=2,
 --			TWEAK=0,
+--			FOG_COLOR= " 0.10 , 0.10 , 0.20 , 0.75 ",
+--			FOG_CONFIG=" 0.99 , 1.00 , 0.00 , 0.00 ",
+			DEPTH_RANGE_REVERSE=gl.DEPTH_RANGE_REVERSE or nil,
 		},
 		
 		zone_screen_build_occlusion={
 			AO_SCALE=0.75,
 			AO_CLIP=0.75,
 			AO_SIZE=0.2,--1/8,
-			AO_SAMPLES=6,
+			AO_SAMPLES=3,
 			SHADOW_SCALE=1,
-			SHADOW_SAMPLES=6,
+			SHADOW_SAMPLES=3,
 --			SHADOW=" 0.0 , 0.0 , 0.0 , 0.0 ",
 --			SHADOW_SQUISH=1,
-
+			DEPTH_RANGE_REVERSE=gl.DEPTH_RANGE_REVERSE or nil,
 		},
 		
 		zone_screen_build_dark={
@@ -260,6 +263,11 @@ M.bake=function(oven,screen)
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo_bloom:bind_texture()
 				gl.Uniform1i( p:uniform("tex2"), gl.NEXT_UNIFORM_TEXTURE )
+				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+
+				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
+				screen.fbo:bind_depth()
+				gl.Uniform1i( p:uniform("tex3"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
 				gl.Uniform4f(p:uniform("day_night"),  screen.day_night )

@@ -28,6 +28,9 @@ function glescode.create(gl,code)
 
 	code=code or {}
 	for n,v in pairs(gl) do code[n]=v end
+
+-- webgl prevents this from being on by default (maybe we should sniff that out)	
+	code.DEPTH_RANGE_REVERSE=false
 	
 -- manage cached and stacked version of 			elseif name==gl.enable and related state
 	code.state={}
@@ -161,7 +164,7 @@ function glescode.create(gl,code)
 				gl.FrontFace(value)
 
 			elseif name==gl.COLOR_WRITEMASK then
-				gl.ColorMask(value)
+				gl.ColorMask(value[1],value[2],value[3],value[4])
 
 			elseif name==gl.DEPTH_WRITEMASK then
 				gl.DepthMask(value)
@@ -170,7 +173,7 @@ function glescode.create(gl,code)
 				gl.DepthFunc(value)
 				
 			elseif name==gl.DEPTH_RANGE then
-				gl.DepthRange(value)
+				gl.DepthRange(value[1],value[2])
 
 			elseif name==gl.POLYGON_OFFSET_FACTOR then
 				gl.PolygonOffset(
@@ -256,6 +259,7 @@ function glescode.create(gl,code)
 		[gl.DEPTH_WRITEMASK]			=	gl.TRUE,
 		[gl.DEPTH_FUNC]					=	gl.LESS,
 		[gl.DEPTH_RANGE]				=	V2(0,1),
+		[gl.DEPTH_CLEAR_VALUE]			=	1,
 		
 		[gl.POLYGON_OFFSET_FACTOR]		=	0,
 		[gl.POLYGON_OFFSET_UNITS]		=	0,
@@ -277,6 +281,12 @@ function glescode.create(gl,code)
 
 	}
 
+if code.DEPTH_RANGE_REVERSE then
+	code.state_defaults[gl.DEPTH_FUNC]					=	gl.GREATER
+	code.state_defaults[gl.DEPTH_RANGE]					=	V2(1,0)
+	code.state_defaults[gl.DEPTH_CLEAR_VALUE]			=	0
+end
+
 	code.state.index=1
 	code.state[1]={}
 	for n,v in pairs(code.state_defaults) do
@@ -286,6 +296,13 @@ function glescode.create(gl,code)
 	-- fix initial values that deviate from opengl defaults
 	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	gl.Enable(gl.BLEND)
+
+if code.DEPTH_RANGE_REVERSE then
+	gl.DepthFunc(gl.GREATER)
+	gl.DepthRange(1,0)
+	gl.ClearDepth(0)
+end
+	
 	-- from this point on you must only use code.state.set function not gl.Enable / etc
 	-- or we will get out of sync
 

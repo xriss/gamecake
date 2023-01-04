@@ -130,6 +130,7 @@ can call on the fbo returned.
 	framebuffers.create = function(w,h,d,def)
 
 		local fbo=def or {} -- allow default settings on 4th param
+		setmetatable(fbo,metatable)
 		
 		fbo.w=0 -- no memory alloced at start
 		fbo.h=0
@@ -138,8 +139,6 @@ can call on the fbo returned.
 		framebuffers.resize(fbo,w or 0,h or 0,d or 0)
 				
 		framebuffers.data[fbo]=fbo
-		
-		setmetatable(fbo,metatable)
 		fbo[0]=pack.alloc(1,{__gc=function() fbo:clean() end}) -- force garbage with fake userdata
 		
 -- create an fbo view since we tend to need one
@@ -212,6 +211,25 @@ buffer.
 		end
 	end
 
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.free_snapshot
+
+	fbo:free_snapshot()
+
+Free the snapshot buffers, fbo.texture_snapshot and fbo.depth_snapshot 
+if they exist.
+
+]]
+	framebuffers.free_snapshot = function(fbo)
+		if fbo.texture_snapshot then
+			gl.DeleteTexture(fbo.texture_snapshot)
+			fbo.texture_snapshot=nil
+		end
+		if fbo.depth_snapshot then
+			gl.DeleteTexture(fbo.depth_snapshot)
+			fbo.depth_snapshot=nil
+		end
+	end
+
 --[[#lua.wetgenes.gamecake.framebuffers.fbo.free_frame
 
 	fbo:free_frame()
@@ -235,6 +253,7 @@ Free all the opengl buffers.
 
 ]]
 	framebuffers.clean = function(fbo)
+		framebuffers.free_snapshot(fbo)
 		framebuffers.free_depth(fbo)
 		framebuffers.free_texture(fbo)
 		framebuffers.free_frame(fbo)
@@ -259,6 +278,23 @@ If there is no texture we will bind 0.
 			gl.BindTexture(gl.TEXTURE_2D, 0)
 		end
 	end
+
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.bind_texture_snapshot
+
+	fbo:bind_texture_snapshot()
+
+BindTexture the rgba snapshot texture part of this fbo.
+
+If there is no snapshot texture we will bind 0.
+
+]]
+	framebuffers.bind_texture_snapshot = function(fbo)
+		if fbo and fbo.texture_snapshot then
+			gl.BindTexture(gl.TEXTURE_2D, fbo.texture_snapshot or 0)
+		else
+			gl.BindTexture(gl.TEXTURE_2D, 0)
+		end
+	end
 	
 --[[#lua.wetgenes.gamecake.framebuffers.fbo.bind_depth
 
@@ -272,6 +308,23 @@ If there is no texture we will bind 0.
 	framebuffers.bind_depth = function(fbo)
 		if fbo and fbo.depth then
 			gl.BindTexture(gl.TEXTURE_2D, fbo.depth or 0)
+		else
+			gl.BindTexture(gl.TEXTURE_2D, 0)
+		end
+	end
+
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.bind_depth_snapshot
+
+	fbo:bind_depth_snapshot()
+
+BindTexture the depth snapshot texture part of this fbo.
+
+If there is no snapshot texture we will bind 0.
+
+]]
+	framebuffers.bind_depth_snapshot = function(fbo)
+		if fbo and fbo.depth_snapshot then
+			gl.BindTexture(gl.TEXTURE_2D, fbo.depth_snapshot or 0)
 		else
 			gl.BindTexture(gl.TEXTURE_2D, 0)
 		end
@@ -306,6 +359,48 @@ needed) all our openGL buffers.
 		framebuffers.resize(fbo,fbo.w,fbo.h,fbo.d) -- realloc if we need to
 	end
 
+
+-- internal use only
+	framebuffers.initialize_depth = function(fbo)
+-- this is the only filter that *will* work on depth buffers
+			if wwin.flavour=="emcc" then -- hack, should test
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+			else
+-- I really want this one, but we will need to test it works before we can use it
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+			end
+
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.CLAMP_TO_EDGE)
+			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
+
+			if fbo.depth_format then
+				gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.depth_format[1], fbo.txw, fbo.txh, 0, fbo.depth_format[2], fbo.depth_format[3],nil)
+			elseif math.abs(fbo.d)>=32 then
+				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT32F, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.FLOAT,nil)
+			elseif math.abs(fbo.d)>=24 then
+				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT,nil)
+			else
+				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT16, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT,nil)
+			end
+	end
+
+-- internal use only
+	framebuffers.initialize_texture = function(fbo)
+		gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
+		gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
+		gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     fbo.TEXTURE_WRAP_S     or framebuffers.TEXTURE_WRAP_S     or gl.CLAMP_TO_EDGE)
+		gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     fbo.TEXTURE_WRAP_T     or framebuffers.TEXTURE_WRAP_T     or gl.CLAMP_TO_EDGE)
+
+		if fbo.texture_format then
+			gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.texture_format[1], fbo.txw, fbo.txh, 0, fbo.texture_format[2], fbo.texture_format[3],nil)
+		else
+			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE,nil)
+		end
+	end
+
+
 --[[#lua.wetgenes.gamecake.framebuffers.fbo.resize
 
 	fbo:resize(w,h,d)
@@ -324,6 +419,10 @@ The w,h,d use the same rules as framebuffer.create
 
 		if w==0 then h=0 d=0 end
 		if h==0 then d=0 w=0 end
+		
+		fbo.w=w
+		fbo.h=h
+		fbo.d=d
 	
 		if w==0 or h==0 then framebuffers.free_texture(fbo) end
 		
@@ -341,32 +440,9 @@ The w,h,d use the same rules as framebuffer.create
 				if not fbo.depth then
 					fbo.depth=gl.GenTexture()
 				end
-
+				
 				gl.BindTexture(gl.TEXTURE_2D, fbo.depth)
-
--- this is the only filter that *will* work on depth buffers
-				if wwin.flavour=="emcc" then -- hack, should test
-					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-				else
--- I really want this one, but we will need to test it works before we can use it
-					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-					gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-				end
-
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.CLAMP_TO_EDGE)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
-
-				if fbo.depth_format then
-					gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.depth_format[1], fbo.txw, fbo.txh, 0, fbo.depth_format[2], fbo.depth_format[3],nil)
-				elseif math.abs(d)>=32 then
-					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT32F, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.FLOAT,nil)
-				elseif math.abs(d)>=24 then
-					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT,nil)
-				else
-					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT16, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT,nil)
-				end
-
+				fbo:initialize_depth()
 				gl.BindTexture(gl.TEXTURE_2D, 0)
 
 			end
@@ -381,19 +457,7 @@ The w,h,d use the same rules as framebuffer.create
 				end
 
 				gl.BindTexture(gl.TEXTURE_2D, fbo.texture)
-				
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     fbo.TEXTURE_WRAP_S     or framebuffers.TEXTURE_WRAP_S     or gl.CLAMP_TO_EDGE)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     fbo.TEXTURE_WRAP_T     or framebuffers.TEXTURE_WRAP_T     or gl.CLAMP_TO_EDGE)
-
-
-				if fbo.texture_format then
-					gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.texture_format[1], fbo.txw, fbo.txh, 0, fbo.texture_format[2], fbo.texture_format[3],nil)
-				else
-					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE,nil)
-				end
-				
+				fbo:initialize_texture()
 				gl.BindTexture(gl.TEXTURE_2D, 0)
 
 			end
@@ -418,12 +482,72 @@ The w,h,d use the same rules as framebuffer.create
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
 		end
-		
-		fbo.w=w
-		fbo.h=h
-		fbo.d=d
 
 	end
+
+--[[#lua.wetgenes.gamecake.framebuffers.fbo.snapshot
+
+	fbo:snapshot()
+
+Take a current snapshot copy of the texture and depth if they exist, 
+store them in fbo.texture_snapshot and fbo.depth_snapshot for later 
+binding.
+
+]]
+	framebuffers.snapshot = function(fbo)
+
+		if not fbo.frame then return end -- nothing to snapshot
+
+		if fbo.texture then
+			if not fbo.texture_snapshot then
+				fbo.texture_snapshot=gl.GenTexture()
+			end
+			gl.BindTexture(gl.TEXTURE_2D, fbo.texture_snapshot)
+			fbo:initialize_texture()
+			gl.BindTexture(gl.TEXTURE_2D, 0)
+		end
+		if fbo.depth then
+			if not fbo.depth_snapshot then
+				fbo.depth_snapshot=gl.GenTexture()
+			end
+			gl.BindTexture(gl.TEXTURE_2D, fbo.depth_snapshot)
+			fbo:initialize_depth()
+			gl.BindTexture(gl.TEXTURE_2D, 0)
+		end
+
+		local frame=gl.GenFramebuffer()
+		gl.BindFramebuffer(gl.READ_FRAMEBUFFER, fbo.frame)
+		gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, frame)
+
+-- prepare snapshot textures
+--[[
+		if fbo.depth then
+			gl.FramebufferTexture2D(gl.READ_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, fbo.depth, 0)
+		end
+		if fbo.texture then
+			gl.FramebufferTexture2D(gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
+		end
+]]
+		if fbo.depth_snapshot then
+			gl.FramebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, fbo.depth_snapshot, 0)
+		end
+		if fbo.texture_snapshot then
+			gl.FramebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture_snapshot, 0)
+		end
+		if( gl.CheckFramebufferStatus(gl.DRAW_FRAMEBUFFER) ~= gl.FRAMEBUFFER_COMPLETE) then
+			error("FBO error".." DEPTH="..fbo.d.." STATUS="..gl.CheckFramebufferStatus(gl.FRAMEBUFFER).." ERROR="..gl.GetError())
+		end
+-- copy textures
+		gl.BlitFramebuffer(
+			0,0,fbo.txw,fbo.txh,
+			0,0,fbo.txw,fbo.txh,
+			gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT,gl.NEAREST
+		)
+		gl.BindFramebuffer(gl.FRAMEBUFFER, fbo.frame) -- assumption
+		gl.DeleteFramebuffer(frame)
+
+	end
+
 	
 --[[#lua.wetgenes.gamecake.framebuffers.fbo.mipmap
 
@@ -574,29 +698,6 @@ Pop old matrix and set the matrix mode to MODELVIEW
 
 	end
 
-
-
--- set some functions into the metatable of each fbo
-	for i,n in ipairs({
-		"clean",
-		"check",
-		"bind_frame",
-		"bind_texture",
-		"bind_depth",
-		"resize",
-		"download",
-		"mipmap",
-		"mipmap_texture",
-		"mipmap_depth",
-		"free_depth",
-		"free_texture",
-		"free_frame",
-		"render_start",
-		"render_stop",
-		}) do
-		funcs[n]=framebuffers[n]
-	end
-
 --[[#lua.wetgenes.gamecake.framebuffers.fbo.pingpong
 
 	fbo:pingpong(fbout,shadername,callback)
@@ -654,6 +755,13 @@ as is.
 
 		fbout:render_stop()
 
+	end
+
+-- set some functions into the metatable of each fbo
+	for n,v in pairs(framebuffers) do
+		if type(v)=="function" then
+			funcs[n]=v
+		end
 	end
 
 	return framebuffers

@@ -831,22 +831,16 @@ end
 -- this may need to be called after setting up a context to be valid...
 gles.extensions={}
 function gles.GetExtensions()
-	local s=gles.Get(gles.EXTENSIONS) or ""
-	gles.GetError() -- ignore any errors here
-	local t={}
-	for w in s:gmatch("([^%s]+)") do
-		if w:sub(1,3)=="GL_" then
-			local s=w:sub(4)
-			t[#t+1]=s
+
+	local num=gles.Get(gles.NUM_EXTENSIONS)
+	for i=0,num-1 do
+		local s=gles.Get(gles.EXTENSIONS,i) or ""
+		if s:sub(1,3)=="GL_" then
+			local s=s:sub(4)
 			gles.extensions[s]=true -- skip the "GL_" at the start
 		end
 	end
-	table.sort(t)
-	for i=1,#t,4 do
-		if gles.debug then -- only spew junk in debug mode
-			print(string.format("GLEXT = %-32.32s %-32.32s %-32.32s %-32.32s",t[i] or "",t[i+1] or "",t[i+2] or "",t[i+3] or ""))
-		end
-	end
+
 end
 
 if core.fixed_pipeline_available then

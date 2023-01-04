@@ -29,30 +29,16 @@ M.bake=function(oven,keys)
 		["left"]		=	{ "rx0" },
 		["down"]		=	{ "ry1" },
 		["right"]		=	{ "rx1" },
---[[
-		["1"]			=	{ "pad_up"    },
-		["2"]			=	{ "pad_left"  },
-		["3"]			=	{ "pad_down"  },
-		["4"]			=	{ "pad_right" },
-		["5"]			=	{ "y" , "fire"},
-		["6"]			=	{ "x" , "fire"},
-		["7"]			=	{ "a" , "fire"},
-		["8"]			=	{ "b" , "fire"},
-		["9"]			=	"select",
-		["0"]			=	"start",
-]]
 		["keypad 8"]	=	{ "pad_up"    },
 		["keypad 4"]	=	{ "pad_left"  },
 		["keypad 2"]	=	{ "pad_down"  },
 		["keypad 6"]	=	{ "pad_right" },
 		["tab"]			=	"select",
 		["enter"]		=	"start",
-		["q"]			=	"l2",
-		["e"]			=	"r2",
 		["z"]			=	"l1",
 		["c"]			=	"r1",
-		["["]			=	"lz1",
-		["]"]			=	"rz1",
+		["q"]			=	{ "lz1" , "l2" },
+		["e"]			=	{ "rz1" , "r2" },
 		["shift_l"]		=	"l3",
 		["shift_r"]		=	"r3",
 		["enter"]		=	{ "y" , "fire"},
@@ -67,10 +53,10 @@ M.bake=function(oven,keys)
 
 -- 1up/2up key islands
 	keys.defaults["island1"]={
-		["up"]			=	{"up","pad_up"},
-		["down"]		=	{"down","pad_down"},
-		["left"]		=	{"left","pad_left"},
-		["right"]		=	{"right","pad_right"},
+		["up"]			=	{"up","pad_up","ly0"},
+		["down"]		=	{"down","pad_down","ly1"},
+		["left"]		=	{"left","pad_left","lx0"},
+		["right"]		=	{"right","pad_right","lx1"},
 		["."]			=	{"fire","x"},
 		["/"]			=	{"fire","x"},
 		["shift_r"]		=	{"fire","y"},
@@ -79,20 +65,20 @@ M.bake=function(oven,keys)
 		["space"]		=	{"fire","x"},
 		["return"]		=	{"fire","a"},
 		["enter"]		=	{"fire","b"},
-		["-"]			=	"l1",
-		["="]			=	"r1",
-		["["]			=	"l2",
-		["]"]			=	"r2",
+		["["]			=	"l1",
+		["]"]			=	"r1",
+		["-"]			=	{"lz1","l2"},
+		["="]			=	{"rz2","r2"},
 		["9"]			=	"select",
 		["0"]			=	"start",
 	}
 	for n,v in pairs(keys.defaults["island1"]) do keys.defaults["islands"][n]=v end
 
 	keys.defaults["island2"]={
-		["w"]			=	{"up","pad_up"},
-		["s"]			=	{"down","pad_down"},
-		["a"]			=	{"left","pad_left"},
-		["d"]			=	{"right","pad_right"},
+		["w"]			=	{"up","pad_up","ly0"},
+		["s"]			=	{"down","pad_down","ly1"},
+		["a"]			=	{"left","pad_left","lx0"},
+		["d"]			=	{"right","pad_right","lx1"},
 		["<"]			=	{"fire","y"},
 		["z"]			=	{"fire","y"},
 		["shift_l"]		=	{"fire","x"},
@@ -101,10 +87,10 @@ M.bake=function(oven,keys)
 		["shift"]		=	{"fire","x"}, -- 1up grabs both the shift
 		["control"]		=	{"fire","a"}, -- control and alt keys
 		["alt"]			=	{"fire","b"}, -- if we cant tell left from right
-		["q"]			=	"l1",
-		["e"]			=	"r1",
-		["tab"]			=	"l2",
-		["r"]			=	"r2",
+		["z"]			=	"l1",
+		["c"]			=	"r1",
+		["q"]			=	{"lz1","l2"},
+		["e"]			=	{"rz2","r2"},
 		["1"]			=	"select",
 		["2"]			=	"start",
 	}
@@ -210,34 +196,6 @@ M.bake=function(oven,keys)
 		
 		key.last_pad_value={} -- cached data to help ignore wobbling inputs
 		
---[[
-		key.joy={}					
-		key.joy.class="joystick"
-		key.joy.lt=0
-		key.joy.rt=0
-		key.joy.lx=0
-		key.joy.rx=0
-		key.joy.dx=0
-		key.joy.ly=0
-		key.joy.ry=0
-		key.joy.dy=0
-		key.joy.lz=0
-		key.joy.rz=0
-		
-		key.posxbox=nil -- assume xbox
-		key.posxbox_set=function(posxbox)
-			if key.posxbox~=posxbox then -- new style joystick, reset stuff
-				local ups=recaps.ups(key.idx)
-				key.posxbox=posxbox
-				key.joy.lx=0
-				key.joy.ly=0
-				for _,n in ipairs{"left","right","up","down","l2","r2"} do
-					ups.set_button(n,false)
-				end
-			end
-		end
-]]
-		
 		function key.clear()
 			key.maps={}
 		end
@@ -246,16 +204,6 @@ M.bake=function(oven,keys)
 		end
 
 		function key.msg(m)
-		
---[[
-			if type(key.posxbox)=="nil" then
-				if m.posix_name then
-					local s=string.lower(m.posix_name)
-					if string.find(s,"xbox") then key.posxbox_set(true) end
-					if string.find(s,"ps3") then key.posxbox_set(false) end
-				end
-			end
-]]
 
 			local used=false
 			local ups=recaps.ups(key.idx)
@@ -275,8 +223,6 @@ M.bake=function(oven,keys)
 					}
 					
 					if key.last_joydir~=joydir then -- only when we change direction
---print(key.last_joydir,joydir)
-	--print(wstr.dump(m))
 						local setclr={}
 						if key.last_joydir then -- clear all old keys
 							for _,n in ipairs(map[key.last_joydir]  ) do setclr[n]="clr" end
@@ -308,20 +254,6 @@ M.bake=function(oven,keys)
 							end
 						end
 					end
-					
---[[
-					for n,a in ipairs{"lx","ly","lz","rx","ry","rz"} do -- check axis buttons and convert to axis movement
-						if ups.now[a.."0_set"] or ups.now[a.."0_clr"] or ups.now[a.."1_set"] or ups.now[a.."1_clr"] then
-							local v=0
-							if     ups.now[a.."0_set"] then v=-32767
-							elseif ups.now[a.."1_set"] then v= 32767
-							elseif (not ups.now[a.."0_clr"]) and ups.state[a.."0"] then v=-32767
-							elseif (not ups.now[a.."1_clr"]) and ups.state[a.."1"] then v= 32767
-							end
-							ups.set_axis({[a]=v})
-						end
-					end
-]]
 				end
 
 			elseif m.class=="touch" then -- touch areas
@@ -385,7 +317,7 @@ M.bake=function(oven,keys)
 
 					if m.action==1 then -- key set
 						if m.keyname then ups.set_button("mouse_"..m.keyname,true) end
-						if m.keyname=="left" or m.keyname=="right" or m.keyname=="middle" then
+						if m.keyname=="left" or m.keyname=="right" --[[or m.keyname=="middle"]] then
 							ups.set_button("fire",true)
 						end
 						used=true
@@ -394,7 +326,7 @@ M.bake=function(oven,keys)
 							ups.set_button("mouse_"..m.keyname,true)
 						end
 						if m.keyname then ups.set_button("mouse_"..m.keyname,false) end
-						if m.keyname=="left" or m.keyname=="right" or m.keyname=="middle" then
+						if m.keyname=="left" or m.keyname=="right" --[[or m.keyname=="middle"]] then
 							ups.set_button("fire",false)
 						end
 						used=true
@@ -450,24 +382,6 @@ M.bake=function(oven,keys)
 					end
 				end
 				
---[[
-			elseif m.class=="joystick" then -- android joystick interface, should be "good" data
-
-				new_joydir( keys.joystick_msg_to_key(m) )
-				ups.set_axis(m) -- tell recap about the joy positions
-
-			elseif m.class=="joykey" then
-
-
-
-				if m.action==1 then -- key set
-					ups.set_button("fire",true)
-					used=true
-				elseif m.action==-1 then -- key clear
-					ups.set_button("fire",false)
-					used=true
-				end
-]]
 			elseif m.class=="padaxis" then -- SDL axis values
 
 				if m.id and key.idx-1 == (m.id+key.opts.pad_map-1)%key.opts.max_up then
@@ -574,13 +488,13 @@ M.bake=function(oven,keys)
 			-- pick best axis l/r axis
 			local lx ,ly ,lz =(ups.state_axis.lx  or 0),(ups.state_axis.ly  or 0),(ups.state_axis.lz  or 0)
 			local lxk,lyk,lzk=(ups.state_axis.lxk or 0),(ups.state_axis.lyk or 0),(ups.state_axis.lzk or 0)
-			if lxk*lxk+lyk*lyk+lzk*lzk > lx*lx+ly*ly+lz*lz then		ups.set_axis({lxb=lxk,lyb=lyk,lzb=lyk})
-			else													ups.set_axis({lxb=lx ,lyb=ly ,lzb=ly })
+			if lxk*lxk+lyk*lyk+lzk*lzk > lx*lx+ly*ly+lz*lz then		ups.set_axis({lxb=lxk,lyb=lyk,lzb=lzk})
+			else													ups.set_axis({lxb=lx ,lyb=ly ,lzb=lz })
 			end
 			local rx ,ry ,rz =(ups.state_axis.rx  or 0),(ups.state_axis.ry  or 0),(ups.state_axis.rz  or 0)
 			local rxk,ryk,rzk=(ups.state_axis.rxk or 0),(ups.state_axis.ryk or 0),(ups.state_axis.rzk or 0)
-			if rxk*rxk+ryk*ryk+rzk*rzk > rx*rx+ry*ry+rz*rz then		ups.set_axis({rxb=rxk,ryb=ryk,rzb=ryk})
-			else													ups.set_axis({rxb=rx ,ryb=ry ,rzb=ry })
+			if rxk*rxk+ryk*ryk+rzk*rzk > rx*rx+ry*ry+rz*rz then		ups.set_axis({rxb=rxk,ryb=ryk,rzb=rzk})
+			else													ups.set_axis({rxb=rx ,ryb=ry ,rzb=rz })
 			end
 --print(ups.state_axis.rxk)
 		end

@@ -16,6 +16,16 @@ local log,dump,display=require("wetgenes.logs"):export("log","dump","display")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.bake=function(oven,B) B=B or {} -- bound to oven for gl etc
+	B.system=function(system) -- bound to zones for scene etc
+		local B={} -- fake bake
+		return M.bake_system(oven,B,system)
+	end
+	return B
+end
+
+M.bake_system=function(oven,B,system)
+local scene=system.scene
+local cameras=system
 
 
 	local gui=oven.rebake("wetgenes.gamecake.zone.gui")
@@ -163,7 +173,7 @@ B.camera.update=function(camera)
 			else
 				orbit.my=rotfix( orbit.my + (      ry  * sensitivity ) )
 				if camera.move_and_rotate then
-					orbit.mx=rotfix( orbit.mx - (  (rx+lx) * sensitivity ) )		-- left + right stick gives auto camera rotate
+					orbit.mx=rotfix( orbit.mx - (  (rx+lx*0.5) * sensitivity ) )		-- left + right stick gives auto camera rotate
 				else
 					orbit.mx=rotfix( orbit.mx - (  (rx   ) * sensitivity ) )		-- right stick only gives no auto camera rotate
 				end
@@ -267,6 +277,8 @@ B.camera.update=function(camera)
 	camera.mtx:rotate( camera.rot[2] ,  0, 1, 0 )
 	camera.mtx:rotate( camera.rot[1] ,  1, 0, 0 )
 	camera.mtx:translate( 0,0, 0.0 + camera.dolly*camera.orbit.dolly )
+	
+	camera.pos=camera.mtx:get_translation_v3()
 
 --	if camera.floor then
 --		if camera.mtx[14] > camera.floor then camera.mtx[14]=camera.floor end -- keep above ground
@@ -283,5 +295,19 @@ B.camera.update=function(camera)
 
 end
 
-return B
+
+-- generate any missing boot (json) data
+B.camera.gene=function(camera,boot)
+	boot=boot or {}
+	return boot
+end
+
+-- fill in a boot (json) with current state
+B.camera.save=function(camera,boot)
+	boot=boot or {}
+	return boot
+end
+
+
+return B.system(system)
 end
