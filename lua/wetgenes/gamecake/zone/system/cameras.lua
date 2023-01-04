@@ -173,7 +173,7 @@ B.camera.update=function(camera)
 			else
 				orbit.my=rotfix( orbit.my + (      ry  * sensitivity ) )
 				if camera.move_and_rotate then
-					orbit.mx=rotfix( orbit.mx - (  (rx+lx) * sensitivity ) )		-- left + right stick gives auto camera rotate
+					orbit.mx=rotfix( orbit.mx - (  (rx+lx*0.5) * sensitivity ) )		-- left + right stick gives auto camera rotate
 				else
 					orbit.mx=rotfix( orbit.mx - (  (rx   ) * sensitivity ) )		-- right stick only gives no auto camera rotate
 				end

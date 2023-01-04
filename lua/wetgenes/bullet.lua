@@ -572,6 +572,49 @@ bullet.body_functions.overlaps=function(body)
 	return overlaps
 end
 
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.support
+
+	x,y,z=body:support(nx,ny,nz)
+
+Get world location of support point in given direction.
+
+EG the world location that is touching the floor when the 
+direction is up.
+
+]]
+bullet.body_functions.support=function(body,nx,ny,nz)
+	return core.body_support( body[0] , nx , ny , nz )
+end
+
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.force
+
+	body:force(fx,fy,fz)
+	body:force(fx,fy,fz,lx,ly,lz)
+
+Apply force fx,fy,fz at world relative location (subtract origin of 
+object) lx,ly,lz which will default to 0,0,0 if not given.
+
+]]
+bullet.body_functions.force=function(body,fx,fy,fz,lx,ly,lz)
+	return core.body_force( body[0] , fx,fy,fz , lx,ly,lz )
+end
+
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.impulse
+
+	body:impulse(fx,fy,fz)
+	body:impulse(fx,fy,fz,lx,ly,lz)
+
+Apply impulse fx,fy,fz at world relative location (subtract origin of 
+object) lx,ly,lz which will default to 0,0,0 if not given.
+
+]]
+bullet.body_functions.impulse=function(body,fx,fy,fz,lx,ly,lz)
+	return core.body_impulse( body[0] , fx,fy,fz , lx,ly,lz )
+end
 
 
 return bullet

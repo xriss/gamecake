@@ -1230,6 +1230,100 @@ btPairCachingGhostObject *ghost = (btPairCachingGhostObject *)lua_bullet_body_pt
 
 /*+------------------------------------------------------------------+**
 
+get body suport point in given direction
+
+*/
+static int lua_bullet_body_support (lua_State *l)
+{
+btCollisionObject *body = lua_bullet_body_ptr(l, 1 );
+
+	btVector3 direction(0,-1,0); // default to floor
+
+	if( lua_isnumber(l,2) ) // optional direction
+	{
+		direction[0]=lua_tonumber(l,2);
+		direction[1]=lua_tonumber(l,3);
+		direction[2]=lua_tonumber(l,4);
+	}
+	
+	btTransform trans = body->getWorldTransform();
+	btConvexShape *shape=(btConvexShape*)body->getCollisionShape();
+
+	btVector3 local_direction = (direction)* trans.getBasis();
+	btVector3 local_v = shape->localGetSupportVertexWithoutMarginNonVirtual(local_direction);
+	btVector3 world_v = trans(local_v);
+
+	lua_pushnumber(l,world_v.getX());
+	lua_pushnumber(l,world_v.getY());
+	lua_pushnumber(l,world_v.getZ());
+
+	return 3;
+}
+
+/*+------------------------------------------------------------------+**
+
+Apply force.
+
+*/
+static int lua_bullet_body_force (lua_State *l)
+{
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
+
+	btVector3 position(0,0,0);
+	btVector3 direction(0,0,0);
+
+	if( lua_isnumber(l,2) ) // force
+	{
+		direction[0]=lua_tonumber(l,2);
+		direction[1]=lua_tonumber(l,3);
+		direction[2]=lua_tonumber(l,4);
+	}
+	
+	if( lua_isnumber(l,5) ) // position
+	{
+		position[0]=lua_tonumber(l,5);
+		position[1]=lua_tonumber(l,6);
+		position[2]=lua_tonumber(l,7);
+	}
+	
+	body->applyForce(direction,position);
+	
+	return 0;
+}
+
+/*+------------------------------------------------------------------+**
+
+Apply Impulse.
+
+*/
+static int lua_bullet_body_impulse (lua_State *l)
+{
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
+
+	btVector3 position(0,0,0);
+	btVector3 direction(0,0,0);
+
+	if( lua_isnumber(l,2) ) // impulse
+	{
+		direction[0]=lua_tonumber(l,2);
+		direction[1]=lua_tonumber(l,3);
+		direction[2]=lua_tonumber(l,4);
+	}
+	
+	if( lua_isnumber(l,5) ) // position
+	{
+		position[0]=lua_tonumber(l,5);
+		position[1]=lua_tonumber(l,6);
+		position[2]=lua_tonumber(l,7);
+	}
+	
+	body->applyImpulse(direction,position);
+	
+	return 0;
+}
+
+/*+------------------------------------------------------------------+**
+
 get real body ptr
 
 */
@@ -1335,6 +1429,10 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_custom_material_callback",	lua_bullet_body_custom_material_callback},
 		
 		{"body_overlaps",					lua_bullet_body_overlaps},
+		{"body_support",					lua_bullet_body_support},
+
+		{"body_force",						lua_bullet_body_force},
+		{"body_impulse",					lua_bullet_body_impulse},
 
 		{0,0}
 	};
