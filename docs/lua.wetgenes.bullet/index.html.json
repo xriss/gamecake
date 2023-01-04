@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 562,
+   "count": 565,
    "name": "lua"
   },
   {
@@ -158,15 +158,15 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 555,
+   "count": 558,
    "name": "lua.wetgenes"
   },
   {
-   "count": 31,
+   "count": 34,
    "name": "lua.wetgenes.bullet"
   },
   {
-   "count": 5,
+   "count": 8,
    "name": "lua.wetgenes.bullet.body"
   },
   {
@@ -179,11 +179,23 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.bullet.body.force"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.bullet.body.gravity"
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.bullet.body.impulse"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.bullet.body.overlaps"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.body.support"
   },
   {
    "count": 25,
@@ -2444,7 +2456,7 @@
  "_list": [
   {
    "body": "<pre><code>local bullet=require(&quot;wetgenes.bullet&quot;)\n</code></pre>\n<p>We use bullet as the local name of this library.</p>\n<p>A lua binding to the <a href=\"https://github.com/bulletphysics/bullet3\">Bullet \nPhysics</a> library</p>\n",
-   "count": 31,
+   "count": 34,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 14,
    "name": "lua.wetgenes.bullet",
@@ -2452,7 +2464,7 @@
   },
   {
    "body": "",
-   "count": 5,
+   "count": 8,
    "name": "lua.wetgenes.bullet.body"
   },
   {
@@ -2472,6 +2484,14 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
+   "body": "<pre><code>body:force(fx,fy,fz)\nbody:force(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply force fx,fy,fz at world relative location (subtract origin of \nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 592,
+   "name": "lua.wetgenes.bullet.body.force",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
    "body": "<pre><code>body:gravity(x,y,z)\nx,y,z = body:gravity()\n</code></pre>\n<p>Set or get body gravity vector. Fidling with this may be the easiest \nway for a player to move an object around, it certainly makes it easier \nto create &quot;magnetic fields&quot; to hover objects above the ground.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
@@ -2480,11 +2500,27 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
+   "body": "<pre><code>body:impulse(fx,fy,fz)\nbody:impulse(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply impulse fx,fy,fz at world relative location (subtract origin of \nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 606,
+   "name": "lua.wetgenes.bullet.body.impulse",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
    "body": "<pre><code>body:overlaps()\n</code></pre>\n<p>Get list of bodys that overlap with a ghost body object.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 555,
    "name": "lua.wetgenes.bullet.body.overlaps",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
+   "body": "<pre><code>x,y,z=body:support(nx,ny,nz)\n</code></pre>\n<p>Get world location of support point in given direction.</p>\n<p>EG the world location that is touching the floor when the \ndirection is up.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 576,
+   "name": "lua.wetgenes.bullet.body.support",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {

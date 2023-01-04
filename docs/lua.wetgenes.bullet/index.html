@@ -63,8 +63,11 @@
 
 <a class="sub" href="../../docs/lua.wetgenes.bullet.body.cgroup"><span>/lua.wetgenes.bullet.body.cgroup</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.body.cmask"><span>/lua.wetgenes.bullet.body.cmask</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.bullet.body.force"><span>/lua.wetgenes.bullet.body.force</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.body.gravity"><span>/lua.wetgenes.bullet.body.gravity</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.bullet.body.overlaps"><span>/lua.wetgenes.bullet.body.overlaps</span></a><a class="par" href="../../docs/lua.wetgenes.bullet.world"><span>/lua.wetgenes.bullet.world</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.bullet.body.impulse"><span>/lua.wetgenes.bullet.body.impulse</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.bullet.body.overlaps"><span>/lua.wetgenes.bullet.body.overlaps</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.bullet.body.support"><span>/lua.wetgenes.bullet.body.support</span></a><a class="par" href="../../docs/lua.wetgenes.bullet.world"><span>/lua.wetgenes.bullet.world</span></a>
 <a class="par" href="../../docs/lua.wetgenes.bullet.world.body"><span>/lua.wetgenes.bullet.world.body</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.active"><span>/lua.wetgenes.bullet.world.body.active</span></a>
@@ -670,6 +673,17 @@ cmask bits are all the groups this body colides with.
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.bullet.body.force">lua.wetgenes.bullet.body.force</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L592">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div><pre><code>body:force(fx,fy,fz)
+body:force(fx,fy,fz,lx,ly,lz)
+</code></pre>
+<p>Apply force fx,fy,fz at world relative location (subtract origin of 
+object) lx,ly,lz which will default to 0,0,0 if not given.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.body.gravity">lua.wetgenes.bullet.body.gravity</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L495">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>body:gravity(x,y,z)
@@ -682,11 +696,33 @@ to create &quot;magnetic fields&quot; to hover objects above the ground.</p>
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.bullet.body.impulse">lua.wetgenes.bullet.body.impulse</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L606">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div><pre><code>body:impulse(fx,fy,fz)
+body:impulse(fx,fy,fz,lx,ly,lz)
+</code></pre>
+<p>Apply impulse fx,fy,fz at world relative location (subtract origin of 
+object) lx,ly,lz which will default to 0,0,0 if not given.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.body.overlaps">lua.wetgenes.bullet.body.overlaps</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L555">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>body:overlaps()
 </code></pre>
 <p>Get list of bodys that overlap with a ghost body object.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.bullet.body.support">lua.wetgenes.bullet.body.support</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L576">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div><pre><code>x,y,z=body:support(nx,ny,nz)
+</code></pre>
+<p>Get world location of support point in given direction.</p>
+<p>EG the world location that is touching the floor when the 
+direction is up.</p>
 </div>
 </div>
 
