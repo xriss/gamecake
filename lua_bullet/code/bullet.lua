@@ -187,7 +187,9 @@ a new one for each ray_test call.
 bullet.world_functions.ray_test=function(world,test)
 
 	core.world_ray_test( world[0] , test )
-
+	if test.hit and test.hit.body_ptr then
+		test.hit.body=world.bodies[test.hit.body_ptr]
+	end
 	return test
 end
 
