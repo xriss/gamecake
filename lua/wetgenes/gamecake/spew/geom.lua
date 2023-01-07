@@ -902,8 +902,22 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 	end
 
 	M.find_center=function(it)
-		local dd=M.find_bounds(it)
-		return (dd[1]+dd[2])/2 , (dd[3]+dd[4])/2 , (dd[5]+dd[6])/2
+		local dd={0,0,0}
+		local cc=0
+		
+		if it.verts[1] then
+			for iv,vv in ipairs(it.verts) do
+				dd[1]=dd[1]+vv[1]
+				dd[2]=dd[2]+vv[2]
+				dd[3]=dd[3]+vv[3]
+				cc=cc+1
+			end
+			dd[1]=dd[1]/cc
+			dd[2]=dd[2]/cc
+			dd[3]=dd[3]/cc
+		end
+		
+		return dd[1],dd[2],dd[3]
 	end
 
 	-- get collision triangle,vertex collision tables
@@ -978,6 +992,33 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		end
 
 		return c
+	end
+
+-- Segment a 3d object (tris only) such that each original poly represents the edge
+-- of a slice with the furthest point in the center of the object
+-- and return each of these slices as an object in an array
+
+	M.segmentris=function(it)
+		local its={}
+	
+		local c=V3(M.find_center(it))
+
+		local np=#it.polys
+		for ip=1,np do local p=it.polys[ip]
+			local o=M.new()
+			its[#its+1]=o -- new object
+			o.verts[1]={unpack(c)} -- add new center vertex for this slice
+			o.polys[#o.polys+1]={2,3,4} -- crust poly
+			for pia=1,#p do -- this vertex
+				local pib=pia+1 if pib>#p then pib=1 end
+				local ia=p[pia] -- vertex index
+				local ib=p[pib] -- vertex index
+				o.verts[1+pia]={unpack(it.verts[ia])} -- copy vertex
+				o.polys[#o.polys+1]={pib+1,pia+1,1} -- make segment poly
+			end
+		end
+
+		return its
 	end
 
 
