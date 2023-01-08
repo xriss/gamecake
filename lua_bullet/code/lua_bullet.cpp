@@ -1324,6 +1324,38 @@ btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 /*+------------------------------------------------------------------+**
 
+Remove body from world before calling this
+
+call this function (body,shape,mass) to set new shape
+
+then add body back into world
+
+returns ptr to old shape which can now be freed.
+
+*/
+static int lua_bullet_body_shape (lua_State *l)
+{
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
+btCollisionShape *shape=lua_bullet_shape_ptr(l, 2 );
+btScalar mass=lua_tonumber(l,3);
+
+	lua_pushlightuserdata(l, body->getCollisionShape() ); // return old
+	body->setCollisionShape(shape); // set new
+
+	btVector3 localInertia(0, 0, 0);
+	if(mass != 0.f)
+	{
+		shape->calculateLocalInertia(mass, localInertia);
+	}
+	body->setMassProps(mass, localInertia);
+	
+	return 1;
+}
+
+
+
+/*+------------------------------------------------------------------+**
+
 get real body ptr
 
 */
@@ -1433,6 +1465,8 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 
 		{"body_force",						lua_bullet_body_force},
 		{"body_impulse",					lua_bullet_body_impulse},
+
+		{"body_shape",						lua_bullet_body_shape},
 
 		{0,0}
 	};

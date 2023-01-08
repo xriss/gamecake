@@ -998,28 +998,65 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 -- of a slice with the furthest point in the center of the object
 -- and return each of these slices as an object in an array
 
-	M.segmentris=function(it)
+	M.segmentris=function(it,shell)
+		local fm=shell or 0.5
+		local mf=1-fm
+		
 		local its={}
 	
 		local c=V3(M.find_center(it))
+		local slide=function(v)
+			v[1]=v[1]*fm+c[1]*mf
+			v[2]=v[2]*fm+c[2]*mf
+			v[3]=v[3]*fm+c[3]*mf
+			return v
+		end
 
 		local np=#it.polys
 		for ip=1,np do local p=it.polys[ip]
 			local o=M.new()
 			its[#its+1]=o -- new object
-			o.verts[1]={unpack(c)} -- add new center vertex for this slice
-			o.polys[#o.polys+1]={2,3,4} -- crust poly
+
 			for pia=1,#p do -- this vertex
 				local pib=pia+1 if pib>#p then pib=1 end
 				local ia=p[pia] -- vertex index
 				local ib=p[pib] -- vertex index
-				o.verts[1+pia]={unpack(it.verts[ia])} -- copy vertex
-				o.polys[#o.polys+1]={pib+1,pia+1,1} -- make segment poly
+				local va=it.verts[ia]
+				local vb=it.verts[ib]
+				local vc=slide{unpack(vb)}
+				local vd=slide{unpack(va)}
+
+				local b=#o.verts
+				o.polys[#o.polys+1]={b+1,b+2,b+3,b+4} -- make segment poly
+				o.verts[b+1]={unpack(vd)} -- copy vertex
+				o.verts[b+2]={unpack(vc)} -- copy vertex
+				o.verts[b+3]={unpack(vb)} -- copy vertex
+				o.verts[b+4]={unpack(va)} -- copy vertex
 			end
+
+			local va=it.verts[ p[1] ]
+			local vb=it.verts[ p[2] ]
+			local vc=it.verts[ p[3] ]
+			local b=#o.verts
+			o.polys[#o.polys+1]={b+1,b+2,b+3} -- make top poly
+			o.verts[b+1]={unpack(va)} -- copy vertex
+			o.verts[b+2]={unpack(vb)} -- copy vertex
+			o.verts[b+3]={unpack(vc)} -- copy vertex
+
+			local va=slide{unpack(it.verts[ p[3] ])}
+			local vb=slide{unpack(it.verts[ p[2] ])}
+			local vc=slide{unpack(it.verts[ p[1] ])}
+			local b=#o.verts
+			o.polys[#o.polys+1]={b+1,b+2,b+3} -- make bot poly
+			o.verts[b+1]={unpack(va)} -- copy vertex
+			o.verts[b+2]={unpack(vb)} -- copy vertex
+			o.verts[b+3]={unpack(vc)} -- copy vertex
+
 		end
 
 		return its
 	end
+
 
 
 -- only subdivide polys *within* the given radius from the origin

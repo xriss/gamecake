@@ -2432,6 +2432,22 @@ Set this q4 to its 0,0,0,1 identity
 ]]
 function q4.identity(it) return array.set(it,0,0,0,1) end 
 
+--[[#lua.wetgenes.tardis.q4.reverse
+
+	q4 = q4:reverse()
+	q4 = q4:reverse(r)
+
+Reverse the rotation of this quaternion.
+
+If r is provided then the result is written into r and returned 
+otherwise q4 is modified and returned.
+
+]]
+function q4.reverse(it,r)
+	r=r or qa
+	return array.set(r , -it[1] , -it[2] , -it[3] , it[4] )
+end
+
 --[[#lua.wetgenes.tardis.q4.lerp
 
 	q4 = q4:lerp(q4b,s)
@@ -2446,8 +2462,8 @@ otherwise q4 is modified and returned.
 function q4.nlerp(qa,qb,sa,r)
 	local sb=1-sa
 	if qa.dot(qb) < 0 then sa=-sa end -- shortest fix
-	r=r or va
-	array.set(r, va[1]*sa+vb[1]*sb , va[2]*sa+vb[2]*sb , va[3]*sa+vb[3]*sb , va[4]*sa+vb[4]*sb )
+	r=r or qa
+	array.set(r, qa[1]*sa+qb[1]*sb , qa[2]*sa+qb[2]*sb , qa[3]*sa+qb[3]*sb , qa[4]*sa+qb[4]*sb )
 	return r:normalize()
 end
 
