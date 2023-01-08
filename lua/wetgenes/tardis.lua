@@ -2444,7 +2444,7 @@ otherwise q4 is modified and returned.
 
 ]]
 function q4.reverse(it,r)
-	r=r or qa
+	r=r or it
 	return array.set(r , -it[1] , -it[2] , -it[3] , it[4] )
 end
 
