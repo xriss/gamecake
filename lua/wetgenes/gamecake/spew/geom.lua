@@ -902,8 +902,22 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 	end
 
 	M.find_center=function(it)
-		local dd=M.find_bounds(it)
-		return (dd[1]+dd[2])/2 , (dd[3]+dd[4])/2 , (dd[5]+dd[6])/2
+		local dd={0,0,0}
+		local cc=0
+		
+		if it.verts[1] then
+			for iv,vv in ipairs(it.verts) do
+				dd[1]=dd[1]+vv[1]
+				dd[2]=dd[2]+vv[2]
+				dd[3]=dd[3]+vv[3]
+				cc=cc+1
+			end
+			dd[1]=dd[1]/cc
+			dd[2]=dd[2]/cc
+			dd[3]=dd[3]/cc
+		end
+		
+		return dd[1],dd[2],dd[3]
 	end
 
 	-- get collision triangle,vertex collision tables
@@ -979,6 +993,70 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 		return c
 	end
+
+-- Segment a 3d object (tris only) such that each original poly represents the base
+-- of a slice which is extruded towards the center, defaults to a 50% shell.
+-- returns array of segment objects
+
+	M.segmentris=function(it,minf,maxf)
+		minf=minf or 0.5
+		maxf=maxf or 1.0
+		
+		local its={}
+	
+		local c=V3(M.find_center(it))
+		local slide=function(v,f)
+			v[1]=c[1]+(v[1]-c[1])*f
+			v[2]=c[2]+(v[2]-c[2])*f
+			v[3]=c[3]+(v[3]-c[3])*f
+			return v
+		end
+
+		local np=#it.polys
+		for ip=1,np do local p=it.polys[ip]
+			local o=M.new()
+			its[#its+1]=o -- new object
+
+			for pia=1,#p do -- this vertex
+				local pib=pia+1 if pib>#p then pib=1 end
+				local ia=p[pia] -- vertex index
+				local ib=p[pib] -- vertex index
+				local va=slide({unpack(it.verts[ia])},maxf)
+				local vb=slide({unpack(it.verts[ib])},maxf)
+				local vc=slide({unpack(vb)},minf)
+				local vd=slide({unpack(va)},minf)
+
+				local b=#o.verts
+				o.polys[#o.polys+1]={b+1,b+2,b+3,b+4} -- make segment poly
+				o.verts[b+1]={unpack(vd)} -- copy vertex
+				o.verts[b+2]={unpack(vc)} -- copy vertex
+				o.verts[b+3]={unpack(vb)} -- copy vertex
+				o.verts[b+4]={unpack(va)} -- copy vertex
+			end
+
+			local va=slide({unpack(it.verts[ p[1] ])},maxf)
+			local vb=slide({unpack(it.verts[ p[2] ])},maxf)
+			local vc=slide({unpack(it.verts[ p[3] ])},maxf)
+			local b=#o.verts
+			o.polys[#o.polys+1]={b+1,b+2,b+3} -- make top poly
+			o.verts[b+1]={unpack(va)} -- copy vertex
+			o.verts[b+2]={unpack(vb)} -- copy vertex
+			o.verts[b+3]={unpack(vc)} -- copy vertex
+
+			local va=slide({unpack(it.verts[ p[3] ])},minf)
+			local vb=slide({unpack(it.verts[ p[2] ])},minf)
+			local vc=slide({unpack(it.verts[ p[1] ])},minf)
+			local b=#o.verts
+			o.polys[#o.polys+1]={b+1,b+2,b+3} -- make bot poly
+			o.verts[b+1]={unpack(va)} -- copy vertex
+			o.verts[b+2]={unpack(vb)} -- copy vertex
+			o.verts[b+3]={unpack(vc)} -- copy vertex
+
+		end
+
+		return its
+	end
+
 
 
 -- only subdivide polys *within* the given radius from the origin

@@ -187,7 +187,9 @@ a new one for each ray_test call.
 bullet.world_functions.ray_test=function(world,test)
 
 	core.world_ray_test( world[0] , test )
-
+	if test.hit and test.hit.body_ptr then
+		test.hit.body=world.bodies[test.hit.body_ptr]
+	end
 	return test
 end
 
@@ -316,10 +318,13 @@ bullet.world_functions.body=function(world,name,shape,mass,x,y,z,cgroup,cmask)
 	body.world=world
 	body.name=name -- probably rigid or ghost
 	body.shape=shape
+	body.mass=opts.mass -- remember
+	body.cgroup=opts.cgroup
+	body.cmask=opts.cmask
 	
 	world.bodies[ core.body_ptr(body[0]) ]=body
 
-	core.world_add_body( world[0] , opts.name , body[0] , opts.cgroup , opts.cmask )
+	core.world_add_body( world[0] , body.name , body[0] , body.cgroup , body.cmask )
 
 	return body
 end
@@ -616,6 +621,33 @@ bullet.body_functions.impulse=function(body,fx,fy,fz,lx,ly,lz)
 	return core.body_impulse( body[0] , fx,fy,fz , lx,ly,lz )
 end
 
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.body.change_shape
+
+	body:change_shape(shape)
+	body:change_shape(shape,mass)
+
+Change the shape assoctiated with this body and optionally change the 
+mass.
+
+]]
+bullet.body_functions.change_shape=function(body,shape,mass)
+	local world=body.world
+	body.mass=mass or body.mass
+
+	if world then
+		core.world_remove_body( world[0] , body[0] )
+	end
+	
+	local old_ptr=core.body_shape( body[0] , shape[0] , body.mass )
+	body.shape=shape
+
+	if world then
+		core.world_add_body( world[0] , body.name , body[0] , body.cgroup , body.cmask )
+		return world.shapes[ old_ptr ]
+	end
+
+end
 
 return bullet
 

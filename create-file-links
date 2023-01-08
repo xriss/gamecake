@@ -39,15 +39,15 @@ ln -f lua_win/code/win.lua                      lua/wetgenes/win.lua
 ln -f lua_win_emcc/code/emcc.lua                lua/wetgenes/win/emcc.lua
 
 ln -f lua_v4l2/code/v4l2.lua                    lua/wetgenes/v4l2.lua
-ln -f lua_hid/code/hid.lua                      lua/wetgenes/hid.lua
+#ln -f lua_hid/code/hid.lua                      lua/wetgenes/hid.lua
 ln -f lua_chipmunk/code/chipmunk.lua            lua/wetgenes/chipmunk.lua
 ln -f lua_bullet/code/bullet.lua                lua/wetgenes/bullet.lua
 ln -f lua_pack/code/pack.lua                    lua/wetgenes/pack.lua
 ln -f lua_fats/code/fats.lua                    lua/wetgenes/fats.lua
 ln -f lua_ogg/code/ogg.lua                      lua/wetgenes/ogg.lua
-ln -f lua_speak/code/speak.lua                  lua/wetgenes/speak.lua
+#ln -f lua_speak/code/speak.lua                  lua/wetgenes/speak.lua
 
-ln -f lua_raspi_unicornhat/code/unicornhat.lua  lua/raspi/unicornhat.lua
+#ln -f lua_raspi_unicornhat/code/unicornhat.lua  lua/raspi/unicornhat.lua
 
 
 
