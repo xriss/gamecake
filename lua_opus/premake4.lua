@@ -7,7 +7,7 @@ links { "lib_lua" }
 
 defines { "HAVE_STDINT_H" }  -- the speexdsp include needs this
 
-includedirs { "." , "../lib_opus/include" , "../lib_speexdsp/include" }
+includedirs { "." , "../lib_opus/opus/include" , "../lib_speexdsp/speexdsp/include" }
 
 KIND{lua="wetgenes.opus.core"}
 
