@@ -3,15 +3,15 @@ project "lib_vorbis"
 
 language "C"
 
-files { "lib/**.c" , "include/**.h" }
+files { "vorbis/lib/**.c" , "vorbis/include/**.h" }
 
 -- these files have a main function, so need to be skipped
-excludes { "lib/psytune.c" }
-excludes { "lib/barkmel.c" }
-excludes { "lib/tone.c" }
+excludes { "vorbis/lib/psytune.c" }
+excludes { "vorbis/lib/barkmel.c" }
+excludes { "vorbis/lib/tone.c" }
 
 
-includedirs { "." , "lib" , "include" , "../lib_ogg/include" }
+includedirs { "vorbis" , "vorbis/lib" , "vorbis/include" , "../lib_ogg/include" }
 
 
 KIND{}
