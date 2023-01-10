@@ -1,0 +1,5 @@
+cd `dirname $0`
+
+rm -rf ogg
+git clone --depth 1 https://github.com/xiph/ogg.git 
+rm -rf ogg/.git
