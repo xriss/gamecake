@@ -1,0 +1,5 @@
+cd `dirname $0`
+
+rm -rf opus
+git clone --depth 1 https://github.com/xiph/opus.git 
+rm -rf opus/.git
