@@ -10,11 +10,19 @@ echo " exe worktree to track exe branch "
 #git branch -f --track exe origin/exe
 rm -rf exe
 git worktree add -f exe origin/exe
+cd exe
+git branch -D exe
+git switch -c exe
+cd ..
 
 echo " docs worktree to track gh-pages branch "
 #git branch -f --track gh-pages origin/gh-pages
 rm -rf docs
 git worktree add -f docs origin/gh-pages
+cd docs
+git branch -D gh-pages
+git switch -c gh-pages
+cd ..
 
 
 ./create-file-links
