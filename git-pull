@@ -7,13 +7,12 @@ plated/upgrade
 
 
 echo " exe worktree to track exe branch "
-git branch -f --track exe origin/exe
-git worktree add -f exe exe
-
+#git branch -f --track exe origin/exe
+git worktree add -f exe origin/exe
 
 echo " docs worktree to track gh-pages branch "
-git branch -f --track gh-pages origin/gh-pages
-git worktree add -f docs gh-pages
+#git branch -f --track gh-pages origin/gh-pages
+git worktree add -f docs origin/gh-pages
 
 
 ./create-file-links
