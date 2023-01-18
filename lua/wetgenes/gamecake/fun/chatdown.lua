@@ -177,7 +177,7 @@ chatdown.parse=function(chat_text)
 			
 		end
 		
-		if v and v~="" and not ignore then
+		if v and not ignore then
 
 			text[#text+1]=v
 
@@ -206,7 +206,8 @@ chatdown.parse=function(chat_text)
 
 		for i,v in ipairs(text) do
 			if v=="" then
-				if t[#t]~="" then t[#t+1]="" end -- start a new string?
+--				if t[#t]~="" then t[#t+1]="" end -- start a new string?
+				t[#t+1]="" -- always start a new string
 			else
 				t[#t]=(t[#t].." "..v):match("^%s*(.-)%s*$")
 			end
@@ -233,7 +234,6 @@ chatdown.parse=function(chat_text)
 		end
 
 		for id,topic in pairs(subject.topics) do
-
 			topic.text=cleanup_text(topic.text)
 			topic.tags=cleanup_tags(topic.tags)
 
