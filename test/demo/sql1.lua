@@ -36,7 +36,8 @@ insert("A String")
 insert("some\nline")
 insert("some\0zero")
 
-insert({"one","two","three"})
+insert(0xffffffff)
+insert(0xffffffffffffffff)
 
 
 for row in db:nrows("SELECT * FROM test") do
