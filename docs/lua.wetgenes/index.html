@@ -166,6 +166,7 @@
 <a class="sub" href="../../docs/lua.wetgenes.csv.parse"><span>/lua.wetgenes.csv.parse</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.csv.unesc"><span>/lua.wetgenes.csv.unesc</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.csv.unquote"><span>/lua.wetgenes.csv.unquote</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.deepcompare"><span>/lua.wetgenes.deepcompare</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.deepcopy"><span>/lua.wetgenes.deepcopy</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.export"><span>/lua.wetgenes.export</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake"><span>/lua.wetgenes.gamecake</span></a>
 <a class="par" href="../../docs/lua.wetgenes.gamecake.framebuffers"><span>/lua.wetgenes.gamecake.framebuffers</span></a>
@@ -1896,6 +1897,15 @@ and will guess the right one using the first line if one is not given.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua#L73">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua</a></div>
 <div><p>Remove quotes from a strine and unescape any &quot;&quot; within that string. If 
 the string is not in quotes then we return it as is.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.deepcompare">lua.wetgenes.deepcompare</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua#L206">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua</a></div>
+<div><pre><code>deepcompare(a,b)
+</code></pre>
+<p>Returns true if a==b , this iterates and recurses into tables.</p>
 </div>
 </div>
 
@@ -4923,7 +4933,7 @@ be called as normal.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.set_env">lua.wetgenes.set_env</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua#L207">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua#L234">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua</a></div>
 <div><pre><code>gamecake -e&quot; require(&#39;wetgenes&#39;).savescripts(&#39;./&#39;) &quot;
 </code></pre>
 <p>Run the above from the command line.</p>

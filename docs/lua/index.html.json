@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 567,
+   "count": 568,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 560,
+   "count": 561,
    "name": "lua.wetgenes"
   },
   {
@@ -588,6 +588,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.csv.unquote"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.deepcompare"
   },
   {
    "count": 1,
@@ -2464,7 +2468,7 @@
  "_list": [
   {
    "body": "",
-   "count": 567,
+   "count": 568,
    "name": "lua"
   },
   {
@@ -2517,7 +2521,7 @@
   },
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 560,
+   "count": 561,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -3372,6 +3376,14 @@
    "line": 73,
    "name": "lua.wetgenes.csv.unquote",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/csv.lua"
+  },
+  {
+   "body": "<pre><code>deepcompare(a,b)\n</code></pre>\n<p>Returns true if a==b , this iterates and recurses into tables.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/init.lua",
+   "line": 206,
+   "name": "lua.wetgenes.deepcompare",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua"
   },
   {
    "body": "<pre><code>deepcopy(tab)\n</code></pre>\n<p>Create and return a new table containing the same data as the input. If any of\nthe table values (not keys) are tables then these are also duplicated,\nrecursively.</p>\n<p>If this is called with a value that is not a table then that value is just\nreturned so it&#39;s safe to call on values without checking them.</p>\n",
@@ -5296,7 +5308,7 @@
    "body": "<pre><code>gamecake -e&quot; require(&#39;wetgenes&#39;).savescripts(&#39;./&#39;) &quot;\n</code></pre>\n<p>Run the above from the command line.</p>\n<p>This will export all the gamecake internal strings into the file system \nit is saved into the current directory so be careful where you run it.</p>\n<p>Game Cake checks the files system first so, these files can be modified \nand they will replace the built in versions.</p>\n<pre><code>gamecake -e&quot; require(&#39;wetgenes&#39;).savescripts(&#39;./internal/&#39;) &quot;\n</code></pre>\n<p>This is a safer version that will save the files to ./internal/lua/* \ninstead of just ./lua/*</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/init.lua",
-   "line": 207,
+   "line": 234,
    "name": "lua.wetgenes.set_env",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua"
   },
