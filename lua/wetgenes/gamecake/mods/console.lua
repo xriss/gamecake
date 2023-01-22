@@ -265,6 +265,8 @@ function M.bake(oven,console)
 		
 		console.line_width=oven.view.hx/8
 		console.data.main=oven.main and oven.main.console or oven.main	-- update best table of app function?
+
+		console.lines_display={}
 	end
 	
 	function console.draw()
@@ -375,7 +377,6 @@ font.vbs_idx=1
 			end
 		end
 
-		console.lines_display={}
 
 		gl.PopMatrix()
 		cake.views.pop_and_apply()
