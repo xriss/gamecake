@@ -202,6 +202,33 @@ local deepcopy ; deepcopy=function(orig)
 end
 M.deepcopy=deepcopy
 
+-----------------------------------------------------------------------------
+--[[#lua.wetgenes.deepcompare
+
+	deepcompare(a,b)
+
+Returns true if a==b , this iterates and recurses into tables.
+
+]]
+-----------------------------------------------------------------------------
+local deepcompare ; deepcompare=function(a,b)
+	local ta=type(a)
+	local tb=type(b)
+	if ta~=tb then return false end -- must be same type
+
+	if ta=="table" then -- iterate (need to do both in case a key only exists on one side)
+		for k,av in pairs(a) do
+			if not deepcompare(av,b[k]) then return false end
+		end
+		for k,bv in pairs(b) do
+			if not deepcompare(bv,a[k]) then return false end
+		end
+	else -- simple
+		if a~=b then return false end
+	end
+	return true
+end
+M.deepcompare=deepcompare
 
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.set_env
