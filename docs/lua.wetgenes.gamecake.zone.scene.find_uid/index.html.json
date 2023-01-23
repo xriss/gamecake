@@ -2470,7 +2470,7 @@
    "body": "<pre><code>local it = scene.find_uid( uid )\n</code></pre>\n<p>Return the item with the given uid or nil if no such item has been remembered.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 112,
+   "line": 124,
    "name": "lua.wetgenes.gamecake.zone.scene.find_uid",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
