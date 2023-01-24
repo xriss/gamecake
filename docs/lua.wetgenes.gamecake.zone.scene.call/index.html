@@ -633,8 +633,11 @@
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L362">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene.call(fname,...)
 </code></pre>
-<p>If fname is a string then that method will be invoked for every item where it
-exists like so.</p>
+<p>If fname is a string then that method will be invoked for every item 
+where it exists like so. Only the first item of each caste is tested, 
+if the function exists there then it is expected to exist for all items 
+of a given caste. This enables us to skip entire castes whilst still 
+making all functions optional.</p>
 <pre><code>if it[fname] then it[fname](it,...) end
 </code></pre>
 <p>if fname is a function then it will result in every item geting called with
