@@ -363,8 +363,11 @@ as it sees fit.
 
 	scene.call(fname,...)
 
-If fname is a string then that method will be invoked for every item where it
-exists like so.
+If fname is a string then that method will be invoked for every item 
+where it exists like so. Only the first item of each caste is tested, 
+if the function exists there then it is expected to exist for all items 
+of a given caste. This enables us to skip entire castes whilst still 
+making all functions optional.
 
 	if it[fname] then it[fname](it,...) end
 	
@@ -402,13 +405,11 @@ currently active items.
 					sys[fname](sys,...)
 					count=count+1
 				end
-				if items then
+				if items and items[1] and items[1][fname] then -- all items *must* have the same functions available
 					for idx=#items,1,-1 do -- call backwards so item can remove self
 						local it=items[idx]
-						if it[fname] then -- call a method, if it exists
-							it[fname](it,...)
-							count=count+1
-						end
+						it[fname](it,...)
+						count=count+1
 					end
 				end
 			end
