@@ -568,10 +568,8 @@ void main(void)
 
 	vec2 siz = 1.0 / vec2( textureSize(tex,0) );
 
-#if BLUR_AXIS == 0
-	siz.y=0.0;
-#elif BLUR_AXIS == 1
-	siz.x=0.0;
+#if BLUR_AXIS == 1
+	siz.x=-siz.x;
 #endif
 
 	vec4  c;
