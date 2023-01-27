@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 568,
+   "count": 569,
    "name": "lua"
   },
   {
@@ -158,11 +158,11 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 561,
+   "count": 562,
    "name": "lua.wetgenes"
   },
   {
-   "count": 35,
+   "count": 36,
    "name": "lua.wetgenes.bullet"
   },
   {
@@ -202,7 +202,7 @@
    "name": "lua.wetgenes.bullet.body.support"
   },
   {
-   "count": 25,
+   "count": 26,
    "name": "lua.wetgenes.bullet.world"
   },
   {
@@ -296,6 +296,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.shape.margin"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.status"
   },
   {
    "count": 1,
@@ -2468,7 +2472,7 @@
  "_list": [
   {
    "body": "<pre><code>local bullet=require(&quot;wetgenes.bullet&quot;)\n</code></pre>\n<p>We use bullet as the local name of this library.</p>\n<p>A lua binding to the <a href=\"https://github.com/bulletphysics/bullet3\">Bullet \nPhysics</a> library</p>\n",
-   "count": 35,
+   "count": 36,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 14,
    "name": "lua.wetgenes.bullet",
@@ -2545,7 +2549,7 @@
   },
   {
    "body": "<pre><code>world=bullet.world()\n</code></pre>\n<p>Create the world you will be simulating physics in.</p>\n",
-   "count": 25,
+   "count": 26,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 45,
    "name": "lua.wetgenes.bullet.world",
@@ -2733,6 +2737,14 @@
    "file": "../lua/wetgenes/bullet.lua",
    "line": 279,
    "name": "lua.wetgenes.bullet.world.shape.margin",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
+   "body": "<pre><code>print( world:status() )\n</code></pre>\n<p>Return a debug string about allocated objects in this world.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 652,
+   "name": "lua.wetgenes.bullet.world.status",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {

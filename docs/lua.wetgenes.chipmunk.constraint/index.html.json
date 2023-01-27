@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 568,
+   "count": 569,
    "name": "lua"
   },
   {
@@ -158,11 +158,11 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 561,
+   "count": 562,
    "name": "lua.wetgenes"
   },
   {
-   "count": 35,
+   "count": 36,
    "name": "lua.wetgenes.bullet"
   },
   {
@@ -202,7 +202,7 @@
    "name": "lua.wetgenes.bullet.body.support"
   },
   {
-   "count": 25,
+   "count": 26,
    "name": "lua.wetgenes.bullet.world"
   },
   {
@@ -296,6 +296,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.shape.margin"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.status"
   },
   {
    "count": 1,
