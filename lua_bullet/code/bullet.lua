@@ -649,5 +649,24 @@ bullet.body_functions.change_shape=function(body,shape,mass)
 
 end
 
+--[[#lua.wetgenes.bullet.world.status
+
+	print( world:status() )
+
+Return a debug string about allocated objects in this world.
+
+]]
+bullet.world_functions.status=function(world)
+	local lines={}
+	local count={}
+	for i,body  in pairs(world.bodies)  do count.bodies=(count.bodies or 0) +1 end
+	for i,shape in pairs(world.shapes)  do count.shapes=(count.shapes or 0) +1 end
+	for i,mesh  in pairs(world.meshes)  do count.meshes=(count.meshes or 0) +1 end
+	for name,count in pairs(count) do
+		lines[#lines+1]=(name).." : "..count
+	end
+	return table.concat(lines,"\n")
+end
+
 return bullet
 
