@@ -438,12 +438,15 @@ local encode_tab
 			if opts.sort then -- sorted by keys
 				local names={}
 				for i,v in pairs(vv) do names[#names+1]=i end
-				table.sort(names) -- might need to fix the compare function?
+				table.sort(names,function(a,b) -- sort by value converted to string
+					return tostring(a)<tostring(b)
+				end)
+				
 				for _,i in ipairs(names) do
 					local v=vv[i]
 					put(comma and ",") comma=true
 					put_newline()
-					put_indent(encode_it(i)) -- allow numbers or strings
+					put_indent(encode_str(i)) -- force strings because json
 					put(":")
 					t=type(v)
 					if t=="table" then
@@ -456,7 +459,7 @@ local encode_tab
 				for i,v in pairs(vv) do
 					put(comma and ",") comma=true
 					put_newline()
-					put_indent(encode_it(i)) -- allow numbers or strings
+					put_indent(encode_str(i)) -- force strings because json
 					put(":")
 					t=type(v)
 					if t=="table" then
