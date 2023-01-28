@@ -4991,6 +4991,9 @@ control the generation of the svg file.</p>
 <h1><a href="../docs/lua.wetgenes.json">lua.wetgenes.json</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua#L44">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua</a></div>
 <div><pre><code>local wjson=require(&quot;wetgenes.json&quot;)
+
+-- or export the main functions like so
+local json_encode,json_decode=require(&quot;wetgenes.json&quot;):export(&quot;encode&quot;,&quot;decode&quot;)
 </code></pre>
 <p>other json encode/decode using pure lua library seemed too slow, 
 here is a fast and loose one lets see if it goes any faster :) 
@@ -5005,7 +5008,7 @@ across some corners so you may find some obscure problems.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.json.decode">lua.wetgenes.json.decode</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua#L168">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua#L172">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua</a></div>
 <div><pre><code>json_table = wjson.decode(json_string,opts)
 </code></pre>
 <p>Convert a json string into a lua table.</p>
@@ -5017,16 +5020,36 @@ replaced with nil.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.json.encode">lua.wetgenes.json.encode</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua#L307">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua#L311">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua</a></div>
 <div><pre><code>json_string = wjson.encode(json_table)
+json_string = wjson.encode(json_table,opts)
 </code></pre>
 <p>Convert a lua table into a json string. Note it must be valid json, 
 primarily make sure that the table is either an array or a dictionary 
-but never both.</p>
+but never both. Note that we can not tell the difference between an 
+empty array and an empty object and will assume it is an object.</p>
+<p>An array must have a length&gt;0 and contain an element in the first slot, 
+eg array[1] and only contain numerical integer keys between 1 and the 
+length. This allows for the possibility of some nil holes depending on 
+the length lua returns but holes are not a good idea in arrays in lua. 
+Best to use false or the special wjson.null value and avoid holes.</p>
 <p>Also some of the internal lua types will cause errors, eg functions 
 as these can not be converted into json.</p>
-<p>include nulls in the output by using wetgenes.json.null
- </p>
+<p>include nulls in the output by using wetgenes.json.null</p>
+<p>opts is an optional table that can set the following options.</p>
+<pre><code>ops.pretty=true
+ops.pretty=&quot; &quot;
+    Enable pretty printing, line feeds and indents and set each 
+    indent level to multiples of the given string or &quot; &quot;.
+    
+ops.white=true
+ops.white=&quot; &quot;
+    Enable white space but not lines or indents, just a single space 
+    between value assignment to make line wrapping easier.
+
+ops.sort=true
+    Sort the keys, so we can create stable output for better diffing.
+</code></pre>
 </div>
 </div>
 

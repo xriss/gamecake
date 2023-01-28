@@ -4926,7 +4926,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grdsvg.lua"
   },
   {
-   "body": "<pre><code>local wjson=require(&quot;wetgenes.json&quot;)\n</code></pre>\n<p>other json encode/decode using pure lua library seemed too slow, \nhere is a fast and loose one lets see if it goes any faster :) \nshould be a direct replacement for JSON4Lua which is what I was \nusing before I profiled where all the time was getting spent...</p>\n<p>I needed it to be pure json as I was running it on googles appengine so\nthe lua was actually running in java, no C available.</p>\n<p>Anyhow I hope it is useful, in order to get it running faster I cut \nacross some corners so you may find some obscure problems.</p>\n",
+   "body": "<pre><code>local wjson=require(&quot;wetgenes.json&quot;)\n\n-- or export the main functions like so\nlocal json_encode,json_decode=require(&quot;wetgenes.json&quot;):export(&quot;encode&quot;,&quot;decode&quot;)\n</code></pre>\n<p>other json encode/decode using pure lua library seemed too slow, \nhere is a fast and loose one lets see if it goes any faster :) \nshould be a direct replacement for JSON4Lua which is what I was \nusing before I profiled where all the time was getting spent...</p>\n<p>I needed it to be pure json as I was running it on googles appengine so\nthe lua was actually running in java, no C available.</p>\n<p>Anyhow I hope it is useful, in order to get it running faster I cut \nacross some corners so you may find some obscure problems.</p>\n",
    "count": 3,
    "file": "../lua/wetgenes/json.lua",
    "line": 44,
@@ -4937,15 +4937,15 @@
    "body": "<pre><code>json_table = wjson.decode(json_string,opts)\n</code></pre>\n<p>Convert a json string into a lua table.</p>\n<p>Set opts.null to wetgenes.json.null (or indeed any othe value) if \nyou would like to have nulls in your results. By default nulls are \nreplaced with nil.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/json.lua",
-   "line": 168,
+   "line": 172,
    "name": "lua.wetgenes.json.decode",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua"
   },
   {
-   "body": "<pre><code>json_string = wjson.encode(json_table)\n</code></pre>\n<p>Convert a lua table into a json string. Note it must be valid json, \nprimarily make sure that the table is either an array or a dictionary \nbut never both.</p>\n<p>Also some of the internal lua types will cause errors, eg functions \nas these can not be converted into json.</p>\n<p>include nulls in the output by using wetgenes.json.null\n </p>\n",
+   "body": "<pre><code>json_string = wjson.encode(json_table)\njson_string = wjson.encode(json_table,opts)\n</code></pre>\n<p>Convert a lua table into a json string. Note it must be valid json, \nprimarily make sure that the table is either an array or a dictionary \nbut never both. Note that we can not tell the difference between an \nempty array and an empty object and will assume it is an object.</p>\n<p>An array must have a length&gt;0 and contain an element in the first slot, \neg array[1] and only contain numerical integer keys between 1 and the \nlength. This allows for the possibility of some nil holes depending on \nthe length lua returns but holes are not a good idea in arrays in lua. \nBest to use false or the special wjson.null value and avoid holes.</p>\n<p>Also some of the internal lua types will cause errors, eg functions \nas these can not be converted into json.</p>\n<p>include nulls in the output by using wetgenes.json.null</p>\n<p>opts is an optional table that can set the following options.</p>\n<pre><code>ops.pretty=true\nops.pretty=&quot; &quot;\n    Enable pretty printing, line feeds and indents and set each \n    indent level to multiples of the given string or &quot; &quot;.\n    \nops.white=true\nops.white=&quot; &quot;\n    Enable white space but not lines or indents, just a single space \n    between value assignment to make line wrapping easier.\n\nops.sort=true\n    Sort the keys, so we can create stable output for better diffing.\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/json.lua",
-   "line": 307,
+   "line": 311,
    "name": "lua.wetgenes.json.encode",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua"
   },
