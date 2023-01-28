@@ -45,6 +45,9 @@ local wjson=M
 
 	local wjson=require("wetgenes.json")
 
+	-- or export the main functions like so
+	local json_encode,json_decode=require("wetgenes.json"):export("encode","decode")
+
 other json encode/decode using pure lua library seemed too slow, 
 here is a fast and loose one lets see if it goes any faster :) 
 should be a direct replacement for JSON4Lua which is what I was 
@@ -149,6 +152,7 @@ end
 local function is_array(t)
 	local len=#t
 	if len==0 then return false end -- short circuit
+	if type(t[1])=="nil" then return false end -- allow holes but not *right* at the start
 	for i,v in pairs(t) do
 		if type(i)=="number" then
 			if math.floor(i)~=i then -- must be int
@@ -307,16 +311,39 @@ end
 --[[#lua.wetgenes.json.encode
 
 	json_string = wjson.encode(json_table)
+	json_string = wjson.encode(json_table,opts)
 
 Convert a lua table into a json string. Note it must be valid json, 
 primarily make sure that the table is either an array or a dictionary 
-but never both.
+but never both. Note that we can not tell the difference between an 
+empty array and an empty object and will assume it is an object.
+
+An array must have a length>0 and contain an element in the first slot, 
+eg array[1] and only contain numerical integer keys between 1 and the 
+length. This allows for the possibility of some nil holes depending on 
+the length lua returns but holes are not a good idea in arrays in lua. 
+Best to use false or the special wjson.null value and avoid holes.
 
 Also some of the internal lua types will cause errors, eg functions 
 as these can not be converted into json.
 
 include nulls in the output by using wetgenes.json.null
+
+opts is an optional table that can set the following options.
+
+	ops.pretty=true
+	ops.pretty=" "
+		Enable pretty printing, line feeds and indents and set each 
+		indent level to multiples of the given string or " ".
+		
+	ops.white=true
+	ops.white=" "
+		Enable white space but not lines or indents, just a single space 
+		between value assignment to make line wrapping easier.
  
+	ops.sort=true
+		Sort the keys, so we can create stable output for better diffing.
+
 ]]
 -----------------------------------------------------------------------------
 function wjson.encode(tab,opts)
