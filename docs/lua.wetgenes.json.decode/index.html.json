@@ -2471,7 +2471,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>json_table = wjson.decode(json_string,opts)\n</code></pre>\n<p>Convert a json string into a lua table.</p>\n<p>Set opts.null to wetgenes.json.null (or indeed any othe value) if \nyou would like to have nulls in your results. By default nulls are \nreplaced with nil.</p>\n",
+   "body": "<pre><code>json_table = wjson.decode(json_string)\njson_table = wjson.decode(json_string,opts)\n</code></pre>\n<p>Convert a json string into a lua table.</p>\n<p>Set opts.null to wetgenes.json.null (or indeed any other value) if you \nwould like to have this as nulls in your results. By default nulls are \nreplaced with nil and therefore invisible.</p>\n<p>Any object key string that looks like a number will be converted to a \nnumber. This will probably reverse any numbers we converted to strings \nwhen encoding. Set opts.keystring=true to turn off this behaviour.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/json.lua",
    "line": 172,

@@ -4577,18 +4577,22 @@ across some corners so you may find some obscure problems.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.json.decode">lua.wetgenes.json.decode</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua#L172">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua</a></div>
-<div><pre><code>json_table = wjson.decode(json_string,opts)
+<div><pre><code>json_table = wjson.decode(json_string)
+json_table = wjson.decode(json_string,opts)
 </code></pre>
 <p>Convert a json string into a lua table.</p>
-<p>Set opts.null to wetgenes.json.null (or indeed any othe value) if 
-you would like to have nulls in your results. By default nulls are 
-replaced with nil.</p>
+<p>Set opts.null to wetgenes.json.null (or indeed any other value) if you 
+would like to have this as nulls in your results. By default nulls are 
+replaced with nil and therefore invisible.</p>
+<p>Any object key string that looks like a number will be converted to a 
+number. This will probably reverse any numbers we converted to strings 
+when encoding. Set opts.keystring=true to turn off this behaviour.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.json.encode">lua.wetgenes.json.encode</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua#L311">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua#L320">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua</a></div>
 <div><pre><code>json_string = wjson.encode(json_table)
 json_string = wjson.encode(json_table,opts)
 </code></pre>
