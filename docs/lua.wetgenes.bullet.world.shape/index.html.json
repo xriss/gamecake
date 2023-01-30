@@ -2482,7 +2482,7 @@
    "body": "<pre><code>shape:destroy()\n</code></pre>\n<p>Destroy shape.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 260,
+   "line": 266,
    "name": "lua.wetgenes.bullet.world.shape.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -2490,7 +2490,7 @@
    "body": "<pre><code>r = body:margin( radius )\n</code></pre>\n<p>get/set the shapes margin size</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 279,
+   "line": 288,
    "name": "lua.wetgenes.bullet.world.shape.margin",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

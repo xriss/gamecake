@@ -2474,7 +2474,7 @@
    "body": "<pre><code>r = body:transform( r )\nr = body:transform()\n</code></pre>\n<p>get/set the body restitution</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 365,
+   "line": 374,
    "name": "lua.wetgenes.bullet.world.body.restitution",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

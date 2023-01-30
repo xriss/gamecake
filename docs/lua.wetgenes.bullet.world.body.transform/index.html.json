@@ -2474,7 +2474,7 @@
    "body": "<pre><code>px,py,pz,qx,qy,qz,qw = body:transform()\npx,py,pz,qx,qy,qz,qw = body:transform(px,py,pz)\npx,py,pz,qx,qy,qz,qw = body:transform(px,py,pz,qx,qy,qz,qw)\n</code></pre>\n<p>get/set the body transform. Position and Rotation Quaternion.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 351,
+   "line": 360,
    "name": "lua.wetgenes.bullet.world.body.transform",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

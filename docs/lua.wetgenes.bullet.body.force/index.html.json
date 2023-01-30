@@ -2474,7 +2474,7 @@
    "body": "<pre><code>body:force(fx,fy,fz)\nbody:force(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply force fx,fy,fz at world relative location (subtract origin of \nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 597,
+   "line": 606,
    "name": "lua.wetgenes.bullet.body.force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }
