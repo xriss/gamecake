@@ -171,13 +171,19 @@ end
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.json.decode
 
+	json_table = wjson.decode(json_string)
 	json_table = wjson.decode(json_string,opts)
 
 Convert a json string into a lua table.
 
-Set opts.null to wetgenes.json.null (or indeed any othe value) if 
-you would like to have nulls in your results. By default nulls are 
-replaced with nil.
+Set opts.null to wetgenes.json.null (or indeed any other value) if you 
+would like to have this as nulls in your results. By default nulls are 
+replaced with nil and therefore invisible.
+
+Any object key string that looks like a number will be converted to a 
+number. This will probably reverse any numbers we converted to strings 
+when encoding. Set opts.keystring=true to turn off this behaviour.
+
 
 ]]
 -----------------------------------------------------------------------------
@@ -228,6 +234,9 @@ local t
 	local function setval()
 		if top.idx==nil then -- set idx not val
 			if type(val)=="table" then err("cannot use table as index") end
+			if not opts.keystring then
+				local n=tonumber(val) if tostring(n)==val then val=n end -- auto convert key string to number
+			end
 			top.idx=val
 			val=nil
 		else
