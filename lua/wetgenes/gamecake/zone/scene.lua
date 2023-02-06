@@ -125,10 +125,12 @@ does not exist.
 
 	local it = scene.find_uid( uid )
 
-Return the item with the given uid or nil if no such item has been remembered.
+Return the item with the given uid or nil if no such item has been 
+remembered or a nil uid has been passed in.
 
 ]]
 	scene.find_uid=function(uid)
+		if not uid then return nil end
 		return scene.uids[uid]
 	end
 

@@ -124,6 +124,17 @@ B.cameras.create=function(cameras,boot)
 	return camera
 end
 
+-- get set or create
+B.camera.depend=function(camera,name,uid)
+	local idx
+	if name=="focus" then
+		idx=1
+		if uid then camera.uids[idx]=uid end
+		local focus=scene.find_uid(camera.uids[idx])
+		return focus
+	end
+end
+
 B.camera.update=function(camera)
 	
 	if camera.focus then
