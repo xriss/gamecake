@@ -221,10 +221,9 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		local p=gl.program(progname)
 		gl.UseProgram( p[0] )
 
-		local vertexarray
 		if gl.GenVertexArray then
-			vertexarray=gl.GenVertexArray()
-			gl.BindVertexArray(vertexarray)
+			it.va=gl.GenVertexArray()
+			gl.BindVertexArray(it.va)
 		end
 
 		if it.vb then -- use a precached buffer
@@ -308,7 +307,8 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 		if gl.GenVertexArray then
 			gl.BindVertexArray(0)
-			gl.DeleteVertexArray(vertexarray)
+			gl.DeleteVertexArray(it.va)
+			it.va=nil
 		end
 
 	end
