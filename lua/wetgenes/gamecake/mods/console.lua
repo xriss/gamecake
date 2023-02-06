@@ -300,7 +300,7 @@ font.vbs_idx=1
 			
 			local s=string.format("fps=%2d %s %2d /%3d %4.0fm%s%4.0fk vb=%d tx=%d fb=%d gl=%d vbi=%d gm=%d",
 				console.fps,
-				string.rep("x",console.fps_updates)..string.rep(" ",4-(console.fps_updates%4)), -- ideally we only want 1 x 
+				string.rep("x",console.fps_updates)..string.rep(" ",8-(console.fps_updates)), -- ideally we only want 1 x 
 				(oven.times.update.time*1000),
 				(oven.times.draw.time*1000),
 				gci/1024,

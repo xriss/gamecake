@@ -126,6 +126,7 @@ end
 
 -- get set or create
 B.camera.depend=function(camera,name,uid)
+	if not camera.uids then camera.uids={0} end
 	local idx
 	if name=="focus" then
 		idx=1
@@ -137,15 +138,16 @@ end
 
 B.camera.update=function(camera)
 	
-	if camera.focus then
+	local focus=camera:depend("focus")
+	if focus then
 
-		if camera.focus.focus_camera then
+		if focus.focus_camera then
 
-			camera.focus:focus_camera(camera)
+			focus:focus_camera(camera)
 
 		else
 
-			camera.pos:set( camera.focus.pos )
+			camera.pos:set( focus.pos )
 
 		end
 
