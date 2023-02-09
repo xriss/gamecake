@@ -247,6 +247,12 @@ bullet.world_functions.shape=function(world,name,a,...)
 	setmetatable(shape,bullet.shape_metatable)
 
 	if name=="mesh" then shape.mesh=a a=a[0] end
+	if name=="compound" then -- multiple sub shapes?
+		shape.shapes={}
+		for i,v in ipairs(a) do
+			shape.shapes[i]=v[1] -- remember children for later freeing
+		end
+	end
 
 	shape[0]=core.shape_create(name,a,...)
 	shape.world=world
@@ -272,6 +278,9 @@ bullet.shape_functions.destroy=function(shape)
 	world.shapes[ ptr ]=nil
 	if shape.mesh then
 		shape.mesh:destroy()
+	end
+	for i,v in ipairs(shape.shapes or {}) do -- sub shapes should also be destroyed
+		v:destroy() 
 	end
 end
 
