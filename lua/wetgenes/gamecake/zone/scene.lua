@@ -316,6 +316,7 @@ custom code.
 
 ]]
 	scene.add=function(it,caste,boot)
+		it.uid=boot.uid
 		scene.remember_uid(it)
 
 		it.scene=scene
