@@ -1370,6 +1370,70 @@ btCollisionObject *body = lua_bullet_body_ptr(l, 1 );
 
 /*+------------------------------------------------------------------+**
 
+Get all current contacts in this world.
+
+Returns table of contacts, each contact is a simple array containing
+
+	body1ptr,
+	body2ptr,
+
+and then multiple contact points of 9 numbers each
+
+	ax,ay,az,	-- m_positionWorldOnA
+	bx,by,bz,	-- m_positionWorldOnB
+	nx,ny,nz,	-- m_normalWorldOnB
+
+*/
+static int lua_bullet_world_contacts (lua_State *l)
+{
+btDiscreteDynamicsWorld *world=lua_bullet_world_ptr(l,1)->world;
+
+	lua_newtable(l);
+		
+	int numManifolds = world->getDispatcher()->getNumManifolds();
+	for(int i=0;i<numManifolds;i++)
+	{
+		btPersistentManifold* contactManifold = world->getDispatcher()->getManifoldByIndexInternal(i);
+		const btCollisionObject* obA = contactManifold->getBody0();
+		const btCollisionObject* obB = contactManifold->getBody1();
+		
+		lua_pushnumber(l,i+1);
+		lua_newtable(l);
+
+		lua_pushnumber(l,1);
+		lua_pushlightuserdata(l,(void*)obA);
+		lua_settable(l,-3);
+
+		lua_pushnumber(l,2);
+		lua_pushlightuserdata(l,(void*)obB);
+		lua_settable(l,-3);
+		
+		int numContacts = contactManifold->getNumContacts();
+		for (int j=0;j<numContacts;j++)
+		{
+			btManifoldPoint& pt = contactManifold->getContactPoint(j);			
+
+			lua_pushnumber(l,2+(j*9)+1); lua_pushnumber(l,pt.m_positionWorldOnA.getX()); lua_settable(l,-3);
+			lua_pushnumber(l,2+(j*9)+2); lua_pushnumber(l,pt.m_positionWorldOnA.getY()); lua_settable(l,-3);
+			lua_pushnumber(l,2+(j*9)+3); lua_pushnumber(l,pt.m_positionWorldOnA.getZ()); lua_settable(l,-3);
+
+			lua_pushnumber(l,2+(j*9)+4); lua_pushnumber(l,pt.m_positionWorldOnB.getX()); lua_settable(l,-3);
+			lua_pushnumber(l,2+(j*9)+5); lua_pushnumber(l,pt.m_positionWorldOnB.getY()); lua_settable(l,-3);
+			lua_pushnumber(l,2+(j*9)+6); lua_pushnumber(l,pt.m_positionWorldOnB.getZ()); lua_settable(l,-3);
+
+			lua_pushnumber(l,2+(j*9)+7); lua_pushnumber(l,pt.m_normalWorldOnB.getX()); lua_settable(l,-3);
+			lua_pushnumber(l,2+(j*9)+8); lua_pushnumber(l,pt.m_normalWorldOnB.getY()); lua_settable(l,-3);
+			lua_pushnumber(l,2+(j*9)+9); lua_pushnumber(l,pt.m_normalWorldOnB.getZ()); lua_settable(l,-3);
+		}
+		
+		lua_settable(l,-3);
+	}
+
+	return 1;
+}
+
+/*+------------------------------------------------------------------+**
+
 open library.
 
 */
@@ -1438,6 +1502,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"world_add_body",					lua_bullet_world_add_body},
 		{"world_remove_body",				lua_bullet_world_remove_body},
 		{"world_ray_test",					lua_bullet_world_ray_test},
+		{"world_contacts",					lua_bullet_world_contacts},
 
 		{"shape_margin",					lua_bullet_shape_margin},
 		{"shape_ptr",						lua_bullet_shape_ptr},
