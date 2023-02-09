@@ -2,52 +2,49 @@ cd `dirname $0`
 
 echo "linking all .lua fles from the main lua dir so we dont accidently edit multiple copies"
 
-ln -f lua_pegasus/git/src/pegasus/compress.lua  lua/pegasus/compress.lua
-ln -f lua_pegasus/git/src/pegasus/handler.lua   lua/pegasus/handler.lua
-ln -f lua_pegasus/git/src/pegasus/init.lua      lua/pegasus/init.lua
-ln -f lua_pegasus/git/src/pegasus/request.lua   lua/pegasus/request.lua
-ln -f lua_pegasus/git/src/pegasus/response.lua  lua/pegasus/response.lua
+ln -f lua/pegasus/compress.lua lua_pegasus/git/src/pegasus/compress.lua
+ln -f lua/pegasus/handler.lua  lua_pegasus/git/src/pegasus/handler.lua 
+ln -f lua/pegasus/init.lua     lua_pegasus/git/src/pegasus/init.lua    
+ln -f lua/pegasus/request.lua  lua_pegasus/git/src/pegasus/request.lua 
+ln -f lua/pegasus/response.lua lua_pegasus/git/src/pegasus/response.lua
+     
+     
+ln -f lua/ltn12.lua          lua_socket/git/src/ltn12.lua            
+ln -f lua/mime.lua           lua_socket/git/src/mime.lua             
+ln -f lua/socket.lua         lua_socket/git/src/socket.lua           
+ln -f lua/socket/ftp.lua     lua_socket/git/src/ftp.lua              
+ln -f lua/socket/headers.lua lua_socket/git/src/headers.lua          
+ln -f lua/socket/http.lua    lua_socket/git/src/http.lua             
+ln -f lua/socket/mbox.lua    lua_socket/git/src/mbox.lua             
+ln -f lua/socket/smtp.lua    lua_socket/git/src/smtp.lua             
+ln -f lua/socket/tp.lua      lua_socket/git/src/tp.lua               
+ln -f lua/socket/url.lua     lua_socket/git/src/url.lua              
+ln -f lua/ssl/https.lua      lua_sec/git/src/https.lua               
+ln -f lua/ssl.lua            lua_sec/git/src/ssl.lua                 
+     
+     
+ln -f lua/glslang.lua  lua_glslang/code/glslang.lua            
+ln -f lua/gles.lua     lua_gles/code/gles.lua                  
+ln -f lua/glescode.lua lua_gles/code/glescode.lua              
+ln -f lua/al.lua       lua_al/code/al.lua                      
+ln -f lua/alc.lua      lua_al/code/alc.lua                     
+ln -f lua/lanes.lua    lua_lanes/lanes/src/lanes.lua           
+     
+ln -f lua/wetgenes/midi.lua   lua_midi/code/midi.lua                  
+ln -f lua/wetgenes/tardis.lua lua_tardis/code/tardis.lua              
+ln -f lua/wetgenes/grd.lua    lua_grd/code/grd.lua                    
+ln -f lua/wetgenes/grdmap.lua lua_grd/code/grdmap.lua                 
+     
+ln -f lua/wetgenes/win.lua      lua_win/code/win.lua                    
+ln -f lua/wetgenes/win/emcc.lua lua_win_emcc/code/emcc.lua              
+     
+ln -f lua/wetgenes/v4l2.lua     lua_v4l2/code/v4l2.lua                  
+ln -f lua/wetgenes/chipmunk.lua lua_chipmunk/code/chipmunk.lua          
+ln -f lua/wetgenes/bullet.lua   lua_bullet/code/bullet.lua              
+ln -f lua/wetgenes/pack.lua     lua_pack/code/pack.lua                  
+ln -f lua/wetgenes/fats.lua     lua_fats/code/fats.lua                  
+ln -f lua/wetgenes/ogg.lua      lua_ogg/code/ogg.lua                    
 
-
-ln -f lua_socket/git/src/ltn12.lua              lua/ltn12.lua
-ln -f lua_socket/git/src/mime.lua               lua/mime.lua
-ln -f lua_socket/git/src/socket.lua             lua/socket.lua
-ln -f lua_socket/git/src/ftp.lua                lua/socket/ftp.lua
-ln -f lua_socket/git/src/headers.lua            lua/socket/headers.lua
-ln -f lua_socket/git/src/http.lua               lua/socket/http.lua
-ln -f lua_socket/git/src/mbox.lua               lua/socket/mbox.lua
-ln -f lua_socket/git/src/smtp.lua               lua/socket/smtp.lua
-ln -f lua_socket/git/src/tp.lua                 lua/socket/tp.lua
-ln -f lua_socket/git/src/url.lua                lua/socket/url.lua
-ln -f lua_sec/git/src/https.lua                 lua/ssl/https.lua
-ln -f lua_sec/git/src/ssl.lua                   lua/ssl.lua
-
-
-ln -f lua_glslang/code/glslang.lua              lua/glslang.lua
-ln -f lua_gles/code/gles.lua                    lua/gles.lua
-ln -f lua_gles/code/glescode.lua                lua/glescode.lua
-ln -f lua_al/code/al.lua                        lua/al.lua
-ln -f lua_al/code/alc.lua                       lua/alc.lua
-ln -f lua_lanes/lanes/src/lanes.lua             lua/lanes.lua
-
-ln -f lua_midi/code/midi.lua                    lua/wetgenes/midi.lua
-ln -f lua_tardis/code/tardis.lua                lua/wetgenes/tardis.lua
-ln -f lua_grd/code/grd.lua                      lua/wetgenes/grd.lua
-ln -f lua_grd/code/grdmap.lua                   lua/wetgenes/grdmap.lua
-
-ln -f lua_win/code/win.lua                      lua/wetgenes/win.lua
-ln -f lua_win_emcc/code/emcc.lua                lua/wetgenes/win/emcc.lua
-
-ln -f lua_v4l2/code/v4l2.lua                    lua/wetgenes/v4l2.lua
-#ln -f lua_hid/code/hid.lua                      lua/wetgenes/hid.lua
-ln -f lua_chipmunk/code/chipmunk.lua            lua/wetgenes/chipmunk.lua
-ln -f lua_bullet/code/bullet.lua                lua/wetgenes/bullet.lua
-ln -f lua_pack/code/pack.lua                    lua/wetgenes/pack.lua
-ln -f lua_fats/code/fats.lua                    lua/wetgenes/fats.lua
-ln -f lua_ogg/code/ogg.lua                      lua/wetgenes/ogg.lua
-#ln -f lua_speak/code/speak.lua                  lua/wetgenes/speak.lua
-
-#ln -f lua_raspi_unicornhat/code/unicornhat.lua  lua/raspi/unicornhat.lua
 
 
 
