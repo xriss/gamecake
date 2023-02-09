@@ -193,6 +193,49 @@ bullet.world_functions.ray_test=function(world,test)
 	return test
 end
 
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.contacts
+
+	local contacts=world:contacts()
+	local contacts=world:contacts(min_dist)
+
+Fetch all contacts in the world that are closer than min_dist which 
+defaults to 0.
+
+This returns a list of contacts. Each contact is an array that 
+consists of.
+
+	a_body,
+	b_body,
+
+and then 1 or more chunks of 9 numbers representing
+
+	ax,ay,az,	-- world position on a_body
+	bx,by,bz,	-- world position on b_body
+	nx,ny,nz,	-- world normal on b_body
+
+So you can find the two bodys in contact[1] and contact[2] but are then 
+expected to loop over the rest of the array as chunks of 9 like so.
+
+	for idx=3,#contact,9 do
+		local pos_a={ contact[idx+0] , contact[idx+1] , contact[idx+2] }
+		local pos_b={ contact[idx+3] , contact[idx+4] , contact[idx+5] }
+		local nrm_b={ contact[idx+6] , contact[idx+7] , contact[idx+8] }
+		...
+	end
+	
+This is intended to be processed and interesting collisions handled or 
+saved for later.
+	
+]]
+bullet.world_functions.contacts=function(world,min_dist)
+	local collisions=core.world_contacts( world[0] , min_dist or 0 )
+	for i,collision in ipairs(collisions) do
+		collision[1]=world.bodies[ collision[1] ]
+		collision[2]=world.bodies[ collision[2] ]
+	end
+	return collisions
+end
 
 
 ------------------------------------------------------------------------

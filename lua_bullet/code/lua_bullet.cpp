@@ -1370,7 +1370,8 @@ btCollisionObject *body = lua_bullet_body_ptr(l, 1 );
 
 /*+------------------------------------------------------------------+**
 
-Get all current contacts in this world.
+Get all current contacts in this world that are closer than min_dist, 
+you probably want to pass in a 0 for this.
 
 Returns table of contacts, each contact is a simple array containing
 
@@ -1387,46 +1388,70 @@ and then multiple contact points of 9 numbers each
 static int lua_bullet_world_contacts (lua_State *l)
 {
 btDiscreteDynamicsWorld *world=lua_bullet_world_ptr(l,1)->world;
+btScalar min_dist=lua_tonumber(l,2);
+btScalar check_dist=0;
 
 	lua_newtable(l);
 		
+	int idx=0;
 	int numManifolds = world->getDispatcher()->getNumManifolds();
 	for(int i=0;i<numManifolds;i++)
 	{
 		btPersistentManifold* contactManifold = world->getDispatcher()->getManifoldByIndexInternal(i);
 		const btCollisionObject* obA = contactManifold->getBody0();
 		const btCollisionObject* obB = contactManifold->getBody1();
-		
-		lua_pushnumber(l,i+1);
-		lua_newtable(l);
-
-		lua_pushnumber(l,1);
-		lua_pushlightuserdata(l,(void*)obA);
-		lua_settable(l,-3);
-
-		lua_pushnumber(l,2);
-		lua_pushlightuserdata(l,(void*)obB);
-		lua_settable(l,-3);
-		
 		int numContacts = contactManifold->getNumContacts();
+		
+		// check if this is an interesting collision
+		check_dist=BT_LARGE_FLOAT;
 		for (int j=0;j<numContacts;j++)
 		{
-			btManifoldPoint& pt = contactManifold->getContactPoint(j);			
-
-			lua_pushnumber(l,2+(j*9)+1); lua_pushnumber(l,pt.m_positionWorldOnA.getX()); lua_settable(l,-3);
-			lua_pushnumber(l,2+(j*9)+2); lua_pushnumber(l,pt.m_positionWorldOnA.getY()); lua_settable(l,-3);
-			lua_pushnumber(l,2+(j*9)+3); lua_pushnumber(l,pt.m_positionWorldOnA.getZ()); lua_settable(l,-3);
-
-			lua_pushnumber(l,2+(j*9)+4); lua_pushnumber(l,pt.m_positionWorldOnB.getX()); lua_settable(l,-3);
-			lua_pushnumber(l,2+(j*9)+5); lua_pushnumber(l,pt.m_positionWorldOnB.getY()); lua_settable(l,-3);
-			lua_pushnumber(l,2+(j*9)+6); lua_pushnumber(l,pt.m_positionWorldOnB.getZ()); lua_settable(l,-3);
-
-			lua_pushnumber(l,2+(j*9)+7); lua_pushnumber(l,pt.m_normalWorldOnB.getX()); lua_settable(l,-3);
-			lua_pushnumber(l,2+(j*9)+8); lua_pushnumber(l,pt.m_normalWorldOnB.getY()); lua_settable(l,-3);
-			lua_pushnumber(l,2+(j*9)+9); lua_pushnumber(l,pt.m_normalWorldOnB.getZ()); lua_settable(l,-3);
+			btManifoldPoint& pt = contactManifold->getContactPoint(j);
+			if( pt.m_distance1 < check_dist )
+			{
+				check_dist=pt.m_distance1;
+			}
 		}
-		
-		lua_settable(l,-3);
+
+		if( check_dist < min_dist )
+		{
+			idx=idx+1;
+			
+			lua_pushnumber(l,idx);
+			lua_newtable(l);
+
+			lua_pushnumber(l,1);
+			lua_pushlightuserdata(l,(void*)obA);
+			lua_settable(l,-3);
+
+			lua_pushnumber(l,2);
+			lua_pushlightuserdata(l,(void*)obB);
+			lua_settable(l,-3);
+			
+			int jb=0;
+			for (int j=0;j<numContacts;j++)
+			{
+				btManifoldPoint& pt = contactManifold->getContactPoint(j);			
+
+				if( pt.m_distance1 < check_dist )
+				{
+					jb=jb+1;
+					lua_pushnumber(l,2+(jb*9)+1); lua_pushnumber(l,pt.m_positionWorldOnA.getX()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*9)+2); lua_pushnumber(l,pt.m_positionWorldOnA.getY()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*9)+3); lua_pushnumber(l,pt.m_positionWorldOnA.getZ()); lua_settable(l,-3);
+
+					lua_pushnumber(l,2+(jb*9)+4); lua_pushnumber(l,pt.m_positionWorldOnB.getX()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*9)+5); lua_pushnumber(l,pt.m_positionWorldOnB.getY()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*9)+6); lua_pushnumber(l,pt.m_positionWorldOnB.getZ()); lua_settable(l,-3);
+
+					lua_pushnumber(l,2+(jb*9)+7); lua_pushnumber(l,pt.m_normalWorldOnB.getX()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*9)+8); lua_pushnumber(l,pt.m_normalWorldOnB.getY()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*9)+9); lua_pushnumber(l,pt.m_normalWorldOnB.getZ()); lua_settable(l,-3);
+				}
+			}
+			
+			lua_settable(l,-3);
+		}
 	}
 
 	return 1;
