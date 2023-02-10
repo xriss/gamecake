@@ -1370,26 +1370,28 @@ btCollisionObject *body = lua_bullet_body_ptr(l, 1 );
 
 /*+------------------------------------------------------------------+**
 
-Get all current contacts in this world that are closer than min_dist, 
-you probably want to pass in a 0 for this.
+Get all current contacts in this world that are the same or closer than 
+min_dist and created an impulse the same or above min_impulse you 
+probably want to pass in a 0 for these two values as a default.
 
 Returns table of contacts, each contact is a simple array containing
 
 	body1ptr,
 	body2ptr,
 
-and then multiple contact points of 9 numbers each
+and then multiple contact points of 10 numbers each
 
 	ax,ay,az,	-- m_positionWorldOnA
 	bx,by,bz,	-- m_positionWorldOnB
 	nx,ny,nz,	-- m_normalWorldOnB
+	impulse,	-- m_appliedImpulse
 
 */
 static int lua_bullet_world_contacts (lua_State *l)
 {
 btDiscreteDynamicsWorld *world=lua_bullet_world_ptr(l,1)->world;
 btScalar min_dist=lua_tonumber(l,2);
-btScalar check_dist=0;
+btScalar min_impulse=lua_tonumber(l,3);
 
 	lua_newtable(l);
 		
@@ -1403,17 +1405,18 @@ btScalar check_dist=0;
 		int numContacts = contactManifold->getNumContacts();
 		
 		// check if this is an interesting collision
-		check_dist=BT_LARGE_FLOAT;
+		bool interesting=false;
 		for (int j=0;j<numContacts;j++)
 		{
 			btManifoldPoint& pt = contactManifold->getContactPoint(j);
-			if( pt.m_distance1 < check_dist )
+			if( ( pt.m_distance1 <= min_dist ) && ( pt.m_appliedImpulse >= min_impulse ) )
 			{
-				check_dist=pt.m_distance1;
+				interesting=true;
+				break;
 			}
 		}
 
-		if( check_dist < min_dist )
+		if( interesting )
 		{
 			idx=idx+1;
 			
@@ -1433,20 +1436,23 @@ btScalar check_dist=0;
 			{
 				btManifoldPoint& pt = contactManifold->getContactPoint(j);			
 
-				if( pt.m_distance1 < check_dist )
+				if( ( pt.m_distance1 <= min_dist ) && ( pt.m_appliedImpulse >= min_impulse ) )
 				{
+					lua_pushnumber(l,2+(jb*10)+1); lua_pushnumber(l,pt.m_positionWorldOnA.getX()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*10)+2); lua_pushnumber(l,pt.m_positionWorldOnA.getY()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*10)+3); lua_pushnumber(l,pt.m_positionWorldOnA.getZ()); lua_settable(l,-3);
+
+					lua_pushnumber(l,2+(jb*10)+4); lua_pushnumber(l,pt.m_positionWorldOnB.getX()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*10)+5); lua_pushnumber(l,pt.m_positionWorldOnB.getY()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*10)+6); lua_pushnumber(l,pt.m_positionWorldOnB.getZ()); lua_settable(l,-3);
+
+					lua_pushnumber(l,2+(jb*10)+7); lua_pushnumber(l,pt.m_normalWorldOnB.getX()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*10)+8); lua_pushnumber(l,pt.m_normalWorldOnB.getY()); lua_settable(l,-3);
+					lua_pushnumber(l,2+(jb*10)+9); lua_pushnumber(l,pt.m_normalWorldOnB.getZ()); lua_settable(l,-3);
+
+					lua_pushnumber(l,2+(jb*10)+10); lua_pushnumber(l,pt.m_appliedImpulse); lua_settable(l,-3);
+
 					jb=jb+1;
-					lua_pushnumber(l,2+(jb*9)+1); lua_pushnumber(l,pt.m_positionWorldOnA.getX()); lua_settable(l,-3);
-					lua_pushnumber(l,2+(jb*9)+2); lua_pushnumber(l,pt.m_positionWorldOnA.getY()); lua_settable(l,-3);
-					lua_pushnumber(l,2+(jb*9)+3); lua_pushnumber(l,pt.m_positionWorldOnA.getZ()); lua_settable(l,-3);
-
-					lua_pushnumber(l,2+(jb*9)+4); lua_pushnumber(l,pt.m_positionWorldOnB.getX()); lua_settable(l,-3);
-					lua_pushnumber(l,2+(jb*9)+5); lua_pushnumber(l,pt.m_positionWorldOnB.getY()); lua_settable(l,-3);
-					lua_pushnumber(l,2+(jb*9)+6); lua_pushnumber(l,pt.m_positionWorldOnB.getZ()); lua_settable(l,-3);
-
-					lua_pushnumber(l,2+(jb*9)+7); lua_pushnumber(l,pt.m_normalWorldOnB.getX()); lua_settable(l,-3);
-					lua_pushnumber(l,2+(jb*9)+8); lua_pushnumber(l,pt.m_normalWorldOnB.getY()); lua_settable(l,-3);
-					lua_pushnumber(l,2+(jb*9)+9); lua_pushnumber(l,pt.m_normalWorldOnB.getZ()); lua_settable(l,-3);
 				}
 			}
 			
@@ -1454,7 +1460,8 @@ btScalar check_dist=0;
 		}
 	}
 
-	return 1;
+	lua_pushnumber(l,10);
+	return 2;
 }
 
 /*+------------------------------------------------------------------+**
