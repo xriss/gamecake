@@ -633,27 +633,36 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.contacts">lua.wetgenes.bullet.world.contacts</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L197">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
-<div><pre><code>local contacts=world:contacts()
-local contacts=world:contacts(min_dist)
+<div><pre><code>local contacts,csiz=world:contacts()
+local contacts,csiz=world:contacts(min_dist)
+local contacts,csiz=world:contacts(min_dist,min_impulse)
 </code></pre>
-<p>Fetch all contacts in the world that are closer than min_dist which 
-defaults to 0.</p>
+<p>Fetch all contacts in the world that are the same or closer than 
+min_dist which defaults to 0 and hit the same or harder than 
+min_impulse which also defaults to 0. This helps filter out 
+uninteresting collisions before we process them.</p>
+<p>csiz, the second return allows us to put more info into each chunk in 
+the future, it will probably be 10 but may grow if it turns out that 
+more contact info for each point would help.</p>
 <p>This returns a list of contacts. Each contact is an array that 
 consists of.</p>
 <pre><code>a_body,
 b_body,
 </code></pre>
-<p>and then 1 or more chunks of 9 numbers representing</p>
+<p>and then 1 or more chunks of csiz (which is currently 10) numbers 
+representing</p>
 <pre><code>ax,ay,az,	-- world position on a_body
 bx,by,bz,	-- world position on b_body
 nx,ny,nz,	-- world normal on b_body
+impulse,	-- impulse applied by collision
 </code></pre>
 <p>So you can find the two bodys in contact[1] and contact[2] but are then 
-expected to loop over the rest of the array as chunks of 9 like so.</p>
-<pre><code>for idx=3,#contact,9 do
+expected to loop over the rest of the array as chunks of csiz like so.</p>
+<pre><code>for idx=3,#contact,csiz do
     local pos_a={ contact[idx+0] , contact[idx+1] , contact[idx+2] }
     local pos_b={ contact[idx+3] , contact[idx+4] , contact[idx+5] }
     local nrm_b={ contact[idx+6] , contact[idx+7] , contact[idx+8] }
+    local impulse=contact[idx+9]
     ...
 end
 </code></pre>

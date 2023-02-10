@@ -2478,7 +2478,7 @@
    "body": "<pre><code>l,a,s = body:friction( linear , angular , spinning )\nl,a,s = body:friction()\n</code></pre>\n<p>get/set the body friction</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 430,
+   "line": 440,
    "name": "lua.wetgenes.bullet.world.body.friction",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

@@ -2478,7 +2478,7 @@
    "body": "<pre><code>shape:destroy()\n</code></pre>\n<p>Destroy shape.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 309,
+   "line": 319,
    "name": "lua.wetgenes.bullet.world.shape.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

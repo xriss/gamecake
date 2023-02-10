@@ -2478,7 +2478,7 @@
    "body": "<pre><code>body:cmask(bits)\nbits=body:cmask()\nbody:cmask(0x7fffffff)\n</code></pre>\n<p>Set or get body cmask bits. You have 31 bits, so use 0x7fffffff to set \nall. This body will only colide with another body if the other bodys \ncgroup has a bit set that is also set in our cmask.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 590,
+   "line": 600,
    "name": "lua.wetgenes.bullet.body.cmask",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }
