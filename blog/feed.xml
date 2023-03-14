@@ -8,7 +8,7 @@
   <link rel="alternate" type="text/html" href="/"/>
   <generator uri="https://github.com/bcomnes/jsonfeed-to-atom#readme" version="1.2.2">jsonfeed-to-atom</generator>
   <entry>
-    <id>/blog/2018-04-24-building-in-boxes</id>
+    <id>/blog/2018-04-24-building-in-boxes/</id>
     <title>Building in boxes.</title>
     <updated>2018-04-24T00:00:00.000Z</updated>
     <published>2018-04-24T00:00:00.000Z</published>
@@ -74,10 +74,10 @@ years before it all begins to rot again.</p>
 
 </div>
 ]]></content>
-    <link rel="alternate" href="/blog/2018-04-24-building-in-boxes"/>
+    <link rel="alternate" href="/blog/2018-04-24-building-in-boxes/"/>
   </entry>
   <entry>
-    <id>/blog/2017-12-30-beware-of-the-node</id>
+    <id>/blog/2017-12-30-beware-of-the-node/</id>
     <title>Beware of the node.</title>
     <updated>2017-12-30T00:00:00.000Z</updated>
     <published>2017-12-30T00:00:00.000Z</published>
@@ -95,6 +95,6 @@ if you expect any of the scripts to work.</p>
 
 </div>
 ]]></content>
-    <link rel="alternate" href="/blog/2017-12-30-beware-of-the-node"/>
+    <link rel="alternate" href="/blog/2017-12-30-beware-of-the-node/"/>
   </entry>
 </feed>
