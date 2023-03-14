@@ -621,10 +621,16 @@ function wtexteditor.msg(pan,m)
 				txt.mark(txt.cy,0,txt.cy+1,0)
 				local u=wwin.get_clipboard()
 				local s=txt.undo.cut()
-				if u and u:sub(-1)=="\n" then -- merge full lines if we hit k repeatedly
+				if s and u and u:sub(-1)=="\n" then -- merge full lines if we hit k repeatedly
 					s=u..s
 				end
 				if s then wwin.set_clipboard(s) end
+				texteditor:scroll_to_view()
+			elseif m.id=="edit_justify" then
+				txt.edit.justify()
+				texteditor:scroll_to_view()
+			elseif m.id=="edit_align" then
+				txt.edit.align()
 				texteditor:scroll_to_view()
 			end
 		end

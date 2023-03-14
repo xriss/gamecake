@@ -8,6 +8,7 @@ local log,dump=require("wetgenes.logs"):export("log","dump")
 local wstring=require("wetgenes.string")
 local wutf=require("wetgenes.txt.utf")
 
+local wtxtedit=require("wetgenes.txt.edit")
 local wtxtundo=require("wetgenes.txt.undo")
 local wtxtdiff=require("wetgenes.txt.diff")
 local wtxtlex =require("wetgenes.txt.lex")
@@ -1090,6 +1091,9 @@ get the lexxer cache for the given line
 
 -- bind to an undo state
 	wtxtundo.construct({},txt)
+
+-- bind to an edit state
+	wtxtedit.construct({},txt)
 
 
 	txt.set_text(txt.endline,"")

@@ -18,6 +18,9 @@ clip_copy,,Copy,Copy text.,Ctrl+C
 clip_paste,,Paste,Paste text.,Ctrl+V
 clip_cutline,,Cut Line,Cut line and replace or append to clipboard.,Ctrl+K
 
+edit_justify,,Justify Text,Replace white space in this paragraph and wrap text.,Ctrl+J
+edit_align,,Align Text,Replace white space to align each line vertically.,Ctrl+L
+
 theme_bright_small,,Bright Small,Set theme to Bright and Small,,"{theme=""bright"",grid_size=24,text_size=16}"
 theme_bright_medium,,Bright Medium,Set theme to Bright and Medium,,"{theme=""bright"",grid_size=40,text_size=24}"
 theme_bright_large,,Bright Large,Set theme to Bright and Large,,"{theme=""bright"",grid_size=64,text_size=48}"

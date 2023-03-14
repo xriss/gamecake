@@ -522,6 +522,8 @@ local lay=
 				{id="clip_cut"},
 				{id="clip_paste"},
 				{id="clip_cutline"},
+				{id="edit_justify"},
+				{id="edit_align"},
 				{id="history_undo"},
 				{id="history_redo"},
 			}},
