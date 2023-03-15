@@ -125,6 +125,7 @@ M.construct=function(edit,txt)
 		if line~="" then a[#a+1]=line end
 		s=table.concat(a,txt.endline)..txt.endline
 		if s then edit.paste(s) end
+		txt.cy,txt.cx=txt.clip_left(txt.cy,txt.cx)
 	end
 
 -- align paragraph vertically ( useful for code )
@@ -152,6 +153,7 @@ M.construct=function(edit,txt)
 		s=table.concat(a)
 		if not ls[1] then s=txt.endline end
 		if s then edit.paste(s) end
+		txt.cy,txt.cx=txt.clip_left(txt.cy,txt.cx)
 	end
 
 	return edit
