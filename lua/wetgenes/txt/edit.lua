@@ -153,7 +153,6 @@ M.construct=function(edit,txt)
 		s=table.concat(a)
 		if not ls[1] then s=txt.endline end
 		if s then edit.paste(s) end
-		txt.cy,txt.cx=txt.clip_left(txt.cy,txt.cx)
 	end
 
 	return edit
