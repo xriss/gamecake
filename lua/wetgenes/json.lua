@@ -483,6 +483,10 @@ local encode_tab
 			put_indent("}")
 		end
 	end
+	
+	if type(tab)~="table" then -- technically invalid but just encode raw strings numbers etc
+		return encode_it(tab)
+	end
 
 	encode_tab(tab,is_array(tab)) -- technically this should not be an array but we allow it
 

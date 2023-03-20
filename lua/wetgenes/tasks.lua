@@ -760,12 +760,13 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 				end
 
 				
+				local blobs=memo.blobs or {}
 				for n,v in pairs( memo.binds or {} ) do
-					if bs[n] then
+					if bs[n] and not blobs[n] then -- a blob might be in both places
 						stmt:bind( bs[n] , v )
 					end
 				end
-				for n,v in pairs( memo.blobs or {} ) do
+				for n,v in pairs( memo.blobs or {} ) do -- these binds should be treated as blobs
 					if bs[n] then
 						stmt:bind_blob( bs[n] , v )
 					end
