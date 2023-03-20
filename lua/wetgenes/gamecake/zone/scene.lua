@@ -161,7 +161,7 @@ be set to the caste of the system for this to work.
 
 ]]
 	scene.systems_insert=function(it)
-		scene.remember_uid(it)
+--		scene.remember_uid(it)
 		if it.caste then
 			for i,v in ipairs(scene.systems) do
 				if v.caste==it.caste then -- replace
