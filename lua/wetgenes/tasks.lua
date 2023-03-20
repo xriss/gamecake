@@ -688,6 +688,9 @@ end
 
 Create send and return a http memo result.
 
+Returns either the result or nil,error so can be used simply with an 
+assert wrapper.
+
 ]]
 M.tasks_functions.http=function(tasks,memo)
 
@@ -697,6 +700,7 @@ M.tasks_functions.http=function(tasks,memo)
 	tasks:receive(memo)
 
 	if memo.error then return nil,memo.error end
+	if memo.result and memo.result.error then return nil,memo.result.error end
 	return memo.result
 end
 
@@ -740,7 +744,6 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 			if memo.binds or memo.blobs then -- use prepared statement
 			
 				local stmt = db:prepare(memo.sql)
-				
 				if not stmt then
 					ret.error=db:errmsg()
 					return ret
@@ -750,15 +753,22 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 				local bs={}
 				for i=1,bmax do
 					local n=stmt:bind_parameter_name(i)
-					if n then bs[n]=i end
+					if n then
+						bs[n]=i
+						bs[n:sub(2)]=i
+					end
 				end
 
 				
 				for n,v in pairs( memo.binds or {} ) do
-					stmt:bind( bs[n] or n , v )
+					if bs[n] then
+						stmt:bind( bs[n] , v )
+					end
 				end
 				for n,v in pairs( memo.blobs or {} ) do
-					stmt:bind_blob( bs[n] or n , v )
+					if bs[n] then
+						stmt:bind_blob( bs[n] , v )
+					end
 				end
 				
 				if memo.compact then
@@ -826,6 +836,9 @@ end
 
 Create send and return a sqlite memo result.
 
+Returns either the result or nil,error so can be used simply with an 
+assert wrapper.
+
 ]]
 M.tasks_functions.sqlite=function(tasks,memo)
 
@@ -835,6 +848,7 @@ M.tasks_functions.sqlite=function(tasks,memo)
 	tasks:receive(memo)
 
 	if memo.error then return nil,memo.error end
+	if memo.result and memo.result.error then return nil,memo.result.error end
 	return memo.result
 end
 
