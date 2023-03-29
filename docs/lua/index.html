@@ -589,6 +589,7 @@
 <a class="sub" href="../../docs/lua.wetgenes.tasks.del_task"><span>/lua.wetgenes.tasks.del_task</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.del_thread"><span>/lua.wetgenes.tasks.del_thread</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.delete"><span>/lua.wetgenes.tasks.delete</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tasks.do_memo"><span>/lua.wetgenes.tasks.do_memo</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.http"><span>/lua.wetgenes.tasks.http</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.http_code"><span>/lua.wetgenes.tasks.http_code</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tasks.receive"><span>/lua.wetgenes.tasks.receive</span></a>
@@ -6977,7 +6978,7 @@ otherwise a new v3 is created and returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks">lua.wetgenes.tasks</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L9">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L12">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>local tasks=require(&quot;wetgenes.tasks&quot;).create()
 </code></pre>
 <p>Manage tasks that should be performed on seperate threads so as not to block the main thread.</p>
@@ -6987,7 +6988,7 @@ otherwise a new v3 is created and returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.add_id">lua.wetgenes.tasks.add_id</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L80">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L109">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>tasks:add_id(it)
 </code></pre>
 <p>Internal function to manage creation of all objects with unique ids.</p>
@@ -6996,7 +6997,7 @@ otherwise a new v3 is created and returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.add_memo">lua.wetgenes.tasks.add_memo</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L113">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L142">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>local memo=tasks:add_memo({})
 </code></pre>
 <p>Create a memo with a unique auto generated numerical id for linda 
@@ -7006,7 +7007,7 @@ comunication.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.add_task">lua.wetgenes.tasks.add_task</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L204">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L233">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>local thread=tasks:add_task({
     id=&quot;test&quot;,
     code=function(linda,task_id,task_idx,task)
@@ -7046,7 +7047,7 @@ with coroutines.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.add_thread">lua.wetgenes.tasks.add_thread</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L141">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L170">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>local thread=tasks:add_thread({
     id=&quot;test&quot;,
     count=1,
@@ -7082,21 +7083,21 @@ which of the count threads we are (mostly for debugging)</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.client">lua.wetgenes.tasks.client</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L1019">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L1048">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><p>Send and/or recieve a (web)socket client memo result.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.client_code">lua.wetgenes.tasks.client_code</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L858">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L887">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><p>A basic function to handle (web)socket client connection.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.cocall">lua.wetgenes.tasks.cocall</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L32">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L61">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>require(&quot;wetgenes.tasks&quot;).cocall(f1,f2,...)
 require(&quot;wetgenes.tasks&quot;).cocall({f1,f2,...})
 </code></pre>
@@ -7112,7 +7113,7 @@ functions can coroutine.yield waiting for another setup to finish first.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.create">lua.wetgenes.tasks.create</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L508">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L537">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><p>Create a tasks group to contain all associated threads and coroutines 
 along with their comunications.</p>
 </div>
@@ -7120,7 +7121,7 @@ along with their comunications.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.create_colinda">lua.wetgenes.tasks.create_colinda</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L403">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L432">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>local colinda=require(&quot;wetgenes.tasks&quot;).colinda(linda)
 </code></pre>
 <p>Create a colinda which is a wrapper around a linda providing 
@@ -7145,7 +7146,7 @@ blocking.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.del_id">lua.wetgenes.tasks.del_id</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L95">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L124">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>tasks:del_id(it)
 </code></pre>
 <p>Internal function to manage deletion of all objects with unique ids.</p>
@@ -7154,7 +7155,7 @@ blocking.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.del_memo">lua.wetgenes.tasks.del_memo</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L129">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L158">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>tasks:del_memo(memo)
 </code></pre>
 <p>Delete a memo.</p>
@@ -7163,7 +7164,7 @@ blocking.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.del_task">lua.wetgenes.tasks.del_task</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L298">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L327">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>tasks:del_thread(task)
 </code></pre>
 <p>Delete a task.</p>
@@ -7172,7 +7173,7 @@ blocking.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.del_thread">lua.wetgenes.tasks.del_thread</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L192">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L221">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>tasks:del_thread(thread)
 </code></pre>
 <p>Delete a thread.</p>
@@ -7181,7 +7182,7 @@ blocking.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.delete">lua.wetgenes.tasks.delete</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L388">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L417">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>tasks:delete()
 </code></pre>
 <p>Force stop all threads and delete all data.</p>
@@ -7191,8 +7192,27 @@ until program termination.</p>
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.tasks.do_memo">lua.wetgenes.tasks.do_memo</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L35">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div><pre><code>-- just grab this function 
+local do_memo=require(&quot;wetgenes.tasks&quot;).do_memo
+
+local r=do_memo(linda,{task=&quot;taskname&quot;})
+local r=do_memo(linda,{task=&quot;taskname&quot;},timeout)
+</code></pre>
+<p>A basic memo send and receive that can be used when all you have is the 
+tasks.linda and you know you are in a thread ( or do not care about 
+blocking while waiting for another thread ) Pretty much everything else 
+in this module is about managing coroutines to pretended to be threads 
+and keeping track of state for debugging but this is all you actually 
+need to use to simply communicate with a task. Especially if you are a 
+task and want to talk to another task.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.http">lua.wetgenes.tasks.http</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L687">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L716">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><p>Create send and return a http memo result.</p>
 <p>Returns either the result or nil,error so can be used simply with an 
 assert wrapper.</p>
@@ -7201,14 +7221,14 @@ assert wrapper.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.http_code">lua.wetgenes.tasks.http_code</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L530">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L559">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><p>A basic function to handle http memos.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.receive">lua.wetgenes.tasks.receive</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L350">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L379">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>result = tasks:receive(memo,timeout)
 result = tasks:receive(memo)
 </code></pre>
@@ -7228,7 +7248,7 @@ memo.result</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.run_task">lua.wetgenes.tasks.run_task</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L263">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L292">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>tasks:run_task(task)
 </code></pre>
 <p>Resume all the coroutines in this task.</p>
@@ -7241,7 +7261,7 @@ this task has finished.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.send">lua.wetgenes.tasks.send</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L323">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L352">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>memo = tasks:send(memo,timeout)
 memo = tasks:send(memo)
 </code></pre>
@@ -7257,7 +7277,7 @@ OK.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.sqlite">lua.wetgenes.tasks.sqlite</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L836">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L865">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><p>Create send and return a sqlite memo result.</p>
 <p>Returns either the result or nil,error so can be used simply with an 
 assert wrapper.</p>
@@ -7266,7 +7286,7 @@ assert wrapper.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.sqlite_code">lua.wetgenes.tasks.sqlite_code</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L707">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L736">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><p>A basic function to handle sqlite memos.</p>
 <p>As we are opening an sqlite database here it wont help much to have 
 more than one thread per database as they will just fight over file 
@@ -7276,7 +7296,7 @@ access.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.update">lua.wetgenes.tasks.update</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L310">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L339">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>tasks:update()
 </code></pre>
 <p>Resume all current coroutines and wait for them to yield.</p>
