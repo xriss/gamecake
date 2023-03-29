@@ -1,8 +1,11 @@
 --
 -- (C) 2022 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+-- should not cache this stuff when using lanes just in case we try and share upvalues across threads
+
+--local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+--     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local log,dump=require("wetgenes.logs"):export("log","dump")
 
@@ -28,6 +31,32 @@ end
 
 -- module
 local M={ modname = (...) } package.loaded[M.modname] = M 
+
+--[[#lua.wetgenes.tasks.do_memo
+
+	-- just grab this function 
+	local do_memo=require("wetgenes.tasks").do_memo
+	
+	local r=do_memo(linda,{task="taskname"})
+	local r=do_memo(linda,{task="taskname"},timeout)
+
+A basic memo send and receive that can be used when all you have is the 
+tasks.linda and you know you are in a thread ( or do not care about 
+blocking while waiting for another thread ) Pretty much everything else 
+in this module is about managing coroutines to pretended to be threads 
+and keeping track of state for debugging but this is all you actually 
+need to use to simply communicate with a task. Especially if you are a 
+task and want to talk to another task.
+
+]]
+M.do_memo=function(linda,memo,timeout)
+	memo.id=tostring(memo) -- should be a unique string, the address of the memo table
+	if linda:send( timeout , memo.task , memo ) then -- send on memo.task (a public name of another task)
+		local ok,r=linda:receive( timeout , memo.id ) -- receive the result on memo.id
+		return r
+	end
+end
+
 
 --[[#lua.wetgenes.tasks.cocall
 
