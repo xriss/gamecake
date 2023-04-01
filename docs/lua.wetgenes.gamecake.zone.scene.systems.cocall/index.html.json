@@ -2486,7 +2486,7 @@
    "body": "<pre><code>scene.systems_cocall(fname,...)\n</code></pre>\n<p>For every system call the function called fname inside a coroutine like \nso.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>This function can yield and should do so if it is waiting for another \nsystem to do something. All coroutines will be run in a round robin \nstyle until they all complete.</p>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 208,
+   "line": 207,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.cocall",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }

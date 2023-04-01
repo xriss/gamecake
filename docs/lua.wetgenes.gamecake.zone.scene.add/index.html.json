@@ -2486,7 +2486,7 @@
    "body": "<pre><code>scene.add(it,caste,boot)\nscene.add(it,caste)\nscene.add(it)\n</code></pre>\n<p>Add a new item of caste or it.caste to the list of things to update.</p>\n<p>The optional boot table contains initialisation/reset values and will \nbe remembered in item.boot. If boot.id is given then we will remember \nthis item with a call to scene.set(id,it)</p>\n<p>The actual act of initalising the item from the boot table is left to \ncustom code.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 302,
+   "line": 301,
    "name": "lua.wetgenes.gamecake.zone.scene.add",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }

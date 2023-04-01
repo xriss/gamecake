@@ -2486,7 +2486,7 @@
    "body": "<pre><code>scene.call(fname,...)\n</code></pre>\n<p>If fname is a string then that method will be invoked for every item \nwhere it exists like so. Only the first item of each caste is tested, \nif the function exists there then it is expected to exist for all items \nof a given caste. This enables us to skip entire castes whilst still \nmaking all functions optional.</p>\n<pre><code>if it[fname] then it[fname](it,...) end\n</code></pre>\n<p>if fname is a function then it will result in every item geting called with\nthat function like so.</p>\n<pre><code>fname(it,...)\n</code></pre>\n<p>The calls are always made backwards through the table so that an item can\nchoose to delete itself.</p>\n<p>Finally we return the number of calls we made so you can keep track of\ncurrently active items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 365,
+   "line": 364,
    "name": "lua.wetgenes.gamecake.zone.scene.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
