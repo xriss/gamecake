@@ -161,18 +161,17 @@ be set to the caste of the system for this to work.
 
 ]]
 	scene.systems_insert=function(it)
---		scene.remember_uid(it)
 		if it.caste then
+			scene.systems[it.caste]=it
+			scene.systems[it.caste.."s"]=it		-- simples autos plurals pleases
 			for i,v in ipairs(scene.systems) do
-				if v.caste==it.caste then -- replace
+				if v.caste==it.caste then -- just replace
 					scene.systems[i]=it
-					scene.systems[it.caste]=it
 					return
 				end
 			end
-			scene.systems[it.caste]=it
 		end
-		scene.systems[#scene.systems+1]=it
+		scene.systems[#scene.systems+1]=it -- add new
 		table.sort(scene.systems,function(a,b)
 			local av=scene.sortby[ a.caste ] or 0 -- use caste to get sortby weight
 			local bv=scene.sortby[ b.caste ] or 0 -- put items without a weight last

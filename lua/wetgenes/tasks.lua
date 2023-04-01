@@ -45,8 +45,8 @@ tasks.linda and you know you are in a thread ( or do not care about
 blocking while waiting for another thread ) Pretty much everything else 
 in this module is about managing coroutines to pretended to be threads 
 and keeping track of state for debugging but this is all you actually 
-need to use to simply communicate with a task. Especially if you are a 
-task and want to talk to another task.
+need to use to simply communicate with a task. Especially useful if you 
+are in a task and want to talk to another task.
 
 ]]
 M.do_memo=function(linda,memo,timeout)
@@ -378,8 +378,8 @@ end
 
 --[[#lua.wetgenes.tasks.receive
 
-	result = tasks:receive(memo,timeout)
-	result = tasks:receive(memo)
+	memo = tasks:receive(memo,timeout)
+	memo = tasks:receive(memo)
 	
 Recieve a memo with optional timeout.
 
@@ -412,6 +412,23 @@ M.tasks_functions.receive=function(tasks,memo,timeout)
 	memo.result=result
 
 	return memo
+end
+
+--[[#lua.wetgenes.tasks.do_memo
+
+	result = tasks:do_memo(memo,timeout)
+	result = tasks:do_memo(memo)
+
+Similar to calling tasks:receive but without the problems that come 
+from me trying to remember how to spell receive and it returns 
+memo.result instead of memo so slightly less mess. This will assert on 
+finding a memo.error so less need to check for errors.
+
+]]
+M.tasks_functions.do_memo=function(tasks,memo,timeout)
+	tasks:receive(memo,timeout)
+	assert(not memo.error)
+	return memo.result
 end
 
 --[[#lua.wetgenes.tasks.delete
@@ -704,7 +721,7 @@ M.tasks_functions.http_code=function(linda,task_id,task_idx)
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=pcall(function() return request(memo) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
 		end
@@ -853,7 +870,7 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=pcall(function() return request(memo) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
 		end
@@ -1036,7 +1053,7 @@ console.log("RECV:"+recv[0]);
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=pcall(function() return send(memo) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
 		end
