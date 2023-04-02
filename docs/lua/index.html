@@ -7083,14 +7083,16 @@ which of the count threads we are (mostly for debugging)</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.client">lua.wetgenes.tasks.client</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L1065">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L1068">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><p>Send and/or recieve a (web)socket client memo result.</p>
+<p>returns nil,error if something went wrong or returns result if 
+something went right.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.client_code">lua.wetgenes.tasks.client_code</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L904">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L907">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><p>A basic function to handle (web)socket client connection.</p>
 </div>
 </div>
@@ -7273,8 +7275,10 @@ OK.</p>
 <h1><a href="../../docs/lua.wetgenes.tasks.sqlite">lua.wetgenes.tasks.sqlite</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L882">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><p>Create send and return a sqlite memo result.</p>
-<p>Returns either the result or nil,error so can be used simply with an 
+<p>Returns either the result.rows or nil,error so can be used simply with an 
 assert wrapper.</p>
+<p>Note that rows can be empty so an additional assert(rows[1]) might be 
+needed to check you have data returned.</p>
 </div>
 </div>
 
