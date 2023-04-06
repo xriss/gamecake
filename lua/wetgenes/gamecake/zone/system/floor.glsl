@@ -39,7 +39,6 @@ uniform vec4 color;
 //uniform mat4 inverse_projection;
 
 uniform mat4 camera;
-uniform mat4 inverse_camera;
 
 uniform vec4 time;
 
