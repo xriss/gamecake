@@ -274,9 +274,17 @@ vec3 depth_to_view(vec2 cc)
 #else
 	vec4 t=vec4( cc , float(texture(tex,cc)) , 1.0 );
 #endif
-	vec4 p=inverse_projection * ( t*2.0 - 1.0 );
+	vec4 p=( t*2.0 - 1.0 );
+
+#ifdef POSITION_CUSTOM_UNDO
+	POSITION_CUSTOM_UNDO
+#endif
+
+	p=inverse_projection * p;
+
 	if(abs(p.w)<0.001){p.w=0.001;} // sanity
-	return p.xyz/p.w;
+	p=p/p.w;
+	return p.xyz;
 }
 
 // convert view space into depth space

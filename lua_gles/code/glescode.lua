@@ -489,9 +489,15 @@ end
 		local paramdefs={"#define SHADER_NAME_"..basename:gsub("[^%w_]*","").." 1"}
 		if params then -- query style
 			for _,d in ipairs( wstr.split(params,"&") ) do
-				local dd=wstr.split(d,"=")
-				if dd[1] and dd[1]~="" then
-					paramdefs[#paramdefs+1]="#define "..dd[1].." "..(dd[2] or "1")
+				local i=string.find(d,"=") -- first = so we do not need to bother to escape = in the value
+				if i and i>1 then -- found an =
+					local n=d:sub(1,i-1)
+					local v=d:sub(i+1)
+					paramdefs[#paramdefs+1]="#define "..n.." "..v
+				else
+					if d~="" then -- a flag so set to 1
+						paramdefs[#paramdefs+1]="#define "..d.." 1"
+					end
 				end
 			end
 		end

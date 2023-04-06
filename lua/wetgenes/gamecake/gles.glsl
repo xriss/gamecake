@@ -99,6 +99,12 @@ Use a lookup material for colors which are stored in a texture
 
 #endif
 
+#ifdef POSITION_CUSTOM_UNIFORM
+	POSITION_CUSTOM_UNIFORM
+#endif
+
+
+uniform mat4 camera;	// can be applied to modelview to remove the camera part of the transform
 uniform mat4 modelview;
 uniform mat4 projection;
 
@@ -168,7 +174,6 @@ IN float a_matidx;
 #endif
 
 #ifdef NORMAL
-uniform mat4 camera;
 IN vec4  a_normal;
 #endif
 
@@ -177,7 +182,6 @@ IN vec4  a_bone;
 #endif
 
 #ifdef SHADOW
-uniform mat4 camera;
 uniform mat4 shadow_mtx;
 OUT vec4  shadow_uv;
 #endif
@@ -270,6 +274,10 @@ void main(void)
 #endif
 
 
+#ifdef POSITION_CUSTOM_V
+	POSITION_CUSTOM_V
+#else
+
 #ifdef SCR
 	vec4 v=vec4(a_vertex.xyz, 1.0);
 #endif
@@ -282,6 +290,9 @@ void main(void)
 #ifdef POS
 	vec4 v=vec4(a_vertex.xy, 0.0, 1.0);
 #endif
+
+#endif
+
 
 #ifdef NORMAL
 	vec3 n=vec3(a_normal.xyz);
@@ -354,6 +365,10 @@ void main(void)
 #endif
 
 
+#ifdef POSITION_CUSTOM
+	POSITION_CUSTOM
+#else
+
 #ifdef SCR
 	gl_Position = v;
 #endif
@@ -367,6 +382,9 @@ void main(void)
 	gl_Position = projection * modelview * v;
 	gl_Position.z+=a_vertex.z;
 #endif
+
+#endif
+
 
 #ifdef SHADOW
 	shadow_uv = ( shadow_mtx * camera * modelview * v ) ;
