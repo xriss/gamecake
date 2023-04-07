@@ -66,6 +66,7 @@ uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec4 color;
 
+uniform mat4 camera;
 uniform mat4 inverse_modelview;
 uniform mat4 inverse_projection;
 
@@ -96,7 +97,7 @@ out vec4 FragColor;
 
 void main(void)
 {
-	vec3 v_eye = normalize( (inverse_modelview * inverse_projection * v_pos ).xyz ) ;
+	vec3 v_eye = normalize( (inverse_modelview * camera * inverse_projection * v_pos ).xyz ) ;
 	
 	FragColor=RGBS(sky(v_eye,vec4(1.0))*SRGB(color));
 }

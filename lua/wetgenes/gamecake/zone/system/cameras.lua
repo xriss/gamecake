@@ -63,10 +63,12 @@ B.cameras.draw_head=function(cameras)
 
 	if camera then
 
-		gl.MultMatrix(camera.inv) -- remove camera transform
-
 		gl.uniforms.camera=function(u)
-			gl.UniformMatrix4f( u , camera.mtx ) -- so we can apply it later
+			gl.UniformMatrix4f( u , camera.mtx ) -- so we can undo the camera from the view
+		end
+
+		gl.uniforms.incamera=function(u)
+			gl.UniformMatrix4f( u , camera.inv ) -- apply this one in a shader
 		end
 
 	end
