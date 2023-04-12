@@ -62,6 +62,8 @@ B.cameras.draw_head=function(cameras)
 	cameras.active=camera
 
 	if camera then
+	
+--		gl.LoadMatrix(camera.inv)
 
 		gl.uniforms.camera=function(u)
 			gl.UniformMatrix4f( u , camera.mtx ) -- so we can undo the camera from the view
@@ -139,7 +141,7 @@ B.camera.depend=function(camera,name,uid)
 end
 
 B.camera.update=function(camera)
-	
+
 	local focus=camera:depend("focus")
 	if focus then
 
