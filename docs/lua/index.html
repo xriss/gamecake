@@ -622,7 +622,10 @@
 <a class="sub" href="../../docs/lua.wetgenes.txt.utf.map_latin0_to_unicode"><span>/lua.wetgenes.txt.utf.map_latin0_to_unicode</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.txt.utf.map_unicode_to_latin0"><span>/lua.wetgenes.txt.utf.map_unicode_to_latin0</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.txt.utf.size"><span>/lua.wetgenes.txt.utf.size</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.txt.utf.string"><span>/lua.wetgenes.txt.utf.string</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.txt.utf.string"><span>/lua.wetgenes.txt.utf.string</span></a><a class="par" href="../../docs/lua.wetgenes.txt.words"><span>/lua.wetgenes.txt.words</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a>
 <a class="sub" href="../../docs/prefabs"><span>/prefabs</span></a>
 <a class="sub" href="../../docs/rules"><span>/rules</span></a>
 <a class="sub" href="../../docs/setup"><span>/setup</span></a>
@@ -7569,6 +7572,52 @@ most needed glyphs into the first 256 codes.</p>
 <pre><code>unicode = wutf.code(string)
 </code></pre>
 <p>get the utf8 value at the start of this string</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.txt.words">lua.wetgenes.txt.words</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua#L1">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua</a></div>
+<div><p>(C) 2023 Kriss Blank and released under the MIT license, see 
+<a href="http://opensource.org/licenses/MIT">http://opensource.org/licenses/MIT</a> for full license text.</p>
+<pre><code>local wtxtwords=require(&quot;wetgenes.txt.words&quot;)
+</code></pre>
+<p>See <a href="https://github.com/xriss/engrish">https://github.com/xriss/engrish</a> for source of words and possible 
+alternative licenses.
+  </p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.txt.words.load">lua.wetgenes.txt.words.load</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua#L78">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua</a></div>
+<div><pre><code>yes = wtxtwords.check(word)
+</code></pre>
+<p>This is a fast check if the word exists.</p>
+<p>May call wtxtwords.load() to auto load data.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.txt.words.transform">lua.wetgenes.txt.words.transform</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua#L137">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua</a></div>
+<div><pre><code>list = wtxtwords.transform(word,count,addletters,subletters)
+</code></pre>
+<p>Returns a table of upto count correctly spelled words that you may have 
+miss spelt given the input word ordered by probability.</p>
+<p>If the input word is spelled correctly then it will probably be the 
+first word in this list but that is not guaranteed.</p>
+<p>addletters is the maximum number of additive transforms, the higher 
+this number the slower this function and it defaults to 4.</p>
+<p>subletters is the maximum number of subtractive transforms and will not 
+have much impact on speed, this defaults to the same value as 
+addletters.</p>
+<p>We run subletters subtractive transforms on our starting word and then 
+we scan all possible words and perform addletters number of subtractive 
+transforms on them and see if they match any of the transforms we built 
+from our starting word. A match then means we can add up the number of 
+transforms on both sides and that is how many steps it would take to 
+get from one word to another by adding and subtracting letters.</p>
 </div>
 </div>
 

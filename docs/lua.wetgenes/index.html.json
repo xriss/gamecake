@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 572,
+   "count": 575,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 565,
+   "count": 568,
    "name": "lua.wetgenes"
   },
   {
@@ -2338,7 +2338,7 @@
    "name": "lua.wetgenes.tsv.load"
   },
   {
-   "count": 20,
+   "count": 23,
    "name": "lua.wetgenes.txt"
   },
   {
@@ -2418,6 +2418,18 @@
    "name": "lua.wetgenes.txt.utf.string"
   },
   {
+   "count": 3,
+   "name": "lua.wetgenes.txt.words"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.words.load"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.words.transform"
+  },
+  {
    "count": 1,
    "name": "prefabs"
   },
@@ -2484,7 +2496,7 @@
  "_list": [
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 565,
+   "count": 568,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -6805,7 +6817,7 @@
   },
   {
    "body": "",
-   "count": 20,
+   "count": 23,
    "name": "lua.wetgenes.txt"
   },
   {
@@ -6959,6 +6971,30 @@
    "line": 50,
    "name": "lua.wetgenes.txt.utf.string",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/utf.lua"
+  },
+  {
+   "body": "<p>(C) 2023 Kriss Blank and released under the MIT license, see \n<a href=\"http://opensource.org/licenses/MIT\">http://opensource.org/licenses/MIT</a> for full license text.</p>\n<pre><code>local wtxtwords=require(&quot;wetgenes.txt.words&quot;)\n</code></pre>\n<p>See <a href=\"https://github.com/xriss/engrish\">https://github.com/xriss/engrish</a> for source of words and possible \nalternative licenses.\n  </p>\n",
+   "count": 3,
+   "file": "../lua/wetgenes/txt/words.lua",
+   "line": 1,
+   "name": "lua.wetgenes.txt.words",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua"
+  },
+  {
+   "body": "<pre><code>yes = wtxtwords.check(word)\n</code></pre>\n<p>This is a fast check if the word exists.</p>\n<p>May call wtxtwords.load() to auto load data.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/txt/words.lua",
+   "line": 78,
+   "name": "lua.wetgenes.txt.words.load",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua"
+  },
+  {
+   "body": "<pre><code>list = wtxtwords.transform(word,count,addletters,subletters)\n</code></pre>\n<p>Returns a table of upto count correctly spelled words that you may have \nmiss spelt given the input word ordered by probability.</p>\n<p>If the input word is spelled correctly then it will probably be the \nfirst word in this list but that is not guaranteed.</p>\n<p>addletters is the maximum number of additive transforms, the higher \nthis number the slower this function and it defaults to 4.</p>\n<p>subletters is the maximum number of subtractive transforms and will not \nhave much impact on speed, this defaults to the same value as \naddletters.</p>\n<p>We run subletters subtractive transforms on our starting word and then \nwe scan all possible words and perform addletters number of subtractive \ntransforms on them and see if they match any of the transforms we built \nfrom our starting word. A match then means we can add up the number of \ntransforms on both sides and that is how many steps it would take to \nget from one word to another by adding and subtracting letters.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/txt/words.lua",
+   "line": 137,
+   "name": "lua.wetgenes.txt.words.transform",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua"
   }
  ],
  "_output_chunkname": "html",

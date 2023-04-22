@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 572,
+   "count": 575,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 565,
+   "count": 568,
    "name": "lua.wetgenes"
   },
   {
@@ -2338,7 +2338,7 @@
    "name": "lua.wetgenes.tsv.load"
   },
   {
-   "count": 20,
+   "count": 23,
    "name": "lua.wetgenes.txt"
   },
   {
@@ -2416,6 +2416,18 @@
   {
    "count": 1,
    "name": "lua.wetgenes.txt.utf.string"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.txt.words"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.words.load"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.txt.words.transform"
   },
   {
    "count": 1,
