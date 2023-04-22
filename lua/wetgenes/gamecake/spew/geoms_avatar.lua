@@ -45,6 +45,7 @@ M.material_names={
 }
 
 -- the available mesh names of an avatar
+-- this is increased after loading a glb to include all meshes
 M.mesh_names={
 
 	{"hat_baseball",		group=1,									},
@@ -245,6 +246,19 @@ M.bake=function(oven,geoms_avatar)
 
 		geoms_avatar.gltf=wgeom_gltf.load(geoms_avatar.filename)
 		geoms_avatar.objs=wgeom_gltf.to_geoms(geoms_avatar.gltf)
+		
+		local map={}
+		for _,v in pairs(M.mesh_names) do
+			map[ v[1] ]=v
+		end
+		for _,o in ipairs(geoms_avatar.objs) do -- add parts
+			if o.name and not map[o.name] then
+--print("adding",o.name)
+				local v={o.name,group=0}
+				map[o.name]=v
+				M.mesh_names[#M.mesh_names+1]=v
+			end
+		end
 		
 --[[
 		log("avatar",#geoms_avatar.objs.anims)
