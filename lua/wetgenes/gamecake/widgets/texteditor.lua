@@ -389,7 +389,9 @@ wtexteditor.texteditor_refresh=function(widget)
 				if     toke=="k" then	ps[pl+3]=6  -- keyword
 				elseif toke=="g" then	ps[pl+3]=7  -- global
 				elseif toke=="c" then	ps[pl+3]=8  -- comment
+				elseif toke=="C" then	ps[pl+3]=12 -- comment
 				elseif toke=="s" then	ps[pl+3]=9  -- string
+				elseif toke=="S" then	ps[pl+3]=13 -- string
 				elseif toke=="0" then	ps[pl+3]=10 -- number
 				elseif toke=="p" then	ps[pl+3]=11 -- punctuation
 				end
@@ -972,14 +974,14 @@ function wtexteditor.setup(widget,def)
 			0xff444444,0xffaaaaaa,	-- text			0,1
 			0xff555555,0xff333333,	-- gutter		2,3
 			0xff333333,0xffbbbbbb,	-- hilite		4,5
-			0xffdd7733,	-- keyword		0,6
-			0xffddaa33,	-- global		0,7
-			0xff888888,	-- comment		0,8
-			0xff66aa33,	-- string		0,9
-			0xff5599cc,	-- number		0,10
-			0xff999999,	-- punctuation	0,11
-			0xff000000,	-- 	0,12
-			0xff000000,	-- 	0,13
+			0xffdd7733,	-- keyword			0,6
+			0xffddaa33,	-- global			0,7
+			0xff888888,	-- comment			0,8
+			0xff66aa33,	-- string			0,9
+			0xff5599cc,	-- number			0,10
+			0xff999999,	-- punctuation		0,11
+			0xffaa8888,	-- comment_spell	0,12
+			0xff88aa33,	-- string_spell		0,13
 			0xff000000,	-- 	0,14
 			0xff000000,	-- 	0,15
 		},
@@ -987,14 +989,14 @@ function wtexteditor.setup(widget,def)
 			0xffcccccc,0xff000000,	-- text			0,1
 			0xffbbbbbb,0xff666666,	-- gutter		2,3
 			0xffdddddd,0xff000000,	-- hilite		4,5
-			0xffff0000,	-- keyword		0,6
-			0xffff6600,	-- global		0,7
-			0xff666666,	-- comment		0,8
-			0xff44cc00,	-- string		0,9
-			0xff0044ff,	-- number		0,10
-			0xff222222,	-- punctuation	0,11
-			0xff000000,	-- 	0,12
-			0xff000000,	-- 	0,13
+			0xffff0000,	-- keyword			0,6
+			0xffff6600,	-- global			0,7
+			0xff666666,	-- comment			0,8
+			0xff44cc00,	-- string			0,9
+			0xff0044ff,	-- number			0,10
+			0xff222222,	-- punctuation		0,11
+			0xff886666,	-- comment_spell	0,12
+			0xff66cc00,	-- string_spell		0,13
 			0xff000000,	-- 	0,14
 			0xff000000,	-- 	0,15
 		},
