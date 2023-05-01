@@ -437,18 +437,17 @@ M.parse=function(state,input,output)
 			end
 		end
 		
-		local check_spell=function(spell_ok,spell_no)
+		local check_spell=function()
 			local ok=true
 			local s=string.lower(token)
 			if #s>1 then -- ignore short words
 				if s:match("[^a-z]") then -- ignore if not just letters
-				else ok=wtxtwords.check(s) end -- check spelling
+					-- ignore
+				else
+					ok=wtxtwords.check(s) -- check spelling
+				end
 			end
-			if ok then -- ok spelling
-				poke(state.stack,spell_ok)
-			else -- bad spelling
-				poke(state.stack,spell_no)
-			end
+			return ok
 		end
 		
 		local check_string=function()
@@ -459,7 +458,11 @@ M.parse=function(state,input,output)
 					poke(state.stack,MAP.punctuation)
 					return true
 				end
-				check_spell(MAP.string,MAP.string_spell)
+				if check_spell() then -- good spelling
+					poke(state.stack,MAP.string)
+				else -- bad spelling
+					poke(state.stack,MAP.string_spell)
+				end
 				return true -- we are trapped in a string
 			elseif token=="\"" then 
 				push(state.terminator,"\"")
@@ -487,7 +490,11 @@ M.parse=function(state,input,output)
 					poke(state.stack,MAP.white)
 					return true
 				end
-				check_spell(MAP.comment,MAP.comment_spell)
+				if check_spell() then -- good spelling
+					poke(state.stack,MAP.comment)
+				else -- bad spelling
+					poke(state.stack,MAP.comment_spell)
+				end
 				return true -- we are trapped in a string
 			elseif token=="--" then 
 				push(state.terminator,"\n")
