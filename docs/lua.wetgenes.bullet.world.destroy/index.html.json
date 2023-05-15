@@ -2498,7 +2498,7 @@
    "body": "<pre><code>world:destroy()\n</code></pre>\n<p>Destroy the world and all associated data.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 71,
+   "line": 72,
    "name": "lua.wetgenes.bullet.world.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

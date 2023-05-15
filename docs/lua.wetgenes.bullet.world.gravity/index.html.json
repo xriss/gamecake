@@ -2498,7 +2498,7 @@
    "body": "<pre><code>world:gravity(x,y,z)\n\nx,y,z = world:gravity()\n</code></pre>\n<p>Set or get world gravity vector. Recommended gravity is 0,-10,0</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 124,
+   "line": 125,
    "name": "lua.wetgenes.bullet.world.gravity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

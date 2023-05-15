@@ -2498,7 +2498,7 @@
    "body": "<pre><code>world:step(seconds,maxsteps,fixedstep)\n\nworld:step(seconds,0,seconds)\n</code></pre>\n<p>world.maxsteps and world.fixedstep will be used as defaults if the second and\nthird values are not provided.</p>\n<p>Move the physics forward in time by the given amount in seconds.</p>\n<p>maxsteps is maximum amount of steps to take during this call and defaults to 1.</p>\n<p>fixedstep is how many seconds to step forward at a time for stable simulation\nand defaults to 1/60</p>\n<p>To force a step forward of a given amount of time use a maxsteps of 0.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 142,
+   "line": 143,
    "name": "lua.wetgenes.bullet.world.step",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }
