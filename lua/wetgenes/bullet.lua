@@ -58,6 +58,7 @@ bullet.world=function(...)
 	setmetatable(world,bullet.world_metatable)
 	world[0]=core.world_create(...)
 
+	world.time=0
 	world.maxsteps=1
 	world.fixedstep=1/60
 	
@@ -161,7 +162,18 @@ To force a step forward of a given amount of time use a maxsteps of 0.
 ]]
 bullet.world_functions.step=function(world,seconds,maxsteps,fixedstep)
 
-	core.world_step( world[0] , seconds , maxsteps or world.maxsteps , fixedstep or world.fixedstep )
+	fixedstep=fixedstep or world.fixedstep
+	maxsteps=maxsteps or world.maxsteps
+	seconds=seconds or world.fixedstep
+
+	core.world_step( world[0] , seconds , maxsteps , fixedstep )
+	
+	-- snap slightly squiffy step times
+	local steps=math.ceil(world.time/fixedstep)
+	local add=math.ceil(seconds/fixedstep)
+	if add>maxsteps then add=maxsteps end
+	if add<1 then add=1 end
+	world.time=(steps+add)*fixedstep
 
 end
 
