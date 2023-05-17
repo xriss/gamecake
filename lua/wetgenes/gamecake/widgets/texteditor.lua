@@ -130,7 +130,11 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 		if widget.opts.gutter_disable then
 			widget.gutter=0
 		else
-			widget.gutter=#string.format(" %d   ",widget.hy)
+			if widget.opts.mode=="hex" then
+				widget.gutter=#string.format(" 00000000   ")
+			else
+				widget.gutter=#string.format(" %d   ",widget.hy)
+			end
 		end
 		
 		local pan=widget.scroll_widget.pan
@@ -297,6 +301,100 @@ wtexteditor.texteditor_refresh=function(widget)
 
 	pan.background_tile=0x00010000 -- default tile, remember it is abgr so backwards
 
+if widget.opts.mode=="hex" then -- display hexedit mode
+
+	local ly,lx=widget.txt.ptr_to_location(cy*16)
+	local cache=widget.txt.get_cache_lex(ly)
+	local wy=1
+	local s=cache.string
+	local p=(cy*16) - txt.location_to_ptr(ly,1)
+	if p>0 then
+		s=s:sub(p+1)
+	end
+	for y=cy+1,cy+256 do
+		local ps={}
+		local pl=0
+
+		while #s<16 and cache do
+			ly=ly+1
+			cache=widget.txt.get_cache_lex(ly)
+			if cache then
+				s=s..cache.string
+			end
+		end
+		
+
+		if not widget.opts.gutter_disable then
+
+			local vn=string.format("%08X",((y-1)*16))
+			vn=" "..vn.." "
+			for i=1,#vn do
+				if pl>=512*3 then break end -- max width
+				ps[pl+1]=string.byte(vn,i,i)
+				ps[pl+2]=0
+				ps[pl+3]=3
+				ps[pl+4]=2
+				pl=pl+4
+			end
+			
+			ps[pl+1]=32
+			ps[pl+2]=0
+			ps[pl+3]=1
+			ps[pl+4]=0
+			pl=pl+4
+			
+			ps[pl+1]=32
+			ps[pl+2]=0
+			ps[pl+3]=1
+			ps[pl+4]=0
+			pl=pl+4
+
+		end
+		
+		for x=1,16 do
+			local c=string.byte(s,x,x)
+			local vn=c and string.format("%02X",c) or ".."
+			for i=1,2 do
+				if pl>=512*3 then break end -- max width
+				ps[pl+1]=string.byte(vn,i,i) or 32
+				ps[pl+2]=0
+				ps[pl+3]=1
+				ps[pl+4]=0
+				pl=pl+4
+			end
+			ps[pl+1]=32
+			ps[pl+2]=0
+			ps[pl+3]=1
+			ps[pl+4]=0
+			pl=pl+4
+			if x==8 or x==16 then
+				ps[pl+1]=32
+				ps[pl+2]=0
+				ps[pl+3]=1
+				ps[pl+4]=0
+				pl=pl+4
+			end
+		end
+		
+		for x=1,16 do
+			local c=string.byte(s,x,x) or 0
+			if c<32 then c=127 end
+			if c>127 then c=127 end
+			ps[pl+1]=c
+			ps[pl+2]=0
+			ps[pl+3]=1
+			ps[pl+4]=0
+			pl=pl+4
+		end
+		
+		s=s:sub(17)
+
+		pan.lines[wy]={text=v,s=string.char(unpack(ps)),y=y,x=cx}
+		wy=wy+1
+	end
+	
+else
+	
 	local wy=1
 	for y=cy+1,cy+256 do
 		local ps={}
@@ -440,6 +538,8 @@ wtexteditor.texteditor_refresh=function(widget)
 		wy=wy+1
 	end
 
+end
+	
 end
 
 function wtexteditor.mouse(pan,act,_x,_y,keyname)
@@ -898,6 +998,9 @@ function wtexteditor.setup(widget,def)
 	widget.opts.readonly		=	opts.readonly
 	widget.opts.gutter_disable	=	opts.gutter_disable
 	widget.opts.word_wrap		=	opts.word_wrap
+	widget.opts.mode			=	opts.mode or "text"
+	
+--	widget.opts.mode="hex"
 
 	widget.class="texteditor"
 	
