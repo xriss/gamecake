@@ -592,28 +592,55 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	dx=dx-texteditor.gutter+1-texteditor.cx
 	dy=dy+1-texteditor.cy
 
-	local line=pan.lines[ dy ]
+	if texteditor.opts.mode=="hex" then
 	
-	if line then
-		dy=line.y
-		dx=line.x+dx
-	end
+		local ptr=(texteditor.cy+dy-1)*16
+		
+		if     dx<=25 then			dx=math.ceil((dx-1)/3)
+		elseif dx<=49 then			dx=math.ceil((dx-26)/3)+8
+		else						dx=math.ceil(dx-50)
+		end
+
+		if dx<0  then dx=0  end
+		if dx>16 then dx=16 end
+		
+		ptr=ptr+dx
+
+		dy,dx=txt.ptr_to_location(ptr)
+		dy=dy or 0
+		dx=dx or 0
 	
-	local cache=txt.get_cache( dy )
-	if cache then
-		if dx > #cache.xc then dx=#cache.xc end
-		dx=cache and cache.xc[dx] or 0
 	else
-		dx=0
+	
+		local line=pan.lines[ dy ]
+		
+		if line then
+			dy=line.y
+			dx=line.x+dx
+		end
+		
+		local cache=txt.get_cache( dy )
+		if cache then
+			if dx > #cache.xc then dx=#cache.xc end
+			dx=cache and cache.xc[dx] or 0
+		else
+			dx=0
+		end
+
 	end
 	
 	if act==1 and texteditor.master.over==pan and keyname=="left" then -- click to activate
+	
 	
 		texteditor.float_cx=nil
 
 		texteditor.key_mouse=1
 
-		texteditor.mark_area={dy,dx,dy,dx}
+--		if texteditor.opts.mode=="hex" then
+--			texteditor.mark_area={dy,dx,dy,dx+1}
+--		else
+			texteditor.mark_area={dy,dx,dy,dx}
+--		end
 
 		txt.mark(unpack(texteditor.mark_area))
 
