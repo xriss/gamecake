@@ -314,6 +314,19 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 	for y=cy+1,cy+256 do
 		local ps={}
 		local pl=0
+		
+		local hilite=function(y,x)
+			if not x then return end
+			if not y then return end
+			if txt.fx and txt.fy and txt.tx and txt.ty then
+				local flip=false
+				if     y==txt.fy and y==txt.ty then if x>=txt.fx and x< txt.tx then flip=true end -- single line
+				elseif y==txt.fy               then if x>=txt.fx               then flip=true end -- first line
+				elseif y==txt.ty               then if x< txt.tx               then flip=true end -- last line
+				elseif y>txt.fy  and y<txt.ty  then                                 flip=true end -- middle line
+				if flip then ps[pl+3],ps[pl+4] = ps[pl+4],ps[pl+3] end
+			end
+		end
 
 		while #s<16 and cache do
 			ly=ly+1
@@ -360,30 +373,34 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 				ps[pl+2]=0
 				ps[pl+3]=1
 				ps[pl+4]=0
+				hilite(widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
 				pl=pl+4
 			end
 			ps[pl+1]=32
 			ps[pl+2]=0
 			ps[pl+3]=1
 			ps[pl+4]=0
+--			hilite(widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
 			pl=pl+4
 			if x==8 or x==16 then
 				ps[pl+1]=32
 				ps[pl+2]=0
 				ps[pl+3]=1
 				ps[pl+4]=0
+--				hilite(widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
 				pl=pl+4
 			end
 		end
 		
 		for x=1,16 do
-			local c=string.byte(s,x,x) or 0
+			local c=string.byte(s,x,x) or 0x20
 			if c<32 then c=127 end
 			if c>127 then c=127 end
 			ps[pl+1]=c
 			ps[pl+2]=0
 			ps[pl+3]=1
 			ps[pl+4]=0
+			hilite(widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
 			pl=pl+4
 		end
 		
@@ -1000,7 +1017,7 @@ function wtexteditor.setup(widget,def)
 	widget.opts.word_wrap		=	opts.word_wrap
 	widget.opts.mode			=	opts.mode or "text"
 	
---	widget.opts.mode="hex"
+	widget.opts.mode="hex"
 
 	widget.class="texteditor"
 	

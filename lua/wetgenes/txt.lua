@@ -161,12 +161,19 @@ Find byte offset into the text from a given line and character.
 Find the line number and column number of the given byte offset into the text.
 
 ]]
-	txt.ptr_to_location=function(ptr)
+	txt.ptr_to_location=function(ptr,ystart,cstart)
+	
+		if ptr<0 then return end
+		local last=txt.permastart[#txt.permastart]
+		if ptr>=last then return end
+	
 
 		local mh=#txt.permastart
-		local c=math.ceil(mh/2)
-		local y=1
-		
+		local c=cstart or math.ceil(mh/2)
+		local y=ystart or math.ceil(mh/2)
+		if y<1    then y=1    end -- clamp
+		if y>mh-1 then y=mh-1 end		
+
 		repeat
 
 			local a=txt.permastart[y]
