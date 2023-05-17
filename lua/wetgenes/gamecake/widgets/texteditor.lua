@@ -394,7 +394,7 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 		
 		for x=1,16 do
 			local c=string.byte(s,x,x) or 0x20
-			if c<32 then c=127 end
+			if c<32 then c=32 end
 			if c>127 then c=127 end
 			ps[pl+1]=c
 			ps[pl+2]=0
@@ -1044,7 +1044,7 @@ function wtexteditor.setup(widget,def)
 	widget.opts.word_wrap		=	opts.word_wrap
 	widget.opts.mode			=	opts.mode or "text"
 	
-	widget.opts.mode="hex"
+--	widget.opts.mode="hex"
 
 	widget.class="texteditor"
 	
