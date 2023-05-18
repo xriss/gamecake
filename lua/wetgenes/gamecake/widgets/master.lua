@@ -649,14 +649,17 @@ function wmaster.setup(widget,def)
 	function master.activate_by_id(id)
 		master:call_descendents(function(w)
 			if w.id==id then
-				master.over=w
-				if w.class=="textedit" then
-					master.edit=w
-				end
-				if master.over then master.over:call_hook_later("over") end
+				master.activate(w)
 			end
 		end)
 		
+	end
+	function master.activate(w)
+		master.over=w
+		if w.class=="textedit" then
+			master.edit=w
+		end
+		if master.over then master.over:call_hook_later("over") end
 	end
 	
 --

@@ -135,7 +135,7 @@ function wmenuitem.menu_add(widget,opts)
 		
 	end
 	local top=opts.top or widget.menu
-	top.px,top.py=widget:get_master_xy(widget.hx*(widget.menu_px or 0),widget.hy*(widget.menu_py or 0))
+	top.px,top.py=widget:get_master_xy(opts.px or widget.hx*(widget.menu_px or 0),opts.py or widget.hy*(widget.menu_py or 0))
 
 -- slight nudge to prevent dropdown gap
 	top.px=math.floor(top.px-2)

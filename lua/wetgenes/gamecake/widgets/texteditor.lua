@@ -30,6 +30,8 @@ M.bake=function(oven,wtexteditor)
 	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
 	local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
 
+	local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
+
 function wtexteditor.update(texteditor)
 
 	local txt=texteditor.txt
@@ -137,11 +139,24 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 			end
 		end
 		
-		local pan=widget.scroll_widget.pan
-		pan.hx_max=(widget.txt.hx+widget.gutter+2)*8
-		pan.hy_max=widget.txt.hy*16
+		if widget.opts.mode=="hex" then
 		
-		if widget.opts.word_wrap then pan.hx_max=0 end -- no x scroll when word wrapping
+			local pan=widget.scroll_widget.pan
+			pan.hx_max=(widget.gutter+18+3*16)*8
+
+			local last=widget.txt.permastart[#widget.txt.permastart]
+
+			pan.hy_max=math.ceil(last/16)*16
+
+		else
+
+			local pan=widget.scroll_widget.pan
+			pan.hx_max=(widget.txt.hx+widget.gutter+2)*8
+			pan.hy_max=widget.txt.hy*16
+			
+			if widget.opts.word_wrap then pan.hx_max=0 end -- no x scroll when word wrapping
+	
+		end
 	
 		if widget.data then -- auto set data if txt changes
 			local sa=widget.txt.get_text()
@@ -566,9 +581,38 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 --	end
 
 	if keyname=="right" and act==1 then
-		log("texteditor","righty clicky")
+--		log("texteditor","righty clicky")
 		pan.master.later_append(function()
-			log("texteditor","righty clicky later")
+--			log("texteditor","righty clicky later")
+
+
+				local menu_data={
+			hooks=function(act,w)
+				if act=="click" then
+					if w and w.action then -- auto trigger action
+						pan.master.push_action_msg(w.id,w.user)
+					end
+				end
+			end,
+			inherit=true,
+			{id="menu_edit",text="Edit",menu_data={
+				{id="select_all"},
+				{id="clip_copy"},
+				{id="clip_cut"},
+				{id="clip_paste"},
+				{id="clip_cutline"},
+				{id="edit_justify"},
+				{id="edit_align"},
+				{id="history_undo"},
+				{id="history_redo"},
+			}},
+		}
+
+		local x,y=pan:mousexy(_x,_y)
+		local top=widgets_menuitem.menu_add(pan,{menu_data=menu_data,px=x,py=y})
+		top.also_over={top} -- pan does not count as over
+		top.master.activate(top)
+
 		end)
 		return
 	end
@@ -709,27 +753,33 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 	local hx=math.floor(texteditor.scroll_widget.pan.hx/8)-texteditor.gutter+1
 	local hy=math.floor(texteditor.scroll_widget.pan.hy/16)
 	
+	
+	if texteditor.opts.mode=="hex" then
+
+	else
+	
 	if dy<4 then
 
-		local d=-(dy-4)
---		print("dec",d)
-		pan.parent.daty:dec(16*d)
+			local d=-(dy-4)
+--			print("dec",d)
+			pan.parent.daty:dec(16*d)
 
-	elseif dy>hy-3 then
+		elseif dy>hy-3 then
 
-		local d=(dy-hy+3)
---		print("inc",d)
-		pan.parent.daty:inc(16*d)
+			local d=(dy-hy+3)
+--			print("inc",d)
+			pan.parent.daty:inc(16*d)
 
-	end
+		end
 
-	local edge=math.floor(hx/3)
-	if edge>8 then edge=8 end
-	if edge<1 then edge=1 end
-	if dx<edge+1 then
-		pan.parent.datx:dec(8*(edge+1-dx))
-	elseif dx>hx-edge then
-		pan.parent.datx:inc(8*(dx-(hx-edge)))
+		local edge=math.floor(hx/3)
+		if edge>8 then edge=8 end
+		if edge<1 then edge=1 end
+		if dx<edge+1 then
+			pan.parent.datx:dec(8*(edge+1-dx))
+		elseif dx>hx-edge then
+			pan.parent.datx:inc(8*(dx-(hx-edge)))
+		end
 	end
 	
 end
@@ -1044,7 +1094,7 @@ function wtexteditor.setup(widget,def)
 	widget.opts.word_wrap		=	opts.word_wrap
 	widget.opts.mode			=	opts.mode or "text"
 	
---	widget.opts.mode="hex"
+	widget.opts.mode="hex"
 
 	widget.class="texteditor"
 	
