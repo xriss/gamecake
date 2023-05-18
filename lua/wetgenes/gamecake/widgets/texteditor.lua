@@ -29,6 +29,7 @@ M.bake=function(oven,wtexteditor)
 	
 	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
 	local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
+	local wtxtwords=require("wetgenes.txt.words")
 
 	local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
@@ -579,43 +580,6 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 --	if pan.meta.mouse(pan,act,_x,_y,keyname) then -- let children have precedence
 --		return
 --	end
-
-	if keyname=="right" and act==1 then
---		log("texteditor","righty clicky")
-		pan.master.later_append(function()
---			log("texteditor","righty clicky later")
-
-
-				local menu_data={
-			hooks=function(act,w)
-				if act=="click" then
-					if w and w.action then -- auto trigger action
-						pan.master.push_action_msg(w.id,w.user)
-					end
-				end
-			end,
-			inherit=true,
-			{id="menu_edit",text="Edit",menu_data={
-				{id="select_all"},
-				{id="clip_copy"},
-				{id="clip_cut"},
-				{id="clip_paste"},
-				{id="clip_cutline"},
-				{id="edit_justify"},
-				{id="edit_align"},
-				{id="history_undo"},
-				{id="history_redo"},
-			}},
-		}
-
-		local x,y=pan:mousexy(_x,_y)
-		local top=widgets_menuitem.menu_add(pan,{menu_data=menu_data,px=x,py=y})
-		top.also_over={top} -- pan does not count as over
-		top.master.activate(top)
-
-		end)
-		return
-	end
 	
 	if pan.master.old_over==pan and pan.parent.daty and pan.parent.daty.class=="number" then
 		if keyname=="wheel_add" and act==-1 then
@@ -673,6 +637,61 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 	end
 	
+	if keyname=="right" and act==1 then
+--		log("texteditor","righty clicky")
+		pan.master.later_append(function()
+--			log("texteditor","righty clicky later")
+
+		local oldmark={txt.markget()}
+		txt.markauto(dy,dx,2) -- select word
+		local newmark={txt.markget()}
+		local word=txt.copy()
+		txt.mark(unpack(oldmark))
+
+				
+			local spells={}
+			local fspells=function()
+				if spells[1] then return spells end
+				local words=wtxtwords.spell(word)
+				if words[1]~=word then table.insert(words,1,word) end
+				for i=1,#words do
+					spells[#spells+1]={id="edit_spell",text=words[i],user=i}
+				end
+				return spells
+			end
+				
+				local menu_data={
+			hooks=function(act,w)
+				if act=="click" then
+					if w and w.action then -- auto trigger action
+						pan.master.push_action_msg(w.id,w.user)
+					end
+				end
+			end,
+			inherit=true,
+			{id="menu_spell",text="Spell",menu_data=fspells},
+			{id="menu_edit",text="Edit",menu_data={
+				{id="select_all"},
+				{id="clip_copy"},
+				{id="clip_cut"},
+				{id="clip_paste"},
+				{id="clip_cutline"},
+				{id="edit_justify"},
+				{id="edit_align"},
+				{id="history_undo"},
+				{id="history_redo"},
+			}},
+		}
+
+		local x,y=pan:mousexy(_x,_y)
+		local top=widgets_menuitem.menu_add(pan,{menu_data=menu_data,px=x,py=y})
+		top.also_over={top} -- pan does not count as over
+		top.master.activate(top)
+
+		end)
+		return
+	end
+
 	if act==1 and texteditor.master.over==pan and keyname=="left" then -- click to activate
 	
 	
