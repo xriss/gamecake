@@ -471,6 +471,9 @@ mark or unmark an area
 			txt.ty=nil
 			return
 		end
+		tx=tx or fx
+		ty=ty or fy
+
 		txt.fy,txt.fx=txt.clip(fy,fx)
 		txt.ty,txt.tx=txt.clip(ty,tx)
 		
