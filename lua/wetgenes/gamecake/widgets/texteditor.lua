@@ -663,13 +663,25 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 				local menu_data={
 			hooks=function(act,w)
 				if act=="click" then
-					if w and w.action then -- auto trigger action
+					if     w.id=="view_hex" then
+						texteditor.opts.mode="hex"
+						texteditor:scroll_to_view()
+						texteditor.txt_dirty=true
+					elseif w.id=="view_txt" then
+						texteditor.opts.mode="txt"
+						texteditor:scroll_to_view()
+						texteditor.txt_dirty=true
+					elseif w and w.action then -- auto trigger action
 						pan.master.push_action_msg(w.id,w.user)
 					end
 				end
 			end,
 			inherit=true,
 			{id="menu_spell",text="Spell",menu_data=fspells},
+			{id="menu_view",text="View",menu_data={
+				{id="view_hex"},
+				{id="view_txt"},
+			}},
 			{id="menu_edit",text="Edit",menu_data={
 				{id="select_all"},
 				{id="clip_copy"},
@@ -1111,10 +1123,8 @@ function wtexteditor.setup(widget,def)
 	widget.opts.readonly		=	opts.readonly
 	widget.opts.gutter_disable	=	opts.gutter_disable
 	widget.opts.word_wrap		=	opts.word_wrap
-	widget.opts.mode			=	opts.mode or "text"
+	widget.opts.mode			=	opts.mode or "txt"
 	
-	widget.opts.mode="hex"
-
 	widget.class="texteditor"
 	
 	widget.update=wtexteditor.update
