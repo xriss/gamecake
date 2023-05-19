@@ -649,6 +649,23 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		txt.mark(unpack(oldmark))
 
 				
+			local hooks=function(act,w)
+				if act=="click" then
+					if     w.id=="view_hex" then
+						texteditor.opts.mode="hex"
+						texteditor.texteditor_hooks("txt_changed")
+					elseif w.id=="view_txt" then
+						texteditor.opts.mode="txt"
+						texteditor.texteditor_hooks("txt_changed")
+					elseif w.id=="edit_spell" then
+						txt.mark(unpack(newmark))
+						txt.undo.replace(w.text)
+					elseif w and w.action then -- auto trigger action
+						pan.master.push_action_msg(w.id,w.user)
+					end
+				end
+			end
+
 			local spells={}
 			local fspells=function()
 				if spells[1] then return spells end
@@ -657,25 +674,12 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 				for i=1,#words do
 					spells[#spells+1]={id="edit_spell",text=words[i],user=i}
 				end
+				spells.hooks=hooks
 				return spells
 			end
 				
 				local menu_data={
-			hooks=function(act,w)
-				if act=="click" then
-					if     w.id=="view_hex" then
-						texteditor.opts.mode="hex"
-						texteditor:scroll_to_view()
-						texteditor.txt_dirty=true
-					elseif w.id=="view_txt" then
-						texteditor.opts.mode="txt"
-						texteditor:scroll_to_view()
-						texteditor.txt_dirty=true
-					elseif w and w.action then -- auto trigger action
-						pan.master.push_action_msg(w.id,w.user)
-					end
-				end
-			end,
+			hooks=hooks,
 			inherit=true,
 			{id="menu_spell",text="Spell",menu_data=fspells},
 			{id="menu_view",text="View",menu_data={
