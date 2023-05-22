@@ -1001,7 +1001,7 @@ assign the lexxer code in charge of highlights
 
 		else -- guess
 		
-			txt.lexer="text" -- generic
+			txt.lexer="txt" -- generic
 			
 			if txt.filename then
 				local p=wpath.parse(txt.filename)
