@@ -7187,10 +7187,10 @@
   {
    "body": "<p>(C) 2020 Kriss Blank under the <a href=\"https://opensource.org/licenses/MIT\">https://opensource.org/licenses/MIT</a></p>\n",
    "count": 1,
-   "file": "../lua/wetgenes/txt/lex_lua.lua",
+   "file": "../lua/wetgenes/txt/lex_txt.lua",
    "line": 1,
    "name": "lua.wetgenes.txt.lex_lua",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/lex_lua.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/lex_txt.lua"
   },
   {
    "body": "<p>(C) 2020 Kriss Blank under the <a href=\"https://opensource.org/licenses/MIT\">https://opensource.org/licenses/MIT</a></p>\n<p>undo / redo code for a text editor with persistence to disk</p>\n<p>persistance to disk is in tsv format filename.txt.undo files where a \n.undo is added to the end of the file.</p>\n<p>see <a href=\"https://pypi.org/project/linear-tsv/1.0.0/\">https://pypi.org/project/linear-tsv/1.0.0/</a> for tsv format the first \nmost column is always a command and the other columns are data needed to \napply/reverse this command in theory a .undo file is a total history \nand as we should only be appending data (lines at a time even) then a \nfile can be recovered from it and it should have limited corruption \npossibilities when things go wrong.</p>\n<p>For security reasons this file may have undos removed as a separate \nstep. That is to say things that where done / pasted accidentality then \nremoved instantly will be purged from its history when performing a \nfile save.</p>\n<p>You can be save in the knowledge that any information you undo will not \nbe saved except as temporary crash safe buffers.</p>\n<p>The following need to be escaped with a \\ when used in each column.</p>\n<pre><code>\\n for newline,\n\\t for tab,\n\\r for carriage return,\n\\\\ for backslash.\n</code></pre>\n",
