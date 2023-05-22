@@ -47,7 +47,7 @@ end
 
 M.token={}
 
---M.token.punctuation=keyval{"!","\"","#","$","%","&","'","(",")","*","+",",","-",".","/",":",";","<","=",">","?","@","[","\\","]","^","_","`","","{","|","}","~"}
+M.token.punctuation=keyval{"!","\"","#","$","%","&","'","(",")","*","+",",","-",".","/",":",";","<","=",">","?","@","[","\\","]","^","_","`","","{","|","}","~"}
 
 
 -- we only need to find lengths of 2 or more that are not matched by the wildcards
@@ -151,14 +151,12 @@ M.parse=function(state,input,output)
 			return true
 		end
 
---[[
 		local check_punctuation=function()
 			if M.token.punctuation[token] then
 				poke(state.stack,MAP.punctuation)
 				return true
 			end
 		end
-]]
 		
 		local check_number=function()
 			if fullmatch(token,"^%d+%.?%d*[eE][%+%-]?%d*") then-- float or int with exponent
@@ -219,31 +217,31 @@ M.parse=function(state,input,output)
 			[MAP.white]={
 				check_number,
 				check_white,
---				check_punctuation,
+				check_punctuation,
 				goto_none,
 			},
 			[MAP.punctuation]={
 				check_number,
 				check_white,
---				check_punctuation,
+				check_punctuation,
 				goto_none,
 			},
 			[MAP.number]={
 				check_number,
 				check_white,
---				check_punctuation,
+				check_punctuation,
 				goto_none,
 			},
 			[MAP.none]={
 				check_number,
 				check_white,
---				check_punctuation,
+				check_punctuation,
 				goto_none,
 			},
 			[MAP.none_spell]={
 				check_number,
 				check_white,
---				check_punctuation,
+				check_punctuation,
 				goto_none,
 			},
 			[MAP.first]={

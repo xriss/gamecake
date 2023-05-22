@@ -317,16 +317,25 @@ wtexteditor.texteditor_refresh=function(widget)
 
 	pan.background_tile=0x00010000 -- default tile, remember it is abgr so backwards
 
+	local color=function(ps,pl,toke)
+		if     toke=="k" then	ps[pl+3]=6  -- keyword
+		elseif toke=="g" then	ps[pl+3]=7  -- global
+		elseif toke=="c" then	ps[pl+3]=8  -- comment
+		elseif toke=="C" then	ps[pl+3]=12 -- comment_spell
+		elseif toke=="s" then	ps[pl+3]=9  -- string
+		elseif toke=="S" then	ps[pl+3]=13 -- string_spell
+		elseif toke=="0" then	ps[pl+3]=10 -- number
+		elseif toke=="p" then	ps[pl+3]=11 -- punctuation
+		elseif toke=="n" then	ps[pl+3]=1  -- none
+		elseif toke=="N" then	ps[pl+3]=15 -- none_spell
+		end
+	end
+
 if widget.opts.mode=="hex" then -- display hexedit mode
 
 	local ly,lx=widget.txt.ptr_to_location(cy*16)
-	local cache=widget.txt.get_cache_lex(ly)
+	ly=ly or 1
 	local wy=1
-	local s=cache.string
-	local p=(cy*16) - txt.location_to_ptr(ly,1)
-	if p>0 then
-		s=s:sub(p+1)
-	end
 	for y=cy+1,cy+256 do
 		local ps={}
 		local pl=0
@@ -344,29 +353,34 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 			end
 		end
 
-		-- 16 bits
+		-- 16 bytes
 		local bytes={}
 		local codes={}
 		local tokes={}
-		while #s<16 and cache do
-			ly=ly+1
-			cache=widget.txt.get_cache_lex(ly)
+		local ptr=(y-1)*16
+		local idx=1
+		local cache=widget.txt.get_cache_lex(ly)
+		repeat
 			if cache then
-				s=s..cache.string
+				local b=(ptr+idx)-cache.start
+				local c=cache.bc[b]
+				local s=cache.string:sub(b,b)
+				if s and s~="" then -- got something
+					bytes[idx]=s:byte()
+					codes[idx]=cache.codes[c]
+					tokes[idx]=cache.tokens and string.sub(cache.tokens,c,c)
+					idx=idx+1
+				else
+					cache=nil -- nexrt line
+				end
 			end
-
---[[
-
-			if pl>=512*3 then break end -- max width
-			local i=cache.xc[x]
-			if not i then break end -- max width
-			local code=cache.codes[i]
-			local toke=cache.tokens and string.sub(cache.tokens,i,i)
-
-]]
-		end
+			if not cache then
+				ly=ly+1 -- try again on next line
+				cache=widget.txt.get_cache_lex(ly)
+				if not cache then break end
+			end
+		until idx>16
 		
-
 		if not widget.opts.gutter_disable then
 
 			local vn=string.format("%08X",((y-1)*16))
@@ -395,14 +409,14 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 		end
 		
 		for x=1,16 do
-			local c=string.byte(s,x,x)
-			local vn=c and string.format("%02X",c) or ".."
+			local vn=bytes[x] and string.format("%02X",bytes[x]) or ".."
 			for i=1,2 do
 				if pl>=512*3 then break end -- max width
 				ps[pl+1]=string.byte(vn,i,i) or 32
 				ps[pl+2]=0
 				ps[pl+3]=1
 				ps[pl+4]=0
+				color(ps,pl,tokes[x])
 				hilite(widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
 				pl=pl+4
 			end
@@ -423,18 +437,18 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 		end
 		
 		for x=1,16 do
-			local c=string.byte(s,x,x) or 0x20
-			if c<32 then c=32 end
+			local c=bytes[x] or 0x20
+			if c==9 then c=32 end -- tab
+			if c<32 then c=127 end
 			if c>127 then c=127 end
 			ps[pl+1]=c
 			ps[pl+2]=0
 			ps[pl+3]=1
 			ps[pl+4]=0
+			color(ps,pl,tokes[x])
 			hilite(widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
 			pl=pl+4
 		end
-		
-		s=s:sub(17)
 
 		pan.lines[wy]={text=v,s=string.char(unpack(ps)),y=y,x=cx}
 		wy=wy+1
@@ -531,18 +545,7 @@ else
 				ps[pl+3]=1
 				ps[pl+4]=0
 				
-				if     toke=="k" then	ps[pl+3]=6  -- keyword
-				elseif toke=="g" then	ps[pl+3]=7  -- global
-				elseif toke=="c" then	ps[pl+3]=8  -- comment
-				elseif toke=="C" then	ps[pl+3]=12 -- comment_spell
-				elseif toke=="s" then	ps[pl+3]=9  -- string
-				elseif toke=="S" then	ps[pl+3]=13 -- string_spell
-				elseif toke=="0" then	ps[pl+3]=10 -- number
-				elseif toke=="p" then	ps[pl+3]=11 -- punctuation
-				elseif toke=="n" then	ps[pl+3]=1  -- none
-				elseif toke=="N" then	ps[pl+3]=15 -- none_spell
-				end
-
+				color(ps,pl,toke)
 				
 				if txt.fx and txt.fy and txt.tx and txt.ty then
 					local flip=false
