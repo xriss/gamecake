@@ -661,43 +661,50 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		pan.master.later_append(function()
 --			log("texteditor","righty clicky later")
 
-		local oldmark={txt.markget()}
-		txt.markauto(dy,dx,2) -- select word
-		local newmark={txt.markget()}
 		local word=txt.copy()
-		txt.mark(unpack(oldmark))
-
-				
-			local hooks=function(act,w)
-				if act=="click" then
-					if     w.id=="view_hex" then
-						texteditor.opts.mode="hex"
-						texteditor.texteditor_hooks("txt_changed")
-					elseif w.id=="view_txt" then
-						texteditor.opts.mode="txt"
-						texteditor.texteditor_hooks("txt_changed")
-					elseif w.id=="edit_spell" then
-						txt.mark(unpack(newmark))
-						txt.undo.replace(w.text)
-					elseif w and w.action then -- auto trigger action
-						pan.master.push_action_msg(w.id,w.user)
-					end
+		if not word or word=="" then -- automark
+			txt.markauto(dy,dx,2) -- auto select word under cursor
+			word=txt.copy()
+			texteditor.mark_area={txt.markget()}
+			texteditor.mark_area_auto={txt.markget()}
+			texteditor:scroll_to_view()
+			texteditor.txt_dirty=true
+		end
+		word=word or ""
+		if #word>64 then word="" end -- too long
+		
+		local hooks=function(act,w)
+			if act=="click" then
+				if     w.id=="view_hex" then
+					texteditor.opts.mode="hex"
+					texteditor.texteditor_hooks("txt_changed")
+				elseif w.id=="view_txt" then
+					texteditor.opts.mode="txt"
+					texteditor.texteditor_hooks("txt_changed")
+				elseif w.id=="edit_spell" then
+					txt.undo.replace(w.text)
+				elseif w and w.action then -- auto trigger action
+					pan.master.push_action_msg(w.id,w.user)
 				end
 			end
+		end
 
-			local spells={}
-			local fspells=function()
-				if spells[1] then return spells end
-				local words=wtxtwords.spell(word)
+		local spells={}
+		local fspells=function()
+			if spells[1] then return spells end
+			local words={""}
+			if word~="" then
+				words=wtxtwords.spell(word)
 				if words[1]~=word then table.insert(words,1,word) end
-				for i=1,#words do
-					spells[#spells+1]={id="edit_spell",text=words[i],user=i}
-				end
-				spells.hooks=hooks
-				return spells
 			end
+			for i=1,#words do
+				spells[#spells+1]={id="edit_spell",text=words[i],user=i}
+			end
+			spells.hooks=hooks
+			return spells
+		end
 				
-				local menu_data={
+		local menu_data={
 			hooks=hooks,
 			inherit=true,
 			{id="menu_spell",text="Spell",menu_data=fspells},
