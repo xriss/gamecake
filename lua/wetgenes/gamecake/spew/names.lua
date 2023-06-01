@@ -62,9 +62,9 @@ do
 		local word=string.lower(cols[1]) or ""
 		for i=3,#cols do
 			local class=cols[i]
-			if class=="np" or class=="ns" or class=="n" then
+			if class=="ns" or class=="n" then
 				M.txt_nouns[#M.txt_nouns+1]=word
-			elseif class=="a" then
+			elseif class=="j" then
 				M.txt_adjectives[#M.txt_adjectives+1]=word
 			end
 		end
