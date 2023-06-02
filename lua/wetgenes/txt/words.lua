@@ -21,10 +21,10 @@ M.langs={} -- loaded data
 -- dumbass if not ending with then add this list
 M.inflects={
 	eng={
-		j={"er","ist"},		-- adjective
-		n={"s"},			-- noun
-		v={"s","ing"},		-- verb
-		all={"s","er","ist","ing"}	-- all
+		j={"er","ist"},							-- adjective
+		n={"s"},								-- noun
+		v={"s","ed","en","ing"},				-- verb
+		all={"s","ed","en","ing","er","ist"}	-- all
 	},
 }
 
@@ -187,8 +187,8 @@ M.spell=function(_word,count,addletters,subletters)
 	if not M.lang then M.load() end
 
 	if not count then count=10 end
-	if not addletters then addletters=4 end
-	if not subletters then subletters=addletters end
+	if not addletters then addletters=3 end
+	if not subletters then subletters=addletters+1 end
 
 	local word=string.lower(_word)
 	local m={}
