@@ -2663,7 +2663,7 @@
    "body": "<pre><code>yes = wtxtwords.check(word)\n</code></pre>\n<p>This is a fast check if the word exists.</p>\n<p>May call wtxtwords.load() to auto load data.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/txt/words.lua",
-   "line": 78,
+   "line": 92,
    "name": "lua.wetgenes.txt.words.load",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua"
   },
@@ -2671,7 +2671,7 @@
    "body": "<pre><code>list = wtxtwords.transform(word,count,addletters,subletters)\n</code></pre>\n<p>Returns a table of upto count correctly spelled words that you may have \nmiss spelt given the input word ordered by probability.</p>\n<p>If the input word is spelled correctly then it will probably be the \nfirst word in this list but that is not guaranteed.</p>\n<p>addletters is the maximum number of additive transforms, the higher \nthis number the slower this function and it defaults to 4.</p>\n<p>subletters is the maximum number of subtractive transforms and will not \nhave much impact on speed, this defaults to the same value as \naddletters.</p>\n<p>We run subletters subtractive transforms on our starting word and then \nwe scan all possible words and perform addletters number of subtractive \ntransforms on them and see if they match any of the transforms we built \nfrom our starting word. A match then means we can add up the number of \ntransforms on both sides and that is how many steps it would take to \nget from one word to another by adding and subtracting letters.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/txt/words.lua",
-   "line": 137,
+   "line": 160,
    "name": "lua.wetgenes.txt.words.transform",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua"
   }

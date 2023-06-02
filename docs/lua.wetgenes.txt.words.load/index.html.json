@@ -2498,7 +2498,7 @@
    "body": "<pre><code>yes = wtxtwords.check(word)\n</code></pre>\n<p>This is a fast check if the word exists.</p>\n<p>May call wtxtwords.load() to auto load data.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/txt/words.lua",
-   "line": 78,
+   "line": 92,
    "name": "lua.wetgenes.txt.words.load",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua"
   }
