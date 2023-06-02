@@ -18,6 +18,18 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.langs={} -- loaded data
 
+-- dumbass if not ending with then add this list
+M.inflects={
+	eng={
+		j={"er","ist"},		-- adjective
+		n={"s"},			-- noun
+		v={"s","ing"},		-- verb
+		all={"s","er","ist","ing"}	-- all
+	},
+}
+
+
+
 --[[#lua.wetgenes.txt.words.load
 
 	wtxtwords.load()
@@ -47,6 +59,7 @@ M.load=function(filename,fmt,lang)
 	M.lang={}
 	M.langs[lang]=M.lang
 	M.lang.words={}
+	M.lang.inflects=M.inflects[lang] or {}
 
 	local maxweight=0
 
@@ -57,8 +70,9 @@ M.load=function(filename,fmt,lang)
 		local cols={} ; for col in line:gmatch("%S+") do cols[#cols+1]=col end
 		local word=string.lower(cols[1]) or ""
 		local weight=tonumber(cols[2]) or 0
+		local classes=cols[3] and string.lower(cols[3])
 		if weight>maxweight then maxweight=weight end
-		if word~="" then M.lang.words[word]=weight end
+		if word~="" then M.lang.words[word]={weight,classes} end
 --[[
 		for i=3,#cols do
 			local class=cols[i]
@@ -69,7 +83,7 @@ M.load=function(filename,fmt,lang)
 	end
 	if maxweight>0 then
 		for n,w in pairs(M.lang.words) do
-			M.lang.words[n]=w/maxweight -- weights are between 0 and 1 higher is better
+			M.lang.words[n][1]=w[1]/maxweight -- weights are between 0 and 1 higher is better
 		end
 	end
 
@@ -86,7 +100,16 @@ May call wtxtwords.load() to auto load data.
 ]]
 M.check=function(word)
 	if not M.lang then M.load() end
-	if M.lang.words[word] then return true else return false end
+	if not word or word:find("%s") then return false end -- fast fail
+	if M.lang.words[word] then return true end -- fast win
+	for _,en in pairs(M.lang.inflects.all or {}) do
+		if en == word:sub(#word+1-#en) then
+			local v=word:sub(1,#word-#en)
+			local t=M.lang.words[v]
+			if t then return true end
+		end
+	end
+	return false
 end
 
 
@@ -159,7 +182,7 @@ transforms on both sides and that is how many steps it would take to
 get from one word to another by adding and subtracting letters.
 
 ]]
-M.spell=function(word,count,addletters,subletters)
+M.spell=function(_word,count,addletters,subletters)
 
 	if not M.lang then M.load() end
 
@@ -167,16 +190,29 @@ M.spell=function(word,count,addletters,subletters)
 	if not addletters then addletters=4 end
 	if not subletters then subletters=addletters end
 
-	local w=string.lower(word)
+	local word=string.lower(_word)
 	local m={}
-	local ws=M.transform(w,subletters)
+	local ws=M.transform(word,subletters)
 	for v,n in pairs(M.lang.words) do
-		if ( #v+1-addletters <= #w ) and ( #w+1-subletters <= #v ) then -- must be this long for possible match
-			for t,f in pairs( M.transform(v,addletters) ) do
-				if ws[t] then -- hit
-					local weight=(1+n)/(f+ws[t])
-					if ( not m[v] ) or ( m[v]<weight ) then
-						m[v]=weight
+		local ens={[""]=true}
+		for c in string.gmatch( n[2] or "","[^%s]+") do
+			local inflects=M.lang.inflects[c]
+			for _,en in pairs(inflects or {}) do
+				ens[en]=true
+			end
+		end
+		for en in pairs(ens) do
+			if #en==0 or v:sub(-#en)~=en then -- not already ending with
+				local w=n[1]-(#en/10)
+				local ven=v..en
+				if ( #ven+1-addletters <= #word ) and ( #word+1-subletters <= #ven ) then -- must be this long for possible match
+					for t,f in pairs( M.transform(ven,addletters) ) do
+						if ws[t] then -- hit
+							local weight=(1+n[1])/(f+ws[t])
+							if ( not m[ven] ) or ( m[ven]<weight ) then
+								m[ven]=weight
+							end
+						end
 					end
 				end
 			end
