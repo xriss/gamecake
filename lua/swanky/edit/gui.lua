@@ -497,7 +497,7 @@ local lay=
 			hooks=gui.hooks,
 			inherit=true,
 
-			{id="menu_file",text="File",top_menu=true,menu_data={
+			{id="menu_file",top_menu=true,menu_data={
 				{id="file_open"},
 				{id="file_close"},
 				{id="file_save"},
@@ -516,7 +516,7 @@ local lay=
 --			{id="menu_window",text="Windows",top_menu=true,menu_data={
 --				{id="dialog",user="1",text="Dialogue 1"},
 --			}},
-			{id="menu_edit",text="Edit",top_menu=true,menu_data={
+			{id="menu_edit",top_menu=true,menu_data={
 				{id="select_all"},
 				{id="clip_copy"},
 				{id="clip_cut"},
@@ -527,6 +527,14 @@ local lay=
 				{id="history_undo"},
 				{id="history_redo"},
 			}},
+
+			{id="menu_search",top_menu=true,menu_data={
+				{id="search_show"},
+				{id="search_find"},
+				{id="search_next"},
+				{id="search_prev"},
+			}},
+
 --			{id="menu_font",text="Font",top_menu=true,menu_data=gui.menu_datas.font_size},
 --[[
 			{id="topmenu",text="Run",top_menu=true,menu_data={

@@ -707,12 +707,8 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		local menu_data={
 			hooks=hooks,
 			inherit=true,
-			{id="menu_spell",text="Spell",menu_data=fspells},
-			{id="menu_view",text="View",menu_data={
-				{id="view_hex"},
-				{id="view_txt"},
-			}},
-			{id="menu_edit",text="Edit",menu_data={
+			{id="menu_spell",menu_data=fspells},
+			{id="menu_edit",menu_data={
 				{id="select_all"},
 				{id="clip_copy"},
 				{id="clip_cut"},
@@ -722,6 +718,15 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 				{id="edit_align"},
 				{id="history_undo"},
 				{id="history_redo"},
+			}},
+			{id="menu_view",menu_data={
+				{id="view_hex"},
+				{id="view_txt"},
+			}},
+			{id="menu_search",menu_data={
+				{id="search_find"},
+				{id="search_next"},
+				{id="search_prev"},
 			}},
 		}
 

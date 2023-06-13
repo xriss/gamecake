@@ -1,7 +1,13 @@
 id,user,text,help,key,json
 
+menu_file,,File,
+menu_edit,,Edit,
+menu_search,,Search,
+menu_view,,View,
+menu_spell,,Spell,
+
 file_quit,,Quit,Close application and Quit.,Ctrl+Q
-file_open,,Open,Open a new file.,Ctrl+O
+file_open,,Open...,Show file load requester.,Ctrl+O
 file_close,,Close,Close this file.,Ctrl+W
 file_save,,Save,Save this file.,Ctrl+S
 file_saveall,,Save all,Save all modified files.,Ctrl+Shift+S
@@ -20,6 +26,11 @@ clip_cutline,,Cut Line,Cut line and replace or append to clipboard.,Ctrl+K
 
 edit_justify,,Justify Text,Replace white space in this paragraph and wrap text.,Ctrl+J
 edit_align,,Align Text,Replace white space to align each line vertically.,Ctrl+L
+
+search_show,,Search...,Show advanced search requester.,Ctrl+Shift+F
+search_find,,Find,Search document for currently selected text.,Ctrl+F
+search_next,,Find Next,Repeat last find in this document.,Ctrl+G
+search_prev,,Find Previous,Repeat last find backwards in this document.,Ctrl+Shift+G
 
 view_hex,,View as HEX,Display as hex dump.,
 view_txt,,View as TXT,Display as normal text.,
