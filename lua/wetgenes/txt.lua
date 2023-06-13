@@ -26,6 +26,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.construct=function(txt)
 	txt = txt or {}
 	
+	txt.search=txt.search or {} -- can be shared for continuity
+	
 	txt.lexer="text"
 	txt.tabsize=4
 	txt.endline="\n"

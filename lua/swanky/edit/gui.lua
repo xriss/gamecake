@@ -535,6 +535,13 @@ local lay=
 				{id="search_prev"},
 			}},
 
+			{id="menu_view",top_menu=true,menu_data={
+				{id="search_find"},
+				{id="search_next"},
+				{id="search_prev"},
+				{id="search_show"},
+			}},
+
 --			{id="menu_font",text="Font",top_menu=true,menu_data=gui.menu_datas.font_size},
 --[[
 			{id="topmenu",text="Run",top_menu=true,menu_data={
