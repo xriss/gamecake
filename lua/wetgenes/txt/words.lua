@@ -66,11 +66,12 @@ M.load=function(filename,fmt,lang)
 	local wzips=require("wetgenes.zips")
 	local lines=assert(wzips.readfile(filename),"file not found: "..filename)
 	--print(words)
+	local weight=0
 	for line in lines:gmatch("[^\n]+") do
+		weight=weight+1
 		local cols={} ; for col in line:gmatch("%S+") do cols[#cols+1]=col end
 		local word=string.lower(cols[1]) or ""
-		local weight=tonumber(cols[2]) or 0
-		local classes=cols[3] and string.lower(cols[3])
+		local classes=cols[3] and string.lower(cols[2])
 		if weight>maxweight then maxweight=weight end
 		if word~="" then M.lang.words[word]={weight,classes} end
 --[[
@@ -83,7 +84,7 @@ M.load=function(filename,fmt,lang)
 	end
 	if maxweight>0 then
 		for n,w in pairs(M.lang.words) do
-			M.lang.words[n][1]=w[1]/maxweight -- weights are between 0 and 1 higher is better
+			M.lang.words[n][1]=1-(w[1]/maxweight) -- weights are between 0 and 1 higher is better
 		end
 	end
 

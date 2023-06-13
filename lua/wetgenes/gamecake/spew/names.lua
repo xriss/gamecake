@@ -60,7 +60,7 @@ do
 	for line in lines:gmatch("[^\n]+") do
 		local cols={} ; for col in line:gmatch("%S+") do cols[#cols+1]=col end
 		local word=string.lower(cols[1]) or ""
-		for i=3,#cols do
+		for i=2,#cols do
 			local class=cols[i]
 			if class=="ns" or class=="n" then
 				M.txt_nouns[#M.txt_nouns+1]=word
