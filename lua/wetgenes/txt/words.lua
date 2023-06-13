@@ -71,7 +71,7 @@ M.load=function(filename,fmt,lang)
 		weight=weight+1
 		local cols={} ; for col in line:gmatch("%S+") do cols[#cols+1]=col end
 		local word=string.lower(cols[1]) or ""
-		local classes=cols[3] and string.lower(cols[2])
+		local classes=cols[2] and string.lower(cols[2])
 		if weight>maxweight then maxweight=weight end
 		if word~="" then M.lang.words[word]={weight,classes} end
 --[[
@@ -196,8 +196,10 @@ M.spell=function(_word,count,addletters,subletters)
 	local ws=M.transform(word,subletters)
 	for v,n in pairs(M.lang.words) do
 		local ens={[""]=true}
-		for c in string.gmatch( n[2] or "","[^%s]+") do
-			local inflects=M.lang.inflects[c]
+		local classs=n[2] or ""
+		for i=1,#classs do -- scan classes
+			local class=classs:sub(i,i)
+			local inflects=M.lang.inflects[class]
 			for _,en in pairs(inflects or {}) do
 				ens[en]=true
 			end

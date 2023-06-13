@@ -29,25 +29,6 @@ function M.random()
 	return M.random_adjective().."_"..M.random_noun()
 end
 
---[[
-local classes={
-	["noun plural"]           = "np",
-	["noun singular"]         = "ns",
-	["noun"]                  = "n",
-	["pronoun"]               = "pn",
-
-	["verb intransitive"]     = "vi",
-	["verb transitive"]       = "vt",
-	["adverb"]                = "av",
-
-	["participial adjective"] = "pa",
-	["adjective"]             = "a",
-	["conjunction"]           = "c",
-	["interjection"]          = "i",
-	["preposition"]           = "p",
-}
-]]
-
 
 M.txt_adjectives={}
 M.txt_nouns={}
@@ -60,9 +41,10 @@ do
 	for line in lines:gmatch("[^\n]+") do
 		local cols={} ; for col in line:gmatch("%S+") do cols[#cols+1]=col end
 		local word=string.lower(cols[1]) or ""
-		for i=2,#cols do
-			local class=cols[i]
-			if class=="ns" or class=="n" then
+		local classs=cols[2] or ""
+		for i=1,#classs do
+			local class=classs:sub(i,i)
+			if class=="m" or class=="n" then
 				M.txt_nouns[#M.txt_nouns+1]=word
 			elseif class=="j" then
 				M.txt_adjectives[#M.txt_adjectives+1]=word
