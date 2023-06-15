@@ -27,10 +27,10 @@ clip_cutline,,Cut Line,Cut line and replace or append to clipboard.,Ctrl+K
 edit_justify,,Justify Text,Replace white space in this paragraph and wrap text.,Ctrl+J
 edit_align,,Align Text,Replace white space to align each line vertically.,Ctrl+L
 
-search_show,,Search...,Show advanced search requester.,Ctrl+Shift+F
-search_find,,Find,Search document for currently selected text.,Ctrl+F
-search_next,,Find Next,Repeat last find in this document.,Ctrl+Shift+G
-search_prev,,Find Previous,Repeat last find backwards in this document.,Ctrl+G
+search_search,,Search...,Show multi document search requester.,Ctrl+Shift+F
+search_find,,Find...,Show single document search requester.,Ctrl+F
+search_next,,Find Next,Find forward in this document.,Ctrl+G
+search_prev,,Find Previous,Find backward in this document.,Ctrl+Shift+G
 
 view_hex,,View as HEX,Display as hex dump.,
 view_txt,,View as TXT,Display as normal text.,
