@@ -902,30 +902,30 @@ function wtexteditor.msg(pan,m)
 				texteditor.texteditor_hooks("txt_changed")
 			elseif m.id=="search_find" then
 
-				local word=txt.copy()
-				if not word or word=="" then -- we do not have a word selected so...
+				local word=txt.copy() or ""
+				
+				if word=="" then -- we do not have a word selected so...
+				
 					txt.markauto(txt.cy,txt.cx,2) -- auto select word under cursor
-					word=txt.copy()
-				end
-				word=word or ""
-
-				if word~="" then -- set search word
+					word=txt.copy() or ""
 					txt.search.text=word
+					texteditor:mark_sync()
+
+				else
+
+					txt.search.text=word
+					txt.find_next()
+					texteditor:mark_sync()
+
 				end
-
-print("FIND",word)
-
-				txt.find_next()
-
-				texteditor:mark_sync()
 
 			elseif m.id=="search_next" then
-print("NEXt")
+
 				txt.find_next()
 				texteditor:mark_sync()
 
 			elseif m.id=="search_prev" then
-print("PREV")
+
 				txt.find_prev()
 				texteditor:mark_sync()
 

@@ -29,8 +29,8 @@ edit_align,,Align Text,Replace white space to align each line vertically.,Ctrl+L
 
 search_show,,Search...,Show advanced search requester.,Ctrl+Shift+F
 search_find,,Find,Search document for currently selected text.,Ctrl+F
-search_next,,Find Next,Repeat last find in this document.,Ctrl+G
-search_prev,,Find Previous,Repeat last find backwards in this document.,Ctrl+Shift+G
+search_next,,Find Next,Repeat last find in this document.,Ctrl+Shift+G
+search_prev,,Find Previous,Repeat last find backwards in this document.,Ctrl+G
 
 view_hex,,View as HEX,Display as hex dump.,
 view_txt,,View as TXT,Display as normal text.,

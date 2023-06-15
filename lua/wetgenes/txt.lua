@@ -1101,12 +1101,54 @@ get the lexxer cache for the given line
 	end
 
 
+local string_find_next=function(s,t,p)
+
+	local b,e=string.find(s,t,p+1,true) -- plain test
+
+	return b,e
+end
+
+local string_find_prev=function(s,t,p)
+
+	local i=1
+	local b,e
+	local rb,re
+
+	repeat
+		rb,re=b,e -- remember last
+		b,e=string.find(s,t,i,true) -- plain test
+		i=e -- step forward		
+	until not b or b>=p
+	
+	return rb,re	-- previous find
+end
+
 --[[
 
 find and select next
 
 ]]
 	txt.find_next=function()
+	
+		local t = txt.search.text -- text we are looking for
+		if not t or t=="" then return end
+
+		local y,x=txt.ty or txt.cy , txt.tx or txt.cx
+
+		local p = txt.location_to_ptr(y,x) -- byte offset to current cursor
+		local s = txt.get_text() -- get all the text
+
+		local b,e=string_find_next(s,t,p+1)
+		
+		if b then -- found it
+
+			local fy,fx=txt.ptr_to_location(b-1) -- location
+			local ty,tx=txt.ptr_to_location(e) -- location
+			
+			txt.mark(fy,fx,ty,tx)
+			
+		end 
+	
 	end
 
 --[[
@@ -1115,6 +1157,28 @@ find and select prev
 
 ]]
 	txt.find_prev=function()
+	
+		local t = txt.search.text -- text we are looking for
+		if not t or t=="" then return end
+
+
+		local y,x=txt.fy or txt.cy , txt.fx or txt.cx
+
+
+		local p = txt.location_to_ptr(y,x) -- byte offset to current cursor
+		local s = txt.get_text() -- get all the text
+
+		local b,e=string_find_prev(s,t,p-1)
+		
+		if b then -- found it
+
+			local fy,fx=txt.ptr_to_location(b-1) -- location
+			local ty,tx=txt.ptr_to_location(e) -- location
+			
+			txt.mark(fy,fx,ty,tx)
+			
+		end 
+
 	end
 
 -- bind to an undo state
