@@ -1139,6 +1139,10 @@ find and select next
 		local s = txt.get_text() -- get all the text
 
 		local b,e=string_find_next(s,t,p+1)
+
+		if not b then --wrap
+			b,e=string_find_next(s,t,0)
+		end
 		
 		if b then -- found it
 
@@ -1168,7 +1172,11 @@ find and select prev
 		local p = txt.location_to_ptr(y,x) -- byte offset to current cursor
 		local s = txt.get_text() -- get all the text
 
-		local b,e=string_find_prev(s,t,p-1)
+		local b,e=string_find_prev(s,t,p+1)
+		
+		if not b then --wrap
+			b,e=string_find_prev(s,t,#s)
+		end
 		
 		if b then -- found it
 
@@ -1176,6 +1184,9 @@ find and select prev
 			local ty,tx=txt.ptr_to_location(e) -- location
 			
 			txt.mark(fy,fx,ty,tx)
+
+			txt.cx=txt.fx	-- place cursor at start when searching backwards
+			txt.cy=txt.fy
 			
 		end 
 
