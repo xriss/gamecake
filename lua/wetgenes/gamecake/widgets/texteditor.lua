@@ -665,23 +665,14 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		if not word or word=="" then -- automark
 			txt.markauto(dy,dx,2) -- auto select word under cursor
 			word=txt.copy()
-			texteditor.mark_area={txt.markget()}
-			texteditor.mark_area_auto={txt.markget()}
-			texteditor:scroll_to_view()
-			texteditor.txt_dirty=true
+			texteditor:mark_sync()
 		end
 		word=word or ""
 		if #word>64 then word="" end -- too long
 		
 		local hooks=function(act,w)
 			if act=="click" then
-				if     w.id=="view_hex" then
-					texteditor.opts.mode="hex"
-					texteditor.texteditor_hooks("txt_changed")
-				elseif w.id=="view_txt" then
-					texteditor.opts.mode="txt"
-					texteditor.texteditor_hooks("txt_changed")
-				elseif w.id=="edit_spell" then
+				if w.id=="edit_spell" then
 					txt.undo.replace(w.text)
 				elseif w and w.action then -- auto trigger action
 					pan.master.push_action_msg(w.id,w.user)
@@ -801,6 +792,15 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 end
 
+function wtexteditor.mark_sync(texteditor)
+
+	texteditor.mark_area={texteditor.txt.markget()}
+	texteditor.mark_area_auto={texteditor.txt.markget()}
+	texteditor:scroll_to_view()
+	texteditor.txt_dirty=true
+
+end
+
 function wtexteditor.scroll_to_bottom(texteditor)
 	local d=texteditor.scroll_widget.daty
 	d:set(d.max or 1)
@@ -894,6 +894,41 @@ function wtexteditor.msg(pan,m)
 			elseif m.id=="edit_align" then
 				txt.edit.align()
 				texteditor:scroll_to_view()
+			elseif m.id=="view_hex" then
+				texteditor.opts.mode="hex"
+				texteditor.texteditor_hooks("txt_changed")
+			elseif m.id=="view_txt" then
+				texteditor.opts.mode="txt"
+				texteditor.texteditor_hooks("txt_changed")
+			elseif m.id=="search_find" then
+
+				local word=txt.copy()
+				if not word or word=="" then -- we do not have a word selected so...
+					txt.markauto(txt.cy,txt.cx,2) -- auto select word under cursor
+					word=txt.copy()
+				end
+				word=word or ""
+
+				if word~="" then -- set search word
+					txt.search.text=word
+				end
+
+print("FIND",word)
+
+				txt.find_next()
+
+				texteditor:mark_sync()
+
+			elseif m.id=="search_next" then
+print("NEXt")
+				txt.find_next()
+				texteditor:mark_sync()
+
+			elseif m.id=="search_prev" then
+print("PREV")
+				txt.find_prev()
+				texteditor:mark_sync()
+
 			end
 		end
 	end
@@ -1172,6 +1207,7 @@ function wtexteditor.setup(widget,def)
 	widget.texteditor_hooks		=	function(act,w) return wtexteditor.texteditor_hooks(widget,act,w) end
 	widget.scroll_to_view		=	wtexteditor.scroll_to_view
 	widget.scroll_to_bottom		=	wtexteditor.scroll_to_bottom
+	widget.mark_sync			=	wtexteditor.mark_sync
 
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",scroll_pan="tiles",color=widget.color})

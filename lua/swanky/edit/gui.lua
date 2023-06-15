@@ -536,10 +536,8 @@ local lay=
 			}},
 
 			{id="menu_view",top_menu=true,menu_data={
-				{id="search_find"},
-				{id="search_next"},
-				{id="search_prev"},
-				{id="search_show"},
+				{id="view_hex"},
+				{id="view_txt"},
 			}},
 
 --			{id="menu_font",text="Font",top_menu=true,menu_data=gui.menu_datas.font_size},

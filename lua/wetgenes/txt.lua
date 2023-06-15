@@ -1101,6 +1101,22 @@ get the lexxer cache for the given line
 	end
 
 
+--[[
+
+find and select next
+
+]]
+	txt.find_next=function()
+	end
+
+--[[
+
+find and select prev
+
+]]
+	txt.find_prev=function()
+	end
+
 -- bind to an undo state
 	wtxtundo.construct({},txt)
 

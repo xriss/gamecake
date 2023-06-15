@@ -89,6 +89,8 @@ M.bake=function(oven,docs)
 		return docs.find(filename) or docs.create(filename)
 	end
 
+	docs.search={} -- share this search info with all txts
+
 	docs.create=function(filename)
 
 		local it={}
@@ -100,7 +102,7 @@ M.bake=function(oven,docs)
 		
 		it.docs=docs
 
-		it.txt=require("wetgenes.txt").construct()
+		it.txt=require("wetgenes.txt").construct({search=docs.search})
 		
 
 		it:load(filename)
