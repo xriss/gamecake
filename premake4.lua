@@ -604,6 +604,9 @@ else -- luajit
 	includedirs { "/usr/local/64/include/luajit-2.1" } -- assume only one of these exists
 	includedirs { "/usr/include/luajit-2.1" }
 	includedirs { "/usr/include/luajit-2.0" }
+
+	includedirs { "/app/include/luajit-2.1" } -- flatpack build
+
 	LUA_LINKS="luajit-5.1"
 
 -- or expect lua to be provided in the system by swapping this with above
