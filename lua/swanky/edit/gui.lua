@@ -507,9 +507,11 @@ local lay=
 					{id="theme_dark_small"},
 					{id="theme_dark_medium"},
 					{id="theme_dark_large"},
+					{id="theme_dark_huge"},
 					{id="theme_bright_small"},
 					{id="theme_bright_medium"},
 					{id="theme_bright_large"},
+					{id="theme_bright_huge"},
 				}},
 				{id="file_quit"},
 			}},
@@ -529,7 +531,6 @@ local lay=
 			}},
 
 			{id="menu_search",top_menu=true,menu_data={
-				{id="search_show"},
 				{id="search_find"},
 				{id="search_next"},
 				{id="search_prev"},

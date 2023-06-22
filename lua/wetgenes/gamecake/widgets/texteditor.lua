@@ -665,6 +665,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		if not word or word=="" then -- automark
 			txt.markauto(dy,dx,2) -- auto select word under cursor
 			word=txt.copy()
+			txt.cursor()
 			texteditor:mark_sync()
 		end
 		word=word or ""
@@ -745,6 +746,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 		txt.mark(unpack(texteditor.mark_area))
 
+		txt.cursor()
 		texteditor:scroll_to_view()
 		texteditor.txt_dirty=true
 
@@ -759,6 +761,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		texteditor.mark_area={txt.markget()}
 		texteditor.mark_area_auto={txt.markget()}
 
+		txt.cursor()
 		texteditor:scroll_to_view()
 		texteditor.txt_dirty=true
 
@@ -784,6 +787,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 				
 			end
 
+			txt.cursor()
 			texteditor:scroll_to_view()
 			texteditor.txt_dirty=true
 		end
@@ -865,19 +869,24 @@ function wtexteditor.msg(pan,m)
 				if m.action==1 then -- first press only
 					local s=txt.undo.cut() or ""
 					if s then wwin.set_clipboard(s) end
+					txt.cursor()
 					texteditor:scroll_to_view()
 				end
 			elseif m.id=="clip_paste" then
 				local s=wwin.get_clipboard() or ""
 				txt.undo.replace(s)
+				txt.cursor()
 				texteditor:scroll_to_view()
 			elseif m.id=="history_undo" then
 				txt.undo.undo()
+				txt.cursor()
 			elseif m.id=="history_redo" then
 				txt.undo.redo()
+				txt.cursor()
 			elseif m.id=="select_all" then
 				txt.mark(0,0,txt.hy+1,0)
 				texteditor.txt_dirty=true
+				txt.cursor()
 				texteditor:scroll_to_view()
 			elseif m.id=="clip_cutline" then
 				txt.mark(txt.cy,0,txt.cy+1,0)
@@ -887,17 +896,22 @@ function wtexteditor.msg(pan,m)
 					s=u..s
 				end
 				if s then wwin.set_clipboard(s) end
+				txt.cursor()
 				texteditor:scroll_to_view()
 			elseif m.id=="edit_justify" then
 				txt.edit.justify()
+				txt.cursor()
 				texteditor:scroll_to_view()
 			elseif m.id=="edit_align" then
 				txt.edit.align()
+				txt.cursor()
 				texteditor:scroll_to_view()
 			elseif m.id=="view_hex" then
+				txt.cursor()
 				texteditor.opts.mode="hex"
 				texteditor.texteditor_hooks("txt_changed")
 			elseif m.id=="view_txt" then
+				txt.cursor()
 				texteditor.opts.mode="txt"
 				texteditor.texteditor_hooks("txt_changed")
 
@@ -909,6 +923,7 @@ function wtexteditor.msg(pan,m)
 				end
 
 				txt.find_next()
+				txt.cursor()
 				texteditor:mark_sync()
 
 			elseif m.id=="search_prev" then
@@ -919,6 +934,7 @@ function wtexteditor.msg(pan,m)
 				end
 
 				txt.find_prev()
+				txt.cursor()
 				texteditor:mark_sync()
 
 			end
@@ -964,6 +980,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			cpre()
 			txt.cy,txt.cx=txt.clip_left(txt.cy,txt.cx)
+			txt.cursor()
 			cpost()
 
 		elseif key=="right" then
@@ -972,6 +989,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			cpre()
 			txt.cy,txt.cx=txt.clip_right(txt.cy,txt.cx)
+			txt.cursor()
 			cpost()
 
 		elseif key=="up" then
@@ -984,6 +1002,7 @@ function wtexteditor.key(pan,ascii,key,act)
 			cpre()
 			local cache=txt.get_cache(txt.cy-1)
 			txt.cy,txt.cx=txt.clip( txt.cy-1 , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
+			txt.cursor()
 			cpost()
 
 		elseif key=="down" then
@@ -996,6 +1015,7 @@ function wtexteditor.key(pan,ascii,key,act)
 			cpre()
 			local cache=txt.get_cache(txt.cy+1)
 			txt.cy,txt.cx=txt.clip( txt.cy+1 , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
+			txt.cursor()
 			cpost()
 
 		elseif key=="home" then
@@ -1003,7 +1023,7 @@ function wtexteditor.key(pan,ascii,key,act)
 			texteditor.float_cx=nil
 
 			txt.cx=1
-			txt.clip()
+			txt.cursor()
 			texteditor:scroll_to_view()
 		
 		elseif key=="end" then
@@ -1011,7 +1031,7 @@ function wtexteditor.key(pan,ascii,key,act)
 			texteditor.float_cx=nil
 
 			txt.cx=txt.get_hx()+1
-			txt.clip()
+			txt.cursor()
 			texteditor:scroll_to_view()
 
 		end

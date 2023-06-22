@@ -42,7 +42,7 @@ M.construct=function(txt)
 
 	txt.hx=0 -- widest string
 	txt.hy=0 -- number of strings
-
+	
 	txt.get_string=function(idx)
 		return txt.strings[idx]
 	end
@@ -87,6 +87,8 @@ M.construct=function(txt)
 -- this *MUST* be a like for like hacky replacement as far as the lexer is concerned
 -- as we are trying not to clear all caches, just slightly tweak this one line
 	txt.tweak_string=function(idx,fb,tb,str)
+
+		txt.strings_text=nil	-- explicit since we are avoiding clear_caches here
 
 		local c=txt.get_cache( idx )
 
@@ -138,6 +140,7 @@ M.construct=function(txt)
 	end
 	
 	txt.clear_caches=function()
+		txt.strings_text=nil
 		txt.permacaches={}
 		txt.caches={}
 		setmetatable(txt.caches, txt.caches_meta)
@@ -246,12 +249,15 @@ Fill the editor up with text, the filename is used to set the lexer used for hig
 	end
 
 	txt.append_text=function(text)
-		txt.clip(txt.hy+1,0)
+		txt.cy,txt.cx=txt.clip(txt.hy+1,0)
 		txt.insert(text)
 	end
 
 	txt.get_text=function()
-		return table.concat(txt.strings) or ""
+		if not txt.strings_text then -- generate cached text
+			txt.strings_text = table.concat(txt.strings) or ""
+		end
+		return txt.strings_text
 	end
 
 --[[
@@ -334,6 +340,125 @@ or japanese double glyphs. Its a complicated mapping so it is precalculated
 		end
 
 		return cache
+	end
+	
+--[[
+
+Find closest bracket on this line and matching bracket on this or any 
+other line.
+
+return brackets data which should be stored in txt.brackets if you want 
+them to be highlighted.
+
+]]
+	txt.find_brackets=function(cy,cx,filters,found)
+	
+		cy=cy or txt.cy
+		cx=cx or txt.cx
+	
+		filters=filters or {
+			{"(",")"},
+			{"[","]"},
+			{"{","}"},
+			{"<",">"}
+		}
+		
+		local found=found -- can pass in partial search
+
+		local cache=txt.get_cache_lex(cy)
+
+--		dump(cache.string)
+		
+		for x=0,#cache.cb do -- check outwards from char
+			if found then break end
+			for d=-1,1,2 do -- look up and down
+				if found then break end
+				local b=cache.cb[cx+(x*d)]
+				if b then
+					local char=cache.string:sub(b,b) -- get char
+					for _,filter in ipairs(filters) do
+						if found then break end
+						if char==filter[1] or char==filter[2] then -- match
+							found={}
+							if char==filter[1] then
+								found.fx=cx+(x*d)		-- location of open bracket
+								found.fy=cy
+							else
+								found.tx=cx+(x*d)		-- location of close bracket
+								found.ty=cy
+							end
+							found.brackets=filter 	-- type of bracket we found
+							break
+						end
+					end
+				end
+			end
+		end
+--		dump(found)
+		
+		if found then -- match next
+			if found.ty then -- we found the closer so match backwards
+				local depth=0
+				local cx=found.tx
+				local cy=found.ty
+				local cache=txt.get_cache_lex(cy)
+				while cache do
+					cx=cx-1
+					if cx<1 then
+						cy=cy-1
+						cache=txt.get_cache_lex(cy)
+						if not cache then break end
+						cx=#cache.cb
+					end
+					local b=cache and cache.cb[cx]
+					if b then
+						local char=cache.string:sub(b,b)
+						if char==found.brackets[1] then
+							depth=depth-1
+						elseif char==found.brackets[2] then
+							depth=depth+1
+						end
+						if depth<0 then
+							found.fy=cy
+							found.fx=cx
+							break
+						end
+					end
+				end
+			else -- match forwards
+				local depth=0
+				local cx=found.fx
+				local cy=found.fy
+				local cache=txt.get_cache_lex(cy)
+				while cache do
+					cx=cx+1
+					if cx>#cache.cb then
+						cy=cy+1
+						cache=txt.get_cache_lex(cy)
+						if not cache then break end
+						cx=1
+					end
+					local b=cache and cache.cb[cx]
+					if b then
+						local char=cache.string:sub(b,b)
+						if char==found.brackets[1] then
+							depth=depth+1
+						elseif char==found.brackets[2] then
+							depth=depth-1
+						end
+						if depth<0 then
+							found.ty=cy
+							found.tx=cx
+							break
+						end
+					end
+				end
+			end
+		end
+
+--		dump(found)
+
+		return found
 	end
 	
 --[[
@@ -727,21 +852,29 @@ get length of line in glyphs
 		return hx
 	end
 
+
+--[[
+
+Set the cursor to this (clipped) location
+
+]]
+	txt.cursor=function(y,x)
+
+		txt.cy , txt.cx = txt.clip(y or txt.cy,x or txt.cx)
+		
+		txt.brackets=txt.find_brackets()
+
+	end
 --[[
 
 clip this location so it is within the text.
 
 eg too the end of a line
 
+return clipped values
+
 ]]
 	txt.clip=function(y,x)
-	
-		if not x then
-			txt.cy,txt.cx=txt.clip(txt.cy,txt.cx)
-			txt.fy,txt.ty=txt.cy
-			txt.fx,txt.tx=txt.cx
-			return
-		end
 
 		if y>txt.hy then y=txt.hy x=txt.get_hx(y)+1 end
 		if y<1 then y=1 end
@@ -816,7 +949,7 @@ insert a character, eg user typing
 		txt.set_string(txt.cy,sb..s..sc)
 	
 		txt.cx=txt.cx+1
-		txt.clip()
+		txt.cursor()
 	
 		hook("changed")
 	end
@@ -838,7 +971,7 @@ insert a new line
 
 		txt.add_string(txt.cy,sc)
 		
-		txt.clip()
+		txt.cursor()
 	
 		hook("changed")
 	end
@@ -914,7 +1047,7 @@ insert any string, which will be broken down by newlines
 			end
 		end
 
-		txt.clip()
+		txt.cursor()
 	
 		hook("changed")
 
@@ -936,7 +1069,7 @@ eg delete the \n at the end of the line
 		txt.cx=hx+1
 		txt.set_string(txt.cy,txt.get_string_sub(txt.cy,1,hx)..sa)
 		txt.del_string(txt.cy+1)
-		txt.clip()
+		txt.cursor()
 
 	end
 
@@ -960,7 +1093,7 @@ delete one glyph from the left of the cursor
 		txt.set_string(txt.cy,sb..sc)
 	
 		txt.cx=txt.cx-1
-		txt.clip()
+		txt.cursor()
 	
 		hook("changed")
 	end
@@ -985,7 +1118,7 @@ delete one glyph from the right of the cursor
 		
 		txt.set_string(txt.cy,sb..sc)
 	
-		txt.clip()
+		txt.cursor()
 	
 		hook("changed")
 	end

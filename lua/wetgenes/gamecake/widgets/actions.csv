@@ -36,11 +36,13 @@ view_hex,,View as HEX,Display as hex dump.,
 view_txt,,View as TXT,Display as normal text.,
 
 theme_bright_small,,Bright Small,Set theme to Bright and Small,,"{theme=""bright"",grid_size=24,text_size=16}"
-theme_bright_medium,,Bright Medium,Set theme to Bright and Medium,,"{theme=""bright"",grid_size=40,text_size=24}"
-theme_bright_large,,Bright Large,Set theme to Bright and Large,,"{theme=""bright"",grid_size=64,text_size=48}"
+theme_bright_medium,,Bright Medium,Set theme to Bright and Medium,,"{theme=""bright"",grid_size=36,text_size=24}"
+theme_bright_large,,Bright Large,Set theme to Bright and Large,,"{theme=""bright"",grid_size=48,text_size=32}"
+theme_bright_huge,,Bright Huge,Set theme to Bright and Huge,,"{theme=""bright"",grid_size=96,text_size=64}"
 theme_dark_small,,Dark Small,Set theme to Dark and Small,,"{theme=""dark"",grid_size=24,text_size=16}"
-theme_dark_medium,,Dark Medium,Set theme to Dark and Medium,,"{theme=""dark"",grid_size=40,text_size=24}"
-theme_dark_large,,Dark Large,Set theme to Dark and Large,,"{theme=""dark"",grid_size=64,text_size=48}"
+theme_dark_medium,,Dark Medium,Set theme to Dark and Medium,,"{theme=""dark"",grid_size=36,text_size=24}"
+theme_dark_large,,Dark Large,Set theme to Dark and Large,,"{theme=""dark"",grid_size=48,text_size=32}"
+theme_dark_huge,,Dark Huge,Set theme to Dark and Huge,,"{theme=""dark"",grid_size=96,text_size=64}"
 
 layout_load,,Load Layout,Load position and size of windows
 layout_save,,Save Layout,Save position and size of windows
