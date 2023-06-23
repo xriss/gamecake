@@ -321,13 +321,33 @@ wtexteditor.texteditor_refresh=function(widget)
 		if     toke=="k" then	ps[pl+3]=6  -- keyword
 		elseif toke=="g" then	ps[pl+3]=7  -- global
 		elseif toke=="c" then	ps[pl+3]=8  -- comment
-		elseif toke=="C" then	ps[pl+3]=12 -- comment_spell
+		elseif toke=="C" then	ps[pl+3]=8 ; ps[pl+4]=15 -- comment_spell
 		elseif toke=="s" then	ps[pl+3]=9  -- string
-		elseif toke=="S" then	ps[pl+3]=13 -- string_spell
+		elseif toke=="S" then	ps[pl+3]=9 ; ps[pl+4]=15 -- string_spell
 		elseif toke=="0" then	ps[pl+3]=10 -- number
 		elseif toke=="p" then	ps[pl+3]=11 -- punctuation
 		elseif toke=="n" then	ps[pl+3]=1  -- none
-		elseif toke=="N" then	ps[pl+3]=15 -- none_spell
+		elseif toke=="N" then	ps[pl+4]=15 -- none_spell
+		end
+	end
+
+	local hilite=function(ps,pl,y,x)
+		if not x then return end
+		if not y then return end
+		if txt.brackets then
+			if	( txt.brackets.fy == y and txt.brackets.fx == x ) or 
+				( txt.brackets.ty == y and txt.brackets.tx == x ) then
+
+					ps[pl+3]=14
+			end
+		end
+		if txt.fx and txt.fy and txt.tx and txt.ty then
+			local flip=false
+			if     y==txt.fy and y==txt.ty then if x>=txt.fx and x< txt.tx then flip=true end -- single line
+			elseif y==txt.fy               then if x>=txt.fx               then flip=true end -- first line
+			elseif y==txt.ty               then if x< txt.tx               then flip=true end -- last line
+			elseif y>txt.fy  and y<txt.ty  then                                 flip=true end -- middle line
+			if flip then ps[pl+3],ps[pl+4] = ps[pl+4],ps[pl+3] end
 		end
 	end
 
@@ -340,19 +360,6 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 		local ps={}
 		local pl=0
 		
-		local hilite=function(y,x)
-			if not x then return end
-			if not y then return end
-			if txt.fx and txt.fy and txt.tx and txt.ty then
-				local flip=false
-				if     y==txt.fy and y==txt.ty then if x>=txt.fx and x< txt.tx then flip=true end -- single line
-				elseif y==txt.fy               then if x>=txt.fx               then flip=true end -- first line
-				elseif y==txt.ty               then if x< txt.tx               then flip=true end -- last line
-				elseif y>txt.fy  and y<txt.ty  then                                 flip=true end -- middle line
-				if flip then ps[pl+3],ps[pl+4] = ps[pl+4],ps[pl+3] end
-			end
-		end
-
 		-- 16 bytes
 		local bytes={}
 		local codes={}
@@ -417,21 +424,21 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 				ps[pl+3]=1
 				ps[pl+4]=0
 				color(ps,pl,tokes[x])
-				hilite(widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
+				hilite(ps,pl,widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
 				pl=pl+4
 			end
 			ps[pl+1]=32
 			ps[pl+2]=0
 			ps[pl+3]=1
 			ps[pl+4]=0
---			hilite(widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
+--			hilite(ps,pl,widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
 			pl=pl+4
 			if x==8 or x==16 then
 				ps[pl+1]=32
 				ps[pl+2]=0
 				ps[pl+3]=1
 				ps[pl+4]=0
---				hilite(widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
+--				hilite(ps,pl,widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
 				pl=pl+4
 			end
 		end
@@ -446,7 +453,7 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 			ps[pl+3]=1
 			ps[pl+4]=0
 			color(ps,pl,tokes[x])
-			hilite(widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
+			hilite(ps,pl,widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
 			pl=pl+4
 		end
 
@@ -460,6 +467,7 @@ else
 	for y=cy+1,cy+256 do
 		local ps={}
 		local pl=0
+
 		local sx=cx
 		local fakeline
 		local cache=widget.txt.get_cache_lex(y)
@@ -546,15 +554,8 @@ else
 				ps[pl+4]=0
 				
 				color(ps,pl,toke)
-				
-				if txt.fx and txt.fy and txt.tx and txt.ty then
-					local flip=false
-					if     y==txt.fy and y==txt.ty then if i>=txt.fx and i< txt.tx then flip=true end -- single line
-					elseif y==txt.fy               then if i>=txt.fx               then flip=true end -- first line
-					elseif y==txt.ty               then if i< txt.tx               then flip=true end -- last line
-					elseif y>txt.fy  and y<txt.ty  then                                 flip=true end -- middle line
-					if flip then ps[pl+3],ps[pl+4] = ps[pl+4],ps[pl+3] end
-				end
+				hilite(ps,pl,y,x+1)
+
 				pl=pl+4
 
 				if widget.opts.word_wrap then
@@ -1282,32 +1283,32 @@ function wtexteditor.setup(widget,def)
 		dark={
 			0xff444444,0xffaaaaaa,	-- text			0,1
 			0xff555555,0xff333333,	-- gutter		2,3
-			0xff333333,0xffbbbbbb,	-- hilite		4,5
-			0xffdd7733,	-- keyword			6
-			0xffddaa33,	-- global			7
-			0xff888888,	-- comment			8
-			0xff66aa33,	-- string			9
-			0xff5599cc,	-- number			10
-			0xff999999,	-- punctuation		11
-			0xffaa8888,	-- comment_spell	12
-			0xff88aa33,	-- string_spell		13
-			0xff000000,	-- 					14
-			0xffccaaaa,	-- text				15
+			0xff000000,0xff000000,	-- 				4,5
+			0xffdd7733,	-- keyword				6
+			0xffddaa33,	-- global				7
+			0xff888888,	-- comment				8
+			0xff66aa33,	-- string				9
+			0xff5599cc,	-- number				10
+			0xff999999,	-- punctuation			11
+			0xffaa8888,	-- 						12
+			0xff88aa33,	-- 						13
+			0xffffffff,	-- high					14
+			0xff554444,	-- spell (background)	15
 		},
 		bright={
 			0xffcccccc,0xff000000,	-- text			0,1
 			0xffbbbbbb,0xff666666,	-- gutter		2,3
-			0xffdddddd,0xff000000,	-- hilite		4,5
-			0xffff0000,	-- keyword			6
-			0xffff6600,	-- global			7
-			0xff666666,	-- comment			8
-			0xff44cc00,	-- string			9
-			0xff0044ff,	-- number			10
-			0xff222222,	-- punctuation		11
-			0xff886666,	-- comment_spell	12
-			0xff66cc00,	-- string_spell		13
-			0xff000000,	--					14
-			0xff220000,	-- text_spell		15
+			0xff000000,0xff000000,	-- 				4,5
+			0xffff0000,	-- keyword				6
+			0xffff6600,	-- global				7
+			0xff666666,	-- comment				8
+			0xff44cc00,	-- string				9
+			0xff0044ff,	-- number				10
+			0xff222222,	-- punctuation			11
+			0xff886666,	-- 						12
+			0xff66cc00,	-- 						13
+			0xff666666,	-- high					14
+			0xffeecccc,	-- spell (background)	15
 		},
 	}
 
