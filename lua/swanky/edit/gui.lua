@@ -504,10 +504,12 @@ local lay=
 				{id="file_saveas"},
 				{id="file_saveall"},
 				{id="menu_theme",text="Theme",menu_data={
+					{id="theme_dark_tiny"},
 					{id="theme_dark_small"},
 					{id="theme_dark_medium"},
 					{id="theme_dark_large"},
 					{id="theme_dark_huge"},
+					{id="theme_bright_tiny"},
 					{id="theme_bright_small"},
 					{id="theme_bright_medium"},
 					{id="theme_bright_large"},
