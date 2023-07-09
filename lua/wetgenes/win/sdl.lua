@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local wwin=require("wetgenes.win")
+
 local log,dump=require("wetgenes.logs"):export("log","dump")
 
 -- do a reverse enum lookup, get a name from a value
@@ -167,7 +169,15 @@ end
 
 sdl.resize=function(it,w,h)
 	it=it or sdl.it
-	if it and it.win then it.win:setSize(w,h) end
+	if it and it.win then it.win:setSize(w,h) end	
+	
+	local screen=wwin.screen()
+	local x=math.floor((screen.width-w)*(0.5))
+	local y=math.floor((screen.height-h)*(0.5))
+	if x<0 then x=0 end
+	if y<0 then y=0 end
+	if it and it.win then it.win:setPosition(x,y) end	
+	
 end
 
 sdl.show=function(it,view)
