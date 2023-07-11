@@ -7,8 +7,8 @@ echo " installing qemu "
 
 
 #update these to get a newer version
-RASPBIAN_FILE=2021-05-07-raspios-buster-armhf-lite
-RASPBIAN_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/$RASPBIAN_FILE.zip
+RASPBIAN_FILE=2023-05-03-raspios-bullseye-armhf-lite
+RASPBIAN_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2023-05-03/$RASPBIAN_FILE.img.xz
 
 if [ -f raspbian.img ] ; then
 
@@ -16,9 +16,8 @@ if [ -f raspbian.img ] ; then
 
 else
 
-	wget -O $RASPBIAN_FILE.zip $RASPBIAN_URL
-	unzip -o $RASPBIAN_FILE.zip
-	rm $RASPBIAN_FILE.zip
+	wget -O $RASPBIAN_FILE.img.xz $RASPBIAN_URL
+	unxz $RASPBIAN_FILE.img.xz
 	mv $RASPBIAN_FILE.img raspbian.img
 
 fi
@@ -142,7 +141,7 @@ echo " cloaning the gamecake repo so we can use scripts from inside it"
 ./ssh " cd gamecake && ./git-pull && cd .. || git clone -v --progress https://github.com/xriss/gamecake.git && gamecake/git-pull"
 
 echo " building build dependencies luajit and sdl2"
-./ssh " cd gamecake/build ; ./install "
+./ssh " cd gamecake/build ; ./install rpi "
 
 ./box-down
 
