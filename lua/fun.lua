@@ -5,6 +5,7 @@ local apps=require("apps")
 apps.default_paths()
 
 local wzips=require("wetgenes.zips")
+local wwin=require("wetgenes.win")
 
 -- strip some args before passing on to main code
 local a=arg or {}
@@ -42,8 +43,17 @@ local funname=filename:gsub("%.fun%.lua$","") -- strip ending if given
 local func=function(...)
 
 	local global=require("global") -- prevent accidental global use
+	
+	local screen=wwin.screen()
+	
+	local hx,hy,ss=424,240,1
+	hx=hx*4
 
-	local hx,hy,ss=424,240,3
+-- remove window scale if tiny screen
+	if screen.width>0 then
+		ss=math.floor(screen.width/hx)
+		if ss<1 then ss=1 end
+	end
 
 	local opts={
 		times=true, -- request simple time keeping samples

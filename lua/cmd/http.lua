@@ -6,7 +6,7 @@ local doublewrap=require("cmd.args").doublewrap
 local splitpath=require("cmd.args").splitpath
 
 local cmds={
-	{ "server",		"Start a simple http server to staticly expose all the files in the current directory on localhost."},
+	{ "server",		"Start a simple http server to statically expose all the files in the current directory on localhost."},
 }
 for i,v in ipairs(cmds) do
 	v.name=v[1]
@@ -35,6 +35,12 @@ local cmd=cmd and string.lower(cmd) -- force lowercase
 if cmd=="server" then
 
 	local args=require("cmd.args").bake({inputs=default_inputs{
+
+		{	"policy",		"none",	[[
+		
+Use --policy=wasm to send CORS headers that make wasm happy.
+
+]], },
 
 		{	"port",		12211,	[[
 		
@@ -67,11 +73,13 @@ Location of files to expose.
 	local pegasus = require "pegasus"
 	
 	local plugin={}
-	plugin.newRequestResponse=function(self,request,response)
-		response:addHeader(	"Cross-Origin-Opener-Policy"	,	"same-origin"	)
-		response:addHeader(	"Cross-Origin-Embedder-Policy"	,	"require-corp"	)
+	if args.data.policy=="wasm" then -- include headers needed for wasm
+		plugin.newRequestResponse=function(self,request,response)
+			response:addHeader(	"Cross-Origin-Opener-Policy"	,	"same-origin"	)
+			response:addHeader(	"Cross-Origin-Embedder-Policy"	,	"require-corp"	)
+		end
 	end
-
+	
 	local server = pegasus:new({
 	  host=args.data.host,
 	  port=args.data.port,

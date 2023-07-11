@@ -62,11 +62,15 @@ B.cameras.draw_head=function(cameras)
 	cameras.active=camera
 
 	if camera then
-
-		gl.MultMatrix(camera.inv) -- remove camera transform
+	
+--		gl.LoadMatrix(camera.inv)
 
 		gl.uniforms.camera=function(u)
-			gl.UniformMatrix4f( u , camera.mtx ) -- so we can apply it later
+			gl.UniformMatrix4f( u , camera.mtx ) -- so we can undo the camera from the view
+		end
+
+		gl.uniforms.incamera=function(u)
+			gl.UniformMatrix4f( u , camera.inv ) -- apply this one in a shader
 		end
 
 	end
@@ -124,17 +128,30 @@ B.cameras.create=function(cameras,boot)
 	return camera
 end
 
+-- get set or create
+B.camera.depend=function(camera,name,uid)
+	if not camera.uids then camera.uids={0} end
+	local idx
+	if name=="focus" then
+		idx=1
+		if uid then camera.uids[idx]=uid end
+		local focus=scene.find_uid(camera.uids[idx])
+		return focus
+	end
+end
+
 B.camera.update=function(camera)
-	
-	if camera.focus then
 
-		if camera.focus.focus_camera then
+	local focus=camera:depend("focus")
+	if focus then
 
-			camera.focus:focus_camera(camera)
+		if focus.focus_camera then
+
+			focus:focus_camera(camera)
 
 		else
 
-			camera.pos:set( camera.focus.pos )
+			camera.pos:set( focus.pos )
 
 		end
 

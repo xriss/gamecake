@@ -6,22 +6,22 @@ language "C"
 defines { "HAVE_STDINT_H" , "FLOATING_POINT" , "EXPORT=extern" , "USE_KISS_FFT" }
 
 includedirs {
-	'./libspeexdsp/',
-	'./include/',
+	'speexdsp/libspeexdsp/',
+	'speexdsp/include/',
 }
 
 files {
-	'./libspeexdsp/buffer.c',
-	'./libspeexdsp/fftwrap.c',
-	'./libspeexdsp/filterbank.c',
-	'./libspeexdsp/jitter.c',
-	'./libspeexdsp/kiss_fft.c',
-	'./libspeexdsp/kiss_fftr.c',
-	'./libspeexdsp/mdf.c',
-	'./libspeexdsp/preprocess.c',
-	'./libspeexdsp/resample.c',
-	'./libspeexdsp/scal.c',
-	'./libspeexdsp/smallft.c',
+	'speexdsp/libspeexdsp/buffer.c',
+	'speexdsp/libspeexdsp/fftwrap.c',
+	'speexdsp/libspeexdsp/filterbank.c',
+	'speexdsp/libspeexdsp/jitter.c',
+	'speexdsp/libspeexdsp/kiss_fft.c',
+	'speexdsp/libspeexdsp/kiss_fftr.c',
+	'speexdsp/libspeexdsp/mdf.c',
+	'speexdsp/libspeexdsp/preprocess.c',
+	'speexdsp/libspeexdsp/resample.c',
+	'speexdsp/libspeexdsp/scal.c',
+	'speexdsp/libspeexdsp/smallft.c',
 }
 
 

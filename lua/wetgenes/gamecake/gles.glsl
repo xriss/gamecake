@@ -40,6 +40,12 @@ is kinda just around for legacy reasons at this point.
 
 The xyz transform mode, using modelview and projection, this is the default mode.
 
+	CAM
+
+The cam transform mode, using modelview and incamera and projection to 
+transform points. A replacement for XYZ if we need a little bit more 
+camera control. IE we are tweaking the view space.
+
 	POS
 
 Is a special 2d z mode where the z component is treated as 0 for view 
@@ -99,6 +105,13 @@ Use a lookup material for colors which are stored in a texture
 
 #endif
 
+#ifdef POSITION_CUSTOM_UNIFORM
+	POSITION_CUSTOM_UNIFORM
+#endif
+
+
+uniform mat4 camera;	// can be applied to modelview to remove the camera part of the transform
+uniform mat4 incamera;	// inverse camera can be applied to modelview if camera is not yet applied
 uniform mat4 modelview;
 uniform mat4 projection;
 
@@ -168,7 +181,6 @@ IN float a_matidx;
 #endif
 
 #ifdef NORMAL
-uniform mat4 camera;
 IN vec4  a_normal;
 #endif
 
@@ -177,7 +189,6 @@ IN vec4  a_bone;
 #endif
 
 #ifdef SHADOW
-uniform mat4 camera;
 uniform mat4 shadow_mtx;
 OUT vec4  shadow_uv;
 #endif
@@ -270,6 +281,10 @@ void main(void)
 #endif
 
 
+#ifdef POSITION_CUSTOM_V
+	POSITION_CUSTOM_V
+#else
+
 #ifdef SCR
 	vec4 v=vec4(a_vertex.xyz, 1.0);
 #endif
@@ -279,9 +294,15 @@ void main(void)
 #ifdef XYZ
 	vec4 v=vec4(a_vertex.xyz, 1.0);
 #endif
+#ifdef CAM
+	vec4 v=vec4(a_vertex.xyz, 1.0);
+#endif
 #ifdef POS
 	vec4 v=vec4(a_vertex.xy, 0.0, 1.0);
 #endif
+
+#endif
+
 
 #ifdef NORMAL
 	vec3 n=vec3(a_normal.xyz);
@@ -354,6 +375,10 @@ void main(void)
 #endif
 
 
+#ifdef POSITION_CUSTOM
+	POSITION_CUSTOM
+#else
+
 #ifdef SCR
 	gl_Position = v;
 #endif
@@ -363,10 +388,16 @@ void main(void)
 #ifdef XYZ
 	gl_Position = projection * modelview * v;
 #endif
+#ifdef CAM
+	gl_Position = projection * incamera * modelview * v;
+#endif
 #ifdef POS
 	gl_Position = projection * modelview * v;
 	gl_Position.z+=a_vertex.z;
 #endif
+
+#endif
+
 
 #ifdef SHADOW
 	shadow_uv = ( shadow_mtx * camera * modelview * v ) ;

@@ -311,6 +311,7 @@ M.fill=function(oven,geom)
 
 -- default draw is polys
 	geom.draw=function(it,progname,cb,modes)
+--		if not it.vb then it.vb=true end
 		if not modes then
 			return geom.draw_polys(it,progname,cb)
 		end

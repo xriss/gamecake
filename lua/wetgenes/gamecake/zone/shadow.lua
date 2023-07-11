@@ -185,6 +185,14 @@ M.bake=function(oven,shadow)
 			gl.MatrixMode(gl.MODELVIEW)
 			gl.LoadIdentity()
 
+			gl.uniforms.camera=function(u)
+				gl.UniformMatrix4f( u , camera.mtx ) -- so we can apply it later
+			end
+
+			gl.uniforms.incamera=function(u) -- no camera
+				gl.UniformMatrix4f( u , M4() ) -- apply this one in a shader
+			end
+
 		end
 
 

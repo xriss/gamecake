@@ -1,0 +1,7 @@
+cd `dirname $0`
+
+rm -rf speexdsp
+git clone --depth 1 https://github.com/xiph/speexdsp.git 
+rm -rf speexdsp/.git
+
+cp speexdsp_config_types.h speexdsp/include/speexdsp_config_types.h

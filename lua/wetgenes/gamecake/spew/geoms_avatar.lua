@@ -45,6 +45,7 @@ M.material_names={
 }
 
 -- the available mesh names of an avatar
+-- this is increased after loading a glb to include all meshes
 M.mesh_names={
 
 	{"hat_baseball",		group=1,									},
@@ -73,20 +74,26 @@ M.mesh_names={
 
 	{"head_base",			group=1,									},
 	{"head_skull",			group=0,									},
+	{"head_robot",			group=0,									},
+	{"head_pill",			group=0,									},
 
 	{"eyebrow_base",		group=1,									},
 	{"eyebrow_block",		group=1,									},
+	{"eyebrow_robot",		group=0,									},
 
 	{"eye_base",			group=1,									},
 	{"eye_lash",			group=1,									},
+	{"eye_robot",			group=0,									},
 
 	{"eyeball_base",		group=1,									},
 	{"eyeball_cat",			group=1,									},
+	{"eyeball_robot",		group=0,									},
 
 	{"eyewear_glasses",		group=1,									},
 
 	{"mouth_base",			group=1,									},
 	{"mouth_jaw",			group=0,									},
+	{"mouth_robot",			group=0,									},
 
 	{"beard_goatbraid",		group=1,									},
 	{"beard_goatee",		group=1,									},
@@ -95,10 +102,12 @@ M.mesh_names={
 
 	{"ear_base",			group=1,									},
 	{"ear_bunny",			group=0,									},
+	{"ear_robot",			group=0,									},
 
 	{"nose_base",			group=1,									},
 	{"nose_piggy",			group=0,									},
 	{"nose_clown",			group=0,									},
+	{"nose_robot",			group=0,									},
 
 	{"body_belly",			group=1,									},
 	{"body_belly_boob",		group=1,									},
@@ -109,6 +118,7 @@ M.mesh_names={
 	{"body_tshirt_boob",	group=1,									},
 	{"body_bodice",			group=1,									},
 	{"body_vest",			group=1,									},
+	{"body_robot",			group=0,									},
 
 	{"body_printer_support",group=0,									},
 	{"body_tie",			group=0,									},
@@ -119,6 +129,7 @@ M.mesh_names={
 
 	{"hand_base",			group=1,									},
 	{"hand_bone",			group=0,									},
+	{"hand_robot",			group=0,									},
 
 	{"tail_bunny",			group=0,									},
 	{"tail_devil",			group=0,									},
@@ -130,6 +141,7 @@ M.mesh_names={
 	{"foot_shoe",			group=1,									},
 	{"foot_boot",			group=1,									},
 	{"foot_heel",			group=1,									},
+	{"foot_robot",			group=0,									},
 
 	{"item_hammer",			group=1,									},
 	{"item_shield",			group=1,									},
@@ -190,6 +202,7 @@ M.tweak_names={
 	"mouth",
 	"body",
 	"boob",
+	"belly",
 	"hand",
 	"tail",
 	"foot",
@@ -233,6 +246,19 @@ M.bake=function(oven,geoms_avatar)
 
 		geoms_avatar.gltf=wgeom_gltf.load(geoms_avatar.filename)
 		geoms_avatar.objs=wgeom_gltf.to_geoms(geoms_avatar.gltf)
+		
+		local map={}
+		for _,v in pairs(M.mesh_names) do
+			map[ v[1] ]=v
+		end
+		for _,o in ipairs(geoms_avatar.objs) do -- add parts
+			if o.name and not map[o.name] then
+--print("adding",o.name)
+				local v={o.name,group=0}
+				map[o.name]=v
+				M.mesh_names[#M.mesh_names+1]=v
+			end
+		end
 		
 --[[
 		log("avatar",#geoms_avatar.objs.anims)
@@ -762,7 +788,7 @@ void main(void)
 		end
 
 
-		local shadername="gamecake_shader?XYZ&NORMAL&TEX&TEXBONE=80&TEXNTOON=1"
+		local shadername=opts.shadername or "gamecake_shader?CAM&NORMAL&TEX&TEXBONE=80&TEXNTOON=1"
 
 		if opts.shadow then
 

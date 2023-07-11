@@ -1,8 +1,11 @@
 --
 -- (C) 2022 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+-- should not cache this stuff when using lanes just in case we try and share upvalues across threads
+
+--local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+--     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local log,dump=require("wetgenes.logs"):export("log","dump")
 
@@ -28,6 +31,32 @@ end
 
 -- module
 local M={ modname = (...) } package.loaded[M.modname] = M 
+
+--[[#lua.wetgenes.tasks.do_memo
+
+	-- just grab this function 
+	local do_memo=require("wetgenes.tasks").do_memo
+	
+	local r=do_memo(linda,{task="taskname"})
+	local r=do_memo(linda,{task="taskname"},timeout)
+
+A basic memo send and receive that can be used when all you have is the 
+tasks.linda and you know you are in a thread ( or do not care about 
+blocking while waiting for another thread ) Pretty much everything else 
+in this module is about managing coroutines to pretended to be threads 
+and keeping track of state for debugging but this is all you actually 
+need to use to simply communicate with a task. Especially useful if you 
+are in a task and want to talk to another task.
+
+]]
+M.do_memo=function(linda,memo,timeout)
+	memo.id=tostring(memo) -- should be a unique string, the address of the memo table
+	if linda:send( timeout , memo.task , memo ) then -- send on memo.task (a public name of another task)
+		local ok,r=linda:receive( timeout , memo.id ) -- receive the result on memo.id
+		return r
+	end
+end
+
 
 --[[#lua.wetgenes.tasks.cocall
 
@@ -349,8 +378,8 @@ end
 
 --[[#lua.wetgenes.tasks.receive
 
-	result = tasks:receive(memo,timeout)
-	result = tasks:receive(memo)
+	memo = tasks:receive(memo,timeout)
+	memo = tasks:receive(memo)
 	
 Recieve a memo with optional timeout.
 
@@ -383,6 +412,23 @@ M.tasks_functions.receive=function(tasks,memo,timeout)
 	memo.result=result
 
 	return memo
+end
+
+--[[#lua.wetgenes.tasks.do_memo
+
+	result = tasks:do_memo(memo,timeout)
+	result = tasks:do_memo(memo)
+
+Similar to calling tasks:receive but without the problems that come 
+from me trying to remember how to spell receive and it returns 
+memo.result instead of memo so slightly less mess. This will assert on 
+finding a memo.error so less need to check for errors.
+
+]]
+M.tasks_functions.do_memo=function(tasks,memo,timeout)
+	tasks:receive(memo,timeout)
+	assert(not memo.error,memo.error)
+	return memo.result
 end
 
 --[[#lua.wetgenes.tasks.delete
@@ -675,7 +721,7 @@ M.tasks_functions.http_code=function(linda,task_id,task_idx)
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=pcall(function() return request(memo) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
 		end
@@ -688,6 +734,9 @@ end
 
 Create send and return a http memo result.
 
+Returns either the result or nil,error so can be used simply with an 
+assert wrapper.
+
 ]]
 M.tasks_functions.http=function(tasks,memo)
 
@@ -697,6 +746,7 @@ M.tasks_functions.http=function(tasks,memo)
 	tasks:receive(memo)
 
 	if memo.error then return nil,memo.error end
+	if memo.result and memo.result.error then return nil,memo.result.error end
 	return memo.result
 end
 
@@ -727,12 +777,12 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 			if memo.cmd=="close" then -- probably good to "try" and do this before exiting
 				db:close()
 				db=nil
-				ret.result=true
+				ret.rows={}
 			end
 
 		elseif memo.sql then -- execute some sql
 
-			local result={}
+			local rows={}
 			
 			
 			local err
@@ -740,7 +790,6 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 			if memo.binds or memo.blobs then -- use prepared statement
 			
 				local stmt = db:prepare(memo.sql)
-				
 				if not stmt then
 					ret.error=db:errmsg()
 					return ret
@@ -750,25 +799,33 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 				local bs={}
 				for i=1,bmax do
 					local n=stmt:bind_parameter_name(i)
-					if n then bs[n]=i end
+					if n then
+						bs[n]=i
+						bs[n:sub(2)]=i
+					end
 				end
 
 				
+				local blobs=memo.blobs or {}
 				for n,v in pairs( memo.binds or {} ) do
-					stmt:bind( bs[n] or n , v )
+					if bs[n] and not blobs[n] then -- a blob might be in both places
+						stmt:bind( bs[n] , v )
+					end
 				end
-				for n,v in pairs( memo.blobs or {} ) do
-					stmt:bind_blob( bs[n] or n , v )
+				for n,v in pairs( memo.blobs or {} ) do -- these binds should be treated as blobs
+					if bs[n] then
+						stmt:bind_blob( bs[n] , v )
+					end
 				end
 				
 				if memo.compact then
-					result.names=stmt:get_names()
+					rows.names=stmt:get_names()
 					for it in stmt:rows() do
-						result[#result+1]=it
+						rows[#rows+1]=it
 					end
 				else
 					for it in stmt:nrows() do
-						result[#result+1]=it
+						rows[#rows+1]=it
 					end
 				end
 
@@ -779,8 +836,8 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 				if memo.compact then -- return data in a slightly more compact format
 
 					err=db:exec(memo.sql,function(udata,cols,values,names)
-						result.names=names
-						result[#result+1]=values
+						rows.names=names
+						rows[#rows+1]=values
 						return 0
 					end,"udata")
 				
@@ -789,7 +846,7 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 					err=db:exec(memo.sql,function(udata,cols,values,names)
 						local it={}
 						for i=1,cols do it[ names[i] ] = values[i] end
-						result[#result+1]=it
+						rows[#rows+1]=it
 						return 0
 					end,"udata")
 
@@ -800,7 +857,7 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 			if err~=sqlite3.OK then
 				ret.error=db:errmsg()
 			else
-				ret.result=result
+				ret.rows=rows
 			end
 
 		end
@@ -813,7 +870,7 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=pcall(function() return request(memo) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
 		end
@@ -826,6 +883,12 @@ end
 
 Create send and return a sqlite memo result.
 
+Returns either the result.rows or nil,error so can be used simply with an 
+assert wrapper.
+
+Note that rows can be empty so an additional assert(rows[1]) might be 
+needed to check you have data returned.
+
 ]]
 M.tasks_functions.sqlite=function(tasks,memo)
 
@@ -835,7 +898,8 @@ M.tasks_functions.sqlite=function(tasks,memo)
 	tasks:receive(memo)
 
 	if memo.error then return nil,memo.error end
-	return memo.result
+	if memo.result.error then return nil,memo.result.error end
+	return memo.result.rows
 end
 
 
@@ -917,7 +981,7 @@ console.log(data.sock);
 		end
 	end
 
-	local send=function(memo)
+	local request=function(memo)
 	
 		if js_eval then -- need js mode
 			local ret=js_call([[
@@ -963,12 +1027,12 @@ console.log("RECV:"+recv[0]);
 				client , err = socket.connect(memo.host,memo.port)
 				if client then client:settimeout(0.00001) end
 				if err then		ret.error=err
-				else			ret.result=true
+				else			ret.data=true
 				end
 			elseif memo.cmd=="close" and client then
 				client:close()
 				client=nil
-				ret.result=true
+				ret.data=true
 			end
 		end
 
@@ -979,7 +1043,7 @@ console.log("RECV:"+recv[0]);
 		
 		if client then -- try and read some data from server
 			local part,e,part2=client:receive("*a")
-			if e=="timeout" then err=nil part=part or part2 end -- ignore timeouts, they are not errors just partial data
+			if e=="timeout" then ret.warning=e e=nil err=nil part=part or part2 end -- ignore timeouts, they are not errors just partial data
 			if part~="" then ret.data=part end
 			if e then ret.error=e end
 		end
@@ -992,7 +1056,7 @@ console.log("RECV:"+recv[0]);
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=pcall(function() return send(memo) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
 		end
@@ -1005,6 +1069,9 @@ end
 
 Send and/or recieve a (web)socket client memo result.
 
+returns nil,error if something went wrong or returns result if 
+something went right.
+
 ]]
 M.tasks_functions.client=function(tasks,memo)
 
@@ -1015,6 +1082,7 @@ M.tasks_functions.client=function(tasks,memo)
 	tasks:receive(memo)
 
 	if memo.error then return nil,memo.error end
+	if memo.result.error then return nil,memo.result.error end
 	return memo.result
 end
 

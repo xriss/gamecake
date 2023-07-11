@@ -58,6 +58,7 @@ bullet.world=function(...)
 	setmetatable(world,bullet.world_metatable)
 	world[0]=core.world_create(...)
 
+	world.time=0
 	world.maxsteps=1
 	world.fixedstep=1/60
 	
@@ -161,7 +162,18 @@ To force a step forward of a given amount of time use a maxsteps of 0.
 ]]
 bullet.world_functions.step=function(world,seconds,maxsteps,fixedstep)
 
-	core.world_step( world[0] , seconds , maxsteps or world.maxsteps , fixedstep or world.fixedstep )
+	fixedstep=fixedstep or world.fixedstep
+	maxsteps=maxsteps or world.maxsteps
+	seconds=seconds or world.fixedstep
+
+	core.world_step( world[0] , seconds , maxsteps , fixedstep )
+	
+	-- snap slightly squiffy step times
+	local steps=math.ceil(world.time/fixedstep)
+	local add=math.ceil(seconds/fixedstep)
+	if add>maxsteps then add=maxsteps end
+	if add<1 then add=1 end
+	world.time=(steps+add)*fixedstep
 
 end
 
@@ -193,6 +205,59 @@ bullet.world_functions.ray_test=function(world,test)
 	return test
 end
 
+------------------------------------------------------------------------
+--[[#lua.wetgenes.bullet.world.contacts
+
+	local contacts,csiz=world:contacts()
+	local contacts,csiz=world:contacts(min_dist)
+	local contacts,csiz=world:contacts(min_dist,min_impulse)
+
+Fetch all contacts in the world that are the same or closer than 
+min_dist which defaults to 0 and hit the same or harder than 
+min_impulse which also defaults to 0. This helps filter out 
+uninteresting collisions before we process them.
+
+csiz, the second return allows us to put more info into each chunk in 
+the future, it will probably be 10 but may grow if it turns out that 
+more contact info for each point would help.
+
+This returns a list of contacts. Each contact is an array that 
+consists of.
+
+	a_body,
+	b_body,
+
+and then 1 or more chunks of csiz (which is currently 10) numbers 
+representing
+
+	ax,ay,az,	-- world position on a_body
+	bx,by,bz,	-- world position on b_body
+	nx,ny,nz,	-- world normal on b_body
+	impulse,	-- impulse applied by collision
+
+So you can find the two bodys in contact[1] and contact[2] but are then 
+expected to loop over the rest of the array as chunks of csiz like so.
+
+	for idx=3,#contact,csiz do
+		local pos_a={ contact[idx+0] , contact[idx+1] , contact[idx+2] }
+		local pos_b={ contact[idx+3] , contact[idx+4] , contact[idx+5] }
+		local nrm_b={ contact[idx+6] , contact[idx+7] , contact[idx+8] }
+		local impulse=contact[idx+9]
+		...
+	end
+	
+This is intended to be processed and interesting collisions handled or 
+saved for later.
+	
+]]
+bullet.world_functions.contacts=function(world,min_dist,min_impulse)
+	local collisions,csiz=core.world_contacts( world[0] , min_dist or 0 , min_impulse or 0 )
+	for i,collision in ipairs(collisions) do
+		collision[1]=world.bodies[ collision[1] ]
+		collision[2]=world.bodies[ collision[2] ]
+	end
+	return collisions,csiz
+end
 
 
 ------------------------------------------------------------------------
@@ -247,6 +312,12 @@ bullet.world_functions.shape=function(world,name,a,...)
 	setmetatable(shape,bullet.shape_metatable)
 
 	if name=="mesh" then shape.mesh=a a=a[0] end
+	if name=="compound" then -- multiple sub shapes?
+		shape.shapes={}
+		for i,v in ipairs(a) do
+			shape.shapes[i]=v[1] -- remember children for later freeing
+		end
+	end
 
 	shape[0]=core.shape_create(name,a,...)
 	shape.world=world
@@ -272,6 +343,9 @@ bullet.shape_functions.destroy=function(shape)
 	world.shapes[ ptr ]=nil
 	if shape.mesh then
 		shape.mesh:destroy()
+	end
+	for i,v in ipairs(shape.shapes or {}) do -- sub shapes should also be destroyed
+		v:destroy() 
 	end
 end
 
@@ -647,6 +721,25 @@ bullet.body_functions.change_shape=function(body,shape,mass)
 		return world.shapes[ old_ptr ]
 	end
 
+end
+
+--[[#lua.wetgenes.bullet.world.status
+
+	print( world:status() )
+
+Return a debug string about allocated objects in this world.
+
+]]
+bullet.world_functions.status=function(world)
+	local lines={}
+	local count={}
+	for i,body  in pairs(world.bodies)  do count.bodies=(count.bodies or 0) +1 end
+	for i,shape in pairs(world.shapes)  do count.shapes=(count.shapes or 0) +1 end
+	for i,mesh  in pairs(world.meshes)  do count.meshes=(count.meshes or 0) +1 end
+	for name,count in pairs(count) do
+		lines[#lines+1]=(name).." : "..count
+	end
+	return table.concat(lines,"\n")
 end
 
 return bullet

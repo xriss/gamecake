@@ -10,6 +10,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+local wtxtwords=require("wetgenes.txt.words")
 
 local wtxtlex=require("wetgenes.txt.lex")
 
@@ -24,7 +25,9 @@ M.MAP={
 	["number"]="0",
 	["punctuation"]="p",
 	["string"]="s",
+	["string_spell"]="S",
 	["comment"]="c",
+	["comment_spell"]="C",
 	["global"]="g",
 	["none"]="n",
 	["first"]="f",
@@ -434,13 +437,31 @@ M.parse=function(state,input,output)
 			end
 		end
 		
+		local check_spell=function()
+			local ok=true
+			local s=string.lower(token)
+			if #s>1 then -- ignore short words
+				if s:match("[^a-z]") then -- ignore if not just letters
+					-- ignore
+				else
+					ok=wtxtwords.check(s) -- check spelling
+				end
+			end
+			return ok
+		end
+		
 		local check_string=function()
-			if last==MAP.string then
+			if last==MAP.string or last==MAP.string_spell then
 				if token==peek(state.terminator) then 
 					pull(state.terminator)
 					push_output(MAP.string)
 					poke(state.stack,MAP.punctuation)
 					return true
+				end
+				if check_spell() then -- good spelling
+					poke(state.stack,MAP.string)
+				else -- bad spelling
+					poke(state.stack,MAP.string_spell)
 				end
 				return true -- we are trapped in a string
 			elseif token=="\"" then 
@@ -462,12 +483,17 @@ M.parse=function(state,input,output)
 		end
 
 		local check_comment=function()
-			if last==MAP.comment then
+			if last==MAP.comment or last==MAP.comment_spell then
 				if token==peek(state.terminator) then 
 					pull(state.terminator)
 					push_output(MAP.comment)
 					poke(state.stack,MAP.white)
 					return true
+				end
+				if check_spell() then -- good spelling
+					poke(state.stack,MAP.comment)
+				else -- bad spelling
+					poke(state.stack,MAP.comment_spell)
 				end
 				return true -- we are trapped in a string
 			elseif token=="--" then 
@@ -533,7 +559,13 @@ M.parse=function(state,input,output)
 			[MAP.string]={
 				check_string,
 			},
+			[MAP.string_spell]={
+				check_string,
+			},
 			[MAP.comment]={
+				check_comment,
+			},
+			[MAP.comment_spell]={
 				check_comment,
 			},
 			[MAP.none]={

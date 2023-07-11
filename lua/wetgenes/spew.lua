@@ -245,16 +245,16 @@ else -- normal sockets
 			
 				if spew.push_stack[1] then -- send and recv
 					while spew.push_stack[1] do
-						local r=tasks:client({
+						local r=assert(tasks:client({
 							data=table.remove(spew.push_stack,1),
 							task="spew_thread_"..spew.id,
-						})
+						}))
 						if r.data then spew.pull_data=spew.pull_data..r.data end
 					end
 				else -- just recv
-					local r=tasks:client({
+					local r=assert(tasks:client({
 						task="spew_thread_"..spew.id,
-					})
+					}))
 					if r.data then spew.pull_data=spew.pull_data..r.data end
 				end
 				

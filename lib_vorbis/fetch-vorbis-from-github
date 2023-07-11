@@ -1,0 +1,6 @@
+cd `dirname $0`
+
+rm -rf vorbis
+git clone --depth 1 https://github.com/xiph/vorbis.git 
+rm -rf vorbis/.git
+

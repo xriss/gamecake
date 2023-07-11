@@ -659,13 +659,14 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 
 				if oven.times then oven.times.update.start() end
 				
-				if oven.now and oven.now.update then
-					oven.now.update()
-				end
 				for i,v in ipairs(oven.mods) do
 					if v.update then
 						v.update()
 					end
+				end
+				
+				if oven.now and oven.now.update then
+					oven.now.update()
 				end
 				
 				if oven.tasks then -- update generic coroutines

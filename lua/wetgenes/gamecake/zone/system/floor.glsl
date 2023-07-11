@@ -39,7 +39,7 @@ uniform vec4 color;
 //uniform mat4 inverse_projection;
 
 uniform mat4 camera;
-uniform mat4 inverse_camera;
+uniform mat4 incamera;
 
 uniform vec4 time;
 
@@ -62,11 +62,12 @@ void main()
 	xy=vec3(v.xz,length(a_vertex.xz));
 
 	
-	gl_Position = projection * modelview * v;
+	gl_Position = projection * incamera * modelview * v;
 
 	pos=gl_Position;
 
-	eye=normalize( ( modelview * camera * v ).xyz  - camera[3].xyz ) ;
+//	eye=normalize( ( modelview * camera * v ).xyz  - camera[3].xyz ) ;
+	eye=normalize( (modelview * v).xyz ) ;
 
 }
 

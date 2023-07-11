@@ -39,7 +39,7 @@ function wmenuitem.draw_text(widget,opts)
 	local gl=oven.gl
 	local font=oven.cake.canvas.font
 
-	local text=widget.text or ( widget.action and widget.action.text ) or ""
+	local text=widget.text or ""
 	local text_right=""
 
 	if widget.menu_data then
@@ -135,7 +135,7 @@ function wmenuitem.menu_add(widget,opts)
 		
 	end
 	local top=opts.top or widget.menu
-	top.px,top.py=widget:get_master_xy(widget.hx*(widget.menu_px or 0),widget.hy*(widget.menu_py or 0))
+	top.px,top.py=widget:get_master_xy(opts.px or widget.hx*(widget.menu_px or 0),opts.py or widget.hy*(widget.menu_py or 0))
 
 -- slight nudge to prevent dropdown gap
 	top.px=math.floor(top.px-2)
@@ -151,6 +151,7 @@ function wmenuitem.menu_add(widget,opts)
 
 		it.class="menuitem"
 		it.action = it.action or widget.master.get_action(it.id,it.user) -- lookup action
+		it.text=it.text or ( it.action and it.action.text ) -- use action text if text is missing
 		it.draw_text=it.draw_text or opts.draw_text or md.draw_text or wmenuitem.draw_text
 		it.text_align=it.text_align or "left"
 		it.hooks=it.hooks or opts.hooks     or md.hooks

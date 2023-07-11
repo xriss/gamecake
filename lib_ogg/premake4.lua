@@ -3,9 +3,9 @@ project "lib_ogg"
 
 language "C"
 
-files { "src/**.c" , "include/**.h" }
+files { "ogg/src/**.c" , "ogg/include/**.h" }
 
-includedirs { "." , "src" , "include" }
+includedirs { "ogg" , "ogg/src" , "ogg/include" }
 
 
 KIND{}

@@ -265,8 +265,11 @@ function M.bake(oven,console)
 		
 		console.line_width=oven.view.hx/8
 		console.data.main=oven.main and oven.main.console or oven.main	-- update best table of app function?
+
+		console.lines_display={}
 	end
-	
+
+console.gci_last=0
 	function console.draw()
 	
 font.vbs_idx=1
@@ -289,13 +292,19 @@ font.vbs_idx=1
 			oven.times.update.done()
 			oven.times.draw.done()
 
+-- we average the last 60 frames
+-- this assumes we are running at 60 frames and not dropping any or the numbers will be a bit off
 			local gci=gcinfo()
-			local s=string.format("fps=%2d %s %2d /%3d %5.2fm vb=%d tx=%d fb=%d gl=%d vbi=%d gm=%d",
+			local mem=(gci-console.gci_last)
+			console.gci_last=gci
+			
+			local s=string.format("fps=%2d %s %2d /%3d %4.0fm%s%4.0fk vb=%d tx=%d fb=%d gl=%d vbi=%d gm=%d",
 				console.fps,
-				string.rep("x",console.fps_updates)..string.rep(" ",4-(console.fps_updates%4)), -- idealy we only want 1 x 
+				string.rep("x",console.fps_updates)..string.rep(" ",8-(console.fps_updates)), -- ideally we only want 1 x 
 				(oven.times.update.time*1000),
 				(oven.times.draw.time*1000),
 				gci/1024,
+				mem<0 and "-" or "+",math.abs(mem),
 				gl.counts.buffers,
 				gl.counts.textures,
 				gl.counts.framebuffers,
@@ -375,7 +384,6 @@ font.vbs_idx=1
 			end
 		end
 
-		console.lines_display={}
 
 		gl.PopMatrix()
 		cake.views.pop_and_apply()

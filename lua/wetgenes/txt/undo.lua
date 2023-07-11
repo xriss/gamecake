@@ -279,5 +279,5 @@ M.construct=function(undo,txt)
 		return txt.insert_char(s)
 	end
 
-	return txtundo
+	return undo
 end

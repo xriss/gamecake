@@ -45,6 +45,9 @@ local wjson=M
 
 	local wjson=require("wetgenes.json")
 
+	-- or export the main functions like so
+	local json_encode,json_decode=require("wetgenes.json"):export("encode","decode")
+
 other json encode/decode using pure lua library seemed too slow, 
 here is a fast and loose one lets see if it goes any faster :) 
 should be a direct replacement for JSON4Lua which is what I was 
@@ -149,6 +152,7 @@ end
 local function is_array(t)
 	local len=#t
 	if len==0 then return false end -- short circuit
+	if type(t[1])=="nil" then return false end -- allow holes but not *right* at the start
 	for i,v in pairs(t) do
 		if type(i)=="number" then
 			if math.floor(i)~=i then -- must be int
@@ -167,13 +171,19 @@ end
 -----------------------------------------------------------------------------
 --[[#lua.wetgenes.json.decode
 
+	json_table = wjson.decode(json_string)
 	json_table = wjson.decode(json_string,opts)
 
 Convert a json string into a lua table.
 
-Set opts.null to wetgenes.json.null (or indeed any othe value) if 
-you would like to have nulls in your results. By default nulls are 
-replaced with nil.
+Set opts.null to wetgenes.json.null (or indeed any other value) if you 
+would like to have this as nulls in your results. By default nulls are 
+replaced with nil and therefore invisible.
+
+Any object key string that looks like a number will be converted to a 
+number. This will probably reverse any numbers we converted to strings 
+when encoding. Set opts.keystring=true to turn off this behaviour.
+
 
 ]]
 -----------------------------------------------------------------------------
@@ -224,6 +234,9 @@ local t
 	local function setval()
 		if top.idx==nil then -- set idx not val
 			if type(val)=="table" then err("cannot use table as index") end
+			if not opts.keystring then
+				local n=tonumber(val) if tostring(n)==val then val=n end -- auto convert key string to number
+			end
 			top.idx=val
 			val=nil
 		else
@@ -307,16 +320,39 @@ end
 --[[#lua.wetgenes.json.encode
 
 	json_string = wjson.encode(json_table)
+	json_string = wjson.encode(json_table,opts)
 
 Convert a lua table into a json string. Note it must be valid json, 
 primarily make sure that the table is either an array or a dictionary 
-but never both.
+but never both. Note that we can not tell the difference between an 
+empty array and an empty object and will assume it is an object.
+
+An array must have a length>0 and contain an element in the first slot, 
+eg array[1] and only contain numerical integer keys between 1 and the 
+length. This allows for the possibility of some nil holes depending on 
+the length lua returns but holes are not a good idea in arrays in lua. 
+Best to use false or the special wjson.null value and avoid holes.
 
 Also some of the internal lua types will cause errors, eg functions 
 as these can not be converted into json.
 
 include nulls in the output by using wetgenes.json.null
+
+opts is an optional table that can set the following options.
+
+	ops.pretty=true
+	ops.pretty=" "
+		Enable pretty printing, line feeds and indents and set each 
+		indent level to multiples of the given string or " ".
+		
+	ops.white=true
+	ops.white=" "
+		Enable white space but not lines or indents, just a single space 
+		between value assignment to make line wrapping easier.
  
+	ops.sort=true
+		Sort the keys, so we can create stable output for better diffing.
+
 ]]
 -----------------------------------------------------------------------------
 function wjson.encode(tab,opts)
@@ -411,12 +447,15 @@ local encode_tab
 			if opts.sort then -- sorted by keys
 				local names={}
 				for i,v in pairs(vv) do names[#names+1]=i end
-				table.sort(names) -- might need to fix the compare function?
+				table.sort(names,function(a,b) -- sort by value converted to string
+					return tostring(a)<tostring(b)
+				end)
+				
 				for _,i in ipairs(names) do
 					local v=vv[i]
 					put(comma and ",") comma=true
 					put_newline()
-					put_indent(encode_it(i)) -- allow numbers or strings
+					put_indent(encode_str(i)) -- force strings because json
 					put(":")
 					t=type(v)
 					if t=="table" then
@@ -429,7 +468,7 @@ local encode_tab
 				for i,v in pairs(vv) do
 					put(comma and ",") comma=true
 					put_newline()
-					put_indent(encode_it(i)) -- allow numbers or strings
+					put_indent(encode_str(i)) -- force strings because json
 					put(":")
 					t=type(v)
 					if t=="table" then
@@ -443,6 +482,10 @@ local encode_tab
 			put_newline()
 			put_indent("}")
 		end
+	end
+	
+	if type(tab)~="table" then -- technically invalid but just encode raw strings numbers etc
+		return encode_it(tab)
 	end
 
 	encode_tab(tab,is_array(tab)) -- technically this should not be an array but we allow it

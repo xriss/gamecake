@@ -3,6 +3,7 @@ docs
 exe
 dbg/*
 
+*.flatpak-builder
 *.gradle
 *.cxx
 *.vagrant

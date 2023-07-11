@@ -1157,6 +1157,69 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		return it
 	end
 
+-- sort low to high, first the vertexes by x,y,z then the polys by indexs
+-- so we are 100% sure what order verts and polys are in.
+	M.stable_sort=function(it)
+	
+		local vorder={}
+		for i=1,#it.verts do
+			vorder[i]=i
+		end
+		table.sort(vorder,function(ia,ib)
+			local va=it.verts[ia]
+			local vb=it.verts[ib]
+			if va[1]<vb[1] then return true end if va[1]>vb[1] then return false end
+			if va[2]<vb[2] then return true end if va[2]>vb[2] then return false end
+			return va[3]<vb[3]
+		end)
+		local verts=it.verts
+		it.verts={}
+		for i=1,#vorder do it.verts[i]=verts[ vorder[i] ] end -- reorder verts
+
+		local vmap={} -- reverse for map
+		for i=1,#it.verts do vmap[ vorder[i] ]=i end
+		for i,p in ipairs(it.polys) do -- remap poly idxs
+			local low=1
+			for pi,pv in ipairs(p) do
+				p[pi]=vmap[pv]
+				if p[pi] < p[low] then low=pi end -- find lowest idx
+			end
+			if low~=1 then -- rotate polys so lowest idx is first
+				local t={}
+				for i=1,#p do
+					t[i]=p[ ((i+low-2)%#p)+1 ]
+				end
+				for i=1,#p do
+					p[i]=t[i]
+				end
+			end
+		end
+		
+		-- sort polys
+		local porder={}
+		for i=1,#it.polys do
+			porder[i]=i
+		end
+		table.sort(porder,function(ia,ib)
+			local pa=it.polys[ia]
+			local pb=it.polys[ib]
+			if pa[1]<pb[1] then return true end if pa[1]>pb[1] then return false end
+			if pa[2]<pb[2] then return true end if pa[2]>pb[2] then return false end
+			if pa[4] and pb[4] then -- sort quads?
+				if pa[3]<pb[3] then return true end if pa[3]>pb[3] then return false end
+				return pa[4]<pb[4]
+			else
+				return pa[3]<pb[3]
+			end
+		end)
+		local polys=it.polys
+		it.polys={}
+		for i=1,#porder do it.polys[i]=polys[ porder[i] ] end -- reorder polys
+
+		return it
+	end
+	
+
 	require("wetgenes.gamecake.spew.geom_mask").fill(M)
 	require("wetgenes.gamecake.spew.geom_solids").fill(M)
 

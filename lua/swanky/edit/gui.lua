@@ -497,34 +497,52 @@ local lay=
 			hooks=gui.hooks,
 			inherit=true,
 
-			{id="menu_file",text="File",top_menu=true,menu_data={
+			{id="menu_file",top_menu=true,menu_data={
 				{id="file_open"},
 				{id="file_close"},
 				{id="file_save"},
 				{id="file_saveas"},
 				{id="file_saveall"},
 				{id="menu_theme",text="Theme",menu_data={
+					{id="theme_dark_tiny"},
 					{id="theme_dark_small"},
 					{id="theme_dark_medium"},
 					{id="theme_dark_large"},
+					{id="theme_dark_huge"},
+					{id="theme_bright_tiny"},
 					{id="theme_bright_small"},
 					{id="theme_bright_medium"},
 					{id="theme_bright_large"},
+					{id="theme_bright_huge"},
 				}},
 				{id="file_quit"},
 			}},
 --			{id="menu_window",text="Windows",top_menu=true,menu_data={
 --				{id="dialog",user="1",text="Dialogue 1"},
 --			}},
-			{id="menu_edit",text="Edit",top_menu=true,menu_data={
+			{id="menu_edit",top_menu=true,menu_data={
 				{id="select_all"},
 				{id="clip_copy"},
 				{id="clip_cut"},
 				{id="clip_paste"},
 				{id="clip_cutline"},
+				{id="edit_justify"},
+				{id="edit_align"},
 				{id="history_undo"},
 				{id="history_redo"},
 			}},
+
+			{id="menu_search",top_menu=true,menu_data={
+				{id="search_find"},
+				{id="search_next"},
+				{id="search_prev"},
+			}},
+
+			{id="menu_view",top_menu=true,menu_data={
+				{id="view_hex"},
+				{id="view_txt"},
+			}},
+
 --			{id="menu_font",text="Font",top_menu=true,menu_data=gui.menu_datas.font_size},
 --[[
 			{id="topmenu",text="Run",top_menu=true,menu_data={
