@@ -5,44 +5,32 @@ echo " installing qemu "
 
 ./install-host-dependencies.sh
 
+mkdir -p roms
 
 #update these to get a newer version
 RASPBIAN_FILE=2023-05-03-raspios-bullseye-armhf-lite
 RASPBIAN_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2023-05-03/$RASPBIAN_FILE.img.xz
 
-if [ -f raspbian.img ] ; then
+if [ -f roms/raspbian.img ] ; then
 
 	echo " raspbian.img exists so skipping download and unpack "
 
 else
 
-	wget -O $RASPBIAN_FILE.img.xz $RASPBIAN_URL
-	unxz $RASPBIAN_FILE.img.xz
-	mv $RASPBIAN_FILE.img raspbian.img
-
-fi
-
-
-
-
-if [ -f kernel-qemu ] ; then
-
-	echo " kernel-qemu exists so skipping download "
-
-else
-
-	wget -O kernel-qemu https://github.com/polaco1782/raspberry-qemu/blob/master/kernel-qemu?raw=true
+	wget -O roms/$RASPBIAN_FILE.img.xz $RASPBIAN_URL
+	unxz roms/$RASPBIAN_FILE.img.xz
+	mv roms/$RASPBIAN_FILE.img roms/raspbian.img
 
 fi
 
 
 echo " copying raspbian "
-cp raspbian.img raspi.img
+cp roms/raspbian.img roms/raspi.img
 
 
 
-echo " resizing to 6gig "
-qemu-img resize -f raw raspi.img 6G
+echo " resizing to 8gig "
+qemu-img resize -f raw roms/raspi.img 8G
 
 echo " checking partition information "
 
@@ -51,7 +39,7 @@ PART_ROOT_START=$(parted raspi.img -ms unit s print | grep "^2" | cut -f 2 -d: |
 echo $PART_BOOT_START $PART_ROOT_START
 
 echo " resizing using fdisk "
-fdisk raspi.img <<EOF
+fdisk roms/raspi.img <<EOF
 p
 d
 2
@@ -94,6 +82,10 @@ EOF
 # dissble security rename user request
 sudo rm root/etc/ssh/sshd_config.d/rename_user.conf
 
+echo " copying kernel and dtb "
+cp boot/bcm2710-rpi-3-b-plus.dtb roms/bcm2710-rpi-3-b-plus.dtb
+cp boot/kernel8.img roms/kernel8.img
+
 ./box-umount
 
 
@@ -135,21 +127,33 @@ echo " installing packages we will need for building etc"
 echo " installing build dependencies"
 ./ssh " sudo apt-get install -y libssl-dev "
 ./ssh " sudo apt-get install -y libpulse-dev "
-#./ssh " sudo apt-get install -y libluajit-5.1-dev "
-#./ssh " sudo apt-get install -y libsdl2-dev "
 
 ./ssh " sudo apt-get install -y lua5.1 "
 ./ssh " sudo apt-get install -y lua-filesystem "
 
+
+#./ssh " sudo apt-get install -y libluajit-5.1-dev " # we can not rely on this lib to be available as a static link
+#./ssh " sudo apt-get install -y libsdl2-dev " # or this one to have needed drivers enabled
+
+
+./ssh " sudo apt-get install -y libsdl2-dev "
+#./ssh " sudo rm -f /usr/lib/arm-linux-gnueabihf/SDL*.so "
+
+./ssh " sudo apt-get install -y libluajit-5.1-dev "
+#./ssh " sudo rm -f /usr/lib/arm-linux-gnueabihf/libluajit*.so "
+
+
+
+
 ./box-down
-./box-up-wait
+#./box-up-wait
 
-echo " cloaning the gamecake repo so we can use scripts from inside it"
-./ssh " git clone -v --progress https://github.com/xriss/gamecake.git "
+#echo " cloaning the gamecake repo so we can use scripts from inside it"
+#./ssh " git clone -v --progress https://github.com/xriss/gamecake.git "
 
-echo " building build dependencies luajit and sdl2"
-./ssh " cd gamecake/build ; ./install rpi "
+#echo " building build dependencies luajit and sdl2"
+#./ssh " cd gamecake/build ; ./install rpi "
 
-./box-down
+#./box-down
 
 
