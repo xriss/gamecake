@@ -11,7 +11,7 @@ excludes { "vorbis/lib/barkmel.c" }
 excludes { "vorbis/lib/tone.c" }
 
 
-includedirs { "vorbis" , "vorbis/lib" , "vorbis/include" , "../lib_ogg/include" }
+includedirs { "vorbis" , "vorbis/lib" , "vorbis/include" , "../lib_ogg/ogg/include" }
 
 
 KIND{}
