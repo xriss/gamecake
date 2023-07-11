@@ -86,7 +86,20 @@ end
 
 
 
+-- perform a "smooth" rotation by using 3 shears.
+-- Turns is a 0-1 value which maps to 0-360 deg or 0-2pi radians
+-- yeah gonna need to replace that skew function with a proper shear
+grdpaint.rots=function(gr,bg,turns)
 
+	local rx= math.tan(math.pi*turns*2/2)
+	local ry=-math.sin(math.pi*turns*2)
+
+	local ga=grdpaint.skew(gr,bg,6,rx)
+	local gb=grdpaint.skew(ga,bg,5,ry)
+	local gc=grdpaint.skew(gb,bg,6,rx)
+
+	return gc
+end
 
 grdpaint.skew=function(gr,bg,direction,ratio)
 

@@ -6,11 +6,15 @@ LUAJIT_DYLIB=libluajit-5.1.2.dylib
 
 vagrant up
 
+if [ "$1" ==  "clean" ] ;  then
+ vagrant ssh -c " rm -rf gamecake  "
+fi
 
 # update git
 vagrant ssh -c " cd gamecake && git pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git  "
 
 # build
+echo vagrant ssh -c " env bash -c gamecake/make $* "
 vagrant ssh -c " env bash -c gamecake/make $* "
 
 
@@ -30,5 +34,6 @@ scp -F ./.vagrant.ssh.config default:gamecake/exe/osx/$LUAJIT_DYLIB ../exe/osx/$
 rm .vagrant.ssh.config
 
 
-vagrant halt
+vagrant halt --force
+
 
