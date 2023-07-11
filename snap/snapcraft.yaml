@@ -10,8 +10,6 @@ confinement: strict # use 'strict' once you have the right plugs and slots
 
 base: core20
 
-architectures: [amd64, arm64, armhf, ppc64el]
-
 parts:
 
   desktop-glib-only:
