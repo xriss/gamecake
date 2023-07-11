@@ -7,7 +7,7 @@ if [ "$1" ==  "clean" ] ;  then
  ./ssh " rm -rf gamecake "
 fi
 
-./ssh " cd gamecake && ./git-pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
+./ssh " cd gamecake && git clean -fxd && git pull && cd .. || git clone --recursive -v --progress https://github.com/xriss/gamecake.git "
 
 ./ssh " cd gamecake ; build/make $* "
 

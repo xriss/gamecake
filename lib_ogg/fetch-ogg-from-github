@@ -3,3 +3,7 @@ cd `dirname $0`
 rm -rf ogg
 git clone --depth 1 https://github.com/xiph/ogg.git 
 rm -rf ogg/.git
+
+# generic
+cp ./config_types.h ogg/include/ogg/config_types.h
+git add -f ogg/include/ogg/config_types.h
