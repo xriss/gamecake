@@ -83,9 +83,16 @@ proc       /proc           proc    defaults          0       0
 
 EOF
 
-sudo tee root/boot/ssh.txt <<EOF
+sudo tee root/boot/ssh boot/ssh <<EOF
 ENABLE SSH
 EOF
+#undo the removal of the default login so we can use pi:raspberry again...
+sudo tee root/boot/userconf boot/userconf <<'EOF'
+pi:$6$rG.YX9cuM9xHE9nt$1zuuFRzSuXrEqSww2Wn7ZR.CtOsm9BIh9XfHwO.7a8sEL.QZVM2SedPJfFLTqwJcyxBHXzVA80szKuTfgDejZ1
+EOF
+
+# dissble security rename user request
+sudo rm root/etc/ssh/sshd_config.d/rename_user.conf
 
 ./box-umount
 
@@ -138,7 +145,7 @@ echo " installing build dependencies"
 ./box-up-wait
 
 echo " cloaning the gamecake repo so we can use scripts from inside it"
-./ssh " cd gamecake && ./git-pull && cd .. || git clone -v --progress https://github.com/xriss/gamecake.git && gamecake/git-pull"
+./ssh " git clone -v --progress https://github.com/xriss/gamecake.git "
 
 echo " building build dependencies luajit and sdl2"
 ./ssh " cd gamecake/build ; ./install rpi "

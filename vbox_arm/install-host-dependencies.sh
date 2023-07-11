@@ -11,6 +11,7 @@ fi
 # commands
 
 require.sh qemu-system
+require.sh qemu-img
 require.sh /usr/bin/qemu-system-arm
 require.sh sshpass
 require.sh unzip
