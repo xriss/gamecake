@@ -34,8 +34,8 @@ qemu-img resize -f raw roms/raspi.img 8G
 
 echo " checking partition information "
 
-PART_BOOT_START=$(parted raspi.img -ms unit s print | grep "^1" | cut -f 2 -d: | cut -f 1 -ds)
-PART_ROOT_START=$(parted raspi.img -ms unit s print | grep "^2" | cut -f 2 -d: | cut -f 1 -ds)
+PART_BOOT_START=$(parted roms/raspi.img -ms unit s print | grep "^1" | cut -f 2 -d: | cut -f 1 -ds)
+PART_ROOT_START=$(parted roms/raspi.img -ms unit s print | grep "^2" | cut -f 2 -d: | cut -f 1 -ds)
 echo $PART_BOOT_START $PART_ROOT_START
 
 echo " resizing using fdisk "
@@ -101,8 +101,8 @@ do
     echo "Trying ssh login again..."
 done
 
-echo " apply final resize of partition "
-./ssh " sudo resize2fs /dev/sda2 "
+#echo " apply final resize of partition "
+#./ssh " sudo resize2fs /dev/sda2 "
 
 echo " updating apt info and sites"
 ./ssh " sudo apt-get update -y "
