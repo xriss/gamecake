@@ -11,3 +11,7 @@ sudo apt-get install -y libluajit-5.1-dev
 
 sudo apt-get install -y lua5.1
 sudo apt-get install -y lua-filesystem
+
+sudo /gamecake/install-build-dependencies
+
+
