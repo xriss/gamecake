@@ -42,3 +42,33 @@ github rather than from the local machine.
 So if you want to use this for something else you would want to scrub 
 that last part.
 
+
+VAGRANT HAS FUCKED SOMETHING
+
+provisioning fails, but vagrant ssh still works, so have added vagrant 
+as the fallback password in the Vagrantfile and need to do the same on 
+the box like so in a live fix before this can work.
+
+	vagrant up
+
+wait for it to fail
+
+	vagrant ssh
+
+then on the box
+
+	sudo bash
+	passwd vagrant
+	vagrant
+	vagrant
+	exit
+	exit
+
+This will set the password to vagrant for the vagrant user and we can 
+then use
+
+	vagrant provision
+
+To do the provisioning that previously failed (note updating brew takes 
+forever)
+
