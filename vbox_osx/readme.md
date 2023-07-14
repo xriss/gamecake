@@ -64,9 +64,16 @@ then on the box
 	exit
 	exit
 
-This will set the password to vagrant for the vagrant user and we can 
-then use
+and finally halt the machine to cleanup
 
+	vagrant halt
+
+
+
+This will set the password to vagrant for the vagrant user and let 
+vagrant unfuck itself and finally we can just use it like normal
+
+	vagrant up
 	vagrant provision
 
 To do the provisioning that previously failed (note updating brew takes 

@@ -1,7 +1,7 @@
 
 echo " updating brew "
 su vagrant -c " brew update "
-su vagrant -c " git -C /usr/local/Homebrew/Library/Taps/homebrew/homebrew-core fetch "
+su vagrant -c " git -C /usr/local/Homebrew/Library/Taps/homebrew/homebrew-core fetch --unshallow "
 su vagrant -c " brew update --auto-update "
 su vagrant -c " brew upgrade "
 
@@ -10,6 +10,12 @@ echo " installing bash "
 su vagrant -c " brew install bash "
 echo /usr/local/bin/bash | sudo tee -a /private/etc/shells
 sudo chpass -s /usr/local/bin/bash vagrant
+
+
+su vagrant -c " brew install luajit "
+
+su vagrant -c " brew install sdl2 "
+
 
 
 #echo " fetching gamecake "
