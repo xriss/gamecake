@@ -64,10 +64,16 @@ then on the box
 	exit
 	exit
 
+
+Now you can edit the Vagrantfile to enable the vagrant password and we are 
+back to where we should have started.
+
+	nano Vagrantfile
+
+
 and finally halt the machine to cleanup
 
 	vagrant halt
-
 
 
 This will set the password to vagrant for the vagrant user and let 
