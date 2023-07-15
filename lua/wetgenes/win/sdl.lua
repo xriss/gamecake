@@ -248,6 +248,15 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 
 	end
 
+	if not it.ctx then -- request an opengl es 2.0 context
+
+		SDL.glSetAttribute(SDL.glAttr.ContextProfileMask, SDL.glProfile.ES)
+		SDL.glSetAttribute(SDL.glAttr.ContextMajorVersion, 2)
+		SDL.glSetAttribute(SDL.glAttr.ContextMinorVersion, 0)
+
+		it.ctx=SDL.glCreateContext(it.win)
+
+	end
 
 
 	assert(it.ctx)
