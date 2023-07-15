@@ -76,8 +76,14 @@ and finally halt the machine to cleanup
 	vagrant halt
 
 
-This will set the password to vagrant for the vagrant user and let 
-vagrant unfuck itself and finally we can just use it like normal
+Now you can unset the password in the vagrantfile, so that vagrant ssh 
+doesnt expect a password. IE undo what you just tweaked
+
+	nano Vagrantfile
+
+
+All this will have set the password to vagrant for the vagrant user and let 
+vagrant unfuck itself and so that finally we can just use it like normal
 
 	vagrant up
 	vagrant provision
