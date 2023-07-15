@@ -832,8 +832,10 @@ end
 gles.extensions={}
 function gles.GetExtensions()
 
-	local num=gles.Get(gles.NUM_EXTENSIONS)
-	for i=0,num-1 do
+	local num=(gles.Get(gles.NUM_EXTENSIONS) or 1)-1
+	if num<0 then num=0 end -- sanity
+	if num>4096 then num=0 end -- sanity
+	for i=0,num do
 		local s=gles.Get(gles.EXTENSIONS,i) or ""
 		if s:sub(1,3)=="GL_" then
 			local s=s:sub(4)
