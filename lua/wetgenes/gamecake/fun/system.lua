@@ -48,14 +48,18 @@ system.load_and_setup=function(name,path)
 
 	gl.forget() -- force reload of shaders
 	
-	name=assert(name or oven.opts.fun)
+	if not name or name=="" then name=oven.opts.fun end --default menu launcher
+	if not name or name=="" then name="lua/fun/all" end --default menu launcher
 	path=path or ""
+
+	name=assert(name)
+
 
 -- remember source text
 	system.source_filename=path..name
 	system.source={}
 	
-	if system.source_filename=="" then -- read in pipe
+	if system.source_filename=="|" then -- read in pipe if we use | as the filename.
 	
 		system.source.lua=io.read("*all")
 

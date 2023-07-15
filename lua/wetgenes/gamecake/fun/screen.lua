@@ -112,6 +112,23 @@ screen.create=function(it,opts)
 	it.fxbo1=framebuffers.create(it.hx,it.hy,0)
 	it.fxbo2=framebuffers.create(it.hx,it.hy,0)
 	
+	it.clean=function()
+		if it.fxbo1 then
+			framebuffers.clean(it.fxbo1)
+			it.fxbo1=nil
+		end
+		if it.fxbo2 then
+			framebuffers.clean(it.fxbo2)
+			it.fxbo2=nil
+		end
+		for _,layer in pairs(it.layers) do
+			if layer.fbo then
+				framebuffers.clean(layer.fbo)
+				layer.fbo=nil
+			end
+		end
+	end
+	
 	-- clear fbo and prepare for drawing into
 	it.draw_into_layer_start=function(idx)
 

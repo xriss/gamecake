@@ -66,6 +66,8 @@ main.setup=function()
 	main.loads()
 
 	main.system=oven.rebake("wetgenes.gamecake.fun.system").load_and_setup()
+	oven.opts.fun="" -- back to menu on reset when running this way
+	
 --		.load_and_setup("test",
 --		"lua/"..(M.modname):gsub("%.","/"):gsub("[^/]+$",""))
 
