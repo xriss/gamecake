@@ -2,7 +2,7 @@ cd `dirname $0`
 
 echo " remember to use --clean to force a full rebuild "
 
-echo build windows ( win32 for life )
+echo " build windows ( win32 for life ) "
 
 ../vbox_mingw/make $*
 
