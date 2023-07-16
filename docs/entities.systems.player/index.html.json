@@ -2498,7 +2498,7 @@
    "body": "<pre><code>entities.systems.player.controls(it,fast)\n</code></pre>\n<p>Handle player style movement, so we can reuse this code for player \nstyle monsters. it is a player or monster, fast lets us tweak the speed \nand defaults to 1</p>\n<p>movement controls are set in it</p>\n<p>it.move which is &quot;left&quot; or &quot;right&quot; to move left or right\nit.jump which is true if we should jump</p>\n",
    "count": 1,
    "file": "../lua/fun/platobj.fun.lua",
-   "line": 726,
+   "line": 727,
    "name": "entities.systems.player",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
   }

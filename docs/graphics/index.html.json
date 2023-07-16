@@ -2498,7 +2498,7 @@
    "body": "<p>define all graphics in this global, we will convert and upload to tiles \nat setup although you can change tiles during a game, we try and only \nupload graphics during initial setup so we have a nice looking sprite \nsheet to be edited by artists</p>\n",
    "count": 1,
    "file": "../lua/fun/platobj.fun.lua",
-   "line": 27,
+   "line": 28,
    "name": "graphics",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
   }

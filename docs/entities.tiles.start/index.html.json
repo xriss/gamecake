@@ -2498,7 +2498,7 @@
    "body": "<p>The player start point, just save the x,y</p>\n",
    "count": 1,
    "file": "../lua/fun/platobj.fun.lua",
-   "line": 1312,
+   "line": 1313,
    "name": "entities.tiles.start",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/fun/platobj.fun.lua"
   }
