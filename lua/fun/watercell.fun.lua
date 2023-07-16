@@ -16,6 +16,7 @@ local fatpix=not(args and args.pixel or false) -- pass --pixel on command line t
 --request this hardware setup !The components will not exist until after main has been called!
 cmap=bitdown.cmap -- use default swanky32 colors
 screen={hx=424,hy=240,ss=3,fps=60}
+oven.opts.fun="" -- back to menu on reset
 hardware={
 	{
 		component="screen",

@@ -4,6 +4,7 @@ local bitdown=require("wetgenes.gamecake.fun.bitdown")
 local chipmunk=require("wetgenes.chipmunk")
 
 
+oven.opts.fun="" -- back to menu on reset
 hardware,main=system.configurator({
 	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
 	graphics=function() return graphics end,

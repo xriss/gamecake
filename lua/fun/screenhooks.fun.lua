@@ -1,4 +1,5 @@
 
+oven.opts.fun="" -- back to menu on reset
 hardware,main=system.configurator({
 	mode="fun64",
 	graphics=function() return graphics end,

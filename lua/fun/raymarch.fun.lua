@@ -10,6 +10,7 @@ local bitdown_font_4x8=require("wetgenes.gamecake.fun.bitdown_font_4x8")
 --
 -- This is fun64 code, you can copy paste it into https://xriss.github.io/fun64/pad/ to run it.
 --
+oven.opts.fun="" -- back to menu on reset
 hardware,main=system.configurator({
 	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
 	update=function() update() end, -- called repeatedly to update+draw

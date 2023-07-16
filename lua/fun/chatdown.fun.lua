@@ -1,6 +1,7 @@
 
 local chatdown=require("wetgenes.gamecake.fun.chatdown")
 
+oven.opts.fun="" -- back to menu on reset
 hardware,main=system.configurator({
 	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
 	update=function() update() end, -- called repeatedly to update+draw
