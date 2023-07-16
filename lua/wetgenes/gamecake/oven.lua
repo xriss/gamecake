@@ -133,6 +133,54 @@ function M.bake(opts)
 	end
 --dprint(opts)
 
+	if opts.args.help then
+	
+		print([[
+gamecake -lfun    # Run in fun mode
+gamecake -lcmd    # Run a command
+
+Mostly we will behave the same as the lua command, but if 
+./lua/init.lua exists then it will be automatically run. Some filenames 
+will be treated differently. So filename.fun.lua will auto run in fun 
+mode and filename.cake will auto run in cake mode. When running a cake 
+or fun script then the following args can control it.
+
+Note all of these args must be placed after the -- to stop them being 
+parsed as part of the standard lua command.
+
+  --help
+    Print this help text and exit
+		gamecake -lfun --help
+		
+  --logs
+    Enable all log output.
+
+  --logs=MODE
+	Enables MODE log output only, eg --logs=oven for oven logs only. 
+	Prefixing mode with a - will remove that mode from the logs, eg 
+	--logs=-oven will show everything but oven logs.
+
+  --show=win
+    Show window as a normal draggable and resizable window.
+
+  --show=max
+	Show window as a maximised window. Desktop resolution possibly 
+	with a visible title bar and desktop panel still visible.
+
+  --show=full
+	Show window as a full screen window. Desktop resolution no title bar.
+
+  --pixel
+    Disable screen space pixel processing, eg scanlines filter.
+
+  --pixel=NUMBER
+	Disable screen space pixel processing and set default window size 
+	to NUMBER view pixels per game pixel.
+]])
+	
+		os.exit(0)
+	end
+
 	opts.width=opts.width or 0
 	opts.height=opts.height or 0
 

@@ -34,6 +34,10 @@ local chat_text=[[
 	
 		Toys
 
+	>cat_test
+	
+		Tests
+
 	>cat_shader
 	
 		GLES 2.0 Shaders
@@ -44,7 +48,13 @@ local chat_text=[[
 		
 		..
 
-	>fun_picish
+	>fun_helloworld
+	
+		=run helloworld
+	
+		Fun64 hello.
+
+	>fun_hellopicish
 	
 		=run hellopicish
 	
@@ -57,11 +67,73 @@ local chat_text=[[
 		
 		..
 
+	>fun_overstep
+	
+		=run overstep
+	
+		Roguelike demo.
+
+	>fun_invaders
+	
+		=run invaders
+	
+		Invaders.
+
+	>fun_platform
+	
+		=run platform
+	
+		Platform multiplayer.
+
+	>fun_platobj
+	
+		=run platobj
+	
+		Platform, walk jump and talk.
+
 <cat_toy
 
 	>welcome
 		
 		..
+
+	>fun_palette
+	
+		=run palette
+	
+		Learn the Swanky32 Palette.
+
+	>fun_chatdown
+	
+		=run chatdown
+	
+		Conversation Example
+
+
+<cat_test
+
+	>welcome
+		
+		..
+
+	>fun_input
+	
+		=run input
+	
+		Input test.
+
+	>fun_beep
+	
+		=run beep
+	
+		Simple Synth test.
+
+	>fun_configurator
+	
+		=run configurator
+	
+		Auto upload test.
+
 
 <cat_shader
 
@@ -69,6 +141,35 @@ local chat_text=[[
 		
 		..
 
+	>fun_raymarch
+	
+		=run raymarch
+	
+		Raymarching.
+
+	>fun_shadertoy
+	
+		=run shadertoy
+	
+		Shadertoy test.
+
+	>fun_screenhooks
+	
+		=run screenhooks
+	
+		3D test.
+
+	>fun_starfield
+	
+		=run starfield
+	
+		Starfield in a shader.
+
+	>fun_watercell
+	
+		=run watercell
+	
+		Cellular Automata in a shader.
 
 ]]
 

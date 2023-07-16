@@ -282,7 +282,8 @@ static int collectargs (char **argv, int *pi, int *pv, int *pe) {
         return i;
     switch (argv[i][1]) {  /* option */
       case '-':
-        notail(argv[i]);
+// ignore long args as they will just be passed on to script
+//        notail(argv[i]);
         return (argv[i+1] != NULL ? i+1 : 0);
       case '\0':
         return i;

@@ -539,6 +539,8 @@ end
 
 #shader "fun_step_watercell"
 
+precision highp float;
+
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform sampler2D tex_cell;
@@ -674,6 +676,8 @@ void main(void)
 #endif
 
 #shader "fun_draw_watercell"
+
+precision highp float;
 
 uniform mat4 modelview;
 uniform mat4 projection;
