@@ -9,7 +9,13 @@ end
 
 require("apps").default_paths()     -- set search paths to smarter defaults
 
-local cmd=table.remove(arg,1)       -- check what cmd is asked for
+local cmd
+for i=1,#arg do
+	cmd=table.remove(arg,1)       -- check what cmd is asked for
+	if cmd and cmd:sub(1,1)=="-" then cmd=nil end -- ignore args
+	if cmd then break end -- found
+end
+
 if cmd then
 	arg[0]="gamecake."..cmd           -- remember cmd name	
 	require("cmd."..cmd)              -- try and run the actual cmd

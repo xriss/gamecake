@@ -414,7 +414,7 @@ int has_fun=0;
 	else
 	if(has_z)
 	{
-		dolibrary(L,"start"); // mount and run code from that zip
+		dolibrary(L,"cake"); // mount and run code from that zip
 	}
 	else
 	{
@@ -426,13 +426,6 @@ int has_fun=0;
 	dolibrary(L,"lua"); // interactive
 //    dotty(L);
   else if (script == 0 && !has_e && !has_v) {
-	ft=fopen("lua/init.lua","r"); // autostart?
-	if(ft)
-	{
-		fclose(ft);
-		dolibrary(L,"start");
-	}
-	else
     if (lua_stdin_is_tty()) {
       print_version();
       dolibrary(L,"lua"); // interactive

@@ -74,6 +74,48 @@ end
 
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+M.help_text=[[
+gamecake -lcake  # Run a cake in cake mode
+gamecake -lfun   # Run a fun in fun mode
+gamecake -lcmd   # Run a cmd in cmd mode
+
+Mostly we will behave the same as the lua or luajit command, but some 
+filenames will be treated as special. So filename.fun.lua will auto 
+run in fun mode and filename.cake will auto run in cake mode. When 
+running a cake or fun script then the following args can control it.
+
+  --help
+    Print help text and exit
+		gamecake -lcake --help
+		gamecake -lcmd --help
+		
+  --logs
+    Enable all log output. ( essentially a verbose mode )
+
+  --logs=MODE
+	Enables MODE log output only, eg --logs=oven for oven logs only. 
+	Prefixing mode with a - will remove that mode from the logs and a + 
+	will add it and we assume + if neither is present, eg --logs=-oven 
+	will show everything except oven logs.
+
+  --show=win
+    Show window as a normal draggable and resizable window.
+
+  --show=max
+	Show window as a maximised window. Desktop resolution possibly 
+	with a visible title bar and desktop panel still visible.
+
+  --show=full
+	Show window as a full screen window. Desktop resolution no title bar.
+
+  --pixel
+    Disable screen space pixel processing, eg fun scanlines filter.
+
+  --pixel=NUMBER
+	Disable screen space pixel processing and set default window size 
+	to NUMBER view pixels per game pixel.
+]]
+
 --[[#lua.wetgenes.gamecake.oven.bake
 
 
@@ -135,48 +177,7 @@ function M.bake(opts)
 
 	if opts.args.help then
 	
-		print([[
-gamecake -lfun    # Run in fun mode
-gamecake -lcmd    # Run a command
-
-Mostly we will behave the same as the lua command, but if 
-./lua/init.lua exists then it will be automatically run. Some filenames 
-will be treated differently. So filename.fun.lua will auto run in fun 
-mode and filename.cake will auto run in cake mode. When running a cake 
-or fun script then the following args can control it.
-
-Note all of these args must be placed after the -- to stop them being 
-parsed as part of the standard lua command.
-
-  --help
-    Print this help text and exit
-		gamecake -lfun --help
-		
-  --logs
-    Enable all log output.
-
-  --logs=MODE
-	Enables MODE log output only, eg --logs=oven for oven logs only. 
-	Prefixing mode with a - will remove that mode from the logs, eg 
-	--logs=-oven will show everything but oven logs.
-
-  --show=win
-    Show window as a normal draggable and resizable window.
-
-  --show=max
-	Show window as a maximised window. Desktop resolution possibly 
-	with a visible title bar and desktop panel still visible.
-
-  --show=full
-	Show window as a full screen window. Desktop resolution no title bar.
-
-  --pixel
-    Disable screen space pixel processing, eg scanlines filter.
-
-  --pixel=NUMBER
-	Disable screen space pixel processing and set default window size 
-	to NUMBER view pixels per game pixel.
-]])
+		print(M.help_text)
 	
 		os.exit(0)
 	end

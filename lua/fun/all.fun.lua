@@ -296,6 +296,7 @@ function setup_menu(chats)
 		if run and run~="" then
 			oven.opts.fun="lua/fun/"..run
 			oven.next="wetgenes.gamecake.fun.main"
+			print("Running fun file "..oven.opts.fun..".fun.lua")
 		end
 	
 	end

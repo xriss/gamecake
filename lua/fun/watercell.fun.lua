@@ -514,7 +514,7 @@ function main(need)
 	coroutine_resume_and_report_errors( fat_controller ) -- setup
 
 -- after setup we should yield and then perform updates only if requested from a yield
-	local done=false while not done do
+	local done=false ; while not done do
 		need=coroutine.yield()
 		if need.update then
 			coroutine_resume_and_report_errors( fat_controller ) -- update
