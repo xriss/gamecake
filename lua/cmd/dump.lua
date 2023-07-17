@@ -28,18 +28,16 @@ local args=require("cmd.args").bake({inputs=default_inputs{
 
 	{	1,			arg[0].." DIR",	[[
 
-Dump all internal lua files into the given DIR/lua/... Use . to dump 
-all files into ./lua/... but beware this will overwrite existing files.
+Dump all internal lua files into the given DIR/lua/* Use . to dump 
+all files into ./lua/* but beware this will overwrite existing files.
 
-	gamecake -lcmd dump .
+Note that all the files found in lua/* will override our internal 
+files so this can be used to export all the internal scripts and make 
+slight tweaks to them.
 
-All the files in ./lua will override our internal files so this can be 
-used to export all the internal scripts and make slight tweaks to them. 
-
-An exception to this are the very low level workings such as 
-lua/fun.lua library which is usually used with a gamecake -lfun 
-command. These are simply loaded too early in the startup process 
-before this functionality becomes available.
+An exception to this are the very low level workings such as the 
+lua/fun.lua library. These are simply loaded too early in the startup 
+process and this functionality is not available.
 
 	]], },
 
