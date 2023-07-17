@@ -66,6 +66,32 @@ local func=function(...)
 		start="wetgenes.gamecake.fun.main",
 		fun=funname,
 		fps=60,
+		icon=[[
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g g g g g 7 7 7 7 7 7 7 g g g g g g g g 
+g g g g g g g 7 7 7 g g g g g 7 7 7 g g g g g g 
+g g g g g g 7 7 g g g g g g g g g 7 7 g g g g g 
+g g g g g 7 7 g g g g g g g g g g g 7 7 g g g g 
+g g g g g 7 g g 7 7 7 7 g 7 7 7 7 g g 7 g g g g 
+g g g g 7 7 g g 7 g g 7 g 7 7 g 7 g g 7 7 g g g 
+g g g g 7 g g g 7 7 g 7 g 7 7 g 7 g g g 7 g g g 
+g g g g 7 g g g 7 g g 7 7 7 7 g 7 g g g 7 g g g 
+g g g g 7 g g g g g g g g g g g g g g g 7 g g g 
+g g g g 7 g g g g 7 7 7 g 7 g 7 g g g g 7 g g g 
+g g g g 7 g g g g 7 g g g 7 g 7 g g g g 7 g g g 
+g g g g 7 7 g g g 7 7 7 g 7 7 7 g g g 7 7 g g g 
+g g g g g 7 g g g 7 g 7 g g g 7 g g g 7 g g g g 
+g g g g g 7 7 g g 7 7 7 g g g 7 g g 7 7 g g g g 
+g g g g g g 7 7 g g g g g g g g g 7 7 g g g g g 
+g g g g g g g 7 7 7 g g g g g 7 7 7 g g g g g g 
+g g g g g g g g g 7 7 7 7 7 7 7 g g g g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+]],
 		... -- include commandline opts
 	}
 

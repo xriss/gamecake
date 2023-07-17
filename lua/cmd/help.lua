@@ -5,6 +5,7 @@ local splitpath=require("cmd.args").splitpath
 
 local cmds={
 	{ "help",		"List available commands."},
+	{ "dump",		"Dump internal lua files."},
 	{ "swed",		"Swanky Editor."},
 	{ "http",		"Static web server."},
 	{ "gltf",		"Process a 3d thing."},
