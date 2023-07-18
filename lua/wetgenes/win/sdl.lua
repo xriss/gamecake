@@ -124,6 +124,59 @@ sdl.create=function(t)
 		flags[#flags+1]=SDL.window.Hidden
 	end
 
+--[[ -- dump modes
+	do
+		local num_video_displays=SDL.getNumVideoDisplays()
+		for video_display_idx=0,num_video_displays-1 do
+			local num_display_modes=SDL.getNumDisplayModes(video_display_idx)
+			for display_mode_idx=0,num_display_modes-1 do
+				local mode=SDL.getDisplayMode(video_display_idx,display_mode_idx)
+				for n,v in pairs( SDL.pixelFormat ) do
+					if v==mode.format then mode.format_name=n end
+				end
+				dump(mode)
+			end
+		end	
+	end
+]]
+
+	it.screen_mode=t.screen_mode -- try something like "640x480x60.RGB888"
+	
+	if type(it.screen_mode)=="string" then -- convert to mode table
+	
+		local mode={
+			width=640,
+			height=480,
+			refreshRate=0,
+			format=SDL.pixelFormat.RGB888,
+		}
+
+		print( it.screen_mode )
+		local idx=1
+		local names={"width","height","refreshRate"}
+		for s in it.screen_mode:gmatch("([%u%d]+)") do
+			local n=tonumber(s)
+			if tostring(n)==s then -- got a number
+				if names[idx] then -- got a place to put it
+					mode[ names[idx] ]=n
+					idx=idx+1
+				end
+			else
+				n=SDL.pixelFormat[s]
+				if n then -- got a pixel format
+					mode.format=n
+				end
+			end
+--			print(s,n)
+        end
+        it.screen_mode=mode
+	
+	end
+	
+--	dump(it.screen_mode)	
+--	it.screen_mode=nil
+
+
 --[[
 	if     view=="full" then	 flags={SDL.window.Desktop,SDL.window.OpenGL}
 	elseif view=="max"  then	 flags={SDL.window.Maximized,SDL.window.OpenGL}
@@ -138,7 +191,11 @@ sdl.create=function(t)
 		x       = t.x,
 		y       = t.y,
 	})
-
+	
+	if it.screen_mode then
+		assert( it.win:setDisplayMode(it.screen_mode) )
+	end
+	
 	if jit and jit.os=="Windows" then -- windows does not do borderless resize, so, meh
 	else
 		if t.borderless then
@@ -187,7 +244,16 @@ sdl.show=function(it,view)
 
 --  it.win:setResizeable(false) it.win:setBordered(false)
 
-	if     view=="full" then	 it.win:setFullscreen(SDL.window.Desktop)
+	if     view=="full" then
+		if it.screen_mode then -- we want to force this fullscreen mode
+			it.win:setFullscreen(0)
+			it.win:restore()
+			it.win:setSize( it.screen_mode.width , it.screen_mode.height )
+			it.win:setDisplayMode(it.screen_mode)
+			it.win:setFullscreen(SDL.window.Fullscreen)
+		else
+			it.win:setFullscreen(SDL.window.Desktop)
+		end
 	elseif view=="max"  then	 it.win:maximize()
 	else						 it.win:setFullscreen(0) it.win:restore()
 	end
