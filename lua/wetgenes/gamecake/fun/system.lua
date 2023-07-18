@@ -509,7 +509,7 @@ system.configurator=function(opts)
 				shadow=fatpix and "drop" or nil,
 				scale=args.pixel and tonumber(args.pixel) or opts.ss,
 				fps=opts.fps,
-				layers=3,
+				layers=1,
 			},
 			{
 				component="sfx",
@@ -521,41 +521,12 @@ system.configurator=function(opts)
 				cmap=opts.cmap, -- swanky32 palette
 			},
 			{
-				component="tiles",
-				name="tiles",
-				tile_size={8,8},
-				bitmap_size={64,64},
-			},
-			{
 				component="canvas",
 				name="canvas",
 				size={opts.hx,opts.hy},
 				layer=1,
 			},
-			{
-				component="tilemap",
-				name="map",
-				tiles="tiles",
-				tile_size={8,8},
-				tilemap_size={math.ceil(opts.hx/8),math.ceil(opts.hy/8)},
-				layer=2,
-			},
-			{
-				component="sprites",
-				name="sprites",
-				tiles="tiles",
-				layer=2,
-			},
-			{
-				component="tilemap",
-				name="text",
-				tiles="tiles",
-				tile_size={4,8}, -- use half width tiles for font
-				tilemap_size={math.ceil(opts.hx/4),math.ceil(opts.hy/8)},
-				layer=3,
-			},
 			graphics={
-				{0x0000,"_font",0x0340}, -- pre-allocate the 4x8 and 8x8 font area
 			},
 			opts=opts,
 		}
