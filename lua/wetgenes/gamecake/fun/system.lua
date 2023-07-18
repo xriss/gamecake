@@ -214,8 +214,9 @@ end
 
 system.clean=function()
 	system.resume({clean=true})
-	for _,it in ipairs(system.components) do
+	for idx,it in ipairs(system.components) do
 		if it.clean then it.clean() end
+		system.components[idx]=nil
 	end
 	system.is_setup=false
 end

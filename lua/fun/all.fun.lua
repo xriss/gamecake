@@ -122,6 +122,12 @@ local chat_text=[[
 	
 		Input test.
 
+	>fun_screenhooks
+	
+		=run screenhooks
+	
+		3D test.
+
 	>fun_beep
 	
 		=run beep
@@ -152,12 +158,6 @@ local chat_text=[[
 		=run shadertoy
 	
 		Shadertoy test.
-
-	>fun_screenhooks
-	
-		=run screenhooks
-	
-		3D test.
 
 	>fun_starfield
 	
