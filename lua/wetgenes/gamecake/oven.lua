@@ -106,7 +106,14 @@ running a cake or fun script then the following args can control it.
 	with a visible title bar and desktop panel still visible.
 
   --show=full
-	Show window as a full screen window. Desktop resolution no title bar.
+	Show window as a borderless full screen window. Desktop resolution 
+	no title bar.
+
+  --screen=1280x720
+  --screen=1280x720x60
+  --screen=1280x720x60.RGB888
+	When going full screen request this resolution, optional framerate 
+	and optional SDL pixel format.
 
   --pixel
     Disable screen space pixel processing, eg fun scanlines filter.
@@ -358,20 +365,7 @@ os.exit()
 			if inf.x<0 then inf.x=0 end
 			if inf.y<0 then inf.y=0 end
 
-			if wwin.flavour=="raspi" then -- do fullscreen on raspi
-				inf.x=0
-				inf.y=0
-				inf.width=screen.width
-				inf.height=screen.height
-				inf.dest_width=screen.width
-				inf.dest_height=screen.height
-				if not opts.winfullrez then -- set this to disable this x2 hack
-					if inf.height>=480*2 then -- ie a 1080 monitor, double the pixel size
-						inf.width=inf.width/2
-						inf.height=inf.height/2
-					end
-				end
-			end
+			inf.screen_mode=opts.args.screen or opts.screen_mode
 
 			oven.win=wwin.create(inf)
 			oven.win:context({})
@@ -935,6 +929,8 @@ log("oven","caught : ",m.class,m.cmd)
 			repeat
 				finished=oven.serv_pulse(oven)
 			until finished
+			
+			oven.win:show("win") -- this may restore original resolution
 			
 			oven.tasks:sqlite({cmd="close"}) -- shut down the default sqlite databsase so we finish with any out standing writes
 			wtongues.save() -- last thing we do is remember any new text ids used in this run

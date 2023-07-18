@@ -142,18 +142,20 @@ sdl.create=function(t)
 
 	it.screen_mode=t.screen_mode -- try something like "640x480x60.RGB888"
 	
-	if type(it.screen_mode)=="string" then -- convert to mode table
+	if it.screen_mode and ( type(it.screen_mode)~="table" ) then -- convert to mode table?
+	
+		it.screen_mode=tostring(it.screen_mode) -- allow a bool to just pick the default res
 	
 		local mode={
-			width=640,
-			height=480,
+			w=1280,
+			h=720,
 			refreshRate=0,
 			format=SDL.pixelFormat.RGB888,
 		}
 
-		print( it.screen_mode )
+--		print( it.screen_mode )
 		local idx=1
-		local names={"width","height","refreshRate"}
+		local names={"w","h","refreshRate"}
 		for s in it.screen_mode:gmatch("([%u%d]+)") do
 			local n=tonumber(s)
 			if tostring(n)==s then -- got a number
@@ -173,6 +175,7 @@ sdl.create=function(t)
 	
 	end
 	
+--	dump("TRY")	
 --	dump(it.screen_mode)	
 --	it.screen_mode=nil
 
@@ -248,7 +251,7 @@ sdl.show=function(it,view)
 		if it.screen_mode then -- we want to force this fullscreen mode
 			it.win:setFullscreen(0)
 			it.win:restore()
-			it.win:setSize( it.screen_mode.width , it.screen_mode.height )
+			it.win:setSize( it.screen_mode.w , it.screen_mode.h )
 			it.win:setDisplayMode(it.screen_mode)
 			it.win:setFullscreen(SDL.window.Fullscreen)
 		else
