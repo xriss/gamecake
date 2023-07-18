@@ -60,6 +60,12 @@ local chat_text=[[
 	
 		Picish hello.
 
+	>fun_helloswordstone
+	
+		=run helloswordstone
+	
+		Swordstone hello.
+
 
 <cat_game
 
