@@ -134,12 +134,6 @@ local chat_text=[[
 	
 		Simple Synth test.
 
-	>fun_configurator
-	
-		=run configurator
-	
-		Auto upload test.
-
 
 <cat_shader
 
