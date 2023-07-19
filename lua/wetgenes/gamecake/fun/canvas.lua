@@ -86,16 +86,15 @@ canvas.create=function(it,opts)
 -- update the bitmap, but do not draw anything
 		if it.dirty() then
 			it.dirty(false)
-			
 			gl.BindTexture( gl.TEXTURE_2D , it.tex )	
 			gl.TexImage2D(
 				gl.TEXTURE_2D,
 				0,
-				gl.RED,			-- some drivers do not like luminance and want red others demand luminance...
+				gl.RED_OR_LUMINANCE,			-- some drivers do not like luminance and want red others demand luminance...
 				it.grd.width,
 				it.grd.height,
 				0,
-				gl.RED,
+				gl.RED_OR_LUMINANCE,
 				gl.UNSIGNED_BYTE,
 				it.grd.data )
 		end
