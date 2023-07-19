@@ -1,0 +1,36 @@
+
+cd `dirname $0`
+
+# we do not want this one if it exists
+rm gamecake.nix
+
+# remove any test file
+rm game.cake
+
+echo "creating new orphan branch"
+
+git checkout --orphan exetmp
+
+upx -9 ./*
+upx-ucl -9 ./*
+
+echo "adding files to new branch"
+
+git add . && git commit -m"bin bump"
+
+echo "renaming/replacing branch"
+
+git branch -D exe
+git branch -m exe
+
+echo "force pushing"
+
+git push --set-upstream origin -f exe
+
+echo "updating reference to new bin"
+
+cd ..
+git commit -a -m"bin bump"
+./git-pull
+git push
+
