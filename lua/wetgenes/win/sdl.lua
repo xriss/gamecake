@@ -144,7 +144,7 @@ sdl.create=function(t)
 	
 	if it.screen_mode and ( type(it.screen_mode)~="table" ) then -- convert to mode table?
 	
-		it.screen_mode=tostring(it.screen_mode) -- allow a bool to just pick the default res
+		it.screen_mode=tostring(it.screen_mode) -- allow a bool to just pick the default res which is 720p
 	
 		local mode={
 			w=1280,

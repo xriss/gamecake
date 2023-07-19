@@ -11,6 +11,7 @@ local cmds={
 	{ "gltf",		"Process a 3d thing."},
 	{ "grd",		"Process an image."},
 	{ "midi",		"Midi connections."},
+	{ "sdl",		"SDL video tests."},
 }
 for i,v in ipairs(cmds) do
 	v.name=v[1]
