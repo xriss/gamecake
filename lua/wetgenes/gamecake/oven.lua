@@ -110,10 +110,10 @@ running a cake or fun script then the following args can control it.
 	no title bar.
 
   --screen=1280x720
-  --screen=1280x720x60
-  --screen=1280x720x60.RGB888
-	When going full screen request this resolution, optional framerate 
-	and optional SDL pixel format.
+  --screen=1280x720.RGB888
+  --screen=1280x720.RGB888/60
+	When going full screen request this resolution, optional SDL pixel 
+	format and optional framerate.
 
   --pixel
     Disable screen space pixel processing, eg fun scanlines filter.
