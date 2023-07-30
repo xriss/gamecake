@@ -1,28 +1,17 @@
 --
 -- This is fun64 code, you can copy paste it into https://xriss.github.io/fun64/pad/ to run it.
 --
+
 oven.opts.fun="" -- back to menu on reset
+
 hardware,main=system.configurator({
-	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
+	mode="swordstone", -- select a characters+sprites on a 256x128 screen using the swanky32 palette.
 	update=function() update() end, -- called repeatedly to update+draw
 })
 
 
--- we will call this once in the update function
-setup=function()
-
---    system.components.screen.bloom=0
---    system.components.screen.filter=nil
---    system.components.screen.shadow=nil
-    
-    print("Setup complete!")
-
-end
-
-
--- updates are run at 60fps
 update=function()
-    
+
     if setup then setup() setup=nil end
 
     local ctext=system.components.text
@@ -31,6 +20,6 @@ update=function()
 
 	ctext.text_clear(0x01000000*bg) -- clear text forcing a background color
 	
-	ctext.text_print("Hello World!",34,15,fg,bg) -- (text,x,y,color,background)
-	
+	ctext.text_print("Hello World!",(256/4-12)/2,(128/8)/2,fg,bg) -- (text,x,y,color,background)
+
 end

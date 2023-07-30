@@ -43,9 +43,8 @@ nginx/proxy_temp/*
 nginx/logs/*
 nginx/static/*.zip
 
-vbox_arm/*.img
-vbox_arm/*.zip
-vbox_arm/kernel-qemu
+vbox_osx/test
+vbox_arm/roms
 vbox_*/*.log
 
 build/premake-*

@@ -6,5 +6,5 @@ echo " box is shutting down "
 
 echo " waiting and then killing any still running qemu-system-arm "
 sleep 10
-killall qemu-system-arm
+killall qemu-system-aarch64
 

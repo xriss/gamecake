@@ -16,6 +16,7 @@ local fatpix=not(args and args.pixel or false) -- pass --pixel on command line t
 --request this hardware setup !The components will not exist until after main has been called!
 cmap=bitdown.cmap -- use default swanky32 colors
 screen={hx=424,hy=240,ss=3,fps=60}
+oven.opts.fun="" -- back to menu on reset
 hardware={
 	{
 		component="screen",
@@ -513,7 +514,7 @@ function main(need)
 	coroutine_resume_and_report_errors( fat_controller ) -- setup
 
 -- after setup we should yield and then perform updates only if requested from a yield
-	local done=false while not done do
+	local done=false ; while not done do
 		need=coroutine.yield()
 		if need.update then
 			coroutine_resume_and_report_errors( fat_controller ) -- update
@@ -537,6 +538,8 @@ end
 
 
 #shader "fun_step_watercell"
+
+precision highp float;
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -673,6 +676,8 @@ void main(void)
 #endif
 
 #shader "fun_draw_watercell"
+
+precision highp float;
 
 uniform mat4 modelview;
 uniform mat4 projection;

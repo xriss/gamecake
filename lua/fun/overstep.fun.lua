@@ -25,15 +25,16 @@ do
 
 end
 
+oven.opts.fun="" -- back to menu on reset
 hardware,main=system.configurator({
 	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
 	update=function() -- called at a steady 60fps
 		if setup then setup() setup=nil end -- call an optional setup function *once*
-		entities.systems.call("update")
+--		entities.systems.call("update")
 		entities.call("update")
 	end,
 	draw=function() -- called at actual display frame rate
-		entities.systems.call("draw")
+--		entities.systems.call("draw")
 		entities.call("draw")
 	end,
 --	hx=320,hy=180, -- wide screen 40x22.5  tiles (8x8) 1/6 of 1920x1080
@@ -2623,11 +2624,11 @@ b b b b 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 b b b b
 			end
 		end
 
-		if up0.button("b_clr") then
+		if up0.button("b_set") then
 
 			menu.show()
 
-		elseif up0.button("fire_clr") then
+		elseif up0.button("fire_set") then
 
 			for i,item in ipairs(menu.items) do
 			
@@ -4880,7 +4881,7 @@ entities.systems.insert{ caste="yarn",
 			local mx=up.axis("mx") -- get mouse position, it will be nil if no mouse
 			local my=up.axis("my")
 
-			if	up.button("mouse_left_clr") and it.cursor then -- move
+			if	up.button("mouse_left_set") and it.cursor then -- move
 
 				local vx=it.cursor.cx-items.ids.player[0].cx
 				local vy=it.cursor.cy-items.ids.player[0].cy
@@ -4935,7 +4936,7 @@ entities.systems.insert{ caste="yarn",
 			local lx=up.axis("lx") -- get left joystick
 			local ly=up.axis("ly")
 
-			if	up.button("a_clr") and it.cursor then -- move
+			if	up.button("a_set") and it.cursor then -- move
 
 				local vx=it.cursor.cx-items.ids.player[0].cx
 				local vy=it.cursor.cy-items.ids.player[0].cy
@@ -4969,10 +4970,10 @@ entities.systems.insert{ caste="yarn",
 
 		local vx,vy=0,0 -- check keys or dpad movement
 
-		if up.button("pad_up_clr")		then vy=-1 end
-		if up.button("pad_down_clr")	then vy= 1 end
-		if up.button("pad_left_clr")	then vx=-1 end
-		if up.button("pad_right_clr")	then vx= 1 end
+		if up.button("pad_up_set")		then vy=-1 end
+		if up.button("pad_down_set")	then vy= 1 end
+		if up.button("pad_left_set")	then vx=-1 end
+		if up.button("pad_right_set")	then vx= 1 end
 		
 		if not ( vx==0 and vy==0 ) then
 --print("moving",vx,vy)
@@ -4985,7 +4986,7 @@ entities.systems.insert{ caste="yarn",
 
 			entities.systems.yarn.cursor=nil -- do not show if we are using keys
 			
-		elseif	up.button("b_clr") then -- menu
+		elseif	up.button("b_set") then -- menu
 
 print("menu")
 

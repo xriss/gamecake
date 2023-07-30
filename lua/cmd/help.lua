@@ -5,10 +5,13 @@ local splitpath=require("cmd.args").splitpath
 
 local cmds={
 	{ "help",		"List available commands."},
+	{ "dump",		"Dump internal lua files."},
+	{ "swed",		"Swanky Editor."},
 	{ "http",		"Static web server."},
 	{ "gltf",		"Process a 3d thing."},
 	{ "grd",		"Process an image."},
 	{ "midi",		"Midi connections."},
+	{ "sdl",		"SDL video tests."},
 }
 for i,v in ipairs(cmds) do
 	v.name=v[1]

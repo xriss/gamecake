@@ -47,8 +47,7 @@ M.bake=function(oven,main)
 		fov=0,
 	})
 
---	local skeys=oven.rebake("wetgenes.gamecake.spew.keys").setup{max_up=6,pad_map=2} -- upto 6 players, two on keyboard 4-6 on controllers
---	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps").setup(6)
+	local skeys=oven.rebake("wetgenes.gamecake.spew.keys").setup{max_up=6,pad_map=2} -- upto 6 players, two on keyboard 4-6 on controllers
 	local sscores=oven.rebake("wetgenes.gamecake.spew.scores").setup(6)
 
 
@@ -66,6 +65,7 @@ main.setup=function()
 	main.loads()
 
 	main.system=oven.rebake("wetgenes.gamecake.fun.system").load_and_setup()
+	
 --		.load_and_setup("test",
 --		"lua/"..(M.modname):gsub("%.","/"):gsub("[^/]+$",""))
 

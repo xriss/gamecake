@@ -757,6 +757,79 @@ end
 		gl.UniformMatrix4f(n,cache_set_m4(p,vname,m4))
 	end
 	
+
+-- probe opengl stuff to guess what works and what doesnt
+
+	code.probe_all=function()
+	
+		for n,f in pairs(code.probes) do
+
+			pcall(f)
+
+		end
+
+	end
+	
+	code.probes={}
+	
+-- some drivers/version do not like luminance and want red others demand luminance...
+-- so we create a GL.RED_OR_LUMINANCE that is set to the right one
+
+	code.probes.luminance=function()
+	
+		local gl=code
+
+		local log,dump=require("wetgenes.logs"):export("log","dump")
+
+		log( "oven","probe","GL_RED_OR_LUMINANCE")
+
+		local wgrd=require("wetgenes.grd")
+
+		local g=wgrd.create("U8_INDEXED", 16 , 16 , 1)
+		
+		local tex=gl.GenTexture()
+
+		gl.BindTexture( gl.TEXTURE_2D , tex )
+
+		gl.GetError() -- clear error
+		gl.TexImage2D(
+			gl.TEXTURE_2D,
+			0,
+			gl.RED, -- try RED
+			16, -- width
+			16, -- height
+			0,
+			gl.RED,
+			gl.UNSIGNED_BYTE,
+			g.data )
+		if gl.GetError()==0 then -- RED is good
+			gl.RED_OR_LUMINANCE=gl.RED			
+			log( "oven","probe","GL_RED_OR_LUMINANCE = GL_RED")
+		end
+		
+		gl.GetError() -- clear error
+		gl.TexImage2D(
+			gl.TEXTURE_2D,
+			0,
+			gl.LUMINANCE, -- try LUMINANCE
+			16, -- width
+			16, -- height
+			0,
+			gl.LUMINANCE,
+			gl.UNSIGNED_BYTE,
+			g.data )
+		if gl.GetError()==0 then -- LUMINANCE is good
+			gl.RED_OR_LUMINANCE=gl.LUMINANCE
+			log( "oven","probe","GL_RED_OR_LUMINANCE = GL_LUMINANCE")
+		end
+
+		gl.BindTexture( gl.TEXTURE_2D , 0 )
+		gl.DeleteTexture( tex )
+
+	end
+
+	code.probe_all()
+
 	return code
 end
 

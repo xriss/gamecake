@@ -1,9 +1,10 @@
 
+
 local chatdown=require("wetgenes.gamecake.fun.chatdown")
 
 oven.opts.fun="" -- back to menu on reset
 hardware,main=system.configurator({
-	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
+	mode="swordstone", -- select the standard 320x240 screen using the swanky32 palette.
 	update=function() update() end, -- called repeatedly to update+draw
 })
 
@@ -16,106 +17,159 @@ local chat_text=[[
 
 #example
 
-	=title Hello!!!
+	=title Example Fun64 programs.
 
-	A rare breed of NPC who will fulfil all your conversational desires for 
-	a very good price.
-
-	=sir sir/madam
-
-	>convo
-
-		Is this the right room for a conversation?
-		
-	>welcome
-	
-		...ERROR...EOF...PLEASE...RESTART...
 
 <welcome
 
-	Good Morning {sir},
+	>cat_hello
+
+		Hello World!
+		
+	>cat_game
 	
-	>morning
+		Games
 
-		Good morning to you too.
-
-	>afternoon
-
-		I think you will find it is now afternoon.
-
-	>sir
-
-		How dare you call me {sir}!
-
-<sir
-
-	My apologies, I am afraid that I am but an NPC with very little 
-	brain, how might I address you?
+	>cat_toy
 	
-	>welcome.1?sir!=madam
+		Toys
 
-		You may address me as Madam.
-
-		=sir madam
-
-	>welcome.2?sir!=God
-
-		You may address me as God.
-
-		=sir God
-
-	>welcome.3?sir!=sir
-
-		You may address me as Sir.
-
-		=sir sir
-
-<afternoon
+	>cat_test
 	
-	Then good afternoon {sir},
+		Tests
+
+	>cat_shader
 	
-	>convo
+		GLES 2.0 Shaders
 
-<morning
-	
-	and how may I help {sir} today?
-	
-	>convo
+<cat_hello
 
-
-<convo
-
-	Indeed it is, would you like the full conversation or just the quick natter?
-
-	>convo_full
-	
-		How long is the full conversation?
-
-	>convo_quick
-
-		A quick natter sounds just perfect.
-
-<convo_full
-
-	The full conversation is very full and long so much so that you 
-	will have to page through many pages before you get to make a 
-	decision
-	
-	>
-		Like this?
-	<
-	
-	Yes just like this. In fact I think you can see that we are already 
-	doing it.
-			
-	
 	>welcome
+		
+		..
 
-<convo_quick
-
-	...
+	>fun_helloworld
 	
+		=run helloworld
+	
+		Fun64 hello.
+
+	>fun_hellopicish
+	
+		=run hellopicish
+	
+		Picish hello.
+
+	>fun_helloswordstone
+	
+		=run helloswordstone
+	
+		Swordstone hello.
+
+
+<cat_game
+
 	>welcome
+		
+		..
+
+	>fun_overstep
+	
+		=run overstep
+	
+		Roguelike demo.
+
+	>fun_invaders
+	
+		=run invaders
+	
+		Invaders.
+
+	>fun_platform
+	
+		=run platform
+	
+		Platform multiplayer.
+
+	>fun_platobj
+	
+		=run platobj
+	
+		Platform, walk jump and talk.
+
+<cat_toy
+
+	>welcome
+		
+		..
+
+	>fun_palette
+	
+		=run palette
+	
+		Learn the Swanky32 Palette.
+
+	>fun_chatdown
+	
+		=run chatdown
+	
+		Conversation Example
+
+
+<cat_test
+
+	>welcome
+		
+		..
+
+	>fun_input
+	
+		=run input
+	
+		Input test.
+
+	>fun_screenhooks
+	
+		=run screenhooks
+	
+		3D test.
+
+	>fun_beep
+	
+		=run beep
+	
+		Simple Synth test.
+
+
+<cat_shader
+
+	>welcome
+		
+		..
+
+	>fun_raymarch
+	
+		=run raymarch
+	
+		Raymarching.
+
+	>fun_shadertoy
+	
+		=run shadertoy
+	
+		Shadertoy test.
+
+	>fun_starfield
+	
+		=run starfield
+	
+		Starfield in a shader.
+
+	>fun_watercell
+	
+		=run watercell
+	
+		Cellular Automata in a shader.
 
 ]]
 
@@ -144,9 +198,9 @@ function setup_menu(chats)
 
 	menu.stack={}
 
-	menu.width=80-4
+	menu.width=(system.components.screen.hx/4)
 	menu.cursor=0
-	menu.cx=math.floor((80-menu.width)/2)
+	menu.cx=math.floor(((system.components.screen.hx/4)-menu.width)/2)
 	menu.cy=0
 	
 	function menu.show(items,subject_name,topic_name)
@@ -236,6 +290,14 @@ function setup_menu(chats)
 			if menu.cursor>menu.items.cursor_max then menu.cursor=1 end
 		
 		end
+		
+		local run=chats:get_tag("run")
+		
+		if run and run~="" then
+			oven.opts.fun="lua/fun/"..run
+			oven.next="wetgenes.gamecake.fun.main"
+			print("Running fun file "..oven.opts.fun..".fun.lua")
+		end
 	
 	end
 	
@@ -285,25 +347,30 @@ function setup_menu(chats)
 	end
 
 	menu.draw=function()
+	
+		local fg1=30
+		local fg0=31
+		local bg1=8
+		local bg0=9
 
 		local tprint=system.components.text.text_print
 		local tgrd=system.components.text.tilemap_grd
 
 		if not menu.lines then return end
 		
-		menu.cy=math.floor((30-(#menu.lines+4))/2)
+		menu.cy=math.floor(((system.components.screen.hy/8)-(#menu.lines+4))/2)
 		
-		tgrd:clip(menu.cx,menu.cy,0,menu.width,#menu.lines+4,1):clear(0x02000000)
-		tgrd:clip(menu.cx+2,menu.cy+1,0,menu.width-4,#menu.lines+4-2,1):clear(0x01000000)
+		tgrd:clip(menu.cx,menu.cy,0,menu.width,#menu.lines+4,1):clear(0x01000000*bg1)
+		tgrd:clip(menu.cx+2,menu.cy+1,0,menu.width-4,#menu.lines+4-2,1):clear(0x01000000*bg0)
 		
 		if menu.items.title then
 			local title=" "..(menu.items.title).." "
 			local wo2=math.floor(#title/2)
-			tprint(title,menu.cx+(menu.width/2)-wo2,menu.cy+0,31,2)
+			tprint(title,menu.cx+(menu.width/2)-wo2,menu.cy+0,fg0,bg1)
 		end
 		
 		for i,v in ipairs(menu.lines) do
-			tprint(v.s,menu.cx+4,menu.cy+i+1,v.color or 31,1)
+			tprint(v.s,menu.cx+4,menu.cy+i+1,v.color or fg0,bg0)
 		end
 		
 		local it=nil
@@ -311,7 +378,7 @@ function setup_menu(chats)
 			if it~=menu.lines[i].item then -- first line only
 				it=menu.lines[i].item
 				if it.cursor == menu.cursor then
-					tprint(">",menu.cx+4,menu.cy+i+1,31,1)
+					tprint(">",menu.cx+4,menu.cy+i+1,fg0,bg0)
 				end
 			end
 		end

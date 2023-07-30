@@ -127,7 +127,10 @@ autocell.create=function(it,opts)
 		if it.system.ticks%it.rate==0 then
 
 -- setup to draw
-			gl.Disable(gl.BLEND)
+--			gl.Disable(gl.BLEND)
+			gl.state.set({
+				[gl.BLEND]					=	gl.FALSE,
+			})
 
 			local fbo=it.frames[it.frame%2+1] -- %2+1 looks backwards but is the right math to pick the other frame
 			fbo:bind_frame()

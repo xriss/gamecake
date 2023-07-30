@@ -11,9 +11,12 @@ fi
 
 # commands
 
+require.sh clang
 require.sh gcc
 require.sh make
 require.sh luajit
+require.sh patchelf
+
 
 # libs
 
@@ -40,7 +43,6 @@ if [ "$1" = "--extra" ]; then
 # commands
 
 	require.sh upx
-	require.sh clang
 	require.sh /usr/bin/i686-w64-mingw32-gcc
 
 #vagrant and virtualbox for building in controlled environments

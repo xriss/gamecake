@@ -43,19 +43,19 @@ end
 local a=arg or {}
 local argx={}
 
-local done_start=false -- only remove the first -lstart we see
+local done_cake=false -- only remove the first -lcake we see
 local done_apk=false
 local done_zip=false
 
 for i=1,#a do
 	local v=tostring(a[i])
 
-	if v=="-lstart" and not done_start then
-		done_start=true
+	if v=="-lstart" and not done_cake then
+		done_cake=true
 		v=nil
 	elseif v:sub(-4)==".apk" and not done_apk then -- the first apk only
 		wzips.add_apk_file(v)
-		done_apk=true	
+		done_apk=true
 		v=nil
 	elseif v:sub(-4)==".zip" and not done_zip then -- the first zip only
 		wzips.add_zip_file(v)
@@ -81,5 +81,11 @@ if str then
 
 	func(unpack(argx))
 
-	os.exit(0) -- force close so that we do not end up at a console?
+else
+
+	local m_oven=require("wetgenes.gamecake.oven")
+	print(m_oven.help_text)
+
 end
+
+	os.exit(0) -- force close so that we do not end up at a console?

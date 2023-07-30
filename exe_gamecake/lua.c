@@ -282,7 +282,8 @@ static int collectargs (char **argv, int *pi, int *pv, int *pe) {
         return i;
     switch (argv[i][1]) {  /* option */
       case '-':
-        notail(argv[i]);
+// ignore long args as they will just be passed on to script
+//        notail(argv[i]);
         return (argv[i+1] != NULL ? i+1 : 0);
       case '\0':
         return i;
@@ -413,7 +414,7 @@ int has_fun=0;
 	else
 	if(has_z)
 	{
-		dolibrary(L,"start"); // mount and run code from that zip
+		dolibrary(L,"cake"); // mount and run code from that zip
 	}
 	else
 	{
@@ -425,13 +426,6 @@ int has_fun=0;
 	dolibrary(L,"lua"); // interactive
 //    dotty(L);
   else if (script == 0 && !has_e && !has_v) {
-	ft=fopen("lua/init.lua","r"); // autostart?
-	if(ft)
-	{
-		fclose(ft);
-		dolibrary(L,"start");
-	}
-	else
     if (lua_stdin_is_tty()) {
       print_version();
       dolibrary(L,"lua"); // interactive

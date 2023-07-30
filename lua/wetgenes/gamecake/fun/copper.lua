@@ -50,7 +50,7 @@ copper.create=function(it,opts)
 
 -- set shader program name and callback to fill in uniform values
 
-	it.shader_name="fun_copper_back_y3"
+	it.shader_name="" -- "fun_copper_back_y3"
 	it.shader_uniforms={
 		ticks={0,0,0,0},
 		sizpos={it.hx,it.hy,0,0},
@@ -66,6 +66,8 @@ copper.create=function(it,opts)
 	end
 
 	it.draw=function()
+	
+		if not it.shader_name or it.shader_name=="" then return end
 
 		local layer=it.screen.layers[it.layer]
 

@@ -1,19 +1,19 @@
 cd `dirname $0`
 
 # Get the starting offset of the root partition (not sure about trailing s)
-PART_BOOT_START=$( parted raspi.img -ms unit s print | grep "^1" | cut -f 2 -d: | cut -f 1 -ds )
-PART_BOOT_SIZE=$(  parted raspi.img -ms unit s print | grep "^1" | cut -f 4 -d: | cut -f 1 -ds )
-PART_ROOT_START=$( parted raspi.img -ms unit s print | grep "^2" | cut -f 2 -d: | cut -f 1 -ds )
-PART_ROOT_SIZE=$(  parted raspi.img -ms unit s print | grep "^2" | cut -f 4 -d: | cut -f 1 -ds )
+PART_BOOT_START=$( parted roms/raspi.img -ms unit s print | grep "^1" | cut -f 2 -d: | cut -f 1 -ds )
+PART_BOOT_SIZE=$(  parted roms/raspi.img -ms unit s print | grep "^1" | cut -f 4 -d: | cut -f 1 -ds )
+PART_ROOT_START=$( parted roms/raspi.img -ms unit s print | grep "^2" | cut -f 2 -d: | cut -f 1 -ds )
+PART_ROOT_SIZE=$(  parted roms/raspi.img -ms unit s print | grep "^2" | cut -f 4 -d: | cut -f 1 -ds )
 
 echo " mounting boot "
 mkdir boot
-sudo mount -o rw,loop,offset=$(($PART_BOOT_START * 512)),sizelimit=$(($PART_BOOT_SIZE*512)) raspi.img ./boot
+sudo mount -o rw,loop,offset=$(($PART_BOOT_START * 512)),sizelimit=$(($PART_BOOT_SIZE*512)) roms/raspi.img ./boot
 
 
 echo " mounting root "
 mkdir root
-sudo mount -o rw,loop,offset=$(($PART_ROOT_START * 512)),sizelimit=$(($PART_ROOT_SIZE*512)) raspi.img ./root
+sudo mount -o rw,loop,offset=$(($PART_ROOT_START * 512)),sizelimit=$(($PART_ROOT_SIZE*512)) roms/raspi.img ./root
 #ls ./root
 
 

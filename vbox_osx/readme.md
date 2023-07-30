@@ -42,3 +42,52 @@ github rather than from the local machine.
 So if you want to use this for something else you would want to scrub 
 that last part.
 
+
+VAGRANT HAS FUCKED SOMETHING
+
+provisioning fails, but vagrant ssh still works, so have added vagrant 
+as the fallback password in the Vagrantfile and need to do the same on 
+the box like so in a live fix before this can work.
+
+	vagrant up
+
+wait for it to fail
+
+	vagrant ssh
+
+then on the box
+
+	sudo bash
+	passwd vagrant
+	vagrant
+	vagrant
+	exit
+	exit
+
+
+Now you can edit the Vagrantfile to enable the vagrant password and we are 
+back to where we should have started.
+
+	nano Vagrantfile
+
+
+and finally halt the machine to cleanup
+
+	vagrant halt
+
+
+Now you can unset the password in the vagrantfile, so that vagrant ssh 
+doesnt expect a password. IE undo what you just tweaked
+
+	nano Vagrantfile
+
+
+All this will have set the password to vagrant for the vagrant user and let 
+vagrant unfuck itself and so that finally we can just use it like normal
+
+	vagrant up
+	vagrant provision
+
+To do the provisioning that previously failed (note updating brew takes 
+forever)
+

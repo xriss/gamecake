@@ -74,6 +74,55 @@ end
 
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+M.help_text=[[
+gamecake -lcake  # Run a cake in cake mode
+gamecake -lfun   # Run a fun in fun mode
+gamecake -lcmd   # Run a cmd in cmd mode
+
+Mostly we will behave the same as the lua or luajit command, but some 
+filenames will be treated as special. So filename.fun.lua will auto 
+run in fun mode and filename.cake will auto run in cake mode. When 
+running a cake or fun script then the following args can control it.
+
+  --help
+    Print help text and exit
+		gamecake -lcake --help
+		gamecake -lcmd --help
+		
+  --logs
+    Enable all log output. ( essentially a verbose mode )
+
+  --logs=MODE
+	Enables MODE log output only, eg --logs=oven for oven logs only. 
+	Prefixing mode with a - will remove that mode from the logs and a + 
+	will add it and we assume + if neither is present, eg --logs=-oven 
+	will show everything except oven logs.
+
+  --show=win
+    Show window as a normal draggable and resizable window.
+
+  --show=max
+	Show window as a maximised window. Desktop resolution possibly 
+	with a visible title bar and desktop panel still visible.
+
+  --show=full
+	Show window as a borderless full screen window. Desktop resolution 
+	no title bar.
+
+  --screen=1280x720
+  --screen=1280x720.RGB888
+  --screen=1280x720.RGB888/60
+	When going full screen request this resolution, optional SDL pixel 
+	format and optional framerate.
+
+  --pixel
+    Disable screen space pixel processing, eg fun scanlines filter.
+
+  --pixel=NUMBER
+	Disable screen space pixel processing and set default window size 
+	to NUMBER view pixels per game pixel.
+]]
+
 --[[#lua.wetgenes.gamecake.oven.bake
 
 
@@ -132,6 +181,13 @@ function M.bake(opts)
 		end
 	end
 --dprint(opts)
+
+	if opts.args.help then
+	
+		print(M.help_text)
+	
+		os.exit(0)
+	end
 
 	opts.width=opts.width or 0
 	opts.height=opts.height or 0
@@ -309,20 +365,7 @@ os.exit()
 			if inf.x<0 then inf.x=0 end
 			if inf.y<0 then inf.y=0 end
 
-			if wwin.flavour=="raspi" then -- do fullscreen on raspi
-				inf.x=0
-				inf.y=0
-				inf.width=screen.width
-				inf.height=screen.height
-				inf.dest_width=screen.width
-				inf.dest_height=screen.height
-				if not opts.winfullrez then -- set this to disable this x2 hack
-					if inf.height>=480*2 then -- ie a 1080 monitor, double the pixel size
-						inf.width=inf.width/2
-						inf.height=inf.height/2
-					end
-				end
-			end
+			inf.screen_mode=opts.args.screen or opts.screen_mode
 
 			oven.win=wwin.create(inf)
 			oven.win:context({})
@@ -886,6 +929,8 @@ log("oven","caught : ",m.class,m.cmd)
 			repeat
 				finished=oven.serv_pulse(oven)
 			until finished
+			
+			oven.win:show("win") -- this may restore original resolution
 			
 			oven.tasks:sqlite({cmd="close"}) -- shut down the default sqlite databsase so we finish with any out standing writes
 			wtongues.save() -- last thing we do is remember any new text ids used in this run

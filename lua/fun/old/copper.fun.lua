@@ -7,6 +7,7 @@ local bitdown=require("wetgenes.gamecake.fun.bitdown")
 local bitdown_font_4x8=require("wetgenes.gamecake.fun.bitdown_font_4x8")
 
 
+oven.opts.fun="" -- back to menu on reset
 
 local ls=function(...) print(wstr.dump(...)) end
 

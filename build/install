@@ -21,7 +21,7 @@ if ! [[ -x "$(command -v require.sh)" ]] ; then
 
 fi
 
-arg_flags=("luajit=git sdl2=2.0.22 help mingw android")
+arg_flags=("luajit=git sdl2=2.28.1 help mingw android")
 
 arg_get() {
 key="$1"
@@ -221,7 +221,7 @@ if [ ! -z "$( arg_get luajit )" ]; then
 
 		echo "using latest git"
 
-		git clone https://luajit.org/git/luajit.git || cd luajit && git pull
+		git clone https://luajit.org/git/luajit.git && cd luajit || cd luajit && git pull
 
 	else
 
@@ -403,9 +403,9 @@ if [ ! -z "$( arg_get sdl2 )" ]; then
 
 		# force static link by deleting any dynamic versions
 		sudo rm -f /usr/local/lib/libSDL2.so
-		sudo rm -f /usr/local/lib/libSDL2.dylib
 
 		cd ..
+
 	fi
 fi
 

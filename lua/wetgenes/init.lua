@@ -254,6 +254,7 @@ M.savescripts=function(basedir)
 
 	assert(basedir, "missing destination path")
 
+	local wpath=require("wetgenes.path")
 	local wbake=require("wetgenes.bake")
 	local wgc=require("wetgenes.gamecake.core")
 	local names=wgc.list_cache_strings()
@@ -261,11 +262,11 @@ M.savescripts=function(basedir)
 	for n,fname in pairs(names) do
 
 		local data=wgc.get_cache_string(fname)
+		local fpath=wpath.join(basedir,fname)
+		print( "saving" , #data , " bytes as ", fpath )
 		
-		print( "saving" , #data , " bytes as ", basedir..fname )
-		
-		wbake.create_dir_for_file( basedir..fname )
-		wbake.writefile( basedir..fname , data )
+		wbake.create_dir_for_file( fpath )
+		wbake.writefile( fpath , data )
 		
 	end
 

@@ -11,6 +11,7 @@ graphics and call the provided update/draw callbacks.
 
 ]]
 -----------------------------------------------------------------------------
+oven.opts.fun="" -- back to menu on reset
 hardware,main=system.configurator({
 	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
 	update=function() -- called at a steady 60fps

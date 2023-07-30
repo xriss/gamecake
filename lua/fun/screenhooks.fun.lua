@@ -1,4 +1,5 @@
 
+oven.opts.fun="" -- back to menu on reset
 hardware,main=system.configurator({
 	mode="fun64",
 	graphics=function() return graphics end,
@@ -58,13 +59,14 @@ local function ball_create()
 		for y=0,7 do
 			for x=0,15 do
 				if ((x+y)%2)==check then
+
+					tp(	xy(x+0,y+0) )
 					tp(	xy(x+0,y+0) )
 					tp(	xy(x+1,y+0) )
 					tp(	xy(x+0,y+1) )
-					
-					tp(	xy(x+1,y+0) )
 					tp(	xy(x+1,y+1) )
-					tp(	xy(x+0,y+1) )
+					tp(	xy(x+1,y+1) )
+
 				end
 				
 			end
@@ -97,6 +99,10 @@ update=function()
 -- add a some custom gl rendering to copper background layer
 		system.components.screen.layers[1].hooks[1]=function(layer)
 
+			gl.state.set({
+				[gl.CULL_FACE]					=	gl.TRUE,
+			})
+
 			gl.PushMatrix()
 			gl.Translate(160,120,0)
 			gl.Rotate(system.ticks%360,1,1,1)
@@ -104,6 +110,10 @@ update=function()
 			ball.draw({gl.C4(0xff00)},1)
 			ball.draw({gl.C4(0xffff)},2)
 			gl.PopMatrix()
+
+			gl.state.set({
+				[gl.CULL_FACE]					=	gl.FALSE,
+			})
 			
 		end
 			
