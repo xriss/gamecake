@@ -7,6 +7,6 @@ Type=Application
 Name=GameCake
 Comment=GameCake
 TryExec=gamecake
-Exec=gamecake %F
+Exec=gamecake -lfun %F
 Icon=gamecake
 
