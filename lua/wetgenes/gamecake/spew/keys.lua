@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 local wstr=require("wetgenes.string")
 
 --module
@@ -173,6 +175,39 @@ M.bake=function(oven,keys)
 
 -- convert keys or whatever into recaps changes
 	function keys.msg(m)
+
+--dump(m)
+		local ups=recaps.ups(1) -- write all keys into player 1
+		if m.class=="mouse" then
+			if m.xraw and m.yraw then
+				ups.set_axis({px=m.xraw,py=m.yraw})
+			end
+			if m.action==1 then
+				ups.set_keyslot(4,"mouse_"..m.keycode)
+			elseif m.action==-1 then
+				if m.keycode==4 or m.keycode==5 then -- only up never down, so need to fake it
+					ups.set_keyslot(4,"mouse_"..m.keycode)
+				end
+				ups.set_keyslot(4,nil)
+			end
+		elseif m.class=="key" then
+			if     ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) then
+				if     m.action== 1 then ups.set_keyslot(1,"shift")
+				elseif m.action==-1 then ups.set_keyslot(1,nil) end
+			elseif ( m.keyname=="control" or m.keyname=="control_l" or m.keyname=="control_r" ) then
+				if     m.action== 1 then ups.set_keyslot(2,"control")
+				elseif m.action==-1 then ups.set_keyslot(2,nil) end
+			elseif ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
+				if     m.action== 1 then ups.set_keyslot(3,"alt")
+				elseif m.action==-1 then ups.set_keyslot(3,nil) end
+			else
+				if     m.action== 1 or m.action==0 then ups.set_keyslot(4,m.keyname)
+				elseif m.action==-1 then ups.set_keyslot(4,nil) end
+			end
+		elseif m.class=="text" then
+			ups.set_text(m.text)
+		end
+
 
 		if not keys.up then return end -- no key maping
 		if m.skeys then return end -- already processed

@@ -71,8 +71,16 @@ M.bake=function(oven,recaps)
 		recap.idx=idx
 		
 
+		-- now_* is live data
+		-- state_* is safe to read data for this frame
 		function recap.reset(flow)
 			recap.flow=flow or "none" -- do not play or record by default
+			recap.state_text={} -- list of text input
+			recap.now_text={}
+			recap.state_keys={} -- list of key names with shift ctrl alt qualifiers , 
+			recap.now_keys={}
+			recap.keyslots={} -- current state of keys as we press and release them
+			-- the above arrays are added too on key down and key repeat so natural typing
 			recap.state={}
 			recap.now={}
 			recap.state_axis={}
@@ -139,6 +147,26 @@ M.bake=function(oven,recaps)
 		end
 
 		
+-- use this to add a piece of text to the text list
+		function recap.set_text(v)
+			recap.now_text[#recap.now_text+1]=v
+		end
+-- use this to set a key slot and add to keys list
+		function recap.set_keyslot(n,v)
+--			if recap.keyslots[n]~=v then -- on change
+				recap.keyslots[n]=v
+				local keyname
+				for i=1,4 do
+					if recap.keyslots[i] then
+						if keyname then keyname=keyname.." "..recap.keyslots[i]
+						else keyname=recap.keyslots[i] end
+					end
+				end
+				if keyname then
+					recap.now_keys[#recap.now_keys+1]=keyname
+				end
+--			end
+		end
 -- use this to set a joysticks axis position
 		function recap.set_axis(m)
 			for n,v in pairs(m) do
@@ -247,6 +275,12 @@ M.bake=function(oven,recaps)
 					recap.state_axis[n]=v
 					recap.now_axis[n]=nil
 				end
+				
+				recap.state_keys=recap.now_keys
+				recap.now_keys={}
+
+				recap.state_text=recap.now_text
+				recap.now_text={}
 
 			end
 			
