@@ -83,15 +83,25 @@ draw=function()
 	local s=i.."up : "..table.concat(a," ")
 	ctext.text_print(s,2,y,fg,0) y=y+1
 
+	for n,v in pairs(up.state or {}) do
+		local ne=n:sub(-4)
+		if ne=="_set" or ne=="_clr" then
+			if v then
+				lines[#lines+1]="button : "..i.." : "..n
+			end
+		end
+	end
+
 	y=y+1
     end
 
 	local up=ups(1)
+
 	for i,v in ipairs(up.state_keys) do		-- key presses and repeat key presses
-		lines[#lines+1]="key  "..v
+		lines[#lines+1]="key : "..v
     end
 	for i,v in ipairs(up.state_text) do		-- and decoded to UTF8 text
-		lines[#lines+1]="text "..v
+		lines[#lines+1]="text : "..v
     end
     
     while #lines > 14 do table.remove(lines,1) end
