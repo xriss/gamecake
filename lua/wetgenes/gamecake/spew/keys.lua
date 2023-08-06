@@ -191,14 +191,14 @@ M.bake=function(oven,keys)
 				ups.set_keyslot(4,nil)
 			end
 		elseif m.class=="key" then
-			if     ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) then
-				if     m.action== 1 then ups.set_keyslot(1,"shift")
+			if     ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
+				if     m.action== 1 then ups.set_keyslot(1,"alt")
 				elseif m.action==-1 then ups.set_keyslot(1,nil) end
 			elseif ( m.keyname=="control" or m.keyname=="control_l" or m.keyname=="control_r" ) then
-				if     m.action== 1 then ups.set_keyslot(2,"control")
+				if     m.action== 1 then ups.set_keyslot(2,"ctrl")
 				elseif m.action==-1 then ups.set_keyslot(2,nil) end
-			elseif ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
-				if     m.action== 1 then ups.set_keyslot(3,"alt")
+			elseif ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) then
+				if     m.action== 1 then ups.set_keyslot(3,"shift")
 				elseif m.action==-1 then ups.set_keyslot(3,nil) end
 			else
 				if     m.action== 1 or m.action==0 then ups.set_keyslot(4,m.keyname)

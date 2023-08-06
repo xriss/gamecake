@@ -157,7 +157,7 @@ M.bake=function(oven,recaps)
 			local keyname
 			for i=1,4 do
 				if recap.keyslots[i] then
-					if keyname then keyname=keyname.." "..recap.keyslots[i]
+					if keyname then keyname=keyname.."+"..recap.keyslots[i]
 					else keyname=recap.keyslots[i] end
 				end
 			end
