@@ -153,19 +153,15 @@ M.bake=function(oven,recaps)
 		end
 -- use this to set a key slot and add to keys list
 		function recap.set_keyslot(n,v)
---			if recap.keyslots[n]~=v then -- on change
-				recap.keyslots[n]=v
-				local keyname
-				for i=1,4 do
-					if recap.keyslots[i] then
-						if keyname then keyname=keyname.." "..recap.keyslots[i]
-						else keyname=recap.keyslots[i] end
-					end
+			recap.keyslots[n]=v
+			local keyname
+			for i=1,4 do
+				if recap.keyslots[i] then
+					if keyname then keyname=keyname.." "..recap.keyslots[i]
+					else keyname=recap.keyslots[i] end
 				end
-				if keyname then
-					recap.now_keys[#recap.now_keys+1]=keyname
-				end
---			end
+			end
+			recap.now_keys[#recap.now_keys+1]=keyname or ""
 		end
 -- use this to set a joysticks axis position
 		function recap.set_axis(m)
