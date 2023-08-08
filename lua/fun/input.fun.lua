@@ -6,6 +6,7 @@ hardware,main=system.configurator({
 	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
 	update=function() update() end, -- called repeatedly to update
 	draw=function() draw() end, -- called repeatedly to draw
+	msg=function(m) msg(m) end, -- handle msgs
 })
 
 local wstr=require("wetgenes.string")
@@ -24,6 +25,40 @@ end
 
 
 lines={}
+
+-- handle raw key press
+msg=function(m)
+
+
+--print(wstr.dump(m))
+
+    local s
+			    
+    if m.class=="mouse" then
+	s=string.format("%6.2f %8s %2d %3d,%3d %s %s",m.time,m.class,m.action,m.x,m.y,tostring(m.keycode or ""),m.keyname or "")
+
+    elseif m.class=="touch" then
+	s=string.format("%6.2f %8s %2d %3d,%3d %3d %3d",m.time,m.class,m.action,m.x,m.y,m.id or 0,m.pressure or 0)
+
+    elseif m.class=="padaxis" then
+	s=string.format("%6.2f %8s %2d %8s %5d %3d",m.time,m.class,m.id or 0,m.name,m.value,m.code)
+
+    elseif m.class=="padkey" then
+	s=string.format("%6.2f %8s %2d %8s %3d %3d",m.time,m.class,m.id or 0,m.name,m.value,m.code)
+
+    elseif m.class=="key" then
+	s=string.format("%6.2f %8s %2d %3s %16s",m.time,m.class,m.action,m.ascii,m.keyname)
+
+    else
+	s=string.format("%6.2f %8s %2d",m.time or 0,m.class,m.action or 0)
+    end
+
+    lines[#lines+1]=s
+    
+    while #lines > 14 do table.remove(lines,1) end
+
+end
+
 
 -- updates are run at 60fps
 update=function()
@@ -57,13 +92,7 @@ draw=function()
 	    "touch",							-- touch buttons
 	    }
 	    
--- left stick and trigger		lx ly lz
--- right stick and trigger		rx ry rz
--- dpad							dx dy
--- mouse absolute				px py
--- mouse relative				mx my
--- touch						tx ty
-	local ax={"lx","ly","lz","rx","ry","rz","dx","dy","px","py","mx","my","tx","ty"} -- axis name
+	local ax={"lx","ly","lz","rx","ry","rz","dx","dy","mx","my","tx","ty"} -- axis name
 	
 	local a={}
 		
@@ -83,29 +112,9 @@ draw=function()
 	local s=i.."up : "..table.concat(a," ")
 	ctext.text_print(s,2,y,fg,0) y=y+1
 
-	for n,v in pairs(up.state or {}) do
-		local ne=n:sub(-4)
-		if ne=="_set" or ne=="_clr" then
-			if v then
-				lines[#lines+1]="button : "..i.." : "..n
-			end
-		end
-	end
-
 	y=y+1
     end
 
-	local up=ups(1)
-
-	for i,v in ipairs(up.state_keys) do		-- key presses and repeat key presses
-		lines[#lines+1]="key : "..v
-    end
-	for i,v in ipairs(up.state_text) do		-- and decoded to UTF8 text
-		lines[#lines+1]="text : "..v
-    end
-    
-    while #lines > 14 do table.remove(lines,1) end
-    
     for i=1,#lines do
 	ctext.text_print(lines[i],1,y,fg,0)
 	y=y+1
