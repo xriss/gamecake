@@ -152,7 +152,19 @@ function wmaster.setup(widget,def)
 		local ups=skeys.ups()
 		if ups then -- use skeys / srecaps code 
 
-
+			for i,v in ipairs(ups.state_keys) do		-- key presses and repeat key presses
+				local name=v:lower()
+				local action=master.keys[name]
+				if action then -- add an action message
+					oven.win:push_msg({
+						class="action",
+						action=1,
+						id=action.id,
+						user=action.user,
+					})
+				end
+			end
+			
 			if master.focus then
 				skeys.set_opts("typing",true)
 			else
@@ -391,9 +403,6 @@ function wmaster.setup(widget,def)
 	
 	function master.msg(widget,m)
 
--- handle shift key states and sending of action msgs triggered by keys
-		master.keystate_msg(m)
-	
 		local fo=master.focus and master.focus.msg and master.focus
 		if fo and fo~=master then
 			fo:msg(m) -- this will catch mouse ups as we lose focus
@@ -715,20 +724,8 @@ function wmaster.setup(widget,def)
 					end
 				end
 				if v.key then -- map keys
-					for m in v.key:gmatch("[^ ]+") do
-						local ks=nil
-						for k in m:gmatch("[^+]+") do
-							k=k:lower()
-							if     k=="alt" then    ks="alt"
-							elseif k=="ctrl" then   ks=ks and ks.."_ctrl"  or "ctrl"
-							elseif k=="shift" then  ks=ks and ks.."_shift" or "shift"
-							elseif k~="" then
-								ks=ks or "none"
-								master.keys[ks]=master.keys[ks] or {}
-								master.keys[ks][k]=v
-							end
-						end
-					end
+					local name=v.key:lower()
+					master.keys[name]=v
 				end
 				if v.json then -- parse json data chunk
 --					print(v.json)
@@ -740,65 +737,10 @@ function wmaster.setup(widget,def)
 
 	end
 
-	master.keystate_reset=function()
-		master.keystate_alt=false
-		master.keystate_ctrl=false
-		master.keystate_shift=false
-		master.keystate="none"
-	end
-
-	master.keystate_update=function()
-		local ks=nil
-		if master.keystate_alt   then  ks="alt"                          end
-		if master.keystate_ctrl  then  ks=ks and ks.."_ctrl"  or "ctrl"  end
-		if master.keystate_shift then  ks=ks and ks.."_shift" or "shift" end
-		master.keystate=ks or "none"
-	end
-
-	master.keystate_msg=function(m)
-
---[[
-		if m.class=="action" then
-			local action=master.get_action(m.id,m.user)
-			dump(m)
-			dump(action)
-		end
-]]
-
-		if m.class=="key" then
-			if     ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) then
-				if     m.action== 1 then master.keystate_shift=true
-				elseif m.action==-1 then master.keystate_shift=false end
-				master.keystate_update()
-			elseif ( m.keyname=="control" or m.keyname=="control_l" or m.keyname=="control_r" ) then
-				if     m.action== 1 then master.keystate_ctrl=true
-				elseif m.action==-1 then master.keystate_ctrl=false end
-				master.keystate_update()
-			elseif ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
-				if     m.action== 1 then master.keystate_alt=true
-				elseif m.action==-1 then master.keystate_alt=false end
-				master.keystate_update()
-			end
-			local name=(m.keyname or ""):lower()
-			local action=(master.keys[master.keystate] or {})[name]
-			if action then -- add an action message
-				oven.win:push_msg({
-					class="action",
-					action=m.action,
-					time=m.time,
-					id=action.id,
-					user=action.user,
-				})
-			end
-		end
-
-	end
-
 -- auto load default actions, call master.reset_actions() to remove these default actions
 	do
 		master.reset_actions()
 		master.load_actions()
-		master.keystate_reset()
 	end
 
 
