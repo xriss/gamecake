@@ -146,13 +146,22 @@ M.bake=function(oven,recaps)
 			return fixaxis( recap.axis(name) )
 		end
 
+-- get keys list
+		function recap.keys()
+			return recap.now_keys
+		end
+		
+-- get text list
+		function recap.text()
+			return recap.now_text
+		end
 		
 -- use this to add a piece of text to the text list
 		function recap.set_text(v)
 			recap.now_text[#recap.now_text+1]=v
 		end
 -- use this to set a key slot and add to keys list
-		function recap.set_keyslot(n,v)
+		function recap.set_keyslot(n,v,action)
 			recap.keyslots[n]=v
 			local keyname
 			for i=1,4 do
