@@ -6,7 +6,6 @@ hardware,main=system.configurator({
 	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
 	update=function() update() end, -- called repeatedly to update
 	draw=function() draw() end, -- called repeatedly to draw
-	msg=function(m) msg(m) end, -- handle msgs
 })
 
 local wstr=require("wetgenes.string")
@@ -26,39 +25,6 @@ end
 
 lines={}
 
--- handle raw key press
-msg=function(m)
-
-
---print(wstr.dump(m))
-
-    local s
-			    
-    if m.class=="mouse" then
-	s=string.format("%6.2f %8s %2d %3d,%3d %s %s",m.time,m.class,m.action,m.x,m.y,tostring(m.keycode or ""),m.keyname or "")
-
-    elseif m.class=="touch" then
-	s=string.format("%6.2f %8s %2d %3d,%3d %3d %3d",m.time,m.class,m.action,m.x,m.y,m.id or 0,m.pressure or 0)
-
-    elseif m.class=="padaxis" then
-	s=string.format("%6.2f %8s %2d %8s %5d %3d",m.time,m.class,m.id or 0,m.name,m.value,m.code)
-
-    elseif m.class=="padkey" then
-	s=string.format("%6.2f %8s %2d %8s %3d %3d",m.time,m.class,m.id or 0,m.name,m.value,m.code)
-
-    elseif m.class=="key" then
-	s=string.format("%6.2f %8s %2d %3s %16s",m.time,m.class,m.action,m.ascii,m.keyname)
-
-    else
-	s=string.format("%6.2f %8s %2d",m.time or 0,m.class,m.action or 0)
-    end
-
-    lines[#lines+1]=s
-    
-    while #lines > 14 do table.remove(lines,1) end
-
-end
-
 
 -- updates are run at 60fps
 update=function()
@@ -76,6 +42,37 @@ draw=function()
 
     cmap.text_clear(0x01000000*bg) -- clear text forcing a background color
 	
+	
+	for _,m in ipairs( ups(1).msgs() ) do -- a cache of msgs can be found here
+
+		local s
+					
+		if m.class=="mouse" then
+		s=string.format("%6.2f %8s %2d %3d,%3d %s %s",m.time,m.class,m.action,m.x,m.y,tostring(m.keycode or ""),m.keyname or "")
+
+		elseif m.class=="touch" then
+		s=string.format("%6.2f %8s %2d %3d,%3d %3d %3d",m.time,m.class,m.action,m.x,m.y,m.id or 0,m.pressure or 0)
+
+		elseif m.class=="padaxis" then
+		s=string.format("%6.2f %8s %2d %8s %5d %3d",m.time,m.class,m.id or 0,m.name,m.value,m.code)
+
+		elseif m.class=="padkey" then
+		s=string.format("%6.2f %8s %2d %8s %3d %3d",m.time,m.class,m.id or 0,m.name,m.value,m.code)
+
+		elseif m.class=="key" then
+		s=string.format("%6.2f %8s %2d %16s %s",m.time,m.class,m.action,m.keyname,m.qualifiers or "")
+
+		elseif m.class=="text" then
+		s=string.format("%6.2f %8s    %16s ",m.time,m.class,m.text)
+
+		else
+		s=string.format("%6.2f %8s %2d",m.time or 0,m.class,m.action or 0)
+		end
+
+		lines[#lines+1]=s
+	end
+
+	while #lines > 14 do table.remove(lines,1) end
 	
     local y=1
 	

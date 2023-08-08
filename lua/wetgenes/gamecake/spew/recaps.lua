@@ -58,7 +58,24 @@ M.bake=function(oven,recaps)
 					end
 				end
 				if t>0 then return math.floor(n/t) end
-			end		
+			end
+			
+			up.axisfixed=function(name)
+				local n=0
+				local t=0
+				for i=1,#recaps.up do
+					local v=recaps.up[i].axisfixed(name)
+					if v then
+						n=n+v
+						t=t+1
+					end
+				end
+				if t>0 then return math.floor(n/t) end
+			end
+
+			up.msgs=function(name)
+				return recaps.up[1].msgs(name)
+			end
 
 			return up
 		end
@@ -73,6 +90,12 @@ M.bake=function(oven,recaps)
 
 		function recap.reset(flow)
 			recap.flow=flow or "none" -- do not play or record by default
+
+			recap.state_msgs={} -- list of msgs for this tick
+			recap.now_msgs={} -- live list that gets swapped into state
+			recap.now_qualifiers={} -- flags of "alt" , "ctrl" , "shift" , "win"  in 1,2,3,4 so we know which keys are held down
+			recap.now_qualifiers_text=nil -- string of the above flags joined by + or nil
+			
 			recap.state={}
 			recap.now={}
 			recap.state_axis={}
@@ -88,6 +111,16 @@ M.bake=function(oven,recaps)
 			
 		end
 		
+		recap.build_qualifiers_text=function()
+			local s
+			local add=function(key) if key then if s then s=s.."+"..key else s=key end end end
+			add(recap.now_qualifiers[1])
+			add(recap.now_qualifiers[2])
+			add(recap.now_qualifiers[3])
+			add(recap.now_qualifiers[4])
+			recap.now_qualifiers_text=s
+		end
+		
 		function recap.set(nam,dat) -- set the volatile data,this gets copied into state before it should be used
 			recap.now[nam]=dat
 		end
@@ -100,6 +133,13 @@ M.bake=function(oven,recaps)
 		end
 		
 
+
+		function recap.msgs(class) -- list of msgs for the last tick with optional simple class filter
+			if class then
+				return recap.state_msgs[class] or {}
+			end
+			return recap.state_msgs or {}
+		end
 
 		function recap.button(name) -- return state "valid" frame data not current "volatile" frame data
 			if name then
@@ -135,10 +175,44 @@ M.bake=function(oven,recaps)
 			end
 		end
 		recap.axisfixed=function(name)
-			return fixaxis( recap.axis(name) )
+			local ax=recap.axis(name)
+			if ax then return fixaxis( ax ) end
+			return nil
 		end
 
 		
+-- use this to copy and remember a msg
+		function recap.set_msg(mm)
+			local m={}
+			for n,v in pairs(mm) do m[n]=v end -- copy top level only
+			recap.now_msgs[#recap.now_msgs+1]=m -- remember in main list
+			if m.class then -- msg will have a class but just in case
+				local list=recap.now_msgs[ m.class ]
+				if not list then list={} ; recap.now_msgs[ m.class ]=list end -- start new class list
+				list[ #list+1 ]=m -- also remember in class list
+			end
+			if m.class=="key" then
+				m.qualifiers=recap.now_qualifiers_text -- add our cached qualifiers to key messages
+				if     ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
+					if     m.action== 1 then recap.now_qualifiers[1]="alt"
+					elseif m.action==-1 then recap.now_qualifiers[1]=false end
+					recap.build_qualifiers_text()
+				elseif ( m.keyname=="control" or m.keyname=="control_l" or m.keyname=="control_r" ) then
+					if     m.action== 1 then recap.now_qualifiers[2]="ctrl"
+					elseif m.action==-1 then recap.now_qualifiers[2]=false end
+					recap.build_qualifiers_text()
+				elseif ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) then
+					if     m.action== 1 then recap.now_qualifiers[3]="shift"
+					elseif m.action==-1 then recap.now_qualifiers[3]=false end
+					recap.build_qualifiers_text()
+				elseif ( m.keyname=="gui" or m.keyname=="left gui" or m.keyname=="right gui" ) then -- gui/command/windows key?
+					if     m.action== 1 then recap.now_qualifiers[4]="win"
+					elseif m.action==-1 then recap.now_qualifiers[4]=false end
+					recap.build_qualifiers_text()
+				end
+			end
+		end
+
 -- use this to set a joysticks axis position
 		function recap.set_axis(m)
 			for n,v in pairs(m) do
@@ -247,6 +321,9 @@ M.bake=function(oven,recaps)
 					recap.state_axis[n]=v
 					recap.now_axis[n]=nil
 				end
+				
+				recap.state_msgs=recap.now_msgs -- use this copy of any messages
+				recap.now_msgs={} -- start a new list
 
 			end
 			

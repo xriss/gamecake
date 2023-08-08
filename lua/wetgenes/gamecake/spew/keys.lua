@@ -174,6 +174,8 @@ M.bake=function(oven,keys)
 -- convert keys or whatever into recaps changes
 	function keys.msg(m)
 
+		recaps.ups(1).set_msg(m) -- copy msg
+
 		if not keys.up then return end -- no key maping
 		if m.skeys then return end -- already processed
 
@@ -204,7 +206,7 @@ M.bake=function(oven,keys)
 		end
 
 		function key.msg(m)
-
+		
 			local used=false
 			local ups=recaps.ups(key.idx)
 --			if not ups then return end -- nowhere to send the data
