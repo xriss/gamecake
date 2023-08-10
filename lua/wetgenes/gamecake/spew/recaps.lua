@@ -192,7 +192,6 @@ M.bake=function(oven,recaps)
 				list[ #list+1 ]=m -- also remember in class list
 			end
 			if m.class=="key" then
-				m.qualifiers=recap.now_qualifiers_text -- add our cached qualifiers to key messages
 				if     ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
 					if     m.action== 1 then recap.now_qualifiers[1]="alt"
 					elseif m.action==-1 then recap.now_qualifiers[1]=false end
@@ -210,6 +209,7 @@ M.bake=function(oven,recaps)
 					elseif m.action==-1 then recap.now_qualifiers[4]=false end
 					recap.build_qualifiers_text()
 				end
+				m.qualifiers=recap.now_qualifiers_text -- add our cached qualifiers to key messages
 			end
 		end
 
