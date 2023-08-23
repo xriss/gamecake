@@ -146,6 +146,7 @@ modules and sharing state between them.
 function M.bake(opts)
 
 	local oven={}
+	oven.is={}
 	wwin.oven=wwin.oven or oven -- store a global oven on first use
 
 	if opts.hints then -- pass hints from opts to sdl
