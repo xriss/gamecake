@@ -177,7 +177,7 @@ M.bake=function(oven,recaps)
 		recap.axisfixed=function(name)
 			local ax=recap.axis(name)
 			if ax then return fixaxis( ax ) end
-			return nil
+			return 0
 		end
 
 		
