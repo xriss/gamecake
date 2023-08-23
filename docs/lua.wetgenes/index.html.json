@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 575,
+   "count": 577,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 568,
+   "count": 570,
    "name": "lua.wetgenes"
   },
   {
@@ -610,7 +610,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 155,
+   "count": 157,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -896,6 +896,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.oven.bake"
+  },
+  {
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.toaster"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.toaster.bake"
   },
   {
    "count": 59,
@@ -2496,7 +2504,7 @@
  "_list": [
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 568,
+   "count": 570,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -3394,7 +3402,7 @@
   },
   {
    "body": "",
-   "count": 155,
+   "count": 157,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -3946,6 +3954,22 @@
    "line": 126,
    "name": "lua.wetgenes.gamecake.oven.bake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
+  },
+  {
+   "body": "<pre><code>oven=require(&quot;wetgenes.gamecake.toaster&quot;).bake(opts)\n</code></pre>\n<p>A cut down oven without opengl or even file access intended to be used \nin a sub process or task.</p>\n",
+   "count": 2,
+   "file": "../lua/wetgenes/gamecake/toaster.lua",
+   "line": 13,
+   "name": "lua.wetgenes.gamecake.toaster",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua"
+  },
+  {
+   "body": "<pre><code>oven=wetgenes.gamecake.toaster.bake(opts)\n</code></pre>\n<p>Bake creates an instance of a lua module bound to an oven state. Here \nwe are creating the main state that other modules will then bind to.</p>\n<p>Modules are then bound together using rebake...</p>\n<pre><code>b=oven.rebake(nameb)\nc=oven.rebake(namec)\n</code></pre>\n<p>All of these will be connected by the same oven and circular \ndependencies should work with the caveat that just because you have the \ntable for a baked module does not mean that it has all been filled in \nyet.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/toaster.lua",
+   "line": 31,
+   "name": "lua.wetgenes.gamecake.toaster.bake",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua"
   },
   {
    "body": "<pre><code>local widgets=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;)\n</code></pre>\n<p>A collection of widgets, rendered using gles2 code and controlled \nusing the mouse, keyboard or a joystick. EG click fire and move \nleft/right to adjust a slider value.</p>\n<p>Widgets must be created and bound to an oven, using the \noven.rebake function.</p>\n<p>This has undergone a number of rewrites as we try to simplify the \nwidget creation and layout process. Eventually we ended up with a \nfixed size system of widget placement so every widget must have a \nknown size in advance, however we allow scaling to occur so for \ninstance building a 256x256 widget does not mean that it has to be \ndisplayed at 256x256 it just means it will be square.</p>\n<p>The basic layout just lets you place these widgets in other widgets \nas left to right lines. So as long as you get your sizes right you \ncan easily place things just using a list and without keeping track \nof the current position.</p>\n<p>Other layout options are available, such as absolute positioning for \nfull control and we have simple custom skin versions of the buttons \nas well rather than the built in skins.</p>\n<p>All value data is handled by data structures that contain ranges and \nresolutions for data allowing the same data to be bound to multiple \ndisplay widgets. For instance the same data can be linked to the \nposition of a slider as well as the content of a text display. I \nthink the kids call this sort of thing an MVC pattern but that&#39;s a \nterribly dull name.</p>\n<p>Swanky paint is probably the most advanced used of the widgets so far\nbut I suspect we will be making a simple text editor in the near \nfuture. Designed for advanced in game tweaking of text files.</p>\n",

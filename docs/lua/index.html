@@ -242,7 +242,9 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules.can"><span>/lua.wetgenes.gamecake.fun.yarn.rules.can</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.yarn.rules.set"><span>/lua.wetgenes.gamecake.fun.yarn.rules.set</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.oven"><span>/lua.wetgenes.gamecake.oven</span></a>
 
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.oven.bake"><span>/lua.wetgenes.gamecake.oven.bake</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.widgets"><span>/lua.wetgenes.gamecake.widgets</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.oven.bake"><span>/lua.wetgenes.gamecake.oven.bake</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.toaster"><span>/lua.wetgenes.gamecake.toaster</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.toaster.bake"><span>/lua.wetgenes.gamecake.toaster.bake</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.widgets"><span>/lua.wetgenes.gamecake.widgets</span></a>
 <a class="par" href="../../docs/lua.wetgenes.gamecake.widgets.button"><span>/lua.wetgenes.gamecake.widgets.button</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.widgets.button.setup"><span>/lua.wetgenes.gamecake.widgets.button.setup</span></a>
@@ -3116,6 +3118,34 @@ pointer for a module and bake is used to get the a module bound to
 an oven.</p>
 <p>By using this bound state we reduce the verbosity of connecting 
 modules and sharing state between them.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.toaster">lua.wetgenes.gamecake.toaster</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L13">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
+<div><pre><code>oven=require(&quot;wetgenes.gamecake.toaster&quot;).bake(opts)
+</code></pre>
+<p>A cut down oven without opengl or even file access intended to be used 
+in a sub process or task.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.toaster.bake">lua.wetgenes.gamecake.toaster.bake</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L31">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
+<div><pre><code>oven=wetgenes.gamecake.toaster.bake(opts)
+</code></pre>
+<p>Bake creates an instance of a lua module bound to an oven state. Here 
+we are creating the main state that other modules will then bind to.</p>
+<p>Modules are then bound together using rebake...</p>
+<pre><code>b=oven.rebake(nameb)
+c=oven.rebake(namec)
+</code></pre>
+<p>All of these will be connected by the same oven and circular 
+dependencies should work with the caveat that just because you have the 
+table for a baked module does not mean that it has all been filled in 
+yet.</p>
 </div>
 </div>
 
