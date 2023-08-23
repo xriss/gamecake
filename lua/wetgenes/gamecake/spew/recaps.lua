@@ -6,6 +6,29 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+
+-- these should be configurable
+		local powzone=2				-- walk helper
+		local minzone=4095			-- deadzone
+		local maxzone=32767-4096	-- run helper
+
+		local fixaxis=function(n)
+			local fix=function(n)
+				local n=(n-minzone)/(maxzone-minzone)
+				if n<0 then return 0 end
+				if n>1 then return 1 end
+				return math.pow(n,powzone)
+			end
+			n=n or 0
+			if n < 0 then
+				return -fix(-n)
+			else
+				return fix(n)
+			end
+		end
+
+
+
 M.bake=function(oven,recaps)
 
 	recaps=recaps or {} 
@@ -61,16 +84,9 @@ M.bake=function(oven,recaps)
 			end
 			
 			up.axisfixed=function(name)
-				local n=0
-				local t=0
-				for i=1,#recaps.up do
-					local v=recaps.up[i].axisfixed(name)
-					if v then
-						n=n+v
-						t=t+1
-					end
-				end
-				if t>0 then return math.floor(n/t) end
+				local t=up.axis(name)
+				if t then return fixaxis(t) end
+				return 0
 			end
 
 			up.msgs=function(name)
@@ -155,25 +171,6 @@ M.bake=function(oven,recaps)
 			return recap.state_axis -- return all axis if no name given
 		end
 
--- these should be configurable
-		local powzone=2				-- walk helper
-		local minzone=4095			-- deadzone
-		local maxzone=32767-4096	-- run helper
-
-		local fixaxis=function(n)
-			local fix=function(n)
-				local n=(n-minzone)/(maxzone-minzone)
-				if n<0 then return 0 end
-				if n>1 then return 1 end
-				return math.pow(n,powzone)
-			end
-			n=n or 0
-			if n < 0 then
-				return -fix(-n)
-			else
-				return fix(n)
-			end
-		end
 		recap.axisfixed=function(name)
 			local ax=recap.axis(name)
 			if ax then return fixaxis( ax ) end
