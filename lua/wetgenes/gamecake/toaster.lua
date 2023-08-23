@@ -61,16 +61,7 @@ function M.bake(opts)
 -- you may perform this yourself if you want more oven control
 --
 	function oven.preheat()
-
-		if opts.start then
-			if type(opts.start)=="string" then
-				oven.next=oven.rebake(opts.start)
-			else
-				oven.next=opts.start
-			end
-			oven.main=oven.next
-		end
-		
+		oven.next=opts.start
 		return oven
 	end
 
@@ -119,58 +110,31 @@ function M.bake(opts)
 		end		
 	end
 
+
+-- simply call into now if the function exists
+
 	function oven.setup()	
-		if oven.now and oven.now.setup then
-			oven.now.setup()
-		end
+		if oven.now and oven.now.setup then return oven.now.setup() end
 	end
 
 	function oven.clean()
-		if oven.now and oven.now.clean then
-			oven.now.clean()
-		end
+		if oven.now and oven.now.clean then return oven.now.clean() end
 	end
 
-	oven.ticks=0
 	function oven.update()
-		oven.ticks=(oven.ticks+1)%0x100000000	-- 32bit update tick counter
-
-		if oven.update_co then -- resume until it dies
-			if coroutine.status(oven.update_co)~="dead" then
-				assert_resume(oven.update_co) -- run it, may need more than one resume before it finishes
-				return
-			else
-				oven.update_co=nil
-			end
-		end
-
-		if not oven.update_co then -- create a new co and run it once
-			local f=function()
-				oven.change()
-				if oven.now and oven.now.update then
-					oven.now.update()
-				end
-			end
-			oven.update_co=coroutine.create(f)
-			assert_resume(oven.update_co)
-		end
+		if oven.now and oven.now.update then return oven.now.update() end
 	end
 
-	
-
--- no draw?
 	function oven.draw() 
-		if oven.now and oven.now.draw then
-			oven.now.draw()
-		end
+		if oven.now and oven.now.draw then return oven.now.draw() end
 	end
 
--- no msgs?
 	function oven.msgs()
-		if oven.now and oven.now.msgs then
-			oven.now.msgs()
-		end
+		if oven.now and oven.now.msgs then return oven.now.msgs() end
 	end
+
+
+
 
 -- a busy blocking loop
 	function oven.serv(oven)
