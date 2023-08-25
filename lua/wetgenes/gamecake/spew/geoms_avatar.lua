@@ -674,16 +674,17 @@ void main(void)
 			
 --			log("avatar",anim.name,#fs)
 			
-			geoms_avatar.bonetexs[anim.name]=textures.create({
-				id="avatar/bonetexs/"..anim.name,
-				gl_data=wpack.save_array(fs,"f32"),
-				gl_width=width,
-				gl_height=height,
-				gl_internal=gl.RGBA32F,
-				gl_format=gl.RGBA,
-				gl_type=gl.FLOAT,
-			})
-
+			if textures then
+				geoms_avatar.bonetexs[anim.name]=textures.create({
+					id="avatar/bonetexs/"..anim.name,
+					gl_data=wpack.save_array(fs,"f32"),
+					gl_width=width,
+					gl_height=height,
+					gl_internal=gl.RGBA32F,
+					gl_format=gl.RGBA,
+					gl_type=gl.FLOAT,
+				})
+			end
 		end
 		
 	end
@@ -780,10 +781,11 @@ void main(void)
 				gl.Uniform1f( p:uniform("animframe"), avatar.frame )
 			end
 
-			gl.UniformMatrix4f( p:uniform("bones"), avatar.bones )
-
-			gl.Uniform4f( p:uniform("material_colors"), avatar.material_colors )
-			gl.Uniform4f( p:uniform("material_values"), avatar.material_values )
+			if avatar.bones then
+				gl.UniformMatrix4f( p:uniform("bones"), avatar.bones )
+				gl.Uniform4f( p:uniform("material_colors"), avatar.material_colors )
+				gl.Uniform4f( p:uniform("material_values"), avatar.material_values )
+			end
 			
 		end
 

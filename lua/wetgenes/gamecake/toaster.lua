@@ -82,7 +82,8 @@ function M.bake(opts)
 		return ret
 	end
 
-	function oven.change()
+	function oven.change(oven_next)
+		if oven_next then oven.next=oven_next end
 		if oven.next then
 		
 			oven.clean()

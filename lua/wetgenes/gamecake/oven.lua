@@ -542,7 +542,8 @@ require("gles").CheckError() -- uhm this fixes an error?
 			oven.times.draw=oven.times.create()
 		end
 
-		function oven.change()
+		function oven.change(oven_next)
+		if oven_next then oven.next=oven_next end
 
 		-- handle oven changes
 
