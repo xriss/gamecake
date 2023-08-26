@@ -73,14 +73,15 @@ M.bake=function(oven,shadow)
 	end
 
 	shadow.update=function()
-		if shadow.fbo.w ~= shadow.mapsize or shadow.fbo.h ~= shadow.mapsize then -- auto resize
-			shadow.fbo:resize( shadow.mapsize , shadow.mapsize , -1 )
-		end
 	end
 	
 --	shadow.default="0.0,0.0,0.0,0.0"
 	shadow.draw_head=function(scene,shadow_idx)
 	
+		if shadow.fbo.w ~= shadow.mapsize or shadow.fbo.h ~= shadow.mapsize then -- auto resize
+			shadow.fbo:resize( shadow.mapsize , shadow.mapsize , -1 )
+		end
+
 -- special shadow transform to make the area around 0 more detailed
 --		gl.program_defs["DRAW_SHADOW_SQUISH"]=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SQUISH
 		gl.program_defs["DRAW_SHADOW_SQUISH"]=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SQUISH

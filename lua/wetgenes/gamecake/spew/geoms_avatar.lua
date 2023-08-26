@@ -269,6 +269,7 @@ M.bake=function(oven,geoms_avatar)
 
 		geoms_avatar.build_texture_anims()
 
+if gl then
 	gl.program_source("avatar_gltf",[[
 
 #version 300 es
@@ -510,7 +511,7 @@ void main(void)
 #endif //FRAGMENT_SHADER
 
 ]])
-
+end
 	end
 	
 	function geoms_avatar.build_bone_masks(avatar)
@@ -593,6 +594,7 @@ void main(void)
 --			avatar.fixtex:upload()
 
 --		else
+if gl then
 			avatar.fixtex=textures.create({
 				gl_data=wpack.save_array(ts,"f32"),
 				gl_table=ts,
@@ -602,6 +604,7 @@ void main(void)
 				gl_format=gl.RGBA,
 				gl_type=gl.FLOAT,
 			})
+end
 --		end
 
 	end
@@ -834,8 +837,9 @@ void main(void)
 				wgrdcanvas.cmap_ramp(g,keys)
 			end
 		end
-		oven.cake.images.unload(avatar.image) -- force a reload
-
+		if gl then
+			oven.cake.images.unload(avatar.image) -- force a reload
+		end
 
 
 		local obj=wgeom.new()
@@ -1196,12 +1200,14 @@ void main(void)
 			avatar.map=wgrd.create(wgrd.FMT_U8_RGBA_PREMULT,64,16,1)
 			avatar.map:clear(0xffffffff)
 			
-			avatar.image=oven.cake.images.load("avatar/"..tostring(avatar),"avatar/"..tostring(avatar),function() return avatar.map end)
-			avatar.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
-			avatar.image.TEXTURE_WRAP_T		=	gl.CLAMP_TO_EDGE
-			avatar.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
-			avatar.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
-
+			if gl then
+				avatar.image=oven.cake.images.load("avatar/"..tostring(avatar),"avatar/"..tostring(avatar),function() return avatar.map end)
+				avatar.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
+				avatar.image.TEXTURE_WRAP_T		=	gl.CLAMP_TO_EDGE
+				avatar.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
+				avatar.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
+			end
+			
 			geoms_avatar.build_texture_tweak(avatar)
 			geoms_avatar.build_bone_masks(avatar)
 

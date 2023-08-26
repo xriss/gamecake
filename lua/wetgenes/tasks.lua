@@ -566,7 +566,7 @@ M.create=function(tasks)
 	tasks.thread={}		-- preemptive tasks
 	tasks.task={}		-- cooperative tasks
 	
-	tasks.linda=lanes.linda()
+	tasks.linda=tasks.linda or lanes.linda() -- can pass in a linda to use
 	tasks.colinda=M.create_colinda(tasks.linda)
 
 	return tasks

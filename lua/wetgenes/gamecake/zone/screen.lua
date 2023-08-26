@@ -41,8 +41,9 @@ M.bake=function(oven,screen)
 	screen.loads=function()
 
 		local filename="lua/"..string.gsub(M.modname,"%.","/")..".glsl"
-		gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
-
+		if gl then
+			gl.shader_sources( assert(wzips.readfile(filename),"file not found: "..filename) , filename )
+		end
 	end
 
 
@@ -62,7 +63,7 @@ M.bake=function(oven,screen)
 --			TWEAK=0,
 --			FOG_COLOR= " 0.10 , 0.10 , 0.20 , 0.75 ",
 --			FOG_CONFIG=" 0.99 , 1.00 , 0.00 , 0.00 ",
-			DEPTH_RANGE_REVERSE=gl.DEPTH_RANGE_REVERSE or nil,
+			DEPTH_RANGE_REVERSE=gl and gl.DEPTH_RANGE_REVERSE or nil,
 		},
 		
 		zone_screen_build_occlusion={
@@ -74,7 +75,7 @@ M.bake=function(oven,screen)
 			SHADOW_SAMPLES=3,
 --			SHADOW=" 0.0 , 0.0 , 0.0 , 0.0 ",
 --			SHADOW_SQUISH=1,
-			DEPTH_RANGE_REVERSE=gl.DEPTH_RANGE_REVERSE or nil,
+			DEPTH_RANGE_REVERSE=gl and gl.DEPTH_RANGE_REVERSE or nil,
 		},
 		
 		zone_screen_build_dark={

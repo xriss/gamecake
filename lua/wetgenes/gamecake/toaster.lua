@@ -56,6 +56,8 @@ function M.bake(opts)
 	
 	oven.baked={}
 
+	oven.tasks=require("wetgenes.tasks").create({linda=opts.linda})
+
 --
 -- preheat a normal oven
 -- you may perform this yourself if you want more oven control
@@ -72,7 +74,7 @@ function M.bake(opts)
 		local ret=oven.baked[name]
 		
 		if not ret then
-	
+--print("rebake",name)	
 			ret={modname=name}
 			oven.baked[name]=ret -- need to create and remember here so we can always rebake even if the result is not filled in yet
 			ret=assert(require(name)).bake(oven,ret)
