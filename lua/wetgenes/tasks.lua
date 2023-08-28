@@ -87,10 +87,22 @@ M.cocall=function(...)
 		coroutines[n]=coroutine.create(f)
 	end
 
+	local start_time=os.time()
 	repeat
+		local dump=false
+		local time=os.time()-start_time
+		if time >=10 then
+			start_time=os.time()
+			dump=true
+		end
+		
 		local runcount=0
 		for n,c in pairs(coroutines) do
 			if coroutine.status( c )=="suspended" then
+
+if dump then
+	print( debug.traceback( c , "long time waiting" ) )
+end
 				runcount=runcount+1
 				local ok , err = coroutine.resume( c )
 				assert( ok , debug.traceback( c , err ) )
