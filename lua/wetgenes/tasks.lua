@@ -51,8 +51,10 @@ are in a task and want to talk to another task.
 ]]
 M.do_memo=function(linda,memo,timeout)
 	memo.id=tostring(memo) -- should be a unique string, the address of the memo table
+log("memo",memo.task,memo.id)
 	if linda:send( timeout , memo.task , memo ) then -- send on memo.task (a public name of another task)
 		local ok,r=linda:receive( timeout , memo.id ) -- receive the result on memo.id
+log("memo",memo.task,memo.id,"done")
 		return r
 	end
 end
@@ -115,7 +117,7 @@ Internal function to manage creation of all objects with unique ids.
 ]]
 M.tasks_functions.add_id=function(tasks,it)
 	it=it or {}
-	it.id=it.id or #tasks.ids+1 -- auto generate id
+	it.id=it.id or tostring(it) -- auto generate id? ( this nay be unsafe ... )
 	tasks.ids[it.id]=it or true -- keep everything in ids
 	if it.type then tasks[it.type][it.id]=it end -- and each type has its own table
 	return it
@@ -134,9 +136,80 @@ M.tasks_functions.del_id=function(tasks,it)
 			tasks[it.type][it.id]=nil
 		end
 		tasks.ids[it.id]=nil
-		it.id=nil
 	end
 	return it
+end
+
+--[[#lua.wetgenes.tasks.claim_global
+
+	tasks:claim_global(name,value)
+
+Claim a name using the global linda socket, returns value on success 
+or false on failure.
+
+The value will be associated with the name on success.
+
+This will block waiting on a result but should be fast.
+
+]]
+M.tasks_functions.claim_global=function(tasks,name,value)
+	value=value or true -- value must must be trueish
+	local memo={}
+	memo.id=tostring(memo) -- should be a unique string, the address of the memo table
+	memo.task="global"
+	memo.cmd="claim"
+	memo.name=name
+	memo.value=value
+	if tasks.linda:send( nil , memo.task , memo ) then -- send on memo.task (a public name of another task)
+		local ok,r=tasks.linda:receive( nil , memo.id ) -- receive the result on memo.id
+		return r.result
+	end
+end
+
+--[[#lua.wetgenes.tasks.eject_global
+
+	tasks:eject_global(name)
+
+Eject a name using the global linda socket, returns value associated 
+with name on success or false on failure.
+
+The value will no longer be associated with the name when this succeeds.
+
+This will block waiting on a result but should be fast.
+
+]]
+M.tasks_functions.eject_global=function(tasks,name)
+	local memo={}
+	memo.id=tostring(memo) -- should be a unique string, the address of the memo table
+	memo.task="global"
+	memo.cmd="eject"
+	memo.name=name
+	if tasks.linda:send( nil , memo.task , memo ) then -- send on memo.task (a public name of another task)
+		local ok,r=tasks.linda:receive( nil , memo.id ) -- receive the result on memo.id
+		return r.result
+	end
+end
+
+--[[#lua.wetgenes.tasks.fetch_name
+
+	tasks:fetch_global(name)
+
+Fetch value associated with the name using the global linda socket or 
+false on failure. You can not associated nil or false with a global value.
+
+This will block waiting on a result but should be fast.
+
+]]
+M.tasks_functions.fetch_global=function(tasks,name)
+	local memo={}
+	memo.id=tostring(memo) -- should be a unique string, the address of the memo table
+	memo.task="global"
+	memo.cmd="fetch"
+	memo.name=name
+	if tasks.linda:send( nil , memo.task , memo ) then -- send on memo.task (a public name of another task)
+		local ok,r=tasks.linda:receive( nil , memo.id ) -- receive the result on memo.id
+		return r.result
+	end
 end
 
 --[[#lua.wetgenes.tasks.add_memo
@@ -426,7 +499,10 @@ finding a memo.error so less need to check for errors.
 
 ]]
 M.tasks_functions.do_memo=function(tasks,memo,timeout)
+	tasks:send(memo,timeout)
+	log("memo",memo.task,memo.id)
 	tasks:receive(memo,timeout)
+	log("memo",memo.task,memo.id,"done")
 	assert(not memo.error,memo.error)
 	return memo.result
 end
@@ -566,12 +642,64 @@ M.create=function(tasks)
 	tasks.thread={}		-- preemptive tasks
 	tasks.task={}		-- cooperative tasks
 	
-	tasks.linda=tasks.linda or lanes.linda() -- can pass in a linda to use
+	if not tasks.linda then -- create a new linda
+		tasks.linda=lanes.linda()
+		tasks:add_thread({
+			count=1,
+			id="global",
+			code=tasks.global_code
+		})
+	end
 	tasks.colinda=M.create_colinda(tasks.linda)
+	tasks.colinda.tasks=tasks -- link back
 
 	return tasks
 end
 
+--[[#lua.wetgenes.tasks.global_code
+
+A basic function to handle global memos to get/set data shared amongst multiple tasks.
+
+]]
+M.tasks_functions.global_code=function(linda,task_id,task_idx)
+
+	local data={}
+
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+		
+		if memo then
+			local ret={result=false}
+			
+			if     memo.cmd=="claim" then
+				if memo.name and memo.value then
+					if not data[memo.name] then	-- must be empty
+						data[memo.name]=memo.value
+						ret.result=memo.value
+					end
+				end
+			elseif memo.cmd=="eject" then
+				if memo.name then
+					if data[memo.name] then -- must exist
+						ret.result=data[memo.name]
+						data[memo.name]=nil
+					end
+				end
+			elseif memo.cmd=="fetch" then
+				if memo.name then
+					ret.result=data[memo.name]
+				end
+			end
+			
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+
+	end
+
+end
 
 --[[#lua.wetgenes.tasks.http_code
 
@@ -723,7 +851,9 @@ M.tasks_functions.http_code=function(linda,task_id,task_idx)
 		if memo then
 			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
-			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
 		end
 
 	end
@@ -738,12 +868,15 @@ Returns either the result or nil,error so can be used simply with an
 assert wrapper.
 
 ]]
-M.tasks_functions.http=function(tasks,memo)
+M.tasks_functions.http=function(tasks,memo,timeout)
 
 	if type(memo) == "string" then memo={url=memo} end
 	memo.task=memo.task or "http"
 	
-	tasks:receive(memo)
+	tasks:send(memo,timeout)
+	log("memo",memo.task,memo.id)
+	tasks:receive(memo,timeout)
+	log("memo",memo.task,memo.id,"done")
 
 	if memo.error then return nil,memo.error end
 	if memo.result and memo.result.error then return nil,memo.result.error end
@@ -872,7 +1005,9 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 		if memo then
 			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
-			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
 		end
 
 	end
@@ -890,12 +1025,15 @@ Note that rows can be empty so an additional assert(rows[1]) might be
 needed to check you have data returned.
 
 ]]
-M.tasks_functions.sqlite=function(tasks,memo)
+M.tasks_functions.sqlite=function(tasks,memo,timeout)
 
 	if type(memo) == "string" then memo={sql=memo} end
 	memo.task=memo.task or "sqlite"
 	
-	tasks:receive(memo)
+	tasks:send(memo,timeout)
+	log("memo",memo.task,memo.id)
+	tasks:receive(memo,timeout)
+	log("memo",memo.task,memo.id,"done")
 
 	if memo.error then return nil,memo.error end
 	if memo.result.error then return nil,memo.result.error end
@@ -910,7 +1048,6 @@ A basic function to handle (web)socket client connection.
 
 ]]
 M.tasks_functions.client_code=function(linda,task_id,task_idx)
-print("starting client code")
 	set_debug_threadname(task_id)
 
 	local wjson = lanes.require("wetgenes.json")
@@ -935,7 +1072,6 @@ print("starting client code")
 	local err
 	local client
 	if js_eval then -- js mode
-print("starting client code js")
 
 		js_call([[
 
@@ -1058,7 +1194,9 @@ console.log("RECV:"+recv[0]);
 		if memo then
 			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
-			linda:send( nil , memo.id , ret ) -- always respond to each memo with something
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
 		end
 
 	end
@@ -1073,13 +1211,16 @@ returns nil,error if something went wrong or returns result if
 something went right.
 
 ]]
-M.tasks_functions.client=function(tasks,memo)
+M.tasks_functions.client=function(tasks,memo,timeout)
 
 	if type(memo) == "string" then memo={data=memo} end
 	memo=memo or {}
 	memo.task=memo.task or "client"
 	
-	tasks:receive(memo)
+	tasks:send(memo,timeout)
+	log("memo",memo.task,memo.id)
+	tasks:receive(memo,timeout)
+	log("memo",memo.task,memo.id,"done")
 
 	if memo.error then return nil,memo.error end
 	if memo.result.error then return nil,memo.result.error end

@@ -74,11 +74,9 @@ function M.bake(opts)
 		local ret=oven.baked[name]
 		
 		if not ret then
---print("rebake",name)	
 			ret={modname=name}
 			oven.baked[name]=ret -- need to create and remember here so we can always rebake even if the result is not filled in yet
 			ret=assert(require(name)).bake(oven,ret)
-
 		end
 
 		return ret
