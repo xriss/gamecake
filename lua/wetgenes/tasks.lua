@@ -252,6 +252,25 @@ M.tasks_functions.del_memo=function(tasks,memo)
 	return memo
 end
 
+--[[#lua.wetgenes.tasks.global_thread
+]]
+M.tasks_functions.global_thread=function(tasks,thread)
+	if tasks.task.threads then -- already on global task
+		if not tasks.thread[thread.id] then -- only create once
+			tasks:add_thread(thread)
+			print("CREATED",thread.id)
+		end
+	else
+		local memo={
+			task="threads",
+			cmd="create",
+			thread=thread,
+		}
+		tasks:do_memo(memo)
+	end
+--	tasks.linda:send( nil , memo.task , memo )
+end
+
 --[[#lua.wetgenes.tasks.add_thread
 
 	local thread=tasks:add_thread({
@@ -311,6 +330,10 @@ Delete a thread.
 
 ]]
 M.tasks_functions.del_thread=function(tasks,thread)
+	for i=#thread.handles,1,-1 do -- cancel all the handles
+		thread.handles[i]:cancel()--1/10,true) -- give it a chance
+		thread.handles[i]=nil
+	end
 	tasks:del_id(thread)	
 	return thread
 end
@@ -367,7 +390,7 @@ M.tasks_functions.add_task=function(tasks,task)
 	task.handles={}
 	for idx=1,task.count do
 		task.handles[idx]=coroutine.create(task.code)
-		local ok , err = coroutine.resume( task.handles[idx] , task.colinda , task.id , idx , task ) -- first call passing in args
+		local ok , err = coroutine.resume( task.handles[idx] , tasks.colinda , task.id , idx , task ) -- first call passing in args
 		if not ok then task.errors[idx]=err end
 	end
 
@@ -399,6 +422,10 @@ M.tasks_functions.run_task=function(tasks,task)
 				task.errors[idx]=err
 				log("tasks" , debug.traceback( task.handles[idx] , err ) )
 			end
+		else
+			if task.errors[idx] then
+				log("tasks" , debug.traceback( task.handles[idx] , task.errors[idx] ) )
+			end
 		end
 	end
 	
@@ -411,7 +438,7 @@ end
 
 --[[#lua.wetgenes.tasks.del_task
 
-	tasks:del_thread(task)
+	tasks:del_task(task)
 	
 Delete a task.
 
@@ -531,6 +558,8 @@ until program termination.
 ]]
 M.tasks_functions.delete=function(tasks)
 	for idx,thread in pairs(tasks.thread) do
+		log("task","delete",idx)
+		tasks:del_thread(thread)
 	end
 end
 
@@ -656,14 +685,48 @@ M.create=function(tasks)
 	
 	if not tasks.linda then -- create a new linda
 		tasks.linda=lanes.linda()
+		tasks.colinda=M.create_colinda(tasks.linda)
+		tasks.colinda.tasks=tasks -- link back
 		tasks:add_thread({
 			count=1,
 			id="global",
 			code=tasks.global_code
 		})
+		tasks:add_task({
+			count=1,
+			id="threads",
+			code=function(linda,task_id,task_idx)
+print("threads starting",task_id)
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+
+		if memo then
+			local ret={result=false}
+			
+			if     memo.cmd=="create" then
+				if not tasks.thread[memo.thread.id] then -- only create once
+					tasks:add_thread(memo.thread)
+					ret.result=true
+					print("CREATED",memo.thread.id)
+				else
+					print("DID NOT CREATE",memo.thread.id)
+				end
+			end
+			
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+
 	end
-	tasks.colinda=M.create_colinda(tasks.linda)
-	tasks.colinda.tasks=tasks -- link back
+
+end,
+		})
+	else
+		tasks.colinda=M.create_colinda(tasks.linda)
+		tasks.colinda.tasks=tasks -- link back
+	end
 
 	return tasks
 end

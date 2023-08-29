@@ -7,6 +7,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
+
 local log,dump=require("wetgenes.logs"):export("log","dump")
 
 
@@ -27,6 +28,55 @@ end
 
 
 local M={ modname=(...) } ; package.loaded[M.modname]=M
+
+--[[#lua.wetgenes.gamecake.toaster.newticks
+
+	ticks=require("wetgenes.gamecake.toaster").newticks(rate,jump)
+
+create a ticks time controller for updates.
+
+rate is time between steps , jump is how far behind we should get 
+before giving up ( eg callback takes longer than rate allows ) these 
+values are in seconds and default to 1/60 and 1 respectively.
+
+Then we perform one or more update steps like so
+
+	ticks.step( callback ) -- callback may be called zero or more times
+
+After that we should wait a bit (maybe draw a frame) and then call 
+again.
+
+]]
+M.newticks=function(rate,jump)
+	-- get time now in seconds
+	local getnow=require("lanes").now_secs
+
+	local ticks={}
+	
+	ticks.jump=jump or 1 -- if we get this far behind then jump forwards
+	ticks.rate=rate or 1/60 -- update rate
+	ticks.time=getnow()
+	ticks.count=0
+
+	-- return true if we callback at least once
+	ticks.step=function(callback)
+		local now=getnow()
+		local done=false
+		while now-ticks.time >= ticks.rate do -- step forward
+			if now-ticks.time >= ticks.jump then -- jump forward skipping updates
+				ticks.time=now
+			else
+				ticks.time=ticks.time+ticks.rate
+			end
+			ticks.count=ticks.count+1
+			done=true
+			callback() -- run callback
+		end
+		return done
+	end
+
+	return ticks
+end
 
 --[[#lua.wetgenes.gamecake.toaster.bake
 
@@ -49,6 +99,8 @@ yet.
 function M.bake(opts)
 
 	local oven={}
+	
+	oven.newticks=M.newticks
 
 	oven.is={}
 

@@ -146,6 +146,7 @@ modules and sharing state between them.
 function M.bake(opts)
 
 	local oven={}
+	oven.newticks=require("wetgenes.gamecake.toaster").newticks
 	oven.is={}
 	wwin.oven=wwin.oven or oven -- store a global oven on first use
 
@@ -927,15 +928,22 @@ log("oven","caught : ",m.class,m.cmd)
 				return oven -- and expect  serv_pulse to be called as often as possible
 			end
 			
-			local finished
-			repeat
-				finished=oven.serv_pulse(oven)
-			until finished
+			local ok,ret=xpcall(function()
+				local finished
+				repeat
+					finished=oven.serv_pulse(oven)
+				until finished
+			end,function(err) return err.."\n"..debug.traceback() end)
+			if not ok then print(ret) end
 			
-			oven.win:show("win") -- this may restore original resolution
+			if oven.win then
+				oven.win:show("win") -- this may restore original resolution
+			end
 			
 			oven.tasks:sqlite({cmd="close"}) -- shut down the default sqlite databsase so we finish with any out standing writes
 			wtongues.save() -- last thing we do is remember any new text ids used in this run
+
+			oven.tasks:delete()
 
 		end
 
