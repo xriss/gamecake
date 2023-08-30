@@ -397,12 +397,12 @@ require("gles").CheckError() -- uhm this fixes an error?
 				
 			})
 			oven.cake.views.push(oven.view) -- add master view which is the size of the main window
+
+			oven.skeys=oven.rebake("wetgenes.gamecake.spew.keys") -- need to use spew keys always or mouse button no click on gui
+
 			-- the order these are added is important for priority, top of list is lowest priority, bottom is highest.
 			oven.rebake_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style escape menu
 			oven.rebake_mod("wetgenes.gamecake.mods.console") -- console gives us a quake style tilda console
-			oven.rebake_mod("wetgenes.gamecake.mods.keys") -- touchscreen keys and posix keymaping
---			oven.rebake_mod("wetgenes.gamecake.mods.mouse") -- auto fake mouse on non windows builds
---			oven.rebake_mod("wetgenes.gamecake.mods.layout") -- screen layout options
 			oven.rebake_mod("wetgenes.gamecake.mods.snaps") -- builtin screen snapshot code
 
 -- handle default win icon if it exists and we need it .06.png will be 64x64 version
@@ -705,6 +705,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 
 				if oven.times then oven.times.update.start() end
 				
+				oven.skeys.update()
 				for i,v in ipairs(oven.mods) do
 					if v.update then
 						v.update()
@@ -899,6 +900,7 @@ log("oven","caught : ",m.class,m.cmd)
 						
 					if not oven.preloader_enabled then -- discard all other msgs during preloader
 						
+						oven.skeys.msg(m)
 						for i=#oven.mods,1,-1 do -- run it through the mods backwards, so the topmost layer gets first crack at the msgs
 							local v=oven.mods[i]
 							if m and v and v.msg then

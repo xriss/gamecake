@@ -108,11 +108,11 @@ function M.bake(oven,keys)
 
 	function keys.setup()
 --print("setup")
-		skeys.setup(1)
+--		skeys.setup(1)
 	end
 	function keys.clean()
 --print("clean")
-		skeys.clean(m)
+		skeys.clean()
 	end
 	function keys.msg(m)
 --print("msg",m)
