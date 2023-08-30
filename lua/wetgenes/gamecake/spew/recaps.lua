@@ -36,9 +36,10 @@ M.bake=function(oven,recaps)
 	local cake=oven.cake
 	local canvas=cake.canvas
 	
-	local keys=oven.rebake("wetgenes.gamecake.spew.keys")
+--	local keys=oven.rebake("wetgenes.gamecake.spew.keys")
 
 	function recaps.setup(opts)
+--print("recaos",opts)	
 		if type(opts)=="number" then opts={max_up=opts} end
 		if not opts then opts={} end
 		recaps.opts=opts
@@ -340,5 +341,6 @@ M.bake=function(oven,recaps)
 	end
 
 
+	recaps.setup(1)
 	return recaps
 end

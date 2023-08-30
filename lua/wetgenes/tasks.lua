@@ -51,10 +51,10 @@ are in a task and want to talk to another task.
 ]]
 M.do_memo=function(linda,memo,timeout)
 	memo.id=tostring(memo) -- should be a unique string, the address of the memo table
-log("memo",memo.task,memo.id)
+--log("memo",memo.task,memo.id)
 	if linda:send( timeout , memo.task , memo ) then -- send on memo.task (a public name of another task)
 		local ok,r=linda:receive( timeout , memo.id ) -- receive the result on memo.id
-log("memo",memo.task,memo.id,"done")
+--log("memo",memo.task,memo.id,"done")
 		return r
 	end
 end
@@ -539,9 +539,9 @@ finding a memo.error so less need to check for errors.
 ]]
 M.tasks_functions.do_memo=function(tasks,memo,timeout)
 	tasks:send(memo,timeout)
-	log("memo",memo.task,memo.id)
+--	log("memo",memo.task,memo.id)
 	tasks:receive(memo,timeout)
-	log("memo",memo.task,memo.id,"done")
+--	log("memo",memo.task,memo.id,"done")
 	assert(not memo.error,memo.error)
 	return memo.result
 end
@@ -949,9 +949,9 @@ M.tasks_functions.http=function(tasks,memo,timeout)
 	memo.task=memo.task or "http"
 	
 	tasks:send(memo,timeout)
-	log("memo",memo.task,memo.id)
+--	log("memo",memo.task,memo.id)
 	tasks:receive(memo,timeout)
-	log("memo",memo.task,memo.id,"done")
+--	log("memo",memo.task,memo.id,"done")
 
 	if memo.error then return nil,memo.error end
 	if memo.result and memo.result.error then return nil,memo.result.error end
@@ -1106,9 +1106,9 @@ M.tasks_functions.sqlite=function(tasks,memo,timeout)
 	memo.task=memo.task or "sqlite"
 	
 	tasks:send(memo,timeout)
-	log("memo",memo.task,memo.id)
+--	log("memo",memo.task,memo.id)
 	tasks:receive(memo,timeout)
-	log("memo",memo.task,memo.id,"done")
+--	log("memo",memo.task,memo.id,"done")
 
 	if memo.error then return nil,memo.error end
 	if memo.result.error then return nil,memo.result.error end
@@ -1293,9 +1293,9 @@ M.tasks_functions.client=function(tasks,memo,timeout)
 	memo.task=memo.task or "client"
 	
 	tasks:send(memo,timeout)
-	log("memo",memo.task,memo.id)
+--	log("memo",memo.task,memo.id)
 	tasks:receive(memo,timeout)
-	log("memo",memo.task,memo.id,"done")
+--	log("memo",memo.task,memo.id,"done")
 
 	if memo.error then return nil,memo.error end
 	if memo.result.error then return nil,memo.result.error end

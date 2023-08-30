@@ -555,5 +555,6 @@ M.bake=function(oven,keys)
 		end
 	end
 
+	keys.setup(1)
 	return keys
 end
