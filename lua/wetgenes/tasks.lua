@@ -13,6 +13,16 @@ local M={ modname = (...) } package.loaded[M.modname] = M
 M.tasks_functions={}
 M.tasks_metatable={__index=M.tasks_functions}
 
+-- print errors
+M.tasks_functions.head_code=function(code,linda,id,idx)
+	set_finalizer(function(err,stack)
+		if type(err) ~= "userdata" then -- we get a userdata when thread is canceled
+			print("LANES:",err or "",table.concat(stack or {},"\n"))
+		end
+	end)
+	return code(linda,id,idx)
+end
+
 --[[#lua.wetgenes.tasks.thread_code
 
 Handle global tasks, starting and stopping and preventing the starting 
@@ -20,9 +30,6 @@ of multiple copies of the same task.
 
 ]]
 M.tasks_functions.thread_code=function(linda,task_id,task_idx)
-set_finalizer(function(err,stack)
-	print("LANES:",err,table.concat(stack,"\n"))
-end)
 
 	local log,dump=require("wetgenes.logs"):export("log","dump")
 
@@ -73,9 +80,6 @@ A basic function to handle global memos to get/set data shared amongst multiple 
 
 ]]
 M.tasks_functions.global_code=function(linda,task_id,task_idx)
-set_finalizer(function(err,stack)
-	print("LANES:",err,table.concat(stack,"\n"))
-end)
 
 	local data={}
 
@@ -122,9 +126,6 @@ A basic function to handle http memos.
 
 ]]
 M.tasks_functions.http_code=function(linda,task_id,task_idx)
-set_finalizer(function(err,stack)
-	print("LANES:",err,table.concat(stack,"\n"))
-end)
 
 	local js_eval -- function call into javascript if we are an emcc build
 	do
@@ -289,9 +290,6 @@ access.
 
 ]]
 M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
-set_finalizer(function(err,stack)
-	print("LANES:",err,table.concat(stack,"\n"))
-end)
 
 	local lanes = require("lanes")
 	local sqlite3 = lanes.require("lsqlite3")
@@ -420,10 +418,6 @@ A basic function to handle (web)socket client connection.
 
 ]]
 M.tasks_functions.client_code=function(linda,task_id,task_idx)
-
-set_finalizer(function(err,stack)
-	print("LANES:",err,table.concat(stack,"\n"))
-end)
 
 	set_debug_threadname(task_id)
 
@@ -907,9 +901,9 @@ M.tasks_functions.add_thread=function(tasks,thread)
 	tasks:add_id(thread)
 
 	thread.count=thread.count or 1
-	thread.start=lanes.gen( "*" , { ["globals"]=thread.globals } , thread.code ) -- prepare task
+	thread.start=lanes.gen( "*" , { ["globals"]=thread.globals } , tasks.head_code ) -- prepare task
 	thread.handles={}
-	for idx=1,thread.count do thread.handles[idx]=thread.start( tasks.linda , thread.id , idx ) end -- start tasks
+	for idx=1,thread.count do thread.handles[idx]=thread.start( thread.code, tasks.linda , thread.id , idx ) end -- start tasks
 	
 	return thread
 end
