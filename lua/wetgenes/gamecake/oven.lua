@@ -285,13 +285,13 @@ end
 -- setup tasks early so we can use recipes.sqlite for data management and run loading tasks on another thread
 	oven.tasks=require("wetgenes.tasks").create()
 -- and http requests
-	oven.tasks:add_thread({
+	oven.tasks:add_global_thread({
 		count=8,
 		id="http",
 		code=oven.tasks.http_code,
 	})
 -- and sqlite requests to a default database
-	oven.tasks:add_thread({
+	oven.tasks:add_global_thread({
 		count=1,
 		id="sqlite",
 		globals={sqlite_filename=wwin.files_prefix.."recipes.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},

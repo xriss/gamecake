@@ -54,7 +54,15 @@ logs.block={
 
 local wwin
 logs.log = function(mode,...)
-	if type(mode)~="string" then return end
+	if type(mode)~="string" then -- special print location in file
+		mode="line"
+		if logs.allow and ( not logs.allow[ mode ] ) then return end
+		if logs.block and (     logs.block[ mode ] ) then return end
+		local line="here"
+		local info=debug.getinfo(2)
+		print( mode , info.currentline , info.name or "." , info.short_src )
+		return
+	end
 
 --[[
 	if not wwin then wwin=require("wetgenes.win") end
@@ -71,6 +79,11 @@ logs.log = function(mode,...)
 	if logs.allow and ( not logs.allow[ mode ] ) then return end
 	if logs.block and (     logs.block[ mode ] ) then return end
 
+-- track down where the damn debug junk is from :)
+--[[
+	local info=debug.getinfo(2)
+	print( mode , info.currentline , info.name or "." , info.short_src )
+]]
 	print( mode , ... )
 
 end
