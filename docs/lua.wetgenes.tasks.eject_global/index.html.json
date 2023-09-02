@@ -2538,7 +2538,7 @@
    "body": "<pre><code>tasks:eject_global(name)\n</code></pre>\n<p>Eject a name using the global linda socket, returns value associated \nwith name on success or false on failure.</p>\n<p>The value will no longer be associated with the name when this succeeds.</p>\n<p>This will block waiting on a result but should be fast.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 755,
+   "line": 749,
    "name": "lua.wetgenes.tasks.eject_global",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }
