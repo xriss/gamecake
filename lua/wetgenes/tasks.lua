@@ -14,13 +14,30 @@ M.tasks_functions={}
 M.tasks_metatable={__index=M.tasks_functions}
 
 -- print errors
-M.tasks_functions.head_code=function(code,linda,id,idx)
-	set_finalizer(function(err,stack)
-		if type(err) ~= "userdata" then -- we get a userdata when thread is canceled
-			print("LANES:",err or "",table.concat(stack or {},"\n"))
+M.tasks_functions.wrap_code=function(code,linda,id,idx)
+	local handle
+	local printerr=function(err)
+		print("LANES:" , id , idx , debug.traceback( handle , err ) )
+	end
+	set_finalizer(function(err,stack) -- might catch more errors here?
+		if err then
+			printerr(err)
 		end
 	end)
-	return code(linda,id,idx)
+	local rawprint=print
+	print=function(...) -- if we concat first we have less threads fighting over output
+		local t={...}
+		for i,v in ipairs(t) do t[i]=tostring(v) end
+		rawprint(table.concat(t,"\t"))
+	end
+	handle=coroutine.create(code)
+	local ok , err = coroutine.resume(handle,linda,id,idx) -- first call passing in args
+	while ok do
+		ok , err = coroutine.resume(handle) -- loop
+	end
+	if err and ( type(err) ~= "userdata" ) then -- we get a userdata when thread is cancelled
+		printerr(err)
+	end
 end
 
 --[[#lua.wetgenes.tasks.thread_code
@@ -901,7 +918,7 @@ M.tasks_functions.add_thread=function(tasks,thread)
 	tasks:add_id(thread)
 
 	thread.count=thread.count or 1
-	thread.start=lanes.gen( "*" , { ["globals"]=thread.globals } , tasks.head_code ) -- prepare task
+	thread.start=lanes.gen( "*" , { ["globals"]=thread.globals } , tasks.wrap_code ) -- prepare task
 	thread.handles={}
 	for idx=1,thread.count do thread.handles[idx]=thread.start( thread.code, tasks.linda , thread.id , idx ) end -- start tasks
 	
