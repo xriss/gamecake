@@ -2538,7 +2538,7 @@
    "body": "<pre><code>tasks:del_global_thread({id=&quot;threadname&quot;})\n</code></pre>\n<p>Destroy a given thread.id or all the threads if thread is nil.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 844,
+   "line": 861,
    "name": "lua.wetgenes.tasks.del_global_thread",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }
