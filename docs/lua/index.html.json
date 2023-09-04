@@ -6760,7 +6760,7 @@
    "body": "<p>Send and/or recieve a (web)socket client memo result.</p>\n<p>returns nil,error if something went wrong or returns result if \nsomething went right.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 1362,
+   "line": 1364,
    "name": "lua.wetgenes.tasks.client",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6880,7 +6880,7 @@
    "body": "<p>Create send and return a http memo result.</p>\n<p>Returns either the result or nil,error so can be used simply with an \nassert wrapper.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 1311,
+   "line": 1313,
    "name": "lua.wetgenes.tasks.http",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -6920,7 +6920,7 @@
    "body": "<p>Create send and return a sqlite memo result.</p>\n<p>Returns either the result.rows or nil,error so can be used simply with an \nassert wrapper.</p>\n<p>Note that rows can be empty so an additional assert(rows[1]) might be \nneeded to check you have data returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 1334,
+   "line": 1336,
    "name": "lua.wetgenes.tasks.sqlite",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
