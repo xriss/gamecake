@@ -1085,7 +1085,7 @@ M.tasks_functions.send=function(tasks,memo,timeout)
 	if memo.error then return memo end
 	if not memo.id then tasks:add_memo(memo) end -- auto add
 	memo.state="sending"
-	local ok=tasks.colinda:send( timeout , memo.task , memo )
+	local ok=(tasks.main_thread and tasks.colinda or tasks.linda):send( timeout , memo.task , memo )
 	memo.state="sent"
 	if not ok then memo.error="send failed" return memo end
 	return memo
@@ -1119,7 +1119,7 @@ M.tasks_functions.receive=function(tasks,memo,timeout)
 		tasks:send(memo,timeout)
 	end
 	memo.state="receiving"
-	local ok,result=tasks.colinda:receive( timeout , memo.id )
+	local ok,result=(tasks.main_thread and tasks.colinda or tasks.linda):receive( timeout , memo.id )
 	memo.state="done"
 	tasks:del_memo(memo)
 
@@ -1285,7 +1285,8 @@ M.create=function(tasks)
 	tasks.thread={}		-- preemptive tasks
 	tasks.task={}		-- cooperative tasks
 	
-	if not tasks.linda then -- create a new linda
+	if not tasks.linda then -- create a new linda and a colinda and mark this tasks as main_thread
+		tasks.main_thread=true
 		tasks.linda=lanes.linda()
 		tasks.colinda=M.create_colinda(tasks.linda)
 		tasks.colinda.tasks=tasks -- link back
@@ -1300,7 +1301,8 @@ M.create=function(tasks)
 			code=tasks.global_code
 		})
 	else
-		tasks.colinda=M.create_colinda(tasks.linda)
+		tasks.main_thread=false -- we are not the main therad
+		tasks.colinda=M.create_colinda(tasks.linda) -- just create a colinda
 		tasks.colinda.tasks=tasks -- link back
 	end
 
