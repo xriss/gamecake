@@ -16,6 +16,7 @@ require.sh gcc
 require.sh make
 require.sh luajit
 require.sh patchelf
+require.sh zip
 
 
 # libs
