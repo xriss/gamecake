@@ -43,7 +43,10 @@ So if you want to use this for something else you would want to scrub
 that last part.
 
 
-VAGRANT HAS FUCKED SOMETHING
+This has become unfucked. however best to leave this here in case it 
+un-unfucks itself in the future.
+
+IF VAGRANT HAS FUCKED SOMETHING
 
 provisioning fails, but vagrant ssh still works, so have added vagrant 
 as the fallback password in the Vagrantfile and need to do the same on 
