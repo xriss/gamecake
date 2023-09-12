@@ -285,7 +285,7 @@ M.tasks_functions.http_code=function(linda,task_id,task_idx)
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err==lanes.cancel_error and "lanes.cancel_error" or err) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(tostring(err)) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			if memo.id then -- result requested
 				linda:send( nil , memo.id , ret )
@@ -417,7 +417,7 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err==lanes.cancel_error and "lanes.cancel_error" or err) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(tostring(err)) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			if memo.id then -- result requested
 				linda:send( nil , memo.id , ret )
@@ -581,7 +581,7 @@ console.log("RECV:"+recv[0]);
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err==lanes.cancel_error and "lanes.cancel_error" or err) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(tostring(err)) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			if memo.id then -- result requested
 				linda:send( nil , memo.id , ret )
@@ -613,6 +613,8 @@ local lanes=require("lanes")
 if lanes.configure then -- first time configuration
 	lanes=lanes.configure(
 		{
+--			protect_allocator = true ,
+--			allocator = "protected" ,
 			with_timers = false ,
 			on_state_create = require("wetgenes.gamecake.core").preloadlibs ,	-- this makes lanes.require work on internal modules inside a new thread
 		}
