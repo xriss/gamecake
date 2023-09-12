@@ -2538,7 +2538,7 @@
    "body": "<pre><code>tasks:del_memo(memo)\n</code></pre>\n<p>Delete a memo.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 831,
+   "line": 832,
    "name": "lua.wetgenes.tasks.del_memo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }
