@@ -1,5 +1,30 @@
 CHANGES:
 
+CHANGE 157: Mitalie 17-Aug-23
+   * Prevent crash on linux as non-root
+   * internal version bumped to 3.16.2
+
+CHANGE 156: BGe 9-Aug-23
+   * new configuration option .internal_allocator to help LuaJIT users.
+   * internal version bumped to 3.16.1
+
+CHANGE 155: BGe 28-Jul-23
+   * tweaks to linux thread priority management: do nothing if not super-user. if super-user, do nothing if nothing is provided (instead of trying to force a prio when LINUX_SCHED_RR is defined).
+
+CHANGE 154: eligovision 1-Mar-22
+   * Fix 3-parametrized __lanesclone
+
+CHANGE 153: BGe 17-Feb-22
+   * NEVER use allocator obtained from lua_getallocf to allocate stuff manually when compiling for LuaJIT
+
+CHANGE 152: BGe 7-Feb-22
+   * bumped version to 3.16.0
+   * __lanesclone is now called only once with 3 parameters dest, source, size -> BREAKS CUSTOM DEEP USERDATA API
+
+CHANGE 151: BGe 7-Feb-22
+   * bumped version to 3.15.2
+   * Lanes no longer relies on malloc/free for internal allocations, but uses the primary alloc function from the master Lua state
+
 CHANGE 150: BGe 22-Sep-21
    * fix require() wrapper to return all values returned by original require()
 

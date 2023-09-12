@@ -13,21 +13,21 @@ typedef enum eLookupMode LookupMode;
 
 struct s_Keeper
 {
-	MUTEX_T keeper_cs;
-	lua_State* L;
-	//int count;
+    MUTEX_T keeper_cs;
+    lua_State* L;
+    //int count;
 };
 typedef struct s_Keeper Keeper;
 
 struct s_Keepers
 {
-	int nb_keepers;
-	Keeper keeper_array[1];
+    int nb_keepers;
+    Keeper keeper_array[1];
 };
 typedef struct s_Keepers Keepers;
 
 void init_keepers( Universe* U, lua_State* L);
-void close_keepers( Universe* U, lua_State* L);
+void close_keepers( Universe* U);
 
 Keeper* which_keeper( Keepers* keepers_, ptrdiff_t magic_);
 Keeper* keeper_acquire( Keepers* keepers_, ptrdiff_t magic_);
