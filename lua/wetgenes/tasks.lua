@@ -15,29 +15,23 @@ M.tasks_metatable={__index=M.tasks_functions}
 
 -- print errors
 M.tasks_functions.wrap_code=function(code,linda,id,idx)
-	local handle
-	local printerr=function(err)
-		print("LANES:" , id , idx , debug.traceback( handle , err ) )
-	end
-	set_finalizer(function(err,stack) -- might catch more errors here?
-		if err then
-			printerr(err)
-		end
-	end)
+	local lanes=require("lanes")
 	local rawprint=print
 	print=function(...) -- if we concat first we have less threads fighting over output
 		local t={...}
 		for i,v in ipairs(t) do t[i]=tostring(v) end
 		rawprint(table.concat(t,"\t"))
 	end
-	handle=coroutine.create(code)
-	local ok , err = coroutine.resume(handle,linda,id,idx) -- first call passing in args
-	while ok do
-		ok , err = coroutine.resume(handle) -- loop
-	end
-	if err and ( type(err) ~= "userdata" ) then -- we get a userdata when thread is cancelled
-		printerr(err)
-	end
+	local log,dump=require("wetgenes.logs"):export("log","dump")
+
+	xpcall(function() code(linda,id,idx) end,function(err)
+		if err==lanes.cancel_error then
+--			log("lanes" , id , idx , debug.traceback("lanes.cancel_error") )
+		else
+			log("thread" , id , idx , debug.traceback( err ) )
+		end
+	end)
+
 end
 
 --[[#lua.wetgenes.tasks.thread_code
@@ -47,6 +41,8 @@ of multiple copies of the same task.
 
 ]]
 M.tasks_functions.thread_code=function(linda,task_id,task_idx)
+
+	local lanes = require("lanes")
 
 	local log,dump=require("wetgenes.logs"):export("log","dump")
 
@@ -98,6 +94,8 @@ A basic function to handle global memos to get/set data shared amongst multiple 
 ]]
 M.tasks_functions.global_code=function(linda,task_id,task_idx)
 
+	local lanes = require("lanes")
+
 	local data={}
 
 	while true do
@@ -144,13 +142,14 @@ A basic function to handle http memos.
 ]]
 M.tasks_functions.http_code=function(linda,task_id,task_idx)
 
+	local lanes = require("lanes")
+
 	local js_eval -- function call into javascript if we are an emcc build
 	do
 		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
 		if ok and lib then js_eval=lib.js_eval end
 	end
 
-	local lanes = require("lanes")
 	local http = lanes.require("socket.http")
 	local ltn12 = lanes.require("ltn12")
 
@@ -286,7 +285,7 @@ M.tasks_functions.http_code=function(linda,task_id,task_idx)
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err==lanes.cancel_error and "lanes.cancel_error" or err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			if memo.id then -- result requested
 				linda:send( nil , memo.id , ret )
@@ -418,7 +417,7 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err==lanes.cancel_error and "lanes.cancel_error" or err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			if memo.id then -- result requested
 				linda:send( nil , memo.id , ret )
@@ -435,6 +434,8 @@ A basic function to handle (web)socket client connection.
 
 ]]
 M.tasks_functions.client_code=function(linda,task_id,task_idx)
+
+	local lanes=require("lanes")
 
 	set_debug_threadname(task_id)
 
@@ -580,7 +581,7 @@ console.log("RECV:"+recv[0]);
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(err==lanes.cancel_error and "lanes.cancel_error" or err) end) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			if memo.id then -- result requested
 				linda:send( nil , memo.id , ret )
