@@ -4,4 +4,7 @@ rm -rf lanes
 git clone --depth 1 https://github.com/LuaLanes/lanes.git
 rm -rf lanes/.git
 
+ln -f lanes/src/lanes.lua ../lua/lanes.lua
+
+
 
