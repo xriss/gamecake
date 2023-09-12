@@ -20,16 +20,17 @@ M.tasks_functions.wrap_code=function(code,linda,id,idx)
 	print=function(...) -- if we concat first we have less threads fighting over output
 		local t={...}
 		for i,v in ipairs(t) do t[i]=tostring(v) end
-		rawprint(table.concat(t,"\t"))
+		io.write(table.concat(t,"\t").."\n")
 	end
-	local log,dump=require("wetgenes.logs"):export("log","dump")
 
-	xpcall(function() code(linda,id,idx) end,function(err)
+	local ok,err=xpcall(function() code(linda,id,idx) end,function(err)
 		if err==lanes.cancel_error then
---			log("lanes" , id , idx , debug.traceback("lanes.cancel_error") )
+--			print("lanes" , id , idx , debug.traceback("lanes.cancel_error") )
+			error(err)
 		else
-			log("thread" , id , idx , debug.traceback( err ) )
+			print("lanes" , id , idx , debug.traceback( err ) )
 		end
+		return err
 	end)
 
 end
