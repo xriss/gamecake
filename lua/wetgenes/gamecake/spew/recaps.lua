@@ -52,9 +52,60 @@ M.bake=function(oven,recaps)
 		return recaps -- so setup is chainable with a bake
 	end
 
-	function recaps.step()
+	function recaps.push()
+		local up=recaps.up and recaps.up[1]
 		for i,v in ipairs(recaps.up or {}) do
 			v.step()
+		end
+		local m={}
+		m.msgs=up and up.state_msgs
+		m.ups={}
+		for i,v in ipairs(recaps.up or {}) do
+			local u={}
+			m.ups[i]=u
+			u.idx=i
+			u.state=v.state
+			u.state_axis=v.state_axis
+		end
+		oven.tasks.linda:send(nil,"ups",m)
+--print("up","push",m)
+	end
+	
+	function recaps.pull()
+		local up=recaps.up and recaps.up[1]
+		repeat
+			local ok,m=oven.tasks.linda:receive(0,"ups") -- grab all available memos
+			if ok and m then
+--print("up","pull",m)
+				if up then
+					up.state_msgs=m.msgs or {}
+				end
+				for i,v in ipairs(recaps.up or {}) do
+					local u=m.ups[i]
+					if u then
+						v.state=u.state
+						v.state_axis=u.state_axis
+					end
+				end
+			end
+		until not m
+	end
+
+	function recaps.step()
+		if oven.is.update then -- pull msgs from other thread
+
+			recaps.pull()
+
+		elseif oven.is.main then -- push msgs to other thread
+
+			recaps.push()
+
+		else -- only one thread
+
+			for i,v in ipairs(recaps.up or {}) do
+				v.step()
+			end
+
 		end
 	end
 	
