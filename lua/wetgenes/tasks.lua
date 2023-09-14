@@ -18,8 +18,10 @@ M.tasks_functions.wrap_code=function(code,linda,id,idx)
 	local lanes=require("lanes")
 	local rawprint=print
 	print=function(...) -- if we concat first we have less threads fighting over output
-		local t={...}
-		for i,v in ipairs(t) do t[i]=tostring(v) end
+		local t={}
+		for i=1,select("#", ...) do
+			t[i]=tostring( select(i, ...) )
+		end
 		io.write(table.concat(t,"\t").."\n")
 	end
 

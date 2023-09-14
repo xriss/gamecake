@@ -55,13 +55,17 @@ logs.block={
 
 local wwin
 logs.log = function(mode,...)
-	if type(mode)~="string" then -- special print location in file
+	local args={}
+	for i=1,select("#", ...) do
+		args[i]=tostring( select(i, ...) )
+	end
+	if type(mode)~="string" or mode=="" then -- special print location in file
 		mode="line"
 		if logs.allow and ( not logs.allow[ mode ] ) then return end
 		if logs.block and (     logs.block[ mode ] ) then return end
 		local line="here"
 		local info=debug.getinfo(2)
-		print( mode , info.currentline , info.name or "." , info.short_src )
+		print( mode , info.currentline , info.name or "." , info.short_src , unpack(args) )
 		return
 	end
 
@@ -85,7 +89,7 @@ logs.log = function(mode,...)
 	local info=debug.getinfo(2)
 	print( mode , info.currentline , info.name or "." , info.short_src )
 ]]
-	print( mode , ... )
+	print( mode , unpack(args) )
 
 end
 
