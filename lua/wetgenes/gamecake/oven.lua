@@ -938,7 +938,7 @@ log("oven","caught : ",m.class,m.cmd)
 					finished=oven.serv_pulse(oven)
 				until finished
 			end,function(err) return err.."\n"..debug.traceback() end)
-			if not ok then print(ret) --[[ oven.tasks.linda:set("ERROR_STATE","DUMP") ]] end
+			if not ok then print(ret) end
 			
 			if oven.win then
 				oven.win:show("win") -- this may restore original resolution

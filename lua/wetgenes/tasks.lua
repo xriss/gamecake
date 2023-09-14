@@ -27,15 +27,14 @@ M.tasks_functions.wrap_code=function(code,linda,id,idx)
 
 	local logs=require("wetgenes.logs")
 	if OVEN_OPTS and OVEN_OPTS.args then logs.setup(OVEN_OPTS.args) end
+	local log=logs.log
 	
 	print_lanes_error=function(err)
 		if err==lanes.cancel_error then
-			if linda:get("ERROR_STATE")=="DUMP" then
-				print("lanes" , id , idx , debug.traceback("lanes.cancel_error") )
-			end
+			log("thread" , id , idx , debug.traceback("lanes canceled") )
 			error(err)
 		else
-			print("lanes" , id , idx , debug.traceback( err ) )
+			log("lanes" , id , idx , debug.traceback( err ) )
 		end
 		return err
 	end
@@ -1309,7 +1308,6 @@ M.create=function(tasks)
 	if not tasks.linda then -- create a new linda and a colinda and mark this tasks as main_thread
 		tasks.main_thread=true
 		tasks.linda=lanes.linda()
-		tasks.linda:set("ERROR_STATE","NONE")
 		tasks.colinda=M.create_colinda(tasks.linda)
 		tasks.colinda.tasks=tasks -- link back
 		tasks:add_thread({

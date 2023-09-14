@@ -64,8 +64,11 @@ logs.log = function(mode,...)
 		if logs.allow and ( not logs.allow[ mode ] ) then return end
 		if logs.block and (     logs.block[ mode ] ) then return end
 		local line="here"
-		local info=debug.getinfo(2)
-		print( mode , info.currentline , info.name or "." , info.short_src , unpack(args) )
+		local info=debug.getinfo(2) -- this can be null if we are a tail call
+		local line=info and info.currentline or 0
+		local name=info and info.name or ""
+		local src=info and info.short_src or ""
+		print( mode , line , name , src , unpack(args) )
 		return
 	end
 
