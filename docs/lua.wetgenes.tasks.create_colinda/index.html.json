@@ -2538,7 +2538,7 @@
    "body": "<pre><code>local colinda=require(&quot;wetgenes.tasks&quot;).colinda(linda)\n</code></pre>\n<p>Create a colinda which is a wrapper around a linda providing \nreplacement functions to be used inside a coroutine so it will yield \n(and assume it will be resumed) rather than wait.</p>\n<p>This should be a dropin replacement for a linda and will fallback to \nnormal linda use if not in a coroutine.</p>\n<p>If linda is nil then we will create one, the linda used in this colinda \ncan be found in colinda.linda if you need raw access.</p>\n<p>What we are doing here is wrapping the send/receive functions so that</p>\n<pre><code>colinda:send(time,...)\ncolinda:recieve(time,...)\n</code></pre>\n<p>will be replaced with functions that call</p>\n<pre><code>linda:send(0,...)\nlinda:recieve(0,...)\n</code></pre>\n<p>and use coroutines.yield to mimic the original timeout value without \nblocking.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 1187,
+   "line": 1189,
    "name": "lua.wetgenes.tasks.create_colinda",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }

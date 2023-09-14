@@ -2538,7 +2538,7 @@
    "body": "<pre><code>local thread=tasks:add_task({\n    id=&quot;test&quot;,\n    code=function(linda,task_id,task_idx,task)\n        while true do\n            local _,memo= linda:receive( 0 , task_id )\n            if memo then\n                ...\n            end\n        end\n    end,\n})\n</code></pre>\n<p>Create a task with various preset values similar to a thread except \ninside a coroutine on the calling thread. As this function is inside a \ncoroutine you must yield regulary this yield will then continue on the \nnext update. Probably called once ever 60th of a second.</p>\n<pre><code>id\n</code></pre>\n<p>A unique id string to be used by lindas when sending messages into this \ntask. The function is expected to sit in an infinite loop testing \nthis linda socket and then yielding if there is nothing to do.</p>\n<pre><code>count\n</code></pre>\n<p>The number of tasks to create, they will all use the same instanced \ncode function so should be interchangable and it should not matter \nwhich task we are actually running code on. If you expect the task to \nmaintain some state between memos, then this must be 1 .</p>\n<pre><code>code\n</code></pre>\n<p>A lua function to run inside a coroutine, this function will recieve \ntasks.linda (which is a colinda) and the task.id for comunication and \nan index so we know which of the count tasks we are (mostly for \ndebugging) and finally the task table itself which make sense to share \nwith coroutines.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 963,
+   "line": 965,
    "name": "lua.wetgenes.tasks.add_task",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }

@@ -2538,7 +2538,7 @@
    "body": "<pre><code>tasks:fetch_global(name)\n</code></pre>\n<p>Fetch value associated with the name using the global linda socket or \nfalse on failure. You can not associated nil or false with a global value.</p>\n<p>This will block waiting on a result but should be fast.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 806,
+   "line": 808,
    "name": "lua.wetgenes.tasks.fetch_name",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }
