@@ -4,6 +4,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local log,dump=require("wetgenes.logs"):export("log","dump")
+local global=require("global")
 
 local jit_mcode_size=0
 --[[
@@ -157,6 +158,7 @@ function M.bake(opts)
 	oven.enable_close_window=true -- let the close button, close the window (otherwise you should catch close messages in app)
 
 	oven.opts=opts or {}
+	global.OVEN_OPTS=oven.opts -- remember last oven opts in global
 	
 	if type(opts[1])=="table" then -- probably passed in from nacl
 		for n,v in pairs(opts[1]) do -- copy it all into opts

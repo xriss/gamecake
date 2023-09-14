@@ -23,7 +23,10 @@ M.tasks_functions.wrap_code=function(code,linda,id,idx)
 		io.write(table.concat(t,"\t").."\n")
 	end
 
-	local ok,err=xpcall(function() code(linda,id,idx) end,function(err)
+	local logs=require("wetgenes.logs")
+	if OVEN_OPTS and OVEN_OPTS.args then logs.setup(OVEN_OPTS.args) end
+	
+	print_lanes_error=function(err)
 		if err==lanes.cancel_error then
 			if linda:get("ERROR_STATE")=="DUMP" then
 				print("lanes" , id , idx , debug.traceback("lanes.cancel_error") )
@@ -33,7 +36,9 @@ M.tasks_functions.wrap_code=function(code,linda,id,idx)
 			print("lanes" , id , idx , debug.traceback( err ) )
 		end
 		return err
-	end)
+	end
+
+	local ok,err=xpcall(function() code(linda,id,idx) end,print_lanes_error)
 
 end
 
@@ -288,7 +293,7 @@ M.tasks_functions.http_code=function(linda,task_id,task_idx)
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(tostring(err)) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			if memo.id then -- result requested
 				linda:send( nil , memo.id , ret )
@@ -425,7 +430,7 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(tostring(err)) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			if memo.id then -- result requested
 				linda:send( nil , memo.id , ret )
@@ -589,7 +594,7 @@ console.log("RECV:"+recv[0]);
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,function(err) return debug.traceback(tostring(err)) end) -- in case of uncaught error
+			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			if memo.id then -- result requested
 				linda:send( nil , memo.id , ret )
@@ -927,6 +932,9 @@ M.tasks_functions.add_thread=function(tasks,thread)
 	thread=thread or {}
 	thread.type="thread"
 	tasks:add_id(thread)
+	
+	thread.globals=thread.globals or {}
+	thread.globals.OVEN_OPTS=OVEN_OPTS
 
 	thread.count=thread.count or 1
 	thread.start=lanes.gen( "*" , { ["globals"]=thread.globals } , tasks.wrap_code ) -- prepare task
