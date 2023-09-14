@@ -25,7 +25,9 @@ M.tasks_functions.wrap_code=function(code,linda,id,idx)
 
 	local ok,err=xpcall(function() code(linda,id,idx) end,function(err)
 		if err==lanes.cancel_error then
---			print("lanes" , id , idx , debug.traceback("lanes.cancel_error") )
+			if linda:get("ERROR_STATE")=="DUMP" then
+				print("lanes" , id , idx , debug.traceback("lanes.cancel_error") )
+			end
 			error(err)
 		else
 			print("lanes" , id , idx , debug.traceback( err ) )
@@ -329,6 +331,11 @@ M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
 			end
 
 		elseif memo.sql then -- execute some sql
+		
+			if not db then
+				ret.error="no database"
+				return ret
+			end
 
 			local rows={}
 			
@@ -1292,6 +1299,7 @@ M.create=function(tasks)
 	if not tasks.linda then -- create a new linda and a colinda and mark this tasks as main_thread
 		tasks.main_thread=true
 		tasks.linda=lanes.linda()
+		tasks.linda:set("ERROR_STATE","NONE")
 		tasks.colinda=M.create_colinda(tasks.linda)
 		tasks.colinda.tasks=tasks -- link back
 		tasks:add_thread({
