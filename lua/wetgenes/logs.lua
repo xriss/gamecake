@@ -59,16 +59,14 @@ logs.log = function(mode,...)
 	for i=1,select("#", ...) do
 		args[i]=tostring( select(i, ...) )
 	end
-	if type(mode)~="string" or mode=="" then -- special print location in file
+	if type(mode)~="string" or mode=="" or mode=="line" then -- special print location in file
 		mode="line"
 		if logs.allow and ( not logs.allow[ mode ] ) then return end
 		if logs.block and (     logs.block[ mode ] ) then return end
 		local line="here"
-		local info=debug.getinfo(2) -- this can be null if we are a tail call
-		local line=info and info.currentline or 0
-		local name=info and info.name or ""
-		local src=info and info.short_src or ""
-		print( mode , line , name , src , unpack(args) )
+		 -- this can be null if we are a tail call so need fake fallback
+		local info=debug.getinfo(2) or {currentline=0,name="",short_src=""}
+		print( mode , info.currentline , info.name , info.short_src , unpack(args) )
 		return
 	end
 

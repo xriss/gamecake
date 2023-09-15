@@ -65,7 +65,7 @@ M.bake=function(oven,recaps)
 			m.ups[i]=u
 			u.idx=i
 			u.state=v.state
-			u.state_axis=v.state_axis
+			u.state_pulse=v.state_pulse
 		end
 		oven.tasks.linda:send(nil,"ups",m)
 --print("up","push",m)
@@ -73,18 +73,27 @@ M.bake=function(oven,recaps)
 	
 	function recaps.pull()
 		local up=recaps.up and recaps.up[1]
+		
+		up.state_msgs={} -- clr old msgs
+		for i,v in ipairs(recaps.up or {}) do
+			v.state_pulse={} -- clr old pulses
+		end
+
 		repeat
 			local ok,m=oven.tasks.linda:receive(0,"ups") -- grab all available memos
 			if ok and m then
 --print("up","pull",m)
 				if up then
-					up.state_msgs=m.msgs or {}
+					local l=#up.state_msgs
+					for i=1,#m.msgs do -- append
+						up.state_msgs[l+i]=m.msgs[i]
+					end
 				end
 				for i,v in ipairs(recaps.up or {}) do
 					local u=m.ups[i]
 					if u then
-						v.state=u.state
-						v.state_axis=u.state_axis
+						for a,b in pairs(u.state) do v.state[a]=b end -- merge state with old state
+						for a,b in pairs(u.state_pulse) do v.state_pulse[a]=b end -- merge pulse with other recent pulses
 					end
 				end
 			end
@@ -155,6 +164,29 @@ M.bake=function(oven,recaps)
 		local recap={}
 		recap.idx=idx
 		
+-- these 4 functions are the only ones a user needs
+-- all others are internal
+		recap.button=function(name) -- return state "valid" frame data not current "volatile" frame data
+			if name then
+				return recap.state[name] or recap.state_pulse[name]
+			end
+			return recap.state -- return all buttons if no name given but this does not include pulses	
+		end
+
+		recap.axis=function(name) -- return state "valid" frame data not current "volatile" frame data
+			if name then
+				return recap.state[name]
+			end
+			return recap.state -- return all axis if no name given
+		end
+
+		recap.axisfixed=function(name) -- fix deadzones etc
+			local ax=recap.axis(name)
+			if ax then return fixaxis( ax ) end
+			return 0
+		end
+-- see above
+
 
 		function recap.reset(flow)
 			recap.flow=flow or "none" -- do not play or record by default
@@ -166,9 +198,10 @@ M.bake=function(oven,recaps)
 			
 			recap.state={}
 			recap.now={}
-			recap.state_axis={}
-			recap.now_axis={}
-			recap.autoclear={}
+			
+			recap.state_pulse={}
+			recap.now_pulse={}
+
 			recap.stream={} -- a stream of change "table"s or "number" frame skips
 			recap.frame=0
 			recap.read=0
@@ -193,42 +226,22 @@ M.bake=function(oven,recaps)
 			recap.now[nam]=dat
 		end
 		function recap.get(nam) -- get the volatile data
-			return recap.now[nam]
+			local l=recap.now[nam] -- now only contains most recent changes
+			if type(l)=="nil" then l=recap.state[nam] end -- so we also need state
+			return l
 		end
 		function recap.pulse(nam,dat) -- set the volatile data but *only* for one frame
-			recap.now[nam]=dat
-			recap.autoclear[nam]=true
+			recap.now_pulse[nam]=dat
 		end
 		
 
 
-		function recap.msgs(class) -- list of msgs for the last tick with optional simple class filter
+		recap.msgs=function(class) -- list of msgs for the last tick with optional simple class filter
 			if class then
 				return recap.state_msgs[class] or {}
 			end
 			return recap.state_msgs or {}
 		end
-
-		function recap.button(name) -- return state "valid" frame data not current "volatile" frame data
-			if name then
-				return recap.state[name]
-			end
-			return recap.state -- return all buttons if no name given			
-		end
-
-		function recap.axis(name) -- return state "valid" frame data not current "volatile" frame data
-			if name then
-				return recap.state_axis[name]
-			end
-			return recap.state_axis -- return all axis if no name given
-		end
-
-		recap.axisfixed=function(name)
-			local ax=recap.axis(name)
-			if ax then return fixaxis( ax ) end
-			return 0
-		end
-
 		
 -- use this to copy and remember a msg
 		function recap.set_msg(mm)
@@ -265,13 +278,13 @@ M.bake=function(oven,recaps)
 -- use this to set a joysticks axis position
 		function recap.set_axis(m)
 			for n,v in pairs(m) do
-				recap.now_axis[n]=v
+				recap.now[n]=v
 			end
 		end
 -- use this to set a mouse axis relative movement
 		function recap.set_axis_relative(m)
 			for n,v in pairs(m) do
-				recap.now_axis[n]=((recap.state_axis[n] or 0)+v)%65536
+				recap.now[n]=((recap.state[n] or 0)+v)%65536
 			end
 		end
 
@@ -290,8 +303,7 @@ M.bake=function(oven,recaps)
 					for _,n in ipairs(nam) do recap.set_button(n,v) end -- multi
 				end
 			else
-				local l=recap.now[nam]
-				if type(l)=="nil" then l=recap.state[nam] end -- now probably only contains recent changes
+				local l=recap.get(nam)
 				if v then -- set
 					if not l then -- change?
 						recap.set(nam,true)
@@ -313,6 +325,8 @@ M.bake=function(oven,recaps)
 --print("step "..tostring(flow))	
 
 			if flow=="record" then
+-- not used not tested best to ignore			
+--[[
 				local change
 				for n,v in pairs(recap.now) do
 					if recap.state[n]~=v then -- changes
@@ -331,9 +345,11 @@ M.bake=function(oven,recaps)
 						table.insert(recap.stream,1) -- change nothing
 					end
 				end
-				
+]]				
 			elseif flow=="play" then -- grab from the stream
-			
+
+-- not used not tested best to ignore			
+--[[
 				if recap.wait>0 then
 				
 					recap.wait=recap.wait-1
@@ -358,6 +374,7 @@ M.bake=function(oven,recaps)
 					
 					end
 				end
+]]
 			
 			else -- default of do not record, do not play just be
 			
@@ -366,21 +383,12 @@ M.bake=function(oven,recaps)
 					recap.now[n]=nil
 				end
 				
-				for n,v in pairs(recap.now_axis) do
-					recap.state_axis[n]=v
-					recap.now_axis[n]=nil
-				end
+				recap.state_pulse=recap.now_pulse
+				recap.now_pulse={} -- new table
 				
 				recap.state_msgs=recap.now_msgs -- use this copy of any messages
 				recap.now_msgs={} -- start a new list
 
-			end
-			
-			if flow~="play" then
-				for n,b in pairs(recap.autoclear) do -- auto clear volatile button pulse states
-					recap.now[n]=false
-					recap.autoclear[n]=nil
-				end
 			end
 			
 			recap.frame=recap.frame+1 -- advance frame counter

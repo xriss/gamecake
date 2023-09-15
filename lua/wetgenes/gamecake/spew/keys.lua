@@ -474,10 +474,10 @@ M.bake=function(oven,keys)
 			local ups=recaps.ups(key.idx)
 			for n,a in ipairs{"lx","ly","lz","rx","ry","rz"} do -- check axis buttons and convert to axis movement
 				local ak=a.."k"
-				local o=(ups.state_axis[ak] or 0)
+				local o=(ups.get(ak) or 0)
 				local v=0
-				if     ups.state[a.."0"] then v=-32767 if(o>0) then o=0 end
-				elseif ups.state[a.."1"] then v= 32767 if(o<0) then o=0 end
+				if     ups.get(a.."0") then v=-32767 if(o>0) then o=0 end
+				elseif ups.get(a.."1") then v= 32767 if(o<0) then o=0 end
 				end
 				if v==0 then
 					v=math.floor(o*0.8+v*0.2)
@@ -488,17 +488,16 @@ M.bake=function(oven,keys)
 			end
 			
 			-- pick best axis l/r axis
-			local lx ,ly ,lz =(ups.state_axis.lx  or 0),(ups.state_axis.ly  or 0),(ups.state_axis.lz  or 0)
-			local lxk,lyk,lzk=(ups.state_axis.lxk or 0),(ups.state_axis.lyk or 0),(ups.state_axis.lzk or 0)
+			local lx ,ly ,lz =(ups.get("lx")  or 0),(ups.get("ly")  or 0),(ups.get("lz")  or 0)
+			local lxk,lyk,lzk=(ups.get("lxk") or 0),(ups.get("lyk") or 0),(ups.get("lzk") or 0)
 			if lxk*lxk+lyk*lyk+lzk*lzk > lx*lx+ly*ly+lz*lz then		ups.set_axis({lxb=lxk,lyb=lyk,lzb=lzk})
 			else													ups.set_axis({lxb=lx ,lyb=ly ,lzb=lz })
 			end
-			local rx ,ry ,rz =(ups.state_axis.rx  or 0),(ups.state_axis.ry  or 0),(ups.state_axis.rz  or 0)
-			local rxk,ryk,rzk=(ups.state_axis.rxk or 0),(ups.state_axis.ryk or 0),(ups.state_axis.rzk or 0)
+			local rx ,ry ,rz =(ups.get("rx")  or 0),(ups.get("ry")  or 0),(ups.get("rz")  or 0)
+			local rxk,ryk,rzk=(ups.get("rxk") or 0),(ups.get("ryk") or 0),(ups.get("rzk") or 0)
 			if rxk*rxk+ryk*ryk+rzk*rzk > rx*rx+ry*ry+rz*rz then		ups.set_axis({rxb=rxk,ryb=ryk,rzb=rzk})
 			else													ups.set_axis({rxb=rx ,ryb=ry ,rzb=rz })
 			end
---print(ups.state_axis.rxk)
 		end
 
 		return key
