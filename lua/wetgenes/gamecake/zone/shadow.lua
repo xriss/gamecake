@@ -101,7 +101,7 @@ M.bake=function(oven,shadow)
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
 		local camera=scene.get("camera")
-		local sky=scene.systems.sky or {time=0}
+		local sky=scene.systems.sky
 		if camera then
 
 			local s=shadow.maparea -- 40*shadow.mapsize/1024
@@ -112,7 +112,8 @@ M.bake=function(oven,shadow)
 			
 			screen.shader_qs.zone_screen_build_occlusion.SHADOW="0.6,"..(0.04/sd)..","..(0.08/sd)..",0.0"
 
-			local r=(sky.time+360-90-5)%360
+			local r=(360-90-5)%360
+			if sky and sky.time then r=(sky.time+360-90-5)%360 end
 
 			local  calculate_matrix=function(ang,rot)
 				shadow.mtx=M4{
@@ -133,19 +134,22 @@ M.bake=function(oven,shadow)
 			calculate_matrix(35,0)
 			shadow.mtx_sun=shadow.mtx
 			-- remember light normal
-			sky.sun[1]=-shadow.mtx[3]
-			sky.sun[2]=-shadow.mtx[7]
-			sky.sun[3]=-shadow.mtx[11]
-			sky.sun:normalize()
-
+			if sky.sun then
+				sky.sun[1]=-shadow.mtx[3]
+				sky.sun[2]=-shadow.mtx[7]
+				sky.sun[3]=-shadow.mtx[11]
+				sky.sun:normalize()
+			end
+			
 			calculate_matrix(0,180)
 			shadow.mtx_moon=shadow.mtx
 			-- remember light normal
-			sky.moon[1]=-shadow.mtx[3]
-			sky.moon[2]=-shadow.mtx[7]
-			sky.moon[3]=-shadow.mtx[11]
-			sky.moon:normalize()
-
+			if sky.moon then
+				sky.moon[1]=-shadow.mtx[3]
+				sky.moon[2]=-shadow.mtx[7]
+				sky.moon[3]=-shadow.mtx[11]
+				sky.moon:normalize()
+			end
 
 			local ddd=10
 
