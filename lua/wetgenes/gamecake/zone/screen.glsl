@@ -379,12 +379,7 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 	vec3 v=depth_to_view( vv );
 
 	vec4 shadow_uv = shadow_mtx * camera * vec4(v,1.0) ;
-#ifdef SHADOW_SQUISH
-//	shadow_uv.xy=clamp(shadow_uv.xy,vec2(-1.0),vec2(1.0));
-//	shadow_uv.xy=(sign(shadow_uv.xy)*pow(abs(shadow_uv.xy),vec2(SHADOW_SQUISH)));
-//  shadow_uv.xy=mix( shadow_uv.xy*0.5 , shadow_uv.xy*0.75 - (sign(shadow_uv.xy)*0.125) , step(0.5,abs(shadow_uv.xy)) );
-    shadow_uv.xy=mix( shadow_uv.xy*2.0 , shadow_uv.xy*0.75/1.25 + (sign(shadow_uv.xy)*0.35) , step(0.25,abs(shadow_uv.xy)) );
-#endif
+
 	shadow_uv = (shadow_uv/shadow_uv.w) * 0.5 + 0.5;
 
 	const vec4 shadow=vec4(SHADOW);

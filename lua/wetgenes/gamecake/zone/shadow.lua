@@ -84,7 +84,7 @@ M.bake=function(oven,shadow)
 
 -- special shadow transform to make the area around 0 more detailed
 --		gl.program_defs["DRAW_SHADOW_SQUISH"]=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SQUISH
-		gl.program_defs["DRAW_SHADOW_SQUISH"]=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SQUISH
+--		gl.program_defs["DRAW_SHADOW_SQUISH"]=screen.shader_qs.zone_screen_build_occlusion.SHADOW_SQUISH
 
 		gl.PushMatrix()
 		shadow.fbo:bind_frame()
@@ -99,6 +99,8 @@ M.bake=function(oven,shadow)
 		})
 
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
+
+if not shadow.updated then -- we are in control
 
 		local camera=scene.get("camera")
 		local sky=scene.systems.sky
@@ -182,32 +184,41 @@ M.bake=function(oven,shadow)
 				shadow.power=(180-r)/ddd
 			end
 			
-
-
-			gl.MatrixMode(gl.PROJECTION)
-			gl.LoadMatrix( shadow.mtx )
-
-			gl.MatrixMode(gl.MODELVIEW)
-			gl.LoadIdentity()
-
-			gl.uniforms.camera=function(u)
-				gl.UniformMatrix4f( u , camera.mtx ) -- so we can apply it later
-			end
-
-			gl.uniforms.incamera=function(u) -- no camera
-				gl.UniformMatrix4f( u , M4() ) -- apply this one in a shader
-			end
-
 		end
 
+		gl.uniforms.camera=function(u)
+			gl.UniformMatrix4f( u , camera.mtx ) -- so we can apply it later
+		end
 
+		gl.uniforms.incamera=function(u) -- no camera
+			gl.UniformMatrix4f( u , M4() ) -- apply this one in a shader
+		end
+
+else
+
+		gl.uniforms.camera=function(u)
+			gl.UniformMatrix4f( u , shadow.cam_mtx ) -- so we can apply it later
+		end
+
+		gl.uniforms.incamera=function(u) -- no camera
+			gl.UniformMatrix4f( u , M4() ) -- apply this one in a shader
+		end
+
+end
+
+
+		gl.MatrixMode(gl.PROJECTION)
+		gl.LoadMatrix( shadow.mtx )
+
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.LoadIdentity()
 
 	end
 
 	shadow.draw_tail=function(scene,shadow_idx)
 
 -- turn off special shadow transform
-		gl.program_defs["DRAW_SHADOW_SQUISH"]=nil
+--		gl.program_defs["DRAW_SHADOW_SQUISH"]=nil
 
 		gl.state.pop()
 		oven.cake.views.pop_and_apply()
