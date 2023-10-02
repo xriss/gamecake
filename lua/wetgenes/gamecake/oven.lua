@@ -643,10 +643,8 @@ require("gles").CheckError() -- uhm this fixes an error?
 			end
 		end
 
-		oven.ticks=0
 		function oven.update()
 --print(oven.ticks)
-			oven.ticks=(oven.ticks+1)%0x100000000	-- 32bit update tick counter
 
 			if oven.do_backtrace then
 				oven.do_backtrace=false
