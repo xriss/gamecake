@@ -128,7 +128,18 @@ M.bake=function(oven,keys)
 			keys.up[i]=keys.create(i,opts) -- 1up 2up etc
 		end
 		
-		if opts.max_up==1 then -- single player, grab lots of keys
+		if opts.keymaps then -- full control
+
+			for i=1,opts.max_up do
+				local name=opts.keymaps[i]
+				local m=name and keys.defaults[name]
+				for n,v in pairs(m or {}) do
+					keys.up[i].set(n,v)
+				end
+			end
+
+		elseif opts.max_up==1 then -- single player, grab lots of keys
+
 			if oven.opts.bake and oven.opts.bake.smell=="pimoroni" then
 				keys.opts.notyping=true
 				for n,v in pairs(keys.defaults["pimoroni"]) do
@@ -139,12 +150,15 @@ M.bake=function(oven,keys)
 					keys.up[1].set(n,v)
 				end
 			end
+
 		else
+
 			for i=1,opts.max_up do -- multiplayer use keyislands so we can all fit on a keyboard
 				for n,v in pairs(keys.defaults["island"..i] or {}) do
 					keys.up[i].set(n,v)
 				end
 			end
+
 		end
 				
 		return keys -- so setup is chainable with a bake
