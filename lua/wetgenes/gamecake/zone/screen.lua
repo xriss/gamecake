@@ -174,6 +174,11 @@ M.bake=function(oven,screen)
 		local ow=math.ceil(w * screen.occlusion_scale )
 		local oh=math.ceil(h * screen.occlusion_scale )
 
+		local bw=math.ceil(width  * 0.25 ) -- should be relative to original size but should also depend on dpi?
+		local bh=math.ceil(height * 0.25 )
+
+		if bw>w then bw=w end -- need to cap the maximum
+		if bh>h then bh=h end
 
 		if screen.fbo.w ~= w or screen.fbo.h ~= h or screen.fbo_occlusion.w ~= ow or screen.fbo_occlusion.h ~= oh then
 
@@ -181,17 +186,14 @@ M.bake=function(oven,screen)
 
 			screen.fbo_occlusion:resize( ow , oh , 0 )
 
-			local bw=math.ceil(width  * 0.25 ) -- should be relative to original size but should also depend on dpi?
-			local bh=math.ceil(height * 0.25 )
+		end
 
-			if bw>w then bw=w end -- need to cap the maximum
-			if bh>h then bh=h end
+		if screen.fbo_bloom.w ~= bw or screen.fbo_bloom.h ~= bh or screen.fbo_blur.w ~= bw or screen.fbo_blur.h ~= bh then
 
 			screen.fbo_bloom:resize( bw , bh , 0 )
 			screen.fbo_blur:resize( bw , bh , 0 )
 
 		end
-		
 
 		screen.view.fov=screen.camera_fov
 		screen.view.vz=8192
@@ -201,6 +203,7 @@ M.bake=function(oven,screen)
 		screen.view_occlusion.vz=8192
 		screen.view_occlusion.pz=0
 
+		screen.view_bloom.fbo=screen.fbo_bloom
 		screen.view_bloom.vz=8192
 		screen.view_bloom.pz=0
 
@@ -412,12 +415,14 @@ M.bake=function(oven,screen)
 
 	end
 
+-- with multiple renders this needs to cache somewhere else
+	screen.swap_bloom=function(scene,fbo)
+		local t=screen.fbo_bloom
+		screen.fbo_bloom=fbo
+		return t
+	end
+
 	screen.build_bloom=function(scene)
-
-		screen.fbo_blur:resize( screen.fbo_bloom.w , screen.fbo_bloom.h , 0 )
-
--- feedback last bloom into new bloom	
-		screen.fbo_blur , screen.fbo_bloom = screen.fbo_bloom , screen.fbo_blur
 
 		local t={
 			-1,	 1,	0,	0,	1,
@@ -433,6 +438,8 @@ M.bake=function(oven,screen)
 			[gl.BLEND]					=	gl.FALSE,
 		})
 
+-- feedback last bloom into new bloom	
+		screen.fbo_blur , screen.fbo_bloom = screen.fbo_bloom , screen.fbo_blur
 		screen.fbo_bloom:bind_frame()
 --		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_bloom_pick",function(p)
 		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_bloom_pick"),function(p)
