@@ -188,7 +188,7 @@ function M.bake(opts)
 
 	if opts.args.help then
 	
-		print(M.help_text)
+		print(opts.help_text or M.help_text)
 	
 		os.exit(0)
 	end
@@ -196,6 +196,10 @@ function M.bake(opts)
 	opts.width=opts.width or 0
 	opts.height=opts.height or 0
 
+	if opts.sanitize then -- sanitize args
+		opts:sanitize()
+	end
+	
 	require("wetgenes.logs").setup(opts.args)
 
 if jit then -- now logs are setup, dump basic jit info
