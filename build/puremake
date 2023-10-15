@@ -1647,7 +1647,6 @@ in backup alternative module to lfs.
 
 ]]
 
-
 local bit = require "bit"
 local ffi = require "ffi"
 
@@ -1668,7 +1667,7 @@ local _M = {
 }
 
 -- common utils/constants
-local IS_64_BIT = io.popen and io.popen('getconf LONG_BIT','r'):read('*a')=="64\n" or ffi.abi('64bit')
+local IS_64_BIT = ffi.abi('64bit')
 local ERANGE = 'Result too large'
 
 if not pcall(ffi.typeof, "ssize_t") then
@@ -2101,7 +2100,6 @@ if OS == "Windows" then
             dir._dentry.handle = findfirst(dir._pattern, entry)
             if dir._dentry.handle == -1 then
                 dir.closed = true
-                error(dir._pattern..": "..errno(),2)
                 return nil, errno()
             end
             return ffi_str(entry.name)
@@ -2123,7 +2121,6 @@ if OS == "Windows" then
             dir._dentry.handle = wfindfirst(szPattern, entry)
             if dir._dentry.handle == -1 then
                 dir.closed = true
-                error(dir._pattern..": "..errno(),2)
                 return nil, errno()
             end
             local szName = win_unicode_to_utf8(entry.name)--, -1, szName, 512);
@@ -2623,7 +2620,7 @@ if OS == 'Linux' then
         ]])
         stat_syscall_num = IS_64_BIT and 106 or 195
         lstat_syscall_num = IS_64_BIT and 107 or 196
-    elseif ARCH == 'arm' or ARCH == 'arm64' then
+    elseif ARCH == 'arm' then
         if IS_64_BIT then
             ffi.cdef([[
                 typedef struct {
@@ -2734,7 +2731,50 @@ if OS == 'Linux' then
         lstat_syscall_num = IS_64_BIT and 4107 or 4214
     end
 
-    if stat_syscall_num then
+    if ARCH == 'arm64' then
+
+-- On arm64 stat and lstat do not exist as syscall but can be used like this
+
+        ffi.cdef([[
+            typedef struct lfs_stat {
+                unsigned long   st_dev;
+                unsigned long   st_ino;
+                unsigned int    st_mode;
+                unsigned int    st_nlink;
+                unsigned int    st_uid;
+                unsigned int    st_gid;
+                unsigned long   st_rdev;
+                unsigned long   __pad1;
+                long            st_size;
+                int             st_blksize;
+                int             __pad2;
+                long            st_blocks;
+                long            st_atime;
+                unsigned long   st_atime_nsec;
+                long            st_mtime;
+                unsigned long   st_mtime_nsec;
+                long            st_ctime;
+                unsigned long   st_ctime_nsec;
+                unsigned int    __unused4;
+                unsigned int    __unused5;
+            } lfs_stat;
+
+        int stat(const char *pathname,
+             struct lfs_stat *statbuf);
+
+        int lstat(const char *pathname,
+             struct lfs_stat *statbuf);
+
+        ]])
+
+        stat_func = function(filepath, buf)
+            return lib.stat(filepath, buf)
+        end
+        lstat_func = function(filepath, buf)
+            return lib.lstat(filepath, buf)
+        end
+
+    elseif stat_syscall_num then
         stat_func = function(filepath, buf)
             return lib.syscall(stat_syscall_num, filepath, buf)
         end
@@ -2807,6 +2847,36 @@ elseif OS == 'OSX' then
     ]])
     stat_func = lib.stat64
     lstat_func = lib.lstat64
+elseif OS == 'BSD' then
+    ffi.cdef([[
+        struct lfs_timespec {
+            time_t tv_sec;
+            long tv_nsec;
+        };
+        typedef struct {
+            uint32_t           st_dev;
+            uint32_t         st_ino;
+            uint16_t          st_mode;
+            uint16_t         st_nlink;
+            uint32_t           st_uid;
+            uint32_t           st_gid;
+            uint32_t           st_rdev;
+            struct lfs_timespec st_atimespec;
+            struct lfs_timespec st_mtimespec;
+            struct lfs_timespec st_ctimespec;
+            int64_t           st_size;
+            int64_t        st_blocks;
+            int32_t       st_blksize;
+            uint32_t        st_flags;
+            uint32_t        st_gen;
+            int32_t         st_lspare;
+            struct lfs_timespec st_birthtimespec;
+        } lfs_stat;
+        int stat(const char *path, lfs_stat *buf);
+        int lstat(const char *path, lfs_stat *buf);
+    ]])
+    stat_func = lib.stat
+    lstat_func = lib.lstat
 else
     ffi.cdef('typedef struct {} lfs_stat;')
     stat_func = function() error('TODO: support other posix system') end
