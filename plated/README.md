@@ -30,14 +30,15 @@ _Commands above are for debian/ubuntu. For other operating systems, please the u
     - Check your URL - http://username.github.io/new-repo
     - Your website should now work and contain the default plated-example landing page.
 
-3. Enable Github Actions https://github.com/username/new-repo/settings/actions
-    - Under **General**, choose **Allow all actions and reusable workflows** and click **Save**
+3. Enable Github Actions in **General** https://github.com/username/new-repo/settings/actions
+    - Under *Actions permissions*, choose **Allow all actions and reusable workflows** and click **Save**
+    - Under *Workflow permissions*, choose **Read and write permissions** and click **Save**
     - You can start editing your site and the changes will automatically be published using Github Actions.
   
 4. Enable actions under the **Actions** tab https://github.com/username/new-repo/actions
     - Click on the green **Enable Actions on this repository** button
 
-4. Read [the next bit](#run-this-local) if you want to view your site locally before publishing.
+5. Read [the next bit](#run-this-local) if you want to view your site locally before publishing.
     
 ---
 
