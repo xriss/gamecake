@@ -189,7 +189,7 @@ function gui.action(m)
 				local window=it ; while not window.close_request and window.parent~=window do window=window.parent end
 				if act=="file_name_click" then
 					local path=window.file:path()
-					req.master.later_append(function()
+					gui.master.later_append(function()
 						docs.manifest(path):show()
 					end)
 					window:close_request()
