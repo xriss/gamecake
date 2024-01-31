@@ -88,6 +88,8 @@ main.setup=function()
 		vz=screen.hy*4,
 		fov=0,
 	})
+
+	oven.msg_view=view -- fix mouse coords using this view
 	
 end
 
@@ -101,9 +103,9 @@ main.clean=function()
 end
 
 main.msg=function(m)
---	print(wstr.dump(m))
 
-	view.msg(m) -- fix mouse coords
+--	view.msg(m) -- fix mouse coords
+--	print(wstr.dump(m))
 
 --	if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
 	

@@ -402,6 +402,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 				fov=0,
 				
 			})
+			oven.msg_view=view -- the view to use to fix mouse position
 			oven.cake.views.push(oven.view) -- add master view which is the size of the main window
 
 			oven.skeys=oven.rebake("wetgenes.gamecake.spew.keys") -- need to use spew keys always or mouse button no click on gui
@@ -867,6 +868,9 @@ end
 						m.xraw=m.x				-- remember in message
 						m.yraw=m.y	
 						oven.frame_rate_auto_active=time_now
+						if oven.msg_view then
+							oven.msg_view.msg(m) -- fix mouse coords using this view
+						end
 					end
 
 					if m.class=="touch" then	-- need to fix x,y numbers
