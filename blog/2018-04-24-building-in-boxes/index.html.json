@@ -23,10 +23,12 @@
    0,
    0
   ],
+  "timecolon": "00:00:00",
   "title": "Building in boxes.",
   "unixtime": 1524528000
  },
  "_blog_post_older": "{_root}blog/2017-12-30-beware-of-the-node/",
+ "_blog_post_this": "{_root}blog/2018-04-24-building-in-boxes/",
  "_dirname": "{_root}blog/2018-04-24-building-in-boxes",
  "_filename": "{_root}blog/2018-04-24-building-in-boxes/index.html",
  "_flags": {
