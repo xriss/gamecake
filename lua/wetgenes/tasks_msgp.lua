@@ -41,15 +41,34 @@ at a special number, that number is configurable and should be
 different for each app. An extra bit of sanity during introductions to 
 indicate that the data stream will be understood by both parties.
 
-Special packets
+Special packets that do not add to the stream of user data but instead 
+are used internally by this protocol.
+
+	bits,bit
+	0x00,0x00
+
+Sending a packet with bits=0 and bit=0 is an empty packet and will 
+Ignore any data sent in the packet, which will probably be empty but 
+does not have to be. Useful if you want to probe to find out if the 
+network gets better or worse when sending different size packets.
+
 
 	bits,bit
 	0x00,0x01
 
 Sending a packet with bits=0 and bit=1 is a hostname packet. The 
-payload data is a simple utf8 string with the hostname of the sender. ( 
-possibly / probably unique until proven otherwise ) 
+payload data is a simple null terminated utf8 string with the hostname 
+of the sender. A null terminated utf8 string of the senders ip4 address 
+and a null terminated utf8 string of the senders ip6 address. These 3 
+values combined will be assumed uniqueish, technically they can clash 
+but we only have so much to go on here and its a reasonable assumption. 
 
+When received, each of the 3 strings needs to be clamped to 255 bytes 
+before use and the ip4 and ip6 addresses replaced with empty strings if 
+invalid.
+
+
+	bits,bit
 	0x00,0x02
 
 Sending a packet with bits=0 and bit=2 is a peername packet. The 
@@ -68,6 +87,204 @@ M.functions={}
 M.metatable={__index=M.functions}
 setmetatable(M,M.metatable)
 
+--[[
+
+Parse an array of 8 numbers into an ip6 address with :: in the first 
+longest run of zeros if needed and lowercase hex letters.
+
+]]
+M.functions.ip6_to_addr=function(list)
+
+	local zer=nil -- idx to collapse
+	local rep=0 -- number of 0s to remove
+	local cnt=0
+	for i=1,9 do
+		if i<9 and list[i]==0 then
+			cnt=cnt+1
+		else
+			if cnt>rep then
+				rep=cnt
+				zer=i-cnt
+			end
+			cnt=0 -- reset
+		end
+	end
+	local s=""
+	for i=1,8 do
+		if rep>=2 and i==zer then -- 2 or more zeros
+			s=s.."::"
+			i=i+rep
+			if i>=8 then return s end -- finished
+		else
+			if i>1 then
+				s=s..":"
+			end
+		end
+		s=s..string.format("%x",list[i])
+	end
+	return s
+end
+
+--[[
+
+Parse an array of numbers into an ip address and maybe port.
+
+	#4 {1,2,3,4} -- ip4
+	#5 {1,2,3,4,5} -- ip4:port
+	#8 {1,2,3,4,5,6,7,8} -- ip6
+	#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port
+
+]]
+M.functions.list_to_addr=function(list)
+
+	local len=#list
+	if     len==4 then -- ip4
+		return string.format("%d.%d.%d.%d",list[1],list[2],list[3],list[4])
+	elseif len==5 then -- ip4:port
+		return string.format("%d.%d.%d.%d:%d",list[1],list[2],list[3],list[4],list[5])
+	elseif len==8 then -- ip6
+		return M.ip6_to_addr(list)
+	elseif len==9 then -- [ip6]:port
+		return string.format("[%s]:%d",M.ip6_to_addr(list),list[9])
+	end
+
+end
+
+--[[
+
+parse an ip address + maybe port encoded as a string into a list of 
+numbers, the length of the list represents the type so
+
+	#4 {1,2,3,4} -- ip4
+	#5 {1,2,3,4,5} -- ip4:port
+	#8 {1,2,3,4,5,6,7,8} -- ip6
+	#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port
+
+]]
+M.functions.addr_to_list=function(addr)
+
+	print(addr)
+	
+	local ipv4=false
+	local ipv6=false
+	local zer
+	local first,last
+	local list={}
+	local idx=0
+	for a,b in string.gmatch(addr,"([%p]*)([^%p]*)") do
+		if a=="" and b=="" then break end
+		idx=idx+1
+--print("#",idx,a,b)
+		if last then return nil,"too many numbers" end -- too many numbers
+		if not first then
+			if a=="[" or a=="" or a=="::" or a=="[::]:" then 
+				first=a
+				if     first=="[::]:" then -- 8 0s and a port
+					last=""
+					ipv6=true
+					list={0,0,0,0,0,0,0,0}
+				elseif first=="::" then
+					ipv6=true
+					zer=#list
+				elseif first=="[" then
+					ipv6=true
+				end
+			else
+				return nil,"invalid start"
+			end
+		else
+			if not ( ipv4 or ipv6 ) then
+				if     a=="." then            ipv4=true
+				elseif a==":" or a=="::" then ipv6=true
+				else
+					return nil,"invalid separator"
+				end
+			end
+			if ipv4 then
+				if a~="." then
+					if a==":" then last=a
+					else
+						return nil,"invalid ipv4 separator"
+					end
+				end
+			end
+			if ipv6 then
+				if a~=":" then
+					if a=="]:" then
+						last=a
+					elseif a=="::" then
+						if zer then return nil end -- only 1 :: allowed
+						zer=#list
+					elseif a=="::]:" then
+						zer=#list
+						last=a
+					else
+						return nil,"invalid ipv6 separator"
+					end
+				end
+			end
+		end
+		if b~="" then
+			list[#list+1]=b
+		end
+		print(a,b)
+	end
+	
+	if zer then -- need to insert some zeros
+		local pad=8-#list
+		if last then pad=pad+1 end -- we have a port so pad to 9 values
+		if pad<2 then return nil,"invalid ipv6 ::" end
+		for i=1,pad do
+			table.insert(list,zer+1,0)
+		end
+	end
+	
+	local len=#list
+	local p=(last and 1 or 0)
+	if ipv4 and len<4   then return nil,"too few ipv4 numbers" end
+	if ipv4 and len>4+p then return nil,"too many ipv4 numbers" end
+	if ipv8 and len<8   then return nil,"too few ipv6 numbers" end
+	if ipv8 and len>8+p then return nil,"too many ipv6 numbers" end
+	
+	if ipv4 then -- convert strings and check range
+		for i=1,4 do
+			if type(list[i])=="string" then
+				list[i]=tonumber(list[i],10)
+			end
+			if list[i]~=list[i] then return nil,"NAN" end
+			if list[i]<0 or list[i]>255 then return nil,"number out of range" end
+		end
+		if last then -- port
+			if type(list[5])=="string" then
+				list[5]=tonumber(list[5],10)
+			end
+			if list[5]~=list[5] then return nil,"NAN" end
+			if list[5]<0 or list[5]>65535 then return nil,"port out of range" end
+		end
+	end
+
+	if ipv6 then -- convert strings and check range
+		for i=1,8 do
+			if type(list[i])=="string" then
+				list[i]=tonumber(list[i],16)
+			end
+			if list[i]~=list[i] then return nil,"NAN" end
+			if list[i]<0 or list[i]>65535 then return nil,"number out of range" end
+		end
+		if last then -- port
+			if type(list[9])=="string" then
+				list[9]=tonumber(list[9],10)
+			end
+			if list[9]~=list[9] then return nil,"NAN" end
+			if list[9]<0 or list[9]>65535 then return nil,"port out of range" end
+		end
+	end
+
+	print(table.concat(list," "))
+	print()
+	
+	return list
+end
 
 --[[
 
@@ -186,12 +403,9 @@ M.functions.test_server=function(tasks)
 
 	local socket = require("socket")
 
-
 	local hostname=socket.dns.gethostname()
 	local ip4,ip6=M.ipsniff()
-	
 	local udp4,udp6
-	
 	if ip6 then
 		udp6 = socket.udp()
 		udp6:settimeout(0)
@@ -218,8 +432,9 @@ print( hostname , ip4 , ip6 , port )
 		local m=M.pack()
 		m.bit=1
 		m=M.pack(m)
-		assert( udp4:sendto(m,"127.0.0.1",baseport) )
-		assert( udp6:sendto(m,"::1",baseport) )
+		if udp6 then	assert( udp6:sendto(m,"::1",       baseport) )
+		else			assert( udp4:sendto(m,"127.0.0.1", baseport) )
+		end
 	end
 	
 	while true do
