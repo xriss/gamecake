@@ -162,8 +162,6 @@ numbers, the length of the list represents the type so
 
 ]]
 M.functions.addr_to_list=function(addr)
-
-	print(addr)
 	
 	local ipv4=false
 	local ipv6=false
@@ -174,16 +172,15 @@ M.functions.addr_to_list=function(addr)
 	for a,b in string.gmatch(addr,"([%p]*)([^%p]*)") do
 		if a=="" and b=="" then break end
 		idx=idx+1
---print("#",idx,a,b)
 		if last then return nil,"too many numbers" end -- too many numbers
 		if not first then
-			if a=="[" or a=="" or a=="::" or a=="[::]:" then 
+			if a=="[" or a=="" or a=="::" or a=="[::" or a=="[::]:" then 
 				first=a
 				if     first=="[::]:" then -- 8 0s and a port
 					last=""
 					ipv6=true
 					list={0,0,0,0,0,0,0,0}
-				elseif first=="::" then
+				elseif first=="::" or first=="[::"then
 					ipv6=true
 					zer=#list
 				elseif first=="[" then
@@ -213,9 +210,10 @@ M.functions.addr_to_list=function(addr)
 					if a=="]:" then
 						last=a
 					elseif a=="::" then
-						if zer then return nil end -- only 1 :: allowed
+						if zer then return nil,"multiple ::" end
 						zer=#list
 					elseif a=="::]:" then
+						if zer then return nil,"multiple ::" end
 						zer=#list
 						last=a
 					else
@@ -227,7 +225,6 @@ M.functions.addr_to_list=function(addr)
 		if b~="" then
 			list[#list+1]=b
 		end
-		print(a,b)
 	end
 	
 	if zer then -- need to insert some zeros
@@ -245,6 +242,15 @@ M.functions.addr_to_list=function(addr)
 	if ipv4 and len>4+p then return nil,"too many ipv4 numbers" end
 	if ipv8 and len<8   then return nil,"too few ipv6 numbers" end
 	if ipv8 and len>8+p then return nil,"too many ipv6 numbers" end
+
+	local bracks=0
+	if first=="[::" or first=="[" then
+		bracks=bracks+1
+	end
+	if last=="]:" or last=="::]:" then
+		bracks=bracks+1
+	end
+	if bracks==1 then return nil,"invalid []" end
 	
 	if ipv4 then -- convert strings and check range
 		for i=1,4 do
@@ -280,9 +286,6 @@ M.functions.addr_to_list=function(addr)
 		end
 	end
 
-	print(table.concat(list," "))
-	print()
-	
 	return list
 end
 
