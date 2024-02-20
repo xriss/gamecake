@@ -325,7 +325,7 @@ M.functions.ipsniff=function(dns4,dns6)
 	local socket = require("socket")
 	
 	pcall(function()
-		local udp4 = socket.udp()
+		local udp4 = socket.udp4()
 		udp4:settimeout(0)
 		udp4:setpeername(dns4,53)
 		ipv4=udp4:getsockname() -- return value
@@ -333,7 +333,7 @@ M.functions.ipsniff=function(dns4,dns6)
 	end)
 
 	pcall(function()
-		local udp6 = socket.udp()
+		local udp6 = socket.udp6()
 		udp6:settimeout(0)
 		udp6:setpeername(dns6,53)
 		ipv6=udp6:getsockname() -- return value
@@ -410,18 +410,18 @@ M.functions.test_server=function(tasks)
 	local ip4,ip6=M.ipsniff()
 	local udp4,udp6
 	if ip6 then
-		udp6 = socket.udp()
+		udp6 = socket.udp6()
 		udp6:settimeout(0)
 	end
 	if ip4 or ( not ip6 ) then
-		udp4 = socket.udp()
+		udp4 = socket.udp4()
 		udp4:settimeout(0)
 	end
 	
 	local port
 	for i=0,1000 do
-		if ( not udp4 ) or ( udp4:setsockname("0.0.0.0", baseport+i) ) then
-			if ( not udp6 ) or ( udp6:setsockname("::", baseport+i) ) then
+		if ( not udp4 ) or ( udp4:setsockname("*", baseport+i) ) then
+			if ( not udp6 ) or ( udp6:setsockname("*", baseport+i) ) then
 				port=baseport+i
 				break
 			end
