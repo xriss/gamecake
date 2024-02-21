@@ -2,613 +2,17 @@
 -- (C) 2022 Kriss@XIXs.com
 --
 
--- should not cache this stuff when using lanes just in case we try and share upvalues across threads
+local M={ modname = (...) } package.loaded[M.modname] = M 
 
---local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
---     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+-- only cache this stuff on main thread
+do
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 -- module
-local M={ modname = (...) } package.loaded[M.modname] = M 
 
 M.tasks_functions={}
 M.tasks_metatable={__index=M.tasks_functions}
-
--- print errors
-M.tasks_functions.wrap_code=function(code,linda,id,idx)
-	local lanes=require("lanes")
-	local rawprint=print
-	print=function(...) -- if we concat first we have less threads fighting over output
-		local t={}
-		for i=1,select("#", ...) do
-			t[i]=tostring( select(i, ...) )
-		end
-		io.write(table.concat(t,"\t").."\n")
-	end
-
-	local logs=require("wetgenes.logs")
-	if OVEN_OPTS and OVEN_OPTS.args then logs.setup(OVEN_OPTS.args) end
-	local log=logs.log
-	
-	print_lanes_error=function(err)
-		if err==lanes.cancel_error then
-			log("thread" , id , idx , debug.traceback("lanes canceled") )
-			error(err)
-		else
-			log("lanes" , id , idx , debug.traceback( err ) )
-		end
-		return err
-	end
-
-	local ok,err=xpcall(function() code(linda,id,idx) end,print_lanes_error)
-
-end
-
---[[#lua.wetgenes.tasks.thread_code
-
-Handle global tasks, starting and stopping and preventing the starting 
-of multiple copies of the same task.
-
-]]
-M.tasks_functions.thread_code=function(linda,task_id,task_idx)
-
-	local lanes = require("lanes")
-
-	local log,dump=require("wetgenes.logs"):export("log","dump")
-
-	local tasks=require("wetgenes.tasks").create({linda=linda}) -- another sub tasks
-
-	while true do
-		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
-
-		if memo then
-			local ret={result=false}
-			
-			if     memo.cmd=="add" then
-				if not tasks.thread[memo.thread.id] then -- only create once
-					tasks:add_thread(memo.thread)
-					ret.result=true
-					log("thread","created",memo.thread.id)
-				else
-					log("thread","already exists",memo.thread.id)
-				end
-			elseif memo.cmd=="del" then
-				local id=memo.thread and memo.thread.id
-				if id then -- end a single task
-					if tasks.thread[id] then -- must exist to end
-						log("thread","destroyed",id)
-						tasks:del_thread(tasks.thread[id])
-					else
-						log("thread","does not exist",id)
-					end
-				else -- end all tasks
-					for id,thread in pairs(tasks.thread) do
-						tasks:del_thread(thread)
-						log("thread","destroyed",id)
-					end
-				end
-			end
-			
-			if memo.id then -- result requested
-				linda:send( nil , memo.id , ret )
-			end
-		end
-	end
-end
-
-
---[[#lua.wetgenes.tasks.global_code
-
-A basic function to handle global memos to get/set data shared amongst multiple tasks.
-
-]]
-M.tasks_functions.global_code=function(linda,task_id,task_idx)
-
-	local lanes = require("lanes")
-
-	local data={}
-
-	while true do
-
-		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
-		
-		if memo then
-			local ret={result=false}
-			
-			if     memo.cmd=="claim" then
-				if memo.name and memo.value then
-					if not data[memo.name] then	-- must be empty
-						data[memo.name]=memo.value
-						ret.result=memo.value
-					end
-				end
-			elseif memo.cmd=="eject" then
-				if memo.name then
-					if data[memo.name] then -- must exist
-						ret.result=data[memo.name]
-						data[memo.name]=nil
-					end
-				end
-			elseif memo.cmd=="fetch" then
-				if memo.name then
-					ret.result=data[memo.name]
-				end
-			end
-			
-			if memo.id then -- result requested
-				linda:send( nil , memo.id , ret )
-			end
-		end
-
-	end
-
-end
-
-
---[[#lua.wetgenes.tasks.http_code
-
-A basic function to handle http memos.
-
-]]
-M.tasks_functions.http_code=function(linda,task_id,task_idx)
-
-	local lanes = require("lanes")
-
-	local js_eval -- function call into javascript if we are an emcc build
-	do
-		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
-		if ok and lib then js_eval=lib.js_eval end
-	end
-
-	local http = lanes.require("socket.http")
-	local ltn12 = lanes.require("ltn12")
-
-	local wjson = lanes.require("wetgenes.json")
-
--- we need a special case for emcc as we can only use websockets or javascript requests
-	local function request_js(memo)
-	
-		local opts={}
-		
-		opts.method=memo.method
-		opts.url=memo.url
-		opts.headers=memo.headers or {}
-		opts.body=memo.body
-		
---		dump(opts)
-
-		local js=[[
-(function(opts){
-
-	var request = new XMLHttpRequest();
-	request.open( opts.method , opts.url , false );
-	for(const key in opts.headers)
-	{
-		request.setRequestHeader( key , opts.headers[key] );
-    }
-  	request.send(opts.body);
-
-	var ret={};
-	ret.body=request.responseText;
-	ret.code=request.status;
-	ret.headers=request.getAllResponseHeaders();
-	
-	return JSON.stringify(ret);
-
-})(]]..wjson.encode(opts)..[[);
-]]
-	
-		local rets=js_eval(js)
-		local ret=wjson.decode( rets or "{}" ) or {}
-		if not ret.body then ret.error=ret.code or 0 end
-
---		dump(ret)
-		
-		return ret
-	end
-	
-	local function request(memo)
-	
-		memo.headers=memo.headers or {}
-
-		local urlencode=function(s)
-			return tostring(s):gsub("([^%w_%%%-%.~])", function(c) return string.format("%%%02X", string.byte(c)) end )
-		end
-
-		-- check for values passed by table that we shouold encode
-		
-		if memo.get then -- add a ? and these values to the url
-		
-			local t={}
-			for n,v in pairs(memo.post) do
-				t[#t+1]=urlencode(n) .. "=" .. urlencode(v)
-			end
-			if string.find( memo.url, "?" , 1 , true ) then -- already a query
-				local c=string.sub(memo.url,-1,1) -- last char
-				if c~="?" and c~="&" then -- must be one a seperator
-					memo.url=memo.url.."&"
-				end
-			else
-				memo.url=memo.url.."?"
-			end
-			memo.url=memo.url..table.concat(t,"&")
-		
-		end
-		
-		if memo.json then -- we want to send all these values in a POST json body
-
-			memo.body=wjson.encode(memo.json)
-			memo.method="POST"
-			memo.headers["Content-Type"]="application/json"
-			
-		end
-
-		if memo.post then -- we want to send all these values in a POST body
-
-			local t={}
-			for n,v in pairs(memo.post) do
-				t[#t+1]=urlencode(n) .. "=" .. urlencode(v)
-			end
-			memo.body=table.concat(t,"&")
-			memo.method="POST"
-			memo.headers["Content-Type"]="application/x-www-form-urlencoded"
-			
-		end
-		
-		memo.method=memo.method or "GET"
-
-		if js_eval then return request_js(memo) end
-
-		local out = {}
-		local req = {}
-
-		req.sink = ltn12.sink.table(out)
-		if memo.body then
-			req.source = ltn12.source.string(memo.body)
-			memo.headers["Content-Length"]=#memo.body
-		end
-
-		req.url=memo.url
-		req.method=memo.method
-		req.headers=memo.headers
-		req.proxy=memo.proxy
-		req.redirect=memo.redirect
-
-		local body , code, headers, status = http.request(req)
-		local ret={}
-
-		if not body then -- error message is in code
-			ret.error=code or true
-		else
-			ret.body=table.concat(out)
-			ret.code=code
-			ret.headers=headers
-			ret.status=status
-		end
-		
-		return ret
-	end
-
-
-	while true do
-
-		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
-		
-		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
-			if not ok then ret={error=ret or true} end -- reformat errors
-			if memo.id then -- result requested
-				linda:send( nil , memo.id , ret )
-			end
-		end
-
-	end
-
-end
-
---[[#lua.wetgenes.tasks.sqlite_code
-
-A basic function to handle sqlite memos.
-
-As we are opening an sqlite database here it wont help much to have 
-more than one thread per database as they will just fight over file 
-access.
-
-]]
-M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
-
-	local lanes = require("lanes")
-	local sqlite3 = lanes.require("lsqlite3")
-
-	local db
-
-	if sqlite_filename then	db = assert(sqlite3.open(sqlite_filename)) end -- auto open
-	if sqlite_pragmas and db then db:exec(sqlite_pragmas) end -- auto configure
-
-	local function request(memo)
-	
-		local ret={}
-	
-		if memo.cmd then -- this is a special cmd eg to close or open the database
-		
-			if memo.cmd=="close" then -- probably good to "try" and do this before exiting
-				db:close()
-				db=nil
-				ret.rows={}
-			end
-
-		elseif memo.sql then -- execute some sql
-		
-			if not db then
-				ret.error="no database"
-				return ret
-			end
-
-			local rows={}
-			
-			
-			local err
-			
-			if memo.binds or memo.blobs then -- use prepared statement
-			
-				local stmt = db:prepare(memo.sql)
-				if not stmt then
-					ret.error=db:errmsg()
-					return ret
-				end
-
-				local bmax=stmt:bind_parameter_count()
-				local bs={}
-				for i=1,bmax do
-					local n=stmt:bind_parameter_name(i)
-					if n then
-						bs[n]=i
-						bs[n:sub(2)]=i
-					end
-				end
-
-				
-				local blobs=memo.blobs or {}
-				for n,v in pairs( memo.binds or {} ) do
-					if bs[n] and not blobs[n] then -- a blob might be in both places
-						stmt:bind( bs[n] , v )
-					end
-				end
-				for n,v in pairs( memo.blobs or {} ) do -- these binds should be treated as blobs
-					if bs[n] then
-						stmt:bind_blob( bs[n] , v )
-					end
-				end
-				
-				if memo.compact then
-					rows.names=stmt:get_names()
-					for it in stmt:rows() do
-						rows[#rows+1]=it
-					end
-				else
-					for it in stmt:nrows() do
-						rows[#rows+1]=it
-					end
-				end
-
-				err=stmt:finalize()
-			
-			else
-			
-				if memo.compact then -- return data in a slightly more compact format
-
-					err=db:exec(memo.sql,function(udata,cols,values,names)
-						rows.names=names
-						rows[#rows+1]=values
-						return 0
-					end,"udata")
-				
-				else
-
-					err=db:exec(memo.sql,function(udata,cols,values,names)
-						local it={}
-						for i=1,cols do it[ names[i] ] = values[i] end
-						rows[#rows+1]=it
-						return 0
-					end,"udata")
-
-				end
-
-			end
-
-			if err~=sqlite3.OK then
-				ret.error=db:errmsg()
-			else
-				ret.rows=rows
-			end
-
-		end
-		
-		return ret
-	end
-
-	while true do
-
-		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
-		
-		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
-			if not ok then ret={error=ret or true} end -- reformat errors
-			if memo.id then -- result requested
-				linda:send( nil , memo.id , ret )
-			end
-		end
-
-	end
-
-end
-
---[[#lua.wetgenes.tasks.client_code
-
-A basic function to handle (web)socket client connection.
-
-]]
-M.tasks_functions.client_code=function(linda,task_id,task_idx)
-
-	local lanes=require("lanes")
-
-	set_debug_threadname(task_id)
-
-	local wjson = lanes.require("wetgenes.json")
-	local js_eval -- function call into javascript if we are an emcc build
-	do
-		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
-		if ok and lib then js_eval=lib.js_eval end
-	end
-	local js_call=function(script,opts)
-		local js=[[
-(function(opts){
-	var ret={};
-]]..script..[[
-	return JSON.stringify(ret);
-})(]]..wjson.encode(opts or {})..[[);
-]]
-		local rets=js_eval(js)
-		return wjson.decode( rets or "{}" ) or {}
-	end
-	
-	local socket = lanes.require("socket")
-	local err
-	local client
-	if js_eval then -- js mode
-
-		js_call([[
-
-globalThis.wetgenes_tasks=globalThis.wetgenes_tasks || {};
-globalThis.wetgenes_tasks[opts.task_id]=globalThis.wetgenes_tasks[opts.task_id] || {};
-
-var data=globalThis.wetgenes_tasks[opts.task_id];
-data.send=[];
-data.recv=[];
-
-data.onmessage=function(e){
-	console.log("onmessage OK");
-	data.recv.push(e.data);
-}
-data.onopen=function(e){
-	console.log("onopen OK");
-	console.log(e);
-}
-data.onclose=function(e){
-	console.log("onclose OK");
-	console.log(e);
-}
-data.onerror=function(e){
-	console.log("onerror OK");
-	console.log(e);
-}
-
-if(opts.url)
-{
-	data.sock=new WebSocket(opts.url);
-	data.sock.onmessage=data.onmessage;
-	data.sock.onopen=data.onopen;
-	data.sock.onclose=data.onclose;
-	data.sock.onerror=data.onerror;
-console.log(data.sock);
-}
-
-]],{task_id=task_id,url=client_url})
-	else
-		if client_host and client_port then -- auto open a client connection
-			client , err = socket.connect(client_host,client_port)
-			if client then client:settimeout(0.00001) end
-		end
-	end
-
-	local request=function(memo)
-	
-		if js_eval then -- need js mode
-			local ret=js_call([[
-
-var data=globalThis.wetgenes_tasks[opts.task_id];
-
-if(opts.data)
-{
-console.log("QUEUE:"+opts.data);
-	data.send.push(opts.data);
-}
-
-if(data.sock)
-{
-	if(data.sock.readyState==1)
-	{
-		while(data.send.length>0)
-		{
-console.log("SEND:"+send[0]);
-			data.sock.send(data.send.shift());
-		}
-	}
-	else
-	{
-//console.log("SOCK:"+data.sock.readyState);
-	}
-}
-while(data.recv.length>0)
-{
-console.log("RECV:"+recv[0]);
-	ret.data=(ret.data || "")+data.recv.shift();
-}
-
-]],{task_id=task_id,data=memo.data})
-
-			return ret
-		end -- end js mode
-		
-		local ret={}
-	
-		if memo.cmd then -- this is a special cmd eg to close or open a socket
-			if     memo.cmd=="connect" and not client then
-				client , err = socket.connect(memo.host,memo.port)
-				if client then client:settimeout(0.00001) end
-				if err then		ret.error=err
-				else			ret.data=true
-				end
-			elseif memo.cmd=="close" and client then
-				client:close()
-				client=nil
-				ret.data=true
-			end
-		end
-
-		if memo.data then -- something to send
-			if not client then return {error=err or true} end
-			client:send(memo.data)
-		end
-		
-		if client then -- try and read some data from server
-			local part,e,part2=client:receive("*a")
-			if e=="timeout" then ret.warning=e e=nil err=nil part=part or part2 end -- ignore timeouts, they are not errors just partial data
-			if part~="" then ret.data=part end
-			if e then ret.error=e end
-		end
-		
-		return ret
-	end
-	
-	while true do
-
-		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
-		
-		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
-			if not ok then ret={error=ret or true} end -- reformat errors
-			if memo.id then -- result requested
-				linda:send( nil , memo.id , ret )
-			end
-		end
-
-	end
-	
-end
-
-
-
-
 
 
 local log,dump=require("wetgenes.logs"):export("log","dump")
@@ -1405,4 +809,599 @@ M.tasks_functions.client=function(tasks,memo,timeout)
 	return memo.result
 end
 
+------------------------------------------------------------------------
+end -- The functions below are free running tasks and should not depend on any locals
+------------------------------------------------------------------------
 
+
+-- wrap all tasks so we can print errors
+M.tasks_functions.wrap_code=function(code,linda,id,idx)
+	local lanes=require("lanes")
+	local rawprint=print
+	print=function(...) -- if we concat first we have less threads fighting over output
+		local t={}
+		for i=1,select("#", ...) do
+			t[i]=tostring( select(i, ...) )
+		end
+		io.write(table.concat(t,"\t").."\n")
+	end
+
+	local logs=require("wetgenes.logs")
+	if OVEN_OPTS and OVEN_OPTS.args then logs.setup(OVEN_OPTS.args) end
+	local log=logs.log
+	
+	print_lanes_error=function(err)
+		if err==lanes.cancel_error then
+			log("thread" , id , idx , debug.traceback("lanes canceled") )
+			error(err)
+		else
+			log("lanes" , id , idx , debug.traceback( err ) )
+		end
+		return err
+	end
+
+	local ok,err=xpcall(function() code(linda,id,idx) end,print_lanes_error)
+
+end
+
+--[[#lua.wetgenes.tasks.thread_code
+
+Handle global tasks, starting and stopping and preventing the starting 
+of multiple copies of the same task.
+
+]]
+M.tasks_functions.thread_code=function(linda,task_id,task_idx)
+
+	local lanes = require("lanes")
+
+	local log,dump=require("wetgenes.logs"):export("log","dump")
+
+	local tasks=require("wetgenes.tasks").create({linda=linda}) -- another sub tasks
+
+	while true do
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+
+		if memo then
+			local ret={result=false}
+			
+			if     memo.cmd=="add" then
+				if not tasks.thread[memo.thread.id] then -- only create once
+					tasks:add_thread(memo.thread)
+					ret.result=true
+					log("thread","created",memo.thread.id)
+				else
+					log("thread","already exists",memo.thread.id)
+				end
+			elseif memo.cmd=="del" then
+				local id=memo.thread and memo.thread.id
+				if id then -- end a single task
+					if tasks.thread[id] then -- must exist to end
+						log("thread","destroyed",id)
+						tasks:del_thread(tasks.thread[id])
+					else
+						log("thread","does not exist",id)
+					end
+				else -- end all tasks
+					for id,thread in pairs(tasks.thread) do
+						tasks:del_thread(thread)
+						log("thread","destroyed",id)
+					end
+				end
+			end
+			
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+	end
+end
+
+
+--[[#lua.wetgenes.tasks.global_code
+
+A basic function to handle global memos to get/set data shared amongst multiple tasks.
+
+]]
+M.tasks_functions.global_code=function(linda,task_id,task_idx)
+
+	local lanes = require("lanes")
+
+	local data={}
+
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+		
+		if memo then
+			local ret={result=false}
+			
+			if     memo.cmd=="claim" then
+				if memo.name and memo.value then
+					if not data[memo.name] then	-- must be empty
+						data[memo.name]=memo.value
+						ret.result=memo.value
+					end
+				end
+			elseif memo.cmd=="eject" then
+				if memo.name then
+					if data[memo.name] then -- must exist
+						ret.result=data[memo.name]
+						data[memo.name]=nil
+					end
+				end
+			elseif memo.cmd=="fetch" then
+				if memo.name then
+					ret.result=data[memo.name]
+				end
+			end
+			
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+
+	end
+
+end
+
+
+--[[#lua.wetgenes.tasks.http_code
+
+A basic function to handle http memos.
+
+]]
+M.tasks_functions.http_code=function(linda,task_id,task_idx)
+
+	local lanes = require("lanes")
+
+	local js_eval -- function call into javascript if we are an emcc build
+	do
+		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
+		if ok and lib then js_eval=lib.js_eval end
+	end
+
+	local http = lanes.require("socket.http")
+	local ltn12 = lanes.require("ltn12")
+
+	local wjson = lanes.require("wetgenes.json")
+
+-- we need a special case for emcc as we can only use websockets or javascript requests
+	local function request_js(memo)
+	
+		local opts={}
+		
+		opts.method=memo.method
+		opts.url=memo.url
+		opts.headers=memo.headers or {}
+		opts.body=memo.body
+		
+--		dump(opts)
+
+		local js=[[
+(function(opts){
+
+	var request = new XMLHttpRequest();
+	request.open( opts.method , opts.url , false );
+	for(const key in opts.headers)
+	{
+		request.setRequestHeader( key , opts.headers[key] );
+    }
+  	request.send(opts.body);
+
+	var ret={};
+	ret.body=request.responseText;
+	ret.code=request.status;
+	ret.headers=request.getAllResponseHeaders();
+	
+	return JSON.stringify(ret);
+
+})(]]..wjson.encode(opts)..[[);
+]]
+	
+		local rets=js_eval(js)
+		local ret=wjson.decode( rets or "{}" ) or {}
+		if not ret.body then ret.error=ret.code or 0 end
+
+--		dump(ret)
+		
+		return ret
+	end
+	
+	local function request(memo)
+	
+		memo.headers=memo.headers or {}
+
+		local urlencode=function(s)
+			return tostring(s):gsub("([^%w_%%%-%.~])", function(c) return string.format("%%%02X", string.byte(c)) end )
+		end
+
+		-- check for values passed by table that we shouold encode
+		
+		if memo.get then -- add a ? and these values to the url
+		
+			local t={}
+			for n,v in pairs(memo.post) do
+				t[#t+1]=urlencode(n) .. "=" .. urlencode(v)
+			end
+			if string.find( memo.url, "?" , 1 , true ) then -- already a query
+				local c=string.sub(memo.url,-1,1) -- last char
+				if c~="?" and c~="&" then -- must be one a seperator
+					memo.url=memo.url.."&"
+				end
+			else
+				memo.url=memo.url.."?"
+			end
+			memo.url=memo.url..table.concat(t,"&")
+		
+		end
+		
+		if memo.json then -- we want to send all these values in a POST json body
+
+			memo.body=wjson.encode(memo.json)
+			memo.method="POST"
+			memo.headers["Content-Type"]="application/json"
+			
+		end
+
+		if memo.post then -- we want to send all these values in a POST body
+
+			local t={}
+			for n,v in pairs(memo.post) do
+				t[#t+1]=urlencode(n) .. "=" .. urlencode(v)
+			end
+			memo.body=table.concat(t,"&")
+			memo.method="POST"
+			memo.headers["Content-Type"]="application/x-www-form-urlencoded"
+			
+		end
+		
+		memo.method=memo.method or "GET"
+
+		if js_eval then return request_js(memo) end
+
+		local out = {}
+		local req = {}
+
+		req.sink = ltn12.sink.table(out)
+		if memo.body then
+			req.source = ltn12.source.string(memo.body)
+			memo.headers["Content-Length"]=#memo.body
+		end
+
+		req.url=memo.url
+		req.method=memo.method
+		req.headers=memo.headers
+		req.proxy=memo.proxy
+		req.redirect=memo.redirect
+
+		local body , code, headers, status = http.request(req)
+		local ret={}
+
+		if not body then -- error message is in code
+			ret.error=code or true
+		else
+			ret.body=table.concat(out)
+			ret.code=code
+			ret.headers=headers
+			ret.status=status
+		end
+		
+		return ret
+	end
+
+
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+		
+		if memo then
+			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+
+	end
+
+end
+
+--[[#lua.wetgenes.tasks.sqlite_code
+
+A basic function to handle sqlite memos.
+
+As we are opening an sqlite database here it wont help much to have 
+more than one thread per database as they will just fight over file 
+access.
+
+]]
+M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
+
+	local lanes = require("lanes")
+	local sqlite3 = lanes.require("lsqlite3")
+
+	local db
+
+	if sqlite_filename then	db = assert(sqlite3.open(sqlite_filename)) end -- auto open
+	if sqlite_pragmas and db then db:exec(sqlite_pragmas) end -- auto configure
+
+	local function request(memo)
+	
+		local ret={}
+	
+		if memo.cmd then -- this is a special cmd eg to close or open the database
+		
+			if memo.cmd=="close" then -- probably good to "try" and do this before exiting
+				db:close()
+				db=nil
+				ret.rows={}
+			end
+
+		elseif memo.sql then -- execute some sql
+		
+			if not db then
+				ret.error="no database"
+				return ret
+			end
+
+			local rows={}
+			
+			
+			local err
+			
+			if memo.binds or memo.blobs then -- use prepared statement
+			
+				local stmt = db:prepare(memo.sql)
+				if not stmt then
+					ret.error=db:errmsg()
+					return ret
+				end
+
+				local bmax=stmt:bind_parameter_count()
+				local bs={}
+				for i=1,bmax do
+					local n=stmt:bind_parameter_name(i)
+					if n then
+						bs[n]=i
+						bs[n:sub(2)]=i
+					end
+				end
+
+				
+				local blobs=memo.blobs or {}
+				for n,v in pairs( memo.binds or {} ) do
+					if bs[n] and not blobs[n] then -- a blob might be in both places
+						stmt:bind( bs[n] , v )
+					end
+				end
+				for n,v in pairs( memo.blobs or {} ) do -- these binds should be treated as blobs
+					if bs[n] then
+						stmt:bind_blob( bs[n] , v )
+					end
+				end
+				
+				if memo.compact then
+					rows.names=stmt:get_names()
+					for it in stmt:rows() do
+						rows[#rows+1]=it
+					end
+				else
+					for it in stmt:nrows() do
+						rows[#rows+1]=it
+					end
+				end
+
+				err=stmt:finalize()
+			
+			else
+			
+				if memo.compact then -- return data in a slightly more compact format
+
+					err=db:exec(memo.sql,function(udata,cols,values,names)
+						rows.names=names
+						rows[#rows+1]=values
+						return 0
+					end,"udata")
+				
+				else
+
+					err=db:exec(memo.sql,function(udata,cols,values,names)
+						local it={}
+						for i=1,cols do it[ names[i] ] = values[i] end
+						rows[#rows+1]=it
+						return 0
+					end,"udata")
+
+				end
+
+			end
+
+			if err~=sqlite3.OK then
+				ret.error=db:errmsg()
+			else
+				ret.rows=rows
+			end
+
+		end
+		
+		return ret
+	end
+
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+		
+		if memo then
+			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+
+	end
+
+end
+
+--[[#lua.wetgenes.tasks.client_code
+
+A basic function to handle (web)socket client connection.
+
+]]
+M.tasks_functions.client_code=function(linda,task_id,task_idx)
+
+	local lanes=require("lanes")
+	set_debug_threadname(task_id)
+
+	local wjson = lanes.require("wetgenes.json")
+	local js_eval -- function call into javascript if we are an emcc build
+	do
+		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
+		if ok and lib then js_eval=lib.js_eval end
+	end
+	local js_call=function(script,opts)
+		local js=[[
+(function(opts){
+	var ret={};
+]]..script..[[
+	return JSON.stringify(ret);
+})(]]..wjson.encode(opts or {})..[[);
+]]
+		local rets=js_eval(js)
+		return wjson.decode( rets or "{}" ) or {}
+	end
+	
+	local socket = lanes.require("socket")
+	local err
+	local client
+	if js_eval then -- js mode
+
+		js_call([[
+
+globalThis.wetgenes_tasks=globalThis.wetgenes_tasks || {};
+globalThis.wetgenes_tasks[opts.task_id]=globalThis.wetgenes_tasks[opts.task_id] || {};
+
+var data=globalThis.wetgenes_tasks[opts.task_id];
+data.send=[];
+data.recv=[];
+
+data.onmessage=function(e){
+	console.log("onmessage OK");
+	data.recv.push(e.data);
+}
+data.onopen=function(e){
+	console.log("onopen OK");
+	console.log(e);
+}
+data.onclose=function(e){
+	console.log("onclose OK");
+	console.log(e);
+}
+data.onerror=function(e){
+	console.log("onerror OK");
+	console.log(e);
+}
+
+if(opts.url)
+{
+	data.sock=new WebSocket(opts.url);
+	data.sock.onmessage=data.onmessage;
+	data.sock.onopen=data.onopen;
+	data.sock.onclose=data.onclose;
+	data.sock.onerror=data.onerror;
+console.log(data.sock);
+}
+
+]],{task_id=task_id,url=client_url})
+	else
+		if client_host and client_port then -- auto open a client connection
+			client , err = socket.connect(client_host,client_port)
+			if client then client:settimeout(0.00001) end
+		end
+	end
+
+	local request=function(memo)
+	
+		if js_eval then -- need js mode
+			local ret=js_call([[
+
+var data=globalThis.wetgenes_tasks[opts.task_id];
+
+if(opts.data)
+{
+console.log("QUEUE:"+opts.data);
+	data.send.push(opts.data);
+}
+
+if(data.sock)
+{
+	if(data.sock.readyState==1)
+	{
+		while(data.send.length>0)
+		{
+console.log("SEND:"+send[0]);
+			data.sock.send(data.send.shift());
+		}
+	}
+	else
+	{
+//console.log("SOCK:"+data.sock.readyState);
+	}
+}
+while(data.recv.length>0)
+{
+console.log("RECV:"+recv[0]);
+	ret.data=(ret.data || "")+data.recv.shift();
+}
+
+]],{task_id=task_id,data=memo.data})
+
+			return ret
+		end -- end js mode
+		
+		local ret={}
+	
+		if memo.cmd then -- this is a special cmd eg to close or open a socket
+			if     memo.cmd=="connect" and not client then
+				client , err = socket.connect(memo.host,memo.port)
+				if client then client:settimeout(0.00001) end
+				if err then		ret.error=err
+				else			ret.data=true
+				end
+			elseif memo.cmd=="close" and client then
+				client:close()
+				client=nil
+				ret.data=true
+			end
+		end
+
+		if memo.data then -- something to send
+			if not client then return {error=err or true} end
+			client:send(memo.data)
+		end
+		
+		if client then -- try and read some data from server
+			local part,e,part2=client:receive("*a")
+			if e=="timeout" then ret.warning=e e=nil err=nil part=part or part2 end -- ignore timeouts, they are not errors just partial data
+			if part~="" then ret.data=part end
+			if e then ret.error=e end
+		end
+		
+		return ret
+	end
+	
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+		
+		if memo then
+			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+
+	end
+	
+end

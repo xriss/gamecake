@@ -2,6 +2,9 @@
 -- (C) 2024 Kriss@XIXs.com
 --
 
+-- module
+local M={ modname = (...) } package.loaded[M.modname] = M 
+
 
 --[[
 
@@ -80,8 +83,11 @@ square brackets (ipv6) and then a colon followed by the port.
 ]]
 
 
--- module
-local M={ modname = (...) } package.loaded[M.modname] = M 
+
+-- only cache this stuff on main thread
+do
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 M.functions={}
 M.metatable={__index=M.functions}
@@ -450,11 +456,6 @@ print( hostname , ip4 , ip6 , port )
 end
 
 
-M.functions.msgp_code=function(linda,task_id,task_idx)
-
-end
-
-
 -- this module must be configured before use
 M.configure=function(conf)
 conf=conf or {}
@@ -463,4 +464,104 @@ local C={}
 setmetatable(C,M.metatable)
 
 return C
+end
+
+------------------------------------------------------------------------
+end -- The functions below are free running tasks and should not depend on any locals
+------------------------------------------------------------------------
+
+M.functions.msgp_code=function(linda,task_id,task_idx)
+
+	local lanes=require("lanes")
+	set_debug_threadname(task_id)
+
+	local socket = require("socket")
+
+	local baseport=2342
+	local basepack=2342
+	local hostname=socket.dns.gethostname()
+	local ip4,ip6=M.ipsniff()
+	local udp4,udp6
+	local port
+
+	local function request(memo)
+		local ret={}
+		
+		if memo.cmd=="host" then
+		
+			if memo.baseport then
+				baseport=memo.baseport
+			end
+			if memo.basepack then
+				basepack=memo.basepack
+			end
+
+			if ip6 then
+				if not udp6 then
+					udp6 = socket.udp6()
+					udp6:settimeout(0)
+				end
+			end
+			if ip4 or ( not ip6 ) then
+				if not udp4 then
+					udp4 = socket.udp4()
+					udp4:settimeout(0)
+				end
+			end
+			
+			port=nil
+			for i=0,1000 do -- try baseport to baseport+1000
+				if ( not udp4 ) or ( udp4:setsockname("*", baseport+i) ) then
+					if ( not udp6 ) or ( udp6:setsockname("*", baseport+i) ) then
+						port=baseport+i
+						break
+					end
+				end
+			end
+			if not port then ret.error="could not bind to port" end
+			
+			ret.port=port
+			ret.hostname=hostname
+			ret.ip4=ip4
+			ret.ip6=ip6
+
+		end
+
+		return ret
+	end
+	
+	local function packet(dat,ip,port)
+	
+		local hex=dat:gsub('.',function(c) return string.format('%02X',string.byte(c)) end)
+		print(ip,port,hex)
+
+	end
+
+	
+	while true do
+	
+		local busy=false
+
+		local _,memo= linda:receive( 0 , task_id ) -- wait for any memos coming into this thread
+		
+		if memo then
+			busy=true -- got some data
+			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+
+		local socks=socket.select({udp4,udp6},{},0)
+		for _,sock in ipairs(socks or {}) do
+			local dat,ip,port=sock:receivefrom()
+			if dat then busy=true end -- got some data
+			packet(dat,ip,port)
+		end
+		
+		if not busy then lanes.sleep(0.00001) end -- take a little nap
+
+	end
+
 end
