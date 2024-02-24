@@ -60,15 +60,20 @@ network gets better or worse when sending different size packets.
 	0x00,0x01
 
 Sending a packet with bits=0 and bit=1 is a hostname packet. The 
-payload data is a simple null terminated utf8 string with the hostname 
-of the sender. A null terminated utf8 string of the senders ip4 address 
-and a null terminated utf8 string of the senders ip6 address. These 3 
-values combined will be assumed uniqueish, technically they can clash 
-but we only have so much to go on here and its a reasonable assumption. 
+payload data is a string array. Consisting of a series of null 
+terminated utf8 strings.
 
-When received, each of the 3 strings needs to be clamped to 255 bytes 
-before use and the ip4 and ip6 addresses replaced with empty strings if 
-invalid.
+	hostname
+	ip4
+	ip6
+	port
+
+When received, each of the strings needs to be clamped to 255 bytes 
+before use and the values validated or replaced with empty strings.
+
+These 4 values combined will be assumed a uniqueish client id, 
+technically they can clash but we only have so much to go on here and 
+its a reasonable assumption.
 
 
 	bits,bit
@@ -166,8 +171,10 @@ numbers, the length of the list represents the type so
 	#8 {1,2,3,4,5,6,7,8} -- ip6
 	#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port
 
+Optionally include a numeric port to add to the list after parsing.
+
 ]]
-M.functions.addr_to_list=function(addr)
+M.functions.addr_to_list=function(addr,port)
 	
 	local ipv4=false
 	local ipv6=false
@@ -242,8 +249,9 @@ M.functions.addr_to_list=function(addr)
 		end
 	end
 	
+	if port then list[#list+1]=port end -- append port
 	local len=#list
-	local p=(last and 1 or 0)
+	local p=((last or port) and 1 or 0)
 	if ipv4 and len<4   then return nil,"too few ipv4 numbers" end
 	if ipv4 and len>4+p then return nil,"too many ipv4 numbers" end
 	if ipv8 and len<8   then return nil,"too few ipv6 numbers" end
@@ -266,7 +274,7 @@ M.functions.addr_to_list=function(addr)
 			if list[i]~=list[i] then return nil,"NAN" end
 			if list[i]<0 or list[i]>255 then return nil,"number out of range" end
 		end
-		if last then -- port
+		if list[5] then -- port
 			if type(list[5])=="string" then
 				list[5]=tonumber(list[5],10)
 			end
@@ -283,7 +291,7 @@ M.functions.addr_to_list=function(addr)
 			if list[i]~=list[i] then return nil,"NAN" end
 			if list[i]<0 or list[i]>65535 then return nil,"number out of range" end
 		end
-		if last then -- port
+		if list[9] then -- port
 			if type(list[9])=="string" then
 				list[9]=tonumber(list[9],10)
 			end
@@ -293,6 +301,29 @@ M.functions.addr_to_list=function(addr)
 	end
 
 	return list
+end
+
+--[[
+
+parse an ip string and port number from an addr/addr+port/addr_list
+
+]]
+M.functions.addr_to_ip_port=function(addr,port)
+	local addr_list
+	if type(addr)=="table" then -- assume already parsed
+		addr_list=addr
+	else
+		addr_list=M.functions.addr_to_list(addr,port)
+	end
+	local ip={unpack(addr_list)} -- split into ip and port
+	if #ip>5 then
+		port=ip[9]
+		ip[9]=nil
+	else
+		port=ip[5]
+		ip[5]=nil
+	end
+	return M.functions.list_to_addr(ip),port
 end
 
 --[[
@@ -373,6 +404,7 @@ M.functions.pack=function(a)
 	if ta=="string" then
 	
 		local b={ string.byte(a,1,8) }
+		if #b<8 then return end -- bad header
 
 		return {
 			idx  = b[1]+b[2]*256	,
@@ -407,52 +439,55 @@ end
 
 M.functions.test_server=function(tasks)
 
+	tasks=tasks or require("wetgenes.tasks").create()
+
+	local log,dump=require("wetgenes.logs"):export("log","dump")
+
 	local baseport=2342
 	local basepack=2342
 
-	local socket = require("socket")
 
-	local hostname=socket.dns.gethostname()
-	local ip4,ip6=M.ipsniff()
-	local udp4,udp6
-	if ip6 then
-		udp6 = socket.udp6()
-		udp6:settimeout(0)
-	end
-	if ip4 or ( not ip6 ) then
-		udp4 = socket.udp4()
-		udp4:settimeout(0)
-	end
-	
-	local port
-	for i=0,1000 do
-		if ( not udp4 ) or ( udp4:setsockname("*", baseport+i) ) then
-			if ( not udp6 ) or ( udp6:setsockname("*", baseport+i) ) then
-				port=baseport+i
-				break
-			end
-		end
-	end
-	if not port then error("could not bind to port") end
+	local lanes=require("lanes")
 
-print( hostname , ip4 , ip6 , port )
-	
-	if port ~= baseport then
-		local m=M.pack()
-		m.bit=1
-		m=M.pack(m)
-		if udp6 then	assert( udp6:sendto(m,"::1",       baseport) )
-		else			assert( udp4:sendto(m,"127.0.0.1", baseport) )
-		end
-	end
-	
+	tasks:add_global_thread({
+		count=1,
+		id="msgp1",
+		code=M.functions.msgp_code,
+	})
+	local ret1=tasks:do_memo({
+		task="msgp1",
+		cmd="host",
+		baseport=baseport,
+		basepack=basepack,
+	})
+	dump(ret1)
+
+	tasks:add_global_thread({
+		count=1,
+		id="msgp2",
+		code=M.functions.msgp_code,
+	})
+	local ret2=tasks:do_memo({
+		task="msgp2",
+		cmd="host",
+		baseport=baseport,
+		basepack=basepack,
+	})
+	dump(ret2)
+
+	local ret3=tasks:do_memo({
+		task="msgp2",
+		cmd="join",
+		addr=ret1.addr,
+	})
+	dump(ret3)
+
 	while true do
-		local socks=socket.select({udp4,udp6},{},1)
-		for _,sock in ipairs(socks or {}) do
-			local dat,ip,port=sock:receivefrom()
-			print(dat,ip,port)
-		end
+		local busy=false
+		-- do something?
+		if not busy then lanes.sleep(0.001) end -- take a little nap
 	end
+
 end
 
 
@@ -475,20 +510,55 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local lanes=require("lanes")
 	set_debug_threadname(task_id)
 
+	local tasks_msgp=require("wetgenes.tasks_msgp")
 	local socket = require("socket")
 
 	local baseport=2342
 	local basepack=2342
 	local hostname=socket.dns.gethostname()
-	local ip4,ip6=M.ipsniff()
+	local ip4,ip6=tasks_msgp.ipsniff()
 	local udp4,udp6
 	local port
+	local clients={} -- client state, reset on host cmd
+	
+	local manifest_client=function(ip,port)
+
+		-- parse ip:port and rebuild it to a standard url format
+		local addr_list=tasks_msgp.addr_to_list(ip,port)
+		local addr=tasks_msgp.list_to_addr(addr_list)
+		local addr_ip,addr_port=tasks_msgp.addr_to_ip_port(addr_list)
+
+		-- already exists?
+		local client=clients[addr]
+		if client then return client end -- found it
+		
+		-- build new client and remember it
+		client={}
+		clients[addr]=client
+		client.state="new" -- this is a new client
+		client.addr_list=addr_list
+		client.addr=addr
+		client.ip=addr_ip
+		client.port=addr_port
+		client.sent_idx=basepack
+		client.sent={}
+		client.recv_idx=basepack
+		client.recv={}
+		return client
+	end
+	local send_client=function(client,idx,pack)
+		if pack then client.sent[idx]=pack end
+		local udp=(#client.addr_list>5) and udp6 or udp4
+		udp:sendto( client.sent[idx] , client.ip , client.port )
+	end
 
 	local function request(memo)
 		local ret={}
 		
 		if memo.cmd=="host" then
 		
+			clients={} -- forget all clients
+			
 			if memo.baseport then
 				baseport=memo.baseport
 			end
@@ -525,6 +595,27 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			ret.ip4=ip4
 			ret.ip6=ip6
 
+			-- preferred connection addr
+			ret.addr_list=tasks_msgp.addr_to_list(ip6 or ip4,port)
+			ret.addr=tasks_msgp.list_to_addr(ret.addr_list)
+
+		elseif memo.cmd=="join" then
+		
+			assert(port) -- must be connected
+
+			local client=manifest_client(memo.addr)
+			ret.client=client
+			
+			local p={}
+			p.idx=basepack
+			p.bit=1
+			p.bits=0
+			p.ack=basepack
+			p.acks=0
+			p.data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"
+	
+			send_client( client , p.idx , tasks_msgp.pack(p) )
+	
 		end
 
 		return ret
@@ -533,8 +624,14 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local function packet(dat,ip,port)
 	
 		local hex=dat:gsub('.',function(c) return string.format('%02X',string.byte(c)) end)
-		print(ip,port,hex)
-
+		print("data",ip,port,hex)
+		local p=tasks_msgp.pack(dat)
+		if not p then return end -- bad header
+		
+		print("pack",p.idx,p.bit,p.bits,p.ack,string.format('%04X',p.acks))
+		print(p.data)
+		local client=manifest_client(ip,port)
+		
 	end
 
 	
