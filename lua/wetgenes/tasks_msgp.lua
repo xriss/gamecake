@@ -484,7 +484,24 @@ M.functions.test_server=function(tasks)
 
 	while true do
 		local busy=false
-		-- do something?
+		-- poll for new data
+		local ret=tasks:do_memo({
+			task="msgp1",
+			cmd="poll",
+		})
+		for i,msg in ipairs( ret.msgs or {} ) do
+			busy=true
+			dump(msg)
+		end
+		-- poll for new data
+		local ret=tasks:do_memo({
+			task="msgp2",
+			cmd="poll",
+		})
+		for i,msg in ipairs( ret.msgs or {} ) do
+			busy=true
+			dump(msg)
+		end
 		if not busy then lanes.sleep(0.001) end -- take a little nap
 	end
 
@@ -520,6 +537,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local udp4,udp6
 	local port
 	local clients={} -- client state, reset on host cmd
+	local msgs -- list of msgs waiting to be polled by main thread
 	
 	local manifest_client=function(ip,port)
 
@@ -551,8 +569,12 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		local udp=(#client.addr_list>5) and udp6 or udp4
 		udp:sendto( client.sent[idx] , client.ip , client.port )
 	end
-
-	local function request(memo)
+	local send_msg=function(msg)
+		if not msgs then msgs={} end
+		msgs[#msgs+1]=msg
+	end
+	
+	local request=function(memo)
 		local ret={}
 		
 		if memo.cmd=="host" then
@@ -616,12 +638,17 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	
 			send_client( client , p.idx , tasks_msgp.pack(p) )
 	
+		elseif memo.cmd=="poll" then
+		
+			ret.msgs=msgs -- any data we have waiting
+			msgs=nil -- reset list of data to send
+
 		end
 
 		return ret
 	end
 	
-	local function packet(dat,ip,port)
+	local packet=function(dat,ip,port)
 	
 		local hex=dat:gsub('.',function(c) return string.format('%02X',string.byte(c)) end)
 		print("data",ip,port,hex)
@@ -632,6 +659,12 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		print(p.data)
 		local client=manifest_client(ip,port)
 		
+		send_msg({
+			why="data",
+			addr=client.addr,
+			data=p.data,
+		})
+
 	end
 
 	
