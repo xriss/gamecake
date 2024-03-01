@@ -5,7 +5,12 @@
 -- module
 local M={ modname = (...) } package.loaded[M.modname] = M 
 
-
+M.PACKET={}
+M.PACKET.PING  = 0x02
+M.PACKET.PONG  = 0x03
+M.PACKET.HAND  = 0x04
+M.PACKET.SHAKE = 0x05
+	
 --[[
 
 Simple UDP data packets with auto resend, little endian with this 8 byte header.
@@ -19,7 +24,7 @@ Simple UDP data packets with auto resend, little endian with this 8 byte header.
 
 A maximum packet size of 8k seems the agreed upon reasonably safe 
 maximum size that will probably work. Breaking a msg into 255 * 8k 
-bits, we should be able to send just under 2meg in a single call.
+bits, we should be able to send just under 2meg in a single msg.
 
 bit/bits only goes up to 255. the 0 value in either of these is 
 reserved as a flag for possible slightly strange packets in the future 
@@ -47,43 +52,52 @@ indicate that the data stream will be understood by both parties.
 Special packets that do not add to the stream of user data but instead 
 are used internally by this protocol.
 
-	bits,bit
-	0x00,0x00
+	id		bits	bit
+	PING	0x00	0x02
+	PONG	0x00	0x03
+	HAND	0x00	0x04
+	SHAKE	0x00	0x05
 
-Sending a packet with bits=0 and bit=0 is an empty packet and will 
-Ignore any data sent in the packet, which will probably be empty but 
-does not have to be. Useful if you want to probe to find out if the 
-network gets better or worse when sending different size packets.
+A PING packet will be accepted and acknowledged after handshaking. 
+Sending a PING packet will cause a PONG response with the same data.
 
+A PONG packet will be accepted and acknowledged after handshaking, its 
+data should be the same as the PING it is responding too.
 
-	bits,bit
-	0x00,0x01
+A HAND packet begins handshaking, the payload data is a string array. 
+Consisting of a series of null terminated utf8 strings.
 
-Sending a packet with bits=0 and bit=1 is a hostname packet. The 
-payload data is a string array. Consisting of a series of null 
-terminated utf8 strings.
+A SHAKE packet ends handshaking The payload data is a string array. 
+Consisting of a series of null terminated utf8 strings.
 
-	hostname
-	ip4
-	ip6
-	port
+Both the HAND and the SHAKE packets contain the same payload data which 
+consists of the following utf8 string, each terminated by a 0 byte. 
 
-When received, each of the strings needs to be clamped to 255 bytes 
-before use and the values validated or replaced with empty strings.
+	host name
+	host ip4
+	host ip6
+	host port
+	client addr
 
-These 4 values combined will be assumed a uniqueish client id, 
-technically they can clash but we only have so much to go on here and 
-its a reasonable assumption.
+When received, each of the strings should to be clamped to 255 bytes 
+and the values validated or replaced with empty strings before use.
 
+hostname is maybe best considered a random string, it could be anything.
 
-	bits,bit
-	0x00,0x02
+host ip4 will be the hosts best guess at their ip4, it is the ip4 they 
+are listening on.
 
-Sending a packet with bits=0 and bit=2 is a peername packet. The 
-payload data is a simple utf8 string with the peer ip and port the 
-sender sees for this host. If ipv4 it will be a string of the format 
-"1.2.3.4:5" and if 1pv6 then "[1::2]:3" So the ip possibly wrapped in 
-square brackets (ipv6) and then a colon followed by the port.
+host ip6 will be the hosts best guess at their ip6, it is the ip6 they 
+are listening on.
+
+host port will be the local port the host is listening on, but as they 
+may be port forwarding we might connect on a different port.
+
+client addr is the client ip and port the sender sees from this host, 
+so it is data about us not the host. If ipv4 it will be a string of the 
+format "1.2.3.4:5" and if 1pv6 then "[1::2]:3" So the ip possibly 
+wrapped in square brackets (ipv6) and then a colon followed by the 
+port.
 
 ]]
 
@@ -491,6 +505,7 @@ M.functions.test_server=function(tasks)
 		})
 		for i,msg in ipairs( ret.msgs or {} ) do
 			busy=true
+			msg.from="msgp1"
 			dump(msg)
 		end
 		-- poll for new data
@@ -500,6 +515,7 @@ M.functions.test_server=function(tasks)
 		})
 		for i,msg in ipairs( ret.msgs or {} ) do
 			busy=true
+			msg.from="msgp2"
 			dump(msg)
 		end
 		if not busy then lanes.sleep(0.001) end -- take a little nap
@@ -539,15 +555,15 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local clients={} -- client state, reset on host cmd
 	local msgs -- list of msgs waiting to be polled by main thread
 	
-	local manifest_client=function(ip,port)
+	local manifest_client=function(ip,port,reset)
 
 		-- parse ip:port and rebuild it to a standard url format
 		local addr_list=tasks_msgp.addr_to_list(ip,port)
 		local addr=tasks_msgp.list_to_addr(addr_list)
 		local addr_ip,addr_port=tasks_msgp.addr_to_ip_port(addr_list)
 
-		-- already exists?
-		local client=clients[addr]
+		local client=clients[addr] -- client already exists?
+		if reset then client=nil end -- we want to reset the client
 		if client then return client end -- found it
 		
 		-- build new client and remember it
@@ -565,7 +581,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		return client
 	end
 	local send_client=function(client,idx,pack)
-		if pack then client.sent[idx]=pack end
+		if pack then client.sent[idx]={ socket.gettime() , pack } end
 		local udp=(#client.addr_list>5) and udp6 or udp4
 		udp:sendto( client.sent[idx] , client.ip , client.port )
 	end
@@ -628,14 +644,14 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			local client=manifest_client(memo.addr)
 			ret.client=client
 			
+			client.state="handshake"
 			local p={}
 			p.idx=basepack
-			p.bit=1
+			p.bit=M.PACKET.HAND
 			p.bits=0
 			p.ack=basepack
 			p.acks=0
-			p.data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"
-	
+			p.data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..clent.addr.."\0"
 			send_client( client , p.idx , tasks_msgp.pack(p) )
 	
 		elseif memo.cmd=="poll" then
@@ -659,11 +675,51 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		print(p.data)
 		local client=manifest_client(ip,port)
 		
-		send_msg({
-			why="data",
-			addr=client.addr,
-			data=p.data,
-		})
+		if p.bits=0 then -- protocol packet
+		
+			-- packets that we do not recognize here will be ignored
+		
+			if		p.bit=M.PACKET.HAND
+			and		p.idx==basepack
+			and		client.state~="handshake"
+			then
+			-- HAND handshake packet
+
+				client=manifest_client(ip,port,true) -- reset client
+
+				client.state="data"
+				client.recv[p.idx]=p
+
+				local p={} -- respond to handshake
+				p.idx=basepack
+				p.bit=M.PACKET.SHAKE
+				p.bits=0
+				p.ack=basepack
+				p.acks=0
+				p.data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..clent.addr.."\0"
+				send_client( client , p.idx , tasks_msgp.pack(p) )
+
+			elseif	p.bit=M.PACKET.SHAKE
+			and		p.idx==basepack
+			and		client.state=="handshake"
+			then
+			-- SHAKE handshake packet
+
+				client.state="data"
+				client.recv[p.idx]=p
+			
+			end
+
+		else -- data packet
+		
+			send_msg({
+				why="data",
+				addr=client.addr,
+				data=p.data,
+			})
+
+		end
+		
 
 	end
 
