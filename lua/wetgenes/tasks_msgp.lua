@@ -583,7 +583,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local send_client=function(client,idx,pack)
 		if pack then client.sent[idx]={ socket.gettime() , pack } end
 		local udp=(#client.addr_list>5) and udp6 or udp4
-		udp:sendto( client.sent[idx] , client.ip , client.port )
+		udp:sendto( client.sent[idx][2] , client.ip , client.port )
 	end
 	local send_msg=function(msg)
 		if not msgs then msgs={} end
@@ -647,11 +647,11 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			client.state="handshake"
 			local p={}
 			p.idx=basepack
-			p.bit=M.PACKET.HAND
+			p.bit=tasks_msgp.PACKET.HAND
 			p.bits=0
 			p.ack=basepack
 			p.acks=0
-			p.data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..clent.addr.."\0"
+			p.data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0"
 			send_client( client , p.idx , tasks_msgp.pack(p) )
 	
 		elseif memo.cmd=="poll" then
@@ -675,11 +675,11 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		print(p.data)
 		local client=manifest_client(ip,port)
 		
-		if p.bits=0 then -- protocol packet
+		if p.bits==0 then -- protocol packet
 		
 			-- packets that we do not recognize here will be ignored
 		
-			if		p.bit=M.PACKET.HAND
+			if		p.bit==tasks_msgp.PACKET.HAND
 			and		p.idx==basepack
 			and		client.state~="handshake"
 			then
@@ -692,14 +692,14 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 
 				local p={} -- respond to handshake
 				p.idx=basepack
-				p.bit=M.PACKET.SHAKE
+				p.bit=tasks_msgp.PACKET.SHAKE
 				p.bits=0
 				p.ack=basepack
 				p.acks=0
-				p.data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..clent.addr.."\0"
+				p.data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0"
 				send_client( client , p.idx , tasks_msgp.pack(p) )
 
-			elseif	p.bit=M.PACKET.SHAKE
+			elseif	p.bit==tasks_msgp.PACKET.SHAKE
 			and		p.idx==basepack
 			and		client.state=="handshake"
 			then
