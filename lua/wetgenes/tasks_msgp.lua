@@ -560,6 +560,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local port
 	local clients={} -- client state, reset on host cmd
 	local msgs -- list of msgs waiting to be polled by main thread
+	local update_time=now() -- update clients / gc etc
 	
 	local manifest_client=function(ip,port,reset)
 
@@ -580,26 +581,31 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		client.addr=addr
 		client.ip=addr_ip
 		client.port=addr_port
-		client.sent_time=now()
-		client.sent_idx=basepack
-		client.sent={}
+		client.ping=0
+		client.pong=""
+		client.ping_time=now()
+		client.send_time=now()
+		client.send_idx=basepack
+		client.send_gc=basepack
+		client.send={}
 		client.recv_time=now()
 		client.recv_idx=basepack
+		client.recv_gc=basepack
 		client.recv={}
 		return client
 	end
 	local send_client=function(client,idx,pack)
-		if pack then client.sent[idx]={ now() , pack } end
+		if pack then client.send[idx]={ now() , pack } end
 		local udp=(#client.addr_list>5) and udp6 or udp4
-		udp:sendto( client.sent[idx][2] , client.ip , client.port )
-		client.sent_time=now()
+		udp:sendto( client.send[idx][2] , client.ip , client.port )
+		client.send_time=now()
 	end
 	local send_packet=function(client,p)
 		p.bit=p.bit or 0
 		p.bits=p.bits or 0
-		if not p.idx then -- auto sent_idx
-			client.sent_idx=(client.sent_idx+1)%0x10000
-			p.idx=client.sent_idx
+		if not p.idx then -- auto send_idx
+			client.send_idx=(client.send_idx+1)%0x10000
+			p.idx=client.send_idx
 		end
 		p.ack=client.recv_idx
 		local acks=0
@@ -623,6 +629,21 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local send_msg=function(msg)
 		if not msgs then msgs={} end
 		msgs[#msgs+1]=msg
+	end
+	local update_client=function(client)
+		if client.state=="msg" then -- connected
+			local t=now()
+			if	(t-client.ping_time) > 1.0
+			or	(t-client.send_time) > 0.5
+			then -- ping if we have not said anything for a while
+				client.ping_time=t
+				client.pong=tostring(client.ping_time) -- the response we expect
+				send_packet( client , {
+					bit=tasks_msgp.PACKET.PING,
+					data=client.pong,
+				} )
+			end
+		end
 	end
 	
 	local request=function(memo)
@@ -702,7 +723,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		if not p then return end -- bad header
 		p.time=now() -- time we received packet
 		local client=manifest_client(ip,port)
-		print("pack",p.idx,p.bit,p.bits,p.ack,string.format('%04X',p.acks),client.addr,p.time)
+		print("pack",p.idx,p.bit,p.bits,p.ack,string.format('%04X',p.acks),client.addr,p.time,math.ceil(client.ping*1000))
 		
 		if p.bits==0 then -- protocol packet
 		
@@ -807,17 +828,10 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			packet(dat,ip,port)
 		end
 		
-		local t=now()
-		local age=1+math.random()
-		for ip,client in pairs(clients) do
-			if client.state=="msg" then -- connected
-				if t-client.sent_time > age then -- ping if we have not said anything for a while
-					client.pong=tostring(t)
-					send_packet( client , {
-						bit=tasks_msgp.PACKET.PING,
-						data=client.pong,
-					} )
-				end
+		if (now()-update_time) > 0.5 then
+			update_time=now()
+			for ip,client in pairs(clients) do
+				update_client(client)
 			end
 		end
 	end
