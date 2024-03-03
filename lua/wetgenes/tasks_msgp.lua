@@ -5,12 +5,6 @@
 -- module
 local M={ modname = (...) } package.loaded[M.modname] = M 
 
-M.PACKET={}
-M.PACKET.PING  = 0x02
-M.PACKET.PONG  = 0x03
-M.PACKET.HAND  = 0x04
-M.PACKET.SHAKE = 0x05
-	
 --[[
 
 Simple UDP data packets with auto resend, little endian with this 8 byte header.
@@ -71,7 +65,7 @@ A SHAKE packet ends handshaking The payload data is a string array.
 Consisting of a series of null terminated utf8 strings.
 
 Both the HAND and the SHAKE packets contain the same payload data which 
-consists of the following utf8 string, each terminated by a 0 byte. 
+consists of the following utf8 strings, each terminated by a 0 byte. 
 
 	host name
 	host ip4
@@ -82,7 +76,7 @@ consists of the following utf8 string, each terminated by a 0 byte.
 When received, each of the strings should to be clamped to 255 bytes 
 and the values validated or replaced with empty strings before use.
 
-hostname is maybe best considered a random string, it could be anything.
+host name is maybe best considered a random string, it could be anything.
 
 host ip4 will be the hosts best guess at their ip4, it is the ip4 they 
 are listening on.
@@ -90,14 +84,14 @@ are listening on.
 host ip6 will be the hosts best guess at their ip6, it is the ip6 they 
 are listening on.
 
-host port will be the local port the host is listening on, but as they 
-may be port forwarding we might connect on a different port.
-
-client addr is the client ip and port the sender sees from this host, 
-so it is data about us not the host. If ipv4 it will be a string of the 
-format "1.2.3.4:5" and if 1pv6 then "[1::2]:3" So the ip possibly 
-wrapped in square brackets (ipv6) and then a colon followed by the 
+host port will be the local port the host is listening on, ip4 and ip6, 
+but as they may be port forwarding we might connect on a different 
 port.
+
+client addr is the client ip and port the sender sent this packet too. 
+If ipv4 it will be a string of the format "1.2.3.4:5" and if 1pv6 then 
+"[1::2]:3" So the ip possibly wrapped in square brackets (ipv6) and 
+then a colon followed by the port in url style format.
 
 ]]
 
@@ -111,6 +105,15 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 M.functions={}
 M.metatable={__index=M.functions}
 setmetatable(M,M.metatable)
+
+-- ids we use for special packets bit, when bits is 0
+
+M.PACKET={}
+M.PACKET.PING  = 0x02
+M.PACKET.PONG  = 0x03
+M.PACKET.HAND  = 0x04
+M.PACKET.SHAKE = 0x05
+	
 
 --[[
 
@@ -185,7 +188,8 @@ numbers, the length of the list represents the type so
 	#8 {1,2,3,4,5,6,7,8} -- ip6
 	#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port
 
-Optionally include a numeric port to add to the list after parsing.
+Optionally include a numeric port to add/replace in the list after 
+parsing.
 
 ]]
 M.functions.addr_to_list=function(addr,port)
@@ -263,7 +267,8 @@ M.functions.addr_to_list=function(addr,port)
 		end
 	end
 	
-	if port then list[#list+1]=port end -- append port
+	if port and ipv4 then list[5]=port end -- force port
+	if port and ipv6 then list[9]=port end
 	local len=#list
 	local p=((last or port) and 1 or 0)
 	if ipv4 and len<4   then return nil,"too few ipv4 numbers" end
@@ -474,7 +479,7 @@ M.functions.test_server=function(tasks)
 		baseport=baseport,
 		basepack=basepack,
 	})
-	dump(ret1)
+--	dump(ret1)
 
 	tasks:add_global_thread({
 		count=1,
@@ -487,24 +492,23 @@ M.functions.test_server=function(tasks)
 		baseport=baseport,
 		basepack=basepack,
 	})
-	dump(ret2)
+--	dump(ret2)
 
 	local ret3=tasks:do_memo({
 		task="msgp2",
 		cmd="join",
 		addr=ret1.addr,
 	})
-	dump(ret3)
+--	dump(ret3)
 
 	while true do
-		local busy=false
+
 		-- poll for new data
 		local ret=tasks:do_memo({
 			task="msgp1",
 			cmd="poll",
 		})
 		for i,msg in ipairs( ret.msgs or {} ) do
-			busy=true
 			msg.from="msgp1"
 			dump(msg)
 		end
@@ -514,11 +518,11 @@ M.functions.test_server=function(tasks)
 			cmd="poll",
 		})
 		for i,msg in ipairs( ret.msgs or {} ) do
-			busy=true
 			msg.from="msgp2"
 			dump(msg)
 		end
-		if not busy then lanes.sleep(0.001) end -- take a little nap
+
+		lanes.sleep(0.1) -- take a little nap
 	end
 
 end
@@ -539,12 +543,14 @@ end -- The functions below are free running tasks and should not depend on any l
 ------------------------------------------------------------------------
 
 M.functions.msgp_code=function(linda,task_id,task_idx)
+	local M -- hide M for thread safety
 
 	local lanes=require("lanes")
 	set_debug_threadname(task_id)
 
 	local tasks_msgp=require("wetgenes.tasks_msgp")
 	local socket = require("socket")
+	local now=function() return socket.gettime() end -- time now
 
 	local baseport=2342
 	local basepack=2342
@@ -574,16 +580,45 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		client.addr=addr
 		client.ip=addr_ip
 		client.port=addr_port
+		client.sent_time=now()
 		client.sent_idx=basepack
 		client.sent={}
+		client.recv_time=now()
 		client.recv_idx=basepack
 		client.recv={}
 		return client
 	end
 	local send_client=function(client,idx,pack)
-		if pack then client.sent[idx]={ socket.gettime() , pack } end
+		if pack then client.sent[idx]={ now() , pack } end
 		local udp=(#client.addr_list>5) and udp6 or udp4
 		udp:sendto( client.sent[idx][2] , client.ip , client.port )
+		client.sent_time=now()
+	end
+	local send_packet=function(client,p)
+		p.bit=p.bit or 0
+		p.bits=p.bits or 0
+		if not p.idx then -- auto sent_idx
+			client.sent_idx=(client.sent_idx+1)%0x10000
+			p.idx=client.sent_idx
+		end
+		p.ack=client.recv_idx
+		local acks=0
+		for i=0,15 do
+			local idx=(client.recv_idx+i+1)%0x10000
+			if client.recv[idx] then
+				acks=acks+(2^i)
+			end
+		end
+		p.acks=acks
+		send_client(client,p.idx,tasks_msgp.pack(p))
+		return p
+	end
+	local recv_packet=function(client,p)
+		client.recv[p.idx]=p
+		while client.recv[ client.recv_idx ] do -- advance
+			client.recv_idx=(client.recv_idx+1)%0x10000
+		end
+		client.recv_time=now()
 	end
 	local send_msg=function(msg)
 		if not msgs then msgs={} end
@@ -645,14 +680,11 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			ret.client=client
 			
 			client.state="handshake"
-			local p={}
-			p.idx=basepack
-			p.bit=tasks_msgp.PACKET.HAND
-			p.bits=0
-			p.ack=basepack
-			p.acks=0
-			p.data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0"
-			send_client( client , p.idx , tasks_msgp.pack(p) )
+			send_packet( client , {
+				idx=basepack,
+				bit=tasks_msgp.PACKET.HAND,
+				data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0",
+			} )
 	
 		elseif memo.cmd=="poll" then
 		
@@ -666,14 +698,11 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	
 	local packet=function(dat,ip,port)
 	
-		local hex=dat:gsub('.',function(c) return string.format('%02X',string.byte(c)) end)
-		print("data",ip,port,hex)
 		local p=tasks_msgp.pack(dat)
 		if not p then return end -- bad header
-		
-		print("pack",p.idx,p.bit,p.bits,p.ack,string.format('%04X',p.acks))
-		print(p.data)
+		p.time=now() -- time we received packet
 		local client=manifest_client(ip,port)
+		print("pack",p.idx,p.bit,p.bits,p.ack,string.format('%04X',p.acks),client.addr,p.time)
 		
 		if p.bits==0 then -- protocol packet
 		
@@ -683,31 +712,66 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			and		p.idx==basepack
 			and		client.state~="handshake"
 			then
-			-- HAND handshake packet
+			-- HAND packet
 
 				client=manifest_client(ip,port,true) -- reset client
 
-				client.state="data"
-				client.recv[p.idx]=p
+				client.state="msg"
+				recv_packet(client,p)
 
-				local p={} -- respond to handshake
-				p.idx=basepack
-				p.bit=tasks_msgp.PACKET.SHAKE
-				p.bits=0
-				p.ack=basepack
-				p.acks=0
-				p.data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0"
-				send_client( client , p.idx , tasks_msgp.pack(p) )
+				send_packet( client , {
+					idx=basepack,
+					bit=tasks_msgp.PACKET.SHAKE,
+					data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0",
+				} )
+
+				send_msg({
+					why="connect",
+					addr=client.addr,
+					data=p.data,
+				})
 
 			elseif	p.bit==tasks_msgp.PACKET.SHAKE
 			and		p.idx==basepack
 			and		client.state=="handshake"
 			then
-			-- SHAKE handshake packet
+			-- SHAKE packet
 
-				client.state="data"
-				client.recv[p.idx]=p
+				client.state="msg"
+				recv_packet(client,p)
+
+				send_msg({
+					why="connect",
+					addr=client.addr,
+					data=p.data,
+				})
 			
+			elseif	p.bit==tasks_msgp.PACKET.PING
+			and		client.state=="msg"
+			then
+			-- PING packet
+
+				recv_packet(client,p)
+
+				send_packet( client , {
+					bit=tasks_msgp.PACKET.PONG,
+					data=p.data,
+				} )
+
+			elseif	p.bit==tasks_msgp.PACKET.PONG
+			and		client.state=="msg"
+			then
+			-- PONG packet
+
+				recv_packet(client,p)
+				
+				if p.data==client.pong then -- expected
+					local t=tonumber(p.data)
+					if t then
+						client.ping=now()-t
+					end
+				end
+
 			end
 
 		else -- data packet
@@ -725,10 +789,8 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 
 	
 	while true do
-	
-		local busy=false
 
-		local _,memo= linda:receive( 0 , task_id ) -- wait for any memos coming into this thread
+		local _,memo= linda:receive( 0.001 , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
 			busy=true -- got some data
@@ -739,15 +801,25 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			end
 		end
 
-		local socks=socket.select({udp4,udp6},{},0)
+		local socks=socket.select({udp4,udp6},{},0.001) -- wait for any udp packets
 		for _,sock in ipairs(socks or {}) do
 			local dat,ip,port=sock:receivefrom()
-			if dat then busy=true end -- got some data
 			packet(dat,ip,port)
 		end
 		
-		if not busy then lanes.sleep(0.00001) end -- take a little nap
-
+		local t=now()
+		local age=1+math.random()
+		for ip,client in pairs(clients) do
+			if client.state=="msg" then -- connected
+				if t-client.sent_time > age then -- ping if we have not said anything for a while
+					client.pong=tostring(t)
+					send_packet( client , {
+						bit=tasks_msgp.PACKET.PING,
+						data=client.pong,
+					} )
+				end
+			end
+		end
 	end
 
 end
