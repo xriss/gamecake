@@ -118,11 +118,15 @@ M.PACKET.SHAKE = 0x05
 M.PACKET_SIZE       = (1024*8)-16
 M.PACKET_TOTAL_SIZE = 255*M.PACKET_SIZE
 
+-- do not set this value except for testing, it will cause random packet drops
+--M.PACKET_DROP_TEST  = 0.8
+
 -- time between actions in seconds
 M.TIME={}
 M.TIME.UPDATE = 0.1		-- update clients
 M.TIME.ACK    = 0.3		-- force an ack for unacked packets
-M.TIME.RESEND = 0.6		-- force resend for unacked packets
+M.TIME.SEND   = 0.1		-- wait at least this long before resending
+M.TIME.RESEND = 0.6		-- auto resend for unacked packets
 M.TIME.PING   = 60.0	-- perform a ping to measure latency
 
 --[[
@@ -599,25 +603,31 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		client.addr=addr
 		client.ip=addr_ip
 		client.port=addr_port
+		client.ack=0
 		client.ping=0
 		client.pong=""
 		client.ping_time=0
 		client.send_time=0
 		client.send_idx=basepack
-		client.send_gc=basepack
+		client.send_ack=basepack
 		client.send={}
 		client.recv_time=0
 		client.recv_idx=basepack
-		client.recv_ack=basepack
 		client.recv_gc=basepack
 		client.recv={}
 		return client
 	end
 	local send_client=function(client,idx,pack)
-		if pack then client.send[idx]={ now() , pack } end
-		local udp=(#client.addr_list>5) and udp6 or udp4
-		udp:sendto( client.send[idx][2] , client.ip , client.port )
-		client.send_time=now()
+		if pack then client.send[idx]={ 0 , pack } end -- prepare first send
+		if not client.send[idx] then return end -- can not resend
+		if client.send[idx][3] then return end -- do not resend if acked
+		local t=now() -- do not resend too fast
+		if ( t - client.send[idx][1] ) > msgp.TIME.SEND then
+			local udp=(#client.addr_list>5) and udp6 or udp4
+			udp:sendto( client.send[idx][2] , client.ip , client.port )
+			client.send_time=t
+			client.send[idx][1]=t
+		end
 	end
 	local send_packet=function(client,p)
 		p.bit=p.bit or 0
@@ -638,49 +648,91 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		send_client(client,p.idx,msgp.pack(p))
 		return p
 	end
-	local ack_packet=function(client,p)
+	local ack_packet=function(client,idx,final)
+		local p=client.send[idx]
 		if not p then return end -- no packet?
-		if p.ack then return end -- already acked
-		p.ack=true
+		client.ack=now()-p[1]
+		if final then
+			client.send[idx]=nil -- remove on final ack
+		else
+			p[3]=true -- flag as acked but do not delete
+		end
 	end
+	-- returns p if we should process it
 	local recv_packet=function(client,p)
+		if diff( p.idx , client.recv_idx ) < 0 then return end -- old packet, ignore it
 		client.recv[p.idx]=p
+		if p.bits>1 then -- grab all the data from each bit
+			p.datas={} -- if this is set then we have all the bits
+			for i = p.idx+0x10001-p.bit , p.idx+0x10000+p.bits-p.bit do
+				local r=client.recv[ i%0x10000 ]
+				if r then
+					p.datas[r.bit]=r.data
+				else
+					p.datas=nil -- fail
+					break
+				end
+			end
+		end
 		while client.recv[ client.recv_idx ] do -- advance
-			client.recv_idx=(client.recv_idx+1)%0x10000
+			local r=client.recv[ client.recv_idx ]
+			-- remove packets if complete
+			if r.bits<2 then -- single packet
+				client.recv[ client.recv_idx ]=nil -- remove
+			elseif r.bit==r.bits then -- remove all when we get the last bit
+				for i = r.idx+0x10001-r.bit , r.idx+0x10000+r.bits-r.bit do
+					client.recv[ i%0x10000 ]=nil -- remove
+				end
+			end
+			client.recv_idx=(client.recv_idx+1)%0x10000			
 		end
 		client.recv_time=now()
 		-- flag packets that have been acked
-		local d=diff(p.ack,client.recv_ack)
+		local d=diff(p.ack,client.send_ack)
 		if d>0 then -- advance client ack and flag packets
-			for idx=client.recv_ack,client.recv_ack+d-1 do
-				ack_packet(client,client.recv[idx%0x10000])
+			for idx=client.send_ack,client.send_ack+d-1 do
+				ack_packet(client,idx%0x10000,true) -- ack and remove
 			end
-			client.recv_ack=p.ack
+			client.send_ack=p.ack
 		end
-		if p.acks~=0 then -- and ack these
+		if p.acks~=0 then -- request resend of the gaps
+			send_client(client,p.ack) -- resend this packet
 			local acks=p.acks
 			local bit=1
 			local div=2
 			for i=1,16 do
 				if (acks%div)==bit then -- flag set
 					acks=acks-bit
-					ack_packet(client,client.recv[(p.ack+i)%0x10000])
+					ack_packet(client,(p.ack+i)%0x10000) -- ack but keep
+				else -- resend this packet
+					send_client(client,(p.ack+i)%0x10000)
 				end
 				if acks==0 then break end -- done
 				div=div*2
 				bit=bit*2
 			end
 		end
+		return p
 	end
 	local send_msg=function(msg)
 		if not msgs then msgs={} end
 		msgs[#msgs+1]=msg
 	end
 	local update_client=function(client)
-		if client.state=="msg" then -- connected
+		if client.state=="msg" or client.state=="handshake" then -- connected
 			local t=now()
+			
+			-- resend
+			for i,r in pairs(client.send) do
+				if	(	not r[3]						) -- not acked
+				and	(	(t-r[1]) > msgp.TIME.RESEND		) -- and old
+				then
+					send_client(client,i)
+				end
+			end
 
-			if	(t-client.ping_time) > msgp.TIME.PING then -- make sure we measure ping every now and again?
+			-- ping
+			if	(t-client.ping_time) > msgp.TIME.PING then
 				client.ping_time=t
 				client.pong=tostring(client.ping_time) -- the response we expect
 				send_packet( client , {
@@ -689,6 +741,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				} )
 			end
 
+			-- keep alive
 			if	(client.send_time<client.recv_time) and (t-client.recv_time) > msgp.TIME.ACK then
 			-- ack last sent packet with empty data
 				send_packet( client , {
@@ -698,6 +751,13 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				} )
 			end
 
+			do
+				local scnt=0 ; for i,v in pairs(client.send) do scnt=scnt+1 end
+				local rcnt=0 ; for i,v in pairs(client.recv) do rcnt=rcnt+1 end
+				if scnt>10 or rcnt>10 then -- something went wrong with the cleanup
+					print("counts",task_id,scnt,rcnt)
+				end
+			end
 		end
 	end
 	
@@ -780,7 +840,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		local client=manifest_client(ip,port)
 		local indent=""
 		if task_id=="msgp2" then indent="\t\t\t\t\t\t\t" end
-		print(indent..p.idx,p.bit.."/"..p.bits,p.ack.."+"..string.format('%04X',p.acks),math.floor(p.time*1000)%100000,math.ceil(client.ping*1000))
+		print(indent..p.idx,p.bit.."/"..p.bits,p.ack.."+"..string.format('%04X',p.acks),math.floor(p.time*1000)%100000,math.ceil(client.ping*1000).."-"..math.ceil(client.ack*1000))
 		
 		if p.bits==0 then -- protocol packet
 		
@@ -795,7 +855,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				client=manifest_client(ip,port,true) -- reset client
 
 				client.state="msg"
-				recv_packet(client,p)
+				if not recv_packet(client,p) then return end
 
 				send_packet( client , {
 					idx=basepack,
@@ -816,7 +876,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			-- SHAKE packet
 
 				client.state="msg"
-				recv_packet(client,p)
+				if not recv_packet(client,p) then return end
 
 				send_msg({
 					why="connect",
@@ -829,7 +889,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			then
 			-- PING packet
 
-				recv_packet(client,p)
+				if not recv_packet(client,p) then return end
 
 				send_packet( client , {
 					bit=msgp.PACKET.PONG,
@@ -841,7 +901,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			then
 			-- PONG packet
 
-				recv_packet(client,p)
+				if not recv_packet(client,p) then return end
 				
 				if p.data==client.pong then -- expected
 					local t=tonumber(p.data)
@@ -854,7 +914,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 
 		else -- data packet
 		
-			recv_packet(client,p)
+			if not recv_packet(client,p) then return end
 
 			if p.data~="" then -- ignore empty data ( sent as acks only )
 				send_msg({
@@ -885,7 +945,11 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		local socks=socket.select({udp4,udp6},{},0.001) -- wait for any udp packets
 		for _,sock in ipairs(socks or {}) do
 			local dat,ip,port=sock:receivefrom()
-			packet(dat,ip,port)
+			if not msgp.PACKET_DROP_TEST
+			or math.random()>=msgp.PACKET_DROP_TEST
+			then
+				packet(dat,ip,port)
+			end
 		end
 		
 		if (now()-update_time) > msgp.TIME.UPDATE then
