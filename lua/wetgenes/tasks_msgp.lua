@@ -778,7 +778,9 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		if not p then return end -- bad header
 		p.time=now() -- time we received packet
 		local client=manifest_client(ip,port)
-		print("pack",p.idx,p.bit,p.bits,p.ack,string.format('%04X',p.acks),client.addr,p.time,math.ceil(client.ping*1000))
+		local indent=""
+		if task_id=="msgp2" then indent="\t\t\t\t\t\t\t" end
+		print(indent..p.idx,p.bit.."/"..p.bits,p.ack.."+"..string.format('%04X',p.acks),math.floor(p.time*1000)%100000,math.ceil(client.ping*1000))
 		
 		if p.bits==0 then -- protocol packet
 		
@@ -843,7 +845,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				
 				if p.data==client.pong then -- expected
 					local t=tonumber(p.data)
-					if t then
+					if t and t==t then
 						client.ping=now()-t
 					end
 				end
