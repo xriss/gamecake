@@ -113,7 +113,17 @@ M.PACKET.PING  = 0x02
 M.PACKET.PONG  = 0x03
 M.PACKET.HAND  = 0x04
 M.PACKET.SHAKE = 0x05
-	
+
+-- max size of each data packet we will size, 8kish chunks and 2megish in total?
+M.PACKET_SIZE       = (1024*8)-16
+M.PACKET_TOTAL_SIZE = 255*M.PACKET_SIZE
+
+-- time between actions in seconds
+M.TIME={}
+M.TIME.UPDATE = 0.1		-- update clients
+M.TIME.ACK    = 0.3		-- force an ack for unacked packets
+M.TIME.RESEND = 0.6		-- force resend for unacked packets
+M.TIME.PING   = 60.0	-- perform a ping to measure latency
 
 --[[
 
@@ -544,30 +554,38 @@ end -- The functions below are free running tasks and should not depend on any l
 
 M.functions.msgp_code=function(linda,task_id,task_idx)
 	local M -- hide M for thread safety
+	local global=require("global") -- lock accidental globals
 
 	local lanes=require("lanes")
 	set_debug_threadname(task_id)
 
-	local tasks_msgp=require("wetgenes.tasks_msgp")
+	local msgp=require("wetgenes.tasks_msgp")
 	local socket = require("socket")
 	local now=function() return socket.gettime() end -- time now
 
 	local baseport=2342
 	local basepack=2342
 	local hostname=socket.dns.gethostname()
-	local ip4,ip6=tasks_msgp.ipsniff()
+	local ip4,ip6=msgp.ipsniff()
 	local udp4,udp6
 	local port
 	local clients={} -- client state, reset on host cmd
 	local msgs -- list of msgs waiting to be polled by main thread
 	local update_time=now() -- update clients / gc etc
 	
+	-- return a-b with idx wrapping fixed
+	local diff=function(a,b)
+		local d=a-b
+		if d>=0x8000 then d=d-0x10000 end
+		if d<-0x8000 then d=d+0x10000 end
+		return d
+	end
 	local manifest_client=function(ip,port,reset)
 
 		-- parse ip:port and rebuild it to a standard url format
-		local addr_list=tasks_msgp.addr_to_list(ip,port)
-		local addr=tasks_msgp.list_to_addr(addr_list)
-		local addr_ip,addr_port=tasks_msgp.addr_to_ip_port(addr_list)
+		local addr_list=msgp.addr_to_list(ip,port)
+		local addr=msgp.list_to_addr(addr_list)
+		local addr_ip,addr_port=msgp.addr_to_ip_port(addr_list)
 
 		local client=clients[addr] -- client already exists?
 		if reset then client=nil end -- we want to reset the client
@@ -583,13 +601,14 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		client.port=addr_port
 		client.ping=0
 		client.pong=""
-		client.ping_time=now()
-		client.send_time=now()
+		client.ping_time=0
+		client.send_time=0
 		client.send_idx=basepack
 		client.send_gc=basepack
 		client.send={}
-		client.recv_time=now()
+		client.recv_time=0
 		client.recv_idx=basepack
+		client.recv_ack=basepack
 		client.recv_gc=basepack
 		client.recv={}
 		return client
@@ -616,8 +635,13 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			end
 		end
 		p.acks=acks
-		send_client(client,p.idx,tasks_msgp.pack(p))
+		send_client(client,p.idx,msgp.pack(p))
 		return p
+	end
+	local ack_packet=function(client,p)
+		if not p then return end -- no packet?
+		if p.ack then return end -- already acked
+		p.ack=true
 	end
 	local recv_packet=function(client,p)
 		client.recv[p.idx]=p
@@ -625,6 +649,28 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			client.recv_idx=(client.recv_idx+1)%0x10000
 		end
 		client.recv_time=now()
+		-- flag packets that have been acked
+		local d=diff(p.ack,client.recv_ack)
+		if d>0 then -- advance client ack and flag packets
+			for idx=client.recv_ack,client.recv_ack+d-1 do
+				ack_packet(client,client.recv[idx%0x10000])
+			end
+			client.recv_ack=p.ack
+		end
+		if p.acks~=0 then -- and ack these
+			local acks=p.acks
+			local bit=1
+			local div=2
+			for i=1,16 do
+				if (acks%div)==bit then -- flag set
+					acks=acks-bit
+					ack_packet(client,client.recv[(p.ack+i)%0x10000])
+				end
+				if acks==0 then break end -- done
+				div=div*2
+				bit=bit*2
+			end
+		end
 	end
 	local send_msg=function(msg)
 		if not msgs then msgs={} end
@@ -633,16 +679,25 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local update_client=function(client)
 		if client.state=="msg" then -- connected
 			local t=now()
-			if	(t-client.ping_time) > 1.0
-			or	(t-client.send_time) > 0.5
-			then -- ping if we have not said anything for a while
+
+			if	(t-client.ping_time) > msgp.TIME.PING then -- make sure we measure ping every now and again?
 				client.ping_time=t
 				client.pong=tostring(client.ping_time) -- the response we expect
 				send_packet( client , {
-					bit=tasks_msgp.PACKET.PING,
+					bit=msgp.PACKET.PING,
 					data=client.pong,
 				} )
 			end
+
+			if	(client.send_time<client.recv_time) and (t-client.recv_time) > msgp.TIME.ACK then
+			-- ack last sent packet with empty data
+				send_packet( client , {
+					bit=1,
+					bits=1,
+					data="",
+				} )
+			end
+
 		end
 	end
 	
@@ -690,8 +745,8 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			ret.ip6=ip6
 
 			-- preferred connection addr
-			ret.addr_list=tasks_msgp.addr_to_list(ip6 or ip4,port)
-			ret.addr=tasks_msgp.list_to_addr(ret.addr_list)
+			ret.addr_list=msgp.addr_to_list(ip6 or ip4,port)
+			ret.addr=msgp.list_to_addr(ret.addr_list)
 
 		elseif memo.cmd=="join" then
 		
@@ -703,7 +758,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			client.state="handshake"
 			send_packet( client , {
 				idx=basepack,
-				bit=tasks_msgp.PACKET.HAND,
+				bit=msgp.PACKET.HAND,
 				data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0",
 			} )
 	
@@ -719,7 +774,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	
 	local packet=function(dat,ip,port)
 	
-		local p=tasks_msgp.pack(dat)
+		local p=msgp.pack(dat)
 		if not p then return end -- bad header
 		p.time=now() -- time we received packet
 		local client=manifest_client(ip,port)
@@ -729,7 +784,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		
 			-- packets that we do not recognize here will be ignored
 		
-			if		p.bit==tasks_msgp.PACKET.HAND
+			if		p.bit==msgp.PACKET.HAND
 			and		p.idx==basepack
 			and		client.state~="handshake"
 			then
@@ -742,7 +797,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 
 				send_packet( client , {
 					idx=basepack,
-					bit=tasks_msgp.PACKET.SHAKE,
+					bit=msgp.PACKET.SHAKE,
 					data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0",
 				} )
 
@@ -752,7 +807,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					data=p.data,
 				})
 
-			elseif	p.bit==tasks_msgp.PACKET.SHAKE
+			elseif	p.bit==msgp.PACKET.SHAKE
 			and		p.idx==basepack
 			and		client.state=="handshake"
 			then
@@ -767,7 +822,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					data=p.data,
 				})
 			
-			elseif	p.bit==tasks_msgp.PACKET.PING
+			elseif	p.bit==msgp.PACKET.PING
 			and		client.state=="msg"
 			then
 			-- PING packet
@@ -775,11 +830,11 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				recv_packet(client,p)
 
 				send_packet( client , {
-					bit=tasks_msgp.PACKET.PONG,
+					bit=msgp.PACKET.PONG,
 					data=p.data,
 				} )
 
-			elseif	p.bit==tasks_msgp.PACKET.PONG
+			elseif	p.bit==msgp.PACKET.PONG
 			and		client.state=="msg"
 			then
 			-- PONG packet
@@ -797,11 +852,15 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 
 		else -- data packet
 		
-			send_msg({
-				why="data",
-				addr=client.addr,
-				data=p.data,
-			})
+			recv_packet(client,p)
+
+			if p.data~="" then -- ignore empty data ( sent as acks only )
+				send_msg({
+					why="data",
+					addr=client.addr,
+					data=p.data,
+				})
+			end
 
 		end
 		
@@ -814,7 +873,6 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		local _,memo= linda:receive( 0.001 , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
-			busy=true -- got some data
 			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
 			if memo.id then -- result requested
@@ -828,7 +886,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			packet(dat,ip,port)
 		end
 		
-		if (now()-update_time) > 0.5 then
+		if (now()-update_time) > msgp.TIME.UPDATE then
 			update_time=now()
 			for ip,client in pairs(clients) do
 				update_client(client)
