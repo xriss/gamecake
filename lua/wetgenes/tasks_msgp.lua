@@ -51,6 +51,7 @@ are used internally by this protocol.
 	PONG	0x00	0x03
 	HAND	0x00	0x04
 	SHAKE	0x00	0x05
+	RESEND	0x00	0x08
 
 A PING packet will be accepted and acknowledged after handshaking. 
 Sending a PING packet will cause a PONG response with the same data.
@@ -93,6 +94,9 @@ If ipv4 it will be a string of the format "1.2.3.4:5" and if 1pv6 then
 "[1::2]:3" So the ip possibly wrapped in square brackets (ipv6) and 
 then a colon followed by the port in url style format.
 
+A RESEND packet consists of a payload of 16bit idxs to packets we would 
+like to be resent to fill in missing data.
+
 ]]
 
 
@@ -109,13 +113,15 @@ setmetatable(M,M.metatable)
 -- ids we use for special packets bit, when bits is 0
 
 M.PACKET={}
-M.PACKET.PING  = 0x02
-M.PACKET.PONG  = 0x03
-M.PACKET.HAND  = 0x04
-M.PACKET.SHAKE = 0x05
+M.PACKET.PING   = 0x02
+M.PACKET.PONG   = 0x03
+M.PACKET.HAND   = 0x04
+M.PACKET.SHAKE  = 0x05
+M.PACKET.RESEND = 0x08
 
--- max size of each data packet we will size, 8kish chunks and 2megish in total?
-M.PACKET_SIZE       = (1024*8)-16
+-- max size of each data packet we will size, maybe 8kish chunks and 2megish in total?
+M.PACKET_SIZE_RAW   = (1024*8)
+M.PACKET_SIZE       = M.PACKET_SIZE_RAW-16
 M.PACKET_TOTAL_SIZE = 255*M.PACKET_SIZE
 
 -- do not set this value except for testing, it will cause random packet drops
@@ -123,11 +129,19 @@ M.PACKET_TOTAL_SIZE = 255*M.PACKET_SIZE
 
 -- time between actions in seconds
 M.TIME={}
-M.TIME.UPDATE = 0.1		-- update clients
-M.TIME.ACK    = 0.3		-- force an ack for unacked packets
-M.TIME.SEND   = 0.1		-- wait at least this long before resending
-M.TIME.RESEND = 0.6		-- auto resend for unacked packets
-M.TIME.PING   = 60.0	-- perform a ping to measure latency
+M.TIME.UPDATE = 0.100	-- update clients
+M.TIME.ACK    = 0.250	-- force an ack for unacked packets
+M.TIME.SEND   = 0.100	-- wait at least this long before resending
+M.TIME.RESEND = 0.500	-- auto resend for unacked packets
+M.TIME.PING   = 60		-- perform a ping to measure latency
+
+
+M.ENCODE5="0123456789abcdefghjkmnpqrtuvwxyz" -- 32 chars 5bits
+-- intended for human typing or other communication
+-- avoiding "OILS" as these letters may be easily mistaken for numerals
+-- any "OILS" can be assumed to mistyped "0115" numbers
+-- lowercase helps but can not be guaranteed
+
 
 --[[
 
@@ -448,7 +462,7 @@ M.functions.pack=function(a)
 			data = string.sub(a,9)	}
 
 	elseif ta=="table" then
-
+a.acks=0
 		return string.char(
 					   a.idx      %256	,
 			math.floor(a.idx /256)%256	,
@@ -482,17 +496,19 @@ M.functions.test_server=function(tasks)
 
 	local lanes=require("lanes")
 
+	local hosts={}
 	tasks:add_global_thread({
 		count=1,
 		id="msgp1",
 		code=M.functions.msgp_code,
 	})
-	local ret1=tasks:do_memo({
+	hosts[1]=tasks:do_memo({
 		task="msgp1",
 		cmd="host",
 		baseport=baseport,
 		basepack=basepack,
 	})
+	hosts[1].task="msgp1"
 --	dump(ret1)
 
 	tasks:add_global_thread({
@@ -500,43 +516,59 @@ M.functions.test_server=function(tasks)
 		id="msgp2",
 		code=M.functions.msgp_code,
 	})
-	local ret2=tasks:do_memo({
+	hosts[2]=tasks:do_memo({
 		task="msgp2",
 		cmd="host",
 		baseport=baseport,
 		basepack=basepack,
 	})
+	hosts[2].task="msgp2"
 --	dump(ret2)
 
-	local ret3=tasks:do_memo({
+	tasks:do_memo({
 		task="msgp2",
 		cmd="join",
-		addr=ret1.addr,
+		addr=hosts[1].addr,
 	})
 --	dump(ret3)
 
+	local dumpit=0
+	local data=""
+
 	while true do
+			
+		for i=1,2 do
+			local task="msgp"..i
+			local host=hosts[i]
+			local other=hosts[1+(i%2)]
+			
+			data=string.sub(data..i..data,-0x100000)
 
-		-- poll for new data
-		local ret=tasks:do_memo({
-			task="msgp1",
-			cmd="poll",
-		})
-		for i,msg in ipairs( ret.msgs or {} ) do
-			msg.from="msgp1"
-			dump(msg)
-		end
-		-- poll for new data
-		local ret=tasks:do_memo({
-			task="msgp2",
-			cmd="poll",
-		})
-		for i,msg in ipairs( ret.msgs or {} ) do
-			msg.from="msgp2"
-			dump(msg)
+			dumpit=dumpit-1
+			if dumpit<=0 then
+				dumpit=0
+				tasks:do_memo({
+					task=host.task,
+					cmd="send",
+					addr=other.addr,
+					data=data
+				})
+			end
+
+			-- send packet
+			-- poll for new data
+			local ret=tasks:do_memo({
+				task=task,
+				cmd="poll",
+			})
+			for i,msg in ipairs( ret.msgs or {} ) do
+				msg.from=task
+--				dump(msg)
+			end
+			lanes.sleep(0.050) -- take a little nap
+
 		end
 
-		lanes.sleep(0.1) -- take a little nap
 	end
 
 end
@@ -612,20 +644,22 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		client.send_ack=basepack
 		client.send={}
 		client.recv_time=0
+		client.recv_max=basepack
 		client.recv_idx=basepack
 		client.recv_gc=basepack
 		client.recv={}
 		return client
 	end
 	local send_client=function(client,idx,pack)
-		if pack then client.send[idx]={ 0 , pack } end -- prepare first send
-		if not client.send[idx] then return end -- can not resend
-		if client.send[idx][3] then return end -- do not resend if acked
 		local t=now() -- do not resend too fast
+		if pack then -- prepare first send
+			client.send[idx]={ 0 , pack }
+			client.send_time=t -- only first send counts ( for acks )
+		end
+		if not client.send[idx] then return end -- can not resend
 		if ( t - client.send[idx][1] ) > msgp.TIME.SEND then
 			local udp=(#client.addr_list>5) and udp6 or udp4
 			udp:sendto( client.send[idx][2] , client.ip , client.port )
-			client.send_time=t
 			client.send[idx][1]=t
 		end
 	end
@@ -633,35 +667,28 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		p.bit=p.bit or 0
 		p.bits=p.bits or 0
 		if not p.idx then -- auto send_idx
-			client.send_idx=(client.send_idx+1)%0x10000
-			p.idx=client.send_idx
+			p.idx=(client.send_idx+1)%0x10000
+		end
+		if diff( p.idx , client.send_idx ) > 0 then -- advance idx
+			client.send_idx=p.idx
 		end
 		p.ack=client.recv_idx
-		local acks=0
-		for i=0,15 do
-			local idx=(client.recv_idx+i+1)%0x10000
-			if client.recv[idx] then
-				acks=acks+(2^i)
-			end
-		end
-		p.acks=acks
 		send_client(client,p.idx,msgp.pack(p))
 		return p
 	end
-	local ack_packet=function(client,idx,final)
+	local ack_packet=function(client,idx)
 		local p=client.send[idx]
 		if not p then return end -- no packet?
 		client.ack=now()-p[1]
-		if final then
-			client.send[idx]=nil -- remove on final ack
-		else
-			p[3]=true -- flag as acked but do not delete
-		end
+		client.send[idx]=nil -- remove on final ack
 	end
 	-- returns p if we should process it
 	local recv_packet=function(client,p)
 		if diff( p.idx , client.recv_idx ) < 0 then return end -- old packet, ignore it
 		client.recv[p.idx]=p
+		if diff( p.idx , client.recv_max ) > 0 then
+			client.recv_max=p.idx	-- remember max idx received
+		end
 		if p.bits>1 then -- grab all the data from each bit
 			p.datas={} -- if this is set then we have all the bits
 			for i = p.idx+0x10001-p.bit , p.idx+0x10000+p.bits-p.bit do
@@ -686,31 +713,16 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			end
 			client.recv_idx=(client.recv_idx+1)%0x10000			
 		end
-		client.recv_time=now()
-		-- flag packets that have been acked
+		-- advance send ack and remove old packets
 		local d=diff(p.ack,client.send_ack)
+		if d>=0 then
+			client.recv_time=now()
+		end
 		if d>0 then -- advance client ack and flag packets
 			for idx=client.send_ack,client.send_ack+d-1 do
 				ack_packet(client,idx%0x10000,true) -- ack and remove
 			end
 			client.send_ack=p.ack
-		end
-		if p.acks~=0 then -- request resend of the gaps
-			send_client(client,p.ack) -- resend this packet
-			local acks=p.acks
-			local bit=1
-			local div=2
-			for i=1,16 do
-				if (acks%div)==bit then -- flag set
-					acks=acks-bit
-					ack_packet(client,(p.ack+i)%0x10000) -- ack but keep
-				else -- resend this packet
-					send_client(client,(p.ack+i)%0x10000)
-				end
-				if acks==0 then break end -- done
-				div=div*2
-				bit=bit*2
-			end
 		end
 		return p
 	end
@@ -723,11 +735,21 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			local t=now()
 			
 			-- resend
-			for i,r in pairs(client.send) do
-				if	(	not r[3]						) -- not acked
-				and	(	(t-r[1]) > msgp.TIME.RESEND		) -- and old
-				then
-					send_client(client,i)
+			local d=diff( client.recv_max , client.recv_idx )
+			if d > 0 then -- we have holes
+				local list={}
+				for idx = client.recv_idx , client.recv_idx+d do
+					if not client.recv[idx%0x10000] then
+						local b=idx%0x10000
+						list[#list+1]=string.char(b%256)
+						list[#list+1]=string.char(math.floor(b/256)%256)
+					end
+				end
+				if #list>0 then -- request resends
+					send_packet( client , {
+						bit=msgp.PACKET.RESEND,
+						data=table.concat(list),
+					} )
 				end
 			end
 
@@ -841,12 +863,17 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				local bits=math.ceil(size/msgp.PACKET_SIZE)				
 				assert(bits<256)
 				
+				local base_idx=client.send_idx
 				for bit=1,bits do
+					local idx=(base_idx+bit)%0x10000
 					send_packet( client , {
+						idx=idx,
 						bit=bit,
 						bits=bits,
 						data=string.sub( memo.data , 1+((bit-1)*msgp.PACKET_SIZE) , (bit*msgp.PACKET_SIZE) ),
 					} )
+					-- take a little nap between each packet or we will clog things up
+					lanes.sleep(0.001)
 				end
 			
 			end
@@ -937,6 +964,19 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					if t and t==t then
 						client.ping=now()-t
 					end
+				end
+
+			elseif	p.bit==msgp.PACKET.RESEND
+			then
+				if not recv_packet(client,p) then return end
+				local data=p.data
+				for i=1,#data,2 do
+					local a=string.byte(data,i,i)
+					local b=string.byte(data,i+1,i+1)
+					local idx=a+b*256
+					send_client(client,idx)
+					-- take a little nap between each packet or we will clog things up even more
+					lanes.sleep(0.001)
 				end
 
 			end
