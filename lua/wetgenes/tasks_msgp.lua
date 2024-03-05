@@ -119,7 +119,7 @@ M.PACKET_SIZE       = (1024*8)-16
 M.PACKET_TOTAL_SIZE = 255*M.PACKET_SIZE
 
 -- do not set this value except for testing, it will cause random packet drops
---M.PACKET_DROP_TEST  = 0.8
+--M.PACKET_DROP_TEST  = 0.1
 
 -- time between actions in seconds
 M.TIME={}
@@ -822,6 +822,35 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0",
 			} )
 	
+		elseif memo.cmd=="send" then
+		
+			local client=manifest_client(memo.addr)
+
+			local size=string.len(memo.data)
+			
+			if size<=msgp.PACKET_SIZE then -- send a single bit
+
+				send_packet( client , {
+					bit=1,
+					bits=1,
+					data=memo.data,
+				} )
+			
+			else -- send in multiple bits
+			
+				local bits=math.ceil(size/msgp.PACKET_SIZE)				
+				assert(bits<256)
+				
+				for bit=1,bits do
+					send_packet( client , {
+						bit=bit,
+						bits=bits,
+						data=string.sub( memo.data , 1+((bit-1)*msgp.PACKET_SIZE) , (bit*msgp.PACKET_SIZE) ),
+					} )
+				end
+			
+			end
+
 		elseif memo.cmd=="poll" then
 		
 			ret.msgs=msgs -- any data we have waiting
@@ -915,12 +944,19 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		else -- data packet
 		
 			if not recv_packet(client,p) then return end
+			
+			local data
+			if p.bits>1 and p.datas then
+				data=table.concat(p.datas)
+			else
+				data=p.data
+			end
 
-			if p.data~="" then -- ignore empty data ( sent as acks only )
+			if data and data~="" then -- ignore empty data ( sent as acks only )
 				send_msg({
 					why="data",
 					addr=client.addr,
-					data=p.data,
+					data=data,
 				})
 			end
 
@@ -949,6 +985,8 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			or math.random()>=msgp.PACKET_DROP_TEST
 			then
 				packet(dat,ip,port)
+			else
+				print(task_id,"packet drop test")
 			end
 		end
 		
