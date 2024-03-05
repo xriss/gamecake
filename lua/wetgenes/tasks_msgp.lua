@@ -7,13 +7,12 @@ local M={ modname = (...) } package.loaded[M.modname] = M
 
 --[[
 
-Simple UDP data packets with auto resend, little endian with this 8 byte header.
+Simple UDP data packets with auto resend, little endian with this 6 byte header.
 
 	u16		idx			//	incrementing and wrapping idx of this packet
+	u16		ack			//	we acknowledge all the packets before this idx so please send this one next (or again maybe)
 	u8		bit			//	which bit this is, all bits should be joined before parsing
 	u8		bits		//	how many bits in total ( all bits will be in adjacent idxs )
-	u16		ack			//	we acknowledge all the packets before this idx so please send this one next (or again maybe)
-	u16		acks		//	flags for ack+1 (0x0001) to ack+16 (0x8000) for other packets we acknowledge, probably all 0
 	u8		data[*]		//	The payload, if multiple bits then all payloads should be concatenated
 
 A maximum packet size of 8k seems the agreed upon reasonably safe 
@@ -25,17 +24,11 @@ reserved as a flag for possible slightly strange packets in the future
 eg maybe we need a ping? and should be ignored as a bad packet if you 
 do not understand them.
 
-if ack is 0x1234 and acks is 0xffff then that means we lost idx 0x1234 
-but the next 16 packets are ok. We should flag a resend if any acks 
-bits are set (ie reporting a hole in data) or if our unacknowledged 
-packets become old. Lets say an age of 500ms with a 500ms delay between 
-sends.
-
 An ack of 0x1234 also implies that 0x9234 to 0x1233 are in the past and 
 0x1234 to 0x9233 are in the future.
 
 Also if we have nothing new to say after 100ms but have received new 
-packets then we can send a packet with empty data (0 length) as an acks 
+packets then we can send a packet with empty data (0 length) as an ack
 only packet.
 
 When connecting to a port for the first time, the idx value must start 
@@ -94,8 +87,8 @@ If ipv4 it will be a string of the format "1.2.3.4:5" and if 1pv6 then
 "[1::2]:3" So the ip possibly wrapped in square brackets (ipv6) and 
 then a colon followed by the port in url style format.
 
-A RESEND packet consists of a payload of 16bit idxs to packets we would 
-like to be resent to fill in missing data.
+A RESEND packet consists of a payload of little endian 16bit idxs to 
+packets we would like to be resent to fill in missing data.
 
 ]]
 
@@ -120,8 +113,9 @@ M.PACKET.SHAKE  = 0x05
 M.PACKET.RESEND = 0x08
 
 -- max size of each data packet we will size, maybe 8kish chunks and 2megish in total?
+M.PACKET_HEAD       = 6
 M.PACKET_SIZE_RAW   = (1024*8)
-M.PACKET_SIZE       = M.PACKET_SIZE_RAW-16
+M.PACKET_SIZE       = M.PACKET_SIZE_RAW-M.PACKET_HEAD
 M.PACKET_TOTAL_SIZE = 255*M.PACKET_SIZE
 
 -- do not set this value except for testing, it will cause random packet drops
@@ -442,7 +436,6 @@ If given table, convert it to a udp data packet string. little endian
 	u8		bit			//	which bit this is, all bits should be joined before parsing
 	u8		bits		//	how many bits in total ( all bits will be in adjacent idxs )
 	u16		ack			//	we acknowledge all the packets before this idx so please send this one next (or again maybe)
-	u16		acks		//	flags for ack+1 (0x0001) to ack+16 (0x8000) for other packets we acknowledge, probably all 0
 	u8		data[*]		//	The payload, if multiple bits then all payloads should be concatenated
 
 ]]
@@ -455,31 +448,26 @@ M.functions.pack=function(a)
 
 		return {
 			idx  = b[1]+b[2]*256	,
-			bit  = b[3]				,
-			bits = b[4]				,
-			ack  = b[5]+b[6]*256	,
-			acks = b[7]+b[8]*256	,
-			data = string.sub(a,9)	}
+			ack  = b[3]+b[4]*256	,
+			bit  = b[5]				,
+			bits = b[6]				,
+			data = string.sub(a,7)	}
 
 	elseif ta=="table" then
-a.acks=0
 		return string.char(
 					   a.idx      %256	,
 			math.floor(a.idx /256)%256	,
-					   a.bit			,
-					   a.bits			,
 					   a.ack      %256	,
 			math.floor(a.ack /256)%256	,
-					   a.acks     %256	,
-			math.floor(a.acks/256)%256	)..(a.data or "")
+					   a.bit			,
+					   a.bits			)..(a.data or "")
 
 	else
 		return {
 			idx  = 0	,
-			bit  = 0	,
-			bits = 0	,
 			ack  = 0	,
-			acks = 0	}
+			bit  = 0	,
+			bits = 0	}
 	end
 end
 
@@ -654,7 +642,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		local t=now() -- do not resend too fast
 		if pack then -- prepare first send
 			client.send[idx]={ 0 , pack }
-			client.send_time=t -- only first send counts ( for acks )
+			client.send_time=t -- only first send counts
 		end
 		if not client.send[idx] then return end -- can not resend
 		if ( t - client.send[idx][1] ) > msgp.TIME.SEND then
@@ -896,7 +884,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		local client=manifest_client(ip,port)
 		local indent=""
 		if task_id=="msgp2" then indent="\t\t\t\t\t\t\t" end
-		print(indent..p.idx,p.bit.."/"..p.bits,p.ack.."+"..string.format('%04X',p.acks),math.floor(p.time*1000)%100000,math.ceil(client.ping*1000).."-"..math.ceil(client.ack*1000))
+		print(indent..p.idx,p.bit.."/"..p.bits,p.ack,math.floor(p.time*1000)%100000,math.ceil(client.ping*1000).."-"..math.ceil(client.ack*1000))
 		
 		if p.bits==0 then -- protocol packet
 		
@@ -992,7 +980,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				data=p.data
 			end
 
-			if data and data~="" then -- ignore empty data ( sent as acks only )
+			if data and data~="" then -- ignore empty data ( sent as ack only )
 				send_msg({
 					why="data",
 					addr=client.addr,
