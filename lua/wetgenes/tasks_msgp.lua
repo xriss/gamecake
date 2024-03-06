@@ -433,9 +433,9 @@ If given aa udp data packet string, convert it to a table.
 If given table, convert it to a udp data packet string. little endian
 
 	u16		idx			//	incrementing and wrapping idx of this packet
+	u16		ack			//	we acknowledge all the packets before this idx so please send this one next (or again maybe)
 	u8		bit			//	which bit this is, all bits should be joined before parsing
 	u8		bits		//	how many bits in total ( all bits will be in adjacent idxs )
-	u16		ack			//	we acknowledge all the packets before this idx so please send this one next (or again maybe)
 	u8		data[*]		//	The payload, if multiple bits then all payloads should be concatenated
 
 ]]
@@ -443,8 +443,8 @@ M.functions.pack=function(a)
 	local ta=type(a)
 	if ta=="string" then
 	
-		local b={ string.byte(a,1,8) }
-		if #b<8 then return end -- bad header
+		local b={ string.byte(a,1,6) }
+		if #b<6 then return end -- bad header
 
 		return {
 			idx  = b[1]+b[2]*256	,
@@ -534,12 +534,19 @@ M.functions.test_server=function(tasks)
 
 			dumpit=dumpit-1
 			if dumpit<=0 then
-				dumpit=0
+				dumpit=101
 				tasks:do_memo({
 					task=host.task,
 					cmd="send",
 					addr=other.addr,
 					data=data
+				})
+			else
+				tasks:do_memo({
+					task=host.task,
+					cmd="send",
+					addr=other.addr,
+					data=string.sub(data,-2048)
 				})
 			end
 
@@ -764,7 +771,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			do
 				local scnt=0 ; for i,v in pairs(client.send) do scnt=scnt+1 end
 				local rcnt=0 ; for i,v in pairs(client.recv) do rcnt=rcnt+1 end
-				if scnt>10 or rcnt>10 then -- something went wrong with the cleanup
+				if (scnt+rcnt) > 500 then -- something went wrong with the cleanup
 					print("counts",task_id,scnt,rcnt)
 				end
 			end
@@ -883,8 +890,22 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		p.time=now() -- time we received packet
 		local client=manifest_client(ip,port)
 		local indent=""
-		if task_id=="msgp2" then indent="\t\t\t\t\t\t\t" end
-		print(indent..p.idx,p.bit.."/"..p.bits,p.ack,math.floor(p.time*1000)%100000,math.ceil(client.ping*1000).."-"..math.ceil(client.ack*1000))
+		
+		do
+			local bitid=p.bit.."/"..p.bits
+			local pings=math.ceil(client.ping*1000).."-"..math.ceil(client.ack*1000)
+			local tims=math.floor(p.time*1000)%100000
+			local idx=string.format("%d",p.idx)
+			local ack=string.format("%d",p.ack)
+			if diff(p.ack,client.send_ack) <= 0 then ack="-" end -- old ack
+
+			if task_id=="msgp2" then
+				print("",ack,"","","","",idx,"",bitid,tims,pings)
+			else
+				print(idx,"",bitid,tims,pings,"","",ack)
+			end
+
+		end
 		
 		if p.bits==0 then -- protocol packet
 		
