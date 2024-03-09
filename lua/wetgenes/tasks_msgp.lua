@@ -126,7 +126,6 @@ M.TIME={}
 M.TIME.UPDATE = 0.100	-- update clients
 M.TIME.ACK    = 0.250	-- force an ack for unacked packets
 M.TIME.SEND   = 0.100	-- wait at least this long before resending
-M.TIME.RESEND = 0.500	-- auto resend for unacked packets
 M.TIME.PING   = 60		-- perform a ping to measure latency
 
 
@@ -907,6 +906,38 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 
 		end
 		
+		local client_handshake=function()
+			client.handshake={}
+
+			-- parse strings from packet
+			local i=0
+			for s,_ in string.gmatch(p.data,"([^%z]*)(%z)") do
+				i=i+1
+				if     i==1 then
+					client.handshake.name=s:sub(1,255) -- make sure string is not huge
+					client.handshake.name=client.handshake.name:gsub("%W","_") -- replace non alpha numbers with _
+					client.handshake.name=client.handshake.name:upper() -- force uppercase
+				elseif i==2 then
+					client.handshake.ip4=msgp.list_to_addr( msgp.addr_to_list(s) )
+				elseif i==3 then
+					client.handshake.ip6=msgp.list_to_addr( msgp.addr_to_list(s) )
+				elseif i==4 then
+					client.handshake.port=tonumber(s)
+					if not client.handshake.port or client.handshake.port~=client.handshake.port then client.handshake.port=nil end
+				elseif i==5 then
+					client.handshake.host=msgp.list_to_addr( msgp.addr_to_list(s) )
+				end
+				if i>=5 then break end
+			end
+--[[
+			print("client name",client.handshake.name)
+			print("client ip4",client.handshake.ip4)
+			print("client ip6",client.handshake.ip6)
+			print("client port",client.handshake.port)
+			print("client host",client.handshake.host)
+]]
+		end
+		
 		if p.bits==0 then -- protocol packet
 		
 			-- packets that we do not recognize here will be ignored
@@ -927,11 +958,13 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					bit=msgp.PACKET.SHAKE,
 					data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0",
 				} )
+				
+				client_handshake()
 
 				send_msg({
 					why="connect",
 					addr=client.addr,
-					data=p.data,
+					handshake=client.handshake,
 				})
 
 			elseif	p.bit==msgp.PACKET.SHAKE
@@ -943,10 +976,12 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				client.state="msg"
 				if not recv_packet(client,p) then return end
 
+				client_handshake()
+
 				send_msg({
 					why="connect",
 					addr=client.addr,
-					data=p.data,
+					handshake=client.handshake,
 				})
 			
 			elseif	p.bit==msgp.PACKET.PING
