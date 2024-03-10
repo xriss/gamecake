@@ -113,8 +113,10 @@ M.PACKET.SHAKE  = 0x05
 M.PACKET.RESEND = 0x08
 
 -- max size of each data packet we will size, maybe 8kish chunks and 2megish in total?
+-- 63k chunks give better data throughput but might be unsafe?
+-- most chunks will be small anyway
 M.PACKET_HEAD       = 6
-M.PACKET_SIZE_RAW   = (1024*8)
+M.PACKET_SIZE_RAW   = (1024*63)
 M.PACKET_SIZE       = M.PACKET_SIZE_RAW-M.PACKET_HEAD
 M.PACKET_TOTAL_SIZE = 255*M.PACKET_SIZE
 
@@ -127,6 +129,7 @@ M.TIME.UPDATE = 0.100	-- update clients
 M.TIME.ACK    = 0.250	-- force an ack for unacked packets
 M.TIME.SEND   = 0.100	-- wait at least this long before resending
 M.TIME.PING   = 60		-- perform a ping to measure latency
+M.TIME.SLEEP  = 0.001	-- time to sleep between multiple packets
 
 
 M.ENCODE5="0123456789abcdefghjkmnpqrtuvwxyz" -- 32 chars 5bits
@@ -471,103 +474,6 @@ M.functions.pack=function(a)
 end
 
 
-M.functions.test_server=function(tasks)
-
-	tasks=tasks or require("wetgenes.tasks").create()
-
-	local log,dump=require("wetgenes.logs"):export("log","dump")
-
-	local baseport=2342
-	local basepack=2342
-
-
-	local lanes=require("lanes")
-
-	local hosts={}
-	tasks:add_global_thread({
-		count=1,
-		id="msgp1",
-		code=M.functions.msgp_code,
-	})
-	hosts[1]=tasks:do_memo({
-		task="msgp1",
-		cmd="host",
-		baseport=baseport,
-		basepack=basepack,
-	})
-	hosts[1].task="msgp1"
---	dump(ret1)
-
-	tasks:add_global_thread({
-		count=1,
-		id="msgp2",
-		code=M.functions.msgp_code,
-	})
-	hosts[2]=tasks:do_memo({
-		task="msgp2",
-		cmd="host",
-		baseport=baseport,
-		basepack=basepack,
-	})
-	hosts[2].task="msgp2"
---	dump(ret2)
-
-	tasks:do_memo({
-		task="msgp2",
-		cmd="join",
-		addr=hosts[1].addr,
-	})
---	dump(ret3)
-
-	local dumpit=0
-	local data=""
-
-	while true do
-			
-		for i=1,2 do
-			local task="msgp"..i
-			local host=hosts[i]
-			local other=hosts[1+(i%2)]
-			
-			data=string.sub(data..i..data,-0x100000)
-
-			dumpit=dumpit-1
-			if dumpit<=0 then
-				dumpit=101
-				tasks:do_memo({
-					task=host.task,
-					cmd="send",
-					addr=other.addr,
-					data=data
-				})
-			else
-				tasks:do_memo({
-					task=host.task,
-					cmd="send",
-					addr=other.addr,
-					data=string.sub(data,-2048)
-				})
-			end
-
-			-- send packet
-			-- poll for new data
-			local ret=tasks:do_memo({
-				task=task,
-				cmd="poll",
-			})
-			for i,msg in ipairs( ret.msgs or {} ) do
-				msg.from=task
---				dump(msg)
-			end
-			lanes.sleep(0.050) -- take a little nap
-
-		end
-
-	end
-
-end
-
-
 -- this module must be configured before use
 M.configure=function(conf)
 conf=conf or {}
@@ -653,6 +559,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		if not client.send[idx] then return end -- can not resend
 		if ( t - client.send[idx][1] ) > msgp.TIME.SEND then
 			local udp=(#client.addr_list>5) and udp6 or udp4
+--			socket.select(nil,{udp}) -- wait till safe to send? nope, does not help...
 			udp:sendto( client.send[idx][2] , client.ip , client.port )
 			client.send[idx][1]=t
 		end
@@ -867,7 +774,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 						data=string.sub( memo.data , 1+((bit-1)*msgp.PACKET_SIZE) , (bit*msgp.PACKET_SIZE) ),
 					} )
 					-- take a little nap between each packet or we will clog things up
-					lanes.sleep(0.001)
+					lanes.sleep(msgp.TIME.SLEEP)
 				end
 			
 			end
@@ -1020,7 +927,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					local idx=a+b*256
 					send_client(client,idx)
 					-- take a little nap between each packet or we will clog things up even more
-					lanes.sleep(0.001)
+					lanes.sleep(msgp.TIME.SLEEP)
 				end
 
 			end
@@ -1052,7 +959,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	
 	while true do
 
-		local _,memo= linda:receive( 0.001 , task_id ) -- wait for any memos coming into this thread
+		local _,memo= linda:receive( 0 , task_id ) -- wait for any memos coming into this thread
 		
 		if memo then
 			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
@@ -1064,7 +971,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 
 		local socks=socket.select({udp4,udp6},{},0.001) -- wait for any udp packets
 		for _,sock in ipairs(socks or {}) do
-			local dat,ip,port=sock:receivefrom()
+			local dat,ip,port=sock:receivefrom(msgp.PACKET_SIZE_RAW)
 			if not msgp.PACKET_DROP_TEST
 			or math.random()>=msgp.PACKET_DROP_TEST
 			then
