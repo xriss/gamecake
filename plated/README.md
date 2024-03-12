@@ -24,16 +24,21 @@ _Commands above are for debian/ubuntu. For other operating systems, please the u
 1. Visit https://github.com/new/import
    - Paste `https://github.com/xriss/plated-example` into the URL
    - Create a name for your new repository and click **Begin import**
+   - Go to your new repository when it's ready
     
-2. Go to ![settings](https://cloud.githubusercontent.com/assets/1515961/25015092/dcf5b398-2069-11e7-9740-424784716088.png)
-    - Change the GitHub Pages source to use **master branch /docs folder**
-    - Save
-
-3. Woohoo! You should now have a brand new website.
+2. Woohoo! You should now have a brand new website.
     - Check your URL - http://username.github.io/new-repo
     - Your website should now work and contain the default plated-example landing page.
 
-4. Read [the next bit](#run-this-local) on how to push new changes to update your live website.
+3. Enable Github Actions in **General** https://github.com/username/new-repo/settings/actions
+    - Under *Actions permissions*, choose **Allow all actions and reusable workflows** and click **Save**
+    - Under *Workflow permissions*, choose **Read and write permissions** and click **Save**
+    - You can start editing your site and the changes will automatically be published using Github Actions.
+  
+4. Enable actions under the **Actions** tab https://github.com/username/new-repo/actions
+    - Click on the green **Enable Actions on this repository** button
+
+5. Read [the next bit](#run-this-local) if you want to view your site locally before publishing.
     
 ---
 
@@ -52,10 +57,10 @@ plated/build
 
 plated/start
 # Leave this running in a separate tab, it should watch and rebuild your new changes.
-# Make sure nothing else is using port http://0.0.0.0:8000.
+# Make sure nothing else is using port http://0.0.0.0:8080.
 
 
-# View your website in a browser at http://0.0.0.0:8000/new-repo
+# View your website in a browser at http://0.0.0.0:8080/new-repo
 # Make sure your browser is not caching content, otherwise your changes will not show up.
 
 
@@ -117,7 +122,7 @@ plated/watch
 
 plated/serv
 # Start a simple static server locally.
-# Visit http://0.0.0.0:8000/new-repo/ in your browser to view your site.
+# Visit http://0.0.0.0:8080/new-repo/ in your browser to view your site.
 # Optional if ```plated/start``` is running
 
 plated/publish

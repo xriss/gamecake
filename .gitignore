@@ -66,7 +66,7 @@ prime/
 snap/.snapcraft/
 stage/
 
-docs
+/docs
 node_modules
 
 rocks/src.zip

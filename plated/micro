@@ -1,0 +1,6 @@
+cd `dirname $0`
+
+. ./settings
+
+./node_modules/.bin/plated micro --source=$PLATED_SOURCE $*
+
