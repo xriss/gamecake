@@ -114,7 +114,7 @@ M.PACKET.RESEND = 0x08
 
 -- max size of each data packet we will size, maybe 8kish chunks and 2megish in total?
 -- 63k chunks give better data throughput but might be unsafe?
--- most chunks will be small anyway
+-- most chunks will be small anyway I think large chunks will be faster
 M.PACKET_HEAD       = 6
 M.PACKET_SIZE_RAW   = (1024*63)
 M.PACKET_SIZE       = M.PACKET_SIZE_RAW-M.PACKET_HEAD
@@ -123,13 +123,18 @@ M.PACKET_TOTAL_SIZE = 255*M.PACKET_SIZE
 -- do not set this value except for testing, it will cause random packet drops
 --M.PACKET_DROP_TEST  = 0.1
 
+-- limit packets sent per ms to
+M.PACKET_PER_MS = 3
+-- so PACKET_PER_MS*1000 packets per second max
+-- and PACKET_SIZE*PACKET_PER_MS*1000 bytes per second max
+
 -- time between actions in seconds
 M.TIME={}
+M.TIME.SELECT = 0.001   -- select timeout
 M.TIME.UPDATE = 0.100	-- update clients
-M.TIME.ACK    = 0.250	-- force an ack for unacked packets
 M.TIME.SEND   = 0.100	-- wait at least this long before resending
+M.TIME.ACK    = 0.200	-- force an ack for unacked packets
 M.TIME.PING   = 60		-- perform a ping to measure latency
-M.TIME.SLEEP  = 0.001	-- time to sleep between multiple packets
 
 
 M.ENCODE5="0123456789abcdefghjkmnpqrtuvwxyz" -- 32 chars 5bits
@@ -558,6 +563,18 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		end
 		if not client.send[idx] then return end -- can not resend
 		if ( t - client.send[idx][1] ) > msgp.TIME.SEND then
+			if msgp.PACKET_PER_MS then -- limit
+				local ms=math.floor(t*1000)
+				if ms~=client.send_ms_stamp then -- advance
+					client.send_ms_stamp=ms
+					client.send_ms_count=1
+				else
+					client.send_ms_count=client.send_ms_count+1
+				end
+				if client.send_ms_count>=msgp.PACKET_PER_MS then
+					lanes.sleep(0.001)
+				end				
+			end
 			local udp=(#client.addr_list>5) and udp6 or udp4
 --			socket.select(nil,{udp}) -- wait till safe to send? nope, does not help...
 			udp:sendto( client.send[idx][2] , client.ip , client.port )
@@ -773,8 +790,6 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 						bits=bits,
 						data=string.sub( memo.data , 1+((bit-1)*msgp.PACKET_SIZE) , (bit*msgp.PACKET_SIZE) ),
 					} )
-					-- take a little nap between each packet or we will clog things up
-					lanes.sleep(msgp.TIME.SLEEP)
 				end
 			
 			end
@@ -926,8 +941,6 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					local b=string.byte(data,i+1,i+1)
 					local idx=a+b*256
 					send_client(client,idx)
-					-- take a little nap between each packet or we will clog things up even more
-					lanes.sleep(msgp.TIME.SLEEP)
 				end
 
 			end
@@ -969,15 +982,21 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			end
 		end
 
-		local socks=socket.select({udp4,udp6},{},0.001) -- wait for any udp packets
+		local socks=socket.select({udp4,udp6},{},msgp.TIME.SELECT) -- wait for any udp packets
 		for _,sock in ipairs(socks or {}) do
-			local dat,ip,port=sock:receivefrom(msgp.PACKET_SIZE_RAW)
-			if not msgp.PACKET_DROP_TEST
-			or math.random()>=msgp.PACKET_DROP_TEST
-			then
-				packet(dat,ip,port)
-			else
-				print(task_id,"packet drop test")
+			while true do
+				local dat,ip,port=sock:receivefrom(msgp.PACKET_SIZE_RAW)
+				if dat then
+					if not msgp.PACKET_DROP_TEST
+					or math.random()>=msgp.PACKET_DROP_TEST
+					then
+						packet(dat,ip,port)
+					else
+						print(task_id,"packet drop test")
+					end
+				else
+					break
+				end
 			end
 		end
 		
