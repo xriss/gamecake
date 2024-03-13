@@ -133,7 +133,7 @@ M.PACKET.RESEND = 0x08
 -- 63k chunks give better data throughput but might be unsafe?
 -- most chunks will be small anyway I think large chunks will be faster
 M.PACKET_HEAD       = 6
-M.PACKET_SIZE_RAW   = (1024*63)
+M.PACKET_SIZE_RAW   = (1024*63.75)
 M.PACKET_SIZE       = M.PACKET_SIZE_RAW-M.PACKET_HEAD
 M.PACKET_TOTAL_SIZE = 255*M.PACKET_SIZE
 
