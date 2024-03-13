@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 585,
+   "count": 593,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 578,
+   "count": 586,
    "name": "lua.wetgenes"
   },
   {
@@ -2356,6 +2356,38 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.update"
+  },
+  {
+   "count": 8,
+   "name": "lua.wetgenes.tasks_msgp"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks_msgp.addr_to_ip_port"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks_msgp.addr_to_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks_msgp.ip6_to_addr"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks_msgp.ipsniff"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks_msgp.list_to_addr"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks_msgp.msgp_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks_msgp.pack"
   },
   {
    "count": 5,
