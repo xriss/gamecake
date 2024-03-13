@@ -5,7 +5,17 @@
 -- module
 local M={ modname = (...) } package.loaded[M.modname] = M 
 
---[[
+--[[#lua.wetgenes.tasks_msgp
+
+	local msgp=require("wetgenes.tasks_msgp")
+
+A stream of lowlevel udp packets with automatic resend ( data will get 
+there eventual ) but hopefully without clogging up an ongoing pulse of 
+smaller packets that contain EG controller state.
+
+We use lua sockets and lanes with some help from wetgenes.tasks to 
+manage the lanes.
+
 
 Simple UDP data packets with auto resend, little endian with this 6 byte header.
 
@@ -15,9 +25,16 @@ Simple UDP data packets with auto resend, little endian with this 6 byte header.
 	u8		bits		//	how many bits in total ( all bits will be in adjacent idxs )
 	u8		data[*]		//	The payload, if multiple bits then all payloads should be concatenated
 
-A maximum packet size of 8k seems the agreed upon reasonably safe 
-maximum size that will probably work. Breaking a msg into 255 * 8k 
-bits, we should be able to send just under 2meg in a single msg.
+A maximum packet size of 63k seems to give good throughput, letting the 
+lower level code split and recombine packets is probably going to be 
+more efficient than us. Note that we care about best case speed, when 
+shit lags and packets drop we care less about performance and more 
+about maintaining a connection with correct state. IE its important 
+that we recover not that we pretend there is no problem. At 255 bits * 
+63k bit size we can seen a data of about 15.6m.
+
+Technically 63k UDP packets might just get dropped as too big but I 
+suspect modern hardware is not really going to cause problems.
 
 bit/bits only goes up to 255. the 0 value in either of these is 
 reserved as a flag for possible slightly strange packets in the future 
@@ -144,7 +161,7 @@ M.ENCODE5="0123456789abcdefghjkmnpqrtuvwxyz" -- 32 chars 5bits
 -- lowercase helps but can not be guaranteed
 
 
---[[
+--[[#lua.wetgenes.tasks_msgp.ip6_to_addr
 
 Parse an array of 8 numbers into an ip6 address with :: in the first 
 longest run of zeros if needed and lowercase hex letters.
@@ -182,7 +199,7 @@ M.functions.ip6_to_addr=function(list)
 	return s
 end
 
---[[
+--[[#lua.wetgenes.tasks_msgp.list_to_addr
 
 Parse an array of numbers into an ip address and maybe port.
 
@@ -207,7 +224,7 @@ M.functions.list_to_addr=function(list)
 
 end
 
---[[
+--[[#lua.wetgenes.tasks_msgp.addr_to_list
 
 parse an ip address + maybe port encoded as a string into a list of 
 numbers, the length of the list represents the type so
@@ -351,9 +368,11 @@ M.functions.addr_to_list=function(addr,port)
 	return list
 end
 
---[[
+--[[#lua.wetgenes.tasks_msgp.addr_to_ip_port
 
 parse an ip string and port number from an addr/addr+port/addr_list
+
+returns addr,port that we can then use with luasocket
 
 ]]
 M.functions.addr_to_ip_port=function(addr,port)
@@ -374,7 +393,7 @@ M.functions.addr_to_ip_port=function(addr,port)
 	return M.functions.list_to_addr(ip),port
 end
 
---[[
+--[[#lua.wetgenes.tasks_msgp.ipsniff
 
 Use ( google by default ) public dns servers to check if we can connect 
 to the internet and if we have ipv4 and/or ipv6 available.
@@ -433,7 +452,7 @@ M.functions.ipsniff=function(dns4,dns6)
 end
 
 
---[[
+--[[#lua.wetgenes.tasks_msgp.pack
 
 If given aa udp data packet string, convert it to a table.
 
@@ -493,6 +512,11 @@ end
 end -- The functions below are free running tasks and should not depend on any locals
 ------------------------------------------------------------------------
 
+--[[#lua.wetgenes.tasks_msgp.msgp_code
+
+lanes task function for handling msgp communication.
+
+]]
 M.functions.msgp_code=function(linda,task_id,task_idx)
 	local M -- hide M for thread safety
 	local global=require("global") -- lock accidental globals
