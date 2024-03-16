@@ -122,6 +122,18 @@ running a cake or fun script then the following args can control it.
   --pixel=NUMBER
 	Disable screen space pixel processing and set default window size 
 	to NUMBER view pixels per game pixel.
+
+  --tasks=many
+  --tasks=only
+  --tasks=net
+  --tasks=fake
+	Request app threading style (which may be ignored if unsupported), 
+	defaults to many which probably means draw on main thread, update 
+	on another thread. Set to only for easier debugging in a single 
+	thread. Net means we are running multiple states and trying to sync 
+	them over a network. Fake means we are doing network but faking 
+	multiple clients on one machine for debugging.
+
 ]]
 
 --[[#lua.wetgenes.gamecake.oven.bake
