@@ -129,7 +129,8 @@ gui.data_setup=function()
 		datas.new({id="run_mode"  ,class="list",  hooks=gui.hooks,num=2,list={
 			{str="none"},
 			{str="auto"},
-			{str="glsl"},
+			{str="stoy"},
+			{str="vtoy"},
 			{str="fun64"},
 		}})
 

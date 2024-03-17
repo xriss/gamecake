@@ -21,7 +21,8 @@ M.bake=function(oven,show)
 	
 	show.modname=M.modname
 
-	show.glsl=oven.rebake(M.modname.."_glsl")
+	show.stoy=oven.rebake(M.modname.."_stoy")
+	show.vtoy=oven.rebake(M.modname.."_vtoy")
 	show.fun64=oven.rebake(M.modname.."_fun64")
 
 	local gui=oven.rebake(oven.modname..".gui")
@@ -59,7 +60,7 @@ M.bake=function(oven,show)
 		local mode=show.get_mode()
 		if mode~=show.mode then
 			show.mode=mode
-			if mode=="glsl" or  mode=="fun64" then
+			if mode=="stoy" or  mode=="fun64" then
 
 				local ss=math.pow(2,gui.master.datas.get_value("run_scale")-1)
 				
@@ -97,8 +98,13 @@ M.bake=function(oven,show)
 		if mode=="auto" then -- pick from file extension
 			if docs.doc and docs.doc.filename then
 				local s=docs.doc.filename
-				if     s:sub(-5)==".glsl"    then mode="glsl"
-				elseif s:sub(-8)==".fun.lua" then mode="fun64"
+				local endswith=function(a,b)
+					if a:sub(-#b)==b then return true end
+					return false
+				end
+				if     endswith(s,".stoy.glsl") then mode="stoy"
+				elseif endswith(s,".vtoy.glsl") then mode="vtoy"
+				elseif endswith(s,".fun.lua")   then mode="fun64"
 				end
 			end
 		end

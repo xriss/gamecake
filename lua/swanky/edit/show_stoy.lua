@@ -15,11 +15,11 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 -- keep track of all the open documents
 
-M.bake=function(oven,show_glsl)
-	local show_glsl=show_glsl or {}
-	show_glsl.oven=oven
+M.bake=function(oven,show_stoy)
+	local show_stoy=show_stoy or {}
+	show_stoy.oven=oven
 	
-	show_glsl.modname=M.modname
+	show_stoy.modname=M.modname
 
 	local gl=oven.gl
 
@@ -106,11 +106,11 @@ uniform float     iSampleRate;           // sound sample rate (i.e., 44100)
 ]]
 
 local i=0
-	show_glsl.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
+	show_stoy.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
 
 --		show.fbo:resize(hx,hy,0)
 
-		local pname="swanky_edit_show_glsl"
+		local pname="swanky_edit_show_stoy"
 
 		gl.headers[pname]=shadertoy_head..gui.master.ids.texteditor.txt.get_text()..shadertoy_tail
 		gl.program_source(pname,{source=gl.headers[pname]})
@@ -180,5 +180,5 @@ end)
 
 	end
 	
-	return show_glsl
+	return show_stoy
 end
