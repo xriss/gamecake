@@ -12,6 +12,22 @@ local function ls(...) print(wstr.dump({...})) end
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+-- create a u16 string of all 16bit numbers in sequence (128k) for vertex buffer
+local vgen64=function()
+	local tab={}
+	for b=0,255 do
+		local s=""
+		for a=0,240,16 do
+			s=s..string.char(
+				a+0,b,a+1,b,a+2,b,a+3,b,
+				a+4,b,a+5,b,a+6,b,a+7,b,
+				a+8,b,a+9,b,a+10,b,a+11,b,
+				a+12,b,a+13,b,a+14,b,a+15,b)
+		end
+		tab[#tab+1]=s
+	end
+	return table.concat(tab)
+end
 
 -- keep track of all the open documents
 
@@ -27,7 +43,18 @@ M.bake=function(oven,show_vtoy)
 	local gui=oven.rebake(oven.modname..".gui")
 
 
-	local shadertoy_head=[[
+	local vapd=oven.cake.canvas.flat.array_predraw(
+		{
+			fmt="rawuv",
+			dataraw=vgen64,
+			datasize=0x20000,
+			pstride=2,
+			array=gl.TRIANGLES,
+			vb=-1,
+		}
+	)
+
+	local vtoy_head=[[
 
 #version 300 es
 #version 330
@@ -54,6 +81,8 @@ uniform mat4 iCamera2D; // 2D Camera transform
 #define HW_PERFORMANCE 0
 
 #ifdef VERTEX_SHADER
+
+in uint a_idx;
 
 in vec3 a_vertex;
 in vec2 a_texcoord;
@@ -85,7 +114,7 @@ out vec4 FragColor;
 #line 1
 ]]
 
-	local shadertoy_tail=[[
+	local vtoy_tail=[[
 void main()
 {
 	mainImage( FragColor , v_texcoord );
@@ -112,7 +141,7 @@ local i=0
 
 		local pname="swanky_edit_show_vtoy"
 
-		gl.headers[pname]=shadertoy_head..gui.master.ids.texteditor.txt.get_text()..shadertoy_tail
+		gl.headers[pname]=vtoy_head..gui.master.ids.texteditor.txt.get_text()..vtoy_tail
 		gl.program_source(pname,{source=gl.headers[pname]})
 		local suc,err = pcall( function() gl.program(pname) end )
 
@@ -137,28 +166,20 @@ local i=0
 		gl.Color(1,1,1,1)
 
 		gl.state.push(gl.state_defaults)
+--[[
 		gl.state.set({
 			[gl.DEPTH_WRITEMASK]			=	gl.FALSE,
 			[gl.DEPTH_TEST]					=	gl.FALSE,
 			[gl.CULL_FACE]					=	gl.FALSE,
 		})
-
+]]
 
 pcall(function()
-		local t={
-			px,		py,		0,		0,	hy,
-			px+hx,	py,		0,		hx,	hy,
-			px,		py+hy,	0,		0,	0,
-			px+hx,	py+hy,	0,		hx,	0,
-		}
-		oven.cake.canvas.flat.tristrip("xyzuv",t,pname,function(p)
 
---[[
-				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
-				show.fbo:bind_texture()
-				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
-				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
-]]
+		vapd.draw(function(p)
+
+			gl.VertexAttribPointer(p:attrib("a_idx"),1,gl.UNSIGNED_SHORT,gl.FALSE,2,0)
+			gl.EnableVertexAttribArray(p:attrib("a_idx"))
 
 -- shadertoy compatability
 			gl.Uniform3f( p:uniform("iResolution"), hx,hy,0 )
@@ -167,13 +188,9 @@ pcall(function()
 			gl.UniformMatrix4f( p:uniform("iCamera"), show.cam )
 			gl.UniformMatrix4f( p:uniform("iCamera2D"), show.cam2d )
 
---			if show.mouse then
-				gl.Uniform4f( p:uniform("iMouse"), show.mouse[1] , show.mouse[2] , show.mouse[3] , show.mouse[4] )
---			else
---				gl.Uniform4f( p:uniform("iMouse"), hx/2 , hy/2 , -hx/2 , -hy/2 )
---			end
+			gl.Uniform4f( p:uniform("iMouse"), show.mouse[1] , show.mouse[2] , show.mouse[3] , show.mouse[4] )
 
-		end)
+		end,pname)
 end)
 		
 		gl.state.pop()

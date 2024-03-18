@@ -73,7 +73,7 @@ end
 flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 -- some basic vertexformats
-	local pstride
+	local pstride=it.pstride
 	local pnrm
 	local ptex
 	local pcolor
@@ -81,8 +81,8 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	local ptans
 	local pbone
 	local p
-	local def_progname
-	local fmt=it.fmt
+	local def_progname=it.progname or ""
+	local fmt=it.fmt or ""
 	if fmt=="xyz" or fmt=="pos" then -- xyz or pos only
 	
 		def_progname=fmt:sub(1,3)
@@ -198,8 +198,8 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 	
 	local data=it.data
-	local datalen=it.datalen or #data
-	local datasize=datalen*4 -- we need this much vdat memory
+	local datalen=it.datalen or (data and #data) or 0
+	local datasize=it.datasize or datalen*4 -- we need this much vdat memory
 	canvas.vdat_check(datasize) -- make sure we have space in the buffer
 	
 	if it.vb then
@@ -207,8 +207,12 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 			it.vb=buffers.create({
 				start=function(vb)
 					vb:bind()
-					pack.save_array(data,"f32",0,datalen,canvas.vdat)
-					gl.BufferData(gl.ARRAY_BUFFER,datasize,canvas.vdat,gl.STATIC_DRAW)
+					if it.dataraw then
+						gl.BufferData(gl.ARRAY_BUFFER,datasize,it.dataraw,gl.STATIC_DRAW)
+					else
+						pack.save_array(data,"f32",0,datalen,canvas.vdat)
+						gl.BufferData(gl.ARRAY_BUFFER,datasize,canvas.vdat,gl.STATIC_DRAW)
+					end
 				end,
 			})
 		end
@@ -242,6 +246,8 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 --		gl.UniformMatrix4f(p:uniform("modelview"), gl.matrix(gl.MODELVIEW) )
 --		gl.UniformMatrix4f(p:uniform("projection"), gl.matrix(gl.PROJECTION) )
 --		gl.Uniform4f( p:uniform("color"), gl.cache.color )
+
+	if it.fmt then -- use default attrs we worked out above
 
 		gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,pstride,0)
 		gl.EnableVertexAttribArray(p:attrib("a_vertex"))
@@ -295,6 +301,8 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 				gl.EnableVertexAttribArray(a)
 			end
 		end
+
+	end
 
 --	local err=gl.GetError() ; assert( err==0 , gl.numtostring(err) ) -- well that went wrong
 

@@ -60,7 +60,7 @@ M.bake=function(oven,show)
 		local mode=show.get_mode()
 		if mode~=show.mode then
 			show.mode=mode
-			if mode=="stoy" or  mode=="fun64" then
+			if mode=="stoy" or mode=="vtoy" or mode=="fun64" then
 
 				local ss=math.pow(2,gui.master.datas.get_value("run_scale")-1)
 				
