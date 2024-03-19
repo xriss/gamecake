@@ -200,7 +200,9 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	local data=it.data
 	local datalen=it.datalen or (data and #data) or 0
 	local datasize=it.datasize or datalen*4 -- we need this much vdat memory
-	canvas.vdat_check(datasize) -- make sure we have space in the buffer
+	if not it.dataraw then
+		canvas.vdat_check(datasize) -- make sure we have space in the buffer
+	end
 	
 	if it.vb then
 		if type(it.vb)~="table" then -- need to create

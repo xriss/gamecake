@@ -41,16 +41,20 @@ M.bake=function(oven,show_vtoy)
 
 	local show=oven.rebake(oven.modname..".show")
 	local gui=oven.rebake(oven.modname..".gui")
-
+	
+	local fats=require("wetgenes.fats")
 
 	local vapd=oven.cake.canvas.flat.array_predraw(
 		{
-			fmt="rawuv",
-			dataraw=vgen64,
-			datasize=0x20000,
-			pstride=2,
+--			dataraw="\000\000\001\000\002\000",--vgen64(),
+--			dataraw=fats.table_to_floats({ 0,0,0, 0,100,0, 100,0,0 }),
+			dataraw=	"\000\000"..fats.table_to_floats({ 0,0,0 })..
+						"\001\000"..fats.table_to_floats({ 0,100,0 })..
+						"\002\000"..fats.table_to_floats({ 100,0,0 }),
+			datasize=(4*3+2)*3,--0x20000-2, -- one less for groups of 3
+			pstride=(4*3+2),
 			array=gl.TRIANGLES,
-			vb=-1,
+--			vb=-1,
 		}
 	)
 
@@ -78,26 +82,42 @@ uniform mat4 iCamera; // Camera transform
 #define ICAMERA2D 1
 uniform mat4 iCamera2D; // 2D Camera transform
 
-#define HW_PERFORMANCE 0
+//#define HW_PERFORMANCE 0
+
+uniform vec4 color;
+uniform mat4 modelview;
+uniform mat4 projection;
+
+#line 1
+]]
+
+	local vtoy_tail=[[
 
 #ifdef VERTEX_SHADER
 
 in uint a_idx;
+in vec3 a_float;
 
-in vec3 a_vertex;
-in vec2 a_texcoord;
-
-out vec2  v_texcoord;
-//out vec4  gl_Position;
-
-uniform mat4 modelview;
-uniform mat4 projection;
-uniform vec4 color;
+out vec4  v_xyzw;
+out vec4  v_uvst;
+out vec4  v_position;
 
 void main()
 {
-	gl_Position = projection * modelview * vec4(a_vertex.xyz, 1.0) ;
-	v_texcoord = a_texcoord;
+	vec4 m_xyzw;
+	vec4 m_uvst;
+	uint t=uint(a_idx);
+
+	mainVertex( m_xyzw , m_uvst , t );
+
+	v_xyzw = m_xyzw;
+	v_uvst = m_uvst;
+	
+//	v_xyzw.xyz+=a_float;
+
+	v_position = projection * modelview * vec4(v_xyzw.xyz, 1.0) ;
+	
+	gl_Position=v_position;
 }
 
 #endif
@@ -105,21 +125,22 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 
-in vec2  v_texcoord;
-//in vec4  gl_Position;
+in vec4  v_xyzw;
+in vec4  v_uvst;
+in vec4  v_position;
 
 out vec4 FragColor;
 
-
-#line 1
-]]
-
-	local vtoy_tail=[[
 void main()
 {
-	mainImage( FragColor , v_texcoord );
+	vec4 m_color;
+
+	mainFragment( m_color , v_xyzw , v_uvst );
+	FragColor=m_color;
+
 }
 #endif
+
 ]]
 
 --[[
@@ -136,6 +157,8 @@ uniform float     iSampleRate;           // sound sample rate (i.e., 44100)
 
 local i=0
 	show_vtoy.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
+
+--print(px,py,hx,hy)
 
 --		show.fbo:resize(hx,hy,0)
 
@@ -166,20 +189,36 @@ local i=0
 		gl.Color(1,1,1,1)
 
 		gl.state.push(gl.state_defaults)
---[[
+
 		gl.state.set({
 			[gl.DEPTH_WRITEMASK]			=	gl.FALSE,
 			[gl.DEPTH_TEST]					=	gl.FALSE,
 			[gl.CULL_FACE]					=	gl.FALSE,
 		})
-]]
 
-pcall(function()
+local suc,err=pcall(function()
 
 		vapd.draw(function(p)
+		
+--			print(p:attrib("a_idx"))
+--			print(p:attrib("a_float"))
 
-			gl.VertexAttribPointer(p:attrib("a_idx"),1,gl.UNSIGNED_SHORT,gl.FALSE,2,0)
-			gl.EnableVertexAttribArray(p:attrib("a_idx"))
+
+			do
+				local a=p:attrib("a_float")
+				if a>=0 then
+					gl.VertexAttribPointer(a,3,gl.FLOAT,gl.FALSE,14,2)
+					gl.EnableVertexAttribArray(a)
+				end
+			end
+
+			do
+				local a=p:attrib("a_idx")
+				if a>=0 then
+					gl.VertexAttribPointer(a,1,gl.UNSIGNED_SHORT,gl.FALSE,14,0)
+					gl.EnableVertexAttribArray(a)
+				end
+			end
 
 -- shadertoy compatability
 			gl.Uniform3f( p:uniform("iResolution"), hx,hy,0 )
@@ -189,10 +228,20 @@ pcall(function()
 			gl.UniformMatrix4f( p:uniform("iCamera2D"), show.cam2d )
 
 			gl.Uniform4f( p:uniform("iMouse"), show.mouse[1] , show.mouse[2] , show.mouse[3] , show.mouse[4] )
-
 		end,pname)
+		gl.CheckError()
+
 end)
-		
+		if not suc then
+
+			gui.master.ids.runtext.txt.set_text(err,"error.txt")
+			gui.master.ids.runtext.txt.set_lexer()
+
+			gui.master.ids.runtext.hidden=false
+
+		end
+
+
 		gl.state.pop()
 
 	end
