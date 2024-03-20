@@ -46,13 +46,15 @@ M.bake=function(oven,show_vtoy)
 
 	local vapd=oven.cake.canvas.flat.array_predraw(
 		{
---			dataraw="\000\000\001\000\002\000",--vgen64(),
+			dataraw=vgen64(),
+			datasize=333,--0x20000-2, -- one less for groups of 3
+			pstride=2,
 --			dataraw=fats.table_to_floats({ 0,0,0, 0,100,0, 100,0,0 }),
-			dataraw=	"\000\000"..fats.table_to_floats({ 0,0,0 })..
-						"\001\000"..fats.table_to_floats({ 0,100,0 })..
-						"\002\000"..fats.table_to_floats({ 100,0,0 }),
-			datasize=(4*3+2)*3,--0x20000-2, -- one less for groups of 3
-			pstride=(4*3+2),
+--			dataraw=	"\000\000"..fats.table_to_floats({ 0,0,0 })..
+--						"\001\000"..fats.table_to_floats({ 0,100,0 })..
+--						"\002\000"..fats.table_to_floats({ 100,0,0 }),
+--			datasize=(4*3+2)*3,--0x20000-2, -- one less for groups of 3
+--			pstride=(4*3+2),
 			array=gl.TRIANGLES,
 --			vb=-1,
 		}
@@ -60,8 +62,8 @@ M.bake=function(oven,show_vtoy)
 
 	local vtoy_head=[[
 
-#version 300 es
 #version 330
+#version 300 es
 #ifdef VERSION_ES
 precision highp float;
 precision highp int;
@@ -96,7 +98,6 @@ uniform mat4 projection;
 #ifdef VERTEX_SHADER
 
 in uint a_idx;
-in vec3 a_float;
 
 out vec4  v_xyzw;
 out vec4  v_uvst;
@@ -104,19 +105,16 @@ out vec4  v_position;
 
 void main()
 {
-	vec4 m_xyzw;
-	vec4 m_uvst;
-	uint t=uint(a_idx);
+//	vec4 m_xyzw;
+//	vec4 m_uvst;
 
-	mainVertex( m_xyzw , m_uvst , t );
+	mainVertex( v_xyzw , v_uvst , a_idx );
 
-	v_xyzw = m_xyzw;
-	v_uvst = m_uvst;
-	
-//	v_xyzw.xyz+=a_float;
+//	v_xyzw = m_xyzw;
+//	v_uvst = m_uvst;
 
 	v_position = projection * modelview * vec4(v_xyzw.xyz, 1.0) ;
-	
+
 	gl_Position=v_position;
 }
 
@@ -133,10 +131,11 @@ out vec4 FragColor;
 
 void main()
 {
-	vec4 m_color;
+//	vec4 m_color;
 
-	mainFragment( m_color , v_xyzw , v_uvst );
-	FragColor=m_color;
+	mainFragment( FragColor , v_xyzw , v_uvst );
+
+//	FragColor=m_color;
 
 }
 #endif
@@ -199,23 +198,11 @@ local i=0
 local suc,err=pcall(function()
 
 		vapd.draw(function(p)
-		
---			print(p:attrib("a_idx"))
---			print(p:attrib("a_float"))
-
-
-			do
-				local a=p:attrib("a_float")
-				if a>=0 then
-					gl.VertexAttribPointer(a,3,gl.FLOAT,gl.FALSE,14,2)
-					gl.EnableVertexAttribArray(a)
-				end
-			end
 
 			do
 				local a=p:attrib("a_idx")
 				if a>=0 then
-					gl.VertexAttribPointer(a,1,gl.UNSIGNED_SHORT,gl.FALSE,14,0)
+					gl.VertexAttribPointer(a,1,gl.UNSIGNED_SHORT,gl.FALSE,2,0)
 					gl.EnableVertexAttribArray(a)
 				end
 			end
