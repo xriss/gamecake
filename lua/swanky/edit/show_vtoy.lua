@@ -91,7 +91,7 @@ uniform mat4 projection;
 
 #ifdef VERTEX_SHADER
 
-in uint a_idx;
+in float a_idx;
 
 out vec4  v_xyzw;
 out vec4  v_uvst;
@@ -185,7 +185,8 @@ local suc,err=pcall(function()
 			do
 				local a=p:attrib("a_idx")
 				if a>=0 then
-					gl.VertexAttribIPointer(a,1,gl.UNSIGNED_SHORT,2,0)
+					gl.VertexAttribPointer(a,1,gl.UNSIGNED_SHORT,gl.FALSE,2,0)
+--					gl.VertexAttribIPointer(a,1,gl.UNSIGNED_SHORT,2,0)
 					gl.EnableVertexAttribArray(a)
 				end
 			end
