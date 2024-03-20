@@ -47,16 +47,10 @@ M.bake=function(oven,show_vtoy)
 	local vapd=oven.cake.canvas.flat.array_predraw(
 		{
 			dataraw=vgen64(),
-			datasize=333,--0x20000-2, -- one less for groups of 3
+			datasize=0x20000-2, -- one less for groups of 3
 			pstride=2,
---			dataraw=fats.table_to_floats({ 0,0,0, 0,100,0, 100,0,0 }),
---			dataraw=	"\000\000"..fats.table_to_floats({ 0,0,0 })..
---						"\001\000"..fats.table_to_floats({ 0,100,0 })..
---						"\002\000"..fats.table_to_floats({ 100,0,0 }),
---			datasize=(4*3+2)*3,--0x20000-2, -- one less for groups of 3
---			pstride=(4*3+2),
 			array=gl.TRIANGLES,
---			vb=-1,
+			vb=-1,
 		}
 	)
 
@@ -84,7 +78,7 @@ uniform mat4 iCamera; // Camera transform
 #define ICAMERA2D 1
 uniform mat4 iCamera2D; // 2D Camera transform
 
-//#define HW_PERFORMANCE 0
+#define HW_PERFORMANCE 0
 
 uniform vec4 color;
 uniform mat4 modelview;
@@ -105,13 +99,7 @@ out vec4  v_position;
 
 void main()
 {
-//	vec4 m_xyzw;
-//	vec4 m_uvst;
-
 	mainVertex( v_xyzw , v_uvst , a_idx );
-
-//	v_xyzw = m_xyzw;
-//	v_uvst = m_uvst;
 
 	v_position = projection * modelview * vec4(v_xyzw.xyz, 1.0) ;
 
@@ -131,12 +119,7 @@ out vec4 FragColor;
 
 void main()
 {
-//	vec4 m_color;
-
 	mainFragment( FragColor , v_xyzw , v_uvst );
-
-//	FragColor=m_color;
-
 }
 #endif
 
@@ -202,7 +185,7 @@ local suc,err=pcall(function()
 			do
 				local a=p:attrib("a_idx")
 				if a>=0 then
-					gl.VertexAttribPointer(a,1,gl.UNSIGNED_SHORT,gl.FALSE,2,0)
+					gl.VertexAttribIPointer(a,1,gl.UNSIGNED_SHORT,2,0)
 					gl.EnableVertexAttribArray(a)
 				end
 			end

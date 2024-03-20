@@ -797,6 +797,24 @@ const void *pointer;
 	return 0;
 }
 
+static int lua_gles_VertexAttribIPointer (lua_State *l)
+{
+int index;
+int size;
+int type;
+int normalized;
+int stride;
+const void *pointer;
+	index=luaL_checknumber(l,1);
+	size=luaL_checknumber(l,2);
+	type=luaL_checknumber(l,3);
+	stride=luaL_checknumber(l,4);
+	pointer=lua_gles_topointer(l,5,0);
+
+	glVertexAttribIPointer(index,size,type,stride,pointer);
+	return 0;
+}
+
 static int lua_gles_VertexAttrib1f (lua_State *l)
 {
 int i;
@@ -1983,6 +2001,7 @@ LUALIB_API int luaopen_gles_core(lua_State *l)
 		{"DisableVertexAttribArray",lua_gles_DisableVertexAttribArray},
 
 		{"VertexAttribPointer",		lua_gles_VertexAttribPointer},
+		{"VertexAttribIPointer",	lua_gles_VertexAttribIPointer},
 		
 		{"VertexAttrib1f",			lua_gles_VertexAttrib1f},
 		{"VertexAttrib2f",			lua_gles_VertexAttrib2f},
