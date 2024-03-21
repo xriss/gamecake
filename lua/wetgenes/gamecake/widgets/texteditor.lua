@@ -83,7 +83,6 @@ function wtexteditor.pan_skin( oldskin )
 			local cache=pan.texteditor.txt and pan.texteditor.txt.get_cache( pan.texteditor.txt.cy )
 			if pan.texteditor.throb and cache then -- draw the blinking cursor
 
-
 				oven.gl.PushMatrix()
 				oven.gl.LoadMatrix(panmtx)
 
@@ -414,6 +413,7 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 			pl=pl+4
 
 		end
+		local gut=pl
 		
 		for x=1,16 do
 			local vn=bytes[x] and string.format("%02X",bytes[x]) or ".."
@@ -424,7 +424,8 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 				ps[pl+3]=1
 				ps[pl+4]=0
 				color(ps,pl,tokes[x])
-				hilite(ps,pl,widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
+				local ly,lx=widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1)
+				hilite(ps,pl,ly,lx)
 				pl=pl+4
 			end
 			ps[pl+1]=32
@@ -453,7 +454,18 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 			ps[pl+3]=1
 			ps[pl+4]=0
 			color(ps,pl,tokes[x])
-			hilite(ps,pl,widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1))
+			local ly,lx=widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1)
+			hilite(ps,pl,ly,lx)
+			local cache=ly and widget.txt.get_cache_lex(ly)
+			if cache then
+				lx=cache.cx[lx]
+				if cursor_x == lx and cursor_y == ly then
+					if cache then
+						widget.cursor_cx=(pl-gut)/4
+						widget.cursor_cy=wy
+					end
+				end
+			end
 			pl=pl+4
 		end
 
