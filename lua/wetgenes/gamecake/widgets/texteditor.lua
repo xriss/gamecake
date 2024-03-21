@@ -554,7 +554,7 @@ else
 				ps[pl+4]=0
 				
 				color(ps,pl,toke)
-				hilite(ps,pl,y,x+1)
+				hilite(ps,pl,y,i)
 
 				pl=pl+4
 
