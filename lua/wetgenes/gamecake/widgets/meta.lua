@@ -255,7 +255,7 @@ function wmeta.setup(def)
 		widget.hx=widget.hx or 0 -- absolute pixel size of widget (in parents space)
 		widget.hy=widget.hy or 0
 		widget.hz=widget.hz or 0 -- used to signal an fbo with a depth buffer
-				
+
 		widget.font=widget.font or widget.parent.font --  use this font if set or inherit value from parent
 		
 		widget.text_color=widget.text_color or widget.parent.text_color -- black text

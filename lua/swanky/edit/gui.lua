@@ -427,6 +427,7 @@ local lay=
 									{
 										id="runfbo",
 										size="full",
+										hz=4096, -- depth please
 										fbo=true,
 										{
 											id="run",

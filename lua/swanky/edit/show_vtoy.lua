@@ -173,8 +173,8 @@ local i=0
 		gl.state.push(gl.state_defaults)
 
 		gl.state.set({
-			[gl.DEPTH_WRITEMASK]			=	gl.FALSE,
-			[gl.DEPTH_TEST]					=	gl.FALSE,
+			[gl.DEPTH_WRITEMASK]			=	gl.TRUE,
+			[gl.DEPTH_TEST]					=	gl.TRUE,
 			[gl.CULL_FACE]					=	gl.FALSE,
 		})
 
@@ -190,6 +190,9 @@ local i=0
 			cy=0.5,
 		})
 		oven.cake.views.push_and_apply(view)
+
+	gl.ClearColor(0,0,0,0)
+	gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 		
 --		gl.Translate(show.pos)
 --		gl.Rotate( show.rot[1] , {0,1,0} )
