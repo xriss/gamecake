@@ -142,6 +142,19 @@ local i=0
 
 --print(px,py,hx,hy)
 
+		local fbo=gui.master.ids.runfbo.fbo
+		local view=oven.cake.views.create({
+			mode="fbo",
+			fbo=fbo,
+			vx=fbo.w,
+			vy=fbo.h,
+			vz=fbo.h*2,
+			fov=1,
+			cx=0.5,
+			cy=0.5,
+		})
+		oven.cake.views.push_and_apply(view)
+
 --		show.fbo:resize(hx,hy,0)
 
 		local pname="swanky_edit_show_vtoy"
@@ -214,6 +227,7 @@ end)
 
 
 		gl.state.pop()
+		oven.cake.views.pop_and_apply()
 
 	end
 	
