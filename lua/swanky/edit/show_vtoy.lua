@@ -47,7 +47,7 @@ M.bake=function(oven,show_vtoy)
 	local vapd=oven.cake.canvas.flat.array_predraw(
 		{
 			dataraw=vgen64(),
-			datasize=0x20000-2, -- one less for groups of 3
+			datasize=0x20000-2, -- 21845 triangles ( 6 bytes per tri )
 			pstride=2,
 			array=gl.TRIANGLES,
 			vb=-1,
@@ -142,19 +142,6 @@ local i=0
 
 --print(px,py,hx,hy)
 
-		local fbo=gui.master.ids.runfbo.fbo
-		local view=oven.cake.views.create({
-			mode="fbo",
-			fbo=fbo,
-			vx=fbo.w,
-			vy=fbo.h,
-			vz=fbo.h*2,
-			fov=1,
-			cx=0.5,
-			cy=0.5,
-		})
-		oven.cake.views.push_and_apply(view)
-
 --		show.fbo:resize(hx,hy,0)
 
 		local pname="swanky_edit_show_vtoy"
@@ -191,6 +178,28 @@ local i=0
 			[gl.CULL_FACE]					=	gl.FALSE,
 		})
 
+		local fbo=gui.master.ids.runfbo.fbo
+		local view=oven.cake.views.create({
+			mode="fbo",
+			fbo=fbo,
+			vx=fbo.w,
+			vy=fbo.h,
+			vz=fbo.h*2,
+			fov=1,
+			cx=0.5,
+			cy=0.5,
+		})
+		oven.cake.views.push_and_apply(view)
+		
+--		gl.Translate(show.pos)
+--		gl.Rotate( show.rot[1] , {0,1,0} )
+--		gl.Rotate( show.rot[2] , {1,0,0} )
+
+
+		gl.LoadMatrix(show.cam3d)
+--		gl.LoadMatrix(show.cam)
+
+
 local suc,err=pcall(function()
 
 		vapd.draw(function(p)
@@ -226,8 +235,8 @@ end)
 		end
 
 
-		gl.state.pop()
 		oven.cake.views.pop_and_apply()
+		gl.state.pop()
 
 	end
 	

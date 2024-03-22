@@ -51,7 +51,56 @@ M.bake=function(oven,show)
 	show.pos2d=V3()
 	show.siz2d=V3(1,1,1)
 
+	show.cam3d=M4()
+	show.orbit=V3()
+	show.dolly=-256
+
 	show.mouse=V4(0,0,0,0) -- shadertoy style mouse values
+	
+	show.cam_reset=function()
+		show.mouse_start=nil
+		
+		show.cam:identity()
+		show.rot:set(0,0,0)
+		show.pos:set(0,0,0)
+
+		show.mouse_start2d=nil
+
+		show.cam2d:identity()
+		show.pos2d:set(0,0,0)
+		show.siz2d:set(1,1,1)
+		
+		show.mouse_start3d=nil
+
+		show.cam3d:identity()
+		show.orbit:set(0,0,0)
+		show.dolly=256
+	end
+	show.cam_reset()
+
+	show.cam_build=function()
+		local m=show.cam:identity()
+		m:translate(show.pos)
+		m:rotate( show.rot[1] , {0,1,0} )
+		m:rotate( show.rot[2] , {1,0,0} )
+
+		local m=show.cam2d:identity()
+		m:translate(show.pos2d)
+		m:scale(show.siz2d)
+
+		-- This is a camera so we are applying reverse transforms...
+		local m=show.cam3d
+		m:identity()
+--			m:translate( camera.pos[1] , camera.pos[2] , camera.pos[3] )
+		m:translate( 0,0, 0.0 - show.dolly )
+		m:rotate( show.orbit[2] ,  1, 0, 0 )
+		m:rotate( show.orbit[1] ,  0, 1, 0 )
+
+--print( "dolly" , show.orbit[1] , show.orbit[2] , show.dolly )
+
+	end
+	
+	show.cam_build()
 	
 	show.mode=nil
 	show.mode_height=nil
@@ -122,18 +171,7 @@ M.bake=function(oven,show)
 
 		if m.keyname=="middle" and m.action==-1 then -- toggle 3d 2d camerea mode
 		
-			show.mouse_start=nil
-			
-			show.cam:identity()
-			show.rot:set(0,0,0)
-			show.pos:set(0,0,0)
-
-			show.mouse_start2d=nil
-
-			show.cam2d:identity()
-			show.pos2d:set(0,0,0)
-			show.siz2d:set(1,1,1)
-			
+			show.cam_reset()
 			buildcam=true
 
 		end
@@ -172,6 +210,23 @@ M.bake=function(oven,show)
 			buildcam=true
 		end
 		
+		if m.keyname=="left" then
+			if m.action ==  1 then show.mouse_start3d={"left",m.x,m.y,V3(show.orbit)} end
+			if m.action == -1 then show.mouse_start3d=nil end
+		elseif m.keyname=="right" then
+--			if m.action ==  1 then show.mouse_start3d={"right",m.x,m.y,V3(show.siz)} end
+--			if m.action == -1 then show.mouse_start3d=nil end
+		elseif m.keyname=="middle" then
+--			if m.action ==  1 then show.mouse_start3d={"middle",m.x,m.y,V3(show.rot)} end
+--			if m.action == -1 then show.mouse_start3d=nil end
+		elseif m.keyname=="wheel_add" and m.action == -1 then
+			show.dolly=show.dolly+8
+			buildcam=true
+		elseif m.keyname=="wheel_sub" and m.action == -1 then
+			show.dolly=show.dolly-8
+			buildcam=true
+		end
+
 --		ls(m)
 		local x,y=widget:mousexy(m.x,m.y)
 		if m.keyname=="left" and m.action ==  1 then -- click remember
@@ -245,15 +300,30 @@ M.bake=function(oven,show)
 			buildcam=true
 		end
 		
-		if buildcam then
-			local m=show.cam:identity()
-			m:translate(show.pos)
-			m:rotate( show.rot[1] , {0,1,0} )
-			m:rotate( show.rot[2] , {1,0,0} )
+		if show.mouse_start3d and widget.master.active==widget then
 
-			local m=show.cam2d:identity()
-			m:translate(show.pos2d)
-			m:scale(show.siz2d)
+			if show.mouse_start3d[1]=="left" then
+				local ax=(m.x-show.mouse_start[2])/widget.hy
+				local ay=(m.y-show.mouse_start[3])/widget.hy
+				show.orbit[1]=show.mouse_start[4][1]+(ax*90)
+				show.orbit[2]=show.mouse_start[4][2]-(ay*90)
+				
+				show.orbit[1]=show.orbit[1]%360 -- wrap x
+				show.orbit[2]=show.orbit[2]%360 -- wrap x
+--				if show.orbit[1]<-90 then show.orbit[1]=-90 end -- clamp y
+--				if show.orbit[1]> 90 then show.orbit[1]= 90 end
+
+			elseif show.mouse_start3d[1]=="right" then
+
+			else
+				show.mouse_start3d=nil
+			end
+			
+			buildcam=true
+		end
+
+		if buildcam then
+			show.cam_build()
 		end
 	end
 
