@@ -93,8 +93,8 @@ M.bake=function(oven,show)
 		m:identity()
 --			m:translate( camera.pos[1] , camera.pos[2] , camera.pos[3] )
 		m:translate( 0,0, 0.0 - show.dolly )
-		m:rotate( show.orbit[2] ,  1, 0, 0 )
 		m:rotate( show.orbit[1] ,  0, 1, 0 )
+		m:rotate( show.orbit[2] ,  1, 0, 0 )
 
 --print( "dolly" , show.orbit[1] , show.orbit[2] , show.dolly )
 

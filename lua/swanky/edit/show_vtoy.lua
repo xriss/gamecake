@@ -78,11 +78,22 @@ uniform mat4 iCamera; // Camera transform
 #define ICAMERA2D 1
 uniform mat4 iCamera2D; // 2D Camera transform
 
+// a define to test for and a new camera input to use in 3d views
+#define ICAMERA3D 1
+uniform mat4 iCamera3D; // 3D Camera transform
+
 #define HW_PERFORMANCE 0
 
 uniform vec4 color;
 uniform mat4 modelview;
 uniform mat4 projection;
+
+#ifdef VERTEX_SHADER
+
+// allow discard in a vertex shader as a return rather than an error
+#define discard return
+
+#endif
 
 #line 1
 ]]
@@ -222,6 +233,7 @@ local suc,err=pcall(function()
 
 			gl.UniformMatrix4f( p:uniform("iCamera"), show.cam )
 			gl.UniformMatrix4f( p:uniform("iCamera2D"), show.cam2d )
+			gl.UniformMatrix4f( p:uniform("iCamera3D"), show.cam3d )
 
 			gl.Uniform4f( p:uniform("iMouse"), show.mouse[1] , show.mouse[2] , show.mouse[3] , show.mouse[4] )
 		end,pname)
