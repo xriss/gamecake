@@ -366,7 +366,7 @@ wtexteditor.texteditor_refresh=function(widget)
 			if	( txt.brackets.fy == y and txt.brackets.fx == x ) or 
 				( txt.brackets.ty == y and txt.brackets.tx == x ) then
 
-					ps[pl+3]=14
+					ps[pl+3]=5
 			end
 		end
 		if y and x then
@@ -376,7 +376,7 @@ wtexteditor.texteditor_refresh=function(widget)
 					local s,e=cache.search[i],cache.search[i+1]
 					if s and e then
 						if x>=s and x<=e then
-							ps[pl+4]=13
+							ps[pl+4]=4
 						end
 					end
 				end
@@ -1344,31 +1344,31 @@ function wtexteditor.setup(widget,def)
 		dark={
 			0xff444444,0xffaaaaaa,	-- text			0,1
 			0xff555555,0xff333333,	-- gutter		2,3
-			0xff000000,0xff000000,	-- 				4,5
+			0xff555555,0xffffffff,	-- hilite		4,5
 			0xffdd7733,	-- keyword				6
 			0xffddaa33,	-- global				7
 			0xff888888,	-- comment				8
 			0xff66aa33,	-- string				9
 			0xff5599cc,	-- number				10
 			0xff999999,	-- punctuation			11
-			0xffaa8888,	-- 						12
-			0xff555555,	-- low					13
-			0xffffffff,	-- high					14
+			0xff000000,	-- 						12
+			0xff000000,	-- 						13
+			0xff000000,	-- 						14
 			0xff554444,	-- spell (background)	15
 		},
 		bright={
 			0xffcccccc,0xff000000,	-- text			0,1
 			0xffbbbbbb,0xff666666,	-- gutter		2,3
-			0xff000000,0xff000000,	-- 				4,5
+			0xff999999,0xff666666,	-- hilite		4,5
 			0xffff0000,	-- keyword				6
 			0xffff6600,	-- global				7
 			0xff666666,	-- comment				8
 			0xff44cc00,	-- string				9
 			0xff0044ff,	-- number				10
 			0xff222222,	-- punctuation			11
-			0xff886666,	-- 						12
-			0xff999999,	-- low					13
-			0xff666666,	-- high					14
+			0xff000000,	-- 						12
+			0xff000000,	-- 						13
+			0xff000000,	-- 						14
 			0xffeecccc,	-- spell (background)	15
 		},
 	}
