@@ -959,17 +959,18 @@ insert a character, eg user typing
 insert a new line
 
 ]]
-	txt.insert_newline=function()
-	
+	txt.insert_newline=function(indent)
+		indent=indent or ""
+
 		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
 		local sc=txt.get_string_sub(txt.cy,txt.cx)
 		
 		txt.set_string(txt.cy,sb..txt.endline)
 
 		txt.cy=txt.cy+1
-		txt.cx=1
+		txt.cx=1+#indent
 
-		txt.add_string(txt.cy,sc)
+		txt.add_string(txt.cy,indent..sc)
 		
 		txt.cursor()
 	

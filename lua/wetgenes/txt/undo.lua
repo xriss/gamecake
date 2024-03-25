@@ -270,8 +270,11 @@ M.construct=function(undo,txt)
 	end
 
 	undo.insert_newline=function()
-		undo.remember("\n")
-		return txt.insert_newline()
+		local s=txt.get_string(txt.cy) or ""
+		local indent=s:match("^([\t ]*)") or ""
+		if txt.cx<=#indent then indent="" end -- no auto indent
+		undo.remember(indent.."\n")
+		return txt.insert_newline(indent)
 	end
 
 	undo.insert_char=function(s)
