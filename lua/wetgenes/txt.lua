@@ -960,7 +960,11 @@ insert a new line
 
 ]]
 	txt.insert_newline=function(indent)
-		indent=indent or ""
+		if not indent then
+			local s=txt.get_string(txt.cy) or ""
+			local indent=s:match("^([\t ]*)") or ""
+			if txt.cx<=#indent then indent="" end -- no auto indent
+		end
 
 		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
 		local sc=txt.get_string_sub(txt.cy,txt.cx)
