@@ -288,6 +288,35 @@ end
 
 wtexteditor.texteditor_refresh=function(widget)
 
+	local search_text=widget.txt.search.text
+	if search_text=="" then search_text=nil end
+	local searches={}
+	local get_line_cache=function(ly)
+		local cache=widget.txt.get_cache_lex(ly)
+		if cache then
+			local search=searches[ly]
+			if search_text then
+				if not search then
+					search={}
+					searches[ly]=search
+					local p=1
+					while p do
+						local s,e=string.find( cache.string , search_text , p ,true)
+						if s then
+							search[#search+1]=s
+							search[#search+1]=e
+							p=e+1
+						else
+							p=nil
+						end
+					end
+				end
+			end
+			cache.search=search
+		end
+		return cache
+	end
+
 	widget.scroll_widget:clean_all(4)
 
 	widget.cursor_cx=nil
@@ -340,6 +369,19 @@ wtexteditor.texteditor_refresh=function(widget)
 					ps[pl+3]=14
 			end
 		end
+		if y and x then
+			local cache=get_line_cache(y)
+			if cache and cache.search then
+				for i=1,#cache.search,2 do
+					local s,e=cache.search[i],cache.search[i+1]
+					if s and e then
+						if x>=s and x<=e then
+							ps[pl+4]=13
+						end
+					end
+				end
+			end
+		end
 		if txt.fx and txt.fy and txt.tx and txt.ty then
 			local flip=false
 			if     y==txt.fy and y==txt.ty then if x>=txt.fx and x< txt.tx then flip=true end -- single line
@@ -365,7 +407,7 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 		local tokes={}
 		local ptr=(y-1)*16
 		local idx=1
-		local cache=widget.txt.get_cache_lex(ly)
+		local cache=get_line_cache(ly)
 		repeat
 			if cache then
 				local b=(ptr+idx)-cache.start
@@ -382,7 +424,7 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 			end
 			if not cache then
 				ly=ly+1 -- try again on next line
-				cache=widget.txt.get_cache_lex(ly)
+				cache=get_line_cache(ly)
 				if not cache then break end
 			end
 		until idx>16
@@ -456,7 +498,7 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 			color(ps,pl,tokes[x])
 			local ly,lx=widget.txt.ptr_to_location((x-1)+(y-1)*16,ly,1)
 			hilite(ps,pl,ly,lx)
-			local cache=ly and widget.txt.get_cache_lex(ly)
+			local cache=ly and get_line_cache(ly)
 			if cache then
 				lx=cache.cx[lx]
 				if cursor_x == lx and cursor_y == ly then
@@ -482,7 +524,7 @@ else
 
 		local sx=cx
 		local fakeline
-		local cache=widget.txt.get_cache_lex(y)
+		local cache=get_line_cache(y)
 		if cache then
 
 			if cache.swed then
@@ -778,6 +820,12 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		texteditor:scroll_to_view()
 		texteditor.txt_dirty=true
 
+		-- auto search lowlite
+		local word=txt.copy() or ""
+		if word~="" then -- lowlite selected
+			txt.search.text=word
+		end
+
 	elseif act==0 and texteditor.key_mouse then -- drag, but only while over widget
 
 		if texteditor.key_mouse and texteditor.mark_area then
@@ -792,6 +840,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 				texteditor.mark_area_auto[3],texteditor.mark_area_auto[4],txt.markget())
 
 				texteditor.mark_area={txt.markget()}
+				
 			else
 
 				texteditor.mark_area[3],texteditor.mark_area[4]=dy,dx
@@ -1303,7 +1352,7 @@ function wtexteditor.setup(widget,def)
 			0xff5599cc,	-- number				10
 			0xff999999,	-- punctuation			11
 			0xffaa8888,	-- 						12
-			0xff88aa33,	-- 						13
+			0xff555555,	-- low					13
 			0xffffffff,	-- high					14
 			0xff554444,	-- spell (background)	15
 		},
@@ -1318,7 +1367,7 @@ function wtexteditor.setup(widget,def)
 			0xff0044ff,	-- number				10
 			0xff222222,	-- punctuation			11
 			0xff886666,	-- 						12
-			0xff66cc00,	-- 						13
+			0xff999999,	-- low					13
 			0xff666666,	-- high					14
 			0xffeecccc,	-- spell (background)	15
 		},
