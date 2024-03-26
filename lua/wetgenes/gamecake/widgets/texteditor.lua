@@ -1363,7 +1363,7 @@ function wtexteditor.setup(widget,def)
 			0xffff0000,	-- keyword				6
 			0xffff6600,	-- global				7
 			0xff666666,	-- comment				8
-			0xff44cc00,	-- string				9
+			0xff449900,	-- string				9
 			0xff0044ff,	-- number				10
 			0xff222222,	-- punctuation			11
 			0xff000000,	-- 						12
