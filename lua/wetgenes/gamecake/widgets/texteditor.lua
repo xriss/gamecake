@@ -355,7 +355,7 @@ wtexteditor.texteditor_refresh=function(widget)
 		elseif toke=="0" then	ps[pl+3]=10 -- number
 		elseif toke=="p" then	ps[pl+3]=11 -- punctuation
 		elseif toke=="n" then	ps[pl+3]=1  -- none
-		elseif toke=="N" then	ps[pl+4]=15 -- none_spell
+		elseif toke=="N" then	ps[pl+3]=1 ; ps[pl+4]=15 -- none_spell
 		end
 	end
 
@@ -742,7 +742,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 			local words={""}
 			if word~="" then
 				words=wtxtwords.spell(word)
-				if words[1]~=word then table.insert(words,1,word) end
+--				if words[1]~=word then table.insert(words,1,word) end
 			end
 			for i=1,#words do
 				spells[#spells+1]={id="edit_spell",text=words[i],user=i}
