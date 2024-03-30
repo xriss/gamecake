@@ -165,8 +165,6 @@ M.bake=function(oven,show)
 	
 		local buildcam
 
-
-	
 		if m.class~="mouse" then return end
 
 		if m.keyname=="middle" and m.action==-1 then -- toggle 3d 2d camerea mode
