@@ -379,7 +379,7 @@ M.parse=function(state,input,output)
 		end
 		
 		local check_string=function()
-			if last==MAP.string then
+			if last==MAP.string or last==MAP.string_spell then
 				if token==peek(state.terminator) then 
 					pull(state.terminator)
 					push_output(MAP.string)
@@ -409,7 +409,7 @@ M.parse=function(state,input,output)
 		end
 
 		local check_comment=function()
-			if last==MAP.comment then
+			if last==MAP.comment or last==MAP.comment_spell then
 				if token==peek(state.terminator) then 
 					pull(state.terminator)
 					push_output(MAP.comment)
@@ -483,7 +483,13 @@ M.parse=function(state,input,output)
 			[MAP.string]={
 				check_string,
 			},
+			[MAP.string_spell]={
+				check_string,
+			},
 			[MAP.comment]={
+				check_comment,
+			},
+			[MAP.comment_spell]={
 				check_comment,
 			},
 			[MAP.none]={

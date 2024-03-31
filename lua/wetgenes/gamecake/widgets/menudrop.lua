@@ -9,6 +9,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wmenudrop)
 wmenudrop=wmenudrop or {}
 
+local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
+
 local cake=oven.cake
 local canvas=cake.canvas
 local font=canvas.font
@@ -109,6 +111,8 @@ function wmenudrop.setup(widget,def)
 
 	widget.class_hooks={wmenudrop.class_hooks}
 	
+	widget.fbo=widget.fbo or framebuffers.create(0,0,0)
+
 	return widget
 end
 
