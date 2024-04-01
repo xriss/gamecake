@@ -769,6 +769,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 			{id="menu_view",menu_data={
 				{id="view_hex"},
 				{id="view_txt"},
+				{id="view_txt_wrap"},
 			}},
 			{id="menu_search",menu_data={
 				{id="search_find"},
@@ -975,6 +976,12 @@ function wtexteditor.msg(pan,m)
 			elseif m.id=="view_txt" then
 				txt.cursor()
 				texteditor.opts.mode="txt"
+				texteditor.opts.word_wrap=false
+				texteditor.texteditor_hooks("txt_changed")
+			elseif m.id=="view_txt_wrap" then
+				txt.cursor()
+				texteditor.opts.mode="txt"
+				texteditor.opts.word_wrap=true
 				texteditor.texteditor_hooks("txt_changed")
 
 			elseif m.id=="search_next" then
