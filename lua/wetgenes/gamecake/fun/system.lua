@@ -168,7 +168,7 @@ system.setup=function(code)
 		
 		if it then
 
-			log("fun","hardware : ",v.component,v.name or v.component)
+			log("oven","funware : ",v.component,v.name or v.component)
 		
 			system.components[#system.components+1]=it
 			system.components[it.name or it.component]=it	-- link by name

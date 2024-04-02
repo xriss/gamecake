@@ -860,6 +860,8 @@ Set the cursor to this (clipped) location
 ]]
 	txt.cursor=function(y,x)
 
+		txt.mark() -- remove any marked area
+		
 		txt.cy , txt.cx = txt.clip(y or txt.cy,x or txt.cx)
 		
 		txt.brackets=txt.find_brackets()
