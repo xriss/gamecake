@@ -34,8 +34,16 @@ M.bake=function(oven,docs)
 				local loaded=docs.find(it.path)
 
 				local prefix="- "
-				if loaded then prefix="+ " end
-
+				if loaded then
+					prefix="+ "
+					if loaded.modified_index~=loaded.txt.undo.index then
+						prefix="* "
+						loaded.modified_show=true
+					else
+						loaded.modified_show=false
+					end
+				end
+				
 				if it.mode=="directory" then
 					if it[1] then
 						prefix="= "
@@ -109,7 +117,27 @@ M.bake=function(oven,docs)
 
 --		docs.refresh()
 
+		it.modified_index=it.txt.undo.index
+
 		return it
+	end
+
+	docs.update=function()
+
+		local doc=docs.doc
+		if not doc then return end
+
+		if doc.modified_index==doc.txt.undo.index then
+			if doc.modified_show==true then
+				gui.refresh_tree()
+				doc.modified_show=false
+			end
+		else
+			if doc.modified_show~=true then
+				gui.refresh_tree()
+				doc.modified_show=true
+			end
+		end
 	end
 
 
@@ -134,6 +162,7 @@ M.bake=function(oven,docs)
 			local d=f:write(s)
 			f:close()
 		end
+		it.modified_index=it.txt.undo.index
 
 	end
 
