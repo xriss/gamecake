@@ -57,30 +57,6 @@ M.bake=function(oven,docs)
 			end
 	end
 	
-	docs.refresh_items=function(widget,items)
-
---		local items=gui.master.ids.treefile.tree_widget.items
-
-		local rec ; rec=function(it)
-			for _,v in ipairs(it) do
-				rec(v)
-			end
-			docs.refresh_item(it)
-		end
-		rec(items)
---		gui.master.ids.treefile:refresh()
---dprint(items)
---[[
-		for i,v in ipairs(tree) do
-			v.prefix="  "
-			for _,doc in ipairs( docs.list ) do
-				if doc.filename==v.path then
-					v.prefix="* "
-				end
-			end
-		end
-]]
-	end
 
 	docs.find=function(filename)
 

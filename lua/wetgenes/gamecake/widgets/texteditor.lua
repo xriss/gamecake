@@ -850,7 +850,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 				
 			end
 
-			txt.cursor()
+--			txt.cursor() -- this removes the marked area
 			texteditor:scroll_to_view()
 			texteditor.txt_dirty=true
 		end

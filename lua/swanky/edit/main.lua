@@ -12,6 +12,7 @@ local wwin=require("wetgenes.win")
 local wxox=require("wetgenes.xox")
 local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
+local wpath=require("wetgenes.path")
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -152,7 +153,8 @@ resultierendes Vergnügen?
 
 			local fname=cmd.args.data[1]
 			if fname then
-				docs.manifest(fname):show()
+				local path=wpath.resolve(fname)
+				docs.manifest(path):show()
 				loaded=true
 			end
 
@@ -163,8 +165,10 @@ resultierendes Vergnügen?
 --			gui.master.ids.texteditor.txt.set_text("\n","")
 --			gui.master.ids.texteditor.txt.set_lexer()
 		end
+
 		
 		gui.master.set_focus( gui.master.ids.texteditor.scroll_widget.pan )
+		gui.refresh_tree()
 
 	end
 
