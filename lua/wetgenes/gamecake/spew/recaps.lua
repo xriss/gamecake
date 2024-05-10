@@ -346,17 +346,28 @@ M.bake=function(oven,recaps)
 			end
 		end
 
--- set all to true and we will pack up all the state rather than just the changes
-		function recap.get_change(all)
+-- get full current state as changeset
+		function recap.get_state()
 			local change={}
-			local changed=false
-			
-			if all then -- want full state
-				changed=true
-				for n,v in pairs(recap.state) do
-					change[n]=v
+			for n,v in pairs(recap.state) do
+				change[n]=v
+			end
+			for n,v in pairs(recap.pulse) do
+				change[n]=v
+			end
+			change.msgs={}
+			if #recap.now_msgs>0 then
+				for i,v in ipairs(recap.msgs) do
+					change.msgs[i]=v
 				end
 			end
+			return change
+		end
+
+-- get diff of now state as changeset
+		function recap.get_change()
+			local change={}
+			local changed=false
 
 			for n,v in pairs(recap.now_pulse) do -- all of these represent a change
 				changed=true
@@ -467,6 +478,9 @@ M.bake=function(oven,recaps)
 --				if change then change.idx=recap.idx ; dump(change) end
 
 				recap.step_next()
+
+--				local change=recap.get_state()
+--				if change then change.idx=recap.idx ; dump(change) end
 
 			end
 			
