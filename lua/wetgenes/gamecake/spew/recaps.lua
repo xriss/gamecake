@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local log,dump=require("wetgenes.logs"):export("log","dump")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -47,12 +49,20 @@ M.bake=function(oven,recaps)
 		opts.max_up=opts.max_up or 1
 		recaps.up={}
 		for i=1,opts.max_up do
-			recaps.up[i]=recaps.create() -- 1up 2up etc
+			recaps.up[i]=recaps.create(i) -- 1up 2up etc
 		end
 		return recaps -- so setup is chainable with a bake
 	end
 
 	function recaps.push()
+		local m={}
+		m.ups={}
+		for i,v in ipairs(recaps.up or {}) do
+			m.ups[i]=v.get_change() or {}
+			v.step()
+		end
+		oven.tasks.linda:send(nil,"ups",m)
+--[[
 		local up=recaps.up and recaps.up[1]
 		for i,v in ipairs(recaps.up or {}) do
 			v.step()
@@ -69,11 +79,28 @@ M.bake=function(oven,recaps)
 		end
 		oven.tasks.linda:send(nil,"ups",m)
 --print("up","push",m)
+]]
 	end
 	
 	function recaps.pull()
 		local up=recaps.up and recaps.up[1]
-		
+		if up then up.state_msgs={} end -- clr old msgs
+		for i,v in ipairs(recaps.up or {}) do
+			v.state_pulse={} -- clr old pulses
+		end
+
+		repeat
+			local ok,m=oven.tasks.linda:receive(0,"ups") -- grab all available memos
+			if ok and m then
+				for i,v in ipairs(m.ups or {}) do
+					local up=recaps.up[i]
+					up.step_apply(v)
+				end
+			end
+		until not m
+
+--[[
+		local up=recaps.up and recaps.up[1]
 		up.state_msgs={} -- clr old msgs
 		for i,v in ipairs(recaps.up or {}) do
 			v.state_pulse={} -- clr old pulses
@@ -98,6 +125,7 @@ M.bake=function(oven,recaps)
 				end
 			end
 		until not m
+]]
 	end
 
 	function recaps.step()
@@ -318,6 +346,77 @@ M.bake=function(oven,recaps)
 			end
 		end
 
+-- set all to true and we will pack up all the state rather than just the changes
+		function recap.get_change(all)
+			local change={}
+			local changed=false
+			
+			if all then -- want full state
+				changed=true
+				for n,v in pairs(recap.state) do
+					change[n]=v
+				end
+			end
+
+			for n,v in pairs(recap.now_pulse) do -- all of these represent a change
+				changed=true
+				change[n]=v
+			end
+			
+			if #recap.now_msgs>0 then -- all msgs need to be kept as is
+				changed=true
+				change.msgs={}
+				for i,v in ipairs(recap.now_msgs) do
+					change.msgs[i]=v
+				end
+			end
+
+			for n,v in pairs(recap.now) do
+				if recap.state[n]~=v then -- a change
+					changed=true
+					change[n]=v
+				end
+			end
+		
+			return changed and change
+		end
+
+		function recap.step_next()
+
+			for n,v in pairs(recap.now) do
+				recap.state[n]=v
+				recap.now[n]=nil
+			end
+
+			recap.state_pulse=recap.now_pulse
+			recap.now_pulse={} -- new table
+			
+			recap.state_msgs=recap.now_msgs -- use this copy of any messages
+			recap.now_msgs={} -- start a new list
+
+		end
+		
+		function recap.step_apply(change)
+			recap.state_pulse={}
+			recap.state_msgs={}
+			for n,v in pairs(change) do
+				local tail=string.sub(n,-4)
+				if tail=="_set" or tail=="_clr" then
+					recap.state_pulse[n]=v
+				elseif n=="msgs" then
+					for _,m in ipairs(v) do
+						recap.state_msgs[ #recap.state_msgs+1 ]=m
+						if m.class then -- also remember in class sub list
+							if not recap.state_msgs[m.class] then recap.state_msgs[m.class]={} end -- new
+							local list=recap.state_msgs[m.class]
+							list[ #list+1 ]=m -- append
+						end
+					end
+				else
+					recap.state[n]=v
+				end
+			end
+		end
 
 		function recap.step(flow)
 			flow=flow or recap.flow
@@ -325,17 +424,10 @@ M.bake=function(oven,recaps)
 --print("step "..tostring(flow))	
 
 			if flow=="record" then
--- not used not tested best to ignore			
---[[
-				local change
-				for n,v in pairs(recap.now) do
-					if recap.state[n]~=v then -- changes
-						change=change or {}
-						change[n]=v
-						recap.state[n]=v
-						recap.now[n]=nil -- from now on we get the value from the state table
-					end
-				end
+
+				local change=recap.get_change()
+				recap.step_next()
+
 				if change then
 					table.insert(recap.stream,change) -- change something
 				else
@@ -345,11 +437,12 @@ M.bake=function(oven,recaps)
 						table.insert(recap.stream,1) -- change nothing
 					end
 				end
-]]				
+			
 			elseif flow=="play" then -- grab from the stream
+			
+				recap.state_pulse={} -- always empty the pulses
+				recap.state_msgs={} -- and msgs
 
--- not used not tested best to ignore			
---[[
 				if recap.wait>0 then
 				
 					recap.wait=recap.wait-1
@@ -362,32 +455,18 @@ M.bake=function(oven,recaps)
 					local tt=type(t)
 					
 					if tt=="number" then
-					
 						recap.wait=t-1
-
 					elseif tt=="table"then
-					
-						for n,v in pairs(t) do
-							recap.state[n]=v
-							recap.now[n]=v
-						end
-					
+						recap.step_apply(t)
 					end
 				end
-]]
 			
 			else -- default of do not record, do not play just be
 			
-				for n,v in pairs(recap.now) do
-					recap.state[n]=v
-					recap.now[n]=nil
-				end
-				
-				recap.state_pulse=recap.now_pulse
-				recap.now_pulse={} -- new table
-				
-				recap.state_msgs=recap.now_msgs -- use this copy of any messages
-				recap.now_msgs={} -- start a new list
+--				local change=recap.get_change()
+--				if change then change.idx=recap.idx ; dump(change) end
+
+				recap.step_next()
 
 			end
 			
