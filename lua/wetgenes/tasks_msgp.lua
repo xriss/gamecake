@@ -62,6 +62,7 @@ are used internally by this protocol.
 	HAND	0x00	0x04
 	SHAKE	0x00	0x05
 	RESEND	0x00	0x08
+	PULSE	0x00	0x10
 
 A PING packet will be accepted and acknowledged after handshaking. 
 Sending a PING packet will cause a PONG response with the same data.
@@ -107,6 +108,16 @@ then a colon followed by the port in url style format.
 A RESEND packet consists of a payload of little endian 16bit idxs to 
 packets we would like to be resent to fill in missing data.
 
+A PULSE packet contains user data but does not get resent or 
+acknowledged, its IDX must be set to 0 and should be ignored when 
+received as this is out of stream data. Pulse packets are small regular 
+packets of user data, eg current client input state. Data sent is 
+included as part of the normal received data stream but there is no 
+guarantee that it will be delivered or when it will be delivered 
+relative to other data. The data must be small enough to fit in a 
+single packet. Think of this as something of a raw UDP packet in terms 
+of how it works.
+
 ]]
 
 
@@ -128,6 +139,7 @@ M.PACKET.PONG   = 0x03
 M.PACKET.HAND   = 0x04
 M.PACKET.SHAKE  = 0x05
 M.PACKET.RESEND = 0x08
+M.PACKET.PULSE  = 0x10
 
 -- max size of each data packet we will size, maybe 8kish chunks and 2megish in total?
 -- 63k chunks give better data throughput but might be unsafe?
@@ -618,6 +630,15 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		send_client(client,p.idx,msgp.pack(p))
 		return p
 	end
+	local send_packet_pulse=function(client,p)
+		p.idx=0 -- idx must be 0 as this is out of stream
+		p.ack=client.recv_idx -- correct ack
+		p.bits=0
+		p.bit=msgp.PACKET.PULSE
+		local udp=(#client.addr_list>5) and udp6 or udp4
+		udp:sendto( msgp.pack(p) , client.ip , client.port ) -- always send now
+		return p
+	end
 	local ack_packet=function(client,idx)
 		local p=client.send[idx]
 		if not p then return end -- no packet?
@@ -786,6 +807,14 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0",
 			} )
 	
+		elseif memo.cmd=="pulse" then
+
+			local client=manifest_client(memo.addr)
+			
+			send_packet_pulse( client , {
+				data=memo.data,
+			} )
+
 		elseif memo.cmd=="send" then
 		
 			local client=manifest_client(memo.addr)
@@ -966,6 +995,15 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					local idx=a+b*256
 					send_client(client,idx)
 				end
+
+			elseif	p.bit==msgp.PACKET.PULSE
+			and		p.idx==0
+			then
+				send_msg({
+					why="data",
+					addr=client.addr,
+					data=p.data,
+				})
 
 			end
 

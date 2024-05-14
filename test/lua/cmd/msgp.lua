@@ -81,6 +81,13 @@ local test_server=function(tasks)
 				})
 			end
 
+			tasks:do_memo({
+				task=host.task,
+				cmd="pulse",
+				addr=other.addr,
+				data=string.sub(data,-1024)
+			})
+
 			-- send packet
 			-- poll for new data
 			local ret=tasks:do_memo({
