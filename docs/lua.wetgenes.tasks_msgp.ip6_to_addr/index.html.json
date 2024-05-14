@@ -2570,7 +2570,7 @@
    "body": "<p>Parse an array of 8 numbers into an ip6 address with :: in the first \nlongest run of zeros if needed and lowercase hex letters.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
-   "line": 164,
+   "line": 176,
    "name": "lua.wetgenes.tasks_msgp.ip6_to_addr",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
   }

@@ -2570,7 +2570,7 @@
    "body": "<p>If given aa udp data packet string, convert it to a table.</p>\n<p>If given table, convert it to a udp data packet string. little endian</p>\n<pre><code>u16\t\tidx\t\t\t//\tincrementing and wrapping idx of this packet\nu16\t\tack\t\t\t//\twe acknowledge all the packets before this idx so please send this one next (or again maybe)\nu8\t\tbit\t\t\t//\twhich bit this is, all bits should be joined before parsing\nu8\t\tbits\t\t//\thow many bits in total ( all bits will be in adjacent idxs )\nu8\t\tdata[*]\t\t//\tThe payload, if multiple bits then all payloads should be concatenated\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
-   "line": 455,
+   "line": 467,
    "name": "lua.wetgenes.tasks_msgp.pack",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
   }

@@ -7487,6 +7487,7 @@ PONG	0x00	0x03
 HAND	0x00	0x04
 SHAKE	0x00	0x05
 RESEND	0x00	0x08
+PULSE	0x00	0x10
 </code></pre>
 <p>A PING packet will be accepted and acknowledged after handshaking. 
 Sending a PING packet will cause a PONG response with the same data.</p>
@@ -7520,12 +7521,21 @@ If ipv4 it will be a string of the format &quot;1.2.3.4:5&quot; and if 1pv6 then
 then a colon followed by the port in url style format.</p>
 <p>A RESEND packet consists of a payload of little endian 16bit idxs to 
 packets we would like to be resent to fill in missing data.</p>
+<p>A PULSE packet contains user data but does not get resent or 
+acknowledged, its IDX must be set to 0 and should be ignored when 
+received as this is out of stream data. Pulse packets are small regular 
+packets of user data, eg current client input state. Data sent is 
+included as part of the normal received data stream but there is no 
+guarantee that it will be delivered or when it will be delivered 
+relative to other data. The data must be small enough to fit in a 
+single packet. Think of this as something of a raw UDP packet in terms 
+of how it works.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks_msgp.addr_to_ip_port">lua.wetgenes.tasks_msgp.addr_to_ip_port</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L371">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L383">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
 <div><p>parse an ip string and port number from an addr/addr+port/addr_list</p>
 <p>returns addr,port that we can then use with luasocket</p>
 </div>
@@ -7533,7 +7543,7 @@ packets we would like to be resent to fill in missing data.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks_msgp.addr_to_list">lua.wetgenes.tasks_msgp.addr_to_list</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L227">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L239">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
 <div><p>parse an ip address + maybe port encoded as a string into a list of 
 numbers, the length of the list represents the type so</p>
 <pre><code>#4 {1,2,3,4} -- ip4
@@ -7548,7 +7558,7 @@ parsing.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks_msgp.ip6_to_addr">lua.wetgenes.tasks_msgp.ip6_to_addr</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L164">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L176">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
 <div><p>Parse an array of 8 numbers into an ip6 address with :: in the first 
 longest run of zeros if needed and lowercase hex letters.</p>
 </div>
@@ -7556,7 +7566,7 @@ longest run of zeros if needed and lowercase hex letters.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks_msgp.ipsniff">lua.wetgenes.tasks_msgp.ipsniff</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L396">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L408">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
 <div><p>Use ( google by default ) public dns servers to check if we can connect 
 to the internet and if we have ipv4 and/or ipv6 available.</p>
 <p>To use alternative dns pass in an ipv4 and ipv6 address as the first 
@@ -7578,7 +7588,7 @@ local ipv4 network is available.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks_msgp.list_to_addr">lua.wetgenes.tasks_msgp.list_to_addr</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L202">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L214">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
 <div><p>Parse an array of numbers into an ip address and maybe port.</p>
 <pre><code>#4 {1,2,3,4} -- ip4
 #5 {1,2,3,4,5} -- ip4:port
@@ -7590,14 +7600,14 @@ local ipv4 network is available.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks_msgp.msgp_code">lua.wetgenes.tasks_msgp.msgp_code</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L515">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L527">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
 <div><p>lanes task function for handling msgp communication.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks_msgp.pack">lua.wetgenes.tasks_msgp.pack</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L455">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L467">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
 <div><p>If given aa udp data packet string, convert it to a table.</p>
 <p>If given table, convert it to a udp data packet string. little endian</p>
 <pre><code>u16		idx			//	incrementing and wrapping idx of this packet
