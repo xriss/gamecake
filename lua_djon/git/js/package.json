@@ -1,0 +1,11 @@
+{
+  "name": "@xriss/djon",
+  "version": "0.0.1",
+  "license": "MIT",
+  "dependencies": {
+    "napi-wasm": "^1.1.0"
+  },
+  "devDependencies": {
+    "node-api-headers": "^1.1.0"
+  }
+}

@@ -1,0 +1,8 @@
+cd `dirname $0`
+
+rm -rf git
+git clone --depth 1 https://github.com/xriss/djon.git git
+rm -rf git/.git
+
+cp git/lua/djon.lua ../lua/djon.lua
+
