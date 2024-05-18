@@ -109,10 +109,10 @@ A RESEND packet consists of a payload of little endian 16bit idxs to
 packets we would like to be resent to fill in missing data.
 
 A PULSE packet contains user data but does not get resent or 
-acknowledged, its IDX must be set to 0 and should be ignored when 
-received as this is out of stream data. Pulse packets are small regular 
-packets of user data, eg current client input state. Data sent is 
-included as part of the normal received data stream but there is no 
+acknowledged, its IDX must be set to 0 and this IDX should be ignored 
+when received as this is out of stream data. Pulse packets are small 
+regular packets of user data, eg current client input state. Data sent 
+is included as part of the normal received data stream but there is no 
 guarantee that it will be delivered or when it will be delivered 
 relative to other data. The data must be small enough to fit in a 
 single packet. Think of this as something of a raw UDP packet in terms 
