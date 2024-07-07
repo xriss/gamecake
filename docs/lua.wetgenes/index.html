@@ -375,7 +375,13 @@
 <a class="sub" href="../../docs/lua.wetgenes.grdsvg.string"><span>/lua.wetgenes.grdsvg.string</span></a><a class="par" href="../../docs/lua.wetgenes.json"><span>/lua.wetgenes.json</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.json.decode"><span>/lua.wetgenes.json.decode</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.json.encode"><span>/lua.wetgenes.json.encode</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json.encode"><span>/lua.wetgenes.json.encode</span></a><a class="par" href="../../docs/lua.wetgenes.json_diff"><span>/lua.wetgenes.json_diff</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.table_find"><span>/lua.wetgenes.json_diff.table_find</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.table_match"><span>/lua.wetgenes.json_diff.table_match</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.table_trim"><span>/lua.wetgenes.json_diff.table_trim</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.value_dedupe"><span>/lua.wetgenes.json_diff.value_dedupe</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.value_equal"><span>/lua.wetgenes.json_diff.value_equal</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.lookup"><span>/lua.wetgenes.lookup</span></a><a class="par" href="../../docs/lua.wetgenes.midi"><span>/lua.wetgenes.midi</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.midi.clients"><span>/lua.wetgenes.midi.clients</span></a>
@@ -4642,6 +4648,88 @@ ops.white=&quot; &quot;
 ops.sort=true
     Sort the keys, so we can create stable output for better diffing.
 </code></pre>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.json_diff">lua.wetgenes.json_diff</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua#L1">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua</a></div>
+<div><p>(C) 2024 Kriss Blank and released under the MIT license, see 
+<a href="http://opensource.org/licenses/MIT">http://opensource.org/licenses/MIT</a> for full license text.</p>
+<p>I assume we are not competing in the lua json_diff library world so 
+just call it json_diff</p>
+<pre><code>local json_diff=require(&quot;wetgenes.json_diff&quot;)
+</code></pre>
+<p>When we talk of json objects or json values we mean that the values 
+must be valid json. So no storing of functions/etc or mixxing of tables 
+and objects. Infinite recursion where data links back into itself is 
+also not possible in json so not allowed here.</p>
+<p>We assume we have data that could be validly serialised as json but 
+this is not enforced. If you want to be 100% safe then convert your 
+data to json text and back again before handing it to these functions.</p>
+<p>If a table has a length of more than 0 then it is considered a json 
+array otherwise it is a json object. An empty table is considered an 
+empty object there is no lua equivalent to an empty json array.</p>
+<p>Json arrays must be normal lua tables, so first index is 1 not 0 this 
+may cause problems if your data is made of objects that have been 
+accidently converted into arrays. Probably wont have happened but best 
+to be aware of possible sharp edges.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.json_diff.table_find">lua.wetgenes.json_diff.table_find</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua#L81">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua</a></div>
+<div><p>Given two tables of json data, return the length , starta , startb of 
+the longest common subsequence in table indexes or nil if not similar.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.json_diff.table_match">lua.wetgenes.json_diff.table_match</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua#L174">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua</a></div>
+<div><p>Given two tables of json data, return two synced tables of tables where 
+as much json data as possible match in each sub batch.</p>
+<p>each of these tables can be concatonated to create the original table.</p>
+<p>When stepping thoigh bothe tables, matches are shown by the tables 
+having equality ( are both pointer to same table ) and differences will 
+be insertions or deletions depending on which of the two has the empty 
+table.</p>
+<p>EG these two lists</p>
+<pre><code>[a,b,c,d,e,f]
+[a,b,e,f]
+</code></pre>
+<p>would become</p>
+<pre><code>[ [a,b] , [c,d] , [e,f] ]
+[ [a,b] , [] , [e,f] ]
+</code></pre>
+<p>The both [a,b] tables would be equal to each other, eg they are the 
+same table so will simply compare as true with an == test. Same with 
+the [e,f] tables.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.json_diff.table_trim">lua.wetgenes.json_diff.table_trim</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua#L138">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua</a></div>
+<div><p>Given two tables of json data, return the length at the start and at the 
+end that are the same. This tends to be a good first step when 
+comparing two chunks of text.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.json_diff.value_dedupe">lua.wetgenes.json_diff.value_dedupe</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua#L38">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua</a></div>
+<div><p>dedupe a value, after this</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.json_diff.value_equal">lua.wetgenes.json_diff.value_equal</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua#L45">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua</a></div>
+<div><p>Compare two json values and return true if they are equal, this may 
+decend into a tree of tables and objects so can be an expensive test.</p>
 </div>
 </div>
 

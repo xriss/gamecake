@@ -264,7 +264,7 @@
     "name": "levels"
    },
    {
-    "count": 593,
+    "count": 599,
     "name": "lua"
    },
    {
@@ -292,7 +292,7 @@
     "name": "lua.glslang.yank_shader_versions"
    },
    {
-    "count": 586,
+    "count": 592,
     "name": "lua.wetgenes"
    },
    {
@@ -1562,6 +1562,30 @@
    {
     "count": 1,
     "name": "lua.wetgenes.json.encode"
+   },
+   {
+    "count": 6,
+    "name": "lua.wetgenes.json_diff"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.json_diff.table_find"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.json_diff.table_match"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.json_diff.table_trim"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.json_diff.value_dedupe"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.json_diff.value_equal"
    },
    {
     "count": 1,
@@ -2937,7 +2961,7 @@
    },
    {
     "body": "",
-    "count": 593,
+    "count": 599,
     "name": "lua"
    },
    {
@@ -2990,7 +3014,7 @@
    },
    {
     "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-    "count": 586,
+    "count": 592,
     "file": "../lua/wetgenes/init.lua",
     "line": 5,
     "name": "lua.wetgenes",
@@ -5498,6 +5522,54 @@
     "line": 320,
     "name": "lua.wetgenes.json.encode",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json.lua"
+   },
+   {
+    "body": "<p>(C) 2024 Kriss Blank and released under the MIT license, see \n<a href=\"http://opensource.org/licenses/MIT\">http://opensource.org/licenses/MIT</a> for full license text.</p>\n<p>I assume we are not competing in the lua json_diff library world so \njust call it json_diff</p>\n<pre><code>local json_diff=require(&quot;wetgenes.json_diff&quot;)\n</code></pre>\n<p>When we talk of json objects or json values we mean that the values \nmust be valid json. So no storing of functions/etc or mixxing of tables \nand objects. Infinite recursion where data links back into itself is \nalso not possible in json so not allowed here.</p>\n<p>We assume we have data that could be validly serialised as json but \nthis is not enforced. If you want to be 100% safe then convert your \ndata to json text and back again before handing it to these functions.</p>\n<p>If a table has a length of more than 0 then it is considered a json \narray otherwise it is a json object. An empty table is considered an \nempty object there is no lua equivalent to an empty json array.</p>\n<p>Json arrays must be normal lua tables, so first index is 1 not 0 this \nmay cause problems if your data is made of objects that have been \naccidently converted into arrays. Probably wont have happened but best \nto be aware of possible sharp edges.</p>\n",
+    "count": 6,
+    "file": "../lua/wetgenes/json_diff.lua",
+    "line": 1,
+    "name": "lua.wetgenes.json_diff",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua"
+   },
+   {
+    "body": "<p>Given two tables of json data, return the length , starta , startb of \nthe longest common subsequence in table indexes or nil if not similar.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/json_diff.lua",
+    "line": 81,
+    "name": "lua.wetgenes.json_diff.table_find",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua"
+   },
+   {
+    "body": "<p>Given two tables of json data, return two synced tables of tables where \nas much json data as possible match in each sub batch.</p>\n<p>each of these tables can be concatonated to create the original table.</p>\n<p>When stepping thoigh bothe tables, matches are shown by the tables \nhaving equality ( are both pointer to same table ) and differences will \nbe insertions or deletions depending on which of the two has the empty \ntable.</p>\n<p>EG these two lists</p>\n<pre><code>[a,b,c,d,e,f]\n[a,b,e,f]\n</code></pre>\n<p>would become</p>\n<pre><code>[ [a,b] , [c,d] , [e,f] ]\n[ [a,b] , [] , [e,f] ]\n</code></pre>\n<p>The both [a,b] tables would be equal to each other, eg they are the \nsame table so will simply compare as true with an == test. Same with \nthe [e,f] tables.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/json_diff.lua",
+    "line": 174,
+    "name": "lua.wetgenes.json_diff.table_match",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua"
+   },
+   {
+    "body": "<p>Given two tables of json data, return the length at the start and at the \nend that are the same. This tends to be a good first step when \ncomparing two chunks of text.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/json_diff.lua",
+    "line": 138,
+    "name": "lua.wetgenes.json_diff.table_trim",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua"
+   },
+   {
+    "body": "<p>dedupe a value, after this</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/json_diff.lua",
+    "line": 38,
+    "name": "lua.wetgenes.json_diff.value_dedupe",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua"
+   },
+   {
+    "body": "<p>Compare two json values and return true if they are equal, this may \ndecend into a tree of tables and objects so can be an expensive test.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/json_diff.lua",
+    "line": 45,
+    "name": "lua.wetgenes.json_diff.value_equal",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua"
    },
    {
     "body": "<pre><code>value = wetgenes.lookup(table,...)\n</code></pre>\n<p>Safe recursive lookup within a table that returns nil if any part of \nthe lookup is nil so we never cause an error but just return nil. \nThis is intended to replace the following sort of code</p>\n<pre><code>a = b and b.c and b.c.d and b.c.d.e\n</code></pre>\n<p>To get e only if all of its parent bits exist and not to cause any \nerror if they do not. instead use</p>\n<pre><code>a = lookup(b,&quot;c&quot;,&quot;d&quot;,&quot;e&quot;)\n</code></pre>\n",
