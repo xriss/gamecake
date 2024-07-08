@@ -35,56 +35,14 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local json_diff=M
 
---[[#lua.wetgenes.json_diff.value_dedupe
 
-dedupe a value, after this
-]]
-json_diff.value_equal=function(a,b)
+--[[#lua.wetgenes.json_diff.array_common
 
-
---[[#lua.wetgenes.json_diff.value_equal
-
-Compare two json values and return true if they are equal, this may 
-decend into a tree of tables and objects so can be an expensive test.
-
-]]
-json_diff.value_equal=function(a,b)
-
-	if a==b then return true end
-
-	if type(a)=="table" and type(b)=="table" then
-		if #a>0 and #b>0 then -- array
-			if #a~=#b then return false end -- must be same length
-			for i=1,#a do
-				if not json_diff.value_equal( a[i] , b[i] ) then return false end
-			end
-			return true
-		else -- object
-			local done={} -- checks can be very expensive so only perform once
-			for i,v in pairs(a) do
-				done[i]=true
-				if not json_diff.value_equal( a[i] , b[i] ) then return false end
-			end
-			for i,v in pairs(b) do
-				if not done[i] then -- do not check twice
-					if not json_diff.value_equal( a[i] , b[i] ) then return false end
-				end
-			end
-			return true
-		end
-	end
-
-	return false
-end
-
-
---[[#lua.wetgenes.json_diff.table_find
-
-Given two tables of json data, return the length , starta , startb of 
+Given two arrays of json data, return the length , starta , startb of 
 the longest common subsequence in table indexes or nil if not similar.
 
 ]]
-json_diff.table_find=function(a,b,froma,fromb,sizea,sizeb)
+json_diff.array_common=function(a,b,froma,fromb,sizea,sizeb)
 
 	froma=froma or 1
 	fromb=fromb or 1
@@ -116,7 +74,7 @@ json_diff.table_find=function(a,b,froma,fromb,sizea,sizeb)
 
 			while true do
 
-				if ( remain(sa+l,sb+l) <= 0 ) or ( a[sa+l] ~= b[sb+l] ) then -- ended
+				if ( remain(sa+l,sb+l) <= 0 ) or not json_diff.equal( a[sa+l] , b[sb+l] ) then -- ended
 					if l > length then -- found a longer string
 						starta=sa
 						startb=sb
@@ -135,14 +93,14 @@ json_diff.table_find=function(a,b,froma,fromb,sizea,sizeb)
 	return nil
 end
 
---[[#lua.wetgenes.json_diff.table_trim
+--[[#lua.wetgenes.json_diff.array_trim
 
-Given two tables of json data, return the length at the start and at the 
+Given two arrays of json data, return the length at the start and at the 
 end that are the same. This tends to be a good first step when 
 comparing two chunks of text.
 
 ]]
-json_diff.table_trim=function(a,b,froma,fromb,sizea,sizeb)
+json_diff.array_trim=function(a,b,froma,fromb,sizea,sizeb)
 
 	froma=froma or 1
 	fromb=fromb or 1
@@ -155,7 +113,7 @@ json_diff.table_trim=function(a,b,froma,fromb,sizea,sizeb)
 	
 	local ls=0
 	for d=0,size-1 do
-		if a[froma+ls] == b[fromb+ls] then ls=ls+1
+		if json_diff.equal( a[froma+ls] , b[fromb+ls] ) then ls=ls+1
 		else break end
 	end
 
@@ -164,24 +122,23 @@ json_diff.table_trim=function(a,b,froma,fromb,sizea,sizeb)
 
 	local le=0
 	for d=0,size-1 do
-		if a[sizea-le] == b[sizeb-le] then le=le+1
+		if json_diff.equal( a[sizea-le] , b[sizeb-le] ) then le=le+1
 		else break end
 	end
 
 	return ls,le
 end
 
---[[#lua.wetgenes.json_diff.table_match
+--[[#lua.wetgenes.json_diff.array_match
 
-Given two tables of json data, return two synced tables of tables where 
+Given two arrays of json data, return two synced arrays of arrays where 
 as much json data as possible match in each sub batch.
 
-each of these tables can be concatonated to create the original table.
+each of these arrays can be concatonated to create the original array.
 
-When stepping thoigh bothe tables, matches are shown by the tables 
-having equality ( are both pointer to same table ) and differences will 
-be insertions or deletions depending on which of the two has the empty 
-table.
+When stepping thoigh bothe arrays, matches are shown by the sub array 
+having equality and differences will be insertions or deletions 
+depending on which of the two has the empty array.
 
 EG these two lists
 
@@ -193,12 +150,11 @@ would become
 	[ [a,b] , [c,d] , [e,f] ]
 	[ [a,b] , [] , [e,f] ]
 
-The both [a,b] tables would be equal to each other, eg they are the 
-same table so will simply compare as true with an == test. Same with 
-the [e,f] tables.
+The two [a,b] arrays will be equal to each other when tested with a 
+simple == compare as they are references to the same table.
 
 ]]
-json_diff.table_match=function(a,b,froma,fromb,sizea,sizeb)
+json_diff.array_match=function(a,b,froma,fromb,sizea,sizeb)
 
 	froma=froma or 1
 	fromb=fromb or 1
@@ -217,7 +173,7 @@ json_diff.table_match=function(a,b,froma,fromb,sizea,sizeb)
 	end
 
 -- find trim
-	local ls,le=json_diff.table_trim(a,b,froma,fromb,sizea,sizeb)
+	local ls,le=json_diff.array_trim(a,b,froma,fromb,sizea,sizeb)
 	
 -- first trim
 	if ls>0 then
@@ -233,7 +189,7 @@ json_diff.table_match=function(a,b,froma,fromb,sizea,sizeb)
 	local recurse
 	recurse=function(a,b,froma,fromb,sizea,sizeb)
 
-		local length , starta , startb = json_diff.table_find(a,b,froma,fromb,sizea,sizeb)
+		local length , starta , startb = json_diff.array_common(a,b,froma,fromb,sizea,sizeb)
 		
 		if length then -- something matched
 		
@@ -247,7 +203,7 @@ json_diff.table_match=function(a,b,froma,fromb,sizea,sizeb)
 				recurse(a,b,starta+length,startb+length,sizea,sizeb) -- last bit
 			end
 
-		else -- nothing matched so insert joined data to return table
+		else -- nothing matched so insert all data in return tables
 		
 			append(ra,a,froma,sizea)
 			append(rb,b,fromb,sizeb)
@@ -262,6 +218,129 @@ json_diff.table_match=function(a,b,froma,fromb,sizea,sizeb)
 		rb[#rb+1]=append(ra,a,sizea+1,sizea+le)
 	end
 
-
 	return ra,rb
 end
+
+--[[#lua.wetgenes.json_diff.equal
+
+Compare two json values and return true if they are equal, this may 
+decend into a tree of tables and objects so can be an expensive test.
+
+]]
+json_diff.equal=function(a,b)
+
+	if a==b then return true end
+
+	if type(a)=="table" and type(b)=="table" then
+		if #a>0 and #b>0 then -- array
+			if #a~=#b then return false end -- must be same length
+			for i=1,#a do
+				if not json_diff.equal( a[i] , b[i] ) then return false end
+			end
+			return true
+		else -- object
+			local done={} -- checks can be very expensive so only perform once
+			for i,v in pairs(a) do
+				done[i]=true
+				if not json_diff.equal( a[i] , b[i] ) then return false end
+			end
+			for i,v in pairs(b) do
+				if not done[i] then -- do not check twice
+					if not json_diff.equal( a[i] , b[i] ) then return false end
+				end
+			end
+			return true
+		end
+	end
+
+	return false
+end
+
+--[[#lua.wetgenes.json_diff.diff
+
+Return a diff of two values
+
+]]
+json_diff.diff=function(a,b,both)
+
+-- array or object ?
+	if type(a)=="table" and type(b)=="table" then
+		if a[1] and b[1] then -- both are arrays
+			local d={"a"}			
+			local ra,rb=json_diff.array_match(a,b)
+			for idx=1,#ra do
+				if ra[idx]==rb[idx] then -- the same
+					local len=#ra
+					d[#d+1]=len
+					d[#d+1]=len
+				else -- diff
+					if #ra==0 then		d[#d+1]=0	-- empty
+					else				d[#d+1]=both and ra or #ra	-- data or count
+					end
+					if #rb==0 then		d[#d+1]=0	-- empty
+					else				d[#d+1]=rb	-- data
+					end
+				end
+			end
+			return d
+		end
+		if ( not a[1] ) and ( not b[1] ) then -- both are objects
+			local d={"o"}
+			local done={} -- checks can be very expensive so only perform once
+			for i,v in pairs(a) do
+				done[i]=true
+				if not json_diff.equal( a[i] , b[i] ) then
+					d[#d+1]=i
+					d[#d+1]=json_diff.diff(a[i],b[i],both)
+				end
+			end
+			for i,v in pairs(b) do
+				if not done[i] then -- do not check twice
+					if not json_diff.equal( a[i] , b[i] ) then
+						d[#d+1]=i
+						d[#d+1]=json_diff.diff(a[i],b[i],both)
+					end
+				end
+			end
+			return d
+		end
+	end
+
+-- value
+	if both then
+		return { "v" , a , b }
+	end
+	return { "v" , b }
+end
+
+--[[#lua.wetgenes.json_diff.dupe
+
+create a (possible) deep copy duplicate of a json value
+
+]]
+json_diff.dupe=function(a)
+	if type(a)=="table" then
+		local r={}
+		for i,v in pairs(a) do r[i]=json_diff.dupe(v) end
+		return r
+	end
+	return a
+end
+
+--[[#lua.wetgenes.json_diff.apply
+
+apply a diff
+
+]]
+json_diff.apply=function(a,d)
+end
+
+--[[#lua.wetgenes.json_diff.undo
+
+undo a diff which *must* have been created with the both flag set in 
+order to have undo data available.
+
+]]
+json_diff.undo=function(b,d)
+end
+
