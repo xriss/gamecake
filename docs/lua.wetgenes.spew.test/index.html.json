@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 599,
+   "count": 602,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 592,
+   "count": 595,
    "name": "lua.wetgenes"
   },
   {
@@ -1430,28 +1430,40 @@
    "name": "lua.wetgenes.json.encode"
   },
   {
-   "count": 6,
+   "count": 9,
    "name": "lua.wetgenes.json_diff"
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.json_diff.table_find"
+   "name": "lua.wetgenes.json_diff.apply"
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.json_diff.table_match"
+   "name": "lua.wetgenes.json_diff.array_common"
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.json_diff.table_trim"
+   "name": "lua.wetgenes.json_diff.array_match"
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.json_diff.value_dedupe"
+   "name": "lua.wetgenes.json_diff.array_trim"
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.json_diff.value_equal"
+   "name": "lua.wetgenes.json_diff.diff"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.json_diff.dupe"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.json_diff.equal"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.json_diff.undo"
   },
   {
    "count": 1,

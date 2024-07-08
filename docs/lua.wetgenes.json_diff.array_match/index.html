@@ -377,11 +377,14 @@
 <a class="sub" href="../../docs/lua.wetgenes.json.decode"><span>/lua.wetgenes.json.decode</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.json.encode"><span>/lua.wetgenes.json.encode</span></a><a class="par" href="../../docs/lua.wetgenes.json_diff"><span>/lua.wetgenes.json_diff</span></a>
 
-<a class="sub" href="../../docs/lua.wetgenes.json_diff.table_find"><span>/lua.wetgenes.json_diff.table_find</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.json_diff.table_match"><span>/lua.wetgenes.json_diff.table_match</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.json_diff.table_trim"><span>/lua.wetgenes.json_diff.table_trim</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.json_diff.value_dedupe"><span>/lua.wetgenes.json_diff.value_dedupe</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.json_diff.value_equal"><span>/lua.wetgenes.json_diff.value_equal</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.apply"><span>/lua.wetgenes.json_diff.apply</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.array_common"><span>/lua.wetgenes.json_diff.array_common</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.array_match"><span>/lua.wetgenes.json_diff.array_match</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.array_trim"><span>/lua.wetgenes.json_diff.array_trim</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.diff"><span>/lua.wetgenes.json_diff.diff</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.dupe"><span>/lua.wetgenes.json_diff.dupe</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.equal"><span>/lua.wetgenes.json_diff.equal</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.json_diff.undo"><span>/lua.wetgenes.json_diff.undo</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.lookup"><span>/lua.wetgenes.lookup</span></a><a class="par" href="../../docs/lua.wetgenes.midi"><span>/lua.wetgenes.midi</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.midi.clients"><span>/lua.wetgenes.midi.clients</span></a>
@@ -660,11 +663,24 @@
 	<div class="main">
 		
 <div class="wrap">
-<h1><a href="../../docs/lua.wetgenes.json_diff.table_trim">lua.wetgenes.json_diff.table_trim</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua#L138">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua</a></div>
-<div><p>Given two tables of json data, return the length at the start and at the 
-end that are the same. This tends to be a good first step when 
-comparing two chunks of text.</p>
+<h1><a href="../../docs/lua.wetgenes.json_diff.array_match">lua.wetgenes.json_diff.array_match</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua#L132">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua</a></div>
+<div><p>Given two arrays of json data, return two synced arrays of arrays where 
+as much json data as possible match in each sub batch.</p>
+<p>each of these arrays can be concatonated to create the original array.</p>
+<p>When stepping thoigh bothe arrays, matches are shown by the sub array 
+having equality and differences will be insertions or deletions 
+depending on which of the two has the empty array.</p>
+<p>EG these two lists</p>
+<pre><code>[a,b,c,d,e,f]
+[a,b,e,f]
+</code></pre>
+<p>would become</p>
+<pre><code>[ [a,b] , [c,d] , [e,f] ]
+[ [a,b] , [] , [e,f] ]
+</code></pre>
+<p>The two [a,b] arrays will be equal to each other when tested with a 
+simple == compare as they are references to the same table.</p>
 </div>
 </div>
 
