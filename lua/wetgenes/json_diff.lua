@@ -11,7 +11,7 @@ just call it json_diff
 When we talk of json objects or json values we mean that the values 
 must be valid json. So no storing of functions/etc or mixxing of tables 
 and objects. Infinite recursion where data links back into itself is 
-also not possible in json so not allowed here.
+also not possible in json so not allowed/expected here.
 
 We assume we have data that could be validly serialised as json but 
 this is not enforced. If you want to be 100% safe then convert your 
@@ -20,6 +20,12 @@ data to json text and back again before handing it to these functions.
 If a table has a length of more than 0 then it is considered a json 
 array otherwise it is a json object. An empty table is considered an 
 empty object there is no lua equivalent to an empty json array.
+
+Lua is not good with holes in its arrays, so that is also not suported.
+
+We do try and diff arrays of objects, but, since arrays may shift up 
+and down it would be better if you had object maps of id to data and 
+arrays of ids that references these maps rather than arrays of objects.
 
 Json arrays must be normal lua tables, so first index is 1 not 0 this 
 may cause problems if your data is made of objects that have been 
@@ -232,7 +238,7 @@ json_diff.equal=function(a,b)
 	if a==b then return true end
 
 	if type(a)=="table" and type(b)=="table" then
-		if #a>0 and #b>0 then -- array
+		if a[1] and b[1] then -- array
 			if #a~=#b then return false end -- must be same length
 			for i=1,#a do
 				if not json_diff.equal( a[i] , b[i] ) then return false end
@@ -256,6 +262,35 @@ json_diff.equal=function(a,b)
 	return false
 end
 
+--[[#lua.wetgenes.json_diff.similar
+
+Compare two json values and return true if they are similar arrays or 
+objects, this may descend into a tree of tables and objects so can be 
+an expensive test.
+
+An array or object is similar if it contains at least one value that is 
+the same in both.
+
+Will return false if not given two objects or two arrays.
+
+]]
+json_diff.similar=function(a,b)
+
+	if type(a)=="table" and type(b)=="table" then
+		if a[1] and b[1] then -- array
+			if json_diff.array_common(a,b) then return true end
+			return false
+		else -- object
+			for i,v in pairs(a) do
+				if json_diff.equal( a[i] , b[i] ) then return true end
+			end
+			return false
+		end
+	end
+
+	return false
+end
+
 --[[#lua.wetgenes.json_diff.diff
 
 Return a diff of two values
@@ -263,10 +298,12 @@ Return a diff of two values
 ]]
 json_diff.diff=function(a,b,both)
 
--- array or object ?
+-- array or object
 	if type(a)=="table" and type(b)=="table" then
 		if a[1] and b[1] then -- both are arrays
-			local d={"a"}			
+-- these are probed in pairs to pickup the following patterns
+-- {num,num} {0,tab} {num,tab} {tab,num} {tab,tab}
+			local d={"a"}
 			local ra,rb=json_diff.array_match(a,b)
 			for idx=1,#ra do
 				if ra[idx]==rb[idx] then -- the same
@@ -274,11 +311,28 @@ json_diff.diff=function(a,b,both)
 					d[#d+1]=len
 					d[#d+1]=len
 				else -- diff
-					if #ra==0 then		d[#d+1]=0	-- empty
-					else				d[#d+1]=both and ra or #ra	-- data or count
-					end
-					if #rb==0 then		d[#d+1]=0	-- empty
-					else				d[#d+1]=rb	-- data
+					local l=#ra ; if #rb<l then l=#rb end -- minimum
+					if l>0 then -- diff this many datas
+						d[#d+1]=l
+						for i=1,l do
+							d[#d+1]=json_diff.diff(ra[i],rb[i],both)
+						end
+						if l<#ra then
+							local r={} ; for i=l,#ra do r[#r+1]=ra[i] end
+							d[#d+1]=0 -- empty rb
+							d[#d+1]=both and r or #r -- ra remainder 
+						elseif l<#rb then
+							local r={} ; for i=l,#rb do r[#r+1]=rb[i] end
+							d[#d+1]=r -- rb remainder 
+							d[#d+1]=0 -- empty ra
+						end
+					else -- one of these will be a 0 , both should not be
+						if #rb==0 then		d[#d+1]=0	-- empty
+						else				d[#d+1]=rb	-- data
+						end
+						if #ra==0 then		d[#d+1]=0	-- empty
+						else				d[#d+1]=both and ra or #ra	-- data or count
+						end
 					end
 				end
 			end
@@ -306,9 +360,10 @@ json_diff.diff=function(a,b,both)
 		end
 	end
 
--- value
+-- value this also deals with array to object or object to array
+-- so not just for numbers and strings
 	if both then
-		return { "v" , a , b }
+		return { "v" , b , a }
 	end
 	return { "v" , b }
 end
@@ -329,10 +384,68 @@ end
 
 --[[#lua.wetgenes.json_diff.apply
 
-apply a diff
+apply a diff , please dupe a before handing it to this function as we 
+will be altering it.
 
 ]]
 json_diff.apply=function(a,d)
+	if d[1]=="v" then
+		return d[2]
+	elseif d[1]=="o" then
+		local idx=2
+		while d[idx] do
+			a[ d[idx] ]=json_diff.apply( a[ d[idx] ],d[idx+1]
+			idx=idx+2
+		end
+	elseif d[1]=="a" then
+		local idx=2
+		local iax=1
+		while d[idx] do
+			local da=d[idx]
+			local db=d[idx+1]
+			local ta=type(da)
+			local tb=type(db)
+			if tb=="table" then db=#db end -- only care about length of db table
+			
+			if     ta=="number" and tb=="number" then
+				if ta==0 then -- delete
+					for i=1,db do
+						table.remove(a,iax)
+					end
+					idx=idx+2
+				elseif da==db then -- advance over values that have not changed
+					iax=iax+da
+					idx=idx+2
+				else
+					assert("invalid jsondiff advance",da,db)
+				end
+			elseif ta=="number" and tb=="table"  then
+				if ta==0 then -- delete
+					for i=1,db do
+						table.remove(a,iax)
+					end
+					idx=idx+2
+				else -- diffs
+					for i=1,da do
+						a[iax+i-1]=json_diff.apply(a[iax+i-1],d[idx+j])
+					end
+					iax=iax+da
+					idx=idx+1+da
+				end
+			elseif ta=="table"  and ( tb=="number" or tb=="table" ) then -- replace
+				if db>0 then
+					for i=1,db do table.remove(a,iax) end -- remove
+				end
+				for i=1,#da do table.insert(a,iax+i-1,da[i] end -- add
+				iax=iax+#da
+				idx=idx+2
+			else
+				assert("invalid jsondiff types",ta,tb)
+			end
+		end
+	else
+		assert("invalid jsondiff",d)
+	end
 end
 
 --[[#lua.wetgenes.json_diff.undo
