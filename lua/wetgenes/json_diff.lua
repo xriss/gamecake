@@ -183,7 +183,7 @@ json_diff.array_match=function(a,b,froma,fromb,sizea,sizeb)
 	
 -- first trim
 	if ls>0 then
-		rb[#rb+1]=append(ra,a,starta,starta+ls-1)
+		rb[#rb+1]=append(ra,a,1,ls)
 	end
 	
 -- adjust by trim
@@ -221,7 +221,7 @@ json_diff.array_match=function(a,b,froma,fromb,sizea,sizeb)
 
 -- last trim
 	if le>0 then
-		rb[#rb+1]=append(ra,a,sizea+1,sizea+le)
+		rb[#rb+1]=append(ra,a,#ra-le,#ra)
 	end
 
 	return ra,rb
@@ -307,31 +307,31 @@ json_diff.diff=function(a,b,both)
 			local ra,rb=json_diff.array_match(a,b)
 			for idx=1,#ra do
 				if ra[idx]==rb[idx] then -- the same
-					local len=#ra
+					local len=#ra[idx]
 					d[#d+1]=len
 					d[#d+1]=len
 				else -- diff
-					local l=#ra ; if #rb<l then l=#rb end -- minimum
-					if l>0 then -- diff this many datas
+					local l=#ra[idx] ; if #rb[idx]<l then l=#rb[idx] end -- minimum
+					if l>0 then -- diff this many shared datas
 						d[#d+1]=l
 						for i=1,l do
-							d[#d+1]=json_diff.diff(ra[i],rb[i],both)
+							d[#d+1]=json_diff.diff(ra[idx][i],rb[idx][i],both)
 						end
-						if l<#ra then
-							local r={} ; for i=l,#ra do r[#r+1]=ra[i] end
-							d[#d+1]=0 -- empty rb
-							d[#d+1]=both and r or #r -- ra remainder 
-						elseif l<#rb then
-							local r={} ; for i=l,#rb do r[#r+1]=rb[i] end
+						if l<#ra[idx] then
+							local r={} ; for i=l,#ra[idx] do r[#r+1]=ra[idx][i] end
+							d[#d+1]=0 -- empty rb[idx]
+							d[#d+1]=both and r or #r -- ra[idx] remainder 
+						elseif l<#rb[idx] then
+							local r={} ; for i=l,#rb[idx] do r[#r+1]=rb[idx][i] end
 							d[#d+1]=r -- rb remainder 
-							d[#d+1]=0 -- empty ra
+							d[#d+1]=0 -- empty ra[idx]
 						end
 					else -- one of these will be a 0 , both should not be
-						if #rb==0 then		d[#d+1]=0	-- empty
-						else				d[#d+1]=rb	-- data
+						if #rb[idx]==0 then		d[#d+1]=0	-- empty
+						else					d[#d+1]=rb[idx]	-- data
 						end
-						if #ra==0 then		d[#d+1]=0	-- empty
-						else				d[#d+1]=both and ra or #ra	-- data or count
+						if #ra[idx]==0 then		d[#d+1]=0	-- empty
+						else					d[#d+1]=both and ra[idx] or #ra[idx]	-- data or count
 						end
 					end
 				end
@@ -340,7 +340,7 @@ json_diff.diff=function(a,b,both)
 		end
 		if ( not a[1] ) and ( not b[1] ) then -- both are objects
 			local d={"o"}
-			local done={} -- checks can be very expensive so only perform once
+			local done={} -- checks can be very expensive so only perform once<
 			for i,v in pairs(a) do
 				done[i]=true
 				if not json_diff.equal( a[i] , b[i] ) then
@@ -394,7 +394,7 @@ json_diff.apply=function(a,d)
 	elseif d[1]=="o" then
 		local idx=2
 		while d[idx] do
-			a[ d[idx] ]=json_diff.apply( a[ d[idx] ],d[idx+1]
+			a[ d[idx] ]=json_diff.apply( a[ d[idx] ],d[idx+1])
 			idx=idx+2
 		end
 	elseif d[1]=="a" then
@@ -408,7 +408,7 @@ json_diff.apply=function(a,d)
 			if tb=="table" then db=#db end -- only care about length of db table
 			
 			if     ta=="number" and tb=="number" then
-				if ta==0 then -- delete
+				if da==0 then -- delete
 					for i=1,db do
 						table.remove(a,iax)
 					end
@@ -417,17 +417,17 @@ json_diff.apply=function(a,d)
 					iax=iax+da
 					idx=idx+2
 				else
-					assert("invalid jsondiff advance",da,db)
+					error("invalid json_diff advance")
 				end
 			elseif ta=="number" and tb=="table"  then
-				if ta==0 then -- delete
+				if da==0 then -- delete
 					for i=1,db do
 						table.remove(a,iax)
 					end
 					idx=idx+2
 				else -- diffs
 					for i=1,da do
-						a[iax+i-1]=json_diff.apply(a[iax+i-1],d[idx+j])
+						a[iax+i-1]=json_diff.apply(a[iax+i-1],d[idx+i])
 					end
 					iax=iax+da
 					idx=idx+1+da
@@ -436,16 +436,17 @@ json_diff.apply=function(a,d)
 				if db>0 then
 					for i=1,db do table.remove(a,iax) end -- remove
 				end
-				for i=1,#da do table.insert(a,iax+i-1,da[i] end -- add
+				for i=1,#da do table.insert(a,iax+i-1,da[i]) end -- add
 				iax=iax+#da
 				idx=idx+2
 			else
-				assert("invalid jsondiff types",ta,tb)
+				error("invalid json_diff types")
 			end
 		end
 	else
-		assert("invalid jsondiff",d)
+		error("invalid json_diff")
 	end
+	return a
 end
 
 --[[#lua.wetgenes.json_diff.undo
@@ -455,5 +456,6 @@ order to have undo data available.
 
 ]]
 json_diff.undo=function(b,d)
+	return b
 end
 
