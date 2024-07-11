@@ -308,8 +308,7 @@ json_diff.diff=function(a,b,both)
 			for idx=1,#ra do
 				if ra[idx]==rb[idx] then -- the same
 					local len=#ra[idx]
-					d[#d+1]=len
-					d[#d+1]=len
+					d[#d+1]=-len
 				else -- diff
 					local l=#ra[idx] ; if #rb[idx]<l then l=#rb[idx] end -- minimum
 					if l>0 then -- diff this many shared datas
@@ -405,35 +404,24 @@ json_diff.apply=function(a,d)
 			local db=d[idx+1]
 			local ta=type(da)
 			local tb=type(db)
-			if tb=="table" then db=#db end -- only care about length of db table
+			if tb=="table" then db=#db end -- db will always be length of db table
 			
-			if     ta=="number" and tb=="number" then
-				if da==0 then -- delete
-					for i=1,db do
-						table.remove(a,iax)
-					end
-					idx=idx+2
-				elseif da==db then -- advance over values that have not changed
-					iax=iax+da
-					idx=idx+2
-				else
-					error("invalid json_diff advance")
+			if     ta=="number" and da<0 then -- advance over values that have not changed
+				iax=iax-da
+				idx=idx+1
+			elseif ta=="number" and da==0 then -- delete
+				for i=1,db do -- db will always be length of db table
+					table.remove(a,iax)
 				end
+				idx=idx+2
 			elseif ta=="number" and tb=="table"  then
-				if da==0 then -- delete
-					for i=1,db do
-						table.remove(a,iax)
-					end
-					idx=idx+2
-				else -- diffs
-					for i=1,da do
-						a[iax+i-1]=json_diff.apply(a[iax+i-1],d[idx+i])
-					end
-					iax=iax+da
-					idx=idx+1+da
+				for i=1,da do
+					a[iax+i-1]=json_diff.apply(a[iax+i-1],d[idx+i])
 				end
+				iax=iax+da
+				idx=idx+1+da
 			elseif ta=="table"  and ( tb=="number" or tb=="table" ) then -- replace
-				if db>0 then
+				if db>0 then -- db will always be length of db table
 					for i=1,db do table.remove(a,iax) end -- remove
 				end
 				for i=1,#da do table.insert(a,iax+i-1,da[i]) end -- add
