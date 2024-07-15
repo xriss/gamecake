@@ -411,7 +411,7 @@ json_diff.apply=function(a,d)
 				idx=idx+1
 			elseif ta=="number" and da==0 then -- delete
 				for i=1,db do -- db will always be length of db table
-					table.remove(a,iax)
+					table.remove(a,iax+db-i) -- backwards
 				end
 				idx=idx+2
 			elseif ta=="number" and tb=="table"  then
@@ -422,7 +422,7 @@ json_diff.apply=function(a,d)
 				idx=idx+1+da
 			elseif ta=="table"  and ( tb=="number" or tb=="table" ) then -- replace
 				if db>0 then -- db will always be length of db table
-					for i=1,db do table.remove(a,iax) end -- remove
+					for i=1,db do table.remove(a,iax+db-i) end -- remove backwards
 				end
 				for i=1,#da do table.insert(a,iax+i-1,da[i]) end -- add
 				iax=iax+#da
@@ -444,6 +444,54 @@ order to have undo data available.
 
 ]]
 json_diff.undo=function(b,d)
+	if d[1]=="v" then
+		return d[3]
+	elseif d[1]=="o" then
+		local idx=2
+		while d[idx] do
+			b[ d[idx] ]=json_diff.undo( b[ d[idx] ],d[idx+1])
+			idx=idx+2
+		end
+	elseif d[1]=="a" then
+		local idx=2
+		local ibx=1
+		while d[idx] do
+			local da=d[idx]
+			local db=d[idx+1]
+			local ta=type(da)
+			local tb=type(db)
+			if ta=="table" then da=#da end -- da will always be length of da table
+			
+			if     ta=="number" and da<0 then -- advance over values that have not changed
+				ibx=ibx-da
+				idx=idx+1
+			elseif ta=="number" and da==0 then -- insert
+				for i=1,#db do table.insert(b,ibx+i-1,db[i]) end -- add
+				idx=idx+2
+			elseif ta=="number" and tb=="table"  then
+				for i=1,da do
+					b[ibx+i-1]=json_diff.undo(b[ibx+i-1],d[idx+i])
+				end
+				ibx=ibx+da
+				idx=idx+1+da
+			elseif ta=="table" and ( tb=="table" or tb=="number" ) then -- replace
+				if da>0 then
+					for i=1,da do table.remove(b,ibx+da-i) end -- remove backwards
+				end
+				if tb=="table" then -- might be zero
+					for i=1,#db do table.insert(b,ibx+i-1,db[i]) end -- add
+					ibx=ibx+#db
+				else
+					assert(db==0)
+				end
+				idx=idx+2
+			else
+				error("invalid json_diff types")
+			end
+		end
+	else
+		error("invalid json_diff")
+	end
 	return b
 end
 
