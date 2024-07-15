@@ -466,6 +466,7 @@ json_diff.undo=function(b,d)
 				ibx=ibx-da
 				idx=idx+1
 			elseif ta=="number" and da==0 then -- insert
+				assert(tb=="table")
 				for i=1,#db do table.insert(b,ibx+i-1,db[i]) end -- add
 				idx=idx+2
 			elseif ta=="number" and tb=="table"  then
