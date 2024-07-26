@@ -167,46 +167,6 @@ M.bake=function(oven,ups)
 		return ups.keymaps[idx]
 	end
 
-	-- keep track of keyboard qualifiers
-	ups.now_qualifiers={false,false,false,false} -- flags of "alt" , "ctrl" , "shift" , "win"  in 1,2,3,4 so we know which keys are held down
-	ups.now_qualifiers_text=nil -- string of the above flags joined by + or nil if no curretn qualifiers
-	
-	local build_qualifiers_text=function()
-		local s
-		local add=function(key) if key then if s then s=s.."+"..key else s=key end end end
-		add(ups.now_qualifiers[1])
-		add(ups.now_qualifiers[2])
-		add(ups.now_qualifiers[3])
-		add(ups.now_qualifiers[4])
-		ups.now_qualifiers_text=s
-	end
-	function ups.msg_set_qualifiers(m)
-		if not m then return end
-		if m.class=="key" then
-			if     ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
-				if     m.action== 1 then ups.now_qualifiers[1]="alt"
-				elseif m.action==-1 then ups.now_qualifiers[1]=false end
-				build_qualifiers_text()
-			elseif ( m.keyname=="control" or m.keyname=="control_l" or m.keyname=="control_r" ) then
-				if     m.action== 1 then ups.now_qualifiers[2]="ctrl"
-				elseif m.action==-1 then ups.now_qualifiers[2]=false end
-				build_qualifiers_text()
-			elseif ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) then
-				if     m.action== 1 then ups.now_qualifiers[3]="shift"
-				elseif m.action==-1 then ups.now_qualifiers[3]=false end
-				build_qualifiers_text()
-			elseif ( m.keyname=="gui" or m.keyname=="left gui" or m.keyname=="right gui" ) then -- gui/command/windows key?
-				if     m.action== 1 then ups.now_qualifiers[4]="win"
-				elseif m.action==-1 then ups.now_qualifiers[4]=false end
-				build_qualifiers_text()
-			end
-			m.qualifiers=ups.now_qualifiers_text -- add our cached qualifiers to key messages
-		elseif m.class=="mouse" then
-			m.qualifiers=ups.now_qualifiers_text -- add our cached qualifiers to mouse messages ( so we can easily catch ctrl click etc )
-		end
-		return m
-	end
-
 
 	
 --[[

@@ -221,8 +221,8 @@ M.bake=function(oven,recaps)
 
 			recap.state_msgs={} -- list of msgs for this tick
 			recap.now_msgs={} -- live list that gets swapped into state
-			recap.now_qualifiers={} -- flags of "alt" , "ctrl" , "shift" , "win"  in 1,2,3,4 so we know which keys are held down
-			recap.now_qualifiers_text=nil -- string of the above flags joined by + or nil
+--			recap.now_qualifiers={} -- flags of "alt" , "ctrl" , "shift" , "win"  in 1,2,3,4 so we know which keys are held down
+--			recap.now_qualifiers_text=nil -- string of the above flags joined by + or nil
 			
 			recap.state={}
 			recap.now={}
@@ -240,6 +240,7 @@ M.bake=function(oven,recaps)
 			
 		end
 		
+--[[
 		recap.build_qualifiers_text=function()
 			local s
 			local add=function(key) if key then if s then s=s.."+"..key else s=key end end end
@@ -249,6 +250,7 @@ M.bake=function(oven,recaps)
 			add(recap.now_qualifiers[4])
 			recap.now_qualifiers_text=s
 		end
+]]
 		
 		function recap.set(nam,dat) -- set the volatile data,this gets copied into state before it should be used
 			recap.now[nam]=dat
@@ -281,6 +283,7 @@ M.bake=function(oven,recaps)
 				if not list then list={} ; recap.now_msgs[ m.class ]=list end -- start new class list
 				list[ #list+1 ]=m -- also remember in class list
 			end
+--[[
 			if m.class=="key" then
 				if     ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
 					if     m.action== 1 then recap.now_qualifiers[1]="alt"
@@ -301,6 +304,7 @@ M.bake=function(oven,recaps)
 				end
 				m.qualifiers=recap.now_qualifiers_text -- add our cached qualifiers to key messages
 			end
+]]
 		end
 
 -- use this to set a joysticks axis position

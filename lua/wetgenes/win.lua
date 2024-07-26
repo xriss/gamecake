@@ -321,6 +321,10 @@ function win.create(opts)
 	w.height=0
 	w.overscale=opts.overscale or 1
 	
+	-- keep track of keyboard qualifiers
+	w.qualifiers={false,false,false,false} -- flags of "alt" , "ctrl" , "shift" , "win"  in 1,2,3,4 so we know which keys are held down
+	w.qualifiers_text=nil -- string of the above flags joined by + or nil if no curretn qualifiers
+
 	base.info(w)
 
 	if posix and base.flavour=="raspi" then
@@ -450,6 +454,38 @@ function base.msg(w)
 			m.keyname=win.keymap(m.keyname)
 		end
 		
+		local build_qualifiers_text=function()
+			local s
+			local add=function(key) if key then if s then s=s.."+"..key else s=key end end end
+			add(w.qualifiers[1])
+			add(w.qualifiers[2])
+			add(w.qualifiers[3])
+			add(w.qualifiers[4])
+			w.qualifiers_text=s
+		end
+		if m.class=="key" then
+			if     ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
+				if     m.action== 1 then w.qualifiers[1]="alt"
+				elseif m.action==-1 then w.qualifiers[1]=false end
+				build_qualifiers_text()
+			elseif ( m.keyname=="control" or m.keyname=="control_l" or m.keyname=="control_r" ) then
+				if     m.action== 1 then w.qualifiers[2]="ctrl"
+				elseif m.action==-1 then w.qualifiers[2]=false end
+				build_qualifiers_text()
+			elseif ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) then
+				if     m.action== 1 then w.qualifiers[3]="shift"
+				elseif m.action==-1 then w.qualifiers[3]=false end
+				build_qualifiers_text()
+			elseif ( m.keyname=="gui" or m.keyname=="left gui" or m.keyname=="right gui" ) then -- gui/command/windows key?
+				if     m.action== 1 then w.qualifiers[4]="win"
+				elseif m.action==-1 then w.qualifiers[4]=false end
+				build_qualifiers_text()
+			end
+			m.qualifiers=w.qualifiers_text -- add our cached qualifiers to key messages
+		elseif m.class=="mouse" then
+			m.qualifiers=w.qualifiers_text -- add our cached qualifiers to mouse messages ( so we can easily catch ctrl click etc )
+		end
+
 	end
 	
 	return m
