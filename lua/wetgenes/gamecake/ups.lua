@@ -8,6 +8,9 @@ local wstr=require("wetgenes.string")
 
 --[[
 
+Since the very first arcade games the UP in 1UP has always stood for 
+*U*ser in*P*ut and this is obvioulsy not a backronym.
+
 This is a replacement for the keys and recaps systems, recaps has never 
 really been used as it was intended ( to recored and replay ) and the 
 whole thing has gotten rather complicated and entwined with the input 
@@ -59,14 +62,14 @@ keymaps["full"]={
 	["keypad 4"]	=	{ "pad_left"  },
 	["keypad 2"]	=	{ "pad_down"  },
 	["keypad 6"]	=	{ "pad_right" },
-	["tab"]			=	"select",
-	["enter"]		=	"start",
-	["z"]			=	"l1",
-	["c"]			=	"r1",
+	["tab"]			=	{ "select" },
+	["enter"]		=	{ "start" },
+	["z"]			=	{ "l1" },
+	["c"]			=	{ "r1" },
 	["q"]			=	{ "lz1" , "l2" },
 	["e"]			=	{ "rz1" , "r2" },
-	["shift_l"]		=	"l3",
-	["shift_r"]		=	"r3",
+	["shift_l"]		=	{ "l3" },
+	["shift_r"]		=	{ "r3" },
 	["enter"]		=	{ "y" , "fire"},
 	["ctrl_l"]		=	{ "x" , "fire"},
 	["space"]		=	{ "a" , "fire"},
@@ -76,46 +79,46 @@ keymaps["full"]={
 
 -- 1up shared keyboard
 keymaps["island1"]={
-	["up"]			=	{"up","pad_up","ly0"},
-	["down"]		=	{"down","pad_down","ly1"},
-	["left"]		=	{"left","pad_left","lx0"},
-	["right"]		=	{"right","pad_right","lx1"},
-	["."]			=	{"fire","x"},
-	["/"]			=	{"fire","x"},
-	["shift_r"]		=	{"fire","y"},
-	["alt_r"]		=	{"fire","a"},
-	["control_r"]	=	{"fire","b"},
-	["space"]		=	{"fire","x"},
-	["return"]		=	{"fire","a"},
-	["enter"]		=	{"fire","b"},
-	["["]			=	"l1",
-	["]"]			=	"r1",
-	["-"]			=	{"lz1","l2"},
-	["="]			=	{"rz2","r2"},
-	["9"]			=	"select",
-	["0"]			=	"start",
+	["up"]			=	{ "up" , "pad_up" , "ly0" },
+	["down"]		=	{ "down" , "pad_down" , "ly1" },
+	["left"]		=	{ "left" , "pad_left" , "lx0" },
+	["right"]		=	{ "right" , "pad_right" , "lx1" },
+	["."]			=	{ "fire" , "x"},
+	["/"]			=	{ "fire" , "x"},
+	["shift_r"]		=	{ "fire" , "y"},
+	["alt_r"]		=	{ "fire" , "a"},
+	["control_r"]	=	{ "fire" , "b"},
+	["space"]		=	{ "fire" , "x"},
+	["return"]		=	{ "fire" , "a"},
+	["enter"]		=	{ "fire" , "b"},
+	["["]			=	{ "l1" },
+	["]"]			=	{ "r1" },
+	["-"]			=	{ "lz1" , "l2"},
+	["="]			=	{ "rz2" , "r2"},
+	["9"]			=	{ "select"},
+	["0"]			=	{ "start"},
 }
 
 -- 2up shared keyboard
 keymaps["island2"]={
-	["w"]			=	{"up","pad_up","ly0"},
-	["s"]			=	{"down","pad_down","ly1"},
-	["a"]			=	{"left","pad_left","lx0"},
-	["d"]			=	{"right","pad_right","lx1"},
-	["<"]			=	{"fire","y"},
-	["z"]			=	{"fire","y"},
-	["shift_l"]		=	{"fire","x"},
-	["control_l"]	=	{"fire","a"},
-	["alt_l"]		=	{"fire","b"},
-	["shift"]		=	{"fire","x"}, -- grab all the shift
-	["control"]		=	{"fire","a"}, -- control and alt keys
-	["alt"]			=	{"fire","b"}, -- if we cant tell left from right
-	["z"]			=	"l1",
-	["c"]			=	"r1",
-	["q"]			=	{"lz1","l2"},
-	["e"]			=	{"rz2","r2"},
-	["1"]			=	"select",
-	["2"]			=	"start",
+	["w"]			=	{ "up" , "pad_up" , "ly0" },
+	["s"]			=	{ "down" , "pad_down" , "ly1" },
+	["a"]			=	{ "left" , "pad_left" , "lx0" },
+	["d"]			=	{ "right" , "pad_right" , "lx1" },
+	["<"]			=	{ "fire" , "y" },
+	["z"]			=	{ "fire" , "y" },
+	["shift_l"]		=	{ "fire" , "x" },
+	["control_l"]	=	{ "fire" , "a" },
+	["alt_l"]		=	{ "fire" , "b" },
+	["shift"]		=	{ "fire" , "x" }, -- grab all the shift
+	["control"]		=	{ "fire" , "a" }, -- control and alt keys
+	["alt"]			=	{ "fire" , "b" }, -- if we cant tell left from right
+	["z"]			=	{ "l1" },
+	["c"]			=	{ "r1" },
+	["q"]			=	{ "lz1" , "l2" },
+	["e"]			=	{ "rz2" , "r2" },
+	["1"]			=	{ "select" },
+	["2"]			=	{ "start" },
 }
 
 -- merge the island1&2 ups in here
@@ -126,9 +129,9 @@ for n,v in pairs(keymaps["island2"]) do keymaps["islands"][n]=v end
 
 
 -- these should be configurable 
-local powzone=2				-- walk helper
-local minzone=4095			-- deadzone
-local maxzone=32767-4096	-- run helper
+local powzone=2			-- walk helper
+local minzone=0x1000	-- deadzone
+local maxzone=0x7000	-- run helper
 
 local fixaxis=function(n)
 	local fix=function(n)
@@ -145,8 +148,90 @@ local fixaxis=function(n)
 	end
 end
 
-			
-			
+M.up_functions={}
+M.up_metatable={__index=M.up_functions}
+
+-- any functions here should not assume that the up we have will have
+-- the correct metatable associated with them so we will need to call
+-- other up functions explicitly.
+
+M.up_functions.reset=function(up)
+
+	up.all={} -- this frame
+	up.now={} -- next frame
+	up.pulse={} -- "_set" or "_clr" next frame only pulse
+	
+	up.last_pad_values={} -- needed for pad axis buttons
+
+end
+
+M.up_functions.get_now=function(up,n)
+	local o=up.now[n] -- old value may be here
+	if type(o)=="nil" then o=up.all[n] end -- but is probably here
+	return n
+end
+
+M.up_functions.set_button=function(up,n,v)
+	local o=up.now[n] -- old value may be here
+	if type(o)=="nil" then o=up.all[n] end -- but is probably here
+	
+	if v then -- must be boolean so set
+		up.now[nam]=true
+		if not o then -- change?
+			up.pulse[nam.."_set"]=true
+		end
+	else -- or clr
+		up.now[nam]=false
+		if o then -- change?
+			up.pulse[nam.."_clr"]=true
+		end
+	end
+end
+
+M.up_functions.set_axis=function(up,n,v)
+--	local o=up.now[n] -- old value may be here
+--	if type(o)=="nil" then o=up.all[n] end -- but is probably here
+	recap.now[n]=v -- range of -0x8000 to +0x8000
+end
+
+M.up_functions.add_axis=function(up,n,v)
+	local o=up.now[n] -- old value may be here
+	if type(o)=="nil" then o=up.all[n] end -- but is probably here
+	recap.now[n]=((((o or 0)+v)%0x10000)+0x10000)%0x10000 -- range of 0x0000 to 0xffff
+end
+
+-- manage fake axis and decay from keypress states
+M.up_functions.fake_axis=function(up)
+
+	for n,a in ipairs{"lx","ly","lz","rx","ry","rz"} do -- check axis buttons and convert to axis movement
+		local ak=a.."k"
+		local o=(up:get_now(ak) or 0)
+		local v=0
+		if     up:get_now(a.."0") then v=-32767 if(o>0) then o=0 end
+		elseif up:get_now(a.."1") then v= 32767 if(o<0) then o=0 end
+		end
+		if v==0 then -- fast decay to zero
+			v=math.floor(o*0.8+v*0.2)
+		else -- slow adjust to full
+			v=math.floor(o*0.95+v*0.05)
+		end
+		up:set_axis(ak,v)
+	end
+	
+	-- pick best l/r axis be it fake keys or real pad and copy to "??b" axis
+	local lx ,ly ,lz =(up:get_now("lx")  or 0),(up:get_now("ly")  or 0),(up:get_now("lz")  or 0)
+	local lxk,lyk,lzk=(up:get_now("lxk") or 0),(up:get_now("lyk") or 0),(up:get_now("lzk") or 0)
+	if lxk*lxk+lyk*lyk+lzk*lzk > lx*lx+ly*ly+lz*lz then		up:set_axis("lxb",lxk) up:set_axis("lyb",lyk) up:set_axis("lzb",lzk)
+	else													up:set_axis("lxb",lx ) up:set_axis("lyb",ly ) up:set_axis("lzb",lz )
+	end
+	local rx ,ry ,rz =(up:get_now("rx")  or 0),(up:get_now("ry")  or 0),(up:get_now("rz")  or 0)
+	local rxk,ryk,rzk=(up:get_now("rxk") or 0),(up:get_now("ryk") or 0),(up:get_now("rzk") or 0)
+	if rxk*rxk+ryk*ryk+rzk*rzk > rx*rx+ry*ry+rz*rz then		up:set_axis("rxb",rxk) up:set_axis("ryb",ryk) up:set_axis("rzb",rzk)
+	else													up:set_axis("rxb",rx ) up:set_axis("ryb",ry ) up:set_axis("rzb",rz )
+	end
+end
+
+		
 M.bake=function(oven,ups)
 
 	ups=ups or {}
@@ -154,19 +239,176 @@ M.bake=function(oven,ups)
 	local cake=oven.cake
 	local canvas=cake.canvas
 	
+	ups.last_pad_values={}
+
 	ups.keymaps={}
 	ups.keymap=function(idx,map)
 		if map then
 			ups.keymaps[idx]={} -- reset
 			if keymaps[map] then map=keymaps[map] end -- named map
 			for n,v in pairs(map) do -- copy
-				if type(v)=="table" then v={unpack(v)} end -- dupe
-				ups.keymap[n]=v
+				ups.keymap[n]={unpack(v)}
 			end
 		end
 		return ups.keymaps[idx]
 	end
 
+	ups.states={}
+	-- get or create a state and remember its idx in states
+	ups.manifest=function(idx)
+		if ups.states[idx] then return ups.states[idx] end -- already created
+		ups.states[idx]=ups.create() -- create and remember
+		return ups.states[idx]
+	end
+	-- create a state
+	ups.create=function()
+		local up={}
+		setmetatable(up,M.up_metatable) -- shared functions
+		up:reset() -- initalize
+		return up
+	end
+
+	ups.all_msgs={} -- all the msgs for this tick
+	ups.now_msgs={} -- volatile building list of msgs
+
+-- remember and apply a msg to our now states using keymaps etc
+	function ups.msg(mm)
+		local m={} -- we will copy and cache
+		for n,v in pairs(mm) do m[n]=v end -- copy top level only
+		ups.now_msgs[#ups.now_msgs+1]=m -- remember
+		
+		if m.class=="key" then
+		
+			for idx,maps in ipairs(ups.keymaps) do -- check all keymaps
+				local buttons=maps[m.keyname] or maps[m.ascii]
+				if buttons then
+					local up=ups.mainfest(idx)
+					if m.action==1 then -- key set
+						for _,button in ipairs(buttons) do
+							up:set_button(button,true)
+						end
+					elseif m.action==-1 then -- key clear
+						for _,button in ipairs(buttons) do
+							up:set_button(button,false)
+						end
+					end
+				end
+			end
+			
+		elseif m.class=="mouse" then -- swipe to move
+		
+			local up=ups.mainfest(1) -- mouse is 1up only
+
+			if m.action==-1 then -- we only get button ups
+				if m.keyname=="wheel_add" then
+					up:add_axis( "mz" , 1 )
+				elseif m.keyname=="wheel_sub" then
+					up:add_axis( "mz" , -1 )
+				end
+			end
+
+			up:add_axis( "mx" , m.dx )
+			up:add_axis( "my" , m.dy )
+			up:set_axis( "vx" , m.x )
+			up:set_axis( "vy" , m.y )
+
+			if m.action==1 then -- key set
+				if m.keyname then
+					up:set_button("mouse_"..m.keyname,true)
+				end
+				if m.keyname=="left" then
+					up:set_button("fire",true)
+				end
+			elseif m.action==-1 then -- key clear
+				if m.keyname=="wheel_add" or m.keyname=="wheel_sub" then -- we do not get key downs just ups
+					up:set_button("mouse_"..m.keyname,true)
+				end
+				if m.keyname then
+					up:set_button("mouse_"..m.keyname,false)
+				end
+				if m.keyname=="left" then
+					up:set_button("fire",false)
+				end
+			end
+
+			elseif m.class=="padaxis" then -- SDL axis values
+
+				local up=ups.mainfest(m.id) -- this pad belongs to
+
+				local zone=0x2000
+
+				local doaxis=function(name1,name2)
+
+					local v=0
+					if     m.value <= -zone then v=-1
+					elseif m.value >=  zone then v= 1
+					end
+
+					if up.last_pad_value[name1]~=v then -- only on change
+						if     v<0 then	up:set_button(name1,true)	up:set_button(name2,false)
+						elseif v>0 then	up:set_button(name1,false)	up:set_button(name2,true)
+						else			up:set_button(name1,false)	up:set_button(name2,false)
+						end
+					end
+
+					up.last_pad_value[name1]=v
+				end
+
+				local dotrig=function(name)
+
+					local v=0
+					if m.value >=  zone then v= 1
+					end
+
+					if up.last_pad_value[name]~=v then -- only on change
+
+						if     v>0 then		up:set_button(name,true)
+						else				up:set_button(name,false)
+						end
+					end
+
+					up.last_pad_value[name]=v
+				end
+				
+				if     m.name=="LeftX"			then		doaxis("left","right")	up:set_axis("lx",m.value)
+				elseif m.name=="LeftY"			then		doaxis("up","down")		up:set_axis("ly",m.value)
+				elseif m.name=="RightX"			then		doaxis("left","right")	up:set_axis("rx",m.value)
+				elseif m.name=="RightY"			then		doaxis("up","down")		up:set_axis("ry",m.value)
+				elseif m.name=="TriggerLeft"	then		dotrig("l2")			up:set_axis("lz",m.value)
+				elseif m.name=="TriggerRight"	then		dotrig("r2")			up:set_axis("rz",m.value)
+				end
+
+			elseif m.class=="padkey" then -- SDL button values
+
+				local up=ups.mainfest(m.id) -- this pad belongs to
+
+				local docode=function(name)
+					if		m.value==1  then	up:set_button(name,true)	-- key set
+					elseif	m.value==-1 then	up:set_button(name,false)	-- key clear
+					end
+				end
+
+				if     m.name=="Left"			then docode("left")   docode("pad_left")    up:set_axis("dx",(m.value==1) and -32767 or 0)
+				elseif m.name=="Right"			then docode("right")  docode("pad_right")   up:set_axis("dx",(m.value==1) and  32767 or 0)
+				elseif m.name=="Up"				then docode("up")     docode("pad_up")      up:set_axis("dy",(m.value==1) and -32767 or 0)
+				elseif m.name=="Down"			then docode("down")   docode("pad_down")    up:set_axis("dy",(m.value==1) and  32767 or 0)
+				elseif m.name=="A"				then docode("a")      docode("fire")
+				elseif m.name=="B"				then docode("b")      docode("fire")
+				elseif m.name=="X"				then docode("x")      docode("fire")
+				elseif m.name=="Y"				then docode("y")      docode("fire")
+				elseif m.name=="LeftShoulder"	then docode("l1")
+				elseif m.name=="RightShoulder"	then docode("r1")
+				elseif m.name=="LeftStick"		then docode("l3")
+				elseif m.name=="RightStick"		then docode("r3")
+				elseif m.name=="Back"			then docode("select")
+				elseif m.name=="Start"			then docode("start")
+				elseif m.name=="Guide"			then docode("guide")
+				else docode("fire") -- all other buttons are fire
+				end
+				
+			end
+		end
+	end
 
 	
 --[[
