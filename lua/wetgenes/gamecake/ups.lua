@@ -31,12 +31,12 @@ thread so the data needs to be kept pure.
 So yeah, lots of stuff going on here but the basic idea for basic use 
 is that we provide.
 
-	ups 0 as the state of all gamepads, eg poke any gamepad or keyboard 
-	and all button press will happen here.
-
 	ups X as the state of a single gamepad which requires mapping to 
 	hardware gamepads or virtual keyboard gamepads or even a remote 
 	gamepad for a networked player.
+	
+	by default we will map mouse and keys to up1 so that can be used 
+	where keyboard and mouse values are wanted.
 
 	A list of all msgs we recieve this frame, everytime we advance a 
 	frame this is reset so it *must* be polled every frame update.
@@ -171,9 +171,7 @@ end
 
 -- get stable axis fixed to +-1.0
 M.up_functions.axis=function(up,name) -- fix deadzones etc
-	local ax=up.all[name]
-	if ax then return fixaxis( ax ) end
-	return 0
+	return fixaxis( up.all[name] )
 end
 
 M.up_functions.set_button=function(up,n,v)
@@ -205,7 +203,8 @@ M.up_functions.add_axis=function(up,n,v)
 end
 
 -- manage fake axis with decay from keypress states
-M.up_functions.fake_axis=function(up)
+-- and handle deletion of pulse msgs
+M.up_functions.update=function(up)
 
 	for n,a in ipairs{"lx","ly","lz","rx","ry","rz"} do -- check axis buttons and convert to axis movement
 		local ak=a.."k"
@@ -233,11 +232,8 @@ M.up_functions.fake_axis=function(up)
 	if rxk*rxk+ryk*ryk+rzk*rzk > rx*rx+ry*ry+rz*rz then		up:set_axis("rxb",rxk) up:set_axis("ryb",ryk) up:set_axis("rzb",rzk)
 	else													up:set_axis("rxb",rx ) up:set_axis("ryb",ry ) up:set_axis("rzb",rz )
 	end
-end
 
--- make pulses only last one update
-M.up_functions.update=function(up)
-
+	-- auto delete pulses
 	for n,v in pairs(up.pulse) do
 		up.all[n]=v -- set or clear this frame
 		if v then	up.pulse[n]=false	-- clear next frame
@@ -251,14 +247,16 @@ M.bake=function(oven,ups)
 
 	ups=ups or {}
 	
+	-- reset everything
 	ups.reset=function()
 		ups.last_pad_values={}
 		ups.keymaps={}
 		ups.states={}
-		ups.all_msgs={} -- all the msgs for this tick
-		ups.now_msgs={} -- volatile building list of msgs
+		ups.msgs={} -- all the msgs for this tick
+		ups.new_msgs={} -- volatile building list of msgs
 	end
 
+	-- set keymap for this idx
 	ups.keymap=function(idx,map)
 		if map then
 			ups.keymaps[idx]={} -- reset
@@ -276,6 +274,7 @@ M.bake=function(oven,ups)
 		ups.states[idx]=ups.create() -- create and remember
 		return ups.states[idx]
 	end
+	
 	-- create a state
 	ups.create=function()
 		local up={}
@@ -289,9 +288,10 @@ M.bake=function(oven,ups)
 	ups.msg=function(mm)
 		local m={} -- we will copy and cache
 		for n,v in pairs(mm) do m[n]=v end -- copy top level only
-		ups.now_msgs[#ups.now_msgs+1]=m -- remember
+		ups.new_msgs[#ups.new_msgs+1]=m -- remember
 	end
 	
+	-- apply msgs to button states
 	ups.msg_apply=function(m)
 		if m.class=="key" then
 		
@@ -430,13 +430,13 @@ M.bake=function(oven,ups)
 	
 		if oven.is.update then -- pull all msgs from other thread
 
-			m.all_msgs={} -- about to fill this
-			m.now_msgs={} -- this is not used
+			ups.msgs={} -- about to fill this
+			ups.new_msgs={} -- this should never contain anything
 			repeat
 				local ok,m=oven.tasks.linda:receive(0,"ups") -- grab all available memos
 				if ok and m then
-					for _,v in ipairs(m.all_msgs) do
-						ups.all_msgs[#ups.all_msgs+1]=v
+					for _,v in ipairs(m.msgs) do
+						ups.msgs[#ups.msgs+1]=v
 					end
 				end
 			until not m
@@ -444,13 +444,13 @@ M.bake=function(oven,ups)
 		else
 
 			-- swap now to all
-			ups.all_msgs=ups.now_msgs
-			ups.now_msgs={}
+			ups.msgs=ups.new_msgs
+			ups.new_msgs={} -- start again
 
 			if oven.is.main then -- push all msgs to other thread
 
 				local m={}
-				m.all_msgs=ups.all_msgs
+				m.msgs=ups.msgs
 				oven.tasks.linda:send(nil,"ups",m)
 			
 			end
@@ -458,22 +458,22 @@ M.bake=function(oven,ups)
 		end
 
 		-- change current state using all msgs
-		for _,m in ipairs( ups.all_msgs ) do
+		for _,m in ipairs( ups.msgs ) do
 			ups.msg_apply(m)
 		end
 
-		-- advance each state one frame
+		-- advance each up state one frame
 		for idx,up in pairs(ups.states) do
-			up:fake_axis()
 			up:update()
 		end
 
 	end
 
 	-- create 1up only by default
-	ups.reset(1)
+	ups.reset()
 	ups.manifest(1)
-	ups.keymap(1,"full")
+	ups.keymap(1,{}) -- no keymap by default
+--	ups.keymap(1,"full")
 
 	return ups
 end
