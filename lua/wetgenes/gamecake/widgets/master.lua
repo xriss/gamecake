@@ -32,11 +32,6 @@ local canvas=oven.canvas
 
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
-	local skeys=oven.rebake("wetgenes.gamecake.spew.keys")
-
-local mkeys=oven.rebake("wetgenes.gamecake.mods.keys")
-
-
 local wdatas=oven.rebake("wetgenes.gamecake.widgets.datas")
 
 
@@ -149,31 +144,24 @@ function wmaster.setup(widget,def)
 	function master.update(widget,resize)
 --print("update",widget)
 		
-		local ups=skeys.ups()
-		if ups then -- use skeys / srecaps code 
-
-
-			if master.focus then
-				skeys.set_opts("typing",true)
-			else
-				skeys.set_opts("typing",false)
-			end
+		local up=oven.ups.up(1)
+		if up then
 			
 			if not master.no_keymove then
 
 				if not master.press then -- do not move when button is held down
 					local vx=0
 					local vy=0
-					if ups.button("left_set")  then vx=-1 end
-					if ups.button("right_set") then vx= 1 end
-					if ups.button("up_set")    then vy=-1 end
-					if ups.button("down_set")  then vy= 1 end
+					if up.button("left_set")  then vx=-1 end
+					if up.button("right_set") then vx= 1 end
+					if up.button("up_set")    then vy=-1 end
+					if up.button("down_set")  then vy= 1 end
 					master.keymove(vx,vy)
 				end
 
 			end
 
-			if ups.button("fire_set")  then
+			if up.button("fire_set")  then
 
 				master.press=true
 
@@ -209,7 +197,7 @@ function wmaster.setup(widget,def)
 
 			end
 			
-			if ups.button("fire_clr")  then
+			if up.button("fire_clr")  then
 
 				master.press=false
 
@@ -226,11 +214,11 @@ function wmaster.setup(widget,def)
 						end
 
 					end
-					if ups.button("mouse_left_clr")  then
+					if up.button("mouse_left_clr")  then
 						master.over:call_hook_later("click",{keyname="mouse_left"}) -- its a left click
-					elseif ups.button("mouse_right_clr")  then
+					elseif up.button("mouse_right_clr")  then
 						master.over:call_hook_later("click",{keyname="mouse_right"}) -- its a right click
-					elseif ups.button("mouse_middle_clr")  then
+					elseif up.button("mouse_middle_clr")  then
 						master.over:call_hook_later("click",{keyname="mouse_middle"}) -- its a middle click
 					else
 						master.over:call_hook_later("click") -- probably not a mouse click
@@ -240,11 +228,11 @@ function wmaster.setup(widget,def)
 				
 				elseif master.over and master.over~=master then -- mouse up but not mouse down ( ie we dragged and released )
 
-					if ups.button("mouse_left_clr")  then
+					if up.button("mouse_left_clr")  then
 						master.over:call_hook_later("release",{keyname="mouse_left"}) -- its a left click
-					elseif ups.button("mouse_right_clr")  then
+					elseif up.button("mouse_right_clr")  then
 						master.over:call_hook_later("release",{keyname="mouse_right"}) -- its a right click
-					elseif ups.button("mouse_middle_clr")  then
+					elseif up.button("mouse_middle_clr")  then
 						master.over:call_hook_later("release",{keyname="mouse_middle"}) -- its a middle click
 					else
 						master.over:call_hook_later("release") -- probably not a mouse click
@@ -400,11 +388,11 @@ function wmaster.setup(widget,def)
 		end
 	
 		if m.class=="text" then
-			if (skeys.opts and skeys.opts.typing) or m.softkey then -- fake keyboard only
+			if master.focus or m.softkey then -- fake keyboard only
 				widget:key(m.text)
 			end
 		elseif m.class=="key" then
-			if (skeys.opts and skeys.opts.typing) or m.softkey then -- fake keyboard only
+			if master.focus or m.softkey then -- fake keyboard only
 				widget:key(nil,m.keyname,m.action)
 			end
 		elseif m.class=="mouse" then

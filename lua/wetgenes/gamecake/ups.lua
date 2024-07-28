@@ -76,6 +76,25 @@ keymaps["full"]={
 	["ctrl_r"]		=	{ "b" , "fire" },
 }
 
+-- basic 1up with only a single fire button
+keymaps["basic"]={
+	["up"]			=	{ "up" , "pad_up" , "ly0" },
+	["down"]		=	{ "down" , "pad_down" , "ly1" },
+	["left"]		=	{ "left" , "pad_left" , "lx0" },
+	["right"]		=	{ "right" , "pad_right" , "lx1" },
+	["shift_r"]		=	{ "fire" },
+	["alt_r"]		=	{ "fire" },
+	["control_r"]	=	{ "fire" },
+	["shift_l"]		=	{ "fire" },
+	["alt_l"]		=	{ "fire" },
+	["control_l"]	=	{ "fire" },
+	["space"]		=	{ "fire" },
+	["return"]		=	{ "fire" },
+	["enter"]		=	{ "fire" },
+	["shift"]		=	{ "fire" }, -- also grab all the shift
+	["control"]		=	{ "fire" }, -- control and alt keys
+	["alt"]			=	{ "fire" }, -- if we cant tell left from right
+}
 
 -- 1up shared keyboard
 keymaps["island1"]={
@@ -97,6 +116,9 @@ keymaps["island1"]={
 	["="]			=	{ "rz2" , "r2"},
 	["9"]			=	{ "select"},
 	["0"]			=	{ "start"},
+	["shift"]		=	{ "fire" }, -- also grab all the shift
+	["control"]		=	{ "fire" }, -- control and alt keys
+	["alt"]			=	{ "fire" }, -- if we cant tell left from right
 }
 
 -- 2up shared keyboard
@@ -110,15 +132,15 @@ keymaps["island2"]={
 	["shift_l"]		=	{ "fire" , "x" },
 	["control_l"]	=	{ "fire" , "a" },
 	["alt_l"]		=	{ "fire" , "b" },
-	["shift"]		=	{ "fire" , "x" }, -- grab all the shift
-	["control"]		=	{ "fire" , "a" }, -- control and alt keys
-	["alt"]			=	{ "fire" , "b" }, -- if we cant tell left from right
 	["z"]			=	{ "l1" },
 	["c"]			=	{ "r1" },
 	["q"]			=	{ "lz1" , "l2" },
 	["e"]			=	{ "rz2" , "r2" },
 	["1"]			=	{ "select" },
 	["2"]			=	{ "start" },
+	["shift"]		=	{ "fire" }, -- also grab all the shift
+	["control"]		=	{ "fire" }, -- control and alt keys
+	["alt"]			=	{ "fire" }, -- if we cant tell left from right
 }
 
 -- merge the island1&2 ups in here
@@ -507,7 +529,7 @@ M.bake=function(oven,ups)
 	ups.reset()
 	ups.manifest(1)
 	ups.keymap(1,{}) -- no keymap by default
-	ups.keymap(1,"full")
+	ups.keymap(1,"basic")
 
 	return ups
 end
