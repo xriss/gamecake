@@ -248,17 +248,27 @@ M.up_functions.update=function(up)
 	-- pick best l/r axis be it "k"eys or "p"ad values.
 	local lxp,lyp,lzp=(up.all["lxp"] or 0),(up.all["lyp"] or 0),(up.all["lzp"]  or 0)
 	local lxk,lyk,lzk=(up.all["lxk"] or 0),(up.all["lyk"] or 0),(up.all["lzk"] or 0)
-	if lxk*lxk+lyk*lyk+lzk*lzk > lxp*lxp+lyp*lyp+lzp*lzp then
-		up.all["lx"]=lxk ; up.all["ly"]=lyk ; up.all["lz"]=lzk
+	if lxk*lxk+lyk*lyk > lxp*lxp+lyp*lyp then -- stick
+		up.all["lx"]=lxk ; up.all["ly"]=lyk
 	else
-		up.all["lx"]=lxp ; up.all["ly"]=lyp ; up.all["lz"]=lzp
+		up.all["lx"]=lxp ; up.all["ly"]=lyp
+	end
+	if lzk*lzk > lzp*lzp then -- trigger
+		up.all["lz"]=lzk
+	else
+		up.all["lz"]=lzp
 	end
 	local rxp,ryp,rzp=(up.all["rxp"] or 0),(up.all["ryp"] or 0),(up.all["rzp"] or 0)
 	local rxk,ryk,rzk=(up.all["rxk"] or 0),(up.all["ryk"] or 0),(up.all["rzk"] or 0)
-	if rxk*rxk+ryk*ryk+rzk*rzk > rxp*rxp+ryp*ryp+rzp*rzp then
-		up.all["rx"]=rxk ; up.all["ry"]=ryk ; up.all["rz"]=rzk
+	if rxk*rxk+ryk*ryk > rxp*rxp+ryp*ryp then -- stick
+		up.all["rx"]=rxk ; up.all["ry"]=ryk
 	else
-		up.all["rx"]=rxp ; up.all["ry"]=ryp ; up.all["rz"]=rzp
+		up.all["rx"]=rxp ; up.all["ry"]=ryp
+	end
+	if rzk*rzk > rzp*rzp then -- trigger
+		up.all["rz"]=rzk
+	else
+		up.all["rz"]=rzp
 	end
 
 	-- auto delete pulses
@@ -529,8 +539,7 @@ M.bake=function(oven,ups)
 	-- create 1up only by default
 	ups.reset()
 	ups.manifest(1)
-	ups.keymap(1,{}) -- no keymap by default
-	ups.keymap(1,"basic")
+	ups.keymap(1,"basic") -- default to basic keymap
 
 	return ups
 end

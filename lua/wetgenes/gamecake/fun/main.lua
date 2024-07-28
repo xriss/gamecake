@@ -47,9 +47,13 @@ M.bake=function(oven,main)
 		fov=0,
 	})
 
-	local skeys=oven.rebake("wetgenes.gamecake.spew.keys").setup{max_up=6,pad_map=2} -- upto 6 players, two on keyboard 4-6 on controllers
-	local sscores=oven.rebake("wetgenes.gamecake.spew.scores").setup(6)
+--	local skeys=oven.rebake("wetgenes.gamecake.spew.keys").setup{max_up=6,pad_map=2} -- upto 6 players, two on keyboard 4-6 on controllers
+--	local sscores=oven.rebake("wetgenes.gamecake.spew.scores").setup(6)
 
+	-- create 1up only by default ( multiple controller use will manifest more )
+	oven.ups.reset()
+	oven.ups.manifest(1)
+	oven.ups.keymap(1,"full") -- single player has full keymap
 
 main.loads=function()
 

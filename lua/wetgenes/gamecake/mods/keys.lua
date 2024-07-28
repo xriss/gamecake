@@ -18,7 +18,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 function M.bake(oven,keys)
 
-	local skeys=oven.rebake("wetgenes.gamecake.spew.keys") -- use spew keys always
+--	local skeys=oven.rebake("wetgenes.gamecake.spew.keys") -- use spew keys always
 
 	keys=keys or {}
 
@@ -112,16 +112,16 @@ function M.bake(oven,keys)
 	end
 	function keys.clean()
 --print("clean")
-		skeys.clean()
+--		skeys.clean()
 	end
 	function keys.msg(m)
 --print("msg",m)
-		skeys.msg(m)
+--		skeys.msg(m)
 		return m
 	end
 	function keys.update()
 --print("update")
-		skeys.update()
+--		skeys.update()
 	end
 
 
