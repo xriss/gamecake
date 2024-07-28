@@ -37,7 +37,7 @@ function M.bake(oven,escmenu)
 	local canvas=cake.canvas
 --	local layout=cake.layouts.create{}
 
-	local skeys=oven.rebake("wetgenes.gamecake.spew.keys")
+--	local skeys=oven.rebake("wetgenes.gamecake.spew.keys")
 
 
 	function escmenu.setup()
@@ -121,6 +121,7 @@ function M.bake(oven,escmenu)
 	
 
 	function escmenu.update()
+	
 		if not escmenu.active then return end
 
 		if escmenu.show then
@@ -175,7 +176,7 @@ function M.bake(oven,escmenu)
 
 				escmenu.view.msg(m)
 
-				skeys.msg(m)
+--				skeys.msg(m)
 
 --				if m.xraw and m.yraw then	-- we need to fix raw x,y numbers
 --					m.x,m.y=layout.xyscale(m.xraw,m.yraw)	-- local coords, 0,0 is center of screen

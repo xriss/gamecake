@@ -103,7 +103,7 @@ system.setup=function(code)
 			gl=oven.gl,
 			require=require,
 			package=package, -- to help with module creation
-			ups=oven.rebake("wetgenes.gamecake.spew.recaps").ups, -- input, for 1up - 6up 
+			ups=oven.ups.up, -- input, for 1up - 6up 
 		}) do env[n]=v end
 		
 		local tab={}

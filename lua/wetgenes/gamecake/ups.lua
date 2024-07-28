@@ -210,27 +210,33 @@ M.up_functions.update=function(up)
 		local ak=a.."k"
 		local o=(up.all[ak] or 0)
 		local v=0
+		-- the +19 is a hack to make sure we reach +32767 due to rounding errors when *0.05
 		if     up.all[a.."0"] then v=-32767 if(o>0) then o=0 end
-		elseif up.all[a.."1"] then v= 32767 if(o<0) then o=0 end
+		elseif up.all[a.."1"] then v= 32768+19 if(o<0) then o=0 end
 		end
 		if v==0 then -- fast decay to zero
-			v=math.floor(o*0.8+v*0.2)
-		else -- slow adjust to full
+			local s=o<0 and -1 or 1 -- remove sign
+			v=math.floor(o*s*0.8)*s
+		else -- slower ramp to full
 			v=math.floor(o*0.95+v*0.05)
 		end
-		up:set_axis(ak,v)
+		up.all[ak]=v
 	end
 	
 	-- pick best l/r axis be it fake keys or real pad and copy to "??b" axis
-	local lx ,ly ,lz =(up.all["lx"]  or 0),(up.all["ly"]  or 0),(up.all["lz"]  or 0)
+	local lxp,lyp,lzp=(up.all["lxp"] or 0),(up.all["lyp"] or 0),(up.all["lzp"]  or 0)
 	local lxk,lyk,lzk=(up.all["lxk"] or 0),(up.all["lyk"] or 0),(up.all["lzk"] or 0)
-	if lxk*lxk+lyk*lyk+lzk*lzk > lx*lx+ly*ly+lz*lz then		up:set_axis("lxb",lxk) up:set_axis("lyb",lyk) up:set_axis("lzb",lzk)
-	else													up:set_axis("lxb",lx ) up:set_axis("lyb",ly ) up:set_axis("lzb",lz )
+	if lxk*lxk+lyk*lyk+lzk*lzk > lxp*lxp+lyp*lyp+lzp*lzp then
+		up.all["lx"]=lxk ; up.all["ly"]=lyk ; up.all["lz"]=lzk
+	else
+		up.all["lx"]=lxp ; up.all["ly"]=lyp ; up.all["lz"]=lzp
 	end
-	local rx ,ry ,rz =(up.all["rx"]  or 0),(up.all["ry"]  or 0),(up.all["rz"]  or 0)
+	local rxp,ryp,rzp=(up.all["rxp"] or 0),(up.all["ryp"] or 0),(up.all["rzp"] or 0)
 	local rxk,ryk,rzk=(up.all["rxk"] or 0),(up.all["ryk"] or 0),(up.all["rzk"] or 0)
-	if rxk*rxk+ryk*ryk+rzk*rzk > rx*rx+ry*ry+rz*rz then		up:set_axis("rxb",rxk) up:set_axis("ryb",ryk) up:set_axis("rzb",rzk)
-	else													up:set_axis("rxb",rx ) up:set_axis("ryb",ry ) up:set_axis("rzb",rz )
+	if rxk*rxk+ryk*ryk+rzk*rzk > rxp*rxp+ryp*ryp+rzp*rzp then
+		up.all["rx"]=rxk ; up.all["ry"]=ryk ; up.all["rz"]=rzk
+	else
+		up.all["rx"]=rxp ; up.all["ry"]=ryp ; up.all["rz"]=rzp
 	end
 
 	-- auto delete pulses
@@ -260,9 +266,10 @@ M.bake=function(oven,ups)
 	ups.keymap=function(idx,map)
 		if map then
 			ups.keymaps[idx]={} -- reset
+			local m=ups.keymaps[idx]
 			if keymaps[map] then map=keymaps[map] end -- named map
 			for n,v in pairs(map) do -- copy
-				ups.keymap[n]={unpack(v)}
+				m[n]={unpack(v)}
 			end
 		end
 		return ups.keymaps[idx]
@@ -298,7 +305,7 @@ M.bake=function(oven,ups)
 			for idx,maps in ipairs(ups.keymaps) do -- check all keymaps
 				local buttons=maps[m.keyname] or maps[m.ascii]
 				if buttons then
-					local up=ups.mainfest(idx)
+					local up=ups.manifest(idx)
 					if m.action==1 then -- key set
 						for _,button in ipairs(buttons) do
 							up:set_button(button,true)
@@ -386,12 +393,12 @@ M.bake=function(oven,ups)
 				up.last_pad_value[name]=v
 			end
 			
-			if     m.name=="LeftX"			then		doaxis("left","right")	up:set_axis("lx",m.value)
-			elseif m.name=="LeftY"			then		doaxis("up","down")		up:set_axis("ly",m.value)
-			elseif m.name=="RightX"			then		doaxis("left","right")	up:set_axis("rx",m.value)
-			elseif m.name=="RightY"			then		doaxis("up","down")		up:set_axis("ry",m.value)
-			elseif m.name=="TriggerLeft"	then		dotrig("l2")			up:set_axis("lz",m.value)
-			elseif m.name=="TriggerRight"	then		dotrig("r2")			up:set_axis("rz",m.value)
+			if     m.name=="LeftX"			then		doaxis("left","right")	up:set_axis("lxp",m.value)
+			elseif m.name=="LeftY"			then		doaxis("up","down")		up:set_axis("lyp",m.value)
+			elseif m.name=="RightX"			then		doaxis("left","right")	up:set_axis("rxp",m.value)
+			elseif m.name=="RightY"			then		doaxis("up","down")		up:set_axis("ryp",m.value)
+			elseif m.name=="TriggerLeft"	then		dotrig("l2")			up:set_axis("lzp",m.value)
+			elseif m.name=="TriggerRight"	then		dotrig("r2")			up:set_axis("rzp",m.value)
 			end
 
 		elseif m.class=="padkey" then -- SDL button values
@@ -468,11 +475,39 @@ M.bake=function(oven,ups)
 
 	end
 
+
+	ups.up=function(idx)
+	
+		if idx<1 then idx=1 end -- simpler than wasting time merging every state
+	
+		local up={}
+		up.core=ups.manifest(idx)
+		setmetatable(up,{__index=up.core})
+		
+		up.button=function(name)
+			return up:get(name)
+		end
+
+		up.axis=function(name)
+			return up:get(name)
+		end
+		
+		up.axisfixed=function(name)
+			return up:axis(name)
+		end
+
+		up.msgs=function(name)
+			return ups.msgs
+		end
+		
+		return up
+	end
+
 	-- create 1up only by default
 	ups.reset()
 	ups.manifest(1)
 	ups.keymap(1,{}) -- no keymap by default
---	ups.keymap(1,"full")
+	ups.keymap(1,"full")
 
 	return ups
 end

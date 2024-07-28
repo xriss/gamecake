@@ -417,7 +417,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 			oven.msg_view=view -- the view to use to fix mouse position
 			oven.cake.views.push(oven.view) -- add master view which is the size of the main window
 
-			oven.skeys=oven.rebake("wetgenes.gamecake.spew.keys") -- need to use spew keys always or mouse button no click on gui
+--			oven.skeys=oven.rebake("wetgenes.gamecake.spew.keys") -- need to use spew keys always or mouse button no click on gui
 
 			oven.ups=oven.rebake("wetgenes.gamecake.ups") -- replace keys and recaps and msg(m) calls with cached msgs/state per frame
 
@@ -725,7 +725,9 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 				if oven.times then oven.times.update.start() end
 				
 				oven.ups.update() -- new way
-				oven.skeys.update() -- old way
+				for _,m in ipairs(oven.ups.msgs) do oven.domsg(m) end
+
+--				oven.skeys.update() -- old way
 				for i,v in ipairs(oven.mods) do
 					if v.update then
 						v.update()
@@ -923,21 +925,23 @@ log("oven","caught : ",m.class,m.cmd)
 						
 					oven.ups.msg(m) -- manage the msgs the new way
 
-					if not oven.preloader_enabled then -- discard all other msgs during preloader
+				end
+			end
+		end
+		function oven.domsg(m)
+			if not oven.preloader_enabled then -- discard all other msgs during preloader
 
-						oven.skeys.msg(m)
-						for i=#oven.mods,1,-1 do -- run it through the mods backwards, so the topmost layer gets first crack at the msgs
-							local v=oven.mods[i]
-							if m and v and v.msg then
-								m=v.msg(m) -- mods can choose to eat the msgs, they must return it for it to bubble down
-							end
-						end
-						if m and oven.now and oven.now.msg then
-							oven.now.msg(m)
-						end
-						
+--				oven.skeys.msg(m)
+				for i=#oven.mods,1,-1 do -- run it through the mods backwards, so the topmost layer gets first crack at the msgs
+					local v=oven.mods[i]
+					if m and v and v.msg then
+						m=v.msg(m) -- mods can choose to eat the msgs, they must return it for it to bubble down
 					end
 				end
+				if m and oven.now and oven.now.msg then
+					oven.now.msg(m)
+				end
+				
 			end
 		end
 
