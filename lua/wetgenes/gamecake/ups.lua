@@ -498,6 +498,7 @@ M.bake=function(oven,ups)
 	end
 
 
+	-- old style recaps hacks
 	ups.up=function(idx)
 	
 		if idx<1 then idx=1 end -- simpler than wasting time merging every state
