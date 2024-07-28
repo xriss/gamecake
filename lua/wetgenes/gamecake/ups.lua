@@ -347,82 +347,81 @@ M.bake=function(oven,ups)
 				end
 			end
 
-			elseif m.class=="padaxis" then -- SDL axis values
+		elseif m.class=="padaxis" then -- SDL axis values
 
-				local up=ups.mainfest(m.id) -- this pad belongs to
+			local up=ups.mainfest(m.id) -- this pad belongs to
 
-				local zone=0x2000
+			local zone=0x2000
 
-				local doaxis=function(name1,name2)
+			local doaxis=function(name1,name2)
 
-					local v=0
-					if     m.value <= -zone then v=-1
-					elseif m.value >=  zone then v= 1
-					end
-
-					if up.last_pad_value[name1]~=v then -- only on change
-						if     v<0 then	up:set_button(name1,true)	up:set_button(name2,false)
-						elseif v>0 then	up:set_button(name1,false)	up:set_button(name2,true)
-						else			up:set_button(name1,false)	up:set_button(name2,false)
-						end
-					end
-
-					up.last_pad_value[name1]=v
+				local v=0
+				if     m.value <= -zone then v=-1
+				elseif m.value >=  zone then v= 1
 				end
 
-				local dotrig=function(name)
-
-					local v=0
-					if m.value >=  zone then v= 1
-					end
-
-					if up.last_pad_value[name]~=v then -- only on change
-
-						if     v>0 then		up:set_button(name,true)
-						else				up:set_button(name,false)
-						end
-					end
-
-					up.last_pad_value[name]=v
-				end
-				
-				if     m.name=="LeftX"			then		doaxis("left","right")	up:set_axis("lx",m.value)
-				elseif m.name=="LeftY"			then		doaxis("up","down")		up:set_axis("ly",m.value)
-				elseif m.name=="RightX"			then		doaxis("left","right")	up:set_axis("rx",m.value)
-				elseif m.name=="RightY"			then		doaxis("up","down")		up:set_axis("ry",m.value)
-				elseif m.name=="TriggerLeft"	then		dotrig("l2")			up:set_axis("lz",m.value)
-				elseif m.name=="TriggerRight"	then		dotrig("r2")			up:set_axis("rz",m.value)
-				end
-
-			elseif m.class=="padkey" then -- SDL button values
-
-				local up=ups.mainfest(m.id) -- this pad belongs to
-
-				local docode=function(name)
-					if		m.value==1  then	up:set_button(name,true)	-- key set
-					elseif	m.value==-1 then	up:set_button(name,false)	-- key clear
+				if up.last_pad_value[name1]~=v then -- only on change
+					if     v<0 then	up:set_button(name1,true)	up:set_button(name2,false)
+					elseif v>0 then	up:set_button(name1,false)	up:set_button(name2,true)
+					else			up:set_button(name1,false)	up:set_button(name2,false)
 					end
 				end
 
-				if     m.name=="Left"			then docode("left")   docode("pad_left")    up:set_axis("dx",(m.value==1) and -32767 or 0)
-				elseif m.name=="Right"			then docode("right")  docode("pad_right")   up:set_axis("dx",(m.value==1) and  32767 or 0)
-				elseif m.name=="Up"				then docode("up")     docode("pad_up")      up:set_axis("dy",(m.value==1) and -32767 or 0)
-				elseif m.name=="Down"			then docode("down")   docode("pad_down")    up:set_axis("dy",(m.value==1) and  32767 or 0)
-				elseif m.name=="A"				then docode("a")      docode("fire")
-				elseif m.name=="B"				then docode("b")      docode("fire")
-				elseif m.name=="X"				then docode("x")      docode("fire")
-				elseif m.name=="Y"				then docode("y")      docode("fire")
-				elseif m.name=="LeftShoulder"	then docode("l1")
-				elseif m.name=="RightShoulder"	then docode("r1")
-				elseif m.name=="LeftStick"		then docode("l3")
-				elseif m.name=="RightStick"		then docode("r3")
-				elseif m.name=="Back"			then docode("select")
-				elseif m.name=="Start"			then docode("start")
-				elseif m.name=="Guide"			then docode("guide")
-				else docode("fire") -- all other buttons are fire
-				end
-				
+				up.last_pad_value[name1]=v
 			end
+
+			local dotrig=function(name)
+
+				local v=0
+				if m.value >=  zone then v= 1
+				end
+
+				if up.last_pad_value[name]~=v then -- only on change
+
+					if     v>0 then		up:set_button(name,true)
+					else				up:set_button(name,false)
+					end
+				end
+
+				up.last_pad_value[name]=v
+			end
+			
+			if     m.name=="LeftX"			then		doaxis("left","right")	up:set_axis("lx",m.value)
+			elseif m.name=="LeftY"			then		doaxis("up","down")		up:set_axis("ly",m.value)
+			elseif m.name=="RightX"			then		doaxis("left","right")	up:set_axis("rx",m.value)
+			elseif m.name=="RightY"			then		doaxis("up","down")		up:set_axis("ry",m.value)
+			elseif m.name=="TriggerLeft"	then		dotrig("l2")			up:set_axis("lz",m.value)
+			elseif m.name=="TriggerRight"	then		dotrig("r2")			up:set_axis("rz",m.value)
+			end
+
+		elseif m.class=="padkey" then -- SDL button values
+
+			local up=ups.mainfest(m.id) -- this pad belongs to
+
+			local docode=function(name)
+				if		m.value==1  then	up:set_button(name,true)	-- key set
+				elseif	m.value==-1 then	up:set_button(name,false)	-- key clear
+				end
+			end
+
+			if     m.name=="Left"			then docode("left")   docode("pad_left")    up:set_axis("dx",(m.value==1) and -32767 or 0)
+			elseif m.name=="Right"			then docode("right")  docode("pad_right")   up:set_axis("dx",(m.value==1) and  32767 or 0)
+			elseif m.name=="Up"				then docode("up")     docode("pad_up")      up:set_axis("dy",(m.value==1) and -32767 or 0)
+			elseif m.name=="Down"			then docode("down")   docode("pad_down")    up:set_axis("dy",(m.value==1) and  32767 or 0)
+			elseif m.name=="A"				then docode("a")      docode("fire")
+			elseif m.name=="B"				then docode("b")      docode("fire")
+			elseif m.name=="X"				then docode("x")      docode("fire")
+			elseif m.name=="Y"				then docode("y")      docode("fire")
+			elseif m.name=="LeftShoulder"	then docode("l1")
+			elseif m.name=="RightShoulder"	then docode("r1")
+			elseif m.name=="LeftStick"		then docode("l3")
+			elseif m.name=="RightStick"		then docode("r3")
+			elseif m.name=="Back"			then docode("select")
+			elseif m.name=="Start"			then docode("start")
+			elseif m.name=="Guide"			then docode("guide")
+			else docode("fire") -- all other buttons are fire
+			end
+			
 		end
 	end
 

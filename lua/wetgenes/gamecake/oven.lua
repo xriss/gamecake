@@ -419,6 +419,8 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 			oven.skeys=oven.rebake("wetgenes.gamecake.spew.keys") -- need to use spew keys always or mouse button no click on gui
 
+			oven.ups=oven.rebake("wetgenes.gamecake.ups") -- replace keys and recaps and msg(m) calls with cached msgs/state per frame
+
 			-- the order these are added is important for priority, top of list is lowest priority, bottom is highest.
 			oven.rebake_mod("wetgenes.gamecake.mods.escmenu") -- escmenu gives us a doom style escape menu
 			oven.rebake_mod("wetgenes.gamecake.mods.console") -- console gives us a quake style tilda console
@@ -918,8 +920,10 @@ log("oven","caught : ",m.class,m.cmd)
 						end
 					end
 						
+					oven.ups.msg(m) -- manage the msgs the new way
+
 					if not oven.preloader_enabled then -- discard all other msgs during preloader
-						
+
 						oven.skeys.msg(m)
 						for i=#oven.mods,1,-1 do -- run it through the mods backwards, so the topmost layer gets first crack at the msgs
 							local v=oven.mods[i]
