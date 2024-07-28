@@ -724,7 +724,8 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 
 				if oven.times then oven.times.update.start() end
 				
-				oven.skeys.update()
+				oven.ups.update() -- new way
+				oven.skeys.update() -- old way
 				for i,v in ipairs(oven.mods) do
 					if v.update then
 						v.update()

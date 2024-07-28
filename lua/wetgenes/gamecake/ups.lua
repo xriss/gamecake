@@ -177,29 +177,29 @@ end
 M.up_functions.set_button=function(up,n,v)
 	local o=up.all[n] -- old value
 	if v then -- must be boolean so set
-		up.all[nam]=true
+		up.all[n]=true
 		if not o then -- change?
-			local nam_set=nam.."_set"
-			up.all[nam_set]=true
-			up.pulse[nam_set]=true
+			local n_set=n.."_set"
+			up.all[n_set]=true
+			up.pulse[n_set]=true
 		end
 	else -- or clr
-		up.all[nam]=false
+		up.all[n]=false
 		if o then -- change?
-			local nam_clr=nam.."_clr"
-			up.all[nam_clr]=true
-			up.pulse[nam_clr]=true
+			local n_clr=n.."_clr"
+			up.all[n_clr]=true
+			up.pulse[n_clr]=true
 		end
 	end
 end
 
 M.up_functions.set_axis=function(up,n,v)
-	recap.all[n]=v -- range of -0x7fff to +0x7fff
+	up.all[n]=v -- range of -0x7fff to +0x7fff
 end
 
 M.up_functions.add_axis=function(up,n,v)
 	local o=up.all[n] -- old value
-	recap.all[n]=((((o or 0)+v)%0x10000)+0x10000)%0x10000 -- range of 0x0000 to 0xffff
+	up.all[n]=((((o or 0)+v)%0x10000)+0x10000)%0x10000 -- range of 0x0000 to 0xffff
 end
 
 -- manage fake axis with decay from keypress states
@@ -313,7 +313,7 @@ M.bake=function(oven,ups)
 			
 		elseif m.class=="mouse" then -- swipe to move
 		
-			local up=ups.mainfest(1) -- mouse is 1up only
+			local up=ups.manifest(1) -- mouse is 1up only
 
 			if m.action==-1 then -- we only get button ups
 				if m.keyname=="wheel_add" then
