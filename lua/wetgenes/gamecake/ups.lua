@@ -223,7 +223,7 @@ M.up_functions.update=function(up)
 		up.all[ak]=v
 	end
 	
-	-- pick best l/r axis be it fake keys or real pad and copy to "??b" axis
+	-- pick best l/r axis be it "k"eys or "p"ad values.
 	local lxp,lyp,lzp=(up.all["lxp"] or 0),(up.all["lyp"] or 0),(up.all["lzp"]  or 0)
 	local lxk,lyk,lzk=(up.all["lxk"] or 0),(up.all["lyk"] or 0),(up.all["lzk"] or 0)
 	if lxk*lxk+lyk*lyk+lzk*lzk > lxp*lxp+lyp*lyp+lzp*lzp then
@@ -344,7 +344,7 @@ M.bake=function(oven,ups)
 				end
 			elseif m.action==-1 then -- key clear
 				if m.keyname=="wheel_add" or m.keyname=="wheel_sub" then -- we do not get key downs just ups
-					up:set_button("mouse_"..m.keyname,true)
+					up:set_button("mouse_"..m.keyname,true) -- fake a down to force a pulse
 				end
 				if m.keyname then
 					up:set_button("mouse_"..m.keyname,false)
