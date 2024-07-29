@@ -8,6 +8,22 @@ local log,dump=require("wetgenes.logs"):export("log","dump")
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+M.bake=function(oven,recaps)
+
+	recaps=recaps or {} 
+
+	recaps.ups=oven.ups.up
+
+	return recaps
+end
+
+
+-- remove all old code and fake it
+--[==[
+
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+
 
 -- these should be configurable
 		local powzone=2				-- walk helper
@@ -500,3 +516,5 @@ M.bake=function(oven,recaps)
 	recaps.setup(1)
 	return recaps
 end
+
+]==]

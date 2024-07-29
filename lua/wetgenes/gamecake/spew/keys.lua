@@ -3,6 +3,25 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+
+M.bake=function(oven,keys)
+
+	keys=keys or {} 
+	
+	keys.set_opts=function()end
+
+
+	return keys
+end
+
+
+-- remove all old code and fake it
+--[==[
+
+
 local wstr=require("wetgenes.string")
 
 --module
@@ -572,3 +591,5 @@ M.bake=function(oven,keys)
 	keys.setup(1)
 	return keys
 end
+
+]==]
