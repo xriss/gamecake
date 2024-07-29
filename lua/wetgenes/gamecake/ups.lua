@@ -362,10 +362,10 @@ M.bake=function(oven,ups)
 				end
 			end
 
-			if m.dx then up:add_axis( "mx" , m.dx ) end
-			if m.dy then up:add_axis( "my" , m.dy ) end
-			if m.vx then up:set_axis( "vx" , m.x ) end
-			if m.vy then up:set_axis( "vy" , m.y ) end
+			up:add_axis( "mx" , m.dx )
+			up:add_axis( "my" , m.dy )
+			up:set_axis( "vx" , m.x )
+			up:set_axis( "vy" , m.y )
 
 			if m.action==1 then -- key set
 				if m.keyname then

@@ -452,6 +452,9 @@ sdl.msg_fetch=function()
 			t.action=0
 			t.x=sdl.mousexy[1]
 			t.y=sdl.mousexy[2]
+			t.dx=0
+			t.dy=0
+
 			if 		e.y>0 then	t.keycode=4 t.action=-1
 			elseif 	e.y<0 then	t.keycode=5 t.action=-1 end
 			
