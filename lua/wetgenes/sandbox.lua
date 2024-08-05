@@ -134,15 +134,18 @@ function make_unsafe_env(opts)
 
 	local env=local_make_env_safe()
 
+-- dangerous global tables
 	env.package=package
 	env.io=io
 	env.debug=debug
+	env.jit=jit
+
+-- dangerous globals
 	env.dofile=dofile
 	env.getfenv=getfenv
 	env.getmetatable=getmetatable
 	env.load=Gload
 	env.loadfile=loadfile
---	env.loadstring=loadstring
 	env.print=print
 	env.rawequal=rawequal
 	env.rawget=rawget
@@ -151,7 +154,9 @@ function make_unsafe_env(opts)
 	env.setmetatable=setmetatable
 	env.module=module
 	env.require=require
-	env.jit=jit
+
+-- we have our own loadstring with builtin setfenv
+--	env.loadstring=loadstring
 
 	return env
 end
