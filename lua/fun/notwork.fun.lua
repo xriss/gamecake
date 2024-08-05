@@ -6,10 +6,17 @@ game
 
 ]]
 
+local tardis=require("wetgenes.tardis")
+local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
+
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
 local chatdown=require("wetgenes.gamecake.fun.chatdown")
 local wstr=require("wetgenes.string")
 function ls(s) print(wstr.dump(s))end
+
+-- request full keymap
+oven.ups.keymap(1,"full") -- 1up has basic keyboard mappings
+
 
 local best_hx=320
 local best_hy=200
@@ -105,12 +112,13 @@ end
 	
 scenery.item.setup=function(sys)
 	sys.metatable={__index=sys.methods}
-	sys:create({})
+	sys:create({pos={128,128,0}})
 end
 
 scenery.item.create=function(sys,boot)
 	local item={}
 	setmetatable(item,sys.metatable)
+	item:gene(boot)
 	scene.add( item , sys.caste , boot )
 	return item:setup(boot)
 end
@@ -118,22 +126,81 @@ end
 
 scenery.item.methods={}
 
-scenery.item.methods.setup=function(item)
-	item.rz=0
+-- generate any missing boot data , it may be nil
+scenery.item.methods.gene=function(_,boot)
+	boot=boot or {}
+	
+	boot.pos=boot.pos or {0,0,0}
+	boot.vel=boot.vel or {0,0,0}
+
+	boot.rot=boot.rot or {0,0,0}
+	boot.ang=boot.ang or {0,0,0}
+
+	return boot
+end
+
+scenery.item.methods.setup=function(it,boot)
+
+	it.pos=V3( boot.pos )
+	it.vel=V3( boot.vel )
+
+	it.rot=V3( boot.rot )
+	it.ang=V3( boot.ang )
+
 end
 	
-scenery.item.methods.update=function(item)
-	item.rz=item.rz+0.1
+scenery.item.methods.update=function(it)
+
+	local up=oven.ups.manifest(1)
+
+	local lx=up:axis("lx") or 0
+	local ly=up:axis("ly") or 0
+	local rx=up:axis("rx") or 0
+	local ry=up:axis("ry") or 0
+	
+	
+	local fa=1/16
+	if ( it.vel[1]*it.vel[1] + it.vel[2]*it.vel[2] ) < (lx*lx + ly*ly) then
+		fa=1/2
+	end
+	it.vel[1] = it.vel[1]*(1-fa) + lx*2*(fa)
+	it.vel[2] = it.vel[2]*(1-fa) + ly*2*(fa)
+
+
+	it.ang[3]=0
+	local dorot=function(dx,dy)
+		if ( dx*dx + dy*dy ) > 0.01 then
+			local d=((math.atan2(dy,dx)*180/math.pi)+90+360*360)%360
+			local dd=(((d-it.rot[3])+360*360)%360)
+			if dd > 180 then dd=dd-360 end
+			local s=5
+			if dd<0 then it.ang[3]=-s else it.ang[3]=s end
+		end
+	end
+	dorot(it.vel[1],it.vel[2])
+	dorot(rx,ry)
+
+
+	it.pos[1]=it.pos[1]+it.vel[1]
+	it.pos[2]=it.pos[2]+it.vel[2]
+	
+	if it.pos[1]<0                    then it.pos[1]=it.pos[1]+components.screen.hx end
+	if it.pos[1]>components.screen.hx then it.pos[1]=it.pos[1]-components.screen.hx end
+	if it.pos[2]<0                    then it.pos[2]=it.pos[2]+components.screen.hy end
+	if it.pos[2]>components.screen.hy then it.pos[2]=it.pos[2]-components.screen.hy end
+
+	it.rot[3]=it.rot[3]+it.ang[3]
+
 end
 	
-scenery.item.methods.draw=function(item)
+scenery.item.methods.draw=function(it)
 	local spr=names.test_ship1
 	components.sprites.list_add({
 		t=spr.idx ,
 		hx=spr.hx , hy=spr.hy ,
 		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
-		px=128 , py=128 , pz=0 ,
-		rz=math.floor((item.rz/15)+0.5)*15,
+		px=it.pos[1] , py=it.pos[2] , pz=it.pos[3] ,
+		rz=math.floor((it.rot[3]/15)+0.5)*15,
 	})
 end
 
