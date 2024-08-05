@@ -26,6 +26,7 @@ local env={
 	type=type,
 	unpack=unpack,
 	xpcall=xpcall,
+	_VERSION=_VERSION,
 	coroutine={
 		create=coroutine and coroutine.create,
 		resume=coroutine and coroutine.resume,
@@ -116,10 +117,41 @@ module("wetgenes.sandbox")
 
 --
 -- get a functional environment full of useful but "safe" functions
+-- probably not safe
 --
 function make_env(opts)
 
-local env=local_make_env_safe()
+	local env=local_make_env_safe()
+
+	return env
+end
+
+--
+-- a duplicate env including unsafe function
+-- definitely not safe
+--
+function make_unsafe_env(opts)
+
+	local env=local_make_env_safe()
+
+	env.package=package
+	env.io=io
+	env.debug=debug
+	env.dofile=dofile
+	env.getfenv=getfenv
+	env.getmetatable=getmetatable
+	env.load=Gload
+	env.loadfile=loadfile
+--	env.loadstring=loadstring
+	env.print=print
+	env.rawequal=rawequal
+	env.rawget=rawget
+	env.rawset=rawset
+	env.setfenv=setfenv
+	env.setmetatable=setmetatable
+	env.module=module
+	env.require=require
+	env.jit=jit
 
 	return env
 end

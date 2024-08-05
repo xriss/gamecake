@@ -93,16 +93,12 @@ system.setup=function(code)
 
 	if code then
 
-		local env=wsandbox.make_env()
+		local env=wsandbox.make_unsafe_env()
 		for n,v in pairs({
 			args=oven.opts.args, -- commandline settings
-			debug=debug,
-			print=print,
 			system=system,
 			oven=oven,
 			gl=oven.gl,
-			require=require,
-			package=package, -- to help with module creation
 			ups=oven.ups.up, -- input, for 1up - 6up 
 		}) do env[n]=v end
 		
