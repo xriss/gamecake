@@ -18,9 +18,10 @@ function ls(s) print(wstr.dump(s))end
 oven.ups.keymap(1,"full") -- 1up has basic keyboard mappings
 
 
-local best_hx=320
-local best_hy=200
 do
+	local best_hx=320
+	local best_hy=200
+
 	local fsx,fsy=system.fullscreen_width  or 1920,system.fullscreen_height or 1080
 	local shy=math.floor((fsy)/best_hy) -- require at least 200 pixels high
 	if shy<1 then shy=1 end -- sanity
@@ -37,8 +38,6 @@ do
 -- for 1920x1080 we would get 384x216
 	print( "myscreensize" , best_hx , best_hy , "x"..shy )
 
-end
-
 oven.opts.fun="" -- back to menu on reset
 hardware,main=system.configurator({
 	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
@@ -51,6 +50,9 @@ hardware,main=system.configurator({
 	end,
 	hx=best_hx,hy=best_hy, -- autoscale, with at least 320x200
 })
+
+end
+
 
 setup=function()
 print("setup")
@@ -79,6 +81,75 @@ end
 
 -- custom scene code and data
 scenery={}
+
+scenery.all={}
+
+scenery.all.setup_metatable=function(sys)
+
+	-- make sure we have unique sub tables
+	sys.methods=sys.methods or {}
+	sys.metatable=sys.metatable or {}
+
+	-- and methods are available to items
+	sys.metatable.__index=sys.methods
+
+	-- merge all functions into each system
+	for n,v in pairs( scenery.all ) do
+		if not sys[n] then
+			sys[n]=v
+		end
+	end
+
+	-- merge all methods into each item
+	for n,v in pairs( scenery.all.methods ) do
+		if not sys.methods[n] then
+			sys.methods[n]=v
+		end
+	end
+	
+end
+
+-- generate any missing boot data
+-- do not call with : use . and pass in boot only
+scenery.all.gene_body=function(sys,boot)
+
+	boot=boot or {}
+	
+	boot.pos=boot.pos or {0,0,0}
+	boot.vel=boot.vel or {0,0,0}
+
+	boot.rot=boot.rot or {0,0,0}
+	boot.ang=boot.ang or {0,0,0}
+
+	return boot
+
+end
+
+scenery.all.methods={}
+
+scenery.all.methods.setup_body=function(it,boot)
+
+	it.pos=V3( boot.pos )
+	it.vel=V3( boot.vel )
+
+	it.rot=V3( boot.rot )
+	it.ang=V3( boot.ang )
+
+end
+
+scenery.all.methods.update_body=function(it)
+
+	it.pos[1]=it.pos[1]+it.vel[1]
+	it.pos[2]=it.pos[2]+it.vel[2]
+	
+	if it.pos[1]<0                    then it.pos[1]=it.pos[1]+components.screen.hx end
+	if it.pos[1]>components.screen.hx then it.pos[1]=it.pos[1]-components.screen.hx end
+	if it.pos[2]<0                    then it.pos[2]=it.pos[2]+components.screen.hy end
+	if it.pos[2]>components.screen.hy then it.pos[2]=it.pos[2]-components.screen.hy end
+
+	it.rot[3]=it.rot[3]+it.ang[3]
+
+end
 
 
 scenery.item={}
@@ -111,41 +182,33 @@ scenery.item.loads=function()
 end
 	
 scenery.item.setup=function(sys)
-	sys.metatable={__index=sys.methods}
+	scenery.all.setup_metatable(sys)
+
 	sys:create({pos={128,128,0}})
 end
 
 scenery.item.create=function(sys,boot)
 	local item={}
 	setmetatable(item,sys.metatable)
-	item:gene(boot)
+	sys:gene(boot)
 	scene.add( item , sys.caste , boot )
-	return item:setup(boot)
+	item:setup(boot)
+	return item
+end
+
+-- generate any missing boot data
+scenery.item.gene=function(sys,boot)
+	boot=sys:gene_body(boot)
+
+	return boot
 end
 
 
 scenery.item.methods={}
 
--- generate any missing boot data , it may be nil
-scenery.item.methods.gene=function(_,boot)
-	boot=boot or {}
-	
-	boot.pos=boot.pos or {0,0,0}
-	boot.vel=boot.vel or {0,0,0}
-
-	boot.rot=boot.rot or {0,0,0}
-	boot.ang=boot.ang or {0,0,0}
-
-	return boot
-end
-
 scenery.item.methods.setup=function(it,boot)
 
-	it.pos=V3( boot.pos )
-	it.vel=V3( boot.vel )
-
-	it.rot=V3( boot.rot )
-	it.ang=V3( boot.ang )
+	it:setup_body(it,boot)
 
 end
 	
@@ -180,16 +243,7 @@ scenery.item.methods.update=function(it)
 	dorot(it.vel[1],it.vel[2])
 	dorot(rx,ry)
 
-
-	it.pos[1]=it.pos[1]+it.vel[1]
-	it.pos[2]=it.pos[2]+it.vel[2]
-	
-	if it.pos[1]<0                    then it.pos[1]=it.pos[1]+components.screen.hx end
-	if it.pos[1]>components.screen.hx then it.pos[1]=it.pos[1]-components.screen.hx end
-	if it.pos[2]<0                    then it.pos[2]=it.pos[2]+components.screen.hy end
-	if it.pos[2]>components.screen.hy then it.pos[2]=it.pos[2]-components.screen.hy end
-
-	it.rot[3]=it.rot[3]+it.ang[3]
+	it:update_body(it,boot)
 
 end
 	
@@ -211,7 +265,7 @@ end
 --
 -- FINALY
 --
--- preload all the images after loading this file
+-- preload all the images
 for name,sys in pairs(scenery) do
 	if sys.loads then sys.loads() end
 end
