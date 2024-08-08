@@ -670,6 +670,7 @@ function array.product(a,b,r)
 	elseif mta=="v3" and mtb=="m3" then return tardis.v3_product_m4(a,b:m4(),r)
 	elseif mta=="v4" and mtb=="m3" then return tardis.v4_product_m4(a,b:m4(),r)
 	elseif mta=="m4" and mtb=="m3" then return tardis.m4_product_m4(a,b:m4(),r)
+	elseif mta=="v1" and mtb=="v1" then return tardis.v1_product_v1(a,b,r)
 	end
 
 	error("tardis : "..mta.." product "..mtb.." not supported",2)
@@ -1720,6 +1721,191 @@ function m4.prerotate(it,a,b,c,d,e)
 	end
 end
 
+
+--[[#lua.wetgenes.tardis.v1
+
+The metatable for a 2d vector class, use the new function to actually 
+create an object.
+
+We also inherit all the functions from tardis.array
+
+]]
+local v1=tardis.class("v1",array)
+
+--[[#lua.wetgenes.tardis.v2.new
+
+	v1 = tardis.v1.new()
+
+Create a new v1 and optionally set it to the given values, v1 methods 
+usually return the input v1 for easy function chaining.
+
+]]
+function v1.new(...) return setmetatable({0},v1):set(...) end
+
+--[[#lua.wetgenes.tardis.v1.identity
+
+	v1 = v1:identity()
+
+Set this v1 to all zeros.
+
+]]
+function v1.identity(it) return array.set(it,0) end 
+
+--[[#lua.wetgenes.tardis.v1.lenlen
+
+	value = v1:lenlen()
+
+Returns the length of this vector, squared, this is often all you need 
+for comparisons so lets us skip the sqrt.
+
+]]
+function v1.lenlen(it)
+	return (it[1]*it[1])
+end
+
+--[[#lua.wetgenes.tardis.v1.len
+
+	value = v1:len()
+
+Returns the length of this vector.
+
+]]
+function v1.len(it)
+	return math.abs( it[1] )
+end
+
+
+--[[#lua.wetgenes.tardis.v1.distance
+
+	value = a:distance(b)
+
+Returns the length of the vector between a and b.
+
+]]
+function v1.distance(a,b)
+	return math.abs( a[1]-b[1] )
+end
+
+--[[#lua.wetgenes.tardis.v1.oo
+
+	v1 = v1:oo()
+	v1 = v1:oo(r)
+
+One Over value. Build the reciprocal of all elements. 
+
+If r is provided then the result is written into r and returned 
+otherwise v1 is modified and returned.
+
+]]
+function v1.oo(it,r)
+	r=r or it
+	return array.set(r, 1/it[1] )
+end
+
+--[[#lua.wetgenes.tardis.v1.scale
+
+	v1 = v1:scale(s)
+	v1 = v1:scale(s,r)
+
+Scale this v1 by s.
+
+If r is provided then the result is written into r and returned 
+otherwise v1 is modified and returned.
+
+]]
+function v1.scale(it,s,r)
+	r=r or it
+	return array.set(r, it[1]*s )
+end
+
+--[[#lua.wetgenes.tardis.v1.normalize
+
+	v1 = v1:normalize()
+	v1 = v1:normalize(r)
+
+Adjust the length of this vector to 1.
+
+An input length of 0 will remain at 0.
+
+If r is provided then the result is written into r and returned 
+otherwise v1 is modified and returned.
+
+]]
+function v1.normalize(it,r)
+	local l=v1.len(it)
+	if l>0 then l=1/l end 
+	return v1.scale(it,l,r)
+end
+
+--[[#lua.wetgenes.tardis.v1.add
+
+	v1 = v1:add(v1b)
+	v1 = v1:add(v1b,r)
+
+Add v1b to v1.
+
+If r is provided then the result is written into r and returned 
+otherwise v1 is modified and returned.
+
+]]
+function v1.add(va,vb,r)
+	r=r or va
+	return array.set(r, va[1]+vb[1] )
+end
+
+--[[#lua.wetgenes.tardis.v1.sub
+
+	v1 = v1:sub(v1b)
+	v1 = v1:sub(v1b,r)
+
+Subtract v1b from v1.
+
+If r is provided then the result is written into r and returned 
+otherwise v1 is modified and returned.
+
+]]
+function v1.sub(va,vb,r)
+	r=r or va
+	return array.set(r, va[1]-vb[1] )
+end
+
+--[[#lua.wetgenes.tardis.v1.mul
+
+	v1 = v1:mul(v1b)
+	v1 = v1:mul(v1b,r)
+
+Multiply v1 by v1b.
+
+If r is provided then the result is written into r and returned 
+otherwise v1 is modified and returned.
+
+]]
+function v1.mul(va,vb,r)
+	r=r or va
+	return array.set(r, (va[1]*vb[1]) )
+end
+
+--[[#lua.wetgenes.tardis.v1.dot
+
+	value = v1:dot(v1b)
+
+Return the dot product of these two vectors.
+
+]]
+function v1.dot(va,vb)
+	return ( (va[1]*vb[1]) )
+end
+
+--[[#lua.wetgenes.tardis.v1.cross
+
+	value = v1:cross(v1b)
+
+Extend to 3d then only return z value as x and y are always 0
+
+]]
+function v1.cross(va,vb)
+	return va[1]*vb[1]
+end
 
 --[[#lua.wetgenes.tardis.v2
 
@@ -2776,6 +2962,11 @@ function tardis.v2_product_v2(va,vb,r)
 	return array.set(r, va[1]*vb[1] , va[2]*vb[2] )
 end
 
+function tardis.v1_product_v1(va,vb,r)
+	r=r or va
+	return array.set(r, va[1]*vb[1] )
+end
+
 function tardis.q4_product_q4(q4a,q4b,r)
 	r=r or q4a
     local r1 =  q4b[1] * q4a[4] + q4b[2] * q4a[3] - q4b[3] * q4a[2] + q4b[4] * q4a[1]
@@ -3048,6 +3239,7 @@ end
 
 end
 
+tardis.V1=tardis.v1.new
 tardis.V2=tardis.v2.new
 tardis.V3=tardis.v3.new
 tardis.V4=tardis.v4.new

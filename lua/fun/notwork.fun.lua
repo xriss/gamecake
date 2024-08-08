@@ -7,7 +7,7 @@ game
 ]]
 
 local tardis=require("wetgenes.tardis")
-local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
+local V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V1","V2","V3","V4","M2","M3","M4","Q4")
 
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
 local chatdown=require("wetgenes.gamecake.fun.chatdown")
@@ -112,16 +112,12 @@ end
 -- generate any missing boot data
 -- do not call with : use . and pass in boot only
 scenery.all.gene_body=function(sys,boot)
-
-	boot=boot or {}
 	
 	boot.pos=boot.pos or {0,0,0}
 	boot.vel=boot.vel or {0,0,0}
 
 	boot.rot=boot.rot or {0,0,0}
 	boot.ang=boot.ang or {0,0,0}
-
-	return boot
 
 end
 
@@ -179,6 +175,17 @@ scenery.all.methods.get=function(it,name)
 	
 	-- search backwards through time for this value
 	for i=1,it.values_length do
+		local v=it.values[i][name]
+		if type(v)~="nil" then return v end
+	end
+
+end
+
+-- get values for previous frame so we can tween with now
+scenery.all.methods.get_prev=function(it,name)
+	
+	-- search backwards through time for this value
+	for i=2,it.values_length do
 		local v=it.values[i][name]
 		if type(v)~="nil" then return v end
 	end
@@ -265,19 +272,20 @@ scenery.item.setup=function(sys)
 end
 
 scenery.item.create=function(sys,boot)
-	local item={}
-	setmetatable(item,sys.metatable)
+	boot=boot or {}
+	local it={}
+	setmetatable(it,sys.metatable)
 	sys:gene(boot)
-	scene.add( item , sys.caste , boot )
-	item:setup(boot)
-	return item
+	scene.add( it , sys.caste , boot )
+	it:setup(boot)
+	return it
 end
 
 -- generate any missing boot data
 scenery.item.gene=function(sys,boot)
-	boot=sys:gene_body(boot)
 
-	return boot
+	sys:gene_body(boot)
+
 end
 
 
