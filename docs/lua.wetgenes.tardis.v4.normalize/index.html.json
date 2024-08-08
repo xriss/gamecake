@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 603,
+   "count": 616,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 596,
+   "count": 609,
    "name": "lua.wetgenes"
   },
   {
@@ -1650,7 +1650,7 @@
    "name": "lua.wetgenes.spew.test"
   },
   {
-   "count": 156,
+   "count": 169,
    "name": "lua.wetgenes.tardis"
   },
   {
@@ -2100,6 +2100,58 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.type"
+  },
+  {
+   "count": 13,
+   "name": "lua.wetgenes.tardis.v1"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.distance"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.dot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.len"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.lenlen"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.mul"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.oo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.sub"
   },
   {
    "count": 14,
@@ -2610,7 +2662,7 @@
    "body": "<pre><code>v4 = v4:normalize()\nv4 = v4:normalize(r)\n</code></pre>\n<p>Adjust the length of this vector to 1.</p>\n<p>An input length of 0 will remain at 0.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2263,
+   "line": 2449,
    "name": "lua.wetgenes.tardis.v4.normalize",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 603,
+   "count": 616,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 596,
+   "count": 609,
    "name": "lua.wetgenes"
   },
   {
@@ -1650,7 +1650,7 @@
    "name": "lua.wetgenes.spew.test"
   },
   {
-   "count": 156,
+   "count": 169,
    "name": "lua.wetgenes.tardis"
   },
   {
@@ -2100,6 +2100,58 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.type"
+  },
+  {
+   "count": 13,
+   "name": "lua.wetgenes.tardis.v1"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.cross"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.distance"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.dot"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.identity"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.len"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.lenlen"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.mul"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.oo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.scale"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v1.sub"
   },
   {
    "count": 14,
@@ -2610,7 +2662,7 @@
    "body": "<pre><code>q4 = q4:set_yaw_pitch_roll(v3)\nq4 = q4:set_yaw_pitch_roll({90,60,30})\t-- 30yaw 60pitch 90roll\n</code></pre>\n<p>Set a V3(roll,pitch,yaw) degree rotation into this quaternion</p>\n<pre><code>yaw   v[3] is rotation about the z axis and is applied first\npitch v[2] is rotation about the y axis and is applied second\nroll  v[1] is rotation about the z axis and is applied last\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2564,
+   "line": 2750,
    "name": "lua.wetgenes.tardis.q4.set_yaw_pitch_roll",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
