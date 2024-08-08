@@ -2662,7 +2662,7 @@
    "body": "<pre><code>value = v1:lenlen()\n</code></pre>\n<p>Returns the length of this vector, squared, this is often all you need \nfor comparisons so lets us skip the sqrt.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1754,
+   "line": 1742,
    "name": "lua.wetgenes.tardis.v1.lenlen",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

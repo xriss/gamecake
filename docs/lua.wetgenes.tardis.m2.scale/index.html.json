@@ -2662,7 +2662,7 @@
    "body": "<pre><code>m2 = m2:scale(s)\nm2 = m2:scale(s,r)\n</code></pre>\n<p>Scale this m2 by s.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 749,
+   "line": 737,
    "name": "lua.wetgenes.tardis.m2.scale",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

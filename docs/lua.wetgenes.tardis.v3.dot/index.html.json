@@ -2662,7 +2662,7 @@
    "body": "<pre><code>value = v3:dot(v3b)\n</code></pre>\n<p>Return the dot product of these two vectors.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2262,
+   "line": 2250,
    "name": "lua.wetgenes.tardis.v3.dot",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

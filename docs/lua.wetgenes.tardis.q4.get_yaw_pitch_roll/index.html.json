@@ -2662,7 +2662,7 @@
    "body": "<pre><code>v3 = q4:get_yaw_pitch_roll()\n</code></pre>\n<p>Get a yaw,pitch,roll degree rotation from this quaternion</p>\n<p>If r is provided then the result is written into r and returned \notherwise a new v3 is created and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2766,
+   "line": 2754,
    "name": "lua.wetgenes.tardis.q4.get_yaw_pitch_roll",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

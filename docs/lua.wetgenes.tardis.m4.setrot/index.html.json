@@ -2662,7 +2662,7 @@
    "body": "<pre><code>m4 = m4:setrot(degrees,v3a)\n</code></pre>\n<p>Set this matrix to a rotation matrix around the given normal by the given degrees.</p>\n<p>we will automatically normalise v3a if necessary.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1503,
+   "line": 1491,
    "name": "lua.wetgenes.tardis.m4.setrot",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

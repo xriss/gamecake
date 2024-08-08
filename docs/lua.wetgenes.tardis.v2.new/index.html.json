@@ -2662,7 +2662,7 @@
    "body": "<pre><code>v2 = tardis.v2.new()\n</code></pre>\n<p>Create a new v2 and optionally set it to the given values, v2 methods \nusually return the input v2 for easy function chaining.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1920,
+   "line": 1908,
    "name": "lua.wetgenes.tardis.v2.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

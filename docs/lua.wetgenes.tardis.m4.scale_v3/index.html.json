@@ -2662,7 +2662,7 @@
    "body": "<pre><code>m4 = m4:scale_v3(v3)\nm4 = m4:scale_v3(v3,r)\n</code></pre>\n<p>Scale this m4 by {x,y,z} or v3.</p>\n<p>If r is provided then the result is written into r and returned \notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1384,
+   "line": 1372,
    "name": "lua.wetgenes.tardis.m4.scale_v3",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

@@ -2662,7 +2662,7 @@
    "body": "<pre><code>value = m4:minor_xy()\n</code></pre>\n<p>Return the minor_xy value of this m4.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1098,
+   "line": 1086,
    "name": "lua.wetgenes.tardis.m4.minor_xy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
