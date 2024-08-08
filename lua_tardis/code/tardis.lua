@@ -655,25 +655,13 @@ otherwise ma is modified and returned.
 
 ]]
 function array.product(a,b,r)
-	local mta=tardis.type(a)
-	local mtb=tardis.type(b)
-
-	if     mta=="v3" and mtb=="m4" then return tardis.v3_product_m4(a,b,r)
-	elseif mta=="v3" and mtb=="q4" then return tardis.v3_product_q4(a,b,r)
-	elseif mtb=="number"           then return a:scalar(b,r)
-	elseif mta=="v4" and mtb=="m4" then return tardis.v4_product_m4(a,b,r)
-	elseif mta=="m4" and mtb=="m4" then return tardis.m4_product_m4(a,b,r)
-	elseif mta=="q4" and mtb=="q4" then return tardis.q4_product_q4(a,b,r)
-	elseif mta=="v4" and mtb=="v4" then return tardis.v4_product_v4(a,b,r)
-	elseif mta=="v3" and mtb=="v3" then return tardis.v3_product_v3(a,b,r)
-	elseif mta=="v2" and mtb=="v2" then return tardis.v2_product_v2(a,b,r)
-	elseif mta=="v3" and mtb=="m3" then return tardis.v3_product_m4(a,b:m4(),r)
-	elseif mta=="v4" and mtb=="m3" then return tardis.v4_product_m4(a,b:m4(),r)
-	elseif mta=="m4" and mtb=="m3" then return tardis.m4_product_m4(a,b:m4(),r)
-	elseif mta=="v1" and mtb=="v1" then return tardis.v1_product_v1(a,b,r)
+	local product=a.product_map[ tardis.type(b) ]
+	
+	if product then
+		return product(a,b,r)
 	end
 
-	error("tardis : "..mta.." product "..mtb.." not supported",2)
+	error("tardis : "..tardis.type(a).." product "..tardis.type(b).." not supported",2)
 end
 
 
@@ -3238,6 +3226,64 @@ if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first
 end
 
 end
+
+m2.product_map={
+-- the product of this with a...
+	number=function(a,b,r) return a:scalar(b,r) end,
+	v1=function(a,b,r) return a:scalar(b[1],r) end,
+}
+m3.product_map={
+-- the product of this with a...
+	number=function(a,b,r) return a:scalar(b,r) end,
+	v1=function(a,b,r) return a:scalar(b[1],r) end,
+}
+m4.product_map={
+-- the product of this with a...
+	number=function(a,b,r) return a:scalar(b,r) end,
+	v1=function(a,b,r) return a:scalar(b[1],r) end,
+	m4=tardis.m4_product_m4,
+	m3=function(a,b,r) return tardis.m4_product_m4(a,b:m4(),r) end,
+}
+v1.product_map={
+-- the product of this with a...
+	number=function(a,b,r) return a:scalar(b,r) end,
+	v1=tardis.v1_product_v1,
+}
+v2.product_map={
+-- the product of this with a...
+	number=function(a,b,r) return a:scalar(b,r) end,
+	v1=function(a,b,r) return a:scalar(b[1],r) end,
+	v2=tardis.v2_product_v2,
+}
+v3.product_map={
+-- the product of this with a...
+	number=function(a,b,r) return a:scalar(b,r) end,
+	v1=function(a,b,r) return a:scalar(b[1],r) end,
+	v3=tardis.v3_product_v3,
+	q4=tardis.v3_product_q4,
+	m3=function(a,b,r) return tardis.v3_product_m4(a,b:m4(),r) end,
+	m4=tardis.v3_product_m4,
+}
+v4.product_map={
+-- the product of this with a...
+	number=function(a,b,r) return a:scalar(b,r) end,
+	v1=function(a,b,r) return a:scalar(b[1],r) end,
+	v4=tardis.v4_product_v4,
+	m3=function(a,b,r) return tardis.v4_product_m4(a,b:m4(),r) end,
+	m4=tardis.v4_product_m4,
+}
+q4.product_map={
+-- the product of this with a...
+	number=function(a,b,r) return a:scalar(b,r) end,
+	v1=function(a,b,r) return a:scalar(b[1],r) end,
+	q4=tardis.q4_product_q4,
+}
+line.product_map={
+-- the product of this with a...
+}
+plane.product_map={
+-- the product of this with a...
+}
 
 tardis.V1=tardis.v1.new
 tardis.V2=tardis.v2.new
