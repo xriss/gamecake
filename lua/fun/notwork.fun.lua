@@ -127,27 +127,104 @@ end
 
 scenery.all.methods={}
 
-scenery.all.methods.setup_body=function(it,boot)
+-- test history diffs
+scenery.all.methods.advance_values=function(it)
 
-	it.pos=V3( boot.pos )
-	it.vel=V3( boot.vel )
-
-	it.rot=V3( boot.rot )
-	it.ang=V3( boot.ang )
+	it:push_values()
+	while it.values_length>16 do -- max history
+		it:pull_values()
+	end
 
 end
 
-scenery.all.methods.update_body=function(it)
+scenery.all.methods.setup_values=function(it)
 
-	it.pos[1]=it.pos[1]+it.vel[1]
-	it.pos[2]=it.pos[2]+it.vel[2]
+	it.values={ {} }
+	it.values_length=#it.values
+
+end
+
+scenery.all.methods.push_values=function(it)
+
+	table.insert(it.values,1,{})
+	it.values_length=#it.values
+
+end
+
+scenery.all.methods.pop_values=function(it)
+
+	assert( it.values_length>1 ) -- must always leave some values
+
+	return table.remove(it.values,1) -- go back in time one tick
+
+end
+
+-- remove base values and merge that data with new base
+scenery.all.methods.pull_values=function(it)
+
+	assert( it.values_length>1 ) -- must always leave some values
+
+	local v=table.remove(it.values,it.values_length) -- base
+	it.values_length=#it.values
+	local w=it.values[it.values_length] -- new base
 	
-	if it.pos[1]<0                    then it.pos[1]=it.pos[1]+components.screen.hx end
-	if it.pos[1]>components.screen.hx then it.pos[1]=it.pos[1]-components.screen.hx end
-	if it.pos[2]<0                    then it.pos[2]=it.pos[2]+components.screen.hy end
-	if it.pos[2]>components.screen.hy then it.pos[2]=it.pos[2]-components.screen.hy end
+	for n,v in pairs(v) do -- copy into any nils
+		if type(w[n])=="nil" then w[n]=v end
+	end
+	
+	return v -- return old value object
+end
 
-	it.rot[3]=it.rot[3]+it.ang[3]
+scenery.all.methods.get=function(it,name)
+	
+	-- search backwards through time for this value
+	for i=1,it.values_length do
+		local v=it.values[i][name]
+		if type(v)~="nil" then return v end
+	end
+
+end
+
+scenery.all.methods.set=function(it,name,value)
+
+	if it:get(name)~=value then -- only write if changed
+		it.values[1][name]=value -- to current values object only
+	end
+
+end
+
+scenery.all.methods.setup_body=function(it,boot)
+
+	it:set( "pos" , V3( boot.pos ) )
+	it:set( "vel" , V3( boot.vel ) )
+
+	it:set( "rot" , V3( boot.rot ) )
+	it:set( "ang" , V3( boot.ang ) )
+
+end
+
+scenery.all.methods.update_body=function(it,pos,vel,rot,ang)
+
+	-- best to pass in these values if you have already got and modified them
+	pos=pos or V3( it:get("pos") )
+	vel=vel or V3( it:get("vel") )
+	rot=rot or V3( it:get("rot") )
+	ang=ang or V3( it:get("ang") )
+	it:advance_values()
+
+	pos=pos+vel
+	
+	if pos[1]<0                    then pos[1]=pos[1]+components.screen.hx end
+	if pos[1]>components.screen.hx then pos[1]=pos[1]-components.screen.hx end
+	if pos[2]<0                    then pos[2]=pos[2]+components.screen.hy end
+	if pos[2]>components.screen.hy then pos[2]=pos[2]-components.screen.hy end
+
+	rot=rot+ang
+
+	it:set("pos",pos)
+	it:set("vel",vel)
+	it:set("rot",rot)
+	it:set("ang",ang)
 
 end
 
@@ -208,11 +285,17 @@ scenery.item.methods={}
 
 scenery.item.methods.setup=function(it,boot)
 
+	it:setup_values(it)
 	it:setup_body(it,boot)
 
 end
 	
 scenery.item.methods.update=function(it)
+
+	local pos=V3( it:get("pos") )
+	local vel=V3( it:get("vel") )
+	local rot=V3( it:get("rot") )
+	local ang=V3( it:get("ang") )
 
 	local up=oven.ups.manifest(1)
 
@@ -223,39 +306,49 @@ scenery.item.methods.update=function(it)
 	
 	
 	local fa=1/16
-	if ( it.vel[1]*it.vel[1] + it.vel[2]*it.vel[2] ) < (lx*lx + ly*ly) then
+	if ( vel[1]*vel[1] + vel[2]*vel[2] ) < (lx*lx + ly*ly) then
 		fa=1/2
 	end
-	it.vel[1] = it.vel[1]*(1-fa) + lx*2*(fa)
-	it.vel[2] = it.vel[2]*(1-fa) + ly*2*(fa)
+	vel[1] = vel[1]*(1-fa) + lx*2*(fa)
+	vel[2] = vel[2]*(1-fa) + ly*2*(fa)
 
 
-	it.ang[3]=0
+	ang[3]=0
 	local dorot=function(dx,dy)
 		if ( dx*dx + dy*dy ) > 0.01 then
 			local d=((math.atan2(dy,dx)*180/math.pi)+90+360*360)%360
-			local dd=(((d-it.rot[3])+360*360)%360)
+			local dd=(((d-rot[3])+360*360)%360)
 			if dd > 180 then dd=dd-360 end
 			local s=5
-			if dd<0 then it.ang[3]=-s else it.ang[3]=s end
+			if dd<0 then ang[3]=-s else ang[3]=s end
 		end
 	end
-	dorot(it.vel[1],it.vel[2])
+	dorot(vel[1],vel[2])
 	dorot(rx,ry)
 
-	it:update_body(it,boot)
+	it:update_body(pos,vel,rot,ang)
 
 end
 	
 scenery.item.methods.draw=function(it)
+
+	local pos=V3( it:get("pos") )
+	local rot=V3( it:get("rot") )
+
 	local spr=names.test_ship1
 	components.sprites.list_add({
 		t=spr.idx ,
 		hx=spr.hx , hy=spr.hy ,
 		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
-		px=it.pos[1] , py=it.pos[2] , pz=it.pos[3] ,
-		rz=math.floor((it.rot[3]/15)+0.5)*15,
+		px=pos[1] , py=pos[2] , pz=pos[3] ,
+		rz=math.floor((rot[3]/15)+0.5)*15,
 	})
+	
+	local s=""
+	for i=1,it.values_length do
+		s=s..tostring( it.values[i].pos ).." "
+	end
+	print(s)
 end
 
 

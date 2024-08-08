@@ -5,11 +5,9 @@ local global=_G ; pcall(function() global=require("global") end)
 require("apps").default_paths() -- default search paths so things can easily be found
 
 
-local tasks_msgp=require("wetgenes.tasks_msgp")
+local msgp=require("wetgenes.tasks_msgp")
 
 --print(tasks_msgp)
-
-local msgp=tasks_msgp.configure()
 
 local test_server=function(tasks)
 

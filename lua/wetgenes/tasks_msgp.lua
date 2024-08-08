@@ -510,16 +510,6 @@ M.functions.pack=function(a)
 end
 
 
--- this module must be configured before use
-M.configure=function(conf)
-conf=conf or {}
-local C={}
-
-setmetatable(C,M.metatable)
-
-return C
-end
-
 ------------------------------------------------------------------------
 end -- The functions below are free running tasks and should not depend on any locals
 ------------------------------------------------------------------------
