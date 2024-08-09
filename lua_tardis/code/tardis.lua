@@ -473,6 +473,52 @@ function array.ceil(it,r)
 	return r
 end
 
+--[[#lua.wetgenes.tardis.array.roundz
+
+	r=it:roundz(r)
+	r=it:roundz(it.new())
+
+Perform math.floor on positive values and math ceil on negative values 
+for all values of this array. So we will always error towards 0.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.roundz(it,r)
+	r=r or it
+	for i=1,#it do
+		if it[i]<0 then  r[i]=math.ceil(it[i])
+		else             r[i]=math.floor(it[i])
+		end
+	end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.quantize
+
+	r=it:quantize(1/1024,r)
+	r=it:quantize(s,it.new())
+
+Perform a roundz(n/s)*s on all values of this array. We recomended use 
+of a power of two, eg 1/1024 rather than 1/1000 if you wanted 3 decimal 
+digits.
+
+If r is provided then the result is written into r and returned 
+otherwise it is modified and returned.
+
+]]
+function array.quantize(it,s,r)
+	r=r or it
+	s=s or 1
+	for i=1,#it do
+		if it[i]<0 then  r[i]=math.ceil(it[i]/s)*s
+		else             r[i]=math.floor(it[i]/s)*s
+		end
+	end
+	return r
+end
+
 --[[#lua.wetgenes.tardis.array.sin
 
 	r=it:sin(r)
@@ -655,8 +701,13 @@ otherwise ma is modified and returned.
 
 ]]
 function array.product(a,b,r)
-	local product=a.product_map[ tardis.type(b) ]
+
+	local product=a.product_map[ tardis.type(b) ]	
+	if product then
+		return product(a,b,r)
+	end
 	
+	product=a.product_map[ "*" ] -- try wildcard before we give up
 	if product then
 		return product(a,b,r)
 	end

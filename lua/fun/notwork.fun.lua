@@ -228,10 +228,10 @@ scenery.all.methods.update_body=function(it,pos,vel,rot,ang)
 
 	rot=rot+ang
 
-	it:set("pos",pos)
-	it:set("vel",vel)
-	it:set("rot",rot)
-	it:set("ang",ang)
+	it:set("pos",pos:quantize(1/128))
+	it:set("vel",vel:quantize(1/128))
+	it:set("rot",rot:quantize(1/128))
+	it:set("ang",ang:quantize(1/128))
 
 end
 
