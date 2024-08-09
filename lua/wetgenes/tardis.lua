@@ -473,19 +473,38 @@ function array.ceil(it,r)
 	return r
 end
 
---[[#lua.wetgenes.tardis.array.roundz
+--[[#lua.wetgenes.tardis.array.round
 
-	r=it:roundz(r)
-	r=it:roundz(it.new())
+	r=it:round(r)
+	r=it:round(it.new())
 
-Perform math.floor on positive values and math ceil on negative values 
-for all values of this array. So we will always error towards 0.
+Perform math.floor( v+0.5 ) on all values of this array. Which will 
+round up or down to the nearest integer.
 
 If r is provided then the result is written into r and returned otherwise it is
 modified and returned.
 
 ]]
-function array.roundz(it,r)
+function array.round(it,r)
+	r=r or it
+	for i=1,#it do r[i]=math.floor(it[i]+0.5) end
+	return r
+end
+
+--[[#lua.wetgenes.tardis.array.trunc
+
+	r=it:trunc(r)
+	r=it:trunc(it.new())
+
+Perform math.floor on positive values and math ceil on negative values 
+for all values of this array. So a trunication that will always error 
+towards 0.
+
+If r is provided then the result is written into r and returned otherwise it is
+modified and returned.
+
+]]
+function array.trunc(it,r)
 	r=r or it
 	for i=1,#it do
 		if it[i]<0 then  r[i]=math.ceil(it[i])
@@ -500,9 +519,9 @@ end
 	r=it:quantize(1/1024,r)
 	r=it:quantize(s,it.new())
 
-Perform a roundz(n/s)*s on all values of this array. We recomended use 
-of a power of two, eg 1/1024 rather than 1/1000 if you wanted 3 decimal 
-digits.
+Perform a trunc(v/s)*s on all values of this array. We recomended the 
+use of a power of two, eg 1/1024 rather than 1/1000 if you wanted 3 
+decimal digits.
 
 If r is provided then the result is written into r and returned 
 otherwise it is modified and returned.
