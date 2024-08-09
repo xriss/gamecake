@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 618,
+   "count": 619,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 611,
+   "count": 612,
    "name": "lua.wetgenes"
   },
   {
@@ -1650,11 +1650,11 @@
    "name": "lua.wetgenes.spew.test"
   },
   {
-   "count": 171,
+   "count": 172,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 33,
+   "count": 34,
    "name": "lua.wetgenes.tardis.array"
   },
   {
@@ -1759,7 +1759,7 @@
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.tardis.array.roundz"
+   "name": "lua.wetgenes.tardis.array.round"
   },
   {
    "count": 1,
@@ -1780,6 +1780,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.tan"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.trunc"
   },
   {
    "count": 1,
@@ -2670,7 +2674,7 @@
    "body": "<pre><code>v4 = v4:add(v4b)\nv4 = v4:add(v4b,r)\n</code></pre>\n<p>Add v4b to v4.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2507,
+   "line": 2526,
    "name": "lua.wetgenes.tardis.v4.add",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
