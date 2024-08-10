@@ -99,9 +99,6 @@ running a cake or fun script then the following args can control it.
 	will add it and we assume + if neither is present, eg --logs=-oven 
 	will show everything except oven logs.
 
-  --show=win
-    Show window as a normal draggable and resizable window.
-
   --win-hx=640
   --win-hy=480
   --win-px=0
@@ -115,11 +112,12 @@ running a cake or fun script then the following args can control it.
   --win-hidden
     Ask for window to start off hidden.
 
-  --win-title=hello
+  --win-title="hello world"
     Set window title.
 
-  --win-name=game
-    Set window name.
+  --show=win
+	Show window as a normal draggable and resizable window. This is the 
+	default.
 
   --show=max
 	Show window as a maximised window. Desktop resolution possibly 
@@ -407,18 +405,20 @@ os.exit()
 				inf.title=inf.title.." ( "..opts.version.." ) "
 			end
 			
-			set_inf_arg("borderless","win-borderless",function(v) return v and true or false end)
-			set_inf_arg("hidden","win-hidden",function(v) return v and true or false end)
-			set_inf_arg("name","win-name")
-			set_inf_arg("title","win-title")
+			local tobool=function(v) return v and true or false end
+			set_inf_arg("borderless","win-borderless",tobool)
+			set_inf_arg("hidden","win-hidden",tobool)
+			set_inf_arg("title","win-title",tostring)
 			set_inf_arg("width","win-hx",tonumber)
 			set_inf_arg("height","win-hy",tonumber)
-				
+			
+			-- auto center dependng on size
 			inf.x=math.floor((screen.width-inf.width)*(opts.win_px or 0.5))
 			inf.y=math.floor((screen.height-inf.height)*(opts.win_py or 0.5))
 			if inf.x<0 then inf.x=0 end
 			if inf.y<0 then inf.y=0 end
 
+			-- overide auto center
 			set_inf_arg("x","win-px",tonumber)
 			set_inf_arg("y","win-py",tonumber)
 
