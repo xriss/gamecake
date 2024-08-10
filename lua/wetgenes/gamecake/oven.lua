@@ -102,6 +102,25 @@ running a cake or fun script then the following args can control it.
   --show=win
     Show window as a normal draggable and resizable window.
 
+  --win-hx=640
+  --win-hy=480
+  --win-px=0
+  --win-py=0
+	Set the window size and position, without these values we will 
+	place and position the window automatically.
+
+  --win-borderless
+    Ask for a borderless window.
+
+  --win-hidden
+    Ask for window to start off hidden.
+
+  --win-title=hello
+    Set window title.
+
+  --win-name=game
+    Set window name.
+
   --show=max
 	Show window as a maximised window. Desktop resolution possibly 
 	with a visible title bar and desktop panel still visible.
@@ -366,7 +385,7 @@ os.exit()
 
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale,
 				console=opts.args.console,		-- use --console on commandline to keep console open
-				borderless=opts.args.borderless,
+				borderless=opts.borderless,
 				hidden=opts.hidden,
 				}
 --				border=opts.args.border}		-- use --border  on commandline to keep window borders
@@ -388,6 +407,8 @@ os.exit()
 				inf.title=inf.title.." ( "..opts.version.." ) "
 			end
 			
+			set_inf_arg("borderless","win-borderless",function(v) return v and true or false end)
+			set_inf_arg("hidden","win-hidden",function(v) return v and true or false end)
 			set_inf_arg("name","win-name")
 			set_inf_arg("title","win-title")
 			set_inf_arg("width","win-hx",tonumber)
