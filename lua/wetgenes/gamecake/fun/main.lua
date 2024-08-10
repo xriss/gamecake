@@ -73,11 +73,15 @@ main.setup=function()
 --		.load_and_setup("test",
 --		"lua/"..(M.modname):gsub("%.","/"):gsub("[^/]+$",""))
 
-	local screen=main.system.components.screen
-	oven.win:resize(screen.hx*screen.scale,screen.hy*screen.scale)
 	
 	oven.rebake("wetgenes.gamecake.mods.console").data.fun=main.system.code -- use fun.whatever in console to tweak fun globals
 	
+	local screen=main.system.components.screen
+	local args=oven.opts.args
+	-- do resize only if we did not force a window size on the command line
+	if not ( args["win-hx"] or args["win-hy"] or args["win-px"] or args["win-py"] ) then
+		oven.win:resize(screen.hx*screen.scale,screen.hy*screen.scale)
+	end
 	opts.width=screen.hx*screen.scale
 	opts.height=screen.hy*screen.scale
 	opts.screen_scale=screen.scale

@@ -370,6 +370,14 @@ os.exit()
 				hidden=opts.hidden,
 				}
 --				border=opts.args.border}		-- use --border  on commandline to keep window borders
+
+			local set_inf_arg=function(inf_name,arg_name,arg_cast)
+				arg_cast=arg_cast or function(v) return v end
+				if opts.args[arg_name] then
+					inf[inf_name]=arg_cast( opts.args[arg_name] )
+				end
+			end
+
 			local screen=wwin.screen()
 
 			inf.name=opts.class_name or opts.title
@@ -380,10 +388,18 @@ os.exit()
 				inf.title=inf.title.." ( "..opts.version.." ) "
 			end
 			
+			set_inf_arg("name","win-name")
+			set_inf_arg("title","win-title")
+			set_inf_arg("width","win-hx",tonumber)
+			set_inf_arg("height","win-hy",tonumber)
+				
 			inf.x=math.floor((screen.width-inf.width)*(opts.win_px or 0.5))
 			inf.y=math.floor((screen.height-inf.height)*(opts.win_py or 0.5))
 			if inf.x<0 then inf.x=0 end
 			if inf.y<0 then inf.y=0 end
+
+			set_inf_arg("x","win-px",tonumber)
+			set_inf_arg("y","win-py",tonumber)
 
 			inf.screen_mode=opts.args.screen or opts.screen_mode
 

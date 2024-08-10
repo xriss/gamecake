@@ -14,6 +14,9 @@ local chatdown=require("wetgenes.gamecake.fun.chatdown")
 local wstr=require("wetgenes.string")
 function ls(s) print(wstr.dump(s))end
 
+-- provides base networking and synced inputs
+local upnet=require("wetgenes.gamecake.upnet").bake(oven)
+
 -- request full keymap
 oven.ups.keymap(1,"full") -- 1up has basic keyboard mappings
 
@@ -56,6 +59,8 @@ end
 
 setup=function()
 print("setup")
+
+	upnet.setup()
 
 	-- cache system tables that we use a lot in globals
 	components=system.components
@@ -352,11 +357,14 @@ scenery.item.methods.draw=function(it)
 		rz=math.floor((rot[3]/15)+0.5)*15,
 	})
 	
+--[[
 	local s=""
 	for i=1,it.values_length do
 		s=s..tostring( it.values[i].pos ).." "
 	end
 	print(s)
+]]
+
 end
 
 
