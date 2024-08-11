@@ -139,7 +139,11 @@ running a cake or fun script then the following args can control it.
   --pixel=NUMBER
 	Disable screen space pixel processing and set default window size 
 	to NUMBER view pixels per game pixel.
+]]
 
+-- probably not generic? maybe
+
+--[[
   --tasks=many
   --tasks=only
   --tasks=net

@@ -30,7 +30,8 @@ M.bake=function(oven,upnet)
 
 	upnet.setup=function()
 
-dump(oven.opts.args)
+		local args=oven.opts.args
+dump(args)
 
 		-- create msgp handling thread
 		upnet.thread=oven.tasks:add_global_thread({
@@ -38,16 +39,28 @@ dump(oven.opts.args)
 			id=upnet.taskid,
 			code=msgp.msgp_code,
 		})
-
-		-- and tell it to start listening
-		upnet.host=oven.tasks:do_memo({
-			task=upnet.taskid,
-			cmd="host",
-			baseport=baseport,
-			basepack=basepack,
-		})
+		
+		if args.host then
+		
+			if tonumber( args.host ) then baseport=tonumber( args.host ) end
+		
+			-- and tell it to start listening
+			upnet.host=oven.tasks:do_memo({
+				task=upnet.taskid,
+				cmd="host",
+				baseport=baseport,
+				basepack=basepack,
+			})
+		
+		end
 		
 		upnet.reset()
+
+		if args.join then
+		
+			upnet.join( args.join )
+
+		end
 
 	end
 
@@ -61,7 +74,7 @@ dump(oven.opts.args)
 	-- try to make a new connection
 	upnet.join=function(addr)
 
-		tasks:do_memo({
+		oven.tasks:do_memo({
 			task=upnet.taskid,
 			cmd="join",
 			addr=addr,

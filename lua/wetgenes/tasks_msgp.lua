@@ -550,7 +550,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local manifest_client=function(ip,port,reset)
 
 		-- parse ip:port and rebuild it to a standard url format
-		local addr_list=msgp.addr_to_list(ip,port)
+		local addr_list=assert( msgp.addr_to_list(ip,port) )
 		local addr=msgp.list_to_addr(addr_list)
 		local addr_ip,addr_port=msgp.addr_to_ip_port(addr_list)
 
