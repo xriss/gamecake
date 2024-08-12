@@ -29,16 +29,17 @@ can be downloaded from https://github.com/xriss/gamecake/archive/exe.zip
 
 
 
-For a linuxy build, the big required build/lib dependencies are luajit, 
-luafilesystem and SDL2. You have two choices either install via a package 
-manager, the following script should do that along with making sure you have a 
-basic build environment setup. If it does not work or you do not trust it then 
-read it and install the bits it asks for yourself.
+For a linuxy build, the big required build/lib dependencies are luajit and SDL2.
+You have two choices either install via a package manager, the following script
+should do that along with making sure you have a basic build environment setup.
+If it does not work or you do not trust it then read it and install the bits it
+asks for yourself.
 
 	./install-build-dependencies
 
-Some of the dependencies can be built them and installed them from source which 
-the following script will try to do for luajit and sdl2.
+Some of the dependencies can be built and installed from source which the
+following script will try to do. This is normally run inside a virtual machine
+so might actually work.
 
 	build/install
 
@@ -60,10 +61,9 @@ following to install tools/libs and then build using mingw.
 	build/make --gcc=mingw
 
 
-Alternatively any vbox_* directory can build a specific executable. For
-instance vbox_1604_64 can be used to build a 64bit executable inside an ubuntu
-16.04 vagrant box. See readme files inside these directories for more
-information.
+Alternatively any vbox_* directory can build a specific executable. For instance
+vbox_64 can be used to build a 64bit executable inside an ubuntu vagrant box.
+See readme files inside these directories for more information.
 
 
 Once built the engine lives in one single fat binary that includes many 
