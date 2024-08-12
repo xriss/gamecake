@@ -863,7 +863,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			local ack=string.format("%d",p.ack)
 			if diff(p.ack,client.send_ack) <= 0 then ack="-" end -- old ack
 
-			if task_id=="msgp2" then
+			if port==2342 then
 				print("",ack,"","","","",idx,"",bitid,tims,pings)
 			else
 				print(idx,"",bitid,tims,pings,"","",ack)
