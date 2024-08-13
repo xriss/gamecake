@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 619,
+   "count": 620,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 612,
+   "count": 613,
    "name": "lua.wetgenes"
   },
   {
@@ -2462,7 +2462,7 @@
    "name": "lua.wetgenes.tasks.update"
   },
   {
-   "count": 8,
+   "count": 9,
    "name": "lua.wetgenes.tasks_msgp"
   },
   {
@@ -2472,6 +2472,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks_msgp.addr_to_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks_msgp.clean_name"
   },
   {
    "count": 1,
@@ -2919,7 +2923,7 @@
   },
   {
    "body": "",
-   "count": 619,
+   "count": 620,
    "name": "lua"
   },
   {
@@ -2972,7 +2976,7 @@
   },
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 612,
+   "count": 613,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -7541,7 +7545,7 @@
   },
   {
    "body": "<pre><code>local msgp=require(&quot;wetgenes.tasks_msgp&quot;)\n</code></pre>\n<p>A stream of lowlevel udp packets with automatic resend ( data will get \nthere eventual ) but hopefully without clogging up an ongoing pulse of \nsmaller packets that contain EG controller state.</p>\n<p>We use lua sockets and lanes with some help from wetgenes.tasks to \nmanage the lanes.\n<br/>\n<br/></p>\n<p>Simple UDP data packets with auto resend, little endian with this 6 byte header.</p>\n<pre><code>u16\t\tidx\t\t\t//\tincrementing and wrapping idx of this packet\nu16\t\tack\t\t\t//\twe acknowledge all the packets before this idx so please send this one next (or again maybe)\nu8\t\tbit\t\t\t//\twhich bit this is, all bits should be joined before parsing\nu8\t\tbits\t\t//\thow many bits in total ( all bits will be in adjacent idxs )\nu8\t\tdata[*]\t\t//\tThe payload, if multiple bits then all payloads should be concatenated\n</code></pre>\n<p>A maximum packet size of 63k seems to give good throughput, letting the \nlower level code split and recombine packets is probably going to be \nmore efficient than us. Note that we care about best case speed, when \nshit lags and packets drop we care less about performance and more \nabout maintaining a connection with correct state. IE its important \nthat we recover not that we pretend there is no problem. At 255 bits * \n63k bit size we can seen a data of about 15.6m.</p>\n<p>Technically 63k UDP packets might just get dropped as too big but I \nsuspect modern hardware is not really going to cause problems.</p>\n<p>bit/bits only goes up to 255. the 0 value in either of these is \nreserved as a flag for possible slightly strange packets in the future \neg maybe we need a ping? and should be ignored as a bad packet if you \ndo not understand them.</p>\n<p>An ack of 0x1234 also implies that 0x9234 to 0x1233 are in the past and \n0x1234 to 0x9233 are in the future.</p>\n<p>Also if we have nothing new to say after 100ms but have received new \npackets then we can send a packet with empty data (0 length) as an ack\nonly packet.</p>\n<p>When connecting to a port for the first time, the idx value must start \nat a special number, that number is configurable and should be \ndifferent for each app. An extra bit of sanity during introductions to \nindicate that the data stream will be understood by both parties.</p>\n<p>Special packets that do not add to the stream of user data but instead \nare used internally by this protocol.</p>\n<pre><code>id\t\tbits\tbit\nPING\t0x00\t0x02\nPONG\t0x00\t0x03\nHAND\t0x00\t0x04\nSHAKE\t0x00\t0x05\nRESEND\t0x00\t0x08\nPULSE\t0x00\t0x10\n</code></pre>\n<p>A PING packet will be accepted and acknowledged after handshaking. \nSending a PING packet will cause a PONG response with the same data.</p>\n<p>A PONG packet will be accepted and acknowledged after handshaking, its \ndata should be the same as the PING it is responding too.</p>\n<p>A HAND packet begins handshaking, the payload data is a string array. \nConsisting of a series of null terminated utf8 strings.</p>\n<p>A SHAKE packet ends handshaking The payload data is a string array. \nConsisting of a series of null terminated utf8 strings.</p>\n<p>Both the HAND and the SHAKE packets contain the same payload data which \nconsists of the following utf8 strings, each terminated by a 0 byte. </p>\n<pre><code>host name\nhost ip4\nhost ip6\nhost port\nclient addr\n</code></pre>\n<p>When received, each of the strings should to be clamped to 255 bytes \nand the values validated or replaced with empty strings before use.</p>\n<p>host name is maybe best considered a random string, it could be anything.</p>\n<p>host ip4 will be the hosts best guess at their ip4, it is the ip4 they \nare listening on.</p>\n<p>host ip6 will be the hosts best guess at their ip6, it is the ip6 they \nare listening on.</p>\n<p>host port will be the local port the host is listening on, ip4 and ip6, \nbut as they may be port forwarding we might connect on a different \nport.</p>\n<p>client addr is the client ip and port the sender sent this packet too. \nIf ipv4 it will be a string of the format &quot;1.2.3.4:5&quot; and if 1pv6 then \n&quot;[1::2]:3&quot; So the ip possibly wrapped in square brackets (ipv6) and \nthen a colon followed by the port in url style format.</p>\n<p>A RESEND packet consists of a payload of little endian 16bit idxs to \npackets we would like to be resent to fill in missing data.</p>\n<p>A PULSE packet contains user data but does not get resent or \nacknowledged, its IDX must be set to 0 and this IDX should be ignored \nwhen received as this is out of stream data. Pulse packets are small \nregular packets of user data, eg current client input state. Data sent \nis included as part of the normal received data stream but there is no \nguarantee that it will be delivered or when it will be delivered \nrelative to other data. The data must be small enough to fit in a \nsingle packet. Think of this as something of a raw UDP packet in terms \nof how it works.</p>\n",
-   "count": 8,
+   "count": 9,
    "file": "../lua/wetgenes/tasks_msgp.lua",
    "line": 8,
    "name": "lua.wetgenes.tasks_msgp",
@@ -7551,7 +7555,7 @@
    "body": "<p>parse an ip string and port number from an addr/addr+port/addr_list</p>\n<p>returns addr,port that we can then use with luasocket</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
-   "line": 383,
+   "line": 404,
    "name": "lua.wetgenes.tasks_msgp.addr_to_ip_port",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
   },
@@ -7559,15 +7563,23 @@
    "body": "<p>parse an ip address + maybe port encoded as a string into a list of \nnumbers, the length of the list represents the type so</p>\n<pre><code>#4 {1,2,3,4} -- ip4\n#5 {1,2,3,4,5} -- ip4:port\n#8 {1,2,3,4,5,6,7,8} -- ip6\n#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port\n</code></pre>\n<p>Optionally include a numeric port to add/replace in the list after \nparsing.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
-   "line": 239,
+   "line": 260,
    "name": "lua.wetgenes.tasks_msgp.addr_to_list",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
+  },
+  {
+   "body": "<p>Clean a hostname so it becomes upercase letters and numbers with \npossible underscores where any other chars would be, eg whitespace.</p>\n<p>we also try not to start or end with an _</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tasks_msgp.lua",
+   "line": 177,
+   "name": "lua.wetgenes.tasks_msgp.clean_name",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
   },
   {
    "body": "<p>Parse an array of 8 numbers into an ip6 address with :: in the first \nlongest run of zeros if needed and lowercase hex letters.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
-   "line": 176,
+   "line": 195,
    "name": "lua.wetgenes.tasks_msgp.ip6_to_addr",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
   },
@@ -7575,7 +7587,7 @@
    "body": "<p>Use ( google by default ) public dns servers to check if we can connect \nto the internet and if we have ipv4 and/or ipv6 available.</p>\n<p>To use alternative dns pass in an ipv4 and ipv6 address as the first \ntwo args, eg to use cloudflare.</p>\n<pre><code>ipsniff(&quot;1.1.1.1&quot;,&quot;2606:4700:4700::1111&quot;)\n</code></pre>\n<p>returns the ipv4,ipv6 address of this host when connecting to that dns \nor nil if no connection possible.</p>\n<p>This result can be used as a bool to indicate working ipv6 or ipv4 \ninternet and is also a best guess as to our ip when connecting to other \ndevices.</p>\n<p>Note that this will only work if we are connected to the internet can \nreach the dns servers etc etc, standard networks can be crazy \ndisclaimer applies.</p>\n<p>So great if this works but still need a fallback plan, eg assuming \nlocal ipv4 network is available.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
-   "line": 408,
+   "line": 429,
    "name": "lua.wetgenes.tasks_msgp.ipsniff",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
   },
@@ -7583,7 +7595,7 @@
    "body": "<p>Parse an array of numbers into an ip address and maybe port.</p>\n<pre><code>#4 {1,2,3,4} -- ip4\n#5 {1,2,3,4,5} -- ip4:port\n#8 {1,2,3,4,5,6,7,8} -- ip6\n#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
-   "line": 214,
+   "line": 235,
    "name": "lua.wetgenes.tasks_msgp.list_to_addr",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
   },
@@ -7591,7 +7603,7 @@
    "body": "<p>lanes task function for handling msgp communication.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
-   "line": 517,
+   "line": 538,
    "name": "lua.wetgenes.tasks_msgp.msgp_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
   },
@@ -7599,7 +7611,7 @@
    "body": "<p>If given aa udp data packet string, convert it to a table.</p>\n<p>If given table, convert it to a udp data packet string. little endian</p>\n<pre><code>u16\t\tidx\t\t\t//\tincrementing and wrapping idx of this packet\nu16\t\tack\t\t\t//\twe acknowledge all the packets before this idx so please send this one next (or again maybe)\nu8\t\tbit\t\t\t//\twhich bit this is, all bits should be joined before parsing\nu8\t\tbits\t\t//\thow many bits in total ( all bits will be in adjacent idxs )\nu8\t\tdata[*]\t\t//\tThe payload, if multiple bits then all payloads should be concatenated\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
-   "line": 467,
+   "line": 488,
    "name": "lua.wetgenes.tasks_msgp.pack",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
   },
