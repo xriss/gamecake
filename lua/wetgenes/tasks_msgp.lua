@@ -173,6 +173,25 @@ M.ENCODE5="0123456789abcdefghjkmnpqrtuvwxyz" -- 32 chars 5bits
 -- lowercase helps but can not be guaranteed
 
 
+
+--[[#lua.wetgenes.tasks_msgp.clean_name
+
+Clean a hostname so it becomes upercase letters and numbers with 
+possible underscores where any other chars would be, eg whitespace.
+
+we also try not to start or end with an _
+
+]]
+M.functions.clean_name=function(name)
+	name=tostring(name)
+	name=name:sub(1,255) -- make sure string is not huge
+	name=name:gsub("%W+","_") -- replace non alpha/numbers with single _
+	name=name:match( "^_*(.-)_*$" ) -- do not start or end with _
+	name=name:upper() -- force uppercase
+	return name
+end
+
+
 --[[#lua.wetgenes.tasks_msgp.ip6_to_addr
 
 Parse an array of 8 numbers into an ip6 address with :: in the first 
@@ -181,32 +200,34 @@ longest run of zeros if needed and lowercase hex letters.
 ]]
 M.functions.ip6_to_addr=function(list)
 
-	local zer=nil -- idx to collapse
+	local zer=0 -- idx to collapse
 	local rep=0 -- number of 0s to remove
 	local cnt=0
-	for i=1,9 do
-		if i<9 and list[i]==0 then
-			cnt=cnt+1
-		else
-			if cnt>rep then
-				rep=cnt
-				zer=i-cnt
-			end
-			cnt=0 -- reset
+	local check_best_and_reset=function(i)
+		if cnt>rep then -- better
+			rep=cnt
+			zer=i-cnt
 		end
+		cnt=0 -- reset
 	end
-	local s=""
 	for i=1,8 do
+		if list[i]==0 then cnt=cnt+1 else check_best_and_reset(i) end
+	end
+	check_best_and_reset(9)
+
+	local s=""
+	local i=1
+	while i<=8 do
 		if rep>=2 and i==zer then -- 2 or more zeros
 			s=s.."::"
 			i=i+rep
-			if i>=8 then return s end -- finished
 		else
-			if i>1 then
+			if i>1 and i~=zer+rep then
 				s=s..":"
 			end
+			s=s..string.format("%x",list[i])
+			i=i+1
 		end
-		s=s..string.format("%x",list[i])
 	end
 	return s
 end
@@ -522,6 +543,8 @@ lanes task function for handling msgp communication.
 M.functions.msgp_code=function(linda,task_id,task_idx)
 	local M -- hide M for thread safety
 	local global=require("global") -- lock accidental globals
+	
+	local task_id_msg=task_id..":msg"
 
 	local lanes=require("lanes")
 	set_debug_threadname(task_id)
@@ -535,9 +558,8 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local hostname=socket.dns.gethostname()
 	local ip4,ip6=msgp.ipsniff()
 	local udp4,udp6
-	local port
+	local hostport
 	local clients={} -- client state, reset on host cmd
-	local msgs -- list of msgs waiting to be polled by main thread
 	local update_time=now() -- update clients / gc etc
 	
 	-- return a-b with idx wrapping fixed
@@ -680,8 +702,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		return p
 	end
 	local send_msg=function(msg)
-		if not msgs then msgs={} end
-		msgs[#msgs+1]=msg
+		linda:send( nil , task_id_msg , msg )
 	end
 	local update_client=function(client)
 		if client.state=="msg" or client.state=="handshake" then -- connected
@@ -763,38 +784,45 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				end
 			end
 			
-			port=nil
+			hostport=nil
 			for i=0,1000 do -- try baseport to baseport+1000
 				if ( not udp4 ) or ( udp4:setsockname("*", baseport+i) ) then
 					if ( not udp6 ) or ( udp6:setsockname("*", baseport+i) ) then
-						port=baseport+i
+						hostport=baseport+i
 						break
 					end
 				end
 			end
-			if not port then ret.error="could not bind to port" end
+			if not hostport then ret.error="could not bind to port" end
 			
-			ret.port=port
-			ret.hostname=hostname
+			ret.port=hostport
+			ret.name=hostname
 			ret.ip4=ip4
 			ret.ip6=ip6
 
 			-- preferred connection addr
-			ret.addr_list=msgp.addr_to_list(ip6 or ip4,port)
+			ret.addr_list=msgp.addr_to_list(ip6 or ip4,hostport)
 			ret.addr=msgp.list_to_addr(ret.addr_list)
 
 		elseif memo.cmd=="join" then
 		
-			assert(port) -- must be connected
+			assert(hostport) -- must be connected
 
 			local client=manifest_client(memo.addr)
-			ret.client=client
-			
+			ret.host={}
+			ret.host.name=msgp.clean_name(hostname)
+			ret.host.ip4=ip4
+			ret.host.ip6=ip6
+			ret.host.port=hostport
+
+			ret.join={}
+			ret.join.addr=memo.addr
+
 			client.state="handshake"
 			send_packet( client , {
 				idx=basepack,
 				bit=msgp.PACKET.HAND,
-				data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0",
+				data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(hostport).."\0"..client.addr.."\0",
 			} )
 	
 		elseif memo.cmd=="pulse" then
@@ -836,12 +864,6 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				end
 			
 			end
-
-		elseif memo.cmd=="poll" then
-		
-			ret.msgs=msgs -- any data we have waiting
-			msgs=nil -- reset list of data to send
-
 		end
 
 		return ret
@@ -879,9 +901,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			for s,_ in string.gmatch(p.data,"([^%z]*)(%z)") do
 				i=i+1
 				if     i==1 then
-					client.handshake.name=s:sub(1,255) -- make sure string is not huge
-					client.handshake.name=client.handshake.name:gsub("%W","_") -- replace non alpha numbers with _
-					client.handshake.name=client.handshake.name:upper() -- force uppercase
+					client.handshake.name=msgp.clean_name(s)
 				elseif i==2 then
 					client.handshake.ip4=msgp.list_to_addr( msgp.addr_to_list(s) )
 				elseif i==3 then
@@ -890,17 +910,11 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					client.handshake.port=tonumber(s)
 					if not client.handshake.port or client.handshake.port~=client.handshake.port then client.handshake.port=nil end
 				elseif i==5 then
-					client.handshake.host=msgp.list_to_addr( msgp.addr_to_list(s) )
+					client.handshake.metoyou=msgp.list_to_addr( msgp.addr_to_list(s) )
 				end
 				if i>=5 then break end
 			end
---[[
-			print("client name",client.handshake.name)
-			print("client ip4",client.handshake.ip4)
-			print("client ip6",client.handshake.ip6)
-			print("client port",client.handshake.port)
-			print("client host",client.handshake.host)
-]]
+
 		end
 		
 		if p.bits==0 then -- protocol packet
@@ -921,7 +935,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				send_packet( client , {
 					idx=basepack,
 					bit=msgp.PACKET.SHAKE,
-					data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(port).."\0"..client.addr.."\0",
+					data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(hostport).."\0"..client.addr.."\0",
 				} )
 				
 				client_handshake()

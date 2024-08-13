@@ -26,17 +26,17 @@ M.bake=function(oven,upnet)
 
 	upnet=upnet or {}
 	
-	upnet.taskid=upnet.taskid or "msgp"
+	upnet.task_id=upnet.task_id or "msgp"
+	upnet.task_id_msg=upnet.task_id..":msg"
 
 	upnet.setup=function()
 
 		local args=oven.opts.args
-dump(args)
 
 		-- create msgp handling thread
 		upnet.thread=oven.tasks:add_global_thread({
 			count=1,
-			id=upnet.taskid,
+			id=upnet.task_id,
 			code=msgp.msgp_code,
 		})
 		
@@ -46,7 +46,7 @@ dump(args)
 		
 			-- and tell it to start listening
 			upnet.host=oven.tasks:do_memo({
-				task=upnet.taskid,
+				task=upnet.task_id,
 				cmd="host",
 				baseport=baseport,
 				basepack=basepack,
@@ -74,11 +74,13 @@ dump(args)
 	-- try to make a new connection
 	upnet.join=function(addr)
 
-		oven.tasks:do_memo({
-			task=upnet.taskid,
+		local ret=oven.tasks:do_memo({
+			task=upnet.task_id,
 			cmd="join",
 			addr=addr,
 		})
+		
+		dump(ret)
 
 	end
 
@@ -91,14 +93,23 @@ dump(args)
 	-- manage msgs and pulse controller state
 	upnet.update=function()
 
-		-- poll for new data
-		local ret=tasks:do_memo({
-			task=upnet.taskid,
-			cmd="poll",
+--[[
+		oven.tasks:send({
+			task=upnet.task_id,
+			cmd="pulse",
+			addr="[::1]:2342",
+			data="test"
 		})
-		for i,msg in ipairs( ret.msgs or {} ) do
-			upnet.domsg(m)
-		end
+]]			
+
+		repeat
+			local _,memo= oven.tasks.linda:receive( 0 , upnet.task_id_msg ) -- wait for any memos coming into this thread
+			
+			if memo then
+				upnet.domsg(memo)
+			end
+		
+		until not memo
 
 	end
 	

@@ -46,6 +46,7 @@ hardware,main=system.configurator({
 	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
 	update=function() -- called at a steady 60fps
 		if setup then setup=setup() end -- call setup once
+		upnet.update()
 		scene.call("update")
 	end,
 	draw=function() -- called at actual display frame rate
