@@ -45,13 +45,15 @@ M.bake=function(oven,upnet)
 			if tonumber( args.host ) then baseport=tonumber( args.host ) end
 		
 			-- and tell it to start listening
-			upnet.host=oven.tasks:do_memo({
+			local ret=oven.tasks:do_memo({
 				task=upnet.task_id,
 				cmd="host",
 				baseport=baseport,
 				basepack=basepack,
 			})
 		
+			dump(ret)
+
 		end
 		
 		upnet.reset()

@@ -796,27 +796,24 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			if not hostport then ret.error="could not bind to port" end
 			
 			ret.port=hostport
-			ret.name=hostname
+			ret.name=msgp.clean_name(hostname)
 			ret.ip4=ip4
 			ret.ip6=ip6
 
 			-- preferred connection addr
-			ret.addr_list=msgp.addr_to_list(ip6 or ip4,hostport)
-			ret.addr=msgp.list_to_addr(ret.addr_list)
+			local list=msgp.addr_to_list(ip6 or ip4,hostport)
+			ret.addr=msgp.list_to_addr(list)
 
 		elseif memo.cmd=="join" then
 		
 			assert(hostport) -- must be connected
 
 			local client=manifest_client(memo.addr)
-			ret.host={}
-			ret.host.name=msgp.clean_name(hostname)
-			ret.host.ip4=ip4
-			ret.host.ip6=ip6
-			ret.host.port=hostport
 
-			ret.join={}
-			ret.join.addr=memo.addr
+			ret.client={}
+			ret.client.addr=client.addr
+			ret.client.ip=client.ip
+			ret.client.port=client.port
 
 			client.state="handshake"
 			send_packet( client , {
