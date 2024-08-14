@@ -6,6 +6,8 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local log,dump=require("wetgenes.logs"):export("log","dump")
 
+local json_pack=require("wetgenes.json_pack")
+
 --[[
 
 Manage basic network connection and transfer of input states between 
@@ -29,6 +31,70 @@ M.bake=function(oven,upnet)
 	upnet.task_id=upnet.task_id or "msgp"
 	upnet.task_id_msg=upnet.task_id..":msg"
 
+	upnet.clients={}
+	upnet.clients_addr={}
+	upnet.manifest_client=function(m)
+	
+		local client=upnet.clients_addr[m.addr]
+		
+		if client then return client end
+		
+		-- create
+		client={}
+		client.addr=m.addr -- this may be different per client
+		client.ip4=m.ip4 or m.handshake.ip4
+		client.ip6=m.ip6 or m.handshake.ip6
+		client.port=m.port or m.handshake.port
+		client.name=m.name or m.handshake.name
+		
+		-- remember
+		upnet.clients_addr[client.addr]=client
+
+
+		setmetatable(client,upnet.client)
+
+		return client
+	end
+
+	-- send basic info from the host on client join
+	upnet.client={}
+	upnet.client.__index=upnet.client
+
+	upnet.client.send=function(client,msg)
+	
+		oven.tasks:send({
+			task=upnet.task_id,
+			cmd="send",
+			addr=client.addr,
+			data=json_pack.into_data(msg),
+		})
+
+	end
+
+	upnet.client.recv=function(client,msg)
+	
+		if msg.upnet=="welcome" then
+		
+			client:welcome_recv(msg)
+
+		end
+		
+	end
+
+	upnet.client.welcome_send=function(client)
+	
+		local msg={ upnet="welcome" }
+		
+		client:send(msg)
+	
+	end
+	upnet.client.welcome_recv=function(client,msg)
+	
+		print("WELCOME",client.idx)
+		dump(msg)
+	
+	end
+
 	upnet.setup=function()
 
 		local args=oven.opts.args
@@ -40,29 +106,46 @@ M.bake=function(oven,upnet)
 			code=msgp.msgp_code,
 		})
 		
+		upnet.reset()
+
+		-- everyone must enable network with a hear
 		if args.host then
 		
 			if tonumber( args.host ) then baseport=tonumber( args.host ) end
 		
 			-- and tell it to start listening
-			local ret=oven.tasks:do_memo({
+			local host_ret=oven.tasks:do_memo({
 				task=upnet.task_id,
 				cmd="host",
 				baseport=baseport,
 				basepack=basepack,
 			})
 		
-			dump(ret)
+--			dump(host_ret)
+
+			-- clients join the host
+			if args.join then
+			
+				upnet.join( args.join )
+				
+				upnet.mode="join"
+
+			else -- and one host just waits for clients to join
+
+				upnet.mode="host"
+				
+				local client=upnet.manifest_client(host_ret)
+			
+				-- we are client 1
+				client.idx=#upnet.clients+1
+				upnet.clients[client.idx]=client
+
+			end
 
 		end
 		
-		upnet.reset()
+		dump(upnet.clients)
 
-		if args.join then
-		
-			upnet.join( args.join )
-
-		end
 
 	end
 
@@ -70,6 +153,7 @@ M.bake=function(oven,upnet)
 	upnet.reset=function()
 	
 		upnet.clients={}
+		upnet.clients_addr={}
 
 	end
 	
@@ -82,14 +166,47 @@ M.bake=function(oven,upnet)
 			addr=addr,
 		})
 		
-		dump(ret)
+--		dump(ret)
 
 	end
 
 	upnet.domsg=function(m)
 
-		dump(m)
+		local client=upnet.clients_addr[m.addr]	-- may be nil
+	
+		if m.why=="connect" then
+		
+			client=upnet.manifest_client(m) -- create client
+		
+			if upnet.mode=="host" then
+				print("I am the host with client from "..m.addr)
+			else
+				print("I am the client connecting to "..m.addr)
+			end
+		
+			if upnet.mode=="host" then -- assign idx
+				
+				-- next client
+				client.idx=#upnet.clients+1
+				upnet.clients[client.idx]=client
+				
+				client:welcome_send()
+			
+				dump(upnet.clients)
+			end
+		
 
+		elseif m.why=="data" then
+		
+			local msg=json_pack.from_data(m.data) -- unpack binary
+			client:recv(msg)
+
+		else
+				
+			dump(m)
+
+		end
+		
 	end
 	
 	-- manage msgs and pulse controller state

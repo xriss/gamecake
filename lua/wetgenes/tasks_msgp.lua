@@ -184,10 +184,10 @@ we also try not to start or end with an _
 ]]
 M.functions.clean_name=function(name)
 	name=tostring(name)
-	name=name:sub(1,255) -- make sure string is not huge
 	name=name:gsub("%W+","_") -- replace non alpha/numbers with single _
 	name=name:match( "^_*(.-)_*$" ) -- do not start or end with _
 	name=name:upper() -- force uppercase
+	name=name:sub(1,32) -- make sure string is not huge
 	return name
 end
 
