@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 620,
+   "count": 623,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 613,
+   "count": 616,
    "name": "lua.wetgenes"
   },
   {
@@ -1468,6 +1468,18 @@
   {
    "count": 1,
    "name": "lua.wetgenes.json_diff.undo"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.json_pack"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.json_pack.from_data"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.json_pack.into_data"
   },
   {
    "count": 1,

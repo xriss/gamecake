@@ -264,7 +264,7 @@
     "name": "levels"
    },
    {
-    "count": 620,
+    "count": 623,
     "name": "lua"
    },
    {
@@ -292,7 +292,7 @@
     "name": "lua.glslang.yank_shader_versions"
    },
    {
-    "count": 613,
+    "count": 616,
     "name": "lua.wetgenes"
    },
    {
@@ -1602,6 +1602,18 @@
    {
     "count": 1,
     "name": "lua.wetgenes.json_diff.undo"
+   },
+   {
+    "count": 3,
+    "name": "lua.wetgenes.json_pack"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.json_pack.from_data"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.json_pack.into_data"
    },
    {
     "count": 1,
@@ -3045,7 +3057,7 @@
    },
    {
     "body": "",
-    "count": 620,
+    "count": 623,
     "name": "lua"
    },
    {
@@ -3098,7 +3110,7 @@
    },
    {
     "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-    "count": 613,
+    "count": 616,
     "file": "../lua/wetgenes/init.lua",
     "line": 5,
     "name": "lua.wetgenes",
@@ -5686,6 +5698,30 @@
     "line": 440,
     "name": "lua.wetgenes.json_diff.undo",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_diff.lua"
+   },
+   {
+    "body": "<p>(C) 2024 Kriss Blank and released under the MIT license, see \n<a href=\"http://opensource.org/licenses/MIT\">http://opensource.org/licenses/MIT</a> for full license text.</p>\n<pre><code>local json_pack=require(&quot;wetgenes.json_pack&quot;)\n</code></pre>\n<p>Turn a valid json table into a binary data string and visa versa.</p>\n<p>A valid json table...</p>\n<pre><code>Does not include functions/userdata/etc.\n\nDoes not self reference.\n\nEach table should be an array or an object never both.\n\nMay have metatables as long as it is not too funky so added \nfunction calls for a class should be fine but this will obviously \nbe lost. Please test and check outputs if including meta.\n</code></pre>\n<p>So normal json style data.\n<br/>\n<br/></p>\n<p>Currently we are using cmsgpack and zlib, this may be changed if a \nbetter way is found.</p>\n",
+    "count": 3,
+    "file": "../lua/wetgenes/json_pack.lua",
+    "line": 1,
+    "name": "lua.wetgenes.json_pack",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_pack.lua"
+   },
+   {
+    "body": "<pre><code>j=json_pack.from_data(d)\n</code></pre>\n<p>Where j is some json data and d is a binary string of the same data.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/json_pack.lua",
+    "line": 57,
+    "name": "lua.wetgenes.json_pack.from_data",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_pack.lua"
+   },
+   {
+    "body": "<pre><code>d=json_pack.into_data(j)\n</code></pre>\n<p>Where j is some json data and d is a binary string of the same data.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/json_pack.lua",
+    "line": 45,
+    "name": "lua.wetgenes.json_pack.into_data",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_pack.lua"
    },
    {
     "body": "<pre><code>value = wetgenes.lookup(table,...)\n</code></pre>\n<p>Safe recursive lookup within a table that returns nil if any part of \nthe lookup is nil so we never cause an error but just return nil. \nThis is intended to replace the following sort of code</p>\n<pre><code>a = b and b.c and b.c.d and b.c.d.e\n</code></pre>\n<p>To get e only if all of its parent bits exist and not to cause any \nerror if they do not. instead use</p>\n<pre><code>a = lookup(b,&quot;c&quot;,&quot;d&quot;,&quot;e&quot;)\n</code></pre>\n",
