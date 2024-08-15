@@ -555,7 +555,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 
 	local baseport=2342
 	local basepack=2342
-	local hostname=socket.dns.gethostname()
+	local hostname=msgp.clean_name( socket.dns.gethostname() ) -- get a clean hostname
 	local ip4,ip6=msgp.ipsniff()
 	local udp4,udp6
 	local hostport
@@ -796,7 +796,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			if not hostport then ret.error="could not bind to port" end
 			
 			ret.port=hostport
-			ret.name=msgp.clean_name(hostname)
+			ret.name=hostname
 			ret.ip4=ip4
 			ret.ip6=ip6
 
@@ -1001,7 +1001,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			and		p.idx==0
 			then
 				send_msg({
-					why="data",
+					why="pulse",
 					addr=client.addr,
 					data=p.data,
 				})

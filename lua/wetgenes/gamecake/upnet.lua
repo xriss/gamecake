@@ -25,14 +25,26 @@ local msgp=require("wetgenes.tasks_msgp")
 
 M.bake=function(oven,upnet)
 
-
 	upnet=upnet or {}
 	
 	upnet.task_id=upnet.task_id or "msgp"
 	upnet.task_id_msg=upnet.task_id..":msg"
 
-	upnet.clients={}
-	upnet.clients_addr={}
+	-- reset all connections
+	upnet.reset=function()
+	
+		upnet.hooks={}
+		
+		upnet.host_idx=0
+		upnet.clients={} -- clients by idx ( managed by host ) these are the live conected clients and array may have holes
+		upnet.clients_addr={} -- clients by addr ( local name )
+		upnet.clients_id={} -- clients by id ( unique name ) as reported by client so could be a lie
+
+		upnet.clients_idx={} -- clients order provided by host, remembered from welcome msg
+
+	end
+	upnet.reset() -- make sure we are always tables
+
 	upnet.manifest_client=function(m)
 	
 		local client=upnet.clients_addr[m.addr]
@@ -47,11 +59,27 @@ M.bake=function(oven,upnet)
 		client.port=m.port or m.handshake.port
 		client.name=m.name or m.handshake.name
 		
-		-- remember
+		-- a unique id which is [ip6]:port or ip4:port:name
+		if client.ip6 then
+			client.id="["..client.ip6.."]:"..client.port
+		else
+			client.id=client.ip4..":"..client.port..":"..client.name
+		end
+		
+		-- remember by
 		upnet.clients_addr[client.addr]=client
+		upnet.clients_id[client.id]=client
 
-
+		-- auto funcs
 		setmetatable(client,upnet.client)
+		
+		-- find idx maybe
+		for i,c in ipairs(upnet.clients_idx) do
+			if c.id==client.id then
+				client.idx=i
+				upnet.clients[i]=client
+			end
+		end
 
 		return client
 	end
@@ -79,11 +107,29 @@ M.bake=function(oven,upnet)
 
 		end
 		
+		for n,f in pairs(upnet.hooks) do
+			if msg[n] then -- if this key is set then the hook wants the msg
+				f(client,msg)
+			end
+		end
+		
 	end
 
 	upnet.client.welcome_send=function(client)
 	
 		local msg={ upnet="welcome" }
+		
+		msg.clients={}
+		for i,c in ipairs(upnet.clients) do -- send all clients idx
+			local v={}
+			v.id=c.id
+			v.idx=c.idx
+			v.ip4=c.ip4
+			v.ip6=c.ip6
+			v.port=c.port
+			v.name=c.name
+			msg.clients[i]=v
+		end
 		
 		client:send(msg)
 	
@@ -91,7 +137,19 @@ M.bake=function(oven,upnet)
 	upnet.client.welcome_recv=function(client,msg)
 	
 		print("WELCOME",client.idx)
-		dump(msg)
+
+		upnet.clients_idx=msg.clients
+		for i,c in ipairs(upnet.clients_idx) do -- assign clients idx
+			local v=upnet.clients_id[c.id]
+			if v then
+				v.idx=i
+				upnet.clients[i]=v
+			else -- need to join this client...
+			end
+		end
+
+
+dump(upnet.clients)
 	
 	end
 
@@ -120,40 +178,29 @@ M.bake=function(oven,upnet)
 				baseport=baseport,
 				basepack=basepack,
 			})
-		
---			dump(host_ret)
+			-- the client of this host
+			local client=upnet.manifest_client(host_ret)
+			client.us=true -- remember that this is us
 
 			-- clients join the host
 			if args.join then
 			
-				upnet.join( args.join )
-				
+				upnet.join( args.join )				
 				upnet.mode="join"
 
 			else -- and one host just waits for clients to join
 
 				upnet.mode="host"
-				
-				local client=upnet.manifest_client(host_ret)
-			
 				-- we are client 1
-				client.idx=#upnet.clients+1
+				upnet.host_idx=upnet.host_idx+1
+				client.idx=upnet.host_idx
 				upnet.clients[client.idx]=client
 
 			end
 
 		end
 		
-		dump(upnet.clients)
-
-
-	end
-
-	-- reset all connections
-	upnet.reset=function()
-	
-		upnet.clients={}
-		upnet.clients_addr={}
+dump(upnet.clients)
 
 	end
 	
@@ -165,8 +212,6 @@ M.bake=function(oven,upnet)
 			cmd="join",
 			addr=addr,
 		})
-		
---		dump(ret)
 
 	end
 
@@ -177,26 +222,21 @@ M.bake=function(oven,upnet)
 		if m.why=="connect" then
 		
 			client=upnet.manifest_client(m) -- create client
-		
-			if upnet.mode=="host" then
-				print("I am the host with client from "..m.addr)
-			else
-				print("I am the client connecting to "..m.addr)
-			end
-		
+				
 			if upnet.mode=="host" then -- assign idx
 				
 				-- next client
-				client.idx=#upnet.clients+1
+				upnet.host_idx=upnet.host_idx+1
+				client.idx=upnet.host_idx
 				upnet.clients[client.idx]=client
 				
 				client:welcome_send()
 			
-				dump(upnet.clients)
+dump(upnet.clients)
 			end
 		
 
-		elseif m.why=="data" then
+		elseif m.why=="data" or m.why=="pulse" then
 		
 			local msg=json_pack.from_data(m.data) -- unpack binary
 			client:recv(msg)
@@ -212,16 +252,8 @@ M.bake=function(oven,upnet)
 	-- manage msgs and pulse controller state
 	upnet.update=function()
 
---[[
-		oven.tasks:send({
-			task=upnet.task_id,
-			cmd="pulse",
-			addr="[::1]:2342",
-			data="test"
-		})
-]]			
-
 		repeat
+		
 			local _,memo= oven.tasks.linda:receive( 0 , upnet.task_id_msg ) -- wait for any memos coming into this thread
 			
 			if memo then
