@@ -35,7 +35,9 @@ M.bake=function(oven,upnet)
 	
 		upnet.hooks={}
 		
-		upnet.host_idx=0
+		upnet.client_idx=nil -- we are client idx
+
+		upnet.host_idx=0 -- host incs per client
 		upnet.clients={} -- clients by idx ( managed by host ) these are the live conected clients and array may have holes
 		upnet.clients_addr={} -- clients by addr ( local name )
 		upnet.clients_id={} -- clients by id ( unique name ) as reported by client so could be a lie
@@ -120,7 +122,7 @@ M.bake=function(oven,upnet)
 		local msg={ upnet="welcome" }
 		
 		msg.clients={}
-		for i,c in ipairs(upnet.clients) do -- send all clients idx
+		for i,c in pairs(upnet.clients) do -- send all clients idx
 			local v={}
 			v.id=c.id
 			v.idx=c.idx
@@ -128,7 +130,7 @@ M.bake=function(oven,upnet)
 			v.ip6=c.ip6
 			v.port=c.port
 			v.name=c.name
-			msg.clients[i]=v
+			msg.clients[#msg.clients+1]=v
 		end
 		
 		client:send(msg)
@@ -142,9 +144,15 @@ M.bake=function(oven,upnet)
 		for i,c in ipairs(upnet.clients_idx) do -- assign clients idx
 			local v=upnet.clients_id[c.id]
 			if v then
-				v.idx=i
+				v.idx=c.idx
 				upnet.clients[i]=v
 			else -- need to join this client...
+			end
+		end
+
+		for i,c in pairs(upnet.clients) do
+			if c.us and c.idx then
+				upnet.client_idx=c.idx
 			end
 		end
 
@@ -195,6 +203,8 @@ dump(upnet.clients)
 				upnet.host_idx=upnet.host_idx+1
 				client.idx=upnet.host_idx
 				upnet.clients[client.idx]=client
+				
+				upnet.client_idx=upnet.host_idx
 
 			end
 
