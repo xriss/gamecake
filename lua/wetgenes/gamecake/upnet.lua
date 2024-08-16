@@ -314,6 +314,28 @@ dump(upnet.clients)
 		end
 		
 	end
+
+	-- get an ups array for the given tick
+	-- each connected client.idx will have an up available for that idx
+	upnet.get_ups=function(tick)
+		tick=tick or upnet.ticks
+		local ti=1+tick-upnet.ticks
+		
+		local ups={}
+		for idx,_ in pairs(upnet.clients) do
+			local up=oven.ups.create()
+			ups[idx]=up
+			for ui=ti,#upnet.history do -- find best state we have
+				local h=upnet.history[ui]
+				if h and h[idx] then
+					up:load(h[idx]) -- fill
+					break -- and done
+				end
+			end
+		end
+		
+		return ups
+	end
 	
 
 	-- tick one tick forwards
@@ -327,7 +349,7 @@ dump(upnet.clients)
 		up:update()
 		-- remember current up
 		table.insert( upnet.history , 1 , { [upnet.client_idx]=up:save() } ) -- remember new tick
-print("history",upnet.client_idx,#upnet.history)
+--print("history",upnet.client_idx,#upnet.history)
 		
 		-- send current ups to network
 		for _,client in pairs(upnet.clients) do

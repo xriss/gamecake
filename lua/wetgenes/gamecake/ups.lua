@@ -303,7 +303,7 @@ M.up_functions.load=function(up,r)
 		for n,v in pairs(up[name]) do -- empty
 			up[name][n]=nil
 		end
-		if r[name] then -- something
+		if r and r[name] then -- something
 			for n,v in pairs(r[name]) do
 				up[name][n]=v
 			end

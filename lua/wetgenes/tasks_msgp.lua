@@ -657,6 +657,20 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		client.ack=now()-p[1]
 		client.send[idx]=nil -- remove on final ack
 	end
+	-- advance ack and ack packet
+	local advance_ack=function(client,p)
+		-- advance send ack and remove old packets
+		local d=diff(p.ack,client.send_ack)
+		if d>=0 then
+			client.recv_time=now()
+		end
+		if d>0 then -- advance client ack and flag packets
+			for idx=client.send_ack,client.send_ack+d-1 do
+				ack_packet(client,idx%0x10000) -- ack and remove
+			end
+			client.send_ack=p.ack
+		end
+	end
 	-- returns p if we should process it
 	local recv_packet=function(client,p)
 		if diff( p.idx , client.recv_idx ) < 0 then return end -- old packet, ignore it
@@ -688,17 +702,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			end
 			client.recv_idx=(client.recv_idx+1)%0x10000			
 		end
-		-- advance send ack and remove old packets
-		local d=diff(p.ack,client.send_ack)
-		if d>=0 then
-			client.recv_time=now()
-		end
-		if d>0 then -- advance client ack and flag packets
-			for idx=client.send_ack,client.send_ack+d-1 do
-				ack_packet(client,idx%0x10000,true) -- ack and remove
-			end
-			client.send_ack=p.ack
-		end
+		advance_ack(client,p)
 		return p
 	end
 	local send_msg=function(msg)
@@ -1000,6 +1004,9 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			elseif	p.bit==msgp.PACKET.PULSE
 			and		p.idx==0
 			then
+
+				advance_ack(client,p)
+
 				send_msg({
 					why="pulse",
 					addr=client.addr,
