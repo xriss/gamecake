@@ -180,7 +180,6 @@ M.up_metatable={__index=M.up_functions}
 M.up_functions.reset=function(up)
 
 	up.all={} -- this frames button state
-
 	up.pulse={} -- "_set" or "_clr" next frame only pulse	
 	up.last_pad_values={} -- needed for pad axis buttons
 
@@ -280,10 +279,61 @@ M.up_functions.update=function(up)
 	end
 
 end
-		
+
+-- save to json ( sameish data as an up but no metatable )
+M.up_functions.save=function(up)
+	local r={}
+	
+	for _,name in pairs{"all","pulse","last_pad_values"} do
+		if next(up[name]) then -- something
+			r[name]={}
+			for n,v in pairs(up[name]) do
+				r[name][n]=v
+			end
+		end
+	end
+
+	return r
+end
+
+-- load from saved json or another up as they are similar
+M.up_functions.load=function(up,r)
+
+	for _,name in pairs{"all","pulse","last_pad_values"} do
+		for n,v in pairs(up[name]) do -- empty
+			up[name][n]=nil
+		end
+		if r[name] then -- something
+			for n,v in pairs(r[name]) do
+				up[name][n]=v
+			end
+		end
+	end
+
+end
+
+-- create new up when we have another up, 
+M.up_functions.create=function()
+	local up={}
+	setmetatable(up,M.up_metatable) -- shared functions
+	up:reset() -- initalize
+	return up
+end
+
+-- duplicate this up
+M.up_functions.duplicate=function(up)
+	local n=up.create()
+	n:load(yp)
+	return n
+end
+
+
 M.bake=function(oven,ups)
 
 	ups=ups or {}
+	
+	ups.auto_advance=true -- automatically advance each update
+	-- upnet will turn this off so it can network sync advances
 	
 	-- reset everything
 	ups.reset=function()
@@ -329,12 +379,7 @@ M.bake=function(oven,ups)
 	end
 	
 	-- create a state
-	ups.create=function()
-		local up={}
-		setmetatable(up,M.up_metatable) -- shared functions
-		up:reset() -- initalize
-		return up
-	end
+	ups.create=M.up_functions.create
 
 -- this is called as each msg is recieved and should be as fast as possible
 -- so just copy the msg into our volatile state for processing on next update
@@ -516,11 +561,18 @@ M.bake=function(oven,ups)
 			ups.msg_apply(m)
 		end
 
+		if ups.auto_advance then
+			ups.advance()
+		end
+
+	end
+	
+	-- needed for manual advance
+	ups.advance=function(idx)
 		-- advance each up state one frame
 		for idx,up in pairs(ups.states) do
 			up:update()
 		end
-
 	end
 
 

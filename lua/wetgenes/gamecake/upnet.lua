@@ -29,13 +29,19 @@ M.bake=function(oven,upnet)
 	
 	upnet.task_id=upnet.task_id or "msgp"
 	upnet.task_id_msg=upnet.task_id..":msg"
-
+	
 	-- reset all connections
 	upnet.reset=function()
 	
+		-- we will control the ups
+		oven.ups.auto_advance=false
+	
+		upnet.ticks=0
+		upnet.history={} -- first index is for upnet.ticks tick , next is -1, etc
+
 		upnet.hooks={}
 		
-		upnet.client_idx=nil -- we are client idx
+		upnet.client_idx=nil -- we are this client idx
 
 		upnet.host_idx=0 -- host incs per client
 		upnet.clients={} -- clients by idx ( managed by host ) these are the live conected clients and array may have holes
@@ -90,23 +96,25 @@ M.bake=function(oven,upnet)
 	upnet.client={}
 	upnet.client.__index=upnet.client
 
-	upnet.client.send=function(client,msg)
+	upnet.client.send=function(client,msg,cmd)
 	
 		oven.tasks:send({
 			task=upnet.task_id,
-			cmd="send",
+			cmd=cmd or "send",
 			addr=client.addr,
 			data=json_pack.into_data(msg),
 		})
 
 	end
 
-	upnet.client.recv=function(client,msg)
+	upnet.client.recv={}
+	upnet.client.recv.all=function(client,msg)
 	
-		if msg.upnet=="welcome" then
-		
-			client:welcome_recv(msg)
-
+		if msg.upnet then
+			local f=upnet.client.recv[msg.upnet]
+			if f then
+				f(client,msg)
+			end
 		end
 		
 		for n,f in pairs(upnet.hooks) do
@@ -133,10 +141,12 @@ M.bake=function(oven,upnet)
 			msg.clients[#msg.clients+1]=v
 		end
 		
+		msg.ticks=upnet.ticks
+		
 		client:send(msg)
 	
 	end
-	upnet.client.welcome_recv=function(client,msg)
+	upnet.client.recv.welcome=function(client,msg)
 	
 		print("WELCOME",client.idx)
 
@@ -156,9 +166,55 @@ M.bake=function(oven,upnet)
 			end
 		end
 
+		upnet.ticks=msg.ticks
 
 dump(upnet.clients)
 	
+	end
+
+	upnet.client.pulse_send=function(client)
+	
+		local msg={ upnet="pulse" }
+		
+		msg.ticks=upnet.ticks
+
+		-- we need to shrink this per client, but for now we hax
+		msg.history=upnet.history
+
+		client:send(msg,"pulse")
+	
+	end
+	upnet.client.recv.pulse=function(client,msg)
+	
+		local cidx=1+upnet.ticks-msg.ticks
+		for midx=1,#msg.history do
+			local c=upnet.history[cidx]
+			local m=msg.history[midx]
+			if c and m then -- accept inputs
+				c[client.idx] = c[client.idx] or m[client.idx]
+			end
+			cidx=cidx+1
+		end
+	end
+
+	-- reduce old history we no longer need
+	upnet.shrink_history=function()
+
+--dump(upnet.ticks,upnet.history)
+
+		for i=#upnet.history,1,-1 do
+
+			local h=upnet.history[i]
+
+			local done=false
+			for _,v in pairs(upnet.clients) do -- must have data for all clients
+				if not h[v.idx] then done=true break end
+			end
+			if done then break end
+
+			upnet.history[i+1]=nil -- forget oldest duplicate data
+		end
+
 	end
 
 	upnet.setup=function()
@@ -174,7 +230,7 @@ dump(upnet.clients)
 		
 		upnet.reset()
 
-		-- everyone must enable network with a hear
+		-- everyone must enable network with a host
 		if args.host then
 		
 			if tonumber( args.host ) then baseport=tonumber( args.host ) end
@@ -193,7 +249,7 @@ dump(upnet.clients)
 			-- clients join the host
 			if args.join then
 			
-				upnet.join( args.join )				
+				upnet.join( args.join )
 				upnet.mode="join"
 
 			else -- and one host just waits for clients to join
@@ -204,7 +260,7 @@ dump(upnet.clients)
 				client.idx=upnet.host_idx
 				upnet.clients[client.idx]=client
 				
-				upnet.client_idx=upnet.host_idx
+				upnet.client_idx=client.idx
 
 			end
 
@@ -249,13 +305,38 @@ dump(upnet.clients)
 		elseif m.why=="data" or m.why=="pulse" then
 		
 			local msg=json_pack.from_data(m.data) -- unpack binary
-			client:recv(msg)
+			client.recv.all(client,msg)
 
 		else
 				
 			dump(m)
 
 		end
+		
+	end
+	
+
+	-- tick one tick forwards
+	upnet.next_tick=function() 
+	
+		if not upnet.client_idx then return end -- need to know who we are first
+	
+		local up=oven.ups.manifest(1) -- we are this input
+
+		upnet.ticks=upnet.ticks+1
+		up:update()
+		-- remember current up
+		table.insert( upnet.history , 1 , { [upnet.client_idx]=up:save() } ) -- remember new tick
+print("history",upnet.client_idx,#upnet.history)
+		
+		-- send current ups to network
+		for _,client in pairs(upnet.clients) do
+			if not client.us then
+				client:pulse_send()
+			end
+		end
+
+		upnet.shrink_history()
 		
 	end
 	
@@ -272,6 +353,11 @@ dump(upnet.clients)
 		
 		until not memo
 
+-- test when evryone is connected
+		if #upnet.clients==2 then
+			upnet.next_tick()
+		end
+		
 	end
 	
 	return upnet
