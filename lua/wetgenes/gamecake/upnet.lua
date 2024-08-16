@@ -334,9 +334,16 @@ dump(upnet.clients)
 			end
 		end
 		
+		ups[0]=oven.ups.empty
+		
 		return ups
 	end
 	
+
+	-- get the tick time of consensus ( when we have all inputs )
+	upnet.get_tick_consensus=function()
+		return upnet.ticks+#upnet.history-1
+	end
 
 	-- tick one tick forwards
 	upnet.next_tick=function() 

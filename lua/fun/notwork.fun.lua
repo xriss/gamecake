@@ -19,7 +19,7 @@ local upnet=require("wetgenes.gamecake.upnet").bake(oven)
 
 -- request full keymap
 oven.ups.keymap(1,"full") -- 1up has basic keyboard mappings
-
+ups={[0]=oven.ups.empty} -- empty ups
 
 do
 	local best_hx=320
@@ -47,7 +47,12 @@ hardware,main=system.configurator({
 	update=function() -- called at a steady 60fps
 		if setup then setup=setup() end -- call setup once
 		upnet.update()
-		scene.call("update")
+		local tick=upnet.get_tick_consensus()
+		while tick>scene_tick do
+			scene_tick=scene_tick+1
+			ups=upnet.get_ups(scene_tick)
+			scene.call("update")
+		end
 	end,
 	draw=function() -- called at actual display frame rate
 		scene.call("draw")
@@ -60,6 +65,8 @@ end
 
 setup=function()
 print("setup")
+
+	scene_tick=0
 
 	upnet.setup()
 
@@ -311,7 +318,7 @@ scenery.item.methods.update=function(it)
 	local rot=V3( it:get("rot") )
 	local ang=V3( it:get("ang") )
 
-	local up=oven.ups.manifest(1)
+	local up=ups[1] or ups[0]
 
 	local lx=up:axis("lx") or 0
 	local ly=up:axis("ly") or 0

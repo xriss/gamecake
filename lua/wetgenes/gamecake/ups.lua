@@ -327,10 +327,21 @@ M.up_functions.duplicate=function(up)
 	return n
 end
 
+-- global empty ups with only read functions
+-- please do not write into it
+M.empty={
+	get=M.up_functions.get,
+	axis=M.up_functions.axis,
+	create=M.up_functions.create,
+	duplicate=M.up_functions.duplicate,
+}
+M.up_functions.reset(M.empty)
 
 M.bake=function(oven,ups)
 
 	ups=ups or {}
+
+	ups.empty=M.empty
 	
 	ups.auto_advance=true -- automatically advance each update
 	-- upnet will turn this off so it can network sync advances
