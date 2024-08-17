@@ -48,10 +48,12 @@ hardware,main=system.configurator({
 		if setup then setup=setup() end -- call setup once
 		upnet.update()
 		local tick=upnet.get_tick_consensus()
-		while tick>scene_tick do
-			scene_tick=scene_tick+1
-			ups=upnet.get_ups(scene_tick)
-			scene.call("update")
+		if tick>scene_tick then -- update once
+			repeat
+				scene_tick=scene_tick+1
+				ups=upnet.get_ups(scene_tick)
+				scene.call("update")
+			until tick-scene_tick < 32 -- update again if far far behind
 		end
 	end,
 	draw=function() -- called at actual display frame rate
@@ -281,7 +283,8 @@ end
 scenery.item.setup=function(sys)
 	scenery.all.setup_metatable(sys)
 
-	sys:create({pos={128,128,0}})
+	sys:create({pos={128,128,0},up=1})
+	sys:create({pos={256,256,0},up=2})
 end
 
 scenery.item.create=function(sys,boot)
@@ -298,6 +301,8 @@ end
 scenery.item.gene=function(sys,boot)
 
 	sys:gene_body(boot)
+	
+	boot.up=boot.up or 0
 
 end
 
@@ -306,8 +311,10 @@ scenery.item.methods={}
 
 scenery.item.methods.setup=function(it,boot)
 
-	it:setup_values(it)
-	it:setup_body(it,boot)
+	it:setup_values()
+	it:setup_body(boot)
+	
+	it.up=boot.up
 
 end
 	
@@ -318,7 +325,7 @@ scenery.item.methods.update=function(it)
 	local rot=V3( it:get("rot") )
 	local ang=V3( it:get("ang") )
 
-	local up=ups[1] or ups[0]
+	local up=ups[it.up] or ups[0]
 
 	local lx=up:axis("lx") or 0
 	local ly=up:axis("ly") or 0

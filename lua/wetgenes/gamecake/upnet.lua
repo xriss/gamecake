@@ -43,7 +43,7 @@ M.bake=function(oven,upnet)
 		
 		upnet.client_idx=nil -- we are this client idx
 
-		upnet.host_idx=0 -- host incs per client
+		upnet.host_inc=0 -- host incs per client
 		upnet.clients={} -- clients by idx ( managed by host ) these are the live conected clients and array may have holes
 		upnet.clients_addr={} -- clients by addr ( local name )
 		upnet.clients_id={} -- clients by id ( unique name ) as reported by client so could be a lie
@@ -202,6 +202,7 @@ dump(upnet.clients)
 
 --dump(upnet.ticks,upnet.history)
 
+		upnet.got_history=#upnet.history
 		for i=#upnet.history,1,-1 do
 
 			local h=upnet.history[i]
@@ -211,9 +212,10 @@ dump(upnet.clients)
 				if not h[v.idx] then done=true break end
 			end
 			if done then break end
-
-			upnet.history[i+1]=nil -- forget oldest duplicate data
+			
+			upnet.got_history=i -- got all data at this point
 		end
+		while #upnet.history>64 do upnet.history[#upnet.history]=nil end -- trim
 
 	end
 
@@ -256,8 +258,8 @@ dump(upnet.clients)
 
 				upnet.mode="host"
 				-- we are client 1
-				upnet.host_idx=upnet.host_idx+1
-				client.idx=upnet.host_idx
+				upnet.host_inc=upnet.host_inc+1
+				client.idx=upnet.host_inc
 				upnet.clients[client.idx]=client
 				
 				upnet.client_idx=client.idx
@@ -292,8 +294,8 @@ dump(upnet.clients)
 			if upnet.mode=="host" then -- assign idx
 				
 				-- next client
-				upnet.host_idx=upnet.host_idx+1
-				client.idx=upnet.host_idx
+				upnet.host_inc=upnet.host_inc+1
+				client.idx=upnet.host_inc
 				upnet.clients[client.idx]=client
 				
 				client:welcome_send()
@@ -319,7 +321,7 @@ dump(upnet.clients)
 	-- each connected client.idx will have an up available for that idx
 	upnet.get_ups=function(tick)
 		tick=tick or upnet.ticks
-		local ti=1+tick-upnet.ticks
+		local ti=1+upnet.ticks-tick
 		
 		local ups={}
 		for idx,_ in pairs(upnet.clients) do
@@ -336,13 +338,16 @@ dump(upnet.clients)
 		
 		ups[0]=oven.ups.empty
 		
+--		print(upnet.client_idx,tick,upnet.ticks,#upnet.history,ti,ups[1] and ups[1].all.lx,ups[2] and ups[2].all.lx)
+--		dump(upnet.history)
+
 		return ups
 	end
 	
 
 	-- get the tick time of consensus ( when we have all inputs )
 	upnet.get_tick_consensus=function()
-		return upnet.ticks+#upnet.history-1
+		return upnet.ticks-(upnet.got_history or #upnet.history)+1
 	end
 
 	-- tick one tick forwards

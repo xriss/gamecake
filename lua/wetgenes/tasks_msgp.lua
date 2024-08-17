@@ -878,7 +878,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		local client=manifest_client(ip,port)
 		local indent=""
 		
-		do
+		if false then
 			local bitid=p.bit.."/"..p.bits
 			local pings=math.ceil(client.ping*1000).."-"..math.ceil(client.ack*1000)
 			local tims=math.floor(p.time*1000)%100000
