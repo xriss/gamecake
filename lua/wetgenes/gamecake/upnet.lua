@@ -202,19 +202,6 @@ dump(upnet.clients)
 
 --dump(upnet.ticks,upnet.history)
 
-		upnet.got_history=#upnet.history
-		for i=#upnet.history,1,-1 do
-
-			local h=upnet.history[i]
-
-			local done=false
-			for _,v in pairs(upnet.clients) do -- must have data for all clients
-				if not h[v.idx] then done=true break end
-			end
-			if done then break end
-			
-			upnet.got_history=i -- got all data at this point
-		end
 		while #upnet.history>64 do upnet.history[#upnet.history]=nil end -- trim
 
 	end
@@ -347,7 +334,19 @@ dump(upnet.clients)
 
 	-- get the tick time of consensus ( when we have all inputs )
 	upnet.get_tick_consensus=function()
-		return upnet.ticks-(upnet.got_history or #upnet.history)+1
+
+		local got=nil
+
+		for i=1,#upnet.history do
+			local h=upnet.history[i]
+			local done=true
+			for _,v in pairs(upnet.clients) do -- must have data for all clients
+				if not h[v.idx] then done=false break end
+			end
+			if done then got=i break end
+		end
+		if not got then return end -- no consensus
+		return upnet.ticks-got+1
 	end
 
 	-- tick one tick forwards

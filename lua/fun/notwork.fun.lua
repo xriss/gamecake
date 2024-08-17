@@ -47,8 +47,8 @@ hardware,main=system.configurator({
 	update=function() -- called at a steady 60fps
 		if setup then setup=setup() end -- call setup once
 		upnet.update()
-		local tick=upnet.get_tick_consensus()
-		if tick>scene_tick then -- update once
+		local tick=upnet.get_tick_consensus() -- null if no consensus yet
+		if tick and tick>scene_tick then -- update once
 			repeat
 				scene_tick=scene_tick+1
 				ups=upnet.get_ups(scene_tick)
