@@ -29,15 +29,38 @@ M.bake=function(oven,upnet)
 	
 	upnet.task_id=upnet.task_id or "msgp"
 	upnet.task_id_msg=upnet.task_id..":msg"
+
+	local socket = require("socket")
+	local now=function() return socket.gettime() end -- time now with sub second acuracy
+	local nowticks=function() return (now()-upnet.ticks.epoch)/upnet.ticks.length end -- time now with sub second acuracy
+
 	
 	-- reset all connections
 	upnet.reset=function()
 	
 		-- we will control the ups
 		oven.ups.auto_advance=false
+
 	
-		upnet.ticks=0
-		upnet.history={} -- first index is for upnet.ticks tick , next is -1, etc
+		upnet.ticks={}
+
+		-- seconds ( floats )
+		upnet.ticks.length=1/16	-- time in seconds for each tick
+		upnet.ticks.epoch=nil	-- start time of ticks in seconds
+
+		-- ticks ( integers )
+		upnet.ticks.input=0		-- the tick we have all inputs for
+		upnet.ticks.now=0		-- the tick we have our input for
+		upnet.ticks.update=0	-- the tick we have updated
+		upnet.ticks.draw=0		-- the tick we have drawn 
+		upnet.ticks.redraw=0	-- the tick we should redraw from
+
+		-- we sync now to time and calculate input tick as data arrives
+		-- redraw may also be reduced to flag a redraw
+		-- you should set update and draw=redraw times when you update and draw
+		-- if things are laging then we may adjust the epoch to "skip" frames
+
+		upnet.history={} -- 1st index is for ticks.now , 2nd is .now-1, etc
 
 		upnet.hooks={}
 		
@@ -141,7 +164,7 @@ M.bake=function(oven,upnet)
 			msg.clients[#msg.clients+1]=v
 		end
 		
-		msg.ticks=upnet.ticks
+		msg.ticks=upnet.ticks.now
 		
 		client:send(msg)
 	
@@ -166,7 +189,8 @@ M.bake=function(oven,upnet)
 			end
 		end
 
-		upnet.ticks=msg.ticks
+		upnet.ticks.now=msg.ticks
+		upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
 
 dump(upnet.clients)
 	
@@ -176,7 +200,7 @@ dump(upnet.clients)
 	
 		local msg={ upnet="pulse" }
 		
-		msg.ticks=upnet.ticks
+		msg.ticks=upnet.ticks.now
 
 		-- we need to shrink this per client, but for now we hax
 		msg.history=upnet.history
@@ -186,7 +210,7 @@ dump(upnet.clients)
 	end
 	upnet.client.recv.pulse=function(client,msg)
 	
-		local cidx=1+upnet.ticks-msg.ticks
+		local cidx=1+upnet.ticks.now-msg.ticks
 		for midx=1,#msg.history do
 			local c=upnet.history[cidx]
 			local m=msg.history[midx]
@@ -200,7 +224,7 @@ dump(upnet.clients)
 	-- reduce old history we no longer need
 	upnet.shrink_history=function()
 
---dump(upnet.ticks,upnet.history)
+--dump(upnet.ticks.now,upnet.history)
 
 		while #upnet.history>64 do upnet.history[#upnet.history]=nil end -- trim
 
@@ -250,6 +274,8 @@ dump(upnet.clients)
 				upnet.clients[client.idx]=client
 				
 				upnet.client_idx=client.idx
+				
+				upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
 
 			end
 
@@ -307,8 +333,8 @@ dump(upnet.clients)
 	-- get an ups array for the given tick
 	-- each connected client.idx will have an up available for that idx
 	upnet.get_ups=function(tick)
-		tick=tick or upnet.ticks
-		local ti=1+upnet.ticks-tick
+		tick=tick or upnet.ticks.now
+		local ti=1+upnet.ticks.now-tick
 		
 		local ups={}
 		for idx,_ in pairs(upnet.clients) do
@@ -325,7 +351,7 @@ dump(upnet.clients)
 		
 		ups[0]=oven.ups.empty
 		
---		print(upnet.client_idx,tick,upnet.ticks,#upnet.history,ti,ups[1] and ups[1].all.lx,ups[2] and ups[2].all.lx)
+--		print(upnet.client_idx,tick,upnet.ticks.now,#upnet.history,ti,ups[1] and ups[1].all.lx,ups[2] and ups[2].all.lx)
 --		dump(upnet.history)
 
 		return ups
@@ -346,18 +372,16 @@ dump(upnet.clients)
 			if done then got=i break end
 		end
 		if not got then return end -- no consensus
-		return upnet.ticks-got+1
+		return upnet.ticks.now-got+1
 	end
 
 	-- tick one tick forwards
 	upnet.next_tick=function() 
 	
-		if not upnet.client_idx then return end -- need to know who we are first
-	
 		local up=oven.ups.manifest(1) -- we are this input
 
-		upnet.ticks=upnet.ticks+1
-		up:update()
+		upnet.ticks.now=upnet.ticks.now+1
+		up:update(upnet.ticks.length)
 		-- remember current up
 		table.insert( upnet.history , 1 , { [upnet.client_idx]=up:save() } ) -- remember new tick
 --print("history",upnet.client_idx,#upnet.history)
@@ -386,9 +410,13 @@ dump(upnet.clients)
 		
 		until not memo
 
--- test when evryone is connected
-		if #upnet.clients==2 then
-			upnet.next_tick()
+
+		if upnet.ticks.epoch and upnet.client_idx then
+			local t=(now()-upnet.ticks.epoch)/upnet.ticks.length
+			while t>upnet.ticks.now do
+print(upnet.ticks.now)
+				upnet.next_tick()
+			end
 		end
 		
 	end

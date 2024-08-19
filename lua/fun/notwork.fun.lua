@@ -47,14 +47,14 @@ hardware,main=system.configurator({
 	update=function() -- called at a steady 60fps
 		if setup then setup=setup() end -- call setup once
 		upnet.update()
-		local tick=upnet.get_tick_consensus() -- null if no consensus yet
-		if tick and tick>scene_tick then -- update once
-			repeat
-				scene_tick=scene_tick+1
-				ups=upnet.get_ups(scene_tick)
-				scene.call("update")
-			until tick-scene_tick < 32 -- update again if far far behind
+		local consensus_tick=upnet.get_tick_consensus() -- null if no consensus yet
+		while consensus_tick and consensus_tick>upnet.ticks.update do -- update
+			upnet.ticks.update=upnet.ticks.update+1
+			ups=upnet.get_ups(upnet.ticks.update)
+			scene.call("update")
 		end
+		upnet.ticks.draw=upnet.ticks.update
+		upnet.ticks.redraw=upnet.ticks.draw
 	end,
 	draw=function() -- called at actual display frame rate
 		scene.call("draw")
@@ -67,8 +67,6 @@ end
 
 setup=function()
 print("setup")
-
-	scene_tick=0
 
 	upnet.setup()
 
@@ -234,14 +232,14 @@ scenery.all.methods.update_body=function(it,pos,vel,rot,ang)
 	ang=ang or V3( it:get("ang") )
 	it:advance_values()
 
-	pos=pos+vel
+	pos=pos+(vel*upnet.ticks.length)
 	
 	if pos[1]<0                    then pos[1]=pos[1]+components.screen.hx end
 	if pos[1]>components.screen.hx then pos[1]=pos[1]-components.screen.hx end
 	if pos[2]<0                    then pos[2]=pos[2]+components.screen.hy end
 	if pos[2]>components.screen.hy then pos[2]=pos[2]-components.screen.hy end
 
-	rot=rot+ang
+	rot=rot+(ang*upnet.ticks.length)
 
 	it:set("pos",pos:quantize(1/128))
 	it:set("vel",vel:quantize(1/128))
@@ -320,6 +318,8 @@ end
 	
 scenery.item.methods.update=function(it)
 
+	local pow=64*upnet.ticks.length
+
 	local pos=V3( it:get("pos") )
 	local vel=V3( it:get("vel") )
 	local rot=V3( it:get("rot") )
@@ -333,12 +333,9 @@ scenery.item.methods.update=function(it)
 	local ry=up:axis("ry") or 0
 	
 	
-	local fa=1/16
-	if ( vel[1]*vel[1] + vel[2]*vel[2] ) < (lx*lx + ly*ly) then
-		fa=1/2
-	end
-	vel[1] = vel[1]*(1-fa) + lx*2*(fa)
-	vel[2] = vel[2]*(1-fa) + ly*2*(fa)
+	local fa=0.8^pow
+	vel[1] = vel[1]*(fa) + lx*120*(1-fa)
+	vel[2] = vel[2]*(fa) + ly*120*(1-fa)
 
 
 	ang[3]=0
@@ -347,8 +344,9 @@ scenery.item.methods.update=function(it)
 			local d=((math.atan2(dy,dx)*180/math.pi)+90+360*360)%360
 			local dd=(((d-rot[3])+360*360)%360)
 			if dd > 180 then dd=dd-360 end
-			local s=5
+			local s=360
 			if dd<0 then ang[3]=-s else ang[3]=s end
+			ang[3]=dd*4
 		end
 	end
 	dorot(vel[1],vel[2])

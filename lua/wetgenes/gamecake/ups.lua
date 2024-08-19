@@ -225,21 +225,23 @@ end
 
 -- manage fake axis with decay from keypress states
 -- and handle deletion of pulse msgs
-M.up_functions.update=function(up)
+M.up_functions.update=function(up,pow)
+	pow=64*(pow or 1/60)
 
 	for n,a in ipairs{"lx","ly","lz","rx","ry","rz"} do -- check axis buttons and convert to axis movement
 		local ak=a.."k"
 		local o=(up.all[ak] or 0)
 		local v=0
-		-- the +19 is a hack to make sure we reach +32767 due to rounding errors when *0.05
 		if     up.all[a.."0"] then v=-32767 if(o>0) then o=0 end
-		elseif up.all[a.."1"] then v= 32768+19 if(o<0) then o=0 end
+		elseif up.all[a.."1"] then v= 32767 if(o<0) then o=0 end
 		end
+		local s=o<0 and -1 or 1 -- remove sign
 		if v==0 then -- fast decay to zero
-			local s=o<0 and -1 or 1 -- remove sign
-			v=math.floor(o*s*0.8)*s
+			local p=0.80^pow
+			v=math.floor((o*p        )*s)*s
 		else -- slower ramp to full
-			v=math.floor(o*0.95+v*0.05)
+			local p=0.95^pow
+			v=math.floor((o*p+v*(1-p))*s)*s
 		end
 		up.all[ak]=v
 	end
