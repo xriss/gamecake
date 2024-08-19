@@ -318,8 +318,6 @@ end
 	
 scenery.item.methods.update=function(it)
 
-	local pow=64*upnet.ticks.length
-
 	local pos=V3( it:get("pos") )
 	local vel=V3( it:get("vel") )
 	local rot=V3( it:get("rot") )
@@ -333,7 +331,7 @@ scenery.item.methods.update=function(it)
 	local ry=up:axis("ry") or 0
 	
 	
-	local fa=0.8^pow
+	local fa=0.7
 	vel[1] = vel[1]*(fa) + lx*120*(1-fa)
 	vel[2] = vel[2]*(fa) + ly*120*(1-fa)
 

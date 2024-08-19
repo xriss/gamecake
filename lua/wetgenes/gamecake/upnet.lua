@@ -414,7 +414,6 @@ dump(upnet.clients)
 		if upnet.ticks.epoch and upnet.client_idx then
 			local t=(now()-upnet.ticks.epoch)/upnet.ticks.length
 			while t>upnet.ticks.now do
-print(upnet.ticks.now)
 				upnet.next_tick()
 			end
 		end
