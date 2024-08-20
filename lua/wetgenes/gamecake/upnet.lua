@@ -33,6 +33,9 @@ M.bake=function(oven,upnet)
 	local socket = require("socket")
 	local now=function() return socket.gettime() end -- time now with sub second acuracy
 	local nowticks=function() return (now()-upnet.ticks.epoch)/upnet.ticks.length end -- time now with sub second acuracy
+	
+	upnet.now=now
+	upnet.nowticks=nowticks
 
 	
 	-- reset all connections
@@ -54,6 +57,10 @@ M.bake=function(oven,upnet)
 		upnet.ticks.update=0	-- the tick we have updated
 		upnet.ticks.draw=0		-- the tick we have drawn 
 		upnet.ticks.redraw=0	-- the tick we should redraw from
+		
+		-- tween from 0 to 1 with 1 being the latest frame used when drawing so 
+		-- this+upnet.ticks.draw-1 would be the fractional tick we are drawing
+		upnet.ticks.draw_tween=1
 
 		-- we sync now to time and calculate input tick as data arrives
 		-- redraw may also be reduced to flag a redraw

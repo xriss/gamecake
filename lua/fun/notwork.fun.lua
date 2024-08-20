@@ -51,13 +51,34 @@ hardware,main=system.configurator({
 		while consensus_tick and consensus_tick>upnet.ticks.update do -- update
 			upnet.ticks.update=upnet.ticks.update+1
 			ups=upnet.get_ups(upnet.ticks.update)
+			scene.call("advance_values")
 			scene.call("update")
 		end
 		upnet.ticks.draw=upnet.ticks.update
 		upnet.ticks.redraw=upnet.ticks.draw
 	end,
 	draw=function() -- called at actual display frame rate
-		scene.call("draw")
+		
+		if upnet.ticks.draw > 0 then -- wait to start drawing
+
+			local oldtick=upnet.ticks.draw
+			local nowtick=upnet.nowticks()
+			while upnet.ticks.draw<nowtick do -- update untill we are in the future
+				upnet.ticks.draw=upnet.ticks.draw+1
+				ups=upnet.get_ups(upnet.ticks.draw)
+				scene.call("advance_values")
+				scene.call("update")
+			end
+			upnet.ticks.draw_tween=nowtick-math.floor(nowtick)
+
+			scene.call("draw")
+
+			while upnet.ticks.draw>oldtick do -- undo update
+				upnet.ticks.draw=upnet.ticks.draw-1
+				scene.call("pop_values")
+			end
+		
+		end
 	end,
 	hx=best_hx,hy=best_hy, -- autoscale, with at least 320x200
 })
@@ -161,11 +182,11 @@ scenery.all.methods.push_values=function(it)
 end
 
 scenery.all.methods.pop_values=function(it)
-
-	assert( it.values_length>1 ) -- must always leave some values
-
-	return table.remove(it.values,1) -- go back in time one tick
-
+	if it.values_length>1 then -- must always leave some values
+		local v=table.remove(it.values,1) -- go back in time one tick
+		it.values_length=#it.values
+		return v
+	end
 end
 
 -- remove base values and merge that data with new base
@@ -195,14 +216,28 @@ scenery.all.methods.get=function(it,name)
 end
 
 -- get values for previous frame so we can tween with now
-scenery.all.methods.get_prev=function(it,name)
+scenery.all.methods.tween=function(it,name,tween)
+	
+	tween=tween or upnet.ticks.draw_tween
+	local a,b
 	
 	-- search backwards through time for this value
 	for i=2,it.values_length do
 		local v=it.values[i][name]
-		if type(v)~="nil" then return v end
+		if type(v)~="nil" then b=v break end
 	end
-
+	local v=it.values[1][name]
+	if type(v)~="nil" then a=v else return b end -- both values are the same so no need to tween
+	
+	if type(b)~="nil" then
+		if type(a)=="number" and type(b)=="number" then -- tween numbers
+			return a*tween + b*(1-tween)
+		elseif type(b)=="table" and b.mix then -- tween using tardis
+			return b:mix(a,tween,b:new())
+		end
+	end
+	if tween<0.5 then return b else return a end -- one or the other
+	
 end
 
 scenery.all.methods.set=function(it,name,value)
@@ -230,7 +265,6 @@ scenery.all.methods.update_body=function(it,pos,vel,rot,ang)
 	vel=vel or V3( it:get("vel") )
 	rot=rot or V3( it:get("rot") )
 	ang=ang or V3( it:get("ang") )
-	it:advance_values()
 
 	pos=pos+(vel*upnet.ticks.length)
 	
@@ -356,8 +390,8 @@ end
 	
 scenery.item.methods.draw=function(it)
 
-	local pos=V3( it:get("pos") )
-	local rot=V3( it:get("rot") )
+	local pos=V3( it:tween("pos") )
+	local rot=V3( it:tween("rot") )
 
 	local spr=names.test_ship1
 	components.sprites.list_add({
