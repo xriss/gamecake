@@ -38,7 +38,7 @@ M.bake=function(oven,upnet)
 	upnet.nowticks=nowticks
 
 	local print=function(...)
-		local idx=(upnet.client_idx or 0)
+		local idx=(upnet.us or 0)
 		local tabs=string.rep("\t\t\t\t\t\t\t\t\t\t\t",idx-1)
 		
 		print( idx..tabs , ... )
@@ -77,7 +77,7 @@ M.bake=function(oven,upnet)
 
 		upnet.hooks={}
 		
-		upnet.client_idx=nil -- we are this client idx
+		upnet.us=nil -- we are this client idx
 
 		upnet.host_inc=0 -- host incs per client
 		upnet.clients={} -- clients by idx ( managed by host ) these are the live conected clients and array may have holes
@@ -197,7 +197,7 @@ M.bake=function(oven,upnet)
 
 		for i,c in pairs(upnet.clients) do
 			if c.us and c.idx then
-				upnet.client_idx=c.idx
+				upnet.us=c.idx
 			end
 		end
 
@@ -228,13 +228,13 @@ dump(upnet.clients)
 		msg.ticks=upnet.ticks.now
 		msg.ack=upnet.ticks.update -- acknowledged up to here
 		
-		if upnet.client_idx then
+		if upnet.us then
 			local hs={}
 			for i=1,#upnet.history do
 				if upnet.ticks.now+1-i <= client.ack then break end
 				local h={}
 				hs[#hs+1]=h
-				h[upnet.client_idx]=upnet.history[i][upnet.client_idx]
+				h[upnet.us]=upnet.history[i][upnet.us]
 			end
 			msg.history=hs
 		end
@@ -313,7 +313,7 @@ dump(upnet.clients)
 				client.idx=upnet.host_inc
 				upnet.clients[client.idx]=client
 				
-				upnet.client_idx=client.idx
+				upnet.us=client.idx
 				
 				upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
 
@@ -391,7 +391,7 @@ dump(upnet.clients)
 		
 		ups[0]=oven.ups.empty
 		
---		print(upnet.client_idx,tick,upnet.ticks.now,#upnet.history,ti,ups[1] and ups[1].all.lx,ups[2] and ups[2].all.lx)
+--		print(upnet.us,tick,upnet.ticks.now,#upnet.history,ti,ups[1] and ups[1].all.lx,ups[2] and ups[2].all.lx)
 --		dump(upnet.history)
 
 		return ups
@@ -421,8 +421,8 @@ dump(upnet.clients)
 		upnet.ticks.now=upnet.ticks.now+1
 		up:update(upnet.ticks.length)
 		-- remember current up
-		table.insert( upnet.history , 1 , { [upnet.client_idx]=up:save() } ) -- remember new tick
---print("history",upnet.client_idx,#upnet.history)
+		table.insert( upnet.history , 1 , { [upnet.us]=up:save() } ) -- remember new tick
+--print("history",upnet.us,#upnet.history)
 		
 		-- send current ups to network
 		for _,client in pairs(upnet.clients) do
@@ -450,7 +450,7 @@ dump(upnet.clients)
 		
 		repeat until not upnet.update_ticks_input() -- update ticks.input
 
-		if upnet.ticks.epoch and upnet.client_idx then -- we are ticking
+		if upnet.ticks.epoch and upnet.us then -- we are ticking
 			local t=(now()-upnet.ticks.epoch)/upnet.ticks.length
 			while t>upnet.ticks.now do
 				upnet.next_tick()
