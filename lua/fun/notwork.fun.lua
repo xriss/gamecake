@@ -47,8 +47,7 @@ hardware,main=system.configurator({
 	update=function() -- called at a steady 60fps
 		if setup then setup=setup() end -- call setup once
 		upnet.update()
-		local consensus_tick=upnet.get_tick_consensus() -- null if no consensus yet
-		while consensus_tick and consensus_tick>upnet.ticks.update do -- update
+		while upnet.ticks.input>upnet.ticks.update do -- update
 			upnet.ticks.update=upnet.ticks.update+1
 			ups=upnet.get_ups(upnet.ticks.update)
 			scene.call("advance_values")

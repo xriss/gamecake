@@ -37,6 +37,7 @@ M.bake=function(oven,upnet)
 	upnet.now=now
 	upnet.nowticks=nowticks
 
+	local print=function(...)	print( upnet.client_idx , ... ) end
 	
 	-- reset all connections
 	upnet.reset=function()
@@ -156,7 +157,6 @@ M.bake=function(oven,upnet)
 	end
 
 	upnet.client.welcome_send=function(client)
-	
 		local msg={ upnet="welcome" }
 		
 		msg.clients={}
@@ -178,8 +178,6 @@ M.bake=function(oven,upnet)
 	end
 	upnet.client.recv.welcome=function(client,msg)
 	
-		print("WELCOME",client.idx)
-
 		upnet.clients_idx=msg.clients
 		for i,c in ipairs(upnet.clients_idx) do -- assign clients idx
 			local v=upnet.clients_id[c.id]
@@ -197,8 +195,12 @@ M.bake=function(oven,upnet)
 		end
 
 		upnet.ticks.now=msg.ticks
+		upnet.ticks.input=upnet.ticks.now
+		upnet.ticks.update=upnet.ticks.now
+		upnet.ticks.draw=upnet.ticks.now
 		upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
 
+print("WELCOME",client.idx)
 dump(upnet.clients)
 	
 	end
@@ -294,7 +296,7 @@ dump(upnet.clients)
 	
 	-- try to make a new connection
 	upnet.join=function(addr)
-
+print("joining",addr)
 		local ret=oven.tasks:do_memo({
 			task=upnet.task_id,
 			cmd="join",
@@ -365,21 +367,19 @@ dump(upnet.clients)
 	end
 	
 
-	-- get the tick time of consensus ( when we have all inputs )
-	upnet.get_tick_consensus=function()
+	-- update the tick time of when we have all inputs
+	upnet.update_ticks_input=function()
 
-		local got=nil
+		local ti=1+upnet.ticks.now-upnet.ticks.input	-- we have input for here
+		local h=upnet.history[ti-1]
+		if not h then return end
 
-		for i=1,#upnet.history do
-			local h=upnet.history[i]
-			local done=true
-			for _,v in pairs(upnet.clients) do -- must have data for all clients
-				if not h[v.idx] then done=false break end
-			end
-			if done then got=i break end
+		for _,v in pairs(upnet.clients) do -- must have data for all clients
+			if not h[v.idx] then return end
 		end
-		if not got then return end -- no consensus
-		return upnet.ticks.now-got+1
+		
+		upnet.ticks.input=upnet.ticks.input+1
+		return true
 	end
 
 	-- tick one tick forwards
@@ -407,7 +407,7 @@ dump(upnet.clients)
 	-- manage msgs and pulse controller state
 	upnet.update=function()
 
-		repeat
+		repeat -- check msgs
 		
 			local _,memo= oven.tasks.linda:receive( 0 , upnet.task_id_msg ) -- wait for any memos coming into this thread
 			
@@ -416,9 +416,10 @@ dump(upnet.clients)
 			end
 		
 		until not memo
+		
+		repeat until not upnet.update_ticks_input() -- update ticks.input
 
-
-		if upnet.ticks.epoch and upnet.client_idx then
+		if upnet.ticks.epoch and upnet.client_idx then -- we are ticking
 			local t=(now()-upnet.ticks.epoch)/upnet.ticks.length
 			while t>upnet.ticks.now do
 				upnet.next_tick()
