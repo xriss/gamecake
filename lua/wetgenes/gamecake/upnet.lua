@@ -178,7 +178,7 @@ M.bake=function(oven,upnet)
 			msg.clients[#msg.clients+1]=v
 		end
 		
-		msg.ticks=upnet.ticks.now
+		msg.ticks=upnet.ticks.input
 		
 		client:send(msg)
 	
@@ -234,7 +234,7 @@ dump(upnet.clients)
 				if upnet.ticks.now+1-i <= client.ack then break end
 				local h={}
 				hs[#hs+1]=h
-				h[upnet.us]=upnet.history[i][upnet.us]
+				h[upnet.us]=upnet.history[i][upnet.us] or {} -- might miss early frames
 			end
 			msg.history=hs
 		end
@@ -266,7 +266,7 @@ dump(upnet.clients)
 
 		local cidx=1+upnet.ticks.now-upnet.ticks.update -- discard used input
 		
-		while #upnet.history>cidx do upnet.history[#upnet.history]=nil end -- trim
+		while #upnet.history>cidx+16 do upnet.history[#upnet.history]=nil end -- trim
 
 	end
 
@@ -456,6 +456,8 @@ dump(upnet.clients)
 				upnet.next_tick()
 			end
 		end
+
+-- print( upnet.ticks.input , upnet.ticks.now , upnet.ticks.update , upnet.ticks.draw , upnet.ticks.redraw )
 		
 	end
 	
