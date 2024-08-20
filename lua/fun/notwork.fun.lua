@@ -228,6 +228,8 @@ scenery.all.methods.tween=function(it,name,tween)
 	local v=it.values[1][name]
 	if type(v)~="nil" then a=v else return b end -- both values are the same so no need to tween
 	
+	if it.values[1].notween then return v end -- flag to disable tweening
+	
 	if type(b)~="nil" then
 		if type(a)=="number" and type(b)=="number" then -- tween numbers
 			return a*tween + b*(1-tween)
@@ -267,10 +269,11 @@ scenery.all.methods.update_body=function(it,pos,vel,rot,ang)
 
 	pos=pos+(vel*upnet.ticks.length)
 	
-	if pos[1]<0                    then pos[1]=pos[1]+components.screen.hx end
-	if pos[1]>components.screen.hx then pos[1]=pos[1]-components.screen.hx end
-	if pos[2]<0                    then pos[2]=pos[2]+components.screen.hy end
-	if pos[2]>components.screen.hy then pos[2]=pos[2]-components.screen.hy end
+	it:set("notween",false) -- must set false before setting to true for notween flag to work
+	if pos[1]<0                    then pos[1]=pos[1]+components.screen.hx it:set("notween",true) end
+	if pos[1]>components.screen.hx then pos[1]=pos[1]-components.screen.hx it:set("notween",true) end
+	if pos[2]<0                    then pos[2]=pos[2]+components.screen.hy it:set("notween",true) end
+	if pos[2]>components.screen.hy then pos[2]=pos[2]-components.screen.hy it:set("notween",true) end
 
 	rot=rot+(ang*upnet.ticks.length)
 
