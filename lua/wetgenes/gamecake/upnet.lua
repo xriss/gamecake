@@ -37,7 +37,12 @@ M.bake=function(oven,upnet)
 	upnet.now=now
 	upnet.nowticks=nowticks
 
-	local print=function(...)	print( upnet.client_idx , ... ) end
+	local print=function(...)
+		local idx=(upnet.client_idx or 0)
+		local tabs=string.rep("\t\t\t\t\t\t\t\t\t\t\t",idx-1)
+		
+		print( idx..tabs , ... )
+	end
 	
 	-- reset all connections
 	upnet.reset=function()
@@ -119,6 +124,8 @@ M.bake=function(oven,upnet)
 				upnet.clients[i]=client
 			end
 		end
+		
+		client.ack=0
 
 		return client
 	end
@@ -200,6 +207,15 @@ M.bake=function(oven,upnet)
 		upnet.ticks.draw=upnet.ticks.now
 		upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
 
+--[[
+		-- send current ups to network
+		for _,client in pairs(upnet.clients) do
+			if not client.us then
+				client:pulse_send()
+			end
+		end
+]]
+
 print("WELCOME",client.idx)
 dump(upnet.clients)
 	
@@ -210,15 +226,28 @@ dump(upnet.clients)
 		local msg={ upnet="pulse" }
 		
 		msg.ticks=upnet.ticks.now
-
-		-- we need to shrink this per client, but for now we hax
-		msg.history=upnet.history
+		msg.ack=upnet.ticks.update -- acknowledged up to here
+		
+		if upnet.client_idx then
+			local hs={}
+			for i=1,#upnet.history do
+				if upnet.ticks.now+1-i <= client.ack then break end
+				local h={}
+				hs[#hs+1]=h
+				h[upnet.client_idx]=upnet.history[i][upnet.client_idx]
+			end
+			msg.history=hs
+		end
 
 		client:send(msg,"pulse")
 	
 	end
 	upnet.client.recv.pulse=function(client,msg)
 	
+--		print("pulse recv",msg.ticks,#msg.history,upnet.ticks.input,upnet.ticks.now)
+
+		client.ack=msg.ack -- this update has been acknowledged
+
 		local cidx=1+upnet.ticks.now-msg.ticks
 		for midx=1,#msg.history do
 			local c=upnet.history[cidx]
@@ -235,7 +264,9 @@ dump(upnet.clients)
 
 --dump(upnet.ticks.now,upnet.history)
 
-		while #upnet.history>64 do upnet.history[#upnet.history]=nil end -- trim
+		local cidx=1+upnet.ticks.now-upnet.ticks.update -- discard used input
+		
+		while #upnet.history>cidx do upnet.history[#upnet.history]=nil end -- trim
 
 	end
 
