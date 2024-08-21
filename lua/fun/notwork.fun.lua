@@ -161,6 +161,16 @@ end
 
 scenery.all.methods={}
 
+scenery.all.methods.destroy=function(it)
+
+	if it.clean then -- optional cleanup
+		it:clean()
+	end
+	
+	scene.remove( it )
+
+end
+
 -- test history diffs
 scenery.all.methods.advance_values=function(it)
 
@@ -186,11 +196,12 @@ scenery.all.methods.push_values=function(it)
 end
 
 scenery.all.methods.pop_values=function(it)
-	if it.values_length>1 then -- must always leave some values
-		local v=table.remove(it.values,1) -- go back in time one tick
-		it.values_length=#it.values
-		return v
+	local v=table.remove(it.values,1) -- go back in time one tick
+	it.values_length=#it.values
+	if it.values_length==0 then -- destroy when we run out of history
+		it:destroy()
 	end
+	return v
 end
 
 -- remove base values and merge that data with new base
@@ -315,6 +326,25 @@ scenery.item.loads=function()
 . . . . . . . . . . . . . . . . 
 ]]},
 
+{nil,"test_cursor",[[
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+7 7 7 7 7 7 . . . 7 7 7 7 7 7 7 
+. . . . . . . . . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+. . . . . . . 7 . . . . . . . . 
+]]},
+
 	}
 
 end
@@ -355,6 +385,8 @@ scenery.item.methods.setup=function(it,boot)
 	
 	it.up=boot.up
 
+	it:set( "mouse" , V3( boot.mouse ) )
+
 end
 	
 scenery.item.methods.update=function(it)
@@ -365,6 +397,8 @@ scenery.item.methods.update=function(it)
 	local ang=V3( it:get("ang") )
 
 	local up=ups[it.up] or ups[0]
+
+	it:set( "mouse" , V3( up:get("vx") , up:get("vy") , 0 ) )
 
 	local lx=up:axis("lx") or 0
 	local ly=up:axis("ly") or 0
@@ -400,6 +434,8 @@ scenery.item.methods.draw=function(it)
 	local pos=V3( it:tween("pos") )
 	local rot=V3( it:tween("rot") )
 
+	local mouse=V3( it:tween("mouse") )
+
 	local spr=names.test_ship1
 	components.sprites.list_add({
 		t=spr.idx ,
@@ -409,6 +445,15 @@ scenery.item.methods.draw=function(it)
 		rz=math.floor((rot[3]/15)+0.5)*15,
 	})
 	
+	local spr=names.test_cursor
+	components.sprites.list_add({
+		t=spr.idx ,
+		hx=spr.hx , hy=spr.hy ,
+		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
+		px=mouse[1] , py=mouse[2] , pz=mouse[3] ,
+		rz=math.floor((rot[3]/15)+0.5)*15,
+	})
+
 --[[
 	local s=""
 	for i=1,it.values_length do
