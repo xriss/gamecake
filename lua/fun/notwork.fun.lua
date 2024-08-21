@@ -47,20 +47,28 @@ hardware,main=system.configurator({
 	update=function() -- called at a steady 60fps
 		if setup then setup=setup() end -- call setup once
 		upnet.update()
-		while upnet.ticks.input>upnet.ticks.update do -- update
-			upnet.ticks.update=upnet.ticks.update+1
-			ups=upnet.get_ups(upnet.ticks.update)
-			scene.call("advance_values")
-			scene.call("update")
+		if upnet.ticks.input>upnet.ticks.update then -- advance
+
+			while upnet.ticks.draw>upnet.ticks.update do -- undo draw update
+				upnet.ticks.draw=upnet.ticks.draw-1
+				scene.call("pop_values")
+			end
+
+			while upnet.ticks.input>upnet.ticks.update do -- update with valid inputs
+				upnet.ticks.update=upnet.ticks.update+1
+				ups=upnet.get_ups(upnet.ticks.update)
+				scene.call("advance_values")
+				scene.call("update")
+			end
+			
+			upnet.ticks.draw=upnet.ticks.update
+
 		end
-		upnet.ticks.draw=upnet.ticks.update
-		upnet.ticks.redraw=upnet.ticks.draw
 	end,
 	draw=function() -- called at actual display frame rate
 		
 		if upnet.ticks.draw > 0 then -- wait to start drawing
 
-			local oldtick=upnet.ticks.draw
 			local nowtick=upnet.nowticks()
 			while upnet.ticks.draw<nowtick do -- update untill we are in the future
 				upnet.ticks.draw=upnet.ticks.draw+1
@@ -69,15 +77,12 @@ hardware,main=system.configurator({
 				scene.call("update")
 			end
 			upnet.ticks.draw_tween=nowtick-math.floor(nowtick)
-
 			scene.call("draw")
-
-			while upnet.ticks.draw>oldtick do -- undo update
-				upnet.ticks.draw=upnet.ticks.draw-1
-				scene.call("pop_values")
-			end
 		
+upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )
+
 		end
+
 	end,
 	hx=best_hx,hy=best_hy, -- autoscale, with at least 320x200
 })
@@ -160,7 +165,7 @@ scenery.all.methods={}
 scenery.all.methods.advance_values=function(it)
 
 	it:push_values()
-	while it.values_length>16 do -- max history
+	while it.values_length>64 do -- max history
 		it:pull_values()
 	end
 

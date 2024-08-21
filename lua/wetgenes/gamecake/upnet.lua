@@ -43,6 +43,7 @@ M.bake=function(oven,upnet)
 		
 		print( idx..tabs , ... )
 	end
+	upnet.print=print
 	
 	-- reset all connections
 	upnet.reset=function()
@@ -59,18 +60,16 @@ M.bake=function(oven,upnet)
 
 		-- ticks ( integers )
 		upnet.ticks.input=0		-- the tick we have all inputs for
+		upnet.ticks.update=0	-- the tick you have updated
 		upnet.ticks.now=0		-- the tick we have our input for
-		upnet.ticks.update=0	-- the tick we have updated
-		upnet.ticks.draw=0		-- the tick we have drawn 
-		upnet.ticks.redraw=0	-- the tick we should redraw from
+		upnet.ticks.draw=0		-- the tick you have drawn 
 		
 		-- tween from 0 to 1 with 1 being the latest frame used when drawing so 
 		-- this+upnet.ticks.draw-1 would be the fractional tick we are drawing
 		upnet.ticks.draw_tween=1
 
 		-- we sync now to time and calculate input tick as data arrives
-		-- redraw may also be reduced to flag a redraw
-		-- you should set update and draw=redraw times when you update and draw
+		-- you should set update and draw times when you update and draw
 		-- if things are laging then we may adjust the epoch to "skip" frames
 
 		upnet.history={} -- 1st index is for ticks.now , 2nd is .now-1, etc
@@ -380,11 +379,16 @@ dump(upnet.clients)
 		for idx,_ in pairs(upnet.clients) do
 			local up=oven.ups.create()
 			ups[idx]=up
-			for ui=ti,#upnet.history do -- find best state we have
-				local h=upnet.history[ui]
-				if h and h[idx] then
-					up:load(h[idx]) -- fill
-					break -- and done
+			if idx==upnet.us and tick>upnet.ticks.now then -- use live input
+				up:load( oven.ups.manifest(1):save() ) -- fill
+				up:update(upnet.ticks.length)
+			else
+				for ui=ti,#upnet.history do -- find best state we have
+					local h=upnet.history[ui]
+					if h and h[idx] then
+						up:load(h[idx]) -- fill
+						break -- and done
+					end
 				end
 			end
 		end
@@ -451,13 +455,11 @@ dump(upnet.clients)
 		repeat until not upnet.update_ticks_input() -- update ticks.input
 
 		if upnet.ticks.epoch and upnet.us then -- we are ticking
-			local t=(now()-upnet.ticks.epoch)/upnet.ticks.length
-			while t>upnet.ticks.now do
+			local t=((now()-upnet.ticks.epoch)/upnet.ticks.length)
+			while t>upnet.ticks.now do -- we have 1 tick of controller latency...
 				upnet.next_tick()
 			end
 		end
-
--- print( upnet.ticks.input , upnet.ticks.now , upnet.ticks.update , upnet.ticks.draw , upnet.ticks.redraw )
 		
 	end
 	
