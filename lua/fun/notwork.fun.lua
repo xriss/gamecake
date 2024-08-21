@@ -79,7 +79,7 @@ hardware,main=system.configurator({
 			upnet.ticks.draw_tween=nowtick-math.floor(nowtick)
 			scene.call("draw")
 		
-upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )
+--upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )
 
 		end
 
@@ -102,7 +102,8 @@ print("setup")
 	-- use zone scene ( same as fun entities ) and set scene as global
 	scene=require("wetgenes.gamecake.zone.scene").create({
 		sortby={
-			"item",
+			"bullet",
+			"player",
 		},
 	})
 
@@ -431,7 +432,8 @@ scenery.player.methods.update=function(it)
 	
 	if fire then
 		local v=V3(math.sin((rot[3]/180)*math.pi),-math.cos((rot[3]/180)*math.pi),0)
-		scene.systems.bullets:create({pos=it:get("pos")+(v*8),vel=v*256})
+		local p=V3( it:get("pos") )
+		scene.systems.bullets:create({pos=p+(v*8),vel=v*256})
 	end
 
 end
@@ -540,6 +542,7 @@ scenery.bullet.methods.update=function(it)
 	local ang=V3( it:get("ang") )
 
 	it:update_body(pos,vel,rot,ang)
+
 
 end
 	
