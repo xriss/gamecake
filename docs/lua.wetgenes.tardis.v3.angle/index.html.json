@@ -2687,7 +2687,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>radians,axis = v3a:dot(v3b)\nradians,axis = v3a:dot(v3b,axis)\n</code></pre>\n<p>Return radians and axis of rotation between these two vectors. If axis is given \nthen it must represent a positive world aligned axis normal. So V3(1,0,0) or \nV3(0,1,0) or V3(0,0,1) only. The point of providing an axis allows the returned \nangle to be over a 360 degree range rather than flipping the axis after 180 \ndegrees this means the second axis returned value can be ignored as it will \nalways be the axis that is passed in.</p>\n",
+   "body": "<pre><code>radians,axis = v3a:angle(v3b)\nradians,axis = v3a:angle(v3b,axis)\n</code></pre>\n<p>Return radians and axis of rotation between these two vectors. If axis is given \nthen it must represent a positive world aligned axis normal. So V3(1,0,0) or \nV3(0,1,0) or V3(0,0,1) only. The point of providing an axis allows the returned \nangle to be over a 360 degree range rather than flipping the axis after 180 \ndegrees this means the second axis returned value can be ignored as it will \nalways be the axis that is passed in.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 2348,
