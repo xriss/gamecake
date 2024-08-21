@@ -301,9 +301,9 @@ scenery.all.methods.update_body=function(it,pos,vel,rot,ang)
 end
 
 
-scenery.item={}
+scenery.player={}
 
-scenery.item.loads=function()
+scenery.player.loads=function()
 
 	hardware.graphics.loads{
 
@@ -349,14 +349,14 @@ scenery.item.loads=function()
 
 end
 	
-scenery.item.setup=function(sys)
+scenery.player.setup=function(sys)
 	scenery.all.setup_metatable(sys)
 
 	sys:create({pos={128,128,0},up=1})
 	sys:create({pos={256,256,0},up=2})
 end
 
-scenery.item.create=function(sys,boot)
+scenery.player.create=function(sys,boot)
 	boot=boot or {}
 	local it={}
 	setmetatable(it,sys.metatable)
@@ -367,7 +367,7 @@ scenery.item.create=function(sys,boot)
 end
 
 -- generate any missing boot data
-scenery.item.gene=function(sys,boot)
+scenery.player.gene=function(sys,boot)
 
 	sys:gene_body(boot)
 	
@@ -376,9 +376,9 @@ scenery.item.gene=function(sys,boot)
 end
 
 
-scenery.item.methods={}
+scenery.player.methods={}
 
-scenery.item.methods.setup=function(it,boot)
+scenery.player.methods.setup=function(it,boot)
 
 	it:setup_values()
 	it:setup_body(boot)
@@ -389,7 +389,7 @@ scenery.item.methods.setup=function(it,boot)
 
 end
 	
-scenery.item.methods.update=function(it)
+scenery.player.methods.update=function(it)
 
 	local pos=V3( it:get("pos") )
 	local vel=V3( it:get("vel") )
@@ -404,6 +404,8 @@ scenery.item.methods.update=function(it)
 	local ly=up:axis("ly") or 0
 	local rx=up:axis("rx") or 0
 	local ry=up:axis("ry") or 0
+
+	local fire=up:get("fire_set") or false
 	
 	
 	local fa=0.7
@@ -426,10 +428,15 @@ scenery.item.methods.update=function(it)
 	dorot(rx,ry)
 
 	it:update_body(pos,vel,rot,ang)
+	
+	if fire then
+		local v=V3(math.sin((rot[3]/180)*math.pi),-math.cos((rot[3]/180)*math.pi),0)
+		scene.systems.bullets:create({pos=it:get("pos")+(v*8),vel=v*256})
+	end
 
 end
 	
-scenery.item.methods.draw=function(it)
+scenery.player.methods.draw=function(it)
 
 	local pos=V3( it:tween("pos") )
 	local rot=V3( it:tween("rot") )
@@ -464,6 +471,93 @@ scenery.item.methods.draw=function(it)
 
 end
 
+
+scenery.bullet={}
+
+scenery.bullet.loads=function()
+
+	hardware.graphics.loads{
+
+{nil,"test_bullet",[[
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . Y . . . . . . . . 
+. . . . . . Y Y Y . . . . . . . 
+. . . . . . . Y . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+]]},
+
+	}
+
+end
+	
+scenery.bullet.setup=function(sys)
+	scenery.all.setup_metatable(sys)
+
+end
+
+scenery.bullet.create=function(sys,boot)
+	boot=boot or {}
+	local it={}
+	setmetatable(it,sys.metatable)
+	sys:gene(boot)
+	scene.add( it , sys.caste , boot )
+	it:setup(boot)
+	return it
+end
+
+-- generate any missing boot data
+scenery.bullet.gene=function(sys,boot)
+
+	sys:gene_body(boot)
+
+end
+
+scenery.bullet.methods={}
+
+scenery.bullet.methods.setup=function(it,boot)
+
+	it:setup_values()
+	it:setup_body(boot)
+
+end
+	
+scenery.bullet.methods.update=function(it)
+
+	local pos=V3( it:get("pos") )
+	local vel=V3( it:get("vel") )
+	local rot=V3( it:get("rot") )
+	local ang=V3( it:get("ang") )
+
+	it:update_body(pos,vel,rot,ang)
+
+end
+	
+scenery.bullet.methods.draw=function(it)
+
+	local pos=V3( it:tween("pos") )
+	local rot=V3( it:tween("rot") )
+
+	local spr=names.test_bullet
+	components.sprites.list_add({
+		t=spr.idx ,
+		hx=spr.hx , hy=spr.hy ,
+		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
+		px=pos[1] , py=pos[2] , pz=pos[3] ,
+		rz=math.floor((rot[3]/15)+0.5)*15,
+	})
+
+end
 
 
 

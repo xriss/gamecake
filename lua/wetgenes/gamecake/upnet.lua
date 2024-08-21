@@ -380,7 +380,6 @@ dump(upnet.clients)
 			local up=oven.ups.create()
 			ups[idx]=up
 			if idx==upnet.us and tick>upnet.ticks.now then -- use live input
-print("future")
 				up:load( oven.ups.manifest(1):save() ) -- fill
 				up:update(upnet.ticks.length)
 			else

@@ -2347,8 +2347,8 @@ end
 
 --[[#lua.wetgenes.tardis.v3.angle
 
-	radians,axis = v3a:dot(v3b)
-	radians,axis = v3a:dot(v3b,axis)
+	radians,axis = v3a:angle(v3b)
+	radians,axis = v3a:angle(v3b,axis)
 
 Return radians and axis of rotation between these two vectors. If axis is given 
 then it must represent a positive world aligned axis normal. So V3(1,0,0) or 
