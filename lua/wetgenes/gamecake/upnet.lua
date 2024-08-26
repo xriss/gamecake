@@ -455,8 +455,8 @@ dump(upnet.clients)
 		repeat until not upnet.update_ticks_input() -- update ticks.input
 
 		if upnet.ticks.epoch and upnet.us then -- we are ticking
-			local t=((now()-upnet.ticks.epoch)/upnet.ticks.length)
-			while t>upnet.ticks.now do -- we have 1 tick of controller latency...
+			local t=((now()-upnet.ticks.epoch)/upnet.ticks.length) -- floor this to reduce latency but get janky predictions
+			while t>upnet.ticks.now do -- without floor we have 1 tick of controller latency
 				upnet.next_tick()
 			end
 		end

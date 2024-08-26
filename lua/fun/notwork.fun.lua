@@ -17,6 +17,9 @@ function ls(s) print(wstr.dump(s))end
 -- provides base networking and synced inputs
 local upnet=require("wetgenes.gamecake.upnet").bake(oven)
 
+local json_pack=require("wetgenes.json_pack")
+
+
 -- request full keymap
 oven.ups.keymap(1,"full") -- 1up has basic keyboard mappings
 ups={[0]=oven.ups.empty} -- empty ups
@@ -268,6 +271,9 @@ end
 
 scenery.all.methods.setup_body=function(it,boot)
 
+	it:set("notween",false) -- must set false before setting to true for notween flag to work
+	it:set("notween",true) -- must set false before setting to true for notween flag to work
+
 	it:set( "pos" , V3( boot.pos ) )
 	it:set( "vel" , V3( boot.vel ) )
 
@@ -470,6 +476,9 @@ scenery.player.methods.draw=function(it)
 	end
 	print(s)
 ]]
+
+--	ls(it.values[it.values_length])
+	print( string.format("%013X",json_pack.chksumish(0,it.values[it.values_length])) )
 
 end
 
