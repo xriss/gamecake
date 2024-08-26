@@ -17,7 +17,7 @@ function ls(s) print(wstr.dump(s))end
 -- provides base networking and synced inputs
 local upnet=require("wetgenes.gamecake.upnet").bake(oven)
 
-local json_pack=require("wetgenes.json_pack")
+local json_diff=require("wetgenes.json_diff")
 
 
 -- request full keymap
@@ -478,7 +478,7 @@ scenery.player.methods.draw=function(it)
 ]]
 
 --	ls(it.values[it.values_length])
-	print( string.format("%013X",json_pack.chksumish(0,it.values[it.values_length])) )
+	print( string.format("%012X",json_diff.chksumish(0,it.values[it.values_length])) )
 
 end
 

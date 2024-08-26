@@ -496,3 +496,80 @@ json_diff.undo=function(b,d)
 	return b
 end
 
+
+do
+
+-- this is not crypto, this is just an attempt to spot out of sync issues
+-- by suming ongoing change, rather than a massive recompare every tick
+-- any simulation out of sync should trigger before it becomes obvious
+-- to the observer, then we resync and continue.
+
+local math_abs=math.abs
+local math_modf=math.modf
+local math_log=math.log
+local math_floor=math.floor
+local string_byte=string.byte
+
+-- return a "+" b where b is bitfiddled and a becomes an acumilated 48bit int checksumish
+local chksumish_number=function(a,b)
+	b=math_abs(b) -- negative numbers are confuzling
+	local e=math_floor(math_log(b)*1.44269504089) -- power of 2 int exponent
+	local c=math_floor( b*(2^(46-e)) ) -- c is now probably a 48bit integer with info in the high bits
+	if c-c~=0 then c=0x55 end -- check for nan or inf (fixes log 0 or anything else funky)
+	a=math_abs(a-c) -- abs sub from a so we stay positive and xorish even maybe
+	local aa ; a,aa=math_modf(a/0x80) ; a=a+aa*0x1000000000000 -- rotate right 7 bits and encourage 48bit int
+	return a
+end
+
+local chksumish_bool=function(a,b)
+	local c = b and 0xaa or 0x55
+	a=math_abs(a-c) -- abs sub from a so we stay positive and xorish even maybe
+	local aa ; a,aa=math_modf(a/0x80) ; a=a+aa*0x1000000000000 -- rotate right 7 bits and encourage 48bit int
+	return a
+end
+
+local chksumish_string=function(a,b)
+	for i=1,#b,6 do
+		local b1,b2,b3,b4,b5,b6 = string_byte(b,i,i+5)
+		local c =	(b1 or 0x55)*0x10000000000 +
+					(b2 or 0x55)*0x100000000   +
+					(b3 or 0x55)*0x1000000     +
+					(b4 or 0x55)*0x10000       +
+					(b5 or 0x55)*0x100         +
+					(b6 or 0x55)
+		a=math_abs(a-c) -- abs sub from a so we stay positive and xorish even maybe
+		local aa ; a,aa=math_modf(a/0x80) ; a=a+aa*0x1000000000000 -- rotate right 7 bits and encourage 48bit int
+	end
+	return a
+end
+
+local chksumish ; chksumish=function(a,b)
+	local t=type(b)
+	if t=="number" then return chksumish_number(a,b) end
+	if t=="string" then return chksumish_string(a,b) end
+	if t=="table" then
+		if type(b[1])~="nil" then -- array
+			for n,v in ipairs(b) do
+				a=chksumish(a,v)
+			end
+		else -- object must iterate in a stable way so...
+			local ns={}
+			for n,v in pairs(b) do ns[#ns+1]=n end
+			table.sort(ns)
+			for _,n in pairs(ns) do
+				a=chksumish(a,b[n])
+			end
+		end
+		return a
+	end
+	return chksumish_bool(a,b)
+end
+
+
+json_diff.chksumish_number = chksumish_number
+json_diff.chksumish_bool   = chksumish_bool
+json_diff.chksumish_string = chksumish_string
+json_diff.chksumish        = chksumish
+
+end
+
