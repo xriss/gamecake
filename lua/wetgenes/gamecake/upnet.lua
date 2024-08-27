@@ -59,6 +59,7 @@ M.bake=function(oven,upnet)
 		upnet.ticks.epoch=nil	-- start time of ticks in seconds
 
 		-- ticks ( integers )
+		upnet.ticks.agreed=0	-- the tick all clients have state agreed as true
 		upnet.ticks.input=0		-- the tick we have all inputs for
 		upnet.ticks.update=0	-- the tick you have updated
 		upnet.ticks.now=0		-- the tick we have our input for
@@ -201,6 +202,7 @@ M.bake=function(oven,upnet)
 		end
 
 		upnet.ticks.now=msg.ticks
+		upnet.ticks.agreed=upnet.ticks.now
 		upnet.ticks.input=upnet.ticks.now
 		upnet.ticks.update=upnet.ticks.now
 		upnet.ticks.draw=upnet.ticks.now

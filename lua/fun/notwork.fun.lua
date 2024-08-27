@@ -62,6 +62,7 @@ hardware,main=system.configurator({
 				ups=upnet.get_ups(upnet.ticks.update)
 				scene.call("advance_values")
 				scene.call("update")
+				scene.call("hashish")
 			end
 			
 			upnet.ticks.draw=upnet.ticks.update
@@ -187,8 +188,18 @@ end
 
 scenery.all.methods.setup_values=function(it)
 
-	it.values={ {} }
+	local values={}
+	it.values={ values }
 	it.values_length=#it.values
+
+
+	for k,v in pairs( it.scene.systems[it.caste].values ) do
+		if type(v)=="table" and v.new then
+			values[k]=v.new(v) -- copy tardis values
+		else
+			values[k]=v -- probbaly a number, bool or string
+		end
+	end
 
 end
 
@@ -262,6 +273,8 @@ scenery.all.methods.tween=function(it,name,tween)
 end
 
 scenery.all.methods.set=function(it,name,value)
+
+	assert( it.scene.systems[it.caste].values[name] ) -- must exist as default
 
 	if it:get(name)~=value then -- only write if changed
 		it.values[1][name]=value -- to current values object only
@@ -355,7 +368,18 @@ scenery.player.loads=function()
 	}
 
 end
+
+scenery.player.values={
+	notween=true,
+
+	pos=V3(0,0,0),
+	vel=V3(0,0,0),
+	rot=V3(0,0,0),
+	ang=V3(0,0,0),
 	
+	mouse=V3(0,0,0),
+}
+
 scenery.player.setup=function(sys)
 	scenery.all.setup_metatable(sys)
 
@@ -478,7 +502,7 @@ scenery.player.methods.draw=function(it)
 ]]
 
 --	ls(it.values[it.values_length])
-	print( string.format("%012X",json_diff.chksumish(0,it.values[it.values_length])) )
+	print( string.format("%012X",json_diff.hashish(0,it.values[it.values_length])) )
 
 end
 
@@ -511,7 +535,16 @@ scenery.bullet.loads=function()
 	}
 
 end
-	
+
+scenery.bullet.values={
+	notween=true,
+
+	pos=V3(0,0,0),
+	vel=V3(0,0,0),
+	rot=V3(0,0,0),
+	ang=V3(0,0,0),
+}
+
 scenery.bullet.setup=function(sys)
 	scenery.all.setup_metatable(sys)
 
@@ -572,6 +605,18 @@ scenery.bullet.methods.draw=function(it)
 end
 
 
+-- auto values_order
+for name,sys in pairs(scenery) do
+
+	if sys.values then -- auto create values_order from values
+		sys.values_order={}
+		for k,v in pairs(sys.values) do
+			sys.values_order[#sys.values_order+1]=k
+		end
+		table.sort(sys.values_order)
+	end
+
+end
 
 
 --

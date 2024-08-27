@@ -511,7 +511,7 @@ local math_floor=math.floor
 local string_byte=string.byte
 
 -- return a "+" b where b is bitfiddled and a becomes an acumilated 48bit int checksumish
-local chksumish_number=function(a,b)
+local hashish_number=function(a,b)
 	b=math_abs(b) -- negative numbers are confuzling
 	local e=math_floor(math_log(b)*1.44269504089) -- power of 2 int exponent
 	local c=math_floor( b*(2^(46-e)) ) -- c is now probably a 48bit integer with info in the high bits
@@ -521,14 +521,14 @@ local chksumish_number=function(a,b)
 	return a
 end
 
-local chksumish_bool=function(a,b)
+local hashish_bool=function(a,b)
 	local c = b and 0xaa or 0x55
 	a=math_abs(a-c) -- abs sub from a so we stay positive and xorish even maybe
 	local aa ; a,aa=math_modf(a/0x80) ; a=a+aa*0x1000000000000 -- rotate right 7 bits and encourage 48bit int
 	return a
 end
 
-local chksumish_string=function(a,b)
+local hashish_string=function(a,b)
 	for i=1,#b,6 do
 		local b1,b2,b3,b4,b5,b6 = string_byte(b,i,i+5)
 		local c =	(b1 or 0x55)*0x10000000000 +
@@ -543,33 +543,33 @@ local chksumish_string=function(a,b)
 	return a
 end
 
-local chksumish ; chksumish=function(a,b)
+local hashish ; hashish=function(a,b)
 	local t=type(b)
-	if t=="number" then return chksumish_number(a,b) end
-	if t=="string" then return chksumish_string(a,b) end
+	if t=="number" then return hashish_number(a,b) end
+	if t=="string" then return hashish_string(a,b) end
 	if t=="table" then
 		if type(b[1])~="nil" then -- array
 			for n,v in ipairs(b) do
-				a=chksumish(a,v)
+				a=hashish(a,v)
 			end
 		else -- object must iterate in a stable way so...
 			local ns={}
 			for n,v in pairs(b) do ns[#ns+1]=n end
 			table.sort(ns)
 			for _,n in pairs(ns) do
-				a=chksumish(a,b[n])
+				a=hashish(a,b[n])
 			end
 		end
 		return a
 	end
-	return chksumish_bool(a,b)
+	return hashish_bool(a,b)
 end
 
 
-json_diff.chksumish_number = chksumish_number
-json_diff.chksumish_bool   = chksumish_bool
-json_diff.chksumish_string = chksumish_string
-json_diff.chksumish        = chksumish
+json_diff.hashish_number = hashish_number
+json_diff.hashish_bool   = hashish_bool
+json_diff.hashish_string = hashish_string
+json_diff.hashish        = hashish
 
 end
 
