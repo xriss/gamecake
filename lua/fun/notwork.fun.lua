@@ -62,7 +62,16 @@ hardware,main=system.configurator({
 				ups=upnet.get_ups(upnet.ticks.update)
 				scene.call("advance_values")
 				scene.call("update")
-				scene.call("hashish")
+				scene.call("hashish") -- build hash for items
+				local hash=0
+				for i=1,#scene.systems do -- build hash for sytem from items
+					local sys=scene.systems[i]
+					if sys.hashs then
+						hash=json_diff.hashish( hash , sys.hashs[1] )
+					end
+				end
+				table.insert(upnet.hashs,1,hash) -- hash of all systems
+				print( string.format("%012X",hash) )
 			end
 			
 			upnet.ticks.draw=upnet.ticks.update
@@ -150,6 +159,24 @@ scenery.all.setup_metatable=function(sys)
 		end
 	end
 	
+	sys.hashs={}
+	
+end
+
+scenery.all.hashish=function(sys)
+	if sys.hashs then
+	
+		local items=scene.data[ sys.caste ]
+		local hash=0
+		if items then
+			for idx=1,#items do
+				local it=items[idx]
+				hash=json_diff.hashish( hash , it:set_hash() )
+			end
+		end
+		table.insert(sys.hashs,1,hash)
+
+	end
 end
 
 -- generate any missing boot data
@@ -184,6 +211,22 @@ scenery.all.methods.advance_values=function(it)
 		it:pull_values()
 	end
 
+end
+
+-- generate hash of values and return it
+scenery.all.methods.set_hash=function(it)
+	if it.values then
+
+		local hash=0
+
+		for _,k in pairs( it.scene.systems[it.caste].values_order ) do
+			hash=json_diff.hashish(hash,it:get(k))
+		end
+		
+		it.values[1].hash=hash
+		
+		return hash
+	end
 end
 
 scenery.all.methods.setup_values=function(it)
@@ -502,8 +545,13 @@ scenery.player.methods.draw=function(it)
 ]]
 
 --	ls(it.values[it.values_length])
-	print( string.format("%012X",json_diff.hashish(0,it.values[it.values_length])) )
-
+--[[
+	local hash=it.values[it.values_length].hash
+	if hash then
+		print( string.format("%012X",hash) )
+	end
+]]
+	
 end
 
 

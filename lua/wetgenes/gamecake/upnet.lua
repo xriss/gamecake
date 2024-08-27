@@ -52,6 +52,8 @@ M.bake=function(oven,upnet)
 		oven.ups.auto_advance=false
 
 	
+		upnet.hashs={}
+
 		upnet.ticks={}
 
 		-- seconds ( floats )
