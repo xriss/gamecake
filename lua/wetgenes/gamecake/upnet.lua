@@ -52,7 +52,6 @@ M.bake=function(oven,upnet)
 		oven.ups.auto_advance=false
 
 	
-		upnet.hashs={}
 
 		upnet.ticks={}
 
@@ -76,6 +75,7 @@ M.bake=function(oven,upnet)
 		-- if things are laging then we may adjust the epoch to "skip" frames
 
 		upnet.history={} -- 1st index is for ticks.now , 2nd is .now-1, etc
+		upnet.hashs={} -- same as history but first hash here is for ticks.update not ticks.now
 
 		upnet.hooks={}
 		
@@ -240,6 +240,9 @@ dump(upnet.clients)
 				h[upnet.us]=upnet.history[i][upnet.us] or {} -- might miss early frames
 			end
 			msg.history=hs
+			msg.hashs_ack=upnet.ticks.agreed -- acknowledged up to here
+			msg.hashs_tick=upnet.ticks.update
+			msg.hashs=upnet.hashs
 		end
 
 		client:send(msg,"pulse")
@@ -250,6 +253,10 @@ dump(upnet.clients)
 --		print("pulse recv",msg.ticks,#msg.history,upnet.ticks.input,upnet.ticks.now)
 
 		client.ack=msg.ack -- this update has been acknowledged
+
+		client.hashs_ack=msg.hashs_ack
+		client.hashs_tick=msg.hashs_tick
+		client.hashs=msg.hashs
 
 		local cidx=1+upnet.ticks.now-msg.ticks
 		for midx=1,#msg.history do

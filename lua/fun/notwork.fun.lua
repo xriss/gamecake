@@ -62,12 +62,13 @@ hardware,main=system.configurator({
 				ups=upnet.get_ups(upnet.ticks.update)
 				scene.call("advance_values")
 				scene.call("update")
-				scene.call("hashish") -- build hash for items
 				local hash=0
-				for i=1,#scene.systems do -- build hash for sytem from items
-					local sys=scene.systems[i]
-					if sys.hashs then
-						hash=json_diff.hashish( hash , sys.hashs[1] )
+				for _,sys in ipairs(scene.systems) do -- hash each sytem
+					local items=scene.data[ sys.caste ]
+					for _,it in ipairs( items or {} ) do -- hash each item
+						for _,k in pairs( sys.values_order or {} ) do -- hash each value
+							hash=json_diff.hashish(hash,it:get(k))
+						end
 					end
 				end
 				table.insert(upnet.hashs,1,hash) -- hash of all systems
@@ -159,25 +160,8 @@ scenery.all.setup_metatable=function(sys)
 		end
 	end
 	
-	sys.hashs={}
-	
 end
 
-scenery.all.hashish=function(sys)
-	if sys.hashs then
-	
-		local items=scene.data[ sys.caste ]
-		local hash=0
-		if items then
-			for idx=1,#items do
-				local it=items[idx]
-				hash=json_diff.hashish( hash , it:set_hash() )
-			end
-		end
-		table.insert(sys.hashs,1,hash)
-
-	end
-end
 
 -- generate any missing boot data
 -- do not call with : use . and pass in boot only
@@ -213,21 +197,7 @@ scenery.all.methods.advance_values=function(it)
 
 end
 
--- generate hash of values and return it
-scenery.all.methods.set_hash=function(it)
-	if it.values then
 
-		local hash=0
-
-		for _,k in pairs( it.scene.systems[it.caste].values_order ) do
-			hash=json_diff.hashish(hash,it:get(k))
-		end
-		
-		it.values[1].hash=hash
-		
-		return hash
-	end
-end
 
 scenery.all.methods.setup_values=function(it)
 
