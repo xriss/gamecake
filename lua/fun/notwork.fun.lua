@@ -71,8 +71,8 @@ hardware,main=system.configurator({
 						end
 					end
 				end
-				table.insert(upnet.hashs,1,hash) -- hash of all systems
-				print( string.format("%012X",hash) )
+				table.insert(upnet.hashs,1,{[upnet.us]=hash}) -- hash of all systems
+--				print( string.format("%012X",hash) )
 			end
 			
 			upnet.ticks.draw=upnet.ticks.update

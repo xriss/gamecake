@@ -129,6 +129,7 @@ M.bake=function(oven,upnet)
 		
 		client.ack=0
 		client.hash_ack=0
+		client.join_tick=0xffffffffffff
 
 		return client
 	end
@@ -183,6 +184,7 @@ M.bake=function(oven,upnet)
 		
 		msg.ticks=upnet.ticks.input
 		
+		client.join_tick=msg.ticks
 		client:send(msg)
 	
 	end
@@ -211,6 +213,8 @@ M.bake=function(oven,upnet)
 		upnet.ticks.draw=upnet.ticks.now
 		upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
 
+		client.join_tick=msg.ticks
+
 --[[
 		-- send current ups to network
 		for _,client in pairs(upnet.clients) do
@@ -229,7 +233,7 @@ dump(upnet.clients)
 	
 		local msg={ upnet="pulse" }
 		
-		msg.ticks=upnet.ticks.now
+		msg.tick=upnet.ticks.now
 		msg.ack=upnet.ticks.update -- acknowledged up to here
 		
 		if upnet.us then
@@ -237,8 +241,7 @@ dump(upnet.clients)
 			for i=1,#upnet.history do
 				if upnet.ticks.now+1-i <= client.ack then break end
 				local h={}
-				hs[#hs+1]=h
-				h[upnet.us]=upnet.history[i][upnet.us] or {} -- might miss early frames
+				hs[#hs+1]=upnet.history[i][upnet.us] or {} -- might miss early frames
 			end
 			msg.history=hs
 			msg.hashs_ack=upnet.ticks.agreed -- acknowledged up to here
@@ -246,7 +249,7 @@ dump(upnet.clients)
 			msg.hashs={}
 			for i=1,#upnet.hashs do
 				if upnet.ticks.update+1-i <= client.hash_ack then break end
-				msg.hashs[i]=upnet.hashs[i]
+				msg.hashs[i]=upnet.hashs[i][upnet.us]
 			end
 		end
 
@@ -261,29 +264,29 @@ dump(upnet.clients)
 
 		client.hashs_ack=msg.hashs_ack
 		client.hashs_tick=msg.hashs_tick
-		client.hashs=msg.hashs
 
-		local cidx=1+upnet.ticks.now-msg.ticks
+		local cidx=1+upnet.ticks.now-msg.tick
 		for midx=1,#msg.history do
 			local c=upnet.history[cidx]
 			local m=msg.history[midx]
 			if c and m then -- accept inputs
-				c[client.idx] = c[client.idx] or m[client.idx]
+				c[client.idx] = c[client.idx] or m
 			end
 			cidx=cidx+1
 		end
+
+		local cidx=1+upnet.ticks.update-msg.hashs_tick
+		for midx=1,#msg.hashs do
+			local c=upnet.hashs[cidx]
+			local m=msg.hashs[midx]
+			if c and m then -- accept hashs
+				c[client.idx] = c[client.idx] or m
+			end
+			cidx=cidx+1
+		end
+
 	end
 
-	-- reduce old history we no longer need
-	upnet.shrink_history=function()
-
---dump(upnet.ticks.now,upnet.history)
-
-		local cidx=1+upnet.ticks.now-upnet.ticks.update -- discard used input
-		
-		while #upnet.history>cidx+16 do upnet.history[#upnet.history]=nil end -- trim
-
-	end
 
 	upnet.setup=function()
 
@@ -430,6 +433,9 @@ dump(upnet.clients)
 		end
 		
 		upnet.ticks.input=upnet.ticks.input+1
+		for i=#upnet.history , 255+1+upnet.ticks.now-upnet.ticks.input , -1 do
+			upnet.history[i]=nil
+		end
 		return true
 	end
 
@@ -440,14 +446,24 @@ dump(upnet.clients)
 		local hash=upnet.hashs[ti-1] 
 		if not hash then return end
 
-		for _,v in pairs(upnet.clients) do -- hashes must agree
-			local ti=1+upnet.ticks.update-upnet.ticks.agreed	-- we have agreed for here
---			local h=
+		local h=hash[upnet.us] -- our hash
+		if not h then return end
+		for _,v in pairs(upnet.clients) do -- all hashes must agree
+			if v.join_tick < upnet.ticks.agreed then
+				if not hash[v.idx] then return end -- no hash yet
+				if h ~= hash[v.idx] then -- this is bad
+					error("out of sync")
+					-- need to trigger a full resync here
+					return
+				end
+			end
 		end
-		return
 		
---		upnet.ticks.agreed=upnet.ticks.agreed+1
---		return true
+		upnet.ticks.agreed=upnet.ticks.agreed+1
+		for i=#upnet.hashs , 255+1+upnet.ticks.update-upnet.ticks.agreed , -1 do
+			upnet.hashs[i]=nil
+		end
+		return true
 	end
 
 	-- tick one tick forwards
@@ -467,8 +483,6 @@ dump(upnet.clients)
 				client:pulse_send()
 			end
 		end
-
-		upnet.shrink_history()
 		
 	end
 	
@@ -492,6 +506,7 @@ dump(upnet.clients)
 			local t=((now()-upnet.ticks.epoch)/upnet.ticks.length) -- floor this to reduce latency but get janky predictions
 			while t>upnet.ticks.now do -- without floor we have 1 tick of controller latency
 				upnet.next_tick()
+--				print("ticks",upnet.ticks.now,upnet.ticks.input,upnet.ticks.agreed)
 			end
 		end
 		
