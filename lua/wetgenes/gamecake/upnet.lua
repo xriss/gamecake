@@ -128,6 +128,7 @@ M.bake=function(oven,upnet)
 		end
 		
 		client.ack=0
+		client.hash_ack=0
 
 		return client
 	end
@@ -242,7 +243,11 @@ dump(upnet.clients)
 			msg.history=hs
 			msg.hashs_ack=upnet.ticks.agreed -- acknowledged up to here
 			msg.hashs_tick=upnet.ticks.update
-			msg.hashs=upnet.hashs
+			msg.hashs={}
+			for i=1,#upnet.hashs do
+				if upnet.ticks.update+1-i <= client.hash_ack then break end
+				msg.hashs[i]=upnet.hashs[i]
+			end
 		end
 
 		client:send(msg,"pulse")
@@ -428,6 +433,23 @@ dump(upnet.clients)
 		return true
 	end
 
+	-- update the tick time of when we have matching checksums
+	upnet.update_ticks_agreed=function()
+
+		local ti=1+upnet.ticks.update-upnet.ticks.agreed	-- we have agreed for here
+		local hash=upnet.hashs[ti-1] 
+		if not hash then return end
+
+		for _,v in pairs(upnet.clients) do -- hashes must agree
+			local ti=1+upnet.ticks.update-upnet.ticks.agreed	-- we have agreed for here
+--			local h=
+		end
+		return
+		
+--		upnet.ticks.agreed=upnet.ticks.agreed+1
+--		return true
+	end
+
 	-- tick one tick forwards
 	upnet.next_tick=function() 
 	
@@ -464,6 +486,7 @@ dump(upnet.clients)
 		until not memo
 		
 		repeat until not upnet.update_ticks_input() -- update ticks.input
+		repeat until not upnet.update_ticks_agreed() -- update ticks.agreed
 
 		if upnet.ticks.epoch and upnet.us then -- we are ticking
 			local t=((now()-upnet.ticks.epoch)/upnet.ticks.length) -- floor this to reduce latency but get janky predictions

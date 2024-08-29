@@ -199,21 +199,44 @@ end
 
 
 
-scenery.all.methods.setup_values=function(it)
+scenery.all.methods.setup_values=function(it,boot)
 
-	local values={}
-	it.values={ values }
-	it.values_length=#it.values
+	it.values={ {} }
+	it.values_length=1
+	
+	it:load_values(boot)
 
+end
+
+scenery.all.methods.load_values=function(it,boot)
+
+	boot=boot or {}
+	local values=it.values[1]
 
 	for k,v in pairs( it.scene.systems[it.caste].values ) do
 		if type(v)=="table" and v.new then
-			values[k]=v.new(v) -- copy tardis values
+			values[k]=v.new( boot[k] or v ) -- copy tardis values
 		else
-			values[k]=v -- probbaly a number, bool or string
+			values[k]=boot[k] or v -- probbaly a number, bool or string
 		end
 	end
 
+end
+
+scenery.all.methods.save_values=function(it)
+
+	local boot={}
+	local values=it.values[1]
+
+	for k,v in pairs( it.scene.systems[it.caste].values ) do
+		if type(v)=="table" and v.new then
+			boot[k]=v.new( it:get(k) ) -- copy tardis values
+		else
+			boot[k]=it:get(k) -- probbaly a number, bool or string
+		end
+	end
+
+	return boot
 end
 
 scenery.all.methods.push_values=function(it)
@@ -292,19 +315,6 @@ scenery.all.methods.set=function(it,name,value)
 	if it:get(name)~=value then -- only write if changed
 		it.values[1][name]=value -- to current values object only
 	end
-
-end
-
-scenery.all.methods.setup_body=function(it,boot)
-
-	it:set("notween",false) -- must set false before setting to true for notween flag to work
-	it:set("notween",true) -- must set false before setting to true for notween flag to work
-
-	it:set( "pos" , V3( boot.pos ) )
-	it:set( "vel" , V3( boot.vel ) )
-
-	it:set( "rot" , V3( boot.rot ) )
-	it:set( "ang" , V3( boot.ang ) )
 
 end
 
@@ -391,6 +401,8 @@ scenery.player.values={
 	ang=V3(0,0,0),
 	
 	mouse=V3(0,0,0),
+	
+	up=0,
 }
 
 scenery.player.setup=function(sys)
@@ -424,12 +436,7 @@ scenery.player.methods={}
 
 scenery.player.methods.setup=function(it,boot)
 
-	it:setup_values()
-	it:setup_body(boot)
-	
-	it.up=boot.up
-
-	it:set( "mouse" , V3( boot.mouse ) )
+	it:setup_values(boot)
 
 end
 	
@@ -440,7 +447,7 @@ scenery.player.methods.update=function(it)
 	local rot=V3( it:get("rot") )
 	local ang=V3( it:get("ang") )
 
-	local up=ups[it.up] or ups[0]
+	local up=ups[ it:get("up") ] or ups[0]
 
 	it:set( "mouse" , V3( up:get("vx") , up:get("vy") , 0 ) )
 
@@ -589,8 +596,7 @@ scenery.bullet.methods={}
 
 scenery.bullet.methods.setup=function(it,boot)
 
-	it:setup_values()
-	it:setup_body(boot)
+	it:setup_values(boot)
 
 end
 	
