@@ -2690,7 +2690,7 @@
    "body": "<pre><code>scene.systems_call(fname,...)\n</code></pre>\n<p>For every system call the function called fname like so.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 183,
+   "line": 184,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }

@@ -2698,7 +2698,7 @@
    "body": "<pre><code>scene.systems_call(fname,...)\n</code></pre>\n<p>For every system call the function called fname like so.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 183,
+   "line": 184,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2706,7 +2706,7 @@
    "body": "<pre><code>scene.systems_cocall(fname,...)\n</code></pre>\n<p>For every system call the function called fname inside a coroutine like \nso.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>This function can yield and should do so if it is waiting for another \nsystem to do something. All coroutines will be run in a round robin \nstyle until they all complete.</p>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 207,
+   "line": 208,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.cocall",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2714,7 +2714,7 @@
    "body": "<pre><code>scene.systems_insert(system)\n</code></pre>\n<p>Insert a new system replacing any system of the same caste. system.caste should\nbe set to the caste of the system for this to work.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 155,
+   "line": 156,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.insert",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2722,7 +2722,7 @@
    "body": "<pre><code>system = scene.systems_remove(caste)\n</code></pre>\n<p>Remove and return the system of the given caste.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 138,
+   "line": 139,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }

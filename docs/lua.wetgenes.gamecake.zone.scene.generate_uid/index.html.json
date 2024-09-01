@@ -2690,7 +2690,7 @@
    "body": "<pre><code>local uid = scene.generate_uid()\n\nlocal uid = scene.generate_uid(uid)\n</code></pre>\n<p>Simple unique incremental IDs for items to be used instead of \npointers, starts at 1 and goes up as items are added.</p>\n<p>Ideally you will also need extra code for compacting these ids ( \nprobably as an export, renumber, import cycle ) to stop them getting \nhuge and breaking. So a save/load system which is out of scope for this \ncode.</p>\n<p>Generally, unless we are creating and destroying millions of items we \nwill run out of memory way before this number gets too big.</p>\n<p>If a uid is passed in then we will return uid+1 and continue on upwards \nfor subsequent calls.</p>\n<p>The point of uids is so we can refer to and lazy link items as weak \nvalues making it easy to delete an item without worrying too much about \nwhere it has been used. So instead of putting the item table inside \nanother item table we can use a uid reference instead.</p>\n<p>Good for serialising data as well.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 53,
+   "line": 52,
    "name": "lua.wetgenes.gamecake.zone.scene.generate_uid",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
