@@ -58,6 +58,7 @@ hardware,main=system.configurator({
 			if upnet.ticks.draw>upnet.ticks.update then -- undo draw update
 				upnet.ticks.draw=upnet.ticks.update
 				scene.values:unpush()
+				scene.systems_call("unpush")
 				-- need to unpush and also delete items...
 				local uid=scene.values:get("uid")
 				scene.call(function(it)
@@ -72,6 +73,7 @@ hardware,main=system.configurator({
 			while upnet.ticks.input>upnet.ticks.update do -- update with valid inputs
 				upnet.ticks.update=upnet.ticks.update+1
 				ups=upnet.get_ups(upnet.ticks.update)
+				scene.systems_call("update")
 				scene.call("update")
 				local hash=0
 				for _,sys in ipairs(scene.systems) do -- hash each sytem
@@ -99,10 +101,13 @@ hardware,main=system.configurator({
 				upnet.ticks.draw=upnet.ticks.draw+1
 				ups=upnet.get_ups(upnet.ticks.draw)
 				scene.values:push()
+				scene.systems_call("push")
 				scene.call("push")
+				scene.systems_call("update")
 				scene.call("update")
 			end
 			upnet.ticks.draw_tween=nowtick-math.floor(nowtick)
+			scene.systems_call("draw")
 			scene.call("draw")
 		
 --upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )

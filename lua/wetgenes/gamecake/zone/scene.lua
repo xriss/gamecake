@@ -192,14 +192,24 @@ For every system call the function called fname like so.
 Returns the number of calls made, which will be the number of systems that had
 an fname function to call.
 
+If fname is a function then it will be called as if it was a method.
+
 ]]
 	scene.systems_call=function(fname,...)
 		local count=0
-		for i=#scene.systems,1,-1 do -- call backwards so item can remove self
-			local system=scene.systems[i]
-			if system[fname] then
-				system[fname](system,...)
+		if type(fname)=="function" then
+			for i=#scene.systems,1,-1 do -- call backwards so item can remove self
+				local system=scene.systems[i]
+				fname(system,...)
 				count=count+1
+			end
+		else
+			for i=#scene.systems,1,-1 do -- call backwards so item can remove self
+				local system=scene.systems[i]
+				if system[fname] then
+					system[fname](system,...)
+					count=count+1
+				end
 			end
 		end
 		return count -- number of systems called
@@ -221,17 +231,33 @@ style until they all complete.
 Returns the number of calls made, which will be the number of systems that had
 an fname function to call.
 
+If fname is a function then it will be called as if it was a method.
+
 ]]
 	scene.systems_cocall=function(fname,...)
 		local functions={}
 		local count=0
-		for i=#scene.systems,1,-1 do -- call backwards so item can remove self
-			local system=scene.systems[i]
-			if system[fname] then
-				local fargs={system,...}
-				local fcall=system[fname]
-				functions[#functions+1]=function() fcall(unpack(fargs)) end
-				count=count+1
+		if type(fname)=="function" then
+			for i=#scene.systems,1,-1 do -- call backwards so item can remove self
+				local system=scene.systems[i]
+				if system[fname] then
+					local fargs={system,...}
+					local fcall=fname
+					functions[#functions+1]=function() fcall(unpack(fargs)) end
+					count=count+1
+				end
+			end
+		else
+			for i=#scene.systems,1,-1 do -- call backwards so item can remove self
+				local system=scene.systems[i]
+				if system[fname] then
+					local fargs={system,...}
+					local fcall=system[fname]
+					if fcall then
+						functions[#functions+1]=function() fcall(unpack(fargs)) end
+						count=count+1
+					end
+				end
 			end
 		end
 		require("wetgenes.tasks").cocall(functions)
@@ -404,10 +430,6 @@ currently active items.
 			for i=#scene.systems,1,-1 do
 				local sys=scene.systems[i]
 				local items=scene.data[ sys.caste ]
-				if sys and sys[fname] then -- call a system method, if it exists
-					sys[fname](sys,...)
-					count=count+1
-				end
 				if items and items[1] and items[1][fname] then -- all items *must* have the same functions available
 					for idx=#items,1,-1 do -- call backwards so item can remove self
 						local it=items[idx]
