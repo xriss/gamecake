@@ -28,7 +28,7 @@ find it useful to force monsters to update before the player.
 M.create=function(scene)
 
 	scene=scene or {} -- a place to store everything that needs to be updated
-	
+
 --[[#lua.wetgenes.gamecake.zone.scene.systems
 
 	scene.systems={name=system,[1]=system}
@@ -47,7 +47,6 @@ delete itself.
 A map of currently remembered uids to items.
 
 ]]
-	scene.uid=0
 	scene.uids=setmetatable({}, { __mode = 'v' }) -- weak values
 
 --[[#lua.wetgenes.gamecake.zone.scene.generate_uid
@@ -80,8 +79,10 @@ Good for serialising data as well.
 ]]
 	scene.generate_uid=function(uid)
 		if uid then scene.uid=uid end
-		scene.uid=scene.uid+1
-		return scene.uid
+		uid=scene.values:get("uid")
+		uid=uid+1
+		scene.values:set("uid",uid)
+		return uid
 	end
 
 
@@ -266,9 +267,9 @@ table that should be modified with the insert and remove functions.
 
 ]]
 	scene.reset=function()
---		scene.call(function(it) scene.remove(it) end) -- make sure things are removed?
-		scene.info={} -- general data
 		scene.data={} -- main lists of scene
+		scene.values=M.create_values() -- values
+		scene.values:set("uid",0) -- starting uid
 		return scene
 	end
 
@@ -430,7 +431,7 @@ bookmark unique items.
 
 ]]
 	scene.get=function(name)
-		return scene.info[name]
+		return scene.values:get(name)
 	end
 
 
@@ -442,8 +443,7 @@ save a value by a unique name
 
 ]]
 	scene.set=function(name,value)
-		scene.info[name]=value
-		return value
+		return scene.values:set(name,value)
 	end
 
 
@@ -456,10 +456,7 @@ already exist. The default value is {} as this is intended for lists.
 
 ]]
 	scene.manifest=function(name,empty)
-		if not scene.info[name] then
-			scene.info[name]=empty or {} -- create empty
-		end
-		return scene.info[name]
+		return scene.values:manifest(name,empty)
 	end
 
 --[[#lua.wetgenes.gamecake.zone.scene.status
@@ -495,4 +492,82 @@ of items of each caste.
 -- reset and return the scene, creating the initial data and info tables
 	return scene.reset()
 
+end
+
+
+
+
+local values_methods={}
+local values_meta={__index=values_methods}
+
+values_methods.new=function()
+	local values={ {} }
+	setmetatable(values,values_meta)
+	return values
+end
+
+values_methods.push=function(values)
+	values[#values+1]={}
+end
+
+values_methods.unpush=function(values)
+	for idx=#values,2,-1 do
+		values[idx]=nil
+	end
+end
+
+values_methods.set=function(values,key,value)
+	if values:get(key)~=value then
+		values[#values][key]=value
+	end
+end
+
+values_methods.get=function(values,key)
+	for idx=#values,1,-1 do
+		local value=values[idx][key]
+		if type(value)~="nil" then return value end
+	end
+end
+
+values_methods.manifest=function(values,key,value)
+	local ret=values:get(key) -- get
+	if type(ret)~="nil" then return ret end -- return got
+	values:set(key,value) -- set
+	return value -- return set
+end
+
+-- get values for previous frame and tween
+values_methods.tween=function(values,key,tween)
+	
+	local a,b
+	local len=#values
+	a=values[len][key]
+	if type(a)=="nil" or len==1 then -- both values are the same so can not tween
+		return values:get(key)
+	else -- got a so find b
+		for idx=len-1,1,-1 do
+			local value=values[idx][key]
+			if type(value)~="nil" then
+				b=value
+				break
+			end
+		end		
+	end
+	
+	if values[len].notween then return a end -- flag to disable tweening
+	
+	if type(b)~="nil" then
+		if type(a)=="number" and type(b)=="number" then -- tween numbers
+			return a*tween + b*(1-tween)
+		elseif type(b)=="table" and b.mix then -- tween using tardis
+			return b:mix(a,tween,b:new())
+		end
+	end
+	if tween<0.5 then return b else return a end -- one or the other
+end
+
+
+
+M.create_values=function()
+	return values_methods.new()
 end

@@ -129,7 +129,7 @@ M.bake=function(oven,upnet)
 		
 		client.ack=0
 		client.hash_ack=0
-		client.join_tick=0xffffffffffff
+		client.join_tick=math.huge
 
 		return client
 	end

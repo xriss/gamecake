@@ -17,6 +17,9 @@ function ls(s) print(wstr.dump(s))end
 -- provides base networking and synced inputs
 local upnet=require("wetgenes.gamecake.upnet").bake(oven)
 
+-- use for base scene and values
+local zscene=require("wetgenes.gamecake.zone.scene")
+
 local json_diff=require("wetgenes.json_diff")
 
 
@@ -52,15 +55,23 @@ hardware,main=system.configurator({
 		upnet.update()
 		if upnet.ticks.input>upnet.ticks.update then -- advance
 
-			while upnet.ticks.draw>upnet.ticks.update do -- undo draw update
-				upnet.ticks.draw=upnet.ticks.draw-1
-				scene.call("pop_values")
+			if upnet.ticks.draw>upnet.ticks.update then -- undo draw update
+				upnet.ticks.draw=upnet.ticks.update
+				scene.values:unpush()
+				-- need to unpush and also delete items...
+				local uid=scene.values:get("uid")
+				scene.call(function(it)
+					if it.uid>uid then -- from the future so delete
+						it:destroy()
+					else
+						it:unpush()
+					end
+				end)
 			end
 
 			while upnet.ticks.input>upnet.ticks.update do -- update with valid inputs
 				upnet.ticks.update=upnet.ticks.update+1
 				ups=upnet.get_ups(upnet.ticks.update)
-				scene.call("advance_values")
 				scene.call("update")
 				local hash=0
 				for _,sys in ipairs(scene.systems) do -- hash each sytem
@@ -87,7 +98,8 @@ hardware,main=system.configurator({
 			while upnet.ticks.draw<nowtick do -- update untill we are in the future
 				upnet.ticks.draw=upnet.ticks.draw+1
 				ups=upnet.get_ups(upnet.ticks.draw)
-				scene.call("advance_values")
+				scene.values:push()
+				scene.call("push")
 				scene.call("update")
 			end
 			upnet.ticks.draw_tween=nowtick-math.floor(nowtick)
@@ -114,13 +126,22 @@ print("setup")
 	names=components.tiles.names
 
 	-- use zone scene ( same as fun entities ) and set scene as global
-	scene=require("wetgenes.gamecake.zone.scene").create({
+	scene=zscene.create({
 		sortby={
+			"all",
 			"bullet",
 			"player",
 		},
 	})
-
+	
+	-- add all to scene as a metatable so we can do scene:call_xxxxx functions
+	do
+		local methods={} -- merge here so functions are available on scene
+		for k,v in pairs(scenery.all.methods) do methods[k]=v end
+		for k,v in pairs(scenery.all) do methods[k]=v end
+		setmetatable(scene,{__index=methods})
+	end
+	
 	-- create scene systems
 	for name,sys in pairs(scenery) do
 		sys.caste=name
@@ -187,22 +208,10 @@ scenery.all.methods.destroy=function(it)
 
 end
 
--- test history diffs
-scenery.all.methods.advance_values=function(it)
-
-	it:push_values()
-	while it.values_length>64 do -- max history
-		it:pull_values()
-	end
-
-end
-
-
 
 scenery.all.methods.setup_values=function(it,boot)
 
-	it.values={ {} }
-	it.values_length=1
+	it.values=zscene.create_values()
 	
 	it:load_values(boot)
 
@@ -211,13 +220,12 @@ end
 scenery.all.methods.load_values=function(it,boot)
 
 	boot=boot or {}
-	local values=it.values[1]
 
 	for k,v in pairs( it.scene.systems[it.caste].values ) do
 		if type(v)=="table" and v.new then
-			values[k]=v.new( boot[k] or v ) -- copy tardis values
+			it.values:set(k,v.new( boot[k] or v )) -- copy tardis values
 		else
-			values[k]=boot[k] or v -- probbaly a number, bool or string
+			it.values:set(k,boot[k] or v) -- probbaly a number, bool or string
 		end
 	end
 
@@ -225,97 +233,45 @@ end
 
 scenery.all.methods.save_values=function(it)
 
-	local boot={}
-	local values=it.values[1]
+	local boot={}	
 
 	for k,v in pairs( it.scene.systems[it.caste].values ) do
 		if type(v)=="table" and v.new then
-			boot[k]=v.new( it:get(k) ) -- copy tardis values
+			boot[k]=v.new( it.values:get(k) ) -- copy tardis values
 		else
-			boot[k]=it:get(k) -- probbaly a number, bool or string
+			boot[k]=it.values:get(k) -- probbaly a number, bool or string
 		end
 	end
+
+	boot.uid=it.uid
+	boot.caste=it.caste
 
 	return boot
 end
 
-scenery.all.methods.push_values=function(it)
-
-	table.insert(it.values,1,{})
-	it.values_length=#it.values
-
+scenery.all.methods.push=function(it)
+	return it.values:push()
 end
 
-scenery.all.methods.pop_values=function(it)
-	local v=table.remove(it.values,1) -- go back in time one tick
-	it.values_length=#it.values
-	if it.values_length==0 then -- destroy when we run out of history
-		it:destroy()
-	end
-	return v
-end
-
--- remove base values and merge that data with new base
-scenery.all.methods.pull_values=function(it)
-
-	assert( it.values_length>1 ) -- must always leave some values
-
-	local v=table.remove(it.values,it.values_length) -- base
-	it.values_length=#it.values
-	local w=it.values[it.values_length] -- new base
-	
-	for n,v in pairs(v) do -- copy into any nils
-		if type(w[n])=="nil" then w[n]=v end
-	end
-	
-	return v -- return old value object
-end
-
-scenery.all.methods.get=function(it,name)
-	
-	-- search backwards through time for this value
-	for i=1,it.values_length do
-		local v=it.values[i][name]
-		if type(v)~="nil" then return v end
-	end
-
-end
-
--- get values for previous frame so we can tween with now
-scenery.all.methods.tween=function(it,name,tween)
-	
-	tween=tween or upnet.ticks.draw_tween
-	local a,b
-	
-	-- search backwards through time for this value
-	for i=2,it.values_length do
-		local v=it.values[i][name]
-		if type(v)~="nil" then b=v break end
-	end
-	local v=it.values[1][name]
-	if type(v)~="nil" then a=v else return b end -- both values are the same so no need to tween
-	
-	if it.values[1].notween then return v end -- flag to disable tweening
-	
-	if type(b)~="nil" then
-		if type(a)=="number" and type(b)=="number" then -- tween numbers
-			return a*tween + b*(1-tween)
-		elseif type(b)=="table" and b.mix then -- tween using tardis
-			return b:mix(a,tween,b:new())
-		end
-	end
-	if tween<0.5 then return b else return a end -- one or the other
-	
+scenery.all.methods.unpush=function(it)
+	return it.values:unpush()
 end
 
 scenery.all.methods.set=function(it,name,value)
+	return it.values:set(name,value)
+end
 
-	assert( it.scene.systems[it.caste].values[name] ) -- must exist as default
+scenery.all.methods.get=function(it,name)
+	return it.values:get(name)
+end
 
-	if it:get(name)~=value then -- only write if changed
-		it.values[1][name]=value -- to current values object only
-	end
+scenery.all.methods.manifest=function(it,name,value)
+	return it.values:manifest(name,value)
+end
 
+-- tween values with previous frame
+scenery.all.methods.tween=function(it,name,tween)
+	return it.values:tween(name,tween or upnet.ticks.draw_tween)
 end
 
 scenery.all.methods.update_body=function(it,pos,vel,rot,ang)
