@@ -522,28 +522,72 @@ end
 local values_methods={}
 local values_meta={__index=values_methods}
 
+--[[#lua.wetgenes.gamecake.zone.scene.values.new
+
+	values2 = values:new()
+	
+Create and return a new values object with a single slot containing an 
+empty object.
+
+]]
 values_methods.new=function()
 	local values={ {} }
 	setmetatable(values,values_meta)
 	return values
 end
 
+--[[#lua.wetgenes.gamecake.zone.scene.values.push
+
+	values:push()
+	
+Add a new slot to the end of the values array. Future values will be 
+writen into this new slot.
+
+]]
 values_methods.push=function(values)
 	values[#values+1]={}
 end
 
+--[[#lua.wetgenes.gamecake.zone.scene.values.unpush
+
+	values:unpush()
+	
+Remove all pushed slots except for values[1] This has the effect of 
+undoing all changes that have been predicted.
+
+Future values will be writen into the base values[1] slot.
+
+
+]]
 values_methods.unpush=function(values)
 	for idx=#values,2,-1 do
 		values[idx]=nil
 	end
 end
 
+--[[#lua.wetgenes.gamecake.zone.scene.values.set
+
+	values:set(key,value)
+
+If this is different from the current value then write the value into 
+the key of the object at the top of the stack. Hence future gets will 
+get this new value.
+
+]]
 values_methods.set=function(values,key,value)
 	if values:get(key)~=value then
 		values[#values][key]=value
 	end
 end
 
+--[[#lua.wetgenes.gamecake.zone.scene.values.get
+
+	value=values:get(key)
+
+Get the current value for this key by searching from the top of the 
+stack to the bottom and returning the first non nil value we find.
+
+]]
 values_methods.get=function(values,key)
 	for idx=#values,1,-1 do
 		local value=values[idx][key]
@@ -551,6 +595,16 @@ values_methods.get=function(values,key)
 	end
 end
 
+--[[#lua.wetgenes.gamecake.zone.scene.values.manifest
+
+	value=values:manifest(key,value)
+
+Get the current value for this key if there is no current value then 
+set the current value.
+
+This uses values:get and values:set to perform these actions.
+
+]]
 values_methods.manifest=function(values,key,value)
 	local ret=values:get(key) -- get
 	if type(ret)~="nil" then return ret end -- return got
@@ -558,7 +612,20 @@ values_methods.manifest=function(values,key,value)
 	return value -- return set
 end
 
--- get values for previous frame and tween
+--[[#lua.wetgenes.gamecake.zone.scene.values.tween
+
+	value=values:tween(key)
+
+Tween between the current value and the previous value.
+
+A tween of 0 gets the previous value, a tween of 1 gets the current 
+value and any other tween will get a mix between the two if that is 
+possible.
+
+We can only mix numbers or tardis values, other values will round to 
+either 0 or 1 whichever is closest and then get that whole value.
+
+]]
 values_methods.tween=function(values,key,tween)
 	
 	local a,b
@@ -590,6 +657,22 @@ end
 
 
 
+--[[#lua.wetgenes.gamecake.zone.scene.values
+
+	zone_scene = require("wetgenes.gamecake.zone.scene")
+
+	values = zone_scene.create_values()
+	
+Create and return a values object.
+
+This is an array of objects representing the main object in values[1] 
+and future predictions in values[2],values[3] etc etc.
+
+The key values in the higher numbers overide key values in the lower 
+numbers so essentially only changes need to be written into the 
+predicted slots.
+
+]]
 M.create_values=function()
 	return values_methods.new()
 end
