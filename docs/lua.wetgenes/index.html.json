@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 623,
+   "count": 631,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 616,
+   "count": 624,
    "name": "lua.wetgenes"
   },
   {
@@ -610,7 +610,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 158,
+   "count": 166,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -1146,11 +1146,11 @@
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 24,
+   "count": 32,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "count": 21,
+   "count": 29,
    "name": "lua.wetgenes.gamecake.zone.scene"
   },
   {
@@ -1232,6 +1232,38 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.scene.uids"
+  },
+  {
+   "count": 8,
+   "name": "lua.wetgenes.gamecake.zone.scene.values"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.push"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.tween"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.unpush"
   },
   {
    "count": 2,
@@ -2688,7 +2720,7 @@
  "_list": [
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 616,
+   "count": 624,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -3586,7 +3618,7 @@
   },
   {
    "body": "",
-   "count": 158,
+   "count": 166,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -4637,12 +4669,12 @@
   },
   {
    "body": "",
-   "count": 24,
+   "count": 32,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
    "body": "<pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)\n</code></pre>\n<p>Manage a simple structure to help group, update and draw discrete game objects.</p>\n<p>This module contains only one function which can be used to create a scene\ninstance and the rest of this documentation concerns the return from this\ncreate function, not the module</p>\n<pre><code>scene = zone_scene.create()\nscene = zone_scene.create( { sortby={&quot;first&quot;,&quot;second&quot;,...} } )\n</code></pre>\n<p>Create and return a scene object. A base object can be passed in and will\nbe filled in and returned. This can used to supply a sortby table to help\ncontrol the order of updates of different castes.</p>\n<p>If passed in sortby is a table of [caste_name]=weight values to help control\nthe order of updates by caste and make it consistent. For instance you might\nfind it useful to force monsters to update before the player.</p>\n",
-   "count": 21,
+   "count": 29,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 6,
    "name": "lua.wetgenes.gamecake.zone.scene",
@@ -4806,6 +4838,70 @@
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 43,
    "name": "lua.wetgenes.gamecake.zone.scene.uids",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)\n\nvalues = zone_scene.create_values()\n</code></pre>\n<p>Create and return a values object.</p>\n<p>This is an array of objects representing the main object in values[1] \nand future predictions in values[2],values[3] etc etc.</p>\n<p>The key values in the higher numbers overide key values in the lower \nnumbers so essentially only changes need to be written into the \npredicted slots.</p>\n",
+   "count": 8,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 660,
+   "name": "lua.wetgenes.gamecake.zone.scene.values",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>value=values:get(key)\n</code></pre>\n<p>Get the current value for this key by searching from the top of the \nstack to the bottom and returning the first non nil value we find.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 583,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.get",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>value=values:manifest(key,value)\n</code></pre>\n<p>Get the current value for this key if there is no current value then \nset the current value.</p>\n<p>This uses values:get and values:set to perform these actions.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 598,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.manifest",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>values2 = values:new()\n</code></pre>\n<p>Create and return a new values object with a single slot containing an \nempty object.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 525,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.new",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>values:push()\n</code></pre>\n<p>Add a new slot to the end of the values array. Future values will be \nwriten into this new slot.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 539,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.push",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>values:set(key,value)\n</code></pre>\n<p>If this is different from the current value then write the value into \nthe key of the object at the top of the stack. Hence future gets will \nget this new value.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 568,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.set",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>value=values:tween(key)\n</code></pre>\n<p>Tween between the current value and the previous value.</p>\n<p>A tween of 0 gets the previous value, a tween of 1 gets the current \nvalue and any other tween will get a mix between the two if that is \npossible.</p>\n<p>We can only mix numbers or tardis values, other values will round to \neither 0 or 1 whichever is closest and then get that whole value.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 615,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.tween",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+  },
+  {
+   "body": "<pre><code>values:unpush()\n</code></pre>\n<p>Remove all pushed slots except for values[1] This has the effect of \nundoing all changes that have been predicted.</p>\n<p>Future values will be writen into the base values[1] slot.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+   "line": 551,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.unpush",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
