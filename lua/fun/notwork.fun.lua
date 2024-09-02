@@ -417,7 +417,7 @@ scenery.player.methods.update=function(it)
 	local rx=up:axis("rx") or 0
 	local ry=up:axis("ry") or 0
 
-	local fire=up:get("fire_set") or false
+	local fire=up:get("fire_set") or up:get("r2_set") or false
 	
 	
 	local fa=0.7

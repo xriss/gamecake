@@ -58,6 +58,7 @@ M.bake=function(oven,upnet)
 		-- seconds ( floats )
 		upnet.ticks.length=1/16	-- time in seconds for each tick
 		upnet.ticks.epoch=nil	-- start time of ticks in seconds
+		upnet.ticks.pause=nil	-- if set, adjust epoch so ticks do not advance
 
 		-- ticks ( integers )
 		upnet.ticks.agreed=0	-- the tick all clients have state agreed as true
@@ -167,7 +168,19 @@ M.bake=function(oven,upnet)
 		
 	end
 
+	upnet.client.done_welcome_send=function(client)
+		local msg={ upnet="done_welcome" }
+		client:send(msg)
+	end
+
+	upnet.client.done_welcome=function(client,msg)
+		upnet.ticks.pause=nil
+	end
+	
 	upnet.client.welcome_send=function(client)
+
+		upnet.ticks.pause="host"
+
 		local msg={ upnet="welcome" }
 		
 		msg.clients={}
@@ -215,17 +228,12 @@ M.bake=function(oven,upnet)
 
 		client.join_tick=msg.ticks
 
---[[
-		-- send current ups to network
-		for _,client in pairs(upnet.clients) do
-			if not client.us then
-				client:pulse_send()
-			end
-		end
-]]
 
 print("WELCOME",client.idx)
 dump(upnet.clients)
+
+		upnet.ticks.pause=nil	-- pause over
+		client:done_welcome_send()
 	
 	end
 
@@ -345,6 +353,9 @@ dump(upnet.clients)
 	
 	-- try to make a new connection
 	upnet.join=function(addr)
+	
+		upnet.ticks.pause="join"
+
 print("joining",addr)
 		local ret=oven.tasks:do_memo({
 			task=upnet.task_id,
@@ -505,8 +516,13 @@ dump(upnet.clients)
 		if upnet.ticks.epoch and upnet.us then -- we are ticking
 			local t=((now()-upnet.ticks.epoch)/upnet.ticks.length) -- floor this to reduce latency but get janky predictions
 			while t>upnet.ticks.now do -- without floor we have 1 tick of controller latency
-				upnet.next_tick()
---				print("ticks",upnet.ticks.now,upnet.ticks.input,upnet.ticks.agreed)
+				if upnet.ticks.pause then
+					upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length) -- reset epoch so we do not advance
+					break
+				else
+					upnet.next_tick()
+--					print("ticks",upnet.ticks.now,upnet.ticks.input,upnet.ticks.agreed)
+				end
 			end
 		end
 		
