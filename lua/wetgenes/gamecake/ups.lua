@@ -460,7 +460,7 @@ M.bake=function(oven,ups)
 			end
 		elseif m.class=="padaxis" then -- SDL axis values
 
-			local up=ups.mainfest( ups.padmaps[((m.id-1)%#ups.padmaps)+1] ) -- this pad belongs to
+			local up=ups.manifest( ups.padmaps[((m.id-1)%#ups.padmaps)+1] ) -- this pad belongs to
 			if up then
 				local zone=0x2000
 
@@ -471,14 +471,14 @@ M.bake=function(oven,ups)
 					elseif m.value >=  zone then v= 1
 					end
 
-					if up.last_pad_value[name1]~=v then -- only on change
+					if up.last_pad_values[name1]~=v then -- only on change
 						if     v<0 then	up:set_button(name1,true)	up:set_button(name2,false)
 						elseif v>0 then	up:set_button(name1,false)	up:set_button(name2,true)
 						else			up:set_button(name1,false)	up:set_button(name2,false)
 						end
 					end
 
-					up.last_pad_value[name1]=v
+					up.last_pad_values[name1]=v
 				end
 
 				local dotrig=function(name)
@@ -487,14 +487,14 @@ M.bake=function(oven,ups)
 					if m.value >=  zone then v= 1
 					end
 
-					if up.last_pad_value[name]~=v then -- only on change
+					if up.last_pad_values[name]~=v then -- only on change
 
 						if     v>0 then		up:set_button(name,true)
 						else				up:set_button(name,false)
 						end
 					end
 
-					up.last_pad_value[name]=v
+					up.last_pad_values[name]=v
 				end
 				
 				if     m.name=="LeftX"			then		doaxis("left","right")	up:set_axis("lxp",m.value)
@@ -508,7 +508,7 @@ M.bake=function(oven,ups)
 
 		elseif m.class=="padkey" then -- SDL button values
 
-			local up=ups.mainfest( ups.padmaps[((m.id-1)%#ups.padmaps)+1] ) -- this pad belongs to
+			local up=ups.manifest( ups.padmaps[((m.id-1)%#ups.padmaps)+1] ) -- this pad belongs to
 			if up then
 
 				local docode=function(name)
