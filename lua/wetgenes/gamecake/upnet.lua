@@ -168,16 +168,19 @@ M.bake=function(oven,upnet)
 		
 	end
 
-	upnet.client.done_welcome_send=function(client)
+	upnet.client.send_done_welcome=function(client)
 		local msg={ upnet="done_welcome" }
+
+		local fh=upnet.hooks.send_done_welcome
+		if fh then fh(client,msg) end -- user hooks can modify msg
 		client:send(msg)
 	end
 
-	upnet.client.done_welcome=function(client,msg)
+	upnet.client.recv.done_welcome=function(client,msg)
 		upnet.ticks.pause=nil
 	end
 	
-	upnet.client.welcome_send=function(client)
+	upnet.client.send_welcome=function(client)
 
 		upnet.ticks.pause="host"
 
@@ -198,6 +201,9 @@ M.bake=function(oven,upnet)
 		msg.ticks=upnet.ticks.input
 		
 		client.join_tick=msg.ticks
+
+		local fh=upnet.hooks.send_done
+		if fh then fh(client,msg) end -- user hooks can modify msg
 		client:send(msg)
 	
 	end
@@ -233,11 +239,11 @@ print("WELCOME",client.idx)
 dump(upnet.clients)
 
 		upnet.ticks.pause=nil	-- pause over
-		client:done_welcome_send()
+		client:send_done_welcome()
 	
 	end
 
-	upnet.client.pulse_send=function(client)
+	upnet.client.send_pulse=function(client)
 	
 		local msg={ upnet="pulse" }
 		
@@ -261,6 +267,8 @@ dump(upnet.clients)
 			end
 		end
 
+		local fh=upnet.hooks.send_pulse
+		if fh then fh(client,msg) end -- user hooks can modify msg
 		client:send(msg,"pulse")
 	
 	end
@@ -380,7 +388,7 @@ print("joining",addr)
 				client.idx=upnet.host_inc
 				upnet.clients[client.idx]=client
 				
-				client:welcome_send()
+				client:send_welcome()
 			
 dump(upnet.clients)
 			end
@@ -491,7 +499,7 @@ dump(upnet.clients)
 		-- send current ups to network
 		for _,client in pairs(upnet.clients) do
 			if not client.us then
-				client:pulse_send()
+				client:send_pulse()
 			end
 		end
 		

@@ -355,6 +355,7 @@ end
 
 scenery.player.values={
 	notween=true,
+	deleteme=false,
 
 	pos=V3(0,0,0),
 	vel=V3(0,0,0),
@@ -524,6 +525,7 @@ end
 
 scenery.bullet.values={
 	notween=true,
+	deleteme=false,
 
 	pos=V3(0,0,0),
 	vel=V3(0,0,0),
