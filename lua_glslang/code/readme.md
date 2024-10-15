@@ -1,6 +1,5 @@
 
 
-
 ---
 			
 The following text is automatically extracted from other files in this 
@@ -8,6 +7,43 @@ directory and should not be edited here.
 
 ---
 
+
+
+
+## code.glslang.lua_glslang_lint_gles2
+
+
+	lua_glslang_lint_gles2(lua)
+
+	lua inputs
+		vertex code string
+		fragment code string
+		linker flag strinf
+
+	lua returns
+		vertex error string
+		fragment error string
+		linker error string
+
+Compile a vertex shader and a fragment shader for GLES2, return 
+nil,nil,nil for no errors or an error string for either phase if 
+something went wrong.
+
+
+
+## code.glslang.lua_glslang_pp
+
+
+	lua_glslang_cpp(lua)
+
+	lua inputs
+		code string
+
+	lua returns
+		preprocesed code string or nil
+		error string if code string is nil
+
+Run the preprocesor on the given code string.
 
 
 
