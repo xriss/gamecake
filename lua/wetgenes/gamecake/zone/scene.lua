@@ -31,6 +31,19 @@ M.create=function(scene)
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems
 
+	scene.infos[caste]=info
+
+User supplied map of static data and functions for each system.
+
+This allows us to easily create other scenes that share all the same 
+systems with this scene by reusing this chunk of static data to create 
+it.
+
+]]
+	scene.infos=scene.infos or {} -- global static infos for each caste
+
+--[[#lua.wetgenes.gamecake.zone.scene.systems
+
 	scene.systems={name=system,[1]=system}
 
 A sorted table and lookup by caste name of each system. Table is sorted so it
@@ -496,9 +509,6 @@ of items of each caste.
 			local datas=scene.data[ items.caste ]
 			local count=datas and #datas or 0
 			lines[#lines+1]=(items.caste or "").." : "..count
-		end
-		for n,v in ipairs(scene.info) do
-			lines[#lines+1]=tostring(n).." = "..tostring(v)
 		end
 		return table.concat(lines,"\n")
 	end
