@@ -2722,7 +2722,7 @@
    "body": "<pre><code>scene.uids={[uid]=item,...}\n</code></pre>\n<p>A map of currently remembered uids to items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 43,
+   "line": 56,
    "name": "lua.wetgenes.gamecake.zone.scene.uids",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }

@@ -2722,7 +2722,7 @@
    "body": "<pre><code>system = scene.systems_remove(caste)\n</code></pre>\n<p>Remove and return the system of the given caste.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 139,
+   "line": 152,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
