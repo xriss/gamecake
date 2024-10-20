@@ -2722,7 +2722,7 @@
    "body": "<pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)\n\nvalues = zone_scene.create_values()\n</code></pre>\n<p>Create and return a values object.</p>\n<p>This is an array of objects representing the main object in values[1] \nand future predictions in values[2],values[3] etc etc.</p>\n<p>The key values in the higher numbers overide key values in the lower \nnumbers so essentially only changes need to be written into the \npredicted slots.</p>\n",
    "count": 8,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 670,
+   "line": 676,
    "name": "lua.wetgenes.gamecake.zone.scene.values",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2730,7 +2730,7 @@
    "body": "<pre><code>value=values:get(key)\n</code></pre>\n<p>Get the current value for this key by searching from the top of the \nstack to the bottom and returning the first non nil value we find.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 593,
+   "line": 599,
    "name": "lua.wetgenes.gamecake.zone.scene.values.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2738,7 +2738,7 @@
    "body": "<pre><code>value=values:manifest(key,value)\n</code></pre>\n<p>Get the current value for this key if there is no current value then \nset the current value.</p>\n<p>This uses values:get and values:set to perform these actions.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 608,
+   "line": 614,
    "name": "lua.wetgenes.gamecake.zone.scene.values.manifest",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2746,7 +2746,7 @@
    "body": "<pre><code>values2 = values:new()\n</code></pre>\n<p>Create and return a new values object with a single slot containing an \nempty object.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 535,
+   "line": 541,
    "name": "lua.wetgenes.gamecake.zone.scene.values.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2754,7 +2754,7 @@
    "body": "<pre><code>values:push()\n</code></pre>\n<p>Add a new slot to the end of the values array. Future values will be \nwriten into this new slot.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 549,
+   "line": 555,
    "name": "lua.wetgenes.gamecake.zone.scene.values.push",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2762,7 +2762,7 @@
    "body": "<pre><code>values:set(key,value)\n</code></pre>\n<p>If this is different from the current value then write the value into \nthe key of the object at the top of the stack. Hence future gets will \nget this new value.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 578,
+   "line": 584,
    "name": "lua.wetgenes.gamecake.zone.scene.values.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2770,7 +2770,7 @@
    "body": "<pre><code>value=values:tween(key)\n</code></pre>\n<p>Tween between the current value and the previous value.</p>\n<p>A tween of 0 gets the previous value, a tween of 1 gets the current \nvalue and any other tween will get a mix between the two if that is \npossible.</p>\n<p>We can only mix numbers or tardis values, other values will round to \neither 0 or 1 whichever is closest and then get that whole value.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 625,
+   "line": 631,
    "name": "lua.wetgenes.gamecake.zone.scene.values.tween",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2778,7 +2778,7 @@
    "body": "<pre><code>values:unpush()\n</code></pre>\n<p>Remove all pushed slots except for values[1] This has the effect of \nundoing all changes that have been predicted.</p>\n<p>Future values will be writen into the base values[1] slot.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 561,
+   "line": 567,
    "name": "lua.wetgenes.gamecake.zone.scene.values.unpush",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }

@@ -2722,7 +2722,7 @@
    "body": "<pre><code>value=values:get(key)\n</code></pre>\n<p>Get the current value for this key by searching from the top of the \nstack to the bottom and returning the first non nil value we find.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 593,
+   "line": 599,
    "name": "lua.wetgenes.gamecake.zone.scene.values.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
