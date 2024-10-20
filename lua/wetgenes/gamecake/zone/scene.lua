@@ -340,9 +340,9 @@ will be autocreated if needed.
 
 --[[#lua.wetgenes.gamecake.zone.scene.add
 
-	scene.add(it,caste,boot)
-	scene.add(it,caste)
 	scene.add(it)
+	scene.add(it,caste)
+	scene.add(it,caste,boot)
 
 Add a new item of caste or it.caste to the list of things to update.
 
@@ -351,22 +351,28 @@ be remembered in item.boot. If boot.id is given then we will remember
 this item with a call to scene.set(id,it)
 
 The actual act of initalising the item from the boot table is left to 
-custom code.
+custom code which ideally should initalize it and then just call 
+scene.add(it) as the auto shortcuts are unnecesary.
 
 ]]
 	scene.add=function(it,caste,boot)
-		it.uid=boot.uid
+		if boot then
+			it.boot=boot
+			if it.boot.uid   then it.uid   = it.boot.uid    end
+			if it.boot.id    then it.id    = it.boot.id     end
+			if it.boot.caste then it.caste = it.boot.caste  end
+		end
 		scene.remember_uid(it)
 
-		it.scene=scene
-		it.boot=boot
-		if boot and boot.id then scene.set( boot.id , it ) it.id=boot.id end
+		-- idealy these should live in a metatable and already be set
+		if type(it.scene)=="nil" then it.scene=scene end
+		if type(it.caste)=="nil" then it.caste=caste or "generic" end
 
-		caste=caste or it.caste or (boot and boot.caste) -- probably from item
-		caste=caste or "generic"
-		it.caste=caste
-		local items=scene.caste(caste)
-		items[ #items+1 ]=it -- add to end of array
+		if it.id then scene.set( it.id , it ) end
+
+		local items=scene.caste(it.caste)
+		items[ #items+1 ]=it -- add to end of items array
+		
 		return it
 	end
 
@@ -601,7 +607,7 @@ stack to the bottom and returning the first non nil value we find.
 values_methods.get=function(values,key)
 	for idx=#values,1,-1 do
 		local value=values[idx][key]
-		if type(value)~="nil" then return value end
+		if value or (type(value)~="nil") then return value end
 	end
 end
 
@@ -617,7 +623,7 @@ This uses values:get and values:set to perform these actions.
 ]]
 values_methods.manifest=function(values,key,value)
 	local ret=values:get(key) -- get
-	if type(ret)~="nil" then return ret end -- return got
+	if ret or (type(ret)~="nil") then return ret end -- return got
 	values:set(key,value) -- set
 	return value -- return set
 end
@@ -646,7 +652,7 @@ values_methods.tween=function(values,key,tween)
 	else -- got a so find b
 		for idx=len-1,1,-1 do
 			local value=values[idx][key]
-			if type(value)~="nil" then
+			if value or (type(value)~="nil") then
 				b=value
 				break
 			end
