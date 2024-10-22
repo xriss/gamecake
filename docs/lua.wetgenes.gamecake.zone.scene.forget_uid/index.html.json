@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 631,
+   "count": 632,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 624,
+   "count": 625,
    "name": "lua.wetgenes"
   },
   {
@@ -610,7 +610,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 166,
+   "count": 167,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -1146,11 +1146,11 @@
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 32,
+   "count": 33,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "count": 29,
+   "count": 30,
    "name": "lua.wetgenes.gamecake.zone.scene"
   },
   {
@@ -1164,6 +1164,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.scene.caste"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.create_values"
   },
   {
    "count": 1,
@@ -2722,7 +2726,7 @@
    "body": "<pre><code>local it = scene.forget_uid( {uid=uid} )\n</code></pre>\n<p>Remove the item from the map of uids. Returns the item or nil if uid was\ninvalid unset or our map was not pointing to the correct item.</p>\n<pre><code>local it = scene.forget_uid( scene.find_uid( uid ) )\n</code></pre>\n<p>Chain with find_uid to forget an item by uid and this is safe even if the item\ndoes not exist.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 117,
+   "line": 124,
    "name": "lua.wetgenes.gamecake.zone.scene.forget_uid",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }

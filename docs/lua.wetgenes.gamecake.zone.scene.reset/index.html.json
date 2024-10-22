@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 631,
+   "count": 632,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 624,
+   "count": 625,
    "name": "lua.wetgenes"
   },
   {
@@ -610,7 +610,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 166,
+   "count": 167,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -1146,11 +1146,11 @@
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 32,
+   "count": 33,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "count": 29,
+   "count": 30,
    "name": "lua.wetgenes.gamecake.zone.scene"
   },
   {
@@ -1164,6 +1164,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.scene.caste"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.create_values"
   },
   {
    "count": 1,
@@ -2722,7 +2726,7 @@
    "body": "<pre><code>scene.reset()\n</code></pre>\n<p>Empty the list of items to update and draw, this does not reset the systems\ntable that should be modified with the insert and remove functions.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 300,
+   "line": 307,
    "name": "lua.wetgenes.gamecake.zone.scene.reset",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
