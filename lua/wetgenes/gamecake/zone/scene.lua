@@ -29,6 +29,13 @@ M.create=function(scene)
 
 	scene=scene or {} -- a place to store everything that needs to be updated
 
+--[[#lua.wetgenes.gamecake.zone.scene.create_values
+
+	Copy of the create_values function from the main zone_scene module.
+
+]]
+	scene.create_values=M.create_values
+
 --[[#lua.wetgenes.gamecake.zone.scene.systems
 
 	scene.infos[caste]=info

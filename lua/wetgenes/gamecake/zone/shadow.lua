@@ -103,7 +103,7 @@ M.bake=function(oven,shadow)
 if not shadow.updated then -- we are in control
 
 		local player=scene.get("player")
-		local camera=player:depend("camera")
+		local camera=player and player:depend("camera")
 		local sky=scene.systems.sky
 		if camera then
 
