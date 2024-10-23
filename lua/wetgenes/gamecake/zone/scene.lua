@@ -366,7 +366,7 @@ scene.add(it) as the auto shortcuts are unnecesary.
 		if boot then
 			it.boot=boot
 			if it.boot.uid   then it.uid   = it.boot.uid    end
-			if it.boot.id    then it.id    = it.boot.id     end
+			if it.boot.name  then it.name  = it.boot.name   end
 			if it.boot.caste then it.caste = it.boot.caste  end
 		end
 		scene.remember_uid(it)
@@ -375,7 +375,7 @@ scene.add(it) as the auto shortcuts are unnecesary.
 		if type(it.scene)=="nil" then it.scene=scene end
 		if type(it.caste)=="nil" then it.caste=caste or "generic" end
 
-		if it.id then scene.set( it.id , it ) end
+		if it.name then scene.set( it.name , it ) end
 
 		local items=scene.caste(it.caste)
 		items[ #items+1 ]=it -- add to end of items array

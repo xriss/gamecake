@@ -188,7 +188,7 @@ if not shadow.updated then -- we are in control
 		end
 
 		gl.uniforms.camera=function(u)
-			gl.UniformMatrix4f( u , camera.mtx ) -- so we can apply it later
+			gl.UniformMatrix4f( u , camera and camera.mtx or M4() ) -- so we can apply it later
 		end
 
 		gl.uniforms.incamera=function(u) -- no camera
@@ -198,7 +198,7 @@ if not shadow.updated then -- we are in control
 else
 
 		gl.uniforms.camera=function(u)
-			gl.UniformMatrix4f( u , shadow.cam_mtx ) -- so we can apply it later
+			gl.UniformMatrix4f( u , shadow and shadow.cam_mtx or M4() ) -- so we can apply it later
 		end
 
 		gl.uniforms.incamera=function(u) -- no camera
