@@ -43,7 +43,7 @@ function M.bake(oven,about)
 	
 	local wetiso=oven.rebake("wetgenes.gamecake.spew.geom_wetiso")
 	local geom=oven.rebake("wetgenes.gamecake.spew.geom")
-	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps")
+--	local srecaps=oven.rebake("wetgenes.gamecake.spew.recaps")
 
 
 	local opts={
@@ -172,7 +172,7 @@ precision highp float; /* really need better numbers if possible */
 	
 	about.update=function()
 		
-		srecaps.step()
+--		srecaps.step()
 
 		assert(coroutine.resume(about.co))
 	end
