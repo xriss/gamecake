@@ -48,8 +48,8 @@ M.bake=function(oven,upnet)
 	-- reset all connections
 	upnet.reset=function()
 	
-		-- we will control the ups
-		oven.ups.auto_advance=false
+		-- we will control the ups when told to do so...
+		-- oven.ups.auto_advance=false
 
 	
 
