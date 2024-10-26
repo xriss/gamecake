@@ -41,18 +41,13 @@ M.bake=function(oven,upnet)
 		local idx=(upnet.us or 0)
 		local tabs=string.rep("\t\t\t\t\t\t\t\t\t\t\t",idx-1)
 		
-		print( idx..tabs , ... )
+		print( "WTF",idx..tabs , ... )
 	end
 	upnet.print=print
 	
 	-- reset all connections
 	upnet.reset=function()
 	
-		-- we will control the ups when told to do so...
-		-- oven.ups.auto_advance=false
-
-	
-
 		upnet.ticks={}
 
 		-- seconds ( floats )
@@ -236,7 +231,7 @@ M.bake=function(oven,upnet)
 
 
 print("WELCOME",client.idx)
-dump(upnet.clients)
+--dump(upnet.clients)
 
 		upnet.ticks.pause=nil	-- pause over
 		client:send_done_welcome()
@@ -318,7 +313,7 @@ dump(upnet.clients)
 		upnet.reset()
 
 		-- everyone must enable network with a host
-		if args.host then
+--		if args.host then
 		
 			if tonumber( args.host ) then baseport=tonumber( args.host ) end
 		
@@ -353,9 +348,9 @@ dump(upnet.clients)
 
 			end
 
-		end
+--		end
 		
-dump(upnet.clients)
+--dump(upnet.clients)
 
 	end
 	
@@ -390,7 +385,7 @@ print("joining",addr)
 				
 				client:send_welcome()
 			
-dump(upnet.clients)
+--dump(upnet.clients)
 			end
 		
 
@@ -401,7 +396,7 @@ dump(upnet.clients)
 
 		else
 				
-			dump(m)
+--			dump(m)
 
 		end
 		
@@ -435,6 +430,8 @@ dump(upnet.clients)
 		
 --		print(upnet.us,tick,upnet.ticks.now,#upnet.history,ti,ups[1] and ups[1].all.lx,ups[2] and ups[2].all.lx)
 --		dump(upnet.history)
+
+		ups.get=function(ups,idx) return ups[idx] or ups[0] end
 
 		return ups
 	end
