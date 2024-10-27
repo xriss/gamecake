@@ -325,19 +325,13 @@ end
 -- duplicate this up
 M.up_functions.duplicate=function(up)
 	local n=up.create()
-	n:load(yp)
+	n:load(up)
 	return n
 end
 
--- global empty ups with only read functions
+-- global empty ups
 -- please do not write into it
-M.empty={
-	get=M.up_functions.get,
-	axis=M.up_functions.axis,
-	create=M.up_functions.create,
-	duplicate=M.up_functions.duplicate,
-}
-M.up_functions.reset(M.empty)
+M.empty=M.up_functions.create()
 
 M.bake=function(oven,ups)
 

@@ -431,8 +431,6 @@ print("joining",addr)
 --		print(upnet.us,tick,upnet.ticks.now,#upnet.history,ti,ups[1] and ups[1].all.lx,ups[2] and ups[2].all.lx)
 --		dump(upnet.history)
 
-		ups.get=function(ups,idx) return ups[idx] or ups[0] end
-
 		return ups
 	end
 	
