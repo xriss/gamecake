@@ -247,7 +247,7 @@ M.up_functions.update=function(up,pow)
 	end
 	
 	-- pick best l/r axis be it "k"eys or "p"ad values.
-	local lxp,lyp,lzp=(up.all["lxp"] or 0),(up.all["lyp"] or 0),(up.all["lzp"]  or 0)
+	local lxp,lyp,lzp=(up.all["lxp"] or 0),(up.all["lyp"] or 0),(up.all["lzp"] or 0)
 	local lxk,lyk,lzk=(up.all["lxk"] or 0),(up.all["lyk"] or 0),(up.all["lzk"] or 0)
 	if lxk*lxk+lyk*lyk > lxp*lxp+lyp*lyp then -- stick
 		up.all["lx"]=lxk ; up.all["ly"]=lyk

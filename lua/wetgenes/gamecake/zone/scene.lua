@@ -637,9 +637,9 @@ end
 
 --[[#lua.wetgenes.gamecake.zone.scene.values.tween
 
-	value=values:tween(key)
+	value=values:tween(key,tween)
 
-Tween between the current value and the previous value.
+Tween between the current value(1) and the previous value(0).
 
 A tween of 0 gets the previous value, a tween of 1 gets the current 
 value and any other tween will get a mix between the two if that is 
@@ -656,9 +656,70 @@ values_methods.tween=function(values,key,tween)
 	local a,b
 	local len=#values
 	a=values[len][key]
-	if type(a)=="nil" or len==1 then -- both values are the same so can not tween
+	
+	local ta=type(a)
+	if ta=="nil" or len==1 then -- both values are the same so can not tween
 		return values:get(key)
 	else -- got a so find b
+
+		if values[len].notween then return a end -- flag to disable tweening
+
+		for idx=len-1,1,-1 do
+			local value=values[idx][key]
+			if (type(value)~="nil") then
+				b=value
+				break
+			end
+		end		
+	end
+	
+	
+	local tb=type(b)
+	if tb~="nil" then
+		if ta=="number" and tb=="number" then -- tween numbers
+			return a*tween + b*(1-tween)
+		elseif tb=="table" and b.mix then -- tween using tardis
+			return b:mix(a,tween,b:new())
+		end
+	end
+	if tween<0.5 then return b else return a end -- one or the other
+end
+
+--[[#lua.wetgenes.gamecake.zone.scene.values.twrap
+
+	value=values:twrap(key,nmax,tween)
+
+Tween wrap between the current value and the previous value.
+
+Result will be in rang of 0>= n <nmax , blended in the shortest 
+direction.
+
+nmax may be a number or a tardis value for nmax per dimension
+
+A tween of 0 gets the previous value, a tween of 1 gets the current 
+value and any other tween will get a mix between the two if that is 
+possible.
+
+We can only mix numbers or tardis values, other values will round to 
+either 0 or 1 whichever is closest and then get that whole value.
+
+
+
+]]
+values_methods.twrap=function(values,key,nmax,tween)
+
+	if (not tween) or (tween>=1) then return values:get(key) end -- shortcut to get
+
+	local a,b
+	local len=#values
+	a=values[len][key]
+	local ta=type(a)
+	if ta=="nil" or len==1 then -- both values are the same so can not tween
+		return values:get(key)
+	else -- got a so find b
+
+		if values[len].notween then return a end -- flag to disable tweening
+
 		for idx=len-1,1,-1 do
 			local value=values[idx][key]
 			if value or (type(value)~="nil") then
@@ -668,18 +729,44 @@ values_methods.tween=function(values,key,tween)
 		end		
 	end
 	
-	if values[len].notween then return a end -- flag to disable tweening
+	-- tween wrap a snigle number, m must be positive
+	local twrap=function(a,b,m,t)
+		local tfix=function(n) -- clamp to within range, 0 to m 
+			if n<0 then return m-((-n)%m)
+			else        return n%m        end
+		end
+		local mo2=(m/2)
+		a=tfix(a)
+		b=tfix(b)
+		local d=a-b
+		if     d < -mo2 then a=a+m     -- long way down
+		elseif d >  mo2 then b=b+m end -- long way up
+		return tfix( a*t + b*(1-t) )
+	end
 	
-	if type(b)~="nil" then
-		if type(a)=="number" and type(b)=="number" then -- tween numbers
-			return a*tween + b*(1-tween)
-		elseif type(b)=="table" and b.mix then -- tween using tardis
-			return b:mix(a,tween,b:new())
+	local tb=type(b)
+	if tb~="nil" then
+		if ta=="number" and tb=="number" then -- tween numbers
+
+			return twrap(a,b,nmax,tween)
+
+		elseif tb=="table" and b.new then -- tween using tardis
+			local r=b.new()
+			if type(nmax)=="number" then -- singular nmax
+				for i=1,#r do
+					r[i]=twrap(a[i],b[i],nmax,tween)
+				end
+			else -- assume table
+				for i=1,#r do
+					r[i]=twrap(a[i],b[i],nmax[i],tween)
+				end
+			end
+			return r
+
 		end
 	end
 	if tween<0.5 then return b else return a end -- one or the other
 end
-
 
 
 --[[#lua.wetgenes.gamecake.zone.scene.values

@@ -51,7 +51,7 @@ M.bake=function(oven,upnet)
 		upnet.ticks={}
 
 		-- seconds ( floats )
-		upnet.ticks.length=1/1	-- time in seconds for each tick
+		upnet.ticks.length=1/16	-- time in seconds for each tick
 		upnet.ticks.epoch=nil	-- start time of ticks in seconds
 		upnet.ticks.pause=nil	-- if set, adjust epoch so ticks do not advance
 
@@ -405,15 +405,13 @@ print("joining",addr)
 	upnet.get_ups=function(tick)
 		tick=tick or upnet.ticks.now
 --print("getups",tick,upnet.ticks.now)
-		local ti=2+upnet.ticks.now-tick
-		
+		local ti=1+upnet.ticks.now-tick
 		local ups={}
 		for idx,_ in pairs(upnet.clients) do
 			local up=oven.ups.create()
 			ups[idx]=up
 			if idx==upnet.us and ti<1 then -- use live input
 				up:load( upnet.upcache:save() ) -- fill
-				up:update(upnet.ticks.length) -- predict
 			else
 				for ui=ti,#upnet.history do -- find best state we have
 					local h=upnet.history[ui]
@@ -438,7 +436,7 @@ print("joining",addr)
 	upnet.update_ticks_input=function()
 
 --print("nowup", upnet.ticks.now , upnet.ticks.input )
-		if not ( upnet.ticks.now>upnet.ticks.input+1 ) then return end
+		if not ( upnet.ticks.now>upnet.ticks.input+1 ) then return end -- input should always be one frame behind
 
 		local ti=1+upnet.ticks.now-upnet.ticks.input	-- we have input for here
 		local h=upnet.history[ti-1]
@@ -487,10 +485,29 @@ print("joining",addr)
 	
 		upnet.ticks.now=upnet.ticks.now+1
 		-- remember current up
+		
+		do -- calc diffs
+			local up=upnet.upcache
+			for _,m in ipairs{"mx","my","mz"} do -- mouse diffs from last frame
+				if up.all[m] then
+					up.all[m.."d"]=up.all[m]-(up.all[m.."o"] or 0)
+				end
+			end
+		end
+
 		table.insert( upnet.history , 1 , { [upnet.us]=upnet.upcache:save() } ) -- remember new tick
 		
 		upnet.upcache=oven.ups.create()
 		upnet.upcache:merge(oven.ups.manifest(1))
+
+		do -- calc diffs
+			local up=upnet.upcache
+			for _,m in ipairs{"mx","my","mz"} do -- remember mouse start for next frame
+				if up.all[m] then
+					up.all[m.."o"]=up.all[m]
+				end
+			end
+		end
 
 --print("history",upnet.us,#upnet.history)
 		
@@ -522,8 +539,8 @@ print("joining",addr)
 		repeat until not upnet.update_ticks_agreed() -- update ticks.agreed
 
 		if upnet.ticks.epoch and upnet.us then -- we are ticking
-			local t=((now()-upnet.ticks.epoch)/upnet.ticks.length) -- floor this to reduce latency but get janky predictions
-			if t>upnet.ticks.now then -- without floor we have 1 tick of controller latency
+			local t=((now()-upnet.ticks.epoch)/upnet.ticks.length) -- we *always* have 1 tick of controller latency
+			if t>upnet.ticks.now then -- which is hopefully enough time to sync inputs between clients
 				if upnet.ticks.pause then
 					upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length) -- reset epoch so we do not advance
 --					break
