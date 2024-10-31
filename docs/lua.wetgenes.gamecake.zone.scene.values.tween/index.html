@@ -335,6 +335,7 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values.push"><span>/lua.wetgenes.gamecake.zone.scene.values.push</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values.set"><span>/lua.wetgenes.gamecake.zone.scene.values.set</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values.tween"><span>/lua.wetgenes.gamecake.zone.scene.values.tween</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values.twrap"><span>/lua.wetgenes.gamecake.zone.scene.values.twrap</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values.unpush"><span>/lua.wetgenes.gamecake.zone.scene.values.unpush</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.zone.system"><span>/lua.wetgenes.gamecake.zone.system</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.system.items"><span>/lua.wetgenes.gamecake.zone.system.items</span></a><a class="par" href="../../docs/lua.wetgenes.grd"><span>/lua.wetgenes.grd</span></a>
@@ -695,9 +696,9 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.tween">lua.wetgenes.gamecake.zone.scene.values.tween</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L638">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
-<div><pre><code>value=values:tween(key)
+<div><pre><code>value=values:tween(key,tween)
 </code></pre>
-<p>Tween between the current value and the previous value.</p>
+<p>Tween between the current value(1) and the previous value(0).</p>
 <p>A tween of 0 gets the previous value, a tween of 1 gets the current 
 value and any other tween will get a mix between the two if that is 
 possible.</p>

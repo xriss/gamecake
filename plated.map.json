@@ -264,7 +264,7 @@
     "name": "levels"
    },
    {
-    "count": 632,
+    "count": 633,
     "name": "lua"
    },
    {
@@ -292,7 +292,7 @@
     "name": "lua.glslang.yank_shader_versions"
    },
    {
-    "count": 625,
+    "count": 626,
     "name": "lua.wetgenes"
    },
    {
@@ -744,7 +744,7 @@
     "name": "lua.wetgenes.export"
    },
    {
-    "count": 167,
+    "count": 168,
     "name": "lua.wetgenes.gamecake"
    },
    {
@@ -1280,11 +1280,11 @@
     "name": "lua.wetgenes.gamecake.widgets.setup"
    },
    {
-    "count": 33,
+    "count": 34,
     "name": "lua.wetgenes.gamecake.zone"
    },
    {
-    "count": 30,
+    "count": 31,
     "name": "lua.wetgenes.gamecake.zone.scene"
    },
    {
@@ -1372,7 +1372,7 @@
     "name": "lua.wetgenes.gamecake.zone.scene.uids"
    },
    {
-    "count": 8,
+    "count": 9,
     "name": "lua.wetgenes.gamecake.zone.scene.values"
    },
    {
@@ -1398,6 +1398,10 @@
    {
     "count": 1,
     "name": "lua.wetgenes.gamecake.zone.scene.values.tween"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.gamecake.zone.scene.values.twrap"
    },
    {
     "count": 1,
@@ -3093,7 +3097,7 @@
    },
    {
     "body": "",
-    "count": 632,
+    "count": 633,
     "name": "lua"
    },
    {
@@ -3146,7 +3150,7 @@
    },
    {
     "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-    "count": 625,
+    "count": 626,
     "file": "../lua/wetgenes/init.lua",
     "line": 5,
     "name": "lua.wetgenes",
@@ -4044,7 +4048,7 @@
    },
    {
     "body": "",
-    "count": 167,
+    "count": 168,
     "name": "lua.wetgenes.gamecake"
    },
    {
@@ -5095,12 +5099,12 @@
    },
    {
     "body": "",
-    "count": 33,
+    "count": 34,
     "name": "lua.wetgenes.gamecake.zone"
    },
    {
     "body": "<pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)\n</code></pre>\n<p>Manage a simple structure to help group, update and draw discrete game objects.</p>\n<p>This module contains only one function which can be used to create a scene\ninstance and the rest of this documentation concerns the return from this\ncreate function, not the module</p>\n<pre><code>scene = zone_scene.create()\nscene = zone_scene.create( { sortby={&quot;first&quot;,&quot;second&quot;,...} } )\n</code></pre>\n<p>Create and return a scene object. A base object can be passed in and will\nbe filled in and returned. This can used to supply a sortby table to help\ncontrol the order of updates of different castes.</p>\n<p>If passed in sortby is a table of [caste_name]=weight values to help control\nthe order of updates by caste and make it consistent. For instance you might\nfind it useful to force monsters to update before the player.</p>\n",
-    "count": 30,
+    "count": 31,
     "file": "../lua/wetgenes/gamecake/zone/scene.lua",
     "line": 6,
     "name": "lua.wetgenes.gamecake.zone.scene",
@@ -5276,9 +5280,9 @@
    },
    {
     "body": "<pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)\n\nvalues = zone_scene.create_values()\n</code></pre>\n<p>Create and return a values object.</p>\n<p>This is an array of objects representing the main object in values[1] \nand future predictions in values[2],values[3] etc etc.</p>\n<p>The key values in the higher numbers overide key values in the lower \nnumbers so essentially only changes need to be written into the \npredicted slots.</p>\n",
-    "count": 8,
+    "count": 9,
     "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-    "line": 685,
+    "line": 772,
     "name": "lua.wetgenes.gamecake.zone.scene.values",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
    },
@@ -5323,11 +5327,19 @@
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
    },
    {
-    "body": "<pre><code>value=values:tween(key)\n</code></pre>\n<p>Tween between the current value and the previous value.</p>\n<p>A tween of 0 gets the previous value, a tween of 1 gets the current \nvalue and any other tween will get a mix between the two if that is \npossible.</p>\n<p>We can only mix numbers or tardis values, other values will round to \neither 0 or 1 whichever is closest and then get that whole value.</p>\n",
+    "body": "<pre><code>value=values:tween(key,tween)\n</code></pre>\n<p>Tween between the current value(1) and the previous value(0).</p>\n<p>A tween of 0 gets the previous value, a tween of 1 gets the current \nvalue and any other tween will get a mix between the two if that is \npossible.</p>\n<p>We can only mix numbers or tardis values, other values will round to \neither 0 or 1 whichever is closest and then get that whole value.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/gamecake/zone/scene.lua",
     "line": 638,
     "name": "lua.wetgenes.gamecake.zone.scene.values.tween",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
+   },
+   {
+    "body": "<pre><code>value=values:twrap(key,nmax,tween)\n</code></pre>\n<p>Tween wrap between the current value and the previous value.</p>\n<p>Result will be in rang of 0&gt;= n &lt;nmax , blended in the shortest \ndirection.</p>\n<p>nmax may be a number or a tardis value for nmax per dimension</p>\n<p>A tween of 0 gets the previous value, a tween of 1 gets the current \nvalue and any other tween will get a mix between the two if that is \npossible.</p>\n<p>We can only mix numbers or tardis values, other values will round to \neither 0 or 1 whichever is closest and then get that whole value.\n<br/>\n<br/></p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
+    "line": 688,
+    "name": "lua.wetgenes.gamecake.zone.scene.values.twrap",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
    },
    {
