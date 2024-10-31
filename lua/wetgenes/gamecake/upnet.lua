@@ -41,7 +41,7 @@ M.bake=function(oven,upnet)
 		local idx=(upnet.us or 0)
 		local tabs=string.rep("\t\t\t\t\t\t\t\t\t\t\t",idx-1)
 		
-		print( "WTF",idx..tabs , ... )
+		print(idx..tabs , ... )
 	end
 	upnet.print=print
 	
@@ -51,7 +51,7 @@ M.bake=function(oven,upnet)
 		upnet.ticks={}
 
 		-- seconds ( floats )
-		upnet.ticks.length=1/16	-- time in seconds for each tick
+		upnet.ticks.length=1/1	-- time in seconds for each tick
 		upnet.ticks.epoch=nil	-- start time of ticks in seconds
 		upnet.ticks.pause=nil	-- if set, adjust epoch so ticks do not advance
 
@@ -62,10 +62,6 @@ M.bake=function(oven,upnet)
 		upnet.ticks.now=0		-- the tick we have our input for
 		upnet.ticks.draw=0		-- the tick you have drawn 
 		
-		-- tween from 0 to 1 with 1 being the latest frame used when drawing so 
-		-- this+upnet.ticks.draw-1 would be the fractional tick we are drawing
-		upnet.ticks.draw_tween=1
-
 		-- we sync now to time and calculate input tick as data arrives
 		-- you should set update and draw times when you update and draw
 		-- if things are laging then we may adjust the epoch to "skip" frames
@@ -83,6 +79,8 @@ M.bake=function(oven,upnet)
 		upnet.clients_id={} -- clients by id ( unique name ) as reported by client so could be a lie
 
 		upnet.clients_idx={} -- clients order provided by host, remembered from welcome msg
+
+		upnet.upcache=oven.ups.create() -- local cached inputs
 
 	end
 	upnet.reset() -- make sure we are always tables
@@ -406,15 +404,16 @@ print("joining",addr)
 	-- each connected client.idx will have an up available for that idx
 	upnet.get_ups=function(tick)
 		tick=tick or upnet.ticks.now
-		local ti=1+upnet.ticks.now-tick
+--print("getups",tick,upnet.ticks.now)
+		local ti=2+upnet.ticks.now-tick
 		
 		local ups={}
 		for idx,_ in pairs(upnet.clients) do
 			local up=oven.ups.create()
 			ups[idx]=up
-			if idx==upnet.us and tick>upnet.ticks.now then -- use live input
-				up:load( oven.ups.manifest(1):save() ) -- fill
-				up:update(upnet.ticks.length)
+			if idx==upnet.us and ti<1 then -- use live input
+				up:load( upnet.upcache:save() ) -- fill
+				up:update(upnet.ticks.length) -- predict
 			else
 				for ui=ti,#upnet.history do -- find best state we have
 					local h=upnet.history[ui]
@@ -437,6 +436,9 @@ print("joining",addr)
 
 	-- update the tick time of when we have all inputs
 	upnet.update_ticks_input=function()
+
+--print("nowup", upnet.ticks.now , upnet.ticks.input )
+		if not ( upnet.ticks.now>upnet.ticks.input+1 ) then return end
 
 		local ti=1+upnet.ticks.now-upnet.ticks.input	-- we have input for here
 		local h=upnet.history[ti-1]
@@ -483,12 +485,13 @@ print("joining",addr)
 	-- tick one tick forwards
 	upnet.next_tick=function() 
 	
-		local up=oven.ups.manifest(1) -- we are this input
-
 		upnet.ticks.now=upnet.ticks.now+1
-		up:update(upnet.ticks.length)
 		-- remember current up
-		table.insert( upnet.history , 1 , { [upnet.us]=up:save() } ) -- remember new tick
+		table.insert( upnet.history , 1 , { [upnet.us]=upnet.upcache:save() } ) -- remember new tick
+		
+		upnet.upcache=oven.ups.create()
+		upnet.upcache:merge(oven.ups.manifest(1))
+
 --print("history",upnet.us,#upnet.history)
 		
 		-- send current ups to network
@@ -502,6 +505,8 @@ print("joining",addr)
 	
 	-- manage msgs and pulse controller state
 	upnet.update=function()
+
+		upnet.upcache:merge(oven.ups.manifest(1)) -- merge as we update
 
 		repeat -- check msgs
 		
@@ -518,10 +523,10 @@ print("joining",addr)
 
 		if upnet.ticks.epoch and upnet.us then -- we are ticking
 			local t=((now()-upnet.ticks.epoch)/upnet.ticks.length) -- floor this to reduce latency but get janky predictions
-			while t>upnet.ticks.now do -- without floor we have 1 tick of controller latency
+			if t>upnet.ticks.now then -- without floor we have 1 tick of controller latency
 				if upnet.ticks.pause then
 					upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length) -- reset epoch so we do not advance
-					break
+--					break
 				else
 					upnet.next_tick()
 --					print("ticks",upnet.ticks.now,upnet.ticks.input,upnet.ticks.agreed)

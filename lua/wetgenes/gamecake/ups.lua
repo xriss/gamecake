@@ -283,8 +283,8 @@ M.up_functions.update=function(up,pow)
 end
 
 -- save to json ( sameish data as an up but no metatable )
-M.up_functions.save=function(up)
-	local r={}
+M.up_functions.save=function(up,r)
+	local r=r or {}
 	
 	for _,name in pairs{"all","pulse","last_pad_values"} do
 		if next(up[name]) then -- something
@@ -305,6 +305,19 @@ M.up_functions.load=function(up,r)
 		for n,v in pairs(up[name]) do -- empty
 			up[name][n]=nil
 		end
+		if r and r[name] then -- something
+			for n,v in pairs(r[name]) do
+				up[name][n]=v
+			end
+		end
+	end
+
+end
+
+-- merge from saved json or another up as they are similar
+M.up_functions.merge=function(up,r)
+
+	for _,name in pairs{"all","pulse","last_pad_values"} do
 		if r and r[name] then -- something
 			for n,v in pairs(r[name]) do
 				up[name][n]=v

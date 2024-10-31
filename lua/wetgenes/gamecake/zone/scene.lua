@@ -650,7 +650,9 @@ either 0 or 1 whichever is closest and then get that whole value.
 
 ]]
 values_methods.tween=function(values,key,tween)
-	
+
+	if (not tween) or (tween>=1) then return values:get(key) end -- shortcut to get
+
 	local a,b
 	local len=#values
 	a=values[len][key]
