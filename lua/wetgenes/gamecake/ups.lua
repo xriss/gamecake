@@ -170,6 +170,9 @@ local fixaxis=function(n)
 	end
 end
 
+-- names of relative mouse axis
+M.is_relative={mx=true,my=true,mz=true}
+
 M.up_functions={}
 M.up_metatable={__index=M.up_functions}
 
@@ -215,13 +218,14 @@ M.up_functions.set_button=function(up,n,v)
 end
 
 M.up_functions.set_axis=function(up,n,v)
-	up.all[n]=v -- range of -0x7fff to +0x7fff
+	up.all[n]=v -- raw range of -0x7fff to +0x7fff probably
 end
 
 M.up_functions.add_axis=function(up,n,v)
-	local o=up.all[n] -- old value
-	up.all[n]=((((o or 0)+v)%0x10000)+0x10000)%0x10000 -- range of 0x0000 to 0xffff
+	local o=up.all[n] or 0-- old value
+	up.all[n]=o+v
 end
+
 
 -- manage fake axis with decay from keypress states
 -- and handle deletion of pulse msgs
@@ -320,7 +324,11 @@ M.up_functions.merge=function(up,r)
 	for _,name in pairs{"all","pulse","last_pad_values"} do
 		if r and r[name] then -- something
 			for n,v in pairs(r[name]) do
-				up[name][n]=v
+				if M.is_relative[n] then -- special merge add for mouse axis
+					up[name][n] = ( up[name][n] or 0 ) + v
+				else
+					up[name][n]=v
+				end
 			end
 		end
 	end
@@ -576,6 +584,13 @@ M.bake=function(oven,ups)
 
 		end
 
+		-- reset relative mouse
+		for idx,up in pairs(ups.states) do
+			up.all.mx=nil
+			up.all.my=nil
+			up.all.mz=nil
+		end
+
 		-- change current state using all msgs
 		for _,m in ipairs( ups.msgs ) do
 			ups.msg_apply(m)
@@ -589,7 +604,7 @@ M.bake=function(oven,ups)
 	
 	-- needed for manual advance
 	ups.advance=function(idx)
-		-- advance each up state one frame
+		-- advance each up state one frame deals with key acc and decay code
 		for idx,up in pairs(ups.states) do
 			up:update()
 		end

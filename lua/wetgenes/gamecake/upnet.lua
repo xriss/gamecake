@@ -486,28 +486,10 @@ print("joining",addr)
 		upnet.ticks.now=upnet.ticks.now+1
 		-- remember current up
 		
-		do -- calc diffs
-			local up=upnet.upcache
-			for _,m in ipairs{"mx","my","mz"} do -- mouse diffs from last frame
-				if up.all[m] then
-					up.all[m.."d"]=up.all[m]-(up.all[m.."o"] or 0)
-				end
-			end
-		end
-
 		table.insert( upnet.history , 1 , { [upnet.us]=upnet.upcache:save() } ) -- remember new tick
 		
 		upnet.upcache=oven.ups.create()
 		upnet.upcache:merge(oven.ups.manifest(1))
-
-		do -- calc diffs
-			local up=upnet.upcache
-			for _,m in ipairs{"mx","my","mz"} do -- remember mouse start for next frame
-				if up.all[m] then
-					up.all[m.."o"]=up.all[m]
-				end
-			end
-		end
 
 --print("history",upnet.us,#upnet.history)
 		
@@ -523,7 +505,8 @@ print("joining",addr)
 	-- manage msgs and pulse controller state
 	upnet.update=function()
 
-		upnet.upcache:merge(oven.ups.manifest(1)) -- merge as we update
+		local up=oven.ups.manifest(1)
+		upnet.upcache:merge(up) -- merge as we update
 
 		repeat -- check msgs
 		
