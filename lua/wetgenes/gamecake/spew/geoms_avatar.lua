@@ -692,6 +692,18 @@ end
 		
 	end
 
+	function geoms_avatar.update_pose(avatar)
+		local objs=geoms_avatar.objs
+		avatar.anim=objs.anims[avatar.pose] or objs.anims[1]
+		if avatar.anim then
+			if avatar.anim.length and avatar.anim.length>0 then
+				avatar.time=(avatar.time or 0)%avatar.anim.length
+			else
+				avatar.time=0
+			end
+		end
+	end
+	
 	function geoms_avatar.update(avatar)
 
 		local objs=geoms_avatar.objs
@@ -740,6 +752,11 @@ end
 		avatar.anim=objs.anims[avatar.pose] or objs.anims[1]
 		if avatar.anim then
 			avatar.time=(avatar.time or 0)+avatar.speed
+			if avatar.anim.length and avatar.anim.length>0 then
+				avatar.time=(avatar.time or 0)%avatar.anim.length
+			else
+				avatar.time=0
+			end
 		end
 		wgeoms.update(objs)
 
@@ -1214,10 +1231,14 @@ end
 			avatar.rebuild( soul )
 		end
 				
+		avatar.update_pose=function()
+			geoms_avatar.update_pose(avatar)
+		end
+	
 		avatar.update=function()
 			geoms_avatar.update(avatar)
 		end
-	
+
 		avatar.draw=function(opts)
 			geoms_avatar.draw(avatar,opts)
 		end
