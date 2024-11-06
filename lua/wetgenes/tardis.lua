@@ -271,6 +271,20 @@ function array.set(it,...)
 	return it
 end
 
+--[[#lua.wetgenes.tardis.array.unpack
+
+	a1,a2=v2:unpack()
+	a1,a2,a3=v3:unpack()
+	a1,a2,a3,a4=v4:unpack()
+
+Return all values in this array. Note this should be used instead of 
+the unpack function for future optimisation safety.
+
+]]
+function array.unpack(it)
+	return unpack(it)
+end
+
 --[[#lua.wetgenes.tardis.array.zero
 
 	a=a:zero()
@@ -291,7 +305,7 @@ Return a single number value that is the minimum of all values in this array.
 
 ]]
 function array.min(it)
-	return math.min(unpack(it))
+	return math.min(it:unpack())
 end
 
 --[[#lua.wetgenes.tardis.array.max
@@ -302,7 +316,7 @@ Return a single number value that is the maximum of all values in this array.
 
 ]]
 function array.max(it)
-	return math.max(unpack(it))
+	return math.max(it:unpack())
 end
 
 
@@ -657,7 +671,7 @@ end
 
 	r=a:mix(b,s,r)
 
-Mix values between a and b where a is returned if s<=0 and b is returned if s>=1
+Mix values between a and b where a is returned if s=0 and b is returned if s=1
 
 If r is provided then the result is written into r and returned otherwise a is
 modified and returned.
@@ -1228,10 +1242,10 @@ function m4.sub(it,m,r)
 		it[13]-m[13],it[14]-m[14],it[15]-m[15],it[16]-m[16])
 end
 
---[[#lua.wetgenes.tardis.m4.lerp
+--[[#lua.wetgenes.tardis.m4.mix
 
-	m4 = m4:lerp(m4b,s)
-	m4 = m4:lerp(m4b,s,r)
+	m4 = m4:mix(m4b,s)
+	m4 = m4:mix(m4b,s,r)
 
 Lerp from m4 to m4b by s.
 
@@ -1239,7 +1253,7 @@ If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
-function m4.lerp(it,m,s,r)
+function m4.mix(it,m,s,r)
 	r=r or m4.new()
 	r:set(m)
 	r:sub(it)
@@ -2692,20 +2706,20 @@ function q4.reverse(it,r)
 	return array.set(r , -it[1] , -it[2] , -it[3] , it[4] )
 end
 
---[[#lua.wetgenes.tardis.q4.lerp
+--[[#lua.wetgenes.tardis.q4.mix
 
-	q4 = q4:lerp(q4b,s)
-	q4 = q4:lerp(q4b,s,r)
+	q4 = q4:mix(q4b,s)
+	q4 = q4:mix(q4b,s,r)
 
-Nlerp from q4 to q4b by s.
+Lerp from q4 to q4b by s.
 
 If r is provided then the result is written into r and returned 
 otherwise q4 is modified and returned.
 
 ]]
-function q4.nlerp(qa,qb,sa,r)
-	local sb=1-sa
-	if qa.dot(qb) < 0 then sa=-sa end -- shortest fix
+function q4.mix(qa,qb,sb,r)
+	local sa=1-sb
+	if qa:dot(qb) < 0 then sa=-sa end -- shortest fix
 	r=r or qa
 	array.set(r, qa[1]*sa+qb[1]*sb , qa[2]*sa+qb[2]*sb , qa[3]*sa+qb[3]*sb , qa[4]*sa+qb[4]*sb )
 	return r:normalize()
