@@ -478,6 +478,7 @@
 <a class="sub" href="../../docs/lua.wetgenes.tardis.array.sub"><span>/lua.wetgenes.tardis.array.sub</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.array.tan"><span>/lua.wetgenes.tardis.array.tan</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.array.trunc"><span>/lua.wetgenes.tardis.array.trunc</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.array.unpack"><span>/lua.wetgenes.tardis.array.unpack</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.array.zero"><span>/lua.wetgenes.tardis.array.zero</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.class"><span>/lua.wetgenes.tardis.class</span></a><a class="par" href="../../docs/lua.wetgenes.tardis.line"><span>/lua.wetgenes.tardis.line</span></a>
 
@@ -515,9 +516,9 @@
 <a class="sub" href="../../docs/lua.wetgenes.tardis.m4.get_translation_v3"><span>/lua.wetgenes.tardis.m4.get_translation_v3</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.m4.identity"><span>/lua.wetgenes.tardis.m4.identity</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.m4.inverse"><span>/lua.wetgenes.tardis.m4.inverse</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.lerp"><span>/lua.wetgenes.tardis.m4.lerp</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.m4.m3"><span>/lua.wetgenes.tardis.m4.m3</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.m4.minor_xy"><span>/lua.wetgenes.tardis.m4.minor_xy</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.m4.mix"><span>/lua.wetgenes.tardis.m4.mix</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.m4.new"><span>/lua.wetgenes.tardis.m4.new</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.m4.prearotate"><span>/lua.wetgenes.tardis.m4.prearotate</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.m4.preqrotate"><span>/lua.wetgenes.tardis.m4.preqrotate</span></a>
@@ -545,7 +546,7 @@
 <a class="sub" href="../../docs/lua.wetgenes.tardis.q4.get_yaw_pitch_roll"><span>/lua.wetgenes.tardis.q4.get_yaw_pitch_roll</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.q4.get_yaw_pitch_roll_in_radians"><span>/lua.wetgenes.tardis.q4.get_yaw_pitch_roll_in_radians</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.q4.identity"><span>/lua.wetgenes.tardis.q4.identity</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.tardis.q4.lerp"><span>/lua.wetgenes.tardis.q4.lerp</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.tardis.q4.mix"><span>/lua.wetgenes.tardis.q4.mix</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.q4.new"><span>/lua.wetgenes.tardis.q4.new</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.q4.prerotate"><span>/lua.wetgenes.tardis.q4.prerotate</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.tardis.q4.prerrotate"><span>/lua.wetgenes.tardis.q4.prerrotate</span></a>
@@ -695,7 +696,7 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4">lua.wetgenes.tardis.q4</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2586">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2600">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><p>The metatable for a quaternion class, use the new function to actually create an object.</p>
 <p>We also inherit all the functions from tardis.v4</p>
 </div>
@@ -703,7 +704,7 @@
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.get_yaw_pitch_roll">lua.wetgenes.tardis.q4.get_yaw_pitch_roll</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2824">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2838">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>v3 = q4:get_yaw_pitch_roll()
 </code></pre>
 <p>Get a yaw,pitch,roll degree rotation from this quaternion</p>
@@ -714,7 +715,7 @@ otherwise a new v3 is created and returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.get_yaw_pitch_roll_in_radians">lua.wetgenes.tardis.q4.get_yaw_pitch_roll_in_radians</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2866">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2880">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>v3 = q4:get_yaw_pitch_roll_in_radians()
 </code></pre>
 <p>Get a yaw,pitch,roll degree rotation from this quaternion</p>
@@ -725,7 +726,7 @@ otherwise a new v3 is created and returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.identity">lua.wetgenes.tardis.q4.identity</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2670">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2684">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = q4:identity()
 </code></pre>
 <p>Set this q4 to its 0,0,0,1 identity</p>
@@ -733,12 +734,12 @@ otherwise a new v3 is created and returned.</p>
 </div>
 
 <div class="wrap">
-<h1><a href="../../docs/lua.wetgenes.tardis.q4.lerp">lua.wetgenes.tardis.q4.lerp</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2695">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
-<div><pre><code>q4 = q4:lerp(q4b,s)
-q4 = q4:lerp(q4b,s,r)
+<h1><a href="../../docs/lua.wetgenes.tardis.q4.mix">lua.wetgenes.tardis.q4.mix</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2709">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div><pre><code>q4 = q4:mix(q4b,s)
+q4 = q4:mix(q4b,s,r)
 </code></pre>
-<p>Nlerp from q4 to q4b by s.</p>
+<p>Lerp from q4 to q4b by s.</p>
 <p>If r is provided then the result is written into r and returned 
 otherwise q4 is modified and returned.</p>
 </div>
@@ -746,7 +747,7 @@ otherwise q4 is modified and returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.new">lua.wetgenes.tardis.q4.new</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2660">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2674">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = tardis.q4.new()
 </code></pre>
 <p>Create a new q4 and optionally set it to the given values, q4 methods 
@@ -756,7 +757,7 @@ usually return the input q4 for easy function chaining.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.prerotate">lua.wetgenes.tardis.q4.prerotate</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2757">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2771">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = q4:prerotate(degrees,v3a)
 q4 = q4:prerotate(degrees,v3a,r)
 </code></pre>
@@ -768,7 +769,7 @@ otherwise q4 is modified and returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.prerrotate">lua.wetgenes.tardis.q4.prerrotate</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2791">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2805">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = q4:prerrotate(radians,v3a)
 q4 = q4:prerrotate(radians,v3a,r)
 </code></pre>
@@ -780,7 +781,7 @@ otherwise q4 is modified and returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.reverse">lua.wetgenes.tardis.q4.reverse</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2679">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2693">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = q4:reverse()
 q4 = q4:reverse(r)
 </code></pre>
@@ -792,7 +793,7 @@ otherwise q4 is modified and returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.rotate">lua.wetgenes.tardis.q4.rotate</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2740">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2754">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = q4:rotate(degrees,v3a)
 q4 = q4:rotate(degrees,v3a,r)
 </code></pre>
@@ -804,7 +805,7 @@ otherwise q4 is modified and returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.rrotate">lua.wetgenes.tardis.q4.rrotate</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2774">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2788">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = q4:rrotate(radians,v3a)
 q4 = q4:rrotate(radians,v3a,r)
 </code></pre>
@@ -816,7 +817,7 @@ otherwise q4 is modified and returned.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.set">lua.wetgenes.tardis.q4.set</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2595">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2609">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = tardis.q4.set(q4,{0,0,0,1})
 q4 = tardis.q4.set(q4,0,0,0,1)
 q4 = tardis.q4.set(q4,{&quot;xyz&quot;,0,90,0})
@@ -837,7 +838,7 @@ easily readable way.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.set_yaw_pitch_roll">lua.wetgenes.tardis.q4.set_yaw_pitch_roll</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2808">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2822">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = q4:set_yaw_pitch_roll(v3)
 q4 = q4:set_yaw_pitch_roll({90,60,30})	-- 30yaw 60pitch 90roll
 </code></pre>
@@ -851,7 +852,7 @@ roll  v[1] is rotation about the z axis and is applied last
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.set_yaw_pitch_roll_in_radians">lua.wetgenes.tardis.q4.set_yaw_pitch_roll_in_radians</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2838">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2852">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = q4:set_yaw_pitch_roll_in_radians(v)
 </code></pre>
 <p>Set a V3(roll,pitch,yaw) radian rotation into this quaternion</p>
@@ -864,7 +865,7 @@ roll  v[1] is rotation about the z axis and is applied last
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.setrot">lua.wetgenes.tardis.q4.setrot</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2714">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2728">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = q4:setrot(degrees,v3a)
 </code></pre>
 <p>Set this quaternion to a rotation around the given normal by the given degrees.</p>
@@ -873,7 +874,7 @@ roll  v[1] is rotation about the z axis and is applied last
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.q4.setrrot">lua.wetgenes.tardis.q4.setrrot</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2727">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L2741">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>q4 = q4:setrrot(radians,v3a)
 </code></pre>
 <p>Set this quaternion to a rotation around the given normal by the given radians.</p>
