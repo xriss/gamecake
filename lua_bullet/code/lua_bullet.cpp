@@ -238,6 +238,8 @@ int    isiz;
 
 shape
 
+	btStaticPlaneShape : "plane" , nx , ny , nz , distance
+
 	btBoxShape : "box" , x/2 , y/2 , z/2
 	
 	btSphereShape : "sphere" , radius
@@ -331,6 +333,15 @@ btQuaternion quat;
 
 // allocate cpShape
 		tp=luaL_checkstring(l,1);
+		if(0==strcmp(tp,"plane"))
+		{
+			hx=luaL_checknumber(l,2);
+			hy=luaL_checknumber(l,3);
+			hz=luaL_checknumber(l,4);
+			radius=luaL_checknumber(l,5);
+			*pp = new btStaticPlaneShape( btVector3(hx,hy,hz) , radius );
+		}
+		else
 		if(0==strcmp(tp,"box"))
 		{
 			hx=luaL_checknumber(l,2);
