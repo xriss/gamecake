@@ -410,15 +410,13 @@ print("joining",addr)
 		for idx,_ in pairs(upnet.clients) do
 			local up=oven.ups.create()
 			ups[idx]=up
-			if idx==upnet.us and ti<1 then -- use live input
-				up:load( upnet.upcache:save() ) -- fill
-			else
-				for ui=ti,#upnet.history do -- find best state we have
-					local h=upnet.history[ui]
-					if h and h[idx] then
-						up:load(h[idx]) -- fill
-						break -- and done
-					end
+			for ui=ti,#upnet.history do -- find best state we have
+				local h=upnet.history[ui]
+				if h and h[idx] then
+					up:load(h[idx]) -- fill
+-- this will have set/clr flags locked on into future prediction frames so we should update to clear them?
+					for i=ti+1,ui do up:update() end -- update to frame requested?
+					break -- and done
 				end
 			end
 		end
@@ -489,7 +487,7 @@ print("joining",addr)
 		table.insert( upnet.history , 1 , { [upnet.us]=upnet.upcache:save() } ) -- remember new tick
 		
 		upnet.upcache=oven.ups.create()
-		upnet.upcache:merge(oven.ups.manifest(1))
+		upnet.upcache:load(oven.ups.manifest(1))
 
 --print("history",upnet.us,#upnet.history)
 		

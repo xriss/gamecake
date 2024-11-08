@@ -172,6 +172,15 @@ end
 
 -- names of relative mouse axis
 M.is_relative={mx=true,my=true,mz=true}
+M.is_pulse={}
+
+for i,n in ipairs{
+		"left","pad_left","right","pad_right","up","pad_up","down","pad_down",
+		"a","b","x","y",	"l1","r1","l2","r2","l3","r3",	"select","start","guide","fire",
+		} do
+	M.is_pulse[ n.."_set" ] = true 
+	M.is_pulse[ n.."_clr" ] = true 
+end
 
 M.up_functions={}
 M.up_metatable={__index=M.up_functions}
@@ -183,8 +192,6 @@ M.up_metatable={__index=M.up_functions}
 M.up_functions.reset=function(up)
 
 	up.all={} -- this frames button state
-	up.pulse={} -- "_set" or "_clr" next frame only pulse	
-	up.last_pad_values={} -- needed for pad axis buttons
 
 end
 
@@ -205,14 +212,12 @@ M.up_functions.set_button=function(up,n,v)
 		if not o then -- change?
 			local n_set=n.."_set"
 			up.all[n_set]=true
-			up.pulse[n_set]=true
 		end
 	else -- or clr
 		up.all[n]=false
 		if o then -- change?
 			local n_clr=n.."_clr"
 			up.all[n_clr]=true
-			up.pulse[n_clr]=true
 		end
 	end
 end
@@ -277,10 +282,13 @@ M.up_functions.update=function(up,pow)
 	end
 
 	-- auto delete pulses
-	for n,v in pairs(up.pulse) do
-		up.all[n]=v -- set or clear this frame
-		if v then	up.pulse[n]=false	-- clear next frame
-		else		up.pulse[n]=nil		-- then forget
+	for n,v in pairs(up.all) do
+		if M.is_pulse[n] then
+			if up.all[n]==1 then
+				up.all[n]=nil
+			else
+				up.all[n]=1	-- use one as a pulse flag that is also true
+			end
 		end
 	end
 
@@ -290,12 +298,10 @@ end
 M.up_functions.save=function(up,r)
 	local r=r or {}
 	
-	for _,name in pairs{"all","pulse","last_pad_values"} do
-		if next(up[name]) then -- something
-			r[name]={}
-			for n,v in pairs(up[name]) do
-				r[name][n]=v
-			end
+	if next(up.all) then -- something
+		r.all={}
+		for n,v in pairs(up.all) do
+			r.all[n]=v
 		end
 	end
 
@@ -305,14 +311,12 @@ end
 -- load from saved json or another up as they are similar
 M.up_functions.load=function(up,r)
 
-	for _,name in pairs{"all","pulse","last_pad_values"} do
-		for n,v in pairs(up[name]) do -- empty
-			up[name][n]=nil
-		end
-		if r and r[name] then -- something
-			for n,v in pairs(r[name]) do
-				up[name][n]=v
-			end
+	for n,v in pairs(up.all) do -- empty
+		up.all[n]=nil
+	end
+	if r and r.all then -- something
+		for n,v in pairs(r.all) do
+			up.all[n]=v
 		end
 	end
 
@@ -321,14 +325,14 @@ end
 -- merge from saved json or another up as they are similar
 M.up_functions.merge=function(up,r)
 
-	for _,name in pairs{"all","pulse","last_pad_values"} do
-		if r and r[name] then -- something
-			for n,v in pairs(r[name]) do
-				if M.is_relative[n] then -- special merge add for mouse axis
-					up[name][n] = ( up[name][n] or 0 ) + v
-				else
-					up[name][n]=v
-				end
+	if r and r.all then -- something
+		for n,v in pairs(r.all) do
+			if M.is_pulse[n] then
+				up.all[n]=up.all[n] or v
+			elseif M.is_relative[n] then -- special merge add for mouse axis
+				up.all[n] = ( up.all[n] or 0 ) + v
+			else
+				up.all[n]=v
 			end
 		end
 	end
@@ -475,7 +479,10 @@ M.bake=function(oven,ups)
 			end
 		elseif m.class=="padaxis" then -- SDL axis values
 
-			local up=ups.manifest( ups.padmaps[((m.id-1)%#ups.padmaps)+1] ) -- this pad belongs to
+			local upi=ups.padmaps[((m.id-1)%#ups.padmaps)+1]
+			if not ups.last_pad_values[upi] then ups.last_pad_values[upi]={} end -- manifest
+			local last_pad_values=ups.last_pad_values[upi]
+			local up=ups.manifest( upi ) -- this pad belongs to
 			if up then
 				local zone=0x2000
 
@@ -486,14 +493,14 @@ M.bake=function(oven,ups)
 					elseif m.value >=  zone then v= 1
 					end
 
-					if up.last_pad_values[name1]~=v then -- only on change
+					if last_pad_values[name1]~=v then -- only on change
 						if     v<0 then	up:set_button(name1,true)	up:set_button(name2,false)
 						elseif v>0 then	up:set_button(name1,false)	up:set_button(name2,true)
 						else			up:set_button(name1,false)	up:set_button(name2,false)
 						end
 					end
 
-					up.last_pad_values[name1]=v
+					last_pad_values[name1]=v
 				end
 
 				local dotrig=function(name)
@@ -502,14 +509,14 @@ M.bake=function(oven,ups)
 					if m.value >=  zone then v= 1
 					end
 
-					if up.last_pad_values[name]~=v then -- only on change
+					if last_pad_values[name]~=v then -- only on change
 
 						if     v>0 then		up:set_button(name,true)
 						else				up:set_button(name,false)
 						end
 					end
 
-					up.last_pad_values[name]=v
+					last_pad_values[name]=v
 				end
 				
 				if     m.name=="LeftX"			then		doaxis("left","right")	up:set_axis("lxp",m.value)
@@ -523,7 +530,8 @@ M.bake=function(oven,ups)
 
 		elseif m.class=="padkey" then -- SDL button values
 
-			local up=ups.manifest( ups.padmaps[((m.id-1)%#ups.padmaps)+1] ) -- this pad belongs to
+			local upi=ups.padmaps[((m.id-1)%#ups.padmaps)+1]
+			local up=ups.manifest( upi ) -- this pad belongs to
 			if up then
 
 				local docode=function(name)
