@@ -10,7 +10,7 @@ local json_pack=require("wetgenes.json_pack")
 
 --[[
 
-Manage basic network connection and transfer of input states between 
+Manage basic network connection and transfer of input states between
 clients.
 
 ]]
@@ -26,28 +26,31 @@ local msgp=require("wetgenes.tasks_msgp")
 M.bake=function(oven,upnet)
 
 	upnet=upnet or {}
-	
+
 	upnet.task_id=upnet.task_id or "msgp"
 	upnet.task_id_msg=upnet.task_id..":msg"
 
 	local socket = require("socket")
 	local now=function() return socket.gettime() end -- time now with sub second acuracy
-	local nowticks=function() return (now()-upnet.ticks.epoch)/upnet.ticks.length end -- time now with sub second acuracy
-	
+	local nowticks=function() -- time now with sub second acuracy
+		if not upnet.ticks.epoch then return -1 end
+		return (now()-upnet.ticks.epoch)/upnet.ticks.length
+	end
+
 	upnet.now=now
 	upnet.nowticks=nowticks
 
 	local print=function(...)
 		local idx=(upnet.us or 0)
 		local tabs=string.rep("\t\t\t\t\t\t\t\t\t\t\t",idx-1)
-		
+
 		print(idx..tabs , ... )
 	end
 	upnet.print=print
-	
+
 	-- reset all connections
 	upnet.reset=function()
-	
+
 		upnet.ticks={}
 
 		-- seconds ( floats )
@@ -60,8 +63,8 @@ M.bake=function(oven,upnet)
 		upnet.ticks.input=0		-- the tick we have all inputs for
 		upnet.ticks.update=0	-- the tick you have updated
 		upnet.ticks.now=0		-- the tick we have our input for
-		upnet.ticks.draw=0		-- the tick you have drawn 
-		
+		upnet.ticks.draw=0		-- the tick you have drawn
+
 		-- we sync now to time and calculate input tick as data arrives
 		-- you should set update and draw times when you update and draw
 		-- if things are laging then we may adjust the epoch to "skip" frames
@@ -70,7 +73,7 @@ M.bake=function(oven,upnet)
 		upnet.hashs={} -- same as history but first hash here is for ticks.update not ticks.now
 
 		upnet.hooks={}
-		
+
 		upnet.us=nil -- we are this client idx
 
 		upnet.host_inc=0 -- host incs per client
@@ -86,11 +89,11 @@ M.bake=function(oven,upnet)
 	upnet.reset() -- make sure we are always tables
 
 	upnet.manifest_client=function(m)
-	
+
 		local client=upnet.clients_addr[m.addr]
-		
+
 		if client then return client end
-		
+
 		-- create
 		client={}
 		client.addr=m.addr -- this may be different per client
@@ -98,21 +101,21 @@ M.bake=function(oven,upnet)
 		client.ip6=m.ip6 or m.handshake.ip6
 		client.port=m.port or m.handshake.port
 		client.name=m.name or m.handshake.name
-		
+
 		-- a unique id which is [ip6]:port or ip4:port:name
 		if client.ip6 then
 			client.id="["..client.ip6.."]:"..client.port
 		else
 			client.id=client.ip4..":"..client.port..":"..client.name
 		end
-		
+
 		-- remember by
 		upnet.clients_addr[client.addr]=client
 		upnet.clients_id[client.id]=client
 
 		-- auto funcs
 		setmetatable(client,upnet.client)
-		
+
 		-- find idx maybe
 		for i,c in ipairs(upnet.clients_idx) do
 			if c.id==client.id then
@@ -120,7 +123,7 @@ M.bake=function(oven,upnet)
 				upnet.clients[i]=client
 			end
 		end
-		
+
 		client.ack=0
 		client.hash_ack=0
 		client.join_tick=math.huge
@@ -133,7 +136,7 @@ M.bake=function(oven,upnet)
 	upnet.client.__index=upnet.client
 
 	upnet.client.send=function(client,msg,cmd)
-	
+
 		oven.tasks:send({
 			task=upnet.task_id,
 			cmd=cmd or "send",
@@ -145,20 +148,20 @@ M.bake=function(oven,upnet)
 
 	upnet.client.recv={}
 	upnet.client.recv.all=function(client,msg)
-	
+
 		if msg.upnet then
 			local f=upnet.client.recv[msg.upnet]
 			if f then
 				f(client,msg)
 			end
 		end
-		
+
 		for n,f in pairs(upnet.hooks) do
 			if msg[n] then -- if this key is set then the hook wants the msg
 				f(client,msg)
 			end
 		end
-		
+
 	end
 
 	upnet.client.send_done_welcome=function(client)
@@ -172,13 +175,13 @@ M.bake=function(oven,upnet)
 	upnet.client.recv.done_welcome=function(client,msg)
 		upnet.ticks.pause=nil
 	end
-	
+
 	upnet.client.send_welcome=function(client)
 
 		upnet.ticks.pause="host"
 
 		local msg={ upnet="welcome" }
-		
+
 		msg.clients={}
 		for i,c in pairs(upnet.clients) do -- send all clients idx
 			local v={}
@@ -190,18 +193,18 @@ M.bake=function(oven,upnet)
 			v.name=c.name
 			msg.clients[#msg.clients+1]=v
 		end
-		
+
 		msg.ticks=upnet.ticks.input
-		
+
 		client.join_tick=msg.ticks
 
 		local fh=upnet.hooks.send_done
 		if fh then fh(client,msg) end -- user hooks can modify msg
 		client:send(msg)
-	
+
 	end
 	upnet.client.recv.welcome=function(client,msg)
-	
+
 		upnet.clients_idx=msg.clients
 		for i,c in ipairs(upnet.clients_idx) do -- assign clients idx
 			local v=upnet.clients_id[c.id]
@@ -233,16 +236,16 @@ print("WELCOME",client.idx)
 
 		upnet.ticks.pause=nil	-- pause over
 		client:send_done_welcome()
-	
+
 	end
 
 	upnet.client.send_pulse=function(client)
-	
+
 		local msg={ upnet="pulse" }
-		
+
 		msg.tick=upnet.ticks.now
 		msg.ack=upnet.ticks.update -- acknowledged up to here
-		
+
 		if upnet.us then
 			local hs={}
 			for i=1,#upnet.history do
@@ -263,10 +266,10 @@ print("WELCOME",client.idx)
 		local fh=upnet.hooks.send_pulse
 		if fh then fh(client,msg) end -- user hooks can modify msg
 		client:send(msg,"pulse")
-	
+
 	end
 	upnet.client.recv.pulse=function(client,msg)
-	
+
 --		print("pulse recv",msg.ticks,#msg.history,upnet.ticks.input,upnet.ticks.now)
 
 		client.ack=msg.ack -- this update has been acknowledged
@@ -307,14 +310,14 @@ print("WELCOME",client.idx)
 			id=upnet.task_id,
 			code=msgp.msgp_code,
 		})
-		
+
 		upnet.reset()
 
 		-- everyone must enable network with a host
 --		if args.host then
-		
+
 			if tonumber( args.host ) then baseport=tonumber( args.host ) end
-		
+
 			-- and tell it to start listening
 			local host_ret=oven.tasks:do_memo({
 				task=upnet.task_id,
@@ -328,7 +331,7 @@ print("WELCOME",client.idx)
 
 			-- clients join the host
 			if args.join then
-			
+
 				upnet.join( args.join )
 				upnet.mode="join"
 
@@ -339,22 +342,22 @@ print("WELCOME",client.idx)
 				upnet.host_inc=upnet.host_inc+1
 				client.idx=upnet.host_inc
 				upnet.clients[client.idx]=client
-				
+
 				upnet.us=client.idx
-				
+
 				upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
 
 			end
 
 --		end
-		
+
 --dump(upnet.clients)
 
 	end
-	
+
 	-- try to make a new connection
 	upnet.join=function(addr)
-	
+
 		upnet.ticks.pause="join"
 
 print("joining",addr)
@@ -369,35 +372,35 @@ print("joining",addr)
 	upnet.domsg=function(m)
 
 		local client=upnet.clients_addr[m.addr]	-- may be nil
-	
+
 		if m.why=="connect" then
-		
+
 			client=upnet.manifest_client(m) -- create client
-				
+
 			if upnet.mode=="host" then -- assign idx
-				
+
 				-- next client
 				upnet.host_inc=upnet.host_inc+1
 				client.idx=upnet.host_inc
 				upnet.clients[client.idx]=client
-				
+
 				client:send_welcome()
-			
+
 --dump(upnet.clients)
 			end
-		
+
 
 		elseif m.why=="data" or m.why=="pulse" then
-		
+
 			local msg=json_pack.from_data(m.data) -- unpack binary
 			client.recv.all(client,msg)
 
 		else
-				
+
 --			dump(m)
 
 		end
-		
+
 	end
 
 	-- get an ups array for the given tick
@@ -420,15 +423,15 @@ print("joining",addr)
 				end
 			end
 		end
-		
+
 		ups[0]=oven.ups.empty
-		
+
 --		print(upnet.us,tick,upnet.ticks.now,#upnet.history,ti,ups[1] and ups[1].all.lx,ups[2] and ups[2].all.lx)
 --		dump(upnet.history)
 
 		return ups
 	end
-	
+
 
 	-- update the tick time of when we have all inputs
 	upnet.update_ticks_input=function()
@@ -443,7 +446,7 @@ print("joining",addr)
 		for _,v in pairs(upnet.clients) do -- must have data for all clients
 			if not h[v.idx] then return end
 		end
-		
+
 		upnet.ticks.input=upnet.ticks.input+1
 		for i=#upnet.history , 255+1+upnet.ticks.now-upnet.ticks.input , -1 do
 			upnet.history[i]=nil
@@ -455,7 +458,7 @@ print("joining",addr)
 	upnet.update_ticks_agreed=function()
 
 		local ti=1+upnet.ticks.update-upnet.ticks.agreed	-- we have agreed for here
-		local hash=upnet.hashs[ti-1] 
+		local hash=upnet.hashs[ti-1]
 		if not hash then return end
 
 		local h=hash[upnet.us] -- our hash
@@ -470,7 +473,7 @@ print("joining",addr)
 				end
 			end
 		end
-		
+
 		upnet.ticks.agreed=upnet.ticks.agreed+1
 		for i=#upnet.hashs , 255+1+upnet.ticks.update-upnet.ticks.agreed , -1 do
 			upnet.hashs[i]=nil
@@ -479,27 +482,27 @@ print("joining",addr)
 	end
 
 	-- tick one tick forwards
-	upnet.next_tick=function() 
-	
+	upnet.next_tick=function()
+
 		upnet.ticks.now=upnet.ticks.now+1
 		-- remember current up
-		
+
 		table.insert( upnet.history , 1 , { [upnet.us]=upnet.upcache:save() } ) -- remember new tick
-		
+
 		upnet.upcache=oven.ups.create()
 		upnet.upcache:load(oven.ups.manifest(1))
 
 --print("history",upnet.us,#upnet.history)
-		
+
 		-- send current ups to network
 		for _,client in pairs(upnet.clients) do
 			if not client.us then
 				client:send_pulse()
 			end
 		end
-		
+
 	end
-	
+
 	-- manage msgs and pulse controller state
 	upnet.update=function()
 
@@ -507,15 +510,15 @@ print("joining",addr)
 		upnet.upcache:merge(up) -- merge as we update
 
 		repeat -- check msgs
-		
+
 			local _,memo= oven.tasks.linda:receive( 0 , upnet.task_id_msg ) -- wait for any memos coming into this thread
-			
+
 			if memo then
 				upnet.domsg(memo)
 			end
-		
+
 		until not memo
-		
+
 		repeat until not upnet.update_ticks_input() -- update ticks.input
 		repeat until not upnet.update_ticks_agreed() -- update ticks.agreed
 
@@ -531,8 +534,8 @@ print("joining",addr)
 				end
 			end
 		end
-		
+
 	end
-	
+
 	return upnet
 end

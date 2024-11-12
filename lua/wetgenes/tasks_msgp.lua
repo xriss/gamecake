@@ -3,17 +3,17 @@
 --
 
 -- module
-local M={ modname = (...) } package.loaded[M.modname] = M 
+local M={ modname = (...) } package.loaded[M.modname] = M
 
 --[[#lua.wetgenes.tasks_msgp
 
 	local msgp=require("wetgenes.tasks_msgp")
 
-A stream of lowlevel udp packets with automatic resend ( data will get 
-there eventual ) but hopefully without clogging up an ongoing pulse of 
+A stream of lowlevel udp packets with automatic resend ( data will get
+there eventual ) but hopefully without clogging up an ongoing pulse of
 smaller packets that contain EG controller state.
 
-We use lua sockets and lanes with some help from wetgenes.tasks to 
+We use lua sockets and lanes with some help from wetgenes.tasks to
 manage the lanes.
 
 
@@ -25,35 +25,35 @@ Simple UDP data packets with auto resend, little endian with this 6 byte header.
 	u8		bits		//	how many bits in total ( all bits will be in adjacent idxs )
 	u8		data[*]		//	The payload, if multiple bits then all payloads should be concatenated
 
-A maximum packet size of 63k seems to give good throughput, letting the 
-lower level code split and recombine packets is probably going to be 
-more efficient than us. Note that we care about best case speed, when 
-shit lags and packets drop we care less about performance and more 
-about maintaining a connection with correct state. IE its important 
-that we recover not that we pretend there is no problem. At 255 bits * 
+A maximum packet size of 63k seems to give good throughput, letting the
+lower level code split and recombine packets is probably going to be
+more efficient than us. Note that we care about best case speed, when
+shit lags and packets drop we care less about performance and more
+about maintaining a connection with correct state. IE its important
+that we recover not that we pretend there is no problem. At 255 bits *
 63k bit size we can seen a data of about 15.6m.
 
-Technically 63k UDP packets might just get dropped as too big but I 
+Technically 63k UDP packets might just get dropped as too big but I
 suspect modern hardware is not really going to cause problems.
 
-bit/bits only goes up to 255. the 0 value in either of these is 
-reserved as a flag for possible slightly strange packets in the future 
-eg maybe we need a ping? and should be ignored as a bad packet if you 
+bit/bits only goes up to 255. the 0 value in either of these is
+reserved as a flag for possible slightly strange packets in the future
+eg maybe we need a ping? and should be ignored as a bad packet if you
 do not understand them.
 
-An ack of 0x1234 also implies that 0x9234 to 0x1233 are in the past and 
+An ack of 0x1234 also implies that 0x9234 to 0x1233 are in the past and
 0x1234 to 0x9233 are in the future.
 
-Also if we have nothing new to say after 100ms but have received new 
+Also if we have nothing new to say after 100ms but have received new
 packets then we can send a packet with empty data (0 length) as an ack
 only packet.
 
-When connecting to a port for the first time, the idx value must start 
-at a special number, that number is configurable and should be 
-different for each app. An extra bit of sanity during introductions to 
+When connecting to a port for the first time, the idx value must start
+at a special number, that number is configurable and should be
+different for each app. An extra bit of sanity during introductions to
 indicate that the data stream will be understood by both parties.
 
-Special packets that do not add to the stream of user data but instead 
+Special packets that do not add to the stream of user data but instead
 are used internally by this protocol.
 
 	id		bits	bit
@@ -64,20 +64,20 @@ are used internally by this protocol.
 	RESEND	0x00	0x08
 	PULSE	0x00	0x10
 
-A PING packet will be accepted and acknowledged after handshaking. 
+A PING packet will be accepted and acknowledged after handshaking.
 Sending a PING packet will cause a PONG response with the same data.
 
-A PONG packet will be accepted and acknowledged after handshaking, its 
+A PONG packet will be accepted and acknowledged after handshaking, its
 data should be the same as the PING it is responding too.
 
-A HAND packet begins handshaking, the payload data is a string array. 
+A HAND packet begins handshaking, the payload data is a string array.
 Consisting of a series of null terminated utf8 strings.
 
-A SHAKE packet ends handshaking The payload data is a string array. 
+A SHAKE packet ends handshaking The payload data is a string array.
 Consisting of a series of null terminated utf8 strings.
 
-Both the HAND and the SHAKE packets contain the same payload data which 
-consists of the following utf8 strings, each terminated by a 0 byte. 
+Both the HAND and the SHAKE packets contain the same payload data which
+consists of the following utf8 strings, each terminated by a 0 byte.
 
 	host name
 	host ip4
@@ -85,37 +85,37 @@ consists of the following utf8 strings, each terminated by a 0 byte.
 	host port
 	client addr
 
-When received, each of the strings should to be clamped to 255 bytes 
+When received, each of the strings should to be clamped to 255 bytes
 and the values validated or replaced with empty strings before use.
 
 host name is maybe best considered a random string, it could be anything.
 
-host ip4 will be the hosts best guess at their ip4, it is the ip4 they 
+host ip4 will be the hosts best guess at their ip4, it is the ip4 they
 are listening on.
 
-host ip6 will be the hosts best guess at their ip6, it is the ip6 they 
+host ip6 will be the hosts best guess at their ip6, it is the ip6 they
 are listening on.
 
-host port will be the local port the host is listening on, ip4 and ip6, 
-but as they may be port forwarding we might connect on a different 
+host port will be the local port the host is listening on, ip4 and ip6,
+but as they may be port forwarding we might connect on a different
 port.
 
-client addr is the client ip and port the sender sent this packet too. 
-If ipv4 it will be a string of the format "1.2.3.4:5" and if 1pv6 then 
-"[1::2]:3" So the ip possibly wrapped in square brackets (ipv6) and 
+client addr is the client ip and port the sender sent this packet too.
+If ipv4 it will be a string of the format "1.2.3.4:5" and if 1pv6 then
+"[1::2]:3" So the ip possibly wrapped in square brackets (ipv6) and
 then a colon followed by the port in url style format.
 
-A RESEND packet consists of a payload of little endian 16bit idxs to 
+A RESEND packet consists of a payload of little endian 16bit idxs to
 packets we would like to be resent to fill in missing data.
 
-A PULSE packet contains user data but does not get resent or 
-acknowledged, its IDX must be set to 0 and this IDX should be ignored 
-when received as this is out of stream data. Pulse packets are small 
-regular packets of user data, eg current client input state. Data sent 
-is included as part of the normal received data stream but there is no 
-guarantee that it will be delivered or when it will be delivered 
-relative to other data. The data must be small enough to fit in a 
-single packet. Think of this as something of a raw UDP packet in terms 
+A PULSE packet contains user data but does not get resent or
+acknowledged, its IDX must be set to 0 and this IDX should be ignored
+when received as this is out of stream data. Pulse packets are small
+regular packets of user data, eg current client input state. Data sent
+is included as part of the normal received data stream but there is no
+guarantee that it will be delivered or when it will be delivered
+relative to other data. The data must be small enough to fit in a
+single packet. Think of this as something of a raw UDP packet in terms
 of how it works.
 
 ]]
@@ -176,7 +176,7 @@ M.ENCODE5="0123456789abcdefghjkmnpqrtuvwxyz" -- 32 chars 5bits
 
 --[[#lua.wetgenes.tasks_msgp.clean_name
 
-Clean a hostname so it becomes upercase letters and numbers with 
+Clean a hostname so it becomes upercase letters and numbers with
 possible underscores where any other chars would be, eg whitespace.
 
 we also try not to start or end with an _
@@ -194,7 +194,7 @@ end
 
 --[[#lua.wetgenes.tasks_msgp.ip6_to_addr
 
-Parse an array of 8 numbers into an ip6 address with :: in the first 
+Parse an array of 8 numbers into an ip6 address with :: in the first
 longest run of zeros if needed and lowercase hex letters.
 
 ]]
@@ -259,7 +259,7 @@ end
 
 --[[#lua.wetgenes.tasks_msgp.addr_to_list
 
-parse an ip address + maybe port encoded as a string into a list of 
+parse an ip address + maybe port encoded as a string into a list of
 numbers, the length of the list represents the type so
 
 	#4 {1,2,3,4} -- ip4
@@ -267,12 +267,12 @@ numbers, the length of the list represents the type so
 	#8 {1,2,3,4,5,6,7,8} -- ip6
 	#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port
 
-Optionally include a numeric port to add/replace in the list after 
+Optionally include a numeric port to add/replace in the list after
 parsing.
 
 ]]
 M.functions.addr_to_list=function(addr,port)
-	
+
 	local ipv4=false
 	local ipv6=false
 	local zer
@@ -284,7 +284,7 @@ M.functions.addr_to_list=function(addr,port)
 		idx=idx+1
 		if last then return nil,"too many numbers" end -- too many numbers
 		if not first then
-			if a=="[" or a=="" or a=="::" or a=="[::" or a=="[::]:" then 
+			if a=="[" or a=="" or a=="::" or a=="[::" or a=="[::]:" then
 				first=a
 				if     first=="[::]:" then -- 8 0s and a port
 					last=""
@@ -336,7 +336,7 @@ M.functions.addr_to_list=function(addr,port)
 			list[#list+1]=b
 		end
 	end
-	
+
 	if zer then -- need to insert some zeros
 		local pad=8-#list
 		if last then pad=pad+1 end -- we have a port so pad to 9 values
@@ -345,7 +345,7 @@ M.functions.addr_to_list=function(addr,port)
 			table.insert(list,zer+1,0)
 		end
 	end
-	
+
 	if port and ipv4 then list[5]=port end -- force port
 	if port and ipv6 then list[9]=port end
 	local len=#list
@@ -363,7 +363,7 @@ M.functions.addr_to_list=function(addr,port)
 		bracks=bracks+1
 	end
 	if bracks==1 then return nil,"invalid []" end
-	
+
 	if ipv4 then -- convert strings and check range
 		for i=1,4 do
 			if type(list[i])=="string" then
@@ -428,26 +428,26 @@ end
 
 --[[#lua.wetgenes.tasks_msgp.ipsniff
 
-Use ( google by default ) public dns servers to check if we can connect 
+Use ( google by default ) public dns servers to check if we can connect
 to the internet and if we have ipv4 and/or ipv6 available.
 
-To use alternative dns pass in an ipv4 and ipv6 address as the first 
+To use alternative dns pass in an ipv4 and ipv6 address as the first
 two args, eg to use cloudflare.
 
 	ipsniff("1.1.1.1","2606:4700:4700::1111")
 
-returns the ipv4,ipv6 address of this host when connecting to that dns 
+returns the ipv4,ipv6 address of this host when connecting to that dns
 or nil if no connection possible.
 
-This result can be used as a bool to indicate working ipv6 or ipv4 
-internet and is also a best guess as to our ip when connecting to other 
+This result can be used as a bool to indicate working ipv6 or ipv4
+internet and is also a best guess as to our ip when connecting to other
 devices.
 
-Note that this will only work if we are connected to the internet can 
-reach the dns servers etc etc, standard networks can be crazy 
+Note that this will only work if we are connected to the internet can
+reach the dns servers etc etc, standard networks can be crazy
 disclaimer applies.
 
-So great if this works but still need a fallback plan, eg assuming 
+So great if this works but still need a fallback plan, eg assuming
 local ipv4 network is available.
 
 ]]
@@ -455,12 +455,12 @@ M.functions.ipsniff=function(dns4,dns6)
 
 	dns4=dns4 or "8.8.8.8"				-- default to google dns ipv4
 	dns6=dns6 or "2001:4860:4860::8888" -- default to google dns ipv6
-	
+
 	local ipv4="0.0.0.0"
 	local ipv6="::"
 
 	local socket = require("socket")
-	
+
 	pcall(function()
 		local udp4 = socket.udp4()
 		udp4:settimeout(0)
@@ -476,7 +476,7 @@ M.functions.ipsniff=function(dns4,dns6)
 		ipv6=udp6:getsockname() -- return value
 		udp6:close()
 	end)
-	
+
 	-- convert ip0 strings to nil
 	if ipv4=="0.0.0.0" then ipv4=nil end
 	if ipv6=="::"      then ipv6=nil end
@@ -501,7 +501,7 @@ If given table, convert it to a udp data packet string. little endian
 M.functions.pack=function(a)
 	local ta=type(a)
 	if ta=="string" then
-	
+
 		local b={ string.byte(a,1,6) }
 		if #b<6 then return end -- bad header
 
@@ -543,7 +543,7 @@ lanes task function for handling msgp communication.
 M.functions.msgp_code=function(linda,task_id,task_idx)
 	local M -- hide M for thread safety
 	local global=require("global") -- lock accidental globals
-	
+
 	local task_id_msg=task_id..":msg"
 
 	local lanes=require("lanes")
@@ -561,7 +561,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local hostport
 	local clients={} -- client state, reset on host cmd
 	local update_time=now() -- update clients / gc etc
-	
+
 	-- return a-b with idx wrapping fixed
 	local diff=function(a,b)
 		local d=a-b
@@ -579,7 +579,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		local client=clients[addr] -- client already exists?
 		if reset then client=nil end -- we want to reset the client
 		if client then return client end -- found it
-		
+
 		-- build new client and remember it
 		client={}
 		clients[addr]=client
@@ -621,7 +621,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				end
 				if client.send_ms_count>=msgp.PACKET_PER_MS then
 					lanes.sleep(0.001)
-				end				
+				end
 			end
 			local udp=(#client.addr_list>5) and udp6 or udp4
 --			socket.select(nil,{udp}) -- wait till safe to send? nope, does not help...
@@ -700,7 +700,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					client.recv[ i%0x10000 ]=nil -- remove
 				end
 			end
-			client.recv_idx=(client.recv_idx+1)%0x10000			
+			client.recv_idx=(client.recv_idx+1)%0x10000
 		end
 		advance_ack(client,p)
 		return p
@@ -711,7 +711,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local update_client=function(client)
 		if client.state=="msg" or client.state=="handshake" then -- connected
 			local t=now()
-			
+
 			-- resend
 			local d=diff( client.recv_max , client.recv_idx )
 			if d > 0 then -- we have holes
@@ -760,14 +760,14 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			end
 		end
 	end
-	
+
 	local request=function(memo)
 		local ret={}
-		
+
 		if memo.cmd=="host" then
-		
+
 			clients={} -- forget all clients
-			
+
 			if memo.baseport then
 				baseport=memo.baseport
 			end
@@ -787,7 +787,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					udp4:settimeout(0)
 				end
 			end
-			
+
 			hostport=nil
 			for i=0,1000 do -- try baseport to baseport+1000
 				if ( not udp4 ) or ( udp4:setsockname("*", baseport+i) ) then
@@ -798,7 +798,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				end
 			end
 			if not hostport then ret.error="could not bind to port" end
-			
+
 			ret.port=hostport
 			ret.name=hostname
 			ret.ip4=ip4
@@ -809,7 +809,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			ret.addr=msgp.list_to_addr(list)
 
 		elseif memo.cmd=="join" then
-		
+
 			assert(hostport) -- must be connected
 
 			local client=manifest_client(memo.addr)
@@ -825,21 +825,21 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				bit=msgp.PACKET.HAND,
 				data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(hostport).."\0"..client.addr.."\0",
 			} )
-	
+
 		elseif memo.cmd=="pulse" then
 
 			local client=manifest_client(memo.addr)
-			
+
 			send_packet_pulse( client , {
 				data=memo.data,
 			} )
 
 		elseif memo.cmd=="send" then
-		
+
 			local client=manifest_client(memo.addr)
 
 			local size=string.len(memo.data)
-			
+
 			if size<=msgp.PACKET_SIZE then -- send a single bit
 
 				send_packet( client , {
@@ -847,12 +847,12 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					bits=1,
 					data=memo.data,
 				} )
-			
+
 			else -- send in multiple bits
-			
-				local bits=math.ceil(size/msgp.PACKET_SIZE)				
+
+				local bits=math.ceil(size/msgp.PACKET_SIZE)
 				assert(bits<256)
-				
+
 				local base_idx=client.send_idx
 				for bit=1,bits do
 					local idx=(base_idx+bit)%0x10000
@@ -863,21 +863,21 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 						data=string.sub( memo.data , 1+((bit-1)*msgp.PACKET_SIZE) , (bit*msgp.PACKET_SIZE) ),
 					} )
 				end
-			
+
 			end
 		end
 
 		return ret
 	end
-	
+
 	local packet=function(dat,ip,port)
-	
+
 		local p=msgp.pack(dat)
 		if not p then return end -- bad header
 		p.time=now() -- time we received packet
 		local client=manifest_client(ip,port)
 		local indent=""
-		
+
 		if false then
 			local bitid=p.bit.."/"..p.bits
 			local pings=math.ceil(client.ping*1000).."-"..math.ceil(client.ack*1000)
@@ -893,7 +893,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			end
 
 		end
-		
+
 		local client_handshake=function()
 			client.handshake={}
 
@@ -917,11 +917,11 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			end
 
 		end
-		
+
 		if p.bits==0 then -- protocol packet
-		
+
 			-- packets that we do not recognize here will be ignored
-		
+
 			if		p.bit==msgp.PACKET.HAND
 			and		p.idx==basepack
 			and		client.state~="handshake"
@@ -938,7 +938,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					bit=msgp.PACKET.SHAKE,
 					data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(hostport).."\0"..client.addr.."\0",
 				} )
-				
+
 				client_handshake()
 
 				send_msg({
@@ -963,7 +963,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 					addr=client.addr,
 					handshake=client.handshake,
 				})
-			
+
 			elseif	p.bit==msgp.PACKET.PING
 			and		client.state=="msg"
 			then
@@ -982,7 +982,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			-- PONG packet
 
 				if not recv_packet(client,p) then return end
-				
+
 				if p.data==client.pong then -- expected
 					local t=tonumber(p.data)
 					if t and t==t then
@@ -1016,9 +1016,9 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			end
 
 		else -- data packet
-		
+
 			if not recv_packet(client,p) then return end
-			
+
 			local data
 			if p.bits>1 and p.datas then
 				data=table.concat(p.datas)
@@ -1035,15 +1035,15 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			end
 
 		end
-		
+
 
 	end
 
-	
+
 	while true do
 
 		local _,memo= linda:receive( 0 , task_id ) -- wait for any memos coming into this thread
-		
+
 		if memo then
 			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
 			if not ok then ret={error=ret or true} end -- reformat errors
@@ -1069,7 +1069,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				end
 			end
 		end
-		
+
 		if (now()-update_time) > msgp.TIME.UPDATE then
 			update_time=now()
 			for ip,client in pairs(clients) do
