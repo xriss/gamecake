@@ -2731,7 +2731,7 @@
  },
  "_list": [
   {
-   "body": "<p>Clean a hostname so it becomes upercase letters and numbers with \npossible underscores where any other chars would be, eg whitespace.</p>\n<p>we also try not to start or end with an _</p>\n",
+   "body": "<p>Clean a hostname so it becomes upercase letters and numbers with\npossible underscores where any other chars would be, eg whitespace.</p>\n<p>we also try not to start or end with an _</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
    "line": 177,

@@ -2731,7 +2731,7 @@
  },
  "_list": [
   {
-   "body": "<p>parse an ip address + maybe port encoded as a string into a list of \nnumbers, the length of the list represents the type so</p>\n<pre><code>#4 {1,2,3,4} -- ip4\n#5 {1,2,3,4,5} -- ip4:port\n#8 {1,2,3,4,5,6,7,8} -- ip6\n#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port\n</code></pre>\n<p>Optionally include a numeric port to add/replace in the list after \nparsing.</p>\n",
+   "body": "<p>parse an ip address + maybe port encoded as a string into a list of\nnumbers, the length of the list represents the type so</p>\n<pre><code>#4 {1,2,3,4} -- ip4\n#5 {1,2,3,4,5} -- ip4:port\n#8 {1,2,3,4,5,6,7,8} -- ip6\n#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port\n</code></pre>\n<p>Optionally include a numeric port to add/replace in the list after\nparsing.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
    "line": 260,

@@ -7869,10 +7869,10 @@ of multiple copies of the same task.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L8">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
 <div><pre><code>local msgp=require(&quot;wetgenes.tasks_msgp&quot;)
 </code></pre>
-<p>A stream of lowlevel udp packets with automatic resend ( data will get 
-there eventual ) but hopefully without clogging up an ongoing pulse of 
+<p>A stream of lowlevel udp packets with automatic resend ( data will get
+there eventual ) but hopefully without clogging up an ongoing pulse of
 smaller packets that contain EG controller state.</p>
-<p>We use lua sockets and lanes with some help from wetgenes.tasks to 
+<p>We use lua sockets and lanes with some help from wetgenes.tasks to
 manage the lanes.
 <br/>
 <br/></p>
@@ -7883,29 +7883,29 @@ u8		bit			//	which bit this is, all bits should be joined before parsing
 u8		bits		//	how many bits in total ( all bits will be in adjacent idxs )
 u8		data[*]		//	The payload, if multiple bits then all payloads should be concatenated
 </code></pre>
-<p>A maximum packet size of 63k seems to give good throughput, letting the 
-lower level code split and recombine packets is probably going to be 
-more efficient than us. Note that we care about best case speed, when 
-shit lags and packets drop we care less about performance and more 
-about maintaining a connection with correct state. IE its important 
-that we recover not that we pretend there is no problem. At 255 bits * 
+<p>A maximum packet size of 63k seems to give good throughput, letting the
+lower level code split and recombine packets is probably going to be
+more efficient than us. Note that we care about best case speed, when
+shit lags and packets drop we care less about performance and more
+about maintaining a connection with correct state. IE its important
+that we recover not that we pretend there is no problem. At 255 bits *
 63k bit size we can seen a data of about 15.6m.</p>
-<p>Technically 63k UDP packets might just get dropped as too big but I 
+<p>Technically 63k UDP packets might just get dropped as too big but I
 suspect modern hardware is not really going to cause problems.</p>
-<p>bit/bits only goes up to 255. the 0 value in either of these is 
-reserved as a flag for possible slightly strange packets in the future 
-eg maybe we need a ping? and should be ignored as a bad packet if you 
+<p>bit/bits only goes up to 255. the 0 value in either of these is
+reserved as a flag for possible slightly strange packets in the future
+eg maybe we need a ping? and should be ignored as a bad packet if you
 do not understand them.</p>
-<p>An ack of 0x1234 also implies that 0x9234 to 0x1233 are in the past and 
+<p>An ack of 0x1234 also implies that 0x9234 to 0x1233 are in the past and
 0x1234 to 0x9233 are in the future.</p>
-<p>Also if we have nothing new to say after 100ms but have received new 
+<p>Also if we have nothing new to say after 100ms but have received new
 packets then we can send a packet with empty data (0 length) as an ack
 only packet.</p>
-<p>When connecting to a port for the first time, the idx value must start 
-at a special number, that number is configurable and should be 
-different for each app. An extra bit of sanity during introductions to 
+<p>When connecting to a port for the first time, the idx value must start
+at a special number, that number is configurable and should be
+different for each app. An extra bit of sanity during introductions to
 indicate that the data stream will be understood by both parties.</p>
-<p>Special packets that do not add to the stream of user data but instead 
+<p>Special packets that do not add to the stream of user data but instead
 are used internally by this protocol.</p>
 <pre><code>id		bits	bit
 PING	0x00	0x02
@@ -7915,46 +7915,46 @@ SHAKE	0x00	0x05
 RESEND	0x00	0x08
 PULSE	0x00	0x10
 </code></pre>
-<p>A PING packet will be accepted and acknowledged after handshaking. 
+<p>A PING packet will be accepted and acknowledged after handshaking.
 Sending a PING packet will cause a PONG response with the same data.</p>
-<p>A PONG packet will be accepted and acknowledged after handshaking, its 
+<p>A PONG packet will be accepted and acknowledged after handshaking, its
 data should be the same as the PING it is responding too.</p>
-<p>A HAND packet begins handshaking, the payload data is a string array. 
+<p>A HAND packet begins handshaking, the payload data is a string array.
 Consisting of a series of null terminated utf8 strings.</p>
-<p>A SHAKE packet ends handshaking The payload data is a string array. 
+<p>A SHAKE packet ends handshaking The payload data is a string array.
 Consisting of a series of null terminated utf8 strings.</p>
-<p>Both the HAND and the SHAKE packets contain the same payload data which 
-consists of the following utf8 strings, each terminated by a 0 byte. </p>
+<p>Both the HAND and the SHAKE packets contain the same payload data which
+consists of the following utf8 strings, each terminated by a 0 byte.</p>
 <pre><code>host name
 host ip4
 host ip6
 host port
 client addr
 </code></pre>
-<p>When received, each of the strings should to be clamped to 255 bytes 
+<p>When received, each of the strings should to be clamped to 255 bytes
 and the values validated or replaced with empty strings before use.</p>
 <p>host name is maybe best considered a random string, it could be anything.</p>
-<p>host ip4 will be the hosts best guess at their ip4, it is the ip4 they 
+<p>host ip4 will be the hosts best guess at their ip4, it is the ip4 they
 are listening on.</p>
-<p>host ip6 will be the hosts best guess at their ip6, it is the ip6 they 
+<p>host ip6 will be the hosts best guess at their ip6, it is the ip6 they
 are listening on.</p>
-<p>host port will be the local port the host is listening on, ip4 and ip6, 
-but as they may be port forwarding we might connect on a different 
+<p>host port will be the local port the host is listening on, ip4 and ip6,
+but as they may be port forwarding we might connect on a different
 port.</p>
-<p>client addr is the client ip and port the sender sent this packet too. 
-If ipv4 it will be a string of the format &quot;1.2.3.4:5&quot; and if 1pv6 then 
-&quot;[1::2]:3&quot; So the ip possibly wrapped in square brackets (ipv6) and 
+<p>client addr is the client ip and port the sender sent this packet too.
+If ipv4 it will be a string of the format &quot;1.2.3.4:5&quot; and if 1pv6 then
+&quot;[1::2]:3&quot; So the ip possibly wrapped in square brackets (ipv6) and
 then a colon followed by the port in url style format.</p>
-<p>A RESEND packet consists of a payload of little endian 16bit idxs to 
+<p>A RESEND packet consists of a payload of little endian 16bit idxs to
 packets we would like to be resent to fill in missing data.</p>
-<p>A PULSE packet contains user data but does not get resent or 
-acknowledged, its IDX must be set to 0 and this IDX should be ignored 
-when received as this is out of stream data. Pulse packets are small 
-regular packets of user data, eg current client input state. Data sent 
-is included as part of the normal received data stream but there is no 
-guarantee that it will be delivered or when it will be delivered 
-relative to other data. The data must be small enough to fit in a 
-single packet. Think of this as something of a raw UDP packet in terms 
+<p>A PULSE packet contains user data but does not get resent or
+acknowledged, its IDX must be set to 0 and this IDX should be ignored
+when received as this is out of stream data. Pulse packets are small
+regular packets of user data, eg current client input state. Data sent
+is included as part of the normal received data stream but there is no
+guarantee that it will be delivered or when it will be delivered
+relative to other data. The data must be small enough to fit in a
+single packet. Think of this as something of a raw UDP packet in terms
 of how it works.</p>
 </div>
 </div>
@@ -7970,14 +7970,14 @@ of how it works.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks_msgp.addr_to_list">lua.wetgenes.tasks_msgp.addr_to_list</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L260">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
-<div><p>parse an ip address + maybe port encoded as a string into a list of 
+<div><p>parse an ip address + maybe port encoded as a string into a list of
 numbers, the length of the list represents the type so</p>
 <pre><code>#4 {1,2,3,4} -- ip4
 #5 {1,2,3,4,5} -- ip4:port
 #8 {1,2,3,4,5,6,7,8} -- ip6
 #9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port
 </code></pre>
-<p>Optionally include a numeric port to add/replace in the list after 
+<p>Optionally include a numeric port to add/replace in the list after
 parsing.</p>
 </div>
 </div>
@@ -7985,7 +7985,7 @@ parsing.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks_msgp.clean_name">lua.wetgenes.tasks_msgp.clean_name</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L177">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
-<div><p>Clean a hostname so it becomes upercase letters and numbers with 
+<div><p>Clean a hostname so it becomes upercase letters and numbers with
 possible underscores where any other chars would be, eg whitespace.</p>
 <p>we also try not to start or end with an _</p>
 </div>
@@ -7994,7 +7994,7 @@ possible underscores where any other chars would be, eg whitespace.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks_msgp.ip6_to_addr">lua.wetgenes.tasks_msgp.ip6_to_addr</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L195">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
-<div><p>Parse an array of 8 numbers into an ip6 address with :: in the first 
+<div><p>Parse an array of 8 numbers into an ip6 address with :: in the first
 longest run of zeros if needed and lowercase hex letters.</p>
 </div>
 </div>
@@ -8002,21 +8002,21 @@ longest run of zeros if needed and lowercase hex letters.</p>
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks_msgp.ipsniff">lua.wetgenes.tasks_msgp.ipsniff</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua#L429">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua</a></div>
-<div><p>Use ( google by default ) public dns servers to check if we can connect 
+<div><p>Use ( google by default ) public dns servers to check if we can connect
 to the internet and if we have ipv4 and/or ipv6 available.</p>
-<p>To use alternative dns pass in an ipv4 and ipv6 address as the first 
+<p>To use alternative dns pass in an ipv4 and ipv6 address as the first
 two args, eg to use cloudflare.</p>
 <pre><code>ipsniff(&quot;1.1.1.1&quot;,&quot;2606:4700:4700::1111&quot;)
 </code></pre>
-<p>returns the ipv4,ipv6 address of this host when connecting to that dns 
+<p>returns the ipv4,ipv6 address of this host when connecting to that dns
 or nil if no connection possible.</p>
-<p>This result can be used as a bool to indicate working ipv6 or ipv4 
-internet and is also a best guess as to our ip when connecting to other 
+<p>This result can be used as a bool to indicate working ipv6 or ipv4
+internet and is also a best guess as to our ip when connecting to other
 devices.</p>
-<p>Note that this will only work if we are connected to the internet can 
-reach the dns servers etc etc, standard networks can be crazy 
+<p>Note that this will only work if we are connected to the internet can
+reach the dns servers etc etc, standard networks can be crazy
 disclaimer applies.</p>
-<p>So great if this works but still need a fallback plan, eg assuming 
+<p>So great if this works but still need a fallback plan, eg assuming
 local ipv4 network is available.</p>
 </div>
 </div>
