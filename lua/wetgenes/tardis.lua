@@ -25,7 +25,7 @@ local error=error
 
 --[[#lua.wetgenes.tardis
 
-Time And Relative Dimensions In Space is of course the perfect name for 
+Time And Relative Dimensions In Space is of course the perfect name for
 a library of matrix based math functions.
 
 	local tardis=require("wetgenes.tardis")
@@ -35,16 +35,16 @@ Designed to work as pure lua but with a faster, but less accurate, f32 core by
 default. ( this core seems to be slightly faster/same speed as vanilla lua but
 slower than luajit , so is currently disabled )
 
-Recoil in terror as we use two glyph names for classes whilst typing in 
-random strings of numbers and operators that may or may not contain 
+Recoil in terror as we use two glyph names for classes whilst typing in
+random strings of numbers and operators that may or may not contain
 tyops.
 
 	v# vector [#]
 	m# matrix [#][#]
 	q4 quaternion
 
-Each class is a table of # values [1] to [#] the 2d number streams are 
-formatted the same as opengl (row-major) and metatables are used to 
+Each class is a table of # values [1] to [#] the 2d number streams are
+formatted the same as opengl (row-major) and metatables are used to
 provide methods.
 
 The easy way of remembering the opengl 4x4 matrix layout is that the
@@ -56,8 +56,8 @@ to the constant 0,0,0,1 for most transforms.
 	m4 = | 3  7  11 15 |
 		 | 4  8  12 16 |
 
-This seems to be the simplest (programmer orientated) description of 
-most of the maths used here so go read it if you want to know what the 
+This seems to be the simplest (programmer orientated) description of
+most of the maths used here so go read it if you want to know what the
 funny words mean.
 
 http://www.j3d.org/matrix_faq/matrfaq_latest.html
@@ -71,6 +71,22 @@ local tardis={ modname=(...) } ; package.loaded[tardis.modname]=tardis
 tardis.export=function(env,...)
 	local tab={...} ; for i=1,#tab do tab[i]=env[ tab[i] ] end
 	return unpack(tab)
+end
+
+
+-- mix two numbers when all values should be in the range 0<= to <max
+tardis.mixwrap=function(a,b,m,t)
+	local tfix=function(n) -- clamp to within range, 0 to m
+		if n<0 then return m-((-n)%m)
+		else        return n%m        end
+	end
+	local mo2=(m/2)
+	a=tfix(a)
+	b=tfix(b)
+	local d=a-b
+	if     d < -mo2 then a=a+m     -- long way down
+	elseif d >  mo2 then b=b+m end -- long way up
+	return tfix( b*t + a*(1-t) )
 end
 
 
@@ -88,14 +104,14 @@ function tardis.type(it) local t=type(it) return t=="table" and it.__type or t e
 
 	metatable=tardis.class(name,class,...)
 
-Create a new metatable for an object class, optionally inheriting from other previously 
+Create a new metatable for an object class, optionally inheriting from other previously
 declared classes.
 
 ]]
 function tardis.class(name,...)
 
 	if tardis[name] then return tardis[name] end
-	
+
 	local meta={} -- create new
 	local sub={...} -- possibly multiple sub classes
 
@@ -117,8 +133,8 @@ end
 --[[#lua.wetgenes.tardis.array
 
 
-Array is the base class for all other tardis classes, it is just a 
-stream of numbers, probably in a table but possibly a chunk of f32 
+Array is the base class for all other tardis classes, it is just a
+stream of numbers, probably in a table but possibly a chunk of f32
 values in a userdata.
 
 ]]
@@ -227,7 +243,7 @@ the first four slots in the given array, as you can see we allow one level of
 tables. Any class that is based on this array class can be used instead of an
 explicit table. So we can use a v2 or v3 or m4 etc etc.
 
-if more numbers are given than the size of the array then they will be 
+if more numbers are given than the size of the array then they will be
 ignored.
 
 if less numbers are given than the size of the array then the last number will
@@ -235,7 +251,7 @@ be repeated.
 
 if no numbers are given then nothing will be done
 
-if a function is given it will be called with the index and should 
+if a function is given it will be called with the index and should
 return a number.
 
 ]]
@@ -277,7 +293,7 @@ end
 	a1,a2,a3=v3:unpack()
 	a1,a2,a3,a4=v4:unpack()
 
-Return all values in this array. Note this should be used instead of 
+Return all values in this array. Note this should be used instead of
 the unpack function for future optimisation safety.
 
 ]]
@@ -492,7 +508,7 @@ end
 	r=it:round(r)
 	r=it:round(it.new())
 
-Perform math.floor( v+0.5 ) on all values of this array. Which will 
+Perform math.floor( v+0.5 ) on all values of this array. Which will
 round up or down to the nearest integer.
 
 If r is provided then the result is written into r and returned otherwise it is
@@ -510,8 +526,8 @@ end
 	r=it:trunc(r)
 	r=it:trunc(it.new())
 
-Perform math.floor on positive values and math ceil on negative values 
-for all values of this array. So a trunication that will always error 
+Perform math.floor on positive values and math ceil on negative values
+for all values of this array. So a trunication that will always error
 towards 0.
 
 If r is provided then the result is written into r and returned otherwise it is
@@ -533,11 +549,11 @@ end
 	r=it:quantize(1/1024,r)
 	r=it:quantize(s,it.new())
 
-Perform a trunc(v/s)*s on all values of this array. We recomended the 
-use of a power of two, eg 1/1024 rather than 1/1000 if you wanted 3 
+Perform a trunc(v/s)*s on all values of this array. We recomended the
+use of a power of two, eg 1/1024 rather than 1/1000 if you wanted 3
 decimal digits.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise it is modified and returned.
 
 ]]
@@ -690,13 +706,13 @@ end
 	a=a:compare(b)
 	a=a:compare(1,2,3,4)
 
-Are the numbers in b the same as the numbers in a, this function will 
+Are the numbers in b the same as the numbers in a, this function will
 return true if they are and false if they are not.
 
 If the arrays are of different lengths then this will return false.
 
-Numbers to test for can be given explicitly in the arguments and we 
-follow the same one level of tables rule as we do with array.set so any 
+Numbers to test for can be given explicitly in the arguments and we
+follow the same one level of tables rule as we do with array.set so any
 class derived from array can be used.
 
 ]]
@@ -722,24 +738,24 @@ end
 	ma = ma:product(mb)
 	ma = ma:product(mb,r)
 
-Look at the type and call the appropriate product function, to produce 
+Look at the type and call the appropriate product function, to produce
 
 	mb x ma
-	
-Note the right to left application and default returning of the 
+
+Note the right to left application and default returning of the
 leftmost term for chaining. This seems to make the most sense.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise ma is modified and returned.
 
 ]]
 function array.product(a,b,r)
 
-	local product=a.product_map[ tardis.type(b) ]	
+	local product=a.product_map[ tardis.type(b) ]
 	if product then
 		return product(a,b,r)
 	end
-	
+
 	product=a.product_map[ "*" ] -- try wildcard before we give up
 	if product then
 		return product(a,b,r)
@@ -762,7 +778,7 @@ local m2=tardis.class("m2",array)
 
 	m2 = tardis.m2.new()
 
-Create a new m2 and optionally set it to the given values, m2 methods 
+Create a new m2 and optionally set it to the given values, m2 methods
 usually return the input m2 for easy function chaining.
 
 ]]
@@ -775,7 +791,7 @@ function m2.new(...) return setmetatable({1,0, 0,1},m2):set(...) end
 Set this m2 to the identity matrix.
 
 ]]
-function m2.identity(it) return array.set(it,1,0, 0,1) end 
+function m2.identity(it) return array.set(it,1,0, 0,1) end
 
 --[[#lua.wetgenes.tardis.m2.determinant
 
@@ -809,7 +825,7 @@ end
 
 Transpose this m2.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m2 is modified and returned.
 
 ]]
@@ -825,7 +841,7 @@ end
 
 Scale this m2 by s.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m2 is modified and returned.
 
 ]]
@@ -841,7 +857,7 @@ end
 
 Cofactor this m2.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m2 is modified and returned.
 
 ]]
@@ -868,7 +884,7 @@ end
 
 Adjugate this m2.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m2 is modified and returned.
 
 ]]
@@ -884,13 +900,13 @@ end
 
 Inverse this m2.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m2 is modified and returned.
 
 ]]
 function m2.inverse(it,r)
 	r=r or it
-	local ood=1/m2.determinant(it)	
+	local ood=1/m2.determinant(it)
 	return m2.scale(m2.cofactor(m2.transpose(it,m2.new())),ood,r)
 end
 
@@ -898,7 +914,7 @@ end
 
 --[[#lua.wetgenes.tardis.m3
 
-The metatable for a 3x3 matrix class, use the new function to actually 
+The metatable for a 3x3 matrix class, use the new function to actually
 create an object.
 
 We also inherit all the functions from tardis.array
@@ -910,7 +926,7 @@ local m3=tardis.class("m3",array)
 
 	m3 = tardis.m3.new()
 
-Create a new m3 and optionally set it to the given values, m3 methods 
+Create a new m3 and optionally set it to the given values, m3 methods
 usually return the input m3 for easy function chaining.
 
 ]]
@@ -923,7 +939,7 @@ function m3.new(...) return setmetatable({1,0,0, 0,1,0, 0,0,1},m3):set(...) end
 Set this m3 to the identity matrix.
 
 ]]
-function m3.identity(it) return array.set(it,1,0,0, 0,1,0, 0,0,1) end 
+function m3.identity(it) return array.set(it,1,0,0, 0,1,0, 0,0,1) end
 
 --[[#lua.wetgenes.tardis.m3.m4
 
@@ -934,7 +950,7 @@ Expand an m3 matrix into an m4 matrix.
 ]]
 function m3.m4(it)
 	return tardis.M4( it[1],it[2],it[3],0 , it[4],it[5],it[6],0 , it[7],it[8],it[9],0 , 0,0,0,1 )
-end 
+end
 
 --[[#lua.wetgenes.tardis.m3.v3
 
@@ -953,7 +969,7 @@ function m3.v3(it,n)
 	elseif n==3 then
 		return tardis.V3(it[7],it[8],it[9])
 	end
-end 
+end
 
 --[[#lua.wetgenes.tardis.m3.determinant
 
@@ -997,7 +1013,7 @@ end
 
 Transpose this m3.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m3 is modified and returned.
 
 ]]
@@ -1013,7 +1029,7 @@ end
 
 Scale this m3 by s.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m3 is modified and returned.
 
 ]]
@@ -1029,7 +1045,7 @@ end
 
 Cofactor this m3.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m3 is modified and returned.
 
 ]]
@@ -1039,7 +1055,7 @@ function m3.cofactor(it,r)
 	for iy=1,3 do
 		for ix=1,3 do
 			local idx=iy*3+ix-3
-			if ((ix+iy)%2)==1 then 
+			if ((ix+iy)%2)==1 then
 				t[idx]=-m3.minor_xy(it,ix,iy)
 			else
 				t[idx]=m3.minor_xy(it,ix,iy)
@@ -1056,7 +1072,7 @@ end
 
 Adjugate this m3.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m3 is modified and returned.
 
 ]]
@@ -1072,19 +1088,19 @@ end
 
 Inverse this m3.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m3 is modified and returned.
 
 ]]
 function m3.inverse(it,r)
 	r=r or it
-	local ood=1/m3.determinant(it)	
+	local ood=1/m3.determinant(it)
 	return m3.scale(m3.cofactor(m3.transpose(it,m3.new())),ood,r)
 end
 
 --[[#lua.wetgenes.tardis.m4
 
-The metatable for a 4x4 matrix class, use the new function to actually 
+The metatable for a 4x4 matrix class, use the new function to actually
 create an object.
 
 We also inherit all the functions from tardis.array
@@ -1096,7 +1112,7 @@ local m4=tardis.class("m4",array)
 
 	m4 = tardis.m4.new()
 
-Create a new m4 and optionally set it to the given values, m4 methods 
+Create a new m4 and optionally set it to the given values, m4 methods
 usually return the input m4 for easy function chaining.
 
 ]]
@@ -1109,7 +1125,7 @@ function m4.new(...) return setmetatable({1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1},m4
 Set this m4 to the identity matrix.
 
 ]]
-function m4.identity(it) return array.set(it,1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1) end 
+function m4.identity(it) return array.set(it,1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1) end
 
 --[[#lua.wetgenes.tardis.m4.m3
 
@@ -1120,7 +1136,7 @@ Grab tthe top,left parts of the m4 matrix as an m3 matrix.
 ]]
 function m4.m3(it)
 	return tardis.M3( it[1],it[2],it[3] , it[5],it[6],it[7] , it[9],it[10],it[11] )
-end 
+end
 
 --[[#lua.wetgenes.tardis.m4.v3
 
@@ -1143,7 +1159,7 @@ function m4.v3(it,n)
 	else
 		return tardis.V3(it[13],it[14],it[15])
 	end
-end 
+end
 
 --[[#lua.wetgenes.tardis.m4.determinant
 
@@ -1164,7 +1180,7 @@ return	(it[ 4 ] * it[ 4+3 ] * it[ 8+2 ] * it[ 12+1 ])-(it[ 3 ] * it[ 4+4 ] * it[
 		(it[ 2 ] * it[ 4+1 ] * it[ 8+4 ] * it[ 12+3 ])-(it[ 1 ] * it[ 4+2 ] * it[ 8+4 ] * it[ 12+3 ])-
 		(it[ 3 ] * it[ 4+2 ] * it[ 8+1 ] * it[ 12+4 ])+(it[ 2 ] * it[ 4+3 ] * it[ 8+1 ] * it[ 12+4 ])+
 		(it[ 3 ] * it[ 4+1 ] * it[ 8+2 ] * it[ 12+4 ])-(it[ 1 ] * it[ 4+3 ] * it[ 8+2 ] * it[ 12+4 ])-
-		(it[ 2 ] * it[ 4+1 ] * it[ 8+3 ] * it[ 12+4 ])+(it[ 1 ] * it[ 4+2 ] * it[ 8+3 ] * it[ 12+4 ])	
+		(it[ 2 ] * it[ 4+1 ] * it[ 8+3 ] * it[ 12+4 ])+(it[ 1 ] * it[ 4+2 ] * it[ 8+3 ] * it[ 12+4 ])
 end
 
 --[[#lua.wetgenes.tardis.m4.minor_xy
@@ -1193,7 +1209,7 @@ end
 
 Transpose this m4.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1209,7 +1225,7 @@ end
 
 Add m4b this m4.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1229,7 +1245,7 @@ end
 
 Subtract m4b this m4.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1249,7 +1265,7 @@ end
 
 Lerp from m4 to m4b by s.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1269,7 +1285,7 @@ end
 
 Cofactor this m4.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1296,7 +1312,7 @@ end
 
 Adjugate this m4.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1312,13 +1328,13 @@ end
 
 Inverse this m4.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
 function m4.inverse(it,r)
 	r=r or it
-	local ood=1/m4.determinant(it)	
+	local ood=1/m4.determinant(it)
 	local d=m4.scalar(m4.cofactor(m4.transpose(it,m4.new())),ood)
 	return array.set(r,d)
 end
@@ -1330,7 +1346,7 @@ end
 
 Translate this m4 along its local axis by v3a.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1350,7 +1366,7 @@ end
 
 Translate this m4 along its global axis by v3a.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1371,7 +1387,7 @@ end
 
 Translate this m4 along its local axis by {x,y,z} or v3a.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1392,7 +1408,7 @@ end
 
 Translate this m4 along its global axis by {x,y,z} or v3a.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1411,7 +1427,7 @@ end
 
 Scale this m4 by {x,y,z} or v3.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1439,7 +1455,7 @@ end
 
 Scale this m4 by {s,s,s} or {x,y,z} or v3.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1460,7 +1476,7 @@ end
 
 Scale this m4 by {x,y,z} or v3.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1488,7 +1504,7 @@ end
 
 Pre Scale this m4 by {s,s,s} or {x,y,z} or v3.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1508,7 +1524,7 @@ end
 
 Get v3 translation from a scale/rot/trans matrix
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise a new v3 is created and returned.
 
 ]]
@@ -1523,7 +1539,7 @@ end
 
 Get v3 scale from a scale/rot/trans matrix
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise a new v3 is created and returned.
 
 ]]
@@ -1540,11 +1556,11 @@ end
 
 	q4 = m4:get_rotation_q4(r)
 
-Get quaternion rotation from a scale/rot/trans matrix. Note that scale 
-is assumed to be uniform which it usually is. If that is not the case 
+Get quaternion rotation from a scale/rot/trans matrix. Note that scale
+is assumed to be uniform which it usually is. If that is not the case
 then remove the scale first.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise a new q4 is created and returned.
 
 ]]
@@ -1586,11 +1602,11 @@ function m4.setrot(it,degrees,v3a)
 	local c=math.cos(-math.pi*degrees/180)
 	local cc=1-c
 	local s=math.sin(-math.pi*degrees/180)
-	
+
 	local x=v3a[1]
 	local y=v3a[2]
 	local z=v3a[3]
-	
+
 	local delta=0.001 -- a smallish number
 	local dd=( (x*x) + (y*y) + (z*z) )
 	if ( dd < (1-delta) ) or ( dd > (1+delta) ) then -- not even close to a unit vector
@@ -1622,11 +1638,11 @@ function m4.setrrot(it,radians,v3a)
 	local c=math.cos(-radians)
 	local cc=1-c
 	local s=math.sin(-radians)
-	
+
 	local x=v3a[1]
 	local y=v3a[2]
 	local z=v3a[3]
-	
+
 	local delta=0.001 -- a smallish number
 	local dd=( (x*x) + (y*y) + (z*z) )
 	if ( dd < (1-delta) ) or ( dd > (1+delta) ) then -- not even close to a unit vector
@@ -1651,7 +1667,7 @@ end
 
 Apply a rotation in degres around the given axis to this matrix.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1667,7 +1683,7 @@ end
 
 Apply a rotation in radians around the given axis to this matrix.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1683,7 +1699,7 @@ end
 
 Apply a quaternion rotation to this matrix.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1701,10 +1717,10 @@ end
 	m4 = m4:rotate(q)
 	m4 = m4:rotate(q,r)
 
-Apply quaternion or angle rotation to this matrix depending on 
+Apply quaternion or angle rotation to this matrix depending on
 arguments provided.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1726,7 +1742,7 @@ end
 
 Pre apply a rotation in degrees around the given axis to this matrix.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1742,7 +1758,7 @@ end
 
 Pre apply a rotation in radians around the given axis to this matrix.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1758,7 +1774,7 @@ end
 
 Pre apply a quaternion rotation to this matrix.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1776,10 +1792,10 @@ end
 	m4 = m4:prerotate(q)
 	m4 = m4:prerotate(q,r)
 
-Pre apply quaternion or angle rotation to this matrix depending on 
+Pre apply quaternion or angle rotation to this matrix depending on
 arguments provided.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise m4 is modified and returned.
 
 ]]
@@ -1796,7 +1812,7 @@ end
 
 --[[#lua.wetgenes.tardis.v1
 
-The metatable for a 2d vector class, use the new function to actually 
+The metatable for a 2d vector class, use the new function to actually
 create an object.
 
 We also inherit all the functions from tardis.array
@@ -1808,7 +1824,7 @@ local v1=tardis.class("v1",array)
 
 	v1 = tardis.v1.new()
 
-Create a new v1 and optionally set it to the given values, v1 methods 
+Create a new v1 and optionally set it to the given values, v1 methods
 usually return the input v1 for easy function chaining.
 
 ]]
@@ -1821,13 +1837,13 @@ function v1.new(...) return setmetatable({0},v1):set(...) end
 Set this v1 to all zeros.
 
 ]]
-function v1.identity(it) return array.set(it,0) end 
+function v1.identity(it) return array.set(it,0) end
 
 --[[#lua.wetgenes.tardis.v1.lenlen
 
 	value = v1:lenlen()
 
-Returns the length of this vector, squared, this is often all you need 
+Returns the length of this vector, squared, this is often all you need
 for comparisons so lets us skip the sqrt.
 
 ]]
@@ -1863,9 +1879,9 @@ end
 	v1 = v1:oo()
 	v1 = v1:oo(r)
 
-One Over value. Build the reciprocal of all elements. 
+One Over value. Build the reciprocal of all elements.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v1 is modified and returned.
 
 ]]
@@ -1881,7 +1897,7 @@ end
 
 Scale this v1 by s.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v1 is modified and returned.
 
 ]]
@@ -1899,13 +1915,13 @@ Adjust the length of this vector to 1.
 
 An input length of 0 will remain at 0.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v1 is modified and returned.
 
 ]]
 function v1.normalize(it,r)
 	local l=v1.len(it)
-	if l>0 then l=1/l end 
+	if l>0 then l=1/l end
 	return v1.scale(it,l,r)
 end
 
@@ -1916,7 +1932,7 @@ end
 
 Add v1b to v1.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v1 is modified and returned.
 
 ]]
@@ -1932,7 +1948,7 @@ end
 
 Subtract v1b from v1.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v1 is modified and returned.
 
 ]]
@@ -1948,7 +1964,7 @@ end
 
 Multiply v1 by v1b.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v1 is modified and returned.
 
 ]]
@@ -1981,7 +1997,7 @@ end
 
 --[[#lua.wetgenes.tardis.v2
 
-The metatable for a 2d vector class, use the new function to actually 
+The metatable for a 2d vector class, use the new function to actually
 create an object.
 
 We also inherit all the functions from tardis.array
@@ -1993,7 +2009,7 @@ local v2=tardis.class("v2",array)
 
 	v2 = tardis.v2.new()
 
-Create a new v2 and optionally set it to the given values, v2 methods 
+Create a new v2 and optionally set it to the given values, v2 methods
 usually return the input v2 for easy function chaining.
 
 ]]
@@ -2006,13 +2022,13 @@ function v2.new(...) return setmetatable({0,0},v2):set(...) end
 Set this v2 to all zeros.
 
 ]]
-function v2.identity(it) return array.set(it,0,0) end 
+function v2.identity(it) return array.set(it,0,0) end
 
 --[[#lua.wetgenes.tardis.v2.lenlen
 
 	value = v2:lenlen()
 
-Returns the length of this vector, squared, this is often all you need 
+Returns the length of this vector, squared, this is often all you need
 for comparisons so lets us skip the sqrt.
 
 ]]
@@ -2050,9 +2066,9 @@ end
 	v2 = v2:oo()
 	v2 = v2:oo(r)
 
-One Over value. Build the reciprocal of all elements. 
+One Over value. Build the reciprocal of all elements.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v2 is modified and returned.
 
 ]]
@@ -2068,7 +2084,7 @@ end
 
 Scale this v2 by s.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v2 is modified and returned.
 
 ]]
@@ -2086,13 +2102,13 @@ Adjust the length of this vector to 1.
 
 An input length of 0 will remain at 0.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v2 is modified and returned.
 
 ]]
 function v2.normalize(it,r)
 	local l=v2.len(it)
-	if l>0 then l=1/l end 
+	if l>0 then l=1/l end
 	return v2.scale(it,l,r)
 end
 
@@ -2103,7 +2119,7 @@ end
 
 Add v2b to v2.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v2 is modified and returned.
 
 ]]
@@ -2119,7 +2135,7 @@ end
 
 Subtract v2b from v2.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v2 is modified and returned.
 
 ]]
@@ -2135,7 +2151,7 @@ end
 
 Multiply v2 by v2b.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v2 is modified and returned.
 
 ]]
@@ -2168,7 +2184,7 @@ end
 
 --[[#lua.wetgenes.tardis.v3
 
-The metatable for a 3d vector class, use the new function to actually 
+The metatable for a 3d vector class, use the new function to actually
 create an object.
 
 We also inherit all the functions from tardis.array
@@ -2180,7 +2196,7 @@ local v3=tardis.class("v3",array)
 
 	v3 = tardis.v3.new()
 
-Create a new v3 and optionally set it to the given values, v3 methods 
+Create a new v3 and optionally set it to the given values, v3 methods
 usually return the input v3 for easy function chaining.
 
 ]]
@@ -2193,13 +2209,13 @@ function v3.new(...) return setmetatable({0,0,0},v3):set(...) end
 Set this v3 to all zeros.
 
 ]]
-function v3.identity(it) return array.set(it,0,0,0) end 
+function v3.identity(it) return array.set(it,0,0,0) end
 
 --[[#lua.wetgenes.tardis.v3.lenlen
 
 	value = v3:lenlen()
 
-Returns the length of this vector, squared, this is often all you need 
+Returns the length of this vector, squared, this is often all you need
 for comparisons so lets us skip the sqrt.
 
 ]]
@@ -2237,9 +2253,9 @@ end
 	v3 = v3:oo()
 	v3 = v3:oo(r)
 
-One Over value. Build the reciprocal of all elements. 
+One Over value. Build the reciprocal of all elements.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v3 is modified and returned.
 
 ]]
@@ -2255,7 +2271,7 @@ end
 
 Scale this v3 by s.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v3 is modified and returned.
 
 ]]
@@ -2273,13 +2289,13 @@ Adjust the length of this vector to 1.
 
 An input length of 0 will remain at 0.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v3 is modified and returned.
 
 ]]
 function v3.normalize(it,r)
 	local l=v3.len(it)
-	if l>0 then l=1/l end 
+	if l>0 then l=1/l end
 	return v3.scale(it,l,r)
 end
 
@@ -2290,7 +2306,7 @@ end
 
 Add v3b to v3.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v3 is modified and returned.
 
 ]]
@@ -2306,7 +2322,7 @@ end
 
 Subtract v3b from v3.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v3 is modified and returned.
 
 ]]
@@ -2322,7 +2338,7 @@ end
 
 Multiply v3 by v3b.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v3 is modified and returned.
 
 ]]
@@ -2349,7 +2365,7 @@ end
 
 Return the cross product of these two vectors.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v3 is modified and returned.
 
 ]]
@@ -2364,11 +2380,11 @@ end
 	radians,axis = v3a:angle(v3b)
 	radians,axis = v3a:angle(v3b,axis)
 
-Return radians and axis of rotation between these two vectors. If axis is given 
-then it must represent a positive world aligned axis normal. So V3(1,0,0) or 
-V3(0,1,0) or V3(0,0,1) only. The point of providing an axis allows the returned 
-angle to be over a 360 degree range rather than flipping the axis after 180 
-degrees this means the second axis returned value can be ignored as it will 
+Return radians and axis of rotation between these two vectors. If axis is given
+then it must represent a positive world aligned axis normal. So V3(1,0,0) or
+V3(0,1,0) or V3(0,0,1) only. The point of providing an axis allows the returned
+angle to be over a 360 degree range rather than flipping the axis after 180
+degrees this means the second axis returned value can be ignored as it will
 always be the axis that is passed in.
 
 ]]
@@ -2388,9 +2404,9 @@ function v3.angle(va,vb,axis)
 
 	local d=na:dot(nb)
 	local r=math.acos( d>1 and 1 or  d<-1 and -1 or d ) -- clamp to avoid nan
-	
+
 	local x=na:cross( nb , tardis.v3.new() ):normalize()
-	
+
 	if axis then
 		if x:dot(axis) < 0 then -- flip negative axis so we can ignore it
 			r=-r
@@ -2399,12 +2415,12 @@ function v3.angle(va,vb,axis)
 	end
 
 	return r,x
-	
+
 end
 
 --[[#lua.wetgenes.tardis.v4
 
-The metatable for a 4d vector class, use the new function to actually 
+The metatable for a 4d vector class, use the new function to actually
 create an object.
 
 We also inherit all the functions from tardis.array
@@ -2416,7 +2432,7 @@ local v4=tardis.class("v4",array)
 
 	v4 = tardis.v4.new()
 
-Create a new v4 and optionally set it to the given values, v4 methods 
+Create a new v4 and optionally set it to the given values, v4 methods
 usually return the input v4 for easy function chaining.
 
 ]]
@@ -2437,8 +2453,8 @@ function v4.identity(it) return array.set(it,0,0,0,0) end
 	v3 = v4:to_v3(r)
 
 scale [4] to 1 then throw it away so we have a v3 xyz
- 
-If r is provided then the result is written into r and returned 
+
+If r is provided then the result is written into r and returned
 otherwise a new v3 is created and returned.
 
 ]]
@@ -2452,7 +2468,7 @@ end
 
 	value = v4:lenlen()
 
-Returns the length of this vector, squared, this is often all you need 
+Returns the length of this vector, squared, this is often all you need
 for comparisons so lets us skip the sqrt.
 
 ]]
@@ -2491,9 +2507,9 @@ end
 	v4 = v4:oo()
 	v4 = v4:oo(r)
 
-One Over value. Build the reciprocal of all elements. 
+One Over value. Build the reciprocal of all elements.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v4 is modified and returned.
 
 ]]
@@ -2509,7 +2525,7 @@ end
 
 Scale this v4 by s.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v4 is modified and returned.
 
 ]]
@@ -2527,13 +2543,13 @@ Adjust the length of this vector to 1.
 
 An input length of 0 will remain at 0.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v4 is modified and returned.
 
 ]]
 function v4.normalize(it,r)
 	local l=v4.len(it)
-	if l>0 then l=1/l end 
+	if l>0 then l=1/l end
 	return v4.scale(it,l,r)
 end
 
@@ -2544,7 +2560,7 @@ end
 
 Add v4b to v4.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v4 is modified and returned.
 
 ]]
@@ -2560,7 +2576,7 @@ end
 
 Subtract v4b from v4.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v4 is modified and returned.
 
 ]]
@@ -2576,7 +2592,7 @@ end
 
 Multiply v4 by v4b.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise v4 is modified and returned.
 
 ]]
@@ -2675,7 +2691,7 @@ end
 
 	q4 = tardis.q4.new()
 
-Create a new q4 and optionally set it to the given values, q4 methods 
+Create a new q4 and optionally set it to the given values, q4 methods
 usually return the input q4 for easy function chaining.
 
 ]]
@@ -2688,7 +2704,7 @@ function q4.new(...) return setmetatable({0,0,0,1},q4):set(...) end
 Set this q4 to its 0,0,0,1 identity
 
 ]]
-function q4.identity(it) return array.set(it,0,0,0,1) end 
+function q4.identity(it) return array.set(it,0,0,0,1) end
 
 --[[#lua.wetgenes.tardis.q4.reverse
 
@@ -2697,7 +2713,7 @@ function q4.identity(it) return array.set(it,0,0,0,1) end
 
 Reverse the rotation of this quaternion.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise q4 is modified and returned.
 
 ]]
@@ -2713,7 +2729,7 @@ end
 
 Lerp from q4 to q4b by s.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise q4 is modified and returned.
 
 ]]
@@ -2758,7 +2774,7 @@ end
 
 Apply a degree rotation to this quaternion.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise q4 is modified and returned.
 
 ]]
@@ -2775,7 +2791,7 @@ end
 
 Pre apply a degree rotation to this quaternion.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise q4 is modified and returned.
 
 ]]
@@ -2792,7 +2808,7 @@ end
 
 Apply a radian rotation to this quaternion.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise q4 is modified and returned.
 
 ]]
@@ -2809,7 +2825,7 @@ end
 
 Pre apply a radian rotation to this quaternion.
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise q4 is modified and returned.
 
 ]]
@@ -2841,7 +2857,7 @@ end
 
 Get a yaw,pitch,roll degree rotation from this quaternion
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise a new v3 is created and returned.
 
 ]]
@@ -2883,7 +2899,7 @@ end
 
 Get a yaw,pitch,roll degree rotation from this quaternion
 
-If r is provided then the result is written into r and returned 
+If r is provided then the result is written into r and returned
 otherwise a new v3 is created and returned.
 
 ]]
@@ -2904,12 +2920,12 @@ function q4.get_yaw_pitch_roll_in_radians(q,r)
 	else
 		r[2] = math.asin(sinp)
 	end
-	
+
 -- yaw (z-axis rotation)
 	local siny_cosp =   2*(q[4] * q[3] + q[1] * q[2])
 	local cosy_cosp = 1-2*(q[2] * q[2] + q[3] * q[3])
 	r[3] = math.atan2(siny_cosp, cosy_cosp)
-	
+
 	return r
 end
 
@@ -3015,7 +3031,7 @@ function tardis.q4_to_m4(q,m)
 					1 - 2 * ( xx + yy ),
 						0,
 						0,0,0,1)
-						
+
 	return m
 end
 
@@ -3136,30 +3152,30 @@ function tardis.m4_project23d(view_width,view_height,width,height,fov,depth)
 	local aspect=height/width
 
 	local m=m4.new()
-	
+
 	local f=depth
 	local n=1
 
 	local win_aspect=((view_height or height)/(view_width or width))
-		
+
 	if (win_aspect > (aspect) ) 	then 	-- fit width to screen
-	
+
 		m[1] = ((aspect)*1)/fov
 		m[6] = -((aspect)/win_aspect)/fov
-		
+
 	else									-- fit height to screen
-	
+
 		m[1] = win_aspect/fov
 		m[6] = -1/fov
-		
+
 	end
-	
-	
+
+
 	m[11] = -(f+n)/(f-n)
 	m[12] = -1
 
 	m[15] = -2*f*n/(f-n)
-	
+
 	return m
 end
 
@@ -3174,9 +3190,9 @@ stack.
 ]]
 function tardis.m4_stack()
 	local stack={}
-	
+
 	stack[1]=tardis.m4.new():identity()
-	
+
 	stack.save=function()
 		return tardis.m4.new(stack[#stack])
 	end
@@ -3241,7 +3257,7 @@ function tardis.m4_stack()
 		stack[#stack]=nil -- remove topmost
 		return stack
 	end
-	
+
 	return stack
 end
 
@@ -3255,7 +3271,7 @@ if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first
 --upgrade the above to hopefully faster C versions working on 16byte aligned userdata arrays of floats
 
 	local tcore=tardis.f32
-		
+
 	-- allow read/write with magical [] lookups
 	function array.__len(it) return 1 end
 	function array.__index(it,n) return array[n] or tcore.read(it,n) end
