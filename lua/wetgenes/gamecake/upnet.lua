@@ -490,7 +490,7 @@ print("joining",addr)
 		table.insert( upnet.history , 1 , { [upnet.us]=upnet.upcache:save() } ) -- remember new tick
 
 		upnet.upcache=oven.ups.create()
-		upnet.upcache:load(oven.ups.manifest(1))
+--		upnet.upcache:load(oven.ups.manifest(1))
 
 --print("history",upnet.us,#upnet.history)
 
@@ -521,6 +521,10 @@ print("joining",addr)
 
 		repeat until not upnet.update_ticks_input() -- update ticks.input
 		repeat until not upnet.update_ticks_agreed() -- update ticks.agreed
+
+		if upnet.ticks.update - upnet.ticks.agreed > 64 then -- pause/glitch if we get way too far behind
+			upnet.ticks.pause="timeout"
+		end
 
 		if upnet.ticks.epoch and upnet.us then -- we are ticking
 			local t=((now()-upnet.ticks.epoch)/upnet.ticks.length) -- we *always* have 1 tick of controller latency
