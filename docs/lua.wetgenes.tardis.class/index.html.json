@@ -2731,10 +2731,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>metatable=tardis.class(name,class,...)\n</code></pre>\n<p>Create a new metatable for an object class, optionally inheriting from other previously \ndeclared classes.</p>\n",
+   "body": "<pre><code>metatable=tardis.class(name,class,...)\n</code></pre>\n<p>Create a new metatable for an object class, optionally inheriting from other previously\ndeclared classes.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 87,
+   "line": 103,
    "name": "lua.wetgenes.tardis.class",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

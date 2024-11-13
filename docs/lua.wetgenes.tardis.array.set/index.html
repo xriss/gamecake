@@ -696,7 +696,7 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tardis.array.set">lua.wetgenes.tardis.array.set</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L218">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua#L234">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua</a></div>
 <div><pre><code>a=a:set(1,2,3,4)
 a=a:set({1,2,3,4})
 a=a:set({1,2},{3,4})
@@ -706,12 +706,12 @@ a=a:set(function(i) return i end)
 the first four slots in the given array, as you can see we allow one level of
 tables. Any class that is based on this array class can be used instead of an
 explicit table. So we can use a v2 or v3 or m4 etc etc.</p>
-<p>if more numbers are given than the size of the array then they will be 
+<p>if more numbers are given than the size of the array then they will be
 ignored.</p>
 <p>if less numbers are given than the size of the array then the last number will
 be repeated.</p>
 <p>if no numbers are given then nothing will be done</p>
-<p>if a function is given it will be called with the index and should 
+<p>if a function is given it will be called with the index and should
 return a number.</p>
 </div>
 </div>

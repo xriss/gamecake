@@ -2731,10 +2731,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>v2 = v2:mul(v2b)\nv2 = v2:mul(v2b,r)\n</code></pre>\n<p>Multiply v2 by v2b.</p>\n<p>If r is provided then the result is written into r and returned \notherwise v2 is modified and returned.</p>\n",
+   "body": "<pre><code>v2 = v2:mul(v2b)\nv2 = v2:mul(v2b,r)\n</code></pre>\n<p>Multiply v2 by v2b.</p>\n<p>If r is provided then the result is written into r and returned\notherwise v2 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2131,
+   "line": 2147,
    "name": "lua.wetgenes.tardis.v2.mul",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
