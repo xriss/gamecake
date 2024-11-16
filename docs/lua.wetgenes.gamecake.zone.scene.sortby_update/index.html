@@ -694,11 +694,13 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.sortby_update">lua.wetgenes.gamecake.zone.scene.sortby_update</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L292">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
-<div><pre><code>scene:sortby_update()
+<div><pre><code>scene:sortby_update(newtab)
 </code></pre>
-<p>A function that takes the array part of scene.sortby and reverses the
+<p>A function that takes the array part of newtab and reverses the
 key=value so a simple order list can be provided without any explicit weights.
 The first caste name in the array gets a weight of 1, second 2 and so on.</p>
+<p>Newtab is coppied into scene.sortby for use a s aweight lookuptable of name to weight.</p>
+<p>If newtab is not provided then scene.sortby is used by default.</p>
 </div>
 </div>
 
