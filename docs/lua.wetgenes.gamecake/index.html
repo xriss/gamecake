@@ -2295,11 +2295,11 @@ scene.add(it,caste)
 scene.add(it,caste,boot)
 </code></pre>
 <p>Add a new item of caste or it.caste to the list of things to update.</p>
-<p>The optional boot table contains initialisation/reset values and will 
-be remembered in item.boot. If boot.id is given then we will remember 
+<p>The optional boot table contains initialisation/reset values and will
+be remembered in item.boot. If boot.id is given then we will remember
 this item with a call to scene.set(id,it)</p>
-<p>The actual act of initalising the item from the boot table is left to 
-custom code which ideally should initalize it and then just call 
+<p>The actual act of initalising the item from the boot table is left to
+custom code which ideally should initalize it and then just call
 scene.add(it) as the auto shortcuts are unnecesary.</p>
 </div>
 </div>
@@ -2309,10 +2309,10 @@ scene.add(it) as the auto shortcuts are unnecesary.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L417">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene.call(fname,...)
 </code></pre>
-<p>If fname is a string then that method will be invoked for every item 
-where it exists like so. Only the first item of each caste is tested, 
-if the function exists there then it is expected to exist for all items 
-of a given caste. This enables us to skip entire castes whilst still 
+<p>If fname is a string then that method will be invoked for every item
+where it exists like so. Only the first item of each caste is tested,
+if the function exists there then it is expected to exist for all items
+of a given caste. This enables us to skip entire castes whilst still
 making all functions optional.</p>
 <pre><code>if it[fname] then it[fname](it,...) end
 </code></pre>
@@ -2334,7 +2334,7 @@ currently active items.</p>
 </code></pre>
 <p>Get the list of items of a given caste, eg &quot;bullets&quot; or &quot;enemies&quot;</p>
 <p>This list will be created if it does not already exist.</p>
-<p>scene.sortby is used to keep this list in order and an empty system 
+<p>scene.sortby is used to keep this list in order and an empty system
 will be autocreated if needed.</p>
 </div>
 </div>
@@ -2352,7 +2352,7 @@ will be autocreated if needed.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L145">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>local it = scene.find_uid( uid )
 </code></pre>
-<p>Return the item with the given uid or nil if no such item has been 
+<p>Return the item with the given uid or nil if no such item has been
 remembered or a nil uid has been passed in.</p>
 </div>
 </div>
@@ -2378,19 +2378,19 @@ does not exist.</p>
 
 local uid = scene.generate_uid(uid)
 </code></pre>
-<p>Simple unique incremental IDs for items to be used instead of 
+<p>Simple unique incremental IDs for items to be used instead of
 pointers, starts at 1 and goes up as items are added.</p>
-<p>Ideally you will also need extra code for compacting these ids ( 
-probably as an export, renumber, import cycle ) to stop them getting 
-huge and breaking. So a save/load system which is out of scope for this 
+<p>Ideally you will also need extra code for compacting these ids (
+probably as an export, renumber, import cycle ) to stop them getting
+huge and breaking. So a save/load system which is out of scope for this
 code.</p>
-<p>Generally, unless we are creating and destroying millions of items we 
+<p>Generally, unless we are creating and destroying millions of items we
 will run out of memory way before this number gets too big.</p>
-<p>If a uid is passed in then we will return uid+1 and continue on upwards 
+<p>If a uid is passed in then we will return uid+1 and continue on upwards
 for subsequent calls.</p>
-<p>The point of uids is so we can refer to and lazy link items as weak 
-values making it easy to delete an item without worrying too much about 
-where it has been used. So instead of putting the item table inside 
+<p>The point of uids is so we can refer to and lazy link items as weak
+values making it easy to delete an item without worrying too much about
+where it has been used. So instead of putting the item table inside
 another item table we can use a uid reference instead.</p>
 <p>Good for serialising data as well.</p>
 </div>
@@ -2514,12 +2514,12 @@ an fname function to call.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L238">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene.systems_cocall(fname,...)
 </code></pre>
-<p>For every system call the function called fname inside a coroutine like 
+<p>For every system call the function called fname inside a coroutine like
 so.</p>
 <pre><code>system[fname](system,...)
 </code></pre>
-<p>This function can yield and should do so if it is waiting for another 
-system to do something. All coroutines will be run in a round robin 
+<p>This function can yield and should do so if it is waiting for another
+system to do something. All coroutines will be run in a round robin
 style until they all complete.</p>
 <p>Returns the number of calls made, which will be the number of systems that had
 an fname function to call.</p>
@@ -2557,16 +2557,16 @@ be set to the caste of the system for this to work.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values">lua.wetgenes.gamecake.zone.scene.values</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L772">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L779">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)
 
 values = zone_scene.create_values()
 </code></pre>
 <p>Create and return a values object.</p>
-<p>This is an array of objects representing the main object in values[1] 
+<p>This is an array of objects representing the main object in values[1]
 and future predictions in values[2],values[3] etc etc.</p>
-<p>The key values in the higher numbers overide key values in the lower 
-numbers so essentially only changes need to be written into the 
+<p>The key values in the higher numbers overide key values in the lower
+numbers so essentially only changes need to be written into the
 predicted slots.</p>
 </div>
 </div>
@@ -2575,18 +2575,22 @@ predicted slots.</p>
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.get">lua.wetgenes.gamecake.zone.scene.values.get</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L606">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:get(key)
+value=values:get(key,topidx)
 </code></pre>
-<p>Get the current value for this key by searching from the top of the 
+<p>Get the current value for this key by searching from the top of the
 stack to the bottom and returning the first non nil value we find.</p>
+<p>If topidx is given then get the value at this idx, this would normally
+be negative in which it counts back from the end. So it is easy to
+time travel back a frame into the cached values with -1 as the idx.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.manifest">lua.wetgenes.gamecake.zone.scene.values.manifest</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L621">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L628">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:manifest(key,value)
 </code></pre>
-<p>Get the current value for this key if there is no current value then 
+<p>Get the current value for this key if there is no current value then
 set the current value.</p>
 <p>This uses values:get and values:set to perform these actions.</p>
 </div>
@@ -2597,7 +2601,7 @@ set the current value.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L548">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values2 = values:new()
 </code></pre>
-<p>Create and return a new values object with a single slot containing an 
+<p>Create and return a new values object with a single slot containing an
 empty object.</p>
 </div>
 </div>
@@ -2607,7 +2611,7 @@ empty object.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L562">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:push()
 </code></pre>
-<p>Add a new slot to the end of the values array. Future values will be 
+<p>Add a new slot to the end of the values array. Future values will be
 writen into this new slot.</p>
 </div>
 </div>
@@ -2617,39 +2621,39 @@ writen into this new slot.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L591">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:set(key,value)
 </code></pre>
-<p>If this is different from the current value then write the value into 
-the key of the object at the top of the stack. Hence future gets will 
+<p>If this is different from the current value then write the value into
+the key of the object at the top of the stack. Hence future gets will
 get this new value.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.tween">lua.wetgenes.gamecake.zone.scene.values.tween</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L638">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L645">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:tween(key,tween)
 </code></pre>
 <p>Tween between the current value(1) and the previous value(0).</p>
-<p>A tween of 0 gets the previous value, a tween of 1 gets the current 
-value and any other tween will get a mix between the two if that is 
+<p>A tween of 0 gets the previous value, a tween of 1 gets the current
+value and any other tween will get a mix between the two if that is
 possible.</p>
-<p>We can only mix numbers or tardis values, other values will round to 
+<p>We can only mix numbers or tardis values, other values will round to
 either 0 or 1 whichever is closest and then get that whole value.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.twrap">lua.wetgenes.gamecake.zone.scene.values.twrap</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L688">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L695">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:twrap(key,nmax,tween)
 </code></pre>
 <p>Tween wrap between the current value and the previous value.</p>
-<p>Result will be in rang of 0&gt;= n &lt;nmax , blended in the shortest 
+<p>Result will be in rang of 0&gt;= n &lt;nmax , blended in the shortest
 direction.</p>
 <p>nmax may be a number or a tardis value for nmax per dimension</p>
-<p>A tween of 0 gets the previous value, a tween of 1 gets the current 
-value and any other tween will get a mix between the two if that is 
+<p>A tween of 0 gets the previous value, a tween of 1 gets the current
+value and any other tween will get a mix between the two if that is
 possible.</p>
-<p>We can only mix numbers or tardis values, other values will round to 
+<p>We can only mix numbers or tardis values, other values will round to
 either 0 or 1 whichever is closest and then get that whole value.
 <br/>
 <br/></p>
@@ -2661,7 +2665,7 @@ either 0 or 1 whichever is closest and then get that whole value.
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L574">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:unpush()
 </code></pre>
-<p>Remove all pushed slots except for values[1] This has the effect of 
+<p>Remove all pushed slots except for values[1] This has the effect of
 undoing all changes that have been predicted.</p>
 <p>Future values will be writen into the base values[1] slot.</p>
 </div>

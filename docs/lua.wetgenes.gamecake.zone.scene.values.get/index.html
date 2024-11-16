@@ -698,9 +698,13 @@
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.get">lua.wetgenes.gamecake.zone.scene.values.get</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L606">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:get(key)
+value=values:get(key,topidx)
 </code></pre>
-<p>Get the current value for this key by searching from the top of the 
+<p>Get the current value for this key by searching from the top of the
 stack to the bottom and returning the first non nil value we find.</p>
+<p>If topidx is given then get the value at this idx, this would normally
+be negative in which it counts back from the end. So it is easy to
+time travel back a frame into the cached values with -1 as the idx.</p>
 </div>
 </div>
 

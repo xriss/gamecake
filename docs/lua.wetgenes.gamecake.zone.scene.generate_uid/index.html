@@ -701,19 +701,19 @@
 
 local uid = scene.generate_uid(uid)
 </code></pre>
-<p>Simple unique incremental IDs for items to be used instead of 
+<p>Simple unique incremental IDs for items to be used instead of
 pointers, starts at 1 and goes up as items are added.</p>
-<p>Ideally you will also need extra code for compacting these ids ( 
-probably as an export, renumber, import cycle ) to stop them getting 
-huge and breaking. So a save/load system which is out of scope for this 
+<p>Ideally you will also need extra code for compacting these ids (
+probably as an export, renumber, import cycle ) to stop them getting
+huge and breaking. So a save/load system which is out of scope for this
 code.</p>
-<p>Generally, unless we are creating and destroying millions of items we 
+<p>Generally, unless we are creating and destroying millions of items we
 will run out of memory way before this number gets too big.</p>
-<p>If a uid is passed in then we will return uid+1 and continue on upwards 
+<p>If a uid is passed in then we will return uid+1 and continue on upwards
 for subsequent calls.</p>
-<p>The point of uids is so we can refer to and lazy link items as weak 
-values making it easy to delete an item without worrying too much about 
-where it has been used. So instead of putting the item table inside 
+<p>The point of uids is so we can refer to and lazy link items as weak
+values making it easy to delete an item without worrying too much about
+where it has been used. So instead of putting the item table inside
 another item table we can use a uid reference instead.</p>
 <p>Good for serialising data as well.</p>
 </div>

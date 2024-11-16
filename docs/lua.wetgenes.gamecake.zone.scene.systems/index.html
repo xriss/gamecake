@@ -724,12 +724,12 @@ an fname function to call.</p>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L238">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene.systems_cocall(fname,...)
 </code></pre>
-<p>For every system call the function called fname inside a coroutine like 
+<p>For every system call the function called fname inside a coroutine like
 so.</p>
 <pre><code>system[fname](system,...)
 </code></pre>
-<p>This function can yield and should do so if it is waiting for another 
-system to do something. All coroutines will be run in a round robin 
+<p>This function can yield and should do so if it is waiting for another
+system to do something. All coroutines will be run in a round robin
 style until they all complete.</p>
 <p>Returns the number of calls made, which will be the number of systems that had
 an fname function to call.</p>
