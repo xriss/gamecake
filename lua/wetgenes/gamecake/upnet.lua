@@ -65,6 +65,8 @@ M.bake=function(oven,upnet)
 		upnet.ticks.now=0		-- the tick we have our input for
 		upnet.ticks.draw=0		-- the tick you have drawn
 
+		upnet.need_sync=false	-- client needs to sync data when this is set
+
 		-- we sync now to time and calculate input tick as data arrives
 		-- you should set update and draw times when you update and draw
 		-- if things are laging then we may adjust the epoch to "skip" frames
@@ -466,17 +468,18 @@ print("joining",addr)
 		for _,v in pairs(upnet.clients) do -- all hashes must agree
 			if v.join_tick < upnet.ticks.agreed then
 				if not hash[v.idx] then return end -- no hash yet
-				if h ~= hash[v.idx] then -- this is bad
-					error("out of sync")
-					-- need to trigger a full resync here
+				if h ~= hash[v.idx] then -- this is bad so
+					print("unsync ",v.idx,upnet.ticks.agreed)
+					upnet.need_sync=true -- need to trigger a full resync
 					return
 				end
 			end
 		end
+		upnet.need_sync=false
 
 		upnet.ticks.agreed=upnet.ticks.agreed+1
-		for i=#upnet.hashs , 255+1+upnet.ticks.update-upnet.ticks.agreed , -1 do
-			upnet.hashs[i]=nil
+		for i=#upnet.hashs , 2+upnet.ticks.update-upnet.ticks.agreed , -1 do
+			upnet.hashs[i]=nil -- remove agreed data
 		end
 		return true
 	end
