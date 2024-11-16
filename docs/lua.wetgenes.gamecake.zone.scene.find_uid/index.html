@@ -314,12 +314,9 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.find_uid"><span>/lua.wetgenes.gamecake.zone.scene.find_uid</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.forget_uid"><span>/lua.wetgenes.gamecake.zone.scene.forget_uid</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.generate_uid"><span>/lua.wetgenes.gamecake.zone.scene.generate_uid</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.get"><span>/lua.wetgenes.gamecake.zone.scene.get</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.manifest"><span>/lua.wetgenes.gamecake.zone.scene.manifest</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.remember_uid"><span>/lua.wetgenes.gamecake.zone.scene.remember_uid</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.remove"><span>/lua.wetgenes.gamecake.zone.scene.remove</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.reset"><span>/lua.wetgenes.gamecake.zone.scene.reset</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.set"><span>/lua.wetgenes.gamecake.zone.scene.set</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.sortby_update"><span>/lua.wetgenes.gamecake.zone.scene.sortby_update</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.status"><span>/lua.wetgenes.gamecake.zone.scene.status</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.zone.scene.systems"><span>/lua.wetgenes.gamecake.zone.scene.systems</span></a>
 
@@ -697,7 +694,7 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.find_uid">lua.wetgenes.gamecake.zone.scene.find_uid</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L145">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
-<div><pre><code>local it = scene.find_uid( uid )
+<div><pre><code>local it = scene:find_uid( uid )
 </code></pre>
 <p>Return the item with the given uid or nil if no such item has been
 remembered or a nil uid has been passed in.</p>
