@@ -291,17 +291,28 @@ If fname is a function then it will be called as if it was a method.
 
 --[[#lua.wetgenes.gamecake.zone.scene.sortby_update
 
-	scene:sortby_update()
+	scene:sortby_update(newtab)
 
-A function that takes the array part of scene.sortby and reverses the
+A function that takes the array part of newtab and reverses the
 key=value so a simple order list can be provided without any explicit weights.
 The first caste name in the array gets a weight of 1, second 2 and so on.
 
+Newtab is coppied into scene.sortby for use a s aweight lookuptable of name to weight.
+
+If newtab is not provided then scene.sortby is used by default.
+
 ]]
-	scene.sortby_update=function(scene)
-		for i,v in pairs(scene.sortby) do if type(i)=="number" then scene.sortby[v]=scene.sortby[v] or i end end
+	scene.sortby_update=function(scene,sortby)
+		sortby=sortby or scene.sortby
+		for i,v in pairs(sortby) do
+			if type(i)=="number" then
+				scene.sortby[v]=scene.sortby[v] or i
+			else
+				scene.sortby[i]=v
+			end
+		end
 	end
-	scene:sortby_update()
+	scene:sortby_update(scene.sortby)
 
 
 --[[#lua.wetgenes.gamecake.zone.scene.reset
