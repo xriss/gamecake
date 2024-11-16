@@ -71,9 +71,9 @@ A map of currently remembered uids to items.
 
 --[[#lua.wetgenes.gamecake.zone.scene.generate_uid
 
-	local uid = scene.generate_uid()
+	local uid = scene:generate_uid()
 
-	local uid = scene.generate_uid(uid)
+	local uid = scene:generate_uid(uid)
 
 Simple unique incremental IDs for items to be used instead of
 pointers, starts at 1 and goes up as items are added.
@@ -97,7 +97,7 @@ another item table we can use a uid reference instead.
 Good for serialising data as well.
 
 ]]
-	scene.generate_uid=function(uid)
+	scene.generate_uid=function(scene,uid)
 		if uid then scene.uid=uid end
 		uid=scene.values:get("uid")
 		uid=uid+1
@@ -108,14 +108,14 @@ Good for serialising data as well.
 
 --[[#lua.wetgenes.gamecake.zone.scene.remember_uid
 
-	local it = scene.remember_uid( {} )
+	local it = scene:remember_uid( {} )
 
 Remember an item in the uids table, generating a uid and setting it.uid to this
 value if one does not already exist.
 
 ]]
-	scene.remember_uid=function(it)
-		it.uid=it.uid or scene.generate_uid()
+	scene.remember_uid=function(scene,it)
+		it.uid=it.uid or scene:generate_uid()
 		scene.uids[it.uid]=it
 		return it
 	end
@@ -123,18 +123,18 @@ value if one does not already exist.
 
 --[[#lua.wetgenes.gamecake.zone.scene.forget_uid
 
-	local it = scene.forget_uid( {uid=uid} )
+	local it = scene:forget_uid( {uid=uid} )
 
 Remove the item from the map of uids. Returns the item or nil if uid was
 invalid unset or our map was not pointing to the correct item.
 
-	local it = scene.forget_uid( scene.find_uid( uid ) )
+	local it = scene:forget_uid( scene.find_uid( uid ) )
 
 Chain with find_uid to forget an item by uid and this is safe even if the item
 does not exist.
 
 ]]
-	scene.forget_uid=function(it)
+	scene.forget_uid=function(scene,it)
 		if not it then return nil end
 		if not it.uid then return nil end
 		if scene.uids[it.uid]~=it then return nil end  -- bad item lookup
@@ -144,13 +144,13 @@ does not exist.
 
 --[[#lua.wetgenes.gamecake.zone.scene.find_uid
 
-	local it = scene.find_uid( uid )
+	local it = scene:find_uid( uid )
 
 Return the item with the given uid or nil if no such item has been
 remembered or a nil uid has been passed in.
 
 ]]
-	scene.find_uid=function(uid)
+	scene.find_uid=function(scene,uid)
 		if not uid then return nil end
 		return scene.uids[uid]
 	end
@@ -158,12 +158,12 @@ remembered or a nil uid has been passed in.
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.remove
 
-	system = scene.systems_remove(caste)
+	system = scene:systems_remove(caste)
 
 Remove and return the system of the given caste.
 
 ]]
-	scene.systems_remove=function(caste)
+	scene.systems_remove=function(scene,caste)
 		scene.systems[caste]=nil
 		for i,v in ipairs(scene.systems) do
 			if v.caste==caste then
@@ -175,13 +175,13 @@ Remove and return the system of the given caste.
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.insert
 
-	scene.systems_insert(system)
+	scene:systems_insert(system)
 
 Insert a new system replacing any system of the same caste. system.caste should
 be set to the caste of the system for this to work.
 
 ]]
-	scene.systems_insert=function(it)
+	scene.systems_insert=function(scene,it)
 		if it.caste then
 			scene.systems[it.caste]=it
 			scene.systems[it.caste.."s"]=it		-- simples autos plurals pleases
@@ -203,7 +203,7 @@ be set to the caste of the system for this to work.
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.call
 
-	scene.systems_call(fname,...)
+	scene:systems_call(fname,...)
 
 For every system call the function called fname like so.
 
@@ -215,7 +215,7 @@ an fname function to call.
 If fname is a function then it will be called as if it was a method.
 
 ]]
-	scene.systems_call=function(fname,...)
+	scene.systems_call=function(scene,fname,...)
 		local count=0
 		if type(fname)=="function" then
 			for i=#scene.systems,1,-1 do -- call backwards so item can remove self
@@ -237,7 +237,7 @@ If fname is a function then it will be called as if it was a method.
 
 --[[#lua.wetgenes.gamecake.zone.scene.systems.cocall
 
-	scene.systems_cocall(fname,...)
+	scene:systems_cocall(fname,...)
 
 For every system call the function called fname inside a coroutine like
 so.
@@ -254,7 +254,7 @@ an fname function to call.
 If fname is a function then it will be called as if it was a method.
 
 ]]
-	scene.systems_cocall=function(fname,...)
+	scene.systems_cocall=function(scene,fname,...)
 		local functions={}
 		local count=0
 		if type(fname)=="function" then
@@ -291,28 +291,28 @@ If fname is a function then it will be called as if it was a method.
 
 --[[#lua.wetgenes.gamecake.zone.scene.sortby_update
 
-	scene.sortby_update()
+	scene:sortby_update()
 
 A function that takes the array part of scene.sortby and reverses the
 key=value so a simple order list can be provided without any explicit weights.
 The first caste name in the array gets a weight of 1, second 2 and so on.
 
 ]]
-	scene.sortby_update=function()
+	scene.sortby_update=function(scene)
 		for i,v in pairs(scene.sortby) do if type(i)=="number" then scene.sortby[v]=scene.sortby[v] or i end end
 	end
-	scene.sortby_update()
+	scene:sortby_update()
 
 
 --[[#lua.wetgenes.gamecake.zone.scene.reset
 
-	scene.reset()
+	scene:reset()
 
 Empty the list of items to update and draw, this does not reset the systems
 table that should be modified with the insert and remove functions.
 
 ]]
-	scene.reset=function()
+	scene.reset=function(scene)
 		scene.data={} -- main lists of scene
 		scene.values=M.create_values() -- values
 		scene.values:set("uid",0) -- starting uid
@@ -322,7 +322,7 @@ table that should be modified with the insert and remove functions.
 
 --[[#lua.wetgenes.gamecake.zone.scene.caste
 
-	scene.caste(caste)
+	scene:caste(caste)
 
 Get the list of items of a given caste, eg "bullets" or "enemies"
 
@@ -332,7 +332,7 @@ scene.sortby is used to keep this list in order and an empty system
 will be autocreated if needed.
 
 ]]
-	scene.caste=function(caste)
+	scene.caste=function(scene,caste)
 		caste=caste or "generic"
 		if not scene.data[caste] then -- create on use
 			if not scene.systems[caste] then -- create system
@@ -347,9 +347,9 @@ will be autocreated if needed.
 
 --[[#lua.wetgenes.gamecake.zone.scene.add
 
-	scene.add(it)
-	scene.add(it,caste)
-	scene.add(it,caste,boot)
+	scene:add(it)
+	scene:add(it,caste)
+	scene:add(it,caste,boot)
 
 Add a new item of caste or it.caste to the list of things to update.
 
@@ -362,22 +362,22 @@ custom code which ideally should initalize it and then just call
 scene.add(it) as the auto shortcuts are unnecesary.
 
 ]]
-	scene.add=function(it,caste,boot)
+	scene.add=function(scene,it,caste,boot)
 		if boot then
 			it.boot=boot
 			if it.boot.uid   then it.uid   = it.boot.uid    end
 			if it.boot.name  then it.name  = it.boot.name   end
 			if it.boot.caste then it.caste = it.boot.caste  end
 		end
-		scene.remember_uid(it)
+		scene:remember_uid(it)
 
 		-- idealy these should live in a metatable and already be set
 		if type(it.scene)=="nil" then it.scene=scene end
 		if type(it.caste)=="nil" then it.caste=caste or "generic" end
 
-		if it.name then scene.set( it.name , it ) end
+		if it.name then scene:set( it.name , it ) end
 
-		local items=scene.caste(it.caste)
+		local items=scene:caste(it.caste)
 		items[ #items+1 ]=it -- add to end of items array
 
 		return it
@@ -386,7 +386,7 @@ scene.add(it) as the auto shortcuts are unnecesary.
 
 --[[#lua.wetgenes.gamecake.zone.scene.remove
 
-	scene.remove(it)
+	scene:remove(it)
 
 Remove this item, this is slightly expensive as we need to search in a table
 to find it before calling table.remove which then has to shuffle the table to
@@ -401,10 +401,10 @@ master particles item that contains many particles and can add/remove/recycle
 as it sees fit.
 
 ]]
-	scene.remove=function(it)
-		scene.forget_uid(it)
-		if it.id then scene.set( it.id ) end
-		local items=scene.caste(it.caste)
+	scene.remove=function(scene,it)
+		scene:forget_uid(it)
+		if it.id then scene:set( it.id ) end
+		local items=scene:caste(it.caste)
 		for idx=#items,1,-1 do -- search backwards
 			if items[idx]==it then
 				table.remove(items,idx)
@@ -416,7 +416,7 @@ as it sees fit.
 
 --[[#lua.wetgenes.gamecake.zone.scene.call
 
-	scene.call(fname,...)
+	scene:call(fname,...)
 
 If fname is a string then that method will be invoked for every item
 where it exists like so. Only the first item of each caste is tested,
@@ -438,7 +438,7 @@ Finally we return the number of calls we made so you can keep track of
 currently active items.
 
 ]]
-	scene.call=function(fname,...)
+	scene.call=function(scene,fname,...)
 		local count=0
 		if type(fname)=="function" then
 			for i=#scene.systems,1,-1 do
@@ -469,53 +469,16 @@ currently active items.
 	end
 
 
---[[#lua.wetgenes.gamecake.zone.scene.get
-
-	scene.get(name)
-
-get a value previously saved, this is an easy way to find a unique entity, eg
-the global space but it can be used to save any values you wish not just to
-bookmark unique items.
-
-]]
-	scene.get=function(name)
-		return scene.values:get(name)
-	end
-
-
---[[#lua.wetgenes.gamecake.zone.scene.set
-
-	scene.set(name,value)
-
-save a value by a unique name
-
-]]
-	scene.set=function(name,value)
-		return scene.values:set(name,value)
-	end
-
-
---[[#lua.wetgenes.gamecake.zone.scene.manifest
-
-	scene.manifest(name,value)
-
-get a value previously saved, or initalize it to the given value if it does not
-already exist. The default value is {} as this is intended for lists.
-
-]]
-	scene.manifest=function(name,empty)
-		return scene.values:manifest(name,empty)
-	end
 
 --[[#lua.wetgenes.gamecake.zone.scene.status
 
-	print( scene.status() )
+	print( scene:status() )
 
 Return a debug string giving details about the system order and current number
 of items of each caste.
 
 ]]
-	scene.status=function()
+	scene.status=function(scene)
 		local lines={}
 		for i=#scene.systems,1,-1 do
 			local items=scene.systems[i]
@@ -528,14 +491,40 @@ of items of each caste.
 
 -- hacks for old fun64 compat which expects these functions in the systems table
 	if scene.fun64 then
-		scene.systems.remove=scene.systems_remove
-		scene.systems.insert=scene.systems_insert
-		scene.systems.call=scene.systems_call
-		scene.systems.cocall=scene.systems_cocall
+
+		local funscene={}
+		setmetatable(funscene,{__index=scene})
+
+		funscene.generate_uid=function(uid) return scene.generate_uid(scene,uid) end
+		funscene.remember_uid=function(it) return scene.remember_uid(scene,it) end
+		funscene.forget_uid=function(it) return scene.forget_uid(scene,it) end
+		funscene.find_uid=function(uid) return scene.find_uid(scene,uid) end
+		funscene.systems_remove=function(caste) return scene.systems_remove(scene,caste) end
+		funscene.systems_insert=function(it) return scene.systems_insert(scene,it) end
+		funscene.systems_call=function(fname,...) return scene.systems_call(scene,fname,...) end
+		funscene.systems_cocall=function(fname,...) return scene.systems_cocall(scene,fname,...) end
+		funscene.sortby_update=function() return scene.sortby_update(scene) end
+		funscene.reset=function() return scene.reset(scene) end
+		funscene.caste=function(caste) return scene.caste(scene,caste) end
+		funscene.add=function(it,caste,boot) return scene.add(scene,caste,boot) end
+		funscene.remove=function(it) return scene.remove(scene,it) end
+		funscene.call=function(fname,...) return scene.call(scene,fname,...) end
+		funscene.status=function() return scene.status(scene) end
+
+		funscene.manifest=function(name,empty) return scene.values:manifest(name,empty) end
+		funscene.set=function(name,value) return scene.values:set(name,value) end
+		funscene.get=function(name) return scene.values:get(name) end
+
+		funscene.systems.remove=funscene.systems_remove
+		funscene.systems.insert=funscene.systems_insert
+		funscene.systems.call=funscene.systems_call
+		funscene.systems.cocall=funscene.systems_cocall
+
+		return funscene.reset()
 	end
 
 -- reset and return the scene, creating the initial data and info tables
-	return scene.reset()
+	return scene:reset()
 
 end
 
