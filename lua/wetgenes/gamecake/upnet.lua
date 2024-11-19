@@ -64,15 +64,17 @@ M.bake=function(oven,upnet)
 		upnet.ticks.update=0	-- the tick you have updated
 		upnet.ticks.now=0		-- the tick we have our input for
 		upnet.ticks.draw=0		-- the tick you have drawn
+		upnet.ticks.base=0		-- the tick at the base of our arrays
 
 		upnet.need_sync=false	-- client needs to sync data when this is set
 
 		-- we sync now to time and calculate input tick as data arrives
 		-- you should set update and draw times when you update and draw
+		-- and must advance base time as a frame os fully synced and no longer needed
 		-- if things are laging then we may adjust the epoch to "skip" frames
 
-		upnet.history={} -- 1st index is for ticks.now , 2nd is .now-1, etc
-		upnet.hashs={} -- same as history but first hash here is for ticks.update not ticks.now
+		upnet.inputs={} -- 1st index is for ticks.now , 2nd is .now-1, etc
+		upnet.hashs={} -- 1st index is for ticks.base 2nd is .base+1 etc
 
 		upnet.hooks={}
 
@@ -224,6 +226,7 @@ M.bake=function(oven,upnet)
 		end
 
 		upnet.ticks.now=msg.ticks
+		upnet.ticks.base=upnet.ticks.now
 		upnet.ticks.agreed=upnet.ticks.now
 		upnet.ticks.input=upnet.ticks.now
 		upnet.ticks.update=upnet.ticks.now
@@ -250,17 +253,15 @@ print("WELCOME",client.idx)
 
 		if upnet.us then
 			local hs={}
-			for i=1,#upnet.history do
+			for i=1,#upnet.inputs do
 				if upnet.ticks.now+1-i <= client.ack then break end
 				local h={}
-				hs[#hs+1]=upnet.history[i][upnet.us] or {} -- might miss early frames
+				hs[#hs+1]=upnet.inputs[i][upnet.us] or {} -- might miss early frames
 			end
-			msg.history=hs
-			msg.hashs_ack=upnet.ticks.agreed -- acknowledged up to here
-			msg.hashs_tick=upnet.ticks.update
+			msg.inputs=hs
+			msg.hashs_tick=upnet.ticks.base
 			msg.hashs={}
-			for i=1,#upnet.hashs do
-				if upnet.ticks.update+1-i <= client.hash_ack then break end
+			for i=1,#upnet.hashs do -- keep resending all our hashes untill we sync
 				msg.hashs[i]=upnet.hashs[i][upnet.us]
 			end
 		end
@@ -272,31 +273,27 @@ print("WELCOME",client.idx)
 	end
 	upnet.client.recv.pulse=function(client,msg)
 
---		print("pulse recv",msg.ticks,#msg.history,upnet.ticks.input,upnet.ticks.now)
+--		print("pulse recv",msg.ticks,#msg.inputs,upnet.ticks.input,upnet.ticks.now)
 
 		client.ack=msg.ack -- this update has been acknowledged
 
-		client.hashs_ack=msg.hashs_ack
-		client.hashs_tick=msg.hashs_tick
-
 		local cidx=1+upnet.ticks.now-msg.tick
-		for midx=1,#msg.history do
-			local c=upnet.history[cidx]
-			local m=msg.history[midx]
-			if c and m then -- accept inputs
+		for midx=1,#msg.inputs do
+			local c=upnet.inputs[cidx]
+			local m=msg.inputs[midx]
+			if c and m then -- accept new inputs but never change
 				c[client.idx] = c[client.idx] or m
 			end
 			cidx=cidx+1
 		end
 
-		local cidx=1+upnet.ticks.update-msg.hashs_tick
-		for midx=1,#msg.hashs do
-			local c=upnet.hashs[cidx]
-			local m=msg.hashs[midx]
-			if c and m then -- accept hashs
-				c[client.idx] = c[client.idx] or m
+		local fix=upnet.ticks.base-msg.hashs_tick
+		for idx=1,#msg.hashs do
+			local c=upnet.hashs[idx+fix]
+			local m=msg.hashs[idx]
+			if c and m then -- accept and overide old data with any new hashes
+				c[client.idx] = m or c[client.idx]
 			end
-			cidx=cidx+1
 		end
 
 	end
@@ -415,8 +412,8 @@ print("joining",addr)
 		for idx,_ in pairs(upnet.clients) do
 			local up=oven.ups.create()
 			ups[idx]=up
-			for ui=ti,#upnet.history do -- find best state we have
-				local h=upnet.history[ui]
+			for ui=ti,#upnet.inputs do -- find best state we have
+				local h=upnet.inputs[ui]
 				if h and h[idx] then
 					up:load(h[idx]) -- fill
 -- this will have set/clr flags locked on into future prediction frames so we should update to clear them?
@@ -428,8 +425,8 @@ print("joining",addr)
 
 		ups[0]=oven.ups.empty
 
---		print(upnet.us,tick,upnet.ticks.now,#upnet.history,ti,ups[1] and ups[1].all.lx,ups[2] and ups[2].all.lx)
---		dump(upnet.history)
+--		print(upnet.us,tick,upnet.ticks.now,#upnet.inputs,ti,ups[1] and ups[1].all.lx,ups[2] and ups[2].all.lx)
+--		dump(upnet.inputs)
 
 		return ups
 	end
@@ -442,7 +439,7 @@ print("joining",addr)
 		if not ( upnet.ticks.now>upnet.ticks.input+1 ) then return end -- input should always be one frame behind
 
 		local ti=1+upnet.ticks.now-upnet.ticks.input	-- we have input for here
-		local h=upnet.history[ti-1]
+		local h=upnet.inputs[ti-1]
 		if not h then return end
 
 		for _,v in pairs(upnet.clients) do -- must have data for all clients
@@ -450,38 +447,60 @@ print("joining",addr)
 		end
 
 		upnet.ticks.input=upnet.ticks.input+1
-		for i=#upnet.history , 255+1+upnet.ticks.now-upnet.ticks.input , -1 do
-			upnet.history[i]=nil
-		end
 		return true
 	end
 
 	-- update the tick time of when we have matching checksums
 	upnet.update_ticks_agreed=function()
 
-		local ti=1+upnet.ticks.update-upnet.ticks.agreed	-- we have agreed for here
-		local hash=upnet.hashs[ti-1]
+		local ti=2+upnet.ticks.agreed-upnet.ticks.base	-- next tick after agreed tick
+		local hash=upnet.hashs[ti]
 		if not hash then return end
 
 		local h=hash[upnet.us] -- our hash
 		if not h then return end
 		for _,v in pairs(upnet.clients) do -- all hashes must agree
-			if v.join_tick < upnet.ticks.agreed then
+--			if v.join_tick < upnet.ticks.agreed then
 				if not hash[v.idx] then return end -- no hash yet
-				if h ~= hash[v.idx] then -- this is bad so
+				if h ~= hash[v.idx] then -- hash does not match
 					print("unsync ",v.idx,upnet.ticks.agreed)
-					upnet.need_sync=true -- need to trigger a full resync
+					upnet.need_sync=upnet.ticks.agreed+1 -- need to trigger a full resync for this frame
 					return
 				end
-			end
+--			end
 		end
 		upnet.need_sync=false
 
 		upnet.ticks.agreed=upnet.ticks.agreed+1
-		for i=#upnet.hashs , 2+upnet.ticks.update-upnet.ticks.agreed , -1 do
-			upnet.hashs[i]=nil -- remove agreed data
-		end
 		return true
+	end
+
+	-- move base one tick forwards deleting old data in cached arrays
+	-- must be called by user to prevent buildup of our cached values
+	-- user should obviously delete own cache at the same time
+	upnet.inc_base=function()
+
+		upnet.ticks.base=upnet.ticks.base+1
+
+		-- adjust hashs table to new base
+		table.remove(upnet.hashs,1)
+
+		-- remove any inputs older than new base
+		for i=#upnet.inputs , 2+upnet.ticks.now-upnet.ticks.base , -1 do
+			upnet.inputs[i]=nil
+		end
+
+	end
+	upnet.set_hash=function(idx,hash)
+
+		local hidx=1+idx-upnet.ticks.base
+		if hidx<1 then return end
+
+		for i=1,hidx do -- make sure array exists
+			if not upnet.hashs[i] then upnet.hashs[i]={} end
+		end
+
+		upnet.hashs[hidx][upnet.us]=hash -- set hash
 	end
 
 	-- tick one tick forwards
@@ -490,12 +509,12 @@ print("joining",addr)
 		upnet.ticks.now=upnet.ticks.now+1
 		-- remember current up
 
-		table.insert( upnet.history , 1 , { [upnet.us]=upnet.upcache:save() } ) -- remember new tick
+		table.insert( upnet.inputs , 1 , { [upnet.us]=upnet.upcache:save() } ) -- remember new tick
 
 		upnet.upcache=oven.ups.create()
 --		upnet.upcache:load(oven.ups.manifest(1))
 
---print("history",upnet.us,#upnet.history)
+--print("inputs",upnet.us,#upnet.inputs)
 
 		-- send current ups to network
 		for _,client in pairs(upnet.clients) do
@@ -537,7 +556,7 @@ print("joining",addr)
 --					break
 				else
 					upnet.next_tick()
---					print("ticks",upnet.ticks.now,upnet.ticks.input,upnet.ticks.agreed)
+--					print("ticks",upnet.ticks.now,upnet.ticks.input,upnet.ticks.agreed,upnet.ticks.base,upnet.dbg_hash[1],upnet.dbg_hash[2])
 				end
 			end
 		end

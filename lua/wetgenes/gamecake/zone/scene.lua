@@ -98,7 +98,7 @@ Good for serialising data as well.
 
 ]]
 	scene.generate_uid=function(scene,uid)
-		if uid then scene.uid=uid end
+		if uid then scene.values:set("uid",uid) end
 		uid=scene.values:get("uid")
 		uid=uid+1
 		scene.values:set("uid",uid)
@@ -601,6 +601,7 @@ values_methods.set=function(values,key,value)
 	if values:get(key)~=value then
 		values[#values][key]=value
 	end
+	if not values[1][key] then values[1][key]=false end -- make sure all keys are in base
 end
 
 --[[#lua.wetgenes.gamecake.zone.scene.values.get
@@ -775,6 +776,28 @@ values_methods.twrap=function(values,key,nmax,tween)
 	if tween<0.5 then return b else return a end -- one or the other
 end
 
+
+values_methods.save_all=function(values,topidx)
+	if not topidx then topidx=#values elseif topidx<0 then topidx=topidx+#values end
+	if topidx<1 then topidx=1 end
+
+	local t={}
+	for k,v in pairs( values[1] or {} ) do
+		t[k]=values:get(k,topidx)
+	end
+	return t
+end
+
+values_methods.save_diff=function(values,topidx)
+	if not topidx then topidx=#values elseif topidx<0 then topidx=topidx+#values end
+	if topidx<1 then topidx=1 end
+
+	local t={}
+	for k,_ in pairs( values[topidx] or {} ) do
+		t[k]=v
+	end
+	return t
+end
 
 --[[#lua.wetgenes.gamecake.zone.scene.values
 
