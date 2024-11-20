@@ -61,12 +61,12 @@ M.bake=function(oven,upnet)
 		upnet.ticks.pause=nil	-- if set, adjust epoch so ticks do not advance
 
 		-- ticks ( integers )
-		upnet.ticks.agreed=0	-- the tick all clients have state agreed as true
-		upnet.ticks.input=0		-- the tick we have all inputs for
-		upnet.ticks.update=0	-- the tick you have updated
-		upnet.ticks.now=0		-- the tick we have our input for
-		upnet.ticks.draw=0		-- the tick you have drawn
-		upnet.ticks.base=0		-- the tick at the base of our arrays
+		upnet.ticks.agreed=1	-- the tick all clients have state agreed as true
+		upnet.ticks.input=1		-- the tick we have all inputs for
+		upnet.ticks.update=1	-- the tick you have updated
+		upnet.ticks.now=1		-- the tick we have our input for
+		upnet.ticks.draw=1		-- the tick you have drawn
+		upnet.ticks.base=1		-- the tick at the base of our arrays
 
 		upnet.need_sync=false	-- client needs to sync data when this is set
 
@@ -464,7 +464,8 @@ print("joining",addr)
 		for _,v in pairs(upnet.clients) do -- all hashes must agree
 			if not hash[v.idx] then return end -- no hash yet
 			if h ~= hash[v.idx] then -- hash does not match
-				print("unsync ",v.idx,upnet.ticks.agreed)
+--				print("unsync ",v.idx,upnet.ticks.agreed+1)
+--				for i,v in pairs(hash) do print(Ox(v)) end
 				upnet.need_sync=upnet.ticks.agreed+1 -- need to trigger a full resync for this frame
 				return
 			end

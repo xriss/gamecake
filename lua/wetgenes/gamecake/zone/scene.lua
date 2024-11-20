@@ -575,17 +575,11 @@ end
 
 	values:unpush()
 
-Remove all pushed slots except for values[1] This has the effect of
-undoing all changes that have been predicted.
-
-Future values will be writen into the base values[1] slot.
-
+Remove top pushed slot.
 
 ]]
 values_methods.unpush=function(values)
-	for idx=#values,2,-1 do
-		values[idx]=nil
-	end
+	values[#values]=nil
 end
 
 --[[#lua.wetgenes.gamecake.zone.scene.values.set
@@ -792,7 +786,7 @@ values_methods.save_diff=function(values,topidx)
 	if topidx > #values then return {} end
 
 	local t={}
-	for k,_ in pairs( values[topidx] or {} ) do
+	for k,v in pairs( values[topidx] or {} ) do
 		t[k]=v
 	end
 	return t
