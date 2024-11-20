@@ -4,6 +4,8 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local Ox=function(n) return string.format("%012x",n or 0) end
+
 local log,dump=require("wetgenes.logs"):export("log","dump")
 
 local json_pack=require("wetgenes.json_pack")
@@ -198,7 +200,7 @@ M.bake=function(oven,upnet)
 			msg.clients[#msg.clients+1]=v
 		end
 
-		msg.ticks=upnet.ticks.input
+		msg.ticks=upnet.ticks.base
 
 		client.join_tick=msg.ticks
 
@@ -460,14 +462,12 @@ print("joining",addr)
 		local h=hash[upnet.us] -- our hash
 		if not h then return end
 		for _,v in pairs(upnet.clients) do -- all hashes must agree
---			if v.join_tick < upnet.ticks.agreed then
-				if not hash[v.idx] then return end -- no hash yet
-				if h ~= hash[v.idx] then -- hash does not match
-					print("unsync ",v.idx,upnet.ticks.agreed)
-					upnet.need_sync=upnet.ticks.agreed+1 -- need to trigger a full resync for this frame
-					return
-				end
---			end
+			if not hash[v.idx] then return end -- no hash yet
+			if h ~= hash[v.idx] then -- hash does not match
+				print("unsync ",v.idx,upnet.ticks.agreed)
+				upnet.need_sync=upnet.ticks.agreed+1 -- need to trigger a full resync for this frame
+				return
+			end
 		end
 		upnet.need_sync=false
 
@@ -556,7 +556,8 @@ print("joining",addr)
 --					break
 				else
 					upnet.next_tick()
---					print("ticks",upnet.ticks.now,upnet.ticks.input,upnet.ticks.agreed,upnet.ticks.base,upnet.dbg_hash[1],upnet.dbg_hash[2])
+					local dbg_hash=upnet.hashs[2+upnet.ticks.agreed-upnet.ticks.base] or {}
+--					print("ticks","now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base,Ox(dbg_hash[1]),Ox(dbg_hash[2]))
 				end
 			end
 		end

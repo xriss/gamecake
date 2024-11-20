@@ -618,8 +618,7 @@ time travel back a frame into the cached values with -1 as the idx.
 
 ]]
 values_methods.get=function(values,key,topidx)
-	if not topidx then topidx=#values elseif topidx<0 then topidx=topidx+#values end
-	if topidx<1 then topidx=1 end
+	if not topidx then topidx=#values elseif topidx<=0 then topidx=topidx+#values end
 	for idx=topidx,1,-1 do
 		local value=values[idx][key]
 		if value or (type(value)~="nil") then return value end
@@ -778,8 +777,8 @@ end
 
 
 values_methods.save_all=function(values,topidx)
-	if not topidx then topidx=#values elseif topidx<0 then topidx=topidx+#values end
-	if topidx<1 then topidx=1 end
+	if not topidx then topidx=#values elseif topidx<=0 then topidx=topidx+#values end
+	if topidx > #values then return {} end
 
 	local t={}
 	for k,v in pairs( values[1] or {} ) do
@@ -789,8 +788,8 @@ values_methods.save_all=function(values,topidx)
 end
 
 values_methods.save_diff=function(values,topidx)
-	if not topidx then topidx=#values elseif topidx<0 then topidx=topidx+#values end
-	if topidx<1 then topidx=1 end
+	if not topidx then topidx=#values elseif topidx<=0 then topidx=topidx+#values end
+	if topidx > #values then return {} end
 
 	local t={}
 	for k,_ in pairs( values[topidx] or {} ) do
