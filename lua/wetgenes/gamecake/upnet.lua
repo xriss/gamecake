@@ -314,43 +314,38 @@ print("WELCOME",client.idx)
 
 		upnet.reset()
 
-		-- everyone must enable network with a host
---		if args.host then
 
-			if tonumber( args.host ) then baseport=tonumber( args.host ) end
+		if tonumber( args.host ) then baseport=tonumber( args.host ) end
 
-			-- and tell it to start listening
-			local host_ret=oven.tasks:do_memo({
-				task=upnet.task_id,
-				cmd="host",
-				baseport=baseport,
-				basepack=basepack,
-			})
-			-- the client of this host
-			local client=upnet.manifest_client(host_ret)
-			client.us=true -- remember that this is us
+		-- and tell it to start listening
+		local host_ret=oven.tasks:do_memo({
+			task=upnet.task_id,
+			cmd="host",
+			baseport=baseport,
+			basepack=basepack,
+		})
+		-- the client of this host
+		local client=upnet.manifest_client(host_ret)
+		client.us=true -- remember that this is us
 
-			-- clients join the host
-			if args.join then
+		-- clients join the host
+		if args.join then
 
-				upnet.join( args.join )
-				upnet.mode="join"
+			upnet.mode="join"
 
-			else -- and one host just waits for clients to join
+		else -- and one host just waits for clients to join
 
-				upnet.mode="host"
-				-- we are client 1
-				upnet.host_inc=upnet.host_inc+1
-				client.idx=upnet.host_inc
-				upnet.clients[client.idx]=client
+			upnet.mode="host"
+			-- we are client 1
+			upnet.host_inc=upnet.host_inc+1
+			client.idx=upnet.host_inc
+			upnet.clients[client.idx]=client
 
-				upnet.us=client.idx
+			upnet.us=client.idx
 
-				upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
+			upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
 
-			end
-
---		end
+		end
 
 --dump(upnet.clients)
 
@@ -527,7 +522,31 @@ print("joining",addr)
 	end
 
 	-- manage msgs and pulse controller state
+	upnet.join_wait=0
 	upnet.update=function()
+
+		if upnet.mode=="join" then
+			if ( now() - upnet.join_wait ) > 5 then -- wait 5 secs to join before we try again
+
+				local joined=false
+				for _,client in pairs(upnet.clients) do
+					if not client.us then
+						joined=true
+					end
+				end
+
+				if not joined then
+
+					local args=oven.opts.args
+
+					upnet.join( args.join )
+
+				end
+
+				upnet.join_wait=now()
+			end
+		end
+
 
 		local up=oven.ups.manifest(1)
 		upnet.upcache:merge(up) -- merge as we update
@@ -558,7 +577,7 @@ print("joining",addr)
 				else
 					upnet.next_tick()
 					local dbg_hash=upnet.hashs[2+upnet.ticks.agreed-upnet.ticks.base] or {}
---					print("ticks","now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base,Ox(dbg_hash[1]),Ox(dbg_hash[2]))
+					print("ticks","now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base,Ox(dbg_hash[1]),Ox(dbg_hash[2]))
 				end
 			end
 		end
