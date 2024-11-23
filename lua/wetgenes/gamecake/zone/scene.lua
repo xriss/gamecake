@@ -196,6 +196,9 @@ be set to the caste of the system for this to work.
 		table.sort(scene.systems,function(a,b)
 			local av=scene.sortby[ a.caste ] or 0 -- use caste to get sortby weight
 			local bv=scene.sortby[ b.caste ] or 0 -- put items without a weight last
+			if av==bv then -- sort by caste name
+				return ( a.caste > b.caste ) -- sort backwards
+			end
 			return ( av > bv ) -- sort backwards
 		end)
 	end
@@ -559,6 +562,22 @@ values_methods.new=function()
 	return values
 end
 
+--[[#lua.wetgenes.gamecake.zone.scene.values.pull
+
+	values:pull()
+
+Merge bottom 2 changesets and replae with just 1 shifting all values down one.
+
+]]
+values_methods.pull=function(values)
+	local t1=values[1]
+	local t2=values[2]
+	for n,v in pairs(t2) do -- merge 1 down
+		t1[n]=v
+	end
+	table.remove(values,2) -- remove old changeset ( t2 )
+end
+
 --[[#lua.wetgenes.gamecake.zone.scene.values.push
 
 	values:push()
@@ -783,7 +802,7 @@ end
 
 values_methods.save_diff=function(values,topidx)
 	if not topidx then topidx=#values elseif topidx<=0 then topidx=topidx+#values end
-	if topidx > #values then return {} end
+	if topidx > #values then print("future") return {} end
 
 	local t={}
 	for k,v in pairs( values[topidx] or {} ) do

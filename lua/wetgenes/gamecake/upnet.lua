@@ -456,11 +456,12 @@ print("joining",addr)
 
 		local h=hash[upnet.us] -- our hash
 		if not h then return end
+--		local hs={}
+--		for i,v in pairs(hash) do hs[i]=(Ox(v)) end
+--		print("hashs",upnet.ticks.agreed+1,unpack(hs))
 		for _,v in pairs(upnet.clients) do -- all hashes must agree
 			if not hash[v.idx] then return end -- no hash yet
 			if h ~= hash[v.idx] then -- hash does not match
---				print("unsync ",v.idx,upnet.ticks.agreed+1)
---				for i,v in pairs(hash) do print(Ox(v)) end
 				upnet.need_sync=upnet.ticks.agreed+1 -- need to trigger a full resync for this frame
 				return
 			end
@@ -561,8 +562,12 @@ print("joining",addr)
 
 		until not memo
 
+		if not upnet.ticks.pause then
+
 		repeat until not upnet.update_ticks_input() -- update ticks.input
 		repeat until not upnet.update_ticks_agreed() -- update ticks.agreed
+
+		end
 
 		if upnet.ticks.update - upnet.ticks.agreed > 64 then -- pause/glitch if we get way too far behind
 			upnet.ticks.pause="timeout"
@@ -576,8 +581,8 @@ print("joining",addr)
 --					break
 				else
 					upnet.next_tick()
-					local dbg_hash=upnet.hashs[2+upnet.ticks.agreed-upnet.ticks.base] or {}
-					print("now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base,Ox(dbg_hash[1]),Ox(dbg_hash[2]))
+--					local dbg_hash=upnet.hashs[2+upnet.ticks.agreed-upnet.ticks.base] or {}
+--					print("now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base,Ox(dbg_hash[1]),Ox(dbg_hash[2]))
 				end
 			end
 		end
