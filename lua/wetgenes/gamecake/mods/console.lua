@@ -29,10 +29,10 @@ local function assert_resume(co,...)
 	if t[1] then
 
 		table.remove(t,1) -- remove status code
-		
+
 		return unpack(t) -- no error
 	end
-	
+
 	log("console" , t[2].."\nin coroutine\n"..debug.traceback(co) ) -- error
 
 end
@@ -50,9 +50,9 @@ function M.bake(oven,console)
 	console.data_meta={__index=_G}
 	console.call = {} -- name -> function : functions that should be easily to call on the console command line
 	console.help={} -- simple help text for callable functions
-	
+
 	console.tasks={} -- running tasks
-	
+
 	setmetatable(console.data,console.data_meta)
 
 	local gl=oven.gl
@@ -66,12 +66,12 @@ function M.bake(oven,console)
 
 	function console.setup()
 		console.replace_print(_G)
-	
+
 		oven.cake.fonts.loads({4}) -- load builtin font number 4 a basic 8x16 font
 
 		console.buff=buffedit.create() -- create buff edit
 		console.buff.enter=function(_,line) console.dump_eval(line) end
-		
+
 		console.lines={}
 		console.lines_display={}
 		console.line_width=80
@@ -80,14 +80,14 @@ function M.bake(oven,console)
 		console.y_show=8*16
 
 		console.fps_updates=0
-		
+
 		console.show=false
 --		console.show_hud=true
 --		console.show_hud=false
 
 --		console.show=true
 --		console.show_hud=true
-		
+
 		console.setup_done=true
 --print("console setup")
 
@@ -99,11 +99,11 @@ function M.bake(oven,console)
 	end
 
 	function console.clean()
-	
+
 		console.setup_done=false
 
 	end
-	
+
 	local function lookup(tab,name)
 		local names=wstr.split(name,".")
 		for i,v in ipairs(names) do
@@ -119,19 +119,19 @@ function M.bake(oven,console)
 
 	console.help.help="List available commands or a specific commands help string."
 	console.call.help=function(name)
-	
+
 		if name then
 			local s=lookup( console.help , name )
 			if s then return "\n"..s.."\n" end
 		end
-	
+
 		local t={"\n"}
 		for n,f in pairs(console.call) do
 			t[#t+1]=n
 		end
-		
+
 		local s="\n\nFor more info about the above commands, try -> help [name] "
-		
+
 		return table.concat(t," ") .. s
 	end
 
@@ -155,62 +155,62 @@ function M.bake(oven,console)
 		if n then s=s.." in "..n end
 		return table.concat(t," ")..s
 	end
-	
+
 
 -- based on ilua.lua
 	function console.dump_eval(line)
-	
+
 		local function compile(line)
 			local f,err = loadstring(line,'local')
 			return err,f
 		end
-		
-		
+
+
 		local err,chunk
 		local ret={}
 		local args={}
-		
+
 		if line~="" then args=wstr.split(line,"%s",true) end -- split input on whitespace
-		
+
 		if args[1] then
-					
+
 			chunk=lookup(console.call,args[1]) -- check special console functions
-			
+
 			if chunk and type(chunk)=="function" then -- must be a function
-						
+
 				setfenv(chunk,console.data) -- call with master environment?
 				table.remove(args,1) -- remove the function name
-				
+
 			else
-			
+
 				chunk=lookup(console.data,args[1]) -- check for functions in data or master environment
-				
+
 				if chunk and type(chunk)=="function" then -- must be a function
 					table.remove(args,1) -- remove the function name
 				else
 					chunk=nil	-- not found
 				end
-			
+
 			end
-			
+
 		end
 
-		
+
 		if not chunk then -- nothing found above
-		
+
 			args={} -- no arguments
-			
+
 			-- is it an expression?
 			err,chunk = compile('return '..line..' ')
 			if err then
 				-- otherwise, a statement?
 				err,chunk = compile(line)
 			end
-			
+
 			if chunk then
 				setfenv(chunk,console.data) -- compile in master environment will have an overloaded print
 			end
-			
+
 		end
 
 		-- if there was a compile error, print it out
@@ -219,7 +219,7 @@ function M.bake(oven,console)
 			_G.print(err)
 
 		elseif chunk then -- begin to run the chunk, it may end or yield
-		
+
 			local co=coroutine.create(chunk)
 			console.tasks[#console.tasks+1]=co
 			local ret={assert_resume(co,unpack(args))}
@@ -240,55 +240,57 @@ function M.bake(oven,console)
 				table.remove(console.tasks,idx) -- remove
 			end
 		end
-	
+
 		console.fps_updates=console.fps_updates+1
 
 		console.buff:update()
-		
+
 		if console.show then
 			if console.y~=console.y_show then
-			
+
 				local d=(console.y_show-console.y)/4
 				if d>0 then d=math.ceil(d) else d=math.floor(d) end
 				console.y= math.floor( console.y + d )
-			
+
 			end
 		else
 			if console.y~=0 then
-			
+
 				local d=(0-console.y)/4
 				if d>0 then d=math.ceil(d) else d=math.floor(d) end
 				console.y= math.floor( console.y + d )
-			
+
 			end
 		end
-		
+
 		console.line_width=oven.view.hx/8
 		console.data.main=oven.main and oven.main.console or oven.main	-- update best table of app function?
 
-		console.lines_display={}
+		if not console.display_disable then
+			console.display_clear()
+		end
 	end
 
 console.gci_last=0
 	function console.draw()
-	
+
 font.vbs_idx=1
 
 
 
 		if oven.times and oven.win then -- simple benchmarking
-		
+
 			local t=oven.win.time()
 
-		-- count frames	
+		-- count frames
 			if (not console.fps) or t-console.fps_last >= 1 then -- update with average value once a sec
-			
+
 				console.fps=console.fps_count or 0
 				console.fps_count=0
 				console.fps_last=t
-			
+
 			end
-			
+
 			oven.times.update.done()
 			oven.times.draw.done()
 
@@ -297,10 +299,10 @@ font.vbs_idx=1
 			local gci=gcinfo()
 			local mem=(gci-console.gci_last)
 			console.gci_last=gci
-			
+
 			local s=string.format("fps=%2d %s %2d /%3d %4.0fm%s%4.0fk vb=%d tx=%d fb=%d gl=%d vbi=%d gm=%d",
 				console.fps,
-				string.rep("x",console.fps_updates)..string.rep(" ",8-(console.fps_updates)), -- ideally we only want 1 x 
+				string.rep("x",console.fps_updates)..string.rep(" ",8-(console.fps_updates)), -- ideally we only want 1 x
 				(oven.times.update.time*1000),
 				(oven.times.draw.time*1000),
 				gci/1024,
@@ -319,8 +321,8 @@ font.vbs_idx=1
 			if gl.patch_functions_method=="disable" then
 				print(s)
 			end
-			
-			table.insert(console.lines_display,1,s)
+
+			console.lines_display[1]=s
 --			console.display(s)
 
 			console.fps_count=console.fps_count+1
@@ -332,9 +334,9 @@ font.vbs_idx=1
 
 		font.set(cake.fonts.get(4))
 		font.set_size(16,0)
-		
+
 		if console.y > 0 then
-		
+
 			gl.Color(pack.argb4_pmf4(0xc040))
 			flat.quad(0,0,oven.view.hx,console.y)
 
@@ -344,14 +346,14 @@ font.vbs_idx=1
 			local i=#console.lines
 			local y=console.y-32
 			while y>-8 and i>0 do
-			
+
 				font.set_xy(0,y)
 				font.draw(console.lines[i])
-				
+
 				y=y-16
 				i=i-1
 			end
-					
+
 			font.set_xy(0,console.y-16)
 			font.draw(">"..console.buff.line)
 
@@ -372,7 +374,7 @@ font.vbs_idx=1
 				gl.Color(pack.argb4_pmf4(0xf000))
 			end
 			for i,v in ipairs(console.lines_display) do
-			
+
 				font.set_xy(1,1+console.y+i*16-16)
 				gl.Color(pack.argb4_pmf4(0xf000))
 				font.draw(v)
@@ -390,7 +392,7 @@ font.vbs_idx=1
 
 	end
 
--- print to the console	
+-- print to the console
 	function console.print(...)
 
 		local t={...}
@@ -400,22 +402,23 @@ font.vbs_idx=1
 		if console.linehook then console.linehook(s) end -- send print data here
 
 		if not console.lines then return end -- not setup yet
-		
+
 		for _,l in ipairs( wstr.smart_wrap( s , console.line_width) ) do
 			table.insert(console.lines,l)
-			
+
 			while #console.lines > 64 do
 				table.remove(console.lines,1)
 			end
 		end
-			
+
 	end
 
 -- print to the display overlay, this must be done *every* frame draw cycle
 	function console.display(...)
-	
+
 		if not console.lines then return end -- not setup yet
-		
+		if console.display_disable then return end -- do not print right now
+
 		local t={...}
 		for i=1,#t do t[i]=tostring(t[i]) end
 		local s=table.concat(t,"\t").."\n"
@@ -425,10 +428,14 @@ font.vbs_idx=1
 		end
 
 	end
-	
+
+	function console.display_clear()
+		console.lines_display={""}
+	end
+
 	function console.mouse(act,x,y,key)
 	end
-	
+
 	function console.screen_mode(mode)
 
 		if type(mode)=="boolean" and mode==true then
@@ -483,7 +490,7 @@ font.vbs_idx=1
 		if m.class=="text" then
 			if console.keypress(m.text) then return nil end
 		end
-		
+
 		return m
 	end
 
@@ -491,16 +498,16 @@ font.vbs_idx=1
 
 --print("conkey",key)
 		if key=="grave" then
-		
+
 			if act==-1 then
 				if console.show then
-				
+
 					console.show=false
 					console.show_hud=false
-					
+
 				elseif console.show_hud then
-				
-					console.show=true			
+
+					console.show=true
 					console.buff.throb=255
 				else
 					console.show_hud=true
@@ -509,33 +516,33 @@ font.vbs_idx=1
 
 			return true
 		end
-			
+
 		if console.show then
-		
+
 			if act==1 or act==0 then
-					
+
 				if key=="pageup" then
-				
+
 					console.y_show=console.y_show-16
-				
+
 				elseif key=="pagedown" then
-				
+
 					console.y_show=console.y_show+16
 
 				end
-				
+
 			end
-			
+
 			return console.buff:keypress(ascii,key,act)
-			
+
 		end
-		
+
 	end
-	
+
 -- overload print function in the given (global) tab
 -- returns a function to undo this act (however this function may fail...)
 	function console.replace_print(g)
-	
+
 		local print_old=g.print
 		console.print_old=g.print
 		local print_new=function(...)
@@ -545,7 +552,7 @@ font.vbs_idx=1
 			end
 		end
 		g.print=print_new
-		
+
 		return function()
 			if g.print==print_new then -- only change back if noone else changed it
 				g.print=print_old
@@ -554,6 +561,6 @@ font.vbs_idx=1
 		end
 	end
 
-	
+
 	return console
 end
