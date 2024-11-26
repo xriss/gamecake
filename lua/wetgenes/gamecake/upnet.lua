@@ -6,7 +6,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local Ox=function(n) return string.format("%012x",n or 0) end
 
-local log,dump=require("wetgenes.logs"):export("log","dump")
+local log,dump,dlog=require("wetgenes.logs"):export("log","dump","dlog")
+
+
 
 local json_pack=require("wetgenes.json_pack")
 
@@ -28,6 +30,10 @@ local msgp=require("wetgenes.tasks_msgp")
 M.bake=function(oven,upnet)
 
 	upnet=upnet or {}
+
+	upnet.dmode=function(mode)
+		return upnet.us..mode..("\t\t\t\t\t\t"):rep(upnet.us-1)
+	end
 
 	upnet.task_id=upnet.task_id or "msgp"
 	upnet.task_id_msg=upnet.task_id..":msg"
@@ -200,7 +206,7 @@ M.bake=function(oven,upnet)
 			msg.clients[#msg.clients+1]=v
 		end
 
-		msg.ticks=upnet.ticks.base
+		msg.ticks=upnet.ticks.agreed
 
 		client.join_tick=msg.ticks
 
@@ -289,7 +295,7 @@ print("WELCOME",client.idx)
 			cidx=cidx+1
 		end
 
-		local fix=upnet.ticks.base-msg.hashs_tick
+		local fix=msg.hashs_tick-upnet.ticks.base
 		for idx=1,#msg.hashs do
 			local c=upnet.hashs[idx+fix]
 			local m=msg.hashs[idx]
@@ -456,13 +462,14 @@ print("joining",addr)
 
 		local h=hash[upnet.us] -- our hash
 		if not h then return end
---		local hs={}
---		for i,v in pairs(hash) do hs[i]=(Ox(v)) end
---		print("hashs",upnet.ticks.agreed+1,unpack(hs))
+--local hs={} ; for i,v in pairs(hash) do hs[i]=(Ox(v)) end
+--dlog(upnet.dmode("hashs"),upnet.ticks.agreed+1,unpack(hs))
 		for _,v in pairs(upnet.clients) do -- all hashes must agree
 			if not hash[v.idx] then return end -- no hash yet
 			if h ~= hash[v.idx] then -- hash does not match
 				upnet.need_sync=upnet.ticks.agreed+1 -- need to trigger a full resync for this frame
+local hs={} ; for i,v in pairs(hash) do hs[i]=(Ox(v)) end
+dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 				return
 			end
 		end
@@ -489,6 +496,8 @@ print("joining",addr)
 
 	end
 	upnet.set_hash=function(idx,hash)
+
+--dlog(upnet.dmode("set"),idx,Ox(hash))
 
 		local hidx=1+idx-upnet.ticks.base
 		if hidx<1 then return end
@@ -583,6 +592,7 @@ print("joining",addr)
 					upnet.next_tick()
 --					local dbg_hash=upnet.hashs[2+upnet.ticks.agreed-upnet.ticks.base] or {}
 --					print("now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base,Ox(dbg_hash[1]),Ox(dbg_hash[2]))
+--					dlog(upnet.dmode("tick"),"now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base)
 				end
 			end
 		end

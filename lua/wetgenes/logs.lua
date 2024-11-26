@@ -129,45 +129,45 @@ logstring= function(o,opts)
 		opts.fout=function(...)
 			for i,v in ipairs({...}) do ret[#ret+1]=v end
 		end
-		logstring(o,opts)		
+		logstring(o,opts)
 		opts.fout("\n")
 		return table.concat(ret)
 	end
 
 	if type(o) == "number" then
-	
+
 		return fout(o)
-		
+
 	elseif type(o) == "boolean" then
-	
+
 		if o then return fout("true") else return fout("false") end
-		
+
 	elseif type(o) == "string" then
-	
+
 		return fout(string.format("%q", o))
-		
+
 	elseif type(o) == "table" then
-			
+
 		if opts.done[o] and opts.no_duplicates then
 			fout(opts.indent,"\n",opts.indent,"{--[[DUPLICATE]]}\n")
 			return
 		else
-		
+
 			fout("{\n")
 
 			opts.indent=opts.indent.." "
-			
+
 			opts.done[o]=true
-			
+
 			local maxi=0
-			
+
 			for k,v in ipairs(o) do -- dump number keys in order
 				fout(opts.indent)
 				logstring(v,opts)
 				fout(",\n")
 				maxi=k -- remember top
 			end
-			
+
 			for k,v in pairs(o) do
 				if (type(k)~="number") or (k<1) or (k>maxi) or (math.floor(k)~=k) then -- skip what we already dumped
 					fout(opts.indent,"[")
@@ -177,16 +177,28 @@ logstring= function(o,opts)
 					fout(",\n")
 				end
 			end
-			
+
 			opts.indent=opts.indent:sub(1,-2)
 			fout(opts.indent,"}")
 			return
 		end
-	elseif type(o) == "nil" then	
+	elseif type(o) == "nil" then
 		return fout("nil")
 	else
 		return fout("nil--[[",type(o),"]]")
 	end
-	
+
+end
+
+
+logs.dlog_cache={}
+logs.dlog=function(mode,...)
+	local ts={}
+	for i=1,select("#", ...) do ts[i]=tostring( select(i, ...) ) end
+	local s=table.concat(ts,"\t")
+	if logs.dlog_cache[mode] ~= s then
+		logs.dlog_cache[mode]=s
+		logs.log(mode,s)
+	end
 end
 
