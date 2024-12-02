@@ -274,7 +274,7 @@ print("WELCOME",client.idx)
 			msg.hashs={}
 			for i=1,#upnet.hashs do -- keep resending all our hashes untill we sync
 				local hi=upnet.hashs[i] or {}
-				msg.hashs[i]=hi[upnet.us] or -1
+				msg.hashs[i]=hi[upnet.us]
 			end
 		end
 
@@ -306,6 +306,9 @@ print("WELCOME",client.idx)
 			local c=upnet.hashs[idx+fix]
 			local m=msg.hashs[idx]
 			if c and m then -- accept and overide old data with any new hashes
+				if c[client.idx] and c[client.idx]~=m then
+--dlog(upnet.dmode("newhash"),idx+msg.ticks_base-1,Ox(c[client.idx]),Ox(m))
+				end
 				c[client.idx] = m or c[client.idx]
 			end
 		end
@@ -481,6 +484,8 @@ print("joining",addr)
 			if not hash[v.idx] then return end -- no hash yet
 			if h ~= hash[v.idx] then -- hash does not match
 				upnet.need_sync=upnet.ticks.agreed+1 -- need to trigger a full resync for this frame
+local hs={} ; for i,v in pairs(hash) do hs[i]=(Ox(v)) end
+dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 				return
 			end
 		end
@@ -539,7 +544,9 @@ print("joining",addr)
 		upnet.ticks.now=upnet.ticks.now+1
 		-- remember current up
 
-		local iidx=2+upnet.ticks.now-upnet.ticks.base
+		 -- current input is locked in for "next" frame not this frame
+		 -- that way we can tween local data into the "future" without glitches
+		local iidx=2+upnet.ticks.now-upnet.ticks.base -- next frame
 		if iidx<1 then return end
 
 		for i=1,iidx do -- make sure full array exists
