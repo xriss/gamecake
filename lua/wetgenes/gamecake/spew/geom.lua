@@ -43,7 +43,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 -- we DO NOT have OpenGL access here
 	M.meta={__index=M}
 	M.new=function(it) it=it or {} setmetatable(it,M.meta) return it:reset() end
-	
+
 	M.reset=function(it)
 		it.verts={}
 		it.mats={}
@@ -51,7 +51,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		it.mats={}
 		return it
 	end
-	
+
 	M.duplicate=function(it)
 		return M.copy(it,M.new())
 	end
@@ -75,7 +75,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			local v={unpack(vert)}
 			dst.verts[ iv ]=v
 		end
---copy polys		
+--copy polys
 		for iv = 1 , #src.polys do local poly=src.polys[iv]
 			local p={unpack(poly)}
 			p.mat=poly.mat
@@ -118,7 +118,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			end
 		end
 		it.verts=vs
-		
+
 --copy good polys
 		local ps={}
 		for iv = 1 , #it.polys do local poly=it.polys[iv]
@@ -141,7 +141,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		if dst.clear_predraw then
 			dst:clear_predraw()
 		end
-		
+
 		local remat={}
 -- copy mats
 		for im = 1 , #src.mats do local mat=src.mats[im]
@@ -158,7 +158,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				dst.mats[ m.idx ]=m
 			end
 			remat[im]=m.idx
-			
+
 			for n,v in pairs(mat) do
 				if n~="idx" then
 					m[n]=v
@@ -171,7 +171,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			local v={unpack(vert)}
 			dst.verts[ bv+iv ]=v
 		end
---copy polys		
+--copy polys
 		local bp=#dst.polys
 		for iv = 1 , #src.polys do local poly=src.polys[iv]
 			local p={unpack(poly)}
@@ -244,7 +244,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			end
 			if not m4 then m4=M4() end
 			local m3=M4(m4):m3() -- get rotation/scale only
-			
+
 
 			M.adjust_vertex_by_m4_and_m3(v,m4,m3)
 		end
@@ -262,7 +262,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		end
 		return it
 	end
-	
+
 	-- position the geom
 	M.adjust_position=function(it,dx,dy,dz)
 		local vs=it.verts
@@ -284,7 +284,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			if not ld[l1] then ld[l1]={} end
 			ld[l1][l2]=true -- merge all lines
 		end
-		
+
 		for i,p in ipairs(it.polys) do -- each poly
 			local hp=#p
 			for ip,vp in ipairs(p) do -- each line
@@ -310,7 +310,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			local hvp=#vp
 			for i1=1,hvp do
 				local i2=i1+1
-				if i2>hvp then i2=1 end -- wrap 
+				if i2>hvp then i2=1 end -- wrap
 				local v1=vp[i1]
 				local v2=vp[i2]
 				if v2>v1 then v1,v2=v2,v1 end -- sort order
@@ -319,7 +319,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				es[v1][v2][ip]=i1 -- what polys it links too and by what vertexs
 			end
 		end
-		
+
 		it.edges={}
 		for i1,v in pairs(es) do
 			for i2,b in pairs(v) do
@@ -328,10 +328,10 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		end
 		return it
 	end
-	
+
 -- uses first 3 verts, does not fix the length
 	M.get_poly_normal=function(it,p)
-	
+
 		local v1=it.verts[ p[1] ]
 		local v2=it.verts[ p[2] ]
 		local v3=it.verts[ p[3] ]
@@ -344,13 +344,13 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		vb[1]=v3[1]-v2[1]
 		vb[2]=v3[2]-v2[2]
 		vb[3]=v3[3]-v2[3]
-		
+
 		-- face normal
 		local vn={}
 		vn[1]=va[3]*vb[2] - va[2]*vb[3]
 		vn[2]=va[1]*vb[3] - va[3]*vb[1]
 		vn[3]=va[2]*vb[1] - va[1]*vb[2]
-		
+
 		return vn
 	end
 
@@ -385,7 +385,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		for i,v in pairs(it.verts) do M.vert_flip(it,v) end
 		return it
 	end
-		
+
 	M.vert_flip=function(it,v)
 		if v[4] then
 			v[4]=-v[4]
@@ -396,7 +396,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 	end
 
 	M.poly_flip=function(it,p)
-	
+
 		local n={}
 		for i=#p,1,-1 do
 			n[#n+1]=p[i]
@@ -417,12 +417,12 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			vv[axis+8]=-vv[axis+8]
 		end
 	end
-	
+
 -- dupe+mirror point and polygons around the origin on the given axis 1=x 2=y 3=z
 	M.mirror=function(it,axis,cb)
-	
+
 		local vmap={} -- map vertexes to their mirrored one
-		
+
 		local dupe=function(it)
 			local r={}
 			for i,v in ipairs(it) do r[i]=v end
@@ -455,12 +455,12 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				end
 				M.poly_flip(it,vd)
 		end
-	
+
 	end
 
 -- unmerge the vertexs so they are unique per face and build normals so we get flat shading
 	M.build_flat_normals=function(it)
-	
+
 		local verts={}
 		local polys={}
 
@@ -476,10 +476,10 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				polys[ip][i]=iv
 			end
 		end
-		
+
 		it.verts=verts
 		it.polys=polys
-		
+
 		M.build_normals(it)
 
 		return it
@@ -495,7 +495,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			vv[6]=0
 			vv.count=0
 		end
-		
+
 -- add each face to normals
 		for ip,vp in ipairs(it.polys) do
 			local n=M.normalize( M.get_poly_normal(it,vp) )
@@ -516,11 +516,11 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				vv[6]=vv[6]/vv.count
 			end
 			vv.count=nil
-			
+
 			if vv[4]~=vv[4] then vv[4]=1 end	-- if nan
 			if vv[5]~=vv[5] then vv[5]=1 end
 			if vv[6]~=vv[6] then vv[6]=1 end
-			
+
 			if vv[4]==0 and vv[5]==0 and vv[6]==0 then -- if zero length
 				vv[4]=1
 				vv[5]=1
@@ -569,7 +569,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			vv[11]=0
 			vv[12]={0,0,0}
 		end
-		
+
 -- check each poly edge and add a weighted version of its normal to the tangent
 		for ip,vp in ipairs(it.polys) do
 			for i=1,#vp do
@@ -605,7 +605,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 			end
 		end
-		
+
 -- merge tangents of vertexs that are in same 3d location
 --[[
 		local merge={}
@@ -663,20 +663,20 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 -- force tangent and bitangent to be at right angles of each other
 
 		for iv,vv in ipairs(it.verts) do
-		
+
 			local n={vv[4],vv[5],vv[6]}
 			local t={vv[9],vv[10],vv[11]}
 			local b={vv[12][1],vv[12][2],vv[12][3]}
-			
+
 			local h=tardis.v3.new(t):add(b):normalize() -- halfway vector
-			
+
 			local c=tardis.v3.new(h):cross(n):normalize()
-			
+
 			local t2=tardis.v3.new(h):add(c):normalize() -- new vector at right angles
 			local b2=tardis.v3.new(h):sub(c):normalize() -- new vector at right angles
-			
+
 			if tardis.v3.dot(t,t2) > tardis.v3.dot(t,b2) then -- right way around
-			
+
 				vv[9]=t2[1]
 				vv[10]=t2[2]
 				vv[11]=t2[3]
@@ -684,9 +684,9 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				vv[12][1]=b2[1]
 				vv[12][2]=b2[2]
 				vv[12][3]=b2[3]
-			
+
 			else
-			
+
 				vv[9]=b2[1]
 				vv[10]=b2[2]
 				vv[11]=b2[3]
@@ -703,7 +703,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 -- work out the sign for the bitangent and force remove any nan values
 		for iv,vv in ipairs(it.verts) do
 			local b={ (vv[5]*vv[11])-(vv[6]*vv[10]) , (vv[6]*vv[9])-(vv[4]*vv[11]) , (vv[4]*vv[10])-(vv[5]*vv[9]) }
-			vv[12] = vv[12][1]*b[1] + vv[12][2]*b[2] + vv[12][3]*b[3] 
+			vv[12] = vv[12][1]*b[1] + vv[12][2]*b[2] + vv[12][3]*b[3]
 			if vv[12]>=0 then vv[12]=1 else vv[12]=-1 end
 			if vv[ 9]~=vv[ 9] then vv[ 9]=1 end
 			if vv[10]~=vv[10] then vv[10]=1 end
@@ -715,12 +715,12 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 -- face polys away from the origin
 	M.fix_poly_order=function(it,p)
-	
+
 		local v2=it.verts[ p[2] ]
 		local vn=M.get_poly_normal(it,p)
-		
+
 		local d = vn[1]*v2[1] + vn[2]*v2[2] + vn[3]*v2[3]
-		
+
 		if d<0 then -- invert poly order
 			M.poly_flip(it,p)
 		end
@@ -730,7 +730,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 	-- bevil a base object, s is how much each face is scaled, so 7/8 is a nice bevel
 	M.apply_bevel=function(it,s)
-	
+
 		M.build_edges(it)
 
 		local vs={}
@@ -797,7 +797,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			M.fix_poly_order(it,p)
 			it.polys[#it.polys+1]=p -- add join poly
 		end
-		
+
 
 		local function dojoin(v2,v1) -- insert v1 into v1
 			if v1[1] == v2[1] then
@@ -819,7 +819,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			end
 
 		end
-		
+
 		for i1,v1 in pairs(js) do
 --			if #v1 == 2 then -- unjoined
 				for i2,v2 in pairs(js) do
@@ -845,17 +845,17 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				end
 --			end
 		end
-		
+
 		for i,v in pairs(js) do -- add pollys
 			v[#v]=nil
 			it.polys[#it.polys+1]=v
 			M.fix_poly_order(it,v)
 		end
-			
+
 		for i,p in pairs(it.polys) do
 			M.fix_poly_order(it,p)
 		end
-			
+
 		return it
 	end
 
@@ -864,7 +864,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 	M.max_radius=function(it)
 
 		local maxdd=0
-		
+
 		for iv,vv in ipairs(it.verts) do
 			local dd=vv[1]*vv[1]+vv[2]*vv[2]+vv[3]*vv[3]
 			if dd>maxdd then maxdd=dd end
@@ -876,7 +876,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 	M.find_bounds=function(it)
 
 		local dd={0,0,0,0,0,0}
-		
+
 		local v=it.verts[1]
 		if v then
 
@@ -886,7 +886,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			dd[4]=v[2]
 			dd[5]=v[3]
 			dd[6]=v[3]
-		
+
 			for iv,vv in ipairs(it.verts) do
 				if vv[1]<dd[1] then dd[1]=vv[1] end
 				if vv[1]>dd[2] then dd[2]=vv[1] end
@@ -897,14 +897,14 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			end
 
 		end
-		
+
 		return dd
 	end
 
 	M.find_center=function(it)
 		local dd={0,0,0}
 		local cc=0
-		
+
 		if it.verts[1] then
 			for iv,vv in ipairs(it.verts) do
 				dd[1]=dd[1]+vv[1]
@@ -916,7 +916,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 			dd[2]=dd[2]/cc
 			dd[3]=dd[3]/cc
 		end
-		
+
 		return dd[1],dd[2],dd[3]
 	end
 
@@ -994,6 +994,24 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 		return c
 	end
 
+-- break larger polys into triangles
+	M.polys_to_tris=function(it)
+
+		local ps={}
+		for _,p in ipairs(it.polys) do
+			for ti=0,(#p-3) do
+				local np={}
+				for i=2,0,-1 do
+					local tv=1+ti+i if i==0 then tv=1 end
+					np[#np+1]=p[tv]
+				end
+				ps[#ps+1]=np
+			end
+		end
+		it.polys=ps -- new polygons
+		return it
+	end
+
 -- Segment a 3d object (tris only) such that each original poly represents the base
 -- of a slice which is extruded towards the center, defaults to a 50% shell.
 -- returns array of segment objects
@@ -1001,9 +1019,9 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 	M.segmentris=function(it,minf,maxf)
 		minf=minf or 0.5
 		maxf=maxf or 1.0
-		
+
 		local its={}
-	
+
 		local c=V3(M.find_center(it))
 		local slide=function(v,f)
 			v[1]=c[1]+(v[1]-c[1])*f
@@ -1116,7 +1134,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				ps[#ps+1]=p
 			end
 
-			
+
 		end
 
 		it.polys=ps -- new polygons
@@ -1140,7 +1158,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				it.verts[ #it.verts+1 ]=M.make_center_vertex(it,p[ib],p[i])
 			end
 
-			if #p==3 then 
+			if #p==3 then
 				ps[#ps+1]={p[1],#it.verts-3+2,#it.verts-3+1,mat=p.mat}
 				ps[#ps+1]={p[2],#it.verts-3+3,#it.verts-3+2,mat=p.mat}
 				ps[#ps+1]={p[3],#it.verts-3+1,#it.verts-3+3,mat=p.mat}
@@ -1149,7 +1167,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				ps[#ps+1]=p
 			end
 
-			
+
 		end
 
 		it.polys=ps -- new polygons
@@ -1160,7 +1178,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 -- sort low to high, first the vertexes by x,y,z then the polys by indexs
 -- so we are 100% sure what order verts and polys are in.
 	M.stable_sort=function(it)
-	
+
 		local vorder={}
 		for i=1,#it.verts do
 			vorder[i]=i
@@ -1194,7 +1212,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				end
 			end
 		end
-		
+
 		-- sort polys
 		local porder={}
 		for i=1,#it.polys do
@@ -1218,7 +1236,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 		return it
 	end
-	
+
 
 	require("wetgenes.gamecake.spew.geom_mask").fill(M)
 	require("wetgenes.gamecake.spew.geom_solids").fill(M)
@@ -1233,7 +1251,7 @@ M.bake=function(oven,geom)
 	geom.meta={__index=geom}
 	geom.new=function(it) it=it or {} setmetatable(it,geom.meta) return it:reset() end
 
-	
+
 	require("wetgenes.gamecake.spew.geom_draw").fill(oven,geom)
 	require("wetgenes.gamecake.spew.geom_render").fill(oven,geom)
 

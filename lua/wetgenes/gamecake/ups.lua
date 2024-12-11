@@ -8,37 +8,37 @@ local wstr=require("wetgenes.string")
 
 --[[
 
-Since the very first arcade games the UP in 1UP has always stood for 
+Since the very first arcade games the UP in 1UP has always stood for
 *U*ser in*P*ut and this is obvioulsy not a backronym.
 
-This is a replacement for the keys and recaps systems, recaps has never 
-really been used as it was intended ( to recored and replay ) and the 
-whole thing has gotten rather complicated and entwined with the input 
-system. So this is an attemt to simplify all that junk without worrying 
-too much about backwards compatibility which I can hack in later as 
+This is a replacement for the keys and recaps systems, recaps has never
+really been used as it was intended ( to recored and replay ) and the
+whole thing has gotten rather complicated and entwined with the input
+system. So this is an attemt to simplify all that junk without worrying
+too much about backwards compatibility which I can hack in later as
 necesary.
 
-Ideally we want a way of mapping keys/mouse/gamepads etc into gamepad 
-like controls for 1-X players and a player 0 who is all/any gamepad. On 
-top of this we need to be able to diff and tween gamepad states for 
+Ideally we want a way of mapping keys/mouse/gamepads etc into gamepad
+like controls for 1-X players and a player 0 who is all/any gamepad. On
+top of this we need to be able to diff and tween gamepad states for
 network fun.
 
-Finally we need to cache the raw messages for when we are doing 
-something even more complicated, eg being a proper gui rather than a 
-game and this needs to include a way of moving these msgs onto another 
+Finally we need to cache the raw messages for when we are doing
+something even more complicated, eg being a proper gui rather than a
+game and this needs to include a way of moving these msgs onto another
 thread so the data needs to be kept pure.
 
-So yeah, lots of stuff going on here but the basic idea for basic use 
+So yeah, lots of stuff going on here but the basic idea for basic use
 is that we provide.
 
-	ups X as the state of a single gamepad which requires mapping to 
-	hardware gamepads or virtual keyboard gamepads or even a remote 
+	ups X as the state of a single gamepad which requires mapping to
+	hardware gamepads or virtual keyboard gamepads or even a remote
 	gamepad for a networked player.
-	
-	by default we will map mouse and keys to up1 so that can be used 
+
+	by default we will map mouse and keys to up1 so that can be used
 	where keyboard and mouse values are wanted.
 
-	A list of all msgs we recieve this frame, everytime we advance a 
+	A list of all msgs we recieve this frame, everytime we advance a
 	frame this is reset so it *must* be polled every frame update.
 
 ]]
@@ -71,9 +71,9 @@ keymaps["full"]={
 	["shift_l"]		=	{ "l3" },
 	["shift_r"]		=	{ "r3" },
 	["enter"]		=	{ "y" , "fire"},
-	["ctrl_l"]		=	{ "x" , "fire"},
+	["control_l"]	=	{ "x" , "fire"},
 	["space"]		=	{ "a" , "fire"},
-	["ctrl_r"]		=	{ "b" , "fire" },
+	["control_r"]	=	{ "b" , "fire" },
 }
 
 -- basic 1up with only a single fire button
@@ -150,7 +150,7 @@ for n,v in pairs(keymaps["island2"]) do keymaps["islands"][n]=v end
 
 
 
--- these should be configurable 
+-- these should be configurable
 local powzone=2			-- walk helper
 local minzone=0x1000	-- deadzone
 local maxzone=0x7000	-- run helper
@@ -178,8 +178,8 @@ for i,n in ipairs{
 		"left","pad_left","right","pad_right","up","pad_up","down","pad_down",
 		"a","b","x","y",	"l1","r1","l2","r2","l3","r3",	"select","start","guide","fire",
 		} do
-	M.is_pulse[ n.."_set" ] = true 
-	M.is_pulse[ n.."_clr" ] = true 
+	M.is_pulse[ n.."_set" ] = true
+	M.is_pulse[ n.."_clr" ] = true
 end
 
 M.up_functions={}
@@ -254,7 +254,7 @@ M.up_functions.update=function(up,pow)
 		end
 		up.all[ak]=v
 	end
-	
+
 	-- pick best l/r axis be it "k"eys or "p"ad values.
 	local lxp,lyp,lzp=(up.all["lxp"] or 0),(up.all["lyp"] or 0),(up.all["lzp"] or 0)
 	local lxk,lyk,lzk=(up.all["lxk"] or 0),(up.all["lyk"] or 0),(up.all["lzk"] or 0)
@@ -297,7 +297,7 @@ end
 -- save to json ( sameish data as an up but no metatable )
 M.up_functions.save=function(up,r)
 	local r=r or {}
-	
+
 	if next(up.all) then -- something
 		r.all={}
 		for n,v in pairs(up.all) do
@@ -339,7 +339,7 @@ M.up_functions.merge=function(up,r)
 
 end
 
--- create new up when we have another up, 
+-- create new up when we have another up,
 M.up_functions.create=function()
 	local up={}
 	setmetatable(up,M.up_metatable) -- shared functions
@@ -363,10 +363,10 @@ M.bake=function(oven,ups)
 	ups=ups or {}
 
 	ups.empty=M.empty
-	
+
 	ups.auto_advance=true -- automatically advance each update
 	-- upnet will turn this off so it can network sync advances
-	
+
 	-- reset everything
 	ups.reset=function()
 		ups.last_pad_values={}
@@ -409,7 +409,7 @@ M.bake=function(oven,ups)
 		ups.states[idx]=ups.create() -- create and remember
 		return ups.states[idx]
 	end
-	
+
 	-- create a state
 	ups.create=M.up_functions.create
 
@@ -420,11 +420,10 @@ M.bake=function(oven,ups)
 		for n,v in pairs(mm) do m[n]=v end -- copy top level only
 		ups.new_msgs[#ups.new_msgs+1]=m -- remember
 	end
-	
+
 	-- apply msgs to button states
 	ups.msg_apply=function(m)
 		if m.class=="key" then
-		
 			for idx,maps in ipairs(ups.keymaps) do -- check all keymaps
 				local buttons=maps[m.keyname] or maps[m.ascii]
 				if buttons then
@@ -440,9 +439,9 @@ M.bake=function(oven,ups)
 					end
 				end
 			end
-			
+
 		elseif m.class=="mouse" then -- swipe to move
-		
+
 			local up=ups.manifest( ups.mousemaps[1] ) -- probably 1up
 			if up then
 				if m.action==-1 then -- we only get button ups
@@ -518,7 +517,7 @@ M.bake=function(oven,ups)
 
 					last_pad_values[name]=v
 				end
-				
+
 				if     m.name=="LeftX"			then		doaxis("left","right")	up:set_axis("lxp",m.value)
 				elseif m.name=="LeftY"			then		doaxis("up","down")		up:set_axis("lyp",m.value)
 				elseif m.name=="RightX"			then		doaxis("left","right")	up:set_axis("rxp",m.value)
@@ -562,7 +561,7 @@ M.bake=function(oven,ups)
 	end
 
 	ups.update=function()
-	
+
 		if oven.is.update then -- pull all msgs from other thread
 
 			ups.msgs={} -- about to fill this
@@ -575,7 +574,7 @@ M.bake=function(oven,ups)
 					end
 				end
 			until not m
-			
+
 		else
 
 			-- swap now to all
@@ -587,7 +586,7 @@ M.bake=function(oven,ups)
 				local m={}
 				m.msgs=ups.msgs
 				oven.tasks.linda:send(nil,"ups",m)
-			
+
 			end
 
 		end
@@ -609,7 +608,7 @@ M.bake=function(oven,ups)
 		end
 
 	end
-	
+
 	-- needed for manual advance
 	ups.advance=function(idx)
 		-- advance each up state one frame deals with key acc and decay code
@@ -623,11 +622,11 @@ M.bake=function(oven,ups)
 	ups.up=function(idx)
 		if type(idx)~="number" then idx=1 end
 		if idx<1 then idx=1 end -- simpler than wasting time merging every state
-	
+
 		local up={}
 		up.core=ups.manifest(idx)
 		setmetatable(up,{__index=up.core})
-		
+
 		up.button=function(name)
 			return up:get(name)
 		end
@@ -635,7 +634,7 @@ M.bake=function(oven,ups)
 		up.axis=function(name)
 			return up:get(name)
 		end
-		
+
 		up.axisfixed=function(name)
 			return up:axis(name)
 		end
@@ -643,7 +642,7 @@ M.bake=function(oven,ups)
 		up.msgs=function(name)
 			return ups.msgs
 		end
-		
+
 		return up
 	end
 

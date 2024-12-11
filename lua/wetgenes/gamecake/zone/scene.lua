@@ -571,7 +571,7 @@ Merge bottom 2 changesets and replae with just 1 shifting all values down one.
 ]]
 values_methods.pull=function(values)
 	local t1=values[1]
-	local t2=values[2]
+	local t2=values[2] or {}
 	for n,v in pairs(t2) do -- merge 1 down
 		t1[n]=v
 	end

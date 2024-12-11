@@ -27,7 +27,7 @@ bool gContactAddedCallback_smooth_mesh(
 
 /*+------------------------------------------------------------------+**
 
-A world plus all the other parts that a world needs allocated in one 
+A world plus all the other parts that a world needs allocated in one
 struct.
 
 */
@@ -62,7 +62,7 @@ static void lua_bullet_world_delete (bullet_world *pp)
 }
 
 static int lua_bullet_world_destroy (lua_State *l)
-{	
+{
 bullet_world *pp=(bullet_world*)luaL_checkudata(l, 1 , lua_bullet_world_meta_name);
 
 	// remove any registry link
@@ -103,7 +103,7 @@ bullet_world *pp;
 
 // this does not really help
 //	pp->world->setApplySpeculativeContactRestitution(true);
-	
+
 	return 1;
 }
 
@@ -130,9 +130,9 @@ btTriangleIndexVertexMaterialArray::btTriangleIndexVertexMaterialArray 	(
 		unsigned char *  	materialBase,
 		int  	materialStride,
 		int *  	triangleMaterialsBase,
-		int  	materialIndexStride 
+		int  	materialIndexStride
 	)
-	
+
 
 		btTriangleIndexVertexArray* meshInterface = new btTriangleIndexVertexArray();
 		btIndexedMesh part;
@@ -146,8 +146,8 @@ btTriangleIndexVertexMaterialArray::btTriangleIndexVertexMaterialArray 	(
 		part.m_indexType = PHY_SHORT;
 
 		meshInterface->addIndexedMesh(part, PHY_SHORT);
-		
-			
+
+
 */
 
 const char *lua_bullet_mesh_meta_name="bullet_mesh*ptr";
@@ -160,18 +160,18 @@ btStridingMeshInterface **pp=(btStridingMeshInterface**)luaL_checkudata(l, idx ,
 }
 
 static int lua_bullet_mesh_destroy (lua_State *l)
-{	
+{
 btStridingMeshInterface **pp=(btStridingMeshInterface**)luaL_checkudata(l, 1 , lua_bullet_mesh_meta_name);
 	if(*pp)
 	{
 		delete *pp;
 		(*pp)=0;
-	}	
+	}
 	return 0;
 }
 
 static int lua_bullet_mesh_create (lua_State *l)
-{	
+{
 btStridingMeshInterface **pp;
 
 int    tnum; // triangles
@@ -220,7 +220,7 @@ int    isiz;
 		iptr=(int *)lua_pack_to_const_buffer(l,10,&ilen);
 		isiz=luaL_checknumber(l,11);
 	}
-	
+
 	if(mptr)
 	{
 		*pp=new btTriangleIndexVertexMaterialArray( tnum,tptr,tsiz, vnum,vptr,vsiz, mnum,mptr,msiz, iptr,isiz );
@@ -241,15 +241,15 @@ shape
 	btStaticPlaneShape : "plane" , nx , ny , nz , distance
 
 	btBoxShape : "box" , x/2 , y/2 , z/2
-	
+
 	btSphereShape : "sphere" , radius
-	
+
 	btCapsuleShape : "capsule" , height , radius , axis
 
 	btCylinderShape : "cylinder" , x/2 , y/2 , z/2 , axis
 
 	btConeShape : "cone" , height , radius , axis
-	
+
 	btMultiSphereShape : "spheres" , { radius,x,y,z, ... }
 
 	btConvexHullShape : "points" , { x,y,z, ... }
@@ -297,7 +297,7 @@ btCollisionShape **pp=(btCollisionShape**)luaL_checkudata(l, 1 , lua_bullet_shap
 
 		delete *pp;
 		(*pp)=0;
-	}	
+	}
 	return 0;
 }
 
@@ -457,9 +457,11 @@ btQuaternion quat;
 					lua_rawgeti(l,2,i+1); hx=luaL_checknumber(l,-1); lua_pop(l,1);
 					lua_rawgeti(l,2,i+2); hy=luaL_checknumber(l,-1); lua_pop(l,1);
 					lua_rawgeti(l,2,i+3); hz=luaL_checknumber(l,-1); lua_pop(l,1);
-					
+
 					((btConvexHullShape*)(*pp))->addPoint( btVector3(hx,hy,hz) );
 				}
+//				((btConvexHullShape*)(*pp))->initializePolyhedralFeatures();
+//				((btConvexHullShape*)(*pp))->optimizeConvexHull();
 			}
 			else
 			{
@@ -478,7 +480,7 @@ btQuaternion quat;
 			axis=luaL_checknumber(l,8);
 			dtype=luaL_checknumber(l,9);
 			flip=lua_toboolean(l,10);
-			
+
 			*pp = new btHeightfieldTerrainShape( width , length , (const void *)dptr , btScalar(scale) , btScalar(hmin) , btScalar(hmax) , axis , (PHY_ScalarType)dtype , (bool)flip );
 
 		}
@@ -486,6 +488,8 @@ btQuaternion quat;
 		if(0==strcmp(tp,"mesh"))
 		{
 				mesh=lua_bullet_mesh_ptr(l,2);
+
+//				btConvexTriangleMeshShape *tmesh=new btConvexTriangleMeshShape(mesh,true);
 				btBvhTriangleMeshShape *tmesh=new btBvhTriangleMeshShape(mesh,true,true);
 				*pp = tmesh;
 				if( lua_toboolean(l,3) ) // smooth internal edge collisions
@@ -506,11 +510,11 @@ btQuaternion quat;
 				for(i=0;i<count;i+=1)
 				{
 					lua_rawgeti(l,2,i+1);
-					
+
 					length=lua_objlen(l,-1); // must be a child table { shape , px,py,pz, qx,qy,qz,qw }
-					
+
 					trans.setIdentity();
-			
+
 					lua_rawgeti(l,-1,1); lua_rawgeti(l,-1,0); shape=lua_bullet_shape_ptr(l,-1); lua_pop(l,2); // must have shape table with shape in [0]
 
 					if(length>=4) // have position
@@ -521,7 +525,7 @@ btQuaternion quat;
 
 						trans.setOrigin( btVector3(hx,hy,hz) );
 					}
-					
+
 					if(length>=8) // have rotation
 					{
 						lua_rawgeti(l,-1,5); qx=luaL_checknumber(l,-1); lua_pop(l,1);
@@ -567,7 +571,7 @@ btCollisionObject **pp=(btCollisionObject**)luaL_checkudata(l, idx , lua_bullet_
 }
 
 static int lua_bullet_body_destroy (lua_State *l)
-{	
+{
 btCollisionObject **pp=(btCollisionObject**)luaL_checkudata(l, 1 , lua_bullet_body_meta_name);
 	if(*pp)
 	{
@@ -583,12 +587,12 @@ btCollisionObject **pp=(btCollisionObject**)luaL_checkudata(l, 1 , lua_bullet_bo
 			delete *pp;
 			(*pp)=0;
 		}
-	}	
+	}
 	return 0;
 }
 
 static int lua_bullet_body_create (lua_State *l)
-{	
+{
 const char *tp;
 btCollisionObject **pp;
 btCollisionShape *shape;
@@ -730,7 +734,7 @@ btDiscreteDynamicsWorld *world = lua_bullet_world_ptr(l,1)->world;
 		lua_pushstring(l,"unknown body type"); lua_error(l);
 	}
 
-	
+
 	return 0;
 }
 
@@ -811,9 +815,9 @@ double x,y,z;
 		lua_pushnumber(l,2); lua_pushnumber(l, closestResults.m_hitNormalWorld.getY() ); lua_settable(l,-3);
 		lua_pushnumber(l,3); lua_pushnumber(l, closestResults.m_hitNormalWorld.getZ() ); lua_settable(l,-3);
 		lua_pop(l,1);
-		
+
 		lua_pushstring(l,"body_ptr"); lua_pushlightuserdata(l, (void*)closestResults.m_collisionObject ); lua_settable(l,-3);
-		
+
 		lua_pop(l,1);
 	}
 	else
@@ -826,7 +830,7 @@ double x,y,z;
 	return 1;
 }
 
-			
+
 
 /*+------------------------------------------------------------------+**
 
@@ -1235,7 +1239,7 @@ btPairCachingGhostObject *ghost = (btPairCachingGhostObject *)lua_bullet_body_pt
 		lua_pushlightuserdata(l,body);
 		lua_settable(l,-3);
 	}
-	
+
 	return 1;
 }
 
@@ -1256,7 +1260,7 @@ btCollisionObject *body = lua_bullet_body_ptr(l, 1 );
 		direction[1]=lua_tonumber(l,3);
 		direction[2]=lua_tonumber(l,4);
 	}
-	
+
 	btTransform trans = body->getWorldTransform();
 	btConvexShape *shape=(btConvexShape*)body->getCollisionShape();
 
@@ -1289,16 +1293,16 @@ btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 		direction[1]=lua_tonumber(l,3);
 		direction[2]=lua_tonumber(l,4);
 	}
-	
+
 	if( lua_isnumber(l,5) ) // position
 	{
 		position[0]=lua_tonumber(l,5);
 		position[1]=lua_tonumber(l,6);
 		position[2]=lua_tonumber(l,7);
 	}
-	
+
 	body->applyForce(direction,position);
-	
+
 	return 0;
 }
 
@@ -1320,16 +1324,16 @@ btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 		direction[1]=lua_tonumber(l,3);
 		direction[2]=lua_tonumber(l,4);
 	}
-	
+
 	if( lua_isnumber(l,5) ) // position
 	{
 		position[0]=lua_tonumber(l,5);
 		position[1]=lua_tonumber(l,6);
 		position[2]=lua_tonumber(l,7);
 	}
-	
+
 	body->applyImpulse(direction,position);
-	
+
 	return 0;
 }
 
@@ -1359,7 +1363,7 @@ btScalar mass=lua_tonumber(l,3);
 		shape->calculateLocalInertia(mass, localInertia);
 	}
 	body->setMassProps(mass, localInertia);
-	
+
 	return 1;
 }
 
@@ -1381,8 +1385,8 @@ btCollisionObject *body = lua_bullet_body_ptr(l, 1 );
 
 /*+------------------------------------------------------------------+**
 
-Get all current contacts in this world that are the same or closer than 
-min_dist and created an impulse the same or above min_impulse you 
+Get all current contacts in this world that are the same or closer than
+min_dist and created an impulse the same or above min_impulse you
 probably want to pass in a 0 for these two values as a default.
 
 Returns table of contacts, each contact is a simple array containing
@@ -1405,7 +1409,7 @@ btScalar min_dist=lua_tonumber(l,2);
 btScalar min_impulse=lua_tonumber(l,3);
 
 	lua_newtable(l);
-		
+
 	int idx=0;
 	int numManifolds = world->getDispatcher()->getNumManifolds();
 	for(int i=0;i<numManifolds;i++)
@@ -1414,7 +1418,7 @@ btScalar min_impulse=lua_tonumber(l,3);
 		const btCollisionObject* obA = contactManifold->getBody0();
 		const btCollisionObject* obB = contactManifold->getBody1();
 		int numContacts = contactManifold->getNumContacts();
-		
+
 		// check if this is an interesting collision
 		bool interesting=false;
 		for (int j=0;j<numContacts;j++)
@@ -1430,7 +1434,7 @@ btScalar min_impulse=lua_tonumber(l,3);
 		if( interesting )
 		{
 			idx=idx+1;
-			
+
 			lua_pushnumber(l,idx);
 			lua_newtable(l);
 
@@ -1441,11 +1445,11 @@ btScalar min_impulse=lua_tonumber(l,3);
 			lua_pushnumber(l,2);
 			lua_pushlightuserdata(l,(void*)obB);
 			lua_settable(l,-3);
-			
+
 			int jb=0;
 			for (int j=0;j<numContacts;j++)
 			{
-				btManifoldPoint& pt = contactManifold->getContactPoint(j);			
+				btManifoldPoint& pt = contactManifold->getContactPoint(j);
 
 				if( ( pt.m_distance1 <= min_dist ) && ( pt.m_appliedImpulse >= min_impulse ) )
 				{
@@ -1466,7 +1470,7 @@ btScalar min_impulse=lua_tonumber(l,3);
 					jb=jb+1;
 				}
 			}
-			
+
 			lua_settable(l,-3);
 		}
 	}
@@ -1567,7 +1571,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_angular_factor",				lua_bullet_body_angular_factor},
 
 		{"body_custom_material_callback",	lua_bullet_body_custom_material_callback},
-		
+
 		{"body_overlaps",					lua_bullet_body_overlaps},
 		{"body_support",					lua_bullet_body_support},
 
