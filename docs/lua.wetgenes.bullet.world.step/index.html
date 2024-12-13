@@ -695,18 +695,13 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.step">lua.wetgenes.bullet.world.step</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L143">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
-<div><pre><code>world:step(seconds,maxsteps,fixedstep)
-
-world:step(seconds,0,seconds)
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L141">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div><pre><code>world:step(seconds)
+world:step(seconds,steps)
 </code></pre>
-<p>world.maxsteps and world.fixedstep will be used as defaults if the second and
-third values are not provided.</p>
-<p>Move the physics forward in time by the given amount in seconds.</p>
-<p>maxsteps is maximum amount of steps to take during this call and defaults to 1.</p>
-<p>fixedstep is how many seconds to step forward at a time for stable simulation
-and defaults to 1/60</p>
-<p>To force a step forward of a given amount of time use a maxsteps of 0.</p>
+<p>Move the simulation forward in time by the given amount in seconds.</p>
+<p>If steps is given then this will be repeated steps times resulting in
+moving the world forward seconds*steps.</p>
 </div>
 </div>
 

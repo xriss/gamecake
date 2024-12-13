@@ -2730,7 +2730,7 @@
    "body": "<pre><code>mesh = world:mesh()\n</code></pre>\n<p>Create a mesh.</p>\n",
    "count": 2,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 264,
+   "line": 248,
    "name": "lua.wetgenes.bullet.world.mesh",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -2738,7 +2738,7 @@
    "body": "<pre><code>mesh:destroy()\n</code></pre>\n<p>Destroy mesh.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 287,
+   "line": 271,
    "name": "lua.wetgenes.bullet.world.mesh.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

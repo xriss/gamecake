@@ -2730,7 +2730,7 @@
    "body": "<pre><code>l,a = body:damping( linear , angular )\nl,a = body:damping()\n</code></pre>\n<p>get/set the body damping</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 465,
+   "line": 449,
    "name": "lua.wetgenes.bullet.world.body.damping",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

@@ -2730,7 +2730,7 @@
    "body": "<pre><code>b = body:custom_material_callback( b )\nb = body:custom_material_callback()\n</code></pre>\n<p>get/set the body custom_material_callback flag</p>\n<p>When set we run a custom callback to try and smooth mesh collisions.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 572,
+   "line": 556,
    "name": "lua.wetgenes.bullet.world.body.custom_material_callback",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }
