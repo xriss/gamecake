@@ -81,6 +81,7 @@
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.factor"><span>/lua.wetgenes.bullet.world.body.factor</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.friction"><span>/lua.wetgenes.bullet.world.body.friction</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.restitution"><span>/lua.wetgenes.bullet.world.body.restitution</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.sleep"><span>/lua.wetgenes.bullet.world.body.sleep</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.transform"><span>/lua.wetgenes.bullet.world.body.transform</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.velocity"><span>/lua.wetgenes.bullet.world.body.velocity</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.contacts"><span>/lua.wetgenes.bullet.world.contacts</span></a>
@@ -694,13 +695,13 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.body.cmask">lua.wetgenes.bullet.body.cmask</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L612">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L625">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>body:cmask(bits)
 bits=body:cmask()
 body:cmask(0x7fffffff)
 </code></pre>
-<p>Set or get body cmask bits. You have 31 bits, so use 0x7fffffff to set 
-all. This body will only colide with another body if the other bodys 
+<p>Set or get body cmask bits. You have 31 bits, so use 0x7fffffff to set
+all. This body will only colide with another body if the other bodys
 cgroup has a bit set that is also set in our cmask.</p>
 <pre><code>cgroup bits are all the groups this body belongs to.
 cmask bits are all the groups this body colides with.

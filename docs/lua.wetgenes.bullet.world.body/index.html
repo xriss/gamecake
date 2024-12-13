@@ -81,6 +81,7 @@
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.factor"><span>/lua.wetgenes.bullet.world.body.factor</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.friction"><span>/lua.wetgenes.bullet.world.body.friction</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.restitution"><span>/lua.wetgenes.bullet.world.body.restitution</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.sleep"><span>/lua.wetgenes.bullet.world.body.sleep</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.transform"><span>/lua.wetgenes.bullet.world.body.transform</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.velocity"><span>/lua.wetgenes.bullet.world.body.velocity</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.contacts"><span>/lua.wetgenes.bullet.world.contacts</span></a>
@@ -715,7 +716,7 @@ b = body:active()
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.angular_factor">lua.wetgenes.bullet.world.body.angular_factor</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L545">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L558">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>x,y,z = body:angular_factor( x , y , z )
 x,y,z = body:angular_factor( r )
 r = ( body:angular_factor( r ) )
@@ -726,7 +727,7 @@ r = ( body:angular_factor( r ) )
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.angular_velocity">lua.wetgenes.bullet.world.body.angular_velocity</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L532">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L545">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>x,y,z = body:angular_velocity( x,y,z )
 x,y,z = body:angular_velocity()
 </code></pre>
@@ -746,7 +747,7 @@ r,t = body:ccd()
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.custom_material_callback">lua.wetgenes.bullet.world.body.custom_material_callback</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L559">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L572">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>b = body:custom_material_callback( b )
 b = body:custom_material_callback()
 </code></pre>
@@ -776,7 +777,7 @@ l,a = body:damping()
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.bullet.world.body.factor">lua.wetgenes.bullet.world.body.factor</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L518">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L531">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
 <div><pre><code>x,y,z = body:factor( x , y , z )
 x,y,z = body:factor( r )
 r = ( body:factor( r ) )
@@ -802,6 +803,16 @@ l,a,s = body:friction()
 r = body:transform()
 </code></pre>
 <p>get/set the body restitution</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.bullet.world.body.sleep">lua.wetgenes.bullet.world.body.sleep</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua#L518">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua</a></div>
+<div><pre><code>l,a = body:sleep()
+l,a = body:sleep(linear,angular)
+</code></pre>
+<p>get/set the sleep threasholds of an object, defaults are ( 0.8 , 1.0 )</p>
 </div>
 </div>
 

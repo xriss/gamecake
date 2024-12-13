@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 632,
+   "count": 633,
    "name": "lua"
   },
   {
@@ -158,11 +158,11 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 625,
+   "count": 626,
    "name": "lua.wetgenes"
   },
   {
-   "count": 37,
+   "count": 38,
    "name": "lua.wetgenes.bullet"
   },
   {
@@ -202,11 +202,11 @@
    "name": "lua.wetgenes.bullet.body.support"
   },
   {
-   "count": 27,
+   "count": 28,
    "name": "lua.wetgenes.bullet.world"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.bullet.world.body"
   },
   {
@@ -248,6 +248,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.body.restitution"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.sleep"
   },
   {
    "count": 1,
@@ -2723,10 +2727,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>body:force(fx,fy,fz)\nbody:force(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply force fx,fy,fz at world relative location (subtract origin of \nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
+   "body": "<pre><code>body:force(fx,fy,fz)\nbody:force(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply force fx,fy,fz at world relative location (subtract origin of\nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 671,
+   "line": 684,
    "name": "lua.wetgenes.bullet.body.force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

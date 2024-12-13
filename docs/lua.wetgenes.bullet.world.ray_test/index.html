@@ -81,6 +81,7 @@
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.factor"><span>/lua.wetgenes.bullet.world.body.factor</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.friction"><span>/lua.wetgenes.bullet.world.body.friction</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.restitution"><span>/lua.wetgenes.bullet.world.body.restitution</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.sleep"><span>/lua.wetgenes.bullet.world.body.sleep</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.transform"><span>/lua.wetgenes.bullet.world.body.transform</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.body.velocity"><span>/lua.wetgenes.bullet.world.body.velocity</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.bullet.world.contacts"><span>/lua.wetgenes.bullet.world.contacts</span></a>
@@ -703,10 +704,10 @@ test=world:ray_test(test)
 
 if world:ray_test(opts).hit then ... end
 </code></pre>
-<p>Perform a ray test between the two ray vectors provided in the test table. 
+<p>Perform a ray test between the two ray vectors provided in the test table.
 fills in hit={...} if we hit something with details of the hit.</p>
-<p>Always returns the test table that was passed in, with modifications that 
-provide the result. Be carefull about reusing this table it is safest to create 
+<p>Always returns the test table that was passed in, with modifications that
+provide the result. Be carefull about reusing this table it is safest to create
 a new one for each ray_test call.</p>
 </div>
 </div>

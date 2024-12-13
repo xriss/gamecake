@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 632,
+   "count": 633,
    "name": "lua"
   },
   {
@@ -158,11 +158,11 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 625,
+   "count": 626,
    "name": "lua.wetgenes"
   },
   {
-   "count": 37,
+   "count": 38,
    "name": "lua.wetgenes.bullet"
   },
   {
@@ -202,11 +202,11 @@
    "name": "lua.wetgenes.bullet.body.support"
   },
   {
-   "count": 27,
+   "count": 28,
    "name": "lua.wetgenes.bullet.world"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.bullet.world.body"
   },
   {
@@ -248,6 +248,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.body.restitution"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.sleep"
   },
   {
    "count": 1,
@@ -2728,50 +2732,50 @@
    "name": "lua.wetgenes.bullet.body"
   },
   {
-   "body": "<pre><code>body:cgroup(bits)\nbits=body:cgroup()\n</code></pre>\n<p>Set or get body cgroup bits. You have 31 bits, so use 0x7fffffff to set \nall. These provide simple yes/no collision control between bodies.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
+   "body": "<pre><code>body:cgroup(bits)\nbits=body:cgroup()\n</code></pre>\n<p>Set or get body cgroup bits. You have 31 bits, so use 0x7fffffff to set\nall. These provide simple yes/no collision control between bodies.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 593,
+   "line": 606,
    "name": "lua.wetgenes.bullet.body.cgroup",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body:change_shape(shape)\nbody:change_shape(shape,mass)\n</code></pre>\n<p>Change the shape assoctiated with this body and optionally change the \nmass.</p>\n",
+   "body": "<pre><code>body:change_shape(shape)\nbody:change_shape(shape,mass)\n</code></pre>\n<p>Change the shape assoctiated with this body and optionally change the\nmass.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 699,
+   "line": 712,
    "name": "lua.wetgenes.bullet.body.change_shape",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body:cmask(bits)\nbits=body:cmask()\nbody:cmask(0x7fffffff)\n</code></pre>\n<p>Set or get body cmask bits. You have 31 bits, so use 0x7fffffff to set \nall. This body will only colide with another body if the other bodys \ncgroup has a bit set that is also set in our cmask.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
+   "body": "<pre><code>body:cmask(bits)\nbits=body:cmask()\nbody:cmask(0x7fffffff)\n</code></pre>\n<p>Set or get body cmask bits. You have 31 bits, so use 0x7fffffff to set\nall. This body will only colide with another body if the other bodys\ncgroup has a bit set that is also set in our cmask.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 612,
+   "line": 625,
    "name": "lua.wetgenes.bullet.body.cmask",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body:force(fx,fy,fz)\nbody:force(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply force fx,fy,fz at world relative location (subtract origin of \nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
+   "body": "<pre><code>body:force(fx,fy,fz)\nbody:force(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply force fx,fy,fz at world relative location (subtract origin of\nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 671,
+   "line": 684,
    "name": "lua.wetgenes.bullet.body.force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body:gravity(x,y,z)\nx,y,z = body:gravity()\n</code></pre>\n<p>Set or get body gravity vector. Fidling with this may be the easiest \nway for a player to move an object around, it certainly makes it easier \nto create &quot;magnetic fields&quot; to hover objects above the ground.</p>\n",
+   "body": "<pre><code>body:gravity(x,y,z)\nx,y,z = body:gravity()\n</code></pre>\n<p>Set or get body gravity vector. Fidling with this may be the easiest\nway for a player to move an object around, it certainly makes it easier\nto create &quot;magnetic fields&quot; to hover objects above the ground.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 574,
+   "line": 587,
    "name": "lua.wetgenes.bullet.body.gravity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body:impulse(fx,fy,fz)\nbody:impulse(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply impulse fx,fy,fz at world relative location (subtract origin of \nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
+   "body": "<pre><code>body:impulse(fx,fy,fz)\nbody:impulse(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply impulse fx,fy,fz at world relative location (subtract origin of\nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 685,
+   "line": 698,
    "name": "lua.wetgenes.bullet.body.impulse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -2779,15 +2783,15 @@
    "body": "<pre><code>body:overlaps()\n</code></pre>\n<p>Get list of bodys that overlap with a ghost body object.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 634,
+   "line": 647,
    "name": "lua.wetgenes.bullet.body.overlaps",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>x,y,z=body:support(nx,ny,nz)\n</code></pre>\n<p>Get world location of support point in given direction.</p>\n<p>EG the world location that is touching the floor when the \ndirection is up.</p>\n",
+   "body": "<pre><code>x,y,z=body:support(nx,ny,nz)\n</code></pre>\n<p>Get world location of support point in given direction.</p>\n<p>EG the world location that is touching the floor when the\ndirection is up.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 655,
+   "line": 668,
    "name": "lua.wetgenes.bullet.body.support",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

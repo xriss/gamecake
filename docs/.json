@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 632,
+   "count": 633,
    "name": "lua"
   },
   {
@@ -158,11 +158,11 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 625,
+   "count": 626,
    "name": "lua.wetgenes"
   },
   {
-   "count": 37,
+   "count": 38,
    "name": "lua.wetgenes.bullet"
   },
   {
@@ -202,11 +202,11 @@
    "name": "lua.wetgenes.bullet.body.support"
   },
   {
-   "count": 27,
+   "count": 28,
    "name": "lua.wetgenes.bullet.world"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.bullet.world.body"
   },
   {
@@ -248,6 +248,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.body.restitution"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.sleep"
   },
   {
    "count": 1,
@@ -2971,7 +2975,7 @@
   },
   {
    "body": "",
-   "count": 632,
+   "count": 633,
    "name": "lua"
   },
   {
@@ -3024,15 +3028,15 @@
   },
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 625,
+   "count": 626,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/init.lua"
   },
   {
-   "body": "<pre><code>local bullet=require(&quot;wetgenes.bullet&quot;)\n</code></pre>\n<p>We use bullet as the local name of this library.</p>\n<p>A lua binding to the <a href=\"https://github.com/bulletphysics/bullet3\">Bullet \nPhysics</a> library</p>\n",
-   "count": 37,
+   "body": "<pre><code>local bullet=require(&quot;wetgenes.bullet&quot;)\n</code></pre>\n<p>We use bullet as the local name of this library.</p>\n<p>A lua binding to the <a href=\"https://github.com/bulletphysics/bullet3\">Bullet\nPhysics</a> library</p>\n",
+   "count": 38,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 14,
    "name": "lua.wetgenes.bullet",
@@ -3044,50 +3048,50 @@
    "name": "lua.wetgenes.bullet.body"
   },
   {
-   "body": "<pre><code>body:cgroup(bits)\nbits=body:cgroup()\n</code></pre>\n<p>Set or get body cgroup bits. You have 31 bits, so use 0x7fffffff to set \nall. These provide simple yes/no collision control between bodies.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
+   "body": "<pre><code>body:cgroup(bits)\nbits=body:cgroup()\n</code></pre>\n<p>Set or get body cgroup bits. You have 31 bits, so use 0x7fffffff to set\nall. These provide simple yes/no collision control between bodies.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 593,
+   "line": 606,
    "name": "lua.wetgenes.bullet.body.cgroup",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body:change_shape(shape)\nbody:change_shape(shape,mass)\n</code></pre>\n<p>Change the shape assoctiated with this body and optionally change the \nmass.</p>\n",
+   "body": "<pre><code>body:change_shape(shape)\nbody:change_shape(shape,mass)\n</code></pre>\n<p>Change the shape assoctiated with this body and optionally change the\nmass.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 699,
+   "line": 712,
    "name": "lua.wetgenes.bullet.body.change_shape",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body:cmask(bits)\nbits=body:cmask()\nbody:cmask(0x7fffffff)\n</code></pre>\n<p>Set or get body cmask bits. You have 31 bits, so use 0x7fffffff to set \nall. This body will only colide with another body if the other bodys \ncgroup has a bit set that is also set in our cmask.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
+   "body": "<pre><code>body:cmask(bits)\nbits=body:cmask()\nbody:cmask(0x7fffffff)\n</code></pre>\n<p>Set or get body cmask bits. You have 31 bits, so use 0x7fffffff to set\nall. This body will only colide with another body if the other bodys\ncgroup has a bit set that is also set in our cmask.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 612,
+   "line": 625,
    "name": "lua.wetgenes.bullet.body.cmask",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body:force(fx,fy,fz)\nbody:force(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply force fx,fy,fz at world relative location (subtract origin of \nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
+   "body": "<pre><code>body:force(fx,fy,fz)\nbody:force(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply force fx,fy,fz at world relative location (subtract origin of\nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 671,
+   "line": 684,
    "name": "lua.wetgenes.bullet.body.force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body:gravity(x,y,z)\nx,y,z = body:gravity()\n</code></pre>\n<p>Set or get body gravity vector. Fidling with this may be the easiest \nway for a player to move an object around, it certainly makes it easier \nto create &quot;magnetic fields&quot; to hover objects above the ground.</p>\n",
+   "body": "<pre><code>body:gravity(x,y,z)\nx,y,z = body:gravity()\n</code></pre>\n<p>Set or get body gravity vector. Fidling with this may be the easiest\nway for a player to move an object around, it certainly makes it easier\nto create &quot;magnetic fields&quot; to hover objects above the ground.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 574,
+   "line": 587,
    "name": "lua.wetgenes.bullet.body.gravity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>body:impulse(fx,fy,fz)\nbody:impulse(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply impulse fx,fy,fz at world relative location (subtract origin of \nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
+   "body": "<pre><code>body:impulse(fx,fy,fz)\nbody:impulse(fx,fy,fz,lx,ly,lz)\n</code></pre>\n<p>Apply impulse fx,fy,fz at world relative location (subtract origin of\nobject) lx,ly,lz which will default to 0,0,0 if not given.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 685,
+   "line": 698,
    "name": "lua.wetgenes.bullet.body.impulse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -3095,21 +3099,21 @@
    "body": "<pre><code>body:overlaps()\n</code></pre>\n<p>Get list of bodys that overlap with a ghost body object.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 634,
+   "line": 647,
    "name": "lua.wetgenes.bullet.body.overlaps",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>x,y,z=body:support(nx,ny,nz)\n</code></pre>\n<p>Get world location of support point in given direction.</p>\n<p>EG the world location that is touching the floor when the \ndirection is up.</p>\n",
+   "body": "<pre><code>x,y,z=body:support(nx,ny,nz)\n</code></pre>\n<p>Get world location of support point in given direction.</p>\n<p>EG the world location that is touching the floor when the\ndirection is up.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 655,
+   "line": 668,
    "name": "lua.wetgenes.bullet.body.support",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
    "body": "<pre><code>world=bullet.world()\n</code></pre>\n<p>Create the world you will be simulating physics in.</p>\n",
-   "count": 27,
+   "count": 28,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 45,
    "name": "lua.wetgenes.bullet.world",
@@ -3117,7 +3121,7 @@
   },
   {
    "body": "<pre><code>body = world:body(&quot;rigid&quot;,shape,mass,x,y,z,cgroup,cmask)\nbody = world:body({name=&quot;rigid&quot;,shape=shape,mass=mass.pos=V3(0)})\n</code></pre>\n<p>Create a body.</p>\n",
-   "count": 13,
+   "count": 14,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 366,
    "name": "lua.wetgenes.bullet.world.body",
@@ -3135,7 +3139,7 @@
    "body": "<pre><code>x,y,z = body:angular_factor( x , y , z )\nx,y,z = body:angular_factor( r )\nr = ( body:angular_factor( r ) )\n</code></pre>\n<p>get/set the angular factor of an object (which disables rotation when zero)</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 545,
+   "line": 558,
    "name": "lua.wetgenes.bullet.world.body.angular_factor",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -3143,7 +3147,7 @@
    "body": "<pre><code>x,y,z = body:angular_velocity( x,y,z )\nx,y,z = body:angular_velocity()\n</code></pre>\n<p>get/set the body angular velocity</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 532,
+   "line": 545,
    "name": "lua.wetgenes.bullet.world.body.angular_velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -3159,7 +3163,7 @@
    "body": "<pre><code>b = body:custom_material_callback( b )\nb = body:custom_material_callback()\n</code></pre>\n<p>get/set the body custom_material_callback flag</p>\n<p>When set we run a custom callback to try and smooth mesh collisions.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 559,
+   "line": 572,
    "name": "lua.wetgenes.bullet.world.body.custom_material_callback",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -3183,7 +3187,7 @@
    "body": "<pre><code>x,y,z = body:factor( x , y , z )\nx,y,z = body:factor( r )\nr = ( body:factor( r ) )\n</code></pre>\n<p>get/set the linear factor of an object (which disables movement when zero)</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 518,
+   "line": 531,
    "name": "lua.wetgenes.bullet.world.body.factor",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
@@ -3204,6 +3208,14 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
+   "body": "<pre><code>l,a = body:sleep()\nl,a = body:sleep(linear,angular)\n</code></pre>\n<p>get/set the sleep threasholds of an object, defaults are ( 0.8 , 1.0 )</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/bullet.lua",
+   "line": 518,
+   "name": "lua.wetgenes.bullet.world.body.sleep",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
+  },
+  {
    "body": "<pre><code>px,py,pz,qx,qy,qz,qw = body:transform()\npx,py,pz,qx,qy,qz,qw = body:transform(px,py,pz)\npx,py,pz,qx,qy,qz,qw = body:transform(px,py,pz,qx,qy,qz,qw)\n</code></pre>\n<p>get/set the body transform. Position and Rotation Quaternion.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
@@ -3220,7 +3232,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>local contacts,csiz=world:contacts()\nlocal contacts,csiz=world:contacts(min_dist)\nlocal contacts,csiz=world:contacts(min_dist,min_impulse)\n</code></pre>\n<p>Fetch all contacts in the world that are the same or closer than \nmin_dist which defaults to 0 and hit the same or harder than \nmin_impulse which also defaults to 0. This helps filter out \nuninteresting collisions before we process them.</p>\n<p>csiz, the second return allows us to put more info into each chunk in \nthe future, it will probably be 10 but may grow if it turns out that \nmore contact info for each point would help.</p>\n<p>This returns a list of contacts. Each contact is an array that \nconsists of.</p>\n<pre><code>a_body,\nb_body,\n</code></pre>\n<p>and then 1 or more chunks of csiz (which is currently 10) numbers \nrepresenting</p>\n<pre><code>ax,ay,az,\t-- world position on a_body\nbx,by,bz,\t-- world position on b_body\nnx,ny,nz,\t-- world normal on b_body\nimpulse,\t-- impulse applied by collision\n</code></pre>\n<p>So you can find the two bodys in contact[1] and contact[2] but are then \nexpected to loop over the rest of the array as chunks of csiz like so.</p>\n<pre><code>for idx=3,#contact,csiz do\n    local pos_a={ contact[idx+0] , contact[idx+1] , contact[idx+2] }\n    local pos_b={ contact[idx+3] , contact[idx+4] , contact[idx+5] }\n    local nrm_b={ contact[idx+6] , contact[idx+7] , contact[idx+8] }\n    local impulse=contact[idx+9]\n    ...\nend\n</code></pre>\n<p>This is intended to be processed and interesting collisions handled or \nsaved for later.\n    </p>\n",
+   "body": "<pre><code>local contacts,csiz=world:contacts()\nlocal contacts,csiz=world:contacts(min_dist)\nlocal contacts,csiz=world:contacts(min_dist,min_impulse)\n</code></pre>\n<p>Fetch all contacts in the world that are the same or closer than\nmin_dist which defaults to 0 and hit the same or harder than\nmin_impulse which also defaults to 0. This helps filter out\nuninteresting collisions before we process them.</p>\n<p>csiz, the second return allows us to put more info into each chunk in\nthe future, it will probably be 10 but may grow if it turns out that\nmore contact info for each point would help.</p>\n<p>This returns a list of contacts. Each contact is an array that\nconsists of.</p>\n<pre><code>a_body,\nb_body,\n</code></pre>\n<p>and then 1 or more chunks of csiz (which is currently 10) numbers\nrepresenting</p>\n<pre><code>ax,ay,az,\t-- world position on a_body\nbx,by,bz,\t-- world position on b_body\nnx,ny,nz,\t-- world normal on b_body\nimpulse,\t-- impulse applied by collision\n</code></pre>\n<p>So you can find the two bodys in contact[1] and contact[2] but are then\nexpected to loop over the rest of the array as chunks of csiz like so.</p>\n<pre><code>for idx=3,#contact,csiz do\n    local pos_a={ contact[idx+0] , contact[idx+1] , contact[idx+2] }\n    local pos_b={ contact[idx+3] , contact[idx+4] , contact[idx+5] }\n    local nrm_b={ contact[idx+6] , contact[idx+7] , contact[idx+8] }\n    local impulse=contact[idx+9]\n    ...\nend\n</code></pre>\n<p>This is intended to be processed and interesting collisions handled or\nsaved for later.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 209,
@@ -3268,7 +3280,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },
   {
-   "body": "<pre><code>local test={\n    mode=&quot;closest&quot;,\n    ray={{0,0,0},{1,1,1}},\n}\ntest=world:ray_test(test)\n\nif world:ray_test(opts).hit then ... end\n</code></pre>\n<p>Perform a ray test between the two ray vectors provided in the test table. \nfills in hit={...} if we hit something with details of the hit.</p>\n<p>Always returns the test table that was passed in, with modifications that \nprovide the result. Be carefull about reusing this table it is safest to create \na new one for each ray_test call.</p>\n",
+   "body": "<pre><code>local test={\n    mode=&quot;closest&quot;,\n    ray={{0,0,0},{1,1,1}},\n}\ntest=world:ray_test(test)\n\nif world:ray_test(opts).hit then ... end\n</code></pre>\n<p>Perform a ray test between the two ray vectors provided in the test table.\nfills in hit={...} if we hit something with details of the hit.</p>\n<p>Always returns the test table that was passed in, with modifications that\nprovide the result. Be carefull about reusing this table it is safest to create\na new one for each ray_test call.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 181,
@@ -3311,7 +3323,7 @@
    "body": "<pre><code>print( world:status() )\n</code></pre>\n<p>Return a debug string about allocated objects in this world.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 726,
+   "line": 739,
    "name": "lua.wetgenes.bullet.world.status",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   },

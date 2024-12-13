@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 632,
+   "count": 633,
    "name": "lua"
   },
   {
@@ -158,11 +158,11 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 625,
+   "count": 626,
    "name": "lua.wetgenes"
   },
   {
-   "count": 37,
+   "count": 38,
    "name": "lua.wetgenes.bullet"
   },
   {
@@ -202,11 +202,11 @@
    "name": "lua.wetgenes.bullet.body.support"
   },
   {
-   "count": 27,
+   "count": 28,
    "name": "lua.wetgenes.bullet.world"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.bullet.world.body"
   },
   {
@@ -248,6 +248,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.body.restitution"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.sleep"
   },
   {
    "count": 1,
@@ -2723,10 +2727,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>body:cgroup(bits)\nbits=body:cgroup()\n</code></pre>\n<p>Set or get body cgroup bits. You have 31 bits, so use 0x7fffffff to set \nall. These provide simple yes/no collision control between bodies.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
+   "body": "<pre><code>body:cgroup(bits)\nbits=body:cgroup()\n</code></pre>\n<p>Set or get body cgroup bits. You have 31 bits, so use 0x7fffffff to set\nall. These provide simple yes/no collision control between bodies.</p>\n<pre><code>cgroup bits are all the groups this body belongs to.\ncmask bits are all the groups this body colides with.\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
-   "line": 593,
+   "line": 606,
    "name": "lua.wetgenes.bullet.body.cgroup",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/bullet.lua"
   }

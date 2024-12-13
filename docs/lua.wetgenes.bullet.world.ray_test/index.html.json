@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 632,
+   "count": 633,
    "name": "lua"
   },
   {
@@ -158,11 +158,11 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 625,
+   "count": 626,
    "name": "lua.wetgenes"
   },
   {
-   "count": 37,
+   "count": 38,
    "name": "lua.wetgenes.bullet"
   },
   {
@@ -202,11 +202,11 @@
    "name": "lua.wetgenes.bullet.body.support"
   },
   {
-   "count": 27,
+   "count": 28,
    "name": "lua.wetgenes.bullet.world"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.bullet.world.body"
   },
   {
@@ -248,6 +248,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.bullet.world.body.restitution"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.bullet.world.body.sleep"
   },
   {
    "count": 1,
@@ -2723,7 +2727,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>local test={\n    mode=&quot;closest&quot;,\n    ray={{0,0,0},{1,1,1}},\n}\ntest=world:ray_test(test)\n\nif world:ray_test(opts).hit then ... end\n</code></pre>\n<p>Perform a ray test between the two ray vectors provided in the test table. \nfills in hit={...} if we hit something with details of the hit.</p>\n<p>Always returns the test table that was passed in, with modifications that \nprovide the result. Be carefull about reusing this table it is safest to create \na new one for each ray_test call.</p>\n",
+   "body": "<pre><code>local test={\n    mode=&quot;closest&quot;,\n    ray={{0,0,0},{1,1,1}},\n}\ntest=world:ray_test(test)\n\nif world:ray_test(opts).hit then ... end\n</code></pre>\n<p>Perform a ray test between the two ray vectors provided in the test table.\nfills in hit={...} if we hit something with details of the hit.</p>\n<p>Always returns the test table that was passed in, with modifications that\nprovide the result. Be carefull about reusing this table it is safest to create\na new one for each ray_test call.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/bullet.lua",
    "line": 181,
