@@ -561,7 +561,6 @@ M.bake=function(oven,ups)
 	end
 
 	ups.update=function()
-
 		if oven.is.update then -- pull all msgs from other thread
 
 			ups.msgs={} -- about to fill this
@@ -648,7 +647,7 @@ M.bake=function(oven,ups)
 
 	-- create 1up only by default
 	ups.reset()
-	ups.keymap(1,"basic") -- 1up has basic keyboard mappings
+	ups.keymap(1,"full") -- 1up has full keyboard mappings
 	ups.mousemap(1) -- 1up has the mouse buttons
 	ups.padmap(1) -- 1up has all the pads
 	ups.manifest(1) -- force 1up to exist

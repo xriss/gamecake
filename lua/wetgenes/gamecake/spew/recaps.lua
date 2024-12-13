@@ -10,9 +10,11 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.bake=function(oven,recaps)
 
-	recaps=recaps or {} 
+	recaps=recaps or {}
 
 	recaps.ups=oven.ups.up
+
+	recaps.step=oven.ups.advance
 
 	return recaps
 end
@@ -49,15 +51,15 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.bake=function(oven,recaps)
 
-	recaps=recaps or {} 
-	
+	recaps=recaps or {}
+
 	local cake=oven.cake
 	local canvas=cake.canvas
-	
+
 --	local keys=oven.rebake("wetgenes.gamecake.spew.keys")
 
 	function recaps.setup(opts)
---print("recaos",opts)	
+--print("recaos",opts)
 		if type(opts)=="number" then opts={max_up=opts} end
 		if not opts then opts={} end
 		recaps.opts=opts
@@ -97,7 +99,7 @@ M.bake=function(oven,recaps)
 --print("up","push",m)
 ]]
 	end
-	
+
 	function recaps.pull()
 		local up=recaps.up and recaps.up[1]
 		if up then up.state_msgs={} end -- clr old msgs
@@ -161,12 +163,12 @@ M.bake=function(oven,recaps)
 
 		end
 	end
-	
+
 -- pick one of the up[idx] tables
 	function recaps.ups(idx)
 		if idx==0 then -- merge all buttons and axis of all controllers
 			local up={}
-			
+
 			up.button=function(name)
 				local b=false
 				for i=1,#recaps.up do
@@ -187,7 +189,7 @@ M.bake=function(oven,recaps)
 				end
 				if t>0 then return math.floor(n/t) end
 			end
-			
+
 			up.axisfixed=function(name)
 				local t=up.axis(name)
 				if t then return fixaxis(t) end
@@ -207,14 +209,14 @@ M.bake=function(oven,recaps)
 	function recaps.create(idx)
 		local recap={}
 		recap.idx=idx
-		
+
 -- these 4 functions are the only ones a user needs
 -- all others are internal
 		recap.button=function(name) -- return state "valid" frame data not current "volatile" frame data
 			if name then
 				return recap.state[name] or recap.state_pulse[name]
 			end
-			return recap.state -- return all buttons if no name given but this does not include pulses	
+			return recap.state -- return all buttons if no name given but this does not include pulses
 		end
 
 		recap.axis=function(name) -- return state "valid" frame data not current "volatile" frame data
@@ -239,10 +241,10 @@ M.bake=function(oven,recaps)
 			recap.now_msgs={} -- live list that gets swapped into state
 --			recap.now_qualifiers={} -- flags of "alt" , "ctrl" , "shift" , "win"  in 1,2,3,4 so we know which keys are held down
 --			recap.now_qualifiers_text=nil -- string of the above flags joined by + or nil
-			
+
 			recap.state={}
 			recap.now={}
-			
+
 			recap.state_pulse={}
 			recap.now_pulse={}
 
@@ -253,9 +255,9 @@ M.bake=function(oven,recaps)
 			recap.touch="" -- you can replace this with a requested touch control scheme
 
 -- "left_right" is a two button touch screen split
-			
+
 		end
-		
+
 --[[
 		recap.build_qualifiers_text=function()
 			local s
@@ -267,7 +269,7 @@ M.bake=function(oven,recaps)
 			recap.now_qualifiers_text=s
 		end
 ]]
-		
+
 		function recap.set(nam,dat) -- set the volatile data,this gets copied into state before it should be used
 			recap.now[nam]=dat
 		end
@@ -279,7 +281,7 @@ M.bake=function(oven,recaps)
 		function recap.pulse(nam,dat) -- set the volatile data but *only* for one frame
 			recap.now_pulse[nam]=dat
 		end
-		
+
 
 
 		recap.msgs=function(class) -- list of msgs for the last tick with optional simple class filter
@@ -288,7 +290,7 @@ M.bake=function(oven,recaps)
 			end
 			return recap.state_msgs or {}
 		end
-		
+
 -- use this to copy and remember a msg
 		function recap.set_msg(mm)
 			local m={}
@@ -393,7 +395,7 @@ M.bake=function(oven,recaps)
 				changed=true
 				change[n]=v
 			end
-			
+
 			if #recap.now_msgs>0 then -- all msgs need to be kept as is
 				changed=true
 				change.msgs={}
@@ -408,7 +410,7 @@ M.bake=function(oven,recaps)
 					change[n]=v
 				end
 			end
-		
+
 			return changed and change
 		end
 
@@ -421,12 +423,12 @@ M.bake=function(oven,recaps)
 
 			recap.state_pulse=recap.now_pulse
 			recap.now_pulse={} -- new table
-			
+
 			recap.state_msgs=recap.now_msgs -- use this copy of any messages
 			recap.now_msgs={} -- start a new list
 
 		end
-		
+
 		function recap.step_apply(change)
 			recap.state_pulse={}
 			recap.state_msgs={}
@@ -452,7 +454,7 @@ M.bake=function(oven,recaps)
 		function recap.step(flow)
 			flow=flow or recap.flow
 
---print("step "..tostring(flow))	
+--print("step "..tostring(flow))
 
 			if flow=="record" then
 
@@ -468,32 +470,32 @@ M.bake=function(oven,recaps)
 						table.insert(recap.stream,1) -- change nothing
 					end
 				end
-			
+
 			elseif flow=="play" then -- grab from the stream
-			
+
 				recap.state_pulse={} -- always empty the pulses
 				recap.state_msgs={} -- and msgs
 
 				if recap.wait>0 then
-				
+
 					recap.wait=recap.wait-1
-					
+
 				else
-				
+
 					recap.read=recap.read+1
-					
+
 					local t=recap.stream[recap.read]
 					local tt=type(t)
-					
+
 					if tt=="number" then
 						recap.wait=t-1
 					elseif tt=="table"then
 						recap.step_apply(t)
 					end
 				end
-			
+
 			else -- default of do not record, do not play just be
-			
+
 --				local change=recap.get_change()
 --				if change then change.idx=recap.idx ; dump(change) end
 
@@ -503,10 +505,10 @@ M.bake=function(oven,recaps)
 --				if change then change.idx=recap.idx ; dump(change) end
 
 			end
-			
+
 			recap.frame=recap.frame+1 -- advance frame counter
 		end
-		
+
 		recap.reset()
 
 		return recap

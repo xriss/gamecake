@@ -94,6 +94,18 @@ bullet_world *pp;
 		pp->phase->getOverlappingPairCache()->setInternalGhostPairCallback(pp->ghost);
 		pp->solver     = new btSequentialImpulseConstraintSolver;
 		pp->world      = new btDiscreteDynamicsWorld( pp->dispatcher, pp->phase, pp->solver, pp->config );
+
+		// coppied from examples uhm ?
+/*
+		pp->world->getSolverInfo().m_erp2 = 0.08;
+		pp->world->getSolverInfo().m_frictionERP = 0.2;
+		pp->world->getSolverInfo().m_linearSlop = 0.00001;
+		pp->world->getSolverInfo().m_numIterations = 50;
+		pp->world->getSolverInfo().m_minimumSolverBatchSize = 0;
+		pp->world->getSolverInfo().m_warmstartingFactor = 0.1;
+		pp->world->getSolverInfo().m_leastSquaresResidualThreshold = 1e-7;
+*/
+
 	}
 	catch (std::exception const& e)
 	{
@@ -1083,6 +1095,29 @@ btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 /*+------------------------------------------------------------------+**
 
+get/set sleep thresholds for linear,angular velocities
+
+*/
+static int lua_bullet_body_sleep (lua_State *l)
+{
+btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
+
+	if( lua_isnumber(l,2) )
+	{
+		body->setSleepingThresholds( lua_tonumber(l,2) ,  lua_tonumber(l,3) );
+	}
+
+	btScalar v=body->getLinearSleepingThreshold();
+	btScalar a=body->getAngularSleepingThreshold();
+
+	lua_pushnumber(l,v);
+	lua_pushnumber(l,a);
+
+	return 2;
+}
+
+/*+------------------------------------------------------------------+**
+
 get/set linear factor
 
 */
@@ -1561,6 +1596,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 		{"body_damping",					lua_bullet_body_damping},
 		{"body_ccd",						lua_bullet_body_ccd},
 		{"body_active",						lua_bullet_body_active},
+		{"body_sleep",						lua_bullet_body_sleep},
 		{"body_factor",						lua_bullet_body_factor},
 		{"body_gravity",					lua_bullet_body_gravity},
 		{"body_cgroup",						lua_bullet_body_cgroup},
