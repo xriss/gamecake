@@ -59,8 +59,6 @@ bullet.world=function(...)
 	world[0]=core.world_create(...)
 
 	world.time=0
-	world.maxsteps=1
-	world.fixedstep=1/60
 
 --	core.world_register(world[0],world)
 
@@ -142,38 +140,24 @@ end
 ------------------------------------------------------------------------
 --[[#lua.wetgenes.bullet.world.step
 
-	world:step(seconds,maxsteps,fixedstep)
+	world:step(seconds)
+	world:step(seconds,steps)
 
-	world:step(seconds,0,seconds)
+Move the simulation forward in time by the given amount in seconds.
 
-world.maxsteps and world.fixedstep will be used as defaults if the second and
-third values are not provided.
-
-Move the physics forward in time by the given amount in seconds.
-
-maxsteps is maximum amount of steps to take during this call and defaults to 1.
-
-fixedstep is how many seconds to step forward at a time for stable simulation
-and defaults to 1/60
-
-To force a step forward of a given amount of time use a maxsteps of 0.
-
+If steps is given then this will be repeated steps times resulting in
+moving the world forward seconds*steps.
 
 ]]
-bullet.world_functions.step=function(world,seconds,maxsteps,fixedstep)
+bullet.world_functions.step=function(world,seconds,steps)
 
-	fixedstep=fixedstep or world.fixedstep
-	maxsteps=maxsteps or world.maxsteps
+	steps=steps or 1
 	seconds=seconds or world.fixedstep
 
-	core.world_step( world[0] , seconds , maxsteps , fixedstep )
+	-- this seems the safest way to call this function so we know exacty what it does
+	core.world_step( world[0] , steps*seconds , steps , seconds )
 
-	-- snap slightly squiffy step times
-	local steps=math.ceil(world.time/fixedstep)
-	local add=math.ceil(seconds/fixedstep)
-	if add>maxsteps then add=maxsteps end
-	if add<1 then add=1 end
-	world.time=(steps+add)*fixedstep
+	world.time=world.time+steps*seconds
 
 end
 
