@@ -1360,7 +1360,7 @@ btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 		direction[2]=lua_tonumber(l,4);
 	}
 
-	if( lua_isnumber(l,5) ) // position
+	if( lua_isnumber(l,5) ) // position relative to object in world space
 	{
 		position[0]=lua_tonumber(l,5);
 		position[1]=lua_tonumber(l,6);

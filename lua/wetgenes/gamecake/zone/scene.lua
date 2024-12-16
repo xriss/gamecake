@@ -612,6 +612,9 @@ get this new value.
 ]]
 values_methods.set=function(values,key,value)
 	if values:get(key)~=value then
+		if type(value)=="table" and value.new then -- dupe so we dont accidently mess with the original
+			value=value.new(value)
+		end
 		values[#values][key]=value
 	end
 	if not values[1][key] then values[1][key]=false end -- make sure all keys are in base
@@ -634,7 +637,12 @@ values_methods.get=function(values,key,topidx)
 	if not topidx then topidx=#values elseif topidx<=0 then topidx=topidx+#values end
 	for idx=topidx,1,-1 do
 		local value=values[idx][key]
-		if value or (type(value)~="nil") then return value end
+		if value or (type(value)~="nil") then
+			if type(value)=="table" and value.new then -- dupe so we dont accidently mess with the original
+				return value.new(value)
+			end
+			return value
+		end
 	end
 end
 
