@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 633,
+   "count": 634,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 626,
+   "count": 627,
    "name": "lua.wetgenes"
   },
   {
@@ -1698,11 +1698,11 @@
    "name": "lua.wetgenes.spew.test"
   },
   {
-   "count": 173,
+   "count": 174,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 35,
+   "count": 36,
    "name": "lua.wetgenes.tardis.array"
   },
   {
@@ -1792,6 +1792,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.mix"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.new"
   },
   {
    "count": 1,
@@ -2730,7 +2734,7 @@
    "body": "<pre><code>value = v1:cross(v1b)\n</code></pre>\n<p>Extend to 3d then only return z value as x and y are always 0</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1987,
+   "line": 2000,
    "name": "lua.wetgenes.tardis.v1.cross",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
