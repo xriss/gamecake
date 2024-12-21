@@ -231,6 +231,17 @@ function array.__div(a,b)
 	return a:product(1/b,a.new())
 end
 
+--[[#lua.wetgenes.tardis.array.new
+
+	a = tardis.array.new()
+	a = tardis.array.new(1,2,3)
+
+Create a new array and optionally set it to the given values which will
+also control its base length.
+
+]]
+function array.new(...) return setmetatable({},array):set(...) end
+
 --[[#lua.wetgenes.tardis.array.set
 
 	a=a:set(1,2,3,4)
@@ -257,6 +268,8 @@ return a number.
 ]]
 function array.set(it,...)
 
+	local itlen=#it -- need this many values, if 0 then take all the values we can
+
 	local aa={...}
 
 	if type(aa[1])=="function" then
@@ -268,7 +281,7 @@ function array.set(it,...)
 	local last
 	local n=1
 	for i,v in ipairs(aa) do
-		if not it[n] then return it end -- got all the data we need (#it)
+		if (itlen>0) and (itlen<n) then return it end -- got all the data we need
 		if type(v)=="number" then
 			last=v
 			it[n]=v
@@ -3384,6 +3397,8 @@ line.product_map={
 plane.product_map={
 -- the product of this with a...
 }
+
+tardis.V0=tardis.array.new
 
 tardis.V1=tardis.v1.new
 tardis.V2=tardis.v2.new
