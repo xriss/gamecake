@@ -78,7 +78,7 @@ sdl.screen=function()
 --	print("SDL screen")
 	sdl.video_init()
 	local b=SDL.getDisplayBounds(0)
-	
+
 -- PI SDL may return nil at this point?
 -- in which case just lie and return 640x480
 	if not b then return 640,480 end
@@ -95,7 +95,7 @@ sdl.create=function(t)
 	if not t.console then -- try and free the windows console unless asked not to
 
 		pcall( function() -- we dont care if this fails, just means we are not running on windows
-		
+
 			local ffi=require("ffi")
 			ffi.cdef(" void FreeConsole(void); ")
 			if ffi.C.FreeConsole then
@@ -104,12 +104,12 @@ sdl.create=function(t)
 			end
 
 		end)
-		
+
 	end
 
 	local it={}
 	sdl.it=it
-	
+
 	local flags={ SDL.window.Resizable , SDL.window.OpenGL }
 
 	if jit and jit.os=="Windows" then -- windows does not do borderless resize, so, meh
@@ -136,16 +136,16 @@ sdl.create=function(t)
 				end
 				dump(mode)
 			end
-		end	
+		end
 	end
 ]]
 
 	it.screen_mode=t.screen_mode -- try something like "640x480x60.RGB888"
-	
+
 	if it.screen_mode and ( type(it.screen_mode)~="table" ) then -- convert to mode table?
-	
+
 		it.screen_mode=tostring(it.screen_mode) -- allow a bool to just pick the default res which is 720p
-	
+
 		local mode={
 			w=1280,
 			h=720,
@@ -172,11 +172,11 @@ sdl.create=function(t)
 --			print(s,n)
         end
         it.screen_mode=mode
-	
+
 	end
-	
---	dump("TRY")	
---	dump(it.screen_mode)	
+
+--	dump("TRY")
+--	dump(it.screen_mode)
 --	it.screen_mode=nil
 
 
@@ -185,7 +185,7 @@ sdl.create=function(t)
 	elseif view=="max"  then	 flags={SDL.window.Maximized,SDL.window.OpenGL}
 	end
 ]]
-	
+
 	it.win= assert(SDL.createWindow {
 		title   = t.title,
 		width   = t.width,
@@ -194,18 +194,18 @@ sdl.create=function(t)
 		x       = t.x,
 		y       = t.y,
 	})
-	
+
 	if it.screen_mode then
 		assert( it.win:setDisplayMode(it.screen_mode) )
 	end
-	
+
 	if jit and jit.os=="Windows" then -- windows does not do borderless resize, so, meh
 	else
 		if t.borderless then
 			require("wetgenes.win.core").sdl_attach_resize_hax(it.win)
 		end
 	end
-	
+
 	return it
 end
 
@@ -229,15 +229,15 @@ end
 
 sdl.resize=function(it,w,h)
 	it=it or sdl.it
-	if it and it.win then it.win:setSize(w,h) end	
-	
+	if it and it.win then it.win:setSize(w,h) end
+
 	local screen=wwin.screen()
 	local x=math.floor((screen.width-w)*(0.5))
 	local y=math.floor((screen.height-h)*(0.5))
 	if x<0 then x=0 end
 	if y<0 then y=0 end
-	if it and it.win then it.win:setPosition(x,y) end	
-	
+	if it and it.win then it.win:setPosition(x,y) end
+
 end
 
 sdl.show=function(it,view)
@@ -260,9 +260,9 @@ sdl.show=function(it,view)
 	elseif view=="max"  then	 it.win:maximize()
 	else						 it.win:setFullscreen(0) it.win:restore()
 	end
-	
+
 --	sdl.mousexy_init()
-	
+
 	return nil
 end
 
@@ -332,15 +332,15 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 
 	SDL.glMakeCurrent(it.win, it.ctx)
 	SDL.glSetSwapInterval(1) -- enable vsync by default
-	
-	
+
+
 	local gles=require("gles")
 	log( "oven","vendor",(gles.Get(gles.VENDOR) or ""))
 	log( "oven","render",(gles.Get(gles.RENDERER) or ""))
 	log( "oven","version",(gles.Get(gles.VERSION) or ""))
 
 -- this is depreciated
---	for w in (gles.Get(gles.EXTENSIONS) or ""):gmatch("([^%s]+)") do 
+--	for w in (gles.Get(gles.EXTENSIONS) or ""):gmatch("([^%s]+)") do
 --		log( "oven","glext",w)
 --	end
 -- need to do this
@@ -352,7 +352,7 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 		table.sort(t)
 		for i,s in ipairs(t) do log( "oven","glext",s) end
 	end
-	
+
 	return it.ctx
 end
 
@@ -360,11 +360,11 @@ sdl.swap=function(it)
 	it=it or sdl.it
 	SDL.glSwapWindow(it.win)
 end
-	
+
 
 sdl.sleep=function(sec)
 --	print("SDL sleep")
-	SDL.delay(sec*1000) -- convert seconds to milliseconds 
+	SDL.delay(sec*1000) -- convert seconds to milliseconds
 	return nil
 end
 
@@ -410,7 +410,7 @@ sdl.mousexy_init=function()
 
 	sdl.mousexy[1]=t.x
 	sdl.mousexy[2]=t.y
-	
+
 print("MOUSE",t.x,t.y)
 
 end
@@ -420,7 +420,7 @@ sdl.msg_fetch=function()
 
 	for e in SDL.pollEvent() do
 
-		if     	(e.type == SDL.event.KeyDown) or 
+		if     	(e.type == SDL.event.KeyDown) or
 				(e.type == SDL.event.KeyUp) then
 
 			local t={}
@@ -428,11 +428,11 @@ sdl.msg_fetch=function()
 			t.class="key"
 			t.action=(e.type==SDL.event.KeyUp) and -1 or ( e["repeat"] and 0 or 1 )
 			t.keyname=SDL.getKeyName(e.keysym.sym)
-			
+
 --			dprint(t)
 
 			sdl.queue[#sdl.queue+1]=t
-					
+
 		elseif     (e.type == SDL.event.TextInput) then
 
 			local t={}
@@ -443,9 +443,9 @@ sdl.msg_fetch=function()
 			sdl.queue[#sdl.queue+1]=t
 
 		elseif	(e.type == SDL.event.MouseWheel)  then
-		
+
 --			dprint(e)
-		
+
 			local t={}
 			t.time=sdl.time()
 			t.class="mouse"
@@ -457,13 +457,13 @@ sdl.msg_fetch=function()
 
 			if 		e.y>0 then	t.keycode=4 t.action=-1
 			elseif 	e.y<0 then	t.keycode=5 t.action=-1 end
-			
+
 --			dprint(t)
 
 			sdl.queue[#sdl.queue+1]=t
 
-		elseif	(e.type == SDL.event.MouseButtonDown) or 
-				(e.type == SDL.event.MouseButtonUp) or 
+		elseif	(e.type == SDL.event.MouseButtonDown) or
+				(e.type == SDL.event.MouseButtonUp) or
 				(e.type == SDL.event.MouseMotion) then
 
 			local t={}
@@ -473,7 +473,7 @@ sdl.msg_fetch=function()
 			t.x=e.x
 			t.y=e.y
 			t.keycode=e.button
-			
+
 			t.dx=e.xrel or 0
 			t.dy=e.yrel or 0
 
@@ -489,9 +489,9 @@ sdl.msg_fetch=function()
 					end
 				end
 			end
-		
-		elseif	(e.type == SDL.event.FingerDown) or 
-				(e.type == SDL.event.FingerUp) or 
+
+		elseif	(e.type == SDL.event.FingerDown) or
+				(e.type == SDL.event.FingerUp) or
 				(e.type == SDL.event.FingerMotion) then
 
 			local t={}
@@ -502,19 +502,19 @@ sdl.msg_fetch=function()
 			t.y=e.y
 			t.id=e.fingerId
 			t.pressure=e.pressure
-			
+
 --			dprint(t)
 
 			sdl.queue[#sdl.queue+1]=t
 
 --			sdl.mousexy[1]=e.x
 --			sdl.mousexy[2]=e.y
-	
-		
+
+
 		elseif	(e.type == SDL.event.WindowEvent) then -- window related, eg focus resize etc
 
 			if ( e.event == SDL.eventWindow.SizeChanged ) then
-			
+
 				local t={}
 				t.time=sdl.time()
 				t.class="resize"
@@ -533,7 +533,7 @@ sdl.msg_fetch=function()
 
 		elseif	(e.type == SDL.event.JoyDeviceAdded) then --ignore
 		elseif	(e.type == SDL.event.ControllerDeviceAdded) then
-		
+
 			sdl.pads[#sdl.pads+1]=SDL.gameControllerOpen(e.which)
 			sdl.pads_fix()
 
@@ -544,7 +544,7 @@ sdl.msg_fetch=function()
 
 			sdl.pads[e.which+1]="CLOSED"
 			sdl.pads_fix()
-			
+
 --print("SDL","Close",e.which)
 
 		elseif	(e.type == SDL.event.JoyAxisMotion) then --ignore
@@ -564,7 +564,7 @@ sdl.msg_fetch=function()
 			t.id=id
 
 			sdl.queue[#sdl.queue+1]=t
-			
+
 		elseif	(e.type == SDL.event.JoyButtonDown)        or (e.type == SDL.event.JoyButtonUp)        then --ignore
 		elseif	(e.type == SDL.event.ControllerButtonDown) or (e.type == SDL.event.ControllerButtonUp) then
 
@@ -628,7 +628,7 @@ local _grd_to_surface=function(g)
 
 	assert(g:convert(wgrd.U8_RGBA)) -- make sure it is this format
 	assert(g:flipy()) -- needs to be the other way up
-	
+
 	local argb=g:pixels(0,0,g.width,g.height)
 	for i=0,g.width*g.height*4-1,4 do argb[i+1],argb[i+3]=argb[i+3],argb[i+1] end -- swap red and blue
 
@@ -712,24 +712,24 @@ local _cursor_names={
 0 0 0 7 . . . . . . . . . . . . 0 0 0 7 . . . .
 . . . . 7 . . . . . . . . . . . . . . . 7 . . .
 . . . . . 7 . . . . . . . . . . . . . . . 7 . .
-. . . . . . R R R R . . . . . . . . . . . . R R 
-. . . . . . R R R R . . . . . . . . . . . . R R 
-. . . . . . R R R R . . . . . . . . . . . . R R 
-. . . . . . R R R R . . . . . . . . . . . . R R 
-. . . . . . . . . . 7 . . . . . . . . . . . . . 
-. . . . . . . . . . . 7 . . . . . . . . . . . . 
-. . . . . . . . . . . . 7 0 0 0 . . . . . . . . 
-. . . . . . . . . . . . 0 7 7 0 . . . . . . . . 
-. . . . . . . . . . . . 0 7 7 0 . . . . . . . . 
-. . . . . . . . . . . . 0 0 0 0 . . . . . . . . 
-0 0 0 0 . . . . . . . . . . . . 0 0 0 0 . . . . 
-0 7 7 0 . . . . . . . . . . . . 0 7 7 0 . . . . 
-0 7 7 0 . . . . . . . . . . . . 0 7 7 0 . . . . 
-0 0 0 7 . . . . . . . . . . . . 0 0 0 7 . . . . 
-. . . . 7 . . . . . . . . . . . . . . . 7 . . . 
-. . . . . 7 . . . . . . . . . . . . . . . 7 . . 
-. . . . . . 7 . . . . . . . . . . . . . . . 7 . 
-. . . . . . . 7 . . . . . . . . . . . . . . . 7 
+. . . . . . R R R R . . . . . . . . . . . . R R
+. . . . . . R R R R . . . . . . . . . . . . R R
+. . . . . . R R R R . . . . . . . . . . . . R R
+. . . . . . R R R R . . . . . . . . . . . . R R
+. . . . . . . . . . 7 . . . . . . . . . . . . .
+. . . . . . . . . . . 7 . . . . . . . . . . . .
+. . . . . . . . . . . . 7 0 0 0 . . . . . . . .
+. . . . . . . . . . . . 0 7 7 0 . . . . . . . .
+. . . . . . . . . . . . 0 7 7 0 . . . . . . . .
+. . . . . . . . . . . . 0 0 0 0 . . . . . . . .
+0 0 0 0 . . . . . . . . . . . . 0 0 0 0 . . . .
+0 7 7 0 . . . . . . . . . . . . 0 7 7 0 . . . .
+0 7 7 0 . . . . . . . . . . . . 0 7 7 0 . . . .
+0 0 0 7 . . . . . . . . . . . . 0 0 0 7 . . . .
+. . . . 7 . . . . . . . . . . . . . . . 7 . . .
+. . . . . 7 . . . . . . . . . . . . . . . 7 . .
+. . . . . . 7 . . . . . . . . . . . . . . . 7 .
+. . . . . . . 7 . . . . . . . . . . . . . . . 7
 ]])
 ]=]
 
@@ -737,18 +737,18 @@ local _cursors={}
 local _cursor=function(s,dat,px,py)
 
 	if dat then -- remember a new one
-			
+
 		dat=_grd_to_surface(dat) -- convert from grd to surface
-		
+
 		_cursors[s]=assert(SDL.createColorCursor(dat , px or 0 , py or 0 ))
-	
+
 	end
 
 	local v=_cursors[s]
 	if v then return v end
-	
+
 	if type(s)~="string" then return end
-	
+
 	local S=s -- fix capitals
 	for i,v in ipairs(_cursor_names) do
 		if v:lower()==s then S=v break end
@@ -778,7 +778,7 @@ sdl.cursor=function(s,dat,px,py)
 			end
 		end
 	end
-	
+
 end
 
 

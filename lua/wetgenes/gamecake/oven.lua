@@ -9,14 +9,14 @@ local global=require("global")
 local jit_mcode_size=0
 --[[
 
-luajit can sometimes get stuck, this forces a large allocation before 
+luajit can sometimes get stuck, this forces a large allocation before
 we try and do much else which usually sorts it out
 
 ]]
 	if jit then -- start by trying to force a jit memory allocation
-	
+
 		local ju=require("jit.util")
-		
+
 		local sm=1024
 		while sm>8 do -- 8k minimum
 			local mi=0
@@ -25,7 +25,7 @@ we try and do much else which usually sorts it out
 			jit.flush()
 			if not ju.tracemc(1) then -- not alloced ( because of flush )
 				for i=1,1000 do end -- this should force an allocation
-				if ju.tracemc(1) then break end -- check if alloced 
+				if ju.tracemc(1) then break end -- check if alloced
 			end
 			sm=sm/2
 		end
@@ -33,7 +33,6 @@ we try and do much else which usually sorts it out
 
 --		os.exit(1)
 	end
-
 
 
 --[[#lua.wetgenes.gamecake.oven
@@ -66,10 +65,11 @@ local dprint=function(a) print(wstr.dump(a)) end
 local function assert_resume(co)
 
 	local a,b=coroutine.resume(co)
-	
+
 	if a then return a,b end -- no error
-	
-	error( tostring(b).."\nin coroutine\n"..debug.traceback(co) ) -- error
+
+	print( debug.traceback(co,b) ) -- error
+	os.exit()
 end
 
 
@@ -80,30 +80,30 @@ gamecake -lcake  # Run a cake in cake mode
 gamecake -lfun   # Run a fun in fun mode
 gamecake -lcmd   # Run a cmd in cmd mode
 
-Mostly we will behave the same as the lua or luajit command, but some 
-filenames will be treated as special. So filename.fun.lua will auto 
-run in fun mode and filename.cake will auto run in cake mode. When 
+Mostly we will behave the same as the lua or luajit command, but some
+filenames will be treated as special. So filename.fun.lua will auto
+run in fun mode and filename.cake will auto run in cake mode. When
 running a cake or fun script then the following args can control it.
 
   --help
     Print help text and exit
 		gamecake -lcake --help
 		gamecake -lcmd --help
-		
+
   --logs
     Enable all log output. ( essentially a verbose mode )
 
   --logs=MODE
-	Enables MODE log output only, eg --logs=oven for oven logs only. 
-	Prefixing mode with a - will remove that mode from the logs and a + 
-	will add it and we assume + if neither is present, eg --logs=-oven 
+	Enables MODE log output only, eg --logs=oven for oven logs only.
+	Prefixing mode with a - will remove that mode from the logs and a +
+	will add it and we assume + if neither is present, eg --logs=-oven
 	will show everything except oven logs.
 
   --win-hx=640
   --win-hy=480
   --win-px=0
   --win-py=0
-	Set the window size and position, without these values we will 
+	Set the window size and position, without these values we will
 	place and position the window automatically.
 
   --win-borderless
@@ -116,28 +116,28 @@ running a cake or fun script then the following args can control it.
     Set window title.
 
   --show=win
-	Show window as a normal draggable and resizable window. This is the 
+	Show window as a normal draggable and resizable window. This is the
 	default.
 
   --show=max
-	Show window as a maximised window. Desktop resolution possibly 
+	Show window as a maximised window. Desktop resolution possibly
 	with a visible title bar and desktop panel still visible.
 
   --show=full
-	Show window as a borderless full screen window. Desktop resolution 
+	Show window as a borderless full screen window. Desktop resolution
 	no title bar.
 
   --screen=1280x720
   --screen=1280x720.RGB888
   --screen=1280x720.RGB888/60
-	When going full screen request this resolution, optional SDL pixel 
+	When going full screen request this resolution, optional SDL pixel
 	format and optional framerate.
 
   --pixel
     Disable screen space pixel processing, eg fun scanlines filter.
 
   --pixel=NUMBER
-	Disable screen space pixel processing and set default window size 
+	Disable screen space pixel processing and set default window size
 	to NUMBER view pixels per game pixel.
 ]]
 
@@ -148,11 +148,11 @@ running a cake or fun script then the following args can control it.
   --tasks=only
   --tasks=net
   --tasks=fake
-	Request app threading style (which may be ignored if unsupported), 
-	defaults to many which probably means draw on main thread, update 
-	on another thread. Set to only for easier debugging in a single 
-	thread. Net means we are running multiple states and trying to sync 
-	them over a network. Fake means we are doing network but faking 
+	Request app threading style (which may be ignored if unsupported),
+	defaults to many which probably means draw on main thread, update
+	on another thread. Set to only for easier debugging in a single
+	thread. Net means we are running multiple states and trying to sync
+	them over a network. Fake means we are doing network but faking
 	multiple clients on one machine for debugging.
 
 ]]
@@ -162,17 +162,17 @@ running a cake or fun script then the following args can control it.
 
 	oven=wetgenes.gamecake.oven.bake(opts)
 
-Bake creates an instance of a lua module bound to a state. Here we 
+Bake creates an instance of a lua module bound to a state. Here we
 are creating the main state that other modules will then bind to.
 
-We call each state an OVEN to fit into the gamecake naming scheme 
+We call each state an OVEN to fit into the gamecake naming scheme
 then we bake a module in this oven to bind them to the common state.
 
-Think of it as a sub version of require, so require gets the global 
-pointer for a module and bake is used to get the a module bound to 
+Think of it as a sub version of require, so require gets the global
+pointer for a module and bake is used to get the a module bound to
 an oven.
 
-By using this bound state we reduce the verbosity of connecting 
+By using this bound state we reduce the verbosity of connecting
 modules and sharing state between them.
 
 
@@ -192,7 +192,7 @@ function M.bake(opts)
 
 	oven.opts=opts or {}
 	global.OVEN_OPTS=oven.opts -- remember last oven opts in global
-	
+
 	if type(opts[1])=="table" then -- probably passed in from nacl
 		for n,v in pairs(opts[1]) do -- copy it all into opts
 			opts[n]=v
@@ -220,9 +220,9 @@ function M.bake(opts)
 --dprint(opts)
 
 	if opts.args.help then
-	
+
 		print(opts.help_text or M.help_text)
-	
+
 		os.exit(0)
 	end
 
@@ -232,7 +232,7 @@ function M.bake(opts)
 	if opts.sanitize then -- sanitize args
 		opts:sanitize()
 	end
-	
+
 	require("wetgenes.logs").setup(opts.args)
 
 if jit then -- now logs are setup, dump basic jit info
@@ -274,7 +274,7 @@ if sniff_homedir then -- smart setup to save files into some sort of user file a
 	end
 
 	if not homedir and (wwin.flavour=="win" or wwin.sdl_platform=="Windows" ) then
-	
+
 		homedir=os.getenv("USERPROFILE") -- windows only check
 
 		if homedir then
@@ -292,7 +292,7 @@ if sniff_homedir then -- smart setup to save files into some sort of user file a
 
 
 	if not homedir then
-	
+
 		homedir=os.getenv("HOME") -- good for most everyone else
 
 		if homedir then
@@ -305,7 +305,7 @@ if sniff_homedir then -- smart setup to save files into some sort of user file a
 
 			oven.homedir=homedir.."/"
 		end
-		
+
 	end
 
 end
@@ -313,10 +313,10 @@ end
 if wwin.steam then -- steamcloud prefers files in your app dir for easy sync between multiple platforms
 
 	local wbake=require("wetgenes.bake")
-			
+
 	wwin.files_prefix=wwin.files_prefix..(wwin.steam.userid).."/"
 	wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
-	
+
 	sniff_homedir=false
 end
 
@@ -347,7 +347,7 @@ os.exit()
 ]]
 
 
--- pull in info about what art we baked		
+-- pull in info about what art we baked
 		local lson=wzips.readfile("lua/init_bake.lua")
 		if lson then
 --print(lson)
@@ -356,7 +356,7 @@ os.exit()
 --print(oven.opts.bake.stamp)
 		end
 
-		
+
 --opts.disable_sounds=true
 
 
@@ -365,7 +365,7 @@ os.exit()
 		wtongues.set(os.getenv("gamecake_tongue") or ( wwin.steam and wwin.steam.language ) or "english")
 		wtongues.load()
 
-		
+
 		oven.baked={}
 		oven.mods={}
 
@@ -408,14 +408,14 @@ os.exit()
 			elseif opts.version then
 				inf.title=inf.title.." ( "..opts.version.." ) "
 			end
-			
+
 			local tobool=function(v) return v and true or false end
 			set_inf_arg("borderless","win-borderless",tobool)
 			set_inf_arg("hidden","win-hidden",tobool)
 			set_inf_arg("title","win-title",tostring)
 			set_inf_arg("width","win-hx",tonumber)
 			set_inf_arg("height","win-hy",tonumber)
-			
+
 			-- auto center dependng on size
 			inf.x=math.floor((screen.width-inf.width)*(opts.win_px or 0.5))
 			inf.y=math.floor((screen.height-inf.height)*(opts.win_py or 0.5))
@@ -435,7 +435,7 @@ require("gles").GetError()
 require("gles").CheckError() -- uhm this fixes an error?
 
 --wwin.hardcore.peek(oven.win[0])
-	
+
 			if not inf.hidden then
 				local doshow=opts.args.show or opts.show or "win" -- default window display
 				if doshow then oven.win:show(doshow) end
@@ -447,13 +447,13 @@ require("gles").CheckError() -- uhm this fixes an error?
 			oven.rebake("wetgenes.gamecake.cake") -- bake the cake in the oven,
 
 			oven.view=oven.cake.views.create({
-			
+
 				mode="win",
 				win=oven.win,
 				vx=oven.win.width,
 				vy=oven.win.height,
 				fov=0,
-				
+
 			})
 			oven.msg_view=view -- the view to use to fix mouse position
 			oven.cake.views.push(oven.view) -- add master view which is the size of the main window
@@ -499,8 +499,8 @@ require("gles").CheckError() -- uhm this fixes an error?
 				end
 				oven.main=oven.next
 			end
-			
-			
+
+
 			return oven
 		end
 
@@ -509,17 +509,17 @@ require("gles").CheckError() -- uhm this fixes an error?
 		function oven.rebake(name)
 
 			local ret=oven.baked[name]
-			
+
 			if not ret then
-		
+
 				if type(name)=="function" then -- allow bake function instead of a name
 					return name(oven,{})
 				end
-			
+
 				ret={modname=name}
 				oven.baked[name]=ret -- need to create and remember here so we can always rebake even if the result is not filled in yet
 				ret=assert(require(name)).bake(oven,ret)
-				
+
 --				print("REBAKED",name,ret)
 			end
 
@@ -529,7 +529,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 		function oven.reload(name)
 
 			if name=="*" then
-			
+
 				for n,v in pairs(oven.baked) do -- reload all baked modules
 					log("rebake",n)
 					local suc,err=pcall(function()
@@ -537,7 +537,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 					end)
 					if not suc then log("rebake","IGNORE",err) end
 				end
-			
+
 			else
 
 				local ret=oven.rebake(name) -- make sure it has been baked once ( probably just finds it)
@@ -545,7 +545,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 				assert(wpackage.reload(name)).bake(oven,ret) -- then bake again
 
 				return ret
-			
+
 			end
 		end
 
@@ -553,20 +553,20 @@ require("gles").CheckError() -- uhm this fixes an error?
 -- so we may insert extra functionality without having to modify the running app
 -- eg a console or an onscreen keyboard
 		function oven.rebake_mod(name)
-		
+
 			if oven.mods[name] then return oven.mods[name] end -- already setup, nothing else to do
 			local m=oven.rebake(name) -- rebake mod into this oven
 
 			oven.mods[name]=m			-- store baked version by its name
 			table.insert(oven.mods,m)		-- and put it at the end of the list for easy iteration
-			
+
 			if m.setup then m.setup() end -- and call setup since it will always be running from now on until it is removed
-			
+
 			local shortname=name:gmatch("%.([^.]*)$")() -- get the bit after the last .
 			oven[shortname]=m -- and store in main oven for easy access to this mod
 			return m
 		end
-		
+
 
 		if opts.times then
 			oven.times={}
@@ -574,31 +574,31 @@ require("gles").CheckError() -- uhm this fixes an error?
 				local t={}
 				t.time=0
 				t.time_live=0
-				
+
 				t.hash=0
 				t.hash_live=0
-				
+
 				t.started=0
-				
+
 				function t.start()
 					t.started=oven.win and oven.win.time() or 0
 				end
-				
+
 				function t.stop()
 					local ended=oven.win and oven.win.time() or 0
-					
+
 					t.time_live=t.time_live + ended-t.started
 					t.hash_live=t.hash_live + 1
 				end
-				
+
 				function t.done()
 					t.time=t.time_live
 					t.hash=t.hash_live
 					t.time_live=0
 					t.hash_live=0
-					
+
 				end
-				
+
 				return t
 			end
 			oven.times.update=oven.times.create()
@@ -611,21 +611,21 @@ require("gles").CheckError() -- uhm this fixes an error?
 		-- handle oven changes
 
 			if oven.next then
-			
+
 				oven.clean()
-				
+
 				if type(oven.next)=="string" then	 -- change by required name
-				
+
 					oven.next=oven.rebake(oven.next)
-					
+
 				elseif type(oven.next)=="boolean" then -- special exit oven
-				
+
 --					if wwin.hardcore.finish then
---						wwin.hardcore.finish() -- try a more serious quit?					
+--						wwin.hardcore.finish() -- try a more serious quit?
 --						oven.next=nil
 --					else
 					if wwin.hardcore.task_to_back then -- on android there is no quit, only back
-						wwin.hardcore.task_to_back()						
+						wwin.hardcore.task_to_back()
 						if opts.start then
 							oven.next=oven.rebake(opts.start) -- beter than staying on the menu
 						else
@@ -633,27 +633,27 @@ require("gles").CheckError() -- uhm this fixes an error?
 						end
 					else
 						oven.next=nil
-						oven.finished=true		
+						oven.finished=true
 					end
-					
+
 					oven.last=oven.now
 					oven.now=oven.next
-					
+
 				end
 
 				if oven.next then
 					oven.last=oven.now
 					oven.now=oven.next
 					oven.next=nil
-					
+
 					oven.setup()
 				end
-				
+
 			end
-			
+
 		end
 
-		function oven.setup()	
+		function oven.setup()
 			if oven.now and oven.now.setup then
 				oven.now.setup() -- this will probably load data and call the preloader
 			end
@@ -663,7 +663,7 @@ require("gles").CheckError() -- uhm this fixes an error?
 
 		oven.started=false -- keep track of startstop state
 		oven.do_start=false -- flag start
-		function oven.start()	
+		function oven.start()
 			oven.do_start=false
 			if oven.started then return end -- already started
 			oven.started=true
@@ -726,16 +726,16 @@ require("gles").CheckError() -- uhm this fixes an error?
 			end
 --[[
 collectgarbage()
-local gci=gcinfo()		
-local gb=oven.gl.counts.buffers				
+local gci=gcinfo()
+local gb=oven.gl.counts.buffers
 print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 ]]
 
-			
+
 			if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
-			
+
 				if oven.frame_time<(oven.win:time()-0.500) then oven.frame_time=oven.win:time() end -- prevent race condition
-				
+
 				if wwin.hardcore.sleep then
 					while (oven.frame_time-(oven.frame_rate or 0))>oven.win:time() do
 						oven.msgs() -- keep handling msgs?
@@ -744,13 +744,13 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
  				else
 					if (oven.frame_time-oven.frame_rate)>oven.win:time() then return end -- cant sleep, just skip
 				end
-							
+
 			end
 
 			local time=oven.win:time() -- cache time here to prevent possible race
 			local f
 			f=function()
-			
+
 				if oven.do_start then
 					oven.start()
 				end
@@ -758,13 +758,13 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 				oven.change() -- run setup/clean codes if we are asked too
 
 				if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
-					oven.frame_time=oven.frame_time+oven.frame_rate -- step frame forward one tick				
+					oven.frame_time=oven.frame_time+oven.frame_rate -- step frame forward one tick
 				end
 
 --print( "UPDATE",math.floor(10000000+(oven.win:time()*1000)%1000000) )
 
 				if oven.times then oven.times.update.start() end
-				
+
 				oven.ups.update() -- new way
 				for _,m in ipairs(oven.ups.msgs) do oven.domsg(m) end
 
@@ -774,23 +774,23 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 						v.update()
 					end
 				end
-				
+
 				if oven.now and oven.now.update then
 					oven.now.update()
 				end
-				
+
 				if oven.tasks then -- update generic coroutines
 					oven.tasks:update()
 				end
 
 				if oven.times then oven.times.update.stop() end
-				
+
 				if oven.frame_rate and oven.frame_time and (not oven.frame_rate_auto) then --  forced updaterate enabled
 					if (oven.frame_time-oven.frame_rate)<time then -- repeat until we are a frame ahead of real time
 						return f() -- tailcall
 					end
 				end
-				
+
 			end
 
 			if not oven.update_co then -- create a new one
@@ -806,7 +806,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 --		if wwin.flavour=="raspi" then -- do fullscreen on raspi
 --			oven.preloader_enabled=false
 --		end
-		
+
 		function oven.preloader(sa,sb)
 			sa=sa or ""
 			sb=sb or ""
@@ -830,11 +830,11 @@ log("oven",sa.." : "..sb)
 				local p=oven.rebake(opts.preloader or "wetgenes.gamecake.spew.preloader")
 				p.setup() -- warning, this is called repeatedly
 				p.update(sa,sb)
-				
+
 				if not oven.preloader_time or ( oven.win:time() > ( oven.preloader_time + (1/60) ) ) then -- avoid frame limiting
-				
+
 					oven.preloader_time=oven.win:time()
-					
+
 					if wwin.hardcore and wwin.hardcore.swap_pending then -- cock blocked waiting for nacl draw code
 						-- do not draw
 					else
@@ -847,48 +847,48 @@ log("oven",sa.." : "..sb)
 					if  oven.update_co and ( coroutine.status(oven.update_co)=="running" ) then
 						coroutine.yield()
 					end
-					
+
 				end
 
 			end
 		end
 
 		function oven.draw()
-		
+
 			if oven.update_co then
 				if coroutine.status(oven.update_co)~="dead" then return end -- draw nothing until it is finished
 				oven.update_co=nil -- create a new one next update
 			else -- nothing to draw, waiting on update to change things
 				return
 			end
-			
+
 			if wwin.hardcore and wwin.hardcore.swap_pending then
 				return
 			end -- cock blocked waiting for nacl draw code
-		
+
 			oven.cake.canvas.draw() -- prepare tempory buffers
-			
+
 --print( "DRAW",math.floor(10000000+(oven.win:time()*1000)%1000000) )
 
 			if oven.times then oven.times.draw.start() end -- between calls to draw
-			
+
 			if oven.now and oven.now.draw then
 				oven.now.draw()
 			end
-			
+
 			for i,v in ipairs(oven.mods) do
 				if v.draw then
 					v.draw()
 				end
 			end
-						
+
 			if oven.times then oven.times.draw.stop() end -- draw is squify so just use it as the total time
 
 			if oven.win then
 				oven.win:swap()
 				oven.cake.images.adjust_mips({force=true}) -- upgrade all textures
 			end
-			
+
 		end
 
 		local old_mouse={x=0,y=0}
@@ -900,14 +900,14 @@ log("oven",sa.." : "..sb)
 				if time_now-oven.frame_rate_auto_active <= 10 then -- any recent activity in 10 seconds?
 
 					if oven.frame_rate ~= oven.frame_rate_auto then -- wake up
-						oven.frame_time=oven.win:time()				
+						oven.frame_time=oven.win:time()
 						oven.frame_rate=oven.frame_rate_auto
 					end
 				else -- no recent activity , so , sleepy time
 					oven.frame_rate=(time_now-oven.frame_rate_auto_active-10)*oven.frame_rate_auto -- wait longer for next frame
 				end
 			end
-			
+
 			if oven.win then
 				for m in oven.win:msgs() do
 
@@ -924,7 +924,7 @@ end
 						old_mouse.x=m.x			-- remember locally
 						old_mouse.y=m.y
 						m.xraw=m.x				-- remember in message
-						m.yraw=m.y	
+						m.yraw=m.y
 						oven.frame_rate_auto_active=time_now
 						if oven.msg_view then
 							oven.msg_view.msg(m) -- fix mouse coords using this view
@@ -933,7 +933,7 @@ end
 
 					if m.class=="touch" then	-- need to fix x,y numbers
 						m.xraw=m.x				-- remember in message
-						m.yraw=m.y	
+						m.yraw=m.y
 						oven.frame_rate_auto_active=time_now
 					end
 
@@ -963,7 +963,7 @@ log("oven","caught : ",m.class,m.cmd)
 							oven.do_stop=true
 						end
 					end
-						
+
 					oven.ups.msg(m) -- manage the msgs the new way
 
 				end
@@ -982,7 +982,7 @@ log("oven","caught : ",m.class,m.cmd)
 				if m and oven.now and oven.now.msg then
 					oven.now.msg(m)
 				end
-				
+
 			end
 		end
 
@@ -990,28 +990,28 @@ log("oven","caught : ",m.class,m.cmd)
 -- of system it just returns and expects the other functions
 -- eg oven.serv_pulse to be called when necesary.
 		function oven.serv(oven)
-		
+
 			if wwin.flavour~="android" then -- android needs lots of complexity due to its "lifecycle" bollox
 				oven.focus=true -- hack, default to focused
 				oven.do_start=true
 			end
-			
+
 			if oven.win.noblock then
 				return oven -- and expect  serv_pulse to be called as often as possible
 			end
-			
+
 			local ok,ret=xpcall(function()
 				local finished
 				repeat
 					finished=oven.serv_pulse(oven)
 				until finished
-			end,function(err) return err.."\n"..debug.traceback() end)
+			end,debug.traceback)
 			if not ok then print(ret) end
-			
+
 			if oven.win then
 				oven.win:show("win") -- this may restore original resolution
 			end
-			
+
 			oven.tasks:sqlite({cmd="close"}) -- shut down the default sqlite databsase so we finish with any out standing writes
 			wtongues.save() -- last thing we do is remember any new text ids used in this run
 
@@ -1022,9 +1022,9 @@ log("oven","caught : ",m.class,m.cmd)
 		function oven.serv_pulse(oven)
 			if oven.finished then return true end
 			oven.msgs()
-			
+
 			oven.cake.update()
-			
+
 			if oven.do_stop then
 				oven.do_stop=false
 				oven.stop()
@@ -1041,7 +1041,7 @@ log("oven","caught : ",m.class,m.cmd)
 				end
 			end
 		end
-		
+
 
 	return oven
 
