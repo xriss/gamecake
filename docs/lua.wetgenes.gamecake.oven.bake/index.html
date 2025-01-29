@@ -699,14 +699,14 @@
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L160">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
 <div><pre><code>oven=wetgenes.gamecake.oven.bake(opts)
 </code></pre>
-<p>Bake creates an instance of a lua module bound to a state. Here we 
+<p>Bake creates an instance of a lua module bound to a state. Here we
 are creating the main state that other modules will then bind to.</p>
-<p>We call each state an OVEN to fit into the gamecake naming scheme 
+<p>We call each state an OVEN to fit into the gamecake naming scheme
 then we bake a module in this oven to bind them to the common state.</p>
-<p>Think of it as a sub version of require, so require gets the global 
-pointer for a module and bake is used to get the a module bound to 
+<p>Think of it as a sub version of require, so require gets the global
+pointer for a module and bake is used to get the a module bound to
 an oven.</p>
-<p>By using this bound state we reduce the verbosity of connecting 
+<p>By using this bound state we reduce the verbosity of connecting
 modules and sharing state between them.</p>
 </div>
 </div>
