@@ -64,12 +64,12 @@ local dprint=function(a) print(wstr.dump(a)) end
 
 local function assert_resume(co)
 
-	local a,b=coroutine.resume(co)
+	local ok,err=coroutine.resume(co)
 
-	if a then return a,b end -- no error
+	if ok then return ok,err end -- no error
 
-	print( debug.traceback(co,b) ) -- error
-	os.exit()
+	print( debug.traceback(co,err) ) -- error
+	os.exit(20)
 end
 
 

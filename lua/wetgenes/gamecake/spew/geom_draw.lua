@@ -24,14 +24,17 @@ M.fill=function(oven,geom)
 	local getfmt=function(it,m)
 
 		local fmt={"xyz"}
-		if it.verts[1] then
-			if it.verts[1][4]  then fmt.nrm=true  fmt[#fmt+1]="nrm" end
-			if it.verts[1][7]  then fmt.uv=true   fmt[#fmt+1]="uv" end
-		end
-		if m               then fmt.m=true    fmt[#fmt+1]="m" end
-		if it.verts[1] then
-			if it.verts[1][9]  then fmt.tans=true fmt[#fmt+1]="tans" end
-			if it.verts[1][13] then fmt.bone=true fmt[#fmt+1]="bone" end
+		if it.verts[1] then -- must have one vertex to probe
+			local l=#it.verts[1] -- use length
+			if l>=4  then fmt.nrm=true  fmt[#fmt+1]="nrm" end
+			if l==10 then
+				fmt.uvwx=true fmt[#fmt+1]="uvwx"
+			elseif l>=7 then
+				fmt.uv=true   fmt[#fmt+1]="uv"
+			end
+			if m               then fmt.m=true    fmt[#fmt+1]="m" end
+			if l>=11 then fmt.tans=true fmt[#fmt+1]="tans" end
+			if l>=13 then fmt.bone=true fmt[#fmt+1]="bone" end
 		end
 		return fmt
 	end
@@ -51,6 +54,11 @@ M.fill=function(oven,geom)
 		if fmt.uv then
 			t[#t+1]=v[7] or 0
 			t[#t+1]=v[8] or 0
+		elseif fmt.uvwx then
+			t[#t+1]=v[7] or 0
+			t[#t+1]=v[8] or 0
+			t[#t+1]=v[9] or 0
+			t[#t+1]=v[10] or 0
 		end
 
 		if fmt.m then
@@ -70,9 +78,9 @@ M.fill=function(oven,geom)
 			t[#t+1]=v[15] or 0
 			t[#t+1]=v[16] or 0
 		end
-		
+
 	end
-	
+
 -- make a predraw buffer to draw triangles
 	geom.predraw_polys=function(it)
 
@@ -112,7 +120,7 @@ M.fill=function(oven,geom)
 
 -- make a predraw buffer to draw triangles but with mask instead of material
 	geom.predraw_polys_mask=function(it)
-	
+
 		local fmt=getfmt(it,true)
 		local t={}
 		local mask=it.mask and it.mask.polys or {}
@@ -216,7 +224,7 @@ M.fill=function(oven,geom)
 			t[#t+1]=v[1]
 			t[#t+1]=v[2]
 			t[#t+1]=v[3]
-			
+
 			local b={ -- bitangent is cross product of normal and tangent
 						(((v[5] or 0)*(v[11] or 0))-((v[6] or 0)*(v[10] or 0))) ,
 						(((v[6] or 0)*(v[9]  or 0))-((v[4] or 0)*(v[11] or 0))) ,
@@ -235,21 +243,21 @@ M.fill=function(oven,geom)
 		if not it[pd] then it[pd]=geom.predraw_polys(it) end
 		it[pd].draw(cb,progname)
 		return it
-	end	
-	
+	end
+
 	geom.draw_flatpolys=function(it,progname,cb)
 		local pd="pd_flatpolys"
 		if not it[pd] then it[pd]=geom.predraw_flatpolys(it) end
 		it[pd].draw(cb,progname)
 		return it
-	end	
+	end
 
 	geom.draw_polys_mask=function(it,progname,cb)
 		local pd="pd_polys_mask"
 		if not it[pd] then it[pd]=geom.predraw_mask(it) end
 		it[pd].draw(cb,progname)
 		return it
-	end	
+	end
 
 	geom.draw_lines=function(it,progname,cb)
 		local pd="pd_lines"
@@ -257,7 +265,7 @@ M.fill=function(oven,geom)
 		if not it[pd] then it[pd]=geom.predraw_lines(it) end
 		it[pd].draw(cb,progname)
 		return it
-	end	
+	end
 
 	geom.draw_lines_mask=function(it,progname,cb)
 		local pd="pd_lines_mask"
@@ -265,35 +273,35 @@ M.fill=function(oven,geom)
 		if not it[pd] then it[pd]=geom.predraw_lines_mask(it) end
 		it[pd].draw(cb,progname)
 		return it
-	end	
+	end
 
 	geom.draw_verts_mask=function(it,progname,cb)
 		local pd="pd_verts_mask"
 		if not it[pd] then it[pd]=geom.predraw_verts_mask(it) end
 		it[pd].draw(cb,progname)
 		return it
-	end	
+	end
 
 	geom.draw_normals=function(it,progname,cb)
 		local pd="pd_normals"
 		if not it[pd] then it[pd]=geom.predraw_normals(it) end
 		it[pd].draw(cb,progname)
 		return it
-	end	
+	end
 
 	geom.draw_tangents=function(it,progname,cb)
 		local pd="pd_tangents"
 		if not it[pd] then it[pd]=geom.predraw_tangents(it) end
 		it[pd].draw(cb,progname)
 		return it
-	end	
+	end
 
 	geom.draw_bitangents=function(it,progname,cb)
 		local pd="pd_bitangents"
 		if not it[pd] then it[pd]=geom.predraw_bitangents(it) end
 		it[pd].draw(cb,progname)
 		return it
-	end	
+	end
 
 -- remove all predraw buffers so we will resync base data next time we draw
 	geom.clear_predraw=function(it)

@@ -29,14 +29,14 @@ flat.quad = function(x1,y1,x2,y2,x3,y3,x4,y4)
 			x2,		y2,		0,		1,		0,
 			x4,		y4,		0,		0,		1,
 			x3,		y3,		0,		1,		1,
-		},"f32",0,5*4,canvas.vdat)	
+		},"f32",0,5*4,canvas.vdat)
 	else
 		pack.save_array({
 			x1,		y1,		0,		0,		0,
 			x2,		y1,		0,		1,		0,
 			x1,		y2,		0,		0,		1,
 			x2,		y2,		0,		1,		1,
-		},"f32",0,5*4,canvas.vdat)	
+		},"f32",0,5*4,canvas.vdat)
 	end
 
 	local p=gl.program("pos")
@@ -76,6 +76,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	local pstride=it.pstride
 	local pnrm
 	local ptex
+	local ptex4
 	local pcolor
 	local pmat
 	local ptans
@@ -84,17 +85,17 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 	local def_progname=it.progname or ""
 	local fmt=it.fmt or ""
 	if fmt=="xyz" or fmt=="pos" then -- xyz or pos only
-	
+
 		def_progname=fmt:sub(1,3)
 		pstride=12
-	
+
 	elseif fmt=="xyznrm" or fmt=="posnrm" then -- xyz and normal (so we may light the thing)
 
 		def_progname=fmt:sub(1,3).."_normal"
 
 		pstride=24
 		pnrm=12
-	
+
 	elseif fmt=="xyznrmuv" or fmt=="posnrmuv" then -- xyz and normal and texture
 
 		def_progname=fmt:sub(1,3).."_normal_tex"
@@ -102,7 +103,15 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		pstride=32
 		pnrm=12
 		ptex=24
-	
+
+	elseif fmt=="xyznrmuvwx" or fmt=="posnrmuvwx" then -- xyz and normal and texture
+
+		def_progname=fmt:sub(1,3).."_normal_tex4"
+
+		pstride=40
+		pnrm=12
+		ptex4=24
+
 	elseif fmt=="xyznrmuvm" or fmt=="posnrmuvm" then -- xyz and normal and texture and  material id
 
 		def_progname=fmt:sub(1,3).."_normal_tex_mat"
@@ -111,7 +120,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		pnrm=12
 		ptex=24
 		pmat=32
-	
+
 	elseif fmt=="xyznrmuvmbone" or fmt=="posnrmuvmbone" then -- xyz and normal and texture and  material id and bones
 
 		def_progname=fmt:sub(1,3).."_normal_tex_mat_bone"
@@ -159,16 +168,16 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 		pstride=20
 		ptex=12
-	
+
 	elseif fmt=="xyzrgba" or fmt=="posrgba" or fmt=="rawrgba" then -- xyz and color
 
 		def_progname=fmt:sub(1,3).."_color"
 
 		pstride=28
 		pcolor=12
-	
+
 	elseif fmt=="xyzuvrgba" or fmt=="posuvrgba" then -- xyz and texture and color
-	
+
 		def_progname=fmt:sub(1,3).."_tex_color"
 
 		pstride=36
@@ -176,7 +185,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		pcolor=20
 
 	elseif fmt=="rawuvrgba" then -- raw-xyz and texture and color
-	
+
 		def_progname="raw_tex_color"
 
 		pstride=36
@@ -184,26 +193,26 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 		pcolor=20
 
 	elseif fmt=="rawuv" then -- raw-xyz and texture and color
-	
+
 		def_progname="raw_tex"
 
 		pstride=20
 		ptex=12
 
 	end
-	
+
 	if canvas.discard_low_alpha then -- try not to break the zbuffer
 		def_progname=def_progname.."_discard"
 	end
 
-	
+
 	local data=it.data
 	local datalen=it.datalen or (data and #data) or 0
 	local datasize=it.datasize or datalen*4 -- we need this much vdat memory
 	if not it.dataraw then
 		canvas.vdat_check(datasize) -- make sure we have space in the buffer
 	end
-	
+
 	if it.vb then
 		if type(it.vb)~="table" then -- need to create
 			it.vb=buffers.create({
@@ -253,7 +262,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 
 		gl.VertexAttribPointer(p:attrib("a_vertex"),3,gl.FLOAT,gl.FALSE,pstride,0)
 		gl.EnableVertexAttribArray(p:attrib("a_vertex"))
-		
+
 --print( progname , fmt , p:attrib("a_texcoord") )
 
 		if pnrm then
@@ -268,6 +277,13 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 			local a=p:attrib("a_texcoord")
 			if a>=0 then
 				gl.VertexAttribPointer(a,2,gl.FLOAT,gl.FALSE,pstride,ptex)
+				gl.EnableVertexAttribArray(a)
+			end
+		end
+		if ptex4 then
+			local a=p:attrib("a_texcoord")
+			if a>=0 then
+				gl.VertexAttribPointer(a,4,gl.FLOAT,gl.FALSE,pstride,ptex4)
 				gl.EnableVertexAttribArray(a)
 			end
 		end
@@ -287,7 +303,7 @@ flat.array_predraw = function(it) -- pass in fmt,data,progname,vb=-1 in here
 				gl.EnableVertexAttribArray(a)
 			end
 		end
-		
+
 		if ptans then
 			local a=p:attrib("a_tangent")
 			if a>=0 then

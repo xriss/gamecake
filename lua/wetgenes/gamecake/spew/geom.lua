@@ -17,7 +17,8 @@ local function dprint(a) print(wstr.dump(a)) end
 
 -- v[1,2,3]			== xyz position
 -- v[4,5,6]			== xyz normal
--- v[7,8]			== uv texture coords
+-- v[7,8]			== uv texture coords or...
+-- v[7,8,9,10]		== uvwx texture coords ( data must end here with a length of 10 )
 -- v[9,10,11,12]	== texture tangent(xyz) and sign(+1 or -1) of bitangent for simple tangent space matrix reconstruction
 -- v[13,14,15,16]	== array of combined bone id and weights. integer part is the bone id and 1-frac is the bone weight
 
@@ -532,6 +533,20 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 	end
 
 
+	M.unshare_points=function(it)
+		local verts={}
+		local idx=0
+		for ip,vp in ipairs(it.polys) do
+			for i=1,#vp do
+				idx=idx+1
+				verts[idx]={unpack(it.verts[ vp[i] ])} -- copy vertex
+				vp[i] = idx
+			end
+		end
+		it.verts=verts -- new verts
+		return it
+	end
+
 	M.merge_points_by_pos=function(it,snap)
 
 		local hash={} -- map string to
@@ -558,6 +573,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 				vp[i] = map[ vp[i] ] -- change vert indexs
 			end
 		end
+
+		return it
 	end
 
 	M.build_tangents=function(it)

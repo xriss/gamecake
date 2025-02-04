@@ -20,10 +20,10 @@ vec4 RGBH(vec3 c){float a=max(1.0,max(max(c.r,c.g),c.b));return vec4(pow(c.rgb/a
 
 /*
 
-This is the default gamecake shader, which is controlled by a bunch of 
+This is the default gamecake shader, which is controlled by a bunch of
 defines to enable various features.
 
-First we must describe what to do with xyz vertex attributes, only one 
+First we must describe what to do with xyz vertex attributes, only one
 of SCR , RAW , XYZ and POS should be used at once.
 
 	SCR
@@ -32,8 +32,8 @@ Screen space, no transforms applied.
 
 	RAW
 
-The raw transform mode, ignores the modelview and only applies the 
-projection. This is for vertexs pre-transformed into world coords and 
+The raw transform mode, ignores the modelview and only applies the
+projection. This is for vertexs pre-transformed into world coords and
 is kinda just around for legacy reasons at this point.
 
 	XYZ
@@ -42,16 +42,16 @@ The xyz transform mode, using modelview and projection, this is the default mode
 
 	CAM
 
-The cam transform mode, using modelview and incamera and projection to 
-transform points. A replacement for XYZ if we need a little bit more 
+The cam transform mode, using modelview and incamera and projection to
+transform points. A replacement for XYZ if we need a little bit more
 camera control. IE we are tweaking the view space.
 
 	POS
 
-Is a special 2d z mode where the z component is treated as 0 for view 
+Is a special 2d z mode where the z component is treated as 0 for view
 transform but added to z in viewspace.
 
-This allows very simple control over depth buffer sorting of 2d polys, 
+This allows very simple control over depth buffer sorting of 2d polys,
 perfect for sprites etc.
 
 
@@ -67,6 +67,10 @@ Each vertex has a normal attribute.
 
 Each vertex has a UV attribute and we have a tex texture to bind to.
 
+	TEX4
+
+Each vertex has a UVWX attribute and we have a tex texture to bind to.
+
 
 	PHONG
 
@@ -74,7 +78,7 @@ Phong style lighting with a shiny spot.
 
 	LIGHT
 
-Use a uniform normal to describe where the light is coming from and its 
+Use a uniform normal to describe where the light is coming from and its
 color, otherwise we assume white and down the camera.
 
 	MATIDX
@@ -120,6 +124,9 @@ uniform vec4 color;
 #ifdef TEX
 uniform sampler2D tex;
 #endif
+#ifdef TEX4
+uniform sampler2D tex;
+#endif
 
 #ifdef MATIDX
 uniform sampler2D tex_mat;
@@ -156,6 +163,9 @@ OUT vec4  v_color;
 #ifdef TEX
 OUT vec2  v_texcoord;
 #endif
+#ifdef TEX4
+OUT vec4  v_texcoord;
+#endif
 
 #ifdef MATIDX
 OUT float v_matidx;
@@ -175,7 +185,10 @@ IN vec4 a_color;
 #ifdef TEX
 IN vec2 a_texcoord;
 #endif
- 
+#ifdef TEX4
+IN vec4 a_texcoord;
+#endif
+
 #ifdef MATIDX
 IN float a_matidx;
 #endif
@@ -261,7 +274,7 @@ mat4 getbone(int bidx)
 //	mf[3]=mab[3];
 	mat4 mf=mat4(mat3(me)*mat3(mab)); // tweak rot/scale should apply localy
 	mf[3].xyz=me[3].xyz+mab[3].xyz; // tweak pos should just be added in world space
-	
+
 	mat4 mr=md*mc*mf;
 
 	return mr*mc;
@@ -354,7 +367,7 @@ void main(void)
 			{
 				bm=getbone( int(a_bone[2]-1.0) );
 				bv+=(1.0-fract(a_bone[2]))*(bm);
-				
+
 				if(a_bone[3]>0.0)
 				{
 					bm=getbone( int(a_bone[3]-1.0) );
@@ -414,8 +427,11 @@ void main(void)
 #else
 	v_color=SRGB(color);
 #endif
-	
+
 #ifdef TEX
+	v_texcoord=a_texcoord;
+#endif
+#ifdef TEX4
 	v_texcoord=a_texcoord;
 #endif
 
@@ -441,6 +457,9 @@ OUT vec4 FragColor;
 
 #ifdef TEX
 IN vec2  v_texcoord;
+#endif
+#ifdef TEX4
+IN vec4  v_texcoord;
 #endif
 
 #ifdef MATIDX
@@ -514,11 +533,11 @@ void main(void)
 	float l=dot(n,s);
 	if(l>=0.0)
 	{
-		FragColor= vec4(  mix( c1.rgb , c1.rgb*(1.0+NTOON) , l ) , c1.a ); 
+		FragColor= vec4(  mix( c1.rgb , c1.rgb*(1.0+NTOON) , l ) , c1.a );
 	}
 	else
 	{
-		FragColor= vec4(  mix( c1.rgb*(1.0-NTOON) , c1.rgb , 1.0-l ) , c1.a ); 
+		FragColor= vec4(  mix( c1.rgb*(1.0-NTOON) , c1.rgb , 1.0-l ) , c1.a );
 	}
 
 #endif
@@ -527,8 +546,8 @@ void main(void)
 	vec3 n=normalize( v_normal );
 	vec3 s=shadow_light.xyz;
 	float l=max( 0.0, dot(n,s)*shadow_light.w );
-	
-	FragColor= vec4(  c1.rgb *         max( l , 0.25 ) + 
+
+	FragColor= vec4(  c1.rgb *         max( l , 0.25 ) +
 						(c2.rgb * pow( max( l , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif
 
@@ -536,7 +555,7 @@ void main(void)
 	vec3 n=normalize(v_normal);
 	vec3 s=shadow_light.xyz;
 	float l=max( 0.0, dot(n,s)*shadow_light.w );
-	FragColor= vec4(  c1.rgb *         max( l , 0.25 ) + 
+	FragColor= vec4(  c1.rgb *         max( l , 0.25 ) +
 						(c2.rgb * pow( max( l , 0.0  ) , c2.a*255.0 )).rgb , c1.a );
 #endif
 
@@ -644,10 +663,22 @@ precision mediump float;
 #define TEX 1
 #include "gamecake_shader"
 
+#shader "xyz_tex4"
+#define XYZ 1
+#define TEX4 1
+#include "gamecake_shader"
+
 #shader "xyz_normal_tex_phong"
 #define XYZ 1
 #define NORMAL 1
 #define TEX 1
+#define PHONG 1
+#include "gamecake_shader"
+
+#shader "xyz_normal_tex4_phong"
+#define XYZ 1
+#define NORMAL 1
+#define TEX4 1
 #define PHONG 1
 #include "gamecake_shader"
 
@@ -657,12 +688,21 @@ precision mediump float;
 #define DISCARD 0.25
 #include "gamecake_shader"
 
+#shader "xyz_tex4_discard"
+#define XYZ 1
+#define TEX4 1
+#define DISCARD 0.25
+#include "gamecake_shader"
 
 #shader "pos_tex"
 #define POS 1
 #define TEX 1
 #include "gamecake_shader"
 
+#shader "pos_tex4"
+#define POS 1
+#define TEX4 1
+#include "gamecake_shader"
 
 #shader "pos_tex_discard"
 #define POS 1
@@ -670,6 +710,11 @@ precision mediump float;
 #define DISCARD 0.25
 #include "gamecake_shader"
 
+#shader "pos_tex4_discard"
+#define POS 1
+#define TEX4 1
+#define DISCARD 0.25
+#include "gamecake_shader"
 
 #shader "pos_tex_color"
 #define POS 1
@@ -677,10 +722,23 @@ precision mediump float;
 #define COLOR 1
 #include "gamecake_shader"
 
+#shader "pos_tex4_color"
+#define POS 1
+#define TEX4 1
+#define COLOR 1
+#include "gamecake_shader"
+
 
 #shader "pos_tex_color_discard"
 #define POS 1
 #define TEX 1
+#define COLOR 1
+#define DISCARD 0.25
+#include "gamecake_shader"
+
+#shader "pos_tex4_color_discard"
+#define POS 1
+#define TEX4 1
 #define COLOR 1
 #define DISCARD 0.25
 #include "gamecake_shader"
@@ -696,9 +754,22 @@ precision mediump float;
 #define COLOR 1
 #include "gamecake_shader"
 
+#shader "raw_tex4_color"
+#define RAW 1
+#define TEX4 1
+#define COLOR 1
+#include "gamecake_shader"
+
 #shader "raw_tex_color_discard"
 #define RAW 1
 #define TEX 1
+#define COLOR 1
+#define DISCARD 0.25
+#include "gamecake_shader"
+
+#shader "raw_tex4_color_discard"
+#define RAW 1
+#define TEX4 1
 #define COLOR 1
 #define DISCARD 0.25
 #include "gamecake_shader"
@@ -708,9 +779,20 @@ precision mediump float;
 #define TEX 1
 #include "gamecake_shader"
 
+#shader "raw_tex4"
+#define RAW 1
+#define TEX4 1
+#include "gamecake_shader"
+
 #shader "raw_tex_discard"
 #define RAW 1
 #define TEX 1
+#define DISCARD 0.25
+#include "gamecake_shader"
+
+#shader "raw_tex4_discard"
+#define RAW 1
+#define TEX4 1
 #define DISCARD 0.25
 #include "gamecake_shader"
 
@@ -770,10 +852,23 @@ precision mediump float;
 #define TEX 1
 #include "gamecake_shader"
 
+#shader "xyz_normal_tex4"
+#define XYZ 1
+#define NORMAL 1
+#define TEX4 1
+#include "gamecake_shader"
+
 #shader "xyz_normal_tex_ntoon"
 #define XYZ 1
 #define NORMAL 1
 #define TEX 1
+#define NTOON 0.75
+#include "gamecake_shader"
+
+#shader "xyz_normal_tex4_ntoon"
+#define XYZ 1
+#define NORMAL 1
+#define TEX4 1
 #define NTOON 0.75
 #include "gamecake_shader"
 
