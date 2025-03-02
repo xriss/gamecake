@@ -1,6 +1,6 @@
 
 if [ -e "`dirname $0`/gamecake.nix" ] ; then
-	`dirname $0`/gamecake.nix $*
+	gdb -ex=r --args `dirname $0`/gamecake.nix $*
 
 elif [ "`uname -o`" = "Msys" ] ; then
 	`dirname $0`/gamecake.exe $*
@@ -9,12 +9,12 @@ elif [ "`uname`" = "Darwin" ] ; then
 	`dirname $0`/gamecake.osx $*
 
 elif [ "`uname -m`" = "armv6l" ] ; then
-	`dirname $0`/gamecake.raspi $*
+	gdb -ex=r --args `dirname $0`/gamecake.raspi $*
 
 elif [ "`getconf LONG_BIT`" = "64" ] ; then
-	`dirname $0`/gamecake.x64 $*
+	gdb -ex=r --args `dirname $0`/gamecake.x64 $*
 
 else
-	`dirname $0`/gamecake.x32 $*
+	gdb -ex=r --args `dirname $0`/gamecake.x32 $*
 
 fi
