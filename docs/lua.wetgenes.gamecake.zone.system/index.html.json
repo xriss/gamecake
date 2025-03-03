@@ -2738,10 +2738,10 @@
   {
    "body": "<p>Generic game objects, IE things that exist in game and can be interacted with \nby the players.</p>\n<p>Some times these exist in world, sometimes they exist in bags or inventory etc \nso are not visible world objects.</p>\n<p>As such this item <em>always</em> exists here and will be moved in and out of world \nobjects as necessary.</p>\n",
    "count": 1,
-   "file": "../lua/wetgenes/gamecake/zone/system/items.lua",
+   "file": "../lua/wetgenes/gamecake/zone/system/old/items.lua",
    "line": 7,
    "name": "lua.wetgenes.gamecake.zone.system.items",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/system/items.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/system/old/items.lua"
   }
  ],
  "_output_chunkname": "html",
