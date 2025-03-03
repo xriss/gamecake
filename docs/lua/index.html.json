@@ -4842,7 +4842,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
   {
-   "body": "<pre><code>A table of where to look for system modules\n</code></pre>\n<p>Replace or modify with list of prefxes to try. Defaults to a table with\none entry of &quot;unzone.system.&quot; a string will be appeneded to the end of\nthese and a require attempted so it should terminate in a &quot;.&quot; and\nincluding a &quot;&quot; at the end will allow a full path to be used as a\nrequire.</p>\n",
+   "body": "<pre><code>A table of where to look for system modules\n</code></pre>\n<p>Replace or modify with list of prefxes to try. Defaults to an array\nwith one entry of &quot;wetgenes.gamecake.zone.system.&quot; A string will be\nappeneded to the end of these and a require attempted. So it should\nterminate in a &quot;.&quot; and including a &quot;&quot; on its own will allow a full dot\npath to be used as a require since it wont change the appended string.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
    "line": 33,
