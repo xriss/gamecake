@@ -52,7 +52,7 @@ uniform vec4 offset; // center of grid
 IN vec3 a_vertex;
 
 OUT vec3 xy;
-//OUT vec3 eye;
+OUT vec3 eye;
 
 OUT vec4 pos;
 
@@ -67,7 +67,7 @@ void main()
 	pos=gl_Position;
 
 //	eye=normalize( ( modelview * camera * v ).xyz  - camera[3].xyz ) ;
-//	eye=normalize( (modelview * v).xyz ) ;
+	eye=normalize( (modelview * v).xyz ) ;
 
 }
 
@@ -75,7 +75,7 @@ void main()
 #ifdef FRAGMENT_SHADER
 
 IN vec4 pos;
-//IN vec3 eye;
+IN vec3 eye;
 
 IN vec3 xy;
 OUT vec4 FragColor;

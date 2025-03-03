@@ -70,7 +70,7 @@ uniform mat4 camera;
 uniform mat4 inverse_modelview;
 uniform mat4 inverse_projection;
 
-//uniform vec4 time;
+uniform vec4 time;
 
 #include "sky_function"
 
