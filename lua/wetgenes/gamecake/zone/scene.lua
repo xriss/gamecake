@@ -29,6 +29,40 @@ M.create=function(scene)
 
 	scene=scene or {} -- a place to store everything that needs to be updated
 
+
+--[[#lua.wetgenes.gamecake.zone.scene.require_search
+
+	A table of where to look for system modules
+
+Replace or modify with list of prefxes to try. Defaults to a table with
+one entry of "unzone.system." a string will be appeneded to the end of
+these and a require attempted so it should terminate in a "." and
+including a "" at the end will allow a full path to be used as a
+require.
+
+]]
+	scene.require_search={
+		"unzone.system.",
+	}
+--[[#lua.wetgenes.gamecake.zone.scene.require
+
+	all=scene:require("all")
+
+	Perform a require using scene.require_search as a list of places to
+	find the module
+
+]]
+	scene.require=function(scene,name)
+		local ret
+		for _,base in ipairs( scene.require_search ) do -- search
+			if ret then break end -- done
+			pcall( function() ret=require(base..name) end ) -- try a require
+		end
+		assert( ret , name.." not found in scene.require" ) -- maybe null
+		return ret
+	end
+
+
 --[[#lua.wetgenes.gamecake.zone.scene.create_values
 
 	Copy of the create_values function from the main zone_scene module.

@@ -130,6 +130,7 @@ all.manifest.create=function(manifest)
 	assert(manifest)
 	assert(manifest.caste)
 	assert(manifest.db)
+	assert(manifest.scene)
 
 	local merge=function(into,from)
 		if not into then return end
@@ -147,12 +148,7 @@ all.manifest.create=function(manifest)
 
 	-- merge all castes
 	for _,caste in ipairs(castes) do
-print(caste)
-		local info
-		if not info then pcall( function() info=require("wetgenes.gamecake.zone.system."..caste) end ) end
-print(caste,info and info.modname , "wetgenes.gamecake.zone.system."..caste)
-		if not info then pcall( function() info=require("unzone.system."..caste) end )                 end
-print(caste,info and info.modname,"unzone.system."..caste)
+		local info=manifest.scene:require(caste)
 		if info then
 			merge( manifest        , info.manifest or {} ) -- merge manifest functions
 		end
