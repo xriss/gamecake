@@ -317,6 +317,8 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.generate_uid"><span>/lua.wetgenes.gamecake.zone.scene.generate_uid</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.remember_uid"><span>/lua.wetgenes.gamecake.zone.scene.remember_uid</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.remove"><span>/lua.wetgenes.gamecake.zone.scene.remove</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.require"><span>/lua.wetgenes.gamecake.zone.scene.require</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.require_search"><span>/lua.wetgenes.gamecake.zone.scene.require_search</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.reset"><span>/lua.wetgenes.gamecake.zone.scene.reset</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.sortby_update"><span>/lua.wetgenes.gamecake.zone.scene.sortby_update</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.status"><span>/lua.wetgenes.gamecake.zone.scene.status</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.zone.scene.systems"><span>/lua.wetgenes.gamecake.zone.scene.systems</span></a>
@@ -696,7 +698,7 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.systems">lua.wetgenes.gamecake.zone.scene.systems</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L52">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L86">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene.systems={name=system,[1]=system}
 </code></pre>
 <p>A sorted table and lookup by caste name of each system. Table is sorted so it
@@ -707,7 +709,7 @@ delete itself.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.systems.call">lua.wetgenes.gamecake.zone.scene.systems.call</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L207">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L241">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:systems_call(fname,...)
 </code></pre>
 <p>For every system call the function called fname like so.</p>
@@ -721,7 +723,7 @@ an fname function to call.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.systems.cocall">lua.wetgenes.gamecake.zone.scene.systems.cocall</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L241">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L275">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:systems_cocall(fname,...)
 </code></pre>
 <p>For every system call the function called fname inside a coroutine like
@@ -739,7 +741,7 @@ an fname function to call.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.systems.insert">lua.wetgenes.gamecake.zone.scene.systems.insert</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L176">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L210">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:systems_insert(system)
 </code></pre>
 <p>Insert a new system replacing any system of the same caste. system.caste should
@@ -749,7 +751,7 @@ be set to the caste of the system for this to work.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.systems.remove">lua.wetgenes.gamecake.zone.scene.systems.remove</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L159">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L193">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>system = scene:systems_remove(caste)
 </code></pre>
 <p>Remove and return the system of the given caste.</p>

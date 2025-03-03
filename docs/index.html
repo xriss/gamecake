@@ -317,6 +317,8 @@
 <a class="sub" href="../docs/lua.wetgenes.gamecake.zone.scene.generate_uid"><span>/lua.wetgenes.gamecake.zone.scene.generate_uid</span></a>
 <a class="sub" href="../docs/lua.wetgenes.gamecake.zone.scene.remember_uid"><span>/lua.wetgenes.gamecake.zone.scene.remember_uid</span></a>
 <a class="sub" href="../docs/lua.wetgenes.gamecake.zone.scene.remove"><span>/lua.wetgenes.gamecake.zone.scene.remove</span></a>
+<a class="sub" href="../docs/lua.wetgenes.gamecake.zone.scene.require"><span>/lua.wetgenes.gamecake.zone.scene.require</span></a>
+<a class="sub" href="../docs/lua.wetgenes.gamecake.zone.scene.require_search"><span>/lua.wetgenes.gamecake.zone.scene.require_search</span></a>
 <a class="sub" href="../docs/lua.wetgenes.gamecake.zone.scene.reset"><span>/lua.wetgenes.gamecake.zone.scene.reset</span></a>
 <a class="sub" href="../docs/lua.wetgenes.gamecake.zone.scene.sortby_update"><span>/lua.wetgenes.gamecake.zone.scene.sortby_update</span></a>
 <a class="sub" href="../docs/lua.wetgenes.gamecake.zone.scene.status"><span>/lua.wetgenes.gamecake.zone.scene.status</span></a><a class="par" href="../docs/lua.wetgenes.gamecake.zone.scene.systems"><span>/lua.wetgenes.gamecake.zone.scene.systems</span></a>
@@ -4177,7 +4179,7 @@ find it useful to force monsters to update before the player.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.add">lua.wetgenes.gamecake.zone.scene.add</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L362">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L396">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:add(it)
 scene:add(it,caste)
 scene:add(it,caste,boot)
@@ -4194,7 +4196,7 @@ scene.add(it) as the auto shortcuts are unnecesary.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.call">lua.wetgenes.gamecake.zone.scene.call</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L431">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L465">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:call(fname,...)
 </code></pre>
 <p>If fname is a string then that method will be invoked for every item
@@ -4217,7 +4219,7 @@ currently active items.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.caste">lua.wetgenes.gamecake.zone.scene.caste</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L337">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L371">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:caste(caste)
 </code></pre>
 <p>Get the list of items of a given caste, eg &quot;bullets&quot; or &quot;enemies&quot;</p>
@@ -4229,7 +4231,7 @@ will be autocreated if needed.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.create_values">lua.wetgenes.gamecake.zone.scene.create_values</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L32">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L66">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>Copy of the create_values function from the main zone_scene module.
 </code></pre>
 </div>
@@ -4237,7 +4239,7 @@ will be autocreated if needed.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.find_uid">lua.wetgenes.gamecake.zone.scene.find_uid</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L145">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L179">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>local it = scene:find_uid( uid )
 </code></pre>
 <p>Return the item with the given uid or nil if no such item has been
@@ -4247,7 +4249,7 @@ remembered or a nil uid has been passed in.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.forget_uid">lua.wetgenes.gamecake.zone.scene.forget_uid</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L124">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L158">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>local it = scene:forget_uid( {uid=uid} )
 </code></pre>
 <p>Remove the item from the map of uids. Returns the item or nil if uid was
@@ -4261,7 +4263,7 @@ does not exist.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.generate_uid">lua.wetgenes.gamecake.zone.scene.generate_uid</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L72">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L106">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>local uid = scene:generate_uid()
 
 local uid = scene:generate_uid(uid)
@@ -4286,7 +4288,7 @@ another item table we can use a uid reference instead.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.remember_uid">lua.wetgenes.gamecake.zone.scene.remember_uid</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L109">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L143">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>local it = scene:remember_uid( {} )
 </code></pre>
 <p>Remember an item in the uids table, generating a uid and setting it.uid to this
@@ -4296,7 +4298,7 @@ value if one does not already exist.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.remove">lua.wetgenes.gamecake.zone.scene.remove</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L401">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L435">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:remove(it)
 </code></pre>
 <p>Remove this item, this is slightly expensive as we need to search in a table
@@ -4312,8 +4314,32 @@ as it sees fit.</p>
 </div>
 
 <div class="wrap">
+<h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.require">lua.wetgenes.gamecake.zone.scene.require</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L47">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div><pre><code>all=scene:require(&quot;all&quot;)
+
+Perform a require using scene.require_search as a list of places to
+find the module
+</code></pre>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.require_search">lua.wetgenes.gamecake.zone.scene.require_search</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L33">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div><pre><code>A table of where to look for system modules
+</code></pre>
+<p>Replace or modify with list of prefxes to try. Defaults to a table with
+one entry of &quot;unzone.system.&quot; a string will be appeneded to the end of
+these and a require attempted so it should terminate in a &quot;.&quot; and
+including a &quot;&quot; at the end will allow a full path to be used as a
+require.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.reset">lua.wetgenes.gamecake.zone.scene.reset</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L321">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L355">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:reset()
 </code></pre>
 <p>Empty the list of items to update and draw, this does not reset the systems
@@ -4323,7 +4349,7 @@ table that should be modified with the insert and remove functions.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.sortby_update">lua.wetgenes.gamecake.zone.scene.sortby_update</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L295">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L329">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:sortby_update(newtab)
 </code></pre>
 <p>A function that takes the array part of newtab and reverses the
@@ -4336,7 +4362,7 @@ The first caste name in the array gets a weight of 1, second 2 and so on.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.status">lua.wetgenes.gamecake.zone.scene.status</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L487">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L521">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>print( scene:status() )
 </code></pre>
 <p>Return a debug string giving details about the system order and current number
@@ -4346,7 +4372,7 @@ of items of each caste.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.systems">lua.wetgenes.gamecake.zone.scene.systems</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L52">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L86">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene.systems={name=system,[1]=system}
 </code></pre>
 <p>A sorted table and lookup by caste name of each system. Table is sorted so it
@@ -4357,7 +4383,7 @@ delete itself.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.systems.call">lua.wetgenes.gamecake.zone.scene.systems.call</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L207">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L241">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:systems_call(fname,...)
 </code></pre>
 <p>For every system call the function called fname like so.</p>
@@ -4371,7 +4397,7 @@ an fname function to call.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.systems.cocall">lua.wetgenes.gamecake.zone.scene.systems.cocall</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L241">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L275">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:systems_cocall(fname,...)
 </code></pre>
 <p>For every system call the function called fname inside a coroutine like
@@ -4389,7 +4415,7 @@ an fname function to call.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.systems.insert">lua.wetgenes.gamecake.zone.scene.systems.insert</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L176">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L210">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene:systems_insert(system)
 </code></pre>
 <p>Insert a new system replacing any system of the same caste. system.caste should
@@ -4399,7 +4425,7 @@ be set to the caste of the system for this to work.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.systems.remove">lua.wetgenes.gamecake.zone.scene.systems.remove</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L159">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L193">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>system = scene:systems_remove(caste)
 </code></pre>
 <p>Remove and return the system of the given caste.</p>
@@ -4408,7 +4434,7 @@ be set to the caste of the system for this to work.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.uids">lua.wetgenes.gamecake.zone.scene.uids</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L63">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L97">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>scene.uids={[uid]=item,...}
 </code></pre>
 <p>A map of currently remembered uids to items.</p>
@@ -4417,7 +4443,7 @@ be set to the caste of the system for this to work.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.values">lua.wetgenes.gamecake.zone.scene.values</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L822">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L856">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)
 
 values = zone_scene.create_values()
@@ -4433,7 +4459,7 @@ predicted slots.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.values.get">lua.wetgenes.gamecake.zone.scene.values.get</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L623">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L657">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:get(key)
 value=values:get(key,topidx)
 </code></pre>
@@ -4447,7 +4473,7 @@ time travel back a frame into the cached values with -1 as the idx.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.values.manifest">lua.wetgenes.gamecake.zone.scene.values.manifest</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L649">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L683">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:manifest(key,value)
 </code></pre>
 <p>Get the current value for this key if there is no current value then
@@ -4458,7 +4484,7 @@ set the current value.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.values.new">lua.wetgenes.gamecake.zone.scene.values.new</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L551">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L585">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values2 = values:new()
 </code></pre>
 <p>Create and return a new values object with a single slot containing an
@@ -4468,7 +4494,7 @@ empty object.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.values.pull">lua.wetgenes.gamecake.zone.scene.values.pull</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L565">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L599">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:pull()
 </code></pre>
 <p>Merge bottom 2 changesets and replae with just 1 shifting all values down one.</p>
@@ -4477,7 +4503,7 @@ empty object.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.values.push">lua.wetgenes.gamecake.zone.scene.values.push</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L581">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L615">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:push()
 </code></pre>
 <p>Add a new slot to the end of the values array. Future values will be
@@ -4487,7 +4513,7 @@ writen into this new slot.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.values.set">lua.wetgenes.gamecake.zone.scene.values.set</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L604">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L638">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:set(key,value)
 </code></pre>
 <p>If this is different from the current value then write the value into
@@ -4498,7 +4524,7 @@ get this new value.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.values.tween">lua.wetgenes.gamecake.zone.scene.values.tween</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L666">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L700">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:tween(key,tween)
 </code></pre>
 <p>Tween between the current value(1) and the previous value(0).</p>
@@ -4512,7 +4538,7 @@ either 0 or 1 whichever is closest and then get that whole value.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.values.twrap">lua.wetgenes.gamecake.zone.scene.values.twrap</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L716">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L750">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:twrap(key,nmax,tween)
 </code></pre>
 <p>Tween wrap between the current value and the previous value.</p>
@@ -4531,7 +4557,7 @@ either 0 or 1 whichever is closest and then get that whole value.
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.zone.scene.values.unpush">lua.wetgenes.gamecake.zone.scene.values.unpush</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L593">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L627">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:unpush()
 </code></pre>
 <p>Remove top pushed slot.</p>
