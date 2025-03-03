@@ -416,7 +416,10 @@ players.item.update=function(player)
 	end
 --print(LINE(),player.avatar.pose,v:lenlen())
 
-	local water_height=player.scene.systems.water:get_water_height(player.pos)
+	local water_height=-0xffff
+	if player.scene.systems.water then
+		water_height=player.scene.systems.water:get_water_height(player.pos)
+	end
 	local submerged=player.feet[2]-water_height
 	display( water_height , submerged )
 	if submerged>0 then -- float in water

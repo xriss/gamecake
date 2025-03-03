@@ -34,15 +34,15 @@ M.create=function(scene)
 
 	A table of where to look for system modules
 
-Replace or modify with list of prefxes to try. Defaults to a table with
-one entry of "unzone.system." a string will be appeneded to the end of
-these and a require attempted so it should terminate in a "." and
-including a "" at the end will allow a full path to be used as a
-require.
+Replace or modify with list of prefxes to try. Defaults to an array
+with one entry of "wetgenes.gamecake.zone.system." A string will be
+appeneded to the end of these and a require attempted. So it should
+terminate in a "." and including a "" on its own will allow a full dot
+path to be used as a require since it wont change the appended string.
 
 ]]
 	scene.require_search={
-		"unzone.system.",
+		"wetgenes.gamecake.zone.system.",
 	}
 --[[#lua.wetgenes.gamecake.zone.scene.require
 
