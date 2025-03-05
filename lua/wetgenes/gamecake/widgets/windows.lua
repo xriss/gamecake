@@ -27,10 +27,10 @@ end
 function wwindows.layout(widget)
 
 	if widget.winmode=="stack" then
-	
+
 		local px=0
 		local py=0
-		
+
 		for i,window in ipairs(widget) do
 			if widget.stack_axis=="x" then
 
@@ -41,7 +41,7 @@ function wwindows.layout(widget)
 					window.hx=window.win_fbo.hx*(window.hy/window.win_fbo.hy)
 				end
 				px=px+window.hx
-				
+
 			else -- y axis
 
 				window.px=0
@@ -81,7 +81,7 @@ function wwindows.layout(widget)
 		widget.sy=ss
 
 	end
-		
+
 	return widget.meta.layout(widget)
 end
 
@@ -94,7 +94,7 @@ function wwindows.setup(widget,def)
 
 --	widget.stack_axis=widget.stack_axis -- "x" or "y"
 	-- the axis along which the the windows stack
-	
+
 	widget.smode="topleft"
 
 	widget.update=wwindows.update

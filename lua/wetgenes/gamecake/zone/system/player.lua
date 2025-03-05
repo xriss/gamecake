@@ -416,7 +416,7 @@ players.item.update=function(player)
 	end
 --print(LINE(),player.avatar.pose,v:lenlen())
 
-	local water_height=-0xffff
+	local water_height=0xffff
 	if player.scene.systems.water then
 		water_height=player.scene.systems.water:get_water_height(player.pos)
 	end
@@ -614,6 +614,7 @@ players.item.update=function(player)
 --	scene.systems.build:update_player(player)
 
 --	print( "PV", player.vel )
+
 end
 
 

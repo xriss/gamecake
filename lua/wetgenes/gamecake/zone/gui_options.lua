@@ -13,9 +13,9 @@ M.bake=function(oven,B) B=B or {} -- bound to oven for gl etc
 
 B.setup=function(zgui)
 	log("setup",M.modname)
-	
+
 	local datas=zgui.master.datas
-	
+
 	local ssettings=oven.rebake("wetgenes.gamecake.spew.settings")
 
 	local list={
@@ -40,7 +40,7 @@ B.setup=function(zgui)
 		end
 		print(m.id)
 	end
-	
+
 	zgui.click["layout_save"]=function(it)
 		local windows=zgui.screen:get_windows()
 		local window_layout={}
@@ -72,8 +72,14 @@ B.setup=function(zgui)
 	end
 	zgui.click["layout_reset"]=function(it)
 		local windows=zgui.screen:get_windows()
-		local window_layout=zgui.master.window_layout -- default layout data that we can copy paste from settings file
+--		local window_layout=zgui.master.window_layout or {} -- default layout data that we can copy paste from settings file
 		for i,window in ipairs(windows) do
+			window.px=24*i
+			window.py=24*i
+			window.hx=window.win_fbo.hx
+			window.hy=window.win_fbo.hy
+			window.hidden=false
+--[[
 			local layout=window_layout[window.id] or window.reset_layout
 			if layout then
 				for _,n in ipairs{"hidden","px","py","hx","hy"} do
@@ -84,6 +90,7 @@ B.setup=function(zgui)
 					end
 				end
 			end
+]]
 		end
 		zgui.master.request_layout=true
 	end
@@ -109,7 +116,7 @@ B.setup=function(zgui)
 			hx=12,hy=8,
 			{
 				class="fill",size="fit",
-				
+
 				{class="text",hx=3,text="Layout",},
 				{class="button",hx=3,id="layout_save",text="Save",color=0},
 				{class="button",hx=3,id="layout_load",text="Load",color=0},
@@ -128,7 +135,7 @@ B.setup=function(zgui)
 	end
 
 	zgui.plan_windows_list.options=plan_windows
-		
+
 end
 
 

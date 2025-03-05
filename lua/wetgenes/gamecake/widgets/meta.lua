@@ -50,7 +50,7 @@ wmeta.classes={
 --classes built out of the base classes
 
 	["tabpages"]=oven.rebake("wetgenes.gamecake.widgets.tabpages"),
-	
+
 	["split_drag"]=oven.rebake("wetgenes.gamecake.widgets.split_drag"),
 
 	["pan"]=oven.rebake("wetgenes.gamecake.widgets.pan"),
@@ -92,9 +92,9 @@ function wmeta.setup(def)
 	function meta.call_hook_later(widget,hook,dat)
 		widget.master.later_append(meta.call_hook,widget,hook,dat)
 	end
-	
+
 	function meta.call_hook(widget,hook,dat)
-	
+
 --[[
 		if hook=="click" and widget.id then
 			local action=widget.master.actions[widget.id]
@@ -111,7 +111,7 @@ function wmeta.setup(def)
 				})
 			end
 		end
-]]	
+]]
 		if widget.class_hooks then
 			for _,ch in ipairs(widget.class_hooks) do
 				if ch(hook,widget,dat) then return end -- and it can eat the event if it returns true
@@ -160,7 +160,7 @@ function wmeta.setup(def)
 		end
 		return ret -- return the first widget added
 	end
-	
+
 	function meta.add_border(parent,c)
 		local n=parent:add({hx=c.hx,hy=c.hy}) -- full size
 		c.hx=c.hx-((c.px or 0)*2)
@@ -182,7 +182,7 @@ function wmeta.setup(def)
 -- remove from parent
 --
 	function meta.remove(widget)
-	
+
 		if widget.parent then
 			for i,v in ipairs(widget.parent) do
 				if v==widget then
@@ -191,16 +191,16 @@ function wmeta.setup(def)
 			end
 			widget.parent=nil
 		end
-		
-	end	
+
+	end
 --
 -- add a previosuly created widget as a child to this widget
 -- the widget will be forcibly removed...
 --
 	function meta.insert(parent,widget,top)
-	
+
 		meta.remove(widget) -- make sure we dont end up in two parents
-		
+
 		if top then
 			table.insert(parent,top,widget)
 		else
@@ -209,7 +209,7 @@ function wmeta.setup(def)
 
 		widget.parent=parent
 		widget.master=parent.master
-		
+
 		return widget
 	end
 
@@ -221,7 +221,7 @@ function wmeta.setup(def)
 -- initial setup
 --def
 	function meta.setup(widget,def)
-	
+
 		for a,b in pairs(def) do if type(a)=="string" then widget[a]=b end end -- shallow copy every string value
 
 		for _,n in ipairs({"data","datx","daty"}) do
@@ -239,16 +239,16 @@ function wmeta.setup(def)
 		end
 
 		if type(widget.class)=="function" then widget.class(widget,def) end -- allow callback to fill in more values
-	
+
 		widget.state=widget.state or "none"
-		
+
 		widget.meta=meta
-		
+
 		widget.smode=widget.smode or "center"
 		widget.sx=widget.sx or 1 -- display scale (of children)
 		widget.sy=widget.sy or 1
 		widget.pa=widget.pa or 0 -- display rotation angle (of children)
-		
+
 		widget.px=widget.px or 0 -- relative to parent, pixel position
 		widget.py=widget.py or 0
 
@@ -257,21 +257,21 @@ function wmeta.setup(def)
 		widget.hz=widget.hz or 0 -- used to signal an fbo with a depth buffer
 
 		widget.font=widget.font or widget.parent.font --  use this font if set or inherit value from parent
-		
+
 		widget.text_color=widget.text_color or widget.parent.text_color -- black text
-		
+
 		if widget.class and wmeta.classes[widget.class] then -- got a class, call its setup, its setup can override other functions
 			wmeta.classes[widget.class].setup(widget,def)
 		end
-		
+
 		if widget.master.ids and widget.id then widget.master.ids[widget.id]=widget end -- lookup by id
-		
+
 		if def.fbo then -- an fbo buffer has been requested (can speed rendering up)
 			widget.fbo=framebuffers.create(0,0,0)
 		end
-		
+
 		widget:set_dirty()
-		
+
 		return widget
 	end
 --
@@ -301,24 +301,24 @@ function wmeta.setup(def)
 -- live adjustment
 --
 	function meta.get(widget,val,...)
-	
+
 		if val=="slide" then
-		
+
 			local x=(widget.px) / (widget.parent.hx-widget.hx)
 			local y=(widget.py) / (widget.parent.hy-widget.hy)
-			
-			
+
+
 			return x,y
 		end
-		
+
 	end
-	
+
 	function meta.set(widget,val,...)
 	local t={...}
-	
+
 		if val=="slide" then
 			for i,v in ipairs(widget) do
-			
+
 				local pxf=0
 				local pyf=0
 				if type(t[1])=="table" then
@@ -329,22 +329,22 @@ function wmeta.setup(def)
 					pyf=t[2] or v.pyf or 0
 				end
 
-				
+
 --print("SET",v.pxf,v.pyf)
 
 				v.px=(widget.hx-v.hx)*pxf -- local position relative to parents size
 				v.py=(widget.hy-v.hy)*pyf
-				
+
 			end
 		end
 	end
-	
+
 --
 -- handle key input
 --
 	function meta.key(widget,ascii,key,act)
 	end
-	
+
 --
 -- handle mouse input
 --
@@ -367,8 +367,9 @@ function wmeta.setup(def)
 		v:product(m)
 		return v[1],v[2]
 	end
-	
+
 	function meta.mouse(widget,act,_x,_y,keyname)
+		if widget.hidden then return end
 		local old_over=widget.master.over
 		for i=#widget,1,-1 do -- children must be within parent bounds to catch clicks
 			local v=widget[i]
@@ -397,18 +398,18 @@ function wmeta.setup(def)
 			w=w.parent
 			if w==widget.master.active then return true end
 		until w.parent==w -- reached top
-		
+
 		return false
 	end
 --
 -- update this widget and its sub widgets
 --
 	function meta.update(widget)
-	
+
 		if widget.anim then
 			widget.anim:update()
 		end
-	
+
 		for i,v in ipairs(widget) do
 			if not v.hidden then v:update() end -- hidden widgets are ignored
 		end
@@ -418,7 +419,7 @@ function wmeta.setup(def)
 -- remove all children of this widget
 --
 	function meta.remove_all(widget)
-	
+
 		local len=#widget
 		for i=1,len do
 			widget[i]=nil
@@ -485,23 +486,23 @@ function wmeta.setup(def)
 
 
 	function meta.build_m4(widget)
-	
+
 		widget.m4=widget.m4 or tardis.m4.new()
-		
+
 		if widget.parent==widget then
 			widget.m4:identity()
 		else
 --print("parent",widget.parent.m4)
 			widget.m4:set(widget.parent.m4)
 		end
-		
-		local m4=tardis.m4.new()	
-		m4:identity()	
+
+		local m4=tardis.m4.new()
+		m4:identity()
 
 --		local m4=widget.m4
 
 
---print("SS",widget.sx,widget.sy)		
+--print("SS",widget.sx,widget.sy)
 		if widget.sx==1 and widget.sy==1 then
 				m4:translate( tardis.v3.new(-widget.px,-widget.py,0,0) )
 --				x= x-widget.px
@@ -523,7 +524,7 @@ function wmeta.setup(def)
 --				y=((y-widget.py)/widget.sy)
 			end
 		end
-		
+
 		if widget.pan_px and widget.pan_py then -- fidle everything
 --print("build",widget.pan_px,widget.pan_py)
 			m4:translate({widget.pan_px,widget.pan_py,0})
@@ -537,15 +538,15 @@ function wmeta.setup(def)
 		end
 
 	end
-	
+
 -- resize is performed recursively before layout so that layout can position its children
 	function meta.resize(widget,mini)
 		mini=mini or 0
 		for i,v in ipairs(widget) do if i>mini and v.size then
-		
+
 
 			for token in string.gmatch(v.size, "[^%s]+") do -- can contain multiple tokens
-			
+
 				if token=="full" then -- force full size
 
 					v.px=0
@@ -572,7 +573,7 @@ function wmeta.setup(def)
 					v.hy=(widget.hy/widget.sy)-(v.py*2)
 
 				elseif token=="minmax" then -- force a minimum width maximum height with scale on parent
-				
+
 					if     v.hx_min and v.hy_max then
 --						v.px=0
 --						v.py=0
@@ -605,7 +606,7 @@ function wmeta.setup(def)
 
 				end
 			end
-			
+
 		end end
 		if widget.hook_resize then -- let the widget do some magic before we recurse
 			widget.hook_resize(widget)
@@ -616,7 +617,7 @@ function wmeta.setup(def)
 		end
 		for i,v in ipairs(widget) do if i>mini and v.size then
 			for token in string.gmatch(v.size, "[^%s]+") do -- can contain multiple tokens
-		
+
 				if token=="fitx" then  -- set hx to maximum of children
 
 					v.hx=0

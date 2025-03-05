@@ -17,7 +17,7 @@ local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
 wwindow=wwindow or {}
-	
+
 	local winclamp=function(it)
 		local window,screen=it:window_screen()
 		local lpx,lpy,lhx,lhy=window.px,window.py,window.hx,window.hy
@@ -56,13 +56,13 @@ function wwindow.edge_drag(widget,x,y)
 
 	local window,screen=widget:window_screen()
 
-	if window.flags.nodrag then return end	
+	if window.flags.nodrag then return end
 
 	local master=widget.master
 	local active_xy=master.active_xy
-	
+
 	local windows= (window.parent.class=="windows") and window.parent or nil
-	
+
 	if windows and windows.winmode~="drag" then -- we are docked
 		return
 	end
@@ -72,7 +72,7 @@ function wwindow.edge_drag(widget,x,y)
 	if not active_xy.edge then -- fill in starting edge on the first call
 
 		active_xy.edge=widget.id
-		
+
 		active_xy.wx,active_xy.wy=screen.windows:mousexy(active_xy.mx,active_xy.my)
 
 		active_xy.px=window.px
@@ -84,16 +84,16 @@ function wwindow.edge_drag(widget,x,y)
 
 	local mx,my=screen.windows:mousexy(x,y)
 
-	if	master.active_xy.edge=="win_edge_br" or 
-		master.active_xy.edge=="win_edge_bl" or 
-		master.active_xy.edge=="win_edge_tr" or 
-		master.active_xy.edge=="win_edge_b"  or 
+	if	master.active_xy.edge=="win_edge_br" or
+		master.active_xy.edge=="win_edge_bl" or
+		master.active_xy.edge=="win_edge_tr" or
+		master.active_xy.edge=="win_edge_b"  or
 		master.active_xy.edge=="win_edge_r"  then
-		
+
 		if master.active_xy.edge=="win_edge_br" or master.active_xy.edge=="win_edge_r" or master.active_xy.edge=="win_edge_tr" then
 			window.hx=active_xy.hx+(mx-active_xy.wx)
 		end
-		
+
 		if master.active_xy.edge=="win_edge_br" or master.active_xy.edge=="win_edge_b" or master.active_xy.edge=="win_edge_bl" then
 			window.hy=active_xy.hy+(my-active_xy.wy)
 		end
@@ -105,22 +105,22 @@ function wwindow.edge_drag(widget,x,y)
 		master.active_xy.edge=="win_edge_bl" or
 		master.active_xy.edge=="win_edge_t" or
 		master.active_xy.edge=="win_edge_l" then
-		
+
 		if master.active_xy.edge=="win_edge_tl" or master.active_xy.edge=="win_edge_l" or master.active_xy.edge=="win_edge_bl" then
 			window.px=active_xy.px+(mx-active_xy.wx)
 			window.hx=active_xy.hx-(mx-active_xy.wx)
 		end
-		
+
 		if master.active_xy.edge=="win_edge_tl" or master.active_xy.edge=="win_edge_t" or master.active_xy.edge=="win_edge_tr" then
 			window.py=active_xy.py+(my-active_xy.wy)
 			window.hy=active_xy.hy-(my-active_xy.wy)
 		end
 
 	end
-	
+
 	if window.hx > screen.windows.hx then window.hx=screen.windows.hx end
 	if window.hy > screen.windows.hy then window.hy=screen.windows.hy end
-	
+
 	if window.panel_mode=="scale" then -- keep aspect when scaling
 
 		local sx=window.hx/window.win_fbo.hx
@@ -135,7 +135,7 @@ function wwindow.edge_drag(widget,x,y)
 		if	master.active_xy.edge=="win_edge_t" or master.active_xy.edge=="win_edge_b" then s=sy end
 		if	master.active_xy.edge=="win_edge_l" or master.active_xy.edge=="win_edge_r" then s=sx end
 
-		
+
 		window.hx=window.win_fbo.hx*s
 		window.hy=window.win_fbo.hy*s
 
@@ -143,7 +143,7 @@ function wwindow.edge_drag(widget,x,y)
 
 	winclamp(window)
 
-	window:set_dirty()	
+	window:set_dirty()
 	window.master.request_layout=true
 
 end
@@ -153,8 +153,8 @@ function wwindow.drag(widget,x,y)
 	local window,screen=widget:window_screen()
 	local windows= (window.parent.class=="windows") and window.parent or nil
 
-	if window.flags.nodrag then return end	
-	
+	if window.flags.nodrag then return end
+
 	if windows and windows.winmode~="drag" then -- we are docked
 		return
 	end
@@ -172,13 +172,13 @@ function wwindow.drag(widget,x,y)
 
 	window.px=x
 	window.py=y
-	
+
 --[[
 	if widget.px<0    then widget.px=0 end
 	if widget.px>maxx then widget.px=maxx end
 	if widget.py<0    then widget.py=0 end
 	if widget.py>maxy then widget.py=maxy end
-	
+
 	if screen.snap then
 		screen:snap(true)
 	end
@@ -192,7 +192,7 @@ function wwindow.drag(widget,x,y)
 	end
 
 	window:call_hook_later("slide")
-	
+
 	window:set_dirty()
 	window.master.request_layout=true
 
@@ -217,7 +217,7 @@ function wwindow.layout(widget)
 
 	local ss=widget.master.theme.grid_size
 	local bar_height=widget.flags.nobar and 0 or ss
-	
+
 	if v then
 		if window.panel_mode=="scale" then -- scale but maintain aspect of content
 
@@ -313,19 +313,19 @@ if window then -- only if message is bound to a window
 ]]
 
 		window:move_to_top()
-		
+
 --		print("ACTIVE",window.id)
 
 	elseif act=="inactive" then
 
---[[		
+--[[
 		if window.active_push and math.abs(window.active_push[2])>16 then
 
 --			print("PUSH",window.id,window.active_push[1],window.active_push[2])
 
 			if not window.active_nopush then
 				if window.parent.windows=="drag" then -- only dock if we are a dragable window
-				
+
 					local axis,order=window.active_push[1],(window.active_push[2]>=0) and 1 or 2
 					local split
 					local v=widget
@@ -352,7 +352,7 @@ if window then -- only if message is bound to a window
 		window.active_nopush=nil
 
 		window.master:layout()
-		
+
 --		print("INACTIVE",window.id)
 ]]
 
@@ -364,7 +364,7 @@ end
 -- window.window_hooks("win_hide")
 
 	if act=="win_hide" or act=="win_menu" then -- clicking the win_menu button will also close the window
-	
+
 		if act=="win_menu" and old_act=="release" then
 			-- do not hide
 		else
@@ -372,18 +372,18 @@ end
 			window.master:call_descendents(function(w) w:set_dirty() end)
 			window.master.request_layout=true
 		end
-		
+
 	elseif act=="win_show" then
-	
+
 		window.hidden=false
 		window:move_to_top()
 		window.master:call_descendents(function(w) w:set_dirty() end)
 		window.master.request_layout=true
 
 	elseif act=="win_toggle" then
-	
+
 		if window.hidden then -- show it
-		
+
 			window.hidden=false
 			window:move_to_top()
 			window.master:call_descendents(function(w) w:set_dirty() end)
@@ -396,14 +396,14 @@ end
 			window.master.request_layout=true
 
 		end
-		
+
 	elseif act=="win_toggle_other" then
-	
+
 		local win=widget.master.ids[widget.user]
 		if win then
 			win.window_hooks("win_toggle")
 		end
-		
+
 	elseif act=="win_grow" then
 
 		window.hx=window.hx*1.5
@@ -429,6 +429,8 @@ end
 
 function wwindow.setup(window,def)
 
+print(def.id,def.px,def.py,def.hx,def.hy)
+
 	window.flags=def.flags or {}
 
 	window.class="window"
@@ -445,7 +447,7 @@ function wwindow.setup(window,def)
 	window.layout=wwindow.layout
 	window.move_to_top=wwindow.move_to_top
 	window.is_top=wwindow.is_top
-	
+
 	window.window_hooks = function(act,w) return wwindow.window_hooks(window,act,w) end
 	window.hooks=window.window_hooks
 
@@ -463,7 +465,7 @@ function wwindow.setup(window,def)
 		{	id="win_windows",	text="Windows...",menu_data=window.window_menu},
 		hooks=window.window_hooks,
 	}
-	
+
 	local ss=window.master.theme.grid_size
 	local color=0
 
@@ -481,7 +483,7 @@ function wwindow.setup(window,def)
 	window.win_fbo=window:add({
 		hook_resize=function(it)
 			if window.win_canvas.size=="fit" then -- does the window fit the canvas?
-			
+
 				local bar_height=(window.flags.nobar and 0 or window.master.theme.grid_size)
 				it.hx=window.win_canvas.hx
 				it.hy=window.win_canvas.hy+bar_height
@@ -517,7 +519,7 @@ function wwindow.setup(window,def)
 	window.win_canvas=window.win_fbo:add({
 		hook_resize=function(it)
 			if window.win_canvas.size=="fit" then -- does the window fit the canvas?
-			
+
 			else -- or does the canvas fit the window
 
 				local bar_height=(window.flags.nobar and 0 or window.master.theme.grid_size)
@@ -540,8 +542,8 @@ function wwindow.setup(window,def)
 		color=color,
 		highlight="none",
 	})
-	
-	
+
+
 	-- use this to recreate the magic top left windows icon/menu anywhere you want
 	window.win_menu_def={
 			class="menudrop",
@@ -561,7 +563,7 @@ function wwindow.setup(window,def)
 		}
 
 	if bar_height>0 then -- add a bar
-	
+
 		window.win_three=window.win_fbo:add({
 			hook_resize=function(it)
 				it.hx=it.parent.hx
@@ -749,11 +751,13 @@ function wwindow.setup(window,def)
 		window:resize()
 		window:layout()
 		window:resize()
-		window.reset_layout.hx=window.win_fbo.hx
-		window.reset_layout.hy=window.win_fbo.hy
+--		window.reset_layout.hx=window.win_fbo.hx
+--		window.reset_layout.hy=window.win_fbo.hy
 	end
-	
-	
+
+--local widget=window
+--print("window start",widget.id,widget.hx,widget.hy,"...",widget.win_fbo.hx,widget.win_fbo.hy)
+
 	return window
 end
 
