@@ -15,13 +15,45 @@ M.bake=function(oven,gui)
 
 	local gui=gui or {}
 	gui.oven=oven
-	
+	oven.gui=gui	-- this is our global gui
+
 	gui.modname=M.modname
 
 	local cake=oven.cake
 	local gl=oven.gl
 
 	local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
+
+
+gui.show=function(yes)
+	if not gui.master then return false end -- must be setup
+	local ret=not gui.master.hidden
+
+	if type(yes)=="boolean" then
+		gui.master.hidden=not yes
+	else
+		gui.master.hidden=not gui.master.hidden
+	end
+
+	if gui.master.hidden then
+		gui.master.over=nil
+		if oven.win then oven.win:relative_mouse(true) end
+		if oven.ups then oven.ups.enable_mouse=true end
+	else
+		if oven.win then oven.win:relative_mouse(false) end
+		if oven.ups then oven.ups.enable_mouse=false end
+	end
+
+	if gui.master.over then
+		if oven.ups then oven.ups.enable_key=false end
+	else
+		if oven.ups then oven.ups.enable_key=true end
+	end
+
+	-- maybe need to flag fake mouse from joypad here, or make joypad work gui somehow?
+
+	return ret
+end
 
 
 gui.loads=function()
@@ -31,7 +63,7 @@ end
 
 
 gui.theme=function(def)
-	if not gui.master then gui.setup() end	
+	if not gui.master then gui.setup() end
 	gui.master:clean_all()
 	gui.master:set_theme(def)
 	gui.plan_windows(gui.master)
@@ -47,12 +79,12 @@ gui.setup=function(...)
 	gui.master=gui.master or oven.rebake("wetgenes.gamecake.widgets").setup({font="Vera",skin=0,no_keymove=true})
 	gui.master:set_theme(oven.rebake("wetgenes.gamecake.spew.settings").get("gui_theme","theme_dark_medium"))
 
-	
+
 	oven.rebake("wetgenes.gamecake.zone.gui_options").setup(gui)
 	oven.rebake("wetgenes.gamecake.zone.gui_user").setup(gui)
 	oven.rebake("wetgenes.gamecake.zone.gui_spew").setup(gui)
 	oven.rebake("wetgenes.gamecake.zone.gui_screen").setup(gui)
-	
+
 	for i,v in ipairs({...}) do v.setup(gui) end -- user windows
 
 --	gui.data_setup()
@@ -70,7 +102,7 @@ gui.setup=function(...)
 			end
 		end
 	end
-	
+
 	if gui.click["layout_load"] then
 		(gui.click["layout_load"])(nil,"auto")
 	end
@@ -84,7 +116,11 @@ end
 
 
 gui.msg=function(m)
-		
+
+	if m.class=="key" and m.action==1 and m.keyname=="tab" then
+		gui.show()
+	end
+
 	return gui.master:msg(m)
 
 end
@@ -95,7 +131,7 @@ gui.update=function()
 
 	gui.master:update({hx=oven.win.width,hy=oven.win.height})
 
--- display cursor	
+-- display cursor
 	if gui.cursor ~= gui.master.cursor then
 		gui.cursor = gui.master.cursor
 		wwin.cursor( gui.cursor or "arrow" )
@@ -106,7 +142,7 @@ end
 
 gui.draw=function()
 	gl.PushMatrix()
-	gui.master:draw()		
+	gui.master:draw()
 	gl.PopMatrix()
 end
 
@@ -152,17 +188,17 @@ function gui.hooks(act,w,dat)
 		if f then f(w) end
 
 	end
-	
+
 end
 
 gui.plan_windows_list={}
 
 gui.plan_windows=function()
-	
+
 	local datas=gui.master.datas
 
 	local gsiz=gui.master.grid_size
-	
+
 	local def=require("wetgenes.gamecake.widgets.defs").create()
 
 	def.set({

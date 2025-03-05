@@ -25,12 +25,12 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,escmenu)
 
 	escmenu=escmenu or {}
-	
+
 	local opts={
 		width=480,
 		height=480,
 	}
-	
+
 
 	local gl=oven.gl
 	local cake=oven.cake
@@ -41,10 +41,10 @@ function M.bake(oven,escmenu)
 
 
 	function escmenu.setup()
-	
-		oven.cake.fonts.loads({4}) -- always load builtin font number 4 a basic 8x16 font		
+
+		oven.cake.fonts.loads({4}) -- always load builtin font number 4 a basic 8x16 font
 		opts.font=4
-		
+
 --[[
 		if wzips.exists("data/fonts/Vera.ttf") then -- we got us better font to use :)
 			oven.cake.fonts.loads({"Vera"})
@@ -56,7 +56,7 @@ function M.bake(oven,escmenu)
 		escmenu.show=false
 
 		escmenu.master=oven.rebake("wetgenes.gamecake.widgets").setup({})
-		
+
 		local hooks={}
 		function hooks.click(act,widget)
 			local id=widget.id
@@ -70,39 +70,39 @@ function M.bake(oven,escmenu)
 			else
 ]]
 			if id=="continue" then
-			
+
 				escmenu.show=false
-				
+
 			elseif id=="restart" then
-			
+
 				oven.next=oven.now
 				escmenu.show=false
-				
+
 			elseif id=="quit" then
-			
+
 				oven.next=true
 				escmenu.show=false
-				
+
 			end
 		end
 		local top=escmenu.master:add({hx=480,hy=480,class="fill",font=opts.font,text_size=32})
 		top:add({hx=480,hy=80})
-		
+
 --		local mlayout=oven.mods["wetgenes.gamecake.mods.layout"]
---		if mlayout then		
+--		if mlayout then
 --			escmenu.layout_widget=top:add({hx=480,hy=80,text=XLT"Layout: "..mlayout.mode,color=0xffcccccc,id="layout",hooks=hooks,text_size=32})
 --		else
 			top:add({hx=480,hy=40})
 --		end
-		
+
 		top:add({class="button",hx=480,hy=80,text=XLT"Continue",color=0x7f00ff00,id="continue",hooks=hooks})
 		top:add({class="button",hx=480,hy=80,text=XLT"Restart",color=0x7fffff00,id="restart",hooks=hooks})
 		top:add({class="button",hx=480,hy=80,text=XLT"Quit",color=0x7fff0000,id="quit",hooks=hooks})
---		if not mlayout then		
+--		if not mlayout then
 			top:add({hx=480,hy=40})
 --		end
 		top:add({hx=480,hy=80})
-		
+
 		escmenu.master:layout()
 
 		escmenu.view=cake.views.create({
@@ -115,26 +115,26 @@ function M.bake(oven,escmenu)
 	end
 
 	function escmenu.clean()
-	
+
 	end
-	
-	
+
+
 
 	function escmenu.update()
-	
+
 		if not escmenu.active then return end
 
 		if escmenu.show then
 
 			escmenu.master:update()
-		
+
 		end
-		
+
 	end
-	
+
 	function escmenu.draw()
 		if not escmenu.active then return end
-	
+
 		local cake=oven.cake
 --		local gl=cake.gl
 --		local canvas=oven.canvas
@@ -154,21 +154,34 @@ function M.bake(oven,escmenu)
 
 		end
 
-		
+
 	end
-		
+
+	escmenu.last_gui_show=true
 	function escmenu.doshow(b)
 		if type(b)=="nil" then b=not escmenu.show end -- auto toggle
 		escmenu.show=b
+
+		if oven.gui then
+			if escmenu.show then
+				escmenu.last_gui_show=oven.gui.show(false)
+			end
+		end
+
 		if escmenu.show then
 			escmenu.old_relative_mouse=oven.win:relative_mouse(false) -- make sure we have mouse
 		else
 			escmenu.old_relative_mouse=oven.win:relative_mouse(escmenu.old_relative_mouse) -- try and restore
+			if oven.gui then
+				oven.gui.show(escmenu.last_gui_show) -- restore gui
+			end
 		end
+
 	end
 
 	function escmenu.msg(m)
 		if not escmenu.active then return m end
+
 
 --dprint(m)
 		if escmenu.show then
@@ -188,9 +201,9 @@ function M.bake(oven,escmenu)
 					escmenu.doshow()
 					return nil
 				end
-				
+
 				if ( m.class=="joykey" and m.action==-1 and (m.keycode==4 or m.keycode==0) ) then -- back button
-					escmenu.show=not escmenu.show
+					escmenu.doshow()
 					return nil
 				end
 
@@ -200,7 +213,7 @@ function M.bake(oven,escmenu)
 			end
 		else
 			if ( m.class=="joykey" and m.action==-1 and m.keycode==0 ) then -- back button
-				escmenu.show=not escmenu.show
+				escmenu.doshow()
 				return nil
 			end
 		end

@@ -73,7 +73,7 @@ function wmaster.setup(widget,def)
 			def=master.actions[def].json or {}
 		end
 
-	-- built in color themes, 
+	-- built in color themes,
 
 		master.color_theme_bright={ { 0.10, 0.10, 0.10 },{ 0.70, 0.70, 0.70 },{ 1.00, 1.00, 1.00 }, text=0, scale=1, alpha=1, grid_size=40, text_size=24, name="bright", }
 		master.color_theme_dark  ={ { 0.00, 0.00, 0.00 },{ 0.30, 0.30, 0.30 },{ 1.00, 1.00, 1.00 }, text=2, scale=1, alpha=1, grid_size=40, text_size=24, name="dark",   }
@@ -93,11 +93,11 @@ function wmaster.setup(widget,def)
 
 -- get a color from a theme and optionally apply a tint
 	function master.get_color(val,tint)
-	
+
 		local t=master.theme
 
 		if not val then val=t.text end -- text color
-	
+
 		local c={}
 
 		val=((val-1)*t.scale)+1 -- theme scale intensity
@@ -110,13 +110,13 @@ function wmaster.setup(widget,def)
 		elseif val>=1 then
 			for i=1,3 do c[i]=t[2][i]*(2-val) + t[3][i]*(val-1) end -- blend up
 		end
-		
+
 --		if c[4]<=0 then c[4]=1 end -- fix possible divide by zero?
 --		for i=1,3 do c[i]=c[i]/c[4] end -- normalise
-		
+
 		if tint then
 			if type(tint)=="number" then -- convert from 0xAARRGGBB
-				local r,g,b,a	
+				local r,g,b,a
 				a=bit.band(bit.rshift(tint,24),0xff)
 				r=bit.band(bit.rshift(tint,16),0xff)
 				g=bit.band(bit.rshift(tint, 8),0xff)
@@ -130,12 +130,12 @@ function wmaster.setup(widget,def)
 		end
 
 		for i=1,3 do if c[i]<0 then c[i]=0 end if c[i]>1 then c[i]=1 end end -- clamp result
-		
+
 		c[1]=c[1]*t.alpha
 		c[2]=c[2]*t.alpha
 		c[3]=c[3]*t.alpha
 		c[4]=t.alpha -- full alpha only
-	
+
 		return c
 	end
 
@@ -143,32 +143,32 @@ function wmaster.setup(widget,def)
 -- the master gets some special overloaded functions to do a few more things
 	function master.update(widget,resize)
 --print("update",widget)
-		
-		local up=oven.ups.up(1)
-		if up then
-			
+
+--		local up=oven.ups.up(1)
+--		if up then
+
 			if not master.no_keymove then
 
 				if not master.press then -- do not move when button is held down
 					local vx=0
 					local vy=0
-					if up.button("left_set")  then vx=-1 end
-					if up.button("right_set") then vx= 1 end
-					if up.button("up_set")    then vy=-1 end
-					if up.button("down_set")  then vy= 1 end
+					if master.keyset["left"]  then vx=-1 end
+					if master.keyset["right"] then vx= 1 end
+					if master.keyset["up"]    then vy=-1 end
+					if master.keyset["down"]  then vy= 1 end
 					master.keymove(vx,vy)
 				end
 
 			end
 
-			if up.button("fire_set")  then
+			if master.keyset["mouse_left"] or master.keyset["space"] or master.keyset["enter"] or master.keyset["return"] then
 
 				master.press=true
 
 				if master.over then
 
 					if master.active~=master.over then
-					
+
 						if master.active then
 							master.active:call_hook_later("inactive") -- this widget is no longer active
 						end
@@ -181,7 +181,7 @@ function wmaster.setup(widget,def)
 							local rx,ry=master.over.parent:mousexy(p[1],p[2])
 							master.active_xy={rx-master.over.px,ry-master.over.py,mx=p[1],my=p[2]}
 						end
-						
+
 						master.active:call_hook_later("active") -- an active widget is about to click (button down)
 					end
 
@@ -196,13 +196,13 @@ function wmaster.setup(widget,def)
 				end
 
 			end
-			
-			if up.button("fire_clr")  then
+
+			if master.keyclr["mouse_left"] or master.keyclr["space"] or master.keyclr["enter"] or master.keyclr["return"] then
 
 				master.press=false
 
 				if master.over and master.over~=master and master.active==master.over then -- no click if we drag away from button
-				
+
 					if not master.over.never_set_focus_edit then
 --print("active",master.active,master.active.class)
 --print("over",master.over,master.over.class)
@@ -214,43 +214,43 @@ function wmaster.setup(widget,def)
 						end
 
 					end
-					if up.button("mouse_left_clr")  then
+					if master.keyclr["mouse_left"]  then
 						master.over:call_hook_later("click",{keyname="mouse_left"}) -- its a left click
-					elseif up.button("mouse_right_clr")  then
+					elseif master.keyclr["mouse_right"]  then
 						master.over:call_hook_later("click",{keyname="mouse_right"}) -- its a right click
-					elseif up.button("mouse_middle_clr")  then
+					elseif master.keyclr["mouse_middle"]  then
 						master.over:call_hook_later("click",{keyname="mouse_middle"}) -- its a middle click
 					else
 						master.over:call_hook_later("click") -- probably not a mouse click
 					end
-					
+
 					master.over:set_dirty()
-				
+
 				elseif master.over and master.over~=master then -- mouse up but not mouse down ( ie we dragged and released )
 
-					if up.button("mouse_left_clr")  then
+					if master.keyclr["mouse_left"]  then
 						master.over:call_hook_later("release",{keyname="mouse_left"}) -- its a left click
-					elseif up.button("mouse_right_clr")  then
+					elseif master.keyclr["mouse_right"]  then
 						master.over:call_hook_later("release",{keyname="mouse_right"}) -- its a right click
-					elseif up.button("mouse_middle_clr")  then
+					elseif master.keyclr["mouse_middle"]  then
 						master.over:call_hook_later("release",{keyname="mouse_middle"}) -- its a middle click
 					else
 						master.over:call_hook_later("release") -- probably not a mouse click
 					end
-					
+
 					master.over:set_dirty()
 
 				end
-				
+
 				if master.active then
 					master.active:call_hook_later("inactive") -- this widget is no longer active
 				end
 
 				master.active=nil
-				
+
 			end
 
-		end
+--		end
 
 
 -- loop over and call all later function
@@ -267,7 +267,7 @@ function wmaster.setup(widget,def)
 				end
 			end
 		end
-		
+
 		local tim=wwin.time()
 		for w,t in pairs(master.timehooks) do
 			if t<=tim then
@@ -275,7 +275,7 @@ function wmaster.setup(widget,def)
 				master.timehooks[w]=nil
 			end
 		end
-	
+
 		if ( resize and (widget.hx~=resize.hx or widget.hy~=resize.hy) ) or master.request_layout or master.request_refresh then
 			master.request_layout=false
 			widget.hx=resize and resize.hx or widget.hx
@@ -287,12 +287,12 @@ function wmaster.setup(widget,def)
 			widget:set_dirty()
 			widget:call_descendents(function(w) w:set_dirty() end) -- force a redraw
 		end
-		
+
 		local throb=(widget.throb>=128)
-		
+
 		widget.throb=widget.throb-4
 		if widget.throb<0 then widget.throb=255 end
-		
+
 		if throb ~= (widget.throb<128) then -- dirty throb...
 			local w=widget.focus
 			if w and w.class=="textedit" then
@@ -305,17 +305,20 @@ function wmaster.setup(widget,def)
 				end
 			end
 		end
-		
+
 		meta.update(widget)
-		
+
 		if master.over and master.over~=master then
 			master.cursor=master.over.cursor
 		else
 			master.cursor=nil
 		end
-		
+
+		-- reset flags
+		master.keyset={}
+		master.keyclr={}
 	end
-	
+
 	function master.resize_and_layout(widget)
 --print("master layout")
 		meta.resize(widget)
@@ -337,7 +340,7 @@ function wmaster.setup(widget,def)
 			if widget.fbo.w~=hx or widget.fbo.h~=hy then -- resize so we need a new fbo
 				widget.fbo:resize(hx,hy,widget.hz or 0)
 				widget:set_dirty() -- flag redraw
-			end				
+			end
 		end
 		for i,v in ipairs(widget) do
 			mark_dirty_fbos(v)
@@ -364,7 +367,7 @@ function wmaster.setup(widget,def)
 		find_dirty_fbos(widget)
 
 		gl.PushMatrix()
-				
+
 		if #dirty_fbos>0 then
 			for i=#dirty_fbos,1,-1 do -- call in reverse so sub fbos can use their child fbo data
 				dirty_fbos[i]:draw() -- dirty, so this only draws into the fbo
@@ -372,21 +375,21 @@ function wmaster.setup(widget,def)
 		end
 
 		meta.draw(widget)
-		
+
 		gl.PopMatrix()
-		
+
 	end
-	
+
 	function master.msg(widget,m)
 
 -- handle shift key states and sending of action msgs triggered by keys
 		master.keystate_msg(m)
-	
+
 		local fo=master.focus and master.focus.msg and master.focus
 		if fo and fo~=master then
 			fo:msg(m) -- this will catch mouse ups as we lose focus
 		end
-	
+
 		if m.class=="text" then
 			if master.focus or m.softkey then -- fake keyboard only
 				widget:key(m.text)
@@ -424,11 +427,11 @@ function wmaster.setup(widget,def)
 			wwin.StopTextInput()
 		end
 	end
-	
+
 	function master.set_focus(focus)
 --print("focus",tostring(focus),focus and focus.class)
 		if master.focus==focus then return end -- no change
-	
+
 		if master.focus then
 			master.focus:call_hook_later("unfocus")
 			master.focus=nil
@@ -448,7 +451,7 @@ function wmaster.setup(widget,def)
 		else
 			master.set_focus_edit(nil)
 		end
-	
+
 	end
 --
 -- handle key input
@@ -456,13 +459,13 @@ function wmaster.setup(widget,def)
 	function master.key(widget,ascii,key,act)
 
 		if master.focus then -- key focus, steals all the key presses until we press enter again
-		
+
 			if master.focus.key then
 				master.focus:key(ascii,key,act)
 			end
-			
+
 		else
-		
+
 			if master.edit then
 				if	key=="left" or
 					key=="right" or
@@ -474,7 +477,7 @@ function wmaster.setup(widget,def)
 					master.edit:key(ascii,key,act)
 				end
 			end
-		
+
 		end
 
 	end
@@ -484,13 +487,13 @@ function wmaster.setup(widget,def)
 		if vx~=0 or vy~=0 then -- move hover selection
 
 -- print(vx,vy)
-		
+
 			if master.over and master.over.hx and master.over.hy then
 				local over=master.over
 				local best={}
 
 				local ox,oy=over:get_master_xy(over.hx/2,over.hy/2)
-				
+
 				master:call_descendents(function(w)
 					if w.solid and w.hooks and not w.hidden then
 						local wx,wy=w:get_master_xy(w.hx/2,w.hy/2)
@@ -504,7 +507,7 @@ function wmaster.setup(widget,def)
 							( dx>0 and vx>0 ) or
 							( dy<0 and vy<0 ) or
 							( dy>0 and vy>0 ) then -- right direction
-							
+
 							if best.over then
 								if best.dd>dd then -- closer
 									best.over=w
@@ -536,13 +539,13 @@ function wmaster.setup(widget,def)
 					end
 				end)
 			end
-			
+
 		end
 	end
 --
 -- set the mouse position to its last position
 -- call this after adding/removing widgets to make sure they highlight properly
---	
+--
 	function master.remouse(widget)
 		local p=widget.last_mouse_position -- or {0,0}
 		if p then
@@ -551,17 +554,17 @@ function wmaster.setup(widget,def)
 	end
 --
 -- handle mouse input
---	
+--
 	function master.mouse(widget,act,x,y,keyname)
 --print(widget,act,x,y,keyname)
 
--- keep mouse state in master	
+-- keep mouse state in master
 		if act==1 and keyname then
 			master["mouse_"..keyname]=true
 		elseif act==-1 and keyname then
 			master["mouse_"..keyname]=false
 		end
-		
+
 		if act==1 then
 			if master.last_mouse_click then
 				if master.last_mouse_click[1]+0.4 > wwin.time() then -- double click
@@ -582,7 +585,7 @@ function wmaster.setup(widget,def)
 		master.old_active=master.active
 		master.old_over=master.over
 
-		
+
 		if master.dragging() then -- handle mouse drag logic
 			master.active:drag(x,y)
 			if master.active.mouse then
@@ -592,7 +595,7 @@ function wmaster.setup(widget,def)
 			master.over=nil
 			meta.mouse(widget,act,x,y,keyname) -- cascade down into all widgets
 		end
-		
+
 --mark as dirty
 		if master.active~=master.old_active then
 			if master.active     then master.active:set_dirty() end
@@ -604,7 +607,7 @@ function wmaster.setup(widget,def)
 			if master.over     then master.over:call_hook_later("over") end
 			if master.edit     then master.edit:call_hook_later("notover") end
 		end
-		
+
 	end
 --
 
@@ -621,13 +624,13 @@ function wmaster.setup(widget,def)
 		master.later={}
 		master.later_append=function(f,...) assert(type(f)=="function") master.later[#master.later+1]={f,...} end
 	end
-	
+
 	function master.dragging()
 
 		if master.active and master.active.drag and master.press then
 			return true
 		end
-		
+
 		return false
 	end
 
@@ -640,7 +643,7 @@ function wmaster.setup(widget,def)
 				master.activate(w)
 			end
 		end)
-		
+
 	end
 	function master.activate(w)
 		master.over=w
@@ -649,7 +652,7 @@ function wmaster.setup(widget,def)
 		end
 		if master.over then master.over:call_hook_later("over") end
 	end
-	
+
 --
 -- mark all widgets that reference this data as dirty
 --
@@ -658,7 +661,7 @@ function wmaster.setup(widget,def)
 			if w.data==data or w.daty==data or w.datx==data then
 				w:set_dirty()
 			end
-		end)		
+		end)
 	end
 
 	function master.get_action(id,user)
@@ -690,7 +693,7 @@ function wmaster.setup(widget,def)
 			local text=assert(wzips.readfile(filename),"file not found: "..filename)
 			new_actions=wcsv.map(wcsv.parse(text))
 		end
-		
+
 		for i,v in ipairs(new_actions) do
 			if tostring(v.id):sub(1,1)=="#" then -- ignore # comment at start of line assuming first column is id
 			else
@@ -729,17 +732,19 @@ function wmaster.setup(widget,def)
 	end
 
 	master.keystate_reset=function()
-		master.keystate_alt=false
-		master.keystate_ctrl=false
-		master.keystate_shift=false
 		master.keystate="none"
+		master.keydown={}
+		master.keyset={}
+		master.keyclr={}
 	end
+	master.keystate_reset()
 
 	master.keystate_update=function()
 		local ks=nil
-		if master.keystate_alt   then  ks="alt"                          end
-		if master.keystate_ctrl  then  ks=ks and ks.."_ctrl"  or "ctrl"  end
-		if master.keystate_shift then  ks=ks and ks.."_shift" or "shift" end
+		local kd=master.keydown
+		if kd.alt   or kd.alt_l   or kd.alt_r   then  ks="alt"                          end
+		if kd.ctrl  or kd.ctrl_l  or kd.ctrl_r  then  ks=ks and ks.."_ctrl"  or "ctrl"  end
+		if kd.shift or kd.shift_l or kd.shift_r then  ks=ks and ks.."_shift" or "shift" end
 		master.keystate=ks or "none"
 	end
 
@@ -754,20 +759,15 @@ function wmaster.setup(widget,def)
 ]]
 
 		if m.class=="key" then
-			if     ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) then
-				if     m.action== 1 then master.keystate_shift=true
-				elseif m.action==-1 then master.keystate_shift=false end
-				master.keystate_update()
-			elseif ( m.keyname=="control" or m.keyname=="control_l" or m.keyname=="control_r" ) then
-				if     m.action== 1 then master.keystate_ctrl=true
-				elseif m.action==-1 then master.keystate_ctrl=false end
-				master.keystate_update()
-			elseif ( m.keyname=="alt" or m.keyname=="alt_l" or m.keyname=="alt_r" ) then
-				if     m.action== 1 then master.keystate_alt=true
-				elseif m.action==-1 then master.keystate_alt=false end
-				master.keystate_update()
-			end
 			local name=(m.keyname or ""):lower()
+			if m.action==1 or m.action==0 then
+				master.keydown[name]=true
+				master.keyset[name]=true
+			elseif m.action==-1 then
+				master.keydown[name]=nil
+				master.keyclr[name]=true
+			end
+			master.keystate_update()
 			local action=(master.keys[master.keystate] or {})[name]
 			if action then -- add an action message
 				oven.win:push_msg({
@@ -777,6 +777,15 @@ function wmaster.setup(widget,def)
 					id=action.id,
 					user=action.user,
 				})
+			end
+		elseif m.class=="mouse" then
+			local name="mouse_"..(m.keyname or ""):lower()
+			if m.action==1 then
+				master.keydown[name]=true
+				master.keyset[name]=true
+			elseif m.action==-1 then
+				master.keydown[name]=nil
+				master.keyclr[name]=true
 			end
 		end
 

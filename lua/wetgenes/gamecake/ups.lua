@@ -376,6 +376,10 @@ M.bake=function(oven,ups)
 		ups.states={}
 		ups.msgs={} -- all the msgs for this tick
 		ups.new_msgs={} -- volatile building list of msgs
+
+		ups.enable_pad=true		-- deal with pad msgs or ignore them (grabbed by somone else)
+		ups.enable_key=true		-- deal with keyboard msgs or ignore them (grabbed by somone else)
+		ups.enable_mouse=true	-- deal with mouse msgs or ignore them (grabbed by somone else)
 	end
 
 	-- set keymap for this idx
@@ -423,7 +427,7 @@ M.bake=function(oven,ups)
 
 	-- apply msgs to button states
 	ups.msg_apply=function(m)
-		if m.class=="key" then
+		if m.class=="key" and ups.enable_key then
 			for idx,maps in ipairs(ups.keymaps) do -- check all keymaps
 				local buttons=maps[m.keyname] or maps[m.ascii]
 				if buttons then
@@ -440,7 +444,7 @@ M.bake=function(oven,ups)
 				end
 			end
 
-		elseif m.class=="mouse" then -- swipe to move
+		elseif m.class=="mouse" and ups.enable_mouse then -- swipe to move
 
 			local up=ups.manifest( ups.mousemaps[1] ) -- probably 1up
 			if up then
@@ -476,7 +480,7 @@ M.bake=function(oven,ups)
 					end
 				end
 			end
-		elseif m.class=="padaxis" then -- SDL axis values
+		elseif m.class=="padaxis" and ups.enable_pad then -- SDL axis values
 
 			local upi=ups.padmaps[((m.id-1)%#ups.padmaps)+1]
 			if not ups.last_pad_values[upi] then ups.last_pad_values[upi]={} end -- manifest
@@ -527,7 +531,7 @@ M.bake=function(oven,ups)
 				end
 			end
 
-		elseif m.class=="padkey" then -- SDL button values
+		elseif m.class=="padkey" and ups.enable_pad then -- SDL button values
 
 			local upi=ups.padmaps[((m.id-1)%#ups.padmaps)+1]
 			local up=ups.manifest( upi ) -- this pad belongs to

@@ -4,7 +4,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
--- two basic widgets merged together to give a simple slide or scrollbar 
+-- two basic widgets merged together to give a simple slide or scrollbar
 
 
 --module
@@ -41,29 +41,29 @@ function wslide.update(widget)
 
 	if widget.master.active==widget  --[[and ( not widget.not_mousewheel )]] then
 --print("slide update")
-			local ups=srecaps.ups()
+--			local ups=srecaps.ups()
 
-			if ups.button("left_set")  then
+			if widget.master.keyset["left"]  then
 				widget.datx:dec()
 			end
-			if ups.button("right_set") then
+			if widget.master.keyset["right"] then
 				widget.datx:inc()
 			end
-			if ups.button("up_set")    then
+			if widget.master.keyset["up"]    then
 				widget.daty:dec()
 			end
-			if ups.button("down_set")  then
+			if widget.master.keyset["down"]  then
 				widget.daty:inc()
 			end
 	end
-	
+
 	local oldx=widget.knob.px
 	local oldy=widget.knob.py
 	widget:snap()
 	if oldx~=widget.knob.px or oldy~=widget.knob.py then
 		widget:build_m4()
 	end
-	
+
 	return widget.meta.update(widget)
 end
 
@@ -72,8 +72,8 @@ function wslide.layout(widget)
 	widget.knob.hx=widget.datx:get_size(widget.hx)
 	widget.knob.hy=widget.daty:get_size(widget.hy)
 
-	widget.meta.layout(widget)	
-	
+	widget.meta.layout(widget)
+
 end
 
 function wslide.slide_snap(it,useloc)
@@ -85,29 +85,29 @@ function wslide.slide_snap(it,useloc)
 		it.knob.px=it.datx:get_pos(it.hx,it.knob.hx,it.datxrev)
 		it.knob.py=it.daty:get_pos(it.hy,it.knob.hy,it.datyrev)
 	end
-	
+
 -- auto snap positions when draged
 	it.knob.px=it.datx:snap( it.hx , it.knob.hx , it.knob.px , it.datxrev )
-	
+
 -- y is now the right way up
 	it.knob.py=it.daty:snap( it.hy , it.knob.hy , it.knob.py , it.datyrev )
-	
+
 end
-	
+
 function wslide.setup(widget,def)
 --	local it={} -- our main data so as not to clobber widget values
 --	it.widget=widget
 --	widget.slide=it
 	widget.class="slide"
-	
+
 	widget.snap=wslide.slide_snap
-	
+
 	widget.key=wslide.key
 	widget.mouse=wslide.mouse
 	widget.update=wslide.update
 	widget.layout=wslide.layout
-	
---setup constraints in x and y 
+
+--setup constraints in x and y
 	widget.datx=widget.datx or widget_data.new_data({max=0,master=widget.master})
 	widget.daty=widget.daty or widget_data.new_data({max=0,master=widget.master})
 
@@ -129,7 +129,7 @@ function wslide.setup(widget,def)
 
 	widget.solid=false
 --	widget.can_focus=true
-	
+
 	return widget
 end
 
