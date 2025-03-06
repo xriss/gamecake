@@ -27,7 +27,7 @@ precision highp float;
 precision mediump float;
 #endif
 #endif
-  
+
 #include "gamecake_shader_funcs"
 
 uniform mat4 modelview;
@@ -115,7 +115,7 @@ float hmap(vec2 v)
 {
 	// wormy wavy pattern
 	float h=wormnoise(v+noise_add.xz,10.0,3.0,time[0]*0.5)*1.0;
-		
+
 	// flatten in the distance by using this height scalar
 	float s=1.0 - smoothstep( MFA , MFB , length(v-offset.xz) );
 	return (0.5+(h*s)*0.5);
@@ -148,7 +148,7 @@ void main()
 	v.y+=hmap(v.xz);
 	xy=v.xz;
 
-	
+
 #ifdef POSITION_CUSTOM
 	POSITION_CUSTOM
 #else
@@ -178,11 +178,11 @@ vec4 water(vec2 p,out vec3 r)
 	float h = 1.0-hmap(p);
 	vec3 wn = hmapn(p).xzy;
 	vec3 vn = normalize( mat3( modelview ) * wn );
-	
+
 	vec3 c1=SRGB(vec3( 0.0 , 0.0 , 0.4 ))*(0.25  + max(0.0,vn.y)*0.75 );
 	vec3 c2=SRGB(vec3( 0.4 , 0.6 , 0.4 ))*( 0.5*h );
 	vec4 c3=SRGB(vec4( 0.0 , 0.0 , 0.0 , 0.0 ));
-	
+
 	vec3 rn=normalize( reflect( eye , vn ) );
 	r=rn;
 
@@ -191,7 +191,7 @@ vec4 water(vec2 p,out vec3 r)
 		c3=sky( rn , vec4( 1.0 , 1.0 , 0.0 , 0.0 ) ) * step( 0.0 , -rn.y ) ;
 	}
 
-	
+
 	vec4 cc=vec4(c1+c2,0.125);
 //	cc.a=length(cc)/4.0;
 //	cc.rgb*=1.0/(cc.a*4.0);
@@ -211,17 +211,18 @@ void main(void)
 	vec3 r;
 
 #if defined(WATER_SOFT)
-	vec3 c1=PHRGB( vec4( water(xy,r) )*SRGB(color) ); // water 
+	vec3 c1=PHRGB( vec4( water(xy,r) )*SRGB(color) ); // water
 	vec3 luv=vec3(0.5)+((pos.xyz/pos.w)*0.5);	// read this pixel from last color/depth
 #ifdef DEPTH_RANGE_REVERSE
 	float d=1.0-float(texture(tex_last_depth,luv.xy)); // scene depth
 #else
 	float d=float(texture(tex_last_depth,luv.xy)); // scene depth
 #endif
+	float t=1.0-clamp(dot(eye,r),0.0,1.0); // adjust transparency based on angle of eye to water
 	float b=1.0-smoothstep( luv.z , 0.5+(((pos.z+4.0)/(pos.w+4.0))*0.5) , d ); // depth of water
 	vec3 c2=HRGB( texture(tex_last_color,luv.xy+r.xy*r.zy*((1.0-b)*0.02)) ); // add a little offset using reflection scaled by water depth
 	c1=mix(c1,vec3(0.5),smoothstep(15.0/16.0,1.0,b)); // white water at edges
-	FragColor=RGBH(mix(c1,c2,  0.10+b*0.40 ));
+	FragColor=RGBH(mix(c1,c2,  (0.10+b*0.40)*t ));
 
 #else
 
