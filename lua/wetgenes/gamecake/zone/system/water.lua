@@ -77,6 +77,13 @@ waters.system.setup=function(sys)
 
 	sys.geomwater=sys.geom.hexafloor({},8192,16):subdivide(1024):subdivide(512):subdivide(512):subdivide(256):subdivide(256):subdivide(256):subdivide(256)
 
+	sys.geomwater:subdivide(128)	-- extra?
+	sys.geomwater:subdivide(64)	-- extra?
+	sys.geomwater:subdivide(32)	-- extra?
+
+	sys.ztri=(8192/16)/(2^7)			-- 4
+	sys.Xtri=sys.ztri*math.sqrt(0.75)	-- 3.5ish
+
 end
 
 waters.system.clean=function(sys)
@@ -160,7 +167,7 @@ waters.item.update=function(water)
 	local y=(camera.mtx[10]*-focus + camera.mtx[14])
 	local z=(camera.mtx[11]*-focus + camera.mtx[15])
 
-	local snap=50
+	local snap=4*10
 	local sx=math.sqrt(0.75)*snap
 	local sz=1*snap
 
