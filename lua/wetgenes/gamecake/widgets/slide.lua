@@ -39,9 +39,8 @@ end
 function wslide.update(widget)
 --	local it=widget.slide
 
-	if widget.master.active==widget  --[[and ( not widget.not_mousewheel )]] then
---print("slide update")
---			local ups=srecaps.ups()
+--print( widget.master.active==widget , widget.master.active , widget , widget.master.keyset["left"] )
+	if widget.master.active==widget.knob then
 
 			if widget.master.keyset["left"]  then
 				widget.datx:dec()

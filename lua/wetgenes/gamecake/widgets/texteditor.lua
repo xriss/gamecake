@@ -24,9 +24,9 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.bake=function(oven,wtexteditor)
 
-	wtexteditor=wtexteditor or {} 
+	wtexteditor=wtexteditor or {}
 	wtexteditor.modname=M.modname
-	
+
 	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
 	local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
 	local wtxtwords=require("wetgenes.txt.words")
@@ -52,9 +52,9 @@ function wtexteditor.update(texteditor)
 		texteditor.throb=throb
 		texteditor.scroll_widget.pan:set_dirty()
 	end
-	
+
 	if texteditor.key_mouse and not texteditor.master.mouse_left then -- catch mouse up nomatter where it was
-	
+
 		texteditor.float_cx=nil
 
 		texteditor.key_mouse=false
@@ -63,7 +63,7 @@ function wtexteditor.update(texteditor)
 			txt.mark(unpack(texteditor.mark_area))
 		end
 		texteditor.mark_area=nil
-		
+
 		texteditor:scroll_to_view()
 		texteditor.txt_dirty=true
 
@@ -138,9 +138,9 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 				widget.gutter=#string.format(" %d   ",widget.hy)
 			end
 		end
-		
+
 		if widget.opts.mode=="hex" then
-		
+
 			local pan=widget.scroll_widget.pan
 			pan.hx_max=(widget.gutter+18+3*16)*8
 
@@ -153,11 +153,11 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 			local pan=widget.scroll_widget.pan
 			pan.hx_max=(widget.txt.hx+widget.gutter+2)*8
 			pan.hy_max=widget.txt.hy*16
-			
+
 			if widget.opts.word_wrap then pan.hx_max=0 end -- no x scroll when word wrapping
-	
+
 		end
-	
+
 		if widget.data then -- auto set data if txt changes
 			local sa=widget.txt.get_text()
 			if sa ~= widget.data:value() then
@@ -201,12 +201,12 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 		local max  =tonumber(swed.config.max)  or 1
 		local step =tonumber(swed.config.step) or 0.01
 		local fmt  =tostring(swed.config.fmt)  or "%.2f"
-		local vec  =tonumber(swed.config.vec)  or 1		
-							
+		local vec  =tonumber(swed.config.vec)  or 1
+
 		if swed.mode=="+" then
 			swed.fakeline=math.ceil(vec/2)*2 -- hide text and leave space for this many lines
 		end
-		
+
 		local sx=8--math.floor((widget.sx or 1)*8)
 		local sy=16--math.floor((widget.sy or 1)*16)
 		widget.scroll_widget.text_size=sy
@@ -219,7 +219,7 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 		end
 		local px=gx
 		local py=(y-1)*sy
-								
+
 		if not swed.data then -- reuse old data
 			swed.data={}
 			swed.data.hook_slide=function(hook,data)
@@ -263,11 +263,11 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 			local s=tokefindstr(i,c,"0+")
 			if not tonumber(s) then swed.fakeline=nil end
 		end
-		
+
 	-- basic container widgets
 		swed.wgutter = widget.scroll_widget:add{class="fill",hx=gx,   hy=sy*(swed.fakeline or 1),px=0, py=py}
 		swed.wtext   = widget.scroll_widget:add{class="fill",hx=sx*80,hy=sy*(swed.fakeline or 1),px=px,py=py}
-		
+
 		swed.wgutter:add{hx=gx-sx*2,hy=sy*1}
 		swed.wgutter:add{class="checkbox",hx=sx*2,hy=sy*1,color=0,text_false="+",text_true="-",data=swed.data.show}
 
@@ -277,11 +277,11 @@ wtexteditor.texteditor_refresh_swed=function(widget,swed,y)
 				swed.wtext:add{hx=sx*8,hy=sy*1}
 			end
 		end
-		
+
 		widget.scroll_widget:resize_and_layout()
 
 	end
-	
+
 --	dump(pan)
 end
 
@@ -328,7 +328,7 @@ wtexteditor.texteditor_refresh=function(widget)
 	widget.last_refresh_pan_hx=pan.hx
 
 	pan.lines={}
-	
+
 	local cx=math.floor(pan.pan_px/8)
 	local cy=math.floor(pan.pan_py/16)
 
@@ -363,7 +363,7 @@ wtexteditor.texteditor_refresh=function(widget)
 		if not x then return end
 		if not y then return end
 		if txt.brackets then
-			if	( txt.brackets.fy == y and txt.brackets.fx == x ) or 
+			if	( txt.brackets.fy == y and txt.brackets.fx == x ) or
 				( txt.brackets.ty == y and txt.brackets.tx == x ) then
 
 					ps[pl+3]=5
@@ -400,7 +400,7 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 	for y=cy+1,cy+256 do
 		local ps={}
 		local pl=0
-		
+
 		-- 16 bytes
 		local bytes={}
 		local codes={}
@@ -428,7 +428,7 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 				if not cache then break end
 			end
 		until idx>16
-		
+
 		if not widget.opts.gutter_disable then
 
 			local vn=string.format("%08X",((y-1)*16))
@@ -441,13 +441,13 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 				ps[pl+4]=2
 				pl=pl+4
 			end
-			
+
 			ps[pl+1]=32
 			ps[pl+2]=0
 			ps[pl+3]=1
 			ps[pl+4]=0
 			pl=pl+4
-			
+
 			ps[pl+1]=32
 			ps[pl+2]=0
 			ps[pl+3]=1
@@ -456,7 +456,7 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 
 		end
 		local gut=pl
-		
+
 		for x=1,16 do
 			local vn=bytes[x] and string.format("%02X",bytes[x]) or ".."
 			for i=1,2 do
@@ -485,7 +485,7 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 				pl=pl+4
 			end
 		end
-		
+
 		for x=1,16 do
 			local c=bytes[x] or 0x20
 			if c==9 then c=32 end -- tab
@@ -514,9 +514,9 @@ if widget.opts.mode=="hex" then -- display hexedit mode
 		pan.lines[wy]={text=v,s=string.char(unpack(ps)),y=y,x=cx}
 		wy=wy+1
 	end
-	
+
 else
-	
+
 	local wy=1
 	for y=cy+1,cy+256 do
 		local ps={}
@@ -544,13 +544,13 @@ else
 					ps[pl+4]=2
 					pl=pl+4
 				end
-				
+
 				ps[pl+1]=32
 				ps[pl+2]=0
 				ps[pl+3]=1
 				ps[pl+4]=0
 				pl=pl+4
-				
+
 				ps[pl+1]=32
 				ps[pl+2]=0
 				ps[pl+3]=1
@@ -563,7 +563,7 @@ else
 			if fakeline then
 
 				for i=2,fakeline do
-				
+
 					if pl==0 then
 						if not widget.opts.gutter_disable then
 							for i=1,widget.gutter do
@@ -575,7 +575,7 @@ else
 							end
 						end
 					end
-				
+
 					local s=string.char(unpack(ps))
 					pan.lines[wy]={text=v,s=s,y=y,x=sx}
 					wy=wy+1
@@ -606,7 +606,7 @@ else
 				ps[pl+2]=0
 				ps[pl+3]=1
 				ps[pl+4]=0
-				
+
 				color(ps,pl,toke)
 				hilite(ps,pl,y,i)
 
@@ -615,7 +615,7 @@ else
 				if widget.opts.word_wrap then
 					local pmax=(math.floor(pan.hx/8)-1)*4
 					if pmax > (widget.gutter*4) and pl > pmax then -- wrap
-					
+
 						local s=string.char(unpack(ps))
 						pan.lines[wy]={text=v,s=s,y=y,x=sx}
 						wy=wy+1
@@ -646,7 +646,7 @@ else
 	end
 
 end
-	
+
 end
 
 function wtexteditor.mouse(pan,act,_x,_y,keyname)
@@ -654,7 +654,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 --	if pan.meta.mouse(pan,act,_x,_y,keyname) then -- let children have precedence
 --		return
 --	end
-	
+
 	if pan.master.old_over==pan and pan.parent.daty and pan.parent.daty.class=="number" then
 		if keyname=="wheel_add" and act==-1 then
 			pan.parent.daty:dec(16*4)
@@ -666,18 +666,18 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	end
 
 	local texteditor=pan.texteditor
-	local txt=texteditor.txt	
+	local txt=texteditor.txt
 	local x,y=pan:mousexy(_x,_y)
 
 	local dx,dy=math.floor(x/8-0.5),math.floor(y/16)
-	
+
 	dx=dx-texteditor.gutter+1-texteditor.cx
 	dy=dy+1-texteditor.cy
 
 	if texteditor.opts.mode=="hex" then
-	
+
 		local ptr=(texteditor.cy+dy-1)*16
-		
+
 		if     dx<=25 then			dx=math.ceil((dx-1)/3)
 		elseif dx<=49 then			dx=math.ceil((dx-26)/3)+8
 		else						dx=math.ceil(dx-50)
@@ -685,22 +685,22 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 		if dx<0  then dx=0  end
 		if dx>16 then dx=16 end
-		
+
 		ptr=ptr+dx
 
 		dy,dx=txt.ptr_to_location(ptr)
 		dy=dy or 0
 		dx=dx or 0
-	
+
 	else
-	
+
 		local line=pan.lines[ dy ]
-		
+
 		if line then
 			dy=line.y
 			dx=line.x+dx
 		end
-		
+
 		local cache=txt.get_cache( dy )
 		if cache then
 			if dx > #cache.xc then dx=#cache.xc end
@@ -710,7 +710,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		end
 
 	end
-	
+
 	if keyname=="right" and act==1 then
 --		log("texteditor","righty clicky")
 		pan.master.later_append(function()
@@ -725,7 +725,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		end
 		word=word or ""
 		if #word>64 then word="" end -- too long
-		
+
 		local hooks=function(act,w)
 			if act=="click" then
 				if w.id=="edit_spell" then
@@ -750,7 +750,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 			spells.hooks=hooks
 			return spells
 		end
-				
+
 		local menu_data={
 			hooks=hooks,
 			inherit=true,
@@ -788,8 +788,8 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	end
 
 	if act==1 and texteditor.master.over==pan and keyname=="left" then -- click to activate
-	
-	
+
+
 		texteditor.float_cx=nil
 
 		texteditor.key_mouse=1
@@ -807,7 +807,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		texteditor.txt_dirty=true
 
 	elseif (act and act>1) and texteditor.master.over==pan and keyname=="left" then -- double click
-	
+
 		texteditor.key_mouse=act
 
 		texteditor.float_cx=nil
@@ -830,31 +830,31 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	elseif act==0 and texteditor.key_mouse then -- drag, but only while over widget
 
 		if texteditor.key_mouse and texteditor.mark_area then
-		
+
 			texteditor.float_cx=nil
 
 			if texteditor.key_mouse > 1 then -- special select
-			
+
 				txt.markauto(dy,dx,texteditor.key_mouse) -- select word
 
 				txt.markmerge(texteditor.mark_area_auto[1],texteditor.mark_area_auto[2],
 				texteditor.mark_area_auto[3],texteditor.mark_area_auto[4],txt.markget())
 
 				texteditor.mark_area={txt.markget()}
-				
+
 			else
 
 				texteditor.mark_area[3],texteditor.mark_area[4]=dy,dx
-				
+
 				txt.mark(unpack(texteditor.mark_area))
-				
+
 			end
 
 --			txt.cursor() -- this removes the marked area
 			texteditor:scroll_to_view()
 			texteditor.txt_dirty=true
 		end
-	
+
 	end
 
 end
@@ -876,21 +876,21 @@ end
 function wtexteditor.scroll_to_view(texteditor,cy,cx)
 	local txt=texteditor.txt
 	local pan=texteditor.scroll_widget.pan
-	
+
 	cx=cx or txt.cx
 	cy=cy or txt.cy
-	
+
 	local dx=cx-texteditor.cx
 	local dy=cy-texteditor.cy
-	
+
 	local hx=math.floor(texteditor.scroll_widget.pan.hx/8)-texteditor.gutter+1
 	local hy=math.floor(texteditor.scroll_widget.pan.hy/16)
-	
-	
+
+
 	if texteditor.opts.mode=="hex" then
 
 	else
-	
+
 	if dy<4 then
 
 			local d=-(dy-4)
@@ -914,7 +914,7 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 			pan.parent.datx:inc(8*(dx-(hx-edge)))
 		end
 	end
-	
+
 end
 
 function wtexteditor.msg(pan,m)
@@ -1020,7 +1020,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 
 	local cpre=function()
-		if master.keystate_shift then
+		if master.keystate=="shift" then
 			if not texteditor.mark_area then
 				texteditor.mark_area={txt.cy,txt.cx,txt.cy,txt.cx}
 			end
@@ -1030,12 +1030,12 @@ function wtexteditor.key(pan,ascii,key,act)
 		end
 	end
 	local cpost=function()
-		if master.keystate_shift and texteditor.mark_area then
+		if master.keystate=="shift" and texteditor.mark_area then
 				texteditor.mark_area[3]=txt.cy
 				texteditor.mark_area[4]=txt.cx
 				txt.mark(unpack(texteditor.mark_area))
 		end
-		
+
 		texteditor:scroll_to_view()
 	end
 
@@ -1053,7 +1053,7 @@ function wtexteditor.key(pan,ascii,key,act)
 			cpost()
 
 		elseif key=="right" then
-			
+
 			texteditor.float_cx=nil
 
 			cpre()
@@ -1062,7 +1062,7 @@ function wtexteditor.key(pan,ascii,key,act)
 			cpost()
 
 		elseif key=="up" then
-		
+
 			local cache=txt.get_cache(txt.cy)
 			if not texteditor.float_cx then
 				texteditor.float_cx = cache and cache.cx[txt.cx] or txt.cx
@@ -1094,9 +1094,9 @@ function wtexteditor.key(pan,ascii,key,act)
 			txt.cx=1
 			txt.cursor()
 			texteditor:scroll_to_view()
-		
+
 		elseif key=="end" then
-				
+
 			texteditor.float_cx=nil
 
 			txt.cx=txt.get_hx()+1
@@ -1104,7 +1104,7 @@ function wtexteditor.key(pan,ascii,key,act)
 			texteditor:scroll_to_view()
 
 		end
-		
+
 	end
 
 
@@ -1114,10 +1114,10 @@ function wtexteditor.key(pan,ascii,key,act)
 		if ascii and ascii~="" then -- not a blank string
 
 			texteditor.txt_dirty=true
-			
+
 			local c=wutf.code(ascii)
 			if c>=32 then
-			
+
 				texteditor.float_cx=nil
 
 				txt.undo.cut()
@@ -1126,7 +1126,7 @@ function wtexteditor.key(pan,ascii,key,act)
 				texteditor:scroll_to_view()
 
 			end
-			
+
 		elseif act==1 or act==0 then
 
 			texteditor.txt_dirty=true
@@ -1134,10 +1134,10 @@ function wtexteditor.key(pan,ascii,key,act)
 			if not (master.keystate=="none" or master.keystate=="shift") then -- catch any special keys
 --[[
 			if master.keystate_control then
-			
-	--print(key)		
+
+	--print(key)
 				if key=="c" then	-- copy
-				
+
 					local s=txt.undo.copy()
 
 					if s then wwin.set_clipboard(s) end
@@ -1145,13 +1145,13 @@ function wtexteditor.key(pan,ascii,key,act)
 				elseif key=="x" then	-- cut
 
 					local s=txt.undo.cut()
-					
+
 					if s then wwin.set_clipboard(s) end
 
 					texteditor:scroll_to_view()
-				
+
 				elseif key=="v" then	-- paste
-				
+
 					if wwin.has_clipboard() then -- only if something to paste
 						local s=wwin.get_clipboard()
 						txt.undo.replace(s)
@@ -1167,7 +1167,7 @@ function wtexteditor.key(pan,ascii,key,act)
 						txt.undo.redo()
 
 				end
-]]			
+]]
 			elseif key=="enter" or key=="return" then
 
 				texteditor.float_cx=nil
@@ -1183,7 +1183,7 @@ function wtexteditor.key(pan,ascii,key,act)
 				if not txt.undo.cut() then -- just delete selection?
 					txt.undo.backspace()
 				end
-				
+
 				texteditor:scroll_to_view()
 
 			elseif key=="delete" then
@@ -1193,7 +1193,7 @@ function wtexteditor.key(pan,ascii,key,act)
 				if not txt.undo.cut() then -- just delete selection?
 					txt.undo.delete()
 				end
-				
+
 				texteditor:scroll_to_view()
 
 			elseif key=="tab" then
@@ -1206,7 +1206,7 @@ function wtexteditor.key(pan,ascii,key,act)
 					if tx>1 then ty=ty+1 end
 					txt.mark(fy,0,ty,0)
 
-					if master.keystate_shift then
+					if master.keystate=="shift" then
 
 						local s=txt.undo.copy()
 						local ls=wstring.split_lines(s)
@@ -1275,9 +1275,9 @@ function wtexteditor.setup(widget,def)
 	widget.opts.gutter_disable	=	opts.gutter_disable
 	widget.opts.word_wrap		=	opts.word_wrap
 	widget.opts.mode			=	opts.mode or "txt"
-	
+
 	widget.class="texteditor"
-	
+
 	widget.update=wtexteditor.update
 	widget.layout=wtexteditor.layout
 	widget.draw=wtexteditor.draw
@@ -1297,12 +1297,12 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_widget.daty.step=16
 	widget.scroll_widget.datx.scroll=1
 	widget.scroll_widget.daty.scroll=1
-		
+
 	widget.set_txt=function(txt)
 		if widget.txt then -- remove old hooks
 			widget.txt.hooks.changed=nil
 		end
-		
+
 		widget.txt=txt
 		widget.txt.hooks.changed=function(txt) return wtexteditor.texteditor_hooks(widget,"txt_changed") end
 
@@ -1311,7 +1311,7 @@ function wtexteditor.setup(widget,def)
 
 	widget.set_txt( require("wetgenes.txt").construct() )
 
-	
+
 
 	widget.gutter=0
 	widget.ducts=0
@@ -1386,7 +1386,7 @@ function wtexteditor.setup(widget,def)
 	if widget.master.theme and widget.master.theme.name and theme[widget.master.theme.name] then
 		t=theme[widget.master.theme.name]
 	end
-	
+
 	for i,v in ipairs(t) do
 		local l=#p
 		p[l+1],p[l+2],p[l+3],p[l+4]=pack.argb_pmb4(v)

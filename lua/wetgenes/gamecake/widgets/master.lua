@@ -742,9 +742,9 @@ function wmaster.setup(widget,def)
 	master.keystate_update=function()
 		local ks=nil
 		local kd=master.keydown
-		if kd.alt   or kd.alt_l   or kd.alt_r   then  ks="alt"                          end
-		if kd.ctrl  or kd.ctrl_l  or kd.ctrl_r  then  ks=ks and ks.."_ctrl"  or "ctrl"  end
-		if kd.shift or kd.shift_l or kd.shift_r then  ks=ks and ks.."_shift" or "shift" end
+		if kd.alt     or kd.alt_l     or kd.alt_r     then  ks="alt"                          end
+		if kd.control or kd.control_l or kd.control_r then  ks=ks and ks.."_ctrl"  or "ctrl"  end
+		if kd.shift   or kd.shift_l   or kd.shift_r   then  ks=ks and ks.."_shift" or "shift" end
 		master.keystate=ks or "none"
 	end
 

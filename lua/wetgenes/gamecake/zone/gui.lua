@@ -44,12 +44,6 @@ gui.show=function(yes)
 		if oven.ups then oven.ups.enable_mouse=false end
 	end
 
-	if gui.master.over then
-		if oven.ups then oven.ups.enable_key=false end
-	else
-		if oven.ups then oven.ups.enable_key=true end
-	end
-
 	-- maybe need to flag fake mouse from joypad here, or make joypad work gui somehow?
 
 	return ret
@@ -128,6 +122,12 @@ end
 
 gui.cursor=nil
 gui.update=function()
+
+	if gui.master.over then
+		if oven.ups then oven.ups.enable_key=false end
+	else
+		if oven.ups then oven.ups.enable_key=true end
+	end
 
 	gui.master:update({hx=oven.win.width,hy=oven.win.height})
 
