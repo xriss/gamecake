@@ -1131,44 +1131,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			texteditor.txt_dirty=true
 
-			if not (master.keystate=="none" or master.keystate=="shift") then -- catch any special keys
---[[
-			if master.keystate_control then
-
-	--print(key)
-				if key=="c" then	-- copy
-
-					local s=txt.undo.copy()
-
-					if s then wwin.set_clipboard(s) end
-
-				elseif key=="x" then	-- cut
-
-					local s=txt.undo.cut()
-
-					if s then wwin.set_clipboard(s) end
-
-					texteditor:scroll_to_view()
-
-				elseif key=="v" then	-- paste
-
-					if wwin.has_clipboard() then -- only if something to paste
-						local s=wwin.get_clipboard()
-						txt.undo.replace(s)
-						texteditor:scroll_to_view()
-					end
-
-				elseif key=="z" then	-- undo
-
-						txt.undo.undo()
-
-				elseif key=="y" then	-- redo
-
-						txt.undo.redo()
-
-				end
-]]
-			elseif key=="enter" or key=="return" then
+			if key=="enter" or key=="return" then
 
 				texteditor.float_cx=nil
 
