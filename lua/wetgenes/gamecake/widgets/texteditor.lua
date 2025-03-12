@@ -794,17 +794,9 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 		texteditor.key_mouse=1
 
---		if texteditor.opts.mode=="hex" then
---			texteditor.mark_area={dy,dx,dy,dx+1}
---		else
-			texteditor.mark_area={dy,dx,dy,dx}
---		end
+		txt.mark(dy,dx,dy,dx)
 
-		txt.mark(unpack(texteditor.mark_area))
-
-		txt.cursor()
-		texteditor:scroll_to_view()
-		texteditor.txt_dirty=true
+		texteditor:mark_sync()
 
 	elseif (act and act>1) and texteditor.master.over==pan and keyname=="left" then -- double click
 
@@ -814,12 +806,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 		txt.markauto(dy,dx,act) -- select word
 
-		texteditor.mark_area={txt.markget()}
-		texteditor.mark_area_auto={txt.markget()}
-
-		txt.cursor()
-		texteditor:scroll_to_view()
-		texteditor.txt_dirty=true
+		texteditor:mark_sync()
 
 		-- auto search lowlite
 		local word=txt.copy() or ""
@@ -836,23 +823,18 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 			if texteditor.key_mouse > 1 then -- special select
 
 				txt.markauto(dy,dx,texteditor.key_mouse) -- select word
-
 				txt.markmerge(texteditor.mark_area_auto[1],texteditor.mark_area_auto[2],
-				texteditor.mark_area_auto[3],texteditor.mark_area_auto[4],txt.markget())
-
-				texteditor.mark_area={txt.markget()}
+					texteditor.mark_area_auto[3],texteditor.mark_area_auto[4],txt.markget())
 
 			else
 
 				texteditor.mark_area[3],texteditor.mark_area[4]=dy,dx
-
 				txt.mark(unpack(texteditor.mark_area))
 
 			end
 
---			txt.cursor() -- this removes the marked area
-			texteditor:scroll_to_view()
-			texteditor.txt_dirty=true
+			texteditor:mark_sync()
+
 		end
 
 	end
@@ -860,12 +842,12 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 end
 
 function wtexteditor.mark_sync(texteditor)
-
-	texteditor.mark_area={texteditor.txt.markget()}
-	texteditor.mark_area_auto={texteditor.txt.markget()}
+	local txt=texteditor.txt
+	texteditor.mark_area={txt.markget()}
+	texteditor.mark_area_auto={txt.markget()}
 	texteditor:scroll_to_view()
 	texteditor.txt_dirty=true
-
+	txt.cy , txt.cx = txt.clip(y or txt.cy,x or txt.cx)
 end
 
 function wtexteditor.scroll_to_bottom(texteditor)
@@ -984,7 +966,7 @@ function wtexteditor.msg(pan,m)
 				texteditor.opts.word_wrap=true
 				texteditor.texteditor_hooks("txt_changed")
 
-			elseif m.id=="search_next" then
+			elseif m.id=="search_next" or m.id=="search_find" then
 
 				local word=txt.copy() or ""
 				if word~="" then -- search for selected?
