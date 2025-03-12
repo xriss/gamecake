@@ -26,6 +26,9 @@
 #include <utility>
 #include <variant>
 
+#include <unistd.h>
+#include <sys/types.h>
+
 #ifdef _MSC_VER
 
 // warning level /Wall triggers a bunch of warnings in Lua headers. we can't do anything about that, so suppress them

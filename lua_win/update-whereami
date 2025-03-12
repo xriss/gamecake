@@ -1,0 +1,4 @@
+cd `dirname $0`
+
+wget https://github.com/gpakosz/whereami/raw/refs/heads/master/src/whereami.h -O ./code/whereami.h
+wget https://github.com/gpakosz/whereami/raw/refs/heads/master/src/whereami.c -O ./code/whereami.c

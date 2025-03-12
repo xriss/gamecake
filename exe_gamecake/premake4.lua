@@ -43,7 +43,7 @@ elseif ANDROID then
 -- these must be dynamic
 	links { "GLESv2" , "EGL" , "android" , "jnigraphics" , "OpenSLES" , "log"  }
 
-	links { "dl",  "c", "m", "gcc" }
+	links { "dl",  "c", "m", }
 
 	KIND{kind="SharedLib",name="libgamecake"}
 

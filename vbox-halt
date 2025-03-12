@@ -6,37 +6,23 @@ sudo echo " sudo make me a vbox "
 # this will destroy and rebuild everything
 
 cd vbox_x64
-vagrant destroy -f
-vagrant up
 vagrant halt
 cd ..
 
 cd vbox_emcc
-vagrant destroy -f
-vagrant up
 vagrant halt
 cd ..
 
 cd vbox_mingw
-vagrant destroy -f
-vagrant up
 vagrant halt
 cd ..
 
 cd vbox_android
-vagrant destroy -f
-vagrant up
 vagrant halt
 cd ..
 
 #this one has slightly borken (vagrant login issues)
-#cd vbox_osx
-#vagrant destroy -f
-#vagrant up
-#vagrant halt
-#cd ..
+cd vbox_osx
+vagrant halt
+cd ..
 
-
-# the arm box is rather slow and this forces a full rebuild...
-
-vbox_arm/install.sh

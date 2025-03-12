@@ -36,7 +36,7 @@ newplatform {
 	{
 		cc ="armv7a-linux-androideabi"..ANDROID_VERSION.."-clang",
 		cxx="armv7a-linux-androideabi"..ANDROID_VERSION.."-clang++",
-		ar ="arm-linux-androideabi-ar",
+		ar ="llvm-ar",
 		cppflags = "-MMD -fPIC",	-- should we build in thumb mode?  "-mthumb"
 	}
 }
@@ -49,7 +49,7 @@ newplatform {
 	{
 		cc ="aarch64-linux-android"..ANDROID_VERSION.."-clang",
 		cxx="aarch64-linux-android"..ANDROID_VERSION.."-clang++",
-		ar ="aarch64-linux-android-ar",
+		ar ="llvm-ar",
 		cppflags = "-MMD -fPIC",
 	}
 }
@@ -63,7 +63,7 @@ newplatform {
 	{
 		cc ="i686-linux-android"..ANDROID_VERSION.."-clang",
 		cxx="i686-linux-android"..ANDROID_VERSION.."-clang++",
-		ar ="i686-linux-android-ar",
+		ar ="llvm-ar",
 		cppflags = "-MMD -fPIC",
 	}
 }
@@ -76,7 +76,7 @@ newplatform {
 	{
 		cc ="x86_64-linux-android"..ANDROID_VERSION.."-clang",
 		cxx="x86_64-linux-android"..ANDROID_VERSION.."-clang++",
-		ar ="x86_64-linux-android-ar",
+		ar ="llvm-ar",
 		cppflags = "-MMD -fPIC",
 	}
 }

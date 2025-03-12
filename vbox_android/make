@@ -7,4 +7,4 @@ vagrant ssh -c " source /home/vagrant/andsdk-env.sh ; cd /gamecake ; build/make 
 vagrant ssh -c " source /home/vagrant/andsdk-env.sh ; cd /gamecake ; build/make --gcc=android --cpu=x32 $* "
 vagrant ssh -c " source /home/vagrant/andsdk-env.sh ; cd /gamecake ; build/make --gcc=android --cpu=x64 $* "
 
-vagrant halt
+#vagrant halt

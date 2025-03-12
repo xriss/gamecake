@@ -5,14 +5,16 @@ if [ -z "$1" ] ; then
 else
         cd $1
 fi
-echo "echo installing android sdk into $(pwd) / andsdk "
+NDKVER=26.1.10909125
+
+echo "echo installing android sdk $NDKVER into $(pwd) / andsdk "
 
 ANDSDK=$(pwd)/andsdk
 
 cat >"andsdk-env.sh" <<EOF
 
 export ANDSDK=$ANDSDK
-export PATH=$ANDSDK/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDSDK/ndk-bundle:\$PATH
+export PATH=$ANDSDK/ndk/$NDKVER/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDSDK/ndk/$NDKVER:\$PATH
 
 export ANDROID_SDK_ROOT=$ANDSDK
 
@@ -41,8 +43,8 @@ require.sh /usr/bin/javac
 require.sh /usr/lib/jvm/java-17-openjdk/bin/javac
 
 
+wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O andsdk.zip
 
-wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O andsdk.zip
 unzip andsdk.zip
 rm andsdk.zip
 
@@ -54,7 +56,7 @@ cmdline-tools/bin/sdkmanager --sdk_root=$ANDSDK --install "cmdline-tools;latest"
 rm -rf cmdline-tools
 
 
-$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "ndk-bundle"
+$ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "ndk;$NDKVER"
 $ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
 $ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "cmake;3.18.1"
 $ANDSDK/cmdline-tools/latest/bin/sdkmanager --install "emulator"
