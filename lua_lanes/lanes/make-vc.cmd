@@ -130,8 +130,8 @@ goto ERR_NOLUA
 @REM
 @set FLAGS=/O2 /LD
 
-cl %WARN% %FLAGS% /I "%LUA51%\include" /Felanes\core.dll src\*.c "%LUA_LIB%\lua5.1.lib"
-@REM cl %WARN% %FLAGS% /I "%LUA51%\include" /Felanes\core.dll src\*.c "%LUA_LIB%\lua5.1.lib" /link /NODEFAULTLIB:libcmt
+cl %WARN% %FLAGS% /I "%LUA51%\include" /Felanes\core.dll src\*.cpp "%LUA_LIB%\lua5.1.lib"
+@REM cl %WARN% %FLAGS% /I "%LUA51%\include" /Felanes\core.dll src\*.cpp "%LUA_LIB%\lua5.1.lib" /link /NODEFAULTLIB:libcmt
 
 @del lanes\core.lib
 @del lanes\core.exp
@@ -215,7 +215,7 @@ REM ---
 REM NOTE: 'timeit' is a funny thing; it does _not_ work with quoted
 REM long paths, but it _does_ work without the quotes. I have no idea,
 REM how it knows the spaces in paths apart from spaces in between
-REM parameters.
+REM arguments.
 
 :LAUNCHTEST
 timeit %LUA_EXE% tests\launchtest.lua %2 %3 %4

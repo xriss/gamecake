@@ -4,22 +4,18 @@
 -- Test program for Lua Lanes
 --
 
-io.stderr:write( "depth:" )
+io.stderr:write("depth: ")
 local function func( depth )
-    io.stderr:write(" " .. depth)
-    if depth > 10 then
+    io.stderr:write(depth .. " ")
+    if depth <= 0 then
         return "done!"
     end
 
     local lanes = require "lanes"
-    -- lanes.configure() is available only at the first require()
-    if lanes.configure then
-			lanes = lanes.configure{with_timers = false}
-		end
-    local lane= lanes.gen("*", func)( depth+1 )
+    local lane = lanes.gen("*", func)( depth-1 )
     return lane[1]
 end
 
-local v= func(0)
+local v= func(100)
 assert(v=="done!")
-io.stderr:write("\n")
+io.stderr:write("TEST OK\n")

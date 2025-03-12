@@ -2,7 +2,11 @@
 -- Test from <ehynes at dharmagaia.com>
 --
 local lanes = require "lanes"
-lanes.configure()
+
+local SLEEP = function(...)
+    local k, v = lanes.sleep(...)
+    assert(k == nil and v == "timeout")
+end
 
 local function PRINT_FMT( fmt, ... )
     io.stderr:write( string.format(fmt,...).."\n" )
@@ -36,7 +40,7 @@ local receiver2 = receiver_gen('another message')
 
 -- a function to pause and log the execution for debugging
 local function logf(s, f, ...)
-    linda:receive(1, "dummy") -- wait 1s
+    SLEEP(1)
     PRINT_FMT( "*** %s", s )
     f(...)
 end

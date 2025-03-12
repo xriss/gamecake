@@ -1,13 +1,13 @@
 
 project "lua_lanes"
 language "C"
-files { "lanes/src/**.c" , "lanes/src/**.h" }
+files { "lanes/src/**.c" , "lanes/src/**.h" , "lanes/src/**.cpp" }
 
 --if NIX then
 --defines { "USE_PTHREAD_TIMEDJOIN" }
 --end
 
-buildlinkoptions { "-Wno-implicit-function-declaration" }
+buildlinkoptions { "-std=c++20" }
 
 
 links { "lib_lua" }

@@ -547,7 +547,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local task_id_msg=task_id..":msg"
 
 	local lanes=require("lanes")
-	set_debug_threadname(task_id)
+	if lane_threadname then lane_threadname(task_id) end
 
 	local msgp=require("wetgenes.tasks_msgp")
 	local socket = require("socket")

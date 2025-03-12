@@ -1,7 +1,8 @@
 cd `dirname $0`
 
 rm -rf lanes
-git clone --depth 1 https://github.com/LuaLanes/lanes.git
+#git clone --depth 1 https://github.com/LuaLanes/lanes.git
+git clone --depth 1 https://github.com/xriss/lanes.git
 rm -rf lanes/.git
 
 ln -f lanes/src/lanes.lua ../lua/lanes.lua

@@ -606,9 +606,10 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 		repeat -- check msgs
 
 			local _,memo= oven.tasks.linda:receive( 0 , upnet.task_id_msg ) -- wait for any memos coming into this thread
-
-			if memo then
+			if type(memo)=="table" then
 				upnet.domsg(memo)
+			else -- probably a timeout userdata
+				memo=nil
 			end
 
 		until not memo

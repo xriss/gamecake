@@ -861,7 +861,8 @@ M.tasks_functions.thread_code=function(linda,task_id,task_idx)
 	while true do
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 
-		if memo then
+		if type(memo)=="table" then
+
 			local ret={result=false}
 			
 			if     memo.cmd=="add" then
@@ -912,7 +913,7 @@ M.tasks_functions.global_code=function(linda,task_id,task_idx)
 
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
-		if memo then
+		if type(memo)=="table" then
 			local ret={result=false}
 			
 			if     memo.cmd=="claim" then
@@ -1251,7 +1252,7 @@ A basic function to handle (web)socket client connection.
 M.tasks_functions.client_code=function(linda,task_id,task_idx)
 
 	local lanes=require("lanes")
-	set_debug_threadname(task_id)
+	if lane_threadname then lane_threadname(task_id) end
 
 	local wjson = lanes.require("wetgenes.json")
 	local js_eval -- function call into javascript if we are an emcc build

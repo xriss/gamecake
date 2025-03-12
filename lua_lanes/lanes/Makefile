@@ -33,20 +33,26 @@ endif
 
 # Autodetect LUA
 #
-LUA=$(word 1,$(shell which lua5.1$(_LUAEXT)) $(shell which lua51$(_LUAEXT)) lua$(_LUAEXT))
+LUA=$(word 1,$(shell which lua5.1$(_LUAEXT)) $(shell which lua51$(_LUAEXT)) $(shell which lua$(_LUAEXT)) $(shell which luajit$(_LUAEXT)))
 
 _TARGET_SO=$(_TARGET_DIR)/core.$(_SO)
+
+_UNITTEST_TARGET=$(_TARGET_DIR)/UnitTests$(_LUAEXT)
 
 _PREFIX=LUA_CPATH="./src/?.$(_SO)" LUA_PATH="./src/?.lua;./tests/?.lua"
 
 #---
-all: $(_TARGET_SO)
+all: $(_TARGET_SO) $(_UNITTEST_TARGET)
 
-$(_TARGET_SO): src/*.lua src/*.c src/*.h
+$(_TARGET_SO): src/*.lua src/*.cpp src/*.h src/*.hpp
 	cd src && $(MAKE) LUA=$(LUA)
+
+$(_UNITTEST_TARGET): $(_TARGET_SO)
+	cd unit_tests && $(MAKE)
 
 clean:
 	cd src && $(MAKE) clean
+	cd unit_tests && $(MAKE) clean
 
 debug:
 	$(MAKE) clean
@@ -72,25 +78,42 @@ rock:
 #--- Testing ---
 #
 test:
-	$(MAKE) errhangtest
-	$(MAKE) irayo_recursive
-	$(MAKE) irayo_closure
+	$(MAKE) appendud
+	$(MAKE) atexit
+	$(MAKE) atomic
 	$(MAKE) basic
 	$(MAKE) cancel
-	$(MAKE) fifo
-	$(MAKE) keeper
-	$(MAKE) timer
-	$(MAKE) atomic
 	$(MAKE) cyclic
-	$(MAKE) objects
+	$(MAKE) deadlock
+	$(MAKE) errhangtest
+	$(MAKE) error
 	$(MAKE) fibonacci
-	$(MAKE) recursive
+	$(MAKE) fifo
+	$(MAKE) finalizer
 	$(MAKE) func_is_string
-	$(MAKE) atexit
+	$(MAKE) irayo_closure
+	$(MAKE) irayo_recursive
+	$(MAKE) keeper
 	$(MAKE) linda_perf
-	$(MAKE) rupval
+	$(MAKE) manual_register
+	$(MAKE) nameof
+	$(MAKE) objects
 	$(MAKE) package
 	$(MAKE) pingpong
+	$(MAKE) recursive
+	$(MAKE) require
+	$(MAKE) rupval
+	$(MAKE) timer
+	$(MAKE) track_lanes
+
+appendud: tests/appendud.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+atexit: tests/atexit.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+atomic: tests/atomic.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
 
 basic: tests/basic.lua $(_TARGET_SO)
 	$(_PREFIX) $(LUA) $<
@@ -98,104 +121,106 @@ basic: tests/basic.lua $(_TARGET_SO)
 cancel: tests/cancel.lua $(_TARGET_SO)
 	$(_PREFIX) $(LUA) $<
 
+cyclic: tests/cyclic.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+deadlock: tests/deadlock.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+ehynes: tests/ehynes.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+errhangtest: tests/errhangtest.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+error: tests/error.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+fibonacci: tests/fibonacci.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+fifo: tests/fifo.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+finalizer: tests/finalizer.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+func_is_string: tests/func_is_string.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+hangtest: tests/hangtest.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+irayo_closure: tests/irayo_closure.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+irayo_recursive: tests/irayo_recursive.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+keeper: tests/keeper.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+launchtest: tests/launchtest.lua $(_TARGET_SO)
+	$(MAKE) _perftest ARGS="$< $(N)"
+
+linda_perf: tests/linda_perf.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+manual_register: tests/manual_register.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+nameof: tests/nameof.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+objects: tests/objects.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+package: tests/package.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+perftest: tests/perftest.lua $(_TARGET_SO)
+	$(MAKE) _perftest ARGS="$< $(N)"
+
+perftest-even: tests/perftest.lua $(_TARGET_SO)
+	$(MAKE) _perftest ARGS="$< $(N) -prio=-2"
+
+perftest-odd: tests/perftest.lua $(_TARGET_SO)
+	$(MAKE) _perftest ARGS="$< $(N) -prio=+2"
+
+perftest-plain: tests/perftest.lua $(_TARGET_SO)
+	$(MAKE) _perftest ARGS="$< $(N) -plain"
+
+pingpong: tests/pingpong.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+recursive: tests/recursive.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+require: tests/require.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+rupval: tests/rupval.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+timer: tests/timer.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+track_lanes: tests/track_lanes.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
 #
 # This tries to show out a bug which happens in lane cleanup (multicore CPU's only)
 #
 REP_ARGS=-llanes -e "print'say aaa'; for i=1,10 do print(i) end"
 repetitive: $(_TARGET_SO)
 	for i in 1 2 3 4 5 6 7 8 9 10 a b c d e f g h i j k l m n o p q r s t u v w x y z; \
-	   do $(_PREFIX) $(LUA) $(REP_ARGS); \
-    done
+		do $(_PREFIX) $(LUA) $(REP_ARGS); \
+	done
 
 repetitive1: $(_TARGET_SO)
 	$(_PREFIX) $(LUA) $(REP_ARGS)
 
-fifo: tests/fifo.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-keeper: tests/keeper.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-fibonacci: tests/fibonacci.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-timer: tests/timer.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-atomic: tests/atomic.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-cyclic: tests/cyclic.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-recursive: tests/recursive.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-hangtest: tests/hangtest.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-ehynes: tests/ehynes.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-#require: tests/require.lua $(_TARGET_SO)
-#	$(_PREFIX) $(LUA) $<
-
-objects: tests/objects.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-irayo_recursive: tests/irayo_recursive.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-irayo_closure: tests/irayo_closure.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-finalizer: tests/finalizer.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-errhangtest: tests/errhangtest.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-error-test: tests/error.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-appendud: tests/appendud.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-func_is_string: tests/func_is_string.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-linda_perf: tests/linda_perf.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-atexit: tests/atexit.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-rupval: tests/rupval.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-package: tests/package.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
-pingpong: tests/pingpong.lua $(_TARGET_SO)
-	$(_PREFIX) $(LUA) $<
-
 #---
-perftest-plain: tests/perftest.lua $(_TARGET_SO)
-	$(MAKE) _perftest ARGS="$< $(N) -plain"
-
-perftest: tests/perftest.lua $(_TARGET_SO)
-	$(MAKE) _perftest ARGS="$< $(N)"
-
-perftest-odd: tests/perftest.lua $(_TARGET_SO)
-	$(MAKE) _perftest ARGS="$< $(N) -prio=+2"
-
-perftest-even: tests/perftest.lua $(_TARGET_SO)
-	$(MAKE) _perftest ARGS="$< $(N) -prio=-2"
-
 #---
-launchtest: tests/launchtest.lua $(_TARGET_SO)
-	$(MAKE) _perftest ARGS="$< $(N)"
-
 _perftest:
 	$(_PREFIX) $(TIME) $(LUA) $(ARGS)
 
@@ -236,9 +261,9 @@ else
 	-rm -rf $(MODULE)-$(VERSION)
 	mkdir $(MODULE)-$(VERSION)
 	tar c * --exclude=.svn --exclude=.DS_Store --exclude="_*" \
-	        --exclude="*.tgz" --exclude="*.rockspec" \
-	        --exclude=lanes.dev --exclude="$(MODULE)-*" --exclude=xcode \
-		    --exclude="*.obj" --exclude="*.dll" --exclude=timeit.dat \
+			--exclude="*.tgz" --exclude="*.rockspec" \
+			--exclude=lanes.dev --exclude="$(MODULE)-*" --exclude=xcode \
+			--exclude="*.obj" --exclude="*.dll" --exclude=timeit.dat \
 	   | (cd $(MODULE)-$(VERSION) && tar x)
 	tar czvf $(MODULE)-$(VERSION).tgz $(MODULE)-$(VERSION)
 	rm -rf $(MODULE)-$(VERSION)
@@ -252,7 +277,7 @@ endif
 # 2.0.1: Running this (instant exit of the main Lua state) occasionally
 #        segfaults (1:15 or so on OS X PowerPC G4).
 #
-require: $(_TARGET_SO)
+require_module: $(_TARGET_SO)
 	$(_PREFIX) $(LUA) -e "require '$(MODULE)'"
 
 run: $(_TARGET_SO)

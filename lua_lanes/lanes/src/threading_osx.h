@@ -2,8 +2,7 @@
  * THREADING_OSX.H
  * http://yyshen.github.io/2015/01/18/binding_threads_to_cores_osx.html
  */
-#ifndef __threading_osx_h__
-#define __threading_osx_h__ 1
+#pragma once
 
 #include <mach/mach_types.h>
 #include <mach/thread_act.h>
@@ -11,14 +10,17 @@
 
 #define SYSCTL_CORE_COUNT "machdep.cpu.core_count"
 
-typedef struct cpu_set {
+struct cpu_set_t
+{
 	uint32_t count;
-} cpu_set_t;
+} ;
 
 static inline void CPU_ZERO(cpu_set_t *cs) { cs->count = 0; }
 static inline void CPU_SET(int num, cpu_set_t *cs) { cs->count |= (1 << num); }
+[[nodiscard]]
 static inline int CPU_ISSET(int num, cpu_set_t *cs) { return (cs->count & (1 << num)); }
 
+[[nodiscard]]
 int sched_getaffinity(pid_t pid, size_t cpu_size, cpu_set_t *cpu_set)
 {
 	int32_t core_count = 0;
@@ -38,6 +40,7 @@ int sched_getaffinity(pid_t pid, size_t cpu_size, cpu_set_t *cpu_set)
 	return 0;
 }
 
+[[nodiscard]]
 int pthread_setaffinity_np(pthread_t thread, size_t cpu_size, cpu_set_t *cpu_set)
 {
 	thread_port_t mach_thread;
@@ -56,4 +59,3 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpu_size, cpu_set_t *cpu_set
 	return 0;
 }
 
-#endif
