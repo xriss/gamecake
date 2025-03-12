@@ -155,7 +155,10 @@ if [[ -n "$( arg_get mingw )" ]] ; then
 	require.sh mingw-w64
 fi
 
+#looks like debian is confusing us with a 2 ?
+require.sh luajit2
 require.sh luajit
+
 require.sh lua-filesystem
 
 require.sh git
