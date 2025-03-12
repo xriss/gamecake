@@ -141,6 +141,8 @@ int lua_wetwin_get_exe_path(lua_State *l)
 {
 int length;
 char *path=0;
+
+#if ! (defined __EMSCRIPTEN__)
 	
 	length=wai_getExecutablePath(NULL, 0, NULL);
 
@@ -161,6 +163,8 @@ char *path=0;
 		return 1;
 	}
 
+#endif
+
 	return 0;
 }
 
@@ -174,6 +178,8 @@ int lua_wetwin_get_mod_path(lua_State *l)
 int length;
 char *path=0;
 	
+#if ! (defined __EMSCRIPTEN__)
+
 	length=wai_getModulePath(NULL, 0, NULL);
 
 	if(length>0)
@@ -192,6 +198,8 @@ char *path=0;
 
 		return 1;
 	}
+
+#endif
 
 	return 0;
 }
@@ -275,5 +283,11 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 	return 1;
 }
 
+
+#if ! (defined __EMSCRIPTEN__)
+
+#include "whereami.c"
+
+#endif
 
 

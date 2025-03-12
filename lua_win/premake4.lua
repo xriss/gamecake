@@ -2,7 +2,7 @@
 project "lua_win"
 language "C"
 
-files {  "code/**.c" , "code/**.h" , "all.h" }
+files {  "code/lua_win.c" }
 includedirs { "." , "code" }
 
 includedirs {
