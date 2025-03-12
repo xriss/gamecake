@@ -1,9 +1,7 @@
 cd `dirname $0`
 
-echo " make me a vbox "
-sudo echo " sudo make me a vbox "
+echo " halt all vboxs "
 
-# this will destroy and rebuild everything
 
 cd vbox_x64
 vagrant halt

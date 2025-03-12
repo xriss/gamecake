@@ -98,8 +98,8 @@ newplatform {
     description = "mingw",
 	gcc=
 	{
-		cc ="i686-w64-mingw32-gcc",
-		cxx="i686-w64-mingw32-c++",
+		cc ="i686-w64-mingw32-gcc-posix",
+		cxx="i686-w64-mingw32-c++-posix",
 		ar ="i686-w64-mingw32-ar",
 		cppflags = "-MMD -fPIC",
 	}
