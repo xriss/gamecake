@@ -66,6 +66,8 @@ elseif WINDOWS then
 		
 	links { "winmm" }
 
+	links { "psapi" }
+
 	linkoptions{ "-mconsole" }
 
 	local exe=".exe"

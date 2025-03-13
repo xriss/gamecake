@@ -755,6 +755,10 @@ static int const gs_prio_remap[] =
         //#define _PRIO_SCOPE PTHREAD_SCOPE_SYSTEM // but do we need this at all to start with?
         THREAD_PRIORITY_IDLE, THREAD_PRIORITY_LOWEST, THREAD_PRIORITY_BELOW_NORMAL, THREAD_PRIORITY_NORMAL, THREAD_PRIORITY_ABOVE_NORMAL, THREAD_PRIORITY_HIGHEST, THREAD_PRIORITY_TIME_CRITICAL
 
+#   elif defined(PLATFORM_EMSCRIPTEN)
+	// make it build
+#       define _PRIO_MODE SCHED_OTHER
+
 #   else
 #       error "Unknown OS: not implemented!"
 #   endif
@@ -900,6 +904,9 @@ void THREAD_SET_PRIORITY( int prio)
 
 void THREAD_SET_AFFINITY( unsigned int aff)
 {
+#if (defined PLATFORM_EMSCRIPTEN)
+	// not suported
+#else
     int bit = 0;
 #ifdef __NetBSD__
     cpuset_t *cpuset = cpuset_create();
@@ -926,6 +933,7 @@ void THREAD_SET_AFFINITY( unsigned int aff)
     cpuset_destroy( cpuset);
 #else
     PT_CALL( pthread_setaffinity_np( pthread_self(), sizeof(cpu_set_t), &cpuset));
+#endif
 #endif
 }
 
