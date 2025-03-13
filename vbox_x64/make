@@ -4,4 +4,4 @@ vagrant up
 
 vagrant ssh -c " cd /gamecake ; build/make --gcc=clang --cpu=x64 $* "
 
-vagrant halt
+#vagrant halt
