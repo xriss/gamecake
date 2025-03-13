@@ -21,6 +21,6 @@ cd ..
 
 #this one has slightly borken (vagrant login issues)
 cd vbox_osx
-vagrant halt
+vagrant halt --force
 cd ..
 

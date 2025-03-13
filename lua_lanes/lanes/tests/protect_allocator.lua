@@ -2,11 +2,6 @@ local print = print
 
 local lanes = require "lanes".configure{ with_timers = false, allocator="protected"}
 
-local SLEEP = function(...)
-	local k, v = lanes.sleep(...)
-	assert(k == nil and v == "timeout")
-end
-
 local linda = lanes.linda()
 
 local body = function( id_)
@@ -43,7 +38,7 @@ end
 
 -- wait a bit
 print "waiting a bit ..."
-SLEEP(2)
+linda:receive( 2, "foo")
 -- tell lanes to start running
 print "GO!"
 for i = 1, COUNT do
@@ -51,8 +46,5 @@ for i = 1, COUNT do
 end
 
 -- wait for completion
-print "wait for completion"
 linda:receive( linda.batched, "key", COUNT)
-print "waiting a bit more ..."
-SLEEP(1)
 print "SUCCESS"

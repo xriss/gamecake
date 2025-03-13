@@ -34,6 +34,6 @@ scp -F ./.vagrant.ssh.config default:gamecake/exe/osx/$LUAJIT_DYLIB ../exe/osx/$
 rm .vagrant.ssh.config
 
 
-vagrant halt --force
+#vagrant halt --force
 
 

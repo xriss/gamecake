@@ -5,11 +5,11 @@
 --
 
 local lanes = require "lanes"
+lanes.configure()
 
 local linda= lanes.linda()
 local key= "$"
 
--- TODO: test what happens when we cancel the linda
 local f= lanes.genatomic( linda, key, 5 )
 
 local v

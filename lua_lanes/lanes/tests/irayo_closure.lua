@@ -11,6 +11,7 @@ e.g. { globals = { data = 1, func = function() useclosurehere() end } }"
 ]]
 
 local lanes = require "lanes"
+lanes.configure()
 
 local function testrun()
     assert( print )

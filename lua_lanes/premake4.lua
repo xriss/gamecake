@@ -7,7 +7,7 @@ files { "lanes/src/**.c" , "lanes/src/**.h" , "lanes/src/**.cpp" }
 --defines { "USE_PTHREAD_TIMEDJOIN" }
 --end
 
-buildlinkoptions { "-std=c++20" }
+--buildlinkoptions { "-std=c++17" }
 
 
 links { "lib_lua" }

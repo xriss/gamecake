@@ -1,7 +1,7 @@
 --
 -- ARGTABLE.LUA            Copyright (c) 2007, Asko Kauppi <akauppi@gmail.com>
 --
--- Command line argument parsing
+-- Command line parameter parsing
 --
 -- NOTE: Wouldn't hurt having such a service built-in to Lua...? :P
 --
@@ -10,10 +10,10 @@ local m= {}
 
 -- tbl= argtable(...)
 --
--- Returns a table with 1..N indices being 'value' arguments, and any
--- "-flag[=xxx]" or "--flag[=xxx]" arguments set to { flag=xxx/true }.
+-- Returns a table with 1..N indices being 'value' parameters, and any
+-- "-flag[=xxx]" or "--flag[=xxx]" parameters set to { flag=xxx/true }.
 --
--- In other words, makes handling command line arguments simple. :)
+-- In other words, makes handling command line parameters simple. :)
 --
 --      15          -->     { 15 }
 --      -20         -->     { -20 }

@@ -1,27 +1,31 @@
-local RequireAModuleThatExportsGlobalFunctions = function(type_)
+
+local register_func = true
+
+local RequireAModuleThatExportsGlobalFunctions = function()
 	-- grab some module that exports C functions, this is good enough for our purpose
-	local due = require "deep_userdata_example"
+	local lfs = require "lfs"
 	-- make one of these a global
-	GlobalFunc = due.get_deep_count
+	GlobalFunc = lfs.attributes
 	-- we need to register it so that it is transferable
-	local lanes = require "lanes"
-	lanes.register( "GlobalFunc", GlobalFunc)
-	print(type_, "RequireAModuleThatExportsGlobalFunctions done:", lanes.nameof(GlobalFunc))
+	if register_func then
+		local lanes = require "lanes"
+		lanes.register( "GlobalFunc", GlobalFunc)
+	end
+	print "RequireAModuleThatExportsGlobalFunctions done"
 end
 
 
-local lanes = require "lanes".configure{on_state_create = RequireAModuleThatExportsGlobalFunctions}
+local lanes = require "lanes".configure{ with_timers = false, on_state_create = RequireAModuleThatExportsGlobalFunctions}
 
 -- load some module that adds C functions to the global space
-RequireAModuleThatExportsGlobalFunctions("main")
+RequireAModuleThatExportsGlobalFunctions()
 
 local GlobalFuncUpval = GlobalFunc
 
 -- a lane that makes use of the above global
 local f = function()
 	GlobalFuncUpval("foo")
-	print("f done:", lanes.nameof(GlobalFuncUpval))
-	return 33
+	print "f done"
 end
 
 
@@ -29,4 +33,3 @@ local g = lanes.gen( "*", f)
 
 -- generate a lane, this will transfer f, which pulls GlobalFunc.
 local h = g()
-assert(h[1] == 33)
