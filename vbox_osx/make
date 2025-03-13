@@ -6,7 +6,7 @@ LUAJIT_DYLIB=libluajit-5.1.2.dylib
 
 vagrant up
 
-if [ "$1" ==  "clean" ] ;  then
+if [ "$1" ==  "--clean" ] ;  then
  vagrant ssh -c " rm -rf gamecake  "
 fi
 
