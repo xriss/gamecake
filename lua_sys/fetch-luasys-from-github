@@ -1,0 +1,11 @@
+cd `dirname $0`
+
+rm -rf luasys
+git clone --depth 1 https://github.com/tnodir/luasys.git luasys
+rm -rf luasys/.git
+
+#ln -f lanes/src/lanes.lua ../lua/lanes.lua
+
+
+
+

@@ -1,11 +1,11 @@
 project "lua_sys"
 language "C"
-files { "./src/luasys.c" }
-includedirs { "./src" }
+files { "luasys/src/luasys.c" }
+includedirs { "luasys/src" }
 KIND{lua="sys"}
 
 project "lua_sys_sock"
 language "C"
-files { "./src/sock/sys_sock.c" }
-includedirs { "./src" }
+files { "luasys/src/sock/sys_sock.c" }
+includedirs { "luasys/src" }
 KIND{lua="sys.sock"}
