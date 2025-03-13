@@ -3,7 +3,7 @@ cd `dirname $0`
 
 ./box-up-wait
 
-if [ "$1" ==  "clean" ] ;  then
+if [ "$1" ==  "--clean" ] ;  then
  ./ssh " rm -rf gamecake "
 fi
 
