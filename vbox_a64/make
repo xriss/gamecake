@@ -1,0 +1,11 @@
+cd `dirname $0`
+
+
+./box-up-wait
+
+
+./ssh " cd /host && ./make --gcc=clang --cpu=a64 $* "
+
+
+
+#./box-down
