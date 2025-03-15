@@ -1,19 +1,33 @@
 cd `dirname $0`
 
-VNUM=`../exe/gamecake ./bump.lua`
+source ../exe_gamecake/version.lua
+V=$GAMECAKE_VERSION
+echo Starting version number $V
 
-echo $VNUM
+V1=${V%%.*}
+V3=${V##*.}
+V2=${V%.*}
+V2=${V2#*.}
+VV2=$V2
 
-git add ..
-git commit -m.
+# providing any argument will only bump revision
+#if (( $# == 1 )) ; then
+# echo bumping revision only
+#else
+ echo setting minor version to date
+ printf -v VV2 '%(%y%m%d)T' -1
+#fi
 
-git tag -a V$VNUM -m "VERSION $VNUM"
+#autobump revision
+#if (( VV2 == V2 )) ; then
+# V3=$((V3+1))
+#else
+# V3=1
+# V2=$VV2
+#fi
 
-git push origin --tags
+V2=$VV2
 
-git checkout release
-git merge master
-git push
-
-git checkout master
-git push
+V=$V1.$V2
+echo "GAMECAKE_VERSION=\"$V\"" >../exe_gamecake/version.lua
+echo Final version number $V
