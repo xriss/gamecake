@@ -1,0 +1,25 @@
+cd `dirname $0`
+
+HOSTDIR=`pwd`
+
+OPTS=" \
+	-M virt \
+	-cpu max \
+	-m 2g \
+	-smp 4 \
+  	-kernel qemu-imgs/debian11-arm64/box/vmlinuz \
+	-initrd qemu-imgs/debian11-arm64/box/initrd.img \
+	-drive file="qemu-imgs/debian11-arm64/box/sda.qcow2",id=hd,if=none,media=disk \
+	-append "console=ttyAMA0" \
+	-device virtio-scsi-device \
+	-device scsi-hd,drive=hd \
+	-nographic \
+	-nic hostfwd=tcp::5522-:22 \
+	-virtfs local,path=$HOSTDIR/..,mount_tag=host,security_model=mapped-xattr \
+	$* \
+"
+
+echo qemu-system-aarch64 $OPTS
+
+qemu-system-aarch64 $OPTS
+

@@ -389,12 +389,7 @@ elseif NIX then
 	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
 
 	if CLANG then
-		if CPU=="a32" or CPU=="a64" then
-			platforms { "clang-arm" } --hax
-		else
-			platforms { "clang" } --hax
-			platforms { "" } --hax
-		end
+		platforms { "clang" } --hax
 	end
 
 	if CPU=="x32" then
@@ -403,6 +398,11 @@ elseif NIX then
 		linkoptions{"-m32 -msse -msse2 -mtune=generic"}
 		
 	elseif CPU=="x64" then
+	
+		buildoptions{"-m64 -mtune=generic"}
+		linkoptions{"-m64 -mtune=generic"}
+	
+	elseif CPU=="a64" then
 	
 		buildoptions{"-m64 -mtune=generic"}
 		linkoptions{"-m64 -mtune=generic"}
