@@ -1,0 +1,19 @@
+cd `dirname $0`
+
+
+./box-up-wait
+
+#if [ "$1" ==  "--clean" ] ;  then
+ ./ssh " rm -rf gamecake "
+#fi
+
+git bundle create gamecake.bundle --all
+dd if=gamecake.bundle | ./ssh " dd of=gamecake.bundle status=progress "
+rm gamecake.bundle
+
+./ssh " cd gamecake && build/make $* "
+
+scp -P 5522 pi@localhost:gamecake/exe/gamecake.nix ../exe/gamecake.arm
+
+./box-down
+

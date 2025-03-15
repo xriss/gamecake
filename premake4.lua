@@ -14,7 +14,7 @@ function buildlinkoptions(t) buildoptions(t) linkoptions(t) end
 
 function newplatform(platform)
  
-    platform.cfgsuffix = "_"..platform.name
+    platform.cfgsuffix = ""
     platform.iscrosscompiler = true
 
     premake.gcc.platforms[platform.name] = platform.gcc
@@ -145,6 +145,17 @@ newplatform {
         cc = "emcc",
         cxx = "em++",
         ar= "emar",
+        cppflags = "-MMD -fPIC",
+    }
+}
+
+newplatform {
+    name = "clang-arm",
+    description = "clang",
+    gcc = {
+        cc = "clang --target=armv7-linux-gnu",
+        cxx = "clang++ --target=armv7-linux-gnu",
+        ar= "ar",
         cppflags = "-MMD -fPIC",
     }
 }
@@ -342,7 +353,7 @@ elseif OSX then
 	
 elseif NIX then
 
-	platforms { "gcc" } --hax
+	platforms { "gcc" } --default hax
 
 	buildlinkoptions {
 		"-pthread",
@@ -378,7 +389,12 @@ elseif NIX then
 	linkoptions "-Wl,-rpath=\\$$ORIGIN:."
 
 	if CLANG then
-		platforms { "clang" } --hax
+		if CPU=="a32" or CPU=="a64" then
+			platforms { "clang-arm" } --hax
+		else
+			platforms { "clang" } --hax
+			platforms { "" } --hax
+		end
 	end
 
 	if CPU=="x32" then

@@ -201,20 +201,18 @@ fi
 
 #default to release and override with debug if selected
 
-makeopts="config=release_$( arg_get gcc )"
+makeopts="config=release"
 
 if [[ -n "$( arg_get debug )" ]] ; then
 
-makeopts="config=debug_$( arg_get gcc )"
+makeopts="config=debug"
 
 fi
 
 # need to include cpu in android builds
-if [[ "$( arg_get gcc )" = "android" ]] ; then
-
-makeopts="$makeopts-$( arg_get cpu )"
-
-fi
+#if [[ "$( arg_get gcc )" = "android" ]] ; then
+#makeopts="$makeopts-$( arg_get cpu )"
+#fi
 
 
 
@@ -240,7 +238,8 @@ $PUREMAKE_LUA build/puremake --openal=$( arg_get openal ) gmake $( arg_get gcc )
 # enter that directory
 cd ${buildhere}
 
-echo $makeopts
+# what is about to happen
+echo ${buildhere} / make $makeopts
 
 if [[ -n "$( arg_get clean )" ]] ; then
 

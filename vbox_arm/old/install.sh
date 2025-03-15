@@ -8,8 +8,8 @@ echo " installing qemu "
 mkdir -p roms
 
 #update these to get a newer version
-RASPBIAN_FILE=2023-05-03-raspios-bullseye-armhf-lite
-RASPBIAN_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2023-05-03/$RASPBIAN_FILE.img.xz
+RASPBIAN_FILE=2024-11-19-raspios-bookworm-armhf-lite
+RASPBIAN_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2024-11-19/$RASPBIAN_FILE.img.xz
 
 if [ -f roms/raspbian.img ] ; then
 
@@ -83,7 +83,7 @@ EOF
 sudo rm root/etc/ssh/sshd_config.d/rename_user.conf
 
 echo " copying kernel and dtb "
-cp boot/bcm2710-rpi-3-b-plus.dtb roms/bcm2710-rpi-3-b-plus.dtb
+cp boot/bcm2711-rpi-4-b.dtb roms/bcm2711-rpi-4-b.dtb
 cp boot/kernel8.img roms/kernel8.img
 
 ./box-umount
@@ -143,6 +143,7 @@ echo " installing build dependencies"
 #./ssh " sudo rm -f /usr/lib/arm-linux-gnueabihf/libluajit*.so "
 
 
+./ssh " sudo apt-get install -y libarchive-tools "
 
 
 ./box-down

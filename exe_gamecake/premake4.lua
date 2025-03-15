@@ -145,6 +145,10 @@ elseif NIX then
 		KIND{kind="ConsoleApp",name="gamecake.x64"}
 	elseif CPU=="x32" then
 		KIND{kind="ConsoleApp",name="gamecake.x32"}
+	elseif CPU=="a32" then
+		KIND{kind="ConsoleApp",name="gamecake.a32"}
+	elseif CPU=="a64" then
+		KIND{kind="ConsoleApp",name="gamecake.a64"}
 	else
 		KIND{kind="ConsoleApp",name="gamecake.nix"}
 	end
