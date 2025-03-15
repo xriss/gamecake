@@ -1,0 +1,10 @@
+
+echo " setup qemu-imgs and dependences "
+git clone git@github.com:xriss/qemu-imgs.git
+qemu-imgs/install
+qemu-imgs/git-pull
+
+echo " FYI you will need an ed25519 public key setup for this to work "
+qemu-imgs/debian11-arm64/box-ssh-copy-id
+qemu-imgs/debian11-arm64/box-down
+
