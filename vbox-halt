@@ -19,6 +19,10 @@ cd vbox_android
 vagrant halt
 cd ..
 
+cd vbox_a64
+./box-down
+cd ..
+
 #this one has slightly borken (vagrant login issues)
 cd vbox_osx
 vagrant halt --force

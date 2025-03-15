@@ -37,6 +37,6 @@ cd ..
 #cd ..
 
 
-# the arm box is rather slow and this forces a full rebuild...
+# the arm box is rather slow and this will reset it so best to do it manually
+#vbox_a64/install.sh
 
-vbox_arm/install.sh
