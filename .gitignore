@@ -44,8 +44,8 @@ nginx/logs/*
 nginx/static/*.zip
 
 vbox_osx/test
-vbox_arm/roms
-vbox_arm/qemu-imgs
+vbox_a64/roms
+vbox_a64/qemu-imgs
 vbox_*/*.log
 
 build/premake-*
