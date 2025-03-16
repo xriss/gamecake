@@ -4,34 +4,47 @@ echo " asking for sudo password at top "
 
 sudo echo " remember to use --clean to force a full rebuild "
 
+
 echo " build windows ( win32 for life ) "
 
-../vbox_mingw/make $*
+cd ../vbox_mingw
+./make $*
+vagrant halt
 
 
 echo build emscripten
 
-../vbox_emcc/make $*
+cd ../vbox_emcc
+./make $*
+vagrant halt
 
 
-echo build 64bit ubuntu 20.04 version
+echo build 64bit debian 11
 
-../vbox_x64/make $*
+cd ../vbox_x64
+./make $*
+vagrant halt
 
 
 echo build 64bit OSX 10.14 version
 
-../vbox_osx/make $*
+cd ../vbox_osx
+./make $*
+vagrant halt
 
 
-echo build arm/raspi
+echo build a64 ( raspi 3 onwards 64bit only )
 
-../vbox_arm/make $*
+cd ../vbox_a64
+./make $*
+./box-down
 
 
 echo build android
 
-../vbox_android/make $*
+cd ../vbox_android
+./make $*
+vagrant halt
 
 
 echo show status, this should list new versions of everything we just built
