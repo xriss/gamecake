@@ -6,6 +6,8 @@ cd `dirname $0`
 
 ./ssh " cd /host && ./make --gcc=clang --cpu=a64 $* "
 
+# fix missing attribute on output
+chmod +x ../exe/gamecake.a64
 
 
 #./box-down
