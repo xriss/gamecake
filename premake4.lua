@@ -247,8 +247,9 @@ if EMCC then
 		"-s USE_PTHREADS",
 	}
 	linkoptions{
---		"-s PTHREAD_POOL_SIZE=8"
+--		"-s PTHREAD_POOL_SIZE=4",
 		"-s PROXY_TO_PTHREAD",
+		"-s OFFSCREEN_FRAMEBUFFER",
 	}
 
 
@@ -274,11 +275,13 @@ if EMCC then
 
 -- set debug/release build flags
 	configuration {"Debug"}
+		linkoptions{
+--			"-s ASSERTIONS=1",
+			"-s SAFE_HEAP=1",
+		}
 		buildlinkoptions{
 			"-O0",
 			"-g3",
---			"-s ASSERTIONS=1",
---			"-s SAFE_HEAP=3",
 --			"-s ALIASING_FUNCTION_POINTERS=0",
 --			"--minify 0",
 		}
@@ -286,6 +289,7 @@ if EMCC then
 		buildlinkoptions{
 			"-g0",
 			"-O3",
+			"-fno-exceptions",
 		}
 	configuration {}
 

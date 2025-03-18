@@ -48,7 +48,7 @@ if flavour_request then print("The requested flavour of win is "..(flavour_reque
 local hardcores={}
 for _,it in ipairs({
 		{name="sdl",		noblock=false,	posix=false,	}, -- we are probably using this one
-		{name="emcc",		noblock=true,	posix=false,	}, -- this is a slightly modified version of sdl
+		{name="emcc",		noblock=false,	posix=false,	}, -- this is a slightly modified version of sdl
 --		{name="nacl",		noblock=true,	posix=false,	}, -- the rest are old and probably broken
 --		{name="android",	noblock=false,	posix=false,	},
 --		{name="windows",	noblock=false,	posix=false,	},

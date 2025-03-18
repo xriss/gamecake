@@ -828,6 +828,18 @@ end
 
 	end
 
+--[[
+print("patchng","TexImage2D")
+code.old_TexImage2D=code.TexImage2D
+	code.TexImage2D=function(...)
+		local a={...}
+--		print("TexImage2D",a[9])
+		print(debug.traceback())
+
+		return code.old_TexImage2D(...)
+	end
+]]
+
 	code.probe_all()
 
 	return code

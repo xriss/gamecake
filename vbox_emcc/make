@@ -2,7 +2,7 @@ cd `dirname $0`
 
 vagrant up
 
-vagrant ssh -c " /gamecake/build/install-emsdk /home/vagrant/ "
+#vagrant ssh -c " /gamecake/build/install-emsdk /home/vagrant/ "
 
 vagrant ssh -c " source /home/vagrant/emsdk/emsdk_env.sh ; cd /gamecake ; build/make --gcc=emcc $* "
 

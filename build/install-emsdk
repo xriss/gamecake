@@ -24,7 +24,7 @@ require.sh lua-filesystem
 require.sh wget
 require.sh git
 require.sh cmake
-require.sh python
+require.sh python3
 
 
 
