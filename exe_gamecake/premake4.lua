@@ -27,7 +27,7 @@ if EMCC then
 	
 	links { "m" }
 	
-	KIND{kind="WindowedApp",name="gamecake.html"}
+	KIND{kind="WindowedApp",name="gamecake.js"}
 
 elseif ANDROID then 
 	
