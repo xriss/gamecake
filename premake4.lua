@@ -767,7 +767,7 @@ all_includes=all_includes or {
 	{"lua_lanes",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- emcc needs a little bit of special sauce
-	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
+--	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
 
 
 -- These are mostly linux only bindings for linux only gamecake projects...

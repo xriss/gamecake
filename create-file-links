@@ -36,7 +36,6 @@ ln -f lua/wetgenes/grd.lua    lua_grd/code/grd.lua
 ln -f lua/wetgenes/grdmap.lua lua_grd/code/grdmap.lua                 
      
 ln -f lua/wetgenes/win.lua      lua_win/code/win.lua                    
-ln -f lua/wetgenes/win/emcc.lua lua_win_emcc/code/emcc.lua              
      
 ln -f lua/wetgenes/v4l2.lua     lua_v4l2/code/v4l2.lua                  
 ln -f lua/wetgenes/chipmunk.lua lua_chipmunk/code/chipmunk.lua          
