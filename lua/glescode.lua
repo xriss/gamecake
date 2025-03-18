@@ -840,7 +840,7 @@ code.old_TexImage2D=code.TexImage2D
 	end
 ]]
 
-	code.probe_all()
+--	code.probe_all()
 
 	return code
 end

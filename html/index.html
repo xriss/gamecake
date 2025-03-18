@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Game Cake</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+	height: 100%;
+	width: 100%;
+}
+
+#canvas {
+	background-color: #000;
+	overflow:hidden;
+}
+
+</style>
+
+<script type="text/javascript" src="./gamecake_loader.js"></script>
+
+<script>
+
+;(function(callback){
+  if (document.readyState != "loading") { callback(); }
+  else { document.addEventListener("DOMContentLoaded", callback); }
+})(function(){
+
+	gamecake=gamecake_loader({urlopts:true});
+
+});
+
+</script>
+
+</head>
+<body><div id="gamecake" style="width:100%;height:100%;" ></div></body>
+</html>

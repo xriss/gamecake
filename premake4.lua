@@ -276,7 +276,7 @@ if EMCC then
 -- set debug/release build flags
 	configuration {"Debug"}
 		linkoptions{
---			"-s ASSERTIONS=1",
+			"-s ASSERTIONS=1",
 			"-s SAFE_HEAP=1",
 		}
 		buildlinkoptions{
@@ -289,7 +289,7 @@ if EMCC then
 		buildlinkoptions{
 			"-g0",
 			"-O3",
-			"-fno-exceptions",
+--			"-fno-exceptions",
 		}
 	configuration {}
 

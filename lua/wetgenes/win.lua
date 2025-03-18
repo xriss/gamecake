@@ -32,10 +32,16 @@ local posix -- set if we are a posix system
 
 local args={...}
 
+-- only SDL
 
+base.flavour="sdl"
 base.noblock=false
-base.flavour="raw"
+hardcore=require("wetgenes.win.sdl")
+base.sdl_platform=hardcore.platform
 
+
+
+--[[
 if type(args[2]=="table" ) then -- you can force a core by using a second arg to require
 	hardcore=args[2]
 elseif type(args[2]=="string" ) then
@@ -48,7 +54,7 @@ if flavour_request then print("The requested flavour of win is "..(flavour_reque
 local hardcores={}
 for _,it in ipairs({
 		{name="sdl",		noblock=false,	posix=false,	}, -- we are probably using this one
-		{name="emcc",		noblock=false,	posix=false,	}, -- this is a slightly modified version of sdl
+--		{name="emcc",		noblock=false,	posix=false,	}, -- this is a slightly modified version of sdl
 --		{name="nacl",		noblock=true,	posix=false,	}, -- the rest are old and probably broken
 --		{name="android",	noblock=false,	posix=false,	},
 --		{name="windows",	noblock=false,	posix=false,	},
@@ -72,11 +78,10 @@ end
 -- choose hardcore
 local info
 
-if flavour_request and hardcores[flavour_request] then -- force this one
+--if flavour_request and hardcores[flavour_request] then -- force this one
+--	info=hardcores[flavour_request]
+--end
 
-	info=hardcores[flavour_request]
-
-end
 
 if (not info) and hardcores.sdl and ( pcall(function() return require("SDL") end ) ) then -- prefer sdl if we have it available
 
@@ -101,17 +106,15 @@ if info then -- finish setup
 
 	end
 	
-	if info.posix then
-
-		posix=require("wetgenes.win.posix")
-	
-	end
+--	if info.posix then
+--		posix=require("wetgenes.win.posix")
+--	end
 	
 end
 
+]]
 
-log("oven","The flavour of win is "..base.flavour)
---print(hardcores)
+--log("oven","The flavour of win is "..base.flavour)
 
 win.hardcore=hardcore
 win.softcore=softcore

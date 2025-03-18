@@ -47,6 +47,15 @@ extern int wetgenes_cache_loader(lua_State *L)
 		return 1;  /* library not found in this path */
 	}
 
+	if( (data[0]=='#') && (data[1]=='!') ) // skip first #! line
+	{
+		int len=strlen(data);
+		for( const char *cp=data ; cp<data+len ; cp++)
+		{
+			if(*cp=='\n') { data=cp; break; } // start on empty first line
+		}
+	}
+
  	if( luaL_loadbuffer(L, data,strlen(data),name) != 0 )
 	{
 		luaL_error(L, "error loading module %s from file %s:\n\t%s",
