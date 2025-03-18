@@ -268,7 +268,7 @@ if EMCC then
 		"-s \"BINARYEN_METHOD='native-wasm'\"",
 		"-s EXPORTED_RUNTIME_METHODS=\"['cwrap']\"",
 		"-s WASM=1",
-		"-s EXPORTED_FUNCTIONS=\"['_main_post','_main']\"",
+		"-s EXPORTED_FUNCTIONS=\"['_main']\"",
 	}
 	
 	platforms { "emcc" }
