@@ -1,0 +1,5 @@
+git add .
+git commit -m.
+npm version patch
+./update-files
+npm publish
