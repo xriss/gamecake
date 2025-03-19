@@ -12,6 +12,8 @@ dbg/*
 build-*
 *.dbg
 
+html/*.zip
+
 android/config.sh
 android/build
 android/*/build

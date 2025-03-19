@@ -1,7 +1,7 @@
 
 // one global function to call
 
-gamecake_loader=function(opts)
+gamecake_loader=async function(opts)
 {
 	opts=opts || {};
 
@@ -67,12 +67,6 @@ console.log(opts)
 		template.innerHTML = html.trim();
 		return template.content.firstChild;
 	}
-
-	let log=(function () {
-		return function (...args) {
-			console.log(...args)
-		}
-	})();
 
 
 	let webgl_support=function()
@@ -141,7 +135,7 @@ console.log(opts)
 		window.show_progress_max=window.show_progress_max || 0;
 		if(window.show_progress_max<n) { window.show_progress_max=n; }
 		let pct=Math.floor(100*(1-(n/window.show_progress_max)));
-		log("GameCake Loading "+pct+"%");
+		console.log("GameCake Loading "+pct+"%");
 		gamecake.progress_bar.setAttribute("value",pct/100);
 		if(pct==100)
 		{
@@ -222,6 +216,21 @@ console.log(opts)
 
 	Module.arguments=opts.args
 
+	if(opts.zipfile)
+	{
+		console.log("fetching "+opts.zipfile);
+
+		Module.zfiles={}
+		console.log(unzipit)
+		let z = await unzipit.unzip(opts.zipfile)
+        for( n in z.entries )
+        {
+			let e=z.entries[n]
+			let b=await e.blob()
+			Module.zfiles[n]=new Uint8Array( await b.arrayBuffer() )
+        }
+	}
+	
 	Module.preInit = function() {
 		gamecake.status="init"
 		gamecake.FS=FS
@@ -229,12 +238,6 @@ console.log(opts)
 
 		gamecake.canvas.focus()
 		
-/*
-		let BFS = new BrowserFS.EmscriptenFS();
-  		FS.mkdir('/files');
-		FS.mount(BFS, {root: '/'}, '/files');
-*/
-
   		FS.mkdir('/files');
 		FS.mount(IDBFS, {}, '/files');
 
@@ -254,8 +257,30 @@ console.log(opts)
 
 		if(opts.cakefile)
 		{
-			log("fetching "+opts.cakefile);
+			console.log("fetching "+opts.cakefile);
 			FS.createPreloadedFile('/', "gamecake.zip", opts.cakefile, true, false);
+		}
+		if(Module.zfiles)
+		{
+			for(let n in Module.zfiles)
+			{
+				let b=Module.zfiles[n]
+				let na=n.split("/")
+				if(na.length>1)
+				{
+					let dn=""
+					for(let i=0 ; i<na.length-1 ; i++)
+					{
+						dn=dn+na[i]+"/"
+						try{ FS.mkdir( dn ) }catch(e){}
+					}
+				}
+				if(na[na.length-1]!="")
+				{
+					console.log(n,b.length)
+					FS.writeFile(n, b);
+				}
+			}
 		}
 		if( gamecake.loading_hook )
 		{
@@ -271,17 +296,6 @@ console.log(opts)
 			gamecake.loaded_hook();
 		}
 	};
-
-	Module.print=function(...args)
-	{
-		log(...args)
-	}
-
-	Module.printErr=function(...args)
-	{
-		gamecake.stop=true
-		log(...args)
-	}
 
 // the clipboard api is useless so we just read when we gain focus and hope that is enough
 	Module.window_event_focus=function(){setTimeout(gamecake.refresh_clipboard,500);}
