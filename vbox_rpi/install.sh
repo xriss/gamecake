@@ -79,11 +79,11 @@ sudo tee root/boot/userconf boot/userconf <<'EOF'
 pi:$6$rG.YX9cuM9xHE9nt$1zuuFRzSuXrEqSww2Wn7ZR.CtOsm9BIh9XfHwO.7a8sEL.QZVM2SedPJfFLTqwJcyxBHXzVA80szKuTfgDejZ1
 EOF
 
-# dissble security rename user request
+# disable security rename user request
 sudo rm root/etc/ssh/sshd_config.d/rename_user.conf
 
 echo " copying kernel and dtb "
-cp boot/bcm2711-rpi-4-b.dtb roms/bcm2711-rpi-4-b.dtb
+cp boot/bcm2710-rpi-3-b-plus.dtb roms/bcm2710-rpi-3-b-plus.dtb
 cp boot/kernel8.img roms/kernel8.img
 
 ./box-umount
@@ -106,7 +106,7 @@ done
 
 echo " updating apt info and sites"
 ./ssh " sudo apt-get update -y "
-./ssh " sudo apt-get upgrade -y "
+#./ssh " sudo apt-get upgrade -y "
 
 echo " installing packages we will need for building etc"
 ./ssh " sudo apt-get install -y aptitude "
@@ -127,34 +127,17 @@ echo " installing packages we will need for building etc"
 echo " installing build dependencies"
 ./ssh " sudo apt-get install -y libssl-dev "
 ./ssh " sudo apt-get install -y libpulse-dev "
+./ssh " sudo apt-get install -y libasound2-dev "
 
 ./ssh " sudo apt-get install -y lua5.1 "
 ./ssh " sudo apt-get install -y lua-filesystem "
 
-
-#./ssh " sudo apt-get install -y libluajit-5.1-dev " # we can not rely on this lib to be available as a static link
-#./ssh " sudo apt-get install -y libsdl2-dev " # or this one to have needed drivers enabled
-
-
 ./ssh " sudo apt-get install -y libsdl2-dev "
-#./ssh " sudo rm -f /usr/lib/arm-linux-gnueabihf/SDL*.so "
 
 ./ssh " sudo apt-get install -y libluajit-5.1-dev "
-#./ssh " sudo rm -f /usr/lib/arm-linux-gnueabihf/libluajit*.so "
 
 
 ./ssh " sudo apt-get install -y libarchive-tools "
 
 
 ./box-down
-#./box-up-wait
-
-#echo " cloaning the gamecake repo so we can use scripts from inside it"
-#./ssh " git clone -v --progress https://github.com/xriss/gamecake.git "
-
-#echo " building build dependencies luajit and sdl2"
-#./ssh " cd gamecake/build ; ./install rpi "
-
-#./box-down
-
-

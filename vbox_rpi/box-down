@@ -4,7 +4,7 @@ echo " box is shutting down "
 
 ./ssh " sudo reboot "
 
-echo " waiting and then killing any still running qemu-system-arm "
+echo " waiting and then killing any still running qemu-system-aarch64 "
 sleep 10
 killall qemu-system-aarch64
 
