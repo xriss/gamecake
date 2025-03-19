@@ -121,7 +121,6 @@ elseif NIX then
 	files { "./lua.c" }
 
 	libdirs { "/usr/local/lib/" }
-	links { "SDL2" }
 
 	if _OPTIONS["openal"]=="sys" then -- link to system openal
 
@@ -129,13 +128,15 @@ elseif NIX then
 
 	end
 
--- these two need to be dynamic
+if not MIDIJUNKIES then
+	links { "SDL2" }
 	links { "udev" }
 	links { "asound" }
-
---	links { "GL" }
 	links { "crypt" }
 	links { "pthread" }
+end
+
+
 	links { "dl" }
 	links { "m" }
 	links { "rt" }
