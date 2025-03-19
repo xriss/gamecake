@@ -131,10 +131,10 @@ elseif NIX then
 if not MIDIJUNKIES then
 	links { "SDL2" }
 	links { "udev" }
-	links { "asound" }
 	links { "crypt" }
 	links { "pthread" }
 end
+	links { "asound" }
 
 
 	links { "dl" }
