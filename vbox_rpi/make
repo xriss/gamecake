@@ -9,11 +9,7 @@ if [ "$1" ==  "--clean" ] ;  then
  ./ssh " rm -rf gamecake "
 fi
 
-git bundle create gamecake.bundle master
-dd if=gamecake.bundle | ./ssh " dd of=gamecake.bundle status=progress "
-rm gamecake.bundle
-
-./ssh " rm -rf gamecake ; git clone gamecake.bundle"
+./ssh " git clone --depth 1 https://github.com/xriss/gamecake.git || cd gamecake && git pull "
 ./ssh " cd gamecake && build/make $* "
 
 scp -P 5522 pi@localhost:gamecake/exe/gamecake.nix ../exe/gamecake.rpi
