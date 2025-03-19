@@ -9,7 +9,7 @@ if [ "$1" ==  "--clean" ] ;  then
  ./ssh " rm -rf gamecake "
 fi
 
-git bundle create gamecake.bundle maseter
+git bundle create gamecake.bundle master
 dd if=gamecake.bundle | ./ssh " dd of=gamecake.bundle status=progress "
 rm gamecake.bundle
 
