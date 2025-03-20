@@ -243,8 +243,8 @@ if EMCC then
 
 	buildlinkoptions {
 		"-pthread",
-		"-Wno-pthreads-mem-growth",
-		"-s USE_PTHREADS",
+--		"-Wno-pthreads-mem-growth",
+--		"-s USE_PTHREADS",
 	}
 	linkoptions{
 --		"-s PTHREAD_POOL_SIZE=4",
@@ -254,21 +254,21 @@ if EMCC then
 
 
 	buildlinkoptions{
-		"-Wno-long-long",
+--		"-Wno-long-long",
 --		"-Werror",
-		"-Wno-almost-asm",
+--		"-Wno-almost-asm",
 	}
 
 	linkoptions{
-		"-as-needed",
+--		"-as-needed",
 --		"--emrun",
-		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 ",
+--		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 ",
 		"-s ALLOW_MEMORY_GROWTH=1",
 --		"-s TOTAL_MEMORY=1GB",
-		"-s \"BINARYEN_METHOD='native-wasm'\"",
-		"-s EXPORTED_RUNTIME_METHODS=\"['cwrap']\"",
-		"-s WASM=1",
-		"-s EXPORTED_FUNCTIONS=\"['_main']\"",
+--		"-s \"BINARYEN_METHOD='native-wasm'\"",
+--		"-s EXPORTED_RUNTIME_METHODS=\"['cwrap']\"",
+--		"-s WASM=1",
+--		"-s EXPORTED_FUNCTIONS=\"['_main']\"",
 	}
 	
 	platforms { "emcc" }
@@ -276,8 +276,8 @@ if EMCC then
 -- set debug/release build flags
 	configuration {"Debug"}
 		linkoptions{
-			"-s ASSERTIONS=1",
-			"-s SAFE_HEAP=1",
+--			"-s ASSERTIONS=1",
+--			"-s SAFE_HEAP=1",
 		}
 		buildlinkoptions{
 			"-O0",
@@ -287,8 +287,8 @@ if EMCC then
 		}
 	configuration {"Release"}
 		buildlinkoptions{
-			"-g0",
 			"-O3",
+			"-g0",
 --			"-fno-exceptions",
 		}
 	configuration {}

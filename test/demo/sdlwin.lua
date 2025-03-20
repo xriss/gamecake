@@ -27,8 +27,11 @@ win:setFullscreen(SDL.window.Desktop)
 print("SDL.createRenderer")
 local rdr = assert( SDL.createRenderer( win, -1) )
 
+print("SDL.Renderer.setDrawColor")
 	rdr:setDrawColor(0xFF0000)
+print("SDL.Renderer.clear")
 	rdr:clear()
+print("SDL.Renderer.present")
 	rdr:present()
 	
 	
