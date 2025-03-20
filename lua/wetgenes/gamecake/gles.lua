@@ -18,6 +18,7 @@ function M.bake(oven,gles)
 		oven.gl=require("glescode").create( require("gles") , gles )
 		
 		oven.gl.GetExtensions()
+		oven.gl.probe_all()
 		
 		oven.gl.MatrixMode(oven.gl.PROJECTION)
 		oven.gl.MatrixMode(oven.gl.MODELVIEW)

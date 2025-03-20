@@ -431,9 +431,6 @@ os.exit()
 			oven.win=wwin.create(inf)
 			oven.win:context({})
 
-require("gles").GetError()
-require("gles").CheckError() -- uhm this fixes an error?
-
 --wwin.hardcore.peek(oven.win[0])
 
 			if not inf.hidden then

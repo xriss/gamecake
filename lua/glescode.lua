@@ -762,6 +762,9 @@ end
 
 	code.probe_all=function()
 	
+		code.GetError()
+		code.CheckError() -- clear errors
+
 		for n,f in pairs(code.probes) do
 
 			pcall(f)
@@ -792,6 +795,7 @@ end
 		gl.BindTexture( gl.TEXTURE_2D , tex )
 
 		gl.GetError() -- clear error
+print("probe gl.RED")
 		gl.TexImage2D(
 			gl.TEXTURE_2D,
 			0,
@@ -808,6 +812,7 @@ end
 		end
 		
 		gl.GetError() -- clear error
+print("probe gl.LUMINANCE")
 		gl.TexImage2D(
 			gl.TEXTURE_2D,
 			0,

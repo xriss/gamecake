@@ -248,10 +248,12 @@ if EMCC then
 	}
 	linkoptions{
 --		"-s PTHREAD_POOL_SIZE=4",
+--		"-rdynamic",
+		"-lidbfs.js",
+		"-v",
 		"-s PROXY_TO_PTHREAD",
 		"-s OFFSCREEN_FRAMEBUFFER",
 	}
-
 
 	buildlinkoptions{
 --		"-Wno-long-long",

@@ -18,14 +18,6 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 if EMCC then
 
 	files { "./lua.c" }
-
-	linkoptions { "-rdynamic" }
-
-	linkoptions { "-lidbfs.js" }
-	
-	linkoptions { "-v" }
-	
-	links { "m" }
 	
 	KIND{kind="WindowedApp",name="gamecake.js"}
 
