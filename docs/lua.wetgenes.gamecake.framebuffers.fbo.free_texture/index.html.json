@@ -2742,7 +2742,7 @@
    "body": "<pre><code>fbo:free_texture()\n</code></pre>\n<p>Free the rgba texture only, is safe to call if there is no rgba \nbuffer.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
-   "line": 199,
+   "line": 232,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.free_texture",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   }

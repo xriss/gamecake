@@ -2742,7 +2742,7 @@
    "body": "<pre><code>fbo:resize(w,h,d)\n</code></pre>\n<p>Change the size of our buffers, which probably means free and then\nreallocate them.</p>\n<p>The w,h,d use the same rules as framebuffer.create</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
-   "line": 404,
+   "line": 443,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.resize",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   }

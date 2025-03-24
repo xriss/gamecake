@@ -2742,7 +2742,7 @@
    "body": "<pre><code>fbo:pingpong(fbout,shadername,callback)\nframebuffers.pingpong({fbin1,fbin2},fbout,shadername,callback)\n</code></pre>\n<p>Render from one or more fbos into another using a fullscreen shader.</p>\n<p>Sometime you need to repeatedly copy a texture back and though applying \na shader, this is the function for you.</p>\n<p>The textures will be bound to tex1,tex2,tex3,etc and the uvs supplied \nin a_texcoord with a_vertex being set to screen coords so can be used \nas is.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
-   "line": 701,
+   "line": 752,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.pingpong",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   }

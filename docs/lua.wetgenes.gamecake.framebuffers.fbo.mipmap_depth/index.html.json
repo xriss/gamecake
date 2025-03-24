@@ -2742,7 +2742,7 @@
    "body": "<pre><code>fbo:mipmap_depth()\n</code></pre>\n<p>Build mipmaps for our depth buffer if it exists and set \nTEXTURE_MIN_FILTER to LINEAR_MIPMAP_LINEAR so it will be used.</p>\n<p>It is possible this may fail (hardware issues) and the \nTEXTURE_MIN_FILTER be reset to gl.NEAREST along with a flag to stop us \neven trying in the future,</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
-   "line": 580,
+   "line": 631,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.mipmap_depth",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   }
