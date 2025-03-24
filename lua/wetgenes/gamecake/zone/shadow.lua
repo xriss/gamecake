@@ -100,7 +100,9 @@ M.bake=function(oven,shadow)
 
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
-if not shadow.updated then -- we are in control
+if not shadow.updated and scene then -- we are in control
+
+		shadow.updated=false
 
 		local player=scene.get("player")
 		local camera=player and player:depend("camera")

@@ -7,6 +7,39 @@ local wwin=require("wetgenes.win")
 local grd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 
+
+-- webgl does not like smaller than 256 ???
+local function uptwopow(n)
+
+	if     n<1      then return 0
+--	elseif n<=1     then return 1
+--	elseif n<=2     then return 2
+--	elseif n<=4     then return 4
+--	elseif n<=8     then return 8
+--	elseif n<=16    then return 16
+--	elseif n<=32    then return 32
+--	elseif n<=64    then return 64
+--	elseif n<=128   then return 128
+	elseif n<=256   then return 256
+	elseif n<=512   then return 512
+	elseif n<=1024  then return 1024
+	elseif n<=2048  then return 2048
+	elseif n<=4096  then return 4096
+	elseif n<=8192  then return 8192
+	elseif n<=16384 then return 16384
+	elseif n<=32768 then return 32768
+--	elseif n<=65536 then return 65536
+	end
+	return 65536
+end
+
+local function zero_data(w,h,p)
+	return nil
+--	return string.rep("\0",w*h*p)
+end
+
+
+
 --[[#lua.wetgenes.gamecake.framebuffers
 
 Deal with FrameBuffers as render targets and textures. Color and Depth 
@@ -363,41 +396,47 @@ needed) all our openGL buffers.
 -- internal use only
 	framebuffers.initialize_depth = function(fbo)
 -- this is the only filter that *will* work on depth buffers
-			if wwin.flavour=="emcc" then -- hack, should test
+--			if wwin.flavour=="emcc" then -- hack, should test
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-			else
+--			else
 -- I really want this one, but we will need to test it works before we can use it
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-			end
+--				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+--				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+--			end
 
 			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.CLAMP_TO_EDGE)
 			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
 
 			if fbo.depth_format then
-				gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.depth_format[1], fbo.txw, fbo.txh, 0, fbo.depth_format[2], fbo.depth_format[3],nil)
+				gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.depth_format[1], fbo.txw, fbo.txh, 0, fbo.depth_format[2], fbo.depth_format[3],zero_data(fbo.txw,fbo.txh,4))
 			elseif math.abs(fbo.d)>=32 then
-				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT32F, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.FLOAT,nil)
+				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT32F, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.FLOAT,zero_data(fbo.txw,fbo.txh,4))
 			elseif math.abs(fbo.d)>=24 then
-				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT,nil)
+				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT,zero_data(fbo.txw,fbo.txh,4))
 			else
-				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT16, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT,nil)
+				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT16, fbo.txw, fbo.txh, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT,zero_data(fbo.txw,fbo.txh,2))
 			end
 	end
 
 -- internal use only
 	framebuffers.initialize_texture = function(fbo)
+
 		gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, fbo.TEXTURE_MIN_FILTER or framebuffers.TEXTURE_MIN_FILTER or gl.LINEAR)
 		gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, fbo.TEXTURE_MAG_FILTER or framebuffers.TEXTURE_MAG_FILTER or gl.LINEAR)
 		gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     fbo.TEXTURE_WRAP_S     or framebuffers.TEXTURE_WRAP_S     or gl.CLAMP_TO_EDGE)
 		gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     fbo.TEXTURE_WRAP_T     or framebuffers.TEXTURE_WRAP_T     or gl.CLAMP_TO_EDGE)
 
+
 		if fbo.texture_format then
-			gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.texture_format[1], fbo.txw, fbo.txh, 0, fbo.texture_format[2], fbo.texture_format[3],nil)
+			gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.texture_format[1], fbo.txw, fbo.txh, 0, fbo.texture_format[2], fbo.texture_format[3],zero_data(fbo.txw,fbo.txh,4))
 		else
-			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE,nil)
+			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbo.txw, fbo.txh, 0, gl.RGBA, gl.UNSIGNED_BYTE,zero_data(fbo.txw,fbo.txh,4))
 		end
+
+--		else -- I think these might be the safest defaults on low hardware GLES2 should work with this
+--			gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB565, fbo.txw, fbo.txh, 0, gl.RGB, gl.UNSIGNED_SHORT_5_6_5,string.rep("\0",fbo.txw*fbo.txh*2))
+
 	end
 
 
@@ -433,8 +472,8 @@ The w,h,d use the same rules as framebuffer.create
 				fbo.txw=w
 				fbo.txh=h
 			else
-				fbo.txw=images.uptwopow(w) -- always keep textures in power of two for simplicity (hardware probs)
-				fbo.txh=images.uptwopow(h)
+				fbo.txw=uptwopow(w) -- always keep textures in power of two for simplicity (hardware probs)
+				fbo.txh=uptwopow(h)
 			end
 			if d~=0 then
 				if not fbo.depth then
@@ -464,19 +503,31 @@ The w,h,d use the same rules as framebuffer.create
 			
 
 			if not fbo.frame then
+--print("CREATE FBO",gl.CheckFramebufferStatus(gl.FRAMEBUFFER))
 				fbo.frame=gl.GenFramebuffer()
 			end
 			gl.BindFramebuffer(gl.FRAMEBUFFER, fbo.frame)
 
 			if fbo.depth then -- optional depth
+--print("APPLY DEPTH",gl.CheckFramebufferStatus(gl.FRAMEBUFFER))
 				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, fbo.depth, 0)
 			end
 			if fbo.texture then
+--print("APPLY TEXTURE",gl.CheckFramebufferStatus(gl.FRAMEBUFFER))
 				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
 			end
 
 			if( gl.CheckFramebufferStatus(gl.FRAMEBUFFER) ~= gl.FRAMEBUFFER_COMPLETE) then
-				error("FBO error".." DEPTH="..d.." STATUS="..gl.CheckFramebufferStatus(gl.FRAMEBUFFER).." ERROR="..gl.GetError())
+				local status=gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
+				if gl.nums[status] then status=gl.nums[status]..":"..status end
+				local err=gl.GetError()
+				if gl.nums[err] then err=gl.nums[err]..":"..err end
+				print("FBO error".." SIZE="..fbo.txw.."x"..fbo.txh.."x"..d.." STATUS="..status.." ERROR="..err)
+				if  fbo.texture_format then
+					print( unpack(fbo.texture_format) )
+				end
+--			else
+--				print("FBO OK".." SIZE="..fbo.txw.."x"..fbo.txh.."x"..d)
 			end
 			
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)

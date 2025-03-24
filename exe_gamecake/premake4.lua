@@ -19,7 +19,7 @@ if EMCC then
 
 	files { "./lua.c" }
 	
-	KIND{kind="WindowedApp",name="gamecake.js"}
+	KIND{kind="WindowedApp",name="gamecake.html"}
 
 elseif ANDROID then 
 	

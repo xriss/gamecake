@@ -795,7 +795,6 @@ end
 		gl.BindTexture( gl.TEXTURE_2D , tex )
 
 		gl.GetError() -- clear error
-print("probe gl.RED")
 		gl.TexImage2D(
 			gl.TEXTURE_2D,
 			0,
@@ -812,7 +811,6 @@ print("probe gl.RED")
 		end
 		
 		gl.GetError() -- clear error
-print("probe gl.LUMINANCE")
 		gl.TexImage2D(
 			gl.TEXTURE_2D,
 			0,

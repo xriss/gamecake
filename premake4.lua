@@ -243,16 +243,19 @@ if EMCC then
 
 	buildlinkoptions {
 		"-pthread",
---		"-Wno-pthreads-mem-growth",
+		"-Wno-pthreads-mem-growth",
 --		"-s USE_PTHREADS",
 	}
 	linkoptions{
 --		"-s PTHREAD_POOL_SIZE=4",
 --		"-rdynamic",
+		"--emrun",
 		"-lidbfs.js",
 		"-v",
 		"-s PROXY_TO_PTHREAD",
 		"-s OFFSCREEN_FRAMEBUFFER",
+		"-s OFFSCREENCANVAS_SUPPORT",
+		
 	}
 
 	buildlinkoptions{
