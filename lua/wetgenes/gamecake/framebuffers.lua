@@ -8,18 +8,18 @@ local grd=require("wetgenes.grd")
 local pack=require("wetgenes.pack")
 
 
--- webgl does not like smaller than 256 ???
+-- webgl issues with smaller than 256 ???
 local function uptwopow(n)
 
 	if     n<1      then return 0
---	elseif n<=1     then return 1
---	elseif n<=2     then return 2
---	elseif n<=4     then return 4
---	elseif n<=8     then return 8
---	elseif n<=16    then return 16
---	elseif n<=32    then return 32
---	elseif n<=64    then return 64
---	elseif n<=128   then return 128
+	elseif n<=1     then return 1
+	elseif n<=2     then return 2
+	elseif n<=4     then return 4
+	elseif n<=8     then return 8
+	elseif n<=16    then return 16
+	elseif n<=32    then return 32
+	elseif n<=64    then return 64
+	elseif n<=128   then return 128
 	elseif n<=256   then return 256
 	elseif n<=512   then return 512
 	elseif n<=1024  then return 1024
@@ -396,14 +396,14 @@ needed) all our openGL buffers.
 -- internal use only
 	framebuffers.initialize_depth = function(fbo)
 -- this is the only filter that *will* work on depth buffers
---			if wwin.flavour=="emcc" then -- hack, should test
+			if wwin.flavour=="emcc" then -- hack, should test
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
---			else
+			else
 -- I really want this one, but we will need to test it works before we can use it
---				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
---				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
---			end
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+				gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+			end
 
 			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     gl.CLAMP_TO_EDGE)
 			gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     gl.CLAMP_TO_EDGE)
