@@ -201,10 +201,10 @@ resultierendes Vergnügen?
 		
 		show.update()
 		
-		if not gui.master.focus or gui.master.focus.id=="run" then -- auto focus
+
+		if not gui.master.focus  then -- auto focus text editor when no other focus
 			gui.master.set_focus( gui.master.ids.texteditor.scroll_widget.pan )
 		end
-
 		gui.master.ids.runfbo:set_dirty()
 
 

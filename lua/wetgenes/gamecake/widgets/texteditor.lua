@@ -73,7 +73,8 @@ function wtexteditor.update(texteditor)
 	return texteditor.meta.update(texteditor)
 end
 
-function wtexteditor.pan_skin( oldskin )
+function wtexteditor.pan_skin( w )
+	local oldskin=w.skin
 	return function(pan)
 		local panmtx=oven.gl.SaveMatrix() -- need to cache the current matrix for later draw call
 		local panskin=oldskin(pan)
@@ -81,7 +82,7 @@ function wtexteditor.pan_skin( oldskin )
 			panskin()
 
 			local cache=pan.texteditor.txt and pan.texteditor.txt.get_cache( pan.texteditor.txt.cy )
-			if pan.texteditor.throb and cache then -- draw the blinking cursor
+			if pan.texteditor.throb and cache and w.master.focus==w then -- draw the blinking cursor
 
 				oven.gl.PushMatrix()
 				oven.gl.LoadMatrix(panmtx)
@@ -994,7 +995,6 @@ function wtexteditor.msg(pan,m)
 end
 
 function wtexteditor.key(pan,ascii,key,act)
---print("gotkey",ascii,act,key)
 
 	local master=pan.master
 	local texteditor=pan.texteditor
@@ -1266,7 +1266,7 @@ function wtexteditor.setup(widget,def)
 
 	widget.scroll_widget.pan.pan_refresh=function(pan) return widget:texteditor_refresh() end -- we will do the scroll
 
-	widget.scroll_widget.pan.skin=wtexteditor.pan_skin( widget.scroll_widget.pan.skin )
+	widget.scroll_widget.pan.skin=wtexteditor.pan_skin( widget.scroll_widget.pan )
 	widget.scroll_widget.pan.texteditor=widget
 
 

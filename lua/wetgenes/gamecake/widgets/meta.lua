@@ -282,7 +282,6 @@ function wmeta.setup(def)
 		if widget.master.ids and widget.id then widget.master.ids[widget.id]=nil end -- remove id lookup
 		if widget.fbo then widget.fbo:clean() end
 		if widget.master.focus==widget then widget.master.set_focus(nil) end
-		if widget.master.edit ==widget then widget.master.set_focus_edit(nil) end
 		return widget
 	end
 

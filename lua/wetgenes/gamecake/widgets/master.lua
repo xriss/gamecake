@@ -147,7 +147,7 @@ function wmaster.setup(widget,def)
 --		local up=oven.ups.up(1)
 --		if up then
 
-			if not master.no_keymove then
+			if not master.no_keymove and not master.focus then
 
 				if not master.press then -- do not move when button is held down
 					local vx=0
@@ -298,12 +298,6 @@ function wmaster.setup(widget,def)
 			if w and w.class=="textedit" then
 				w:set_dirty()
 			end
-			if w~=widget.edit then
-				w=widget.edit
-				if w and w.class=="textedit" then
-					w:set_dirty()
-				end
-			end
 		end
 
 		meta.update(widget)
@@ -391,13 +385,13 @@ function wmaster.setup(widget,def)
 		end
 
 		if m.class=="text" then
-			if master.focus or m.softkey then -- fake keyboard only
+--			if master.focus or m.softkey then -- fake keyboard only
 				widget:key(m.text)
-			end
+--			end
 		elseif m.class=="key" then
-			if master.focus or m.softkey then -- fake keyboard only
+--			if master.focus or m.softkey then -- fake keyboard only
 				widget:key(nil,m.keyname,m.action)
-			end
+--			end
 		elseif m.class=="mouse" then
 			widget:mouse(m.action,m.x,m.y,m.keyname)
 		end
@@ -409,31 +403,16 @@ function wmaster.setup(widget,def)
 
 	end
 
-	function master.set_focus_edit(edit)
-		if master.edit==edit then return end -- no change
-
-		if master.edit then
-			master.edit:call_hook_later("unfocus_edit")
-			master.edit=nil
-		end
-
-		if edit then -- can set to nil
-			if edit.class=="textedit" then -- also set edit focus
-				widget.edit=edit
-				master.edit:call_hook_later("focus_edit")
-			end
-			wwin.StartTextInput()
-		else
-			wwin.StopTextInput()
-		end
-	end
-
 	function master.set_focus(focus)
 --print("focus",tostring(focus),focus and focus.class)
 		if master.focus==focus then return end -- no change
 
 		if master.focus then
 			master.focus:call_hook_later("unfocus")
+			if master.focus.class=="textedit" then
+				master.focus:call_hook_later("unfocus_edit")
+--				wwin.StopTextInput()
+			end
 			master.focus=nil
 		end
 
@@ -441,15 +420,11 @@ function wmaster.setup(widget,def)
 			if focus.can_focus then
 				master.focus=focus
 				master.focus:call_hook_later("focus")
-				if focus.class=="textedit" then -- also set edit focus
-					master.set_focus_edit(focus)
---print("edit focus",tostring(focus),focus and focus.class)
-				else
-					master.set_focus_edit(nil)
+				if master.focus.class=="textedit" then -- also set edit focus
+					master.focus:call_hook_later("focus_edit")
+--					wwin.StartTextInput()
 				end
 			end
-		else
-			master.set_focus_edit(nil)
 		end
 
 	end
@@ -465,19 +440,6 @@ function wmaster.setup(widget,def)
 			end
 
 		else
-
-			if master.edit then
-				if	key=="left" or
-					key=="right" or
-					key=="up" or
-					key=="down" or
-					key=="return" then
-					-- ignore
-				else
-					master.edit:key(ascii,key,act)
-				end
-			end
-
 		end
 
 	end
@@ -605,7 +567,6 @@ function wmaster.setup(widget,def)
 			if master.over     then master.over:set_dirty() end
 			if master.old_over then master.old_over:set_dirty() end
 			if master.over     then master.over:call_hook_later("over") end
-			if master.edit     then master.edit:call_hook_later("notover") end
 		end
 
 	end
@@ -616,7 +577,6 @@ function wmaster.setup(widget,def)
 		master.over=nil
 		master.active=nil
 		master.focus=nil
-		master.edit=nil
 		master.go_back_id=nil
 		master.go_forward_id=nil
 		master.ids={}
@@ -647,9 +607,6 @@ function wmaster.setup(widget,def)
 	end
 	function master.activate(w)
 		master.over=w
-		if w.class=="textedit" then
-			master.edit=w
-		end
 		if master.over then master.over:call_hook_later("over") end
 	end
 
@@ -770,6 +727,7 @@ function wmaster.setup(widget,def)
 			master.keystate_update()
 			local action=(master.keys[master.keystate] or {})[name]
 			if action then -- add an action message
+-- TODO focus check?
 				oven.win:push_msg({
 					class="action",
 					action=m.action,

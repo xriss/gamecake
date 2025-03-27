@@ -880,7 +880,7 @@ end
 					font.draw(line)
 					
 					if widget.class=="textedit" then -- hack
-						if widget.master.focus==widget or widget.master.edit==widget then --only draw curser in active widget
+						if widget.master.focus==widget then --only draw curser in active widget
 							if widget.master.throb>=128 then
 								local sw=font.width(widget.text:sub(1,widget.data.str_idx))
 
