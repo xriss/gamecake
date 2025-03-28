@@ -67,30 +67,31 @@ local func=function(...)
 		fun=funname,
 		fps=60,
 		icon=[[
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g g g g g 7 7 7 7 7 7 7 g g g g g g g g 
-g g g g g g g 7 7 7 g g g g g 7 7 7 g g g g g g 
-g g g g g g 7 7 g g g g g g g g g 7 7 g g g g g 
-g g g g g 7 7 g g g g g g g g g g g 7 7 g g g g 
-g g g g g 7 g g 7 7 7 7 g 7 7 7 7 g g 7 g g g g 
-g g g g 7 7 g g 7 g g 7 g 7 7 g 7 g g 7 7 g g g 
-g g g g 7 g g g 7 7 g 7 g 7 7 g 7 g g g 7 g g g 
-g g g g 7 g g g 7 g g 7 7 7 7 g 7 g g g 7 g g g 
-g g g g 7 g g g g g g g g g g g g g g g 7 g g g 
-g g g g 7 g g g g 7 7 7 g 7 g 7 g g g g 7 g g g 
-g g g g 7 g g g g 7 g g g 7 g 7 g g g g 7 g g g 
-g g g g 7 7 g g g 7 7 7 g 7 7 7 g g g 7 7 g g g 
-g g g g g 7 g g g 7 g 7 g g g 7 g g g 7 g g g g 
-g g g g g 7 7 g g 7 7 7 g g g 7 g g 7 7 g g g g 
-g g g g g g 7 7 g g g g g g g g g 7 7 g g g g g 
-g g g g g g g 7 7 7 g g g g g 7 7 7 g g g g g g 
-g g g g g g g g g 7 7 7 7 7 7 7 g g g g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
+b b b b b b b b b b b b b b b b b b b b b b b b b 
+7 7 7 7 7 7 b 7 7 7 b 7 b 7 b 7 7 7 b 7 7 7 7 7 7 
+b b b b b b b 7 b b b 7 b 7 b 7 b 7 b b b b b b b 
+b 7 7 7 7 7 b 7 7 7 b 7 b 7 b 7 b 7 b 7 7 7 7 7 b 
+b b b b b b b 7 b b b 7 b 7 b 7 b 7 b b b b b b b 
+b b 7 7 7 7 b 7 b b b 7 7 7 b 7 b 7 b 7 7 7 7 b b 
+b b b b b b b b b b b b b b b b b b b b b b b b b 
+b b b 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 b b b 
+b b b b b b b b b b b b b b b b b b b b b b b b b 
+b b b b 7 b 7 7 7 7 7 7 b 7 7 b b 7 7 b 7 b b b b 
+b b b b b b 7 7 7 7 7 7 b 7 7 b b 7 7 b b b b b b 
+b b b b b b 7 7 b b b b b 7 7 b b 7 7 b b b b b b 
+b b b b b b 7 7 b b b b b 7 7 b b 7 7 b b b b b b 
+b b b b b b 7 7 7 7 7 7 b 7 7 7 7 7 7 b b b b b b 
+b b b b b b 7 7 7 7 7 7 b 7 7 7 7 7 7 b b b b b b 
+b b b b b b 7 7 b b 7 7 b b b b b 7 7 b b b b b b 
+b b b b b b 7 7 b b 7 7 b b b b b 7 7 b b b b b b 
+b b b b b b 7 7 7 7 7 7 b 7 7 7 b 7 7 b b b b b b 
+b b b b b b 7 7 7 7 7 7 b b b b b 7 7 b b b b b b 
+b b b b b b b b b b b b b 7 7 7 b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b 7 7 7 7 7 b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b 7 7 7 b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b b b b b b b 
 ]],
 		... -- include commandline opts
 	}
