@@ -201,8 +201,9 @@ function wmaster.setup(widget,def)
 						master.set_focus(nil)
 					end
 
-					master.over:set_dirty()
-
+					if master.over then -- set focus may nave niled this
+						master.over:set_dirty()
+					end
 				end
 
 			end
