@@ -227,12 +227,16 @@ function wtextedit.key(widget,ascii,key,act)
 				f(master)
 --				print("found",n,nf,nn)
 				n=n or nf
-				master.set_focus(n)
+--				master.set_focus(n)
+				master.next_focus=n
+
 				
-				if n then wtextedit.select_all(n) end
+				
+--				if n then wtextedit.select_all(n) end
 
 			else
-				master.set_focus(nil)
+--				master.set_focus(nil)
+				master.next_focus=false
 			end
 			
 			changed=true

@@ -161,7 +161,17 @@ function wmaster.setup(widget,def)
 
 			end
 
-			if master.keyset["mouse_left"] or master.keyset["space"] or master.keyset["enter"] or master.keyset["return"] then
+			if
+				master.keyset["mouse_left"] or
+				(
+					( not master.focus ) and
+					(
+						master.keyset["space"] or
+						master.keyset["enter"] or
+						master.keyset["return"]
+					)
+				)
+			then
 
 				master.press=true
 
@@ -197,7 +207,17 @@ function wmaster.setup(widget,def)
 
 			end
 
-			if master.keyclr["mouse_left"] or master.keyclr["space"] or master.keyclr["enter"] or master.keyclr["return"] then
+			if
+				master.keyclr["mouse_left"] or
+				(
+					( not master.focus ) and
+					(
+						master.keyclr["space"] or
+						master.keyclr["enter"] or
+						master.keyclr["return"]
+					)
+				)
+			then
 
 				master.press=false
 
@@ -311,6 +331,13 @@ function wmaster.setup(widget,def)
 		-- reset flags
 		master.keyset={}
 		master.keyclr={}
+
+-- changing focus is complicated so defer it to here
+		if type(master.next_focus)~="nil" then
+			master.set_focus( master.next_focus )
+			master.next_focus=nil
+		end
+
 	end
 
 	function master.resize_and_layout(widget)
@@ -406,6 +433,7 @@ function wmaster.setup(widget,def)
 	function master.set_focus(focus)
 --print("focus",tostring(focus),focus and focus.class)
 		if master.focus==focus then return end -- no change
+		master.activate(focus)
 
 		if master.focus then
 			master.focus:call_hook_later("unfocus")
@@ -416,7 +444,7 @@ function wmaster.setup(widget,def)
 			master.focus=nil
 		end
 
-		if focus then -- can set to nil
+		if focus then -- can set to nil ( or false )
 			if focus.can_focus then
 				master.focus=focus
 				master.focus:call_hook_later("focus")
@@ -577,6 +605,7 @@ function wmaster.setup(widget,def)
 		master.over=nil
 		master.active=nil
 		master.focus=nil
+		master.next_focus=nil
 		master.go_back_id=nil
 		master.go_forward_id=nil
 		master.ids={}
@@ -606,8 +635,18 @@ function wmaster.setup(widget,def)
 
 	end
 	function master.activate(w)
+		if master.active then
+			master.active:set_dirty()
+		end
+		if master.over then
+			master.over:set_dirty()
+		end
 		master.over=w
-		if master.over then master.over:call_hook_later("over") end
+		if master.over then
+			master.over:set_dirty()
+			master.over:call_hook_later("over")
+		end
+		master.active=w
 	end
 
 --
