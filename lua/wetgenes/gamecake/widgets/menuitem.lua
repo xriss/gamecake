@@ -176,7 +176,7 @@ function wmenuitem.menu_add(widget,opts)
 
 	widget.master.request_layout=true
 --	widget.master:layout()
-	widget.master.focus=nil
+--	widget.master.focus=nil
 
 	return top
 

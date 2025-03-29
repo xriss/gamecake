@@ -197,8 +197,8 @@ function wmaster.setup(widget,def)
 
 					if master.active and master.active.can_focus then
 						master.set_focus(master.active)
-					else
-						master.set_focus(nil)
+--					else
+--						master.set_focus(nil)
 					end
 
 					if master.over then -- set focus may nave niled this
@@ -432,7 +432,8 @@ function wmaster.setup(widget,def)
 	end
 
 	function master.set_focus(focus)
---print("focus",tostring(focus),focus and focus.class)
+-- print("focus",focus and focus.class)
+
 		if master.focus==focus then return end -- no change
 		master.activate(focus)
 
