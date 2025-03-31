@@ -23,7 +23,6 @@ M.bake=function(oven,wtree)
 	
 
 wtree.refresh=function(widget,items)
-
 	if items then widget.items=items end
 	
 	local pan=widget.scroll_widget.pan
@@ -31,6 +30,7 @@ wtree.refresh=function(widget,items)
 
 	local ss=widget.master.theme.grid_size
 
+-- flatten the tree of data
 	local recurse ; recurse=function(items,depth)
 	
 		for i,it in ipairs(items) do
@@ -47,13 +47,11 @@ wtree.refresh=function(widget,items)
 				user=it,
 				color=0,
 			}
-			if it.refresh then
+			if it.refresh then -- auto replace
 				it.refresh(it,depth,opts)
 			end
-			if not opts.text then
-				opts.text=it.text and string.rep("  ",depth)..it.text
-			end
-
+			 -- override any string property of widget with item
+			for n,v in pairs(it) do if type(n)=="string" then opts[n]=v end end
 			pan:add(opts)
 
 			if it[1] then -- children

@@ -170,6 +170,8 @@ end
 
 
 function gui.refresh_tree()
+--	local w=gui.master.ids.treefile.tree_widget
+--	gui.master.ids.treefile.tree_widget:refresh()
 	gui.master.ids.treefile.tree_widget:refresh()
 end
 
@@ -250,7 +252,6 @@ function gui.hooks(act,w,dat)
 		w.master.later_append(function()
 		
 			docs.manifest(path):show()
-
 			gui.refresh_tree()
 		end)
 
@@ -505,6 +506,11 @@ local lay=
 				{id="file_save"},
 				{id="file_saveas"},
 				{id="file_saveall"},
+				{id="menu_collection",menu_data={
+					{id="collection_name"},
+					{id="collection_open"},
+					{id="collection_close"},
+				}},
 				{id="menu_theme",text="Theme",menu_data={
 					{id="theme_dark_tiny"},
 					{id="theme_dark_small"},

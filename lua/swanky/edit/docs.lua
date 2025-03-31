@@ -28,9 +28,8 @@ M.bake=function(oven,docs)
 
 	docs.list={} -- list of open documents
 
-	docs.refresh_item=function(it,depth,opts)
+	docs.refresh_item=function(it)
 			if it.name then
-
 				local loaded=docs.find(it.path)
 
 				local prefix="- "
@@ -50,9 +49,9 @@ M.bake=function(oven,docs)
 					else
 						prefix="> "
 					end
-					it.text=prefix..it.name.."/"
+					it.text=string.rep("  ",it.depth-1)..prefix..it.name.."/"
 				else
-					it.text=prefix..it.name
+					it.text=string.rep("  ",it.depth-1)..prefix..it.name
 				end
 			end
 	end

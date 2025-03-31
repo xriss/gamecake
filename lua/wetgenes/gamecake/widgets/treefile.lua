@@ -57,16 +57,18 @@ function wtreefile.refresh_items(widget,items)
 		it.mode=v.mode
 		it.path=v.path
 		it.name=v.name
+		it.depth=items.depth+1
 
 		if it.mode=="directory" then
-			it.text=it.name.."/"
+			it.text=string.rep("  ",it.depth-1)..it.name.."/"
 		else
-			it.text=it.name
+			it.text=string.rep("  ",it.depth-1)..it.name
 		end
 
 		if widget.refresh_item then
 			it.refresh=widget.refresh_item
 		end
+		if it.refresh then it:refresh() end
 
 		items[#items+1]=it
 		
@@ -79,9 +81,19 @@ function wtreefile.refresh(treefile)
 --	if not treefile.tree_widget.items.path then
 
 		local items={}
+		
+		items[1]={
+			class="textedit",
+			color=0,
+			data=treefile.data_dir,
+			clip2=true,
+			hooks=wtreefile.class_hooks,
+			id="dir",
+		}
 
 		items.path=wpath.resolve(treefile.data_dir:value())
 		items.mode="directory"
+		items.depth=0
 		wtreefile.refresh_items(treefile,items)
 
 		treefile.tree_widget:refresh(items)
@@ -106,17 +118,19 @@ function wtreefile.class_hooks(hook,widget,dat)
 	if hook=="click" and widget and widget.id=="files" then
 		local it=widget.user
 		local tree=widget ; while tree and tree.parent~=tree and tree.class~="tree" do tree=tree.parent end
-		local treefile=tree.parent.parent
+		local treefile=tree.parent
 		if treefile.class=="treefile" then -- sanity
 			if it.mode=="directory" then
 
-				if it[1] then
+				if it[1] then -- hide dir
 					for i=#it,1,-1 do
 						it[i]=nil
 					end
-				else
+				else -- show dir
 					wtreefile.refresh_items(treefile,it)
 				end
+				
+				if it.refresh then it:refresh() end
 
 				tree:refresh()
 
@@ -142,15 +156,12 @@ function wtreefile.setup(widget,def)
 
 	widget.data_dir  = widget.data_dir  or wdata.new_data({class="string",str=wpath.currentdir(),master=widget.master,hooks=wtreefile.class_hooks})
 
-	widget.split_widget=widget:add({size="full",class="split",split_axis="y",split_order=1})
+--	widget.split_widget=widget:add({size="full",class="split",split_axis="y",split_order=1})
+--	widget.dir_widget=widget.split_widget:add({hy=ss,class="textedit",color=0,data=widget.data_dir,clip2=true,hooks=wtreefile.class_hooks,id="dir"})
+--	widget.tree_widget=widget.split_widget:add({class="tree",id="files"})
 
-	widget.dir_widget=widget.split_widget:add({hy=ss,class="textedit",color=0,data=widget.data_dir,clip2=true,hooks=wtreefile.class_hooks,id="dir"})
-	widget.tree_widget=widget.split_widget:add({class="tree",id="files"})
-	
+	widget.tree_widget=widget:add({size="full",class="tree",id="files"})	
 	widget.tree_widget.class_hooks={wtreefile.class_hooks}
-
---	widget.tree_widget=widget:add({hx=widget.hx,hy=widget.hy,size="full",class="tree",id="files"})
---	widget.tree_widget.class_hooks={wtreefile.class_hooks}
 
 	widget:refresh()
 
