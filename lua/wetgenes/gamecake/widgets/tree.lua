@@ -18,6 +18,10 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.bake=function(oven,wtree)
 
+local cake=oven.cake
+local canvas=cake.canvas
+local font=canvas.font
+
 	wtree=wtree or {} 
 	wtree.modname=M.modname
 	
@@ -42,7 +46,7 @@ wtree.refresh=function(widget,items)
 				hooks=it.hooks or widget.hooks,
 				hx=ss,
 				hy=ss,
-				size="fullx",
+--				size="fullx",
 				text_align="left",
 				user=it,
 				color=0,
@@ -62,7 +66,60 @@ wtree.refresh=function(widget,items)
 		
 	end ; recurse(widget.items,0)
 	
+--	widget:layout()
+	
+	widget.scroll_widget.pan:layout()
 	widget.master.request_layout=true
+end
+
+
+-- auto resize to text contents vertically
+function wtree.pan_layout(widget)
+
+	local py=0
+	local hx=0
+	for i,v in ipairs(widget) do
+		if not v.hidden then
+		
+			v.hx=0
+			v.hy=0
+			
+			if v[1] then -- we have sub widgets, assume layout will generate a size
+				v:layout()
+			else -- use text size
+				if v.draw_text then
+					local f=v:bubble("font") or 1
+					local fs=v:bubble("text_size") or 16
+					font.set(cake.fonts.get(f))
+					font.set_size(fs,0)
+					v.hx,v.hy=v:draw_text({size=true})
+				elseif v.text then
+					local f=v:bubble("font") or 1
+					local fs=v:bubble("text_size") or 16
+					v.hy=widget.grid_size or fs*1.5
+					font.set(cake.fonts.get(f))
+					font.set_size(fs,0)
+					v.hx=font.width(v.text)+(v.hx_pad or v.hy)
+				end
+			end
+			
+			v.px=0
+			v.py=py
+			
+			py=py+v.hy
+			
+			if v.hx>hx then hx=v.hx end -- widest
+		end
+	end
+	
+	if widget.hx > hx then hx=widget.hx end -- include parent size in maximum width
+	widget.hx_max=hx
+	widget.hy_max=py
+	for i,v in ipairs(widget) do -- set all to widest
+		v.hx=hx
+	end
+
+	widget.meta.layout(widget)
 end
 
 
@@ -75,6 +132,8 @@ function wtree.setup(widget,def)
 --	widget.tree_hooks=wtree.tree_hooks -- handle clicks to expand or collapse
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,size="full",class="scroll"})
+
+	widget.scroll_widget.pan.layout=wtree.pan_layout -- custom layout
 
 	widget:refresh()
 

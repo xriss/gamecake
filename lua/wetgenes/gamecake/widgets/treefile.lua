@@ -60,9 +60,9 @@ function wtreefile.refresh_items(widget,items)
 		it.depth=items.depth+1
 
 		if it.mode=="directory" then
-			it.text=string.rep("  ",it.depth-1)..it.name.."/"
+			it.text=string.rep("  ",it.depth)..it.name.."/"
 		else
-			it.text=string.rep("  ",it.depth-1)..it.name
+			it.text=string.rep("  ",it.depth)..it.name
 		end
 
 		if widget.refresh_item then
@@ -81,7 +81,7 @@ function wtreefile.refresh(treefile)
 --	if not treefile.tree_widget.items.path then
 
 		local items={}
-		
+--[[
 		items[1]={
 			class="textedit",
 			color=0,
@@ -90,11 +90,29 @@ function wtreefile.refresh(treefile)
 			hooks=wtreefile.class_hooks,
 			id="dir",
 		}
+]]		
+		local pp=wpath.split(treefile.data_dir:value())
+		if pp[#pp]=="" then pp[#pp]=nil end -- strip trailing slash
+--		dprint(pp)
+		local path=""
+		local last=items
+		for i,v in ipairs(pp) do
+			path=path..v.."/"
+			local it={name=v,text=v.."/",path=path,mode="directory",depth=i-1,refresh=treefile.refresh_item}
+			if it.refresh then it:refresh() end
+			last[#last+1]=it
+			last=it
+		end
 
+--[[
 		items.path=wpath.resolve(treefile.data_dir:value())
 		items.mode="directory"
 		items.depth=0
 		wtreefile.refresh_items(treefile,items)
+]]
+
+--		last.depth=0
+		wtreefile.refresh_items(treefile,last)
 
 		treefile.tree_widget:refresh(items)
 
