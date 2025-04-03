@@ -663,6 +663,12 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		elseif keyname=="wheel_sub" and act==-1  then
 			pan.parent.daty:inc(16*4)
 			return
+		elseif keyname=="wheel_left" and act==-1 then
+			pan.parent.datx:dec(16*4)
+			return
+		elseif keyname=="wheel_right" and act==-1  then
+			pan.parent.datx:inc(16*4)
+			return
 		end
 	end
 
