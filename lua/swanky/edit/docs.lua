@@ -49,9 +49,9 @@ M.bake=function(oven,docs)
 					else
 						prefix="> "
 					end
-					it.text=string.rep("  ",it.depth)..prefix..it.name.."/"
+					it.text=string.rep(" ",it.depth)..prefix..it.name.."/"
 				else
-					it.text=string.rep("  ",it.depth)..prefix..it.name
+					it.text=string.rep(" ",it.depth)..prefix..it.name
 				end
 			end
 	end

@@ -30,6 +30,12 @@ function wpan.mouse(widget,act,_x,_y,keyname)
 			elseif keyname=="wheel_sub" and act==-1  then
 				widget.parent.daty:inc()
 				return
+			elseif keyname=="wheel_left" and act==-1 then
+				widget.parent.datx:dec()
+				return
+			elseif keyname=="wheel_right" and act==-1  then
+				widget.parent.datx:inc()
+				return
 			end
 		end
 	end

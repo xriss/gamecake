@@ -444,8 +444,6 @@ sdl.msg_fetch=function()
 
 		elseif	(e.type == SDL.event.MouseWheel)  then
 
---			dprint(e)
-
 			local t={}
 			t.time=sdl.time()
 			t.class="mouse"
@@ -456,7 +454,9 @@ sdl.msg_fetch=function()
 			t.dy=0
 
 			if 		e.y>0 then	t.keycode=4 t.action=-1
-			elseif 	e.y<0 then	t.keycode=5 t.action=-1 end
+			elseif 	e.y<0 then	t.keycode=5 t.action=-1
+			elseif 	e.x>0 then	t.keycode=6 t.action=-1
+			elseif 	e.x<0 then	t.keycode=7 t.action=-1 end
 
 --			dprint(t)
 

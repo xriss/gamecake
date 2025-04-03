@@ -448,6 +448,8 @@ function base.msg(w)
 				elseif m.keycode==3 then m.keyname="right"
 				elseif m.keycode==4 then m.keyname="wheel_add"
 				elseif m.keycode==5 then m.keyname="wheel_sub"
+				elseif m.keycode==6 then m.keyname="wheel_right"
+				elseif m.keycode==7 then m.keyname="wheel_left"
 				else m.keyname="mouse"
 				end
 			end

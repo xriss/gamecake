@@ -60,9 +60,9 @@ function wtreefile.refresh_items(widget,items)
 		it.depth=items.depth+1
 
 		if it.mode=="directory" then
-			it.text=string.rep("  ",it.depth)..it.name.."/"
+			it.text=string.rep(" ",it.depth)..it.name.."/"
 		else
-			it.text=string.rep("  ",it.depth)..it.name
+			it.text=string.rep(" ",it.depth)..it.name
 		end
 
 		if widget.refresh_item then
