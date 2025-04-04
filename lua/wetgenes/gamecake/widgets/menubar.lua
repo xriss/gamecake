@@ -46,7 +46,7 @@ function wmenubar.layout(widget)
 				v:layout()
 			else -- use text size
 				if v.text then
-					v.hx=(widget:sizeof_text())
+					v.hx=(v:sizeof_text())
 					v.hy=widget.hy -- use set height from parent
 				end
 			end
