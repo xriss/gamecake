@@ -42,7 +42,6 @@ wtree.refresh=function(widget,items)
 				hooks=it.hooks or widget.hooks,
 				hx=ss,
 				hy=ss,
---				size="fullx",
 				text_align="left",
 				user=it,
 				color=0,
@@ -112,11 +111,10 @@ function wtree.setup(widget,def)
 
 	widget.items={} -- items to display
 	widget.refresh=wtree.refresh -- rebuild display from items
---	widget.tree_hooks=wtree.tree_hooks -- handle clicks to expand or collapse
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,size="full",class="scroll"})
 
-	widget.scroll_widget.pan.layout=wtree.pan_layout -- custom layout
+	widget.scroll_widget.pan.layout=wtree.pan_layout -- custom pan layout
 
 	widget:refresh()
 
