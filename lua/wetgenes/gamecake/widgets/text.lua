@@ -13,14 +13,25 @@ wtext=wtext or {}
 function wtext.update(widget)
 
 	if widget.data then
-		widget.text=widget.data.str
+		if widget.text~=widget.data.str then
+			widget.text=widget.data.str
+			widget:resize()
+		end
 	end
 
 	return widget.meta.update(widget)
 end
 
+
 function wtext.draw(widget)
 	return widget.meta.draw(widget)
+end
+
+
+-- auto resize to text contents horizontally
+function wtext.resize(widget)
+	widget.hx,widget.hy=widget:sizeof_text() -- auto set to size of text
+	widget.meta.resize(widget) -- maybe changed here
 end
 
 
@@ -32,6 +43,7 @@ function wtext.setup(widget,def)
 	widget.key=wtext.key
 	widget.mouse=wtext.mouse
 	widget.update=wtext.update
+	widget.resize=wtext.resize
 	widget.draw=wtext.draw
 
 	return widget

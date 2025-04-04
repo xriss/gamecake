@@ -29,6 +29,7 @@ wmeta.classes={
 
 	["master"]=oven.rebake("wetgenes.gamecake.widgets.master"),
 	["fill"]=oven.rebake("wetgenes.gamecake.widgets.fill"),
+	["line"]=oven.rebake("wetgenes.gamecake.widgets.line"),
 	["center"]=oven.rebake("wetgenes.gamecake.widgets.center"),
 	["paragraph"]=oven.rebake("wetgenes.gamecake.widgets.paragraph"),
 	["split"]=oven.rebake("wetgenes.gamecake.widgets.split"),
