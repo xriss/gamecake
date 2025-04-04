@@ -18,10 +18,6 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 M.bake=function(oven,wtree)
 
-local cake=oven.cake
-local canvas=cake.canvas
-local font=canvas.font
-
 	wtree=wtree or {} 
 	wtree.modname=M.modname
 	
@@ -87,20 +83,7 @@ function wtree.pan_layout(widget)
 			if v[1] then -- we have sub widgets, assume layout will generate a size
 				v:layout()
 			else -- use text size
-				if v.draw_text then
-					local f=v:bubble("font") or 1
-					local fs=v:bubble("text_size") or 16
-					font.set(cake.fonts.get(f))
-					font.set_size(fs,0)
-					v.hx,v.hy=v:draw_text({size=true})
-				elseif v.text then
-					local f=v:bubble("font") or 1
-					local fs=v:bubble("text_size") or 16
-					v.hy=widget.grid_size or fs*1.5
-					font.set(cake.fonts.get(f))
-					font.set_size(fs,0)
-					v.hx=font.width(v.text)+(v.hx_pad or v.hy)
-				end
+				v.hx,v.hy=v:sizeof_text()
 			end
 			
 			v.px=0

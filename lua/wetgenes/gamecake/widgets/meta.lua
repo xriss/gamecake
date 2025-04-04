@@ -16,6 +16,10 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 function M.bake(oven,wmeta)
 wmeta=wmeta or {}
 
+local cake=oven.cake
+local canvas=cake.canvas
+local font=canvas.font
+
 local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
 -- available widget classes
@@ -668,6 +672,27 @@ function wmeta.setup(def)
 		widget:build_m4()
 --exit()
 	end
+
+-- return the hx,hy size of this widget needed to fit its .text, may be 0,0
+	function meta.sizeof_text(widget)
+		local hx,hy=0,0
+		if widget.draw_text then
+			local f=widget:bubble("font") or 1
+			local fs=widget:bubble("text_size") or 16
+			font.set(cake.fonts.get(f))
+			font.set_size(fs,0)
+			hx,hy=widget:draw_text({size=true})
+		elseif widget.text then
+			local f=widget:bubble("font") or 1
+			local fs=widget:bubble("text_size") or 16
+			hy=widget:bubble("grid_size") or widget.master.theme.grid_size
+			font.set(cake.fonts.get(f))
+			font.set_size(fs,0)
+			hx=font.width(widget.text)+(widget.hx_pad or widget.hy)
+		end
+		return hx,hy
+	end
+
 
 end
 
