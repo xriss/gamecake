@@ -45,14 +45,15 @@ function wtreefile.refresh_item(item,widget)
 	item.line_indent=item.line:add({class="text",text=(" "):rep(item.depth)})
 	if item.mode=="directory" then
 		if item.expanded then
-			item.line_prefix=item.line:add({class="text",text="< "})
+			item.line_prefix=item.line:add({class="text",text="= "})
 		else
 			item.line_prefix=item.line:add({class="text",text="> "})
 		end
+		item.line_text=item.line:add({class="text",text=item.name.."/"})
 	else
 		item.line_prefix=item.line:add({class="text",text="- "})
+		item.line_text=item.line:add({class="text",text=item.name})
 	end
-	item.line_text=item.line:add({class="text",text=item.text})
 
 end
 
@@ -66,8 +67,11 @@ end
 
 function wtreefile.item_empty_dir(item)
 	item.expanded=false
-	while #item > 0 do
-		item[#item]=nil	-- remove item
+	for i=#item,1,-1 do
+		local it=item[i]
+		if not it.keep then
+			table.remove(item,i)	-- remove item
+		end
 	end
 end
 
@@ -85,14 +89,32 @@ function wtreefile.item_fill_dir(item)
 				if t then
 					t.name=n
 					t.path=wpath.resolve(item.path,t.name)
-					t.prefix=""
 					files[#files+1]=t
 				end
 			end
 		end
 	end)
 	
-	table.sort(files,function(a,b)
+	for i,file in ipairs(files) do
+	
+		local it
+		for _,v in ipairs(item) do
+			if v.name==file.name then it=v break end -- already have this one
+		end
+		if not it then -- does not already exist
+			local it={}
+			it.mode=file.mode
+			it.path=file.path
+			it.name=file.name
+			it.depth=item.depth+1
+			it.refresh=wtreefile.refresh_item
+
+			item[#item+1]=it
+		end
+
+	end
+
+	table.sort(item,function(a,b)
 		if a.mode == b.mode then
 			return b.name:lower() > a.name:lower()
 		else
@@ -100,23 +122,6 @@ function wtreefile.item_fill_dir(item)
 		end
 	end)
 
-	for i,v in ipairs(files) do
-		local it={}
-
-		it.mode=v.mode
-		it.path=v.path
-		it.name=v.name
-		it.depth=item.depth+1
-		it.refresh=wtreefile.refresh_item
-
-		if it.mode=="directory" then
-			it.text=it.name.."/"
-		else
-			it.text=it.name
-		end
-
-		item[#item+1]=it
-	end
 
 end
 
@@ -137,6 +142,7 @@ function wtreefile.refresh(treefile)
 			mode="directory",
 			depth=i-1,
 			refresh=wtreefile.refresh_item,
+			keep=true, -- no not remove when collapsed
 		}
 		if it.refresh then it:refresh(treefile.tree_widget) end
 		last[#last+1]=it
