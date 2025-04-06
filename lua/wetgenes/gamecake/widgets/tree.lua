@@ -21,47 +21,71 @@ M.bake=function(oven,wtree)
 	wtree=wtree or {} 
 	wtree.modname=M.modname
 	
-
-wtree.refresh=function(widget,items)
-	if items then widget.items=items end
+-- refresh any item
+wtree.refresh_item=function(widget,item)
 	
+	if item.refresh then -- this must update or provide a .line output
+		item:refresh(widget)
+	else
+		local ss=widget.master.theme.grid_size		
+		local opts={
+			class="line",
+			id=item.id or widget.id,
+			class_hooks=item.class_hooks or widget.class_hooks,
+			hooks=item.hooks or widget.hooks,
+			hx=ss,
+			hy=ss,
+			text_align="left",
+			user=item,
+			color=0,
+			solid=true,
+		}
+
+		item.line=widget:create(opts)
+		item.line_text=item.line:add({class="text",text=item.text})
+	end
+
+	for _,it in ipairs(item) do
+		it.parent=item
+		widget:refresh_item(it)
+	end
+end
+
+-- set / refresh top level list of items ( which is not itself an item )
+wtree.refresh_items=function(widget,items)
+	if items then widget.items=items end
+	items=widget.items
+	
+	for _,item in ipairs(items) do
+		item.parent=items
+		widget:refresh_item(item)
+	end
+
+end
+
+wtree.refresh=function(widget)
+	
+	local ss=widget.master.theme.grid_size
 	local pan=widget.scroll_widget.pan
+
 	pan:remove_all()
 
-	local ss=widget.master.theme.grid_size
-
--- flatten the tree of data
-	local recurse ; recurse=function(items,depth)
-	
-		for i,it in ipairs(items) do
-		
-			local opts={
-				class="button",
-				id=it.id or widget.id,
-				class_hooks=it.class_hooks or widget.class_hooks,
-				hooks=it.hooks or widget.hooks,
-				hx=ss,
-				hy=ss,
-				text_align="left",
-				user=it,
-				color=0,
-			}
-			if it.refresh then -- auto replace
-				it.refresh(it,depth,opts)
+-- run refresh_item on each item and add item.line to the display
+	if widget.items then
+		widget:refresh_items(widget.items)
+		local recurse
+		recurse=function(parent)
+			for _,item in ipairs(parent) do
+				if item.line then -- add this line widget
+					pan:insert(item.line)
+				end
+				if item[1] then -- children of this item in numerical keys
+					recurse(item)
+				end
 			end
-			 -- override any string property of widget with item
-			for n,v in pairs(it) do if type(n)=="string" then opts[n]=v end end
-			pan:add(opts)
-
-			if it[1] then -- children
-				recurse(it,depth+1)
-			end
-		
 		end
-		
-	end ; recurse(widget.items,0)
-	
---	widget:layout()
+		recurse(widget.items) -- this is just a list not an item itself
+	end
 	
 	widget.scroll_widget.pan:layout()
 	widget.master.request_layout=true
@@ -79,15 +103,14 @@ function wtree.pan_layout(widget)
 			v.hx=0
 			v.hy=0
 			
-			if v[1] then -- we have sub widgets, assume layout will generate a size
-				v:layout()
+			if v[1] then -- we have sub widgets so ask for size
+				v:resize()
 			else -- use text size
 				v.hx,v.hy=v:sizeof_text()
 			end
 			
 			v.px=0
 			v.py=py
-			
 			py=py+v.hy
 			
 			if v.hx>hx then hx=v.hx end -- widest
@@ -115,6 +138,11 @@ function wtree.setup(widget,def)
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,size="full",class="scroll"})
 
 	widget.scroll_widget.pan.layout=wtree.pan_layout -- custom pan layout
+	
+
+-- update item info
+	widget.refresh_items=wtree.refresh_items
+	widget.refresh_item=wtree.refresh_item
 
 	widget:refresh()
 

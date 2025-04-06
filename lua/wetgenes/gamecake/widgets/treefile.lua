@@ -24,18 +24,67 @@ M.bake=function(oven,wtreefile)
 	
 	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
 	local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
-	
 
-function wtreefile.refresh_items(widget,items)
+function wtreefile.refresh_item(item,widget)
+
+	local ss=widget.master.theme.grid_size		
+	local opts={
+		class="line",
+		id=item.id or widget.id,
+		class_hooks=item.class_hooks or widget.class_hooks,
+		hooks=item.hooks or widget.hooks,
+		hx=ss,
+		hy=ss,
+		text_align="left",
+		user=item,
+		color=0,
+		solid=true,
+	}
+
+	item.line=widget:create(opts)
+	item.line_indent=item.line:add({class="text",text=(" "):rep(item.depth)})
+	if item.mode=="directory" then
+		if item.expanded then
+			item.line_prefix=item.line:add({class="text",text="< "})
+		else
+			item.line_prefix=item.line:add({class="text",text="> "})
+		end
+	else
+		item.line_prefix=item.line:add({class="text",text="- "})
+	end
+	item.line_text=item.line:add({class="text",text=item.text})
+
+end
+
+function wtreefile.item_toggle_dir(item)
+	if item.expanded then
+		wtreefile.item_empty_dir(item)
+	else
+		wtreefile.item_fill_dir(item)
+	end
+end
+
+function wtreefile.item_empty_dir(item)
+	item.expanded=false
+	while #item > 0 do
+		item[#item]=nil	-- remove item
+	end
+end
+
+function wtreefile.item_fill_dir(item)
+
+	wtreefile.item_empty_dir(item)
+
+	item.expanded=true	
 
 	local files={}
 	pcall( function()
-		for n in lfs.dir(items.path) do
+		for n in lfs.dir(item.path) do
 			if n~="." and n~=".." then
-				local t=lfs.attributes(wpath.resolve(items.path,n))
+				local t=lfs.attributes(wpath.resolve(item.path,n))
 				if t then
 					t.name=n
-					t.path=wpath.resolve(items.path,t.name)
+					t.path=wpath.resolve(item.path,t.name)
 					t.prefix=""
 					files[#files+1]=t
 				end
@@ -57,69 +106,49 @@ function wtreefile.refresh_items(widget,items)
 		it.mode=v.mode
 		it.path=v.path
 		it.name=v.name
-		it.depth=items.depth+1
+		it.depth=item.depth+1
+		it.refresh=wtreefile.refresh_item
 
 		if it.mode=="directory" then
-			it.text=string.rep(" ",it.depth)..it.name.."/"
+			it.text=it.name.."/"
 		else
-			it.text=string.rep(" ",it.depth)..it.name
+			it.text=it.name
 		end
 
-		if widget.refresh_item then
-			it.refresh=widget.refresh_item
-		end
-		if it.refresh then it:refresh() end
-
-		items[#items+1]=it
-		
+		item[#item+1]=it
 	end
 
 end
 
 function wtreefile.refresh(treefile)
 
---	if not treefile.tree_widget.items.path then
-
-		local items={}
---[[
-		items[1]={
-			class="textedit",
-			color=0,
-			data=treefile.data_dir,
-			clip2=true,
-			hooks=wtreefile.class_hooks,
-			id="dir",
-		}
-]]		
-		local pp=wpath.split(treefile.data_dir:value())
-		if pp[#pp]=="" then pp[#pp]=nil end -- strip trailing slash
+	local items={}
+	local pp=wpath.split(treefile.data_dir:value())
+	if pp[#pp]=="" then pp[#pp]=nil end -- strip trailing slash
 --		dprint(pp)
-		local path=""
-		local last=items
-		for i,v in ipairs(pp) do
-			path=path..v.."/"
-			local it={name=v,text=v.."/",path=path,mode="directory",depth=i-1,refresh=treefile.refresh_item}
-			if it.refresh then it:refresh() end
-			last[#last+1]=it
-			last=it
-		end
-
---[[
-		items.path=wpath.resolve(treefile.data_dir:value())
-		items.mode="directory"
-		items.depth=0
-		wtreefile.refresh_items(treefile,items)
-]]
-
---		last.depth=0
-		wtreefile.refresh_items(treefile,last)
-
-		treefile.tree_widget:refresh(items)
-
---	end
-
+	local path=""
+	local last=items
+	for i,v in ipairs(pp) do
+		path=path..v.."/"
+		local it={
+			name=v,
+			text=v.."/",
+			path=path,
+			mode="directory",
+			depth=i-1,
+			refresh=wtreefile.refresh_item,
+		}
+		if it.refresh then it:refresh(treefile.tree_widget) end
+		last[#last+1]=it
+		last=it
+	end
+	wtreefile.item_fill_dir(last)
+	
+	treefile.tree_widget:refresh_items(items)
 	treefile.tree_widget:refresh()
+
 end
+
 
 function wtreefile.class_hooks(hook,widget,dat)
 
@@ -140,15 +169,9 @@ function wtreefile.class_hooks(hook,widget,dat)
 		if treefile.class=="treefile" then -- sanity
 			if it.mode=="directory" then
 
-				if it[1] then -- hide dir
-					for i=#it,1,-1 do
-						it[i]=nil
-					end
-				else -- show dir
-					wtreefile.refresh_items(treefile,it)
-				end
-				
-				if it.refresh then it:refresh() end
+				wtreefile.item_toggle_dir(it)
+
+				if it.refresh then it:refresh(treefile.tree_widget) end
 
 				tree:refresh()
 
@@ -178,7 +201,7 @@ function wtreefile.setup(widget,def)
 --	widget.dir_widget=widget.split_widget:add({hy=ss,class="textedit",color=0,data=widget.data_dir,clip2=true,hooks=wtreefile.class_hooks,id="dir"})
 --	widget.tree_widget=widget.split_widget:add({class="tree",id="files"})
 
-	widget.tree_widget=widget:add({size="full",class="tree",id="files"})	
+	widget.tree_widget=widget:add({size="full",class="tree",id="files"})
 	widget.tree_widget.class_hooks={wtreefile.class_hooks}
 
 	widget:refresh()

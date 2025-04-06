@@ -35,8 +35,8 @@ function wline.resize(widget)
 		hx=hx+v.hx
 		if v.hy>hy then hy=v.hy end
 	end
-	v.hx=hx
-	v.hy=hy
+	widget.hx=hx
+	widget.hy=hy
 end
 
 

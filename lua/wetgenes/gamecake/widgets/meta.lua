@@ -144,6 +144,17 @@ function wmeta.setup(def)
 		end
 	end
 
+
+	function meta.create(master,def) -- create widget from defs but do not insert
+		master=master.master or master -- force upwards to master
+		local widget={}
+		widget.meta=meta
+		widget.master=master
+		setmetatable(widget,meta)
+		widget:setup(def) -- we do not know parent yet here but do know master
+		return widget
+	end
+
 --
 -- add a new widget as a child to this one
 --
@@ -151,13 +162,9 @@ function wmeta.setup(def)
 		if parent.children then parent=parent.children end -- always put children here
 		local ret
 		for i,def in pairs{...} do
-			local widget={}
-			setmetatable(widget,meta)
-			table.insert(parent,widget)
+			local widget=parent:create(def)
 			widget.parent=parent
-			widget.master=parent.master
-			widget:setup(def)
-			widget.meta=meta
+			table.insert(parent,widget)
 			ret=ret or widget
 			for i,v in ipairs(def) do -- sub add
 				(ret.children or ret):add(v)
@@ -261,9 +268,14 @@ function wmeta.setup(def)
 		widget.hy=widget.hy or 0
 		widget.hz=widget.hz or 0 -- used to signal an fbo with a depth buffer
 
-		widget.font=widget.font or widget.parent.font --  use this font if set or inherit value from parent
-
-		widget.text_color=widget.text_color or widget.parent.text_color -- black text
+		local inherit=function(n)
+			if not widget[n] then widget[n] = widget.parent and widget.parent[n] end
+--			if not widget[n] then widget[n] = widget.master and widget.master[n] end
+		end
+		inherit("font")
+		inherit("text_color")
+--		widget.font=widget.font or widget.parent.font --  use this font if set or inherit value from parent
+--		widget.text_color=widget.text_color or widget.parent.text_color -- black text
 
 		if widget.class and wmeta.classes[widget.class] then -- got a class, call its setup, its setup can override other functions
 			wmeta.classes[widget.class].setup(widget,def)
@@ -689,7 +701,7 @@ function wmeta.setup(def)
 			hy=widget:bubble("grid_size") or widget.master.theme.grid_size
 			font.set(cake.fonts.get(f))
 			font.set_size(fs,0)
-			hx=font.width(widget.text)+(widget.hx_pad or widget.hy)
+			hx=font.width(widget.text) -- +(widget.hx_pad or widget.hy)
 		end
 		return hx,hy
 	end
