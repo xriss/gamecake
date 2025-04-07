@@ -75,6 +75,55 @@ function wtreefile.item_empty_dir(item)
 	end
 end
 
+
+function wtreefile.add_dir_item(treefile,path)
+	if path=="" then return end
+
+	local pp=wpath.split(path)
+	if pp[#pp]=="" then pp[#pp]=nil end -- strip trailing slash
+
+	local path=""
+	local last=treefile.tree_widget.items
+	if not last then
+		last={}
+		treefile.tree_widget.items=last
+	end
+	for i,v in ipairs(pp) do
+		local it
+		path=path..v.."/"
+		for ii,vv in ipairs(last) do -- find one that already exists
+			if vv.path==path then
+				it=vv
+				break
+			end
+		end
+		if not it then -- need to create
+			it={
+				parent=last,
+				name=v,
+				path=path,
+				mode="directory",
+				depth=(last.depth or 0)+1,
+				refresh=wtreefile.refresh_item,
+			}
+			if it.refresh then it:refresh(treefile.tree_widget) end
+		end
+		it.keep=true -- no not remove this one when collapsed
+		last[#last+1]=it
+		last=it
+	end
+
+	return last
+end
+
+
+function wtreefile.add_file_item(treefile,path)
+	local item=treefile:add_dir_item(path.."/") -- cheat add as a dir even if path is ""
+	item.mode="file" -- then change it to a file
+	return item
+end
+
+
 function wtreefile.item_fill_dir(item)
 
 	wtreefile.item_empty_dir(item)
@@ -103,6 +152,7 @@ function wtreefile.item_fill_dir(item)
 		end
 		if not it then -- does not already exist
 			local it={}
+			it.parent=item
 			it.mode=file.mode
 			it.path=file.path
 			it.name=file.name
@@ -127,30 +177,10 @@ end
 
 function wtreefile.refresh(treefile)
 
-	local items={}
-	local pp=wpath.split(treefile.data_dir:value())
-	if pp[#pp]=="" then pp[#pp]=nil end -- strip trailing slash
---		dprint(pp)
-	local path=""
-	local last=items
-	for i,v in ipairs(pp) do
-		path=path..v.."/"
-		local it={
-			name=v,
-			text=v.."/",
-			path=path,
-			mode="directory",
-			depth=i-1,
-			refresh=wtreefile.refresh_item,
-			keep=true, -- no not remove when collapsed
-		}
-		if it.refresh then it:refresh(treefile.tree_widget) end
-		last[#last+1]=it
-		last=it
-	end
-	wtreefile.item_fill_dir(last)
+	local item=treefile:add_dir_item( treefile.data_dir:value() )
+	wtreefile.item_fill_dir(item)
 	
-	treefile.tree_widget:refresh_items(items)
+	treefile.tree_widget:refresh_items()
 	treefile.tree_widget:refresh()
 
 end
@@ -195,6 +225,9 @@ end
 function wtreefile.setup(widget,def)
 
 	widget.class="treefile"
+
+	widget.add_dir_item=wtreefile.add_dir_item
+	widget.add_file_item=wtreefile.add_file_item
 
 	widget.refresh=wtreefile.refresh
 	widget.class_hooks={wtreefile.class_hooks}
