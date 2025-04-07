@@ -64,7 +64,6 @@ wtree.refresh_items=function(widget,items)
 end
 
 wtree.refresh=function(widget)
-	
 	local ss=widget.master.theme.grid_size
 	local pan=widget.scroll_widget.pan
 
@@ -87,7 +86,7 @@ wtree.refresh=function(widget)
 		recurse(widget.items) -- this is just a list not an item itself
 	end
 	
-	widget.scroll_widget.pan:layout()
+--	widget.scroll_widget.pan:layout()
 	widget.master.request_layout=true
 end
 

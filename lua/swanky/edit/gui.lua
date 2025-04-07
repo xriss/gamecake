@@ -405,7 +405,7 @@ local lay=
 								size="full",style="flat",hx=200,highlight="none",color=0,
 								{
 									id="treefile",
-									color=0,fbo=true,class="treefile",size="full",hooks=gui.hooks,
+									class="treefile",size="full",hooks=gui.hooks,
 									refresh_item=docs.refresh_item
 								},
 								{

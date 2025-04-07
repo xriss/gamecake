@@ -25,14 +25,14 @@ M.bake=function(oven,wtreefile)
 	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
 	local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
 
-function wtreefile.refresh_item(item,widget)
+function wtreefile.refresh_item(item,treefile)
 
-	local ss=widget.master.theme.grid_size		
+	local ss=treefile.master.theme.grid_size		
 	local opts={
 		class="line",
-		id=item.id or widget.id,
-		class_hooks=item.class_hooks or widget.class_hooks,
-		hooks=item.hooks or widget.hooks,
+		id=item.id or treefile.id,
+		class_hooks=item.class_hooks or treefile.class_hooks,
+		hooks=item.hooks or treefile.hooks,
 		hx=ss,
 		hy=ss,
 		text_align="left",
@@ -41,7 +41,7 @@ function wtreefile.refresh_item(item,widget)
 		solid=true,
 	}
 
-	item.line=widget:create(opts)
+	item.line=treefile:create(opts)
 	item.line_indent=item.line:add({class="text",text=(" "):rep(item.depth)})
 	if item.mode=="directory" then
 		if item.expanded then
@@ -57,15 +57,15 @@ function wtreefile.refresh_item(item,widget)
 
 end
 
-function wtreefile.item_toggle_dir(item)
+function wtreefile.item_toggle_dir(item,treefile)
 	if item.expanded then
-		wtreefile.item_empty_dir(item)
+		wtreefile.item_empty_dir(item,treefile)
 	else
-		wtreefile.item_fill_dir(item)
+		wtreefile.item_fill_dir(item,treefile)
 	end
 end
 
-function wtreefile.item_empty_dir(item)
+function wtreefile.item_empty_dir(item,treefile)
 	item.expanded=false
 	for i=#item,1,-1 do
 		local it=item[i]
@@ -78,6 +78,7 @@ end
 
 function wtreefile.add_dir_item(treefile,path)
 	if path=="" then return end
+	treefile.master.request_layout=true
 
 	local pp=wpath.split(path)
 	if pp[#pp]=="" then pp[#pp]=nil end -- strip trailing slash
@@ -104,12 +105,12 @@ function wtreefile.add_dir_item(treefile,path)
 				path=path,
 				mode="directory",
 				depth=(last.depth or 0)+1,
-				refresh=wtreefile.refresh_item,
+				refresh=treefile.refresh_item,
 			}
-			if it.refresh then it:refresh(treefile.tree_widget) end
+--			if it.refresh then it:refresh(treefile.tree_widget) end
+			last[#last+1]=it
 		end
 		it.keep=true -- no not remove this one when collapsed
-		last[#last+1]=it
 		last=it
 	end
 
@@ -118,13 +119,39 @@ end
 
 
 function wtreefile.add_file_item(treefile,path)
-	local item=treefile:add_dir_item(path.."/") -- cheat add as a dir even if path is ""
-	item.mode="file" -- then change it to a file
-	return item
+	treefile.master.request_layout=true
+
+	local pp=wpath.split(path)
+	local filename=pp[#pp]
+	pp[#pp]=nil -- strip filename
+	local item_dir=treefile:add_dir_item(wpath.join(pp)) -- cheat parent dir
+
+	local it
+	for ii,vv in ipairs(item_dir) do -- find one that already exists
+		if vv.path==path then
+			it=vv
+			break
+		end
+	end
+	if not it then -- need to create
+		it={
+			parent=last,
+			name=filename,
+			path=path,
+			mode="file",
+			depth=(item_dir.depth or 0)+1,
+			refresh=treefile.refresh_item,
+		}
+		item_dir[#item_dir+1]=it
+		if it.refresh then it:refresh(treefile.tree_widget) end
+	end
+	it.keep=true -- no not remove this one when collapsed
+	return it
 end
 
 
-function wtreefile.item_fill_dir(item)
+function wtreefile.item_fill_dir(item,treefile)
+	treefile.master.request_layout=true
 
 	wtreefile.item_empty_dir(item)
 
@@ -157,7 +184,7 @@ function wtreefile.item_fill_dir(item)
 			it.path=file.path
 			it.name=file.name
 			it.depth=item.depth+1
-			it.refresh=wtreefile.refresh_item
+			it.refresh=treefile.refresh_item
 
 			item[#item+1]=it
 		end
@@ -178,9 +205,8 @@ end
 function wtreefile.refresh(treefile)
 
 	local item=treefile:add_dir_item( treefile.data_dir:value() )
-	wtreefile.item_fill_dir(item)
+	wtreefile.item_fill_dir(item,treefile)
 	
-	treefile.tree_widget:refresh_items()
 	treefile.tree_widget:refresh()
 
 end
@@ -205,14 +231,14 @@ function wtreefile.class_hooks(hook,widget,dat)
 		if treefile.class=="treefile" then -- sanity
 			if it.mode=="directory" then
 
-				wtreefile.item_toggle_dir(it)
+				wtreefile.item_toggle_dir(it,treefile)
 
 				if it.refresh then it:refresh(treefile.tree_widget) end
 
 				tree:refresh()
 
 			elseif it.mode=="file" then
-			
+
 				treefile:call_hook_later("file_name_click",it)
 
 			end
@@ -228,6 +254,8 @@ function wtreefile.setup(widget,def)
 
 	widget.add_dir_item=wtreefile.add_dir_item
 	widget.add_file_item=wtreefile.add_file_item
+	
+	widget.refresh_item = widget.refresh_item or wtreefile.refresh_item
 
 	widget.refresh=wtreefile.refresh
 	widget.class_hooks={wtreefile.class_hooks}

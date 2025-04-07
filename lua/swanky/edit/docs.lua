@@ -4,6 +4,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local wstr=require("wetgenes.string")
+local wpath=require("wetgenes.path")
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -17,6 +18,8 @@ M.bake=function(oven,docs)
 
 	local gui=oven.rebake(oven.modname..".gui")
 
+	local wtreefile=oven.rebake("wetgenes.gamecake.widgets.treefile")
+
 
 	local doc={}
 	local docmeta={__index=doc}
@@ -28,32 +31,23 @@ M.bake=function(oven,docs)
 
 	docs.list={} -- list of open documents
 
-	docs.refresh_item=function(it)
-			if it.name then
-				local loaded=docs.find(it.path)
+	docs.refresh_item=function(item,treefile)
 
-				local prefix="- "
-				if loaded then
-					prefix="+ "
-					if loaded.modified_index~=loaded.txt.undo.index then
-						prefix="* "
-						loaded.modified_show=true
-					else
-						loaded.modified_show=false
-					end
-				end
-				
-				if it.mode=="directory" then
-					if it[1] then
-						prefix="= "
-					else
-						prefix="> "
-					end
-					it.text=string.rep(" ",it.depth)..prefix..it.name.."/"
+		wtreefile.refresh_item(item,treefile)
+
+		if item.mode~="directory" then
+			local loaded=docs.find(item.path)
+			item.line_prefix.text_color=nil
+			if loaded then
+				item.line_prefix.text_color=0xff00cc00
+				if loaded.modified_index~=loaded.txt.undo.index then
+					item.line_prefix.text_color=0xffcc0000
+					item.line_prefix.text="* "
 				else
-					it.text=string.rep(" ",it.depth)..prefix..it.name
+					item.line_prefix.text="+ "
 				end
 			end
+		end
 	end
 	
 
@@ -75,7 +69,7 @@ M.bake=function(oven,docs)
 	docs.search={} -- share this search info with all txts
 
 	docs.create=function(filename)
-
+	
 		local it={}
 
 		docs.list[#docs.list+1]=it
@@ -145,11 +139,12 @@ M.bake=function(oven,docs)
 
 
 		if not filename then
-			filename=os.date("swanky-%Y%m%d-%H%M%S.txt")
+			filename=wpath.currentdir()..os.date("swanky-%Y%m%d-%H%M%S.txt")
 		end
 		it.filename=filename
 		it.txt.set_text("\n",filename)
 
+		gui.master.ids.treefile:add_file_item(it.filename)
 
 		local f=io.open(filename,"rb")
 		if f then
