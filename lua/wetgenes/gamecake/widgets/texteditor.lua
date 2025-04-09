@@ -924,23 +924,30 @@ function wtexteditor.msg(pan,m)
 					local s=txt.undo.cut() or ""
 					if s then wwin.set_clipboard(s) end
 					txt.cursor()
+					texteditor:mark_sync()
 					texteditor:scroll_to_view()
 				end
 			elseif m.id=="clip_paste" then
 				local s=wwin.get_clipboard() or ""
 				txt.undo.replace(s)
 				txt.cursor()
+				texteditor:mark_sync()
 				texteditor:scroll_to_view()
 			elseif m.id=="history_undo" then
 				txt.undo.undo()
 				txt.cursor()
+				texteditor:mark_sync()
+				texteditor:scroll_to_view()
 			elseif m.id=="history_redo" then
 				txt.undo.redo()
 				txt.cursor()
+				texteditor:mark_sync()
+				texteditor:scroll_to_view()
 			elseif m.id=="select_all" then
 				txt.mark(0,0,txt.hy+1,0)
 				texteditor.txt_dirty=true
 				txt.cursor()
+				texteditor:mark_sync()
 				texteditor:scroll_to_view()
 			elseif m.id=="clip_cutline" then
 				txt.mark(txt.cy,0,txt.cy+1,0)
@@ -951,14 +958,17 @@ function wtexteditor.msg(pan,m)
 				end
 				if s then wwin.set_clipboard(s) end
 				txt.cursor()
+				texteditor:mark_sync()
 				texteditor:scroll_to_view()
 			elseif m.id=="edit_justify" then
 				txt.edit.justify()
 				txt.cursor()
+				texteditor:mark_sync()
 				texteditor:scroll_to_view()
 			elseif m.id=="edit_align" then
 				txt.edit.align()
 				txt.cursor()
+				texteditor:mark_sync()
 				texteditor:scroll_to_view()
 			elseif m.id=="view_hex" then
 				txt.cursor()
@@ -984,6 +994,7 @@ function wtexteditor.msg(pan,m)
 
 				txt.find_next()
 				texteditor:mark_sync()
+				texteditor:scroll_to_view()
 
 			elseif m.id=="search_prev" then
 
@@ -994,6 +1005,7 @@ function wtexteditor.msg(pan,m)
 
 				txt.find_prev()
 				texteditor:mark_sync()
+				texteditor:scroll_to_view()
 
 			end
 		end
