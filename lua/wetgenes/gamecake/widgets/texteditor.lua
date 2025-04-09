@@ -852,6 +852,8 @@ function wtexteditor.mark_sync(texteditor)
 	local txt=texteditor.txt
 	texteditor.mark_area={txt.markget()}
 	texteditor.mark_area_auto={txt.markget()}
+	if not texteditor.mark_area[1] then texteditor.mark_area=nil end
+	if not texteditor.mark_area_auto[1] then texteditor.mark_area_auto=nil end
 	texteditor:scroll_to_view()
 	texteditor.txt_dirty=true
 	txt.cy , txt.cx = txt.clip(y or txt.cy,x or txt.cx)
@@ -981,7 +983,6 @@ function wtexteditor.msg(pan,m)
 				end
 
 				txt.find_next()
-				txt.cursor()
 				texteditor:mark_sync()
 
 			elseif m.id=="search_prev" then
@@ -992,7 +993,6 @@ function wtexteditor.msg(pan,m)
 				end
 
 				txt.find_prev()
-				txt.cursor()
 				texteditor:mark_sync()
 
 			end
