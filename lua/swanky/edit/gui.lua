@@ -406,7 +406,7 @@ local lay=
 								{
 									id="treefile",
 									class="treefile",size="full",hooks=gui.hooks,
-									refresh_item=docs.refresh_item
+									item_refresh=docs.item_refresh,
 								},
 								{
 									id="output",hidden=true,

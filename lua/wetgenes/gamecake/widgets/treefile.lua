@@ -25,14 +25,14 @@ M.bake=function(oven,wtreefile)
 	local wdata=oven.rebake("wetgenes.gamecake.widgets.data")
 	local wfill=oven.rebake("wetgenes.gamecake.widgets.fill")
 
-function wtreefile.refresh_item(item,treefile)
+function wtreefile.item_refresh(treefile,item)
 
 	local ss=treefile.master.theme.grid_size		
 	local opts={
 		class="line",
-		id=item.id or treefile.id,
-		class_hooks=item.class_hooks or treefile.class_hooks,
-		hooks=item.hooks or treefile.hooks,
+		id=item.id or "file", -- or treefile.id,
+		class_hooks=treefile.class_hooks,
+		hooks=item.hooks, -- or treefile.hooks,
 		hx=ss,
 		hy=ss,
 		text_align="left",
@@ -57,15 +57,15 @@ function wtreefile.refresh_item(item,treefile)
 
 end
 
-function wtreefile.item_toggle_dir(item,treefile)
+function wtreefile.item_toggle_dir(treefile,item)
 	if item.expanded then
-		wtreefile.item_empty_dir(item,treefile)
+		treefile:item_empty_dir(item)
 	else
-		wtreefile.item_fill_dir(item,treefile)
+		treefile:item_fill_dir(item)
 	end
 end
 
-function wtreefile.item_empty_dir(item,treefile)
+function wtreefile.item_empty_dir(treefile,item)
 	item.expanded=false
 	for i=#item,1,-1 do
 		local it=item[i]
@@ -74,6 +74,60 @@ function wtreefile.item_empty_dir(item,treefile)
 		end
 	end
 end
+
+
+function wtreefile.item_fill_dir(treefile,item)
+	treefile.master.request_layout=true
+
+	treefile:item_empty_dir(item)
+
+	item.expanded=true	
+
+	local files={}
+	pcall( function()
+		for n in lfs.dir(item.path) do
+			if n~="." and n~=".." then
+				local t=lfs.attributes(wpath.resolve(item.path,n))
+				if t then
+					t.name=n
+					t.path=wpath.resolve(item.path,t.name)
+					files[#files+1]=t
+				end
+			end
+		end
+	end)
+	
+	for i,file in ipairs(files) do
+	
+		local it
+		for _,v in ipairs(item) do
+			if v.name==file.name then it=v break end -- already have this one
+		end
+		if not it then -- does not already exist
+			local it={}
+			it.parent=item
+			it.mode=file.mode
+			it.path=file.path
+			it.name=file.name
+			it.depth=item.depth+1
+			it.refresh=function(item) return treefile:item_refresh(item) end
+
+			item[#item+1]=it
+		end
+
+	end
+
+	table.sort(item,function(a,b)
+		if a.mode == b.mode then
+			return b.name:lower() > a.name:lower()
+		else
+			return b.mode > a.mode
+		end
+	end)
+
+
+end
+
 
 
 function wtreefile.add_dir_item(treefile,path)
@@ -105,7 +159,7 @@ function wtreefile.add_dir_item(treefile,path)
 				path=path,
 				mode="directory",
 				depth=(last.depth or 0)+1,
-				refresh=treefile.refresh_item,
+				refresh=function(item) return treefile:item_refresh(item) end,
 			}
 --			if it.refresh then it:refresh(treefile.tree_widget) end
 			last[#last+1]=it
@@ -140,72 +194,21 @@ function wtreefile.add_file_item(treefile,path)
 			path=path,
 			mode="file",
 			depth=(item_dir.depth or 0)+1,
-			refresh=treefile.refresh_item,
+			refresh=function(item) return treefile:item_refresh(item) end,
 		}
 		item_dir[#item_dir+1]=it
-		if it.refresh then it:refresh(treefile.tree_widget) end
+--	if it.refresh then it:refresh() end
 	end
 	it.keep=true -- no not remove this one when collapsed
 	return it
 end
 
 
-function wtreefile.item_fill_dir(item,treefile)
-	treefile.master.request_layout=true
-
-	wtreefile.item_empty_dir(item)
-
-	item.expanded=true	
-
-	local files={}
-	pcall( function()
-		for n in lfs.dir(item.path) do
-			if n~="." and n~=".." then
-				local t=lfs.attributes(wpath.resolve(item.path,n))
-				if t then
-					t.name=n
-					t.path=wpath.resolve(item.path,t.name)
-					files[#files+1]=t
-				end
-			end
-		end
-	end)
-	
-	for i,file in ipairs(files) do
-	
-		local it
-		for _,v in ipairs(item) do
-			if v.name==file.name then it=v break end -- already have this one
-		end
-		if not it then -- does not already exist
-			local it={}
-			it.parent=item
-			it.mode=file.mode
-			it.path=file.path
-			it.name=file.name
-			it.depth=item.depth+1
-			it.refresh=treefile.refresh_item
-
-			item[#item+1]=it
-		end
-
-	end
-
-	table.sort(item,function(a,b)
-		if a.mode == b.mode then
-			return b.name:lower() > a.name:lower()
-		else
-			return b.mode > a.mode
-		end
-	end)
-
-
-end
 
 function wtreefile.refresh(treefile)
 
 	local item=treefile:add_dir_item( treefile.data_dir:value() )
-	wtreefile.item_fill_dir(item,treefile)
+	treefile:item_fill_dir(item)
 	
 	treefile.tree_widget:refresh()
 
@@ -224,16 +227,16 @@ function wtreefile.class_hooks(hook,widget,dat)
 		end
 	end
 	
-	if hook=="click" and widget and widget.id=="files" then
+	if hook=="click" and widget and widget.id=="file" then
 		local it=widget.user
 		local tree=widget ; while tree and tree.parent~=tree and tree.class~="tree" do tree=tree.parent end
 		local treefile=tree.parent
 		if treefile.class=="treefile" then -- sanity
 			if it.mode=="directory" then
 
-				wtreefile.item_toggle_dir(it,treefile)
+				treefile:item_toggle_dir(it)
 
-				if it.refresh then it:refresh(treefile.tree_widget) end
+				if it.refresh then it:refresh() end
 
 				tree:refresh()
 
@@ -255,11 +258,14 @@ function wtreefile.setup(widget,def)
 	widget.add_dir_item=wtreefile.add_dir_item
 	widget.add_file_item=wtreefile.add_file_item
 	
-	widget.refresh_item = widget.refresh_item or wtreefile.refresh_item
+	widget.item_refresh    = widget.item_refresh    or wtreefile.item_refresh
+	widget.item_toggle_dir = widget.item_toggle_dir or wtreefile.item_toggle_dir
+	widget.item_empty_dir  = widget.item_empty_dir  or wtreefile.item_empty_dir
+	widget.item_fill_dir   = widget.item_fill_dir   or wtreefile.item_fill_dir
 
 	widget.refresh=wtreefile.refresh
 	widget.class_hooks={wtreefile.class_hooks}
-
+	
 	local ss=widget.master.theme.grid_size
 
 	widget.data_dir  = widget.data_dir  or wdata.new_data({class="string",str=wpath.currentdir(),master=widget.master,hooks=wtreefile.class_hooks})
@@ -269,7 +275,6 @@ function wtreefile.setup(widget,def)
 --	widget.tree_widget=widget.split_widget:add({class="tree",id="files"})
 
 	widget.tree_widget=widget:add({size="full",class="tree",id="files"})
-	widget.tree_widget.class_hooks={wtreefile.class_hooks}
 
 	widget:refresh()
 

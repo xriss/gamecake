@@ -31,9 +31,9 @@ M.bake=function(oven,docs)
 
 	docs.list={} -- list of open documents
 
-	docs.refresh_item=function(item,treefile)
+	docs.item_refresh=function(treefile,item)
 
-		wtreefile.refresh_item(item,treefile)
+		wtreefile.item_refresh(treefile,item)
 
 		if item.mode~="directory" then
 			local loaded=docs.find(item.path)

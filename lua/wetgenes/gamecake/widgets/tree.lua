@@ -22,17 +22,17 @@ M.bake=function(oven,wtree)
 	wtree.modname=M.modname
 	
 -- refresh any item
-wtree.refresh_item=function(widget,item)
+wtree.item_to_line=function(widget,item)
 	
-	if item.refresh then -- this must update or provide a .line output
-		item:refresh(widget)
+	if item.refresh then -- this must provide a .line output
+		item:refresh()
 	else
 		local ss=widget.master.theme.grid_size		
 		local opts={
 			class="line",
-			id=item.id or widget.id,
-			class_hooks=item.class_hooks or widget.class_hooks,
-			hooks=item.hooks or widget.hooks,
+			id=item.id, -- or widget.id,
+			class_hooks=widget.class_hooks,
+			hooks=item.hooks, -- or widget.hooks,
 			hx=ss,
 			hy=ss,
 			text_align="left",
@@ -47,18 +47,18 @@ wtree.refresh_item=function(widget,item)
 
 	for _,it in ipairs(item) do
 		it.parent=item
-		widget:refresh_item(it)
+		widget:item_to_line(it)
 	end
 end
 
 -- set / refresh top level list of items ( which is not itself an item )
-wtree.refresh_items=function(widget,items)
+wtree.items_to_lines=function(widget,items)
 	if items then widget.items=items end
 	items=widget.items
 	
 	for _,item in ipairs(items) do
 		item.parent=items
-		widget:refresh_item(item)
+		widget:item_to_line(item)
 	end
 
 end
@@ -71,7 +71,7 @@ wtree.refresh=function(widget)
 
 -- run refresh_item on each item and add item.line to the display
 	if widget.items then
-		widget:refresh_items(widget.items)
+		widget:items_to_lines(widget.items)
 		local recurse
 		recurse=function(parent)
 			for _,item in ipairs(parent) do
@@ -140,8 +140,8 @@ function wtree.setup(widget,def)
 	
 
 -- update item info
-	widget.refresh_items=wtree.refresh_items
-	widget.refresh_item=wtree.refresh_item
+	widget.items_to_lines=wtree.items_to_lines
+	widget.item_to_line=wtree.item_to_line
 
 	widget:refresh()
 
