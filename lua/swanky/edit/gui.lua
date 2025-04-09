@@ -246,14 +246,18 @@ end
 
 function gui.hooks(act,w,dat)
 
-	if act=="file_name_click" then
+	if act=="line_click" then
+	
+		if dat.mode=="file" then
 
-		local path=dat.path
-		w.master.later_append(function()
-		
-			docs.manifest(path):show()
-			gui.refresh_tree()
-		end)
+			local path=dat.path
+			w.master.later_append(function()
+			
+				docs.manifest(path):show()
+				gui.refresh_tree()
+			end)
+			
+		end
 
 	elseif act=="click" then
 

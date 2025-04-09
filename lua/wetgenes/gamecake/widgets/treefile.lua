@@ -240,11 +240,9 @@ function wtreefile.class_hooks(hook,widget,dat)
 
 				tree:refresh()
 
-			elseif it.mode=="file" then
-
-				treefile:call_hook_later("file_name_click",it)
-
 			end
+
+			treefile:call_hook_later("line_click",it)
 
 		end
 	end
