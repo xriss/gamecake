@@ -217,7 +217,7 @@ end
 
 function wtreefile.class_hooks(hook,widget,dat)
 
-	if hook=="unfocus_edit" or hook=="timedelay" then
+	if hook=="unfocus" or hook=="timedelay" then
 		if widget.id=="dir" then
 			local treefile=widget
 			while treefile and treefile.parent~=treefile and treefile.class~="treefile" do treefile=treefile.parent end

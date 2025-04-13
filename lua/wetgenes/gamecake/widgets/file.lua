@@ -73,7 +73,7 @@ end
 wfile.refresh=function(widget)
 	widget:file_scan()
 	widget:file_refresh()
-	widget.master.request_layout=true
+	widget.master.request_redraw=true
 --	widget:resize()
 --	widget:layout()
 --	widget:build_m4()
@@ -133,7 +133,7 @@ end
 
 
 wfile.file_hooks=function(widget,act,w)
-	if act=="unfocus_edit" or act=="timedelay" then
+	if act=="unfocus" or act=="timedelay" then
 		if w.id=="dir" then
 			widget:file_dir({name="."})
 		end

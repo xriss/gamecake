@@ -101,8 +101,7 @@ B.setup=function(zgui)
 		end
 		
 		scroll.pan:set_dirty()
-		zgui.master.request_layout=true
-		zgui.master.request_refresh=true
+		zgui.master.request_redraw=true
 
 -- auto scroll to bottom?
 		if	scroll.daty.num==scroll.daty.max then

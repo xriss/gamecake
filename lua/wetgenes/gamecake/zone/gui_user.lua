@@ -67,7 +67,7 @@ B.setup=function(zgui)
 		local pages=zgui.master.ids.window_user_pages
 		if pages and pages.data then
 			pages.data:value(mode or "Status")
-			zgui.master.request_refresh=true
+			zgui.master.request_redraw=true
 		end
 	end
 

@@ -297,14 +297,14 @@ function wmaster.setup(widget,def)
 			end
 		end
 
-		if ( resize and (widget.hx~=resize.hx or widget.hy~=resize.hy) ) or master.request_layout or master.request_refresh then
+		if ( resize and (widget.hx~=resize.hx or widget.hy~=resize.hy) ) or master.request_layout or master.request_redraw then
 			master.request_layout=false
 			widget.hx=resize and resize.hx or widget.hx
 			widget.hy=resize and resize.hy or widget.hy
 			widget:resize_and_layout()
 		end
-		if master.request_refresh then -- redraw and layout
-			master.request_refresh=false
+		if master.request_redraw then -- redraw and layout
+			master.request_redraw=false
 			widget:set_dirty()
 			widget:call_descendents(function(w) w:set_dirty() end) -- force a redraw
 		end
@@ -439,10 +439,10 @@ function wmaster.setup(widget,def)
 
 		if master.focus then
 			master.focus:call_hook_later("unfocus")
-			if master.focus.class=="textedit" then
-				master.focus:call_hook_later("unfocus_edit")
+--			if master.focus.class=="textedit" then
+--				master.focus:call_hook_later("unfocus_edit")
 --				wwin.StopTextInput()
-			end
+--			end
 			master.focus=nil
 		end
 
@@ -450,10 +450,10 @@ function wmaster.setup(widget,def)
 			if focus.can_focus then
 				master.focus=focus
 				master.focus:call_hook_later("focus")
-				if master.focus.class=="textedit" then -- also set edit focus
-					master.focus:call_hook_later("focus_edit")
+--				if master.focus.class=="textedit" then -- also set edit focus
+--					master.focus:call_hook_later("focus_edit")
 --					wwin.StartTextInput()
-				end
+--				end
 			end
 		end
 
@@ -597,6 +597,23 @@ function wmaster.setup(widget,def)
 			if master.over     then master.over:set_dirty() end
 			if master.old_over then master.old_over:set_dirty() end
 			if master.over     then master.over:call_hook_later("over") end
+		end
+
+		if
+			( act==-1 ) and keyname and
+			(
+				keyname=="wheel_add"   or
+				keyname=="wheel_sub"   or
+				keyname=="wheel_left"  or
+				keyname=="wheel_right"
+			)
+		then
+			if master.over and master.over.can_focus then
+				master.set_focus(master.over)
+			end
+			if master.over then -- set focus may nave niled this
+				master.over:set_dirty()
+			end
 		end
 
 	end

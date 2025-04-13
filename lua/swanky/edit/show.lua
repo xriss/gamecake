@@ -162,7 +162,6 @@ M.bake=function(oven,show)
 		
 		
 	show.widget_msg=function(widget,m)
-	
 		local buildcam
 
 		if m.class~="mouse" then return end
