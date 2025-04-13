@@ -117,6 +117,12 @@ function wtreefile.item_fill_dir(treefile,item)
 
 	end
 
+	treefile:item_sort(item)
+
+end
+
+function wtreefile.item_sort(treefile,item)
+
 	table.sort(item,function(a,b)
 		if a.mode == b.mode then
 			return b.name:lower() > a.name:lower()
@@ -125,9 +131,7 @@ function wtreefile.item_fill_dir(treefile,item)
 		end
 	end)
 
-
 end
-
 
 
 function wtreefile.add_dir_item(treefile,path)
@@ -260,6 +264,7 @@ function wtreefile.setup(widget,def)
 	widget.item_toggle_dir = widget.item_toggle_dir or wtreefile.item_toggle_dir
 	widget.item_empty_dir  = widget.item_empty_dir  or wtreefile.item_empty_dir
 	widget.item_fill_dir   = widget.item_fill_dir   or wtreefile.item_fill_dir
+	widget.item_sort       = widget.item_sort       or wtreefile.item_sort
 
 	widget.refresh=wtreefile.refresh
 	widget.class_hooks={wtreefile.class_hooks}

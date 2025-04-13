@@ -54,6 +54,7 @@ M.bake=function(oven,main)
 	local gui=oven.rebake(oven.modname..".gui")
 	local cmd=oven.rebake(oven.modname..".cmd")
 	local docs=oven.rebake(oven.modname..".docs")
+	local finds=oven.rebake(oven.modname..".finds")
 
 	local show=oven.rebake(oven.modname..".show")
 
