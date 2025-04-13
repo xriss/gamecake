@@ -610,6 +610,8 @@ function wmaster.setup(widget,def)
 		then
 			if master.over and master.over.can_focus then
 				master.set_focus(master.over)
+			else
+				master.set_focus(nil)
 			end
 			if master.over then -- set focus may nave niled this
 				master.over:set_dirty()
