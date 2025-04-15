@@ -125,7 +125,7 @@ function wtreefile.item_sort(treefile,item)
 
 	table.sort(item,function(a,b)
 		if a.mode == b.mode then
-			return b.name:lower() > a.name:lower()
+			return b.path:lower() > a.path:lower()
 		else
 			return b.mode > a.mode
 		end
@@ -135,7 +135,8 @@ end
 
 
 function wtreefile.add_dir_item(treefile,path)
-	if path=="" then return end
+--	if path=="" then return treefile.tree_widget.items end
+	path=wpath.unslash(path)
 	treefile.master.request_layout=true
 
 	local pp=wpath.split(path)
@@ -151,7 +152,7 @@ function wtreefile.add_dir_item(treefile,path)
 		local it
 		path=path..v.."/"
 		for ii,vv in ipairs(last) do -- find one that already exists
-			if vv.path==path then
+			if wpath.unslash(vv.path)==wpath.unslash(path) then
 				it=vv
 				break
 			end

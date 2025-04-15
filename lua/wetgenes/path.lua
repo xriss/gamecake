@@ -68,7 +68,19 @@ wpath.setup=function(flavour)
 end
 wpath.setup()
 
+--[[#lua.wetgenes.path.unslash
 
+If the path ends in "/" ( or multiple "//" etc ) then remove it,
+
+return the path which is now guaranteed not to end in the slash separator.
+
+]]
+wpath.unslash=function(s)
+	while s:sub(-#wpath.separator)==wpath.separator do -- trim trailing separator
+		s=s:sub(1,-1-#wpath.separator)
+	end
+	return s
+end
 
 --[[#lua.wetgenes.path.split
 
@@ -206,6 +218,8 @@ end
 
 remove ".." and "." components from the path string
 
+this will also convert multiple "/" into a single "/" but will not remove a trailing "/"
+
 ]]
 wpath.normalize=function(...)
 
@@ -215,7 +229,7 @@ wpath.normalize=function(...)
 	
 	local idx=2
 
-	while idx <= #ps-1 do
+	while idx <= #ps-1 do -- do not remove trailing /
 		if ps[idx]=="" then -- remove double //
 			table.remove(ps,idx)
 		else -- just advance

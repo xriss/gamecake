@@ -80,7 +80,7 @@ M.bake=function(oven,docs)
 		it.docs=docs
 
 		it.txt=require("wetgenes.txt").construct({search=docs.search})
-		
+		it.txt.doc=it
 
 		it:load(filename)
 

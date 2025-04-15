@@ -10,6 +10,7 @@ local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local wgrd=require("wetgenes.grd")
 local wzips=require("wetgenes.zips")
 local wcsv=require("wetgenes.csv")
+local wpath=require("wetgenes.path")
 
 local function dprint(a) print(wstr.dump(a)) end
 
@@ -33,6 +34,7 @@ M.bake=function(oven,gui)
 
 	local widgets_menuitem=oven.rebake("wetgenes.gamecake.widgets.menuitem")
 
+	local finds=oven.rebake(oven.modname..".finds")
 	local docs=oven.rebake(oven.modname..".docs")
 	local show=oven.rebake(oven.modname..".show")
 
@@ -234,6 +236,33 @@ function gui.action(m)
 			gui.theme(a.json)
 			ssettings.set("gui_theme",m.id)
 		end
+
+	elseif m.id=="search_find" then
+
+		local texteditor=gui.master.ids.texteditor
+		local txt=texteditor.txt
+
+		local word=txt.copy() or ""
+		if word~="" then -- search for selected?
+
+			local dir=wpath.dir(txt.doc.filename)
+			dir=wpath.unslash(dir)
+
+print("search_find",word,dir)
+
+			local find=finds.get(dir,word)
+			if not find then
+				find=finds.create({dir=dir,word=word})
+				find:add_item()
+				find:scan()
+			end
+
+			gui.refresh_tree()
+			gui.master.request_redraw=true
+	
+		end
+
+
 	end
 
 end
