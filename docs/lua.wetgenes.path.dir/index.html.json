@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 636,
+   "count": 637,
    "name": "lua"
   },
   {
@@ -158,7 +158,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 629,
+   "count": 630,
    "name": "lua.wetgenes"
   },
   {
@@ -1598,7 +1598,7 @@
    "name": "lua.wetgenes.package.reload"
   },
   {
-   "count": 15,
+   "count": 16,
    "name": "lua.wetgenes.path"
   },
   {
@@ -1656,6 +1656,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.path.split"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.unslash"
   },
   {
    "count": 4,
@@ -2742,7 +2746,7 @@
    "body": "<pre><code>local dir=wpath.dir(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the dir component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 340,
+   "line": 354,
    "name": "lua.wetgenes.path.dir",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   }
