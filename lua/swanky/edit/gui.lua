@@ -282,10 +282,35 @@ function gui.hooks(act,w,dat)
 			local path=dat.path
 			w.master.later_append(function()
 			
-				docs.manifest(path):show()
+				local doc=docs.manifest(path)
+				doc:show()
+
 				gui.refresh_tree()
 			end)
+		end
+
+		if dat.mode=="file_find" then
+
+			local path=dat.path
+			w.master.later_append(function()
 			
+				local doc=docs.manifest(path)
+				local txt=doc.txt
+				doc:show()
+				local texteditor=gui.master.ids.texteditor
+
+				local hy=dat.bpos[1]
+				local hxa=dat.bpos[2]
+				local hxb=dat.bpos[3]
+
+				txt.mark(hy,hxa,hy,hxb)
+				texteditor:mark_sync()
+				texteditor:scroll_to_view()
+				texteditor.txt_dirty=true
+
+				gui.refresh_tree()
+
+			end)			
 		end
 
 	elseif act=="click" then

@@ -985,7 +985,7 @@ function wtexteditor.msg(pan,m)
 				texteditor.opts.word_wrap=true
 				texteditor.texteditor_hooks("txt_changed")
 
-			elseif m.id=="search_next" or m.id=="search_find" then
+			elseif m.id=="search_next" then -- or m.id=="search_find" then
 
 				local word=txt.copy() or ""
 				if word~="" then -- search for selected?

@@ -84,7 +84,16 @@ M.bake=function(oven,finds)
 		end
 	end
 	
-	finds.class_hook=function(a,b,c)
+	finds.class_hook=function(hook,widget,dat)
+		if hook=="click" then
+			local it=widget.user
+			local tree=widget ; while tree and tree.parent~=tree and tree.class~="tree" do tree=tree.parent end
+			local treefile=tree.parent
+			if it then -- item click
+				treefile:call_hook_later("line_click",it)
+--				print(a,b.user.mode)
+			end
+		end
 --		print("hook",a,b,c,b and b.dir)
 	end
 	finds.class_hooks={finds.class_hook}
@@ -109,11 +118,11 @@ M.bake=function(oven,finds)
 		if not item.line then
 			item.line=treefile:create(opts)
 			item.line_indent=item.line:add({class="text",text=(" "):rep(item.depth)})
-			item.line_prefix=item.line:add({class="text",text="? "})
+			item.line_prefix=item.line:add({class="text",text="  "})
 			item.line_text=item.line:add({class="text",text=item.text or item.word})
 		end
 		item.line_indent.text=(" "):rep(item.depth)
-		if item.mode=="_find" then
+		if item.mode=="base_find" then
 			item.line_prefix.text="> "
 		elseif item.mode=="directory_find" then
 			item.line_prefix.text="> "
@@ -134,9 +143,10 @@ print("dir",find.dir)
 print("path",dir_item.path)
 		
 		local item={
-			mode="_find",
+			mode="base_find",
 			keep=true,
-			path=find.dir.."#"..find.word,
+			path=dir_item.path,
+			name="#"..find.word,
 			dir=find.dir,
 			word=find.word,
 			text="searching",
@@ -157,7 +167,7 @@ print("path",dir_item.path)
 		local rekky
 		rekky=function(items)
 			for _,item in ipairs(items) do
-				if	item.mode == "_find"    and
+				if	item.mode == "base_find"    and
 					find.dir == item.dir and 
 					find.word == item.word
 				then -- found it
@@ -202,6 +212,7 @@ print("path",dir_item.path)
 				it={
 					parent=last,
 					text=v,
+					name=v,
 					path=path,
 					mode="directory_find",
 					depth=(last.depth or 0)+1,
@@ -265,9 +276,7 @@ print("path",dir_item.path)
 		find.lines={}
 
 		local count=0
-		for file,_ in pairs(files) do
-			count=count+1
-		end
+		for file,_ in pairs(files) do count=count+1 end
 
 		local idx=0
 		for file,_ in pairs(files) do
@@ -292,11 +301,12 @@ print("path",dir_item.path)
 						local itdir=find:manifest_dir_item(base_item,pp.path)
 						local it={
 							parent=itdir,
-							path=string.format("%s/%09d/%09d",file,li,fs),
+							name=string.format("%09d/%09d",li,fs),
+							path=file,
 							file=file,
 							text=li.." ("..fs..")",
 							mode="file_find",
-							charpos={li,fs,1+fe-fs},
+							bpos={li,fs,fe+1},
 							depth=(itdir.depth or 0)+1,
 							refresh=function(item) return find:item_refresh(item) end,
 						}
@@ -308,7 +318,7 @@ print("path",dir_item.path)
 			fp:close()
 			
 		end
-		base_item.text="?\""..base_item.word.."\""
+		base_item.text="*"..base_item.word.."*"
 		find:item_refresh(base_item)
 		gui.master.request_redraw=true
 		

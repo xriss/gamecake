@@ -125,7 +125,7 @@ function wtreefile.item_sort(treefile,item)
 
 	table.sort(item,function(a,b)
 		if a.mode == b.mode then
-			return b.path:lower() > a.path:lower()
+			return b.name:lower() > a.name:lower()
 		else
 			return b.mode > a.mode
 		end
