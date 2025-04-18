@@ -59,18 +59,24 @@ end
 
 function wtreefile.item_toggle_dir(treefile,item)
 	if item.expanded then
-		treefile:item_empty_dir(item)
+		treefile:item_empty_dir(item,true)
 	else
 		treefile:item_fill_dir(item)
 	end
+	treefile:refresh()
 end
 
-function wtreefile.item_empty_dir(treefile,item)
+function wtreefile.item_empty_dir(treefile,item,recurse)
+	treefile.master.request_layout=true
 	item.expanded=false
 	for i=#item,1,-1 do
 		local it=item[i]
 		if not it.keep then
 			table.remove(item,i)	-- remove item
+		elseif recurse then
+			if it.mode=="directory" then
+				treefile:item_empty_dir(it,recurse)
+			end
 		end
 	end
 end
@@ -211,9 +217,6 @@ end
 
 
 function wtreefile.refresh(treefile)
-
-	local item=treefile:add_dir_item( treefile.data_dir:value() )
-	treefile:item_fill_dir(item)
 	
 	treefile.tree_widget:refresh()
 
@@ -280,6 +283,8 @@ function wtreefile.setup(widget,def)
 
 	widget.tree_widget=widget:add({size="full",class="tree",id="files"})
 
+	local item=widget:add_dir_item( widget.data_dir:value() )
+	widget:item_fill_dir(item)
 	widget:refresh()
 
 	return widget

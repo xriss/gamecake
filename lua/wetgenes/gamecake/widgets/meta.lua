@@ -463,8 +463,10 @@ function wmeta.setup(def)
 --
 	function meta.call_descendents(widget,func)
 		for i,v in ipairs(widget) do
-			meta.call_descendents(v,func)
 			func(v)
+			if v[1] then
+				meta.call_descendents(v,func)
+			end
 		end
 	end
 

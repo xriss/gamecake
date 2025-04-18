@@ -306,7 +306,7 @@ function wmaster.setup(widget,def)
 		if master.request_redraw then -- redraw and layout
 			master.request_redraw=false
 			widget:set_dirty()
-			widget:call_descendents(function(w) w:set_dirty() end) -- force a redraw
+--			widget:call_descendents(function(w) w:set_dirty() end) -- force a redraw
 		end
 
 		local throb=(widget.throb>=128)

@@ -834,9 +834,8 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 					texteditor.mark_area_auto[3],texteditor.mark_area_auto[4],txt.markget())
 
 			else
-
-				texteditor.mark_area[3],texteditor.mark_area[4]=dy,dx
-				txt.mark(unpack(texteditor.mark_area))
+			
+				txt.markmerge(dy,dx,dy,dx,unpack(texteditor.mark_area))
 
 			end
 
