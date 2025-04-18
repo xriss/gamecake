@@ -22,6 +22,7 @@ M.bake=function(oven,finds)
 	local finds=finds or {}
 
 
+	local docs=oven.rebake(oven.modname..".docs")
 	local gui=oven.rebake(oven.modname..".gui")
 	local wtreefile=oven.rebake("wetgenes.gamecake.widgets.treefile")
 
@@ -130,6 +131,20 @@ M.bake=function(oven,finds)
 			item.line_prefix.text="# "
 		end
 		item.line_text.text=item.text
+
+		if item.mode=="file_find" or item.mode=="directory_find" then
+			local loaded=docs.find(item.path)
+			item.line_prefix.text_color=nil
+			if loaded then
+				item.line_prefix.text_color=0xff00cc00
+				if loaded.modified_index~=loaded.txt.undo.index then
+					item.line_prefix.text_color=0xffcc0000
+--					item.line_prefix.text="* "
+--				else
+--					item.line_prefix.text="+ "
+				end
+			end
+		end
 		
 	end
 	

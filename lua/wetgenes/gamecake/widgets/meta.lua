@@ -87,6 +87,7 @@ function wmeta.setup(def)
 -- the dirty flag is cleared on draw
 	function meta.set_dirty(widget)
 		widget.dirty=true
+		widget:call_descendents(function(w) w.dirty=true end)
 		while (widget.parent ~= widget) and widget.parent and not widget.parent.dirty do
 			widget=widget.parent
 			widget.dirty=true

@@ -100,11 +100,15 @@ M.bake=function(oven,docs)
 			if doc.modified_show==true then
 				gui.refresh_tree()
 				doc.modified_show=false
+				gui.master.ids.infobar.text_color=nil
+				gui.master.ids.infobar:set_dirty()
 			end
 		else
 			if doc.modified_show~=true then
 				gui.refresh_tree()
 				doc.modified_show=true
+				gui.master.ids.infobar.text_color=0xffcc0000
+				gui.master.ids.infobar:set_dirty()
 			end
 		end
 	end
@@ -118,6 +122,15 @@ M.bake=function(oven,docs)
 		it.txt.hooks={}
 		gui.master.ids.texteditor.txt.hooks={}
 		gui.master.ids.texteditor.set_txt(it.txt)
+
+		gui.master.ids.infobar.text=it.filename
+		if it.modified_index==it.txt.undo.index then
+			gui.master.ids.infobar.text_color=nil
+		else
+			gui.master.ids.infobar.text_color=0xffcc0000
+		end
+		gui.master.ids.infobar:set_dirty()
+
 
 		return it
 	end
@@ -159,7 +172,6 @@ M.bake=function(oven,docs)
 
 		return it
 	end
-
 
 	return docs
 end

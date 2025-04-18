@@ -607,8 +607,8 @@ system.configurator=function(opts)
 	elseif opts.mode=="swordstone" then -- text focused 256x128 screen with sprites ( 64x16 chars with 4x8 font )
 	
 		opts.cmap = opts.cmap or bitdown.cmap -- use default swanky32 colors
-		opts.hx  = opts.hx  or 256
-		opts.hy  = opts.hy  or 128
+		opts.hx  = opts.hx  or (64*3)
+		opts.hy  = opts.hy  or (64*2)
 		opts.ss  = opts.ss  or 4
 		opts.fps = opts.fps or 60
 		
