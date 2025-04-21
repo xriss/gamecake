@@ -17,6 +17,27 @@ getsql.sqlite={}
 setmetatable(getsql.sqlite, getsql.sqlite_meta)
 
 
+-- convert simple lists into table data
+getsql.prepare_tables=function(tables)
+
+	for tabname,tab in pairs(tables) do
+		tab.name=tabname
+		tab.columns={} -- keyed by column name
+		for idx,col in ipairs(tab) do
+			col.index=idx
+			for i,val in ipairs(col) do
+				if i==1 then -- first is name
+					col.name=val
+					tab.columns[col.name]=col
+				else		-- everything else is auto flags
+					col[val]=true
+				end
+			end
+		end
+	end
+	
+	return tables
+end
 
 getsql.sqlite.columns_types=function(columns,types)
 	types=types or {}

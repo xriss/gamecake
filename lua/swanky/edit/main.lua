@@ -55,6 +55,7 @@ M.bake=function(oven,main)
 	local cmd=oven.rebake(oven.modname..".cmd")
 	local docs=oven.rebake(oven.modname..".docs")
 	local finds=oven.rebake(oven.modname..".finds")
+	local collect=oven.rebake(oven.modname..".collect")
 
 	local show=oven.rebake(oven.modname..".show")
 
@@ -67,6 +68,8 @@ M.bake=function(oven,main)
 	end
 			
 	main.setup=function()
+	
+		collect.setup()
 
 		main.loads(oven)
 		
