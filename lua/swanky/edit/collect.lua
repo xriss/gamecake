@@ -34,7 +34,8 @@ M.tables=wgetsql.prepare_tables({
 	},
 
 	file={
-		{	"path",		"TEXT",		"PRIMARY",	},
+		{	"id",		"INTEGER",	"PRIMARY",	},
+		{	"path",		"TEXT",		"UNIQUE",	},
 		{	"dir",		"TEXT",					},
 		{	"name",		"TEXT",					},
 	},
@@ -126,6 +127,12 @@ M.task_code=function(linda,task_id,task_idx)
 			for tabname,tab in pairs(tables) do
 				local sql=wgetsql.sqlite.create_table(tab.name,tab)
 				db:exec(sql)
+				for _,sql in ipairs( wgetsql.sqlite.alter_table(tab.name,tab) ) do
+					db:exec(sql)
+				end
+				for _,sql in ipairs( wgetsql.sqlite.create_table_indexs(tab.name,tab) ) do
+					db:exec(sql)
+				end
 			end
 		end
 		

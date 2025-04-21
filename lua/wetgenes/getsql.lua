@@ -81,14 +81,15 @@ getsql.sqlite.create_table=function(name,columns)
 			end
 			
 			if     column.PRIMARY  then push(" PRIMARY KEY ")
-			elseif column.UNIQUE   then push(" UNIQUE ")
+			elseif column.UNIQUE   and  ( type(column.UNIQUE) ~= "table" )  then push(" UNIQUE ")
 			end
 			
 			if     column.NOCASE   then push(" COLLATE NOCASE ")
 			end
 
-			if     column.UNIQUE and  ( type(column.UNIQUE) ~= "table" )  then push(" UNIQUE ")
+			if     column.DEFAULT   then push(" DEFAULT "..column.DEFAULT.." ")
 			end
+
 		end
 
 	end
@@ -106,6 +107,45 @@ getsql.sqlite.create_table=function(name,columns)
 	return table.concat(ss,"");
 end
 
+-- returns array of strings that should be run and ignored if they fail
+getsql.sqlite.alter_table=function(name,columns)
+
+	local rets={}
+	local ss={}
+	local push=function(s) ss[#ss+1]=s end
+	
+	for _,column in ipairs(columns) do
+		ss={}
+		if column.name then
+
+			push("ALTER TABLE "..name.." ADD COLUMN ")
+			
+			push(" "..column.name.." ")
+			
+			if     column.INTEGER  then push(" INTEGER ")
+			elseif column.REAL     then push(" REAL ")
+			elseif column.BLOB     then push(" BLOB ")
+			elseif column.TEXT     then push(" TEXT ")
+			elseif column.NOCASE   then push(" TEXT ")
+			elseif column.JSON     then push(" TEXT ")
+			end
+
+			if     column.NOT_NULL then push(" NOT NULL ")
+			end
+
+			if     column.NOCASE   then push(" COLLATE NOCASE ")
+			end
+
+			rets[#rets+1]=table.concat(ss,"").." ; "
+		end
+
+	end
+
+	return rets
+end
+
+
+-- returns array of strings that should be run to create indexs
 getsql.sqlite.create_table_indexs=function(name,columns)
 
 	local rets={}
