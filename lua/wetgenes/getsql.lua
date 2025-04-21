@@ -102,7 +102,7 @@ getsql.sqlite.create_table=function(name,columns)
 
 	end
 
-	push(" );\n\n")
+	push(" ) STRICT ;\n\n")
 
 	return table.concat(ss,"");
 end
