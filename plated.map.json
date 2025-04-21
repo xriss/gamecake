@@ -264,7 +264,7 @@
     "name": "levels"
    },
    {
-    "count": 637,
+    "count": 641,
     "name": "lua"
    },
    {
@@ -290,6 +290,22 @@
    {
     "count": 1,
     "name": "lua.glslang.yank_shader_versions"
+   },
+   {
+    "count": 4,
+    "name": "lua.swanky"
+   },
+   {
+    "count": 3,
+    "name": "lua.swanky.edit"
+   },
+   {
+    "count": 2,
+    "name": "lua.swanky.edit.collect"
+   },
+   {
+    "count": 1,
+    "name": "lua.swanky.edit.collect.task_code"
    },
    {
     "count": 630,
@@ -3113,7 +3129,7 @@
    },
    {
     "body": "",
-    "count": 637,
+    "count": 641,
     "name": "lua"
    },
    {
@@ -3163,6 +3179,29 @@
     "line": 24,
     "name": "lua.glslang.yank_shader_versions",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/glslang.lua"
+   },
+   {
+    "body": "",
+    "count": 4,
+    "name": "lua.swanky"
+   },
+   {
+    "body": "",
+    "count": 3,
+    "name": "lua.swanky.edit"
+   },
+   {
+    "body": "",
+    "count": 2,
+    "name": "lua.swanky.edit.collect"
+   },
+   {
+    "body": "<p>lanes task function for handling collect communication.</p>\n<p>Mostly we are read/writing an sqlite database containing constantly updated state info.</p>\n",
+    "count": 1,
+    "file": "../lua/swanky/edit/collect.lua",
+    "line": 95,
+    "name": "lua.swanky.edit.collect.task_code",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/swanky/edit/collect.lua"
    },
    {
     "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
