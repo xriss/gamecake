@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 641,
+   "count": 642,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 630,
+   "count": 631,
    "name": "lua.wetgenes"
   },
   {
@@ -1614,7 +1614,7 @@
    "name": "lua.wetgenes.package.reload"
   },
   {
-   "count": 16,
+   "count": 17,
    "name": "lua.wetgenes.path"
   },
   {
@@ -1628,6 +1628,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.path.ext"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.file"
   },
   {
    "count": 1,
@@ -2760,7 +2764,7 @@
  "_list": [
   {
    "body": "<p>Manage file paths under linux or windows, so we need to deal with \\ or \n/ and know the root difference between / and C:\\</p>\n<pre><code>local wpath=require(&quot;wetgenes.path&quot;)\n</code></pre>\n",
-   "count": 16,
+   "count": 17,
    "file": "../lua/wetgenes/path.lua",
    "line": 7,
    "name": "lua.wetgenes.path",
@@ -2775,7 +2779,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
   {
-   "body": "<pre><code>local dir=wpath.dir(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the dir component of the result.</p>\n",
+   "body": "<pre><code>local dir=wpath.dir(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the dir component of the result.</p>\n<p>this will probably end in a / so you may want to call unslash as well \nto remove any trailing slashes and create a more valid path for this \ndirectory. Note this will transform a root dir of &quot;/&quot; into one of &quot;&quot;.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
    "line": 354,
@@ -2786,15 +2790,23 @@
    "body": "<pre><code>local ext=wpath.ext(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the ext component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 414,
+   "line": 418,
    "name": "lua.wetgenes.path.ext",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
+  },
+  {
+   "body": "<pre><code>local file=wpath.file(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the file component of the result.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/path.lua",
+   "line": 370,
+   "name": "lua.wetgenes.path.file",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
   {
    "body": "<pre><code>local folder=wpath.folder(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the folder component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 390,
+   "line": 394,
    "name": "lua.wetgenes.path.folder",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -2810,7 +2822,7 @@
    "body": "<pre><code>local name=wpath.name(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the name component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 402,
+   "line": 406,
    "name": "lua.wetgenes.path.name",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -2858,7 +2870,7 @@
    "body": "<pre><code>local root=wpath.root(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the root component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 378,
+   "line": 382,
    "name": "lua.wetgenes.path.root",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },

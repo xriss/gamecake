@@ -426,6 +426,7 @@
 <a class="sub" href="../../docs/lua.wetgenes.path.currentdir"><span>/lua.wetgenes.path.currentdir</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.dir"><span>/lua.wetgenes.path.dir</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.ext"><span>/lua.wetgenes.path.ext</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.path.file"><span>/lua.wetgenes.path.file</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.folder"><span>/lua.wetgenes.path.folder</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.join"><span>/lua.wetgenes.path.join</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.name"><span>/lua.wetgenes.path.name</span></a>
@@ -708,6 +709,9 @@
 </code></pre>
 <p>This is a small utility function to perform a wpath.resolve then 
 wpath.parse and return the dir component of the result.</p>
+<p>this will probably end in a / so you may want to call unslash as well 
+to remove any trailing slashes and create a more valid path for this 
+directory. Note this will transform a root dir of &quot;/&quot; into one of &quot;&quot;.</p>
 </div>
 </div>
 

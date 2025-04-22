@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 641,
+   "count": 642,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 630,
+   "count": 631,
    "name": "lua.wetgenes"
   },
   {
@@ -1614,7 +1614,7 @@
    "name": "lua.wetgenes.package.reload"
   },
   {
-   "count": 16,
+   "count": 17,
    "name": "lua.wetgenes.path"
   },
   {
@@ -1628,6 +1628,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.path.ext"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.file"
   },
   {
    "count": 1,
