@@ -17,6 +17,7 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.bake=function(oven,docs)
 
 	local gui=oven.rebake(oven.modname..".gui")
+	local collect=oven.rebake(oven.modname..".collect")
 
 	local wtreefile=oven.rebake("wetgenes.gamecake.widgets.treefile")
 
@@ -158,6 +159,8 @@ M.bake=function(oven,docs)
 		it.txt.set_text("\n",filename)
 
 		gui.master.ids.treefile:add_file_item(it.filename)
+		
+		collect.load(filename)
 
 		local f=io.open(filename,"rb")
 		if f then

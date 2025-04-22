@@ -18,6 +18,7 @@ setmetatable(M,M.metatable)
 
 local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
+local djon=require("djon")
 local wpath=require("wetgenes.path")
 local wgetsql=require("wetgenes.getsql")
 
@@ -30,19 +31,34 @@ M.tables=wgetsql.prepare_tables({
 
 	data={
 		{	"key",		"TEXT",		"PRIMARY",	},
-		{	"value",	"JSON",					},
+		{	"value",	"JSONB",				},
 	},
 
+-- single row per file
 	file={
 		{	"id",		"INTEGER",	"PRIMARY",	},
 		{	"path",		"TEXT",		"UNIQUE",	},
-		{	"dir",		"TEXT",					},
-		{	"name",		"TEXT",					},
+		{	"dir",		"TEXT",		"INDEX",	},
+		{	"name",		"TEXT",		"INDEX",	},
+		{	"meta",		"JSONB",				},
+	},
+
+-- single row per file ( cache of last save/load file contents )
+	file_data={
+		{	"id",		"INTEGER",	"PRIMARY",	},
+		{	"ud",		"INTEGER",				},
+		{	"value",	"BLOB",					},
+	},
+
+-- multiple rows per file so id can not be primary and each row is an undo change
+	file_undo={
+		{	"id",		"INTEGER",	"INDEX",	},
+		{	"ud",		"INTEGER",				},
+		{	"value",	"JSONB",				},
+		{	UNIQUE={"id","ud"},					},
 	},
 
 })
-
-dprint(M.tables)
 
 -- collection of state backed up to an sqlite database continuously
 
@@ -64,7 +80,7 @@ M.bake=function(oven,collect)
 			},
 			code=M.task_code,
 		})
-		
+				
 		-- global json state data contained in keys, read on startup and should be written when changed
 		collect.data={}
 
@@ -77,13 +93,90 @@ SELECT * FROM data ;
 
 			]],
 		})
-print(json_data.error)
-print(json_data.rows)
 		for i,v in ipairs(json_data.rows) do
 			collect.data[v.key]=v.value
 		end
 
 	end
+
+-- load the file from database first then disk and also cache this file in database
+	collect.load=function(path)
+	
+		local file={}
+
+		file.meta=oven.tasks:do_memo({
+			task=collect.task_id,
+			binds={
+				PATH=path,
+			},
+			sql=[[
+
+	SELECT * FROM file WHERE path=$PATH;
+
+			]],
+		}).rows[1]
+
+		if not file.meta then -- load from disk and write base values into sqlite
+
+			local f=io.open(path,"rb") -- read full file
+			if f then
+				file.text=f:read("*a")
+				f:close()
+			end			
+			if not file.text then return end -- could not load file
+			
+			local meta={}
+			meta.undo=0
+
+			-- write meta
+			dprint(oven.tasks:do_memo({
+				task=collect.task_id,
+				binds={
+					PATH=path,
+					DIR=wpath.unslash( wpath.dir(path) ),
+					NAME=wpath.file(path),
+					META=djon.save( meta ,"compact" ),
+				},
+				sql=[[
+
+	INSERT INTO file (path,dir,name,meta)
+	VALUES ( $PATH,$DIR,$NAME,jsonb($META) )
+
+				]],
+			}))
+		
+		end
+		
+		if file.meta then -- load from sqlite
+		
+			file.data=oven.tasks:do_memo({
+				task=collect.task_id,
+				binds={
+					ID=file_meta.id,
+				},
+				sql=[[
+
+	SELECT * FROM file_data WHERE id=$ID;
+
+				]],
+			}).rows[1]
+
+			file.undos=oven.tasks:do_memo({
+				task=collect.task_id,
+				binds={
+					ID=file_meta.id,
+				},
+				sql=[[
+
+	SELECT * FROM file_undo WHERE id=$ID;
+
+				]],
+			}).rows or {}
+			
+		end
+
+	end
+
 	
 	return collect
 end

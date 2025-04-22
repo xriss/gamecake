@@ -75,6 +75,7 @@ getsql.sqlite.create_table=function(name,columns)
 			elseif column.TEXT     then push(" TEXT ")
 			elseif column.NOCASE   then push(" TEXT ")
 			elseif column.JSON     then push(" TEXT ")
+			elseif column.JSONB    then push(" BLOB ")
 			end
 
 			if     column.NOT_NULL then push(" NOT NULL ")
@@ -97,12 +98,12 @@ getsql.sqlite.create_table=function(name,columns)
 	for _,column in ipairs(columns) do
 
 		if type(column.UNIQUE)=="table" then -- add unique constraints
-			push(" , UNIQUE ("..table.concat(column.UNIQUE,",")..") \n")
+			push(" ,\n UNIQUE ("..table.concat(column.UNIQUE,",")..") ")
 		end
 
 	end
 
-	push(" ) STRICT ;\n\n")
+	push("\n ) STRICT ;\n\n")
 
 	return table.concat(ss,"");
 end

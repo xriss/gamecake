@@ -358,21 +358,25 @@ end
 This is a small utility function to perform a wpath.resolve then 
 wpath.parse and return the dir component of the result.
 
+this will probably end in a / so you may want to call unslash as well 
+to remove any trailing slashes and create a more valid path for this 
+directory. Note this will transform a root dir of "/" into one of "".
+
 ]]
 wpath.dir=function(...)
 	return wpath.parse( wpath.resolve(...) ).dir
 end
 
---[[#lua.wetgenes.path.name
+--[[#lua.wetgenes.path.file
 
-	local name=wpath.name(path)
+	local file=wpath.file(path)
 
 This is a small utility function to perform a wpath.resolve then 
-wpath.parse and return the name component of the result.
+wpath.parse and return the file component of the result.
 
 ]]
-wpath.name=function(...)
-	return wpath.parse( wpath.resolve(...) ).name
+wpath.file=function(...)
+	return wpath.parse( wpath.resolve(...) ).file
 end
 
 --[[#lua.wetgenes.path.root
