@@ -24,6 +24,10 @@ local wgetsql=require("wetgenes.getsql")
 
 local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
+local zlib=require("zlib")
+local zip_inflate=function(d) return ((zlib.inflate())(d)) end
+local zip_deflate=function(d) return ((zlib.deflate())(d,"finish")) end
+
 local function dprint(a) print(wstr.dump(a)) end
 
 
@@ -67,6 +71,77 @@ M.bake=function(oven,collect)
 	collect.task_id=collect.task_id or "collect"
 	collect.task_id_msg=collect.task_id..":msg"
 
+	collect.do_memo=function(it,noerror)
+		it.task=collect.task_id
+		local ret=oven.tasks:do_memo(it)
+		if ret.error and ( not noerror ) then error(ret.error) end -- auto raise any SQL errors
+		return ret
+	end
+	
+	local load_meta=function(path)
+		local it=collect.do_memo({
+			binds={
+				PATH=path,
+			},
+			sql=[[
+
+	SELECT id,path,json(meta) AS meta FROM file WHERE path=$PATH;
+
+			]],
+		}).rows[1]
+		if it then -- maybe null
+			it.meta=djon.load(it.meta)
+			it.meta.id=it.id
+			it.meta.path=it.path
+			return it.meta
+		end
+	end
+
+	local manifest_meta=function(path)
+		local it=load_meta(path)
+		if it then return it end
+
+		local meta={}
+		meta.undo=0	-- a new file will have an undo level of 0
+		meta.state="manifest" -- this is a new file
+
+		-- write meta
+		collect.do_memo({
+			binds={
+				PATH=path,
+				DIR=wpath.unslash( wpath.dir(path) ),
+				NAME=wpath.file(path),
+				META=djon.save( meta ,"compact" ),
+			},
+			sql=[[
+
+	INSERT INTO file (path,dir,name,meta)
+	VALUES ( $PATH,$DIR,$NAME,jsonb($META) )
+
+			]],
+		})
+
+		-- read meta so we know ID
+		return load_meta(path)
+	end
+
+	local save_meta=function(meta)
+
+		-- write meta to sqlite
+		collect.do_memo({
+			binds={
+				ID=meta.id,
+				META=djon.save( meta ,"compact" ),
+			},
+			sql=[[
+
+	UPDATE file SET meta=jsonb($META) WHERE id=$ID;
+
+			]],
+		})
+
+	end
+
 	collect.setup=function()
 
 		-- create collect data handling thread
@@ -85,98 +160,131 @@ M.bake=function(oven,collect)
 		collect.data={}
 
 		-- block and read all the json
-		local json_data=oven.tasks:do_memo({
-			task=collect.task_id,
+		local json_data=collect.do_memo({
 			sql=[[
 
-SELECT * FROM data ;
+SELECT key,json(value) as value FROM data ;
 
 			]],
 		})
 		for i,v in ipairs(json_data.rows) do
-			collect.data[v.key]=v.value
+			collect.data[v.key]=djon.load(v.value)
 		end
 
 	end
 
 -- load the file from database first then disk and also cache this file in database
-	collect.load=function(path)
+	collect.load=function(it,path)
 	
-		local file={}
+		it.meta=manifest_meta(path)
 
-		file.meta=oven.tasks:do_memo({
-			task=collect.task_id,
+		if it.meta.state=="manifest" then -- not a real meta yet so load from disk and update
+
+			local text
+			local f=io.open(path,"rb") -- read full file
+			if f then
+				text=f:read("*a")
+				f:close()
+			end
+		
+			-- write data only if we have some
+			if text then
+				collect.do_memo({
+					binds={
+						ID=it.meta.id,
+						UD=0,
+					},
+					blobs={
+						DATA=zip_deflate(text),
+					},
+					sql=[[
+
+	INSERT INTO file_data (id,ud,value)
+	VALUES ( $ID,$UD,$DATA )
+
+					]],
+				})
+			end
+			
+			it.meta.state="new"
+			save_meta(it.meta)
+
+		end
+
+-- always load from sqlite even if we just saved to it
+
+		local data=collect.do_memo({
 			binds={
-				PATH=path,
+				ID=it.meta.id,
 			},
 			sql=[[
 
-	SELECT * FROM file WHERE path=$PATH;
+	SELECT id,ud,value FROM file_data WHERE id=$ID;
 
 			]],
 		}).rows[1]
+		if data then
+			it.meta.undo=data.ud -- the undo point that this data was saved at
+			it.txt.set_text( zip_inflate(data.value) ,filename) -- set the uncompressed text
 
-		if not file.meta then -- load from disk and write base values into sqlite
-
-			local f=io.open(path,"rb") -- read full file
-			if f then
-				file.text=f:read("*a")
-				f:close()
-			end			
-			if not file.text then return end -- could not load file
-			
-			local meta={}
-			meta.undo=0
-
-			-- write meta
-			dprint(oven.tasks:do_memo({
-				task=collect.task_id,
-				binds={
-					PATH=path,
-					DIR=wpath.unslash( wpath.dir(path) ),
-					NAME=wpath.file(path),
-					META=djon.save( meta ,"compact" ),
-				},
-				sql=[[
-
-	INSERT INTO file (path,dir,name,meta)
-	VALUES ( $PATH,$DIR,$NAME,jsonb($META) )
-
-				]],
-			}))
-		
+			data=nil -- dont bother keeping the compressed data around
 		end
-		
-		if file.meta then -- load from sqlite
-		
-			file.data=oven.tasks:do_memo({
-				task=collect.task_id,
-				binds={
-					ID=file_meta.id,
-				},
-				sql=[[
 
-	SELECT * FROM file_data WHERE id=$ID;
+		local undos=collect.do_memo({
+			binds={
+				ID=it.meta.id,
+			},
+			sql=[[
 
-				]],
-			}).rows[1]
+	SELECT id,ud,json(value) AS value FROM file_undo WHERE id=$ID;
 
-			file.undos=oven.tasks:do_memo({
-				task=collect.task_id,
-				binds={
-					ID=file_meta.id,
-				},
-				sql=[[
-
-	SELECT * FROM file_undo WHERE id=$ID;
-
-				]],
-			}).rows or {}
-			
+			]],
+		}).rows or {}
+		for i,r in pairs(undos) do --need to replace txt undos with this data
+			r.value=djon.load(r.value)
 		end
 
 	end
 
+-- save the file from database first then disk
+	collect.save=function(it,path)
+
+		if path and path~=it.meta.path then -- saving to new file
+			it.meta=manifest_meta(path) -- this will generate a new meta ( or load it from disk)
+			-- need to reset any undos this file may already have
+		end
+		
+		local text=it.txt.get_text()
+		
+		it.meta.undo=it.txt.undo.index
+		it.meta.state="save"
+		save_meta(it.meta)
+
+		-- write data to sqlite
+		collect.do_memo({
+			binds={
+				ID=it.meta.id,
+				UD=it.meta.undo,
+			},
+			blobs={
+				DATA=zip_deflate(text),
+			},
+			sql=[[
+
+	UPDATE file_data SET ud=$UD,value=$DATA WHERE id=$ID;
+
+			]],
+		})
+
+		-- write data to disk
+		local f=io.open(it.filename,"wb")
+		if f then
+			local d=f:write(text)
+			f:close()
+		end
+
+		it.modified_index=it.meta.undo
+	end
 	
 	return collect
 end

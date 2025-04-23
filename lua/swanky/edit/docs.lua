@@ -138,14 +138,17 @@ M.bake=function(oven,docs)
 
 	doc.save=function(it,filename)
 	
-		if filename then it.filename=filename end
-		local s=it.txt.get_text()
-		local f=io.open(it.filename,"wb")
-		if f then
-			local d=f:write(s)
-			f:close()
+		if filename and it.filename~=filename then
+
+-- TODO stop us saving over the name of another opened doc
+
+			it.filename=filename
+-- save with a new filename is basically a dupe or file copy.
+			collect.save(it,filename)
+		else
+			collect.save(it)
 		end
-		it.modified_index=it.txt.undo.index
+
 
 	end
 
@@ -153,24 +156,15 @@ M.bake=function(oven,docs)
 
 
 		if not filename then
-			filename=wpath.currentdir()..os.date("swanky-%Y%m%d-%H%M%S.txt")
+			filename=wpath.currentdir()..os.date("swed-%Y%m%d-%H%M%S.txt")
 		end
 		it.filename=filename
 		it.txt.set_text("\n",filename)
 
 		gui.master.ids.treefile:add_file_item(it.filename)
 		
-		collect.load(filename)
-
-		local f=io.open(filename,"rb")
-		if f then
-			local d=f:read("*a")
-			if d then
-				it.txt.set_text(d,filename)
-			end
-			f:close()
-		end
-
+		collect.load(it,filename)
+		
 		it.txt.set_lexer()
 
 		return it
