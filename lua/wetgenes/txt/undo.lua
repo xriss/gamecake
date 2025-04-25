@@ -92,6 +92,16 @@ M.construct=function(undo,txt)
 	end
 	undo.list_reset()
 	
+	undo.list_set_fromsql=function(rows,idx)
+		undo.list_reset()
+		for i,row in pairs(rows) do --need to replace txt undos with this data
+			undo.list[row.ud]=row.value
+			undo.memory=undo.memory+#row.value -- keep running total
+		end
+		undo.length=#undo.list
+		undo.index=idx
+	end
+	
 	undo.list_get=function(index)
 		if not index then return end
 		local it=undo.list[index]
@@ -106,6 +116,9 @@ M.construct=function(undo,txt)
 			undo.length=index
 			undo.memory=undo.memory+#it -- keep running total
 		end
+		if undo.list_hook then
+			undo:list_hook("set",index,it) -- call this user function with new/changed data ( write to sqlite database )
+		end
 	end
 
 	undo.list_push=function(it)
@@ -115,6 +128,7 @@ M.construct=function(undo,txt)
 	end
 
 	undo.list_trim=function(index)
+		index = index or undo.index	--  default to current index
 		if index < undo.length then -- need to trim some fat
 			for i=undo.length,index+1,-1 do -- remove these
 				local it=undo.list[i]
@@ -122,6 +136,9 @@ M.construct=function(undo,txt)
 				undo.list[i]=nil
 			end
 			undo.length=index
+			if undo.list_hook then
+				undo:list_hook("trim",index) -- call this user function with new/changed data ( write to sqlite database )
+			end
 		end
 	end
 
@@ -161,6 +178,12 @@ M.construct=function(undo,txt)
 		if undo.index>0 then
 			undo.apply(undo.index,2)
 			undo.index=undo.index-1
+		end
+	end
+
+	undo.redo_all=function() -- fast forwards
+		while undo.index<undo.length do
+			undo.redo()
 		end
 	end
 

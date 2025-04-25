@@ -58,7 +58,7 @@ M.tables=wgetsql.prepare_tables({
 	file_undo={
 		{	"id",		"INTEGER",	"INDEX",	},
 		{	"ud",		"INTEGER",				},
-		{	"value",	"JSONB",				},
+		{	"value",	"BLOB",					},
 		{	UNIQUE={"id","ud"},					},
 	},
 
@@ -70,6 +70,11 @@ M.bake=function(oven,collect)
 
 	collect.task_id=collect.task_id or "collect"
 	collect.task_id_msg=collect.task_id..":msg"
+
+	collect.send_memo=function(it)
+		it.task=collect.task_id
+		oven.tasks:send(it,0)
+	end
 
 	collect.do_memo=function(it,noerror)
 		it.task=collect.task_id
@@ -236,14 +241,53 @@ SELECT key,json(value) as value FROM data ;
 			},
 			sql=[[
 
-	SELECT id,ud,json(value) AS value FROM file_undo WHERE id=$ID;
+	SELECT id,ud,value FROM file_undo WHERE id=$ID;
 
 			]],
 		}).rows or {}
-		for i,r in pairs(undos) do --need to replace txt undos with this data
-			r.value=djon.load(r.value)
-		end
+		it.txt.undo.list_set_fromsql(undos,it.meta.undo)
+		it.txt.undo.redo_all()
 
+	end
+
+-- save an undo update ( possibly overwrite )
+	collect.undo_update=function(it,index,data)
+		if not it.meta then return end -- need meta id
+
+		collect.send_memo({
+			binds={
+				ID=it.meta.id,
+				UD=index,
+			},
+			blobs={
+				DATA=data,
+			},
+			sql=[[
+
+	INSERT INTO file_undo ( id, ud, value )
+	VALUES ( $ID, $UD, $DATA )
+	ON CONFLICT DO UPDATE SET
+	id=$ID,	ud=$UD,	value=$DATA ;
+
+			]],
+		})
+	end
+
+-- trim undos to the given index
+	collect.undo_trim=function(it,index)
+		if not it.meta then return end -- need meta id
+
+		collect.do_memo({
+			binds={
+				ID=it.meta.id,
+				UD=index,
+			},
+			sql=[[
+
+	DELETE FROM file_undo WHERE id=$ID AND ud>$UD;
+
+			]],
+		})
 	end
 
 -- save the file from database first then disk
@@ -283,7 +327,6 @@ SELECT key,json(value) as value FROM data ;
 			f:close()
 		end
 
-		it.modified_index=it.meta.undo
 	end
 	
 	return collect

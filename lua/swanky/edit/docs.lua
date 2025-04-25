@@ -41,7 +41,7 @@ M.bake=function(oven,docs)
 			item.line_prefix.text_color=nil
 			if loaded then
 				item.line_prefix.text_color=0xff00cc00
-				if loaded.modified_index~=loaded.txt.undo.index then
+				if loaded.meta.undo~=loaded.txt.undo.index then
 					item.line_prefix.text_color=0xffcc0000
 					item.line_prefix.text="* "
 				else
@@ -82,12 +82,16 @@ M.bake=function(oven,docs)
 
 		it.txt=require("wetgenes.txt").construct({search=docs.search})
 		it.txt.doc=it
+		it.txt.undo.list_hook=function(undo,mode,index,data)
+			local it=undo.txt.doc
+			if     mode=="trim" then	collect.undo_trim(it,index)
+			elseif mode=="set"  then	collect.undo_update(it,index,data)
+			else	error("unknown undo.list_hook mode : "..mode )
+			end
+		end
 
 		it:load(filename)
 
---		docs.refresh()
-
-		it.modified_index=it.txt.undo.index
 
 		return it
 	end
@@ -97,7 +101,7 @@ M.bake=function(oven,docs)
 		local doc=docs.doc
 		if not doc then return end
 
-		if doc.modified_index==doc.txt.undo.index then
+		if doc.meta.undo==doc.txt.undo.index then
 			if doc.modified_show==true then
 				gui.refresh_tree()
 				doc.modified_show=false
@@ -125,7 +129,7 @@ M.bake=function(oven,docs)
 		gui.master.ids.texteditor.set_txt(it.txt)
 
 		gui.master.ids.infobar.text=it.filename
-		if it.modified_index==it.txt.undo.index then
+		if it.meta.undo==it.txt.undo.index then
 			gui.master.ids.infobar.text_color=nil
 		else
 			gui.master.ids.infobar.text_color=0xffcc0000
@@ -137,6 +141,9 @@ M.bake=function(oven,docs)
 	end
 
 	doc.save=function(it,filename)
+
+-- trim on save ( so you can undo then save and know that the data is gone gone gone )	
+		it.txt.undo.list_trim()
 	
 		if filename and it.filename~=filename then
 
@@ -156,7 +163,7 @@ M.bake=function(oven,docs)
 
 
 		if not filename then
-			filename=wpath.currentdir()..os.date("swed-%Y%m%d-%H%M%S.txt")
+			filename=wpath.currentdir()..os.date("swed-%Y%m%d.txt")
 		end
 		it.filename=filename
 		it.txt.set_text("\n",filename)

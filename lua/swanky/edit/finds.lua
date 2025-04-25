@@ -137,7 +137,7 @@ M.bake=function(oven,finds)
 			item.line_prefix.text_color=nil
 			if loaded then
 				item.line_prefix.text_color=0xff00cc00
-				if loaded.modified_index~=loaded.txt.undo.index then
+				if loaded.meta.undo~=loaded.txt.undo.index then
 					item.line_prefix.text_color=0xffcc0000
 --					item.line_prefix.text="* "
 --				else
