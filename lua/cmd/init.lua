@@ -7,7 +7,7 @@ if arg[1] and arg[1]=="-lcmd" then
 	if arg[1] and arg[1]=="--" then table.remove(arg,1) end
 end
 
-require("apps").default_paths()     -- set search paths to smarter defaults
+--require("apps").default_paths()     -- set search paths to smarter defaults
 
 local cmd
 for i=1,#arg do

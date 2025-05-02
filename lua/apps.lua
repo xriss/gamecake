@@ -106,7 +106,6 @@ end
 -- than using the builtin strings. Also lets us pick up any dlls in there.
 --
 function default_paths(appdir)
-
 -- we are looking for a dir/lua/name.lua and dir will be our base dir so look in various places
 
 	if not pcall( function() return require("lfs") end ) then return end -- not possible without lfs

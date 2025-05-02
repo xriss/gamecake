@@ -1,6 +1,13 @@
 #!/usr/local/bin/gamecake
 
+-- we do not want to pickup non embeded data by default
+--[[
 local luapath,apppath=require("apps").default_paths(debug.getinfo(1,"S").source:match("^@(.*[/\\])")) -- default search paths so things can easily be found
+]]
+-- we should be good to work with *only* internal files so disable *all* module path loading
+package.path=""
+package.cpath=""
+-- this is so this installed swed will continue to work using only its internal installed code
 
 local global=require("global") -- prevent accidental global use
 
@@ -10,7 +17,7 @@ local opts={
 	width=1280,
 	height=720,
 	name="swanky",
-	version="Alpha+11c",
+	version=require("swanky.edit.version").version,
 	fps="auto",
 	title="Swanky Edit",
 	name="swanky.edit",

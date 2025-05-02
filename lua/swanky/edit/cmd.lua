@@ -25,11 +25,10 @@ M.bake=function(oven,cmd)
 	cmd.start=function(opts)
 		opts=opts or oven.opts
 		
+
 --		dprint(opts)
 
 --		gui.texteditor.txt.set_text("Hello")
-
-
 
 
 		local args=require("cmd.args").bake({inputs={
