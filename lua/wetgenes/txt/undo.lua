@@ -127,7 +127,7 @@ M.construct=function(undo,txt)
 			local ty,tx=txt.ptr_to_location(it[1]+#it[2])
 
 			txt.mark(fy,fx,ty,tx)
-			assert( it[2] == txt.cut() )
+			assert( it[2] == ( txt.cut() or "" ) )
 			txt.insert(it[3])
 
 		elseif ru==2 then -- undo
@@ -136,7 +136,7 @@ M.construct=function(undo,txt)
 			local ty,tx=txt.ptr_to_location(it[1]+#it[3])
 
 			txt.mark(fy,fx,ty,tx)
-			assert( it[3] == txt.cut() )
+			assert( it[3] == ( txt.cut() or "" ) )
 			txt.insert(it[2])
 
 		end
