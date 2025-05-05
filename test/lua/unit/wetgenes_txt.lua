@@ -23,3 +23,22 @@ function test_lex_lua()
 end
 
 
+function test_pos_lua()
+
+	local txt=wtxt.construct()
+	txt.set_text("abcdefghijklmnopqrstuvwxyz")
+
+assert_equal("z",txt.get_string_sub(1, -1) )
+assert_equal("z",txt.get_string_sub(1, -1,-1) )
+assert_equal("a",txt.get_string_sub(1, 1,1) )
+assert_equal("",txt.get_string_sub(1, 0,0) )
+assert_equal("abcdefghijklmnopqrstuvwxyz",txt.get_string_sub(1, 0) )
+assert_equal("abcdefghijklmnopqrstuvwxyz",txt.get_string_sub(1, 1) )
+assert_equal("fghijkl",txt.get_string_sub(1, 6,12) )
+assert_equal("tuvwxyz",txt.get_string_sub(1, 20,30) )
+assert_equal("xyz",txt.get_string_sub(1, 24,30) )
+assert_equal("yz",txt.get_string_sub(1, 25,30) )
+
+end
+
+

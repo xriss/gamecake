@@ -54,14 +54,19 @@ M.construct=function(txt)
 		local l=#cache.codes -- length of codes
 		i=i or 1
 		j=j or l
+--print("sub1",i,j)
 		if i<0 then i=l+1+i   end -- adjust negative start
 		if j<0 then j=l+1+j   end -- adjust negative end
 		if i<1 then i=1       end -- clamp start
 		if j>l then j=l       end -- clamp end
+		if j<i then return "" end -- range ends before it starts
 		if i>l then return "" end -- starts after end
 		if j<1 then return "" end -- ends before start
+--print("sub2",i,j)
 		i=cache.cb[i] -- convert to byte offsets
 		j=cache.cb[j+1]-1 -- one less than next char
+--print("sub3",i,j)
+--print("sub4",cache.string:sub(i,j))
 		return cache.string:sub(i,j) -- finally return string
 	end
 
@@ -931,7 +936,8 @@ move a cursor one character up and clip it
 
 ]]
 	txt.clip_up=function(y,x)
-		return txt.clip(y-1,x)
+		if y>1 then y=y-1 end
+		return txt.clip(y,x)
 	end
 
 --[[
@@ -940,7 +946,8 @@ move a cursor one character down and clip it
 
 ]]
 	txt.clip_down=function(y,x)
-		return txt.clip(y+1,x)
+		if y<txt.hy then y=y+1 end
+		return txt.clip(y,x)
 	end
 
 --[[
