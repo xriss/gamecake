@@ -172,9 +172,13 @@ Find the line number and column number of the given byte offset into the text.
 ]]
 	txt.ptr_to_location=function(ptr,ystart,cstart)
 	
-		if ptr<0 then return end
+		if ptr<0 then -- return start
+			return 1,1
+		end
 		local last=txt.permastart[#txt.permastart]
-		if ptr>=last then return end
+		if ptr>=last then -- return end
+			return txt.hy,txt.get_hx(txt.hy)+1
+		end
 	
 
 		local mh=#txt.permastart
@@ -1350,7 +1354,7 @@ find and select prev
 	wtxtedit.construct({},txt)
 
 
-	txt.set_text(txt.endline,"")
+	txt.set_text("","")
 	txt.set_lexer()
 	return txt
 end

@@ -4,31 +4,6 @@
 
 undo / redo code for a text editor with persistence to disk
 
-persistance to disk is in tsv format filename.txt.undo files where a 
-.undo is added to the end of the file.
-
-see https://pypi.org/project/linear-tsv/1.0.0/ for tsv format the first 
-most column is always a command and the other columns are data needed to 
-apply/reverse this command in theory a .undo file is a total history 
-and as we should only be appending data (lines at a time even) then a 
-file can be recovered from it and it should have limited corruption 
-possibilities when things go wrong.
-
-For security reasons this file may have undos removed as a separate 
-step. That is to say things that where done / pasted accidentality then 
-removed instantly will be purged from its history when performing a 
-file save.
-
-You can be save in the knowledge that any information you undo will not 
-be saved except as temporary crash safe buffers.
-
-The following need to be escaped with a \ when used in each column.
-
-	\n for newline,
-	\t for tab,
-	\r for carriage return,
-	\\ for backslash.
-  
 ]]
 
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
@@ -151,8 +126,8 @@ M.construct=function(undo,txt)
 			local fy,fx=txt.ptr_to_location(it[1])
 			local ty,tx=txt.ptr_to_location(it[1]+#it[2])
 
-			local sa=txt.cut(fy,fx,ty,tx)
-			txt.mark(fy,fx,fy,fx)
+			txt.mark(fy,fx,ty,tx)
+			assert( it[2] == txt.cut() )
 			txt.insert(it[3])
 
 		elseif ru==2 then -- undo
@@ -160,8 +135,8 @@ M.construct=function(undo,txt)
 			local fy,fx=txt.ptr_to_location(it[1])
 			local ty,tx=txt.ptr_to_location(it[1]+#it[3])
 
-			local sa=txt.cut(fy,fx,ty,tx)
-			txt.mark(fy,fx,fy,fx)
+			txt.mark(fy,fx,ty,tx)
+			assert( it[3] == txt.cut() )
 			txt.insert(it[2])
 
 		end
@@ -216,10 +191,10 @@ M.construct=function(undo,txt)
 					-- is it a good idea to append?
 					local good_idea=true
 					
-					if it[3]:find("\n") then -- do not join line
+					if it[3]:find(txt.endline) then -- do not join line
 						good_idea=false
 					end
-					if insert_string:find("\n") then -- do not join lines
+					if insert_string:find(txt.endline) then -- do not join lines
 						good_idea=false
 					end
 					if it[3]:find("%s") then -- if old string contains space then only append space
@@ -296,7 +271,7 @@ M.construct=function(undo,txt)
 		local s=txt.get_string(txt.cy) or ""
 		local indent=s:match("^([\t ]*)") or ""
 		if txt.cx<=#indent then indent="" end -- no auto indent
-		undo.remember(indent.."\n")
+		undo.remember(txt.endline..indent)
 		return txt.insert_newline(indent)
 	end
 
