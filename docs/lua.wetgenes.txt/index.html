@@ -805,26 +805,6 @@ https://github.com/sublimehq/Packages
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/undo.lua#L1">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/undo.lua</a></div>
 <div><p>(C) 2020 Kriss Blank under the <a href="https://opensource.org/licenses/MIT">https://opensource.org/licenses/MIT</a></p>
 <p>undo / redo code for a text editor with persistence to disk</p>
-<p>persistance to disk is in tsv format filename.txt.undo files where a 
-.undo is added to the end of the file.</p>
-<p>see <a href="https://pypi.org/project/linear-tsv/1.0.0/">https://pypi.org/project/linear-tsv/1.0.0/</a> for tsv format the first 
-most column is always a command and the other columns are data needed to 
-apply/reverse this command in theory a .undo file is a total history 
-and as we should only be appending data (lines at a time even) then a 
-file can be recovered from it and it should have limited corruption 
-possibilities when things go wrong.</p>
-<p>For security reasons this file may have undos removed as a separate 
-step. That is to say things that where done / pasted accidentality then 
-removed instantly will be purged from its history when performing a 
-file save.</p>
-<p>You can be save in the knowledge that any information you undo will not 
-be saved except as temporary crash safe buffers.</p>
-<p>The following need to be escaped with a \ when used in each column.</p>
-<pre><code>\n for newline,
-\t for tab,
-\r for carriage return,
-\\ for backslash.
-</code></pre>
 </div>
 </div>
 
