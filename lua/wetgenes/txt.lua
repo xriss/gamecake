@@ -51,18 +51,17 @@ M.construct=function(txt)
 	txt.get_string_sub=function(idx,i,j)
 		local cache=txt.get_cache(idx)
 		if not cache then return "" end
-		i=i or  1
-		j=j or -1
 		local l=#cache.codes -- length of codes
-		if i<0 then i=l+i end -- deal with negative values
-		if j<0 then j=l+1+j end
-		if i<1 then i=1 end -- clamp values
-		if j<0 then j=0 end
-		if i>l then i=l end
-		if j>l then j=l end
-		if j==0 then return "" end
-		i=cache.cb[i] or 0 -- convert to byte offset
-		j=(cache.cb[j+1] or 1)-1
+		i=i or 1
+		j=j or l
+		if i<0 then i=l+1+i   end -- adjust negative start
+		if j<0 then j=l+1+j   end -- adjust negative end
+		if i<1 then i=1       end -- clamp start
+		if j>l then j=l       end -- clamp end
+		if i>l then return "" end -- starts after end
+		if j<1 then return "" end -- ends before start
+		i=cache.cb[i] -- convert to byte offsets
+		j=cache.cb[j+1]-1 -- one less than next char
 		return cache.string:sub(i,j) -- finally return string
 	end
 
@@ -228,6 +227,10 @@ Fill the editor up with text, the filename is used to set the lexer used for hig
 
 		if text then -- set new text
 			txt.strings=wstring.split_lines(text)
+			if text=="" or text:sub(-1)==txt.endline then -- empty file or ends in \n
+				txt.strings[#txt.strings+1]="" -- then add an empty last line
+			end
+
 			txt.clear_caches()
 		
 			txt.hx=0
@@ -335,9 +338,11 @@ or japanese double glyphs. Its a complicated mapping so it is precalculated
 			x=x+width
 			b=b+size
 
-			cache.cb[c]=b
-			cache.cx[c]=x
 		end
+		
+		-- last char
+		cache.cb[c]=b
+		cache.cx[c]=x
 
 		return cache
 	end
@@ -947,7 +952,6 @@ insert a character, eg user typing
 	
 		local sb=txt.get_string_sub(txt.cy,1,txt.cx-1)
 		local sc=txt.get_string_sub(txt.cy,txt.cx)
-		
 		txt.set_string(txt.cy,sb..s..sc)
 	
 		txt.cx=txt.cx+1

@@ -185,7 +185,7 @@ SELECT key,json(value) as value FROM data ;
 
 		if it.meta.state=="manifest" then -- not a real meta yet so load from disk and update
 
-			local text
+			local text="" -- default to empty
 			local f=io.open(path,"rb") -- read full file
 			if f then
 				text=f:read("*a")
@@ -193,23 +193,21 @@ SELECT key,json(value) as value FROM data ;
 			end
 		
 			-- write data only if we have some
-			if text then
-				collect.do_memo({
-					binds={
-						ID=it.meta.id,
-						UD=0,
-					},
-					blobs={
-						DATA=zip_deflate(text),
-					},
-					sql=[[
+			collect.do_memo({
+				binds={
+					ID=it.meta.id,
+					UD=0,
+				},
+				blobs={
+					DATA=zip_deflate(text),
+				},
+				sql=[[
 
 	INSERT INTO file_data (id,ud,value)
 	VALUES ( $ID,$UD,$DATA )
 
-					]],
-				})
-			end
+				]],
+			})
 			
 			it.meta.state="new"
 			save_meta(it.meta)
@@ -321,7 +319,7 @@ SELECT key,json(value) as value FROM data ;
 		})
 
 		-- write data to disk
-		local f=io.open(it.filename,"wb")
+		local f=io.open(it.meta.path,"wb")
 		if f then
 			local d=f:write(text)
 			f:close()
