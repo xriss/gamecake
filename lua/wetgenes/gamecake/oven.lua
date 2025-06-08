@@ -712,6 +712,7 @@ os.exit()
 				end
 			end
 
+			-- a multi frame update is usually caused by changing state so do not do anything smart here just keep going
 			if oven.update_co then -- just continue coroutine until it ends
 				if coroutine.status(oven.update_co)~="dead" then
 --					print( "CO:"..coroutine.status(oven.update_co) )
@@ -721,25 +722,24 @@ os.exit()
 					oven.update_co=nil
 				end
 			end
---[[
-collectgarbage()
-local gci=gcinfo()
-local gb=oven.gl.counts.buffers
-print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
-]]
-
 
 			if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
 
-				if oven.frame_time<(oven.win:time()-0.500) then oven.frame_time=oven.win:time() end -- prevent race condition
-
-				if wwin.hardcore.sleep then
-					while (oven.frame_time-(oven.frame_rate or 0))>oven.win:time() do
-						oven.msgs() -- keep handling msgs?
-						wwin.hardcore.sleep(0.001) -- sleep here 1ms until we need to update
+				if oven.frame_time<(oven.win:time()-0.500) then
+--					oven.upnet_pause="catchup"
+--print(oven.upnet_pause)
+-- need to pause network code here so everyone can catch up
+					oven.frame_time=oven.win:time()-- prevent race condition
+				end
+				
+				while (oven.frame_time-(oven.frame_rate or 0))>oven.win:time() do
+					oven.msgs() -- keep handling msgs?
+--print("waiting")
+					if wwin.hardcore.sleep then
+						if (oven.frame_time-(oven.frame_rate or 0))<=oven.win:time() then
+							wwin.hardcore.sleep(0.001) -- sleep here 1ms until we need to update
+						end
 					end
- 				else
-					if (oven.frame_time-oven.frame_rate)>oven.win:time() then return end -- cant sleep, just skip
 				end
 
 			end
@@ -762,10 +762,9 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 
 				if oven.times then oven.times.update.start() end
 
-				oven.ups.update() -- new way
+				oven.ups.update() -- get new inputs
 				for _,m in ipairs(oven.ups.msgs) do oven.domsg(m) end
 
---				oven.skeys.update() -- old way
 				for i,v in ipairs(oven.mods) do
 					if v.update then
 						v.update()
@@ -784,6 +783,8 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 
 				if oven.frame_rate and oven.frame_time and (not oven.frame_rate_auto) then --  forced updaterate enabled
 					if (oven.frame_time-oven.frame_rate)<time then -- repeat until we are a frame ahead of real time
+					oven.upnet_pause=oven.upnet_pause or "updates"
+--print(oven.upnet_pause ,oven.frame_time,oven.frame_rate , time)
 						return f() -- tailcall
 					end
 				end
@@ -791,6 +792,7 @@ print(string.format("mem=%6.0fk gb=%4d",math.floor(gci),gb))
 			end
 
 			if not oven.update_co then -- create a new one
+				oven.upnet_pause=nil -- release pause
 				oven.update_co=coroutine.create(f)
 			end
 			if coroutine.status(oven.update_co)~="dead" then

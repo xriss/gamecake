@@ -215,6 +215,7 @@ end
 all.scene.do_update=function(scene)
 
 
+
 	local upnet=scene.oven.upnet
 	scene.ticklength=upnet.ticks.length
 	scene.tween=1 -- disable tweening while updating
@@ -223,7 +224,12 @@ all.scene.do_update=function(scene)
 
 --	main_zone.scene.call("update")
 
-	upnet.update()
+	if oven.upnet_pause=="updates" then-- only first update should update
+		upnet.update() -- do not advance time
+		return
+	else
+		upnet.update(true) -- advance time
+	end
 
 	-- remove data we have all agreed too
 	while upnet.get_client_agreed() > (upnet.ticks.base+1) do

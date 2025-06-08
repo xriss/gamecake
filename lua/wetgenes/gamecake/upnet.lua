@@ -575,7 +575,9 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 
 	-- manage msgs and pulse controller state
 	upnet.join_wait=0
-	upnet.update=function()
+	upnet.update=function(advance)
+		local pause=not advance
+		pause=pause or upnet.ticks.pause -- can also pause while connecting
 
 		if upnet.mode=="join" then
 			if ( now() - upnet.join_wait ) > 5 then -- wait 5 secs to join before we try again
@@ -614,7 +616,7 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 
 		until not memo
 
-		if not upnet.ticks.pause then
+		if not pause then
 
 		repeat until not upnet.update_ticks_input() -- update ticks.input
 		repeat until not upnet.update_ticks_agreed() -- update ticks.agreed
@@ -625,12 +627,13 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 
 		if upnet.ticks.now - upnet.ticks.agreed > 64 then -- pause/glitch if we get way too far behind
 			upnet.ticks.pause="timeout"
+			-- todo unpause when we catchup ?
 		end
 
 		if upnet.ticks.epoch and upnet.us then -- we are ticking
 			local t=math.floor((now()-upnet.ticks.epoch)/upnet.ticks.length)
 			if t>upnet.ticks.now then
-				if upnet.ticks.pause then
+				if pause then
 					upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length) -- reset epoch so we do not advance
 --					break
 				else
