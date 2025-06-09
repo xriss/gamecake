@@ -907,6 +907,7 @@ btTransform trans;
 			trans.setRotation(btQuaternion( lua_tonumber(l,5) ,  lua_tonumber(l,6) , lua_tonumber(l,7) , lua_tonumber(l,8) ));
 		}
 		body->setWorldTransform(trans);
+		body->setInterpolationWorldTransform(trans);
 	}
 
 //	btMotionState *motion=body->getMotionState();
@@ -941,7 +942,9 @@ btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isnumber(l,2) )
 	{
-		body->setLinearVelocity( btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) ) );
+		btVector3 lv = btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) );
+		body->setLinearVelocity( lv );
+		body->setInterpolationLinearVelocity( lv );
 	}
 
 	btVector3 v=body->getLinearVelocity();
@@ -964,7 +967,9 @@ btRigidBody *body = (btRigidBody*)lua_bullet_body_ptr(l, 1 );
 
 	if( lua_isnumber(l,2) )
 	{
-		body->setAngularVelocity( btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) ) );
+		btVector3 av = btVector3( lua_tonumber(l,2) ,  lua_tonumber(l,3) , lua_tonumber(l,4) );
+		body->setAngularVelocity( av );
+		body->setInterpolationAngularVelocity( av );
 	}
 
 	btVector3 v=body->getAngularVelocity();
