@@ -630,18 +630,20 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 			-- todo unpause when we catchup ?
 		end
 
-		if upnet.ticks.epoch and upnet.us then -- we are ticking
+		while upnet.ticks.epoch and upnet.us do -- we are ticking
 			local t=math.floor((now()-upnet.ticks.epoch)/upnet.ticks.length)
 			if t>upnet.ticks.now then
 				if pause then
 					upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length) -- reset epoch so we do not advance
---					break
+					return
 				else
 					upnet.next_tick()
 --					local dbg_hash=upnet.hashs[2+upnet.ticks.agreed-upnet.ticks.base] or {}
 --					print("now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base,Ox(dbg_hash[1]),Ox(dbg_hash[2]))
 --					dlog(upnet.dmode("tick"),"now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base)
 				end
+			else
+				return
 			end
 		end
 

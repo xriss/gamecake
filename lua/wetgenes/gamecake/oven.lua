@@ -34,6 +34,10 @@ we try and do much else which usually sorts it out
 --		os.exit(1)
 	end
 
+-- tweak garbage to eat less time?
+collectgarbage("setpause",400)
+collectgarbage("setstepmul",100)
+
 
 --[[#lua.wetgenes.gamecake.oven
 
@@ -723,18 +727,20 @@ os.exit()
 				end
 			end
 
+			oven.upnet_pause=nil -- release pause
 			if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
 
-				if oven.frame_time<(oven.win:time()-0.500) then
---					oven.upnet_pause="catchup"
+				if oven.frame_time<(oven.win:time()-0.250) then
+					oven.upnet_pause="catchup" -- we are too far behind so skip forward
 --print(oven.upnet_pause)
 -- need to pause network code here so everyone can catch up
-					oven.frame_time=oven.win:time()-- prevent race condition
+					oven.frame_time=oven.win:time()-- zip forwards
 				end
 				
 				while (oven.frame_time-(oven.frame_rate or 0))>oven.win:time() do
 					oven.msgs() -- keep handling msgs?
---print("waiting")
+--					collectgarbage("step")
+--print("frame wait")
 					if wwin.hardcore.sleep then
 						if (oven.frame_time-(oven.frame_rate or 0))<=oven.win:time() then
 							wwin.hardcore.sleep(0.001) -- sleep here 1ms until we need to update
@@ -783,8 +789,8 @@ os.exit()
 
 				if oven.frame_rate and oven.frame_time and (not oven.frame_rate_auto) then --  forced updaterate enabled
 					if (oven.frame_time-oven.frame_rate)<time then -- repeat until we are a frame ahead of real time
-					oven.upnet_pause=oven.upnet_pause or "updates"
---print(oven.upnet_pause ,oven.frame_time,oven.frame_rate , time)
+					oven.upnet_pause="updates"
+--print(oven.upnet_pause ,oven.frame_time , time)
 						return f() -- tailcall
 					end
 				end
@@ -792,7 +798,6 @@ os.exit()
 			end
 
 			if not oven.update_co then -- create a new one
-				oven.upnet_pause=nil -- release pause
 				oven.update_co=coroutine.create(f)
 			end
 			if coroutine.status(oven.update_co)~="dead" then

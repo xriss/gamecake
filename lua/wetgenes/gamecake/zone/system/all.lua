@@ -214,6 +214,12 @@ end
 
 all.scene.do_update=function(scene)
 
+	if oven.upnet_pause=="updates" then return end -- only ever need one update to keep in sync
+
+local counts={}
+counts.undo=0
+counts.update=0
+counts.draw=0
 
 
 	local upnet=scene.oven.upnet
@@ -224,9 +230,8 @@ all.scene.do_update=function(scene)
 
 --	main_zone.scene.call("update")
 
-	if oven.upnet_pause=="updates" then-- only first update should update
+	if oven.upnet_pause=="catchup" then -- fast forward time
 		upnet.update() -- do not advance time
-		return
 	else
 		upnet.update(true) -- advance time
 	end
@@ -250,6 +255,7 @@ all.scene.do_update=function(scene)
 
 		if upnet.ticks.draw>upnet.ticks.update then
 			while upnet.ticks.draw>upnet.ticks.update do -- undo draw prediction update
+				counts.undo=counts.undo+1
 				upnet.ticks.draw=upnet.ticks.draw-1
 --print("revert",upnet.ticks.update)
 				scene:do_unpush()
@@ -262,6 +268,7 @@ all.scene.do_update=function(scene)
 		scene:systems_call("housekeeping")
 
 		while upnet.ticks.input>upnet.ticks.update do -- update with valid inputs
+			counts.update=counts.update+1
 			scene.oven.console.display_disable=false
 			scene.oven.console.display_clear()
 			display("")
@@ -295,6 +302,7 @@ all.scene.do_update=function(scene)
 -- predict into the future with local inputs
 	local nowtick=upnet.nowticks()
 	while upnet.ticks.draw<nowtick do -- update untill we are in the future
+		counts.draw=counts.draw+1
 		upnet.ticks.draw=upnet.ticks.draw+1
 --print("future",upnet.ticks.draw)
 		scene:do_push()
@@ -309,6 +317,11 @@ all.scene.do_update=function(scene)
 	end
 
 --upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )
+
+--	print( "do_update" , counts.undo , counts.update , counts.draw )
+
+-- this slows things down to test worst case updates
+--collectgarbage()
 
 end
 
@@ -325,6 +338,8 @@ all.scene.do_draw=function(scene)
 
 	scene:call("render_screen")
 
+
+--	print( "do_draw" )
 
 end
 
