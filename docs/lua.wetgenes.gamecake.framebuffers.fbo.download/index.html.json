@@ -2766,7 +2766,7 @@
    "body": "<pre><code>fbo:download()\nfbo:download(w,h,x,y)\n</code></pre>\n<p>Read back color data from a framebuffer and return it in an RGBA \nPREMULT grd object (which is probably what it is).</p>\n<p>If a width,height is given then we will read the given pixels only from \nthe x,y location.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
-   "line": 658,
+   "line": 659,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.download",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   }

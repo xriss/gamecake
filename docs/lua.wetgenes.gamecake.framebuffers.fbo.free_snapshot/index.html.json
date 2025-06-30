@@ -2766,7 +2766,7 @@
    "body": "<pre><code>fbo:free_snapshot()\n</code></pre>\n<p>Free the snapshot buffers, fbo.texture_snapshot and fbo.depth_snapshot \nif they exist.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/framebuffers.lua",
-   "line": 247,
+   "line": 249,
    "name": "lua.wetgenes.gamecake.framebuffers.fbo.free_snapshot",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/framebuffers.lua"
   }
