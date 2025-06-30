@@ -34,8 +34,10 @@ local function uptwopow(n)
 end
 
 local function zero_data(w,h,p)
-	return nil
---	return string.rep("\0",w*h*p)
+--	return nil
+-- a nil will work on most drivers but the memory will not be cleared on some drivers.
+-- so the only safe way to initialize a texture to 0 is with this dumb allocation
+	return string.rep("\0",w*h*p)
 end
 
 
@@ -427,7 +429,6 @@ needed) all our openGL buffers.
 		gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     fbo.TEXTURE_WRAP_S     or framebuffers.TEXTURE_WRAP_S     or gl.CLAMP_TO_EDGE)
 		gl.TexParameter(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T,     fbo.TEXTURE_WRAP_T     or framebuffers.TEXTURE_WRAP_T     or gl.CLAMP_TO_EDGE)
 
-
 		if fbo.texture_format then
 			gl.TexImage2D(gl.TEXTURE_2D, 0, fbo.texture_format[1], fbo.txw, fbo.txh, 0, fbo.texture_format[2], fbo.texture_format[3],zero_data(fbo.txw,fbo.txh,4))
 		else
@@ -552,18 +553,18 @@ binding.
 		if fbo.texture then
 			if not fbo.texture_snapshot then
 				fbo.texture_snapshot=gl.GenTexture()
+				gl.BindTexture(gl.TEXTURE_2D, fbo.texture_snapshot)
+				fbo:initialize_texture()
+				gl.BindTexture(gl.TEXTURE_2D, 0)
 			end
-			gl.BindTexture(gl.TEXTURE_2D, fbo.texture_snapshot)
-			fbo:initialize_texture()
-			gl.BindTexture(gl.TEXTURE_2D, 0)
 		end
 		if fbo.depth then
 			if not fbo.depth_snapshot then
 				fbo.depth_snapshot=gl.GenTexture()
+				gl.BindTexture(gl.TEXTURE_2D, fbo.depth_snapshot)
+				fbo:initialize_depth()
+				gl.BindTexture(gl.TEXTURE_2D, 0)
 			end
-			gl.BindTexture(gl.TEXTURE_2D, fbo.depth_snapshot)
-			fbo:initialize_depth()
-			gl.BindTexture(gl.TEXTURE_2D, 0)
 		end
 
 		local frame=gl.GenFramebuffer()
