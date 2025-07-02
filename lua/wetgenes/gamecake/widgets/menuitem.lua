@@ -80,6 +80,7 @@ function wmenuitem.draw_text(widget,opts)
 end
 
 function wmenuitem.menu_add(widget,opts)
+
 	opts=opts or {}
 	if type(opts)=="function" then opts=opts() end
 	local md=opts.menu_data or widget.menu_data
@@ -107,6 +108,7 @@ function wmenuitem.menu_add(widget,opts)
 	local window,screen=widget:window_screen()
 
 	if not opts.top then
+
 		if widget.menu then
 			widget.menu:remove()
 			widget.menu=nil
@@ -178,6 +180,37 @@ function wmenuitem.menu_add(widget,opts)
 --	widget.master:layout()
 --	widget.master.focus=nil
 
+	local map={}
+	local bubble
+	bubble=function(p)
+		if not p then return end
+		if map[p] then return end
+		map[p]=true
+		while p and p~=p.parent do
+			if p.also_over then
+				for i,v in pairs(p.also_over) do
+					if not v.parent then p.also_over[i]=nil end -- its been deleted, clear it
+				end
+				for i,v in pairs(p.also_over) do
+					bubble(v)
+				end
+				p.also_over[top]=top
+			end
+			p=p.parent
+		end
+	end
+	bubble(top)
+
+	widget.master:call_descendents(function(w)
+		if w.menu and not w.menu.hidden then
+-- if not part of this menu chain then hide the menu
+			if not w.menu:isover(top) then
+				w.menu.hidden=true
+			end
+		end
+	end)
+
+
 	return top
 
 end
@@ -187,36 +220,8 @@ function wmenuitem.hooks(hook,widget,dat)
 local showmenu=function()
 
 	if widget.menu_data then -- add a sub menu using this data
-
-		if widget.top_menu then -- hide all other menus first
-			widget.master:call_descendents(function(w)
-				if w.menu then
-					w.menu.hidden=true
-				end
-			end)
-		end
 		
 		local w=widget:menu_add(widget.menu_data)
-		local map={}
-		local bubble
-		bubble=function(p)
-			if not p then return end
-			if map[p] then return end
-			map[p]=true
-			while p and p~=p.parent do
-				if p.also_over then
-					for i,v in pairs(p.also_over) do
-						if not v.parent then p.also_over[i]=nil end -- its been deleted, clear it
-					end
-					for i,v in pairs(p.also_over) do
-						bubble(v)
-					end
-					p.also_over[w]=w
-				end
-				p=p.parent
-			end
-		end
-		bubble(w)
 
 	end
 end
