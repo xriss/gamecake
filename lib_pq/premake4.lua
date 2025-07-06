@@ -42,6 +42,11 @@ files {
 	"./src/interfaces/libpq/wchar.c",	
 	}
 
+
+-- libpq is now half bullshit and relies on makefile generated tat
+-- wire protocol my arse so we stick with this old junk for now
+buildoptions { "-std=gnu17" }
+
 defines{ "FRONTEND" , "UNSAFE_STAT_OK" }
 
 includedirs { "." , "./src/include" , "./src/interfaces/libpq" , "./src/port" , "./src/backend" }

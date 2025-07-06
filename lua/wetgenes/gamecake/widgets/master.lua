@@ -339,6 +339,12 @@ function wmaster.setup(widget,def)
 			master.next_focus=nil
 		end
 
+		if master.focus  then -- lose focus on when focus is hidden
+			if master.focus:ishidden() then
+				master.set_focus(false)
+			end
+		end
+
 	end
 
 	function master.resize_and_layout(widget)

@@ -8,6 +8,8 @@ if NIX then
 	defines( "_GNU_SOURCE" )
 end
 
+buildoptions { "-std=gnu17" }
+
 KIND{lua="pgsql"}
 
 

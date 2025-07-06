@@ -486,6 +486,17 @@ function wmeta.setup(def)
 		return false
 	end
 
+	meta.ishidden=function(widget)
+		local w=widget
+		if w then
+			while w~=w.parent do -- need to check all parents
+				if w.hidden then return true end
+				w=w.parent
+			end
+		end
+		return false
+	end
+
 
 -- search upwards and return window,screen (so this could be a widget in the window)
 -- screen should always be the widgets parent
