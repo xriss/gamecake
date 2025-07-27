@@ -272,7 +272,6 @@ sdl.context=function(it)
 --	print("SDL context")
 	it=it or sdl.it
 
-
 --[[
 
 	if string.find(SDL.getPlatform(),"Mac") then

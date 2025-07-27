@@ -50,7 +50,6 @@ All the other functions are returned from within the bake function.
 possible ENV settings
 
 	gamecake_tongue=english
-	gamecake_flavour=sdl
 
 ]]
 
@@ -246,6 +245,7 @@ if jit then -- now logs are setup, dump basic jit info
 	log( "oven" , table.concat(t,"\t") )
 end
 
+-- no more flavour, only SDL
 --print(wwin.flavour)
 
 
@@ -262,8 +262,6 @@ if fp then -- stick with the default files in the app dir (lets the user force l
 end
 
 
-if wwin.flavour=="emcc" then sniff_homedir=false end -- the homedir is a lie and /files has been mounted as persistant storage so use that
-
 
 if sniff_homedir then -- smart setup to save files into some sort of user file area depending on OS
 
@@ -277,7 +275,7 @@ if sniff_homedir then -- smart setup to save files into some sort of user file a
 		end
 	end
 
-	if not homedir and (wwin.flavour=="win" or wwin.sdl_platform=="Windows" ) then
+	if not homedir and (wwin.sdl_platform=="Windows" ) then
 
 		homedir=os.getenv("USERPROFILE") -- windows only check
 
@@ -807,9 +805,6 @@ os.exit()
 		end
 
 		oven.preloader_enabled=false -- do we need this? we is fast and it is broken
---		if wwin.flavour=="raspi" then -- do fullscreen on raspi
---			oven.preloader_enabled=false
---		end
 
 		function oven.preloader(sa,sb)
 			sa=sa or ""
@@ -817,15 +812,6 @@ os.exit()
 
 log("oven",sa.." : "..sb)
 
---[[
-			if wwin.flavour=="nacl" then
-				wwin.hardcore.print(sa.." : "..sb)
-				if  oven.update_co and ( coroutine.status(oven.update_co)=="running" ) then
-					coroutine.yield()
-				end
-				return
-			end
-]]
 			if not oven.preloader_enabled then return end
 
 			local t=oven.rebake("wetgenes.gamecake.images").get("fonts/basefont_8x8") -- font loaded test?
@@ -995,10 +981,8 @@ log("oven","caught : ",m.class,m.cmd)
 -- eg oven.serv_pulse to be called when necesary.
 		function oven.serv(oven)
 
-			if wwin.flavour~="android" then -- android needs lots of complexity due to its "lifecycle" bollox
-				oven.focus=true -- hack, default to focused
-				oven.do_start=true
-			end
+			oven.focus=true -- hack, default to focused
+			oven.do_start=true
 
 			if oven.win.noblock then
 				return oven -- and expect  serv_pulse to be called as often as possible

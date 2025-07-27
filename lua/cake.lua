@@ -50,7 +50,7 @@ local done_zip=false
 for i=1,#a do
 	local v=tostring(a[i])
 
-	if v=="-lstart" and not done_cake then
+	if v=="-lcake" and not done_cake then
 		done_cake=true
 		v=nil
 	elseif v:sub(-4)==".apk" and not done_apk then -- the first apk only

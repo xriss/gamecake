@@ -252,7 +252,7 @@ if EMCC then
 		"--emrun",
 		"-lidbfs.js",
 		"-v",
-		"-s PROXY_TO_PTHREAD",
+--		"-s PROXY_TO_PTHREAD", -- this just not work so we need to use emscripten_set_main_loop instead...
 		"-s OFFSCREEN_FRAMEBUFFER",
 		"-s OFFSCREENCANVAS_SUPPORT",
 		

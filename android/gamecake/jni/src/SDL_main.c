@@ -382,7 +382,7 @@ int l=0;
   s->status = runargs(L, argv, (script > 0) ? script : s->argc);
   if (s->status != 0) return 0;
 
-	dolibrary(L,"start"); // always run lua/init.lua (encoded in res)
+	dolibrary(L,"cake"); // always run lua/init.lua (encoded in res)
 
   return 0;
 }
