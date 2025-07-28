@@ -69,7 +69,7 @@ all.values={
 	uids=V0(),		-- list of uids related to this object [1] is always parent
 }
 
-all.tweens={
+all.types={
 	chksum="ignore",
 	notween="ignore",
 	deleted="ignore",
@@ -408,7 +408,7 @@ all.system.initialize=function(sys)
 	sys.metatable=sys.metatable or {}
 	sys.zips=sys.zips or {}
 
-	sys.info.tweens=sys.info.tweens or {}
+	sys.info.types=sys.info.types or {}
 
 	-- and methods will be available to items via metatable
 	sys.metatable.__index=sys.methods
@@ -442,7 +442,7 @@ all.system.initialize=function(sys)
 			merge( sys             , info.system or {} ) -- merge system functions
 			merge( sys.methods     , info.item   or {} ) -- and item functions
 			merge( sys.info.values , info.values or {} ) -- and values
-			merge( sys.info.tweens , info.tweens or {} ) -- and value tweena
+			merge( sys.info.types  , info.types  or {} ) -- and value tweena
 		end
 	end
 
@@ -451,17 +451,17 @@ all.system.initialize=function(sys)
 		if t=="table" then -- a table
 			if not v.new then -- not a tardis value, assume ziped data
 				sys.zips[n]=""
-				sys.info.tweens[n]="ignore" -- do not get/set these
+				sys.info.types[n]="ignore" -- do not get/set these
 			end
 		end
-		if not sys.info.tweens[n] then	-- any other values are set to auto
-			sys.info.tweens[n]="get"
+		if not sys.info.types[n] then	-- any other values are set to auto
+			sys.info.types[n]="get"
 		end
 	end
-	sys.tweens={}
-	for n,v in pairs( sys.info.tweens ) do
+	sys.types={}
+	for n,v in pairs( sys.info.types ) do
 		if v~="ignore" then -- remove ignores
-			sys.tweens[n]=v
+			sys.types[n]=v
 		end
 	end
 
@@ -596,7 +596,7 @@ all.item.setup_values=function(it,boot)
 end
 
 all.item.get_auto_values=function(it)
-	for n,t in pairs(it.sys.tweens) do
+	for n,t in pairs(it.sys.types) do
 		if     t=="tween" then it[n]=it:tween(n)
 		elseif t=="get"   then it[n]=it:get(n)
 		end
@@ -608,7 +608,7 @@ all.item.get_values=function(it)
 end
 
 all.item.set_auto_values=function(it)
-	for n,t in pairs(it.sys.tweens) do
+	for n,t in pairs(it.sys.types) do
 		it:set(n,it[n])
 	end
 	it:set_zips()

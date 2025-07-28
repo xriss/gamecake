@@ -42,7 +42,7 @@ waters.values={
 
 }
 
-waters.tweens={
+waters.types={
 	time="tween",
 	turns="tween",
 	pos="tween",

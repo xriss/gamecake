@@ -37,7 +37,7 @@ cameras.values={
 	dolly_part=1,
 }
 
-cameras.tweens={
+cameras.types={
 	direction="twrap",
 	pos="tween",
 	tilt="tween",

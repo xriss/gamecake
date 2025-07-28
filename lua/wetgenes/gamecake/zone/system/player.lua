@@ -46,7 +46,7 @@ players.values={
 	avatar_pose="breath",
 
 }
-players.tweens={
+players.types={
 	avatar_pose="ignore",
 	avatar_time="ignore",
 	acc="tween",

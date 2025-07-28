@@ -35,7 +35,7 @@ skys.values={
 	moon=V3(0,0,0),
 }
 
-skys.tweens={
+skys.types={
 	time="tween",
 	sun="tween",
 	moon="tween",
