@@ -68,35 +68,12 @@ cameras.item.get_values=function(camera)
 		if focus.focus_camera then focus:focus_camera(camera) end
 	end
 
-	local dc=camera
-	if camera.scene.drawtween then -- smooth the drawing data slightly per draw
-		local t2=camera.scene.drawtween
-		local t1=1-t2
-		dc=camera.drawcache
-		if not dc then -- init
-			dc={}
-			camera.drawcache=dc
-			dc.focus_pos=V3(camera.focus_pos)
-			dc.direction=camera.direction
-			dc.tilt=camera.tilt
-			dc.dolly=camera.dolly
-			dc.dolly_part=camera.dolly_part
-		else -- 0.25 tween
-			dc.focus_pos=dc.focus_pos:mix(camera.focus_pos,t2)
-			dc.direction=tardis.mixwrap(dc.direction,camera.direction,360,t2)
-			dc.tilt=dc.tilt*t1+camera.tilt*t2
-			dc.dolly=dc.dolly*t1+camera.dolly*t2
-			dc.dolly_part=dc.dolly_part*t1+camera.dolly_part*t2
-		end
-
-	end
-
 -- This is a camera so we are applying reverse transforms...
 	camera.mtx=M4()
-	camera.mtx:translate( dc.focus_pos[1] , dc.focus_pos[2] , dc.focus_pos[3] )
-	camera.mtx:rotate( dc.direction ,  0, 1, 0 )
-	camera.mtx:rotate( dc.tilt      ,  1, 0, 0 )
-	camera.mtx:translate( 0,0, 0.0 + dc.dolly*dc.dolly_part )
+	camera.mtx:translate( camera.focus_pos[1] , camera.focus_pos[2] , camera.focus_pos[3] )
+	camera.mtx:rotate( camera.direction ,  0, 1, 0 )
+	camera.mtx:rotate( camera.tilt      ,  1, 0, 0 )
+	camera.mtx:translate( 0,0, 0.0 + camera.dolly*camera.dolly_part )
 
 	camera.pos=camera.mtx:get_translation_v3()
 --	camera:set("pos",camera.pos)

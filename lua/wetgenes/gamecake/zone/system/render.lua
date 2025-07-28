@@ -98,9 +98,6 @@ renders.item.render_camera=function(render)
 	sky:update_shadow()
 
 
-	-- we are going to call draw repeatedly so this needs to be disabled after the first time
-	local drawtween=scene.drawtween
-
 	if camera then camera:set_active() end -- perform tween update here
 
 	for idx=1,sys.shadow.count do
@@ -110,8 +107,6 @@ renders.item.render_camera=function(render)
 		sys.shadow.draw_tail(scene,idx)
 		gl.PopMatrix()
 
-		-- only apply tween once
-		if scene.drawtween then	scene.drawtween=0 end
 	end
 
 	if camera then camera:set_active() end
@@ -124,8 +119,6 @@ renders.item.render_camera=function(render)
 	scene:systems_call("draw_tail")
 	sys.screen.draw_tail()
 	gl.PopMatrix()
-
-	scene.drawtween=drawtween
 
 	sys.screen.build_occlusion(scene)
 	sys.screen.build_bloom(scene)

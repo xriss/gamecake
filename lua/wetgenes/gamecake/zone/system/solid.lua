@@ -262,13 +262,12 @@ solids.item.draw=function(solid)
 	local sys=solid.sys
 
 	solid:get_values()
-	local dc=solid.scene.drawtween and solid.drawcache or solid
 
 	local gl=solid.gl
 
 	gl.PushMatrix()
-	gl.Translate(dc.pos)
-	gl.Rotate(dc.rot)
+	gl.Translate(solid.pos)
+	gl.Rotate(solid.rot)
 
 	sys.wgeom.draw(solid.geom,"gamecake_shader?CAM&NORMAL&TEX&TEXNTOON=1.0",function(p)
 		gl.ActiveTexture(gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )

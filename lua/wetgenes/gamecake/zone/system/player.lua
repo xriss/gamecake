@@ -89,17 +89,6 @@ players.item.get_values=function(player)
 -- feet of player
 	player.feet=V3( player.pos[1] , player.pos[2]+(player.body_hover+player.body_radius) , player.pos[3] )
 
-	if player.scene.drawtween and player.drawcache then -- smooth the drawing data slightly per draw
-		local t2=player.scene.drawtween
-		local t1=1-t2
-		local dc=player.drawcache
-		if not dc.feet then dc.feet=player.feet:new() end
-		if not dc.tweaks then dc.tweaks=player.tweaks:new() end
-
-		dc.feet:mix(player.feet,t2)
-		dc.tweaks:mix(player.tweaks,t2)
-	end
-
 end
 
 players.system.setup=function(sys)
@@ -649,7 +638,6 @@ end
 players.item.draw=function(player)
 
 	player:get_values()
-	local dc=player.scene.drawtween and player.drawcache or player
 
 	player.avatar.update()
 
@@ -661,8 +649,8 @@ players.item.draw=function(player)
 --	if not player:depend("camera") then return end
 
 	gl.PushMatrix()
-	gl.Translate(dc.feet)
-	gl.Rotate(dc.rot)
+	gl.Translate(player.feet)
+	gl.Rotate(player.rot)
 
 	local m1=M4():translate(0,player.tweaks[1],0)
 	local m2=M4():translate(0,player.tweaks[2],0)

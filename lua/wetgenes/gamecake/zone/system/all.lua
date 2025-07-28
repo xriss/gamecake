@@ -225,7 +225,6 @@ counts.draw=0
 	local upnet=scene.oven.upnet
 	scene.ticklength=upnet.ticks.length
 	scene.tween=1 -- disable tweening while updating
-	scene.drawtween=false
 
 
 --	main_zone.scene.call("update")
@@ -332,7 +331,6 @@ all.scene.do_draw=function(scene)
 
 	local nowtick=upnet.nowticks()
 	scene.tween=1+nowtick-upnet.ticks.draw
-	scene.drawtween=0.5
 
 	scene:call("render_camera")
 
@@ -441,8 +439,8 @@ all.system.initialize=function(sys)
 		if info then
 			merge( sys             , info.system or {} ) -- merge system functions
 			merge( sys.methods     , info.item   or {} ) -- and item functions
-			merge( sys.info.values , info.values or {} ) -- and values
-			merge( sys.info.types  , info.types  or {} ) -- and value tweena
+			merge( sys.info.values , info.values or {} ) -- and default values
+			merge( sys.info.types  , info.types  or {} ) -- and types of values
 		end
 	end
 
@@ -471,6 +469,7 @@ all.system.initialize=function(sys)
 
 	-- global system values
 	sys.values=sys.scene.create_values()
+	sys.tweens=sys.scene.create_values()
 	sys:get_rnd() -- seed with caste name
 
 	-- load glsl code if it exists
@@ -581,6 +580,7 @@ all.item.setup_values=function(it,boot)
 	it.zips={} -- dupe zip cache
 	for n,v in pairs( it.sys.zips or {} ) do it.zips[n]=v end
 	it.values=it.scene.create_values()
+	it.tweens=it.scene.create_values()
 
 	it:set_boot(boot)
 
@@ -786,19 +786,6 @@ all.item.get_body_values=function(it)
 	it.rot=it:tween("rot")
 	it.vel=it:tween("vel")
 	it.ang=it:tween("ang")
-
-	if it.scene.drawtween then -- smooth the drawing data slightly per draw
-		local t2=it.scene.drawtween
-		local t1=1-t2
-		if not it.drawcache then it.drawcache={} end
-		local dc=it.drawcache
-
-		if not dc.pos then dc.pos=it.pos:new() end
-		if not dc.rot then dc.rot=it.rot:new() end
-
-		dc.pos:mix(it.pos,t2)
-		dc.rot:mix(it.rot,t2)
-	end
 
 end
 
