@@ -169,13 +169,9 @@ console.log(opts)
 			}
 		}
 
-//		if(gamecake.post)
-//		{
-//			gamecake.post('cmd=lua\n','require("wetgenes.win").hardcore.resize(nil,'+w+','+h+')'); // but this might help?
-//		}
 	};
 
-// simple sync clipboard get/set and refresh at start up or when we gain focus
+// simple sync clipboard get/set and refresh at startup or when we gain focus
 	gamecake.clipboard_data=""
 	gamecake.set_clipboard=function(data)
 	{
@@ -207,10 +203,9 @@ console.log(opts)
 	Module={}; // this is a global
 	gamecake.Module=Module
 	Module.gamecake=gamecake
-//	Module.msg=gamecake.msg;
+	Module.noExitRuntime=true
 	Module.canvas=gamecake.canvas;
 //	Module.noInitialRun=true
-//	Module.memoryInitializerPrefixURL=opts.dir;
 
 	Module.monitorRunDependencies=show_progress;
 
@@ -288,13 +283,27 @@ console.log(opts)
 		}
 	};
 
+	gamecake.animation_frame= function() {
+		requestAnimationFrame(gamecake.animation_frame)
+		if( gamecake.main_update )
+		{
+			gamecake.main_update()
+		}
+	}
+
 	Module.onRuntimeInitialized = function() {
+
+		// export functions
+		gamecake.main_update=Module.cwrap("main_update")
+		gamecake.main_close=Module.cwrap("main_close")
+
 		gamecake.status="start"
 		gamecake.resize();
 		if( gamecake.loaded_hook )
 		{
 			gamecake.loaded_hook();
 		}
+		requestAnimationFrame(gamecake.animation_frame)
 	};
 
 // the clipboard api is useless so we just read when we gain focus and hope that is enough

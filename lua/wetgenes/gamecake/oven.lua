@@ -979,7 +979,7 @@ log("oven","caught : ",m.class,m.cmd)
 -- a busy blocking loop, or not, if we are running on the wrong sort
 -- of system it just returns and expects the other functions
 -- eg oven.serv_pulse to be called when necesary.
-		function oven.serv(oven)
+		function oven.serv()
 
 			oven.focus=true -- hack, default to focused
 			oven.do_start=true
@@ -995,19 +995,12 @@ log("oven","caught : ",m.class,m.cmd)
 				until finished
 			end,debug.traceback)
 			if not ok then print(ret) end
-
-			if oven.win then
-				oven.win:show("win") -- this may restore original resolution
-			end
-
-			oven.tasks:sqlite({cmd="close"}) -- shut down the default sqlite databsase so we finish with any out standing writes
-			wtongues.save() -- last thing we do is remember any new text ids used in this run
-
-			oven.tasks:delete()
+			
+			oven.finish()
 
 		end
 
-		function oven.serv_pulse(oven)
+		function oven.serv_pulse()
 			if oven.finished then return true end
 			oven.msgs()
 
@@ -1030,6 +1023,14 @@ log("oven","caught : ",m.class,m.cmd)
 			end
 		end
 
+		function oven.finish()
+			if oven.win then
+				oven.win:show("win") -- this may restore original resolution
+			end
+			oven.tasks:sqlite({cmd="close"}) -- shut down the default sqlite databsase so we finish with any out standing writes
+			wtongues.save() -- last thing we do is remember any new text ids used in this run
+			oven.tasks:delete()
+		end
 
 	return oven
 

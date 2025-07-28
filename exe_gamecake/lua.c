@@ -366,7 +366,6 @@ int has_fun=0;
   char **argv = s->argv;
   int script;
   int has_i = 0, has_v = 0, has_e = 0;
-  globalL = L;
   if (argv[0] && argv[0][0]) progname = argv[0];
   lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
   luaL_openlibs(L);  /* open libraries */
@@ -436,10 +435,33 @@ int has_fun=0;
   return 0;
 }
 
+void main_update () {
+  lua_State *L = globalL ;
+  if (L == NULL) { return; }
+
+  lua_getglobal(L, "main_update");  /* function to be called */
+  if ( lua_isfunction(L,-1) ) { // sanity check that it is a function
+    lua_call(L,0,0);
+  }
+  else {
+	  lua_pop(L,1);
+  }
+}
+
+void main_close () {
+  lua_State *L = globalL ;
+  if (L == NULL) { return; }
+
+  lua_close(L);
+  globalL = NULL;
+}
+
 int main (int argc, char **argv) {
   int status;
   struct Smain s;
+
   lua_State *L = lua_open();  /* create state */
+  globalL = L;
   if (L == NULL) {
     l_message(argv[0], "cannot create state: not enough memory");
     return EXIT_FAILURE;
@@ -448,7 +470,13 @@ int main (int argc, char **argv) {
   s.argv = argv;
   status = lua_cpcall(L, &pmain, &s);
   report(L, status);
-  lua_close(L);
+
+// do not close lua state
+// so we can call main_update and then
+// explicitly call main_close when finished
+#if ! defined( NO_MAIN_CLOSE )
+  main_close();  
+#endif
+
   return (status || s.status) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
-

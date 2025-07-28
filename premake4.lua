@@ -266,14 +266,13 @@ if EMCC then
 
 	linkoptions{
 --		"-as-needed",
---		"--emrun",
---		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 ",
 		"-s ALLOW_MEMORY_GROWTH=1",
+		"-s EXPORTED_FUNCTIONS=\"['_main','_main_update','_main_close']\"",
+		"-s EXPORTED_RUNTIME_METHODS=\"['ccall','cwrap']\"",
+--		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 ",
 --		"-s TOTAL_MEMORY=1GB",
 --		"-s \"BINARYEN_METHOD='native-wasm'\"",
---		"-s EXPORTED_RUNTIME_METHODS=\"['cwrap']\"",
 --		"-s WASM=1",
---		"-s EXPORTED_FUNCTIONS=\"['_main']\"",
 	}
 	
 	platforms { "emcc" }

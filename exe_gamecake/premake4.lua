@@ -17,6 +17,11 @@ if LUA_LINKS   then links  (LUA_LINKS)   end
 
 if EMCC then
 
+	-- do not close lua state in main
+	-- must call main_close explicitly
+	-- and may also call main_update
+	defines{ "NO_MAIN_CLOSE" }
+
 	files { "./lua.c" }
 	
 	KIND{kind="WindowedApp",name="gamecake.html"}
