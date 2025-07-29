@@ -419,7 +419,9 @@ print("joining",addr)
 	upnet.get_ups=function(tick)
 		tick=tick or upnet.ticks.now
 --print("getups",tick,upnet.ticks.now)
-		local ti=1+tick-upnet.ticks.base
+		local ti=tick+1-upnet.ticks.base
+--print("readup",tick,ti)
+
 		local ups={}
 		for ci,_ in pairs(upnet.clients) do
 			local up=oven.ups.create()
@@ -539,14 +541,16 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 	end
 
 	-- tick one tick forwards
-	upnet.next_tick=function()
+	upnet.next_tick=function(f)
 
 		upnet.ticks.now=upnet.ticks.now+1
 		-- remember current up
 
 		 -- current input is locked in for "next" frame not this frame
 		 -- that way we can tween local data into the "future" without glitches
-		local iidx=2+upnet.ticks.now-upnet.ticks.base -- next frame
+		local iidx=1+upnet.ticks.now-upnet.ticks.base -- next frame
+--		if f>=0.5 then iidx=iidx+2 else iidx=iidx+1 end -- 1 frame ahead rounded up so maybe 2 actual frames
+		iidx=iidx+2 -- save local inputs into the future at least one frame maybe 2?
 		if iidx<1 then return end
 
 		for i=1,iidx do -- make sure full array exists
@@ -554,13 +558,15 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 				upnet.inputs[i]={}
 			end
 			if not upnet.inputs[ i ][upnet.us] then -- fill in with our data
+--print("writeup",upnet.ticks.base-1+i,i)
 				upnet.inputs[ i ][upnet.us]=upnet.upcache:save() -- remember next ticks inputs
 			end
 		end
 --		upnet.inputs[ iidx ][upnet.us]=upnet.upcache:save() -- remember new tick
 
-		upnet.upcache=oven.ups.create() -- reset cache
---		upnet.upcache:load(oven.ups.manifest(1))
+
+-- remove all pulse flags so they will not be set on next save
+		upnet.upcache:unpulse()
 
 --print("inputs",upnet.us,#upnet.inputs)
 
@@ -631,13 +637,15 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 		end
 
 		while upnet.ticks.epoch and upnet.us do -- we are ticking
-			local t=math.floor((now()-upnet.ticks.epoch)/upnet.ticks.length)
+			local f=(now()-upnet.ticks.epoch)/upnet.ticks.length
+			local t=math.floor(f)
+			f=f-t -- fraction of a frame
 			if t>upnet.ticks.now then
 				if pause then
 					upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length) -- reset epoch so we do not advance
 					return
 				else
-					upnet.next_tick()
+					upnet.next_tick(f)
 --					local dbg_hash=upnet.hashs[2+upnet.ticks.agreed-upnet.ticks.base] or {}
 --					print("now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base,Ox(dbg_hash[1]),Ox(dbg_hash[2]))
 --					dlog(upnet.dmode("tick"),"now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base)

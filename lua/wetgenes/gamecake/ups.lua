@@ -322,6 +322,20 @@ M.up_functions.load=function(up,r)
 
 end
 
+-- remove pulse flags and relative movement
+M.up_functions.unpulse=function(up)
+	-- mouse
+	up.all.mx=nil
+	up.all.my=nil
+	up.all.mz=nil
+	-- auto delete pulses
+	for n,v in pairs(up.all) do
+		if M.is_pulse[n] then -- remove all pulses
+			up.all[n]=nil
+		end
+	end
+end
+
 -- merge from saved json or another up as they are similar
 M.up_functions.merge=function(up,r)
 
