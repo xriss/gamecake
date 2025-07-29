@@ -75,7 +75,7 @@ players.item.get_values=function(player)
 
 	player:get_auto_values()
 
-	player.avatar.time=player:twrap("avatar_time",player.avatar.anim.length or 0)
+	player.avatar.time=player:get("avatar_time") -- ,player.avatar.anim.length or 0)
 	player.avatar.pose=player:get("avatar_pose")
 	player.avatar.speed=0
 	player.avatar.update_pose()
@@ -245,7 +245,7 @@ players.item.update_control=function(player)
 
 		player.run = player.run + ( player.run:normalize(V3()) * ((ly/ -4)) ) -- adjust speed with forward/back
 		player.run:product(Q4("y",-lx)) --rotate a little bit with left/right
-		camera.direction=camera:twrap( "direction" , 360 ) -- also adjust camera
+		camera.direction=camera:get( "direction" ) -- also adjust camera
 		camera.direction=camera.direction-lx
 		camera:set( "direction" , camera.direction )
 

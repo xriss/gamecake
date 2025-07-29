@@ -330,7 +330,9 @@ all.scene.do_draw=function(scene)
 	oven.console.lines_display[2]=("now:"..upnet.ticks.now.." inp:"..upnet.ticks.input.." agr:"..upnet.ticks.agreed.." bse:"..upnet.ticks.base)
 
 	local nowtick=upnet.nowticks()
-	scene.tween=1+nowtick-upnet.ticks.draw
+	scene.tween=1+nowtick-upnet.ticks.draw -- tween draw blend between frames
+	if scene.tween<0 then scene.tween=0 end -- sanity
+	if scene.tween>1 then scene.tween=1 end
 
 	scene:call("render_camera")
 
@@ -597,7 +599,8 @@ end
 
 all.item.get_auto_values=function(it)
 	for n,t in pairs(it.sys.types) do
-		if     t=="tween" then it[n]=it:tween(n)
+		if     t=="tween" then it[n]=it:get(n)
+		elseif t=="twrap" then it[n]=it:get(n)
 		elseif t=="get"   then it[n]=it:get(n)
 		end
 	end
@@ -684,15 +687,27 @@ all.item.get=function(it,name,topidx)
 end
 all.system.get=all.item.get
 
+-- tween version of value set
+all.item.tset=function(it,name,value)
+	return it.tweens:set(name,value)
+end
+all.system.tset=all.item.tset
+
+-- tween version of value get
+all.item.tget=function(it,name,topidx)
+	return it.tweens:get(name,topidx)
+end
+all.system.tget=all.item.tget
+
 -- tween values now(1) with previous(0) frame
 all.item.tween=function(it,name,tween)
-	return it.values:tween(name,tween or it.scene.tween)
+	return it.tweens:tween(name,tween or it.scene.tween)
 end
 all.system.tween=all.item.tween
 
 -- tween wrap values now(1) with previous(0) frame numbers will wrap  0>= n <nmax
 all.item.twrap=function(it,name,nmax,tween)
-	return it.values:twrap(name,nmax,tween or it.scene.tween)
+	return it.tweens:twrap(name,nmax,tween or it.scene.tween)
 end
 all.system.twrap=all.item.twrap
 
@@ -782,10 +797,10 @@ end
 
 all.item.get_body_values=function(it)
 
-	it.pos=it:tween("pos")
-	it.rot=it:tween("rot")
-	it.vel=it:tween("vel")
-	it.ang=it:tween("ang")
+	it.pos=it:get("pos")
+	it.rot=it:get("rot")
+	it.vel=it:get("vel")
+	it.ang=it:get("ang")
 
 end
 

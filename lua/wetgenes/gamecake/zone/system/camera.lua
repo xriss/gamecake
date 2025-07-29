@@ -59,12 +59,12 @@ end
 cameras.item.get_values=function(camera)
 
 	camera:get_auto_values()
-	camera.direction=camera:twrap("direction",360)
+--	camera.direction=camera:get("direction") -- 360
 
 	if not camera.focus_pos then camera.focus_pos=V3() end
 	local focus=camera:depend("focus") -- probably focused on player
 	if focus then
-		camera.focus_pos:set( focus:tween("pos") )
+		camera.focus_pos:set( focus:get("pos") )
 		if focus.focus_camera then focus:focus_camera(camera) end
 	end
 
