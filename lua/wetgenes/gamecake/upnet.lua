@@ -36,8 +36,8 @@ M.bake=function(oven,upnet)
 		return us..mode..("\t\t\t\t\t\t"):rep(us-1)
 	end
 
-	upnet.task_id=upnet.task_id or "msgp"
-	upnet.task_id_msg=upnet.task_id..":msg"
+	upnet.msgp_task_id=upnet.task_id or "msgp"
+	upnet.msgp_task_id_msg=upnet.msgp_task_id..":msg"
 
 	local socket = require("socket")
 	local now=function() return socket.gettime() end -- time now with sub second acuracy
@@ -151,7 +151,7 @@ M.bake=function(oven,upnet)
 	upnet.client.send=function(client,msg,cmd)
 
 		oven.tasks:send({
-			task=upnet.task_id,
+			task=upnet.msgp_task_id,
 			cmd=cmd or "send",
 			addr=client.addr,
 			data=json_pack.into_data(msg),
@@ -323,7 +323,7 @@ print("WELCOME",client.idx)
 		-- create msgp handling thread
 		upnet.thread=oven.tasks:add_global_thread({
 			count=1,
-			id=upnet.task_id,
+			id=upnet.msgp_task_id,
 			code=msgp.msgp_code,
 		})
 
@@ -334,7 +334,7 @@ print("WELCOME",client.idx)
 
 		-- and tell it to start listening
 		local host_ret=oven.tasks:do_memo({
-			task=upnet.task_id,
+			task=upnet.msgp_task_id,
 			cmd="host",
 			baseport=baseport,
 			basepack=basepack,
@@ -373,7 +373,7 @@ print("WELCOME",client.idx)
 
 print("joining",addr)
 		local ret=oven.tasks:do_memo({
-			task=upnet.task_id,
+			task=upnet.msgp_task_id,
 			cmd="join",
 			addr=addr,
 		})
@@ -613,7 +613,7 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 
 		repeat -- check msgs
 
-			local _,memo= oven.tasks.linda:receive( 0 , upnet.task_id_msg ) -- wait for any memos coming into this thread
+			local _,memo= oven.tasks.linda:receive( 0 , upnet.msgp_task_id_msg ) -- wait for any memos coming into this thread
 			if type(memo)=="table" then
 				upnet.domsg(memo)
 			else -- probably a timeout userdata
