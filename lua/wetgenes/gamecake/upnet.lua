@@ -123,7 +123,7 @@ M.bake=function(oven,upnet)
 
 		upnet.clients_idx={} -- clients order provided by host, remembered from welcome msg
 
-		upnet.upcache=oven.ups.create() -- local cached inputs
+		upnet.upcache=oven.ups.create_up() -- local cached inputs
 
 	end
 	upnet.reset() -- make sure we are always tables
@@ -444,7 +444,7 @@ print("joining",addr)
 
 		local ups={}
 		for ci,_ in pairs(upnet.clients) do
-			local up=oven.ups.create()
+			local up=oven.ups.create_up()
 			ups[ci]=up
 			for ui=ti,1,-1 do -- find best state we have
 				local h=upnet.inputs[ui]

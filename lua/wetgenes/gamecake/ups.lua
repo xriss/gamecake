@@ -187,30 +187,30 @@ for i,n in ipairs{
 	M.is_pulse[ n.."_clr" ] = true
 end
 
-M.up_functions={}
-M.up_metatable={__index=M.up_functions}
+M.up={}
+M.up_metatable={__index=M.up}
 
 -- any functions here should not assume that the up we have will have
 -- the correct metatable associated with them so we will need to call
 -- other up functions explicitly.
 
-M.up_functions.reset=function(up)
+M.up.reset=function(up)
 
 	up.all={} -- this frames button state
 
 end
 
 -- get stable value ( raw axis will be +-32767 )
-M.up_functions.get=function(up,name)
+M.up.get=function(up,name)
 	return up.all[name]
 end
 
 -- get stable axis fixed to +-1.0
-M.up_functions.axis=function(up,name) -- fix deadzones etc
+M.up.axis=function(up,name) -- fix deadzones etc
 	return fixaxis( up.all[name] )
 end
 
-M.up_functions.set_button=function(up,n,v)
+M.up.set_button=function(up,n,v)
 	local o=up.all[n] -- old value
 	if v then -- must be boolean so set
 		up.all[n]=true
@@ -227,11 +227,11 @@ M.up_functions.set_button=function(up,n,v)
 	end
 end
 
-M.up_functions.set_axis=function(up,n,v)
+M.up.set_axis=function(up,n,v)
 	up.all[n]=v -- raw range of -0x7fff to +0x7fff probably
 end
 
-M.up_functions.add_axis=function(up,n,v)
+M.up.add_axis=function(up,n,v)
 	local o=up.all[n] or 0-- old value
 	up.all[n]=o+v
 end
@@ -239,7 +239,7 @@ end
 
 -- manage fake axis with decay from keypress states
 -- and handle deletion of pulse msgs
-M.up_functions.update=function(up,pow)
+M.up.update=function(up,pow)
 	pow=64*(pow or 1/60)
 
 	for n,a in ipairs{"lx","ly","lz","rx","ry","rz"} do -- check axis buttons and convert to axis movement
@@ -300,7 +300,7 @@ M.up_functions.update=function(up,pow)
 end
 
 -- save to json ( sameish data as an up but no metatable )
-M.up_functions.save=function(up,r)
+M.up.save=function(up,r)
 	local r=r or {}
 
 	if next(up.all) then -- something
@@ -314,7 +314,7 @@ M.up_functions.save=function(up,r)
 end
 
 -- load from saved json or another up as they are similar
-M.up_functions.load=function(up,r)
+M.up.load=function(up,r)
 
 	for n,v in pairs(up.all) do -- empty
 		up.all[n]=nil
@@ -328,7 +328,7 @@ M.up_functions.load=function(up,r)
 end
 
 -- remove pulse flags and relative movement
-M.up_functions.unpulse=function(up)
+M.up.unpulse=function(up)
 	-- mouse
 	up.all.mx=nil
 	up.all.my=nil
@@ -342,7 +342,7 @@ M.up_functions.unpulse=function(up)
 end
 
 -- merge from saved json or another up as they are similar
-M.up_functions.merge=function(up,r)
+M.up.merge=function(up,r)
 
 	if r and r.all then -- something
 		for n,v in pairs(r.all) do
@@ -359,7 +359,7 @@ M.up_functions.merge=function(up,r)
 end
 
 -- create new up when we have another up,
-M.up_functions.create=function()
+M.up.create=function()
 	local up={}
 	setmetatable(up,M.up_metatable) -- shared functions
 	up:reset() -- initalize
@@ -367,15 +367,283 @@ M.up_functions.create=function()
 end
 
 -- duplicate this up
-M.up_functions.duplicate=function(up)
-	local n=up.create()
+M.up.duplicate=function(up)
+	local n=M.up.create()
 	n:load(up)
 	return n
 end
 
 -- global empty ups
 -- please do not write into it
-M.empty=M.up_functions.create()
+M.empty=M.up.create()
+
+
+M.ups={}
+M.ups_metatable={__index=M.ups}
+
+-- reset everything
+M.ups.reset=function(ups)
+	ups.last_pad_values={}
+	ups.keymaps={}
+	ups.mousemaps={1}
+	ups.padmaps={1}
+	ups.states={}
+	ups.msgs={} -- all the msgs for this tick
+	ups.new_msgs={} -- volatile building list of msgs
+
+	ups.enable_pad=true		-- deal with pad msgs or ignore them (grabbed by somone else)
+	ups.enable_key=true		-- deal with keyboard msgs or ignore them (grabbed by somone else)
+	ups.enable_mouse=true	-- deal with mouse msgs or ignore them (grabbed by somone else)
+end
+
+-- set keymap for this idx
+M.ups.keymap=function(ups,idx,map)
+	if map then
+		ups.keymaps[idx]={} -- reset
+		local m=ups.keymaps[idx]
+		if keymaps[map] then map=keymaps[map] end -- named map
+		for n,v in pairs(map) do -- copy
+			m[n]={unpack(v)}
+		end
+	end
+	return ups.keymaps[idx]
+end
+
+-- set mousemap to this idx
+M.ups.mousemap=function(ups,...)
+	ups.mousemaps={...}
+end
+
+-- set padmap to these idxs
+M.ups.padmap=function(ups,...)
+	ups.padmaps={...}
+end
+
+
+-- get or create a state and remember its idx in states
+M.ups.manifest=function(ups,idx)
+	if idx<1 then return nil end -- asking for 0 gets you a nil
+	if ups.states[idx] then return ups.states[idx] end -- already created
+	ups.states[idx]=M.up.create() -- create and remember
+	return ups.states[idx]
+end
+
+-- create an ups state
+M.ups.create=function(ups)
+	ups=ups or {}
+	setmetatable(ups,M.ups_metatable) -- shared functions
+	ups:reset() -- initialize
+	return ups
+end
+
+-- this is called as each msg is received and should be as fast as possible
+-- so just copy the msg into our volatile state for processing on next update
+M.ups.msg=function(ups,mm)
+	local m={} -- we will copy and cache
+	for n,v in pairs(mm) do m[n]=v end -- copy top level only
+	ups.new_msgs[#ups.new_msgs+1]=m -- remember
+end
+
+-- apply msgs to button states
+M.ups.msg_apply=function(ups,m)
+	if m.class=="key" and ups.enable_key then
+		for idx,maps in ipairs(ups.keymaps) do -- check all keymaps
+			local buttons=maps[m.keyname] or maps[m.ascii]
+			if buttons then
+				local up=ups:manifest(idx)
+				if m.action==1 then -- key set
+					for _,button in ipairs(buttons) do
+						up:set_button(button,true)
+					end
+				elseif m.action==-1 then -- key clear
+					for _,button in ipairs(buttons) do
+						up:set_button(button,false)
+					end
+				end
+			end
+		end
+
+	elseif m.class=="mouse" and ups.enable_mouse then -- swipe to move
+
+		local up=ups:manifest( ups.mousemaps[1] ) -- probably 1up
+		if up then
+			if m.action==-1 then -- we only get button ups
+				if m.keyname=="wheel_add" then
+					up:add_axis( "mz" , 1 )
+				elseif m.keyname=="wheel_sub" then
+					up:add_axis( "mz" , -1 )
+				end
+			end
+
+			up:add_axis( "mx" , m.dx )
+			up:add_axis( "my" , m.dy )
+			up:set_axis( "vx" , m.x )
+			up:set_axis( "vy" , m.y )
+
+			if m.action==1 then -- key set
+				if m.keyname then
+					up:set_button("mouse_"..m.keyname,true)
+				end
+				if m.keyname=="left" then
+					up:set_button("fire",true)
+				end
+			elseif m.action==-1 then -- key clear
+				if m.keyname=="wheel_add" or m.keyname=="wheel_sub" then -- we do not get key downs just ups
+					up:set_button("mouse_"..m.keyname,true) -- fake a down to force a pulse
+				end
+				if m.keyname then
+					up:set_button("mouse_"..m.keyname,false)
+				end
+				if m.keyname=="left" then
+					up:set_button("fire",false)
+				end
+			end
+		end
+	elseif m.class=="padaxis" and ups.enable_pad then -- SDL axis values
+
+		local upi=ups.padmaps[((m.id-1)%#ups.padmaps)+1]
+		if not ups.last_pad_values[upi] then ups.last_pad_values[upi]={} end -- manifest
+		local last_pad_values=ups.last_pad_values[upi]
+		local up=ups:manifest( upi ) -- this pad belongs to
+		if up then
+			local zone=0x2000
+
+			local doaxis=function(name1,name2)
+
+				local v=0
+				if     m.value <= -zone then v=-1
+				elseif m.value >=  zone then v= 1
+				end
+
+				if last_pad_values[name1]~=v then -- only on change
+					if     v<0 then	up:set_button(name1,true)	up:set_button(name2,false)
+					elseif v>0 then	up:set_button(name1,false)	up:set_button(name2,true)
+					else			up:set_button(name1,false)	up:set_button(name2,false)
+					end
+				end
+
+				last_pad_values[name1]=v
+			end
+
+			local dotrig=function(name)
+
+				local v=0
+				if m.value >=  zone then v= 1
+				end
+
+				if last_pad_values[name]~=v then -- only on change
+
+					if     v>0 then		up:set_button(name,true)
+					else				up:set_button(name,false)
+					end
+				end
+
+				last_pad_values[name]=v
+			end
+
+			if     m.name=="LeftX"			then		doaxis("left","right")	up:set_axis("lxp",m.value)
+			elseif m.name=="LeftY"			then		doaxis("up","down")		up:set_axis("lyp",m.value)
+			elseif m.name=="RightX"			then		doaxis("left","right")	up:set_axis("rxp",m.value)
+			elseif m.name=="RightY"			then		doaxis("up","down")		up:set_axis("ryp",m.value)
+			elseif m.name=="TriggerLeft"	then		dotrig("l2")			up:set_axis("lzp",m.value)
+			elseif m.name=="TriggerRight"	then		dotrig("r2")			up:set_axis("rzp",m.value)
+			end
+		end
+
+	elseif m.class=="padkey" and ups.enable_pad then -- SDL button values
+
+		local upi=ups.padmaps[((m.id-1)%#ups.padmaps)+1]
+		local up=ups:manifest( upi ) -- this pad belongs to
+		if up then
+
+			local docode=function(name)
+				if		m.value==1  then	up:set_button(name,true)	-- key set
+				elseif	m.value==-1 then	up:set_button(name,false)	-- key clear
+				end
+			end
+
+			if     m.name=="Left"			then docode("left")   docode("pad_left")    up:set_axis("dx",(m.value==1) and -32767 or 0)
+			elseif m.name=="Right"			then docode("right")  docode("pad_right")   up:set_axis("dx",(m.value==1) and  32767 or 0)
+			elseif m.name=="Up"				then docode("up")     docode("pad_up")      up:set_axis("dy",(m.value==1) and -32767 or 0)
+			elseif m.name=="Down"			then docode("down")   docode("pad_down")    up:set_axis("dy",(m.value==1) and  32767 or 0)
+			elseif m.name=="A"				then docode("a")      docode("fire")
+			elseif m.name=="B"				then docode("b")      docode("fire")
+			elseif m.name=="X"				then docode("x")      docode("fire")
+			elseif m.name=="Y"				then docode("y")      docode("fire")
+			elseif m.name=="LeftShoulder"	then docode("l1")
+			elseif m.name=="RightShoulder"	then docode("r1")
+			elseif m.name=="LeftStick"		then docode("l3")
+			elseif m.name=="RightStick"		then docode("r3")
+			elseif m.name=="Back"			then docode("select")
+			elseif m.name=="Start"			then docode("start")
+			elseif m.name=="Guide"			then docode("guide")
+			else docode("fire") -- all other buttons are fire
+			end
+		end
+	end
+end
+
+M.ups.update=function(ups)
+
+	-- swap now to all
+	ups.msgs=ups.new_msgs
+	ups.new_msgs={} -- start again
+
+	-- reset relative mouse
+	for idx,up in pairs(ups.states) do
+		up.all.mx=nil
+		up.all.my=nil
+		up.all.mz=nil
+	end
+
+	-- change current state using all msgs
+	for _,m in ipairs( ups.msgs ) do
+		ups.msg_apply(m)
+	end
+
+	if ups.auto_advance then
+		ups:advance()
+	end
+
+end
+
+-- needed for manual advance
+M.ups.advance=function(ups)
+	-- advance each up state one frame deals with key acc and decay code
+	for idx,up in pairs(ups.states) do
+		up:update()
+	end
+end
+
+
+-- old style recaps hacks
+M.ups.up=function(ups,idx)
+	if type(idx)~="number" then idx=1 end
+	if idx<1 then idx=1 end -- simpler than wasting time merging every state
+
+	local up={}
+	up.core=ups.manifest(idx)
+	setmetatable(up,{__index=up.core})
+
+	up.button=function(name)
+		return up:get(name)
+	end
+
+	up.axis=function(name)
+		return up:get(name)
+	end
+
+	up.axisfixed=function(name)
+		return up:axis(name)
+	end
+
+	up.msgs=function(name)
+		return ups.msgs
+	end
+
+	return up
+end
+
 
 M.bake=function(oven,ups)
 
@@ -441,12 +709,12 @@ M.bake=function(oven,ups)
 	ups.manifest=function(idx)
 		if idx<1 then return nil end -- asking for 0 gets you a nil
 		if ups.states[idx] then return ups.states[idx] end -- already created
-		ups.states[idx]=ups.create() -- create and remember
+		ups.states[idx]=M.up.create() -- create and remember
 		return ups.states[idx]
 	end
 
 	-- create a state
-	ups.create=M.up_functions.create
+	ups.create_up=M.up.create
 
 -- this is called as each msg is recieved and should be as fast as possible
 -- so just copy the msg into our volatile state for processing on next update
@@ -596,6 +864,7 @@ M.bake=function(oven,ups)
 	end
 
 	ups.update=function()
+--[[
 		if oven.is.update then -- pull all msgs from other thread
 
 			ups.msgs={} -- about to fill this
@@ -610,11 +879,12 @@ M.bake=function(oven,ups)
 			until not m
 
 		else
-
+]]
 			-- swap now to all
 			ups.msgs=ups.new_msgs
 			ups.new_msgs={} -- start again
 
+--[[
 			if oven.is.main then -- push all msgs to other thread
 
 				local m={}
@@ -622,8 +892,9 @@ M.bake=function(oven,ups)
 				oven.tasks.linda:send(nil,"ups",m)
 
 			end
+]]
 
-		end
+--		end
 
 		-- reset relative mouse
 		for idx,up in pairs(ups.states) do
