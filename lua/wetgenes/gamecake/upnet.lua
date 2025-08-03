@@ -1,6 +1,22 @@
 --
 -- (C) 2024 Kriss@XIXs.com
 --
+
+
+--[[
+
+Manage basic network connection and transfer of input states between
+clients.
+
+]]
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+
+
+------------------------------------------------------------------------
+do -- stop these locals from poisoning task functions
+------------------------------------------------------------------------
+
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
@@ -12,15 +28,7 @@ local log,dump,dlog=require("wetgenes.logs"):export("log","dump","dlog")
 
 local json_pack=require("wetgenes.json_pack")
 
---[[
 
-Manage basic network connection and transfer of input states between
-clients.
-
-]]
-
---module
-local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 local baseport=2342
 local basepack=2342
@@ -31,13 +39,32 @@ M.bake=function(oven,upnet)
 
 	upnet=upnet or {}
 
+	-- can override the default name and :msg stream
+	upnet.upnet_task_id=upnet.upnet_task_id or "upnet"
+	upnet.upnet_task_id_msg=upnet.upnet_task_id..":msg"
+
+	-- can override the default msgp and :msg stream
+	upnet.msgp_task_id=upnet.msgp_task_id or "msgp"
+	upnet.msgp_task_id_msg=upnet.msgp_task_id..":msg"
+
+	-- create msgp handling thread if it does not exist
+	oven.tasks:add_global_thread({
+		count=1,
+		id=upnet.msgp_task_id,
+		code=msgp.msgp_code,
+	})
+
+	-- create upnet handling thread if it does not exist
+	oven.tasks:add_global_thread({
+		count=1,
+		id=upnet.upnet_task_id,
+		code=M.upnet_code,
+	})
+
 	upnet.dmode=function(mode)
 		local us=(upnet.us or 0)
 		return us..mode..("\t\t\t\t\t\t"):rep(us-1)
 	end
-
-	upnet.msgp_task_id=upnet.task_id or "msgp"
-	upnet.msgp_task_id_msg=upnet.msgp_task_id..":msg"
 
 	local socket = require("socket")
 	local now=function() return socket.gettime() end -- time now with sub second acuracy
@@ -319,13 +346,6 @@ print("WELCOME",client.idx)
 	upnet.setup=function()
 
 		local args=oven.opts.args
-
-		-- create msgp handling thread
-		upnet.thread=oven.tasks:add_global_thread({
-			count=1,
-			id=upnet.msgp_task_id,
-			code=msgp.msgp_code,
-		})
 
 		upnet.reset()
 
@@ -659,3 +679,43 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 
 	return upnet
 end
+
+
+------------------------------------------------------------------------
+end -- The functions below are free running tasks and should not depend on any locals
+------------------------------------------------------------------------
+
+M.upnet_code=function(linda,task_id,task_idx)
+	local M -- hide M for thread safety
+	local global=require("global") -- lock accidental globals
+
+	local task_id_msg=task_id..":msg"
+
+	local lanes=require("lanes")
+	if lane_threadname then lane_threadname(task_id) end
+
+	local wwin=require("wetgenes.win") --  just for ms resolution timer
+	local now=function() return wwin.gettime() end -- time now in seconds with ms accuracy, probs
+
+	local request=function(memo)
+		local ret={}
+
+		return ret
+	end
+
+	while true do
+
+		local _,memo= linda:receive( 0.001 , task_id ) -- wait for any memos coming into this thread
+
+		if memo then
+			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+
+	end
+
+end
+

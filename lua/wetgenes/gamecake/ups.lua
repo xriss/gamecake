@@ -1,22 +1,18 @@
 --
 -- (C) 2024 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-
-local wstr=require("wetgenes.string")
-
 
 --[[
 
 Since the very first arcade games the UP in 1UP has always stood for
-*U*ser in*P*ut and this is obvioulsy not a backronym.
+*U*ser in*P*ut and this is obviously not a backronym.
 
 This is a replacement for the keys and recaps systems, recaps has never
-really been used as it was intended ( to recored and replay ) and the
+really been used as it was intended ( to record and replay ) and the
 whole thing has gotten rather complicated and entwined with the input
-system. So this is an attemt to simplify all that junk without worrying
+system. So this is an attempt to simplify all that junk without worrying
 too much about backwards compatibility which I can hack in later as
-necesary.
+necessary.
 
 Ideally we want a way of mapping keys/mouse/gamepads etc into gamepad
 like controls for 1-X players and a player 0 who is all/any gamepad. On
@@ -38,13 +34,22 @@ is that we provide.
 	by default we will map mouse and keys to up1 so that can be used
 	where keyboard and mouse values are wanted.
 
-	A list of all msgs we recieve this frame, everytime we advance a
+	A list of all msgs we receive this frame, everytime we advance a
 	frame this is reset so it *must* be polled every frame update.
 
 ]]
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
+
+
+------------------------------------------------------------------------
+do -- stop these locals from poisoning task functions
+------------------------------------------------------------------------
+
+local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+
+local wstr=require("wetgenes.string")
 
 local keymaps={}
 
@@ -376,6 +381,18 @@ M.bake=function(oven,ups)
 
 	ups=ups or {}
 
+	-- can override the default name and :msg stream
+	ups.ups_task_id=ups.ups_task_id or "upnet"
+	ups.ups_task_id_msg=ups.ups_task_id..":msg"
+
+	-- create ups handling thread if it does not exist
+	oven.tasks:add_global_thread({
+		count=1,
+		id=ups.ups_task_id,
+		code=M.ups_code,
+	})
+
+
 	ups.empty=M.empty
 
 	ups.auto_advance=true -- automatically advance each update
@@ -672,3 +689,45 @@ M.bake=function(oven,ups)
 
 	return ups
 end
+
+
+------------------------------------------------------------------------
+end -- The functions below are free running tasks and should not depend on any locals
+------------------------------------------------------------------------
+
+M.ups_code=function(linda,task_id,task_idx)
+	local M -- hide M for thread safety
+	local global=require("global") -- lock accidental globals
+
+	local task_id_msg=task_id..":msg"
+
+	local lanes=require("lanes")
+	if lane_threadname then lane_threadname(task_id) end
+
+	local wwin=require("wetgenes.win") --  just for ms resolution timer
+	local now=function() return wwin.gettime() end -- time now in seconds with ms accuracy, probs
+
+	local wgups=require("wetgenes.gamecake.ups")
+
+	local request=function(memo)
+		local ret={}
+
+		return ret
+	end
+
+	while true do
+
+		local _,memo= linda:receive( 0.001 , task_id ) -- wait for any memos coming into this thread
+
+		if memo then
+			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+
+	end
+
+end
+
