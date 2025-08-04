@@ -704,12 +704,13 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.do_memo">lua.wetgenes.tasks.do_memo</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L556">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua#L560">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua</a></div>
 <div><pre><code>result = tasks:do_memo(memo,timeout)
 result = tasks:do_memo(memo)
 </code></pre>
-<p>Similar to calling tasks:receive but without the problems that come 
-from me trying to remember how to spell receive and it returns 
+<p>set memo.id to false and we will only send and not receive</p>
+<p>Similar to calling tasks:send/receive but without the problems that 
+come from me trying to remember how to spell receive and it returns 
 memo.result instead of memo so slightly less mess. This will assert on 
 finding a memo.error so less need to check for errors.</p>
 </div>

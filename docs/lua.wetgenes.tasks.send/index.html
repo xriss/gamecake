@@ -712,7 +712,9 @@ memo = tasks:send(memo)
 <p>This is intended to be run from within a coroutine task on the main 
 thread. It will work outside of a task but that may block the main 
 thread waiting to send.</p>
-<p>if memo.id is not set then we will auto call add_memo to create it.</p>
+<p>if memo.id is nil then we will auto call add_memo to create it.</p>
+<p>set memo.id to false and we will not need to receive on that id</p>
+<p>if you do not want/expect a response then set memo.id to false</p>
 <p>Check memo.error for posible error, this will be nil if everything went 
 OK.</p>
 </div>
