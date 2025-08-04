@@ -499,7 +499,9 @@ This is intended to be run from within a coroutine task on the main
 thread. It will work outside of a task but that may block the main 
 thread waiting to send.
 
-if memo.id is not set then we will auto call add_memo to create it.
+if memo.id is nil then we will auto call add_memo to create it.
+
+if you do not want/expect a response then set memo.id to false
 
 Check memo.error for posible error, this will be nil if everything went 
 OK.
@@ -507,7 +509,7 @@ OK.
 ]]
 M.tasks_functions.send=function(tasks,memo,timeout)
 	if memo.error then return memo end
-	if not memo.id then tasks:add_memo(memo) end -- auto add
+	if type(memo.id)=="nil" then tasks:add_memo(memo) end -- auto add
 	memo.state="sending"
 	local ok=(tasks.main_thread and tasks.colinda or tasks.linda):send( timeout , memo.task , memo )
 	memo.state="sent"

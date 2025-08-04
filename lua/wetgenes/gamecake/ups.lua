@@ -598,21 +598,13 @@ M.ups.update=function(ups)
 
 	-- change current state using all msgs
 	for _,m in ipairs( ups.msgs ) do
-		ups.msg_apply(m)
+		ups:msg_apply(m)
 	end
 
-	if ups.auto_advance then
-		ups:advance()
-	end
-
-end
-
--- needed for manual advance
-M.ups.advance=function(ups)
-	-- advance each up state one frame deals with key acc and decay code
 	for idx,up in pairs(ups.states) do
 		up:update()
 	end
+
 end
 
 
@@ -650,7 +642,7 @@ M.bake=function(oven,ups)
 	ups=ups or {}
 
 	-- can override the default name and :msg stream
-	ups.ups_task_id=ups.ups_task_id or "upnet"
+	ups.ups_task_id=ups.ups_task_id or "ups"
 	ups.ups_task_id_msg=ups.ups_task_id..":msg"
 
 	-- create ups handling thread if it does not exist
@@ -668,6 +660,8 @@ M.bake=function(oven,ups)
 
 	-- reset everything
 	ups.reset=function()
+		ups.upish={}
+		
 		ups.last_pad_values={}
 		ups.keymaps={}
 		ups.mousemaps={1}
@@ -722,6 +716,14 @@ M.bake=function(oven,ups)
 		local m={} -- we will copy and cache
 		for n,v in pairs(mm) do m[n]=v end -- copy top level only
 		ups.new_msgs[#ups.new_msgs+1]=m -- remember
+
+		oven.tasks:send({
+			task=ups.ups_task_id,
+			id=false,
+			cmd="msg",
+			msg=mm,
+		})
+
 	end
 
 	-- apply msgs to button states
@@ -912,10 +914,15 @@ M.bake=function(oven,ups)
 			ups.advance()
 		end
 
+		ups.upish=oven.tasks:do_memo({
+			task=ups.ups_task_id,
+			cmd="update",
+		})
+
 	end
 
 	-- needed for manual advance
-	ups.advance=function(idx)
+	ups.advance=function()
 		-- advance each up state one frame deals with key acc and decay code
 		for idx,up in pairs(ups.states) do
 			up:update()
@@ -979,9 +986,44 @@ M.ups_code=function(linda,task_id,task_idx)
 	local now=function() return wwin.gettime() end -- time now in seconds with ms accuracy, probs
 
 	local wgups=require("wetgenes.gamecake.ups")
+	
+	local ups=wgups.ups.create()
 
 	local request=function(memo)
 		local ret={}
+		
+		if memo.cmd=="reset" then
+		
+			ups:reset()
+
+		elseif memo.cmd=="map" then
+
+			if memo.keymaps then
+				for i,v in memo.keymaps do
+					ups:keymap(unpack(v))
+				end
+			end
+			if memo.mousemap then ups:mousemap(unpack(memo.mousemap)) end
+			if memo.padmap   then ups:padmap(unpack(memo.padmap))     end
+
+		elseif memo.cmd=="msg" then
+
+			-- just store, they get applied on update
+			ups.new_msgs[#ups.new_msgs+1]=memo.msg
+
+		elseif ( memo.cmd=="get" ) or ( memo.cmd=="update" ) then
+		
+			if memo.cmd=="update" then
+				ups:update()
+			end
+			
+			ret.states={}
+			for idx,up in pairs(ups.states) do
+				ret.states[idx]=up:save()
+			end
+			ret.msgs=ups.msgs
+
+		end
 
 		return ret
 	end
