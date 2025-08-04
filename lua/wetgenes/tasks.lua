@@ -501,6 +501,8 @@ thread waiting to send.
 
 if memo.id is nil then we will auto call add_memo to create it.
 
+set memo.id to false and we will not need to receive on that id
+
 if you do not want/expect a response then set memo.id to false
 
 Check memo.error for posible error, this will be nil if everything went 
@@ -559,9 +561,11 @@ end
 
 	result = tasks:do_memo(memo,timeout)
 	result = tasks:do_memo(memo)
+	
+set memo.id to false and we will only send and not receive
 
-Similar to calling tasks:receive but without the problems that come 
-from me trying to remember how to spell receive and it returns 
+Similar to calling tasks:send/receive but without the problems that 
+come from me trying to remember how to spell receive and it returns 
 memo.result instead of memo so slightly less mess. This will assert on 
 finding a memo.error so less need to check for errors.
 
@@ -569,7 +573,9 @@ finding a memo.error so less need to check for errors.
 M.tasks_functions.do_memo=function(tasks,memo,timeout)
 	tasks:send(memo,timeout)
 --	log("memo",memo.task,memo.id)
-	tasks:receive(memo,timeout)
+	if memo.id then -- do we expect a result? ( set id to false for no result expected )
+		tasks:receive(memo,timeout)
+	end
 --	log("memo",memo.task,memo.id,"done")
 	assert(not memo.error,memo.error)
 	return memo.result

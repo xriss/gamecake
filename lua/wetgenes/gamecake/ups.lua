@@ -660,51 +660,43 @@ M.bake=function(oven,ups)
 
 	-- reset everything
 	ups.reset=function()
-		ups.upish={}
-		
-		ups.last_pad_values={}
-		ups.keymaps={}
-		ups.mousemaps={1}
-		ups.padmaps={1}
-		ups.states={}
-		ups.msgs={} -- all the msgs for this tick
-		ups.new_msgs={} -- volatile building list of msgs
-
-		ups.enable_pad=true		-- deal with pad msgs or ignore them (grabbed by somone else)
-		ups.enable_key=true		-- deal with keyboard msgs or ignore them (grabbed by somone else)
-		ups.enable_mouse=true	-- deal with mouse msgs or ignore them (grabbed by somone else)
+		ups.upish={states={},msgs={}}
+		ups.msgs={}
+		oven.tasks:do_memo({
+			task=ups.ups_task_id,
+			id=false,
+			cmd="reset",
+		})
 	end
 
 	-- set keymap for this idx
 	ups.keymap=function(idx,map)
-		if map then
-			ups.keymaps[idx]={} -- reset
-			local m=ups.keymaps[idx]
-			if keymaps[map] then map=keymaps[map] end -- named map
-			for n,v in pairs(map) do -- copy
-				m[n]={unpack(v)}
-			end
-		end
-		return ups.keymaps[idx]
+		oven.tasks:do_memo({
+			task=ups.ups_task_id,
+			id=false,
+			cmd="map",
+			keymaps={{idx,map}},
+		})
 	end
 
 	-- set mousemap to this idx
 	ups.mousemap=function(...)
-		ups.mousemaps={...}
+		oven.tasks:do_memo({
+			task=ups.ups_task_id,
+			id=false,
+			cmd="map",
+			mousemaps={...},
+		})
 	end
 
 	-- set padmap to these idxs
 	ups.padmap=function(...)
-		ups.padmaps={...}
-	end
-
-
-	-- get or create a state and remember its idx in states
-	ups.manifest=function(idx)
-		if idx<1 then return nil end -- asking for 0 gets you a nil
-		if ups.states[idx] then return ups.states[idx] end -- already created
-		ups.states[idx]=M.up.create() -- create and remember
-		return ups.states[idx]
+		oven.tasks:do_memo({
+			task=ups.ups_task_id,
+			id=false,
+			cmd="map",
+			padmaps={...},
+		})
 	end
 
 	-- create a state
@@ -713,232 +705,38 @@ M.bake=function(oven,ups)
 -- this is called as each msg is recieved and should be as fast as possible
 -- so just copy the msg into our volatile state for processing on next update
 	ups.msg=function(mm)
-		local m={} -- we will copy and cache
-		for n,v in pairs(mm) do m[n]=v end -- copy top level only
-		ups.new_msgs[#ups.new_msgs+1]=m -- remember
-
-		oven.tasks:send({
+		oven.tasks:do_memo({
 			task=ups.ups_task_id,
 			id=false,
 			cmd="msg",
 			msg=mm,
 		})
-
 	end
 
-	-- apply msgs to button states
-	ups.msg_apply=function(m)
-		if m.class=="key" and ups.enable_key then
-			for idx,maps in ipairs(ups.keymaps) do -- check all keymaps
-				local buttons=maps[m.keyname] or maps[m.ascii]
-				if buttons then
-					local up=ups.manifest(idx)
-					if m.action==1 then -- key set
-						for _,button in ipairs(buttons) do
-							up:set_button(button,true)
-						end
-					elseif m.action==-1 then -- key clear
-						for _,button in ipairs(buttons) do
-							up:set_button(button,false)
-						end
-					end
-				end
-			end
-
-		elseif m.class=="mouse" and ups.enable_mouse then -- swipe to move
-
-			local up=ups.manifest( ups.mousemaps[1] ) -- probably 1up
-			if up then
-				if m.action==-1 then -- we only get button ups
-					if m.keyname=="wheel_add" then
-						up:add_axis( "mz" , 1 )
-					elseif m.keyname=="wheel_sub" then
-						up:add_axis( "mz" , -1 )
-					end
-				end
-
-				up:add_axis( "mx" , m.dx )
-				up:add_axis( "my" , m.dy )
-				up:set_axis( "vx" , m.x )
-				up:set_axis( "vy" , m.y )
-
-				if m.action==1 then -- key set
-					if m.keyname then
-						up:set_button("mouse_"..m.keyname,true)
-					end
-					if m.keyname=="left" then
-						up:set_button("fire",true)
-					end
-				elseif m.action==-1 then -- key clear
-					if m.keyname=="wheel_add" or m.keyname=="wheel_sub" then -- we do not get key downs just ups
-						up:set_button("mouse_"..m.keyname,true) -- fake a down to force a pulse
-					end
-					if m.keyname then
-						up:set_button("mouse_"..m.keyname,false)
-					end
-					if m.keyname=="left" then
-						up:set_button("fire",false)
-					end
-				end
-			end
-		elseif m.class=="padaxis" and ups.enable_pad then -- SDL axis values
-
-			local upi=ups.padmaps[((m.id-1)%#ups.padmaps)+1]
-			if not ups.last_pad_values[upi] then ups.last_pad_values[upi]={} end -- manifest
-			local last_pad_values=ups.last_pad_values[upi]
-			local up=ups.manifest( upi ) -- this pad belongs to
-			if up then
-				local zone=0x2000
-
-				local doaxis=function(name1,name2)
-
-					local v=0
-					if     m.value <= -zone then v=-1
-					elseif m.value >=  zone then v= 1
-					end
-
-					if last_pad_values[name1]~=v then -- only on change
-						if     v<0 then	up:set_button(name1,true)	up:set_button(name2,false)
-						elseif v>0 then	up:set_button(name1,false)	up:set_button(name2,true)
-						else			up:set_button(name1,false)	up:set_button(name2,false)
-						end
-					end
-
-					last_pad_values[name1]=v
-				end
-
-				local dotrig=function(name)
-
-					local v=0
-					if m.value >=  zone then v= 1
-					end
-
-					if last_pad_values[name]~=v then -- only on change
-
-						if     v>0 then		up:set_button(name,true)
-						else				up:set_button(name,false)
-						end
-					end
-
-					last_pad_values[name]=v
-				end
-
-				if     m.name=="LeftX"			then		doaxis("left","right")	up:set_axis("lxp",m.value)
-				elseif m.name=="LeftY"			then		doaxis("up","down")		up:set_axis("lyp",m.value)
-				elseif m.name=="RightX"			then		doaxis("left","right")	up:set_axis("rxp",m.value)
-				elseif m.name=="RightY"			then		doaxis("up","down")		up:set_axis("ryp",m.value)
-				elseif m.name=="TriggerLeft"	then		dotrig("l2")			up:set_axis("lzp",m.value)
-				elseif m.name=="TriggerRight"	then		dotrig("r2")			up:set_axis("rzp",m.value)
-				end
-			end
-
-		elseif m.class=="padkey" and ups.enable_pad then -- SDL button values
-
-			local upi=ups.padmaps[((m.id-1)%#ups.padmaps)+1]
-			local up=ups.manifest( upi ) -- this pad belongs to
-			if up then
-
-				local docode=function(name)
-					if		m.value==1  then	up:set_button(name,true)	-- key set
-					elseif	m.value==-1 then	up:set_button(name,false)	-- key clear
-					end
-				end
-
-				if     m.name=="Left"			then docode("left")   docode("pad_left")    up:set_axis("dx",(m.value==1) and -32767 or 0)
-				elseif m.name=="Right"			then docode("right")  docode("pad_right")   up:set_axis("dx",(m.value==1) and  32767 or 0)
-				elseif m.name=="Up"				then docode("up")     docode("pad_up")      up:set_axis("dy",(m.value==1) and -32767 or 0)
-				elseif m.name=="Down"			then docode("down")   docode("pad_down")    up:set_axis("dy",(m.value==1) and  32767 or 0)
-				elseif m.name=="A"				then docode("a")      docode("fire")
-				elseif m.name=="B"				then docode("b")      docode("fire")
-				elseif m.name=="X"				then docode("x")      docode("fire")
-				elseif m.name=="Y"				then docode("y")      docode("fire")
-				elseif m.name=="LeftShoulder"	then docode("l1")
-				elseif m.name=="RightShoulder"	then docode("r1")
-				elseif m.name=="LeftStick"		then docode("l3")
-				elseif m.name=="RightStick"		then docode("r3")
-				elseif m.name=="Back"			then docode("select")
-				elseif m.name=="Start"			then docode("start")
-				elseif m.name=="Guide"			then docode("guide")
-				else docode("fire") -- all other buttons are fire
-				end
-			end
-		end
-	end
 
 	ups.update=function()
---[[
-		if oven.is.update then -- pull all msgs from other thread
-
-			ups.msgs={} -- about to fill this
-			ups.new_msgs={} -- this should never contain anything
-			repeat
-				local ok,m=oven.tasks.linda:receive(0,"ups") -- grab all available memos
-				if ok and m then
-					for _,v in ipairs(m.msgs) do
-						ups.msgs[#ups.msgs+1]=v
-					end
-				end
-			until not m
-
-		else
-]]
-			-- swap now to all
-			ups.msgs=ups.new_msgs
-			ups.new_msgs={} -- start again
-
---[[
-			if oven.is.main then -- push all msgs to other thread
-
-				local m={}
-				m.msgs=ups.msgs
-				oven.tasks.linda:send(nil,"ups",m)
-
-			end
-]]
-
---		end
-
-		-- reset relative mouse
-		for idx,up in pairs(ups.states) do
-			up.all.mx=nil
-			up.all.my=nil
-			up.all.mz=nil
-		end
-
-		-- change current state using all msgs
-		for _,m in ipairs( ups.msgs ) do
-			ups.msg_apply(m)
-		end
-
 		if ups.auto_advance then
 			ups.advance()
 		end
+	end
 
+	-- manual advance
+	ups.advance=function()
 		ups.upish=oven.tasks:do_memo({
 			task=ups.ups_task_id,
 			cmd="update",
 		})
-
+		ups.msgs=ups.upish.msgs or {}
 	end
 
-	-- needed for manual advance
-	ups.advance=function()
-		-- advance each up state one frame deals with key acc and decay code
-		for idx,up in pairs(ups.states) do
-			up:update()
+	ups.manifest=function(idx)
+		
+		local up=ups.upish.states[idx] or {}
+
+		up.get=function(name)
+			return up.state.all[name]
 		end
-	end
-
-
-	-- old style recaps hacks
-	ups.up=function(idx)
-		if type(idx)~="number" then idx=1 end
-		if idx<1 then idx=1 end -- simpler than wasting time merging every state
-
-		local up={}
-		up.core=ups.manifest(idx)
-		setmetatable(up,{__index=up.core})
-
+		
 		up.button=function(name)
 			return up:get(name)
 		end
@@ -956,6 +754,14 @@ M.bake=function(oven,ups)
 		end
 
 		return up
+	end
+
+	-- old style recaps hacks
+	-- ups.upish will contain current frame of data that changes every advance
+	ups.up=function(idx)
+		if type(idx)~="number" then idx=1 end
+		if idx<1 then idx=1 end -- simpler than wasting time merging every state
+		return ups.manifest(idx)
 	end
 
 	-- create 1up only by default
@@ -999,7 +805,7 @@ M.ups_code=function(linda,task_id,task_idx)
 		elseif memo.cmd=="map" then
 
 			if memo.keymaps then
-				for i,v in memo.keymaps do
+				for i,v in ipairs(memo.keymaps) do
 					ups:keymap(unpack(v))
 				end
 			end
