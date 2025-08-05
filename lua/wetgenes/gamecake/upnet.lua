@@ -41,11 +41,9 @@ M.bake=function(oven,upnet)
 
 	-- can override the default name and :msg stream
 	upnet.upnet_task_id=upnet.upnet_task_id or "upnet"
-	upnet.upnet_task_id_msg=upnet.upnet_task_id..":msg"
 
 	-- can override the default msgp and :msg stream
 	upnet.msgp_task_id=upnet.msgp_task_id or "msgp"
-	upnet.msgp_task_id_msg=upnet.msgp_task_id..":msg"
 
 	-- create msgp handling thread if it does not exist
 	oven.tasks:add_global_thread({
@@ -633,7 +631,7 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 
 		repeat -- check msgs
 
-			local _,memo= oven.tasks.linda:receive( 0 , upnet.msgp_task_id_msg ) -- wait for any memos coming into this thread
+			local _,memo= oven.tasks.linda:receive( 0 , upnet.msgp_task_id ) -- wait for any memos coming into this thread
 			if type(memo)=="table" then
 				upnet.domsg(memo)
 			else -- probably a timeout userdata
@@ -689,8 +687,6 @@ M.upnet_code=function(linda,task_id,task_idx)
 	local M -- hide M for thread safety
 	local global=require("global") -- lock accidental globals
 
-	local task_id_msg=task_id..":msg"
-
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
 
@@ -699,9 +695,20 @@ M.upnet_code=function(linda,task_id,task_idx)
 
 	local request=function(memo)
 		local ret={}
+		
+		if memo.cmd=="ups_subscription" then
+
+
+		end
 
 		return ret
 	end
+
+	-- subscribe to all ups updates
+	linda:send( nil , "ups" , {
+		cmd="subscribe",
+		subid=task_id,
+	} )
 
 	while true do
 

@@ -643,7 +643,6 @@ M.bake=function(oven,ups)
 
 	-- can override the default name and :msg stream
 	ups.ups_task_id=ups.ups_task_id or "ups"
-	ups.ups_task_id_msg=ups.ups_task_id..":msg"
 
 	-- create ups handling thread if it does not exist
 	oven.tasks:add_global_thread({
@@ -769,7 +768,7 @@ M.bake=function(oven,ups)
 	ups.keymap(1,"full") -- 1up has full keyboard mappings
 	ups.mousemap(1) -- 1up has the mouse buttons
 	ups.padmap(1) -- 1up has all the pads
-	ups.manifest(1) -- force 1up to exist
+--	ups.manifest(1) -- force 1up to exist
 
 	return ups
 end
@@ -783,8 +782,6 @@ M.ups_code=function(linda,task_id,task_idx)
 	local M -- hide M for thread safety
 	local global=require("global") -- lock accidental globals
 
-	local task_id_msg=task_id..":msg"
-
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
 
@@ -794,6 +791,8 @@ M.ups_code=function(linda,task_id,task_idx)
 	local wgups=require("wetgenes.gamecake.ups")
 	
 	local ups=wgups.ups.create()
+	
+	local subscriptions={}
 
 	local request=function(memo)
 		local ret={}
@@ -817,6 +816,14 @@ M.ups_code=function(linda,task_id,task_idx)
 			-- just store, they get applied on update
 			ups.new_msgs[#ups.new_msgs+1]=memo.msg
 
+		elseif memo.cmd=="subscribe" then
+		
+			subscriptions[memo.subid]=true
+
+		elseif memo.cmd=="unsubscribe" then
+		
+			subscriptions[memo.subid]=nil
+
 		elseif ( memo.cmd=="get" ) or ( memo.cmd=="update" ) then
 		
 			if memo.cmd=="update" then
@@ -828,6 +835,17 @@ M.ups_code=function(linda,task_id,task_idx)
 				ret.states[idx]=up:save()
 			end
 			ret.msgs=ups.msgs
+			
+			if memo.cmd=="update" then
+				for subid,_ in pairs(subscriptions) do
+					local sub={
+						cmd="ups_subscription",
+						states=ret.states,
+						msgs=ret.msgs,
+					}
+					linda:send( nil , subid , sub )
+				end
+			end
 
 		end
 
