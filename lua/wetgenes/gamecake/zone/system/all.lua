@@ -211,10 +211,17 @@ all.scene.initialize=function(scene)
 --	upnet.hooks.sync=function(client,msg) return scene:recv_msg_sync(client,msg) end
 
 
+	scene.values:set("tick",1) -- starting tick
+	scene.values:set("tick_input",1) -- cache of latest input tick for this update
 	-- init scene.ticks from upnet.ticks
 	scene.ticks={}
-	for n,v in pairs( scene.oven.upnet.get_ticks() ) do scene.ticks[n]=v end
+	scene:ticks_sync()
 
+	scene.oven.upnet.subscribe("upsall")
+end
+
+all.scene.ticks_sync=function(scene)
+	for n,v in pairs( scene.oven.upnet.get_ticks() ) do scene.ticks[n]=v end
 end
 
 all.scene.do_update=function(scene)
@@ -239,92 +246,77 @@ counts.draw=0
 --	end
 
 	-- copy upnet ticks into scene
-	for n,v in pairs( scene.oven.upnet.get_ticks() ) do scene.ticks[n]=v end
+	scene:ticks_sync()
 
-	-- remove data we have all agreed too
+	-- remove old data that we no longer need
 	while scene.values[2] and scene.values:get("tick",0) < scene.ticks.agreed do
 --	print( scene.values:get("tick",0) , scene.ticks.agreed )
 		scene:do_pull()
 	end
 
---[[ todo subscribe sync
-	if upnet.need_sync then
-		if upnet.mode=="host" then -- we are the host
-			if upnet.need_sync ~= scene.last_need_sync then -- only send once per frame
-				scene.last_need_sync = upnet.need_sync
-				scene:send_msg_sync(upnet.need_sync)
-			end
+
+	for m in scene.oven.upnet.subscriptions("upsall") do
+		if m.need_sync then
+			scene.last_need_sync = m.need_sync
+			scene:send_msg_sync(m.need_sync)
 		end
 	end
-]]
 
-	if scene.ticks.input > scene.values:get("tick") then
+	-- called often but out of sync of rewinds so will probably cause a resync
+	scene:systems_call("housekeeping")
 
---[[ todo undo draw
-		if upnet.ticks.draw>upnet.ticks.update then
-			while upnet.ticks.draw>upnet.ticks.update do -- undo draw prediction update
+	if scene.ticks.input > scene.values:get("tick_input") then
+
+		-- undo draw predictions without full inputs
+		if scene.values:get("tick") > scene.values:get("tick_input") then
+			while scene.values:get("tick") > scene.values:get("tick_input") do
 				counts.undo=counts.undo+1
-				upnet.ticks.draw=upnet.ticks.draw-1
---print("revert",upnet.ticks.update)
 				scene:do_unpush()
 			end
 			scene:call("get_values") -- sync item and kinetics
 			scene:call("set_body")
 		end
-]]
-		-- called often but out of sync of rewinds so will probably cause a resync
-		scene:systems_call("housekeeping")
 
-		while scene.ticks.input>scene.values:get("tick") do -- update with valid inputs
+		while scene.ticks.input > scene.values:get("tick") do -- update with valid inputs
+		
 			counts.update=counts.update+1
 			scene.oven.console.display_disable=false
 			scene.oven.console.display_clear()
 			display("")
 
---			upnet.ticks.update=upnet.ticks.update+1
---			upnet.ticks.draw=upnet.ticks.update
---print("update",upnet.ticks.update)
-			scene:do_push()
---print("update",upnet.ticks.update)
+			scene:do_push() -- inc tick
 			scene.ups=scene.oven.upnet.get_ups( scene.values:get("tick") )
-
---print("UPDATE:"..upnet.ticks.update)
 
 			scene:systems_call("update")
 			scene:call("update")
 			scene:call("update_kinetic")
+			
+			-- save hashes 
+			scene.values:set("tick_input", scene.values:get("tick") )
 			local hash=scene:get_hashs( scene.values:get("tick") )[1]
---hash=0
 			scene.oven.upnet.set_hash( scene.values:get("tick") , hash )
 			scene.oven.console.display_disable=true
 		end
 
 	end
 
---[[
-	local hashs=scene:get_hashs(upnet.ticks.update)
-	for n,v in pairs(hashs) do hashs[n]=Ox(v) end --; dump(hashs)
-	print(upnet.dmode("H"),upnet.ticks.update,hashs[1],hashs.camera)
-]]
 
--- predict into the future with local inputs
---[[ todo draw predict
-	local nowtick=upnet.nowticks()
-	while upnet.ticks.draw<nowtick do -- update untill we are in the future
+	
+	scene:ticks_sync()
+	while  scene.ticks.now > scene.values:get("tick") do -- update until we are in the future
 		counts.draw=counts.draw+1
-		upnet.ticks.draw=upnet.ticks.draw+1
---print("future",upnet.ticks.draw)
 		scene:do_push()
---print("draw",upnet.ticks.draw)
-		scene.ups=upnet.get_ups(upnet.ticks.draw)
-
---print("UPDRAW:"..upnet.ticks.draw)
+		scene.ups=scene.oven.upnet.get_ups( scene.values:get("tick") )
 
 		scene:systems_call("update")
 		scene:call("update")
 		scene:call("update_kinetic")
+
+		scene:ticks_sync()
 	end
-]]
+	
+	-- save update state into draw state
+
 
 --upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )
 
