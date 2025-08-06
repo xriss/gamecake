@@ -4812,7 +4812,7 @@
    "body": "<pre><code>scene:add(it)\nscene:add(it,caste)\nscene:add(it,caste,boot)\n</code></pre>\n<p>Add a new item of caste or it.caste to the list of things to update.</p>\n<p>The optional boot table contains initialisation/reset values and will\nbe remembered in item.boot. If boot.id is given then we will remember\nthis item with a call to scene.set(id,it)</p>\n<p>The actual act of initalising the item from the boot table is left to\ncustom code which ideally should initalize it and then just call\nscene.add(it) as the auto shortcuts are unnecesary.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 397,
+   "line": 396,
    "name": "lua.wetgenes.gamecake.zone.scene.add",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4820,7 +4820,7 @@
    "body": "<pre><code>scene:call(fname,...)\n</code></pre>\n<p>If fname is a string then that method will be invoked for every item\nwhere it exists like so. Only the first item of each caste is tested,\nif the function exists there then it is expected to exist for all items\nof a given caste. This enables us to skip entire castes whilst still\nmaking all functions optional.</p>\n<pre><code>if it[fname] then it[fname](it,...) end\n</code></pre>\n<p>if fname is a function then it will result in every item geting called with\nthat function like so.</p>\n<pre><code>fname(it,...)\n</code></pre>\n<p>The calls are always made backwards through the table so that an item can\nchoose to delete itself.</p>\n<p>Finally we return the number of calls we made so you can keep track of\ncurrently active items.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 466,
+   "line": 465,
    "name": "lua.wetgenes.gamecake.zone.scene.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4828,7 +4828,7 @@
    "body": "<pre><code>scene:caste(caste)\n</code></pre>\n<p>Get the list of items of a given caste, eg &quot;bullets&quot; or &quot;enemies&quot;</p>\n<p>This list will be created if it does not already exist.</p>\n<p>scene.sortby is used to keep this list in order and an empty system\nwill be autocreated if needed.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 372,
+   "line": 371,
    "name": "lua.wetgenes.gamecake.zone.scene.caste",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4876,7 +4876,7 @@
    "body": "<pre><code>scene:remove(it)\n</code></pre>\n<p>Remove this item, this is slightly expensive as we need to search in a table\nto find it before calling table.remove which then has to shuffle the table to\nfill in the hole.</p>\n<p>With very dynamic items it can be faster to allocate all the items you need at\nthe start and then flag them on/off rather than add and remove dynamically.</p>\n<p>It may make more sense to create a system which handles its own list of\nobjects, such as particles. Then only use the items to keep track of a\nmaster particles item that contains many particles and can add/remove/recycle\nas it sees fit.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 436,
+   "line": 435,
    "name": "lua.wetgenes.gamecake.zone.scene.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4916,7 +4916,7 @@
    "body": "<pre><code>print( scene:status() )\n</code></pre>\n<p>Return a debug string giving details about the system order and current number\nof items of each caste.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 522,
+   "line": 521,
    "name": "lua.wetgenes.gamecake.zone.scene.status",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4972,7 +4972,7 @@
    "body": "<pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)\n\nvalues = zone_scene.create_values()\n</code></pre>\n<p>Create and return a values object.</p>\n<p>This is an array of objects representing the main object in values[1]\nand future predictions in values[2],values[3] etc etc.</p>\n<p>The key values in the higher numbers overide key values in the lower\nnumbers so essentially only changes need to be written into the\npredicted slots.</p>\n",
    "count": 10,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 857,
+   "line": 856,
    "name": "lua.wetgenes.gamecake.zone.scene.values",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4980,7 +4980,7 @@
    "body": "<pre><code>value=values:get(key)\nvalue=values:get(key,topidx)\n</code></pre>\n<p>Get the current value for this key by searching from the top of the\nstack to the bottom and returning the first non nil value we find.</p>\n<p>If topidx is given then get the value at this idx, this would normally\nbe negative in which it counts back from the end. So it is easy to\ntime travel back a frame into the cached values with -1 as the idx.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 658,
+   "line": 657,
    "name": "lua.wetgenes.gamecake.zone.scene.values.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4988,7 +4988,7 @@
    "body": "<pre><code>value=values:manifest(key,value)\n</code></pre>\n<p>Get the current value for this key if there is no current value then\nset the current value.</p>\n<p>This uses values:get and values:set to perform these actions.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 684,
+   "line": 683,
    "name": "lua.wetgenes.gamecake.zone.scene.values.manifest",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -4996,7 +4996,7 @@
    "body": "<pre><code>values2 = values:new()\n</code></pre>\n<p>Create and return a new values object with a single slot containing an\nempty object.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 586,
+   "line": 585,
    "name": "lua.wetgenes.gamecake.zone.scene.values.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -5004,7 +5004,7 @@
    "body": "<pre><code>values:pull()\n</code></pre>\n<p>Merge bottom 2 changesets and replae with just 1 shifting all values down one.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 600,
+   "line": 599,
    "name": "lua.wetgenes.gamecake.zone.scene.values.pull",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -5012,7 +5012,7 @@
    "body": "<pre><code>values:push()\n</code></pre>\n<p>Add a new slot to the end of the values array. Future values will be\nwriten into this new slot.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 616,
+   "line": 615,
    "name": "lua.wetgenes.gamecake.zone.scene.values.push",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -5020,7 +5020,7 @@
    "body": "<pre><code>values:set(key,value)\n</code></pre>\n<p>If this is different from the current value then write the value into\nthe key of the object at the top of the stack. Hence future gets will\nget this new value.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 639,
+   "line": 638,
    "name": "lua.wetgenes.gamecake.zone.scene.values.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -5028,7 +5028,7 @@
    "body": "<pre><code>value=values:tween(key,tween)\n</code></pre>\n<p>Tween between the current value(1) and the previous value(0).</p>\n<p>A tween of 0 gets the previous value, a tween of 1 gets the current\nvalue and any other tween will get a mix between the two if that is\npossible.</p>\n<p>We can only mix numbers or tardis values, other values will round to\neither 0 or 1 whichever is closest and then get that whole value.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 701,
+   "line": 700,
    "name": "lua.wetgenes.gamecake.zone.scene.values.tween",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -5036,7 +5036,7 @@
    "body": "<pre><code>value=values:twrap(key,nmax,tween)\n</code></pre>\n<p>Tween wrap between the current value and the previous value.</p>\n<p>Result will be in rang of 0&gt;= n &lt;nmax , blended in the shortest\ndirection.</p>\n<p>nmax may be a number or a tardis value for nmax per dimension</p>\n<p>A tween of 0 gets the previous value, a tween of 1 gets the current\nvalue and any other tween will get a mix between the two if that is\npossible.</p>\n<p>We can only mix numbers or tardis values, other values will round to\neither 0 or 1 whichever is closest and then get that whole value.\n<br/>\n<br/></p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 751,
+   "line": 750,
    "name": "lua.wetgenes.gamecake.zone.scene.values.twrap",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -5044,7 +5044,7 @@
    "body": "<pre><code>values:unpush()\n</code></pre>\n<p>Remove top pushed slot.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 628,
+   "line": 627,
    "name": "lua.wetgenes.gamecake.zone.scene.values.unpush",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
