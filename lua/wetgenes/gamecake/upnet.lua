@@ -135,9 +135,7 @@ M.upnet=function(upnet)
 		-- ticks ( integers )
 		upnet.ticks.agreed=1	-- the tick all clients have state agreed as true
 		upnet.ticks.input=1		-- the tick we have all inputs for
---		upnet.ticks.update=1	-- the tick you have updated
 		upnet.ticks.now=1		-- the tick we have our input for
---		upnet.ticks.draw=1		-- the tick you have drawn
 		upnet.ticks.base=1		-- the tick at the base of our arrays
 
 		upnet.need_sync=false	-- client needs to sync data when this is set
@@ -304,11 +302,8 @@ M.upnet=function(upnet)
 		upnet.ticks.base=upnet.ticks.now
 		upnet.ticks.agreed=upnet.ticks.now
 		upnet.ticks.input=upnet.ticks.now
-		upnet.ticks.update=upnet.ticks.now
-		upnet.ticks.draw=upnet.ticks.now
 		upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
 
-		upnet.ticks_agreed=upnet.ticks.now -- reset agreed
 		upnet.hashs={} -- reset hashes
 		upnet.inputs={} -- reset inputs
 

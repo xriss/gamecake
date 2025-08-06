@@ -77,7 +77,7 @@ end
 
 
 skys.item.setup=function(sky)
-
+	sky.time=0
 end
 
 skys.item.update=function(sky)
