@@ -24,7 +24,7 @@ local Ox=function(n) return string.format("%012x",n or 0) end
 
 local log,dump,dlog=require("wetgenes.logs"):export("log","dump","dlog")
 
-
+local wgups=require("wetgenes.gamecake.ups")
 
 local json_pack=require("wetgenes.json_pack")
 
@@ -35,7 +35,61 @@ local basepack=2342
 
 local msgp=require("wetgenes.tasks_msgp")
 
+
 M.bake=function(oven,upnet)
+
+	upnet=M.upnet(upnet)
+	
+	upnet.args=oven.opts.args
+	upnet.tasks=oven.tasks
+
+	-- create msgp handling thread if it does not exist
+	upnet.tasks:add_global_thread({
+		count=1,
+		id=upnet.msgp_task_id,
+		code=msgp.msgp_code,
+	})
+
+	-- create upnet handling thread if it does not exist
+	upnet.tasks:add_global_thread({
+		count=1,
+		id=upnet.upnet_task_id,
+		code=M.upnet_code,
+	})
+	
+	
+	upnet.get_ticks=function()
+		return upnet.ticks
+	end
+
+	upnet.subscribe=function(id)
+		upnet.subscribed[id]={}
+	end
+	upnet.unsubscribe=function(id)
+		upnet.subscribed[id]=nil
+	end
+	-- iterator
+	upnet.subscriptions=function(id)
+		local list=upnet.subscribed[id]
+		if not list then return end
+		return table.remove(list,1)
+	end
+	
+	upnet.broadcast=function(msg)
+		for _,client in pairs(upnet.clients) do
+			if not client.us then
+				client:send(msg)
+			end
+		end
+	end
+
+
+
+	return upnet
+end
+
+
+M.upnet=function(upnet)
 
 	upnet=upnet or {}
 
@@ -44,20 +98,6 @@ M.bake=function(oven,upnet)
 
 	-- can override the default msgp and :msg stream
 	upnet.msgp_task_id=upnet.msgp_task_id or "msgp"
-
-	-- create msgp handling thread if it does not exist
-	oven.tasks:add_global_thread({
-		count=1,
-		id=upnet.msgp_task_id,
-		code=msgp.msgp_code,
-	})
-
-	-- create upnet handling thread if it does not exist
-	oven.tasks:add_global_thread({
-		count=1,
-		id=upnet.upnet_task_id,
-		code=M.upnet_code,
-	})
 
 	upnet.dmode=function(mode)
 		local us=(upnet.us or 0)
@@ -95,9 +135,9 @@ M.bake=function(oven,upnet)
 		-- ticks ( integers )
 		upnet.ticks.agreed=1	-- the tick all clients have state agreed as true
 		upnet.ticks.input=1		-- the tick we have all inputs for
-		upnet.ticks.update=1	-- the tick you have updated
+--		upnet.ticks.update=1	-- the tick you have updated
 		upnet.ticks.now=1		-- the tick we have our input for
-		upnet.ticks.draw=1		-- the tick you have drawn
+--		upnet.ticks.draw=1		-- the tick you have drawn
 		upnet.ticks.base=1		-- the tick at the base of our arrays
 
 		upnet.need_sync=false	-- client needs to sync data when this is set
@@ -121,8 +161,9 @@ M.bake=function(oven,upnet)
 
 		upnet.clients_idx={} -- clients order provided by host, remembered from welcome msg
 
-		upnet.upcache=oven.ups.create_up() -- local cached inputs
+		upnet.upcache=wgups.up.create() -- local cached inputs
 
+		upnet.subscribed={}
 	end
 	upnet.reset() -- make sure we are always tables
 
@@ -175,7 +216,7 @@ M.bake=function(oven,upnet)
 
 	upnet.client.send=function(client,msg,cmd)
 
-		oven.tasks:send({
+		upnet.tasks:send({
 			task=upnet.msgp_task_id,
 			cmd=cmd or "send",
 			addr=client.addr,
@@ -343,7 +384,7 @@ print("WELCOME",client.idx)
 
 	upnet.setup=function()
 
-		local args=oven.opts.args
+		local args=upnet.args
 
 		upnet.reset()
 
@@ -351,7 +392,7 @@ print("WELCOME",client.idx)
 		if tonumber( args.host ) then baseport=tonumber( args.host ) end
 
 		-- and tell it to start listening
-		local host_ret=oven.tasks:do_memo({
+		local host_ret=upnet.tasks:do_memo({
 			task=upnet.msgp_task_id,
 			cmd="host",
 			baseport=baseport,
@@ -390,7 +431,7 @@ print("WELCOME",client.idx)
 		upnet.ticks.pause="join"
 
 print("joining",addr)
-		local ret=oven.tasks:do_memo({
+		local ret=upnet.tasks:do_memo({
 			task=upnet.msgp_task_id,
 			cmd="join",
 			addr=addr,
@@ -442,7 +483,7 @@ print("joining",addr)
 
 		local ups={}
 		for ci,_ in pairs(upnet.clients) do
-			local up=oven.ups.create_up()
+			local up=wgups.up.create()
 			ups[ci]=up
 			for ui=ti,1,-1 do -- find best state we have
 				local h=upnet.inputs[ui]
@@ -458,7 +499,7 @@ print("joining",addr)
 			end
 		end
 
-		ups[0]=oven.ups.empty
+		ups[0]=wgups.empty
 
 --		print(upnet.us,tick,upnet.ticks.now,#upnet.inputs,ti,ups[1] and ups[1].all.lx,ups[2] and ups[2].all.lx)
 --		dump(upnet.inputs)
@@ -603,6 +644,12 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 		local pause=not advance
 		pause=pause or upnet.ticks.pause -- can also pause while connecting
 
+		while upnet.get_client_agreed() > (upnet.ticks.base+1) do
+			upnet.inc_base()
+--			scene:do_pull()
+		end
+
+
 		if upnet.mode=="join" then
 			if ( now() - upnet.join_wait ) > 5 then -- wait 5 secs to join before we try again
 
@@ -615,7 +662,7 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 
 				if not joined then
 
-					local args=oven.opts.args
+					local args=upnet.args
 
 					upnet.join( args.join )
 
@@ -626,12 +673,13 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 		end
 
 
-		local up=oven.ups.manifest(1)
+--		local up=oven.ups.manifest(1)
+		local up=wgups.empty
 		upnet.upcache:merge(up) -- merge as we update
 
 		repeat -- check msgs
 
-			local _,memo= oven.tasks.linda:receive( 0 , upnet.msgp_task_id ) -- wait for any memos coming into this thread
+			local _,memo= upnet.tasks.linda:receive( 0 , upnet.msgp_task_id ) -- wait for any memos coming into this thread
 			if type(memo)=="table" then
 				upnet.domsg(memo)
 			else -- probably a timeout userdata

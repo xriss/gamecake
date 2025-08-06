@@ -364,6 +364,7 @@ table that should be modified with the insert and remove functions.
 		scene.data={} -- main lists of scene
 		scene.values=M.create_values() -- values
 		scene.values:set("uid",0) -- starting uid
+		scene.values:set("tick",0) -- starting tick
 		return scene
 	end
 

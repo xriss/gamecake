@@ -725,11 +725,11 @@ os.exit()
 				end
 			end
 
-			oven.upnet_pause=nil -- release pause
+--			oven.upnet_pause=nil -- release pause
 			if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
 
 				if oven.frame_time<(oven.win:time()-0.250) then
-					oven.upnet_pause="catchup" -- we are too far behind so skip forward
+--					oven.upnet_pause="catchup" -- we are too far behind so skip forward
 --print(oven.upnet_pause)
 -- need to pause network code here so everyone can catch up
 					oven.frame_time=oven.win:time()-- zip forwards
@@ -787,7 +787,7 @@ os.exit()
 
 				if oven.frame_rate and oven.frame_time and (not oven.frame_rate_auto) then --  forced updaterate enabled
 					if (oven.frame_time-oven.frame_rate)<time then -- repeat until we are a frame ahead of real time
-					oven.upnet_pause="updates"
+--					oven.upnet_pause="updates"
 --print(oven.upnet_pause ,oven.frame_time , time)
 						return f() -- tailcall
 					end

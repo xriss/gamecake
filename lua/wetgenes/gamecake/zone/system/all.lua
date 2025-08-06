@@ -207,14 +207,19 @@ all.scene.initialize=function(scene)
 		scene:systems_insert(sys)
 	end
 
-	local upnet=scene.oven.upnet
-	upnet.hooks.sync=function(client,msg) return scene:recv_msg_sync(client,msg) end
+--	local upnet=scene.oven.upnet
+--	upnet.hooks.sync=function(client,msg) return scene:recv_msg_sync(client,msg) end
+
+
+	-- init scene.ticks from upnet.ticks
+	scene.ticks={}
+	for n,v in pairs( scene.oven.upnet.get_ticks() ) do scene.ticks[n]=v end
 
 end
 
 all.scene.do_update=function(scene)
 
-	if oven.upnet_pause=="updates" then return end -- only ever need one update to keep in sync
+--	if oven.upnet_pause=="updates" then return end -- only ever need one update to keep in sync
 
 local counts={}
 counts.undo=0
@@ -222,25 +227,27 @@ counts.update=0
 counts.draw=0
 
 
-	local upnet=scene.oven.upnet
-	scene.ticklength=upnet.ticks.length
 	scene.tween=1 -- disable tweening while updating
-
 
 --	main_zone.scene.call("update")
 
-	if oven.upnet_pause=="catchup" then -- fast forward time
-		upnet.update() -- do not advance time
-	else
-		upnet.update(true) -- advance time
-	end
+--	local upnet=scene.oven.upnet
+--	if oven.upnet_pause=="catchup" then -- fast forward time
+--		upnet.update() -- do not advance time
+--	else
+		scene.oven.upnet.update(true) -- advance time
+--	end
+
+	-- copy upnet ticks into scene
+	for n,v in pairs( scene.oven.upnet.get_ticks() ) do scene.ticks[n]=v end
 
 	-- remove data we have all agreed too
-	while upnet.get_client_agreed() > (upnet.ticks.base+1) do
-		upnet.inc_base()
+	while scene.values[2] and scene.values:get("tick",0) < scene.ticks.agreed do
+--	print( scene.values:get("tick",0) , scene.ticks.agreed )
 		scene:do_pull()
 	end
 
+--[[ todo subscribe sync
 	if upnet.need_sync then
 		if upnet.mode=="host" then -- we are the host
 			if upnet.need_sync ~= scene.last_need_sync then -- only send once per frame
@@ -249,9 +256,11 @@ counts.draw=0
 			end
 		end
 	end
+]]
 
-	if upnet.ticks.input>upnet.ticks.update then
+	if scene.ticks.input > scene.values:get("tick") then
 
+--[[ todo undo draw
 		if upnet.ticks.draw>upnet.ticks.update then
 			while upnet.ticks.draw>upnet.ticks.update do -- undo draw prediction update
 				counts.undo=counts.undo+1
@@ -262,31 +271,31 @@ counts.draw=0
 			scene:call("get_values") -- sync item and kinetics
 			scene:call("set_body")
 		end
-
+]]
 		-- called often but out of sync of rewinds so will probably cause a resync
 		scene:systems_call("housekeeping")
 
-		while upnet.ticks.input>upnet.ticks.update do -- update with valid inputs
+		while scene.ticks.input>scene.values:get("tick") do -- update with valid inputs
 			counts.update=counts.update+1
 			scene.oven.console.display_disable=false
 			scene.oven.console.display_clear()
 			display("")
 
-			upnet.ticks.update=upnet.ticks.update+1
-			upnet.ticks.draw=upnet.ticks.update
+--			upnet.ticks.update=upnet.ticks.update+1
+--			upnet.ticks.draw=upnet.ticks.update
 --print("update",upnet.ticks.update)
 			scene:do_push()
 --print("update",upnet.ticks.update)
-			scene.ups=upnet.get_ups(upnet.ticks.update)
+			scene.ups=scene.oven.upnet.get_ups( scene.values:get("tick") )
 
 --print("UPDATE:"..upnet.ticks.update)
 
 			scene:systems_call("update")
 			scene:call("update")
 			scene:call("update_kinetic")
-			local hash=scene:get_hashs(upnet.ticks.update)[1]
+			local hash=scene:get_hashs( scene.values:get("tick") )[1]
 --hash=0
-			upnet.set_hash(upnet.ticks.update,hash)
+			scene.oven.upnet.set_hash( scene.values:get("tick") , hash )
 			scene.oven.console.display_disable=true
 		end
 
@@ -299,6 +308,7 @@ counts.draw=0
 ]]
 
 -- predict into the future with local inputs
+--[[ todo draw predict
 	local nowtick=upnet.nowticks()
 	while upnet.ticks.draw<nowtick do -- update untill we are in the future
 		counts.draw=counts.draw+1
@@ -314,6 +324,7 @@ counts.draw=0
 		scene:call("update")
 		scene:call("update_kinetic")
 	end
+]]
 
 --upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )
 
@@ -326,11 +337,11 @@ end
 
 all.scene.do_draw=function(scene)
 
-	local upnet=scene.oven.upnet
-	oven.console.lines_display[2]=("now:"..upnet.ticks.now.." inp:"..upnet.ticks.input.." agr:"..upnet.ticks.agreed.." bse:"..upnet.ticks.base)
+--	local upnet=scene.oven.upnet
+	oven.console.lines_display[2]=("now:"..scene.ticks.now.." inp:"..scene.ticks.input.." agr:"..scene.ticks.agreed.." bse:"..scene.ticks.base)
 
-	local nowtick=upnet.nowticks()
-	scene.tween=1+nowtick-upnet.ticks.draw -- tween draw blend between frames
+--	local nowtick=upnet.nowticks()
+	scene.tween=1 -- 1+nowtick-upnet.ticks.draw -- tween draw blend between frames
 	if scene.tween<0 then scene.tween=0 end -- sanity
 	if scene.tween>1 then scene.tween=1 end
 
@@ -415,14 +426,14 @@ all.system.initialize=function(sys)
 
 	-- keep shortcuts to oven bound data in each system
 	sys.oven=sys.scene.oven
-	sys.upnet=sys.oven.upnet
+--	sys.upnet=sys.oven.upnet
 	sys.gl=sys.oven.gl
 
 	-- keep shortcuts to oven bound data in each items metatable
 	sys.methods.sys=sys
 	sys.methods.scene=sys.scene
 	sys.methods.oven=sys.oven
-	sys.methods.upnet=sys.upnet
+--	sys.methods.upnet=sys.upnet
 	sys.methods.gl=sys.gl
 
 	sys.uidmap=sys.info.uidmap
@@ -857,9 +868,9 @@ all.system.load_values=all.item.load_values
 
 all.scene.recv_msg_sync=function(scene,client,msg)
 
-	local upnet=scene.oven.upnet
+--	local upnet=scene.oven.upnet
 	local tick=msg.sync
-	local topidx=1+tick-upnet.ticks.base
+	local topidx=1+tick-scene.ticks.base
 
 --print( "recv sync" , upnet.us , tick , topidx , upnet.ticks.base  , #scene.values )
 	if topidx > #scene.values then print( "OVER?" , topidx , #scene.values ) return end
@@ -873,7 +884,7 @@ all.scene.recv_msg_sync=function(scene,client,msg)
 
 	local hash=msg.hashs[1]
 --print( upnet.dmode("syncR") , tick , Ox(hash) )
-	upnet.set_hash(tick,hash)
+	scene.oven.upnet.set_hash(tick,hash)
 
 --print( "RECV SYNC" , tick..":"..topidx , Ox(hash) )
 
@@ -890,13 +901,15 @@ dump({uids,msg.uids})
 error("stop")
 ]]
 
+--[[
 	while upnet.ticks.draw>upnet.ticks.update do -- undo draw prediction update
 		upnet.ticks.draw=upnet.ticks.draw-1
 		scene:do_unpush()
 	end
-	while upnet.ticks.update>tick do -- undo update prediction back to bad tick
-		upnet.ticks.update=upnet.ticks.update-1
-		upnet.ticks.draw=upnet.ticks.update
+]]
+	while scene.values:get("tick") > tick do -- undo update prediction back to bad tick
+--		upnet.ticks.update=upnet.ticks.update-1
+--		upnet.ticks.draw=upnet.ticks.update
 		scene:do_unpush()
 	end
 
@@ -910,8 +923,8 @@ end
 
 all.scene.send_msg_sync=function(scene,tick)
 
-	local upnet=scene.oven.upnet
-	local topidx=1+tick-upnet.ticks.base
+--	local upnet=scene.oven.upnet
+	local topidx=1+tick-scene.ticks.base
 
 	local hashs=scene:get_hashs(tick)
 	local hash=hashs[1]
@@ -926,15 +939,12 @@ all.scene.send_msg_sync=function(scene,tick)
 	end
 	local hashs=scene:get_hashs(tick)
 	local hash=hashs[1]
-	for _,client in pairs(upnet.clients) do
-		if not client.us then
-			local msg={}
-			msg.sync=tick
-			msg.uids=uids
-			msg.hashs=hashs
-			client:send(msg)
-		end
-	end
+	
+	upnet.broadcast({
+		sync=tick,
+		uids=uids,
+		hashs=hashs,
+	})
 
 
 --print( "send sync" , upnet.us , tick , topidx , upnet.ticks.base , Ox(hash) )
@@ -948,8 +958,8 @@ end
 
 all.scene.get_hashs=function(scene,tick)
 
-	local upnet=scene.oven.upnet
-	local topidx=1+tick-upnet.ticks.base
+--	local upnet=scene.oven.upnet
+	local topidx=1+tick-scene.ticks.base
 	if topidx > #scene.values or topidx<1 then print( "OVER2?" , tick, topidx , #scene.values ) ; return {} end
 
 	local r={0}
@@ -977,6 +987,7 @@ end
 
 all.scene.do_push=function(scene)
 	scene.values:push()
+	scene.values:set( "tick" , scene.values:get("tick")+1 ) -- advance tick
 	scene:systems_call("push")
 	scene:call("push")
 end

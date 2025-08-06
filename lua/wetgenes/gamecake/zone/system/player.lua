@@ -400,7 +400,7 @@ players.item.update=function(player)
 		end
 		if player.avatar.speed>4/16 then player.avatar.speed=4/16 end -- walk looks bad any faster than 4x
 	else
-		player.avatar.speed=player.scene.ticklength
+		player.avatar.speed=player.scene.ticks.length
 		player.avatar.pose="breath"
 	end
 --print(LINE(),player.avatar.pose,v:lenlen())

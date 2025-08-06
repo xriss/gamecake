@@ -146,7 +146,7 @@ cameras.item.update=function(camera)
 
 			local orbit=camera.orbit
 
-			local sensitivity=256*camera.scene.ticklength
+			local sensitivity=256*camera.scene.ticks.length
 
 			local mouse_middle=up:get("mouse_middle") or false
 			local mouse_button=( up:get("mouse_right") or up:get("mouse_left") ) or false
