@@ -2766,7 +2766,7 @@
    "body": "<pre><code>value=values:get(key)\nvalue=values:get(key,topidx)\n</code></pre>\n<p>Get the current value for this key by searching from the top of the\nstack to the bottom and returning the first non nil value we find.</p>\n<p>If topidx is given then get the value at this idx, this would normally\nbe negative in which it counts back from the end. So it is easy to\ntime travel back a frame into the cached values with -1 as the idx.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 657,
+   "line": 658,
    "name": "lua.wetgenes.gamecake.zone.scene.values.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }

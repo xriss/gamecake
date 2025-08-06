@@ -2766,7 +2766,7 @@
    "body": "<pre><code>values:push()\n</code></pre>\n<p>Add a new slot to the end of the values array. Future values will be\nwriten into this new slot.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 615,
+   "line": 616,
    "name": "lua.wetgenes.gamecake.zone.scene.values.push",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
