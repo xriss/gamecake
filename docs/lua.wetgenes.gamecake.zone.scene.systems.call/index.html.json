@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 642,
+   "count": 643,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 631,
+   "count": 632,
    "name": "lua.wetgenes"
   },
   {
@@ -630,7 +630,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 168,
+   "count": 169,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -1166,11 +1166,11 @@
    "name": "lua.wetgenes.gamecake.widgets.setup"
   },
   {
-   "count": 34,
+   "count": 35,
    "name": "lua.wetgenes.gamecake.zone"
   },
   {
-   "count": 31,
+   "count": 32,
    "name": "lua.wetgenes.gamecake.zone.scene"
   },
   {
@@ -1254,7 +1254,7 @@
    "name": "lua.wetgenes.gamecake.zone.scene.uids"
   },
   {
-   "count": 10,
+   "count": 11,
    "name": "lua.wetgenes.gamecake.zone.scene.values"
   },
   {
@@ -1264,6 +1264,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.scene.values.manifest"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.zone.scene.values.merge"
   },
   {
    "count": 1,
@@ -2766,7 +2770,7 @@
    "body": "<pre><code>scene:systems_call(fname,...)\n</code></pre>\n<p>For every system call the function called fname like so.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n<p>If fname is a function then it will be called as if it was a method.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 241,
+   "line": 244,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
