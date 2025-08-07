@@ -130,6 +130,7 @@ M.upnet=function(upnet)
 		upnet.ticks={}
 
 		-- seconds ( floats )
+		upnet.ticks.time=0		-- now time in ticks (time-epoch)/length
 		upnet.ticks.length=1/16	-- time in seconds for each tick
 		upnet.ticks.epoch=nil	-- start time of ticks in seconds
 		upnet.ticks.pause=nil	-- if set, adjust epoch so ticks do not advance
@@ -700,7 +701,8 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 		end
 
 		while upnet.ticks.epoch and upnet.us do -- we are ticking
-			local f=(now()-upnet.ticks.epoch)/upnet.ticks.length
+			upnet.ticks.time=(now()-upnet.ticks.epoch)/upnet.ticks.length
+			local f=upnet.ticks.time
 			local t=math.floor(f)
 			f=f-t -- fraction of a frame
 			if t>upnet.ticks.now then

@@ -356,6 +356,12 @@ all.scene.do_draw=function(scene)
 	oven.console.lines_display[2]=("now:"..scene.ticks.now.." inp:"..scene.ticks.input.." agr:"..scene.ticks.agreed.." bse:"..scene.ticks.base)
 
 --	local nowtick=upnet.nowticks()
+	scene:ticks_sync()
+	local t=scene.ticks.time
+	local n=math.floor(t)
+	local f=t-n
+	print(t)
+
 	scene.tween=1 -- 1+nowtick-upnet.ticks.draw -- tween draw blend between frames
 	if scene.tween<0 then scene.tween=0 end -- sanity
 	if scene.tween>1 then scene.tween=1 end
