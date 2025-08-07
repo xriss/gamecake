@@ -54,11 +54,14 @@ path to be used as a require since it wont change the appended string.
 ]]
 	scene.require=function(scene,name)
 		local ret
+		local ok
+		local err=""
 		for _,base in ipairs( scene.require_search ) do -- search
 			if ret then break end -- done
-			pcall( function() ret=require(base..name) end ) -- try a require
+			local o,e=pcall( function() ret=require(base..name) end ) -- try a require
+			if not o then err=err.." "..e end
 		end
-		assert( ret , name.." not found in scene.require" ) -- maybe null
+		assert( ret , name.." not found in scene.require"..err ) -- maybe null
 		return ret
 	end
 
@@ -364,6 +367,7 @@ table that should be modified with the insert and remove functions.
 		scene.data={} -- main lists of scene
 		scene.values=M.create_values() -- values
 		scene.values:set("uid",0) -- starting uid
+		scene.tweens=M.create_values() -- tweens ( drawing cache of values )
 		return scene
 	end
 
@@ -600,16 +604,34 @@ end
 
 	values:pull()
 
-Merge bottom 2 changesets and replae with just 1 shifting all values down one.
+Merge bottom 2 slots into 1, so shifting all values down one.
 
 ]]
 values_methods.pull=function(values)
+	if #values<2 then return end -- nothing to merge
 	local t1=values[1]
-	local t2=values[2] or {}
+	local t2=values[2]
 	for n,v in pairs(t2) do -- merge 1 down
 		t1[n]=v
 	end
-	table.remove(values,2) -- remove old changeset ( t2 )
+	table.remove(values,2) -- remove old slot ( t2 )
+end
+
+--[[#lua.wetgenes.gamecake.zone.scene.values.merge
+
+	values:merge()
+
+Merge top 2 slots into 1
+
+]]
+values_methods.merge=function(values)
+	if #values<2 then return end -- nothing to merge
+	local t1=values[#values-1]
+	local t2=values[#values] or {}
+	for n,v in pairs(t2) do -- merge 1 down
+		t1[n]=v
+	end
+	values[#values]=nil -- remove old slot ( t2 )
 end
 
 --[[#lua.wetgenes.gamecake.zone.scene.values.push
@@ -671,8 +693,9 @@ values_methods.get=function(values,key,topidx)
 	if not topidx then topidx=#values elseif topidx<=0 then topidx=topidx+#values end
 	for idx=topidx,1,-1 do
 		local value=values[idx][key]
-		if value or (type(value)~="nil") then
-			if type(value)=="table" and value.new then -- dupe so we dont accidently mess with the original
+		local tvalue=type(value)
+		if value or (tvalue~="nil") then
+			if tvalue=="table" and value.new then -- dupe so we dont accidently mess with the original
 				return value.new(value)
 			end
 			return value

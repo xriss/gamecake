@@ -250,7 +250,6 @@ counts.draw=0
 
 	-- remove old data that we no longer need
 	while scene.values[2] and scene.values:get("tick",0) < scene.ticks.agreed do
---	print( scene.values:get("tick",0) , scene.ticks.agreed )
 		scene:do_pull()
 	end
 
@@ -277,7 +276,7 @@ counts.draw=0
 			scene:call("set_body")
 		end
 
-		while scene.ticks.input > scene.values:get("tick") do -- update with valid inputs
+		while scene.ticks.input > scene.values:get("tick") do -- update with full inputs and save hashs
 		
 			counts.update=counts.update+1
 			scene.oven.console.display_disable=false
@@ -302,8 +301,10 @@ counts.draw=0
 
 
 	
-	scene:ticks_sync()
-	while  scene.ticks.now > scene.values:get("tick") do -- update until we are in the future
+	local need_tween_push=( scene.tweens:get("tick") or 0 ) < ( scene.values:get("tick") or 0 )
+	while  scene.ticks.now >= scene.values:get("tick") do -- predict until we are in the future
+		need_tween_push=true
+
 		counts.draw=counts.draw+1
 		scene:do_push()
 		scene.ups=scene.oven.upnet.get_ups( scene.values:get("tick") )
@@ -311,16 +312,38 @@ counts.draw=0
 		scene:systems_call("update")
 		scene:call("update")
 		scene:call("update_kinetic")
-
-		scene:ticks_sync()
 	end
 	
-	-- save update state into draw state
+	-- tween state helpers
+	local do_tween=function(f)
+		f(scene)
+		scene:systems_call(f)
+		scene:call(f)
+	end
+
+	-- copy some extra values into the tweens
+	if need_tween_push or #scene.tweens<2 then
+		do_tween( function(it)
+			it.tweens:push() -- fresh slot
+			for n,v in pairs(it.values[1]) do -- slot 1 will have all names
+				it.tweens:set( n , it.values:get(n) ) -- fill up fresh slot
+			end
+		end )
+		-- send new tweens to subscrbers here?
+	end
+	
+	-- shrink tweens down to two slots so we may tween between them
+	while #scene.tweens > 2 and scene.tweens:get("tick",2) <= scene.ticks.now do
+		do_tween( function(it) it.tweens:pull() end )
+	end
+	while #scene.tweens > 2 do
+		do_tween( function(it) it.tweens:merge() end )
+	end
 
 
 --upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )
 
---	print( "do_update" , counts.undo , counts.update , counts.draw )
+	print( "do_update" , counts.undo , counts.update , counts.draw )
 
 -- this slows things down to test worst case updates
 --collectgarbage()
@@ -474,7 +497,7 @@ all.system.initialize=function(sys)
 
 	-- global system values
 	sys.values=sys.scene.create_values()
-	sys.tweens=sys.scene.create_values()
+	sys.tweens=sys.scene.create_values() -- ( drawing cache of values )
 	sys:get_rnd() -- seed with caste name
 
 	-- load glsl code if it exists
@@ -585,7 +608,7 @@ all.item.setup_values=function(it,boot)
 	it.zips={} -- dupe zip cache
 	for n,v in pairs( it.sys.zips or {} ) do it.zips[n]=v end
 	it.values=it.scene.create_values()
-	it.tweens=it.scene.create_values()
+	it.tweens=it.scene.create_values() -- ( drawing cache of values )
 
 	it:set_boot(boot)
 
