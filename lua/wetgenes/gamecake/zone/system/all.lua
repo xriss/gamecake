@@ -250,7 +250,7 @@ counts.draw=0
 
 
 
-	for m in scene.oven.upnet.subscriptions("upsall") do
+	for m in oven.tasks:memos("upsall") do
 		if m.need_sync then
 			scene.last_need_sync = m.need_sync
 			scene:send_msg_sync(m.need_sync)

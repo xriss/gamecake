@@ -70,14 +70,6 @@ M.bake=function(oven,upnet)
 	upnet.unsubscribe=function(id)
 		upnet.subscribed[id]=nil
 	end
-	-- iterator
-	upnet.subscriptions=function(id)
-		return function()
-			local list=upnet.subscribed[id]
-			if not list then return end
-			return table.remove(list,1)
-		end
-	end
 	
 	upnet.broadcast=function(msg)
 		for _,client in pairs(upnet.clients) do

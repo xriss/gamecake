@@ -708,16 +708,7 @@ M.bake=function(oven,ups)
 			cmd="unsubscribe",
 			subid=subid,
 		})
-	end
-	-- iterator
-	ups.subscriptions=function(subid)
-		return function()
-			-- get any memo waiting but do not block
-			local _,memo= linda:receive( 0 , subid )
-			return memo
-		end
-	end
-	
+	end	
 	
 	-- create a state
 	ups.create_up=M.up.create

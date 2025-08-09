@@ -597,6 +597,23 @@ M.tasks_functions.delete=function(tasks)
 	end
 end
 
+--[[#lua.wetgenes.tasks.memos
+
+	for memo in tasks:memos(subid) do
+		... -- deal with new memos
+	end
+	
+Simple iterator for memos available at a subscription id.
+
+]]
+M.tasks_functions.memos=function(tasks,subid)
+	return function()
+		-- get any memo waiting but do not block
+		local _,memo= tasks.linda:receive( 0 , subid )
+		return memo
+	end
+end
+
 --[[#lua.wetgenes.tasks.create_colinda
 
 	local colinda=require("wetgenes.tasks").colinda(linda)
