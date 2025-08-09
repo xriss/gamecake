@@ -260,7 +260,7 @@ do	-- get best time we can, should have at least ms accuracy, possibly slightly 
 		oven.time=lanes.now_secs
 		log( "oven" , "using time from lanes" )
 	end) or pcall(function()
-		local wwin = require("wetgenes.win")
+		local wwin = require("wetgenes.win") -- probably SDL
 		oven.time=wwin.time
 		log( "oven" , "using time from wetgenes.win" )
 	end)

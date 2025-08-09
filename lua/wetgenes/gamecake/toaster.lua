@@ -27,6 +27,21 @@ local function assert_resume(co)
 end
 
 
+-- get time in seconds with best accuracy available
+local get_time
+do
+	local ok=pcall(function()
+		local socket = require("socket")
+		get_time=function() return socket.gettime() end
+	end) or pcall(function()
+		local lanes = require("lanes")
+		get_time=lanes.now_secs
+	end) or pcall(function()
+		local wwin = require("wetgenes.win") -- probably SDL
+		get_time=wwin.time
+	end)
+end
+
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 --[[#lua.wetgenes.gamecake.toaster.newticks
@@ -48,30 +63,17 @@ again.
 
 ]]
 M.newticks=function(rate,jump)
-	-- get time now in seconds
-	local getnow
-	local ok=pcall(function()
-		local socket = require("socket")
-		getnow=function() return socket.gettime() end
-	end) or pcall(function()
-		local lanes = require("lanes")
-		getnow=lanes.now_secs
-	end) or pcall(function()
-		local wwin = require("wetgenes.win")
-		getnow=wwin.time
-	end)
-
 
 	local ticks={}
 	
 	ticks.jump=jump or 1 -- if we get this far behind then jump forwards
 	ticks.rate=rate or 1/60 -- update rate
-	ticks.time=getnow()
+	ticks.time=get_time()
 	ticks.count=0
 
 	-- return true if we callback at least once
 	ticks.step=function(callback)
-		local now=getnow()
+		local now=get_time()
 		local done=false
 		while now-ticks.time >= ticks.rate do -- step forward
 			if now-ticks.time >= ticks.jump then -- jump forward skipping updates
@@ -111,16 +113,7 @@ function M.bake(opts)
 
 	local oven={}
 	
-	local ok=pcall(function()
-		local socket = require("socket")
-		oven.time=function() return socket.gettime() end
-	end) or pcall(function()
-		local lanes = require("lanes")
-		oven.time=lanes.now_secs
-	end) or pcall(function()
-		local wwin = require("wetgenes.win")
-		oven.time=wwin.time
-	end)
+	oven.time=get_time
 
 	oven.newticks=M.newticks
 
