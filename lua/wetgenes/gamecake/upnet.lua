@@ -142,6 +142,7 @@ M.upnet=function(upnet)
 		upnet.ticks.base=1		-- the tick at the base of our arrays
 
 		upnet.need_sync=false	-- client needs to sync data when this is set
+		upnet.need_hash=false	-- if set then client must provide a hash for each frame
 
 		-- we sync now to time and calculate input tick as data arrives
 		-- you should set update and draw times when you update and draw
@@ -205,7 +206,6 @@ M.upnet=function(upnet)
 		end
 
 		client.ack=0
-		client.hash_ack=0
 		client.join_tick=math.huge
 
 		return client
@@ -530,6 +530,12 @@ print("joining",addr)
 	upnet.update_ticks_agreed=function()
 
 		local ti=1+upnet.ticks.agreed-upnet.ticks.base	--  agreed tick
+		if not need_hash then
+			if upnet.ticks.agreed<upnet.ticks.now-1 then
+				upnet.hashs[ti+1] = upnet.hashs[ti+1] or {}
+				upnet.hashs[ti+1][upnet.us]=0
+			end
+		end
 		local hash=upnet.hashs[ti+1] -- next tick after agreed tick
 		if not hash then return end
 
@@ -634,6 +640,10 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 			end
 		end
 
+	end
+
+	upnet.catchup=function()
+		upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
 	end
 
 	-- manage msgs and pulse controller state

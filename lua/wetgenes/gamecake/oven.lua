@@ -371,6 +371,10 @@ os.exit()
 		oven.baked={}
 		oven.mods={}
 
+
+		oven.frame_rate_limited=function()
+			return oven.frame_rate and oven.frame_time and (not oven.frame_rate_auto)
+		end
 --
 -- preheat a normal oven
 -- you may perform this yourself if you want more oven control
@@ -714,41 +718,9 @@ os.exit()
 				end
 			end
 
-			-- a multi frame update is usually caused by changing state so do not do anything smart here just keep going
-			if oven.update_co then -- just continue coroutine until it ends
-				if coroutine.status(oven.update_co)~="dead" then
---					print( "CO:"..coroutine.status(oven.update_co) )
-					assert_resume(oven.update_co) -- run it, may need more than one resume before it finishes
-					return
-				else
-					oven.update_co=nil
-				end
-			end
-
 --			oven.upnet_pause=nil -- release pause
-			if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
 
-				if oven.frame_time<(oven.win:time()-0.250) then
---					oven.upnet_pause="catchup" -- we are too far behind so skip forward
---print(oven.upnet_pause)
--- need to pause network code here so everyone can catch up
-					oven.frame_time=oven.win:time()-- zip forwards
-				end
-				
-				while (oven.frame_time-(oven.frame_rate or 0))>oven.win:time() do
-					oven.msgs() -- keep handling msgs?
---					collectgarbage("step")
---print("frame wait")
-					if wwin.hardcore.sleep then
-						if (oven.frame_time-(oven.frame_rate or 0))<=oven.win:time() then
-							wwin.hardcore.sleep(0.001) -- sleep here 1ms until we need to update
-						end
-					end
-				end
-
-			end
-
-			local time=oven.win:time() -- cache time here to prevent possible race
+			local cached_time=oven.win:time() -- cache time here to prevent possible race
 			local f
 			f=function()
 
@@ -758,7 +730,7 @@ os.exit()
 
 				oven.change() -- run setup/clean codes if we are asked too
 
-				if oven.frame_rate and oven.frame_time then --  framerate limiter enabled
+				if oven.frame_rate_limited() then
 					oven.frame_time=oven.frame_time+oven.frame_rate -- step frame forward one tick
 				end
 
@@ -779,14 +751,10 @@ os.exit()
 					oven.now.update()
 				end
 
-				if oven.tasks then -- update generic coroutines
-					oven.tasks:update()
-				end
-
 				if oven.times then oven.times.update.stop() end
 
-				if oven.frame_rate and oven.frame_time and (not oven.frame_rate_auto) then --  forced updaterate enabled
-					if (oven.frame_time-oven.frame_rate)<time then -- repeat until we are a frame ahead of real time
+				if oven.frame_rate_limited() then
+					if (oven.frame_time-oven.frame_rate)<cached_time then -- repeat until we are a frame ahead of real time
 --					oven.upnet_pause="updates"
 --print(oven.upnet_pause ,oven.frame_time , time)
 						return f() -- tailcall
@@ -798,9 +766,16 @@ os.exit()
 			if not oven.update_co then -- create a new one
 				oven.update_co=coroutine.create(f)
 			end
-			if coroutine.status(oven.update_co)~="dead" then
+			while coroutine.status(oven.update_co)~="dead" do
+				if oven.tasks then -- update generic coroutines
+					oven.tasks:update()
+				end
 				assert_resume(oven.update_co) -- run it, may need more than one resume before it finishes
+
+--log( "oven" , debug.traceback(oven.update_co) ) -- debug where we are?
+
 			end
+			oven.update_co=nil
 
 		end
 
@@ -834,9 +809,9 @@ log("oven",sa.." : "..sb)
 						oven.cake.images.adjust_mips() -- upgrade visible only
 					end
 
-					if  oven.update_co and ( coroutine.status(oven.update_co)=="running" ) then
-						coroutine.yield()
-					end
+--					if  oven.update_co and ( coroutine.status(oven.update_co)=="running" ) then
+--						coroutine.yield()
+--					end
 
 				end
 
@@ -844,13 +819,6 @@ log("oven",sa.." : "..sb)
 		end
 
 		function oven.draw()
-
-			if oven.update_co then
-				if coroutine.status(oven.update_co)~="dead" then return end -- draw nothing until it is finished
-				oven.update_co=nil -- create a new one next update
-			else -- nothing to draw, waiting on update to change things
-				return
-			end
 
 			if wwin.hardcore and wwin.hardcore.swap_pending then
 				return
@@ -885,16 +853,16 @@ log("oven",sa.." : "..sb)
 		oven.frame_rate_auto_active=os.time()
 		function oven.msgs() -- read and process any msgs we have from win:msg
 
-			local time_now=os.time()
+			local cached_time=oven.win:time() -- cache time here to prevent possible race
 			if oven.frame_rate_auto then -- auto pick
-				if time_now-oven.frame_rate_auto_active <= 10 then -- any recent activity in 10 seconds?
+				if cached_time-oven.frame_rate_auto_active <= 10 then -- any recent activity in 10 seconds?
 
 					if oven.frame_rate ~= oven.frame_rate_auto then -- wake up
 						oven.frame_time=oven.win:time()
 						oven.frame_rate=oven.frame_rate_auto
 					end
 				else -- no recent activity , so , sleepy time
-					oven.frame_rate=(time_now-oven.frame_rate_auto_active-10)*oven.frame_rate_auto -- wait longer for next frame
+					oven.frame_rate=(cached_time-oven.frame_rate_auto_active-10)*oven.frame_rate_auto -- wait longer for next frame
 				end
 			end
 
@@ -1000,8 +968,25 @@ log("oven","caught : ",m.class,m.cmd)
 
 		end
 
+		function oven.catchup()
+			oven.frame_time=oven.win:time()-- zip forwards
+			if oven.upnet then
+				oven.upnet.catchup()
+			end
+			if oven.now and oven.now.catchup then
+				oven.now.catchup()
+			end
+		end
+		
 		function oven.serv_pulse()
 			if oven.finished then return true end
+
+			if oven.frame_rate_limited() then
+				if oven.frame_time<(oven.win:time()-0.250) then
+				   oven.catchup()
+				end
+			end
+
 			oven.msgs()
 
 			oven.cake.update()
@@ -1016,6 +1001,17 @@ log("oven","caught : ",m.class,m.cmd)
 				if oven.started then -- can draw?
 					oven.draw()
 				end
+
+				local cached_time=oven.win:time() -- cache time here to prevent possible race
+				if oven.frame_rate_limited() then
+					while (oven.frame_time-(oven.frame_rate or 0))>cached_time do
+						oven.msgs() -- keep handling msgs?
+						if wwin.hardcore.sleep then
+							wwin.hardcore.sleep(0.001) -- sleep here 1ms until we need to update again
+						end
+					end
+				end
+
 			else
 				if wwin.hardcore.sleep then
 					wwin.hardcore.sleep(1/10)
