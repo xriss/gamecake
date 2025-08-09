@@ -6,6 +6,22 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 local log,dump=require("wetgenes.logs"):export("log","dump")
 local global=require("global")
 
+-- calling this once a frame, turns off gc and forces gc to only happen here
+
+-- this will stop gc and take control of it
+local garbage_collect_step=function()
+	collectgarbage("stop") -- from now on we must explicitly call step as often as we can
+	collectgarbage("setpause",100) -- this number adjusts when collection will start ( still seems to effect us here )
+	collectgarbage("setstepmul",10) -- this number adjusts how much time that each step should take
+	collectgarbage("step",0) -- this function may do nothing or may collect some garbage
+end
+-- if we can not regularly call garbage_collect_step then we must restore the default settings and restart it
+local garbage_collect_restart=function()
+	collectgarbage("setpause",200)
+	collectgarbage("setstepmul",200)
+	collectgarbage("restart")
+end
+
 local jit_mcode_size=0
 --[[
 
@@ -33,10 +49,6 @@ we try and do much else which usually sorts it out
 
 --		os.exit(1)
 	end
-
--- tweak garbage to eat less time?
-collectgarbage("setpause",400)
-collectgarbage("setstepmul",100)
 
 
 --[[#lua.wetgenes.gamecake.oven
@@ -237,6 +249,22 @@ function M.bake(opts)
 	end
 
 	require("wetgenes.logs").setup(opts.args)
+
+do	-- get best time we can, should have at least ms accuracy, possibly slightly more
+	local ok=pcall(function()
+		local socket = require("socket")
+		oven.time=function() return socket.gettime() end
+		log( "oven" , "using time from socket" )
+	end) or pcall(function()
+		local lanes = require("lanes")
+		oven.time=lanes.now_secs
+		log( "oven" , "using time from lanes" )
+	end) or pcall(function()
+		local wwin = require("wetgenes.win")
+		oven.time=wwin.time
+		log( "oven" , "using time from wetgenes.win" )
+	end)
+end
 
 if jit then -- now logs are setup, dump basic jit info
 	local t={jit.version,jit.status()}
@@ -584,11 +612,11 @@ os.exit()
 				t.started=0
 
 				function t.start()
-					t.started=oven.win and oven.win.time() or 0
+					t.started=oven.win and oven.time() or 0
 				end
 
 				function t.stop()
-					local ended=oven.win and oven.win.time() or 0
+					local ended=oven.win and oven.time() or 0
 
 					t.time_live=t.time_live + ended-t.started
 					t.hash_live=t.hash_live + 1
@@ -658,6 +686,7 @@ os.exit()
 
 		function oven.setup()
 			if oven.now and oven.now.setup then
+				garbage_collect_restart() -- in case of large allocations
 				oven.now.setup() -- this will probably load data and call the preloader
 			end
 --print("setup preloader=off")
@@ -720,7 +749,7 @@ os.exit()
 
 --			oven.upnet_pause=nil -- release pause
 
-			local cached_time=oven.win:time() -- cache time here to prevent possible race
+			local cached_time=oven.time() -- cache time here to prevent possible race
 			local f
 			f=function()
 
@@ -734,7 +763,7 @@ os.exit()
 					oven.frame_time=oven.frame_time+oven.frame_rate -- step frame forward one tick
 				end
 
---print( "UPDATE",math.floor(10000000+(oven.win:time()*1000)%1000000) )
+--print( "UPDATE",math.floor(10000000+(oven.time()*1000)%1000000) )
 
 				if oven.times then oven.times.update.start() end
 
@@ -796,9 +825,9 @@ log("oven",sa.." : "..sb)
 				p.setup() -- warning, this is called repeatedly
 				p.update(sa,sb)
 
-				if not oven.preloader_time or ( oven.win:time() > ( oven.preloader_time + (1/60) ) ) then -- avoid frame limiting
+				if not oven.preloader_time or ( oven.time() > ( oven.preloader_time + (1/60) ) ) then -- avoid frame limiting
 
-					oven.preloader_time=oven.win:time()
+					oven.preloader_time=oven.time()
 
 					if wwin.hardcore and wwin.hardcore.swap_pending then -- cock blocked waiting for nacl draw code
 						-- do not draw
@@ -826,7 +855,7 @@ log("oven",sa.." : "..sb)
 
 			oven.cake.canvas.draw() -- prepare tempory buffers
 
---print( "DRAW",math.floor(10000000+(oven.win:time()*1000)%1000000) )
+--print( "DRAW",math.floor(10000000+(oven.time()*1000)%1000000) )
 
 			if oven.times then oven.times.draw.start() end -- between calls to draw
 
@@ -853,12 +882,12 @@ log("oven",sa.." : "..sb)
 		oven.frame_rate_auto_active=os.time()
 		function oven.msgs() -- read and process any msgs we have from win:msg
 
-			local cached_time=oven.win:time() -- cache time here to prevent possible race
+			local cached_time=oven.time() -- cache time here to prevent possible race
 			if oven.frame_rate_auto then -- auto pick
 				if cached_time-oven.frame_rate_auto_active <= 10 then -- any recent activity in 10 seconds?
 
 					if oven.frame_rate ~= oven.frame_rate_auto then -- wake up
-						oven.frame_time=oven.win:time()
+						oven.frame_time=oven.time()
 						oven.frame_rate=oven.frame_rate_auto
 					end
 				else -- no recent activity , so , sleepy time
@@ -969,7 +998,7 @@ log("oven","caught : ",m.class,m.cmd)
 		end
 
 		function oven.catchup()
-			oven.frame_time=oven.win:time()-- zip forwards
+			oven.frame_time=oven.time()-- zip forwards
 			if oven.upnet then
 				oven.upnet.catchup()
 			end
@@ -982,7 +1011,7 @@ log("oven","caught : ",m.class,m.cmd)
 			if oven.finished then return true end
 
 			if oven.frame_rate_limited() then
-				if oven.frame_time<(oven.win:time()-0.250) then
+				if oven.frame_time<(oven.time()-0.250) then
 				   oven.catchup()
 				end
 			end
@@ -1002,8 +1031,12 @@ log("oven","caught : ",m.class,m.cmd)
 					oven.draw()
 				end
 
+				-- we probably have some time so try and run a small gc step
+				-- this should take less than 1ms
+				garbage_collect_step()
+
 				if oven.frame_rate_limited() then
-					while (oven.frame_time-(oven.frame_rate or 0))>oven.win:time() do
+					while (oven.frame_time-(oven.frame_rate or 0))>oven.time() do
 						oven.msgs() -- keep handling msgs?
 						if wwin.hardcore.sleep then
 							wwin.hardcore.sleep(0.001) -- sleep here 1ms until we need to update again

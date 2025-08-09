@@ -49,7 +49,18 @@ again.
 ]]
 M.newticks=function(rate,jump)
 	-- get time now in seconds
-	local getnow=require("lanes").now_secs
+	local getnow
+	local ok=pcall(function()
+		local socket = require("socket")
+		getnow=function() return socket.gettime() end
+	end) or pcall(function()
+		local lanes = require("lanes")
+		getnow=lanes.now_secs
+	end) or pcall(function()
+		local wwin = require("wetgenes.win")
+		getnow=wwin.time
+	end)
+
 
 	local ticks={}
 	
@@ -100,6 +111,17 @@ function M.bake(opts)
 
 	local oven={}
 	
+	local ok=pcall(function()
+		local socket = require("socket")
+		oven.time=function() return socket.gettime() end
+	end) or pcall(function()
+		local lanes = require("lanes")
+		oven.time=lanes.now_secs
+	end) or pcall(function()
+		local wwin = require("wetgenes.win")
+		oven.time=wwin.time
+	end)
+
 	oven.newticks=M.newticks
 
 	oven.is={}
