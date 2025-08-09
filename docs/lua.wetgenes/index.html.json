@@ -4239,7 +4239,7 @@
    "body": "<pre><code>oven=wetgenes.gamecake.toaster.bake(opts)\n</code></pre>\n<p>Bake creates an instance of a lua module bound to an oven state. Here \nwe are creating the main state that other modules will then bind to.</p>\n<p>Modules are then bound together using rebake...</p>\n<pre><code>b=oven.rebake(nameb)\nc=oven.rebake(namec)\n</code></pre>\n<p>All of these will be connected by the same oven and circular \ndependencies should work with the caveat that just because you have the \ntable for a baked module does not mean that it has all been filled in \nyet.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/toaster.lua",
-   "line": 92,
+   "line": 94,
    "name": "lua.wetgenes.gamecake.toaster.bake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua"
   },
@@ -4247,7 +4247,7 @@
    "body": "<pre><code>ticks=require(&quot;wetgenes.gamecake.toaster&quot;).newticks(rate,jump)\n</code></pre>\n<p>create a ticks time controller for updates.</p>\n<p>rate is time between steps , jump is how far behind we should get \nbefore giving up ( eg callback takes longer than rate allows ) these \nvalues are in seconds and default to 1/60 and 1 respectively.</p>\n<p>Then we perform one or more update steps like so</p>\n<pre><code>ticks.step( callback ) -- callback may be called zero or more times\n</code></pre>\n<p>After that we should wait a bit (maybe draw a frame) and then call \nagain.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/toaster.lua",
-   "line": 32,
+   "line": 47,
    "name": "lua.wetgenes.gamecake.toaster.newticks",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua"
   },
