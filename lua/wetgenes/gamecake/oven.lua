@@ -912,7 +912,7 @@ end
 						old_mouse.y=m.y
 						m.xraw=m.x				-- remember in message
 						m.yraw=m.y
-						oven.frame_rate_auto_active=time_now
+						oven.frame_rate_auto_active=cached_time
 						if oven.msg_view then
 							oven.msg_view.msg(m) -- fix mouse coords using this view
 						end
@@ -921,15 +921,15 @@ end
 					if m.class=="touch" then	-- need to fix x,y numbers
 						m.xraw=m.x				-- remember in message
 						m.yraw=m.y
-						oven.frame_rate_auto_active=time_now
+						oven.frame_rate_auto_active=cached_time
 					end
 
 					if m.class=="key" or m.class=="padkey" then -- key or joystick buttons
-						oven.frame_rate_auto_active=time_now
+						oven.frame_rate_auto_active=cached_time
 					end
 
 					if m.class=="resize" then -- window resize
-						oven.frame_rate_auto_active=time_now
+						oven.frame_rate_auto_active=cached_time
 					end
 
 					if m.class=="close" then -- window has been closed so do a shutdown
