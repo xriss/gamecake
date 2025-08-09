@@ -1002,9 +1002,8 @@ log("oven","caught : ",m.class,m.cmd)
 					oven.draw()
 				end
 
-				local cached_time=oven.win:time() -- cache time here to prevent possible race
 				if oven.frame_rate_limited() then
-					while (oven.frame_time-(oven.frame_rate or 0))>cached_time do
+					while (oven.frame_time-(oven.frame_rate or 0))>oven.win:time() do
 						oven.msgs() -- keep handling msgs?
 						if wwin.hardcore.sleep then
 							wwin.hardcore.sleep(0.001) -- sleep here 1ms until we need to update again
