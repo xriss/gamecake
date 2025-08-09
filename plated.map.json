@@ -264,7 +264,7 @@
     "name": "levels"
    },
    {
-    "count": 643,
+    "count": 644,
     "name": "lua"
    },
    {
@@ -308,7 +308,7 @@
     "name": "lua.swanky.edit.collect.task_code"
    },
    {
-    "count": 632,
+    "count": 633,
     "name": "lua.wetgenes"
    },
    {
@@ -2564,7 +2564,7 @@
     "name": "lua.wetgenes.tardis.v4.to_v3"
    },
    {
-    "count": 31,
+    "count": 32,
     "name": "lua.wetgenes.tasks"
    },
    {
@@ -2658,6 +2658,10 @@
    {
     "count": 1,
     "name": "lua.wetgenes.tasks.http_code"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.tasks.memos"
    },
    {
     "count": 1,
@@ -3137,7 +3141,7 @@
    },
    {
     "body": "",
-    "count": 643,
+    "count": 644,
     "name": "lua"
    },
    {
@@ -3213,7 +3217,7 @@
    },
    {
     "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-    "count": 632,
+    "count": 633,
     "file": "../lua/wetgenes/init.lua",
     "line": 5,
     "name": "lua.wetgenes",
@@ -7686,7 +7690,7 @@
    },
    {
     "body": "<pre><code>local tasks=require(&quot;wetgenes.tasks&quot;).create()\n</code></pre>\n<p>Manage tasks that should be performed on seperate threads so as not to block the main thread.</p>\n<p>Manage coroutines that can then easily call into these threads by yeilding</p>\n",
-    "count": 31,
+    "count": 32,
     "file": "../lua/wetgenes/tasks.lua",
     "line": 20,
     "name": "lua.wetgenes.tasks",
@@ -7744,7 +7748,7 @@
     "body": "<p>Send and/or recieve a (web)socket client memo result.</p>\n<p>returns nil,error if something went wrong or returns result if \nsomething went right.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/tasks.lua",
-    "line": 796,
+    "line": 813,
     "name": "lua.wetgenes.tasks.client",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
@@ -7752,7 +7756,7 @@
     "body": "<p>A basic function to handle (web)socket client connection.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/tasks.lua",
-    "line": 1255,
+    "line": 1272,
     "name": "lua.wetgenes.tasks.client_code",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
@@ -7768,7 +7772,7 @@
     "body": "<p>Create a tasks group to contain all associated threads and coroutines \nalong with their comunications.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/tasks.lua",
-    "line": 705,
+    "line": 722,
     "name": "lua.wetgenes.tasks.create",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
@@ -7776,7 +7780,7 @@
     "body": "<pre><code>local colinda=require(&quot;wetgenes.tasks&quot;).colinda(linda)\n</code></pre>\n<p>Create a colinda which is a wrapper around a linda providing \nreplacement functions to be used inside a coroutine so it will yield \n(and assume it will be resumed) rather than wait.</p>\n<p>This should be a dropin replacement for a linda and will fallback to \nnormal linda use if not in a coroutine.</p>\n<p>If linda is nil then we will create one, the linda used in this colinda \ncan be found in colinda.linda if you need raw access.</p>\n<p>What we are doing here is wrapping the send/receive functions so that</p>\n<pre><code>colinda:send(time,...)\ncolinda:recieve(time,...)\n</code></pre>\n<p>will be replaced with functions that call</p>\n<pre><code>linda:send(0,...)\nlinda:recieve(0,...)\n</code></pre>\n<p>and use coroutines.yield to mimic the original timeout value without \nblocking.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/tasks.lua",
-    "line": 600,
+    "line": 617,
     "name": "lua.wetgenes.tasks.create_colinda",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
@@ -7856,7 +7860,7 @@
     "body": "<p>A basic function to handle global memos to get/set data shared amongst multiple tasks.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/tasks.lua",
-    "line": 909,
+    "line": 926,
     "name": "lua.wetgenes.tasks.global_code",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
@@ -7864,7 +7868,7 @@
     "body": "<p>Create send and return a http memo result.</p>\n<p>Returns either the result or nil,error so can be used simply with an \nassert wrapper.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/tasks.lua",
-    "line": 745,
+    "line": 762,
     "name": "lua.wetgenes.tasks.http",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
@@ -7872,8 +7876,16 @@
     "body": "<p>A basic function to handle http memos.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/tasks.lua",
-    "line": 957,
+    "line": 974,
     "name": "lua.wetgenes.tasks.http_code",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
+   },
+   {
+    "body": "<pre><code>for memo in tasks:memos(subid) do\n    ... -- deal with new memos\nend\n</code></pre>\n<p>Simple iterator for memos available at a subscription id.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/tasks.lua",
+    "line": 600,
+    "name": "lua.wetgenes.tasks.memos",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
    {
@@ -7904,7 +7916,7 @@
     "body": "<p>Create send and return a sqlite memo result.</p>\n<p>Returns either the result.rows or nil,error so can be used simply with an \nassert wrapper.</p>\n<p>Note that rows can be empty so an additional assert(rows[1]) might be \nneeded to check you have data returned.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/tasks.lua",
-    "line": 768,
+    "line": 785,
     "name": "lua.wetgenes.tasks.sqlite",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
@@ -7912,7 +7924,7 @@
     "body": "<p>A basic function to handle sqlite memos.</p>\n<p>As we are opening an sqlite database here it wont help much to have \nmore than one thread per database as they will just fight over file \naccess.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/tasks.lua",
-    "line": 1118,
+    "line": 1135,
     "name": "lua.wetgenes.tasks.sqlite_code",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
@@ -7920,7 +7932,7 @@
     "body": "<p>Handle global tasks, starting and stopping and preventing the starting \nof multiple copies of the same task.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/tasks.lua",
-    "line": 855,
+    "line": 872,
     "name": "lua.wetgenes.tasks.thread_code",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
