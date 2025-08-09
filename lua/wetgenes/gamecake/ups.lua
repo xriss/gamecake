@@ -154,27 +154,6 @@ for n,v in pairs(keymaps["island1"]) do keymaps["islands"][n]=v end
 for n,v in pairs(keymaps["island2"]) do keymaps["islands"][n]=v end
 
 
-
--- these should be configurable
-local powzone=2			-- walk helper
-local minzone=0x1000	-- deadzone
-local maxzone=0x7000	-- run helper
-
-local fixaxis=function(n)
-	local fix=function(n)
-		local n=(n-minzone)/(maxzone-minzone)
-		if n<0 then return 0 end
-		if n>1 then return 1 end
-		return math.pow(n,powzone)
-	end
-	if type(n)~="number" then n=0 end -- replace nils etc
-	if n < 0 then
-		return -fix(-n)
-	else
-		return fix(n)
-	end
-end
-
 -- names of relative mouse axis
 M.is_relative={mx=true,my=true,mz=true}
 M.is_pulse={}
@@ -205,9 +184,25 @@ M.up.get=function(up,name)
 	return up.all[name]
 end
 
+
+M.up.powzone=2		-- walk helper
+M.up.minzone=0x1000	-- deadzone
+M.up.maxzone=0x7000	-- run helper
 -- get stable axis fixed to +-1.0
 M.up.axis=function(up,name) -- fix deadzones etc
-	return fixaxis( up.all[name] )
+	local n=up.all[name]
+	local fix=function(n)
+		local n=(n-up.minzone)/(up.maxzone-up.minzone)
+		if n<0 then return 0 end
+		if n>1 then return 1 end
+		return math.pow(n,up.powzone)
+	end
+	if type(n)~="number" then n=0 end -- replace nils etc
+	if n < 0 then
+		return -fix(-n)
+	else
+		return fix(n)
+	end
 end
 
 M.up.set_button=function(up,n,v)
@@ -698,6 +693,32 @@ M.bake=function(oven,ups)
 		})
 	end
 
+	ups.subscribe=function(subid)
+		oven.tasks:do_memo({
+			task=ups.ups_task_id,
+			id=false,
+			cmd="subscribe",
+			subid=subid,
+		})
+	end
+	ups.unsubscribe=function(subid)
+		oven.tasks:do_memo({
+			task=ups.ups_task_id,
+			id=false,
+			cmd="unsubscribe",
+			subid=subid,
+		})
+	end
+	-- iterator
+	ups.subscriptions=function(subid)
+		return function()
+			-- get any memo waiting but do not block
+			local _,memo= linda:receive( 0 , subid )
+			return memo
+		end
+	end
+	
+	
 	-- create a state
 	ups.create_up=M.up.create
 

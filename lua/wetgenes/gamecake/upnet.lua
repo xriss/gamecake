@@ -25,6 +25,7 @@ local Ox=function(n) return string.format("%012x",n or 0) end
 local log,dump,dlog=require("wetgenes.logs"):export("log","dump","dlog")
 
 local wgups=require("wetgenes.gamecake.ups")
+local wstr=require("wetgenes.string")
 
 local json_pack=require("wetgenes.json_pack")
 
@@ -57,6 +58,7 @@ M.bake=function(oven,upnet)
 		code=M.upnet_code,
 	})
 	
+	oven.ups.subscribe("upnet/ups") -- 
 	
 	upnet.get_ticks=function()
 		return upnet.ticks
@@ -682,8 +684,13 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 
 
 --		local up=oven.ups.manifest(1)
-		local up=wgups.empty
-		upnet.upcache:merge(up) -- merge as we update
+--		local up=wgups.empty
+		for memo in function() local _,memo= upnet.tasks.linda:receive( 0 , "upnet/ups" ) ; return memo end do
+--print(wstr.dump(memo))
+			if memo.states and memo.states[1] then
+				upnet.upcache:merge( memo.states[1] ) -- merge as we update
+			end
+		end
 
 		repeat -- check msgs
 
