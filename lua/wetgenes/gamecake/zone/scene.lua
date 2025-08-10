@@ -735,7 +735,6 @@ either 0 or 1 whichever is closest and then get that whole value.
 
 ]]
 values_methods.tween=function(values,key,tween)
-
 	if (not tween) or (tween>=1) then return values:get(key) end -- shortcut to get
 
 	local a,b
@@ -758,9 +757,10 @@ values_methods.tween=function(values,key,tween)
 		end
 	end
 
-
 	local tb=type(b)
-	if tb~="nil" then
+	if tb=="nil" then
+		return values:get(key)
+	else
 		if ta=="number" and tb=="number" then -- tween numbers
 			return a*tween + b*(1-tween)
 		elseif tb=="table" and b.mix then -- tween using tardis

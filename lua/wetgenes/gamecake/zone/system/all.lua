@@ -238,7 +238,7 @@ counts.update=0
 counts.draw=0
 
 
-	scene.tween=1 -- disable tweening while updating
+	scene.tween=nil -- disable tweening while updating
 
 --	main_zone.scene.call("update")
 
@@ -370,9 +370,15 @@ all.scene.do_draw=function(scene)
 	local n=math.floor(t)
 	local f=t-n
 
-	scene.tween=1 -- 1+nowtick-upnet.ticks.draw -- tween draw blend between frames
+	if #scene.tweens == 2 then
+		scene.tween=scene.ticks.time-scene.tweens:get("tick",1)
+	else
+		scene.tween=1
+	end
 	if scene.tween<0 then scene.tween=0 end -- sanity
 	if scene.tween>1 then scene.tween=1 end
+--	print(scene.tween)
+
 
 	scene:call("render_camera")
 
@@ -449,6 +455,7 @@ all.system.initialize=function(sys)
 	sys.zips=sys.zips or {}
 
 	sys.info.types=sys.info.types or {}
+	sys.info.twraps=sys.info.twraps or {}
 
 	-- and methods will be available to items via metatable
 	sys.metatable.__index=sys.methods
@@ -483,6 +490,7 @@ all.system.initialize=function(sys)
 			merge( sys.methods     , info.item   or {} ) -- and item functions
 			merge( sys.info.values , info.values or {} ) -- and default values
 			merge( sys.info.types  , info.types  or {} ) -- and types of values
+			merge( sys.info.twraps , info.twraps or {} ) -- and twraps of values
 		end
 	end
 
@@ -503,6 +511,10 @@ all.system.initialize=function(sys)
 		if v~="ignore" then -- remove ignores
 			sys.types[n]=v
 		end
+	end
+	sys.twraps={}
+	for n,v in pairs( sys.info.twraps ) do
+		sys.twraps[n]=v
 	end
 
 	sys.info.values_order={}
@@ -553,7 +565,7 @@ all.system.create_core=function(sys,boot)
 	if it.boot.id  then it.id  = it.boot.id  end
 	setmetatable(it,sys.metatable)
 	sys.scene:add(it)
-	it:setup_values()
+	it:setup_values(boot)
 	it:setup() -- system specific setup
 	return it
 end
@@ -631,6 +643,10 @@ all.item.setup_values=function(it,boot)
 		it:set("zid",zone and zone.uid or 0)
 	end
 
+	for n,v in pairs(it.values[1]) do -- copy base values into tweens
+		it.tweens:set(n,v)
+	end
+
 	for i=1,#it.scene.values do -- make sure we have same depth as everyone else
 		if not it.values[i] then it.values[i]={} end
 	end
@@ -638,10 +654,19 @@ all.item.setup_values=function(it,boot)
 end
 
 all.item.get_auto_values=function(it)
-	for n,t in pairs(it.sys.types) do
-		if     t=="tween" then it[n]=it:get(n)
-		elseif t=="twrap" then it[n]=it:get(n)
-		elseif t=="get"   then it[n]=it:get(n)
+	if it.scene.tween then -- we are drawing need to use tween cache
+		for n,t in pairs(it.sys.types) do
+			if     t=="get"   then it[n]=it:tget(n)
+			elseif t=="tween" then it[n]=it:tween(n)
+			elseif t=="twrap" then it[n]=it:twrap(n,it.sys.twraps[n])
+			end
+		end
+	else
+		for n,t in pairs(it.sys.types) do
+			if     t=="get"   then it[n]=it:get(n)
+			elseif t=="tween" then it[n]=it:get(n)
+			elseif t=="twrap" then it[n]=it:get(n)
+			end
 		end
 	end
 	it:get_zips()

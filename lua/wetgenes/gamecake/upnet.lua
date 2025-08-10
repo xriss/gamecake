@@ -124,7 +124,7 @@ M.upnet=function(upnet)
 		upnet.ticks={}
 
 		-- seconds ( floats )
-		upnet.ticks.time=0		-- now time in ticks (time-epoch)/length
+		upnet.ticks.time=0		-- now time in ticks (time-epoch)/length (probably now + a fraction)
 		upnet.ticks.length=1/16	-- time in seconds for each tick
 		upnet.ticks.epoch=nil	-- start time of ticks in seconds
 		upnet.ticks.pause=nil	-- if set, adjust epoch so ticks do not advance

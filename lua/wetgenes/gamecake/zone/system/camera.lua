@@ -45,6 +45,10 @@ cameras.types={
 	dolly_part="tween",
 }
 
+cameras.twraps={
+	direction=360,
+}
+
 -- methods added to system
 cameras.system={}
 -- methods added to each item
