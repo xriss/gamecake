@@ -125,6 +125,7 @@ M.upnet=function(upnet)
 
 		-- seconds ( floats )
 		upnet.ticks.time=0		-- now time in ticks (time-epoch)/length (probably now + a fraction)
+		upnet.ticks.lag=1		-- number of ticks to lag input (0 will create glitch frames)
 		upnet.ticks.length=1/16	-- time in seconds for each tick
 		upnet.ticks.epoch=nil	-- start time of ticks in seconds
 		upnet.ticks.pause=nil	-- if set, adjust epoch so ticks do not advance
@@ -484,7 +485,11 @@ print("joining",addr)
 -- this will have set/clr flags locked on into future prediction frames so we should update to clear them?
 					if ui<ti then -- we had to look backwards in timw
 --print(tick,ci,ui,ti,#upnet.inputs,upnet.inputs[#upnet.inputs][1],upnet.inputs[#upnet.inputs][2])
-						for i=ui+1,ti do up:update() end -- so update to frame requested?
+						for i=ui+1,ti do
+--							print("ups future",i)
+							 -- predict next frame
+							up:update(upnet.ticks.length)
+						end
 					end
 					break -- and done
 				end
@@ -603,11 +608,10 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 		upnet.ticks.now=upnet.ticks.now+1
 		-- remember current up
 
-		 -- current input is locked in for "next" frame not this frame
-		 -- that way we can tween local data into the "future" without glitches
 		local iidx=1+upnet.ticks.now-upnet.ticks.base -- next frame
---		if f>=0.5 then iidx=iidx+2 else iidx=iidx+1 end -- 1 frame ahead rounded up so maybe 2 actual frames
-		iidx=iidx+2 -- save local inputs into the future at least one frame maybe 2?
+		-- current input is locked in for "next" frame not this frame
+		-- that way we can tween local data into the near "future" without glitches
+		iidx=iidx+upnet.ticks.lag
 		if iidx<1 then return end
 
 		for i=1,iidx do -- make sure full array exists
@@ -642,15 +646,17 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 
 	-- manage msgs and pulse controller state
 	upnet.join_wait=0
-	upnet.update=function(advance)
-		local pause=not advance
-		pause=pause or upnet.ticks.pause -- can also pause while connecting
+	upnet.update=function()
+
+-- keep reading inputs	
+oven.msgs() -- keep handling msgs
+
+		local pause=upnet.ticks.pause -- need pause while connecting etc
 
 		while upnet.get_client_agreed() > (upnet.ticks.base+1) do
 			upnet.inc_base()
 --			scene:do_pull()
 		end
-
 
 		if upnet.mode=="join" then
 			if ( now() - upnet.join_wait ) > 5 then -- wait 5 secs to join before we try again
@@ -681,6 +687,7 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 --print(wstr.dump(memo))
 			if memo.states and memo.states[1] then
 				upnet.upcache:merge( memo.states[1] ) -- merge as we update
+--print("upsin", (now()-upnet.ticks.epoch)/upnet.ticks.length )
 			end
 		end
 

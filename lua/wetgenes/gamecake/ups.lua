@@ -234,7 +234,7 @@ end
 
 -- manage fake axis with decay from keypress states
 -- and handle deletion of pulse msgs
-M.up.update=function(up,pow)
+M.up.update=function(up,pow,keep_pulse)
 	pow=64*(pow or 1/60)
 
 	for n,a in ipairs{"lx","ly","lz","rx","ry","rz"} do -- check axis buttons and convert to axis movement
@@ -282,12 +282,14 @@ M.up.update=function(up,pow)
 	end
 
 	-- auto delete pulses
-	for n,v in pairs(up.all) do
-		if M.is_pulse[n] then
-			if up.all[n]==1 then
-				up.all[n]=nil
-			else
-				up.all[n]=1	-- use one as a pulse flag that is also true
+	if not keep_pulse then
+		for n,v in pairs(up.all) do
+			if M.is_pulse[n] then
+				if up.all[n]==1 then
+					up.all[n]=nil
+				else
+					up.all[n]=1	-- use one as a pulse flag that is also true
+				end
 			end
 		end
 	end

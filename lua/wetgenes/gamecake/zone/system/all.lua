@@ -221,16 +221,20 @@ all.scene.initialize=function(scene)
 end
 
 all.scene.ticks_sync=function(scene)
+	-- keep running updates here until we move it into a subtask
+ 	scene.oven.upnet.update()
 	for n,v in pairs( scene.oven.upnet.get_ticks() ) do scene.ticks[n]=v end
 end
 
 all.scene.do_update=function(scene)
 
-	scene.oven.upnet.update(true) -- advance time
-	scene:ticks_sync()
-	if scene.ticks.now < scene.values:get("tick") then return end -- tick advance only
+-- called often but out of sync of rewinds so will probably cause a resync
+-- this is chugging and needs to happen out of state or something
+--	scene:systems_call("housekeeping")
 
---	if oven.upnet_pause=="updates" then return end -- only ever need one update to keep in sync
+
+	scene:ticks_sync()
+--	if scene.ticks.now < scene.values:get("tick") then return end -- tick advance only?
 
 local counts={}
 counts.undo=0
@@ -256,16 +260,6 @@ counts.draw=0
 			scene:send_msg_sync(m.need_sync)
 		end
 	end
-
-	-- this also needs to be synced with upnet using subsciptions?
---	print( "CC", #scene.values, scene.values[2] and scene.values:get("tick",2) , scene.ticks.agreed )
-	-- merge slot 1+2 when that data has been sync confirmed
-	while scene.values[2] do -- and scene.values:get("tick",2) <= scene.ticks.agreed do
-		scene:do_pull()
-	end
-
-	-- called often but out of sync of rewinds so will probably cause a resync
-	scene:systems_call("housekeeping")
 
 	if scene.ticks.input > scene.values:get("tick_input") then
 
@@ -303,8 +297,14 @@ local hash=0
 			scene:ticks_sync()
 		end
 
-	end
+	-- this also needs to be synced with upnet using subsciptions?
+--	print( "CC", #scene.values, scene.values[2] and scene.values:get("tick",2) , scene.ticks.agreed )
+	-- merge slot 1+2 when that data has been sync confirmed
+		while scene.values[2] do -- and scene.values:get("tick",2) <= scene.ticks.agreed do
+			scene:do_pull()
+		end
 
+	end
 
 	
 	local need_tween_push=( scene.tweens:get("tick") or 0 ) < ( scene.values:get("tick") or 0 )
@@ -351,7 +351,7 @@ local hash=0
 
 --upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )
 
---	print( "do_update" , counts.undo , counts.update , counts.draw , scene.ticks.time , #scene.values , #scene.tweens )
+--	print( "do_update" , -counts.undo , counts.update , "+"..counts.draw , scene.ticks.time , #scene.values , #scene.tweens )
 
 -- this slows things down to test worst case updates
 --collectgarbage()
@@ -370,7 +370,7 @@ all.scene.do_draw=function(scene)
 	local n=math.floor(t)
 	local f=t-n
 
-	if #scene.tweens == 2 then
+	if #scene.tweens == 2 and scene.tweens:get("tick",1) then
 		scene.tween=scene.ticks.time-scene.tweens:get("tick",1)
 	else
 		scene.tween=1

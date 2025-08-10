@@ -8,6 +8,9 @@ local global=require("global")
 
 -- calling this once a frame, turns off gc and forces gc to only happen here
 
+--	collectgarbage("setpause",400)
+--	collectgarbage("setstepmul",100)
+
 -- this will stop gc and take control of it
 local garbage_collect_step=function()
 	collectgarbage("stop") -- from now on we must explicitly call step as often as we can
