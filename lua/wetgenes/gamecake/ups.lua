@@ -799,9 +799,9 @@ M.ups_code=function(linda,task_id,task_idx)
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
 
-	local wwin=require("wetgenes.win") --  just for ms resolution timer
-	local now=function() return wwin.gettime() end -- time now in seconds with ms accuracy, probs
-
+--	local wtasks=require("wetgenes.tasks")
+--	local wwin=require("wetgenes.win")
+--	local now=wwin.time -- function to get time now in seconds with ms accuracy, probs
 	local wgups=require("wetgenes.gamecake.ups")
 	
 	local ups=wgups.ups.create()

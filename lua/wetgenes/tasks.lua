@@ -47,6 +47,7 @@ end
 	
 	local r=do_memo(linda,{task="taskname"})
 	local r=do_memo(linda,{task="taskname"},timeout)
+	do_memo(linda,{task="taskname",id=false})
 
 A basic memo send and receive that can be used when all you have is the 
 tasks.linda and you know you are in a thread ( or do not care about 
@@ -58,12 +59,16 @@ are in a task and want to talk to another task.
 
 ]]
 M.do_memo=function(linda,memo,timeout)
-	memo.id=tostring(memo) -- should be a unique string, the address of the memo table
+	if type(memo.id)=="nil" then -- auto gen id if nul, disable return with false
+		memo.id=tostring(memo) -- should be a unique string, the address of the memo table
+	end
 --log("memo",memo.task,memo.id)
 	if linda:send( timeout , memo.task , memo ) then -- send on memo.task (a public name of another task)
-		local ok,r=linda:receive( timeout , memo.id ) -- receive the result on memo.id
+		if memo.id then
+			local ok,r=linda:receive( timeout , memo.id ) -- receive the result on memo.id
 --log("memo",memo.task,memo.id,"done")
-		return r
+			return r
+		end
 	end
 end
 

@@ -113,8 +113,8 @@ end
 ]]
 
 players.item.get_up=function(player)
-	local ups=player.scene.ups -- this is input for this frame acording to network code
-	return ups and ups[1] or sys.oven.ups.empty
+	local ups=player.scene.ups -- this is input for this frame according to network code
+	return ups and ups[1] or player.sys.oven.ups.empty
 end
 
 players.item.setup=function(player)

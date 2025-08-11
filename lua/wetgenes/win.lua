@@ -521,12 +521,22 @@ function base.sleep(...)
 end
 win.sleep=base.sleep
 
-function base.time()
-	if hardcore and hardcore.time then
-		return hardcore.time()
-	else
-		return os.time()
-	end
+do	-- get best time we can, should have at least ms accuracy, possibly slightly more
+	local ok=pcall(function()
+		local socket = require("socket")
+		base.time=function() return socket.gettime() end
+	end) or pcall(function()
+		local lanes = require("lanes")
+		base.time=function() return lanes.now_secs() end
+	end) or pcall(function()
+		base.time=function()
+			if hardcore and hardcore.time then
+				return hardcore.time()
+			else
+				return os.time()
+			end
+		end
+	end)
 end
 win.time=base.time
 

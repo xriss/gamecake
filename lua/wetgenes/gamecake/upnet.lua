@@ -39,61 +39,112 @@ local msgp=require("wetgenes.tasks_msgp")
 
 M.bake=function(oven,upnet)
 
-	upnet=M.upnet(upnet)
-	
-	upnet.args=oven.opts.args
-	upnet.tasks=oven.tasks
+	upnet=upnet or {}
 
 	-- create msgp handling thread if it does not exist
-	upnet.tasks:add_global_thread({
+	oven.tasks:add_global_thread({
 		count=1,
-		id=upnet.msgp_task_id,
+		id="msgp",
 		code=msgp.msgp_code,
 	})
 
 	-- create upnet handling thread if it does not exist
-	upnet.tasks:add_global_thread({
+	oven.tasks:add_global_thread({
 		count=1,
-		id=upnet.upnet_task_id,
+		id="upnet",
 		code=M.upnet_code,
 	})
 	
-	oven.ups.subscribe("upnet/ups") -- 
+	oven.ups.subscribe("upnet/ups") -- request all ups to be sent here
 	
+	upnet.setup=function()
+		oven.tasks:do_memo({
+			task="upnet",
+			id=false,
+			cmd="setup",
+			args={}, -- oven.opts.args,
+		})
+	end
+	
+	upnet.clean=function()
+		oven.tasks:do_memo({
+			task="upnet",
+			id=false,
+			cmd="clean",
+		})
+	end
+
+	upnet.update=function()
+		-- nothing to do, is 
+	end
+
+	upnet.catchup=function()
+		oven.tasks:do_memo({
+			task="upnet",
+			id=false,
+			cmd="catchup",
+		})
+	end
+	
+	upnet.subscribe=function(subid)
+		oven.tasks:do_memo({
+			task="upnet",
+			id=false,
+			cmd="subscribe",
+			subid=subid,
+		})
+	end
+
+	upnet.unsubscribe=function(subid)
+		oven.tasks:do_memo({
+			task="upnet",
+			id=false,
+			cmd="unsubscribe",
+			subid=subid,
+		})
+	end
+	
+	upnet.broadcast=function(data)
+		oven.tasks:do_memo({
+			task="upnet",
+			id=false,
+			cmd="broadcast",
+			data=data,
+		})
+	end
+
 	upnet.get_ticks=function()
-		return upnet.ticks
+		local r=oven.tasks:do_memo({
+			task="upnet",
+			cmd="get_ticks",
+		})
+		return r.ticks
 	end
 
-	upnet.subscribe=function(id)
-		upnet.subscribed[id]={}
+	upnet.get_ups=function(tick)
+		local r=oven.tasks:do_memo({
+			task="upnet",
+			cmd="get_ups",
+			tick=tick,
+		})
+		local ups={}
+		for i,v in pairs(r.ups) do
+			ups[1]=wgups.up.create()
+			ups[1]:load(v)
+		end
+		return ups
 	end
-	upnet.unsubscribe=function(id)
-		upnet.subscribed[id]=nil
+
+	upnet.set_hash=function()
 	end
 	
-	upnet.broadcast=function(msg)
-		for _,client in pairs(upnet.clients) do
-			if not client.us then
-				client:send(msg)
-			end
-		end
-	end
-
-
-
 	return upnet
 end
 
 
-M.upnet=function(upnet)
+M.create=function(upnet)
 
 	upnet=upnet or {}
-
-	-- can override the default name and :msg stream
-	upnet.upnet_task_id=upnet.upnet_task_id or "upnet"
-
-	-- can override the default msgp and :msg stream
-	upnet.msgp_task_id=upnet.msgp_task_id or "msgp"
 
 	upnet.dmode=function(mode)
 		local us=(upnet.us or 0)
@@ -213,7 +264,7 @@ M.upnet=function(upnet)
 	upnet.client.send=function(client,msg,cmd)
 
 		upnet.tasks:send({
-			task=upnet.msgp_task_id,
+			task="msgp",
 			cmd=cmd or "send",
 			addr=client.addr,
 			data=json_pack.into_data(msg),
@@ -375,7 +426,14 @@ print("WELCOME",client.idx)
 	end
 
 
+	upnet.clean=function()
+		upnet.setup_done=false
+		-- should disconnect clients etc?
+	end
+	
 	upnet.setup=function()
+	
+		upnet.setup_done=true
 
 		local args=upnet.args
 
@@ -385,8 +443,8 @@ print("WELCOME",client.idx)
 		if tonumber( args.host ) then baseport=tonumber( args.host ) end
 
 		-- and tell it to start listening
-		local host_ret=upnet.tasks:do_memo({
-			task=upnet.msgp_task_id,
+		local host_ret=upnet.do_memo({
+			task="msgp",
 			cmd="host",
 			baseport=baseport,
 			basepack=basepack,
@@ -424,8 +482,8 @@ print("WELCOME",client.idx)
 		upnet.ticks.pause="join"
 
 print("joining",addr)
-		local ret=upnet.tasks:do_memo({
-			task=upnet.msgp_task_id,
+		local ret=upnet.do_memo({
+			task="msgp",
 			cmd="join",
 			addr=addr,
 		})
@@ -647,9 +705,11 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 	-- manage msgs and pulse controller state
 	upnet.join_wait=0
 	upnet.update=function()
+	
+		if not upnet.setup_done then return end -- make sure we call setup first
 
 -- keep reading inputs	
-oven.msgs() -- keep handling msgs
+--oven.msgs() -- keep handling msgs
 
 		local pause=upnet.ticks.pause -- need pause while connecting etc
 
@@ -683,7 +743,7 @@ oven.msgs() -- keep handling msgs
 
 --		local up=oven.ups.manifest(1)
 --		local up=wgups.empty
-		for memo in function() local _,memo= upnet.tasks.linda:receive( 0 , "upnet/ups" ) ; return memo end do
+		for memo in function() local _,memo= upnet.linda:receive( 0 , "upnet/ups" ) ; return memo end do
 --print(wstr.dump(memo))
 			if memo.states and memo.states[1] then
 				upnet.upcache:merge( memo.states[1] ) -- merge as we update
@@ -693,7 +753,7 @@ oven.msgs() -- keep handling msgs
 
 		repeat -- check msgs
 
-			local _,memo= upnet.tasks.linda:receive( 0 , upnet.msgp_task_id ) -- wait for any memos coming into this thread
+			local _,memo= upnet.linda:receive( 0 , "msgp" ) -- wait for any memos coming into this thread
 			if type(memo)=="table" then
 				upnet.domsg(memo)
 			else -- probably a timeout userdata
@@ -753,38 +813,82 @@ M.upnet_code=function(linda,task_id,task_idx)
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
 
-	local wwin=require("wetgenes.win") --  just for ms resolution timer
-	local now=function() return wwin.gettime() end -- time now in seconds with ms accuracy, probs
+	local wtasks=require("wetgenes.tasks")
+	local wwin=require("wetgenes.win")
+	local now=wwin.time -- function to get time now in seconds with ms accuracy, probs
+	local wgups=require("wetgenes.gamecake.ups")
+	local wgupnet=require("wetgenes.gamecake.upnet")
+
+	-- create main state
+	local upnet=wgupnet.create()
+	upnet.linda=linda
+	upnet.do_memo=function(memo,timeout)
+		return wtasks.do_memo(linda,memo,timeout)
+	end
 
 	local request=function(memo)
 		local ret={}
 		
-		if memo.cmd=="ups_subscription" then
+		if memo.cmd=="setup" then
 
+			upnet.args=memo.args or {}
+			upnet.setup()
+
+		elseif memo.cmd=="clean" then
+
+			upnet.clean()
+
+		elseif memo.cmd=="catchup" then
+
+			upnet.catchup()
+
+		elseif memo.cmd=="subscribe" then
+
+			upnet.subscribed[memo.subid]={}
+
+		elseif memo.cmd=="unsubscribe" then
+
+			upnet.subscribed[memo.subid]=nil
+
+		elseif memo.cmd=="broadcast" then
+
+			for _,client in pairs(upnet.clients) do
+				if not client.us then
+					client:send(memo.data)
+				end
+			end
+
+		elseif memo.cmd=="get_ticks" then
+		
+			ret.ticks=upnet.ticks
+
+		elseif memo.cmd=="get_ups" then
+		
+			local ups=upnet.get_ups(memo.tick)
+			ret.ups={}
+			for i,up in pairs(ups) do
+				ret.ups[i]=up:save()
+			end
 
 		end
 
 		return ret
 	end
 
-	-- subscribe to all ups updates
-	linda:send( nil , "ups" , {
-		cmd="subscribe",
-		subid=task_id,
-	} )
-
 	while true do
-
-		local _,memo= linda:receive( 0.001 , task_id ) -- wait for any memos coming into this thread
-
-		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
-			if not ok then ret={error=ret or true} end -- reformat errors
-			if memo.id then -- result requested
-				linda:send( nil , memo.id , ret )
+		upnet.update() -- probably getting called every 1ms ish
+		local timeout=0.001 -- first receive will be 1ms or less
+		repeat
+			local _,memo= linda:receive( timeout , task_id ) -- wait for any memos coming into this thread
+			timeout=0 -- repeat receive are instant
+			if memo then
+				local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+				if not ok then ret={error=ret or true} end -- reformat errors
+				if memo.id then -- result requested
+					linda:send( nil , memo.id , ret )
+				end
 			end
-		end
-
+		until not memo
 	end
 
 end
