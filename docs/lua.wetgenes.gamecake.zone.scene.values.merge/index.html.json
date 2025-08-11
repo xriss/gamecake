@@ -2774,7 +2774,7 @@
    "body": "<pre><code>values:merge()\n</code></pre>\n<p>Merge top 2 slots into 1</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 620,
+   "line": 618,
    "name": "lua.wetgenes.gamecake.zone.scene.values.merge",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
