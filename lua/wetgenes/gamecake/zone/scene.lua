@@ -300,12 +300,10 @@ If fname is a function then it will be called as if it was a method.
 		if type(fname)=="function" then
 			for i=#scene.systems,1,-1 do -- call backwards so item can remove self
 				local system=scene.systems[i]
-				if system[fname] then
-					local fargs={system,...}
-					local fcall=fname
-					functions[#functions+1]=function() fcall(unpack(fargs)) end
-					count=count+1
-				end
+				local fargs={system,...}
+				local fcall=fname
+				functions[#functions+1]=function() fcall(unpack(fargs)) end
+				count=count+1
 			end
 		else
 			for i=#scene.systems,1,-1 do -- call backwards so item can remove self

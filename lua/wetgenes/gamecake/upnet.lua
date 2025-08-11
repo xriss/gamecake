@@ -708,6 +708,10 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 	
 		if not upnet.setup_done then return end -- make sure we call setup first
 
+		if upnet.ticks.epoch and upnet.us then -- we are ticking
+			upnet.ticks.time=(now()-upnet.ticks.epoch)/upnet.ticks.length
+		end
+
 -- keep reading inputs	
 --oven.msgs() -- keep handling msgs
 
@@ -876,11 +880,11 @@ M.upnet_code=function(linda,task_id,task_idx)
 	end
 
 	while true do
-		upnet.update() -- probably getting called every 1ms ish
 		local timeout=0.001 -- first receive will be 1ms or less
 		repeat
 			local _,memo= linda:receive( timeout , task_id ) -- wait for any memos coming into this thread
-			timeout=0 -- repeat receive are instant
+--			timeout=0 -- repeat receive are instant
+			upnet.update() -- probably getting called every 1ms ish
 			if memo then
 				local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
 				if not ok then ret={error=ret or true} end -- reformat errors

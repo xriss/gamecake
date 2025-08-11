@@ -256,7 +256,7 @@ function M.bake(opts)
 do	-- get best time we can, should have at least ms accuracy, possibly slightly more
 	local ok=pcall(function()
 		local socket = require("socket")
-		oven.time=function() return socket.gettime() end
+		oven.time=socket.gettime
 		log( "oven" , "using time from socket" )
 	end) or pcall(function()
 		local lanes = require("lanes")

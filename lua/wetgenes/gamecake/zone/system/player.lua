@@ -49,8 +49,12 @@ players.values={
 players.types={
 	avatar_pose="ignore",
 	avatar_time="ignore",
-	acc="tween",
 	tweaks="tween",
+	pos="tween",
+	rot="tween",
+	ang="get",
+	vel="get",
+	acc="get",
 }
 -- methods added to system
 players.system={}
@@ -67,7 +71,7 @@ players.item.set_values=function(player)
 
 	player.feet=V3( player.pos[1] , player.pos[2]+(player.body_hover+player.body_radius) , player.pos[3] )
 
-	player:set_body_values()
+--	player:set_body_values()
 
 end
 
@@ -80,7 +84,7 @@ players.item.get_values=function(player)
 	player.avatar.speed=0
 	player.avatar.update_pose()
 
-	player:get_body_values()
+--	player:get_body_values()
 
 -- player direction normal
 	player.face=V3(0,0,1)*player.rot

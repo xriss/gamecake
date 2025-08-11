@@ -76,7 +76,7 @@ all.types={
 	zid="ignore",
 	zname="ignore",
 	uids="ignore",
-	-- body values use get_body_values if you need them
+	-- body values are ignored by default and need to be added by each system that uses them
 	pos="ignore",
 	rot="ignore",
 	vel="ignore",
@@ -360,11 +360,12 @@ end
 
 all.scene.do_draw=function(scene)
 
+	scene:ticks_sync()
+
 --	local upnet=scene.oven.upnet
 	oven.console.lines_display[2]=("now:"..scene.ticks.now.." inp:"..scene.ticks.input.." agr:"..scene.ticks.agreed.." bse:"..scene.ticks.base)
 
 --	local nowtick=upnet.nowticks()
-	scene:ticks_sync()
 --	print("do_draw",scene.ticks.time)
 	local t=scene.ticks.time
 	local n=math.floor(t)
@@ -646,6 +647,7 @@ all.item.setup_values=function(it,boot)
 	for n,v in pairs(it.values[1]) do -- copy base values into tweens
 		it.tweens:set(n,v)
 	end
+	it.tweens:push() -- tweens should always be two slots
 
 	for i=1,#it.scene.values do -- make sure we have same depth as everyone else
 		if not it.values[i] then it.values[i]={} end
@@ -765,14 +767,24 @@ end
 all.system.tget=all.item.tget
 
 -- tween values now(1) with previous(0) frame
+-- but only when scene.tween is set otherwise this is just a get
 all.item.tween=function(it,name,tween)
-	return it.tweens:tween(name,tween or it.scene.tween)
+	if it.scene.tween then
+		return it.tweens:tween(name,tween or it.scene.tween)
+	else
+		return it.values:get(name)
+	end
 end
 all.system.tween=all.item.tween
 
 -- tween wrap values now(1) with previous(0) frame numbers will wrap  0>= n <nmax
+-- but only when scene.tween is set otherwise this is just a get
 all.item.twrap=function(it,name,nmax,tween)
-	return it.tweens:twrap(name,nmax,tween or it.scene.tween)
+	if it.scene.tween then
+		return it.tweens:twrap(name,nmax,tween or it.scene.tween)
+	else
+		return it.values:get(name)
+	end
 end
 all.system.twrap=all.item.twrap
 
@@ -851,6 +863,7 @@ all.item.impulse_body=function(it,v,p)
 
 end
 
+--[[
 all.item.set_body_values=function(it)
 
 	it:set("pos",it.pos)
@@ -859,7 +872,9 @@ all.item.set_body_values=function(it)
 	it:set("ang",it.ang)
 
 end
+]]
 
+--[[
 all.item.get_body_values=function(it)
 
 	it.pos=it:get("pos")
@@ -868,6 +883,7 @@ all.item.get_body_values=function(it)
 	it.ang=it:get("ang")
 
 end
+]]
 
 all.item.set_zips=function(it)
 	if not it.zips then return end -- no zips

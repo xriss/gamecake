@@ -37,6 +37,11 @@ floors.values={
 
 }
 
+floors.types={
+	pos="get",
+	rot="get",
+}
+
 -- methods added to system
 floors.system={}
 -- methods added to each item
@@ -45,14 +50,14 @@ floors.item={}
 floors.item.get_values=function(floor)
 
 	floor:get_auto_values()
-	floor:get_body_values()
+--	floor:get_body_values()
 
 end
 
 floors.item.set_values=function(floor)
 
 	floor:set_auto_values()
-	floor:set_body_values()
+--	floor:set_body_values()
 
 end
 

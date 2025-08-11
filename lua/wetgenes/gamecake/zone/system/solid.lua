@@ -42,6 +42,13 @@ solids.values={
 	sides=6,
 }
 
+solids.types={
+	pos="tween",
+	rot="tween",
+	vel="get",
+	ang="get",
+}
+
 
 -- methods added to system
 solids.system={}
@@ -51,14 +58,14 @@ solids.item={}
 solids.item.set_values=function(solid)
 
 	solid:set_auto_values()
-	solid:set_body_values()
+--	solid:set_body_values()
 
 end
 
 solids.item.get_values=function(solid)
 
 	solid:get_auto_values()
-	solid:get_body_values()
+--	solid:get_body_values()
 
 end
 
