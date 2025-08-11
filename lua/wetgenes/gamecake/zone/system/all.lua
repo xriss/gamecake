@@ -656,18 +656,19 @@ all.item.setup_values=function(it,boot)
 end
 
 all.item.get_auto_values=function(it)
-	if it.scene.tween then -- we are drawing need to use tween cache
+	local s=it.scene.tween -- cache for later use
+	if s then -- we are drawing, need to use tween cache
 		for n,t in pairs(it.sys.types) do
-			if     t=="get"   then it[n]=it:tget(n)
-			elseif t=="tween" then it[n]=it:tween(n)
-			elseif t=="twrap" then it[n]=it:twrap(n,it.sys.twraps[n])
+			if     t=="get"   then it[n]=it.tweens:get( n )
+			elseif t=="tween" then it[n]=it.tweens:tween( n , s)
+			elseif t=="twrap" then it[n]=it.tweens:twrap( n , it.sys.twraps[n] , s )
 			end
 		end
 	else
 		for n,t in pairs(it.sys.types) do
-			if     t=="get"   then it[n]=it:get(n)
-			elseif t=="tween" then it[n]=it:get(n)
-			elseif t=="twrap" then it[n]=it:get(n)
+			if     t=="get"   then it[n]=it.values:get( n )
+			elseif t=="tween" then it[n]=it.values:get( n )
+			elseif t=="twrap" then it[n]=it.values:get( n )
 			end
 		end
 	end
@@ -677,6 +678,7 @@ all.item.get_values=function(it)
 	it:get_auto_values()
 end
 
+-- this should never be called by draw code so has no need to check
 all.item.set_auto_values=function(it)
 	for n,t in pairs(it.sys.types) do
 		it:set(n,it[n])
@@ -754,15 +756,31 @@ all.item.get=function(it,name,topidx)
 end
 all.system.get=all.item.get
 
+
+-- all of the tween get/set code here will check scene.tween
+-- they will only work on the tweens if scene.tween is set
+-- if you always require absolute access then you must call
+-- it.tweens:get(...) and it.tweens:set(...) etc explicitly
+
 -- tween version of value set
+-- but only when scene.tween is set otherwise this is just a set
 all.item.tset=function(it,name,value)
-	return it.tweens:set(name,value)
+	if it.scene.tween then
+		return it.tweens:set(name,value)
+	else
+		return it.values:set(name,value)
+	end
 end
 all.system.tset=all.item.tset
 
 -- tween version of value get
+-- but only when scene.tween is set otherwise this is just a get
 all.item.tget=function(it,name,topidx)
-	return it.tweens:get(name,topidx)
+	if it.scene.tween then
+		return it.tweens:get(name,topidx)
+	else
+		return it.values:get(name,topidx)
+	end
 end
 all.system.tget=all.item.tget
 

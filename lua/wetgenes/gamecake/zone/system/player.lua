@@ -130,11 +130,12 @@ players.item.setup=function(player)
 	player.walk_speed=1
 
 -- shrink fatty a bit so we can fit in 4x4 holes
-	local radius  = 2.00 -  0.125
-	local capsule = 0.75 + (0.125*2)
+	local overlap = 0.01 -- make everything a little bit bigger so collisions can not easily slip inside
+	local radius  = 2.00 -  0.125 + overlap
+	local capsule = 0.75 + (0.125*2) + overlap
 	player.body_wide=radius -- belly radius
 	player.body_radius=(2*radius+capsule)*0.5 -- half height of capsule
-	player.body_hover=1.0 -- hover height above the ground to bottom of capsule
+	player.body_hover=1.0 + overlap -- hover height above the ground to bottom of capsule
 
 	player.avatar=sys.wgeoms_avatar.avatar({pose="breath"},sys.wgeoms_avatar.random_soul({seed=tostring(math.random())}) )
 	player:get_values()
@@ -158,9 +159,17 @@ end
 
 
 
---[[
-player.item.focus_camera=function(player,camera)
+players.item.focus_camera=function(player,camera)
 
+	local pos=player:tween("pos")
+	local tweaks=player:tween("tweaks")
+
+	-- try to reduce screen bounce caused by springy feet
+	pos[2]=pos[2] + ( (tweaks[1]+tweaks[2])/2 ) 
+
+	camera.focus_pos:set( pos )
+
+--[[
 	if player.floor  then
 		local d=math.abs(player.floor.dy) -- 0 when exactly on floor
 		d=math.min(1,math.max(0,d)) -- clamp
@@ -172,9 +181,9 @@ player.item.focus_camera=function(player,camera)
 	end
 	camera.focus[2]=camera.focus[2]-7
 	camera.floor=player.feet[2]
+]]
 
 end
-]]
 
 -- apply controller to player, setting player.acc and player.vel
 players.item.update_control=function(player)
