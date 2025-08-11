@@ -2774,7 +2774,7 @@
    "body": "<pre><code>tasks:del_thread(thread)\n</code></pre>\n<p>Delete a thread.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 352,
+   "line": 357,
    "name": "lua.wetgenes.tasks.del_thread",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }

@@ -2774,7 +2774,7 @@
    "body": "<pre><code>tasks:claim_global(name,value)\n</code></pre>\n<p>Claim a name using the global linda socket, returns value on success \nor false on failure.</p>\n<p>The value will be associated with the name on success.</p>\n<p>This will block waiting on a result but should be fast.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 161,
+   "line": 166,
    "name": "lua.wetgenes.tasks.claim_global",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }
