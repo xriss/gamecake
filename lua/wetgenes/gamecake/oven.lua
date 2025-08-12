@@ -770,8 +770,9 @@ os.exit()
 
 				if oven.times then oven.times.update.start() end
 
-				oven.ups.update() -- get new inputs
-				for _,m in ipairs(oven.ups.msgs) do oven.domsg(m) end
+				oven.msgs() -- send inputs to ups as fast as we can
+				oven.ups.update() -- get new inputs from ups
+				for _,m in ipairs(oven.ups.msgs) do oven.domsg(m) end -- and handle ups msgs
 
 				for i,v in ipairs(oven.mods) do
 					if v.update then
@@ -919,29 +920,19 @@ end
 						if oven.msg_view then
 							oven.msg_view.msg(m) -- fix mouse coords using this view
 						end
-					end
-
-					if m.class=="touch" then	-- need to fix x,y numbers
+					elseif m.class=="touch" then	-- need to fix x,y numbers
 						m.xraw=m.x				-- remember in message
 						m.yraw=m.y
 						oven.frame_rate_auto_active=cached_time
-					end
-
-					if m.class=="key" or m.class=="padkey" then -- key or joystick buttons
+					elseif m.class=="key" or m.class=="padkey" then -- key or joystick buttons
 						oven.frame_rate_auto_active=cached_time
-					end
-
-					if m.class=="resize" then -- window resize
+					elseif m.class=="resize" then -- window resize
 						oven.frame_rate_auto_active=cached_time
-					end
-
-					if m.class=="close" then -- window has been closed so do a shutdown
+					elseif m.class=="close" then -- window has been closed so do a shutdown
 						if oven.enable_close_window then
 							oven.next=true
 						end
-					end
-
-					if m.class=="app" then -- androidy
+					elseif m.class=="app" then -- androidy
 log("oven","caught : ",m.class,m.cmd)
 						if		m.cmd=="init_window" then
 							oven.do_start=true
@@ -954,7 +945,7 @@ log("oven","caught : ",m.class,m.cmd)
 						end
 					end
 
-					oven.ups.msg(m) -- manage the msgs the new way
+					oven.ups.msg(m) -- manage the msgs the new way (they belong to ups now)
 
 				end
 			end

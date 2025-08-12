@@ -79,8 +79,8 @@ players.item.get_values=function(player)
 
 	player:get_auto_values()
 
-	player.avatar.time=player:get("avatar_time") -- ,player.avatar.anim.length or 0)
-	player.avatar.pose=player:get("avatar_pose")
+	player.avatar.time=player:twrap("avatar_time",1) -- ,player.avatar.anim.length or 0)
+	player.avatar.pose=player:tget("avatar_pose")
 	player.avatar.speed=0
 	player.avatar.update_pose()
 
@@ -130,7 +130,7 @@ players.item.setup=function(player)
 	player.walk_speed=1
 
 -- shrink fatty a bit so we can fit in 4x4 holes
-	local overlap = 0.01 -- make everything a little bit bigger so collisions can not easily slip inside
+	local overlap = 0.1 -- make everything a little bit bigger so collisions can not easily slip inside
 	local radius  = 2.00 -  0.125 + overlap
 	local capsule = 0.75 + (0.125*2) + overlap
 	player.body_wide=radius -- belly radius
@@ -602,7 +602,9 @@ players.item.update=function(player)
 -- player.pos[2]=-3.6
 
 	-- apply speed here so we can save it and update does not change it
-	player.avatar.time=(player.avatar.time+player.avatar.speed)%(player.avatar.anim.length or 1)
+	if player.avatar.anim.length then
+		player.avatar.time=(player.avatar.time+(player.avatar.speed/player.avatar.anim.length))%1
+	end
 	player.avatar.speed=0
 
 	player:set_body()

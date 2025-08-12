@@ -696,11 +696,7 @@ end
 		local objs=geoms_avatar.objs
 		avatar.anim=objs.anims[avatar.pose] or objs.anims[1]
 		if avatar.anim then
-			if avatar.anim.length and avatar.anim.length>0 then
-				avatar.time=(avatar.time or 0)%avatar.anim.length
-			else
-				avatar.time=0
-			end
+			avatar.time=(avatar.time or 0)%1
 		end
 	end
 	
@@ -751,12 +747,10 @@ end
 
 		avatar.anim=objs.anims[avatar.pose] or objs.anims[1]
 		if avatar.anim then
-			avatar.time=(avatar.time or 0)+avatar.speed
 			if avatar.anim.length and avatar.anim.length>0 then
-				avatar.time=(avatar.time or 0)%avatar.anim.length
-			else
-				avatar.time=0
+				avatar.time=(avatar.time or 0)+(avatar.speed/avatar.anim.length)
 			end
+			avatar.time=(avatar.time or 0)%1
 		end
 		wgeoms.update(objs)
 
@@ -789,12 +783,10 @@ end
 			if avatar.anim then
 				local anim=avatar.anim
 				anim.length=anim.max-anim.min
-				if anim.length>0 then
-					avatar.time=(avatar.time or 0)%anim.length
-				end
+				avatar.time=(avatar.time or 0)%1
 				if anim.keys[2] then
 					local rate=anim.keys[2]-anim.keys[1]
-					avatar.frame=math.floor(avatar.time/rate)
+					avatar.frame=(avatar.time*anim.length/rate)
 				else
 					avatar.frame=0
 				end

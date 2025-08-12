@@ -386,7 +386,7 @@ all.scene.do_draw=function(scene)
 	scene:call("render_screen")
 
 
---	print( "do_draw" )
+--	print( "do_draw" , scene.ticks.time)
 
 end
 
