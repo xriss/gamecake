@@ -74,13 +74,13 @@ B.setup=function(zgui)
 		screen.shader_qs.zone_screen_build_occlusion.SHADOW_SAMPLES=it:value()
 	end
 			
-	datas.new({id="shadow_mapsize",class="number",hooks=zgui.hooks,num=12,min=8,max=16,step=1,
+	datas.new({id="shadow_mapsize",class="number",hooks=zgui.hooks,num=11,min=8,max=16,step=1,
 		tostring=function(dat,num) return string.format("%d",math.pow(2.0, (num or dat.num) )) end})
 	zgui.value["shadow_mapsize"]=function(it)
 		shadow.mapsize=math.pow(2.0,it:value())
 	end
 
-	datas.new({id="shadow_maparea",class="number",hooks=zgui.hooks,num=9,min=4,max=16,step=1,
+	datas.new({id="shadow_maparea",class="number",hooks=zgui.hooks,num=8,min=4,max=16,step=1,
 		tostring=function(dat,num) return string.format("%d",math.pow(2.0, (num or dat.num) )) end})
 	zgui.value["shadow_maparea"]=function(it)
 		shadow.maparea=math.pow(2.0,it:value()-1)

@@ -41,8 +41,8 @@ renders.system.setup=function(sys)
 	sys.screen       = sys.oven.rebake("wetgenes.gamecake.zone.screen")
 	sys.framebuffers = sys.oven.rebake("wetgenes.gamecake.framebuffers")
 
-	sys.shadow.mapsize=8192
-	sys.shadow.maparea=2048
+	sys.shadow.mapsize=2048
+	sys.shadow.maparea=256
 
 end
 
