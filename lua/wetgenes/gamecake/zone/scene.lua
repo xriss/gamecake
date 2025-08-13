@@ -865,7 +865,7 @@ end
 
 values_methods.save_diff=function(values,topidx)
 	if not topidx then topidx=#values elseif topidx<=0 then topidx=topidx+#values end
-	if topidx > #values then print("future") return {} end
+	if topidx > #values then return {} end
 
 	local t={}
 	for k,v in pairs( values[topidx] or {} ) do

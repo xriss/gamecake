@@ -130,19 +130,19 @@ players.item.setup=function(player)
 	player.walk_speed=1
 
 -- shrink fatty a bit so we can fit in 4x4 holes
-	local overlap = 0.1 -- make everything a little bit bigger so collisions can not easily slip inside
-	local radius  = 2.00 -  0.125 + overlap
-	local capsule = 0.75 + (0.125*2) + overlap
+	local overlap = 0.125 -- make some things a little bit bigger so collisions can not easily slip inside
+	local radius  = 2.00 -  0.125
+	local capsule = 0.75 + (0.125*2)
 	player.body_wide=radius -- belly radius
 	player.body_radius=(2*radius+capsule)*0.5 -- half height of capsule
-	player.body_hover=1.0 + overlap -- hover height above the ground to bottom of capsule
+	player.body_hover=1.0 -- hover height above the ground to bottom of capsule
 
 	player.avatar=sys.wgeoms_avatar.avatar({pose="breath"},sys.wgeoms_avatar.random_soul({seed=tostring(math.random())}) )
 	player:get_values()
 
 	local world=player:get_singular("kinetic").world
 
-	local shape=world:shape("capsule",radius,capsule)	-- radius , height  so  2*r+h is the height of the capsule
+	local shape=world:shape("capsule",radius,capsule+overlap)	-- radius , height  so  2*r+h is the height of the capsule
 	player.body=world:body( "rigid" , shape , 8*8,  player.pos[1],player.pos[2],player.pos[3]  , 0x0100 )
 	player.body.item=player -- backlink for collison
 

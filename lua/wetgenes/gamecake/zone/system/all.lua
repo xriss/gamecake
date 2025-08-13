@@ -390,6 +390,11 @@ all.scene.do_draw=function(scene)
 
 end
 
+all.scene.get_singular=function(scene,name)
+	local sys=scene.systems[name]
+	if sys then return sys.singular end
+end
+
 
 -- get a system by name
 all.system.get_system=function(sys,name)
@@ -1094,3 +1099,73 @@ all.scene.do_unpush=function(scene)
 	end)
 end
 
+
+
+
+all.scene.save_all_values=function(scene,force_full)
+	local ret={}
+	ret.systems={}
+	ret.items={}
+
+	local zone=scene:get_singular("zone") -- current zone ( all current items should belong to this zone )
+	ret.zid=zone and zone.uid or 0
+	ret.zname=zone and zone.name or ""
+
+	
+	local save=function(it,caste,uid)
+		local r
+		if force_full then
+			r=it.values:save_all()
+			r.caste=caste -- caste is not in values
+			-- we can junk some of these values as they will be filled with defaults
+			-- so we can mess with values
+			r.notween=nil -- do not need
+			r.deleted=r.deleted or nil -- turn false into a nil
+			r.zid=nil -- zone should be a constant for every item dumped
+			r.zname=nil -- also constant
+			if not ( r.uids and next(r.uids) ) then r.uids=nil end -- remove empty uids
+		else
+			r=it.values[#it.values]
+		end
+		if uid then ret.items[uid]=r
+		else        ret.systems[caste]=r
+		end
+	end
+
+	save(scene,"scene")
+	scene:systems_call(function(it) save(it,it.caste) end)
+	scene:call(function(it) save(it,it.caste,it.uid) end)
+	
+	return ret
+end
+
+all.scene.load_all_values=function(scene)
+end
+
+all.scene.save_all_tweens=function(scene,force_full)
+	local ret={}
+	ret.systems={}
+	ret.items={}
+	
+	local save=function(it,caste,uid)
+		local r
+		if force_full then
+			r=it.tweens:save_all()
+			-- these values will be used as is, so should not be messed with only copied
+		else
+			r=it.tweens[#it.values]
+		end
+		if uid then ret.items[uid]=r
+		else        ret.systems[caste]=r
+		end
+	end
+
+	save(scene,"scene")
+	scene:systems_call(function(it) save(it,it.caste) end)
+	scene:call(function(it) save(it,it.caste,it.uid) end)
+	
+	return ret
+end
+
+all.scene.load_all_tweens=function(scene)
+end
