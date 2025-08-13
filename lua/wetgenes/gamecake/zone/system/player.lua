@@ -45,6 +45,10 @@ players.values={
 	avatar_time=0,
 	avatar_pose="breath",
 
+	zip={
+		soul={},
+	},
+
 }
 players.types={
 	avatar_pose="ignore",
@@ -121,6 +125,19 @@ players.item.get_up=function(player)
 	return ups and ups[1] or player.sys.oven.ups.empty
 end
 
+players.gene=function(boot)
+	boot=boot or {}
+
+	boot.zip=boot.zip or {}
+	if not boot.zip.soul then -- randomly generate one
+		local wgeoms_avatar=require("wetgenes.gamecake.spew.geoms_avatar")
+		boot.zip.soul=wgeoms_avatar.random_soul({seed=tostring(math.random())})
+	end
+
+	return boot
+end
+players.system.gene=function(_,boot) return players.gene(boot) end
+
 players.item.setup=function(player)
 	local sys=player.sys
 
@@ -137,8 +154,9 @@ players.item.setup=function(player)
 	player.body_radius=(2*radius+capsule)*0.5 -- half height of capsule
 	player.body_hover=1.0 -- hover height above the ground to bottom of capsule
 
-	player.avatar=sys.wgeoms_avatar.avatar({pose="breath"},sys.wgeoms_avatar.random_soul({seed=tostring(math.random())}) )
-	player:get_values()
+	player:get_auto_values() -- fills in zip
+	player.avatar=sys.wgeoms_avatar.avatar({pose="breath"},player.zip.soul )
+	player:get_values() -- writes into avatar
 
 	local world=player:get_singular("kinetic").world
 

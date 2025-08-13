@@ -909,7 +909,7 @@ end
 ]]
 
 all.item.set_zips=function(it)
-	if not it.zips then return end -- no zips
+	if not it.zips then return end -- no zipsge
 
 	for n,s in pairs(it.zips) do
 		local t=it[n]
@@ -1108,8 +1108,8 @@ all.scene.save_all_values=function(scene,force_full)
 	ret.items={}
 
 	local zone=scene:get_singular("zone") -- current zone ( all current items should belong to this zone )
-	ret.zid=zone and zone.uid or 0
-	ret.zname=zone and zone.name or ""
+--	ret.zid=zone and zone.uid or 0
+--	ret.zname=zone and zone.name or ""
 
 	
 	local save=function(it,caste,uid)
@@ -1121,9 +1121,9 @@ all.scene.save_all_values=function(scene,force_full)
 			-- so we can mess with values
 			r.notween=nil -- do not need
 			r.deleted=r.deleted or nil -- turn false into a nil
-			r.zid=nil -- zone should be a constant for every item dumped
-			r.zname=nil -- also constant
-			if not ( r.uids and next(r.uids) ) then r.uids=nil end -- remove empty uids
+--			r.zid=nil -- zone should be a constant for every item dumped
+--			r.zname=nil -- also constant
+--			if not ( r.uids and next(r.uids) ) then r.uids=nil end -- remove empty uids
 		else
 			r=it.values[#it.values]
 		end
@@ -1139,7 +1139,26 @@ all.scene.save_all_values=function(scene,force_full)
 	return ret
 end
 
-all.scene.load_all_values=function(scene)
+all.scene.load_all_values=function(scene,dat)
+
+	-- set system and scene values
+	for caste,vals in pairs(dat.systems) do
+		local sys=scene.systems[caste]
+		if caste=="scene" then sys=scene end -- catch special scene
+		if sys then
+			for n,v in pairs(vals) do
+				sys.values:set(n,v)
+			end
+		end
+	end
+	
+	-- create items
+	for uid,boot in pairs(dat.items) do
+		boot.uid=uid
+		if type(boot.zip)=="string" then boot.zip=uncompress(boot.zip) end
+		scene:create(boot)
+	end
+
 end
 
 all.scene.save_all_tweens=function(scene,force_full)

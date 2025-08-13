@@ -219,6 +219,210 @@ M.pose_names={
 }
 
 
+M.simp_to_ramp=function(cr,cg,cb,ca)
+	
+	if cr<0   then cr=0   end
+	if cr>255 then cr=255 end
+	if cg<0   then cg=0   end
+	if cg>255 then cg=255 end
+	if cb<0   then cb=0   end
+	if cb>255 then cb=255 end
+	if ca<0   then ca=0   end
+	if ca>255 then ca=255 end
+
+	local crl=cr-ca
+	local cgl=cg-ca
+	local cbl=cb-ca
+	
+	if crl<0   then crl=0   end
+	if crl>255 then crl=255 end
+	if cgl<0   then cgl=0   end
+	if cgl>255 then cgl=255 end
+	if cbl<0   then cbl=0   end
+	if cbl>255 then cbl=255 end
+	
+	local crh=cr+ca
+	local cgh=cg+ca
+	local cbh=cb+ca
+	
+	if crh<0   then crh=0   end
+	if crh>255 then crh=255 end
+	if cgh<0   then cgh=0   end
+	if cgh>255 then cgh=255 end
+	if cbh<0   then cbh=0   end
+	if cbh>255 then cbh=255 end
+	
+	local ramp={}
+	ramp[1]=wpack.b4_argb8(crl,cgl,cbl,0x00)
+	ramp[2]=wpack.b4_argb8(cr,cg,cb,0x80)
+	ramp[3]=wpack.b4_argb8(crh,cgh,cbh,0xff)
+
+	return ramp
+end
+
+
+M.ramp_to_simp=function(ramp)
+
+	local crl,cgl,cbl,cal=wpack.argb8_b4( ramp[1] or 0x00000000 )
+	local cr,cg,cb,ca=wpack.argb8_b4( ramp[2] or 0x00000000 )
+	local crh,cgh,cbh,cah=wpack.argb8_b4( ramp[3] or 0x00000000 )
+
+	ca=0
+
+	if cr-crl > ca then ca=cr-crl end
+	if cg-cgl > ca then ca=cg-cgl end
+	if cb-cbl > ca then ca=cb-cbl end
+
+	if crh-cr > ca then ca=crh-cr end
+	if cgh-cg > ca then ca=cgh-cg end
+	if cbh-cb > ca then ca=cbh-cb end
+
+	return cr,cg,cb,ca
+end
+
+M.ramp_is_simp=function(ramp)
+
+	if #ramp ~= 3 then return false end
+
+	local cr,cg,cb,ca = M.ramp_to_simp(ramp)
+	
+	local temp = M.simp_to_ramp(cr,cg,cb,ca)
+	
+	if temp[1] ~= ramp[1] then return false end
+	if temp[2] ~= ramp[2] then return false end
+	if temp[3] ~= ramp[3] then return false end
+	
+	return true
+end
+
+M.random_soul=function(opts)
+	opts=opts or {}
+	
+	local rnd
+	if opts.seed then
+		rnd=rnd64k(opts.seed)
+	else
+		rnd=rnd64k(math.random()*65535)
+	end
+
+	local soul={}
+	
+	soul.tweaks={}
+	soul.parts={}
+	soul.materials={}
+
+	for i,name in ipairs( M.part_names ) do
+	
+		local chance=1.0
+		if name=="hat" or name=="eyewear" or name=="beard" or name=="tail" or name=="item" then
+			chance=0.1
+		end
+		
+		local r=rnd()
+
+--print( name, r , chance , r < chance )
+
+		if r < chance then -- object
+		
+			local poss={}
+			
+			for _,v in ipairs( M.mesh_names ) do
+			
+				local s=v[1]
+				if s:sub(1,#name+1)==name.."_" then
+					if v.group==1 then
+						poss[#poss+1]=v[1]
+					end
+				end
+			end
+			
+			if #poss>0 then
+				local i=rnd(1,#poss)
+				soul.parts[name]={{name=poss[i],flags=3}}
+			else
+				soul.parts[name]={}
+			end
+
+		else
+			soul.parts[name]={}
+		end
+
+	end
+	
+	if soul.parts.hat[1] then soul.parts.hair[1]={name="hair_base",flags=3} end -- smaller hair if we have a hat
+	if soul.parts.item[1] then soul.parts.item[1].flags=rnd(1,2) end -- only 1 item in a random hand
+
+	local cmap={
+		0x11cccccc,
+		0x11888888,
+		0x11000000,
+		0x11ee9988,
+		0x11dd8888,
+		0x11884444,
+		0x11444488,
+		0x11cccccc,
+		0x11cc4444,
+		0x11cc8844,
+		0x11cccc44,
+		0x1144cc44,
+		0x114444cc,
+		0x1144cccc,
+		0x11cc8888,
+		0x11884444,
+	}
+	for i,name in ipairs( M.material_names ) do
+	
+		local r,g,b,a=wpack.argb8_b4(cmap[i])
+					
+		r=r+rnd(-64,64)
+		g=g+rnd(-64,64)
+		b=b+rnd(-64,64)
+		a=a+rnd(-16,64)
+		
+		local ramp=M.simp_to_ramp(r,g,b,a)
+
+		soul.materials[name]={ ramp=ramp }
+	
+	end
+	
+	for i,name in ipairs( M.tweak_names ) do
+		local tweak={}
+		soul.tweaks[name]=tweak
+		tweak.scale={}
+		tweak.scale[1]    =rnd(0.95,1.05)
+		tweak.scale[2]    =rnd(0.95,1.05)
+		tweak.scale[3]    =rnd(0.95,1.05)
+		tweak.rotate={}
+		tweak.rotate[1]   =rnd(-3,3)
+		tweak.rotate[2]   =rnd(-3,3)
+		tweak.rotate[3]   =rnd(-3,3)
+		tweak.translate={}
+		tweak.translate[1]=rnd(-0.003,0.003)
+		tweak.translate[2]=rnd(-0.003,0.003)
+		tweak.translate[3]=rnd(-0.003,0.003)
+
+		if name=="eye" or name=="ear" or name=="mouth" or name=="cheek" or name=="boob" then
+			tweak.scale[1]    =rnd(0.75,1.25)
+			tweak.scale[2]    =rnd(0.75,1.25)
+			tweak.scale[3]    =rnd(0.75,1.25)
+		end
+
+		if name=="body" or name=="item" or name=="hat" or name=="hair" or name=="eyeball" then
+			tweak.scale[1]    =1
+			tweak.scale[2]    =1
+			tweak.scale[3]    =1
+			tweak.rotate[1]   =0
+			tweak.rotate[2]   =0
+			tweak.rotate[3]   =0
+			tweak.translate[1]=0
+			tweak.translate[2]=0
+			tweak.translate[3]=0
+		end
+	end
+	
+	return soul
+end
+
 M.bake=function(oven,geoms_avatar)
 
 	local wgeom=oven.rebake("wetgenes.gamecake.spew.geom")
@@ -975,212 +1179,10 @@ end
 
 	end
 
-
-	geoms_avatar.simp_to_ramp=function(cr,cg,cb,ca)
-		
-		if cr<0   then cr=0   end
-		if cr>255 then cr=255 end
-		if cg<0   then cg=0   end
-		if cg>255 then cg=255 end
-		if cb<0   then cb=0   end
-		if cb>255 then cb=255 end
-		if ca<0   then ca=0   end
-		if ca>255 then ca=255 end
-
-		local crl=cr-ca
-		local cgl=cg-ca
-		local cbl=cb-ca
-		
-		if crl<0   then crl=0   end
-		if crl>255 then crl=255 end
-		if cgl<0   then cgl=0   end
-		if cgl>255 then cgl=255 end
-		if cbl<0   then cbl=0   end
-		if cbl>255 then cbl=255 end
-		
-		local crh=cr+ca
-		local cgh=cg+ca
-		local cbh=cb+ca
-		
-		if crh<0   then crh=0   end
-		if crh>255 then crh=255 end
-		if cgh<0   then cgh=0   end
-		if cgh>255 then cgh=255 end
-		if cbh<0   then cbh=0   end
-		if cbh>255 then cbh=255 end
-		
-		local ramp={}
-		ramp[1]=wpack.b4_argb8(crl,cgl,cbl,0x00)
-		ramp[2]=wpack.b4_argb8(cr,cg,cb,0x80)
-		ramp[3]=wpack.b4_argb8(crh,cgh,cbh,0xff)
-
-		return ramp
-	end
-
-
-	geoms_avatar.ramp_to_simp=function(ramp)
-
-		local crl,cgl,cbl,cal=wpack.argb8_b4( ramp[1] or 0x00000000 )
-		local cr,cg,cb,ca=wpack.argb8_b4( ramp[2] or 0x00000000 )
-		local crh,cgh,cbh,cah=wpack.argb8_b4( ramp[3] or 0x00000000 )
-
-		ca=0
-
-		if cr-crl > ca then ca=cr-crl end
-		if cg-cgl > ca then ca=cg-cgl end
-		if cb-cbl > ca then ca=cb-cbl end
-
-		if crh-cr > ca then ca=crh-cr end
-		if cgh-cg > ca then ca=cgh-cg end
-		if cbh-cb > ca then ca=cbh-cb end
-
-		return cr,cg,cb,ca
-	end
-
-	geoms_avatar.ramp_is_simp=function(ramp)
-	
-		if #ramp ~= 3 then return false end
-	
-		local cr,cg,cb,ca = geoms_avatar.ramp_to_simp(ramp)
-		
-		local temp = geoms_avatar.simp_to_ramp(cr,cg,cb,ca)
-		
-		if temp[1] ~= ramp[1] then return false end
-		if temp[2] ~= ramp[2] then return false end
-		if temp[3] ~= ramp[3] then return false end
-		
-		return true
-	end
-
-
-	geoms_avatar.random_soul=function(opts)
-		opts=opts or {}
-		
-		local rnd
-		if opts.seed then
-			rnd=rnd64k(opts.seed)
-		else
-			rnd=rnd64k(math.random()*65535)
-		end
-	
-		local soul={}
-		
-		soul.tweaks={}
-		soul.parts={}
-		soul.materials={}
-
-		for i,name in ipairs( geoms_avatar.part_names ) do
-		
-			local chance=1.0
-			if name=="hat" or name=="eyewear" or name=="beard" or name=="tail" or name=="item" then
-				chance=0.1
-			end
-			
-			local r=rnd()
-
---print( name, r , chance , r < chance )
-
-			if r < chance then -- object
-			
-				local poss={}
-				
-				for _,v in ipairs( geoms_avatar.mesh_names ) do
-				
-					local s=v[1]
-					if s:sub(1,#name+1)==name.."_" then
-						if v.group==1 then
-							poss[#poss+1]=v[1]
-						end
-					end
-				end
-				
-				if #poss>0 then
-					local i=rnd(1,#poss)
-					soul.parts[name]={{name=poss[i],flags=3}}
-				else
-					soul.parts[name]={}
-				end
-
-			else
-				soul.parts[name]={}
-			end
-
-		end
-		
-		if soul.parts.hat[1] then soul.parts.hair[1]={name="hair_base",flags=3} end -- smaller hair if we have a hat
-		if soul.parts.item[1] then soul.parts.item[1].flags=rnd(1,2) end -- only 1 item in a random hand
-
-		local cmap={
-			0x11cccccc,
-			0x11888888,
-			0x11000000,
-			0x11ee9988,
-			0x11dd8888,
-			0x11884444,
-			0x11444488,
-			0x11cccccc,
-			0x11cc4444,
-			0x11cc8844,
-			0x11cccc44,
-			0x1144cc44,
-			0x114444cc,
-			0x1144cccc,
-			0x11cc8888,
-			0x11884444,
-		}
-		for i,name in ipairs( geoms_avatar.material_names ) do
-		
-			local r,g,b,a=wpack.argb8_b4(cmap[i])
-						
-			r=r+rnd(-64,64)
-			g=g+rnd(-64,64)
-			b=b+rnd(-64,64)
-			a=a+rnd(-16,64)
-			
-			local ramp=geoms_avatar.simp_to_ramp(r,g,b,a)
-
-			soul.materials[name]={ ramp=ramp }
-		
-		end
-		
-		for i,name in ipairs( geoms_avatar.tweak_names ) do
-			local tweak={}
-			soul.tweaks[name]=tweak
-			tweak.scale={}
-			tweak.scale[1]    =rnd(0.95,1.05)
-			tweak.scale[2]    =rnd(0.95,1.05)
-			tweak.scale[3]    =rnd(0.95,1.05)
-			tweak.rotate={}
-			tweak.rotate[1]   =rnd(-3,3)
-			tweak.rotate[2]   =rnd(-3,3)
-			tweak.rotate[3]   =rnd(-3,3)
-			tweak.translate={}
-			tweak.translate[1]=rnd(-0.003,0.003)
-			tweak.translate[2]=rnd(-0.003,0.003)
-			tweak.translate[3]=rnd(-0.003,0.003)
-
-			if name=="eye" or name=="ear" or name=="mouth" or name=="cheek" or name=="boob" then
-				tweak.scale[1]    =rnd(0.75,1.25)
-				tweak.scale[2]    =rnd(0.75,1.25)
-				tweak.scale[3]    =rnd(0.75,1.25)
-			end
-
-			if name=="body" or name=="item" or name=="hat" or name=="hair" or name=="eyeball" then
-				tweak.scale[1]    =1
-				tweak.scale[2]    =1
-				tweak.scale[3]    =1
-				tweak.rotate[1]   =0
-				tweak.rotate[2]   =0
-				tweak.rotate[3]   =0
-				tweak.translate[1]=0
-				tweak.translate[2]=0
-				tweak.translate[3]=0
-			end
-		end
-		
-		return soul
-	end
-
+geoms_avatar.simp_to_ramp=M.simp_to_ramp
+geoms_avatar.ramp_to_simp=M.ramp_to_simp
+geoms_avatar.ramp_is_simp=M.ramp_is_simp
+geoms_avatar.random_soul=M.random_soul
 
 	function geoms_avatar.avatar(avatar,soul)
 	
