@@ -76,7 +76,7 @@ Destroy the world and all associated data.
 ]]
 bullet.world_functions.destroy=function(world)
 
-	for i,body  in pairs(world.bodys)   do body:destroy() end
+	for i,body  in pairs(world.bodies)  do body:destroy() end
 	for i,shape in pairs(world.shapes)  do shape:destroy() end
 	for i,mesh  in pairs(world.meshes)  do mesh:destroy() end
 

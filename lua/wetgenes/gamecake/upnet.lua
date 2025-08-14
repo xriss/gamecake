@@ -113,6 +113,15 @@ M.bake=function(oven,upnet)
 		})
 	end
 
+	upnet.set_tick=function(tick)
+		oven.tasks:do_memo({
+			task="upnet",
+			id=false,
+			cmd="set_tick",
+			tick=tick
+		})
+	end
+
 	upnet.get_ticks=function()
 		local r=oven.tasks:do_memo({
 			task="upnet",
@@ -861,6 +870,16 @@ M.upnet_code=function(linda,task_id,task_idx)
 					client:send(memo.data)
 				end
 			end
+
+		elseif memo.cmd=="set_tick" then
+		
+			upnet.ticks.now=memo.tick
+			upnet.ticks.base=upnet.ticks.now
+			upnet.ticks.agreed=upnet.ticks.now
+			upnet.ticks.input=upnet.ticks.now
+			upnet.ticks.epoch=now()-(upnet.ticks.now*upnet.ticks.length)
+			upnet.hashs={} -- reset hashes
+			upnet.inputs={} -- reset inputs
 
 		elseif memo.cmd=="get_ticks" then
 		

@@ -37,6 +37,7 @@ kinetics.system={}
 -- methods added to each item
 kinetics.item={}
 
+-- need to cleanup old worlds.
 
 kinetics.item.setup=function(kinetic)
 
@@ -54,6 +55,17 @@ kinetics.item.setup=function(kinetic)
 
 	return kinetic
 end
+
+kinetics.item.clean=function(kinetic)
+	-- we need to call this so every sub part else is destroyed first
+	-- otherwise GC might do it in the wrong order if you just rely on it going out of scope
+	-- can cause a segfault
+	if kinetic.world then
+		kinetic.world:destroy()
+		kinetic.world=nil
+	end
+end
+
 
 kinetics.item.update=function(kinetic)
 
