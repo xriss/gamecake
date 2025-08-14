@@ -113,11 +113,11 @@ M.bake=function(oven,upnet)
 		})
 	end
 
-	upnet.set_tick=function(tick)
+	upnet.reset_tick=function(tick)
 		oven.tasks:do_memo({
 			task="upnet",
 			id=false,
-			cmd="set_tick",
+			cmd="reset_tick",
 			tick=tick
 		})
 	end
@@ -871,7 +871,7 @@ M.upnet_code=function(linda,task_id,task_idx)
 				end
 			end
 
-		elseif memo.cmd=="set_tick" then
+		elseif memo.cmd=="reset_tick" then
 		
 			upnet.ticks.now=memo.tick
 			upnet.ticks.base=upnet.ticks.now

@@ -1157,11 +1157,7 @@ all.scene.load_all_values=function(scene,dat)
 		boot.uid=uid
 		if type(boot.zip)=="string" then boot.zip=uncompress(boot.zip) end
 		scene:create(boot)
-	end
-	
-	-- reset upnet ticks
-	scene.oven.upnet.set_tick( scene.values:get("tick") )
-	
+	end	
 
 end
 

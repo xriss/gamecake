@@ -274,11 +274,17 @@ players.item.update_control=function(player)
 	else -- we are running
 		camera.move_and_rotate=false
 
-		player.run = player.run + ( player.run:normalize(V3()) * ((ly/ -4)) ) -- adjust speed with forward/back
-		player.run:product(Q4("y",-lx)) --rotate a little bit with left/right
-		camera.direction=camera:get( "direction" ) -- also adjust camera
-		camera.direction=camera.direction-lx
-		camera:set( "direction" , camera.direction )
+		-- adjust left stick from camera space into player space
+		local move=((lx*camera.playerx) + (ly*camera.playery) )
+		local cx=-(move:dot(player.side))
+		local cy=-(move:dot(player.face))
+		-- if camera and player are aligned then cx,cy will be the same as lx,ly
+
+		player.run = player.run + ( player.run:normalize(V3()) * ((cy/ -4)) ) -- adjust speed with forward/back
+		player.run:product(Q4("y",-(cx*4))) --rotate a little bit with left/right
+--		camera.direction=camera:get( "direction" ) -- also adjust camera
+--		camera.direction=camera.direction-(cx*2)
+--		camera:set( "direction" , camera.direction )
 
 
 		if player.run:len() > player.run_speed then -- max speed
