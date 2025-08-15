@@ -265,47 +265,14 @@ all.scene.ticks_sync=function(scene)
 	for n,v in pairs( scene.oven.upnet.get_ticks() ) do scene.ticks[n]=v end
 end
 
-all.scene.do_update=function(scene)
-
--- called often but out of sync of rewinds so will probably cause a resync
--- this is chugging and needs to happen out of state or something
---	scene:systems_call("housekeeping")
-
-
+all.scene.do_update_values=function(scene)
 	scene:ticks_sync()
---	if scene.ticks.now < scene.values:get("tick") then return end -- tick advance only?
-
-local counts={}
-counts.undo=0
-counts.update=0
-counts.draw=0
-
-
-	scene.tween=nil -- disable tweening while updating
-
---	main_zone.scene.call("update")
-
---	local upnet=scene.oven.upnet
---	if oven.upnet_pause=="catchup" then -- fast forward time
---		upnet.update() -- do not advance time
---	else
---	end
-
-
-
-	for m in oven.tasks:memos("upsall") do
-		if m.need_sync then
-			scene.last_need_sync = m.need_sync
-			scene:send_msg_sync(m.need_sync)
-		end
-	end
-
 	if scene.ticks.input > scene.values:get("tick_input") then
 
 		-- undo draw predictions without full inputs
 		if scene.values:get("tick") > scene.values:get("tick_input") then
 			while scene.values[2] and scene.values:get("tick") > scene.values:get("tick_input") do
-				counts.undo=counts.undo+1
+--				counts.undo=counts.undo+1
 				scene:do_unpush()
 			end
 			scene:call("get_values") -- sync item and kinetics
@@ -314,10 +281,12 @@ counts.draw=0
 
 		while scene.ticks.input > scene.values:get("tick") do -- update with full inputs and save hashs
 		
-			counts.update=counts.update+1
-			scene.oven.console.display_disable=false
-			scene.oven.console.display_clear()
-			display("")
+--			counts.update=counts.update+1
+			if scene.oven.console then
+				scene.oven.console.display_disable=false
+				scene.oven.console.display_clear()
+				display("")
+			end
 
 			scene:do_push() -- inc tick
 			scene.ups=scene.oven.upnet.get_ups( scene.values:get("tick") )
@@ -331,8 +300,11 @@ counts.draw=0
 --			local hash=scene:get_hashs( scene.values:get("tick") )[1]
 local hash=0
 			scene.oven.upnet.set_hash( scene.values:get("tick") , hash )
-			scene.oven.console.display_disable=true
 
+			if scene.oven.console then
+				scene.oven.console.display_disable=true
+			end
+			
 			scene:ticks_sync()
 		end
 
@@ -349,13 +321,15 @@ local hash=0
 --		scene:load_all_values(dat)
 
 	end
+end
 
-	
+all.scene.do_update_tweens=function(scene)
+
 	local need_tween_push=( scene.tweens:get("tick") or 0 ) < ( scene.values:get("tick") or 0 )
 	while  scene.ticks.now >= scene.values:get("tick") do -- predict until we are in the future
 		need_tween_push=true
 
-		counts.draw=counts.draw+1
+--		counts.draw=counts.draw+1
 		scene:do_push()
 		scene.ups=scene.oven.upnet.get_ups( scene.values:get("tick") )
 
@@ -391,6 +365,46 @@ local hash=0
 	while #scene.tweens > 2 do
 		do_tween( function(it) it.tweens:merge() end )
 	end
+end
+
+all.scene.do_update=function(scene)
+
+-- called often but out of sync of rewinds so will probably cause a resync
+-- this is chugging and needs to happen out of state or something
+--	scene:systems_call("housekeeping")
+
+
+	scene:ticks_sync()
+--	if scene.ticks.now < scene.values:get("tick") then return end -- tick advance only?
+
+local counts={}
+counts.undo=0
+counts.update=0
+counts.draw=0
+
+
+	scene.tween=nil -- disable tweening while updating
+
+--	main_zone.scene.call("update")
+
+--	local upnet=scene.oven.upnet
+--	if oven.upnet_pause=="catchup" then -- fast forward time
+--		upnet.update() -- do not advance time
+--	else
+--	end
+
+
+
+	for m in oven.tasks:memos("upsall") do
+		if m.need_sync then
+			scene.last_need_sync = m.need_sync
+			scene:send_msg_sync(m.need_sync)
+		end
+	end
+
+	scene:do_update_values()
+
+	scene:do_update_tweens()
 
 
 --upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )
@@ -1300,6 +1314,9 @@ M.values_code=function(linda,task_id,task_idx)
 	local scene
 	
 	local main=function()
+		if scene then
+			scene:do_update_values()
+		end
 	end
 
 	local request=function(memo)
