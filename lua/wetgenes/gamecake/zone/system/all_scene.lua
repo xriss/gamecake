@@ -110,7 +110,7 @@ all.scene.do_update_values=function(scene)
 	local undo_count=0
 	local update_count=0
 
-	for m in oven.tasks:memos("upsall") do
+	for m in scene.oven.tasks:memos("upsall") do
 		if m.need_sync then
 			scene.last_need_sync = m.need_sync
 			scene:send_msg_sync(m.need_sync)

@@ -15,7 +15,7 @@ M.code=all.code
 all.scene.start_all_tasks=function(scene)
 
 	local oven=scene.oven
---[[
+
 	-- create threads and init then	
 
 	oven.tasks:add_global_thread({
@@ -40,11 +40,11 @@ all.scene.start_all_tasks=function(scene)
 	oven.tasks:do_memo({
 		task="all_values",
 		id=false,
-		cmd="create",
+		cmd="scene",
 		scene=scene.wrap_name,
 		call="full_setup",
 	})
-]]
+
 end
 
 
