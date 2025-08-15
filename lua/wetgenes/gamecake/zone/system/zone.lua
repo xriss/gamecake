@@ -40,6 +40,8 @@ end
 
 zones.item.setup=function(zone)
 
+	if not zone.sys.singular then zone.sys.singular=zone end -- auto set singular
+
 	zone:get_values()
 
 	return zone

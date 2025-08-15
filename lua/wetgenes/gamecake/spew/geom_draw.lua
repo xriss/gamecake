@@ -17,9 +17,9 @@ M.fill=function(oven,geom)
 
 	local gl=oven.gl
 	local cake=oven.cake
-	local canvas=cake.canvas
-	local font=canvas.font
-	local flat=canvas.flat
+	local canvas=cake and cake.canvas
+	local font=canvas and canvas.font
+	local flat=canvas and canvas.flat
 
 	local getfmt=function(it,m)
 

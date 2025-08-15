@@ -64,9 +64,9 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 function M.bake(oven,framebuffers)
 		
-	local gl=oven.cake.gles -- oven.rebake("wetgenes.gamecake.gles")
-	local images=oven.cake.images -- oven.rebake("wetgenes.gamecake.images")
-	local views=oven.cake.views -- oven.rebake("wetgenes.gamecake.views")
+	local gl=oven.cake and oven.cake.gles -- oven.rebake("wetgenes.gamecake.gles")
+	local images=oven.cake and oven.cake.images -- oven.rebake("wetgenes.gamecake.images")
+	local views=oven.cake and oven.cake.views -- oven.rebake("wetgenes.gamecake.views")
 	
 	framebuffers.stack={}
 	framebuffers.peek=function() return framebuffers.stack[#framebuffers.stack] end

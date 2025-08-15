@@ -84,12 +84,13 @@ floors.system.setup=function(sys)
 		},
 	})
 
-	sys.image=sys.oven.cake.images.load("floors/"..tostring(sys),"floors/"..tostring(sys),function() return sys.ramps end)
-	sys.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
-	sys.image.TEXTURE_WRAP_T		=	gl.CLAMP_TO_EDGE
-	sys.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
-	sys.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
-
+	if sys.oven.cake then
+		sys.image=sys.oven.cake.images.load("floors/"..tostring(sys),"floors/"..tostring(sys),function() return sys.ramps end)
+		sys.image.TEXTURE_WRAP_S		=	gl.CLAMP_TO_EDGE
+		sys.image.TEXTURE_WRAP_T		=	gl.CLAMP_TO_EDGE
+		sys.image.TEXTURE_MIN_FILTER	=	gl.LINEAR
+		sys.image.TEXTURE_MAX_FILTER	=	gl.LINEAR
+	end
 
 end
 

@@ -41,21 +41,24 @@ M.bake=function(oven,upnet)
 
 	upnet=upnet or {}
 
-	-- create msgp handling thread if it does not exist
-	oven.tasks:add_global_thread({
-		count=1,
-		id="msgp",
-		code=msgp.msgp_code,
-	})
+	if oven.ups then -- in main task
 
-	-- create upnet handling thread if it does not exist
-	oven.tasks:add_global_thread({
-		count=1,
-		id="upnet",
-		code=M.upnet_code,
-	})
+		-- create msgp handling thread if it does not exist
+		oven.tasks:add_global_thread({
+			count=1,
+			id="msgp",
+			code=msgp.msgp_code,
+		})
+
+		-- create upnet handling thread if it does not exist
+		oven.tasks:add_global_thread({
+			count=1,
+			id="upnet",
+			code=M.upnet_code,
+		})
 	
-	oven.ups.subscribe("upnet/ups") -- request all ups to be sent here
+		oven.ups.subscribe("upnet/ups") -- request all ups to be sent here
+	end
 	
 	upnet.setup=function()
 		oven.tasks:do_memo({

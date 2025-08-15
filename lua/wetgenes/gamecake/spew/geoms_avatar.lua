@@ -431,7 +431,7 @@ M.bake=function(oven,geoms_avatar)
 
 	local gl=oven.gl
 
-	local textures=oven.cake.textures
+	local textures=oven.cake and oven.cake.textures
 	
 	geoms_avatar.bonetexs={} -- animation converted into a shader texture
 	

@@ -1,6 +1,16 @@
 --
 -- (C) 2024 Kriss@XIXs.com
 --
+
+--module
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+
+------------------------------------------------------------------------
+do -- stop these locals from poisoning task functions
+------------------------------------------------------------------------
+local all=M
+
+
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
@@ -46,11 +56,6 @@ local inherits=function(names,reverse,split)
 	end
 end
 --for s in inherits("a_b_c_d_e_f",true) do print(s) end
-
---module
-local M={ modname=(...) } ; package.loaded[M.modname]=M
-
-local all=M
 
 all.caste="all"
 
@@ -167,6 +172,40 @@ end
 
 all.scene.create=function(scene,boot) -- shorthand to create from boot
 	return scene.systems[ boot.caste or boot[1] ]:create(boot)
+end
+
+-- initalize systems in the scene
+all.scene.start_all_tasks=function(scene)
+
+	-- create threads and init then
+
+	oven.tasks:add_global_thread({
+		count=1,
+		id="all_popins",
+		code=M.popins_code,
+	})
+
+	oven.tasks:add_global_thread({
+		count=1,
+		id="all_values",
+		code=M.values_code,
+	})
+
+	oven.tasks:add_global_thread({
+		count=1,
+		id="all_tweens",
+		code=M.tweens_code,
+	})
+
+
+	oven.tasks:do_memo({
+		task="all_values",
+		id=false,
+		cmd="create",
+		scene=scene.wrap_name,
+		call="full_setup",
+	})
+
 end
 
 -- initalize systems in the scene
@@ -303,6 +342,11 @@ local hash=0
 		while scene.values[2] do -- and scene.values:get("tick",2) <= scene.ticks.agreed do
 			scene:do_pull()
 		end
+
+-- test reloading everything every frame
+--		local dat=scene:save_all_values(true)
+--		scene:call(function(it)if it.caste~="kinetic" then it:destroy() end end)
+--		scene:load_all_values(dat)
 
 	end
 
@@ -1151,12 +1195,26 @@ all.scene.load_all_values=function(scene,dat)
 			end
 		end
 	end
+
+	-- delete items
+	scene:call(function(it)
+		if not dat.items[it.uid] then -- all live objects will be in this map
+			it:destroy()
+		end
+	end)
 	
 	-- create items
 	for uid,boot in pairs(dat.items) do
-		boot.uid=uid
-		if type(boot.zip)=="string" then boot.zip=uncompress(boot.zip) end
-		scene:create(boot)
+		local it=scene:find_uid(uid)
+		if it then -- load into existing object
+			for n,v in pairs(boot) do
+				it.values:set(n,v)
+			end
+		else -- create new
+			boot.uid=uid
+			if type(boot.zip)=="string" then boot.zip=uncompress(boot.zip) end
+			scene:create(boot) -- we should auto cope with zip strings in the boot...
+		end
 	end	
 
 end
@@ -1188,3 +1246,131 @@ end
 
 all.scene.load_all_tweens=function(scene)
 end
+
+------------------------------------------------------------------------
+end -- The functions below are free running tasks and should not depend on any locals
+------------------------------------------------------------------------
+
+-- task that deals with popin/out and other world generation
+M.popins_code=function(linda,task_id,task_idx)
+	local M -- hide M for thread safety
+	local global=require("global") -- lock accidental globals
+
+	local lanes=require("lanes")
+	if lane_threadname then lane_threadname(task_id) end
+
+	local main=function()
+	end
+
+	local request=function(memo)
+		local ret={}
+		return ret
+	end
+
+	while true do
+		local timeout=0.001 -- first receive will be 1ms or less
+		repeat
+			local _,memo= linda:receive( timeout , task_id ) -- wait for any memos coming into this thread
+			timeout=0 -- repeat receive are instant
+			main() -- probably getting called every 1ms ish
+			if memo then
+				local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+				if not ok then ret={error=ret or true} end -- reformat errors
+				if memo.id then -- result requested
+					linda:send( nil , memo.id , ret )
+				end
+			end
+		until not memo
+	end
+
+end
+
+-- manage scene update and full syncs of values to other tasks
+M.values_code=function(linda,task_id,task_idx)
+	local M -- hide M for thread safety
+	local global=require("global") -- lock accidental globals
+
+	local lanes=require("lanes")
+	if lane_threadname then lane_threadname(task_id) end
+	
+	-- basic oven, nogl etc
+	local oven=require("wetgenes.gamecake.toaster").bake({linda=linda})
+	oven.upnet=oven.rebake("wetgenes.gamecake.upnet")
+
+	local scene
+	
+	local main=function()
+	end
+
+	local request=function(memo)
+		local ret={}
+		
+		if memo.cmd=="create" then
+			if scene then
+				scene:full_clean()
+				scene=nil
+			end
+			scene=require(memo.scene).create()
+			scene.oven=oven
+			scene.infos.all.scene.initialize(scene)
+			print("create",memo.scene)
+			if memo.call then
+				scene[memo.call](scene)
+			end
+		end
+		
+		return ret
+	end
+
+	while true do
+		local timeout=0.001 -- first receive will be 1ms or less
+		repeat
+			local _,memo= linda:receive( timeout , task_id ) -- wait for any memos coming into this thread
+			timeout=0 -- repeat receive are instant
+			main() -- probably getting called every 1ms ish
+			if memo then
+				local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+				if not ok then ret={error=ret or true} end -- reformat errors
+				if memo.id then -- result requested
+					linda:send( nil , memo.id , ret )
+				end
+			end
+		until not memo
+	end
+
+end
+
+-- manage scene predictions and draw state generation ( draw needs to happen on main thread )
+M.tweens_code=function(linda,task_id,task_idx)
+	local M -- hide M for thread safety
+	local global=require("global") -- lock accidental globals
+
+	local lanes=require("lanes")
+	if lane_threadname then lane_threadname(task_id) end
+
+	local main=function()
+	end
+
+	local request=function(memo)
+		local ret={}
+		return ret
+	end
+
+	while true do
+		local timeout=0.001 -- first receive will be 1ms or less
+		repeat
+			local _,memo= linda:receive( timeout , task_id ) -- wait for any memos coming into this thread
+			timeout=0 -- repeat receive are instant
+			main() -- probably getting called every 1ms ish
+			if memo then
+				local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+				if not ok then ret={error=ret or true} end -- reformat errors
+				if memo.id then -- result requested
+					linda:send( nil , memo.id , ret )
+				end
+			end
+		until not memo
+	end
+
+end
+

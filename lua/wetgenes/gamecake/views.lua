@@ -25,7 +25,7 @@ function M.bake(oven,views)
 	local gl=oven.gl
 	local cake=oven.cake
 	local win=oven.win
-	local canvas=cake.canvas
+	local canvas=cake and cake.canvas
 
 -- this stack is for master views, so push/pop when entering a subsystem that needs to be resized
 -- the oven creates a master win related view at startup
