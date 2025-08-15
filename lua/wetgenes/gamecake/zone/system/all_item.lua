@@ -37,15 +37,7 @@ local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3
 local json_diff=require("wetgenes.json_diff")
 local hashish=require("wetgenes.json_diff").hashish
 
-local cmsgpack=require("cmsgpack")
-local zlib=require("zlib")
-local zipinflate=function(d) return d and ((zlib.inflate())(d))          end
-local zipdeflate=function(d) return d and ((zlib.deflate())(d,"finish")) end
-local   compress=function(d) return d and zipdeflate(cmsgpack.pack(d))   end
-local uncompress=function(d) return d and cmsgpack.unpack(zipinflate(d)) end
 
-
-all.item.run_as_coroutine=all.run_as_coroutine
 -- get a system by name
 all.item.get_system=function(it,name)
 	return it.scene.systems[name]
@@ -167,7 +159,7 @@ all.item.set_boot=function(it,boot)
 			if v.new then
 				it.values:set(k,v.new( boot[k] or v )) -- copy tardis values
 			else
-				it.values:set(k, compress(boot[k]) ) -- assume uncompressed zip value
+				it.values:set(k, all.compress(boot[k]) ) -- assume uncompressed zip value
 			end
 		else
 			it.values:set(k,boot[k] or v) -- probbaly a number, bool or string
@@ -183,7 +175,7 @@ all.item.get_boot=function(it)
 			if v.new then
 				boot[k]=v.new( it.values:get(k) ) -- copy tardis values
 			else
-				boot[k]=uncompress( it.values:get(k) ) -- assume zip value
+				boot[k]=all.uncompress( it.values:get(k) ) -- assume zip value
 			end
 		else
 			boot[k]=it.values:get(k) -- probbaly a number, bool or string
@@ -359,7 +351,7 @@ all.item.set_zips=function(it)
 		local t=it[n]
 		if t.dirty then -- flaged as changed by user code when we change anything
 			t.dirty=false
-			local z=compress(t)
+			local z=all.compress(t)
 			it.zips[n]=z
 			it:set(n,z) -- set will check against current value so this is always safe to call
 		end
@@ -374,7 +366,7 @@ all.item.get_zips=function(it)
 		local z=it:get(n)
 		if s~=z then -- changed
 			it.zips[n]=z -- remember
-			local t=uncompress(z)
+			local t=all.uncompress(z)
 			it[n]=t
 		end
 	end

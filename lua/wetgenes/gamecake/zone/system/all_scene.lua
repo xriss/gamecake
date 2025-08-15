@@ -38,13 +38,6 @@ local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3
 local json_diff=require("wetgenes.json_diff")
 local hashish=require("wetgenes.json_diff").hashish
 
-local cmsgpack=require("cmsgpack")
-local zlib=require("zlib")
-local zipinflate=function(d) return d and ((zlib.inflate())(d))          end
-local zipdeflate=function(d) return d and ((zlib.deflate())(d,"finish")) end
-local   compress=function(d) return d and zipdeflate(cmsgpack.pack(d))   end
-local uncompress=function(d) return d and cmsgpack.unpack(zipinflate(d)) end
-
 
 -- make sure we keep tasks running when in cocall loops
 all.scene.also_cocall=function()
@@ -113,13 +106,24 @@ all.scene.ticks_sync=function(scene)
 end
 
 all.scene.do_update_values=function(scene)
+
+	local undo_count=0
+	local update_count=0
+
+	for m in oven.tasks:memos("upsall") do
+		if m.need_sync then
+			scene.last_need_sync = m.need_sync
+			scene:send_msg_sync(m.need_sync)
+		end
+	end
+
 	scene:ticks_sync()
 	if scene.ticks.input > scene.values:get("tick_input") then
 
 		-- undo draw predictions without full inputs
 		if scene.values:get("tick") > scene.values:get("tick_input") then
 			while scene.values[2] and scene.values:get("tick") > scene.values:get("tick_input") do
---				counts.undo=counts.undo+1
+				undo_count=undo_count+1
 				scene:do_unpush()
 			end
 			scene:call("get_values") -- sync item and kinetics
@@ -128,7 +132,7 @@ all.scene.do_update_values=function(scene)
 
 		while scene.ticks.input > scene.values:get("tick") do -- update with full inputs and save hashs
 		
---			counts.update=counts.update+1
+			update_count=update_count+1
 			if scene.oven.console then
 				scene.oven.console.display_disable=false
 				scene.oven.console.display_clear()
@@ -168,15 +172,19 @@ local hash=0
 --		scene:load_all_values(dat)
 
 	end
+	
+	return undo_count , update_count
 end
 
 all.scene.do_update_tweens=function(scene)
+
+	local draw_count=0
 
 	local need_tween_push=( scene.tweens:get("tick") or 0 ) < ( scene.values:get("tick") or 0 )
 	while  scene.ticks.now >= scene.values:get("tick") do -- predict until we are in the future
 		need_tween_push=true
 
---		counts.draw=counts.draw+1
+		draw_count=draw_count+1
 		scene:do_push()
 		scene.ups=scene.oven.upnet.get_ups( scene.values:get("tick") )
 
@@ -212,6 +220,8 @@ all.scene.do_update_tweens=function(scene)
 	while #scene.tweens > 2 do
 		do_tween( function(it) it.tweens:merge() end )
 	end
+	
+	return draw_count
 end
 
 all.scene.do_update=function(scene)
@@ -241,17 +251,9 @@ counts.draw=0
 --	end
 
 
+	counts.undo , counts.update = scene:do_update_values()
 
-	for m in oven.tasks:memos("upsall") do
-		if m.need_sync then
-			scene.last_need_sync = m.need_sync
-			scene:send_msg_sync(m.need_sync)
-		end
-	end
-
-	scene:do_update_values()
-
-	scene:do_update_tweens()
+	counts.draw = scene:do_update_tweens()
 
 
 --upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )
@@ -509,7 +511,7 @@ all.scene.load_all_values=function(scene,dat)
 			end
 		else -- create new
 			boot.uid=uid
-			if type(boot.zip)=="string" then boot.zip=uncompress(boot.zip) end
+			if type(boot.zip)=="string" then boot.zip=all.uncompress(boot.zip) end
 			scene:create(boot) -- we should auto cope with zip strings in the boot...
 		end
 	end	

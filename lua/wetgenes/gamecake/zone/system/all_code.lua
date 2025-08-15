@@ -106,17 +106,19 @@ all.code.values=function(linda,task_id,task_idx)
 	local request=function(memo)
 		local ret={}
 		
-		if memo.cmd=="create" then
+		if memo.cmd=="scene" then
 			if scene then
 				scene:full_clean()
 				scene=nil
 			end
-			scene=require(memo.scene).create()
-			scene.oven=oven
-			scene.infos.all.scene.initialize(scene)
-			print("create",memo.scene)
-			if memo.call then
-				scene[memo.call](scene)
+			if memo.scene then -- can delete scene by not naming one
+				scene=require(memo.scene).create()
+				scene.oven=oven
+				scene.infos.all.scene.initialize(scene)
+				print("create",memo.scene)
+				if memo.call then
+					scene[memo.call](scene)
+				end
 			end
 		end
 		

@@ -38,13 +38,6 @@ local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3
 local json_diff=require("wetgenes.json_diff")
 local hashish=require("wetgenes.json_diff").hashish
 
-local cmsgpack=require("cmsgpack")
-local zlib=require("zlib")
-local zipinflate=function(d) return d and ((zlib.inflate())(d))          end
-local zipdeflate=function(d) return d and ((zlib.deflate())(d,"finish")) end
-local   compress=function(d) return d and zipdeflate(cmsgpack.pack(d))   end
-local uncompress=function(d) return d and cmsgpack.unpack(zipinflate(d)) end
-
 
 -- get a system by name
 all.system.get_system=function(sys,name)
