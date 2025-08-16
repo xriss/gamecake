@@ -48,6 +48,9 @@ waters.types={
 	pos="tween",
 	siz="tween",
 	add="tween",
+	time_step="get",
+	turn_step="get",
+	RND="get"
 }
 
 -- methods added to system
@@ -142,7 +145,7 @@ waters.item.update=function(water)
 	if water.time_step<-water.time_step_max then water.time_step=-water.time_step_max end
 
 	local camera=water:get_singular("camera")
-	if not camera then return end
+--	if not camera then return end
 	local render=camera:depend("render")
 	local sky=camera:depend("sky")
 	local screen=render.sys.screen
@@ -185,6 +188,8 @@ waters.item.update=function(water)
 end
 
 waters.item.draw=function(water)
+
+	water:get_values()
 
 	local sys=water.sys
 	local gl=sys.oven.gl

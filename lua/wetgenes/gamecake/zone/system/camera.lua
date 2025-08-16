@@ -100,6 +100,8 @@ cameras.item.set_active=function(camera)
 	local sys=camera.sys
 	local gl=camera.gl
 
+	camera.sys.singular=camera
+
 	camera:get_values()
 
 	if camera then -- can be called with nil to unset
@@ -124,7 +126,7 @@ end
 
 cameras.item.setup=function(camera)
 
-	if not camera.sys.singular then camera.sys.singular=kinetic end
+	if not camera.sys.singular then camera.sys.singular=camera end
 
 	camera:get_values()
 
