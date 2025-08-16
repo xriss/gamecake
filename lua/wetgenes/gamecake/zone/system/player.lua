@@ -56,6 +56,7 @@ players.types={
 	tweaks="tween",
 	pos="tween",
 	rot="tween",
+	run="get",
 	ang="get",
 	vel="get",
 	acc="get",
@@ -233,7 +234,8 @@ players.item.update_control=function(player)
 	local ly=( up:axis("ly") ) or 0
 
 
-	if player.run==V3(0,0,0) then -- we are walking
+	if player.run:len()<player.walk_speed then -- we are walking
+		player.run=V3(0,0,0)
 		camera.move_and_rotate=true
 
 		local move=((lx*camera.playerx) + (ly*camera.playery) )

@@ -56,15 +56,19 @@ all.scene.initialize=function(scene)
 
 	-- add all.scene to scene as a metatable so we can do eg scene:call_xxxxx functions
 	setmetatable(scene,{__index=scene.infos.all.scene})
+	-- this guarantees call order, so if we call setup we will always call setup on kinetic system/items first
 	scene.sortby={
 		--
-		kinetic =	-1000	-1,
+		kinetic =	-1000	-2,
+		render  =	-1000	-1,
 		--
 		input   =	0		-5,
 		camera  =	0		-4,
 		player  =	0		-3,
 		tool    =	0		-2,
 		build   =	0		-1,
+		--
+		-- everything not explicitly mentioned goes here in alphabetical order
 		--
 		sky     =   0		+1,
 		water   = 	0		+2,
