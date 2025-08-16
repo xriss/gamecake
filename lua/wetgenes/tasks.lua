@@ -40,7 +40,7 @@ if lanes.configure then -- first time configuration
 end
 
 
---[[#lua.wetgenes.tasks.do_memo
+--[[#lua.wetgenes.tasks.linda_do_memo
 
 	-- just grab this function 
 	local do_memo=require("wetgenes.tasks").do_memo
@@ -59,7 +59,7 @@ are in a task and want to talk to another task.
 
 ]]
 M.do_memo=function(linda,memo,timeout)
-	if type(memo.id)=="nil" then -- auto gen id if nul, disable return with false
+	if type(memo.id)=="nil" then -- auto gen id if nil, disable return with false
 		memo.id=tostring(memo) -- should be a unique string, the address of the memo table
 	end
 --log("memo",memo.task,memo.id)
@@ -69,6 +69,25 @@ M.do_memo=function(linda,memo,timeout)
 --log("memo",memo.task,memo.id,"done")
 			return r
 		end
+	end
+end
+
+--[[#lua.wetgenes.tasks.linda_memos
+
+	local memos=require("wetgenes.tasks").memos
+
+	for memo in memos(linda,subid) do
+		... -- deal with new memos
+	end
+	
+Simple iterator for memos available at a subscription id.
+
+]]
+M.memos=function(linda,subid)
+	return function()
+		-- get any memo waiting but do not block
+		local _,memo= linda:receive( 0 , subid )
+		return memo
 	end
 end
 

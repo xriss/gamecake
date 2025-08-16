@@ -45,6 +45,13 @@ all.scene.start_all_tasks=function(scene)
 		call="full_setup",
 	})
 
+	oven.tasks:do_memo({
+		task="all_values",
+		id=false,
+		cmd="subscribe",
+		subid="all_test",
+	})
+
 end
 
 
@@ -85,6 +92,8 @@ end
 -- manage scene update and full syncs of values to other tasks
 all.code.values=function(linda,task_id,task_idx)
 	local M,all -- hide for thread safety
+	local p=print
+	print=function(...) return p(task_id,...) end
 	local global=require("global") -- lock accidental globals
 
 	local lanes=require("lanes")
@@ -114,12 +123,30 @@ all.code.values=function(linda,task_id,task_idx)
 			if memo.scene then -- can delete scene by not naming one
 				scene=require(memo.scene).create()
 				scene.oven=oven
+				scene.subscribed={}
 				scene.infos.all.scene.initialize(scene)
 				print("create",memo.scene)
 				if memo.call then
 					scene[memo.call](scene)
 				end
 			end
+		elseif memo.cmd=="subscribe" then
+
+			scene.subscribed[memo.subid]={}
+			
+			local values=scene:save_all_values(true) -- first full dump
+			scene.oven.tasks:do_memo({
+				task=memo.subid,
+				id=false,
+				cmd="values",
+				values=values,
+			})
+
+
+		elseif memo.cmd=="unsubscribe" then
+
+			scene.subscribed[memo.subid]=nil
+
 		end
 		
 		return ret
@@ -146,6 +173,8 @@ end
 -- manage scene predictions and draw state generation ( draw needs to happen on main thread )
 all.code.tweens=function(linda,task_id,task_idx)
 	local M,all -- hide for thread safety
+	local p=print
+	print=function(...) return p(task_id,...) end
 	local global=require("global") -- lock accidental globals
 
 	local lanes=require("lanes")

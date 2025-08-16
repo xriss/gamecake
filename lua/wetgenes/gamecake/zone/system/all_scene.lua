@@ -156,6 +156,19 @@ local hash=0
 				scene.oven.console.display_disable=true
 			end
 			
+			-- this should only be set in the values sub task
+			if scene.subscribed then -- send out new values
+				local values=scene:save_all_values()
+				for subid in pairs(scene.subscribed) do
+					scene.oven.tasks:do_memo({
+						task=subid,
+						id=false,
+						cmd="values",
+						values=values,
+					})
+				end
+			end
+			
 			scene:ticks_sync()
 		end
 
@@ -251,7 +264,25 @@ counts.draw=0
 --	end
 
 
-	counts.undo , counts.update = scene:do_update_values()
+	for memo in oven.tasks:memos("all_test") do
+		if memo.cmd=="values" then
+
+		-- undo draw predictions without full inputs
+		if scene.values:get("tick") > scene.values:get("tick_input") then
+			while scene.values[2] and scene.values:get("tick") > scene.values:get("tick_input") do
+--print("undo")
+				scene:do_unpush()
+			end
+			scene:call("get_values") -- sync item and kinetics
+			scene:call("set_body")
+		end
+
+--print("values")
+			scene:load_all_values(memo.values)
+		end
+	end
+
+--	counts.undo , counts.update = scene:do_update_values()
 
 	counts.draw = scene:do_update_tweens()
 

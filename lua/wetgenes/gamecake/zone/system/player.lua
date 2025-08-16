@@ -51,8 +51,8 @@ players.values={
 
 }
 players.types={
-	avatar_pose="ignore",
-	avatar_time="ignore",
+	avatar_pose="get",
+	avatar_time="twrap",
 	tweaks="tween",
 	pos="tween",
 	rot="tween",
@@ -60,6 +60,10 @@ players.types={
 	vel="get",
 	acc="get",
 }
+players.twraps={
+	avatar_time=1,
+}
+
 -- methods added to system
 players.system={}
 -- methods added to each item
@@ -68,14 +72,11 @@ players.item={}
 
 players.item.set_values=function(player)
 
-
+	player.avatar_time=player.avatar.time -- from avatar
+	player.avatar_pose=player.avatar.pose
 	player:set_auto_values()
-	player:set("avatar_time",player.avatar.time)
-	player:set("avatar_pose",player.avatar.pose)
 
 	player.feet=V3( player.pos[1] , player.pos[2]+(player.body_hover+player.body_radius) , player.pos[3] )
-
---	player:set_body_values()
 
 end
 
@@ -83,8 +84,8 @@ players.item.get_values=function(player)
 
 	player:get_auto_values()
 
-	player.avatar.time=player:twrap("avatar_time",1) -- ,player.avatar.anim.length or 0)
-	player.avatar.pose=player:tget("avatar_pose")
+	player.avatar.time=player.avatar_time -- into avatar
+	player.avatar.pose=player.avatar_pose
 	player.avatar.speed=0
 	player.avatar.update_pose()
 
@@ -626,8 +627,9 @@ players.item.update=function(player)
 -- player.pos[2]=-3.6
 
 	-- apply speed here so we can save it and update does not change it
-	if player.avatar.anim.length then
-		player.avatar.time=(player.avatar.time+(player.avatar.speed/player.avatar.anim.length))%1
+	if player.avatar.anim then
+		local length=player.avatar.anim.max-player.avatar.anim.min
+		player.avatar.time=(player.avatar.time+(player.avatar.speed/length))%1
 	end
 	player.avatar.speed=0
 

@@ -899,9 +899,6 @@ end
 	function geoms_avatar.update_pose(avatar)
 		local objs=geoms_avatar.objs
 		avatar.anim=objs.anims[avatar.pose] or objs.anims[1]
-		if avatar.anim then
-			avatar.time=(avatar.time or 0)%1
-		end
 	end
 	
 	function geoms_avatar.update(avatar)
@@ -951,8 +948,9 @@ end
 
 		avatar.anim=objs.anims[avatar.pose] or objs.anims[1]
 		if avatar.anim then
-			if avatar.anim.length and avatar.anim.length>0 then
-				avatar.time=(avatar.time or 0)+(avatar.speed/avatar.anim.length)
+			local length=avatar.anim.max-avatar.anim.min
+			if length and length>0 then
+				avatar.time=(avatar.time or 0)+(avatar.speed/length)
 			end
 			avatar.time=(avatar.time or 0)%1
 		end
@@ -986,11 +984,11 @@ end
 			local objs=geoms_avatar.objs
 			if avatar.anim then
 				local anim=avatar.anim
-				anim.length=anim.max-anim.min
+				local length=anim.max-anim.min
 				avatar.time=(avatar.time or 0)%1
 				if anim.keys[2] then
 					local rate=anim.keys[2]-anim.keys[1]
-					avatar.frame=(avatar.time*anim.length/rate)
+					avatar.frame=(avatar.time*length/rate)
 				else
 					avatar.frame=0
 				end
