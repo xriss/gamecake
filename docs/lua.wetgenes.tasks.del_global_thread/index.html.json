@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 644,
+   "count": 646,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 633,
+   "count": 635,
    "name": "lua.wetgenes"
   },
   {
@@ -2430,7 +2430,7 @@
    "name": "lua.wetgenes.tardis.v4.to_v3"
   },
   {
-   "count": 32,
+   "count": 34,
    "name": "lua.wetgenes.tasks"
   },
   {
@@ -2524,6 +2524,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.http_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.linda_do_memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.linda_memos"
   },
   {
    "count": 1,
@@ -2774,7 +2782,7 @@
    "body": "<pre><code>tasks:del_global_thread({id=&quot;threadname&quot;})\n</code></pre>\n<p>Destroy a given thread.id or all the threads if thread is nil.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 287,
+   "line": 306,
    "name": "lua.wetgenes.tasks.del_global_thread",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }

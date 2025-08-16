@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 644,
+   "count": 646,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 633,
+   "count": 635,
    "name": "lua.wetgenes"
   },
   {
@@ -2430,7 +2430,7 @@
    "name": "lua.wetgenes.tardis.v4.to_v3"
   },
   {
-   "count": 32,
+   "count": 34,
    "name": "lua.wetgenes.tasks"
   },
   {
@@ -2524,6 +2524,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.http_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.linda_do_memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tasks.linda_memos"
   },
   {
    "count": 1,
@@ -2774,7 +2782,7 @@
    "body": "<pre><code>tasks:fetch_global(name)\n</code></pre>\n<p>Fetch value associated with the name using the global linda socket or \nfalse on failure. You can not associated nil or false with a global value.</p>\n<p>This will block waiting on a result but should be fast.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 216,
+   "line": 235,
    "name": "lua.wetgenes.tasks.fetch_name",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }
