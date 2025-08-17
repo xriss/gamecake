@@ -14,29 +14,35 @@ M.code=all.code
 -- initalize systems in the scene
 all.scene.start_all_tasks=function(scene)
 
+	-- create threads and init data and subscriptions
+
 	local oven=scene.oven
 
-	-- create threads and init then	
-
-	oven.tasks:add_global_thread({
-		count=1,
-		id="all_popins",
-		code=all.code.popins,
-	})
-
-	oven.tasks:add_global_thread({
-		count=1,
-		id="all_values",
-		code=all.code.values,
-	})
-
+	-- tweens
 	oven.tasks:add_global_thread({
 		count=1,
 		id="all_tweens",
 		code=all.code.tweens,
 	})
+	oven.tasks:do_memo({
+		task="all_tweens",
+		id=false,
+		cmd="scene",
+		scene=scene.wrap_name,
+	})
+	oven.tasks:do_memo({
+		task="all_tweens",
+		id=false,
+		cmd="subscribe",
+		subid="all_draws",
+	})
 
-
+	-- values
+	oven.tasks:add_global_thread({
+		count=1,
+		id="all_values",
+		code=all.code.values,
+	})
 	oven.tasks:do_memo({
 		task="all_values",
 		id=false,
@@ -44,12 +50,18 @@ all.scene.start_all_tasks=function(scene)
 		scene=scene.wrap_name,
 		call="full_setup",
 	})
-
 	oven.tasks:do_memo({
 		task="all_values",
 		id=false,
 		cmd="subscribe",
-		subid="all_test",
+		subid="all_tweens",
+	})
+
+	-- popins
+	oven.tasks:add_global_thread({
+		count=1,
+		id="all_popins",
+		code=all.code.popins,
 	})
 
 end
@@ -128,6 +140,8 @@ all.code.values=function(linda,task_id,task_idx)
 				print("create",memo.scene)
 				if memo.call then
 					scene[memo.call](scene)
+				else
+					scene:systems_cocall("setup")
 				end
 			end
 		elseif memo.cmd=="subscribe" then
@@ -157,7 +171,6 @@ all.code.values=function(linda,task_id,task_idx)
 		repeat
 			local _,memo= linda:receive( timeout , task_id ) -- wait for any memos coming into this thread
 			timeout=0 -- repeat receive are instant
-			main() -- probably getting called every 1ms ish
 			if memo then
 				local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
 				if not ok then ret={error=ret or true} end -- reformat errors
@@ -165,6 +178,7 @@ all.code.values=function(linda,task_id,task_idx)
 					linda:send( nil , memo.id , ret )
 				end
 			end
+			main() -- probably getting called every 1ms ish
 		until not memo
 	end
 
@@ -179,12 +193,78 @@ all.code.tweens=function(linda,task_id,task_idx)
 
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
+	
+	-- basic oven, nogl etc
+	local oven=require("wetgenes.gamecake.toaster").bake({linda=linda})
+	oven.upnet=oven.rebake("wetgenes.gamecake.upnet")
 
+	local scene
+	
+	-- this should mostly not do anything as it will be called a lot
 	local main=function()
+		if scene then
+			scene:do_update_tweens()
+		end
 	end
 
 	local request=function(memo)
 		local ret={}
+		
+		if memo.cmd=="values" then -- incoming values from first task
+			if scene then
+				-- undo draw predictions without full inputs
+				if scene.values:get("tick") > scene.values:get("tick_input") then
+					while scene.values[2] and scene.values:get("tick") > scene.values:get("tick_input") do
+		--print("undo")
+						scene:do_unpush()
+					end
+					scene:call("get_values") -- sync item and kinetics
+					scene:call("set_body")
+				end
+
+	--print("values")
+				scene:values_call( function(it) it.values:push() end )
+				scene:load_all_values(memo.values)
+				while scene.values[3] do -- and scene.values:get("tick",2) <= scene.ticks.agreed do
+					scene:do_pull()
+				end
+			end
+		elseif memo.cmd=="scene" then
+			if scene then
+				scene:full_clean()
+				scene=nil
+			end
+			if memo.scene then -- can delete scene by not naming one
+				scene=require(memo.scene).create()
+				scene.oven=oven
+				scene.subscribed={}
+				scene.infos.all.scene.initialize(scene)
+				print("create",memo.scene)
+				if memo.call then
+					scene[memo.call](scene)
+				else
+					scene:systems_cocall("setup")
+				end
+			end			
+
+		elseif memo.cmd=="subscribe" then
+
+			scene.subscribed[memo.subid]={}
+			
+			local tweens=scene:save_all_tweens(true) -- first full dump
+			scene.oven.tasks:do_memo({
+				task=memo.subid,
+				id=false,
+				cmd="tweens",
+				tweens=tweens,
+			})
+
+		elseif memo.cmd=="unsubscribe" then
+
+			scene.subscribed[memo.subid]=nil
+
+		end
+		
 		return ret
 	end
 
@@ -193,7 +273,6 @@ all.code.tweens=function(linda,task_id,task_idx)
 		repeat
 			local _,memo= linda:receive( timeout , task_id ) -- wait for any memos coming into this thread
 			timeout=0 -- repeat receive are instant
-			main() -- probably getting called every 1ms ish
 			if memo then
 				local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
 				if not ok then ret={error=ret or true} end -- reformat errors
@@ -201,6 +280,7 @@ all.code.tweens=function(linda,task_id,task_idx)
 					linda:send( nil , memo.id , ret )
 				end
 			end
+			main() -- probably getting called every 1ms ish
 		until not memo
 	end
 

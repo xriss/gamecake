@@ -194,6 +194,7 @@ waters.item.draw=function(water)
 	local sys=water.sys
 	local gl=sys.oven.gl
 
+	 -- this should be a water per render/camera but we are currently just sharing a hack
 	local camera=water:get_singular("camera")
 	local render=camera:depend("render")
 	local sky=camera:depend("sky")

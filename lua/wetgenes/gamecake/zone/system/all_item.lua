@@ -94,6 +94,8 @@ end
 all.item.setup_values=function(it,boot)
 	boot=boot or it.boot
 
+	it.values_are_new=true -- flag to help with value copying in subscriptions
+
 	it.zips={} -- dupe zip cache
 	for n,v in pairs( it.sys.zips or {} ) do it.zips[n]=v end
 	it.values=it.scene.create_values()

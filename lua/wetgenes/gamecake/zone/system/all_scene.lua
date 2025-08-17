@@ -31,7 +31,6 @@ local automap=function(it,r) r=r or it for i=1,#it do r[ it[i] ]=i end return r 
 
 local bit = require("bit")
 
-
 local tardis=require("wetgenes.tardis")
 local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4")
 
@@ -179,7 +178,7 @@ local hash=0
 	-- this also needs to be synced with upnet using subsciptions?
 --	print( "CC", #scene.values, scene.values[2] and scene.values:get("tick",2) , scene.ticks.agreed )
 	-- merge slot 1+2 when that data has been sync confirmed
-		while scene.values[2] do -- and scene.values:get("tick",2) <= scene.ticks.agreed do
+		while scene.values[3] do -- and scene.values:get("tick",2) <= scene.ticks.agreed do
 			scene:do_pull()
 		end
 
@@ -197,6 +196,8 @@ all.scene.do_update_tweens=function(scene)
 
 	local draw_count=0
 
+	scene:ticks_sync()
+
 	local need_tween_push=( scene.tweens:get("tick") or 0 ) < ( scene.values:get("tick") or 0 )
 	while  scene.ticks.now >= scene.values:get("tick") do -- predict until we are in the future
 		need_tween_push=true
@@ -212,30 +213,36 @@ all.scene.do_update_tweens=function(scene)
 		scene:ticks_sync()
 	end
 	
-	-- tween state helpers
-	local do_tween=function(f)
-		f(scene)
-		scene:systems_call(f)
-		scene:call(f)
-	end
-
 	-- copy some extra values into the tweens
 	if need_tween_push or #scene.tweens<2 then
-		do_tween( function(it)
+	
+		scene:values_call( function(it)
 			it.tweens:push() -- fresh slot
 			for n,v in pairs(it.values[1]) do -- slot 1 will have all names
 				it.tweens:set( n , it.values:get(n) ) -- fill up fresh slot
 			end
 		end )
-		-- send new tweens to subscrbers here?
+
+		-- this should only be set in the values sub task
+		if scene.subscribed then -- send out new values
+			local tweens=scene:save_all_tweens()
+			for subid in pairs(scene.subscribed) do
+				scene.oven.tasks:do_memo({
+					task=subid,
+					id=false,
+					cmd="tweens",
+					tweens=tweens,
+				})
+			end
+		end
 	end
 	
 	-- shrink tweens down to two slots so we may tween between them
 	while #scene.tweens > 2 and scene.tweens:get("tick",2) <= scene.ticks.now do
-		do_tween( function(it) it.tweens:pull() end )
+		scene:values_call( function(it) it.tweens:pull() end )
 	end
 	while #scene.tweens > 2 do
-		do_tween( function(it) it.tweens:merge() end )
+		scene:values_call( function(it) it.tweens:merge() end )
 	end
 	
 	return draw_count
@@ -268,6 +275,7 @@ counts.draw=0
 --	end
 
 
+--[[
 	for memo in oven.tasks:memos("all_test") do
 		if memo.cmd=="values" then
 
@@ -285,10 +293,30 @@ counts.draw=0
 			scene:load_all_values(memo.values)
 		end
 	end
+]]
 
 --	counts.undo , counts.update = scene:do_update_values()
 
-	counts.draw = scene:do_update_tweens()
+	for memo in oven.tasks:memos("all_draws") do
+		if memo.cmd=="tweens" then
+			scene:values_call( function(it) it.tweens:push() end )
+			scene:load_all_tweens(memo.tweens)
+		end
+	end
+	scene:ticks_sync()
+	-- shrink tweens down to two slots so we may tween between them
+	while #scene.tweens > 2 and scene.tweens:get("tick",2) <= scene.ticks.now do
+		scene:values_call( function(it) it.tweens:pull() end ) -- merge 2 into 1
+	end
+	while #scene.tweens > 2 do
+		scene:values_call( function(it) it.tweens:merge() end ) -- merge 3 into 2
+	end
+
+--if #scene.tweens==2 then
+--print( scene.tweens:get("tick",1) , scene.tweens:get("tick",2) , scene.ticks.time )
+--end
+
+--	counts.draw = scene:do_update_tweens()
 
 
 --upnet.print( upnet.ticks.input , upnet.ticks.update , upnet.ticks.now , upnet.ticks.draw )
@@ -320,8 +348,6 @@ all.scene.do_draw=function(scene)
 	end
 	if scene.tween<0 then scene.tween=0 end -- sanity
 	if scene.tween>1 then scene.tween=1 end
---	print(scene.tween)
-
 
 	scene:call("render_camera")
 
@@ -480,7 +506,7 @@ end
 
 
 
-all.scene.save_all_values=function(scene,force_full)
+all.scene.save_all_values=function(scene,force_full_subscription)
 	local ret={}
 	ret.systems={}
 	ret.items={}
@@ -492,9 +518,10 @@ all.scene.save_all_values=function(scene,force_full)
 	
 	local save=function(it,caste,uid)
 		local r
-		if force_full then
+		if force_full_subscription or it.values_are_new then
+			it.values_are_new=nil
 			r=it.values:save_all()
-			r.caste=caste -- caste is not in values
+			r.caste=caste -- caste is not in tweens but is required for booting a new item
 			-- we can junk some of these values as they will be filled with defaults
 			-- so we can mess with values
 			r.notween=nil -- do not need
@@ -553,18 +580,20 @@ all.scene.load_all_values=function(scene,dat)
 
 end
 
-all.scene.save_all_tweens=function(scene,force_full)
+all.scene.save_all_tweens=function(scene,force_full_subscription)
 	local ret={}
 	ret.systems={}
 	ret.items={}
-	
 	local save=function(it,caste,uid)
 		local r
-		if force_full then
+		if force_full_subscription or it.values_are_new then
+			it.values_are_new=nil
 			r=it.tweens:save_all()
-			-- these values will be used as is, so should not be messed with only copied
+			r.caste=caste -- caste is not in tweens but is required for booting a new item
+			r.notween=nil -- might be bad?
+			r.deleted=r.deleted or nil -- turn false into a nil
 		else
-			r=it.tweens[#it.values]
+			r=it.tweens[#it.tweens]
 		end
 		if uid then ret.items[uid]=r
 		else        ret.systems[caste]=r
@@ -578,5 +607,38 @@ all.scene.save_all_tweens=function(scene,force_full)
 	return ret
 end
 
-all.scene.load_all_tweens=function(scene)
+all.scene.load_all_tweens=function(scene,dat)
+
+	-- set system and scene values
+	for caste,vals in pairs(dat.systems) do
+		local sys=scene.systems[caste]
+		if caste=="scene" then sys=scene end -- catch special scene
+		if sys then
+			for n,v in pairs(vals) do
+				sys.tweens:set(n,v)
+			end
+		end
+	end
+
+	-- delete items
+	scene:call(function(it)
+		if not dat.items[it.uid] then -- all live objects will be in this map
+			it:destroy()
+		end
+	end)
+	
+	-- create items
+	for uid,boot in pairs(dat.items) do
+		local it=scene:find_uid(uid)
+		if it then -- load into existing object
+			for n,v in pairs(boot) do
+				it.tweens:set(n,v)
+			end
+		else -- create new
+			boot.uid=uid
+			if type(boot.zip)=="string" then boot.zip=all.uncompress(boot.zip) end
+			scene:create(boot) -- we should auto cope with zip strings in the boot...
+		end
+	end	
+
 end

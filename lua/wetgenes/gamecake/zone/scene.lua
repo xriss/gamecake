@@ -520,6 +520,25 @@ currently active items.
 
 
 
+--[[#lua.wetgenes.gamecake.zone.scene.values_call
+
+	scene:values_call(func,...)
+
+Call this function for every values state tracking entity, so it will 
+be called for this scene, for each system and for each item. A values 
+state tracking entity contains a values and a tweens member full of 
+data.
+
+So as well as explicitly calling on this scene itself we also call the 
+scenes systems_call and call functions.
+
+]]
+	scene.values_call=function(scene,func,...)
+		func(scene,...)
+		scene:systems_call(func,...)
+		scene:call(func,...)
+	end
+
 --[[#lua.wetgenes.gamecake.zone.scene.status
 
 	print( scene:status() )
