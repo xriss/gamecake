@@ -342,7 +342,8 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values.set"><span>/lua.wetgenes.gamecake.zone.scene.values.set</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values.tween"><span>/lua.wetgenes.gamecake.zone.scene.values.tween</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values.twrap"><span>/lua.wetgenes.gamecake.zone.scene.values.twrap</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values.unpush"><span>/lua.wetgenes.gamecake.zone.scene.values.unpush</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.zone.system"><span>/lua.wetgenes.gamecake.zone.system</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values.unpush"><span>/lua.wetgenes.gamecake.zone.scene.values.unpush</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values_call"><span>/lua.wetgenes.gamecake.zone.scene.values_call</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.zone.system"><span>/lua.wetgenes.gamecake.zone.system</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.system.items"><span>/lua.wetgenes.gamecake.zone.system.items</span></a><a class="par" href="../../docs/lua.wetgenes.grd"><span>/lua.wetgenes.grd</span></a>
 
@@ -3965,7 +3966,7 @@ The first caste name in the array gets a weight of 1, second 2 and so on.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.status">lua.wetgenes.gamecake.zone.scene.status</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L523">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L542">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>print( scene:status() )
 </code></pre>
 <p>Return a debug string giving details about the system order and current number
@@ -4046,7 +4047,7 @@ be set to the caste of the system for this to work.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values">lua.wetgenes.gamecake.zone.scene.values</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L877">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L896">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>zone_scene = require(&quot;wetgenes.gamecake.zone.scene&quot;)
 
 values = zone_scene.create_values()
@@ -4062,7 +4063,7 @@ predicted slots.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.get">lua.wetgenes.gamecake.zone.scene.values.get</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L677">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L696">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:get(key)
 value=values:get(key,topidx)
 </code></pre>
@@ -4076,7 +4077,7 @@ time travel back a frame into the cached values with -1 as the idx.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.manifest">lua.wetgenes.gamecake.zone.scene.values.manifest</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L704">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L723">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:manifest(key,value)
 </code></pre>
 <p>Get the current value for this key if there is no current value then
@@ -4087,7 +4088,7 @@ set the current value.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.merge">lua.wetgenes.gamecake.zone.scene.values.merge</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L618">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L637">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:merge()
 </code></pre>
 <p>Merge top 2 slots into 1</p>
@@ -4096,7 +4097,7 @@ set the current value.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.new">lua.wetgenes.gamecake.zone.scene.values.new</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L587">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L606">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values2 = values:new()
 </code></pre>
 <p>Create and return a new values object with a single slot containing an
@@ -4106,7 +4107,7 @@ empty object.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.pull">lua.wetgenes.gamecake.zone.scene.values.pull</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L601">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L620">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:pull()
 </code></pre>
 <p>Merge bottom 2 slots into 1, so shifting all values down one.</p>
@@ -4115,7 +4116,7 @@ empty object.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.push">lua.wetgenes.gamecake.zone.scene.values.push</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L635">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L654">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:push()
 </code></pre>
 <p>Add a new slot to the end of the values array. Future values will be
@@ -4125,7 +4126,7 @@ writen into this new slot.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.set">lua.wetgenes.gamecake.zone.scene.values.set</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L658">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L677">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:set(key,value)
 </code></pre>
 <p>If this is different from the current value then write the value into
@@ -4136,7 +4137,7 @@ get this new value.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.tween">lua.wetgenes.gamecake.zone.scene.values.tween</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L721">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L740">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:tween(key,tween)
 </code></pre>
 <p>Tween between the current value(1) and the previous value(0).</p>
@@ -4150,7 +4151,7 @@ either 0 or 1 whichever is closest and then get that whole value.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.twrap">lua.wetgenes.gamecake.zone.scene.values.twrap</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L771">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L790">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>value=values:twrap(key,nmax,tween)
 </code></pre>
 <p>Tween wrap between the current value and the previous value.</p>
@@ -4169,10 +4170,24 @@ either 0 or 1 whichever is closest and then get that whole value.
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values.unpush">lua.wetgenes.gamecake.zone.scene.values.unpush</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L647">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L666">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
 <div><pre><code>values:unpush()
 </code></pre>
 <p>Remove top pushed slot.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.zone.scene.values_call">lua.wetgenes.gamecake.zone.scene.values_call</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua#L523">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua</a></div>
+<div><pre><code>scene:values_call(func,...)
+</code></pre>
+<p>Call this function for every values state tracking entity, so it will 
+be called for this scene, for each system and for each item. A values 
+state tracking entity contains a values and a tweens member full of 
+data.</p>
+<p>So as well as explicitly calling on this scene itself we also call the 
+scenes systems_call and call functions.</p>
 </div>
 </div>
 
