@@ -111,9 +111,10 @@ all.item.setup_values=function(it,boot)
 	for n,v in pairs(it.values[1]) do -- copy base values into tweens
 		it.tweens:set(n,v)
 	end
-	it.tweens:push() -- tweens should always be two slots
-
-	for i=1,#it.scene.values do -- make sure we have same depth as everyone else
+	for i=1,#it.scene.tweens do -- make sure we have same tweens depth as everyone else
+		if not it.tweens[i] then it.tweens[i]={} end
+	end
+	for i=1,#it.scene.values do -- make sure we have same values depth as everyone else
 		if not it.values[i] then it.values[i]={} end
 	end
 
