@@ -124,6 +124,12 @@ running a cake or fun script then the following args can control it.
 	Set the window size and position, without these values we will
 	place and position the window automatically.
 
+  --win-vsync=1
+	Set vsync to 0 for immediate updates, 1 for updates synchronized 
+	with the vertical retrace, -1 for adaptive vsync. We default to 
+	1 so will not be able to run at an fps faster than your screens 
+	refresh rate.
+
   --win-borderless
     Ask for a borderless window.
 
@@ -452,6 +458,7 @@ os.exit()
 			set_inf_arg("title","win-title",tostring)
 			set_inf_arg("width","win-hx",tonumber)
 			set_inf_arg("height","win-hy",tonumber)
+			set_inf_arg("vsync","win-vsync",tonumber)
 
 			-- auto center dependng on size
 			inf.x=math.floor((screen.width-inf.width)*(opts.win_px or 0.5))

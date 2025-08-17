@@ -141,6 +141,7 @@ sdl.create=function(t)
 ]]
 
 	it.screen_mode=t.screen_mode -- try something like "640x480x60.RGB888"
+	it.vsync=t.vsync or 1 -- should be 1 or 0 or -1 and -1 may fail
 
 	if it.screen_mode and ( type(it.screen_mode)~="table" ) then -- convert to mode table?
 
@@ -330,8 +331,7 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 	assert(it.ctx)
 
 	SDL.glMakeCurrent(it.win, it.ctx)
-	SDL.glSetSwapInterval(1) -- enable vsync by default
-
+	SDL.glSetSwapInterval(it.vsync) -- probably enable vsync by default
 
 	local gles=require("gles")
 	log( "oven","vendor",(gles.Get(gles.VENDOR) or ""))
