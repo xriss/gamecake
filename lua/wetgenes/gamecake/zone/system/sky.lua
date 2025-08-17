@@ -36,6 +36,9 @@ skys.values={
 }
 
 skys.types={
+	time_frac="get",
+	time_speed="get",
+	time_snap="get",
 	time="tween",
 	sun="tween",
 	moon="tween",
@@ -92,9 +95,10 @@ skys.item.update=function(sky)
 	if d<-180 then d=d+360 end
 	sky.time=( sky.time+(d/32) ) % 360
 
-	sky:update_shadow()
-
 	sky:set_values()
+
+--	sky:update_shadow()
+
 end
 
 skys.item.update_shadow=function(sky)
@@ -104,6 +108,9 @@ skys.item.update_shadow=function(sky)
 
 	local camera=sky:depend("camera")
 
+	camera:get_values()
+	sky:get_values()
+
 	local s=shadow.maparea -- 40*shadow.mapsize/1024
 	local sd=1024*8
 	local x=0
@@ -111,7 +118,7 @@ skys.item.update_shadow=function(sky)
 	local z=0
 
 	if camera then
-		local pos=camera:get("pos")
+		local pos=camera:tget("pos")
 		local snap=function(n) return math.floor(n/16)*16 end
 		x=(snap(pos[1]))--*-1/s	-- swap z/y as rotation
 		y=(snap(pos[2]))--*-1/s
@@ -180,7 +187,7 @@ skys.item.update_shadow=function(sky)
 	if r > 180-ddd then
 		shadow.power=(180-r)/ddd
 	end
-
+	
 	shadow.updated=true
 end
 
@@ -188,6 +195,8 @@ skys.item.draw_sky=function(sky)
 	local sys=sky.sys
 	if not sys.gl then return end -- no gl no draw
 	local gl=sys.gl
+
+	sky:get_values()
 
 	gl.state.push()
 

@@ -102,9 +102,9 @@ cameras.item.set_active=function(camera)
 
 	camera.sys.singular=camera
 
-	camera:get_values()
-
 	if camera then -- can be called with nil to unset
+
+		camera:get_values()
 
 		gl.uniforms.camera=function(u)
 			gl.UniformMatrix4f( u , camera.mtx ) -- so we can undo the camera from the view

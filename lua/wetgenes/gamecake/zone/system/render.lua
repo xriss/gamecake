@@ -93,6 +93,8 @@ renders.item.render_camera=function(render)
 	local sky=camera:depend("sky")
 	camera.sys.singular=camera -- remember this camera
 
+	render:get_values()
+
 	render.fbo_bloom=sys.screen:swap_bloom(render.fbo_bloom)
 
 	sky:update_shadow()
@@ -155,6 +157,8 @@ renders.item.render_screen=function(render)
 	local sys=render.sys
 	if not sys.gl then return end -- no gl no draw
 	local gl=sys.gl
+
+	render:get_values()
 
 	gl.PushMatrix()
 	gl.state.push(gl.state_defaults)
