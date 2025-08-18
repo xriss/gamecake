@@ -18,6 +18,13 @@ all.scene.start_all_tasks=function(scene)
 
 	local oven=scene.oven
 
+	-- db load/save interface ( boot data )
+	oven.tasks:add_global_thread({
+		count=1,
+		id="all_db",
+		code=all.code.db,
+	})
+
 	-- tweens
 	oven.tasks:add_global_thread({
 		count=1,
@@ -67,9 +74,46 @@ all.scene.start_all_tasks=function(scene)
 end
 
 
+-- task that deals with database access
+all.code.db=function(linda,task_id,task_idx)
+	local M,all -- hide for thread safety
+	local oldprint=print
+	print=function(...) return oldprint(task_id,...) end
+	local global=require("global") -- lock accidental globals
+
+	local all=require("wetgenes.gamecake.zone.system.all")
+
+	local lanes=require("lanes")
+	if lane_threadname then lane_threadname(task_id) end
+	
+	local db=all.db.open({linda=linda})
+
+	local request=function(memo)
+		local ret={}
+		return ret
+	end
+
+	while true do
+		local timeout=0.001 -- first receive will be 1ms or less
+		repeat
+			local _,memo= linda:receive( timeout , task_id ) -- wait for any memos coming into this thread
+			if memo then
+				local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+				if not ok then ret={error=ret or true} end -- reformat errors
+				if memo.id then -- result requested
+					linda:send( nil , memo.id , ret )
+				end
+			end
+		until not memo
+	end
+
+end
+
 -- task that deals with popin/out and other world generation
 all.code.popins=function(linda,task_id,task_idx)
 	local M,all -- hide for thread safety
+	local oldprint=print
+	print=function(...) return oldprint(task_id,...) end
 	local global=require("global") -- lock accidental globals
 
 	local lanes=require("lanes")
@@ -104,8 +148,8 @@ end
 -- manage scene update and full syncs of values to other tasks
 all.code.values=function(linda,task_id,task_idx)
 	local M,all -- hide for thread safety
-	local p=print
-	print=function(...) return p(task_id,...) end
+	local oldprint=print
+	print=function(...) return oldprint(task_id,...) end
 	local global=require("global") -- lock accidental globals
 
 	local lanes=require("lanes")
@@ -187,8 +231,8 @@ end
 -- manage scene predictions and draw state generation ( draw needs to happen on main thread )
 all.code.tweens=function(linda,task_id,task_idx)
 	local M,all -- hide for thread safety
-	local p=print
-	print=function(...) return p(task_id,...) end
+	local oldprint=print
+	print=function(...) return oldprint(task_id,...) end
 	local global=require("global") -- lock accidental globals
 
 	local lanes=require("lanes")

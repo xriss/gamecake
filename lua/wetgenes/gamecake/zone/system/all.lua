@@ -7,6 +7,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 local all=M
 
+-- database code
+all.db=all.db or {}
 -- sub tasks for running in other threads
 all.code=all.code or {}
 -- methods added to manifest, we do not require a scene or systems to manifest boot data
@@ -37,6 +39,7 @@ local json_diff=require("wetgenes.json_diff")
 local hashish=require("wetgenes.json_diff").hashish
 
 -- convert data into or from a binary string
+local mime=require("mime")
 local cmsgpack=require("cmsgpack")
 local zlib=require("zlib")
 local zipinflate=function(d) return d and ((zlib.inflate())(d))          end
@@ -46,6 +49,34 @@ local zipdeflate=function(d) return d and ((zlib.deflate())(d,"finish")) end
 all.compress=    function(d) return d and zipdeflate(cmsgpack.pack(d))   end
 all.uncompress=  function(d) return d and cmsgpack.unpack(zipinflate(d)) end
 
+-- these functions will catch nil inputs and return nils
+all.encode=function(t)
+	if not t then return nil end -- nil input outputs a nil rather than a string
+	return all.compress(t)
+end
+all.decode=function(s)
+	if not s then return nil end -- nil input outputs a nil rather than a table
+	return all.uncompress(s)
+end
+
+-- sometimes we need to build text safe strings from binary data
+all.b64_encode=function(it)
+	local p=(#it)%3
+	local pad
+	if p~=0 then pad=string.rep("\0",3-p) end -- pad up
+	return (mime.b64(it,pad))
+end
+all.b64_decode=function(it)
+	local p=(#it)%4
+	local pad
+	if p~=0 then pad=string.rep("\0",4-p) end -- pad up
+	return (mime.unb64(it,pad))
+end
+
+-- grab basic memo functions from tasks
+-- these require a linda as first arg and may block
+all.do_memo=require("wetgenes.tasks").do_memo
+all.memos=require("wetgenes.tasks").memos
 
 all.caste="all"
 
@@ -193,3 +224,4 @@ require("wetgenes.gamecake.zone.system.all_scene")
 require("wetgenes.gamecake.zone.system.all_system")
 require("wetgenes.gamecake.zone.system.all_item")
 require("wetgenes.gamecake.zone.system.all_code")
+require("wetgenes.gamecake.zone.system.all_db")

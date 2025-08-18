@@ -43,10 +43,10 @@ getsql.sqlite.columns_types=function(columns,types)
 	types=types or {}
 	for n,v in pairs(columns) do
 		local t="TEXT"
-		if v.INTEGER then t="INTEGER" end
+		if v.INTEGER then t="INTEGER" end -- lowest priority
 		if v.REAL    then t="REAL"    end
 		if v.BLOB    then t="BLOB"    end
-		if v.JSON    then t="JSON"    end
+		if v.JSON    then t="JSON"    end -- highest priority
 		types[v.name]=t
 	end
 	return types
