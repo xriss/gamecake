@@ -461,7 +461,7 @@ all.scene.get_hashs=function(scene,tick)
 
 	local r={0}
 	for _,sys in ipairs(scene.systems) do -- hash each sytem
-		local hash=sys.values[topidx] and sys.values[topidx].chksum or 0
+		local hash=0
 		local items=scene.data[ sys.caste ]
 		for _,it in ipairs( items or {} ) do -- hash each item
 			local chksum=it.values[topidx] and it.values[topidx].chksum
@@ -478,22 +478,19 @@ end
 
 all.scene.do_pull=function(scene)
 	scene.values:pull()
-	scene:systems_call("pull")
 	scene:call("pull")
 end
 
 all.scene.do_push=function(scene)
 	scene.values:push()
 	scene.values:set( "tick" , scene.values:get("tick")+1 ) -- advance tick
-	scene:systems_call("push")
 	scene:call("push")
 end
 
 all.scene.do_unpush=function(scene)
 	scene.values:unpush()
-	scene:systems_call("unpush")
 	-- need to unpush and also delete items...
-	local uid=scene.values:get("uid")
+	local uid=scene.values:get("uidtop")
 	scene:call(function(it)
 		if it.uid and it.uid>uid then -- item is from the future so delete
 			it:destroy()
@@ -508,7 +505,6 @@ end
 
 all.scene.save_all_values=function(scene,force_full_subscription)
 	local ret={}
-	ret.systems={}
 	ret.items={}
 
 	local zone=scene:get_singular("zone") -- current zone ( all current items should belong to this zone )
@@ -532,13 +528,10 @@ all.scene.save_all_values=function(scene,force_full_subscription)
 		else
 			r=it.values[#it.values]
 		end
-		if uid then ret.items[uid]=r
-		else        ret.systems[caste]=r
-		end
+		ret.items[uid]=r
 	end
 
-	save(scene,"scene")
-	scene:systems_call(function(it) save(it,it.caste) end)
+	save(scene,"scene",1)
 	scene:call(function(it) save(it,it.caste,it.uid) end)
 	
 	return ret
@@ -546,15 +539,9 @@ end
 
 all.scene.load_all_values=function(scene,dat)
 
-	-- set system and scene values
-	for caste,vals in pairs(dat.systems) do
-		local sys=scene.systems[caste]
-		if caste=="scene" then sys=scene end -- catch special scene
-		if sys then
-			for n,v in pairs(vals) do
-				sys.values:set(n,v)
-			end
-		end
+	-- set scene values
+	for n,v in pairs(dat.items[1]) do
+		scene.values:set(n,v)
 	end
 
 	-- delete items
@@ -563,26 +550,33 @@ all.scene.load_all_values=function(scene,dat)
 			it:destroy()
 		end
 	end)
-	
-	-- create items
+
+	-- update or create items
+	local boots={}
 	for uid,boot in pairs(dat.items) do
-		local it=scene:find_uid(uid)
-		if it then -- load into existing object
-			for n,v in pairs(boot) do
-				it.values:set(n,v)
+		if uid>1000 then -- special ids bellow 1000
+			local it=scene:find_uid(uid)
+			if it then -- load into existing object
+				for n,v in pairs(boot) do
+					it.values:set(n,v)
+				end
+			else -- need to create new
+				boots[#boots+1]=boot
+				boot.uid=uid
+				if type(boot.zip)=="string" then boot.zip=all.uncompress(boot.zip) end
 			end
-		else -- create new
-			boot.uid=uid
-			if type(boot.zip)=="string" then boot.zip=all.uncompress(boot.zip) end
-			scene:create(boot) -- we should auto cope with zip strings in the boot...
 		end
 	end	
+	-- must create in uid order
+	table.sort(boots,function(a,b) return a.uid<b.uid end)
+	for i,boot in ipairs(boots) do
+		scene:create(boot)
+	end
 
 end
 
 all.scene.save_all_tweens=function(scene,force_full_subscription)
 	local ret={}
-	ret.systems={}
 	ret.items={}
 	local save=function(it,caste,uid)
 		local r
@@ -595,13 +589,10 @@ all.scene.save_all_tweens=function(scene,force_full_subscription)
 		else
 			r=it.tweens[#it.tweens]
 		end
-		if uid then ret.items[uid]=r
-		else        ret.systems[caste]=r
-		end
+		ret.items[uid]=r
 	end
 
-	save(scene,"scene")
-	scene:systems_call(function(it) save(it,it.caste) end)
+	save(scene,"scene",1)
 	scene:call(function(it) save(it,it.caste,it.uid) end)
 	
 	return ret
@@ -609,15 +600,9 @@ end
 
 all.scene.load_all_tweens=function(scene,dat)
 
-	-- set system and scene values
-	for caste,vals in pairs(dat.systems) do
-		local sys=scene.systems[caste]
-		if caste=="scene" then sys=scene end -- catch special scene
-		if sys then
-			for n,v in pairs(vals) do
-				sys.tweens:set(n,v)
-			end
-		end
+	-- set scene values
+	for n,v in pairs(dat.items[1]) do
+		scene.tweens:set(n,v)
 	end
 
 	-- delete items
@@ -627,18 +612,26 @@ all.scene.load_all_tweens=function(scene,dat)
 		end
 	end)
 	
-	-- create items
+	-- update or create items
+	local boots={}
 	for uid,boot in pairs(dat.items) do
-		local it=scene:find_uid(uid)
-		if it then -- load into existing object
-			for n,v in pairs(boot) do
-				it.tweens:set(n,v)
+		if uid>1000 then
+			local it=scene:find_uid(uid)
+			if it then -- load into existing object
+				for n,v in pairs(boot) do
+					it.tweens:set(n,v)
+				end
+			else -- need to create new
+				boots[#boots+1]=boot
+				boot.uid=uid
+				if type(boot.zip)=="string" then boot.zip=all.uncompress(boot.zip) end
 			end
-		else -- create new
-			boot.uid=uid
-			if type(boot.zip)=="string" then boot.zip=all.uncompress(boot.zip) end
-			scene:create(boot) -- we should auto cope with zip strings in the boot...
 		end
 	end	
+	-- must create in uid order
+	table.sort(boots,function(a,b) return a.uid<b.uid end)
+	for i,boot in ipairs(boots) do
+		scene:create(boot)
+	end
 
 end

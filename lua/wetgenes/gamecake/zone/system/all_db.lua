@@ -23,22 +23,10 @@ M.db=all.db
 all.db.meta={__index=all.db}
 
 all.db.table_columns={
-	{ name="uid",    NOT_NULL=true ,  INTEGER=true ,  PRIMARY=true },
-	{ name="stage",  NOT_NULL=true ,  INTEGER=true ,  INDEX=true   },
-	{ name="caste",  NOT_NULL=true ,  TEXT=true    ,  INDEX=true   },
-	{ name="idz",    INTEGER=true  ,  INDEX=true   },
-	{ name="pidx",   INTEGER=true  ,  INDEX=true   }, -- index into uids of parent link ( and a flag that we are a childof )
-	{ name="id",     TEXT=true     ,  INDEX=true   },
-	{ name="uids",   TEXT=true     ,  JSON=true    },
+	{ name="uid",    NOT_NULL=true ,  INTEGER=true ,  PRIMARY=true }, -- fully unique
+	{ name="time",   REAL=true     ,  INDEX=true   }, -- last updated game time of this object in seconds
+	{ name="boot",   TEXT=true     ,  JSON=true    }, -- full boot data not including the zip blob
 	{ name="zip",    BLOB=true     },
-	{ name="time",   REAL=true     ,  INDEX=true   }, -- last updated time of this object in seconds
-	{ name="siz",    TEXT=true     ,  JSON=true    }, -- json will mostly be arrays of 3 or 4 numbers
-	{ name="pos",    TEXT=true     ,  JSON=true    },
-	{ name="rot",    TEXT=true     ,  JSON=true    },
-	{ name="vel",    TEXT=true     ,  JSON=true    },
-	{ name="rez",    TEXT=true     ,  JSON=true    },
-	{ name="ang",    TEXT=true     ,  JSON=true    },
-	{ name="dot",    TEXT=true     ,  JSON=true    },
 }
 all.db.table_columns_type=get_sql_to.columns_types(all.db.table_columns)
 

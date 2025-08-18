@@ -194,17 +194,15 @@ end
 all.item.pull=function(it)
 	return it.values:pull()
 end
-all.system.pull=all.item.pull
+--all.system.pull=all.item.pull
 
 all.item.push=function(it)
 	it.values:push()
 end
-all.system.push=all.item.push
 
 all.item.unpush=function(it)
 	return it.values:unpush()
 end
-all.system.unpush=all.item.unpush
 
 all.item.set=function(it,name,value)
 
@@ -214,12 +212,10 @@ all.item.set=function(it,name,value)
 
 	return it.values:set(name,value)
 end
-all.system.set=all.item.set
 
 all.item.get=function(it,name,topidx)
 	return it.values:get(name,topidx)
 end
-all.system.get=all.item.get
 
 
 -- all of the tween get/set code here will check scene.tween
@@ -236,7 +232,6 @@ all.item.tset=function(it,name,value)
 		return it.values:set(name,value)
 	end
 end
-all.system.tset=all.item.tset
 
 -- tween version of value get
 -- but only when scene.tween is set otherwise this is just a get
@@ -247,7 +242,6 @@ all.item.tget=function(it,name,topidx)
 		return it.values:get(name,topidx)
 	end
 end
-all.system.tget=all.item.tget
 
 -- tween values now(1) with previous(0) frame
 -- but only when scene.tween is set otherwise this is just a get
@@ -258,7 +252,6 @@ all.item.tween=function(it,name,tween)
 		return it.values:get(name)
 	end
 end
-all.system.tween=all.item.tween
 
 -- tween wrap values now(1) with previous(0) frame numbers will wrap  0>= n <nmax
 -- but only when scene.tween is set otherwise this is just a get
@@ -269,17 +262,14 @@ all.item.twrap=function(it,name,nmax,tween)
 		return it.values:get(name)
 	end
 end
-all.system.twrap=all.item.twrap
 
 all.item.save_all=function(it,topidx)
 	return it.values:save_all(topidx)
 end
-all.system.save_all=all.item.save_all
 
 all.item.save_diff=function(it,topidx)
 	return it.values:save_diff(topidx)
 end
-all.system.save_diff=all.item.save_diff
 
 -- we want to keep these values saneish so as to avoid too much drift between clients physics
 local floor=math.floor

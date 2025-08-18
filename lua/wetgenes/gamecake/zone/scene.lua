@@ -29,6 +29,8 @@ M.create=function(scene)
 
 	scene=scene or {} -- a place to store everything that needs to be updated
 
+	scene.caste="scene" -- so we can check if this table is a scene
+	scene.uid=1 -- the scene will be saved in the database as uid 1
 
 --[[#lua.wetgenes.gamecake.zone.scene.require_search
 
@@ -135,10 +137,10 @@ Good for serialising data as well.
 
 ]]
 	scene.generate_uid=function(scene,uid)
-		if uid then scene.values:set("uid",uid) end
-		uid=scene.values:get("uid")
+		if uid then scene.values:set("uidtop",uid) end
+		uid=scene.values:get("uidtop")
 		uid=uid+1
-		scene.values:set("uid",uid)
+		scene.values:set("uidtop",uid)
 		return uid
 	end
 
@@ -364,7 +366,7 @@ table that should be modified with the insert and remove functions.
 	scene.reset=function(scene)
 		scene.data={} -- main lists of scene
 		scene.values=M.create_values() -- values
-		scene.values:set("uid",0) -- starting uid
+		scene.values:set("uidtop",1000) -- starting uid ( uid 0 will be the scene )
 		scene.tweens=M.create_values() -- tweens ( drawing cache of values )
 		return scene
 	end
@@ -525,17 +527,11 @@ currently active items.
 	scene:values_call(func,...)
 
 Call this function for every values state tracking entity, so it will 
-be called for this scene, for each system and for each item. A values 
-state tracking entity contains a values and a tweens member full of 
-data.
-
-So as well as explicitly calling on this scene itself we also call the 
-scenes systems_call and call functions.
+be called for this scene and for each item.
 
 ]]
 	scene.values_call=function(scene,func,...)
 		func(scene,...)
-		scene:systems_call(func,...)
 		scene:call(func,...)
 	end
 

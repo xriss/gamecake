@@ -51,10 +51,10 @@ all.system.get_singular=function(sys,name)
 end
 
 all.system.get_rnd_raw=function(sys)
-	local r=sys:get("rnd")
+	local r=sys.scene.values:get(sys.caste.."_rnd")
 	if not r then r=0 for i=1,#sys.caste do r=r+sys.caste:byte(i) end r=r%65536 end
 	r=(((r+1)*75)%65537)-1
-	sys:set("rnd",r) -- note rnd is in the range 0 to 65535 inclusive
+	sys.scene.values:set(sys.caste.."_rnd",r) -- note rnd is in the range 0 to 65535 inclusive
 	return r
 end
 -- get a basic pseudo random number between 0 and 1 inclusive ( zxspectrum sequence )
@@ -170,9 +170,7 @@ all.system.initialize=function(sys)
 	for n in pairs(sys.info.values) do sys.info.values_order[#sys.info.values_order+1]=n end
 	table.sort(sys.info.values_order)
 
-	-- global system values
-	sys.values=sys.scene.create_values()
-	sys.tweens=sys.scene.create_values() -- ( drawing cache of values )
+	-- global system values are stored in scene
 	sys:get_rnd() -- seed with caste name
 
 	-- load glsl code if it exists
