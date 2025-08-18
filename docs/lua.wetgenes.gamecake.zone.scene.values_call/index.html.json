@@ -2783,10 +2783,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>scene:values_call(func,...)\n</code></pre>\n<p>Call this function for every values state tracking entity, so it will \nbe called for this scene, for each system and for each item. A values \nstate tracking entity contains a values and a tweens member full of \ndata.</p>\n<p>So as well as explicitly calling on this scene itself we also call the \nscenes systems_call and call functions.</p>\n",
+   "body": "<pre><code>scene:values_call(func,...)\n</code></pre>\n<p>Call this function for every values state tracking entity, so it will \nbe called for this scene and for each item.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 523,
+   "line": 525,
    "name": "lua.wetgenes.gamecake.zone.scene.values_call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
