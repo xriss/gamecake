@@ -10,6 +10,8 @@ local fats=require("wetgenes.fats")
 
 local get_sql_to=require("wetgenes.getsql").sqlite
 
+local log,dump,display=require("wetgenes.logs"):export("log","dump","display")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -25,13 +27,13 @@ all.db.meta={__index=all.db}
 all.db.table_columns={
 	{ name="uid",    NOT_NULL=true ,  INTEGER=true ,  PRIMARY=true }, -- fully unique
 	{ name="time",   REAL=true     ,  INDEX=true   }, -- last updated timestamp for this object
-	{ name="boot",   TEXT=true     ,  JSON=true    }, -- full boot data *not* including the zip blob
+	{ name="boot",   TEXT=true     ,  JSON=true    }, -- full boot data *not* including the zip blob or uid
 	{ name="zip",    BLOB=true     },
 }
 all.db.table_columns_type=get_sql_to.columns_types(all.db.table_columns)
 
 -- convert a json encoded sql row to an unzipped boot
-all.db.row_to_boot=function(row)
+all.db.row_to_boot=function(db,row)
 	local boot=djon.load(row.boot)
 	boot.uid=row.uid
 	boot.zip=row.zip
@@ -39,14 +41,15 @@ all.db.row_to_boot=function(row)
 end
 
 -- convert a boot to a json encoded sql row
-all.db.boot_to_row=function(boot)
+all.db.boot_to_row=function(db,boot)
 	local row={}
 	row.uid=boot.uid
 	boot.uid=nil
+	if not next(boot) then return nil end -- no data
 	row.zip=boot.zip
 	boot.zip=nil
 	row.boot=djon.save(boot,"compact")
-	row.time=0
+	row.time=db.time()
 	return row
 end
 
@@ -57,6 +60,7 @@ all.db.open=function(opts)
 	setmetatable(db,all.db.meta)
 	
 	db.linda=assert(opts.linda) -- passing in a linda is required
+	db.time=assert(opts.time) -- passing in a time function is required
 	db.table_name=opts.table_name or "zones" -- can choose table name for data
 
 	db:do_memo({
@@ -84,7 +88,11 @@ all.db.memos=function(db,...) return all.memos(db.linda,...) end
 -- write this change of boot data to the database
 all.db.save_boot=function(db,boot)
 
-	local row=db.boot_to_row(boot)
+	local row=db:boot_to_row(boot)
+	
+	if not row then -- nothing to update
+		return
+	end
 
 	-- probably not updating zip	
 	local sql=[[
@@ -101,12 +109,13 @@ ON CONFLICT( uid ) DO UPDATE SET uid=$uid , time=$time , boot=json_patch( boot ,
 
 	local ret=db:do_memo({
 		task="sqlite",
+		id=false,
 		sql=sql,
 		binds={ uid=row.uid , time=row.time , boot=row.boot , zip=row.zip and true },
 		blobs={ zip=row.zip },
 	})
 	
 	-- print error but keep going
-	if ret.error then print(sql,ret.error) end
+--	if ret.error then print(sql,ret.error) end
 
 end

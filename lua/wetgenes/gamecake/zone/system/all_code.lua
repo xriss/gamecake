@@ -94,7 +94,9 @@ all.code.db=function(linda,task_id,task_idx)
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
 	
-	local db=all.db.open({linda=linda})
+	local oven=require("wetgenes.gamecake.toaster").bake({linda=linda})
+
+	local db=all.db.open({linda=linda,time=oven.time})
 
 	local request=function(memo)
 		local ret={}

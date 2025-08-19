@@ -464,7 +464,12 @@ all.scene.get_hashs=function(scene,tick)
 		local hash=0
 		local items=scene.data[ sys.caste ]
 		for _,it in ipairs( items or {} ) do -- hash each item
-			local chksum=it.values[topidx] and it.values[topidx].chksum
+			local chksum=0 -- it.values[topidx] and it.values[topidx].chksum
+			local top=it.values[topidx]
+			local ns={}
+			for n,v in pairs(top) do ns[#ns+1]=n end
+			table.sort(ns)
+			for i,n in ipairs(ns) do chksum=hashish(chksum,top[n]) end
 			if chksum then
 				hash=json_diff.hashish(hash,chksum)
 			end

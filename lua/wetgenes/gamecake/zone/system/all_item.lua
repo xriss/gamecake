@@ -205,11 +205,6 @@ all.item.unpush=function(it)
 end
 
 all.item.set=function(it,name,value)
-
-	-- auto update chksum value as we set any value even if it is not different
-	local hash=it.values:get("chksum") or 0
-	it.values:set("chksum",hashish(hash,value))
-
 	return it.values:set(name,value)
 end
 

@@ -96,7 +96,6 @@ all.values={
 }
 
 all.types={
-	chksum="ignore",
 	notween="ignore",
 	deleted="ignore",
 	zid="ignore",
