@@ -22,7 +22,8 @@ local zones=M
 zones.caste="zone"
 
 zones.uidmap={
-	length=0,
+	kinetic=2,
+	length=2,
 }
 
 zones.values={

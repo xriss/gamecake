@@ -24,7 +24,9 @@ cameras.uidmap={
 	focus=1,
 	render=2,
 	sky=3,
-	length=3,
+	floor=4,
+	water=5,
+	length=5,
 }
 
 cameras.values={

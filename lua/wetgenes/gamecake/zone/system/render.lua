@@ -91,6 +91,7 @@ renders.item.render_camera=function(render)
 
 	local camera=render:depend("camera")
 	local sky=camera:depend("sky")
+	local water=camera:depend("water")
 	camera.sys.singular=camera -- remember this camera
 
 	render:get_values()
@@ -118,6 +119,7 @@ renders.item.render_camera=function(render)
 	scene:systems_call("draw_head")
 	sky:draw_sky()
 	scene:call("draw")
+	water:draw_water()
 	scene:systems_call("draw_tail")
 	sys.screen.draw_tail()
 	gl.PopMatrix()

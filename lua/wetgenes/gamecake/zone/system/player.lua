@@ -362,8 +362,6 @@ players.item.update=function(player)
 
 	local camera=player:depend("camera")
 
-
-
 	local best_hit_fraction=1
 	player.floor=nil
 	local tw={0.3,0.3}

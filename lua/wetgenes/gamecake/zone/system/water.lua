@@ -24,7 +24,8 @@ local waters=M
 waters.caste="water"
 
 waters.uidmap={
-	length=0,
+	camera=2,
+	length=2,
 }
 
 waters.values={
@@ -187,15 +188,14 @@ waters.item.update=function(water)
 
 end
 
-waters.item.draw=function(water)
+waters.item.draw_water=function(water)
 
 	water:get_values()
 
 	local sys=water.sys
 	local gl=sys.oven.gl
 
-	 -- this should be a water per render/camera but we are currently just sharing a hack
-	local camera=water:get_singular("camera")
+	local camera=water:depend("camera") -- we are water for this camera
 	local render=camera:depend("render")
 	local sky=camera:depend("sky")
 	local screen=render.sys.screen
