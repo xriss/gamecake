@@ -71,6 +71,14 @@ all.scene.start_all_tasks=function(scene)
 		code=all.code.popins,
 	})
 
+	-- db subscription
+	oven.tasks:do_memo({
+		task="all_values",
+		id=false,
+		cmd="subscribe",
+		subid="all_db",
+	})
+
 end
 
 
@@ -90,6 +98,14 @@ all.code.db=function(linda,task_id,task_idx)
 
 	local request=function(memo)
 		local ret={}
+
+		if memo.cmd=="values" then -- incoming values from first task
+			for uid,boot in pairs(memo.values.items) do
+				boot.uid=uid
+				db:save_boot(boot)
+			end
+		end
+
 		return ret
 	end
 

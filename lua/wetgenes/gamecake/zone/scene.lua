@@ -366,7 +366,7 @@ table that should be modified with the insert and remove functions.
 	scene.reset=function(scene)
 		scene.data={} -- main lists of scene
 		scene.values=M.create_values() -- values
-		scene.values:set("uidtop",1000) -- starting uid ( uid 0 will be the scene )
+		scene.values:set("uidtop",1000) -- top of allocated ids ( uid 1 will be the scene )
 		scene.tweens=M.create_values() -- tweens ( drawing cache of values )
 		return scene
 	end
