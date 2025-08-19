@@ -107,7 +107,8 @@ ON CONFLICT( uid ) DO UPDATE SET uid=$uid , time=$time , boot=json_patch( boot ,
 ]]
 	end
 
-	local ret=db:do_memo({
+	-- dont ask for a response, assume it all went well
+	db:do_memo({
 		task="sqlite",
 		id=false,
 		sql=sql,

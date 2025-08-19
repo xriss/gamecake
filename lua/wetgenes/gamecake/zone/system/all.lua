@@ -87,7 +87,6 @@ all.uidmap={
 }
 
 all.values={
-	chksum=0,		-- chksum of data changed as data is modified
 	notween=true,	-- disable tweening for when an object needs to jump to a new position
 	deleted=false,	-- delayed deletion of an object, when this is set object should be considered dead
 	zid=0,			-- a uid of the zone this item belongs in, 0 is a synonym for null

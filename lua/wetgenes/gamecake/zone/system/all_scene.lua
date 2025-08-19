@@ -465,7 +465,7 @@ all.scene.get_hashs=function(scene,tick)
 		local items=scene.data[ sys.caste ]
 		for _,it in ipairs( items or {} ) do -- hash each item
 			local top=it.values[topidx]
-			if next(top) then -- need some values?
+			if next(top) then -- need some values, mostly this will be empty
 				local chksum=0 -- it.values[topidx] and it.values[topidx].chksum
 				local ns={}
 				for n,v in pairs(top) do ns[#ns+1]=n end
