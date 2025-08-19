@@ -96,13 +96,13 @@ all.db.save_boot=function(db,boot)
 
 	-- probably not updating zip	
 	local sql=[[
-INSERT INTO	]]..db.table_name..[[ ( uid , time , boot ) VALUES ( $uid , $time , $boot )
+INSERT INTO ]]..db.table_name..[[ ( uid , time , boot ) VALUES ( $uid , $time , $boot )
 ON CONFLICT( uid ) DO UPDATE SET uid=$uid , time=$time , boot=json_patch( boot , $boot ) ;
 ]]
 	-- but if we are then
 	if row.zip then
 		sql=[[
-INSERT INTO	]]..db.table_name..[[ ( uid , time , boot , zip ) VALUES ( $uid , $time , $boot , $zip )
+INSERT INTO ]]..db.table_name..[[ ( uid , time , boot , zip ) VALUES ( $uid , $time , $boot , $zip )
 ON CONFLICT( uid ) DO UPDATE SET uid=$uid , time=$time , boot=json_patch( boot , $boot ) , zip=$zip ;
 ]]
 	end
@@ -119,4 +119,57 @@ ON CONFLICT( uid ) DO UPDATE SET uid=$uid , time=$time , boot=json_patch( boot ,
 	-- print error but keep going
 --	if ret.error then print(sql,ret.error) end
 
+end
+
+
+--[[
+	Get boot that matches this partial boot, normally by uid eg 
+	{uid=1234} but any root parts of boot can be explicitly matched and 
+	multiple boots may be returned
+--]]
+all.db.get_boots=function(db,boot,recursive)
+	local qs={}
+	local vs={}
+	
+	for n,v in pairs(boot) do
+		qs[#qs+1]=qs[1] and " AND " or nil -- only between
+		if n=="uid" then -- explicit uid is not in boot
+			qs[#qs+1]=" "..n.."=$"..n.." "
+		else
+			qs[#qs+1]=" json_extract(boot, '$."..n.."' )=$"..n.." "
+		end
+		vs[n]=v
+	end
+	
+	local sql=[[
+SELECT uid,time,boot,zip FROM ]]..db.table_name..[[ t1 WHERE ]]..table.concat(qs)..[[
+]]
+
+	if recursive then -- recurse all dependencies using boot.uids arrays
+	
+		sql=[[
+WITH RECURSIVE list(uid,time,boot,zip) AS
+( ]]..sql..[[
+UNION ALL
+SELECT t1.uid,t1.time,t1.boot,t1.zip FROM list JOIN ]]..db.table_name..[[ t1
+WHERE t1.uid IN ( SELECT value FROM json_each(list.boot, '$.uids') )
+)
+SELECT uid,time,boot,zip FROM list
+]]
+
+	end
+
+	-- dont ask for a response, assume it all went well
+	local ret=db:do_memo({
+		task="sqlite",
+		sql=sql..";",
+		binds=vs,
+	})
+	if ret.error then return nil,ret.error end
+	
+	local boots={}
+	for i,row in ipairs(ret.rows) do
+		boots[#boots+1]=db:row_to_boot(row)
+	end
+	return boots
 end

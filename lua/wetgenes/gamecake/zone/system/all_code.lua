@@ -102,10 +102,12 @@ all.code.db=function(linda,task_id,task_idx)
 		local ret={}
 
 		if memo.cmd=="values" then -- incoming values from first task
-			for uid,boot in pairs(memo.values.items) do
+			for uid,boot in pairs(memo.values.boots) do
 				boot.uid=uid
 				db:save_boot(boot)
 			end
+		elseif memo.cmd=="get_boots" then -- read some boots from db
+			ret.boots , ret.error = db:get_boots(memo.boot,memo.recursive)
 		end
 
 		return ret

@@ -512,7 +512,7 @@ end
 
 all.scene.save_all_values=function(scene,force_full_subscription)
 	local ret={}
-	ret.items={}
+	ret.boots={}
 
 	local zone=scene:get_singular("zone") -- current zone ( all current items should belong to this zone )
 --	ret.zid=zone and zone.uid or 0
@@ -535,7 +535,7 @@ all.scene.save_all_values=function(scene,force_full_subscription)
 		else
 			r=it.values[#it.values]
 		end
-		ret.items[uid]=r
+		ret.boots[uid]=r
 	end
 
 	save(scene,"scene",1)
@@ -547,20 +547,20 @@ end
 all.scene.load_all_values=function(scene,dat)
 
 	-- set scene values
-	for n,v in pairs(dat.items[1]) do
+	for n,v in pairs(dat.boots[1]) do
 		scene.values:set(n,v)
 	end
 
 	-- delete items
 	scene:call(function(it)
-		if not dat.items[it.uid] then -- all live objects will be in this map
+		if not dat.boots[it.uid] then -- all live objects will be in this map
 			it:destroy()
 		end
 	end)
 
 	-- update or create items
 	local boots={}
-	for uid,boot in pairs(dat.items) do
+	for uid,boot in pairs(dat.boots) do
 		if uid>1000 then -- special ids bellow 1000
 			local it=scene:find_uid(uid)
 			if it then -- load into existing object
@@ -584,7 +584,7 @@ end
 
 all.scene.save_all_tweens=function(scene,force_full_subscription)
 	local ret={}
-	ret.items={}
+	ret.boots={}
 	local save=function(it,caste,uid)
 		local r
 		if force_full_subscription or it.values_are_new then
@@ -596,7 +596,7 @@ all.scene.save_all_tweens=function(scene,force_full_subscription)
 		else
 			r=it.tweens[#it.tweens]
 		end
-		ret.items[uid]=r
+		ret.boots[uid]=r
 	end
 
 	save(scene,"scene",1)
@@ -608,20 +608,20 @@ end
 all.scene.load_all_tweens=function(scene,dat)
 
 	-- set scene values
-	for n,v in pairs(dat.items[1]) do
+	for n,v in pairs(dat.boots[1]) do
 		scene.tweens:set(n,v)
 	end
 
 	-- delete items
 	scene:call(function(it)
-		if not dat.items[it.uid] then -- all live objects will be in this map
+		if not dat.boots[it.uid] then -- all live objects will be in this map
 			it:destroy()
 		end
 	end)
 	
 	-- update or create items
 	local boots={}
-	for uid,boot in pairs(dat.items) do
+	for uid,boot in pairs(dat.boots) do
 		if uid>1000 then
 			local it=scene:find_uid(uid)
 			if it then -- load into existing object
