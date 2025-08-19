@@ -47,6 +47,24 @@ all.scene.create=function(scene,boot) -- shorthand to create from boot
 	return scene.systems[ boot.caste or boot[1] ]:create(boot)
 end
 
+all.scene.creates=function(scene,boots) -- batch create and set depends
+	local items={}
+	-- create
+	for i,boot in ipairs(boots) do
+		items[i]=scene:create(boot)
+	end
+	-- assign depends to uids
+	for i,boot in ipairs(boots) do
+		if boot.depends then
+			for name,idx in pairs(boot.depends) do 
+				items[i]:depend(name,items[idx].uid) -- convert idx into uid
+			end
+		end
+	end
+	-- return all created items
+	return items
+end
+
 -- initalize systems in the scene
 all.scene.initialize=function(scene)
 
