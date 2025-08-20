@@ -70,6 +70,18 @@ all.scene.start_all_tasks=function(scene)
 		id="all_popins",
 		code=all.code.popins,
 	})
+	oven.tasks:do_memo({
+		task="all_popins",
+		id=false,
+		cmd="scene",
+		scene=scene.wrap_name,
+	})
+	oven.tasks:do_memo({
+		task="all_popins",
+		id=false,
+		cmd="subscribe",
+		subid="all_values",
+	})
 
 	-- db subscription
 	oven.tasks:do_memo({
@@ -139,20 +151,64 @@ all.code.popins=function(linda,task_id,task_idx)
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
 
+	local oven=require("wetgenes.gamecake.toaster").bake({linda=linda})
+	oven.upnet=oven.rebake("wetgenes.gamecake.upnet")
+
+	local scene
+	local popins
+
 	local main=function()
+		if popins then
+		end
 	end
 
 	local request=function(memo)
 		local ret={}
+
+		if memo.cmd=="scene" then
+			if scene then
+				scene:full_clean()
+				scene=nil
+				popins=nil
+			end
+			if memo.scene then -- can delete scene by not naming one
+				scene=require(memo.scene).create()
+				scene.oven=oven
+				scene.subscribed={}
+				scene.infos.all.scene.initialize(scene)
+				print("create",memo.scene)
+				popins=scene:popins({caste="chunk",scene=scene})
+			end
+		elseif memo.cmd=="subscribe" then
+
+			scene.subscribed[memo.subid]={}
+			
+			local values=scene:save_all_values(true) -- first full dump
+			scene.oven.tasks:do_memo({
+				task=memo.subid,
+				id=false,
+				cmd="values",
+				values=values,
+			})
+
+
+		elseif memo.cmd=="unsubscribe" then
+
+			scene.subscribed[memo.subid]=nil
+
+		elseif memo.cmd=="first" then
+			ret.pops=popins:first(memo)
+		end
+
 		return ret
 	end
 
 	while true do
+		main() -- probably getting called every 1ms ish
 		local timeout=0.001 -- first receive will be 1ms or less
 		repeat
 			local _,memo= linda:receive( timeout , task_id ) -- wait for any memos coming into this thread
-			timeout=0 -- repeat receive are instant
-			main() -- probably getting called every 1ms ish
+			timeout=0 -- repeat receive are instant so we can empty the queue
 			if memo then
 				local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
 				if not ok then ret={error=ret or true} end -- reformat errors

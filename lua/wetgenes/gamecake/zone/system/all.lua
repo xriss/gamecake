@@ -13,6 +13,7 @@ all.db=all.db or {}
 all.code=all.code or {}
 -- methods added to manifest, we do not require a scene or systems to manifest boot data
 all.manifest=all.manifest or {}
+all.popins=all.popins or {}
 -- methods added to scene
 all.scene=all.scene or {}
 -- methods added to systems, shared resources can be kept in a system but not state data
@@ -192,6 +193,38 @@ end
 all.scene.manifest  =function(scene  ,manifest) return all.manifest.create(manifest) end
 all.system.manifest =function(system ,manifest) return all.manifest.create(manifest) end
 
+all.popins.create=function(popins)
+	assert(popins)
+	assert(popins.caste)
+--	assert(popins.db)
+	assert(popins.scene)
+
+	local merge=function(into,from)
+		if not into then return end
+		for n,v in pairs( from or {} ) do
+			if type(into[n])=="nil" then -- never overwrite
+				into[n]=v
+			end
+		end
+	end
+
+	-- get list of all sub castes seperated by _
+	local castes={}
+	for caste in all.inherits(popins.caste,true) do castes[#castes+1]=caste end
+	castes[#castes+1]="all" -- and include all as a generic base class
+
+	-- merge all castes
+	for _,caste in ipairs(castes) do
+		local info=popins.scene:require(caste)
+		if info then
+			merge( popins        , info.popins or {} ) -- merge popins functions
+		end
+	end
+
+	return popins
+end
+all.scene.popins  =function(scene  ,popins) return all.popins.create(popins) end
+all.system.popins =function(system ,popins) return all.popins.create(popins) end
 
 -- generate any missing boot data
 all.gene_body=function(boot)
