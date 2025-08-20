@@ -97,7 +97,7 @@ skys.item.update=function(sky)
 
 	sky:set_values()
 
---	sky:update_shadow()
+	sky:update_shadow()
 
 end
 
@@ -189,6 +189,8 @@ skys.item.update_shadow=function(sky)
 	end
 	
 	shadow.updated=true
+
+	sky:set_values()
 end
 
 skys.item.draw_sky=function(sky)
@@ -196,6 +198,7 @@ skys.item.draw_sky=function(sky)
 	if not sys.gl then return end -- no gl no draw
 	local gl=sys.gl
 
+-- values will have been set by update_shadow ?
 	sky:get_values()
 
 	gl.state.push()

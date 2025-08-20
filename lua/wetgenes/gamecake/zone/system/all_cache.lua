@@ -5,7 +5,7 @@
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-local all=M
+local all=require("wetgenes.gamecake.zone.system.all") -- put everything in here
 
 -- database code
 all.cache=all.cache or {}
@@ -28,11 +28,12 @@ local deepcopy=require("wetgenes"):export("deepcopy")
 local log,dump,display=require("wetgenes.logs"):export("log","dump","display")
 local automap=function(it,r) r=r or it for i=1,#it do r[ it[i] ]=i end return r end
 
+all.cache.meta={__index=all.cache}
 
 -- a simple uid->boot cache
 all.cache.create=function(cache)
 	local cache=cache or {}
-	setmetatable(cache,{__index=M.cache})
+	setmetatable(cache,all.cache.meta)
 
 	cache.uids={} -- main table of cached uid -> boot data
 
@@ -40,10 +41,12 @@ all.cache.create=function(cache)
 end
 all.scene.cache=function(scene,cache) return all.cache.create(cache) end
 
+
 all.cache.get=function(cache,uid)
 	if not uid then return end
 	return (cache.uids[uid])
 end
+
 
 all.cache.set=function(cache,boot,uid)
 	if not uid then uid=boot.uid end
@@ -51,3 +54,25 @@ all.cache.set=function(cache,boot,uid)
 end
 
 
+--[[
+	Get all boots that matches this partial boot, any root parts of 
+	boot can be explicitly matched and multiple boots may be returned 
+	This takes a full scan of the cache so unlike a get by uid you 
+	really should cache the results.
+--]]
+all.cache.get_boots=function(cache,boot)
+	local ret={}
+	for uid,dat in pairs(cache.uids) do
+		local pass=true
+		for n,v in boot do -- must pass all checks
+			if dat[n]==v then
+				pass=false
+				break
+			end
+		end
+		if pass then
+			ret[#ret+1]=dat -- output
+		end
+	end
+	return ret
+end

@@ -247,6 +247,8 @@ all.system.gene_body=function(_,boot) return all.gene_body(boot) end
 
 all.gene=function(boot)
 	boot=boot or {}
+	boot.caste=boot.caste or boot[1] -- allow shortcut
+	boot[1]=nil -- and remove shortcut
 	if type(boot.zip)=="string" then -- auto uncompress string
 		boot.zip=all.decode(boot.zip)
 	end

@@ -46,8 +46,11 @@ all.scene.also_cocall=function()
 	oven.tasks:update()
 end
 
-all.scene.create=function(scene,boot) -- shorthand to create from boot
+all.scene.create=function(scene,boot) -- create from boot
 	return scene.systems[ boot.caste or boot[1] ]:create(boot)
+end
+all.scene.gene=function(scene,boot) -- cleanup boot making sure it is well formed
+	return scene.systems[ boot.caste or boot[1] ]:gene(boot)
 end
 
 all.scene.creates=function(scene,boots) -- batch create and set depends
