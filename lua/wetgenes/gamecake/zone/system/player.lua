@@ -128,7 +128,7 @@ players.item.get_up=function(player)
 end
 
 players.gene=function(boot)
-	boot=boot or {}
+	boot=all.gene(boot)
 
 	boot.zip=boot.zip or {}
 	if not boot.zip.soul then -- randomly generate one

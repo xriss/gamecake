@@ -150,7 +150,7 @@ SELECT uid,time,boot,zip FROM ]]..db.table_name..[[ t1 WHERE ]]..table.concat(qs
 		sql=[[
 WITH RECURSIVE list(uid,time,boot,zip) AS
 ( ]]..sql..[[
-UNION ALL
+UNION
 SELECT t1.uid,t1.time,t1.boot,t1.zip FROM list JOIN ]]..db.table_name..[[ t1
 WHERE t1.uid IN ( SELECT value FROM json_each(list.boot, '$.uids') )
 )
@@ -159,7 +159,6 @@ SELECT uid,time,boot,zip FROM list
 
 	end
 
-	-- dont ask for a response, assume it all went well
 	local ret=db:do_memo({
 		task="sqlite",
 		sql=sql..";",

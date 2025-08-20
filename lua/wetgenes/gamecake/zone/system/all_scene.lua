@@ -38,6 +38,9 @@ local json_diff=require("wetgenes.json_diff")
 local hashish=require("wetgenes.json_diff").hashish
 
 
+all.scene.do_memo=function(scene,...)	return all.do_memo(scene.oven.tasks.linda,...)	end
+all.scene.memos=function(scene,...)	return all.memos(scene.oven.tasks.linda,...)	end
+
 -- make sure we keep tasks running when in cocall loops
 all.scene.also_cocall=function()
 	oven.tasks:update()

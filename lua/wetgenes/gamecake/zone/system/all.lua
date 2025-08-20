@@ -212,6 +212,9 @@ all.system.gene_body=function(_,boot) return all.gene_body(boot) end
 
 all.gene=function(boot)
 	boot=boot or {}
+	if type(boot.zip)=="string" then -- auto uncompress string
+		boot.zip=all.decode(boot.zip)
+	end
 	return boot
 end
 all.system.gene=function(_,boot) return all.gene(boot) end
