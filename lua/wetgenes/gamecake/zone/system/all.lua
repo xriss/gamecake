@@ -7,6 +7,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 local all=M
 
+-- cache code
+all.cache=all.cache or {}
 -- database code
 all.db=all.db or {}
 -- sub tasks for running in other threads
@@ -259,3 +261,4 @@ require("wetgenes.gamecake.zone.system.all_system")
 require("wetgenes.gamecake.zone.system.all_item")
 require("wetgenes.gamecake.zone.system.all_code")
 require("wetgenes.gamecake.zone.system.all_db")
+require("wetgenes.gamecake.zone.system.all_cache")

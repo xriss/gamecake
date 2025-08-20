@@ -54,7 +54,14 @@ all.scene.creates=function(scene,boots) -- batch create and set depends
 	local items={}
 	-- create
 	for i,boot in ipairs(boots) do
-		items[i]=scene:create(boot)
+		if boot.uid then -- pre existing check (we probably just want to fix the depends)
+			items[i]=scene:find_uid(boot.uid)
+			-- should we also apply the boot here?
+			-- not sure, maybe just assert on diffs?
+		end
+		if not items[i] then -- we do need to create
+			items[i]=scene:create(boot)
+		end
 	end
 	-- assign depends to uids
 	for i,boot in ipairs(boots) do
