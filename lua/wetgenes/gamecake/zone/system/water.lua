@@ -147,6 +147,7 @@ waters.item.update=function(water)
 
 	local camera=water:get_singular("camera")
 --	if not camera then return end
+	local player=camera:depend("focus")
 	local render=camera:depend("render")
 	local sky=camera:depend("sky")
 	local screen=render.sys.screen
@@ -179,10 +180,16 @@ waters.item.update=function(water)
 --	y=math.floor(0.5+y/snap)*snap
 	z=math.floor(0.5+z/sz)*sz
 
+	
 	water.pos[1]=x
 	water.pos[2]=tide
 	water.pos[3]=z
 
+-- this slow slide might look better than the flips?
+--[[
+water.pos[1]=player.pos[1]
+water.pos[3]=player.pos[3]
+]]
 
 	water:set_values()
 
