@@ -240,7 +240,10 @@ all.code.values=function(linda,task_id,task_idx)
 	-- this should mostly not do anything as it will be called a lot
 	local main=function()
 		if scene then
-			scene:do_update_values()
+			local undo_count,update_count=scene:do_update_values()
+			if update_count~=0 or undo_count~=0 then
+--				print("undo",-undo_count,"update",update_count,"tick",scene.values:get("tick"),scene.values:get("tick_input"))
+			end
 		end
 	end
 
@@ -319,11 +322,17 @@ all.code.tweens=function(linda,task_id,task_idx)
 	oven.upnet=oven.rebake("wetgenes.gamecake.upnet")
 
 	local scene
+	local wait_for_values=false
 	
 	-- this should mostly not do anything as it will be called a lot
 	local main=function()
 		if scene then
-			scene:do_update_tweens()
+			if not wait_for_values then
+				local draw_count=scene:do_update_tweens()
+				if draw_count~=0 then
+--					print("draw",draw_count,"tick",scene.values:get("tick"),scene.values:get("tick_input"))
+				end
+			end
 		end
 	end
 
@@ -347,6 +356,10 @@ all.code.tweens=function(linda,task_id,task_idx)
 				scene:load_all_values(memo.values)
 				while scene.values[3] do -- and scene.values:get("tick",2) <= scene.ticks.agreed do
 					scene:do_pull()
+				end
+				if wait_for_values then
+					wait_for_values=false
+					print("wait_for_values",false)
 				end
 			end
 		elseif memo.cmd=="scene" then
@@ -383,6 +396,14 @@ all.code.tweens=function(linda,task_id,task_idx)
 
 			scene.subscribed[memo.subid]=nil
 
+		elseif memo.cmd=="tick" then
+			while scene.values[2] do
+				scene:do_unpush()
+			end
+			scene.values:set("tick",memo.tick)
+			scene.values:set("tick_input",memo.tick)
+			wait_for_values=true
+			print("wait_for_values",true)
 		end
 		
 		return ret

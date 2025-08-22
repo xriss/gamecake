@@ -223,6 +223,8 @@ all.popins.create=function(popins)
 		end
 	end
 
+	popins.cache=popins.scene:cache() -- create boot cache
+
 	return popins
 end
 all.scene.popins  =function(scene  ,popins) return all.popins.create(popins) end

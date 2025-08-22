@@ -231,6 +231,10 @@ all.scene.do_update_tweens=function(scene)
 
 	local need_tween_push=( scene.tweens:get("tick") or 0 ) < ( scene.values:get("tick") or 0 )
 	while  scene.ticks.now >= scene.values:get("tick") do -- predict until we are in the future
+--		if draw_count>50 then
+--			print("overdraw",scene.ticks.now , scene.values:get("tick"))
+--			break
+--		end
 		need_tween_push=true
 
 		draw_count=draw_count+1
