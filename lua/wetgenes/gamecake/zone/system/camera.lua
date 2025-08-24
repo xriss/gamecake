@@ -216,38 +216,24 @@ cameras.item.update=function(camera)
 
 	end
 
+camera.dolly_part=1
+
 -- ray cast the camera distance to control the dolly
---[[
-	local physics=camera.scene.systems.physics
-	if physics then
-		local q=Q4()
-		q:rotate( camera.rot[1] ,  {1,0,0} )
-		q:rotate( camera.rot[2] ,  {0,1,0} )
-		q:rotate( camera.rot[3] ,  {0,0,1} )
-		local d=V3(0,0,1):product(q)
+	local world=player:get_singular("kinetic").world
 
+	local mtx=M4()
+--		mtx:translate( camera.focus_pos[1] , camera.focus_pos[2] , camera.focus_pos[3] )
+	mtx:rotate( camera.direction ,  0, 1, 0 )
+	mtx:rotate( camera.tilt      ,  1, 0, 0 )
+--		mtx:translate( 0,0, 0.0 + camera.dolly*camera.dolly_part )
+	local d=V3(0,0,1):product(mtx) -- direction for ray
 
-		local frac=1
-
-		for yp=-3,3,3 do
-			local test=physics.world:ray_test({
-				ray={
-					camera.focus+V3(0,0,0),
-					camera.focus+(d*camera.dolly)+V3(0,0+yp,0),
-				},
-				cmask=0x00ff,
-			})
-			if test.hit then
---				test.hit.body=physics.world.bodies[test.hit.body_ptr]
-				if test.hit.fraction < frac then
-					frac=test.hit.fraction
-				end
-			end
-		end
---		camera.orbit.dolly = ( camera.orbit.dolly*3 + frac ) /4
-		camera.orbit.dolly = frac
+	local ray1=camera.focus_pos+V3(0,0,0)
+	local ray2=camera.focus_pos+(d*(camera.dolly*2))+V3(0,0,0)
+	local test=world:ray_test({ ray={ray1,ray2}, cmask=0x00ff, })
+	if test.hit then -- this hit will be halfway to solid ( so camera will not intersect solid )
+		camera.dolly_part = test.hit.fraction -- the hit point would be test.hit.fraction*2 and may be more than 1
 	end
-]]
 
 	camera:set_values()
 

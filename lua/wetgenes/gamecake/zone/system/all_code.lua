@@ -358,8 +358,8 @@ all.code.tweens=function(linda,task_id,task_idx)
 					scene:do_pull()
 				end
 				if wait_for_values then
-					wait_for_values=false
-					print("wait_for_values",false)
+					wait_for_values=false -- we got values so can continue
+	--				print("wait_for_values",false)
 				end
 			end
 		elseif memo.cmd=="scene" then
@@ -403,7 +403,7 @@ all.code.tweens=function(linda,task_id,task_idx)
 			scene.values:set("tick",memo.tick)
 			scene.values:set("tick_input",memo.tick)
 			wait_for_values=true
-			print("wait_for_values",true)
+--			print("wait_for_values",true)
 		end
 		
 		return ret
