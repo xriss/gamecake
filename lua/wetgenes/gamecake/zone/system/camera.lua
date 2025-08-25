@@ -132,7 +132,7 @@ cameras.item.setup=function(camera)
 
 	camera:get_values()
 
-	camera.tilt_min=-90
+	camera.tilt_min=-60 -- cannot look directly up
 	camera.tilt_max=90
 	camera.dolly_min=8
 	camera.dolly_max=50

@@ -185,7 +185,7 @@ players.item.focus_camera=function(player,camera)
 	local tweaks=player:tween("tweaks")
 
 	-- try to reduce screen bounce caused by springy feet
-	pos[2]=pos[2] + ( (tweaks[1]+tweaks[2])/2 ) -2
+	pos[2]=pos[2] + ( (tweaks[1]+tweaks[2])/2 ) -3
 
 	camera.focus_pos:set( pos )
 
