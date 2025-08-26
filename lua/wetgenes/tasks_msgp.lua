@@ -557,6 +557,7 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	local basepack=2342
 	local hostname=msgp.clean_name( socket.dns.gethostname() ) -- get a clean hostname
 	local ip4,ip6=msgp.ipsniff()
+	if not ( ip4 or ip6 ) then ip4="0.0.0.0" end -- pretend ip4
 	local udp4,udp6
 	local hostport
 	local clients={} -- client state, reset on host cmd

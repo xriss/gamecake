@@ -39,6 +39,7 @@ players.values={
 	ang=V3( 0,0,0 ),
 
 	run=V3( 0,0,0 ),	-- unit vector of run direction
+	run_tick=0,
 
 	tweaks=V4( 0,0,0,0 ),
 
@@ -57,6 +58,7 @@ players.types={
 	pos="tween",
 	rot="tween",
 	run="get",
+	run_tick="get",
 	ang="get",
 	vel="get",
 	acc="get",
@@ -208,6 +210,7 @@ end
 -- apply controller to player, setting player.acc and player.vel
 players.item.update_control=function(player)
 
+	local tick=player.scene.values:get("tick") -- time
 	local camera=player:depend("camera")
 
 	local up=player:get_up()
@@ -234,7 +237,7 @@ players.item.update_control=function(player)
 	local ly=( up:axis("ly") ) or 0
 
 
-	if player.run:len()<player.walk_speed then -- we are walking
+	if player.run_time==0 then -- we are walking
 		player.run=V3(0,0,0)
 		camera.move_and_rotate=true
 
@@ -273,6 +276,12 @@ players.item.update_control=function(player)
 
 		if l3_set then -- click to start runinng
 			player.run=camera.playery*-player.run_speed -- we run in this direction and speed
+			player.run_time=tick
+		end
+		-- if you keep holding the run button you will start running again
+		if player.run_time==0 and l3 and ( player.vel:len()>10 ) then -- auto run
+			player.run=player.vel
+			player.run_time=1 -- releasing button will always stop
 		end
 	else -- we are running
 		camera.move_and_rotate=false
@@ -285,10 +294,6 @@ players.item.update_control=function(player)
 
 		player.run = player.run + ( player.run:normalize(V3()) * ((cy/ -4)) ) -- adjust speed with forward/back
 		player.run:product(Q4("y",-(cx*4))) --rotate a little bit with left/right
---		camera.direction=camera:get( "direction" ) -- also adjust camera
---		camera.direction=camera.direction-(cx*2)
---		camera:set( "direction" , camera.direction )
-
 
 		if player.run:len() > player.run_speed then -- max speed
 			player.run = player.run:normalize()*player.run_speed
@@ -307,8 +312,11 @@ players.item.update_control=function(player)
 
 		player.acc=(move*(15))*( (player.floor and 5) or (player.water and 1) or 1 )
 
-		if l3_set or ( player.run:len()<0.9 ) then -- stop runing if we slow down target ( pull back on stick ) or click again
-			player.run=V3(0,0,0) -- stop running
+		-- ignore quick release ( taps ) so you can either hold run or tap to toggle
+		-- also stop running if we slow down target ( pull back on stick ) but only if run is not held down
+ 		if	( l3_clr and ( ( (tick-player.run_time)>8 ) or ( player.run_time>tick ) ) ) or
+			( ( player.vel:len()<9 ) ) then
+			player.run_time=0
 		end
 	end
 

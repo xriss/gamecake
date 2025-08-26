@@ -236,10 +236,10 @@ M.create=function(upnet)
 		-- create
 		client={}
 		client.addr=m.addr -- this may be different per client
-		client.ip4=m.ip4 or m.handshake.ip4
-		client.ip6=m.ip6 or m.handshake.ip6
-		client.port=m.port or m.handshake.port
-		client.name=m.name or m.handshake.name
+		client.ip4=m.ip4 or "0.0.0.0"
+		client.ip6=m.ip6 or "::"
+		client.port=m.port or 0
+		client.name=m.name or ""
 
 		-- a unique id which is [ip6]:port or ip4:port:name
 		if client.ip6 then
