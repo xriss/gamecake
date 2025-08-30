@@ -155,11 +155,8 @@ all.code.popins=function(linda,task_id,task_idx)
 	oven.upnet=oven.rebake("wetgenes.gamecake.upnet")
 
 	local scene
-	local popins
 
 	local main=function()
-		if popins then
-		end
 	end
 
 	local request=function(memo)
@@ -177,7 +174,6 @@ all.code.popins=function(linda,task_id,task_idx)
 				scene.subscribed={}
 				scene.infos.all.scene.initialize(scene)
 				print("create",memo.scene)
-				popins=scene:popins({caste="chunk",scene=scene})
 			end
 		elseif memo.cmd=="subscribe" then
 
@@ -197,6 +193,7 @@ all.code.popins=function(linda,task_id,task_idx)
 			scene.subscribed[memo.subid]=nil
 
 		elseif memo.cmd=="first" then
+			local popins=scene:popins({caste="chunk",scene=scene})
 			ret.pops=popins:first(memo)
 		end
 
