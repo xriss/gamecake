@@ -100,8 +100,16 @@ renders.item.render_camera=function(render)
 
 	sky:update_shadow()
 
-
-	if camera then camera:set_active() end -- perform tween update here
+	if camera then
+		camera:set_active() -- perform tween update here
+		-- rotate bloom with camera movement ( barely noticeable )
+		sys.screen.blurd1=V3(1,0,0)*Q4("z", (camera.tilt+camera.direction)* 8 )
+		sys.screen.blurd2=V3(0,1,0)*Q4("z", (camera.tilt+camera.direction)* 8 )
+	else
+		local blur_rot=Q4("z",45)
+		sys.screen.blurd1=V3(1,0,0)*blur_rot
+		sys.screen.blurd2=V3(0,1,0)*blur_rot
+	end
 
 	for idx=1,sys.shadow.count do
 		gl.PushMatrix()

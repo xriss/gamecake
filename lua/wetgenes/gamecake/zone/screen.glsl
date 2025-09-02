@@ -542,6 +542,8 @@ uniform sampler2D tex;
 
 uniform mat4 inverse_projection;
 
+// direction of blur
+uniform vec2 blurd;
 
 #ifdef VERTEX_SHADER
 
@@ -569,11 +571,7 @@ void main(void)
 {
 	vec2 tc=v_texcoord;
 
-	vec2 siz = 1.0 / vec2( textureSize(tex,0) );
-
-#if BLUR_AXIS == 1
-	siz.x=-siz.x;
-#endif
+	vec2 siz = blurd / vec2( textureSize(tex,0) );
 
 	vec4  c;
 

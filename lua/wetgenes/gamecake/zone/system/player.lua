@@ -39,7 +39,7 @@ players.values={
 	ang=V3( 0,0,0 ),
 
 	run=V3( 0,0,0 ),	-- unit vector of run direction
-	run_tick=0,
+	run_time=0,
 
 	tweaks=V4( 0,0,0,0 ),
 
@@ -58,7 +58,7 @@ players.types={
 	pos="tween",
 	rot="tween",
 	run="get",
-	run_tick="get",
+	run_time="get",
 	ang="get",
 	vel="get",
 	acc="get",
@@ -187,7 +187,9 @@ players.item.focus_camera=function(player,camera)
 	local tweaks=player:tween("tweaks")
 
 	-- try to reduce screen bounce caused by springy feet
-	pos[2]=pos[2] + ( (tweaks[1]+tweaks[2])/2 ) -3
+	pos[2]=pos[2] + ( (tweaks[1]+tweaks[2])/2 ) -4
+
+--	pos=pos+(player.side*-3)
 
 	camera.focus_pos:set( pos )
 
@@ -315,7 +317,7 @@ players.item.update_control=function(player)
 		-- ignore quick release ( taps ) so you can either hold run or tap to toggle
 		-- also stop running if we slow down target ( pull back on stick ) but only if run is not held down
  		if	( l3_clr and ( ( (tick-player.run_time)>8 ) or ( player.run_time>tick ) ) ) or
-			( ( player.vel:len()<9 ) ) then
+			( ( player.vel:len()<9 ) and ( player.run:len() < player.walk_speed ) ) then
 			player.run_time=0
 		end
 	end

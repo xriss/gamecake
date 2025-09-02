@@ -37,6 +37,8 @@ M.bake=function(oven,screen)
 	local framebuffers=oven.rebake("wetgenes.gamecake.framebuffers")
 
 	screen.day_night=V4( 0.0 , 0.0 , 0.0 , 0.0 )
+	screen.blurd1=V2(1,1)
+	screen.blurd2=V2(-1,1)
 
 	screen.loads=function()
 
@@ -461,27 +463,32 @@ M.bake=function(oven,screen)
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
 		end)
-
+		
 --		screen.fbo_blur:resize( screen.fbo_bloom.w , screen.fbo_bloom.h , 0 )
 		screen.fbo_blur:bind_frame()
 --		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=0&BLUR=22",function(p)
-		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{BLUR_AXIS=0}),function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{}),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo_bloom:bind_texture()
 				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
 
+				gl.Uniform2f(p:uniform("blurd"),  screen.blurd1 )
+
 		end)
+
 
 		screen.fbo_bloom:bind_frame()
 --		oven.cake.canvas.flat.tristrip("rawuv",t,"zone_screen_build_blur?BLUR_AXIS=1&BLUR=22",function(p)
-		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{BLUR_AXIS=1}),function(p)
+		oven.cake.canvas.flat.tristrip("rawuv",t,screen.get_shader_qs("zone_screen_build_blur",{}),function(p)
 
 				gl.ActiveTexture( gl.TEXTURE0 + gl.NEXT_UNIFORM_TEXTURE )
 				screen.fbo_blur:bind_texture()
 				gl.Uniform1i( p:uniform("tex"), gl.NEXT_UNIFORM_TEXTURE )
 				gl.NEXT_UNIFORM_TEXTURE=gl.NEXT_UNIFORM_TEXTURE+1
+
+				gl.Uniform2f(p:uniform("blurd"),  screen.blurd2 )
 
 		end)
 
