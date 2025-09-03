@@ -388,7 +388,7 @@ float shadow_occlusion( vec2 vv , vec3 nrm )
 
 	if( (shadow_uv.x > 0.0)  && (shadow_uv.x < 1.0) && (shadow_uv.y > 0.0) && (shadow_uv.y < 1.0) && (shadow_uv.z > 0.0) && (shadow_uv.z < 1.0) )
 	{
-		vec3 sas=smoothstep( -1.00 , -0.90 , -abs( shadow_uv.xyz*2.0-1.0 )  );
+		vec3 sas=smoothstep( -1.00 , -0.80 , -abs( shadow_uv.xyz*2.0-1.0 )  );
 		float fade=sas.x*sas.y*sas.z;
 
 //		float shadow_min=1.0;
