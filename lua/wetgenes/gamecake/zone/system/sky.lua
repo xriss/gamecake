@@ -120,8 +120,8 @@ skys.item.update_shadow=function(sky)
 	if camera then
 		local pos=camera:tget("focus_pos")
 --		local snap=function(n) return math.floor(n/16)*16 end
---		local snap=function(n) return n end
-		local snap=function(n) return n-1+math.random()*2 end -- should snap in shadow space
+		local snap=function(n) return n end
+--		local snap=function(n) return n-1+math.random()*2 end -- should snap in shadow space
 		x=(snap(pos[1]))--*-1/s	-- swap z/y as rotation
 		y=(snap(pos[2]))--*-1/s
 		z=(snap(pos[3]))--*-1/s
