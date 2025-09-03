@@ -192,9 +192,9 @@ all.code.popins=function(linda,task_id,task_idx)
 
 			scene.subscribed[memo.subid]=nil
 
-		elseif memo.cmd=="first" then
+		elseif memo.cmd=="cidlist" then
 			local popins=scene:popins({caste="chunk",scene=scene})
-			ret.pops=popins:first(memo)
+			ret.pops=popins:cidlist(memo)
 		end
 
 		return ret
