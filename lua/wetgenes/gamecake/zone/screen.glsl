@@ -225,8 +225,10 @@ void main(void)
 #ifdef VERSION_ES
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
+precision highp sampler2D;
 #else
 precision mediump float;
+precision mediump sampler2D;
 #endif
 #endif
   
@@ -270,9 +272,9 @@ out vec4 FragColor;
 vec3 depth_to_view(vec2 cc)
 {
 #ifdef DEPTH_RANGE_REVERSE
-	vec4 t=vec4( cc , 1.0-float(texture(tex,cc)) , 1.0 );
+	vec4 t=vec4( cc , 1.0-texture(tex,cc).r , 1.0 );
 #else
-	vec4 t=vec4( cc , float(texture(tex,cc)) , 1.0 );
+	vec4 t=vec4( cc , texture(tex,cc).r , 1.0 );
 #endif
 	vec4 p=( t*2.0 - 1.0 );
 

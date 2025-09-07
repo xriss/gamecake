@@ -76,12 +76,6 @@ all.scene.start_all_tasks=function(scene)
 		cmd="scene",
 		scene=scene.wrap_name,
 	})
-	oven.tasks:do_memo({
-		task="all_popins",
-		id=false,
-		cmd="subscribe",
-		subid="all_values",
-	})
 
 	-- db subscription
 	oven.tasks:do_memo({
@@ -120,6 +114,9 @@ all.code.db=function(linda,task_id,task_idx)
 			end
 		elseif memo.cmd=="get_boots" then -- read some boots from db
 			ret.boots , ret.error = db:get_boots(memo.boot,memo.recursive)
+
+		else
+			print("unknown memo",memo.cmd)
 		end
 
 		return ret
@@ -134,6 +131,9 @@ all.code.db=function(linda,task_id,task_idx)
 				if not ok then ret={error=ret or true} end -- reformat errors
 				if memo.id then -- result requested
 					linda:send( nil , memo.id , ret )
+				end
+				if memo.result then -- result requested
+					linda:send( nil , memo.result , ret )
 				end
 			end
 		until not memo
@@ -175,26 +175,14 @@ all.code.popins=function(linda,task_id,task_idx)
 				scene.infos.all.scene.initialize(scene)
 				print("create",memo.scene)
 			end
-		elseif memo.cmd=="subscribe" then
-
-			scene.subscribed[memo.subid]={}
-			
-			local values=scene:save_all_values(true) -- first full dump
-			scene.oven.tasks:do_memo({
-				task=memo.subid,
-				id=false,
-				cmd="values",
-				values=values,
-			})
-
-
-		elseif memo.cmd=="unsubscribe" then
-
-			scene.subscribed[memo.subid]=nil
 
 		elseif memo.cmd=="cidlist" then
 			local popins=scene:popins({caste="chunk",scene=scene})
+			ret.cmd="popins"
 			ret.pops=popins:cidlist(memo)
+
+		else
+			print("unknown memo",memo.cmd)
 		end
 
 		return ret
@@ -211,6 +199,9 @@ all.code.popins=function(linda,task_id,task_idx)
 				if not ok then ret={error=ret or true} end -- reformat errors
 				if memo.id then -- result requested
 					linda:send( nil , memo.id , ret )
+				end
+				if memo.result then -- result requested
+					linda:send( nil , memo.result , ret )
 				end
 			end
 		until not memo
@@ -281,6 +272,12 @@ all.code.values=function(linda,task_id,task_idx)
 
 			scene.subscribed[memo.subid]=nil
 
+		elseif memo.cmd=="popins" then
+
+			scene.systems.chunks:got_pops(memo.pops)
+
+		else
+			print("unknown memo",memo.cmd)
 		end
 		
 		return ret
@@ -296,6 +293,9 @@ all.code.values=function(linda,task_id,task_idx)
 				if not ok then ret={error=ret or true} end -- reformat errors
 				if memo.id then -- result requested
 					linda:send( nil , memo.id , ret )
+				end
+				if memo.result then -- result requested
+					linda:send( nil , memo.result , ret )
 				end
 			end
 			main() -- probably getting called every 1ms ish
@@ -401,6 +401,9 @@ all.code.tweens=function(linda,task_id,task_idx)
 			scene.values:set("tick_input",memo.tick)
 			wait_for_values=true
 --			print("wait_for_values",true)
+
+		else
+			print("unknown memo",memo.cmd)
 		end
 		
 		return ret
@@ -416,6 +419,9 @@ all.code.tweens=function(linda,task_id,task_idx)
 				if not ok then ret={error=ret or true} end -- reformat errors
 				if memo.id then -- result requested
 					linda:send( nil , memo.id , ret )
+				end
+				if memo.result then -- result requested
+					linda:send( nil , memo.result , ret )
 				end
 			end
 			main() -- probably getting called every 1ms ish

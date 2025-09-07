@@ -146,6 +146,8 @@ end
 
 all.scene.do_update_values=function(scene)
 
+
+
 	local undo_count=0
 	local update_count=0
 
@@ -168,6 +170,9 @@ all.scene.do_update_values=function(scene)
 			scene:call("get_values") -- sync item and kinetics
 			scene:call("set_body")
 		end
+
+		-- called often...
+		scene:systems_call("housekeeping")
 
 		while scene.ticks.input > scene.values:get("tick") do -- update with full inputs and save hashs
 		
@@ -289,10 +294,6 @@ all.scene.do_update_tweens=function(scene)
 end
 
 all.scene.do_update=function(scene)
-
--- called often but out of sync of rewinds so will probably cause a resync
--- this is chugging and needs to happen out of state or something
---	scene:systems_call("housekeeping")
 
 
 	scene:ticks_sync()

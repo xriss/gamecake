@@ -128,7 +128,7 @@ M.bake=function(oven,screen)
 
 		screen.loads()
 
-		screen.fbo=framebuffers.create(0,0,1,{ no_uptwopow=true , depth_format={gl.DEPTH_COMPONENT32F,gl.DEPTH_COMPONENT, gl.FLOAT} } )
+		screen.fbo=framebuffers.create(0,0,1,{ no_uptwopow=true , depth_format={gl.DEPTH_COMPONENT24,gl.DEPTH_COMPONENT, gl.UNSIGNED_INT} } )
 
 		screen.view=oven.cake.views.create({
 			mode="fbo",

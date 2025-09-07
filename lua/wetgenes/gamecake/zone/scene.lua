@@ -406,19 +406,17 @@ will be autocreated if needed.
 Add a new item of caste or it.caste to the list of things to update.
 
 The optional boot table contains initialisation/reset values and will
-be remembered in item.boot. If boot.id is given then we will remember
-this item with a call to scene.set(id,it)
+be remembered in item.boot.
 
 The actual act of initalising the item from the boot table is left to
 custom code which ideally should initalize it and then just call
-scene.add(it) as the auto shortcuts are unnecesary.
+scene.add(it).
 
 ]]
 	scene.add=function(scene,it,caste,boot)
 		if boot then
 			it.boot=boot
 			if it.boot.uid   then it.uid   = it.boot.uid    end
-			if it.boot.name  then it.name  = it.boot.name   end
 			if it.boot.caste then it.caste = it.boot.caste  end
 		end
 		scene:remember_uid(it)
@@ -426,8 +424,6 @@ scene.add(it) as the auto shortcuts are unnecesary.
 		-- idealy these should live in a metatable and already be set
 		if type(it.scene)=="nil" then it.scene=scene end
 		if type(it.caste)=="nil" then it.caste=caste or "generic" end
-
-		if it.name then scene:set( it.name , it ) end
 
 		local items=scene:caste(it.caste)
 		items[ #items+1 ]=it -- add to end of items array
@@ -455,7 +451,6 @@ as it sees fit.
 ]]
 	scene.remove=function(scene,it)
 		scene:forget_uid(it)
-		if it.id then scene:set( it.id ) end
 		local items=scene:caste(it.caste)
 		for idx=#items,1,-1 do -- search backwards
 			if items[idx]==it then

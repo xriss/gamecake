@@ -25,6 +25,7 @@ precision mediump float;
 #version 330
 #ifdef VERSION_ES
 precision mediump float;
+precision mediump sampler2D;
 #endif
   
 uniform mat4 modelview;

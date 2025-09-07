@@ -47,7 +47,7 @@ M.bake=function(oven,shadow)
 
 		shadow.loads()
 
-		shadow.fbo=framebuffers.create(shadow.mapsize,shadow.mapsize,-1,{ no_uptwopow=true , depth_format={gl.DEPTH_COMPONENT32F,gl.DEPTH_COMPONENT, gl.FLOAT} } )
+		shadow.fbo=framebuffers.create(shadow.mapsize,shadow.mapsize,-1,{ no_uptwopow=true , depth_format={gl.DEPTH_COMPONENT24,gl.DEPTH_COMPONENT, gl.UNSIGNED_INT} } )
 		shadow.view=oven.cake.views.create({
 			mode="fbo",
 			fbo=shadow.fbo,
