@@ -646,6 +646,9 @@ M.bake=function(oven,ups)
 		count=1,
 		id=ups.ups_task_id,
 		code=M.ups_code,
+		globals={
+			TASK_NAME="#UPS"
+		}
 	})
 
 

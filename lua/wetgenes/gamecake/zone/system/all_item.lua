@@ -77,18 +77,11 @@ all.item.depend=function(it,name,uid)
 end
 
 all.item.destroy=function(it)
-
-	if it.clean then -- optional cleanup
-		it:clean()
-	end
-
-	it.scene:remove( it ) -- it.scene should still be valid
-
+	return it.sys:destroy(it)
 end
 
 all.item.setup=function(it,boot)
 	boot=boot or it.boot
-
 end
 
 all.item.setup_values=function(it,boot)

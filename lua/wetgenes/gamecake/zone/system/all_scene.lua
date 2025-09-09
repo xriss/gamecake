@@ -26,7 +26,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local Ox=function(n) return string.format("%012x",n or 0) end
 
-local log,dump,display=require("wetgenes.logs"):export("log","dump","display")
+local log,dump,display,PRINT=require("wetgenes.logs"):export("log","dump","display","PRINT")
 local automap=function(it,r) r=r or it for i=1,#it do r[ it[i] ]=i end return r end
 
 local bit = require("bit")
@@ -47,10 +47,10 @@ all.scene.also_cocall=function()
 end
 
 all.scene.create=function(scene,boot) -- create from boot
-	return scene.systems[ boot.caste or boot[1] ]:create(boot)
+	return scene.systems[ assert(boot.caste or boot[1]) ]:create(boot)
 end
 all.scene.gene=function(scene,boot) -- cleanup boot making sure it is well formed
-	return scene.systems[ boot.caste or boot[1] ]:gene(boot)
+	return scene.systems[ assert(boot.caste or boot[1]) ]:gene(boot)
 end
 
 all.scene.creates=function(scene,boots) -- batch create and set depends
@@ -618,6 +618,7 @@ all.scene.load_all_values=function(scene,dat)
 	-- must create in uid order
 	table.sort(boots,function(a,b) return a.uid<b.uid end)
 	for i,boot in ipairs(boots) do
+		PRINT(i,boot,boot.uid,scene:find_uid(uid),boot.caste,boot[1])
 		scene:create(boot)
 	end
 
@@ -679,6 +680,7 @@ all.scene.load_all_tweens=function(scene,dat)
 	-- must create in uid order
 	table.sort(boots,function(a,b) return a.uid<b.uid end)
 	for i,boot in ipairs(boots) do
+		PRINT(i,boot,boot.caste,boot[1])
 		scene:create(boot)
 	end
 

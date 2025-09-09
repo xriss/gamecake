@@ -26,7 +26,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local Ox=function(n) return string.format("%012x",n or 0) end
 
-local log,dump,display=require("wetgenes.logs"):export("log","dump","display")
+local log,dump,display,PRINT=require("wetgenes.logs"):export("log","dump","display","PRINT")
 local automap=function(it,r) r=r or it for i=1,#it do r[ it[i] ]=i end return r end
 
 local bit = require("bit")
@@ -191,6 +191,22 @@ all.system.create_core=function(sys,boot)
 	sys.scene:add(it)
 	it:setup_values(boot)
 	it:setup() -- system specific setup
+
+PRINT("create",it.uid)
+
+	return it
+end
+
+-- core destroy actions
+all.system.destroy_core=function(sys,it)
+
+PRINT("destroy",it.uid)
+
+	if it.clean then -- optional cleanup
+		it:clean()
+	end
+	it.scene:remove( it ) -- it.scene should still be valid
+
 	return it
 end
 
@@ -198,3 +214,6 @@ all.system.create=function(sys,boot)
 	return all.system.create_core(sys,boot)
 end
 
+all.system.destroy=function(sys,it)
+	return all.system.destroy_core(sys,it)
+end

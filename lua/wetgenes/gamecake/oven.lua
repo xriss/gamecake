@@ -3,7 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local log,dump=require("wetgenes.logs"):export("log","dump")
+local log,dump,PRINT=require("wetgenes.logs"):export("log","dump","PRINT")
 local global=require("global")
 
 -- calling this once a frame, turns off gc and forces gc to only happen here
@@ -14,8 +14,8 @@ local global=require("global")
 -- this will stop gc and take control of it
 local garbage_collect_step=function()
 	collectgarbage("stop") -- from now on we must explicitly call step as often as we can
-	collectgarbage("setpause",100) -- this number adjusts when collection will start ( still seems to effect us here )
-	collectgarbage("setstepmul",10) -- this number adjusts how much time that each step should take
+	collectgarbage("setpause",400) -- this number adjusts when collection will start ( still seems to effect us here )
+	collectgarbage("setstepmul",1) -- this number adjusts how much time that each step should take
 	collectgarbage("step",0) -- this function may do nothing or may collect some garbage
 end
 -- if we can not regularly call garbage_collect_step then we must restore the default settings and restart it
@@ -216,6 +216,8 @@ function M.bake(opts)
 
 	oven.opts=opts or {}
 	global.OVEN_OPTS=oven.opts -- remember last oven opts in global
+	global.TASK_NAME="#MAIN"
+	global.PRINT=PRINT
 
 	if type(opts[1])=="table" then -- probably passed in from nacl
 		for n,v in pairs(opts[1]) do -- copy it all into opts
@@ -228,14 +230,15 @@ function M.bake(opts)
 	for i=0,#opts do local v=opts[i]
 		if type(v)=="string" then
 			if v:sub(1,2)=="--" then -- strip --from-start-of-flags
+				local n=v:sub(3)
+				local d=true
 				local s,e = v:find("=")
 				if s then -- its a setting so set it
-					local n=v:sub(3,s-1)
-					local s=v:sub(e+1)
-					opts.args[ n ]=s -- simple setting, strings only
-				else
-					opts.args[ v:sub(3) ]=true -- just a flag
+					n=(v:sub(3,s-1))
+					d=v:sub(e+1)
 				end
+				n=n:lower():gsub("[^%w]", "_")
+				opts.args[ n ]=d -- simple setting, strings only
 			else
 				opts.args[#opts.args+1]=v -- normal arg
 			end
@@ -367,13 +370,20 @@ end
 		count=8,
 		id="http",
 		code=oven.tasks.http_code,
+		globals={
+			TASK_NAME="#HTTP"
+		}
 	})
 -- and sqlite requests to a default database
 	oven.tasks:add_global_thread({
 		count=1,
 		id="sqlite",
-		globals={sqlite_filename=wwin.files_prefix.."recipes.sqlite",sqlite_pragmas=[[ PRAGMA synchronous=0; ]]},
 		code=oven.tasks.sqlite_code,
+		globals={
+			sqlite_filename=wwin.files_prefix.."recipes.sqlite",
+			sqlite_pragmas=[[ PRAGMA synchronous=0; ]],
+			TASK_NAME="#SQL",
+		}
 	})
 -- so we can run off thread code and coroutines
 

@@ -766,12 +766,18 @@ M.create=function(tasks)
 		tasks:add_thread({
 			count=1,
 			id="thread",
-			code=tasks.thread_code
+			code=tasks.thread_code,
+			globals={
+				TASK_NAME="#THREAD"
+			}
 		})
 		tasks:add_thread({
 			count=1,
 			id="global",
-			code=tasks.global_code
+			code=tasks.global_code,
+			globals={
+				TASK_NAME="#GLOBAL"
+			}
 		})
 	else
 		tasks.main_thread=false -- we are not the main therad
@@ -866,6 +872,7 @@ end -- The functions below are free running tasks and should not depend on any l
 -- wrap all tasks so we can print errors
 M.tasks_functions.wrap_code=function(code,linda,id,idx)
 	local lanes=require("lanes")
+
 	local rawprint=print
 	print=function(...) -- if we concat first we have less threads fighting over output
 		local t={}
@@ -877,14 +884,18 @@ M.tasks_functions.wrap_code=function(code,linda,id,idx)
 
 	local logs=require("wetgenes.logs")
 	if OVEN_OPTS and OVEN_OPTS.args then logs.setup(OVEN_OPTS.args) end
-	local log=logs.log
-	
+-- set global PRINT
+	PRINT=logs.PRINT	
+
 	print_lanes_error=function(err)
 		if err==lanes.cancel_error then
-			log("thread" , id , idx , debug.traceback("lanes canceled") )
+			logs.log("thread" , id , idx , debug.traceback("lanes canceled") )
 			error(err)
 		else
-			log("lanes" , id , idx , debug.traceback( err ) )
+			logs.log("lanes" , id , idx , debug.traceback( err ) )
+		end
+		if OVEN_OPTS and OVEN_OPTS.args and OVEN_OPTS.args.quickexit then
+			os.exit(0)
 		end
 		return err
 	end

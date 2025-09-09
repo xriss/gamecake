@@ -11,6 +11,7 @@ local wtsv=require("wetgenes.tsv")
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local logs = M
 
+
 logs.export=function(env,...)
 	local tab={...} ; for i=1,#tab do tab[i]=env[ tab[i] ] end
 	return unpack(tab)
@@ -19,6 +20,10 @@ end
 -- setup from command line args
 
 logs.setup=function(args)
+
+	if args.logs_trace then -- include traceback in each log
+		logs.trace=true
+	end
 
 	if args.logs then -- change allow and block lists
 		logs.allow=nil
@@ -44,6 +49,7 @@ logs.setup=function(args)
 
 end
 
+logs.trace=false -- enable line trace for each log
 
 logs.allow=nil -- put a table here to enable
 
@@ -54,12 +60,19 @@ logs.block={
 }
 
 local wwin
+local modemap={
+	[""]="TASK"
+}
 logs.log = function(mode,...)
+	mode=mode or "TASK"
+	mode=modemap[mode] or mode
+
 	local args={}
 	for i=1,select("#", ...) do
 		args[i]=tostring( select(i, ...) )
 	end
-	if type(mode)~="string" or mode=="" or mode=="line" then -- special print location in file
+
+	if  mode=="LINE" then -- special print location in file
 		mode="line"
 		if logs.allow and ( not logs.allow[ mode ] ) then return end
 		if logs.block and (     logs.block[ mode ] ) then return end
@@ -70,29 +83,26 @@ logs.log = function(mode,...)
 		return
 	end
 
---[[
-	if not wwin then wwin=require("wetgenes.win") end
-	if wwin.files_prefix then
-		local t={mode,...}
-		for i,v in ipairs(t) do t[i]=tostring(v) end
-
-		local fp=io.open( wwin.files_prefix.."logs.tsv" , "a" )
-		fp:write( table.concat(t,"\t") .. "\n" )
-		fp:close()
+	if mode=="TASK" then -- use task name global as mode
+		mode=TASK_NAME or "TASK"
 	end
-]]
-
+	
 	if logs.allow and ( not logs.allow[ mode ] ) then return end
 	if logs.block and (     logs.block[ mode ] ) then return end
 
--- track down where the damn debug junk is from :)
---[[
-	local info=debug.getinfo(2)
-	print( mode , info.currentline , info.name or "." , info.short_src )
-]]
+	if logs.trace then -- track down where the damn debug junk is from :)
+		local bn=2
+		local info=debug.getinfo(bn)
+		if info.name=="PRINT" then bn=bn+1 ; info=debug.getinfo(bn) end -- not this one
+		if info.name=="dump" then bn=bn+1 ; info=debug.getinfo(bn) end -- or this one
+		print( mode , info.currentline , info.name or "." , info.short_src )
+	end
 	print( mode , unpack(args) )
 
 end
+
+-- print replacement that goes through the log system and prepends TASK_NAME
+logs.PRINT=function(...) logs.log("TASK",...) end
 
 -- print to the main display
 logs.display = function(...)
@@ -105,7 +115,7 @@ end
 -- show full table contents
 
 logs.dump = function(...)
-	logs.log( "dump" , logs.tostring(...) )
+	logs.log( "TASK" , logs.tostring(...) )
 end
 
 local logstring

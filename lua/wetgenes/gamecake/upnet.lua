@@ -48,6 +48,9 @@ M.bake=function(oven,upnet)
 			count=1,
 			id="msgp",
 			code=msgp.msgp_code,
+			globals={
+				TASK_NAME="#MSGP"
+			}
 		})
 
 		-- create upnet handling thread if it does not exist
@@ -55,6 +58,9 @@ M.bake=function(oven,upnet)
 			count=1,
 			id="upnet",
 			code=M.upnet_code,
+			globals={
+				TASK_NAME="#UPNET"
+			}
 		})
 	
 		oven.ups.subscribe("upnet/ups") -- request all ups to be sent here

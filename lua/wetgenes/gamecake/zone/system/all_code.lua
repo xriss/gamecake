@@ -23,6 +23,9 @@ all.scene.start_all_tasks=function(scene)
 		count=1,
 		id="all_db",
 		code=all.code.db,
+		globals={
+			TASK_NAME="#DB"
+		}
 	})
 
 	-- tweens
@@ -30,6 +33,9 @@ all.scene.start_all_tasks=function(scene)
 		count=1,
 		id="all_tweens",
 		code=all.code.tweens,
+		globals={
+			TASK_NAME="#TWEEN"
+		}
 	})
 	oven.tasks:do_memo({
 		task="all_tweens",
@@ -49,6 +55,9 @@ all.scene.start_all_tasks=function(scene)
 		count=1,
 		id="all_values",
 		code=all.code.values,
+		globals={
+			TASK_NAME="#VALUE"
+		}
 	})
 	oven.tasks:do_memo({
 		task="all_values",
@@ -69,6 +78,9 @@ all.scene.start_all_tasks=function(scene)
 		count=1,
 		id="all_popins",
 		code=all.code.popins,
+		globals={
+			TASK_NAME="#POPIN"
+		}
 	})
 	oven.tasks:do_memo({
 		task="all_popins",
@@ -173,7 +185,7 @@ all.code.popins=function(linda,task_id,task_idx)
 				scene.oven=oven
 				scene.subscribed={}
 				scene.infos.all.scene.initialize(scene)
-				print("create",memo.scene)
+				PRINT("scene",memo.scene)
 			end
 
 		elseif memo.cmd=="cidlist" then
@@ -182,7 +194,7 @@ all.code.popins=function(linda,task_id,task_idx)
 			ret.pops=popins:cidlist(memo)
 
 		else
-			print("unknown memo",memo.cmd)
+			PRINT("unknown memo",memo.cmd)
 		end
 
 		return ret
@@ -248,7 +260,7 @@ all.code.values=function(linda,task_id,task_idx)
 				scene.oven=oven
 				scene.subscribed={}
 				scene.infos.all.scene.initialize(scene)
-				print("create",memo.scene)
+				PRINT("scene",memo.scene)
 				if memo.call then
 					scene[memo.call](scene)
 				else
@@ -277,7 +289,7 @@ all.code.values=function(linda,task_id,task_idx)
 			scene.systems.chunks:got_pops(memo.pops)
 
 		else
-			print("unknown memo",memo.cmd)
+			PRINT("unknown memo",memo.cmd)
 		end
 		
 		return ret
@@ -369,7 +381,7 @@ all.code.tweens=function(linda,task_id,task_idx)
 				scene.oven=oven
 				scene.subscribed={}
 				scene.infos.all.scene.initialize(scene)
-				print("create",memo.scene)
+				PRINT("scene",memo.scene)
 				if memo.call then
 					scene[memo.call](scene)
 				else
@@ -403,7 +415,7 @@ all.code.tweens=function(linda,task_id,task_idx)
 --			print("wait_for_values",true)
 
 		else
-			print("unknown memo",memo.cmd)
+			PRINT("unknown memo",memo.cmd)
 		end
 		
 		return ret
