@@ -3,7 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local log,dump,PRINT=require("wetgenes.logs"):export("log","dump","PRINT")
+--local log,dump,PRINT=require("wetgenes.logs"):export("log","dump","PRINT")
+local logs=require("wetgenes.logs")
 local global=require("global")
 
 -- calling this once a frame, turns off gc and forces gc to only happen here
@@ -217,7 +218,10 @@ function M.bake(opts)
 	oven.opts=opts or {}
 	global.OVEN_OPTS=oven.opts -- remember last oven opts in global
 	global.TASK_NAME="#MAIN"
-	global.PRINT=PRINT
+	global.PRINT=logs.print
+	global.DUMP=logs.dump
+	global.LOG=logs.log
+	global.TRACEBACK=logs.traceback
 
 	if type(opts[1])=="table" then -- probably passed in from nacl
 		for n,v in pairs(opts[1]) do -- copy it all into opts
@@ -266,15 +270,15 @@ do	-- get best time we can, should have at least ms accuracy, possibly slightly 
 	local ok=pcall(function()
 		local socket = require("socket")
 		oven.time=socket.gettime
-		log( "oven" , "using time from socket" )
+		LOG( "oven" , "using time from socket" )
 	end) or pcall(function()
 		local lanes = require("lanes")
 		oven.time=lanes.now_secs
-		log( "oven" , "using time from lanes" )
+		LOG( "oven" , "using time from lanes" )
 	end) or pcall(function()
 		local wwin = require("wetgenes.win") -- probably SDL
 		oven.time=wwin.time
-		log( "oven" , "using time from wetgenes.win" )
+		LOG( "oven" , "using time from wetgenes.win" )
 	end)
 end
 
@@ -282,7 +286,7 @@ if jit then -- now logs are setup, dump basic jit info
 	local t={jit.version,jit.status()}
 	t[2]=tostring(t[2])
 	t[#t+1]="jit_mcode_size="..jit_mcode_size.."k"
-	log( "oven" , table.concat(t,"\t") )
+	LOG( "oven" , table.concat(t,"\t") )
 end
 
 -- no more flavour, only SDL
@@ -582,11 +586,11 @@ os.exit()
 			if name=="*" then
 
 				for n,v in pairs(oven.baked) do -- reload all baked modules
-					log("rebake",n)
+					LOG("rebake",n)
 					local suc,err=pcall(function()
 						oven.reload(n)
 					end)
-					if not suc then log("rebake","IGNORE",err) end
+					if not suc then LOG("rebake","IGNORE",err) end
 				end
 
 			else
@@ -761,9 +765,9 @@ os.exit()
 			if oven.do_backtrace then
 				oven.do_backtrace=false
 				if oven.update_co then
-					log( "oven" , debug.traceback(oven.update_co) ) -- debug where we are?
+					LOG( "oven" , debug.traceback(oven.update_co) ) -- debug where we are?
 				else
-					log( "oven" , debug.traceback() ) -- debug where we are?
+					LOG( "oven" , debug.traceback() ) -- debug where we are?
 				end
 			end
 
@@ -835,7 +839,7 @@ os.exit()
 			sa=sa or ""
 			sb=sb or ""
 
-log("oven",sa.." : "..sb)
+LOG("oven",sa.." : "..sb)
 
 			if not oven.preloader_enabled then return end
 
@@ -950,7 +954,7 @@ end
 							oven.next=true
 						end
 					elseif m.class=="app" then -- androidy
-log("oven","caught : ",m.class,m.cmd)
+LOG("oven","caught : ",m.class,m.cmd)
 						if		m.cmd=="init_window" then
 							oven.do_start=true
 						elseif	m.cmd=="gained_focus"  then
