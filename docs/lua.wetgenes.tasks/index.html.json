@@ -2850,7 +2850,7 @@
    "body": "<p>A basic function to handle (web)socket client connection.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 1307,
+   "line": 1312,
    "name": "lua.wetgenes.tasks.client_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -2954,7 +2954,7 @@
    "body": "<p>A basic function to handle global memos to get/set data shared amongst multiple tasks.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 961,
+   "line": 967,
    "name": "lua.wetgenes.tasks.global_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -2970,7 +2970,7 @@
    "body": "<p>A basic function to handle http memos.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 1009,
+   "line": 1015,
    "name": "lua.wetgenes.tasks.http_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -3034,7 +3034,7 @@
    "body": "<p>A basic function to handle sqlite memos.</p>\n<p>As we are opening an sqlite database here it wont help much to have \nmore than one thread per database as they will just fight over file \naccess.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 1170,
+   "line": 1175,
    "name": "lua.wetgenes.tasks.sqlite_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -3042,7 +3042,7 @@
    "body": "<p>Handle global tasks, starting and stopping and preventing the starting \nof multiple copies of the same task.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 907,
+   "line": 913,
    "name": "lua.wetgenes.tasks.thread_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
