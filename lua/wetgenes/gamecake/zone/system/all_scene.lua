@@ -26,7 +26,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local Ox=function(n) return string.format("%012x",n or 0) end
 
-local log,dump,display,PRINT=require("wetgenes.logs"):export("log","dump","display","PRINT")
+local log,dump,display=require("wetgenes.logs"):export("log","dump","display")
 local automap=function(it,r) r=r or it for i=1,#it do r[ it[i] ]=i end return r end
 
 local bit = require("bit")
