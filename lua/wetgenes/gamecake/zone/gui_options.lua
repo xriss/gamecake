@@ -38,7 +38,7 @@ B.setup=function(zgui)
 			zgui.theme(a.json)
 			ssettings.set("gui_theme",m.id)
 		end
-		print(m.id)
+		LOG(m.id)
 	end
 
 	zgui.click["layout_save"]=function(it)

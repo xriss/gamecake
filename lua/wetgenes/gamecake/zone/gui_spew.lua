@@ -28,14 +28,14 @@ B.setup=function(zgui)
 	zgui.confirm["window_chat_input"]=function(it)
 		local master=zgui.master
 		local s=datas.get("chat_input"):value()
-		print("confirm",it.id,s)
+		LOG("confirm",it.id,s)
 		datas.get("chat_input"):value("")
 		master.set_focus(it)
 		oven.spew.push({cmd="cmd",txt=s})
 	end
 
 	local spew_hook=function(spew,msg,str)
-		print(str)
+		LOG(str)
 --		dump(msg)
 --[[
 		local t={}

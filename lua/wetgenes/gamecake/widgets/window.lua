@@ -429,7 +429,7 @@ end
 
 function wwindow.setup(window,def)
 
-print(def.id,def.px,def.py,def.hx,def.hy)
+--print(def.id,def.px,def.py,def.hx,def.hy)
 
 	window.flags=def.flags or {}
 

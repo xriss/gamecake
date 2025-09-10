@@ -903,9 +903,6 @@ M.tasks_functions.wrap_code=function(code,linda,id,idx)
 		return err
 	end
 
-PRINT(lanes.require)
-for n,v in pairs(package.preload) do PRINT(n) end
-
 	local ok,err=xpcall(function() code(linda,id,idx) end,print_lanes_error)
 
 end
