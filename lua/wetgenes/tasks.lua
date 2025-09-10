@@ -884,8 +884,11 @@ M.tasks_functions.wrap_code=function(code,linda,id,idx)
 
 	local logs=require("wetgenes.logs")
 	if OVEN_OPTS and OVEN_OPTS.args then logs.setup(OVEN_OPTS.args) end
--- set global PRINT
-	PRINT=logs.PRINT	
+-- set global PRINT DUMP and LOG
+	PRINT=logs.print
+	DUMP=logs.dump
+	LOG=logs.log
+	TRACEBACK=logs.traceback
 
 	print_lanes_error=function(err)
 		if err==lanes.cancel_error then
@@ -899,6 +902,9 @@ M.tasks_functions.wrap_code=function(code,linda,id,idx)
 		end
 		return err
 	end
+
+PRINT(lanes.require)
+for n,v in pairs(package.preload) do PRINT(n) end
 
 	local ok,err=xpcall(function() code(linda,id,idx) end,print_lanes_error)
 
@@ -1020,7 +1026,6 @@ M.tasks_functions.http_code=function(linda,task_id,task_idx)
 		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
 		if ok and lib then js_eval=lib.js_eval end
 	end
-
 	local http = lanes.require("socket.http")
 	local ltn12 = lanes.require("ltn12")
 
