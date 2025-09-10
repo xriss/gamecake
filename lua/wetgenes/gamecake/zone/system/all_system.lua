@@ -192,7 +192,7 @@ all.system.create_core=function(sys,boot)
 	it:setup_values(boot)
 	it:setup() -- system specific setup
 
-PRINT("create",it.uid)
+--PRINT("create",it.uid)
 
 	return it
 end
@@ -200,7 +200,7 @@ end
 -- core destroy actions
 all.system.destroy_core=function(sys,it)
 
-PRINT("destroy",it.uid)
+--PRINT("destroy",it.uid)
 
 	if it.clean then -- optional cleanup
 		it:clean()

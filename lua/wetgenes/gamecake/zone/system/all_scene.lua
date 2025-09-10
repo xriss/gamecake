@@ -74,7 +74,9 @@ all.scene.creates=function(scene,boots) -- batch create and set depends
 		if boot then -- ignore padding values that are set to false
 			if boot.depends then
 				for name,idx in pairs(boot.depends) do 
-					items[i]:depend(name,items[idx].uid) -- convert idx into uid
+					if items[idx] then -- can link
+						items[i]:depend(name,items[idx].uid) -- convert idx into uid
+					end
 				end
 			end
 		end
@@ -171,11 +173,9 @@ all.scene.do_update_values=function(scene)
 			scene:call("set_body")
 		end
 
-		-- called often...
-		scene:systems_call("housekeeping")
-
 		while scene.ticks.input > scene.values:get("tick") do -- update with full inputs and save hashs
 		
+
 			update_count=update_count+1
 			if scene.oven.console then
 				scene.oven.console.display_disable=false
@@ -185,6 +185,8 @@ all.scene.do_update_values=function(scene)
 
 			scene:do_push() -- inc tick
 			scene.ups=scene.oven.upnet.get_ups( scene.values:get("tick") )
+
+			-- called often...
 
 			scene:systems_call("update")
 			scene:call("update")
@@ -200,6 +202,8 @@ local hash=0
 				scene.oven.console.display_disable=true
 			end
 			
+			scene:systems_call("housekeeping")
+
 			-- this should only be set in the values sub task
 			if scene.subscribed then -- send out new values
 				local values=scene:save_all_values()
@@ -618,7 +622,7 @@ all.scene.load_all_values=function(scene,dat)
 	-- must create in uid order
 	table.sort(boots,function(a,b) return a.uid<b.uid end)
 	for i,boot in ipairs(boots) do
-		PRINT(i,boot,boot.uid,scene:find_uid(uid),boot.caste,boot[1])
+--		PRINT(i,boot,boot.uid,scene:find_uid(uid),boot.caste,boot[1])
 		scene:create(boot)
 	end
 
@@ -680,7 +684,7 @@ all.scene.load_all_tweens=function(scene,dat)
 	-- must create in uid order
 	table.sort(boots,function(a,b) return a.uid<b.uid end)
 	for i,boot in ipairs(boots) do
-		PRINT(i,boot,boot.caste,boot[1])
+--		PRINT(i,boot,boot.caste,boot[1])
 		scene:create(boot)
 	end
 
