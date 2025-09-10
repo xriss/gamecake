@@ -5,7 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
-local wtsv=require("wetgenes.tsv")
+--local wtsv=require("wetgenes.tsv")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -21,7 +21,7 @@ end
 
 logs.setup=function(args)
 
-	if args.logs_trace then -- include traceback in each log
+	if args.logs_trace then -- include line trace in each log
 		logs.trace=true
 	end
 
@@ -61,7 +61,7 @@ logs.block={
 
 local wwin
 local modemap={
-	[""]="TASK"
+	[""]="TASK",
 }
 logs.log = function(mode,...)
 	mode=mode or "TASK"
@@ -79,8 +79,11 @@ logs.log = function(mode,...)
 		local line="here"
 		 -- this can be null if we are a tail call so need fake fallback
 		local info=debug.getinfo(2) or {currentline=0,name="",short_src=""}
-		print( mode , info.currentline , info.name , info.short_src , unpack(args) )
-		return
+		table.insert(1,info.short_src)
+		table.insert(1,info.name)
+		table.insert(1,info.currentline)
+--		print( mode , info.currentline , info.name , info.short_src , unpack(args) )
+--		return
 	end
 
 	if mode=="TASK" then -- use task name global as mode
@@ -92,17 +95,29 @@ logs.log = function(mode,...)
 
 	if logs.trace then -- track down where the damn debug junk is from :)
 		local bn=2
-		local info=debug.getinfo(bn)
-		if info.name=="PRINT" then bn=bn+1 ; info=debug.getinfo(bn) end -- not this one
-		if info.name=="dump" then bn=bn+1 ; info=debug.getinfo(bn) end -- or this one
-		print( mode , info.currentline , info.name or "." , info.short_src )
+		local info
+		while true do
+			info=debug.getinfo(bn)
+			local name=string.lower(info.name or "")
+			 -- skip these
+			if     name=="print"     then bn=bn+1
+			elseif name=="dump"      then bn=bn+1
+			elseif name=="traceback" then bn=bn+1
+			else
+				break
+			end
+		end
+		print( mode , info.name or "." , info.short_src..":"..info.currentline )
 	end
 	print( mode , unpack(args) )
 
 end
 
 -- print replacement that goes through the log system and prepends TASK_NAME
-logs.PRINT=function(...) logs.log("TASK",...) end
+logs.print=function(...) logs.log("TASK",...) end
+
+-- print traceback
+logs.traceback=function(...) logs.log("TASK",debug.traceback(...)) end
 
 -- print to the main display
 logs.display = function(...)
@@ -111,9 +126,7 @@ logs.display = function(...)
 	end
 end
 
-
 -- show full table contents
-
 logs.dump = function(...)
 	logs.log( "TASK" , logs.tostring(...) )
 end

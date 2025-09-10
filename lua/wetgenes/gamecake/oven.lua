@@ -3,7 +3,7 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local log,dump,PRINT=require("wetgenes.logs"):export("log","dump","PRINT")
+local logs=require("wetgenes.logs")
 local global=require("global")
 
 -- calling this once a frame, turns off gc and forces gc to only happen here
@@ -217,7 +217,10 @@ function M.bake(opts)
 	oven.opts=opts or {}
 	global.OVEN_OPTS=oven.opts -- remember last oven opts in global
 	global.TASK_NAME="#MAIN"
-	global.PRINT=PRINT
+	global.PRINT=logs.print
+	global.DUMP=logs.dump
+	global.LOG=logs.log
+	global.TRACEBACK=logs.traceback
 
 	if type(opts[1])=="table" then -- probably passed in from nacl
 		for n,v in pairs(opts[1]) do -- copy it all into opts
@@ -282,7 +285,7 @@ if jit then -- now logs are setup, dump basic jit info
 	local t={jit.version,jit.status()}
 	t[2]=tostring(t[2])
 	t[#t+1]="jit_mcode_size="..jit_mcode_size.."k"
-	log( "oven" , table.concat(t,"\t") )
+	LOG( "oven" , table.concat(t,"\t") )
 end
 
 -- no more flavour, only SDL
@@ -835,7 +838,7 @@ os.exit()
 			sa=sa or ""
 			sb=sb or ""
 
-log("oven",sa.." : "..sb)
+LOG("oven",sa.." : "..sb)
 
 			if not oven.preloader_enabled then return end
 
