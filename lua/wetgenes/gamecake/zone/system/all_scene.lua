@@ -202,8 +202,16 @@ local hash=0
 				scene.oven.console.display_disable=true
 			end
 			
-			scene:systems_call("housekeeping")
-
+			-- disable house keeping for a while
+			if scene.pause_housekeeping then
+				if scene.pause_housekeeping>0 then
+					scene.pause_housekeeping=scene.pause_housekeeping-1
+				else
+					scene:systems_call("housekeeping")
+				end
+			else
+				scene:systems_call("housekeeping")
+			end
 			-- this should only be set in the values sub task
 			if scene.subscribed then -- send out new values
 				local values=scene:save_all_values()

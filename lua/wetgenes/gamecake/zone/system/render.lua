@@ -103,8 +103,8 @@ renders.item.render_camera=function(render)
 	if camera then
 		camera:set_active() -- perform tween update here
 		-- rotate bloom with camera movement ( barely noticeable unless you squish one of the axis)
-		sys.screen.blurd1=V3(1,0,0)*Q4("z", (camera.tilt+camera.direction)* 8 )
-		sys.screen.blurd2=V3(0,1/2,0)*Q4("z", (camera.tilt+camera.direction)* 8 )
+		sys.screen.blurd1=V3(1,0,0)*Q4("z", (camera.tilt+camera.direction)* 1 )
+		sys.screen.blurd2=V3(0,1/2,0)*Q4("z", (camera.tilt+camera.direction)* 1 )
 	else
 		local blur_rot=Q4("z",45)
 		sys.screen.blurd1=V3(1,0,0)*blur_rot
