@@ -44,6 +44,57 @@ end
 
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+
+-- calling this once a frame, turns off gc and forces gc to only happen here
+
+--	collectgarbage("setpause",400)
+--	collectgarbage("setstepmul",100)
+
+-- this will stop gc and take control of it
+M.garbage_collect_step=function()
+	collectgarbage("stop") -- from now on we must explicitly call step as often as we can
+	collectgarbage("setpause",400) -- this number adjusts when collection will start ( still seems to effect us here )
+	collectgarbage("setstepmul",1) -- this number adjusts how much time that each step should take
+	collectgarbage("step",0) -- this function may do nothing or may collect some garbage
+end
+
+-- if we can not regularly call garbage_collect_step then we must restore the default settings and restart it
+M.garbage_collect_restart=function()
+	collectgarbage("setpause",200)
+	collectgarbage("setstepmul",200)
+	collectgarbage("restart")
+end
+
+--[[
+
+luajit can sometimes get stuck, this forces a large allocation before
+we try and do much else which usually sorts it out
+
+]]
+M.jit_mcode_size=0
+M.jit_prealloc=function()
+
+	if jit then -- start by trying to force a jit memory allocation
+
+		local ju=require("jit.util")
+
+		local sm=1024
+		while sm>8 do -- 8k minimum
+			local mi=0
+			require("jit.opt").start("sizemcode="..sm,"maxmcode="..sm)
+			jit.on()
+			jit.flush()
+			if not ju.tracemc(1) then -- not alloced ( because of flush )
+				for i=1,1000 do end -- this should force an allocation
+				if ju.tracemc(1) then break end -- check if alloced
+			end
+			sm=sm/2
+		end
+		if sm>8 then M.jit_mcode_size=sm else jit.off() end -- auto turn jit off if alloc failed
+	end
+end
+
+
 --[[#lua.wetgenes.gamecake.toaster.newticks
 
 	ticks=require("wetgenes.gamecake.toaster").newticks(rate,jump)

@@ -6,53 +6,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --local log,dump,PRINT=require("wetgenes.logs"):export("log","dump","PRINT")
 local logs=require("wetgenes.logs")
 local global=require("global")
-
--- calling this once a frame, turns off gc and forces gc to only happen here
-
---	collectgarbage("setpause",400)
---	collectgarbage("setstepmul",100)
-
--- this will stop gc and take control of it
-local garbage_collect_step=function()
-	collectgarbage("stop") -- from now on we must explicitly call step as often as we can
-	collectgarbage("setpause",400) -- this number adjusts when collection will start ( still seems to effect us here )
-	collectgarbage("setstepmul",1) -- this number adjusts how much time that each step should take
-	collectgarbage("step",0) -- this function may do nothing or may collect some garbage
-end
--- if we can not regularly call garbage_collect_step then we must restore the default settings and restart it
-local garbage_collect_restart=function()
-	collectgarbage("setpause",200)
-	collectgarbage("setstepmul",200)
-	collectgarbage("restart")
-end
-
-local jit_mcode_size=0
---[[
-
-luajit can sometimes get stuck, this forces a large allocation before
-we try and do much else which usually sorts it out
-
-]]
-	if jit then -- start by trying to force a jit memory allocation
-
-		local ju=require("jit.util")
-
-		local sm=1024
-		while sm>8 do -- 8k minimum
-			local mi=0
-			require("jit.opt").start("sizemcode="..sm,"maxmcode="..sm)
-			jit.on()
-			jit.flush()
-			if not ju.tracemc(1) then -- not alloced ( because of flush )
-				for i=1,1000 do end -- this should force an allocation
-				if ju.tracemc(1) then break end -- check if alloced
-			end
-			sm=sm/2
-		end
-		if sm>8 then jit_mcode_size=sm else jit.off() end -- auto turn jit off if alloc failed
-
---		os.exit(1)
-	end
+local toaster=require("wetgenes.gamecake.toaster")
+-- help luajit work on android/arm
+toaster.jit_prealloc()
 
 
 --[[#lua.wetgenes.gamecake.oven
@@ -205,7 +161,7 @@ modules and sharing state between them.
 function M.bake(opts)
 
 	local oven={}
-	oven.newticks=require("wetgenes.gamecake.toaster").newticks
+	oven.newticks=toaster.newticks
 	oven.is={}
 	wwin.oven=wwin.oven or oven -- store a global oven on first use
 
@@ -285,7 +241,7 @@ end
 if jit then -- now logs are setup, dump basic jit info
 	local t={jit.version,jit.status()}
 	t[2]=tostring(t[2])
-	t[#t+1]="jit_mcode_size="..jit_mcode_size.."k"
+	t[#t+1]="jit_mcode_size="..toaster.jit_mcode_size.."k"
 	LOG( "oven" , table.concat(t,"\t") )
 end
 
@@ -710,7 +666,7 @@ os.exit()
 
 		function oven.setup()
 			if oven.now and oven.now.setup then
-				garbage_collect_restart() -- in case of large allocations
+				toaster.garbage_collect_restart() -- in case of large allocations
 				oven.now.setup() -- this will probably load data and call the preloader
 			end
 --print("setup preloader=off")
@@ -1048,7 +1004,7 @@ LOG("oven","caught : ",m.class,m.cmd)
 
 				-- we probably have some time so try and run a small gc step
 				-- this should take less than 1ms
-				garbage_collect_step()
+				toaster.garbage_collect_step()
 
 				if oven.frame_rate_limited() then
 					while (oven.frame_time-(oven.frame_rate or 0))>oven.time() do

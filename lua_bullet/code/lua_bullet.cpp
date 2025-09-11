@@ -51,6 +51,14 @@ bullet_world *pp;
 	return pp;
 }
 
+static int lua_bullet_world_check (lua_State *l)
+{
+bullet_world *pp;
+	pp=(bullet_world*)luaL_checkudata(l, 1 , lua_bullet_world_meta_name);
+	lua_pushboolean(l, pp->world ? 1 : 0 );
+	return 1;
+}
+
 static void lua_bullet_world_delete (bullet_world *pp)
 {
 	if(pp->world)      { delete pp->world;      pp->world=0;      }
@@ -1571,6 +1579,7 @@ LUALIB_API int luaopen_wetgenes_bullet_core (lua_State *l)
 
 	const luaL_Reg lib[] =
 	{
+		{"world_check",						lua_bullet_world_check},
 		{"world_create",					lua_bullet_world_create},
 		{"world_destroy",					lua_bullet_world_destroy},
 		{"world_register",					lua_bullet_world_register},
