@@ -96,22 +96,23 @@ all.scene.initialize=function(scene)
 	-- this guarantees call order, so if we call setup we will always call setup on kinetic system/items first
 	scene.sortby={
 		--
-		kinetic =	-1000	-2,
-		render  =	-1000	-1,
+		kinetic =	-1000	-20,
+		render  =	-1000	-10,
 		--
-		input   =	0		-5,
-		camera  =	0		-4,
-		player  =	0		-3,
-		tool    =	0		-2,
-		build   =	0		-1,
+		input   =	0		-60,
+		camera  =	0		-50,
+		chunk   =	0		-40,
+		player  =	0		-30,
+		tool    =	0		-20,
+		build   =	0		-10,
 		--
 		-- everything not explicitly mentioned goes here in alphabetical order
 		--
-		sky     =   0		+1,
-		water   = 	0		+2,
+		sky     =   0		+10,
+		water   = 	0		+20,
 		--
-		zone    =	1000	+1,
-		sync    =	1000	+2,
+		zone    =	1000	+10,
+		sync    =	1000	+20,
 		--
 	}
 	scene:sortby_update()
