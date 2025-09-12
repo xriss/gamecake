@@ -112,7 +112,9 @@ all.code.db=function(linda,task_id,task_idx)
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
 	
-	local oven=require("wetgenes.gamecake.toaster").bake({linda=linda})
+	local toaster=require("wetgenes.gamecake.toaster")
+	toaster.jit_prealloc()	-- help luajit work on android/arm
+	local oven=toaster.bake({linda=linda})
 
 	local db=all.db.open({linda=linda,time=oven.time})
 
@@ -163,7 +165,10 @@ all.code.popins=function(linda,task_id,task_idx)
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
 
-	local oven=require("wetgenes.gamecake.toaster").bake({linda=linda})
+	local toaster=require("wetgenes.gamecake.toaster")
+	toaster.jit_prealloc()	-- help luajit work on android/arm
+	local oven=toaster.bake({linda=linda})
+
 	oven.upnet=oven.rebake("wetgenes.gamecake.upnet")
 
 	local scene
@@ -231,8 +236,10 @@ all.code.values=function(linda,task_id,task_idx)
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
 	
-	-- basic oven, nogl etc
-	local oven=require("wetgenes.gamecake.toaster").bake({linda=linda})
+	local toaster=require("wetgenes.gamecake.toaster")
+	toaster.jit_prealloc()	-- help luajit work on android/arm
+	local oven=toaster.bake({linda=linda})
+
 	oven.upnet=oven.rebake("wetgenes.gamecake.upnet")
 
 	local scene
@@ -312,6 +319,7 @@ all.code.values=function(linda,task_id,task_idx)
 			end
 			main() -- probably getting called every 1ms ish
 		until not memo
+		toaster.garbage_collect_step() -- try and avoid gc glitching
 	end
 
 end
@@ -326,8 +334,10 @@ all.code.tweens=function(linda,task_id,task_idx)
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
 	
-	-- basic oven, nogl etc
-	local oven=require("wetgenes.gamecake.toaster").bake({linda=linda})
+	local toaster=require("wetgenes.gamecake.toaster")
+	toaster.jit_prealloc()	-- help luajit work on android/arm
+	local oven=toaster.bake({linda=linda})
+
 	oven.upnet=oven.rebake("wetgenes.gamecake.upnet")
 
 	local scene
@@ -438,6 +448,7 @@ all.code.tweens=function(linda,task_id,task_idx)
 			end
 			main() -- probably getting called every 1ms ish
 		until not memo
+		toaster.garbage_collect_step() -- try and avoid gc glitching
 	end
 
 end

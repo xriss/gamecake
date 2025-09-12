@@ -117,6 +117,7 @@ all.scene.initialize=function(scene)
 	}
 	scene:sortby_update()
 
+	scene.scrib={}
 	scene.db=db
 	for caste,info in pairs(scene.infos) do -- initialize each system from info
 		local sys={}
@@ -351,20 +352,33 @@ counts.draw=0
 
 --	counts.undo , counts.update = scene:do_update_values()
 
+	if not scene.scrib.tim then
+		scene.scrib.tim=oven.times.create()
+	end
+	scene.scrib.tim.start()
+
+	scene.scrib.tween=0
+	scene.scrib.pull=0
+	scene.scrib.merge=0
 	for memo in oven.tasks:memos("all_draws") do
 		if memo.cmd=="tweens" then
 			scene:values_call( function(it) it.tweens:push() end )
 			scene:load_all_tweens(memo.tweens)
+			scene.scrib.tween=scene.scrib.tween+1
 		end
 	end
 	scene:ticks_sync()
 	-- shrink tweens down to two slots so we may tween between them
 	while #scene.tweens > 2 and scene.tweens:get("tick",2) <= scene.ticks.now do
 		scene:values_call( function(it) it.tweens:pull() end ) -- merge 2 into 1
+		scene.scrib.pull=scene.scrib.pull+1
 	end
 	while #scene.tweens > 2 do
 		scene:values_call( function(it) it.tweens:merge() end ) -- merge 3 into 2
+		scene.scrib.merge=scene.scrib.merge+1
 	end
+
+	scene.scrib.tim.stop()
 
 --if #scene.tweens==2 then
 --print( scene.tweens:get("tick",1) , scene.tweens:get("tick",2) , scene.ticks.time )
@@ -386,8 +400,17 @@ all.scene.do_draw=function(scene)
 
 	scene:ticks_sync()
 
+	scene.scrib.tim.done()
+--[[
+if scene.scrib.tim.time > 0.01 then
+PRINT("TIM",math.floor(scene.scrib.tim.time*1000))
+end
+]]
+
 --	local upnet=scene.oven.upnet
-	oven.console.lines_display[2]=("now:"..scene.ticks.now.." inp:"..scene.ticks.input.." agr:"..scene.ticks.agreed.." bse:"..scene.ticks.base)
+	oven.console.lines_display[2]=(
+--	"tween:"..scene.scrib.tween.." pull:"..scene.scrib.pull.." merge:"..scene.scrib.merge.." "..
+	"now:"..scene.ticks.now.." inp:"..scene.ticks.input.." agr:"..scene.ticks.agreed.." bse:"..scene.ticks.base)
 
 --	local nowtick=upnet.nowticks()
 --	print("do_draw",scene.ticks.time)

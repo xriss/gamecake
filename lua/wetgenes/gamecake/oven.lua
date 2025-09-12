@@ -6,10 +6,11 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 --local log,dump,PRINT=require("wetgenes.logs"):export("log","dump","PRINT")
 local logs=require("wetgenes.logs")
 local global=require("global")
+
 local toaster=require("wetgenes.gamecake.toaster")
 -- help luajit work on android/arm
 toaster.jit_prealloc()
-
+local profile=require("jit.profile")
 
 --[[#lua.wetgenes.gamecake.oven
 
@@ -666,7 +667,6 @@ os.exit()
 
 		function oven.setup()
 			if oven.now and oven.now.setup then
-				toaster.garbage_collect_restart() -- in case of large allocations
 				oven.now.setup() -- this will probably load data and call the preloader
 			end
 --print("setup preloader=off")
@@ -717,6 +717,16 @@ os.exit()
 
 		function oven.update()
 --print(oven.ticks)
+
+local prof={TOTAL=0}
+if false then
+	local ms=5
+	profile.start("fi"..ms,function(thread, samples, vmstate)
+		prof.TOTAL=prof.TOTAL+samples*ms
+		local s=profile.dumpstack(thread, "l", 1)
+		prof[s]=(prof[s] or 0 ) +samples*ms
+	end)
+end
 
 			if oven.do_backtrace then
 				oven.do_backtrace=false
@@ -786,6 +796,25 @@ os.exit()
 
 			end
 			oven.update_co=nil
+
+if false then
+	profile.stop()
+	if prof.TOTAL >= 10 then
+		local list={}
+		for n,v in pairs(prof) do
+			list[#list+1]=string.format("%4i",v).." : "..n
+		end
+		table.sort(list)
+		local c=0
+		for i=#list,1,-1 do
+			PRINT(list[i])
+			c=c+1
+			if c>=5 then break end
+		end
+		PRINT("")
+	end
+--	DUMP(oven.tasks.linda:dump())
+end
 
 		end
 

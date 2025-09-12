@@ -835,6 +835,9 @@ M.upnet_code=function(linda,task_id,task_idx)
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end
 
+	local toaster=require("wetgenes.gamecake.toaster")
+	toaster.jit_prealloc()	-- help luajit work on android/arm
+
 	local wtasks=require("wetgenes.tasks")
 	local wwin=require("wetgenes.win")
 	local now=wwin.time -- function to get time now in seconds with ms accuracy, probs
@@ -921,6 +924,7 @@ M.upnet_code=function(linda,task_id,task_idx)
 				end
 			end
 		until not memo
+		toaster.garbage_collect_step() -- try and avoid gc glitching
 	end
 
 end

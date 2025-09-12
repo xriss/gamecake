@@ -53,8 +53,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 -- this will stop gc and take control of it
 M.garbage_collect_step=function()
 	collectgarbage("stop") -- from now on we must explicitly call step as often as we can
-	collectgarbage("setpause",400) -- this number adjusts when collection will start ( still seems to effect us here )
-	collectgarbage("setstepmul",1) -- this number adjusts how much time that each step should take
+	collectgarbage("setpause",500) -- this number adjusts when collection will start ( still seems to effect us here )
+	collectgarbage("setstepmul",10) -- this number adjusts how much time that each step should take
 	collectgarbage("step",0) -- this function may do nothing or may collect some garbage
 end
 

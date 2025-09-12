@@ -325,6 +325,11 @@ font.vbs_idx=1
 			console.lines_display[1]=s
 --			console.display(s)
 
+if oven.times.update.time+oven.times.draw.time > 0.030 then -- slow frame
+
+PRINT("SLOW",s)--, oven.now.now.scene:status())
+end
+
 			console.fps_count=console.fps_count+1
 		end
 

@@ -66,6 +66,7 @@ M.do_memo=function(linda,memo,timeout)
 	if linda:send( timeout , memo.task , memo ) then -- send on memo.task (a public name of another task)
 		if memo.id then
 			local ok,r=linda:receive( timeout , memo.id ) -- receive the result on memo.id
+			linda:set(memo.id) -- cleanup
 --log("memo",memo.task,memo.id,"done")
 			return r
 		end
@@ -204,6 +205,7 @@ M.tasks_functions.claim_global=function(tasks,name,value)
 	memo.value=value
 	if tasks.linda:send( nil , memo.task , memo ) then -- send on memo.task (a public name of another task)
 		local ok,r=tasks.linda:receive( nil , memo.id ) -- receive the result on memo.id
+		tasks.linda:set(memo.id) -- cleanup
 		return r.result
 	end
 end
@@ -228,6 +230,7 @@ M.tasks_functions.eject_global=function(tasks,name)
 	memo.name=name
 	if tasks.linda:send( nil , memo.task , memo ) then -- send on memo.task (a public name of another task)
 		local ok,r=tasks.linda:receive( nil , memo.id ) -- receive the result on memo.id
+		tasks.linda:set(memo.id) -- cleanup
 		return r.result
 	end
 end
@@ -250,6 +253,7 @@ M.tasks_functions.fetch_global=function(tasks,name)
 	memo.name=name
 	if tasks.linda:send( nil , memo.task , memo ) then -- send on memo.task (a public name of another task)
 		local ok,r=tasks.linda:receive( nil , memo.id ) -- receive the result on memo.id
+		tasks.linda:set(memo.id) -- cleanup
 		return r.result
 	end
 end
@@ -571,7 +575,8 @@ M.tasks_functions.receive=function(tasks,memo,timeout)
 		tasks:send(memo,timeout)
 	end
 	memo.state="receiving"
-	local ok,result=(tasks.main_thread and tasks.colinda or tasks.linda):receive( timeout , memo.id )
+	local ok,result=(tasks.main_thread and tasks.colinda or tasks.linda):receive( timeout , memo.id ) ;
+	(tasks.main_thread and tasks.colinda or tasks.linda):set(memo.id) -- cleanup
 	memo.state="done"
 	tasks:del_memo(memo)
 
@@ -712,11 +717,14 @@ M.colinda_functions.send=function(colinda,...)
 	local timestart
 	if timeout then timestart=os.time() end
 	
+--PRINT(timeout)
+--TRACEBACK()
+
 	local ret
 	repeat
-		ret={ colinda.linda:send(0,unpack(aa)) }
+		ret={ colinda.linda:send(1,unpack(aa)) }
 		if ret[1] then break end -- got a result
-		if timeout and os.time() > timestart+timeout then break end
+		if timeout and os.time() >= timestart+timeout then break end
 		coroutine.yield()
 	until false
 	
@@ -734,9 +742,9 @@ M.colinda_functions.receive=function(colinda,...)
 	
 	local ret
 	repeat
-		ret={ colinda.linda:receive(0,unpack(aa)) }
+		ret={ colinda.linda:receive(1,unpack(aa)) }
 		if ret[1] then break end -- got a result
-		if timeout and os.time() > timestart+timeout then break end
+		if timeout and os.time() >= timestart+timeout then break end
 		coroutine.yield()
 	until false
 
