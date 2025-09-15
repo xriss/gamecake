@@ -147,8 +147,8 @@ players.item.setup=function(player)
 
 	player.max_slope=-0.75
 	player.min_slope=-1.00
-	player.run_speed=2
-	player.walk_speed=1
+	player.run_speed=30
+	player.walk_speed=15
 
 -- shrink fatty a bit so we can fit in 4x4 holes
 	local overlap = 0.125 -- make some things a little bit bigger so collisions can not easily slip inside
@@ -264,7 +264,7 @@ players.item.update_control=function(player)
 		end
 
 		if move:lenlen() > 1 then move:normalize() end -- no go faster than 1
-		move=move*player.walk_speed
+		move=move
 
 	-- handle movement with fake gravity in direction of stick
 		if move:len()>0.1 then -- need some movement to cause rotation
@@ -274,10 +274,14 @@ players.item.update_control=function(player)
 		else
 			player.body_active=nil
 		end
-		player.acc=(move*(15))*( (player.floor and 5) or (player.water and 1) or 1 )
+		player.acc=(move*player.walk_speed)*( (player.floor and 5) or (player.water and 1) or 1 )
 
 		if l3_set then -- click to start runinng
-			player.run=camera.playery*-player.run_speed -- we run in this direction and speed
+			if move:lenlen() > 0.25 then -- use move
+				player.run=move -- we run in this direction and speed
+			else
+				player.run=-camera.playery -- we run in this direction and speed
+			end
 			player.run_time=tick
 		end
 		-- if you keep holding the run button you will start running again
@@ -297,8 +301,8 @@ players.item.update_control=function(player)
 		player.run = player.run + ( player.run:normalize(V3()) * ((cy/ -4)) ) -- adjust speed with forward/back
 		player.run:product(Q4("y",-(cx*4))) --rotate a little bit with left/right
 
-		if player.run:len() > player.run_speed then -- max speed
-			player.run = player.run:normalize()*player.run_speed
+		if player.run:len() > 1 then -- max speed
+			player.run = player.run:normalize()
 		end
 
 		local move=V3(player.run) -- do not alter run as it is our "target" direction and speed
@@ -312,12 +316,12 @@ players.item.update_control=function(player)
 		player.rot:rrotate( forward/4 , V3(0,-1,0) )
 		player.body_active=true
 
-		player.acc=(move*(15))*( (player.floor and 5) or (player.water and 1) or 1 )
+		player.acc=(move*player.run_speed)*( (player.floor and 5) or (player.water and 1) or 1 )
 
 		-- ignore quick release ( taps ) so you can either hold run or tap to toggle
 		-- also stop running if we slow down target ( pull back on stick ) but only if run is not held down
  		if	( l3_clr and ( ( (tick-player.run_time)>8 ) or ( player.run_time>tick ) ) ) or
-			( ( player.vel:len()<9 ) and ( player.run:len() < player.walk_speed ) ) then
+			( ( player.vel:len()<9 ) and ( player.run:len() < 0.5 ) ) then
 			player.run_time=0
 		end
 	end
