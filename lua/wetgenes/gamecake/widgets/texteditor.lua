@@ -945,7 +945,6 @@ function wtexteditor.msg(pan,m)
 			elseif m.id=="select_all" then
 				txt.mark(0,0,txt.hy+1,0)
 				texteditor.txt_dirty=true
-				txt.cursor()
 				texteditor:mark_sync()
 				texteditor:scroll_to_view()
 			elseif m.id=="clip_cutline" then
