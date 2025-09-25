@@ -104,17 +104,18 @@ uniform mat4 projection;
 
 in float a_idx;
 
-out vec4  v_xyzw;
+out vec3  v_xyz;
+out vec3  v_nrm;
 out vec4  v_uvst;
-out vec4  v_position;
 
 void main()
 {
-	mainVertex( v_xyzw , v_uvst , a_idx );
+	
+	mainVertex( v_xyz , v_nrm , v_uvst , a_idx );
 
-	v_position = projection * modelview * vec4(v_xyzw.xyz, 1.0) ;
+	v_nrm = mat3(modelview) * v_nrm ; // only rotate normal
 
-	gl_Position=v_position;
+	gl_Position = projection * modelview * vec4( v_xyz , 1.0 );
 }
 
 #endif
@@ -122,16 +123,17 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 
-in vec4  v_xyzw;
+in vec3  v_xyz;
+in vec3  v_nrm;
 in vec4  v_uvst;
-in vec4  v_position;
 
-out vec4 FragColor;
+out vec4 FragColor;	
 
 void main()
 {
-	mainFragment( FragColor , v_xyzw , v_uvst );
+	mainFragment( FragColor , v_xyz , v_nrm , v_uvst );
 }
+
 #endif
 
 ]]
