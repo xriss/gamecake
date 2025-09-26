@@ -39,7 +39,9 @@ base.noblock=false
 hardcore=require("wetgenes.win.sdl")
 base.sdl_platform=hardcore.platform
 
-
+if base.sdl_platform=="Emscripten" then
+	base.noblock=true
+end
 
 --[[
 if type(args[2]=="table" ) then -- you can force a core by using a second arg to require
@@ -217,99 +219,6 @@ function win.load_run_init(args)
 
 end
 
---
--- Special nacl entry points, we pass in the url of the main zip we wish to load
--- this does things that must only happen once
---
-local main -- gonna have to cache the main state here
-function win.nacl_start(args)
---	_G.print=hardcore.print
---	print=_G.print
-	
---print("nacl start ")
-
-	if type(args)=="string" then -- just a zip name
-		args={zips={args}}
-	end
-
-	local zips=require("wetgenes.zips")
-	
--- we want nacl msgs to go here.
-	_G.nacl_input_event=function(...) return hardcore.input_event(...) end
-	
-	local lastpct=-1
-	local loads={}
-	for i,v in ipairs(args.zips) do
-		loads[i]={v,100,0}
-	end
-	for i,v in ipairs(args.zips) do
-		local f=function(i,v)
-		hardcore.getURL(v,function(mem,total,progress)	
-			local l=loads[i]
-			
-			if total==0 then
-				hardcore.print(string.format("Failed to load %s (probably a missing size in the html headers)",v))
-				return
-			end 
-			
-			l[2]=total
-			l[3]=progress
-			
-			local t=0
-			local p=0
-			for i,v in ipairs(loads) do
-				t=t+v[2]
-				p=p+v[3]
-			end
-
-if args.progress then -- callback with progress
-	pcall(function() args.progress(t,p) end)
-else
-	local pct=math.floor(100*p/t)
-	if lastpct<pct then
-		hardcore.print(string.format("Preloading zips : %02d%%",pct)) -- progress
-		lastpct=pct
-	end
-end
-
-			if total<=progress then -- this file has loaded
-
-				zips.add_zip_data(mem)
-
-				if t<=p then --all loaded
-					main=win.load_run_init(args)
-				end
-			end
-		end)
-		end
-		f(i,v)
-	end
-
-	if not loads[1] then -- no zips?
-		main=win.load_run_init(args)
-	end
-	
---print("nacl start done")
-
-end
-
-function win.nacl_pulse() -- called 60ish times a second depending upon how retarted the browser is
-
-	if main then
-		main:serv_pulse()
-	end
-end
-
-function win.emcc_start(args)
-
-	local zips=require("wetgenes.zips")
-	assert(zips.add_zip_file(args.zip or "gamecake.zip"))
-	local main=win.load_run_init(args)
-	if oven then
-		oven.preloader_enabled=false -- disable preloader
-	end
-	require("global").gamecake_pulse=function() main:serv_pulse() end
-end
 
 function win.create(opts)
 
@@ -334,6 +243,12 @@ function win.create(opts)
 		posix.win_translate_msg=function(m) return posix.win_translate_msg_keys_and_mouse(w,m) end -- need to make real keyboard/mouse msgs
 	end
 
+	-- run main_update often from this point on, which then runs the global OVEN
+	if base.noblock then
+		require("global").main_update=function() if OVEN then OVEN:serv_pulse() end end
+		softcore.set_main_loop()
+	end
+	
 	return w
 end
 

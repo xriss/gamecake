@@ -139,7 +139,7 @@ function M.bake(oven,console)
 	console.call.reload=wpackage.reload
 
 	console.help.rebake="Force reload a baked module using global oven."
-	console.call.rebake=function(n) if wwin.oven then return wwin.oven.reload(n) end end
+	console.call.rebake=function(n) if OVEN then return OVEN.reload(n) end end
 
 	console.help.ls="List data currently set in the console environment."
 	console.call.ls=function(n)

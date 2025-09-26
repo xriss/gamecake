@@ -49,7 +49,7 @@ local opts={
 . . . . . . . . . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . . . . . . . . . 
 ]],
-	... -- include commandline opts
+	unpack(arg) -- include commandline opts
 }
 
 math.randomseed( os.time() ) -- try and randomise a little bit better

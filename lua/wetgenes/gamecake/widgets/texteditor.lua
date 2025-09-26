@@ -860,7 +860,9 @@ end
 
 function wtexteditor.scroll_to_bottom(texteditor)
 	local d=texteditor.scroll_widget.daty
-	d:set(d.max or 1)
+	if d then -- TODO: why moight this happen
+		d:set(d.max or 1)
+	end
 end
 
 function wtexteditor.scroll_to_view(texteditor,cy,cx)

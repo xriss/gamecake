@@ -241,46 +241,36 @@ if EMCC then
 
 	defines "EMCC"
 
+	buildoptions {
+	}
+
 	buildlinkoptions {
 		"-pthread",
-		"-Wno-pthreads-mem-growth",
---		"-s USE_PTHREADS",
 	}
+	
 	linkoptions{
---		"-s PTHREAD_POOL_SIZE=4",
---		"-rdynamic",
+		"-s PTHREAD_POOL_SIZE=16",
 		"--emrun",
 		"-lidbfs.js",
 		"-v",
---		"-s PROXY_TO_PTHREAD", -- this just not work so we need to use emscripten_set_main_loop instead...
-		"-s OFFSCREEN_FRAMEBUFFER",
-		"-s OFFSCREENCANVAS_SUPPORT",
-		
-	}
-
-	buildlinkoptions{
---		"-Wno-long-long",
---		"-Werror",
---		"-Wno-almost-asm",
-	}
-
-	linkoptions{
---		"-as-needed",
+--		"-s OFFSCREEN_FRAMEBUFFER",
+--		"-s OFFSCREENCANVAS_SUPPORT",
+--		"-s MALLOC=mimalloc",
 		"-s ALLOW_MEMORY_GROWTH=1",
 		"-s EXPORTED_FUNCTIONS=\"['_main','_main_update','_main_close']\"",
 		"-s EXPORTED_RUNTIME_METHODS=\"['ccall','cwrap']\"",
---		"-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 ",
---		"-s TOTAL_MEMORY=1GB",
---		"-s \"BINARYEN_METHOD='native-wasm'\"",
---		"-s WASM=1",
+		
+--		"-s PROXY_TO_PTHREAD=0", -- PROXY_TO_PTHREAD is borked so must be disabled
+--		"-s OFFSCREEN_FRAMEBUFFER",
+
 	}
-	
+
 	platforms { "emcc" }
 
 -- set debug/release build flags
 	configuration {"Debug"}
 		linkoptions{
---			"-s ASSERTIONS=1",
+			"-s ASSERTIONS=1",
 --			"-s SAFE_HEAP=1",
 		}
 		buildlinkoptions{

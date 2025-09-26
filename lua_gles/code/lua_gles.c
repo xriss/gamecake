@@ -368,8 +368,8 @@ int id=(int)luaL_checknumber(l,1);
 }
 
 static int lua_gles_TexImage2D (lua_State *l)
-{		
-/* tracking down emcc issue
+{
+/*// tracking down emcc issue
 void *p=(void*)lua_gles_topointer(l,9,0);
 printf("lua_gles_TexImage2D %p\n",p);
 */

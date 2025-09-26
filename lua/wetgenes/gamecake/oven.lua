@@ -10,7 +10,7 @@ local global=require("global")
 local toaster=require("wetgenes.gamecake.toaster")
 -- help luajit work on android/arm
 toaster.jit_prealloc()
-local profile=require("jit.profile")
+local profile ; pcall(function() profile = require("jit.profile") end)
 
 --[[#lua.wetgenes.gamecake.oven
 
@@ -164,7 +164,6 @@ function M.bake(opts)
 	local oven={}
 	oven.newticks=toaster.newticks
 	oven.is={}
-	wwin.oven=wwin.oven or oven -- store a global oven on first use
 
 	if opts.hints then -- pass hints from opts to sdl
 		wwin.hints(opts.hints)
@@ -978,6 +977,8 @@ LOG("oven","caught : ",m.class,m.cmd)
 -- eg oven.serv_pulse to be called when necesary.
 		function oven.serv()
 
+			global.OVEN=oven -- remember global oven
+
 			oven.focus=true -- hack, default to focused
 			oven.do_start=true
 
@@ -1008,6 +1009,7 @@ LOG("oven","caught : ",m.class,m.cmd)
 		end
 		
 		function oven.serv_pulse()
+
 			if oven.finished then return true end
 
 			if oven.frame_rate_limited() then

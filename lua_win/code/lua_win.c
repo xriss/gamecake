@@ -16,6 +16,9 @@
 
 #include "../../lua_sdl2/luasdl2/src/window.h"
 
+#if (defined __EMSCRIPTEN__)
+#include "emscripten.h"
+#endif
 
 
 static const u8 font_bits[16*48]={
@@ -250,7 +253,16 @@ int lua_wetwin_sdl_attach_resize_hax(lua_State *l)
 
 
 
+extern void main_update ();
+int lua_set_main_loop(lua_State *l)
+{
+#if (defined __EMSCRIPTEN__)
 
+	emscripten_set_main_loop( main_update , 0 , 0 );
+
+#endif
+	return 0;
+}
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -262,6 +274,8 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{
+		{"set_main_loop",			lua_set_main_loop},
+
 		{"glyph_8x8",			lua_wetwin_glyph_8x8},
 
 // find ourselves
@@ -282,7 +296,6 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 	
 	return 1;
 }
-
 
 #if ! (defined __EMSCRIPTEN__)
 

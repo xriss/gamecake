@@ -2,6 +2,7 @@ cd `dirname $0`
 
 vagrant up
 
+# this is slow so enable it only when you want to bump the emsdk version
 #vagrant ssh -c " /gamecake/build/install-emsdk /home/vagrant/ "
 
 vagrant ssh -c " source /home/vagrant/emsdk/emsdk_env.sh ; cd /gamecake ; build/make --gcc=emcc $* "
