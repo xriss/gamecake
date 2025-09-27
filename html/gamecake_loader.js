@@ -116,7 +116,7 @@ console.log(opts)
 	gamecake.progress_bar=template_element('<progress value="0" style="width:100%; position:absolute;" title="Loading GameCake"></progress>');
 	gamecake.progress_about=template_element(
 		'<div style="font-family:sans-serif; font-size:2em; color:#fff; line-height:1.5em; text-align:center; width:66%; margin:auto; ">'+readme+'</div>');
-	gamecake.canvas=template_element('<canvas onclick="this.focus();" tabindex="-1" id="canvas" style=" width:100%; height:100%; position:absolute; " oncontextmenu="event.preventDefault()"></canvas>');
+	gamecake.canvas=template_element('<canvas onclick="this.focus();" tabindex="-1" id="canvas" style="position:absolute; " oncontextmenu="event.preventDefault()"></canvas>');
 
 	gamecake.listener.appendChild(gamecake.progress_bar)
 	gamecake.listener.appendChild(gamecake.progress_about)
@@ -144,7 +144,7 @@ console.log(opts)
 		}
 	};
 	gamecake.resize=function(){
-		let e=gamecake.div;
+		let e=document.documentElement;
 
 		let isFullscreen = !((document.fullScreenElement !== undefined && document.fullScreenElement === null) || 
 		 (document.msFullscreenElement !== undefined && document.msFullscreenElement === null) || 
@@ -156,16 +156,21 @@ console.log(opts)
 			e=gamecake.canvas; // fullscreen does funky stuff, try not to disturb it.
 		}
 
-		let w=parseFloat(window.getComputedStyle(e).width);
-		let h=parseFloat(window.getComputedStyle(e).height);
+		let w=e.getBoundingClientRect().width;
+		let h=e.getBoundingClientRect().height;
 
 //console.log(w,h)
 		
 		if(!isFullscreen) // it seems better not to call this when fullscreen
 		{
+			console.log("size",w,h)
+			gamecake.canvas.style.width = w+"px"
+			gamecake.canvas.style.height = h+"px"
+			gamecake.canvas.width = w
+			gamecake.canvas.height = h
 			if(Module.setCanvasSize)
 			{
-				Module.setCanvasSize(w,h);
+				setTimeout(function(){Module.setCanvasSize(w,h)},500);
 			}
 		}
 
@@ -175,6 +180,7 @@ console.log(opts)
 	gamecake.clipboard_data=""
 	gamecake.set_clipboard=function(data)
 	{
+console.log("set clipboard",data)
 		try{
 			gamecake.clipboard_data=data;
 			if(navigator.clipboard.writeText)
@@ -283,6 +289,7 @@ console.log(opts)
 		}
 	};
 
+/*
 	gamecake.animation_frame= function() {
 		requestAnimationFrame(gamecake.animation_frame)
 		if( gamecake.main_update )
@@ -290,11 +297,12 @@ console.log(opts)
 			gamecake.main_update()
 		}
 	}
+*/
 
 	Module.onRuntimeInitialized = function() {
 
 		// export functions
-		gamecake.main_update=Module.cwrap("main_update")
+//		gamecake.main_update=Module.cwrap("main_update")
 		gamecake.main_close=Module.cwrap("main_close")
 
 		gamecake.status="start"
@@ -303,7 +311,7 @@ console.log(opts)
 		{
 			gamecake.loaded_hook();
 		}
-		requestAnimationFrame(gamecake.animation_frame)
+//		requestAnimationFrame(gamecake.animation_frame)
 	};
 
 // the clipboard api is useless so we just read when we gain focus and hope that is enough

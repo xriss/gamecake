@@ -265,6 +265,53 @@ int lua_set_main_loop(lua_State *l)
 }
 
 
+/*+-----------------------------------------------------------------------------------------------------------------
+
+handle clipboard through javascript hacks
+
++-----------------------------------------------------------------------------------------------------------------+*/
+
+#if (defined __EMSCRIPTEN__)
+
+int lua_emcc_has_clipboard(lua_State *l)
+{
+	lua_pushboolean(l,1); // just say yes always
+	return 1;
+}
+
+
+EM_JS(void, lua_emcc_set_clipboard_js, (const char* data), {
+	var s0=UTF8ToString(data);
+	Module.gamecake.set_clipboard(s0);
+});
+
+int lua_emcc_set_clipboard(lua_State *l)
+{
+	lua_emcc_set_clipboard_js( lua_tostring(l,1) );
+	return 0;
+}
+
+EM_JS(char*, lua_emcc_get_clipboard_js, (), {
+	var jsString = Module.gamecake.get_clipboard();
+	var lengthBytes = lengthBytesUTF8(jsString)+1;
+	var stringOnWasmHeap = _malloc(lengthBytes);
+	stringToUTF8(jsString, stringOnWasmHeap, lengthBytes);
+	return stringOnWasmHeap;
+});
+
+int lua_emcc_get_clipboard(lua_State *l)
+{
+	char *s=lua_emcc_get_clipboard_js();
+	lua_pushstring(l,s);
+	free(s);
+	return 1;
+}
+
+#endif
+
+
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open library.
@@ -287,6 +334,11 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 
 		{"sdl_attach_resize_hax",		lua_wetwin_sdl_attach_resize_hax},
 		
+#if (defined __EMSCRIPTEN__)
+		{	"has_clipboard",				lua_emcc_has_clipboard				},
+		{	"set_clipboard",				lua_emcc_set_clipboard				},
+		{	"get_clipboard",				lua_emcc_get_clipboard				},
+#endif
 		{0,0}
 	};
 
