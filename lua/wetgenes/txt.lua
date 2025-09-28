@@ -610,6 +610,7 @@ mark or unmark an area
 			txt.fy=nil
 			txt.tx=nil
 			txt.ty=nil
+			txt.brackets=txt.find_brackets()
 			return
 		end
 		tx=tx or fx
@@ -628,6 +629,7 @@ mark or unmark an area
 			txt.fy,txt.ty=txt.ty,txt.fy
 		end
 
+		txt.brackets=txt.find_brackets()
 	end
 
 --[[
@@ -878,7 +880,6 @@ Set the cursor to this (clipped) location
 		
 		txt.cy , txt.cx = txt.clip(y or txt.cy,x or txt.cx)
 		
-		txt.brackets=txt.find_brackets()
 
 	end
 --[[
