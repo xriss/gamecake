@@ -608,6 +608,10 @@ local lay=
 				{id="view_hex"},
 				{id="view_txt"},
 				{id="view_txt_wrap"},
+				{id="view_lex_txt"},
+				{id="view_lex_lua"},
+				{id="view_lex_js"},
+				{id="view_lex_glsl"},
 			}},
 
 --			{id="menu_font",text="Font",top_menu=true,menu_data=gui.menu_datas.font_size},

@@ -777,6 +777,10 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 				{id="view_hex"},
 				{id="view_txt"},
 				{id="view_txt_wrap"},
+				{id="view_lex_txt"},
+				{id="view_lex_lua"},
+				{id="view_lex_js"},
+				{id="view_lex_glsl"},
 			}},
 			{id="menu_search",menu_data={
 				{id="search_find"},
@@ -983,6 +987,22 @@ function wtexteditor.msg(pan,m)
 				txt.cursor()
 				texteditor.opts.mode="txt"
 				texteditor.opts.word_wrap=true
+				texteditor.texteditor_hooks("txt_changed")
+
+			elseif m.id=="view_lex_txt" then
+				txt.set_lexer("txt")
+				texteditor.texteditor_hooks("txt_changed")
+
+			elseif m.id=="view_lex_lua" then
+				txt.set_lexer("lua")
+				texteditor.texteditor_hooks("txt_changed")
+
+			elseif m.id=="view_lex_js" then
+				txt.set_lexer("js")
+				texteditor.texteditor_hooks("txt_changed")
+
+			elseif m.id=="view_lex_glsl" then
+				txt.set_lexer("glsl")
 				texteditor.texteditor_hooks("txt_changed")
 
 			elseif m.id=="search_next" then -- or m.id=="search_find" then
