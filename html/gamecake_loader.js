@@ -57,9 +57,7 @@ gamecake_loader=async function(opts)
 	opts.div=opts.div || "#gamecake"; // div to display within
 	opts.dir=opts.dir || "./exe/"; // where to load stuff from
 	opts.args=opts.args || ["--","gamecake.zip","--logs"]
-
-console.log(opts)
-
+	if(!Array.isArray(opts.args)){opts.args=[opts.args]} // force args to array
 
 	let template_element=function(html)
 	{
@@ -112,18 +110,17 @@ console.log(opts)
 
 	gamecake.engine="emcc";
 	
-	gamecake.listener=template_element('<div id="gamecake_listener" style="width:100%;height:100%;position:relative; background-color:#000;"></div>'); // Main container of stuff
-	gamecake.progress_bar=template_element('<progress value="0" style="width:100%; position:absolute;" title="Loading GameCake"></progress>');
-	gamecake.progress_about=template_element(
-		'<div style="font-family:sans-serif; font-size:2em; color:#fff; line-height:1.5em; text-align:center; width:66%; margin:auto; ">'+readme+'</div>');
-	gamecake.canvas=template_element('<canvas onclick="this.focus();" tabindex="-1" id="canvas" style="position:absolute; " oncontextmenu="event.preventDefault()"></canvas>');
-
-	gamecake.listener.appendChild(gamecake.progress_bar)
-	gamecake.listener.appendChild(gamecake.progress_about)
-	gamecake.listener.appendChild(gamecake.canvas)
-
+	// style empty and insert elements into main container
+	gamecake.div.style.position="fixed"
+	gamecake.div.style.width="100%"
+	gamecake.div.style.height="100%"
 	gamecake.div.innerHTML=""
-	gamecake.div.appendChild(gamecake.listener);
+	gamecake.progress_bar=template_element('<progress value="0" style="width:100%; position:absolute;" title="Loading GameCake"></progress>');
+	gamecake.div.appendChild(gamecake.progress_bar)
+	gamecake.progress_about=template_element('<div style="font-family:sans-serif; font-size:2em; color:#fff; line-height:1.5em; text-align:center; width:66%; margin:auto; ">'+readme+'</div>');
+	gamecake.div.appendChild(gamecake.progress_about)
+	gamecake.canvas=template_element('<canvas onclick="this.focus();" tabindex="-1" id="canvas" style="position:absolute; width:100%; height:100%;" oncontextmenu="event.preventDefault()"></canvas>');
+	gamecake.div.appendChild(gamecake.canvas)
 
 	if(warning!="") // hide canvas as it is not going to work.
 	{
@@ -143,44 +140,11 @@ console.log(opts)
 			gamecake.progress_about.style.display = "none";
 		}
 	};
-	gamecake.resize=function(){
-		let e=document.documentElement;
-
-		let isFullscreen = !((document.fullScreenElement !== undefined && document.fullScreenElement === null) || 
-		 (document.msFullscreenElement !== undefined && document.msFullscreenElement === null) || 
-		 (document.mozFullScreen !== undefined && !document.mozFullScreen) || 
-		 (document.webkitIsFullScreen !== undefined && !document.webkitIsFullScreen));
-
-		if(isFullscreen)
-		{
-			e=gamecake.canvas; // fullscreen does funky stuff, try not to disturb it.
-		}
-
-		let w=e.getBoundingClientRect().width;
-		let h=e.getBoundingClientRect().height;
-
-//console.log(w,h)
-		
-		if(!isFullscreen) // it seems better not to call this when fullscreen
-		{
-			console.log("size",w,h)
-			gamecake.canvas.style.width = w+"px"
-			gamecake.canvas.style.height = h+"px"
-			gamecake.canvas.width = w
-			gamecake.canvas.height = h
-			if(Module.setCanvasSize)
-			{
-				setTimeout(function(){Module.setCanvasSize(w,h)},500);
-			}
-		}
-
-	};
 
 // simple sync clipboard get/set and refresh at startup or when we gain focus
 	gamecake.clipboard_data=""
 	gamecake.set_clipboard=function(data)
 	{
-console.log("set clipboard",data)
 		try{
 			gamecake.clipboard_data=data;
 			if(navigator.clipboard.writeText)
@@ -205,7 +169,6 @@ console.log("set clipboard",data)
 	};
 	gamecake.refresh_clipboard()
 
-//	window.addEventListener("resize",gamecake.resize);
 	Module={}; // this is a global
 	gamecake.Module=Module
 	Module.gamecake=gamecake
@@ -235,7 +198,6 @@ console.log("set clipboard",data)
 	Module.preInit = function() {
 		gamecake.status="init"
 		gamecake.FS=FS
-//		ENV.SDL_EMSCRIPTEN_KEYBOARD_ELEMENT = "#gamecake_listener";
 
 		gamecake.canvas.focus()
 		
@@ -289,43 +251,21 @@ console.log("set clipboard",data)
 		}
 	};
 
-/*
-	gamecake.animation_frame= function() {
-		requestAnimationFrame(gamecake.animation_frame)
-		if( gamecake.main_update )
-		{
-			gamecake.main_update()
-		}
-	}
-*/
-
 	Module.onRuntimeInitialized = function() {
 
 		// export functions
-//		gamecake.main_update=Module.cwrap("main_update")
 		gamecake.main_close=Module.cwrap("main_close")
 
 		gamecake.status="start"
-		gamecake.resize();
 		if( gamecake.loaded_hook )
 		{
 			gamecake.loaded_hook();
 		}
-//		requestAnimationFrame(gamecake.animation_frame)
 	};
 
 // the clipboard api is useless so we just read when we gain focus and hope that is enough
 	Module.window_event_focus=function(){setTimeout(gamecake.refresh_clipboard,500);}
-
-	Module.window_event_resize=function(){setTimeout(gamecake.resize,500);}
-	Module.window_event_fullscreenchange=function(){setTimeout(gamecake.resize,500);}
-	Module.window_event_orientationchange=function(){setTimeout(gamecake.resize,500);}
-
 	window.addEventListener('focus', Module.window_event_focus);
-	window.addEventListener("resize",Module.window_event_resize);
-	window.addEventListener("fullscreenchange",Module.window_event_fullscreenchange);
-	window.addEventListener("orientationchange",Module.window_event_orientationchange);
-
 
 	gamecake.load_gamecakejs=function()
 	{
