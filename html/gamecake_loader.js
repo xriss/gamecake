@@ -110,10 +110,7 @@ gamecake_loader=async function(opts)
 
 	gamecake.engine="emcc";
 	
-	// style empty and insert elements into main container
-	gamecake.div.style.position="fixed"
-	gamecake.div.style.width="100%"
-	gamecake.div.style.height="100%"
+	// empty and insert elements into main container
 	gamecake.div.innerHTML=""
 	gamecake.progress_bar=template_element('<progress value="0" style="width:100%; position:absolute;" title="Loading GameCake"></progress>');
 	gamecake.div.appendChild(gamecake.progress_bar)
@@ -180,19 +177,23 @@ gamecake_loader=async function(opts)
 
 	Module.arguments=opts.args
 
-	if(opts.zipfile)
+	if(opts.zipfile) // possibly multiple zips
 	{
-		console.log("fetching "+opts.zipfile);
+		let zips=[opts.zipfile]
+		if(Array.isArray(opts.zipfile)){zips=opts.zipfile}
+		for(zip of zips)
+		{
+			console.log("fetching "+zip);
 
-		Module.zfiles={}
-		console.log(unzipit)
-		let z = await unzipit.unzip(opts.zipfile)
-        for( n in z.entries )
-        {
-			let e=z.entries[n]
-			let b=await e.blob()
-			Module.zfiles[n]=new Uint8Array( await b.arrayBuffer() )
-        }
+			Module.zfiles={}
+			let z = await unzipit.unzip(zip)
+			for( n in z.entries )
+			{
+				let e=z.entries[n]
+				let b=await e.blob()
+				Module.zfiles[n]=new Uint8Array( await b.arrayBuffer() )
+			}
+		}
 	}
 	
 	Module.preInit = function() {
