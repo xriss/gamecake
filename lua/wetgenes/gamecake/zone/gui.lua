@@ -120,6 +120,7 @@ gui.msg=function(m)
 end
 
 
+gui.button_gui=false
 gui.cursor=nil
 gui.update=function()
 
@@ -137,6 +138,18 @@ gui.update=function()
 		wwin.cursor( gui.cursor or "arrow" )
 	end
 
+	local button_gui=false
+	if not gui.master.hidden then
+		button_gui=true
+--		if gui.master.over then button_gui=true end
+--		if gui.master.focus then button_gui=true end
+--		print( gui.master.focus and gui.master.focus.id )
+	end
+	if oven.escmenu and oven.escmenu.show then button_gui=true end
+	if gui.button_gui ~= button_gui then
+		gui.button_gui = button_gui
+		oven.ups.msg_button("gui",gui.button_gui and 1 or -1)
+	end
 end
 
 

@@ -161,6 +161,7 @@ M.is_pulse={}
 for i,n in ipairs{
 		"left","pad_left","right","pad_right","up","pad_up","down","pad_down",
 		"a","b","x","y",	"l1","r1","l2","r2","l3","r3",	"select","start","guide","fire",
+		"gui",
 		} do
 	M.is_pulse[ n.."_set" ] = true
 	M.is_pulse[ n.."_clr" ] = true
@@ -577,6 +578,13 @@ M.ups.msg_apply=function(ups,m)
 			else docode("fire") -- all other buttons are fire
 			end
 		end
+	elseif m.class=="button" then -- special button set msgs eg for gui button so we can ignore gui mouse clicks
+		local up=ups:manifest( ups.mousemaps[1] ) -- probably 1up
+		if m.action==1 then -- key set
+			up:set_button(m.keyname,true)
+		elseif m.action==-1 then -- key clear
+			up:set_button(m.keyname,false)
+		end
 	end
 end
 
@@ -726,6 +734,12 @@ M.bake=function(oven,ups)
 			id=false,
 			cmd="msg",
 			msg=mm,
+		})
+	end
+-- shorthand for special button msgs use for gui button on/off state
+	ups.msg_button=function(keyname,action)
+		ups.msg({
+			class="button",keyname=keyname,action=action,
 		})
 	end
 

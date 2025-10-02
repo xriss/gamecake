@@ -41,6 +41,8 @@ players.values={
 	run=V3( 0,0,0 ),	-- unit vector of run direction
 	run_time=0,
 
+	cam_focus=V3(0,-4,0),
+	
 	tweaks=V4( 0,0,0,0 ),
 
 	avatar_time=0,
@@ -62,6 +64,7 @@ players.types={
 	ang="get",
 	vel="get",
 	acc="get",
+	cam_focus="get",
 }
 players.twraps={
 	avatar_time=1,
@@ -183,11 +186,14 @@ end
 
 players.item.focus_camera=function(player,camera)
 
+	local cam_focus=player:get("cam_focus")
 	local pos=player:tween("pos")
 	local tweaks=player:tween("tweaks")
 
 	-- try to reduce screen bounce caused by springy feet
-	pos[2]=pos[2] + ( (tweaks[1]+tweaks[2])/2 ) -4
+	pos[2]=pos[2] + ( (tweaks[1]+tweaks[2])/2 )
+	
+	pos=pos+cam_focus
 
 --	pos=pos+(player.side*-3)
 

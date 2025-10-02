@@ -40,6 +40,8 @@ floors.values={
 floors.types={
 	pos="get",
 	rot="get",
+	vel="get",
+	ang="get",
 }
 
 -- methods added to system

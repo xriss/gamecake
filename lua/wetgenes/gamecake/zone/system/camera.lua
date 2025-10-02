@@ -168,6 +168,18 @@ cameras.item.update=function(camera)
 			local mx=up:get("mx") or 0
 			local my=up:get("my") or 0
 			local mz=up:get("mz") or 0
+			
+			if up:get("gui") then -- special mouse
+				if up:get("mouse_right") then
+					mouse_button=( up:get("mouse_left") ) or false
+				else
+					mx=0
+					my=0
+					mz=0
+					mouse_middle=false
+					mouse_button=false
+				end
+			end
 
 			if r3 or mouse_middle then -- hold r3 or middle_mouse in to dolly camera and allow parallel to camera movement
 				camera.dolly=  camera.dolly + ( 0.25 * (ry-ly) * sensitivity )
