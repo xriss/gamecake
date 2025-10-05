@@ -3,6 +3,13 @@
 
 gamecake_loader=async function(opts)
 {
+/* cors fetch test
+let fr=await fetch("https://cors-anywhere.herokuapp.com/https://gist.githubusercontent.com/xriss/e6965fb7b34b9353fd744e223b0f6af6/raw/d70f94d57a0bbe7b81213b6ae22dbdebd4034cdb/palette.fun.lua")
+let tr=await fr.text()
+console.log(tr)
+*/
+  
+
 	opts=opts || {};
 
 	let msg_dec=function(s)

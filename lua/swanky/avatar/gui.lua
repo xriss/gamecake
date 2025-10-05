@@ -77,7 +77,7 @@ gui.msg=function(m)
 
 end
 
-gui.button_gui=false
+--gui.button_gui=false
 gui.cursor=nil
 gui.update=function()
 
@@ -91,6 +91,7 @@ gui.update=function()
 
 	zgui.update()
 
+--[[
 	local button_gui=false
 	if not gui.master.hidden then
 		button_gui=true
@@ -101,8 +102,9 @@ gui.update=function()
 	if oven.escmenu and oven.escmenu.show then button_gui=true end
 	if gui.button_gui ~= button_gui then
 		gui.button_gui = button_gui
-		oven.ups.msg_button("gui",gui.button_gui and 1 or -1)
+		oven.ups.msg_set("gui",gui.button_gui)
 	end
+]]
 
 end
 

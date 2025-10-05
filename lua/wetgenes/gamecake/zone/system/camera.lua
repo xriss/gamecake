@@ -169,15 +169,17 @@ cameras.item.update=function(camera)
 			local my=up:get("my") or 0
 			local mz=up:get("mz") or 0
 			
-			if up:get("gui") then -- special mouse
+			if up:get("gui") then -- gui is shown
 				if up:get("mouse_right") then
 					mouse_button=( up:get("mouse_left") ) or false
 				else
 					mx=0
 					my=0
-					mz=0
-					mouse_middle=false
-					mouse_button=false
+					if up:get("over") then -- gui is shown and we are over it
+						mz=0
+						mouse_middle=false
+						mouse_button=false
+					end
 				end
 			end
 
