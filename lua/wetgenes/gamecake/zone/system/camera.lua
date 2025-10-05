@@ -175,7 +175,7 @@ cameras.item.update=function(camera)
 				else
 					mx=0
 					my=0
-					if up:get("over") then -- gui is shown and we are over it
+					if up:get("gui_over") then -- gui is shown and we are over it
 						mz=0
 						mouse_middle=false
 						mouse_button=false

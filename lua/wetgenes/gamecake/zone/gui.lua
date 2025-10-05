@@ -156,7 +156,7 @@ gui.update=function()
 	end
 	if gui.button_over ~= button_over then
 		gui.button_over = button_over
-		oven.ups.msg_set("over",gui.button_over)
+		oven.ups.msg_set("gui_over",gui.button_over)
 	end
 end
 
