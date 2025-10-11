@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 647,
+   "count": 646,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 636,
+   "count": 635,
    "name": "lua.wetgenes"
   },
   {
@@ -630,7 +630,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 170,
+   "count": 171,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -930,7 +930,7 @@
    "name": "lua.wetgenes.gamecake.toaster.newticks"
   },
   {
-   "count": 59,
+   "count": 60,
    "name": "lua.wetgenes.gamecake.widgets"
   },
   {
@@ -1088,6 +1088,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.widgets.datas.set_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datatree"
   },
   {
    "count": 7,
@@ -1736,6 +1740,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.spew.test"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.syncs"
   },
   {
    "count": 174,
@@ -2434,7 +2442,7 @@
    "name": "lua.wetgenes.tardis.v4.to_v3"
   },
   {
-   "count": 34,
+   "count": 29,
    "name": "lua.wetgenes.tasks"
   },
   {
@@ -2448,10 +2456,6 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.add_memo"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks.add_task"
   },
   {
    "count": 1,
@@ -2479,10 +2483,6 @@
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.tasks.create_colinda"
-  },
-  {
-   "count": 1,
    "name": "lua.wetgenes.tasks.del_global_thread"
   },
   {
@@ -2492,10 +2492,6 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.del_memo"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks.del_task"
   },
   {
    "count": 1,
@@ -2547,10 +2543,6 @@
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.tasks.run_task"
-  },
-  {
-   "count": 1,
    "name": "lua.wetgenes.tasks.send"
   },
   {
@@ -2566,8 +2558,12 @@
    "name": "lua.wetgenes.tasks.thread_code"
   },
   {
+   "count": 2,
+   "name": "lua.wetgenes.tasks_gist"
+  },
+  {
    "count": 1,
-   "name": "lua.wetgenes.tasks.update"
+   "name": "lua.wetgenes.tasks_gist.list"
   },
   {
    "count": 9,
@@ -2784,7 +2780,7 @@
  "_list": [
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 636,
+   "count": 635,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -3690,7 +3686,7 @@
   },
   {
    "body": "",
-   "count": 170,
+   "count": 171,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -4269,7 +4265,7 @@
   },
   {
    "body": "<pre><code>local widgets=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;)\n</code></pre>\n<p>A collection of widgets, rendered using gles2 code and controlled \nusing the mouse, keyboard or a joystick. EG click fire and move \nleft/right to adjust a slider value.</p>\n<p>Widgets must be created and bound to an oven, using the \noven.rebake function.</p>\n<p>This has undergone a number of rewrites as we try to simplify the \nwidget creation and layout process. Eventually we ended up with a \nfixed size system of widget placement so every widget must have a \nknown size in advance, however we allow scaling to occur so for \ninstance building a 256x256 widget does not mean that it has to be \ndisplayed at 256x256 it just means it will be square.</p>\n<p>The basic layout just lets you place these widgets in other widgets \nas left to right lines. So as long as you get your sizes right you \ncan easily place things just using a list and without keeping track \nof the current position.</p>\n<p>Other layout options are available, such as absolute positioning for \nfull control and we have simple custom skin versions of the buttons \nas well rather than the built in skins.</p>\n<p>All value data is handled by data structures that contain ranges and \nresolutions for data allowing the same data to be bound to multiple \ndisplay widgets. For instance the same data can be linked to the \nposition of a slider as well as the content of a text display. I \nthink the kids call this sort of thing an MVC pattern but that&#39;s a \nterribly dull name.</p>\n<p>Swanky paint is probably the most advanced used of the widgets so far\nbut I suspect we will be making a simple text editor in the near \nfuture. Designed for advanced in game tweaking of text files.</p>\n",
-   "count": 59,
+   "count": 60,
    "file": "../lua/wetgenes/gamecake/widgets/init.lua",
    "line": 13,
    "name": "lua.wetgenes.gamecake.widgets",
@@ -4586,6 +4582,14 @@
    "line": 103,
    "name": "lua.wetgenes.gamecake.widgets.datas.set_value",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datas.lua"
+  },
+  {
+   "body": "<pre><code>local datatree={}\ndatatree=require(&quot;wetgenes.widgets.datatree&quot;).create(datatree)\n</code></pre>\n<br/>\n<br/>\n\n<p>Manage data in a tree like structure that can be accesed via a path, \ndata may not be readily available and instead generated by waiting on \nnewtword/filesystem requests.</p>\n<p>This is of course designed to mirror a filesystem but can be used for \nother data.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/datatree.lua",
+   "line": 4,
+   "name": "lua.wetgenes.gamecake.widgets.datatree",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/datatree.lua"
   },
   {
    "body": "<p>Helpers to define defaults for each class of widget </p>\n",
@@ -5870,6 +5874,14 @@
    "line": 279,
    "name": "lua.wetgenes.spew.test",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/spew.lua"
+  },
+  {
+   "body": "<pre><code>local await=require(&quot;wetgenes.syncs&quot;).wait\n</code></pre>\n<p>Simple coop await style coroutines, probably all you need is the global await function.</p>\n<p>This global function will wrap another function in a coroutine and resume it \nrepeatedly along with other global coroutines until it returns.</p>\n<p>This is really only useful if you have other coroutines or tasks doing \nsomething useful that you have a way of communicating with. IE use it \nwith tasks as a simpler more generic way to wrap a function that may \nyield.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/syncs.lua",
+   "line": 4,
+   "name": "lua.wetgenes.syncs",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/syncs.lua"
   },
   {
    "body": "<p>Time And Relative Dimensions In Space is of course the perfect name for\na library of matrix based math functions.</p>\n<pre><code>local tardis=require(&quot;wetgenes.tardis&quot;)\n</code></pre>\n<p>This tardis is a lua library for manipulating time and space with numbers.\nDesigned to work as pure lua but with a faster, but less accurate, f32 core by\ndefault. ( this core seems to be slightly faster/same speed as vanilla lua but\nslower than luajit , so is currently disabled )</p>\n<p>Recoil in terror as we use two glyph names for classes whilst typing in\nrandom strings of numbers and operators that may or may not contain\ntyops.</p>\n<pre><code>v# vector [#]\nm# matrix [#][#]\nq4 quaternion\n</code></pre>\n<p>Each class is a table of # values [1] to [#] the 2d number streams are\nformatted the same as opengl (row-major) and metatables are used to\nprovide methods.</p>\n<p>The easy way of remembering the opengl 4x4 matrix layout is that the\ntranslate x,y,z values sit at 13,14,15 and 4,8,12,16 is normally set\nto the constant 0,0,0,1 for most transforms.</p>\n<pre><code>     | 1  5  9  13 |\n     | 2  6  10 14 |\nm4 = | 3  7  11 15 |\n     | 4  8  12 16 |\n</code></pre>\n<p>This seems to be the simplest (programmer orientated) description of\nmost of the maths used here so go read it if you want to know what the\nfunny words mean.</p>\n<p><a href=\"http://www.j3d.org/matrix_faq/matrfaq_latest.html\">http://www.j3d.org/matrix_faq/matrfaq_latest.html</a></p>\n",
@@ -7265,9 +7277,9 @@
   },
   {
    "body": "<pre><code>local tasks=require(&quot;wetgenes.tasks&quot;).create()\n</code></pre>\n<p>Manage tasks that should be performed on seperate threads so as not to block the main thread.</p>\n<p>Manage coroutines that can then easily call into these threads by yeilding</p>\n",
-   "count": 34,
+   "count": 29,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 20,
+   "line": 21,
    "name": "lua.wetgenes.tasks",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7275,7 +7287,7 @@
    "body": "<pre><code>tasks:add_global_thread(thread)\n</code></pre>\n<p>This runs an add_thread inside a named thread so all threads are kept \ntogether no matter which thread tried to start it.</p>\n<p>thread is the same as add_thread</p>\n<p>if the thread id already exists then it will not be added again.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 289,
+   "line": 287,
    "name": "lua.wetgenes.tasks.add_global_thread",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7283,7 +7295,7 @@
    "body": "<pre><code>tasks:add_id(it)\n</code></pre>\n<p>Internal function to manage creation of all objects with unique ids.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 154,
+   "line": 152,
    "name": "lua.wetgenes.tasks.add_id",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7291,23 +7303,15 @@
    "body": "<pre><code>local memo=tasks:add_memo({})\n</code></pre>\n<p>Create a memo with a unique auto generated numerical id for linda \ncomunication.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 261,
+   "line": 259,
    "name": "lua.wetgenes.tasks.add_memo",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
-  },
-  {
-   "body": "<pre><code>local thread=tasks:add_task({\n    id=&quot;test&quot;,\n    code=function(linda,task_id,task_idx,task)\n        while true do\n            local _,memo= linda:receive( 0 , task_id )\n            if memo then\n                ...\n            end\n        end\n    end,\n})\n</code></pre>\n<p>Create a task with various preset values similar to a thread except \ninside a coroutine on the calling thread. As this function is inside a \ncoroutine you must yield regulary this yield will then continue on the \nnext update. Probably called once ever 60th of a second.</p>\n<pre><code>id\n</code></pre>\n<p>A unique id string to be used by lindas when sending messages into this \ntask. The function is expected to sit in an infinite loop testing \nthis linda socket and then yielding if there is nothing to do.</p>\n<pre><code>count\n</code></pre>\n<p>The number of tasks to create, they will all use the same instanced \ncode function so should be interchangable and it should not matter \nwhich task we are actually running code on. If you expect the task to \nmaintain some state between memos, then this must be 1 .</p>\n<pre><code>code\n</code></pre>\n<p>A lua function to run inside a coroutine, this function will recieve \ntasks.linda (which is a colinda) and the task.id for comunication and \nan index so we know which of the count tasks we are (mostly for \ndebugging) and finally the task table itself which make sense to share \nwith coroutines.</p>\n",
-   "count": 1,
-   "file": "../lua/wetgenes/tasks.lua",
-   "line": 396,
-   "name": "lua.wetgenes.tasks.add_task",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
   {
    "body": "<pre><code>local thread=tasks:add_thread({\n    id=&quot;test&quot;,\n    count=1,\n    code=function(linda,task_id,task_idx)\n        while true do\n            local _,memo= linda:receive( nil , task_id )\n            if memo then\n                ...\n            end\n        end\n    end,\n})\n</code></pre>\n<p>Create a thread with various preset values:</p>\n<pre><code>id\n</code></pre>\n<p>A unique id string to be used by lindas when sending messages into this \ntask. The function is expected to sit in an infinite loop waiting on \nthis linda socket.</p>\n<pre><code>count\n</code></pre>\n<p>The number of threads to create, they will all use the same instanced \ncode function so should be interchangable and it should not matter \nwhich thread we are actually running code on. If you expect the task to \nmaintain some state between memos, then this must be 1 .</p>\n<pre><code>code\n</code></pre>\n<p>A lua function to run inside each thread, this function will recieve \ntasks.linda and the task.id for comunication and an index so we know \nwhich of the count threads we are (mostly for debugging)</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 326,
+   "line": 324,
    "name": "lua.wetgenes.tasks.add_thread",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7315,7 +7319,7 @@
    "body": "<pre><code>tasks:claim_global(name,value)\n</code></pre>\n<p>Claim a name using the global linda socket, returns value on success \nor false on failure.</p>\n<p>The value will be associated with the name on success.</p>\n<p>This will block waiting on a result but should be fast.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 186,
+   "line": 184,
    "name": "lua.wetgenes.tasks.claim_global",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7323,7 +7327,7 @@
    "body": "<p>Send and/or recieve a (web)socket client memo result.</p>\n<p>returns nil,error if something went wrong or returns result if \nsomething went right.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 851,
+   "line": 617,
    "name": "lua.wetgenes.tasks.client",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7331,7 +7335,7 @@
    "body": "<p>A basic function to handle (web)socket client connection.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 1317,
+   "line": 1083,
    "name": "lua.wetgenes.tasks.client_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7339,7 +7343,7 @@
    "body": "<pre><code>require(&quot;wetgenes.tasks&quot;).cocall(f1,f2,...)\nrequire(&quot;wetgenes.tasks&quot;).cocall({f1,f2,...})\n</code></pre>\n<p>Manage simple coroutines that can poll each others results and wait on \nthem.</p>\n<p>Turn a table of &quot;setup&quot; functions into a table of coroutines that can \nyield waiting for other coroutines to complete and run them all.</p>\n<p>You still need to be carefull with race conditions but it allows you to \nwrite code in such away that setup order is no longer important. Setup \nfunctions can coroutine.yield waiting for another setup to finish first.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 96,
+   "line": 97,
    "name": "lua.wetgenes.tasks.cocall",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7347,23 +7351,15 @@
    "body": "<p>Create a tasks group to contain all associated threads and coroutines \nalong with their comunications.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 754,
+   "line": 525,
    "name": "lua.wetgenes.tasks.create",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
-  },
-  {
-   "body": "<pre><code>local colinda=require(&quot;wetgenes.tasks&quot;).colinda(linda)\n</code></pre>\n<p>Create a colinda which is a wrapper around a linda providing \nreplacement functions to be used inside a coroutine so it will yield \n(and assume it will be resumed) rather than wait.</p>\n<p>This should be a dropin replacement for a linda and will fallback to \nnormal linda use if not in a coroutine.</p>\n<p>If linda is nil then we will create one, the linda used in this colinda \ncan be found in colinda.linda if you need raw access.</p>\n<p>What we are doing here is wrapping the send/receive functions so that</p>\n<pre><code>colinda:send(time,...)\ncolinda:recieve(time,...)\n</code></pre>\n<p>will be replaced with functions that call</p>\n<pre><code>linda:send(0,...)\nlinda:recieve(0,...)\n</code></pre>\n<p>and use coroutines.yield to mimic the original timeout value without \nblocking.</p>\n",
-   "count": 1,
-   "file": "../lua/wetgenes/tasks.lua",
-   "line": 646,
-   "name": "lua.wetgenes.tasks.create_colinda",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
   {
    "body": "<pre><code>tasks:del_global_thread({id=&quot;threadname&quot;})\n</code></pre>\n<p>Destroy a given thread.id or all the threads if thread is nil.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 310,
+   "line": 308,
    "name": "lua.wetgenes.tasks.del_global_thread",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7371,7 +7367,7 @@
    "body": "<pre><code>tasks:del_id(it)\n</code></pre>\n<p>Internal function to manage deletion of all objects with unique ids.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 169,
+   "line": 167,
    "name": "lua.wetgenes.tasks.del_id",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7379,23 +7375,15 @@
    "body": "<pre><code>tasks:del_memo(memo)\n</code></pre>\n<p>Delete a memo.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 277,
+   "line": 275,
    "name": "lua.wetgenes.tasks.del_memo",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
-  },
-  {
-   "body": "<pre><code>tasks:del_task(task)\n</code></pre>\n<p>Delete a task.</p>\n",
-   "count": 1,
-   "file": "../lua/wetgenes/tasks.lua",
-   "line": 494,
-   "name": "lua.wetgenes.tasks.del_task",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
   {
    "body": "<pre><code>tasks:del_thread(thread)\n</code></pre>\n<p>Delete a thread.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 380,
+   "line": 378,
    "name": "lua.wetgenes.tasks.del_thread",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7403,7 +7391,7 @@
    "body": "<pre><code>tasks:delete()\n</code></pre>\n<p>Force stop all threads and delete all data.</p>\n<p>Failure to call this will allow any created threads to continue to run \nuntil program termination.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 613,
+   "line": 489,
    "name": "lua.wetgenes.tasks.delete",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7411,7 +7399,7 @@
    "body": "<pre><code>result = tasks:do_memo(memo,timeout)\nresult = tasks:do_memo(memo)\n</code></pre>\n<p>set memo.id to false and we will only send and not receive</p>\n<p>Similar to calling tasks:send/receive but without the problems that \ncome from me trying to remember how to spell receive and it returns \nmemo.result instead of memo so slightly less mess. This will assert on \nfinding a memo.error so less need to check for errors.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 589,
+   "line": 465,
    "name": "lua.wetgenes.tasks.do_memo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7419,7 +7407,7 @@
    "body": "<pre><code>tasks:eject_global(name)\n</code></pre>\n<p>Eject a name using the global linda socket, returns value associated \nwith name on success or false on failure.</p>\n<p>The value will no longer be associated with the name when this succeeds.</p>\n<p>This will block waiting on a result but should be fast.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 213,
+   "line": 211,
    "name": "lua.wetgenes.tasks.eject_global",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7427,7 +7415,7 @@
    "body": "<pre><code>tasks:fetch_global(name)\n</code></pre>\n<p>Fetch value associated with the name using the global linda socket or \nfalse on failure. You can not associated nil or false with a global value.</p>\n<p>This will block waiting on a result but should be fast.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 238,
+   "line": 236,
    "name": "lua.wetgenes.tasks.fetch_name",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7435,7 +7423,7 @@
    "body": "<p>A basic function to handle global memos to get/set data shared amongst multiple tasks.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 972,
+   "line": 738,
    "name": "lua.wetgenes.tasks.global_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7443,7 +7431,7 @@
    "body": "<p>Create send and return a http memo result.</p>\n<p>Returns either the result or nil,error so can be used simply with an \nassert wrapper.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 800,
+   "line": 566,
    "name": "lua.wetgenes.tasks.http",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7451,7 +7439,7 @@
    "body": "<p>A basic function to handle http memos.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 1020,
+   "line": 786,
    "name": "lua.wetgenes.tasks.http_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7459,7 +7447,7 @@
    "body": "<pre><code>-- just grab this function \nlocal do_memo=require(&quot;wetgenes.tasks&quot;).do_memo\n\nlocal r=do_memo(linda,{task=&quot;taskname&quot;})\nlocal r=do_memo(linda,{task=&quot;taskname&quot;},timeout)\ndo_memo(linda,{task=&quot;taskname&quot;,id=false})\n</code></pre>\n<p>A basic memo send and receive that can be used when all you have is the \ntasks.linda and you know you are in a thread ( or do not care about \nblocking while waiting for another thread ) Pretty much everything else \nin this module is about managing coroutines to pretended to be threads \nand keeping track of state for debugging but this is all you actually \nneed to use to simply communicate with a task. Especially useful if you \nare in a task and want to talk to another task.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 43,
+   "line": 44,
    "name": "lua.wetgenes.tasks.linda_do_memo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7467,7 +7455,7 @@
    "body": "<pre><code>local memos=require(&quot;wetgenes.tasks&quot;).memos\n\nfor memo in memos(linda,subid) do\n    ... -- deal with new memos\nend\n</code></pre>\n<p>Simple iterator for memos available at a subscription id.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 76,
+   "line": 77,
    "name": "lua.wetgenes.tasks.linda_memos",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7475,7 +7463,7 @@
    "body": "<pre><code>for memo in tasks:memos(subid) do\n    ... -- deal with new memos\nend\n</code></pre>\n<p>Simple iterator for memos available at a subscription id.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 629,
+   "line": 505,
    "name": "lua.wetgenes.tasks.memos",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7483,23 +7471,15 @@
    "body": "<pre><code>memo = tasks:receive(memo,timeout)\nmemo = tasks:receive(memo)\n</code></pre>\n<p>Recieve a memo with optional timeout.</p>\n<p>This is intended to be run from within a coroutine task on the main \nthread. It will work outside of a task but that will block the main \nthread waiting for a response.</p>\n<p>The memo will be deleted after being recieved (ie we will have called \ndel_memo) so as to free up its comunication id for another memo.</p>\n<p>if the memo has not yet been sent or even been through add_memo (we \ncheck state for &quot;setup&quot; or nil) then it will be autosent with the same \ntimeout before we try and receive it.</p>\n<p>After calling check if memo.error is nil then you will find the result in \nmemo.result</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 550,
+   "line": 426,
    "name": "lua.wetgenes.tasks.receive",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
-  },
-  {
-   "body": "<pre><code>tasks:run_task(task)\n</code></pre>\n<p>Resume all the coroutines in this task.</p>\n<p>Any errors will be logged with a backtrace.</p>\n<p>If the tasks have finished running (returned or crashed) then we will \ntasks:del_task(task) this task. Check task.id which will be nil after \nthis task has finished.</p>\n",
-   "count": 1,
-   "file": "../lua/wetgenes/tasks.lua",
-   "line": 455,
-   "name": "lua.wetgenes.tasks.run_task",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
   {
    "body": "<pre><code>memo = tasks:send(memo,timeout)\nmemo = tasks:send(memo)\n</code></pre>\n<p>Send a memo with optional timeout.</p>\n<p>This is intended to be run from within a coroutine task on the main \nthread. It will work outside of a task but that may block the main \nthread waiting to send.</p>\n<p>if memo.id is nil then we will auto call add_memo to create it.</p>\n<p>set memo.id to false and we will not need to receive on that id</p>\n<p>if you do not want/expect a response then set memo.id to false</p>\n<p>Check memo.error for posible error, this will be nil if everything went \nOK.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 519,
+   "line": 395,
    "name": "lua.wetgenes.tasks.send",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7507,7 +7487,7 @@
    "body": "<p>Create send and return a sqlite memo result.</p>\n<p>Returns either the result.rows or nil,error so can be used simply with an \nassert wrapper.</p>\n<p>Note that rows can be empty so an additional assert(rows[1]) might be \nneeded to check you have data returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 823,
+   "line": 589,
    "name": "lua.wetgenes.tasks.sqlite",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7515,7 +7495,7 @@
    "body": "<p>A basic function to handle sqlite memos.</p>\n<p>As we are opening an sqlite database here it wont help much to have \nmore than one thread per database as they will just fight over file \naccess.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 1180,
+   "line": 946,
    "name": "lua.wetgenes.tasks.sqlite_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
@@ -7523,17 +7503,25 @@
    "body": "<p>Handle global tasks, starting and stopping and preventing the starting \nof multiple copies of the same task.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 918,
+   "line": 684,
    "name": "lua.wetgenes.tasks.thread_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
   {
-   "body": "<pre><code>tasks:update()\n</code></pre>\n<p>Resume all current coroutines and wait for them to yield.</p>\n",
+   "body": "<pre><code>local gist=require(&quot;wetgenes.tasks_gist&quot;)\n</code></pre>\n<p>Access github gists using the github api via the http tasks.</p>\n",
+   "count": 2,
+   "file": "../lua/wetgenes/tasks_gist.lua",
+   "line": 8,
+   "name": "lua.wetgenes.tasks_gist",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_gist.lua"
+  },
+  {
+   "body": "<pre><code>local tasks=require(&quot;wetgenes.tasks&quot;).create()\nlocal gist=require(&quot;wetgenes.tasks_gist&quot;)\nlocal opts={\n    tasks=tasks, -- required\n}\nlocal list=gist.list(opts)\n</code></pre>\n<p>List some gists from github using options found in opts, valid options are...</p>\n<p>baseurl can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot;</p>\n<p>tasks is always <em>required</em> as we use it for http access.</p>\n<p>token should be set to a github access token and is required for \nwritting data or accessing non public information.</p>\n<p>username is the name of a github user we wish to list gists for</p>\n<p>filter can be &quot;public&quot; to request only public gists or &quot;starred&quot; to \nrequest only starred gists.</p>\n<p>since is an ISO_8601 timestamp in a string and should be set if we are \nonly interested in gists since this time.</p>\n<p>per_page is the number of results we want, the api limits this to 100 \nbut defaults to 30. Probably a good idea to set this to 100 unless you \nwant to deal with paging code and even then you can only get the first \n3000 results.</p>\n<p>page is the page of results we are requesting, It defaults to 1 so can \nbe omitted unless you are going to request multiple pages.</p>\n",
    "count": 1,
-   "file": "../lua/wetgenes/tasks.lua",
-   "line": 506,
-   "name": "lua.wetgenes.tasks.update",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
+   "file": "../lua/wetgenes/tasks_gist.lua",
+   "line": 24,
+   "name": "lua.wetgenes.tasks_gist.list",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_gist.lua"
   },
   {
    "body": "<pre><code>local msgp=require(&quot;wetgenes.tasks_msgp&quot;)\n</code></pre>\n<p>A stream of lowlevel udp packets with automatic resend ( data will get\nthere eventual ) but hopefully without clogging up an ongoing pulse of\nsmaller packets that contain EG controller state.</p>\n<p>We use lua sockets and lanes with some help from wetgenes.tasks to\nmanage the lanes.\n<br/>\n<br/></p>\n<p>Simple UDP data packets with auto resend, little endian with this 6 byte header.</p>\n<pre><code>u16\t\tidx\t\t\t//\tincrementing and wrapping idx of this packet\nu16\t\tack\t\t\t//\twe acknowledge all the packets before this idx so please send this one next (or again maybe)\nu8\t\tbit\t\t\t//\twhich bit this is, all bits should be joined before parsing\nu8\t\tbits\t\t//\thow many bits in total ( all bits will be in adjacent idxs )\nu8\t\tdata[*]\t\t//\tThe payload, if multiple bits then all payloads should be concatenated\n</code></pre>\n<p>A maximum packet size of 63k seems to give good throughput, letting the\nlower level code split and recombine packets is probably going to be\nmore efficient than us. Note that we care about best case speed, when\nshit lags and packets drop we care less about performance and more\nabout maintaining a connection with correct state. IE its important\nthat we recover not that we pretend there is no problem. At 255 bits *\n63k bit size we can seen a data of about 15.6m.</p>\n<p>Technically 63k UDP packets might just get dropped as too big but I\nsuspect modern hardware is not really going to cause problems.</p>\n<p>bit/bits only goes up to 255. the 0 value in either of these is\nreserved as a flag for possible slightly strange packets in the future\neg maybe we need a ping? and should be ignored as a bad packet if you\ndo not understand them.</p>\n<p>An ack of 0x1234 also implies that 0x9234 to 0x1233 are in the past and\n0x1234 to 0x9233 are in the future.</p>\n<p>Also if we have nothing new to say after 100ms but have received new\npackets then we can send a packet with empty data (0 length) as an ack\nonly packet.</p>\n<p>When connecting to a port for the first time, the idx value must start\nat a special number, that number is configurable and should be\ndifferent for each app. An extra bit of sanity during introductions to\nindicate that the data stream will be understood by both parties.</p>\n<p>Special packets that do not add to the stream of user data but instead\nare used internally by this protocol.</p>\n<pre><code>id\t\tbits\tbit\nPING\t0x00\t0x02\nPONG\t0x00\t0x03\nHAND\t0x00\t0x04\nSHAKE\t0x00\t0x05\nRESEND\t0x00\t0x08\nPULSE\t0x00\t0x10\n</code></pre>\n<p>A PING packet will be accepted and acknowledged after handshaking.\nSending a PING packet will cause a PONG response with the same data.</p>\n<p>A PONG packet will be accepted and acknowledged after handshaking, its\ndata should be the same as the PING it is responding too.</p>\n<p>A HAND packet begins handshaking, the payload data is a string array.\nConsisting of a series of null terminated utf8 strings.</p>\n<p>A SHAKE packet ends handshaking The payload data is a string array.\nConsisting of a series of null terminated utf8 strings.</p>\n<p>Both the HAND and the SHAKE packets contain the same payload data which\nconsists of the following utf8 strings, each terminated by a 0 byte.</p>\n<pre><code>host name\nhost ip4\nhost ip6\nhost port\nclient addr\n</code></pre>\n<p>When received, each of the strings should to be clamped to 255 bytes\nand the values validated or replaced with empty strings before use.</p>\n<p>host name is maybe best considered a random string, it could be anything.</p>\n<p>host ip4 will be the hosts best guess at their ip4, it is the ip4 they\nare listening on.</p>\n<p>host ip6 will be the hosts best guess at their ip6, it is the ip6 they\nare listening on.</p>\n<p>host port will be the local port the host is listening on, ip4 and ip6,\nbut as they may be port forwarding we might connect on a different\nport.</p>\n<p>client addr is the client ip and port the sender sent this packet too.\nIf ipv4 it will be a string of the format &quot;1.2.3.4:5&quot; and if 1pv6 then\n&quot;[1::2]:3&quot; So the ip possibly wrapped in square brackets (ipv6) and\nthen a colon followed by the port in url style format.</p>\n<p>A RESEND packet consists of a payload of little endian 16bit idxs to\npackets we would like to be resent to fill in missing data.</p>\n<p>A PULSE packet contains user data but does not get resent or\nacknowledged, its IDX must be set to 0 and this IDX should be ignored\nwhen received as this is out of stream data. Pulse packets are small\nregular packets of user data, eg current client input state. Data sent\nis included as part of the normal received data stream but there is no\nguarantee that it will be delivered or when it will be delivered\nrelative to other data. The data must be small enough to fit in a\nsingle packet. Think of this as something of a raw UDP packet in terms\nof how it works.</p>\n",

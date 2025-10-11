@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 647,
+   "count": 646,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 636,
+   "count": 635,
    "name": "lua.wetgenes"
   },
   {
@@ -630,7 +630,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 170,
+   "count": 171,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -930,7 +930,7 @@
    "name": "lua.wetgenes.gamecake.toaster.newticks"
   },
   {
-   "count": 59,
+   "count": 60,
    "name": "lua.wetgenes.gamecake.widgets"
   },
   {
@@ -1088,6 +1088,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.widgets.datas.set_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.datatree"
   },
   {
    "count": 7,
@@ -1736,6 +1740,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.spew.test"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.syncs"
   },
   {
    "count": 174,
@@ -2434,7 +2442,7 @@
    "name": "lua.wetgenes.tardis.v4.to_v3"
   },
   {
-   "count": 34,
+   "count": 29,
    "name": "lua.wetgenes.tasks"
   },
   {
@@ -2448,10 +2456,6 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.add_memo"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks.add_task"
   },
   {
    "count": 1,
@@ -2479,10 +2483,6 @@
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.tasks.create_colinda"
-  },
-  {
-   "count": 1,
    "name": "lua.wetgenes.tasks.del_global_thread"
   },
   {
@@ -2492,10 +2492,6 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tasks.del_memo"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks.del_task"
   },
   {
    "count": 1,
@@ -2547,10 +2543,6 @@
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.tasks.run_task"
-  },
-  {
-   "count": 1,
    "name": "lua.wetgenes.tasks.send"
   },
   {
@@ -2566,8 +2558,12 @@
    "name": "lua.wetgenes.tasks.thread_code"
   },
   {
+   "count": 2,
+   "name": "lua.wetgenes.tasks_gist"
+  },
+  {
    "count": 1,
-   "name": "lua.wetgenes.tasks.update"
+   "name": "lua.wetgenes.tasks_gist.list"
   },
   {
    "count": 9,
@@ -2786,7 +2782,7 @@
    "body": "<pre><code>local memos=require(&quot;wetgenes.tasks&quot;).memos\n\nfor memo in memos(linda,subid) do\n    ... -- deal with new memos\nend\n</code></pre>\n<p>Simple iterator for memos available at a subscription id.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 76,
+   "line": 77,
    "name": "lua.wetgenes.tasks.linda_memos",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }
