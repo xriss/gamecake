@@ -125,6 +125,7 @@ gui.data_setup=function()
 
 		datas.new({id="list_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
 			{str="tree"},
+			{str="gist"},
 			{str="output"},
 		}})
 
@@ -366,15 +367,21 @@ function gui.hooks(act,w,dat)
 
 		if w.id=="list_mode" then -- change
 
+			gui.master.ids.treefile.hidden=true
+			gui.master.ids.treefile.hidden=true
+			gui.master.ids.output.hidden=true
+
 			if w.str=="tree" then
 
 				gui.master.ids.treefile.hidden=false
-				gui.master.ids.output.hidden=true
 
 			elseif w.str=="output" then
 
-				gui.master.ids.treefile.hidden=true
 				gui.master.ids.output.hidden=false
+
+			elseif w.str=="gist" then
+
+				gui.master.ids.gist.hidden=false
 
 			end
 
@@ -462,7 +469,7 @@ local lay=
 								id="list",
 								size="full",style="flat",hx=200,highlight="none",color=0,
 								{
-									id="treefile",
+									id="treefile",hidden=true,
 									class="treefile",size="full",hooks=gui.hooks,
 									item_refresh=docs.item_refresh,
 								},
@@ -470,6 +477,12 @@ local lay=
 									id="output",hidden=true,
 									class="texteditor",size="full",style="flat",color=0,
 									opts={readonly=true,gutter_disable=true,word_wrap=true},
+								},
+								{
+									-- TODO: test gist
+									id="gist",hidden=false,
+									class="treegist",size="full",hooks=gui.hooks,
+									item_refresh=docs.item_refresh,
 								},
 							},
 						},

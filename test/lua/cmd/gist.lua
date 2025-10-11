@@ -6,12 +6,6 @@ local djon=require("djon")
 
 require("apps").default_paths() -- default search paths so things can easily be found
 
-global.TASK_NAME="#MAIN"
-global.PRINT=logs.print
-global.DUMP=logs.dump
-global.LOG=logs.log
-global.TRACEBACK=logs.traceback
-
 local tasks=require("wetgenes.tasks").create()
 tasks:add_global_thread({
 	count=8,
@@ -32,7 +26,7 @@ opts.per_page=100
 opts.page=1
 
 local result=gist.list(opts)
---DUMP(result)
+--logs.DUMP(result)
 for i,v in ipairs(result) do
 	print(i,v.id,v.description)
 	for n,f in pairs(v.files or {}) do

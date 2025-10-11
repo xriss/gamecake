@@ -1129,7 +1129,27 @@ function wtexteditor.key(pan,ascii,key,act)
 
 
 
-	if not texteditor.opts.readonly then -- allow changes
+
+	local allow_changes=false
+	if texteditor.opts.console then -- can only edit last line which is the input line and has no line ending
+		allow_changes=false
+		
+		if txt.marked() then
+			local fy,fx,ty,tx=txt.markget()
+			if fy==txt.hy and ty==txt.hy then -- last line select so can edit
+				allow_changes=true
+			end
+		else
+			if txt.cy==txt.hy then -- last line cursor so can edit
+				allow_changes=true
+			end
+		end
+	end
+	if texteditor.opts.readonly then -- do not allow changes
+		allow_changes=false
+	end
+
+	if allow_changes then -- allow changes
 
 		if ascii and ascii~="" then -- not a blank string
 
@@ -1254,6 +1274,7 @@ function wtexteditor.setup(widget,def)
 
 	local opts=def.opts or {}
 	widget.opts={}
+	widget.opts.console			=	opts.console
 	widget.opts.readonly		=	opts.readonly
 	widget.opts.gutter_disable	=	opts.gutter_disable
 	widget.opts.word_wrap		=	opts.word_wrap

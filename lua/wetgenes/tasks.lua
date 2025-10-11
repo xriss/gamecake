@@ -11,8 +11,9 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 -- module
 
-M.tasks_functions={}
-M.tasks_metatable={__index=M.tasks_functions}
+M.tasks={}
+M.tasks_metatable={__index=M.tasks}
+
 
 
 local log,dump=require("wetgenes.logs"):export("log","dump")
@@ -148,9 +149,6 @@ end
 
 
 
-M.colinda_functions={}
-M.colinda_metatable={__index=M.colinda_functions}
-
 --[[#lua.wetgenes.tasks.add_id
 
 	tasks:add_id(it)
@@ -158,7 +156,7 @@ M.colinda_metatable={__index=M.colinda_functions}
 Internal function to manage creation of all objects with unique ids.
 
 ]]
-M.tasks_functions.add_id=function(tasks,it)
+M.tasks.add_id=function(tasks,it)
 	it=it or {}
 	it.id=it.id or tostring(it) -- auto generate id? ( this nay be unsafe ... )
 	tasks.ids[it.id]=it or true -- keep everything in ids
@@ -173,7 +171,7 @@ end
 Internal function to manage deletion of all objects with unique ids.
 
 ]]
-M.tasks_functions.del_id=function(tasks,it)
+M.tasks.del_id=function(tasks,it)
 	if it.id then
 		if it.type then
 			tasks[it.type][it.id]=nil
@@ -195,7 +193,7 @@ The value will be associated with the name on success.
 This will block waiting on a result but should be fast.
 
 ]]
-M.tasks_functions.claim_global=function(tasks,name,value)
+M.tasks.claim_global=function(tasks,name,value)
 	value=value or true -- value must must be trueish
 	local memo={}
 	memo.id=tostring(memo) -- should be a unique string, the address of the memo table
@@ -222,7 +220,7 @@ The value will no longer be associated with the name when this succeeds.
 This will block waiting on a result but should be fast.
 
 ]]
-M.tasks_functions.eject_global=function(tasks,name)
+M.tasks.eject_global=function(tasks,name)
 	local memo={}
 	memo.id=tostring(memo) -- should be a unique string, the address of the memo table
 	memo.task="global"
@@ -245,7 +243,7 @@ false on failure. You can not associated nil or false with a global value.
 This will block waiting on a result but should be fast.
 
 ]]
-M.tasks_functions.fetch_global=function(tasks,name)
+M.tasks.fetch_global=function(tasks,name)
 	local memo={}
 	memo.id=tostring(memo) -- should be a unique string, the address of the memo table
 	memo.task="global"
@@ -266,7 +264,7 @@ Create a memo with a unique auto generated numerical id for linda
 comunication.
 
 ]]
-M.tasks_functions.add_memo=function(tasks,memo)
+M.tasks.add_memo=function(tasks,memo)
 	memo=memo or {}
 	memo.type="memo"
 	memo.state="setup"
@@ -281,7 +279,7 @@ end
 Delete a memo.
 
 ]]
-M.tasks_functions.del_memo=function(tasks,memo)
+M.tasks.del_memo=function(tasks,memo)
 	tasks:del_id(memo)	
 	return memo
 end
@@ -298,7 +296,7 @@ thread is the same as add_thread
 if the thread id already exists then it will not be added again.
 
 ]]
-M.tasks_functions.add_global_thread=function(tasks,thread)
+M.tasks.add_global_thread=function(tasks,thread)
 	local memo={
 		task="thread",
 		cmd="add",
@@ -314,7 +312,7 @@ end
 Destroy a given thread.id or all the threads if thread is nil.
 
 ]]
-M.tasks_functions.del_global_thread=function(tasks,thread)
+M.tasks.del_global_thread=function(tasks,thread)
 	local memo={
 		task="thread",
 		cmd="del",
@@ -361,7 +359,7 @@ which of the count threads we are (mostly for debugging)
 
 
 ]]
-M.tasks_functions.add_thread=function(tasks,thread)
+M.tasks.add_thread=function(tasks,thread)
 	thread=thread or {}
 	thread.type="thread"
 	tasks:add_id(thread)
@@ -384,7 +382,7 @@ end
 Delete a thread.
 
 ]]
-M.tasks_functions.del_thread=function(tasks,thread)
+M.tasks.del_thread=function(tasks,thread)
 	for i=#thread.handles,1,-1 do -- cancel all the handles
 		thread.handles[i]:cancel()--1/10,true) -- give it a chance
 		thread.handles[i]=nil
@@ -393,128 +391,6 @@ M.tasks_functions.del_thread=function(tasks,thread)
 	return thread
 end
 
---[[#lua.wetgenes.tasks.add_task
-
-	local thread=tasks:add_task({
-		id="test",
-		code=function(linda,task_id,task_idx,task)
-			while true do
-				local _,memo= linda:receive( 0 , task_id )
-				if memo then
-					...
-				end
-			end
-		end,
-	})
-	
-Create a task with various preset values similar to a thread except 
-inside a coroutine on the calling thread. As this function is inside a 
-coroutine you must yield regulary this yield will then continue on the 
-next update. Probably called once ever 60th of a second.
-
-	id
-
-A unique id string to be used by lindas when sending messages into this 
-task. The function is expected to sit in an infinite loop testing 
-this linda socket and then yielding if there is nothing to do.
-
-	count
-
-The number of tasks to create, they will all use the same instanced 
-code function so should be interchangable and it should not matter 
-which task we are actually running code on. If you expect the task to 
-maintain some state between memos, then this must be 1 .
-
-	code
-
-A lua function to run inside a coroutine, this function will recieve 
-tasks.linda (which is a colinda) and the task.id for comunication and 
-an index so we know which of the count tasks we are (mostly for 
-debugging) and finally the task table itself which make sense to share 
-with coroutines.
-
-]]
-M.tasks_functions.add_task=function(tasks,task)
-	if type(task)=="function" then task={code=task} end -- the simplest form is to just pass in a function
-	task=task or {}
-	task.type="task"
-	tasks:add_id(task)
-	
-	task.count=task.count or 1
-	task.errors={}
-	task.handles={}
-	for idx=1,task.count do
-		task.handles[idx]=coroutine.create(task.code)
-		local ok , err = coroutine.resume( task.handles[idx] , tasks.colinda , task.id , idx , task ) -- first call passing in args
-		if not ok then task.errors[idx]=err end
-	end
-
-	return task
-end
-
---[[#lua.wetgenes.tasks.run_task
-
-	tasks:run_task(task)
-	
-Resume all the coroutines in this task.
-
-Any errors will be logged with a backtrace.
-
-If the tasks have finished running (returned or crashed) then we will 
-tasks:del_task(task) this task. Check task.id which will be nil after 
-this task has finished.
-
-]]
-M.tasks_functions.run_task=function(tasks,task)
-
-	local runcount=0
-
-	for idx=1,task.count do
-		if coroutine.status( task.handles[idx] )=="suspended" then
-			runcount=runcount+1
-			local ok , err = coroutine.resume( task.handles[idx] )
-			if not ok then
-				task.errors[idx]=err
-				log("tasks" , debug.traceback( task.handles[idx] , err ) )
-			end
-		else
-			if task.errors[idx] then
-				log("tasks" , debug.traceback( task.handles[idx] , task.errors[idx] ) )
-			end
-		end
-	end
-	
-	if runcount==0 then -- coroutines are not runnig
-		tasks:del_task(task)
-	end
-
-	return task
-end
-
---[[#lua.wetgenes.tasks.del_task
-
-	tasks:del_task(task)
-	
-Delete a task.
-
-]]
-M.tasks_functions.del_task=function(tasks,task)
-	tasks:del_id(task)	
-	return task
-end
-
---[[#lua.wetgenes.tasks.update
-
-	tasks:update()
-	
-Resume all current coroutines and wait for them to yield.
-
-]]
-M.tasks_functions.update=function(tasks)
-	for idx,task in pairs(tasks.task) do
-		tasks:run_task(task)
-	end
-end
 
 --[[#lua.wetgenes.tasks.send
 
@@ -537,11 +413,11 @@ Check memo.error for posible error, this will be nil if everything went
 OK.
 
 ]]
-M.tasks_functions.send=function(tasks,memo,timeout)
+M.tasks.send=function(tasks,memo,timeout)
 	if memo.error then return memo end
 	if type(memo.id)=="nil" then tasks:add_memo(memo) end -- auto add
 	memo.state="sending"
-	local ok=(tasks.main_thread and tasks.colinda or tasks.linda):send( timeout , memo.task , memo )
+	local ok=tasks.linda:send( timeout , memo.task , memo )
 	memo.state="sent"
 	if not ok then memo.error="send failed" return memo end
 	return memo
@@ -569,14 +445,14 @@ After calling check if memo.error is nil then you will find the result in
 memo.result
 
 ]]
-M.tasks_functions.receive=function(tasks,memo,timeout)
+M.tasks.receive=function(tasks,memo,timeout)
 	if memo.error then return memo end
 	if memo.state=="setup" or not memo.state then -- autosend
 		tasks:send(memo,timeout)
 	end
 	memo.state="receiving"
-	local ok,result=(tasks.main_thread and tasks.colinda or tasks.linda):receive( timeout , memo.id ) ;
-	(tasks.main_thread and tasks.colinda or tasks.linda):set(memo.id) -- cleanup
+	local ok,result=tasks.linda:receive( timeout , memo.id ) ;
+	tasks.linda:set(memo.id) -- cleanup
 	memo.state="done"
 	tasks:del_memo(memo)
 
@@ -599,7 +475,7 @@ memo.result instead of memo so slightly less mess. This will assert on
 finding a memo.error so less need to check for errors.
 
 ]]
-M.tasks_functions.do_memo=function(tasks,memo,timeout)
+M.tasks.do_memo=function(tasks,memo,timeout)
 	tasks:send(memo,timeout)
 --	log("memo",memo.task,memo.id)
 	if memo.id then -- do we expect a result? ( set id to false for no result expected )
@@ -620,7 +496,7 @@ Failure to call this will allow any created threads to continue to run
 until program termination.
 
 ]]
-M.tasks_functions.delete=function(tasks)
+M.tasks.delete=function(tasks)
 	if tasks.thread.thread then -- this is the global tasks
 		tasks:del_global_thread()
 	end
@@ -635,7 +511,7 @@ end
 Simple iterator for memos available at a subscription id.
 
 ]]
-M.tasks_functions.memos=function(tasks,subid)
+M.tasks.memos=function(tasks,subid)
 	return function()
 		-- get any memo waiting but do not block
 		local _,memo= tasks.linda:receive( 0 , subid )
@@ -643,112 +519,7 @@ M.tasks_functions.memos=function(tasks,subid)
 	end
 end
 
---[[#lua.wetgenes.tasks.create_colinda
-
-	local colinda=require("wetgenes.tasks").colinda(linda)
-	
-Create a colinda which is a wrapper around a linda providing 
-replacement functions to be used inside a coroutine so it will yield 
-(and assume it will be resumed) rather than wait.
-
-This should be a dropin replacement for a linda and will fallback to 
-normal linda use if not in a coroutine.
-
-If linda is nil then we will create one, the linda used in this colinda 
-can be found in colinda.linda if you need raw access.
-
-What we are doing here is wrapping the send/receive functions so that
-
-	colinda:send(time,...)
-	colinda:recieve(time,...)
-
-will be replaced with functions that call
-
-	linda:send(0,...)
-	linda:recieve(0,...)
-
-and use coroutines.yield to mimic the original timeout value without 
-blocking.
-
-]]
-M.create_colinda=function(linda)
-	if not linda then linda=lanes.linda() end
-	local colinda={linda=linda}
-	setmetatable(colinda,M.colinda_metatable)
-	return colinda
-end
-	
-M.colinda_functions.set=function(colinda,...)
-	return colinda.linda:set(...)
-end
-
-M.colinda_functions.get=function(colinda,...)
-	return colinda.linda:get(...)
-end
-
-M.colinda_functions.count=function(colinda,...)
-	return colinda.linda:count(...)
-end
-
-M.colinda_functions.dump=function(colinda,...)
-	return colinda.linda:cancel(...)
-end
-
-M.colinda_functions.cancel=function(colinda,...)
-	return colinda.linda:cancel(...)
-end
-
-local checktimeout=function(timeout,...)
-	local aa={...}
-	local t=type(timeout)
-	if ( t~="nil" and t~="number" ) then -- is the first arg a valid timeout
-		timeout=nil
-		table.insert(aa,1,timeout)
-	end
-	return timeout,aa
-end
-
-M.colinda_functions.send=function(colinda,...)
-	if not coroutine.running() then
-		return colinda.linda:send(...)
-	end
-	local timeout,aa=checktimeout(...)
-	if timeout==0 then return colinda.linda:send(0,unpack(aa)) end -- no need to yield
-	local timestart
-	if timeout then timestart=os.time() end
-	
---PRINT(timeout)
---TRACEBACK()
-
-	local ret
-	repeat
-		ret={ colinda.linda:send(1,unpack(aa)) }
-		if ret[1] then break end -- got a result
-		if timeout and os.time() >= timestart+timeout then break end
-		coroutine.yield()
-	until false
-	
-	return unpack(ret)
-end
-
-M.colinda_functions.receive=function(colinda,...)
-	if not coroutine.running() then
-		return colinda.linda:receive(...)
-	end
-	local timeout,aa=checktimeout(...)
-	if timeout==0 then return colinda.linda:receive(0,unpack(aa)) end -- no need to yield
-	local timestart
-	if timeout then timestart=os.time() end
-	
-	local ret
-	repeat
-		ret={ colinda.linda:receive(1,unpack(aa)) }
-		if ret[1] then break end -- got a result
-		if timeout and os.time() >= timestart+timeout then break end
-		coroutine.yield()
-	until false
-
-	return unpack(ret)
+M.tasks.update=function(tasks)
 end
 
 --[[#lua.wetgenes.tasks.create
@@ -764,13 +535,10 @@ M.create=function(tasks)
 	tasks.ids={}		-- unique ids within tasks
 	tasks.memo={}		-- data sent between tasks
 	tasks.thread={}		-- preemptive tasks
-	tasks.task={}		-- cooperative tasks
 	
-	if not tasks.linda then -- create a new linda and a colinda and mark this tasks as main_thread
+	if not tasks.linda then -- create a new linda and mark this tasks as main_thread
 		tasks.main_thread=true
 		tasks.linda=lanes.linda()
-		tasks.colinda=M.create_colinda(tasks.linda)
-		tasks.colinda.tasks=tasks -- link back
 		tasks:add_thread({
 			count=1,
 			id="thread",
@@ -789,8 +557,6 @@ M.create=function(tasks)
 		})
 	else
 		tasks.main_thread=false -- we are not the main therad
-		tasks.colinda=M.create_colinda(tasks.linda) -- just create a colinda
-		tasks.colinda.tasks=tasks -- link back
 	end
 
 	return tasks
@@ -805,7 +571,7 @@ Returns either the result or nil,error so can be used simply with an
 assert wrapper.
 
 ]]
-M.tasks_functions.http=function(tasks,memo,timeout)
+M.tasks.http=function(tasks,memo,timeout)
 
 	if type(memo) == "string" then memo={url=memo} end
 	memo.task=memo.task or "http"
@@ -831,7 +597,7 @@ Note that rows can be empty so an additional assert(rows[1]) might be
 needed to check you have data returned.
 
 ]]
-M.tasks_functions.sqlite=function(tasks,memo,timeout)
+M.tasks.sqlite=function(tasks,memo,timeout)
 
 	if type(memo) == "string" then memo={sql=memo} end
 	memo.task=memo.task or "sqlite"
@@ -856,7 +622,7 @@ returns nil,error if something went wrong or returns result if
 something went right.
 
 ]]
-M.tasks_functions.client=function(tasks,memo,timeout)
+M.tasks.client=function(tasks,memo,timeout)
 
 	if type(memo) == "string" then memo={data=memo} end
 	memo=memo or {}
@@ -878,7 +644,7 @@ end -- The functions below are free running tasks and should not depend on any l
 
 
 -- wrap all tasks so we can print errors
-M.tasks_functions.wrap_code=function(code,linda,id,idx)
+M.tasks.wrap_code=function(code,linda,id,idx)
 	local lanes=require("lanes")
 
 	local rawprint=print
@@ -921,7 +687,7 @@ Handle global tasks, starting and stopping and preventing the starting
 of multiple copies of the same task.
 
 ]]
-M.tasks_functions.thread_code=function(linda,task_id,task_idx)
+M.tasks.thread_code=function(linda,task_id,task_idx)
 
 	local lanes = require("lanes")
 
@@ -974,7 +740,7 @@ end
 A basic function to handle global memos to get/set data shared amongst multiple tasks.
 
 ]]
-M.tasks_functions.global_code=function(linda,task_id,task_idx)
+M.tasks.global_code=function(linda,task_id,task_idx)
 
 	local lanes = require("lanes")
 
@@ -1022,7 +788,7 @@ end
 A basic function to handle http memos.
 
 ]]
-M.tasks_functions.http_code=function(linda,task_id,task_idx)
+M.tasks.http_code=function(linda,task_id,task_idx)
 
 	local lanes = require("lanes")
 
@@ -1186,7 +952,7 @@ more than one thread per database as they will just fight over file
 access.
 
 ]]
-M.tasks_functions.sqlite_code=function(linda,task_id,task_idx)
+M.tasks.sqlite_code=function(linda,task_id,task_idx)
 
 	local lanes = require("lanes")
 	local sqlite3 = lanes.require("lsqlite3")
@@ -1319,7 +1085,7 @@ end
 A basic function to handle (web)socket client connection.
 
 ]]
-M.tasks_functions.client_code=function(linda,task_id,task_idx)
+M.tasks.client_code=function(linda,task_id,task_idx)
 
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end

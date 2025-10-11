@@ -325,6 +325,9 @@ end
 
 -- setup tasks early so we can use recipes.sqlite for data management and run loading tasks on another thread
 	oven.tasks=require("wetgenes.tasks").create()
+	-- make sure syncs knows how to resume these tasks
+	require("wetgenes.syncs").start(function() oven.tasks:update() end)
+
 -- and http requests
 	oven.tasks:add_global_thread({
 		count=8,
