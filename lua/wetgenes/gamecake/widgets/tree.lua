@@ -24,8 +24,8 @@ M.bake=function(oven,wtree)
 -- refresh any item
 wtree.item_to_line=function(widget,item)
 	
-	if item.refresh then -- this must provide a .line output
-		item:refresh()
+	if item.to_line then -- this must provide a .line output
+		item:to_line(widget)
 	else
 		local ss=widget.master.theme.grid_size		
 		local opts={
@@ -43,28 +43,17 @@ wtree.item_to_line=function(widget,item)
 
 		item.line=widget:create(opts)
 		item.line_text=item.line:add({class="text",text=item.text})
-	end
 
-	for _,it in ipairs(item) do
-		it.parent=item
-		widget:item_to_line(it)
-	end
-end
-
--- set / refresh top level list of items ( which is not itself an item )
-wtree.items_to_lines=function(widget,items)
-	if items then widget.items=items end
-	items=widget.items
-	
-	for _,item in ipairs(items) do
-		item.parent=items
-		widget:item_to_line(item)
+		for _,it in ipairs(item) do
+			widget:item_to_line(it)
+		end
 	end
 
 end
+
 
 wtree.refresh=function(widget)
-	widget:items_to_lines()
+	widget:item_to_line(widget.items)
 	widget:layout()
 	widget:set_dirty()
 end
@@ -79,16 +68,14 @@ wtree.layout=function(widget)
 	if widget.items then
 		local recurse
 		recurse=function(parent)
-			for _,item in ipairs(parent) do
+			for _,item in ipairs(parent.dir or parent) do
 				if item.line then -- add this line widget
 					pan:insert(item.line)
-				end
-				if item[1] then -- children of this item in numerical keys
 					recurse(item)
 				end
 			end
 		end
-		recurse(widget.items) -- this is just a list not an item itself
+		recurse({widget.items}) -- top item
 	end
 	
 	widget.meta.layout(widget)
@@ -145,7 +132,6 @@ function wtree.setup(widget,def)
 	
 
 -- update item info
-	widget.items_to_lines=wtree.items_to_lines
 	widget.item_to_line=wtree.item_to_line
 
 	widget:refresh()

@@ -175,8 +175,6 @@ function M.bake(opts)
 	oven.baked={}
 
 	oven.tasks=require("wetgenes.tasks").create({linda=opts.linda})
-	-- make sure syncs knows how to resume these tasks
-	require("wetgenes.syncs").start(function() oven.tasks:update() end)
 
 --
 -- preheat a normal oven

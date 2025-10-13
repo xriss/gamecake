@@ -368,8 +368,8 @@ function gui.hooks(act,w,dat)
 		if w.id=="list_mode" then -- change
 
 			gui.master.ids.treefile.hidden=true
-			gui.master.ids.treefile.hidden=true
 			gui.master.ids.output.hidden=true
+			gui.master.ids.gist.hidden=true
 
 			if w.str=="tree" then
 
@@ -469,7 +469,7 @@ local lay=
 								id="list",
 								size="full",style="flat",hx=200,highlight="none",color=0,
 								{
-									id="treefile",hidden=true,
+									id="treefile",hidden=false,
 									class="treefile",size="full",hooks=gui.hooks,
 									item_refresh=docs.item_refresh,
 								},
@@ -480,7 +480,7 @@ local lay=
 								},
 								{
 									-- TODO: test gist
-									id="gist",hidden=false,
+									id="gist",hidden=true,
 									class="treegist",size="full",hooks=gui.hooks,
 									item_refresh=docs.item_refresh,
 								},
