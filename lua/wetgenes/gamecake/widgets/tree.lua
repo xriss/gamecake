@@ -53,9 +53,9 @@ end
 
 
 wtree.refresh=function(widget)
-	widget:item_to_line(widget.items)
-	widget:layout()
-	widget:set_dirty()
+--	widget:item_to_line(widget.items)
+	widget:resize_and_layout() -- layout will auto update
+--	widget:set_dirty()
 end
 
 wtree.layout=function(widget)
@@ -66,6 +66,7 @@ wtree.layout=function(widget)
 
 -- run refresh_item on each item and add item.line to the display
 	if widget.items then
+		widget:item_to_line(widget.items) -- auto refresh
 		local recurse
 		recurse=function(parent)
 			for _,item in ipairs(parent.dir or parent) do
@@ -134,7 +135,7 @@ function wtree.setup(widget,def)
 -- update item info
 	widget.item_to_line=wtree.item_to_line
 
-	widget:refresh()
+--	widget:refresh()
 
 	return widget
 end

@@ -175,7 +175,7 @@ end
 function gui.refresh_tree()
 --	local w=gui.master.ids.treefile.tree_widget
 --	gui.master.ids.treefile.tree_widget:refresh()
-	gui.master.ids.treefile.tree_widget:refresh()
+--	gui.master.ids.treefile.tree_widget:refresh()
 end
 
 function gui.action(m)
@@ -251,12 +251,14 @@ function gui.action(m)
 
 print("search_find",word,dir)
 
+--[[
 			local find=finds.get(dir,word)
 			if not find then
 				find=finds.create({dir=dir,word=word})
 				find:add_item()
 				find:scan()
 			end
+]]
 
 			gui.refresh_tree()
 			gui.master.request_redraw=true
@@ -276,9 +278,11 @@ end
 
 function gui.hooks(act,w,dat)
 
-	if act=="line_click" then
+	if act=="line_click" and dat and dat.is=="fs" then
+
+--print(act,dat.path)
 	
-		if dat.mode=="file" then
+		if not dat.dir then -- a file click
 
 			local path=dat.path
 			w.master.later_append(function()
@@ -290,6 +294,7 @@ function gui.hooks(act,w,dat)
 			end)
 		end
 
+--[[
 		if dat.mode=="file_find" then
 
 			local path=dat.path
@@ -313,6 +318,7 @@ function gui.hooks(act,w,dat)
 
 			end)			
 		end
+]]
 
 	elseif act=="click" then
 
@@ -430,7 +436,7 @@ local lay=
 						hx=gsiz*4,hy=gsiz*1,class="menubar",id="menubar",always_draw=true,
 					},
 					{
-						hx=gsiz*1,hy=gsiz*1,text="Welcome to swanky edit (swed)",id="infobar",solid=true
+						hx=gsiz*1,hy=gsiz*1,text="Welcome to swed",id="infobar",solid=true
 					},
 				},
 				{

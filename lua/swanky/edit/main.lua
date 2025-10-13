@@ -196,7 +196,7 @@ resultierendes Vergnügen?
 
 --		srecaps.step()
 		
-		finds.update()
+--		finds.update()
 		
 		docs.update()
 

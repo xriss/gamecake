@@ -35,6 +35,7 @@ M.fs_metatable={__index=M.fs}
 local wpath=require("wetgenes.path")
 local lfs ; pcall( function() lfs=require("lfs") end )
 
+M.fs.is="fs"
 
 M.fs.setup=function(fs)
 	if not fs then fs={} end
@@ -47,6 +48,7 @@ M.fs.setup=function(fs)
 			if attr then
 				local it={}
 				if attr.mode=="directory" then
+					fs.expanded=false -- dirs start of collapsed
 					fs.dir={}
 					fs.name=fs.name.."/"
 				else
@@ -100,33 +102,34 @@ M.fs.merge_dir=function(fs,dir)
 		dir=fs:fetch_dir(fs.path)
 	end
 
-	local map={}
-	for i,v in ipairs(dir) do
-		map[v.name]=v
-	end
-	
 	if not fs.dir then -- just set
 		fs.dir=dir
-		return
-	end
+	else
 
-	for i=#fs.dir,1,-1 do
-		local v=fs.dir[i]
-		local o=map[v.name]
-		if o then -- merge
-			map[v.name]=nil -- forget after merge 
-			for k,s in pairs(o) do
-				if not v[k] or type(s)~="table" then -- do not merge tables unless dest is empty
-					v[k]=s
-				end
-			end
-		else -- delete
-			table.remove(fs.dir,i)
+		local map={}
+		for i,v in ipairs(dir) do
+			map[v.name]=v
 		end
-	end
-	-- any items left in the map are new
-	for _,v in pairs(map) do -- add
-		fs.dir[#fs.dir+1]=v
+
+		for i=#fs.dir,1,-1 do -- backwards so we can remove
+			local v=fs.dir[i]
+			local o=map[v.name]
+			if o then -- merge
+				map[v.name]=nil -- forget after merge 
+				for k,s in pairs(o) do
+					if not v[k] or type(s)~="table" then -- do not merge tables unless dest is empty
+						v[k]=s
+					end
+				end
+			else -- delete
+				table.remove(fs.dir,i)
+			end
+		end
+		-- any items left in the map are new
+		for _,v in pairs(map) do -- add
+			fs.dir[#fs.dir+1]=v
+		end
+
 	end
 
 	fs:sort_dir()
@@ -163,7 +166,7 @@ M.fs.manifest_path=function(fs,fullpath)
 		local it=last:find_it({path=path})
 		if not it then -- need to create
 			it=fs.setup({
-				path=path
+				path=path,
 			})
 			last.dir[#last.dir+1]=it
 		end
@@ -175,10 +178,25 @@ end
 
 M.fs.toggle_dir=function(fs)
 
+	if not fs.dir then return end
+	
+	fs.expanded = not fs.expanded
+
+	if fs.expanded then -- expanded so refresh contents
+		fs:merge_dir()
+	else -- collapsed so remove children
+		for i=#fs.dir,1,-1 do
+			local v=fs.dir[i]
+			if not v.keep then
+				table.remove(fs.dir,i)
+			end
+		end		
+	end
+
 end
 
 
-M.fs.to_line=function(fs,widget)
+M.fs.to_line=function(fs,widget,only)
 
 	local ss=widget.master.theme.grid_size		
 	local opts={
@@ -195,51 +213,46 @@ M.fs.to_line=function(fs,widget)
 
 	fs.line=widget:create(opts)
 
-	local pp=wpath.split(fs.path)
+	local pp=wpath.split( wpath.unslash(fs.path) )
 
-	fs.text=string.rep(" ",#pp-1).."- "..fs.name
+	fs.text=string.rep(" ",#pp-1)
+	if fs.dir then
+		if fs.expanded then
+			fs.text=fs.text.."< "
+		else
+			fs.text=fs.text.."= "
+		end
+	else
+		fs.text=fs.text.."- "
+	end
+	fs.text=fs.text..fs.name
 
 	fs.line_text=fs.line:add({class="text",text=fs.text})
 
-	for _,it in ipairs(fs.dir) do
-		it:to_line(widget)
+	if not only then
+		if fs.dir then
+			for _,it in ipairs(fs.dir) do
+				it:to_line(widget)
+			end
+		end
 	end
-
 end
 
 
 M.fs.hooks=function(hook,widget,dat)
 
---print(hook,widget,dat,widget and widget.user and widget.user.path )
-
-	if hook=="unfocus" or hook=="timedelay" then
---[[
-		if widget.id=="dir" then
-			local treefile=widget
-			while treefile and treefile.parent~=treefile and treefile.class~="treefile" do treefile=treefile.parent end
-			if treefile.class=="treefile" then -- sanity
-				treefile:refresh()
-			end
-		end
-]]
-	end
+-- print(hook,widget,dat,widget and widget.user and widget.user.path , widget.class )
 	
 	if hook=="click" and widget and widget.class=="line" then
 		local it=widget.user
 		local tree=widget ; while tree and tree.parent~=tree and tree.class~="tree" do tree=tree.parent end
-		local treefile=tree.parent
-		if treefile.class=="treefile" then -- sanity
-			if it.dir then
-
-				it:toggle_dir()
-
---				treefile:item_toggle_dir(it)
---				if it.refresh then it:refresh() end
---				tree:refresh()
-
-			end
-
-			treefile:call_hook_later("line_click",it)
+		assert( tree.class=="tree" )
+		
+		if it.dir then
+			it:toggle_dir()
+			tree:refresh()
 		end
+
+		tree:call_hook_later("line_click",it)
 	end
 end

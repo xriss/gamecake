@@ -21,6 +21,7 @@ M.bake=function(oven,finds)
 
 	local finds=finds or {}
 
+--[[
 
 	local docs=oven.rebake(oven.modname..".docs")
 	local gui=oven.rebake(oven.modname..".gui")
@@ -338,7 +339,7 @@ print("path",dir_item.path)
 		gui.master.request_redraw=true
 		
 	end
-
+]]
 
 	return finds
 end
