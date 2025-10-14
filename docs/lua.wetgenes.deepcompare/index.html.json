@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 646,
+   "count": 645,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 635,
+   "count": 634,
    "name": "lua.wetgenes"
   },
   {
@@ -630,7 +630,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 171,
+   "count": 170,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -930,7 +930,7 @@
    "name": "lua.wetgenes.gamecake.toaster.newticks"
   },
   {
-   "count": 60,
+   "count": 59,
    "name": "lua.wetgenes.gamecake.widgets"
   },
   {
@@ -1088,10 +1088,6 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.widgets.datas.set_value"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.widgets.datatree"
   },
   {
    "count": 7,
