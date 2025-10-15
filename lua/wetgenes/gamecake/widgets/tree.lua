@@ -16,11 +16,11 @@ local wpath=require("wetgenes.path")
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 
-M.mount_ms=function()
+M.mount_ms=function(...)
 	return M.ms.setup({
 		name="",
 		path="",
-		dir={},
+		dir={...},
 	})
 end
 
@@ -105,6 +105,24 @@ M.ms.merge_dir=function(ms,dir)
 	ms:sort_dir()
 end
 
+M.ms.toggle_dir=function(ms)
+
+	if not ms.dir then return end
+	
+	ms.expanded = not ms.expanded
+
+	if ms.expanded then -- expanded so refresh contents
+		ms:merge_dir()
+	else -- collapsed so remove children
+		for i=#ms.dir,1,-1 do
+			local v=ms.dir[i]
+			if not v.keep then
+				table.remove(ms.dir,i)
+			end
+		end		
+	end
+
+end
 
 M.ms.find_it=function(ms,search)
 	local found=true
@@ -124,6 +142,49 @@ M.ms.find_it=function(ms,search)
 end
 
 
+M.ms.to_line=function(ms,widget,only)
+
+	local ss=widget.master.theme.grid_size		
+	local opts={
+		class="line",
+		class_hooks=widget.class_hooks,
+		hooks=ms.hooks, -- or widget.hooks,
+		hx=ss,
+		hy=ss,
+		text_align="left",
+		user=ms,
+		color=0,
+		solid=true,
+	}
+
+	ms.line=widget:create(opts)
+
+	local pp=wpath.split( wpath.unslash(ms.path) )
+
+	ms.text=string.rep(" ",#pp-1)
+	if ms.dir then
+		if ms.expanded then
+			ms.text=ms.text.."< "
+		else
+			ms.text=ms.text.."= "
+		end
+	else
+		ms.text=ms.text.."- "
+	end
+	ms.text=ms.text..ms.name
+
+	ms.line_text=ms.line:add({class="text",text=ms.text})
+
+	if not only then
+		if ms.dir then
+			for _,it in ipairs(ms.dir) do
+				it:to_line(widget)
+			end
+		end
+	end
+end
+
+
 M.ms.fetch_attr=function(ms,path)
 	local it,path=assert(ms:find_prefix(path))
 	return it:fetch_attr(path)
@@ -136,6 +197,7 @@ end
 
 M.ms.manifest_path=function(ms,path)
 	local it,path=assert(ms:find_prefix(path))
+print(it,path)
 	return it:manifest_path(path)
 end
 
@@ -256,9 +318,11 @@ function wtree.setup(widget,def)
 
 	widget.scroll_widget.pan.layout=wtree.pan_layout -- custom pan layout
 	
-
 -- update item info
 	widget.item_to_line=wtree.item_to_line
+
+print(def.mounts)
+	widget.items=M.mount_ms(unpack(def.mounts or {}))
 
 --	widget:refresh()
 

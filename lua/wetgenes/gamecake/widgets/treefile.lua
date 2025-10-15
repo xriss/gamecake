@@ -113,67 +113,6 @@ M.fs.manifest_path=function(fs,fullpath)
 	return last
 end
 
-M.fs.toggle_dir=function(fs)
-
-	if not fs.dir then return end
-	
-	fs.expanded = not fs.expanded
-
-	if fs.expanded then -- expanded so refresh contents
-		fs:merge_dir()
-	else -- collapsed so remove children
-		for i=#fs.dir,1,-1 do
-			local v=fs.dir[i]
-			if not v.keep then
-				table.remove(fs.dir,i)
-			end
-		end		
-	end
-
-end
-
-
-M.fs.to_line=function(fs,widget,only)
-
-	local ss=widget.master.theme.grid_size		
-	local opts={
-		class="line",
-		class_hooks=widget.class_hooks,
-		hooks=fs.hooks, -- or widget.hooks,
-		hx=ss,
-		hy=ss,
-		text_align="left",
-		user=fs,
-		color=0,
-		solid=true,
-	}
-
-	fs.line=widget:create(opts)
-
-	local pp=wpath.split( wpath.unslash(fs.path) )
-
-	fs.text=string.rep(" ",#pp-1)
-	if fs.dir then
-		if fs.expanded then
-			fs.text=fs.text.."< "
-		else
-			fs.text=fs.text.."= "
-		end
-	else
-		fs.text=fs.text.."- "
-	end
-	fs.text=fs.text..fs.name
-
-	fs.line_text=fs.line:add({class="text",text=fs.text})
-
-	if not only then
-		if fs.dir then
-			for _,it in ipairs(fs.dir) do
-				it:to_line(widget)
-			end
-		end
-	end
-end
 
 
 M.fs.hooks=function(hook,widget,dat)

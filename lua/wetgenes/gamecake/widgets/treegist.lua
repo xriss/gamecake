@@ -45,8 +45,10 @@ function wtreegist.setup(widget,def)
 
 	widget.data_dir  = widget.data_dir  or wdata.new_data({class="string",str=wpath.currentdir(),master=widget.master,hooks=wtreegist.class_hooks})
 
-	widget.tree_widget=widget:add({size="full",class="tree",id="gists"})
-	widget.tree_widget.items=require("wetgenes.gamecake.widgets.treefile").mount_fs()
+	widget.tree_widget=widget:add({size="full",class="tree",id="gists",mounts={
+		require("wetgenes.gamecake.widgets.treefile").mount_fs()
+	}})
+--	widget.tree_widget.items=require("wetgenes.gamecake.widgets.treefile").mount_fs()
 	widget.tree_widget.items:manifest_path( widget.data_dir:value() )
 	widget.tree_widget.hooks=function(...) return widget.hooks(...) end -- hook up sub widget
 

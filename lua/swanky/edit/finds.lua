@@ -197,7 +197,7 @@ print("path",dir_item.path)
 				end
 			end
 		end
-		local item=rekky(treefile.tree_widget.items)
+		local item=rekky(treefiles.items)
 
 		return item
 	end

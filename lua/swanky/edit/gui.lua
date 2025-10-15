@@ -125,7 +125,6 @@ gui.data_setup=function()
 
 		datas.new({id="list_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
 			{str="tree"},
-			{str="gist"},
 			{str="output"},
 		}})
 
@@ -174,8 +173,8 @@ end
 
 function gui.refresh_tree()
 --	local w=gui.master.ids.treefile.tree_widget
---	gui.master.ids.treefile.tree_widget:refresh()
---	gui.master.ids.treefile.tree_widget:refresh()
+--	gui.master.ids.treefiles:refresh()
+--	gui.master.ids.treefiles:refresh()
 end
 
 function gui.action(m)
@@ -373,21 +372,16 @@ function gui.hooks(act,w,dat)
 
 		if w.id=="list_mode" then -- change
 
-			gui.master.ids.treefile.hidden=true
+			gui.master.ids.treefiles.hidden=true
 			gui.master.ids.output.hidden=true
-			gui.master.ids.gist.hidden=true
 
 			if w.str=="tree" then
 
-				gui.master.ids.treefile.hidden=false
+				gui.master.ids.treefiles.hidden=false
 
 			elseif w.str=="output" then
 
 				gui.master.ids.output.hidden=false
-
-			elseif w.str=="gist" then
-
-				gui.master.ids.gist.hidden=false
 
 			end
 
@@ -475,20 +469,16 @@ local lay=
 								id="list",
 								size="full",style="flat",hx=200,highlight="none",color=0,
 								{
-									id="treefile",hidden=false,
-									class="treefile",size="full",hooks=gui.hooks,
-									item_refresh=docs.item_refresh,
+									id="treefiles",hidden=false,
+									class="tree",size="full",hooks=gui.hooks,
+									mounts={
+										require("wetgenes.gamecake.widgets.treefile").mount_fs()
+									},
 								},
 								{
 									id="output",hidden=true,
 									class="texteditor",size="full",style="flat",color=0,
 									opts={readonly=true,gutter_disable=true,word_wrap=true},
-								},
-								{
-									-- TODO: test gist
-									id="gist",hidden=true,
-									class="treegist",size="full",hooks=gui.hooks,
-									item_refresh=docs.item_refresh,
 								},
 							},
 						},
