@@ -33,7 +33,7 @@ M.bake=function(oven,docs)
 	docs.list={} -- list of open documents
 
 	docs.item_refresh=function(treefile,item)
-
+--[[
 		wtreefile.item_refresh(treefile,item)
 
 		if item.mode~="directory" then
@@ -49,6 +49,7 @@ M.bake=function(oven,docs)
 				end
 			end
 		end
+]]
 	end
 	
 
@@ -169,6 +170,7 @@ M.bake=function(oven,docs)
 		it.txt.set_text("\n",filename)
 
 --		gui.master.ids.treefile:add_file_item(it.filename)
+		gui.master.ids.treefile.tree_widget.items:manifest_path( it.filename )
 		
 		collect.load(it,filename)
 		

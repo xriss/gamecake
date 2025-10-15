@@ -25,6 +25,17 @@ end
 
 
 M.fs={}
+-- simple inherits, no tables and last has priority
+for _,t in ipairs({
+	{ "wetgenes.gamecake.widgets.tree" , "ms" },
+}) do
+	for n,v in pairs( require( t[1] )[ t[2] ] ) do
+		if type(v)~="table" then
+			M.fs[n]=v
+		end
+	end
+end
+
 M.fs_metatable={__index=M.fs}
 
 local wpath=require("wetgenes.path")
@@ -79,85 +90,15 @@ M.fs.fetch_dir=function(fs,path)
 	return dir
 end
 
-M.fs.sort_dir=function(fs)
-	if fs.dir then -- safe check
-		table.sort(fs.dir,function(a,b)
-			if ( not a.dir ) == ( not b.dir ) then -- both are dir or files
-				return a.name:lower() < b.name:lower()
-			else
-				if a.dir then return true end
-			end
-		end)
-	end
-end
-
-M.fs.merge_dir=function(fs,dir)
-
-	if not dir then
-		dir=fs:fetch_dir(fs.path)
-	end
-
-	if not fs.dir then -- just set
-		fs.dir=dir
-	else
-
-		local map={}
-		for i,v in ipairs(dir) do
-			map[v.name]=v
-		end
-
-		for i=#fs.dir,1,-1 do -- backwards so we can remove
-			local v=fs.dir[i]
-			local o=map[v.name]
-			if o then -- merge
-				map[v.name]=nil -- forget after merge 
-				for k,s in pairs(o) do
-					if not v[k] or type(s)~="table" then -- do not merge tables unless dest is empty
-						v[k]=s
-					end
-				end
-			else -- delete
-				table.remove(fs.dir,i)
-			end
-		end
-		-- any items left in the map are new
-		for _,v in pairs(map) do -- add
-			fs.dir[#fs.dir+1]=v
-		end
-
-	end
-
-	fs:sort_dir()
-end
-
-
-M.fs.find_it=function(fs,search)
-	local found=true
-	for k,v in pairs(search) do -- must match every key,value in search
-		if fs[k]~=v then found=false break end
-	end
-	if found then return fs end -- found it
-	
-	if fs.dir then -- is a dir with data
-		for ids,it in pairs(fs.dir) do
-			local found=it:find_it(search)
-			if found then return found end -- found it
-		end
-	end
-	
-	return false
-end
-
-
 M.fs.manifest_path=function(fs,fullpath)
 	fullpath=wpath.unslash(fullpath)
 	local pp=wpath.split(fullpath)
-	if pp[#pp]=="" then pp[#pp]=nil end -- strip trailing slash
+--	if pp[#pp]=="" then pp[#pp]=nil end -- strip trailing slash
 
 	local path=""
 	local last=fs
 	for i,v in ipairs(pp) do
-		path=path..v.."/"
+		path=wpath.resolve(path.."/"..v)
 		local it=last:find_it({path=path})
 		if not it then -- need to create
 			it=fs.setup({
@@ -169,6 +110,7 @@ M.fs.manifest_path=function(fs,fullpath)
 		last=it
 	end
 
+	return last
 end
 
 M.fs.toggle_dir=function(fs)
