@@ -54,7 +54,16 @@ void main(void)
 	vec2 tm=(floor(mod(uv,map_info.zw))+vec2(0.5,0.5))/map_info.zw;			// map uv
 	
 	d=texture2D(tex_map, tm).rgba;	
-	c=texture2D(tex_tile, (((d.rg*vec2(255.0,255.0))+tc)*tile_info.xy)/tile_info.zw ).rgba;
+	vec2 xy=((floor(vec2( 0.5, 0.5)+(d.rg*vec2(255.0,255.0)))+tc)*tile_info.xy);
+
+// this will blur slightly
+//	c=(   texture2D(tex_tile, (xy+vec2(-0.5,-0.5))/tile_info.zw ).rgba
+//		+ texture2D(tex_tile, (xy+vec2( 0.5,-0.5))/tile_info.zw ).rgba
+//		+ texture2D(tex_tile, (xy+vec2(-0.5, 0.5))/tile_info.zw ).rgba
+//		+ texture2D(tex_tile, (xy+vec2( 0.5, 0.5))/tile_info.zw ).rgba )/4.0;
+
+// better to do this and then render to an fbo and scale that
+	c=(   texture2D(tex_tile, (xy                )/tile_info.zw ).rgba );
 	
 	fg=texture2D(tex_cmap, vec2( d.b,0.5) ).rgba;
 	bg=texture2D(tex_cmap, vec2( d.a,0.5) ).rgba;

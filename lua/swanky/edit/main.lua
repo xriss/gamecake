@@ -21,6 +21,8 @@ M.bake=function(oven,main)
 	main.modname=M.modname
 	
 	oven.modname="swanky.edit"
+	
+	oven.console.input_disable=true
 
 	local gl=oven.gl
 	local cake=oven.cake

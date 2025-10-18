@@ -10,13 +10,11 @@ local wstr=require("wetgenes.string")
 
 arg={...}
 
-lfs.chdir(apps.dir)
+if apps.dir then lfs.chdir(apps.dir) end
 
 if arg[1] then
 
-	local m=require("cmd."..arg[1])
-
-	return m.cmd(unpack(arg))
+	require("cmd."..arg[1],unpack(arg))
 
 else
 

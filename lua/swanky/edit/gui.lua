@@ -125,7 +125,7 @@ gui.data_setup=function()
 
 		datas.new({id="list_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
 			{str="tree"},
-			{str="output"},
+			{str="console"},
 		}})
 
 		datas.new({id="run_mode"  ,class="list",  hooks=gui.hooks,num=2,list={
@@ -373,15 +373,15 @@ function gui.hooks(act,w,dat)
 		if w.id=="list_mode" then -- change
 
 			gui.master.ids.treefiles.hidden=true
-			gui.master.ids.output.hidden=true
+			gui.master.ids.console.hidden=true
 
 			if w.str=="tree" then
 
 				gui.master.ids.treefiles.hidden=false
 
-			elseif w.str=="output" then
+			elseif w.str=="console" then
 
-				gui.master.ids.output.hidden=false
+				gui.master.ids.console.hidden=false
 
 			end
 
@@ -445,7 +445,8 @@ local lay=
 				style="flat",hx=400,highlight="none",color=0,
 				{
 					id="texteditor",
-					class="texteditor",color=0,fbo=true,hooks=gui.hooks,
+					class="texteditor",color=0,hooks=gui.hooks,
+					fbo=true, --  scale using fbo so it is smoothed
 				}
 			},
 			{
@@ -454,7 +455,7 @@ local lay=
 					id="bar1",class="fill",
 					style="flat",highlight="none",color=0,
 					{
-						class="menudrop",hx=gsiz*2,hy=gsiz,color=0,
+						class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
 						data=gui.datas.get("list_mode"),
 					},
 				},
@@ -476,9 +477,10 @@ local lay=
 									},
 								},
 								{
-									id="output",hidden=true,
+									id="console",hidden=true,
 									class="texteditor",size="full",style="flat",color=0,
-									opts={readonly=true,gutter_disable=true,word_wrap=true},
+									opts={console=true,gutter_disable=true,word_wrap=true},
+									fbo=true, --  scale using fbo so it is smoothed
 								},
 							},
 						},
@@ -678,12 +680,15 @@ local lay=
 			it.sx=ss
 			it.sy=ss
 		end
-
+		gui.master.ids.console.hook_resize=gui.master.ids.texteditor.hook_resize
 
 		oven.console.linehook=function(s)
-			gui.master.ids.output.txt.append_text(s)
-			gui.master.ids.output:layout()
-			gui.master.ids.output:scroll_to_bottom()
+			local console=gui.master.ids.console
+			if console then
+				console.txt.append_text(s)
+--				console:layout()
+				console:scroll_to_bottom()
+			end
 		end
 
 

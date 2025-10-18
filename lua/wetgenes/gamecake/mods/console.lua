@@ -471,6 +471,7 @@ end
 	end
 
 	function console.msg(m)
+		
 
 		if     m.class=="key" and ( m.keyname=="shift" or m.keyname=="shift_l" or m.keyname=="shift_r" ) and m.action==1 then
 			console.shift_key=true
@@ -486,6 +487,8 @@ end
 			end
 			return nil
 		end
+
+		if console.input_disable then return m end -- can turn off key intercepts
 
 		if m.class=="key" then
 			if console.keypress(nil,m.keyname,m.action) then return nil end

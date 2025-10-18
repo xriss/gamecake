@@ -288,6 +288,7 @@ function wmeta.setup(def)
 
 		if def.fbo then -- an fbo buffer has been requested (can speed rendering up)
 			widget.fbo=framebuffers.create(0,0,0)
+--			widget.fbo=nil
 		end
 
 		widget:set_dirty()

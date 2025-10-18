@@ -144,36 +144,40 @@ end
 
 M.ms.to_line=function(ms,widget,only)
 
-	local ss=widget.master.theme.grid_size		
-	local opts={
-		class="line",
-		class_hooks=widget.class_hooks,
-		hooks=ms.hooks, -- or widget.hooks,
-		hx=ss,
-		hy=ss,
-		text_align="left",
-		user=ms,
-		color=0,
-		solid=true,
-	}
+	if ms.path~="" then -- no show mounts
+	
+		local ss=widget.master.theme.grid_size		
+		local opts={
+			class="line",
+			class_hooks=widget.class_hooks,
+			hooks=ms.hooks, -- or widget.hooks,
+			hx=ss,
+			hy=ss,
+			text_align="left",
+			user=ms,
+			color=0,
+			solid=true,
+		}
 
-	ms.line=widget:create(opts)
+		ms.line=widget:create(opts)
 
-	local pp=wpath.split( wpath.unslash(ms.path) )
+		local pp=wpath.split( wpath.unslash(ms.path) )
 
-	ms.text=string.rep(" ",#pp-1)
-	if ms.dir then
-		if ms.expanded then
-			ms.text=ms.text.."< "
+		ms.text=string.rep(" ",#pp-1)
+		if ms.dir then
+			if ms.expanded then
+				ms.text=ms.text.."< "
+			else
+				ms.text=ms.text.."= "
+			end
 		else
-			ms.text=ms.text.."= "
+			ms.text=ms.text.."- "
 		end
-	else
-		ms.text=ms.text.."- "
-	end
-	ms.text=ms.text..ms.name
+		ms.text=ms.text..ms.name
 
-	ms.line_text=ms.line:add({class="text",text=ms.text})
+		ms.line_text=ms.line:add({class="text",text=ms.text})
+
+	end
 
 	if not only then
 		if ms.dir then
@@ -225,7 +229,7 @@ wtree.item_to_line=function(widget,item)
 			text_align="left",
 			user=item,
 			color=0,
-			solid=true,
+--			solid=true,
 		}
 
 		item.line=widget:create(opts)
@@ -259,8 +263,8 @@ wtree.layout=function(widget)
 			for _,item in ipairs(parent.dir or parent) do
 				if item.line then -- add this line widget
 					pan:insert(item.line)
-					recurse(item)
 				end
+				recurse(item)
 			end
 		end
 		recurse({widget.items}) -- top item

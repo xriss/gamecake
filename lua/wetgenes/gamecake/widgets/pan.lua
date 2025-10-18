@@ -66,7 +66,7 @@ function wpan.setup(widget,def)
 	widget.draw=wpan.draw
 	widget.layout=wfill.layout
 	
-	widget.fbo=framebuffers.create(0,0,0)
+--	widget.fbo=framebuffers.create(0,0,0)
 
 --	widget.clip=true
 

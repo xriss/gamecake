@@ -93,7 +93,7 @@ function wtexteditor.pan_skin( w )
 				if cx and cy and cx>=1 and cx<=pan.hx/8 and cy>=1 and cy<=pan.hy/16 then -- visible cursor
 
 					local x,y,hx,hy=pan.px,pan.py,pan.hx,pan.hy
-
+					
 					x=x+(cx-1+pan.texteditor.gutter)*8-2
 					y=y+(cy-1)*16
 					hx=2
@@ -913,6 +913,29 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 
 end
 
+function wtexteditor.allow_changes(texteditor)
+	local txt=texteditor.txt
+	local allow_changes=true
+	if texteditor.opts.console then -- can only edit last line which is the input line and has no line ending
+		allow_changes=false
+		
+		if txt.marked() then
+			local fy,fx,ty,tx=txt.markget()
+			if fy==txt.hy and ty==txt.hy then -- last line select so can edit
+				allow_changes=true
+			end
+		else
+			if txt.cy==txt.hy then -- last line cursor so can edit
+				allow_changes=true
+			end
+		end
+	end
+	if texteditor.opts.readonly then -- do not allow changes
+		allow_changes=false
+	end
+	return allow_changes
+end
+
 function wtexteditor.msg(pan,m)
 	if m.class=="action" then -- only handle actions
 		local master=pan.master
@@ -926,28 +949,36 @@ function wtexteditor.msg(pan,m)
 				end
 			elseif m.id=="clip_cut" then
 				if m.action==1 then -- first press only
-					local s=txt.undo.cut() or ""
-					if s then wwin.set_clipboard(s) end
+					if texteditor:allow_changes() then
+						local s=txt.undo.cut() or ""
+						if s then wwin.set_clipboard(s) end
+						txt.cursor()
+						texteditor:mark_sync()
+						texteditor:scroll_to_view()
+					end
+				end
+			elseif m.id=="clip_paste" then
+				if texteditor:allow_changes() then
+					local s=wwin.get_clipboard() or ""
+					txt.undo.replace(s)
 					txt.cursor()
 					texteditor:mark_sync()
 					texteditor:scroll_to_view()
 				end
-			elseif m.id=="clip_paste" then
-				local s=wwin.get_clipboard() or ""
-				txt.undo.replace(s)
-				txt.cursor()
-				texteditor:mark_sync()
-				texteditor:scroll_to_view()
 			elseif m.id=="history_undo" then
-				txt.undo.undo()
-				txt.cursor()
-				texteditor:mark_sync()
-				texteditor:scroll_to_view()
+				if texteditor:allow_changes() then
+					txt.undo.undo()
+					txt.cursor()
+					texteditor:mark_sync()
+					texteditor:scroll_to_view()
+				end
 			elseif m.id=="history_redo" then
-				txt.undo.redo()
-				txt.cursor()
-				texteditor:mark_sync()
-				texteditor:scroll_to_view()
+				if texteditor:allow_changes() then
+					txt.undo.redo()
+					txt.cursor()
+					texteditor:mark_sync()
+					texteditor:scroll_to_view()
+				end
 			elseif m.id=="select_all" then
 				txt.mark(0,0,txt.hy+1,0)
 				texteditor.txt_dirty=true
@@ -955,25 +986,31 @@ function wtexteditor.msg(pan,m)
 				texteditor:scroll_to_view()
 			elseif m.id=="clip_cutline" then
 				txt.mark(txt.cy,0,txt.cy+1,0)
-				local u=wwin.get_clipboard()
-				local s=txt.undo.cut()
-				if s and u and u:sub(-1)=="\n" then -- merge full lines if we hit k repeatedly
-					s=u..s
+				if texteditor:allow_changes() then
+					local u=wwin.get_clipboard()
+					local s=txt.undo.cut()
+					if s and u and u:sub(-1)=="\n" then -- merge full lines if we hit k repeatedly
+						s=u..s
+					end
+					if s then wwin.set_clipboard(s) end
+					txt.cursor()
+					texteditor:mark_sync()
+					texteditor:scroll_to_view()
 				end
-				if s then wwin.set_clipboard(s) end
-				txt.cursor()
-				texteditor:mark_sync()
-				texteditor:scroll_to_view()
 			elseif m.id=="edit_justify" then
-				txt.edit.justify()
-				txt.cursor()
-				texteditor:mark_sync()
-				texteditor:scroll_to_view()
+				if texteditor:allow_changes() then
+					txt.edit.justify()
+					txt.cursor()
+					texteditor:mark_sync()
+					texteditor:scroll_to_view()
+				end
 			elseif m.id=="edit_align" then
-				txt.edit.align()
-				txt.cursor()
-				texteditor:mark_sync()
-				texteditor:scroll_to_view()
+				if texteditor:allow_changes() then
+					txt.edit.align()
+					txt.cursor()
+					texteditor:mark_sync()
+					texteditor:scroll_to_view()
+				end
 			elseif m.id=="view_hex" then
 				txt.cursor()
 				texteditor.opts.mode="hex"
@@ -1033,7 +1070,6 @@ function wtexteditor.msg(pan,m)
 end
 
 function wtexteditor.key(pan,ascii,key,act)
-
 	local master=pan.master
 	local texteditor=pan.texteditor
 	local txt=texteditor.txt
@@ -1062,6 +1098,8 @@ function wtexteditor.key(pan,ascii,key,act)
 
 
 	if (act==1 or act==0) and ( not ascii or ascii=="" ) then
+
+		texteditor.txt_dirty=true
 
 		if key=="left" then
 
@@ -1128,28 +1166,7 @@ function wtexteditor.key(pan,ascii,key,act)
 	end
 
 
-
-
-	local allow_changes=false
-	if texteditor.opts.console then -- can only edit last line which is the input line and has no line ending
-		allow_changes=false
-		
-		if txt.marked() then
-			local fy,fx,ty,tx=txt.markget()
-			if fy==txt.hy and ty==txt.hy then -- last line select so can edit
-				allow_changes=true
-			end
-		else
-			if txt.cy==txt.hy then -- last line cursor so can edit
-				allow_changes=true
-			end
-		end
-	end
-	if texteditor.opts.readonly then -- do not allow changes
-		allow_changes=false
-	end
-
-	if allow_changes then -- allow changes
+	if texteditor:allow_changes() then -- allow changes
 
 		if ascii and ascii~="" then -- not a blank string
 
@@ -1261,8 +1278,8 @@ end
 
 function wtexteditor.layout(widget)
 
-	widget.scroll_widget.hx=widget.hx
-	widget.scroll_widget.hy=widget.hy
+	widget.scroll_widget.hx=math.floor(widget.hx)
+	widget.scroll_widget.hy=math.floor(widget.hy)
 
 	return widget.meta.layout(widget)
 end
@@ -1288,6 +1305,7 @@ function wtexteditor.setup(widget,def)
 	widget.refresh=wtexteditor.refresh
 
 -- internal functions
+	widget.allow_changes		=	wtexteditor.allow_changes
 	widget.texteditor_refresh	=	wtexteditor.texteditor_refresh
 	widget.texteditor_hooks		=	function(act,w) return wtexteditor.texteditor_hooks(widget,act,w) end
 	widget.scroll_to_view		=	wtexteditor.scroll_to_view

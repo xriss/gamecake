@@ -51,10 +51,6 @@ function wtiles.update(widget)
 	return widget.meta.update(widget)
 end
 
---function wtiles.draw(widget)
---	return widget.meta.draw(widget)
---end
-
 function wtiles.render_lines(widget,lines)
 
 	local g=widget.tilemap_grd
@@ -74,6 +70,7 @@ function wtiles.skin(widget)
 		wtiles.render_lines(widget,widget.lines or {} )
 				
 		local x,y,hx,hy=widget.px,widget.py,widget.hx,widget.hy -- it.window_px+dl.dx , it.window_py+dl.dy , it.window_hx , it.window_hy
+
 		local u,v,hu,hv=0,0,hx/8,hy/16 -- it.px/it.tile_hx , it.py/it.tile_hy , hx/it.tile_hx , hy/it.tile_hy
 
 		local ta=gl.apply_modelview( {x    ,y+hy  ,0,1} )

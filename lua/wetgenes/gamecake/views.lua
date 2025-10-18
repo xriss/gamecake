@@ -214,12 +214,14 @@ function M.bake(oven,views)
 
 			end
 
+
 			return view
 		end
 		
 		view.update=function()	-- update pmtx and port
 
 			view.resize() -- possibly check parents size as well
+
 
 -- calculate opengl viewport
 			view.port[1]=view.px
@@ -235,6 +237,7 @@ function M.bake(oven,views)
 			local va=view.vy/view.vx
 			local ha=view.hy/view.hx
 			
+--PRINT(view.mode,view.px,view.py,view.vx,view.vy,view.hx,view.hy,va,ha,va/ha,view.scale)
 
 -- after dealing with fov here you can assume a y of +-1 will get you to the edge of your view space (fited to the real screen)
 -- and x will depend on your aspect so +-1.7777... for a standard 1920x1080 screen to give square pixels
@@ -262,7 +265,7 @@ function M.bake(oven,views)
 				view.pmtx[1] =   va    		-- X = X mul
 				view.pmtx[6] = -(va/ha)		-- Y = Y mul
 				
-			else									-- fit height to screen
+			else	--  view.fov_lock==2	-- fit height to screen
 			
 				view.fov_axis=2
 
@@ -309,14 +312,13 @@ Ah mybad we can not use glDepthRange as WebGL hates the depth buffer
 			end
 
 
+			if view.scale then
+				view.pmtx:scale( view.scale )
+			end
+
 			view.pmtx:inverse( view.pinv )
 
-
 			view.cmtx:identity() -- a default camera matrix for 2d views
-
-			if view.scale then
-				view.cmtx:scale( view.scale )
-			end
 			
 			view.cmtx:translate( view.vx*(view.cx-0.5) , view.vy*(view.cy-0.5) , 0 )
 
