@@ -96,7 +96,7 @@ B.setup=function(zgui)
 		local name=datas.get("user_name"):value()
 		local pass=datas.get("user_password"):value()
 		
-		B.task=oven.tasks:add_task(function(linda,task_id,task_idx,task)
+--		B.task=oven.tasks:add_task(function(linda,task_id,task_idx,task)
 		
 			login_head("Checking password")
 			refresh()
@@ -131,13 +131,13 @@ B.setup=function(zgui)
 
 			return
 
-		end)
+--		end)
 	end
 
 	zgui.click["user_login_session"]=function(it,mode)
 		local session=datas.get("user_session"):value()
 		
-		B.task=oven.tasks:add_task(function(linda,task_id,task_idx,task)
+--		B.task=oven.tasks:add_task(function(linda,task_id,task_idx,task)
 		
 			login_head("Checking session")
 			refresh()
@@ -178,7 +178,7 @@ B.setup=function(zgui)
 
 			return
 
-		end)
+--		end)
 	end
 
 	local plan_windows=function()
