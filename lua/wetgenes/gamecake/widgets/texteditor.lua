@@ -1415,6 +1415,8 @@ function wtexteditor.setup(widget,def)
 	end
 	widget.scroll_widget.pan.colormap_grd:pixels(0,0,#p/4,1,p)
 
+	widget.fbo=oven.cake.framebuffers.create(0,0,0)
+
 	return widget
 end
 

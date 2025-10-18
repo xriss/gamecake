@@ -325,8 +325,10 @@ function wtree.setup(widget,def)
 -- update item info
 	widget.item_to_line=wtree.item_to_line
 
-print(def.mounts)
+--print(def.mounts)
 	widget.items=M.mount_ms(unpack(def.mounts or {}))
+	
+	widget.fbo=oven.cake.framebuffers.create(0,0,0)
 
 --	widget:refresh()
 

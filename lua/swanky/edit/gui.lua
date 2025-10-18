@@ -420,7 +420,8 @@ local lay=
 		class="split",size="full",split_axis="y",
 		{
 			id="top",
-			size="fullx fity",fbo=true,style="flat",highlight="none",color=0,
+			size="fullx fity",style="flat",highlight="none",color=0,
+			fbo=true,
 			{
 				id="topbar",
 				size="minmax",smode="topleft",hx_min=gsiz*60,hy_max=gsiz*1,class="fill",
@@ -446,7 +447,7 @@ local lay=
 				{
 					id="texteditor",
 					class="texteditor",color=0,hooks=gui.hooks,
-					fbo=true, --  scale using fbo so it is smoothed
+					--fbo=true, --  scale using fbo so it is smoothed
 				}
 			},
 			{
@@ -480,7 +481,7 @@ local lay=
 									id="console",hidden=true,
 									class="texteditor",size="full",style="flat",color=0,
 									opts={console=true,gutter_disable=true,word_wrap=true},
-									fbo=true, --  scale using fbo so it is smoothed
+									--fbo=true, --  scale using fbo so it is smoothed
 								},
 							},
 						},
