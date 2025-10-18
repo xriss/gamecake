@@ -312,14 +312,14 @@ Ah mybad we can not use glDepthRange as WebGL hates the depth buffer
 			end
 
 
-			if view.scale then
-				view.pmtx:scale( view.scale )
-			end
-
 			view.pmtx:inverse( view.pinv )
 
 			view.cmtx:identity() -- a default camera matrix for 2d views
 			
+			if view.scale then
+				view.cmtx:scale( view.scale )
+			end
+
 			view.cmtx:translate( view.vx*(view.cx-0.5) , view.vy*(view.cy-0.5) , 0 )
 
 			view.cmtx:inverse( view.cinv )
