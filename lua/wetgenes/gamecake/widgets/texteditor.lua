@@ -94,7 +94,7 @@ function wtexteditor.pan_skin( w )
 
 					local x,y,hx,hy=pan.px,pan.py,pan.hx,pan.hy
 					
-					x=x+(cx-1+pan.texteditor.gutter)*8-2
+					x=x+(cx-1+pan.texteditor.gutter)*8-1
 					y=y+(cy-1)*16
 					hx=2
 					hy=16
@@ -167,6 +167,7 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 		end
 
 		widget.txt_dirty=true
+		
 	end
 
 --print(act,w and w.id)
@@ -346,7 +347,7 @@ wtexteditor.texteditor_refresh=function(widget)
 
 	pan.background_tile=0x00010000 -- default tile, remember it is abgr so backwards
 
-	local color=function(ps,pl,toke)
+	local colormain=function(ps,pl,toke)
 		if     toke=="k" then	ps[pl+3]=6  -- keyword
 		elseif toke=="g" then	ps[pl+3]=7  -- global
 		elseif toke=="c" then	ps[pl+3]=8  -- comment
@@ -357,6 +358,12 @@ wtexteditor.texteditor_refresh=function(widget)
 		elseif toke=="p" then	ps[pl+3]=11 -- punctuation
 		elseif toke=="n" then	ps[pl+3]=1  -- none
 		elseif toke=="N" then	ps[pl+3]=1 ; ps[pl+4]=15 -- none_spell
+		end
+	end
+	local color=colormain
+	if widget.opts.console then
+		color=function(ps,pl,toke)
+			colormain(ps,pl,toke:lower()) -- remove spellings
 		end
 	end
 
@@ -371,13 +378,19 @@ wtexteditor.texteditor_refresh=function(widget)
 			end
 		end
 		if y and x then
-			local cache=get_line_cache(y)
-			if cache and cache.search then
-				for i=1,#cache.search,2 do
-					local s,e=cache.search[i],cache.search[i+1]
-					if s and e then
-						if x>=s and x<=e then
-							ps[pl+4]=4
+			if widget.opts.console then
+				if y>=txt.hy then -- last line
+					ps[pl+4]=2
+				end
+			else
+				local cache=get_line_cache(y)
+				if cache and cache.search then
+					for i=1,#cache.search,2 do
+						local s,e=cache.search[i],cache.search[i+1]
+						if s and e then
+							if x>=s and x<=e then
+								ps[pl+4]=4
+							end
 						end
 					end
 				end
@@ -922,11 +935,15 @@ function wtexteditor.allow_changes(texteditor)
 		if txt.marked() then
 			local fy,fx,ty,tx=txt.markget()
 			if fy==txt.hy and ty==txt.hy then -- last line select so can edit
-				allow_changes=true
+				if fx>2 then
+					allow_changes=true
+				end
 			end
 		else
 			if txt.cy==txt.hy then -- last line cursor so can edit
-				allow_changes=true
+				if txt.cx>2 then
+					allow_changes=true
+				end
 			end
 		end
 	end
@@ -1188,20 +1205,14 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			texteditor.txt_dirty=true
 
-			if key=="enter" or key=="return" then
-
-				texteditor.float_cx=nil
-
-				txt.undo.cut()
-				txt.undo.insert_newline()
-				texteditor:scroll_to_view()
-
-			elseif key=="back" then
+			if key=="back" then
 
 				texteditor.float_cx=nil
 
 				if not txt.undo.cut() then -- just delete selection?
-					txt.undo.backspace()
+					if ( not texteditor.opts.console ) or ( txt.cx>3 ) then -- prompt hax
+						txt.undo.backspace()
+					end
 				end
 
 				texteditor:scroll_to_view()
@@ -1268,6 +1279,46 @@ function wtexteditor.key(pan,ascii,key,act)
 				end
 
 			end
+
+		end
+
+	end
+
+	if ( act==1 or act==0 ) and ( key=="enter" or key=="return" ) then
+
+		texteditor.txt_dirty=true
+
+		if texteditor.opts.console then -- zip to end
+
+			texteditor.float_cx=nil
+
+			local cut=txt.undo.copy()
+
+			txt.cy,txt.cx=txt.clip( txt.hy+1 , 0 )
+			txt.cursor()
+			
+			if cut then -- auto copy selected text on enter
+				if not cut:find(txt.endline) then -- do not auto paste multilines
+					txt.undo.insert(cut)
+				end
+			end
+			txt.undo.insert_newline()
+
+			local cmd=txt.get_cache(txt.cy-1).string
+			if texteditor.console_command then
+				texteditor.console_command(cmd)
+			end
+			txt.undo.insert("> ")
+
+			texteditor:scroll_to_view()
+
+		elseif texteditor:allow_changes() then -- normal enter
+	
+			texteditor.float_cx=nil
+
+			txt.undo.cut()
+			txt.undo.insert_newline()
+			texteditor:scroll_to_view()
 
 		end
 	end

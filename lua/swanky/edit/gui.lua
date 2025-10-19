@@ -56,6 +56,7 @@ gui.loads=function()
 end
 
 gui.setup=function()
+	oven.console.linehook_safety=true
 
 	gui.loads()
 
@@ -66,6 +67,7 @@ gui.setup=function()
 --	gui.data_load("all")
 --	gui.plan_windows_load()
 
+	oven.console.linehook_safety=false
 	return gui
 end
 
@@ -73,6 +75,7 @@ gui.clean=function()
 end
 
 gui.msg=function(m)
+	oven.console.linehook_safety=true
 
 	if m.class=="action" and m.action==1 then -- deal with actions
 		gui.action(m)
@@ -80,11 +83,13 @@ gui.msg=function(m)
 		
 	gui.master:msg(m)
 
+	oven.console.linehook_safety=false
 end
 
 
 gui.cursor=nil
 gui.update=function()
+	oven.console.linehook_safety=true
 
 --	local it=gui.texteditor
 --	print( gui.testa.hx ,  gui.testb.hx , it.parent.hx , it.hx , it.scroll_widget.hx , it.scroll_widget.pan.hx )
@@ -97,12 +102,15 @@ gui.update=function()
 		wwin.cursor( gui.cursor or "arrow" )
 	end
 
+	oven.console.linehook_safety=false
 end
 
 gui.draw=function()
+	oven.console.linehook_safety=true
 	gl.PushMatrix()
 	gui.master:draw()		
 	gl.PopMatrix()
+	oven.console.linehook_safety=false
 end
 
 	local datas=gui.master.datas
@@ -482,6 +490,7 @@ local lay=
 									class="texteditor",size="full",style="flat",color=0,
 									opts={console=true,gutter_disable=true,word_wrap=true},
 									--fbo=true, --  scale using fbo so it is smoothed
+									console_command=gui.console_command,
 								},
 							},
 						},
@@ -683,22 +692,29 @@ local lay=
 		end
 		gui.master.ids.console.hook_resize=gui.master.ids.texteditor.hook_resize
 
-		oven.console.linehook=function(s)
-			local console=gui.master.ids.console
-			if console then
-				console.txt.append_text(s)
---				console:layout()
-				console:scroll_to_bottom()
-			end
-		end
-
-
-
-
+		oven.console.linehook=gui.console_linehook
 --		docs.refresh()
 
 		gui.screen:windows_reset()
 
+	end
+
+	gui.console_linehook=function(s)
+		if oven.console.linehook_safety then return end
+		local console=gui.master.ids.console
+		if console then
+			console.txt.append_text(s)
+--				console:layout()
+			console:scroll_to_bottom()
+		end
+	end
+	gui.console_command=function(s)
+		s=s:match( "^>%s*(.-)%s*$" )
+		if s then
+			oven.console.linehook_safety=false
+			oven.console.dump_eval(s)
+			oven.console.linehook_safety=true
+		end
 	end
 
 
