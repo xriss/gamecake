@@ -1,0 +1,20 @@
+{
+
+ gists = {
+
+  // bookmarked list of gist IDs
+  gists = [
+   1ae83d25d088d102a0b633c3e59d3aa0
+  ]
+
+  // github access token, this is of course a secret
+  token = xxxxxxxxxxxxxxxx
+
+  // bookmarked list of github usernames
+  users = [
+   xriss
+  ]
+
+ }
+
+}

@@ -693,10 +693,21 @@ local lay=
 		gui.master.ids.console.hook_resize=gui.master.ids.texteditor.hook_resize
 
 		oven.console.linehook=gui.console_linehook
+		oven.console.call.gtoken=gui.console_gtoken
+		oven.console.call.gist=gui.console_gist
 --		docs.refresh()
 
 		gui.screen:windows_reset()
 
+	end
+
+	gui.console_gtoken=function(s)
+	PRINT("GTOKEN",s)
+		gui.GTOKEN=s
+	end
+	gui.console_gist=function(s)
+	PRINT("GIST",s)
+		gui.GIST=s
 	end
 
 	gui.console_linehook=function(s)
@@ -706,6 +717,7 @@ local lay=
 			console.txt.append_text(s)
 --				console:layout()
 			console:scroll_to_bottom()
+			console.txt_dirty=true
 		end
 	end
 	gui.console_command=function(s)

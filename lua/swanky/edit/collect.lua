@@ -6,6 +6,8 @@
 local M={ modname = (...) } package.loaded[M.modname] = M
 
 
+-- unix paths and we use // for internal data so //data/ is not expected to hit the filesystem
+
 ------------------------------------------------------------------------
 do -- only cache this stuff on main thread
 ------------------------------------------------------------------------
@@ -21,6 +23,7 @@ local wstr=require("wetgenes.string")
 local djon=require("djon")
 local wpath=require("wetgenes.path")
 local wgetsql=require("wetgenes.getsql")
+local wzips=require("wetgenes.zips")
 
 local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
@@ -30,12 +33,24 @@ local zip_deflate=function(d) return ((zlib.deflate())(d,"finish")) end
 
 local function dprint(a) print(wstr.dump(a)) end
 
+M.default_configs={}
+do
+	local default_config_filename="lua/swanky/edit/config.djon"
+	local default_config=assert(wzips.readfile(default_config_filename),"file not found: "..default_config_filename)
+	local t=djon.load(default_config,"comment")
+	for n,v in pairs(t[1]) do -- comment format so tables within tables
+		M.default_configs[n]=djon.save(v,"djon","comment") -- reformat keeping comments
+	end
+end
 
 M.tables=wgetsql.prepare_tables({
 
-	data={
+-- djon data with comments so intended to be human editable
+-- this means we must keep comments on read/write cycles
+-- top level values are considered keys in the config object
+	config={
 		{	"key",		"TEXT",		"PRIMARY",	},
-		{	"value",	"JSONB",				},
+		{	"value",	"TEXT",					},
 	},
 
 -- single row per file
@@ -157,24 +172,27 @@ M.bake=function(oven,collect)
 				sqlite_filename=wwin.files_prefix.."swed.collect.sqlite",
 				sqlite_pragmas=[[ ; ]],
 				sqlite_tables=M.tables,
+				default_configs=M.default_configs,
 			},
 			code=M.task_code,
 		})
 				
 		-- global json state data contained in keys, read on startup and should be written when changed
-		collect.data={}
+		collect.config={}
 
 		-- block and read all the json
-		local json_data=collect.do_memo({
+		local djon_config=collect.do_memo({
 			sql=[[
 
-SELECT key,json(value) as value FROM data ;
+SELECT key,value FROM config ;
 
 			]],
 		})
-		for i,v in ipairs(json_data.rows) do
-			collect.data[v.key]=djon.load(v.value)
+		for i,v in ipairs(djon_config.rows) do
+			collect.config[v.key]=djon.load(v.value) -- this loses comments
 		end
+		
+--		DUMP( collect.config )
 
 	end
 
@@ -378,9 +396,29 @@ M.task_code=function(linda,task_id,task_idx)
 			end
 		end
 		
+		if default_configs then -- auto create
+		
+			local keys={}
+			for key in db:urows([[
+				SELECT key FROM config ;
+			]]) do
+				keys[key]=true
+			end
+			
+			for key,value in pairs(default_configs) do
+				if not keys[key] then
+					local stmt = db:prepare[[ INSERT INTO config VALUES (:key, :value) ]]
+					stmt:bind_names{  key = key,  value = value    }
+					stmt:step()
+					stmt:finalize()
+				end
+			end
+
+		end
+		
 		return db
 	end
-	opendb( sqlite_filename , sqlite_pragmas , sqlite_tables ) -- auto open and pragma and create tables
+	opendb( sqlite_filename , sqlite_pragmas , sqlite_tables , default_configs ) -- auto open and pragma and create tables
 
 	local request=function(memo)
 	
