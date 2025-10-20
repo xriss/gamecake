@@ -37,6 +37,7 @@ M.bake=function(oven,gui)
 	local finds=oven.rebake(oven.modname..".finds")
 	local docs=oven.rebake(oven.modname..".docs")
 	local show=oven.rebake(oven.modname..".show")
+	local collect=oven.rebake(oven.modname..".collect")
 
 	local ssettings=oven.rebake("wetgenes.gamecake.spew.settings")
 
@@ -285,7 +286,7 @@ end
 
 function gui.hooks(act,w,dat)
 
-	if act=="line_click" and dat and dat.is=="fs" then
+	if act=="line_click" and dat and dat.is=="file" then
 
 --print(act,dat.path)
 	
@@ -481,9 +482,7 @@ local lay=
 								{
 									id="treefiles",hidden=false,
 									class="tree",size="full",hooks=gui.hooks,
-									mounts={
-										require("wetgenes.gamecake.widgets.treefile").mount_fs()
-									},
+									items=collect.mounts,
 								},
 								{
 									id="console",hidden=true,

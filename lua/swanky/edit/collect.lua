@@ -32,6 +32,8 @@ local zlib=require("zlib")
 local zip_inflate=function(d) return ((zlib.inflate())(d)) end
 local zip_deflate=function(d) return ((zlib.deflate())(d,"finish")) end
 
+local wgw_mounts=require("wetgenes.gamecake.widgets.mounts")
+
 local function dprint(a) print(wstr.dump(a)) end
 
 M.default_configs={}
@@ -85,48 +87,11 @@ M.tables=wgetsql.prepare_tables({
 M.bake=function(oven,collect)
 
 
-	collect.mounts={}
-	collect.find_mount=function(path)
-		local best
-		for n,m in pairs(collect.mounts) do
-			if path:sub(1,#n)==n then
-				if not best then best=n end
-				if #n > #best then best=n end
-			end
-		end
-		if best then return collect.mounts[best] end
-	end
-
-	collect.readfile=function(path) -- check mounts
-		if path:sub(1,2)=="//" then
-			local mount=collect.find_mount(path)
-			return mount.readfile(path)
-		else
-			local text
-			local f=io.open(path,"rb") -- read full file
-			if f then
-				text=f:read("*a")
-				f:close()
-			end
-			return text
-		end
-	end
-
-	collect.writefile=function(path,text)
-		if path:sub(1,2)=="//" then -- check mounts
-			local mount=collect.find_mount(path)
-			return mount.writefile(path,text)
-		else
-			local f=io.open(it.meta.path,"wb")
-			if f then
-				local d=f:write(text)
-				f:close()
-				return true
-			end
-		end
-		return false
-	end
-
+	collect.mounts=wgw_mounts.mount_meta(
+		wgw_mounts.mount_gist(),
+		wgw_mounts.mount_file()
+	)
+	
 	collect.task_id=collect.task_id or "collect"
 	collect.task_id_msg=collect.task_id..":msg"
 
@@ -247,7 +212,7 @@ SELECT key,value FROM config ;
 
 		if it.meta.state=="manifest" then -- not a real meta yet so load from disk and update
 
-			local text=collect.readfile(path) or ""
+			local text=collect.mounts:read_file(path) or ""
 		
 			-- write data only if we have some
 			collect.do_memo({
@@ -376,7 +341,7 @@ SELECT key,value FROM config ;
 		})
 
 		-- write data to disk
-		collect.writefile( it.meta.path , text )
+		collect.mounts:write_file( it.meta.path , text )
 
 	end
 	
