@@ -87,10 +87,60 @@ M.tables=wgetsql.prepare_tables({
 M.bake=function(oven,collect)
 
 
+	collect.mounts_config=wgw_mounts.mount_config()
+	collect.mounts_gist=wgw_mounts.mount_gist()
+	collect.mounts_file=wgw_mounts.mount_file()
 	collect.mounts=wgw_mounts.mount_meta(
-		wgw_mounts.mount_gist(),
-		wgw_mounts.mount_file()
+		collect.mounts_config,
+		collect.mounts_gist,
+		collect.mounts_file
 	)
+
+	collect.config_mounts=function(config)
+		if config.gists then
+			local parent=collect.mounts_gist
+			parent.dir={} -- reset
+			if config.gists.users then
+				for _,name in ipairs( config.gists.users ) do
+					local it=wgw_mounts.gist.setup({
+						path=parent.path..name.."/",
+						name=name.."/",
+						gist_user=name,
+						dir={},
+					})
+					it.keep=true
+					it.parent=parent
+					parent.dir[#parent.dir+1]=it
+				end
+			end
+			if config.gists.gists then
+				local it=wgw_mounts.gist.setup({
+					path=parent.path..".../",
+					name=".../",
+					gist_user=".../",
+					dir={},
+				})
+				it.keep=true
+				it.parent=parent
+				parent.dir[#parent.dir+1]=it
+				do
+					local parent=it
+					for _,id in ipairs( config.gists.gists ) do
+						local it=wgw_mounts.gist.setup({
+							path=parent.path..id.."/",
+							name=id.."/",
+							gist_id=id,
+							dir={},
+						})
+						it.keep=true
+						it.parent=parent
+						parent.dir[#parent.dir+1]=it
+					end
+				end
+			end
+		end
+	end
+
 	
 	collect.task_id=collect.task_id or "collect"
 	collect.task_id_msg=collect.task_id..":msg"
@@ -200,6 +250,8 @@ SELECT key,value FROM config ;
 		for i,v in ipairs(djon_config.rows) do
 			collect.config[v.key]=djon.load(v.value) -- this loses comments
 		end
+		
+		collect.config_mounts( collect.config )
 		
 --		DUMP( collect.config )
 

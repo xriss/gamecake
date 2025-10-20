@@ -21,6 +21,7 @@ M.mount_meta=function(...)
 		name="",
 		path="",
 		dir={...},
+		keep=true,
 	})
 end
 
@@ -248,6 +249,7 @@ M.mount_file=function()
 		name="/",
 		path="/",
 		dir={},
+		keep=true,
 	})
 end
 
@@ -353,6 +355,7 @@ M.file.manifest_path=function(file,fullpath)
 			it=file.setup({
 				path=path,
 			})
+			it.parent=last
 			last.dir[#last.dir+1]=it
 		end
 		it.keep=true -- do not remove this one when collapsed
@@ -369,6 +372,7 @@ M.mount_gist=function()
 		name="//gists/",
 		path="//gists/",
 		dir={},
+		keep=true,
 	})
 end
 
@@ -394,9 +398,47 @@ M.gist.setup=function(gist)
 	if not gist then gist={} end
 	setmetatable(gist,M.gist_metatable)		
 	if gist.path and not gist.name then -- fill in name etc from path
-		local pp=wpath.parse( wpath.unslash( wpath.resolve(gist.path) ) )
+		local pp=wpath.parse( wpath.unslash( wpath.resolve(gist.path) ) ) -- note this will lose one of the two stating slashes
 		gist.name=pp.file
 	end
 	return gist
+end
+
+
+M.mount_config=function()
+	return M.gist.setup({
+		name="//config/",
+		path="//config/",
+		dir={},
+		keep=true,
+	})
+end
+
+M.config={}
+-- simple inherits, no tables and last has priority
+do
+	for _,it in ipairs{ M.meta , } do
+		for n,v in pairs( it ) do
+			if type(v)~="table" then
+				M.config[n]=v
+			end
+		end
+	end
+end
+
+M.config_metatable={__index=M.config}
+
+local wpath=require("wetgenes.path")
+
+M.config.is="config"
+
+M.config.setup=function(config)
+	if not config then config={} end
+	setmetatable(config,M.config_metatable)		
+	if config.path and not config.name then -- fill in name etc from path
+		local pp=wpath.parse( wpath.unslash( wpath.resolve(config.path) ) ) -- note this will lose one of the two stating slashes
+		config.name=pp.file
+	end
+	return config
 end
 
