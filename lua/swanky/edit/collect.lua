@@ -8,6 +8,7 @@ local M={ modname = (...) } package.loaded[M.modname] = M
 
 -- unix paths and we use // for internal data so //data/ is not expected to hit the filesystem
 
+
 ------------------------------------------------------------------------
 do -- only cache this stuff on main thread
 ------------------------------------------------------------------------
@@ -82,6 +83,49 @@ M.tables=wgetsql.prepare_tables({
 -- collection of state backed up to an sqlite database continuously
 
 M.bake=function(oven,collect)
+
+
+	collect.mounts={}
+	collect.find_mount=function(path)
+		local best
+		for n,m in pairs(collect.mounts) do
+			if path:sub(1,#n)==n then
+				if not best then best=n end
+				if #n > #best then best=n end
+			end
+		end
+		if best then return collect.mounts[best] end
+	end
+
+	collect.readfile=function(path) -- check mounts
+		if path:sub(1,2)=="//" then
+			local mount=collect.find_mount(path)
+			return mount.readfile(path)
+		else
+			local text
+			local f=io.open(path,"rb") -- read full file
+			if f then
+				text=f:read("*a")
+				f:close()
+			end
+			return text
+		end
+	end
+
+	collect.writefile=function(path,text)
+		if path:sub(1,2)=="//" then -- check mounts
+			local mount=collect.find_mount(path)
+			return mount.writefile(path,text)
+		else
+			local f=io.open(it.meta.path,"wb")
+			if f then
+				local d=f:write(text)
+				f:close()
+				return true
+			end
+		end
+		return false
+	end
 
 	collect.task_id=collect.task_id or "collect"
 	collect.task_id_msg=collect.task_id..":msg"
@@ -203,12 +247,7 @@ SELECT key,value FROM config ;
 
 		if it.meta.state=="manifest" then -- not a real meta yet so load from disk and update
 
-			local text="" -- default to empty
-			local f=io.open(path,"rb") -- read full file
-			if f then
-				text=f:read("*a")
-				f:close()
-			end
+			local text=collect.readfile(path) or ""
 		
 			-- write data only if we have some
 			collect.do_memo({
@@ -337,11 +376,7 @@ SELECT key,value FROM config ;
 		})
 
 		-- write data to disk
-		local f=io.open(it.meta.path,"wb")
-		if f then
-			local d=f:write(text)
-			f:close()
-		end
+		collect.writefile( it.meta.path , text )
 
 	end
 	
