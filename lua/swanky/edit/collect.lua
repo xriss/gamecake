@@ -91,12 +91,13 @@ M.bake=function(oven,collect)
 		name="config/",
 		path="//config/",
 		dir={},
-		config_collect=collect,
+		collect=collect, -- back link to this state data
 	})
 	collect.mounts_gist=wgw_mounts.gist.setup({
 		name="gists/",
 		path="//gists/",
 		dir={},
+		collect=collect, -- back link to this state data
 	})
 	collect.mounts_meta=wgw_mounts.meta.setup({
 		name="//",

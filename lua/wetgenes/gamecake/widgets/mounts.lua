@@ -18,6 +18,8 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.meta={}
 M.meta_metatable={__index=M.meta}
 
+M.meta.is="meta"
+
 M.mount_meta=function(...)
 	return M.meta.setup({
 		name="",
@@ -27,12 +29,17 @@ M.mount_meta=function(...)
 	})
 end
 
-M.meta.is="meta"
+M.meta.setup=function(meta)
+	if not meta then meta={} end
+	setmetatable(meta,M.meta_metatable)		
+	return meta
+end
 
 M.meta.find_prefix=function(meta,path)
 	if meta.is~="meta" then return nil,path end -- must be meta
 	local best
-	for _,it in pairs(meta.dir) do -- find best dir prefix for this path ( mount points )
+	-- prefer dir_auto in case this is collapsed meta
+	for _,it in pairs(meta.dir_auto or meta.dir) do -- find best dir prefix for this path ( mount points )
 		local c=path:sub(1,#it.path) -- path must begin with
 		if c==it.path then
 			if not best then best=it end
@@ -43,12 +50,6 @@ M.meta.find_prefix=function(meta,path)
 		return best:find_prefix(path)
 	end
 	return best,path -- may be nil and path may be adjusted
-end
-
-M.meta.setup=function(meta)
-	if not meta then meta={} end
-	setmetatable(meta,M.meta_metatable)		
-	return meta
 end
 
 M.meta.sort_dir=function(meta)
@@ -254,6 +255,10 @@ do
 	end
 end
 
+M.file_metatable={__index=M.file}
+
+M.file.is="file"
+
 M.mount_file=function()
 	return M.file.setup({
 		name="/",
@@ -262,10 +267,6 @@ M.mount_file=function()
 		keep=true,
 	})
 end
-
-M.file_metatable={__index=M.file}
-
-M.file.is="file"
 
 M.file.setup=function(file)
 	if not file then file={} end
@@ -366,6 +367,10 @@ do
 	end
 end
 
+M.gist_metatable={__index=M.gist}
+
+M.gist.is="gist"
+
 M.mount_gist=function()
 	return M.gist.setup({
 		name="//gists/",
@@ -374,10 +379,6 @@ M.mount_gist=function()
 		keep=true,
 	})
 end
-
-M.gist_metatable={__index=M.gist}
-
-M.gist.is="gist"
 
 M.gist.setup=function(gist)
 	if not gist then gist={} end
@@ -389,14 +390,37 @@ M.gist.setup=function(gist)
 	return gist
 end
 
+M.gist.fetch_dir=function(gist,path)
+	path="/"..wpath.resolve(path) -- force the // prefix
+	local dir={}
 
-M.mount_config=function()
-	return M.config.setup({
-		name="//config/",
-		path="//config/",
-		dir={},
-		keep=true,
-	})
+	if path=="//gist/" then
+
+--[[
+		for i,v in ipairs(rows) do
+			local itpath=path..v.key
+			local it=config.setup({
+				path=itpath,
+				collect=config.collect,
+			})
+			it.parent=config
+			dir[#dir+1]=it
+		end
+]]
+
+	end
+	
+	return dir
+end
+
+M.gist.read_file=function(gist,path)
+PRINT("read_gist",path)
+
+end
+
+M.gist.write_file=function(gist,path)
+PRINT("write_gist",path)
+
 end
 
 
@@ -421,6 +445,15 @@ local wpath=require("wetgenes.path")
 
 M.config.is="config"
 
+M.mount_config=function()
+	return M.config.setup({
+		name="//config/",
+		path="//config/",
+		dir={},
+		keep=true,
+	})
+end
+
 M.config.setup=function(config)
 	if not config then config={} end
 	setmetatable(config,M.config_metatable)		
@@ -437,10 +470,10 @@ M.config.fetch_dir=function(config,path)
 
 	if path=="//config/" then
 
-		local rows=config.config_collect.do_memo({
+		local rows=config.collect.do_memo({
 			sql=[[
 
-SELECT key FROM config ;
+	SELECT key FROM config ;
 
 			]],
 		}).rows
@@ -448,7 +481,7 @@ SELECT key FROM config ;
 			local itpath=path..v.key
 			local it=config.setup({
 				path=itpath,
-				config_collect=config.config_collect,
+				collect=config.collect,
 			})
 			it.parent=config
 			dir[#dir+1]=it
@@ -460,10 +493,10 @@ SELECT key FROM config ;
 end
 
 M.config.read_file=function(config,path)
-PRINT("read_file",path)
+PRINT("read_config",path)
 	if path:sub(1,#"//config/")=="//config/" then
 		local key=path:sub(1+#"//config/")
-		local rows=config.config_collect.do_memo({
+		local rows=config.collect.do_memo({
 			binds={
 				KEY=key,
 			},
@@ -478,7 +511,7 @@ PRINT("read_file",path)
 end
 
 M.config.write_file=function(config,path,data)
-PRINT("write_file",path)
+PRINT("write_config",path)
 
 	if path:sub(1,#"//config/")=="//config/" then
 
@@ -486,12 +519,12 @@ PRINT("write_file",path)
 		local tab
 		pcall(function() -- try and parse but ignore errors
 			tab=djon.load(data,"comment")
-			config.config_collect.config[key]=djon.load(data) -- set internal config
+			config.collect.config[key]=djon.load(data) -- set internal config
 		end)
 		tab=tab or {{}} -- maybe wipe on error , undo to get old text back
 		local newdata=djon.save(tab,"djon","comment")  -- reformat keeping comments
 
-		local rows=config.config_collect.do_memo({
+		local rows=config.collect.do_memo({
 			binds={
 				KEY=key,
 				VALUE=newdata,
