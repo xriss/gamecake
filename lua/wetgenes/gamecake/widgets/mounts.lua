@@ -6,6 +6,7 @@
 local djon=require("djon")
 local wpath=require("wetgenes.path")
 local lfs ; pcall( function() lfs=require("lfs") end )
+local wgist=require("wetgenes.tasks_gist")
 
 
 --module
@@ -386,6 +387,7 @@ M.gist.setup=function(gist)
 	if gist.path and not gist.name then -- fill in name etc from path
 		local pp=wpath.parse( wpath.unslash( wpath.resolve(gist.path) ) ) -- note this will lose one of the two stating slashes
 		gist.name=pp.file
+		if gist.dir then gist.name=gist.name.."/" end
 	end
 	return gist
 end
@@ -394,19 +396,53 @@ M.gist.fetch_dir=function(gist,path)
 	path="/"..wpath.resolve(path) -- force the // prefix
 	local dir={}
 
-	if path=="//gist/" then
+	local pp=wpath.split(path)
+	local gid,gfname
+	if pp[1]=="" and pp[2]=="gists" then
+		gid=pp[3]
+		gfname=pp[4]
+	end
+	if gid=="" then gid=nil end
+	if gfname=="" then gfname=nil end
 
---[[
-		for i,v in ipairs(rows) do
-			local itpath=path..v.key
-			local it=config.setup({
+	if path=="//gists/" then
+	
+		local tab=gist.collect.config.gists and gist.collect.config.gists.gists or {}
+
+		for i,v in ipairs(tab) do
+			local itpath=path..v.."/"
+			local it=gist.setup({
 				path=itpath,
-				collect=config.collect,
+				collect=gist.collect,
+				dir={},
 			})
-			it.parent=config
+			it.parent=gist
 			dir[#dir+1]=it
 		end
-]]
+
+	elseif gid and not gfname then -- hit up gist
+
+		local opts={}
+		opts.tasks=gist.collect.oven.tasks
+		opts.gid=gid
+
+		local result=wgist.get(opts)
+		for n,v in pairs(result.files) do
+			local itpath=path..n
+			local it=gist.setup({
+				path=itpath,
+				collect=gist.collect,
+			})
+			it.parent=gist
+			dir[#dir+1]=it
+		end
+		local itpath=path..".meta" -- special file name for description etc?
+		local it=gist.setup({
+			path=itpath,
+			collect=gist.collect,
+		})
+		it.parent=gist
+		dir[#dir+1]=it
 
 	end
 	
@@ -416,10 +452,53 @@ end
 M.gist.read_file=function(gist,path)
 PRINT("read_gist",path)
 
+	local pp=wpath.split(path)
+	local gid,gfname
+	if pp[1]=="" and pp[2]=="gists" then
+		gid=pp[3]
+		gfname=pp[4]
+	end
+	if gid=="" then gid=nil end
+	if gfname=="" then gfname=nil end
+	
+	if gid and gfname then
+	
+		local opts={}
+		opts.tasks=gist.collect.oven.tasks
+		opts.gid=gid
+
+		local result=wgist.get(opts)
+		if gfname==".meta" then
+			return djon.save({
+				description=result.description,
+				owner=result.owner and result.owner.login,
+				created_at=result.created_at,
+				updated_at=result.updated_at,
+				public=result.public,
+				html_url=result.html_url,
+			},"djon")
+		else
+			return result.files and result.files[gfname] and result.files[gfname].content
+		end
+	end
+
 end
 
 M.gist.write_file=function(gist,path)
 PRINT("write_gist",path)
+
+	local pp=wpath.split(path)
+	local gid,gfname
+	if pp[1]=="" and pp[2]=="gists" then
+		gid=pp[3]
+		gfname=pp[4]
+	end
+	if gid=="" then gid=nil end
+	if gfname=="" then gfname=nil end
+
+	if gid and gfname then
+	
+	end
 
 end
 

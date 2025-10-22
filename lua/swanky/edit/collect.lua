@@ -86,6 +86,7 @@ M.tables=wgetsql.prepare_tables({
 
 M.bake=function(oven,collect)
 
+	collect.oven=oven -- back link for meta access
 
 	collect.mounts_config=wgw_mounts.config.setup({
 		name="config/",
