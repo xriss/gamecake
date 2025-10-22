@@ -87,15 +87,38 @@ M.tables=wgetsql.prepare_tables({
 M.bake=function(oven,collect)
 
 
-	collect.mounts_config=wgw_mounts.mount_config()
-	collect.mounts_gist=wgw_mounts.mount_gist()
-	collect.mounts_file=wgw_mounts.mount_file()
-	collect.mounts=wgw_mounts.mount_meta(
-		collect.mounts_config,
-		collect.mounts_gist,
-		collect.mounts_file
-	)
+	collect.mounts_config=wgw_mounts.config.setup({
+		name="config/",
+		path="//config/",
+		dir={},
+		config_collect=collect,
+	})
+	collect.mounts_gist=wgw_mounts.gist.setup({
+		name="gists/",
+		path="//gists/",
+		dir={},
+	})
+	collect.mounts_meta=wgw_mounts.meta.setup({
+		name="//",
+		path="//",
+		dir={},
+		dir_auto={ collect.mounts_config , collect.mounts_gist },
+		keep=true,
+	})
+	collect.mounts_file=wgw_mounts.file.setup({
+		name="/",
+		path="/",
+		dir={},
+		keep=true,
+	})
+	collect.mounts=wgw_mounts.meta.setup({
+		name="",
+		path="",
+		dir={ collect.mounts_meta , collect.mounts_file },
+		keep=true,
+	})
 
+--[[
 	collect.config_mounts=function(config)
 		if config.gists then
 			local parent=collect.mounts_gist
@@ -140,7 +163,7 @@ M.bake=function(oven,collect)
 			end
 		end
 	end
-
+]]
 	
 	collect.task_id=collect.task_id or "collect"
 	collect.task_id_msg=collect.task_id..":msg"
@@ -251,7 +274,7 @@ SELECT key,value FROM config ;
 			collect.config[v.key]=djon.load(v.value) -- this loses comments
 		end
 		
-		collect.config_mounts( collect.config )
+--		collect.config_mounts( collect.config )
 		
 --		DUMP( collect.config )
 
@@ -372,6 +395,14 @@ SELECT key,value FROM config ;
 		
 		local text=it.txt.get_text()
 		
+		-- write data to disk
+		local retext=collect.mounts:write_file( it.meta.path , text )
+		if retext and retext~=text then -- doc was auto updated on save
+			it.txt.mark(0,0,it.txt.hy+1,0)
+			it.txt.undo.replace(retext)
+			text=retext
+		end
+
 		it.meta.undo=it.txt.undo.index
 		it.meta.state="save"
 		save_meta(it.meta)
@@ -392,8 +423,6 @@ SELECT key,value FROM config ;
 			]],
 		})
 
-		-- write data to disk
-		collect.mounts:write_file( it.meta.path , text )
 
 	end
 	

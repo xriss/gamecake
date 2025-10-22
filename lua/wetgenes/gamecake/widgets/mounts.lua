@@ -1,20 +1,22 @@
 --
--- (C) 2020 Kriss@XIXs.com
+-- (C) 2025 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
-local function print(...) _G.print(...) end
-local function dprint(a) print(require("wetgenes.string").dump(a)) end
 
-local wwin=require("wetgenes.win")
-local wstr=require("wetgenes.string")
-local pack=require("wetgenes.pack")
+local djon=require("djon")
 local wpath=require("wetgenes.path")
+local lfs ; pcall( function() lfs=require("lfs") end )
 
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+
+--------------------------------------------------------------------------------
+
+
+M.meta={}
+M.meta_metatable={__index=M.meta}
 
 M.mount_meta=function(...)
 	return M.meta.setup({
@@ -25,15 +27,10 @@ M.mount_meta=function(...)
 	})
 end
 
-
-M.meta={}
-M.meta_metatable={__index=M.meta}
-
-local wpath=require("wetgenes.path")
-
 M.meta.is="meta"
 
 M.meta.find_prefix=function(meta,path)
+	if meta.is~="meta" then return nil,path end -- must be meta
 	local best
 	for _,it in pairs(meta.dir) do -- find best dir prefix for this path ( mount points )
 		local c=path:sub(1,#it.path) -- path must begin with
@@ -41,6 +38,9 @@ M.meta.find_prefix=function(meta,path)
 			if not best then best=it end
 			if #it.path > #best.path then best=it end -- longest path wins
 		end
+	end
+	if best and best.is=="meta" then -- auto recursive on meta
+		return best:find_prefix(path)
 	end
 	return best,path -- may be nil and path may be adjusted
 end
@@ -66,7 +66,7 @@ end
 M.meta.merge_dir=function(meta,dir)
 
 	if not dir then
-		dir=meta:fetch_dir(meta.path)
+		dir=meta:fetch_dir(meta.path) or meta.dir_auto
 		if not dir then
 			return -- nothing to do
 		end
@@ -161,9 +161,10 @@ M.meta.to_line=function(meta,widget,only)
 
 		meta.line=widget:create(opts)
 
-		local pp=wpath.split( wpath.unslash(meta.path) )
+		local pp=#(wpath.split( wpath.unslash(meta.path) ))-1
+--		if meta.path:sub(1,2)=="//" then pp=pp-2 else pp=pp-1 end
 
-		meta.text=string.rep(" ",#pp-1)
+		meta.text=string.rep(" ",pp)
 		if meta.dir then
 			if meta.expanded then
 				meta.text=meta.text.."< "
@@ -188,13 +189,6 @@ M.meta.to_line=function(meta,widget,only)
 	end
 end
 
-
-M.meta.fetch_attr=function(meta,path)
-	local it,path=meta:find_prefix(path)
-	if it and it.fetch_attr then
-		return it:fetch_attr(path)
-	end
-end
 
 M.meta.fetch_dir=function(meta,path)
 	local it,path=meta:find_prefix(path)
@@ -232,7 +226,9 @@ M.meta.hooks=function(hook,widget,dat)
 		local it=widget.user
 		local tree=widget ; while tree and tree.parent~=tree and tree.class~="tree" do tree=tree.parent end
 		assert( tree.class=="tree" )
-		
+
+PRINT("click",it.path)
+
 		if it.dir then
 			it:toggle_dir()
 			tree:refresh()
@@ -243,15 +239,7 @@ M.meta.hooks=function(hook,widget,dat)
 end
 
 
-
-M.mount_file=function()
-	return M.file.setup({
-		name="/",
-		path="/",
-		dir={},
-		keep=true,
-	})
-end
+--------------------------------------------------------------------------------
 
 
 M.file={}
@@ -266,10 +254,16 @@ do
 	end
 end
 
-M.file_metatable={__index=M.file}
+M.mount_file=function()
+	return M.file.setup({
+		name="/",
+		path="/",
+		dir={},
+		keep=true,
+	})
+end
 
-local wpath=require("wetgenes.path")
-local lfs ; pcall( function() lfs=require("lfs") end )
+M.file_metatable={__index=M.file}
 
 M.file.is="file"
 
@@ -294,15 +288,6 @@ M.file.setup=function(file)
 		end)
 	end
 	return file
-end
-
-M.file.fetch_attr=function(file,path)
-	path=wpath.resolve(path)
-	local attr
-	pcall( function()
-		attr=lfs.attributes(path)
-	end )
-	return attr
 end
 
 M.file.fetch_dir=function(file,path)
@@ -366,15 +351,8 @@ M.file.manifest_path=function(file,fullpath)
 end
 
 
+--------------------------------------------------------------------------------
 
-M.mount_gist=function()
-	return M.gist.setup({
-		name="//gists/",
-		path="//gists/",
-		dir={},
-		keep=true,
-	})
-end
 
 M.gist={}
 -- simple inherits, no tables and last has priority
@@ -388,9 +366,16 @@ do
 	end
 end
 
-M.gist_metatable={__index=M.gist}
+M.mount_gist=function()
+	return M.gist.setup({
+		name="//gists/",
+		path="//gists/",
+		dir={},
+		keep=true,
+	})
+end
 
-local wpath=require("wetgenes.path")
+M.gist_metatable={__index=M.gist}
 
 M.gist.is="gist"
 
@@ -406,13 +391,17 @@ end
 
 
 M.mount_config=function()
-	return M.gist.setup({
+	return M.config.setup({
 		name="//config/",
 		path="//config/",
 		dir={},
 		keep=true,
 	})
 end
+
+
+--------------------------------------------------------------------------------
+
 
 M.config={}
 -- simple inherits, no tables and last has priority
@@ -442,3 +431,78 @@ M.config.setup=function(config)
 	return config
 end
 
+M.config.fetch_dir=function(config,path)
+	path="/"..wpath.resolve(path) -- force the // prefix
+	local dir={}
+
+	if path=="//config/" then
+
+		local rows=config.config_collect.do_memo({
+			sql=[[
+
+SELECT key FROM config ;
+
+			]],
+		}).rows
+		for i,v in ipairs(rows) do
+			local itpath=path..v.key
+			local it=config.setup({
+				path=itpath,
+				config_collect=config.config_collect,
+			})
+			it.parent=config
+			dir[#dir+1]=it
+		end
+
+	end
+	
+	return dir
+end
+
+M.config.read_file=function(config,path)
+PRINT("read_file",path)
+	if path:sub(1,#"//config/")=="//config/" then
+		local key=path:sub(1+#"//config/")
+		local rows=config.config_collect.do_memo({
+			binds={
+				KEY=key,
+			},
+			sql=[[
+
+	SELECT key,value FROM config WHERE key=$KEY;
+
+			]],
+		}).rows
+		return rows and rows[1] and rows[1].value
+	end
+end
+
+M.config.write_file=function(config,path,data)
+PRINT("write_file",path)
+
+	if path:sub(1,#"//config/")=="//config/" then
+
+		local key=path:sub(1+#"//config/")
+		local tab
+		pcall(function() -- try and parse but ignore errors
+			tab=djon.load(data,"comment")
+			config.config_collect.config[key]=djon.load(data) -- set internal config
+		end)
+		tab=tab or {{}} -- maybe wipe on error , undo to get old text back
+		local newdata=djon.save(tab,"djon","comment")  -- reformat keeping comments
+
+		local rows=config.config_collect.do_memo({
+			binds={
+				KEY=key,
+				VALUE=newdata,
+			},
+			sql=[[
+
+	INSERT INTO config(key,value) VALUES( $KEY , $VALUE ) ON CONFLICT(key) DO UPDATE SET value=$VALUE ;
+
+			]],
+		})
+
+		return newdata
+	end
+end

@@ -216,6 +216,8 @@ function gui.action(m)
 
 	elseif m.id=="file_close" then
 
+	elseif m.id=="file_reload" then
+
 	elseif m.id=="file_save" then
 
 		docs.doc:save()
@@ -286,7 +288,7 @@ end
 
 function gui.hooks(act,w,dat)
 
-	if act=="line_click" and dat and dat.is=="file" then
+	if act=="line_click" and dat and dat.read_file then
 
 --print(act,dat.path)
 	
@@ -581,6 +583,7 @@ local lay=
 			{id="menu_file",top_menu=true,menu_data={
 				{id="file_open"},
 				{id="file_close"},
+				{id="file_reload"},
 				{id="file_save"},
 				{id="file_saveas"},
 				{id="file_saveall"},
