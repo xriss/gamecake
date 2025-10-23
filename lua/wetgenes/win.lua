@@ -505,10 +505,13 @@ end
 
 
 -- clipboard (only SDL2 and only text)
-
+-- softcore has first crack otherwise we cross fingers and hope for SDL (hardcore) to manage it
 function base.get_clipboard()
 	if softcore and softcore.get_clipboard then
 		return softcore.get_clipboard()
+	end
+	if hardcore and hardcore.get_clipboard then
+		return hardcore.get_clipboard()
 	end
 end
 
@@ -517,6 +520,9 @@ function base.set_clipboard(w,s)
 	if softcore and softcore.set_clipboard then
 		return softcore.set_clipboard(s)
 	end
+	if hardcore and hardcore.set_clipboard then
+		return hardcore.set_clipboard(s)
+	end
 end
 
 function base.has_clipboard()
@@ -524,6 +530,11 @@ function base.has_clipboard()
 		return softcore.has_clipboard()
 	elseif softcore and softcore.get_clipboard then
 		return softcore.get_clipboard() and true or false
+	end
+	if     hardcore and hardcore.has_clipboard then
+		return hardcore.has_clipboard()
+	elseif hardcore and hardcore.get_clipboard then
+		return hardcore.get_clipboard() and true or false
 	end
 end
 
