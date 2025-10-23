@@ -318,13 +318,11 @@ M.file.read_file=function(_,path)
 end
 
 M.file.write_file=function(_,path,text)
-	local f=io.open(it.meta.path,"wb")
+	local f=io.open(path,"wb")
 	if f then
 		local d=f:write(text)
 		f:close()
-		return true
 	end
-	return false
 end
 
 
