@@ -22,7 +22,12 @@ M.bake=function(oven,main)
 	
 	oven.modname="swanky.edit"
 	
-	oven.console.input_disable=true
+	if oven.console then
+		oven.console.input_disable=true
+	end
+	if oven.escmenu then -- if we have an escape menu
+		oven.escmenu.active=false -- then disable it
+	end
 
 	local gl=oven.gl
 	local cake=oven.cake
@@ -180,14 +185,28 @@ resultierendes Vergnügen?
 
 	end
 
+	main.fullshow=false
 	main.msg=function(m)
+
+		-- toggle fullshow
+		if m.class=="key" and m.keyname=="escape" and m.action==-1 then
+			main.fullshow=not main.fullshow
+		end
+
 
 		view.msg(m) -- fix mouse coords
 
 --		if skeys.msg(m) then m.skeys=true end -- flag this msg as handled by skeys
 
-		gui.msg(m)
+		if main.fullshow then
 
+			show.widget_msg(gui.master,m)
+			
+		else
+
+			gui.msg(m)
+
+		end
 --dprint(m)
 
 	end
@@ -195,6 +214,16 @@ resultierendes Vergnügen?
 
 
 	main.update=function()
+	
+		if main.fullshow then
+			oven.console.input_disable=false
+
+			show.update()
+		
+		else
+			oven.console.input_disable=true
+			oven.console.show=false
+			oven.console.show_hud=false
 
 --		srecaps.step()
 		
@@ -212,12 +241,11 @@ resultierendes Vergnügen?
 		end
 		gui.master.ids.runfbo:set_dirty()
 
-
+		end
 	end
 
 	main.draw=function()
-	
-		
+			
 --  we want the main view to track the window size
 
 		oven.win:info()
@@ -231,15 +259,15 @@ resultierendes Vergnügen?
 		gl.ClearColor(pack.argb4_pmf4(0xf000))
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 
-		gl.PushMatrix()
+--		gl.PushMatrix()
 		
 		font.set(cake.fonts.get(4)) -- default font
 		font.set_size(16,0)
 		
-		canvas.gl_default() -- reset gl state
+--		canvas.gl_default() -- reset gl state
 
 		
-		gl.Translate(view.vx*0.5,view.vy*0.9,view.vz*0.0) -- top left corner is origin
+--		gl.Translate(view.vx*0.5,view.vy*0.9,view.vz*0.0) -- top left corner is origin
 
 --[[
 		local ss=view.vy*0.125*gui.datas.get_value("zoom")*0.01
@@ -250,10 +278,18 @@ resultierendes Vergnügen?
 
 --		beep.draw()
 
-		gl.PopMatrix()
+--		gl.PopMatrix()
 
-		gui.draw()
+		if main.fullshow then
 
+			show.widget_draw(0,0,view.vx,view.vy)
+			
+		else
+
+			gui.draw()
+
+		end
+		
 		views.pop_and_apply()
 		
 	end

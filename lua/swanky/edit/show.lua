@@ -239,7 +239,7 @@ M.bake=function(oven,show)
 			end
 		end
 
-		if show.mouse_start and widget.master.active==widget then
+		if show.mouse_start and ( widget.master.active==widget or widget.master==widget ) then
 		
 			if show.mouse_start[1]=="left" then
 				local ax=(m.x-show.mouse_start[2])/widget.hy
@@ -279,7 +279,7 @@ M.bake=function(oven,show)
 		
 		end
 			
-		if show.mouse_start2d and widget.master.active==widget then
+		if show.mouse_start2d and( widget.master.active==widget or widget.master==widget ) then
 
 			if show.mouse_start2d[1]=="left" then
 				local ax=(m.x-show.mouse_start2d[2])/widget.hy
@@ -297,7 +297,7 @@ M.bake=function(oven,show)
 			buildcam=true
 		end
 		
-		if show.mouse_start3d and widget.master.active==widget then
+		if show.mouse_start3d and ( widget.master.active==widget or widget.master==widget ) then
 
 			if show.mouse_start3d[1]=="left" then
 				local ax=(m.x-show.mouse_start[2])/widget.hy

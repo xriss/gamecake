@@ -192,6 +192,7 @@ local i=0
 		})
 
 		local fbo=gui.master.ids.runfbo.fbo
+		fbo:resize(hx,hy,4096)
 		local view=oven.cake.views.create({
 			mode="fbo",
 			fbo=fbo,
