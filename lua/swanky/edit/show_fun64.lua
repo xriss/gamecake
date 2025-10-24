@@ -24,6 +24,15 @@ M.bake=function(oven,show_fun64)
 	local gui=oven.rebake(oven.modname..".gui")
 	local system=oven.rebake("wetgenes.gamecake.fun.system")
 
+
+	show_fun64.widget_msg=function(w,m)
+		if system.is_setup then
+			pcall(function()
+				system.msg(m)
+			end)
+		end
+	end
+
 	show_fun64.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
 
 		if system.is_setup then

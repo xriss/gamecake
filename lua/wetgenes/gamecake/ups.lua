@@ -756,22 +756,22 @@ M.bake=function(oven,ups)
 
 	ups.manifest=function(idx)
 		
-		local up=ups.upish.states[idx] or {}
+		local up=ups.upish.states[idx] or {all={}}
 
 		up.get=function(name)
-			return up.state.all[name]
+			return up.all[name]
 		end
 		
 		up.button=function(name)
-			return up:get(name)
+			return up.get(name)
 		end
 
 		up.axis=function(name)
-			return up:get(name)
+			return up.get(name)
 		end
 
 		up.axisfixed=function(name)
-			return up:axis(name)
+			return up.axis(name)
 		end
 
 		up.msgs=function(name)
