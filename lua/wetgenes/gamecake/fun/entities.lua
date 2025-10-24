@@ -5,12 +5,9 @@ local deepcopy=require("wetgenes"):export("deepcopy")
 
 local modname=(...)
 
-package.loaded[modname]=deepcopy( require("wetgenes.gamecake.zone.scene") )
+local zscene=require("wetgenes.gamecake.zone.scene")
+local fscene={}
 
--- flag compatibility hax
-local old_create=package.loaded[modname].create
-package.loaded[modname].create=function(scene)
-	scene=scene or {}
-	scene.fun64=true
-	return old_create(scene)
-end
+package.loaded[modname]=fscene
+
+fscene.create=zscene.create_fun

@@ -549,45 +549,46 @@ of items of each caste.
 		return table.concat(lines,"\n")
 	end
 
--- hacks for old fun64 compat which expects these functions in the systems table
-	if scene.fun64 then
-
-		local funscene={}
-		setmetatable(funscene,{__index=scene})
-
-		funscene.generate_uid=function(uid) return scene.generate_uid(scene,uid) end
-		funscene.remember_uid=function(it) return scene.remember_uid(scene,it) end
-		funscene.forget_uid=function(it) return scene.forget_uid(scene,it) end
-		funscene.find_uid=function(uid) return scene.find_uid(scene,uid) end
-		funscene.systems_remove=function(caste) return scene.systems_remove(scene,caste) end
-		funscene.systems_insert=function(it) return scene.systems_insert(scene,it) end
-		funscene.systems_call=function(fname,...) return scene.systems_call(scene,fname,...) end
-		funscene.systems_cocall=function(fname,...) return scene.systems_cocall(scene,fname,...) end
-		funscene.sortby_update=function() return scene.sortby_update(scene) end
-		funscene.reset=function() return scene.reset(scene) end
-		funscene.caste=function(caste) return scene.caste(scene,caste) end
-		funscene.add=function(it,caste,boot) return scene.add(scene,caste,boot) end
-		funscene.remove=function(it) return scene.remove(scene,it) end
-		funscene.call=function(fname,...) return scene.call(scene,fname,...) end
-		funscene.status=function() return scene.status(scene) end
-
-		funscene.manifest=function(name,empty) return scene.values:manifest(name,empty) end
-		funscene.set=function(name,value) return scene.values:set(name,value) end
-		funscene.get=function(name) return scene.values:get(name) end
-
-		funscene.systems.remove=funscene.systems_remove
-		funscene.systems.insert=funscene.systems_insert
-		funscene.systems.call=funscene.systems_call
-		funscene.systems.cocall=funscene.systems_cocall
-
-		return funscene.reset()
-	end
-
 -- reset and return the scene, creating the initial data and info tables
 	return scene:reset()
 
 end
 
+-- hacks for old fun64 compat which expects these functions in the systems table
+M.create_fun=function(scene)
+
+	scene=M.create(scene)
+
+	local funscene={}
+	setmetatable(funscene,{__index=scene})
+
+	funscene.generate_uid=function(uid) return scene.generate_uid(scene,uid) end
+	funscene.remember_uid=function(it) return scene.remember_uid(scene,it) end
+	funscene.forget_uid=function(it) return scene.forget_uid(scene,it) end
+	funscene.find_uid=function(uid) return scene.find_uid(scene,uid) end
+	funscene.systems_remove=function(caste) return scene.systems_remove(scene,caste) end
+	funscene.systems_insert=function(it) return scene.systems_insert(scene,it) end
+	funscene.systems_call=function(fname,...) return scene.systems_call(scene,fname,...) end
+	funscene.systems_cocall=function(fname,...) return scene.systems_cocall(scene,fname,...) end
+	funscene.sortby_update=function() return scene.sortby_update(scene) end
+	funscene.reset=function() scene.reset(scene) return funscene end
+	funscene.caste=function(caste) return scene.caste(scene,caste) end
+	funscene.add=function(it,caste,boot) return scene.add(scene,it,caste,boot) end
+	funscene.remove=function(it) return scene.remove(scene,it) end
+	funscene.call=function(fname,...) return scene.call(scene,fname,...) end
+	funscene.status=function() return scene.status(scene) end
+
+	funscene.manifest=function(name,empty) return scene.values:manifest(name,empty) end
+	funscene.set=function(name,value) return scene.values:set(name,value) end
+	funscene.get=function(name) return scene.values:get(name) end
+
+	funscene.systems.remove=funscene.systems_remove
+	funscene.systems.insert=funscene.systems_insert
+	funscene.systems.call=funscene.systems_call
+	funscene.systems.cocall=funscene.systems_cocall
+
+	return funscene.reset()
+end
 
 
 
