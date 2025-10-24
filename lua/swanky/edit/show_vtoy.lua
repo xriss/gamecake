@@ -192,7 +192,10 @@ local i=0
 		})
 
 		local fbo=gui.master.ids.runfbo.fbo
-		fbo:resize(hx,hy,4096)
+		if fbo.w~=hx or fbo.h~=hy then -- resize so we need a new fbo
+			fbo:resize(hx,hy,4096)
+		end
+
 		local view=oven.cake.views.create({
 			mode="fbo",
 			fbo=fbo,
