@@ -7,5 +7,5 @@ vagrant up
 
 vagrant ssh -c " source /home/vagrant/emsdk/emsdk_env.sh ; cd /gamecake ; build/make --gcc=emcc $* "
 
-#vagrant halt
+vagrant halt
 

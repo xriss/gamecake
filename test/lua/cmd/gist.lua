@@ -26,7 +26,7 @@ opts.per_page=100
 opts.page=1
 
 local result=gist.list(opts)
---logs.DUMP(result)
+logs.dump(result)
 for i,v in ipairs(result) do
 	print(i,v.id,v.description)
 	for n,f in pairs(v.files or {}) do
