@@ -311,6 +311,32 @@ int lua_emcc_get_clipboard(lua_State *l)
 
 
 
+/*+-----------------------------------------------------------------------------------------------------------------
+
+Eval a javascript string and return a possible string value from that function
+
++-----------------------------------------------------------------------------------------------------------------+*/
+#if (defined __EMSCRIPTEN__)
+
+int lua_emcc_js_eval(lua_State *l)
+{
+const char *eval=0;
+const char *result=0;
+
+	eval=lua_tostring(l,1);
+
+	result=emscripten_run_script_string(eval);
+	
+	if(result)
+	{
+		lua_pushstring(l,result);
+//		free((void*)result);
+	}
+
+	return 1;
+}
+#endif
+
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -338,6 +364,7 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 		{	"has_clipboard",				lua_emcc_has_clipboard				},
 		{	"set_clipboard",				lua_emcc_set_clipboard				},
 		{	"get_clipboard",				lua_emcc_get_clipboard				},
+		{	"js_eval",						lua_emcc_js_eval					},
 #endif
 		{0,0}
 	};

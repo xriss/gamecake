@@ -798,7 +798,7 @@ M.tasks.http_code=function(linda,task_id,task_idx)
 
 	local js_eval -- function call into javascript if we are an emcc build
 	do
-		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
+		local ok,lib=pcall(function() return lanes.require("wetgenes.win.core") end )
 		if ok and lib then js_eval=lib.js_eval end
 	end
 	local http = lanes.require("socket.http")
@@ -1097,7 +1097,7 @@ M.tasks.client_code=function(linda,task_id,task_idx)
 	local wjson = lanes.require("wetgenes.json")
 	local js_eval -- function call into javascript if we are an emcc build
 	do
-		local ok,lib=pcall(function() return lanes.require("wetgenes.win.emcc") end )
+		local ok,lib=pcall(function() return lanes.require("wetgenes.win.core") end )
 		if ok and lib then js_eval=lib.js_eval end
 	end
 	local js_call=function(script,opts)
