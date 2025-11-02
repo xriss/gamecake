@@ -9,13 +9,16 @@
   ]
 
   // github access token, this is of course a secret
-  token = xxxxxxxxxxxxxxxx
+  token = FALSE
 
   // bookmarked list of github usernames
-  users = [
-   xriss
-  ]
+  users = [  ]
 
+ }
+
+ docs = {
+	// currently open docs as a map of path->info
+	open={}
  }
 
 }

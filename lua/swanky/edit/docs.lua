@@ -30,7 +30,8 @@ M.bake=function(oven,docs)
 	docs.modname=M.modname
 
 
-	docs.list={} -- list of open documents
+	-- simple list of open documents
+	docs.list={}
 
 	docs.item_refresh=function(treefile,item)
 --[[
@@ -120,6 +121,32 @@ M.bake=function(oven,docs)
 	end
 
 
+	docs.config_load=function()
+		if not collect.config.docs      then return end
+		if not collect.config.docs.open then return end
+
+		-- close any open docs
+		for idx=#docs.list,1,-1 do
+			local v=docs.list[idx]
+			v:close()
+		end
+
+		-- open saved docs
+		for i,v in ipairs( collect.config.docs.open ) do
+		end
+
+	end
+
+	docs.config_save=function()
+		if not collect.config.docs      then collect.config.docs={}      end
+		if not collect.config.docs.open then collect.config.docs.open={} end
+		for i,v in ipairs( docs.list ) do
+			local t={}
+			collect.config.docs.open[ v.filename ] = t
+		end
+
+	end
+
 -- show this document in the main text editor window
 	doc.show=function(it)
 	
@@ -177,6 +204,18 @@ M.bake=function(oven,docs)
 
 		return it
 	end
+	
+	doc.close=function(it)
 
+		-- remove from docs list
+		for idx=#docs.list,1,-1 do
+			local v=docs.list[idx]
+			if v==it then
+				table.remove(docs.list,idx)
+			end
+		end
+
+	end
+	
 	return docs
 end

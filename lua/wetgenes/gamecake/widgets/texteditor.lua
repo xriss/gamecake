@@ -59,10 +59,10 @@ function wtexteditor.update(texteditor)
 
 		texteditor.key_mouse=false
 
-		if texteditor.mark_area then
-			txt.mark(unpack(texteditor.mark_area))
-		end
-		texteditor.mark_area=nil
+--		if texteditor.mark_area then
+--			txt.mark(unpack(texteditor.mark_area))
+--		end
+--		texteditor.mark_area=nil
 
 		texteditor:scroll_to_view()
 		texteditor.txt_dirty=true
@@ -774,12 +774,12 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		local menu_data={
 			hooks=hooks,
 			inherit=true,
+			{id="clip_copy"},
+			{id="clip_cut"},
+			{id="clip_paste"},
 			{id="menu_spell",menu_data=fspells},
 			{id="menu_edit",menu_data={
 				{id="select_all"},
-				{id="clip_copy"},
-				{id="clip_cut"},
-				{id="clip_paste"},
 				{id="clip_cutline"},
 				{id="edit_justify"},
 				{id="edit_align"},
@@ -818,7 +818,12 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 		texteditor.key_mouse=1
 
-		txt.mark(dy,dx,dy,dx)
+		if not texteditor.mark_area or texteditor.master.keystate~="shift" then -- hold shift to add to selection
+			texteditor.mark_area={dy,dx,dy,dx}
+		end
+		texteditor.mark_area[3]=dy
+		texteditor.mark_area[4]=dx
+		txt.mark(unpack(texteditor.mark_area))
 
 		texteditor:mark_sync()
 
@@ -852,7 +857,9 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 			else
 			
-				txt.markmerge(dy,dx,dy,dx,unpack(texteditor.mark_area))
+				texteditor.mark_area[3]=dy
+				texteditor.mark_area[4]=dx
+				txt.mark(unpack(texteditor.mark_area))
 
 			end
 
@@ -866,13 +873,13 @@ end
 
 function wtexteditor.mark_sync(texteditor)
 	local txt=texteditor.txt
-	texteditor.mark_area={txt.markget()}
+--	texteditor.mark_area={txt.markget()}
 	texteditor.mark_area_auto={txt.markget()}
 	if not texteditor.mark_area[1] then texteditor.mark_area=nil end
 	if not texteditor.mark_area_auto[1] then texteditor.mark_area_auto=nil end
 	texteditor:scroll_to_view()
 	texteditor.txt_dirty=true
-	txt.cy , txt.cx = txt.clip(y or txt.cy,x or txt.cx)
+	txt.cy , txt.cx = txt.clip(txt.cy,txt.cx)
 end
 
 function wtexteditor.scroll_to_bottom(texteditor)

@@ -216,6 +216,8 @@ resultierendes Vergnügen?
 	main.update=function()
 	
 		if main.fullshow then
+			oven.frame_rate_wakeup() -- do not sleep in this mode
+
 			oven.console.input_disable=false
 
 			show.update()

@@ -380,8 +380,13 @@ os.exit()
 		oven.mods={}
 
 
+		-- call this to prevent sleeping for the next 10ish seconds
+		oven.frame_rate_wakeup=function()
+			oven.frame_rate_auto_active=oven.time()
+		end
+		
 		oven.frame_rate_limited=function()
-			return oven.frame_rate and oven.frame_time and (not oven.frame_rate_auto)
+			return oven.frame_rate and oven.frame_time -- and (not oven.frame_rate_auto)
 		end
 --
 -- preheat a normal oven
@@ -390,13 +395,14 @@ os.exit()
 		function oven.preheat()
 
 			if opts.fps then
-				if opts.fps=="auto" then -- we will auto regulate between 1 and 60 fps
+				if opts.fps=="auto" then -- we will auto regulate upto 60 fps
 					oven.frame_rate=1/60
 					oven.frame_rate_auto=1/60
+					oven.frame_time=0
 				else
 					oven.frame_rate=1/opts.fps -- how fast we want to run
+					oven.frame_time=0
 				end
-				oven.frame_time=0
 			end
 
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale,
@@ -893,6 +899,7 @@ LOG("oven",sa.." : "..sb)
 		function oven.msgs() -- read and process any msgs we have from win:msg
 
 			local cached_time=oven.time() -- cache time here to prevent possible race
+
 			if oven.frame_rate_auto then -- auto pick
 				if cached_time-oven.frame_rate_auto_active <= 10 then -- any recent activity in 10 seconds?
 
@@ -901,7 +908,7 @@ LOG("oven",sa.." : "..sb)
 						oven.frame_rate=oven.frame_rate_auto
 					end
 				else -- no recent activity , so , sleepy time
-					oven.frame_rate=(cached_time-oven.frame_rate_auto_active-10)*oven.frame_rate_auto -- wait longer for next frame
+					oven.frame_rate=math.floor(cached_time-oven.frame_rate_auto_active-9)*oven.frame_rate_auto -- wait longer for next frame
 				end
 			end
 
