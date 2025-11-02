@@ -851,9 +851,9 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 			if texteditor.key_mouse > 1 then -- special select
 
+				local oldmark={txt.markget()}
 				txt.markauto(dy,dx,texteditor.key_mouse) -- select word
-				txt.markmerge(texteditor.mark_area_auto[1],texteditor.mark_area_auto[2],
-					texteditor.mark_area_auto[3],texteditor.mark_area_auto[4],txt.markget())
+				txt.markmerge(oldmark[1],oldmark[2],oldmark[3],oldmark[4],txt.markget())
 
 			else
 			
@@ -873,13 +873,9 @@ end
 
 function wtexteditor.mark_sync(texteditor)
 	local txt=texteditor.txt
---	texteditor.mark_area={txt.markget()}
-	texteditor.mark_area_auto={txt.markget()}
-	if not texteditor.mark_area[1] then texteditor.mark_area=nil end
-	if not texteditor.mark_area_auto[1] then texteditor.mark_area_auto=nil end
-	texteditor:scroll_to_view()
 	texteditor.txt_dirty=true
 	txt.cy , txt.cx = txt.clip(txt.cy,txt.cx)
+	texteditor:scroll_to_view()
 end
 
 function wtexteditor.scroll_to_bottom(texteditor)
@@ -978,7 +974,6 @@ function wtexteditor.msg(pan,m)
 						if s then wwin.set_clipboard(s) end
 						txt.cursor()
 						texteditor:mark_sync()
-						texteditor:scroll_to_view()
 					end
 				end
 			elseif m.id=="clip_paste" then
@@ -987,27 +982,23 @@ function wtexteditor.msg(pan,m)
 					txt.undo.replace(s)
 					txt.cursor()
 					texteditor:mark_sync()
-					texteditor:scroll_to_view()
 				end
 			elseif m.id=="history_undo" then
 				if texteditor:allow_changes() then
 					txt.undo.undo()
 					txt.cursor()
 					texteditor:mark_sync()
-					texteditor:scroll_to_view()
 				end
 			elseif m.id=="history_redo" then
 				if texteditor:allow_changes() then
 					txt.undo.redo()
 					txt.cursor()
 					texteditor:mark_sync()
-					texteditor:scroll_to_view()
 				end
 			elseif m.id=="select_all" then
 				txt.mark(0,0,txt.hy+1,0)
 				texteditor.txt_dirty=true
 				texteditor:mark_sync()
-				texteditor:scroll_to_view()
 			elseif m.id=="clip_cutline" then
 				txt.mark(txt.cy,0,txt.cy+1,0)
 				if texteditor:allow_changes() then
@@ -1019,21 +1010,18 @@ function wtexteditor.msg(pan,m)
 					if s then wwin.set_clipboard(s) end
 					txt.cursor()
 					texteditor:mark_sync()
-					texteditor:scroll_to_view()
 				end
 			elseif m.id=="edit_justify" then
 				if texteditor:allow_changes() then
 					txt.edit.justify()
 					txt.cursor()
 					texteditor:mark_sync()
-					texteditor:scroll_to_view()
 				end
 			elseif m.id=="edit_align" then
 				if texteditor:allow_changes() then
 					txt.edit.align()
 					txt.cursor()
 					texteditor:mark_sync()
-					texteditor:scroll_to_view()
 				end
 			elseif m.id=="view_hex" then
 				txt.cursor()
@@ -1075,7 +1063,6 @@ function wtexteditor.msg(pan,m)
 
 				txt.find_next()
 				texteditor:mark_sync()
-				texteditor:scroll_to_view()
 
 			elseif m.id=="search_prev" then
 
@@ -1086,7 +1073,6 @@ function wtexteditor.msg(pan,m)
 
 				txt.find_prev()
 				texteditor:mark_sync()
-				texteditor:scroll_to_view()
 
 			end
 		end
