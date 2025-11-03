@@ -7,6 +7,7 @@ menu_view,,View,
 menu_spell,,Spell,
 
 file_quit,,Quit,Close application and Quit.,Ctrl+Q
+file_new,,New,Create new file.,Ctrl+N
 file_open,,Open...,Show file load requester.,Ctrl+O
 file_close,,Close,Close this file.,Ctrl+W
 file_reload,,Reload,Reload this file.,Ctrl+R

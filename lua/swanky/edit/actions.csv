@@ -1,6 +1,8 @@
 id,user,text,help,key,json
 
 menu_collection,,Collection,
-collection_new,,New Collection,
-collection_open,,Open Collection,
-collection_close,,Close Collection,
+collection_new,,New Collection.,
+collection_purge_history,,Purge this history.,
+collection_purge_all_history,,Purge all history.,
+collection_open,,Open Collection.,
+collection_close,,Close Collection.,

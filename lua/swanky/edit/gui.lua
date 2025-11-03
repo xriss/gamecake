@@ -192,6 +192,10 @@ function gui.action(m)
 	
 		oven.next=true
 
+	elseif m.id=="file_new" then
+
+		docs.manifest():show()
+
 	elseif m.id=="file_open" then
 
 		gui.screen.dialogs:show({
@@ -215,16 +219,20 @@ function gui.action(m)
 		})
 
 	elseif m.id=="file_close" then
-
+		if docs.doc then
+			docs.doc:close()
+		end
 	elseif m.id=="file_reload" then
-
+		if docs.doc then
+			docs.doc:reload()
+		end
 	elseif m.id=="file_save" then
-
-		docs.doc:save()
-
+		if docs.doc then
+			docs.doc:save()
+		end
 	elseif m.id=="file_saveall" then
 
---			docs.doc:save()
+		docs.save_all()
 
 	elseif m.id=="file_saveas" then
 
@@ -235,7 +243,9 @@ function gui.action(m)
 			ok=function(window)
 				local path=window.file:path()
 				window.master.later_append(function()
-					docs.doc:save(path)
+					if docs.doc then
+						docs.doc:save(path)
+					end
 				end)
 			end,
 			cancel=function()end,
@@ -581,6 +591,7 @@ local lay=
 			inherit=true,
 
 			{id="menu_file",top_menu=true,menu_data={
+				{id="file_new"},
 				{id="file_open"},
 				{id="file_close"},
 				{id="file_reload"},
@@ -589,6 +600,8 @@ local lay=
 				{id="file_saveall"},
 				{id="menu_collection",menu_data={
 					{id="collection_name"},
+					{id="collection_purge_history"},
+					{id="collection_purge_all_history"},
 					{id="collection_open"},
 					{id="collection_close"},
 				}},

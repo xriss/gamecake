@@ -147,6 +147,28 @@ M.bake=function(oven,docs)
 
 	end
 
+	docs.save_all=function()
+		for i,v in ipairs( docs.list ) do
+			if v:is_modified() then
+				v:save()
+			end
+		end
+	end
+
+	-- show or disable document display
+	docs.show=function(doc)
+		if not doc then
+			docs.doc=nil
+			gui.master.ids.texteditor.hidden=true
+		else
+			docs.doc=doc
+			doc:show()			
+		end
+	end
+
+	doc.is_modified=function(it)
+		return it.meta.undo~=it.txt.undo.index
+	end
 -- show this document in the main text editor window
 	doc.show=function(it)
 	
@@ -155,6 +177,7 @@ M.bake=function(oven,docs)
 		it.txt.hooks={}
 		gui.master.ids.texteditor.txt.hooks={}
 		gui.master.ids.texteditor.set_txt(it.txt)
+		gui.master.ids.texteditor.hidden=false
 
 		gui.master.ids.infobar.text=it.filename
 		if it.meta.undo==it.txt.undo.index then
@@ -167,7 +190,6 @@ M.bake=function(oven,docs)
 
 		return it
 	end
-
 	doc.save=function(it,filename)
 
 -- trim on save ( so you can undo then save and know that the data is gone gone gone )	
@@ -199,12 +221,16 @@ M.bake=function(oven,docs)
 		gui.master.ids.treefiles.items:manifest_path( it.filename )
 		
 		collect.load(it,filename)
-		
 		it.txt.set_lexer()
 
 		return it
 	end
 	
+	doc.reload=function(it)
+		collect.load(it,filename)		
+		it.txt.set_lexer()
+	end
+
 	doc.close=function(it)
 
 		-- remove from docs list
@@ -214,6 +240,8 @@ M.bake=function(oven,docs)
 				table.remove(docs.list,idx)
 			end
 		end
+		
+		docs.show()
 
 	end
 	

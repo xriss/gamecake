@@ -168,7 +168,8 @@ resultierendes Vergnügen?
 
 		end
 		if not loaded then
-			docs.manifest():show()
+			docs.show()
+--			docs.manifest():show()
 --			gui.master.ids.texteditor.txt.set_text(string.rep(ipsum,4),"")
 --			gui.master.ids.texteditor.txt.set_text("\n","")
 --			gui.master.ids.texteditor.txt.set_lexer()
@@ -239,7 +240,9 @@ resultierendes Vergnügen?
 		
 
 		if not gui.master.focus  then -- auto focus text editor when no other focus
-			gui.master.set_focus( gui.master.ids.texteditor.scroll_widget.pan )
+			if not gui.master.ids.texteditor.hidden then -- except if it is hidden
+				gui.master.set_focus( gui.master.ids.texteditor.scroll_widget.pan )
+			end
 		end
 		gui.master.ids.runfbo:set_dirty()
 

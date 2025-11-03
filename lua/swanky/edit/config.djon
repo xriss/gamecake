@@ -12,13 +12,13 @@
   token = FALSE
 
   // bookmarked list of github usernames
-  users = [  ]
+  users = [ FALSE ]
 
  }
 
  docs = {
 	// currently open docs as a map of path->info
-	open={}
+	open = [ FALSE ]
  }
 
 }

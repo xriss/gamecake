@@ -48,7 +48,7 @@ prefixes.
 Choose window mode. win|max|full for normal maximized or fullscreen.
 
 ]], },
-			{	1,			"swanky.edit file.txt",	[[
+			{	1,			"swed file.txt",	[[
 
 Load file.txt for editing.
 
