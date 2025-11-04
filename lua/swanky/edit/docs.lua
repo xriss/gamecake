@@ -32,6 +32,7 @@ M.bake=function(oven,docs)
 
 	-- simple list of open documents
 	docs.list={}
+	docs.list_modified=false
 
 	docs.item_refresh=function(treefile,item)
 --[[
@@ -81,6 +82,7 @@ M.bake=function(oven,docs)
 		local it={}
 
 		docs.list[#docs.list+1]=it
+		docs.list_modified=true
 
 		setmetatable(it,docmeta)
 
@@ -123,6 +125,11 @@ M.bake=function(oven,docs)
 				gui.master.ids.infobar:set_dirty()
 			end
 		end
+		
+		if docs.list_modified then
+			docs.config_save()
+			collect.save_config("docs")
+		end
 	end
 
 
@@ -137,19 +144,26 @@ M.bake=function(oven,docs)
 		end
 
 		-- open saved docs
-		for i,v in ipairs( collect.config.docs.open ) do
+		for _,v in ipairs( collect.config.docs.open ) do
+			if v then -- skip falses
+				docs.manifest(v.filename):show()
+			end
 		end
 
+		docs.list_modified=false
 	end
 
 	docs.config_save=function()
 		if not collect.config.docs      then collect.config.docs={}      end
-		if not collect.config.docs.open then collect.config.docs.open={} end
+		collect.config.docs.open={}
 		for i,v in ipairs( docs.list ) do
-			local t={}
-			collect.config.docs.open[ v.filename ] = t
+			local t={
+				filename=v.filename
+			}
+			table.insert( collect.config.docs.open , t )
 		end
 
+		docs.list_modified=false
 	end
 
 	docs.save_all=function()
@@ -217,25 +231,25 @@ M.bake=function(oven,docs)
 
 	end
 
-	doc.load=function(it,filename)
+	doc.load=function(it,filename,reload)
 
-
-		if not filename then
-			filename=wpath.currentdir()..os.date("swed-%Y%m%d.txt")
+		if filename then
+			it.filename=filename
 		end
-		it.filename=filename
-		it.txt.set_text("\n",filename)
+		if not it.filename then
+			it.filename=wpath.currentdir()..os.date("swed-%Y%m%d.txt")
+		end
+		it.txt.set_text("\n",it.filename)
 		
-		collect.manifest_path(filename)
-		collect.load(it,filename)
+		collect.manifest_path(it.filename)
+		collect.load(it,it.filename,reload)
 		it.txt.set_lexer()
 
 		return it
 	end
 	
 	doc.reload=function(it)
-		collect.load(it,filename)		
-		it.txt.set_lexer()
+		it:load(nil,true)
 	end
 
 	doc.close=function(it)
@@ -247,6 +261,7 @@ M.bake=function(oven,docs)
 				table.remove(docs.list,idx)
 			end
 		end
+		docs.list_modified=true
 		
 		if docs.doc==it then -- currently viewing this doc
 			docs.show( docs.list[1] ) -- show another doc or no doc if list is empty

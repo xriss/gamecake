@@ -11,8 +11,7 @@ test/c/checkobj.o
 
 js/build
 js/node_modules
-js/djon.h
 
 
-
-
+eg/c/eg
+eg/c/eg.djon

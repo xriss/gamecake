@@ -602,11 +602,11 @@ PRINT("write_config",path)
 		local key=path:sub(1+#"//config/")
 		local tab
 		pcall(function() -- try and parse but ignore errors
-			tab=djon.load(data,"comment")
+			tab=djon.load(data,"comments")
 			config.collect.config[key]=djon.load(data) -- set internal config
 		end)
 		tab=tab or {{}} -- maybe wipe on error , undo to get old text back
-		local newdata=djon.save(tab,"djon","comment")  -- reformat keeping comments
+		local newdata=djon.save(tab,"djon","comments")  -- reformat keeping comments
 
 		local rows=config.collect.do_memo({
 			binds={

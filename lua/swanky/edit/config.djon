@@ -17,7 +17,7 @@
  }
 
  docs = {
-	// currently open docs as a map of path->info
+	// list of currently open docs
 	open = [ FALSE ]
  }
 

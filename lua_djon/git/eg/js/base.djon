@@ -1,0 +1,45 @@
+{
+ // set to true for verbose rule checking
+ debug = FALSE
+ // decide which episode we like, ( tags from filename, including extension )
+ episode = {
+  // we are looking for the smallest file released
+  best = small
+  // muse be less than 4gig so no super highrez bullshit
+  maxsize = 4000000000
+  // a little bit of sanity to avoid samples
+  minsize = 1000000
+  rules = [
+   // start with everything
+   [ TRUE ]
+   // avoid lowrez unless its the only version available
+   [ `480p` FALSE ]
+  ]
+ }
+ // array of url to rss feeds of torrent files
+ feeds = [ ]
+ // paths can be relative to this config files location
+ paths = { download=`new` rss=`rss.xml` sqlite=`rss.sqlite` tv=`tv` }
+ rss = {
+  // number of episodes to list in the rss files
+  length = 512
+ }
+ // decide which shows we like ( tags from tvmaze )
+ show = {
+  rules = [
+   // start with everything
+   [ TRUE ]
+   // must be english audio ( language is listed on TVMAZE )
+   [ `!english` FALSE ]
+   // do not want these categorys ( as listed on TVMAZE )
+   [ `reality` FALSE ]
+   [ `sports` FALSE ]
+   // documentarys are genrally OK but not if they are crime/medical
+   [ `documentary` `crime` FALSE ]
+   [ `documentary` `medical` FALSE ]
+   // allow some reality TV if it is nature/food
+   [ `english` `reality` `nature` TRUE ]
+   [ `english` `reality` `food` TRUE ]
+  ]
+ }
+}

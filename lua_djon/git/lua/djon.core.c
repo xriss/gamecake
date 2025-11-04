@@ -171,17 +171,12 @@ int cc;
 int cb;
 int idx=0;
 
-	if(ds->comment)
-	{
-			lua_newtable(l);
-	}
-
 	switch(v->typ&DJON_TYPEMASK)
 	{
 		case DJON_ARRAY:
 			lua_newtable(l);
 			idx=0;
-			vi=v->val;
+			vi=v->lst;
 			while( vi )
 			{
 				idx++;
@@ -192,28 +187,11 @@ int idx=0;
 		break;
 		case DJON_OBJECT:
 			lua_newtable(l);
-			ki=v->key;
+			ki=v->lst;
 			while( ki )
 			{
 				lua_pushlstring(l,djon_get(ds,ki)->str,djon_get(ds,ki)->len);
-				lua_djon_get_value(l,ds,djon_get(ds,ki)->val);
-				if(ds->comment)
-				{
-					// replace value comments with key and value comments
-					for( ci=djon_get(ds,ki)->com , cc=2 ; ci ; ci=djon_get(ds,ci)->com , cc++ )
-					{
-						v=djon_get(ds,ci);
-						lua_pushlstring(l,v->str,v->len);
-						lua_rawseti(l,-2,cc);
-					}
-					cb=cc;
-					for( ci=djon_get(ds,djon_get(ds,ki)->val)->com , cc=2 ; ci ; ci=djon_get(ds,ci)->com , cc++ )
-					{
-						v=djon_get(ds,ci);
-						lua_pushlstring(l,v->str,v->len);
-						lua_rawseti(l,-2,cc+cb-2);
-					}
-				}
+				lua_djon_get_value(l,ds,djon_get(ds,ki)->lst);
 				lua_rawset(l,-3);
 				ki=djon_get(ds,ki)->nxt;
 			}
@@ -235,16 +213,6 @@ int idx=0;
 		break;
 	}
 
-	if(ds->comment)
-	{
-		lua_rawseti(l,-2,1);
-		for( ci=djon_get(ds,i)->com , cc=2 ; ci ; ci=djon_get(ds,ci)->com , cc++ )
-		{
-			v=djon_get(ds,ci);
-			lua_pushlstring(l,v->str,v->len);
-			lua_rawseti(l,-2,cc);
-		}
-	}
 }
 
 /*
@@ -255,12 +223,18 @@ Convert internal data state into lua tables.
 static int lua_djon_get (lua_State *l)
 {
 djon_state *ds=lua_djon_check_ptr(l,1);
-	ds->comment=0;
+int comments=0;
+
 	for(int i=2;i<=10;i++) // check string flags in args
 	{
 		const char *s=lua_tostring(l,i);
 		if(!s){break;}
-		if( strcmp(s,"comment")==0 ) { ds->comment=1; }
+		if( strcmp(s,"comments")==0 ) { comments=1; }
+	}
+
+	if(comments)
+	{
+		ds->parse_value=djon_value_to_vca(ds,ds->parse_value);
 	}
 
 	lua_djon_get_value(l,ds,ds->parse_value);
@@ -285,42 +259,51 @@ int ki=0;
 int ci;
 int cc;
 int lc;
-	
-	if(ds->comment)
+		
+	if( lua_type(l, -1) == LUA_TTABLE )
 	{
-		if( ! lua_istable(l,-1) ) {luaL_error(l,"values must be tables"); }
-		lua_rawgeti(l,-1,1);
-	}
-	
-	if( lua_istable(l,-1) )
-	{
-		lua_rawgeti(l,-1,1); // check first element of an array
-		if(lua_isnil(l,-1)) // if nil then this is an object
+
+		int isarray=1; // assume array if empty
+		lua_pushnil(l);
+		if( lua_next(l,-2) != 0 ) // check first key only
 		{
-			lua_pop(l,1);
+			isarray=0; // assume object unless
+			if( lua_type(l, -2) == LUA_TNUMBER ) // first key is a number
+			{
+				if( lua_tonumber(l, -2) == 1.0 ) // and that number is 1
+				{
+					isarray=1;
+				}
+			}
+			lua_pop(l,2);
+		}
+
+		if( ! isarray ) // if empty or first key is a string
+		{
 
 			i=djon_alloc(ds); if(!i) { luaL_error(l, "out of memory" ); }
 			v=djon_get(ds,i);
 			v->typ=DJON_OBJECT;
 
 			lua_pushnil(l);
+			li=0;
 			while( lua_next(l, -2) != 0)
 			{
-				if(!lua_isstring(l,-2)) { luaL_error(l, "object keys must be strings" ); }
+				if( lua_type(l, -2) != LUA_TSTRING ) { luaL_error(l, "object keys must be strings" ); }
 				ki=djon_alloc(ds); if(!ki) { luaL_error(l, "out of memory" ); }
 				kv=djon_get(ds,ki);
-				kv->typ=DJON_STRING;
+				kv->typ=DJON_KEY|DJON_STRING; // this is a key
 				kv->str=(char*)lua_tolstring(l,-2,&slen);
 				kv->len=slen;
+				kv->par=i;
 				
 				vi=lua_djon_set_value(l,ds);
-				kv=djon_get(ds,ki); // realloc safe
-				kv->val=vi;
+				djon_get(ds,ki)->lst=vi; // realloc safe
+				djon_get(ds,vi)->par=ki;
 
-				v=djon_get(ds,i); // realloc safe
-				if( v->key==0) // first
+				if( li==0 ) // first
 				{
-					v->key=ki;
+					djon_get(ds,i)->lst=ki;
 				}
 				else // chain
 				{
@@ -329,37 +312,31 @@ int lc;
 				}
 				li=ki;
 
-				if(ds->comment)
-				{
-					// move comments to key
-					djon_get(ds,ki)->com=djon_get(ds,vi)->com;
-					djon_get(ds,vi)->com=0;
-				}
-
 				lua_pop(l, 1);
 			}
 
 		}
-		else
+		else // array
 		{
-			lua_pop(l,1);
 
 			i=djon_alloc(ds); if(!i) { luaL_error(l, "out of memory" ); }
 			v=djon_get(ds,i);
 			v->typ=DJON_ARRAY;
 			
+			li=0;
 			for( idx=1 ; 1 ; idx++)
 			{
 				lua_rawgeti(l,-1,idx);
 				if(lua_isnil(l,-1)) { lua_pop(l,1); break; }
 
 				vi=lua_djon_set_value(l,ds);
+				djon_get(ds,vi)->par=i;
+				djon_get(ds,vi)->idx=idx-1;
 				lua_pop(l,1);
 
-				v=djon_get(ds,i);
-				if( v->val==0) // first
+				if( li==0 ) // first
 				{
-					v->val=vi;
+					djon_get(ds,i)->lst=vi;
 				}
 				else // chain
 				{
@@ -371,7 +348,7 @@ int lc;
 		}
 	}
 	else
-	if( lua_isnumber(l,-1) )
+	if( lua_type(l, -1) == LUA_TNUMBER )
 	{
 		i=djon_alloc(ds); if(!i) { luaL_error(l, "out of memory" ); }
 		v=djon_get(ds,i);
@@ -379,7 +356,7 @@ int lc;
 		v->num=lua_tonumber(l,-1);
 	}
 	else
-	if( lua_isstring(l,-1) )
+	if( lua_type(l, -1) == LUA_TSTRING )
 	{
 		i=djon_alloc(ds); if(!i) { luaL_error(l, "out of memory" ); }
 		v=djon_get(ds,i);
@@ -388,37 +365,12 @@ int lc;
 		v->len=slen;
 	}
 	else
-	if( lua_isboolean(l,-1) )
+	if( lua_type(l, -1) == LUA_TBOOLEAN )
 	{
 		i=djon_alloc(ds); if(!i) { luaL_error(l, "out of memory" ); }
 		v=djon_get(ds,i);
 		v->typ=DJON_BOOL;
 		v->num=lua_toboolean(l,-1);
-	}
-
-	if(ds->comment)
-	{
-		lua_pop(l, 1);
-		for( cc=2 , lc=i ; 1 ; cc++ )
-		{
-			lua_rawgeti(l,-1,cc);
-			if(lua_isnil(l,-1))
-			{
-				lua_pop(l, 1);
-				break;
-			}
-
-			if(!lua_isstring(l,-1)) { luaL_error(l, "comments must be strings" ); }
-			ci=djon_alloc(ds); if(!ci) { luaL_error(l, "out of memory" ); }
-			cv=djon_get(ds,ci);
-			cv->typ=DJON_COMMENT;
-			cv->str=(char*)lua_tolstring(l,-1,&slen);
-			cv->len=slen;
-			djon_get(ds,lc)->com=ci;
-			lc=ci;
-
-			lua_pop(l, 1);
-		}
 	}
 	
 	return i;
@@ -435,19 +387,25 @@ careful not to free the data before you write it.
 static int lua_djon_set (lua_State *l)
 {
 djon_state *ds=lua_djon_check_ptr(l,1);
-	ds->comment=0;
+int comments=0;
+
 	for(int i=3;i<=10;i++) // check string flags in args
 	{
 		const char *s=lua_tostring(l,i);
 		if(!s){break;}
-		if( strcmp(s,"comment")==0 ) { ds->comment=1; }
+		if( strcmp(s,"comments")==0 ) { comments=1; }
 	}
-	
+
 	ds->write_data=0; // prepare to alloc strings
 
 	lua_pushvalue(l,2);
 	ds->parse_value=lua_djon_set_value(l,ds);
 	lua_pop(l,1);
+
+	if(comments)
+	{
+		ds->parse_value=djon_vca_to_value(ds,ds->parse_value);
+	}
 
 	return 0;
 }
@@ -559,7 +517,7 @@ LUALIB_API int luaopen_djon_core (lua_State *l)
 
 	luaL_newmetatable(l, lua_djon_ptr_name);
 	
-#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 520
+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 502
 	luaL_setfuncs(l, meta, 0);
 #else
 	luaL_openlib(l, NULL, meta, 0);
@@ -570,7 +528,7 @@ LUALIB_API int luaopen_djon_core (lua_State *l)
 
 	lua_newtable(l);
 
-#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 520
+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 502
 	luaL_setfuncs(l, lib, 0);
 #else
 	luaL_openlib(l, NULL, lib, 0);

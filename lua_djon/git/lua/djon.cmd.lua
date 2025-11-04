@@ -9,12 +9,13 @@ for _,v in ipairs({...}) do
 	local vp=v
 	if opts.skip_opts then vp=nil end -- skip all opts
 
-	if     vp=="--"        then		opts.skip_opts=true
-	elseif vp=="--djon"    then		opts.djon=true
-	elseif vp=="--json"    then		opts.djon=false
-	elseif vp=="--compact" then		opts.compact=true
-	elseif vp=="--pretty"  then		opts.compact=false
-	elseif vp=="--help"  then		opts.help=true
+	if     vp=="--"         then		opts.skip_opts=true
+	elseif vp=="--djon"     then		opts.djon=true
+	elseif vp=="--json"     then		opts.djon=false
+	elseif vp=="--compact"  then		opts.compact=true
+	elseif vp=="--strict"   then		opts.strict=true
+	elseif vp=="--comments" then		opts.comments=true
+	elseif vp=="--help"     then		opts.help=true
 	else
 		if vp and vp:sub(1,2)=="--" then
 			print( "unknown option "..v )
@@ -37,16 +38,21 @@ lua/djon.sh input.filename output.filename
 
 	If no output.filename then write to stdout
 	If no input.filename then read from stdin
+	Input is always parsed as djon (which can be valid json)
 
 Possible options are:
 
-	--djon    : output djon format
-	--json    : output json format
-	--compact : output compact
-	--pretty  : output pretty
-	--        : stop parsing options
+	--djon     : output djon format
+	--json     : output json format (default)
+	--compact  : compact output format
+	--strict   : require input to be valid json ( bitch mode )
+	--comments : comments array to djon or djon to comments array
+	--         : stop parsing options
 
-We default to pretty output.
+The comments flag implies that you are converting between a
+json array format [value,comment,...] values and djon.
+So it applies to input if writing djon and output if writing json.
+
 ]])
 
 os.exit(0)
@@ -64,7 +70,10 @@ else
 	data_input=io.read("*all")
 end
 
-local data_tab=djon.load(data_input,"comment")
+local flags={}
+if opts.strict then flags[#flags+1]="strict" end
+if ( not opts.djon and opts.comments ) or not opts.comments then flags[#flags+1]="comments" end
+local data_tab=djon.load(data_input,unpack(flags))
 
 
 local dump;dump=function(it,idnt)
@@ -94,9 +103,11 @@ end
 --dump(data_tab)
 
 
-local flags={"comment"}
+local flags={}
 if opts.djon then flags[#flags+1]="djon" end
+if opts.strict then flags[#flags+1]="strict" end
 if opts.compact then flags[#flags+1]="compact" end
+if ( opts.djon and opts.comments ) or not opts.comments then flags[#flags+1]="comments" end
 local data_output=djon.save(data_tab,unpack(flags))
 
 if opts.fname2 then

@@ -83,18 +83,17 @@ M.bake=function(oven,main)
 
 		cmd.start()
 		
-		local loaded=false
-		if cmd.args then
+		docs.show() -- hide main text as we have nothing to show yet
+
+		docs.config_load() -- load old docs ( collect has prepped the data )
+
+		if cmd.args then -- load doc from command line
 
 			local fname=cmd.args.data[1]
 			if fname then
 				docs.manifest(fname):show()
-				loaded=true
 			end
 
-		end
-		if not loaded then
-			docs.show() -- hide main text as we have nothing to show
 		end
 
 		

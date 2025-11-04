@@ -4,9 +4,15 @@
 DJON is JSON but we DGAF.
 =========================
 
-DJON is a UTF8 only relaxed superset of JSON. DJON supports round trip 
-comments, numbers are explicitly 64bit floats and strings can contain 
-raw binary data.
+DJON is a UTF8 only relaxed superset of JSON so can also be used as a
+JSON parser. DJON supports round trip comments, numbers are explicitly
+64bit floats and strings can contain raw binary data.
+
+Djon is half man half machine:
+
+Pretty djon makes for more human readable and editable json style 
+configuration files and compact djon is a machine readable format that 
+can store binary data.
 
 There are some similar projects but none of them fixes enough things, 
 we should try and "fix" everything or not bother changing anything.
@@ -79,7 +85,8 @@ code in the future so lets see if I am correct.
 Format
 ======
 
-This uses C style data so || is a logical OR and && is a logical AND.
+This document uses C style data so || is a logical OR and && is a 
+logical AND.
 
 To show optional characters we use the idiom of "a" || "" with "" 
 meaning an empty string to imply that the "a" is optional.
@@ -277,9 +284,9 @@ UTF16 surrogate pairs must be used to reach characters outside of that
 
 Backtick strings may span multiple lines, with this in mind if the 
 first character is a '\n' then it will be removed. This is for human 
-formatting of the open and close quotes of a multiline string which can 
-now placed on their own lines without generating an extra '\n' at the 
-start.
+formatting of the open and close quotes of a multiline string allowing 
+them to be placed on their own lines without generating an extra '\n' 
+at the start.
 
 
 LONG_QUOTE:
@@ -436,6 +443,14 @@ length of the number of digits becomes unwieldy, at e8 or e-8 so you
 may not see any exponents between -7 and 7 inclusive when stringifying 
 numbers.
 
+Finally converting between decimal strings and 64bit IEEE floating 
+point numbers can be a bit squify. We always serialize to the closest 
+stable number that will not change value with multiple conversions back 
+and forth between these formats.
+
+If you are suprised by slightly unpredictable rounding at the extreams 
+of floating point precision, this is why.
+
 
 Strings
 =======
@@ -476,6 +491,11 @@ mistaken for something else. So a naked string can not start with
 {}[],:= or look like a valid number or any of the keywords. Note a 
 keyword or number must end with a deliminator character so for instance 
 "100a" is allowed to start a naked string as is "nulll".
+
+There are some obvious dangers and possible confusion to naked strings, 
+eg user edited and accidental changed to a valid number, so they will 
+never be used when serialising output djon in "strict" mode.
+
 
 Keywords
 --------

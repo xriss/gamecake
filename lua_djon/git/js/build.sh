@@ -9,7 +9,6 @@ emcc \
 \
 -Oz --profiling-funcs \
 \
--I../c \
 -Inode_modules/node-api-headers/include \
 \
 -s EXPORTED_FUNCTIONS=_napi_register_wasm_v1,_napi_wasm_malloc \
@@ -19,6 +18,9 @@ emcc \
 \
 ./djon_core.c \
 
+
+# and base64 it because apparently that is the only safe way to embed wasm
+./djon_core.cmd.js
 
 
 #-s TOTAL_STACK=16MB \

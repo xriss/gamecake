@@ -1,0 +1,19 @@
+{
+ // set to true for verbose rule checking
+ debug = FALSE
+ episode = {
+  best = small
+  maxsize = 4000000000
+  minsize = 1000000
+  rules = [ TRUE ]
+ }
+ feeds = [ ]
+ paths = { download=`new` rss=`rss.xml` sqlite=`rss.sqlite` tv=`tv` }
+ rss = {
+  // number of episodes to list in the rss files
+  length = 512
+ }
+ // decide which shows we like ( tags from tvmaze )
+ show = old comments are kept even if we change data type
+ this_is_new = yes old
+}

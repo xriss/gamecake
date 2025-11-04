@@ -28,8 +28,15 @@ SOFTWARE.
 #ifndef DJON_H
 #define DJON_H
 
+#define DJON_VERSION 1.251031
+
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+// maximum path size including null
+#ifndef DJON_MAX_PATH
+#define DJON_MAX_PATH (1024)
 #endif
 
 // maximum stack to use, when parsing
@@ -57,7 +64,7 @@ extern "C" {
 #endif
 
 // need some maths for parsing numbers
-#if !(defined(DJON_POW10)||defined(DJON_LOG10))
+#if !(defined(DJON_POW10)&&defined(DJON_LOG10)&&defined(DJON_FLOOR))
 #include <math.h>
 #endif
 #ifndef DJON_POW10 
@@ -88,7 +95,7 @@ extern "C" {
 extern void *djon_mem(void *ctx,void *ptr,int old,int siz);
 void *djon_mem(void *ctx,void *ptr,int old,int siz)
 {
-	if(!ctx) { return (void*)1; } // alloc fake ctx
+	if(!ctx) { return (void*)1; } // no context needed
 	else
 	if(ptr)
 	{
@@ -100,7 +107,7 @@ void *djon_mem(void *ctx,void *ptr,int old,int siz)
 	{
 		if(siz) { return malloc(siz); }
 	}
-	return (void*)0; // free fake ctx
+	return (void*)0; // no context needed
 }
 #endif
 #define DJON_MEM_MALLOC(ds,siz)          DJON_MEM(ds->memctx,0,0,siz)
@@ -118,8 +125,10 @@ typedef enum djon_enum
 	DJON_COMMENT  = 0x0007,
 
 	DJON_ESCAPED  = 0x0100, // this string contains \n \t \" etc
-	DJON_LONG     = 0x0200, // this string is long ( remove first/last \n )
+	DJON_LONG     = 0x0200, // this string is long
 	DJON_KEY      = 0x0400, // this string is a key
+
+	DJON_FREE     = 0x0000, // this value is free and can be allocated
 
 	DJON_TYPEMASK = 0x00ff, // base types are in lower byte
 	DJON_FLAGMASK = 0xff00, // additional flags are in upper byte
@@ -129,18 +138,19 @@ typedef enum djon_enum
 
 typedef struct djon_value
 {
-	int    typ; // the type of data contained in the string
-
-	int    nxt; // idx to next value if this is part of a list
-	int    prv; // idx to prev value if this is part of a list
-
+// data
+	int    typ; // the type of data contained in this structure
 	char * str; // start of string ( points into djon_state.data )
-	int    len; // number of characters
-
-	double num; // number or bool value
-	int    key; // linked list of keys for object
-	int    val; // linked list of values for object or array
+	int    len; // length of string
+	double num; // number or bool
+// pointers to relative values
+	int    nxt; // next value if this is part of a list
+	int    prv; // prev value if this is part of a list
 	int    com; // linked list of comments for this value
+	int    lst; // child keys for object or child values for array or child value for a key
+	int    par; // parent array/object/key
+// array index
+	int    idx; // index into array if parent is an array
 
 } djon_value ;
 
@@ -153,6 +163,8 @@ typedef struct djon_state
 	// output values
 	djon_value * values;
 	int          values_len; // used buffer size
+	int          values_inc; // reuse test index
+	int          values_reset; // reset test index
 	int          values_siz; // allocated buffer size
 
 	// current parse state
@@ -167,26 +179,27 @@ typedef struct djon_state
 	int   error_char;   // char in line
 	int   error_line;   // line in file
 
-	int   comment; // compact style input/output flag
-	// every value is a table starting with the value and followed by optional comment lines
 #if !DJON_FILE
 	void *fp; // we do not know what a file is
 #else
 	FILE *fp; // where to write output
 #endif
+	int   small; // what is considered small ( 128 ) set to 0 to disable
 	int   compact; // compact output flag
-	int   strict; // strict input/output flag
+	int   strict; // json bitch mode input flag
 	char *write_data; // string output
 	int   write_size;
 	int   write_len;
 	int (*write)(struct djon_state *ds, const char *cp, int len); // ptr to output function
 
+	int   path_len; // path size when constructing path ( built backwards in buf )
+
 	void *memctx; // memory allocator ctx
-	char buf[256]; // small buffer used for generating text output
+	char buf[DJON_MAX_PATH]; // small very tempory buffer used for generating text
 
 } djon_state ;
 
-
+// C interface used to parse and stringify json/djon
 extern djon_state * djon_setup();
 extern void         djon_clean(       djon_state *ds);
 extern int          djon_load_file(   djon_state *ds, const char *fname);
@@ -197,12 +210,38 @@ extern int          djon_write_data(  djon_state *ds, const char *ptr, int len )
 extern void         djon_write_json(  djon_state *ds, int idx);
 extern void         djon_write_djon(  djon_state *ds, int idx);
 extern int          djon_alloc(       djon_state *ds);
-extern int          djon_free(        djon_state *ds, int idx);
-extern int          djon_idx(         djon_state *ds, djon_value *val);
+extern void         djon_free(        djon_state *ds, int idx);
 extern djon_value * djon_get(         djon_state *ds, int idx);
+extern int          djon_idx(         djon_state *ds, djon_value *dv);
 extern int          djon_parse_value( djon_state *ds);
 extern int          djon_check_stack( djon_state *ds);
 extern void         djon_sort_object( djon_state *ds, int idx );
+
+// simplish path based C interface for create delete and find of json data used in this library
+extern int          djon_value_newkey(   djon_state *ds, int base_idx, const char *path, const char *key);
+extern int          djon_value_newindex( djon_state *ds, int base_idx, const char *path, int index);
+extern void         djon_value_delete(   djon_state *ds, int base_idx, const char *path);
+extern void         djon_value_dechild(  djon_state *ds, int base_idx, const char *path);
+extern int          djon_value_by_path(  djon_state *ds, int base_idx, const char *path, const char **lastkey);
+extern int          djon_value_by_index( djon_state *ds, int base_idx, int index);
+extern int          djon_value_all(      djon_state *ds, int base_idx, int di);
+extern const char * djon_value_to_path(  djon_state *ds, int base_idx, int di);
+// simplish C interface for getting,setting and iterating
+extern int          djon_value_copy_str(   djon_state *ds, int di, char *dest, int siz);
+extern const char * djon_value_get_str(    djon_state *ds, int di);
+extern int          djon_value_get_len(    djon_state *ds, int di);
+extern double       djon_value_get_num(    djon_state *ds, int di);
+extern int          djon_value_get_typ(    djon_state *ds, int di);
+extern int          djon_value_get_nxt(    djon_state *ds, int di);
+extern int          djon_value_get_prv(    djon_state *ds, int di);
+extern int          djon_value_get_first(  djon_state *ds, int di);
+extern int          djon_value_get_parent( djon_state *ds, int di);
+extern void         djon_value_set(        djon_state *ds, int, djon_enum typ, double num, int len, const char *str);
+
+
+// deal with comments round tripping in pure json using vca values
+extern int djon_value_to_vca(djon_state *ds,int idx);
+extern int djon_vca_to_value(djon_state *ds,int idx);
 
 #define DJON_IS_WHITESPACE(c) ( ((c)==' ') || ((c)=='\t') || ((c)=='\n') || ((c)=='\r')  )
 #define DJON_IS_STRUCTURE(c)  ( ((c)=='{') || ((c)=='}') || ((c)=='[') || ((c)==']') || ((c)==':') || ((c)=='=') || ((c)==',') )
@@ -224,6 +263,23 @@ extern void         djon_sort_object( djon_state *ds, int idx );
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// compare null terminated string s, to the cs buffer
+int djon_compare_string(const char *cs,int len,const char *s)
+{
+	const char *ce=cs+len;
+	const char *sp;
+	const char *cp;
+	char c;
+	for( cp=cs,sp=s ; *sp ; cp++,sp++ )
+	{
+		if(cp>=ce) { return 0; } // out of buffer but not out of string
+		c=*cp;
+		if( c!=*sp ) { return 0; } // no match
+	}
+	if(cp==ce) { return 1; } // both strings are of same length
+	return 0; // buffer is longer
+}
 
 // compare null terminated string s, to the start of the cs buffer
 // returns true if buffer begins with the s string.
@@ -574,7 +630,7 @@ void djon_int_to_hexstr( int num , int len , char * buf )
 }
 
 // write into buf, return length of string writen excluding null terminator
-// this should write a maximum of 26 including null terminator to the buffer
+// this should write a maximum of 27 including null terminator to the buffer
 // so please supply at least a 32 char buffer to write into.
 int djon_double_to_str_internal( double _num , char * buf , int first_call)
 {
@@ -582,8 +638,8 @@ int djon_double_to_str_internal( double _num , char * buf , int first_call)
 #define DJON_DIGIT_PRECISION 15
 // amount of zeros to include before/after decimal point before we switch to exponents
 #define DJON_DIGIT_ZEROS 9
-// these two numbers with '-' at the start and a '\0' at the end is the worst case
-#define DJON_DIGIT_LEN 26
+// these two numbers with '-' at the start including a decimal '.' and a '\0' at the end is the worst case
+#define DJON_DIGIT_LEN 27
 
 	char *cp=buf;
 	double num=_num;
@@ -858,7 +914,7 @@ error:
 	return NAN;
 }
 
-double djon_str_to_number(char *cp,char **endptr)
+double djon_str_to_number(djon_state *ds, char *cp,char **endptr)
 {
 	if	(
 			( (cp[0]=='0') && ( (cp[1]=='x') || (cp[1]=='X') ) )
@@ -866,6 +922,11 @@ double djon_str_to_number(char *cp,char **endptr)
 			( ( (cp[0]=='+') || (cp[0]=='-') ) && (cp[1]=='0') && ( (cp[2]=='x') || (cp[2]=='X') ) )
 		)
 	{
+		if(ds->strict)
+		{
+			djon_set_error(ds,"0x numbers not allowed in strict mode");
+			return 0;
+		}
 		return djon_str_to_hex(cp,endptr);
 	}
 	else
@@ -960,9 +1021,11 @@ djon_state * djon_setup()
 
 	ds->strict=0;
 	ds->compact=0;
-	ds->comment=0;
+	ds->small=128;
 
 	ds->values_len=1; // first value is used as a null so start at 1
+	ds->values_reset=0; // reset search
+	ds->values_inc=0; // reset search
 	ds->values_siz=(DJON_VALUE_CHUNK_SIZE);
 	ds->values=(djon_value *)DJON_MEM_MALLOC(ds, ds->values_siz * sizeof(djon_value) );
 	if(!ds->values) { djon_clean(ds); return 0; }
@@ -982,18 +1045,599 @@ void *memctx=ds->memctx;
 }
 
 // get a index from pointer
-int djon_idx(djon_state *ds,djon_value *val)
+int djon_idx(djon_state *ds,djon_value *dv)
 {
-	if(!val){return 0;}
-	return val - ds->values;
+	if(!dv){return 0;}
+	return dv - ds->values;
 }
 
-// get a value by index
+// get a value by index and check if index is valid
+// returns 0 for invalid index
 djon_value * djon_get(djon_state *ds,int idx)
 {
 	if( idx <= 0 )              { return 0; }
 	if( idx >= ds->values_siz ) { return 0; }
 	return ds->values + idx ;
+}
+
+
+void djon_value_set(djon_state *ds, int di, djon_enum typ, double num, int len, const char *str)
+{
+	djon_value_dechild(ds,di,0); // in case this was an object or array
+	djon_value *dv=djon_get(ds,di);
+	if( (len<=0) && str ) // auto length
+	{
+		len=0;
+		for( const char *cp=str; *cp ; cp++ ){ len++; }
+	}
+	if(!dv) { return; } dv->typ=typ; dv->num=num; dv->len=len; dv->str=(char*)str;
+}
+
+// copy string into dest array which has a sizeof siz
+// return length of string now in dest, assume clipped if this is siz-1
+int djon_value_copy_str(djon_state *ds,  int di , char *dest , int siz )
+{
+	djon_value *dv=djon_get(ds,di);
+	if(!dv) { return -1; }
+	int len=dv->len;
+	if(len>(siz-1)) { len=siz-1; } // overflow
+	for( char *ca=dest, *cb=(dest+len), *cc=dv->str ; ca<cb ; ca++,cc++ ) { *ca=*cc; } // copy
+	dest[len]=0; // terminate
+	return len;
+}
+
+const char * djon_value_get_str(djon_state *ds,  int di)
+{
+	djon_value *dv=djon_get(ds,di);
+	if(!dv) { return ""; } return dv->str;
+}
+int djon_value_get_len(djon_state *ds,  int di)
+{
+	djon_value *dv=djon_get(ds,di);
+	if(!dv) { return 0; } return dv->len;
+}
+double djon_value_get_num(djon_state *ds,  int di)
+{
+	djon_value *dv=djon_get(ds,di);
+	if(!dv) { return 0.0; } return dv->num;
+}
+int djon_value_get_typ(djon_state *ds,  int di)
+{
+	djon_value *dv=djon_get(ds,di);
+	if(!dv) { return 0; } return dv->typ;
+}
+int djon_value_get_nxt(djon_state *ds,  int di)
+{
+	djon_value *dv=djon_get(ds,di);
+	if(!dv) { return 0; } return dv->nxt;
+}
+int djon_value_get_prv(djon_state *ds,  int di)
+{
+	djon_value *dv=djon_get(ds,di);
+	if(!dv) { return 0; } return dv->prv;
+}
+int djon_value_get_first(djon_state *ds,  int di)
+{
+	djon_value *dv=djon_get(ds,di);
+	if(!dv) { return 0; } return dv->lst;
+}
+int djon_value_get_parent(djon_state *ds,  int di)
+{
+	djon_value *dv=djon_get(ds,di);
+	if(!dv) { return 0; } return dv->par;
+}
+
+void djon_path_push_string(djon_state *ds, char *str, int len)
+{
+	int i;
+	
+	if( (ds->path_len+len) > (DJON_MAX_PATH-1) )
+	{ return; }
+	
+	for(i=0;i<len;i++)
+	{
+		ds->buf[ ((DJON_MAX_PATH-1)-ds->path_len)+i-len ] = str[i];
+	}
+	ds->path_len+=len;
+}
+
+void djon_path_push_escaped_string(djon_state *ds, char *str, int len)
+{
+	char buf[DJON_MAX_PATH]; // copy/escape into this buffer
+		
+	char c;
+	int cr;
+	int cw;
+	
+	int need_to_escape=0;
+	for( cr=0 , cw=0 ; cr<len ; cr++ , cw++ ) // try and copy string without escaping
+	{
+		c = str[cr] ;
+		if( (c=='"') || (c=='\'') || (c=='.') || (c=='[') || (c==']') ) // need to be inside "
+		{
+			need_to_escape=1;
+			break; // give up
+		}
+		buf[cw] = c ;
+		if( cw > DJON_MAX_PATH-1 )	{ return; }
+	}
+	if(need_to_escape) // copy again but escape it this time
+	{
+		cw=0;
+		buf[cw++] = '"' ;
+		if( cw > DJON_MAX_PATH-1 )	{ return; }
+		
+		for( cr=0 ; cr<len ; cr++ ) // copy string escaping it
+		{
+			c = str[cr] ;
+			if( (c=='"') || (c=='\\') ) // must escape
+			{
+				buf[cw++] = '\\' ;
+				if( cw > DJON_MAX_PATH-1 )	{ return; }
+			}
+			buf[cw++] = c ;
+			if( cw > DJON_MAX_PATH-1 )	{ return; }
+		}
+
+		buf[cw++] = '"' ;
+		if( cw > DJON_MAX_PATH-1 )	{ return; }
+	}
+	djon_path_push_string(ds,buf,cw);
+}
+
+// get a path from a value
+// pointer returned will be ds->buf so you do not have to free it
+// but you do have to dupe its data if you want to keep it around.
+// It should be considered invalid after any call to a djon function.
+// we may set an error so be sure to check ds->error_string if we return a 0
+const char * djon_value_to_path(djon_state *ds, int base_idx , int idx)
+{
+	djon_value *sub_val;
+	djon_value *val;
+	int val_idx;
+	
+	char num_buf[32];
+	int num_len;
+	
+	char buf[DJON_MAX_PATH];
+
+	ds->path_len=0; // start path
+	ds->buf[(DJON_MAX_PATH-1)]=0; // null
+
+	val_idx=idx;
+	val=djon_get(ds,val_idx);
+	if(!val) { return 0; }
+	while( val && (val_idx!=base_idx) )
+	{
+		if( ! val->par ) { break; } // reached the top
+		sub_val=val;
+		val_idx=val->par;
+		val=djon_get(ds,val_idx);
+		if(!val) { return 0; }
+		if((val->typ&DJON_TYPEMASK)==DJON_OBJECT)
+		{
+			djon_path_push_escaped_string(ds,sub_val->str,sub_val->len);
+			if(ds->error_string){return 0;}
+
+			if( val->par && (val->par!=base_idx) ) // need another seperator
+			{
+				djon_path_push_string(ds,".",1); // seperator
+				if(ds->error_string){return 0;}
+			}
+		}
+		else
+		if((val->typ&DJON_TYPEMASK)==DJON_ARRAY)
+		{
+			num_len = djon_double_to_str_internal( ((double)(sub_val->idx)) , num_buf , 1 );
+
+			djon_path_push_string(ds,num_buf,num_len);
+			if(ds->error_string){return 0;}
+
+			if( val->par && (val->par!=base_idx) ) // need another seperator
+			{
+				djon_path_push_string(ds,".",1);
+				if(ds->error_string){return 0;}
+			}
+		}
+
+	}
+	
+	return ds->buf+((DJON_MAX_PATH-1)-ds->path_len);
+}
+
+// get array(base_idx)[index] as a given index , 0 is the first etc..
+int djon_value_by_index(djon_state *ds, int base_idx , int index)
+{
+	if((djon_value_get_typ(ds,base_idx)&DJON_TYPEMASK)!=DJON_ARRAY)	{ return 0; }
+	for( int i=0 , ai=djon_value_get_first(ds,base_idx) ; ai ; i++ , ai=djon_value_get_nxt(ds,ai) )
+	{
+		if( i==index ) { return ai; } // found it
+	}
+	return 0;
+}
+
+// next idx may be a child or sibling, used to iterate of a recursive set
+int djon_value_all(djon_state *ds, int base_idx, int di )
+{
+	if(di==0){ return 0; } // sanity
+
+	int fi=djon_value_get_first(ds,di); // children
+	if(fi) { return fi; }
+
+	int ni=djon_value_get_nxt(ds,di); // siblings
+	if(ni) { return ni; }
+	
+	while(di)
+	{
+		if( di == base_idx ) { return 0; } // do not recurse upwards past base_idx
+		int pi=djon_value_get_parent(ds,di);
+		if(!pi) { return 0; }
+		di=pi; // parent
+		int ni=djon_value_get_nxt(ds,di); // return next sibling only
+		if(ni) { return ni; }
+	}
+
+	return 0;
+}
+
+// get a value index by path, path must be less than DJON_MAX_PATH including its null.
+// path may be "part.part[part]" and each part may be wrapped in " or ' with /escapes 
+// the empty string "" gets you the base value and "." gets you  base[""][""] value
+// if lastpart is set then we return the idx for the part before last and
+// write a char * into lastpart which will be the last part of the path string
+int djon_value_by_path(djon_state *ds, int base_idx , const char *path, const char **lastkey)
+{
+	if(!lastkey) // cant shortcut a lastkey request
+	{
+		// shortcut so a null path or "" path returns base_idx
+		if(!path){return base_idx;}
+		if(!path[0]){return base_idx;}
+	}
+
+	djon_value *val;
+	djon_value *key;
+	int val_idx=0;
+	int key_idx=0;
+	int idx=0;
+	int i=0;
+
+	char buf[DJON_MAX_PATH]; // need buf to escape strings
+	int buf_len=0;
+	
+	int brackets=0;
+	char mode='.';
+	int fetch=0;
+	int len;
+	char c;
+	const char *cp;
+	const char *oldcp;
+	for(cp=path,len=0;*cp;cp++){len++;} // find length
+	if( len>(DJON_MAX_PATH-1) ) { return 0; } // path too big
+
+	val_idx=base_idx;
+	val=djon_get(ds,val_idx);
+	oldcp=path;
+	for( cp=path; cp<=(path+len); )
+	{
+		c=*cp++; // probably one at a time, but sometimes two as we deal with escapes
+		switch(mode)
+		{
+			case '"': // part in quotes
+			case '\'': // part in quote
+				if(c==mode) { mode='.'; } // end with mode quote
+				else
+				if(c=='\\') { buf[buf_len++]=*cp++; }  // escape, next char is raw (maybe 0 term)
+				else
+				{ buf[buf_len++]=c; } // this char
+			break;
+
+			case '.': // raw part?
+				if( c==']' ) // closing brackets?
+				{
+					if( brackets!=0 ) // if we are looking for them
+					{
+						brackets=0;
+						fetch=1;
+					}
+					else
+					{
+						return 0;
+					}
+				}
+				else
+				if(c=='"') { mode='"'; } // start quotes
+				else
+				if(c=='\'') { mode='\''; } // start quote
+				else
+				if( c=='[' ) // new part in brackets
+				{
+					brackets=1;
+					if(buf_len>0) // might be the end of a previous part
+					{
+						fetch=1; // do fetch
+					}
+				}
+				else
+				if( c=='.' || c==0 ) // part seperator
+				{
+					fetch=1; // do fetch
+				}
+				else // raw
+				{
+					buf[buf_len++]=c;
+				}
+			break;
+		}
+		
+		if(fetch && (brackets==0) )
+		{
+			buf[buf_len]=0; // null term
+			if(!val) // invalid value
+			{
+				return 0;
+			}
+
+			if(cp==(path+len+1)) // last part
+			{
+				if(lastkey)
+				{
+					*lastkey=oldcp;
+					return val_idx; // first part
+				}
+			}
+			oldcp=cp;
+
+			if((val->typ&DJON_TYPEMASK)==DJON_OBJECT)
+			{
+				key_idx=val->lst;
+				while(key_idx)
+				{
+					key=djon_get(ds,key_idx);
+					if( djon_compare_string( key->str , key->len , buf ) ) // found key
+					{
+						val_idx=key->lst;
+						val=djon_get(ds,val_idx);
+						break;
+					}
+					else
+					{
+						key_idx=key->nxt;
+					}
+				}
+				if(key_idx==0) // not found
+				{
+					return 0;
+				}
+			}
+			else
+			if((val->typ&DJON_TYPEMASK)==DJON_ARRAY)
+			{
+				i=(int)djon_str_to_number(ds,buf,0);
+
+				val_idx=val->lst;
+				while(val_idx)
+				{
+					val=djon_get(ds,val_idx);
+					if(val->idx==i)
+					{ break; } // found it
+					else
+					{ val_idx=val->nxt; }
+				}
+				if(val_idx==0) // not found
+				{
+					return 0;
+				}
+			}
+			else
+			{
+				return 0;
+			}
+
+			fetch=0;
+			buf_len=0;
+		}
+	}
+	if( brackets!=0 ) // if we are still looking
+	{
+		return 0;
+	}
+	return val_idx;
+}
+
+int djon_value_newkey( djon_state *ds, int base_idx, const char *path, const char *key)
+{
+	int oi=djon_value_by_path(ds,base_idx,path,0);
+	djon_value *ov=djon_get(ds,oi);
+	if(!ov){ return 0; }
+
+	if((ov->typ&DJON_TYPEMASK)!=DJON_OBJECT) // must be an object
+	{
+		return 0;
+	}
+	
+	// first see if we can find the key
+	int fi=djon_value_by_path(ds,oi,key,0);
+	if(fi) // replace this value
+	{
+		return fi;
+	}
+	
+	// add a new key and value to this object
+
+	int ki=djon_alloc(ds); // allocate key
+	if(!ki){return 0;}
+	int vi=djon_alloc(ds); // allocate value
+	if(!vi){djon_free(ds,ki);return 0;}
+	djon_value *vv=djon_get(ds,vi);
+	vv->par=ki;
+	djon_value *kv=djon_get(ds,ki);
+	kv->par=oi;
+	kv->typ=DJON_KEY;
+	kv->lst=vi;
+	kv->str=(char*)key;
+	kv->len=0;
+	for(const char *cp=key;*cp;cp++){kv->len++;} // length of key
+
+	ov=djon_get(ds,oi); // must refresh after allocation
+	if( !ov->lst )
+	{
+		ov->lst=ki;
+	}
+	else
+	{
+		int ci=0;
+		for( ci=ov->lst ; djon_get(ds,ci)->nxt ; ci=djon_get(ds,ci)->nxt  ){}
+		djon_value *cv=djon_get(ds,ci);
+		cv->nxt=ki;
+		djon_value *kv=djon_get(ds,ki);
+		kv->prv=ci;
+	}
+
+	return vi;
+}
+
+int djon_value_newindex( djon_state *ds, int base_idx, const char *path, int index)
+{
+	int oi=djon_value_by_path(ds,base_idx,path,0);
+	djon_value *ov=djon_get(ds,oi);
+	if(!ov){ djon_free(ds,oi); return 0; }
+
+	if((ov->typ&DJON_TYPEMASK)!=DJON_ARRAY) // must be an array
+	{
+		return 0;
+	}
+	
+	// first see if we can find the key
+	int fi=djon_value_by_index(ds,oi,index);
+	if(fi) // replace this value
+	{
+		return fi;
+	}
+	
+	// add a new values to this array
+
+	ov=djon_get(ds,oi); // must refresh after allocation
+	int i=0;
+	int ai=ov->lst;
+	if(!ai) { ai=djon_alloc(ds); if(!ai){return 0;} }
+	djon_get(ds,ai)->idx=i;
+	djon_get(ds,ai)->par=oi;
+	djon_get(ds,oi)->lst=ai; // first
+	for( int ni=0,ci=0 ; ( (i<=index) || (index==-1) ) ; i++ , ai=ni )
+	{
+		int li=ai;
+		if(i==index) // done
+		{
+			return ai; // return the array element we allocated
+		}
+		ni=djon_value_get_nxt(ds,ai);
+		if(!ni) { ni=djon_alloc(ds); if(!ni){return 0;} ci=ni; }
+		djon_get(ds,ni)->prv=ai;
+		djon_get(ds,ai)->nxt=ni; // next
+		djon_get(ds,ai)->idx=i;
+		djon_get(ds,ai)->par=oi;
+		if( (index==-1) && ci ) // return first index we allocate ( added to end of array )
+		{
+			return ai;
+		}
+	}
+	return 0;
+}
+
+
+// delete all children and their comments of this item ( but not comments on *this* item )
+// this prepares a value for its type to be safely changed, eg to a string from an object
+void djon_value_dechild(   djon_state *ds, int base_idx, const char *path)
+{
+	int vi=djon_value_by_path(ds,base_idx,path,0);
+	djon_value *vv=djon_get(ds,vi);
+	if(!vv){return;}
+
+	if(	((vv->typ&DJON_TYPEMASK)==DJON_ARRAY)   ||
+		((vv->typ&DJON_TYPEMASK)==DJON_OBJECT)  ||
+		((vv->typ&DJON_TYPEMASK)==DJON_KEY)     ) // possible value in lst
+	{
+		for(  int ci=vv->lst , cv_nxt  ;  ci  ;  ci=cv_nxt  )
+		{
+			djon_value *cv=djon_get(ds,ci);
+			cv_nxt=cv->nxt; // get next vefore we delete
+			djon_value_delete(ds,ci,0);
+		}
+		vv->lst=0;
+	}
+	return;
+}
+// delete this item and all children and all comments
+void djon_value_delete(   djon_state *ds, int base_idx, const char *path)
+{
+	// remove children recursivly
+	djon_value_dechild(ds,base_idx,path);
+
+	int vi=djon_value_by_path(ds,base_idx,path,0);
+	djon_value *vv=djon_get(ds,vi);
+	if(!vv){return;}
+
+	// delete comments
+	for(  int ci=vv->com , cv_com  ;  ci  ;  ci=cv_com  )
+	{
+		djon_value *cv=djon_get(ds,ci);
+		cv_com=cv->com; // get next before we free
+		djon_free(ds,ci);
+	}
+	vv->com=0;
+
+	djon_free(ds,vi);
+	return;
+}
+
+// guess the output size of outputting data so we can use compact format for small
+// arrays and objects, small is your character count idea of small, bucket 
+// must start at 0 and is returned after adding the size
+int djon_value_is_small(djon_state *ds,int idx,int small,int bucket)
+{
+	if(bucket>small){return bucket;}
+
+	int vi=idx;
+	djon_value *vv=djon_get(ds,vi);
+	if(!vv){return bucket;}
+
+	if(	vv->com && (bucket>0) ) { return bucket+small; } // give up on any sub comments
+
+	if(	vv->lst )
+	{
+		bucket+=2; // add minimum array/string size
+		if((vv->typ&DJON_TYPEMASK)==DJON_STRING) // its a key
+		{
+			bucket+=vv->len;
+		}
+		if(bucket>small){return bucket;}
+		for( int ci=vv->lst ; ci ; ci=djon_value_get_nxt(ds,ci) )
+		{
+			bucket=djon_value_is_small(ds,ci,small,bucket);
+			if(bucket>small){return bucket;}
+		}
+	}
+	else
+	if((vv->typ&DJON_TYPEMASK)==DJON_STRING)
+	{
+		bucket+=2+vv->len;
+	}
+	else
+	if((vv->typ&DJON_TYPEMASK)==DJON_NUMBER)
+	{
+		bucket+=10; // average number size dont bother with precision
+	}
+	else
+	if((vv->typ&DJON_TYPEMASK)==DJON_BOOL)
+	{
+		bucket+=vv->num?5:6;
+	}
+	else
+	if((vv->typ&DJON_TYPEMASK)==DJON_NULL)
+	{
+		bucket+=4;
+	}
+	return bucket;
 }
 
 // unallocate unused values at the end of a parse
@@ -1005,30 +1649,64 @@ void djon_shrink(djon_state *ds)
 	ds->values_siz=ds->values_len;
 }
 
+// mark this value as free, it may be reused next time we allocate one
+void djon_free(djon_state *ds,int idx)
+{
+	if(idx<ds->values_reset) { ds->values_reset=idx; } // reset reset
+	djon_value * v=djon_get(ds,idx);
+	if( v )
+	{
+		v->typ=DJON_FREE; // flag as free
+	}
+}
+
 // allocate a new value and return its index, 0 on error
 // note that everytime we call this function all djon_value ptrs are invalidated.
 int djon_alloc(djon_state *ds)
 {
-	djon_value * v;
-	if( ds->values_len+1 >= ds->values_siz ) // check for space
+	djon_value * v=0;
+	for(int i=0;i<16;i++) // first do a quick search for previously freed values
 	{
-		v=(djon_value *)DJON_MEM_REALLOC(ds, (void*)ds->values , ds->values_siz * sizeof(djon_value) , (ds->values_siz+(DJON_VALUE_CHUNK_SIZE)) * sizeof(djon_value) );
-		if(!v) { djon_set_error(ds,"out of memory"); return 0; }
-		ds->values_siz=ds->values_siz+(DJON_VALUE_CHUNK_SIZE);
-		ds->values=v; // might change pointer
+		if(ds->values_inc==ds->values_reset) { ds->values_reset++; } // auto advance reset
+		ds->values_inc++; // simple wrapping search pointer
+		if( ds->values_inc >= ds->values_len ) // reset and give up
+		{
+			ds->values_inc=ds->values_reset;
+			v=0;
+			break;
+		}
+		else
+		{
+			v=djon_get(ds,ds->values_inc);
+			if(v->typ==DJON_FREE) { break; } // found one
+			v=0;
+		}
 	}
-	v=djon_get(ds,ds->values_len);
-	v->nxt=0;
-	v->prv=0;
+	if(!v) // need another one, last one didnt do me no good
+	{
+		if( ds->values_len+1 >= ds->values_siz ) // check for space
+		{
+			v=(djon_value *)DJON_MEM_REALLOC(ds, (void*)ds->values , ds->values_siz * sizeof(djon_value) , (ds->values_siz+(DJON_VALUE_CHUNK_SIZE)) * sizeof(djon_value) );
+			if(!v) { djon_set_error(ds,"out of memory"); return 0; }
+			ds->values_siz=ds->values_siz+(DJON_VALUE_CHUNK_SIZE);
+			ds->values=v; // might change pointer
+		}
+		v=djon_get(ds,ds->values_len++);
+	}
+	
+	// clear value data
+	v->typ=DJON_NULL;
 	v->str=0;
 	v->len=0;
-	v->typ=DJON_NULL;
 	v->num=0.0;
-	v->key=0;
-	v->val=0;
+	v->nxt=0;
+	v->prv=0;
 	v->com=0;
+	v->lst=0;
+	v->par=0;
+	v->idx=0;
 
-	return ds->values_len++;
+	return djon_idx(ds,v);
 }
 
 // apply current cached comment chain to this value
@@ -1049,17 +1727,6 @@ void djon_apply_comments(djon_state *ds, int idx)
 			ds->parse_com_last=0;
 		}
 	}
-}
-
-// we can only free the top most allocated idx, return 0 if not freed
-int djon_free(djon_state *ds,int idx)
-{
-	if( idx == (ds->values_len-1) )
-	{
-		ds->values_len--;
-		return idx;
-	}
-	return 0;
 }
 
 // write to fp
@@ -1205,7 +1872,7 @@ void djon_write_json_indent(djon_state *ds,int idx,int indent,char *coma)
 			{
 				djon_write_string(ds,"\n");
 			}
-			val_idx=v->val; val=djon_get(ds,val_idx);
+			val_idx=v->lst; val=djon_get(ds,val_idx);
 			while(val)
 			{
 				djon_write_json_indent(ds,val_idx,indent+1,0);
@@ -1229,7 +1896,7 @@ void djon_write_json_indent(djon_state *ds,int idx,int indent,char *coma)
 			{
 				djon_write_string(ds,"\n");
 			}
-			key_idx=v->key; key=djon_get(ds,key_idx);
+			key_idx=v->lst; key=djon_get(ds,key_idx);
 			while(key)
 			{
 				indent=djon_write_indent(ds,indent+1)-1;
@@ -1249,12 +1916,12 @@ void djon_write_json_indent(djon_state *ds,int idx,int indent,char *coma)
 				if(ds->compact)
 				{
 					djon_write_string(ds,"\":");
-					djon_write_json_indent(ds,key->val,-(indent+1),(char*)(key->nxt?",":""));
+					djon_write_json_indent(ds,key->lst,-(indent+1),(char*)(key->nxt?",":""));
 				}
 				else
 				{
 					djon_write_string(ds,"\" : ");
-					djon_write_json_indent(ds,key->val,-(indent+1),(char*)(key->nxt?" ,":""));
+					djon_write_json_indent(ds,key->lst,-(indent+1),(char*)(key->nxt?" ,":""));
 				}
 				key_idx=key->nxt; key=djon_get(ds,key_idx);
 			}
@@ -1363,7 +2030,15 @@ void djon_write_djon_indent(djon_state *ds,int idx,int indent)
 	{
 		if( ((v->typ&DJON_TYPEMASK)!=DJON_COMMENT) && (v->com) )
 		{
-			djon_write_djon_indent(ds,v->com,indent);
+			key=djon_get(ds,v->par);
+			if( key && ( ((key->typ&DJON_FLAGMASK)==DJON_KEY) || ((key->typ&DJON_TYPEMASK)==DJON_ARRAY) ) )
+			{
+				// already printed
+			}
+			else
+			{
+				djon_write_djon_indent(ds,v->com,indent);
+			}
 		}
 
 		if((v->typ&DJON_TYPEMASK)==DJON_COMMENT)
@@ -1378,22 +2053,15 @@ void djon_write_djon_indent(djon_state *ds,int idx,int indent)
 				for( com_idx=idx ; (com=djon_get(ds,com_idx)) ; com_idx=com->com )
 				{
 					indent=djon_write_indent(ds,indent);
-					djon_write_string(ds,"//");
-					if(!ds->compact)
-					{
-						djon_write_string(ds," ");
-					}
+					djon_write_string(ds,"// ");
 					for( cp=com->str ; cp<com->str+com->len ; cp++ )
 					{
 						c=*cp;
 						if(c=='\n')
 						{
 							djon_write_string(ds,"\n");
-							djon_write_string(ds,"//");
-							if(!ds->compact)
-							{
-								djon_write_string(ds," ");
-							}
+							indent=djon_write_indent(ds,indent);
+							djon_write_string(ds,"// ");
 						}
 						else
 						{
@@ -1408,9 +2076,11 @@ void djon_write_djon_indent(djon_state *ds,int idx,int indent)
 		if((v->typ&DJON_TYPEMASK)==DJON_ARRAY)
 		{
 			indent=djon_write_indent(ds,indent);
+			int ds_compact=ds->compact; // save
+			if(djon_value_is_small(ds,idx,ds->small,0)<=ds->small) { ds->compact=1; }
 			djon_write_string(ds,"[");
-			djon_write_string(ds,"\n");
-			val_idx=v->val; val=djon_get(ds,val_idx);
+			djon_write_string(ds,ds->compact?" ":"\n");
+			val_idx=v->lst; val=djon_get(ds,val_idx);
 			while(val)
 			{
 				if(val->com)
@@ -1422,21 +2092,29 @@ void djon_write_djon_indent(djon_state *ds,int idx,int indent)
 			}
 			indent=djon_write_indent(ds,indent);
 			djon_write_string(ds,"]");
-			djon_write_string(ds,"\n");
+			ds->compact=ds_compact; // unsave
+			djon_write_string(ds,ds->compact?" ":"\n");
 		}
 		else
 		if((v->typ&DJON_TYPEMASK)==DJON_OBJECT)
 		{
-			djon_sort_object(ds,idx); // sort
 			indent=djon_write_indent(ds,indent);
+			int ds_compact=ds->compact; // save
+			if(djon_value_is_small(ds,idx,ds->small,0)<=ds->small) { ds->compact=1; }
+			djon_sort_object(ds,idx); // sort
 			djon_write_string(ds,"{");
-			djon_write_string(ds,"\n");
-			key_idx=v->key; key=djon_get(ds,key_idx);
+			djon_write_string(ds,ds->compact?" ":"\n");
+			key_idx=v->lst; key=djon_get(ds,key_idx);
 			while(key)
 			{
+				val=djon_get(ds,key->lst);
 				if(key->com)
 				{
 					djon_write_djon_indent(ds,key->com,indent+1);
+				}
+				if(val->com)
+				{
+					djon_write_djon_indent(ds,val->com,indent+1);
 				}
 				indent=djon_write_indent(ds,indent+1)-1;
 				if( djon_is_naked_key(key->str,key->len) )
@@ -1471,18 +2149,19 @@ void djon_write_djon_indent(djon_state *ds,int idx,int indent)
 						djon_write_string(ds," = ");
 					}
 				}
-				djon_write_djon_indent(ds,key->val,-(indent+1));
+				djon_write_djon_indent(ds,key->lst,-(indent+1));
 				key_idx=key->nxt; key=djon_get(ds,key_idx);
 			}
 			indent=djon_write_indent(ds,indent);
 			djon_write_string(ds,"}");
-			djon_write_string(ds,"\n");
+			ds->compact=ds_compact; // unsave
+			djon_write_string(ds,ds->compact?" ":"\n");
 		}
 		else
 		if((v->typ&DJON_TYPEMASK)==DJON_STRING)
 		{
-			// no naked strings in strict djon
-			if( (!ds->strict) && djon_is_naked_string(v->str,v->len) )
+			// no naked strings in compact djon
+			if( (!ds->compact) && djon_is_naked_string(v->str,v->len) )
 			{
 				indent=djon_write_indent(ds,indent);
 				djon_write_it(ds,v->str,v->len);
@@ -1502,7 +2181,7 @@ void djon_write_djon_indent(djon_state *ds,int idx,int indent)
 				}
 				djon_write_it(ds,v->str,v->len);
 				djon_write_string(ds,qs);
-				djon_write_string(ds,"\n");
+				djon_write_string(ds,ds->compact?" ":"\n");
 			}
 		}
 		else
@@ -1511,27 +2190,27 @@ void djon_write_djon_indent(djon_state *ds,int idx,int indent)
 			indent=djon_write_indent(ds,indent);
 			len=djon_double_to_str(v->num,ds->buf);
 			djon_write_it(ds,ds->buf,len);
-			djon_write_string(ds,"\n");
+			djon_write_string(ds,ds->compact?" ":"\n");
 		}
 		else
 		if((v->typ&DJON_TYPEMASK)==DJON_BOOL)
 		{
 			indent=djon_write_indent(ds,indent);
 			djon_write_string(ds,(char*)(v->num?"TRUE":"FALSE"));
-			djon_write_string(ds,"\n");
+			djon_write_string(ds,ds->compact?" ":"\n");
 		}
 		else
 		if((v->typ&DJON_TYPEMASK)==DJON_NULL)
 		{
 			indent=djon_write_indent(ds,indent);
 			djon_write_string(ds,"NULL");
-			djon_write_string(ds,"\n");
+			djon_write_string(ds,ds->compact?" ":"\n");
 		}
 		else
 		{
 			indent=djon_write_indent(ds,indent);
 			djon_write_string(ds,"NULL");
-			djon_write_string(ds,"\n");
+			djon_write_string(ds,ds->compact?" ":"\n");
 		}
 	}
 }
@@ -1540,6 +2219,201 @@ void djon_write_djon(djon_state *ds,int idx)
 {
 	djon_set_error(ds,0);// clear error state
 	djon_write_djon_indent(ds,idx,0);
+}
+
+int djon_dupe_value(djon_state *ds,int idx)
+{
+	int val_idx=djon_alloc(ds);
+	djon_value *old=djon_get(ds,idx); if(!old) { return 0; }
+	djon_value *val=djon_get(ds,val_idx); if(!val) { return 0; }
+	val->typ=old->typ;
+	val->str=old->str;
+	val->len=old->len;
+	val->num=old->num;
+	val->idx=old->idx;
+	return val_idx;
+}
+
+// recursivly convert a value into a vca
+// a vca is an array wrapper where the first value is the
+// value and the rest are string comments for this value
+// returns new value idx to replace old value with
+int djon_value_to_vca(djon_state *ds,int idx)
+{
+	int lst_idx;
+	int new_idx;
+	int old_idx;
+	djon_value *old;
+	int key_idx;
+	djon_value *key;
+	int val_idx;
+	djon_value *val;
+	int arr_idx;
+	djon_value *arr;
+	int com_idx;
+	djon_value *com;
+	int i;
+	
+	old=djon_get(ds,idx);
+	if(!old) { return 0; }
+	djon_value *par=djon_get(ds,old->par); // parent maybe key and might have comments
+
+	arr_idx=0;
+	if( (old->com) || ((old->typ&DJON_TYPEMASK)==DJON_ARRAY) || (par&&((par->typ&DJON_FLAGMASK)==DJON_KEY)&&par->com) ) // turn value into array with comments
+	{
+		com_idx=old->com ? old->com : ( par ? par->com : 0 );
+		arr_idx=djon_alloc(ds); // this invalidates pointers
+		if(!arr_idx) { return 0; }
+		val_idx=djon_dupe_value(ds,idx); // this invalidates pointers
+		if(!val_idx) { return 0; }
+
+		// first item
+		arr=djon_get(ds,arr_idx);
+		arr->typ=DJON_ARRAY;
+		arr->lst=val_idx;
+		
+		val=djon_get(ds,val_idx);
+		val->par=arr_idx;
+		val->idx=0;
+		lst_idx=val_idx;
+		
+		// loop comments
+		for( i=1 ; com_idx ; i++ , com_idx=djon_get(ds,com_idx)->com )
+		{
+			new_idx=djon_dupe_value(ds,com_idx); // this invalidates pointers
+			if(!new_idx) { return 0; }
+			val=djon_get(ds,new_idx);
+			val->typ=DJON_STRING; // convert dupe from comment to string
+			val->par=arr_idx;
+			val->prv=lst_idx;
+			val->idx=i;
+			djon_get(ds,lst_idx)->nxt=new_idx;
+			lst_idx=new_idx;
+		}
+	}
+	else // just dupe
+	{
+		val_idx=djon_dupe_value(ds,idx); // this invalidates pointers
+		if(!val_idx) { return 0; }
+	}
+
+	old=djon_get(ds,idx); // check for recursing
+	if((old->typ&DJON_TYPEMASK)==DJON_ARRAY)
+	{
+		for( lst_idx=0 , i=0 , old_idx=old->lst ; old_idx ; i++ , old_idx=djon_get(ds,old_idx)->nxt )
+		{
+			new_idx=djon_value_to_vca(ds, old_idx);
+			if(!new_idx) { return 0; }
+			djon_get(ds,new_idx)->prv=lst_idx;
+			djon_get(ds,new_idx)->idx=i;
+			djon_get(ds,new_idx)->par=val_idx;
+			if(!lst_idx) { djon_get(ds,val_idx)->lst=new_idx; } // first
+			else         { djon_get(ds,lst_idx)->nxt=new_idx; }
+			lst_idx=new_idx;
+		}
+	}
+	else
+	if((old->typ&DJON_TYPEMASK)==DJON_OBJECT)
+	{
+		for( lst_idx=0 , old_idx=old->lst ; old_idx ; old_idx=djon_get(ds,old_idx)->nxt )
+		{
+			key_idx=djon_dupe_value(ds, old_idx);
+			if(!key_idx) { return 0; }
+			djon_get(ds,key_idx)->par=val_idx;
+			if(!lst_idx) { djon_get(ds,val_idx)->lst=key_idx; } // first
+			else         { djon_get(ds,lst_idx)->nxt=key_idx; }
+			new_idx=djon_value_to_vca(ds, djon_get(ds,old_idx)->lst );
+			if(!new_idx) { return 0; }
+			djon_get(ds,key_idx)->lst=new_idx;
+			djon_get(ds,key_idx)->prv=lst_idx;
+			djon_get(ds,new_idx)->par=key_idx;
+			lst_idx=key_idx;
+		}
+	}
+	
+	return arr_idx ? arr_idx : val_idx ;
+}
+
+// recursivly move the comments back into the ->com from a vca
+// returns new value idx to replace old value with
+int djon_vca_to_value(djon_state *ds,int idx)
+{
+	int lst_idx;
+	int new_idx;
+	
+	int old_idx;
+	djon_value *old;
+	int key_idx;
+	djon_value *key;
+	int newkey_idx;
+	djon_value *newkey;
+	int newval_idx;
+	djon_value *newval;
+	int newcom_idx;
+	djon_value *newcom;
+	int com_idx;
+	djon_value *com;
+	int i;
+	
+	old=djon_get(ds,idx);
+	if(!old) { return 0; }
+
+	if((old->typ&DJON_TYPEMASK)==DJON_ARRAY) // need to map back into comments
+	{
+		old_idx=old->lst;
+		new_idx=djon_dupe_value(ds,old_idx); // this invalidates pointers
+		if(!new_idx) { return 0; }
+		
+		for( lst_idx=new_idx , com_idx=djon_get(ds,old_idx)->nxt ; com_idx ; com_idx=djon_get(ds,com_idx)->nxt )
+		{
+			newcom_idx=djon_dupe_value(ds,com_idx); // this invalidates pointers
+			if(!newcom_idx) { return 0; }
+			newcom=djon_get(ds,newcom_idx);
+			newcom->typ=DJON_COMMENT;
+			djon_get(ds,lst_idx)->com=newcom_idx;
+			lst_idx=newcom_idx;
+		}
+	}
+	else // just dupe
+	{
+		old_idx=idx;
+		new_idx=djon_dupe_value(ds,old_idx); // this invalidates pointers
+		if(!new_idx) { return 0; }
+	}
+	old=djon_get(ds,old_idx); // check for recursing
+	if((old->typ&DJON_TYPEMASK)==DJON_ARRAY)
+	{
+		for( lst_idx=0 , i=0 , key_idx=old->lst ; key_idx ; i++ , key_idx=djon_get(ds,key_idx)->nxt )
+		{
+			newkey_idx=djon_vca_to_value(ds, key_idx);
+			if(!newkey_idx) { return 0; }
+			if(!lst_idx) { djon_get(ds,new_idx)->lst=newkey_idx; } // first
+			else         { djon_get(ds,lst_idx)->nxt=newkey_idx; }
+			djon_get(ds,newkey_idx)->prv=lst_idx;
+			djon_get(ds,newkey_idx)->idx=i;
+			djon_get(ds,newkey_idx)->par=new_idx;
+			lst_idx=newkey_idx;
+		}
+	}
+	else
+	if((old->typ&DJON_TYPEMASK)==DJON_OBJECT)
+	{
+		for( lst_idx=0 , i=0 , key_idx=old->lst ; key_idx ; i++ , key_idx=djon_get(ds,key_idx)->nxt )
+		{
+			newkey_idx=djon_dupe_value(ds, key_idx);
+			if(!newkey_idx) { return 0; }
+			if(!lst_idx) { djon_get(ds,new_idx)->lst=newkey_idx; } // first
+			else         { djon_get(ds,lst_idx)->nxt=newkey_idx; }
+			newval_idx=djon_vca_to_value(ds, djon_get(ds,key_idx)->lst );
+			if(!newval_idx) { return 0; }
+			djon_get(ds,newkey_idx)->par=new_idx;
+			djon_get(ds,newkey_idx)->lst=newval_idx;
+			djon_get(ds,newkey_idx)->prv=lst_idx;
+			djon_get(ds,newval_idx)->par=newkey_idx;
+			lst_idx=newkey_idx;
+		}
+	}
+	return new_idx;
 }
 
 // load a new file or possibly from stdin , pipes allowed
@@ -1557,7 +2431,7 @@ int djon_load_file(djon_state *ds,const char *fname)
     int size=0;
     int used=0;
 
-	ds->data=(char*)"";
+	ds->data=0;
 	ds->data_len=0;
 
 	// first alloc
@@ -1979,7 +2853,7 @@ int djon_parse_number(djon_state *ds)
 	char *cpe;
 
 //	double d=strtod(cps,&cpe);
-	double d=djon_str_to_number(cps,&cpe);
+	double d=djon_str_to_number(ds,cps,&cpe);
 	int len=cpe-cps;
 	if( len > 0 ) // valid number
 	{
@@ -2014,12 +2888,14 @@ int djon_parse_key(djon_state *ds)
 	c=ds->data[ ds->parse_idx ];
 	if( c=='\'' || c=='"' || c=='`') // reuse string parsing
 	{
+		if((ds->strict)&&(c!='"')){ djon_set_error(ds,"keys require double quotes in strict mode"); goto error; }
 		key_idx=djon_parse_string(ds,c);
 		key=djon_get(ds,key_idx);
 		if(!key){return 0;} // out of data
 		key->typ=DJON_KEY|DJON_STRING; // this is a key
 		return key_idx;
 	}
+	if(ds->strict){ djon_set_error(ds,"naked keys not allowed in strict mode"); goto error; }
 
 
 	key_idx=djon_parse_next(ds);
@@ -2125,15 +3001,15 @@ void djon_sort_object(djon_state *ds, int idx )
 {
 	djon_value *obj=djon_get(ds,idx);
 	if(!obj) { return; }
-	if(!obj->key) { return; }
+	if(!obj->lst) { return; }
 	
-	djon_value *s=djon_get(ds,obj->key);
+	djon_value *s=djon_get(ds,obj->lst);
 	djon_value *e;
 	for( e=s ; e && e->nxt ; e=djon_get(ds,e->nxt) ) {;}
 
 	djon_sort_part(ds, s, e );
 	while( s && s->prv ) { s = djon_get(ds,s->prv); } // find new start
-	obj->key=djon_idx(ds,s); // save new start
+	obj->lst=djon_idx(ds,s); // save new start
 }
 
 
@@ -2155,9 +3031,9 @@ void djon_clean_object(djon_state *ds, int idx )
 {
 	djon_value *obj=djon_get(ds,idx);
 	if(!obj) { return; }
-	if(!obj->key) { return; }
+	if(!obj->lst) { return; }
 	
-	djon_value *s=djon_get(ds,obj->key);
+	djon_value *s=djon_get(ds,obj->lst);
 	djon_value *e;
 	for( e=s ; e && e->nxt ; e=djon_get(ds,e->nxt) ) {;}
 
@@ -2178,7 +3054,7 @@ void djon_clean_object(djon_state *ds, int idx )
 	}
 	// end will be the same but start may have changed so
 	for( s=e ; s && s->prv ; s=djon_get(ds,s->prv) ) {;}
-	obj->key=djon_idx(ds,s);
+	obj->lst=djon_idx(ds,s);
 }
 
 int djon_parse_object(djon_state *ds)
@@ -2188,6 +3064,7 @@ int djon_parse_object(djon_state *ds)
 	if(!obj){return 0;}
 
 	djon_value *key;
+	djon_value *val;
 
 	ds->parse_idx++; // skip opener
 	obj->typ=DJON_OBJECT;
@@ -2201,7 +3078,7 @@ int djon_parse_object(djon_state *ds)
 		djon_skip_white(ds);
 		if( ds->data[ds->parse_idx]=='}' ) // found closer
 		{
-			djon_apply_comments(ds,key_idx?key_idx:obj_idx); // apply any final comments to the last key or the object
+			djon_apply_comments(ds,val_idx?val_idx:obj_idx); // apply any final comments to the last key or the object
 			ds->parse_idx++;
 			djon_clean_object(ds,obj_idx); // remove duplicate keys
 			return obj_idx;
@@ -2209,26 +3086,31 @@ int djon_parse_object(djon_state *ds)
 
 		key_idx=djon_parse_key(ds);
 		if(!key_idx) { djon_set_error(ds,"missing }"); return 0; }
-		if( djon_skip_white_punct(ds,"=:") != 1 ) { djon_set_error(ds,"missing :"); return 0; } // required
-		djon_apply_comments(ds,key_idx); // apply any middle comments to the key
+		if( djon_skip_white_punct(ds,ds->strict ? ":" : "=:") != 1 ) { djon_set_error(ds,"missing :"); return 0; } // required
 		val_idx=djon_parse_value(ds); if(!val_idx){ djon_set_error(ds,"missing value"); return 0; }
+		djon_apply_comments(ds,val_idx); // apply any middle comments to the key
 
 		obj=djon_get(ds,obj_idx); // realloc safe
-		if( obj->key==0) // first
+		if( obj->lst==0) // first
 		{
-			obj->key=key_idx;
-			obj->val=val_idx;
+			obj->lst=key_idx;
+			val=djon_get(ds,val_idx);
+			val->par=key_idx;
 			key=djon_get(ds,key_idx);
-			key->val=val_idx; //  remember val for this key
+			key->par=obj_idx;
+			key->lst=val_idx; //  remember val for this key
 			lst_idx=key_idx;
 		}
 		else // chain
 		{
+			val=djon_get(ds,val_idx);
+			val->par=key_idx;
 			key=djon_get(ds,lst_idx); // last key
 			key->nxt=key_idx;
 			key=djon_get(ds,key_idx);
+			key->par=obj_idx;
 			key->prv=lst_idx;
-			key->val=val_idx; //  remember val for this key
+			key->lst=val_idx; //  remember val for this key
 			lst_idx=key_idx;
 		}
 
@@ -2267,6 +3149,7 @@ int djon_parse_array(djon_state *ds)
 	int lst_idx=0;
 	int val_idx=0;
 
+	int idx=0; // 0 based index into array
 	while(1)
 	{
 		djon_skip_white(ds);
@@ -2281,15 +3164,21 @@ int djon_parse_array(djon_state *ds)
 		if(!val_idx) { djon_set_error(ds,"missing ]"); return 0; } // no value, probably missed a ]
 
 		arr=djon_get(ds,arr_idx); // realloc safe
-		if( arr->val==0) // first
+		if( arr->lst==0) // first
 		{
-			arr->val=val_idx;
+			val=djon_get(ds,val_idx);
+			val->par=arr_idx;
+			val->idx=idx++;
+			arr->lst=val_idx;
 			lst_idx=val_idx;
 		}
 		else // chain
 		{
-			val=djon_get(ds,lst_idx);
-			val->nxt=val_idx;
+			val=djon_get(ds,val_idx);
+			val->par=arr_idx;
+			val->idx=idx++;
+			val->prv=lst_idx;
+			djon_get(ds,lst_idx)->nxt=val_idx;
 			lst_idx=val_idx;
 		}
 		if( 0 == djon_skip_white(ds) ) // check for whitespace after value
@@ -2324,7 +3213,7 @@ int djon_parse_value(djon_state *ds)
 	djon_skip_white(ds);
 
 // check for special strings lowercase/camel/upper only
-	if( djon_peek_string(ds,"true" ) || djon_peek_string(ds,"True" ) || djon_peek_string(ds,"TRUE" ) )
+	if( djon_peek_string(ds,"true" ) || ( (!ds->strict) && ( djon_peek_string(ds,"True" ) || djon_peek_string(ds,"TRUE" ) ) ) )
 	{
 		idx=djon_alloc(ds);
 		v=djon_get(ds,idx);
@@ -2335,7 +3224,7 @@ int djon_parse_value(djon_state *ds)
 		return idx;
 	}
 	else
-	if( djon_peek_string(ds,"false" ) || djon_peek_string(ds,"False" ) || djon_peek_string(ds,"FALSE" ) )
+	if( djon_peek_string(ds,"false" ) || ( (!ds->strict) && ( djon_peek_string(ds,"False" ) || djon_peek_string(ds,"FALSE" ) ) ) )
 	{
 		idx=djon_alloc(ds);
 		v=djon_get(ds,idx);
@@ -2346,7 +3235,7 @@ int djon_parse_value(djon_state *ds)
 		return idx;
 	}
 	else
-	if( djon_peek_string(ds,"null" ) || djon_peek_string(ds,"Null" ) || djon_peek_string(ds,"NULL" ) )
+	if( djon_peek_string(ds,"null" ) || ( (!ds->strict) && ( djon_peek_string(ds,"Null" ) || djon_peek_string(ds,"NULL" ) ) ) )
 	{
 		idx=djon_alloc(ds);
 		v=djon_get(ds,idx);
@@ -2395,14 +3284,14 @@ int djon_parse_value(djon_state *ds)
 			return djon_parse_string(ds,'\'');
 		break;
 		case '"' :
-			if(ds->strict)
-			{
-				djon_set_error(ds,"double quote string not allowed in strict mode");
-				return 0;
-			}
 			return djon_parse_string(ds,'"');
 		break;
 		case '`' :
+			if(ds->strict)
+			{
+				djon_set_error(ds,"back quote string not allowed in strict mode");
+				return 0;
+			}
 			return djon_parse_string(ds,'`');
 		break;
 		case '0' :
@@ -2418,6 +3307,11 @@ int djon_parse_value(djon_state *ds)
 		case '.' :
 		case '+' :
 		case '-' :
+			if( (ds->strict) && ( ( c=='+' ) || ( c=='.' ) ) )
+			{
+				djon_set_error(ds,"numbers may not begin with a . or + in strict mode");
+				return 0;
+			}
 			return djon_parse_number(ds);
 		break;
 	}

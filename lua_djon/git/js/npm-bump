@@ -1,0 +1,40 @@
+
+cd `dirname $0`
+
+#js node
+V=$(node -p "require('./package.json').version")
+V1=${V%%.*}
+V3=${V##*.}
+V2=${V%.*}
+V2=${V2#*.}
+VV2=$V2
+if (( $# == 1 )) ; then
+ echo bumping minor version, edit package.json to bump major version
+ printf -v VV2 '%(%y%m%d)T' -1
+else
+ echo bumping revision, run with any argument to bump minor version
+fi
+if (( VV2 == V2 )) ; then
+ V3=$((V3+1))
+else
+ V3=1
+ V2=$VV2
+fi
+V=$V1.$V2.$V3
+npm version $V
+
+#c
+sed -i "s/^#define DJON_VERSION .*/#define DJON_VERSION $V1.$V2/" ../c/djon.h
+
+#lua rocks
+rm ../rockspecs/djon-1*
+cp ../rockspecs/djon-HEAD-0.rockspec ../rockspecs/djon-$V1.$V2-$V3.rockspec
+sed -i "s/^version = .*/version = \"$V1.$V2-$V3\"/" ../rockspecs/djon-$V1.$V2-$V3.rockspec
+sed -i "s/^	tag = .*/	tag = \"v$V1.$V2.$V3\"/" ../rockspecs/djon-$V1.$V2-$V3.rockspec
+
+#git
+git add ..
+git commit -mv$V1.$V2.$V3
+git tag v$V1.$V2.$V3
+git push origin --tags
+

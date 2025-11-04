@@ -40,9 +40,9 @@ M.default_configs={}
 do
 	local default_config_filename="lua/swanky/edit/config.djon"
 	local default_config=assert(wzips.readfile(default_config_filename),"file not found: "..default_config_filename)
-	local t=djon.load(default_config,"comment")
-	for n,v in pairs(t[1]) do -- comment format so tables within tables
-		M.default_configs[n]=djon.save(v,"djon","comment") -- reformat keeping comments
+	local t=djon.load(default_config,"comments")
+	for n,v in pairs(t) do -- comment format so tables within tables
+		M.default_configs[n]=djon.save(v,"djon","comments") -- reformat keeping comments
 	end
 end
 
@@ -293,12 +293,47 @@ SELECT key,value FROM config ;
 
 	end
 
+	collect.save_config=function(name)
+
+		--  load comments
+		local row=collect.do_memo({
+			binds={
+				KEY=name
+			},
+			sql=[[
+
+SELECT key,value FROM config WHERE key=$KEY ;
+
+			]],
+		}).rows[1]
+
+		-- merge with current data
+		local com=djon.load(row.value,"comments")
+		com=djon.merge_comments(collect.config[name],com)
+		
+		local value=djon.save(com,"comments","djon")
+		-- save with comments
+		local r=collect.do_memo({
+			binds={
+				KEY=name,
+				VALUE=value,
+			},
+			sql=[[
+
+UPDATE config SET value=$VALUE WHERE key=$KEY ;
+
+			]],
+		})
+
+	end
+
+
 -- load the file from database first then disk and also cache this file in database
-	collect.load=function(it,path)
+	collect.load=function(it,path,reload)
 
 		it.meta=manifest_meta(path)
 
-		if it.meta.state=="manifest" then -- not a real meta yet so load from disk and update
+		if reload or it.meta.state=="manifest" then -- not a real meta yet so load from disk and update
 
 			local text=collect.mounts:read_file(path) or ""
 		
@@ -315,6 +350,8 @@ SELECT key,value FROM config ;
 
 	INSERT INTO file_data (id,ud,value)
 	VALUES ( $ID,$UD,$DATA )
+	ON CONFLICT DO UPDATE SET
+	id=$ID,	ud=$UD,	value=$DATA ;
 
 				]],
 			})

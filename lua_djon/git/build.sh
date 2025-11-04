@@ -3,8 +3,9 @@ cd `dirname $0`
 
 c/build.sh
 
-luarocks --lua-version 5.1 build --local
+lua/build.sh
 
 js/build.sh
-npm install --prefix js
+cd js
+npm install
 

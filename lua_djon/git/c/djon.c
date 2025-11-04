@@ -10,13 +10,14 @@
 
 int main(int argc, char *argv[])
 {
-//printf("START %d\n",argc);
 
 	FILE *fp=0;
+	int idx;
 	int checkopts=1;
 	int write_djon=0;
 	int compact=0;
 	int strict=0;
+	int comments=0;
 	char *fname1=0;
 	char *fname2=0;
 	int i;
@@ -46,14 +47,14 @@ int main(int argc, char *argv[])
 				compact=1;
 			}
 			else
-			if( 0==strcmp(cp,"--pretty") )
-			{
-				compact=0;
-			}
-			else
 			if( 0==strcmp(cp,"--strict") )
 			{
 				strict=1;
+			}
+			else
+			if( 0==strcmp(cp,"--comments") )
+			{
+				comments=1;
 			}
 			else
 			if( 0==strcmp(cp,"--help") )
@@ -63,17 +64,20 @@ djon input.filename output.filename\n\
 \n\
 	If no output.filename then write to stdout\n\
 	If no input.filename then read from stdin\n\
+	Input is always parsed as djon (which can be valid json)\n\
 \n\
 Possible options are:\n\
 \n\
-	--djon    : output djon format\n\
-	--json    : output json format\n\
-	--compact : output compact\n\
-	--pretty  : output pretty\n\
-	--strict  : input/output strict\n\
-	--        : stop parsing options\n\
+	--djon     : output djon format\n\
+	--json     : output json format (default)\n\
+	--compact  : compact output format\n\
+	--strict   : require input to be valid json ( bitch mode )\n\
+	--comments : comments array to djon or djon to comments array\n\
+	--         : stop parsing options\n\
 \n\
-We default to pretty output.\n\
+The comments flag implies that you are converting between a\n\
+json array format [value,comment,...] values and djon.\n\
+So it applies to input if writing djon and output if writing json.\n\
 \n\
 ");
 				return 0;
@@ -96,13 +100,12 @@ We default to pretty output.\n\
 			}
 		}
 	}
-	
 
 	djon_state *ds=djon_setup();
 
 	ds->strict=strict; // set strict mode from command line options
 	ds->compact=compact; // set compact output flat from command line options
-	
+		
 	if(fname1)
 	{
 		djon_load_file(ds,fname1); // filename
@@ -113,10 +116,12 @@ We default to pretty output.\n\
 	}
 	if( ds->error_string ){ goto error; }
 
-	
 	djon_parse(ds);
 	
-	djon_value *v=djon_get(ds,ds->parse_value);
+	if( write_djon && comments ) // input is json vca so convert it
+	{
+		ds->parse_value = djon_vca_to_value(ds, ds->parse_value );
+	}
 
 	if(fname2)
 	{
@@ -148,7 +153,12 @@ We default to pretty output.\n\
 		}
 		else
 		{
-			djon_write_json(ds,ds->parse_value);
+			idx = ds->parse_value ;
+			if( comments ) // output is json vca
+			{
+				idx = djon_value_to_vca(ds,idx);
+			}
+			djon_write_json(ds,idx);
 		}
 	}
 	
