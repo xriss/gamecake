@@ -599,11 +599,10 @@ local lay=
 				{id="file_saveas"},
 				{id="file_saveall"},
 				{id="menu_collection",menu_data={
-					{id="collection_name"},
-					{id="collection_purge_history"},
-					{id="collection_purge_all_history"},
-					{id="collection_open"},
-					{id="collection_close"},
+--					{id="collection_name"},
+					{id="collection_switch"},
+					{id="collection_purge_file"},
+					{id="collection_purge_all"},
 				}},
 				{id="menu_theme",text="Theme",menu_data={
 					{id="theme_dark_tiny"},

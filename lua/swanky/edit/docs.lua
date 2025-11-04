@@ -65,7 +65,9 @@ M.bake=function(oven,docs)
 	end
 	
 	docs.manifest=function(filename)
-
+		if filename:sub(1,2)~="//" then -- do nothing with special // paths
+			filename=wpath.resolve(filename) -- fix path ( eg use cd )
+		end
 		return docs.find(filename) or docs.create(filename)
 	end
 
@@ -217,9 +219,8 @@ M.bake=function(oven,docs)
 		end
 		it.filename=filename
 		it.txt.set_text("\n",filename)
-
-		gui.master.ids.treefiles.items:manifest_path( it.filename )
 		
+		collect.manifest_path(filename)
 		collect.load(it,filename)
 		it.txt.set_lexer()
 

@@ -73,35 +73,31 @@ M.meta.merge_dir=function(meta,dir)
 			return -- nothing to do
 		end
 	end
+	
+	if not meta.dir then meta.dir={} end
 
-	if not meta.dir then -- just set
-		meta.dir=dir
-	else
+	local map={}
+	for i,v in ipairs(dir) do
+		map[v.name]=v
+	end
 
-		local map={}
-		for i,v in ipairs(dir) do
-			map[v.name]=v
-		end
-
-		for i=#meta.dir,1,-1 do -- backwards so we can remove
-			local v=meta.dir[i]
-			local o=map[v.name]
-			if o then -- merge
-				map[v.name]=nil -- forget after merge 
-				for k,s in pairs(o) do
-					if not v[k] or type(s)~="table" then -- do not merge tables unless dest is empty
-						v[k]=s
-					end
+	for i=#meta.dir,1,-1 do -- backwards so we can remove
+		local v=meta.dir[i]
+		local o=map[v.name]
+		if o then -- merge
+			map[v.name]=nil -- forget after merge 
+			for k,s in pairs(o) do
+				if not v[k] or type(s)~="table" then -- do not merge tables unless dest is empty
+					v[k]=s
 				end
-			else -- delete
-				table.remove(meta.dir,i)
 			end
+		else -- delete
+			table.remove(meta.dir,i)
 		end
-		-- any items left in the map are new
-		for _,v in pairs(map) do -- add
-			meta.dir[#meta.dir+1]=v
-		end
-
+	end
+	-- any items left in the map are new
+	for _,v in pairs(map) do -- add
+		meta.dir[#meta.dir+1]=v
 	end
 
 	meta:sort_dir()
@@ -199,11 +195,47 @@ M.meta.fetch_dir=function(meta,path)
 	end
 end
 
-M.meta.manifest_path=function(meta,path)
-	local it,path=meta:find_prefix(path)
-	if it and it.manifest_path then
-		return it:manifest_path(path)
+M.meta.new_item=function(meta,name)
+	local path=meta.path..name
+	if meta.dir_auto then -- use auto items ?
+		for n,v in pairs(meta.dir_auto) do
+			if v.path==path then return v end
+		end
 	end
+	local isdir
+	if name:sub(-1)=="/" then isdir={} end -- use trailing slash as dir flag
+	local it=meta.setup({
+		path=path,
+		parent=meta,
+		dir=isdir,
+	})
+	return it
+end
+
+M.meta.manifest_path=function(meta,fullpath)
+
+	local path=""
+	if fullpath:sub(1,2)=="//" then path="/" end
+
+	fullpath=wpath.unslash(fullpath)
+	local pp=wpath.split(fullpath)
+--	if pp[#pp]=="" then pp[#pp]=nil end -- strip trailing slash
+
+	local last=meta
+	for i,v in ipairs(pp) do
+		if pp[i+1] then v=v.."/" end -- trailing slash except for last
+		path=path..v
+		local it=last:find_it({path=path})
+		if not it then -- need to create
+			it=last:new_item(v)
+			last.dir[#last.dir+1]=it
+		end
+		it.keep=true -- do not remove this one when collapsed
+		last=it
+	end
+
+	return last
+
 end
 
 M.meta.read_file=function(meta,path)
@@ -282,6 +314,9 @@ M.file.setup=function(file)
 				if attr.mode=="directory" then
 					file.expanded=false -- dirs start of collapsed
 					file.dir={}
+					if file.path:sub(-1)~="/" then -- force ending to slash if dir
+						file.path=file.path.."/"
+					end
 					file.name=file.name.."/"
 				else
 					file.size=attr.size
@@ -292,15 +327,18 @@ M.file.setup=function(file)
 	return file
 end
 
+M.file.new_item=function(file,name)
+	local it=file.setup({path=file.path..name,parent=file})
+	return it
+end
+
 M.file.fetch_dir=function(file,path)
 	path=wpath.resolve(path)
 	local dir={}
 	pcall( function()
 		for n in lfs.dir(path) do
 			if n~="." and n~=".." then
-				local it=file.setup({path=wpath.resolve(path,n)})
-				it.parent=file
-				dir[#dir+1]=it
+				dir[#dir+1]=file:new_item(n)
 			end
 		end
 	end)
@@ -323,31 +361,6 @@ M.file.write_file=function(_,path,text)
 		local d=f:write(text)
 		f:close()
 	end
-end
-
-
-M.file.manifest_path=function(file,fullpath)
-	fullpath=wpath.unslash(fullpath)
-	local pp=wpath.split(fullpath)
---	if pp[#pp]=="" then pp[#pp]=nil end -- strip trailing slash
-
-	local path=""
-	local last=file
-	for i,v in ipairs(pp) do
-		path=wpath.resolve(path.."/"..v)
-		local it=last:find_it({path=path})
-		if not it then -- need to create
-			it=file.setup({
-				path=path,
-			})
-			it.parent=last
-			last.dir[#last.dir+1]=it
-		end
-		it.keep=true -- do not remove this one when collapsed
-		last=it
-	end
-
-	return last
 end
 
 
@@ -390,6 +403,18 @@ M.gist.setup=function(gist)
 	return gist
 end
 
+M.gist.new_item=function(gist,name)
+	local isdir
+	if name:sub(-1)=="/" then isdir={} end -- use trailing slash as dir flag
+	local it=gist.setup({
+		path=gist.path..name,
+		collect=gist.collect,
+		dir=isdir,
+		parent=gist,
+	})
+	return it
+end
+
 M.gist.fetch_dir=function(gist,path)
 	path="/"..wpath.resolve(path) -- force the // prefix
 	local dir={}
@@ -404,18 +429,9 @@ M.gist.fetch_dir=function(gist,path)
 	if gfname=="" then gfname=nil end
 
 	if path=="//gists/" then
-	
 		local tab=gist.collect.config.gists and gist.collect.config.gists.gists or {}
-
 		for i,v in ipairs(tab) do
-			local itpath=path..v.."/"
-			local it=gist.setup({
-				path=itpath,
-				collect=gist.collect,
-				dir={},
-			})
-			it.parent=gist
-			dir[#dir+1]=it
+			dir[#dir+1]=gist:new_item(v.."/")
 		end
 
 	elseif gid and not gfname then -- hit up gist
@@ -426,21 +442,9 @@ M.gist.fetch_dir=function(gist,path)
 
 		local result=wgist.get(opts)
 		for n,v in pairs(result.files) do
-			local itpath=path..n
-			local it=gist.setup({
-				path=itpath,
-				collect=gist.collect,
-			})
-			it.parent=gist
-			dir[#dir+1]=it
+			dir[#dir+1]=gist:new_item(n)
 		end
-		local itpath=path..".meta" -- special file name for description etc?
-		local it=gist.setup({
-			path=itpath,
-			collect=gist.collect,
-		})
-		it.parent=gist
-		dir[#dir+1]=it
+		dir[#dir+1]=gist:new_item(".meta")
 
 	end
 	
@@ -541,6 +545,15 @@ M.config.setup=function(config)
 	return config
 end
 
+M.config.new_item=function(config,name)
+	local it=config.setup({
+		path=config.path..name,
+		collect=config.collect,
+		parent=config,
+	})
+	return it
+end
+
 M.config.fetch_dir=function(config,path)
 	path="/"..wpath.resolve(path) -- force the // prefix
 	local dir={}
@@ -555,13 +568,7 @@ M.config.fetch_dir=function(config,path)
 			]],
 		}).rows
 		for i,v in ipairs(rows) do
-			local itpath=path..v.key
-			local it=config.setup({
-				path=itpath,
-				collect=config.collect,
-			})
-			it.parent=config
-			dir[#dir+1]=it
+			dir[#dir+1]=config:new_item(v.key)
 		end
 
 	end

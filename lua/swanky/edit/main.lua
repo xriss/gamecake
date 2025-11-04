@@ -80,80 +80,7 @@ M.bake=function(oven,main)
 		show.setup()
 
 		gui.setup()
-		
-local ipsum=[[
 
-But I must explain to you how all this mistaken idea of denouncing 
-pleasure and praising pain was born and I will give you a complete 
-account of the system, and expound the actual teachings of the great 
-explorer of the truth, the master-builder of human happiness. No one 
-rejects, dislikes, or avoids pleasure itself, because it is pleasure, 
-but because those who do not know how to pursue pleasure rationally 
-encounter consequences that are extremely painful. Nor again is there 
-anyone who loves or pursues or desires to obtain pain of itself, 
-because it is pain, but because occasionally circumstances occur in 
-which toil and pain can procure him some great pleasure. To take a 
-trivial example, which of us ever undertakes laborious physical 
-exercise, except to obtain some advantage from it? But who has any 
-right to find fault with a man who chooses to enjoy a pleasure that has 
-no annoying consequences, or one who avoids a pain that produces no 
-resultant pleasure?
-
-Pero debo explicarte cómo toda esta idea equivocada de denunciar nació 
-el placer y el elogio del dolor y te daré un completo cuenta del 
-sistema, y exponga las enseñanzas reales de los grandes explorador de 
-la verdad, el maestro constructor de la felicidad humana. Ninguno 
-rechaza, no le gusta o evita el placer mismo, porque es placer, sino 
-porque aquellos que no saben buscar el placer racionalmente encontrar 
-consecuencias que son extremadamente dolorosas. Tampoco hay de nuevo 
-cualquiera que ama o persigue o desea obtener dolor de sí mismo, porque 
-es dolor, pero porque ocasionalmente ocurren circunstancias en que 
-trabajo y dolor pueden proporcionarle un gran placer. Para tomar un 
-ejemplo trivial, ¿quién de nosotros emprende alguna vez un trabajo 
-físico laborioso? ejercicio, excepto para obtener alguna ventaja de él? 
-Pero quien tiene derecho a encontrar fallas en un hombre que elige 
-disfrutar de un placer que tiene sin consecuencias molestas, o alguien 
-que evita un dolor que no produce placer resultante?
-
-
-Mais je dois vous expliquer comment toute cette idée erronée de 
-dénonciation le plaisir et la louange de la douleur était né et je vais 
-vous donner une complète compte du système, et exposer les 
-enseignements actuels du grand explorateur de la vérité, maître d'œuvre 
-du bonheur humain. Personne rejette, n'aime pas ou évite le plaisir 
-lui-même, parce que c'est un plaisir, mais parce que ceux qui ne savent 
-pas rechercher le plaisir rationnellement faire face à des conséquences 
-extrêmement douloureuses. Ni encore est-il toute personne qui aime ou 
-poursuit ou désire obtenir la douleur d'elle-même, parce que c'est la 
-douleur, mais parce que parfois des circonstances surviennent dans le 
-travail et la douleur peuvent lui procurer un grand plaisir. Prendre un 
-exemple trivial, lequel d'entre nous entreprend jamais physique 
-laborieuse exercice, sauf pour en tirer un avantage? Mais qui a tout le 
-droit de trouver à redire à un homme qui choisit de jouir d'un plaisir 
-qui a pas de conséquences ennuyeuses, ou qui évite une douleur qui ne 
-produit pas plaisir résultant?
-
-
-Aber ich muss Ihnen erklären, wie all diese falsche Vorstellung, etwas 
-anzuprangern Vergnügen und lobender Schmerz wurden geboren und ich 
-werde dir ein vollständiges geben Rechenschaft über das System ab und 
-erläutern Sie die tatsächlichen Lehren der Großen Erforscher der 
-Wahrheit, der Baumeister des menschlichen Glücks. Niemand lehnt ab, 
-lehnt ab oder vermeidet das Vergnügen selbst, weil es das Vergnügen 
-ist, sondern weil diejenigen, die nicht wissen, wie man Vergnügen 
-rational verfolgt Konsequenzen haben, die äußerst schmerzhaft sind. 
-Noch ist wieder da wer liebt oder verfolgt oder Schmerz von sich selbst 
-erlangen will, weil es schmerzen sind, aber weil gelegentlich umstände 
-in Welche Mühe und welcher Schmerz können ihm ein großes Vergnügen 
-bereiten? Etwas nehmen triviales Beispiel, das von uns jemals mühsame 
-körperliche unternimmt Übung, außer um einen Vorteil daraus zu ziehen? 
-Aber wer hat welche? Recht, einen Mann zu bemängeln, der sich dafür 
-entscheidet, ein Vergnügen zu genießen, das er hat Keine lästigen 
-Konsequenzen oder einer, der einen Schmerz vermeidet, der keine erzeugt 
-resultierendes Vergnügen?
-
-]]
-		
 		cmd.start()
 		
 		local loaded=false
@@ -161,18 +88,13 @@ resultierendes Vergnügen?
 
 			local fname=cmd.args.data[1]
 			if fname then
-				local path=wpath.resolve(fname)
-				docs.manifest(path):show()
+				docs.manifest(fname):show()
 				loaded=true
 			end
 
 		end
 		if not loaded then
-			docs.show()
---			docs.manifest():show()
---			gui.master.ids.texteditor.txt.set_text(string.rep(ipsum,4),"")
---			gui.master.ids.texteditor.txt.set_text("\n","")
---			gui.master.ids.texteditor.txt.set_lexer()
+			docs.show() -- hide main text as we have nothing to show
 		end
 
 		

@@ -86,6 +86,9 @@ M.tables=wgetsql.prepare_tables({
 
 M.bake=function(oven,collect)
 
+	local gui=oven.rebake(oven.modname..".gui")
+
+
 	collect.oven=oven -- back link for meta access
 
 	collect.mounts_config=wgw_mounts.config.setup({
@@ -119,6 +122,15 @@ M.bake=function(oven,collect)
 		dir={ collect.mounts_meta , collect.mounts_file },
 		keep=true,
 	})
+
+	collect.manifest_path=function(path)
+	
+		collect.mounts:manifest_path(path)
+
+--		gui.master.ids.treefiles.items:manifest_path( path )
+
+	end
+
 
 --[[
 	collect.config_mounts=function(config)
@@ -284,7 +296,7 @@ SELECT key,value FROM config ;
 
 -- load the file from database first then disk and also cache this file in database
 	collect.load=function(it,path)
-	
+
 		it.meta=manifest_meta(path)
 
 		if it.meta.state=="manifest" then -- not a real meta yet so load from disk and update
