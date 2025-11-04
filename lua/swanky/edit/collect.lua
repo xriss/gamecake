@@ -126,8 +126,7 @@ M.bake=function(oven,collect)
 	collect.manifest_path=function(path)
 	
 		collect.mounts:manifest_path(path)
-
---		gui.master.ids.treefiles.items:manifest_path( path )
+		gui.master.ids.treefiles:refresh()
 
 	end
 

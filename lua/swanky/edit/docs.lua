@@ -65,6 +65,9 @@ M.bake=function(oven,docs)
 	end
 	
 	docs.manifest=function(filename)
+		if not filename then
+			return docs.create()
+		end
 		if filename:sub(1,2)~="//" then -- do nothing with special // paths
 			filename=wpath.resolve(filename) -- fix path ( eg use cd )
 		end
@@ -162,6 +165,9 @@ M.bake=function(oven,docs)
 		if not doc then
 			docs.doc=nil
 			gui.master.ids.texteditor.hidden=true
+			gui.master.ids.infobar.text=""
+			gui.master.ids.infobar.text_color=nil
+			gui.master.ids.infobar:set_dirty()
 		else
 			docs.doc=doc
 			doc:show()			
@@ -242,7 +248,9 @@ M.bake=function(oven,docs)
 			end
 		end
 		
-		docs.show()
+		if docs.doc==it then -- currently viewing this doc
+			docs.show( docs.list[1] ) -- show another doc or no doc if list is empty
+		end
 
 	end
 	

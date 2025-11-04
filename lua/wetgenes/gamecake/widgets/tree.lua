@@ -54,9 +54,8 @@ end
 
 
 wtree.refresh=function(widget)
---	widget:item_to_line(widget.items)
 	widget:resize_and_layout() -- layout will auto update
---	widget:set_dirty()
+	widget:set_dirty()
 end
 
 wtree.layout=function(widget)
