@@ -181,9 +181,8 @@ end
 
 
 function gui.refresh_tree()
---	local w=gui.master.ids.treefile.tree_widget
---	gui.master.ids.treefiles:refresh()
---	gui.master.ids.treefiles:refresh()
+	collect.update_keepers()
+	gui.master.ids.treefiles:refresh()
 end
 
 function gui.action(m)

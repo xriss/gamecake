@@ -87,6 +87,7 @@ M.tables=wgetsql.prepare_tables({
 M.bake=function(oven,collect)
 
 	local gui=oven.rebake(oven.modname..".gui")
+	local docs=oven.rebake(oven.modname..".docs")
 
 
 	collect.oven=oven -- back link for meta access
@@ -126,10 +127,26 @@ M.bake=function(oven,collect)
 	collect.manifest_path=function(path)
 	
 		collect.mounts:manifest_path(path)
-		gui.master.ids.treefiles:refresh()
+		gui.refresh_tree()
 
 	end
 
+	collect.update_keepers=function()
+		local keepers=docs.get_keepers()
+		local walk;walk=function(it)
+			if keepers[it.path] then
+				it.keep=true
+			else
+				it.keep=false
+			end
+			if it.dir then
+				for i,v in ipairs(it.dir) do
+					walk(v)
+				end
+			end
+		end
+		walk(collect.mounts)
+	end
 
 --[[
 	collect.config_mounts=function(config)

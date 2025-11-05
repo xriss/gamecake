@@ -54,6 +54,26 @@ M.bake=function(oven,docs)
 ]]
 	end
 	
+	docs.get_keepers=function()
+		local t={}
+		t["/"]=true -- force roots
+		t["//"]=true
+		
+		local addpath;addpath=function(path)
+			t[path]=true
+			if path:sub(-1)=="/" then path=path:sub(1,-2) end
+			local s,f=path:find("[^/]*$")
+			if s and s>1 then
+				addpath( path:sub(1,s-1) )
+			end
+		end
+		
+		for _,it in ipairs(docs.list) do
+			addpath(it.filename)
+		end
+		
+		return t
+	end
 
 	docs.find=function(filename)
 
@@ -129,6 +149,7 @@ M.bake=function(oven,docs)
 		if docs.list_modified then
 			docs.config_save()
 			collect.save_config("docs")
+			gui.refresh_tree()
 		end
 	end
 
