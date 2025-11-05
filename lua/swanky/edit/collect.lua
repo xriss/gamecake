@@ -329,11 +329,11 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 
 
 -- load the file from database first then disk and also cache this file in database
-	collect.load=function(it,path,reload)
+	collect.load=function(it,path)
 
 		it.meta=manifest_meta(path)
 
-		if reload or it.meta.state=="manifest" then -- not a real meta yet so load from disk and update
+		if it.meta.state=="manifest" then -- not a real meta yet so load from disk and update
 
 			local text=collect.mounts:read_file(path) or ""
 		

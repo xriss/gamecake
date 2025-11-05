@@ -144,7 +144,8 @@ M.bake=function(oven,docs)
 		end
 
 		-- open saved docs
-		for _,v in ipairs( collect.config.docs.open ) do
+		for idx=#collect.config.docs.open,1,-1 do
+			local v=collect.config.docs.open[idx]
 			if v then -- skip falses
 				docs.manifest(v.filename):show()
 			end
@@ -194,6 +195,16 @@ M.bake=function(oven,docs)
 -- show this document in the main text editor window
 	doc.show=function(it)
 	
+		for i,v in ipairs(docs.list) do
+			if v==it then
+				if i~=1 then -- move to front
+					table.insert(docs.list,1, table.remove(docs.list,i) )
+					docs.list_modified=true
+				end
+				break
+			end
+		end
+
 		it.docs.doc=it -- remember current doc
 	
 		it.txt.hooks={}
@@ -249,7 +260,13 @@ M.bake=function(oven,docs)
 	end
 	
 	doc.reload=function(it)
-		it:load(nil,true)
+		local text_file=collect.mounts:read_file(it.filename)
+		local text_doc=it.txt.get_text()
+		
+		if text_file~=text_doc then -- text in file is not the same as text in memory
+			it.txt.mark(0,0,it.txt.hy+1,0)
+			it.txt.undo.replace(text_file)
+		end
 	end
 
 	doc.close=function(it)
