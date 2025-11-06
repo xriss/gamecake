@@ -185,6 +185,12 @@ M.meta.to_line=function(meta,widget,only)
 			end
 		end
 	end
+	
+	if type(meta.keep)=="table" then -- a bool flag that can be a table
+		if meta.keep.to_line then -- callback to modify meta.line_text etc
+			meta.keep.to_line( meta , widget )
+		end
+	end
 end
 
 

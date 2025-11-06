@@ -130,19 +130,26 @@ M.bake=function(oven,docs)
 		local doc=docs.doc
 		if not doc then return end
 
-		if doc.meta.undo==doc.txt.undo.index then
-			if doc.modified_show==true then
-				gui.refresh_tree()
-				doc.modified_show=false
-				gui.master.ids.infobar.text_color=nil
+		local get_text_color=function(tint)
+			local c=gui.master.get_color(nil,tint)
+			local cc=        bit.band(c[3]*0xff,0xff)
+			cc=cc+bit.lshift(bit.band(c[2]*0xff,0xff),8)
+			cc=cc+bit.lshift(bit.band(c[1]*0xff,0xff),16)
+			cc=cc+bit.lshift(bit.band(c[4]*0xff,0xff),24)
+			return cc
+		end
+
+		if doc.meta.undo~=doc.txt.undo.index then
+			if gui.master.ids.infobar.text_color~=get_text_color(0x80ff0000) then
+				gui.master.ids.infobar.text_color=get_text_color(0x80ff0000)
 				gui.master.ids.infobar:set_dirty()
+				gui.refresh_tree()
 			end
 		else
-			if doc.modified_show~=true then
-				gui.refresh_tree()
-				doc.modified_show=true
-				gui.master.ids.infobar.text_color=0xffcc0000
+			if gui.master.ids.infobar.text_color~=get_text_color(0x8000ff00) then
+				gui.master.ids.infobar.text_color=get_text_color(0x8000ff00)
 				gui.master.ids.infobar:set_dirty()
+				gui.refresh_tree()
 			end
 		end
 		

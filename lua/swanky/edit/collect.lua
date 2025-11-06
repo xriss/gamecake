@@ -132,10 +132,29 @@ M.bake=function(oven,collect)
 	end
 
 	collect.update_keepers=function()
+		local keep={to_line=function( it , widget )
+			local get_text_color=function(tint)
+				local c=gui.master.get_color(nil,tint)
+				local cc=        bit.band(c[3]*0xff,0xff)
+				cc=cc+bit.lshift(bit.band(c[2]*0xff,0xff),8)
+				cc=cc+bit.lshift(bit.band(c[1]*0xff,0xff),16)
+				cc=cc+bit.lshift(bit.band(c[4]*0xff,0xff),24)
+				return cc
+			end
+			local doc=docs.find( it.path )
+			if doc then
+				if doc.meta and doc.meta.undo~=doc.txt.undo.index then
+					it.line_text.text_color=get_text_color(0x80ff0000)
+				else
+					it.line_text.text_color=get_text_color(0x8000ff00)
+				end
+			end
+		end}
+	
 		local keepers=docs.get_keepers()
 		local walk;walk=function(it)
 			if keepers[it.path] then
-				it.keep=true
+				it.keep=keep
 			else
 				it.keep=false
 			end
