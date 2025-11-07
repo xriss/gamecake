@@ -27,6 +27,8 @@ function M.bake(oven,system)
 
 	system.components={}
 
+	system.ups=oven.ups.up -- maybe need to replace this to disable input
+
 -- utility code
 
 
@@ -99,7 +101,7 @@ system.setup=function(code)
 			system=system,
 			oven=oven,
 			gl=oven.gl,
-			ups=oven.ups.up, -- input, for 1up - 6up 
+			ups=system.ups, -- input, for 1up - 6up 
 		}) do env[n]=v end
 		
 		local tab={}

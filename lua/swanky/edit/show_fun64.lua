@@ -20,9 +20,20 @@ M.bake=function(oven,show_fun64)
 
 	local gl=oven.gl
 
+	local main=oven.rebake(oven.modname..".main")
 	local show=oven.rebake(oven.modname..".show")
 	local gui=oven.rebake(oven.modname..".gui")
 	local system=oven.rebake("wetgenes.gamecake.fun.system")
+	
+	-- smart input that can be disabled on loss of focus
+	system.ups_empty=oven.ups.manifest(-1) -- create an empty
+	system.ups=function(idx)
+		if gui.master.focus==gui.master.ids.run or main.fullshow then
+			return oven.ups.up(idx)
+		else
+			return system.ups_empty
+		end
+	end
 
 
 	show_fun64.widget_msg=function(w,m)
