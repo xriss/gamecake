@@ -44,8 +44,8 @@ M.bake=function(oven,show_fun64)
 		end
 	end
 
-	show_fun64.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
-
+	show_fun64.update_draw=function()
+	
 		if system.is_setup then
 			gui.master.ids.runtext.hidden=true
 		else
@@ -67,27 +67,8 @@ M.bake=function(oven,show_fun64)
 			end
 		end
 		local draw=function()
-			if system.is_setup then
-				local screen=system.components.screen
-				local sx=hx/screen.hx
-				local sy=hy/screen.hy
-				local ss=sx
-				if sy<sx then ss=sy end
-
---[[
-				local fhy=math.floor(hx*screen.hy/screen.hx)
-				if fhy~=gui.master.ids.dock2.hy then
-					gui.master.ids.dock2.hy=fhy
-					gui.master:layout()
-				end
-]]
-
-				gl.PushMatrix()
-				gl.Translate(hx/2,hy/2,0)
-				gl.Scale(ss)
-				system.draw()
-				gl.PopMatrix()
-				
+			if system.is_setup then				
+				system.draw_into_screen()
 			end
 		end
 		local wrap=function(f)
@@ -126,6 +107,34 @@ M.bake=function(oven,show_fun64)
 			update()
 			draw()
 
+		end
+
+	end
+	
+	show_fun64.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
+	
+		if system.is_setup then
+
+			local screen=system.components.screen
+			local sx=hx/screen.hx
+			local sy=hy/screen.hy
+			local ss=sx
+			if sy<sx then ss=sy end
+
+--[[
+			local fhy=math.floor(hx*screen.hy/screen.hx)
+			if fhy~=gui.master.ids.dock2.hy then
+				gui.master.ids.dock2.hy=fhy
+				gui.master:layout()
+			end
+]]
+
+			gl.PushMatrix()
+			gl.Translate(hx/2,hy/2,0)
+			gl.Scale(ss)
+			system.components.screen.draw_screen()
+			gl.PopMatrix()
+			
 		end
 
 	end

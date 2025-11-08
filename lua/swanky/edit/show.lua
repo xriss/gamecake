@@ -331,18 +331,23 @@ M.bake=function(oven,show)
 			show.cam_build()
 		end
 	end
+	
+	show.update_draw=function()
+		local mode=show.get_mode()
+		local it=show[mode]
+
+		if it and it.update_draw then
+			it.update_draw()
+		end
+	end
 
 	show.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
-
 		local mode=show.get_mode()
 		local it=show[mode]
 
 		if it then
-
 			it.widget_draw(px,py,hx,hy)
-
 		end
-		
 	end
 
 	return show

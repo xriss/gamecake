@@ -171,6 +171,8 @@ M.bake=function(oven,main)
 	end
 
 	main.draw=function()
+
+		show.update_draw()
 			
 --  we want the main view to track the window size
 

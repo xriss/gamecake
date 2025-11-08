@@ -236,9 +236,7 @@ system.update=function()
 	end
 end
 
-system.draw=function()
-
-	local use_this_fbo=gl.Get(gl.FRAMEBUFFER_BINDING)
+system.draw_into_screen=function()
 
 	system.resume({draw=true})
 
@@ -267,8 +265,15 @@ system.draw=function()
 	screen.draw_into_screen_start()
 	for idx=1,#screen.layers do screen.draw_layer(idx) end
 	screen.draw_into_screen_finish()
-	
+
+end
+
+system.draw=function()
+
+	local use_this_fbo=gl.Get(gl.FRAMEBUFFER_BINDING)
+	system.draw_into_screen() -- this will change the fbo
 	gl.BindFramebuffer(gl.FRAMEBUFFER, use_this_fbo)
+	
 	screen.draw_screen()
 
 --hax
