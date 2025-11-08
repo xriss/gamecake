@@ -22,7 +22,7 @@ local opts={
 	title="Swanky Edit",
 	name="swanky.edit",
 	start="swanky.edit.main",
-	disable_sounds=true, -- we have no sounds
+	disable_sounds=false, -- we need sounds
 	icon=[[
 . . . . . . . . . . . . . . . . 
 . 7 7 7 7 7 7 7 0 0 0 0 0 0 0 . 

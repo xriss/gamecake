@@ -116,6 +116,8 @@ M.bake=function(oven,show_fun64)
 		if system.is_setup then
 
 			local screen=system.components.screen
+			if not screen then return end
+			
 			local sx=hx/screen.hx
 			local sy=hy/screen.hy
 			local ss=sx
