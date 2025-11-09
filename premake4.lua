@@ -250,7 +250,6 @@ if EMCC then
 	
 	linkoptions{
 		"-s PTHREAD_POOL_SIZE=16",
---		"--emrun",
 		"-lidbfs.js",
 		"-v",
 --		"-s OFFSCREEN_FRAMEBUFFER",
@@ -271,6 +270,7 @@ if EMCC then
 	configuration {"Debug"}
 		linkoptions{
 			"-s ASSERTIONS=1",
+			"--emrun", -- expect the debug emscripten to do the emrun stuff
 --			"-s SAFE_HEAP=1",
 		}
 		buildlinkoptions{

@@ -155,12 +155,13 @@ for n,v in pairs(keymaps["island2"]) do keymaps["islands"][n]=v end
 
 
 -- names of relative mouse axis
-M.is_relative={mx=true,my=true,mz=true}
+M.is_relative={mx=true,my=true,mz=true,mw=true}
 M.is_pulse={}
 
 for i,n in ipairs{
 		"left","pad_left","right","pad_right","up","pad_up","down","pad_down",
 		"a","b","x","y",	"l1","r1","l2","r2","l3","r3",	"select","start","guide","fire",
+		"mouse_left","mouse_right","mouse_middle",
 		} do
 	M.is_pulse[ n.."_set" ] = true
 	M.is_pulse[ n.."_clr" ] = true
@@ -330,6 +331,7 @@ M.up.unpulse=function(up)
 	up.all.mx=nil
 	up.all.my=nil
 	up.all.mz=nil
+	up.all.mw=nil
 	-- auto delete pulses
 	for n,v in pairs(up.all) do
 		if M.is_pulse[n] then -- remove all pulses
@@ -469,6 +471,10 @@ M.ups.msg_apply=function(ups,m)
 					up:add_axis( "mz" , 1 )
 				elseif m.keyname=="wheel_sub" then
 					up:add_axis( "mz" , -1 )
+				elseif m.keyname=="wheel_right" then
+					up:add_axis( "mw" , 1 )
+				elseif m.keyname=="wheel_left" then
+					up:add_axis( "mw" , -1 )
 				end
 			end
 
@@ -594,6 +600,7 @@ M.ups.update=function(ups)
 		up.all.mx=nil
 		up.all.my=nil
 		up.all.mz=nil
+		up.all.mw=nil
 	end
 
 	-- change current state using all msgs
