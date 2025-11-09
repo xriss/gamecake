@@ -495,27 +495,51 @@ auto select an entire word or line depending on number of clicks
 		local s=txt.get_string(txt.cy) or ""
 		local sl=wutf.length(s)
 		local toke=function(x)
-			if cache.tokens then
-				local t=string.sub(cache.tokens,x,x)
-				if t=="c" then
-					if (wutf.ncode( s , x ) or 0) <= 32 then t="w" end
-				end
-				return t
-			else
-				local t="c"
-				if (wutf.ncode( s , x ) or 0) <= 32 then t="w" end
-				return t
-			end
+			if x>=sl then return nil end -- ignore line ends
+			local n=wutf.ncode( s , x )			
+			if not n then return nil end
+			
+			if n<=0x20 then return "w" end -- whitespace
+			if n>=0x80 then return "t" end -- assume utf8 is text
+			if n>=0x30 and n<=0x38 then return "t" end -- text number
+			if n>=0x41 and n<=0x5a then return "t" end -- text letter (upper)
+			if n>=0x61 and n<=0x7a then return "t" end -- text letter (lower)
+			if n==0x22 or n==0x27 or n==0x60 then return "q" end -- quotes
+			if	n==0x28 or n==0x29 or
+--				n==0x3c or n==0x3e or -- angle brackets?
+				n==0x5b or n==0x5d or
+				n==0x7b or n==0x7d then return "b" end -- brackets
+			return "p" -- everything else is punctuation
 		end
+		local tokespesh=function(t)
+			return ( t=="w" or t=="q" or t=="b" ) -- prefer pairs of these
+		end
+		local tokepri=function(a,b)
+			local num=function(t)
+				if not t then return 0
+				elseif t=="b" then return 1
+				elseif t=="q" then return 2
+				elseif t=="w" then return 3
+				elseif t=="t" then return 4
+				elseif t=="p" then return 5
+				else return 6
+				end
+			end
+			return num(a)>num(b)
+		end
+
 		local lx=txt.fx-1+1
 		local hx=txt.fx-1-1
 
 		for i=2,clicks do
+		
+			local lxo=lx
+			local hxo=hx
 
 			local lc = toke(lx-1)
 			local hc = toke(hx+1)
 
-			if lc and lc~="w" or ( lc==hc or not hc ) then
+			if lc and ( not tokespesh(lc) or lc==hc or not hc ) then
 				while lx>0    and toke(lx-1)==lc do lx=lx-1 end
 				if lc=="w" and lc==hc  then -- greedy white
 					local c = toke(lx-1)
@@ -523,11 +547,19 @@ auto select an entire word or line depending on number of clicks
 				end
 			end
 
-			if hc and hc~="w" or ( lc==hc or not lc ) then
+			if hc and ( not tokespesh(hc) or lc==hc or not lc )then
 				while hx<sl-1 and toke(hx+1)==hc do hx=hx+1 end
 				if hc=="w" and lc==hc then -- greedy white
 					local c = toke(hx+1)
 					while hx<sl-1 and toke(hx+1)==c do hx=hx+1 end
+				end
+			end
+			
+			if (lxo==lx) and (hxo==hx) then -- no movement so force some
+				if tokepri(lc,hc) then
+					while lx>0    and toke(lx-1)==lc do lx=lx-1 end
+				else
+					while hx<sl-1 and toke(hx+1)==hc do hx=hx+1 end
 				end
 			end
 
