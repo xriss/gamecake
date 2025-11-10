@@ -54,16 +54,18 @@ M.construct=function(edit,txt)
 	edit.width=80 -- should be editable
 
 
--- select paragraph under cursor , spread up and down until we find a blank line
+-- select paragraph under cursor , spread up and down until we find a blank line or change of indention
 	edit.select_paragraph=function()
 	
 		local fy=txt.cy
 		local ty=fy
 
-		local trim=function(s) return (s:gsub("^%s*(.-)%s*$", "%1")) end
+		local trim=function(s) return (s:match("^%s*(.-)%s*$")) end
+		local pfix=function(s) return (s:match("^%s*")) end
 
 		local l=txt.get_string(fy)
 		if l and trim(l)=="" then return txt.mark(fy,1,ty+1,1) end  -- so nothing to select
+		local w=pfix(l) -- get white space prefix
 
 -- search up
 		repeat
@@ -72,6 +74,7 @@ M.construct=function(edit,txt)
 			local l=txt.get_string(fy)
 			if l then
 				if trim(l)~="" then done=false end
+				if pfix(l)~=w  then done=true  end -- not matching white space prefix
 			end
 		until done
 		fy=fy+1
@@ -83,12 +86,12 @@ M.construct=function(edit,txt)
 			local l=txt.get_string(ty)
 			if l then
 				if trim(l)~="" then done=false end
+				if pfix(l)~=w  then done=true  end -- not matching white space prefix
 			end
 		until done
 		ty=ty-1
 
 		txt.mark(fy,1,ty+1,1) -- full lines
-
 	end
 
 -- copy current selection
@@ -103,13 +106,26 @@ M.construct=function(edit,txt)
 
 -- wrap paragraph
 	edit.justify=function()
+		local pfix=function(s) return (s:match("^%s*")) end
 		if not txt.marked() then edit.select_paragraph() end
 		local s=edit.copy() or ""
+		local w=pfix(s) -- get white space prefix
 		local line=""
 		local t=split(s)
 		local a={}
+		local ww=0
+		for i=1,#w do -- dumb whitespace width
+			local a=w:sub(i,i)
+			if a=="\t" then
+				ww=ww+4 -- tab
+			else
+				ww=ww+1 -- space
+			end
+		end
+		if ww>40 then ww=40 end -- 50% max
+		local width=edit.width-ww
 		for _,w in ipairs(t) do
-			if #line+#w+1 >= edit.width then -- last part of line
+			if #line+#w+1 >= width then -- last part of line
 				if line=="" then -- full overflow
 					a[#a+1]=w
 					line=""
@@ -123,7 +139,7 @@ M.construct=function(edit,txt)
 			end
 		end
 		if line~="" then a[#a+1]=line end
-		s=table.concat(a,txt.endline)..txt.endline
+		s=w..table.concat(a,txt.endline..w)..txt.endline
 		if s then edit.paste(s) end
 		txt.cy,txt.cx=txt.clip_left(txt.cy,txt.cx)
 	end
