@@ -99,6 +99,10 @@ M.bake=function(oven,main)
 		
 		gui.master.set_focus( gui.master.ids.texteditor.scroll_widget.pan )
 		gui.refresh_tree()
+		
+		if cmd.args and cmd.args.data.run then
+			main.fullshow=true
+		end
 
 	end
 

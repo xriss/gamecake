@@ -60,8 +60,8 @@ M.construct=function(edit,txt)
 		local fy=txt.cy
 		local ty=fy
 
-		local trim=function(s) return (s:match("^%s*(.-)%s*$")) end
-		local pfix=function(s) return (s:match("^%s*")) end
+		local trim=function(s) return (s:match("^[%-/#]*%s**(.-)%s*$")) end
+		local pfix=function(s) return (s:match("^[%-/#]*%s*")) end
 
 		local l=txt.get_string(fy)
 		if l and trim(l)=="" then return txt.mark(fy,1,ty+1,1) end  -- so nothing to select
@@ -106,10 +106,11 @@ M.construct=function(edit,txt)
 
 -- wrap paragraph
 	edit.justify=function()
-		local pfix=function(s) return (s:match("^%s*")) end
+		local pfix=function(s) return (s:match("^[%-/#]*%s*")) end
 		if not txt.marked() then edit.select_paragraph() end
 		local s=edit.copy() or ""
 		local w=pfix(s) -- get white space prefix
+		s=s:sub(#w+1):gsub("\n[%-/#]*%s*"," ") -- remove all prefixs
 		local line=""
 		local t=split(s)
 		local a={}

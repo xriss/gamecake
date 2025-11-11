@@ -36,6 +36,7 @@ M.bake=function(oven,cmd)
 			{	"swanky-edit",	false,	"force swanky.edit app. When running a combined swanky app this forces edit mode.", },
 			{	"help",			false,	"Print help and exit.", },
 			{	"console",		false,	"Keep console open.", },
+			{	"run",			false,	"Run the file full screen.", },
 			{	"logs",			false,	[[
 
 Choose log verbosity. Set to true to enable all logs or use a string of 
