@@ -91,7 +91,9 @@ system.setup=function(code)
 	system.fullscreen_width=screensize.width or 1920
 	system.fullscreen_height=screensize.height or 1080
 
---print("system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
+
+
+LOG("oven","fun system setup "..system.fullscreen_width.."x"..system.fullscreen_height)
 
 	if code then
 
@@ -274,6 +276,7 @@ system.draw=function()
 	system.draw_into_screen() -- this will change the fbo
 	gl.BindFramebuffer(gl.FRAMEBUFFER, use_this_fbo)
 	
+	local screen=system.components.screen
 	screen.draw_screen()
 
 --hax

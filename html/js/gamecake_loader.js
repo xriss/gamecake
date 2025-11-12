@@ -111,7 +111,7 @@ console.log(tr)
 
 // setup gamecake
 
-	let gamecake={};
+	let gamecake={opts:opts};
 	gamecake.div=document.querySelector(opts.div); // where to put stuff	
 
 
@@ -209,9 +209,12 @@ console.log(tr)
 
 		gamecake.canvas.focus()
 		
-  		FS.mkdir('/files');
-		FS.mount(IDBFS, {}, '/files');
-
+// home is probably provided
+		try{
+			FS.mkdir('/home');
+		}catch(e){}
+// make home persistent data
+		FS.mount(IDBFS, {}, '/home');
 		FS.syncfs(true, function (err) {
 			if(err) { console.log(err); }
 

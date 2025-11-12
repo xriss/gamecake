@@ -294,6 +294,8 @@ screen.create=function(it,opts)
 				local v=views.get()
 				gl.Uniform4f( p:uniform("siz"), it.fbo.txw				,	it.fbo.txh, 
 												it.fbo.uvw/v.hx*v.sx	,	it.fbo.uvh/v.hy*v.sy	)
+				local view=views.get()
+				gl.Uniform4f( p:uniform("vsiz"), view.hx/view.sx , view.hy/view.sy , it.fbo.w , it.fbo.h )
 			end)
 		else
 			flat.tristrip("rawuv",t,"raw_tex")

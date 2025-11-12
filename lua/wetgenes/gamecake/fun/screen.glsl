@@ -122,6 +122,7 @@ uniform mat4 projection;
 uniform vec4 color;
 uniform sampler2D tex;
 uniform vec4 siz;
+uniform vec4 vsiz; // output size in pixels x,y , rendersize in pixels z,w
 
 
 #ifdef VERTEX_SHADER
@@ -163,6 +164,8 @@ vec4 render(vec2 uv)
 
 	c=texture2D(tex, tb).rgba;
 
+	// reduce filter as output pixel size gets smaller
+	vec2 fx=smoothstep( vec2(1.0,1.0) , vec2(5.0,5.0) , (vsiz.xy/vsiz.zw) );
 
 	aa=2.0*(fract(uv.x*siz.x)-0.5);
 	if(aa<0.0)
@@ -170,20 +173,20 @@ vec4 render(vec2 uv)
 		c2=texture2D(tex, tb-xo ).rgba;
 		aa=clamp(aa,-1.0,0.0);
 		aa=aa*aa;
-		c=mix(c,c2,aa*0.5);
+		c=mix(c,c2,aa*0.5*fx.x);
 	}
 	else
 	{
 		c2=texture2D(tex, tb+xo).rgba;
 		aa=clamp(aa,0.0,1.0);
 		aa=aa*aa;
-		c=mix(c,c2,aa*0.5);
+		c=mix(c,c2,aa*0.5*fx.x);
 	}
 
 
 // scanline	
 	aa=2.0*(fract(uv.y*siz.y)-0.5);
-	aa*=aa*aa*aa;
+	aa*=aa*aa*aa*fx.y;
 	c.rgb=c.rgb*(1.0-aa);
 	
 	return vec4(c.rgb,1.0);

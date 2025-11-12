@@ -270,6 +270,7 @@ if EMCC then
 	configuration {"Debug"}
 		linkoptions{
 			"-s ASSERTIONS=1",
+			"-gsource-map=inline",
 			"--emrun", -- expect the debug emscripten to do the emrun stuff
 --			"-s SAFE_HEAP=1",
 		}
@@ -608,7 +609,7 @@ elseif MINGW then
 --	includedirs { path.getabsolute("./vbox_mingw/luajit/include") }
 --	libdirs { path.getabsolute("./vbox_mingw/luajit/lib") }
 
-else -- luajit
+else
 
 	defines{ "LUA_JIT_USED" }
 
