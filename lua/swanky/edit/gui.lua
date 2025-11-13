@@ -526,6 +526,8 @@ local lay=
 											can_focus=true,
 										}
 									},
+									color=0xff000000,
+									skin=0,
 								},
 								{
 									id="runtext",

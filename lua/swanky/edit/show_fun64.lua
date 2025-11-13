@@ -20,6 +20,9 @@ M.bake=function(oven,show_fun64)
 
 	local gl=oven.gl
 
+	local views=oven.cake.views
+
+
 	local main=oven.rebake(oven.modname..".main")
 	local show=oven.rebake(oven.modname..".show")
 	local gui=oven.rebake(oven.modname..".gui")
@@ -118,10 +121,21 @@ M.bake=function(oven,show_fun64)
 			local screen=system.components.screen
 			if not screen then return end
 			
+
+			local view=views.create({
+				parent=views.get(),
+				px=px,py=py,
+				hx=hx,hy=hy,
+				vx=screen.hx,vy=screen.hy,
+				cx=0.5,cy=0.5,
+			})
+
+--[[
 			local sx=hx/screen.hx
 			local sy=hy/screen.hy
 			local ss=sx
 			if sy<sx then ss=sy end
+]]
 
 --[[
 			local fhy=math.floor(hx*screen.hy/screen.hx)
@@ -131,11 +145,15 @@ M.bake=function(oven,show_fun64)
 			end
 ]]
 
+--[[
 			gl.PushMatrix()
 			gl.Translate(hx/2,hy/2,0)
 			gl.Scale(ss)
+]]
+			views.push_and_apply(view)
 			system.components.screen.draw_screen()
-			gl.PopMatrix()
+			views.pop_and_apply(view)
+--			gl.PopMatrix()
 			
 		end
 
