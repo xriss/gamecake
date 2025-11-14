@@ -62,6 +62,7 @@ M.bake=function(oven,show_fun64)
 			str=str or gui.master.ids.texteditor.txt.get_text()
 			show_fun64.last_str=str
 			system.clean()
+			gl.shader_sources( str , "" ) -- also try and load GLSL embeded in the lua file -> #SHADER
 			system.setup(str)
 		end
 		local update=function()

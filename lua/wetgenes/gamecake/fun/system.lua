@@ -255,7 +255,9 @@ system.draw_into_screen=function()
 		screen.draw_into_layer_start(idx)
 
 		for _,it in ipairs(system.components) do
-			if it.draw and it.layer==idx then it.draw() end
+			if it.draw and it.layer==idx then
+				it.draw()
+			end
 		end
 
 		screen.hooks(idx) -- custom extra lowlevel drawing for this layer

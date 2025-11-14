@@ -147,8 +147,6 @@ screen.create=function(it,opts)
 			[gl.DEPTH_WRITEMASK]			=	gl.TRUE,
 			[gl.DEPTH_TEST]					=	gl.TRUE,
 		})
---		gl.DepthMask(gl.TRUE)
---		gl.Enable(gl.DEPTH_TEST)
 		gl.Clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT)
 	end
 
