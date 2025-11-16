@@ -353,6 +353,8 @@ function gui.hooks(act,w,dat)
 
 			show.start_doc()
 
+--			gui.master.dirty_by_data(gui.datas.get("run_state"))
+
 		elseif w.id=="run_play_pause" then
 
 			local run_state=gui.datas.get_string("run_state")
@@ -362,10 +364,13 @@ function gui.hooks(act,w,dat)
 			else
 				gui.datas.set_string("run_state","play")
 			end
+--			gui.master.dirty_by_data(gui.datas.get("run_state"))
 
 		elseif w.id=="run_play_stop" then
 			
 			gui.datas.set_string("run_state","stop")
+			
+--			gui.master.dirty_by_data(gui.datas.get("run_state"))
 
 		end
 
@@ -560,14 +565,6 @@ local lay=
 							data=gui.datas.get("run_state"),
 							data_selected="play",
 						},
---						{
---							class="menudrop",hx=gsiz*2,hy=gsiz,color=0,
---							data=gui.datas.get("run_mode"),
---						},
---						{
---							class="menudrop",hx=gsiz,hy=gsiz,color=0,
---							data=gui.datas.get("run_scale"),
---						},
 					},
 --				},
 			},
