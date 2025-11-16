@@ -180,7 +180,7 @@ uniform float     iSampleRate;           // sound sample rate (i.e., 44100)
 		local state=gui.datas.get("run_state").str
 		if state~="play" and state~="pause" then return end -- nothing to draw
 		if state=="play" then -- update and draw
-			show_vtoy.itime=itimshow_vtoy.itimee+1
+			show_vtoy.itime=show_vtoy.itime+1
 		end
 
 --		if i%60 == 0 then print(i/60) end
