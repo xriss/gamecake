@@ -359,10 +359,10 @@ function gui.hooks(act,w,dat)
 
 			local run_state=gui.datas.get_string("run_state")
 			
-			if run_state=="play" then
-				gui.datas.set_string("run_state","pause")
-			else
+			if run_state=="pause" then
 				gui.datas.set_string("run_state","play")
+			else
+				gui.datas.set_string("run_state","pause")
 			end
 --			gui.master.dirty_by_data(gui.datas.get("run_state"))
 
@@ -535,34 +535,34 @@ local lay=
 						fbo=true,
 						{
 							class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
-							data=gui.datas.get("list_mode"),
+							data="list_mode",
 						},
 						{
 							id="run_play_autoplay",hooks=gui.hooks,
 							class="checkbox",hx=gsiz*1,hy=gsiz*1,color=1,
 							text_true=">>",
 							text_false="--",
-							data=gui.datas.get("run_auto"),
+							data="run_auto",
 						},
 						{
 							id="run_play_stop",hooks=gui.hooks,
 							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
 							text="[]",
-							data=gui.datas.get("run_state"),
+							data="run_state",
 							data_selected="stop",
 						},
 						{
 							id="run_play_pause",hooks=gui.hooks,
 							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
 							text="||",
-							data=gui.datas.get("run_state"),
+							data="run_state",
 							data_selected="pause",
 						},
 						{
 							id="run_play_restart",hooks=gui.hooks,
 							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
 							text=">",
-							data=gui.datas.get("run_state"),
+							data="run_state",
 							data_selected="play",
 						},
 					},

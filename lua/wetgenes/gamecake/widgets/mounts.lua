@@ -435,7 +435,7 @@ M.gist.fetch_dir=function(gist,path)
 	if gfname=="" then gfname=nil end
 
 	if path=="//gists/" then
-		local tab=gist.collect.config.gists and gist.collect.config.gists.gists or {}
+		local tab=gist.collect.config.cloud and gist.collect.config.cloud.gist_bookmarks or {}
 		for i,v in ipairs(tab) do
 			dir[#dir+1]=gist:new_item(v.."/")
 		end
