@@ -12,6 +12,9 @@ local wzips=require("wetgenes.zips")
 local wcsv=require("wetgenes.csv")
 local wpath=require("wetgenes.path")
 
+local bit=require("bit")
+local NOT , AND , OR , XOR = bit.bnot , bit.band , bit.bor , bit.bxor
+
 local function dprint(a) print(wstr.dump(a)) end
 
 --module
@@ -133,32 +136,27 @@ gui.data_setup=function()
 		gui.datas=datas
 
 		datas.new({id="list_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
-			{str="tree"},
+			{str="play"},
 			{str="console"},
+			{str="find"},
 		}})
 
-		datas.new({id="run_mode"  ,class="list",  hooks=gui.hooks,num=2,list={
-			{str="none"},
+		datas.new({id="run_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
 			{str="auto"},
 			{str="stoy"},
 			{str="vtoy"},
 			{str="fun64"},
 		}})
 
-		datas.new({id="run_play"  ,class="list",  hooks=gui.hooks,num=4,list={
-			{str="pause"},
-			{str="restart"},
+		datas.new({id="run_state"  ,class="list",  hooks=gui.hooks,num=1,list={
+			{str="error"},
+			{str="stop"},
 			{str="play"},
-			{str="autoplay"},
+			{str="pause"},
 		}})
 
-		datas.new({id="run_scale"  ,class="list",  hooks=gui.hooks,num=1,list={
-			{str="x1"},
-			{str="x2"},
-			{str="x4"},
-			{str="x8"},
-			{str="x16"},
-		}})
+		datas.new({id="run_auto"  ,class="number",  hooks=gui.hooks,num=1})
+
 	end
 end
 
@@ -353,34 +351,21 @@ function gui.hooks(act,w,dat)
 
 		elseif w.id=="run_play_restart" then
 
-			gui.master.ids.run_play_pause.state="none"
-			gui.master.ids.run_play_autoplay.state="none"
-
-			gui.datas.get("run_play"):value(2)
+			show.start_doc()
 
 		elseif w.id=="run_play_pause" then
 
-			local run_play=gui.datas.get("run_play")
-			if run_play.str=="pause" then run_play:value("play")
-			elseif run_play.str=="play" then run_play:value("pause")
-			elseif run_play.str=="autoplay" then run_play:value("pause")
-			else run_play:value("restart")
-			end
-
-			if run_play.str=="pause" then
-				gui.master.ids.run_play_pause.state="selected"
-				gui.master.ids.run_play_autoplay.state="none"
+			local run_state=gui.datas.get_string("run_state")
+			
+			if run_state=="play" then
+				gui.datas.set_string("run_state","pause")
 			else
-				gui.master.ids.run_play_pause.state="none"
-				gui.master.ids.run_play_autoplay.state="none"
+				gui.datas.set_string("run_state","play")
 			end
 
-		elseif w.id=="run_play_autoplay" then
-
-			gui.master.ids.run_play_pause.state="none"
-			gui.master.ids.run_play_autoplay.state="selected"
-
-			gui.datas.get("run_play"):value(4)
+		elseif w.id=="run_play_stop" then
+			
+			gui.datas.set_string("run_state","stop")
 
 		end
 
@@ -392,31 +377,24 @@ function gui.hooks(act,w,dat)
 
 		if w.id=="list_mode" then -- change
 
-			gui.master.ids.treefiles.hidden=true
 			gui.master.ids.console.hidden=true
-
-			if w.str=="tree" then
-
-				gui.master.ids.treefiles.hidden=false
-
-			elseif w.str=="console" then
+			gui.master.ids.find.hidden=true
+			gui.master.ids.play.hidden=true
+			
+			if w.str=="console" then
 
 				gui.master.ids.console.hidden=false
 
+			elseif w.str=="find" then
+
+				gui.master.ids.find.hidden=false
+
+			elseif w.str=="play" then
+
+				gui.master.ids.play.hidden=false
+
 			end
 
-		elseif w.id=="run_play" then -- change
-
-			print(w:value())
-
-		elseif w.id=="run_scale" then -- change
-	
-			local ss=math.pow(2,w:value()-1)
-			
-			gui.master.ids.runscale.sx=ss
-			gui.master.ids.runscale.sy=ss
-
-			gui.master:layout()
 		end
 
 --print("VALUE",w.id)
@@ -471,6 +449,7 @@ local lay=
 				}
 			},
 			{
+--[[
 				class="split",split_axis="y",split_order=1,split_num=gsiz*1,hx=200,
 				{
 					id="bar1",class="fill",
@@ -481,7 +460,8 @@ local lay=
 					},
 				},
 				{
-					class="split",split_axis="y",split_order=2,split_num=gsiz*1,
+]]
+					class="split",split_axis="y",split_order=2,split_num=gsiz*1,hx=300,
 					{
 						id="dock_split",
 						class="split_drag",split_axis="y",split_order=2,--split_aspect=1.00,
@@ -489,11 +469,44 @@ local lay=
 							id="dock1",
 							{
 								id="list",
-								size="full",style="flat",hx=200,highlight="none",color=0,
+								size="full",style="flat",hx=300,highlight="none",color=0,
 								{
 									id="treefiles",hidden=false,
 									class="tree",size="full",hooks=gui.hooks,
 									items=collect.mounts,
+								},
+							},
+						},
+						{
+							id="dock2",
+							style="flat",highlight="none",color=0,
+							hy=300,
+							{
+								size="full",
+								{
+									id="play",hidden=false,
+									color=0xff000000,
+									skin=0,
+									size="full",
+--									sx=1,sy=1,
+--									smode="topleft",
+									{
+										id="runfbo",
+										size="full",
+										hz=4096, -- depth please
+										fbo=true, -- we assume we are in an fbo when we render
+										{
+											id="run",
+											size="full",
+											solid=true,
+											can_focus=true,
+										},
+									},
+									{
+										id="runtext",hidden=true,
+										class="texteditor",size="full",style="flat",color=0,
+										opts={readonly=true,gutter_disable=true,word_wrap=true},
+									},
 								},
 								{
 									id="console",hidden=true,
@@ -502,69 +515,61 @@ local lay=
 									--fbo=true, --  scale using fbo so it is smoothed
 									console_command=gui.console_command,
 								},
-							},
-						},
-						{
-							id="dock2",
-							style="flat",highlight="none",color=0,
-							{
-								size="full",
 								{
-									id="runscale",
-									size="full",
-									sx=1,sy=1,
-									smode="topleft",
-									{
-										id="runfbo",
-										size="full",
-										hz=4096, -- depth please
-										fbo=true,
-										{
-											id="run",
-											size="full",
-											solid=true,
-											can_focus=true,
-										}
-									},
-									color=0xff000000,
+									id="find",hidden=true,
+									size="full",style="flat",
+									color=0xff008000,
 									skin=0,
-								},
-								{
-									id="runtext",
-									class="texteditor",size="full",style="flat",color=0,
-									opts={readonly=true,gutter_disable=true,word_wrap=true},
-								},
+								}
 							}
 						},							
 					},
 					{
 						id="bar2",class="fill",
 						style="flat",highlight="none",color=0,
+						fbo=true,
 						{
-							id="run_play_restart",hooks=gui.hooks,
+							class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
+							data=gui.datas.get("list_mode"),
+						},
+						{
+							id="run_play_autoplay",hooks=gui.hooks,
+							class="checkbox",hx=gsiz*1,hy=gsiz*1,color=1,
+							text_true=">>",
+							text_false="--",
+							data=gui.datas.get("run_auto"),
+						},
+						{
+							id="run_play_stop",hooks=gui.hooks,
 							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
-							text="<",
+							text="[]",
+							data=gui.datas.get("run_state"),
+							data_selected="stop",
 						},
 						{
 							id="run_play_pause",hooks=gui.hooks,
 							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
 							text="||",
+							data=gui.datas.get("run_state"),
+							data_selected="pause",
 						},
 						{
-							id="run_play_autoplay",hooks=gui.hooks,
+							id="run_play_restart",hooks=gui.hooks,
 							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
 							text=">",
+							data=gui.datas.get("run_state"),
+							data_selected="play",
 						},
-						{
-							class="menudrop",hx=gsiz*2,hy=gsiz,color=0,
-							data=gui.datas.get("run_mode"),
-						},
-						{
-							class="menudrop",hx=gsiz,hy=gsiz,color=0,
-							data=gui.datas.get("run_scale"),
-						},
+--						{
+--							class="menudrop",hx=gsiz*2,hy=gsiz,color=0,
+--							data=gui.datas.get("run_mode"),
+--						},
+--						{
+--							class="menudrop",hx=gsiz,hy=gsiz,color=0,
+--							data=gui.datas.get("run_scale"),
+--						},
 					},
-				},
+--				},
 			},
 		},
 	},

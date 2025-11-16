@@ -150,7 +150,23 @@ uniform float     iSampleRate;           // sound sample rate (i.e., 44100)
 
 ]]
 
-local i=0
+	show_vtoy.start=function(str)
+	
+		show_vtoy.itime=0
+
+		local pname="swanky_edit_show_vtoy"
+	
+		gl.headers[pname]=vtoy_head..str..vtoy_tail
+		gl.program_source(pname,{source=gl.headers[pname]})
+		local suc,err = pcall( function() gl.program(pname) end )
+
+		if not suc then
+			show.set_error(err)
+		end
+
+	end
+	show_vtoy.itime=0
+
 	show_vtoy.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
 
 --print(px,py,hx,hy)
@@ -159,25 +175,14 @@ local i=0
 
 		local pname="swanky_edit_show_vtoy"
 
-		gl.headers[pname]=vtoy_head..gui.master.ids.texteditor.txt.get_text()..vtoy_tail
-		gl.program_source(pname,{source=gl.headers[pname]})
-		local suc,err = pcall( function() gl.program(pname) end )
+--		gui.master.ids.runtext.hidden=true
 
-		if not suc then
-
-			gui.master.ids.runtext.txt.set_text(err,"error.txt")
-			gui.master.ids.runtext.txt.set_lexer()
-
-			gui.master.ids.runtext.hidden=false
-
---			print(err)
-			return
-
+		local state=gui.datas.get("run_state").str
+		if state~="play" and state~="pause" then return end -- nothing to draw
+		if state=="play" then -- update and draw
+			show_vtoy.itime=itimshow_vtoy.itimee+1
 		end
 
-		gui.master.ids.runtext.hidden=true
-
-		i=i+1
 --		if i%60 == 0 then print(i/60) end
 --		print(hx,hy)
 		
@@ -235,7 +240,7 @@ local suc,err=pcall(function()
 
 -- shadertoy compatability
 			gl.Uniform3f( p:uniform("iResolution"), hx,hy,0 )
-			gl.Uniform1f( p:uniform("iTime"), i/60 )
+			gl.Uniform1f( p:uniform("iTime"), show_vtoy.itime/60 )
 
 			gl.UniformMatrix4f( p:uniform("iCamera"), show.cam )
 			gl.UniformMatrix4f( p:uniform("iCamera2D"), show.cam2d )

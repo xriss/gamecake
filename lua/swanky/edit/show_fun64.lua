@@ -47,76 +47,58 @@ M.bake=function(oven,show_fun64)
 		end
 	end
 
-	show_fun64.update_draw=function()
-	
-		if system.is_setup then
-			gui.master.ids.runtext.hidden=true
-		else
-			gui.master.ids.runtext.hidden=false
-		end
-		
-		local t=gui.datas.get("run_play")
---		print(t.str,t.num)
-
-		local setup=function(str)
-			str=str or gui.master.ids.texteditor.txt.get_text()
-			show_fun64.last_str=str
-			system.clean()
-			gl.shader_sources( str , "" ) -- also try and load GLSL embeded in the lua file -> #SHADER
-			system.setup(str)
-		end
-		local update=function()
-			if system.is_setup then
-				system.update()
-			end
-		end
-		local draw=function()
-			if system.is_setup then				
-				system.draw_into_screen()
-			end
-		end
+	do
 		local wrap=function(f)
 			return function(...)
 				local suc,err = pcall(f,...)
 				if not suc then
-					gui.master.ids.runtext.txt.set_text(err,"error.txt")
+					show.set_error(err)
 				end
 			end
 		end
-		setup=wrap(setup)
-		update=wrap(update)
-		draw=wrap(draw)
 
-		if t.str=="restart" then
-
-			setup()
-			t:value("play")
-
-		elseif t.str=="pause" then
-
-			draw()
-
-		elseif t.str=="play" then
-
-			update()
-			draw()
-
-		elseif t.str=="autoplay" then
-
-			local str=gui.master.ids.texteditor.txt.get_text()
-			if show_fun64.last_str ~= str then
-				setup(str)
+		show_fun64.sys_setup=wrap(function(str)
+			gui.master.ids.runtext.hidden=true
+			str=str
+			system.clean()
+			gl.shader_sources( str , "" ) -- also try and load GLSL embeded in the lua file -> #SHADER
+			system.setup(str)
+		end)
+		show_fun64.sys_update=wrap(function()
+			if system.is_setup then
+				system.update()
 			end
+		end)
+		show_fun64.sys_draw=wrap(function()
+			if system.is_setup then				
+				system.draw_into_screen()
+			end
+		end)
+	end
 
-			update()
-			draw()
+	show_fun64.start=function(str)
+		show_fun64.sys_setup(str)
+	end
 
+	show_fun64.update_draw=function()
+	
+		local state=gui.datas.get_string("run_state")
+		if state=="play" then -- update and draw
+			show_fun64.sys_update()
+			show_fun64.sys_draw()
+		elseif state=="pause" then -- draw only
+			show_fun64.sys_draw()
 		end
 
 	end
 	
 	show_fun64.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
 	
+		local state=gui.datas.get_string("run_state")
+		if state=="stop" then -- no draw
+			return
+		end
+		
 		if system.is_setup then
 
 			local screen=system.components.screen

@@ -249,7 +249,7 @@ if EMCC then
 	}
 	
 	linkoptions{
-		"-s PTHREAD_POOL_SIZE=16",
+		"-s PTHREAD_POOL_SIZE=16", -- safer to have these available.
 		"-lidbfs.js",
 		"-v",
 --		"-s OFFSCREEN_FRAMEBUFFER",

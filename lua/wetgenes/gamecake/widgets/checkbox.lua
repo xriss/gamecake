@@ -5,7 +5,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local bit=require("bit")
-local bnot , band , bor , bxor = bit.bnot , bit.band , bit.bor , bit.bxor
+local NOT , AND , OR , XOR = bit.bnot , bit.band , bit.bor , bit.bxor
 
 --[[#lua.wetgenes.gamecake.widgets.checkbox
 
@@ -36,7 +36,7 @@ function B.update(widget)
 
 	if widget.data and widget.text_false and widget.text_true then
 		local num=widget.data.num or 0
-		widget.text= ( band(num,widget.data_mask) == 0 ) and widget.text_false or widget.text_true
+		widget.text= ( AND( num , widget.data_mask ) == 0 ) and widget.text_false or widget.text_true
 	end
 
 	return widget.meta.update(widget)
@@ -52,7 +52,7 @@ function B.class_hooks(hook,widget,dat)
 	if hook=="click" then
 		if widget.data then
 			local num=widget.data.num or 0
-			widget.data:value( ( band(num,widget.data_mask) == 0 ) and bor(num,widget.data_mask) or band(num,bnot(widget.data_mask)) )
+			widget.data:value( XOR( num , widget.data_mask ) )
 		end
 	end
 end

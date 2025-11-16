@@ -42,6 +42,11 @@ M.bake=function(oven,show)
 	show.clean=function()
 	end
 	
+	show.autostart=false
+	show.autofname=""
+	show.autocode=""
+	show.automode=""
+	
 	show.cam=M4()
 	show.rot=V3()
 	show.pos=V3()
@@ -102,44 +107,41 @@ M.bake=function(oven,show)
 	
 	show.cam_build()
 	
-	show.mode=nil
-	show.mode_height=nil
-	show.update=function()
+--	show.mode=nil
+--	show.mode_height=nil
 	
-		local mode=show.get_mode()
-		if mode~=show.mode then
-			show.mode=mode
-			if mode=="stoy" or mode=="vtoy" or mode=="fun64" then
+--		if mode~=show.mode then
+--			show.mode=mode
+--			if mode=="stoy" or mode=="vtoy" or mode=="fun64" then
 
-				local ss=math.pow(2,gui.master.datas.get_value("run_scale")-1)
-				
-				gui.master.ids.runscale.sx=ss
-				gui.master.ids.runscale.sy=ss
+--				local ss=math.pow(2,gui.master.datas.get_value("run_scale")-1)				
+--				gui.master.ids.play.sx=ss
+--				gui.master.ids.play.sy=ss
 
-				if gui.master.ids.dock2.hy > 0 then
-					show.mode_height=gui.master.ids.dock2.hy
-				end
-				if not show.mode_height or show.mode_height<ss or show.mode_height>gui.master.ids.dock2.parent.hy-ss then
-					show.mode_height = math.floor(gui.master.ids.dock2.parent.hy/2)
-				end
-				gui.master.ids.dock2.hy=show.mode_height
-				gui.master:layout()
+--				if gui.master.ids.dock2.hy > 0 then
+--					show.mode_height=gui.master.ids.dock2.hy
+--				end
+--				if not show.mode_height or show.mode_height<ss or show.mode_height>gui.master.ids.dock2.parent.hy-ss then
+--					show.mode_height = math.floor(gui.master.ids.dock2.parent.hy/2)
+--				end
+--				gui.master.ids.dock2.hy=show.mode_height
+--				gui.master:layout()
 
-			else
+--			else
 
-				gui.master.ids.runscale.sx=1
-				gui.master.ids.runscale.sy=1
+--				gui.master.ids.play.sx=1
+--				gui.master.ids.play.sy=1
 
-				if gui.master.ids.dock2.hy > 0 then
-					show.mode_height=gui.master.ids.dock2.hy
-				end
-				gui.master.ids.dock2.hy=0
-				gui.master:layout()
+--				if gui.master.ids.dock2.hy > 0 then
+--					show.mode_height=gui.master.ids.dock2.hy
+--				end
+--				gui.master.ids.dock2.hy=0
+--				gui.master:layout()
 			
-			end
-		end
+--			end
+--		end
 
-	end
+--	end
 	
 	show.get_mode=function()
 		local d=gui.datas.get("run_mode")
@@ -165,7 +167,7 @@ M.bake=function(oven,show)
 		local buildcam
 
 		do
-			local mode=show.get_mode()
+			local mode=show.automode
 			local it=show[mode]
 			if it and it.widget_msg then
 				it.widget_msg(widget,m)
@@ -331,9 +333,77 @@ M.bake=function(oven,show)
 			show.cam_build()
 		end
 	end
+
+	show.start_doc=function()
+		show.autocode = gui.master.ids.texteditor.txt.get_text()
+		show.automode = show.get_mode()
+		local doc=docs.list[1]
+		show.autofname = doc and doc.filename or ""
+		show.autostart = 0
+	end
+
+	show.update=function()
+
+		local mode=show.get_mode() -- only change mode here
+		local run_auto=gui.datas.get_number("run_auto")
+		local run_state=gui.datas.get_string("run_state")
+
+		if run_auto==1 and not ( run_state=="stop" or run_state=="pause" ) then -- restart on text change unless we are paused or stopped
+		
+			local doc=docs.list[1]
+			local fname=doc and doc.filename or ""
+			local code=gui.master.ids.texteditor.txt.get_text()
+			if show.automode ~= mode then
+				show.start_doc()
+			elseif show.autofname ~= fname then
+				show.start_doc()
+			elseif show.autocode ~= code then
+				show.start_doc()
+				if mode=="fun64" then -- slower fun64 reloads
+					show.autostart = 60*1
+				end
+			end
+					
+		end
+
+		if show.autostart then
+			show.autostart=show.autostart-1 -- delay the change a little
+			if show.autostart<=0 then
+				show.autostart=false
+				show.start(show.autocode)
+			end	
+		end
+
+	end
 	
+	show.start=function(str)
+		gui.datas.set_string("run_state","play")
+		gui.master.ids.runtext.hidden=true
+
+		local mode=show.automode
+		local it=show[mode]
+
+		if it and it.start then
+			if not str then -- auto get code
+				gui.master.ids.texteditor.txt.get_text()
+			end
+			it.start(str)
+
+			-- clear auto flags
+			show.autostart = false
+		end
+	end
+
+	show.set_error=function(err)
+		gui.datas.set_string("run_state","error")
+		gui.master.ids.runtext.hidden=false
+
+		gui.master.ids.runtext.txt.set_text(err,"error.txt")
+		gui.master.ids.runtext.txt.set_lexer()
+	end
+
 	show.update_draw=function()
-		local mode=show.get_mode()
+		local mode=show.automode
 		local it=show[mode]
 
 		if it and it.update_draw then
@@ -342,8 +412,10 @@ M.bake=function(oven,show)
 	end
 
 	show.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
-		local mode=show.get_mode()
+		local mode=show.automode
 		local it=show[mode]
+
+--print("draw",mode,it,px,py,hx,hy)
 
 		if it then
 			it.widget_draw(px,py,hx,hy)

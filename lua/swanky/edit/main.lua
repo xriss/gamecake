@@ -169,15 +169,20 @@ M.bake=function(oven,main)
 				gui.master.set_focus( gui.master.ids.texteditor.scroll_widget.pan )
 			end
 		end
+
 		gui.master.ids.runfbo:set_dirty()
+		gui.master.ids.run:set_dirty()
 
 		end
 	end
 
 	main.draw=function()
 
-		show.update_draw()
-			
+		local state=gui.datas.get_string("run_state")
+		if state=="play" then -- update and draw
+			show.update_draw() -- called outside of the gui to prepare fbos
+		end
+
 --  we want the main view to track the window size
 
 		oven.win:info()

@@ -28,7 +28,15 @@ any change there is copied here instead?
 function B.update(widget)
 
 	if widget.data then
-		widget.text=widget.data:tostring()
+		if widget.data_selected then
+			if widget.data:tostring()==widget.data_selected then
+				widget.state="selected"
+			else
+				widget.state="none"
+			end
+		else
+			widget.text=widget.data:tostring()
+		end
 	end
 
 	return widget.meta.update(widget)
