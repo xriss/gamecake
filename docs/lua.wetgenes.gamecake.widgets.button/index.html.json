@@ -2786,7 +2786,7 @@
    "body": "<pre><code>see lua.wetgenes.gamecake.widgets.meta.setup for generic options\n</code></pre>\n<p>As a button we always need to be solid so this is forced to true.</p>\n<p>Also cursor will be set to &quot;hand&quot; if it is not already set so you can \ntell it is a button when you hover over it.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/button.lua",
-   "line": 37,
+   "line": 45,
    "name": "lua.wetgenes.gamecake.widgets.button.setup",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/button.lua"
   },
