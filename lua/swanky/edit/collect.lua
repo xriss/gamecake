@@ -439,6 +439,10 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 		
 		-- write data to disk
 		local retext=collect.mounts:write_file( it.meta.path , text )
+		if not retext then
+			print("ERROR faild to save file : ",it.meta.path)
+			return
+		end
 		if retext and retext~=text then -- doc was auto updated on save
 			it.txt.mark(0,0,it.txt.hy+1,0)
 			it.txt.undo.replace(retext)

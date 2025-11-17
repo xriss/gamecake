@@ -116,5 +116,19 @@ M.functions.get=function(opts)
 end
 
 M.functions.set=function(opts)
+	local tasks=opts.tasks -- must be running tasks as returned from wetgenes.tasks.create()
+	
+	local baseurl=opts.baseurl or M.baseurl
+
+	local headers={}
+	headers["Accept"]="application/vnd.github+json"
+	headers["X-GitHub-Api-Version"]="2022-11-28"
+	headers["Authorization"]="Bearer "..assert(opts.token)
+	
+	local memo={headers=headers,method="PATCH",url=baseurl.."/gists/"..opts.gid,body=djon.save(opts.body)}
+	local result=tasks:http(memo)
+	local body=djon.load(result.body or "{}")
+
+	return body
 end
 

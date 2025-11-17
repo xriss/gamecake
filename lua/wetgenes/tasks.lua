@@ -879,7 +879,7 @@ M.tasks.http_code=function(linda,task_id,task_idx)
 		if memo.json then -- we want to send all these values in a POST json body
 
 			memo.body=wjson.encode(memo.json)
-			memo.method="POST"
+			memo.method=memo.method or "POST"
 			memo.headers["Content-Type"]="application/json"
 			
 		end
@@ -891,7 +891,7 @@ M.tasks.http_code=function(linda,task_id,task_idx)
 				t[#t+1]=urlencode(n) .. "=" .. urlencode(v)
 			end
 			memo.body=table.concat(t,"&")
-			memo.method="POST"
+			memo.method=memo.method or "POST"
 			memo.headers["Content-Type"]="application/x-www-form-urlencoded"
 			
 		end

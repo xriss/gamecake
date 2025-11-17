@@ -492,7 +492,7 @@ PRINT("read_gist",path)
 
 end
 
-M.gist.write_file=function(gist,path)
+M.gist.write_file=function(gist,path,data)
 PRINT("write_gist",path)
 
 	local pp=wpath.split(path)
@@ -505,7 +505,27 @@ PRINT("write_gist",path)
 	if gfname=="" then gfname=nil end
 
 	if gid and gfname then
+
+		if not gist.collect.config.cloud.gist_token then
+			return nil
+		end
 	
+		local opts={}
+		opts.tasks=gist.collect.oven.tasks
+		opts.gid=gid
+		opts.token=gist.collect.config.cloud.gist_token
+		
+		if gfname==".meta" then -- no save meta
+
+			return data
+		else
+			opts.body={files={}}
+			opts.body.files[gfname]={content=data}
+			local result=wgist.set(opts)
+-- we get result?
+			return result.files and result.files[gfname] and result.files[gfname].content
+		end
+
 	end
 
 end
