@@ -429,7 +429,8 @@ M.gist.fetch_dir=function(gist,path)
 	local pp=wpath.split(path)
 	local gid,gfname
 	if pp[1]=="" and pp[2]=="gists" then
-		gid=pp[3]
+		gid=pp[3] or ""
+		gid=gid:match("[^%.]*$") -- id is end part, possibly after last .
 		gfname=pp[4]
 	end
 	if gid=="" then gid=nil end
@@ -448,7 +449,7 @@ M.gist.fetch_dir=function(gist,path)
 		opts.gid=gid
 
 		local result=wgist.get(opts)
-		for n,v in pairs(result.files) do
+		for n,v in pairs(result.files or {}) do
 			dir[#dir+1]=gist:new_item(n)
 		end
 		dir[#dir+1]=gist:new_item(".meta")
@@ -465,6 +466,7 @@ PRINT("read_gist",path)
 	local gid,gfname
 	if pp[1]=="" and pp[2]=="gists" then
 		gid=pp[3]
+		gid=gid:match("[^%.]*$") -- id is end part, possibly after last .
 		gfname=pp[4]
 	end
 	if gid=="" then gid=nil end
@@ -500,6 +502,7 @@ PRINT("write_gist",path)
 	local gid,gfname
 	if pp[1]=="" and pp[2]=="gists" then
 		gid=pp[3]
+		gid=gid:match("[^%.]*$") -- id is end part, possibly after last .
 		gfname=pp[4]
 	end
 	if gid=="" then gid=nil end
