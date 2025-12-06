@@ -4,7 +4,7 @@
 
   // bookmarked list of gist IDs
   gist_bookmarks = [
-   Fun64.b1897ef9df5741f5ccaad9d0928616d4
+   Fun64s.b1897ef9df5741f5ccaad9d0928616d4
    ShaderToys.b87dd0ae57b04b4af3788fb137511dcf
   ]
 
