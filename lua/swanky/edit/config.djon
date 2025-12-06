@@ -8,7 +8,7 @@
    ShaderToys.b87dd0ae57b04b4af3788fb137511dcf
   ]
 
-  // github access token, this is of course a secret
+  // github access token, this is of course, a secret
   gist_token = FALSE
 
   // bookmarked list of github usernames
