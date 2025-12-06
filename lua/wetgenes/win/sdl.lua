@@ -83,7 +83,7 @@ sdl.screen=function()
 -- in which case just lie and return 640x480
 	if not b then return 640,480 end
 
-	return b.w,b.h
+	return b.w,b.h,b.x,b.y
 end
 
 

@@ -53,7 +53,6 @@ M.default_readme={}
 do
 	local default_readme_filename="lua/swanky/edit/readme.md"
 	local default_readme=assert(wzips.readfile(default_readme_filename),"file not found: "..default_readme_filename)
-	print(default_readme)
 
 	local lines=wstr.split_lines(default_readme)
 	
@@ -63,7 +62,7 @@ do
 		if line:sub(1,2)=="#^" then -- new chunk
 			local n=line:find("%s")
 			if n>3 then
-				name=line:sub(3,n)
+				name=line:sub(3,n-1)
 				if not M.default_readme[name] then M.default_readme[name]={} end
 				chunk=M.default_readme[name]
 			else
@@ -76,8 +75,11 @@ do
 		end
 	end
 	for name,chunk in pairs(M.default_readme) do
-		M.default_readme[name]=table.concat(chunk,"\n")
+		M.default_readme[name]=table.concat(chunk,"")
 	end
+
+--	DUMP(M.default_readme)
+
 end
 
 M.tables=wgetsql.prepare_tables({

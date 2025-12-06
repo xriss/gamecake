@@ -438,8 +438,8 @@ os.exit()
 			set_inf_arg("vsync","win-vsync",tonumber)
 
 			-- auto center dependng on size
-			inf.x=math.floor((screen.width-inf.width)*(opts.win_px or 0.5))
-			inf.y=math.floor((screen.height-inf.height)*(opts.win_py or 0.5))
+			inf.x=screen.x+math.floor((screen.width-inf.width)*(opts.win_px or 0.5))
+			inf.y=screen.y+math.floor((screen.height-inf.height)*(opts.win_py or 0.5))
 			if inf.x<0 then inf.x=0 end
 			if inf.y<0 then inf.y=0 end
 
