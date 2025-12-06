@@ -366,6 +366,7 @@ M.file.write_file=function(_,path,text)
 	if f then
 		local d=f:write(text)
 		f:close()
+		return text -- success
 	end
 end
 
