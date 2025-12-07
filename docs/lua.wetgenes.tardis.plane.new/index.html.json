@@ -2778,7 +2778,7 @@
    "body": "<pre><code>plane = tardis.plane.new(p,n)\n</code></pre>\n<p>Create a new plane and optionally set it to the given values.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2978,
+   "line": 3005,
    "name": "lua.wetgenes.tardis.plane.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

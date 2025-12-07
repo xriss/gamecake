@@ -2778,7 +2778,7 @@
    "body": "<pre><code>r=a:scalar(s,r)\n</code></pre>\n<p>Multiply all value in array by number.</p>\n<p>If r is provided then the result is written into r and returned otherwise a is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 683,
+   "line": 710,
    "name": "lua.wetgenes.tardis.array.scalar",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
