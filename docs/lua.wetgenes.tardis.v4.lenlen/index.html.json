@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 645,
+   "count": 647,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 634,
+   "count": 636,
    "name": "lua.wetgenes"
   },
   {
@@ -1742,11 +1742,11 @@
    "name": "lua.wetgenes.syncs"
   },
   {
-   "count": 174,
+   "count": 176,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 36,
+   "count": 38,
    "name": "lua.wetgenes.tardis.array"
   },
   {
@@ -1788,6 +1788,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.aset"
   },
   {
    "count": 1,
@@ -1840,6 +1844,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.nset"
   },
   {
    "count": 1,
@@ -2778,7 +2786,7 @@
    "body": "<pre><code>value = v4:lenlen()\n</code></pre>\n<p>Returns the length of this vector, squared, this is often all you need\nfor comparisons so lets us skip the sqrt.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2510,
+   "line": 2563,
    "name": "lua.wetgenes.tardis.v4.lenlen",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

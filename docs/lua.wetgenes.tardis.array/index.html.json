@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 645,
+   "count": 647,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 634,
+   "count": 636,
    "name": "lua.wetgenes"
   },
   {
@@ -1742,11 +1742,11 @@
    "name": "lua.wetgenes.syncs"
   },
   {
-   "count": 174,
+   "count": 176,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 36,
+   "count": 38,
    "name": "lua.wetgenes.tardis.array"
   },
   {
@@ -1788,6 +1788,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.aset"
   },
   {
    "count": 1,
@@ -1840,6 +1844,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.nset"
   },
   {
    "count": 1,
@@ -2776,7 +2784,7 @@
  "_list": [
   {
    "body": "<p>Array is the base class for all other tardis classes, it is just a\nstream of numbers, probably in a table but possibly a chunk of f32\nvalues in a userdata.</p>\n",
-   "count": 36,
+   "count": 38,
    "file": "../lua/wetgenes/tardis.lua",
    "line": 133,
    "name": "lua.wetgenes.tardis.array",
@@ -2842,7 +2850,7 @@
    "body": "<pre><code>r=it:abs(r)\nr=it:abs(it.new())\n</code></pre>\n<p>Perform math.abs on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 498,
+   "line": 551,
    "name": "lua.wetgenes.tardis.array.abs",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2850,7 +2858,7 @@
    "body": "<pre><code>r=it:acos(r)\nr=it:acos(it.new())\n</code></pre>\n<p>Perform math.acos on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 663,
+   "line": 716,
    "name": "lua.wetgenes.tardis.array.acos",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2858,15 +2866,23 @@
    "body": "<pre><code>r=it:add(b,r)\nr=it:add(b,it.new())\n</code></pre>\n<p>Add b to it. b may be a number or another array of the same size as this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 382,
+   "line": 435,
    "name": "lua.wetgenes.tardis.array.add",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
+   "body": "<pre><code>a=a:aset({1,2,3,4})\n</code></pre>\n<p>Dumber version of set that must be an array of numbers and does not repeat \nthe last value or stop if we provide too many values.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 282,
+   "name": "lua.wetgenes.tardis.array.aset",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
    "body": "<pre><code>r=it:asin(r)\nr=it:asin(it.new())\n</code></pre>\n<p>Perform math.asin on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 630,
+   "line": 683,
    "name": "lua.wetgenes.tardis.array.asin",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2874,7 +2890,7 @@
    "body": "<pre><code>r=it:atan(r)\nr=it:atan(it.new())\n</code></pre>\n<p>Perform math.atan on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 696,
+   "line": 749,
    "name": "lua.wetgenes.tardis.array.atan",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2882,7 +2898,7 @@
    "body": "<pre><code>r=it:ceil(r)\nr=it:ceil(it.new())\n</code></pre>\n<p>Perform math.ceil on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 532,
+   "line": 585,
    "name": "lua.wetgenes.tardis.array.ceil",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2890,7 +2906,7 @@
    "body": "<pre><code>a=a:compare(b)\na=a:compare(1,2,3,4)\n</code></pre>\n<p>Are the numbers in b the same as the numbers in a, this function will\nreturn true if they are and false if they are not.</p>\n<p>If the arrays are of different lengths then this will return false.</p>\n<p>Numbers to test for can be given explicitly in the arguments and we\nfollow the same one level of tables rule as we do with array.set so any\nclass derived from array can be used.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 747,
+   "line": 800,
    "name": "lua.wetgenes.tardis.array.compare",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2898,7 +2914,7 @@
    "body": "<pre><code>r=it:cos(r)\nr=it:cos(it.new())\n</code></pre>\n<p>Perform math.cos on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 647,
+   "line": 700,
    "name": "lua.wetgenes.tardis.array.cos",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2906,7 +2922,7 @@
    "body": "<pre><code>r=it:exp(r)\nr=it:exp(it.new())\n</code></pre>\n<p>Perform math.exp on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 481,
+   "line": 534,
    "name": "lua.wetgenes.tardis.array.exp",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2914,7 +2930,7 @@
    "body": "<pre><code>r=it:floor(r)\nr=it:floor(it.new())\n</code></pre>\n<p>Perform math.floor on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 515,
+   "line": 568,
    "name": "lua.wetgenes.tardis.array.floor",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2922,7 +2938,7 @@
    "body": "<pre><code>r=it:fract(r)\nr=it:fract(it.new())\n</code></pre>\n<p>Return the fractional part of each value using math.modf.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 425,
+   "line": 478,
    "name": "lua.wetgenes.tardis.array.fract",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2930,7 +2946,7 @@
    "body": "<pre><code>r=it:log(r)\nr=it:log(it.new())\n</code></pre>\n<p>Perform math.log on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 464,
+   "line": 517,
    "name": "lua.wetgenes.tardis.array.log",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2938,7 +2954,7 @@
    "body": "<pre><code>r=it:max()\n</code></pre>\n<p>Return a single number value that is the maximum of all values in this array.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 370,
+   "line": 423,
    "name": "lua.wetgenes.tardis.array.max",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2946,7 +2962,7 @@
    "body": "<pre><code>r=it:min()\n</code></pre>\n<p>Return a single number value that is the minimum of all values in this array.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 359,
+   "line": 412,
    "name": "lua.wetgenes.tardis.array.min",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2954,7 +2970,7 @@
    "body": "<pre><code>r=a:mix(b,s,r)\n</code></pre>\n<p>Mix values between a and b where a is returned if s=0 and b is returned if s=1</p>\n<p>If r is provided then the result is written into r and returned otherwise a is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 729,
+   "line": 782,
    "name": "lua.wetgenes.tardis.array.mix",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2967,10 +2983,18 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
   {
+   "body": "<pre><code>a=a:nset(1,2,3,4)\n</code></pre>\n<p>Dumber version of set that must be number arguments and does not repeat \nthe last value or stop if we provide too many values.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/tardis.lua",
+   "line": 245,
+   "name": "lua.wetgenes.tardis.array.nset",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
+  },
+  {
    "body": "<pre><code>r=it:pow(p,r)\nr=it:pow(p,it.new())\n</code></pre>\n<p>Perform math.pow(it,p) on all values of this array. p may be a number or\nanother array of the same size as this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 442,
+   "line": 495,
    "name": "lua.wetgenes.tardis.array.pow",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2978,7 +3002,7 @@
    "body": "<pre><code>ma = ma:product(mb)\nma = ma:product(mb,r)\n</code></pre>\n<p>Look at the type and call the appropriate product function, to produce</p>\n<pre><code>mb x ma\n</code></pre>\n<p>Note the right to left application and default returning of the\nleftmost term for chaining. This seems to make the most sense.</p>\n<p>If r is provided then the result is written into r and returned\notherwise ma is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 779,
+   "line": 832,
    "name": "lua.wetgenes.tardis.array.product",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2986,7 +3010,7 @@
    "body": "<pre><code>r=it:quantize(1/1024,r)\nr=it:quantize(s,it.new())\n</code></pre>\n<p>Perform a trunc(v/s)*s on all values of this array. We recomended the\nuse of a power of two, eg 1/1024 rather than 1/1000 if you wanted 3\ndecimal digits.</p>\n<p>If r is provided then the result is written into r and returned\notherwise it is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 590,
+   "line": 643,
    "name": "lua.wetgenes.tardis.array.quantize",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -2994,7 +3018,7 @@
    "body": "<pre><code>r=it:round(r)\nr=it:round(it.new())\n</code></pre>\n<p>Perform math.floor( v+0.5 ) on all values of this array. Which will\nround up or down to the nearest integer.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 549,
+   "line": 602,
    "name": "lua.wetgenes.tardis.array.round",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -3002,7 +3026,7 @@
    "body": "<pre><code>r=a:scalar(s,r)\n</code></pre>\n<p>Multiply all value in array by number.</p>\n<p>If r is provided then the result is written into r and returned otherwise a is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 713,
+   "line": 766,
    "name": "lua.wetgenes.tardis.array.scalar",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -3010,7 +3034,7 @@
    "body": "<pre><code>a=a:set(1,2,3,4)\na=a:set({1,2,3,4})\na=a:set({1,2},{3,4})\na=a:set(function(i) return i end)\n</code></pre>\n<p>Assign some numbers to an array, all the above examples will assign 1,2,3,4 to\nthe first four slots in the given array, as you can see we allow one level of\ntables. Any class that is based on this array class can be used instead of an\nexplicit table. So we can use a v2 or v3 or m4 etc etc.</p>\n<p>if more numbers are given than the size of the array then they will be\nignored.</p>\n<p>if less numbers are given than the size of the array then the last number will\nbe repeated.</p>\n<p>if no numbers are given then nothing will be done</p>\n<p>if a function is given it will be called with the index and should\nreturn a number.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 245,
+   "line": 298,
    "name": "lua.wetgenes.tardis.array.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -3018,7 +3042,7 @@
    "body": "<pre><code>r=it:sin(r)\nr=it:sin(it.new())\n</code></pre>\n<p>Perform math.sin on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 614,
+   "line": 667,
    "name": "lua.wetgenes.tardis.array.sin",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -3026,7 +3050,7 @@
    "body": "<pre><code>r=it:sub(b,r)\nr=it:sub(b,it.new())\n</code></pre>\n<p>Subtract b from it. b may be a number or another array of the same size as this\narray.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 403,
+   "line": 456,
    "name": "lua.wetgenes.tardis.array.sub",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -3034,7 +3058,7 @@
    "body": "<pre><code>r=it:tan(r)\nr=it:tan(it.new())\n</code></pre>\n<p>Perform math.tan on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 680,
+   "line": 733,
    "name": "lua.wetgenes.tardis.array.tan",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -3042,7 +3066,7 @@
    "body": "<pre><code>r=it:trunc(r)\nr=it:trunc(it.new())\n</code></pre>\n<p>Perform math.floor on positive values and math ceil on negative values\nfor all values of this array. So a trunication that will always error\ntowards 0.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 567,
+   "line": 620,
    "name": "lua.wetgenes.tardis.array.trunc",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -3050,7 +3074,7 @@
    "body": "<pre><code>a1,a2=v2:unpack()\na1,a2,a3=v3:unpack()\na1,a2,a3,a4=v4:unpack()\n</code></pre>\n<p>Return all values in this array. Note this should be used instead of\nthe unpack function for future optimisation safety.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 333,
+   "line": 386,
    "name": "lua.wetgenes.tardis.array.unpack",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   },
@@ -3058,7 +3082,7 @@
    "body": "<pre><code>a=a:zero()\n</code></pre>\n<p>Set all values in this array to zero.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 347,
+   "line": 400,
    "name": "lua.wetgenes.tardis.array.zero",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
