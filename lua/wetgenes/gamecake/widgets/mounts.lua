@@ -598,7 +598,7 @@ M.config.fetch_dir=function(config,path)
 			]],
 		}).rows
 		for i,v in ipairs(rows) do
-			dir[#dir+1]=config:new_item(v.key)
+			dir[#dir+1]=config:new_item(v.key..".djon")
 		end
 
 	end
@@ -610,6 +610,7 @@ M.config.read_file=function(config,path)
 PRINT("read_config",path)
 	if path:sub(1,#"//config/")=="//config/" then
 		local key=path:sub(1+#"//config/")
+		if key:sub(-#".djon")==".djon" then key=key:sub(1,-6) end -- remove extension
 		local rows=config.collect.do_memo({
 			binds={
 				KEY=key,
@@ -630,6 +631,7 @@ PRINT("write_config",path)
 	if path:sub(1,#"//config/")=="//config/" then
 
 		local key=path:sub(1+#"//config/")
+		if key:sub(-#".djon")==".djon" then key=key:sub(1,-6) end -- remove extension
 		local tab
 		pcall(function() -- try and parse but ignore errors
 			tab=djon.load(data,"comments")
