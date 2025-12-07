@@ -2778,7 +2778,7 @@
    "body": "<pre><code>v3 = m4:get_translation_v3(r)\n</code></pre>\n<p>Get v3 translation from a scale/rot/trans matrix</p>\n<p>If r is provided then the result is written into r and returned\notherwise a new v3 is created and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1561,
+   "line": 1564,
    "name": "lua.wetgenes.tardis.m4.get_translation_v3",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

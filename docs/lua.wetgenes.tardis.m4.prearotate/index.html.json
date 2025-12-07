@@ -2778,7 +2778,7 @@
    "body": "<pre><code>m4 = m4:prearotate(degrees,v3a)\nm4 = m4:prearotate(degrees,v3a,r)\n</code></pre>\n<p>Pre apply a rotation in degrees around the given axis to this matrix.</p>\n<p>If r is provided then the result is written into r and returned\notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1778,
+   "line": 1781,
    "name": "lua.wetgenes.tardis.m4.prearotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

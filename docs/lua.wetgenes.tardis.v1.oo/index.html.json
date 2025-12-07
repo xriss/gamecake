@@ -2778,7 +2778,7 @@
    "body": "<pre><code>v1 = v1:oo()\nv1 = v1:oo(r)\n</code></pre>\n<p>One Over value. Build the reciprocal of all elements.</p>\n<p>If r is provided then the result is written into r and returned\notherwise v1 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1917,
+   "line": 1920,
    "name": "lua.wetgenes.tardis.v1.oo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

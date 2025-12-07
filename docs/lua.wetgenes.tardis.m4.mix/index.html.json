@@ -2778,7 +2778,7 @@
    "body": "<pre><code>m4 = m4:mix(m4b,s)\nm4 = m4:mix(m4b,s,r)\n</code></pre>\n<p>Lerp from m4 to m4b by s.</p>\n<p>If r is provided then the result is written into r and returned\notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1301,
+   "line": 1304,
    "name": "lua.wetgenes.tardis.m4.mix",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

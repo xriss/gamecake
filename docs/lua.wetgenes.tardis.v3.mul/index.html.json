@@ -2778,7 +2778,7 @@
    "body": "<pre><code>v3 = v3:mul(v3b)\nv3 = v3:mul(v3b,r)\n</code></pre>\n<p>Multiply v3 by v3b.</p>\n<p>If r is provided then the result is written into r and returned\notherwise v3 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2374,
+   "line": 2377,
    "name": "lua.wetgenes.tardis.v3.mul",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

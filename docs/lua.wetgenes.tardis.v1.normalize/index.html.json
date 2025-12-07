@@ -2778,7 +2778,7 @@
    "body": "<pre><code>v1 = v1:normalize()\nv1 = v1:normalize(r)\n</code></pre>\n<p>Adjust the length of this vector to 1.</p>\n<p>An input length of 0 will remain at 0.</p>\n<p>If r is provided then the result is written into r and returned\notherwise v1 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1949,
+   "line": 1952,
    "name": "lua.wetgenes.tardis.v1.normalize",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
