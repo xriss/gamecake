@@ -267,35 +267,62 @@ return a number.
 
 ]]
 function array.set(it,...)
+	if not (...) then return it end -- nothing to do
+	
+	local itlen=#it -- need this many values
+	local a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16=... -- try and avoid table allocation
 
-	local itlen=#it -- need this many values, if 0 then take all the values we can
-
-	local aa={...}
-
-	if type(aa[1])=="function" then
-		local f=aa[1]
-		for i=1,#it do it[i]=f(i) end -- repeat last number
+	if type(a1)=="function" then
+		for i=1,itlen do it[i]=a1(i) end -- fill
 		return it
 	end
-
+	
 	local last
 	local n=1
-	for i,v in ipairs(aa) do
-		if (itlen>0) and (itlen<n) then return it end -- got all the data we need
+	local donum;donum=function(v)
+		if n>itlen then return true end
+		if not v then v=last end
 		if type(v)=="number" then
 			last=v
 			it[n]=v
 			n=n+1
-		else
-			for ii=1,#v do local vv=v[ii] -- allow one depth of tables
-				last=vv
-				it[n]=vv
+		elseif v then -- must be number or table like thing
+			for i=1,#v do
+				local vi=v[i]
+				if n>itlen then return true end
+				if not vi then vi=last end
+				last=vi
+				it[n]=vi
 				n=n+1
 			end
 		end
 	end
-	if last then
-		for i=n,#it do it[i]=last end -- repeat last number
+	if donum(a1) then return it end
+	if donum(a2) then return it end
+	if donum(a3) then return it end
+	if donum(a4) then return it end
+	if donum(a5) then return it end
+	if donum(a6) then return it end
+	if donum(a7) then return it end
+	if donum(a8) then return it end
+	if donum(a9) then return it end
+	if donum(a10) then return it end
+	if donum(a11) then return it end
+	if donum(a12) then return it end
+	if donum(a13) then return it end
+	if donum(a14) then return it end
+	if donum(a15) then return it end
+	if donum(a16) then return it end
+	if a16 and n<=itlen then
+		local aa={...} -- try the rest of the vargs
+		for i=17,#aa do
+			if donum(aa[i]) then return it end
+		end
+	end
+	if last and n<=itlen then
+		while n<=itlen do -- fill in any more repeats
+			if donum(last) then return it end
+		end
 	end
 	return it
 end
@@ -362,7 +389,7 @@ modified and returned.
 ]]
 function array.add(it,b,r)
 	r=r or it
-	if type(p=="number") then
+	if type(b)=="number" then
 		for i=1,#it do r[i]= it[i] + b end
 	else
 		for i=1,#it do r[i]= it[i] + b[i] end
@@ -384,7 +411,7 @@ modified and returned.
 ]]
 function array.sub(it,b,r)
 	r=r or it
-	if type(p=="number") then
+	if type(b)=="number" then
 		for i=1,#it do r[i]= it[i] - b end
 	else
 		for i=1,#it do r[i]= it[i] - b[i] end
@@ -423,7 +450,7 @@ modified and returned.
 ]]
 function array.pow(it,p,r)
 	r=r or it
-	if type(p=="number") then
+	if type(p)=="number" then
 		for i=1,#it do r[i]= it[i] ^ p end
 	else
 		for i=1,#it do r[i]= it[i] ^ p[i] end
