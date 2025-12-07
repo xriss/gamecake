@@ -157,6 +157,10 @@ gui.data_setup=function()
 
 		datas.new({id="run_auto"  ,class="number",  hooks=gui.hooks,num=1})
 
+		datas.new({id="find_search"  ,class="string",  hooks=gui.hooks,str=""})
+		datas.new({id="find_replace"  ,class="string",  hooks=gui.hooks,str=""})
+		datas.new({id="find_files"  ,class="string",  hooks=gui.hooks,str=""})
+
 	end
 end
 
@@ -521,10 +525,57 @@ local lay=
 									console_command=gui.console_command,
 								},
 								{
-									id="find",hidden=true,
+									id="find",hidden=true,class="fill",
 									size="full",style="flat",
-									color=0xff008000,
-									skin=0,
+									fbo=true,
+									{
+										class="text",size="fullx",hx=gsiz*1,hy=gsiz*1,
+										text=" Search for: ",
+									},
+									{
+										class="textedit",size="fullx",hx=gsiz*1,hy=gsiz*1,
+										color=0,
+										data="find_search",
+									},
+									{
+										class="text",size="fullx",hx=gsiz*1,hy=gsiz*1,
+										text=" Replace with: ",
+									},
+									{
+										class="textedit",size="fullx",hx=gsiz*1,hy=gsiz*1,
+										color=0,
+										data="find_replace",
+									},
+									{
+										class="text",size="fullx",hx=gsiz*1,hy=gsiz*1,
+										text=" Look in files: ",
+									},
+									{
+										class="textedit",size="fullx",hx=gsiz*1,hy=gsiz*1,
+										color=0,
+										data="find_files",
+									},
+									{
+										class="text",size="fullx",hx=gsiz*1,hy=gsiz*1,
+										text="",
+									},
+									{
+										id="find_goto",hooks=gui.hooks,
+										class="button",hx=gsiz*3,hy=gsiz*1,color=1,
+										text="find",
+									},
+									{
+										id="find_replace",hooks=gui.hooks,
+										class="button",hx=gsiz*3,hy=gsiz*1,color=1,
+										text="replace",
+									},
+--[[
+									{
+										id="find_replace all",hooks=gui.hooks,
+										class="button",hx=gsiz*5,hy=gsiz*1,color=1,
+										text="replace all",
+									},
+]]
 								}
 							}
 						},							
@@ -533,10 +584,6 @@ local lay=
 						id="bar2",class="fill",
 						style="flat",highlight="none",color=0,
 						fbo=true,
-						{
-							class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
-							data="list_mode",
-						},
 						{
 							id="run_play_autoplay",hooks=gui.hooks,
 							class="checkbox",hx=gsiz*1,hy=gsiz*1,color=1,
@@ -564,6 +611,11 @@ local lay=
 							text=">",
 							data="run_state",
 							data_selected="play",
+						},
+						{
+							class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
+							data="list_mode",
+							menu_px=0,menu_py=-2.9, -- menu position hacks
 						},
 					},
 --				},
