@@ -242,6 +242,59 @@ also control its base length.
 ]]
 function array.new(...) return setmetatable({},array):set(...) end
 
+--[[#lua.wetgenes.tardis.array.nset
+
+	a=a:nset(1,2,3,4)
+
+Dumber version of set that must be number arguments and does not repeat 
+the last value or stop if we provide too many values.
+
+]]
+function array.nset(it,...)
+	local a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17=... -- try and avoid table allocation
+	if not a1 then return it end -- nothing to do
+	local n=1
+	if not a1  then return it end ; it[1]=a1
+	if not a2  then return it end ; it[2]=a2
+	if not a3  then return it end ; it[3]=a3
+	if not a4  then return it end ; it[4]=a4
+	if not a5  then return it end ; it[5]=a5
+	if not a6  then return it end ; it[6]=a6
+	if not a7  then return it end ; it[7]=a7
+	if not a8  then return it end ; it[8]=a8
+	if not a9  then return it end ; it[9]=a9
+	if not a10 then return it end ; it[10]=a10
+	if not a11 then return it end ; it[11]=a11
+	if not a12 then return it end ; it[12]=a12
+	if not a13 then return it end ; it[13]=a13
+	if not a14 then return it end ; it[14]=a14
+	if not a15 then return it end ; it[15]=a15
+	if not a16 then return it end ; it[16]=a16
+	if a17 then
+		local aa={...} -- try the rest of the vargs
+		for i=17,#aa do
+			it[i]=aa[i]
+		end
+	end
+	return it
+end
+
+--[[#lua.wetgenes.tardis.array.aset
+
+	a=a:aset({1,2,3,4})
+
+Dumber version of set that must be an array of numbers and does not repeat 
+the last value or stop if we provide too many values.
+
+]]
+function array.aset(it,a)
+	if not a[1] then return it end -- nothing to do
+	for i=1,#a do
+		it[i]=a[i]
+	end
+	return it
+end
+
 --[[#lua.wetgenes.tardis.array.set
 
 	a=a:set(1,2,3,4)
@@ -270,7 +323,7 @@ function array.set(it,...)
 	if not (...) then return it end -- nothing to do
 	
 	local itlen=#it -- need this many values
-	local a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16=... -- try and avoid table allocation
+	local a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17=... -- try and avoid table allocation
 
 	if type(a1)=="function" then
 		for i=1,itlen do it[i]=a1(i) end -- fill
@@ -321,7 +374,7 @@ function array.set(it,...)
 	if donum(a14) then return dofill(it) end
 	if donum(a15) then return dofill(it) end
 	if donum(a16) then return dofill(it) end
-	if a16 and n<=itlen then
+	if a17 and n<=itlen then
 		local aa={...} -- try the rest of the vargs
 		for i=17,#aa do
 			if donum(aa[i]) then return dofill(it) end
