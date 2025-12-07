@@ -280,8 +280,8 @@ function array.set(it,...)
 	local last
 	local n=1
 	local donum;donum=function(v)
-		if n>itlen then return true end
-		if not v then v=last end
+		if not v then return true end
+		if itlen>0 and n>itlen then return true end
 		if type(v)=="number" then
 			last=v
 			it[n]=v
@@ -289,7 +289,7 @@ function array.set(it,...)
 		elseif v then -- must be number or table like thing
 			for i=1,#v do
 				local vi=v[i]
-				if n>itlen then return true end
+				if itlen>0 and n>itlen then return true end
 				if not vi then vi=last end
 				last=vi
 				it[n]=vi
@@ -297,34 +297,37 @@ function array.set(it,...)
 			end
 		end
 	end
-	if donum(a1) then return it end
-	if donum(a2) then return it end
-	if donum(a3) then return it end
-	if donum(a4) then return it end
-	if donum(a5) then return it end
-	if donum(a6) then return it end
-	if donum(a7) then return it end
-	if donum(a8) then return it end
-	if donum(a9) then return it end
-	if donum(a10) then return it end
-	if donum(a11) then return it end
-	if donum(a12) then return it end
-	if donum(a13) then return it end
-	if donum(a14) then return it end
-	if donum(a15) then return it end
-	if donum(a16) then return it end
+	local dofill=function()
+		if last and n<=itlen then
+			while n<=itlen do -- fill in any more repeats
+				if donum(last) then return it end
+			end
+		end
+		return it
+	end
+	if donum(a1) then return dofill(it) end
+	if donum(a2) then return dofill(it) end
+	if donum(a3) then return dofill(it) end
+	if donum(a4) then return dofill(it) end
+	if donum(a5) then return dofill(it) end
+	if donum(a6) then return dofill(it) end
+	if donum(a7) then return dofill(it) end
+	if donum(a8) then return dofill(it) end
+	if donum(a9) then return dofill(it) end
+	if donum(a10) then return dofill(it) end
+	if donum(a11) then return dofill(it) end
+	if donum(a12) then return dofill(it) end
+	if donum(a13) then return dofill(it) end
+	if donum(a14) then return dofill(it) end
+	if donum(a15) then return dofill(it) end
+	if donum(a16) then return dofill(it) end
 	if a16 and n<=itlen then
 		local aa={...} -- try the rest of the vargs
 		for i=17,#aa do
-			if donum(aa[i]) then return it end
+			if donum(aa[i]) then return dofill(it) end
 		end
 	end
-	if last and n<=itlen then
-		while n<=itlen do -- fill in any more repeats
-			if donum(last) then return it end
-		end
-	end
-	return it
+	return dofill(it)
 end
 
 --[[#lua.wetgenes.tardis.array.unpack
