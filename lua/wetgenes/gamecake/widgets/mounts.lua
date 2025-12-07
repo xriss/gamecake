@@ -610,7 +610,7 @@ M.config.read_file=function(config,path)
 PRINT("read_config",path)
 	if path:sub(1,#"//config/")=="//config/" then
 		local key=path:sub(1+#"//config/")
-		if key:sub(-#".djon")==".djon" then key=key:sub(1,-6) end -- remove extension
+		if key:sub(-#".djon")==".djon" then key=key:sub(1,-(1+#".djon")) end -- remove extension
 		local rows=config.collect.do_memo({
 			binds={
 				KEY=key,
@@ -631,7 +631,7 @@ PRINT("write_config",path)
 	if path:sub(1,#"//config/")=="//config/" then
 
 		local key=path:sub(1+#"//config/")
-		if key:sub(-#".djon")==".djon" then key=key:sub(1,-6) end -- remove extension
+		if key:sub(-#".djon")==".djon" then key=key:sub(1,-(1+#".djon")) end -- remove extension
 		local tab
 		pcall(function() -- try and parse but ignore errors
 			tab=djon.load(data,"comments")
@@ -653,5 +653,89 @@ PRINT("write_config",path)
 		})
 
 		return newdata
+	end
+end
+
+
+--------------------------------------------------------------------------------
+
+
+M.readme={}
+-- simple inherits, no tables and last has priority
+do
+	for _,it in ipairs{ M.meta , } do
+		for n,v in pairs( it ) do
+			if type(v)~="table" then
+				M.readme[n]=v
+			end
+		end
+	end
+end
+
+M.readme_metatable={__index=M.readme}
+
+local wpath=require("wetgenes.path")
+
+M.readme.is="readme"
+
+M.mount_readme=function()
+	return M.readme.setup({
+		name="//readme/",
+		path="//readme/",
+		dir={},
+		keep=true,
+	})
+end
+
+M.readme.setup=function(readme)
+	if not readme then readme={} end
+	setmetatable(readme,M.readme_metatable)		
+	if readme.path and not readme.name then -- fill in name etc from path
+		local pp=wpath.parse( wpath.unslash( wpath.resolve(readme.path) ) ) -- note this will lose one of the two starting slashes
+		readme.name=pp.file
+	end
+	return readme
+end
+
+M.readme.new_item=function(readme,name)
+	local it=readme.setup({
+		path=readme.path..name,
+		collect=readme.collect,
+		parent=readme,
+	})
+	return it
+end
+
+M.readme.fetch_dir=function(readme,path)
+	path="/"..wpath.resolve(path) -- force the // prefix
+	local dir={}
+
+	if path=="//readme/" then
+	
+		local rows={}
+		for n,v in pairs( readme.collect.readmes ) do
+			dir[#dir+1]=readme:new_item(n)
+		end
+
+	end
+	
+	return dir
+end
+
+M.readme.read_file=function(readme,path)
+PRINT("read_readme",path)
+	if path:sub(1,#"//readme/")=="//readme/" then
+		local key=path:sub(1+#"//readme/")		
+		return readme.collect.readmes[key]
+	end
+end
+
+M.readme.write_file=function(readme,path,data)
+PRINT("write_readme",path)
+
+	if path:sub(1,#"//readme/")=="//readme/" then
+
+		local key=path:sub(1+#"//readme/")
+		return nil -- no can save
 	end
 end

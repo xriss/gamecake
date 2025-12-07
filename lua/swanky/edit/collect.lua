@@ -125,6 +125,7 @@ M.bake=function(oven,collect)
 	local gui=oven.rebake(oven.modname..".gui")
 	local docs=oven.rebake(oven.modname..".docs")
 
+	collect.readmes=M.default_readme -- expose readmes
 
 	collect.oven=oven -- back link for meta access
 
@@ -140,11 +141,17 @@ M.bake=function(oven,collect)
 		dir={},
 		collect=collect, -- back link to this state data
 	})
+	collect.mounts_readme=wgw_mounts.readme.setup({
+		name="readme/",
+		path="//readme/",
+		dir={},
+		collect=collect, -- back link to this state data
+	})
 	collect.mounts_meta=wgw_mounts.meta.setup({
 		name="//",
 		path="//",
 		dir={},
-		dir_auto={ collect.mounts_config , collect.mounts_gist },
+		dir_auto={ collect.mounts_config , collect.mounts_gist , collect.mounts_readme },
 		keep=true,
 	})
 	collect.mounts_file=wgw_mounts.file.setup({

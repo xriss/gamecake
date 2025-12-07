@@ -96,6 +96,10 @@ M.bake=function(oven,main)
 
 		end
 
+		if not docs.list[1] then -- auto load hello.md
+			docs.manifest("//readme/hello.md"):show()
+		end
+
 		
 		gui.master.set_focus( gui.master.ids.texteditor.scroll_widget.pan )
 		gui.refresh_tree()
