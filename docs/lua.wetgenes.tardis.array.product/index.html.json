@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 647,
+   "count": 654,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 636,
+   "count": 643,
    "name": "lua.wetgenes"
   },
   {
@@ -1742,7 +1742,7 @@
    "name": "lua.wetgenes.syncs"
   },
   {
-   "count": 176,
+   "count": 183,
    "name": "lua.wetgenes.tardis"
   },
   {
@@ -1910,7 +1910,7 @@
    "name": "lua.wetgenes.tardis.line.new"
   },
   {
-   "count": 10,
+   "count": 11,
    "name": "lua.wetgenes.tardis.m2"
   },
   {
@@ -1943,6 +1943,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m2.nset"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m2.scale"
   },
   {
@@ -1950,7 +1954,7 @@
    "name": "lua.wetgenes.tardis.m2.transpose"
   },
   {
-   "count": 12,
+   "count": 13,
    "name": "lua.wetgenes.tardis.m3"
   },
   {
@@ -1987,6 +1991,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.m3.nset"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.m3.scale"
   },
   {
@@ -1998,7 +2006,7 @@
    "name": "lua.wetgenes.tardis.m3.v3"
   },
   {
-   "count": 34,
+   "count": 35,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -2056,6 +2064,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.new"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.nset"
   },
   {
    "count": 1,
@@ -2222,7 +2234,7 @@
    "name": "lua.wetgenes.tardis.type"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.v1"
   },
   {
@@ -2263,6 +2275,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.v1.nset"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.v1.oo"
   },
   {
@@ -2274,7 +2290,7 @@
    "name": "lua.wetgenes.tardis.v1.sub"
   },
   {
-   "count": 14,
+   "count": 15,
    "name": "lua.wetgenes.tardis.v2"
   },
   {
@@ -2319,6 +2335,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.v2.nset"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.v2.oo"
   },
   {
@@ -2330,7 +2350,7 @@
    "name": "lua.wetgenes.tardis.v2.sub"
   },
   {
-   "count": 15,
+   "count": 16,
    "name": "lua.wetgenes.tardis.v3"
   },
   {
@@ -2379,6 +2399,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.v3.nset"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.v3.oo"
   },
   {
@@ -2390,7 +2414,7 @@
    "name": "lua.wetgenes.tardis.v3.sub"
   },
   {
-   "count": 14,
+   "count": 15,
    "name": "lua.wetgenes.tardis.v4"
   },
   {
@@ -2428,6 +2452,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.normalize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.nset"
   },
   {
    "count": 1,
@@ -2786,7 +2814,7 @@
    "body": "<pre><code>ma = ma:product(mb)\nma = ma:product(mb,r)\n</code></pre>\n<p>Look at the type and call the appropriate product function, to produce</p>\n<pre><code>mb x ma\n</code></pre>\n<p>Note the right to left application and default returning of the\nleftmost term for chaining. This seems to make the most sense.</p>\n<p>If r is provided then the result is written into r and returned\notherwise ma is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 832,
+   "line": 833,
    "name": "lua.wetgenes.tardis.array.product",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
