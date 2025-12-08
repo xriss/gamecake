@@ -320,11 +320,11 @@ if a function is given it will be called with the index and should
 return a number.
 
 ]]
-function array.set(it,...)
-	if not (...) then return it end -- nothing to do
+function array.set(it,a1,...)
+	if not a1 then return it end -- nothing to do, probably fastest short circuit?
 	
 	local itlen=#it -- need this many values
-	local a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17=... -- try and avoid table allocation
+	local a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17=... -- try and avoid table allocation
 
 	if type(a1)=="function" then
 		for i=1,itlen do it[i]=a1(i) end -- fill
@@ -359,29 +359,29 @@ function array.set(it,...)
 		end
 		return it
 	end
-	if donum(a1) then return dofill(it) end
-	if donum(a2) then return dofill(it) end
-	if donum(a3) then return dofill(it) end
-	if donum(a4) then return dofill(it) end
-	if donum(a5) then return dofill(it) end
-	if donum(a6) then return dofill(it) end
-	if donum(a7) then return dofill(it) end
-	if donum(a8) then return dofill(it) end
-	if donum(a9) then return dofill(it) end
-	if donum(a10) then return dofill(it) end
-	if donum(a11) then return dofill(it) end
-	if donum(a12) then return dofill(it) end
-	if donum(a13) then return dofill(it) end
-	if donum(a14) then return dofill(it) end
-	if donum(a15) then return dofill(it) end
-	if donum(a16) then return dofill(it) end
+	if donum(a1) then return dofill() end
+	if donum(a2) then return dofill() end
+	if donum(a3) then return dofill() end
+	if donum(a4) then return dofill() end
+	if donum(a5) then return dofill() end
+	if donum(a6) then return dofill() end
+	if donum(a7) then return dofill() end
+	if donum(a8) then return dofill() end
+	if donum(a9) then return dofill() end
+	if donum(a10) then return dofill() end
+	if donum(a11) then return dofill() end
+	if donum(a12) then return dofill() end
+	if donum(a13) then return dofill() end
+	if donum(a14) then return dofill() end
+	if donum(a15) then return dofill() end
+	if donum(a16) then return dofill() end
 	if a17 and n<=itlen then
 		local aa={...} -- try the rest of the vargs
-		for i=17,#aa do
-			if donum(aa[i]) then return dofill(it) end
+		for i=17-1,#aa do -- note that ... does not contain the first one so we sub 1
+			if donum(aa[i]) then return dofill() end
 		end
 	end
-	return dofill(it)
+	return dofill()
 end
 
 --[[#lua.wetgenes.tardis.array.unpack
