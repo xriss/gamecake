@@ -30,10 +30,13 @@ a library of matrix based math functions.
 
 	local tardis=require("wetgenes.tardis")
 
-This tardis is a lua library for manipulating time and space with numbers.
-Designed to work as pure lua but with a faster, but less accurate, f32 core by
-default. ( this core seems to be slightly faster/same speed as vanilla lua but
-slower than luajit , so is currently disabled )
+	local V3,V4,Q4,M3,M4=require("wetgenes.tardis"):export("V3","V4","Q4","M3","M4")
+
+This tardis is a lua library for manipulating time and space with 
+numbers. Designed to work as pure lua so expect lots of small tables 
+full of numbers. In the future we may attempt clever optimisations and 
+change from tables to somthing else but so far all attempts have 
+failed.
 
 Recoil in terror as we use two glyph names for classes whilst typing in
 random strings of numbers and operators that may or may not contain
@@ -69,7 +72,8 @@ local tardis={ modname=(...) } ; package.loaded[tardis.modname]=tardis
 
 
 tardis.export=function(env,...)
-	local tab={...} ; for i=1,#tab do tab[i]=env[ tab[i] ] end
+	local tab={...}
+	for i=1,#tab do tab[i]=env[ tab[i] ] end
 	return unpack(tab)
 end
 
@@ -2907,6 +2911,14 @@ end
 Create a new q4 and optionally set it to the given values, q4 methods
 usually return the input q4 for easy function chaining.
 
+These Quaternions are of the x,y,z,w variety.
+
+Quaternions are not complicated because they are 4 dimensional. 
+
+Quaternions are complicated because programers think they go x,y,z,w 
+and maths people think quaternions go w,x,y,z which can lead to a lot 
+of confusion.
+
 ]]
 function q4.new(...) return setmetatable({0,0,0,1},q4):set(...) end
 
@@ -2914,7 +2926,7 @@ function q4.new(...) return setmetatable({0,0,0,1},q4):set(...) end
 
 	q4 = q4:identity()
 
-Set this q4 to its 0,0,0,1 identity
+Set this q4 to its 0,0,0,1 identity. 
 
 ]]
 function q4.identity(it) return q4.nset(it,0,0,0,1) end
