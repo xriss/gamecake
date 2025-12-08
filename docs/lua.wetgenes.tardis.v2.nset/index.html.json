@@ -2814,7 +2814,7 @@
    "body": "<pre><code>v2 = v2:nset(1,2)\n</code></pre>\n<p>Set exactly 2 numbers into the array.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2189,
+   "line": 2193,
    "name": "lua.wetgenes.tardis.v2.nset",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

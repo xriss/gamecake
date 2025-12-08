@@ -2814,7 +2814,7 @@
    "body": "<pre><code>m3 = m3:adjugate()\nm3 = m3:adjugate(r)\n</code></pre>\n<p>Adjugate this m3.</p>\n<p>If r is provided then the result is written into r and returned\notherwise m3 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1200,
+   "line": 1204,
    "name": "lua.wetgenes.tardis.m3.adjugate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

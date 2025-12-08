@@ -2811,10 +2811,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>q4 = tardis.q4.new()\n</code></pre>\n<p>Create a new q4 and optionally set it to the given values, q4 methods\nusually return the input q4 for easy function chaining.</p>\n",
+   "body": "<pre><code>q4 = tardis.q4.new()\n</code></pre>\n<p>Create a new q4 and optionally set it to the given values, q4 methods\nusually return the input q4 for easy function chaining.</p>\n<p>These Quaternions are of the x,y,z,w variety.</p>\n<p>Quaternions are not complicated because they are 4 dimensional. </p>\n<p>Quaternions are complicated because programers think they go x,y,z,w \nand maths people think quaternions go w,x,y,z which can lead to a lot \nof confusion.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2903,
+   "line": 2907,
    "name": "lua.wetgenes.tardis.q4.new",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

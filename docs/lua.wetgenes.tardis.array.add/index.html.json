@@ -2814,7 +2814,7 @@
    "body": "<pre><code>r=it:add(b,r)\nr=it:add(b,it.new())\n</code></pre>\n<p>Add b to it. b may be a number or another array of the same size as this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 436,
+   "line": 440,
    "name": "lua.wetgenes.tardis.array.add",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

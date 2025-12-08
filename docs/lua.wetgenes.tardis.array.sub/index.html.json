@@ -2814,7 +2814,7 @@
    "body": "<pre><code>r=it:sub(b,r)\nr=it:sub(b,it.new())\n</code></pre>\n<p>Subtract b from it. b may be a number or another array of the same size as this\narray.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 457,
+   "line": 461,
    "name": "lua.wetgenes.tardis.array.sub",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

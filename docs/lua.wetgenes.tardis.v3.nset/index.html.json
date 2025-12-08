@@ -2814,7 +2814,7 @@
    "body": "<pre><code>v3 = v3:nset(1,2,3)\n</code></pre>\n<p>Set exactly 3 numbers into the array.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2389,
+   "line": 2393,
    "name": "lua.wetgenes.tardis.v3.nset",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

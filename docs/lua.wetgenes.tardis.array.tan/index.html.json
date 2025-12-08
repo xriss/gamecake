@@ -2814,7 +2814,7 @@
    "body": "<pre><code>r=it:tan(r)\nr=it:tan(it.new())\n</code></pre>\n<p>Perform math.tan on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 734,
+   "line": 738,
    "name": "lua.wetgenes.tardis.array.tan",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
