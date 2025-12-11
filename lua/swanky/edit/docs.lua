@@ -111,7 +111,7 @@ M.bake=function(oven,docs)
 		
 		it.docs=docs
 
-		it.txt=require("wetgenes.txt").construct({search=docs.search})
+		it.txt=require("wetgenes.txt").construct({search=gui.master.datas.get("find_search")})
 		it.txt.doc=it
 		it.txt.undo.list_hook=function(undo,mode,index,data)
 			local it=undo.txt.doc

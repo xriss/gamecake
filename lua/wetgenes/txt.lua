@@ -28,7 +28,7 @@ M.construct=function(txt)
 	
 	txt.search=txt.search or { -- can be a shared data continuity
 		str="",
-		value=function(it,v)
+		value=function(it,v) -- we only use this function to get/set a string
 			if v then it.str=v end
 			return it.str
 		end
@@ -1356,7 +1356,7 @@ find and select prev
 ]]
 	txt.find_prev=function()
 	
-		local t = txt.search:value*( -- text we are looking for
+		local t = txt.search:value() -- text we are looking for
 		if not t or t=="" then return end
 
 
