@@ -290,7 +290,7 @@ end
 
 wtexteditor.texteditor_refresh=function(widget)
 
-	local search_text=widget.txt.search.text
+	local search_text=widget.txt.search:value()
 	if search_text=="" then search_text=nil end
 	local searches={}
 	local get_line_cache=function(ly)
@@ -840,7 +840,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		-- auto search lowlite
 		local word=txt.copy() or ""
 		if word~="" then -- lowlite selected
-			txt.search.text=word
+			txt.search:value(word)
 		end
 
 	elseif act==0 and texteditor.key_mouse then -- drag, but only while over widget
@@ -1058,7 +1058,7 @@ function wtexteditor.msg(pan,m)
 
 				local word=txt.copy() or ""
 				if word~="" then -- search for selected?
-					txt.search.text=word
+					txt.search:value(word)
 				end
 
 				txt.find_next()
@@ -1068,7 +1068,7 @@ function wtexteditor.msg(pan,m)
 
 				local word=txt.copy() or ""
 				if word~="" then -- search for selected?
-					txt.search.text=word
+					txt.search:value(word)
 				end
 
 				txt.find_prev()

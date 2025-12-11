@@ -26,7 +26,13 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.construct=function(txt)
 	txt = txt or {}
 	
-	txt.search=txt.search or {} -- can be shared for continuity
+	txt.search=txt.search or { -- can be a shared data continuity
+		str="",
+		value=function(it,v)
+			if v then it.str=v end
+			return it.str
+		end
+	}
 	
 	txt.lexer="text"
 	txt.tabsize=4
@@ -1318,7 +1324,7 @@ find and select next
 ]]
 	txt.find_next=function()
 	
-		local t = txt.search.text -- text we are looking for
+		local t = txt.search:value() -- text we are looking for
 		if not t or t=="" then return end
 
 		local y,x=txt.ty or txt.cy , txt.tx or txt.cx
@@ -1350,7 +1356,7 @@ find and select prev
 ]]
 	txt.find_prev=function()
 	
-		local t = txt.search.text -- text we are looking for
+		local t = txt.search:value*( -- text we are looking for
 		if not t or t=="" then return end
 
 

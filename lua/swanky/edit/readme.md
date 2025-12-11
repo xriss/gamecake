@@ -15,12 +15,12 @@ will automatically run in the bottom right panel and can be toggle to
 fullscreen by pressing the ESC key. Shadertoy like examples can also be 
 found in the shadertoys.HASH/ which is also under gists/.
 
-Apart from that this is a file editor you can edit files but be aware 
-that we constantly save the current state to an sqlite database 
-(refered to as a collection). As such exiting and reloading should get 
-you back to exactly where you where before. Also we retain changes so 
-opening a previously saved file will allow you to undo changes and 
-revert that file to its previous states.
+This is a file editor so you can load and edit files but be aware that 
+we constantly save the current state to an sqlite database (referred to 
+as a collection). As such exiting and reloading should maintain state. 
+Also we retain changes past saving. So closing and then reopening a 
+previously saved file will allow you to undo changes and revert that 
+file to its state before it was saved.
 
 Right now this is still a work in progress so try the examples and 
 maybe even mess around a bit with some of the example code, some of the 
