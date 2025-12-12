@@ -424,10 +424,10 @@ function wmaster.setup(widget,def)
 --			end
 		elseif m.class=="key" then
 --			if master.focus or m.softkey then -- fake keyboard only
-				widget:key(nil,m.keyname,m.action)
+				widget:key(nil,m.keyname,m.action,m.keystate)
 --			end
 		elseif m.class=="mouse" then
-			widget:mouse(m.action,m.x,m.y,m.keyname)
+			widget:mouse(m.action,m.x,m.y,m.keyname,m.keystate)
 		end
 
 		local oo=master.over and master.over.msg and master.over
@@ -769,6 +769,7 @@ function wmaster.setup(widget,def)
 		if kd.control or kd.control_l or kd.control_r then  ks=ks and ks.."_ctrl"  or "ctrl"  end
 		if kd.shift   or kd.shift_l   or kd.shift_r   then  ks=ks and ks.."_shift" or "shift" end
 		master.keystate=ks or "none"
+		return master.keystate
 	end
 
 	master.keystate_msg=function(m)
@@ -790,7 +791,7 @@ function wmaster.setup(widget,def)
 				master.keydown[name]=nil
 				master.keyclr[name]=true
 			end
-			master.keystate_update()
+			m.keystate=master.keystate_update() -- remember keystate on press
 			local action=(master.keys[master.keystate] or {})[name]
 			if action then -- add an action message
 -- TODO focus check?
@@ -803,6 +804,7 @@ function wmaster.setup(widget,def)
 				})
 			end
 		elseif m.class=="mouse" then
+			m.keystate=master.keystate
 			local name="mouse_"..(m.keyname or ""):lower()
 			if m.action==1 then
 				master.keydown[name]=true

@@ -1180,18 +1180,20 @@ function wtexteditor.key(pan,ascii,key,act)
 
 		if ascii and ascii~="" then -- not a blank string
 
-			texteditor.txt_dirty=true
+			if master.keystate=="shift" or master.keystate=="none" then -- ignore ctrl+ or alt+ keys
+				texteditor.txt_dirty=true
 
-			local c=wutf.code(ascii)
-			if c>=32 then
+				local c=wutf.code(ascii)
+				if c>=32 then
 
-				texteditor.float_cx=nil
+					texteditor.float_cx=nil
 
-				txt.undo.cut()
-				txt.undo.insert_char(ascii)
+					txt.undo.cut()
+					txt.undo.insert_char(ascii)
 
-				texteditor:scroll_to_view()
+					texteditor:scroll_to_view()
 
+				end
 			end
 
 		elseif act==1 or act==0 then
