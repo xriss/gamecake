@@ -17,3 +17,6 @@ for now I think I'm jsut going to be doing a lot of data dump and copying betwee
 that I cannot be bothered to debug might as well just replace, then we can dump lanes and just use pthreds
 
 
+TODO
+
+Need named pipes, to spot a previously run app and possibly send new commands to it,  and that should probably happen here.
