@@ -110,7 +110,7 @@ uniform float     iSampleRate;           // sound sample rate (i.e., 44100)
 
 		local pname="swanky_edit_show_stoy"
 
-		show_stoy.itime=0
+--		show_stoy.itime=0
 
 		gl.headers[pname]=shadertoy_head..str..shadertoy_tail
 		gl.program_source(pname,{source=gl.headers[pname]})

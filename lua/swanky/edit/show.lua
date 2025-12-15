@@ -334,12 +334,17 @@ M.bake=function(oven,show)
 		end
 	end
 
-	show.start_doc=function()
+	show.start_doc=function(itime)
 		show.autocode = gui.master.ids.texteditor.txt.get_text()
 		show.automode = show.get_mode()
 		local doc=docs.list[1]
 		show.autofname = doc and doc.filename or ""
 		show.autostart = 0
+		if itime then
+			local mode=show.automode
+			local it=show[mode]
+			if it and it.itime then it.itime=itime end
+		end
 	end
 
 	show.update=function()
@@ -379,7 +384,7 @@ M.bake=function(oven,show)
 	end
 	
 	show.start=function(str)
-		gui.datas.set_string("run_state","play")
+--		gui.datas.set_string("run_state","play")
 		gui.master.ids.runtext.hidden=true
 
 		local mode=show.automode
@@ -397,7 +402,6 @@ M.bake=function(oven,show)
 	end
 
 	show.set_error=function(err)
-		gui.datas.set_string("run_state","error")
 		gui.master.ids.runtext.hidden=false
 
 		gui.master.ids.runtext.txt.set_text(err,"error.txt")

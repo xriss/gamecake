@@ -156,11 +156,10 @@ gui.data_setup=function()
 			{str="fun64"},
 		}})
 
-		datas.new({id="run_state"  ,class="list",  hooks=gui.hooks,num=1,list={
-			{str="error"},
+		datas.new({id="run_state"  ,class="list",  hooks=gui.hooks,num=3,list={
 			{str="stop"},
-			{str="play"},
 			{str="pause"},
+			{str="play"},
 		}})
 
 		datas.new({id="run_auto"  ,class="number",  hooks=gui.hooks,num=1})
@@ -395,9 +394,13 @@ function gui.hooks(act,w,dat)
 
 		elseif w.id=="run_play_restart" then
 
-			show.start_doc()
+			gui.datas.set_string("run_state","play")
+			show.start_doc(0)
 
---			gui.master.dirty_by_data(gui.datas.get("run_state"))
+		elseif w.id=="run_play_start" then
+
+			gui.datas.set_string("run_state","play")
+			show.start_doc()
 
 		elseif w.id=="run_play_pause" then
 
@@ -445,6 +448,7 @@ function gui.hooks(act,w,dat)
 			gui.master.ids.play.hidden=true
 
 			gui.master.ids.run_play_autoplay.hidden=true
+			gui.master.ids.run_play_start.hidden=true
 			gui.master.ids.run_play_stop.hidden=true
 			gui.master.ids.run_play_pause.hidden=true
 			gui.master.ids.run_play_restart.hidden=true
@@ -462,6 +466,7 @@ function gui.hooks(act,w,dat)
 				gui.master.ids.play.hidden=false
 
 				gui.master.ids.run_play_autoplay.hidden=false
+				gui.master.ids.run_play_start.hidden=false
 				gui.master.ids.run_play_stop.hidden=false
 				gui.master.ids.run_play_pause.hidden=false
 				gui.master.ids.run_play_restart.hidden=false
@@ -661,9 +666,14 @@ local lay=
 							data="run_auto",
 						},
 						{
+							id="run_play_restart",hooks=gui.hooks,
+							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
+							text="<",
+						},
+						{
 							id="run_play_stop",hooks=gui.hooks,
 							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
-							text="[]",
+							text="0",
 							data="run_state",
 							data_selected="stop",
 						},
@@ -675,7 +685,7 @@ local lay=
 							data_selected="pause",
 						},
 						{
-							id="run_play_restart",hooks=gui.hooks,
+							id="run_play_start",hooks=gui.hooks,
 							class="button",hx=gsiz*1,hy=gsiz*1,color=1,
 							text=">",
 							data="run_state",

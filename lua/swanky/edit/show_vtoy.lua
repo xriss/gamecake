@@ -152,7 +152,7 @@ uniform float     iSampleRate;           // sound sample rate (i.e., 44100)
 
 	show_vtoy.start=function(str)
 	
-		show_vtoy.itime=0
+--		show_vtoy.itime=0
 
 		local pname="swanky_edit_show_vtoy"
 	
