@@ -502,7 +502,7 @@ local lay=
 						hx=gsiz*4,hy=gsiz*1,class="menubar",id="menubar",always_draw=true,
 					},
 					{
-						hx=gsiz*1,hy=gsiz*1,text="Welcome to swed",id="infobar",solid=true
+						hx=gsiz*1,hy=gsiz*1,text="Welcome to swed",id="infobar",solid=true,fbo=true, -- clip
 					},
 				},
 				{

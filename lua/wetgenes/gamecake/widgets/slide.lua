@@ -113,7 +113,7 @@ function wslide.setup(widget,def)
 	-- shorthand "datx" or "daty" rather than repeating
 	if type(widget.data)=="string" then widget.data=widget[widget.data] end
 
-	widget.style=widget.style or "indent"
+--	widget.style=widget.style or "indent"
 
 -- auto add the draging button as a child
 	widget.knob=widget:add({style="button",class="drag",color=widget.color,solid=true,
