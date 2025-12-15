@@ -91,6 +91,7 @@ gui.msg=function(m)
 end
 
 
+gui.do_actions={}
 gui.cursor=nil
 gui.update=function()
 	oven.console.linehook_safety=true
@@ -105,6 +106,13 @@ gui.update=function()
 		gui.cursor = gui.master.cursor
 		wwin.cursor( gui.cursor or "arrow" )
 	end
+
+
+	for _,a in ipairs(gui.do_actions) do
+		gui.action(a)
+	end
+	gui.do_actions={}
+
 
 	oven.console.linehook_safety=false
 end
@@ -138,7 +146,7 @@ gui.data_setup=function()
 		datas.new({id="list_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
 			{str="play"},
 			{str="console"},
-			{str="find"},
+			{str="search"},
 		}})
 
 		datas.new({id="run_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
@@ -269,6 +277,7 @@ function gui.action(m)
 
 			local dir=wpath.dir(txt.doc.filename)
 			dir=wpath.unslash(dir)
+--			gui.datas.set_string("find_files",dir)
 
 print("search_find",word,dir)
 
@@ -281,11 +290,42 @@ print("search_find",word,dir)
 			end
 ]]
 
-			gui.refresh_tree()
-			gui.master.request_redraw=true
-	
+--			gui.refresh_tree()
+--			gui.master.request_redraw=true
+
 		end
 
+
+		-- show search
+		gui.datas.set_string("list_mode","search")
+
+	elseif m.id=="find_goto" then
+
+		local texteditor=gui.master.ids.texteditor
+		local txt=texteditor.txt
+
+		txt.find_next()
+		texteditor:mark_sync()
+
+	elseif m.id=="find_replace" then
+
+		local texteditor=gui.master.ids.texteditor
+		local txt=texteditor.txt
+
+		if texteditor:allow_changes() then
+
+
+			local s=gui.datas.get_string("find_search")
+			local r=gui.datas.get_string("find_replace")
+			local old=txt.copy() or ""
+
+			if old~=s then -- just searched, so replace that 
+				txt.find_next()
+			end
+			txt.undo.replace_and_select(r)
+
+			texteditor:mark_sync()
+		end
 
 	end
 
@@ -376,6 +416,14 @@ function gui.hooks(act,w,dat)
 			
 --			gui.master.dirty_by_data(gui.datas.get("run_state"))
 
+		elseif w.id=="find_goto" then
+		
+			gui.do_actions[#gui.do_actions+1]={id=w.id}
+
+		elseif w.id=="find_replace" then
+
+			gui.do_actions[#gui.do_actions+1]={id=w.id}
+
 		end
 
 
@@ -384,23 +432,39 @@ function gui.hooks(act,w,dat)
 
 	if act=="value" then
 
-		if w.id=="list_mode" then -- change
+		if w.id=="run_state" then -- change
+
+			gui.master.dirty_by_data("run_state")
+
+		elseif w.id=="list_mode" then -- change
+
+			gui.master.ids.bar2:set_dirty()
 
 			gui.master.ids.console.hidden=true
-			gui.master.ids.find.hidden=true
+			gui.master.ids.search.hidden=true
 			gui.master.ids.play.hidden=true
-			
+
+			gui.master.ids.run_play_autoplay.hidden=true
+			gui.master.ids.run_play_stop.hidden=true
+			gui.master.ids.run_play_pause.hidden=true
+			gui.master.ids.run_play_restart.hidden=true
+
 			if w.str=="console" then
 
 				gui.master.ids.console.hidden=false
 
-			elseif w.str=="find" then
+			elseif w.str=="search" then
 
-				gui.master.ids.find.hidden=false
+				gui.master.ids.search.hidden=false
 
 			elseif w.str=="play" then
 
 				gui.master.ids.play.hidden=false
+
+				gui.master.ids.run_play_autoplay.hidden=false
+				gui.master.ids.run_play_stop.hidden=false
+				gui.master.ids.run_play_pause.hidden=false
+				gui.master.ids.run_play_restart.hidden=false
 
 			end
 
@@ -525,7 +589,7 @@ local lay=
 									console_command=gui.console_command,
 								},
 								{
-									id="find",hidden=true,class="fill",
+									id="search",hidden=true,class="fill",
 									size="full",style="flat",
 									fbo=true,
 									{
@@ -585,6 +649,11 @@ local lay=
 						style="flat",highlight="none",color=0,
 						fbo=true,
 						{
+							class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
+							data="list_mode",
+							menu_px=0,menu_py=-2.9, -- menu position hacks
+						},
+						{
 							id="run_play_autoplay",hooks=gui.hooks,
 							class="checkbox",hx=gsiz*1,hy=gsiz*1,color=1,
 							text_true=">>",
@@ -611,11 +680,6 @@ local lay=
 							text=">",
 							data="run_state",
 							data_selected="play",
-						},
-						{
-							class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
-							data="list_mode",
-							menu_px=0,menu_py=-2.9, -- menu position hacks
 						},
 					},
 --				},

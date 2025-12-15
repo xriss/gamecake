@@ -680,6 +680,9 @@ function wmaster.setup(widget,def)
 -- mark all widgets that reference this data as dirty
 --
 	function master.dirty_by_data(data)
+		if type(data)~="table" then -- auto lookup
+			data=master.datas.get(data)
+		end
 		master:call_descendents(function(w)
 			if w.data==data or w.daty==data or w.datx==data then
 				w:set_dirty()

@@ -267,6 +267,20 @@ M.construct=function(undo,txt)
 		end
 	end
 
+	undo.replace_and_select=function(s)
+		local fy,fx=txt.fy,txt.fx
+		local o=txt.copy()
+		if o and #o > 0 then
+			undo.remember(s,wutf.length(o),txt.fy,txt.fx)
+			txt.cut()
+			txt.insert(s)
+		else
+			undo.remember(s)
+			txt.insert(s)
+		end
+		txt.mark( txt.rangeget(fy,fx,wutf.length(s)) )
+	end
+	
 	undo.insert_newline=function()
 		local s=txt.get_string(txt.cy) or ""
 		local indent=s:match("^([\t ]*)") or ""
