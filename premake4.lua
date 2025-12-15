@@ -237,6 +237,15 @@ end
 
 print("TARGET == "..TARGET.." " ..CPU )
 
+-- no warnings on release builds ( assume a user is building, warning are not what they care about )
+-- when actually developing we will be using debug builds
+configuration {"Release"}
+	buildlinkoptions{
+		"-w",
+	}
+configuration {}
+	
+	
 if EMCC then
 
 	defines "EMCC"
