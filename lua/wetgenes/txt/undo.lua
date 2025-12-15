@@ -120,46 +120,69 @@ M.construct=function(undo,txt)
 -- ru 1==redo , 2==undo	
 	undo.apply=function(index,ru)
 		local it=undo.list_get(index)
-		
+		if not it then
+			print("UNDO index out of bounds "..index)
+			return false
+		end
+
 		if     ru==1 then -- redo
 		
 			local fy,fx=txt.ptr_to_location(it[1])
 			local ty,tx=txt.ptr_to_location(it[1]+#it[2])
 
 			txt.mark(fy,fx,ty,tx)
-			assert( it[2] == ( txt.cut() or "" ) )
+			local s=( txt.copy() or "" ) -- old string
+			if it[2] ~= s then -- sanity test
+				print("REDO ERROR '"..it[2].."' == '"..s.."'")
+				return false
+			end
+			txt.cut()
 			txt.insert(it[3])
-
+			return true
 		elseif ru==2 then -- undo
 
 			local fy,fx=txt.ptr_to_location(it[1])
 			local ty,tx=txt.ptr_to_location(it[1]+#it[3])
 
 			txt.mark(fy,fx,ty,tx)
-			assert( it[3] == ( txt.cut() or "" ) )
+			local s=( txt.copy() or "" ) -- old string
+			if it[3] ~= s then -- sanity test
+				print("UNDO ERROR '"..it[3].."' == '"..s.."'")
+				return false
+			end
+			txt.cut()
 			txt.insert(it[2])
-
+			return true
 		end
 	end
 
 	undo.redo=function() -- go forward a step
 		if undo.index<undo.length then
-			undo.index=undo.index+1
-			undo.apply(undo.index,1)
+			if undo.apply(undo.index+1,1) then
+				undo.index=undo.index+1
+				return true
+			end
 		end
+		return false
 	end
 
 	undo.undo=function() -- go back a step
 		if undo.index>0 then
-			undo.apply(undo.index,2)
-			undo.index=undo.index-1
+			if undo.apply(undo.index,2) then
+				undo.index=undo.index-1
+				return true
+			end
 		end
+		return false
 	end
 
 	undo.redo_all=function() -- fast forwards
 		while undo.index<undo.length do
-			undo.redo()
+			if not undo.redo() then
+				return false -- something went very wrong
+			end
 		end
+		return true
 	end
 
 	undo.goto=function(index) -- goto a specific index

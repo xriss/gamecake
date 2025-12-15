@@ -290,7 +290,7 @@ M.bake=function(oven,docs)
 	end
 	
 	doc.reload=function(it)
-		local text_file=collect.mounts:read_file(it.filename)
+		local text_file=collect.mounts:read_file(it.filename) or ""
 		local text_doc=it.txt.get_text()
 		
 		if text_file~=text_doc then -- text in file is not the same as text in memory

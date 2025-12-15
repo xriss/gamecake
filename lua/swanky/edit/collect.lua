@@ -423,7 +423,10 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 			]],
 		}).rows or {}
 		it.txt.undo.list_set_fromsql(undos,it.meta.undo)
-		it.txt.undo.redo_all()
+		if not it.txt.undo.redo_all() then -- fail and reset undos
+			it.txt.undo.list_reset()
+			collect.undo_trim(it,0)
+		end
 
 	end
 

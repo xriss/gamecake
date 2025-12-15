@@ -348,7 +348,7 @@ M.bake=function(oven,show)
 		local run_auto=gui.datas.get_number("run_auto")
 		local run_state=gui.datas.get_string("run_state")
 
-		if run_auto==1 and not ( run_state=="stop" or run_state=="pause" ) then -- restart on text change unless we are paused or stopped
+		if run_auto==1 and not ( run_state=="stop" ) then -- restart on text change unless we are stopped
 		
 			local doc=docs.list[1]
 			local fname=doc and doc.filename or ""
@@ -361,6 +361,8 @@ M.bake=function(oven,show)
 				show.start_doc()
 				if mode=="fun64" then -- slower fun64 reloads
 					show.autostart = 60*1
+				else
+					show.autostart = 10*1
 				end
 			end
 					
