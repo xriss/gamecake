@@ -596,7 +596,7 @@ if EMCC then -- need to build and use our lua
 
 	LUA_BIT="lua_bit"
 	LIB_LUA="lib_lua" -- default 
-	includedirs { "lib_lua/src" }
+	includedirs { "libs/lib_lua/src" }
 	LUA_LINKS= nil
 
 elseif ANDROID then
@@ -667,7 +667,7 @@ if EMCC or ANDROID then
 
 elseif WINDOWS then -- need windows GL hacks
 
-	includedirs { "lua_gles/include" }
+	includedirs { "libs/lua_gles/include" }
 	defines{ "LUA_GLES_GL" }
 	if GCC then
 		defines{ "INCLUDE_GLES_GL=\\\"GL/gl3w.h\\\"" }
@@ -677,7 +677,7 @@ elseif WINDOWS then -- need windows GL hacks
 
 else -- use GL 
 
-	includedirs { "lua_gles/include" }
+	includedirs { "libs/lua_gles/include" }
 	defines{ "LUA_GLES_GL" }
 
 	defines{ "INCLUDE_GLES_GL=\\\"GL/gl3w.h\\\"" }
@@ -726,14 +726,14 @@ if _OPTIONS["openal"]=="sys" then
 	LIB_OPENAL=nil
 else
 	LIB_OPENAL="lib_openal"
-	includedirs { "./lib_openal/mojoal" }
+	includedirs { "libs/lib_openal/mojoal" }
 	defines("AL_LIBTYPE_STATIC")
 end
 
 
-includedirs { "./lib_hacks/code" }
-includedirs { "./lua_freetype/code" }
-includedirs { "./lua_grd/code" }
+includedirs { "libs/lib_hacks/code" }
+includedirs { "libs/lua_freetype/code" }
+includedirs { "libs/lua_grd/code" }
 
 
 all_includes=all_includes or {
@@ -826,7 +826,7 @@ all_includes=all_includes or {
 
 for i,v in ipairs(all_includes) do
 	if v[1] and v[2] then
-		include(v[1])
+		include("libs/"..v[1])
 	end
 end
 

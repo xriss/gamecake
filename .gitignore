@@ -23,32 +23,32 @@ android/gamecake/src/main/AndroidManifest.xml
 android/gamecake/src/main/java/com/wetgenes/gamecake/*
 android/gamecake/build.gradle
 
-exe_gamecake/preloadlibs.c
-exe_gamecake/cache.c
+libs/exe_gamecake/preloadlibs.c
+libs/exe_gamecake/cache.c
 */log.txt
 build/*.nix
-lib_luajit/*/native/*
+libs/lib_luajit/*/native/*
 
-lua_bullet/bullet3
+libs/lua_bullet/bullet3
 
 #postgres junk that we do not need...
-lib_pq/src/test/*
-lib_pq/src/bin/*
-lib_pq/src/backend/*
-lib_pq/doc/*
-lib_pq/contrib/*
-lib_pq/config/*
+libs/lib_pq/src/test/*
+libs/lib_pq/src/bin/*
+libs/lib_pq/src/backend/*
+libs/lib_pq/doc/*
+libs/lib_pq/contrib/*
+libs/lib_pq/config/*
 
-lib_pepperjs/pepper.js/*/*/emscripten/*
+libs/lib_pepperjs/pepper.js/*/*/emscripten/*
 
 nginx/proxy_temp/*
 nginx/logs/*
 nginx/static/*.zip
 
-vbox_osx/test
-vbox_*/roms
-vbox_*/qemu-imgs
-vbox_*/*.log
+boxs/vbox_osx/test
+boxs/vbox_*/roms
+boxs/vbox_*/qemu-imgs
+boxs/vbox_*/*.log
 
 build/premake-*
 build/SDL2-*
