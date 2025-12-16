@@ -1,6 +1,6 @@
 Files: *
 License: The MIT License (MIT)
- Copyright (c) 2013 Kriss Blank <kriss@wetgenes.com>
+ Copyright (c) 2025 Kriss Blank <kriss@wetgenes.com>
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,76 @@ License: The MIT License (MIT)
  THE SOFTWARE.
 
 
-Files: lib_pcre/*
+Files: libs/lib_openal/*
+License: ...
+ Copyright (c) 2018-2023 Ryan C. Gordon <icculus@icculus.org>
+   
+ This software is provided 'as-is', without any express or implied
+ warranty.  In no event will the authors be held liable for any damages
+ arising from the use of this software.
+ 
+ Permission is granted to anyone to use this software for any purpose,
+ including commercial applications, and to alter it and redistribute it
+ freely, subject to the following restrictions:
+   
+ 1. The origin of this software must not be misrepresented; you must not
+    claim that you wrote the original software. If you use this software
+    in a product, an acknowledgment in the product documentation would be
+    appreciated but is not required. 
+ 2. Altered source versions must be plainly marked as such, and must not be
+    misrepresented as being the original software.
+ 3. This notice may not be removed or altered from any source distribution.
+ 
+
+Files: libs/lib_opus/*
+License: ...
+ Copyright 2001-2011 Xiph.Org, Skype Limited, Octasic,
+                     Jean-Marc Valin, Timothy B. Terriberry,
+                     CSIRO, Gregory Maxwell, Mark Borgerding,
+                     Erik de Castro Lopo
+ 
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 
+ - Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 
+ - Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ 
+ - Neither the name of Internet Society, IETF or IETF Trust, nor the
+ names of specific contributors, may be used to endorse or promote
+ products derived from this software without specific prior written
+ permission.
+ 
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ 
+ Opus is subject to the royalty-free patent licenses which are
+ specified at:
+ 
+ Xiph.Org Foundation:
+ https://datatracker.ietf.org/ipr/1524/
+ 
+ Microsoft Corporation:
+ https://datatracker.ietf.org/ipr/1914/
+ 
+ Broadcom Corporation:
+ https://datatracker.ietf.org/ipr/1526/
+ 
+
+Files: libs/lib_pcre/*
 License: ...
  PCRE LICENCE
  ------------
@@ -117,7 +186,7 @@ License: ...
  End
  
 
-Files: lib_png/*
+Files: libs/lib_png/*
 License: ...
  
  This copy of the libpng notices is provided for your convenience.  In case of
@@ -232,7 +301,7 @@ License: ...
  December 22, 2014
  
 
-Files: lib_pq/*
+Files: libs/lib_pq/*
 License: ...
  PostgreSQL Database Management System
  (formerly known as Postgres, then as Postgres95)
@@ -259,7 +328,7 @@ License: ...
  PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  
 
-Files: lib_speexdsp/*
+Files: libs/lib_speexdsp/*
 License: ...
  Copyright 2002-2008 	Xiph.org Foundation
  Copyright 2002-2008 	Jean-Marc Valin
@@ -298,7 +367,7 @@ License: ...
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
 
-Files: lib_vorbis/*
+Files: libs/lib_vorbis/*
 License: ...
  Copyright (c) 2002-2020 Xiph.org Foundation
  
@@ -330,7 +399,7 @@ License: ...
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
 
-Files: lib_wolfssl/*
+Files: libs/lib_wolfssl/*
 License: ...
  
  wolfSSL (formerly known as CyaSSL) and wolfCrypt are either licensed for use
@@ -348,7 +417,7 @@ License: ...
  
  
 
-Files: lib_z/*
+Files: libs/lib_z/*
 License: ...
  ZLIB DATA COMPRESSION LIBRARY
  
@@ -467,7 +536,7 @@ License: ...
  the FAQ for more information on the distribution of modified source versions.
  
 
-Files: lib_zip/*
+Files: libs/lib_zip/*
 License: ...
  Copyright (C) 1999-2013 Dieter Baron and Thomas Klausner
  
@@ -502,7 +571,7 @@ License: ...
  IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
 
-Files: lib_zzip/*
+Files: libs/lib_zzip/*
 License: ...
  		  GNU LIBRARY GENERAL PUBLIC LICENSE
  		       Version 2, June 1991
@@ -987,7 +1056,7 @@ License: ...
  That's all there is to it!
  
 
-Files: lua_bit/*
+Files: libs/lua_bit/*
 License: ...
  README for Lua BitOp 1.0.1
  --------------------------
@@ -1013,7 +1082,7 @@ License: ...
  
  
 
-Files: lua_brimworkszip/*
+Files: libs/lua_brimworkszip/*
 License: ...
  **********************************************************************
  * Author  : Brian Maher <maherb at brimworks dot com>
@@ -1326,7 +1395,7 @@ License: ...
      the specified filename or file index does not exist.
  
 
-Files: lua_bullet/*
+Files: libs/lua_bullet/*
 License: ...
  
  The files in this repository are licensed under the zlib license, except for the files under 'Extras' and examples/ThirdPartyLibs.
@@ -1345,7 +1414,7 @@ License: ...
  3. This notice may not be removed or altered from any source distribution.
  
 
-Files: lua_chipmunk/*
+Files: libs/lua_chipmunk/*
 License: ...
  Copyright (c) 2007-2015 Scott Lembcke and Howling Moon Software
  
@@ -1368,7 +1437,7 @@ License: ...
  SOFTWARE.
  
 
-Files: lua_cmsgpack/*
+Files: libs/lua_cmsgpack/*
 License: ...
  README for lua-cmsgpack.c
  ===
@@ -1487,7 +1556,7 @@ License: ...
  Some of the test vectors in "test.lua" are obtained from the Javascript [MessagePack-JS library](https://github.com/cuzic/MessagePack-JS).
  
 
-Files: lua_djon/*
+Files: libs/lua_djon/*
 License: ...
  MIT License
  
@@ -1514,7 +1583,7 @@ License: ...
  
  
 
-Files: lua_glslang/*
+Files: libs/lua_glslang/*
 License: ...
  Here, glslang proper means core GLSL parsing, HLSL parsing, and SPIR-V code
  generation. Glslang proper requires use of a number of licenses, one that covers
@@ -2534,7 +2603,7 @@ License: ...
  */
  
 
-Files: lua_kissfft/*
+Files: libs/lua_kissfft/*
 License: ...
  Copyright (c) 2003-2010 Mark Borgerding
  
@@ -2549,7 +2618,7 @@ License: ...
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
 
-Files: lua_lanes/*
+Files: libs/lua_lanes/*
 License: ...
  
  Lua Lanes is licensed under the same MIT license as the Lua 5.1 source code, 
@@ -2585,7 +2654,7 @@ License: ...
  (end of COPYRIGHT)
  
 
-Files: lua_lash/*
+Files: libs/lua_lash/*
 License: ...
  /*
   * Copyright (c) 2008 Neil Richardson (nrich@iinet.net.au)
@@ -2610,7 +2679,7 @@ License: ...
   */
  
 
-Files: lua_lfs/*
+Files: libs/lua_lfs/*
 License: ...
  The LuaFileSystem library is designed and implemented by Roberto
  Ierusalimschy, Andr&eacute; Carregal and Tom&aacute;s Guisasola.
@@ -2639,7 +2708,7 @@ License: ...
  SOFTWARE.
  
 
-Files: lua_linenoise/*
+Files: libs/lua_linenoise/*
 License: ...
  Copyright (c) 2011-2012 Rob Hoelz <rob@hoelz.ro>
  
@@ -2661,7 +2730,7 @@ License: ...
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  
 
-Files: lua_pegasus/*
+Files: libs/lua_pegasus/*
 License: ...
  The MIT License (MIT)
  
@@ -2686,7 +2755,7 @@ License: ...
  SOFTWARE.
  
 
-Files: lua_periphery/*
+Files: libs/lua_periphery/*
 License: ...
   Copyright (c) 2014 vsergeev / Ivan (Vanya) A. Sergeev
  
@@ -2709,41 +2778,7 @@ License: ...
   THE SOFTWARE.
  
 
-Files: lua_pgsql/*
-License: ...
- A Lua Binding for PostgreSQL
- 
- Copyright (C) Micro Systems Marc Balmer.
- You can reach the author at marc@msys.ch
- 
- Makefile is for BSD systems
- GNUmakefile is for Linux systems
- 
-
-Files: lua_posix/*
-License: ...
- Copyright (C) 2006-2012 luaposix authors
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- 
-
-Files: lua_zlib/*
+Files: libs/lua_zlib/*
 License: ...
  **********************************************************************
  * Author  : Brian Maher <maherb at brimworks dot com>
@@ -2865,7 +2900,95 @@ License: ...
          inflated string chunks.
  
 
-Files: lib_freetype/*
+Files: libs/lua_pgsql/*
+License: ...
+ A Lua Binding for PostgreSQL
+ 
+ Copyright (C) Micro Systems Marc Balmer.
+ You can reach the author at marc@msys.ch
+ 
+ Makefile is for BSD systems
+ GNUmakefile is for Linux systems
+ 
+
+Files: libs/lua_zip/*
+License: ...
+ Copyright &copy; 2003-2007 The Kepler Project.
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ 
+
+Files: libs/lua_posix/*
+License: ...
+ Copyright (C) 2006-2012 luaposix authors
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ 
+
+Files: libs/lua_sys/*
+License: ...
+ ===============================================================================
+  LuaSys is Copyright (c) 2011 Nodir Temirkhodjaev.
+ 
+  You may use, distribute and copy the LuaSys under the terms of MIT license,
+  that is displayed below.
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ 
+ [ MIT license: http://www.opensource.org/licenses/mit-license.php ]
+ 
+ ===============================================================================
+ 
+
+Files: libs/lib_freetype/*
 License: ...
  
  The  FreeType 2  font  engine is  copyrighted  work and  cannot be  used
@@ -2906,30 +3029,31 @@ License: ...
  --- end of LICENSE.TXT ---
  
 
-Files: lua_zip/*
+Files: libs/lua_socket/*
 License: ...
- Copyright &copy; 2003-2007 The Kepler Project.
+ LuaSocket 3.0 license
+ Copyright © 2004-2013 Diego Nehab
  
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a
+ copy of this software and associated documentation files (the "Software"),
+ to deal in the Software without restriction, including without limitation
+ the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ and/or sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following conditions:
  
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
  
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ DEALINGS IN THE SOFTWARE.
  
 
-Files: lib_gif/*
+Files: libs/lib_gif/*
 License: ...
  The GIFLIB distribution is Copyright (c) 1997  Eric S. Raymond
  
@@ -2952,38 +3076,32 @@ License: ...
  THE SOFTWARE.
  
 
-Files: lua_sys/*
+Files: libs/lua_sec/*
 License: ...
- ===============================================================================
-  LuaSys is Copyright (c) 2011 Nodir Temirkhodjaev.
+ LuaSec 1.0.2 license
+ Copyright (C) 2006-2021 Bruno Silvestre, UFG
  
-  You may use, distribute and copy the LuaSys under the terms of MIT license,
-  that is displayed below.
+ Permission is hereby granted, free  of charge, to any person obtaining
+ a  copy  of this  software  and  associated  documentation files  (the
+ "Software"), to  deal in  the Software without  restriction, including
+ without limitation  the rights to  use, copy, modify,  merge, publish,
+ distribute,  sublicense, and/or sell  copies of  the Software,  and to
+ permit persons to whom the Software  is furnished to do so, subject to
+ the following conditions:
  
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
+ The  above  copyright  notice  and  this permission  notice  shall  be
+ included in all copies or substantial portions of the Software.
  
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- 
- [ MIT license: http://www.opensource.org/licenses/mit-license.php ]
- 
- ===============================================================================
+ THE  SOFTWARE IS  PROVIDED  "AS  IS", WITHOUT  WARRANTY  OF ANY  KIND,
+ EXPRESS OR  IMPLIED, INCLUDING  BUT NOT LIMITED  TO THE  WARRANTIES OF
+ MERCHANTABILITY,    FITNESS    FOR    A   PARTICULAR    PURPOSE    AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  
 
-Files: lib_jpeg/*
+Files: libs/lib_jpeg/*
 License: ...
  The Independent JPEG Group's JPEG software
  ==========================================
@@ -3365,31 +3483,26 @@ License: ...
  Please send bug reports, offers of help, etc. to jpeg-info@jpegclub.org.
  
 
-Files: lua_socket/*
+Files: libs/lua_sdl2/*
 License: ...
- LuaSocket 3.0 license
- Copyright © 2004-2013 Diego Nehab
+ ISC License
  
- Permission is hereby granted, free of charge, to any person obtaining a
- copy of this software and associated documentation files (the "Software"),
- to deal in the Software without restriction, including without limitation
- the rights to use, copy, modify, merge, publish, distribute, sublicense,
- and/or sell copies of the Software, and to permit persons to whom the
- Software is furnished to do so, subject to the following conditions:
+ Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
+ Permission to use, copy, modify, and/or distribute this software for any
+ purpose with or without fee is hereby granted, provided that the above
+ copyright notice and this permission notice appear in all copies.
  
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- DEALINGS IN THE SOFTWARE.
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  
 
-Files: lib_lua/*
+Files: libs/lib_lua/*
 License: ...
  Lua License
  -----------
@@ -3427,104 +3540,7 @@ License: ...
  (end of COPYRIGHT)
  
 
-Files: lua_sec/*
-License: ...
- LuaSec 1.0.2 license
- Copyright (C) 2006-2021 Bruno Silvestre, UFG
- 
- Permission is hereby granted, free  of charge, to any person obtaining
- a  copy  of this  software  and  associated  documentation files  (the
- "Software"), to  deal in  the Software without  restriction, including
- without limitation  the rights to  use, copy, modify,  merge, publish,
- distribute,  sublicense, and/or sell  copies of  the Software,  and to
- permit persons to whom the Software  is furnished to do so, subject to
- the following conditions:
- 
- The  above  copyright  notice  and  this permission  notice  shall  be
- included in all copies or substantial portions of the Software.
- 
- THE  SOFTWARE IS  PROVIDED  "AS  IS", WITHOUT  WARRANTY  OF ANY  KIND,
- EXPRESS OR  IMPLIED, INCLUDING  BUT NOT LIMITED  TO THE  WARRANTIES OF
- MERCHANTABILITY,    FITNESS    FOR    A   PARTICULAR    PURPOSE    AND
- NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
- WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- 
-
-Files: lib_ogg/*
-License: ...
- Copyright (c) 2002, Xiph.org Foundation
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions
- are met:
- 
- - Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- - Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in the
- documentation and/or other materials provided with the distribution.
- 
- - Neither the name of the Xiph.org Foundation nor the names of its
- contributors may be used to endorse or promote products derived from
- this software without specific prior written permission.
- 
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION
- OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- 
-
-Files: lua_sdl2/*
-License: ...
- ISC License
- 
- Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
- 
- Permission to use, copy, modify, and/or distribute this software for any
- purpose with or without fee is hereby granted, provided that the above
- copyright notice and this permission notice appear in all copies.
- 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- 
-
-Files: lib_openal/*
-License: ...
- Copyright (c) 2018-2023 Ryan C. Gordon <icculus@icculus.org>
-   
- This software is provided 'as-is', without any express or implied
- warranty.  In no event will the authors be held liable for any damages
- arising from the use of this software.
- 
- Permission is granted to anyone to use this software for any purpose,
- including commercial applications, and to alter it and redistribute it
- freely, subject to the following restrictions:
-   
- 1. The origin of this software must not be misrepresented; you must not
-    claim that you wrote the original software. If you use this software
-    in a product, an acknowledgment in the product documentation would be
-    appreciated but is not required. 
- 2. Altered source versions must be plainly marked as such, and must not be
-    misrepresented as being the original software.
- 3. This notice may not be removed or altered from any source distribution.
- 
-
-Files: lua_rex/*
+Files: libs/lua_rex/*
 License: ...
  License of Lrexlib release
  --------------------------
@@ -3555,12 +3571,9 @@ License: ...
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  
 
-Files: lib_opus/*
+Files: libs/lib_ogg/*
 License: ...
- Copyright 2001-2011 Xiph.Org, Skype Limited, Octasic,
-                     Jean-Marc Valin, Timothy B. Terriberry,
-                     CSIRO, Gregory Maxwell, Mark Borgerding,
-                     Erik de Castro Lopo
+ Copyright (c) 2002, Xiph.org Foundation
  
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -3573,33 +3586,20 @@ License: ...
  notice, this list of conditions and the following disclaimer in the
  documentation and/or other materials provided with the distribution.
  
- - Neither the name of Internet Society, IETF or IETF Trust, nor the
- names of specific contributors, may be used to endorse or promote
- products derived from this software without specific prior written
- permission.
+ - Neither the name of the Xiph.org Foundation nor the names of its
+ contributors may be used to endorse or promote products derived from
+ this software without specific prior written permission.
  
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
- OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- 
- Opus is subject to the royalty-free patent licenses which are
- specified at:
- 
- Xiph.Org Foundation:
- https://datatracker.ietf.org/ipr/1524/
- 
- Microsoft Corporation:
- https://datatracker.ietf.org/ipr/1914/
- 
- Broadcom Corporation:
- https://datatracker.ietf.org/ipr/1526/
+ A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION
+ OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
 

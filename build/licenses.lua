@@ -64,12 +64,10 @@ local lcs={
 
 }
 
-local wbake=require("wetgenes.bake")
-
 local head=[[
 Files: *
 License: The MIT License (MIT)
- Copyright (c) 2013 Kriss Blank <kriss@wetgenes.com>
+ Copyright (c) 2025 Kriss Blank <kriss@wetgenes.com>
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -95,11 +93,13 @@ License: The MIT License (MIT)
 print(head)
 for n,v in pairs(lcs) do
 
-	local d=wbake.readfile(v)
+	local fp=assert(io.open("libs/"..v,"rb"))
+	local d=fp:read("*all")
+	fp:close()
 	
 	local t=" "..string.gsub(d,"\n","\n ")
 	
-	print("Files: "..n.."/*")
+	print("Files: libs/"..n.."/*")
 	print("License: ...")
 	print(t.."\n")
 

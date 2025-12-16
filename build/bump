@@ -1,6 +1,6 @@
 cd `dirname $0`
 
-source ../exe_gamecake/version.lua
+source ../libs/exe_gamecake/version.lua
 V=$GAMECAKE_VERSION
 echo Starting version number $V
 
@@ -29,5 +29,5 @@ VV2=$V2
 V2=$VV2
 
 V=$V1.$V2
-echo "GAMECAKE_VERSION=\"$V\"" >../exe_gamecake/version.lua
+echo "GAMECAKE_VERSION=\"$V\"" >../libs/exe_gamecake/version.lua
 echo Final version number $V
