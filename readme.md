@@ -5,6 +5,9 @@ https://xriss.github.io/gamecake/ so go there if that is what you are
 interested in, the rest of this readme concerns the process of building 
 gamecake from source.
 
+You can find the pure lua code in the lua directory, this directory is 
+embeded into the gamecake binary, libs contains C or C++ librarys that are 
+also built and linked into gamecake.
 
 If you want to build then you should clone and then run the git-pull script to
 make sure everything is up to date.
@@ -21,7 +24,7 @@ so that git is less likely to get its knickers in a twist.
 
 
 
-Releases are compiled inside the vbox_* directories
+Releases are compiled inside the boxs directories
 (linux32/linux64/raspi/emscipten/windows) which contain vagrant or qemu boxes
 setup to build the code in a controlled environment via a ./make script. The
 latest code built this way can be found in the exe branch and a zip of them all
@@ -61,7 +64,7 @@ following to install tools/libs and then build using mingw.
 	build/make --gcc=mingw
 
 
-Alternatively any vbox_* directory can build a specific executable. For instance
+Alternatively any boxs directory can build a specific executable. For instance
 vbox_64 can be used to build a 64bit executable inside an ubuntu vagrant box.
 See readme files inside these directories for more information.
 
