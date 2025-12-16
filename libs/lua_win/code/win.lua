@@ -137,10 +137,12 @@ setmetatable(win,meta)
 function win.screen()
 	local it={}
 	if hardcore and hardcore.screen then
-		it.width,it.height=hardcore.screen()
-	else
-		it.width,it.height=0,0
+		it.width,it.height,it.x,it.y=hardcore.screen()
 	end
+	it.width=it.width or 0
+	it.height=it.height or 0
+	it.x=it.x or 0
+	it.y=it.y or 0
 	return it
 end
 
