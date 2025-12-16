@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>g:copy_data(gb)\n</code></pre>\n<p>Copy all of the bitmap data from gb into g.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 972,
    "name": "lua.wetgenes.grd.copy_data",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

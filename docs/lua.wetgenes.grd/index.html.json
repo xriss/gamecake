@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,298 +2813,298 @@
   {
    "body": "<pre><code>local wgrd=require(&quot;wetgenes.grd&quot;)\n</code></pre>\n<p>We use wgrd as the local name of this library.</p>\n<p>Handle bitmap creation, loading, saving and blitting. The bitmap and \nthe colormap for indexed bitmaps are represented by the same data \nstructure which describes a continuous chunk of memory with optional \nability to select an area of a larger chunk using simple byte spans.</p>\n<p>Swanky Paint uses this to manage its bitmaps and its also used to \nconvert art into data at build time for use in the GameCake engine. The \nPageCake engine uses this for image management, creating live thumbnails \nand so on.</p>\n<p>We load and save jpeg, png and gif. The png lib contains extensions for \napng which allows animation chunks. Animations are contained in the Z \n(depth) dimension of the grd.</p>\n<p>The following are possible format options that we support. Most of them \nare OpenGL friendly.</p>\n<pre><code>wgrd.FMT_U8_RGBA\n</code></pre>\n<p>32 bits per pixel with a byte order of red, green, blue, alpha and a \nlittle endian U32 of ABGR. We prefer this byte order because OpenGL.</p>\n<pre><code>wgrd.FMT_U8_ARGB\n</code></pre>\n<p>32 bits per pixel with a byte order of alpha, red, green, blue and a \nlittle endian U32 of BGRA.</p>\n<pre><code>wgrd.FMT_U8_RGB\n</code></pre>\n<p>24 bits per pixel with a byte order of red, green, blue.</p>\n<pre><code>wgrd.FMT_U8_INDEXED\n</code></pre>\n<p>8 bits per pixel which indexes a wgrd.FMT_U8_RGBA palette.</p>\n<pre><code>wgrd.FMT_U8_LUMINANCE\n</code></pre>\n<p>8 bits per pixel, grey scale only.</p>\n<pre><code>wgrd.FMT_U8_ALPHA\n</code></pre>\n<p>8 bits per pixel, alpha only.</p>\n<pre><code>wgrd.FMT_U16_RGBA_5551\n</code></pre>\n<p>16 bits per pixel with 5 bits each of red,green,blue and 1 bit of alpha \npacked into a single U16.</p>\n<pre><code>wgrd.FMT_U16_RGBA_4444\n</code></pre>\n<p>16 bits per pixel with 4 bits each of red,green,blue,alpha packed into \na single U16.</p>\n<pre><code>wgrd.FMT_U16_RGBA_5650\n</code></pre>\n<p>16 bits per pixel with 4 bits of red, 5 bits of green and 4 bits of \nblue packed into a single U16.\n<br/>\n<br/></p>\n<pre><code>wgrd.FMT_U8_RGBA_PREMULT\nwgrd.FMT_U8_ARGB_PREMULT\nwgrd.FMT_U8_INDEXED_PREMULT\nwgrd.FMT_U16_RGBA_5551_PREMULT\nwgrd.FMT_U16_RGBA_4444_PREMULT\nwgrd.FMT_U16_RGBA_5650_PREMULT\n</code></pre>\n<p>Are all just pre-multiplied alpha versions of the base format described \nabove.</p>\n<p>Check this link out for why pre-multiplied alpha is a good idea for any \nimage that will be used as a texture \n<a href=\"http://blogs.msdn.com/b/shawnhar/archive/2009/11/06/premultiplied-alpha.aspx\">http://blogs.msdn.com/b/shawnhar/archive/2009/11/06/premultiplied-alpha.aspx</a>\n<br/>\n<br/></p>\n<pre><code>wgrd.GRD_FMT_HINT_PNG\nwgrd.GRD_FMT_HINT_JPG\nwgrd.GRD_FMT_HINT_GIF\n</code></pre>\n<p>These are used to choose a specific file format when loading or saving.</p>\n",
    "count": 37,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 6,
    "name": "lua.wetgenes.grd",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>ga:adjust_contrast(sub,con)\n</code></pre>\n<p>sub is the middle grey value, probably 127, and con is the amount of \ncontrast.</p>\n<p>A con of 0 should have no effect, a con of -1 will be a flat grey and a \ncon of 1 will give a huge contrast increase.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 1120,
    "name": "lua.wetgenes.grd.adjust_contrast",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>ga:adjust_hsv(hue,saturation,value)\n</code></pre>\n<p>Add hue and adjust -1 to +1 in for saturation and value.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 1107,
    "name": "lua.wetgenes.grd.adjust_hsv",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>ga:adjust_rgb(red,green,blue)\n</code></pre>\n<p>Adjust -1 to +1 in for each RGB component.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 1094,
    "name": "lua.wetgenes.grd.adjust_rgb",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:attr_redux(cw,ch,num,sub,bak)\n</code></pre>\n<p>Perform attribute clash simulation on an indexed image.</p>\n<p>cw,ch are the width and height of each character we are simulating, 8x8 \nis the right size for spectrum attrs but could be 4x8 for c64 multicolor \nmode.</p>\n<p>num is the number of colors allowed within this area, so 2 for spectrum mode.</p>\n<p>sub is the size of sub pallete groups, eg 16 in nes mode or 8 in \nspectrum mode, EG bright simulation in spectrum mode requires all \ncolors in a attr block to be from the bright palette or the dark \npalette no mixing so this forces that grouping. Set to 0 or 256 and \nthis restriction will be disabled.</p>\n<p>bak is the index of the background color that is shared across all \ncharacters, set to -1 if there is no shared background color.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 609,
    "name": "lua.wetgenes.grd.attr_redux",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:blit(gb,x,y,cx,cy,cw,ch)\n</code></pre>\n<p>Blit a 2D area from one grd into another.</p>\n<p>gb is the grd to blit from.</p>\n<p>x,y is the location to blit too.</p>\n<p>cx,cy,cw,ch is a clip area that should be applied to gb before it is \nblitted. EG to specify an area within gb. If not provided it will \ndefault to the entirety of gb,</p>\n<p>g (destination) must be FMT_U8_RGBA and gb (source) must be \nFMT_U8_RGBA_PREMULT this function will blend the images using normal \nalpha blending.</p>\n<p>This is not overly optimised but should be reasonably fast.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 854,
    "name": "lua.wetgenes.grd.blit",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:clear(color)\n</code></pre>\n<p>Fill this grd with a single color, the color passed in depends on the \nformat of the grd, it could be an index value for 8bit images or a \n32bit value for rgba images.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 575,
    "name": "lua.wetgenes.grd.clear",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>gr=g:clip(x,y,z,w,h,d)\n</code></pre>\n<p>create a clipped window into this grd</p>\n<p>the actual data is still stored in the original, so any changes there will effect the newly returned grd</p>\n<p>x,y,z are the staring pixel and w,h,d are the width height and depth in pixels.</p>\n<p>If you intend to use this clipped area for an extended period of time then you should duplicate this grd once you do this.</p>\n<p>This returns a new grd with gr.parent set to g (the original grd)</p>\n<p>This is a very shallow dangerous copy and should only really be used for temporary actions.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 995,
    "name": "lua.wetgenes.grd.clip",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:convert(fmt)\n</code></pre>\n<p>Convert this grd to a new format, eg start with an 8 bit indexed grd \nand convert it to 32 bit like by passing in wgrd.FMT_U8_RGBA as the fmt.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 540,
    "name": "lua.wetgenes.grd.convert",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:copy_data(gb)\n</code></pre>\n<p>Copy all of the bitmap data from gb into g.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 972,
    "name": "lua.wetgenes.grd.copy_data",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:copy_data_layer(gb,z,zb)\n</code></pre>\n<p>Copy one layer (frame) of the bitmap data from gb into g. z is the \ndepth of the layer to copy into zb is the depth of the layer to copy \nfrom.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 982,
    "name": "lua.wetgenes.grd.copy_data_layer",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>ga=wgrd.create(gb)\n</code></pre>\n<p>Duplicate the grd.</p>\n<pre><code>ga=wgrd.create(format,width,height,depth)\n</code></pre>\n<p>Create a grd in the given format with the given width height and depth. </p>\n<pre><code>ga=wgrd.create(filename,opts)\n</code></pre>\n<p>Load an image from the file system.</p>\n<pre><code>ga=wgrd.create()\n</code></pre>\n<p>Create a blank grd of 0 dimensions.</p>\n<p>This is usually the only wgrd function you would need to call as once you \nhave a grd you can use the : calling convention to modify it. The other \nfunctions will be shown as examples using the : calling convention.</p>\n<pre><code>wgrd.create():load(opts)\n</code></pre>\n<p>For instance could be used if you wish to perform a more esoteric load \nthan from the file system.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns a grd object.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 278,
    "name": "lua.wetgenes.grd.create",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:create_convert(fmt)\n</code></pre>\n<p>Like convert but returns a new grd rather than converting in place.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 560,
    "name": "lua.wetgenes.grd.create_convert",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>gr=g:create_normal()\n</code></pre>\n<p>convert a greyscale height map  into an rgb normal map using the sobel filter.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 1028,
    "name": "lua.wetgenes.grd.create_normal",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:destroy()\n</code></pre>\n<p>Free the grd and associated memory. This will of course be done \nautomatically by garbage collection but you can force it explicitly \nusing this function.\n    </p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 356,
    "name": "lua.wetgenes.grd.destroy",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>ga = g:duplicate()\n</code></pre>\n<p>Create a duplicate of this grd and return it.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 526,
    "name": "lua.wetgenes.grd.duplicate",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>ga:fillmask(gb,seedx,seedy)\n</code></pre>\n<p>Fill gb with a fillmask version of ga that starts the floodfill at \nseedx,seedy</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 1149,
    "name": "lua.wetgenes.grd.fillmask",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:flipx()\n</code></pre>\n<p>This function flips the image reversing the x axis.\n    </p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 785,
    "name": "lua.wetgenes.grd.flipx",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:flipy()\n</code></pre>\n<p>This function flips the image reversing the y axis.</p>\n<p>Some image formats and rendering engines like to use upside down images \nso this is rather useful.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 769,
    "name": "lua.wetgenes.grd.flipy",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:info()\n</code></pre>\n<p>This function looks at the userdata stored in g[0] and fills in the g \ntable with its values. So it refreshes the width height etc values to \nreflect any changes. This should not need to be called explicitly as it \nis called whenever we change anything.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 839,
    "name": "lua.wetgenes.grd.info",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:load(opts)\n</code></pre>\n<p>Load an image from memory or file system depending on settings in opts.</p>\n<pre><code>opts.fmt\n</code></pre>\n<p>Lets you choose an image format, the strings &quot;jpg&quot;,&quot;png&quot; or &quot;gif&quot; will \nbe converted to the appropriate wgrd.FMT_HINT_* value.</p>\n<pre><code>opts.data\n</code></pre>\n<p>Flags this as a load from memory and provides the data string to load \nfrom.</p>\n<pre><code>opts.filename\n</code></pre>\n<p>Flags this as a load the file system and provides the file name to \nopen.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 414,
    "name": "lua.wetgenes.grd.load",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:load_data(datastring,format)\n</code></pre>\n<p>Load an image from memory.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 400,
    "name": "lua.wetgenes.grd.load_data",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:load_file(filename,format)\n</code></pre>\n<p>Load an image from the file system.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.\n </p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 386,
    "name": "lua.wetgenes.grd.load_file",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:paint(gb,x,y,cx,cy,cw,ch,mode,trans,color)\n</code></pre>\n<p>Blit a 2D area from one grd into another using dpaint style paint modes.</p>\n<p>Both grids must be indexed - FMT_U8_INDEXED</p>\n<p>gb is the grd to blit from.</p>\n<p>x,y is the location to blit too.</p>\n<p>cx,cy,cw,ch is a clip area that should be applied to gb before it is \nblitted. EG to specify an area within gb. If not provided it will \ndefault to the entirety of gb,</p>\n<p>mode is one of the following</p>\n<pre><code>PAINT_MODE_TRANS\n</code></pre>\n<p>Skip the transparent color.</p>\n<pre><code>GRD_PAINT_MODE_COLOR\n</code></pre>\n<p>Skip the transparent color and make every solid pixel the same color.</p>\n<pre><code>GRD_PAINT_MODE_COPY\n</code></pre>\n<p>Copy the entire area.</p>\n<pre><code>GRD_PAINT_MODE_XOR\n</code></pre>\n<p>XOR the values. (Can be used to find differences in an image)</p>\n<pre><code>GRD_PAINT_MODE_ALPHA\n</code></pre>\n<p>Skip the transparent colors as defined in the palette.\n<br/>\n<br/></p>\n<p>trans is the index of the transparent color, bground color, for use in \nthe appropriate modes.</p>\n<p>color is the index of the drawing color, foreground color, for use in \nthe appropriate modes. \n<br/>\n<br/></p>\n<p>This is not overly optimised but should be reasonably fast.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 899,
    "name": "lua.wetgenes.grd.paint",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:palette(x,w)\ng:palette(x,w,&quot;&quot;)\ng:palette(x,w,tab)\ng:palette(x,w,str)\ng:palette(x,w,grd)\n</code></pre>\n<p>These are the same as g:pixels() but refer to the palette information \nwhich is stored as a 1 pixel high 256 pixel wide rgba image. The use of \n&quot;&quot; to read a string of bytes and passing in either a table of numerical \nvalues or string of bytes to write into the palette is the same system \nas used with pixels.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 694,
    "name": "lua.wetgenes.grd.palette",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:pixels(x,y,w,h)\ng:pixels(x,y,z,w,h,d)\n</code></pre>\n<p>Read the area of pixels as a table of numerical values, the amount of \nnumbers you get per pixel <em>depends</em> on the format of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,&quot;&quot;)\ng:pixels(x,y,z,w,h,d,&quot;&quot;)\n</code></pre>\n<p>Read the area of pixels as a string of byte values, the amount of bytes \nyou get per pixel <em>depends</em> on the format of the grd. Note the passing \nin of an empty string to indicate that you with to receive a string.</p>\n<pre><code>g:pixels(x,y,w,h,tab)\ng:pixels(x,y,z,w,h,d,tab)\n</code></pre>\n<p>Write the area of pixels from a table of numerical values which is \nprovided in tab, the amount of numbers you need to provide per pixel \n<em>depends</em> on the format of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,str)\ng:pixels(x,y,z,w,h,d,str)\n</code></pre>\n<p>Write the area of pixels from a string of bytes which is provided in \nstr, the amount of bytes you need to provide per pixel <em>depends</em> on the \nformat of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,grd)\ng:pixels(x,y,z,w,h,d,grd)\n</code></pre>\n<p>Write the area of pixels from a grd which is provided in grd. use \nclip/layer functions to select a portion of a larger grd.</p>\n<p>As you can see depending on the arguments given this does one of two \nthings, read some pixels or write some pixels. The area that is to be \nused is provided first, as a 2d(x,y,w,h) or 3d(x,y,z,w,h,d) area. To \nread or write the entire 2d image or the first frame of an animation \nuse (0,0,g.width,g.height)</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns the requested data.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 640,
    "name": "lua.wetgenes.grd.pixels",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:quant(num)\n</code></pre>\n<p>Convert to an 8bit indexed image containing a palette of the requested size.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 593,
    "name": "lua.wetgenes.grd.quant",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>ga:remap(gb)\n</code></pre>\n<p>Fill gb with a remaped version of ga, each pixel is mapped to the closest palette entry.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 1080,
    "name": "lua.wetgenes.grd.remap",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:reset()\n</code></pre>\n<p>Reset the grd which will now be a blank image of 0 dimensions.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 370,
    "name": "lua.wetgenes.grd.reset",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:resize(w,h,d)\n</code></pre>\n<p>Resize the image to the given dimensions, this does not scale the image \ndata so instead each pixel will be in the same place after the resize. \nThis gives a crop effect when shrinking and extra blank area at the \nbottom right when growing. Useful if for instance you want to upload a \ntexture to OpenGL and need to change the size to be a power of two in \nwidth and height so you can mipmap it.\n    </p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 719,
    "name": "lua.wetgenes.grd.resize",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:save(opts)\n</code></pre>\n<p>Save an image to memory or filesytem depending on settings in opts.</p>\n<pre><code>opts.fmt\n</code></pre>\n<p>Lets you choose an image format, the strings &quot;jpg&quot;,&quot;png&quot; or &quot;gif&quot; will \nbe converted to the appropriate wgrd.FMT_HINT_* value.</p>\n<p>We will guess opts.fmt from the file name extension if it is not \nprovided and a file name is.</p>\n<pre><code>opts.filename\n</code></pre>\n<p>Flags this as a load the file system and provides the file name to \nwrite to. If no filename is given then we will be saving into memory \nand be returning that data string as the first return value.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert.</p>\n<p>If no file name is given then we <em>return</em> the data string that we saved.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 461,
    "name": "lua.wetgenes.grd.save",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:scale(w,h,d)\n</code></pre>\n<p>Scale the image to the given dimensions, this is currently using a \nterrible scale filter that is only any good at halving or doubling the \nsize.</p>\n<p>This should only be used to create mipmaps until it is replaced with a \nbetter scale filter.\n    </p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 737,
    "name": "lua.wetgenes.grd.scale",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:shrink(area)\n</code></pre>\n<p>area is an {x=0,y=0,z=0,w=100,h=100,d=100} style table specifying a 3D\narea, set {z=0,d=1} for a 2D area.</p>\n<p>You should set this to the full size of the image.</p>\n<p>This function looks at the pixels in that area and shrinks each edge \ninwards if it is fully transparent then return this new area in the \nsame table that was passed in.</p>\n<p>You can then use this information to crop this image resulting in a \nsmaller sized grd containing all the solid pixels.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 816,
    "name": "lua.wetgenes.grd.shrink",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:slide(dx,dy,dz)\n</code></pre>\n<p>Slide the image along the x,y,z axis by the given amounts. The image wraps around the edges \nso no pixels are lost just moved around.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 755,
    "name": "lua.wetgenes.grd.slide",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>ga:sort_cmap()\n</code></pre>\n<p>Sort cmap into a &quot;good&quot; order and remap the image.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 1136,
    "name": "lua.wetgenes.grd.sort_cmap",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>stream=g:stream(filename)\nstream=g:stream({filename=filename,...})\n</code></pre>\n<p>Open a GIF stream, returns a table with the following functions,</p>\n<pre><code>stream:write(ga)\n</code></pre>\n<p>Add a frame to the gif, each frame should be the same size and color map.</p>\n<pre><code>stream:close()\n</code></pre>\n<p>Close the stream and finalise the GIF.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 1041,
    "name": "lua.wetgenes.grd.stream",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   },
   {
    "body": "<pre><code>g:xor(ga)\n</code></pre>\n<p>Set our image data to the XOR of the image/palette data from ga and g.</p>\n<p>This is intended to be combined with g:shrink to work out the area of \nchange between the two images.</p>\n<p>Both grds must be the same size and format.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 798,
    "name": "lua.wetgenes.grd.xor",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

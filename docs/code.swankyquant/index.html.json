@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2818,42 +2818,42 @@
   {
    "body": "<h1 id=\"swankyquant\">SwankyQuant</h1>\n<p>To use this code remember to include it only once with SWANKYQUANT_C \ndefined or no code will be generated. For example.\n<br/>\n<br/></p>\n<pre><code>#define SWANKYQUANT_C\n#include &quot;swankyquant.h&quot;\n\n...\n\nswanky_quant( input, length, 256, output, palette, 6 );\n\nswanky_quant_remap( input, length, 256, output, palette, width, 6 );\n</code></pre>\n<p>The remap step is unnecessary unless you want your output image \ndithered.\n<br/>\n<br/></p>\n<p>SwankyQuant is a palette selection algorithm made of a combination of \nsimple actions, it requires a weighted compare function between two \ncolours and everything else is brute force selection based on this \ncompare. Since this compare is only used for yes/no logic then a 4d \ndistance squared between two 32bit colours is the default. Unlike the \nalternatives we fully support alpha in out palettes.</p>\n<p>The trick that makes this possible is using a byte per pixel thinking \nbuffer. Since you are presumably intending to remap the original image \ninto a buffer exactly like this I do not consider this an excessive \nextra resource, especially since this buffer is <em>also</em> the output \nindexed image when we are finished.</p>\n<p>This buffer allows us to keep track of which bucket we have assigned to \neach pixel, this combined with multiple image passes allows pixels to \njump from bucket to bucket until the allocation of pixels to available \nbuckets is reasonably optimal. We don&#39;t actually pick a palette we just \nsort pixels into buckets with other pixels of a similar colour. When \nfinished the average colour of each bucket is the resulting palette. </p>\n<p>Essentially we skip the generate a palette step and instead remap the \nimage repeatedly with the output palette automatically effected by \nevery pixels decision. Giving nice simple feedback until we hit a \nstable optimum solution.</p>\n<p>In order to reduce the number of image passes (each one is expensive) \nwe use an adjustable weight on the decision to jump so that early \npasses have more of an effect and later passes cleanup any mistakes, \nthis combined with a reasonable starting state (map by luminescence) \nhelps to reduce the cost of multiple passes and brute force searches to \nan acceptable level.</p>\n<p>Due to the brute force compares, generating a smaller palette is faster \nthan a larger palette. In Swanky Paint we are much more interested in \n16/32 colour palettes than 256 colour palettes so this is an additional \nadvantage.</p>\n<p>If the input contains only a handful of unique colours then we are very \nlikely to pick these exact colours provided there is enough room for \nthem all in the output palette.\n<br/>\n<br/></p>\n<h1 id=\"reference-links-to-other-algorithms\">REFERENCE LINKS TO OTHER ALGORITHMS</h1>\n<ol>\n<li>   <a href=\"http://www.imagemagick.org/script/quantize.php\">http://www.imagemagick.org/script/quantize.php</a></li>\n<li>   <a href=\"https://www.researchgate.net/publication/232079905_Kohonen_neural_networks_for_optimal_colour_quantization\">https://www.researchgate.net/publication/232079905_Kohonen_neural_networks_for_optimal_colour_quantization</a></li>\n<li>   <a href=\"https://scientificgems.wordpress.com/stuff/neuquant-fast-high-quality-image-quantization/\">https://scientificgems.wordpress.com/stuff/neuquant-fast-high-quality-image-quantization/</a><br/>\n<br/></li>\n</ol>\n<p>In comparison to the above I would list the following pros and cons.\n<br/>\n<br/></p>\n<pre><code>SWANKYQUANT PROS\n================\n\n    . Is simple to understand and tweak.\n\n    . Works with 32bit alpha.\n\n    . Works well with a small output palette.\n\n    . Will pick every distinct input if palette size allows.\n\n\nSWANKYQUANT CONS\n================\n\n    . Uses output memory as a thinking buffer.\n\n    . Is slower for large images and 256 colour palettes.\n</code></pre>\n<br/>\n<br/>\n\n<p>For large images I would recommend scaling the image down in size then \nusing the smaller image to generate the palette. Less precise but a \nhuge performance gain. This is the logic I use in Swanky Paint and the \ngrd library when loading larger images.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/swankyquant.h",
+   "file": "../libs/lua_grd/code/swankyquant.h",
    "line": 9,
    "name": "code.swankyquant.algorithm",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/swankyquant.h"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/swankyquant.h"
   },
   {
    "body": "<p>Compare two colors and return a distance value. This is non linear, as \nwe do not need to bother with the sqrt since the numbers are only used \nfor comparison.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/swankyquant.h",
+   "file": "../libs/lua_grd/code/swankyquant.h",
    "line": 163,
    "name": "code.swankyquant.color_distance",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/swankyquant.h"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/swankyquant.h"
   },
   {
    "body": "<p>Compare how close a match it would be if we added our color(weighted) \nto a bucket.</p>\n<p>Each bucket is 5 doubles and contains an rgba accumulator in \n[0][1][2][3]  and a number of samples in [5] Doubles must be used \nrather than floats or we will encounter number overflow for images that \nare larger than 256x256 pixels. </p>\n<p>(A float or int version for smaller images might be worthwhile.)</p>\n<p>The weight should be a natural 1.0 but since we want to encourage early \nbucket jumping we fudge it high at the start and then lower it on later \npasses to bring stability to the feedback system. This is simply to \nreduce the number of passes over the data required to get good results.</p>\n<p>This function also accounts for most of the thinking time so \ncould/should be optimised more.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/swankyquant.h",
+   "file": "../libs/lua_grd/code/swankyquant.h",
    "line": 176,
    "name": "code.swankyquant.color_distance_weight",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/swankyquant.h"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/swankyquant.h"
   },
   {
    "body": "<p>Reduce input rgba data to the requested number of index colors(2-256)</p>\n<p>reads data from input[4*length]</p>\n<p>writes data to output[length] and palette[4*colors]</p>\n<p>Make sure this memory is available.</p>\n<p>Quality is the number of passes and 6 or more is recommended for good \nresults.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/swankyquant.h",
+   "file": "../libs/lua_grd/code/swankyquant.h",
    "line": 209,
    "name": "code.swankyquant.swanky_quant",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/swankyquant.h"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/swankyquant.h"
   },
   {
    "body": "<p>Perform a final remap on a swanky_quant output image with an optional \namount of ordered dithering.</p>\n<pre><code>dither = 0  ==   1 bit pattern  ( no dithering )\ndither = 1  ==   3 bit patterns\ndither = 2  ==   5 bit patterns\ndither = 3  ==   9 bit patterns\ndither = 4  ==  17 bit patterns ( recommended dithering )\ndither = 5  ==  33 bit patterns\ndither = 6  ==  65 bit patterns ( maximum dithering )\n</code></pre>\n<p>width is the width of the image, we need to know this so we can dither \nnicely.</p>\n<p>All other values are the same as used in the swanky_quant function \ncall.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/swankyquant.h",
+   "file": "../libs/lua_grd/code/swankyquant.h",
    "line": 301,
    "name": "code.swankyquant.swanky_quant_remap",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/swankyquant.h"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/swankyquant.h"
   }
  ],
  "_output_chunkname": "html",

@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>g:blit(gb,x,y,cx,cy,cw,ch)\n</code></pre>\n<p>Blit a 2D area from one grd into another.</p>\n<p>gb is the grd to blit from.</p>\n<p>x,y is the location to blit too.</p>\n<p>cx,cy,cw,ch is a clip area that should be applied to gb before it is \nblitted. EG to specify an area within gb. If not provided it will \ndefault to the entirety of gb,</p>\n<p>g (destination) must be FMT_U8_RGBA and gb (source) must be \nFMT_U8_RGBA_PREMULT this function will blend the images using normal \nalpha blending.</p>\n<p>This is not overly optimised but should be reasonably fast.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 854,
    "name": "lua.wetgenes.grd.blit",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

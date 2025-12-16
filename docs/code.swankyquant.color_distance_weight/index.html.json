@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<p>Compare how close a match it would be if we added our color(weighted) \nto a bucket.</p>\n<p>Each bucket is 5 doubles and contains an rgba accumulator in \n[0][1][2][3]  and a number of samples in [5] Doubles must be used \nrather than floats or we will encounter number overflow for images that \nare larger than 256x256 pixels. </p>\n<p>(A float or int version for smaller images might be worthwhile.)</p>\n<p>The weight should be a natural 1.0 but since we want to encourage early \nbucket jumping we fudge it high at the start and then lower it on later \npasses to bring stability to the feedback system. This is simply to \nreduce the number of passes over the data required to get good results.</p>\n<p>This function also accounts for most of the thinking time so \ncould/should be optimised more.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/swankyquant.h",
+   "file": "../libs/lua_grd/code/swankyquant.h",
    "line": 176,
    "name": "code.swankyquant.color_distance_weight",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/swankyquant.h"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/swankyquant.h"
   }
  ],
  "_output_chunkname": "html",

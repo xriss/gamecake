@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>g:resize(w,h,d)\n</code></pre>\n<p>Resize the image to the given dimensions, this does not scale the image \ndata so instead each pixel will be in the same place after the resize. \nThis gives a crop effect when shrinking and extra blank area at the \nbottom right when growing. Useful if for instance you want to upload a \ntexture to OpenGL and need to change the size to be a power of two in \nwidth and height so you can mipmap it.\n    </p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 719,
    "name": "lua.wetgenes.grd.resize",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

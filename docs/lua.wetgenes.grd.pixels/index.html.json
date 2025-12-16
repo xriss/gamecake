@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>g:pixels(x,y,w,h)\ng:pixels(x,y,z,w,h,d)\n</code></pre>\n<p>Read the area of pixels as a table of numerical values, the amount of \nnumbers you get per pixel <em>depends</em> on the format of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,&quot;&quot;)\ng:pixels(x,y,z,w,h,d,&quot;&quot;)\n</code></pre>\n<p>Read the area of pixels as a string of byte values, the amount of bytes \nyou get per pixel <em>depends</em> on the format of the grd. Note the passing \nin of an empty string to indicate that you with to receive a string.</p>\n<pre><code>g:pixels(x,y,w,h,tab)\ng:pixels(x,y,z,w,h,d,tab)\n</code></pre>\n<p>Write the area of pixels from a table of numerical values which is \nprovided in tab, the amount of numbers you need to provide per pixel \n<em>depends</em> on the format of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,str)\ng:pixels(x,y,z,w,h,d,str)\n</code></pre>\n<p>Write the area of pixels from a string of bytes which is provided in \nstr, the amount of bytes you need to provide per pixel <em>depends</em> on the \nformat of the grd.</p>\n<pre><code>g:pixels(x,y,w,h,grd)\ng:pixels(x,y,z,w,h,d,grd)\n</code></pre>\n<p>Write the area of pixels from a grd which is provided in grd. use \nclip/layer functions to select a portion of a larger grd.</p>\n<p>As you can see depending on the arguments given this does one of two \nthings, read some pixels or write some pixels. The area that is to be \nused is provided first, as a 2d(x,y,w,h) or 3d(x,y,z,w,h,d) area. To \nread or write the entire 2d image or the first frame of an animation \nuse (0,0,g.width,g.height)</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns the requested data.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 640,
    "name": "lua.wetgenes.grd.pixels",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

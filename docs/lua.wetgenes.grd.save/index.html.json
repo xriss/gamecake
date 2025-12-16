@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>g:save(opts)\n</code></pre>\n<p>Save an image to memory or filesytem depending on settings in opts.</p>\n<pre><code>opts.fmt\n</code></pre>\n<p>Lets you choose an image format, the strings &quot;jpg&quot;,&quot;png&quot; or &quot;gif&quot; will \nbe converted to the appropriate wgrd.FMT_HINT_* value.</p>\n<p>We will guess opts.fmt from the file name extension if it is not \nprovided and a file name is.</p>\n<pre><code>opts.filename\n</code></pre>\n<p>Flags this as a load the file system and provides the file name to \nwrite to. If no filename is given then we will be saving into memory \nand be returning that data string as the first return value.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert.</p>\n<p>If no file name is given then we <em>return</em> the data string that we saved.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 461,
    "name": "lua.wetgenes.grd.save",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

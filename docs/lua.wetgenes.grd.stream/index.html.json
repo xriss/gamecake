@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>stream=g:stream(filename)\nstream=g:stream({filename=filename,...})\n</code></pre>\n<p>Open a GIF stream, returns a table with the following functions,</p>\n<pre><code>stream:write(ga)\n</code></pre>\n<p>Add a frame to the gif, each frame should be the same size and color map.</p>\n<pre><code>stream:close()\n</code></pre>\n<p>Close the stream and finalise the GIF.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 1041,
    "name": "lua.wetgenes.grd.stream",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<p>Reduce input rgba data to the requested number of index colors(2-256)</p>\n<p>reads data from input[4*length]</p>\n<p>writes data to output[length] and palette[4*colors]</p>\n<p>Make sure this memory is available.</p>\n<p>Quality is the number of passes and 6 or more is recommended for good \nresults.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/swankyquant.h",
+   "file": "../libs/lua_grd/code/swankyquant.h",
    "line": 209,
    "name": "code.swankyquant.swanky_quant",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/swankyquant.h"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/swankyquant.h"
   }
  ],
  "_output_chunkname": "html",

@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>g:shrink(area)\n</code></pre>\n<p>area is an {x=0,y=0,z=0,w=100,h=100,d=100} style table specifying a 3D\narea, set {z=0,d=1} for a 2D area.</p>\n<p>You should set this to the full size of the image.</p>\n<p>This function looks at the pixels in that area and shrinks each edge \ninwards if it is fully transparent then return this new area in the \nsame table that was passed in.</p>\n<p>You can then use this information to crop this image resulting in a \nsmaller sized grd containing all the solid pixels.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 816,
    "name": "lua.wetgenes.grd.shrink",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>g:paint(gb,x,y,cx,cy,cw,ch,mode,trans,color)\n</code></pre>\n<p>Blit a 2D area from one grd into another using dpaint style paint modes.</p>\n<p>Both grids must be indexed - FMT_U8_INDEXED</p>\n<p>gb is the grd to blit from.</p>\n<p>x,y is the location to blit too.</p>\n<p>cx,cy,cw,ch is a clip area that should be applied to gb before it is \nblitted. EG to specify an area within gb. If not provided it will \ndefault to the entirety of gb,</p>\n<p>mode is one of the following</p>\n<pre><code>PAINT_MODE_TRANS\n</code></pre>\n<p>Skip the transparent color.</p>\n<pre><code>GRD_PAINT_MODE_COLOR\n</code></pre>\n<p>Skip the transparent color and make every solid pixel the same color.</p>\n<pre><code>GRD_PAINT_MODE_COPY\n</code></pre>\n<p>Copy the entire area.</p>\n<pre><code>GRD_PAINT_MODE_XOR\n</code></pre>\n<p>XOR the values. (Can be used to find differences in an image)</p>\n<pre><code>GRD_PAINT_MODE_ALPHA\n</code></pre>\n<p>Skip the transparent colors as defined in the palette.\n<br/>\n<br/></p>\n<p>trans is the index of the transparent color, bground color, for use in \nthe appropriate modes.</p>\n<p>color is the index of the drawing color, foreground color, for use in \nthe appropriate modes. \n<br/>\n<br/></p>\n<p>This is not overly optimised but should be reasonably fast.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 899,
    "name": "lua.wetgenes.grd.paint",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

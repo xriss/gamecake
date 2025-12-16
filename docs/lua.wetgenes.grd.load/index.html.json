@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>g:load(opts)\n</code></pre>\n<p>Load an image from memory or file system depending on settings in opts.</p>\n<pre><code>opts.fmt\n</code></pre>\n<p>Lets you choose an image format, the strings &quot;jpg&quot;,&quot;png&quot; or &quot;gif&quot; will \nbe converted to the appropriate wgrd.FMT_HINT_* value.</p>\n<pre><code>opts.data\n</code></pre>\n<p>Flags this as a load from memory and provides the data string to load \nfrom.</p>\n<pre><code>opts.filename\n</code></pre>\n<p>Flags this as a load the file system and provides the file name to \nopen.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 414,
    "name": "lua.wetgenes.grd.load",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

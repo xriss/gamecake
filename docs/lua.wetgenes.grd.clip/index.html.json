@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>gr=g:clip(x,y,z,w,h,d)\n</code></pre>\n<p>create a clipped window into this grd</p>\n<p>the actual data is still stored in the original, so any changes there will effect the newly returned grd</p>\n<p>x,y,z are the staring pixel and w,h,d are the width height and depth in pixels.</p>\n<p>If you intend to use this clipped area for an extended period of time then you should duplicate this grd once you do this.</p>\n<p>This returns a new grd with gr.parent set to g (the original grd)</p>\n<p>This is a very shallow dangerous copy and should only really be used for temporary actions.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 995,
    "name": "lua.wetgenes.grd.clip",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

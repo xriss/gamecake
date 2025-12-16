@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>g:palette(x,w)\ng:palette(x,w,&quot;&quot;)\ng:palette(x,w,tab)\ng:palette(x,w,str)\ng:palette(x,w,grd)\n</code></pre>\n<p>These are the same as g:pixels() but refer to the palette information \nwhich is stored as a 1 pixel high 256 pixel wide rgba image. The use of \n&quot;&quot; to read a string of bytes and passing in either a table of numerical \nvalues or string of bytes to write into the palette is the same system \nas used with pixels.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 694,
    "name": "lua.wetgenes.grd.palette",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",

@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<p>Perform a final remap on a swanky_quant output image with an optional \namount of ordered dithering.</p>\n<pre><code>dither = 0  ==   1 bit pattern  ( no dithering )\ndither = 1  ==   3 bit patterns\ndither = 2  ==   5 bit patterns\ndither = 3  ==   9 bit patterns\ndither = 4  ==  17 bit patterns ( recommended dithering )\ndither = 5  ==  33 bit patterns\ndither = 6  ==  65 bit patterns ( maximum dithering )\n</code></pre>\n<p>width is the width of the image, we need to know this so we can dither \nnicely.</p>\n<p>All other values are the same as used in the swanky_quant function \ncall.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/swankyquant.h",
+   "file": "../libs/lua_grd/code/swankyquant.h",
    "line": 301,
    "name": "code.swankyquant.swanky_quant_remap",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/swankyquant.h"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/swankyquant.h"
   }
  ],
  "_output_chunkname": "html",

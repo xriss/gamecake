@@ -2769,8 +2769,8 @@
  "_docs_json": {
   "dirname": "{_root}docs",
   "dirs": {
-   "../../lua": "",
-   "../../lua_grd": ""
+   "../../libs/lua_grd": "",
+   "../../lua": ""
   },
   "ignore": {
    "node_modules": true
@@ -2813,10 +2813,10 @@
   {
    "body": "<pre><code>g:attr_redux(cw,ch,num,sub,bak)\n</code></pre>\n<p>Perform attribute clash simulation on an indexed image.</p>\n<p>cw,ch are the width and height of each character we are simulating, 8x8 \nis the right size for spectrum attrs but could be 4x8 for c64 multicolor \nmode.</p>\n<p>num is the number of colors allowed within this area, so 2 for spectrum mode.</p>\n<p>sub is the size of sub pallete groups, eg 16 in nes mode or 8 in \nspectrum mode, EG bright simulation in spectrum mode requires all \ncolors in a attr block to be from the bright palette or the dark \npalette no mixing so this forces that grouping. Set to 0 or 256 and \nthis restriction will be disabled.</p>\n<p>bak is the index of the background color that is shared across all \ncharacters, set to -1 if there is no shared background color.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
-   "file": "../lua_grd/code/grd.lua",
+   "file": "../libs/lua_grd/code/grd.lua",
    "line": 609,
    "name": "lua.wetgenes.grd.attr_redux",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua_grd/code/grd.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
  ],
  "_output_chunkname": "html",
