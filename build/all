@@ -7,7 +7,8 @@ sudo echo " remember to use --clean to force a full rebuild "
 
 echo " build windows ( win32 for life ) "
 
-cd ../vbox_mingw
+# need boxs in first cd
+cd ../boxs/vbox_mingw
 ./make $*
 vagrant halt
 

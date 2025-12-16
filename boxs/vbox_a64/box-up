@@ -15,7 +15,7 @@ OPTS=" \
 	-device scsi-hd,drive=hd \
 	-nographic \
 	-nic hostfwd=tcp::5522-:22 \
-	-virtfs local,path=$HOSTDIR/..,mount_tag=host,security_model=mapped-xattr \
+	-virtfs local,path=$HOSTDIR/../..,mount_tag=host,security_model=mapped-xattr \
 	$* \
 "
 
