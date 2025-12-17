@@ -2814,7 +2814,7 @@
    "body": "<pre><code>local root=wpath.root(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the root component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 382,
+   "line": 386,
    "name": "lua.wetgenes.path.root",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   }

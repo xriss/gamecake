@@ -726,7 +726,7 @@
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.currentdir">lua.wetgenes.path.currentdir</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L261">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L265">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><p>Get the current working directory, this requires lfs and if lfs is not 
 available then it will return wpath.root this path will have a trailing 
 separator so can be joined directly to a filename.</p>
@@ -737,7 +737,7 @@ separator so can be joined directly to a filename.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.dir">lua.wetgenes.path.dir</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L354">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L358">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><pre><code>local dir=wpath.dir(path)
 </code></pre>
 <p>This is a small utility function to perform a wpath.resolve then 
@@ -750,7 +750,7 @@ directory. Note this will transform a root dir of &quot;/&quot; into one of &quo
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.ext">lua.wetgenes.path.ext</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L418">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L422">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><pre><code>local ext=wpath.ext(path)
 </code></pre>
 <p>This is a small utility function to perform a wpath.resolve then 
@@ -760,7 +760,7 @@ wpath.parse and return the ext component of the result.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.file">lua.wetgenes.path.file</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L370">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L374">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><pre><code>local file=wpath.file(path)
 </code></pre>
 <p>This is a small utility function to perform a wpath.resolve then 
@@ -770,7 +770,7 @@ wpath.parse and return the file component of the result.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.folder">lua.wetgenes.path.folder</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L394">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L398">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><pre><code>local folder=wpath.folder(path)
 </code></pre>
 <p>This is a small utility function to perform a wpath.resolve then 
@@ -787,7 +787,7 @@ wpath.parse and return the folder component of the result.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.name">lua.wetgenes.path.name</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L406">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L410">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><pre><code>local name=wpath.name(path)
 </code></pre>
 <p>This is a small utility function to perform a wpath.resolve then 
@@ -805,7 +805,7 @@ wpath.parse and return the name component of the result.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.parent">lua.wetgenes.path.parent</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L341">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L345">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><p>Resolve input and go up a single directory level, ideally you should 
 pass in a directory, IE a string that ends in / or \ and we will return 
 the parent of this directory.</p>
@@ -845,7 +845,7 @@ like C:\ under windows.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.relative">lua.wetgenes.path.relative</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L305">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L309">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><p>Build a relative path from point a to point b this will probably be a 
 bunch of ../../../ followed by some of the ending of the second 
 argument.</p>
@@ -854,7 +854,7 @@ argument.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.resolve">lua.wetgenes.path.resolve</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L287">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L291">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><p>Join all path segments and resolve them to absolute using wpath.join 
 and wpath.normalize with a prepended wpath.currentdir as necessary.</p>
 </div>
@@ -862,7 +862,7 @@ and wpath.normalize with a prepended wpath.currentdir as necessary.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.root">lua.wetgenes.path.root</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L382">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L386">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><pre><code>local root=wpath.root(path)
 </code></pre>
 <p>This is a small utility function to perform a wpath.resolve then 
