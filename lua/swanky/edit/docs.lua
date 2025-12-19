@@ -59,7 +59,7 @@ M.bake=function(oven,docs)
 	docs.get_keepers=function()
 		local t={}
 		t["/"]=true -- force roots
-		t["//"]=true
+		t["/../"]=true
 		
 		local addpath;addpath=function(path)
 			t[path]=true
@@ -69,11 +69,14 @@ M.bake=function(oven,docs)
 				addpath( path:sub(1,s-1) )
 			end
 		end
+
+		addpath( wpath.currentdir() )
+		if wpath.home then addpath( wpath.home ) end
 		
 		for _,it in ipairs(docs.list) do
 			addpath(it.filename)
 		end
-		
+
 		return t
 	end
 
@@ -91,9 +94,9 @@ M.bake=function(oven,docs)
 		if not filename then
 			return docs.create()
 		end
-		if filename:sub(1,2)~="//" then -- do nothing with special // paths
-			filename=wpath.resolve(filename) -- fix path ( eg use cd )
-		end
+--		if filename:sub(1,2)~="/../" then -- do nothing with special /../ paths
+			filename=wpath.resolve(filename) -- fix path ( eg use cd or HOME )
+--		end
 		return docs.find(filename) or docs.create(filename)
 	end
 
@@ -278,7 +281,7 @@ M.bake=function(oven,docs)
 			it.filename=filename
 		end
 		if not it.filename then
-			it.filename=wpath.currentdir()..os.date("swed-%Y%m%d.txt")
+			it.filename=wpath.currentdir()..os.date("swed-%Y%m%d%H%M%S.txt")
 		end
 		it.txt.set_text("\n",it.filename)
 		

@@ -6,7 +6,7 @@
 local M={ modname = (...) } package.loaded[M.modname] = M
 
 
--- unix paths and we use // for internal data so //data/ is not expected to hit the filesystem
+-- unix paths and we use /../ for internal data so /../data/ is not expected to hit the filesystem
 
 
 ------------------------------------------------------------------------
@@ -130,40 +130,45 @@ M.bake=function(oven,collect)
 	collect.oven=oven -- back link for meta access
 
 	collect.mounts_config=wgw_mounts.config.setup({
-		name="config/",
-		path="//config/",
-		dir={},
 		collect=collect, -- back link to this state data
+		name="config/",
+		path="/../config/",
+		dir={}
 	})
 	collect.mounts_gist=wgw_mounts.gist.setup({
-		name="gists/",
-		path="//gists/",
-		dir={},
 		collect=collect, -- back link to this state data
+		name="gists/",
+		path="/../gists/",
+		dir={}
 	})
 	collect.mounts_readme=wgw_mounts.readme.setup({
-		name="readme/",
-		path="//readme/",
-		dir={},
 		collect=collect, -- back link to this state data
+		name="readme/",
+		path="/../readme/",
+		dir={}
 	})
 	collect.mounts_meta=wgw_mounts.meta.setup({
-		name="//",
-		path="//",
+		collect=collect, -- back link to this state data
+		name="../",
+		path="/../",
+		mounts={ collect.mounts_config , collect.mounts_gist , collect.mounts_readme },
 		dir={},
-		dir_auto={ collect.mounts_config , collect.mounts_gist , collect.mounts_readme },
 		keep=true,
 	})
 	collect.mounts_file=wgw_mounts.file.setup({
+		collect=collect, -- back link to this state data
 		name="/",
 		path="/",
+		mounts={  collect.mounts_meta },
 		dir={},
 		keep=true,
 	})
 	collect.mounts=wgw_mounts.meta.setup({
+		collect=collect, -- back link to this state data
 		name="",
 		path="",
-		dir={ collect.mounts_meta , collect.mounts_file },
+		mounts={  collect.mounts_file },
+		dir={},
 		keep=true,
 	})
 
@@ -173,7 +178,7 @@ M.bake=function(oven,collect)
 		gui.refresh_tree()
 
 	end
-
+	
 	collect.update_keepers=function()
 		local keep={to_line=function( it , widget )
 			local get_text_color=function(tint)

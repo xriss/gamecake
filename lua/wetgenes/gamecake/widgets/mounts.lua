@@ -32,23 +32,26 @@ end
 
 M.meta.setup=function(meta)
 	if not meta then meta={} end
-	setmetatable(meta,M.meta_metatable)		
+	setmetatable(meta,M.meta_metatable)
+	if meta.mounts then
+		meta:merge_dir(meta.mounts)
+	end
 	return meta
 end
 
 M.meta.find_prefix=function(meta,path)
-	if meta.is~="meta" then return nil,path end -- must be meta
-	local best
-	-- prefer dir_auto in case this is collapsed meta
-	for _,it in pairs(meta.dir_auto or meta.dir) do -- find best dir prefix for this path ( mount points )
+	local best=meta
+	for _,it in pairs(meta.mounts or {}) do -- find best dir prefix for this path ( mount points )
 		local c=path:sub(1,#it.path) -- path must begin with
 		if c==it.path then
 			if not best then best=it end
 			if #it.path > #best.path then best=it end -- longest path wins
 		end
 	end
-	if best and best.is=="meta" then -- auto recursive on meta
-		return best:find_prefix(path)
+	if best~=meta and best.mounts then -- auto recursive on sub mounts find
+		local it,path=best:find_prefix(path)
+		if not best then best=it end
+		if #it.path > #best.path then best=it end -- longest path wins
 	end
 	return best,path -- may be nil and path may be adjusted
 end
@@ -65,10 +68,16 @@ M.meta.sort_dir=function(meta)
 	end
 end
 
-M.meta.merge_dir=function(meta,dir)
+M.meta.merge_dir=function(meta,dir,only)
 
 	if not dir then
-		dir=meta:fetch_dir(meta.path) or meta.dir_auto
+		dir=meta:fetch_dir(meta.path)
+		if meta.mounts then
+			for _,m in ipairs(meta.mounts) do
+				dir=dir or {}
+				dir[#dir+1]=m
+			end
+		end
 		if not dir then
 			return -- nothing to do
 		end
@@ -92,7 +101,11 @@ M.meta.merge_dir=function(meta,dir)
 				end
 			end
 		else -- delete
-			table.remove(meta.dir,i)
+			if only then -- delete everything else
+				if not v.keep then -- unless we want to keep it
+					table.remove(meta.dir,i)
+				end
+			end
 		end
 	end
 	-- any items left in the map are new
@@ -110,7 +123,7 @@ M.meta.toggle_dir=function(meta)
 	meta.expanded = not meta.expanded
 
 	if meta.expanded then -- expanded so refresh contents
-		meta:merge_dir()
+		meta:merge_dir(nil,true)
 	else -- collapsed so remove children
 		for i=#meta.dir,1,-1 do
 			local v=meta.dir[i]
@@ -160,7 +173,7 @@ M.meta.to_line=function(meta,widget,only)
 		meta.line=widget:create(opts)
 
 		local pp=#(wpath.split( wpath.unslash(meta.path) ))-1
---		if meta.path:sub(1,2)=="//" then pp=pp-2 else pp=pp-1 end
+--		if meta.path:sub(1,2)=="/../" then pp=pp-2 else pp=pp-1 end
 
 		meta.text=string.rep(" ",pp)
 		if meta.dir then
@@ -196,15 +209,15 @@ end
 
 M.meta.fetch_dir=function(meta,path)
 	local it,path=meta:find_prefix(path)
-	if it and it.fetch_dir then
+	if it and it.fetch_dir and it~=meta then
 		return it:fetch_dir(path)
 	end
 end
 
 M.meta.new_item=function(meta,name)
 	local path=meta.path..name
-	if meta.dir_auto then -- use auto items ?
-		for n,v in pairs(meta.dir_auto) do
+	if meta.mounts then -- use auto mount items ?
+		for n,v in pairs(meta.mounts) do
 			if v.path==path then return v end
 		end
 	end
@@ -220,23 +233,27 @@ end
 
 M.meta.manifest_path=function(meta,fullpath)
 
-	local path=""
-	if fullpath:sub(1,2)=="//" then path="/" end
+	local best,fullpath=meta:find_prefix(fullpath)
+	local path=best.path
+	fullpath=fullpath:sub(#path+1)
+--	best.keep=true
 
 	fullpath=wpath.unslash(fullpath)
 	local pp=wpath.split(fullpath)
 --	if pp[#pp]=="" then pp[#pp]=nil end -- strip trailing slash
-
-	local last=meta
+	local last=best
 	for i,v in ipairs(pp) do
 		if pp[i+1] then v=v.."/" end -- trailing slash except for last
 		path=path..v
 		local it=last:find_it({path=path})
 		if not it then -- need to create
 			it=last:new_item(v)
-			last.dir[#last.dir+1]=it
+			if last.dir then
+				last:merge_dir({it})
+--				last.dir[#last.dir+1]=it
+			end
 		end
-		it.keep=true -- do not remove this one when collapsed
+--		it.keep=true -- do not remove this one when collapsed
 		last=it
 	end
 
@@ -245,8 +262,10 @@ M.meta.manifest_path=function(meta,fullpath)
 end
 
 M.meta.read_file=function(meta,path)
+print("READ",meta.is,path)
 	local it,path=meta:find_prefix(path)
 	if it and it.read_file then
+print("READ",it.path,it.is,path)
 		return it:read_file(path)
 	end
 end
@@ -310,6 +329,9 @@ end
 M.file.setup=function(file)
 	if not file then file={} end
 	setmetatable(file,M.file_metatable)		
+	if file.mounts then
+		file:merge_dir(file.mounts)
+	end
 	if file.path and not file.name then -- fill in name etc from path
 		local pp=wpath.parse( wpath.unslash( wpath.resolve(file.path) ) )
 		file.name=pp.file
@@ -392,8 +414,8 @@ M.gist.is="gist"
 
 M.mount_gist=function()
 	return M.gist.setup({
-		name="//gists/",
-		path="//gists/",
+		name="/../gists/",
+		path="/../gists/",
 		dir={},
 		keep=true,
 	})
@@ -402,6 +424,9 @@ end
 M.gist.setup=function(gist)
 	if not gist then gist={} end
 	setmetatable(gist,M.gist_metatable)		
+	if gist.mounts then
+		gist:merge_dir(gist.mounts)
+	end
 	if gist.path and not gist.name then -- fill in name etc from path
 		local pp=wpath.parse( wpath.unslash( wpath.resolve(gist.path) ) ) -- note this will lose one of the two stating slashes
 		gist.name=pp.file
@@ -423,20 +448,21 @@ M.gist.new_item=function(gist,name)
 end
 
 M.gist.fetch_dir=function(gist,path)
-	path="/"..wpath.resolve(path) -- force the // prefix
+--	path="/"..wpath.resolve(path) -- force the // prefix
 	local dir={}
 
 	local pp=wpath.split(path)
+
 	local gid,gfname
-	if pp[1]=="" and pp[2]=="gists" then
-		gid=pp[3] or ""
+	if pp[1]=="" and pp[2]==".." and pp[3]=="gists" then
+		gid=pp[4] or ""
 		gid=gid:match("[^%.]*$") -- id is end part, possibly after last .
-		gfname=pp[4]
+		gfname=pp[5]
 	end
 	if gid=="" then gid=nil end
 	if gfname=="" then gfname=nil end
 
-	if path=="//gists/" then
+	if path=="/../gists/" then
 		local tab=gist.collect.config.cloud and gist.collect.config.cloud.gist_bookmarks or {}
 		for i,v in ipairs(tab) do
 			dir[#dir+1]=gist:new_item(v.."/")
@@ -464,10 +490,10 @@ PRINT("read_gist",path)
 
 	local pp=wpath.split(path)
 	local gid,gfname
-	if pp[1]=="" and pp[2]=="gists" then
-		gid=pp[3]
+	if pp[1]=="" and pp[2]==".." and pp[3]=="gists" then
+		gid=pp[4]
 		gid=gid:match("[^%.]*$") -- id is end part, possibly after last .
-		gfname=pp[4]
+		gfname=pp[5]
 	end
 	if gid=="" then gid=nil end
 	if gfname=="" then gfname=nil end
@@ -500,10 +526,10 @@ PRINT("write_gist",path)
 
 	local pp=wpath.split(path)
 	local gid,gfname
-	if pp[1]=="" and pp[2]=="gists" then
-		gid=pp[3]
+	if pp[1]=="" and pp[2]==".." and pp[3]=="gists" then
+		gid=pp[4]
 		gid=gid:match("[^%.]*$") -- id is end part, possibly after last .
-		gfname=pp[4]
+		gfname=pp[5]
 	end
 	if gid=="" then gid=nil end
 	if gfname=="" then gfname=nil end
@@ -558,8 +584,8 @@ M.config.is="config"
 
 M.mount_config=function()
 	return M.config.setup({
-		name="//config/",
-		path="//config/",
+		name="/../config/",
+		path="/../config/",
 		dir={},
 		keep=true,
 	})
@@ -568,6 +594,9 @@ end
 M.config.setup=function(config)
 	if not config then config={} end
 	setmetatable(config,M.config_metatable)		
+	if config.mounts then
+		config:merge_dir(config.mounts)
+	end
 	if config.path and not config.name then -- fill in name etc from path
 		local pp=wpath.parse( wpath.unslash( wpath.resolve(config.path) ) ) -- note this will lose one of the two stating slashes
 		config.name=pp.file
@@ -585,10 +614,10 @@ M.config.new_item=function(config,name)
 end
 
 M.config.fetch_dir=function(config,path)
-	path="/"..wpath.resolve(path) -- force the // prefix
+--	path="/"..wpath.resolve(path) -- force the // prefix
 	local dir={}
 
-	if path=="//config/" then
+	if path=="/../config/" then
 
 		local rows=config.collect.do_memo({
 			sql=[[
@@ -608,8 +637,8 @@ end
 
 M.config.read_file=function(config,path)
 PRINT("read_config",path)
-	if path:sub(1,#"//config/")=="//config/" then
-		local key=path:sub(1+#"//config/")
+	if path:sub(1,#"/../config/")=="/../config/" then
+		local key=path:sub(1+#"/../config/")
 		if key:sub(-#".djon")==".djon" then key=key:sub(1,-(1+#".djon")) end -- remove extension
 		local rows=config.collect.do_memo({
 			binds={
@@ -628,9 +657,9 @@ end
 M.config.write_file=function(config,path,data)
 PRINT("write_config",path)
 
-	if path:sub(1,#"//config/")=="//config/" then
+	if path:sub(1,#"/../config/")=="/../config/" then
 
-		local key=path:sub(1+#"//config/")
+		local key=path:sub(1+#"/../config/")
 		if key:sub(-#".djon")==".djon" then key=key:sub(1,-(1+#".djon")) end -- remove extension
 		local tab
 		pcall(function() -- try and parse but ignore errors
@@ -680,8 +709,8 @@ M.readme.is="readme"
 
 M.mount_readme=function()
 	return M.readme.setup({
-		name="//readme/",
-		path="//readme/",
+		name="/../readme/",
+		path="/../readme/",
 		dir={},
 		keep=true,
 	})
@@ -690,6 +719,9 @@ end
 M.readme.setup=function(readme)
 	if not readme then readme={} end
 	setmetatable(readme,M.readme_metatable)		
+	if readme.mounts then
+		readme:merge_dir(readme.mounts)
+	end
 	if readme.path and not readme.name then -- fill in name etc from path
 		local pp=wpath.parse( wpath.unslash( wpath.resolve(readme.path) ) ) -- note this will lose one of the two starting slashes
 		readme.name=pp.file
@@ -707,10 +739,10 @@ M.readme.new_item=function(readme,name)
 end
 
 M.readme.fetch_dir=function(readme,path)
-	path="/"..wpath.resolve(path) -- force the // prefix
+--	path="/"..wpath.resolve(path) -- force the // prefix
 	local dir={}
 
-	if path=="//readme/" then
+	if path=="/../readme/" then
 	
 		local rows={}
 		for n,v in pairs( readme.collect.readmes ) do
@@ -724,8 +756,8 @@ end
 
 M.readme.read_file=function(readme,path)
 PRINT("read_readme",path)
-	if path:sub(1,#"//readme/")=="//readme/" then
-		local key=path:sub(1+#"//readme/")		
+	if path:sub(1,#"/../readme/")=="/../readme/" then
+		local key=path:sub(1+#"/../readme/")		
 		return readme.collect.readmes[key]
 	end
 end
@@ -733,9 +765,9 @@ end
 M.readme.write_file=function(readme,path,data)
 PRINT("write_readme",path)
 
-	if path:sub(1,#"//readme/")=="//readme/" then
+	if path:sub(1,#"/../readme/")=="/../readme/" then
 
-		local key=path:sub(1+#"//readme/")
+		local key=path:sub(1+#"/../readme/")
 		return nil -- no can save
 	end
 end

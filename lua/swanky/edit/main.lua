@@ -96,9 +96,14 @@ M.bake=function(oven,main)
 
 		end
 
-		if not docs.list[1] then -- auto load hello.md
-			docs.manifest("//readme/hello.md"):show()
+		collect.manifest_path(wpath.currentdir())
+		if wpath.home then
+			collect.manifest_path(wpath.home)
 		end
+		if not docs.list[1] then -- auto load hello.md
+			docs.manifest("/../readme/hello.md"):show()
+		end
+
 
 		
 		gui.master.set_focus( gui.master.ids.texteditor.scroll_widget.pan )

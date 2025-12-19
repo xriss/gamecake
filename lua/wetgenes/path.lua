@@ -17,57 +17,6 @@ local M={} ; package.loaded[(...)]=M ; local wpath=M
 -- a soft require of lfs so lfs can be nil
 local _,lfs=pcall( function() return require("lfs_any") end ) ; lfs=_ and lfs
 
-
---[[#lua.wetgenes.path.setup
-
-setup for windows or linux style paths, to force one or the other use
-
-	wpath.setup("win")
-	wpath.setup("nix")
-
-We automatically call this at startup and make a best guess, you can 
-revert to this best guess with
-
-	wpath.setup()
-
-This is a global setting, so be careful with changes. Mostly its 
-probably best to stick with the best guess unless we are mistakenly 
-guessing windows.
-
-]]
-wpath.setup=function(flavour)
-
--- try and guess if we are dealing with linux or windows style paths
-	if not flavour then
-		if package.config:sub(1,1) ==  "/" then -- paths begin with /
-			flavour="nix"
-		else
-			flavour="win"
-		end
-	end
-
-	if flavour == "win" then
-	
-		wpath.root="C:\\"
-		wpath.separator="\\"
-		wpath.delimiter=":"
-		wpath.winhax=true
-
-	elseif flavour == "nix" then
-
-		wpath.root="/"
-		wpath.separator="/"
-		wpath.delimiter=";"
-		wpath.winhax=true
-		
--- always enable winhax by default, so we can hack around with windows style paths
--- we should make sure that we are always windows safe
-
-	end
-
-end
-wpath.setup()
-
 --[[#lua.wetgenes.path.unslash
 
 If the path ends in "/" ( or multiple "//" etc ) then remove it,
@@ -216,7 +165,7 @@ end
 
 --[[#lua.wetgenes.path.normalize
 
-remove ".." and "." components from the path string
+remove ".." and "." components from the path string if we can
 
 this will also convert multiple "/" into a single "/" but will not remove a trailing "/"
 
@@ -251,7 +200,6 @@ wpath.normalize=function(...)
 					table.remove(ps,idx)
 				end
 			else -- we can not remove so must ignore
---				table.remove(ps,idx)
 				idx=idx+1
 			end
 		else -- just advance
@@ -290,13 +238,23 @@ end
 
 --[[#lua.wetgenes.path.resolve
 
+expand paths starting with ~ to the home path which is usually found in 
+environment variable HOME ( or USERPROFILE on windows )
+
+prepended wpath.currentdir if this is not a full path with a root
+
 Join all path segments and resolve them to absolute using wpath.join 
-and wpath.normalize with a prepended wpath.currentdir as necessary.
+and wpath.normalize.
+
+We should end up with an absolute path without any . or .. parts.
 
 ]]
 wpath.resolve=function(...)
 
 	local p=wpath.join(...)
+	if wpath.home and ( (p:sub(1,2)=="~/") or (p=="~") ) then -- auto home expansion
+		p=wpath.join( wpath.home , p:sub(2) )
+	end
 
 	if wpath.parse(p).root then -- already absolute
 		return wpath.normalize(p) -- just normalize
@@ -430,3 +388,58 @@ wpath.parse and return the ext component of the result.
 wpath.ext=function(...)
 	return wpath.parse( wpath.resolve(...) ).ext
 end
+
+--[[#lua.wetgenes.path.setup
+
+setup for windows or linux style paths, to force one or the other use
+
+	wpath.setup("win")
+	wpath.setup("nix")
+
+We automatically call this at startup and make a best guess, you can 
+revert to this best guess with
+
+	wpath.setup()
+
+This is a global setting, so be careful with changes. Mostly its 
+probably best to stick with the best guess unless we are mistakenly 
+guessing windows.
+
+]]
+wpath.setup=function(flavour)
+
+-- try and guess if we are dealing with linux or windows style paths
+	if not flavour then
+		if package.config:sub(1,1) ==  "/" then -- paths begin with /
+			flavour="nix"
+		else
+			flavour="win"
+		end
+	end
+
+	if flavour == "win" then
+	
+		wpath.root="C:\\"
+		wpath.separator="\\"
+		wpath.delimiter=":"
+		wpath.winhax=true
+		wpath.home=os.getenv("USERPROFILE")
+
+	elseif flavour == "nix" then
+
+		wpath.root="/"
+		wpath.separator="/"
+		wpath.delimiter=";"
+		wpath.winhax=true
+		wpath.home=os.getenv("HOME")
+
+	end
+	
+	if wpath.home then
+		wpath.home=wpath.resolve(wpath.home)
+	end
+
+end
+
+-- finally setup paths
+wpath.setup()
