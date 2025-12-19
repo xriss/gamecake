@@ -2814,7 +2814,7 @@
    "body": "<p>join a split path, tables are auto expanded</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 111,
+   "line": 60,
    "name": "lua.wetgenes.path.join",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   }

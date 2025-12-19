@@ -5682,7 +5682,7 @@
    "body": "<p>Get the current working directory, this requires lfs and if lfs is not \navailable then it will return wpath.root this path will have a trailing \nseparator so can be joined directly to a filename.</p>\n<pre><code>wpath.currentdir()..&quot;filename.ext&quot;\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 265,
+   "line": 213,
    "name": "lua.wetgenes.path.currentdir",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5690,7 +5690,7 @@
    "body": "<pre><code>local dir=wpath.dir(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the dir component of the result.</p>\n<p>this will probably end in a / so you may want to call unslash as well \nto remove any trailing slashes and create a more valid path for this \ndirectory. Note this will transform a root dir of &quot;/&quot; into one of &quot;&quot;.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 358,
+   "line": 316,
    "name": "lua.wetgenes.path.dir",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5698,7 +5698,7 @@
    "body": "<pre><code>local ext=wpath.ext(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the ext component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 422,
+   "line": 380,
    "name": "lua.wetgenes.path.ext",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5706,7 +5706,7 @@
    "body": "<pre><code>local file=wpath.file(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the file component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 374,
+   "line": 332,
    "name": "lua.wetgenes.path.file",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5714,7 +5714,7 @@
    "body": "<pre><code>local folder=wpath.folder(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the folder component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 398,
+   "line": 356,
    "name": "lua.wetgenes.path.folder",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5722,7 +5722,7 @@
    "body": "<p>join a split path, tables are auto expanded</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 111,
+   "line": 60,
    "name": "lua.wetgenes.path.join",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5730,15 +5730,15 @@
    "body": "<pre><code>local name=wpath.name(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the name component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 410,
+   "line": 368,
    "name": "lua.wetgenes.path.name",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
   {
-   "body": "<p>remove &quot;..&quot; and &quot;.&quot; components from the path string</p>\n<p>this will also convert multiple &quot;/&quot; into a single &quot;/&quot; but will not remove a trailing &quot;/&quot;</p>\n",
+   "body": "<p>remove &quot;..&quot; and &quot;.&quot; components from the path string if we can</p>\n<p>this will also convert multiple &quot;/&quot; into a single &quot;/&quot; but will not remove a trailing &quot;/&quot;</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 217,
+   "line": 166,
    "name": "lua.wetgenes.path.normalize",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5746,7 +5746,7 @@
    "body": "<p>Resolve input and go up a single directory level, ideally you should \npass in a directory, IE a string that ends in / or \\ and we will return \nthe parent of this directory.</p>\n<p>If called repeatedly, then eventually we will return wpath.root</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 345,
+   "line": 303,
    "name": "lua.wetgenes.path.parent",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5754,7 +5754,7 @@
    "body": "<p>split a path into named parts like so</p>\n<pre><code>|--------------------------------------------|\n|                     path                   |\n|-----------------------|--------------------|\n|         dir           |        file        |\n|----------|------------|----------|---------|\n| root [1] | folder [2] | name [3] | ext [4] |\n|----------|------------|----------|---------|\n| /        | home/user/ | file     | .txt    |\n|----------|------------|----------|---------|\n</code></pre>\n<p>this can be reversed with simple joins and checks for nil, note that \n[1][2][3][4] are forced strings so will be &quot;&quot; rather than nil unlike \ntheir named counterparts. This means you may use wpath.join to reverse \nthis parsing.</p>\n<pre><code>dir = (root or &quot;&quot;)..(folder or &quot;&quot;)\nfile = (name or &quot;&quot;)..(ext or &quot;&quot;)\npath = (dir or &quot;&quot;)..(file or &quot;&quot;)\npath = (root or &quot;&quot;)..(folder or &quot;&quot;)..(name or &quot;&quot;)..(ext or &quot;&quot;)\npath = [1]..[2]..[3]..[4]\npath = wpath.join(it)\n</code></pre>\n<p>if root is set then it implies an absolute path and will be something \nlike C:\\ under windows.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 135,
+   "line": 84,
    "name": "lua.wetgenes.path.parse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5762,15 +5762,15 @@
    "body": "<p>Build a relative path from point a to point b this will probably be a \nbunch of ../../../ followed by some of the ending of the second \nargument.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 309,
+   "line": 267,
    "name": "lua.wetgenes.path.relative",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
   {
-   "body": "<p>Join all path segments and resolve them to absolute using wpath.join \nand wpath.normalize with a prepended wpath.currentdir as necessary.</p>\n",
+   "body": "<p>expand paths starting with ~ to the home path which is usually found in \nenvironment variable HOME ( or USERPROFILE on windows )</p>\n<p>prepended wpath.currentdir if this is not a full path with a root</p>\n<p>Join all path segments and resolve them to absolute using wpath.join \nand wpath.normalize.</p>\n<p>We should end up with an absolute path without any . or .. parts.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 291,
+   "line": 239,
    "name": "lua.wetgenes.path.resolve",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5778,7 +5778,7 @@
    "body": "<pre><code>local root=wpath.root(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the root component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 386,
+   "line": 344,
    "name": "lua.wetgenes.path.root",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5786,7 +5786,7 @@
    "body": "<p>setup for windows or linux style paths, to force one or the other use</p>\n<pre><code>wpath.setup(&quot;win&quot;)\nwpath.setup(&quot;nix&quot;)\n</code></pre>\n<p>We automatically call this at startup and make a best guess, you can \nrevert to this best guess with</p>\n<pre><code>wpath.setup()\n</code></pre>\n<p>This is a global setting, so be careful with changes. Mostly its \nprobably best to stick with the best guess unless we are mistakenly \nguessing windows.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 21,
+   "line": 392,
    "name": "lua.wetgenes.path.setup",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5794,7 +5794,7 @@
    "body": "<p>split a path into numbered components</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 85,
+   "line": 34,
    "name": "lua.wetgenes.path.split",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -5802,7 +5802,7 @@
    "body": "<p>If the path ends in &quot;/&quot; ( or multiple &quot;//&quot; etc ) then remove it,</p>\n<p>return the path which is now guaranteed not to end in the slash separator.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 71,
+   "line": 20,
    "name": "lua.wetgenes.path.unslash",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },

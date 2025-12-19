@@ -716,9 +716,13 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.resolve">lua.wetgenes.path.resolve</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L291">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
-<div><p>Join all path segments and resolve them to absolute using wpath.join 
-and wpath.normalize with a prepended wpath.currentdir as necessary.</p>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L239">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div><p>expand paths starting with ~ to the home path which is usually found in 
+environment variable HOME ( or USERPROFILE on windows )</p>
+<p>prepended wpath.currentdir if this is not a full path with a root</p>
+<p>Join all path segments and resolve them to absolute using wpath.join 
+and wpath.normalize.</p>
+<p>We should end up with an absolute path without any . or .. parts.</p>
 </div>
 </div>
 

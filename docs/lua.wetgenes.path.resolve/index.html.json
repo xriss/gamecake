@@ -2811,10 +2811,10 @@
  },
  "_list": [
   {
-   "body": "<p>Join all path segments and resolve them to absolute using wpath.join \nand wpath.normalize with a prepended wpath.currentdir as necessary.</p>\n",
+   "body": "<p>expand paths starting with ~ to the home path which is usually found in \nenvironment variable HOME ( or USERPROFILE on windows )</p>\n<p>prepended wpath.currentdir if this is not a full path with a root</p>\n<p>Join all path segments and resolve them to absolute using wpath.join \nand wpath.normalize.</p>\n<p>We should end up with an absolute path without any . or .. parts.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 291,
+   "line": 239,
    "name": "lua.wetgenes.path.resolve",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   }

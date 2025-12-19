@@ -2814,7 +2814,7 @@
    "body": "<p>setup for windows or linux style paths, to force one or the other use</p>\n<pre><code>wpath.setup(&quot;win&quot;)\nwpath.setup(&quot;nix&quot;)\n</code></pre>\n<p>We automatically call this at startup and make a best guess, you can \nrevert to this best guess with</p>\n<pre><code>wpath.setup()\n</code></pre>\n<p>This is a global setting, so be careful with changes. Mostly its \nprobably best to stick with the best guess unless we are mistakenly \nguessing windows.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 21,
+   "line": 392,
    "name": "lua.wetgenes.path.setup",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   }

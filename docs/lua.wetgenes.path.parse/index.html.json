@@ -2814,7 +2814,7 @@
    "body": "<p>split a path into named parts like so</p>\n<pre><code>|--------------------------------------------|\n|                     path                   |\n|-----------------------|--------------------|\n|         dir           |        file        |\n|----------|------------|----------|---------|\n| root [1] | folder [2] | name [3] | ext [4] |\n|----------|------------|----------|---------|\n| /        | home/user/ | file     | .txt    |\n|----------|------------|----------|---------|\n</code></pre>\n<p>this can be reversed with simple joins and checks for nil, note that \n[1][2][3][4] are forced strings so will be &quot;&quot; rather than nil unlike \ntheir named counterparts. This means you may use wpath.join to reverse \nthis parsing.</p>\n<pre><code>dir = (root or &quot;&quot;)..(folder or &quot;&quot;)\nfile = (name or &quot;&quot;)..(ext or &quot;&quot;)\npath = (dir or &quot;&quot;)..(file or &quot;&quot;)\npath = (root or &quot;&quot;)..(folder or &quot;&quot;)..(name or &quot;&quot;)..(ext or &quot;&quot;)\npath = [1]..[2]..[3]..[4]\npath = wpath.join(it)\n</code></pre>\n<p>if root is set then it implies an absolute path and will be something \nlike C:\\ under windows.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 135,
+   "line": 84,
    "name": "lua.wetgenes.path.parse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   }

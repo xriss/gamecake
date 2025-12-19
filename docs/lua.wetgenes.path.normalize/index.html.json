@@ -2811,10 +2811,10 @@
  },
  "_list": [
   {
-   "body": "<p>remove &quot;..&quot; and &quot;.&quot; components from the path string</p>\n<p>this will also convert multiple &quot;/&quot; into a single &quot;/&quot; but will not remove a trailing &quot;/&quot;</p>\n",
+   "body": "<p>remove &quot;..&quot; and &quot;.&quot; components from the path string if we can</p>\n<p>this will also convert multiple &quot;/&quot; into a single &quot;/&quot; but will not remove a trailing &quot;/&quot;</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 217,
+   "line": 166,
    "name": "lua.wetgenes.path.normalize",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   }
