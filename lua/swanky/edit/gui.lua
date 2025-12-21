@@ -326,6 +326,29 @@ print("search_find",word,dir)
 			texteditor:mark_sync()
 		end
 
+	elseif m.id=="find_replace_all" then
+
+		local texteditor=gui.master.ids.texteditor
+		local txt=texteditor.txt
+
+		if texteditor:allow_changes() then
+
+			local s=gui.datas.get_string("find_search")
+			local r=gui.datas.get_string("find_replace")
+
+			local t = txt.get_text() -- get all the text
+
+			s=s:gsub("%p","%%%0") -- escape any paterns
+			r=r:gsub("%%","%%%%")
+
+			t=t:gsub( s , r ) -- simple replace
+
+			txt.mark(0,0,txt.hy+1,0) -- update text with a full file undo
+			txt.undo.replace(t)
+
+			texteditor:mark_sync()
+		end
+
 	end
 
 end
@@ -424,6 +447,10 @@ function gui.hooks(act,w,dat)
 			gui.do_actions[#gui.do_actions+1]={id=w.id}
 
 		elseif w.id=="find_replace" then
+
+			gui.do_actions[#gui.do_actions+1]={id=w.id}
+
+		elseif w.id=="find_replace_all" then
 
 			gui.do_actions[#gui.do_actions+1]={id=w.id}
 
@@ -638,13 +665,11 @@ local lay=
 										class="button",hx=gsiz*3,hy=gsiz*1,color=1,
 										text="replace",
 									},
---[[
 									{
-										id="find_replace all",hooks=gui.hooks,
+										id="find_replace_all",hooks=gui.hooks,
 										class="button",hx=gsiz*5,hy=gsiz*1,color=1,
 										text="replace all",
 									},
-]]
 								}
 							}
 						},							
