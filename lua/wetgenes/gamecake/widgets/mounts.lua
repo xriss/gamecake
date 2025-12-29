@@ -771,3 +771,80 @@ PRINT("write_readme",path)
 		return nil -- no can save
 	end
 end
+
+
+--------------------------------------------------------------------------------
+
+
+M.find={}
+-- simple inherits, no tables and last has priority
+do
+	for _,it in ipairs{ M.meta , } do
+		for n,v in pairs( it ) do
+			if type(v)~="table" then
+				M.find[n]=v
+			end
+		end
+	end
+end
+
+M.find_metatable={__index=M.find}
+
+local wpath=require("wetgenes.path")
+
+M.find.is="find"
+
+M.mount_find=function()
+	return M.find.setup({
+		name="/../find/",
+		path="/../find/",
+		dir={},
+		keep=true,
+	})
+end
+
+M.find.setup=function(find)
+	if not find then find={} end
+	setmetatable(find,M.find_metatable)		
+	if find.mounts then
+		find:merge_dir(find.mounts)
+	end
+	if find.path and not find.name then -- fill in name etc from path
+		local pp=wpath.parse( wpath.unslash( wpath.resolve(find.path) ) ) -- note this will lose one of the two starting slashes
+		find.name=pp.file
+	end
+	return find
+end
+
+M.find.new_item=function(find,name)
+	local it=find.setup({
+		path=find.path..name,
+		collect=find.collect,
+		parent=find,
+	})
+	return it
+end
+
+M.find.fetch_dir=function(find,path)
+--	path="/"..wpath.resolve(path) -- force the // prefix
+	local dir={}
+
+	if path=="/../find/" then
+--[[
+		local rows={}
+		for n,v in pairs( find.collect.finds ) do
+			dir[#dir+1]=find:new_item(n)
+		end
+]]
+	end
+	
+	return dir
+end
+
+M.find.read_file=function(find,path)
+PRINT("read_find",path)
+end
+
+M.find.write_file=function(find,path,data)
+PRINT("write_find",path)
+end

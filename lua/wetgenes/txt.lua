@@ -510,6 +510,7 @@ auto select an entire word or line depending on number of clicks
 			if n>=0x30 and n<=0x38 then return "t" end -- text number
 			if n>=0x41 and n<=0x5a then return "t" end -- text letter (upper)
 			if n>=0x61 and n<=0x7a then return "t" end -- text letter (lower)
+			if n==0x5F or n==0x2D then return "t" end -- _ and - are "text" so snake and kebab case
 			if n==0x22 or n==0x27 or n==0x60 then return "q" end -- quotes
 			if	n==0x28 or n==0x29 or
 --				n==0x3c or n==0x3e or -- angle brackets?

@@ -317,5 +317,11 @@ M.construct=function(undo,txt)
 		return txt.insert_char(s)
 	end
 
+-- replace all the text, ( can undo ) should be made smarter with a diff etc
+	undo.set_text=function(text)
+		txt.mark(0,0,txt.hy+1,0)
+		undo.replace(text)
+	end
+
 	return undo
 end

@@ -297,8 +297,7 @@ M.bake=function(oven,docs)
 		local text_doc=it.txt.get_text()
 		
 		if text_file~=text_doc then -- text in file is not the same as text in memory
-			it.txt.mark(0,0,it.txt.hy+1,0)
-			it.txt.undo.replace(text_file)
+			it.txt.undo.set_text(text_file)
 		end
 	end
 

@@ -7,7 +7,7 @@ local wwin=require("wetgenes.win")
 local wstr=require("wetgenes.string")
 local wpath=require("wetgenes.path")
 
-local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
+local lfs ; pcall( function() lfs=require("lfs") end )
 
 local function dprint(a) print(wstr.dump(a)) end
 

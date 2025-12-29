@@ -5,6 +5,7 @@ menu_edit,,Edit,
 menu_search,,Search,
 menu_view,,View,
 menu_spell,,Spell,
+menu_case,,Case,
 
 file_quit,,Quit,Close application and Quit.,Ctrl+Q
 file_new,,New,Create new file.,Ctrl+N
@@ -28,6 +29,16 @@ clip_cutline,,Cut Line,Cut line and replace or append to clipboard.,Ctrl+K
 
 edit_justify,,Justify Text,Replace white space in this paragraph and wrap text.,Ctrl+J
 edit_align,,Align Text,Replace white space to align each line vertically.,Ctrl+L
+
+edit_case_upper,,UPPER CASE,Convert to upper case.,
+edit_case_lower,,lower case,Convert to lower case.,
+edit_case_camel,,camelCase,Convert conjoined words to camel case.,
+edit_case_pascal,,PascalCase,Convert conjoined words to pascal case.,
+edit_case_upper_snake,,SNAKE_CASE,Convert conjoined words to upper snake case.,
+edit_case_lower_snake,,snake_case,Convert conjoined words to snake case.,
+edit_case_upper_kebab,,KEBAB-CASE,Convert conjoined words to upper kebab case.,
+edit_case_lower_kebab,,kebab-case,Convert conjoined words to kebab case.,
+
 
 search_search,,Search...,Show multi document search requester.,Ctrl+Shift+F
 search_find,,Find...,Show single document search requester.,Ctrl+F

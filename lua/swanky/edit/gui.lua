@@ -272,7 +272,7 @@ function gui.action(m)
 		local txt=texteditor.txt
 
 		local word=txt.copy() or ""
-		if word~="" then -- search for selected?
+		if word~="" and #word<256 then -- search for selected unless it is huge
 
 			local dir=wpath.dir(txt.doc.filename)
 			dir=wpath.unslash(dir)

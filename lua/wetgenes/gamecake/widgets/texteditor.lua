@@ -18,6 +18,8 @@ local _,lfs=pcall( function() return require("lfs") end ) ; lfs=_ and lfs
 
 local ls=function(...) print(wstring.dump({...})) end
 
+local MAX_AUTO_SEARCH=256
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -786,6 +788,16 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 				{id="history_undo"},
 				{id="history_redo"},
 			}},
+			{id="menu_case",menu_data={
+				{id="edit_case_upper"},
+				{id="edit_case_lower"},
+				{id="edit_case_camel"},
+				{id="edit_case_pascal"},
+				{id="edit_case_upper_snake"},
+				{id="edit_case_lower_snake"},
+				{id="edit_case_upper_kebab"},
+				{id="edit_case_lower_kebab"},
+			}},
 			{id="menu_view",menu_data={
 				{id="view_hex"},
 				{id="view_txt"},
@@ -839,7 +851,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 		-- auto search lowlite
 		local word=txt.copy() or ""
-		if word~="" then -- lowlite selected
+		if word~="" and ((#word)<MAX_AUTO_SEARCH) then -- lowlite selected
 			txt.search:value(word)
 		end
 
@@ -956,13 +968,36 @@ function wtexteditor.allow_changes(texteditor)
 	return allow_changes
 end
 
+
+local AUTO_TRANSFORM_SELECTED={
+	edit_justify="justify",
+	edit_align="align",
+	edit_case_upper="case_upper",
+	edit_case_lower="case_lower",
+	edit_case_camel="case_camel",
+	edit_case_pascal="case_pascal",
+	edit_case_upper_snake="case_upper_snake",
+	edit_case_lower_snake="case_lower_snake",
+	edit_case_upper_kebab="case_upper_kebab",
+	edit_case_lower_kebab="case_lower_kebab",
+}
+
 function wtexteditor.msg(pan,m)
 	if m.class=="action" then -- only handle actions
 		local master=pan.master
 		local texteditor=pan.texteditor
 		local txt=texteditor.txt
 		if m.action==1 or m.action==0 then -- allow repeats
-			if m.id=="clip_copy" then
+			if m.action==1 and AUTO_TRANSFORM_SELECTED[ m.id ] then
+
+				local transform=AUTO_TRANSFORM_SELECTED[ m.id ]
+				if texteditor:allow_changes() then
+					txt.edit[transform]()
+					txt.cursor()
+					texteditor:mark_sync()
+				end
+			
+			elseif m.id=="clip_copy" then
 				if m.action==1 then -- first press only
 					local s=txt.undo.copy() or ""
 					if s then wwin.set_clipboard(s) end
@@ -1011,18 +1046,6 @@ function wtexteditor.msg(pan,m)
 					txt.cursor()
 					texteditor:mark_sync()
 				end
-			elseif m.id=="edit_justify" then
-				if texteditor:allow_changes() then
-					txt.edit.justify()
-					txt.cursor()
-					texteditor:mark_sync()
-				end
-			elseif m.id=="edit_align" then
-				if texteditor:allow_changes() then
-					txt.edit.align()
-					txt.cursor()
-					texteditor:mark_sync()
-				end
 			elseif m.id=="view_hex" then
 				txt.cursor()
 				texteditor.opts.mode="hex"
@@ -1057,7 +1080,7 @@ function wtexteditor.msg(pan,m)
 			elseif m.id=="search_next" then -- or m.id=="search_find" then
 
 				local word=txt.copy() or ""
-				if word~="" then -- search for selected?
+				if word~="" and ((#word)<MAX_AUTO_SEARCH) then -- search for selected?
 					txt.search:value(word)
 				end
 
@@ -1067,7 +1090,7 @@ function wtexteditor.msg(pan,m)
 			elseif m.id=="search_prev" then
 
 				local word=txt.copy() or ""
-				if word~="" then -- search for selected?
+				if word~="" and ((#word)<MAX_AUTO_SEARCH) then -- search for selected?
 					txt.search:value(word)
 				end
 

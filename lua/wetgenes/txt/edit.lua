@@ -172,5 +172,123 @@ M.construct=function(edit,txt)
 		if s then edit.paste(s) end
 	end
 
+local CONJOINED_WORD_PATTERN="[A-Za-z0-9_%-]*"
+
+-- guess style and split conjoined-words into array of words
+	local case_split=function(words)
+		local a={}
+		
+		local wsplit=function(p) -- snake or kebab
+			local l=#words
+			local b=1
+			while b<l do
+				local e=words:find(p,b+1)
+				if not e then e=l+1 end -- last word
+				a[#a+1]=words:sub(b,e-1)
+				b=e+1
+			end
+		end
+
+		if words:find("%_") and not words:find("%_%_") then -- snake
+
+			wsplit("%_")
+
+		elseif words:find("%-") and not words:find("%-%-") then -- kebab
+
+			wsplit("%-")
+
+		elseif words:find("[A-Z]") and words:find("[a-z]") then -- upper and lower so pascal or camel
+
+			local l=#words
+			local b=1
+			while b<l do
+				local e=words:find("[A-Z]",b+1)
+				if not e then e=l+1 end -- last word
+				a[#a+1]=words:sub(b,e-1)
+				b=e
+			end
+
+		else -- none but could be a single word in snake or kebab so lets go with that
+			a[1]=words
+		end
+		
+		return a[1] and a or false -- did we split ?
+	end
+
+	local conjoined_replace=function(f)
+		local s=edit.copy() or ""
+		s=s:gsub(CONJOINED_WORD_PATTERN,function(a)
+			local b=case_split(a)
+			if b then return f(b) end
+			return a
+		end)
+		if s then edit.paste(s) end
+	end
+
+-- adjust case
+	edit.case_upper=function()
+		local s=edit.copy() or ""
+		s=s:upper()
+		if s then edit.paste(s) end
+	end
+	edit.case_lower=function()
+		local s=edit.copy() or ""
+		s=s:lower()
+		if s then edit.paste(s) end
+	end
+	edit.case_camel=function()
+		conjoined_replace(function(a)
+			if a[1] then
+				a[1]=a[1]:lower()
+				for i=2,#a do
+					local s=a[i]:lower()
+					a[i]=s:sub(1,1):upper()..s:sub(2)
+				end
+			end
+			return table.concat(a)
+		end)
+	end
+	edit.case_pascal=function()
+		conjoined_replace(function(a)
+			for i=1,#a do
+				local s=a[i]:lower()
+				a[i]=s:sub(1,1):upper()..s:sub(2)
+			end
+			return table.concat(a)
+		end)
+	end
+	edit.case_upper_snake=function()
+		conjoined_replace(function(a)
+			for i=1,#a do
+				a[i]=a[i]:upper()
+			end
+			return table.concat(a,"_")
+		end)
+	end
+	edit.case_lower_snake=function()
+		conjoined_replace(function(a)
+			for i=1,#a do
+				a[i]=a[i]:lower()
+			end
+			return table.concat(a,"_")
+		end)
+	end
+	edit.case_upper_kebab=function()
+		conjoined_replace(function(a)
+			for i=1,#a do
+				a[i]=a[i]:upper()
+			end
+			return table.concat(a,"-")
+		end)
+	end
+	edit.case_lower_kebab=function()
+		conjoined_replace(function(a)
+			for i=1,#a do
+				a[i]=a[i]:lower()
+			end
+			return table.concat(a,"-")
+		end)
+	end
+
 	return edit
 end
