@@ -164,7 +164,7 @@ M.bake=function(oven,main)
 
 --		srecaps.step()
 		
---		finds.update()
+		finds.update()
 		
 		docs.update()
 

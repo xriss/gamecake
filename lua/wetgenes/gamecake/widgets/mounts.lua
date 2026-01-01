@@ -723,7 +723,7 @@ M.readme.setup=function(readme)
 		readme:merge_dir(readme.mounts)
 	end
 	if readme.path and not readme.name then -- fill in name etc from path
-		local pp=wpath.parse( wpath.unslash( wpath.resolve(readme.path) ) ) -- note this will lose one of the two starting slashes
+		local pp=wpath.parse( wpath.unslash( wpath.resolve(readme.path) ) )
 		readme.name=pp.file
 	end
 	return readme
@@ -810,7 +810,7 @@ M.find.setup=function(find)
 		find:merge_dir(find.mounts)
 	end
 	if find.path and not find.name then -- fill in name etc from path
-		local pp=wpath.parse( wpath.unslash( wpath.resolve(find.path) ) ) -- note this will lose one of the two starting slashes
+		local pp=wpath.parse( wpath.unslash( wpath.resolve(find.path) ) )
 		find.name=pp.file
 	end
 	return find
@@ -818,7 +818,7 @@ end
 
 M.find.new_item=function(find,name)
 	local it=find.setup({
-		path=find.path..name,
+		path="/../find/"..name,
 		collect=find.collect,
 		parent=find,
 	})
@@ -830,12 +830,17 @@ M.find.fetch_dir=function(find,path)
 	local dir={}
 
 	if path=="/../find/" then
---[[
+
+PRINT("list_find",path)
+
 		local rows={}
-		for n,v in pairs( find.collect.finds ) do
-			dir[#dir+1]=find:new_item(n)
+		for i,it in pairs( find.collect.finds.list ) do
+
+			for filename,count in pairs( it.filenames ) do
+				dir[#dir+1]=find:new_item(filename)
+			end
 		end
-]]
+
 	end
 	
 	return dir

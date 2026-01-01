@@ -122,8 +122,11 @@ M.tables=wgetsql.prepare_tables({
 
 M.bake=function(oven,collect)
 
+	local finds=oven.rebake(oven.modname..".finds")
 	local gui=oven.rebake(oven.modname..".gui")
 	local docs=oven.rebake(oven.modname..".docs")
+	
+	collect.finds=finds
 
 	collect.readmes=M.default_readme -- expose readmes
 
@@ -147,11 +150,17 @@ M.bake=function(oven,collect)
 		path="/../readme/",
 		dir={}
 	})
+	collect.mounts_find=wgw_mounts.find.setup({
+		collect=collect, -- back link to this state data
+		name="find/",
+		path="/../find/",
+		dir={}
+	})
 	collect.mounts_meta=wgw_mounts.meta.setup({
 		collect=collect, -- back link to this state data
 		name="../",
 		path="/../",
-		mounts={ collect.mounts_config , collect.mounts_gist , collect.mounts_readme },
+		mounts={ collect.mounts_config , collect.mounts_gist , collect.mounts_readme , collect.mounts_find },
 		dir={},
 		keep=true,
 	})

@@ -21,8 +21,6 @@ M.bake=function(oven,finds)
 
 	local finds=finds or {}
 
---[[
-
 	local docs=oven.rebake(oven.modname..".docs")
 	local gui=oven.rebake(oven.modname..".gui")
 	local wtreefile=oven.rebake("wetgenes.gamecake.widgets.treefile")
@@ -63,6 +61,14 @@ M.bake=function(oven,finds)
 		end
 	end
 
+	finds.cancel_all=function()
+		for i=#finds.list,1,-1 do
+			local task=finds.list[i]
+			finds.tasks[task]=nil
+			finds.list[i]=nil
+		end
+	end
+
 -- create the find
 	finds.create=function(find)
 		local find=find or {}
@@ -86,6 +92,7 @@ M.bake=function(oven,finds)
 		end
 	end
 	
+--[[
 	finds.class_hook=function(hook,widget,dat)
 		if hook=="click" then
 			local it=widget.user
@@ -243,6 +250,7 @@ print("path",dir_item.path)
 
 		return last
 	end
+]]
 
 
 -- start scanning drive in a long running task
@@ -259,8 +267,8 @@ print("path",dir_item.path)
 	end
 	find.scan_task=function(find)
 		
-		local base_item=find:get_item()
-		if not base_item then return end -- must exist
+--		local base_item=find:get_item()
+--		if not base_item then return end -- must exist
 
 		local dirs={}
 		local files={}
@@ -289,7 +297,7 @@ print("path",dir_item.path)
 		end
 		filescan(wpath.resolve(find.dir)) -- find all the files
 
-		find.lines={}
+		find.filenames={}
 
 		local count=0
 		for file,_ in pairs(files) do count=count+1 end
@@ -298,10 +306,20 @@ print("path",dir_item.path)
 		for file,_ in pairs(files) do
 			yield_maybe(find)
 			idx=idx+1
-			base_item.text=idx.."/"..count
-			base_item.line_text.text=base_item.text
+--			base_item.text=idx.."/"..count
+--			base_item.line_text.text=base_item.text
 		
+print(file,idx,count)
 			local fp=io.open(file,"rb")
+
+			pcall(function()
+				local d=fp:read("*all")
+				if string.find(d,find.word,1,true) then -- found it
+print(file,"found")
+					find.filenames[file]=1
+				end
+			end)
+--[[
 			local li=0
 			for line in fp:lines() do
 				gui.master.request_redraw=true
@@ -331,15 +349,17 @@ print("path",dir_item.path)
 					end
 				until not fs
 			end
-			fp:close()
-			
+]]
+			if fp then
+				fp:close()
+			end
+
 		end
-		base_item.text="*"..base_item.word.."*"
-		find:item_refresh(base_item)
-		gui.master.request_redraw=true
+--		base_item.text="*"..base_item.word.."*"
+--		find:item_refresh(base_item)
+--		gui.master.request_redraw=true
 		
 	end
-]]
 
 	return finds
 end

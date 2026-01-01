@@ -349,6 +349,22 @@ print("search_find",word,dir)
 			texteditor:mark_sync()
 		end
 
+	elseif m.id=="find_in_files" then
+
+PRINT("find_in_files")
+
+		local s=gui.datas.get_string("find_search")
+		local f=gui.datas.get_string("find_files")
+
+
+		finds.cancel_all() -- only 1 find at a time?
+		local find=finds.create({dir=wpath.resolve(f),word=s})
+		find:scan() -- start search
+
+	elseif m.id=="find_in_files_cancel" then
+
+		finds.cancel_all() -- only 1 find at a time?
+
 	end
 
 end
@@ -451,6 +467,14 @@ function gui.hooks(act,w,dat)
 			gui.do_actions[#gui.do_actions+1]={id=w.id}
 
 		elseif w.id=="find_replace_all" then
+
+			gui.do_actions[#gui.do_actions+1]={id=w.id}
+
+		elseif w.id=="find_in_files" then
+
+			gui.do_actions[#gui.do_actions+1]={id=w.id}
+
+		elseif w.id=="find_in_files_cancel" then
 
 			gui.do_actions[#gui.do_actions+1]={id=w.id}
 
@@ -661,13 +685,23 @@ local lay=
 										text="find",
 									},
 									{
+										id="find_in_files",hooks=gui.hooks,
+										class="button",hx=gsiz*4,hy=gsiz*1,color=1,
+										text="in files",
+									},
+									{
+										id="find_in_files_cancel",hooks=gui.hooks,
+										class="button",hx=gsiz*1,hy=gsiz*1,color=1,
+										text="X",
+									},
+									{
 										id="find_replace",hooks=gui.hooks,
 										class="button",hx=gsiz*3,hy=gsiz*1,color=1,
 										text="replace",
 									},
 									{
 										id="find_replace_all",hooks=gui.hooks,
-										class="button",hx=gsiz*5,hy=gsiz*1,color=1,
+										class="button",hx=gsiz*4,hy=gsiz*1,color=1,
 										text="replace all",
 									},
 								}
