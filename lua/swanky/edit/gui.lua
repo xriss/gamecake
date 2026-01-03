@@ -168,6 +168,8 @@ gui.data_setup=function()
 		datas.new({id="find_replace"  ,class="string",  hooks=gui.hooks,str=""})
 		datas.new({id="find_files"  ,class="string",  hooks=gui.hooks,str=""})
 
+		datas.new({id="find_infiles"  ,class="string",  hooks=gui.hooks,str="in files"}) -- dynamic button text
+
 	end
 end
 
@@ -355,11 +357,16 @@ PRINT("find_in_files")
 
 		local s=gui.datas.get_string("find_search")
 		local f=gui.datas.get_string("find_files")
+		
+		local t=gui.datas.get_string("find_infiles")
 
-
-		finds.cancel_all() -- only 1 find at a time?
-		local find=finds.create({dir=wpath.resolve(f),word=s})
-		find:scan() -- start search
+		if t~="in files" then -- cancel
+			finds.cancel_all() -- only 1 find at a time?
+		else
+			finds.cancel_all() -- only 1 find at a time?
+			local find=finds.create({dir=wpath.resolve(f),word=s})
+			find:scan() -- start search
+		end
 
 	elseif m.id=="find_in_files_cancel" then
 
@@ -687,13 +694,16 @@ local lay=
 									{
 										id="find_in_files",hooks=gui.hooks,
 										class="button",hx=gsiz*4,hy=gsiz*1,color=1,
-										text="in files",
+--										text="in files",
+										data="find_infiles",
 									},
+--[[
 									{
 										id="find_in_files_cancel",hooks=gui.hooks,
 										class="button",hx=gsiz*1,hy=gsiz*1,color=1,
 										text="X",
 									},
+]]
 									{
 										id="find_replace",hooks=gui.hooks,
 										class="button",hx=gsiz*3,hy=gsiz*1,color=1,

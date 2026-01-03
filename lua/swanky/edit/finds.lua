@@ -67,6 +67,7 @@ M.bake=function(oven,finds)
 			finds.tasks[task]=nil
 			finds.list[i]=nil
 		end
+		gui.datas.set_string("find_infiles","in files")
 	end
 
 -- create the find
@@ -306,6 +307,9 @@ print("path",dir_item.path)
 		for file,_ in pairs(files) do
 			yield_maybe(find)
 			idx=idx+1
+
+			gui.datas.set_string("find_infiles",""..idx.."/"..count.."")
+
 --			base_item.text=idx.."/"..count
 --			base_item.line_text.text=base_item.text
 		
@@ -359,6 +363,7 @@ print(file,"found")
 --		find:item_refresh(base_item)
 --		gui.master.request_redraw=true
 		
+		finds.cancel_all()
 	end
 
 	return finds
