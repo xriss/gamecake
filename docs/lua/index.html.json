@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 654,
+   "count": 657,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 643,
+   "count": 646,
    "name": "lua.wetgenes"
   },
   {
@@ -1622,8 +1622,12 @@
    "name": "lua.wetgenes.package.reload"
   },
   {
-   "count": 17,
+   "count": 20,
    "name": "lua.wetgenes.path"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.create_dirs"
   },
   {
    "count": 1,
@@ -1635,11 +1639,19 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.path.dir_exists"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.path.ext"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.path.file"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.file_exists"
   },
   {
    "count": 1,
@@ -2812,7 +2824,7 @@
  "_list": [
   {
    "body": "",
-   "count": 654,
+   "count": 657,
    "name": "lua"
   },
   {
@@ -2888,7 +2900,7 @@
   },
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 643,
+   "count": 646,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -5748,10 +5760,18 @@
   },
   {
    "body": "<p>Manage file paths under linux or windows, so we need to deal with \\ or \n/ and know the root difference between / and C:\\</p>\n<pre><code>local wpath=require(&quot;wetgenes.path&quot;)\n</code></pre>\n",
-   "count": 17,
+   "count": 20,
    "file": "../lua/wetgenes/path.lua",
    "line": 7,
    "name": "lua.wetgenes.path",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
+  },
+  {
+   "body": "<p>This function requires a working lfs.</p>\n<p>given a filename make sure that its containing directory exists, we \nwill work our way up the path creating missing directories.</p>\n<p>Note you must include a filename or end with a /</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/path.lua",
+   "line": 472,
+   "name": "lua.wetgenes.path.create_dirs",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
   {
@@ -5771,6 +5791,14 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
   {
+   "body": "<p>This function requires a working lfs.</p>\n<p>given a dirname return true if it exists and is a dir</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/path.lua",
+   "line": 445,
+   "name": "lua.wetgenes.path.dir_exists",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
+  },
+  {
    "body": "<pre><code>local ext=wpath.ext(path)\n</code></pre>\n<p>This is a small utility function to perform a wpath.resolve then \nwpath.parse and return the ext component of the result.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
@@ -5784,6 +5812,14 @@
    "file": "../lua/wetgenes/path.lua",
    "line": 332,
    "name": "lua.wetgenes.path.file",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
+  },
+  {
+   "body": "<p>This function requires a working lfs.</p>\n<p>given a filename return true if it exists and is a file</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/path.lua",
+   "line": 459,
+   "name": "lua.wetgenes.path.file_exists",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
   {

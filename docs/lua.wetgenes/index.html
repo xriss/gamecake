@@ -425,10 +425,13 @@
 
 <a class="sub" href="../../docs/lua.wetgenes.package.reload"><span>/lua.wetgenes.package.reload</span></a><a class="par" href="../../docs/lua.wetgenes.path"><span>/lua.wetgenes.path</span></a>
 
+<a class="sub" href="../../docs/lua.wetgenes.path.create_dirs"><span>/lua.wetgenes.path.create_dirs</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.currentdir"><span>/lua.wetgenes.path.currentdir</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.dir"><span>/lua.wetgenes.path.dir</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.path.dir_exists"><span>/lua.wetgenes.path.dir_exists</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.ext"><span>/lua.wetgenes.path.ext</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.file"><span>/lua.wetgenes.path.file</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.path.file_exists"><span>/lua.wetgenes.path.file_exists</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.folder"><span>/lua.wetgenes.path.folder</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.join"><span>/lua.wetgenes.path.join</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.name"><span>/lua.wetgenes.path.name</span></a>
@@ -5232,6 +5235,16 @@ luck.</p>
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.path.create_dirs">lua.wetgenes.path.create_dirs</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L472">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div><p>This function requires a working lfs.</p>
+<p>given a filename make sure that its containing directory exists, we 
+will work our way up the path creating missing directories.</p>
+<p>Note you must include a filename or end with a /</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.currentdir">lua.wetgenes.path.currentdir</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L213">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><p>Get the current working directory, this requires lfs and if lfs is not 
@@ -5256,6 +5269,14 @@ directory. Note this will transform a root dir of &quot;/&quot; into one of &quo
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.path.dir_exists">lua.wetgenes.path.dir_exists</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L445">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div><p>This function requires a working lfs.</p>
+<p>given a dirname return true if it exists and is a dir</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.ext">lua.wetgenes.path.ext</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L380">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
 <div><pre><code>local ext=wpath.ext(path)
@@ -5272,6 +5293,14 @@ wpath.parse and return the ext component of the result.</p>
 </code></pre>
 <p>This is a small utility function to perform a wpath.resolve then 
 wpath.parse and return the file component of the result.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.path.file_exists">lua.wetgenes.path.file_exists</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L459">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div><p>This function requires a working lfs.</p>
+<p>given a filename return true if it exists and is a file</p>
 </div>
 </div>
 
