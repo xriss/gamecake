@@ -729,10 +729,9 @@
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.create_dirs">lua.wetgenes.path.create_dirs</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L472">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
-<div><p>This function requires a working lfs.</p>
-<p>given a filename make sure that its containing directory exists, we 
-will work our way up the path creating missing directories.</p>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L473">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div><p>Given a path make sure that its containing directory exists, we will 
+work our way up the path creating missing directories.</p>
 <p>Note you must include a filename or end with a /</p>
 </div>
 </div>
@@ -764,8 +763,10 @@ directory. Note this will transform a root dir of &quot;/&quot; into one of &quo
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.dir_exists">lua.wetgenes.path.dir_exists</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L445">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
-<div><p>This function requires a working lfs.</p>
-<p>given a dirname return true if it exists and is a dir</p>
+<div><p>given a dirname return true if it exists and is mode directory acording 
+to lfs.attributes</p>
+<p>note a path may have a trailing slash and we will auto remove the slash 
+before asking the filessystem if it exists.</p>
 </div>
 </div>
 
@@ -791,9 +792,9 @@ wpath.parse and return the file component of the result.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.file_exists">lua.wetgenes.path.file_exists</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L459">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
-<div><p>This function requires a working lfs.</p>
-<p>given a filename return true if it exists and is a file</p>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L461">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
+<div><p>given a filename return true if it exists and is mode file acording to 
+lfs.attributes</p>
 </div>
 </div>
 

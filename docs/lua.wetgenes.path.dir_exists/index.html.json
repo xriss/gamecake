@@ -2823,7 +2823,7 @@
  },
  "_list": [
   {
-   "body": "<p>This function requires a working lfs.</p>\n<p>given a dirname return true if it exists and is a dir</p>\n",
+   "body": "<p>given a dirname return true if it exists and is mode directory acording \nto lfs.attributes</p>\n<p>note a path may have a trailing slash and we will auto remove the slash \nbefore asking the filessystem if it exists.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
    "line": 445,

@@ -720,8 +720,10 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.dir_exists">lua.wetgenes.path.dir_exists</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L445">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
-<div><p>This function requires a working lfs.</p>
-<p>given a dirname return true if it exists and is a dir</p>
+<div><p>given a dirname return true if it exists and is mode directory acording 
+to lfs.attributes</p>
+<p>note a path may have a trailing slash and we will auto remove the slash 
+before asking the filessystem if it exists.</p>
 </div>
 </div>
 

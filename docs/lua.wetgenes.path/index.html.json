@@ -2831,10 +2831,10 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
   {
-   "body": "<p>This function requires a working lfs.</p>\n<p>given a filename make sure that its containing directory exists, we \nwill work our way up the path creating missing directories.</p>\n<p>Note you must include a filename or end with a /</p>\n",
+   "body": "<p>Given a path make sure that its containing directory exists, we will \nwork our way up the path creating missing directories.</p>\n<p>Note you must include a filename or end with a /</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 472,
+   "line": 473,
    "name": "lua.wetgenes.path.create_dirs",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
@@ -2855,7 +2855,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
   {
-   "body": "<p>This function requires a working lfs.</p>\n<p>given a dirname return true if it exists and is a dir</p>\n",
+   "body": "<p>given a dirname return true if it exists and is mode directory acording \nto lfs.attributes</p>\n<p>note a path may have a trailing slash and we will auto remove the slash \nbefore asking the filessystem if it exists.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
    "line": 445,
@@ -2879,10 +2879,10 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
   {
-   "body": "<p>This function requires a working lfs.</p>\n<p>given a filename return true if it exists and is a file</p>\n",
+   "body": "<p>given a filename return true if it exists and is mode file acording to \nlfs.attributes</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
-   "line": 459,
+   "line": 461,
    "name": "lua.wetgenes.path.file_exists",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua"
   },
