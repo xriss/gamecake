@@ -364,7 +364,7 @@ PRINT("find_in_files")
 			finds.cancel_all() -- only 1 find at a time?
 		else
 			finds.cancel_all() -- only 1 find at a time?
-			local find=finds.create({dir=wpath.resolve(f),word=s})
+			local find=finds.create({match=f,word=s})
 			find:scan() -- start search
 		end
 

@@ -172,10 +172,14 @@ M.meta.to_line=function(meta,widget,only)
 
 		meta.line=widget:create(opts)
 
-		local pp=#(wpath.split( wpath.unslash(meta.path) ))-1
---		if meta.path:sub(1,2)=="/../" then pp=pp-2 else pp=pp-1 end
+		if meta.indent then  -- custom indent
+			meta.text=meta.indent
+		else -- count slashes
+			local pp=#(wpath.split( wpath.unslash(meta.path) ))-1
+	--		if meta.path:sub(1,2)=="/../" then pp=pp-2 else pp=pp-1 end
+			meta.text=string.rep(" ",pp)
+		end
 
-		meta.text=string.rep(" ",pp)
 		if meta.dir then
 			if meta.expanded then
 				meta.text=meta.text.."< "
@@ -818,7 +822,9 @@ end
 
 M.find.new_item=function(find,name)
 	local it=find.setup({
-		path="/../find/"..name,
+		path=name,
+		indent="   ",
+		name=name,
 		collect=find.collect,
 		parent=find,
 	})
