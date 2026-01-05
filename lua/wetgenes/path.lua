@@ -444,9 +444,11 @@ end
 
 --[[#lua.wetgenes.path.dir_exists
 
-This function requires a working lfs.
+given a dirname return true if it exists and is mode directory acording 
+to lfs.attributes
 
-given a dirname return true if it exists and is a dir
+note a path may have a trailing slash and we will auto remove the slash 
+before asking the filessystem if it exists.
 
 ]]
 wpath.dir_exists=function(p)
@@ -458,9 +460,8 @@ end
 
 --[[#lua.wetgenes.path.file_exists
 
-This function requires a working lfs.
-
-given a filename return true if it exists and is a file
+given a filename return true if it exists and is mode file acording to 
+lfs.attributes
 
 ]]
 wpath.file_exists=function(p)
@@ -471,10 +472,8 @@ end
 
 --[[#lua.wetgenes.path.create_dirs
 
-This function requires a working lfs.
-
-given a filename make sure that its containing directory exists, we 
-will work our way up the path creating missing directories.
+Given a path make sure that its containing directory exists, we will 
+work our way up the path creating missing directories.
 
 Note you must include a filename or end with a /
 
