@@ -283,9 +283,8 @@ if sniff_homedir then -- smart setup to save files into some sort of user file a
 			wwin.files_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/files/"
 			wwin.cache_prefix=homedir.."/gamecake/"..(opts.name or "gamecake").."/cache/"
 
-			local wbake=require("wetgenes.bake")
-			wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
-			wbake.create_dir_for_file(wwin.cache_prefix.."t.txt")
+			wpath.create_dirs(wwin.files_prefix.."t.txt")
+			wpath.create_dirs(wwin.cache_prefix.."t.txt")
 
 			oven.homedir=homedir.."/"
 		end
@@ -301,9 +300,8 @@ if sniff_homedir then -- smart setup to save files into some sort of user file a
 			wwin.files_prefix=homedir.."/.config/"..(opts.name or "gamecake").."/files/"
 			wwin.cache_prefix=homedir.."/.config/"..(opts.name or "gamecake").."/cache/"
 
-			local wbake=require("wetgenes.bake")
-			wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
-			wbake.create_dir_for_file(wwin.cache_prefix.."t.txt")
+			wpath.create_dirs(wwin.files_prefix.."t.txt")
+			wpath.create_dirs(wwin.cache_prefix.."t.txt")
 
 			oven.homedir=homedir.."/"
 		end
@@ -314,10 +312,8 @@ end
 
 if wwin.steam then -- steamcloud prefers files in your app dir for easy sync between multiple platforms
 
-	local wbake=require("wetgenes.bake")
-
 	wwin.files_prefix=wwin.files_prefix..(wwin.steam.userid).."/"
-	wbake.create_dir_for_file(wwin.files_prefix.."t.txt")
+	wpath.create_dirs(wwin.files_prefix.."t.txt")
 
 	sniff_homedir=false
 end

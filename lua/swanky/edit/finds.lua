@@ -186,7 +186,7 @@ if idx%100==0 then print(idx) end
 --			base_item.line_text.text=base_item.text
 		
 --print(file,idx,count)
-			local fp=io.open(file,"rb")
+			local fp=assert( io.open(file,"rb") )
 
 --			pcall(function()
 				if fp then
@@ -198,7 +198,7 @@ if idx%100==0 then print(idx) end
 --print(file)
 					end
 				else
-print(file,"invalided")
+--print(file,"invalided")
 				end
 --			end)
 			
@@ -209,9 +209,11 @@ print(file,"invalided")
 		end
 		
 		finds.cancel_all()
+		local cnt=0
 		for p,c in pairs( find.filenames ) do
-			print( p,c)
+			cnt=cnt+1
 		end
+		print("fouind "..cnt)
 	end
 
 	return finds

@@ -1,8 +1,5 @@
-The LuaFileSystem library is designed and implemented by Roberto
-Ierusalimschy, Andr&eacute; Carregal and Tom&aacute;s Guisasola.
-The implementation is not derived from licensed software.
-
-Copyright &copy; 2004-2005 The Kepler Project.
+Copyright © 2003-2010 Kepler Project.
+Copyright © 2010-2022 The LuaFileSystem authors.
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation

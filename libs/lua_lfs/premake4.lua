@@ -2,7 +2,7 @@
 
 project "lua_lfs"
 language "C++"
-files { "src/**.c" , "src/**.cpp" ,  "src/**.h" }
+files { "git/src/**.c" , "git/src/**.cpp" ,  "git/src/**.h" }
 
 
 links { "lib_lua" }

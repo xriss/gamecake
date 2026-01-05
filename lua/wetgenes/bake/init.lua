@@ -26,7 +26,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- Hopefully things are kept shrinkwrapped enough here to enable an easy unixy port when I need it (theywoz)
 --
 
-local lfs=require("lfs")
+local lfs=require("lfs_any")
 local wstr=require("wetgenes.string")
 local wsbox=require("wetgenes.sandbox")
 

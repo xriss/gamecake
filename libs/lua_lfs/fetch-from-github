@@ -1,0 +1,7 @@
+cd `dirname $0`
+
+rm -rf git
+git clone --depth 1 https://github.com/lunarmodules/luafilesystem.git git
+rm -rf git/.git
+
+

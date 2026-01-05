@@ -15,7 +15,7 @@ Manage file paths under linux or windows, so we need to deal with \ or
 local M={} ; package.loaded[(...)]=M ; local wpath=M
 
 -- a soft require of lfs so lfs can be nil
-local _,lfs=pcall( function() return require("lfs_any") end ) ; lfs=_ and lfs
+local lfs ; pcall( function() lfs=require("lfs_any") end )
 
 --[[#lua.wetgenes.path.unslash
 
@@ -440,6 +440,62 @@ wpath.setup=function(flavour)
 	end
 
 end
+
+
+--[[#lua.wetgenes.path.dir_exists
+
+This function requires a working lfs.
+
+given a dirname return true if it exists and is a dir
+
+]]
+wpath.dir_exists=function(p)
+	assert(lfs)
+	if p:sub(-1)=="/" then p=p:sub(1,-2) end -- auto remove trailing slash
+	local a=lfs.attributes(p)
+	return a and a.mode=="directory"
+end
+
+--[[#lua.wetgenes.path.file_exists
+
+This function requires a working lfs.
+
+given a filename return true if it exists and is a file
+
+]]
+wpath.file_exists=function(p)
+	assert(lfs)
+	local a=lfs.attributes(p)
+	return a and a.mode=="file"
+end
+
+--[[#lua.wetgenes.path.create_dirs
+
+This function requires a working lfs.
+
+given a filename make sure that its containing directory exists, we 
+will work our way up the path creating missing directories.
+
+Note you must include a filename or end with a /
+
+]]
+wpath.create_dirs=function(n)
+	assert(lfs)
+	local t={}
+	for w in string.gmatch(n, "[^/]+") do t[#t+1]=w end
+	local s=""
+	if n:sub(1,1)=="/" then s="/" end -- start with slash
+	t[#t]=nil -- remove the filename
+	for i,v in ipairs(t) do
+		s=s..v
+		if not wpath.dir_exists(s) then
+			lfs.mkdir(s)
+		end
+		s=s.."/"
+	end
+end
+
+
 
 -- finally setup paths
 wpath.setup()
