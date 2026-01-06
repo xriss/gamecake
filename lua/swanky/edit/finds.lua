@@ -29,6 +29,44 @@ local wildcard_pattern=function(s)
 	)
 end
 
+local find_common_root=function(map)
+
+	local tree={}
+	
+	local root
+	for n,v in pairs(map) do
+		if not root then
+			root=n
+		else
+			for i=1,#root do
+				if root:sub(i)~=v:sub(i) then
+					root=root:sub(1,i-1)
+					break
+				end
+			end
+		end
+	end
+	tree[root]={}
+	for n,v in pairs(map) do
+		local cn=n:sub(#root+1)
+		local fn=cn:find("/[^/]*&")
+		local d,f
+		if fn then
+			d=cn:sub(1,fn-1)
+			f=cn:sub(fn+1)
+			if type(tree[root][d]) ~= "table" then
+				tree[root][d]={}
+			end
+			tree[root][d][f]=v
+		else
+			tree[root][cn]=v
+		end
+	end
+
+	return tree
+end
+
+
 -- searches
 
 M.bake=function(oven,finds)
@@ -75,13 +113,21 @@ M.bake=function(oven,finds)
 		end
 	end
 
+	finds.set_progress=function(idx,total)
+		if idx and total then
+			gui.datas.set_string("find_infiles",""..idx.."/"..total.."")
+		else
+			gui.datas.set_string("find_infiles","in files")
+		end
+	end
+
 	finds.cancel_all=function()
 		for i=#finds.list,1,-1 do
 			local task=finds.list[i]
 			finds.tasks[task]=nil
 			finds.list[i]=nil
 		end
-		gui.datas.set_string("find_infiles","in files")
+		finds.set_progress()
 	end
 
 -- create the find
@@ -98,11 +144,14 @@ M.bake=function(oven,finds)
 		
 		if find.match then -- get a dir from the match and convert wildcards to lua pattern
 		
-			local s=find.match:find("[^/]*[%?%*]") -- find first wildcard dir
-			if not s then s=#find.match+1 end -- full
+			local m=find.match
+			local s=m:find("[^/]*[%?%*]") -- find first wildcard dir
+			if not s then m=m.."*" -- auto *
+				s=m:find("[^/]*[%?%*]") -- find first wildcard dir again
+			end
 		
-			find.dir=wpath.resolve(find.match:sub(1,s-1)) -- directory to search
-			find.pattern=wildcard_pattern( wpath.resolve( find.match ) ) -- full path of files to match
+			find.dir=wpath.resolve(m:sub(1,s-1)) -- directory to search
+			find.pattern=wildcard_pattern( wpath.resolve( m ) ) -- full path of files to match
 		end
 print("MATCH",find.dir,find.pattern)
 
@@ -170,50 +219,38 @@ print("MATCH",find.dir,find.pattern)
 
 		local count=0
 		for file,_ in pairs(files) do count=count+1 end
-print( count )
+--print( count )
 		local idx=0
 		for file,_ in pairs(files) do
 			yield_maybe(find)
 			idx=idx+1
-if idx%100==0 then print(idx) end
+--if idx%100==0 then print(idx) end
 
-			gui.datas.set_string("find_infiles",""..idx.."/"..count.."")
+			finds.set_progress(idx,count)
 
---print(file,"check")
-
-
---			base_item.text=idx.."/"..count
---			base_item.line_text.text=base_item.text
-		
---print(file,idx,count)
-			local fp=assert( io.open(file,"rb") )
-
---			pcall(function()
-				if fp then
-					local d=fp:read("*all")
-					if string.find(d,find.word,1,true) then -- found it
---print(file,"found")
-						find.filenames[file]=1
-					else
---print(file)
-					end
-				else
---print(file,"invalided")
+			local fp
+			local ok,err=pcall(function()
+				fp=assert( io.open(file,"rb") )
+				local d=fp:read("*all")
+				if string.find(d,find.word,1,true) then -- found it
+					find.filenames[file]=1
 				end
---			end)
+			end)
+			if not ok then print(file,err) end
 			
 			if fp then
 				fp:close()
 			end
 
+			collectgarbage("step")
 		end
 		
-		finds.cancel_all()
+		finds.set_progress()
 		local cnt=0
 		for p,c in pairs( find.filenames ) do
 			cnt=cnt+1
 		end
-		print("fouind "..cnt)
+		print("found "..cnt.."/"..count)
 	end
 
 	return finds

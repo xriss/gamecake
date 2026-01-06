@@ -841,10 +841,16 @@ PRINT("list_find",path)
 
 		local rows={}
 		for i,it in pairs( find.collect.finds.list ) do
-
 			for filename,count in pairs( it.filenames ) do
+
+				if #dir >= 100 then break end -- this is bad mkay, need to group
+
 				dir[#dir+1]=find:new_item(filename)
 			end
+		end
+
+		if #dir >= 100 then
+			print("Too Many FINDS")
 		end
 
 	end
