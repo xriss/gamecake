@@ -29,7 +29,7 @@ local wildcard_pattern=function(s)
 	)
 end
 
-local find_common_root=function(map)
+local map_to_tree=function(map)
 
 	local tree={}
 	
@@ -39,20 +39,23 @@ local find_common_root=function(map)
 			root=n
 		else
 			for i=1,#root do
-				if root:sub(i)~=v:sub(i) then
+				if root:sub(i,i)~=n:sub(i,i) then
 					root=root:sub(1,i-1)
 					break
 				end
 			end
 		end
 	end
+	
+	if not root then return tree end -- no data
+	
 	tree[root]={}
 	for n,v in pairs(map) do
 		local cn=n:sub(#root+1)
-		local fn=cn:find("/[^/]*&")
+		local fn=cn:find("/[^/]*$")
 		local d,f
 		if fn then
-			d=cn:sub(1,fn-1)
+			d=cn:sub(1,fn)
 			f=cn:sub(fn+1)
 			if type(tree[root][d]) ~= "table" then
 				tree[root][d]={}
@@ -244,6 +247,9 @@ print("MATCH",find.dir,find.pattern)
 
 			collectgarbage("step")
 		end
+		
+		find.filetree=map_to_tree(find.filenames)
+--		DUMP( find.filetree )
 		
 		finds.set_progress()
 		local cnt=0

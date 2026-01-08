@@ -834,23 +834,62 @@ end
 M.find.fetch_dir=function(find,path)
 --	path="/"..wpath.resolve(path) -- force the // prefix
 	local dir={}
-
+	
+	local walkcount=function(tree)
+		local count=0
+		local walk;walk=function(t)
+			for i,v in pairs(t) do
+				if type(v)=="table" then
+					walk(v)
+				else
+					count=count+1
+				end
+			end
+		end
+		walk(tree)
+		return count
+	end
+	
 	if path=="/../find/" then
 
 PRINT("list_find",path)
 
 		local rows={}
-		for i,it in pairs( find.collect.finds.list ) do
-			for filename,count in pairs( it.filenames ) do
 
-				if #dir >= 100 then break end -- this is bad mkay, need to group
-
-				dir[#dir+1]=find:new_item(filename)
+		local it=find.collect.finds.list[1] -- only 1 find active
+		if it then
+			local n=next(it.filetree) -- only 1 root at top level
+			if n then
+				local v=it.filetree[n]
+				local count=walkcount(v)
+				local f=find:new_item(n)
+				dir[#dir+1]=f
+				f.name="("..count..")"..n
+				f.filetree=v
+				f.dir={}
+				f.indent="    "
 			end
 		end
 
-		if #dir >= 100 then
-			print("Too Many FINDS")
+	else
+
+		for n,v in pairs( find.filetree ) do
+		
+			if type(v)=="table" then
+				local count=walkcount(v)
+				local f=find:new_item(find.path..n)
+				dir[#dir+1]=f
+				f.name="("..count..")"..n
+				f.filetree=v
+				f.dir={}
+				f.indent=find.indent.." "
+			else
+				local f=find:new_item(find.path..n)
+				f.name="<"..v..">"..n
+				dir[#dir+1]=f
+				f.indent=find.indent.." "
+			end
+		
 		end
 
 	end
