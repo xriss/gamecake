@@ -21,4 +21,8 @@
 	open = [ FALSE ]
  }
 
+ datas = {
+  find_infiles = *.lua
+ }
+
 }

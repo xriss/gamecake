@@ -39,8 +39,8 @@ function wdatas.new_datas(datas)
 --[[#lua.wetgenes.gamecake.widgets.datas.set
 
 ]]
-	datas.set=function(n,v)
-		if type(n)=="table" then datas.ids[n.id]=n return n else error("must set data") end
+	datas.set=function(v)
+		if type(v)=="table" then datas.ids[v.id]=v return v else error("must set data") end
 	end
 
 --[[#lua.wetgenes.gamecake.widgets.datas.del

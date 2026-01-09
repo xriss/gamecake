@@ -80,6 +80,7 @@ M.bake=function(oven,main)
 		show.setup()
 
 		gui.setup()
+		gui.data_load() -- load from config
 
 		cmd.start()
 		

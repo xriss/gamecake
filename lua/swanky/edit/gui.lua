@@ -113,6 +113,11 @@ gui.update=function()
 	end
 	gui.do_actions={}
 
+	if not gui.data_save_time then gui.data_save_time=wwin.time() end
+	if gui.data_save_time+1 < wwin.time() then -- save but not too often
+		gui.data_save()
+		gui.data_save_time=wwin.time()
+	end
 
 	oven.console.linehook_safety=false
 end
@@ -173,6 +178,34 @@ gui.data_setup=function()
 	end
 end
 
+gui.data_load=function()
+	if not collect.config.datas then return end
+
+	for n,v in pairs( collect.config.datas ) do
+		local d=datas.get(n)
+		if d then
+			d:value(v)
+		end
+	end
+
+end
+
+gui.data_save=function()
+	if not collect.config.datas      then collect.config.datas={}      end
+
+	local changed=false
+	for n,d in pairs( datas.ids ) do
+		local v=d:value()
+		if collect.config.datas[n]~=v then
+			collect.config.datas[n]=v
+			changed=true
+		end
+	end
+	if changed then
+		collect.save_config("datas")
+	end
+	return changed
+end
 
 
 

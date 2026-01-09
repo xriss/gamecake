@@ -330,11 +330,13 @@ SELECT key,value FROM config ;
 			]],
 		})
 		for i,v in ipairs(djon_config.rows) do
-			collect.config[v.key]=djon.load(v.value) -- this loses comments
+			if v.key and v.value and v.value~="" then
+				collect.config[v.key]=djon.load(v.value) -- this loses comments
+			end
 		end
 		
 --		collect.config_mounts( collect.config )
-		
+
 --		DUMP( collect.config )
 
 	end
@@ -354,10 +356,14 @@ SELECT key,value FROM config WHERE key=$KEY ;
 		}).rows[1]
 
 		-- merge with current data
-		local com=djon.load(row.value,"comments")
-		com=djon.merge_comments(collect.config[name],com)
-		
-		local value=djon.save(com,"comments","djon")
+		local value
+		if row and row.value and row.value~="" then
+			local com=djon.load(row.value,"comments")
+			com=djon.merge_comments(collect.config[name],com)
+			value=djon.save(com,"comments","djon")
+		else
+			value=djon.save(collect.config[name],"djon")
+		end
 		-- save with comments
 		local r=collect.do_memo({
 			binds={
