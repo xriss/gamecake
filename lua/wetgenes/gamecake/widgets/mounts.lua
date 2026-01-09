@@ -39,6 +39,27 @@ M.meta.setup=function(meta)
 	return meta
 end
 
+
+M.meta.find_path=function(meta,path)
+	local ret
+	local walk;walk=function(it)
+		if it.path==path then -- found it
+print("found",it.path)
+			ret=it
+		end
+print("walk",it.path)
+		if it.path==path:sub(1,#it.path) then -- only look here
+			if it.dir then
+				for i,v in ipairs(it.dir or {}) do
+					walk(v)
+				end
+			end
+		end
+	end
+	walk(meta)
+	return ret
+end
+
 M.meta.find_prefix=function(meta,path)
 	local best=meta
 	for _,it in pairs(meta.mounts or {}) do -- find best dir prefix for this path ( mount points )

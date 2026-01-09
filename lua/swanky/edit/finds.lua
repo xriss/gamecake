@@ -49,6 +49,14 @@ local map_to_tree=function(map)
 	
 	if not root then return tree end -- no data
 	
+	while #root>0 do
+		if root:sub(-1,-1)=="/" then
+			break
+		else
+			root=root:sub(1,-2) -- must end on /
+		end
+	end
+	
 	tree[root]={}
 	for n,v in pairs(map) do
 		local cn=n:sub(#root+1)
@@ -76,6 +84,7 @@ M.bake=function(oven,finds)
 
 	local finds=finds or {}
 
+	local collect=oven.rebake(oven.modname..".collect")
 	local docs=oven.rebake(oven.modname..".docs")
 	local gui=oven.rebake(oven.modname..".gui")
 	local wtreefile=oven.rebake("wetgenes.gamecake.widgets.treefile")
@@ -125,12 +134,21 @@ M.bake=function(oven,finds)
 	end
 
 	finds.cancel_all=function()
+print("cancel all")
 		for i=#finds.list,1,-1 do
 			local task=finds.list[i]
 			finds.tasks[task]=nil
 			finds.list[i]=nil
 		end
 		finds.set_progress()
+		-- remove all expanded finds
+		local mf=collect.mounts:find_path("/../find/")
+		mf.dir={} -- empty
+		if mf.expanded then
+			mf:toggle_dir() -- force it closed
+		end
+		
+		gui.refresh_tree()
 	end
 
 -- create the find
@@ -257,6 +275,19 @@ print("MATCH",find.dir,find.pattern)
 			cnt=cnt+1
 		end
 		print("found "..cnt.."/"..count)
+
+-- update tree
+		local mf=collect.mounts:find_path("/../find/")
+		if not mf.expanded then -- should be close
+			mf:toggle_dir() -- force it open
+		end
+		for i,v in ipairs(mf.dir) do -- top level only
+			if not v.expanded then -- should be close
+				v:toggle_dir() -- force it open
+			end
+		end
+		gui.refresh_tree()
+
 	end
 
 	return finds
