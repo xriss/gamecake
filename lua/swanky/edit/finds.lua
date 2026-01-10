@@ -253,8 +253,14 @@ print("MATCH",find.dir,find.pattern)
 			local ok,err=pcall(function()
 				fp=assert( io.open(file,"rb") )
 				local d=fp:read("*all")
-				if string.find(d,find.word,1,true) then -- found it
-					find.filenames[file]=1
+				local cnt=0
+				local s,e=0,0
+				while s do
+					s,e=string.find(d,find.word,e+1,true) -- found it
+					if s then cnt=cnt+1 end
+				end
+				if cnt>0 then
+					find.filenames[file]=cnt
 				end
 			end)
 			if not ok then print(file,err) end
