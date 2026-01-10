@@ -418,6 +418,8 @@ end
 function gui.hooks(act,w,dat)
 
 	if act=="line_click" and dat and dat.read_file then
+	
+--	print( dat.is )
 
 --print(act,dat.path)
 	
@@ -430,6 +432,15 @@ function gui.hooks(act,w,dat)
 				doc:show()
 
 				gui.refresh_tree()
+				
+				if dat.is=="find" and dat.find then -- select next when clicked
+					local find=dat.find
+					
+					if gui.datas.get_string("find_search") ~= find.word then
+						gui.datas.get_string("find_search",find.word)
+					end
+					gui.action({id="find_goto"})
+				end
 			end)
 		end
 

@@ -847,6 +847,7 @@ M.find.new_item=function(find,name)
 		indent="   ",
 		name=name,
 		collect=find.collect,
+		find=find.find,
 		parent=find,
 	})
 	return it
@@ -889,6 +890,7 @@ PRINT("list_find",path)
 				f.filetree=v
 				f.dir={}
 				f.indent="    "
+				f.find=it
 			end
 		end
 
@@ -916,12 +918,4 @@ PRINT("list_find",path)
 	end
 	
 	return dir
-end
-
-M.find.read_file=function(find,path)
-PRINT("read_find",path)
-end
-
-M.find.write_file=function(find,path,data)
-PRINT("write_find",path)
 end
