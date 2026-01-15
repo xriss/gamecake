@@ -3,11 +3,11 @@
 # Welcome To Swanky Edit ( SWED )
 
 To your right you should see a tree file explorer panel where / will be 
-the root of your file system and // is used for internal files, eg 
+the root of your file system and /../ is used for internal files, eg 
 config, these internal files exist only inside the editor and not on 
 your filesystem.
 
-Clicking on // ( to expand it ) then gists/ and then finally 
+Clicking on /../ ( to expand it ) then gists/ and then finally 
 fun64s.HASH/ ( where HASH is the actual gist id so not something you 
 should remember ) will load a gist from github ( internet access 
 required ). Inside this gist you can find some fun64 examples. These 

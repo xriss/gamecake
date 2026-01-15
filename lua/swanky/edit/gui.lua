@@ -384,6 +384,27 @@ print("search_find",word,dir)
 			texteditor:mark_sync()
 		end
 
+	elseif m.id=="find_replace_selection" then
+
+		local texteditor=gui.master.ids.texteditor
+		local txt=texteditor.txt
+
+		if texteditor:allow_changes() then
+
+			local s=gui.datas.get_string("find_search")
+			local r=gui.datas.get_string("find_replace")
+
+			local t = txt.copy() or "" -- get selected text
+
+			s=s:gsub("%p","%%%0") -- escape any paterns
+			r=r:gsub("%%","%%%%")
+
+			t=t:gsub( s , r ) -- simple replace
+
+			txt.undo.replace(t)
+			texteditor:mark_sync()
+		end
+
 	elseif m.id=="find_in_files" then
 
 PRINT("find_in_files")
@@ -526,6 +547,10 @@ function gui.hooks(act,w,dat)
 			gui.do_actions[#gui.do_actions+1]={id=w.id}
 
 		elseif w.id=="find_in_files_cancel" then
+
+			gui.do_actions[#gui.do_actions+1]={id=w.id}
+
+		elseif w.id=="find_replace_selection" then
 
 			gui.do_actions[#gui.do_actions+1]={id=w.id}
 
@@ -718,13 +743,17 @@ local lay=
 										data="find_replace",
 									},
 									{
-										class="text",size="fullx",hx=gsiz*1,hy=gsiz*1,
-										text=" Look in files: ",
-									},
-									{
-										class="textedit",size="fullx",hx=gsiz*1,hy=gsiz*1,
-										color=0,
-										data="find_files",
+										class="split",size="fullx",hx=gsiz*1,hy=gsiz*1,
+										split_axis="x",split_order=1,
+										{
+											class="text",hx=gsiz*1,hy=gsiz*1,
+											text=" Allow : ",
+										},
+										{
+											class="textedit",hx=gsiz*1,hy=gsiz*1,
+											color=0,
+											data="find_files",
+										},
 									},
 									{
 										class="text",size="fullx",hx=gsiz*1,hy=gsiz*1,
@@ -751,12 +780,17 @@ local lay=
 									{
 										id="find_replace",hooks=gui.hooks,
 										class="button",hx=gsiz*3,hy=gsiz*1,color=1,
-										text="replace",
+										text="Replace",
 									},
 									{
 										id="find_replace_all",hooks=gui.hooks,
 										class="button",hx=gsiz*4,hy=gsiz*1,color=1,
-										text="replace all",
+										text="Replace all",
+									},
+									{
+										id="find_replace_selection",hooks=gui.hooks,
+										class="button",hx=gsiz*7,hy=gsiz*1,color=1,
+										text="Replace in selection",
 									},
 								}
 							}
