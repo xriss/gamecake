@@ -112,6 +112,68 @@ screen.create=function(it,opts)
 	it.fxbo1=framebuffers.create(it.hx,it.hy,0)
 	it.fxbo2=framebuffers.create(it.hx,it.hy,0)
 	
+	it.screen_resize_view=function()
+		if it.system.opts.hxhy=="best" then -- auto resize
+		
+			local view=views.get()
+			local opts=it.system.opts
+			local hx,hy=opts.hx,opts.hy
+
+			local faa=view.hx/view.hy
+			local haa=opts.xx/opts.yy
+
+			if haa > faa then -- fit aspect
+				hx=opts.xx
+				hy=math.floor((opts.xx/faa)/2)*2 -- force even number
+			else
+				hy=opts.yy
+				hx=math.floor((opts.yy*faa)/2)*2 -- force even number
+			end
+			
+			-- sanity
+			if hx<opts.xx then hx=opts.xx end -- no less than minimum size
+			if hy<opts.yy then hy=opts.yy end
+			if hx>opts.xx*2 then hx=opts.xx*2 end -- no more than double minimum size
+			if hy>opts.yy*2 then hy=opts.yy*2 end
+			hx=math.floor(hx)	-- snap
+			hy=math.floor(hy)
+
+			it.system.screen_resize(hx,hy) -- resize all
+
+			view.vx=hx
+			view.vy=hy
+			view.vz=hy*4
+
+		end
+
+	end
+
+	it.screen_resize=function(hx,hy)
+		if hx~=it.hx or hy~=it.hy then -- new size
+		
+			it.hx=hx
+			it.hy=hy
+			it.view.vx=hx
+			it.view.vy=hy
+			it.view.vz=hy*4
+			it.fbo:resize(hx,hy,0)
+			it.fxbo1:resize(hx,hy,0)
+			it.fxbo2:resize(hx,hy,0)
+
+			for i,l in ipairs(it.layers) do
+				l.hx=hx
+				l.hy=hy
+				l.clip_hx=hx
+				l.clip_hy=hy
+				l.view.vx=hx
+				l.view.vy=hy
+				l.view.vz=hy*4
+				l.fbo:resize(hx,hy,1)
+			end
+		
+		end
+	end
+
 	it.clean=function()
 		if it.fxbo1 then
 			framebuffers.clean(it.fxbo1)
@@ -308,6 +370,7 @@ screen.create=function(it,opts)
 			
 		end
 
+		it.screen_resize_view()
 	end
 
 	-- create the bloom 

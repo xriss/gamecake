@@ -4,10 +4,14 @@
 
 oven.opts.fun="" -- back to menu on reset
 
-hardware,main=system.configurator({
+sysopts={
 	mode="swordstone", -- select a characters+sprites on a 256x128 screen using the swanky32 palette.
 	update=function() update() end, -- called repeatedly to update+draw
-})
+	hx=256,hy=128, -- minimum size
+	hxhy="best", -- auto set hx,hy size to available space growing upto 2x bigger
+}
+
+hardware,main=system.configurator(sysopts)
 
 
 update=function()

@@ -25,6 +25,7 @@ function M.bake(oven,system)
 	local canvas=cake.canvas
 	local flat=canvas.flat
 
+	system.opts={}
 	system.components={}
 
 	system.ups=oven.ups.up -- maybe need to replace this to disable input
@@ -225,6 +226,12 @@ system.msg=function(m)
 	system.resume({msg=m})
 	for _,it in ipairs(system.components) do
 		if it.msg then it.msg(m) end
+	end
+end
+
+system.screen_resize=function(hx,hy)
+	for _,it in ipairs(system.components) do
+		if it.screen_resize then it.screen_resize(hx,hy) end
 	end
 end
 
@@ -486,7 +493,56 @@ system.save_fun_png=function(name,path)
 
 end
 
+-- read xx,yy as minimum width and height of our display and double this is maximum
+-- set hx,hy,ss to get a good integer scale with the same aspect as the screen
+system.best_integer_scale=function(opts)
+
+	opts.xx=opts.xx or opts.hx or 256 -- *minimum* size should be passed in
+	opts.yy=opts.yy or opts.hy or 128
+
+	local fsx,fsy=system.fullscreen_width  or 1920,system.fullscreen_height or 1080
+	local faa=fsx/fsy
+	local haa=opts.xx/opts.yy
+	local shy=math.floor((fsy)/opts.yy)
+	local shx=math.floor((fsx)/opts.xx)
+
+-- these may be slightly higher than the inputs, to fully cover available screen aspect ratio
+
+	opts.ss=shx<shy and shx or shy -- pick the smallest divider
+	if opts.ss<1 then opts.ss=1 end -- sanity in case of tiny screen
+	if haa > faa then
+		opts.hx=opts.xx
+		opts.hy=math.floor((opts.xx/faa)/2)*2 -- force even number
+	else
+		opts.hy=opts.yy
+		opts.hx=math.floor((opts.yy*faa)/2)*2 -- force even number
+	end
+	if opts.hx>opts.xx*2 then opts.hx=opts.xx*2 end -- no more than double minimum size
+	if opts.hy>opts.yy*2 then opts.hy=opts.yy*2 end
+	while opts.hx*opts.ss > fsx*0.75 do opts.ss=opts.ss-1 end -- try and keep window smaller than 75% of fullscreen
+	while opts.hy*opts.ss > fsy*0.75 do opts.ss=opts.ss-1 end
+	if opts.ss<1 then opts.ss=1 end -- sanity in case of tiny screen
+
+	opts.hx=math.floor(opts.hx)	-- snap
+	opts.hy=math.floor(opts.hy)
+	
+	if opts.hx<opts.xx then opts.hx=opts.xx end -- sanity
+	if opts.hy<opts.yy then opts.hy=opts.yy end -- sanity
+
+-- pick an integer scale that is at least as big as our minimum request and the same aspect as the screen
+-- this will make a good starting integer scaled window, probably a little bit smaller than the screen
+-- and when full screened it will loose its integer scale but will already be screen aspect
+--	LOG("fun", "best_integer_scale" , opts.hx , opts.hy , "x"..opts.ss )
+
+end
+
 system.configurator=function(opts)
+
+	system.opts=opts -- remember opts
+
+	if opts.hxhy=="best" then
+		system.best_integer_scale(opts) -- pick a starting window size
+	end
 
 	local bitdown=require("wetgenes.gamecake.fun.bitdown")
 	local bitdown_font=require("wetgenes.gamecake.fun.bitdown_font")

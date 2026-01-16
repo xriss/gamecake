@@ -55,6 +55,20 @@ canvas.create=function(it,opts)
 	it.window_hx=it.opts.window and it.opts.window[3] or it.screen.hx
 	it.window_hy=it.opts.window and it.opts.window[4] or it.screen.hy
 
+	it.screen_resize=function(hx,hy)
+		if hx~=it.hx or hy~=it.hy then -- new size
+
+			it.hx=hx
+			it.hy=hy
+			
+			it.window_hx=hx
+			it.window_hy=hy
+
+			it.grd:resize( it.hx , it.hy , 1)
+
+		end
+	end
+
 	it.setup=function(opts)
 		
 		it.grd  =wgrd.create("U8_INDEXED", it.hx , it.hy , 1)

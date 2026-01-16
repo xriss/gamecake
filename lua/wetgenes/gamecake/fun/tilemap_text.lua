@@ -35,6 +35,23 @@ tilemap_text.inject=function(it,opts)
 	it.text_fg=31 -- default foreground color index, white in swanky32
 	it.text_bg=0  -- default background color index, transparent in swanky32
 	
+	it.screen_resize=function(hx,hy)
+		if hx~=it.window_hx or hy~=it.window_hy then -- new size
+
+			it.window_hx=hx
+			it.window_hy=hy
+
+			it.tilemap_hx=math.ceil(hx/it.tile_hx)
+			it.tilemap_hy=math.ceil(hy/it.tile_hy)
+			it.tilemap_grd:resize(it.tilemap_hx,it.tilemap_hy,1)
+
+			it.text_hx=it.tilemap_hx
+			it.text_hy=it.tilemap_hy
+
+		end
+	end
+
+
 	it.text_tile4x8=function(c,fg,bg)
 		return (c:byte()),0,fg or it.text_fg,bg or it.text_bg -- use the first line of tiles as a font
 	end

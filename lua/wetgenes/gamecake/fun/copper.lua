@@ -62,6 +62,18 @@ copper.create=function(it,opts)
 	}
 	it.shader_function=function()end
 	
+	it.screen_resize=function(hx,hy)
+		if hx~=it.hx or hy~=it.hy then -- new size
+		
+			it.hx=hx
+			it.hy=hy
+
+			it.shader_uniforms.sizpos[1]=hx
+			it.shader_uniforms.sizpos[2]=hy
+
+		end
+	end
+
 	it.update=function()
 	end
 
