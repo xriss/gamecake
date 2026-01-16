@@ -229,12 +229,6 @@ system.msg=function(m)
 	end
 end
 
-system.screen_resize=function(hx,hy)
-	for _,it in ipairs(system.components) do
-		if it.screen_resize then it.screen_resize(hx,hy) end
-	end
-end
-
 system.update=function()
 
 	system.ticks=system.ticks+1
@@ -497,37 +491,39 @@ end
 -- set hx,hy,ss to get a good integer scale with the same aspect as the screen
 system.best_integer_scale=function(opts)
 
-	opts.xx=opts.xx or opts.hx or 256 -- *minimum* size should be passed in
-	opts.yy=opts.yy or opts.hy or 128
+	opts.lox=opts.lox or opts.hx or 256 -- *minimum* size should be passed in
+	opts.loy=opts.loy or opts.hy or 128
+	opts.hix=opts.hix or opts.hx or 256 -- *maximum* size should be passed in
+	opts.hiy=opts.hiy or opts.hy or 256
 
 	local fsx,fsy=system.fullscreen_width  or 1920,system.fullscreen_height or 1080
 	local faa=fsx/fsy
-	local haa=opts.xx/opts.yy
-	local shy=math.floor((fsy)/opts.yy)
-	local shx=math.floor((fsx)/opts.xx)
+	local haa=opts.lox/opts.loy
+	local shy=math.floor((fsy)/opts.loy)
+	local shx=math.floor((fsx)/opts.lox)
 
 -- these may be slightly higher than the inputs, to fully cover available screen aspect ratio
 
 	opts.ss=shx<shy and shx or shy -- pick the smallest divider
 	if opts.ss<1 then opts.ss=1 end -- sanity in case of tiny screen
-	if haa > faa then
-		opts.hx=opts.xx
-		opts.hy=math.floor((opts.xx/faa)/2)*2 -- force even number
-	else
-		opts.hy=opts.yy
-		opts.hx=math.floor((opts.yy*faa)/2)*2 -- force even number
+	if haa > faa then -- fit x
+		opts.hx=opts.lox
+		opts.hy=math.floor((opts.lox/faa)/2)*2 -- force even number
+	else -- fit y
+		opts.hy=opts.loy
+		opts.hx=math.floor((opts.loy*faa)/2)*2 -- force even number
 	end
-	if opts.hx>opts.xx*2 then opts.hx=opts.xx*2 end -- no more than double minimum size
-	if opts.hy>opts.yy*2 then opts.hy=opts.yy*2 end
+	if opts.hx>opts.hix then opts.hx=opts.hix end -- maximum size
+	if opts.hy>opts.hiy then opts.hy=opts.hiy end
 	while opts.hx*opts.ss > fsx*0.75 do opts.ss=opts.ss-1 end -- try and keep window smaller than 75% of fullscreen
 	while opts.hy*opts.ss > fsy*0.75 do opts.ss=opts.ss-1 end
 	if opts.ss<1 then opts.ss=1 end -- sanity in case of tiny screen
-
-	opts.hx=math.floor(opts.hx)	-- snap
-	opts.hy=math.floor(opts.hy)
 	
-	if opts.hx<opts.xx then opts.hx=opts.xx end -- sanity
-	if opts.hy<opts.yy then opts.hy=opts.yy end -- sanity
+	if opts.hx<opts.lox then opts.hx=opts.lox end -- minimum size
+	if opts.hy<opts.loy then opts.hy=opts.loy end
+
+	opts.hx=math.floor(opts.hx/2)*2	-- even snap
+	opts.hy=math.floor(opts.hy/2)*2
 
 -- pick an integer scale that is at least as big as our minimum request and the same aspect as the screen
 -- this will make a good starting integer scaled window, probably a little bit smaller than the screen
@@ -538,9 +534,7 @@ end
 
 system.configurator=function(opts)
 
-	system.opts=opts -- remember opts
-
-	if opts.hxhy=="best" then
+	if opts.lox then
 		system.best_integer_scale(opts) -- pick a starting window size
 	end
 
@@ -574,6 +568,8 @@ system.configurator=function(opts)
 				scale=args.pixel and tonumber(args.pixel) or opts.ss,
 				fps=opts.fps,
 				layers=1,
+				lox=opts.lox,loy=opts.loy,
+				hix=opts.hix,hiy=opts.hiy,
 			},
 			{
 				component="sfx",
@@ -589,6 +585,8 @@ system.configurator=function(opts)
 				name="canvas",
 				size={opts.hx,opts.hy},
 				layer=1,
+				lox=opts.lox,loy=opts.loy,
+				hix=opts.hix,hiy=opts.hiy,
 			},
 			graphics={
 			},
@@ -614,6 +612,8 @@ system.configurator=function(opts)
 				scale=args.pixel and tonumber(args.pixel) or opts.ss,
 				fps=opts.fps,
 				layers=3,
+				lox=opts.lox,loy=opts.loy,
+				hix=opts.hix,hiy=opts.hiy,
 			},
 			{
 				component="sfx",
@@ -635,6 +635,8 @@ system.configurator=function(opts)
 				name="copper",
 				size={opts.hx,opts.hy},
 				layer=1,
+				lox=opts.lox,loy=opts.loy,
+				hix=opts.hix,hiy=opts.hiy,
 			},
 			{
 				component="tilemap",
@@ -643,6 +645,8 @@ system.configurator=function(opts)
 				tile_size={8,8},
 				tilemap_size={math.ceil(opts.hx/8),math.ceil(opts.hy/8)},
 				layer=1,
+				lox=opts.lox,loy=opts.loy,
+				hix=opts.hix,hiy=opts.hiy,
 			},
 			{
 				component="tilemap",
@@ -651,6 +655,8 @@ system.configurator=function(opts)
 				tile_size={8,8},
 				tilemap_size={math.ceil(opts.hx/8),math.ceil(opts.hy/8)},
 				layer=2,
+				lox=opts.lox,loy=opts.loy,
+				hix=opts.hix,hiy=opts.hiy,
 			},
 			{
 				component="sprites",
@@ -665,6 +671,8 @@ system.configurator=function(opts)
 				tile_size={4,8}, -- use half width tiles for font
 				tilemap_size={math.ceil(opts.hx/4),math.ceil(opts.hy/8)},
 				layer=3,
+				lox=opts.lox,loy=opts.loy,
+				hix=opts.hix,hiy=opts.hiy,
 			},
 			graphics={
 				{0x0000,"_font",0x0340}, -- pre-allocate the 4x8 and 8x8 font area
@@ -691,6 +699,8 @@ system.configurator=function(opts)
 				scale=args.pixel and tonumber(args.pixel) or opts.ss,
 				fps=opts.fps,
 				layers=1,
+				lox=opts.lox,loy=opts.loy,
+				hix=opts.hix,hiy=opts.hiy,
 			},
 			{
 				component="sfx",
@@ -714,6 +724,8 @@ system.configurator=function(opts)
 				tile_size={4,8}, -- use half width tiles for font
 				tilemap_size={math.ceil(opts.hx/4),math.ceil(opts.hy/8)},
 				layer=1,
+				lox=opts.lox,loy=opts.loy,
+				hix=opts.hix,hiy=opts.hiy,
 			},
 			{
 				component="sprites",

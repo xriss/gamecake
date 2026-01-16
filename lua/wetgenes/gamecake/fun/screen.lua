@@ -43,6 +43,11 @@ screen.create=function(it,opts)
 	it.component="screen"
 	it.name=opts.name or it.component
 	
+	it.lox=it.opts.lox
+	it.loy=it.opts.loy
+	it.hix=it.opts.hix
+	it.hiy=it.opts.hiy
+
 	it.bloom=it.opts.bloom
 
 	it.scale=it.opts.scale or 3
@@ -113,32 +118,33 @@ screen.create=function(it,opts)
 	it.fxbo2=framebuffers.create(it.hx,it.hy,0)
 	
 	it.screen_resize_view=function()
-		if it.system.opts.hxhy=="best" then -- auto resize
+		if it.lox then -- auto resize
 		
 			local view=views.get()
-			local opts=it.system.opts
-			local hx,hy=opts.hx,opts.hy
+			local hx,hy=it.hx,it.hy
 
 			local faa=view.hx/view.hy
-			local haa=opts.xx/opts.yy
+			local haa=it.lox/it.loy
 
 			if haa > faa then -- fit aspect
-				hx=opts.xx
-				hy=math.floor((opts.xx/faa)/2)*2 -- force even number
+				hx=it.lox
+				hy=math.floor((it.lox/faa)/2)*2 -- force even number
 			else
-				hy=opts.yy
-				hx=math.floor((opts.yy*faa)/2)*2 -- force even number
+				hy=it.loy
+				hx=math.floor((it.loy*faa)/2)*2 -- force even number
 			end
 			
 			-- sanity
-			if hx<opts.xx then hx=opts.xx end -- no less than minimum size
-			if hy<opts.yy then hy=opts.yy end
-			if hx>opts.xx*2 then hx=opts.xx*2 end -- no more than double minimum size
-			if hy>opts.yy*2 then hy=opts.yy*2 end
-			hx=math.floor(hx)	-- snap
-			hy=math.floor(hy)
+			if hx<it.lox then hx=it.lox end -- no less than minimum size
+			if hy<it.loy then hy=it.loy end
+			if hx>it.hix then hx=it.hix end -- no more than maximum size
+			if hy>it.hiy then hy=it.hiy end
+			hx=math.floor(hx/2)*2	-- even snap
+			hy=math.floor(hy/2)*2
 
-			it.system.screen_resize(hx,hy) -- resize all
+			for _,c in ipairs(it.system.components) do
+				if c.screen_resize and c.lox then c.screen_resize(hx,hy) end
+			end
 
 			view.vx=hx
 			view.vy=hy

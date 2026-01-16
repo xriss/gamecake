@@ -44,6 +44,11 @@ tilemap.create=function(it,opts)
 	it.component="tilemap"
 	it.name=opts.name or it.component
 
+	it.lox=it.opts.lox
+	it.loy=it.opts.loy
+	it.hix=it.opts.hix
+	it.hiy=it.opts.hiy
+
 	it.layer=opts.layer or 1
 	
 	it.px=it.opts.scroll and it.opts.scroll[1] or 0	-- scroll
