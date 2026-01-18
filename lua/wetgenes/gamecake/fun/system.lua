@@ -98,6 +98,8 @@ LOG("oven","fun system setup "..system.fullscreen_width.."x"..system.fullscreen_
 
 	if code then
 
+		local logs=require("wetgenes.logs")
+
 		local env=wsandbox.make_unsafe_env()
 		for n,v in pairs({
 			args=oven.opts.args, -- commandline settings
@@ -105,6 +107,11 @@ LOG("oven","fun system setup "..system.fullscreen_width.."x"..system.fullscreen_
 			oven=oven,
 			gl=oven.gl,
 			ups=system.ups, -- input, for 1up - 6up 
+-- set global PRINT DUMP and LOG
+			PRINT=logs.print,
+			DUMP=logs.dump,
+			LOG=logs.log,
+			TRACEBACK=logs.traceback,
 		}) do env[n]=v end
 		
 		local tab={}
