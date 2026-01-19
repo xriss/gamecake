@@ -47,6 +47,7 @@ screen.create=function(it,opts)
 	it.loy=it.opts.loy
 	it.hix=it.opts.hix
 	it.hiy=it.opts.hiy
+	it.autosize=it.opts.autosize
 
 	it.bloom=it.opts.bloom
 
@@ -118,7 +119,7 @@ screen.create=function(it,opts)
 	it.fxbo2=framebuffers.create(it.hx,it.hy,0)
 	
 	it.screen_resize_view=function()
-		if it.lox then -- auto resize
+		if it.autosize=="lohi" then -- auto resize using lox,loy and hix,hiy values
 		
 			local view=views.get()
 			local hx,hy=it.hx,it.hy
@@ -143,7 +144,7 @@ screen.create=function(it,opts)
 			hy=math.floor(hy/2)*2
 
 			for _,c in ipairs(it.system.components) do
-				if c.screen_resize and c.lox then c.screen_resize(hx,hy) end
+				if c.screen_resize and c.autosize=="lohi" then c.screen_resize(hx,hy) end
 			end
 
 			view.vx=hx

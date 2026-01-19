@@ -42,10 +42,7 @@ copper.create=function(it,opts)
 	it.component="copper"
 	it.name=opts.name or it.component
 
-	it.lox=it.opts.lox
-	it.loy=it.opts.loy
-	it.hix=it.opts.hix
-	it.hiy=it.opts.hiy
+	it.autosize=it.opts.autosize
 
 	it.layer=opts.layer or 1
 	local layer=assert(it.screen.layers[it.layer])

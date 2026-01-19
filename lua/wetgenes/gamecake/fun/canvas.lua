@@ -42,10 +42,7 @@ canvas.create=function(it,opts)
 	it.component="canvas"
 	it.name=opts.name or it.component
 	
-	it.lox=it.opts.lox
-	it.loy=it.opts.loy
-	it.hix=it.opts.hix
-	it.hiy=it.opts.hiy
+	it.autosize=it.opts.autosize
 
 	it.hx=it.opts.size and it.opts.size[1] or it.screen.hx
 	it.hy=it.opts.size and it.opts.size[2] or it.screen.hy

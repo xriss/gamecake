@@ -541,7 +541,7 @@ end
 
 system.configurator=function(opts)
 
-	if opts.lox then
+	if opts.autosize=="lohi" then
 		system.best_integer_scale(opts) -- pick a starting window size
 	end
 
@@ -577,6 +577,7 @@ system.configurator=function(opts)
 				layers=1,
 				lox=opts.lox,loy=opts.loy,
 				hix=opts.hix,hiy=opts.hiy,
+				autosize=opts.autosize,
 			},
 			{
 				component="sfx",
@@ -592,8 +593,7 @@ system.configurator=function(opts)
 				name="canvas",
 				size={opts.hx,opts.hy},
 				layer=1,
-				lox=opts.lox,loy=opts.loy,
-				hix=opts.hix,hiy=opts.hiy,
+				autosize=opts.autosize,
 			},
 			graphics={
 			},
@@ -621,6 +621,7 @@ system.configurator=function(opts)
 				layers=3,
 				lox=opts.lox,loy=opts.loy,
 				hix=opts.hix,hiy=opts.hiy,
+				autosize=opts.autosize,
 			},
 			{
 				component="sfx",
@@ -642,8 +643,7 @@ system.configurator=function(opts)
 				name="copper",
 				size={opts.hx,opts.hy},
 				layer=1,
-				lox=opts.lox,loy=opts.loy,
-				hix=opts.hix,hiy=opts.hiy,
+				autosize=opts.autosize,
 			},
 			{
 				component="tilemap",
@@ -652,8 +652,7 @@ system.configurator=function(opts)
 				tile_size={8,8},
 				tilemap_size={2+math.ceil(opts.hx/8),2+math.ceil(opts.hy/8)},
 				layer=1,
-				lox=opts.lox,loy=opts.loy,
-				hix=opts.hix,hiy=opts.hiy,
+				autosize=opts.autosize,
 			},
 			{
 				component="tilemap",
@@ -662,8 +661,7 @@ system.configurator=function(opts)
 				tile_size={8,8},
 				tilemap_size={2+math.ceil(opts.hx/8),2+math.ceil(opts.hy/8)},
 				layer=2,
-				lox=opts.lox,loy=opts.loy,
-				hix=opts.hix,hiy=opts.hiy,
+				autosize=opts.autosize,
 			},
 			{
 				component="sprites",
@@ -678,8 +676,7 @@ system.configurator=function(opts)
 				tile_size={4,8}, -- use half width tiles for font
 				tilemap_size={4+math.ceil(opts.hx/4),2+math.ceil(opts.hy/8)},
 				layer=3,
-				lox=opts.lox,loy=opts.loy,
-				hix=opts.hix,hiy=opts.hiy,
+				autosize=opts.autosize,
 			},
 			graphics={
 				{0x0000,"_font",0x0340}, -- pre-allocate the 4x8 and 8x8 font area
@@ -708,6 +705,7 @@ system.configurator=function(opts)
 				layers=1,
 				lox=opts.lox,loy=opts.loy,
 				hix=opts.hix,hiy=opts.hiy,
+				autosize=opts.autosize,
 			},
 			{
 				component="sfx",
@@ -731,8 +729,7 @@ system.configurator=function(opts)
 				tile_size={4,8}, -- use half width tiles for font
 				tilemap_size={4+math.ceil(opts.hx/4),2+math.ceil(opts.hy/8)},
 				layer=1,
-				lox=opts.lox,loy=opts.loy,
-				hix=opts.hix,hiy=opts.hiy,
+				autosize=opts.autosize,
 			},
 			{
 				component="sprites",

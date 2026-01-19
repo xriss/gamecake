@@ -9,9 +9,50 @@ sysopts={
 	update=function() update() end, -- called repeatedly to update+draw
 	lox=256,loy=128, -- minimum size
 	hix=256,hiy=256, -- maximum size
+	autosize="lohi", -- flag that we want to auto resize
 }
 
 hardware,main=system.configurator(sysopts)
+
+-- create global all
+all=require("wetgenes.gamecake.zone.flat.all"):import()
+all.create_scene=function(scene)
+
+	-- a scene is a bunch of systems and items
+	scene=scene or require("wetgenes.gamecake.zone.scene").create()
+	
+	scene.require_search={
+		"wetgenes.gamecake.zone.flat.",
+		"",
+	}
+	for _,it in pairs({ -- static data and functions for each system
+		all,
+--		scene:require("test"),
+	}) do
+		scene.infos[it.caste]=it
+	end
+	
+	scene.full_clean=function(scene)
+		scene:systems_cocall("clean")
+		scene:call("destroy")
+		scene:reset()
+	end
+	
+	scene.full_setup=function(scene)
+		scene:systems_cocall("setup")
+	end
+
+	return scene
+
+end
+
+-- create global scene
+scene=all.create_scene()
+
+
+
+
+-- old test code
 
 local px,py=0,0
 local vx,vy=2,1
@@ -51,38 +92,3 @@ update=function()
 	ctext.text_print("Hello World!",px,py,fg,bg) -- (text,x,y,color,background)
 
 end
-
--- create global all
-all=require("wetgenes.gamecake.zone.flat.all"):import()
-all.create_scene=function(scene)
-
-	-- a scene is a bunch of systems and items
-	scene=scene or require("wetgenes.gamecake.zone.scene").create()
-	
-	scene.require_search={
-		"wetgenes.gamecake.zone.flat.",
-		"",
-	}
-	for _,it in pairs({ -- static data and functions for each system
-		all,
---		scene:require("test"),
-	}) do
-		scene.infos[it.caste]=it
-	end
-	
-	scene.full_clean=function(scene)
-		scene:systems_cocall("clean")
-		scene:call("destroy")
-		scene:reset()
-	end
-	
-	scene.full_setup=function(scene)
-		scene:systems_cocall("setup")
-	end
-
-	return scene
-
-end
-
--- create global scene
-scene=all.create_scene()

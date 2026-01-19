@@ -9,6 +9,7 @@ sysopts={
 	update=function() update() end, -- called repeatedly to update+draw
 	lox=256,loy=128, -- minimum size
 	hix=256,hiy=256, -- maximum size
+	autosize="lohi", -- flag that we want to auto resize
 }
 
 hardware,main=system.configurator(sysopts)
