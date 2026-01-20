@@ -17,10 +17,6 @@ all.system=all.system or {}
 -- methods added to each item
 all.item=all.item or {}
 
-
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-
 local Ox=function(n) return string.format("%012x",n or 0) end
 
 local automap=function(it,r) r=r or it for i=1,#it do r[ it[i] ]=i end return r end

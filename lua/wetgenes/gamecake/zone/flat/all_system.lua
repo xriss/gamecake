@@ -17,10 +17,6 @@ all.system=all.system or {}
 -- methods added to each item
 all.item=all.item or {}
 
-
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-
 local Ox=function(n) return string.format("%012x",n or 0) end
 
 local automap=function(it,r) r=r or it for i=1,#it do r[ it[i] ]=i end return r end
@@ -72,14 +68,15 @@ all.system.load_glsl=function(sys)
 	local wzips=require("wetgenes.zips")
 	local gl=sys.gl
 
-	local nameslash=sys.info.modname:gsub("%.","/")
-	local filename="lua/"..nameslash..".glsl"
-	local src=wzips.readfile(filename)
-	if src and gl then
-		gl.shader_sources( src , filename )
---		print("GLSL LOAD",sys.info.modname,filename)
+	if sys.info.modname then
+		local nameslash=sys.info.modname:gsub("%.","/")
+		local filename="lua/"..nameslash..".glsl"
+		local src=wzips.readfile(filename)
+		if src and gl then
+			gl.shader_sources( src , filename )
+	--		print("GLSL LOAD",sys.info.modname,filename)
+		end
 	end
-
 end
 
 -- initalize metatables links and load extra data ( call once as system is added )
@@ -108,7 +105,9 @@ all.system.initialize=function(sys)
 	-- keep shortcuts to oven bound data in each system
 	sys.oven=sys.scene.oven
 --	sys.upnet=sys.oven.upnet
-	sys.gl=sys.oven.gl
+	if sys.oven then
+		sys.gl=sys.oven.gl
+	end
 
 	-- keep shortcuts to oven bound data in each items metatable
 	sys.methods.sys=sys

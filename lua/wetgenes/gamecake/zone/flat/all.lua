@@ -6,6 +6,7 @@
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 M.import=function(_,all)
 all=all or {}
+all.modname=M.modname
 -- cache code
 all.cache=all.cache or {}
 -- database code
@@ -21,10 +22,6 @@ all.scene=all.scene or {}
 all.system=all.system or {}
 -- methods added to each item
 all.item=all.item or {}
-
-
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local Ox=function(n) return string.format("%012x",n or 0) end
 
@@ -45,6 +42,18 @@ local cmsgpack=require("cmsgpack")
 local zlib=require("zlib")
 local zipinflate=function(d) return d and ((zlib.inflate())(d))          end
 local zipdeflate=function(d) return d and ((zlib.deflate())(d,"finish")) end
+
+
+-- auto merge other parts into all
+require("wetgenes.gamecake.zone.flat.all_item"       ):import(all)
+require("wetgenes.gamecake.zone.flat.all_scene"      ):import(all)
+require("wetgenes.gamecake.zone.flat.all_scene_mono" ):import(all)
+require("wetgenes.gamecake.zone.flat.all_system"     ):import(all)
+--require("wetgenes.gamecake.zone.flat.all_code"       ):import(all)
+--require("wetgenes.gamecake.zone.flat.all_db"         ):import(all)
+--require("wetgenes.gamecake.zone.flat.all_cache"      ):import(all)
+
+
 
 -- use these functions on json style data only
 all.compress=    function(d) return d and zipdeflate(cmsgpack.pack(d))   end
@@ -256,15 +265,6 @@ all.gene=function(boot)
 end
 all.system.gene=function(_,boot) return all.gene(boot) end
 
-
-
--- auto merge other parts into all
-require("wetgenes.gamecake.zone.flat.all_item"   ):import(all)
-require("wetgenes.gamecake.zone.flat.all_scene"  ):import(all)
-require("wetgenes.gamecake.zone.flat.all_system" ):import(all)
---require("wetgenes.gamecake.zone.flat.all_code"   ):import(all)
---require("wetgenes.gamecake.zone.flat.all_db"     ):import(all)
---require("wetgenes.gamecake.zone.flat.all_cache"  ):import(all)
 
 	return all
 end
