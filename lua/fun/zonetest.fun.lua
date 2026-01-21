@@ -33,7 +33,7 @@ all.create_scene=function(scene)
 	}
 	for _,it in pairs({ -- static data and functions for each system
 		all,
-		tests,
+		textbounces,
 	}) do
 		scene.infos[it.caste]=it
 	end
@@ -49,7 +49,9 @@ all.create_scene=function(scene)
 		scene:systems_cocall("setup")
 
 		local boots={
-			{"test"},
+			{"textbounce",text="Hello World!",pos={1,1,0},vel={2/16,1/16,0},},
+			{"textbounce",text="POOP!",pos={7,11,0},vel={2/16,1/16,0},},
+			{"textbounce",text="Bounce!",pos={1,3,0},vel={2/16,1/16,0},},
 		}
 		scene:creates(boots)
 	end
@@ -61,6 +63,7 @@ all.create_scene=function(scene)
 end
 
 setup=function()
+	-- create global scene
 	scene=all.create_scene()
 	scene:do_setup()
 end
@@ -71,111 +74,112 @@ update=function()
 end
 
 draw=function()
-	scene:do_draw()
-end
 
-
-tests={}
--- methods added to system
-tests.system={}
--- methods added to each item
-tests.item={}
-
-tests.caste="test"
-
-tests.uidmap={
-	length=0,
-}
-
-tests.values={
-	pos=V3( 0,0,0 ),
-	rot=Q4( 0,0,0,1 ),
-	vel=V3( 0,0,0 ),
-	ang=V3( 0,0,0 ),
-}
-
-tests.types={
-	pos="get",
-	rot="get",
-	vel="get",
-	ang="get",
-}
-
-
-tests.item.get_values=function(test)
-
-	test:get_auto_values()
---	test:get_body_values()
-
-end
-
-tests.item.set_values=function(test)
-
-	test:set_auto_values()
---	test:set_body_values()
-
-end
-
-
-tests.system.setup=function(sys)
-end
-
-tests.system.clean=function(sys)
-end
-
-tests.system.draw=function(sys)
     local cscreen=system.components.screen
     local ctext=system.components.text
     local bg=9
 	ctext.text_clear(0x01000000*bg) -- clear text forcing a background color
+	-- all text is expected to be redrawn in scene
+	scene:do_draw()
 end
 
-tests.item.setup=function(test)
-	test:get_values()
+-- static info about a caste used in a scene
+-- it is pluralized with an s at the end but the caste name is not
+textbounces={}
+-- methods added to system
+textbounces.system={}
+-- methods added to each item
+textbounces.item={}
 
-	test:set_values()
+textbounces.caste="textbounce"
+
+textbounces.uidmap={
+	length=0,
+}
+
+textbounces.values={
+	pos=V3( 0,0,0 ),
+	rot=Q4( 0,0,0,1 ),
+	vel=V3( 1,1,0 ),
+	ang=V3( 0,0,0 ),
+	text="",
+}
+
+textbounces.types={
+	pos="tween",
+	rot="get",
+	vel="get",
+	ang="get",
+	text="get",
+}
+
+
+textbounces.item.get_values=function(textbounce)
+
+	textbounce:get_auto_values()
+--	textbounce:get_body_values()
+
 end
 
-tests.item.update=function(test)
-	test:get_values()
+textbounces.item.set_values=function(textbounce)
+
+	textbounce:set_auto_values()
+--	textbounce:set_body_values()
+
+end
+
+
+-- the system has no state values but can still perform generic actions
+-- eg allocate shared resources for later use
+textbounces.system.setup=function(sys)
+end
+
+textbounces.system.clean=function(sys)
+end
+
+-- state values are cached into the item for easy access on a get
+-- and must be set again if they are altered so setup and updates
+-- must begin and end with a get and a set
+textbounces.item.setup=function(textbounce)
+	textbounce:get_values()
+
+	textbounce:set_values()
+end
+
+textbounces.item.update=function(textbounce)
+	textbounce:get_values()
 
     local cscreen=system.components.screen
 
-	local tx=math.ceil(cscreen.hx/4)
-	local ty=math.ceil(cscreen.hy/8)
-	local s="Hello World!"
+	local tx=math.floor(cscreen.hx/4)
+	local ty=math.floor(cscreen.hy/8)
+	local s=textbounce.text
 	local sx=#s
 	
---	speed=speed+1
---	if speed>=60 then
-		test.pos[1]=test.pos[1]+test.vel[1]
-		test.pos[2]=test.pos[2]+test.vel[2]
---		speed=0
---	end
+	textbounce.pos[1]=textbounce.pos[1]+textbounce.vel[1]
+	textbounce.pos[2]=textbounce.pos[2]+textbounce.vel[2]
 	
-	if test.pos[1]<=0     then test.pos[1]=0     ; test.vel[1]= 2/16 end
-	if test.pos[2]<=0     then test.pos[2]=0     ; test.vel[2]= 1/16 end
-	if test.pos[1]>=tx-sx then test.pos[1]=tx-sx ; test.vel[1]=-2/16 end
-	if test.pos[2]>=ty-1  then test.pos[2]=ty-1  ; test.vel[2]=-1/16 end
+	if textbounce.pos[1]<=0     then textbounce.pos[1]=0     ; textbounce.vel[1]= math.abs(textbounce.vel[1]) end
+	if textbounce.pos[2]<=0     then textbounce.pos[2]=0     ; textbounce.vel[2]= math.abs(textbounce.vel[2]) end
+	if textbounce.pos[1]>=tx-sx then textbounce.pos[1]=tx-sx ; textbounce.vel[1]=-math.abs(textbounce.vel[1]) end
+	if textbounce.pos[2]>=ty-1  then textbounce.pos[2]=ty-1  ; textbounce.vel[2]=-math.abs(textbounce.vel[2]) end
 
-
-	test:set_values()
+	textbounce:set_values()
 end
 
-tests.item.draw=function(test)
+textbounces.item.draw=function(textbounce)
 
-	test:get_values()
-
+	textbounce:get_values()
 
     local cscreen=system.components.screen
     local ctext=system.components.text
     local bg=9
     local fg=system.ticks%32 -- cycle the foreground color
 
-	local px=math.floor(0.5+test.pos[1])
-	local py=math.floor(0.5+test.pos[2])
+	local px=math.floor(0.5+textbounce.pos[1])
+	local py=math.floor(0.5+textbounce.pos[2])
 
-	ctext.text_print("Hello World!",px,py,fg,bg) -- (text,x,y,color,background)
+	ctext.text_print(textbounce.text,px,py,fg,bg) -- (text,x,y,color,background)
 
 end
 
