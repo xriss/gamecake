@@ -64,7 +64,7 @@ end
 
 setup=function()
 	-- create global scene
-	scene=all.create_scene()
+	global.scene=all.create_scene()
 	scene:do_setup()
 end
 
@@ -183,3 +183,7 @@ textbounces.item.draw=function(textbounce)
 
 end
 
+
+-- lock globals to help catch future accidents
+global=require("global").__newindex_create_meta_lock(_G)
+global.__newindex_lock()
