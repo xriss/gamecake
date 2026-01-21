@@ -26,6 +26,7 @@ all.create_scene=function(scene)
 	-- a scene is a bunch of systems and items
 	scene=scene or require("wetgenes.gamecake.zone.scene").create()
 	scene.create=create_scene
+	scene.oven=oven
 	
 	scene.require_search={
 		"wetgenes.gamecake.zone.flat.",

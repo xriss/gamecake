@@ -87,31 +87,64 @@ all.scene.initialize=function(scene)
 --	local upnet=scene.oven.upnet
 --	upnet.hooks.sync=function(client,msg) return scene:recv_msg_sync(client,msg) end
 
+	-- we are not doing anythinmg clever so tweens and values can be shared
+	scene.tweens=scene.values
 
---	scene.ticks={}
---	scene:ticks_sync()
---	scene.values:set("tick",scene.ticks.now) -- starting tick
---	scene.values:set("tick_input",scene.ticks.now) -- cache of latest input tick for this update
+	scene.ticks={}
+	scene:ticks_sync()
+	scene.values:set("tick",scene.ticks.now) -- starting tick
+	scene.values:set("tick_input",scene.ticks.now) -- cache of latest input tick for this update
 	-- init scene.ticks from upnet.ticks
 
 --	scene.oven.upnet.subscribe("upsall")
 end
 
-all.scene.ticks_init=function(scene)
-end
-
-all.scene.ticks_tick=function(scene)
+all.scene.ticks_sync=function(scene)
+	-- keep running updates here until we move it into a subtask
+ 	scene.oven.upnet.update()
+	for n,v in pairs( scene.oven.upnet.get_ticks() ) do scene.ticks[n]=v end
 end
 
 all.scene.do_update=function(scene)
 
-	scene:systems_call("update")
-	scene:call("update")
-	scene:call("update_kinetic")
+	scene.tween=nil -- disable tweening while updating
+
+	scene:ticks_sync()
+	if scene.ticks.input > scene.values:get("tick_input") then
+
+		while scene.ticks.input > scene.values:get("tick") do -- update with full inputs and save hashs
+
+			scene:do_push() -- inc tick
+			scene.ups=scene.oven.upnet.get_ups( scene.values:get("tick") )
+
+			scene:systems_call("update")
+			scene:call("update")
+			scene:call("update_kinetic")
+
+			scene:ticks_sync()
+		end
+
+	-- merge slot 1+2 when that data has been sync confirmed
+		while scene.values[3] do -- and scene.values:get("tick",2) <= scene.ticks.agreed do
+			scene:do_pull()
+		end
+
+	end
 
 end
 
 all.scene.do_draw=function(scene)
+
+	-- note tweens and values are the same
+	if #scene.tweens == 2 and scene.tweens:get("tick",1) then
+		scene.tween=scene.ticks.time-scene.tweens:get("tick",1)
+	else
+		scene.tween=1
+	end
+	if scene.tween<0 then scene.tween=0 end -- sanity
+	if scene.tween>1 then scene.tween=1 end
+
+--PRINT(scene.tween)
 
 	scene:systems_call("draw")
 	scene:call("draw")

@@ -28,6 +28,10 @@ M.bake=function(oven,main)
 	local font=canvas.font
 	local flat=canvas.flat
 
+	oven.ups.keymap(1,"full") -- 1up has basic keyboard mappings
+	oven.upnet=oven.rebake("wetgenes.gamecake.upnet")
+
+
 --	local layout=layouts.push_child{} -- we shall have a child layout to fiddle with
 	local view=views.create({
 		parent=views.get(),
@@ -98,6 +102,8 @@ main.setup=function()
 	})
 
 	oven.msg_view=view -- fix mouse coords using this view
+
+	oven.upnet.setup()
 	
 end
 

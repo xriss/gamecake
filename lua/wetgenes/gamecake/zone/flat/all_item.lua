@@ -84,7 +84,9 @@ all.item.setup_values=function(it,boot)
 	it.zips={} -- dupe zip cache
 	for n,v in pairs( it.sys.zips or {} ) do it.zips[n]=v end
 	it.values=it.scene.create_values()
-	it.tweens=it.scene.create_values() -- ( drawing cache of values )
+-- shared values with tweens if not networking
+	it.tweens=it.values
+--	it.tweens=it.scene.create_values() -- ( drawing cache of values )
 
 	it:set_boot(boot)
 

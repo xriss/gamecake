@@ -38,6 +38,9 @@ M.bake=function(oven,main)
 	local font=canvas.font
 	local flat=canvas.flat
 
+	oven.ups.keymap(1,"full") -- 1up has basic keyboard mappings
+	oven.upnet=oven.rebake("wetgenes.gamecake.upnet")
+
 	local view=views.create({
 		parent=views.get(),
 		mode="full",
@@ -113,6 +116,8 @@ M.bake=function(oven,main)
 		if cmd.args and cmd.args.data.run then
 			main.fullshow=true
 		end
+
+		oven.upnet.setup()
 
 	end
 
