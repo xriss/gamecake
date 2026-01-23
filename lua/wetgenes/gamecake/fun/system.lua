@@ -569,11 +569,11 @@ system.configurator=function(opts)
 				component="screen",
 				name="screen",
 				size={opts.hx,opts.hy},
-				bloom=fatpix and 0.75 or 0,
-				filter=fatpix and "scanline" or nil,
-				shadow=fatpix and "drop" or nil,
-				scale=args.pixel and tonumber(args.pixel) or opts.ss,
-				fps=opts.fps,
+				bloom=opts.bloom or fatpix and 0.75 or 0,
+				filter=opts.filter or fatpix and "scanline" or nil,
+				shadow=opts.shadow or fatpix and "drop" or nil,
+				scale=opts.scale or args.pixel and tonumber(args.pixel) or opts.ss,
+				fps=opts.fps or 60,
 				layers=1,
 				lox=opts.lox,loy=opts.loy,
 				hix=opts.hix,hiy=opts.hiy,
@@ -599,6 +599,9 @@ system.configurator=function(opts)
 			},
 			opts=opts,
 		}
+		for i,v in ipairs( opts.hardware or {} ) do -- modify hardware
+			hardware[#hardware+1]=v
+		end
 
 	elseif opts.mode=="fun64" then -- default settings
 	
@@ -613,11 +616,11 @@ system.configurator=function(opts)
 				component="screen",
 				name="screen",
 				size={opts.hx,opts.hy},
-				bloom=fatpix and 0.75 or 0,
-				filter=fatpix and "scanline" or nil,
-				shadow=fatpix and "drop" or nil,
-				scale=args.pixel and tonumber(args.pixel) or opts.ss,
-				fps=opts.fps,
+				bloom=opts.bloom or fatpix and 0.75 or 0,
+				filter=opts.filter or fatpix and "scanline" or nil,
+				shadow=opts.shadow or fatpix and "drop" or nil,
+				scale=opts.scale or args.pixel and tonumber(args.pixel) or opts.ss,
+				fps=opts.fps or 60,
 				layers=3,
 				lox=opts.lox,loy=opts.loy,
 				hix=opts.hix,hiy=opts.hiy,
@@ -650,7 +653,7 @@ system.configurator=function(opts)
 				name="back",
 				tiles="tiles",
 				tile_size={8,8},
-				tilemap_size={2+math.ceil(opts.hx/8),2+math.ceil(opts.hy/8)},
+				tilemap_size={math.ceil(opts.hx/8),math.ceil(opts.hy/8)},
 				layer=1,
 				autosize=opts.autosize,
 			},
@@ -659,7 +662,7 @@ system.configurator=function(opts)
 				name="map",
 				tiles="tiles",
 				tile_size={8,8},
-				tilemap_size={2+math.ceil(opts.hx/8),2+math.ceil(opts.hy/8)},
+				tilemap_size={math.ceil(opts.hx/8),math.ceil(opts.hy/8)},
 				layer=2,
 				autosize=opts.autosize,
 			},
@@ -674,7 +677,7 @@ system.configurator=function(opts)
 				name="text",
 				tiles="tiles",
 				tile_size={4,8}, -- use half width tiles for font
-				tilemap_size={4+math.ceil(opts.hx/4),2+math.ceil(opts.hy/8)},
+				tilemap_size={math.ceil(opts.hx/4),math.ceil(opts.hy/8)},
 				layer=3,
 				autosize=opts.autosize,
 			},
@@ -683,6 +686,9 @@ system.configurator=function(opts)
 			},
 			opts=opts,
 		}
+		for i,v in ipairs( opts.hardware or {} ) do -- modify hardware
+			hardware[#hardware+1]=v
+		end
 	
 	elseif opts.mode=="swordstone" then -- text focused 256x128 screen with sprites ( 64x16 chars with 4x8 font )
 	
@@ -697,12 +703,12 @@ system.configurator=function(opts)
 				component="screen",
 				name="screen",
 				size={opts.hx,opts.hy},
-				bloom=fatpix and 0.75 or 0,
-				filter=fatpix and "scanline" or nil,
-				shadow=fatpix and "drop" or nil,
-				scale=args.pixel and tonumber(args.pixel) or opts.ss,
-				fps=opts.fps,
-				layers=1,
+				bloom=opts.bloom or fatpix and 0.75 or 0,
+				filter=opts.filter or fatpix and "scanline" or nil,
+				shadow=opts.shadow or fatpix and "drop" or nil,
+				scale=opts.scale or args.pixel and tonumber(args.pixel) or opts.ss,
+				fps=opts.fps or 60,
+				layers=opts.layers or 1,
 				lox=opts.lox,loy=opts.loy,
 				hix=opts.hix,hiy=opts.hiy,
 				autosize=opts.autosize,
@@ -727,21 +733,18 @@ system.configurator=function(opts)
 				name="text",
 				tiles="tiles",
 				tile_size={4,8}, -- use half width tiles for font
-				tilemap_size={4+math.ceil(opts.hx/4),2+math.ceil(opts.hy/8)},
+				tilemap_size={math.ceil(opts.hx/4),math.ceil(opts.hy/8)},
 				layer=1,
 				autosize=opts.autosize,
-			},
-			{
-				component="sprites",
-				name="sprites",
-				tiles="tiles",
-				layer=1,
 			},
 			graphics={
 				{0x0000,"_font",0x0340}, -- pre-allocate the 4x8 and 8x8 font area
 			},
 			opts=opts,
 		}
+		for i,v in ipairs( opts.hardware or {} ) do -- modify hardware
+			hardware[#hardware+1]=v
+		end
 	
 	end
 	

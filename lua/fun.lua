@@ -67,31 +67,25 @@ local func=function(...)
 		fun=funname,
 		fps=60,
 		icon=[[
-b b b b b b b b b b b b b b b b b b b b b b b b b 
-7 7 7 7 7 7 b 7 7 7 b 7 b 7 b 7 7 7 b 7 7 7 7 7 7 
-b b b b b b b 7 b b b 7 b 7 b 7 b 7 b b b b b b b 
-b 7 7 7 7 7 b 7 7 7 b 7 b 7 b 7 b 7 b 7 7 7 7 7 b 
-b b b b b b b 7 b b b 7 b 7 b 7 b 7 b b b b b b b 
-b b 7 7 7 7 b 7 b b b 7 7 7 b 7 b 7 b 7 7 7 7 b b 
-b b b b b b b b b b b b b b b b b b b b b b b b b 
-b b b 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 b b b 
-b b b b b b b b b b b b b b b b b b b b b b b b b 
-b b b b 7 b 7 7 7 7 7 7 b 7 7 b b 7 7 b 7 b b b b 
-b b b b b b 7 7 7 7 7 7 b 7 7 b b 7 7 b b b b b b 
-b b b b b b 7 7 b b b b b 7 7 b b 7 7 b b b b b b 
-b b b b b b 7 7 b b b b b 7 7 b b 7 7 b b b b b b 
-b b b b b b 7 7 7 7 7 7 b 7 7 7 7 7 7 b b b b b b 
-b b b b b b 7 7 7 7 7 7 b 7 7 7 7 7 7 b b b b b b 
-b b b b b b 7 7 b b 7 7 b b b b b 7 7 b b b b b b 
-b b b b b b 7 7 b b 7 7 b b b b b 7 7 b b b b b b 
-b b b b b b 7 7 7 7 7 7 b 7 7 7 b 7 7 b b b b b b 
-b b b b b b 7 7 7 7 7 7 b b b b b 7 7 b b b b b b 
-b b b b b b b b b b b b b 7 7 7 b b b b b b b b b 
-b b b b b b b b b b b b b b b b b b b b b b b b b 
-b b b b b b b b b b 7 7 7 7 7 b b b b b b b b b b 
-b b b b b b b b b b b b b b b b b b b b b b b b b 
-b b b b b b b b b b b 7 7 7 b b b b b b b b b b b 
-b b b b b b b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b 7 7 7 7 7 7 7 b 7 7 7 7 7 b b b 
+b b b 7 7 b b b 7 7 b 7 7 b 7 7 b b b 
+b b b 7 7 7 7 b 7 7 b 7 7 b 7 7 b b b 
+b b b 7 7 b b b 7 7 b 7 7 b 7 7 b b b 
+b b b 7 7 b b b 7 7 7 7 7 b 7 7 b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b 7 7 7 7 7 7 7 b 7 7 7 b 7 7 7 b b 
+b b 7 7 7 b b b b b 7 7 7 b 7 7 7 b b 
+b b 7 7 7 7 7 7 7 b 7 7 7 7 7 7 7 b b 
+b b 7 7 7 b 7 7 7 b b b b b 7 7 7 b b 
+b b 7 7 7 7 7 7 7 b b b b b 7 7 7 b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
 ]],
 		... -- include commandline opts
 	}

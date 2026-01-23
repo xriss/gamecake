@@ -41,8 +41,8 @@ tilemap_text.inject=function(it,opts)
 			it.window_hx=hx
 			it.window_hy=hy
 
-			it.tilemap_hx=2+math.ceil(hx/it.tile_hx)
-			it.tilemap_hy=2+math.ceil(hy/it.tile_hy)
+			it.tilemap_hx=math.ceil(hx/it.tile_hx)
+			it.tilemap_hy=math.ceil(hy/it.tile_hy)
 			it.tilemap_grd:resize(it.tilemap_hx,it.tilemap_hy,1)
 
 			it.text_hx=it.tilemap_hx

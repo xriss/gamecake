@@ -109,6 +109,36 @@ tiles.create=function(it,opts)
 
 	end
 
+	it.reset_tiles=function()
+		for n,v in pairs( it.idxnames ) do
+			it.idxnames[n]=nil
+		end
+		for n,v in pairs( it.names ) do
+			it.idxnames[n]=nil
+		end
+		it.bitmap_grd:clear(0)
+		it.dirty(true)
+	end
+	
+	-- first line
+	it.upload_default_font_4x8=function()
+		local bitdown_font=require("wetgenes.gamecake.fun.bitdown_font")
+		-- copy font data tiles into top line
+		it.bitmap_grd:pixels(0,0 ,128*4,8, bitdown_font.build_grd(4,8):pixels(0,0,128*4,8,"") )
+		it.upload_tiles( { {0x0000,"_font_4x8",0x0140} } )
+		it.dirty(true)
+	end
+	-- second and third line
+	it.upload_default_font_8x8=function()
+		local bitdown_font=require("wetgenes.gamecake.fun.bitdown_font")
+		-- and 8x8 font 
+		local g=bitdown_font.build_grd(8,8) -- 1 long line
+		it.bitmap_grd:pixels(0,8 ,64*8,8, g:pixels(0,   0,64*8,8,"") ) -- 2 lines
+		it.bitmap_grd:pixels(0,16,64*8,8, g:pixels(64*8,0,64*8,8,"") )
+		it.upload_tiles( { {0x0100,"_font_8x8",0x0240} } )
+		it.dirty(true)
+	end
+
 -- upload all the given tiles t[1]=idx t[2]=name t[3]=ascii
 	it.upload_tiles=function(graphics)
 		for n,v in ipairs(graphics) do
@@ -195,7 +225,7 @@ tiles.create=function(it,opts)
 			end
 
 		end
-
+		
 --[[
 			for y=0,it.bitmap_hy-1 do
 				for x=0,it.bitmap_hx-1 do

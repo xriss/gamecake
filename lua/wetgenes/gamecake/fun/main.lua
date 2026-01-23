@@ -70,6 +70,27 @@ end
 		
 main.setup=function()
 
+--[[
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 b b 
+b b 7 b b b b b b b b b b b b b 7 b b 
+b b 7 b 7 7 7 b 7 b 7 b 7 7 7 b 7 b b 
+b b 7 b 7 b b b 7 b 7 b 7 b 7 b 7 b b 
+b b 7 b 7 7 7 b 7 b 7 b 7 b 7 b 7 b b 
+b b 7 b 7 b b b 7 b 7 b 7 b 7 b 7 b b 
+b b 7 b 7 b b b 7 7 7 b 7 b 7 b 7 b b 
+b b 7 b b b b b b b b b b b b b 7 b b 
+b b 7 b 7 7 7 7 7 b 7 7 b 7 7 b 7 b b 
+b b 7 b 7 7 b b b b 7 7 b 7 7 b 7 b b 
+b b 7 b 7 7 7 7 7 b 7 7 7 7 7 b 7 b b 
+b b 7 b 7 7 b 7 7 b b b b 7 7 b 7 b b 
+b b 7 b 7 7 7 7 7 b b b b 7 7 b 7 b b 
+b b 7 b b b b b b b b b b b b b 7 b b 
+b b 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+]]
 	main.loads()
 
 	main.system=oven.rebake("wetgenes.gamecake.fun.system").load_and_setup()
