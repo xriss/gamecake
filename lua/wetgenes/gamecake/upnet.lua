@@ -147,8 +147,8 @@ M.bake=function(oven,upnet)
 		})
 		local ups={}
 		for i,v in pairs(r.ups) do
-			ups[1]=wgups.up.create()
-			ups[1]:load(v)
+			ups[i]=wgups.up.create()
+			ups[i]:load(v)
 		end
 		return ups
 	end

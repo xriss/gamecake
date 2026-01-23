@@ -36,7 +36,7 @@ sysopts={
 			component="tilemap",
 			name="text", -- will replace the old text
 			tiles="tiles",
-			tile_size={4,8}, -- use half width tiles for font
+			tile_size={4,8},
 			layer=3,
 			autosize="lohi",
 		},
@@ -350,6 +350,14 @@ end
 
 players.item.update=function(player)
 	player:get_values()
+
+	local up=player.scene.ups[player.idx] or player.sys.oven.ups.empty
+
+	local lx=( up:axis("lx") ) or 0
+	local ly=( up:axis("ly") ) or 0
+
+	player.vel[1]=(player.vel[1]+lx*4)*0.75
+	player.vel[2]=(player.vel[2]+ly*4)*0.75
 
 	player.pos=player.pos+player.vel
 
