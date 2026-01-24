@@ -5,6 +5,7 @@
 local tardis=require("wetgenes.tardis")
 local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4")
 
+local bitdown=require("wetgenes.gamecake.fun.bitdown")
 
 oven.opts.fun="" -- back to menu on reset
 
@@ -60,6 +61,8 @@ all.create_scene=function(scene)
 	}
 	for _,it in pairs({ -- static data and functions for each system
 		all,
+		require("wetgenes.gamecake.zone.flat.kinetic"):import(),
+		levels,
 		textbounces,
 		players,
 	}) do
@@ -77,6 +80,8 @@ all.create_scene=function(scene)
 		scene:systems_cocall("setup")
 
 		local boots={
+			{"kinetic"},
+			{"level",idx=1},
 			{"textbounce",text="Hello World!",pos={1,1,0},vel={2/16,1/16,0},},
 			{"textbounce",text="POOP!",pos={7,11,0},vel={2/16,1/16,0},},
 			{"textbounce",text="Bounce!",pos={1,3,0},vel={2/16,1/16,0},},
@@ -249,6 +254,7 @@ players.values={
 	vel=V3( 0,0,0 ),
 	ang=V3( 0,0,0 ),
 	idx=1,
+	side=1,
 }
 
 players.types={
@@ -257,6 +263,7 @@ players.types={
 	vel="get",
 	ang="get",
 	idx="get",
+	side="get",
 }
 
 
@@ -302,13 +309,14 @@ players.graphics={
 
 }
 
-players.sprite=function(sname,pos)
+players.sprite=function(sname,pos,side)
 	local spr=system.components.tiles.names[sname]
 	system.components.sprites.list_add({
 		t=spr.idx ,
 		hx=spr.hx , hy=spr.hy ,
 		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
 		px=pos[1] , py=pos[2] , pz=0 ,
+		sx=side,
 		rz=0,
 	})
 end
@@ -316,14 +324,12 @@ end
 players.item.get_values=function(player)
 
 	player:get_auto_values()
---	player:get_body_values()
 
 end
 
 players.item.set_values=function(player)
 
 	player:set_auto_values()
---	player:set_body_values()
 
 end
 
@@ -345,6 +351,13 @@ end
 players.item.setup=function(player)
 	player:get_values()
 
+	local space=player:get_singular("kinetic").space
+	player.body=space:body(1,1)
+	player.shape=player.body:shape("circle",6,0,0)
+	player.shape:friction(0.5)
+	player.shape:elasticity(1)
+
+
 	player:set_values()
 end
 
@@ -356,11 +369,19 @@ players.item.update=function(player)
 	local lx=( up:axis("lx") ) or 0
 	local ly=( up:axis("ly") ) or 0
 
-	player.vel[1]=(player.vel[1]+lx*4)*0.75
-	player.vel[2]=(player.vel[2]+ly*4)*0.75
+	player.vel[1]=(player.vel[1]+lx*32)
+	player.vel[2]=(player.vel[2]+ly*32)
+	
+	if lx<0 then player.side= 1 end
+	if lx>0 then player.side=-1 end
 
-	player.pos=player.pos+player.vel
+--	player.pos=player.pos+player.vel
 
+	player:set_body() -- then we call update_kinetic which will set_values before draw
+end
+
+players.item.update_kinetic=function(player)
+	player:get_body()
 	player:set_values()
 end
 
@@ -370,10 +391,207 @@ players.item.draw=function(player)
 
 	player:get_values()
 
-	players.sprite( "ply"..player.idx , player.pos )
+	players.sprite( "ply"..player.idx , player.pos , player.side )
 
 end
 
+
+--------------------------------------------------------------------------------
+--
+-- a level
+
+levels={}
+-- methods added to system
+levels.system={}
+-- methods added to each item
+levels.item={}
+
+levels.caste="level"
+
+levels.uidmap={
+	length=0,
+}
+
+levels.values={
+	pos=V3( 0,0,0 ),
+	idx=1,
+}
+
+levels.types={
+	pos="tween",
+	idx="get",
+}
+
+
+levels.graphics={
+
+{nil,"char_empty",[[
+I I I I I I I I 
+I I I I I I I I 
+I I I I I I I I 
+I I I I I I I I 
+I I I I I I I I 
+I I I I I I I I 
+I I I I I I I I 
+I I I I I I I I 
+]]},
+
+{nil,"char_black",[[
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+]]},
+
+{nil,"char_solid",[[
+7 7 7 7 7 7 7 7 
+7 0 0 0 0 0 0 7 
+7 0 0 0 0 0 0 7 
+7 0 0 0 0 0 0 7 
+7 0 0 0 0 0 0 7 
+7 0 0 0 0 0 0 7 
+7 0 0 0 0 0 0 7 
+7 7 7 7 7 7 7 7 
+]]},
+
+}
+
+levels.combine_legends=function(...)
+	local legend={}
+	for _,t in ipairs{...} do -- merge all
+		for n,v in pairs(t) do -- shallow copy, right side values overwrite left
+			legend[n]=v
+		end
+	end
+	return legend
+end
+
+levels.legend={
+	[0]={ name="char_empty",	},
+
+	[". "]={ name="char_empty",				},
+	["00"]={ name="char_black",				solid=1, dense=1, },		-- black border
+	["0 "]={ name="char_solid",				solid=1, dense=1, },		-- empty border
+}
+
+levels.infos={}
+
+levels.infos[1]={
+legend=levels.combine_legends(levels.legend,{
+}),
+title="Test.",
+map=[[
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+]],
+}
+
+levels.item.get_values=function(level)
+
+	level:get_auto_values()
+
+end
+
+levels.item.set_values=function(level)
+
+	level:set_auto_values()
+
+end
+
+
+-- the system has no state values but can still perform generic actions
+-- eg allocate shared resources for later use
+levels.system.setup=function(sys)
+
+	 system.components.tiles.upload_tiles( levels.graphics )
+
+end
+
+levels.system.clean=function(sys)
+end
+
+-- state values are cached into the item for easy access on a get
+-- and must be set again if they are altered so setup and updates
+-- must begin and end with a get and a set
+levels.item.setup=function(level)
+	level:get_values()
+
+	local names=system.components.tiles.names
+	local space=level:get_singular("kinetic").space
+	
+	local info=levels.infos[level.idx]
+
+	local tilemap={}
+	for n,v in pairs( info.legend ) do -- build tilemap from legend
+		if v.name then -- convert name to tile
+			tilemap[n]=names[v.name]
+		end
+	end
+	local hx,hy=bitdown.pix_size(info.map)
+--print("mapsize",hx,hy)
+	system.components.map.autosize=nil -- turn off autosize
+	system.components.map.screen_resize(hx*8,hy*8)
+	system.components.map.tilemap_grd:clear(0)
+
+	bitdown.tile_grd( info.map, tilemap, system.components.map.tilemap_grd  ) -- draw into the screen (tiles)
+
+	local map=bitdown.pix_tiles(  info.map,  info.legend )
+	for y,line in pairs(map) do
+		for x,tile in pairs(line) do
+			local shape
+			if tile.solid then
+				shape=space.static:shape("box",x*8,y*8,(x+1)*8,(y+1)*8,0)
+				shape:friction(tile.solid)
+				shape:elasticity(tile.solid)
+			end
+			tile.map=map -- remember map
+			tile.level=level -- remember level
+			if shape then -- link shape and tile
+				shape.tile=tile
+				tile.shape=shape
+			end
+		end
+	end
+	level:set_values()
+end
+
+levels.item.update=function(level)
+	level:get_values()
+
+
+	level:set_values()
+end
+
+
+-- when drawing get will auto tween values
+-- so it can be called multiple times between updates for different results
+levels.item.draw=function(level)
+
+	level:get_values()
+
+end
 
 --------------------------------------------------------------------------------
 

@@ -263,6 +263,10 @@ local snap=function(n) return floor((n*0x1000)+0.5)/0x1000 end
 all.item.set_body=function(it)
 	if not it.body then return end -- no body
 
+	it.body:position(it.pos[1],it.pos[2])
+	it.body:velocity(it.vel[1],it.vel[2])
+
+--[[
 	it.body:transform(
 		(it.pos[1]) , (it.pos[2]) , (it.pos[3]) ,
 		(it.rot[1]) , (it.rot[2]) , (it.rot[3]) , (it.rot[4]) )
@@ -270,12 +274,20 @@ all.item.set_body=function(it)
 	it.body:angular_velocity( (it.ang[1]) , (it.ang[2]) , (it.ang[3]) )
 
 	if it.body_active then it.body:active(true) end -- keep this body active
+]]
 
 end
 
 all.item.get_body=function(it)
 	if not it.body then return end -- no body
 
+	local px,py=it.body:position()
+	local vx,vy=it.body:velocity()
+
+	it.pos=V3(px,py,0)
+	it.vel=V3(vx,vy,0)
+
+--[[
 	local px,py,pz,qx,qy,qz,qw=it.body:transform()
 	it.pos=V3(snap(px),snap(py),snap(pz))
 	it.rot=Q4(snap(qx),snap(qy),snap(qz),snap(qw))
@@ -286,9 +298,12 @@ all.item.get_body=function(it)
 
 	local ax,ay,az=it.body:angular_velocity()
 	it.ang=V3( snap(ax),snap(ay),snap(az) )
+]]
+
 end
 
 -- ( set , impulse , get ) on body this should only update the velocitys
+--[[
 all.item.impulse_body=function(it,v,p)
 	if not it.body then return end -- no body
 	if not it.vel then return end -- no body values
@@ -317,6 +332,7 @@ all.item.impulse_body=function(it,v,p)
 	it:set("ang",it.ang)
 
 end
+]]
 
 
 all.item.set_zips=function(it)
