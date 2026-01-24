@@ -558,22 +558,51 @@ levels.item.setup=function(level)
 	bitdown.tile_grd( info.map, tilemap, system.components.map.tilemap_grd  ) -- draw into the screen (tiles)
 
 	local map=bitdown.pix_tiles(  info.map,  info.legend )
+	local get_tile=function(x,y,name)
+		local t=map[y] and map[y][x]
+		if name then return t and t[name] else return t end
+	end
 	for y,line in pairs(map) do
 		for x,tile in pairs(line) do
 			local shape
-			if tile.solid then
-				shape=space.static:shape("box",x*8,y*8,(x+1)*8,(y+1)*8,0)
-				shape:friction(tile.solid)
-				shape:elasticity(tile.solid)
-			end
-			tile.map=map -- remember map
-			tile.level=level -- remember level
-			if shape then -- link shape and tile
-				shape.tile=tile
+			if tile.solid then -- merge outside edges of solid cells to create smoother collisions
+				if (not get_tile(x,y-1,"solid") or not get_tile(x,y+1,"solid") ) then -- try to drag across
+					local otile=get_tile(x-1,y)
+					if otile and otile.shape and otile.solid==tile.solid then -- drag across
+						if otile.shape[5]-otile.shape[3] == 8 then -- check size
+							shape=otile.shape
+							shape[4]=shape[4]+8
+						end
+					end
+				elseif (not get_tile(x-1,y,"solid") or not get_tile(x+1,y,"solid") ) then -- try to drag down
+					local otile=get_tile(x,y-1)
+					if otile and otile.shape and otile.solid==tile.solid then -- drag across
+						if otile.shape[4]-otile.shape[2] == 8 then -- check size
+							shape=otile.shape
+							shape[5]=shape[5]+8
+						end
+					end
+				end
+				if not shape then -- start new shape
+					shape={"box",x*8,y*8,(x+1)*8,(y+1)*8,0}
+				end
 				tile.shape=shape
 			end
 		end
 	end
+	for y,line in pairs(map) do
+		for x,tile in pairs(line) do
+			local shape=tile.shape
+			tile.shape=nil
+			if shape and shape[2]==x*8 and shape[3]==y*8 then -- shape must start at this cell
+--print("shape",unpack(shape))
+				tile.shape=space.static:shape(unpack(shape))
+				tile.shape:friction(tile.solid)
+				tile.shape:elasticity(tile.solid)
+			end
+		end
+	end
+
 	level:set_values()
 end
 
