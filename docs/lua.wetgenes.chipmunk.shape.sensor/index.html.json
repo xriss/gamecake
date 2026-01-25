@@ -2826,7 +2826,7 @@
    "body": "<pre><code>f=shape:sensor()\nf=shape:sensor(f)\n</code></pre>\n<p>Get and/or Set the sensor flag for this shape.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 949,
+   "line": 950,
    "name": "lua.wetgenes.chipmunk.shape.sensor",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

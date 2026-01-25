@@ -2826,7 +2826,7 @@
    "body": "<pre><code>v=constraint:impulse()\n</code></pre>\n<p>Get the last impulse for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1182,
+   "line": 1183,
    "name": "lua.wetgenes.chipmunk.constraint.impulse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

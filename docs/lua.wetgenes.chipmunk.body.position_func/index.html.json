@@ -2826,7 +2826,7 @@
    "body": "<pre><code>body:position_func(position_callback)\nbody:position_func()\n</code></pre>\n<p>Set or clear the position callback update function for this body.</p>\n<pre><code>position_callback(body)\n\nbody.delta_time\n</code></pre>\n<p>This callback will be called with the above values set into body, you \ncan adjust these and return true to perform a normal position update \nbut with these new values.</p>\n<p>Alternatively you can update the bodys position directly and return \nfalse so the normal position update code will not be run.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 899,
+   "line": 900,
    "name": "lua.wetgenes.chipmunk.body.position_func",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

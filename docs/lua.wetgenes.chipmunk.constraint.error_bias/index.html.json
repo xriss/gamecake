@@ -2826,7 +2826,7 @@
    "body": "<pre><code>v=constraint:error_bias()\nv=constraint:error_bias(v)\n</code></pre>\n<p>Get and/or Set the error bias for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1146,
+   "line": 1147,
    "name": "lua.wetgenes.chipmunk.constraint.error_bias",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

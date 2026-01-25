@@ -2826,7 +2826,7 @@
    "body": "<pre><code>body:velocity_func(velocity_callback)\nbody:velocity_func()\n</code></pre>\n<p>Set or clear the velocity callback update function for this body.</p>\n<pre><code>velocity_callback(body)\n\nbody.gravity_x\nbody.gravity_y\nbody.damping\nbody.delta_time\n</code></pre>\n<p>This callback will be called with the above values set into body, you \ncan adjust these and return true to perform a normal velocity update \nbut with these new values.</p>\n<p>IE you can choose a new gravity vector for this body which is the \nsimplest change to make.</p>\n<p>Alternatively you can update the bodys velocity directly and return \nfalse so the normal velocity update code will not be run.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 870,
+   "line": 871,
    "name": "lua.wetgenes.chipmunk.body.velocity_func",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

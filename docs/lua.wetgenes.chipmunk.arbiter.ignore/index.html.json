@@ -2826,7 +2826,7 @@
    "body": "<pre><code>return arbiter:ignore()\n</code></pre>\n<p>Ignore this collision, from now until the shapes separate.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1122,
+   "line": 1123,
    "name": "lua.wetgenes.chipmunk.arbiter.ignore",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

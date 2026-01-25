@@ -2834,7 +2834,7 @@
    "body": "<pre><code>v=constraint:collide_bodies()\nv=constraint:collide_bodies(v)\n</code></pre>\n<p>Get and/or Set the max collide bodies flag for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1170,
+   "line": 1171,
    "name": "lua.wetgenes.chipmunk.constraint.collide_bodies",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -2842,7 +2842,7 @@
    "body": "<pre><code>v=constraint:error_bias()\nv=constraint:error_bias(v)\n</code></pre>\n<p>Get and/or Set the error bias for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1146,
+   "line": 1147,
    "name": "lua.wetgenes.chipmunk.constraint.error_bias",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -2850,7 +2850,7 @@
    "body": "<pre><code>v=constraint:impulse()\n</code></pre>\n<p>Get the last impulse for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1182,
+   "line": 1183,
    "name": "lua.wetgenes.chipmunk.constraint.impulse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -2858,7 +2858,7 @@
    "body": "<pre><code>v=constraint:max_bias()\nv=constraint:max_bias(v)\n</code></pre>\n<p>Get and/or Set the max bias for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1158,
+   "line": 1159,
    "name": "lua.wetgenes.chipmunk.constraint.max_bias",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -2866,7 +2866,7 @@
    "body": "<pre><code>v=constraint:max_force()\nv=constraint:max_force(v)\n</code></pre>\n<p>Get and/or Set the max force for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1134,
+   "line": 1135,
    "name": "lua.wetgenes.chipmunk.constraint.max_force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

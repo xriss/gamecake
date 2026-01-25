@@ -2826,7 +2826,7 @@
    "body": "<pre><code>it = shape:query_segment(sx,sy,ex,ey,r)\n</code></pre>\n<p>Find the hitpoint along this raycast segment, from (sx,sy) to \n(ex,ey) with a radius of r. </p>\n<p>Returns a table with the following info or nil for no hit</p>\n<pre><code>it.shape\t\t-- the shape\nit.point_x\t\t-- the point of contact (x)\nit.point_y\t\t-- the point of contact (y)\nit.normal_x\t\t-- the normal at contact (x)\nit.normal_y\t\t-- the normal at contact (y)\nit.alpha\t\t-- how far along the segment the contact happened (0 to 1)\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1068,
+   "line": 1069,
    "name": "lua.wetgenes.chipmunk.shape.query_segment",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

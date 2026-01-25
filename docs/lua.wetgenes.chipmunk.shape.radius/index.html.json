@@ -2826,7 +2826,7 @@
    "body": "<pre><code>radius=shape:radius()\nradius=shape:radius(radius)\n</code></pre>\n<p>Get and/or Set the radius for this shape. Setting is unsafe and may \nbreak the physics simulation.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1026,
+   "line": 1027,
    "name": "lua.wetgenes.chipmunk.shape.radius",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

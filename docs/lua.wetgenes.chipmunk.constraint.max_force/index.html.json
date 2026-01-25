@@ -2826,7 +2826,7 @@
    "body": "<pre><code>v=constraint:max_force()\nv=constraint:max_force(v)\n</code></pre>\n<p>Get and/or Set the max force for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1134,
+   "line": 1135,
    "name": "lua.wetgenes.chipmunk.constraint.max_force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

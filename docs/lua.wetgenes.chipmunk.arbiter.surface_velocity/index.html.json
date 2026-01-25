@@ -2826,7 +2826,7 @@
    "body": "<pre><code>vx,vy=arbiter:surface_velocity()\nvx,vy=arbiter:surface_velocity(vx,vy)\n</code></pre>\n<p>Get and/or Set the surface velocity for this arbiter.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1110,
+   "line": 1111,
    "name": "lua.wetgenes.chipmunk.arbiter.surface_velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

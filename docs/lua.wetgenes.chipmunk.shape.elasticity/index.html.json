@@ -2826,7 +2826,7 @@
    "body": "<pre><code>f=shape:elasticity()\nf=shape:elasticity(f)\n</code></pre>\n<p>Get and/or Set the elasticity for this shape.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 961,
+   "line": 962,
    "name": "lua.wetgenes.chipmunk.shape.elasticity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

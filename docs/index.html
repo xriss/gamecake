@@ -1727,7 +1727,7 @@ moving the world forward seconds*steps.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.arbiter.ignore">lua.wetgenes.chipmunk.arbiter.ignore</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1122">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1123">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>return arbiter:ignore()
 </code></pre>
 <p>Ignore this collision, from now until the shapes separate.</p>
@@ -1736,7 +1736,7 @@ moving the world forward seconds*steps.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.arbiter.points">lua.wetgenes.chipmunk.arbiter.points</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1098">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1099">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>points=arbiter:points()
 points=arbiter:points(points)
 </code></pre>
@@ -1746,7 +1746,7 @@ points=arbiter:points(points)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.arbiter.surface_velocity">lua.wetgenes.chipmunk.arbiter.surface_velocity</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1110">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1111">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>vx,vy=arbiter:surface_velocity()
 vx,vy=arbiter:surface_velocity(vx,vy)
 </code></pre>
@@ -1798,7 +1798,7 @@ a=body:angular_velocity(a)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.body.apply_force">lua.wetgenes.chipmunk.body.apply_force</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L834">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L835">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>body:apply_force(fx,fy,px,py)
 body:apply_force(fx,fy,px,py,&quot;world&quot;)
 </code></pre>
@@ -1810,7 +1810,7 @@ object coordinates.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.body.apply_impulse">lua.wetgenes.chipmunk.body.apply_impulse</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L852">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L853">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>body:apply_impulse(ix,iy,px,py)
 body:apply_impulse(ix,iy,px,py,&quot;world&quot;)
 </code></pre>
@@ -1836,8 +1836,8 @@ vx,vy=body:center_of_gravity(vx,vy)
 <div><pre><code>vx,vy=body:force()
 vx,vy=body:force(vx,vy)
 </code></pre>
-<p>Get and/or Set the force for this body. This is reset back to 0 after 
-each step.</p>
+<p>Get and/or Set the force for this body. This is <em>NOT</em> reset back to 0 
+after each step.</p>
 </div>
 </div>
 
@@ -1873,7 +1873,7 @@ vx,vy=body:position(vx,vy)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.body.position_func">lua.wetgenes.chipmunk.body.position_func</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L899">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L900">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>body:position_func(position_callback)
 body:position_func()
 </code></pre>
@@ -1892,7 +1892,7 @@ false so the normal position update code will not be run.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.body.shape">lua.wetgenes.chipmunk.body.shape</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L922">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L923">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>shape=body:shape(form,...)
 </code></pre>
 <p>Add a new shape to this body, returns the shape for further 
@@ -1906,7 +1906,8 @@ modification.</p>
 <div><pre><code>a=body:torque()
 a=body:torque(a)
 </code></pre>
-<p>Get and/or Set the torque for this body.</p>
+<p>Get and/or Set the torque for this body. This is 
+<em>NOT</em> reset back to 0 after each step.</p>
 </div>
 </div>
 
@@ -1932,7 +1933,7 @@ vx,vy=body:velocity(vx,vy)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.body.velocity_func">lua.wetgenes.chipmunk.body.velocity_func</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L870">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L871">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>body:velocity_func(velocity_callback)
 body:velocity_func()
 </code></pre>
@@ -2000,7 +2001,7 @@ constraint=chipmunk.constraint(abody,bbody,&quot;pivot_joint&quot;,ax,ay,bx,by)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.constraint.collide_bodies">lua.wetgenes.chipmunk.constraint.collide_bodies</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1170">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1171">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>v=constraint:collide_bodies()
 v=constraint:collide_bodies(v)
 </code></pre>
@@ -2010,7 +2011,7 @@ v=constraint:collide_bodies(v)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.constraint.error_bias">lua.wetgenes.chipmunk.constraint.error_bias</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1146">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1147">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>v=constraint:error_bias()
 v=constraint:error_bias(v)
 </code></pre>
@@ -2020,7 +2021,7 @@ v=constraint:error_bias(v)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.constraint.impulse">lua.wetgenes.chipmunk.constraint.impulse</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1182">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1183">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>v=constraint:impulse()
 </code></pre>
 <p>Get the last impulse for this constraint.</p>
@@ -2029,7 +2030,7 @@ v=constraint:error_bias(v)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.constraint.max_bias">lua.wetgenes.chipmunk.constraint.max_bias</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1158">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1159">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>v=constraint:max_bias()
 v=constraint:max_bias(v)
 </code></pre>
@@ -2039,7 +2040,7 @@ v=constraint:max_bias(v)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.constraint.max_force">lua.wetgenes.chipmunk.constraint.max_force</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1134">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1135">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>v=constraint:max_force()
 v=constraint:max_force(v)
 </code></pre>
@@ -2078,7 +2079,7 @@ you want rounded corners</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.shape.bounding_box">lua.wetgenes.chipmunk.shape.bounding_box</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L938">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L939">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>min_x,min_y,max_x,max_y=shape:bounding_box()
 </code></pre>
 <p>Get the current bounding box for this shape.</p>
@@ -2087,7 +2088,7 @@ you want rounded corners</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.shape.collision_type">lua.wetgenes.chipmunk.shape.collision_type</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L997">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L998">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>f=shape:collision_type()
 f=shape:collision_type(f)
 </code></pre>
@@ -2099,7 +2100,7 @@ number via the space:type function.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.shape.elasticity">lua.wetgenes.chipmunk.shape.elasticity</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L961">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L962">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>f=shape:elasticity()
 f=shape:elasticity(f)
 </code></pre>
@@ -2109,7 +2110,7 @@ f=shape:elasticity(f)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.shape.filter">lua.wetgenes.chipmunk.shape.filter</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1013">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1014">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>f=shape:filter()
 f=shape:filter(f)
 </code></pre>
@@ -2119,7 +2120,7 @@ f=shape:filter(f)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.shape.friction">lua.wetgenes.chipmunk.shape.friction</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L973">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L974">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>f=shape:friction()
 f=shape:friction(f)
 </code></pre>
@@ -2129,7 +2130,7 @@ f=shape:friction(f)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.shape.query_point">lua.wetgenes.chipmunk.shape.query_point</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1039">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1040">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>item = shape:query_point(x,y)
 </code></pre>
 <p>Find the nearest point on the shape from the point at x,y.</p>
@@ -2146,7 +2147,7 @@ it.gradient_y	-- the normalised vector to collision (y)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.shape.query_segment">lua.wetgenes.chipmunk.shape.query_segment</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1068">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1069">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>it = shape:query_segment(sx,sy,ex,ey,r)
 </code></pre>
 <p>Find the hitpoint along this raycast segment, from (sx,sy) to 
@@ -2164,7 +2165,7 @@ it.alpha		-- how far along the segment the contact happened (0 to 1)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.shape.radius">lua.wetgenes.chipmunk.shape.radius</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1026">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L1027">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>radius=shape:radius()
 radius=shape:radius(radius)
 </code></pre>
@@ -2175,7 +2176,7 @@ break the physics simulation.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.shape.sensor">lua.wetgenes.chipmunk.shape.sensor</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L949">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L950">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>f=shape:sensor()
 f=shape:sensor(f)
 </code></pre>
@@ -2185,7 +2186,7 @@ f=shape:sensor(f)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.chipmunk.shape.surface_velocity">lua.wetgenes.chipmunk.shape.surface_velocity</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L985">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua#L986">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua</a></div>
 <div><pre><code>vx,vy=shape:surface_velocity()
 vx,vy=shape:surface_velocity(vx,vy)
 </code></pre>

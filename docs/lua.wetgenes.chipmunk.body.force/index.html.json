@@ -2823,7 +2823,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>vx,vy=body:force()\nvx,vy=body:force(vx,vy)\n</code></pre>\n<p>Get and/or Set the force for this body. This is reset back to 0 after \neach step.</p>\n",
+   "body": "<pre><code>vx,vy=body:force()\nvx,vy=body:force(vx,vy)\n</code></pre>\n<p>Get and/or Set the force for this body. This is <em>NOT</em> reset back to 0 \nafter each step.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 785,

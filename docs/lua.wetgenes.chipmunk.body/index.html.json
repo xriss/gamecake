@@ -2850,7 +2850,7 @@
    "body": "<pre><code>body:apply_force(fx,fy,px,py)\nbody:apply_force(fx,fy,px,py,&quot;world&quot;)\n</code></pre>\n<p>Apply a force to this body at a specific point, the point can be in \nworld coordinates if you include the &quot;world&quot; flag but defaults to local \nobject coordinates.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 834,
+   "line": 835,
    "name": "lua.wetgenes.chipmunk.body.apply_force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -2858,7 +2858,7 @@
    "body": "<pre><code>body:apply_impulse(ix,iy,px,py)\nbody:apply_impulse(ix,iy,px,py,&quot;world&quot;)\n</code></pre>\n<p>Apply a force to this body at a specific point, the point can be in \nworld coordinates if you include the &quot;world&quot; flag but defaults to local \nobject coordinates.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 852,
+   "line": 853,
    "name": "lua.wetgenes.chipmunk.body.apply_impulse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -2871,7 +2871,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>vx,vy=body:force()\nvx,vy=body:force(vx,vy)\n</code></pre>\n<p>Get and/or Set the force for this body. This is reset back to 0 after \neach step.</p>\n",
+   "body": "<pre><code>vx,vy=body:force()\nvx,vy=body:force(vx,vy)\n</code></pre>\n<p>Get and/or Set the force for this body. This is <em>NOT</em> reset back to 0 \nafter each step.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 785,
@@ -2906,7 +2906,7 @@
    "body": "<pre><code>body:position_func(position_callback)\nbody:position_func()\n</code></pre>\n<p>Set or clear the position callback update function for this body.</p>\n<pre><code>position_callback(body)\n\nbody.delta_time\n</code></pre>\n<p>This callback will be called with the above values set into body, you \ncan adjust these and return true to perform a normal position update \nbut with these new values.</p>\n<p>Alternatively you can update the bodys position directly and return \nfalse so the normal position update code will not be run.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 899,
+   "line": 900,
    "name": "lua.wetgenes.chipmunk.body.position_func",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -2914,12 +2914,12 @@
    "body": "<pre><code>shape=body:shape(form,...)\n</code></pre>\n<p>Add a new shape to this body, returns the shape for further \nmodification.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 922,
+   "line": 923,
    "name": "lua.wetgenes.chipmunk.body.shape",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
-   "body": "<pre><code>a=body:torque()\na=body:torque(a)\n</code></pre>\n<p>Get and/or Set the torque for this body.</p>\n",
+   "body": "<pre><code>a=body:torque()\na=body:torque(a)\n</code></pre>\n<p>Get and/or Set the torque for this body. This is \n<em>NOT</em> reset back to 0 after each step.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 822,
@@ -2946,7 +2946,7 @@
    "body": "<pre><code>body:velocity_func(velocity_callback)\nbody:velocity_func()\n</code></pre>\n<p>Set or clear the velocity callback update function for this body.</p>\n<pre><code>velocity_callback(body)\n\nbody.gravity_x\nbody.gravity_y\nbody.damping\nbody.delta_time\n</code></pre>\n<p>This callback will be called with the above values set into body, you \ncan adjust these and return true to perform a normal velocity update \nbut with these new values.</p>\n<p>IE you can choose a new gravity vector for this body which is the \nsimplest change to make.</p>\n<p>Alternatively you can update the bodys velocity directly and return \nfalse so the normal velocity update code will not be run.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 870,
+   "line": 871,
    "name": "lua.wetgenes.chipmunk.body.velocity_func",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

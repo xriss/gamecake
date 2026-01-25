@@ -2826,7 +2826,7 @@
    "body": "<pre><code>body:apply_force(fx,fy,px,py)\nbody:apply_force(fx,fy,px,py,&quot;world&quot;)\n</code></pre>\n<p>Apply a force to this body at a specific point, the point can be in \nworld coordinates if you include the &quot;world&quot; flag but defaults to local \nobject coordinates.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 834,
+   "line": 835,
    "name": "lua.wetgenes.chipmunk.body.apply_force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

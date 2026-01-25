@@ -2826,7 +2826,7 @@
    "body": "<pre><code>f=shape:collision_type()\nf=shape:collision_type(f)\n</code></pre>\n<p>Get and/or Set the collision type for this shape.</p>\n<p>The f argument can be a string in which case it will be converted to a \nnumber via the space:type function.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 997,
+   "line": 998,
    "name": "lua.wetgenes.chipmunk.shape.collision_type",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }

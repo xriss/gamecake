@@ -2823,7 +2823,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>a=body:torque()\na=body:torque(a)\n</code></pre>\n<p>Get and/or Set the torque for this body.</p>\n",
+   "body": "<pre><code>a=body:torque()\na=body:torque(a)\n</code></pre>\n<p>Get and/or Set the torque for this body. This is \n<em>NOT</em> reset back to 0 after each step.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 822,
