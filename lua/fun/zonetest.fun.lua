@@ -86,7 +86,7 @@ all.create_scene=function(scene)
 			{"textbounce",text="POOP!",pos={7,11,0},vel={2/16,1/16,0},},
 			{"textbounce",text="Bounce!",pos={1,3,0},vel={2/16,1/16,0},},
 			{"player",idx=1,pos={32,32,0}},
---			{"player",idx=2,pos={64,32,0}},
+			{"player",idx=2,pos={64,32,0}},
 		}
 		scene:creates(boots)
 	end
@@ -299,11 +299,11 @@ players.graphics={
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
-. . . . . R R . . R R . . . . . 
-. . . . . R R . . R R . . . . . 
-. . . . . R R . . R R . . . . . 
-. . . . . R R . . R R . . . . . 
-. . . . . R R . . R R . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
 . . . . . R R . . R R . . . . . 
 . . . . . R R . . R R . . . . . 
 . . . . . R R . . R R . . . . . 
@@ -337,11 +337,11 @@ players.graphics={
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
-. . . . . g g . . g g . . . . . 
-. . . . . g g . . g g . . . . . 
-. . . . . g g . . g g . . . . . 
-. . . . . g g . . g g . . . . . 
-. . . . . g g . . g g . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
 . . . . . g g . . g g . . . . . 
 . . . . . g g . . g g . . . . . 
 . . . . . G G . . G G . . . . . 
@@ -395,7 +395,7 @@ players.item.setup=function(player)
 
 	local space=player:get_singular("kinetic").space
 	player.body=space:body(1,1)
-	player.shape=player.body:shape("circle",5,0,0)
+	player.shape=player.body:shape("circle",4,0,0)
 	player.shape:friction(0.5)
 	player.shape:elasticity(0.5)
 	player.shape:filter(player.idx,0x00010000,0xffffffff)
@@ -412,31 +412,37 @@ players.item.update=function(player)
 	local lx=( up:axis("lx") ) or 0
 	local ly=( up:axis("ly") ) or 0
 
-	player.vel[1]=(player.vel[1]+lx*32)
-	player.vel[2]=(player.vel[2]+ly*32)
+	player.acc=V3( lx*256 , ly*256 ,0) -- reset force
 	
 	if lx<0 then player.side= 1 end
 	if lx>0 then player.side=-1 end
 
 --	player.pos=player.pos+player.vel
 
-	local footspeed=1
+	local footspeed=0.25
 
 	local space=player:get_singular("kinetic").space
-	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,1,player.idx)
-	if hit and hit.alpha then
-		local d=hit.alpha*16
-		if player.foot>d then player.foot=player.foot-footspeed end
-		if player.foot<d then player.foot=player.foot+footspeed end
-		local v=((8-d)*4)
-		player.vel[2]=player.vel[2]-v
+	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,2,player.idx)
+	if hit and hit.alpha and hit.alpha<0.75 then
+
+		player.vel[2]=player.vel[2]*7/8 --  dampen vertical velocity
+		
+		local d=(hit.alpha*16)+2 -- distance + radius
+		local o=player.vel[2] -- original velocity
+		local v=((d-9)) -- distance to where we want to be
+		local a=v*32 -- force to adjust velocity by
+
+		player.foot=d
+		if player.foot<7  then player.foot=7  end
+		if player.foot>11 then player.foot=11 end
+		player.acc[2]=player.acc[2]+a --  hover
 	else
-		if player.foot>8 then player.foot=player.foot-footspeed end
-		if player.foot<8 then player.foot=player.foot+footspeed end
+		if player.foot>11 then player.foot=player.foot-footspeed end
+		if player.foot<11 then player.foot=player.foot+footspeed end
+
+		player.acc[2]=player.acc[2]+200 -- gravity
 	end
 	
-	print("frc",player.body:force())
-	print("aaa",player.acc)
 
 	player:set_body() -- then we call update_kinetic which will set_values before draw
 end
