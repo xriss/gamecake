@@ -86,7 +86,7 @@ all.create_scene=function(scene)
 			{"textbounce",text="POOP!",pos={7,11,0},vel={2/16,1/16,0},},
 			{"textbounce",text="Bounce!",pos={1,3,0},vel={2/16,1/16,0},},
 			{"player",idx=1,pos={32,32,0}},
-			{"player",idx=2,pos={64,32,0}},
+--			{"player",idx=2,pos={64,32,0}},
 		}
 		scene:creates(boots)
 	end
@@ -253,8 +253,10 @@ players.values={
 	rot=Q4( 0,0,0,1 ),
 	vel=V3( 0,0,0 ),
 	ang=V3( 0,0,0 ),
+	acc=V3( 0,200,0 ),
 	idx=1,
 	side=1,
+	foot=8,
 }
 
 players.types={
@@ -262,8 +264,10 @@ players.types={
 	rot="tween",
 	vel="get",
 	ang="get",
+	acc="get",
 	idx="get",
 	side="get",
+	foot="get",
 }
 
 
@@ -284,7 +288,26 @@ players.graphics={
 . . R R r r r r R R R R R R . . 
 . . . R R R R R R R R R R . . . 
 . . . . R R R R R R R R . . . . 
-. . . . . O O R R O O . . . . . 
+. . . . . . R R R R . . . . . . 
+. . . . . . . . . . . . . . . . 
+]]},
+
+{nil,"ply1_feet",[[
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . R R . . R R . . . . . 
+. . . . . R R . . R R . . . . . 
+. . . . . R R . . R R . . . . . 
+. . . . . R R . . R R . . . . . 
+. . . . . R R . . R R . . . . . 
+. . . . . R R . . R R . . . . . 
+. . . . . R R . . R R . . . . . 
+. . . . . R R . . R R . . . . . 
+. . . . . O O . . O O . . . . . 
 . . . . r r r . r r r . . . . . 
 ]]},
 
@@ -302,7 +325,26 @@ players.graphics={
 . . . G G G G G G G g g . . . . 
 . . . g g g g g g g g g . . . . 
 . . . g g g g g g g g g . . . . 
-. . . g g G G g g G G g . . . . 
+. . . g g g g g g g g g . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+]]},
+
+{nil,"ply2_feet",[[
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . g g . . g g . . . . . 
+. . . . . g g . . g g . . . . . 
+. . . . . g g . . g g . . . . . 
+. . . . . g g . . g g . . . . . 
+. . . . . g g . . g g . . . . . 
+. . . . . g g . . g g . . . . . 
+. . . . . g g . . g g . . . . . 
+. . . . . G G . . G G . . . . . 
 . . . . . d d . . d d . . . . . 
 . . . . G G G . G G G . . . . . 
 ]]},
@@ -353,9 +395,10 @@ players.item.setup=function(player)
 
 	local space=player:get_singular("kinetic").space
 	player.body=space:body(1,1)
-	player.shape=player.body:shape("circle",6,0,0)
+	player.shape=player.body:shape("circle",5,0,0)
 	player.shape:friction(0.5)
-	player.shape:elasticity(1)
+	player.shape:elasticity(0.5)
+	player.shape:filter(player.idx,0x00010000,0xffffffff)
 
 
 	player:set_values()
@@ -377,6 +420,24 @@ players.item.update=function(player)
 
 --	player.pos=player.pos+player.vel
 
+	local footspeed=1
+
+	local space=player:get_singular("kinetic").space
+	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,1,player.idx)
+	if hit and hit.alpha then
+		local d=hit.alpha*16
+		if player.foot>d then player.foot=player.foot-footspeed end
+		if player.foot<d then player.foot=player.foot+footspeed end
+		local v=((8-d)*4)
+		player.vel[2]=player.vel[2]-v
+	else
+		if player.foot>8 then player.foot=player.foot-footspeed end
+		if player.foot<8 then player.foot=player.foot+footspeed end
+	end
+	
+	print("frc",player.body:force())
+	print("aaa",player.acc)
+
 	player:set_body() -- then we call update_kinetic which will set_values before draw
 end
 
@@ -391,7 +452,8 @@ players.item.draw=function(player)
 
 	player:get_values()
 
-	players.sprite( "ply"..player.idx , player.pos , player.side )
+	players.sprite( "ply"..player.idx          , player.pos , player.side )
+	players.sprite( "ply"..player.idx.."_feet" , player.pos+V3(0,player.foot-8,0) , player.side )
 
 end
 
@@ -500,9 +562,9 @@ map=[[
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . 0 0 0 . . . . . . 0 
+0 . . . . . . . . 0 0 0 . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 ]],
@@ -599,6 +661,7 @@ levels.item.setup=function(level)
 				tile.shape=space.static:shape(unpack(shape))
 				tile.shape:friction(tile.solid)
 				tile.shape:elasticity(tile.solid)
+				tile.shape:filter(0,0x00000001,0xffffffff)
 			end
 		end
 	end

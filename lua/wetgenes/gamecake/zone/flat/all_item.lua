@@ -85,7 +85,9 @@ all.item.setup_values=function(it,boot)
 	for n,v in pairs( it.sys.zips or {} ) do it.zips[n]=v end
 	it.values=it.scene.create_values()
 -- shared values with tweens if not networking
-	it.tweens=it.values
+	if it.scene.tweens==it.scene.values then
+		it.tweens=it.values
+	end
 --	it.tweens=it.scene.create_values() -- ( drawing cache of values )
 
 	it:set_boot(boot)
@@ -265,6 +267,10 @@ all.item.set_body=function(it)
 
 	it.body:position(it.pos[1],it.pos[2])
 	it.body:velocity(it.vel[1],it.vel[2])
+	
+	if it.acc then
+		it.body:force(it.acc[1],it.acc[2])
+	end
 
 --[[
 	it.body:transform(
@@ -286,6 +292,11 @@ all.item.get_body=function(it)
 
 	it.pos=V3(px,py,0)
 	it.vel=V3(vx,vy,0)
+
+	if it.acc then
+		local ax,ay=it.body:force()
+		it.acc=V3(ax,ay,0)
+	end
 
 --[[
 	local px,py,pz,qx,qy,qz,qw=it.body:transform()

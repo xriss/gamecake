@@ -49,7 +49,7 @@ kinetics.item.setup=function(kinetic)
 	local chipmunk=require("wetgenes.chipmunk")
 	kinetic.space=chipmunk.space()
 	
-	kinetic.space:gravity(0,200)
+--	kinetic.space:gravity(0,200)
 	kinetic.space:damping(0.5)
 	kinetic.space:sleep_time_threshold(1)
 	kinetic.space:idle_speed_threshold(10)

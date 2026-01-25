@@ -646,7 +646,7 @@ Returns a table with the following info or nil for no hit
 	it.alpha		-- how far along the segment the contact happened (0 to 1)
 
 ]]
-chipmunk.space_functions.query_segment=function(space,sx,sy,ex,ey,r,group,categories,mask)
+chipmunk.space_functions.query_segment_first=function(space,sx,sy,ex,ey,r,group,categories,mask)
 	group,categories,mask=group_categories_mask(group,categories,mask)
 	local rs,px,py,nx,ny,a=core.space_query_segment_first(space[0],sx,sy,ex,ey,r,group,categories,mask)
 	if not rs then return end -- return nil for no hit
@@ -787,8 +787,8 @@ end
 	vx,vy=body:force()
 	vx,vy=body:force(vx,vy)
 
-Get and/or Set the force for this body. This is reset back to 0 after 
-each step.
+Get and/or Set the force for this body. This is *NOT* reset back to 0 
+after each step.
 
 ]]
 chipmunk.body_functions.force=function(body,vx,vy)
@@ -824,7 +824,8 @@ end
 	a=body:torque()
 	a=body:torque(a)
 
-Get and/or Set the torque for this body.
+Get and/or Set the torque for this body. This is 
+*NOT* reset back to 0 after each step.
 
 ]]
 chipmunk.body_functions.torque=function(body,a)
