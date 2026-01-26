@@ -257,6 +257,8 @@ players.values={
 	idx=1,
 	side=1,
 	foot=8,
+	onfloor=0,
+	jump=0,
 }
 
 players.types={
@@ -268,6 +270,8 @@ players.types={
 	idx="get",
 	side="get",
 	foot="get",
+	onfloor="get",
+	jump="get",
 }
 
 
@@ -357,7 +361,7 @@ players.sprite=function(sname,pos,side)
 		t=spr.idx ,
 		hx=spr.hx , hy=spr.hy ,
 		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
-		px=pos[1] , py=pos[2] , pz=0 ,
+		px=pos[1] , py=pos[2] , pz=1024+pos[2] ,
 		sx=side,
 		rz=0,
 	})
@@ -406,13 +410,27 @@ end
 
 players.item.update=function(player)
 	player:get_values()
-
+	
 	local up=player.scene.ups[player.idx] or player.sys.oven.ups.empty
 
 	local lx=( up:axis("lx") ) or 0
 	local ly=( up:axis("ly") ) or 0
+	local ba=( up:get("a") or up:get("a_set") ) or false
+	local ba_set=( up:get("a_set") ) or false
 
-	player.acc=V3( lx*256 , ly*256 ,0) -- reset force
+	local grav=400
+	if ba then
+		grav=200
+	end
+
+	player.acc=V3( 0, 0 ,0) -- reset force
+	if player.onfloor>0 or player.jump>0 then
+		player.acc[1]=lx*256
+	else
+		player.acc[1]=lx*128
+	end
+	player.vel[1]=player.vel[1]*12/16 --  dampen horizontal velocity
+	player.vel[2]=player.vel[2]*14/16 --  dampen vertical velocity
 	
 	if lx<0 then player.side= 1 end
 	if lx>0 then player.side=-1 end
@@ -425,8 +443,6 @@ players.item.update=function(player)
 	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,2,player.idx)
 	if hit and hit.alpha and hit.alpha<0.75 then
 
-		player.vel[2]=player.vel[2]*7/8 --  dampen vertical velocity
-		
 		local d=(hit.alpha*16)+2 -- distance + radius
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
@@ -436,13 +452,31 @@ players.item.update=function(player)
 		if player.foot<7  then player.foot=7  end
 		if player.foot>11 then player.foot=11 end
 		player.acc[2]=player.acc[2]+a --  hover
+
+		player.onfloor=4
 	else
 		if player.foot>11 then player.foot=player.foot-footspeed end
 		if player.foot<11 then player.foot=player.foot+footspeed end
 
-		player.acc[2]=player.acc[2]+200 -- gravity
+		player.acc[2]=player.acc[2]+grav -- gravity
 	end
-	
+
+	if player.onfloor>0 and player.jump<=0 then -- meep meep jump	
+		if ba_set then
+			player.onfloor=0
+			player.jump=4
+			player.acc[2]=0
+			player.vel[2]=-120
+		end
+	end
+	if player.onfloor>0 then player.onfloor=player.onfloor-1 end
+
+	if player.jump>0 then -- jump higher while button is held down
+		player.onfloor=0 -- no foot grab while jumping
+		player.jump=player.jump-1 -- continue jump
+	end
+
+--PRINT( ba , player.onfloor , player.jump )
 
 	player:set_body() -- then we call update_kinetic which will set_values before draw
 end
