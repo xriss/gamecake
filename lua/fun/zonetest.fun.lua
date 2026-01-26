@@ -424,11 +424,19 @@ players.item.update=function(player)
 	end
 
 	player.acc=V3( 0, 0 ,0) -- reset force
-	if player.onfloor>0 or player.jump>0 then
-		player.acc[1]=lx*256
-	else
-		player.acc[1]=lx*128
+	local va -- velocity we want to achieve
+	if player.onfloor>0 or player.jump>0 then -- when on floor
+		va=lx*512
+	else -- when in air
+		va=lx*256
 	end
+	if va then -- apply left/right movement
+		if va<0 and player.vel[1]>0 then player.vel[1]=0 end -- quick turn
+		if va>0 and player.vel[1]<0 then player.vel[1]=0 end -- quick turn
+		local vb=va-player.vel[1] -- diff from current velocity
+		player.acc[1]=player.acc[1]+(vb) -- apply force to make us move at requested speed
+	end
+	
 	player.vel[1]=player.vel[1]*12/16 --  dampen horizontal velocity
 	player.vel[2]=player.vel[2]*14/16 --  dampen vertical velocity
 	
@@ -477,6 +485,7 @@ players.item.update=function(player)
 	end
 
 --PRINT( ba , player.onfloor , player.jump )
+--PRINT( player.vel )
 
 	player:set_body() -- then we call update_kinetic which will set_values before draw
 end
