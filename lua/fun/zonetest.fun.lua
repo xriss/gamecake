@@ -259,6 +259,7 @@ players.values={
 	foot=8,
 	onfloor=0,
 	jump=0,
+	flap=0,
 }
 
 players.types={
@@ -272,6 +273,7 @@ players.types={
 	foot="get",
 	onfloor="get",
 	jump="get",
+	flap="get",
 }
 
 
@@ -286,13 +288,32 @@ players.graphics={
 . . r 7 0 0 7 0 0 7 r r R R . . 
 . r r r 7 7 r 7 7 r r r R R R . 
 . r r r r r r r r r r R R R R . 
-. r r 7 r r r 7 r r r r O r r R 
-. R r r 7 7 7 r r r R r O r r R 
+. r r 7 r r r 7 r r r R R R R . 
+. R r r 7 7 7 r r r R R R R R . 
 . . R r r r r r r R R R R R . . 
 . . R R r r r r R R R R R R . . 
 . . . R R R R R R R R R R . . . 
 . . . . R R R R R R R R . . . . 
 . . . . . . R R R R . . . . . . 
+. . . . . . . . . . . . . . . . 
+]]},
+
+{nil,"ply1_hand",[[
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . r O r r R 
+. . . . . . . . . . . r O r r R 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 ]]},
 
@@ -307,7 +328,7 @@ players.graphics={
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
+. . . . . R R . . R R . . . . . 
 . . . . . R R . . R R . . . . . 
 . . . . . R R . . R R . . . . . 
 . . . . . R R . . R R . . . . . 
@@ -323,13 +344,32 @@ players.graphics={
 . . . G 7 0 G 7 0 G g g . . . . 
 . . . G 7 7 G 7 7 G g g . . . . 
 . . . G G G G G G G g g . . . . 
-. . . G 7 G 7 G 7 G g G d G G . 
-. . . G G 7 G 7 G G g G d G . . 
+. . . G 7 G 7 G 7 G g g . . . . 
+. . . G G 7 G 7 G G g g . . . . 
 . . . G G G G G G G g g . . . . 
 . . . G G G G G G G g g . . . . 
 . . . g g g g g g g g g . . . . 
 . . . g g g g g g g g g . . . . 
 . . . g g g g g g g g g . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+]]},
+
+{nil,"ply2_hand",[[
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . g G d G G . 
+. . . . . . . . . . g G d G . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 ]]},
@@ -345,7 +385,7 @@ players.graphics={
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
+. . . . . g g . . g g . . . . . 
 . . . . . g g . . g g . . . . . 
 . . . . . g g . . g g . . . . . 
 . . . . . G G . . G G . . . . . 
@@ -361,7 +401,7 @@ players.sprite=function(sname,pos,side)
 		t=spr.idx ,
 		hx=spr.hx , hy=spr.hy ,
 		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
-		px=pos[1] , py=pos[2] , pz=1024+pos[2] ,
+		px=pos[1] , py=pos[2] , pz=pos[3] ,
 		sx=side,
 		rz=0,
 	})
@@ -415,12 +455,15 @@ players.item.update=function(player)
 
 	local lx=( up:axis("lx") ) or 0
 	local ly=( up:axis("ly") ) or 0
-	local ba=( up:get("a") or up:get("a_set") ) or false
+	local ba_now=( up:get("a") or up:get("a_set") ) or false
 	local ba_set=( up:get("a_set") ) or false
 
 	local grav=400
-	if ba then
+	if ba_now then
 		grav=200
+		player.flap=(player.flap+1)%4
+	else
+		player.flap=2
 	end
 
 	player.acc=V3( 0, 0 ,0) -- reset force
@@ -484,7 +527,7 @@ players.item.update=function(player)
 		player.jump=player.jump-1 -- continue jump
 	end
 
---PRINT( ba , player.onfloor , player.jump )
+--PRINT( ba_now , player.onfloor , player.jump )
 --PRINT( player.vel )
 
 	player:set_body() -- then we call update_kinetic which will set_values before draw
@@ -501,8 +544,11 @@ players.item.draw=function(player)
 
 	player:get_values()
 
-	players.sprite( "ply"..player.idx          , player.pos , player.side )
-	players.sprite( "ply"..player.idx.."_feet" , player.pos+V3(0,player.foot-8,0) , player.side )
+	local p=V3( player.pos[1] , player.pos[2], player.pos[2] )
+	local f=math.abs(player.flap-2)
+	players.sprite( "ply"..player.idx          , p , player.side )
+	players.sprite( "ply"..player.idx.."_hand" , p+V3(0,f,-1) , player.side )
+	players.sprite( "ply"..player.idx.."_feet" , p+V3(0,player.foot-8,1) , player.side )
 
 end
 
@@ -600,19 +646,19 @@ map=[[
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . 0 0 . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . 0 0 . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . 0 0 0 . . . . . . 0 
+0 0 . . . . . . . . . . . . . . . . . . . . 0 0 0 . . . 0 0 0 0 
 0 . . . . . . . . 0 0 0 . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
