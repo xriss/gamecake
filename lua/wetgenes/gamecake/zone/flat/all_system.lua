@@ -38,8 +38,8 @@ end
 
 -- get a system.singular by name
 all.system.get_singular=function(sys,name)
-	local sys=sys.scene.systems[name]
-	if sys then return sys.singular end
+	local d=sys.scene.data[name]
+	return d and d[1]
 end
 
 all.system.get_rnd_raw=function(sys)

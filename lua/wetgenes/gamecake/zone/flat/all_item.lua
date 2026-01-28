@@ -37,8 +37,8 @@ end
 
 -- get a system.singular by name
 all.item.get_singular=function(it,name)
-	local sys=it.scene.systems[name]
-	if sys then return sys.singular end
+	local d=it.scene.data[name]
+	return d and d[1]
 end
 
 

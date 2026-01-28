@@ -42,7 +42,7 @@ kinetics.item={}
 
 kinetics.item.setup=function(kinetic)
 
-	if not kinetic.sys.singular then kinetic.sys.singular=kinetic end -- auto set singular
+--	if not kinetic.sys.singular then kinetic.sys.singular=kinetic end -- auto set singular
 
 	kinetic:get_values()
 

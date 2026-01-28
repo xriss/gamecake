@@ -52,8 +52,12 @@ all.create_scene=function(scene)
 
 	-- a scene is a bunch of systems and items
 	scene=scene or require("wetgenes.gamecake.zone.scene").create()
-	scene.create=create_scene
+	scene.create_scene=all.create_scene
 	scene.oven=oven
+
+	-- do level after players so we can more easily focus
+	scene.sortby.level=-1001
+	scene:sortby_update()
 	
 	scene.require_search={
 		"wetgenes.gamecake.zone.flat.",
@@ -82,9 +86,9 @@ all.create_scene=function(scene)
 		local boots={
 			{"kinetic"},
 			{"level",idx=1},
-			{"textbounce",text="Hello World!",pos={1,1,0},vel={2/16,1/16,0},},
-			{"textbounce",text="POOP!",pos={7,11,0},vel={2/16,1/16,0},},
-			{"textbounce",text="Bounce!",pos={1,3,0},vel={2/16,1/16,0},},
+--			{"textbounce",text="Hello World!",pos={1,1,0},vel={2/16,1/16,0},},
+--			{"textbounce",text="POOP!",pos={7,11,0},vel={2/16,1/16,0},},
+--			{"textbounce",text="Bounce!",pos={1,3,0},vel={2/16,1/16,0},},
 			{"player",idx=1,pos={32,32,0}},
 			{"player",idx=2,pos={64,32,0}},
 		}
@@ -396,12 +400,15 @@ players.graphics={
 }
 
 players.sprite=function(sname,pos,side)
+	local map=system.components.map
+	local px=map.window_px-map.px
+	local py=map.window_py-map.py
 	local spr=system.components.tiles.names[sname]
 	system.components.sprites.list_add({
 		t=spr.idx ,
 		hx=spr.hx , hy=spr.hy ,
 		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
-		px=pos[1] , py=pos[2] , pz=pos[3] ,
+		px=pos[1]+px , py=pos[2]+py , pz=pos[3] ,
 		sx=side,
 		rz=0,
 	})
@@ -450,6 +457,9 @@ end
 
 players.item.update=function(player)
 	player:get_values()
+
+	local level=player:get_singular("level")
+	level.values:set("focus",V3(player.pos))
 	
 	local up=player.scene.ups[player.idx] or player.sys.oven.ups.empty
 
@@ -571,11 +581,13 @@ levels.uidmap={
 
 levels.values={
 	pos=V3( 0,0,0 ),
+	focus=V3( 0,0,0 ),
 	idx=1,
 }
 
 levels.types={
 	pos="tween",
+	focus="tween",
 	idx="get",
 }
 
@@ -631,6 +643,10 @@ levels.legend={
 	[0]={ name="char_empty",	},
 
 	[". "]={ name="char_empty",				},
+	["< "]={ name="char_empty",				dir="left",  pdir=0, },
+	["> "]={ name="char_empty",				dir="right", pdir=0, },
+	["^ "]={ name="char_empty",				dir="up",    pdir=0, },
+	["v "]={ name="char_empty",				dir="down",  pdir=0, },
 	["00"]={ name="char_black",				solid=1, dense=1, },		-- black border
 	["0 "]={ name="char_solid",				solid=1, dense=1, },		-- empty border
 }
@@ -649,13 +665,13 @@ map=[[
 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . 0 0 . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
+0 . . . 0 0 0 0 . . . . . . . . . 0 0 0 . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . 0 0 . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
+0 . . . . . . . . . . . . . . . . 0 0 . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . 0 
+0 . . . 0 0 0 0 . . . . . . . . 0 0 . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . 0 
 0 0 . . . . . . . . . . . . . . . . . . . . 0 0 0 . . . 0 0 0 0 
@@ -766,6 +782,27 @@ end
 
 levels.item.update=function(level)
 	level:get_values()
+	
+	local map=system.components.map
+	local screen=system.components.screen
+
+	if map.window_hx<=screen.hx then -- center
+		level.pos[1]=-(screen.hx-map.window_hx)/2
+	else
+		level.pos[1]=level.focus[1]-( screen.hx/2 )
+		if level.pos[1]<0 then level.pos[1]=0 end
+		local m=map.window_hx-screen.hx
+		if level.pos[1]>m then level.pos[1]=m end
+	end
+
+	if map.window_hy<=screen.hy then -- center
+		level.pos[2]=-(screen.hy-map.window_hy)/2
+	else
+		level.pos[2]=level.focus[2]-( screen.hy/2 )
+		if level.pos[2]<0 then level.pos[2]=0 end
+		local m=map.window_hy-screen.hy
+		if level.pos[2]>m then level.pos[2]=m end
+	end
 
 
 	level:set_values()
@@ -776,7 +813,26 @@ end
 -- so it can be called multiple times between updates for different results
 levels.item.draw=function(level)
 
+	local map=system.components.map
+	local screen=system.components.screen
+
 	level:get_values()
+
+	if level.pos[1]<0 then
+		map.window_px=-level.pos[1]
+		map.px=0
+	else
+		map.window_px=0
+		map.px=level.pos[1]
+	end
+	
+	if level.pos[2]<0 then
+		map.window_py=-level.pos[2]
+		map.py=0
+	else
+		map.window_py=0
+		map.py=level.pos[2]
+	end
 
 end
 
