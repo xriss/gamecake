@@ -69,6 +69,7 @@ all.create_scene=function(scene)
 		levels,
 		textbounces,
 		players,
+		faunas,
 	}) do
 		scene.infos[it.caste]=it
 	end
@@ -91,6 +92,7 @@ all.create_scene=function(scene)
 --			{"textbounce",text="Bounce!",pos={1,3,0},vel={2/16,1/16,0},},
 			{"player",idx=1,pos={32,32,0}},
 			{"player",idx=2,pos={64,32,0}},
+			{"fauna",sname="fauna_slime",pos={96,32,0}},
 		}
 		scene:creates(boots)
 	end
@@ -235,6 +237,7 @@ textbounces.item.draw=function(textbounce)
 	ctext.text_print(textbounce.text,px,py,fg,bg) -- (text,x,y,color,background)
 
 end
+
 
 --------------------------------------------------------------------------------
 --
@@ -457,9 +460,6 @@ end
 
 players.item.update=function(player)
 	player:get_values()
-
-	local level=player:get_singular("level")
-	level.values:set("focus",V3(player.pos))
 	
 	local up=player.scene.ups[player.idx] or player.sys.oven.ups.empty
 
@@ -559,6 +559,243 @@ players.item.draw=function(player)
 	players.sprite( "ply"..player.idx          , p , player.side )
 	players.sprite( "ply"..player.idx.."_hand" , p+V3(0,f,-1) , player.side )
 	players.sprite( "ply"..player.idx.."_feet" , p+V3(0,player.foot-8,1) , player.side )
+
+end
+
+
+--------------------------------------------------------------------------------
+--
+-- a basic fauna
+
+faunas={}
+-- methods added to system
+faunas.system={}
+-- methods added to each item
+faunas.item={}
+
+faunas.caste="fauna"
+
+faunas.uidmap={
+	length=0,
+}
+
+faunas.values={
+	pos=V3( 0,0,0 ),
+	rot=Q4( 0,0,0,1 ),
+	vel=V3( 0,0,0 ),
+	ang=V3( 0,0,0 ),
+	acc=V3( 0,200,0 ),
+	idx=1,
+	side=1,
+	foot=8,
+	onfloor=0,
+	jump=0,
+	flap=0,
+	sname="",
+}
+
+faunas.types={
+	pos="tween",
+	rot="tween",
+	vel="get",
+	ang="get",
+	acc="get",
+	idx="get",
+	side="get",
+	foot="get",
+	onfloor="get",
+	jump="get",
+	flap="get",
+	sname="get",
+}
+
+
+faunas.graphics={
+
+{nil,"fauna_slime",[[
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . d d d G . . . . . . 
+. . . . d d d d d d G G . . . . 
+. . . d d d d d d d d G G . . . 
+. . d d 7 0 d 7 0 d d d G G . . 
+. . d d 0 0 d 0 0 d d d G G . . 
+. d d d d d d d d d d d G G G . 
+. d d d d d d d d d d G G G G . 
+. G G d d d d d d d G G G G G . 
+. . G G G G G G G G G G G G . . 
+]]},
+
+{nil,"fauna_slime_feet",[[
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . G G G G G G G G G G G G . . 
+. . G G G G G G G G G G G G . . 
+. . G G G G G G G G G G G G . . 
+. . G G G G G G G G G G G G . . 
+. . . G G G G G G G G G G . . . 
+. . . . . G G G G G G G . . . . 
+]]},
+
+}
+
+faunas.sprite=function(sname,pos,side)
+	local map=system.components.map
+	local px=map.window_px-map.px
+	local py=map.window_py-map.py
+	local spr=system.components.tiles.names[sname]
+	system.components.sprites.list_add({
+		t=spr.idx ,
+		hx=spr.hx , hy=spr.hy ,
+		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
+		px=pos[1]+px , py=pos[2]+py , pz=pos[3] ,
+		sx=side,
+		rz=0,
+	})
+end
+
+faunas.item.get_values=function(fauna)
+
+	fauna:get_auto_values()
+
+end
+
+faunas.item.set_values=function(fauna)
+
+	fauna:set_auto_values()
+
+end
+
+
+-- the system has no state values but can still perform generic actions
+-- eg allocate shared resources for later use
+faunas.system.setup=function(sys)
+
+	 system.components.tiles.upload_tiles( faunas.graphics )
+
+end
+
+faunas.system.clean=function(sys)
+end
+
+-- state values are cached into the item for easy access on a get
+-- and must be set again if they are altered so setup and updates
+-- must begin and end with a get and a set
+faunas.item.setup=function(fauna)
+	fauna:get_values()
+
+	local space=fauna:get_singular("kinetic").space
+	fauna.body=space:body(1,1)
+	fauna.shape=fauna.body:shape("circle",4,0,0)
+	fauna.shape:friction(0.5)
+	fauna.shape:elasticity(0.5)
+	fauna.shape:filter(fauna.uid,0x00010000,0xffffffff)
+
+
+	fauna:set_values()
+end
+
+faunas.item.update=function(fauna)
+	fauna:get_values()
+	
+	local up=fauna.scene.ups[fauna.idx] or fauna.sys.oven.ups.empty
+
+	local do_move=V3(0,0,0)
+	local do_jump=false
+
+	local grav=400
+
+	fauna.acc=V3( 0, 0 ,0) -- reset force
+	local va -- velocity we want to achieve
+	if fauna.onfloor>0 or fauna.jump>0 then -- when on floor
+		va=do_move[1]*512
+	else -- when in air
+		va=do_move[1]*256
+	end
+	if va then -- apply left/right movement
+		if va<0 and fauna.vel[1]>0 then fauna.vel[1]=0 end -- quick turn
+		if va>0 and fauna.vel[1]<0 then fauna.vel[1]=0 end -- quick turn
+		local vb=va-fauna.vel[1] -- diff from current velocity
+		fauna.acc[1]=fauna.acc[1]+(vb) -- apply force to make us move at requested speed
+	end
+	
+	fauna.vel[1]=fauna.vel[1]*12/16 --  dampen horizontal velocity
+	fauna.vel[2]=fauna.vel[2]*14/16 --  dampen vertical velocity
+	
+	if do_move[1]<0 then fauna.side= 1 end
+	if do_move[1]>0 then fauna.side=-1 end
+
+--	fauna.pos=fauna.pos+fauna.vel
+
+	local footspeed=0.25
+	local footbase=3
+	local space=fauna:get_singular("kinetic").space
+	local hit=space:query_segment_first(fauna.pos[1],fauna.pos[2],fauna.pos[1],fauna.pos[2]+16,2,fauna.uid)
+	if hit and hit.alpha and hit.alpha<((footbase+4)/16) then
+
+		local d=(hit.alpha*16)+2 -- distance + radius
+		local o=fauna.vel[2] -- original velocity
+		local v=((d-(footbase+2))) -- distance to where we want to be
+		local a=v*32 -- force to adjust velocity by
+
+		fauna.foot=d-(footbase+2)
+		if fauna.foot<0  then fauna.foot=0  end
+		if fauna.foot>3 then fauna.foot=3 end
+		fauna.acc[2]=fauna.acc[2]+a --  hover
+
+		fauna.onfloor=4
+	else
+		if fauna.foot>3 then fauna.foot=3 end
+		if fauna.foot<3 then fauna.foot=fauna.foot+footspeed end
+
+		fauna.acc[2]=fauna.acc[2]+grav -- gravity
+	end
+
+	if fauna.onfloor>0 and fauna.jump<=0 then -- meep meep jump	
+		if do_jump then
+			fauna.onfloor=0
+			fauna.jump=4
+			fauna.acc[2]=0
+			fauna.vel[2]=-120
+		end
+	end
+	if fauna.onfloor>0 then fauna.onfloor=fauna.onfloor-1 end
+
+
+--PRINT( ba_now , fauna.onfloor , fauna.jump )
+--PRINT( fauna.vel )
+
+	fauna:set_body() -- then we call update_kinetic which will set_values before draw
+end
+
+faunas.item.update_kinetic=function(fauna)
+	fauna:get_body()
+	fauna:set_values()
+end
+
+-- when drawing get will auto tween values
+-- so it can be called multiple times between updates for different results
+faunas.item.draw=function(fauna)
+
+	fauna:get_values()
+
+	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[2] )
+	local f=math.abs(fauna.flap-2)
+	faunas.sprite( fauna.sname          , p , fauna.side )
+	players.sprite( fauna.sname.."_feet" , p+V3(0,fauna.foot,8) , fauna.side )
 
 end
 
@@ -782,6 +1019,10 @@ end
 
 levels.item.update=function(level)
 	level:get_values()
+	
+	local p1=level:get_singular("player",1)
+
+	level.focus:mix(p1.pos+p1.vel,1/16) -- smooth ?
 	
 	local map=system.components.map
 	local screen=system.components.screen

@@ -36,9 +36,9 @@ all.item.get_system=function(it,name)
 end
 
 -- get a system.singular by name
-all.item.get_singular=function(it,name)
+all.item.get_singular=function(it,name,idx)
 	local d=it.scene.data[name]
-	return d and d[1]
+	return d and d[idx or 1]
 end
 
 
