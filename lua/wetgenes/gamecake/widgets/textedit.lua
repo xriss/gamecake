@@ -395,6 +395,10 @@ function wtextedit.select_all(widget)
 	widget.data.str_select=#widget.data.str
 end
 
+function wtextedit.focus(widget)
+	wtextedit.select_all(widget)
+end
+
 function wtextedit.unfocus(widget)
 
 	if widget.data then
@@ -425,6 +429,7 @@ function wtextedit.class_hooks(hook,widget,dat)
 	if hook=="timedelay" then return wtextedit.timedelay(widget) end
 	if hook=="unfocus" then return wtextedit.unfocus(widget) end
 	if hook=="notover" then return wtextedit.unfocus(widget) end
+	if hook=="focus" then return wtextedit.focus(widget) end
 	
 end
 

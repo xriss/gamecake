@@ -208,6 +208,19 @@ M.bake=function(oven,docs)
 		end
 	end
 
+	docs.show_idx=0
+	docs.show_prev=function()
+		if docs.show_idx>#docs.list or docs.show_idx<1 then
+			docs.show_idx=1
+		end
+		local idx=docs.show_idx+1
+		if idx>#docs.list then
+			idx=1
+		end
+		docs.list[idx]:show(true)
+		docs.show_idx=idx
+	end
+	
 	-- show or disable document display
 	docs.show=function(doc)
 		if not doc then
@@ -222,12 +235,12 @@ M.bake=function(oven,docs)
 		end
 	end
 
-	doc.is_modified=function(it)
-		return it.meta.undo~=it.txt.undo.index
-	end
--- show this document in the main text editor window
-	doc.show=function(it)
-	
+	docs.doc_to_front=function(it)
+		if not it then
+			it=docs.doc
+		end
+		if docs.list[1]==it then return end -- do nothing
+		docs.show_idx=0 -- reset
 		for i,v in ipairs(docs.list) do
 			if v==it then
 				if i~=1 then -- move to front
@@ -236,6 +249,17 @@ M.bake=function(oven,docs)
 				end
 				break
 			end
+		end
+	end
+
+	doc.is_modified=function(it)
+		return it.meta.undo~=it.txt.undo.index
+	end
+-- show this document in the main text editor window
+	doc.show=function(it,nosort)
+
+		if not nosort then
+			docs.doc_to_front(it)
 		end
 
 		it.docs.doc=it -- remember current doc

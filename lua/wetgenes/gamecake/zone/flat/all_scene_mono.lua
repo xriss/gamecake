@@ -110,6 +110,13 @@ all.scene.do_update=function(scene)
 	scene.tween=nil -- disable tweening while updating
 
 	scene:ticks_sync()
+	
+-- reset time if we get too far out of sync
+	if scene.ticks.input > scene.values:get("tick_input")+2 then
+		scene.oven.upnet.reset_tick( scene.values:get("tick_input")+2 )
+		scene:ticks_sync()
+	end
+
 	if scene.ticks.input > scene.values:get("tick_input") then
 
 		while scene.ticks.input > scene.values:get("tick") do -- update with full inputs and save hashs
@@ -120,6 +127,7 @@ all.scene.do_update=function(scene)
 			scene:systems_call("update")
 			scene:call("update")
 			scene:call("update_kinetic")
+			scene.values:set("tick_input", scene.values:get("tick") )
 
 			scene:ticks_sync()
 		end

@@ -1245,7 +1245,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 				texteditor:scroll_to_view()
 
-			elseif key=="tab" then
+			elseif key=="tab" and ( master.keystate=="shift" or master.keystate=="none" ) then
 
 				texteditor.float_cx=nil
 

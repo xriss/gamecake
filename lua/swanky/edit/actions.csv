@@ -4,3 +4,6 @@ menu_collection,,Collection,
 collection_purge_file,,Purge this file.,
 collection_purge_all,,Purge all files.,
 collection_switch,,Switch Collection...,
+
+menu_docs,,Documents,
+docs_prev,,Previous document.,,Ctrl+Tab

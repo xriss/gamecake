@@ -7,7 +7,7 @@ local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3
 
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
 
-oven.opts.fun="" -- back to menu on reset
+oven.opts.fun="" -- back to menu on reset				
 
 sysopts={
 	update=function() update() end, -- call global update
@@ -17,28 +17,34 @@ sysopts={
 	lox=256,loy=128, -- minimum size
 	hix=256,hiy=256, -- maximum size
 	autosize="lohi", -- flag that we want to auto resize
-	layers=3,
+	layers=4,
 	hardware={ -- modify hardware so we have sprites and move the text layer
+		{
+			component="copper",
+			name="copper",
+			autosize="lohi",
+			layer=1,
+		},
 		{
 			component="tilemap",
 			name="map",
 			tiles="tiles",
 			tile_size={8,8},
-			layer=1,
+			layer=2,
 			autosize="lohi",
 		},
 		{
 			component="sprites",
 			name="sprites",
 			tiles="tiles",
-			layer=2,
+			layer=3,
 		},
 		{
 			component="tilemap",
 			name="text", -- will replace the old text
 			tiles="tiles",
 			tile_size={4,8},
-			layer=3,
+			layer=4,
 			autosize="lohi",
 		},
 	},
@@ -92,6 +98,9 @@ all.create_scene=function(scene)
 --			{"textbounce",text="Bounce!",pos={1,3,0},vel={2/16,1/16,0},},
 			{"player",idx=1,pos={32,32,0}},
 			{"player",idx=2,pos={64,32,0}},
+			{"fauna",sname="fauna_slime",pos={96,32,0}},
+			{"fauna",sname="fauna_slime",pos={96,32,0}},
+			{"fauna",sname="fauna_slime",pos={96,32,0}},
 			{"fauna",sname="fauna_slime",pos={96,32,0}},
 		}
 		scene:creates(boots)
@@ -554,7 +563,7 @@ players.item.draw=function(player)
 
 	player:get_values()
 
-	local p=V3( player.pos[1] , player.pos[2], player.pos[2] )
+	local p=V3( player.pos[1] , player.pos[2], player.pos[1]+player.pos[2] )
 	local f=math.abs(player.flap-2)
 	players.sprite( "ply"..player.idx          , p , player.side )
 	players.sprite( "ply"..player.idx.."_hand" , p+V3(0,f,-1) , player.side )
@@ -592,6 +601,7 @@ faunas.values={
 	jump=0,
 	flap=0,
 	sname="",
+	thunk=0,
 }
 
 faunas.types={
@@ -607,6 +617,7 @@ faunas.types={
 	jump="get",
 	flap="get",
 	sname="get",
+	thunk="get",
 }
 
 
@@ -708,22 +719,34 @@ faunas.item.setup=function(fauna)
 	fauna:set_values()
 end
 
+faunas.item.update_brain=function(fauna,brain)
+
+	fauna.thunk=fauna.thunk-1
+	if fauna.thunk<=0 then
+		fauna.thunk=fauna.sys:get_rnd(8,32)
+		brain.jump=V3(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160),0)
+		brain.move[1]=brain.jump[1]<0 and -1 or 1
+	end
+end
+
 faunas.item.update=function(fauna)
 	fauna:get_values()
 	
-	local up=fauna.scene.ups[fauna.idx] or fauna.sys.oven.ups.empty
+--	local up=fauna.scene.ups[fauna.idx] or fauna.sys.oven.ups.empty
 
-	local do_move=V3(0,0,0)
-	local do_jump=false
+	local brain={}
+	brain.move=V3(0,0,0)
+	brain.jump=nil
+	fauna:update_brain(brain)
 
 	local grav=400
 
 	fauna.acc=V3( 0, 0 ,0) -- reset force
 	local va -- velocity we want to achieve
 	if fauna.onfloor>0 or fauna.jump>0 then -- when on floor
-		va=do_move[1]*512
+		va=brain.move[1]*512
 	else -- when in air
-		va=do_move[1]*256
+		va=brain.move[1]*256
 	end
 	if va then -- apply left/right movement
 		if va<0 and fauna.vel[1]>0 then fauna.vel[1]=0 end -- quick turn
@@ -735,8 +758,8 @@ faunas.item.update=function(fauna)
 	fauna.vel[1]=fauna.vel[1]*12/16 --  dampen horizontal velocity
 	fauna.vel[2]=fauna.vel[2]*14/16 --  dampen vertical velocity
 	
-	if do_move[1]<0 then fauna.side= 1 end
-	if do_move[1]>0 then fauna.side=-1 end
+	if brain.move[1]<0 then fauna.side= 1 end
+	if brain.move[1]>0 then fauna.side=-1 end
 
 --	fauna.pos=fauna.pos+fauna.vel
 
@@ -765,15 +788,19 @@ faunas.item.update=function(fauna)
 	end
 
 	if fauna.onfloor>0 and fauna.jump<=0 then -- meep meep jump	
-		if do_jump then
+		if brain.jump then
 			fauna.onfloor=0
 			fauna.jump=4
 			fauna.acc[2]=0
-			fauna.vel[2]=-120
+			fauna.vel:add(brain.jump) --[2]=-120
 		end
 	end
 	if fauna.onfloor>0 then fauna.onfloor=fauna.onfloor-1 end
 
+	if fauna.jump>0 then -- jump higher while button is held down
+		fauna.onfloor=0 -- no foot grab while jumping
+		fauna.jump=fauna.jump-1 -- continue jump
+	end
 
 --PRINT( ba_now , fauna.onfloor , fauna.jump )
 --PRINT( fauna.vel )
@@ -792,7 +819,7 @@ faunas.item.draw=function(fauna)
 
 	fauna:get_values()
 
-	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[2] )
+	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
 	local f=math.abs(fauna.flap-2)
 	faunas.sprite( fauna.sname          , p , fauna.side )
 	players.sprite( fauna.sname.."_feet" , p+V3(0,fauna.foot,8) , fauna.side )
@@ -832,14 +859,14 @@ levels.types={
 levels.graphics={
 
 {nil,"char_empty",[[
-I I I I I I I I 
-I I I I I I I I 
-I I I I I I I I 
-I I I I I I I I 
-I I I I I I I I 
-I I I I I I I I 
-I I I I I I I I 
-I I I I I I I I 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
 ]]},
 
 {nil,"char_black",[[
@@ -1013,6 +1040,15 @@ levels.item.setup=function(level)
 			end
 		end
 	end
+
+-- set background color
+	local it=system.components.copper
+	it.shader_name="fun_copper_back_y5"
+	it.shader_uniforms.cy0={ 0.25 , 0    , 0.25 , 1   }
+	it.shader_uniforms.cy1={ 0.125, 0    , 0.25 , 1   }
+	it.shader_uniforms.cy2={ 0.125, 0.125, 0.25 , 1   }
+	it.shader_uniforms.cy3={ 0    , 0.125, 0.25 , 1   }
+	it.shader_uniforms.cy4={ 0    , 0.25 , 0.25 , 1   }
 
 	level:set_values()
 end

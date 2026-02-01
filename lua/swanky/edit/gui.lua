@@ -85,6 +85,12 @@ gui.msg=function(m)
 		gui.action(m)
 	end
 		
+	if m.class=="key" and m.action==-1 and
+		( m.keyname=="control" or m.keyname=="control_l" or m.keyname=="control_r" )
+			then -- deal with special control up
+		docs.doc_to_front() -- catch ctrl-tab release ( bump final selection to front )
+	end
+
 	gui.master:msg(m)
 
 	oven.console.linehook_safety=false
@@ -313,7 +319,7 @@ function gui.action(m)
 			dir=wpath.unslash(dir)
 --			gui.datas.set_string("find_files",dir)
 
-print("search_find",word,dir)
+--print("search_find",word,dir)
 
 --[[
 			local find=finds.get(dir,word)
@@ -332,6 +338,8 @@ print("search_find",word,dir)
 
 		-- show search
 		gui.datas.set_string("list_mode","search")
+		
+		gui.master.set_focus( gui.master.ids.find_search_text )
 
 	elseif m.id=="find_goto" then
 
@@ -425,6 +433,10 @@ PRINT("find_in_files")
 	elseif m.id=="find_in_files_cancel" then
 
 		finds.cancel_all() -- only 1 find at a time?
+
+	elseif m.id=="docs_prev" then
+
+		docs.show_prev()
 
 	end
 
@@ -606,6 +618,13 @@ function gui.hooks(act,w,dat)
 
 	end
 
+	if act=="unfocus" then
+	
+		if w.id=="find_search_text" then -- on enter/tab in search box
+			gui.do_actions[#gui.do_actions+1]={id="find_goto"}
+		end
+
+	end
 	
 end
 
@@ -729,6 +748,7 @@ local lay=
 										text=" Search for: ",
 									},
 									{
+										id="find_search_text",hooks=gui.hooks,
 										class="textedit",size="fullx",hx=gsiz*1,hy=gsiz*1,
 										color=0,
 										data="find_search",
@@ -874,6 +894,9 @@ local lay=
 				{id="file_save"},
 				{id="file_saveas"},
 				{id="file_saveall"},
+				{id="menu_docs",menu_data={
+					{id="docs_prev"},
+				}},
 				{id="menu_collection",menu_data={
 --					{id="collection_name"},
 					{id="collection_switch"},

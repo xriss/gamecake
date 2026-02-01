@@ -121,6 +121,13 @@ all.scene.do_update_values=function(scene)
 	end
 
 	scene:ticks_sync()
+
+-- reset time if we get too far out of sync
+	if scene.ticks.input > scene.values:get("tick_input")+32 then
+		scene.oven.upnet.reset_tick( scene.values:get("tick_input")+32 )
+		scene:ticks_sync()
+	end
+
 	if scene.ticks.input > scene.values:get("tick_input") then
 
 		-- undo draw predictions without full inputs
@@ -151,9 +158,9 @@ all.scene.do_update_values=function(scene)
 			scene:systems_call("update")
 			scene:call("update")
 			scene:call("update_kinetic")
+			scene.values:set("tick_input", scene.values:get("tick") )
 			
 			-- save hashes 
-			scene.values:set("tick_input", scene.values:get("tick") )
 --			local hash=scene:get_hashs( scene.values:get("tick") )[1]
 local hash=0
 			scene.oven.upnet.set_hash( scene.values:get("tick") , hash )
