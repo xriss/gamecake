@@ -56,6 +56,35 @@ M.bake=function(oven,docs)
 ]]
 	end
 	
+	docs.get_filters=function(mounts)
+		local t={}
+		
+		local addpath;addpath=function(path)
+			t[path]=true
+			if path:sub(-1)=="/" then path=path:sub(1,-2) end
+			local s,f=path:find("[^/]*$")
+			if s and s>1 then
+				addpath( path:sub(1,s-1) )
+			end
+		end
+
+		local s=gui.datas.get_string("tree_filter")
+		local walk;walk=function(it)
+			if it.path:find(s,0,true) then -- path contains filter
+				addpath(it.path)
+			end
+			if it.dir then
+				for i,v in ipairs(it.dir) do
+					walk(v)
+				end
+			end
+		end
+		walk(mounts)
+
+		return t
+	end
+
+
 	docs.get_keepers=function()
 		local t={}
 		t["/"]=true -- force roots

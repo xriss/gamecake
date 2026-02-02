@@ -70,7 +70,7 @@ wtree.layout=function(widget)
 		local recurse
 		recurse=function(parent)
 			for _,item in ipairs(parent.dir or parent) do
-				if item.line then -- add this line widget
+				if item.line and not item.hide then -- add this line widget
 					pan:insert(item.line)
 				end
 				recurse(item)

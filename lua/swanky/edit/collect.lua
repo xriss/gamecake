@@ -208,12 +208,18 @@ M.bake=function(oven,collect)
 			end
 		end}
 	
-		local keepers=docs.get_keepers()
+		local keepers=docs.get_keepers(collect.mounts)
+		local filters=docs.get_filters(collect.mounts)
 		local walk;walk=function(it)
 			if keepers[it.path] then
 				it.keep=keep
 			else
 				it.keep=false
+			end
+			if filters[it.path] then
+				it.hide=false
+			else
+				it.hide=true
 			end
 			if it.dir then
 				for i,v in ipairs(it.dir) do

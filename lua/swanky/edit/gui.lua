@@ -175,6 +175,8 @@ gui.data_setup=function()
 
 		datas.new({id="run_auto"  ,class="number",  hooks=gui.hooks,num=1})
 
+		datas.new({id="tree_filter"  ,class="string",  hooks=gui.hooks,str=""})
+
 		datas.new({id="find_search"  ,class="string",  hooks=gui.hooks,str=""})
 		datas.new({id="find_replace"  ,class="string",  hooks=gui.hooks,str=""})
 		datas.new({id="find_files"  ,class="string",  hooks=gui.hooks,str=""})
@@ -622,6 +624,8 @@ function gui.hooks(act,w,dat)
 	
 		if w.id=="find_search_text" then -- on enter/tab in search box
 			gui.do_actions[#gui.do_actions+1]={id="find_goto"}
+		elseif w.id=="tree_filter_text" then -- on enter/tab in search box
+			gui.refresh_tree()
 		end
 
 	end
@@ -673,18 +677,20 @@ local lay=
 				}
 			},
 			{
---[[
+--
 				class="split",split_axis="y",split_order=1,split_num=gsiz*1,hx=200,
 				{
 					id="bar1",class="fill",
 					style="flat",highlight="none",color=0,
 					{
-						class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
-						data=gui.datas.get("list_mode"),
+						id="tree_filter_text",hooks=gui.hooks,
+						class="textedit",size="fullx",hx=gsiz*1,hy=gsiz*1,
+						color=0,
+						data="tree_filter",
 					},
 				},
 				{
-]]
+
 					class="split",split_axis="y",split_order=2,split_num=gsiz*1,hx=300,
 					{
 						id="dock_split",
@@ -859,7 +865,7 @@ local lay=
 							data_selected="play",
 						},
 					},
---				},
+				},
 			},
 		},
 	},
