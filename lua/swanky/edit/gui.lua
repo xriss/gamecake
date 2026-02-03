@@ -440,6 +440,10 @@ PRINT("find_in_files")
 
 		docs.show_prev()
 
+	elseif m.id=="docs_close_other" then
+
+		docs.close_other()
+
 	end
 
 end
@@ -902,6 +906,7 @@ local lay=
 				{id="file_saveall"},
 				{id="menu_docs",menu_data={
 					{id="docs_prev"},
+					{id="docs_close_other"},
 				}},
 				{id="menu_collection",menu_data={
 --					{id="collection_name"},

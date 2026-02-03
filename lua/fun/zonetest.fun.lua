@@ -112,7 +112,7 @@ all.create_scene=function(scene)
 
 end
 
-setup=function()
+local main_setup=function()
 
 	-- reset tiles
     local ctiles=system.components.tiles
@@ -124,6 +124,7 @@ setup=function()
 	scene:do_setup()
 
 end
+setup=main_setup
 
 update=function()
 	if setup then setup=setup() end -- call setup once
@@ -276,6 +277,7 @@ players.values={
 	onfloor=0,
 	jump=0,
 	flap=0,
+	walk=0,
 }
 
 players.types={
@@ -290,6 +292,7 @@ players.types={
 	onfloor="get",
 	jump="get",
 	flap="get",
+	walk="get",
 }
 
 
@@ -344,13 +347,32 @@ players.graphics={
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
-. . . . . R R . . R R . . . . . 
+. . . . . . . . . . . . . . . . 
 . . . . . R R . . R R . . . . . 
 . . . . . R R . . R R . . . . . 
 . . . . . R R . . R R . . . . . 
 . . . . . O O . . O O . . . . . 
 . . . . r r r . r r r . . . . . 
 ]]},
+
+{nil,"ply1_walk",[[
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . R R . . R R . . . . . . . . . . R R . . R R . . . . . . . . . . R R . . R R . . . . . . . . . . R R . . R R . . . . . 
+. . . . R R . . . R R . . . . . . . . . . R R . . R R . . . . . . . . . . R R . R R . . . . . . . . . . . R R . . R R . . . . . 
+. . . . O O . . . . R R . . . . . . . . R R . . . O O . . . . . . . . . . . R R O O . . . . . . . . . . . O O . R R . . . . . . 
+. . . r r r . . . . O O . . . . . . . . O O . . r r r . . . . . . . . . . . O O r r . . . . . . . . . . r r r . O O . . . . . . 
+. . . . . . . . . r r r . . . . . . . r r r . . . . . . . . . . . . . . . r r r . . . . . . . . . . . . . . . r r r . . . . . . 
+]],4},
 
 {nil,"ply2",[[
 . . . . . . . . . . . . . . . . 
@@ -401,7 +423,7 @@ players.graphics={
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
-. . . . . g g . . g g . . . . . 
+. . . . . . . . . . . . . . . . 
 . . . . . g g . . g g . . . . . 
 . . . . . g g . . g g . . . . . 
 . . . . . G G . . G G . . . . . 
@@ -409,13 +431,35 @@ players.graphics={
 . . . . G G G . G G G . . . . . 
 ]]},
 
+{nil,"ply2_walk",[[
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . g g . . g g . . . . . . . . . . g g . . g g . . . . . . . . . . g g . . g g . . . . . . . . . . g g . . g g . . . . . 
+. . . . g g . . . g g . . . . . . . . . . g g . . g g . . . . . . . . . . g g . g g . . . . . . . . . . . g g . . g g . . . . . 
+. . . . d d . . . . g g . . . . . . . . g g . . . d d . . . . . . . . . . . g g d d . . . . . . . . . . . d d . g g . . . . . . 
+. . . G G G . . . . d d . . . . . . . . d d . . G G G . . . . . . . . . . . d d G G . . . . . . . . . . G G G . d d . . . . . . 
+. . . . . . . . . G G G . . . . . . . G G G . . . . . . . . . . . . . . . G G G . . . . . . . . . . . . . . . G G G . . . . . . 
+]],4},
+
 }
 
-players.sprite=function(sname,pos,side)
+players.sprite=function(sname,pos,side,idx)
 	local map=system.components.map
 	local px=map.window_px-map.px
 	local py=map.window_py-map.py
 	local spr=system.components.tiles.names[sname]
+	if idx then
+		spr=spr.cuts[idx]
+	end
 	system.components.sprites.list_add({
 		t=spr.idx ,
 		hx=spr.hx , hy=spr.hy ,
@@ -498,6 +542,13 @@ players.item.update=function(player)
 		local vb=va-player.vel[1] -- diff from current velocity
 		player.acc[1]=player.acc[1]+(vb) -- apply force to make us move at requested speed
 	end
+
+	if lx*lx > 1/16 then
+		player.walk=player.walk+1
+		if player.walk>4 then player.walk=1 end
+	else
+		player.walk=0
+	end
 	
 	player.vel[1]=player.vel[1]*12/16 --  dampen horizontal velocity
 	player.vel[2]=player.vel[2]*14/16 --  dampen vertical velocity
@@ -567,8 +618,12 @@ players.item.draw=function(player)
 	local f=math.abs(player.flap-2)
 	players.sprite( "ply"..player.idx          , p , player.side )
 	players.sprite( "ply"..player.idx.."_hand" , p+V3(0,f,-1) , player.side )
-	players.sprite( "ply"..player.idx.."_feet" , p+V3(0,player.foot-8,1) , player.side )
 
+	if player.walk==0 then
+		players.sprite( "ply"..player.idx.."_feet" , p+V3(0,player.foot-8,-1) , player.side )
+	else
+		players.sprite( "ply"..player.idx.."_walk" , p+V3(0,player.foot-8,-1) , player.side , player.walk)
+	end
 end
 
 

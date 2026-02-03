@@ -7,3 +7,4 @@ collection_switch,,Switch Collection...,
 
 menu_docs,,Documents,
 docs_prev,,Previous document.,,Ctrl+Tab
+docs_close_other,,Close other documents.,,

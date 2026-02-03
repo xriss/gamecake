@@ -145,6 +145,7 @@ tiles.create=function(it,opts)
 			local t={}
 			t.idx=v[1]
 			t.name=v[2]
+			t.cuts=v[4]
 
 			if type(v[3])=="number" then -- just mark as allocated
 			
@@ -223,7 +224,24 @@ tiles.create=function(it,opts)
 					it.idxnames[ 1 + x + y*256 ]=t.name
 				end
 			end
-
+			
+			-- cut horizontal slices into sub sprites
+			if t.cuts then
+				local cuts={}
+				for i=1,t.cuts do
+					local c={}
+					cuts[i]=c
+					for n,v in pairs(t) do c[n]=v end -- dupe
+					c.cuts=nil
+					c.ascii=nil
+					c.hx=math.floor(t.hx/t.cuts)
+					c.hxt=math.floor(t.hxt/t.cuts)
+					c.pxt=c.pxt+((i-1)*c.hxt)
+					c.px=c.pxt*it.tile_hx
+					c.idx=c.idx+((i-1)*c.hxt)
+				end
+				t.cuts=cuts
+			end
 		end
 		
 --[[

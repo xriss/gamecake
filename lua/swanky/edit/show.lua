@@ -365,7 +365,7 @@ M.bake=function(oven,show)
 			elseif show.autocode ~= code then
 				show.start_doc()
 				if mode=="fun64" then -- slower fun64 reloads
-					show.autostart = 60*1
+					show.autostart = 120*1
 				else
 					show.autostart = 10*1
 				end

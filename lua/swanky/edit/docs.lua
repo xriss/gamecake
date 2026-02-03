@@ -280,6 +280,16 @@ M.bake=function(oven,docs)
 			end
 		end
 	end
+	
+	docs.close_other=function()
+	
+		docs.doc_to_front()
+		while docs.list[2] do
+			docs.list[2]:close()
+		end
+	
+	end
+
 
 	doc.is_modified=function(it)
 		return it.meta.undo~=it.txt.undo.index
