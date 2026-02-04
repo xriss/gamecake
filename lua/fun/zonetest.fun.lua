@@ -76,6 +76,7 @@ all.create_scene=function(scene)
 		textbounces,
 		players,
 		faunas,
+		fauna_pandas,
 	}) do
 		scene.infos[it.caste]=it
 	end
@@ -98,10 +99,10 @@ all.create_scene=function(scene)
 --			{"textbounce",text="Bounce!",pos={1,3,0},vel={2/16,1/16,0},},
 			{"player",idx=1,pos={32,32,0}},
 			{"player",idx=2,pos={64,32,0}},
-			{"fauna",sname="fauna_slime",pos={96,32,0}},
-			{"fauna",sname="fauna_slime",pos={96,32,0}},
-			{"fauna",sname="fauna_slime",pos={96,32,0}},
-			{"fauna",sname="fauna_slime",pos={96,32,0}},
+--			{"fauna",sname="fauna_slime",pos={96,32,0}},
+--			{"fauna",sname="fauna_slime",pos={96,32,0}},
+--			{"fauna",sname="fauna_slime",pos={96,32,0}},
+			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
 		}
 		scene:creates(boots)
 	end
@@ -508,6 +509,7 @@ players.item.setup=function(player)
 	player.shape:filter(player.idx,0x00010000,0xffffffff)
 
 
+	player:set_body()
 	player:set_values()
 end
 
@@ -770,7 +772,7 @@ faunas.item.setup=function(fauna)
 	fauna.shape:elasticity(0.5)
 	fauna.shape:filter(fauna.uid,0x00010000,0xffffffff)
 
-
+	fauna:set_body()
 	fauna:set_values()
 end
 
@@ -877,10 +879,163 @@ faunas.item.draw=function(fauna)
 	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
 	local f=math.abs(fauna.flap-2)
 	faunas.sprite( fauna.sname          , p , fauna.side )
-	players.sprite( fauna.sname.."_feet" , p+V3(0,fauna.foot,8) , fauna.side )
+	faunas.sprite( fauna.sname.."_feet" , p+V3(0,fauna.foot,8) , fauna.side )
 
 end
 
+
+--------------------------------------------------------------------------------
+--
+-- a basic fauna_panda
+
+fauna_pandas={}
+-- methods added to system
+fauna_pandas.system={}
+-- methods added to each item
+fauna_pandas.item={}
+
+fauna_pandas.caste="fauna_panda"
+
+fauna_pandas.uidmap={
+	length=0,
+}
+
+fauna_pandas.values={
+	pos=V3( 0,0,0 ),
+	sname="",
+	thunk=0,
+}
+
+fauna_pandas.types={
+	pos="tween",
+	sname="get",
+	thunk="get",
+}
+
+
+fauna_pandas.graphics={
+
+{nil,"fauna_panda",[[
+. . 0 0 0 0 . . . . . . . . . . . 0 0 0 0 . . . 
+. 0 0 1 1 0 0 . . 6 6 6 6 6 . . 0 0 1 1 0 0 . . 
+. 0 1 0 0 0 0 6 6 6 6 6 6 6 6 6 0 0 0 0 1 0 . . 
+. 0 1 0 0 0 6 6 6 6 6 6 6 6 6 6 6 0 0 0 1 0 . . 
+. 0 0 0 0 6 6 0 0 0 6 6 6 0 0 0 6 6 0 0 0 0 . . 
+. . 0 0 6 6 0 0 6 0 0 6 0 0 6 0 0 6 6 0 0 . . . 
+. . . . 6 6 0 0 0 0 6 6 6 0 0 0 0 6 6 . . . . . 
+. . . 6 6 6 6 0 0 6 6 6 6 6 0 0 6 6 6 6 . . . . 
+. . . 6 6 6 6 6 6 6 0 0 0 6 6 6 6 6 6 6 . . . . 
+. . . 6 6 6 6 6 6 6 6 0 6 6 6 6 6 6 6 6 . . . . 
+. . . . 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 . . . . . 
+. . . . 6 6 6 0 6 6 0 0 0 6 6 0 6 6 6 . . . . . 
+. . . . . 6 6 6 0 0 6 6 6 0 0 6 6 6 . . . . . . 
+. . . . . . 0 6 6 6 6 6 6 6 6 6 0 . . . . . . . 
+. . . . . 0 0 0 0 6 6 6 6 6 0 0 0 0 . . . . . . 
+. . . . 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 . . . . . 
+. . . 0 0 0 0 0 0 0 6 6 6 0 0 0 0 0 0 0 . . . . 
+. . 0 1 0 0 0 0 6 6 6 6 6 6 6 0 0 0 0 1 0 . . . 
+. . 0 1 1 0 . 6 6 6 0 6 0 6 6 6 . 0 1 1 0 . . . 
+. . . 0 0 . . 6 6 6 6 0 6 6 6 6 . . 0 0 . . . . 
+. . . . . . . 0 0 0 6 0 6 0 0 0 . . . . . . . . 
+. . . . . . 0 1 0 1 0 . 0 1 0 1 0 . . . . . . . 
+. . . . . . 0 0 1 0 0 . 0 0 1 0 0 . . . . . . . 
+. . . . . . . 0 0 0 . . . 0 0 0 . . . . . . . . 
+]]},
+
+}
+
+fauna_pandas.sprite=function(sname,pos,side)
+	local map=system.components.map
+	local px=map.window_px-map.px
+	local py=map.window_py-map.py
+	local spr=system.components.tiles.names[sname]
+	system.components.sprites.list_add({
+		t=spr.idx ,
+		hx=spr.hx , hy=spr.hy ,
+		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
+		px=pos[1]+px , py=pos[2]+py , pz=pos[3] ,
+		sx=side,
+		rz=0,
+	})
+end
+
+fauna_pandas.item.get_values=function(fauna_panda)
+
+	fauna_panda:get_auto_values()
+
+end
+
+fauna_pandas.item.set_values=function(fauna_panda)
+
+	fauna_panda:set_auto_values()
+
+end
+
+
+-- the system has no state values but can still perform generic actions
+-- eg allocate shared resources for later use
+fauna_pandas.system.setup=function(sys)
+
+	 system.components.tiles.upload_tiles( fauna_pandas.graphics )
+
+end
+
+fauna_pandas.system.clean=function(sys)
+end
+
+-- state values are cached into the item for easy access on a get
+-- and must be set again if they are altered so setup and updates
+-- must begin and end with a get and a set
+fauna_pandas.item.setup=function(fauna_panda)
+	fauna_panda:get_values()
+
+--[[
+	local space=fauna_panda:get_singular("kinetic").space
+	fauna_panda.body=space:body(1,1)
+	fauna_panda.shape=fauna_panda.body:shape("circle",4,0,0)
+	fauna_panda.shape:friction(0.5)
+	fauna_panda.shape:elasticity(0.5)
+	fauna_panda.shape:filter(fauna_panda.uid,0x00010000,0xffffffff)
+]]
+
+	fauna_panda:set_values()
+end
+
+fauna_pandas.item.update_brain=function(fauna_panda,brain)
+
+	fauna_panda.thunk=fauna_panda.thunk-1
+	if fauna_panda.thunk<=0 then
+		fauna_panda.thunk=fauna_panda.sys:get_rnd(16*8,16*16)
+		scene:creates({
+			{"fauna",sname="fauna_slime",pos={fauna_panda.pos[1],fauna_panda.pos[2],0}},
+		})
+	end
+
+
+end
+
+fauna_pandas.item.update=function(fauna_panda)
+	fauna_panda:get_values()
+	
+	local brain={}
+	fauna_panda:update_brain(brain)
+	
+	fauna_panda:set_values()
+end
+
+fauna_pandas.item.update_kinetic=function(fauna_panda)
+end
+
+-- when drawing get will auto tween values
+-- so it can be called multiple times between updates for different results
+fauna_pandas.item.draw=function(fauna_panda)
+
+	fauna_panda:get_values()
+
+	local p=V3( fauna_panda.pos[1] , fauna_panda.pos[2]-3, fauna_panda.pos[1]+fauna_panda.pos[2] )
+	fauna_pandas.sprite( fauna_panda.sname          , p , 1 )
+
+end
 
 --------------------------------------------------------------------------------
 --
