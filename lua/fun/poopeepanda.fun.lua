@@ -95,8 +95,15 @@ all.create_scene=function(scene)
 		local boots={
 			{"kinetic"},
 			{"level",idx=1},
-			{"player",idx=1,pos={32,32,0}},
-			{"player",idx=2,pos={64,32,0}},
+
+			{"hud",idx=1,depends={player=5}},
+			{"camera",idx=1,depends={player=5}},
+			{"player",idx=1,pos={32,32,0},depends={camera=4,hud=3}},
+
+			{"hud",idx=2,depends={player=8}},
+			{"camera",idx=2,depends={player=8}},
+			{"player",idx=2,pos={64,32,0},depends={camera=7,hud=6}},
+
 --			{"fauna",sname="fauna_slime",pos={96,32,0}},
 			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
 		}
@@ -130,11 +137,6 @@ end
 
 draw=function()
 
-    local cscreen=system.components.screen
-    local ctext=system.components.text
-    local bg=0
-	ctext.text_clear(0x01000000*bg) -- clear text forcing a background color
-	-- all text is expected to be redrawn in scene
 	scene:do_draw()
 end
 
@@ -153,8 +155,13 @@ players.item={}
 
 players.caste="player"
 
+-- players are hard linked to these other entities by uid
+-- note slot 1 is reserved for a parent which we do not have so it is empty
+-- which also means these other entities will back link to us via slot 1
 players.uidmap={
-	length=0,
+	camera=2,
+	hud=3,
+	length=3,
 }
 
 players.values={
@@ -1157,32 +1164,6 @@ end
 levels.item.update=function(level)
 	level:get_values()
 	
-	local p1=level:get_singular("player",1)
-
-	level.focus:mix(p1.pos+p1.vel,1/16) -- smooth ?
-	
-	local map=system.components.map
-	local screen=system.components.screen
-
-	if map.window_hx<=screen.hx then -- center
-		level.pos[1]=-(screen.hx-map.window_hx)/2
-	else
-		level.pos[1]=level.focus[1]-( screen.hx/2 )
-		if level.pos[1]<0 then level.pos[1]=0 end
-		local m=map.window_hx-screen.hx
-		if level.pos[1]>m then level.pos[1]=m end
-	end
-
-	if map.window_hy<=screen.hy then -- center
-		level.pos[2]=-(screen.hy-map.window_hy)/2
-	else
-		level.pos[2]=level.focus[2]-( screen.hy/2 )
-		if level.pos[2]<0 then level.pos[2]=0 end
-		local m=map.window_hy-screen.hy
-		if level.pos[2]>m then level.pos[2]=m end
-	end
-
-
 	level:set_values()
 end
 
@@ -1190,27 +1171,6 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 levels.item.draw=function(level)
-
-	local map=system.components.map
-	local screen=system.components.screen
-
-	level:get_values()
-
-	if level.pos[1]<0 then
-		map.window_px=-level.pos[1]
-		map.px=0
-	else
-		map.window_px=0
-		map.px=level.pos[1]
-	end
-	
-	if level.pos[2]<0 then
-		map.window_py=-level.pos[2]
-		map.py=0
-	else
-		map.window_py=0
-		map.py=level.pos[2]
-	end
 
 end
 
@@ -1227,7 +1187,8 @@ cameras.item={}
 cameras.caste="camera"
 
 cameras.uidmap={
-	length=0,
+	player=1,
+	length=1,
 }
 
 cameras.values={
@@ -1281,9 +1242,38 @@ cameras.item.setup=function(camera)
 end
 
 cameras.item.update=function(camera)
+	if camera.idx~=1 then return end -- only 1 hud
+
 	camera:get_values()
 	
-	local p1=camera:get_singular("player",1)
+
+	local player=camera:depend("player")
+	local hud=player:depend("hud")
+
+	camera.focus:mix(player.pos+player.vel,1/16) -- smooth ?
+	
+	local map=system.components.map
+	local screen=system.components.screen
+
+	if map.window_hx<=screen.hx then -- center
+		camera.pos[1]=-(screen.hx-map.window_hx)/2
+	else
+		camera.pos[1]=camera.focus[1]-( screen.hx/2 )
+		if camera.pos[1]<0 then camera.pos[1]=0 end
+		local m=map.window_hx-screen.hx
+		if camera.pos[1]>m then camera.pos[1]=m end
+	end
+
+	local shy=(screen.hy-hud.pos[2])
+	if map.window_hy<=shy then -- center
+		camera.pos[2]=-(shy-map.window_hy)/2
+	else
+		camera.pos[2]=camera.focus[2]-( shy/2 )
+		if camera.pos[2]<0 then camera.pos[2]=0 end
+		local m=map.window_hy-(shy-hud.pos[1])
+		if camera.pos[2]>m then camera.pos[2]=m end
+	end
+
 
 
 	camera:set_values()
@@ -1293,6 +1283,28 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 cameras.item.draw=function(camera)
+	if camera.idx~=1 then return end -- only 1 hud
+
+	local map=system.components.map
+	local screen=system.components.screen
+
+	camera:get_values()
+
+	if camera.pos[1]<0 then
+		map.window_px=-camera.pos[1]
+		map.px=0
+	else
+		map.window_px=0
+		map.px=camera.pos[1]
+	end
+	
+	if camera.pos[2]<0 then
+		map.window_py=-camera.pos[2]
+		map.py=0
+	else
+		map.window_py=0
+		map.py=camera.pos[2]
+	end
 
 end
 
@@ -1309,7 +1321,8 @@ huds.item={}
 huds.caste="hud"
 
 huds.uidmap={
-	length=0,
+	player=1,
+	length=1,
 }
 
 huds.values={
@@ -1365,20 +1378,31 @@ end
 huds.system.clean=function(sys)
 end
 
+huds.system.draw=function(sys)
+
+    local ctext=system.components.text
+    local bg=24
+	ctext.text_clear(0x01000000*bg) -- clear text forcing a background color
+
+end
+
 -- state values are cached into the item for easy access on a get
 -- and must be set again if they are altered so setup and updates
 -- must begin and end with a get and a set
 huds.item.setup=function(hud)
 	hud:get_values()
 
+	hud.pos[2]=64
+
 	hud:set_values()
 end
 
 huds.item.update=function(hud)
+	if hud.idx~=1 then return end -- only 1 hud
+
 	hud:get_values()
 	
-	local p1=hud:get_singular("player",1)
-
+	local player=hud:depend("player")
 
 	hud:set_values()
 end
@@ -1387,6 +1411,21 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 huds.item.draw=function(hud)
+	if hud.idx~=1 then return end -- only 1 hud
+
+
+	local text=system.components.text
+	local screen=system.components.screen
+
+	hud:get_values()
+
+	text.window_py=screen.hy-hud.pos[2]
+	text.py=0
+
+    local bg=24
+--	text.text_clear(0x01000000*bg) -- clear text forcing a background color
+
+	text.text_print("This is the hud, 4 lives and 10 secs",0,0,31,24) -- (text,x,y,color,background)
 
 end
 
