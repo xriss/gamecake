@@ -122,6 +122,8 @@ local main_setup=function()
     local ctiles=system.components.tiles
 	ctiles.reset_tiles()
 	ctiles.upload_default_font_4x8()
+	ctiles.upload_default_font_8x8()
+	ctiles.upload_default_font_8x16()
 
 	-- create global scene
 	global.scene=all.create_scene()
@@ -142,6 +144,28 @@ end
 
 
 
+--------------------------------------------------------------------------------
+--
+-- Drawing utility funcs
+
+draws={}
+draws.sprite=function(sname,pos,side,idx)
+	local map=system.components.map
+	local px=map.window_px-map.px
+	local py=map.window_py-map.py
+	local spr=system.components.tiles.names[sname]
+	if idx then
+		spr=spr.cuts[idx]
+	end
+	system.components.sprites.list_add({
+		t=spr.idx ,
+		hx=spr.hx , hy=spr.hy ,
+		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
+		px=pos[1]+px , py=pos[2]+py , pz=pos[3] ,
+		sx=side,
+		rz=0,
+	})
+end
 
 --------------------------------------------------------------------------------
 --
@@ -351,24 +375,6 @@ players.graphics={
 
 }
 
-players.sprite=function(sname,pos,side,idx)
-	local map=system.components.map
-	local px=map.window_px-map.px
-	local py=map.window_py-map.py
-	local spr=system.components.tiles.names[sname]
-	if idx then
-		spr=spr.cuts[idx]
-	end
-	system.components.sprites.list_add({
-		t=spr.idx ,
-		hx=spr.hx , hy=spr.hy ,
-		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
-		px=pos[1]+px , py=pos[2]+py , pz=pos[3] ,
-		sx=side,
-		rz=0,
-	})
-end
-
 players.item.get_values=function(player)
 
 	player:get_auto_values()
@@ -414,6 +420,8 @@ end
 players.item.update=function(player)
 	player:get_values()
 	
+	local level=player:get_singular("level") -- only one level is active at a time
+
 	local up=player.scene.ups[player.idx] or player.sys.oven.ups.empty
 
 	local lx=( up:axis("lx") ) or 0
@@ -421,9 +429,9 @@ players.item.update=function(player)
 	local ba_now=( up:get("a") or up:get("a_set") ) or false
 	local ba_set=( up:get("a_set") ) or false
 
-	local grav=400
+	local grav=level:get_gravity(player.pos)
 	if ba_now then
-		grav=200
+		grav=grav*0.5 -- reduce gravity while flapping arms
 		player.flap=(player.flap+1)%4
 	else
 		player.flap=2
@@ -467,6 +475,11 @@ players.item.update=function(player)
 		local d=(hit.alpha*16)+2 -- distance + radius
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
+
+		if ba_now then -- crouch while button held down
+			v=v+3
+		end
+
 		local a=v*32 -- force to adjust velocity by
 
 		player.foot=d
@@ -479,7 +492,7 @@ players.item.update=function(player)
 		if player.foot>11 then player.foot=player.foot-footspeed end
 		if player.foot<11 then player.foot=player.foot+footspeed end
 
-		player.acc[2]=player.acc[2]+grav -- gravity
+		player.acc:add(grav) -- gravity
 	end
 
 	if player.onfloor>0 and player.jump<=0 then -- meep meep jump	
@@ -516,13 +529,13 @@ players.item.draw=function(player)
 
 	local p=V3( player.pos[1] , player.pos[2], player.pos[1]+player.pos[2] )
 	local f=math.abs(player.flap-2)
-	players.sprite( "ply"..player.idx          , p , player.side )
-	players.sprite( "ply"..player.idx.."_hand" , p+V3(0,f,-1) , player.side )
+	draws.sprite( "ply"..player.idx          , p , player.side )
+	draws.sprite( "ply"..player.idx.."_hand" , p+V3(0,f,-1) , player.side )
 
 	if player.walk==0 then
-		players.sprite( "ply"..player.idx.."_feet" , p+V3(0,player.foot-8,-1) , player.side )
+		draws.sprite( "ply"..player.idx.."_feet" , p+V3(0,player.foot-8,-1) , player.side )
 	else
-		players.sprite( "ply"..player.idx.."_walk" , p+V3(0,player.foot-8,-1) , player.side , player.walk)
+		draws.sprite( "ply"..player.idx.."_walk" , p+V3(0,player.foot-8,-1) , player.side , player.walk)
 	end
 end
 
@@ -618,21 +631,6 @@ faunas.graphics={
 
 }
 
-faunas.sprite=function(sname,pos,side)
-	local map=system.components.map
-	local px=map.window_px-map.px
-	local py=map.window_py-map.py
-	local spr=system.components.tiles.names[sname]
-	system.components.sprites.list_add({
-		t=spr.idx ,
-		hx=spr.hx , hy=spr.hy ,
-		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
-		px=pos[1]+px , py=pos[2]+py , pz=pos[3] ,
-		sx=side,
-		rz=0,
-	})
-end
-
 faunas.item.get_values=function(fauna)
 
 	fauna:get_auto_values()
@@ -689,12 +687,14 @@ faunas.item.update=function(fauna)
 	
 --	local up=fauna.scene.ups[fauna.idx] or fauna.sys.oven.ups.empty
 
+	local level=fauna:get_singular("level") -- only one level is active at a time
+
 	local brain={}
 	brain.move=V3(0,0,0)
 	brain.jump=nil
 	fauna:update_brain(brain)
 
-	local grav=400
+	local grav=level:get_gravity(fauna.pos)
 
 	fauna.acc=V3( 0, 0 ,0) -- reset force
 	local va -- velocity we want to achieve
@@ -739,7 +739,7 @@ faunas.item.update=function(fauna)
 		if fauna.foot>3 then fauna.foot=3 end
 		if fauna.foot<3 then fauna.foot=fauna.foot+footspeed end
 
-		fauna.acc[2]=fauna.acc[2]+grav -- gravity
+		fauna.acc:add(grav) -- gravity
 	end
 
 	if fauna.onfloor>0 and fauna.jump<=0 then -- meep meep jump	
@@ -776,8 +776,8 @@ faunas.item.draw=function(fauna)
 
 	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
 	local f=math.abs(fauna.flap-2)
-	faunas.sprite( fauna.sname          , p , fauna.side )
-	faunas.sprite( fauna.sname.."_feet" , p+V3(0,fauna.foot,8) , fauna.side )
+	draws.sprite( fauna.sname          , p , fauna.side )
+	draws.sprite( fauna.sname.."_feet" , p+V3(0,fauna.foot,8) , fauna.side )
 
 end
 
@@ -841,21 +841,6 @@ fauna_pandas.graphics={
 ]]},
 
 }
-
-fauna_pandas.sprite=function(sname,pos,side)
-	local map=system.components.map
-	local px=map.window_px-map.px
-	local py=map.window_py-map.py
-	local spr=system.components.tiles.names[sname]
-	system.components.sprites.list_add({
-		t=spr.idx ,
-		hx=spr.hx , hy=spr.hy ,
-		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
-		px=pos[1]+px , py=pos[2]+py , pz=pos[3] ,
-		sx=side,
-		rz=0,
-	})
-end
 
 fauna_pandas.item.get_values=function(fauna_panda)
 
@@ -931,7 +916,7 @@ fauna_pandas.item.draw=function(fauna_panda)
 	fauna_panda:get_values()
 
 	local p=V3( fauna_panda.pos[1] , fauna_panda.pos[2]-3, fauna_panda.pos[1]+fauna_panda.pos[2] )
-	fauna_pandas.sprite( fauna_panda.sname          , p , 1 )
+	draws.sprite( fauna_panda.sname          , p , 1 )
 
 end
 
@@ -955,11 +940,13 @@ levels.values={
 	pos=V3( 0,0,0 ),
 	focus=V3( 0,0,0 ),
 	idx=1,
+	time=0,
 }
 
 levels.types={
 	pos="tween",
 	focus="tween",
+	time="tween",
 	idx="get",
 }
 
@@ -989,15 +976,27 @@ levels.graphics={
 ]]},
 
 {nil,"char_solid",[[
-7 7 7 7 7 7 7 7 
-7 0 0 0 0 0 0 7 
-7 0 0 0 0 0 0 7 
-7 0 0 0 0 0 0 7 
-7 0 0 0 0 0 0 7 
-7 0 0 0 0 0 0 7 
-7 0 0 0 0 0 0 7 
-7 7 7 7 7 7 7 7 
+r r r r r r r R 
+r r r r r r r R 
+r r r r r r r R 
+R R R R R R R R 
+r r r R r r r r 
+r r r R r r r r 
+r r r R r r r r 
+R R R R R R R R 
 ]]},
+
+{nil,"char_sign",[[
+. . . F f . . . 
+s s s s s s s s 
+s 0 1 0 1 0 1 s 
+s 1 0 1 0 1 0 s 
+s s s s s s s s 
+. . . F f . . . 
+. . . F f . . . 
+. . . F f . . . 
+]]},
+
 
 }
 
@@ -1021,6 +1020,7 @@ levels.legend={
 	["v "]={ name="char_empty",				dir="down",  pdir=0, },
 	["00"]={ name="char_black",				solid=1, dense=1, },		-- black border
 	["0 "]={ name="char_solid",				solid=1, dense=1, },		-- empty border
+	["T "]={ name="char_sign",				text="Welcome to the Dungeon" },
 }
 
 levels.infos={}
@@ -1042,7 +1042,7 @@ map=[[
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . 0 0 . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . 0 
+0 . . . . . T . . . . . . . . . . 0 . . . . . . . . . . . . . 0 
 0 . . . 0 0 0 0 . . . . . . . . 0 0 . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . 0 
@@ -1103,6 +1103,7 @@ levels.item.setup=function(level)
 	bitdown.tile_grd( info.map, tilemap, system.components.map.tilemap_grd  ) -- draw into the screen (tiles)
 
 	local map=bitdown.pix_tiles(  info.map,  info.legend )
+	level.map=map
 	local get_tile=function(x,y,name)
 		local t=map[y] and map[y][x]
 		if name then return t and t[name] else return t end
@@ -1158,19 +1159,122 @@ levels.item.setup=function(level)
 	it.shader_uniforms.cy3={ 0    , 0.125, 0.25 , 1   }
 	it.shader_uniforms.cy4={ 0    , 0.25 , 0.25 , 1   }
 
+	it.shader_uniforms.cy0={ 1/2 , 0   , 1/2 , 1   }
+	it.shader_uniforms.cy1={ 1/4 , 0   , 1/2 , 1   }
+	it.shader_uniforms.cy2={ 1/4 , 1/4 , 1/2 , 1   }
+	it.shader_uniforms.cy3={ 0   , 1/4 , 1/2 , 1   }
+	it.shader_uniforms.cy4={ 0   , 1/2 , 1/2 , 1   }
+
+	level.time=0
+
 	level:set_values()
 end
 
 levels.item.update=function(level)
 	level:get_values()
+
+	level.time=level.time+(1/16)
 	
 	level:set_values()
+end
+
+levels.item.get_gravity=function(level,pos)
+	return V3(0,400,0)
+--[[
+	local n=pos-V3(128,96,0)
+	local d=n:len()
+	n:normalize()
+	d=d-100
+	if d>0 then
+		d=0
+	else
+		d=math.abs(d*d)
+		if d>800 then d=800 end
+	end
+	return n*-d
+]]
+end
+
+levels.item.get_tile_by_xy=function(level,x,y,name)
+	local t=level.map[y] and level.map[y][x]
+	if name then return t and t[name] else return t end
+end
+
+
+levels.item.get_tile_by_pos=function(level,pos)
+	local x=math.floor((pos[1])/8)
+	local y=math.floor((pos[2])/8)
+	return level:get_tile_by_xy(x,y)
+end
+
+levels.item.each_tile_near=function(level,pos,near)
+
+--	local done={}
+	local list={}
+	local push=function(t)
+		if not t then return end
+--		if done[t] then return end
+--		done[t]=true
+		list[#list+1]=t
+	end
+
+	local bx=math.floor((pos[1])/8)
+	local by=math.floor((pos[2])/8)
+
+	push( level:get_tile_by_xy(bx,by) )
+
+	for n=1,near do
+		for x=-n,n,1 do
+			push( level:get_tile_by_xy(bx+x,by-n) )
+			push( level:get_tile_by_xy(bx+x,by+n) )
+		end
+		for y=-n+1,n-1,1 do
+			push( level:get_tile_by_xy(bx-n,by+y) )
+			push( level:get_tile_by_xy(bx+n,by+y) )
+		end
+	end
+
+	return ipairs(list)
 end
 
 
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 levels.item.draw=function(level)
+	
+	local text=system.components.text
+
+	local add_char=function(s,x,y)
+
+		local sx,sy=text.text_tile8x16(s)
+		system.components.sprites.list_add({
+			t=sy*256+sx ,
+			hx=8 , hy=16 ,
+			ox=0 , oy=0 ,
+			px=x+1 , py=y+1 , pz=0 ,
+			color=0xff000000,
+		})
+		system.components.sprites.list_add({
+			t=sy*256+sx ,
+			hx=8 , hy=16 ,
+			ox=0 , oy=0 ,
+			px=x , py=y , pz=-1 ,
+			color=0xffffffff,
+		})
+	end
+
+	local add_string=function(s,x,y)
+		local l=#s
+		for i=1,l do
+			local c=s:sub(i,i)
+			add_char(c,128-(l*4)+((i-1)*8),0)
+		end
+	end
+	local tf=math.floor(level.time*100)%100
+	local ts=math.floor(level.time)%60
+	local tm=math.floor(level.time/60)%60
+--	add_string(tm..":"..("0"..ts):sub(-2).."."..("0"..tf):sub(-2))
+	add_string(tm..":"..("0"..ts):sub(-2))
 
 end
 
@@ -1329,12 +1433,16 @@ huds.values={
 	pos=V3( 0,0,0 ),
 	focus=V3( 0,0,0 ),
 	idx=1,
+	dst=V3( 0,0,0 ),
+	show_text="",
 }
 
 huds.types={
 	pos="tween",
+	dst="tween",
 	focus="tween",
 	idx="get",
+	show_text="get",
 }
 
 
@@ -1392,8 +1500,6 @@ end
 huds.item.setup=function(hud)
 	hud:get_values()
 
-	hud.pos[2]=64
-
 	hud:set_values()
 end
 
@@ -1403,6 +1509,24 @@ huds.item.update=function(hud)
 	hud:get_values()
 	
 	local player=hud:depend("player")
+	
+	local level=hud:get_singular("level") -- only one level is active at a time
+	
+	local show_tile
+	for _,t in level:each_tile_near( player.pos , 1 ) do
+		if t.name=="char_sign" then
+			show_tile=t
+			break
+		end
+	end
+	if show_tile then
+		hud.show_text=show_tile.text
+		hud.dst=V3(0,32,0)
+	else
+		hud.dst=V3(0,0,0)
+	end
+
+	hud.pos=(hud.dst+hud.pos*7)/8
 
 	hud:set_values()
 end
@@ -1425,7 +1549,9 @@ huds.item.draw=function(hud)
     local bg=24
 --	text.text_clear(0x01000000*bg) -- clear text forcing a background color
 
-	text.text_print("This is the hud, 4 lives and 10 secs",0,0,31,24) -- (text,x,y,color,background)
+--	text.text_print("This is the hud, 4 lives and 10 secs",0,0,31,24) -- (text,x,y,color,background)
+--	text.text_print2("This is the hud, 4 lives and 10 secs",0,1,31,24) -- (text,x,y,color,background)
+	text.text_print4(hud.show_text,0,0,31,24) -- (text,x,y,color,background)
 
 end
 

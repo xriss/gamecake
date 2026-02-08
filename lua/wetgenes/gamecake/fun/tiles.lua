@@ -138,6 +138,16 @@ tiles.create=function(it,opts)
 		it.upload_tiles( { {0x0100,"_font_8x8",0x0240} } )
 		it.dirty(true)
 	end
+	-- 4,5,6,7 line
+	it.upload_default_font_8x16=function()
+		local bitdown_font=require("wetgenes.gamecake.fun.bitdown_font")
+		-- and 8x16 font 
+		local g=bitdown_font.build_grd(8,16) -- 1 long line
+		it.bitmap_grd:pixels(0,24,64*8,16, g:pixels(0,   0,64*8,16,"") ) -- 4 lines
+		it.bitmap_grd:pixels(0,40,64*8,16, g:pixels(64*8,0,64*8,16,"") )
+		it.upload_tiles( { {0x0300,"_font_8x16",0x0440} } )
+		it.dirty(true)
+	end
 
 -- upload all the given tiles t[1]=idx t[2]=name t[3]=ascii
 	it.upload_tiles=function(graphics)

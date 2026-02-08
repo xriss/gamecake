@@ -63,8 +63,8 @@ tilemap_text.inject=function(it,opts)
 	end
 	it.text_tile8x16=function(c,fg,bg)
 		local i=(c:byte())
-		local x=i%32
-		local y=2+((i-x)/64) -- use tile lines 4,5,6,7 (or lines 2,3 in 8x16 tiles)
+		local x=i%64
+		local y=3+(((i-x)/64)*2) -- use tile lines 4,5,6,7 (or lines 2,3 in 8x16 tiles)
 		return x,y,fg or it.text_fg,bg or it.text_bg
 	end
 	
@@ -158,7 +158,7 @@ tilemap_text.inject=function(it,opts)
 		local bm={}
 		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
 			if x>=it.text_px and y>=it.text_py and x<it.text_px+it.text_hx and y<it.text_py+it.text_hy then
-				local c1,c2,c3,c4=it.text_tile(c,fg,bg)
+				local c1,c2,c3,c4=it.text_tile8x8(c,fg,bg)
 				local bl=#bm
 				bm[bl+1]=c1*2
 				bm[bl+2]=c2
@@ -177,6 +177,50 @@ tilemap_text.inject=function(it,opts)
 		return x,y
 	end
 	
+	it.text_print4=function(s,x,y,fg,bg)
+		local ox=x
+		local bm={}
+		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
+			if x>=it.text_px and y>=it.text_py and x<it.text_px+it.text_hx and y<it.text_py+it.text_hy then
+				local c1,c2,c3,c4=it.text_tile8x16(c,fg,bg)
+				local bl=#bm
+				bm[bl+1]=c1*2
+				bm[bl+2]=c2
+				bm[bl+3]=c3
+				bm[bl+4]=c4
+				bm[bl+5]=c1*2+1
+				bm[bl+6]=c2
+				bm[bl+7]=c3
+				bm[bl+8]=c4
+				x=x+2
+			end
+		end
+		if x-ox>0 then
+			it.tilemap_grd:pixels( ox,y, x-ox,1, bm )
+		end
+		x=ox
+		bm={}
+		for c in s:gmatch("([%z\1-\127\194-\244][\128-\191]*)") do
+			if x>=it.text_px and y>=it.text_py and x<it.text_px+it.text_hx and y<it.text_py+it.text_hy then
+				local c1,c2,c3,c4=it.text_tile8x16(c,fg,bg)
+				local bl=#bm
+				bm[bl+1]=c1*2
+				bm[bl+2]=c2+1
+				bm[bl+3]=c3
+				bm[bl+4]=c4
+				bm[bl+5]=c1*2+1
+				bm[bl+6]=c2+1
+				bm[bl+7]=c3
+				bm[bl+8]=c4
+				x=x+2
+			end
+		end
+		if x-ox>0 then
+			it.tilemap_grd:pixels( ox,y+1, x-ox,1, bm )
+		end
+		return x,y+1
+	end
+
 	it.text_print=it.text_print1
 
 -- set the text window
