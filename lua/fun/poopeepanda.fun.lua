@@ -1093,6 +1093,7 @@ levels.legend={
 	["0 "]={ name="char_solid",				solid=1, dense=1, },		-- empty border
 	["T1"]={ name="char_sign",				text="Welcome to the Dungeon, we got fun and games." },
 	["T2"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
+	["T3"]={ name="char_sign",				text="Stomp ten Slims." },
 }
 
 levels.infos={}
@@ -1108,7 +1109,7 @@ map=[[
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . T1. . . . T2. . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . T1. . . . T2. . . T3. . . . . . . . . . . . 0 
 0 . . . 0 0 0 0 . 0 0 0 0 . 0 0 . 0 0 0 . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
