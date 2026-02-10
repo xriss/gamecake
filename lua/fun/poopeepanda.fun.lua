@@ -6,6 +6,8 @@ local tardis=require("wetgenes.tardis")
 local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4")
 
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
+local wstr=require("wetgenes.string")
+
 
 oven.opts.fun="" -- back to menu on reset				
 
@@ -201,6 +203,7 @@ players.values={
 	jump=0,
 	flap=0,
 	walk=0,
+	score=0,
 }
 
 players.types={
@@ -216,6 +219,7 @@ players.types={
 	jump="get",
 	flap="get",
 	walk="get",
+	score="get",
 }
 
 
@@ -410,7 +414,8 @@ players.item.setup=function(player)
 	player.shape=player.body:shape("circle",4,0,0)
 	player.shape:friction(0.5)
 	player.shape:elasticity(0.5)
-	player.shape:filter(player.idx,0x00010000,0xffffffff)
+	player.shape:filter(player.uid,0x00010000,0xffffffff)
+	player.shape.uid=player.uid
 
 
 	player:set_body()
@@ -469,7 +474,7 @@ players.item.update=function(player)
 	local footspeed=0.25
 
 	local space=player:get_singular("kinetic").space
-	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,2,player.idx)
+	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,2,player.uid)
 	if hit and hit.alpha and hit.alpha<0.75 then
 
 		local d=(hit.alpha*16)+2 -- distance + radius
@@ -488,6 +493,17 @@ players.item.update=function(player)
 		player.acc[2]=player.acc[2]+a --  hover
 
 		player.onfloor=4
+
+if hit.shape.uid then
+	local it=scene:find_uid(hit.shape.uid)
+	if it and it.caste=="fauna" then
+		if it:do_die() then
+			player.score=player.score+100
+		end
+	end
+--	print("player stomp",hit.shape.uid)
+end
+
 	else
 		if player.foot>11 then player.foot=player.foot-footspeed end
 		if player.foot<11 then player.foot=player.foot+footspeed end
@@ -610,6 +626,25 @@ faunas.graphics={
 . . G G G G G G G G G G G G . . 
 ]]},
 
+{nil,"fauna_slime_splat",[[
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . d d d d d d G G . . . . . . . . 
+. . . . . . . d d d d d d d d G G . . . . . . . 
+. . . . . . d d 7 0 d 7 0 d d d G G . . . . . . 
+. . . . G G d d 0 0 d 0 0 d d d G G G G . . . . 
+G G G G G G G G G G G G G G G G G G G G G G G G 
+]]},
+
 {nil,"fauna_slime_feet",[[
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
@@ -667,9 +702,16 @@ faunas.item.setup=function(fauna)
 	fauna.shape:friction(0.5)
 	fauna.shape:elasticity(0.5)
 	fauna.shape:filter(fauna.uid,0x00010000,0xffffffff)
+	fauna.shape.uid=fauna.uid
 
 	fauna:set_body()
 	fauna:set_values()
+end
+faunas.item.clean=function(fauna)
+	local space=fauna:get_singular("kinetic").space
+	space:remove(fauna.shape)
+	space:remove(fauna.body)
+	scene:remove(fauna)
 end
 
 faunas.item.update_brain=function(fauna,brain)
@@ -682,7 +724,26 @@ faunas.item.update_brain=function(fauna,brain)
 	end
 end
 
+faunas.item.do_die=function(fauna)
+	local d=fauna:get("deleted")
+	if not d then
+		fauna:set("deleted",2)
+		return true
+	end
+end
+
 faunas.item.update=function(fauna)
+
+	if fauna:get("deleted") then
+		local d=fauna:get("deleted")
+		d=d-1
+		fauna:set("deleted",d)
+		if d<=0 then
+			fauna:clean()
+		end
+		return
+	end
+
 	fauna:get_values()
 	
 --	local up=fauna.scene.ups[fauna.idx] or fauna.sys.oven.ups.empty
@@ -735,6 +796,11 @@ faunas.item.update=function(fauna)
 		fauna.acc[2]=fauna.acc[2]+a --  hover
 
 		fauna.onfloor=4
+
+if hit.shape.uid then
+--	print("monster stomp",hit.shape.uid)
+end
+
 	else
 		if fauna.foot>3 then fauna.foot=3 end
 		if fauna.foot<3 then fauna.foot=fauna.foot+footspeed end
@@ -771,6 +837,11 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 faunas.item.draw=function(fauna)
+	if fauna:get("deleted") then
+		local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
+		draws.sprite( fauna.sname.."_splat"          , p , fauna.side )
+		return
+	end
 
 	fauna:get_values()
 
@@ -1020,7 +1091,8 @@ levels.legend={
 	["v "]={ name="char_empty",				dir="down",  pdir=0, },
 	["00"]={ name="char_black",				solid=1, dense=1, },		-- black border
 	["0 "]={ name="char_solid",				solid=1, dense=1, },		-- empty border
-	["T "]={ name="char_sign",				text="Welcome to the Dungeon" },
+	["T1"]={ name="char_sign",				text="Welcome to the Dungeon, we got fun and games." },
+	["T2"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
 }
 
 levels.infos={}
@@ -1036,13 +1108,13 @@ map=[[
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . T1. . . . T2. . . . . . . . . . . . . . . . 0 
 0 . . . 0 0 0 0 . 0 0 0 0 . 0 0 . 0 0 0 . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . 0 0 . . . . . . . . . . . . 0 
-0 . . . . . T . . . . . . . . . . 0 . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . 0 
 0 . . . 0 0 0 0 . . . . . . . . 0 0 . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . 0 
@@ -1147,6 +1219,9 @@ levels.item.setup=function(level)
 				tile.shape:elasticity(tile.solid)
 				tile.shape:filter(0,0x00000001,0xffffffff)
 			end
+			if tile.text then
+				tile.text_lines=wstr.smart_wrap(tile.text,(256-16)/8)
+			end
 		end
 	end
 
@@ -1193,6 +1268,12 @@ levels.item.get_gravity=function(level,pos)
 	end
 	return n*-d
 ]]
+end
+
+levels.item.get_tile_by_idx=function(level,idx,name)
+	local x=idx%0x100
+	local y=math.floor(idx/0x100)%0x100
+	return level:get_tile_by_xy(x,y,name)
 end
 
 levels.item.get_tile_by_xy=function(level,x,y,name)
@@ -1244,8 +1325,7 @@ levels.item.draw=function(level)
 	
 	local text=system.components.text
 
-	local add_char=function(s,x,y)
-
+	local add_char16=function(s,x,y)
 		local sx,sy=text.text_tile8x16(s)
 		system.components.sprites.list_add({
 			t=sy*256+sx ,
@@ -1262,20 +1342,55 @@ levels.item.draw=function(level)
 			color=0xffffffff,
 		})
 	end
-
-	local add_string=function(s,x,y)
+	local add_string16=function(s,x,y)
 		local l=#s
 		for i=1,l do
 			local c=s:sub(i,i)
-			add_char(c,128-(l*4)+((i-1)*8),0)
+			add_char16(c,x+((i-1)*8),y)
 		end
 	end
+
+	local add_char4=function(s,x,y)
+		local sx,sy=text.text_tile4x8(s)
+		system.components.sprites.list_add({
+			t=sy*256+(sx/2) ,
+			hx=4 , hy=8 ,
+			ox=0 , oy=0 ,
+			px=x+1 , py=y+1 , pz=0 ,
+			color=0xff000000,
+		})
+		system.components.sprites.list_add({
+			t=sy*256+(sx/2) ,
+			hx=4 , hy=8 ,
+			ox=0 , oy=0 ,
+			px=x , py=y , pz=-1 ,
+			color=0xffffffff,
+		})
+	end
+	local add_string4=function(s,x,y)
+		local l=#s
+		for i=1,l do
+			local c=s:sub(i,i)
+			add_char4(c,x+((i-1)*4),y)
+		end
+	end
+
 	local tf=math.floor(level.time*100)%100
 	local ts=math.floor(level.time)%60
-	local tm=math.floor(level.time/60)%60
---	add_string(tm..":"..("0"..ts):sub(-2).."."..("0"..tf):sub(-2))
-	add_string(tm..":"..("0"..ts):sub(-2))
+	local tm=math.floor(level.time/60)
+	local s=tm..":"..("0"..ts):sub(-2)
+	add_string16(s,128-(#s*4),0)
 
+	local players=scene:caste("player")
+	for i,p in ipairs(players) do
+		if p.idx==1 then
+			local s=p.score..""
+			add_string4(s,2,1)
+		elseif p.idx==2 then
+			local s=p.score..""
+			add_string4(s,254-(#s*4),1)
+		end
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -1299,6 +1414,7 @@ cameras.values={
 	pos=V3( 0,0,0 ),
 	focus=V3( 0,0,0 ),
 	idx=1,
+	tile=0x0000,
 }
 
 cameras.types={
@@ -1434,7 +1550,7 @@ huds.values={
 	focus=V3( 0,0,0 ),
 	idx=1,
 	dst=V3( 0,0,0 ),
-	show_text="",
+	tile_idx=0,
 }
 
 huds.types={
@@ -1442,7 +1558,7 @@ huds.types={
 	dst="tween",
 	focus="tween",
 	idx="get",
-	show_text="get",
+	tile_idx="get",
 }
 
 
@@ -1520,9 +1636,10 @@ huds.item.update=function(hud)
 		end
 	end
 	if show_tile then
-		hud.show_text=show_tile.text
-		hud.dst=V3(0,32,0)
+		hud.tile_idx=show_tile.idx
+		hud.dst=V3(0,#show_tile.text_lines*16+16,0)
 	else
+--		hud.tile_idx=-1
 		hud.dst=V3(0,0,0)
 	end
 
@@ -1540,6 +1657,7 @@ huds.item.draw=function(hud)
 
 	local text=system.components.text
 	local screen=system.components.screen
+	local level=hud:get_singular("level") -- only one level is active at a time
 
 	hud:get_values()
 
@@ -1551,8 +1669,14 @@ huds.item.draw=function(hud)
 
 --	text.text_print("This is the hud, 4 lives and 10 secs",0,0,31,24) -- (text,x,y,color,background)
 --	text.text_print2("This is the hud, 4 lives and 10 secs",0,1,31,24) -- (text,x,y,color,background)
-	text.text_print4(hud.show_text,0,0,31,24) -- (text,x,y,color,background)
-
+	if hud.tile_idx>=0 then
+		local tile=level:get_tile_by_idx(hud.tile_idx)
+		if tile and tile.text_lines then
+			for i,line in ipairs(tile.text_lines) do
+				text.text_print4(line,2,i*2-1,31,24) -- (text,x,y,color,background)
+			end
+		end
+	end
 end
 
 --------------------------------------------------------------------------------

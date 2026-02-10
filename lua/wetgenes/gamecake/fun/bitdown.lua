@@ -426,6 +426,7 @@ M.pix_tiles=function(str,map,tiles,px,py,hx,hy)
 			local c=scopy(getc(s) or {0,0,0,0}) -- this will be a new table per cell, shallow copy
 			c.x=x+px -- add x,y of tile to the copied data
 			c.y=y+py
+			c.idx=c.x+c.y*0x100 -- yx combined idx
 			tiles[y+py][x+px]=c
 		end
 	end
