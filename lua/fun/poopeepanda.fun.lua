@@ -1516,19 +1516,19 @@ cameras.item.draw=function(camera)
 	camera:get_values()
 
 	if camera.pos[1]<0 then
-		map.window_px=-camera.pos[1]
+		map.window_px=math.floor(-camera.pos[1])
 		map.px=0
 	else
 		map.window_px=0
-		map.px=camera.pos[1]
+		map.px=math.floor(camera.pos[1])
 	end
 	
 	if camera.pos[2]<0 then
-		map.window_py=-camera.pos[2]
+		map.window_py=math.floor(-camera.pos[2])
 		map.py=0
 	else
 		map.window_py=0
-		map.py=camera.pos[2]
+		map.py=math.floor(camera.pos[2])
 	end
 
 end
@@ -1643,15 +1643,18 @@ huds.item.update=function(hud)
 	end
 	if show_tile and hud.tile_idx~=show_tile.idx then -- new text
 		hud.tile_idx=show_tile.idx
-		hud.dst=V3(0,#show_tile.text_lines*16+16,0)
 		hud.tile_time=0
 	end
 	
-	if not show_tile then
+	if show_tile then
+		hud.dst=V3(0,#show_tile.text_lines*16+16,0)
+		hud.tile_time=hud.tile_time+1
+	else
 		hud.dst=V3(0,0,0)
+		hud.tile_time=hud.tile_time-1
+		if hud.tile_time<0 then hud.tile_time=0 end
 	end
 
-	hud.tile_time=hud.tile_time+1
 
 	hud.pos=(hud.dst+hud.pos*7)/8
 
