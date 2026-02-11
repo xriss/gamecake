@@ -196,8 +196,10 @@ LOG("oven","fun system setup "..system.fullscreen_width.."x"..system.fullscreen_
 
 	system.resume({setup=true})
 
-	if system.components.screen then
+	if system.components.screen and system.components.screen.pixel_snaps then
 		oven.mods["wetgenes.gamecake.mods.snaps"].fbo=system.components.screen.fbo
+	else
+		oven.mods["wetgenes.gamecake.mods.snaps"].fbo=nil
 	end
 	
 	system.is_setup=true

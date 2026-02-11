@@ -43,6 +43,8 @@ screen.create=function(it,opts)
 	it.component="screen"
 	it.name=opts.name or it.component
 	
+	it.pixel_snaps=it.opts.pixel_snaps -- set flag to snap raw pixels else we snap postprocesed pixels
+	
 	it.lox=it.opts.lox
 	it.loy=it.opts.loy
 	it.hix=it.opts.hix

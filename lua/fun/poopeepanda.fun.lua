@@ -409,6 +409,12 @@ end
 players.item.setup=function(player)
 	player:get_values()
 
+	player:setup_kinetic()
+	player:set_values()
+end
+
+players.item.setup_kinetic=function(player)
+	if player.body then return end -- only create once
 	local space=player:get_singular("kinetic").space
 	player.body=space:body(1,1)
 	player.shape=player.body:shape("circle",4,0,0)
@@ -416,13 +422,24 @@ players.item.setup=function(player)
 	player.shape:elasticity(0.5)
 	player.shape:filter(player.uid,0x00010000,0xffffffff)
 	player.shape.uid=player.uid
+	player:set_body() -- set positon etc
+end
 
+players.item.clean_kinetic=function(player)
+	if not player.body then return end -- auto clean
+	local space=player:get_singular("kinetic").space		
+	space:remove(player.shape)
+	space:remove(player.body)
+	player.body=nil
+	player.shape=nil
+end
 
-	player:set_body()
-	player:set_values()
+players.item.clean=function(player)
+	player:clean_kinetic()
 end
 
 players.item.update=function(player)
+	if player:get("deleted") then return end -- marked for deletion
 	player:get_values()
 	
 	local level=player:get_singular("level") -- only one level is active at a time
@@ -497,7 +514,7 @@ players.item.update=function(player)
 if hit.shape.uid then
 	local it=scene:find_uid(hit.shape.uid)
 	if it and it.caste=="fauna" then
-		if it:do_die() then
+		if it:mark_deleted() then
 			player.score=player.score+100
 		end
 	end
@@ -533,6 +550,7 @@ end
 end
 
 players.item.update_kinetic=function(player)
+	if player:get("deleted") then return end -- already done
 	player:get_body()
 	player:set_values()
 end
@@ -540,6 +558,7 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 players.item.draw=function(player)
+	if player:get("deleted") then return end -- already done
 
 	player:get_values()
 
@@ -696,6 +715,12 @@ end
 faunas.item.setup=function(fauna)
 	fauna:get_values()
 
+	fauna:setup_kinetic()
+	fauna:set_values()
+end
+
+faunas.item.setup_kinetic=function(fauna)
+	if fauna.body then return end -- already done
 	local space=fauna:get_singular("kinetic").space
 	fauna.body=space:body(1,1)
 	fauna.shape=fauna.body:shape("circle",4,0,0)
@@ -703,15 +728,20 @@ faunas.item.setup=function(fauna)
 	fauna.shape:elasticity(0.5)
 	fauna.shape:filter(fauna.uid,0x00010000,0xffffffff)
 	fauna.shape.uid=fauna.uid
-
 	fauna:set_body()
-	fauna:set_values()
 end
-faunas.item.clean=function(fauna)
-	local space=fauna:get_singular("kinetic").space
+
+faunas.item.clean_kinetic=function(fauna)
+	if not fauna.body then return end -- already done
+	local space=fauna:get_singular("kinetic").space		
 	space:remove(fauna.shape)
 	space:remove(fauna.body)
-	scene:remove(fauna)
+	fauna.body=nil
+	fauna.shape=nil
+end
+
+faunas.item.clean=function(fauna)
+	fauna:clean_kinetic()
 end
 
 faunas.item.update_brain=function(fauna,brain)
@@ -724,25 +754,18 @@ faunas.item.update_brain=function(fauna,brain)
 	end
 end
 
-faunas.item.do_die=function(fauna)
-	local d=fauna:get("deleted")
+faunas.item.mark_deleted=function(fauna)
+	local d=fauna:get("deleted") -- only die once
 	if not d then
-		fauna:set("deleted",2)
+		fauna:set("deleted",true)
+		fauna:clean_kinetic() -- remove collision
 		return true
 	end
 end
 
 faunas.item.update=function(fauna)
 
-	if fauna:get("deleted") then
-		local d=fauna:get("deleted")
-		d=d-1
-		fauna:set("deleted",d)
-		if d<=0 then
-			fauna:clean()
-		end
-		return
-	end
+	if fauna:get("deleted") then return end
 
 	fauna:get_values()
 	
@@ -830,6 +853,7 @@ end
 end
 
 faunas.item.update_kinetic=function(fauna)
+	if fauna:get("deleted") then return end
 	fauna:get_body()
 	fauna:set_values()
 end
@@ -837,11 +861,7 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 faunas.item.draw=function(fauna)
-	if fauna:get("deleted") then
-		local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
-		draws.sprite( fauna.sname.."_splat"          , p , fauna.side )
-		return
-	end
+	if fauna:get("deleted") then return end
 
 	fauna:get_values()
 
@@ -942,15 +962,6 @@ end
 -- must begin and end with a get and a set
 fauna_pandas.item.setup=function(fauna_panda)
 	fauna_panda:get_values()
-
---[[
-	local space=fauna_panda:get_singular("kinetic").space
-	fauna_panda.body=space:body(1,1)
-	fauna_panda.shape=fauna_panda.body:shape("circle",4,0,0)
-	fauna_panda.shape:friction(0.5)
-	fauna_panda.shape:elasticity(0.5)
-	fauna_panda.shape:filter(fauna_panda.uid,0x00010000,0xffffffff)
-]]
 
 	fauna_panda:set_values()
 end
@@ -1085,15 +1096,17 @@ levels.legend={
 	[0]={ name="char_empty",	},
 
 	[". "]={ name="char_empty",				},
-	["< "]={ name="char_empty",				dir="left",  pdir=0, },
-	["> "]={ name="char_empty",				dir="right", pdir=0, },
-	["^ "]={ name="char_empty",				dir="up",    pdir=0, },
-	["v "]={ name="char_empty",				dir="down",  pdir=0, },
+	["< "]={ name="char_empty",				dir_left=1,  },
+	["> "]={ name="char_empty",				dir_right=1, },
+	["^ "]={ name="char_empty",				dir_up=1,    },
+	["v "]={ name="char_empty",				dir_down=1,  },
 	["00"]={ name="char_black",				solid=1, dense=1, },		-- black border
 	["0 "]={ name="char_solid",				solid=1, dense=1, },		-- empty border
 	["T1"]={ name="char_sign",				text="Welcome to the Dungeon, we got fun and games." },
 	["T2"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
 	["T3"]={ name="char_sign",				text="Stomp ten Slims." },
+	["P1"]={ spawn="player", idx=1,  },
+	["P2"]={ spawn="player", idx=2,  },
 }
 
 levels.infos={}
@@ -1119,9 +1132,9 @@ map=[[
 0 . . . 0 0 0 0 . . . . . . . . 0 0 . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . 0 
-0 0 . . . . . . . . . . . . . . . . . . . . 0 0 0 . . . 0 0 0 0 
+0 0 0 0 . . . . . . . . . . . . . . . . . . 0 0 0 . . . 0 0 0 0 
 0 . . . . . . . . 0 0 0 . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 P1. . . . . . . . . . . . . . . . . . . . . . . . . . . . P20 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 ]],
 }
