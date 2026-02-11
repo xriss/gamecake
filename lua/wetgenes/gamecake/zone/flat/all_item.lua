@@ -72,6 +72,17 @@ all.item.destroy=function(it)
 	return it.sys:destroy(it)
 end
 
+-- set special deleted flag and possibly remove kinetic part
+all.item.mark_deleted=function(it)
+	local d=it:get("deleted") -- only delete once
+	if d then return false end
+	it:set("deleted",true)
+	if it.clean_kinetic then
+		it:clean_kinetic() -- remove collision
+	end
+	return true
+end
+
 all.item.setup=function(it,boot)
 	boot=boot or it.boot
 end

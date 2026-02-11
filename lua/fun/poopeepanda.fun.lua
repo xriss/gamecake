@@ -439,8 +439,9 @@ players.item.clean=function(player)
 end
 
 players.item.update=function(player)
-	if player:get("deleted") then return end -- marked for deletion
+	if player:get("deleted") then return end
 	player:get_values()
+	player:setup_kinetic() -- might need to recreate body
 	
 	local level=player:get_singular("level") -- only one level is active at a time
 
@@ -550,7 +551,7 @@ end
 end
 
 players.item.update_kinetic=function(player)
-	if player:get("deleted") then return end -- already done
+	if player:get("deleted") then return end
 	player:get_body()
 	player:set_values()
 end
@@ -558,7 +559,7 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 players.item.draw=function(player)
-	if player:get("deleted") then return end -- already done
+	if player:get("deleted") then return end
 
 	player:get_values()
 
@@ -754,20 +755,10 @@ faunas.item.update_brain=function(fauna,brain)
 	end
 end
 
-faunas.item.mark_deleted=function(fauna)
-	local d=fauna:get("deleted") -- only die once
-	if not d then
-		fauna:set("deleted",true)
-		fauna:clean_kinetic() -- remove collision
-		return true
-	end
-end
-
 faunas.item.update=function(fauna)
-
 	if fauna:get("deleted") then return end
-
 	fauna:get_values()
+	fauna:setup_kinetic() -- might need to recreate body
 	
 --	local up=fauna.scene.ups[fauna.idx] or fauna.sys.oven.ups.empty
 
@@ -1565,6 +1556,7 @@ huds.values={
 	idx=1,
 	dst=V3( 0,0,0 ),
 	tile_idx=0,
+	tile_time=0,
 }
 
 huds.types={
@@ -1649,13 +1641,17 @@ huds.item.update=function(hud)
 			break
 		end
 	end
-	if show_tile then
+	if show_tile and hud.tile_idx~=show_tile.idx then -- new text
 		hud.tile_idx=show_tile.idx
 		hud.dst=V3(0,#show_tile.text_lines*16+16,0)
-	else
---		hud.tile_idx=-1
+		hud.tile_time=0
+	end
+	
+	if not show_tile then
 		hud.dst=V3(0,0,0)
 	end
+
+	hud.tile_time=hud.tile_time+1
 
 	hud.pos=(hud.dst+hud.pos*7)/8
 
@@ -1683,11 +1679,18 @@ huds.item.draw=function(hud)
 
 --	text.text_print("This is the hud, 4 lives and 10 secs",0,0,31,24) -- (text,x,y,color,background)
 --	text.text_print2("This is the hud, 4 lives and 10 secs",0,1,31,24) -- (text,x,y,color,background)
+
 	if hud.tile_idx>=0 then
+		local maxchar=math.floor(hud.tile_time/1)
+		
 		local tile=level:get_tile_by_idx(hud.tile_idx)
 		if tile and tile.text_lines then
 			for i,line in ipairs(tile.text_lines) do
-				text.text_print4(line,2,i*2-1,31,24) -- (text,x,y,color,background)
+				if maxchar>0 then
+					local s=line:sub(1,maxchar)
+					maxchar=maxchar-#s
+					text.text_print4(s,2,i*2-1,31,24) -- (text,x,y,color,background)
+				end
 			end
 		end
 	end
