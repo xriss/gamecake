@@ -604,6 +604,8 @@ print("joining",addr)
 	-- update the tick time of when we have matching checksums
 	upnet.update_ticks_agreed=function()
 
+		if upnet.ticks.agreed >= upnet.ticks.input then return end -- cant go past input
+
 		local ti=1+upnet.ticks.agreed-upnet.ticks.base	--  agreed tick
 		if not need_hash then
 			if upnet.ticks.agreed<upnet.ticks.now-1 then
@@ -611,6 +613,7 @@ print("joining",addr)
 				upnet.hashs[ti+1][upnet.us]=0
 			end
 		end
+				
 		local hash=upnet.hashs[ti+1] -- next tick after agreed tick
 		if not hash then return end
 
@@ -654,7 +657,6 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 	upnet.inc_base=function()
 
 		upnet.ticks.base=upnet.ticks.base+1
-
 		-- adjust hashs table to new base
 		table.remove(upnet.hashs,1)
 
@@ -810,7 +812,7 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 				else
 					upnet.next_tick(f)
 --					local dbg_hash=upnet.hashs[2+upnet.ticks.agreed-upnet.ticks.base] or {}
---					print("now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base,Ox(dbg_hash[1]),Ox(dbg_hash[2]))
+--					print("now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base)
 --					dlog(upnet.dmode("tick"),"now:"..upnet.ticks.now,"inp:"..upnet.ticks.input,"agr:"..upnet.ticks.agreed,"bse:"..upnet.ticks.base)
 				end
 			else
