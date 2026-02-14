@@ -78,6 +78,7 @@ all.create_scene=function(scene)
 		cameras,
 		huds,
 		players,
+		gibs,
 		faunas,
 		fauna_pandas,
 	}) do
@@ -420,7 +421,7 @@ players.item.setup_kinetic=function(player)
 	player.shape=player.body:shape("circle",4,0,0)
 	player.shape:friction(0.5)
 	player.shape:elasticity(0.5)
-	player.shape:filter(player.uid,0x00010000,0xffffffff)
+	player.shape:filter(player.uid,0x00000100,0x00ffffff)
 	player.shape.uid=player.uid
 	player:set_body() -- set positon etc
 end
@@ -492,7 +493,7 @@ players.item.update=function(player)
 	local footspeed=0.25
 
 	local space=player:get_singular("kinetic").space
-	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,2,player.uid)
+	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,2,player.uid,0x00000100,0x00ffffff)
 	if hit and hit.alpha and hit.alpha<0.75 then
 
 		local d=(hit.alpha*16)+2 -- distance + radius
@@ -517,6 +518,19 @@ if hit.shape.uid then
 	if it and it.caste=="fauna" then
 		if it:mark_deleted() then
 			player.score=player.score+100
+			local r1=(player.sys:get_rnd()*200)-100
+			local r2=(player.sys:get_rnd()*200)-100
+			local boots={
+				{"gib",sname="gib_green",life=16*21,pos=it.pos,vel=V3(r1,r2-200,0)+player.vel},
+				{"gib",sname="gib_green",life=16*22,pos=it.pos,vel=V3(r2,r1-200,0)+player.vel},
+				{"gib",sname="gib_green",life=16*23,pos=it.pos,vel=V3(-r1,-r2-200,0)+player.vel},
+				{"gib",sname="gib_green",life=16*24,pos=it.pos,vel=V3(-r2,-r1-200,0)+player.vel},
+				{"gib",sname="gib_green",life=16*25,pos=it.pos,vel=V3(r1,r2-200,0)+player.vel},
+				{"gib",sname="gib_green",life=16*26,pos=it.pos,vel=V3(r2,r1-200,0)+player.vel},
+				{"gib",sname="gib_green",life=16*27,pos=it.pos,vel=V3(-r1,-r2-200,0)+player.vel},
+				{"gib",sname="gib_green",life=16*28,pos=it.pos,vel=V3(-r2,-r1-200,0)+player.vel},
+			}
+			scene:creates(boots)
 		end
 	end
 --	print("player stomp",hit.shape.uid)
@@ -727,7 +741,7 @@ faunas.item.setup_kinetic=function(fauna)
 	fauna.shape=fauna.body:shape("circle",4,0,0)
 	fauna.shape:friction(0.5)
 	fauna.shape:elasticity(0.5)
-	fauna.shape:filter(fauna.uid,0x00010000,0xffffffff)
+	fauna.shape:filter(fauna.uid,0x00010000,0x00ffffff)
 	fauna.shape.uid=fauna.uid
 	fauna:set_body()
 end
@@ -796,7 +810,7 @@ faunas.item.update=function(fauna)
 	local footspeed=0.25
 	local footbase=3
 	local space=fauna:get_singular("kinetic").space
-	local hit=space:query_segment_first(fauna.pos[1],fauna.pos[2],fauna.pos[1],fauna.pos[2]+16,2,fauna.uid)
+	local hit=space:query_segment_first(fauna.pos[1],fauna.pos[2],fauna.pos[1],fauna.pos[2]+16,2,fauna.uid,0x00010000,0x00ffffff)
 	if hit and hit.alpha and hit.alpha<((footbase+4)/16) then
 
 		local d=(hit.alpha*16)+2 -- distance + radius
@@ -863,6 +877,152 @@ faunas.item.draw=function(fauna)
 
 end
 
+
+--------------------------------------------------------------------------------
+--
+-- a basic gib
+
+gibs={}
+-- methods added to system
+gibs.system={}
+-- methods added to each item
+gibs.item={}
+
+gibs.caste="gib"
+
+gibs.uidmap={
+	length=0,
+}
+
+gibs.values={
+	pos=V3( 0,0,0 ),
+	rot=Q4( 0,0,0,1 ),
+	vel=V3( 0,0,0 ),
+	ang=V3( 0,0,0 ),
+	acc=V3( 0,200,0 ),
+	sname="gib_green",
+	life=16*30,
+}
+
+gibs.types={
+	pos="tween",
+	rot="tween",
+	vel="get",
+	ang="get",
+	acc="get",
+	snane="get",
+	life="get",
+}
+
+
+gibs.graphics={
+
+
+{nil,"gib_green",[[
+. . . . . . . . 
+. . g g g g . . 
+. g g G G g g . 
+. g G G G G g . 
+. g G G G G g . 
+. g g G G g g . 
+. . g g g g . . 
+. . . . . . . . 
+]]},
+
+}
+
+gibs.item.get_values=function(gib)
+
+	gib:get_auto_values()
+
+end
+
+gibs.item.set_values=function(gib)
+
+	gib:set_auto_values()
+
+end
+
+
+-- the system has no state values but can still perform generic actions
+-- eg allocate shared resources for later use
+gibs.system.setup=function(sys)
+
+	 system.components.tiles.upload_tiles( gibs.graphics )
+
+end
+
+gibs.system.clean=function(sys)
+end
+
+-- state values are cached into the item for easy access on a get
+-- and must be set again if they are altered so setup and updates
+-- must begin and end with a get and a set
+gibs.item.setup=function(gib)
+	gib:get_values()
+	
+	gib:setup_kinetic()
+	gib:set_values()
+end
+
+gibs.item.setup_kinetic=function(gib)
+	if gib.body then return end -- already done
+	local space=gib:get_singular("kinetic").space
+	gib.body=space:body(1,1)
+	gib.shape=gib.body:shape("circle",3,0,0)
+--	gib.shape=gib.body:shape("box",-3,-3,3,3,0)
+	gib.shape:friction(1.0)
+	gib.shape:elasticity(0.0)
+	gib.shape:filter(gib.uid,0x01000000,0xff0000ff)
+	gib.shape.uid=gib.uid
+	gib:set_body()
+end
+
+gibs.item.clean_kinetic=function(gib)
+	if not gib.body then return end -- already done
+	local space=gib:get_singular("kinetic").space		
+	space:remove(gib.shape)
+	space:remove(gib.body)
+	gib.body=nil
+	gib.shape=nil
+end
+
+gibs.item.clean=function(gib)
+	gib:clean_kinetic()
+end
+
+
+gibs.item.update=function(gib)
+	if gib:get("deleted") then return end
+	gib:get_values()
+	gib:setup_kinetic() -- might need to recreate body
+	
+	if gib.life>0 then
+		gib.life=gib.life-1
+	else
+		gib:mark_deleted()
+	end
+
+	gib:set_body() -- then we call update_kinetic which will set_values before draw
+end
+
+gibs.item.update_kinetic=function(gib)
+	if gib:get("deleted") then return end
+	gib:get_body()
+	gib:set_values()
+end
+
+-- when drawing get will auto tween values
+-- so it can be called multiple times between updates for different results
+gibs.item.draw=function(gib)
+	if gib:get("deleted") then return end
+
+	gib:get_values()
+
+	local p=V3( gib.pos[1] , gib.pos[2], gib.pos[1]+gib.pos[2] )
+	draws.sprite( gib.sname          , p , 1 )
+
+end
 
 --------------------------------------------------------------------------------
 --
