@@ -1,3 +1,4 @@
+--#
 --
 -- This is fun64 code, you can copy paste it into https://xriss.github.io/fun64/pad/ to run it.
 --
@@ -147,6 +148,7 @@ end
 
 
 
+--#base_draw.lua
 --------------------------------------------------------------------------------
 --
 -- Drawing utility funcs
@@ -170,6 +172,7 @@ draws.sprite=function(sname,pos,side,idx)
 	})
 end
 
+--#player.lua
 --------------------------------------------------------------------------------
 --
 -- a player
@@ -518,19 +521,14 @@ if hit.shape.uid then
 	if it and it.caste=="fauna" then
 		if it:mark_deleted() then
 			player.score=player.score+100
-			local r1=(player.sys:get_rnd()*200)-100
-			local r2=(player.sys:get_rnd()*200)-100
-			local boots={
-				{"gib",sname="gib_green",life=16*21,pos=it.pos,vel=V3(r1,r2-200,0)+player.vel},
-				{"gib",sname="gib_green",life=16*22,pos=it.pos,vel=V3(r2,r1-200,0)+player.vel},
-				{"gib",sname="gib_green",life=16*23,pos=it.pos,vel=V3(-r1,-r2-200,0)+player.vel},
-				{"gib",sname="gib_green",life=16*24,pos=it.pos,vel=V3(-r2,-r1-200,0)+player.vel},
-				{"gib",sname="gib_green",life=16*25,pos=it.pos,vel=V3(r1,r2-200,0)+player.vel},
-				{"gib",sname="gib_green",life=16*26,pos=it.pos,vel=V3(r2,r1-200,0)+player.vel},
-				{"gib",sname="gib_green",life=16*27,pos=it.pos,vel=V3(-r1,-r2-200,0)+player.vel},
-				{"gib",sname="gib_green",life=16*28,pos=it.pos,vel=V3(-r2,-r1-200,0)+player.vel},
-			}
-			scene:creates(boots)
+--			scene.systems.gibs:add_burst(it.pos,player.vel,4,V3(0,-200,0),4)
+			for i=1,16 do
+				local v=V3( player.vel[1]*-2+(100*((player.sys:get_rnd()-0.5)*2)) , player.vel[2]*-2+(-100*player.sys:get_rnd()) , 0 )
+				local boots={
+					{"gib",sname="gib_green",life=0,size=4,pos=it.pos,vel=v},
+				}
+				scene:creates(boots)
+			end
 		end
 	end
 --	print("player stomp",hit.shape.uid)
@@ -590,6 +588,7 @@ players.item.draw=function(player)
 end
 
 
+--#fauna.lua
 --------------------------------------------------------------------------------
 --
 -- a basic fauna
@@ -878,6 +877,7 @@ faunas.item.draw=function(fauna)
 end
 
 
+--#gib.lua
 --------------------------------------------------------------------------------
 --
 -- a basic gib
@@ -901,7 +901,8 @@ gibs.values={
 	ang=V3( 0,0,0 ),
 	acc=V3( 0,200,0 ),
 	sname="gib_green",
-	life=16*30,
+	life=16,
+	size=4,
 }
 
 gibs.types={
@@ -912,6 +913,7 @@ gibs.types={
 	acc="get",
 	snane="get",
 	life="get",
+	size="get",
 }
 
 
@@ -919,16 +921,35 @@ gibs.graphics={
 
 
 {nil,"gib_green",[[
-. . . . . . . . 
-. . g g g g . . 
-. g g G G g g . 
-. g G G G G g . 
-. g G G G G g . 
-. g g G G g g . 
-. . g g g g . . 
-. . . . . . . . 
-]]},
+. . g g g g . . . . . . . . . . . . . . . . . . . . . . . . . . 
+. g d d G g g . . . g g g g . . . . . . . . . . . . . . . . . . 
+g d d d d G g g . g g d G g g . . . . g g . . . . . . . . . . . 
+g d d d d G G g . g d d d G g . . . g d G g . . . . . d G . . . 
+g G d d G G G g . g G d G G g . . . g G G g . . . . . G g . . . 
+g G G G G G G g . g g G G g g . . . . g g . . . . . . . . . . . 
+. g g G G G g . . . g g g g . . . . . . . . . . . . . . . . . . 
+. . g g g g . . . . . . . . . . . . . . . . . . . . . . . . . . 
+]],4},
 
+}
+
+gibs.collision_name=0x00010001	-- unique ID
+gibs.collision_bits=0x01000000	-- assigned bitmask
+gibs.collision_mask=0x000000ff	-- interact bitmask
+gibs.collision_handlers={
+	[{gibs.collision_name}]={
+		postsolve=function(it)
+			local gib=it.shape_a.in_body -- should be a gib
+			local points=it:points()
+			local n=V3( points.normal_x , points.normal_y , 0 )
+			-- remember what we hit for next update
+			gib.hit={
+				body=it.shape_a.in_body,
+				normal=n,
+			}
+			return true
+		end
+	}
 }
 
 gibs.item.get_values=function(gib)
@@ -965,16 +986,25 @@ gibs.item.setup=function(gib)
 	gib:set_values()
 end
 
+gibs.item.setup_kinetic_reshape=function(gib)
+	local space=gib:get_singular("kinetic").space
+	if gib.shape then
+		space:remove(gib.shape)
+		gib.shape=nil
+	end
+	gib.shape=gib.body:shape("circle",gib.size,0,0)
+--	gib.shape=gib.body:shape("box",-3,-3,3,3,0)
+	gib.shape:friction(1.0)
+	gib.shape:elasticity(0.5)
+	gib.shape:filter(gib.uid,gibs.collision_bits,gibs.collision_mask)
+	gib.shape:collision_type(gibs.collision_name)
+	gib.shape.uid=gib.uid
+end
 gibs.item.setup_kinetic=function(gib)
 	if gib.body then return end -- already done
 	local space=gib:get_singular("kinetic").space
 	gib.body=space:body(1,1)
-	gib.shape=gib.body:shape("circle",3,0,0)
---	gib.shape=gib.body:shape("box",-3,-3,3,3,0)
-	gib.shape:friction(1.0)
-	gib.shape:elasticity(0.0)
-	gib.shape:filter(gib.uid,0x01000000,0xff0000ff)
-	gib.shape.uid=gib.uid
+	gib:setup_kinetic_reshape()
 	gib:set_body()
 end
 
@@ -997,10 +1027,19 @@ gibs.item.update=function(gib)
 	gib:get_values()
 	gib:setup_kinetic() -- might need to recreate body
 	
-	if gib.life>0 then
-		gib.life=gib.life-1
-	else
-		gib:mark_deleted()
+	if gib.body.hit then
+		if gib.life>0 then
+			gib.life=gib.life-1
+			gib.body.hit=nil -- ignore hits until we run out of life
+		else
+			if gib.size>1 then
+				gib.size=gib.size-1
+				gib:setup_kinetic_reshape()
+				gib.body.hit=nil
+			else
+				gib:mark_deleted()
+			end
+		end
 	end
 
 	gib:set_body() -- then we call update_kinetic which will set_values before draw
@@ -1020,10 +1059,11 @@ gibs.item.draw=function(gib)
 	gib:get_values()
 
 	local p=V3( gib.pos[1] , gib.pos[2], gib.pos[1]+gib.pos[2] )
-	draws.sprite( gib.sname          , p , 1 )
+	draws.sprite( gib.sname          , p , 1 , 5-gib.size)
 
 end
 
+--#fauna_panda.lua
 --------------------------------------------------------------------------------
 --
 -- a basic fauna_panda
@@ -1153,6 +1193,7 @@ fauna_pandas.item.draw=function(fauna_panda)
 
 end
 
+--#level.lua
 --------------------------------------------------------------------------------
 --
 -- a level
@@ -1558,6 +1599,7 @@ levels.item.draw=function(level)
 	end
 end
 
+--#camera.lua
 --------------------------------------------------------------------------------
 --
 -- a camera
@@ -1693,6 +1735,7 @@ cameras.item.draw=function(camera)
 
 end
 
+--#hud.lua
 --------------------------------------------------------------------------------
 --
 -- a hud
@@ -1859,6 +1902,7 @@ huds.item.draw=function(hud)
 	end
 end
 
+--#
 --------------------------------------------------------------------------------
 
 -- lock globals to help catch future accidents

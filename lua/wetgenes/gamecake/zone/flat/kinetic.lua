@@ -59,7 +59,13 @@ kinetics.item.setup=function(kinetic)
 	kinetic.substeps=4 -- number of substeps
 	kinetic.fixedstep=kinetic.step/kinetic.substeps -- actual size of each discrete step
 
-
+	for name,info in pairs(kinetic.scene.infos) do
+		if info.collision_handlers then
+			for arg,arb in pairs(info.collision_handlers) do
+				kinetic.space:add_handler(arb,unpack(arg))
+			end
+		end
+	end
 --[[
 	kinetic.world=bullet.world()
 
