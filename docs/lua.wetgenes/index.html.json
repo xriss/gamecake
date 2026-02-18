@@ -7651,7 +7651,7 @@
    "body": "<pre><code>local tasks=require(&quot;wetgenes.tasks&quot;).create()\nlocal gist=require(&quot;wetgenes.tasks_gist&quot;)\nlocal opts={\n    tasks=tasks, -- required\n}\nlocal list=gist.list(opts)\n</code></pre>\n<p>List some gists from github using options found in opts, valid options are...</p>\n<p>baseurl can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot;</p>\n<p>tasks is always <em>required</em> as we use it for http access.</p>\n<p>token should be set to a github access token and is required for \nwritting data or accessing non public information.</p>\n<p>username is the name of a github user we wish to list gists for</p>\n<p>filter can be &quot;public&quot; to request only public gists or &quot;starred&quot; to \nrequest only starred gists.</p>\n<p>since is an ISO_8601 timestamp in a string and should be set if we are \nonly interested in gists since this time.</p>\n<p>per_page is the number of results we want, the api limits this to 100 \nbut defaults to 30. Probably a good idea to set this to 100 unless you \nwant to deal with paging code and even then you can only get the first \n3000 results.</p>\n<p>page is the page of results we are requesting, It defaults to 1 so can \nbe omitted unless you are going to request multiple pages.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_gist.lua",
-   "line": 24,
+   "line": 43,
    "name": "lua.wetgenes.tasks_gist.list",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_gist.lua"
   },
