@@ -394,6 +394,8 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 		if it.meta.state=="manifest" then -- not a real meta yet so load from disk and update
 
 			local text=collect.mounts:read_file(path) or ""
+			local text_age=collect.mounts:age_file(path)
+			it.fileage=text_age
 		
 			-- write data only if we have some
 			collect.do_memo({

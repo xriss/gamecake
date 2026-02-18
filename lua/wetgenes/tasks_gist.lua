@@ -21,6 +21,25 @@ setmetatable(M,M.metatable)
 
 M.baseurl="https://api.github.com"
 
+local get_timezone=function()
+    local now = os.time()
+    return os.difftime(now, os.time(os.date("!*t", now)))
+end
+local epoch = get_timezone()
+
+M.functions.parse_iso8601=function(str)
+    local year, month, day, hour, minute, seconds, offsetsign, offsethour, offsetmin =
+		str:match("(%d+)%-(%d+)%-(%d+)%a(%d+)%:(%d+)%:([%d%.]+)([Z%+%- ])(%d?%d?)%:?(%d?%d?)")
+    local timestamp = os.time{year = year, month = month, day = day, hour = hour, min = minute, sec = math.floor(seconds)} + epoch
+    local offset = 0
+    if offsetsign ~= 'Z' then
+        offset = tonumber(offsethour) * 60 + tonumber(offsetmin)
+        if offsetsign == "-" then offset = -offset end
+    end
+    return timestamp - offset * 60
+end
+
+
 --[[#lua.wetgenes.tasks_gist.list
 
 	local tasks=require("wetgenes.tasks").create()

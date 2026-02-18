@@ -209,7 +209,9 @@ M.bake=function(oven,docs)
 		for idx=#collect.config.docs.open,1,-1 do
 			local v=collect.config.docs.open[idx]
 			if v then -- skip falses
-				docs.manifest(v.filename):show()
+				local doc=docs.manifest(v.filename)
+				doc.fileage=v.fileage -- set on disk age we remember
+				doc:show()
 			end
 		end
 
@@ -221,7 +223,8 @@ M.bake=function(oven,docs)
 		collect.config.docs.open={}
 		for i,v in ipairs( docs.list ) do
 			local t={
-				filename=v.filename
+				filename=v.filename,
+				fileage=v.fileage,
 			}
 			table.insert( collect.config.docs.open , t )
 		end
@@ -334,6 +337,8 @@ M.bake=function(oven,docs)
 		else
 			collect.save(it)
 		end
+		
+		it.fileage=os.time() -- rememober time of file modification
 
 
 	end
@@ -349,18 +354,30 @@ M.bake=function(oven,docs)
 		it.txt.set_text("\n",it.filename)
 		
 		collect.manifest_path(it.filename)
-		collect.load(it,it.filename,reload)
+		collect.load(it,it.filename)
 		it.txt.set_lexer()
 
 		return it
 	end
 	
+	doc.auto_age_reload=function(it)
+		if it.fileage then
+			local text_age=collect.mounts:age_file(it.filename)
+			if text_age > it.fileage then  -- file is newer
+				doc.reload(it)
+			end
+		end
+	end
+
 	doc.reload=function(it)
 		local text_file=collect.mounts:read_file(it.filename) or ""
+		local text_age=collect.mounts:age_file(it.filename)
 		local text_doc=it.txt.get_text()
+		it.fileage=text_age
 		
 		if text_file~=text_doc then -- text in file is not the same as text in memory
 			it.txt.undo.set_text(text_file)
+			it.meta.undo=it.txt.undo.index -- show as no need to save?
 		end
 	end
 

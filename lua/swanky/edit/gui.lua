@@ -468,6 +468,7 @@ function gui.hooks(act,w,dat)
 			w.master.later_append(function()
 			
 				local doc=docs.manifest(path)
+				doc:auto_age_reload() -- auto reload on change
 				doc:show()
 
 				gui.refresh_tree()

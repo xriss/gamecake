@@ -1,4 +1,3 @@
---#
 --
 -- This is fun64 code, you can copy paste it into https://xriss.github.io/fun64/pad/ to run it.
 --

@@ -286,11 +286,16 @@ M.meta.manifest_path=function(meta,fullpath)
 
 end
 
+M.meta.age_file=function(meta,path)
+	local it,path=meta:find_prefix(path)
+	if it and it.age_file then
+		return it:age_file(path)
+	end
+end
+
 M.meta.read_file=function(meta,path)
-print("READ",meta.is,path)
 	local it,path=meta:find_prefix(path)
 	if it and it.read_file then
-print("READ",it.path,it.is,path)
 		return it:read_file(path)
 	end
 end
@@ -396,6 +401,13 @@ M.file.fetch_dir=function(file,path)
 		end
 	end)
 	return dir
+end
+
+M.file.age_file=function(_,path)
+	if lfs then
+		local a=lfs.attributes(path)
+		return a and a.modification
+	end
 end
 
 M.file.read_file=function(_,path)
@@ -508,6 +520,30 @@ M.gist.fetch_dir=function(gist,path)
 	end
 	
 	return dir
+end
+
+M.gist.age_file=function(gist,path)
+
+	local pp=wpath.split(path)
+	local gid,gfname
+	if pp[1]=="" and pp[2]==".." and pp[3]=="gists" then
+		gid=pp[4]
+		gid=gid:match("[^%.]*$") -- id is end part, possibly after last .
+		gfname=pp[5]
+	end
+	if gid=="" then gid=nil end
+	if gfname=="" then gfname=nil end
+	
+	if gid and gfname then
+	
+		local opts={}
+		opts.tasks=gist.collect.oven.tasks
+		opts.gid=gid
+
+		local result=wgist.get(opts)
+		return wgist.parse_iso8601( result.updated_at ) -- into os.time() comparable value
+	end
+
 end
 
 M.gist.read_file=function(gist,path)
