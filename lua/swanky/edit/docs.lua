@@ -265,6 +265,7 @@ M.bake=function(oven,docs)
 			docs.doc=doc
 			doc:show()			
 		end
+		return docs.doc
 	end
 
 	docs.doc_to_front=function(it)
@@ -375,9 +376,34 @@ M.bake=function(oven,docs)
 		local text_doc=it.txt.get_text()
 		it.fileage=text_age
 		
+		-- return length of matching prefix and postfix
+		local get_pre_post=function(a,b)
+			if a==b then return #a,0 end -- equal of sanity
+			local al,bl=#a,#b
+			local l=al ; if al>bl then l=bl end -- shortest of the two strings
+			local pre=0
+			local post=0
+			local string_byte=string.byte -- unnecessary function caching :)
+			for i=1,l do
+				if string_byte(a,i)~=string_byte(b,i) then break end
+				pre=pre+1 -- length of prefix
+			end
+			for i=0,l-pre-1 do
+				if string_byte(a,al-i)~=string_byte(b,bl-i) then break end
+				post=post+1 -- length of postfix
+			end
+			return pre,post
+		end
+		
 		if text_file~=text_doc then -- text in file is not the same as text in memory
-			it.txt.undo.set_text(text_file)
-			it.meta.undo=it.txt.undo.index -- show as no need to save?
+			local pre,post=get_pre_post(text_file,text_doc) -- get size of matching prefix and postfix
+			local fy,fx=it.txt.ptr_to_location(pre)
+			local ty,tx=it.txt.ptr_to_location(#text_doc-post)
+			it.txt.mark(fy,fx,ty,tx) -- area to replace
+			it.txt.undo.replace_and_select( text_file:sub(pre+1,-(post+1)) )
+			-- select new area so you have a clue that something just happened
+			gui.master.ids.texteditor:scroll_to_view()
+			-- if it was bad you can undo it, but auto syncing like this is probably the right thing to do.
 		end
 	end
 

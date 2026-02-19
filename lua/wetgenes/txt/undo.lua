@@ -296,6 +296,7 @@ M.construct=function(undo,txt)
 		if o and #o > 0 then
 			undo.remember(s,wutf.length(o),txt.fy,txt.fx)
 			txt.cut()
+			fy,fx=txt.fy,txt.fx
 			txt.insert(s)
 		else
 			undo.remember(s)

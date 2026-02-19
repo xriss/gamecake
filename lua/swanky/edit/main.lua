@@ -95,7 +95,9 @@ M.bake=function(oven,main)
 
 			local fname=cmd.args.data[1]
 			if fname then
-				docs.manifest(fname):show()
+				local doc=docs.manifest(fname)
+				doc:show()
+				doc:auto_age_reload() -- check disk version hasnt changed
 			end
 
 		end
