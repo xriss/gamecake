@@ -1,6 +1,6 @@
 --
 -- This is fun64 code, you can copy paste it into https://xriss.github.io/fun64/pad/ to run it.
--- ok ok 
+--
 
 local tardis=require("wetgenes.tardis")
 local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4")

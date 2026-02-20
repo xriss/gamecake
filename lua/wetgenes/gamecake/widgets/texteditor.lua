@@ -1134,6 +1134,18 @@ function wtexteditor.key(pan,ascii,key,act)
 
 		texteditor.txt_dirty=true
 
+		local yjump=function(a)
+			local cache=txt.get_cache(txt.cy)
+			if not texteditor.float_cx then
+				texteditor.float_cx = cache and cache.cx[txt.cx] or txt.cx
+			end
+			cpre()
+			local cache=txt.get_cache(txt.cy+a)
+			txt.cy,txt.cx=txt.clip( txt.cy+a , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
+			txt.cursor()
+			cpost()
+		end
+
 		if key=="left" then
 
 			texteditor.float_cx=nil
@@ -1153,30 +1165,12 @@ function wtexteditor.key(pan,ascii,key,act)
 			cpost()
 
 		elseif key=="up" then
-
-			local cache=txt.get_cache(txt.cy)
-			if not texteditor.float_cx then
-				texteditor.float_cx = cache and cache.cx[txt.cx] or txt.cx
-			end
-
-			cpre()
-			local cache=txt.get_cache(txt.cy-1)
-			txt.cy,txt.cx=txt.clip( txt.cy-1 , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
-			txt.cursor()
-			cpost()
+		
+			yjump(-1)
 
 		elseif key=="down" then
 
-			local cache=txt.get_cache(txt.cy)
-			if not texteditor.float_cx then
-				texteditor.float_cx = cache and cache.cx[txt.cx] or txt.cx
-			end
-
-			cpre()
-			local cache=txt.get_cache(txt.cy+1)
-			txt.cy,txt.cx=txt.clip( txt.cy+1 , cache and cache.xc[texteditor.float_cx] or texteditor.float_cx )
-			txt.cursor()
-			cpost()
+			yjump( 1)
 
 		elseif key=="home" then
 
@@ -1193,6 +1187,14 @@ function wtexteditor.key(pan,ascii,key,act)
 			txt.cx=txt.get_hx()+1
 			txt.cursor()
 			texteditor:scroll_to_view()
+
+		elseif key=="pageup" then
+
+			yjump(-32)
+
+		elseif key=="pagedown" then
+
+			yjump(32)
 
 		end
 
