@@ -1176,17 +1176,19 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			texteditor.float_cx=nil
 
+			cpre()
 			txt.cx=1
 			txt.cursor()
-			texteditor:scroll_to_view()
+			cpost()
 
 		elseif key=="end" then
 
 			texteditor.float_cx=nil
 
+			cpre()
 			txt.cx=txt.get_hx()+1
 			txt.cursor()
-			texteditor:scroll_to_view()
+			cpost()
 
 		elseif key=="pageup" then
 
