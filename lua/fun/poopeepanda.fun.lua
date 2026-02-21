@@ -1309,7 +1309,7 @@ title="Test.",
 map=[[
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . v . . . . . . . . . . . < . . . . . . . . . < . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
@@ -1317,14 +1317,14 @@ map=[[
 0 . . . 0 0 0 0 . 0 0 0 0 . 0 0 . 0 0 0 . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
+0 0 . v . . . . . . . . . . . . . . . . . . . . . ^ . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . 0 0 . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . 0 
 0 . . . 0 0 0 0 . . . . . . . . 0 0 . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . 0 
 0 0 0 0 . . . . . . . . . . . . . . . . . . 0 0 0 . . . 0 0 0 0 
-0 . . . . . . . . 0 0 0 . . . . . . . . . . . . . . . . . . . 0 
+0 . . > . . . . . 0 0 0 . . . > . . . . . . . . . . ^ . . . . 0 
 0 P1. . . . . . . . . . . . . . . . . . . . . . . . . . . . P20 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 ]],
@@ -1413,6 +1413,7 @@ levels.item.setup=function(level)
 			end
 		end
 	end
+
 	for y,line in pairs(map) do
 		for x,tile in pairs(line) do
 			local shape=tile.shape
@@ -1427,6 +1428,49 @@ levels.item.setup=function(level)
 			if tile.text then
 				tile.text_lines=wstr.smart_wrap(tile.text,(256-16)/8)
 			end
+			tile.dir_left  = tile.dir_left  or math.huge
+			tile.dir_right = tile.dir_right or math.huge
+			tile.dir_up    = tile.dir_up    or math.huge
+			tile.dir_down  = tile.dir_down  or math.huge
+		end
+	end
+
+	local get_side_tiles=function(x,y)
+		local stiles={}
+		local push=function(t)
+			if not t then return end
+			stiles[#stiles+1]=t
+		end
+		push(map[y-1] and map[y-1][x])
+		push(map[y]   and map[y][x-1])
+		push(map[y]   and map[y][x+1])
+		push(map[y+1] and map[y+1][x])
+		return stiles
+	end
+
+	repeat
+		local done=true
+		for y,line in pairs(map) do
+			for x,tile in pairs(line) do
+				for _,side in ipairs( get_side_tiles(x,y) ) do
+					for _,name in ipairs( { "dir_left" , "dir_right" , "dir_up" , "dir_down" } ) do
+						if side[name]>tile[name]+1 then
+							side[name]=tile[name]+1
+							done=false
+						end
+					end
+				end
+			end
+		end
+	until done
+
+	for y,line in pairs(map) do
+		for x,tile in pairs(line) do
+			-- calc the wind direction normal for this tile
+			tile.dir=V2(
+					(1/tile.dir_right)-(1/tile.dir_left),
+					(1/tile.dir_down)-(1/tile.dir_up)
+				):normalize()
 		end
 	end
 
@@ -1460,6 +1504,20 @@ end
 
 levels.item.get_gravity=function(level,pos)
 	return V3(0,400,0)
+--[[	
+	local tx=math.floor(pos[1]/8)
+	local ty=math.floor(pos[2]/8)
+
+	local map=level.map
+	local get_tile=function(x,y,name)
+		local t=map[y] and map[y][x]
+		if name then return t and t[name] else return t end
+	end
+	
+	local dir=get_tile(ty,tx,"dir")
+
+	return V3( dir or V2(0,1)*400 )
+]]
 --[[
 	local n=pos-V3(128,96,0)
 	local d=n:len()

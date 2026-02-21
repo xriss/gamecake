@@ -296,13 +296,14 @@ M.construct=function(undo,txt)
 		if o and #o > 0 then
 			undo.remember(s,wutf.length(o),txt.fy,txt.fx)
 			txt.cut()
-			fy,fx=txt.fy,txt.fx
 			txt.insert(s)
 		else
 			undo.remember(s)
 			txt.insert(s)
 		end
-		txt.mark( txt.rangeget(fy,fx,wutf.length(s)) )
+		if fy and fx then
+			txt.mark( txt.rangeget(fy,fx,wutf.length(s)) )
+		end
 	end
 	
 	undo.insert_newline=function()
