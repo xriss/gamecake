@@ -78,19 +78,19 @@ M.construct=function(txt)
 
 	txt.set_string=function(idx,str)
 		txt.strings[idx]=str
-		txt.clear_caches()
+		txt.clear_onward_caches(idx)
 	end
 
 	txt.add_string=function(idx,str)
 		table.insert( txt.strings , idx , str)
 		txt.hy=txt.hy+1
-		txt.clear_caches()
+		txt.clear_onward_caches(idx)
 	end
 
 	txt.del_string=function(idx)
 		table.remove( txt.strings , idx )
 		txt.hy=txt.hy-1
-		txt.clear_caches()
+		txt.clear_onward_caches(idx)
 	end
 
 -- replace the text on line idx between fb and tb (bytes) inclusive with the given string
@@ -114,9 +114,9 @@ M.construct=function(txt)
 
 	txt.del_cache=function(idx)
 		txt.caches[idx]=nil
-		if (idx-1)%txt.permacache_ratio == 0 then
-			txt.permacaches[1+math.floor((idx-1)/txt.permacache_ratio)]=nil
-		end
+--		if (idx-1)%txt.permacache_ratio == 0 then
+--			txt.permacaches[1+math.floor((idx-1)/txt.permacache_ratio)]=nil
+--		end
 	end
 
 	txt.get_cache=function(idx)
@@ -124,9 +124,9 @@ M.construct=function(txt)
 		if cache then return cache end
 		cache=txt.build_cache(idx)
 		txt.caches[idx]=cache
-		if (idx-1)%txt.permacache_ratio == 0 then
-			txt.permacaches[1+math.floor((idx-1)/txt.permacache_ratio)]=cache -- do not forget every X caches
-		end
+--		if (idx-1)%txt.permacache_ratio == 0 then
+--			txt.permacaches[1+math.floor((idx-1)/txt.permacache_ratio)]=cache -- do not forget every X caches
+--		end
 		return cache
 	end
 
@@ -149,9 +149,20 @@ M.construct=function(txt)
 		txt.permastart[#txt.permastart+1]=start -- end of text
 	end
 	
+	txt.clear_onward_caches=function(cy)
+		txt.strings_text=nil
+		for y=cy,txt.hy do
+			txt.caches[y]=nil
+		end
+--		for i=1+math.floor((cy-1)/txt.permacache_ratio),1+math.floor((txt.hy-1)/txt.permacache_ratio) do
+--			txt.permacaches[y]=nil
+--		end
+		txt.rebuild_permastart()
+	end
+
 	txt.clear_caches=function()
 		txt.strings_text=nil
-		txt.permacaches={}
+--		txt.permacaches={}
 		txt.caches={}
 		setmetatable(txt.caches, txt.caches_meta)
 		txt.rebuild_permastart()

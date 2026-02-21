@@ -628,7 +628,11 @@ function gui.hooks(act,w,dat)
 	if act=="unfocus" then
 	
 		if w.id=="find_search_text" then -- on enter/tab in search box
-			gui.do_actions[#gui.do_actions+1]={id="find_goto"}
+			local texteditor=gui.master.ids.texteditor
+			local txt=texteditor.txt
+			if (txt.copy() or "") == "" then -- only if not selected
+				gui.do_actions[#gui.do_actions+1]={id="find_goto"}
+			end
 		elseif w.id=="tree_filter_text" then -- on enter/tab in search box
 			gui.refresh_tree()
 		end

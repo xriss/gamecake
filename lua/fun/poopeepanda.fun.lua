@@ -79,7 +79,8 @@ all.create_scene=function(scene)
 		huds,
 		players,
 		gibs,
-		faunas,
+		fauna_slims,
+		fauna_trenchs,
 		fauna_pandas,
 	}) do
 		scene.infos[it.caste]=it
@@ -107,7 +108,6 @@ all.create_scene=function(scene)
 			{"camera",idx=2,depends={player=8}},
 			{"player",idx=2,pos={64,32,0},depends={camera=7,hud=6}},
 
---			{"fauna",sname="fauna_slime",pos={96,32,0}},
 			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
 		}
 		scene:creates(boots)
@@ -147,10 +147,9 @@ end
 
 
 
---#base_draw.lua
 --------------------------------------------------------------------------------
 --
--- Drawing utility funcs
+--#base_draw
 
 draws={}
 draws.sprite=function(sname,pos,side,idx)
@@ -171,10 +170,9 @@ draws.sprite=function(sname,pos,side,idx)
 	})
 end
 
---#player.lua
 --------------------------------------------------------------------------------
 --
--- a player
+--#player
 
 players={}
 -- methods added to system
@@ -517,7 +515,7 @@ players.item.update=function(player)
 
 if hit.shape.uid then
 	local it=scene:find_uid(hit.shape.uid)
-	if it and it.caste=="fauna" then
+	if it and it.caste=="fauna_slim" then
 		if it:mark_deleted() then
 			player.score=player.score+100
 --			scene.systems.gibs:add_burst(it.pos,player.vel,4,V3(0,-200,0),4)
@@ -548,7 +546,8 @@ end
 			player.vel[2]=-120
 		end
 	end
-	if player.onfloor>0 then player.onfloor=player.onfloor-1 end
+-- forever coyote time
+--	if player.onfloor>0 then player.onfloor=player.onfloor-1 end
 
 	if player.jump>0 then -- jump higher while button is held down
 		player.onfloor=0 -- no foot grab while jumping
@@ -587,24 +586,23 @@ players.item.draw=function(player)
 end
 
 
---#fauna.lua
 --------------------------------------------------------------------------------
 --
--- a basic fauna
+--#fauna_slims
 
-faunas={}
+fauna_slims={}
 -- methods added to system
-faunas.system={}
+fauna_slims.system={}
 -- methods added to each item
-faunas.item={}
+fauna_slims.item={}
 
-faunas.caste="fauna"
+fauna_slims.caste="fauna_slim"
 
-faunas.uidmap={
+fauna_slims.uidmap={
 	length=0,
 }
 
-faunas.values={
+fauna_slims.values={
 	pos=V3( 0,0,0 ),
 	rot=Q4( 0,0,0,1 ),
 	vel=V3( 0,0,0 ),
@@ -620,7 +618,7 @@ faunas.values={
 	thunk=0,
 }
 
-faunas.types={
+fauna_slims.types={
 	pos="tween",
 	rot="tween",
 	vel="get",
@@ -637,9 +635,9 @@ faunas.types={
 }
 
 
-faunas.graphics={
+fauna_slims.graphics={
 
-{nil,"fauna_slime",[[
+{nil,"fauna_slim",[[
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
@@ -658,7 +656,7 @@ faunas.graphics={
 . . G G G G G G G G G G G G . . 
 ]]},
 
-{nil,"fauna_slime_splat",[[
+{nil,"fauna_slim_splat",[[
 . . . . . . . . . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . . . . . . . . . 
@@ -677,7 +675,7 @@ faunas.graphics={
 G G G G G G G G G G G G G G G G G G G G G G G G 
 ]]},
 
-{nil,"fauna_slime_feet",[[
+{nil,"fauna_slim_feet",[[
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
@@ -698,13 +696,13 @@ G G G G G G G G G G G G G G G G G G G G G G G G
 
 }
 
-faunas.item.get_values=function(fauna)
+fauna_slims.item.get_values=function(fauna)
 
 	fauna:get_auto_values()
 
 end
 
-faunas.item.set_values=function(fauna)
+fauna_slims.item.set_values=function(fauna)
 
 	fauna:set_auto_values()
 
@@ -713,26 +711,26 @@ end
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
-faunas.system.setup=function(sys)
+fauna_slims.system.setup=function(sys)
 
-	 system.components.tiles.upload_tiles( faunas.graphics )
+	 system.components.tiles.upload_tiles( fauna_slims.graphics )
 
 end
 
-faunas.system.clean=function(sys)
+fauna_slims.system.clean=function(sys)
 end
 
 -- state values are cached into the item for easy access on a get
 -- and must be set again if they are altered so setup and updates
 -- must begin and end with a get and a set
-faunas.item.setup=function(fauna)
+fauna_slims.item.setup=function(fauna)
 	fauna:get_values()
 
 	fauna:setup_kinetic()
 	fauna:set_values()
 end
 
-faunas.item.setup_kinetic=function(fauna)
+fauna_slims.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local space=fauna:get_singular("kinetic").space
 	fauna.body=space:body(1,1)
@@ -744,7 +742,7 @@ faunas.item.setup_kinetic=function(fauna)
 	fauna:set_body()
 end
 
-faunas.item.clean_kinetic=function(fauna)
+fauna_slims.item.clean_kinetic=function(fauna)
 	if not fauna.body then return end -- already done
 	local space=fauna:get_singular("kinetic").space		
 	space:remove(fauna.shape)
@@ -753,11 +751,11 @@ faunas.item.clean_kinetic=function(fauna)
 	fauna.shape=nil
 end
 
-faunas.item.clean=function(fauna)
+fauna_slims.item.clean=function(fauna)
 	fauna:clean_kinetic()
 end
 
-faunas.item.update_brain=function(fauna,brain)
+fauna_slims.item.update_brain=function(fauna,brain)
 
 	fauna.thunk=fauna.thunk-1
 	if fauna.thunk<=0 then
@@ -767,7 +765,7 @@ faunas.item.update_brain=function(fauna,brain)
 	end
 end
 
-faunas.item.update=function(fauna)
+fauna_slims.item.update=function(fauna)
 	if fauna:get("deleted") then return end
 	fauna:get_values()
 	fauna:setup_kinetic() -- might need to recreate body
@@ -855,7 +853,7 @@ end
 	fauna:set_body() -- then we call update_kinetic which will set_values before draw
 end
 
-faunas.item.update_kinetic=function(fauna)
+fauna_slims.item.update_kinetic=function(fauna)
 	if fauna:get("deleted") then return end
 	fauna:get_body()
 	fauna:set_values()
@@ -863,7 +861,7 @@ end
 
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
-faunas.item.draw=function(fauna)
+fauna_slims.item.draw=function(fauna)
 	if fauna:get("deleted") then return end
 
 	fauna:get_values()
@@ -876,10 +874,286 @@ faunas.item.draw=function(fauna)
 end
 
 
---#gib.lua
 --------------------------------------------------------------------------------
 --
--- a basic gib
+--#fauna_trenchs
+
+fauna_trenchs={}
+-- methods added to system
+fauna_trenchs.system={}
+-- methods added to each item
+fauna_trenchs.item={}
+
+fauna_trenchs.caste="fauna_trench"
+
+fauna_trenchs.uidmap={
+	length=0,
+}
+
+fauna_trenchs.values={
+	pos=V3( 0,0,0 ),
+	rot=Q4( 0,0,0,1 ),
+	vel=V3( 0,0,0 ),
+	ang=V3( 0,0,0 ),
+	acc=V3( 0,200,0 ),
+	idx=1,
+	side=1,
+	foot=8,
+	onfloor=0,
+	jump=0,
+	flap=0,
+	sname="",
+	thunk=0,
+}
+
+fauna_trenchs.types={
+	pos="tween",
+	rot="tween",
+	vel="get",
+	ang="get",
+	acc="get",
+	idx="get",
+	side="get",
+	foot="get",
+	onfloor="get",
+	jump="get",
+	flap="get",
+	sname="get",
+	thunk="get",
+}
+
+
+fauna_trenchs.graphics={
+
+{nil,"fauna_trench",[[
+. . . . . . . . . F F F F F f . . . . . . . . . 
+. . . . . . . . . F F F F F f . . . . . . . . . 
+. . . . . . F F F F F F F F F F F f . . . . . . 
+. . . . . . f f f f f f f f f f f f . . . . . . 
+. . . . . . . d d d d d d d d G G . . . . . . . 
+. . . . . . d d 7 0 d 7 0 d d d G G . . . . . . 
+. . . . . . d d 0 0 d 0 0 d d d G G . . . . . . 
+. . . . . F d d d d d d d d d F F F F . . . . . 
+. . . . . f F F d d d d d F F f f f f . . . . . 
+. . . . . f f F F F d F F F f f f f f . . . . . 
+. . . . f f f f f F G F f f f f f f f f . . . . 
+. . . . f f f F F F g F F F f f j f f f . . . . 
+. . . . f f F F F F g F F F F f j f f f . . . . 
+. . . . f f f F F F g F F F f f j f f f . . . . 
+. . . . f f f f F F f F F f f f j f f f . . . . 
+. . . . F F f f f F s F f f f f j F F F . . . . 
+. . . . F F f f F F f F F f f f j F F F . . . . 
+. . . . . . f f F F f F F f f f f f . . . . . . 
+. . . . . . f f F F g F F f f f f f . . . . . . 
+. . . . . . f f F F g F F f f f f f . . . . . . 
+. . . . . . f f F F g F F f f f f f . . . . . . 
+. . . . . . f f F F G F F f f f f f . . . . . . 
+. . . . . . f f F F d F F f f f f f . . . . . . 
+. . . . . . G G G G G G G G G G G G . . . . . . 
+]],3},
+
+{nil,"fauna_trench_feet",[[
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . . . . . . 
+. . . . . . G G G G G G G G G G G G . . . . . . 
+. . . . . . G G G G G G G G G G G G . . . . . . 
+. . . . . . G G G G G G G G G G G G . . . . . . 
+. . . . . . G G G G G G G G G G G G . . . . . . 
+. . . . . . . G G G G G G G G G G . . . . . . . 
+. . . . . . . . . G G G G G G G . . . . . . . . 
+]]},
+
+}
+
+fauna_trenchs.item.get_values=function(fauna)
+
+	fauna:get_auto_values()
+
+end
+
+fauna_trenchs.item.set_values=function(fauna)
+
+	fauna:set_auto_values()
+
+end
+
+
+-- the system has no state values but can still perform generic actions
+-- eg allocate shared resources for later use
+fauna_trenchs.system.setup=function(sys)
+
+	 system.components.tiles.upload_tiles( fauna_trenchs.graphics )
+
+end
+
+fauna_trenchs.system.clean=function(sys)
+end
+
+-- state values are cached into the item for easy access on a get
+-- and must be set again if they are altered so setup and updates
+-- must begin and end with a get and a set
+fauna_trenchs.item.setup=function(fauna)
+	fauna:get_values()
+
+	fauna:setup_kinetic()
+	fauna:set_values()
+end
+
+fauna_trenchs.item.setup_kinetic=function(fauna)
+	if fauna.body then return end -- already done
+	local space=fauna:get_singular("kinetic").space
+	fauna.body=space:body(1,1)
+	fauna.shape=fauna.body:shape("circle",4,0,0)
+	fauna.shape:friction(0.5)
+	fauna.shape:elasticity(0.5)
+	fauna.shape:filter(fauna.uid,0x00010000,0x00ffffff)
+	fauna.shape.uid=fauna.uid
+	fauna:set_body()
+end
+
+fauna_trenchs.item.clean_kinetic=function(fauna)
+	if not fauna.body then return end -- already done
+	local space=fauna:get_singular("kinetic").space		
+	space:remove(fauna.shape)
+	space:remove(fauna.body)
+	fauna.body=nil
+	fauna.shape=nil
+end
+
+fauna_trenchs.item.clean=function(fauna)
+	fauna:clean_kinetic()
+end
+
+fauna_trenchs.item.update_brain=function(fauna,brain)
+
+	fauna.thunk=fauna.thunk-1
+	if fauna.thunk<=0 then
+		fauna.thunk=fauna.sys:get_rnd(8,32)
+		brain.jump=V3(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160),0)
+		brain.move[1]=brain.jump[1]<0 and -1 or 1
+	end
+end
+
+fauna_trenchs.item.update=function(fauna)
+	if fauna:get("deleted") then return end
+	fauna:get_values()
+	fauna:setup_kinetic() -- might need to recreate body
+	
+--	local up=fauna.scene.ups[fauna.idx] or fauna.sys.oven.ups.empty
+
+	local level=fauna:get_singular("level") -- only one level is active at a time
+
+	local brain={}
+	brain.move=V3(0,0,0)
+	brain.jump=nil
+	fauna:update_brain(brain)
+
+	local grav=level:get_gravity(fauna.pos)
+
+	fauna.acc=V3( 0, 0 ,0) -- reset force
+	local va -- velocity we want to achieve
+	if fauna.onfloor>0 or fauna.jump>0 then -- when on floor
+		va=brain.move[1]*512
+	else -- when in air
+		va=brain.move[1]*256
+	end
+	if va then -- apply left/right movement
+		if va<0 and fauna.vel[1]>0 then fauna.vel[1]=0 end -- quick turn
+		if va>0 and fauna.vel[1]<0 then fauna.vel[1]=0 end -- quick turn
+		local vb=va-fauna.vel[1] -- diff from current velocity
+		fauna.acc[1]=fauna.acc[1]+(vb) -- apply force to make us move at requested speed
+	end
+	
+	fauna.vel[1]=fauna.vel[1]*12/16 --  dampen horizontal velocity
+	fauna.vel[2]=fauna.vel[2]*14/16 --  dampen vertical velocity
+	
+	if brain.move[1]<0 then fauna.side= 1 end
+	if brain.move[1]>0 then fauna.side=-1 end
+
+--	fauna.pos=fauna.pos+fauna.vel
+
+	local footspeed=0.25
+	local footbase=3
+	local space=fauna:get_singular("kinetic").space
+	local hit=space:query_segment_first(fauna.pos[1],fauna.pos[2],fauna.pos[1],fauna.pos[2]+16,2,fauna.uid,0x00010000,0x00ffffff)
+	if hit and hit.alpha and hit.alpha<((footbase+4)/16) then
+
+		local d=(hit.alpha*16)+2 -- distance + radius
+		local o=fauna.vel[2] -- original velocity
+		local v=((d-(footbase+2))) -- distance to where we want to be
+		local a=v*32 -- force to adjust velocity by
+
+		fauna.foot=d-(footbase+2)
+		if fauna.foot<0  then fauna.foot=0  end
+		if fauna.foot>3 then fauna.foot=3 end
+		fauna.acc[2]=fauna.acc[2]+a --  hover
+
+		fauna.onfloor=4
+
+if hit.shape.uid then
+--	print("monster stomp",hit.shape.uid)
+end
+
+	else
+		if fauna.foot>3 then fauna.foot=3 end
+		if fauna.foot<3 then fauna.foot=fauna.foot+footspeed end
+
+		fauna.acc:add(grav) -- gravity
+	end
+
+	if fauna.onfloor>0 and fauna.jump<=0 then -- meep meep jump	
+		if brain.jump then
+			fauna.onfloor=0
+			fauna.jump=4
+			fauna.acc[2]=0
+			fauna.vel:add(brain.jump) --[2]=-120
+		end
+	end
+	if fauna.onfloor>0 then fauna.onfloor=fauna.onfloor-1 end
+
+	if fauna.jump>0 then -- jump higher while button is held down
+		fauna.onfloor=0 -- no foot grab while jumping
+		fauna.jump=fauna.jump-1 -- continue jump
+	end
+
+--PRINT( ba_now , fauna.onfloor , fauna.jump )
+--PRINT( fauna.vel )
+
+	fauna:set_body() -- then we call update_kinetic which will set_values before draw
+end
+
+fauna_trenchs.item.update_kinetic=function(fauna)
+	if fauna:get("deleted") then return end
+	fauna:get_body()
+	fauna:set_values()
+end
+
+-- when drawing get will auto tween values
+-- so it can be called multiple times between updates for different results
+fauna_trenchs.item.draw=function(fauna)
+	if fauna:get("deleted") then return end
+
+	fauna:get_values()
+
+	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
+	local f=math.abs(fauna.flap-2)
+	draws.sprite( fauna.sname          , p , fauna.side )
+	draws.sprite( fauna.sname.."_feet" , p+V3(0,fauna.foot,8) , fauna.side )
+
+end
+
+
+--------------------------------------------------------------------------------
+--
+--#gib
 
 gibs={}
 -- methods added to system
@@ -902,6 +1176,8 @@ gibs.values={
 	sname="gib_green",
 	life=16,
 	size=4,
+	hit=0,
+	hit_normal=V3(0,0,0),
 }
 
 gibs.types={
@@ -913,6 +1189,8 @@ gibs.types={
 	snane="get",
 	life="get",
 	size="get",
+	hit="get",
+	hit_normal="get",
 }
 
 
@@ -938,14 +1216,12 @@ gibs.collision_mask=0x000000ff	-- interact bitmask
 gibs.collision_handlers={
 	[{gibs.collision_name}]={
 		postsolve=function(it)
-			local gib=it.shape_a.in_body -- should be a gib
-			local points=it:points()
-			local n=V3( points.normal_x , points.normal_y , 0 )
-			-- remember what we hit for next update
-			gib.hit={
-				body=it.shape_a.in_body,
-				normal=n,
-			}
+			local gib=scene:find_uid(it.shape_a.uid)
+			if gib and gib.caste=="gib" then -- sanity
+--				local points=it:points()
+				gib.hit=it.shape_b.uid or -1
+--				gib.hit_normal=V3( points.normal_x , points.normal_y , 0 )
+			end
 			return true
 		end
 	}
@@ -1026,17 +1302,22 @@ gibs.item.update=function(gib)
 	gib:get_values()
 	gib:setup_kinetic() -- might need to recreate body
 	
-	if gib.body.hit then
-		if gib.life>0 then
-			gib.life=gib.life-1
-			gib.body.hit=nil -- ignore hits until we run out of life
+
+	if gib.hit~=0 then
+		local hit=scene:find_uid(gib.hit)
+		gib.hit=0
+		if hit and hit.caste=="gib" then
+			-- self hit?`
 		else
-			if gib.size>1 then
-				gib.size=gib.size-1
-				gib:setup_kinetic_reshape()
-				gib.body.hit=nil
+			if gib.life>0 then
+				gib.life=gib.life-1
 			else
-				gib:mark_deleted()
+				if gib.size>1 then
+					gib.size=gib.size-1
+					gib:setup_kinetic_reshape()
+				else
+					gib:mark_deleted()
+				end
 			end
 		end
 	end
@@ -1062,10 +1343,9 @@ gibs.item.draw=function(gib)
 
 end
 
---#fauna_panda.lua
 --------------------------------------------------------------------------------
 --
--- a basic fauna_panda
+--#fauna_panda
 
 fauna_pandas={}
 -- methods added to system
@@ -1162,7 +1442,7 @@ fauna_pandas.item.update_brain=function(fauna_panda,brain)
 	if fauna_panda.thunk<=0 then
 		fauna_panda.thunk=fauna_panda.sys:get_rnd(16*8,16*16)
 		scene:creates({
-			{"fauna",sname="fauna_slime",pos={fauna_panda.pos[1],fauna_panda.pos[2],0}},
+			{"fauna_slim",sname="fauna_slim",pos={fauna_panda.pos[1],fauna_panda.pos[2],0}},
 		})
 	end
 
@@ -1192,10 +1472,9 @@ fauna_pandas.item.draw=function(fauna_panda)
 
 end
 
---#level.lua
 --------------------------------------------------------------------------------
 --
--- a level
+--#level
 
 levels={}
 -- methods added to system
@@ -1648,18 +1927,19 @@ levels.item.draw=function(level)
 	for i,p in ipairs(players) do
 		if p.idx==1 then
 			local s=p.score..""
+			if p.onfloor>0 then s=s.." _" end
 			add_string4(s,2,1)
 		elseif p.idx==2 then
 			local s=p.score..""
+			if p.onfloor>0 then s="_ "..s end
 			add_string4(s,254-(#s*4),1)
 		end
 	end
 end
 
---#camera.lua
 --------------------------------------------------------------------------------
 --
--- a camera
+--#camera
 
 cameras={}
 -- methods added to system
