@@ -612,10 +612,12 @@ fauna_slims.values={
 	side=1,
 	foot=8,
 	onfloor=0,
+	floor_uid=0,
 	jump=0,
 	flap=0,
 	sname="",
 	thunk=0,
+	floor_uid=0,
 }
 
 fauna_slims.types={
@@ -632,6 +634,7 @@ fauna_slims.types={
 	flap="get",
 	sname="get",
 	thunk="get",
+	floor_uid="get",
 }
 
 
@@ -821,11 +824,23 @@ fauna_slims.item.update=function(fauna)
 
 		fauna.onfloor=4
 
-if hit.shape.uid then
---	print("monster stomp",hit.shape.uid)
-end
+		fauna.floor_uid=hit.shape.uid or -1
+		
+		local f2=scene:find_uid(fauna.floor_uid)
+		if f2 then
+			local f3=scene:find_uid(f2.floor_uid)
+			if f2 and f3 and f2.caste==fauna.caste and f3.caste==fauna.caste then
+				if fauna.uid~=f2.uid and fauna.uid~=f3.uid and f2.uid~=f3.uid then 
+
+-- upgrade to trench...
+
+				end
+			end
+		end
 
 	else
+		fauna.floor_uid=0
+
 		if fauna.foot>3 then fauna.foot=3 end
 		if fauna.foot<3 then fauna.foot=fauna.foot+footspeed end
 
@@ -904,6 +919,7 @@ fauna_trenchs.values={
 	flap=0,
 	sname="",
 	thunk=0,
+	floor_uid=0,
 }
 
 fauna_trenchs.types={
@@ -920,6 +936,7 @@ fauna_trenchs.types={
 	flap="get",
 	sname="get",
 	thunk="get",
+	floor_uid="get",
 }
 
 
@@ -1098,11 +1115,11 @@ fauna_trenchs.item.update=function(fauna)
 
 		fauna.onfloor=4
 
-if hit.shape.uid then
---	print("monster stomp",hit.shape.uid)
-end
+
 
 	else
+		fauna.floor_uid=0
+	
 		if fauna.foot>3 then fauna.foot=3 end
 		if fauna.foot<3 then fauna.foot=fauna.foot+footspeed end
 
