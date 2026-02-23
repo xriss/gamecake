@@ -597,7 +597,7 @@ fauna_slims.values={
 	floor_uid=0,
 	jump=0,
 	flap=0,
-	sname="",
+	sname="fauna_slim",
 	thunk=0,
 	floor_uid=0,
 }
@@ -803,6 +803,14 @@ fauna_slims.item.update=function(fauna)
 				if fauna.uid~=f2.uid and fauna.uid~=f3.uid and f2.uid~=f3.uid then 
 
 -- upgrade to trench...
+					fauna:mark_deleted()
+					f2:mark_deleted()
+					f3:mark_deleted()
+
+					local boots={
+						{"fauna_trench",pos=f2.pos},
+					}
+					scene:creates(boots)
 
 				end
 			end
@@ -882,7 +890,7 @@ fauna_trenchs.values={
 	onfloor=0,
 	jump=0,
 	flap=0,
-	sname="",
+	sname="fauna_trench",
 	thunk=0,
 	floor_uid=0,
 }
