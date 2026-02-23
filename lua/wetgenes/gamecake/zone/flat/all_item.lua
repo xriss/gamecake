@@ -120,6 +120,21 @@ all.item.setup_values=function(it,boot)
 
 end
 
+all.item.get_auto_value=function(it,n)
+	local t=it.sys.types[n]
+	local s=it.scene.tween
+	if s then -- we are drawing, need to use tween cache
+		if     t=="get"   then it[n]=it.tweens:get( n )
+		elseif t=="tween" then it[n]=it.tweens:tween( n , s)
+		elseif t=="twrap" then it[n]=it.tweens:twrap( n , it.sys.twraps[n] , s )
+		end
+	else
+		if     t=="get"   then it[n]=it.values:get( n )
+		elseif t=="tween" then it[n]=it.values:get( n )
+		elseif t=="twrap" then it[n]=it.values:get( n )
+		end
+	end
+end
 all.item.get_auto_values=function(it)
 	local s=it.scene.tween -- cache for later use
 	if s then -- we are drawing, need to use tween cache
@@ -143,7 +158,12 @@ all.item.get_values=function(it)
 	it:get_auto_values()
 end
 
+
 -- this should never be called by draw code so has no need to check
+
+all.item.set_auto_value=function(it,n)
+	it:set(n,it[n])
+end
 all.item.set_auto_values=function(it)
 	for n,t in pairs(it.sys.types) do
 		it:set(n,it[n])
@@ -276,6 +296,10 @@ local snap=function(n) return floor((n*0x1000)+0.5)/0x1000 end
 all.item.set_body=function(it)
 	if not it.body then return end -- no body
 
+	it:get_auto_value("pos")
+	it:get_auto_value("vel")
+	it:get_auto_value("acc")
+
 	it.body:position(it.pos[1],it.pos[2])
 	it.body:velocity(it.vel[1],it.vel[2])
 	
@@ -304,9 +328,13 @@ all.item.get_body=function(it)
 	it.pos=V3(px,py,0)
 	it.vel=V3(vx,vy,0)
 
+	it:set_auto_value("pos")
+	it:set_auto_value("vel")
+
 	if it.acc then
 		local ax,ay=it.body:force()
 		it.acc=V3(ax,ay,0)
+		it:set_auto_value("acc")
 	end
 
 --[[

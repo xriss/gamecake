@@ -123,9 +123,14 @@ all.scene.do_update=function(scene)
 			scene:do_push() -- inc tick
 			scene.ups=scene.oven.upnet.get_ups( scene.values:get("tick") )
 
+
 			scene:systems_call("update")
 			scene:call("update")
-			scene:call("update_kinetic")
+
+			scene:call("set_body")			-- write into kinetic space
+			scene:call("update_kinetic")	-- update kinetic space
+			scene:call("get_body")			-- read from kinetic space
+
 			scene.values:set("tick_input", scene.values:get("tick") )
 
 local hash=(scene.ticks.input)%0x100000000 -- fake hash

@@ -557,12 +557,6 @@ end
 --PRINT( ba_now , player.onfloor , player.jump )
 --PRINT( player.vel )
 
-	player:set_body() -- then we call update_kinetic which will set_values before draw
-end
-
-players.item.update_kinetic=function(player)
-	if player:get("deleted") then return end
-	player:get_body()
 	player:set_values()
 end
 
@@ -865,14 +859,9 @@ fauna_slims.item.update=function(fauna)
 --PRINT( ba_now , fauna.onfloor , fauna.jump )
 --PRINT( fauna.vel )
 
-	fauna:set_body() -- then we call update_kinetic which will set_values before draw
-end
-
-fauna_slims.item.update_kinetic=function(fauna)
-	if fauna:get("deleted") then return end
-	fauna:get_body()
 	fauna:set_values()
 end
+
 
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
@@ -1144,14 +1133,9 @@ fauna_trenchs.item.update=function(fauna)
 --PRINT( ba_now , fauna.onfloor , fauna.jump )
 --PRINT( fauna.vel )
 
-	fauna:set_body() -- then we call update_kinetic which will set_values before draw
-end
-
-fauna_trenchs.item.update_kinetic=function(fauna)
-	if fauna:get("deleted") then return end
-	fauna:get_body()
 	fauna:set_values()
 end
+
 
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
@@ -1235,8 +1219,8 @@ gibs.collision_handlers={
 		postsolve=function(it)
 			local gib=scene:find_uid(it.shape_a.uid)
 			if gib and gib.caste=="gib" then -- sanity
+				gib:set("hit",it.shape_b.uid or -1) -- set value for update
 --				local points=it:points()
-				gib.hit=it.shape_b.uid or -1
 --				gib.hit_normal=V3( points.normal_x , points.normal_y , 0 )
 			end
 			return true
@@ -1339,13 +1323,8 @@ gibs.item.update=function(gib)
 		end
 	end
 
-	gib:set_body() -- then we call update_kinetic which will set_values before draw
-end
-
-gibs.item.update_kinetic=function(gib)
-	if gib:get("deleted") then return end
-	gib:get_body()
 	gib:set_values()
+
 end
 
 -- when drawing get will auto tween values
@@ -1475,8 +1454,6 @@ fauna_pandas.item.update=function(fauna_panda)
 	fauna_panda:set_values()
 end
 
-fauna_pandas.item.update_kinetic=function(fauna_panda)
-end
 
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
