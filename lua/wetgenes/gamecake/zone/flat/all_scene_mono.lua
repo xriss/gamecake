@@ -127,6 +127,7 @@ all.scene.do_update=function(scene)
 			scene:systems_call("update")
 			scene:call("update")
 
+			-- need to run kinetic update now or we will feel control lag
 			scene:call("set_body")			-- write into kinetic space
 			scene:call("update_kinetic")	-- update kinetic space
 			scene:call("get_body")			-- read from kinetic space

@@ -380,18 +380,6 @@ players.graphics={
 
 }
 
-players.item.get_values=function(player)
-
-	player:get_auto_values()
-
-end
-
-players.item.set_values=function(player)
-
-	player:set_auto_values()
-
-end
-
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
@@ -693,18 +681,6 @@ G G G G G G G G G G G G G G G G G G G G G G G G
 
 }
 
-fauna_slims.item.get_values=function(fauna)
-
-	fauna:get_auto_values()
-
-end
-
-fauna_slims.item.set_values=function(fauna)
-
-	fauna:set_auto_values()
-
-end
-
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
@@ -979,18 +955,6 @@ fauna_trenchs.graphics={
 
 }
 
-fauna_trenchs.item.get_values=function(fauna)
-
-	fauna:get_auto_values()
-
-end
-
-fauna_trenchs.item.set_values=function(fauna)
-
-	fauna:set_auto_values()
-
-end
-
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
@@ -1228,18 +1192,6 @@ gibs.collision_handlers={
 	}
 }
 
-gibs.item.get_values=function(gib)
-
-	gib:get_auto_values()
-
-end
-
-gibs.item.set_values=function(gib)
-
-	gib:set_auto_values()
-
-end
-
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
@@ -1398,18 +1350,6 @@ fauna_pandas.graphics={
 ]]},
 
 }
-
-fauna_pandas.item.get_values=function(fauna_panda)
-
-	fauna_panda:get_auto_values()
-
-end
-
-fauna_pandas.item.set_values=function(fauna_panda)
-
-	fauna_panda:set_auto_values()
-
-end
 
 
 -- the system has no state values but can still perform generic actions
@@ -1602,18 +1542,6 @@ map=[[
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 ]],
 }
-
-levels.item.get_values=function(level)
-
-	level:get_auto_values()
-
-end
-
-levels.item.set_values=function(level)
-
-	level:set_auto_values()
-
-end
 
 
 -- the system has no state values but can still perform generic actions
@@ -1966,18 +1894,6 @@ cameras.graphics={
 
 }
 
-cameras.item.get_values=function(camera)
-
-	camera:get_auto_values()
-
-end
-
-cameras.item.set_values=function(camera)
-
-	camera:set_auto_values()
-
-end
-
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
@@ -2117,18 +2033,6 @@ huds.graphics={
 
 
 }
-
-huds.item.get_values=function(hud)
-
-	hud:get_auto_values()
-
-end
-
-huds.item.set_values=function(hud)
-
-	hud:set_auto_values()
-
-end
 
 
 -- the system has no state values but can still perform generic actions
