@@ -102,11 +102,11 @@ all.create_scene=function(scene)
 
 			{"hud",idx=1,depends={player=5}},
 			{"camera",idx=1,depends={player=5}},
-			{"player",idx=1,pos={32,32,0},depends={camera=4,hud=3}},
+			{"player",idx=1,vel={-64,32,0},pos={32,32,0},depends={camera=4,hud=3},mode="egg",},
 
 			{"hud",idx=2,depends={player=8}},
 			{"camera",idx=2,depends={player=8}},
-			{"player",idx=2,pos={64,32,0},depends={camera=7,hud=6}},
+			{"player",idx=2,vel={64,32,0},pos={64,32,0},depends={camera=7,hud=6},mode="egg",},
 
 			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
 		}
@@ -198,6 +198,7 @@ players.values={
 	ang=V3( 0,0,0 ),
 	acc=V3( 0,200,0 ),
 	idx=1,
+	mode="none",
 	side=1,
 	foot=8,
 	onfloor=0,
@@ -243,6 +244,28 @@ players.graphics={
 . . . . R R R R R R R R . . . . 
 . . . . . . R R R R . . . . . . 
 . . . . . . . . . . . . . . . . 
+]]},
+
+{nil,"ply1_egg",[[
+. . r r r r . . 
+. r O O r r r . 
+r O Y o O r r r 
+r O o o O r r r 
+r r O O r r R r 
+r r r r r R R r 
+. r r r R R r . 
+. . r r r r . . 
+]]},
+
+{nil,"ply2_egg",[[
+. . r r r r . . 
+. r O O r r r . 
+r O Y o O r r r 
+r O o o O r r r 
+r r O O r r R r 
+r r r r r R R r 
+. r r r R R r . 
+. . r r r r . . 
 ]]},
 
 {nil,"ply1_hand",[[
@@ -442,6 +465,15 @@ players.item.update=function(player)
 	local ba_set=( up:get("a_set") ) or false
 
 	local grav=level:get_gravity(player.pos)
+
+if player.mode=="egg" then
+
+	if ba_set then
+		player.mode="none"
+	end
+	
+else
+	
 	if ba_now then
 		grav=grav*0.5 -- reduce gravity while flapping arms
 		player.flap=(player.flap+1)%4
@@ -545,6 +577,8 @@ end
 --PRINT( ba_now , player.onfloor , player.jump )
 --PRINT( player.vel )
 
+end
+
 	player:set_values()
 end
 
@@ -556,15 +590,25 @@ players.item.draw=function(player)
 	player:get_values()
 
 	local p=V3( player.pos[1] , player.pos[2], player.pos[1]+player.pos[2] )
-	local f=math.abs(player.flap-2)
-	draws.sprite( "ply"..player.idx          , p , player.side )
-	draws.sprite( "ply"..player.idx.."_hand" , p+V3(0,f,-1) , player.side )
 
-	if player.walk==0 then
-		draws.sprite( "ply"..player.idx.."_feet" , p+V3(0,player.foot-8,-1) , player.side )
+	if player.mode=="egg" then
+
+		draws.sprite( "ply"..player.idx.."_egg" , p , player.side )
+
 	else
-		draws.sprite( "ply"..player.idx.."_walk" , p+V3(0,player.foot-8,-1) , player.side , player.walk)
+
+		local f=math.abs(player.flap-2)
+		draws.sprite( "ply"..player.idx          , p , player.side )
+		draws.sprite( "ply"..player.idx.."_hand" , p+V3(0,f,-1) , player.side )
+
+		if player.walk==0 then
+			draws.sprite( "ply"..player.idx.."_feet" , p+V3(0,player.foot-8,-1) , player.side )
+		else
+			draws.sprite( "ply"..player.idx.."_walk" , p+V3(0,player.foot-8,-1) , player.side , player.walk)
+		end
+
 	end
+
 end
 
 
