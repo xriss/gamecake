@@ -100,21 +100,14 @@ all.values={
 	notween=true,	-- disable tweening for when an object needs to jump to a new position
 	deleted=false,	-- delayed deletion of an object, when this is set object should be considered dead
 	zid=0,			-- a uid of the zone this item belongs in, 0 is a synonym for null
---	zname="",		-- a unique name within the zid name space
 	uids=V0(),		-- list of uids related to this object [1] is always parent
 }
 
 all.types={
-	notween="ignore",
-	deleted="ignore",
-	zid="ignore",
---	zname="ignore",
-	uids="ignore",
-	-- body values are ignored by default and need to be added by each system that uses them
-	pos="ignore",
-	rot="ignore",
-	vel="ignore",
-	ang="ignore",
+	notween="ignore",	-- tween auto gets
+	deleted="ignore",	-- must auto get to check
+	zid="ignore",	-- will all be the same so use the global
+	uids="ignore",	-- depend auto gets
 }
 
 -- iterate over caste subnames so we can merge inheritences, set reverse flag to iterate backwards

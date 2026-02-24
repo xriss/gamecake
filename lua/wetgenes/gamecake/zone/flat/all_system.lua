@@ -91,13 +91,13 @@ all.system.initialize=function(sys)
 		end
 	end
 
-	-- make sure we have unique sub tables
-	sys.methods=sys.methods or {}
-	sys.metatable=sys.metatable or {}
-	sys.zips=sys.zips or {}
-
-	sys.info.types=sys.info.types or {}
-	sys.info.twraps=sys.info.twraps or {}
+	-- make sure we have unique sub tables that exist
+	sys.methods   = sys.methods   or {}
+	sys.metatable = sys.metatable or {}
+	sys.zips      = sys.zips      or {}
+	sys.defaults  = sys.defaults  or {}
+	sys.types     = sys.types     or {}
+	sys.twraps    = sys.twraps    or {}
 
 	-- and methods will be available to items via metatable
 	sys.metatable.__index=sys.methods
@@ -130,40 +130,43 @@ all.system.initialize=function(sys)
 	for _,caste in ipairs(castes) do
 		local info=sys.scene.infos[caste]
 		if info then
-			merge( sys             , info.system or {} ) -- merge system functions
-			merge( sys.methods     , info.item   or {} ) -- and item functions
-			merge( sys.info.values , info.values or {} ) -- and default values
-			merge( sys.info.types  , info.types  or {} ) -- and types of values
-			merge( sys.info.twraps , info.twraps or {} ) -- and twraps of values
+			merge( sys          , info.system ) -- merge system functions
+			merge( sys.methods  , info.item   ) -- and item functions
+			merge( sys.defaults , info.values ) -- and default values
+			merge( sys.types    , info.types  ) -- and types of values
+			merge( sys.twraps   , info.twraps ) -- and twraps of values
 		end
 	end
 
-	for n,v in pairs( sys.info.values ) do -- find zip values which wil be non tardis tables and auto flag tweens
+	for n,v in pairs( sys.defaults ) do -- find zip values which wil be non tardis tables and auto flag tweens
 		local t=type(v)
 		if t=="table" then -- a table
 			if not v.new then -- not a tardis value, assume ziped data
 				sys.zips[n]=""
-				sys.info.types[n]="ignore" -- do not get/set these
+				sys.types[n]="ignore" -- do not auto get/set these
 			end
 		end
-		if not sys.info.types[n] then	-- any other values are set to auto
-			sys.info.types[n]="get"
+		if not sys.types[n] then	-- any other values are set to auto get
+			sys.types[n]="get"
 		end
 	end
-	sys.types={}
-	for n,v in pairs( sys.info.types ) do
-		if v~="ignore" then -- remove ignores
-			sys.types[n]=v
+	for n,v in pairs( sys.types ) do
+		if v=="ignore" then -- finally remove ignores
+			sys.types[n]=nil
 		end
-	end
-	sys.twraps={}
-	for n,v in pairs( sys.info.twraps ) do
-		sys.twraps[n]=v
 	end
 
-	sys.info.values_order={}
-	for n in pairs(sys.info.values) do sys.info.values_order[#sys.info.values_order+1]=n end
-	table.sort(sys.info.values_order)
+	sys.order={}
+	for n in pairs(sys.defaults) do sys.order[#sys.order+1]=n end
+	table.sort(sys.order)
+
+--[[
+PRINT( sys.caste, "defaults" , "types" , "twraps" , "order" )
+DUMP( sys.defaults )
+DUMP( sys.types )
+DUMP( sys.twraps )
+DUMP( sys.order )
+]]
 
 	-- global system values are stored in scene
 	sys:get_rnd() -- seed with caste name

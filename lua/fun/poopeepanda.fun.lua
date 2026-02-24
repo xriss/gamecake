@@ -211,17 +211,6 @@ players.values={
 players.types={
 	pos="tween",
 	rot="tween",
-	vel="get",
-	ang="get",
-	acc="get",
-	idx="get",
-	side="get",
-	foot="get",
-	onfloor="get",
-	jump="get",
-	flap="get",
-	walk="get",
-	score="get",
 }
 
 
@@ -258,14 +247,14 @@ r r r r r R R r
 ]]},
 
 {nil,"ply2_egg",[[
-. . r r r r . . 
-. r O O r r r . 
-r O Y o O r r r 
-r O o o O r r r 
-r r O O r r R r 
-r r r r r R R r 
-. r r r R R r . 
-. . r r r r . . 
+. . G G G G . . 
+. G d d G G G . 
+G d C D d G G G 
+G d D D d G G G 
+G G d d G G g G 
+G G G G G g g G 
+. G G G g g G . 
+. . G G G G . . 
 ]]},
 
 {nil,"ply1_hand",[[
@@ -644,23 +633,12 @@ fauna_slims.values={
 	sname="fauna_slim",
 	thunk=0,
 	floor_uid=0,
+	mode="none",
 }
 
 fauna_slims.types={
 	pos="tween",
 	rot="tween",
-	vel="get",
-	ang="get",
-	acc="get",
-	idx="get",
-	side="get",
-	foot="get",
-	onfloor="get",
-	jump="get",
-	flap="get",
-	sname="get",
-	thunk="get",
-	floor_uid="get",
 }
 
 
@@ -684,6 +662,18 @@ fauna_slims.graphics={
 . G G d d d d d d d G G G G G . 
 . . G G G G G G G G G G G G . . 
 ]]},
+
+{nil,"fauna_slim_egg",[[
+. . G G G G . . 
+. G G d d G G . 
+G G d d d d G G 
+G G G G G G G G 
+G G G G G G G G 
+G G g g g g G G 
+. G G g g G G . 
+. . G G G G . . 
+]]},
+
 
 {nil,"fauna_slim_splat",[[
 . . . . . . . . . . . . . . . . . . . . . . . . 
@@ -791,12 +781,21 @@ fauna_slims.item.update=function(fauna)
 
 	local level=fauna:get_singular("level") -- only one level is active at a time
 
+	local grav=level:get_gravity(fauna.pos)
+
+
+if fauna.mode=="egg" then
+
+	fauna.acc:set(grav) -- gravity
+
+
+else
+
 	local brain={}
 	brain.move=V3(0,0,0)
 	brain.jump=nil
 	fauna:update_brain(brain)
 
-	local grav=level:get_gravity(fauna.pos)
 
 	fauna.acc=V3( 0, 0 ,0) -- reset force
 	local va -- velocity we want to achieve
@@ -887,6 +886,8 @@ fauna_slims.item.update=function(fauna)
 --PRINT( ba_now , fauna.onfloor , fauna.jump )
 --PRINT( fauna.vel )
 
+end
+
 	fauna:set_values()
 end
 
@@ -898,10 +899,16 @@ fauna_slims.item.draw=function(fauna)
 
 	fauna:get_values()
 
+if fauna.mode=="egg" then
+	local p=V3( fauna.pos[1] , fauna.pos[2], fauna.pos[1]+fauna.pos[2] )
+	draws.sprite( fauna.sname.."_egg"  , p , fauna.side )
+
+else
 	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
 	local f=math.abs(fauna.flap-2)
 	draws.sprite( fauna.sname          , p , fauna.side )
 	draws.sprite( fauna.sname.."_feet" , p+V3(0,fauna.foot,8) , fauna.side )
+end
 
 end
 
@@ -942,20 +949,7 @@ fauna_trenchs.values={
 fauna_trenchs.types={
 	pos="tween",
 	rot="tween",
-	vel="get",
-	ang="get",
-	acc="get",
-	idx="get",
-	side="get",
-	foot="get",
-	onfloor="get",
-	jump="get",
-	flap="get",
-	sname="get",
-	thunk="get",
-	floor_uid="get",
 }
-
 
 fauna_trenchs.graphics={
 
@@ -1200,14 +1194,6 @@ gibs.values={
 gibs.types={
 	pos="tween",
 	rot="tween",
-	vel="get",
-	ang="get",
-	acc="get",
-	snane="get",
-	life="get",
-	size="get",
-	hit="get",
-	hit_normal="get",
 }
 
 
@@ -1367,8 +1353,6 @@ fauna_pandas.values={
 
 fauna_pandas.types={
 	pos="tween",
-	sname="get",
-	thunk="get",
 }
 
 
@@ -1430,7 +1414,7 @@ fauna_pandas.item.update_brain=function(fauna_panda,brain)
 	if fauna_panda.thunk<=0 then
 		fauna_panda.thunk=fauna_panda.sys:get_rnd(16*8,16*16)
 		scene:creates({
-			{"fauna_slim",sname="fauna_slim",pos={fauna_panda.pos[1],fauna_panda.pos[2],0}},
+			{"fauna_slim",sname="fauna_slim",pos={fauna_panda.pos[1],fauna_panda.pos[2],0},vel={fauna_panda.sys:get_rnd(-20,20),0},mode="egg"},
 		})
 	end
 
@@ -1485,7 +1469,6 @@ levels.types={
 	pos="tween",
 	focus="tween",
 	time="tween",
-	idx="get",
 }
 
 
@@ -1938,7 +1921,6 @@ cameras.values={
 cameras.types={
 	pos="tween",
 	focus="tween",
-	idx="get",
 }
 
 
@@ -2065,8 +2047,6 @@ huds.types={
 	pos="tween",
 	dst="tween",
 	focus="tween",
-	idx="get",
-	tile_idx="get",
 }
 
 

@@ -171,7 +171,7 @@ end
 all.item.set_boot=function(it,boot)
 	boot=boot or it.boot
 
-	for k,v in pairs( it.sys.info.values ) do
+	for k,v in pairs( it.sys.defaults ) do
 		if type(v)=="table" then
 			if v.new then
 				it.values:set(k,v.new( boot[k] or v )) -- copy tardis values
@@ -187,7 +187,7 @@ end
 all.item.get_boot=function(it)
 	local boot={}
 
-	for k,v in pairs( it.sys.info.values ) do
+	for k,v in pairs( it.sys.defaults ) do
 		if type(v)=="table" then
 			if v.new then
 				boot[k]=v.new( it.values:get(k) ) -- copy tardis values
@@ -415,7 +415,7 @@ all.item.load_values=function(it,data,topidx)
 	it.values[topidx]=t
 --	if not t then print("load top",topidx,#it.values) end
 	for k,v in pairs(data) do
-		if type(b[k])=="table" then -- could be a special calss
+		if type(b[k])=="table" then -- could be a special class
 			if b[k].new then -- it is a class
 				t[k]=b[k].new(v) -- so enable all the meta
 			else
