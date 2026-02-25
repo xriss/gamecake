@@ -616,6 +616,7 @@ fauna_eggs.values={
 	acc=V3( 0,0,0 ),
 	idx=1,
 	sname="fauna_egg",
+	egg="fauna_slim",
 }
 
 fauna_eggs.types={

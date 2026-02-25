@@ -120,6 +120,26 @@ all.item.setup_values=function(it,boot)
 
 end
 
+all.item.set_zip=function(it,n)
+	local s=it.zips[n]
+	local t=it[n]
+	if t.dirty then -- flaged as changed by user code when we change anything
+		t.dirty=false
+		local z=all.compress(t)
+		it.zips[n]=z
+		it:set(n,z) -- set will check against current value so this is always safe to call
+	end
+end
+
+all.item.get_zip=function(it,n)
+	local z=it:get(n)
+	if s~=z then -- changed
+		it.zips[n]=z -- remember
+		local t=all.uncompress(z)
+		it[n]=t
+	end
+end
+
 all.item.get_value=function(it,n)
 	local t=it.sys.types[n]
 	local s=it.scene.tween
@@ -127,13 +147,16 @@ all.item.get_value=function(it,n)
 		if     t=="get"   then it[n]=it.tweens:get( n )
 		elseif t=="tween" then it[n]=it.tweens:tween( n , s)
 		elseif t=="twrap" then it[n]=it.tweens:twrap( n , it.sys.twraps[n] , s )
+		elseif t=="zip"   then it:get_zip(n)
 		end
 	else
 		if     t=="get"   then it[n]=it.values:get( n )
 		elseif t=="tween" then it[n]=it.values:get( n )
 		elseif t=="twrap" then it[n]=it.values:get( n )
+		elseif t=="zip"   then it:get_zip(n)
 		end
 	end
+	return it[n]
 end
 all.item.get_values=function(it)
 	local s=it.scene.tween -- cache for later use
@@ -142,6 +165,7 @@ all.item.get_values=function(it)
 			if     t=="get"   then it[n]=it.tweens:get( n )
 			elseif t=="tween" then it[n]=it.tweens:tween( n , s)
 			elseif t=="twrap" then it[n]=it.tweens:twrap( n , it.sys.twraps[n] , s )
+			elseif t=="zip"   then it:get_zip(n)
 			end
 		end
 	else
@@ -149,24 +173,33 @@ all.item.get_values=function(it)
 			if     t=="get"   then it[n]=it.values:get( n )
 			elseif t=="tween" then it[n]=it.values:get( n )
 			elseif t=="twrap" then it[n]=it.values:get( n )
+			elseif t=="zip"   then it:get_zip(n)
 			end
 		end
 	end
-	it:get_zips()
 end
 
 
 -- this should never be called by draw code so has no need to check
 
 all.item.set_value=function(it,n)
-	it:set(n,it[n])
+	local t=it.sys.types[n]
+	if t=="zip" then
+		it:set_zip(n)
+	elseif t~="ignore" then
+		it:set(n,it[n])
+	end
 end
 all.item.set_values=function(it)
 	for n,t in pairs(it.sys.types) do
-		it:set(n,it[n])
+		if t=="zip" then
+			it:set_zip(n)
+		elseif t~="ignore" then
+			it:set(n,it[n])
+		end
 	end
-	it:set_zips()
 end
+
 
 all.item.set_boot=function(it,boot)
 	boot=boot or it.boot
@@ -377,35 +410,6 @@ all.item.impulse_body=function(it,v,p)
 
 end
 ]]
-
-
-all.item.set_zips=function(it)
-	if not it.zips then return end -- no zipsge
-
-	for n,s in pairs(it.zips) do
-		local t=it[n]
-		if t.dirty then -- flaged as changed by user code when we change anything
-			t.dirty=false
-			local z=all.compress(t)
-			it.zips[n]=z
-			it:set(n,z) -- set will check against current value so this is always safe to call
-		end
-	end
-
-end
-
-all.item.get_zips=function(it)
-	if not it.zips then return end -- no zips
-
-	for n,s in pairs(it.zips) do
-		local z=it:get(n)
-		if s~=z then -- changed
-			it.zips[n]=z -- remember
-			local t=all.uncompress(z)
-			it[n]=t
-		end
-	end
-end
 
 
 all.item.load_values=function(it,data,topidx)

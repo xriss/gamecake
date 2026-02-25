@@ -143,16 +143,11 @@ all.system.initialize=function(sys)
 		if t=="table" then -- a table
 			if not v.new then -- not a tardis value, assume ziped data
 				sys.zips[n]=""
-				sys.types[n]="ignore" -- do not auto get/set these
+				sys.types[n]="zip"
 			end
 		end
 		if not sys.types[n] then	-- any other values are set to auto get
 			sys.types[n]="get"
-		end
-	end
-	for n,v in pairs( sys.types ) do
-		if v=="ignore" then -- finally remove ignores
-			sys.types[n]=nil
 		end
 	end
 
