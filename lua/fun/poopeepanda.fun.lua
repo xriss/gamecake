@@ -79,6 +79,7 @@ all.create_scene=function(scene)
 		huds,
 		players,
 		gibs,
+		fauna_eggs,
 		fauna_slims,
 		fauna_trenchs,
 		fauna_pandas,
@@ -524,18 +525,8 @@ else
 
 if hit.shape.uid then
 	local it=scene:find_uid(hit.shape.uid)
-	if it and it.caste=="fauna_slim" then
-		if it:mark_deleted() then
-			player.score=player.score+100
---			scene.systems.gibs:add_burst(it.pos,player.vel,4,V3(0,-200,0),4)
-			for i=1,16 do
-				local v=V3( player.vel[1]*-2+(100*((player.sys:get_rnd()-0.5)*2)) , player.vel[2]*-2+(-100*player.sys:get_rnd()) , 0 )
-				local boots={
-					{"gib",sname="gib_green",life=0,size=4,pos=it.pos,vel=v},
-				}
-				scene:creates(boots)
-			end
-		end
+	if it and it.stomp then
+		it:stomp(player)
 	end
 --	print("player stomp",hit.shape.uid)
 end
@@ -603,6 +594,125 @@ end
 
 --------------------------------------------------------------------------------
 --
+--#fauna_eggs
+
+fauna_eggs={}
+-- methods added to system
+fauna_eggs.system={}
+-- methods added to each item
+fauna_eggs.item={}
+
+fauna_eggs.caste="fauna_egg"
+
+fauna_eggs.uidmap={
+	length=0,
+}
+
+fauna_eggs.values={
+	pos=V3( 0,0,0 ),
+	rot=Q4( 0,0,0,1 ),
+	vel=V3( 0,0,0 ),
+	ang=V3( 0,0,0 ),
+	acc=V3( 0,0,0 ),
+	idx=1,
+	sname="fauna_egg",
+}
+
+fauna_eggs.types={
+	pos="tween",
+	rot="tween",
+}
+
+
+fauna_eggs.graphics={
+
+{nil,"fauna_egg",[[
+. . G G G G . . 
+. G G d d G G . 
+G G d d d d G G 
+G G G G G G G G 
+G G G G G G G G 
+G G g g g g G G 
+. G G g g G G . 
+. . G G G G . . 
+]]},
+
+
+}
+
+
+-- the system has no state values but can still perform generic actions
+-- eg allocate shared resources for later use
+fauna_eggs.system.setup=function(sys)
+	 system.components.tiles.upload_tiles( fauna_eggs.graphics )
+end
+
+fauna_eggs.system.clean=function(sys)
+end
+
+-- state values are cached into the item for easy access on a get
+-- and must be set again if they are altered so setup and updates
+-- must begin and end with a get and a set
+fauna_eggs.item.setup=function(fauna)
+	fauna:get_values()
+
+	fauna:setup_kinetic()
+	fauna:set_values()
+end
+
+fauna_eggs.item.setup_kinetic=function(fauna)
+	if fauna.body then return end -- already done
+	local space=fauna:get_singular("kinetic").space
+	fauna.body=space:body(1,1)
+	fauna.shape=fauna.body:shape("circle",4,0,0)
+	fauna.shape:friction(0.5)
+	fauna.shape:elasticity(0.5)
+	fauna.shape:filter(fauna.uid,0x00010000,0x00ffffff)
+	fauna.shape.uid=fauna.uid
+	fauna:set_body()
+end
+
+fauna_eggs.item.clean_kinetic=function(fauna)
+	if not fauna.body then return end -- already done
+	local space=fauna:get_singular("kinetic").space		
+	space:remove(fauna.shape)
+	space:remove(fauna.body)
+	fauna.body=nil
+	fauna.shape=nil
+end
+
+fauna_eggs.item.clean=function(fauna)
+	fauna:clean_kinetic()
+end
+
+fauna_eggs.item.update=function(fauna)
+	if fauna:get("deleted") then return end
+	fauna:get_values()
+	fauna:setup_kinetic() -- might need to recreate body
+
+	local level=fauna:get_singular("level") -- only one level is active at a time
+	local grav=level:get_gravity(fauna.pos)
+
+	fauna.acc:set(grav) -- gravity
+
+	fauna:set_values()
+end
+
+-- when drawing get will auto tween values
+-- so it can be called multiple times between updates for different results
+fauna_eggs.item.draw=function(fauna)
+	if fauna:get("deleted") then return end
+
+	fauna:get_values()
+
+	local p=V3( fauna.pos[1] , fauna.pos[2], fauna.pos[1]+fauna.pos[2] )
+	draws.sprite( fauna.sname  , p , fauna.side )
+
+end
+
+
+--------------------------------------------------------------------------------
+--
 --#fauna_slims
 
 fauna_slims={}
@@ -661,17 +771,6 @@ fauna_slims.graphics={
 . d d d d d d d d d d G G G G . 
 . G G d d d d d d d G G G G G . 
 . . G G G G G G G G G G G G . . 
-]]},
-
-{nil,"fauna_slim_egg",[[
-. . G G G G . . 
-. G G d d G G . 
-G G d d d d G G 
-G G G G G G G G 
-G G G G G G G G 
-G G g g g g G G 
-. G G g g G G . 
-. . G G G G . . 
 ]]},
 
 
@@ -784,13 +883,6 @@ fauna_slims.item.update=function(fauna)
 	local grav=level:get_gravity(fauna.pos)
 
 
-if fauna.mode=="egg" then
-
-	fauna.acc:set(grav) -- gravity
-
-
-else
-
 	local brain={}
 	brain.move=V3(0,0,0)
 	brain.jump=nil
@@ -886,11 +978,26 @@ else
 --PRINT( ba_now , fauna.onfloor , fauna.jump )
 --PRINT( fauna.vel )
 
-end
-
 	fauna:set_values()
 end
 
+-- who stomps this (it)
+fauna_slims.item.stomp=function(it,who)
+	if who.caste=="player" then
+		if it.mode=="flip" then
+	 		if it:mark_deleted() then
+				who.score=who.score+100
+				for i=1,16 do
+					local v=V3( who.vel[1]*-2+(100*((who.sys:get_rnd()-0.5)*2)) , who.vel[2]*-2+(-100*who.sys:get_rnd()) , 0 )
+					local boots={
+						{"gib",sname="gib_green",life=0,size=4,pos=it.pos,vel=v},
+					}
+					scene:creates(boots)
+				end
+			end
+		end
+	end
+end
 
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
@@ -899,16 +1006,10 @@ fauna_slims.item.draw=function(fauna)
 
 	fauna:get_values()
 
-if fauna.mode=="egg" then
-	local p=V3( fauna.pos[1] , fauna.pos[2], fauna.pos[1]+fauna.pos[2] )
-	draws.sprite( fauna.sname.."_egg"  , p , fauna.side )
-
-else
 	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
 	local f=math.abs(fauna.flap-2)
 	draws.sprite( fauna.sname          , p , fauna.side )
 	draws.sprite( fauna.sname.."_feet" , p+V3(0,fauna.foot,8) , fauna.side )
-end
 
 end
 
@@ -1414,7 +1515,11 @@ fauna_pandas.item.update_brain=function(fauna_panda,brain)
 	if fauna_panda.thunk<=0 then
 		fauna_panda.thunk=fauna_panda.sys:get_rnd(16*8,16*16)
 		scene:creates({
-			{"fauna_slim",sname="fauna_slim",pos={fauna_panda.pos[1],fauna_panda.pos[2],0},vel={fauna_panda.sys:get_rnd(-20,20),0},mode="egg"},
+			{
+				"fauna_egg",
+				pos={fauna_panda.pos[1],fauna_panda.pos[2],0},
+				vel={fauna_panda.sys:get_rnd(-20,20),0},
+			},
 		})
 	end
 
@@ -1544,6 +1649,7 @@ levels.legend={
 	["T1"]={ name="char_sign",				text="Welcome to the Dungeon, we got fun and games." },
 	["T2"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
 	["T3"]={ name="char_sign",				text="Stomp ten Slims." },
+	["P0"]={ spawn="player", idx=0,  },
 	["P1"]={ spawn="player", idx=1,  },
 	["P2"]={ spawn="player", idx=2,  },
 }
@@ -1565,7 +1671,7 @@ map=[[
 0 . . . 0 0 0 0 . 0 0 0 0 . 0 0 . 0 0 0 . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 0 . v . . . . . . . . . . . . . . . . . . . . . ^ . . 0 0 0 0 
+0 0 . v . . . . . . . . . . P0. . . . . . . . . . ^ . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . 0 0 . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . 0 
 0 . . . 0 0 0 0 . . . . . . . . 0 0 . . . . . . . . . . 0 0 0 0 
@@ -1617,12 +1723,16 @@ levels.item.setup=function(level)
 
 	local map=bitdown.pix_tiles(  info.map,  info.legend )
 	level.map=map
+	level.spawns={} -- find spawn tiles easily
 	local get_tile=function(x,y,name)
 		local t=map[y] and map[y][x]
 		if name then return t and t[name] else return t end
 	end
 	for y,line in pairs(map) do
 		for x,tile in pairs(line) do
+			if tile.spawn and tile.idx then
+				level.spawns[tile.spawn.."_"..tile.idx]=tile
+			end
 			local shape
 			if tile.solid then -- merge outside edges of solid cells to create smoother collisions
 				if (not get_tile(x,y-1,"solid") or not get_tile(x,y+1,"solid") ) then -- try to drag across
@@ -1733,7 +1843,7 @@ end
 levels.item.update=function(level)
 	level:get_values()
 
-	level.time=level.time+(1/16)
+	level.time=level.time+(1/16) -- yes we are updating at 16fps, but can draw at 60 or whatevs.
 	
 	level:set_values()
 end
