@@ -121,18 +121,22 @@ all.item.setup_values=function(it,boot)
 end
 
 all.item.set_zip=function(it,n)
-	local s=it.zips[n]
-	local t=it[n]
-	if t.dirty then -- flaged as changed by user code when we change anything
-		t.dirty=false
+	local t=it[n] -- may be nil
+	if not t or t.dirty then -- *must* flag as changed by user code when we change anything
+		if t then t.dirty=false end -- auto clear dirty flag
 		local z=all.compress(t)
 		it.zips[n]=z
-		it:set(n,z) -- set will check against current value so this is always safe to call
+--		if it.scene.tween then
+--			it.tweens:set(n,z) -- tween flag should not be used when writing data so this should not happen...
+--		else
+			it.values:set(n,z) -- set will check against current value so this is always safe to call
+--		end
 	end
 end
 
 all.item.get_zip=function(it,n)
-	local z=it:get(n)
+	local z=it.scene.tween and it.tweens:get( n ) or it.values:get( n )
+	local s=it.zips[n]
 	if s~=z then -- changed
 		it.zips[n]=z -- remember
 		local t=all.uncompress(z)
@@ -140,10 +144,10 @@ all.item.get_zip=function(it,n)
 	end
 end
 
-all.item.get_value=function(it,n)
-	local t=it.sys.types[n]
-	local s=it.scene.tween
-	if s then -- we are drawing, need to use tween cache
+all.item.get_value=function(it,n,t,s)
+	if not t then t=it.sys.types[n] end -- check
+	if not s then s=it.scene.tween end -- check
+	if s and s>=0 then -- we are drawing, need to use tween cache
 		if     t=="get"   then it[n]=it.tweens:get( n )
 		elseif t=="tween" then it[n]=it.tweens:tween( n , s)
 		elseif t=="twrap" then it[n]=it.tweens:twrap( n , it.sys.twraps[n] , s )
@@ -159,31 +163,17 @@ all.item.get_value=function(it,n)
 	return it[n]
 end
 all.item.get_values=function(it)
-	local s=it.scene.tween -- cache for later use
-	if s then -- we are drawing, need to use tween cache
-		for n,t in pairs(it.sys.types) do
-			if     t=="get"   then it[n]=it.tweens:get( n )
-			elseif t=="tween" then it[n]=it.tweens:tween( n , s)
-			elseif t=="twrap" then it[n]=it.tweens:twrap( n , it.sys.twraps[n] , s )
-			elseif t=="zip"   then it:get_zip(n)
-			end
-		end
-	else
-		for n,t in pairs(it.sys.types) do
-			if     t=="get"   then it[n]=it.values:get( n )
-			elseif t=="tween" then it[n]=it.values:get( n )
-			elseif t=="twrap" then it[n]=it.values:get( n )
-			elseif t=="zip"   then it:get_zip(n)
-			end
-		end
+	local s=it.scene.tween or -1 -- replace nul with -1 so we do not double dip later
+	for n,t in pairs(it.sys.types) do
+		it:get_value(n,t,s)
 	end
 end
 
 
 -- this should never be called by draw code so has no need to check
 
-all.item.set_value=function(it,n)
-	local t=it.sys.types[n]
+all.item.set_value=function(it,n,t)
+	if not t then t=it.sys.types[n] end
 	if t=="zip" then
 		it:set_zip(n)
 	elseif t~="ignore" then
@@ -192,11 +182,7 @@ all.item.set_value=function(it,n)
 end
 all.item.set_values=function(it)
 	for n,t in pairs(it.sys.types) do
-		if t=="zip" then
-			it:set_zip(n)
-		elseif t~="ignore" then
-			it:set(n,it[n])
-		end
+		it:set_value(n,t)
 	end
 end
 
@@ -432,7 +418,6 @@ all.item.load_values=function(it,data,topidx)
 	end
 
 end
-all.system.load_values=all.item.load_values
 
 	return all
 end

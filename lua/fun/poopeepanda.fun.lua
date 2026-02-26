@@ -109,7 +109,7 @@ all.create_scene=function(scene)
 			{"camera",idx=2,depends={player=8}},
 			{"player",idx=2,vel={64,32,0},pos={64,32,0},depends={camera=7,hud=6},mode="egg",},
 
-			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
+--			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
 		}
 		scene:creates(boots)
 	end
@@ -617,6 +617,7 @@ fauna_eggs.values={
 	idx=1,
 	sname="fauna_egg",
 	egg="fauna_slim",
+	hatch=16*5,
 }
 
 fauna_eggs.types={
@@ -649,6 +650,38 @@ fauna_eggs.system.setup=function(sys)
 end
 
 fauna_eggs.system.clean=function(sys)
+end
+
+-- we have no system storage but can perform holistic updates on our items here.
+fauna_eggs.system.update=function(sys)
+	local list_eggs=scene:caste("fauna_egg")
+	local list_players=scene:caste("player")
+--	print(#list_eggs)
+	local best_egg,best_player
+	local best_d=math.huge
+	for i,egg in ipairs(list_eggs) do
+		if not egg:get("deleted") then -- live egg
+			for p,player in ipairs(list_players) do
+				if not player:get("deleted") then -- live player
+					local mode=player:get_value("mode")
+					if mode~="egg" then -- ignore unhatched players
+						local p1=player:get_value("pos")
+						local p2=egg:get_value("pos")
+						local d=p1:distance(p2)
+						if d<best_d then
+							best_d=d
+							best_egg=egg
+							best_player=player
+						end
+					end
+				end
+			end
+		end
+	end
+	-- only the egg closest to a player will try and hatch
+	if best_egg and best_player then
+		best_egg:update_hatch(best_player)
+	end
 end
 
 -- state values are cached into the item for easy access on a get
@@ -684,6 +717,29 @@ end
 
 fauna_eggs.item.clean=function(fauna)
 	fauna:clean_kinetic()
+end
+
+fauna_eggs.item.update_hatch=function(fauna,player)
+	fauna:get_values()
+	
+	fauna.hatch=fauna.hatch-1
+	if fauna.hatch<=0 then
+		fauna:mark_deleted()
+		scene:creates({
+			{
+				"fauna_slim",
+				pos={fauna.pos[1],fauna.pos[2],0},
+				vel={fauna.sys:get_rnd(-20,20),fauna.sys:get_rnd(-20,20),0},
+			},
+		})
+	else
+		if fauna.hatch%16==0 then -- jiggle
+			local jump=V3(fauna.sys:get_rnd(-20,20),fauna.sys:get_rnd(-80,-40),0)
+			fauna.vel=fauna.vel+jump
+		end
+	end
+
+	fauna:set_values()
 end
 
 fauna_eggs.item.update=function(fauna)
@@ -1653,6 +1709,7 @@ levels.legend={
 	["P0"]={ spawn="player", idx=0,  },
 	["P1"]={ spawn="player", idx=1,  },
 	["P2"]={ spawn="player", idx=2,  },
+	["S1"]={ fauna="egg", egg="slim", },
 }
 
 levels.infos={}
@@ -1665,22 +1722,22 @@ map=[[
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . v . . . . . . . . . . . < . . . . . . . . . < . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 S1. . . . . . . . . . . . . . . . . . . . . . . . . . . . S10 
 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . T1. . . . T2. . . T3. . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . S10 
+0 . . . . . . . . T1. . . . T2. . . T3. . . . . . . . . . . S10 
 0 . . . 0 0 0 0 . 0 0 0 0 . 0 0 . 0 0 0 . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 0 . v . . . . . . . . . . P0. . . . . . . . . . ^ . . 0 0 0 0 
+0 S1. . . . . . . . . . . . . . . . . . . . . . . . . . . . S10 
+0 0 . v . . . . . . . . . . P0. . . S1. . . . . . ^ . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . 0 0 . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . S10 . . . . . . . . . . . . S10 
 0 . . . 0 0 0 0 . . . . . . . . 0 0 . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . 0 
+0 S1. . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . S10 
 0 0 0 0 . . . . . . . . . . . . . . . . . . 0 0 0 . . . 0 0 0 0 
 0 . . > . . . . . 0 0 0 . . . > . . . . . . . . . . ^ . . . . 0 
-0 P1. . . . . . . . . . . . . . . . . . . . . . . . . . . . P20 
+0 P1. . . . . . . . . . . . . . S1. . . . . . . . . . . . . P20 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 ]],
 }
@@ -1818,6 +1875,16 @@ levels.item.setup=function(level)
 					(1/tile.dir_right)-(1/tile.dir_left),
 					(1/tile.dir_down)-(1/tile.dir_up)
 				):normalize()
+				
+			if tile.fauna=="egg" then -- spawn an egg
+				scene:creates({
+					{
+						"fauna_egg",
+						egg=tile.egg,
+						pos={tile.x*8+4,tile.y*8+4,0},
+					},
+				})
+			end
 		end
 	end
 
