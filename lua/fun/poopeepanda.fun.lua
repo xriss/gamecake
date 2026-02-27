@@ -189,7 +189,8 @@ players.caste="player"
 players.uidmap={
 	camera=2,
 	hud=3,
-	length=3,
+	hold=4,
+	length=4,
 }
 
 players.values={
@@ -213,7 +214,6 @@ players.types={
 	pos="tween",
 	rot="tween",
 }
-
 
 players.graphics={
 
@@ -415,6 +415,9 @@ players.item.setup=function(player)
 	player:set_values()
 end
 
+players.collision_bits=0x00000100	-- assigned bitmask
+players.collision_mask=0x00ffffff	-- interact bitmask
+
 players.item.setup_kinetic=function(player)
 	if player.body then return end -- only create once
 	local space=player:get_singular("kinetic").space
@@ -422,7 +425,7 @@ players.item.setup_kinetic=function(player)
 	player.shape=player.body:shape("circle",4,0,0)
 	player.shape:friction(0.5)
 	player.shape:elasticity(0.5)
-	player.shape:filter(player.uid,0x00000100,0x00ffffff)
+	player.shape:filter(player.uid,players.collision_bits,players.collision_mask)
 	player.shape.uid=player.uid
 	player:set_body() -- set positon etc
 end
@@ -453,6 +456,10 @@ players.item.update=function(player)
 	local ly=( up:axis("ly") ) or 0
 	local ba_now=( up:get("a") or up:get("a_set") ) or false
 	local ba_set=( up:get("a_set") ) or false
+
+	local bb_now=( up:get("b")     ) or false
+	local bb_set=( up:get("b_set") ) or false
+	local bb_clr=( up:get("b_clr") ) or false
 
 	local grav=level:get_gravity(player.pos)
 
@@ -495,8 +502,8 @@ else
 	player.vel[1]=player.vel[1]*12/16 --  dampen horizontal velocity
 	player.vel[2]=player.vel[2]*14/16 --  dampen vertical velocity
 	
-	if lx<0 then player.side= 1 end
-	if lx>0 then player.side=-1 end
+	if lx>0 then player.side= 1 end -- facing right
+	if lx<0 then player.side=-1 end -- facing left
 
 --	player.pos=player.pos+player.vel
 
@@ -554,6 +561,60 @@ end
 		player.jump=player.jump-1 -- continue jump
 	end
 
+
+	local hold_pos=player.pos+V3(0,-16,0)
+	local hold=player:depend("hold")
+	if hold then
+		hold:get_value("pos")
+		hold:get_value("vel")
+		local p=hold_pos-hold.pos
+		hold.vel:add( p*8 )
+		hold.vel:scale(1/2)
+		hold:set_value("vel")
+	end
+	if bb_clr and hold then -- throw
+		player:depend("hold",0)
+		hold:depend("held",0)
+		hold.shape:filter(hold.uid,hold.collision_bits,hold.collision_mask)
+		hold.vel=player.vel+V3(player.side*400,200,0)
+		hold:set_value("vel")
+	end
+	if bb_set and not hold then -- pickup
+		local v1=player.pos+V3(-8,-16,0)
+		local v2=player.pos+V3( 8, 16,0)
+		if player.side>0 then	v2[1]=v2[1]+16
+		else					v1[1]=v1[1]-16	end
+		local shapes=space:query_bounding_box(v1[1],v1[2],v2[1],v2[2],player.uid,0xffffffff,0xffffffff)
+		local its={}
+		for _,shape in ipairs(shapes) do
+			local it=scene:find_uid(shape.uid)
+			if it then its[it]=shape end
+		end
+		local best_d=math.huge
+		local best
+		for it,shape in pairs(its) do
+			local maybe=false -- check if we can pick it up
+			if it.caste=="fauna_egg" or it.caste=="junk" then
+				maybe=true
+			end
+			if it.caste=="player" and it.mode=="egg" then
+				maybe=true
+			end
+			if maybe then -- check distance
+				local d=hold_pos:distance(it.pos)
+				if d<best_d then
+					best_d=d
+					best=it
+				end
+			end
+		end
+		if best then -- pick this up
+			player:depend("hold",best.uid)
+			best:depend("held",player.uid)
+			best.shape:filter(player.uid,players.collision_bits,players.collision_mask)
+		end
+	end
+
 --PRINT( ba_now , player.onfloor , player.jump )
 --PRINT( player.vel )
 
@@ -573,18 +634,18 @@ players.item.draw=function(player)
 
 	if player.mode=="egg" then
 
-		draws.sprite( "ply"..player.idx.."_egg" , p , player.side )
+		draws.sprite( "ply"..player.idx.."_egg" , p , -player.side )
 
 	else
 
 		local f=math.abs(player.flap-2)
-		draws.sprite( "ply"..player.idx          , p , player.side )
-		draws.sprite( "ply"..player.idx.."_hand" , p+V3(0,f,-1) , player.side )
+		draws.sprite( "ply"..player.idx          , p , -player.side )
+		draws.sprite( "ply"..player.idx.."_hand" , p+V3(0,f,-1) , -player.side )
 
 		if player.walk==0 then
-			draws.sprite( "ply"..player.idx.."_feet" , p+V3(0,player.foot-8,-1) , player.side )
+			draws.sprite( "ply"..player.idx.."_feet" , p+V3(0,player.foot-8,-1) , -player.side )
 		else
-			draws.sprite( "ply"..player.idx.."_walk" , p+V3(0,player.foot-8,-1) , player.side , player.walk)
+			draws.sprite( "ply"..player.idx.."_walk" , p+V3(0,player.foot-8,-1) , -player.side , player.walk)
 		end
 
 	end
@@ -605,7 +666,8 @@ fauna_eggs.item={}
 fauna_eggs.caste="fauna_egg"
 
 fauna_eggs.uidmap={
-	length=0,
+	held=1,
+	length=1,
 }
 
 fauna_eggs.values={
@@ -660,7 +722,7 @@ fauna_eggs.system.update=function(sys)
 	local best_egg,best_player
 	local best_d=math.huge
 	for i,egg in ipairs(list_eggs) do
-		if not egg:get("deleted") then -- live egg
+		if not egg:get("deleted") and not egg:depend("held") then -- live egg not held
 			for p,player in ipairs(list_players) do
 				if not player:get("deleted") then -- live player
 					local mode=player:get_value("mode")
@@ -694,6 +756,9 @@ fauna_eggs.item.setup=function(fauna)
 	fauna:set_values()
 end
 
+fauna_eggs.collision_bits=0x00010000	-- assigned bitmask
+fauna_eggs.collision_mask=0x00ffffff	-- interact bitmask
+
 fauna_eggs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local space=fauna:get_singular("kinetic").space
@@ -701,7 +766,7 @@ fauna_eggs.item.setup_kinetic=function(fauna)
 	fauna.shape=fauna.body:shape("circle",4,0,0)
 	fauna.shape:friction(0.5)
 	fauna.shape:elasticity(0.5)
-	fauna.shape:filter(fauna.uid,0x00010000,0x00ffffff)
+	fauna.shape:filter(fauna.uid,fauna_eggs.collision_bits,fauna_eggs.collision_mask)
 	fauna.shape.uid=fauna.uid
 	fauna:set_body()
 end
@@ -733,8 +798,8 @@ fauna_eggs.item.update_hatch=function(fauna,player)
 			},
 		})
 	else
-		if fauna.hatch%16==0 then -- jiggle
-			local jump=V3(fauna.sys:get_rnd(-20,20),fauna.sys:get_rnd(-80,-40),0)
+		if math.sqrt(fauna.hatch*2)%1==0 then -- jiggle
+			local jump=V3(fauna.sys:get_rnd(-10,10),fauna.sys:get_rnd(-60,-30),0)
 			fauna.vel=fauna.vel+jump
 		end
 	end
@@ -781,7 +846,8 @@ fauna_slims.item={}
 fauna_slims.caste="fauna_slim"
 
 fauna_slims.uidmap={
-	length=0,
+	held=1,
+	length=1,
 }
 
 fauna_slims.values={
@@ -893,6 +959,9 @@ fauna_slims.item.setup=function(fauna)
 	fauna:set_values()
 end
 
+fauna_slims.collision_bits=0x00010000	-- assigned bitmask
+fauna_slims.collision_mask=0x00ffffff	-- interact bitmask
+
 fauna_slims.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local space=fauna:get_singular("kinetic").space
@@ -900,7 +969,7 @@ fauna_slims.item.setup_kinetic=function(fauna)
 	fauna.shape=fauna.body:shape("circle",4,0,0)
 	fauna.shape:friction(0.5)
 	fauna.shape:elasticity(0.5)
-	fauna.shape:filter(fauna.uid,0x00010000,0x00ffffff)
+	fauna.shape:filter(fauna.uid,fauna_slims.collision_bits,fauna_slims.collision_mask)
 	fauna.shape.uid=fauna.uid
 	fauna:set_body()
 end
@@ -933,12 +1002,18 @@ fauna_slims.item.update=function(fauna)
 	fauna:get_values()
 	fauna:setup_kinetic() -- might need to recreate body
 	
+	
 --	local up=fauna.scene.ups[fauna.idx] or fauna.sys.oven.ups.empty
 
 	local level=fauna:get_singular("level") -- only one level is active at a time
 
 	local grav=level:get_gravity(fauna.pos)
 
+	if fauna:depend("held") then -- hang limp just acc
+		fauna.acc=grav
+		fauna:set_values()
+		return
+	end
 
 	local brain={}
 	brain.move=V3(0,0,0)
@@ -1181,6 +1256,9 @@ fauna_trenchs.item.setup=function(fauna)
 	fauna:set_values()
 end
 
+fauna_trenchs.collision_bits=0x00010000	-- assigned bitmask
+fauna_trenchs.collision_mask=0x00ffffff	-- interact bitmask
+
 fauna_trenchs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local space=fauna:get_singular("kinetic").space
@@ -1188,7 +1266,7 @@ fauna_trenchs.item.setup_kinetic=function(fauna)
 	fauna.shape=fauna.body:shape("circle",4,0,0)
 	fauna.shape:friction(0.5)
 	fauna.shape:elasticity(0.5)
-	fauna.shape:filter(fauna.uid,0x00010000,0x00ffffff)
+	fauna.shape:filter(fauna.uid,fauna_trenchs.collision_bits,fauna_trenchs.collision_mask)
 	fauna.shape.uid=fauna.uid
 	fauna:set_body()
 end
