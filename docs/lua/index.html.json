@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 657,
+   "count": 658,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 646,
+   "count": 647,
    "name": "lua.wetgenes"
   },
   {
@@ -330,16 +330,20 @@
    "name": "lua.wetgenes.bullet.world.step"
   },
   {
-   "count": 64,
+   "count": 65,
    "name": "lua.wetgenes.chipmunk"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.wetgenes.chipmunk.arbiter"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.chipmunk.arbiter.ignore"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.arbiter.impulse"
   },
   {
    "count": 1,
@@ -2824,7 +2828,7 @@
  "_list": [
   {
    "body": "",
-   "count": 657,
+   "count": 658,
    "name": "lua"
   },
   {
@@ -2900,7 +2904,7 @@
   },
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 646,
+   "count": 647,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -3209,7 +3213,7 @@
   },
   {
    "body": "<pre><code>local chipmunk=require(&quot;wetgenes.chipmunk&quot;)\n</code></pre>\n<p>We use chipmunk as the local name of this library.</p>\n<p>A lua binding to the Chipmunk2D physics library <a href=\"https://chipmunk-physics.net/\">chipmunk-physics.net</a></p>\n",
-   "count": 64,
+   "count": 65,
    "file": "../lua/wetgenes/chipmunk.lua",
    "line": 6,
    "name": "lua.wetgenes.chipmunk",
@@ -3217,15 +3221,23 @@
   },
   {
    "body": "",
-   "count": 4,
+   "count": 5,
    "name": "lua.wetgenes.chipmunk.arbiter"
   },
   {
    "body": "<pre><code>return arbiter:ignore()\n</code></pre>\n<p>Ignore this collision, from now until the shapes separate.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1123,
+   "line": 1134,
    "name": "lua.wetgenes.chipmunk.arbiter.ignore",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>vx,vy=arbiter:impulse()\n</code></pre>\n<p>Get the impulse vector for this arbiter. ( how hard we hit ) only valid in postsolve</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1111,
+   "name": "lua.wetgenes.chipmunk.arbiter.impulse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
@@ -3240,7 +3252,7 @@
    "body": "<pre><code>vx,vy=arbiter:surface_velocity()\nvx,vy=arbiter:surface_velocity(vx,vy)\n</code></pre>\n<p>Get and/or Set the surface velocity for this arbiter.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1111,
+   "line": 1122,
    "name": "lua.wetgenes.chipmunk.arbiter.surface_velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -3384,7 +3396,7 @@
    "body": "<pre><code>v=constraint:collide_bodies()\nv=constraint:collide_bodies(v)\n</code></pre>\n<p>Get and/or Set the max collide bodies flag for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1171,
+   "line": 1182,
    "name": "lua.wetgenes.chipmunk.constraint.collide_bodies",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -3392,7 +3404,7 @@
    "body": "<pre><code>v=constraint:error_bias()\nv=constraint:error_bias(v)\n</code></pre>\n<p>Get and/or Set the error bias for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1147,
+   "line": 1158,
    "name": "lua.wetgenes.chipmunk.constraint.error_bias",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -3400,7 +3412,7 @@
    "body": "<pre><code>v=constraint:impulse()\n</code></pre>\n<p>Get the last impulse for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1183,
+   "line": 1194,
    "name": "lua.wetgenes.chipmunk.constraint.impulse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -3408,7 +3420,7 @@
    "body": "<pre><code>v=constraint:max_bias()\nv=constraint:max_bias(v)\n</code></pre>\n<p>Get and/or Set the max bias for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1159,
+   "line": 1170,
    "name": "lua.wetgenes.chipmunk.constraint.max_bias",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
@@ -3416,7 +3428,7 @@
    "body": "<pre><code>v=constraint:max_force()\nv=constraint:max_force(v)\n</code></pre>\n<p>Get and/or Set the max force for this constraint.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1135,
+   "line": 1146,
    "name": "lua.wetgenes.chipmunk.constraint.max_force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },

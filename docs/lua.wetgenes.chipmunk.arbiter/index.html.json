@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 657,
+   "count": 658,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 646,
+   "count": 647,
    "name": "lua.wetgenes"
   },
   {
@@ -330,16 +330,20 @@
    "name": "lua.wetgenes.bullet.world.step"
   },
   {
-   "count": 64,
+   "count": 65,
    "name": "lua.wetgenes.chipmunk"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.wetgenes.chipmunk.arbiter"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.chipmunk.arbiter.ignore"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.chipmunk.arbiter.impulse"
   },
   {
    "count": 1,
@@ -2824,15 +2828,23 @@
  "_list": [
   {
    "body": "",
-   "count": 4,
+   "count": 5,
    "name": "lua.wetgenes.chipmunk.arbiter"
   },
   {
    "body": "<pre><code>return arbiter:ignore()\n</code></pre>\n<p>Ignore this collision, from now until the shapes separate.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1123,
+   "line": 1134,
    "name": "lua.wetgenes.chipmunk.arbiter.ignore",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
+  },
+  {
+   "body": "<pre><code>vx,vy=arbiter:impulse()\n</code></pre>\n<p>Get the impulse vector for this arbiter. ( how hard we hit ) only valid in postsolve</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/chipmunk.lua",
+   "line": 1111,
+   "name": "lua.wetgenes.chipmunk.arbiter.impulse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   },
   {
@@ -2847,7 +2859,7 @@
    "body": "<pre><code>vx,vy=arbiter:surface_velocity()\nvx,vy=arbiter:surface_velocity(vx,vy)\n</code></pre>\n<p>Get and/or Set the surface velocity for this arbiter.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/chipmunk.lua",
-   "line": 1111,
+   "line": 1122,
    "name": "lua.wetgenes.chipmunk.arbiter.surface_velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/chipmunk.lua"
   }
