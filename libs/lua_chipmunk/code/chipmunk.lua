@@ -1108,6 +1108,17 @@ chipmunk.arbiter_functions.points=function(arbiter,points)
 	return core.arbiter_points(arbiter[0],points)
 end
 ------------------------------------------------------------------------
+--[[#lua.wetgenes.chipmunk.arbiter.impulse
+
+	vx,vy=arbiter:impulse()
+
+Get the impulse vector for this arbiter. ( how hard we hit ) only valid in postsolve
+
+]]
+chipmunk.arbiter_functions.impulse=function(arbiter,vx,vy)
+	return core.arbiter_impulse(arbiter[0],vx,vy)
+end
+------------------------------------------------------------------------
 --[[#lua.wetgenes.chipmunk.arbiter.surface_velocity
 
 	vx,vy=arbiter:surface_velocity()

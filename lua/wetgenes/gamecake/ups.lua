@@ -75,9 +75,10 @@ keymaps["full"]={
 	["e"]			=	{ "rz1" , "r2" },
 	["shift_l"]		=	{ "l3" },
 	["shift_r"]		=	{ "r3" },
-	["enter"]		=	{ "y" , "fire"},
-	["control_l"]	=	{ "x" , "fire"},
+	["control_l"]	=	{ "y" , "fire"},
+	["alt_l"]		=	{ "x" , "fire"},
 	["space"]		=	{ "a" , "fire"},
+	["alt_r"]		=	{ "a" , "fire"},
 	["control_r"]	=	{ "b" , "fire" },
 }
 

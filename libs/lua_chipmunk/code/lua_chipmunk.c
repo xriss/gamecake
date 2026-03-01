@@ -1069,6 +1069,25 @@ cpVect v;
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// arbiter get impulse vector ( how hard the collison was )
+//
+// is only valid in postStep or postSolve
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+static int lua_chipmunk_arbiter_impulse (lua_State *l)
+{	
+cpArbiter *arbiter=(cpArbiter *)lua_touserdata(l,1); if(!arbiter){ lua_pushstring(l,"missing arbiter"); lua_error(l); }
+cpVect v;
+
+	v=cpArbiterTotalImpulse(arbiter);
+	lua_pushnumber(l,v.x);
+	lua_pushnumber(l,v.y);
+
+	return 2;
+}
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // arbiter ignore collision ( lasts until the objects separate )
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -2359,6 +2378,7 @@ LUALIB_API int luaopen_wetgenes_chipmunk_core (lua_State *l)
 		{"shape_query_point",				lua_chipmunk_shape_query_point},				// cpShapePointQuery
 		{"shape_query_segment",				lua_chipmunk_shape_query_segment},				// cpShapeSegmentQuery
 
+		{"arbiter_impulse",					lua_chipmunk_arbiter_impulse},
 		{"arbiter_surface_velocity",		lua_chipmunk_arbiter_surface_velocity},
 		{"arbiter_points",					lua_chipmunk_arbiter_points},
 		{"arbiter_ignore",					lua_chipmunk_arbiter_ignore},

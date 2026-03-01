@@ -206,6 +206,7 @@ players.values={
 	onfloor=0,
 	jump=0,
 	flap=0,
+	holdtime=0,
 	walk=0,
 	score=0,
 }
@@ -564,26 +565,13 @@ end
 
 	local hold_pos=player.pos+V3(0,-16,0)
 	local hold=player:depend("hold")
-	if hold then
-		hold:get_value("pos")
-		hold:get_value("vel")
-		local p=hold_pos-hold.pos
-		hold.vel:add( p*8 )
-		hold.vel:scale(1/2)
-		hold:set_value("vel")
-	end
-	if bb_clr and hold then -- throw
-		player:depend("hold",0)
-		hold:depend("held",0)
-		hold.shape:filter(hold.uid,hold.collision_bits,hold.collision_mask)
-		hold.vel=player.vel+V3(player.side*400,200,0)
-		hold:set_value("vel")
-	end
+	local hold_len -- how well held 0 is best
 	if bb_set and not hold then -- pickup
-		local v1=player.pos+V3(-8,-16,0)
-		local v2=player.pos+V3( 8, 16,0)
-		if player.side>0 then	v2[1]=v2[1]+16
-		else					v1[1]=v1[1]-16	end
+		player.holdtime=0
+		local v1=player.pos+V3(-24,-16,0)
+		local v2=player.pos+V3( 24, 24,0)
+--		if player.side>0 then	v2[1]=v2[1]+16
+--		else					v1[1]=v1[1]-16	end
 		local shapes=space:query_bounding_box(v1[1],v1[2],v2[1],v2[2],player.uid,0xffffffff,0xffffffff)
 		local its={}
 		for _,shape in ipairs(shapes) do
@@ -609,10 +597,38 @@ end
 			end
 		end
 		if best then -- pick this up
-			player:depend("hold",best.uid)
-			best:depend("held",player.uid)
-			best.shape:filter(player.uid,players.collision_bits,players.collision_mask)
+			hold=best
+			player:depend("hold",hold.uid)
+			hold:depend("held",player.uid)
+			hold.shape:filter(player.uid,players.collision_bits,players.collision_mask)
 		end
+	end
+	if hold then
+		player.holdtime=player.holdtime+1
+
+		hold:get_value("pos")
+		hold:get_value("vel")
+		local p=hold_pos-hold.pos
+		hold_len=p:len() -- distance
+		if hold_len>40 then -- too far so just drop
+			player:depend("hold",0)
+			hold:depend("held",0)
+			hold.shape:filter(hold.uid,hold.collision_bits,hold.collision_mask)
+		else
+			hold.vel:add( p*8 )
+			hold.vel:scale(1/2)
+			hold:set_value("vel")
+		end
+	end
+	if bb_clr and hold then -- throw
+		player:depend("hold",0)
+		hold:depend("held",0)
+		hold.shape:filter(hold.uid,hold.collision_bits,hold.collision_mask)
+		local m=((player.holdtime-8)/16)
+		if m>1 then m=1 end -- full speed after 1.5 seconds
+		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
+		hold.vel=player.vel+V3(player.side*(400*m),(200*m),0)
+		hold:set_value("vel")
 	end
 
 --PRINT( ba_now , player.onfloor , player.jump )
