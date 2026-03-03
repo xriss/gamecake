@@ -79,6 +79,7 @@ all.create_scene=function(scene)
 		huds,
 		players,
 		gibs,
+		junks,
 		fauna_eggs,
 		fauna_slims,
 		fauna_trenchs,
@@ -153,22 +154,29 @@ end
 --#base_draw
 
 draws={}
-draws.sprite=function(sname,pos,side,idx)
-	local map=system.components.map
-	local px=map.window_px-map.px
-	local py=map.window_py-map.py
-	local spr=system.components.tiles.names[sname]
-	if idx then
-		spr=spr.cuts[idx]
+draws.sprite=function(it) -- note that we will modify this table
+	local spr=system.components.tiles.names[it.n] -- sprite by name
+	if it.i then spr=spr.cuts[it.i] end -- and cuts idx
+	it.t=spr.idx
+	if it.p then
+		it.px=it.p[1]
+		it.py=it.p[2]
+		it.pz=it.p[3]
 	end
-	system.components.sprites.list_add({
-		t=spr.idx ,
-		hx=spr.hx , hy=spr.hy ,
-		ox=(spr.hx)/2 , oy=(spr.hy)/2 ,
-		px=pos[1]+px , py=pos[2]+py , pz=pos[3] ,
-		sx=side,
-		rz=0,
-	})
+	if not it.pz then it.pz=px+py end	-- auto pz
+	local map=system.components.map
+	it.px=it.px+map.window_px-map.px	-- auto map position
+	it.py=it.py+map.window_py-map.py
+	if not it.hx then it.hx=spr.hx end -- auto size
+	if not it.hy then it.hy=spr.hy end
+	it.ox=(it.ox or 0)+(spr.hx)/2 -- auto center handle
+	it.oy=(it.oy or 0)+(spr.hy)/2
+	it.px=math.floor(it.px+0.5)
+	it.py=math.floor(it.py+0.5)
+	if it.rz then
+		it.rz=360*math.floor(it.rz*32+0.5)/32
+	end
+	system.components.sprites.list_add(it)
 end
 
 --------------------------------------------------------------------------------
@@ -195,9 +203,9 @@ players.uidmap={
 
 players.values={
 	pos=V3( 0,0,0 ),
-	rot=Q4( 0,0,0,1 ),
+	rot=0,
 	vel=V3( 0,0,0 ),
-	ang=V3( 0,0,0 ),
+	ang=0,
 	acc=V3( 0,200,0 ),
 	idx=1,
 	mode="none",
@@ -416,8 +424,15 @@ players.item.setup=function(player)
 	player:set_values()
 end
 
+players.collision_type=0x00040001	-- assigned type
 players.collision_bits=0x00000100	-- assigned bitmask
 players.collision_mask=0x00ffffff	-- interact bitmask
+
+players.item.reset_kinetic_ids=function(player)
+	player.shape:filter(player.uid,players.collision_bits,players.collision_mask)
+	player.shape:collision_type(players.collision_type)
+end
+
 
 players.item.setup_kinetic=function(player)
 	if player.body then return end -- only create once
@@ -426,7 +441,7 @@ players.item.setup_kinetic=function(player)
 	player.shape=player.body:shape("circle",4,0,0)
 	player.shape:friction(0.5)
 	player.shape:elasticity(0.5)
-	player.shape:filter(player.uid,players.collision_bits,players.collision_mask)
+	player:reset_kinetic_ids()
 	player.shape.uid=player.uid
 	player:set_body() -- set positon etc
 end
@@ -503,8 +518,14 @@ else
 	player.vel[1]=player.vel[1]*12/16 --  dampen horizontal velocity
 	player.vel[2]=player.vel[2]*14/16 --  dampen vertical velocity
 	
-	if lx>0 then player.side= 1 end -- facing right
-	if lx<0 then player.side=-1 end -- facing left
+	if lx>0 and player.side<0 then  -- turn right
+		player.side= 1
+		player.holdtime=math.floor(player.holdtime/2)
+	end
+	if lx<0 and player.side>0 then -- turn left
+		player.side=-1
+		player.holdtime=math.floor(player.holdtime/2)
+	end
 
 --	player.pos=player.pos+player.vel
 
@@ -600,11 +621,12 @@ end
 			hold=best
 			player:depend("hold",hold.uid)
 			hold:depend("held",player.uid)
-			hold.shape:filter(player.uid,players.collision_bits,players.collision_mask)
 		end
 	end
 	if hold then
 		player.holdtime=player.holdtime+1
+		-- stop player coliding with held object
+		hold.shape:filter(player.uid,players.collision_bits,players.collision_mask)
 
 		hold:get_value("pos")
 		hold:get_value("vel")
@@ -618,16 +640,21 @@ end
 			hold.vel:add( p*8 )
 			hold.vel:scale(1/2)
 			hold:set_value("vel")
+			local m=((player.holdtime-8)/16)
+			if m>1 then m=1 end -- full speed after 1.5 seconds
+			if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
+			hold.ang=m*2*player.side
+			hold:set_value("ang")
 		end
 	end
 	if bb_clr and hold then -- throw
 		player:depend("hold",0)
 		hold:depend("held",0)
-		hold.shape:filter(hold.uid,hold.collision_bits,hold.collision_mask)
+		hold.shape:collision_type(junks.collision_type) -- become dangerous
 		local m=((player.holdtime-8)/16)
 		if m>1 then m=1 end -- full speed after 1.5 seconds
 		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
-		hold.vel=player.vel+V3(player.side*(400*m),(200*m),0)
+		hold.vel=player.vel+V3(player.side*(400*m),(400*m),0)
 		hold:set_value("vel")
 	end
 
@@ -650,18 +677,18 @@ players.item.draw=function(player)
 
 	if player.mode=="egg" then
 
-		draws.sprite( "ply"..player.idx.."_egg" , p , -player.side )
+		draws.sprite{ n="ply"..player.idx.."_egg" , p=p , sx=-player.side }
 
 	else
 
 		local f=math.abs(player.flap-2)
-		draws.sprite( "ply"..player.idx          , p , -player.side )
-		draws.sprite( "ply"..player.idx.."_hand" , p+V3(0,f,-1) , -player.side )
+		draws.sprite{ n="ply"..player.idx          , p=p , sx=-player.side }
+		draws.sprite{ n="ply"..player.idx.."_hand" , p=p+V3(0,f,-1) , sx=-player.side }
 
 		if player.walk==0 then
-			draws.sprite( "ply"..player.idx.."_feet" , p+V3(0,player.foot-8,-1) , -player.side )
+			draws.sprite{ n="ply"..player.idx.."_feet" , p=p+V3(0,player.foot-8,-1) , sx=-player.side }
 		else
-			draws.sprite( "ply"..player.idx.."_walk" , p+V3(0,player.foot-8,-1) , -player.side , player.walk)
+			draws.sprite{ n="ply"..player.idx.."_walk" , p=p+V3(0,player.foot-8,-1) , sx=-player.side , i=player.walk }
 		end
 
 	end
@@ -688,9 +715,9 @@ fauna_eggs.uidmap={
 
 fauna_eggs.values={
 	pos=V3( 0,0,0 ),
-	rot=Q4( 0,0,0,1 ),
+	rot=0,
 	vel=V3( 0,0,0 ),
-	ang=V3( 0,0,0 ),
+	ang=0,
 	acc=V3( 0,0,0 ),
 	idx=1,
 	sname="fauna_egg",
@@ -772,8 +799,14 @@ fauna_eggs.item.setup=function(fauna)
 	fauna:set_values()
 end
 
+fauna_eggs.collision_type=0x00020001	-- weapon
 fauna_eggs.collision_bits=0x00010000	-- assigned bitmask
 fauna_eggs.collision_mask=0x00ffffff	-- interact bitmask
+
+fauna_eggs.item.reset_kinetic_ids=function(fauna)
+	fauna.shape:filter(fauna.uid,fauna_eggs.collision_bits,fauna_eggs.collision_mask)
+	fauna.shape:collision_type(fauna_eggs.collision_type)
+end
 
 fauna_eggs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
@@ -782,7 +815,7 @@ fauna_eggs.item.setup_kinetic=function(fauna)
 	fauna.shape=fauna.body:shape("circle",4,0,0)
 	fauna.shape:friction(0.5)
 	fauna.shape:elasticity(0.5)
-	fauna.shape:filter(fauna.uid,fauna_eggs.collision_bits,fauna_eggs.collision_mask)
+	fauna:reset_kinetic_ids()
 	fauna.shape.uid=fauna.uid
 	fauna:set_body()
 end
@@ -837,14 +870,14 @@ fauna_eggs.item.update=function(fauna)
 end
 
 -- when drawing get will auto tween values
--- so it can be called multiple times between updates for different results
+-- so it can be called multiple times draws.sprite updates for different results
 fauna_eggs.item.draw=function(fauna)
 	if fauna:get("deleted") then return end
 
 	fauna:get_values()
 
 	local p=V3( fauna.pos[1] , fauna.pos[2], fauna.pos[1]+fauna.pos[2] )
-	draws.sprite( fauna.sname  , p , fauna.side )
+	draws.sprite{ n=fauna.sname  , p=p , sx=fauna.side }
 
 end
 
@@ -868,9 +901,9 @@ fauna_slims.uidmap={
 
 fauna_slims.values={
 	pos=V3( 0,0,0 ),
-	rot=Q4( 0,0,0,1 ),
+	rot=0,
 	vel=V3( 0,0,0 ),
-	ang=V3( 0,0,0 ),
+	ang=0,
 	acc=V3( 0,200,0 ),
 	idx=1,
 	side=1,
@@ -883,6 +916,8 @@ fauna_slims.values={
 	thunk=0,
 	floor_uid=0,
 	mode="none",
+	slap=0,
+	stun=0,
 }
 
 fauna_slims.types={
@@ -1030,6 +1065,19 @@ fauna_slims.item.update=function(fauna)
 		fauna:set_values()
 		return
 	end
+	
+	if fauna.slap > 100 then -- got hit hard enough to stun
+		fauna.stun=16*5
+	end
+	
+	if fauna.stun>0 then -- we are stunned
+	
+--		fauna.stun=fauna.stun-1 -- limit stun time
+	
+		fauna.acc=grav
+		fauna:set_values()
+		return
+	end
 
 	local brain={}
 	brain.move=V3(0,0,0)
@@ -1132,7 +1180,7 @@ end
 -- who stomps this (it)
 fauna_slims.item.stomp=function(it,who)
 	if who.caste=="player" then
-		if it.mode=="flip" then
+		if it.stun>0 then
 	 		if it:mark_deleted() then
 				who.score=who.score+100
 				for i=1,16 do
@@ -1155,10 +1203,13 @@ fauna_slims.item.draw=function(fauna)
 	fauna:get_values()
 
 	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
-	local f=math.abs(fauna.flap-2)
-	draws.sprite( fauna.sname          , p , fauna.side )
-	draws.sprite( fauna.sname.."_feet" , p+V3(0,fauna.foot,8) , fauna.side )
-
+	
+	if fauna.stun>0 then
+		draws.sprite( { n=fauna.sname , p=p, sx=fauna.side , oy=7, sy=-1 } )
+	else
+		draws.sprite( { n=fauna.sname , p=p, sx=fauna.side } )
+		draws.sprite( { n=fauna.sname.."_feet" , p=p+V3(0,fauna.foot,8) , sx=fauna.side } )
+	end
 end
 
 
@@ -1180,9 +1231,9 @@ fauna_trenchs.uidmap={
 
 fauna_trenchs.values={
 	pos=V3( 0,0,0 ),
-	rot=Q4( 0,0,0,1 ),
+	rot=0,
 	vel=V3( 0,0,0 ),
-	ang=V3( 0,0,0 ),
+	ang=0,
 	acc=V3( 0,200,0 ),
 	idx=1,
 	side=1,
@@ -1193,6 +1244,7 @@ fauna_trenchs.values={
 	sname="fauna_trench",
 	thunk=0,
 	floor_uid=0,
+	slap=0,
 }
 
 fauna_trenchs.types={
@@ -1408,8 +1460,8 @@ fauna_trenchs.item.draw=function(fauna)
 
 	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
 	local f=math.abs(fauna.flap-2)
-	draws.sprite( fauna.sname          , p , fauna.side )
-	draws.sprite( fauna.sname.."_feet" , p+V3(0,fauna.foot,8) , fauna.side )
+	draws.sprite{ n=fauna.sname          , p=p , sx=fauna.side }
+	draws.sprite{ n=fauna.sname.."_feet" , p=p+V3(0,fauna.foot,8) , sx=fauna.side }
 
 end
 
@@ -1432,9 +1484,9 @@ gibs.uidmap={
 
 gibs.values={
 	pos=V3( 0,0,0 ),
-	rot=Q4( 0,0,0,1 ),
+	rot=0,
 	vel=V3( 0,0,0 ),
-	ang=V3( 0,0,0 ),
+	ang=0,
 	acc=V3( 0,200,0 ),
 	sname="gib_green",
 	life=16,
@@ -1465,11 +1517,11 @@ g G G G G G G g . g g G G g g . . . . g g . . . . . . . . . . .
 
 }
 
-gibs.collision_name=0x00010001	-- unique ID
+gibs.collision_type=0x00010001	-- unique ID
 gibs.collision_bits=0x01000000	-- assigned bitmask
 gibs.collision_mask=0x000000ff	-- interact bitmask
 gibs.collision_handlers={
-	[{gibs.collision_name}]={
+	[{gibs.collision_type}]={
 		postsolve=function(it)
 			local gib=scene:find_uid(it.shape_a.uid)
 			if gib and gib.caste=="gib" then -- sanity
@@ -1515,7 +1567,7 @@ gibs.item.setup_kinetic_reshape=function(gib)
 	gib.shape:friction(1.0)
 	gib.shape:elasticity(0.5)
 	gib.shape:filter(gib.uid,gibs.collision_bits,gibs.collision_mask)
-	gib.shape:collision_type(gibs.collision_name)
+	gib.shape:collision_type(gibs.collision_type)
 	gib.shape.uid=gib.uid
 end
 gibs.item.setup_kinetic=function(gib)
@@ -1577,7 +1629,165 @@ gibs.item.draw=function(gib)
 	gib:get_values()
 
 	local p=V3( gib.pos[1] , gib.pos[2], gib.pos[1]+gib.pos[2] )
-	draws.sprite( gib.sname          , p , 1 , 5-gib.size)
+	draws.sprite{ n=gib.sname          , p=p , i=5-gib.size }
+
+end
+
+--------------------------------------------------------------------------------
+--
+--#junk
+
+junks={}
+-- methods added to system
+junks.system={}
+-- methods added to each item
+junks.item={}
+
+junks.caste="junk"
+
+junks.uidmap={
+	length=0,
+}
+
+junks.values={
+	pos=V3( 0,0,0 ),
+	rot=0,
+	vel=V3( 0,0,0 ),
+	ang=0,
+	acc=V3( 0,200,0 ),
+	sname="junk_green",
+}
+
+junks.types={
+	pos="tween",
+	rot="tween",
+}
+
+
+junks.graphics={
+
+
+{nil,"junk_green",[[
+4 4 4 4 4 4 4 4 
+4 3 3 3 3 3 3 4 
+4 3 3 3 3 3 3 4 
+4 3 3 3 3 3 3 4 
+4 3 3 3 3 3 3 4 
+4 3 3 3 3 3 3 4 
+4 3 3 3 3 3 3 4 
+4 4 4 4 4 4 4 4 
+]]},
+
+}
+
+junks.collision_type=0x00020001	-- weapon ID
+junks.collision_bits=0x00010000	-- assigned bitmask
+junks.collision_mask=0x00ffffff	-- interact bitmask
+junks.collision_handlers={
+	[{junks.collision_type}]={
+		postsolve=function(arb)
+			local junk=scene:find_uid(arb.shape_a.uid)
+			if junk then -- sanity
+				if junk.reset_kinetic_ids then -- first hit
+					junk:reset_kinetic_ids() -- stop ignoring player collisons
+				end
+				local it=scene:find_uid(arb.shape_b.uid)
+				if it then
+					local old=it:get("slap") -- do we want to know how hard we been slapped?
+					if old then
+						local v=junk:get("vel") -- use velocity of "weapon"
+						local d=v:len()
+						if d>old then
+							it:set("slap",d)
+						end
+					end
+				end
+			end
+			return true
+		end
+	}
+}
+
+
+-- the system has no state values but can still perform generic actions
+-- eg allocate shared resources for later use
+junks.system.setup=function(sys)
+
+	 system.components.tiles.upload_tiles( junks.graphics )
+
+end
+
+junks.system.clean=function(sys)
+end
+
+-- state values are cached into the item for easy access on a get
+-- and must be set again if they are altered so setup and updates
+-- must begin and end with a get and a set
+junks.item.setup=function(junk)
+	junk:get_values()
+	
+	junk:setup_kinetic()
+	junk:set_values()
+end
+
+junks.item.reset_kinetic_ids=function(junk)
+	junk.shape:filter(junk.uid,junks.collision_bits,junks.collision_mask)
+	junk.shape:collision_type(junks.collision_type)
+end
+junks.item.setup_kinetic_reshape=function(junk)
+	local space=junk:get_singular("kinetic").space
+	if junk.shape then
+		space:remove(junk.shape)
+		junk.shape=nil
+	end
+--	junk.shape=junk.body:shape("circle",8,0,0)
+	junk.shape=junk.body:shape("box",-4,-4,4,4,0)
+	junk.shape:friction(1.0)
+	junk.shape:elasticity(0.5)
+	junk.shape.uid=junk.uid
+	junk:reset_kinetic_ids()
+end
+junks.item.setup_kinetic=function(junk)
+	if junk.body then return end -- already done
+	local space=junk:get_singular("kinetic").space
+	junk.body=space:body(1,1)
+	junk:setup_kinetic_reshape()
+	junk:set_body()
+end
+
+junks.item.clean_kinetic=function(junk)
+	if not junk.body then return end -- already done
+	local space=junk:get_singular("kinetic").space		
+	space:remove(junk.shape)
+	space:remove(junk.body)
+	junk.body=nil
+	junk.shape=nil
+end
+
+junks.item.clean=function(junk)
+	junk:clean_kinetic()
+end
+
+
+junks.item.update=function(junk)
+	if junk:get("deleted") then return end
+	junk:get_values()
+	junk:setup_kinetic() -- might need to recreate body
+	
+
+	junk:set_values()
+
+end
+
+-- when drawing get will auto tween values
+-- so it can be called multiple times between updates for different results
+junks.item.draw=function(junk)
+	if junk:get("deleted") then return end
+
+	junk:get_values()
+
+	local p=V3( junk.pos[1] , junk.pos[2], junk.pos[1]+junk.pos[2] )
+	draws.sprite{ n=junk.sname          , p=p , rz=junk.rot , }
 
 end
 
@@ -1694,7 +1904,7 @@ fauna_pandas.item.draw=function(fauna_panda)
 	fauna_panda:get_values()
 
 	local p=V3( fauna_panda.pos[1] , fauna_panda.pos[2]-3, fauna_panda.pos[1]+fauna_panda.pos[2] )
-	draws.sprite( fauna_panda.sname          , p , 1 )
+	draws.sprite{ n=fauna_panda.sname          , p=p }
 
 end
 
@@ -1803,7 +2013,8 @@ levels.legend={
 	["P0"]={ spawn="player", idx=0,  },
 	["P1"]={ spawn="player", idx=1,  },
 	["P2"]={ spawn="player", idx=2,  },
-	["S1"]={ fauna="egg", egg="slim", },
+	["S1"]={ spawn="egg", egg="slim", },
+	["J1"]={ spawn="junk", junk="box", },
 }
 
 levels.infos={}
@@ -1814,22 +2025,22 @@ legend=levels.combine_legends(levels.legend,{
 title="Test.",
 map=[[
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . J1. . . . . 0 
 0 . . v . . . . . . . . . . . < . . . . . . . . . < . . . . . 0 
 0 S1. . . . . . . . . . . . . . . . . . . . . . . . . . . . S10 
 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . S10 
-0 . . . . . . . . T1. . . . T2. . . T3. . . . . . . . . . . S10 
+0 . . . . J1. . . T1. . . . T2. . . T3. . . . . . . . . . . S10 
 0 . . . 0 0 0 0 . 0 0 0 0 . 0 0 . 0 0 0 . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 S1. . . . . . . . . . . . . . . . . . . . . . . . . . . . S10 
 0 0 . v . . . . . . . . . . P0. . . S1. . . . . . ^ . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . 0 0 . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . . . S10 . . . . . . . . . . . . S10 
+0 . . . . J1. . . . . . . . . . S10 . . . . . . . . . . . . S10 
 0 . . . 0 0 0 0 . . . . . . . . 0 0 . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 S1. . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . S10 
-0 0 0 0 . . . . . . . . . . . . . . . . . . 0 0 0 . . . 0 0 0 0 
+0 0 0 0 . . . . . . J1. . . . . . . . . . . 0 0 0 . . . 0 0 0 0 
 0 . . > . . . . . 0 0 0 . . . > . . . . . . . . . . ^ . . . . 0 
 0 P1. . . . . . . . . . . . . . S1. . . . . . . . . . . . . P20 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
@@ -1884,6 +2095,8 @@ levels.item.setup=function(level)
 		for x,tile in pairs(line) do
 			if tile.spawn and tile.idx then
 				level.spawns[tile.spawn.."_"..tile.idx]=tile
+			elseif tile.spawn then
+				level.spawns[tile.spawn]=tile
 			end
 			local shape
 			if tile.solid then -- merge outside edges of solid cells to create smoother collisions
@@ -1970,11 +2183,19 @@ levels.item.setup=function(level)
 					(1/tile.dir_down)-(1/tile.dir_up)
 				):normalize()
 				
-			if tile.fauna=="egg" then -- spawn an egg
+			if tile.spawn=="egg" then -- spawn an egg
 				scene:creates({
 					{
 						"fauna_egg",
 						egg=tile.egg,
+						pos={tile.x*8+4,tile.y*8+4,0},
+					},
+				})
+			elseif tile.spawn=="junk" then -- spawn an egg
+				scene:creates({
+					{
+						"junk",
+						junk=tile.junk,
 						pos={tile.x*8+4,tile.y*8+4,0},
 					},
 				})

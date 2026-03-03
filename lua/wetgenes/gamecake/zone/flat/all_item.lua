@@ -312,9 +312,13 @@ all.item.set_body=function(it)
 	it:get_value("pos")
 	it:get_value("vel")
 	it:get_value("acc")
+	it:get_value("rot")
+	it:get_value("ang")
 
 	it.body:position(it.pos[1],it.pos[2])
 	it.body:velocity(it.vel[1],it.vel[2])
+	it.body:angle(it.rot*(math.pi*2))
+	it.body:angular_velocity(it.ang*(math.pi*2))
 	
 	if it.acc then
 		it.body:force(it.acc[1],it.acc[2])
@@ -337,12 +341,18 @@ all.item.get_body=function(it)
 
 	local px,py=it.body:position()
 	local vx,vy=it.body:velocity()
+	local rz=it.body:angle()
+	local az=it.body:angular_velocity()
 
 	it.pos=V3(px,py,0)
 	it.vel=V3(vx,vy,0)
+	it.rot=rz/(math.pi*2)
+	it.ang=az/(math.pi*2)
 
 	it:set_value("pos")
 	it:set_value("vel")
+	it:set_value("rot")
+	it:set_value("ang")
 
 	if it.acc then
 		local ax,ay=it.body:force()
