@@ -174,7 +174,7 @@ draws.sprite=function(it) -- note that we will modify this table
 	it.px=math.floor(it.px+0.5)
 	it.py=math.floor(it.py+0.5)
 	if it.rz then
-		it.rz=360*math.floor(it.rz*32+0.5)/32
+		it.rz=360*math.floor(it.rz*16+0.5)/16
 	end
 	system.components.sprites.list_add(it)
 end
@@ -534,7 +534,6 @@ else
 	local space=player:get_singular("kinetic").space
 	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,2,player.uid,0x00000100,0x00ffffff)
 	if hit and hit.alpha and hit.alpha<0.75 then
-
 		local d=(hit.alpha*16)+2 -- distance + radius
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
@@ -551,15 +550,13 @@ else
 		player.acc[2]=player.acc[2]+a --  hover
 
 		player.onfloor=4
-
-if hit.shape.uid then
-	local it=scene:find_uid(hit.shape.uid)
-	if it and it.stomp then
-		it:stomp(player)
-	end
---	print("player stomp",hit.shape.uid)
-end
-
+		if hit.shape.uid then
+			local it=scene:find_uid(hit.shape.uid)
+			if it and it.stomp then
+				it:stomp(player)
+			end
+		--	print("player stomp",hit.shape.uid)
+		end
 	else
 		if player.foot>11 then player.foot=player.foot-footspeed end
 		if player.foot<11 then player.foot=player.foot+footspeed end
@@ -572,7 +569,7 @@ end
 			player.onfloor=0
 			player.jump=4
 			player.acc[2]=0
-			player.vel[2]=-120
+			player.vel[2]=-140
 		end
 	end
 -- forever coyote time
