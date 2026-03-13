@@ -357,6 +357,7 @@ M.bake=function(oven,docs)
 		collect.manifest_path(it.filename)
 		collect.load(it,it.filename)
 		it.txt.set_lexer()
+		it.txt.anchors=it.txt.scan_anchors()
 
 		return it
 	end

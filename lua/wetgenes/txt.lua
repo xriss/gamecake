@@ -1398,6 +1398,59 @@ find and select prev
 
 	end
 
+
+-- Find anchors in text and remember them
+	txt.scan_anchors=function()
+		local anchors={}
+
+		for idx,line in ipairs(txt.strings) do
+			if string.find(line,"^[%-/][%-/]#") then
+				local name=string.match(line,"^[%-/][%-/]#([%w_%.%-]+)")
+				if name and name~="" then
+					local anchor={}
+					anchor.idx=idx
+					anchor.name=name
+					anchors[#anchors+1]=anchor
+				end
+--print(name,line)
+			end
+		end
+		
+		return anchors
+	end
+
+
+-- refind anchor ( start looking where it was )
+	txt.refind_anchor=function(anchor)
+	
+		local found
+		local check=function(idx)
+			local line=txt.strings[idx]
+			if not line then return end -- ignore out of scope
+			local name=string.match(line,"^[%-/][%-/]#([%w_%.%-]+)")
+			if name and name~="" and name==anchor.name then
+				anchor.idx=idx
+				found=anchor
+			end
+		end
+		local idx=anchor.idx
+		for i=0,#txt.strings do
+			check(idx+i)
+			check(idx-i)
+			if found then return found end
+		end
+		return nil -- not found
+	end
+
+
+-- Goto given anchor
+	txt.goto_anchor=function(anchor)
+		local found=edit.refind_anchor(anchor)
+		if not found then return end
+	end
+
+
+
 -- bind to an undo state
 	wtxtundo.construct({},txt)
 

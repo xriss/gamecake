@@ -52,8 +52,7 @@ M.construct=function(edit,txt)
 	txt.edit=edit
 	
 	edit.width=80 -- should be editable
-
-
+	
 -- select paragraph under cursor , spread up and down until we find a blank line or change of indention
 	edit.select_paragraph=function()
 	
