@@ -1422,7 +1422,16 @@ find and select prev
 
 -- refind anchor ( start looking where it was )
 	txt.refind_anchor=function(anchor)
-	
+		if type(anchor)=="string" then -- use cache
+			for i,a in ipairs(txt.anchors or {}) do
+				if a.name==anchor then
+					anchor=a
+					break
+				end
+			end
+		end
+		if type(anchor)~="table" then return nil end -- not found
+
 		local found
 		local check=function(idx)
 			local line=txt.strings[idx]
@@ -1437,7 +1446,7 @@ find and select prev
 		for i=0,#txt.strings do
 			check(idx+i)
 			check(idx-i)
-			if found then return found end
+			if found then return found end -- stop on hit
 		end
 		return nil -- not found
 	end
@@ -1445,8 +1454,9 @@ find and select prev
 
 -- Goto given anchor
 	txt.goto_anchor=function(anchor)
-		local found=edit.refind_anchor(anchor)
+		local found=txt.refind_anchor(anchor)
 		if not found then return end
+		txt.mark(found.idx,0,found.idx,0)
 	end
 
 

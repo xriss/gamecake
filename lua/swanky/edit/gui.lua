@@ -17,6 +17,9 @@ local NOT , AND , OR , XOR = bit.bnot , bit.band , bit.bor , bit.bxor
 
 local function dprint(a) print(wstr.dump(a)) end
 
+local wgw_mounts=require("wetgenes.gamecake.widgets.mounts")
+
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -462,17 +465,41 @@ function gui.hooks(act,w,dat)
 
 --print(act,dat.path)
 	
-		if not dat.dir then -- a file click
+		if dat.path and dat.path:sub(-1)~="/" then -- a file click
+
+			if dat.dir then
+				dat.dir=nil
+			else
+				dat.dir={}
+			end
 
 			local path=dat.path
 			w.master.later_append(function()
 			
 				local doc=docs.manifest(path)
 				doc:auto_age_reload() -- auto reload on change
+				if dat.anchor then -- goto anchor
+					doc.txt.goto_anchor(dat.anchor)
+				end
 				doc:show()
-
-				gui.refresh_tree()
 				
+				if dat.dir then -- fill anchors
+					if not dat.anchor and doc.txt.anchors then
+						local pp=#(wpath.split( wpath.unslash(dat.path) ))-1
+						for _,a in ipairs( doc.txt.anchors ) do
+							dat.dir[#dat.dir+1]=wgw_mounts.file.setup({
+								path=dat.path,
+								name="#"..a.name,
+								anchor=a.name,
+								indent=string.rep(" ",pp+1)
+							})
+						end
+					end
+				end
+				if dat.dir and not dat.dir[1] then dat.dir=nil end 
+				
+				gui.refresh_tree()
+								
 				if dat.is=="find" and dat.find then -- select next when clicked
 					local find=dat.find
 					
