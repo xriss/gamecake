@@ -897,7 +897,7 @@ function wtexteditor.scroll_to_bottom(texteditor)
 	end
 end
 
-function wtexteditor.scroll_to_view(texteditor,cy,cx)
+function wtexteditor.scroll_to_view(texteditor,cy,cx,top)
 	local txt=texteditor.txt
 	local pan=texteditor.scroll_widget.pan
 
@@ -915,7 +915,7 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 
 	else
 
-	if dy<4 then
+		if dy<4 or top then
 
 			local d=-(dy-4)
 --			print("dec",d)
@@ -940,6 +940,7 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx)
 	end
 
 end
+
 
 function wtexteditor.allow_changes(texteditor)
 	local txt=texteditor.txt

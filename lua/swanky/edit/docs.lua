@@ -320,7 +320,7 @@ M.bake=function(oven,docs)
 		end
 		gui.master.ids.infobar:set_dirty()
 
-		gui.master.ids.texteditor:scroll_to_view()
+		gui.master.ids.texteditor:scroll_to_view(nil,nil,true) -- force top
 
 		return it
 	end

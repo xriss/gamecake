@@ -219,7 +219,7 @@ Find the line number and column number of the given byte offset into the text.
 			
 			c=math.ceil(c/2) -- half the jump
 			
-		until a<=ptr and b>ptr -- in range
+		until a<=ptr and ( b>ptr  or c<=1 ) -- in range
 		
 		if not y then return end -- failed to find line
 		
@@ -227,9 +227,16 @@ Find the line number and column number of the given byte offset into the text.
 
 		y=1+(y-1)*txt.permacache_ratio -- y back into full range
 
+		while a>ptr do -- maybe step backward
+			y=y-1
+			local s=txt.strings[y]
+			if not s then break end -- fail
+			a=a-#s
+		end
+
 		local b=a+#txt.strings[y]
 
-		while b<=ptr do -- step forward
+		while b<=ptr do -- maybe step forward
 			y=y+1
 			local s=txt.strings[y]
 			if not s then break end -- fail
@@ -1345,11 +1352,9 @@ find and select next
 		local s = txt.get_text() -- get all the text
 
 		local b,e=string_find_next(s,t,p+1)
-
 		if not b then --wrap
 			b,e=string_find_next(s,t,0)
 		end
-		
 		if b then -- found it
 
 			local fy,fx=txt.ptr_to_location(b-1) -- location

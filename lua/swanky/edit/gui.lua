@@ -157,9 +157,14 @@ gui.data_setup=function()
 	
 		gui.datas=datas
 
+		datas.new({id="list_top"  ,class="list",  hooks=gui.hooks,num=1,list={
+			{str="tree"},
+			{str="console"},
+		}})
+
 		datas.new({id="list_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
 			{str="play"},
-			{str="console"},
+--			{str="console"},
 			{str="search"},
 		}})
 
@@ -612,11 +617,22 @@ function gui.hooks(act,w,dat)
 
 			gui.master.dirty_by_data("run_state")
 
+		elseif w.id=="list_top" then -- change
+
+			gui.master.ids.console.hidden=true
+			gui.master.ids.treefiles.hidden=true
+
+			if w.str=="tree" then
+				gui.master.ids.treefiles.hidden=false
+			elseif w.str=="console" then
+				gui.master.ids.console.hidden=false
+			end
+			
 		elseif w.id=="list_mode" then -- change
 
 			gui.master.ids.bar2:set_dirty()
 
-			gui.master.ids.console.hidden=true
+--			gui.master.ids.console.hidden=true
 			gui.master.ids.search.hidden=true
 			gui.master.ids.play.hidden=true
 
@@ -626,11 +642,11 @@ function gui.hooks(act,w,dat)
 			gui.master.ids.run_play_pause.hidden=true
 			gui.master.ids.run_play_restart.hidden=true
 
-			if w.str=="console" then
+--			if w.str=="console" then
+--				gui.master.ids.console.hidden=false
+--			else
 
-				gui.master.ids.console.hidden=false
-
-			elseif w.str=="search" then
+			if w.str=="search" then
 
 				gui.master.ids.search.hidden=false
 
@@ -716,8 +732,14 @@ local lay=
 --
 				class="split",split_axis="y",split_order=1,split_num=gsiz*1,hx=200,
 				{
-					id="bar1",class="fill",
-					style="flat",highlight="none",color=0,
+--					id="bar1",class="fill",
+--					style="flat",highlight="none",color=0,
+					class="split",split_axis="x",split_order=1,hy=gsiz,
+					{
+						class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
+						data="list_top",
+--										menu_px=0,menu_py=-1.9, -- menu position hacks
+					},
 					{
 						id="tree_filter_text",hooks=gui.hooks,
 						class="textedit",size="fullx",hx=gsiz*1,hy=gsiz*1,
@@ -740,6 +762,13 @@ local lay=
 									id="treefiles",hidden=false,
 									class="tree",size="full",hooks=gui.hooks,
 									items=collect.mounts,
+								},
+								{
+									id="console",hidden=true,
+									class="texteditor",size="full",style="flat",color=0,
+									opts={console=true,gutter_disable=true,word_wrap=true},
+									--fbo=true, --  scale using fbo so it is smoothed
+									console_command=gui.console_command,
 								},
 							},
 						},
@@ -773,13 +802,6 @@ local lay=
 										class="texteditor",size="full",style="flat",color=0,
 										opts={readonly=true,gutter_disable=true,word_wrap=true},
 									},
-								},
-								{
-									id="console",hidden=true,
-									class="texteditor",size="full",style="flat",color=0,
-									opts={console=true,gutter_disable=true,word_wrap=true},
-									--fbo=true, --  scale using fbo so it is smoothed
-									console_command=gui.console_command,
 								},
 								{
 									id="search",hidden=true,class="fill",
@@ -865,7 +887,7 @@ local lay=
 						{
 							class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
 							data="list_mode",
-							menu_px=0,menu_py=-2.9, -- menu position hacks
+							menu_px=0,menu_py=-1.9, -- menu position hacks
 						},
 						{
 							id="run_play_autoplay",hooks=gui.hooks,

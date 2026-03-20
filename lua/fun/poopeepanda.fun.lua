@@ -54,7 +54,14 @@ sysopts={
 
 hardware,main=system.configurator(sysopts)
 
+systems={}
+
 all=require("wetgenes.gamecake.zone.flat.all"):import()
+systems[#systems+1]=all
+
+kinetic=require("wetgenes.gamecake.zone.flat.kinetic"):import()
+systems[#systems+1]=kinetic
+
 
 all.create_scene=function(scene)
 
@@ -71,20 +78,7 @@ all.create_scene=function(scene)
 		"wetgenes.gamecake.zone.flat.",
 		"",
 	}
-	for _,it in pairs({ -- static data and functions for each system
-		all,
-		require("wetgenes.gamecake.zone.flat.kinetic"):import(),
-		levels,
-		cameras,
-		huds,
-		players,
-		gibs,
-		junks,
-		fauna_eggs,
-		fauna_slims,
-		fauna_trenchs,
-		fauna_pandas,
-	}) do
+	for _,it in pairs(systems) do  -- static data and functions for each system
 		scene.infos[it.caste]=it
 	end
 
@@ -184,6 +178,7 @@ end
 --#player
 
 players={}
+systems[#systems+1]=players
 -- methods added to system
 players.system={}
 -- methods added to each item
@@ -584,6 +579,18 @@ else
 	local hold_pos=player.pos+V3(0,-16,0)
 	local hold=player:depend("hold")
 	local hold_len -- how well held 0 is best
+	if bb_set and hold then -- throw
+		player:depend("hold",0)
+		hold:depend("held",0)
+		hold.shape:collision_type(junks.collision_type) -- become dangerous
+		local m=((player.holdtime-8)/16)
+		if m>1 then m=1 end -- full speed after 1.5 seconds
+		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
+		local aim=V3(player.side/256,1/256,0)+V3(lx,ly,0)
+		aim:normalize()
+		hold.vel=aim*(400*m)
+		hold:set_value("vel")
+	end
 	if bb_set and not hold then -- pickup
 		player.holdtime=0
 		local v1=player.pos+V3(-24,-16,0)
@@ -644,16 +651,6 @@ else
 			hold:set_value("ang")
 		end
 	end
-	if bb_clr and hold then -- throw
-		player:depend("hold",0)
-		hold:depend("held",0)
-		hold.shape:collision_type(junks.collision_type) -- become dangerous
-		local m=((player.holdtime-8)/16)
-		if m>1 then m=1 end -- full speed after 1.5 seconds
-		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
-		hold.vel=player.vel+V3(player.side*(400*m),(400*m),0)
-		hold:set_value("vel")
-	end
 
 --PRINT( ba_now , player.onfloor , player.jump )
 --PRINT( player.vel )
@@ -698,6 +695,7 @@ end
 --#fauna_eggs
 
 fauna_eggs={}
+systems[#systems+1]=fauna_eggs
 -- methods added to system
 fauna_eggs.system={}
 -- methods added to each item
@@ -884,6 +882,7 @@ end
 --#fauna_slims
 
 fauna_slims={}
+systems[#systems+1]=fauna_slims
 -- methods added to system
 fauna_slims.system={}
 -- methods added to each item
@@ -1215,6 +1214,7 @@ end
 --#fauna_trenchs
 
 fauna_trenchs={}
+systems[#systems+1]=fauna_trenchs
 -- methods added to system
 fauna_trenchs.system={}
 -- methods added to each item
@@ -1468,6 +1468,7 @@ end
 --#gib
 
 gibs={}
+systems[#systems+1]=gibs
 -- methods added to system
 gibs.system={}
 -- methods added to each item
@@ -1635,6 +1636,7 @@ end
 --#junk
 
 junks={}
+systems[#systems+1]=junks
 -- methods added to system
 junks.system={}
 -- methods added to each item
@@ -1793,6 +1795,7 @@ end
 --#fauna_panda
 
 fauna_pandas={}
+systems[#systems+1]=fauna_pandas
 -- methods added to system
 fauna_pandas.system={}
 -- methods added to each item
@@ -1910,6 +1913,7 @@ end
 --#level
 
 levels={}
+systems[#systems+1]=levels
 -- methods added to system
 levels.system={}
 -- methods added to each item
@@ -2389,6 +2393,7 @@ end
 --#camera
 
 cameras={}
+systems[#systems+1]=cameras
 -- methods added to system
 cameras.system={}
 -- methods added to each item
@@ -2506,12 +2511,12 @@ cameras.item.draw=function(camera)
 
 end
 
---#hud.lua
 --------------------------------------------------------------------------------
 --
--- a hud
+--#hud
 
 huds={}
+systems[#systems+1]=huds
 -- methods added to system
 huds.system={}
 -- methods added to each item
