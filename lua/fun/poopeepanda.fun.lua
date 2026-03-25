@@ -95,15 +95,6 @@ all.create_scene=function(scene)
 		local boots={
 			{"kinetic"},
 			{"level",idx=1},
-
-			{"hud",idx=1,depends={player=5}},
-			{"camera",idx=1,depends={player=5}},
-			{"player",idx=1,vel={-64,32,0},pos={32,32,0},depends={camera=4,hud=3},mode="egg",},
-
-			{"hud",idx=2,depends={player=8}},
-			{"camera",idx=2,depends={player=8}},
-			{"player",idx=2,vel={64,32,0},pos={64,32,0},depends={camera=7,hud=6},mode="egg",},
-
 --			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
 		}
 		scene:creates(boots)
@@ -201,7 +192,7 @@ players.values={
 	rot=0,
 	vel=V3( 0,0,0 ),
 	ang=0,
-	acc=V3( 0,200,0 ),
+	acc=V3( 0,0,0 ),
 	idx=1,
 	mode="none",
 	side=1,
@@ -212,6 +203,7 @@ players.values={
 	holdtime=0,
 	walk=0,
 	score=0,
+	idle=0,
 }
 
 players.types={
@@ -433,18 +425,22 @@ players.item.setup_kinetic=function(player)
 	if player.body then return end -- only create once
 	local space=player:get_singular("kinetic").space
 	player.body=space:body(1,1)
-	player.shape=player.body:shape("circle",4,0,0)
-	player.shape:friction(0.5)
-	player.shape:elasticity(0.5)
-	player:reset_kinetic_ids()
-	player.shape.uid=player.uid
+	if player.mode=="spawn" then
+		-- no collision when spawning
+	else
+		player.shape=player.body:shape("circle",4,0,0)
+		player.shape:friction(0.5)
+		player.shape:elasticity(0.5)
+		player:reset_kinetic_ids()
+		player.shape.uid=player.uid
+	end
 	player:set_body() -- set positon etc
 end
 
 players.item.clean_kinetic=function(player)
 	if not player.body then return end -- auto clean
-	local space=player:get_singular("kinetic").space		
-	space:remove(player.shape)
+	local space=player:get_singular("kinetic").space
+	if player.shape then space:remove(player.shape) end
 	space:remove(player.body)
 	player.body=nil
 	player.shape=nil
@@ -467,19 +463,46 @@ players.item.update=function(player)
 	local ly=( up:axis("ly") ) or 0
 	local ba_now=( up:get("a") or up:get("a_set") ) or false
 	local ba_set=( up:get("a_set") ) or false
+	local ba_clr=( up:get("a_clr") ) or false
 
-	local bb_now=( up:get("b")     ) or false
+	local bb_now=( up:get("b") or up:get("b_set") ) or false
 	local bb_set=( up:get("b_set") ) or false
 	local bb_clr=( up:get("b_clr") ) or false
 
 	local grav=level:get_gravity(player.pos)
+	
+if player.mode=="spawn" then -- we are spawning but not really here yet
 
-if player.mode=="egg" then
+	if ba_set and ( player.idx==1 or player.idle<16*10 ) then -- hide p2 after 10 secs
+		player.mode="none"
+		player:clean_kinetic()
+		player:setup_kinetic()
+
+		local tile=level:get_tile_by_pos(player.pos)
+		player.vel=V3(tile.dir)*400
+	end
+
+	player.idle=player.idle+1
+	local ll=lx*lx+ly*ly
+	if ll>0.25 or bb_set or bb_clr or ba_set or ba_clr then
+		player.idle=0 -- ticks since last controller input
+	end
+
+
+elseif player.mode=="egg" then
+
+	player.acc=grav -- apply gravity
 
 	if ba_set then
 		player.mode="none"
+		player:clean_kinetic()
+		player:setup_kinetic()
 	end
 	
+elseif player.mode=="die" then
+
+	player.acc=grav -- apply gravity
+
 else
 	
 	if ba_now then
@@ -669,7 +692,17 @@ players.item.draw=function(player)
 
 	local p=V3( player.pos[1] , player.pos[2], player.pos[1]+player.pos[2] )
 
-	if player.mode=="egg" then
+	if player.mode=="spawn" then
+
+		local level=player:get_singular("level")
+		local t=level:get("time")
+		local s=1
+		if ( player.idx==1 or player.idle<16*10 ) then -- hide p2 after 10secs of inactivity
+			if 1==((t*16)%2) then -- blink
+				draws.sprite{ n="ply"..player.idx.."_egg" , p=p , sy=s,sx=-player.side*s }
+			end
+		end
+	elseif player.mode=="egg" then
 
 		draws.sprite{ n="ply"..player.idx.."_egg" , p=p , sx=-player.side }
 
@@ -764,7 +797,7 @@ fauna_eggs.system.update=function(sys)
 			for p,player in ipairs(list_players) do
 				if not player:get("deleted") then -- live player
 					local mode=player:get_value("mode")
-					if mode~="egg" then -- ignore unhatched players
+					if mode=="none" then -- ignore unhatched players
 						local p1=player:get_value("pos")
 						local p2=egg:get_value("pos")
 						local d=p1:distance(p2)
@@ -2008,12 +2041,8 @@ levels.legend={
 	["v "]={ name="char_empty",				dir_down=1,  },
 	["00"]={ name="char_black",				solid=1, dense=1, },		-- black border
 	["0 "]={ name="char_solid",				solid=1, dense=1, },		-- empty border
-	["T1"]={ name="char_sign",				text="Welcome to the Dungeon, we got fun and games." },
-	["T2"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
-	["T3"]={ name="char_sign",				text="Stomp ten Slims." },
-	["P0"]={ spawn="player", idx=0,  },
-	["P1"]={ spawn="player", idx=1,  },
-	["P2"]={ spawn="player", idx=2,  },
+	["P1"]={ spawn="player", player=1,  },
+	["P2"]={ spawn="player", player=2,  },
 	["S1"]={ spawn="egg", egg="slim", },
 	["J1"]={ spawn="junk", junk="box", },
 }
@@ -2021,6 +2050,39 @@ levels.legend={
 levels.infos={}
 
 levels.infos[1]={
+legend=levels.combine_legends(levels.legend,{
+	["Ta"]={ name="char_sign",				text="Welcome to the Dungeon, we got fun and games." },
+	["Tb"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
+	["Tc"]={ name="char_sign",				text="Congratulations on the coyote jump." },
+	["Td"]={ name="char_sign",				text="You may JUMP in the air after walking off a platform." },
+	["T1"]={ name="char_sign",				text="Press JUMP to join in." },
+	["T2"]={ name="char_sign",				text="Try jumping up." },
+	["T3"]={ name="char_sign",				text="Hold JUMP to flap arms and duck when walking." },
+	["T4"]={ name="char_sign",				text="Press USE to pickup object, press USE again to throw it." },
+	["T5"]={ name="char_sign",				text="Throw power is speed of object rotation." },
+	["T6"]={ name="char_sign",				text="Aim throw with LEFT STICK or direction will be forwards and downwards." },
+	["T7"]={ name="char_sign",				text="Throw object at slim to stun him." },
+	["T8"]={ name="char_sign",				text="Touch stuned slim to finish him." },
+}),
+title="Test.",
+map=[[
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 . . . . . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . Tb. . . Ta. . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . Tc. . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 0 0 0 0 . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . Td. . . . 0 . . . . . . . . . . . . . . . . . . . . . 0 0 0 . . . 0 
+0 . . . . . . . . . . . . 0 0 0 . . . 0 . . . . . . . . . . . . . . . . . . . . . 0 0 0 . . , 0 
+0 P1P2. . . . . . . . . . 0 0 0 . . . 0 . . . . . . . . . . . . . . . . . . . . . 0 0 0 . . . 0 
+0 . T1. . . . . . . . T2. 0 0 0 . T3. . . . T4. . J1. . T5. . T6. . T7. . T8  . . 0 0 0 . . S10 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+]],
+}
+
+levels.infos[10]={
 legend=levels.combine_legends(levels.legend,{
 }),
 title="Test.",
@@ -2035,19 +2097,18 @@ map=[[
 0 . . . 0 0 0 0 . 0 0 0 0 . 0 0 . 0 0 0 . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 S1. . . . . . . . . . . . . . . . . . . . . . . . . . . . S10 
-0 0 . v . . . . . . . . . . P0. . . S1. . . . . . ^ . . 0 0 0 0 
-0 . . . . . . . . . . . . . . . . 0 0 . . . . . . . . . . . . 0 
+0 0 . v . . . . . . . . . . . . . . S1. . . . . . ^ . . 0 0 0 0 
+0 P1. . . . . . . . . . . . . . . 0 0 . . . . . . . . . . . P20 
 0 . . . . J1. . . . . . . . . . S10 . . . . . . . . . . . . S10 
 0 . . . 0 0 0 0 . . . . . . . . 0 0 . . . . . . . . . . 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 S1. . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . S10 
 0 0 0 0 . . . . . . J1. . . . . . . . . . . 0 0 0 . . . 0 0 0 0 
 0 . . > . . . . . 0 0 0 . . . > . . . . . . . . . . ^ . . . . 0 
-0 P1. . . . . . . . . . . . . . S1. . . . . . . . . . . . . P20 
+0 . . . . . . . . . . . . . . . S1. . . . . . . . . . . . . . 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 ]],
 }
-
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
@@ -2184,21 +2245,28 @@ levels.item.setup=function(level)
 					(1/tile.dir_down)-(1/tile.dir_up)
 				):normalize()
 				
+			local pos={ (tile.x or 0)*8+4 , (tile.y or 0)*8+4 , 0 }
 			if tile.spawn=="egg" then -- spawn an egg
 				scene:creates({
 					{
 						"fauna_egg",
 						egg=tile.egg,
-						pos={tile.x*8+4,tile.y*8+4,0},
+						pos=pos,
 					},
 				})
-			elseif tile.spawn=="junk" then -- spawn an egg
+			elseif tile.spawn=="junk" then -- spawn junk
 				scene:creates({
 					{
 						"junk",
 						junk=tile.junk,
-						pos={tile.x*8+4,tile.y*8+4,0},
+						pos=pos,
 					},
+				})
+			elseif tile.spawn=="player" then -- spawn players
+				scene:creates({
+					{"hud",idx=tile.player,depends={player=3}},
+					{"camera",idx=tile.player,depends={player=3}},
+					{"player",idx=tile.player,pos=pos,depends={camera=2,hud=1},mode="spawn",},
 				})
 			end
 		end
