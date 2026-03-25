@@ -741,6 +741,8 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		local word=txt.copy()
 		if not word or word=="" then -- automark
 			txt.markauto(dy,dx,2) -- auto select word under cursor
+			texteditor.mark_area={txt.markget()}
+			texteditor.click_area={unpack(texteditor.mark_area)}
 			word=txt.copy()
 			txt.cursor()
 			texteditor:mark_sync()
@@ -835,6 +837,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		end
 		texteditor.mark_area[3]=dy
 		texteditor.mark_area[4]=dx
+		texteditor.click_area={unpack(texteditor.mark_area)}
 		txt.mark(unpack(texteditor.mark_area))
 
 		texteditor:mark_sync()
@@ -846,6 +849,8 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		texteditor.float_cx=nil
 
 		txt.markauto(dy,dx,act) -- select word
+		texteditor.mark_area={txt.markget()}
+		texteditor.click_area={unpack(texteditor.mark_area)}
 
 		texteditor:mark_sync()
 
@@ -863,7 +868,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 			if texteditor.key_mouse > 1 then -- special select
 
-				local oldmark={txt.markget()}
+				local oldmark=texteditor.click_area or {}
 				txt.markauto(dy,dx,texteditor.key_mouse) -- select word
 				txt.markmerge(oldmark[1],oldmark[2],oldmark[3],oldmark[4],txt.markget())
 
@@ -1113,9 +1118,11 @@ function wtexteditor.key(pan,ascii,key,act)
 		if master.keystate=="shift" then
 			if not texteditor.mark_area then
 				texteditor.mark_area={txt.cy,txt.cx,txt.cy,txt.cx}
+				texteditor.click_area={unpack(texteditor.mark_area)}
 			end
 		else
 			texteditor.mark_area=false
+			texteditor.click_area=false
 			txt.mark()
 		end
 	end
@@ -1123,6 +1130,7 @@ function wtexteditor.key(pan,ascii,key,act)
 		if master.keystate=="shift" and texteditor.mark_area then
 				texteditor.mark_area[3]=txt.cy
 				texteditor.mark_area[4]=txt.cx
+				texteditor.click_area={unpack(texteditor.mark_area)}
 				txt.mark(unpack(texteditor.mark_area))
 		end
 
