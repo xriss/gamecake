@@ -2054,13 +2054,13 @@ legend=levels.combine_legends(levels.legend,{
 	["Ta"]={ name="char_sign",				text="Welcome to the Dungeon, we got fun and games." },
 	["Tb"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
 	["Tc"]={ name="char_sign",				text="Congratulations on the coyote jump." },
-	["Td"]={ name="char_sign",				text="You may JUMP in the air after walking off a platform." },
+	["Td"]={ name="char_sign",				text="You may JUMP in the air after walking off of a platform." },
 	["T1"]={ name="char_sign",				text="Press JUMP to join in." },
-	["T2"]={ name="char_sign",				text="Try jumping up." },
-	["T3"]={ name="char_sign",				text="Hold JUMP to flap arms and duck when walking." },
+--	["T2"]={ name="char_sign",				text="Try jumping up." },
+	["T3"]={ name="char_sign",				text="Hold JUMP to flap arms and duck down." },
 	["T4"]={ name="char_sign",				text="Press USE to pickup object, press USE again to throw it." },
-	["T5"]={ name="char_sign",				text="Throw power is speed of object rotation." },
-	["T6"]={ name="char_sign",				text="Aim throw with LEFT STICK or direction will be forwards and downwards." },
+--	["T5"]={ name="char_sign",				text="Throw power is speed of object rotation." },
+--	["T6"]={ name="char_sign",				text="Aim throw with LEFT STICK or direction will be forwards and downwards." },
 	["T7"]={ name="char_sign",				text="Throw object at slim to stun him." },
 	["T8"]={ name="char_sign",				text="Touch stuned slim to finish him." },
 }),
@@ -2068,11 +2068,11 @@ title="Test.",
 map=[[
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 . . . . . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . Tb. . . Ta. . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 J1. . . Tb. . . Ta. . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . Tc. . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 J1. Tc. . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 0 0 0 0 . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 . . . . . . . . . . . . . Td. . . . 0 . . . . . . . . . . . . . . . . . . . . . 0 0 0 . . . 0 
 0 . . . . . . . . . . . . 0 0 0 . . . 0 . . . . . . . . . . . . . . . . . . . . . 0 0 0 . . , 0 
