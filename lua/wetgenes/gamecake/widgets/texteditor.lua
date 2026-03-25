@@ -909,7 +909,13 @@ function wtexteditor.scroll_to_view(texteditor,cy,cx,top)
 	cx=cx or txt.cx
 	cy=cy or txt.cy
 
-	local dx=cx-texteditor.cx
+	local cache=txt.get_cache(cy)
+	local xcx=cache and cache.cx and cache.cx[cx] or cx -- need screen dist
+
+	local cache=txt.get_cache(texteditor.cy)
+	local xtx=cache and cache.cx and cache.cx[texteditor.cx] or texteditor.cx -- need screen dist
+
+	local dx=xcx-xtx
 	local dy=cy-texteditor.cy
 
 	local hx=math.floor(texteditor.scroll_widget.pan.hx/8)-texteditor.gutter+1
