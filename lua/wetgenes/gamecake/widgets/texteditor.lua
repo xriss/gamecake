@@ -745,7 +745,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 			texteditor.click_area={unpack(texteditor.mark_area)}
 			word=txt.copy()
 			txt.cursor()
-			texteditor:mark_sync()
+			texteditor:cursor_sync()
 		end
 		word=word or ""
 		if #word>64 then word="" end -- too long
@@ -840,7 +840,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		texteditor.click_area={unpack(texteditor.mark_area)}
 		txt.mark(unpack(texteditor.mark_area))
 
-		texteditor:mark_sync()
+		texteditor:cursor_sync()
 
 	elseif (act and act>1) and texteditor.master.over==pan and keyname=="left" then -- double click
 
@@ -852,7 +852,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		texteditor.mark_area={txt.markget()}
 		texteditor.click_area={unpack(texteditor.mark_area)}
 
-		texteditor:mark_sync()
+		texteditor:cursor_sync()
 
 		-- auto search lowlite
 		local word=txt.copy() or ""
@@ -880,7 +880,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 			end
 
-			texteditor:mark_sync()
+			texteditor:cursor_sync()
 
 		end
 
@@ -888,7 +888,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 end
 
-function wtexteditor.mark_sync(texteditor)
+function wtexteditor.cursor_sync(texteditor)
 	local txt=texteditor.txt
 	texteditor.txt_dirty=true
 	txt.cy , txt.cx = txt.clip(txt.cy,txt.cx)
@@ -1000,7 +1000,7 @@ function wtexteditor.msg(pan,m)
 				if texteditor:allow_changes() then
 					txt.edit[transform]()
 					txt.cursor()
-					texteditor:mark_sync()
+					texteditor:cursor_sync()
 				end
 			
 			elseif m.id=="clip_copy" then
@@ -1014,7 +1014,7 @@ function wtexteditor.msg(pan,m)
 						local s=txt.undo.cut() or ""
 						if s then wwin.set_clipboard(s) end
 						txt.cursor()
-						texteditor:mark_sync()
+						texteditor:cursor_sync()
 					end
 				end
 			elseif m.id=="clip_paste" then
@@ -1022,24 +1022,24 @@ function wtexteditor.msg(pan,m)
 					local s=wwin.get_clipboard() or ""
 					txt.undo.replace(s)
 					txt.cursor()
-					texteditor:mark_sync()
+					texteditor:cursor_sync()
 				end
 			elseif m.id=="history_undo" then
 				if texteditor:allow_changes() then
 					txt.undo.undo()
 					txt.cursor()
-					texteditor:mark_sync()
+					texteditor:cursor_sync()
 				end
 			elseif m.id=="history_redo" then
 				if texteditor:allow_changes() then
 					txt.undo.redo()
 					txt.cursor()
-					texteditor:mark_sync()
+					texteditor:cursor_sync()
 				end
 			elseif m.id=="select_all" then
 				txt.mark(0,0,txt.hy+1,0)
 				texteditor.txt_dirty=true
-				texteditor:mark_sync()
+				texteditor:cursor_sync()
 			elseif m.id=="clip_cutline" then
 				txt.mark(txt.cy,0,txt.cy+1,0)
 				if texteditor:allow_changes() then
@@ -1050,7 +1050,7 @@ function wtexteditor.msg(pan,m)
 					end
 					if s then wwin.set_clipboard(s) end
 					txt.cursor()
-					texteditor:mark_sync()
+					texteditor:cursor_sync()
 				end
 			elseif m.id=="view_hex" then
 				txt.cursor()
@@ -1091,7 +1091,7 @@ function wtexteditor.msg(pan,m)
 				end
 
 				txt.find_next()
-				texteditor:mark_sync()
+				texteditor:cursor_sync()
 
 			elseif m.id=="search_prev" then
 
@@ -1101,7 +1101,7 @@ function wtexteditor.msg(pan,m)
 				end
 
 				txt.find_prev()
-				texteditor:mark_sync()
+				texteditor:cursor_sync()
 
 			end
 		end
@@ -1392,7 +1392,7 @@ function wtexteditor.setup(widget,def)
 	widget.texteditor_hooks		=	function(act,w) return wtexteditor.texteditor_hooks(widget,act,w) end
 	widget.scroll_to_view		=	wtexteditor.scroll_to_view
 	widget.scroll_to_bottom		=	wtexteditor.scroll_to_bottom
-	widget.mark_sync			=	wtexteditor.mark_sync
+	widget.cursor_sync			=	wtexteditor.cursor_sync
 
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",scroll_pan="tiles",color=widget.color})
