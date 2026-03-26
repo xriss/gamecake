@@ -2669,10 +2669,14 @@ huds.item.update=function(hud)
 	local level=hud:get_singular("level") -- only one level is active at a time
 	
 	local show_tile
-	for _,t in level:each_tile_near( player.pos , 1 ) do
-		if t.name=="char_sign" then
-			show_tile=t
-			break
+	local v=player:get("vel")
+	local ll=v:lenlen()
+	if ll < 256 then -- only show when not moving
+		for _,t in level:each_tile_near( player.pos + V3(0,-4,0), 1 ) do
+			if t.name=="char_sign" then
+				show_tile=t
+				break
+			end
 		end
 	end
 	if show_tile and hud.tile_idx~=show_tile.idx then -- new text
