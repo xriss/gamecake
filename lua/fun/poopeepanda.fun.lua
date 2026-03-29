@@ -849,8 +849,8 @@ floaters.item.update=function(floater)
 	 			floater:mark_deleted()
 --				who.score=who.score+100
 				for i=1,16 do
-					local v=V3( hit.vel[1]*-2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
-								hit.vel[2]*-2+(-100*hit.sys:get_rnd()) ,
+					local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
+								hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
 								0 )
 					local boots={
 						{"gib",sname="gib_green",life=0,size=4,pos=floater.pos,vel=v},
