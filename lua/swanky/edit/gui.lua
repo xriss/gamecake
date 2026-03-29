@@ -357,7 +357,7 @@ function gui.action(m)
 		local txt=texteditor.txt
 
 		txt.find_next()
-		texteditor:mark_sync()
+		texteditor:cursor_sync()
 
 	elseif m.id=="find_replace" then
 
@@ -376,7 +376,7 @@ function gui.action(m)
 			end
 			txt.undo.replace_and_select(r)
 
-			texteditor:mark_sync()
+			texteditor:cursor_sync()
 		end
 
 	elseif m.id=="find_replace_all" then
@@ -399,7 +399,7 @@ function gui.action(m)
 			txt.mark(0,0,txt.hy+1,0) -- update text with a full file undo
 			txt.undo.replace(t)
 
-			texteditor:mark_sync()
+			texteditor:cursor_sync()
 		end
 
 	elseif m.id=="find_replace_selection" then
@@ -420,7 +420,7 @@ function gui.action(m)
 			t=t:gsub( s , r ) -- simple replace
 
 			txt.undo.replace(t)
-			texteditor:mark_sync()
+			texteditor:cursor_sync()
 		end
 
 	elseif m.id=="find_in_files" then
@@ -532,7 +532,7 @@ function gui.hooks(act,w,dat)
 				local hxb=dat.bpos[3]
 
 				txt.mark(hy,hxa,hy,hxb)
-				texteditor:mark_sync()
+				texteditor:cursor_sync()
 				texteditor:scroll_to_view()
 				texteditor.txt_dirty=true
 

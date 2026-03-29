@@ -42,13 +42,19 @@ all.item.get_singular=function(it,name,idx)
 end
 
 
+-- does this dependency exist
+all.item.can_depend=function(it,name)
+	local idx=tonumber(name) or it.uidmap[name] -- use number or convert string
+	return ( idx and idx>=1 and idx<=it.uidmap.length ) and true or false
+end
+
 -- get or set a dependency, returns the item from the named slot
 -- if uid is given then we first set the named slot to that uid
 all.item.depend=function(it,name,uid)
-	local uids=it:get("uids")
 	local idx=tonumber(name) or it.uidmap[name] -- use number or convert string
 	if not idx then return nil end -- bad name or number
 
+	local uids=it:get("uids")
 	if uid and uids[idx]~=uid then -- we are setting
 		local nuids={} -- new table so it is flaged as a change of data
 		for i=1,it.uidmap.length do -- must be set to number of slots

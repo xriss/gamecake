@@ -166,7 +166,7 @@ end
 
 --------------------------------------------------------------------------------
 --
---#player
+--#players
 
 players={}
 systems[#systems+1]=players
@@ -725,6 +725,140 @@ end
 
 --------------------------------------------------------------------------------
 --
+--#floaters
+
+floaters={}
+systems[#systems+1]=floaters
+-- methods added to system
+floaters.system={}
+-- methods added to each item
+floaters.item={}
+
+floaters.caste="floater"
+
+floaters.uidmap={
+	fauna=2,
+	length=2,
+}
+
+floaters.values={
+	pos=V3( 0,0,0 ),
+	rot=0,
+	vel=V3( 0,0,0 ),
+	ang=0,
+	acc=V3( 0,0,0 ),
+
+	sname="fauna_slim",
+}
+
+floaters.types={
+	pos="tween",
+	rot="tween",
+}
+
+
+floaters.graphics={
+
+{nil,"floater_egg",[[
+. . G G G G . . 
+. G G d d G G . 
+G G d d d d G G 
+G G G G G G G G 
+G G G G G G G G 
+G G g g g g G G 
+. G G g g G G . 
+. . G G G G . . 
+]]},
+
+
+}
+
+
+-- the system has no state values but can still perform generic actions
+-- eg allocate shared resources for later use
+floaters.system.setup=function(sys)
+	 system.components.tiles.upload_tiles( floaters.graphics )
+end
+
+floaters.system.clean=function(sys)
+end
+
+
+-- state values are cached into the item for easy access on a get
+-- and must be set again if they are altered so setup and updates
+-- must begin and end with a get and a set
+floaters.item.setup=function(floater)
+	floater:get_values()
+
+	floater:setup_kinetic()
+	floater:set_values()
+end
+
+floaters.collision_type=0x00020001	-- weapon
+floaters.collision_bits=0x00010000	-- assigned bitmask
+floaters.collision_mask=0x00ffffff	-- interact bitmask
+
+floaters.item.reset_kinetic_ids=function(floater)
+	floater.shape:filter(floater.uid,floaters.collision_bits,floaters.collision_mask)
+	floater.shape:collision_type(floaters.collision_type)
+end
+
+floaters.item.setup_kinetic=function(floater)
+	if floater.body then return end -- already done
+	local space=floater:get_singular("kinetic").space
+	floater.body=space:body(1,1)
+	floater.shape=floater.body:shape("circle",6,0,0)
+	floater.shape:friction(0.5)
+	floater.shape:elasticity(0.5)
+	floater:reset_kinetic_ids()
+	floater.shape.uid=floater.uid
+	floater:set_body()
+end
+
+floaters.item.clean_kinetic=function(floater)
+	if not floater.body then return end -- already done
+	local space=floater:get_singular("kinetic").space		
+	space:remove(floater.shape)
+	space:remove(floater.body)
+	floater.body=nil
+	floater.shape=nil
+end
+
+floaters.item.clean=function(floater)
+	floater:clean_kinetic()
+end
+
+
+floaters.item.update=function(floater)
+	if floater:get("deleted") then return end
+	floater:get_values()
+	floater:setup_kinetic() -- might need to recreate body
+
+	local level=floater:get_singular("level") -- only one level is active at a time
+--	local grav=level:get_gravity(floater.pos)
+--	floater.acc:set(grav) -- gravity
+
+	floater:set_values()
+end
+
+-- when drawing get will auto tween values
+-- so it can be called multiple times draws.sprite updates for different results
+floaters.item.draw=function(floater)
+	if floater:get("deleted") then return end
+
+	floater:get_values()
+
+	local fauna=floater:depend("fauna")
+	if fauna then -- draw fauna in this floater
+		local p=V3( floater.pos[1] , floater.pos[2], floater.pos[1]+floater.pos[2] )
+		draws.sprite{ n=fauna.sname  , p=p , sx=fauna.side }
+	end
+end
+
+
+
+--------------------------------------------------------------------------------
+--
 --#fauna_eggs
 
 fauna_eggs={}
@@ -925,7 +1059,8 @@ fauna_slims.caste="fauna_slim"
 
 fauna_slims.uidmap={
 	held=1,
-	length=1,
+	hit=2,
+	length=2,
 }
 
 fauna_slims.values={
@@ -945,8 +1080,8 @@ fauna_slims.values={
 	thunk=0,
 	floor_uid=0,
 	mode="none",
-	slap=0,
-	stun=0,
+--	slap=0,
+--	stun=0,
 }
 
 fauna_slims.types={
@@ -1046,18 +1181,20 @@ fauna_slims.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local space=fauna:get_singular("kinetic").space
 	fauna.body=space:body(1,1)
-	fauna.shape=fauna.body:shape("circle",4,0,0)
-	fauna.shape:friction(0.5)
-	fauna.shape:elasticity(0.5)
-	fauna.shape:filter(fauna.uid,fauna_slims.collision_bits,fauna_slims.collision_mask)
-	fauna.shape.uid=fauna.uid
+	if not fauna:depend("held") then
+		fauna.shape=fauna.body:shape("circle",4,0,0)
+		fauna.shape:friction(0.5)
+		fauna.shape:elasticity(0.5)
+		fauna.shape:filter(fauna.uid,fauna_slims.collision_bits,fauna_slims.collision_mask)
+		fauna.shape.uid=fauna.uid
+	end
 	fauna:set_body()
 end
 
 fauna_slims.item.clean_kinetic=function(fauna)
 	if not fauna.body then return end -- already done
 	local space=fauna:get_singular("kinetic").space		
-	space:remove(fauna.shape)
+	if fauna.shape then space:remove(fauna.shape) end
 	space:remove(fauna.body)
 	fauna.body=nil
 	fauna.shape=nil
@@ -1089,22 +1226,19 @@ fauna_slims.item.update=function(fauna)
 
 	local grav=level:get_gravity(fauna.pos)
 
-	if fauna:depend("held") then -- hang limp just acc
-		fauna.acc=grav
-		fauna:set_values()
+	if fauna:depend("held") then
 		return
 	end
+		
+	if fauna:depend("hit") then -- we are hit so turn into stunned floater
 	
-	if fauna.slap > 100 then -- got hit hard enough to stun
-		fauna.stun=16*5
-	end
+		local floater=scene:create({"floater", sname=fauna.sname, pos=fauna.pos, vel=fauna.vel, })
+		floater:depend("fauna",fauna.uid)
+		fauna:depend("held",floater.uid)
+		fauna:depend("hit",0) -- remove hit
+		fauna:clean_kinetic() -- recreate body
+		fauna:setup_kinetic()
 	
-	if fauna.stun>0 then -- we are stunned
-	
---		fauna.stun=fauna.stun-1 -- limit stun time
-	
-		fauna.acc=grav
-		fauna:set_values()
 		return
 	end
 
@@ -1233,8 +1367,8 @@ fauna_slims.item.draw=function(fauna)
 
 	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
 	
-	if fauna.stun>0 then
-		draws.sprite( { n=fauna.sname , p=p, sx=fauna.side , oy=7, sy=-1 } )
+	if fauna:depend("held") then
+		-- no draw
 	else
 		draws.sprite( { n=fauna.sname , p=p, sx=fauna.side } )
 		draws.sprite( { n=fauna.sname.."_feet" , p=p+V3(0,fauna.foot,8) , sx=fauna.side } )
@@ -1498,7 +1632,7 @@ end
 
 --------------------------------------------------------------------------------
 --
---#gib
+--#gibs
 
 gibs={}
 systems[#systems+1]=gibs
@@ -1666,7 +1800,7 @@ end
 
 --------------------------------------------------------------------------------
 --
---#junk
+--#junks
 
 junks={}
 systems[#systems+1]=junks
@@ -1678,7 +1812,8 @@ junks.item={}
 junks.caste="junk"
 
 junks.uidmap={
-	length=0,
+	held=1,
+	length=1,
 }
 
 junks.values={
@@ -1724,14 +1859,11 @@ junks.collision_handlers={
 					junk:reset_kinetic_ids() -- stop ignoring player collisons
 				end
 				local it=scene:find_uid(arb.shape_b.uid)
-				if it then
-					local old=it:get("slap") -- do we want to know how hard we been slapped?
-					if old then
-						local v=junk:get("vel") -- use velocity of "weapon"
-						local d=v:len()
-						if d>old then
-							it:set("slap",d)
-						end
+				if it and it:can_depend("hit") then -- do we want to know when hit?
+					local v=junk:get("vel") -- use velocity of "weapon"
+					local d=v:len()
+					if d>100  then
+						it:depend("hit",junk.uid) -- hit by
 					end
 				end
 			end
@@ -1825,7 +1957,7 @@ end
 
 --------------------------------------------------------------------------------
 --
---#fauna_panda
+--#fauna_pandas
 
 fauna_pandas={}
 systems[#systems+1]=fauna_pandas
@@ -1943,7 +2075,7 @@ end
 
 --------------------------------------------------------------------------------
 --
---#level
+--#levels
 
 levels={}
 systems[#systems+1]=levels
@@ -2459,7 +2591,7 @@ end
 
 --------------------------------------------------------------------------------
 --
---#camera
+--#cameras
 
 cameras={}
 systems[#systems+1]=cameras
@@ -2582,7 +2714,7 @@ end
 
 --------------------------------------------------------------------------------
 --
---#hud
+--#huds
 
 huds={}
 systems[#systems+1]=huds
