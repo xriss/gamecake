@@ -737,8 +737,9 @@ floaters.item={}
 floaters.caste="floater"
 
 floaters.uidmap={
-	fauna=2,
-	length=2,
+	hit=2,
+	fauna=3,
+	length=3,
 }
 
 floaters.values={
@@ -749,6 +750,7 @@ floaters.values={
 	acc=V3( 0,0,0 ),
 
 	sname="fauna_slim",
+	spin=0,
 }
 
 floaters.types={
@@ -835,8 +837,35 @@ floaters.item.update=function(floater)
 	floater:setup_kinetic() -- might need to recreate body
 
 	local level=floater:get_singular("level") -- only one level is active at a time
---	local grav=level:get_gravity(floater.pos)
---	floater.acc:set(grav) -- gravity
+	local wind=level:get_wind(floater.pos)
+
+	if floater:depend("hit") then -- we are hit so burst fauna
+
+		local fauna=floater:depend("fauna")
+		if fauna then
+	 		if fauna:mark_deleted() then -- remove fauna
+
+	 			local hit=floater:depend("hit")
+	 			floater:mark_deleted()
+--				who.score=who.score+100
+				for i=1,16 do
+					local v=V3( hit.vel[1]*-2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
+								hit.vel[2]*-2+(-100*hit.sys:get_rnd()) ,
+								0 )
+					local boots={
+						{"gib",sname="gib_green",life=0,size=4,pos=floater.pos,vel=v},
+					}
+					scene:creates(boots)
+				end
+				
+			end
+		end	
+		return
+	end
+
+	floater.acc:set(wind*16)
+
+	floater.spin=floater.spin+(1/16)
 
 	floater:set_values()
 end
@@ -851,7 +880,7 @@ floaters.item.draw=function(floater)
 	local fauna=floater:depend("fauna")
 	if fauna then -- draw fauna in this floater
 		local p=V3( floater.pos[1] , floater.pos[2], floater.pos[1]+floater.pos[2] )
-		draws.sprite{ n=fauna.sname  , p=p , sx=fauna.side }
+		draws.sprite{ n=fauna.sname.."_float"  , p=p , sx=fauna.side ,rz=floater.spin, }
 	end
 end
 
@@ -1111,6 +1140,25 @@ fauna_slims.graphics={
 . . G G G G G G G G G G G G . . 
 ]]},
 
+
+{nil,"fauna_slim_float",[[
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . d d d G . . . . . . 
+. . . . d d d d d d G G . . . . 
+. . . d d d d d d d d G G . . . 
+. . d d 7 0 d 7 0 d d d G G . . 
+. . d d 0 0 d 0 0 d d d G G . . 
+. d d d d d d d d d d d G G G . 
+. d d d d d d d d d d G G G G . 
+. G G d d d d d d d G G G G G . 
+. . G G G G G G G G G G G G . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+]]},
 
 {nil,"fauna_slim_splat",[[
 . . . . . . . . . . . . . . . . . . . . . . . . 
@@ -2194,7 +2242,7 @@ legend=levels.combine_legends(levels.legend,{
 --	["T5"]={ name="char_sign",				text="Throw power is speed of object rotation." },
 --	["T6"]={ name="char_sign",				text="Aim throw with LEFT STICK or direction will be forwards and downwards." },
 	["T7"]={ name="char_sign",				text="Throw object at slim to stun him." },
-	["T8"]={ name="char_sign",				text="Touch stuned slim to finish him." },
+	["T8"]={ name="char_sign",				text="Throw object at stuned slim to finish him." },
 }),
 title="Test.",
 map=[[
@@ -2431,6 +2479,11 @@ levels.item.update=function(level)
 	level.time=level.time+(1/16) -- yes we are updating at 16fps, but can draw at 60 or whatevs.
 	
 	level:set_values()
+end
+
+levels.item.get_wind=function(level,pos)
+	local t=level:get_tile_by_pos(pos)
+	return V3( t and t.dir )
 end
 
 levels.item.get_gravity=function(level,pos)
