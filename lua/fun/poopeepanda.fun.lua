@@ -413,6 +413,20 @@ end
 players.collision_type=0x00040001	-- assigned type
 players.collision_bits=0x00000100	-- assigned bitmask
 players.collision_mask=0x00ffffff	-- interact bitmask
+players.collision_handlers={
+	[{players.collision_type}]={
+		postsolve=function(arb)
+			local player=scene:find_uid(arb.shape_a.uid)
+			local it=scene:find_uid(arb.shape_b.uid)
+			if player and it then -- sanity
+				if it:can_depend("hit") then -- do we want to know when hit?
+					it:depend("hit",player.uid) -- hit by
+				end
+			end
+			return true
+		end
+	}
+}
 
 players.item.reset_kinetic_ids=function(player)
 	player.shape:filter(player.uid,players.collision_bits,players.collision_mask)
@@ -567,6 +581,7 @@ else
 		player.acc[2]=player.acc[2]+a --  hover
 
 		player.onfloor=4
+--[[
 		if hit.shape.uid then
 			local it=scene:find_uid(hit.shape.uid)
 			if it and it.stomp then
@@ -574,6 +589,7 @@ else
 			end
 		--	print("player stomp",hit.shape.uid)
 		end
+]]
 	else
 		if player.foot>11 then player.foot=player.foot-footspeed end
 		if player.foot<11 then player.foot=player.foot+footspeed end
@@ -610,8 +626,8 @@ else
 		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
 		local aim=V3(player.side/256,1/256,0)+V3(lx,ly,0)
 		aim:normalize()
-		hold.vel=aim*(400*m)
-		hold:set_value("vel")
+		hold.vel=aim*(400*m) ; hold:set_value("vel")
+		hold.danger=16*8     ; hold:set_value("danger")
 	end
 	if bb_set and not hold then -- pickup
 		player.holdtime=0
@@ -628,14 +644,7 @@ else
 		local best_d=math.huge
 		local best
 		for it,shape in pairs(its) do
-			local maybe=false -- check if we can pick it up
-			if it.caste=="fauna_egg" or it.caste=="junk" then
-				maybe=true
-			end
-			if it.caste=="player" and it.mode=="egg" then
-				maybe=true
-			end
-			if maybe then -- check distance
+			if it.caste=="junk" then -- check distance
 				local d=hold_pos:distance(it.pos)
 				if d<best_d then
 					best_d=d
@@ -838,13 +847,14 @@ floaters.item.update=function(floater)
 	local level=floater:get_singular("level") -- only one level is active at a time
 	local wind=level:get_wind(floater.pos)
 
-	if floater:depend("hit") then -- we are hit so burst fauna
+	local hit=floater:depend("hit")
+	floater:depend("hit",0)-- reset
+	if hit and hit.caste=="player" then -- we are stomped so burst fauna
 
 		local fauna=floater:depend("fauna")
 		if fauna then
 	 		if fauna:mark_deleted() then -- remove fauna
 
-	 			local hit=floater:depend("hit")
 	 			floater:mark_deleted()
 --				who.score=who.score+100
 				for i=1,16 do
@@ -862,7 +872,7 @@ floaters.item.update=function(floater)
 		return
 	end
 
-	floater.acc:set(wind*16)
+	floater.acc:set(wind*32)
 
 	floater.spin=floater.spin+(1/16)
 
@@ -1277,16 +1287,19 @@ fauna_slims.item.update=function(fauna)
 		return
 	end
 		
-	if fauna:depend("hit") then -- we are hit so turn into stunned floater
-	
-		local floater=scene:create({"floater", sname=fauna.sname, pos=fauna.pos, vel=fauna.vel, })
-		floater:depend("fauna",fauna.uid)
-		fauna:depend("held",floater.uid)
-		fauna:depend("hit",0) -- remove hit
-		fauna:clean_kinetic() -- recreate body
-		fauna:setup_kinetic()
-	
-		return
+	local hit=fauna:depend("hit")
+	fauna:depend("hit",0) -- remove hit
+	if hit  then -- we are hit so turn into stunned floater
+		hit:get_value("danger")
+		if hit.danger and hit.danger>0 then
+			local floater=scene:create({"floater", sname=fauna.sname, pos=fauna.pos, vel=fauna.vel, })
+			floater:depend("fauna",fauna.uid)
+			fauna:depend("held",floater.uid)
+			fauna:clean_kinetic() -- recreate body
+			fauna:setup_kinetic()
+		
+			return
+		end
 	end
 
 	local brain={}
@@ -1388,6 +1401,7 @@ fauna_slims.item.update=function(fauna)
 end
 
 -- who stomps this (it)
+--[[
 fauna_slims.item.stomp=function(it,who)
 	if who.caste=="player" then
 		if it.stun>0 then
@@ -1404,6 +1418,7 @@ fauna_slims.item.stomp=function(it,who)
 		end
 	end
 end
+]]
 
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
@@ -1870,6 +1885,7 @@ junks.values={
 	ang=0,
 	acc=V3( 0,200,0 ),
 	sname="junk_green",
+	danger=0,
 }
 
 junks.types={
@@ -1901,17 +1917,11 @@ junks.collision_handlers={
 	[{junks.collision_type}]={
 		postsolve=function(arb)
 			local junk=scene:find_uid(arb.shape_a.uid)
-			if junk then -- sanity
-				if junk.reset_kinetic_ids then -- first hit
-					junk:reset_kinetic_ids() -- stop ignoring player collisons
-				end
-				local it=scene:find_uid(arb.shape_b.uid)
-				if it and it:can_depend("hit") then -- do we want to know when hit?
-					local v=junk:get("vel") -- use velocity of "weapon"
-					local d=v:len()
-					if d>100  then
-						it:depend("hit",junk.uid) -- hit by
-					end
+			local it=scene:find_uid(arb.shape_b.uid)
+			if junk then junk:reset_kinetic_ids() end
+			if junk and it then -- sanity
+				if it:can_depend("hit") then
+					it:depend("hit",junk.uid) -- hit by
 				end
 			end
 			return true
@@ -1985,6 +1995,13 @@ junks.item.update=function(junk)
 	junk:get_values()
 	junk:setup_kinetic() -- might need to recreate body
 	
+	if junk.danger>0 then -- limit danger time
+		junk.danger=junk.danger-1
+		local len=junk.vel:len()
+		if len<2 then -- limit if stopped moving
+			junk.danger=0
+		end
+	end
 
 	junk:set_values()
 
