@@ -1123,7 +1123,7 @@ local lay=
 
 --print(s)
 
-		local _,_,line=string.find(s,"%[string \"%.\"%]%:(%d+)%:")
+		local _,_,line=string.find(s,"%[string \"%.\"%]%:(%d+)")
 		line=tonumber(line)
 
 --print(line)
