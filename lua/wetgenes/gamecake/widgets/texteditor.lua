@@ -906,8 +906,10 @@ function wtexteditor.scroll_to_bottom(texteditor)
 end
 
 function wtexteditor.scroll_to_line(texteditor,cy)
-
+	local txt=texteditor.txt
 	local pan=texteditor.scroll_widget.pan
+
+	cy=cy or ( txt.cy-4 )
 
 	pan.parent.daty:value(16*cy)
 

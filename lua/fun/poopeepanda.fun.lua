@@ -2241,7 +2241,7 @@ legend=levels.combine_legends(levels.legend,{
 --	["T5"]={ name="char_sign",				text="Throw power is speed of object rotation." },
 --	["T6"]={ name="char_sign",				text="Aim throw with LEFT STICK or direction will be forwards and downwards." },
 	["T7"]={ name="char_sign",				text="Throw object at slim to stun him." },
-	["T8"]={ name="char_sign",				text="Throw object at stuned slim to finish him." },
+	["T8"]={ name="char_sign",				text="Stomp stuned slim to finish him." },
 }),
 title="Test.",
 map=[[

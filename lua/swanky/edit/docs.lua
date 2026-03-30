@@ -320,7 +320,7 @@ M.bake=function(oven,docs)
 		end
 		gui.master.ids.infobar:set_dirty()
 
-		gui.master.ids.texteditor:scroll_to_view(nil,nil,true) -- force top
+		gui.master.ids.texteditor:scroll_to_line() -- force top
 
 		return it
 	end
@@ -404,7 +404,7 @@ M.bake=function(oven,docs)
 			it.txt.mark(fy,fx,ty,tx) -- area to replace
 			it.txt.undo.replace_and_select( text_file:sub(pre+1,-(post+1)) )
 			-- select new area so you have a clue that something just happened
-			gui.master.ids.texteditor:scroll_to_view()
+			gui.master.ids.texteditor:scroll_to_line()
 			-- if it was bad you can undo it, but auto syncing like this is probably the right thing to do.
 		end
 	end
