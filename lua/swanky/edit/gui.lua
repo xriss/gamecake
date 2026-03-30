@@ -930,6 +930,8 @@ local lay=
 }
 
 		gui.screen=gui.master:add(lay)
+		
+		gui.master.ids.runtext.double_click=gui.double_click
 
 --[[
 		gui.menu_datas={
@@ -1105,6 +1107,39 @@ local lay=
 			oven.console.dump_eval(s)
 			oven.console.linehook_safety=true
 		end
+	end
+
+-- special find and goto error function
+	gui.double_click=function(texteditor,cy,cx,act)
+
+		local txt=texteditor.txt
+
+--print(cy,cx,act)
+
+-- in lua the chunk of the current editor text will be named .
+-- so we can search for -> [string "."]:00000: <- where the number inside :: is the line
+
+		local s=txt.get_string(cy)
+
+--print(s)
+
+		local _,_,line=string.find(s,"%[string \"%.\"%]%:(%d+)%:")
+		line=tonumber(line)
+
+--print(line)
+
+		if line then -- goto line in current doc
+			local w=gui.master.ids.texteditor
+
+			w.txt.mark(line+1,1,line,1)
+			w.mark_area={txt.markget()}
+			w.click_area={unpack(texteditor.mark_area)}
+			w:cursor_sync()
+			w:scroll_to_line(line-4)
+			gui.master.next_focus=w	-- change focus to editor
+
+		end
+
 	end
 
 

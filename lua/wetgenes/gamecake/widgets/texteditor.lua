@@ -71,7 +71,6 @@ function wtexteditor.update(texteditor)
 
 	end
 
-
 	return texteditor.meta.update(texteditor)
 end
 
@@ -848,7 +847,11 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 		texteditor.float_cx=nil
 
-		txt.markauto(dy,dx,act) -- select word
+--	we can overload this function to do special things on double click text
+		texteditor:double_click(dy,dx,act)
+--		txt.markauto(dy,dx,act) -- select word
+
+
 		texteditor.mark_area={txt.markget()}
 		texteditor.click_area={unpack(texteditor.mark_area)}
 
@@ -898,8 +901,16 @@ end
 function wtexteditor.scroll_to_bottom(texteditor)
 	local d=texteditor.scroll_widget.daty
 	if d then -- TODO: why moight this happen
-		d:set(d.max or 1)
+		d:value(d.max or 1)
 	end
+end
+
+function wtexteditor.scroll_to_line(texteditor,cy)
+
+	local pan=texteditor.scroll_widget.pan
+
+	pan.parent.daty:value(16*cy)
+
 end
 
 function wtexteditor.scroll_to_view(texteditor,cy,cx,top)
@@ -1364,6 +1375,13 @@ function wtexteditor.key(pan,ascii,key,act)
 
 end
 
+wtexteditor.double_click=function(texteditor,dy,dx,act)
+	-- select word by default, act will be 2 or higher if 3 clicks etc
+	-- it should mark the selected area and return
+	texteditor.txt.markauto(dy,dx,act) 
+end
+
+
 function wtexteditor.layout(widget)
 
 	widget.scroll_widget.hx=math.floor(widget.hx)
@@ -1397,8 +1415,12 @@ function wtexteditor.setup(widget,def)
 	widget.texteditor_refresh	=	wtexteditor.texteditor_refresh
 	widget.texteditor_hooks		=	function(act,w) return wtexteditor.texteditor_hooks(widget,act,w) end
 	widget.scroll_to_view		=	wtexteditor.scroll_to_view
+	widget.scroll_to_line		=	wtexteditor.scroll_to_line
 	widget.scroll_to_bottom		=	wtexteditor.scroll_to_bottom
 	widget.cursor_sync			=	wtexteditor.cursor_sync
+
+	-- so we can overload double clicking
+	widget.double_click=wtexteditor.double_click
 
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",scroll_pan="tiles",color=widget.color})
@@ -1445,6 +1467,7 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_widget.pan.msg=wtexteditor.msg
 	widget.scroll_widget.pan.key=wtexteditor.key
 	widget.scroll_widget.pan.mouse=wtexteditor.mouse
+
 
 	widget.scroll_widget.pan.drag=function()end -- fake drag so we are treated as drag able
 

@@ -84,7 +84,7 @@ system.load_and_setup=function(name,path)
 	return system
 end
 
-system.setup=function(code)
+system.setup=function(code,codename)
 
 	system.ticks=0
 	
@@ -121,10 +121,10 @@ LOG("oven","fun system setup "..system.fullscreen_width.."x"..system.fullscreen_
 
 		local f
 		if setfenv and loadstring then
-			f=assert(loadstring(code))
+			f=assert(loadstring(code,codename))
 			setfenv(f,tab)
 		else
-			f=assert(load(code, nil,"t",tab))
+			f=assert(load(code, codename,"t",tab))
 		end
 
 		local co=coroutine.create(f)

@@ -62,7 +62,7 @@ M.bake=function(oven,show_fun64)
 			str=str
 			system.clean()
 			gl.shader_sources( str , "" ) -- also try and load GLSL embeded in the lua file -> #SHADER
-			system.setup(str)
+			system.setup(str,".")
 		end)
 		show_fun64.sys_update=wrap(function()
 			if system.is_setup then
