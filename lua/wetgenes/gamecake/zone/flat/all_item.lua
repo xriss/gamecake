@@ -128,8 +128,8 @@ all.item.setup_values=function(it,boot)
 end
 
 all.item.set_zip=function(it,n,v)
-	if not v then v=it[n] end
 	if v~=it.zipt[n] then -- *must* replace entire table to save values
+		it[n]=v -- we cache zip table on change
 		it.zipt[n]=v -- remember zip table
 		local z=all.compress(v)
 		it.zips[n]=z -- remember zip string
@@ -177,7 +177,6 @@ end
 
 all.item.set_value=function(it,n,v,t)
 	if not t then t=it.sys.types[n] end
-	if not v then v=it[n] end -- be careful with nil or false
 	if t=="zip" then
 		it:set_zip(n,v)
 	elseif t~="ignore" then
@@ -353,15 +352,15 @@ all.item.get_body=function(it)
 	it.rot=rz/(math.pi*2)
 	it.ang=az/(math.pi*2)
 
-	it:set_value("pos")
-	it:set_value("vel")
-	it:set_value("rot")
-	it:set_value("ang")
+	it:set_value("pos",it.pos)
+	it:set_value("vel",it.vel)
+	it:set_value("rot",it.rot)
+	it:set_value("ang",it.ang)
 
 	if it.acc then
 		local ax,ay=it.body:force()
 		it.acc=V3(ax,ay,0)
-		it:set_value("acc")
+		it:set_value("acc",it.acc)
 	end
 
 --[[

@@ -624,8 +624,8 @@ else
 		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
 		local aim=V3(player.side/256,1/256,0)+V3(lx,ly,0)
 		aim:normalize()
-		hold.vel=aim*(400*m) ; hold:set_value("vel")
-		hold.danger=16*8     ; hold:set_value("danger")
+		hold:set_value("vel",aim*(400*m))
+		hold:set_value("danger",16*8)
 	end
 	if bb_set and not hold then -- pickup
 		player.holdtime=0
@@ -672,12 +672,11 @@ else
 		else
 			hold.vel:add( p*8 )
 			hold.vel:scale(1/2)
-			hold:set_value("vel")
+			hold:set_value("vel",hold.vel)
 			local m=((player.holdtime-8)/16)
 			if m>1 then m=1 end -- full speed after 1.5 seconds
 			if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
-			hold.ang=m*2*player.side
-			hold:set_value("ang")
+			hold:set_value("ang",m*2*player.side)
 		end
 	end
 
@@ -840,8 +839,7 @@ end
 -- called inside the physics loop so probably shouldnt do anything complex
 floaters.item.do_hit=function(floater,hit,arb)
 	if hit.caste=="player" then
-		floater.hit={uid=hit.uid}
-		hit:set_value("hit")
+		floater:set_value("hit",{uid=hit.uid})
 	end
 end
 
@@ -1232,8 +1230,7 @@ end
 fauna_slims.item.do_hit=function(fauna,hit,arb)
 	hit:get_value("danger")
 	if hit.danger and hit.danger>0 then
-		fauna.hit={uid=hit.uid}
-		hit:set_value("hit")
+		fauna:set_value("hit",{uid=hit.uid})
 	end
 end
 
