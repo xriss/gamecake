@@ -203,6 +203,7 @@ players.values={
 	walk=0,
 	score=0,
 	idle=0,
+	spawn=V3( 0,0,0 ),
 }
 
 players.types={
@@ -421,6 +422,11 @@ players.collision_handlers={
 			if player and it and it.do_touch then -- sanity
 				it:do_touch(player,arb)
 			end
+			if it then
+				if it.caste=="fauna_slim" then -- kill on touch
+					player:do_die(it,arb)
+				end
+			end
 			return true
 		end
 	}
@@ -436,7 +442,7 @@ players.item.setup_kinetic=function(player)
 	if player.body then return end -- only create once
 	local space=player:get_singular("kinetic").space
 	player.body=space:body(1,1)
-	if player.mode=="spawn" then
+	if player.mode=="spawn" or player.mode=="die" then
 		-- no collision when spawning
 	else
 		player.shape=player.body:shape("circle",4,0,0)
@@ -459,6 +465,10 @@ end
 
 players.item.clean=function(player)
 	player:clean_kinetic()
+end
+
+players.item.do_die=function(player)
+		player:set_value("mode","die")
 end
 
 players.item.update=function(player)
@@ -512,7 +522,30 @@ elseif player.mode=="egg" then
 	
 elseif player.mode=="die" then
 
+	if player.shape then -- stop colliding with anything (start of death)
+		player:clean_kinetic()
+		player:setup_kinetic()
+
+		player.vel[2]=player.vel[2]-200
+	end
+
 	player.acc=grav -- apply gravity
+	
+	if player.pos[2] > 512 then -- fell way off of screen
+	
+		player.mode="spawn"
+
+		
+		player:clean_kinetic()
+		player:setup_kinetic()
+
+		player.pos=V3()+player.spawn
+		player.rot=0
+		player.vel=V3()
+		player.ang=0
+		player.acc=V3()
+
+	end
 
 else
 	
@@ -707,6 +740,10 @@ players.item.draw=function(player)
 	elseif player.mode=="egg" then
 
 		draws.sprite{ n="ply"..player.idx.."_egg" , p=p , sx=-player.side }
+
+	elseif player.mode=="die" then
+
+		draws.sprite{ n="ply"..player.idx , p=p , sx=-player.side , sy=-1 }
 
 	else
 
@@ -2477,7 +2514,7 @@ levels.item.setup=function(level)
 				scene:creates({
 					{"hud",idx=tile.player,depends={player=3}},
 					{"camera",idx=tile.player,depends={player=3}},
-					{"player",idx=tile.player,pos=pos,depends={camera=2,hud=1},mode="spawn",},
+					{"player",idx=tile.player,pos=pos,spawn=pos,depends={camera=2,hud=1},mode="spawn",},
 				})
 			end
 		end
