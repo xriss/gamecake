@@ -1111,8 +1111,9 @@ local lay=
 
 -- special find and goto error function
 	gui.double_click=function(texteditor,cy,cx,act)
-
 		local txt=texteditor.txt
+
+		txt.mark(cy,1,cy+1,1)
 
 --print(cy,cx,act)
 
@@ -1122,8 +1123,9 @@ local lay=
 		local s=txt.get_string(cy)
 
 --print(s)
+		if not s then return end -- bad click
 
-		local _,_,line=string.find(s,"%[string \"%.\"%]%:(%d+)")
+		local fx,tx,line=string.find(s,"%[string \"%.\"%]%:(%d+)")
 		line=tonumber(line)
 
 --print(line)
@@ -1131,12 +1133,14 @@ local lay=
 		if line then -- goto line in current doc
 			local w=gui.master.ids.texteditor
 
+			txt.mark(cy,fx,cy,tx+1)
+
 			w.txt.mark(line+1,1,line,1)
 			w.mark_area={txt.markget()}
 			w.click_area={unpack(texteditor.mark_area)}
 			w:cursor_sync()
 			w:scroll_to_line(line-4)
-			gui.master.next_focus=w	-- change focus to editor
+--			gui.master.next_focus=w	-- change focus to editor
 
 		end
 
