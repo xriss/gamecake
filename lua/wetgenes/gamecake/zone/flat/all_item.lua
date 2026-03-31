@@ -98,7 +98,8 @@ all.item.setup_values=function(it,boot)
 
 	it.values_are_new=true -- flag to help with value copying in subscriptions
 
-	it.zips={} -- dupe zip cache
+	it.zipt={} -- table zip cache
+	it.zips={} -- string zip cache
 	for n,v in pairs( it.sys.zips or {} ) do it.zips[n]=v end
 	it.values=it.scene.create_values()
 -- shared values with tweens if not networking
@@ -128,25 +129,21 @@ end
 
 all.item.set_zip=function(it,n)
 	local t=it[n] -- may be nil
-	if not t or t.dirty then -- *must* flag as changed by user code when we change anything
-		if t then t.dirty=false end -- auto clear dirty flag
+	if t~=it.zipt[n] then -- *must* replace entire table to save values
+		it.zipt[n]=t -- remember zip table
 		local z=all.compress(t)
-		it.zips[n]=z
---		if it.scene.tween then
---			it.tweens:set(n,z) -- tween flag should not be used when writing data so this should not happen...
---		else
-			it.values:set(n,z) -- set will check against current value so this is always safe to call
---		end
+		it.zips[n]=z -- remember zip string
+		it.values:set(n,z) -- set will check against current value so this is always safe to call
 	end
 end
 
 all.item.get_zip=function(it,n)
 	local z=it.scene.tween and it.tweens:get( n ) or it.values:get( n )
-	local s=it.zips[n]
-	if s~=z then -- changed
-		it.zips[n]=z -- remember
+	if z~=it.zips[n] then -- changed string
+		it.zips[n]=z -- remember zip string
 		local t=all.uncompress(z)
 		it[n]=t
+		it.zipt[n]=t -- remember zip table
 	end
 end
 
@@ -201,7 +198,7 @@ all.item.set_boot=function(it,boot)
 			if v.new then
 				it.values:set(k,v.new( boot[k] or v )) -- copy tardis values
 			else
-				it.values:set(k, all.compress(boot[k]) ) -- assume uncompressed zip value
+				it.values:set(k, all.compress( boot[k] or v) ) -- assume uncompressed zip value
 			end
 		else
 			it.values:set(k,boot[k] or v) -- probbaly a number, bool or string

@@ -418,10 +418,8 @@ players.collision_handlers={
 		postsolve=function(arb)
 			local player=scene:find_uid(arb.shape_a.uid)
 			local it=scene:find_uid(arb.shape_b.uid)
-			if player and it then -- sanity
-				if it:can_depend("hit") then -- do we want to know when hit?
-					it:depend("hit",player.uid) -- hit by
-				end
+			if player and it and it.do_hit then -- sanity
+				it:do_hit(player,arb)
 			end
 			return true
 		end
@@ -745,9 +743,8 @@ floaters.item={}
 floaters.caste="floater"
 
 floaters.uidmap={
-	hit=2,
-	fauna=3,
-	length=3,
+	fauna=2,
+	length=2,
 }
 
 floaters.values={
@@ -757,6 +754,7 @@ floaters.values={
 	ang=0,
 	acc=V3( 0,0,0 ),
 
+	hit={},
 	sname="fauna_slim",
 	spin=0,
 }
@@ -839,6 +837,14 @@ floaters.item.clean=function(floater)
 end
 
 
+-- called inside the physics loop so probably shouldnt do anything complex
+floaters.item.do_hit=function(floater,hit,arb)
+	if hit.caste=="player" then
+		floater.hit={uid=hit.uid}
+		hit:set_value("hit")
+	end
+end
+
 floaters.item.update=function(floater)
 	if floater:get("deleted") then return end
 	floater:get_values()
@@ -847,29 +853,30 @@ floaters.item.update=function(floater)
 	local level=floater:get_singular("level") -- only one level is active at a time
 	local wind=level:get_wind(floater.pos)
 
-	local hit=floater:depend("hit")
-	floater:depend("hit",0)-- reset
-	if hit and hit.caste=="player" then -- we are stomped so burst fauna
-
-		local fauna=floater:depend("fauna")
-		if fauna then
-	 		if fauna:mark_deleted() then -- remove fauna
-
-	 			floater:mark_deleted()
---				who.score=who.score+100
-				for i=1,16 do
-					local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
-								hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
-								0 )
-					local boots={
-						{"gib",sname="gib_green",life=0,size=4,pos=floater.pos,vel=v},
-					}
-					scene:creates(boots)
+	if floater.hit.uid then
+		local hit=scene:find_uid(floater.hit.uid)
+		if hit  then -- we are stomped so burst fauna
+			local fauna=floater:depend("fauna")
+			if fauna then
+		 		if fauna:mark_deleted() then -- remove fauna
+	
+		 			floater:mark_deleted()
+	--				who.score=who.score+100
+					for i=1,16 do
+						local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
+									hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
+									0 )
+						local boots={
+							{"gib",sname="gib_green",life=0,size=4,pos=floater.pos,vel=v},
+						}
+						scene:creates(boots)
+					end
+					
 				end
-				
-			end
-		end	
-		return
+			end	
+			return
+		end
+		floater.hit={} -- remove hit as it has been dealt with
 	end
 
 	floater.acc:set(wind*32)
@@ -1097,8 +1104,7 @@ fauna_slims.caste="fauna_slim"
 
 fauna_slims.uidmap={
 	held=1,
-	hit=2,
-	length=2,
+	length=1,
 }
 
 fauna_slims.values={
@@ -1118,6 +1124,7 @@ fauna_slims.values={
 	thunk=0,
 	floor_uid=0,
 	mode="none",
+	hit={save=true},
 --	slap=0,
 --	stun=0,
 }
@@ -1221,6 +1228,15 @@ end
 fauna_slims.system.clean=function(sys)
 end
 
+-- called inside the physics loop so probably shouldnt do anything complex
+fauna_slims.item.do_hit=function(fauna,hit,arb)
+	hit:get_value("danger")
+	if hit.danger and hit.danger>0 then
+		fauna.hit={uid=hit.uid}
+		hit:set_value("hit")
+	end
+end
+
 -- state values are cached into the item for easy access on a get
 -- and must be set again if they are altered so setup and updates
 -- must begin and end with a get and a set
@@ -1286,20 +1302,18 @@ fauna_slims.item.update=function(fauna)
 	if fauna:depend("held") then
 		return
 	end
-		
-	local hit=fauna:depend("hit")
-	fauna:depend("hit",0) -- remove hit
-	if hit  then -- we are hit so turn into stunned floater
-		hit:get_value("danger")
-		if hit.danger and hit.danger>0 then
+	
+	if fauna.hit.uid then
+		local hit=scene:find_uid(fauna.hit.uid)
+		if hit  then -- we are hit so turn into stunned floater
 			local floater=scene:create({"floater", sname=fauna.sname, pos=fauna.pos, vel=fauna.vel, })
 			floater:depend("fauna",fauna.uid)
 			fauna:depend("held",floater.uid)
 			fauna:clean_kinetic() -- recreate body
 			fauna:setup_kinetic()
-		
 			return
 		end
+		fauna.hit={} -- remove hit as it has been dealt with
 	end
 
 	local brain={}
@@ -1918,11 +1932,14 @@ junks.collision_handlers={
 		postsolve=function(arb)
 			local junk=scene:find_uid(arb.shape_a.uid)
 			local it=scene:find_uid(arb.shape_b.uid)
-			if junk then junk:reset_kinetic_ids() end
-			if junk and it then -- sanity
-				if it:can_depend("hit") then
-					it:depend("hit",junk.uid) -- hit by
+			if junk then
+				local held=junk:depend("held")
+				if not held then
+					junk:reset_kinetic_ids()
 				end
+			end
+			if junk and it and it.do_hit then -- sanity
+				it:do_hit(junk,arb)
 			end
 			return true
 		end
