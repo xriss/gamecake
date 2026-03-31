@@ -418,8 +418,8 @@ players.collision_handlers={
 		postsolve=function(arb)
 			local player=scene:find_uid(arb.shape_a.uid)
 			local it=scene:find_uid(arb.shape_b.uid)
-			if player and it and it.do_hit then -- sanity
-				it:do_hit(player,arb)
+			if player and it and it.do_touch then -- sanity
+				it:do_touch(player,arb)
 			end
 			return true
 		end
@@ -567,7 +567,7 @@ else
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
 
-		if ba_now then -- crouch while button held down
+		if ba_now or ly>0.25 then -- crouch while button held down or move down
 			v=v+3
 		end
 
@@ -579,15 +579,12 @@ else
 		player.acc[2]=player.acc[2]+a --  hover
 
 		player.onfloor=4
---[[
 		if hit.shape.uid then
 			local it=scene:find_uid(hit.shape.uid)
-			if it and it.stomp then
-				it:stomp(player)
+			if it and it.do_touch then -- sanity
+				it:do_touch(player,arb)
 			end
-		--	print("player stomp",hit.shape.uid)
 		end
-]]
 	else
 		if player.foot>11 then player.foot=player.foot-footspeed end
 		if player.foot<11 then player.foot=player.foot+footspeed end
@@ -622,7 +619,7 @@ else
 		local m=((player.holdtime-8)/16)
 		if m>1 then m=1 end -- full speed after 1.5 seconds
 		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
-		local aim=V3(player.side/256,1/256,0)+V3(lx,ly,0)
+		local aim=V3(player.side/128,1/256,0)+V3(lx,ly,0)
 		aim:normalize()
 		hold:set_value("vel",aim*(400*m))
 		hold:set_value("danger",16*8)
@@ -753,7 +750,7 @@ floaters.values={
 	ang=0,
 	acc=V3( 0,0,0 ),
 
-	hit={},
+	touch={},
 	sname="fauna_slim",
 	spin=0,
 }
@@ -837,9 +834,9 @@ end
 
 
 -- called inside the physics loop so probably shouldnt do anything complex
-floaters.item.do_hit=function(floater,hit,arb)
-	if hit.caste=="player" then
-		floater:set_value("hit",{uid=hit.uid})
+floaters.item.do_touch=function(floater,touch,arb)
+	if touch.caste=="player" then
+		floater:set_value("touch",{uid=touch.uid})
 	end
 end
 
@@ -851,8 +848,8 @@ floaters.item.update=function(floater)
 	local level=floater:get_singular("level") -- only one level is active at a time
 	local wind=level:get_wind(floater.pos)
 
-	if floater.hit.uid then
-		local hit=scene:find_uid(floater.hit.uid)
+	if floater.touch.uid then
+		local hit=scene:find_uid(floater.touch.uid)
 		if hit  then -- we are stomped so burst fauna
 			local fauna=floater:depend("fauna")
 			if fauna then
@@ -874,7 +871,7 @@ floaters.item.update=function(floater)
 			end	
 			return
 		end
-		floater.hit={} -- remove hit as it has been dealt with
+		floater.touch={} -- remove hit as it has been dealt with
 	end
 
 	floater.acc:set(wind*32)
@@ -1122,7 +1119,7 @@ fauna_slims.values={
 	thunk=0,
 	floor_uid=0,
 	mode="none",
-	hit={save=true},
+	touch={},
 --	slap=0,
 --	stun=0,
 }
@@ -1227,10 +1224,10 @@ fauna_slims.system.clean=function(sys)
 end
 
 -- called inside the physics loop so probably shouldnt do anything complex
-fauna_slims.item.do_hit=function(fauna,hit,arb)
-	hit:get_value("danger")
-	if hit.danger and hit.danger>0 then
-		fauna:set_value("hit",{uid=hit.uid})
+fauna_slims.item.do_touch=function(fauna,touch,arb)
+	touch:get_value("danger")
+	if touch.danger and touch.danger>0 then
+		fauna:set_value("touch",{uid=touch.uid})
 	end
 end
 
@@ -1300,8 +1297,8 @@ fauna_slims.item.update=function(fauna)
 		return
 	end
 	
-	if fauna.hit.uid then
-		local hit=scene:find_uid(fauna.hit.uid)
+	if fauna.touch.uid then
+		local hit=scene:find_uid(fauna.touch.uid)
 		if hit  then -- we are hit so turn into stunned floater
 			local floater=scene:create({"floater", sname=fauna.sname, pos=fauna.pos, vel=fauna.vel, })
 			floater:depend("fauna",fauna.uid)
@@ -1310,7 +1307,7 @@ fauna_slims.item.update=function(fauna)
 			fauna:setup_kinetic()
 			return
 		end
-		fauna.hit={} -- remove hit as it has been dealt with
+		fauna.touch={} -- remove hit as it has been dealt with
 	end
 
 	local brain={}
@@ -1729,8 +1726,7 @@ gibs.values={
 	sname="gib_green",
 	life=16,
 	size=4,
-	hit=0,
-	hit_normal=V3(0,0,0),
+	touch=0,
 }
 
 gibs.types={
@@ -1763,9 +1759,7 @@ gibs.collision_handlers={
 		postsolve=function(it)
 			local gib=scene:find_uid(it.shape_a.uid)
 			if gib and gib.caste=="gib" then -- sanity
-				gib:set("hit",it.shape_b.uid or -1) -- set value for update
---				local points=it:points()
---				gib.hit_normal=V3( points.normal_x , points.normal_y , 0 )
+				gib:set("touch",it.shape_b.uid or -1) -- set value for update
 			end
 			return true
 		end
@@ -1836,11 +1830,11 @@ gibs.item.update=function(gib)
 	gib:setup_kinetic() -- might need to recreate body
 	
 
-	if gib.hit~=0 then
-		local hit=scene:find_uid(gib.hit)
-		gib.hit=0
-		if hit and hit.caste=="gib" then
-			-- self hit?`
+	if gib.touch~=0 then
+		local touch=scene:find_uid(gib.touch)
+		gib.touch=0
+		if touch and touch.caste=="gib" then
+			-- self touch?`
 		else
 			if gib.life>0 then
 				gib.life=gib.life-1
@@ -1935,8 +1929,8 @@ junks.collision_handlers={
 					junk:reset_kinetic_ids()
 				end
 			end
-			if junk and it and it.do_hit then -- sanity
-				it:do_hit(junk,arb)
+			if junk and it and it.do_touch then -- sanity
+				it:do_touch(junk,arb)
 			end
 			return true
 		end
@@ -2016,7 +2010,7 @@ junks.item.update=function(junk)
 			junk.danger=0
 		end
 	end
-
+	
 	junk:set_values()
 
 end
@@ -2030,6 +2024,12 @@ junks.item.draw=function(junk)
 
 	local p=V3( junk.pos[1] , junk.pos[2], junk.pos[1]+junk.pos[2] )
 	draws.sprite{ n=junk.sname          , p=p , rz=junk.rot , }
+	
+	if junk.danger>0 then
+
+		draws.sprite{ n=junk.sname          , p=p , rz=junk.rot  , s=1.25 }
+
+	end
 
 end
 
