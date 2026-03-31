@@ -127,11 +127,11 @@ all.item.setup_values=function(it,boot)
 
 end
 
-all.item.set_zip=function(it,n)
-	local t=it[n] -- may be nil
-	if t~=it.zipt[n] then -- *must* replace entire table to save values
-		it.zipt[n]=t -- remember zip table
-		local z=all.compress(t)
+all.item.set_zip=function(it,n,v)
+	if not v then v=it[n] end
+	if v~=it.zipt[n] then -- *must* replace entire table to save values
+		it.zipt[n]=v -- remember zip table
+		local z=all.compress(v)
 		it.zips[n]=z -- remember zip string
 		it.values:set(n,z) -- set will check against current value so this is always safe to call
 	end
@@ -175,17 +175,18 @@ end
 
 -- this should never be called by draw code so has no need to check
 
-all.item.set_value=function(it,n,t)
+all.item.set_value=function(it,n,v,t)
 	if not t then t=it.sys.types[n] end
+	if not v then v=it[n] end -- be careful with nil or false
 	if t=="zip" then
-		it:set_zip(n)
+		it:set_zip(n,v)
 	elseif t~="ignore" then
-		it:set(n,it[n])
+		it:set(n,v)
 	end
 end
 all.item.set_values=function(it)
 	for n,t in pairs(it.sys.types) do
-		it:set_value(n,t)
+		it:set_value(n,it[n],t)
 	end
 end
 
