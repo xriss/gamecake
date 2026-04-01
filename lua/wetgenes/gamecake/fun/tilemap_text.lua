@@ -47,6 +47,8 @@ tilemap_text.inject=function(it,opts)
 --print("map",it.tilemap_hx,it.tilemap_hy)
 			it.text_hx=it.tilemap_hx
 			it.text_hy=it.tilemap_hy
+			
+			it.dirty(true)
 
 		end
 	end
