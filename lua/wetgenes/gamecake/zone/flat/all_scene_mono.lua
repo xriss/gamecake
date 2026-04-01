@@ -87,6 +87,13 @@ all.scene.initialize=function(scene)
 --	local upnet=scene.oven.upnet
 --	upnet.hooks.sync=function(client,msg) return scene:recv_msg_sync(client,msg) end
 
+	-- init scene.ticks from upnet.ticks
+	scene:reset_ticks()
+
+--	scene.oven.upnet.subscribe("upsall")
+end
+
+all.scene.reset_ticks=function(scene)
 	-- we are not doing anythinmg clever so tweens and values can be shared
 	scene.tweens=scene.values
 
@@ -94,9 +101,6 @@ all.scene.initialize=function(scene)
 	scene:ticks_sync()
 	scene.values:set("tick",scene.ticks.now) -- starting tick
 	scene.values:set("tick_input",scene.ticks.now) -- cache of latest input tick for this update
-	-- init scene.ticks from upnet.ticks
-
---	scene.oven.upnet.subscribe("upsall")
 end
 
 all.scene.ticks_sync=function(scene)
@@ -125,12 +129,12 @@ all.scene.do_update=function(scene)
 
 
 			scene:systems_call("update")
-			scene:call("update")
+			scene:call("live_update")
 
 			-- need to run kinetic update now or we will feel control lag
-			scene:call("set_body")			-- write into kinetic space
+			scene:call("live_set_body")		-- write into kinetic space
 			scene:call("update_kinetic")	-- update kinetic space
-			scene:call("get_body")			-- read from kinetic space
+			scene:call("live_get_body")		-- read from kinetic space
 
 			scene.values:set("tick_input", scene.values:get("tick") )
 
@@ -163,7 +167,7 @@ all.scene.do_draw=function(scene)
 --PRINT(scene.tween)
 
 	scene:systems_call("draw")
-	scene:call("draw")
+	scene:call("live_draw")
 
 end
 

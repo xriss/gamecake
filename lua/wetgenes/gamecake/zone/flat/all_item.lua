@@ -78,17 +78,6 @@ all.item.destroy=function(it)
 	return it.sys:destroy(it)
 end
 
--- set special deleted flag and possibly remove kinetic part
-all.item.mark_deleted=function(it)
-	local d=it:get("deleted") -- only delete once
-	if d then return false end
-	it:set("deleted",true)
-	if it.clean_kinetic then
-		it:clean_kinetic() -- remove collision
-	end
-	return true
-end
-
 all.item.setup=function(it,boot)
 	boot=boot or it.boot
 end
@@ -431,6 +420,39 @@ all.item.load_values=function(it,data,topidx)
 	end
 
 end
+
+-- set special deleted flag and possibly remove kinetic part
+all.item.mark_deleted=function(it)
+	local d=it:get("deleted") -- only delete once
+	if d then return false end
+	it:set("deleted",true)
+	if it.clean_kinetic then
+		it:clean_kinetic() -- remove collision
+	end
+	return true
+end
+
+-- do not call items marked for deletion
+all.item.live_update=function(it)
+	if it:get("deleted") then return end
+	it:update()
+end
+
+all.item.live_draw=function(it)
+	if it:get("deleted") then return end
+	it:draw()
+end
+
+all.item.live_set_body=function(it)
+	if it:get("deleted") then return end
+	it:set_body()
+end
+
+all.item.live_get_body=function(it)
+	if it:get("deleted") then return end
+	it:get_body()
+end
+
 
 	return all
 end

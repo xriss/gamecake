@@ -71,7 +71,9 @@ end
 
 all.scene.get_singular=function(scene,name)
 	local sys=scene.systems[name]
-	if sys then return sys.data[1] end
+	if sys then
+		return sys.data[#sys.data]
+	end
 end
 
 

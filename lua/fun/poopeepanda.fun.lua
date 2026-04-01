@@ -85,6 +85,7 @@ all.create_scene=function(scene)
 		scene:systems_cocall("clean")
 		scene:call("destroy")
 		scene:reset()
+		scene:reset_ticks()
 --		scene.infos.all.scene.initialize(scene)
 	end
 	
@@ -99,6 +100,17 @@ all.create_scene=function(scene)
 		scene:creates(boots)
 	end
 
+	scene.do_level=function(scene,level)
+		scene:call("destroy")
+		scene:reset()
+		scene:reset_ticks()
+		local boots={
+			{"kinetic"},
+			{"level",idx=level},
+		}
+		scene:creates(boots)
+	end
+	
 	scene.infos.all.scene.initialize(scene)
 
 	return scene
@@ -124,6 +136,7 @@ setup=main_setup
 update=function()
 	if setup then setup=setup() end -- call setup once
 	scene:do_update()
+
 end
 
 draw=function()
@@ -456,7 +469,9 @@ end
 
 players.item.clean_kinetic=function(player)
 	if not player.body then return end -- auto clean
-	local space=player:get_singular("kinetic").space
+	local kinetic=player:get_singular("kinetic")
+	if not kinetic then return end -- already done
+	local space=kinetic.space		
 	if player.shape then space:remove(player.shape) end
 	space:remove(player.body)
 	player.body=nil
@@ -472,7 +487,6 @@ players.item.do_die=function(player)
 end
 
 players.item.update=function(player)
-	if player:get("deleted") then return end
 	player:get_values()
 	player:setup_kinetic() -- might need to recreate body
 	
@@ -721,7 +735,6 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 players.item.draw=function(player)
-	if player:get("deleted") then return end
 
 	player:get_values()
 
@@ -858,7 +871,9 @@ end
 
 floaters.item.clean_kinetic=function(floater)
 	if not floater.body then return end -- already done
-	local space=floater:get_singular("kinetic").space		
+	local kinetic=floater:get_singular("kinetic")
+	if not kinetic then return end -- already done
+	local space=kinetic.space		
 	space:remove(floater.shape)
 	space:remove(floater.body)
 	floater.body=nil
@@ -878,7 +893,6 @@ floaters.item.do_touch=function(floater,touch,arb)
 end
 
 floaters.item.update=function(floater)
-	if floater:get("deleted") then return end
 	floater:get_values()
 	floater:setup_kinetic() -- might need to recreate body
 
@@ -921,7 +935,6 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times draws.sprite updates for different results
 floaters.item.draw=function(floater)
-	if floater:get("deleted") then return end
 
 	floater:get_values()
 
@@ -1061,7 +1074,9 @@ end
 
 fauna_eggs.item.clean_kinetic=function(fauna)
 	if not fauna.body then return end -- already done
-	local space=fauna:get_singular("kinetic").space		
+	local kinetic=fauna:get_singular("kinetic")
+	if not kinetic then return end -- already done
+	local space=kinetic.space		
 	space:remove(fauna.shape)
 	space:remove(fauna.body)
 	fauna.body=nil
@@ -1096,7 +1111,6 @@ fauna_eggs.item.update_hatch=function(fauna,player)
 end
 
 fauna_eggs.item.update=function(fauna)
-	if fauna:get("deleted") then return end
 	fauna:get_values()
 	fauna:setup_kinetic() -- might need to recreate body
 
@@ -1111,7 +1125,6 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times draws.sprite updates for different results
 fauna_eggs.item.draw=function(fauna)
-	if fauna:get("deleted") then return end
 
 	fauna:get_values()
 
@@ -1319,7 +1332,6 @@ fauna_slims.item.update_brain=function(fauna,brain)
 end
 
 fauna_slims.item.update=function(fauna)
-	if fauna:get("deleted") then return end
 	fauna:get_values()
 	fauna:setup_kinetic() -- might need to recreate body
 	
@@ -1468,7 +1480,6 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 fauna_slims.item.draw=function(fauna)
-	if fauna:get("deleted") then return end
 
 	fauna:get_values()
 
@@ -1612,7 +1623,9 @@ end
 
 fauna_trenchs.item.clean_kinetic=function(fauna)
 	if not fauna.body then return end -- already done
-	local space=fauna:get_singular("kinetic").space		
+	local kinetic=fauna:get_singular("kinetic")
+	if not kinetic then return end -- already done
+	local space=kinetic.space		
 	space:remove(fauna.shape)
 	space:remove(fauna.body)
 	fauna.body=nil
@@ -1634,7 +1647,6 @@ fauna_trenchs.item.update_brain=function(fauna,brain)
 end
 
 fauna_trenchs.item.update=function(fauna)
-	if fauna:get("deleted") then return end
 	fauna:get_values()
 	fauna:setup_kinetic() -- might need to recreate body
 	
@@ -1725,7 +1737,6 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 fauna_trenchs.item.draw=function(fauna)
-	if fauna:get("deleted") then return end
 
 	fauna:get_values()
 
@@ -1849,7 +1860,9 @@ end
 
 gibs.item.clean_kinetic=function(gib)
 	if not gib.body then return end -- already done
-	local space=gib:get_singular("kinetic").space		
+	local kinetic=gib:get_singular("kinetic")
+	if not kinetic then return end -- already done
+	local space=kinetic.space		
 	space:remove(gib.shape)
 	space:remove(gib.body)
 	gib.body=nil
@@ -1862,7 +1875,6 @@ end
 
 
 gibs.item.update=function(gib)
-	if gib:get("deleted") then return end
 	gib:get_values()
 	gib:setup_kinetic() -- might need to recreate body
 	
@@ -1893,7 +1905,6 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 gibs.item.draw=function(gib)
-	if gib:get("deleted") then return end
 
 	gib:get_values()
 
@@ -2023,7 +2034,9 @@ end
 
 junks.item.clean_kinetic=function(junk)
 	if not junk.body then return end -- already done
-	local space=junk:get_singular("kinetic").space		
+	local kinetic=junk:get_singular("kinetic")
+	if not kinetic then return end -- already done
+	local space=kinetic.space		
 	space:remove(junk.shape)
 	space:remove(junk.body)
 	junk.body=nil
@@ -2036,7 +2049,6 @@ end
 
 
 junks.item.update=function(junk)
-	if junk:get("deleted") then return end
 	junk:get_values()
 	junk:setup_kinetic() -- might need to recreate body
 	
@@ -2055,7 +2067,6 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 junks.item.draw=function(junk)
-	if junk:get("deleted") then return end
 
 	junk:get_values()
 
@@ -2210,6 +2221,7 @@ levels.values={
 	focus=V3( 0,0,0 ),
 	idx=1,
 	time=0,
+	complete=0,
 }
 
 levels.types={
@@ -2330,7 +2342,7 @@ map=[[
 ]],
 }
 
-levels.infos[10]={
+levels.infos[2]={
 legend=levels.combine_legends(levels.legend,{
 }),
 title="Test.",
@@ -2545,6 +2557,34 @@ levels.item.update=function(level)
 
 	level.time=level.time+(1/16) -- yes we are updating at 16fps, but can draw at 60 or whatevs.
 	
+
+	local fauna=0
+	local lists={
+		scene:caste("fauna_egg"),
+		scene:caste("fauna_slim"),
+	}
+	for _,list in ipairs(lists) do
+		for i,it in ipairs(list) do
+			if not it:get("deleted") then -- live
+				fauna=fauna+1
+				break
+			end
+		end
+	end
+	if fauna==0 then -- all mosters dead
+		level.complete=level.complete+1
+	end
+	
+	if level.complete>(64+16) then -- delete everything and restart
+	
+		local idx=level.idx+1
+		if not levels.infos[idx] then idx=1 end
+		scene:do_level(idx)
+		return
+		
+	end
+
+
 	level:set_values()
 end
 
@@ -2770,6 +2810,15 @@ cameras.item.update=function(camera)
 
 	camera:get_values()
 	
+	local level=camera:get_singular("level") -- only one level is active at a time
+	
+if level.complete>0 then
+
+	if level.complete>64 then
+		local t=(level.complete-64)
+		camera.pos[2]=camera.pos[2]-t*t
+	end
+else
 
 	local player=camera:depend("player")
 	local hud=player:depend("hud")
@@ -2797,7 +2846,7 @@ cameras.item.update=function(camera)
 		local m=map.window_hy-(shy-hud.pos[1])
 		if camera.pos[2]>m then camera.pos[2]=m end
 	end
-
+end
 
 
 	camera:set_values()
@@ -2811,6 +2860,7 @@ cameras.item.draw=function(camera)
 
 	local map=system.components.map
 	local screen=system.components.screen
+	local level=camera:get_singular("level") -- only one level is active at a time
 
 	camera:get_values()
 
@@ -2828,6 +2878,10 @@ cameras.item.draw=function(camera)
 	else
 		map.window_py=0
 		map.py=math.floor(camera.pos[2])
+	end
+	
+	if level.complete>0 then
+		map.window_py=map.window_py-map.py
 	end
 
 end
@@ -2911,6 +2965,7 @@ huds.item.setup=function(hud)
 	hud:set_values()
 end
 
+local TEXT_DELAY_WAIT=16
 huds.item.update=function(hud)
 	if hud.idx~=1 then return end -- only 1 hud
 
@@ -2922,27 +2977,35 @@ huds.item.update=function(hud)
 	
 	local show_tile
 	local v=player:get("vel")
-	local ll=v:lenlen()
-	if ll < 256 then -- only show when not moving
-		for _,t in level:each_tile_near( player.pos + V3(0,-4,0), 1 ) do
+		for _,t in level:each_tile_near( player.pos + V3(0,0,0), 1 ) do
 			if t.name=="char_sign" then
 				show_tile=t
 				break
 			end
 		end
-	end
+
 	if show_tile and hud.tile_idx~=show_tile.idx then -- new text
 		hud.tile_idx=show_tile.idx
-		hud.tile_time=0
+		if hud.tile_time>TEXT_DELAY_WAIT then
+			hud.tile_time=TEXT_DELAY_WAIT
+		end
 	end
 	
 	if show_tile then
-		hud.dst=V3(0,#show_tile.text_lines*16+16,0)
 		hud.tile_time=hud.tile_time+1
+		if hud.tile_time > #show_tile.text_lines*32+16 then
+			hud.tile_time = #show_tile.text_lines*32+16
+		end
+	else
+		hud.tile_time=hud.tile_time-4
+		if hud.tile_time<TEXT_DELAY_WAIT then hud.tile_time=0 end
+	end
+
+-- 1 sec pause
+	if hud.tile_time>TEXT_DELAY_WAIT and show_tile then
+		hud.dst=V3(0,#show_tile.text_lines*16+16,0)
 	else
 		hud.dst=V3(0,0,0)
-		hud.tile_time=hud.tile_time-1
-		if hud.tile_time<0 then hud.tile_time=0 end
 	end
 
 
@@ -2974,7 +3037,7 @@ huds.item.draw=function(hud)
 --	text.text_print2("This is the hud, 4 lives and 10 secs",0,1,31,24) -- (text,x,y,color,background)
 
 	if hud.tile_idx>=0 then
-		local maxchar=math.floor(hud.tile_time/1)
+		local maxchar=math.floor((hud.tile_time-TEXT_DELAY_WAIT)/1)
 		
 		local tile=level:get_tile_by_idx(hud.tile_idx)
 		if tile and tile.text_lines then
