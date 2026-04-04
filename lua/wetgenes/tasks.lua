@@ -22,21 +22,23 @@ local linda_receive=function(linda,timeout,name)
 	local ok,ret
 	
 	if wwin.sdl_platform=="Emscripten" then -- wasm hax
-PRINT("wait",name)
+--PRINT("wait",name)
 
-		if type(timeout)=="nil" then -- do a sleepy wait
-			repeat
-				ok,ret=linda:receive(0,name) -- peek
-				if not ok then
-					wwin.softcore.js_sleep(0) -- sleep
-					PRINT("sleep")
-				end
-			until ok
-		else
-			ok,ret=linda:receive(timeout,name)
+	local start_time=os.time()
+	repeat
+		ok,ret=linda:receive(0,name) -- peek
+		if not ok then
+			wwin.softcore.js_sleep(0) -- sleep
+--			PRINT("sleep")
 		end
+		if timeout then
+			if os.time()-start_time > timeout then
+				return -- fail
+			end
+		end
+	until ok
 	
-PRINT("done",name)
+--PRINT("done",name)
 	else
 			ok,ret=linda:receive(timeout,name)	
 	end
@@ -854,8 +856,8 @@ PRINT("pre js_http")
 			local rets=js_http( wjson.encode(opts) )
 PRINT("post js_http")
 			local ret=wjson.decode( rets or "{}" ) or {}
-			if not ret.body then ret.error=ret.code or 0 end
-			
+			if not ret.body then ret.error=ret.code or true end
+
 			return ret
 		end
 	end
@@ -911,19 +913,9 @@ PRINT("post js_http")
 		memo.method=memo.method or "GET"
 
 		if request_js then
-
--- this is borked in new emscripten builds, have no idea why
--- i think it tries to run something back on the main thread which is blocked
--- so we currently disabled it to make the rest of the code run
-if true then
-			local ret={body="",code=404}
-else
-PRINT("pre eval")
-			local ret=request_js(memo)
-PRINT("post eval")
-end
-			return ret
+			return request_js(memo)
 		end
+
 		local out = {}
 		local req = {}
 

@@ -204,30 +204,18 @@ console.log(tr)
 	}
 	
 	Module.preInit = function() {
+
 		gamecake.status="init"
+		gamecake.canvas.focus()
+
+	};
+
+	Module.onRuntimeInitialized = function() {
+
 		gamecake.FS=FS
 
-		gamecake.canvas.focus()
-		
-// home is probably provided
-		try{
-			FS.mkdir('/home');
-		}catch(e){}
-// make home persistent data
-		FS.mount(IDBFS, {}, '/home');
-		FS.syncfs(true, function (err) {
-			if(err) { console.log(err); }
-
-			let syncfs ; syncfs=function(){
-//				console.log("Syncing IDBFS")
-				FS.syncfs(false, function (err) {
-					if(err) { console.log(err); }
-				});
-				setTimeout(syncfs, 10000);
-			} ; syncfs()
-
-		}); // this probably works but is all rather squiffy for now
-
+		// export functions
+		gamecake.main_close=Module.cwrap("main_close")
 
 		if(opts.cakefile)
 		{
@@ -260,12 +248,6 @@ console.log(tr)
 		{
 			gamecake.loading_hook();
 		}
-	};
-
-	Module.onRuntimeInitialized = function() {
-
-		// export functions
-		gamecake.main_close=Module.cwrap("main_close")
 
 		gamecake.status="start"
 		if( gamecake.loaded_hook )

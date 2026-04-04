@@ -234,7 +234,7 @@ end
 
 M.meta.fetch_dir=function(meta,path)
 	local it,path=meta:find_prefix(path)
-	if it and it.fetch_dir and it~=meta then
+	if it and it.fetch_dir and it.fetch_dir~=M.meta.fetch_dir then
 		return it:fetch_dir(path)
 	end
 end
@@ -288,21 +288,22 @@ end
 
 M.meta.age_file=function(meta,path)
 	local it,path=meta:find_prefix(path)
-	if it and it.age_file then
-		return it:age_file(path)
+	if it and it.age_file and it.age_file~=M.meta.age_file then
+		local a,b,c=it:age_file(path)
+		return a,b,c
 	end
 end
 
 M.meta.read_file=function(meta,path)
 	local it,path=meta:find_prefix(path)
-	if it and it.read_file then
+	if it and it.read_file and it.read_file~=M.meta.read_file then
 		return it:read_file(path)
 	end
 end
 
 M.meta.write_file=function(meta,path,data)
 	local it,path=meta:find_prefix(path)
-	if it and it.write_file then
+	if it and it.write_file and it.write_file~=M.meta.write_file then
 		return it:write_file(path,data)
 	end
 end

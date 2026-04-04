@@ -241,6 +241,11 @@ M.create=function(upnet)
 
 	upnet.manifest_client=function(m)
 
+		if not m then -- wasm
+			m={
+				addr="0.0.0.0"
+			}
+		end
 		local client=upnet.clients_addr[m.addr]
 
 		if client then return client end

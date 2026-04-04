@@ -258,19 +258,30 @@ if EMCC then
 	}
 	
 	linkoptions{
-		"-s PTHREAD_POOL_SIZE=16", -- safer to have these available.
-		"-lidbfs.js",
 		"-v",
-		"-s ALLOW_MEMORY_GROWTH=1",
-		"-s EXPORTED_FUNCTIONS=\"['_main','_main_update','_main_close']\"",
-		"-s EXPORTED_RUNTIME_METHODS=\"['ccall','cwrap']\"",
+		"-s PTHREAD_POOL_SIZE=16", -- safer to have these available.
+		"-s ALLOW_MEMORY_GROWTH=1", -- we are big and ineffable so this is rather necessary
+
+		"-s EXPORTED_FUNCTIONS=\"['"..table.concat({
+			"_main",
+			"_main_update",
+			"_main_close",
+		},"','").."']\"",
+
+		"-s EXPORTED_RUNTIME_METHODS=\"['"..table.concat({
+			"ccall",
+			"cwrap",
+		},"','").."']\"",
 		
 --		"-s PROXY_TO_PTHREAD=0", -- PROXY_TO_PTHREAD is borked so must be disabled
 --		"-s OFFSCREEN_FRAMEBUFFER",
 
 		"-s ASYNCIFY",
-		"-s ASYNCIFY_IMPORTS=['_emscripten_receive_on_main_thread_js']",
-
+--		"-s ASYNCIFY_IMPORTS=['_emscripten_receive_on_main_thread_js']",
+		
+--		"-lidbfs.js",
+		"-s WASMFS",
+		"-s FORCE_FILESYSTEM",
 
 	}
 
@@ -280,7 +291,7 @@ if EMCC then
 	configuration {"Debug"}
 		linkoptions{
 			"-s ASSERTIONS=1",
-			"-gsource-map=inline",
+--			"-gsource-map=inline", -- this breaks...?
 			"--emrun", -- expect the debug emscripten to do the emrun stuff
 --			"-s SAFE_HEAP=1",
 		}
