@@ -7,9 +7,10 @@ Setting the following tools as active:
 Next steps:
 - To conveniently access emsdk tools from the command line,
   consider adding the following directories to your PATH:
-    /home/kriss/emsdk
-    /home/kriss/emsdk/upstream/emscripten
+    /home/vagrant/emsdk
+    /home/vagrant/emsdk/node/22.16.0_64bit/bin
+    /home/vagrant/emsdk/upstream/emscripten
 - This can be done for the current shell by running:
-    source "/home/kriss/emsdk/emsdk_env.sh"
+    source "/home/vagrant/emsdk/emsdk_env.sh"
 - Configure emsdk in your shell startup scripts by running:
-    echo 'source "/home/kriss/emsdk/emsdk_env.sh"' >> $HOME/.bash_profile
+    echo 'source "/home/vagrant/emsdk/emsdk_env.sh"' >> $HOME/.bash_profile
