@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+SDIR=`dirname "$(realpath $0)"`
+
 if [ -z "$1" ] ; then
 	cd ~
 else
@@ -31,10 +33,13 @@ require.sh python3
 if [ -d "emsdk" ]; then
 	cd emsdk
 	git pull
-	./emsdk update
-	./emsdk install latest
-	./emsdk activate latest
 else
 	git clone https://github.com/juj/emsdk.git
 fi
 
+./emsdk update
+./emsdk install latest
+./emsdk activate latest
+
+# remember which version we build with ( check it in when it works )
+./emsdk activate latest > $SDIR/working_emsdk.txt

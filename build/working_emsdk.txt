@@ -1,0 +1,15 @@
+Resolving SDK alias 'latest' to '5.0.5'
+Resolving SDK version '5.0.5' to 'sdk-releases-6eae703422b3962d1ed75e15f728ece57aad6bd6-64bit'
+Setting the following tools as active:
+   node-22.16.0-64bit
+   releases-6eae703422b3962d1ed75e15f728ece57aad6bd6-64bit
+
+Next steps:
+- To conveniently access emsdk tools from the command line,
+  consider adding the following directories to your PATH:
+    /home/kriss/emsdk
+    /home/kriss/emsdk/upstream/emscripten
+- This can be done for the current shell by running:
+    source "/home/kriss/emsdk/emsdk_env.sh"
+- Configure emsdk in your shell startup scripts by running:
+    echo 'source "/home/kriss/emsdk/emsdk_env.sh"' >> $HOME/.bash_profile
