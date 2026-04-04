@@ -312,18 +312,23 @@ M.bake=function(oven,collect)
 	collect.setup=function()
 
 		-- create collect data handling thread
+		local sqlite_filename=wwin.files_prefix.."swed.collect.sqlite"
+		if wwin.sdl_platform=="Emscripten" then -- use memory db
+			sqlite_filename=nil
+		end
 		collect.thread=oven.tasks:add_global_thread({
 			count=1,
 			id=collect.task_id,
 			globals={
-				sqlite_filename=wwin.files_prefix.."swed.collect.sqlite",
+				sqlite_filename=sqlite_filename,
 				sqlite_pragmas=[[ ; ]],
 				sqlite_tables=M.tables,
 				default_configs=M.default_configs,
+				TASK_NAME="#collect"
 			},
 			code=M.task_code,
 		})
-				
+
 		-- global json state data contained in keys, read on startup and should be written when changed
 		collect.config={}
 
@@ -571,12 +576,13 @@ M.task_code=function(linda,task_id,task_idx)
 	local db
 	
 	local opendb=function(filename,pragmas,tables)
-		if db then db:close() end
-		db=nil
-		if not filename then return end -- close 
 
-		db = assert(sqlite3.open(filename))
-
+		if not filename then -- for wasm problems
+			db = assert(sqlite3.open_memory())
+		else
+			db = assert(sqlite3.open(filename))
+		end
+		
 		if pragmas then
 			db:exec(pragmas)
 		end
@@ -630,7 +636,8 @@ M.task_code=function(linda,task_id,task_idx)
 
 			elseif memo.cmd=="close" then -- probably good to "try" and do this before exiting
 
-				opendb() -- yeah uhm so no filename means we are just going to close the current db
+				if db then db:close() end
+				db=nil
 
 			end
 
@@ -720,7 +727,7 @@ M.task_code=function(linda,task_id,task_idx)
 			end
 
 		end
-		
+
 		return ret
 	end
 

@@ -28,11 +28,13 @@ require.sh python3
 
 
 
-rm -rf emsdk
-git clone https://github.com/juj/emsdk.git
-cd emsdk
+if [ -d "emsdk" ]; then
+	cd emsdk
+	git pull
+	./emsdk update
+	./emsdk install latest
+	./emsdk activate latest
+else
+	git clone https://github.com/juj/emsdk.git
+fi
 
-git pull
-./emsdk update
-./emsdk install latest
-./emsdk activate latest

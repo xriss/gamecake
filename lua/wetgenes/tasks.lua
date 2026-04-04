@@ -9,8 +9,41 @@ do
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
      =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+	do
+		local ok,lib=pcall(function() return lanes.require("wetgenes.win.core") end )
+		if ok and lib then js_http=lib.js_http end
+	end
 
+local wwin=require("wetgenes.win")
 local wsyncs=require("wetgenes.syncs")
+
+-- might need to do something funky here for wasm so wrap this
+local linda_receive=function(linda,timeout,name)
+	local ok,ret
+	
+	if wwin.sdl_platform=="Emscripten" then -- wasm hax
+PRINT("wait",name)
+
+		if type(timeout)=="nil" then -- do a sleepy wait
+			repeat
+				ok,ret=linda:receive(0,name) -- peek
+				if not ok then
+					wwin.softcore.js_sleep(0) -- sleep
+					PRINT("sleep")
+				end
+			until ok
+		else
+			ok,ret=linda:receive(timeout,name)
+		end
+	
+PRINT("done",name)
+	else
+			ok,ret=linda:receive(timeout,name)	
+	end
+
+
+	return ok,ret
+end
 
 -- module
 
@@ -69,7 +102,7 @@ M.do_memo=function(linda,memo,timeout)
 --log("memo",memo.task,memo.id)
 	if linda:send( timeout , memo.task , memo ) then -- send on memo.task (a public name of another task)
 		if memo.id then
-			local ok,r=linda:receive( timeout , memo.id ) -- receive the result on memo.id
+			local ok,r=linda_receive( linda , timeout , memo.id ) -- receive the result on memo.id
 			linda:set(memo.id) -- cleanup
 --log("memo",memo.task,memo.id,"done")
 			return r
@@ -91,7 +124,7 @@ Simple iterator for memos available at a subscription id.
 M.memos=function(linda,subid)
 	return function()
 		-- get any memo waiting but do not block
-		local _,memo= linda:receive( 0 , subid )
+		local _,memo= linda_receive( linda , 0 , subid )
 		return memo
 	end
 end
@@ -205,7 +238,7 @@ M.tasks.claim_global=function(tasks,name,value)
 	memo.name=name
 	memo.value=value
 	if tasks.linda:send( nil , memo.task , memo ) then -- send on memo.task (a public name of another task)
-		local ok,r=tasks.linda:receive( nil , memo.id ) -- receive the result on memo.id
+		local ok,r=tasks.linda_receive( linda , nil , memo.id ) -- receive the result on memo.id
 		tasks.linda:set(memo.id) -- cleanup
 		return r.result
 	end
@@ -230,7 +263,7 @@ M.tasks.eject_global=function(tasks,name)
 	memo.cmd="eject"
 	memo.name=name
 	if tasks.linda:send( nil , memo.task , memo ) then -- send on memo.task (a public name of another task)
-		local ok,r=tasks.linda:receive( nil , memo.id ) -- receive the result on memo.id
+		local ok,r=linda_receive( tasks.linda , nil , memo.id ) -- receive the result on memo.id
 		tasks.linda:set(memo.id) -- cleanup
 		return r.result
 	end
@@ -253,7 +286,7 @@ M.tasks.fetch_global=function(tasks,name)
 	memo.cmd="fetch"
 	memo.name=name
 	if tasks.linda:send( nil , memo.task , memo ) then -- send on memo.task (a public name of another task)
-		local ok,r=tasks.linda:receive( nil , memo.id ) -- receive the result on memo.id
+		local ok,r=linda_receive( tasks.linda , nil , memo.id ) -- receive the result on memo.id
 		tasks.linda:set(memo.id) -- cleanup
 		return r.result
 	end
@@ -454,7 +487,7 @@ M.tasks.receive=function(tasks,memo,timeout)
 		tasks:send(memo,timeout)
 	end
 	memo.state="receiving"
-	local ok,result=tasks.linda:receive( timeout , memo.id ) ;
+	local ok,result=linda_receive( tasks.linda , timeout , memo.id ) ;
 	tasks.linda:set(memo.id) -- cleanup
 	memo.state="done"
 	tasks:del_memo(memo)
@@ -517,7 +550,7 @@ Simple iterator for memos available at a subscription id.
 M.tasks.memos=function(tasks,subid)
 	return function()
 		-- get any memo waiting but do not block
-		local _,memo= tasks.linda:receive( 0 , subid )
+		local _,memo= linda_receive( tasks.linda , 0 , subid )
 		return memo
 	end
 end
@@ -796,10 +829,10 @@ M.tasks.http_code=function(linda,task_id,task_idx)
 
 	local lanes = require("lanes")
 
-	local js_eval -- function call into javascript if we are an emcc build
+	local js_http -- function call into javascript if we are an emcc build
 	do
 		local ok,lib=pcall(function() return lanes.require("wetgenes.win.core") end )
-		if ok and lib then js_eval=lib.js_eval end
+		if ok and lib then js_http=lib.js_http end
 	end
 	local http = lanes.require("socket.http")
 	local ltn12 = lanes.require("ltn12")
@@ -807,47 +840,26 @@ M.tasks.http_code=function(linda,task_id,task_idx)
 	local wjson = lanes.require("wetgenes.json")
 
 -- we need a special case for emcc as we can only use websockets or javascript requests
-	local function request_js(memo)
-	
-		local opts={}
-		
-		opts.method=memo.method
-		opts.url=memo.url
-		opts.headers=memo.headers or {}
-		opts.body=memo.body
-		
---		dump(opts)
+	local request_js
+	if js_http then
+		request_js=function(memo)
 
-		local js=[[
-(function(opts){
-
-	var request = new XMLHttpRequest();
-	request.open( opts.method , opts.url , false );
-	for(const key in opts.headers)
-	{
-		request.setRequestHeader( key , opts.headers[key] );
-    }
-  	request.send(opts.body);
-
-	var ret={};
-	ret.body=request.responseText;
-	ret.code=request.status;
-	ret.headers=request.getAllResponseHeaders();
-	
-	return JSON.stringify(ret);
-
-})(]]..wjson.encode(opts)..[[);
-]]
-	
-		local rets=js_eval(js)
-		local ret=wjson.decode( rets or "{}" ) or {}
-		if not ret.body then ret.error=ret.code or 0 end
-
---		dump(ret)
-		
-		return ret
+			local opts={}
+			opts.method=memo.method
+			opts.url=memo.url
+			opts.headers=memo.headers or {}
+			opts.body=memo.body
+			
+PRINT("pre js_http")
+			local rets=js_http( wjson.encode(opts) )
+PRINT("post js_http")
+			local ret=wjson.decode( rets or "{}" ) or {}
+			if not ret.body then ret.error=ret.code or 0 end
+			
+			return ret
+		end
 	end
-	
+
 	local function request(memo)
 	
 		memo.headers=memo.headers or {}
@@ -898,8 +910,20 @@ M.tasks.http_code=function(linda,task_id,task_idx)
 		
 		memo.method=memo.method or "GET"
 
-		if js_eval then return request_js(memo) end
+		if request_js then
 
+-- this is borked in new emscripten builds, have no idea why
+-- i think it tries to run something back on the main thread which is blocked
+-- so we currently disabled it to make the rest of the code run
+if true then
+			local ret={body="",code=404}
+else
+PRINT("pre eval")
+			local ret=request_js(memo)
+PRINT("post eval")
+end
+			return ret
+		end
 		local out = {}
 		local req = {}
 

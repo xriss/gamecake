@@ -24,6 +24,7 @@ local Ox=function(n) return string.format("%012x",n or 0) end
 
 local log,dump,dlog=require("wetgenes.logs"):export("log","dump","dlog")
 
+local wwin=require("wetgenes.win")
 local wgups=require("wetgenes.gamecake.ups")
 local wstr=require("wetgenes.string")
 
@@ -43,15 +44,20 @@ M.bake=function(oven,upnet)
 
 	if oven.ups then -- in main task
 
+
 		-- create msgp handling thread if it does not exist
-		oven.tasks:add_global_thread({
-			count=1,
-			id="msgp",
-			code=msgp.msgp_code,
-			globals={
-				TASK_NAME="#MSGP"
-			}
-		})
+		if wwin.sdl_platform~="Emscripten" then -- disable msgp on wasm
+
+			oven.tasks:add_global_thread({
+				count=1,
+				id="msgp",
+				code=msgp.msgp_code,
+				globals={
+					TASK_NAME="#MSGP"
+				}
+			})
+			
+		end
 
 		-- create upnet handling thread if it does not exist
 		oven.tasks:add_global_thread({
@@ -62,7 +68,7 @@ M.bake=function(oven,upnet)
 				TASK_NAME="#UPNET"
 			}
 		})
-	
+		
 		oven.ups.subscribe("upnet/ups") -- request all ups to be sent here
 	end
 	
@@ -850,6 +856,12 @@ M.upnet_code=function(linda,task_id,task_idx)
 	local upnet=wgupnet.create()
 	upnet.linda=linda
 	upnet.do_memo=function(memo,timeout)
+		if wwin.sdl_platform=="Emscripten" then -- disable msgp on wasm
+			if memo.task=="msgp" then
+				return
+			end
+		end
+
 		return wtasks.do_memo(linda,memo,timeout)
 	end
 

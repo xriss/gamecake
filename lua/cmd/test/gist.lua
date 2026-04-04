@@ -6,9 +6,11 @@ local djon=require("djon")
 
 require("apps").default_paths() -- default search paths so things can easily be found
 
+print("starting http task")
+
 local tasks=require("wetgenes.tasks").create()
 tasks:add_global_thread({
-	count=8,
+	count=1,
 	id="http",
 	code=tasks.http_code,
 	globals={
@@ -24,6 +26,8 @@ opts.tasks=tasks
 opts.token=os.getenv("GIST_TOKEN") -- must provide a token
 opts.per_page=100
 opts.page=1
+
+print("starting sending request to http task")
 
 local result=gist.list(opts)
 logs.dump(result)

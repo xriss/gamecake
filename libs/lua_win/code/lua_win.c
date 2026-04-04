@@ -335,6 +335,68 @@ const char *result=0;
 
 	return 1;
 }
+
+
+EM_JS(const char *, lua_emcc_js_http_js, ( const char* strptr ), {
+
+	let str = UTF8ToString(strptr);
+	let opts=JSON.parse(str);
+
+	let request = new XMLHttpRequest();
+console.log("pre open",opts.method,opts.url);
+	request.open( opts.method , opts.url  , false );
+console.log("pst open");
+	for(const key in opts.headers)
+	{
+		request.setRequestHeader( key , opts.headers[key] );
+    }
+
+  	request.send(opts.body);
+
+	let ret={};
+	ret.body=request.responseText;
+	ret.code=request.status;
+	ret.headers=request.getAllResponseHeaders();
+
+	let retval = JSON.stringify(ret);
+	let retlen = lengthBytesUTF8(retval)+1;
+	let retptr = _malloc(retlen);
+	stringToUTF8(retval, retptr, retlen);
+console.log("req done");
+	return retptr;
+});
+
+int lua_emcc_js_http(lua_State *l)
+{
+const char *opts=0;
+const char *result=0;
+
+	opts=lua_tostring(l,1);
+
+printf("pre lua_emcc_js_http_js\n");
+	result=lua_emcc_js_http_js(opts);
+printf("post lua_emcc_js_http_js\n");
+	
+	if(result)
+	{
+		lua_pushstring(l,result);
+		free((void*)result);
+	}
+
+	return 1;
+}
+
+int lua_emcc_js_sleep(lua_State *l)
+{
+double t;
+
+	t=lua_tonumber(l,1);
+
+    emscripten_sleep(t*1000);
+
+	return 0;
+}
+
 #endif
 
 
@@ -365,6 +427,8 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 		{	"set_clipboard",				lua_emcc_set_clipboard				},
 		{	"get_clipboard",				lua_emcc_get_clipboard				},
 		{	"js_eval",						lua_emcc_js_eval					},
+		{	"js_http",						lua_emcc_js_http					},
+		{	"js_sleep",						lua_emcc_js_sleep					},
 #endif
 		{0,0}
 	};

@@ -25,18 +25,17 @@ local test_server=function(tasks)
 	
 	for i=1,2 do
 	
-		local thread=tasks:add_global_thread({
+		tasks:add_global_thread({
 			count=1,
 			id="msgp"..i,
 			code=msgp.msgp_code,
 		})
-		hosts[i]=tasks:do_memo({
+		hosts[i]=assert( tasks:do_memo({
 			task="msgp"..i,
 			cmd="host",
 			baseport=baseport,
 			basepack=basepack,
-		})
-		hosts[i].thread=thread
+		}) )
 		hosts[i].task="msgp"..i
 	--	dump(ret1)
 
