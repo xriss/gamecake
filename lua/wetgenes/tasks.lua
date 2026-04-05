@@ -28,7 +28,7 @@ local linda_receive=function(linda,timeout,name)
 	repeat
 		ok,ret=linda:receive(0,name) -- peek
 		if not ok then
-			wwin.softcore.js_sleep(0) -- sleep
+			wwin.softcore.js_sleep(1/1024) -- sleep
 --			PRINT("sleep")
 		end
 		if timeout then

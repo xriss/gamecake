@@ -55,31 +55,42 @@ local keymaps={}
 
 -- single player covering entire keyboard controller style
 keymaps["full"]={
+-- left stick
 	["w"]			=	{ "ly0" , "up"    },
 	["a"]			=	{ "lx0" , "left"  },
 	["s"]			=	{ "ly1" , "down"  },
 	["d"]			=	{ "lx1" , "right" },
+-- right stick
 	["up"]			=	{ "ry0" },
 	["left"]		=	{ "rx0" },
 	["down"]		=	{ "ry1" },
 	["right"]		=	{ "rx1" },
+-- dpad
 	["keypad 8"]	=	{ "pad_up"    },
 	["keypad 4"]	=	{ "pad_left"  },
 	["keypad 2"]	=	{ "pad_down"  },
 	["keypad 6"]	=	{ "pad_right" },
+-- meta
 	["tab"]			=	{ "select" },
 	["enter"]		=	{ "start" },
+-- triggers
 	["z"]			=	{ "l1" },
 	["c"]			=	{ "r1" },
 	["q"]			=	{ "lz1" , "l2" },
 	["e"]			=	{ "rz1" , "r2" },
+-- button keys that wont break keyboard hardware when held down
 	["shift_l"]		=	{ "l3" },
-	["shift_r"]		=	{ "r3" },
 	["control_l"]	=	{ "y" , "fire"},
 	["alt_l"]		=	{ "x" , "fire"},
-	["space"]		=	{ "a" , "fire"},
 	["alt_r"]		=	{ "a" , "fire"},
 	["control_r"]	=	{ "b" , "fire" },
+	["shift_r"]		=	{ "r3" },
+-- alternative buttons for when OS force steals your keys as shortcuts
+	["space"]		=	{ "a" , "fire"},
+	["m"]			=	{ "y" , "fire"},
+	[","]			=	{ "x" , "fire"},
+	["."]			=	{ "a" , "fire"},
+	["/"]			=	{ "b" , "fire" },
 }
 
 -- basic 1up with only a single fire button
