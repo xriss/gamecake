@@ -494,6 +494,8 @@ players.item.update=function(player)
 
 	local up=player.scene.ups[player.idx] or player.sys.oven.ups.empty
 
+	local rx=( up:axis("rx") ) or 0
+	local ry=( up:axis("ry") ) or 0
 	local lx=( up:axis("lx") ) or 0
 	local ly=( up:axis("ly") ) or 0
 	local ba_now=( up:get("a") or up:get("a_set") ) or false
@@ -666,7 +668,7 @@ else
 		local m=((player.holdtime-8)/16)
 		if m>1 then m=1 end -- full speed after 1.5 seconds
 		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
-		local aim=V3(player.side/128,1/256,0)+V3(lx,ly,0)
+		local aim=V3( (player.side/128)+lx+(rx*256) , (1/256)+ly+(ry*256) , 0 )
 		aim:normalize()
 		hold:set_value("vel",aim*(400*m))
 		hold:set_value("danger",16*8)
@@ -698,6 +700,7 @@ else
 			hold=best
 			player:depend("hold",hold.uid)
 			hold:depend("held",player.uid)
+			hold:set_value("danger",0)
 		end
 	end
 	if hold then
@@ -2312,16 +2315,16 @@ levels.infos[1]={
 legend=levels.combine_legends(levels.legend,{
 	["Ta"]={ name="char_sign",				text="Welcome to the Dungeon, we got fun and games." },
 	["Tb"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
-	["Tc"]={ name="char_sign",				text="Congratulations on the coyote jump." },
-	["Td"]={ name="char_sign",				text="You may JUMP in the air after walking off of a platform." },
-	["T1"]={ name="char_sign",				text="Press JUMP to join in." },
---	["T2"]={ name="char_sign",				text="Try jumping up." },
-	["T3"]={ name="char_sign",				text="Hold JUMP to flap arms and duck down." },
-	["T4"]={ name="char_sign",				text="Press USE to pickup object, press USE again to throw it." },
---	["T5"]={ name="char_sign",				text="Throw power is speed of object rotation." },
---	["T6"]={ name="char_sign",				text="Aim throw with LEFT STICK or direction will be forwards and downwards." },
+	["Tc"]={ name="char_sign",				text="Congratulations on the coyote JUMP." },
+	["Td"]={ name="char_sign",				text="You may coyote JUMP in the air after walking off of a platform." },
+	["T1"]={ name="char_sign",				text="Press Button A or R-ALT or . to JUMP in." },
+	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move. Hold JUMP to JUMP higher." },
+	["T3"]={ name="char_sign",				text="Hold JUMP to flap arms and duck down or just MOVE down to duck." },
+	["T4"]={ name="char_sign",				text="Press Button B or R-CTRL or / to GRAB object, press GRAB again to throw it." },
+	["T5"]={ name="char_sign",				text="Throw power is shown by object rotation, wait for it to speed up." },
+	["T6"]={ name="char_sign",				text="Aim throw with Right Stick or Cursor Keys." },
 	["T7"]={ name="char_sign",				text="Throw object at slim to stun him." },
-	["T8"]={ name="char_sign",				text="Stomp stuned slim to finish him." },
+	["T8"]={ name="char_sign",				text="Stomp stunned slim to finish him." },
 }),
 title="Test.",
 map=[[
@@ -2343,6 +2346,34 @@ map=[[
 }
 
 levels.infos[2]={
+legend=levels.combine_legends(levels.legend,{
+}),
+title="Test.",
+map=[[
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 . . . . . > v . . . . . . . . . . . . . . . . v < . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . J1. . . . . . . . . . . . . . . . . . J1. . . . . 0 
+0 0 0 0 0 0 0 . . . . . . . . . . . . . . . . . . 0 0 0 0 0 0 0 
+0 . . . J1. . . . . . . . . . . . . . . . . . . . . . J1. . . 0 
+0 . . . . . . . . . . . . . S1. . S1. . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . 0 0 0 0 0 0 . . . . . . . . . . . . 0 
+0 . . . . . . . . . . > ^ < . . . . > ^ < . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . S1. . . . . . . . . . S1. . . . . . . . . 0 
+0 . . . . . . . . 0 0 0 0 0 0 0 0 0 0 0 0 0 0 . . . . . . . . 0 
+0 . . . . . . > ^ < . . . . . . . . . . . . > ^ < . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . S1. . . . . . . . . . . . . . . . . . S1. . . . . 0 
+0 . . . . 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 . . . . 0 
+0 ^ . > ^ < . . . . . . . . . . . . . . . . . . . . > ^ < . . 0 
+0 P1. . . . . . . . . . . . . . . . . . . . . . . . . . . P2. 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+]],
+}
+
+levels.infos[3]={
 legend=levels.combine_legends(levels.legend,{
 }),
 title="Test.",
@@ -2676,77 +2707,7 @@ end
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 levels.item.draw=function(level)
-	
-	local text=system.components.text
 
-	local add_char16=function(s,x,y)
-		local sx,sy=text.text_tile8x16(s)
-		system.components.sprites.list_add({
-			t=sy*256+sx ,
-			hx=8 , hy=16 ,
-			ox=0 , oy=0 ,
-			px=x+1 , py=y+1 , pz=0 ,
-			color=0xff000000,
-		})
-		system.components.sprites.list_add({
-			t=sy*256+sx ,
-			hx=8 , hy=16 ,
-			ox=0 , oy=0 ,
-			px=x , py=y , pz=-1 ,
-			color=0xffffffff,
-		})
-	end
-	local add_string16=function(s,x,y)
-		local l=#s
-		for i=1,l do
-			local c=s:sub(i,i)
-			add_char16(c,x+((i-1)*8),y)
-		end
-	end
-
-	local add_char4=function(s,x,y)
-		local sx,sy=text.text_tile4x8(s)
-		system.components.sprites.list_add({
-			t=sy*256+(sx/2) ,
-			hx=4 , hy=8 ,
-			ox=0 , oy=0 ,
-			px=x+1 , py=y+1 , pz=0 ,
-			color=0xff000000,
-		})
-		system.components.sprites.list_add({
-			t=sy*256+(sx/2) ,
-			hx=4 , hy=8 ,
-			ox=0 , oy=0 ,
-			px=x , py=y , pz=-1 ,
-			color=0xffffffff,
-		})
-	end
-	local add_string4=function(s,x,y)
-		local l=#s
-		for i=1,l do
-			local c=s:sub(i,i)
-			add_char4(c,x+((i-1)*4),y)
-		end
-	end
-
-	local tf=math.floor(level.time*100)%100
-	local ts=math.floor(level.time)%60
-	local tm=math.floor(level.time/60)
-	local s=tm..":"..("0"..ts):sub(-2)
-	add_string16(s,128-(#s*4),0)
-
-	local players=scene:caste("player")
-	for i,p in ipairs(players) do
-		if p.idx==1 then
-			local s=p.score..""
-			if p.onfloor>0 then s=s.." _" end
-			add_string4(s,2,1)
-		elseif p.idx==2 then
-			local s=p.score..""
-			if p.onfloor>0 then s="_ "..s end
-			add_string4(s,254-(#s*4),1)
-		end
-	end
 end
 
 --------------------------------------------------------------------------------
@@ -3025,6 +2986,57 @@ huds.item.draw=function(hud)
 	local screen=system.components.screen
 	local level=hud:get_singular("level") -- only one level is active at a time
 
+	local add_char16=function(s,x,y)
+		local sx,sy=text.text_tile8x16(s)
+		system.components.sprites.list_add({
+			t=sy*256+sx ,
+			hx=8 , hy=16 ,
+			ox=0 , oy=0 ,
+			px=x+1 , py=y+1 , pz=0 ,
+			color=0xff000000,
+		})
+		system.components.sprites.list_add({
+			t=sy*256+sx ,
+			hx=8 , hy=16 ,
+			ox=0 , oy=0 ,
+			px=x , py=y , pz=-1 ,
+			color=0xffffffff,
+		})
+	end
+	local add_string16=function(s,x,y)
+		local l=#s
+		for i=1,l do
+			local c=s:sub(i,i)
+			add_char16(c,x+((i-1)*8),y)
+		end
+	end
+
+	local add_char4=function(s,x,y)
+		local sx,sy=text.text_tile4x8(s)
+		system.components.sprites.list_add({
+			t=sy*256+(sx/2) ,
+			hx=4 , hy=8 ,
+			ox=0 , oy=0 ,
+			px=x+1 , py=y+1 , pz=0 ,
+			color=0xff000000,
+		})
+		system.components.sprites.list_add({
+			t=sy*256+(sx/2) ,
+			hx=4 , hy=8 ,
+			ox=0 , oy=0 ,
+			px=x , py=y , pz=-1 ,
+			color=0xffffffff,
+		})
+	end
+	local add_string4=function(s,x,y)
+		local l=#s
+		for i=1,l do
+			local c=s:sub(i,i)
+			add_char4(c,x+((i-1)*4),y)
+		end
+	end
+
+
 	hud:get_values()
 
 	text.window_py=screen.hy-hud.pos[2]
@@ -3050,6 +3062,28 @@ huds.item.draw=function(hud)
 			end
 		end
 	end
+
+
+
+	local tf=math.floor(level.time*100)%100
+	local ts=math.floor(level.time)%60
+	local tm=math.floor(level.time/60)
+	local s=tm..":"..("0"..ts):sub(-2)
+	add_string16(s,128-(#s*4),0)
+
+	local players=scene:caste("player")
+	for i,p in ipairs(players) do
+		if p.idx==1 then
+			local s=p.score..""
+--			if p.onfloor>0 then s=s.." _" end
+			add_string4(s,2,1)
+		elseif p.idx==2 then
+			local s=p.score..""
+--			if p.onfloor>0 then s="_ "..s end
+			add_string4(s,254-(#s*4),1)
+		end
+	end
+
 end
 
 --#
