@@ -816,7 +816,7 @@ floaters.types={
 
 floaters.graphics={
 
-{nil,"floater_egg",[[
+{nil,"floater_bubble",[[
 . . G G G G . . 
 . G G d d G G . 
 G G d d d d G G 
@@ -911,13 +911,20 @@ floaters.item.update=function(floater)
 	
 		 			floater:mark_deleted()
 	--				who.score=who.score+100
+					local bonus=hit.sys:get_rnd(4)
 					for i=1,16 do
 						local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
 									hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
 									0 )
 						local boots={
-							{"gib",sname="gib_green",life=0,size=4,pos=floater.pos,vel=v},
+							{"gib",sname="gib_green",size=4,pos=floater.pos,vel=v},
 						}
+						if i<=bonus then -- some gibs are fruits
+							local r=hit.sys:get_rnd(9)
+							boots={
+								{"fruit",sname="fruit_"..r,pos=floater.pos,vel=v*2},
+							}
+						end
 						scene:creates(boots)
 					end
 					
@@ -1750,6 +1757,272 @@ fauna_trenchs.item.draw=function(fauna)
 
 end
 
+--------------------------------------------------------------------------------
+--
+--#fruits
+
+fruits={}
+systems[#systems+1]=fruits
+-- methods added to system
+fruits.system={}
+-- methods added to each item
+fruits.item={}
+
+fruits.caste="fruit"
+
+fruits.uidmap={
+	length=0,
+}
+
+fruits.values={
+	pos=V3( 0,0,0 ),
+	rot=0,
+	vel=V3( 0,0,0 ),
+	ang=0,
+	acc=V3( 0,200,0 ),
+	sname="fruit_1",
+	age=0,
+	touch={},
+}
+
+fruits.types={
+	pos="tween",
+	rot="tween",
+}
+
+
+fruits.graphics={
+
+{nil,"fruit_1",[[
+. . . . . . . . 
+. . Y Y Y . . . 
+. Y o o o o . . 
+Y o 7 7 7 o O . 
+Y o 7 o o o O . 
+Y o 7 7 7 o O . 
+. o o o o O . . 
+. . O O O . . . 
+]]},
+
+{nil,"fruit_2",[[
+. . . . . R . . 
+. . . R R 1 R . 
+. . R 1 R R R . 
+. R R R R 1 R . 
+d R R 1 R R R . 
+G G R R R 1 R . 
+. d d G G R R . 
+. . . d d d G . 
+]]},
+
+{nil,"fruit_3",[[
+. . I I I I . . 
+. I B B B B I . 
+I B d d d d B I 
+B d Y Y Y Y Y B 
+d Y O O O O Y d 
+Y O O R R O O Y 
+O O R R R R O O 
+O R R . . R R O 
+]]},
+
+{nil,"fruit_4",[[
+. . . . . . . . 
+. . . . . . . . 
+. Y O Y O o . . 
+Y O o O o r r . 
+s s F F F f f . 
+Y Y Y Y Y o o . 
+s s F F F f f . 
+o o O O O r r . 
+]]},
+
+{nil,"fruit_5",[[
+. . . . . . . . 
+. . . Y Y Y . . 
+. . Y o o o Y . 
+. Y o y y y o Y 
+. Y o y . . y y 
+Y o y . . . . 1 
+Y y y . . . . 1 
+. y . . . . . . 
+]]},
+
+{nil,"fruit_6",[[
+. . . . . . . . 
+. R R . R R . . 
+R O r R O r R . 
+R r R R r R R . 
+R R R R R R R . 
+. R R R R R . . 
+. . R R R . . . 
+. . . R . . . . 
+]]},
+
+{nil,"fruit_7",[[
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. Y O Y O o . . 
+Y O o O o r r . 
+s s F F F f f . 
+o o O O O r r . 
+]]},
+
+{nil,"fruit_8",[[
+. . d . . G . . 
+. . . d G . . . 
+. . r R r R . . 
+. r R r R r R . 
+. R r R r R r . 
+. r R r R r R . 
+. . r R r R . . 
+. . . r R . . . 
+]]},
+
+{nil,"fruit_9",[[
+G . g . . . . . 
+. G F . . . . . 
+. . F F F R R . 
+. . F . R r r R 
+. R R . R r R R 
+R r r R . R R . 
+R r R R . . . . 
+. R R . . . . . 
+]]},
+
+}
+
+fruits.collision_type=0x00010002	-- unique ID
+fruits.collision_bits=0x00010000	-- assigned bitmask
+fruits.collision_mask=0x000001ff	-- interact bitmask
+fruits.collision_handlers={
+	[{fruits.collision_type}]={
+		postsolve=function(arb)
+			local fruit=scene:find_uid(arb.shape_a.uid)
+			local touch=scene:find_uid(arb.shape_b.uid)
+			if fruit and fruit.caste=="fruit" then -- sanity
+				fruit:do_touch(touch,arb) -- set value for update
+			end
+			return true
+		end
+	}
+}
+-- called inside the physics loop so probably shouldnt do anything complex
+fruits.item.do_touch=function(fruit,touch,arb)
+	local oldtouch=fruit:get_value("touch")
+	if oldtouch.uid==0 or oldtouch.uid==-1 then -- replace with real uid
+		fruit:set_value("touch",{uid=touch and touch.uid or -1})
+	end
+end
+
+
+-- the system has no state values but can still perform generic actions
+-- eg allocate shared resources for later use
+fruits.system.setup=function(sys)
+
+	 system.components.tiles.upload_tiles( fruits.graphics )
+
+end
+
+fruits.system.clean=function(sys)
+end
+
+-- state values are cached into the item for easy access on a get
+-- and must be set again if they are altered so setup and updates
+-- must begin and end with a get and a set
+fruits.item.setup=function(fruit)
+	fruit:get_values()
+	
+	fruit:setup_kinetic()
+	fruit:set_values()
+end
+
+fruits.item.setup_kinetic_reshape=function(fruit)
+	local space=fruit:get_singular("kinetic").space
+	if fruit.shape then
+		space:remove(fruit.shape)
+		fruit.shape=nil
+	end
+	fruit.shape=fruit.body:shape("circle",4,0,0)
+--	fruit.shape=fruit.body:shape("box",-3,-3,3,3,0)
+	fruit.shape:friction(1.0)
+	fruit.shape:elasticity(0.5)
+	fruit.shape:filter(fruit.uid,fruits.collision_bits,fruits.collision_mask)
+	fruit.shape:collision_type(fruits.collision_type)
+	fruit.shape.uid=fruit.uid
+end
+fruits.item.setup_kinetic=function(fruit)
+	if fruit.body then return end -- already done
+	local space=fruit:get_singular("kinetic").space
+	fruit.body=space:body(1,1)
+	fruit:setup_kinetic_reshape()
+	fruit:set_body()
+end
+
+fruits.item.clean_kinetic=function(fruit)
+	if not fruit.body then return end -- already done
+	local kinetic=fruit:get_singular("kinetic")
+	if not kinetic then return end -- already done
+	local space=kinetic.space		
+	space:remove(fruit.shape)
+	space:remove(fruit.body)
+	fruit.body=nil
+	fruit.shape=nil
+end
+
+fruits.item.clean=function(fruit)
+	fruit:clean_kinetic()
+end
+
+
+fruits.item.update=function(fruit)
+	fruit:get_values()
+	fruit:setup_kinetic() -- might need to recreate body
+
+	fruit.age=fruit.age+1
+	
+	if fruit.touch.uid~=0 then
+		local touch=scene:find_uid(fruit.touch.uid)
+		fruit.touch.uid=0
+
+		if touch and touch.caste=="player" then -- pickup
+			if fruit.age>=16 then
+				if fruit:mark_deleted() then
+					local score=touch:get_value("score")
+					touch:set_value("score",score+100)
+				end
+			end
+		end
+
+	end
+	
+	if fruit.age>=(16*10) then
+		fruit:mark_deleted()
+	end
+
+	fruit:set_values()
+
+end
+
+-- when drawing get will auto tween values
+-- so it can be called multiple times between updates for different results
+fruits.item.draw=function(fruit)
+
+	fruit:get_values()
+
+	local p=V3( fruit.pos[1] , fruit.pos[2], fruit.pos[1]+fruit.pos[2] )
+	
+	if fruit.age>=(16*7) or fruit.age<=(16*1) then -- flash when old or young
+		if 1==fruit.age%2 then -- blink
+			draws.sprite{ n=fruit.sname          , p=p  }
+		end
+	else
+		draws.sprite{ n=fruit.sname          , p=p  }
+	end
+
+end
 
 --------------------------------------------------------------------------------
 --
@@ -1775,7 +2048,6 @@ gibs.values={
 	ang=0,
 	acc=V3( 0,200,0 ),
 	sname="gib_green",
-	life=16,
 	size=4,
 	touch=0,
 }
@@ -1888,15 +2160,11 @@ gibs.item.update=function(gib)
 		if touch and touch.caste=="gib" then
 			-- self touch?`
 		else
-			if gib.life>0 then
-				gib.life=gib.life-1
+			if gib.size>1 then
+				gib.size=gib.size-1
+				gib:setup_kinetic_reshape()
 			else
-				if gib.size>1 then
-					gib.size=gib.size-1
-					gib:setup_kinetic_reshape()
-				else
-					gib:mark_deleted()
-				end
+				gib:mark_deleted()
 			end
 		end
 	end
@@ -1915,6 +2183,7 @@ gibs.item.draw=function(gib)
 	draws.sprite{ n=gib.sname          , p=p , i=5-gib.size }
 
 end
+
 
 --------------------------------------------------------------------------------
 --
@@ -2594,6 +2863,7 @@ levels.item.update=function(level)
 	local lists={
 		scene:caste("fauna_egg"),
 		scene:caste("fauna_slim"),
+		scene:caste("fruit"),
 	}
 	for _,list in ipairs(lists) do
 		for i,it in ipairs(list) do
