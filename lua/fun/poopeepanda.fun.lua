@@ -2317,14 +2317,14 @@ legend=levels.combine_legends(levels.legend,{
 	["Tb"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
 	["Tc"]={ name="char_sign",				text="Congratulations on the coyote JUMP." },
 	["Td"]={ name="char_sign",				text="You may coyote JUMP in the air after walking off of a platform." },
-	["T1"]={ name="char_sign",				text="Press Button A or R-ALT or . to JUMP in." },
+	["T1"]={ name="char_sign",				text="Press Button A or RIGHT-ALT or . to JUMP in." },
 	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move. Hold JUMP to JUMP higher." },
 	["T3"]={ name="char_sign",				text="Hold JUMP to flap arms and duck down or just MOVE down to duck." },
-	["T4"]={ name="char_sign",				text="Press Button B or R-CTRL or / to GRAB object, press GRAB again to throw it." },
+	["T4"]={ name="char_sign",				text="Press Button B or RIGHT-CTRL or / to GRAB object, press GRAB again to throw it." },
 	["T5"]={ name="char_sign",				text="Throw power is shown by object rotation, wait for it to speed up." },
 	["T6"]={ name="char_sign",				text="Aim throw with Right Stick or Cursor Keys." },
-	["T7"]={ name="char_sign",				text="Throw object at slim to stun him." },
-	["T8"]={ name="char_sign",				text="Stomp stunned slim to finish him." },
+	["T7"]={ name="char_sign",				text="Throw object at Slim Slimy to stun him." },
+	["T8"]={ name="char_sign",				text="Stomp stunned Slim Slimy to finish him." },
 }),
 title="Test.",
 map=[[
@@ -2434,6 +2434,7 @@ levels.item.setup=function(level)
 	system.components.map.autosize=nil -- turn off autosize
 	system.components.map.screen_resize(hx*8,hy*8)
 	system.components.map.tilemap_grd:clear(0)
+	system.components.map.dirty(true)
 
 	bitdown.tile_grd( info.map, tilemap, system.components.map.tilemap_grd  ) -- draw into the screen (tiles)
 
