@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Game Cake</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+	height: 100%;
+	width: 100%;
+}
+
+#canvas {
+	background-color: #000;
+	overflow:hidden;
+}
+
+</style>
+
+<script type="text/javascript" src="js/gamecake_loader.js"></script>
+<script type="text/javascript" src="js/unzipit.js"></script>
+
+<script>
+
+;(function(callback){
+  if (document.readyState != "loading") { callback(); }
+  else { document.addEventListener("DOMContentLoaded", callback); }
+})(async function(){
+	
+	let code=await ( await fetch("poopeepanda.fun.lua") ).text()
+
+	gamecake=await gamecake_loader({
+			dir:"./exe/",
+			args: ["-lcmd" , "--" , "swed", "poopeepanda.fun.lua" , "--run" , "--logs" ],
+			no_load_gamecakejs:true,
+	});
+
+	gamecake.loading_hook=function(){
+		gamecake.FS.writeFile("/poopeepanda.fun.lua", code,  { encoding: "utf8" } );
+	}
+
+	gamecake.load_gamecakejs()
+
+});
+
+</script>
+
+</head>
+<body><div id="gamecake" style="position:fixed;width:100%;height:100%;" ></div></body>
+</html>
