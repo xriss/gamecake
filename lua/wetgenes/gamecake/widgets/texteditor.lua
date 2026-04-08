@@ -1033,6 +1033,7 @@ function wtexteditor.msg(pan,m)
 						local s=txt.undo.cut() or ""
 						if s then wwin.set_clipboard(s) end
 						txt.cursor()
+						texteditor.mark_area=nil
 						texteditor:cursor_sync()
 					end
 				end
@@ -1041,18 +1042,21 @@ function wtexteditor.msg(pan,m)
 					local s=wwin.get_clipboard() or ""
 					txt.undo.replace(s)
 					txt.cursor()
+					texteditor.mark_area=nil
 					texteditor:cursor_sync()
 				end
 			elseif m.id=="history_undo" then
 				if texteditor:allow_changes() then
 					txt.undo.undo()
 					txt.cursor()
+					texteditor.mark_area=nil
 					texteditor:cursor_sync()
 				end
 			elseif m.id=="history_redo" then
 				if texteditor:allow_changes() then
 					txt.undo.redo()
 					txt.cursor()
+					texteditor.mark_area=nil
 					texteditor:cursor_sync()
 				end
 			elseif m.id=="select_all" then
@@ -1069,6 +1073,7 @@ function wtexteditor.msg(pan,m)
 					end
 					if s then wwin.set_clipboard(s) end
 					txt.cursor()
+					texteditor.mark_area=nil
 					texteditor:cursor_sync()
 				end
 			elseif m.id=="view_hex" then
@@ -1246,6 +1251,7 @@ function wtexteditor.key(pan,ascii,key,act)
 					txt.undo.cut()
 					txt.undo.insert_char(ascii)
 
+					texteditor.mark_area=nil
 					texteditor:scroll_to_view()
 
 				end
@@ -1265,6 +1271,7 @@ function wtexteditor.key(pan,ascii,key,act)
 					end
 				end
 
+				texteditor.mark_area=nil
 				texteditor:scroll_to_view()
 
 			elseif key=="delete" then
@@ -1275,6 +1282,7 @@ function wtexteditor.key(pan,ascii,key,act)
 					txt.undo.delete()
 				end
 
+				texteditor.mark_area=nil
 				texteditor:scroll_to_view()
 
 			elseif key=="tab" and ( master.keystate=="shift" or master.keystate=="none" ) then
@@ -1302,6 +1310,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 						txt.mark(fy,0,ty,0)
 
+						texteditor.mark_area=nil
 						texteditor:scroll_to_view()
 
 					else
@@ -1317,6 +1326,7 @@ function wtexteditor.key(pan,ascii,key,act)
 
 						txt.mark(fy,0,ty,0)
 
+						texteditor.mark_area=nil
 						texteditor:scroll_to_view()
 
 					end
@@ -1324,6 +1334,7 @@ function wtexteditor.key(pan,ascii,key,act)
 				else
 
 					txt.undo.insert_char("\t")
+					texteditor.mark_area=nil
 					texteditor:scroll_to_view()
 
 				end
@@ -1360,6 +1371,7 @@ function wtexteditor.key(pan,ascii,key,act)
 			end
 			txt.undo.insert("> ")
 
+			texteditor.mark_area=nil
 			texteditor:scroll_to_view()
 
 		elseif texteditor:allow_changes() then -- normal enter
@@ -1368,6 +1380,8 @@ function wtexteditor.key(pan,ascii,key,act)
 
 			txt.undo.cut()
 			txt.undo.insert_newline()
+
+			texteditor.mark_area=nil
 			texteditor:scroll_to_view()
 
 		end

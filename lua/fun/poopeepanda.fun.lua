@@ -176,6 +176,75 @@ draws.sprite=function(it) -- note that we will modify this table
 	system.components.sprites.list_add(it)
 end
 
+draws.char16=function(s,x,y)
+	local sx,sy=system.components.text.text_tile8x16(s)
+	system.components.sprites.list_add({
+		t=sy*256+sx ,
+		hx=8 , hy=16 ,
+		ox=0 , oy=0 ,
+		px=x+1 , py=y+1 , pz=0 ,
+		color=0xff000000,
+	})
+	system.components.sprites.list_add({
+		t=sy*256+sx ,
+		hx=8 , hy=16 ,
+		ox=0 , oy=0 ,
+		px=x , py=y , pz=-1 ,
+		color=0xffffffff,
+	})
+end
+
+draws.string16=function(s,x,y)
+	local l=#s
+	for i=1,l do
+		local c=s:sub(i,i)
+		draws.char16(c,x+((i-1)*8),y)
+	end
+end
+
+draws.string16_in_map=function(s,x,y)
+	local map=system.components.map
+	x=x+map.window_px-map.px	-- auto map position
+	y=y+map.window_py-map.py
+	draws.string16(s,x,y)
+end
+
+
+draws.char4=function(s,x,y)
+	local sx,sy=system.components.text.text_tile4x8(s)
+	system.components.sprites.list_add({
+		t=sy*256+(sx/2) ,
+		hx=4 , hy=8 ,
+		ox=0 , oy=0 ,
+		px=x+1 , py=y+1 , pz=0 ,
+		color=0xff000000,
+	})
+	system.components.sprites.list_add({
+		t=sy*256+(sx/2) ,
+		hx=4 , hy=8 ,
+		ox=0 , oy=0 ,
+		px=x , py=y , pz=-1 ,
+		color=0xffffffff,
+	})
+end
+
+draws.string4=function(s,x,y)
+	local l=#s
+	for i=1,l do
+		local c=s:sub(i,i)
+		draws.char4(c,x+((i-1)*4),y)
+	end
+end
+
+draws.string4_in_map=function(s,x,y)
+	local map=system.components.map
+	x=x+map.window_px-map.px	-- auto map position
+	y=y+map.window_py-map.py
+	draws.string4(s,x,y)
+end
+
+
+
 --------------------------------------------------------------------------------
 --
 --#players
@@ -780,6 +849,79 @@ end
 
 --------------------------------------------------------------------------------
 --
+--#scores
+--
+-- These are very simple objects that just display a number and do not interact
+-- with anything so no physics collision no special system setup and no need to
+-- clean anything up.
+
+scores={}
+systems[#systems+1]=scores
+-- methods added to system
+scores.system={}
+-- methods added to each item
+scores.item={}
+
+scores.caste="score"
+
+scores.uidmap={
+	length=1,
+}
+
+scores.values={
+	pos=V3( 0,0,0 ),
+	vel=V3( 0,0,0 ),
+
+	num=0,
+	age=0,
+}
+
+scores.types={
+	pos="tween",
+}
+
+
+scores.graphics={
+
+}
+
+-- state values are cached into the item for easy access on a get
+-- and must be set again if they are altered so setup and updates
+-- must begin and end with a get and a set
+scores.item.setup=function(score)
+	score:get_values()
+
+	score:set_values()
+end
+
+
+scores.item.update=function(score)
+	score:get_values()
+	
+	score.vel=score.vel+V3(0,-1,0)
+	score.pos=score.pos+score.vel
+	
+	if score.pos[2] < -64 then -- off of top of screen
+		score:mark_deleted()
+	end
+
+	score:set_values()
+end
+
+-- when drawing get will auto tween values
+-- so it can be called multiple times draws.sprite updates for different results
+scores.item.draw=function(score)
+
+	score:get_values()
+
+	local s=tostring(score.num)
+	draws.string4_in_map(s,score.pos[1]-(#s*2),score.pos[2]-4)
+
+end
+
+
+--------------------------------------------------------------------------------
+--
 --#floaters
 
 floaters={}
@@ -954,6 +1096,7 @@ floaters.item.draw=function(floater)
 		draws.sprite{ n=fauna.sname.."_float"  , p=p , sx=fauna.side ,rz=floater.spin, }
 	end
 end
+
 
 
 
@@ -1992,6 +2135,10 @@ fruits.item.update=function(fruit)
 				if fruit:mark_deleted() then
 					local score=touch:get_value("score")
 					touch:set_value("score",score+100)
+					local boots={
+						{"score",num=100,pos=fruit.pos},
+					}
+					scene:creates(boots)
 				end
 			end
 		end
@@ -3257,56 +3404,6 @@ huds.item.draw=function(hud)
 	local screen=system.components.screen
 	local level=hud:get_singular("level") -- only one level is active at a time
 
-	local add_char16=function(s,x,y)
-		local sx,sy=text.text_tile8x16(s)
-		system.components.sprites.list_add({
-			t=sy*256+sx ,
-			hx=8 , hy=16 ,
-			ox=0 , oy=0 ,
-			px=x+1 , py=y+1 , pz=0 ,
-			color=0xff000000,
-		})
-		system.components.sprites.list_add({
-			t=sy*256+sx ,
-			hx=8 , hy=16 ,
-			ox=0 , oy=0 ,
-			px=x , py=y , pz=-1 ,
-			color=0xffffffff,
-		})
-	end
-	local add_string16=function(s,x,y)
-		local l=#s
-		for i=1,l do
-			local c=s:sub(i,i)
-			add_char16(c,x+((i-1)*8),y)
-		end
-	end
-
-	local add_char4=function(s,x,y)
-		local sx,sy=text.text_tile4x8(s)
-		system.components.sprites.list_add({
-			t=sy*256+(sx/2) ,
-			hx=4 , hy=8 ,
-			ox=0 , oy=0 ,
-			px=x+1 , py=y+1 , pz=0 ,
-			color=0xff000000,
-		})
-		system.components.sprites.list_add({
-			t=sy*256+(sx/2) ,
-			hx=4 , hy=8 ,
-			ox=0 , oy=0 ,
-			px=x , py=y , pz=-1 ,
-			color=0xffffffff,
-		})
-	end
-	local add_string4=function(s,x,y)
-		local l=#s
-		for i=1,l do
-			local c=s:sub(i,i)
-			add_char4(c,x+((i-1)*4),y)
-		end
-	end
-
 
 	hud:get_values()
 
@@ -3340,18 +3437,18 @@ huds.item.draw=function(hud)
 	local ts=math.floor(level.time)%60
 	local tm=math.floor(level.time/60)
 	local s=tm..":"..("0"..ts):sub(-2)
-	add_string16(s,128-(#s*4),0)
+	draws.string16(s,128-(#s*4),0)
 
 	local players=scene:caste("player")
 	for i,p in ipairs(players) do
 		if p.idx==1 then
 			local s=p.score..""
 --			if p.onfloor>0 then s=s.." _" end
-			add_string4(s,2,1)
+			draws.string4(s,2,1)
 		elseif p.idx==2 then
 			local s=p.score..""
 --			if p.onfloor>0 then s="_ "..s end
-			add_string4(s,254-(#s*4),1)
+			draws.string4(s,254-(#s*4),1)
 		end
 	end
 

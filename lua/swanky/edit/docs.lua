@@ -342,6 +342,7 @@ M.bake=function(oven,docs)
 		
 		it.fileage=os.time() -- rememober time of file modification
 
+		it.txt.anchors=it.txt.scan_anchors() -- rescan
 
 	end
 
