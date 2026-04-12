@@ -50,7 +50,7 @@ vagrant halt
 
 echo " show status, this should list new versions of everything we just built "
 
-cd ../exe
+cd ../../exe
 
 git status
 
