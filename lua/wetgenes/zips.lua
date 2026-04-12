@@ -85,7 +85,8 @@ function loader(...)
 	local sname=name:gsub("%.","/") -- replace . with /
 	local fnames={ "lua/"..sname..".lua" , "lua/"..sname.."/init.lua" }
 
-	for i,v in ipairs(files) do
+	for i=#files,1.-1 do -- last added zip has priority when searching
+		local v=files[i]
 
 		if v.z then -- this is the pre opened zipfile
 		
@@ -197,3 +198,12 @@ function dir(dname)
 	return found and ret
 end
 
+
+
+-- try and add lua.zip if it exists
+--[[
+if exists("lua.zip") then
+print("mounting lua.zip")
+	add_zip_file("lua.zip")
+end
+]]

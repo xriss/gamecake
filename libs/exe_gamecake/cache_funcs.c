@@ -73,8 +73,7 @@ extern void wetgenes_cache_preloader(lua_State *L)
 
 	int numLoaders = 0;
 
-	lua_getglobal(L,"package");
-//	lua_getfield(L, LUA_GLOBALSINDEX, "package");	// push "package"
+	lua_getglobal(L,"package");	// push "package"
 	lua_getfield(L, -1, "loaders");					// push "package.loaders"
 	lua_remove(L, -2);								// remove "package"
 
@@ -88,7 +87,7 @@ extern void wetgenes_cache_preloader(lua_State *L)
 		numLoaders++;
 	}
 
-	if(data)
+	if(data) // this is the zipsloader
 	{
 		lua_pushinteger(L, numLoaders + 1);
 
@@ -109,5 +108,11 @@ extern void wetgenes_cache_preloader(lua_State *L)
 
 	// Table is still on the stack.  Get rid of it now.
 	lua_pop(L, 1);
+
+// by requiring wetgenes.zips we will auto mount lua.zip if it exists as a zipsloader
+//	lua_getglobal(L, "require");
+//	lua_pushstring(L, "wetgenes.zips");
+//	lua_call(L, 1, 0);
+	
 }
 
