@@ -226,6 +226,25 @@ function wtiles.setup(widget,def)
 	
 	widget.colormap_grd:pixels(0,0,256,1,require("wetgenes.gamecake.fun.bitdown").cmap_swanky32.grd) -- copy swanky32
 
+	widget.datx=widget.datx or widget_data.new_data({max=0,master=widget.master})
+	widget.daty=widget.daty or widget_data.new_data({max=0,master=widget.master})
+
+	widget.datx_hook=function(hook,dat)
+--print("tiles",hook,dat,dat.num)
+		if hook=="value" then
+			widget.pan_px=widget.datx.num
+		end
+	end
+	widget.daty_hook=function(hook,dat)
+--print("tiles",hook,dat,dat.num)
+		if hook=="value" then
+			widget.pan_py=widget.daty.num
+		end
+	end
+
+	widget.datx:add_class_hook(widget.datx_hook)
+	widget.daty:add_class_hook(widget.daty_hook)
+
 	return widget
 end
 

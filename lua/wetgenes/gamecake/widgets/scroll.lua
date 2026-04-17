@@ -23,16 +23,15 @@ end
 function wscroll.update(widget)
 
 	local pan=widget.pan
+
+-- cache pan_px,pan_py and refresh here on change
 	
-	local pan_px=widget.datx.num
-	local pan_py=widget.daty.num
-	
-	if pan_px~=pan.pan_px or pan_py~=pan.pan_py then
+	if widget.cache_pan_px~=pan.pan_px or widget.cache_pan_py~=pan.pan_py then
 	
 --print("update",pan_px,pan_py)
 
-		pan.pan_px=pan_px
-		pan.pan_py=pan_py
+		widget.cache_pan_px=pan.pan_px
+		widget.cache_pan_py=pan.pan_py
 		
 		if pan.pan_refresh then pan:pan_refresh() end -- update
 		pan:set_dirty()
@@ -110,11 +109,15 @@ function wscroll.setup(widget,def)
 	if widget.hx<ss*2 then ss=widget.hx/2 end
 	if widget.hy<ss*2 then ss=widget.hy/2 end
 	local s2=math.ceil(ss/2)
-
+	
 	widget.datx=widget_data.new_data{max=1,master=widget.master}
 	widget.daty=widget_data.new_data{max=1,master=widget.master}
+
 	widget.solid=true
 	
+	widget.cache_pan_px=0
+	widget.cache_pan_py=0
+
 	widget.datx.step=1
 	widget.datx.scroll=32
 	widget.daty.step=1
@@ -123,7 +126,8 @@ function wscroll.setup(widget,def)
 	widget.color=widget.color or 0
 	widget.highlight="none"
 	
-	widget.pan=		widget:add({class=widget.scroll_pan or "pan",	hx=widget.hx-s2,	hy=widget.hy-s2	,color=widget.color, fbo=true})
+	widget.pan=		widget:add({class=widget.scroll_pan or "pan",	hx=widget.hx-s2,	hy=widget.hy-s2	,color=widget.color, fbo=true,
+		datx=widget.datx,daty=widget.daty })
 	widget.slidey=	widget:add({class="slide",	hx=s2,				hy=widget.hy-s2,	px=widget.hx-s2,	py=0,
 		daty=widget.daty,color=widget.color})
 	widget.slidex=	widget:add({class="slide",	hx=widget.hx,	hy=s2,           	px=0,           	py=widget.hy-s2,

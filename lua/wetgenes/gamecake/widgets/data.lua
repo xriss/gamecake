@@ -12,18 +12,23 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 A number or string that can be shared between multiple widgets given 
 basic limits and watched for changes.
 
-This alows the same data to be linked and displayed in multiple widgets 
+This allows the same data to be linked and displayed in multiple widgets 
 simultaneously.
 
 ]]
 
 -- module bake
-local M={ modname = (...) } package.loaded[M.modname] = M function M.bake(oven,B) B = B or {}
+local M={ modname = (...) } ; package.loaded[M.modname] = M
+
+M.bake = function(oven,B) B = B or {}
 
 local wdata=B
 
 
 --[[#lua.wetgenes.gamecake.widgets.data.call_hook_later
+
+Data hooks should be immediate and "fast", but maybe you need to defer 
+something till the main loop which is what "later" means.
 
 ]]
 wdata.call_hook_later=function(dat,hook)
@@ -38,6 +43,9 @@ wdata.call_hook_later=function(dat,hook)
 end
 
 --[[#lua.wetgenes.gamecake.widgets.data.call_hook
+
+Data hooks should be fast and probably just adjust other data values 
+which might then trigger more hooks etc so be careful not to feed back.
 
 ]]
 wdata.call_hook=function(dat,hook)
@@ -101,12 +109,12 @@ wdata.data_value=function(dat,val,nohook)
 			if old~=dat.num then
 				dat.str=dat:tostring(dat.num) -- cache on change
 				if not nohook then -- disable hooks
-					dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
+					dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
 				end
 				master.dirty_by_data(dat)
 			else
 				if not nohook then -- disable hooks
---					dat:call_hook_later("click1") -- call click hook if value did not change
+--					dat:call_hook("click1") -- call click hook if value did not change
 				end
 			end
 		end 
@@ -116,12 +124,12 @@ wdata.data_value=function(dat,val,nohook)
 			if val~=dat.str then
 				dat.str=val or dat.str
 				if not nohook then -- disable hooks
-					dat:call_hook_later("value") -- call value hook, which may choose to mod the num some more...
+					dat:call_hook("value") -- call value hook, which may choose to mod the num some more...
 				end
 				master.dirty_by_data(dat)
 			else
 				if not nohook then -- disable hooks
---					dat:call_hook_later("click2") -- call click hook if value did not change
+--					dat:call_hook("click2") -- call click hook if value did not change
 				end
 			end
 		end
@@ -314,6 +322,8 @@ function wdata.new_data(dat)
 
 	dat.call_hook=wdata.call_hook
 	dat.call_hook_later=wdata.call_hook_later
+	dat.add_class_hook=wdata.add_class_hook
+	dat.del_class_hook=wdata.del_class_hook
 
 	dat.tostring=dat.tostring or wdata.data_tostring -- convert number value to string (possible custom format)
 	dat.tonumber=dat.tonumber or wdata.data_tonumber -- convert string value to number (possible custom format)

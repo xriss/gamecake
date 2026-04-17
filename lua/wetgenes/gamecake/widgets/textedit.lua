@@ -205,7 +205,7 @@ function wtextedit.key(widget,ascii,key,act)
 
 				widget:call_hook_later("confirm")
 
-				widget.data:call_hook_later("value")
+				widget.data:call_hook("value")
 				
 			end
 			
@@ -367,7 +367,7 @@ function wtextedit.key(widget,ascii,key,act)
 		widget:call_hook_later("changed")
 		widget:set_dirty()
 
-		widget.data:call_hook_later("changed")
+		widget.data:call_hook("changed")
 
 	end
 	
@@ -379,7 +379,7 @@ end
 function wtextedit.timedelay(widget)
 --print("timedelay")
 	if widget.data then
-		widget.data:call_hook_later("value")
+		widget.data:call_hook("value")
 		if widget.data.class=="number" then
 			local num=widget.data:tonumber(widget.data.str)
 			widget.data:value(num or 0)
@@ -402,7 +402,7 @@ end
 function wtextedit.unfocus(widget)
 
 	if widget.data then
-		widget.data:call_hook_later("value")
+		widget.data:call_hook("value")
 		if widget.data.class=="number" then
 			local num=widget.data:tonumber(widget.data.str)
 			widget.data:value(num or 0)
