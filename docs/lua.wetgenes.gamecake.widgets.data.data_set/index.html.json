@@ -2830,7 +2830,7 @@
    "body": "<p>set a number value and min/max range probably without any triggers</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
-   "line": 153,
+   "line": 161,
    "name": "lua.wetgenes.gamecake.widgets.data.data_set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   }

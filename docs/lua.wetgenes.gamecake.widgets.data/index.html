@@ -726,67 +726,71 @@ local data=master.new_data{}
 </code></pre>
 <p>A number or string that can be shared between multiple widgets given 
 basic limits and watched for changes.</p>
-<p>This alows the same data to be linked and displayed in multiple widgets 
+<p>This allows the same data to be linked and displayed in multiple widgets 
 simultaneously.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.add_class_hook">lua.wetgenes.gamecake.widgets.data.add_class_hook</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L58">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L66">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div></div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.call_hook">lua.wetgenes.gamecake.widgets.data.call_hook</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L40">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
-<div></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L45">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div><p>Data hooks should be fast and probably just adjust other data values 
+which might then trigger more hooks etc so be careful not to feed back.</p>
+</div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.call_hook_later">lua.wetgenes.gamecake.widgets.data.call_hook_later</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L26">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
-<div></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L28">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div><p>Data hooks should be immediate and &quot;fast&quot;, but maybe you need to defer 
+something till the main loop which is what &quot;later&quot; means.</p>
+</div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.data_dec">lua.wetgenes.gamecake.widgets.data.data_dec</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L142">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L150">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div><p>adjust number (may trigger hook)</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.data_get_pos">lua.wetgenes.gamecake.widgets.data.data_get_pos</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L223">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L231">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div><p>get display pos, given the size of the parent and our size?</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.data_get_size">lua.wetgenes.gamecake.widgets.data.data_get_size</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L203">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L211">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div><p>how wide or tall should the handle be given the size of the parent?</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.data_inc">lua.wetgenes.gamecake.widgets.data.data_inc</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L132">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L140">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div><p>adjust number (may trigger hook)</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.data_set">lua.wetgenes.gamecake.widgets.data.data_set</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L153">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L161">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div><p>set a number value and min/max range probably without any triggers</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.data_snap">lua.wetgenes.gamecake.widgets.data.data_snap</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L244">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L252">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div><p>given the parents size and our relative position/size within it update 
 dat.num and return a new position (for snapping)</p>
 </div>
@@ -794,46 +798,46 @@ dat.num and return a new position (for snapping)</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.data_tonumber">lua.wetgenes.gamecake.widgets.data.data_tonumber</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L184">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L192">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div><p>get a number from the string</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.data_tonumber_from_list">lua.wetgenes.gamecake.widgets.data.data_tonumber_from_list</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L192">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L200">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div></div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.data_tostring">lua.wetgenes.gamecake.widgets.data.data_tostring</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L168">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L176">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div><p>get a string from the number</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.data_tostring_from_list">lua.wetgenes.gamecake.widgets.data.data_tostring_from_list</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L176">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L184">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div></div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.data_value">lua.wetgenes.gamecake.widgets.data.data_value</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L78">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L86">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div><p>set number (may trigger hook unless nohook is set)</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.del_class_hook">lua.wetgenes.gamecake.widgets.data.del_class_hook</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L65">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L73">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div></div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.widgets.data.new_data">lua.wetgenes.gamecake.widgets.data.new_data</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L282">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua#L290">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua</a></div>
 <div></div>
 </div>
 
