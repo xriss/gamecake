@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 658,
+   "count": 659,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 647,
+   "count": 648,
    "name": "lua.wetgenes"
   },
   {
@@ -1758,11 +1758,11 @@
    "name": "lua.wetgenes.syncs"
   },
   {
-   "count": 183,
+   "count": 184,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 38,
+   "count": 39,
    "name": "lua.wetgenes.tardis.array"
   },
   {
@@ -1888,6 +1888,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.setn"
   },
   {
    "count": 1,
@@ -2830,7 +2834,7 @@
    "body": "<pre><code>q4 = tardis.q4.set(q4,{0,0,0,1})\nq4 = tardis.q4.set(q4,0,0,0,1)\nq4 = tardis.q4.set(q4,{&quot;xyz&quot;,0,90,0})\nq4 = tardis.q4.set(q4,&quot;xyz&quot;,0,90,0)\nq4 = tardis.q4.set(q4,&quot;xyz&quot;,{0,90,0})\n</code></pre>\n<p>If the first item in the stream is not a string then this is just a normal\narray.set style.</p>\n<p>If first parameter of the stream is a string then initialise the quaternion\nusing a simple axis rotation notation Where the string is a list of axis. This\nstring is lower case letters. x y or z and then the following numbers are\namount of rotation to apply around that axis in degrees. You should provide as\nmany numbers as letters.</p>\n<p>Essentially this gives you a way of initialising quaternion rotations in an\neasily readable way.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2842,
+   "line": 2868,
    "name": "lua.wetgenes.tardis.q4.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

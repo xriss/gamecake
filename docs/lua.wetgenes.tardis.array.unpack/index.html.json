@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 658,
+   "count": 659,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 647,
+   "count": 648,
    "name": "lua.wetgenes"
   },
   {
@@ -1758,11 +1758,11 @@
    "name": "lua.wetgenes.syncs"
   },
   {
-   "count": 183,
+   "count": 184,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 38,
+   "count": 39,
    "name": "lua.wetgenes.tardis.array"
   },
   {
@@ -1888,6 +1888,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.setn"
   },
   {
    "count": 1,
@@ -2830,7 +2834,7 @@
    "body": "<pre><code>a1,a2=v2:unpack()\na1,a2,a3=v3:unpack()\na1,a2,a3,a4=v4:unpack()\n</code></pre>\n<p>Return all values in this array. Note this should be used instead of\nthe unpack function for future optimisation safety.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 391,
+   "line": 417,
    "name": "lua.wetgenes.tardis.array.unpack",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

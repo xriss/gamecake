@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 658,
+   "count": 659,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 647,
+   "count": 648,
    "name": "lua.wetgenes"
   },
   {
@@ -1758,11 +1758,11 @@
    "name": "lua.wetgenes.syncs"
   },
   {
-   "count": 183,
+   "count": 184,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 38,
+   "count": 39,
    "name": "lua.wetgenes.tardis.array"
   },
   {
@@ -1888,6 +1888,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.setn"
   },
   {
    "count": 1,
@@ -2830,7 +2834,7 @@
    "body": "<pre><code>m4 = m4:prerrotate(radians,v3a)\nm4 = m4:prerrotate(radians,v3a,r)\n</code></pre>\n<p>Pre apply a rotation in radians around the given axis to this matrix.</p>\n<p>If r is provided then the result is written into r and returned\notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1917,
+   "line": 1943,
    "name": "lua.wetgenes.tardis.m4.prerrotate",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

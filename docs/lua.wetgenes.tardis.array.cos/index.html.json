@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 658,
+   "count": 659,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 647,
+   "count": 648,
    "name": "lua.wetgenes"
   },
   {
@@ -1758,11 +1758,11 @@
    "name": "lua.wetgenes.syncs"
   },
   {
-   "count": 183,
+   "count": 184,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 38,
+   "count": 39,
    "name": "lua.wetgenes.tardis.array"
   },
   {
@@ -1888,6 +1888,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.setn"
   },
   {
    "count": 1,
@@ -2830,7 +2834,7 @@
    "body": "<pre><code>r=it:cos(r)\nr=it:cos(it.new())\n</code></pre>\n<p>Perform math.cos on all values of this array.</p>\n<p>If r is provided then the result is written into r and returned otherwise it is\nmodified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 705,
+   "line": 731,
    "name": "lua.wetgenes.tardis.array.cos",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

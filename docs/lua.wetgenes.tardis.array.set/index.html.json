@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 658,
+   "count": 659,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 647,
+   "count": 648,
    "name": "lua.wetgenes"
   },
   {
@@ -1758,11 +1758,11 @@
    "name": "lua.wetgenes.syncs"
   },
   {
-   "count": 183,
+   "count": 184,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 38,
+   "count": 39,
    "name": "lua.wetgenes.tardis.array"
   },
   {
@@ -1888,6 +1888,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.setn"
   },
   {
    "count": 1,
@@ -2830,7 +2834,7 @@
    "body": "<pre><code>a=a:set(1,2,3,4)\na=a:set({1,2,3,4})\na=a:set({1,2},{3,4})\na=a:set(function(i) return i end)\n</code></pre>\n<p>Assign some numbers to an array, all the above examples will assign 1,2,3,4 to\nthe first four slots in the given array, as you can see we allow one level of\ntables. Any class that is based on this array class can be used instead of an\nexplicit table. So we can use a v2 or v3 or m4 etc etc.</p>\n<p>if more numbers are given than the size of the array then they will be\nignored.</p>\n<p>if less numbers are given than the size of the array then the last number will\nbe repeated.</p>\n<p>if no numbers are given then nothing will be done</p>\n<p>if a function is given it will be called with the index and should\nreturn a number.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 303,
+   "line": 329,
    "name": "lua.wetgenes.tardis.array.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
