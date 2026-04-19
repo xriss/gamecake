@@ -45,6 +45,9 @@ screen.create=function(it,opts)
 	
 	it.pixel_snaps=it.opts.pixel_snaps -- set flag to snap raw pixels else we snap postprocesed pixels
 	
+	it.raw_hx=1 -- raw size of window / fbo we are drawing into
+	it.raw_hy=1
+
 	it.lox=it.opts.lox
 	it.loy=it.opts.loy
 	it.hix=it.opts.hix
@@ -121,11 +124,15 @@ screen.create=function(it,opts)
 	it.fxbo2=framebuffers.create(it.hx,it.hy,0)
 	
 	it.screen_resize_view=function()
+		local view=views.get()
+		local hx,hy=it.hx,it.hy
+		
+		it.raw_view=view -- remember parent view
+		it.raw_hx=view.hx	-- raw size of window / fbo we are drawing into
+		it.raw_hy=view.hy
+
 		if it.autosize=="lohi" then -- auto resize using lox,loy and hix,hiy values
 		
-			local view=views.get()
-			local hx,hy=it.hx,it.hy
-
 			local faa=view.hx/view.hy
 			local haa=it.lox/it.loy
 
@@ -377,6 +384,34 @@ screen.create=function(it,opts)
 			flat.tristrip("rawuv",t,"raw_tex")
 			gl.Color(r,g,b,a)
 			
+		end
+
+		if it.overshade then -- { "shadername" , function(p) custom_uniforms end }
+
+			local t={
+				-1,	 1,	0,	0,			0,
+				-1,	-1,	0,	0,			it.raw_hy,
+				 1,	 1,	0,	it.raw_hx,	0,
+				 1,	-1,	0,	it.raw_hx,	it.raw_hy,
+			}
+
+local ok,err=xpcall(function()
+		gl.Enable(gl.BLEND)
+			flat.tristrip( "rawuv", t, it.overshade[1], function(p)
+
+				local id=p:uniform("iResolution")
+				if id then
+					gl.Uniform3f( id, it.raw_hx,it.raw_hy,0 )
+				end
+
+				if it.overshade[2] then -- custom uniform setup
+					(it.overshade[2])(p)
+				end
+				
+			end)
+end,debug.traceback)
+if not ok then print(err) end
+
 		end
 
 		it.screen_resize_view()

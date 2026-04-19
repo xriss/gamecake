@@ -171,10 +171,16 @@ end
 	r = array.__add(a,b)
 
 Add a to b and return a a.new(result) so the class returned will match the
-input class of a and neither a or b will be modified.
+input class of a ( or b if a is a number ) and neither a or b will be modified.
 
 ]]
 function array.__add(a,b)
+	if type(a)=="number" then
+		return b.new(b):add( b.new():setn(a) )
+	end
+	if type(b)=="number" then
+		return a.new(a):add( a.new():setn(b) )
+	end
 	return a.new(a):add(b)
 end
 
@@ -183,10 +189,16 @@ end
 	r = array.__sub(a,b)
 
 Subtract b from a and return a a.new(result) so the class returned will match the
-input class of a and neither a or b will be modified.
+input class of a ( or b if a is a number ) and neither a or b will be modified.
 
 ]]
 function array.__sub(a,b)
+	if type(a)=="number" then
+		return b.new(b):sub( b.new():setn(a) )
+	end
+	if type(b)=="number" then
+		return a.new(a):sub( a.new():setn(b) )
+	end
 	return a.new(a):sub(b)
 end
 
@@ -248,6 +260,20 @@ also control its base length.
 
 ]]
 function array.new(...) return setmetatable({},array):set(...) end
+
+--[[#lua.wetgenes.tardis.array.setn
+
+	a=a:setn(1)
+
+Dumber version of set that must be a single number and repeats to all slots.
+
+]]
+function array.setn(it,n)
+	for i=1,#it do
+		it[i]=n
+	end
+	return it
+end
 
 --[[#lua.wetgenes.tardis.array.nset
 

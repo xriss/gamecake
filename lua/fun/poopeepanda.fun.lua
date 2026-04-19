@@ -1,6 +1,6 @@
---
--- This is fun64 code, you can copy paste it into https://xriss.github.io/fun64/pad/ to run it.
---
+-- 
+-- This is fun64 code, you can copy paste it into https://xriss.github.io/fun64/pad/ to run it. 
+-- 
 
 local tardis=require("wetgenes.tardis")
 local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4")
@@ -130,20 +130,21 @@ local main_setup=function()
 	global.scene=all.create_scene()
 	scene:do_setup()
 
+	-- add overshade
+	overshade:setup()
 end
 setup=main_setup
 
 update=function()
 	if setup then setup=setup() end -- call setup once
+	overshade:update()
 	scene:do_update()
-
 end
 
 draw=function()
-
+	overshade:draw()
 	scene:do_draw()
 end
-
 
 
 --------------------------------------------------------------------------------
@@ -243,7 +244,332 @@ draws.string4_in_map=function(s,x,y)
 	draws.string4(s,x,y)
 end
 
+--------------------------------------------------------------------------------
+--
+--#overshade
 
+overshade={}
+
+overshade.setup=function(overshade)
+    local screen=system.components.screen
+
+	overshade.buttons={
+		{ "bl" , 14/32 , 20/32 ,  5.0/32 , "up" },
+		{ "bl" ,  8/32 , 14/32 ,  5.0/32 , "left" },
+		{ "bl" , 20/32 , 14/32 ,  5.0/32 , "right" },
+		{ "bl" , 14/32 ,  8/32 ,  5.0/32 , "down" },
+
+--		{ "br" , 14/32 , 20/32 ,  5.0/32 , "y" , name="Y" },
+		{ "br" ,  8/32 , 14/32 ,  5.0/32 , "b" , name="B" },
+--		{ "br" , 20/32 , 14/32 ,  5.0/32 , "x" , name="X" },
+		{ "br" , 14/32 ,  8/32 ,  5.0/32 , "a" , name="A" },
+	}
+    overshade.touches={}
+	
+	overshade.DATA_MAX=#overshade.buttons
+
+	overshade.enable={"fun_overshade?DATA_MAX="..overshade.DATA_MAX.."&hax="..tostring(overshade),overshade.uniforms}
+	overshade:update()
+end
+
+overshade.update=function(overshade)
+    local screen=system.components.screen
+    
+    overshade.hx=screen.raw_hx
+    overshade.hy=screen.raw_hy
+    
+    -- shortest edge
+    overshade.hh=overshade.hx < overshade.hy and overshade.hx or overshade.hy
+    
+    overshade.margin=0
+    overshade.margin_min=-4/32
+    overshade.margin_max=8/32
+    
+    overshade.stick=overshade.stick or {} -- fill this up with left/right/up/down
+	local stick=overshade.stick
+
+	local s=overshade.hh/2
+	for i,button in ipairs(overshade.buttons) do
+		local base
+		local flip
+		if     button[1]=="bl" then
+			base=V2(0,overshade.hy)
+			flip=V2(s,-s)
+		elseif button[1]=="br" then
+			base=V2(overshade.hx,overshade.hy)
+			flip=V2(-s,-s)
+		elseif button[1]=="tl" then
+			base=V2(0,0)
+			flip=V2(s,s)
+		elseif button[1]=="tr" then
+			base=V2(overshade.hx,0)
+			flip=V2(-s,s)
+		end
+		button.pos=base+((overshade.margin+V2(button[2],button[3]))*flip)
+		button.siz=s*button[4]
+		if     button[5]=="left"  then	stick[1]=button ; button.stick=stick
+		elseif button[5]=="right" then	stick[2]=button ; button.stick=stick
+		elseif button[5]=="up"    then	stick[3]=button ; button.stick=stick
+		elseif button[5]=="down"  then	stick[4]=button ; button.stick=stick
+		end
+	end
+	
+	-- merge stick
+	stick.xpos=stick[1] and stick[2] and (stick[1].pos+stick[2].pos)/2 or V2()
+	stick.ypos=stick[3] and stick[4] and (stick[3].pos+stick[4].pos)/2 or V2()
+	stick.pos=(stick.xpos+stick.ypos)/2
+
+	for _,m in ipairs( ups(1).msgs() ) do -- a cache of msgs can be found here
+--DUMP(m)
+	
+		local id=0
+		local pos=V2()
+		local action=0
+
+		if m.class=="mouse" then
+			if m.keyname=="left" or m.keyname=="mouse" then -- only left mouse clicks
+				id="mouse"
+				action=m.action
+			end
+			pos=V2(m.x,m.y)
+		elseif m.class=="touch" then
+			id=m.id
+			action=m.action
+			pos=V2(m.x,m.y)
+		end
+
+		if id~=0 then -- ignore unknown id
+			local touch=overshade.touches[id]
+			if action==1 then -- first touch creates
+				if not touch then touch={} ; overshade.touches[id]=touch end
+				local best_dist=math.huge
+				local best_button
+				for i,button in ipairs(overshade.buttons) do
+					if not button.stick then -- sticks are special
+						local d=(pos-button.pos):len()
+						if d<best_dist then
+							best_dist=d
+							best_button=button
+						end
+					end
+				end
+				local d=(pos-stick.pos):len()
+				if d<best_dist then
+					best_dist=d
+					best_button=stick
+				end
+				if best_button then
+					touch.button=best_button -- link button to touch
+					touch.button.touch=touch -- link touch to button
+					touch.start=V2(pos)
+				end
+				if touch.button.name then
+					oven.ups.msg({
+						time=oven.time(),
+						class="padkey",
+						value=1,
+						name=touch.button.name,
+						id=1,
+					})
+				end
+			end
+			if touch then
+--print(id,action,pos,touch)
+				touch.pos=V2(pos)
+				
+				if touch.button==stick then -- special stick
+					local m=touch.pos-stick.pos
+					if math.abs(m[1]) > math.abs(m[2]) then
+						if m[1]<0 then
+							stick.dir="left"
+						else
+							stick.dir="right"
+						end
+					else
+						if m[2]<0 then
+							stick.dir="up"
+						else
+							stick.dir="down"
+						end
+					end
+					-- send virtual stick movements back into ups
+					local px=m[1]/(overshade.hh/8)
+					if px<-1 then px=-1 end
+					if px> 1 then px= 1 end
+					local py=m[2]/(overshade.hh/8)
+					if py<-1 then py=-1 end
+					if py> 1 then py= 1 end
+					oven.ups.msg({
+						time=oven.time(),
+						class="padaxis",
+						value=math.floor(0x7fff*px),
+						name="LeftX",
+						id=1,
+					})
+					oven.ups.msg({
+						time=oven.time(),
+						class="padaxis",
+						value=math.floor(0x7fff*py),
+						name="LeftY",
+						id=1,
+					})
+				end
+				
+				if action==-1 then -- last touch removes
+					-- send virtual button presses back into ups
+					if touch.button.name then
+						oven.ups.msg({
+							time=oven.time(),
+							class="padkey",
+							value=-1,
+							name=touch.button.name,
+							id=1,
+						})
+					end
+					touch.button.touch=nil
+					overshade.touches[id]=nil
+					if touch.button==stick then -- special stick
+						stick.dir=nil
+						oven.ups.msg({
+							time=oven.time(),
+							class="padaxis",
+							value=0,
+							name="LeftX",
+							id=1,
+						})
+						oven.ups.msg({
+							time=oven.time(),
+							class="padaxis",
+							value=0,
+							name="LeftY",
+							id=1,
+						})
+					end
+				end
+			end
+		end
+--		print(id,act,x,y)
+	end
+
+	screen.overshade=overshade.enable
+	
+end
+
+overshade.draw=function(overshade)
+end
+
+overshade.uniforms=function(p)
+	local idx=p:uniform("data")
+
+	for i,button in ipairs(overshade.buttons) do
+		local touch=button.touch
+		local pos=button.pos
+		if touch then
+			pos=touch.start -- move button to click pos
+		end
+		if button[5]==overshade.stick.dir then
+			touch=overshade.stick
+		end
+		gl.Uniform4f( idx+i-1,   pos[1],pos[2],button.siz,touch and 1 or 0 )
+	end
+
+end
+
+-- Include GLSL code inside a comment
+-- The GLSL handler will pickup the #shader directive and use all the code following it until the next #shader directive.
+--[=[
+#shader "fun_overshade"
+
+#ifdef VERTEX_SHADER
+
+attribute vec3 a_vertex;
+attribute vec2 a_texcoord;
+
+varying vec2  v_texcoord;
+ 
+void main()
+{
+	gl_Position = vec4(a_vertex, 1.0);
+	v_texcoord = a_texcoord;
+}
+
+
+#endif
+
+#ifdef FRAGMENT_SHADER
+
+#if defined(GL_FRAGMENT_PRECISION_HIGH)
+precision highp float; /* really need better numbers if possible */
+#endif
+
+varying vec2  v_texcoord;
+
+uniform vec4 data[DATA_MAX];
+
+void check(inout vec4 best,vec4 dat)
+{
+	vec2 dd=v_texcoord.xy-dat.xy;
+	float dl=length(dd);
+	if( dl<dat.z )
+	{
+		if( dl<best.w )
+		{
+			float c=dl/dat.z;
+			if(dat.w==0.0)
+			{
+				if(c>(4.0/8.0))
+				{
+					float f=pow(1.0-min(1.0,max(0.0,(abs(c-(6.0/8.0))*8.0))),1.0/4.0)*0.25;
+					best=vec4( f , f , f , dl );
+				}
+			}
+			else
+			{
+				float f=pow(1.0-min(1.0,max(0.0,((c-(6.0/8.0))*8.0))),1.0/4.0)*0.25;
+				best=vec4( f , f , f , dl );
+			}
+		}
+	}
+}
+
+void main(void)
+{
+	vec4 best=vec4( 0.0 , 0.0 , 0.0 , 1.0/0.0 );
+
+// unrolled loop
+
+	#if 0<DATA_MAX
+		check(best, data[0] );
+	#endif
+	#if 1<DATA_MAX
+		check(best, data[1] );
+	#endif
+	#if 2<DATA_MAX
+		check(best, data[2] );
+	#endif
+	#if 3<DATA_MAX
+		check(best, data[3] );
+	#endif
+	#if 4<DATA_MAX
+		check(best, data[4] );
+	#endif
+	#if 5<DATA_MAX
+		check(best, data[5] );
+	#endif
+	#if 6<DATA_MAX
+		check(best, data[6] );
+	#endif
+	#if 7<DATA_MAX
+		check(best, data[7] );
+	#endif
+
+	gl_FragColor=vec4( best.xyz , 0.0 );
+}
+
+#endif
+
+#shader
+]=]
 
 --------------------------------------------------------------------------------
 --
