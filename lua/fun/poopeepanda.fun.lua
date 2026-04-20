@@ -267,6 +267,7 @@ overshade.setup=function(overshade)
     overshade.touches={}
 	
 	overshade.DATA_MAX=#overshade.buttons
+    overshade.last_touch=0
 
 	overshade.enable={"fun_overshade?DATA_MAX="..overshade.DATA_MAX.."&hax="..tostring(overshade),overshade.uniforms}
 	overshade:update()
@@ -375,6 +376,8 @@ overshade.update=function(overshade)
 			end
 			if touch then
 --print(id,action,pos,touch)
+			    overshade.last_touch=oven.time()
+
 				touch.pos=V2(pos)
 				
 				if touch.button==stick then -- special stick
@@ -451,8 +454,22 @@ overshade.update=function(overshade)
 --		print(id,act,x,y)
 	end
 
-	screen.overshade=overshade.enable
-	
+	local age=(oven.time()-overshade.last_touch)
+	if age>10 then
+		overshade.fade=0
+	else
+		if age<0 then
+			overshade.fade=1
+		else
+			overshade.fade=1-((age)/10)
+		end
+	end
+
+	if overshade.fade==0 then
+		screen.overshade=nil
+	else
+		screen.overshade=overshade.enable
+	end
 end
 
 overshade.draw=function(overshade)
@@ -460,7 +477,6 @@ end
 
 overshade.uniforms=function(p)
 	local idx=p:uniform("data")
-
 	for i,button in ipairs(overshade.buttons) do
 		local touch=button.touch
 		local pos=button.pos
@@ -472,6 +488,8 @@ overshade.uniforms=function(p)
 		end
 		gl.Uniform4f( idx+i-1,   pos[1],pos[2],button.siz,touch and 1 or 0 )
 	end
+
+	gl.Uniform4f( p:uniform("fade") , overshade.fade,0,0,0 )
 
 end
 
@@ -503,6 +521,8 @@ precision highp float; /* really need better numbers if possible */
 #endif
 
 varying vec2  v_texcoord;
+
+uniform vec4 fade;
 
 uniform vec4 data[DATA_MAX];
 
@@ -563,7 +583,7 @@ void main(void)
 		check(best, data[7] );
 	#endif
 
-	gl_FragColor=vec4( best.xyz , 0.0 );
+	gl_FragColor=vec4( best.xyz , 0.0 )*fade.x;
 }
 
 #endif
