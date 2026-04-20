@@ -1,7 +1,7 @@
 project "lua_linenoise"
 language "C"
-files { "./*.c" }
+files { "linenoise/linenoise.c" }
 
-includedirs { "." }
+includedirs { "linenoise" }
 
 KIND{lua="linenoise"}

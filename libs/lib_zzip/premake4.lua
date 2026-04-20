@@ -2,7 +2,7 @@
 project "lib_zzip"
 kind "StaticLib"
 language "C"
-files { "zzip/**.c" , "zzip/**.h" }
+files { "zziplib/zzip/**.c" , "zziplib/zzip/**.h" }
 
 if WINDOWS then
 
@@ -22,7 +22,7 @@ else -- nix
 end
 
 
-includedirs { "." , "../lib_z" }
+includedirs { "zziplib" , "../lib_z" }
 
 
 

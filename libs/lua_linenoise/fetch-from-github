@@ -1,0 +1,6 @@
+cd `dirname $0`
+
+rm -rf linenoise
+git clone --depth 1 https://github.com/antirez/linenoise.git 
+rm -rf linenoise/.git
+

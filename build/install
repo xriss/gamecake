@@ -302,13 +302,13 @@ if [ ! -z "$( arg_get luajit )" ]; then
 	elif [ ! -z "$( arg_get mingw )" ]; then
 	
 		make clean
-		make amalg HOST_CC="gcc -m32" CROSS=i686-w64-mingw32- TARGET_SYS=Windows BUILDMODE=static
+		make amalg HOST_CC="gcc -m64" CROSS=x86_64-w64-mingw32- TARGET_SYS=Windows BUILDMODE=static
 
-		sudo mkdir -p /usr/i686-w64-mingw32/include/luajit
-		sudo cp src/lua*.h /usr/i686-w64-mingw32/include/luajit
-		sudo cp src/lauxlib.h /usr/i686-w64-mingw32/include/luajit
+		sudo mkdir -p /usr/x86_64-w64-mingw32/include/luajit
+		sudo cp src/lua*.h /usr/x86_64-w64-mingw32/include/luajit
+		sudo cp src/lauxlib.h /usr/x86_64-w64-mingw32/include/luajit
 		
-		sudo cp src/libluajit.a /usr/i686-w64-mingw32/lib
+		sudo cp src/libluajit.a /usr/x86_64-w64-mingw32/lib
 		
 	elif [ "`uname`" = "Darwin" ] ; then
 
@@ -376,12 +376,12 @@ if [ ! -z "$( arg_get sdl2 )" ]; then
 		tar zxvf SDL2-devel-$( arg_get sdl2 ).tar.gz
 		cd SDL2-$( arg_get sdl2 )
 		
-		sudo cp -r i686-w64-mingw32/ /usr/
+		sudo cp -r x86_64-w64-mingw32/ /usr/
 
 		# force static link by deleting any dynamic versions
-		sudo rm -f /usr/i686-w64-mingw32/lib/libSDL2.so
-		sudo rm -f /usr/i686-w64-mingw32/lib/libSDL2.dylib
-		sudo rm -f /usr/i686-w64-mingw32/lib/libSDL2.dll.a
+		sudo rm -f /usr/x86_64-w64-mingw32/lib/libSDL2.so
+		sudo rm -f /usr/x86_64-w64-mingw32/lib/libSDL2.dylib
+		sudo rm -f /usr/x86_64-w64-mingw32/lib/libSDL2.dll.a
 
 		cd ..
 		

@@ -98,9 +98,9 @@ newplatform {
     description = "mingw",
 	gcc=
 	{
-		cc ="i686-w64-mingw32-gcc-posix",
-		cxx="i686-w64-mingw32-c++-posix",
-		ar ="i686-w64-mingw32-ar",
+		cc ="x86_64-w64-mingw32-gcc",
+		cxx="x86_64-w64-mingw32-c++",
+		ar ="x86_64-w64-mingw32-ar",
 		cppflags = "-MMD -fPIC",
 	}
 }
@@ -624,7 +624,7 @@ elseif MINGW then
 	LUA_LINKS= { "luajit" }
 
 -- build these files using build/install --mingw
-	includedirs { "/usr/i686-w64-mingw32/include/luajit" }
+	includedirs { "/usr/x86_64-w64-mingw32/include/luajit" }
 --	libdirs { "/usr/i686-w64-mingw32/lib/luajit" }
 
 --	includedirs { path.getabsolute("./vbox_mingw/luajit/include") }
@@ -701,7 +701,7 @@ end
 if MINGW then
 
 -- build these files using build/install --mingw
-	includedirs { "/usr/i686-w64-mingw32/include/SDL2" }
+	includedirs { "/usr/x86_64-w64-mingw32/include/SDL2" }
 --	libdirs { "/usr/i686-w64-mingw32/lib/SDL2" }
 
 --	includedirs { path.getabsolute("./vbox_mingw/SDL2/include/SDL2") }
@@ -787,7 +787,7 @@ all_includes=all_includes or {
 
 
 -- These are mostly linux only bindings for linux only gamecake projects...
-	{"lua_linenoise",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
+--	{"lua_linenoise",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
 	{"lua_posix",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 	{"lua_periphery",	nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_v4l2",		nil			or		NIX		or		nil			or		nil			or	nil		},

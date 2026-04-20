@@ -143,6 +143,7 @@ Available options are :
 
 ./make --gcc=gcc     # normal nix build using gcc (default)
 ./make --gcc=clang   # alternative nix build using clang
+./make --gcc=mingw   # build using mingw
 ./make --gcc=emcc    # build using emscripten
 ./make --gcc=android # build using android
 ./make --gcc=osx     # build using osx clang
