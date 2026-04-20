@@ -1073,7 +1073,7 @@ else
 	end
 
 
-	local hold_pos=player.pos+V3(0,-16,0)
+	local hold_pos=player.pos+V3(0,-10,0)
 	local hold=player:depend("hold")
 	local hold_len -- how well held 0 is best
 	if bb_set and hold then -- throw
