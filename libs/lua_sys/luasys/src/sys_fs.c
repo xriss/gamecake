@@ -1,8 +1,6 @@
 /* Lua System: File System */
 
-
 #ifndef _WIN32
-#include <limits.h>
 #include <sys/statvfs.h>
 #include <dirent.h>
 #endif

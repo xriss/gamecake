@@ -784,7 +784,7 @@ sys_ioctl (lua_State *L)
   res = -1;
 #else
   res = !DeviceIoControl(fd, code, in.ptr.w, (DWORD) in.size,
-   out.ptr.w, (DWORD) out.size, &nr, NULL);
+   out.ptr.w, (DWORD) out.size, (LPDWORD)&nr, NULL);
 #endif
   sys_vm_enter(L);
 

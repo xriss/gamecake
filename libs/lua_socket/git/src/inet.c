@@ -512,7 +512,7 @@ int inet_aton(const char *cp, struct in_addr *inp)
 }
 #endif
 
-#ifdef LUASOCKET_INET_PTON
+#ifdef LUASOCKET_INET_PTON_NO
 int inet_pton(int af, const char *src, void *dst)
 {
     struct addrinfo hints, *res;
