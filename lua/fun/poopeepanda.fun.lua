@@ -327,16 +327,18 @@ overshade.update=function(overshade)
 		local pos=V2()
 		local action=0
 
-		if m.class=="mouse" then
+		if m.class=="touch" then
+			id=m.id
+			action=m.action
+			pos=V2(m.x,m.y)
+--[[
+		elseif m.class=="mouse" then
 			if m.keyname=="left" or m.keyname=="mouse" then -- only left mouse clicks
 				id="mouse"
 				action=m.action
 			end
 			pos=V2(m.x,m.y)
-		elseif m.class=="touch" then
-			id=m.id
-			action=m.action
-			pos=V2(m.x,m.y)
+]]
 		end
 
 		if id~=0 then -- ignore unknown id
