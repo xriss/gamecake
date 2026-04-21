@@ -4,7 +4,6 @@ exe
 dbg/*
 
 *.flatpak-builder
-*.gradle
 *.cxx
 *.vagrant
 *.git
@@ -22,6 +21,7 @@ android/res/*
 android/gamecake/src/main/AndroidManifest.xml
 android/gamecake/src/main/java/com/wetgenes/gamecake/*
 android/gamecake/build.gradle
+android/.gradle/
 
 libs/exe_gamecake/preloadlibs.c
 libs/exe_gamecake/cache.c
