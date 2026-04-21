@@ -13,7 +13,6 @@ build-*
 
 html/*.zip
 
-android/config.sh
 android/build
 android/*/build
 android/gamecake/src/main/res/*
