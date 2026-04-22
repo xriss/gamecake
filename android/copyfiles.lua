@@ -10,7 +10,7 @@ local args={...}
 
 local basedir=assert( args[1] or os.getenv("ANDROID_APP_BASEDIR") ,"Must specify basedir, eg \"./copyfiles.lua ../../apps/dike\"")
 
-local smell=args[2] or os.getenv("ANDROID_APP_SMELL") -- optional smell
+local smell=args[2] or os.getenv("ANDROID_APP_SMELL") or "" -- optional smell
 
 local fdat=assert(zips.readfile(basedir.."/opts.lua"),"opts.lua must exist in the given basedir")
 
@@ -31,31 +31,26 @@ end
 
 local version=args[3] or preopts.version or bake.version_from_time()
 local opts={
-		smell=smell,
-        name=preopts.name,
-        title=preopts.title,
-        namev=preopts.title..".v"..version,
-        version=version,
-        version_int=math.floor(version*1000),
+	basedir=basedir,
+	smell=smell,
+	name=preopts.name,
+	title=preopts.title,
+	namev=preopts.title..".v"..version,
+	version=version,
+	version_int=math.floor(version*100000),
 	orientation=preopts.orientation or "unspecified",
-	
 	package=preopts.android_package or "com.wetgenes.gamecake."..preopts.name,
 	activity=preopts.android_activity or "com.wetgenes.gamecake."..preopts.name..".CakeAct",
 	permissions=preopts.android_permissions or "",
 }
 
 
--- remove all files in res
-
-os.execute("rm -rf gamecake/src/main/java/com/wetgenes/gamecake")
-os.execute("rm -rf res")
-os.execute("mkdir res")
-os.execute("mkdir res/values")
+os.execute("mkdir -p gamecake/src/main/res/")
 os.execute("mkdir -p gamecake/src/main/java/com/wetgenes/gamecake/"..opts.name)
 
-
+bake.replacefile("input/config.sh","config.sh",opts)
 bake.replacefile("input/AndroidManifest.xml","gamecake/src/main/AndroidManifest.xml",opts)
-bake.replacefile("input/strings.xml","res/values/strings.xml",opts)
+bake.replacefile("input/strings.xml","gamecake/src/main/res/strings.xml",opts)
 bake.replacefile("input/CakeAct.java","gamecake/src/main/java/com/wetgenes/gamecake/"..opts.name.."/CakeAct.java",opts)
 bake.replacefile("input/build.gradle","gamecake/build.gradle",opts)
 
@@ -67,7 +62,7 @@ for _,dir in ipairs{"lua","data"} do
 	local files=bake.findfiles{basedir=basedir,dir=dir}.ret
 
 	for i,v in ipairs(files) do
-		local n=zips.apk_munge_filename(v) -- this includes the res/raw prefix
+		local n="gamecake/src/main/"..zips.apk_munge_filename(v) -- this includes the res/raw prefix
 		bake.create_dir_for_file(n)
 		bake.copyfile(basedir.."/"..v,n)
 		print(n)
@@ -106,9 +101,8 @@ local ficon=basedir.."/art/icons/android_icon.png"
 if not bake.file_exists(ficon) then
 	ficon="art/icons/android_icon.png"
 end
-
+--[[
 if bake.file_exists(ficon) then
-
 
 	for i,v in ipairs{
 		{s=192,o="xxxhdpi"},
@@ -130,5 +124,5 @@ if bake.file_exists(ficon) then
 	end
 
 end
-
+]]
 

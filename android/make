@@ -11,8 +11,9 @@ BASENAME=` basename $ANDROID_APP_BASEDIR `
 ./gradlew build installDebug
 
 ./adb logcat -c
-./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake.$BASENAME/.CakeAct | ./adb logcat "SDL/APP:*" "*:S"
-
+#./adb logcat "SDL/APP:*" "*:S" \
+./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake.$BASENAME/.CakeAct
+#./adb logcat
 
 #zipinfo app/build/outputs/apk/debug/app-debug.apk
 

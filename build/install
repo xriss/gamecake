@@ -21,7 +21,7 @@ if ! [[ -x "$(command -v require.sh)" ]] ; then
 
 fi
 
-arg_flags=("luajit=git sdl2=2.28.1 help mingw android")
+arg_flags=("luajit=git sdl2=2.32.10 help mingw android")
 
 arg_get() {
 key="$1"

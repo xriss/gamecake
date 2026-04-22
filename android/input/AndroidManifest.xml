@@ -3,7 +3,6 @@
      com.gamemaker.game
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="{package}"
     android:versionCode="1"
     android:versionName="1.0"
     android:installLocation="auto">
@@ -64,7 +63,8 @@
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-        android:hardwareAccelerated="true" >
+        android:hardwareAccelerated="true"
+		>
 
         <!-- Example of setting SDL hints from AndroidManifest.xml:
         <meta-data android:name="SDL_ENV.SDL_ACCELEROMETER_AS_JOYSTICK" android:value="0"/>
@@ -75,6 +75,7 @@
             android:alwaysRetainTaskState="true"
             android:launchMode="singleInstance"
             android:configChanges="layoutDirection|locale|orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
+			android:exported="true"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
