@@ -6,11 +6,14 @@ source ./config.sh
 
 BASENAME=` basename $ANDROID_APP_BASEDIR `
 
+rm -rf build
+rm -rf gamecake/build
+
 ./copyfiles
 
 ./gradlew build installDebug
 
-./adb logcat -c
+#./adb logcat -c
 #./adb logcat "SDL/APP:*" "*:S" \
 ./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake.$BASENAME/.CakeAct
 #./adb logcat

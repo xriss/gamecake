@@ -45,7 +45,8 @@ local opts={
 }
 
 
-os.execute("mkdir -p gamecake/src/main/res/")
+os.execute("rm -rf gamecake/src/main/assets")
+os.execute("rm -rf gamecake/src/main/java/com")
 os.execute("mkdir -p gamecake/src/main/java/com/wetgenes/gamecake/"..opts.name)
 
 bake.replacefile("input/config.sh","config.sh",opts)
@@ -74,7 +75,7 @@ end
 	local files=bake.findfiles{basedir="..",dir="lua/wetgenes"}.ret
 
 	for i,v in ipairs(files) do
-		local n=zips.apk_munge_filename(v) -- this includes the res/raw prefix
+		local n="gamecake/src/main/"..zips.apk_munge_filename(v) -- this includes the res/raw prefix
 		bake.create_dir_for_file(n)
 		bake.copyfile("../"..v,n)
 		print(n)
@@ -83,7 +84,7 @@ end
 
 
 -- patch init.lua
-bake.replacefile(basedir.."/lua/init.lua",zips.apk_munge_filename("lua/init.lua"),opts)
+bake.replacefile(basedir.."/lua/init.lua","gamecake/src/main/"..zips.apk_munge_filename("lua/init.lua"),opts)
 
 if bake.file_exists(basedir.."/lua/init_bake.lua") then
 	local lson=bake.readfile(basedir.."/lua/init_bake.lua")
@@ -91,7 +92,7 @@ if bake.file_exists(basedir.."/lua/init_bake.lua") then
 		local data=sbox.lson(lson)
 		data.smell=smell -- any given smell overides
 		data.version= opts.version or data.version
-		bake.writefile( zips.apk_munge_filename("lua/init_bake.lua") , wstr.serialize(data) )
+		bake.writefile( "gamecake/src/main/"..zips.apk_munge_filename("lua/init_bake.lua") , wstr.serialize(data) )
 	end
 end
 

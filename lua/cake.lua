@@ -7,8 +7,6 @@ apps.default_paths()
 local SDL=require("SDL")
 local platform=SDL.getPlatform()
 
--- need to auto mount some zip files for reading from
-local wzips=require("wetgenes.zips")
 
 if platform=="Android" then
 
@@ -24,6 +22,10 @@ if platform=="Android" then
 	os.exit=function()print("os.exit() IN ANDROID IS DISABLED") return 1/0 end
 
 end
+
+-- need to auto mount some zip files for reading from
+local wzips=require("wetgenes.zips")
+
 
 	if jit then -- start by trying to force a jit memory allocation
 --		print("LUAJIT",jit.status())
