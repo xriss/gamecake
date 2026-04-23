@@ -74,6 +74,8 @@ sdl.video_init=function()
 	end
 end
 
+sdl.screen_hx=640
+sdl.screen_hy=480
 sdl.screen=function()
 --	print("SDL screen")
 	sdl.video_init()
@@ -82,6 +84,9 @@ sdl.screen=function()
 -- PI SDL may return nil at this point?
 -- in which case just lie and return 640x480
 	if not b then return 640,480 end
+
+	sdl.screen_hx=b.w
+	sdl.screen_hy=b.h
 
 	return b.w,b.h,b.x,b.y
 end
@@ -221,11 +226,16 @@ sdl.destroy=function(it)
 	return nil
 end
 
+-- need quick access to a global win size because touch events come in mathtarded
+sdl.win_hx=640
+sdl.win_hy=480
 sdl.info=function(it,w)
 --	print("SDL info")
 	it=it or sdl.it
 	w=w or {}
 	w.width,w.height=it.win:getSize()
+	sdl.win_hx=w.width
+	sdl.win_hy=w.height
 end
 
 sdl.resize=function(it,w,h)
@@ -497,8 +507,8 @@ sdl.msg_fetch=function()
 			t.time=sdl.time()
 			t.class="touch"
 			t.action=(e.type==SDL.event.FingerUp) and -1 or ( (e.type==SDL.event.FingerDown) and 1 or 0 )
-			t.x=e.x
-			t.y=e.y
+			t.x=e.x*sdl.win_hx
+			t.y=e.y*sdl.win_hy
 			t.id=e.fingerId
 			t.pressure=e.pressure
 

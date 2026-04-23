@@ -328,7 +328,7 @@ overshade.update=function(overshade)
 		local action=0
 
 		if m.class=="touch" then
-			id=m.id
+			id=m.id+1
 			action=m.action
 			pos=V2(m.x,m.y)
 --[[

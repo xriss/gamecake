@@ -48,13 +48,22 @@ local argx={}
 local done_cake=false -- only remove the first -lcake we see
 local done_apk=false
 local done_zip=false
+local done_all=false
 
 for i=1,#a do
 	local v=tostring(a[i])
 
-	if v=="-lcake" and not done_cake then
+	if done_all then
+	elseif v=="--" then -- stop looking
+		done_all=true
+		v=nil
+	elseif v=="-lcake" and not done_cake then
 		done_cake=true
 		v=nil
+	elseif v=="-lfun" then -- switch to fun mode
+		require("fun")
+		os.exit(0)
+
 	elseif v:sub(-4)==".apk" and not done_apk then -- the first apk only
 		wzips.add_apk_file(v)
 		done_apk=true

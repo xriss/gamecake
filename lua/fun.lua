@@ -13,14 +13,23 @@ local argx={}
 
 local done_fun=false -- only remove the first
 local done_zip=false
+local done_all=false
 
 local filename=""
 
 for i=1,#a do
 	local v=tostring(a[i])
 
-	if v=="-lfun" and not done_fun then
+	if done_all then
+	elseif v=="--" then -- stop looking
+		done_all=true
+		v=nil
+	elseif v=="-lfun" and not done_fun then
 		done_fun=true
+		v=nil
+	elseif v:sub(-4)==".apk" and not done_apk then -- the first apk only
+		wzips.add_apk_file(v)
+		done_apk=true
 		v=nil
 	elseif v:sub(-4)==".zip" and not done_zip then -- the first zip only
 		wzips.add_zip_file(v)
@@ -29,7 +38,7 @@ for i=1,#a do
 	elseif v:sub(-5)==".cake" then -- all .cake files we are given
 		wzips.add_zip_file(v)
 		v=nil
-	elseif v:sub(1,1)~="-" then -- this is the file we plan to run
+	elseif v:sub(1,1)~="-" and filename=="" then -- this is the file we plan to run
 		filename=v
 		v=nil
 	end
