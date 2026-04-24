@@ -49,6 +49,24 @@ sysopts={
 			autosize="lohi",
 		},
 	},
+	icon=[[
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . d d d G . . . . . . 
+. . . . d d d d d d G G . . . . 
+. . . d d d d d d d d G G . . . 
+. . d d 7 0 d 7 0 d d d G G . . 
+. . d d 0 0 d 0 0 d d d G G . . 
+. d d d d d d d d d d d G G G . 
+. d d d d d d d d d d G G G G . 
+. G G d d d d d d d G G G G G . 
+. . G G G G G G G G G G G G . . 
+]],
 }
 
 hardware,main=system.configurator(sysopts)

@@ -559,6 +559,11 @@ system.configurator=function(opts)
 
 	local done=false
 
+	if opts.icon then -- change icon
+		local g=bitdown.pix_grd(opts.icon)
+		wwin.hardcore.icon(oven.win[0],g)
+	end
+
 	if opts.mode=="picish" then -- tiny settings
 
 		opts.cmap = opts.cmap or bitdown.cmap -- use default swanky32 colors
