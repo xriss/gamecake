@@ -64,7 +64,8 @@ local wzips=require("wetgenes.zips")
 
 
 local function print_usage()
-  io_stderr:write(string_format([=[
+-- need to use print so we can overload it on android
+  print(string_format([=[
 %s [options] [mountfile.zip|.cake|.apk] [script -- [script_args]]
 Script filenames that end in .fun.lua will auto run inside a fun oven.
 Mounting a zip will allow you to require lua code from within its lua directory.
@@ -76,23 +77,18 @@ Available options are:
 	--       stop handling options
 	-        execute stdin and stop handling options
 ]=],progname))
-  io_stderr:flush()
 end
 
 
+local function l_message (pname, msg)
+-- might need to replace global print, so do not cache (eg -landroid will mess with globals)
+	print( string.format("%s%s",pname and string_format("%s: ", pname) or "",msg) )
+end
 
 --------------------------------------------------------------------------
 -- all the old codes, should reqrite and add better interactive mode
 -- fix the gamecake console interactive mode and run it in a terminal too, maybe?
 --------------------------------------------------------------------------
-
-
-
-local function l_message (pname, msg)
-  if pname then io_stderr:write(string_format("%s: ", pname)) end
-  io_stderr:write(string_format("%s\n", msg))
-  io_stderr:flush()
-end
 
 local function report(status, msg)
   if not status and msg ~= nil then
@@ -324,25 +320,30 @@ local do_fun=function(fname,args)
 		fun=fname,
 		fps=60,
 		icon=[[
-b b b b b b b b b b b b b b b b b b b 
-b b b b b b b b b b b b b b b b b b b 
-b b b b b b b b b b b b b b b b b b b 
-b b b 7 7 7 7 7 7 7 b 7 7 7 7 7 b b b 
-b b b 7 7 b b b 7 7 b 7 7 b 7 7 b b b 
-b b b 7 7 7 7 b 7 7 b 7 7 b 7 7 b b b 
-b b b 7 7 b b b 7 7 b 7 7 b 7 7 b b b 
-b b b 7 7 b b b 7 7 7 7 7 b 7 7 b b b 
-b b b b b b b b b b b b b b b b b b b 
-b b b b b b b b b b b b b b b b b b b 
-b b 7 7 7 7 7 7 7 b 7 7 7 b 7 7 7 b b 
-b b 7 7 7 b b b b b 7 7 7 b 7 7 7 b b 
-b b 7 7 7 7 7 7 7 b 7 7 7 7 7 7 7 b b 
-b b 7 7 7 b 7 7 7 b b b b b 7 7 7 b b 
-b b 7 7 7 7 7 7 7 b b b b b 7 7 7 b b 
-b b b b b b b b b b b b b b b b b b b 
-b b b b b b b b b b b b b b b b b b b 
-b b b b b b b b b b b b b b b b b b b 
-b b b b b b b b b b b b b b b b b b b 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g d d d d g d d g d d g d d d d d g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g d d d d g d d g d d g d d g d d g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g d d g g g d d d d d g d d g d d g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g d d g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g d d g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d g g g g g g d d g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g d d d d d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g d d d d d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d g g d d g g g g g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g g g g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g g g g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
 ]],
 		unpack(args)
 	}
@@ -426,7 +427,7 @@ for idx=1,#args do
 				script_auto=true
 				wzips.add_zip_file(arg)
 			else
-				if not script then
+				if ( not script ) and arg:sub(1,1)~="-" then -- script can not start with -
 					script=arg
 				else
 					script_args[#script_args+1]=arg
