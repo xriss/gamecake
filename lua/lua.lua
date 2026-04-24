@@ -68,7 +68,7 @@ local function print_usage()
   io_stderr:flush()
 end
 
-luai = {}
+--luai = {}
 
 local our_tostring = tostring
 local dofile
@@ -142,11 +142,13 @@ local function init_readline()
 end
 
 
+--[[
 function luai.set_tostring(ts)
     local old_tostring = our_tostring
     our_tostring = ts
     return old_tostring
 end
+]]
 
 local function our_print (...)
     local args = tuple(...)

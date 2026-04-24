@@ -11,43 +11,49 @@ local wwin=require("wetgenes.win")
 local a=arg or {}
 local argx={}
 
-local done_fun=false -- only remove the first
-local done_zip=false
-local done_all=false
+local filename
 
-local filename=""
+local done_all=false
 
 for i=1,#a do
 	local v=tostring(a[i])
 
 	if done_all then
+		-- ignore everything after --
 	elseif v=="--" then -- stop looking
 		done_all=true
 		v=nil
-	elseif v=="-lfun" and not done_fun then
-		done_fun=true
+	elseif v=="-landroid" then -- may have started as android
 		v=nil
-	elseif v:sub(-4)==".apk" and not done_apk then -- the first apk only
+	elseif v=="-lcake" then -- we are this lib
+		v=nil
+	elseif v:sub(1,1)=="-" then
+		-- ignore opts
+	elseif v:sub(-4)==".apk" then -- mount apk
 		wzips.add_apk_file(v)
-		done_apk=true
 		v=nil
-	elseif v:sub(-4)==".zip" and not done_zip then -- the first zip only
-		wzips.add_zip_file(v)
-		done_zip=true	
-		v=nil
-	elseif v:sub(-5)==".cake" then -- all .cake files we are given
+	elseif v:sub(-4)==".zip" then -- mount zip
 		wzips.add_zip_file(v)
 		v=nil
-	elseif v:sub(1,1)~="-" and filename=="" then -- this is the file we plan to run
-		filename=v
+	elseif v:sub(-5)==".cake" then -- mount cake
+		wzips.add_zip_file(v)
 		v=nil
+	else
+		if not filename then -- filename is first non option
+			filename=v
+			v=nil
+		end
 	end
 
 	if v then argx[#argx+1]=v end 
 end
 
-local funname=filename:gsub("%.fun%.lua$","") -- strip ending if given
---local funpath=filename:gsub("[^/]+$","") -- path to file
+
+
+local funname
+if filename then -- we have a file to run
+	funname=filename:gsub("%.fun%.lua$","") -- strip ending if given
+end
 
 local func=function(...)
 
@@ -99,8 +105,6 @@ b b b b b b b b b b b b b b b b b b b
 		... -- include commandline opts
 	}
 
-	require("apps").default_paths() -- default search paths so things can easily be found
-
 	math.randomseed( os.time() ) -- try and randomise a little bit better
 
 	-- setup oven with vanilla cake setup and save as a global value
@@ -110,7 +114,9 @@ b b b b b b b b b b b b b b b b b b b
 	return oven:serv()
 end
 
-func(unpack(argx))
+if funname then
+	func(unpack(argx))
 
-os.exit(0) -- force close so that we do not end up at a console?
+	os.exit(0)
+end
 
