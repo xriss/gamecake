@@ -9,6 +9,12 @@
 -- Based on lua.c from Lua 5.1.3.
 -- Improvements by Shmuel Zeigerman.
 
+-- HAXTBH
+
+-- remorked the argument handling to be more lua less c but mostly the same results, probably
+
+
+
 -- Variables analogous to those in luaconf.h
 local LUA_INIT = "LUA_INIT"
 local LUA_PROGNAME = "lua"
@@ -48,36 +54,39 @@ local progname = LUA_PROGNAME
 
 
 
--- setup search paths
+-- attempt to find lua code relative to executable
 local apps=require("apps")
 apps.default_paths()
 
--- need to auto mount some zip files for reading from
+-- need to be able to auto mount some zip files for reading from
 local wzips=require("wetgenes.zips")
 
 
 
-
--- Use external functions, if available
-local lua_stdin_is_tty = function() return true end
-local setsignal = function() end
-
 local function print_usage()
-  io_stderr:write(string_format(
-  "usage: %s [options] [mountfile.zip|.cake|.apk] [script [args]].\n" ..
-  "script filenames that end in .fun.lua will run in a fun oven.\n" ..
-  "Available options are:\n" ..
-  "  -e stat  execute string " .. LUA_QL("stat") .. "\n" ..
-  "  -l name  require library " .. LUA_QL("name") .. "\n" ..
-  "  -i       enter interactive mode after executing " ..
-              LUA_QL("script") .. "\n" ..
-  "  -v       show version information\n" ..
-  "  --       stop handling options\n" ..
-  "  -        execute stdin and stop handling options\n"
-  ,
-  progname))
+  io_stderr:write(string_format([=[
+%s [options] [mountfile.zip|.cake|.apk] [script -- [script_args]]
+Script filenames that end in .fun.lua will auto run inside a fun oven.
+Mounting a zip will allow you to require lua code from within its lua directory.
+Available options are:
+	-e stat  execute string 'stat'
+	-l name  require library 'name'
+	-i       enter interactive mode after executing 'script'
+	-v       show version information
+	--       stop handling options
+	-        execute stdin and stop handling options
+]=],progname))
   io_stderr:flush()
 end
+
+
+
+--------------------------------------------------------------------------
+-- all the old codes, should reqrite and add better interactive mode
+-- fix the gamecake console interactive mode and run it in a terminal too, maybe?
+--------------------------------------------------------------------------
+
+
 
 local function l_message (pname, msg)
   if pname then io_stderr:write(string_format("%s: ", pname)) end
@@ -111,9 +120,9 @@ end
 local function docall(f, ...)
   local tp = {...}  -- no need in tuple (string arguments only)
   local F = function() return f(unpack(tp)) end
-  setsignal(true)
+--  setsignal(true)
   local result = tuple(xpcall(F, traceback))
-  setsignal(false)
+--  setsignal(false)
   -- force a complete garbage collection in case of errors
   if not result[1] then collectgarbage("collect") end
   return unpack(result, 1, result.n)
@@ -137,12 +146,12 @@ end
 
 local function print_version()
 
-if jit then -- now logs are setup, dump basic jit info
-	local t={jit.version,jit.status()}
-	t[2]=tostring(t[2])
---	t[#t+1]="jit_mcode_size="..toaster.jit_mcode_size.."k"
-	l_message(nil, table.concat(t,"\t") )
-end
+	if jit then -- dump basic jit info
+		local t={jit.version,jit.status()}
+		t[2]=tostring(t[2])
+	--	t[#t+1]="jit_mcode_size="..toaster.jit_mcode_size.."k"
+		l_message(nil, table.concat(t,"\t") )
+	end
 
 	local s=require("wetgenes.gamecake.core").get_version()
 	l_message(nil, s)
@@ -243,117 +252,7 @@ local function dotty ()
 end
 
 
---[[
-local function handle_script(argv, n)
-  local fname = argv[n]
-  if fname == "-" and argv[n-1] ~= "--" then
-    fname = nil  -- stdin
-  end
-  local status, msg = loadfile(fname)
-  if status then
-    status, msg = docall(status, unpack(argv))
-  end
-  return report(status, msg)
-end
 
-local function collectargs (argv, p)
-  local i = 1
-  while i <= #argv do
-    if string_sub(argv[i], 1, 1) ~= '-' then  -- not an option?
-      return i
-    end
-    local prefix = string_sub(argv[i], 1, 2)
-    if prefix == '--' then
-      if #argv[i] > 2 then return -1 end
-      return argv[i+1] and i+1 or 0
-    elseif prefix == '-' then
-      return i
-    elseif prefix == '-i' then
-      if #argv[i] > 2 then return -1 end
-      p.i = true
-      p.v = true
-    elseif prefix == '-v' then
-      if #argv[i] > 2 then return -1 end
-      p.v = true
-    elseif prefix == '-e' then
-      p.e = true
-      if #argv[i] == 2 then
-        i = i + 1
-        if argv[i] == nil then return -1 end
-      end
-    elseif prefix == '-l' then
-      if #argv[i] == 2 then
-        i = i + 1
-        if argv[i] == nil then return -1 end
-      end
-    else
-      return -1  -- invalid option
-    end
-    i = i + 1
-  end
-  return 0
-end
-
-
-local function runargs(argv, n)
-  local i = 1
-  while i <= n do if argv[i] then
-    assert(string_sub(argv[i], 1, 1) == '-')
-    local c = string_sub(argv[i], 2, 2) -- option
-    if c == 'e' then
-      local chunk = string_sub(argv[i], 3)
-      if chunk == '' then i = i + 1; chunk = argv[i] end
-      assert(chunk)
-      if not dostring(chunk, "=(command line)") then return false end
-    elseif c == 'l' then
-      local filename = string_sub(argv[i], 3)
-      if filename == '' then i = i + 1; filename = argv[i] end
-      assert(filename)
-      if not dolibrary(filename) then return false end
-    end
-    i = i + 1
-  end end
-  return true
-end
-
-
-	l=strlen(argv[script]);
-	if(l>4)
-	{
-		if(strncmp((argv[script]+(l-4)),".zip",4)==0)
-		{
-			has_z=1;
-		}
-	}
-	if(l>5)
-	{
-		if(strncmp((argv[script]+(l-5)),".cake",5)==0)
-		{
-			has_z=1;
-		}
-	}
-	if(l>8)
-	{
-		if(strncmp((argv[script]+(l-8)),".fun.lua",8)==0)
-		{
-			has_fun=1;
-		}
-	}
-	if(has_fun)
-	{
-		dolibrary(L,"fun"); // have some fun
-	}
-	else
-	if(has_z)
-	{
-		dolibrary(L,"cake"); // mount and run code from that zip
-	}
-	else
-	{
-		s->status = handle_script(L, argv, script);
-	}
-
-]]
 
 local function handle_luainit()
   local init = os_getenv(LUA_INIT)
@@ -367,14 +266,11 @@ local function handle_luainit()
 end
 
 
-local import = _G.import
-if import then
-  lua_stdin_is_tty = import.lua_stdin_is_tty or lua_stdin_is_tty
-  setsignal        = import.setsignal or setsignal
-  LUA_RELEASE      = import.LUA_RELEASE or LUA_RELEASE
-  LUA_COPYRIGHT    = import.LUA_COPYRIGHT or LUA_COPYRIGHT
-  _G.import = nil
-end
+
+
+--------------------------------------------------------------------------
+-- mostly new arg handling codes
+--------------------------------------------------------------------------
 
 local args = _G.arg or {}
 if args[0] and #args[0] > 0 then progname = args[0] end
@@ -564,28 +460,3 @@ elseif none then
 	print_usage()
 	os_exit(0)
 end
-
---[[
-local has = {i=false, v=false, e=false}
-local script = collectargs(argv, has)
-if script < 0 then -- invalid args?
-  print_usage()
-  os_exit(1)
-end
-if has.v then print_version() end
-local status = runargs(argv, (script > 0) and script-1 or #argv)
-if not status then os_exit(1) end
-if script ~= 0 then
-  status = handle_script(argv, script)
-  if not status then os_exit(1) end
-end
-if has.i then
-  dotty()
-elseif script == 0 and not has.e and not has.v then
-  if lua_stdin_is_tty() then
-    print_version()
-    dotty()
-  else dofile(nil)  -- executes stdin as a file
-  end
-end
-]]
