@@ -372,8 +372,10 @@ int l=0;
   lua_gc(L, LUA_GCRESTART, 0);
   s->status = handle_luainit(L);
   if (s->status != 0) return 0;
+
+/*
   script = collectargs(argv, &has_i, &has_v, &has_e);
-  if (script < 0) {  /* invalid args? */
+  if (script < 0) {  
     print_usage();
     s->status = 1;
     return 0;
@@ -381,8 +383,15 @@ int l=0;
   if (has_v) print_version();
   s->status = runargs(L, argv, (script > 0) ? script : s->argc);
   if (s->status != 0) return 0;
+*/
 
-	dolibrary(L,"cake"); // always run lua/init.lua (encoded in res)
+// set the global arg to *all* arguments, before doing anything else
+  int narg = getargs(L, argv, 0);  /* collect arguments */
+  lua_setglobal(L, "arg");
+  lua_pop(L,narg);
+
+// run lua code to do everything
+  dolibrary(L,"lua"); // always run lua/lua.lua (encoded in res)
 
   return 0;
 }

@@ -9,7 +9,6 @@
 -- Based on lua.c from Lua 5.1.3.
 -- Improvements by Shmuel Zeigerman.
 
-
 -- Variables analogous to those in luaconf.h
 local LUA_INIT = "LUA_INIT"
 local LUA_PROGNAME = "lua"
@@ -18,24 +17,23 @@ local LUA_PROMPT2  = ">> "
 local function LUA_QL(x) return "'" .. x .. "'" end
 
 -- Variables analogous to those in lua.h
-local LUA_RELEASE   = "Lua 5.1.3"
+local LUA_RELEASE   = "Lua x.x.x"
 local LUA_COPYRIGHT = "Copyright (C) 1994-2008 Lua.org, PUC-Rio"
 
 
 -- Note: don't allow user scripts to change implementation.
 -- Check for globals with "cat lua.lua | luac -p -l - | grep ETGLOBAL"
-local lua51 = (_G._VERSION or ""):match '5%.1$'
 local _G = _G
 local assert = assert
 local collectgarbage = collectgarbage
 local loadfile = loadfile
-local loadstring = loadstring or load
+local loadstring = loadstring
 local pcall = pcall
 local rawget = rawget
 local select = select
 local tostring = tostring
 local type = type
-local unpack = unpack or table.unpack
+local unpack = unpack
 local xpcall = xpcall
 local io_stderr = io.stderr
 local io_stdout = io.stdout
@@ -48,13 +46,26 @@ local os_exit = os.exit
 
 local progname = LUA_PROGNAME
 
+
+
+-- setup search paths
+local apps=require("apps")
+apps.default_paths()
+
+-- need to auto mount some zip files for reading from
+local wzips=require("wetgenes.zips")
+
+
+
+
 -- Use external functions, if available
 local lua_stdin_is_tty = function() return true end
 local setsignal = function() end
 
 local function print_usage()
   io_stderr:write(string_format(
-  "usage: %s [options] [script [args]].\n" ..
+  "usage: %s [options] [mountfile.zip|.cake|.apk] [script [args]].\n" ..
+  "script filenames that end in .fun.lua will run in a fun oven.\n" ..
   "Available options are:\n" ..
   "  -e stat  execute string " .. LUA_QL("stat") .. "\n" ..
   "  -l name  require library " .. LUA_QL("name") .. "\n" ..
@@ -66,112 +77,6 @@ local function print_usage()
   ,
   progname))
   io_stderr:flush()
-end
-
---luai = {}
-
-local our_tostring = tostring
-local dofile
-local rl_support,rl
-
-local function tuple(...)
-  return {n=select('#', ...), ...}
-end
-
-local function is_pair_iterable(t)
-    local mt = getmetatable(t)
-    return type(t) == 'table' or (mt and mt.__pairs)
-end
-
-local function candidates(line)
-  -- identify the expression!
-  local i1,i2 = line:find('[.:%w_]+$')
-  if not i1 then return end
-  local front,partial = line:sub(1,i1-1), line:sub(i1)
-  local prefix, last = partial:match '(.-)([^.:]*)$'
-  local t, all = _G
-  if #prefix > 0 then        
-    local P = prefix:sub(1,-2)
-    all = last == ''
-    for w in P:gmatch '[^.:]+' do
-      t = t[w]
-      if not t then return end
-    end
-  end
-  prefix = front .. prefix
-  local res, append = {}, table.insert   
-  local function append_candidates(t)  
-    for k,v in pairs(t) do
-      if all or k:sub(1,#last) == last then
-        append(res,prefix..k)
-      end
-    end
-  end
-  local mt = getmetatable(t)
-  if is_pair_iterable(t) then
-    append_candidates(t)
-  end
-  if mt and is_pair_iterable(mt.__index) then
-    append_candidates(mt.__index)
-  end
-  return res
-end
-
-local function completion_handler(c,s)
-  local cc = candidates(s)
-  if cc then
-    for _,name in ipairs(cc) do
-      rl.addcompletion(c,name)
-    end
-  end
-end
-
-local function init_readline()
- -- if package.config:match '^/' then -- only for Unix
-    rl_support,rl = pcall(require,'linenoise')
-    if rl_support then
-      rl.setcompletion(completion_handler)
---      local luarc = os.getenv 'HOME' .. '/.luairc.lua'
---      local f = io.open(luarc,'r')
---      if f then
---        f:close()
---        dofile(luarc)
---      end
-    end
- -- end
-end
-
-
---[[
-function luai.set_tostring(ts)
-    local old_tostring = our_tostring
-    our_tostring = ts
-    return old_tostring
-end
-]]
-
-local function our_print (...)
-    local args = tuple(...)
-    for i = 1,args.n do
-        io.write(our_tostring(args[i]),'\t')
-    end
-    io.write '\n'
-end
-
-local function saveline(s)
-  if rl_support then
-    rl.historyadd(s)
-  end
-end
-
-local function getline(prmt)
-  if rl_support then
-    return rl.linenoise(prmt)
-  else
-    io_stdout:write(prmt)
-    io_stdout:flush()
-    return io_stdin:read'*l'
-  end
 end
 
 local function l_message (pname, msg)
@@ -187,6 +92,10 @@ local function report(status, msg)
     l_message(progname, msg);
   end
   return status
+end
+
+local function tuple(...)
+  return {n=select('#', ...), ...}
 end
 
 local function traceback (message)
@@ -210,7 +119,7 @@ local function docall(f, ...)
   return unpack(result, 1, result.n)
 end
 
-function dofile(name)
+local function dofile(name)
   local f, msg = loadfile(name)
   if f then f, msg = docall(f) end
   return report(f, msg)
@@ -230,18 +139,15 @@ local function print_version()
   l_message(nil, LUA_RELEASE .. "  " .. LUA_COPYRIGHT)
 end
 
-local function getargs (argv, n)
-  local arg = {}
-  for i=1,#argv do arg[i - n] = argv[i] end
-  if _G.arg then
-    local i = 0
-    while _G.arg[i] do
-      arg[i - n] = _G.arg[i]
-      i = i - 1
-    end
-  end
-  return arg
+
+--FIX? readline support
+local history = {}
+local function saveline(s)
+--  if #s > 0 then
+--    history[#history+1] = s
+--  end
 end
+
 
 local function get_prompt (firstline)
   -- use rawget to play fine with require 'strict'
@@ -253,13 +159,10 @@ local function get_prompt (firstline)
   return firstline and LUA_PROMPT or LUA_PROMPT2
 end
 
-local function fetchline(firstline)
-  return getline(get_prompt(firstline))
-end
 
 local function incomplete (msg)
   if msg then
-    local ender = lua51 and LUA_QL("<eof>") or '<eof>'
+    local ender = LUA_QL("<eof>")
     if string_sub(msg, -#ender) == ender then
       return true
     end
@@ -269,7 +172,10 @@ end
 
 
 local function pushline (firstline)
-  local b = fetchline(firstline)
+  local prmt = get_prompt(firstline)
+  io_stdout:write(prmt)
+  io_stdout:flush()
+  local b = io_stdin:read'*l'
   if not b then return end -- no input
   if firstline and string_sub(b, 1, 1) == '=' then
     return "return " .. string_sub(b, 2)  -- change '=' to `return'
@@ -302,7 +208,6 @@ end
 local function dotty ()
   local oldprogname = progname
   progname = nil
-  init_readline()
   while true do
     local result
     local status, msg = loadline()
@@ -313,7 +218,7 @@ local function dotty ()
     end
     report(status, msg)
     if status and result.n > 1 then  -- any result to print?
-      status, msg = pcall(our_print, unpack(result, 2, result.n))
+      status, msg = pcall(_G.print, unpack(result, 2, result.n))
       if not status then
         l_message(progname, string_format(
             "error calling %s (%s)",
@@ -327,19 +232,18 @@ local function dotty ()
 end
 
 
+--[[
 local function handle_script(argv, n)
-  _G.arg = getargs(argv, n)  -- collect arguments
   local fname = argv[n]
   if fname == "-" and argv[n-1] ~= "--" then
     fname = nil  -- stdin
   end
   local status, msg = loadfile(fname)
   if status then
-    status, msg = docall(status, unpack(_G.arg))
+    status, msg = docall(status, unpack(argv))
   end
   return report(status, msg)
 end
-
 
 local function collectargs (argv, p)
   local i = 1
@@ -402,6 +306,44 @@ local function runargs(argv, n)
 end
 
 
+	l=strlen(argv[script]);
+	if(l>4)
+	{
+		if(strncmp((argv[script]+(l-4)),".zip",4)==0)
+		{
+			has_z=1;
+		}
+	}
+	if(l>5)
+	{
+		if(strncmp((argv[script]+(l-5)),".cake",5)==0)
+		{
+			has_z=1;
+		}
+	}
+	if(l>8)
+	{
+		if(strncmp((argv[script]+(l-8)),".fun.lua",8)==0)
+		{
+			has_fun=1;
+		}
+	}
+	if(has_fun)
+	{
+		dolibrary(L,"fun"); // have some fun
+	}
+	else
+	if(has_z)
+	{
+		dolibrary(L,"cake"); // mount and run code from that zip
+	}
+	else
+	{
+		s->status = handle_script(L, argv, script);
+	}
+
+]]
+
 local function handle_luainit()
   local init = os_getenv(LUA_INIT)
   if init == nil then
@@ -413,50 +355,221 @@ local function handle_luainit()
   end
 end
 
-local M={}
--- do not do standard main?
-function M.main(...)
 
-	local import = _G.import
-	if import then
-	  lua_stdin_is_tty = import.lua_stdin_is_tty or lua_stdin_is_tty
-	  setsignal        = import.setsignal or setsignal
-	  LUA_RELEASE      = import.LUA_RELEASE or LUA_RELEASE
-	  LUA_COPYRIGHT    = import.LUA_COPYRIGHT or LUA_COPYRIGHT
-	  _G.import = nil
-	end
-
-	if _G.arg and _G.arg[0] and #_G.arg[0] > 0 then progname = _G.arg[0] end
-	local argv = {...}
-	handle_luainit()
-	local has = {i=false, v=false, e=false}
-	local script = collectargs(argv, has)
-	if script < 0 then -- invalid args?
-	  print_usage()
-	  os_exit(1)
-	end
-	if has.v then print_version() end
-	local status = runargs(argv, (script > 0) and script-1 or #argv)
-	if not status then os_exit(1) end
-	if script ~= 0 then
-	  status = handle_script(argv, script)
-	  if not status then os_exit(1) end
-	else
-	  _G.arg = nil
-	end
-	if has.i then
-	  dotty()
-	elseif script == 0 and not has.e and not has.v then
-	  if lua_stdin_is_tty() then
-		print_version()
-		dotty()
-	  else dofile(nil)  -- executes stdin as a file
-	  end
-	end
-
+local import = _G.import
+if import then
+  lua_stdin_is_tty = import.lua_stdin_is_tty or lua_stdin_is_tty
+  setsignal        = import.setsignal or setsignal
+  LUA_RELEASE      = import.LUA_RELEASE or LUA_RELEASE
+  LUA_COPYRIGHT    = import.LUA_COPYRIGHT or LUA_COPYRIGHT
+  _G.import = nil
 end
 
---l_message(nil, "starting linenoise interactive console ( lua.lua ) ")
-dotty()
+local args = _G.arg or {}
+if args[0] and #args[0] > 0 then progname = args[0] end
+handle_luainit()
 
-return M
+local load_script=function(fname)
+	local code=wzips.readfile(fname) -- check file system and mounted zips
+	if code then
+		if code:sub(1,2)=="#!" then
+			code="--"..code -- ignore hashbang on first line
+		end
+	else
+		error("missing file : "..fname)
+	end
+	return code
+end
+
+local do_script=function(fname,args)
+	local code=load_script(fname)
+	local func = assert( loadstring(code,fname) )
+	assert( docall( func, unpack(args) ) )
+	-- continue here if no error
+end
+
+local do_fun=function(fname,args)
+	
+	local wwin=require("wetgenes.win")
+
+	local global=require("global") -- prevent accidental global use
+	
+	local screen=wwin.screen()
+	
+	local hx,hy,ss=424,240,1
+	hx=hx*4
+
+-- remove window scale if tiny screen
+	if screen.width>0 then
+		ss=math.floor(screen.width/hx)
+		if ss<1 then ss=1 end
+	end
+
+	local opts={
+		times=true, -- request simple time keeping samples
+
+		width=hx*ss,	-- display basics
+		height=hy*ss,
+		screen_scale=ss,
+	--	show="full",
+		title="fun",
+		start="wetgenes.gamecake.fun.main",
+		fun=fname,
+		fps=60,
+		icon=[[
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b 7 7 7 7 7 7 7 b 7 7 7 7 7 b b b 
+b b b 7 7 b b b 7 7 b 7 7 b 7 7 b b b 
+b b b 7 7 7 7 b 7 7 b 7 7 b 7 7 b b b 
+b b b 7 7 b b b 7 7 b 7 7 b 7 7 b b b 
+b b b 7 7 b b b 7 7 7 7 7 b 7 7 b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b 7 7 7 7 7 7 7 b 7 7 7 b 7 7 7 b b 
+b b 7 7 7 b b b b b 7 7 7 b 7 7 7 b b 
+b b 7 7 7 7 7 7 7 b 7 7 7 7 7 7 7 b b 
+b b 7 7 7 b 7 7 7 b b b b b 7 7 7 b b 
+b b 7 7 7 7 7 7 7 b b b b b 7 7 7 b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+b b b b b b b b b b b b b b b b b b b 
+]],
+		unpack(args)
+	}
+
+	math.randomseed( os.time() ) -- try and randomise a little bit better
+
+	-- setup oven with vanilla cake setup and save as a global value
+	global.oven=require("wetgenes.gamecake.oven").bake(opts).preheat()
+
+	-- this will busy loop or hand back control depending on the system we are running on, eitherway opts.start will run next 
+	return oven:serv()
+end
+
+local none=true
+local interact
+local pipe
+local script
+local script_args={}
+local script_try
+local skip=0
+for idx=1,#args do
+	local arg=args[idx]
+	if skip>0 then
+		skip=skip-1
+	else
+
+		if arg=="--" then break end -- ignore everything else
+		if arg=="-"  then pipe=true break end -- ignore everything else and pipe in
+
+		if     arg:sub(1,2)=="-e" then
+			none=false
+
+			local chunk = arg:sub(3)
+			if chunk=="" then
+				chunk=assert(args[idx+1])
+				skip=skip+1
+			end
+			if not dostring(chunk, "=(command line)") then
+				os_exit(1)
+			end
+
+		elseif arg:sub(1,2)=="-l" then
+
+			local fname=arg:sub(3)
+			if fname=="" then
+				fname=assert(args[idx+1])
+				skip=skip+1
+			end
+			if not dolibrary(fname) then
+				os_exit(1)
+			end
+
+		elseif arg=="-i" then
+
+			interact=true 
+
+		elseif arg=="-h" then
+
+			print_usage()
+			os_exit(0)
+
+		elseif arg=="-v" then
+
+			print_version()
+			os_exit(0)
+
+		else
+
+			if arg:sub(-4)==".apk" then -- mount apk
+				script_auto=true
+				wzips.add_apk_file(arg)
+			elseif arg:sub(-4)==".zip" then -- mount zip
+				script_auto=true
+				wzips.add_zip_file(arg)
+			elseif arg:sub(-5)==".cake" then -- mount cake
+				script_auto=true
+				wzips.add_zip_file(arg)
+			else
+				if not script then
+					script=arg
+				else
+					script_args[#script_args+1]=arg
+				end
+			end
+
+		end
+	end
+end
+
+if not script and script_auto then
+	if wzips.exists("lua/init.lua") then -- use this file if it exists
+		script="lua/init.lua"
+	end
+end
+if script then
+	none=false
+	if script:sub(-8)==".fun.lua" then
+		do_fun(script,script_args)
+	else
+		do_script(script,script_args)
+	end
+end
+
+if interact then
+	print_version()
+	dotty()
+elseif pipe then
+	dofile(nil)  -- executes stdin as a file
+elseif none then
+	print_usage()
+	os_exit(0)
+end
+
+--[[
+local has = {i=false, v=false, e=false}
+local script = collectargs(argv, has)
+if script < 0 then -- invalid args?
+  print_usage()
+  os_exit(1)
+end
+if has.v then print_version() end
+local status = runargs(argv, (script > 0) and script-1 or #argv)
+if not status then os_exit(1) end
+if script ~= 0 then
+  status = handle_script(argv, script)
+  if not status then os_exit(1) end
+end
+if has.i then
+  dotty()
+elseif script == 0 and not has.e and not has.v then
+  if lua_stdin_is_tty() then
+    print_version()
+    dotty()
+  else dofile(nil)  -- executes stdin as a file
+  end
+end
+]]

@@ -56,6 +56,7 @@ system.load_and_setup=function(name,path)
 	path=path or ""
 
 	name=assert(name)
+	name=name:gsub("%.fun%.lua$","") -- strip ending if given
 
 
 -- remember source text

@@ -373,8 +373,19 @@ int has_fun=0;
   lua_gc(L, LUA_GCRESTART, 0);
   s->status = handle_luainit(L);
   if (s->status != 0) return 0;
+
+// set the global arg to *all* arguments, before doing anything else
+  int narg = getargs(L, argv, 0);  /* collect arguments */
+  lua_setglobal(L, "arg");
+  lua_pop(L,narg);
+
+// replace this file with lua code
+  dolibrary(L,"lua"); // always run lua/lua.lua (encoded in res)
+  
+
+/*
   script = collectargs(argv, &has_i, &has_v, &has_e);
-  if (script < 0) {  /* invalid args? */
+  if (script < 0) {  
     print_usage();
     s->status = 1;
     return 0;
@@ -430,8 +441,10 @@ int has_fun=0;
       dolibrary(L,"lua"); // interactive
 //      dotty(L);
     }
-    else dofile(L, NULL);  /* executes stdin as a file */
+    else dofile(L, NULL); 
   }
+ */
+ 
   return 0;
 }
 
