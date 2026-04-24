@@ -461,10 +461,12 @@ M.ups.msg_apply=function(ups,m)
 	if m.class=="button" then -- raw buttons for input injection
 
 		local up=ups:manifest(m.upidx)
-		if m.action==1 then -- key set
-			up:set_button(button,true)
-		elseif m.action==-1 then -- key clear
-			up:set_button(button,false)
+		if m.button then
+			if m.action==1 then -- key set
+				up:set_button(m.button,true)
+			elseif m.action==-1 then -- key clear
+				up:set_button(m.button,false)
+			end
 		end
 	
 	elseif m.class=="key" and ups.enable_key then

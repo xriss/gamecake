@@ -287,6 +287,9 @@ overshade.setup=function(overshade)
 	overshade.DATA_MAX=#overshade.buttons
     overshade.last_touch=0
 
+    overshade.stick={} -- fill this up with left/right/up/down state
+    overshade.stick.state={left=-1,right=-1,up=-1,down=-1}
+
 	overshade.enable={"fun_overshade?DATA_MAX="..overshade.DATA_MAX.."&hax="..tostring(overshade),overshade.uniforms}
 	overshade:update()
 end
@@ -304,8 +307,27 @@ overshade.update=function(overshade)
     overshade.margin_min=-4/32
     overshade.margin_max=8/32
     
-    overshade.stick=overshade.stick or {} -- fill this up with left/right/up/down
 	local stick=overshade.stick
+	local stick_state_change=function(newstate)
+		local bname={
+			left="lx0",
+			right="lx1",
+			up="ly0",
+			down="ly1",
+		}
+		for i,name in ipairs{"left","right","up","down"} do
+			if stick.state[name] ~= newstate[name] then
+				stick.state[name] = newstate[name]
+				oven.ups.msg({
+					time=oven.time(),
+					class="button",
+					action=stick.state[name],
+					button=bname[ name ],
+					upidx=1,
+				})
+			end
+		end
+	end
 
 	local s=overshade.hh/2
 	for i,button in ipairs(overshade.buttons) do
@@ -401,41 +423,13 @@ overshade.update=function(overshade)
 				touch.pos=V2(pos)
 				
 				if touch.button==stick then -- special stick
-					local m=touch.pos-stick.pos
-					if math.abs(m[1]) > math.abs(m[2]) then
-						if m[1]<0 then
-							stick.dir="left"
-						else
-							stick.dir="right"
-						end
-					else
-						if m[2]<0 then
-							stick.dir="up"
-						else
-							stick.dir="down"
-						end
-					end
-					-- send virtual stick movements back into ups
-					local px=m[1]/(overshade.hh/8)
-					if px<-1 then px=-1 end
-					if px> 1 then px= 1 end
-					local py=m[2]/(overshade.hh/8)
-					if py<-1 then py=-1 end
-					if py> 1 then py= 1 end
-					oven.ups.msg({
-						time=oven.time(),
-						class="padaxis",
-						value=math.floor(0x7fff*px),
-						name="LeftX",
-						id=1,
-					})
-					oven.ups.msg({
-						time=oven.time(),
-						class="padaxis",
-						value=math.floor(0x7fff*py),
-						name="LeftY",
-						id=1,
-					})
+					local state={left=-1,right=-1,up=-1,down=-1}
+					local m=(touch.pos-stick.pos)/(overshade.hh/8) -- normaliseish
+					if m[1]<-0.25 then state.left=1  end
+					if m[1]> 0.25 then state.right=1 end
+					if m[2]<-0.25 then state.up=1    end
+					if m[2]> 0.25 then state.down=1  end
+					stick_state_change(state)
 				end
 				
 				if action==-1 then -- last touch removes
@@ -451,22 +445,9 @@ overshade.update=function(overshade)
 					end
 					touch.button.touch=nil
 					overshade.touches[id]=nil
-					if touch.button==stick then -- special stick
-						stick.dir=nil
-						oven.ups.msg({
-							time=oven.time(),
-							class="padaxis",
-							value=0,
-							name="LeftX",
-							id=1,
-						})
-						oven.ups.msg({
-							time=oven.time(),
-							class="padaxis",
-							value=0,
-							name="LeftY",
-							id=1,
-						})
+					if touch.button==stick then -- special stick release
+						local state={left=-1,right=-1,up=-1,down=-1}
+						stick_state_change(state)
 					end
 				end
 			end
@@ -503,7 +484,7 @@ overshade.uniforms=function(p)
 		if touch then
 			pos=touch.start -- move button to click pos
 		end
-		if button[5]==overshade.stick.dir then
+		if overshade.stick.state[ button[5] ]==1 then -- stick buttons
 			touch=overshade.stick
 		end
 		gl.Uniform4f( idx+i-1,   pos[1],pos[2],button.siz,touch and 1 or 0 )
