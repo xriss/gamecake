@@ -245,6 +245,8 @@ if jit then -- now logs are setup, dump basic jit info
 	LOG( "oven" , table.concat(t,"\t") )
 end
 
+LOG( "oven" , require("wetgenes.gamecake.core").get_version() )
+
 -- no more flavour, only SDL
 --print(wwin.flavour)
 

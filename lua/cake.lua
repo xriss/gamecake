@@ -1,4 +1,6 @@
 
+print("-lcake is depreciated and probably unnecessary, just mount a zip or explicitly run lua/init.lua")
+
 local apps=require("apps")
 -- try hard to find any files wemay need
 apps.default_paths()

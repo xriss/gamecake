@@ -136,7 +136,18 @@ local function dolibrary (name)
 end
 
 local function print_version()
-  l_message(nil, LUA_RELEASE .. "  " .. LUA_COPYRIGHT)
+
+if jit then -- now logs are setup, dump basic jit info
+	local t={jit.version,jit.status()}
+	t[2]=tostring(t[2])
+--	t[#t+1]="jit_mcode_size="..toaster.jit_mcode_size.."k"
+	l_message(nil, table.concat(t,"\t") )
+end
+
+	local s=require("wetgenes.gamecake.core").get_version()
+	l_message(nil, s)
+
+--  l_message(nil, LUA_RELEASE .. "  " .. LUA_COPYRIGHT)
 end
 
 
@@ -462,7 +473,12 @@ for idx=1,#args do
 		skip=skip-1
 	else
 
-		if arg=="--" then break end -- ignore everything else
+		if arg=="--" then -- everything else is script_args
+			for i=idx+1,#args do
+				script_args[#script_args+1]=args[i]
+			end
+			break
+		end 
 		if arg=="-"  then pipe=true break end -- ignore everything else and pipe in
 
 		if     arg:sub(1,2)=="-e" then

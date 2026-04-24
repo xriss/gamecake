@@ -1,4 +1,6 @@
 
+print("-lfun is depreciated and probably unnecessary, just end your file with a .fun.lua")
+
 local apps=require("apps")
 
 -- try hard to find any files wemay need

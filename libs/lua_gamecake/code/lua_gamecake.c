@@ -302,6 +302,21 @@ static int lua_gamecake_preloadlibs(lua_State *l)
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
+// get internal version string from the auto built cache of lua files
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+extern const char *wetgenes_wetmods_version();
+
+static int lua_gamecake_get_version(lua_State *l)
+{
+//  l_message(NULL, LUA_RELEASE "  " LUA_COPYRIGHT );
+	lua_pushstring(l, wetgenes_wetmods_version() );
+	return 1;
+}
+
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -319,6 +334,7 @@ LUALIB_API int luaopen_wetgenes_gamecake_core (lua_State *l)
 		{"canvas_font_sync",		lua_gamecake_canvas_font_sync},
 		{"canvas_font_draw",		lua_gamecake_canvas_font_draw},
 
+		{"get_version",				lua_gamecake_get_version},
 
 		{0,0}
 	};
