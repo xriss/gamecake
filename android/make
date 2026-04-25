@@ -15,7 +15,7 @@ rm -rf gamecake/build
 
 #./adb logcat -c
 #./adb logcat "SDL/APP:*" "*:S" \
-./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake.$BASENAME/.CakeAct
+#./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake.$BASENAME.CakeAct
 #./adb logcat
 
 #zipinfo app/build/outputs/apk/debug/app-debug.apk

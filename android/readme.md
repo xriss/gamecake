@@ -6,3 +6,6 @@ then install android junk with
 
 	../build/install-andsdk
 
+If sdl version has been bumped then may need to replace the java files in org.libsdl.app
+
+

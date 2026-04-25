@@ -5,6 +5,7 @@ local bake=require("wetgenes.bake")
 local sbox=require("wetgenes.sandbox")
 local wstr=require("wetgenes.string")
 local wgrd=require("wetgenes.grd")
+local wpath=require("wetgenes.path")
 
 local args={...}
 
@@ -12,11 +13,28 @@ local basedir=assert( args[1] or os.getenv("ANDROID_APP_BASEDIR") ,"Must specify
 
 local smell=args[2] or os.getenv("ANDROID_APP_SMELL") or "" -- optional smell
 
-local fdat=assert(zips.readfile(basedir.."/opts.lua"),"opts.lua must exist in the given basedir")
-
 -- os.execute( "cd "..basedir.." ; ../bake "..(smell or "") ) --make sure it is baked
 
-local preopts=sbox.ini(fdat)
+local preopts={}
+
+if smell=="fun" then
+
+
+preopts={
+	name="fun",
+	title="fun",
+	version=1.234567,
+	fun=basedir,
+	fun_file="lua/"..wpath.file(basedir),
+}
+preopts.commandline=[[ "]]..preopts.fun_file..[[" , "--" , "--logs" , "--fullscreen" ]]
+
+else
+
+local fdat=assert(zips.readfile(basedir.."/opts.lua"),"opts.lua must exist in the given basedir")
+preopts=sbox.ini(fdat)
+
+end
 
 if smell and preopts.smells and preopts.smells[smell] then -- override preopts with smell settings
 	for i,v in pairs(preopts.smells[smell]) do
@@ -29,10 +47,13 @@ end
 
 --print(wstr.dump(opts))
 
-local version=args[3] or preopts.version or bake.version_from_time()
+local version=preopts.version or bake.version_from_time()
 local opts={
 	basedir=basedir,
 	smell=smell,
+	fun=preopts.fun,
+	fun_file=preopts.fun_file,
+	commandline=preopts.commandline or [[ "--" , "--logs" , "--fullscreen" ]],
 	name=preopts.name,
 	title=preopts.title,
 	namev=preopts.title..".v"..version,
@@ -43,6 +64,9 @@ local opts={
 	activity=preopts.android_activity or "com.wetgenes.gamecake."..preopts.name..".CakeAct",
 	permissions=preopts.android_permissions or "",
 }
+for n,v in pairs(opts) do
+	print(n,"=",v)
+end
 
 
 os.execute("rm -rf gamecake/src/main/assets")
@@ -51,10 +75,15 @@ os.execute("mkdir -p gamecake/src/main/java/com/wetgenes/gamecake/"..opts.name)
 
 bake.replacefile("input/config.sh","config.sh",opts)
 bake.replacefile("input/AndroidManifest.xml","gamecake/src/main/AndroidManifest.xml",opts)
-bake.replacefile("input/strings.xml","gamecake/src/main/res/strings.xml",opts)
+bake.replacefile("input/strings.xml","gamecake/src/main/res/values/strings.xml",opts)
 bake.replacefile("input/CakeAct.java","gamecake/src/main/java/com/wetgenes/gamecake/"..opts.name.."/CakeAct.java",opts)
 bake.replacefile("input/build.gradle","gamecake/build.gradle",opts)
 
+if smell=="fun" then
+	local n="gamecake/src/main/assets/"..opts.fun_file
+	bake.create_dir_for_file(n)
+	bake.copyfile(opts.fun,n)
+end
 
 -- copy all data and code from root into res/raw
 
@@ -83,8 +112,10 @@ end
 
 
 
--- patch init.lua
-bake.replacefile(basedir.."/lua/init.lua","gamecake/src/main/"..zips.apk_munge_filename("lua/init.lua"),opts)
+-- patch init.lua if it exists
+if bake.file_exists( basedir.."/lua/init.lua" ) then
+	bake.replacefile(basedir.."/lua/init.lua","gamecake/src/main/"..zips.apk_munge_filename("lua/init.lua"),opts)
+end
 
 if bake.file_exists(basedir.."/lua/init_bake.lua") then
 	local lson=bake.readfile(basedir.."/lua/init_bake.lua")
@@ -102,7 +133,7 @@ local ficon=basedir.."/art/icons/android_icon.png"
 if not bake.file_exists(ficon) then
 	ficon="art/icons/android_icon.png"
 end
---[[
+
 if bake.file_exists(ficon) then
 
 	for i,v in ipairs{
@@ -116,14 +147,11 @@ if bake.file_exists(ficon) then
 		local gd=assert(wgrd.create(ficon))
 		assert(gd:convert(wgrd.FMT_U8_RGBA))
 		gd:scale(v.s,v.s,1)
-		local n="res/drawable-"..v.o.."/ic_launcher_background.png"
+		local n="gamecake/src/main/res/mipmap-"..v.o.."/ic_launcher.png"
 		bake.create_dir_for_file(n)
-		gd:save(n)
-		local n="res/drawable-"..v.o.."/ic_launcher_foreground.png"
 		gd:save(n)
 		print(n)
 	end
 
 end
-]]
 

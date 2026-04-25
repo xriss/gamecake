@@ -5,7 +5,7 @@ plugins {
 def buildWithCMake = project.hasProperty('BUILD_WITH_CMAKE');
 
 android {
-    namespace = "com.wetgenes.gamecake.dike"
+    namespace = "{package}"
     compileSdkVersion 35
     ndkVersion = "28.2.13676358"
     defaultConfig {
