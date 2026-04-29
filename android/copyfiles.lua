@@ -27,7 +27,7 @@ preopts={
 	fun=basedir,
 	fun_file="lua/"..wpath.file(basedir),
 }
-preopts.commandline=[[ "]]..preopts.fun_file..[[" , "--" , "--logs" , "--fullscreen" ]]
+preopts.commandline=[[ "]]..preopts.fun_file..[[" , "--" , "--logs" , "--show=full" ]]
 
 else
 

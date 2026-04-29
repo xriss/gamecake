@@ -272,15 +272,15 @@ overshade.setup=function(overshade)
     local screen=system.components.screen
 
 	overshade.buttons={
-		{ "bl" , 14/32 , 20/32 ,  5.0/32 , "up" },
-		{ "bl" ,  8/32 , 14/32 ,  5.0/32 , "left" },
-		{ "bl" , 20/32 , 14/32 ,  5.0/32 , "right" },
-		{ "bl" , 14/32 ,  8/32 ,  5.0/32 , "down" },
+		{ "bl" , 16/32 , 22/32 ,  5.0/32 , "up" },
+		{ "bl" , 10/32 , 16/32 ,  5.0/32 , "left" },
+		{ "bl" , 22/32 , 16/32 ,  5.0/32 , "right" },
+		{ "bl" , 16/32 , 10/32 ,  5.0/32 , "down" },
 
---		{ "br" , 14/32 , 20/32 ,  5.0/32 , "y" , name="Y" },
-		{ "br" ,  8/32 , 14/32 ,  5.0/32 , "b" , name="B" },
---		{ "br" , 20/32 , 14/32 ,  5.0/32 , "x" , name="X" },
-		{ "br" , 14/32 ,  8/32 ,  5.0/32 , "a" , name="A" },
+--		{ "br" , 16/32 , 22/32 ,  5.0/32 , "y" , name="Y" },
+		{ "br" , 10/32 , 16/32 ,  5.0/32 , "b" , name="B" },
+--		{ "br" , 22/32 , 16/32 ,  5.0/32 , "x" , name="X" },
+		{ "br" , 16/32 , 10/32 ,  5.0/32 , "a" , name="A" },
 	}
     overshade.touches={}
 	
@@ -304,8 +304,8 @@ overshade.update=function(overshade)
     overshade.hh=overshade.hx < overshade.hy and overshade.hx or overshade.hy
     
     overshade.margin=0
-    overshade.margin_min=-4/32
-    overshade.margin_max=8/32
+    overshade.margin_min=-10/32
+    overshade.margin_max=10/32
     
 	local stick=overshade.stick
 	local stick_state_change=function(newstate)
@@ -626,8 +626,10 @@ players.values={
 	side=1,
 	foot=8,
 	onfloor=0,
-	jump=0,
 	flap=0,
+	jump_force=0,
+	jump_decay=0,
+	jump_debounce=0,
 	holdtime=0,
 	walk=0,
 	score=0,
@@ -982,7 +984,7 @@ elseif player.mode=="die" then
 else
 	
 	if ba_now then
-		grav=grav*0.5 -- reduce gravity while flapping arms
+--		grav=grav*0.5 -- reduce gravity while flapping arms
 		player.flap=(player.flap+1)%4
 	else
 		player.flap=2
@@ -990,7 +992,7 @@ else
 
 	player.acc=V3( 0, 0 ,0) -- reset force
 	local va -- velocity we want to achieve
-	if player.onfloor>0 or player.jump>0 then -- when on floor
+	if player.onfloor>0 or player.jump_force>0 then -- when on floor
 		va=lx*512
 	else -- when in air
 		va=lx*256
@@ -1057,20 +1059,31 @@ else
 		player.acc:add(grav) -- gravity
 	end
 
-	if player.onfloor>0 and player.jump<=0 then -- meep meep jump	
-		if ba_set then
+	if player.jump_debounce>0 then -- force minimum time between jumps
+		player.jump_debounce=math.max(0,player.jump_debounce-1)
+		player.onfloor=0
+	end
+
+	if player.onfloor>0 and player.jump_force==0 then -- can jump
+		if ba_set then -- start jump
 			player.onfloor=0
-			player.jump=4
-			player.acc[2]=0
-			player.vel[2]=-140
+			player.jump_force=42
+			player.jump_decay=4
+			player.jump_debounce=4
+			player.vel[2]=-player.jump_force -- starting force
 		end
 	end
--- forever coyote time
---	if player.onfloor>0 then player.onfloor=player.onfloor-1 end
 
-	if player.jump>0 then -- jump higher while button is held down
-		player.onfloor=0 -- no foot grab while jumping
-		player.jump=player.jump-1 -- continue jump
+	if player.jump_force>0 then -- continue jumping
+		if ba_now then
+			player.jump_force=math.max(0,player.jump_force-player.jump_decay)
+		else
+			player.jump_force=0 -- force 0 on jump release
+		end
+	end
+
+	if player.jump_force>0 then -- apply jump force
+		player.vel[2]=player.vel[2]-player.jump_force
 	end
 
 
