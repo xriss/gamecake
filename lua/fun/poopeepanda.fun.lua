@@ -628,7 +628,6 @@ players.values={
 	onfloor=0,
 	flap=0,
 	jump_force=0,
-	jump_decay=0,
 	jump_debounce=0,
 	holdtime=0,
 	walk=0,
@@ -1034,8 +1033,10 @@ else
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
 
-		if ba_now or ly>0.25 then -- crouch while button held down or move down
+		if ly>0.25 then -- crouch
 			v=v+3
+		elseif ly<-0.25 then -- tiptoe
+			v=v-2
 		end
 
 		local a=v*32 -- force to adjust velocity by
@@ -1064,28 +1065,21 @@ else
 		player.onfloor=0
 	end
 
-	if player.onfloor>0 and player.jump_force==0 then -- can jump
-		if ba_set then -- start jump
+	if ba_set then -- start jump
+		if player.onfloor>0 and player.jump_force==0 then -- can jump
 			player.onfloor=0
-			player.jump_force=42
-			player.jump_decay=4
+			player.jump_force=11	-- (F*(F+1)/2)*-4 applied over F frames
 			player.jump_debounce=4
-			player.vel[2]=-player.jump_force -- starting force
+			player.vel[2]=0 -- reset starting force
 		end
 	end
-
-	if player.jump_force>0 then -- continue jumping
-		if ba_now then
-			player.jump_force=math.max(0,player.jump_force-player.jump_decay)
-		else
-			player.jump_force=0 -- force 0 on jump release
-		end
+	if ba_now then -- continue jump
+		player.vel[2]=player.vel[2]+(player.jump_force*-4)	-- apply jump force
+		player.jump_force=math.max(0,player.jump_force-1)	-- decay jump force
 	end
-
-	if player.jump_force>0 then -- apply jump force
-		player.vel[2]=player.vel[2]-player.jump_force
+	if ba_clr then -- end of jump
+		player.jump_force=0 -- 0 on jump force on release of jump
 	end
-
 
 	local hold_pos=player.pos+V3(0,-10,0)
 	local hold=player:depend("hold")
@@ -3001,6 +2995,7 @@ levels.values={
 	idx=1,
 	time=0,
 	complete=0,
+	start=0,
 }
 
 levels.types={
@@ -3093,10 +3088,10 @@ legend=levels.combine_legends(levels.legend,{
 	["Tb"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
 	["Tc"]={ name="char_sign",				text="Congratulations on the coyote JUMP." },
 	["Td"]={ name="char_sign",				text="You may coyote JUMP in the air after walking off of a platform." },
-	["T1"]={ name="char_sign",				text="Press Button A or RIGHT-ALT or . to JUMP in." },
+	["T1"]={ name="char_sign",				text="Press Button A or . to JUMP in." },
 	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move. Hold JUMP to JUMP higher." },
-	["T3"]={ name="char_sign",				text="Hold JUMP to flap arms and duck down or just MOVE down to duck." },
-	["T4"]={ name="char_sign",				text="Press Button B or RIGHT-CTRL or / to GRAB object, press GRAB again to throw it." },
+	["T3"]={ name="char_sign",				text="MOVE down to crouch down." },
+	["T4"]={ name="char_sign",				text="Press Button B or / to GRAB object, press GRAB again to throw it." },
 	["T5"]={ name="char_sign",				text="Throw power is shown by object rotation, wait for it to speed up." },
 	["T6"]={ name="char_sign",				text="Aim throw with Right Stick or Cursor Keys." },
 	["T7"]={ name="char_sign",				text="Throw object at Slim Slimy to stun him." },
@@ -3356,6 +3351,7 @@ levels.item.setup=function(level)
 	it.shader_uniforms.cy4={ 0   , 1/2 , 1/2 , 1   }
 
 	level.time=0
+	level.start=0
 
 	level:set_values()
 end
@@ -3383,6 +3379,8 @@ levels.item.update=function(level)
 	if fauna==0 then -- all mosters dead
 		level.complete=level.complete+1
 	end
+	
+	level.start=level.start+1
 	
 	if level.complete>(64+16) then -- delete everything and restart
 	
@@ -3509,12 +3507,14 @@ cameras.uidmap={
 cameras.values={
 	pos=V3( 0,0,0 ),
 	focus=V3( 0,0,0 ),
+	slide=V3( 0,0,0 ),
 	idx=1,
 	tile=0x0000,
 }
 
 cameras.types={
 	pos="tween",
+	slide="tween",
 	focus="tween",
 }
 
@@ -3550,14 +3550,8 @@ cameras.item.update=function(camera)
 	camera:get_values()
 	
 	local level=camera:get_singular("level") -- only one level is active at a time
+	level:get_values()
 	
-if level.complete>0 then
-
-	if level.complete>64 then
-		local t=(level.complete-64)
-		camera.pos[2]=camera.pos[2]-t*t
-	end
-else
 
 	local player=camera:depend("player")
 	local hud=player:depend("hud")
@@ -3585,7 +3579,20 @@ else
 		local m=map.window_hy-(shy-hud.pos[1])
 		if camera.pos[2]>m then camera.pos[2]=m end
 	end
-end
+
+	camera.slide[2]=0
+	if level.start<32 then
+		local t=(32-level.start)
+		camera.slide[2]=-(t*t)
+	end
+
+	if level.complete>0 then
+		if level.complete>64 then
+			local t=(level.complete-64)
+			camera.slide[2]=t*t
+		end
+	end
+
 
 
 	camera:set_values()
@@ -3618,6 +3625,9 @@ cameras.item.draw=function(camera)
 		map.window_py=0
 		map.py=math.floor(camera.pos[2])
 	end
+
+	map.window_px=map.window_px+math.floor(camera.slide[1])
+	map.window_py=map.window_py+math.floor(camera.slide[2])
 	
 	if level.complete>0 then
 		map.window_py=map.window_py-map.py
