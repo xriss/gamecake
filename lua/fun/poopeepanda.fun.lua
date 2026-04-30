@@ -167,7 +167,7 @@ end
 
 --------------------------------------------------------------------------------
 --
---#base_draw
+--#draws
 
 draws={}
 draws.sprite=function(it) -- note that we will modify this table
@@ -260,6 +260,23 @@ draws.string4_in_map=function(s,x,y)
 	x=x+map.window_px-map.px	-- auto map position
 	y=y+map.window_py-map.py
 	draws.string4(s,x,y)
+end
+
+draws.integer_to_string_with_commas=function(n)
+	local sign
+	n=math.floor(n) -- force int
+	if n<0 then -- remove negative
+		sign="-"
+		n=-n
+	end
+	local s=tostring( n )
+	local t={}
+	for i=1,#s,3 do
+		table.insert(t,1,s:sub(-i-2,-i))
+	end
+	s=table.concat(t,",")
+	if sign then return sign..s end
+	return s
 end
 
 --------------------------------------------------------------------------------
@@ -1268,7 +1285,7 @@ scores.item.draw=function(score)
 
 	score:get_values()
 
-	local s=tostring(score.num)
+	local s=draws.integer_to_string_with_commas( score.num )
 	draws.string4_in_map(s,score.pos[1]-(#s*2),score.pos[2]-4)
 
 end
@@ -1404,10 +1421,11 @@ floaters.item.update=function(floater)
 			local fauna=floater:depend("fauna")
 			if fauna then
 		 		if fauna:mark_deleted() then -- remove fauna
+		 		
+		 			local number_of_floaters=scene:get_number_of("floater")
+		 			local number_of_fruits=scene:get_number_of("fruit")
 	
 		 			floater:mark_deleted()
-	--				who.score=who.score+100
-					local bonus=hit.sys:get_rnd(4)
 					for i=1,16 do
 						local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
 									hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
@@ -1415,12 +1433,20 @@ floaters.item.update=function(floater)
 						local boots={
 							{"gib",sname="gib_green",size=4,pos=floater.pos,vel=v},
 						}
-						if i<=bonus then -- some gibs are fruits
-							local r=hit.sys:get_rnd(9)
-							boots={
-								{"fruit",sname="fruit_"..r,pos=floater.pos,vel=v*2},
-							}
-						end
+						scene:creates(boots)
+					end
+
+					local r=hit.sys:get_rnd(1,6) -- number of fruit drops
+					if r<=3 then r=1 elseif r<=5 then r=2 else r=3 end
+
+					for i=1,r do -- 1-3 fruits
+						local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
+									hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
+									0 )
+						local f=math.min(8,number_of_fruits+i) -- maximum fruit
+						local boots={
+							{"fruit",sname="fruit_"..f,pos=floater.pos,vel=v*2,score=(2^(f-1))*100},
+						}
 						scene:creates(boots)
 					end
 					
@@ -2279,6 +2305,7 @@ fruits.values={
 	acc=V3( 0,200,0 ),
 	sname="fruit_1",
 	age=0,
+	score=100,
 	touch={},
 }
 
@@ -2302,72 +2329,6 @@ Y o 7 7 7 o O .
 ]]},
 
 {nil,"fruit_2",[[
-. . . . . R . . 
-. . . R R 1 R . 
-. . R 1 R R R . 
-. R R R R 1 R . 
-d R R 1 R R R . 
-G G R R R 1 R . 
-. d d G G R R . 
-. . . d d d G . 
-]]},
-
-{nil,"fruit_3",[[
-. . I I I I . . 
-. I B B B B I . 
-I B d d d d B I 
-B d Y Y Y Y Y B 
-d Y O O O O Y d 
-Y O O R R O O Y 
-O O R R R R O O 
-O R R . . R R O 
-]]},
-
-{nil,"fruit_4",[[
-. . . . . . . . 
-. . . . . . . . 
-. Y O Y O o . . 
-Y O o O o r r . 
-s s F F F f f . 
-Y Y Y Y Y o o . 
-s s F F F f f . 
-o o O O O r r . 
-]]},
-
-{nil,"fruit_5",[[
-. . . . . . . . 
-. . . Y Y Y . . 
-. . Y o o o Y . 
-. Y o y y y o Y 
-. Y o y . . y y 
-Y o y . . . . 1 
-Y y y . . . . 1 
-. y . . . . . . 
-]]},
-
-{nil,"fruit_6",[[
-. . . . . . . . 
-. R R . R R . . 
-R O r R O r R . 
-R r R R r R R . 
-R R R R R R R . 
-. R R R R R . . 
-. . R R R . . . 
-. . . R . . . . 
-]]},
-
-{nil,"fruit_7",[[
-. . . . . . . . 
-. . . . . . . . 
-. . . . . . . . 
-. . . . . . . . 
-. Y O Y O o . . 
-Y O o O o r r . 
-s s F F F f f . 
-o o O O O r r . 
-]]},
-
-{nil,"fruit_8",[[
 . . d . . G . . 
 . . . d G . . . 
 . . r R r R . . 
@@ -2378,7 +2339,7 @@ o o O O O r r .
 . . . r R . . . 
 ]]},
 
-{nil,"fruit_9",[[
+{nil,"fruit_3",[[
 G . g . . . . . 
 . G F . . . . . 
 . . F F F R R . 
@@ -2388,6 +2349,73 @@ R r r R . R R .
 R r R R . . . . 
 . R R . . . . . 
 ]]},
+
+{nil,"fruit_4",[[
+. . . . . . . . 
+. . . Y Y Y . . 
+. . Y o o o Y . 
+. Y o y y y o Y 
+. Y o y . . y y 
+Y o y . . . . 1 
+Y y y . . . . 1 
+. y . . . . . . 
+]]},
+
+{nil,"fruit_5",[[
+. . . . . R . . 
+. . . R R 1 R . 
+. . R 1 R R R . 
+. R R R R 1 R . 
+d R R 1 R R R . 
+G G R R R 1 R . 
+. d d G G R R . 
+. . . d d d G . 
+]]},
+
+{nil,"fruit_6",[[
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. Y O Y O o . . 
+Y O o O o r r . 
+s s F F F f f . 
+o o O O O r r . 
+]]},
+
+{nil,"fruit_7",[[
+. . . . . . . . 
+. . . . . . . . 
+. Y O Y O o . . 
+Y O o O o r r . 
+s s F F F f f . 
+Y Y Y Y Y o o . 
+s s F F F f f . 
+o o O O O r r . 
+]]},
+
+{nil,"fruit_8",[[
+. . I I I I . . 
+. I B B B B I . 
+I B d d d d B I 
+B d Y Y Y Y Y B 
+d Y O O O O Y d 
+Y O O R R O O Y 
+O O R R R R O O 
+O R R . . R R O 
+]]},
+
+{nil,"fruit_9",[[
+. . . . . . . . 
+. R R . R R . . 
+R O r R O r R . 
+R r R R r R R . 
+R R R R R R R . 
+. R R R R R . . 
+. . R R R . . . 
+. . . R . . . . 
+]]},
+
 
 }
 
@@ -2488,9 +2516,9 @@ fruits.item.update=function(fruit)
 			if fruit.age>=16 then
 				if fruit:mark_deleted() then
 					local score=touch:get_value("score")
-					touch:set_value("score",score+100)
+					touch:set_value("score",score+fruit.score)
 					local boots={
-						{"score",num=100,pos=fruit.pos},
+						{"score",num=fruit.score,pos=fruit.pos},
 					}
 					scene:creates(boots)
 				end
@@ -3628,10 +3656,6 @@ cameras.item.draw=function(camera)
 
 	map.window_px=map.window_px+math.floor(camera.slide[1])
 	map.window_py=map.window_py+math.floor(camera.slide[2])
-	
-	if level.complete>0 then
-		map.window_py=map.window_py-map.py
-	end
 
 end
 
@@ -3812,11 +3836,11 @@ huds.item.draw=function(hud)
 	local players=scene:caste("player")
 	for i,p in ipairs(players) do
 		if p.idx==1 then
-			local s=p.score..""
+			local s=draws.integer_to_string_with_commas(p.score)
 --			if p.onfloor>0 then s=s.." _" end
 			draws.string4(s,2,1)
 		elseif p.idx==2 then
-			local s=p.score..""
+			local s=draws.integer_to_string_with_commas(p.score)
 --			if p.onfloor>0 then s="_ "..s end
 			draws.string4(s,254-(#s*4),1)
 		end

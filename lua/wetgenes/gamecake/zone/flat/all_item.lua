@@ -159,6 +159,7 @@ all.item.get_values=function(it)
 	for n,t in pairs(it.sys.types) do
 		it:get_value(n,t,s)
 	end
+	return it
 end
 
 

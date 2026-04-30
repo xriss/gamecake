@@ -68,11 +68,24 @@ all.scene.creates=function(scene,boots) -- batch create and set depends
 	return items
 end
 
+-- get number of active items of this caste
+all.scene.get_number_of=function(scene,name)
+	local count=0
+	local its=scene.data[name]
+	if its then
+		for idx,it in ipairs(its) do
+			if not it:get("deleted") then -- check it is not deleted
+				count=count+1
+			end
+		end
+	end
+	return count
+end
 
 all.scene.get_singular=function(scene,name)
-	local sys=scene.systems[name]
-	if sys then
-		return sys.data[#sys.data]
+	local its=scene.data[name]
+	if its then
+		return its[#its]
 	end
 end
 
