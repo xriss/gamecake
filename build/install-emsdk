@@ -35,6 +35,7 @@ if [ -d "emsdk" ]; then
 	git pull
 else
 	git clone https://github.com/juj/emsdk.git
+	cd emsdk
 fi
 
 ./emsdk update

@@ -10,4 +10,4 @@ cd `dirname $0`
 chmod +x ../../exe/gamecake.a64
 
 
-#./box-down
+./box-down
