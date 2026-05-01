@@ -1145,6 +1145,10 @@ else
 	end
 	if hold then
 		player.holdtime=player.holdtime+1
+		
+		if math.abs(lx)>0.5 then -- run to speed up spin timer
+			player.holdtime=player.holdtime+2
+		end
 		-- stop player coliding with held object
 		hold.shape:filter(player.uid,players.collision_bits,players.collision_mask)
 
@@ -1436,8 +1440,8 @@ floaters.item.update=function(floater)
 						scene:creates(boots)
 					end
 
-					local r=hit.sys:get_rnd(1,6) -- number of fruit drops
-					if r<=3 then r=1 elseif r<=5 then r=2 else r=3 end
+					local r=hit.sys:get_rnd(1,100) -- percent chance
+					if r<=75 then r=1 elseif r<=95 then r=2 else r=3 end -- 1,2 or 3 drops
 
 					for i=1,r do -- 1-3 fruits
 						local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
@@ -3120,7 +3124,7 @@ legend=levels.combine_legends(levels.legend,{
 	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move. Hold JUMP to JUMP higher." },
 	["T3"]={ name="char_sign",				text="MOVE down to crouch down." },
 	["T4"]={ name="char_sign",				text="Press Button B or / to GRAB object, press GRAB again to throw it." },
-	["T5"]={ name="char_sign",				text="Throw power is shown by object rotation, wait for it to speed up." },
+	["T5"]={ name="char_sign",				text="Throw power is shown by object rotation, run for it to speed up." },
 	["T6"]={ name="char_sign",				text="Aim throw with Right Stick or Cursor Keys." },
 	["T7"]={ name="char_sign",				text="Throw object at Slim Slimy to stun him." },
 	["T8"]={ name="char_sign",				text="Stomp stunned Slim Slimy to finish him." },
@@ -3173,6 +3177,34 @@ map=[[
 }
 
 levels.infos[3]={
+legend=levels.combine_legends(levels.legend,{
+}),
+title="Test.",
+map=[[
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 > . . . . . . . . . . . . , . . . . . . . . . . . . . . . < 0 
+0 P1. . . . . . . . . . . . . . . . . . . . . . . . . . . P2. 0 
+0 . . . . . . . . . > . . . . . . . . . . < . . . . . . . . . 0 
+0 0 0 0 0 0 0 . . . . . . . . . . . . . . . . . . 0 0 0 0 0 0 0 
+0 . . . . . . . . . . . . . . v v . . . . . . . . . . . . . . 0 
+0 . . . . . . . S10 0 . . . . . . . . . . 0 0 S1. . . . . . . 0 
+0 . . . . . < 0 0 0 0 0 0 . J1. . J1. 0 0 0 0 0 0 > . . . . . 0 
+0 . . . . . . . . . . . . . S1. . S1. . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . J1< > J1. . . . . . . . . . . . . 0 
+0 . . ^ . . . . . . . . . . S1. . S1. . . . . . . . . . ^ . . 0 
+0 . . . . . . . . . . . . 0 0 0 0 0 0 . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 S1. . . . . . . . . . . . . < > . . . . . . . . . . . . . S10 
+0 0 0 0 0 0 0 0 0 0 0 0 0 . . . . . . 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 . . . . . . . . . . J1. . . . . . . . J1. . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 > . . . . > . . . . . > . . . . . . < . . . . . < . . . . < 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+]],
+}
+
+levels.infos[4]={
 legend=levels.combine_legends(levels.legend,{
 }),
 title="Test.",
