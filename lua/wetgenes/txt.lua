@@ -440,7 +440,10 @@ them to be highlighted.
 				local cx=found.tx
 				local cy=found.ty
 				local cache=txt.get_cache_lex(cy)
+				local sanity=0
 				while cache do
+					sanity=sanity+1
+					if sanity>1000 then break end -- dont look tooo hard
 					cx=cx-1
 					if cx<1 then
 						cy=cy-1
@@ -468,7 +471,10 @@ them to be highlighted.
 				local cx=found.fx
 				local cy=found.fy
 				local cache=txt.get_cache_lex(cy)
+				local sanity=0
 				while cache do
+					sanity=sanity+1
+					if sanity>1000 then break end -- dont look tooo hard
 					cx=cx+1
 					if cx>#cache.cb then
 						cy=cy+1
