@@ -5,7 +5,7 @@ echo " asking for sudo password at top "
 sudo echo " remember to use --clean to force a full rebuild "
 
 
-echo " build windows ( win32 for life ) "
+echo " build windows  "
 
 # need boxs in first cd
 cd ../boxs/vbox_mingw
@@ -27,11 +27,10 @@ cd ../vbox_x64
 vagrant halt
 
 
-echo " build 64bit OSX 10.14 version "
-
-cd ../vbox_osx
-./make $*
-vagrant halt
+#echo " build 64bit OSX 10.14 version "
+#cd ../vbox_osx
+#./make $*
+#vagrant halt
 
 
 echo " build a64 raspi 3 onwards 64bit only "

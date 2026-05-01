@@ -18,9 +18,12 @@ zip -r ../$ZIPNAME poopeepanda.fun.lua
 
 
 
-ZIPNAME=poopeepanda-$DATE.win.zip
+ZIPNAME=poopeepanda-$DATE.pc.zip
 rm  ../$ZIPNAME
 zip -r ../$ZIPNAME exe/gamecake.exe
+zip -r ../$ZIPNAME exe/gamecake.x64
+zip -r ../$ZIPNAME exe/gamecake.a64
 zip -r ../$ZIPNAME poopeepanda.fun.lua
 zip -r ../$ZIPNAME poopeepanda.bat
+zip -r ../$ZIPNAME poopeepanda.sh
 
