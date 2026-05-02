@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 659,
+   "count": 668,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 648,
+   "count": 657,
    "name": "lua.wetgenes"
   },
   {
@@ -1758,11 +1758,11 @@
    "name": "lua.wetgenes.syncs"
   },
   {
-   "count": 184,
+   "count": 193,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 39,
+   "count": 40,
    "name": "lua.wetgenes.tardis.array"
   },
   {
@@ -1804,6 +1804,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.alloc"
   },
   {
    "count": 1,
@@ -1930,12 +1934,16 @@
    "name": "lua.wetgenes.tardis.line.new"
   },
   {
-   "count": 11,
+   "count": 12,
    "name": "lua.wetgenes.tardis.m2"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m2.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.alloc"
   },
   {
    "count": 1,
@@ -1974,12 +1982,16 @@
    "name": "lua.wetgenes.tardis.m2.transpose"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.m3"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m3.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.alloc"
   },
   {
    "count": 1,
@@ -2026,7 +2038,7 @@
    "name": "lua.wetgenes.tardis.m3.v3"
   },
   {
-   "count": 35,
+   "count": 36,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -2036,6 +2048,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.alloc"
   },
   {
    "count": 1,
@@ -2178,8 +2194,12 @@
    "name": "lua.wetgenes.tardis.plane.new"
   },
   {
-   "count": 16,
+   "count": 17,
    "name": "lua.wetgenes.tardis.q4"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.alloc"
   },
   {
    "count": 1,
@@ -2254,7 +2274,7 @@
    "name": "lua.wetgenes.tardis.type"
   },
   {
-   "count": 14,
+   "count": 15,
    "name": "lua.wetgenes.tardis.v1"
   },
   {
@@ -2291,6 +2311,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.v1.new"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.v1.normalize"
   },
   {
@@ -2310,12 +2334,16 @@
    "name": "lua.wetgenes.tardis.v1.sub"
   },
   {
-   "count": 15,
+   "count": 16,
    "name": "lua.wetgenes.tardis.v2"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v2.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.alloc"
   },
   {
    "count": 1,
@@ -2370,12 +2398,16 @@
    "name": "lua.wetgenes.tardis.v2.sub"
   },
   {
-   "count": 16,
+   "count": 17,
    "name": "lua.wetgenes.tardis.v3"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v3.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.alloc"
   },
   {
    "count": 1,
@@ -2434,12 +2466,16 @@
    "name": "lua.wetgenes.tardis.v3.sub"
   },
   {
-   "count": 15,
+   "count": 16,
    "name": "lua.wetgenes.tardis.v4"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.alloc"
   },
   {
    "count": 1,
@@ -2834,7 +2870,7 @@
    "body": "<pre><code>m4 = m4:inverse()\nm4 = m4:inverse(r)\n</code></pre>\n<p>Inverse this m4.</p>\n<p>If r is provided then the result is written into r and returned\notherwise m4 is modified and returned.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1513,
+   "line": 1557,
    "name": "lua.wetgenes.tardis.m4.inverse",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

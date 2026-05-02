@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 659,
+   "count": 668,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 648,
+   "count": 657,
    "name": "lua.wetgenes"
   },
   {
@@ -1758,11 +1758,11 @@
    "name": "lua.wetgenes.syncs"
   },
   {
-   "count": 184,
+   "count": 193,
    "name": "lua.wetgenes.tardis"
   },
   {
-   "count": 39,
+   "count": 40,
    "name": "lua.wetgenes.tardis.array"
   },
   {
@@ -1804,6 +1804,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.array.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.array.alloc"
   },
   {
    "count": 1,
@@ -1930,12 +1934,16 @@
    "name": "lua.wetgenes.tardis.line.new"
   },
   {
-   "count": 11,
+   "count": 12,
    "name": "lua.wetgenes.tardis.m2"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m2.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m2.alloc"
   },
   {
    "count": 1,
@@ -1974,12 +1982,16 @@
    "name": "lua.wetgenes.tardis.m2.transpose"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.wetgenes.tardis.m3"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m3.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m3.alloc"
   },
   {
    "count": 1,
@@ -2026,7 +2038,7 @@
    "name": "lua.wetgenes.tardis.m3.v3"
   },
   {
-   "count": 35,
+   "count": 36,
    "name": "lua.wetgenes.tardis.m4"
   },
   {
@@ -2036,6 +2048,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.m4.adjugate"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.m4.alloc"
   },
   {
    "count": 1,
@@ -2178,8 +2194,12 @@
    "name": "lua.wetgenes.tardis.plane.new"
   },
   {
-   "count": 16,
+   "count": 17,
    "name": "lua.wetgenes.tardis.q4"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.q4.alloc"
   },
   {
    "count": 1,
@@ -2254,7 +2274,7 @@
    "name": "lua.wetgenes.tardis.type"
   },
   {
-   "count": 14,
+   "count": 15,
    "name": "lua.wetgenes.tardis.v1"
   },
   {
@@ -2291,6 +2311,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wetgenes.tardis.v1.new"
+  },
+  {
+   "count": 1,
    "name": "lua.wetgenes.tardis.v1.normalize"
   },
   {
@@ -2310,12 +2334,16 @@
    "name": "lua.wetgenes.tardis.v1.sub"
   },
   {
-   "count": 15,
+   "count": 16,
    "name": "lua.wetgenes.tardis.v2"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v2.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v2.alloc"
   },
   {
    "count": 1,
@@ -2370,12 +2398,16 @@
    "name": "lua.wetgenes.tardis.v2.sub"
   },
   {
-   "count": 16,
+   "count": 17,
    "name": "lua.wetgenes.tardis.v3"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v3.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v3.alloc"
   },
   {
    "count": 1,
@@ -2434,12 +2466,16 @@
    "name": "lua.wetgenes.tardis.v3.sub"
   },
   {
-   "count": 15,
+   "count": 16,
    "name": "lua.wetgenes.tardis.v4"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.tardis.v4.add"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.tardis.v4.alloc"
   },
   {
    "count": 1,
@@ -2834,7 +2870,7 @@
    "body": "<pre><code>scene.systems={name=system,[1]=system}\n</code></pre>\n<p>A sorted table and lookup by caste name of each system. Table is sorted so it\nwill be traversed backwards, backwards traversal allows the current item to\ndelete itself.</p>\n",
    "count": 5,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 91,
+   "line": 95,
    "name": "lua.wetgenes.gamecake.zone.scene.systems",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2842,7 +2878,7 @@
    "body": "<pre><code>scene:systems_call(fname,...)\n</code></pre>\n<p>For every system call the function called fname like so.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n<p>If fname is a function then it will be called as if it was a method.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 246,
+   "line": 250,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.call",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2850,7 +2886,7 @@
    "body": "<pre><code>scene:systems_cocall(fname,...)\n</code></pre>\n<p>For every system call the function called fname inside a coroutine like\nso.</p>\n<pre><code>system[fname](system,...)\n</code></pre>\n<p>This function can yield and should do so if it is waiting for another\nsystem to do something. All coroutines will be run in a round robin\nstyle until they all complete.</p>\n<p>Returns the number of calls made, which will be the number of systems that had\nan fname function to call.</p>\n<p>If fname is a function then it will be called as if it was a method.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 280,
+   "line": 284,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.cocall",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2858,7 +2894,7 @@
    "body": "<pre><code>scene:systems_insert(system)\n</code></pre>\n<p>Insert a new system replacing any system of the same caste. system.caste should\nbe set to the caste of the system for this to work.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 215,
+   "line": 219,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.insert",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   },
@@ -2866,7 +2902,7 @@
    "body": "<pre><code>system = scene:systems_remove(caste)\n</code></pre>\n<p>Remove and return the system of the given caste.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/zone/scene.lua",
-   "line": 198,
+   "line": 202,
    "name": "lua.wetgenes.gamecake.zone.scene.systems.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/scene.lua"
   }
