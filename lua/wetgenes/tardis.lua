@@ -228,7 +228,7 @@ meta to call a:compare(b) and return the result
 
 ]]
 function array.__eq(a,b)
-	if not a then a,b=b,a end
+	if not tardis.is_table(a) then a,b=b,a end -- might need to swap if number or nil
 	return a:compare(b)
 end
 
