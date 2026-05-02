@@ -1,4 +1,8 @@
 
+local tardis=require("wetgenes.tardis")
+local V0,V1,V2,V3,V4,M2,M3,M4,Q4,is_table=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4","is_table")
+
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
@@ -677,7 +681,7 @@ get this new value.
 ]]
 values_methods.set=function(values,key,value)
 	if values:get(key)~=value then
-		if type(value)=="table" and value.new then -- dupe so we dont accidently mess with the original
+		if is_table(value) and value.new then -- dupe so we dont accidently mess with the original
 			value=value.new(value)
 		end
 		values[#values][key]=value
@@ -704,7 +708,7 @@ values_methods.get=function(values,key,topidx)
 		local value=values[idx][key]
 		local tvalue=type(value)
 		if value or (tvalue~="nil") then
-			if tvalue=="table" and value.new then -- dupe so we dont accidently mess with the original
+			if is_table(value) and value.new then -- dupe so we dont accidently mess with the original
 				return value.new(value)
 			end
 			return value
@@ -772,7 +776,7 @@ values_methods.tween=function(values,key,tween)
 	else
 		if ta=="number" and tb=="number" then -- tween numbers
 			return a*tween + b*(1-tween)
-		elseif tb=="table" and b.mix then -- tween using tardis
+		elseif is_table(b) and b.mix then -- tween using tardis
 			return b:mix(a,tween,b:new())
 		end
 	end
@@ -844,7 +848,7 @@ values_methods.twrap=function(values,key,nmax,tween)
 
 			return twrap(a,b,nmax,tween)
 
-		elseif tb=="table" and b.new then -- tween using tardis
+		elseif is_table(b) and b.new then -- tween using tardis
 			local r=b.new()
 			if type(nmax)=="number" then -- singular nmax
 				for i=1,#r do

@@ -70,6 +70,11 @@ http://www.j3d.org/matrix_faq/matrfaq_latest.html
 --module
 local tardis={ modname=(...) } ; package.loaded[tardis.modname]=tardis
 
+tardis.metas={} -- cache of just meta tables
+
+tardis.is_table=function(a)
+	return type(a)=="table"
+end
 
 tardis.export=function(env,...)
 	local tab={...}
@@ -102,7 +107,7 @@ end
 This will return the type of an object previously registered with class
 
 ]]
-function tardis.type(it) local t=type(it) return t=="table" and it.__type or t end
+tardis.type = function(it) return tardis.is_table(it) and it.__type or type(it) end
 
 --[[#lua.wetgenes.tardis.class
 
@@ -112,9 +117,9 @@ Create a new metatable for an object class, optionally inheriting from other pre
 declared classes.
 
 ]]
-function tardis.class(name,...)
+tardis.class = function(name,...)
 
-	if tardis[name] then return tardis[name] end
+	if tardis.metas[name] then return tardis.metas[name] end
 
 	local meta={} -- create new
 	local sub={...} -- possibly multiple sub classes
@@ -128,7 +133,8 @@ function tardis.class(name,...)
 	meta.__index=meta -- this metatable is its own index
 	meta.__type=name -- class name
 
-	tardis[name]=meta -- save in using name and return table
+	tardis.metas[name]=meta
+	tardis[name]=meta
 	return meta
 end
 
@@ -222,6 +228,7 @@ meta to call a:compare(b) and return the result
 
 ]]
 function array.__eq(a,b)
+	if not a then a,b=b,a end
 	return a:compare(b)
 end
 
@@ -250,6 +257,15 @@ function array.__div(a,b)
 	return a:product(1/b,a.new())
 end
 
+--[[#lua.wetgenes.tardis.array.alloc
+
+	a = tardis.array.alloc()
+
+Create an empty object with applied metatable.
+
+]]
+function array.alloc(...) return setmetatable({},array) end
+
 --[[#lua.wetgenes.tardis.array.new
 
 	a = tardis.array.new()
@@ -259,7 +275,8 @@ Create a new array and optionally set it to the given values which will
 also control its base length.
 
 ]]
-function array.new(...) return setmetatable({},array):set(...) end
+function array.new(...) return array.alloc():set(...) end
+
 
 --[[#lua.wetgenes.tardis.array.setn
 
@@ -901,6 +918,15 @@ We also inherit all the functions from tardis.array
 ]]
 m2=tardis.class("m2",array)
 
+--[[#lua.wetgenes.tardis.m2.alloc
+
+	m2 = tardis.m2.alloc()
+
+Create empty m2 object with applied metatable.
+
+]]
+function m2.alloc() return setmetatable({1,0, 0,1},m2) end
+
 --[[#lua.wetgenes.tardis.m2.new
 
 	m2 = tardis.m2.new()
@@ -909,7 +935,7 @@ Create a new m2 and optionally set it to the given values, m2 methods
 usually return the input m2 for easy function chaining.
 
 ]]
-function m2.new(...) return setmetatable({1,0, 0,1},m2):set(...) end
+function m2.new(...) return m2.alloc():set(...) end
 
 --[[#lua.wetgenes.tardis.m2.nset
 
@@ -1064,6 +1090,15 @@ We also inherit all the functions from tardis.array
 ]]
 m3=tardis.class("m3",array)
 
+--[[#lua.wetgenes.tardis.m3.alloc
+
+	m3 = tardis.m3.alloc()
+
+Create empty m3 object with applied metatable.
+
+]]
+function m3.alloc(...) return setmetatable({1,0,0, 0,1,0, 0,0,1},m3) end
+
 --[[#lua.wetgenes.tardis.m3.new
 
 	m3 = tardis.m3.new()
@@ -1072,7 +1107,7 @@ Create a new m3 and optionally set it to the given values, m3 methods
 usually return the input m3 for easy function chaining.
 
 ]]
-function m3.new(...) return setmetatable({1,0,0, 0,1,0, 0,0,1},m3):set(...) end
+function m3.new(...) return m3.alloc():set(...) end
 
 --[[#lua.wetgenes.tardis.m3.nset
 
@@ -1270,6 +1305,15 @@ We also inherit all the functions from tardis.array
 ]]
 m4=tardis.class("m4",array)
 
+--[[#lua.wetgenes.tardis.m4.alloc
+
+	m4 = tardis.m4.alloc()
+
+Create empty m4 object with applied metatable.
+
+]]
+function m4.alloc(...) return setmetatable({1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1},m4) end
+
 --[[#lua.wetgenes.tardis.m4.new
 
 	m4 = tardis.m4.new()
@@ -1278,7 +1322,7 @@ Create a new m4 and optionally set it to the given values, m4 methods
 usually return the input m4 for easy function chaining.
 
 ]]
-function m4.new(...) return setmetatable({1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1},m4):set(...) end
+function m4.new(...) return m4.alloc():set(...) end
 
 --[[#lua.wetgenes.tardis.m4.nset
 
@@ -1581,7 +1625,7 @@ otherwise m4 is modified and returned.
 
 ]]
 function m4.translate(it,a,b,c,d)
-	if type(a)=="table" then
+	if tardis.is_table(a) then
 		return m4.translate_v3(it,a,b)
 	else
 		return m4.translate_v3(it,{a,b,c},d)
@@ -1602,7 +1646,7 @@ otherwise m4 is modified and returned.
 
 ]]
 function m4.pretranslate(it,a,b,c,d)
-	if type(a)=="table" then
+	if tardis.is_table(a) then
 		return m4.pretranslate_v3(it,a,b)
 	else
 		return m4.pretranslate_v3(it,{a,b,c},d)
@@ -1649,7 +1693,7 @@ otherwise m4 is modified and returned.
 
 ]]
 function m4.scale(it,a,b,c,d)
-	if type(a)=="table" then
+	if tardis.is_table(a) then
 		return m4.scale_v3(it,a,b)
 	elseif c then
 		return m4.scale_v3(it,{a,b,c},d)
@@ -1698,7 +1742,7 @@ otherwise m4 is modified and returned.
 
 ]]
 function m4.prescale(it,a,b,c,d)
-	if type(a)=="table" then
+	if tardis.is_table(a) then
 		return m4.prescale_v3(it,a,b)
 	elseif c then
 		return m4.prescale_v3(it,{a,b,c},d)
@@ -1914,9 +1958,9 @@ otherwise m4 is modified and returned.
 
 ]]
 function m4.rotate(it,a,b,c,d,e)
-	if type(a)=="table" then -- q4
+	if tardis.is_table(a) then -- q4
 		return m4.qrotate(it,a,b)
-	elseif type(b)=="table" then -- v3
+	elseif tardis.is_table(b) then -- v3
 		return m4.arotate(it,a,b,c)
 	else
 		return m4.arotate(it,a,{b,c,d},e)
@@ -1989,9 +2033,9 @@ otherwise m4 is modified and returned.
 
 ]]
 function m4.prerotate(it,a,b,c,d,e)
-	if type(a)=="table" then -- q4
+	if tardis.is_table(a) then -- q4
 		return m4.preqrotate(it,a,b)
-	elseif type(b)=="table" then -- v3
+	elseif tardis.is_table(b) then -- v3
 		return m4.prearotate(it,a,b,c)
 	else
 		return m4.prearotate(it,a,{b,c,d},e)
@@ -2009,7 +2053,16 @@ We also inherit all the functions from tardis.array
 ]]
 v1=tardis.class("v1",array)
 
---[[#lua.wetgenes.tardis.v2.new
+--[[#lua.wetgenes.tardis.v1.new
+
+	v1 = tardis.v1.alloc()
+
+Allocate an empty v1 object with metatable.
+
+]]
+function v1.alloc() return setmetatable({0},v1) end
+
+--[[#lua.wetgenes.tardis.v1.new
 
 	v1 = tardis.v1.new()
 
@@ -2017,7 +2070,7 @@ Create a new v1 and optionally set it to the given values, v1 methods
 usually return the input v1 for easy function chaining.
 
 ]]
-function v1.new(...) return setmetatable({0},v1):set(...) end
+function v1.new(...) return v1.alloc():set(...) end
 
 --[[#lua.wetgenes.tardis.v1.nset
 
@@ -2206,6 +2259,15 @@ We also inherit all the functions from tardis.array
 ]]
 v2=tardis.class("v2",array)
 
+--[[#lua.wetgenes.tardis.v2.alloc
+
+	v2 = tardis.v2.alloc()
+
+Allocate an empty v2 object with metatable.
+
+]]
+function v2.alloc() return setmetatable({0,0},v2) end
+
 --[[#lua.wetgenes.tardis.v2.new
 
 	v2 = tardis.v2.new()
@@ -2214,7 +2276,7 @@ Create a new v2 and optionally set it to the given values, v2 methods
 usually return the input v2 for easy function chaining.
 
 ]]
-function v2.new(...) return setmetatable({0,0},v2):set(...) end
+function v2.new(...) return v2.alloc():set(...) end
 
 --[[#lua.wetgenes.tardis.v2.nset
 
@@ -2406,6 +2468,15 @@ We also inherit all the functions from tardis.array
 ]]
 v3=tardis.class("v3",array)
 
+--[[#lua.wetgenes.tardis.v3.alloc
+
+	v3 = tardis.v3.alloc()
+
+Allocate an empty v3 object with metatable.
+
+]]
+function v3.alloc(...) return setmetatable({0,0,0},v3) end
+
 --[[#lua.wetgenes.tardis.v3.new
 
 	v3 = tardis.v3.new()
@@ -2414,7 +2485,7 @@ Create a new v3 and optionally set it to the given values, v3 methods
 usually return the input v3 for easy function chaining.
 
 ]]
-function v3.new(...) return setmetatable({0,0,0},v3):set(...) end
+function v3.new(...) return v3.alloc():set(...) end
 
 --[[#lua.wetgenes.tardis.v3.nset
 
@@ -2656,6 +2727,15 @@ We also inherit all the functions from tardis.array
 ]]
 v4=tardis.class("v4",array)
 
+--[[#lua.wetgenes.tardis.v4.alloc
+
+	v4 = tardis.v4.alloc()
+
+Allocate an empty v4 object with metatable
+
+]]
+function v4.alloc(...) return setmetatable({0,0,0,0},v4) end
+
 --[[#lua.wetgenes.tardis.v4.new
 
 	v4 = tardis.v4.new()
@@ -2664,7 +2744,7 @@ Create a new v4 and optionally set it to the given values, v4 methods
 usually return the input v4 for easy function chaining.
 
 ]]
-function v4.new(...) return setmetatable({0,0,0,0},v4):set(...) end
+function v4.new(...) return v4.alloc():set(...) end
 
 --[[#lua.wetgenes.tardis.v4.nset
 
@@ -2892,7 +2972,7 @@ function q4.set(it,...)
 
 -- check for key or fall back to array.set
 
-	if type(data[1])=="table" and type(data[1][1])=="string" then
+	if tardis.is_table(data[1]) and type(data[1][1])=="string" then
 		key=data[1][1]
 	elseif type(data[1])=="string" then
 		key=data[1]
@@ -2917,7 +2997,7 @@ function q4.set(it,...)
 	for i,v in ipairs(data) do
 		if type(v)=="number" then
 			dorot(v)
-		elseif type(v)=="table" then
+		elseif tardis.is_table(v) then
 			for ii=1,#v do
 				local vv=v[ii] -- allow one depth of tables
 				if type(vv)=="number" then
@@ -2929,6 +3009,15 @@ function q4.set(it,...)
 
 	return it
 end
+
+--[[#lua.wetgenes.tardis.q4.alloc
+
+	q4 = tardis.q4.alloc()
+	
+Allocate a q4 object with metatable
+
+]]
+function q4.alloc(...) return setmetatable({0,0,0,1},q4) end
 
 --[[#lua.wetgenes.tardis.q4.new
 
@@ -2946,7 +3035,7 @@ and maths people think quaternions go w,x,y,z which can lead to a lot
 of confusion.
 
 ]]
-function q4.new(...) return setmetatable({0,0,0,1},q4):set(...) end
+function q4.new(...) return q4.alloc():set(...) end
 
 --[[#lua.wetgenes.tardis.q4.identity
 
@@ -3512,72 +3601,6 @@ function tardis.m4_stack()
 	return stack
 end
 
-
-
-if false then -- this is not faster than luajit :)
-
-tardis.f32=require("wetgenes.tardis.core") -- use a "faster?" f32 C core
-
-if not DISABLE_WETGENES_TARDIS_CORE then -- set this global to true before first use to disable use of tardis f32 core
---upgrade the above to hopefully faster C versions working on 16byte aligned userdata arrays of floats
-
-	local tcore=tardis.f32
-
-	-- allow read/write with magical [] lookups
-	function array.__len(it) return 1 end
-	function array.__index(it,n) return array[n] or tcore.read(it,n) end
-	function array.__newindex(it,n,v) tcore.write(it,n,v) end
-
-	function m2.new(...) return tcore.alloc(4* 4,m2):identity():set(...) end
-	function m3.new(...) return tcore.alloc(4* 9,m3):identity():set(...) end
-	function m4.new(...) return tcore.alloc(4*16,m4):identity():set(...) end
-
-	function m2.__len(it) return 4 end
-	function m3.__len(it) return 9 end
-	function m4.__len(it) return 16 end
-
-	function m2.__index(it,n) return m2[n] or tcore.read(it,n) end
-	function m3.__index(it,n) return m3[n] or tcore.read(it,n) end
-	function m4.__index(it,n) return m4[n] or tcore.read(it,n) end
-
-	m2.__newindex=array.__newindex
-	m3.__newindex=array.__newindex
-	m4.__newindex=array.__newindex
-
-	function v2.new(...) return tcore.alloc(4* 2,v2):set(...) end
-	function v3.new(...) return tcore.alloc(4* 3,v3):set(...) end
-	function v4.new(...) return tcore.alloc(4* 4,v4):set(...) end
-	function q4.new(...) return tcore.alloc(4* 4,q4):set(...) end
-
-	function v2.__len(it) return 2 end
-	function v3.__len(it) return 3 end
-	function v4.__len(it) return 4 end
-	function q4.__len(it) return 4 end
-
-	function v2.__index(it,n) return v2[n] or tcore.read(it,n) end
-	function v3.__index(it,n) return v3[n] or tcore.read(it,n) end
-	function v4.__index(it,n) return v4[n] or tcore.read(it,n) end
-	function q4.__index(it,n) return q4[n] or tcore.read(it,n) end
-
-	v2.__newindex=array.__newindex
-	v3.__newindex=array.__newindex
-	v4.__newindex=array.__newindex
-	q4.__newindex=array.__newindex
-
-	-- replace some functions with C code
-
-	tardis.m4_product_m4		=	tcore.m4_product_m4
-	tardis.v4_product_m4		=	tcore.v4_product_m4
-
-	m4.identity			=	tcore.m4_identity
-	m4.arotate			=	tcore.m4_rotate
-	m4.scale_v3			=	tcore.m4_scale_v3
-	m4.translate		=	tcore.m4_translate
-
-end
-
-end
-
 m2.product_map={
 -- the product of this with a...
 	number=function(a,b,r) return a:scalar(b,r) end,
@@ -3636,19 +3659,97 @@ plane.product_map={
 -- the product of this with a...
 }
 
-tardis.V0=tardis.array.new
+tardis.V0=array.new
 
-tardis.V1=tardis.v1.new
-tardis.V2=tardis.v2.new
-tardis.V3=tardis.v3.new
-tardis.V4=tardis.v4.new
+tardis.V1=v1.new
+tardis.V2=v2.new
+tardis.V3=v3.new
+tardis.V4=v4.new
 
-tardis.M2=tardis.m2.new
-tardis.M3=tardis.m3.new
-tardis.M4=tardis.m4.new
+tardis.M2=m2.new
+tardis.M3=m3.new
+tardis.M4=m4.new
 
-tardis.Q4=tardis.q4.new
+tardis.Q4=q4.new
 
-tardis.LINE=tardis.line.new
-tardis.PLANE=tardis.plane.new
+tardis.LINE=line.new
+tardis.PLANE=plane.new
+
+
+if true then -- enable luajit optimization
+local ffi ; pcall(function() ffi=require "ffi" end )
+if ffi then
+
+	-- replace is_table to accept cdata
+	tardis.is_table=function(a)
+		local t=type(a)
+		return t=="table" or t=="cdata"
+	end
+
+	ffi.cdef[[ typedef struct { double d[1]; } struct_v1 ; ]]
+	v1.ffi=ffi.typeof("struct_v1")
+	v1.__len      = function(t)        return 1                 end
+	v1.__index    = function(t,n)      return v1[n] or t.d[n-1] end
+	v1.__newindex = function(t,n,v)           t.d[n-1]=v        end
+	v1.alloc=v1.ffi
+	ffi.metatype("struct_v1",v1) -- *we can no longer alter meta table*
+
+	ffi.cdef[[ typedef struct { double d[2]; } struct_v2 ; ]]
+	v2.ffi=ffi.typeof("struct_v2")
+	v2.__len      = function(t)        return 2                 end
+	v2.__index    = function(t,n)      return v2[n] or t.d[n-1] end
+	v2.__newindex = function(t,n,v)           t.d[n-1]=v        end
+	v2.alloc=v2.ffi
+	ffi.metatype("struct_v2",v2) -- *we can no longer alter meta table*
+
+	ffi.cdef[[ typedef struct { double d[3]; } struct_v3 ; ]]
+	v3.ffi=ffi.typeof("struct_v3")
+	v3.__len      = function(t)        return 3                 end
+	v3.__index    = function(t,n)      return v3[n] or t.d[n-1] end
+	v3.__newindex = function(t,n,v)           t.d[n-1]=v        end
+	v3.alloc=v3.ffi
+	ffi.metatype("struct_v3",v3) -- *we can no longer alter meta table*
+
+	ffi.cdef[[ typedef struct { double d[4]; } struct_v4 ; ]]
+	v4.ffi=ffi.typeof("struct_v4")
+	v4.__len      = function(t)        return 4                 end
+	v4.__index    = function(t,n)      return v4[n] or t.d[n-1] end
+	v4.__newindex = function(t,n,v)           t.d[n-1]=v        end
+	v4.alloc=v4.ffi
+	ffi.metatype("struct_v4",v4) -- *we can no longer alter meta table*
+
+	ffi.cdef[[ typedef struct { double d[4]; } struct_q4 ; ]]
+	q4.ffi=ffi.typeof("struct_q4")
+	q4.__len      = function(t)        return 4                 end
+	q4.__index    = function(t,n)      return q4[n] or t.d[n-1] end
+	q4.__newindex = function(t,n,v)           t.d[n-1]=v        end
+	q4.alloc=function() return q4.ffi():identity() end
+	ffi.metatype("struct_q4",q4) -- *we can no longer alter meta table*
+
+	ffi.cdef[[ typedef struct { double d[4]; } struct_m2 ; ]]
+	m2.ffi=ffi.typeof("struct_m2")
+	m2.__len      = function(t)        return 4                 end
+	m2.__index    = function(t,n)      return m2[n] or t.d[n-1] end
+	m2.__newindex = function(t,n,v)           t.d[n-1]=v        end
+	m2.alloc=function() return m2.ffi():identity() end
+	ffi.metatype("struct_m2",m2) -- *we can no longer alter meta table*
+
+	ffi.cdef[[ typedef struct { double d[9]; } struct_m3 ; ]]
+	m3.ffi=ffi.typeof("struct_m3")
+	m3.__len      = function(t)        return 9                 end
+	m3.__index    = function(t,n)      return m3[n] or t.d[n-1] end
+	m3.__newindex = function(t,n,v)           t.d[n-1]=v        end
+	m3.alloc=function() return m3.ffi():identity() end
+	ffi.metatype("struct_m3",m3) -- *we can no longer alter meta table*
+
+	ffi.cdef[[ typedef struct { double d[16]; } struct_m4 ; ]]
+	m4.ffi=ffi.typeof("struct_m4")
+	m4.__len      = function(t)        return 16                end
+	m4.__index    = function(t,n)      return m4[n] or t.d[n-1] end
+	m4.__newindex = function(t,n,v)           t.d[n-1]=v        end
+	m4.alloc=function() return m4.ffi():identity() end
+	ffi.metatype("struct_m4",m4) -- *we can no longer alter meta table*
+
+end
+end
 

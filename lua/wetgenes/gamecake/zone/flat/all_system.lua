@@ -25,7 +25,7 @@ local bit = require("bit")
 
 
 local tardis=require("wetgenes.tardis")
-local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4")
+local V0,V1,V2,V3,V4,M2,M3,M4,Q4,is_table=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4","is_table")
 
 local json_diff=require("wetgenes.json_diff")
 local hashish=require("wetgenes.json_diff").hashish
@@ -139,8 +139,7 @@ all.system.initialize=function(sys)
 	end
 
 	for n,v in pairs( sys.defaults ) do -- find zip values which wil be non tardis tables and auto flag tweens
-		local t=type(v)
-		if t=="table" then -- a table
+		if is_table(v) then -- a table
 			if not v.new then -- not a tardis value, assume ziped data
 				sys.zips[n]=""
 				sys.types[n]="zip"

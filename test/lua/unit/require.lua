@@ -9,7 +9,7 @@ local n={
 	"wetgenes.grdmap.core","wetgenes.sod.core","socket.core",
 	"mime.core","wetgenes.gamecake.core","wetgenes.win.core","lfs",
 	"lsqlite3","posix_c","lash","SDL","cmsgpack","periphery",
-	"wetgenes.v4l2.core","rex_pcre","linenoise","brimworks_zip",
+	"wetgenes.v4l2.core","rex_pcre"--[[,"linenoise"]],"brimworks_zip",
 	"sys","sys.sock","pgsql","wetgenes.opus.core"}
 
 

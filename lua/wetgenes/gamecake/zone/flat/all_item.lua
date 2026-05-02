@@ -24,7 +24,7 @@ local automap=function(it,r) r=r or it for i=1,#it do r[ it[i] ]=i end return r 
 local bit = require("bit")
 
 local tardis=require("wetgenes.tardis")
-local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4")
+local V0,V1,V2,V3,V4,M2,M3,M4,Q4,is_table=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4","is_table")
 
 local json_diff=require("wetgenes.json_diff")
 local hashish=require("wetgenes.json_diff").hashish
@@ -184,7 +184,7 @@ all.item.set_boot=function(it,boot)
 	boot=boot or it.boot
 
 	for k,v in pairs( it.sys.defaults ) do
-		if type(v)=="table" then
+		if is_table(v) then
 			if v.new then
 				it.values:set(k,v.new( boot[k] or v )) -- copy tardis values
 			else
@@ -200,7 +200,7 @@ all.item.get_boot=function(it)
 	local boot={}
 
 	for k,v in pairs( it.sys.defaults ) do
-		if type(v)=="table" then
+		if is_table(v) then
 			if v.new then
 				boot[k]=v.new( it.values:get(k) ) -- copy tardis values
 			else
@@ -408,7 +408,7 @@ all.item.load_values=function(it,data,topidx)
 	it.values[topidx]=t
 --	if not t then print("load top",topidx,#it.values) end
 	for k,v in pairs(data) do
-		if type(b[k])=="table" then -- could be a special class
+		if is_table(b[k]) then -- could be a special class
 			if b[k].new then -- it is a class
 				t[k]=b[k].new(v) -- so enable all the meta
 			else

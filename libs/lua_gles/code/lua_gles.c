@@ -17,6 +17,35 @@ extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
 // 512 vec4 is 128 mat4
 #define MAX_UNIFORM_V4_LEN 512
 
+
+double * lua_tardis_ints(lua_State *l,int idx,int *ip,int count)
+{
+	double *dp=lua_tardis_cdata(l,idx);
+	if(dp && ip ) // got doubles but need floats
+	{
+		for(int i=0 ; i<count ; i++ ) // caller must know count
+		{
+			ip[i]=(int)dp[i];
+		}
+	}
+	return dp;
+}
+
+
+double * lua_tardis_floats(lua_State *l,int idx,float *fp,int count)
+{
+	double *dp=lua_tardis_cdata(l,idx);
+	if(dp && fp ) // got doubles but need floats
+	{
+		for(int i=0 ; i<count ; i++ ) // caller must know count
+		{
+			fp[i]=(float)dp[i];
+		}
+	}
+	return dp;
+}
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // turn a string or userdata at given idx into a ptr, returns 0 if not possible
@@ -804,353 +833,247 @@ const void *pointer;
 static int lua_gles_VertexAttrib1f (lua_State *l)
 {
 int i;
-float *fp;
+double *dp;
 float ff[1];
 	i=(int)luaL_checknumber(l,1);
-	fp=(float*)lua_tardis_uda(l,2);
-	if(!fp)
+	dp=lua_tardis_floats(l,2,ff,1);
+	if(!dp)
 	{
-		fp=ff;
 		ff[0]=(float)luaL_checknumber(l,2);
 	}
-	glVertexAttrib1fv(i,fp);
+	glVertexAttrib1fv(i,ff);
 	return 0;
 }
 static int lua_gles_VertexAttrib2f (lua_State *l)
 {
 int i;
-float *fp;
+double *dp;
 float ff[2];
 	i=(int)luaL_checknumber(l,1);
-	fp=(float*)lua_tardis_uda(l,2);
-	if(!fp)
+	dp=lua_tardis_floats(l,2,ff,2);
+	if(!dp)
 	{
-		fp=ff;
 		ff[0]=(float)luaL_checknumber(l,2);
 		ff[1]=(float)luaL_checknumber(l,3);
 	}
-	glVertexAttrib2fv(i,fp);
+	glVertexAttrib2fv(i,ff);
 	return 0;
 }
 static int lua_gles_VertexAttrib3f (lua_State *l)
 {
 int i;
-float *fp;
+double *dp;
 float ff[3];
 	i=(int)luaL_checknumber(l,1);
-	fp=(float*)lua_tardis_uda(l,2);
-	if(!fp)
+	dp=lua_tardis_floats(l,2,ff,3);
+	if(!dp)
 	{
-		fp=ff;
 		ff[0]=(float)luaL_checknumber(l,2);
 		ff[1]=(float)luaL_checknumber(l,3);
 		ff[2]=(float)luaL_checknumber(l,4);
 	}
-	glVertexAttrib3fv(i,fp);
+	glVertexAttrib3fv(i,ff);
 	return 0;
 }
 static int lua_gles_VertexAttrib4f (lua_State *l)
 {
 int i;
-float *fp;
+double *dp;
 float ff[4];
 	i=(int)luaL_checknumber(l,1);
-	fp=(float*)lua_tardis_uda(l,2);
-	if(!fp)
+	dp=lua_tardis_floats(l,2,ff,4);
+	if(!dp)
 	{
-		fp=ff;
 		ff[0]=(float)luaL_checknumber(l,2);
 		ff[1]=(float)luaL_checknumber(l,3);
 		ff[2]=(float)luaL_checknumber(l,4);
 		ff[3]=(float)luaL_checknumber(l,5);
 	}
-	glVertexAttrib4fv(i,fp);
+	glVertexAttrib4fv(i,ff);
 	return 0;
 }
 
 
+static int lua_gles_fill_ints (lua_State *l , int max , int *ii )
+{
+int len=0;
+int i;
+	len=lua_tardis_count(l,2); // 0 if not valid
+	if(len>max) { len=max; }
+	if(len>0)
+	{
+		lua_tardis_ints(l,2,ii,len);
+	}
+	else
+	if( lua_istable(l,2))
+	{
+		len=lua_objlen(l,2);
+		if(len>max) { len=max; }
+		for(i=0;i<len;i++)
+		{
+			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
+	}
+	else
+	{
+		len=max;
+		for(i=0;i<len;i++)
+		{
+			if( lua_isnumber(l,i+2) )
+			{
+				ii[i]=(int)luaL_checknumber(l,i+2);
+			}
+			else // out of numbers
+			{
+				len=i;
+				break;
+			}
+		}
+	}
+	return len;
+}
 
 static int lua_gles_Uniform1i (lua_State *l)
 {
 int idx;
-int *ip;
+int max=MAX_UNIFORM_V4_LEN*1;
 int ii[MAX_UNIFORM_V4_LEN*1];
-int len=1;
+int len=0;
 int i;
 	idx=(int)luaL_checknumber(l,1);
-	ip=(int*)lua_tardis_uda(l,2);
-	if(ip)
-	{
-		len=lua_tardis_uda_count(l,2)/1;
-	}
-	else
-	if( lua_istable(l,2))
-	{
-		ip=ii;
-		len=lua_objlen(l,2)/1;
-		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
-		for(i=0;i<len*1;i++)
-		{
-			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
-		}
-	}
-	else
-	{
-		ip=ii;
-		for(i=0;i<len*1;i++)
-		{
-			ii[i]=(int)luaL_checknumber(l,i+2);
-		}
-	}
-	glUniform1iv(idx,len,ip);
-	return 0;
-}
-static int lua_gles_Uniform2i (lua_State *l)
-{
-int idx;
-int *ip;
-int ii[MAX_UNIFORM_V4_LEN*2];
-int len=1;
-int i;
-	idx=(int)luaL_checknumber(l,1);
-	ip=(int*)lua_tardis_uda(l,2);
-	if(ip)
-	{
-		len=lua_tardis_uda_count(l,2)/2;
-	}
-	else
-	if( lua_istable(l,2))
-	{
-		ip=ii;
-		len=lua_objlen(l,2)/2;
-		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
-		for(i=0;i<len*2;i++)
-		{
-			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
-		}
-	}
-	else
-	{
-		ip=ii;
-		for(i=0;i<len*2;i++)
-		{
-			ii[i]=(int)luaL_checknumber(l,i+2);
-		}
-	}
-	glUniform2iv(idx,len,ip);
-	return 0;
-}
-static int lua_gles_Uniform3i (lua_State *l)
-{
-int idx;
-int *ip;
-int ii[MAX_UNIFORM_V4_LEN*3];
-int len=1;
-int i;
-	idx=(int)luaL_checknumber(l,1);
-	ip=(int*)lua_tardis_uda(l,2);
-	if(ip)
-	{
-		len=lua_tardis_uda_count(l,2)/3;
-	}
-	else
-	if( lua_istable(l,2))
-	{
-		ip=ii;
-		len=lua_objlen(l,2)/3;
-		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
-		for(i=0;i<len*3;i++)
-		{
-			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
-		}
-	}
-	else
-	{
-		ip=ii;
-		for(i=0;i<len*3;i++)
-		{
-			ii[i]=(int)luaL_checknumber(l,i+2);
-		}
-	}
-	glUniform3iv(idx,len,ip);
-	return 0;
-}
-static int lua_gles_Uniform4i (lua_State *l)
-{
-int idx;
-int *ip;
-int ii[MAX_UNIFORM_V4_LEN*4];
-int len=1;
-int i;
-	idx=(int)luaL_checknumber(l,1);
-	ip=(int*)lua_tardis_uda(l,2);
-	if(ip)
-	{
-		len=lua_tardis_uda_count(l,2)/4;
-	}
-	else
-	if( lua_istable(l,2))
-	{
-		ip=ii;
-		len=lua_objlen(l,2)/4;
-		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
-		for(i=0;i<len*4;i++)
-		{
-			lua_rawgeti(l,2,i+1); ii[i]=(int)luaL_checknumber(l,-1); lua_pop(l,1);
-		}
-	}
-	else
-	{
-		ip=ii;
-		for(i=0;i<len*4;i++)
-		{
-			ii[i]=(int)luaL_checknumber(l,i+2);
-		}
-	}
-	glUniform4iv(idx,len,ip);
+	len=lua_gles_fill_ints(l,max,ii);
+	glUniform1iv(idx,len,ii);
 	return 0;
 }
 
+static int lua_gles_Uniform2i (lua_State *l)
+{
+int idx;
+int max=MAX_UNIFORM_V4_LEN*2;
+int ii[MAX_UNIFORM_V4_LEN*2];
+int len=0;
+int i;
+	idx=(int)luaL_checknumber(l,1);
+	len=lua_gles_fill_ints(l,max,ii);
+	glUniform2iv(idx,len/2,ii);
+	return 0;
+}
+
+static int lua_gles_Uniform3i (lua_State *l)
+{
+int idx;
+int max=MAX_UNIFORM_V4_LEN*3;
+int ii[MAX_UNIFORM_V4_LEN*3];
+int len=0;
+int i;
+	idx=(int)luaL_checknumber(l,1);
+	len=lua_gles_fill_ints(l,max,ii);
+	glUniform3iv(idx,len/3,ii);
+	return 0;
+}
+
+static int lua_gles_Uniform4i (lua_State *l)
+{
+int idx;
+int max=MAX_UNIFORM_V4_LEN*4;
+int ii[MAX_UNIFORM_V4_LEN*4];
+int len=0;
+int i;
+	idx=(int)luaL_checknumber(l,1);
+	len=lua_gles_fill_ints(l,max,ii);
+	glUniform4iv(idx,len/4,ii);
+	return 0;
+}
+
+
+static int lua_gles_fill_floats (lua_State *l , int max , float *ff )
+{
+int len=0;
+int i;
+	len=lua_tardis_count(l,2); // 0 if not valid
+	if(len>max) { len=max; }
+	if(len>0)
+	{
+		lua_tardis_floats(l,2,ff,len);
+	}
+	else
+	if( lua_istable(l,2))
+	{
+		len=lua_objlen(l,2);
+		if(len>max) { len=max; }
+		for(i=0;i<len;i++)
+		{
+			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
+		}
+	}
+	else
+	{
+		len=max;
+		for(i=0;i<len;i++)
+		{
+			if( lua_isnumber(l,i+2) )
+			{
+				ff[i]=(float)luaL_checknumber(l,i+2);
+			}
+			else // out of numbers
+			{
+				len=i;
+				break;
+			}
+		}
+	}
+	return len;
+}
 
 static int lua_gles_Uniform1f (lua_State *l)
 {
 int idx;
-float *fp;
+int max=MAX_UNIFORM_V4_LEN*1;
 float ff[MAX_UNIFORM_V4_LEN*1];
-int len=1;
+int len=0;
 int i;
 	idx=(int)luaL_checknumber(l,1);
-	fp=(float*)lua_tardis_uda(l,2);
-	if(fp)
-	{
-		len=lua_tardis_uda_count(l,2)/1;
-	}
-	else
-	if( lua_istable(l,2))
-	{
-		fp=ff;
-		len=lua_objlen(l,2)/1;
-		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
-		for(i=0;i<len*1;i++)
-		{
-			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		}
-	}
-	else
-	{
-		fp=ff;
-		for(i=0;i<len*1;i++)
-		{
-			ff[i]=(float)luaL_checknumber(l,i+2);
-		}
-	}
-	glUniform1fv(idx,len,fp);
+	len=lua_gles_fill_floats(l,max,ff);
+	glUniform1fv(idx,len/1,ff);
 	return 0;
 }
+
 static int lua_gles_Uniform2f (lua_State *l)
 {
 int idx;
-float *fp;
+int max=MAX_UNIFORM_V4_LEN*2;
 float ff[MAX_UNIFORM_V4_LEN*2];
-int len=1;
+int len=0;
 int i;
 	idx=(int)luaL_checknumber(l,1);
-	fp=(float*)lua_tardis_uda(l,2);
-	if(fp)
-	{
-		len=lua_tardis_uda_count(l,2)/2;
-	}
-	else
-	if( lua_istable(l,2))
-	{
-		fp=ff;
-		len=lua_objlen(l,2)/2;
-		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
-		for(i=0;i<len*2;i++)
-		{
-			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		}
-	}
-	else
-	{
-		fp=ff;
-		for(i=0;i<len*2;i++)
-		{
-			ff[i]=(float)luaL_checknumber(l,i+2);
-		}
-	}
-	glUniform2fv(idx,len,fp);
+	len=lua_gles_fill_floats(l,max,ff);
+	glUniform2fv(idx,len/2,ff);
 	return 0;
 }
+
 static int lua_gles_Uniform3f (lua_State *l)
 {
 int idx;
-float *fp;
+int max=MAX_UNIFORM_V4_LEN*3;
 float ff[MAX_UNIFORM_V4_LEN*3];
-int len=1;
+int len=0;
 int i;
 	idx=(int)luaL_checknumber(l,1);
-	fp=(float*)lua_tardis_uda(l,2);
-	if(fp)
-	{
-		len=lua_tardis_uda_count(l,2)/3;
-	}
-	else
-	if( lua_istable(l,2))
-	{
-		fp=ff;
-		len=lua_objlen(l,2)/3;
-		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
-		for(i=0;i<len*3;i++)
-		{
-			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		}
-	}
-	else
-	{
-		fp=ff;
-		for(i=0;i<len*3;i++)
-		{
-			ff[i]=(float)luaL_checknumber(l,i+2);
-		}
-	}
-	glUniform3fv(idx,len,fp);
+	len=lua_gles_fill_floats(l,max,ff);
+	glUniform3fv(idx,len/3,ff);
 	return 0;
 }
+
 static int lua_gles_Uniform4f (lua_State *l)
 {
 int idx;
-float *fp;
+int max=MAX_UNIFORM_V4_LEN*4;
 float ff[MAX_UNIFORM_V4_LEN*4];
-int len=1;
+int len=0;
 int i;
 	idx=(int)luaL_checknumber(l,1);
-	
-	fp=(float*)lua_tardis_uda(l,2);
-	if(fp)
-	{
-		len=lua_tardis_uda_count(l,2)/4;
-	}
-	else
-	if( lua_istable(l,2))
-	{
-		fp=ff;
-		len=lua_objlen(l,2)/4;
-		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
-		for(i=0;i<len*4;i++)
-		{
-			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		}
-	}
-	else
-	{
-		fp=ff;
-		for(i=0;i<len*4;i++)
-		{
-			ff[i]=(float)luaL_checknumber(l,i+2);
-		}
-	}
-	glUniform4fv(idx,len,fp);
+	len=lua_gles_fill_floats(l,max,ff);
+	glUniform4fv(idx,len/4,ff);
 	return 0;
 }
 
@@ -1158,109 +1081,39 @@ int i;
 static int lua_gles_UniformMatrix2f (lua_State *l)
 {
 int idx;
-float *fp;
-float ff[MAX_UNIFORM_V4_LEN*4];
-int len=1;
+int max=(MAX_UNIFORM_V4_LEN/2)*4;
+float ff[(MAX_UNIFORM_V4_LEN/2)*4];
+int len=0;
 int i;
 	idx=(int)luaL_checknumber(l,1);
-	
-	fp=(float*)lua_tardis_uda(l,2);
-	if(fp)
-	{
-		len=lua_tardis_uda_count(l,2)/4;
-	}
-	else
-	if( lua_istable(l,2))
-	{
-		fp=ff;
-		len=lua_objlen(l,2)/4;
-		if(len>MAX_UNIFORM_V4_LEN) {len=MAX_UNIFORM_V4_LEN;}
-		for(i=0;i<len*4;i++)
-		{
-			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		}
-	}
-	else
-	{
-		fp=ff;
-		for(i=0;i<len*4;i++)
-		{
-			ff[i]=(float)luaL_checknumber(l,i+2);
-		}
-	}
-	glUniformMatrix2fv(idx, len, 0, fp );
+	len=lua_gles_fill_floats(l,max,ff);
+	glUniformMatrix2fv(idx, len/4, 0, ff );
 	return 0;
 }
+
 static int lua_gles_UniformMatrix3f (lua_State *l)
 {
 int idx;
-float *fp;
-float ff[(MAX_UNIFORM_V4_LEN/4)*9];
-int len=1;
+int max=(MAX_UNIFORM_V4_LEN/3)*9;
+float ff[(MAX_UNIFORM_V4_LEN/3)*9];
+int len=0;
 int i;
 	idx=(int)luaL_checknumber(l,1);
-	
-	fp=(float*)lua_tardis_uda(l,2);
-	if(fp)
-	{
-		len=lua_tardis_uda_count(l,2)/9;
-	}
-	else
-	if( lua_istable(l,2))
-	{
-		fp=ff;
-		len=lua_objlen(l,2)/9;
-		if(len>(MAX_UNIFORM_V4_LEN/4)) {len=(MAX_UNIFORM_V4_LEN/4);}
-		for(i=0;i<len*9;i++)
-		{
-			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		}
-	}
-	else
-	{
-		fp=ff;
-		for(i=0;i<len*9;i++)
-		{
-			ff[i]=(float)luaL_checknumber(l,i+2);
-		}
-	}
-	glUniformMatrix3fv(idx, len, 0, fp );
+	len=lua_gles_fill_floats(l,max,ff);
+	glUniformMatrix3fv(idx, len/9, 0, ff );
 	return 0;
 }
+
 static int lua_gles_UniformMatrix4f (lua_State *l)
 {
 int idx;
-float *fp;
+int max=(MAX_UNIFORM_V4_LEN/4)*16;
 float ff[(MAX_UNIFORM_V4_LEN/4)*16];
-int len=1;
+int len=0;
 int i;
 	idx=(int)luaL_checknumber(l,1);
-	
-	fp=(float*)lua_tardis_uda(l,2);
-	if(fp)
-	{
-		len=lua_tardis_uda_count(l,2)/16;
-	}
-	else
-	if( lua_istable(l,2))
-	{
-		fp=ff;
-		len=lua_objlen(l,2)/16;
-		if(len>(MAX_UNIFORM_V4_LEN/4)) {len=(MAX_UNIFORM_V4_LEN/4);}
-		for(i=0;i<len*16;i++)
-		{
-			lua_rawgeti(l,2,i+1); ff[i]=(float)luaL_checknumber(l,-1); lua_pop(l,1);
-		}
-	}
-	else
-	{
-		fp=ff;
-		for(i=0;i<len*16;i++)
-		{
-			ff[i]=(float)luaL_checknumber(l,i+2);
-		}
-	}
-	glUniformMatrix4fv(idx, len, 0, fp );
+	len=lua_gles_fill_floats(l,max,ff);
+	glUniformMatrix4fv(idx, len/16, 0, ff );
 	return 0;
 }
 
