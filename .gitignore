@@ -12,6 +12,7 @@ build-*
 *.dbg
 
 html/*.zip
+html/*.apk
 
 android/build
 android/*/build

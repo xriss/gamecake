@@ -49,6 +49,24 @@ sysopts={
 			autosize="lohi",
 		},
 	},
+	icon=[[
+. . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . 
+. . . . . Y Y O O Y Y O O o o . . . . 
+. . . . . Y Y O O Y Y O O o o . . . . 
+. . . Y Y O O o o O O o o r r r r . . 
+. . . Y Y O O o o O O o o r r r r . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
+. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . o o o o O O O O O O r r r r . . 
+. . . o o o o O O O O O O r r r r . . 
+. . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . 
+]],
 }
 
 hardware,main=system.configurator(sysopts)
@@ -149,7 +167,7 @@ end
 
 --------------------------------------------------------------------------------
 --
---#base_draw
+--#draws
 
 draws={}
 draws.sprite=function(it) -- note that we will modify this table
@@ -244,6 +262,23 @@ draws.string4_in_map=function(s,x,y)
 	draws.string4(s,x,y)
 end
 
+draws.integer_to_string_with_commas=function(n)
+	local sign
+	n=math.floor(n) -- force int
+	if n<0 then -- remove negative
+		sign="-"
+		n=-n
+	end
+	local s=tostring( n )
+	local t={}
+	for i=1,#s,3 do
+		table.insert(t,1,s:sub(-i-2,-i))
+	end
+	s=table.concat(t,",")
+	if sign then return sign..s end
+	return s
+end
+
 --------------------------------------------------------------------------------
 --
 --#overshade
@@ -254,20 +289,23 @@ overshade.setup=function(overshade)
     local screen=system.components.screen
 
 	overshade.buttons={
-		{ "bl" , 14/32 , 20/32 ,  5.0/32 , "up" },
-		{ "bl" ,  8/32 , 14/32 ,  5.0/32 , "left" },
-		{ "bl" , 20/32 , 14/32 ,  5.0/32 , "right" },
-		{ "bl" , 14/32 ,  8/32 ,  5.0/32 , "down" },
+		{ "bl" , 16/32 , 22/32 ,  5.0/32 , "up" },
+		{ "bl" , 10/32 , 16/32 ,  5.0/32 , "left" },
+		{ "bl" , 22/32 , 16/32 ,  5.0/32 , "right" },
+		{ "bl" , 16/32 , 10/32 ,  5.0/32 , "down" },
 
---		{ "br" , 14/32 , 20/32 ,  5.0/32 , "y" , name="Y" },
-		{ "br" ,  8/32 , 14/32 ,  5.0/32 , "b" , name="B" },
---		{ "br" , 20/32 , 14/32 ,  5.0/32 , "x" , name="X" },
-		{ "br" , 14/32 ,  8/32 ,  5.0/32 , "a" , name="A" },
+--		{ "br" , 16/32 , 22/32 ,  5.0/32 , "y" , name="Y" },
+		{ "br" , 10/32 , 16/32 ,  5.0/32 , "b" , name="B" },
+--		{ "br" , 22/32 , 16/32 ,  5.0/32 , "x" , name="X" },
+		{ "br" , 16/32 , 10/32 ,  5.0/32 , "a" , name="A" },
 	}
     overshade.touches={}
 	
 	overshade.DATA_MAX=#overshade.buttons
     overshade.last_touch=0
+
+    overshade.stick={} -- fill this up with left/right/up/down state
+    overshade.stick.state={left=-1,right=-1,up=-1,down=-1}
 
 	overshade.enable={"fun_overshade?DATA_MAX="..overshade.DATA_MAX.."&hax="..tostring(overshade),overshade.uniforms}
 	overshade:update()
@@ -283,11 +321,30 @@ overshade.update=function(overshade)
     overshade.hh=overshade.hx < overshade.hy and overshade.hx or overshade.hy
     
     overshade.margin=0
-    overshade.margin_min=-4/32
-    overshade.margin_max=8/32
+    overshade.margin_min=-10/32
+    overshade.margin_max=10/32
     
-    overshade.stick=overshade.stick or {} -- fill this up with left/right/up/down
 	local stick=overshade.stick
+	local stick_state_change=function(newstate)
+		local bname={
+			left="lx0",
+			right="lx1",
+			up="ly0",
+			down="ly1",
+		}
+		for i,name in ipairs{"left","right","up","down"} do
+			if stick.state[name] ~= newstate[name] then
+				stick.state[name] = newstate[name]
+				oven.ups.msg({
+					time=oven.time(),
+					class="button",
+					action=stick.state[name],
+					button=bname[ name ],
+					upidx=1,
+				})
+			end
+		end
+	end
 
 	local s=overshade.hh/2
 	for i,button in ipairs(overshade.buttons) do
@@ -328,7 +385,7 @@ overshade.update=function(overshade)
 		local action=0
 
 		if m.class=="touch" then
-			id=m.id
+			id=m.id+1
 			action=m.action
 			pos=V2(m.x,m.y)
 --[[
@@ -383,41 +440,13 @@ overshade.update=function(overshade)
 				touch.pos=V2(pos)
 				
 				if touch.button==stick then -- special stick
-					local m=touch.pos-stick.pos
-					if math.abs(m[1]) > math.abs(m[2]) then
-						if m[1]<0 then
-							stick.dir="left"
-						else
-							stick.dir="right"
-						end
-					else
-						if m[2]<0 then
-							stick.dir="up"
-						else
-							stick.dir="down"
-						end
-					end
-					-- send virtual stick movements back into ups
-					local px=m[1]/(overshade.hh/8)
-					if px<-1 then px=-1 end
-					if px> 1 then px= 1 end
-					local py=m[2]/(overshade.hh/8)
-					if py<-1 then py=-1 end
-					if py> 1 then py= 1 end
-					oven.ups.msg({
-						time=oven.time(),
-						class="padaxis",
-						value=math.floor(0x7fff*px),
-						name="LeftX",
-						id=1,
-					})
-					oven.ups.msg({
-						time=oven.time(),
-						class="padaxis",
-						value=math.floor(0x7fff*py),
-						name="LeftY",
-						id=1,
-					})
+					local state={left=-1,right=-1,up=-1,down=-1}
+					local m=(touch.pos-stick.pos)/(overshade.hh/8) -- normaliseish
+					if m[1]<-0.25 then state.left=1  end
+					if m[1]> 0.25 then state.right=1 end
+					if m[2]<-0.25 then state.up=1    end
+					if m[2]> 0.25 then state.down=1  end
+					stick_state_change(state)
 				end
 				
 				if action==-1 then -- last touch removes
@@ -433,22 +462,9 @@ overshade.update=function(overshade)
 					end
 					touch.button.touch=nil
 					overshade.touches[id]=nil
-					if touch.button==stick then -- special stick
-						stick.dir=nil
-						oven.ups.msg({
-							time=oven.time(),
-							class="padaxis",
-							value=0,
-							name="LeftX",
-							id=1,
-						})
-						oven.ups.msg({
-							time=oven.time(),
-							class="padaxis",
-							value=0,
-							name="LeftY",
-							id=1,
-						})
+					if touch.button==stick then -- special stick release
+						local state={left=-1,right=-1,up=-1,down=-1}
+						stick_state_change(state)
 					end
 				end
 			end
@@ -485,7 +501,7 @@ overshade.uniforms=function(p)
 		if touch then
 			pos=touch.start -- move button to click pos
 		end
-		if button[5]==overshade.stick.dir then
+		if overshade.stick.state[ button[5] ]==1 then -- stick buttons
 			touch=overshade.stick
 		end
 		gl.Uniform4f( idx+i-1,   pos[1],pos[2],button.siz,touch and 1 or 0 )
@@ -627,8 +643,9 @@ players.values={
 	side=1,
 	foot=8,
 	onfloor=0,
-	jump=0,
 	flap=0,
+	jump_force=0,
+	jump_debounce=0,
 	holdtime=0,
 	walk=0,
 	score=0,
@@ -983,7 +1000,7 @@ elseif player.mode=="die" then
 else
 	
 	if ba_now then
-		grav=grav*0.5 -- reduce gravity while flapping arms
+--		grav=grav*0.5 -- reduce gravity while flapping arms
 		player.flap=(player.flap+1)%4
 	else
 		player.flap=2
@@ -991,7 +1008,7 @@ else
 
 	player.acc=V3( 0, 0 ,0) -- reset force
 	local va -- velocity we want to achieve
-	if player.onfloor>0 or player.jump>0 then -- when on floor
+	if player.onfloor>0 or player.jump_force>0 then -- when on floor
 		va=lx*512
 	else -- when in air
 		va=lx*256
@@ -1033,8 +1050,10 @@ else
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
 
-		if ba_now or ly>0.25 then -- crouch while button held down or move down
+		if ly>0.25 then -- crouch
 			v=v+3
+		elseif ly<-0.25 then -- tiptoe
+			v=v-2
 		end
 
 		local a=v*32 -- force to adjust velocity by
@@ -1058,22 +1077,26 @@ else
 		player.acc:add(grav) -- gravity
 	end
 
-	if player.onfloor>0 and player.jump<=0 then -- meep meep jump	
-		if ba_set then
+	if player.jump_debounce>0 then -- force minimum time between jumps
+		player.jump_debounce=math.max(0,player.jump_debounce-1)
+		player.onfloor=0
+	end
+
+	if ba_set then -- start jump
+		if player.onfloor>0 and player.jump_force==0 then -- can jump
 			player.onfloor=0
-			player.jump=4
-			player.acc[2]=0
-			player.vel[2]=-140
+			player.jump_force=11	-- (F*(F+1)/2)*-4 applied over F frames
+			player.jump_debounce=4
+			player.vel[2]=0 -- reset starting force
 		end
 	end
--- forever coyote time
---	if player.onfloor>0 then player.onfloor=player.onfloor-1 end
-
-	if player.jump>0 then -- jump higher while button is held down
-		player.onfloor=0 -- no foot grab while jumping
-		player.jump=player.jump-1 -- continue jump
+	if ba_now then -- continue jump
+		player.vel[2]=player.vel[2]+(player.jump_force*-4)	-- apply jump force
+		player.jump_force=math.max(0,player.jump_force-1)	-- decay jump force
 	end
-
+	if ba_clr then -- end of jump
+		player.jump_force=0 -- 0 on jump force on release of jump
+	end
 
 	local hold_pos=player.pos+V3(0,-10,0)
 	local hold=player:depend("hold")
@@ -1122,6 +1145,10 @@ else
 	end
 	if hold then
 		player.holdtime=player.holdtime+1
+		
+		if math.abs(lx)>0.5 then -- run to speed up spin timer
+			player.holdtime=player.holdtime+2
+		end
 		-- stop player coliding with held object
 		hold.shape:filter(player.uid,players.collision_bits,players.collision_mask)
 
@@ -1262,7 +1289,7 @@ scores.item.draw=function(score)
 
 	score:get_values()
 
-	local s=tostring(score.num)
+	local s=draws.integer_to_string_with_commas( score.num )
 	draws.string4_in_map(s,score.pos[1]-(#s*2),score.pos[2]-4)
 
 end
@@ -1398,10 +1425,11 @@ floaters.item.update=function(floater)
 			local fauna=floater:depend("fauna")
 			if fauna then
 		 		if fauna:mark_deleted() then -- remove fauna
+		 		
+		 			local number_of_floaters=scene:get_number_of("floater")
+		 			local number_of_fruits=scene:get_number_of("fruit")
 	
 		 			floater:mark_deleted()
-	--				who.score=who.score+100
-					local bonus=hit.sys:get_rnd(4)
 					for i=1,16 do
 						local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
 									hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
@@ -1409,12 +1437,20 @@ floaters.item.update=function(floater)
 						local boots={
 							{"gib",sname="gib_green",size=4,pos=floater.pos,vel=v},
 						}
-						if i<=bonus then -- some gibs are fruits
-							local r=hit.sys:get_rnd(9)
-							boots={
-								{"fruit",sname="fruit_"..r,pos=floater.pos,vel=v*2},
-							}
-						end
+						scene:creates(boots)
+					end
+
+					local r=hit.sys:get_rnd(1,100) -- percent chance
+					if r<=75 then r=1 elseif r<=95 then r=2 else r=3 end -- 1,2 or 3 drops
+
+					for i=1,r do -- 1-3 fruits
+						local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
+									hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
+									0 )
+						local f=math.min(8,number_of_fruits+i) -- maximum fruit
+						local boots={
+							{"fruit",sname="fruit_"..f,pos=floater.pos,vel=v*2,score=(2^(f-1))*100},
+						}
 						scene:creates(boots)
 					end
 					
@@ -2273,6 +2309,7 @@ fruits.values={
 	acc=V3( 0,200,0 ),
 	sname="fruit_1",
 	age=0,
+	score=100,
 	touch={},
 }
 
@@ -2296,72 +2333,6 @@ Y o 7 7 7 o O .
 ]]},
 
 {nil,"fruit_2",[[
-. . . . . R . . 
-. . . R R 1 R . 
-. . R 1 R R R . 
-. R R R R 1 R . 
-d R R 1 R R R . 
-G G R R R 1 R . 
-. d d G G R R . 
-. . . d d d G . 
-]]},
-
-{nil,"fruit_3",[[
-. . I I I I . . 
-. I B B B B I . 
-I B d d d d B I 
-B d Y Y Y Y Y B 
-d Y O O O O Y d 
-Y O O R R O O Y 
-O O R R R R O O 
-O R R . . R R O 
-]]},
-
-{nil,"fruit_4",[[
-. . . . . . . . 
-. . . . . . . . 
-. Y O Y O o . . 
-Y O o O o r r . 
-s s F F F f f . 
-Y Y Y Y Y o o . 
-s s F F F f f . 
-o o O O O r r . 
-]]},
-
-{nil,"fruit_5",[[
-. . . . . . . . 
-. . . Y Y Y . . 
-. . Y o o o Y . 
-. Y o y y y o Y 
-. Y o y . . y y 
-Y o y . . . . 1 
-Y y y . . . . 1 
-. y . . . . . . 
-]]},
-
-{nil,"fruit_6",[[
-. . . . . . . . 
-. R R . R R . . 
-R O r R O r R . 
-R r R R r R R . 
-R R R R R R R . 
-. R R R R R . . 
-. . R R R . . . 
-. . . R . . . . 
-]]},
-
-{nil,"fruit_7",[[
-. . . . . . . . 
-. . . . . . . . 
-. . . . . . . . 
-. . . . . . . . 
-. Y O Y O o . . 
-Y O o O o r r . 
-s s F F F f f . 
-o o O O O r r . 
-]]},
-
-{nil,"fruit_8",[[
 . . d . . G . . 
 . . . d G . . . 
 . . r R r R . . 
@@ -2372,7 +2343,7 @@ o o O O O r r .
 . . . r R . . . 
 ]]},
 
-{nil,"fruit_9",[[
+{nil,"fruit_3",[[
 G . g . . . . . 
 . G F . . . . . 
 . . F F F R R . 
@@ -2382,6 +2353,73 @@ R r r R . R R .
 R r R R . . . . 
 . R R . . . . . 
 ]]},
+
+{nil,"fruit_4",[[
+. . . . . . . . 
+. . . Y Y Y . . 
+. . Y o o o Y . 
+. Y o y y y o Y 
+. Y o y . . y y 
+Y o y . . . . 1 
+Y y y . . . . 1 
+. y . . . . . . 
+]]},
+
+{nil,"fruit_5",[[
+. . . . . R . . 
+. . . R R 1 R . 
+. . R 1 R R R . 
+. R R R R 1 R . 
+d R R 1 R R R . 
+G G R R R 1 R . 
+. d d G G R R . 
+. . . d d d G . 
+]]},
+
+{nil,"fruit_6",[[
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. Y O Y O o . . 
+Y O o O o r r . 
+s s F F F f f . 
+o o O O O r r . 
+]]},
+
+{nil,"fruit_7",[[
+. . . . . . . . 
+. . . . . . . . 
+. Y O Y O o . . 
+Y O o O o r r . 
+s s F F F f f . 
+Y Y Y Y Y o o . 
+s s F F F f f . 
+o o O O O r r . 
+]]},
+
+{nil,"fruit_8",[[
+. . I I I I . . 
+. I B B B B I . 
+I B d d d d B I 
+B d Y Y Y Y Y B 
+d Y O O O O Y d 
+Y O O R R O O Y 
+O O R R R R O O 
+O R R . . R R O 
+]]},
+
+{nil,"fruit_9",[[
+. . . . . . . . 
+. R R . R R . . 
+R O r R O r R . 
+R r R R r R R . 
+R R R R R R R . 
+. R R R R R . . 
+. . R R R . . . 
+. . . R . . . . 
+]]},
+
 
 }
 
@@ -2482,9 +2520,9 @@ fruits.item.update=function(fruit)
 			if fruit.age>=16 then
 				if fruit:mark_deleted() then
 					local score=touch:get_value("score")
-					touch:set_value("score",score+100)
+					touch:set_value("score",score+fruit.score)
 					local boots={
-						{"score",num=100,pos=fruit.pos},
+						{"score",num=fruit.score,pos=fruit.pos},
 					}
 					scene:creates(boots)
 				end
@@ -2989,6 +3027,7 @@ levels.values={
 	idx=1,
 	time=0,
 	complete=0,
+	start=0,
 }
 
 levels.types={
@@ -3081,11 +3120,11 @@ legend=levels.combine_legends(levels.legend,{
 	["Tb"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
 	["Tc"]={ name="char_sign",				text="Congratulations on the coyote JUMP." },
 	["Td"]={ name="char_sign",				text="You may coyote JUMP in the air after walking off of a platform." },
-	["T1"]={ name="char_sign",				text="Press Button A or RIGHT-ALT or . to JUMP in." },
+	["T1"]={ name="char_sign",				text="Press Button A or . to JUMP in." },
 	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move. Hold JUMP to JUMP higher." },
-	["T3"]={ name="char_sign",				text="Hold JUMP to flap arms and duck down or just MOVE down to duck." },
-	["T4"]={ name="char_sign",				text="Press Button B or RIGHT-CTRL or / to GRAB object, press GRAB again to throw it." },
-	["T5"]={ name="char_sign",				text="Throw power is shown by object rotation, wait for it to speed up." },
+	["T3"]={ name="char_sign",				text="MOVE down to crouch down." },
+	["T4"]={ name="char_sign",				text="Press Button B or / to GRAB object, press GRAB again to throw it." },
+	["T5"]={ name="char_sign",				text="Throw power is shown by object rotation, run for it to speed up." },
 	["T6"]={ name="char_sign",				text="Aim throw with Right Stick or Cursor Keys." },
 	["T7"]={ name="char_sign",				text="Throw object at Slim Slimy to stun him." },
 	["T8"]={ name="char_sign",				text="Stomp stunned Slim Slimy to finish him." },
@@ -3138,6 +3177,34 @@ map=[[
 }
 
 levels.infos[3]={
+legend=levels.combine_legends(levels.legend,{
+}),
+title="Test.",
+map=[[
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 > . . . . . . . . . . . . , . . . . . . . . . . . . . . . < 0 
+0 P1. . . . . . . . . . . . . . . . . . . . . . . . . . . P2. 0 
+0 . . . . . . . . . > . . . . . . . . . . < . . . . . . . . . 0 
+0 0 0 0 0 0 0 . . . . . . . . . . . . . . . . . . 0 0 0 0 0 0 0 
+0 . . . . . . . . . . . . . . v v . . . . . . . . . . . . . . 0 
+0 . . . . . . . S10 0 . . . . . . . . . . 0 0 S1. . . . . . . 0 
+0 . . . . . < 0 0 0 0 0 0 . J1. . J1. 0 0 0 0 0 0 > . . . . . 0 
+0 . . . . . . . . . . . . . S1. . S1. . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . J1< > J1. . . . . . . . . . . . . 0 
+0 . . ^ . . . . . . . . . . S1. . S1. . . . . . . . . . ^ . . 0 
+0 . . . . . . . . . . . . 0 0 0 0 0 0 . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 S1. . . . . . . . . . . . . < > . . . . . . . . . . . . . S10 
+0 0 0 0 0 0 0 0 0 0 0 0 0 . . . . . . 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 . . . . . . . . . . J1. . . . . . . . J1. . . . . . . . . . 0 
+0 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 > . . . . > . . . . . > . . . . . . < . . . . . < . . . . < 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+]],
+}
+
+levels.infos[4]={
 legend=levels.combine_legends(levels.legend,{
 }),
 title="Test.",
@@ -3344,6 +3411,7 @@ levels.item.setup=function(level)
 	it.shader_uniforms.cy4={ 0   , 1/2 , 1/2 , 1   }
 
 	level.time=0
+	level.start=0
 
 	level:set_values()
 end
@@ -3371,6 +3439,8 @@ levels.item.update=function(level)
 	if fauna==0 then -- all mosters dead
 		level.complete=level.complete+1
 	end
+	
+	level.start=level.start+1
 	
 	if level.complete>(64+16) then -- delete everything and restart
 	
@@ -3497,12 +3567,14 @@ cameras.uidmap={
 cameras.values={
 	pos=V3( 0,0,0 ),
 	focus=V3( 0,0,0 ),
+	slide=V3( 0,0,0 ),
 	idx=1,
 	tile=0x0000,
 }
 
 cameras.types={
 	pos="tween",
+	slide="tween",
 	focus="tween",
 }
 
@@ -3538,14 +3610,8 @@ cameras.item.update=function(camera)
 	camera:get_values()
 	
 	local level=camera:get_singular("level") -- only one level is active at a time
+	level:get_values()
 	
-if level.complete>0 then
-
-	if level.complete>64 then
-		local t=(level.complete-64)
-		camera.pos[2]=camera.pos[2]-t*t
-	end
-else
 
 	local player=camera:depend("player")
 	local hud=player:depend("hud")
@@ -3573,7 +3639,20 @@ else
 		local m=map.window_hy-(shy-hud.pos[1])
 		if camera.pos[2]>m then camera.pos[2]=m end
 	end
-end
+
+	camera.slide[2]=0
+	if level.start<32 then
+		local t=(32-level.start)
+		camera.slide[2]=-(t*t)
+	end
+
+	if level.complete>0 then
+		if level.complete>64 then
+			local t=(level.complete-64)
+			camera.slide[2]=t*t
+		end
+	end
+
 
 
 	camera:set_values()
@@ -3606,10 +3685,9 @@ cameras.item.draw=function(camera)
 		map.window_py=0
 		map.py=math.floor(camera.pos[2])
 	end
-	
-	if level.complete>0 then
-		map.window_py=map.window_py-map.py
-	end
+
+	map.window_px=map.window_px+math.floor(camera.slide[1])
+	map.window_py=map.window_py+math.floor(camera.slide[2])
 
 end
 
@@ -3790,11 +3868,11 @@ huds.item.draw=function(hud)
 	local players=scene:caste("player")
 	for i,p in ipairs(players) do
 		if p.idx==1 then
-			local s=p.score..""
+			local s=draws.integer_to_string_with_commas(p.score)
 --			if p.onfloor>0 then s=s.." _" end
 			draws.string4(s,2,1)
 		elseif p.idx==2 then
-			local s=p.score..""
+			local s=draws.integer_to_string_with_commas(p.score)
 --			if p.onfloor>0 then s="_ "..s end
 			draws.string4(s,254-(#s*4),1)
 		end

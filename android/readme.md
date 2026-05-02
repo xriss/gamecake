@@ -8,4 +8,8 @@ then install android junk with
 
 If sdl version has been bumped then may need to replace the java files in org.libsdl.app
 
+for relase signing we need zipalign ?
+
+
+sudo pamac install  android-sdk-build-tools
 
