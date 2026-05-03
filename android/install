@@ -1,0 +1,8 @@
+cd `dirname $0`
+
+source ~/andsdk-env.sh
+
+source ./config.sh
+
+./gradlew installDebug
+
