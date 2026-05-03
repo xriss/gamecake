@@ -484,6 +484,7 @@ If no file name is given then we *return* the data string that we saved.
 
 ]]
 base.save=function(g,opts)
+	opts=opts or {}
 
 	if type(opts)=="string" then
 		opts={filename=opts}
@@ -501,16 +502,18 @@ base.save=function(g,opts)
 
 	if not opts.fmt then -- guess
 	
-		if opts.filename:lower():find("%.gif$") then
-			opts.fmt=grd.FMT_HINT_GIF
-		elseif opts.filename:lower():find("%.jpg$") then
-			opts.fmt=grd.FMT_HINT_JPG
-		elseif opts.filename:lower():find("%.jpeg$") then
-			opts.fmt=grd.FMT_HINT_JPG
-		else
-			opts.fmt=grd.FMT_HINT_PNG
+		opts.fmt=grd.FMT_HINT_PNG
+		if opts.filename then
+			if opts.filename:lower():find("%.gif$") then
+				opts.fmt=grd.FMT_HINT_GIF
+			elseif opts.filename:lower():find("%.jpg$") then
+				opts.fmt=grd.FMT_HINT_JPG
+			elseif opts.filename:lower():find("%.jpeg$") then
+				opts.fmt=grd.FMT_HINT_JPG
+			else
+				opts.fmt=grd.FMT_HINT_PNG
+			end
 		end
-	
 	end
 	
 	if type(opts.json)=="table" then -- turn json opts into string

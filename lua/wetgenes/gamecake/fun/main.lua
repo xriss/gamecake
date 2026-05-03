@@ -8,10 +8,37 @@ local wgrd=require("wetgenes.grd")
 local tardis=require("wetgenes.tardis")	-- matrix/vector math
 local wzips=require("wetgenes.zips")
 
+local wsandbox=require("wetgenes.sandbox")
+
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
+
+-- hacky function to scan a fun file for useful info
+M.get_info=function(fname)
+
+	local text=wzips.readfile(fname)
+
+	local env=wsandbox.make_env()
+	-- fake enough to get past env.system.configurator
+	env.require=function() return {
+		import=function() return {} end,
+		export=function() return {} end,
+	} end
+	env.oven={}
+	env.oven.opts={}
+	env.system={}
+	env.system.configurator=function(a) return a end
+	pcall( function()
+		local f=assert(loadstring(text))
+		setfenv(f,env)
+		assert(pcall(f))
+	end )
+	
+	return env.hardware
+end
+
 
 M.bake=function(oven,main)
 	main=main or {}
@@ -67,8 +94,26 @@ main.loads=function()
 	})
 	
 end
-		
+
 main.setup=function()
+
+	local args=oven.opts.args
+
+	if args.fun_info then -- dump info from this fun file
+	
+		local info = M.get_info(oven.opts.fun)
+
+		if args.fun_info=="title" then
+			print(info.title)
+		elseif args.fun_info=="icon" then
+			local g=bitdown.pix_grd(info.icon)
+			local png=g:save({})
+			io.stdout:write(png)
+		else
+			DUMP(info.hardware)
+		end
+		os.exit()
+	end
 
 --[[
 b b b b b b b b b b b b b b b b b b b 
@@ -102,7 +147,6 @@ b b b b b b b b b b b b b b b b b b b
 	oven.rebake("wetgenes.gamecake.mods.console").data.fun=main.system.code -- use fun.whatever in console to tweak fun globals
 	
 	local screen=main.system.components.screen
-	local args=oven.opts.args
 	-- do resize only if we did not force a window size on the command line
 	if not ( args["win-hx"] or args["win-hy"] or args["win-px"] or args["win-py"] ) then
 		oven.win:resize(screen.hx*screen.scale,screen.hy*screen.scale)

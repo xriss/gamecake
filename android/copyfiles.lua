@@ -7,6 +7,9 @@ local wstr=require("wetgenes.string")
 local wgrd=require("wetgenes.grd")
 local wpath=require("wetgenes.path")
 
+local bitdown=require("wetgenes.gamecake.fun.bitdown")
+local wgfun=require("wetgenes.gamecake.fun.main")
+
 local args={...}
 
 local basedir=assert( args[1] or os.getenv("ANDROID_APP_BASEDIR") ,"Must specify basedir, eg \"./copyfiles.lua ../../apps/dike\"")
@@ -19,7 +22,6 @@ local preopts={}
 
 if smell=="fun" then
 
-
 preopts={
 	name="fun",
 	title="fun",
@@ -28,6 +30,37 @@ preopts={
 	fun_file="lua/"..wpath.file(basedir),
 }
 preopts.commandline=[[ "]]..preopts.fun_file..[[" , "--" , "--logs" , "--show=full" ]]
+
+print(basedir)
+local info=wgfun.get_info(basedir)
+preopts.name=info.android_class or "fun"
+preopts.title=info.title or "fun"
+preopts.icon=info.icon or [[
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g d d d d g d d g d d g d d d d d g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g d d d d g d d g d d g d d g d d g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g d d g g g d d d d d g d d g d d g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g d d g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g d d g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d g g g g g g d d g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g d d d d d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g d d d d d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d g g d d g g g g g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g g g g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+g g g g g d d d d d d g g g g g g d d g g g g g 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+]]
 
 else
 
@@ -144,9 +177,16 @@ if bake.file_exists(ficon) then
 --		{s=48,o="mdpi"},
 --		{s=36,o="ldpi"},
 	} do
-		local gd=assert(wgrd.create(ficon))
-		assert(gd:convert(wgrd.FMT_U8_RGBA))
-		gd:scale(v.s,v.s,1)
+		local gd
+		if preopts.icon then
+			gd=bitdown.pix_grd(preopts.icon)
+			assert(gd:convert(wgrd.FMT_U8_RGBA))
+			gd:scale(v.s,v.s,1)
+		else
+			gd=assert(wgrd.create(ficon))
+			assert(gd:convert(wgrd.FMT_U8_RGBA))
+			gd:scale(v.s,v.s,1)
+		end
 		local n="gamecake/src/main/res/mipmap-"..v.o.."/ic_launcher.png"
 		bake.create_dir_for_file(n)
 		gd:save(n)

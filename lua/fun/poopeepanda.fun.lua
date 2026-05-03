@@ -49,6 +49,8 @@ sysopts={
 			autosize="lohi",
 		},
 	},
+	android_class="poo_pee_panda",
+	title="Poo Pee Panda",
 	icon=[[
 . . . . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . . . . 
