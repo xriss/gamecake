@@ -2870,7 +2870,7 @@
    "body": "<pre><code>ga:fillmask(gb,seedx,seedy)\n</code></pre>\n<p>Fill gb with a fillmask version of ga that starts the floodfill at \nseedx,seedy</p>\n",
    "count": 1,
    "file": "../libs/lua_grd/code/grd.lua",
-   "line": 1149,
+   "line": 1152,
    "name": "lua.wetgenes.grd.fillmask",
    "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }

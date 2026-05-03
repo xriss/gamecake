@@ -2870,7 +2870,7 @@
    "body": "<pre><code>ga:sort_cmap()\n</code></pre>\n<p>Sort cmap into a &quot;good&quot; order and remap the image.</p>\n",
    "count": 1,
    "file": "../libs/lua_grd/code/grd.lua",
-   "line": 1136,
+   "line": 1139,
    "name": "lua.wetgenes.grd.sort_cmap",
    "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }

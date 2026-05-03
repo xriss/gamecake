@@ -2870,7 +2870,7 @@
    "body": "<pre><code>g:quant(num)\n</code></pre>\n<p>Convert to an 8bit indexed image containing a palette of the requested size.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
    "file": "../libs/lua_grd/code/grd.lua",
-   "line": 593,
+   "line": 596,
    "name": "lua.wetgenes.grd.quant",
    "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }

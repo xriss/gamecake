@@ -2870,7 +2870,7 @@
    "body": "<pre><code>ga = g:duplicate()\n</code></pre>\n<p>Create a duplicate of this grd and return it.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
    "file": "../libs/lua_grd/code/grd.lua",
-   "line": 526,
+   "line": 529,
    "name": "lua.wetgenes.grd.duplicate",
    "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }

@@ -2870,7 +2870,7 @@
    "body": "<pre><code>g:create_convert(fmt)\n</code></pre>\n<p>Like convert but returns a new grd rather than converting in place.</p>\n",
    "count": 1,
    "file": "../libs/lua_grd/code/grd.lua",
-   "line": 560,
+   "line": 563,
    "name": "lua.wetgenes.grd.create_convert",
    "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }

@@ -2870,7 +2870,7 @@
    "body": "<pre><code>g:xor(ga)\n</code></pre>\n<p>Set our image data to the XOR of the image/palette data from ga and g.</p>\n<p>This is intended to be combined with g:shrink to work out the area of \nchange between the two images.</p>\n<p>Both grds must be the same size and format.</p>\n",
    "count": 1,
    "file": "../libs/lua_grd/code/grd.lua",
-   "line": 798,
+   "line": 801,
    "name": "lua.wetgenes.grd.xor",
    "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }

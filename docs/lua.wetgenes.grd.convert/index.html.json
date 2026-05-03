@@ -2870,7 +2870,7 @@
    "body": "<pre><code>g:convert(fmt)\n</code></pre>\n<p>Convert this grd to a new format, eg start with an 8 bit indexed grd \nand convert it to 32 bit like by passing in wgrd.FMT_U8_RGBA as the fmt.</p>\n<p>Returns nil,error if something goes wrong so can be used with assert \notherwise returns g so that we can chain the result.</p>\n",
    "count": 1,
    "file": "../libs/lua_grd/code/grd.lua",
-   "line": 540,
+   "line": 543,
    "name": "lua.wetgenes.grd.convert",
    "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }

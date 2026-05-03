@@ -2870,7 +2870,7 @@
    "body": "<pre><code>ga:remap(gb)\n</code></pre>\n<p>Fill gb with a remaped version of ga, each pixel is mapped to the closest palette entry.</p>\n",
    "count": 1,
    "file": "../libs/lua_grd/code/grd.lua",
-   "line": 1080,
+   "line": 1083,
    "name": "lua.wetgenes.grd.remap",
    "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua"
   }
