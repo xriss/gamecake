@@ -12,7 +12,6 @@ rm -rf gamecake/build
 ./copyfiles
 
 ./gradlew build
-#installDebug
 
 #./adb logcat -c
 #./adb logcat "SDL/APP:*" "*:S" \
@@ -21,9 +20,12 @@ rm -rf gamecake/build
 
 #zipinfo app/build/outputs/apk/debug/app-debug.apk
 
-jarsigner -keystore ~/android.keystore -storepass xxxxxx gamecake/build/outputs/apk/release/gamecake-release-unsigned.apk android
 zipalign -p -f -v 4 gamecake/build/outputs/apk/release/gamecake-release-unsigned.apk gamecake/build/outputs/apk/release/gamecake-release.apk
+apksigner sign -ks ~/android.keystore -ks-pass pass:xxxxxx gamecake/build/outputs/apk/release/gamecake-release.apk
 
 #./adb install gamecake/build/outputs/apk/release/gamecake-release.apk
 #./adb shell am start -a android.intent.action.MAIN -n com.wetgenes.gamecake/.CakeAct
 
+
+
+#./gradlew installDebug

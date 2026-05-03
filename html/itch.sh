@@ -1,4 +1,5 @@
-cd `dirname $0`
+#!/usr/bin/env bash
+cd "$(dirname "$0")"
 
 DATE=`date '+%y%m%d'`
 
@@ -18,7 +19,7 @@ zip -r ../$ZIPNAME poopeepanda.fun.lua
 
 
 
-ZIPNAME=poopeepanda-$DATE.win.zip
+ZIPNAME=poopeepanda-$DATE.windows.zip
 rm  ../$ZIPNAME
 zip -r ../$ZIPNAME exe/gamecake.exe
 zip -r ../$ZIPNAME poopeepanda.fun.lua
