@@ -49,25 +49,23 @@ sysopts={
 			autosize="lohi",
 		},
 	},
-	android_class="poo_pee_panda",
-	title="Poo Pee Panda",
 	icon=[[
-. . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . 
-. . . . . Y Y O O Y Y O O o o . . . . 
-. . . . . Y Y O O Y Y O O o o . . . . 
-. . . Y Y O O o o O O o o r r r r . . 
-. . . Y Y O O o o O O o o r r r r . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
-. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . o o o o O O O O O O r r r r . . 
-. . . o o o o O O O O O O r r r r . . 
-. . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 Y Y O O Y Y O O o o 0 0 0 0 
+0 0 0 0 0 Y Y O O Y Y O O o o 0 0 0 0 
+0 0 0 Y Y O O o o O O o o r r r r 0 0 
+0 0 0 Y Y O O o o O O o o r r r r 0 0 
+0 0 0 s s s s F F F F F F f f f f 0 0 
+0 0 0 s s s s F F F F F F f f f f 0 0 
+0 0 0 Y Y Y Y Y Y Y Y Y Y o o o o 0 0 
+0 0 0 Y Y Y Y Y Y Y Y Y Y o o o o 0 0 
+0 0 0 s s s s F F F F F F f f f f 0 0 
+0 0 0 s s s s F F F F F F f f f f 0 0 
+0 0 0 o o o o O O O O O O r r r r 0 0 
+0 0 0 o o o o O O O O O O r r r r 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 ]],
 }
 
@@ -496,7 +494,6 @@ overshade.draw=function(overshade)
 end
 
 overshade.uniforms=function(p)
-	local idx=p:uniform("data")
 	for i,button in ipairs(overshade.buttons) do
 		local touch=button.touch
 		local pos=button.pos
@@ -506,7 +503,8 @@ overshade.uniforms=function(p)
 		if overshade.stick.state[ button[5] ]==1 then -- stick buttons
 			touch=overshade.stick
 		end
-		gl.Uniform4f( idx+i-1,   pos[1],pos[2],button.siz,touch and 1 or 0 )
+		local idx=p:uniform("data["..(i-1).."]")
+		gl.Uniform4f( idx,   pos[1], pos[2], button.siz, touch and 1 or 0 )
 	end
 
 	gl.Uniform4f( p:uniform("fade") , overshade.fade,0,0,0 )
