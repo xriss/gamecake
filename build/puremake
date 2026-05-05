@@ -2685,7 +2685,8 @@ end
 		if file == nil then
 			return dirs
 		end
-		for line in io.lines(conf_file) do
+		for _line in io.lines(conf_file) do
+			local line=_line
 			-- ignore comments
 			first = line:find("#", 1, true)
 			if first ~= nil then
