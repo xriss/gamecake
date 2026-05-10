@@ -28,7 +28,7 @@ SOFTWARE.
 #ifndef DJON_H
 #define DJON_H
 
-#define DJON_VERSION 1.251031
+#define DJON_VERSION 1.260510
 
 #ifdef __cplusplus
 extern "C" {
@@ -1640,6 +1640,30 @@ int djon_value_is_small(djon_state *ds,int idx,int small,int bucket)
 	return bucket;
 }
 
+// returns true if this is an array that only contains numbers and true/false/nil values
+// so no strings or objects or arrays. So it would make sense to put many values on a a line.
+int djon_value_is_uniform(djon_state *ds,int idx)
+{
+	int vi=idx;
+	djon_value *vv=djon_get(ds,vi);
+	if(!vv){return 0;}
+
+	if(	vv->com ) { return 0; } // give up on any sub comments
+
+	if((vv->typ&DJON_TYPEMASK)!=DJON_ARRAY) { return 0; } // must be array
+
+	for( int ci=vv->lst ; ci ; ci=djon_value_get_nxt(ds,ci) )
+	{
+		vv=djon_get(ds,ci);
+		if(	vv->com ) { return 0; } // give up on any sub comments
+		if((vv->typ&DJON_TYPEMASK)==DJON_STRING) { return 0; } // no strings
+		if((vv->typ&DJON_TYPEMASK)==DJON_ARRAY)  { return 0; } // no arrays
+		if((vv->typ&DJON_TYPEMASK)==DJON_OBJECT) { return 0; } // no objects
+	}
+
+	return 1; // passed all the tests
+}
+
 // unallocate unused values at the end of a parse
 void djon_shrink(djon_state *ds)
 {
@@ -2023,6 +2047,7 @@ void djon_write_djon_indent(djon_state *ds,int idx,int indent)
 	int val_idx;
 	int com_idx;
 	int len;
+	int count;
 	char *qs;
 	char *cp;
 	char c;
@@ -2079,16 +2104,49 @@ void djon_write_djon_indent(djon_state *ds,int idx,int indent)
 			int ds_compact=ds->compact; // save
 			if(djon_value_is_small(ds,idx,ds->small,0)<=ds->small) { ds->compact=1; }
 			djon_write_string(ds,"[");
-			djon_write_string(ds,ds->compact?" ":"\n");
-			val_idx=v->lst; val=djon_get(ds,val_idx);
-			while(val)
+			if( !ds->compact && djon_value_is_uniform(ds,idx) ) // compact a uniform array
 			{
-				if(val->com)
+				djon_write_string(ds,"\n");
+				count=0;
+				val_idx=v->lst; val=djon_get(ds,val_idx);
+				while(val)
 				{
-					djon_write_djon_indent(ds,val->com,indent+1);
+					if((count%10)==0) // first in line
+					{
+						ds->compact=0;
+						djon_write_indent(ds,indent+1);
+						ds->compact=1;
+						djon_write_djon_indent(ds,val_idx,-1);
+					}
+					else
+					if( (((count%10)==9)&&(val->nxt)) || (!(val->nxt)) ) // last in line
+					{
+						ds->compact=0;
+						djon_write_djon_indent(ds,val_idx,-1);
+					}
+					else
+					{
+						ds->compact=1;
+						djon_write_djon_indent(ds,val_idx,-1);
+					}
+					count++;
+					val_idx=val->nxt; val=djon_get(ds,val_idx);
 				}
-				djon_write_djon_indent(ds,val_idx,indent+1);
-				val_idx=val->nxt; val=djon_get(ds,val_idx);
+				ds->compact=ds_compact; // unsave
+			}
+			else
+			{
+				djon_write_string(ds,ds->compact?" ":"\n");
+				val_idx=v->lst; val=djon_get(ds,val_idx);
+				while(val)
+				{
+					if(val->com)
+					{
+						djon_write_djon_indent(ds,val->com,indent+1);
+					}
+					djon_write_djon_indent(ds,val_idx,indent+1);
+					val_idx=val->nxt; val=djon_get(ds,val_idx);
+				}
 			}
 			indent=djon_write_indent(ds,indent);
 			djon_write_string(ds,"]");

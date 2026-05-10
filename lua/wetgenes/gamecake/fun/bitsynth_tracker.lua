@@ -20,8 +20,10 @@ this not just throw in an old mod.
 
 ]]
 
-local wpack=require("wetgenes.pack")
-local fats=require("wetgenes.fats")
+-- these bit twiddlers work in vanilla lua and fats is luajit ffi optimized
+-- we cant just use luajit ffi as we want to be wasm compatible
+local wpack=require("wetgenes.pack") -- slower struct style access
+local fats=require("wetgenes.fats") -- faster for large arrays of bytes / floats etc
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -217,6 +219,32 @@ bitsynth_tracker.IT_to_mod=function(data)
 		sample.vid = t1[2]
 		sample.vir = t1[3]
 		sample.vit = extract_8bits(t1[4])
+		
+		if sample.flg[1] then -- got a sample
+			local maxs=0
+			local adds=0
+			if sample.flg[2] then -- 16 bit
+				sample.data=fats.int16s_to_table( data:sub( sample.pointer+1 , sample.pointer+(sample.length*2) ) )
+				maxs=0x8000
+				if sample.cvt[1] then -- signed
+					adds=0
+				else
+					adds=-0x8000
+				end
+			else
+				sample.data=fats.int8s_to_table( data:sub( sample.pointer+1 , sample.pointer+(sample.length*1) ) )
+				maxs=0x80
+				if sample.cvt[1] then -- signed
+					adds=0
+				else
+					adds=-0x80
+				end
+			end
+			for i=1,#sample.data do
+				local v=sample.data[i]
+				sample.data[i]=(v+adds)/maxs -- fix signed and normalize 
+			end
+		end
 		
 	end
 	mod.samples_offsets=nil
