@@ -29,6 +29,189 @@ local fats=require("wetgenes.fats") -- faster for large arrays of bytes / floats
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local bitsynth_tracker=M
 
+
+--[[
+
+		MODULE
+        0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+      ┌───┬───┬───┬───┬───────────────────────────────────────────────┐
+0000: │'I'│'M'│'P'│'M'│ Song Name, max 26 characters, includes NULL   │
+      ├───┴───┴───┴───┴───────────────────────────────────────┬───────┤
+0010: │.......................................................│PHiligt│
+      ├───────┬───────┬───────┬───────┬───────┬───────┬───────┼───────┤
+0020: │OrdNum │InsNum │SmpNum │PatNum │ Cwt/v │ Cmwt  │ Flags │Special│
+      ├───┬───┼───┬───┼───┬───┼───────┼───────┴───────┼───────┴───────┤
+0030: │GV │MV │IS │IT │Sep│PWD│MsgLgth│Message Offset │   Reserved    │
+      ├───┴───┴───┴───┴───┴───┴───────┴───────────────┴───────────────┤
+0040: │ Chnl Pan (64 bytes)...........................................│
+      ├───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┤
+
+      ├───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┤
+0080: │ Chnl Vol (64 bytes)...........................................│
+      ├───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┤
+
+      ├───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┤
+00C0: │ Orders, Length = OrdNum                                       │
+      ├───────────────────────────────────────────────────────────────┤
+xxxx: │ 'Long' Offset of instruments, Length = InsNum*4 (1)           │
+      ├───────────────────────────────────────────────────────────────┤
+xxxx: │ 'Long' Offset of samples headers, Length = SmpNum*4 (2)       │
+      ├───────────────────────────────────────────────────────────────┤
+xxxx: │ 'Long' Offset of patterns, Length = PatNum*4 (3)              │
+      └───────────────────────────────────────────────────────────────┘
+
+]]    
+  
+bitsynth_tracker.format_module_1E={
+	"u16",	"philigt",
+	"u16",	"ordnum",
+	"u16",	"insnum",
+	"u16",	"smpnum",
+	"u16",	"patnum",
+	"u16",	"cwtv",
+	"u16",	"cmwt",
+	"u16",	"flags",
+	"u16",	"special",
+	"u8",	"gv",
+	"u8",	"mv",
+	"u8",	"is",
+	"u8",	"it",
+	"u8",	"sep",
+	"u8",	"pwd",
+	"u16",	"message_length",
+	"u32",	"message_offset",
+	"u32",	"reserved",
+}
+
+--[[
+
+      INSTRUMENT
+        0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+      ┌───┬───┬───┬───┬───────────────────────────────────────────────┐
+0000: │'I'│'M'│'P'│'I'│ DOS FileName (12345678.123)                   │
+      ├───┼───┼───┼───┼───────┬───┬───┬───┬───┬───┬───┬───────┬───┬───┤
+0010: │00h│NNA│DCT│DCA│FadeOut│PPS│PPC│GbV│DfP│RV │RP │TrkVers│NoS│ x │
+      ├───┴───┴───┴───┴───────┴───┴───┴───┴───┴───┴───┴───────┴───┴───┤
+0020: │ Instrument Name, max 26 bytes, includes NUL...................│
+      ├───────────────────────────────────────┬───┬───┬───┬───┬───────┤
+0030: │.......................................│IFC│IFR│MCh│MPr│MIDIBnk│
+      ├───────────────────────────────────────┴───┴───┴───┴───┴───────┤
+0040: │ Note-Sample/Keyboard Table, Length = 240 bytes................│
+      ├───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┤
+
+      ├───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┤
+0130: │ Envelopes.....................................................│
+      ├───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┤
+
+]]
+
+bitsynth_tracker.format_instrument_11={
+	"u8",	"nna",
+	"u8",	"dct",
+	"u8",	"dca",
+	"u16",	"fadeout",
+	"u8",	"pps",
+	"u8",	"ppc",
+	"u8",	"gbv",
+	"u8",	"dfp",
+	"u8",	"rv",
+	"u8",	"rp",
+	"u16",	"trkvers",
+	"u8",	"nos",
+	"u8",	"x",
+}
+
+bitsynth_tracker.format_instrument_3A={
+	"u8",	"ifc",
+	"u8",	"ifr",
+	"u8",	"mch",
+	"u8",	"mpr",
+	"u16",	"midibnk",
+}
+
+--[[
+
+		ENVELOPE
+        0   1   2   3   4   5   6.......
+      ┌───┬───┬───┬───┬───┬───┬───────────────────────────────────┬───┐
+xxxx: │Flg│Num│LpB│LpE│SLB│SLE│ Node points, 25 sets, 75 bytes....│ x │
+      ├───┼───┼───┼───┼───┼───┼───┬───┬───┬───┬───┬───┬───┬───┬───┼───┤
+
+]]
+
+bitsynth_tracker.format_envelope_00={
+	"u8",	"flg",
+	"u8",	"num",
+	"u8",	"lpb",
+	"u8",	"lpe",
+	"u8",	"slb",
+	"u8",	"sle",
+}
+
+--[[
+
+		SAMPLE
+        0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+      ┌───┬───┬───┬───┬───────────────────────────────────────────────┐
+0000: │'I'│'M'│'P'│'S'│ DOS Filename (12345678.123)                   │
+      ├───┼───┼───┼───┼───────────────────────────────────────────────┤
+0010: │00h│GvL│Flg│Vol│ Sample Name, max 26 bytes, includes NUL.......│
+      ├───┴───┴───┴───┴───────────────────────────────────────┬───┬───┤
+0020: │.......................................................│Cvt│DfP│
+      ├───────────────┬───────────────┬───────────────┬───────┴───┴───┤
+0030: │ Length        │ Loop Begin    │ Loop End      │ C5Speed       │
+      ├───────────────┼───────────────┼───────────────┼───┬───┬───┬───┤
+0040: │ SusLoop Begin │ SusLoop End   │ SamplePointer │ViS│ViD│ViR│ViT│
+      └───────────────┴───────────────┴───────────────┴───┴───┴───┴───┘
+
+The cache file has the following pieces of information added on:
+
+        0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+      ┌───────────────┬───────┬───────┬───┬───────────────────────────┐
+0050: │ File Size     │ Date  │ Time  │Fmt│...........................│
+      └───────────────┴───────┴───────┴───┴───────────────────────────┘
+
+]]
+
+bitsynth_tracker.format_sample_11={
+	"u8",	"gvl",
+	"u8",	"flg",
+	"u8",	"vol",
+}
+
+bitsynth_tracker.format_sample_2E={
+	"u8",	"cvt",
+	"u8",	"dfp",
+	"u32",	"length",
+	"u32",	"loop_begin",
+	"u32",	"loop_end",
+	"u32",	"c5speed",
+	"u32",	"susloop_begin",
+	"u32",	"susloop_end",
+	"u32",	"pointer",
+	"u8",	"vis",
+	"u8",	"vid",
+	"u8",	"vir",
+	"u8",	"vit",
+}
+
+--[[
+
+		PATTERN
+        0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+      ┌───────┬───────┬───┬───┬───┬───┬───────────────────────────────┐
+0000: │Length │ Rows  │ x │ x │ x │ x │ Packed data................   │
+      ├───┬───┼───┬───┼───┼───┼───┼───┼───┬───┬───┬───┬───┬───┬───┬───┤
+
+]]
+
+bitsynth_tracker.format_pattern_00={
+	"u16",	"length",
+	"u16",	"rows",
+}
+
+
+
 -- honor null terminated string in data
 local extract_cstring=function(data,start,maxlength)
 	if not start then start=1 end
@@ -62,6 +245,7 @@ bitsynth_tracker.IT_to_mod=function(data)
 
 	mod.head.name=extract_cstring(data,5,26)
 
+--[[
 	local t=fats.uint16s_to_table( data:sub(31,48) )
 	
 	mod.head.philigt  = t[1]
@@ -90,8 +274,15 @@ bitsynth_tracker.IT_to_mod=function(data)
 	local t=fats.uint32s_to_table( data:sub(57,60) )
 
 	mod.head.message_offset = t[1]
+]]
 
-	mod.head.message=extract_cstring(data,mod.head.message_offset+1,mod.head.message_length)
+	wpack.load( data , bitsynth_tracker.format_module_1E , 0x1e , mod.head )
+
+	mod.head.flags    = extract_8bits( mod.head.flags )
+
+	mod.head.special  = extract_8bits( mod.head.special )
+
+	mod.head.message=extract_cstring( data , mod.head.message_offset+1 , mod.head.message_length )
 
 	mod.chanel_pan=fats.uint8s_to_table( data:sub(65,128) )
 
@@ -120,6 +311,7 @@ bitsynth_tracker.IT_to_mod=function(data)
 		assert( instrument.magick == "IMPI" )
 		instrument.filename=extract_cstring(dat,5,17)
 		
+--[[
 		local t1=fats.uint8s_to_table( dat:sub(17,32) )
 		local t2=fats.uint16s_to_table( dat:sub(17,32) )
 
@@ -140,8 +332,6 @@ bitsynth_tracker.IT_to_mod=function(data)
 
 		instrument.nos=t1[15]
 
-		instrument.name=extract_cstring(dat,33,58)
-
 		local t1=fats.uint8s_to_table( dat:sub(59,62) )
 		local t2=fats.uint8s_to_table( dat:sub(63,64) )
 
@@ -151,18 +341,34 @@ bitsynth_tracker.IT_to_mod=function(data)
 		instrument.mpr=t1[4]
 
 		instrument.midibnk=t2[1]
+]]
+		wpack.load( dat , bitsynth_tracker.format_instrument_11 , 0x11 , instrument )
+
+		instrument.nna=extract_8bits( instrument.nna )
+		instrument.dct=extract_8bits( instrument.dct )
+		instrument.dca=extract_8bits( instrument.dca )
+
+		instrument.name=extract_cstring(dat,33,58)
 		
 		instrument.keyboard=fats.uint8s_to_table( dat:sub(64+1,64+240) )
 		
-		local parse_envelope=function(t)
+		local parse_envelope=function(data,start)
+			local t=fats.uint8s_to_table( data:sub(start+1,start+0x52) )
+
 			envelope={}
 
+--[[
 			envelope.flg=extract_8bits(t[1])
 			envelope.num=t[2]
 			envelope.lpb=t[3]
 			envelope.lpe=t[4]
 			envelope.slb=t[5]
 			envelope.sle=t[6]
+]]
+
+
+			wpack.load(  data , bitsynth_tracker.format_envelope_00, start , envelope )
+			envelope.flg=extract_8bits( envelope.flg )
 			
 			envelope.nodes={}
 			if envelope.num>25 then envelope.num=25 end --clamp
@@ -173,9 +379,9 @@ bitsynth_tracker.IT_to_mod=function(data)
 			return envelope
 		end
 
-		instrument.envelope_volume  = parse_envelope( fats.uint8s_to_table( data:sub(0x130+1,0x130+0x52) ) )
-		instrument.envelope_panning = parse_envelope( fats.uint8s_to_table( data:sub(0x182+1,0x182+0x52) ) )
-		instrument.envelope_pitch   = parse_envelope( fats.uint8s_to_table( data:sub(0x1d4+1,0x1d4+0x52) ) )
+		instrument.envelope_volume  = parse_envelope( data , 0x130 ) -- fats.uint8s_to_table( data:sub(0x130+1,0x130+0x52) ) )
+		instrument.envelope_panning = parse_envelope( data , 0x182 ) --  fats.uint8s_to_table( data:sub(0x182+1,0x182+0x52) ) )
+		instrument.envelope_pitch   = parse_envelope( data , 0x1d4 ) --  fats.uint8s_to_table( data:sub(0x1d4+1,0x1d4+0x52) ) )
                    
 	end
 	mod.instruments_offsets=nil
@@ -190,6 +396,7 @@ bitsynth_tracker.IT_to_mod=function(data)
 		assert( sample.magick == "IMPS" )
 		sample.filename=extract_cstring(dat,5,17)
 
+--[[
 		local t1=fats.uint8s_to_table( dat:sub(16+1,16+4) )
 		
 		sample.gvl = t1[2]
@@ -219,6 +426,17 @@ bitsynth_tracker.IT_to_mod=function(data)
 		sample.vid = t1[2]
 		sample.vir = t1[3]
 		sample.vit = extract_8bits(t1[4])
+]]
+
+		wpack.load( dat , bitsynth_tracker.format_sample_11, 0x11 , sample )
+		wpack.load( dat , bitsynth_tracker.format_sample_2E, 0x2e , sample )
+
+		sample.flg = extract_8bits( sample.flg )
+		sample.cvt = extract_8bits( sample.cvt )
+		sample.vit = extract_8bits( sample.vit )
+
+		sample.name=extract_cstring(dat,20+1,20+26)
+
 		
 		if sample.flg[1] then -- got a sample
 			local maxs=0
@@ -312,6 +530,54 @@ end
 
 bitsynth_tracker.mod_to_IT=function(mod)
 
+	local alloc_addr=0
+	local alloc=function(size)
+		local ret=alloc_addr		
+		size=math.ceil(size/16)*16 -- round up length to 16 bytes
+		alloc_addr=alloc_addr+size
+		return ret
+	end
 
-	return data
+	local write_datas={}
+	local write=function(data)
+		write_datas[#write_datas+1]=data
+	end
+
+-- first we need to pre calculate values, mostly the position in the output file of each structure
+
+	mod.head.size = 192+mod.head.ordnum+(mod.head.insnum*4)+(mod.head.smpnum*4)+(mod.head.patnum*4)
+	mod.head.addr = alloc( mod.head.size ) -- should always be 0 as it is the first allocation
+	
+	for i,instrument in ipairs( mod.instruments ) do
+		instrument.size = 0x226
+		instrument.addr = alloc( instrument.size )
+	end
+
+	for i,sample in ipairs( mod.samples ) do
+		sample.size = 0x60
+		sample.addr = alloc( sample.size )
+
+		sample.data_size = 2*#sample.data
+		sample.data_addr = alloc( sample.data_size )
+	end
+
+	for i,pattern in ipairs( mod.patterns ) do -- just an empty pattern for now
+		pattern.size = 8 + 32
+		pattern.addr = alloc( pattern.size )
+	end
+
+-- then we create a data string of all the data combined
+
+	for i,instrument in ipairs( mod.instruments ) do
+	end
+
+	for i,sample in ipairs( mod.samples ) do
+	end
+
+	for i,pattern in ipairs( mod.patterns ) do -- just empty pattern for now
+	end
+
+
+
+	return table.concat( write_datas )
 end

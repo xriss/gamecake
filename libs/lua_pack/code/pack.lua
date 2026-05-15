@@ -4,7 +4,7 @@
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
-local pack={}
+local pack={ modname=(...) } ; package.loaded[pack.modname]=pack
 
 local core=require("wetgenes.pack.core")
 pack.core=core
@@ -47,10 +47,11 @@ pack.save_raw=function(...) return core.save(...) end
 -- where "u32" is a string id of a data type or the length of a string to read
 -- name is the name of the table field to return the data in
 --
--- we return a table and the length of the data read in bytes
+-- we return a table(datr) and the length of the data read in bytes, datr may be passed in
 -- 
 --
-pack.load=function(dats,fmts,off)
+pack.load=function(dats,fmts,off,datr)
+	datr=datr or {}
 
 	local fmtt={} -- format field type
 	local fmtn={} -- format field name
@@ -72,7 +73,6 @@ pack.load=function(dats,fmts,off)
 
 -- now we assign the fields to their given names
 
-	local datr={}
 	for i,v in ipairs(fmtn) do
 		datr[v]=datt[i]
 	end
@@ -282,7 +282,3 @@ pack.stream.new=function(initial_size)
 
 	return stream
 end
-
-
-
-return pack
