@@ -70,8 +70,8 @@ bitsynth_tracker.format_module_1E={
 	"u16",	"patnum",
 	"u16",	"cwtv",
 	"u16",	"cmwt",
-	"u16",	"flags",
-	"u16",	"special",
+	"u16",	"u16_flags",
+	"u16",	"u16_special",
 	"u8",	"gv",
 	"u8",	"mv",
 	"u8",	"is",
@@ -106,9 +106,9 @@ bitsynth_tracker.format_module_1E={
 ]]
 
 bitsynth_tracker.format_instrument_11={
-	"u8",	"nna",
-	"u8",	"dct",
-	"u8",	"dca",
+	"u8",	"u8_nna",
+	"u8",	"u8_dct",
+	"u8",	"u8_dca",
 	"u16",	"fadeout",
 	"u8",	"pps",
 	"u8",	"ppc",
@@ -140,7 +140,7 @@ xxxx: │Flg│Num│LpB│LpE│SLB│SLE│ Node points, 25 sets, 75 bytes....
 ]]
 
 bitsynth_tracker.format_envelope_00={
-	"u8",	"flg",
+	"u8",	"u8_flg",
 	"u8",	"num",
 	"u8",	"lpb",
 	"u8",	"lpe",
@@ -175,12 +175,12 @@ The cache file has the following pieces of information added on:
 
 bitsynth_tracker.format_sample_11={
 	"u8",	"gvl",
-	"u8",	"flg",
+	"u8",	"u8_flg",
 	"u8",	"vol",
 }
 
 bitsynth_tracker.format_sample_2E={
-	"u8",	"cvt",
+	"u8",	"u8_cvt",
 	"u8",	"dfp",
 	"u32",	"length",
 	"u32",	"loop_begin",
@@ -192,7 +192,7 @@ bitsynth_tracker.format_sample_2E={
 	"u8",	"vis",
 	"u8",	"vid",
 	"u8",	"vir",
-	"u8",	"vit",
+	"u8",	"u8_vit",
 }
 
 --[[
@@ -224,15 +224,32 @@ local extract_cstring=function(data,start,maxlength)
 	stop=stop-1
 	return string.sub( data , start , stop )
 end
+-- returns a null terminated/padded string of the given size
+local pad_cstring=function(str,size)
+	if #str > size-1 then
+		str=str:sub(1,size-1)
+	end
+	return str + string.rep("\0",size-#str)
+end
 
 -- table of true/false for bits 0-7 in the given unsigned byte number 0-255
-local extract_8bits=function(num)
+local extract_bits=function(num,bitcount)
+	if not bitcount then bitcount=8 end
 	local bits={}
-	for i=1,8 do
+	for i=1,bitcount do
 		if num%2==1 then bits[i]=true else bits[i]=false end
 		num=math.floor(num/2)
 	end
 	return bits
+end
+local insert_bits=function(bits)
+	local num=0
+	for i=1,#bits do
+		if bits[i] then
+			num=num+( 2^(i-1) )
+		end
+	end
+	return num
 end
 
 bitsynth_tracker.IT_to_mod=function(data)
@@ -245,42 +262,10 @@ bitsynth_tracker.IT_to_mod=function(data)
 
 	mod.head.name=extract_cstring(data,5,26)
 
---[[
-	local t=fats.uint16s_to_table( data:sub(31,48) )
-	
-	mod.head.philigt  = t[1]
-	mod.head.ordnum   = t[2]
-	mod.head.insnum   = t[3]
-	mod.head.smpnum   = t[4]
-	mod.head.patnum   = t[5]
-	mod.head.cwt      = t[6]
-	mod.head.cmwt     = t[7]
-	mod.head.flags    = extract_8bits(t[8])
-	mod.head.special  = extract_8bits(t[9])
-
-	local t=fats.uint8s_to_table( data:sub(49,54) )
-
-	mod.head.gv   = t[1]
-	mod.head.mv   = t[2]
-	mod.head.is   = t[3]
-	mod.head.it   = t[4]
-	mod.head.sep  = t[5]
-	mod.head.pwd  = t[6]
-
-	local t=fats.uint16s_to_table( data:sub(55,56) )
-
-	mod.head.message_length = t[1]
-
-	local t=fats.uint32s_to_table( data:sub(57,60) )
-
-	mod.head.message_offset = t[1]
-]]
-
 	wpack.load( data , bitsynth_tracker.format_module_1E , 0x1e , mod.head )
 
-	mod.head.flags    = extract_8bits( mod.head.flags )
-
-	mod.head.special  = extract_8bits( mod.head.special )
+	mod.head.flags    = extract_bits( mod.head.u16_flags , 16 )
+	mod.head.special  = extract_bits( mod.head.u16_special , 16 )
 
 	mod.head.message=extract_cstring( data , mod.head.message_offset+1 , mod.head.message_length )
 
@@ -311,42 +296,11 @@ bitsynth_tracker.IT_to_mod=function(data)
 		assert( instrument.magick == "IMPI" )
 		instrument.filename=extract_cstring(dat,5,17)
 		
---[[
-		local t1=fats.uint8s_to_table( dat:sub(17,32) )
-		local t2=fats.uint16s_to_table( dat:sub(17,32) )
-
-		instrument.nna=extract_8bits(t1[2])
-		instrument.dct=extract_8bits(t1[3])
-		instrument.dca=extract_8bits(t1[4])
-
-		instrument.fadeout=t2[3]
-
-		instrument.pps=t1[7]
-		instrument.ppc=t1[8]
-		instrument.gbv=t1[9]
-		instrument.dfp=t1[10]
-		instrument.rv=t1[11]
-		instrument.rp=t1[12]
-
-		instrument.trkvers=t2[7]
-
-		instrument.nos=t1[15]
-
-		local t1=fats.uint8s_to_table( dat:sub(59,62) )
-		local t2=fats.uint8s_to_table( dat:sub(63,64) )
-
-		instrument.ifc=t1[1]
-		instrument.ifr=t1[2]
-		instrument.mch=t1[3]
-		instrument.mpr=t1[4]
-
-		instrument.midibnk=t2[1]
-]]
 		wpack.load( dat , bitsynth_tracker.format_instrument_11 , 0x11 , instrument )
 
-		instrument.nna=extract_8bits( instrument.nna )
-		instrument.dct=extract_8bits( instrument.dct )
-		instrument.dca=extract_8bits( instrument.dca )
+		instrument.nna=extract_bits( instrument.u8_nna , 8 )
+		instrument.dct=extract_bits( instrument.u8_dct , 8 )
+		instrument.dca=extract_bits( instrument.u8_dca , 8 )
 
 		instrument.name=extract_cstring(dat,33,58)
 		
@@ -357,18 +311,8 @@ bitsynth_tracker.IT_to_mod=function(data)
 
 			envelope={}
 
---[[
-			envelope.flg=extract_8bits(t[1])
-			envelope.num=t[2]
-			envelope.lpb=t[3]
-			envelope.lpe=t[4]
-			envelope.slb=t[5]
-			envelope.sle=t[6]
-]]
-
-
 			wpack.load(  data , bitsynth_tracker.format_envelope_00, start , envelope )
-			envelope.flg=extract_8bits( envelope.flg )
+			envelope.flg=extract_bits( envelope.u8_flg , 8 )
 			
 			envelope.nodes={}
 			if envelope.num>25 then envelope.num=25 end --clamp
@@ -396,44 +340,12 @@ bitsynth_tracker.IT_to_mod=function(data)
 		assert( sample.magick == "IMPS" )
 		sample.filename=extract_cstring(dat,5,17)
 
---[[
-		local t1=fats.uint8s_to_table( dat:sub(16+1,16+4) )
-		
-		sample.gvl = t1[2]
-		sample.flg = extract_8bits(t1[3])
-		sample.vol = t1[4]
-
-		sample.name=extract_cstring(dat,20+1,20+26)
-
-		local t1=fats.uint8s_to_table( dat:sub(0x2e+1,0x2e+2) )
-
-		sample.cvt = extract_8bits(t1[1])
-		sample.dfp = t1[2]
-
-		local t4=fats.uint32s_to_table( dat:sub(0x30+1,0x30+28) )
-
-		sample.length        = t4[1]
-		sample.loop_begin    = t4[2]
-		sample.loop_end      = t4[3]
-		sample.c5speed       = t4[4]
-		sample.susloop_begin = t4[5]
-		sample.susloop_end   = t4[6]
-		sample.pointer       = t4[7]
-
-		local t1=fats.uint8s_to_table( dat:sub(0x4c+1,0x4c+4) )
-
-		sample.vis = t1[1]
-		sample.vid = t1[2]
-		sample.vir = t1[3]
-		sample.vit = extract_8bits(t1[4])
-]]
-
 		wpack.load( dat , bitsynth_tracker.format_sample_11, 0x11 , sample )
 		wpack.load( dat , bitsynth_tracker.format_sample_2E, 0x2e , sample )
 
-		sample.flg = extract_8bits( sample.flg )
-		sample.cvt = extract_8bits( sample.cvt )
-		sample.vit = extract_8bits( sample.vit )
+		sample.flg = extract_bits( sample.u8_flg , 8 )
+		sample.cvt = extract_bits( sample.u8_cvt , 8 )
+		sample.vit = extract_bits( sample.u8_vit , 8 )
 
 		sample.name=extract_cstring(dat,20+1,20+26)
 
@@ -483,7 +395,7 @@ bitsynth_tracker.IT_to_mod=function(data)
 		local pull=function() idx=idx+1 ; return dat[idx] end
 		local states={}
 		local get_state=function(idx)
-			if not states[idx] then states[idx]={0,0,0,0,0,mask=extract_8bits(0)} end
+			if not states[idx] then states[idx]={0,0,0,0,0,mask=extract_bits(0,8)} end
 			return states[idx]
 		end
 		for i=1,rows do
@@ -498,7 +410,7 @@ bitsynth_tracker.IT_to_mod=function(data)
 				if c>128 then
 					c=c-128
 					s=get_state(c)
-					s.mask=extract_8bits(pull())
+					s.mask=extract_bits(pull(),8)
 				else
 					s=get_state(c)
 				end
@@ -545,12 +457,33 @@ bitsynth_tracker.mod_to_IT=function(mod)
 
 -- first we need to pre calculate values, mostly the position in the output file of each structure
 
+	mod.head.ordnum = #mod.orders
+	mod.head.insnum = #mod.instruments
+	mod.head.smpnum = #mod.samples
+	mod.head.patnum = #mod.patterns
+
 	mod.head.size = 192+mod.head.ordnum+(mod.head.insnum*4)+(mod.head.smpnum*4)+(mod.head.patnum*4)
 	mod.head.addr = alloc( mod.head.size ) -- should always be 0 as it is the first allocation
+	
+	mod.head.u16_flags    = insert_bits( mod.head.flags )
+	mod.head.u16_special  = insert_bits( mod.head.special )
 	
 	for i,instrument in ipairs( mod.instruments ) do
 		instrument.size = 0x226
 		instrument.addr = alloc( instrument.size )
+
+		instrument.u8_nna=insert_bits( instrument.nna )
+		instrument.u8_dct=insert_bits( instrument.dct )
+		instrument.u8_dca=insert_bits( instrument.dca )
+
+		local prepare_envelope=function(envelope)
+			envelope.u8_flg=insert_bits( envelope.flg )
+		end
+		
+		prepare_envelope( instrument.envelope_volume )
+		prepare_envelope( instrument.envelope_panning )
+		prepare_envelope( instrument.envelope_pitch )
+
 	end
 
 	for i,sample in ipairs( mod.samples ) do
@@ -559,6 +492,10 @@ bitsynth_tracker.mod_to_IT=function(mod)
 
 		sample.data_size = 2*#sample.data
 		sample.data_addr = alloc( sample.data_size )
+
+		sample.u8_flg = insert_bits( sample.flg )
+		sample.u8_cvt = insert_bits( sample.cvt )
+		sample.u8_vit = insert_bits( sample.vit )
 	end
 
 	for i,pattern in ipairs( mod.patterns ) do -- just an empty pattern for now
@@ -568,15 +505,51 @@ bitsynth_tracker.mod_to_IT=function(mod)
 
 -- then we create a data string of all the data combined
 
+	write("IMPM")
+	write( pad_cstring( mod.head.name , 26 ) )
+	write( wpack.save( mod.head , bitsynth_tracker.format_module_1E ) )
+	write( fats.table_to_uint8s( mod.chanel_pan ) )
+	write( fats.table_to_uint8s( mod.chanel_vol ) )
+
+	write( fats.table_to_uint8s( mod.orders ) )
 	for i,instrument in ipairs( mod.instruments ) do
+		write( fats.table_to_uint32s( {instrument.addr} ) )
+	end
+	for i,sample in ipairs( mod.samples ) do
+		write( fats.table_to_uint32s( {sample.addr} ) )
+	end
+	for i,pattern in ipairs( mod.patterns ) do
+		write( fats.table_to_uint32s( {pattern.addr} ) )
+	end
+
+	for i,instrument in ipairs( mod.instruments ) do
+		write("IMPI")
+		write( pad_cstring( instrument.filename , 13 ) )
+		write( wpack.save( instrument , bitsynth_tracker.format_instrument_11 ) )
+		write( pad_cstring( instrument.name , 26 ) )
+		write( wpack.save( instrument , bitsynth_tracker.format_instrument_3A ) )
+		write( fats.table_to_uint8s( instrument.keyboard ) )
+		
+		local write_envelope=function( envelope )
+			write( wpack.save(  envelope , bitsynth_tracker.format_envelope_00 ) )
+			for i=1,25 do
+				local node=envelope.nodes[i]
+				if not node then node={0,0}
+				write( fats.table_to_uint8s( { node[1] } )
+				write( fats.table_to_uint16s( { node[2] } )
+			end
+		end
+		
+		write_envelope( instrument.envelope_volume )
+		write_envelope( instrument.envelope_panning )
+		write_envelope( instrument.envelope_pitch )
 	end
 
 	for i,sample in ipairs( mod.samples ) do
 	end
 
-	for i,pattern in ipairs( mod.patterns ) do -- just empty pattern for now
+	for i,pattern in ipairs( mod.patterns ) do
 	end
-
 
 
 	return table.concat( write_datas )
