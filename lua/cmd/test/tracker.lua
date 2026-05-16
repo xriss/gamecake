@@ -16,3 +16,22 @@ local mod=bitsynth_tracker.IT_to_mod(data)
 --print( wstr.dump(mod) )
 
 print( djon.save(mod,"djon") )
+
+local newdata=bitsynth_tracker.mod_to_IT(mod)
+
+local fp=assert(io.open("/home/kriss/Desktop/test_out.it","wb"))
+fp:write(newdata)
+fp:close()
+
+-- read back in and dump
+
+local fp=assert(io.open("/home/kriss/Desktop/test_out.it","rb"))
+local data=fp:read("*a")
+fp:close()
+
+
+local mod=bitsynth_tracker.IT_to_mod(data)
+
+--print( wstr.dump(mod) )
+
+print( djon.save(mod,"djon") )

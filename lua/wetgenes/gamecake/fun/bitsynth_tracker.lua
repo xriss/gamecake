@@ -25,6 +25,8 @@ this not just throw in an old mod.
 local wpack=require("wetgenes.pack") -- slower struct style access
 local fats=require("wetgenes.fats") -- faster for large arrays of bytes / floats etc
 
+local DUMP=require("wetgenes.logs"):export("dump")
+
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local bitsynth_tracker=M
@@ -182,13 +184,13 @@ bitsynth_tracker.format_sample_11={
 bitsynth_tracker.format_sample_2E={
 	"u8",	"u8_cvt",
 	"u8",	"dfp",
-	"u32",	"length",
+	"u32",	"data_size",
 	"u32",	"loop_begin",
 	"u32",	"loop_end",
 	"u32",	"c5speed",
 	"u32",	"susloop_begin",
 	"u32",	"susloop_end",
-	"u32",	"pointer",
+	"u32",	"data_addr",
 	"u8",	"vis",
 	"u8",	"vid",
 	"u8",	"vir",
@@ -229,7 +231,7 @@ local pad_cstring=function(str,size)
 	if #str > size-1 then
 		str=str:sub(1,size-1)
 	end
-	return str + string.rep("\0",size-#str)
+	return str .. string.rep("\0",size-#str)
 end
 
 -- table of true/false for bits 0-7 in the given unsigned byte number 0-255
@@ -242,7 +244,7 @@ local extract_bits=function(num,bitcount)
 	end
 	return bits
 end
-local insert_bits=function(bits)
+local compact_bits=function(bits)
 	local num=0
 	for i=1,#bits do
 		if bits[i] then
@@ -293,6 +295,7 @@ bitsynth_tracker.IT_to_mod=function(data)
 		local dat=data:sub( mod.instruments_offsets[idx]+1 , mod.instruments_offsets[idx]+1024 )
 		
 		instrument.magick=dat:sub(1,4)
+print(idx,instrument.magick)
 		assert( instrument.magick == "IMPI" )
 		instrument.filename=extract_cstring(dat,5,17)
 		
@@ -354,7 +357,7 @@ bitsynth_tracker.IT_to_mod=function(data)
 			local maxs=0
 			local adds=0
 			if sample.flg[2] then -- 16 bit
-				sample.data=fats.int16s_to_table( data:sub( sample.pointer+1 , sample.pointer+(sample.length*2) ) )
+				sample.data=fats.int16s_to_table( data:sub( sample.data_addr+1 , sample.data_addr+(sample.data_size*2) ) )
 				maxs=0x8000
 				if sample.cvt[1] then -- signed
 					adds=0
@@ -362,7 +365,7 @@ bitsynth_tracker.IT_to_mod=function(data)
 					adds=-0x8000
 				end
 			else
-				sample.data=fats.int8s_to_table( data:sub( sample.pointer+1 , sample.pointer+(sample.length*1) ) )
+				sample.data=fats.int8s_to_table( data:sub( sample.data_addr+1 , sample.data_addr+(sample.data_size*1) ) )
 				maxs=0x80
 				if sample.cvt[1] then -- signed
 					adds=0
@@ -444,15 +447,27 @@ bitsynth_tracker.mod_to_IT=function(mod)
 
 	local alloc_addr=0
 	local alloc=function(size)
-		local ret=alloc_addr		
-		size=math.ceil(size/16)*16 -- round up length to 16 bytes
+		local r=alloc_addr%16
+		if r~=0 then
+			alloc_addr=alloc_addr+16-r -- round up to 16 bytes
+		end
+		local ret=alloc_addr
 		alloc_addr=alloc_addr+size
 		return ret
 	end
 
+	local write_addr=0
 	local write_datas={}
 	local write=function(data)
+		write_addr=write_addr+#data
 		write_datas[#write_datas+1]=data
+	end
+	local write_align=function(align)
+		if not align then align=16 end
+		local n=align-((write_addr)%align)
+		if n==align then return end -- already aligned
+		write_addr=write_addr+n
+		write_datas[#write_datas+1]=string.rep("\0",n)
 	end
 
 -- first we need to pre calculate values, mostly the position in the output file of each structure
@@ -465,19 +480,19 @@ bitsynth_tracker.mod_to_IT=function(mod)
 	mod.head.size = 192+mod.head.ordnum+(mod.head.insnum*4)+(mod.head.smpnum*4)+(mod.head.patnum*4)
 	mod.head.addr = alloc( mod.head.size ) -- should always be 0 as it is the first allocation
 	
-	mod.head.u16_flags    = insert_bits( mod.head.flags )
-	mod.head.u16_special  = insert_bits( mod.head.special )
+	mod.head.u16_flags    = compact_bits( mod.head.flags )
+	mod.head.u16_special  = compact_bits( mod.head.special )
 	
 	for i,instrument in ipairs( mod.instruments ) do
 		instrument.size = 0x226
 		instrument.addr = alloc( instrument.size )
 
-		instrument.u8_nna=insert_bits( instrument.nna )
-		instrument.u8_dct=insert_bits( instrument.dct )
-		instrument.u8_dca=insert_bits( instrument.dca )
+		instrument.u8_nna=compact_bits( instrument.nna )
+		instrument.u8_dct=compact_bits( instrument.dct )
+		instrument.u8_dca=compact_bits( instrument.dca )
 
 		local prepare_envelope=function(envelope)
-			envelope.u8_flg=insert_bits( envelope.flg )
+			envelope.u8_flg=compact_bits( envelope.flg )
 		end
 		
 		prepare_envelope( instrument.envelope_volume )
@@ -487,20 +502,22 @@ bitsynth_tracker.mod_to_IT=function(mod)
 	end
 
 	for i,sample in ipairs( mod.samples ) do
-		sample.size = 0x60
+		sample.size = 0x50
 		sample.addr = alloc( sample.size )
 
-		sample.data_size = 2*#sample.data
-		sample.data_addr = alloc( sample.data_size )
-
-		sample.u8_flg = insert_bits( sample.flg )
-		sample.u8_cvt = insert_bits( sample.cvt )
-		sample.u8_vit = insert_bits( sample.vit )
+		sample.u8_flg = compact_bits( sample.flg )
+		sample.u8_cvt = compact_bits( sample.cvt )
+		sample.u8_vit = compact_bits( sample.vit )
 	end
 
 	for i,pattern in ipairs( mod.patterns ) do -- just an empty pattern for now
 		pattern.size = 8 + 32
 		pattern.addr = alloc( pattern.size )
+	end
+
+	for i,sample in ipairs( mod.samples ) do -- put sample data last
+		sample.data_size = #sample.data
+		sample.data_addr = alloc( sample.data_size*2 )
 	end
 
 -- then we create a data string of all the data combined
@@ -522,7 +539,9 @@ bitsynth_tracker.mod_to_IT=function(mod)
 		write( fats.table_to_uint32s( {pattern.addr} ) )
 	end
 
+
 	for i,instrument in ipairs( mod.instruments ) do
+		write_align()
 		write("IMPI")
 		write( pad_cstring( instrument.filename , 13 ) )
 		write( wpack.save( instrument , bitsynth_tracker.format_instrument_11 ) )
@@ -534,23 +553,49 @@ bitsynth_tracker.mod_to_IT=function(mod)
 			write( wpack.save(  envelope , bitsynth_tracker.format_envelope_00 ) )
 			for i=1,25 do
 				local node=envelope.nodes[i]
-				if not node then node={0,0}
-				write( fats.table_to_uint8s( { node[1] } )
-				write( fats.table_to_uint16s( { node[2] } )
+				if not node then node={0,0} end -- pad empty nodes
+				write( fats.table_to_uint8s( { node[1] } ) )
+				write( fats.table_to_uint16s( { node[2] } ) )
 			end
 		end
 		
 		write_envelope( instrument.envelope_volume )
 		write_envelope( instrument.envelope_panning )
 		write_envelope( instrument.envelope_pitch )
+
 	end
 
 	for i,sample in ipairs( mod.samples ) do
+		write_align()
+		write("IMPS")
+		write( pad_cstring( sample.filename , 13 ) )
+		write( wpack.save( sample , bitsynth_tracker.format_sample_11 ) )
+		write( pad_cstring( sample.name , 26 ) )
+		write( wpack.save( sample , bitsynth_tracker.format_sample_2E ) )
 	end
 
 	for i,pattern in ipairs( mod.patterns ) do
+		write_align()
+		-- shortest valid pattern
+		write( fats.table_to_uint16s( { 32,32 } ) )
+		-- padding
+		write( fats.table_to_uint8s( { 0,0,0,0 } ) )
+		-- blank pattern
+		write( fats.table_to_uint8s( { 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0 , 0,0,0,0,0,0,0,0 } ) )
 	end
 
+	for i,sample in ipairs( mod.samples ) do
+		write_align()
+		local d={}
+		for i,f in ipairs(sample.data) do
+			local n=math.floor(f*0x7fff)
+			if n<-0x7fff then n=-0x7fff end
+			if n> 0x7fff then n= 0x7fff end
+			d[i]=n
+		end
+		write( fats.table_to_int16s( d ) )
+	end
 
+	write_align()
 	return table.concat( write_datas )
 end
