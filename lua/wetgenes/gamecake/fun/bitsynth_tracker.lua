@@ -64,7 +64,9 @@ xxxx: │ 'Long' Offset of patterns, Length = PatNum*4 (3)              │
 
 ]]    
   
-bitsynth_tracker.format_module_1E={
+bitsynth_tracker.format_module={
+	4,		"magick",
+	26,		"u8s_name",
 	"u16",	"philigt",
 	"u16",	"ordnum",
 	"u16",	"insnum",
@@ -83,6 +85,8 @@ bitsynth_tracker.format_module_1E={
 	"u16",	"message_length",
 	"u32",	"message_offset",
 	"u32",	"reserved",
+	64,		"u8s_chanel_pan",
+	64,		"u8s_chanel_vol",
 }
 
 --[[
@@ -107,7 +111,9 @@ bitsynth_tracker.format_module_1E={
 
 ]]
 
-bitsynth_tracker.format_instrument_11={
+bitsynth_tracker.format_instrument={
+	4,		"magick",
+	13,		"u8s_filename",
 	"u8",	"u8_nna",
 	"u8",	"u8_dct",
 	"u8",	"u8_dca",
@@ -121,14 +127,16 @@ bitsynth_tracker.format_instrument_11={
 	"u16",	"trkvers",
 	"u8",	"nos",
 	"u8",	"x",
-}
-
-bitsynth_tracker.format_instrument_3A={
+	26,		"u8s_name",
 	"u8",	"ifc",
 	"u8",	"ifr",
 	"u8",	"mch",
 	"u8",	"mpr",
 	"u16",	"midibnk",
+	240,	"u8s_keyboard",
+	0x52,	"u8s_envelope_volume",
+	0x52,	"u8s_envelope_panning",
+	0x52,	"u8s_envelope_pitch",
 }
 
 --[[
@@ -141,13 +149,14 @@ xxxx: │Flg│Num│LpB│LpE│SLB│SLE│ Node points, 25 sets, 75 bytes....
 
 ]]
 
-bitsynth_tracker.format_envelope_00={
+bitsynth_tracker.format_envelope={
 	"u8",	"u8_flg",
 	"u8",	"num",
 	"u8",	"lpb",
 	"u8",	"lpe",
 	"u8",	"slb",
 	"u8",	"sle",
+	75,		"u8s_points",
 }
 
 --[[
@@ -175,13 +184,13 @@ The cache file has the following pieces of information added on:
 
 ]]
 
-bitsynth_tracker.format_sample_11={
+bitsynth_tracker.format_sample={
+	4,		"magick",
+	13,		"u8s_filename",
 	"u8",	"gvl",
 	"u8",	"u8_flg",
 	"u8",	"vol",
-}
-
-bitsynth_tracker.format_sample_2E={
+	26,		"u8s_name",
 	"u8",	"u8_cvt",
 	"u8",	"dfp",
 	"u32",	"data_size",
@@ -207,12 +216,24 @@ bitsynth_tracker.format_sample_2E={
 
 ]]
 
-bitsynth_tracker.format_pattern_00={
+bitsynth_tracker.format_pattern={
 	"u16",	"length",
 	"u16",	"rows",
+	4,		"pad",
 }
 
+local clean_format=function(tab,format)
 
+	for i=1,#format,2 do
+		local name=format[i+1]
+		for _,n in ipairs({ "u8s_", "u8_", "u16_", "u32_", }) do
+			if name:sub(1,#n)==n then -- binary prefix
+				tab[name]=nil
+			end
+		end
+	end
+
+end
 
 -- honor null terminated string in data
 local extract_cstring=function(data,start,maxlength)
@@ -259,21 +280,26 @@ bitsynth_tracker.IT_to_mod=function(data)
 	local mod={}
 	mod.head={}
 	
-	mod.head.magick=data:sub(1,4)
+	wpack.load( data , bitsynth_tracker.format_module , 0 , mod.head )
+
 	assert( mod.head.magick == "IMPM" )
 
-	mod.head.name=extract_cstring(data,5,26)
-
-	wpack.load( data , bitsynth_tracker.format_module_1E , 0x1e , mod.head )
-
+	mod.head.name=extract_cstring(mod.head.u8s_name)
 	mod.head.flags    = extract_bits( mod.head.u16_flags , 16 )
 	mod.head.special  = extract_bits( mod.head.u16_special , 16 )
+	mod.head.chanel_pan=fats.uint8s_to_table( mod.head.u8s_chanel_pan )
+	mod.head.chanel_vol=fats.uint8s_to_table( mod.head.u8s_chanel_vol )
 
 	mod.head.message=extract_cstring( data , mod.head.message_offset+1 , mod.head.message_length )
-
-	mod.chanel_pan=fats.uint8s_to_table( data:sub(65,128) )
-
-	mod.chanel_vol=fats.uint8s_to_table( data:sub(129,192) )
+	if mod.head.message:find("\r") then -- fix windows \r to \n
+		if mod.head.message:find("\n") then
+			mod.head.message=mod.head.message:gsub("\r","")
+		else
+			mod.head.message=mod.head.message:gsub("\r","\n")
+		end
+	end
+	
+	clean_format( mod.head , bitsynth_tracker.format_module )
 
 	local loc={
 		192,
@@ -283,7 +309,6 @@ bitsynth_tracker.IT_to_mod=function(data)
 		192+mod.head.ordnum+(mod.head.insnum*4)+(mod.head.smpnum*4)+(mod.head.patnum*4),
 	}
 	mod.orders              = fats.uint8s_to_table(  data:sub(loc[1]+1,loc[2]) )
-
 	mod.instruments_offsets = fats.uint32s_to_table( data:sub(loc[2]+1,loc[3]) )
 	mod.samples_offsets     = fats.uint32s_to_table( data:sub(loc[3]+1,loc[4]) )
 	mod.patterns_offsets    = fats.uint32s_to_table( data:sub(loc[4]+1,loc[5]) )
@@ -292,29 +317,23 @@ bitsynth_tracker.IT_to_mod=function(data)
 	for idx=1,mod.head.insnum do
 		local instrument={}
 		mod.instruments[idx]=instrument
-		local dat=data:sub( mod.instruments_offsets[idx]+1 , mod.instruments_offsets[idx]+1024 )
-		
-		instrument.magick=dat:sub(1,4)
-print(idx,instrument.magick)
-		assert( instrument.magick == "IMPI" )
-		instrument.filename=extract_cstring(dat,5,17)
-		
-		wpack.load( dat , bitsynth_tracker.format_instrument_11 , 0x11 , instrument )
+		wpack.load( data , bitsynth_tracker.format_instrument , mod.instruments_offsets[idx] , instrument )
 
+		assert( instrument.magick == "IMPI" )
+		
+		instrument.filename=extract_cstring(instrument.u8s_filename)
 		instrument.nna=extract_bits( instrument.u8_nna , 8 )
 		instrument.dct=extract_bits( instrument.u8_dct , 8 )
 		instrument.dca=extract_bits( instrument.u8_dca , 8 )
-
-		instrument.name=extract_cstring(dat,33,58)
+		instrument.name=extract_cstring(instrument.u8s_name)
+		instrument.keyboard=fats.uint8s_to_table( instrument.u8s_keyboard )
 		
-		instrument.keyboard=fats.uint8s_to_table( dat:sub(64+1,64+240) )
-		
-		local parse_envelope=function(data,start)
-			local t=fats.uint8s_to_table( data:sub(start+1,start+0x52) )
+		local parse_envelope=function(data)
+			local t=fats.uint8s_to_table( data )
 
 			envelope={}
 
-			wpack.load(  data , bitsynth_tracker.format_envelope_00, start , envelope )
+			wpack.load(  data , bitsynth_tracker.format_envelope, 0 , envelope )
 			envelope.flg=extract_bits( envelope.u8_flg , 8 )
 			
 			envelope.nodes={}
@@ -322,14 +341,16 @@ print(idx,instrument.magick)
 			for i=1,envelope.num do
 				envelope.nodes[i]={ t[ 7+((i-1)*3)+1 ] , t[ 7+((i-1)*3)+2 ] + t[ 7+((i-1)*3)+3 ]*256 }
 			end
-
+			
+			clean_format( envelope , bitsynth_tracker.format_envelope )
 			return envelope
 		end
 
-		instrument.envelope_volume  = parse_envelope( data , 0x130 ) -- fats.uint8s_to_table( data:sub(0x130+1,0x130+0x52) ) )
-		instrument.envelope_panning = parse_envelope( data , 0x182 ) --  fats.uint8s_to_table( data:sub(0x182+1,0x182+0x52) ) )
-		instrument.envelope_pitch   = parse_envelope( data , 0x1d4 ) --  fats.uint8s_to_table( data:sub(0x1d4+1,0x1d4+0x52) ) )
-                   
+		instrument.envelope_volume  = parse_envelope( instrument.u8s_envelope_volume  ) -- fats.uint8s_to_table( data:sub(0x130+1,0x130+0x52) ) )
+		instrument.envelope_panning = parse_envelope( instrument.u8s_envelope_panning ) -- fats.uint8s_to_table( data:sub(0x182+1,0x182+0x52) ) )
+		instrument.envelope_pitch   = parse_envelope( instrument.u8s_envelope_pitch   ) -- fats.uint8s_to_table( data:sub(0x1d4+1,0x1d4+0x52) ) )
+
+		clean_format( instrument , bitsynth_tracker.format_instrument )
 	end
 	mod.instruments_offsets=nil
 	
@@ -337,21 +358,18 @@ print(idx,instrument.magick)
 	for idx=1,mod.head.smpnum do
 		local sample={}
 		mod.samples[idx]=sample
-		local dat=data:sub( mod.samples_offsets[idx]+1 , mod.samples_offsets[idx]+1024 )
-		
-		sample.magick=dat:sub(1,4)
-		assert( sample.magick == "IMPS" )
-		sample.filename=extract_cstring(dat,5,17)
 
-		wpack.load( dat , bitsynth_tracker.format_sample_11, 0x11 , sample )
-		wpack.load( dat , bitsynth_tracker.format_sample_2E, 0x2e , sample )
+		wpack.load( data , bitsynth_tracker.format_sample , mod.samples_offsets[idx] , sample )
+		
+		assert( sample.magick == "IMPS" )
+
+		sample.filename=extract_cstring(sample.u8s_filename)
 
 		sample.flg = extract_bits( sample.u8_flg , 8 )
 		sample.cvt = extract_bits( sample.u8_cvt , 8 )
 		sample.vit = extract_bits( sample.u8_vit , 8 )
 
-		sample.name=extract_cstring(dat,20+1,20+26)
-
+		sample.name=extract_cstring(sample.u8s_name)
 		
 		if sample.flg[1] then -- got a sample
 			local maxs=0
@@ -378,7 +396,8 @@ print(idx,instrument.magick)
 				sample.data[i]=(v+adds)/maxs -- fix signed and normalize 
 			end
 		end
-		
+
+		clean_format( sample , bitsynth_tracker.format_sample )
 	end
 	mod.samples_offsets=nil
 
@@ -472,6 +491,8 @@ bitsynth_tracker.mod_to_IT=function(mod)
 
 -- first we need to pre calculate values, mostly the position in the output file of each structure
 
+	mod.head.magick = "IMPM"
+
 	mod.head.ordnum = #mod.orders
 	mod.head.insnum = #mod.instruments
 	mod.head.smpnum = #mod.samples
@@ -482,17 +503,35 @@ bitsynth_tracker.mod_to_IT=function(mod)
 	
 	mod.head.u16_flags    = compact_bits( mod.head.flags )
 	mod.head.u16_special  = compact_bits( mod.head.special )
+
+	mod.head.u8s_name = pad_cstring( mod.head.name , 26 )
+	mod.head.chanel_u8s_pan = fats.table_to_uint8s( mod.head.chanel_pan )
+	mod.head.chanel_u8s_vol = fats.table_to_uint8s( mod.head.chanel_vol )
 	
 	for i,instrument in ipairs( mod.instruments ) do
 		instrument.size = 0x226
 		instrument.addr = alloc( instrument.size )
 
+		instrument.magick = "IMPI"
+
 		instrument.u8_nna=compact_bits( instrument.nna )
 		instrument.u8_dct=compact_bits( instrument.dct )
 		instrument.u8_dca=compact_bits( instrument.dca )
 
+		instrument.u8s_filename = pad_cstring( instrument.filename , 13 )
+		instrument.u8s_name = pad_cstring( instrument.name , 26 )
+		instrument.u8s_keyboard = fats.table_to_uint8s( instrument.keyboard )
+
 		local prepare_envelope=function(envelope)
 			envelope.u8_flg=compact_bits( envelope.flg )
+			envelope.u8s_points={}
+			for i=1,25 do
+				local node=envelope.nodes[i]
+				if not node then node={0,0} end -- pad empty nodes
+				envelope.u8s_points[#envelope.u8s_points+1]= fats.table_to_uint8s( { node[1] } )
+				envelope.u8s_points[#envelope.u8s_points+1]= fats.table_to_uint16s( { node[2] } )
+			end
+			envelope.u8s_points=table.concat(envelope.u8s_points)
 		end
 		
 		prepare_envelope( instrument.envelope_volume )
@@ -505,9 +544,14 @@ bitsynth_tracker.mod_to_IT=function(mod)
 		sample.size = 0x50
 		sample.addr = alloc( sample.size )
 
+		sample.magick = "IMPS"
+
 		sample.u8_flg = compact_bits( sample.flg )
 		sample.u8_cvt = compact_bits( sample.cvt )
 		sample.u8_vit = compact_bits( sample.vit )
+
+		sample.u8s_filename = pad_cstring( sample.filename , 13 )
+		sample.u8s_name = pad_cstring( sample.name , 26 )
 	end
 
 	for i,pattern in ipairs( mod.patterns ) do -- just an empty pattern for now
@@ -522,11 +566,8 @@ bitsynth_tracker.mod_to_IT=function(mod)
 
 -- then we create a data string of all the data combined
 
-	write("IMPM")
-	write( pad_cstring( mod.head.name , 26 ) )
-	write( wpack.save( mod.head , bitsynth_tracker.format_module_1E ) )
-	write( fats.table_to_uint8s( mod.chanel_pan ) )
-	write( fats.table_to_uint8s( mod.chanel_vol ) )
+	write( wpack.save( mod.head , bitsynth_tracker.format_module ) )
+	clean_format( mod.head , bitsynth_tracker.format_module )
 
 	write( fats.table_to_uint8s( mod.orders ) )
 	for i,instrument in ipairs( mod.instruments ) do
@@ -542,36 +583,14 @@ bitsynth_tracker.mod_to_IT=function(mod)
 
 	for i,instrument in ipairs( mod.instruments ) do
 		write_align()
-		write("IMPI")
-		write( pad_cstring( instrument.filename , 13 ) )
-		write( wpack.save( instrument , bitsynth_tracker.format_instrument_11 ) )
-		write( pad_cstring( instrument.name , 26 ) )
-		write( wpack.save( instrument , bitsynth_tracker.format_instrument_3A ) )
-		write( fats.table_to_uint8s( instrument.keyboard ) )
-		
-		local write_envelope=function( envelope )
-			write( wpack.save(  envelope , bitsynth_tracker.format_envelope_00 ) )
-			for i=1,25 do
-				local node=envelope.nodes[i]
-				if not node then node={0,0} end -- pad empty nodes
-				write( fats.table_to_uint8s( { node[1] } ) )
-				write( fats.table_to_uint16s( { node[2] } ) )
-			end
-		end
-		
-		write_envelope( instrument.envelope_volume )
-		write_envelope( instrument.envelope_panning )
-		write_envelope( instrument.envelope_pitch )
-
+		write( wpack.save( instrument , bitsynth_tracker.format_instrument ) )		
+		clean_format( instrument , bitsynth_tracker.format_instrument )
 	end
 
 	for i,sample in ipairs( mod.samples ) do
 		write_align()
-		write("IMPS")
-		write( pad_cstring( sample.filename , 13 ) )
-		write( wpack.save( sample , bitsynth_tracker.format_sample_11 ) )
-		write( pad_cstring( sample.name , 26 ) )
-		write( wpack.save( sample , bitsynth_tracker.format_sample_2E ) )
+		write( wpack.save( sample , bitsynth_tracker.format_sample ) )
+		clean_format( sample , bitsynth_tracker.format_sample )
 	end
 
 	for i,pattern in ipairs( mod.patterns ) do
