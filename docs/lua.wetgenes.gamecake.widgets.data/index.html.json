@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 668,
+   "count": 670,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 657,
+   "count": 659,
    "name": "lua.wetgenes"
   },
   {
@@ -634,7 +634,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 170,
+   "count": 172,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -934,7 +934,7 @@
    "name": "lua.wetgenes.gamecake.toaster.newticks"
   },
   {
-   "count": 59,
+   "count": 61,
    "name": "lua.wetgenes.gamecake.widgets"
   },
   {
@@ -978,7 +978,7 @@
    "name": "lua.wetgenes.gamecake.widgets.checkbox.update"
   },
   {
-   "count": 17,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.widgets.data"
   },
   {
@@ -1036,6 +1036,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.widgets.data.data_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_wrap_dec"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_wrap_inc"
   },
   {
    "count": 1,
@@ -2868,7 +2876,7 @@
  "_list": [
   {
    "body": "<pre><code>local master=oven.rebake(&quot;wetgenes.gamecake.widgets&quot;).setup()\nlocal data=master.new_data{}\n</code></pre>\n<p>A number or string that can be shared between multiple widgets given \nbasic limits and watched for changes.</p>\n<p>This allows the same data to be linked and displayed in multiple widgets \nsimultaneously.</p>\n",
-   "count": 17,
+   "count": 19,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
    "line": 7,
    "name": "lua.wetgenes.gamecake.widgets.data",
@@ -2910,7 +2918,7 @@
    "body": "<p>get display pos, given the size of the parent and our size?</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
-   "line": 231,
+   "line": 258,
    "name": "lua.wetgenes.gamecake.widgets.data.data_get_pos",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   },
@@ -2918,7 +2926,7 @@
    "body": "<p>how wide or tall should the handle be given the size of the parent?</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
-   "line": 211,
+   "line": 238,
    "name": "lua.wetgenes.gamecake.widgets.data.data_get_size",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   },
@@ -2934,7 +2942,7 @@
    "body": "<p>set a number value and min/max range probably without any triggers</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
-   "line": 161,
+   "line": 188,
    "name": "lua.wetgenes.gamecake.widgets.data.data_set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   },
@@ -2942,7 +2950,7 @@
    "body": "<p>given the parents size and our relative position/size within it update \ndat.num and return a new position (for snapping)</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
-   "line": 252,
+   "line": 279,
    "name": "lua.wetgenes.gamecake.widgets.data.data_snap",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   },
@@ -2950,7 +2958,7 @@
    "body": "<p>get a number from the string</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
-   "line": 192,
+   "line": 219,
    "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   },
@@ -2958,7 +2966,7 @@
    "body": "",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
-   "line": 200,
+   "line": 227,
    "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber_from_list",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   },
@@ -2966,7 +2974,7 @@
    "body": "<p>get a string from the number</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
-   "line": 176,
+   "line": 203,
    "name": "lua.wetgenes.gamecake.widgets.data.data_tostring",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   },
@@ -2974,7 +2982,7 @@
    "body": "",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
-   "line": 184,
+   "line": 211,
    "name": "lua.wetgenes.gamecake.widgets.data.data_tostring_from_list",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   },
@@ -2984,6 +2992,22 @@
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
    "line": 86,
    "name": "lua.wetgenes.gamecake.widgets.data.data_value",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>like dec but we wrap around max value\nadjust number (may trigger hook)</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 174,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_wrap_dec",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
+  },
+  {
+   "body": "<p>like inc but we wrap around max value\nadjust number (may trigger hook) </p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/widgets/data.lua",
+   "line": 161,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_wrap_inc",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   },
   {
@@ -2998,7 +3022,7 @@
    "body": "",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
-   "line": 290,
+   "line": 317,
    "name": "lua.wetgenes.gamecake.widgets.data.new_data",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   }

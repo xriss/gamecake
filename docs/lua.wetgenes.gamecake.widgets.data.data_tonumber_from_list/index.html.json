@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 668,
+   "count": 670,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 657,
+   "count": 659,
    "name": "lua.wetgenes"
   },
   {
@@ -634,7 +634,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 170,
+   "count": 172,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -934,7 +934,7 @@
    "name": "lua.wetgenes.gamecake.toaster.newticks"
   },
   {
-   "count": 59,
+   "count": 61,
    "name": "lua.wetgenes.gamecake.widgets"
   },
   {
@@ -978,7 +978,7 @@
    "name": "lua.wetgenes.gamecake.widgets.checkbox.update"
   },
   {
-   "count": 17,
+   "count": 19,
    "name": "lua.wetgenes.gamecake.widgets.data"
   },
   {
@@ -1036,6 +1036,14 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.widgets.data.data_value"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_wrap_dec"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.widgets.data.data_wrap_inc"
   },
   {
    "count": 1,
@@ -2870,7 +2878,7 @@
    "body": "",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/widgets/data.lua",
-   "line": 200,
+   "line": 227,
    "name": "lua.wetgenes.gamecake.widgets.data.data_tonumber_from_list",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/widgets/data.lua"
   }
