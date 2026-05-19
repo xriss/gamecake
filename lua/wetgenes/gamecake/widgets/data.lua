@@ -158,6 +158,33 @@ wdata.data_dec=function(dat,step,nohook)
 	return dat:value(dat.num-step,nohook)
 end
 
+--[[#lua.wetgenes.gamecake.widgets.data.data_wrap_inc
+
+like inc but we wrap around max value
+adjust number (may trigger hook) 
+
+]]
+wdata.data_wrap_inc=function(dat,step,nohook)
+	step=step or dat.scroll or dat.step
+	if step==0 then step=1 end
+	local n=dat.num+step
+	if n>dat.max then n=n-dat.max end -- wrap
+	return dat:value(n,nohook)
+end
+--[[#lua.wetgenes.gamecake.widgets.data.data_wrap_dec
+
+like dec but we wrap around max value
+adjust number (may trigger hook)
+
+]]
+wdata.data_wrap_dec=function(dat,step,nohook)
+	step=step or dat.scroll or dat.step
+	if step==0 then step=1 end
+	local n=dat.num-step
+	if n<1 then n=n+dat.max end -- wrap
+	return dat:value(n,nohook)
+end
+
 --[[#lua.wetgenes.gamecake.widgets.data.data_set
 
 set a number value and min/max range probably without any triggers
@@ -335,6 +362,8 @@ function wdata.new_data(dat)
 	dat.value=wdata.data_value
 	dat.inc=wdata.data_inc
 	dat.dec=wdata.data_dec
+	dat.wrap_inc=wdata.data_wrap_inc
+	dat.wrap_dec=wdata.data_wrap_dec
 	dat.set=wdata.data_set
 
 -- work out snapping for scroll bars	

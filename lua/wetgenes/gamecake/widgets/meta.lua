@@ -70,6 +70,7 @@ wmeta.classes={
 	["textmap"]=oven.rebake("wetgenes.gamecake.widgets.textmap"),
 
 	["menudrop"]=oven.rebake("wetgenes.gamecake.widgets.menudrop"),
+	["menutoggle"]=oven.rebake("wetgenes.gamecake.widgets.menutoggle"),
 
 	["file"]=oven.rebake("wetgenes.gamecake.widgets.file"),
 	["texteditor"]=oven.rebake("wetgenes.gamecake.widgets.texteditor"),

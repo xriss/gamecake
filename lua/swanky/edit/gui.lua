@@ -736,9 +736,9 @@ local lay=
 --					style="flat",highlight="none",color=0,
 					class="split",split_axis="x",split_order=1,hy=gsiz,
 					{
-						class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
+						class="menutoggle",hx=gsiz*3,hy=gsiz,color=0,
 						data="list_top",
---										menu_px=0,menu_py=-1.9, -- menu position hacks
+						menu_px=0,menu_py=0.9, -- menu position hacks
 					},
 					{
 						id="tree_filter_text",hooks=gui.hooks,
@@ -885,7 +885,7 @@ local lay=
 						style="flat",highlight="none",color=0,
 						fbo=true,
 						{
-							class="menudrop",hx=gsiz*3,hy=gsiz,color=0,
+							class="menutoggle",hx=gsiz*3,hy=gsiz,color=0,
 							data="list_mode",
 							menu_px=0,menu_py=-1.9, -- menu position hacks
 						},
