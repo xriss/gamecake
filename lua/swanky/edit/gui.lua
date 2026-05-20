@@ -766,7 +766,7 @@ local lay=
 								{
 									id="console",hidden=true,
 									class="texteditor",size="full",style="flat",color=0,
-									opts={console=true,gutter_disable=true,word_wrap=true},
+									opts={console=true,gutter_disable=true,word_wrap=false},
 									--fbo=true, --  scale using fbo so it is smoothed
 									console_command=gui.console_command,
 								},

@@ -150,17 +150,19 @@ M.bake=function(oven,collect)
 		path="/../readme/",
 		dir={}
 	})
+--[[
 	collect.mounts_find=wgw_mounts.find.setup({
 		collect=collect, -- back link to this state data
 		name="find/",
 		path="/../find/",
 		dir={}
 	})
+]]
 	collect.mounts_meta=wgw_mounts.meta.setup({
 		collect=collect, -- back link to this state data
 		name="../",
 		path="/../",
-		mounts={ collect.mounts_config , collect.mounts_gist , collect.mounts_readme , collect.mounts_find },
+		mounts={ collect.mounts_config , collect.mounts_gist , collect.mounts_readme },
 		dir={},
 		keep=true,
 	})

@@ -142,11 +142,13 @@ print("cancel all")
 		end
 		finds.set_progress()
 		-- remove all expanded finds
+--[[
 		local mf=collect.mounts:find_path("/../find/")
 		mf.dir={} -- empty
 		if mf.expanded then
 			mf:toggle_dir() -- force it closed
 		end
+]]
 		
 		gui.refresh_tree()
 	end
@@ -202,7 +204,10 @@ print("MATCH",find.dir,find.pattern)
 
 	end
 	find.scan_task=function(find)
-		
+
+		local prefix=wpath.resolve(find.dir)
+print( "searching : ".. prefix )
+
 --		local base_item=find:get_item()
 --		if not base_item then return end -- must exist
 
@@ -240,7 +245,9 @@ print("MATCH",find.dir,find.pattern)
 
 		local count=0
 		for file,_ in pairs(files) do count=count+1 end
---print( count )
+
+print( "searching ".. count .." files.")
+
 		local idx=0
 		for file,_ in pairs(files) do
 			yield_maybe(find)
@@ -261,6 +268,7 @@ print("MATCH",find.dir,find.pattern)
 				end
 				if cnt>0 then
 					find.filenames[file]=cnt
+print(file,cnt)
 				end
 			end)
 			if not ok then print(file,err) end
@@ -271,7 +279,6 @@ print("MATCH",find.dir,find.pattern)
 
 			collectgarbage("step")
 		end
-		
 		find.filetree=map_to_tree(find.filenames)
 --		DUMP( find.filetree )
 		
@@ -282,6 +289,7 @@ print("MATCH",find.dir,find.pattern)
 		end
 		print("found "..cnt.."/"..count)
 
+--[[		
 -- update tree
 		local mf=collect.mounts:find_path("/../find/")
 		if not mf.expanded then -- should be close
@@ -293,6 +301,7 @@ print("MATCH",find.dir,find.pattern)
 			end
 		end
 		gui.refresh_tree()
+]]
 
 	end
 
