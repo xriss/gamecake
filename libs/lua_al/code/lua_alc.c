@@ -1,4 +1,6 @@
 
+#include <stdlib.h>
+
 #include "lua.h"
 #include "lauxlib.h"
 
@@ -267,27 +269,41 @@ static int lua_alc_CaptureSamples (lua_State *l)
 ALCdevice *device;
 
 const u8 *ptr=0;
-size_t len;
+size_t len=0;
+size_t lenmax=0;
+
+const u8 *tmp=0;
 
 	device = lua_alc_check_capture_device(l, 1 );
 	
 	if(lua_isuserdata(l,2)) // must check for light first...
 	{
-		ptr=lua_toluserdata(l,2,&len);
+		ptr=lua_toluserdata(l,2,&lenmax);
+		len=lua_tonumber(l,3);
+		if(len>lenmax) { len=lenmax; }
 	}
 
 	if( (ptr==0) || (len==0) )
 	{
 		len=lua_tonumber(l,3);
-		ptr=lua_newuserdata(l,len*2); // hack 16bit samples
+		tmp=malloc(len*2);
+		ptr=tmp;
 	}
-	else // valid inpu buffer to fill so we also return it
+
+	if(ptr)
+	{
+		alcCaptureSamples(device,(void*)ptr,len);
+	}
+
+	if(tmp) // return data string
+	{
+		lua_pushlstring(l,(char*)tmp,len*2);
+		free(tmp);
+	}
+	else // return userdata passed in
 	{
 		lua_pushvalue(l,2);
 	}
-
-	alcCaptureSamples(device,(void*)ptr,len/2);
-
 	return 1;
 }
 

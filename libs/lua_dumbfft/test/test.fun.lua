@@ -3,6 +3,7 @@
 local sample_rate=48000
 local buffer_size=sample_rate/8 -- bigger the buffer better the signal ( 8hz is midi 0 ish )
 
+-- here we choose the buckets we will fill up, specifically the midi notes 0-127
 local note_freq_octs={
 { [4]=261.63 },
 { [4]=277.18 },
@@ -31,7 +32,7 @@ for i,v in ipairs(note_freq_octs) do -- build other octaves
 	v[9]=v[4]*32
 end
 
-local midi_wavelen={} -- 0-127 but 
+local midi_wavelen={} -- 0-127
 for o=-1,9 do
 	for n=1,12 do -- build other octaves
 		local f=note_freq_octs[n][o]
@@ -40,18 +41,17 @@ for o=-1,9 do
 	end
 end
 
-for i=0,127 do
-	print( 1/midi_wavelen[i] , math.ceil(sample_rate*midi_wavelen[i]) )
-end
-
 -- the midi notes we plan to bucket
+-- could also be worth doing the half notes so we get 256 outputs
 local min_bucket=0
 local max_bucket=127
 
--- try multiple probe waves into the data
--- output buckets
+--
+-- Here begins the DumbFT code
+--
 
-
+-- output buckets, each one has its own circular buffer to maintain a running total
+-- this buffer size does not slow us down but does increase memory usage
 local new_bucket=function(midi,base_size)
 	local bucket={}
 	
@@ -71,7 +71,7 @@ local new_bucket=function(midi,base_size)
 -- keep bucket size to multiple of probe size.
 	bucket.size=math.floor(bucket.size/bucket.probe_size)*bucket.probe_size
 
--- probe must fit in the bucket ( eg low hz must increase bucket size )
+-- probe must fit in the bucket ( eg low hz will increase bucket size )
 	if bucket.size<bucket.probe_size then bucket.size=bucket.probe_size end
 
 	bucket.wave=function(t)
@@ -93,7 +93,7 @@ local new_bucket=function(midi,base_size)
 		bucket.ctotal=0
 	end
 	bucket.reset()
-	
+	-- push a new s16 sample into the bucket
 	bucket.push=function(num)
 		local sf=math.floor(num*bucket.probe_data[bucket.probe_idx])
 		local cf=math.floor(num*bucket.probe_data[ (bucket.probe_idx+bucket.probe_cos)%bucket.probe_size ])
@@ -109,6 +109,8 @@ local new_bucket=function(midi,base_size)
 
 		bucket.idx=(bucket.idx+1)%bucket.size -- advance idx along rotational buffer
 	end
+
+	-- get the current totals, can be called anytime
 	bucket.get=function()
 		local t=math.sqrt( (bucket.stotal*bucket.stotal) + (bucket.ctotal*bucket.ctotal) )
 		local n=t/(bucket.size*0x3fff) -- aim for 0-1 ish might go a bit over
@@ -129,34 +131,79 @@ local push_sample=function(num)
 	end
 end
 
-local print_buckets=function()
-	print("...")
-	local t={}
-	local tots=0
-	local best_num=0
-	local best_m=0
+local pull_buckets=function()
+	local bs={}
 	for m=min_bucket,max_bucket do
-		local num=buckets[m].get()*128
-		local fnum=math.floor(num)
-		local mnum=fnum
-		if mnum>128 then mnum=128 end
-		tots=tots+num
-		print(m,math.floor(1/midi_wavelen[m]),fnum,string.rep("#",mnum))
---		buckets[m].reset()
-		if num>best_num then
-			best_num=num
-			best_m=m
-		end
+		bs[m]=buckets[m].get()
 	end
-	print("...",math.floor(1/midi_wavelen[best_m]),tots)
+	return bs
+end
+--
+-- Here ends the DumbFT code
+--
+
+--
+-- This is fun64 code, you can copy paste it into https://xriss.github.io/fun64/pad/ to run it.
+--
+local fats=require("wetgenes.fats")
+
+oven.opts.fun="" -- back to menu on reset
+
+sysopts={
+	mode="swordstone", -- select a characters+sprites on a 256x128 screen using the swanky32 palette.
+	update=function() update() end, -- called repeatedly to update+draw
+	lox=256,loy=128, -- minimum size
+	hix=256,hiy=256, -- maximum size
+	autosize="lohi", -- flag that we want to auto resize
+}
+
+hardware,main=system.configurator(sysopts)
+
+local px,py=0,0
+local vx,vy=2,1
+local speed=0
+
+setup=function()
+	oven.cake.sounds.start_capture()
 end
 
-for m=6,127,16 do
-local f=sample_rate/buckets[m].probe_size
-for i=1,buffer_size do 
-	local w=math.sin( ( f*i/sample_rate )*math.pi*2 )
-	push_sample( math.floor(w*0x7fff) )
-end
-print_buckets()
+update=function()
 
+    if setup then setup() ; setup=nil end
+
+	local buff,len=oven.cake.sounds.get_capture()
+	local s16s
+	if buff then
+		s16s=fats.int16s_to_table(buff)
+	else
+		s16s={}
+	end
+	for i,v in ipairs(s16s) do
+		push_sample(v)
+	end
+	local bs=pull_buckets()
+
+
+    local cscreen=system.components.screen
+    local ctext=system.components.text
+    local bg=9
+    local fg=31 -- system.ticks%32 -- cycle the foreground color
+
+	ctext.text_clear(0x01000000*bg) -- clear text forcing a background color
+	
+	local tx=math.ceil(cscreen.hx/4)
+	local ty=math.ceil(cscreen.hy/8)
+
+	for m=min_bucket,max_bucket do
+		local n=bs[m]
+		n=math.floor(n*8)
+		local s=string.rep("*",n)
+		local x=0
+		local y=m
+		while y>=ty do
+			y=y-ty
+			x=x+8
+		end
+		ctext.text_print(s,x,y,fg,bg)
+	end
 end

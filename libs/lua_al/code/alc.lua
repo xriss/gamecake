@@ -3,6 +3,8 @@
 --
 local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
+local al=require("al")
+
 local alc={}
 
 local core=require("alc.core")
@@ -169,14 +171,20 @@ function alc.setup(opts)
 	dc.device=alc.OpenDevice()
 --print("AL","CreateContext")
 	dc.context=alc.CreateContext(dc.device)
+
+	dc.clean_capture=alc.clean_capture
+	dc.setup_capture=alc.setup_capture
 	dc.clean=alc.clean
+	dc.start_capture=alc.start_capture
+	dc.stop_capture=alc.stop_capture
+	dc.get_capture_length=alc.get_capture_length
+	dc.fill_capture_buff=alc.fill_capture_buff
+
 --print("AL","MakeContextCurrent")
 	alc.MakeContextCurrent(dc.context)
 	
 	if opts.capture then
---print("AL","CaptureOpenDevice")
---		dc.capture_device=alc.CaptureOpenDevice(nil,44100,alc.CAPTURE_SAMPLES,44100)
-		dc.capture_device=alc.CaptureOpenDevice(nil,48000,al.FORMAT_MONO16,32768)
+		alc.setup_captue(dc,opts)
 	end
 	
 --print("AL","setup done","freq",	alc.Get(dc.device,alc.FREQUENCY),
@@ -185,15 +193,44 @@ function alc.setup(opts)
 	return dc
 end
 
+-- might need to setup capture later
+function alc.setup_capture(dc,opts)
+	if not dc.capture_device then
+--print("AL","CaptureOpenDevice")
+--		dc.capture_device=alc.CaptureOpenDevice(nil,44100,alc.CAPTURE_SAMPLES,44100)
+		dc.capture_device=alc.CaptureOpenDevice(nil,48000,al.FORMAT_MONO16,48000)
+	end
+end
+
+function alc.clean_capture(dc)
+	if dc.capture_device then
+		alc.CaptureCloseDevice(dc.capture_device)
+		dc.capture_device=nil
+	end
+end
+
+function alc.start_capture(dc)
+	alc.CaptureStart(dc.capture_device)
+end
+function alc.stop_capture(dc)
+	alc.CaptureStop(dc.capture_device)
+end
+function alc.get_capture_length(dc)
+	local len=alc.Get(dc.capture_device,alc.CAPTURE_SAMPLES)
+	return len
+end
+function alc.fill_capture_buff(dc,buff,len)
+	buff=alc.CaptureSamples(dc.capture_device,buff,len)
+	return buff,len
+end
+
 function alc.clean(dc)
 -- cleanup must happen in this order
 	alc.MakeContextCurrent()
-	if dc.context then dc.context=alc.DestroyContext(dc.context) end
-	if dc.device then dc.device=alc.CloseDevice(dc.device) end
+	if dc.context then dc.context=alc.DestroyContext(dc.context) ; dc.context=nil end
+	if dc.device then dc.device=alc.CloseDevice(dc.device) ; dc.device=nil end
 	
-	if dc.capture_device then
-		alc.CaptureCloseDevice(dc.capture_device)
-	end
+	alc.clean_capture(dc)
 	
 	return dc
 end

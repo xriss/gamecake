@@ -295,6 +295,26 @@ sounds.loads=function(tab)
 
 end
 
+sounds.start_capture = function()
+	sounds.context:setup_capture()
+	sounds.context:start_capture()
+end
+
+-- returns a new buffer , number of samples in buffer
+-- returns nil,0 if no data available
+sounds.get_capture = function()
+	local len=alc.get_capture_length(sounds.context) -- number of samples available
+	local buff
+	if len>0 then
+		buff=alc.fill_capture_buff(sounds.context , nil , len)
+	end
+	return buff,len
+end
+
+sounds.stop_capture = function()
+	sounds.context:stop_capture()
+	sounds.context:clean_capture()
+end
 
 sounds.start = function()
 
