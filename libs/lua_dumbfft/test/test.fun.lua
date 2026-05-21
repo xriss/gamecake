@@ -1,7 +1,7 @@
 
 -- expect this many s16 audio samples per second
 local sample_rate=48000
-local buffer_size=sample_rate/8 -- bigger the buffer better the signal ( 8hz is midi 0 ish )
+local buffer_size=sample_rate/16 -- bigger the buffer steadier/lower the signal ( 8hz is midi 0 ish )
 
 -- here we choose the buckets we will fill up, specifically the midi notes 0-127
 local note_freq_octs={
@@ -152,7 +152,7 @@ oven.opts.fun="" -- back to menu on reset
 sysopts={
 	mode="swordstone", -- select a characters+sprites on a 256x128 screen using the swanky32 palette.
 	update=function() update() end, -- called repeatedly to update+draw
-	lox=256,loy=128, -- minimum size
+	lox=256,loy=192, -- minimum size
 	hix=256,hiy=256, -- maximum size
 	autosize="lohi", -- flag that we want to auto resize
 }
@@ -194,16 +194,18 @@ update=function()
 	local tx=math.ceil(cscreen.hx/4)
 	local ty=math.ceil(cscreen.hy/8)
 
-	for m=min_bucket,max_bucket do
+	for m=min_bucket+(12*0),max_bucket do
 		local n=bs[m]
-		n=math.floor(n*8)
+		n=math.ceil((n^1)*4*2^(m/24))
 		local s=string.rep("*",n)
 		local x=0
 		local y=m
-		while y>=ty do
-			y=y-ty
-			x=x+8
+		fg=24
+		while y>=12 do
+			y=y-12
+			x=x+6
+			fg=fg-1
 		end
-		ctext.text_print(s,x,y,fg,bg)
+		ctext.text_print(s,x-(6*0),y,fg,bg)
 	end
 end
