@@ -1,6 +1,7 @@
 
 -- expect this many s16 audio samples per second
 local sample_rate=48000
+local buffer_size=sample_rate/8 -- bigger the buffer better the signal
 
 local note_freq_octs={
 { [4]=261.63 },
@@ -44,19 +45,19 @@ for i=0,127 do
 end
 
 -- the midi notes we plan to bucket
-local min_bucket=24
-local max_bucket=107
+local min_bucket=0
+local max_bucket=127
 
 -- try multiple probe waves into the data
 -- output buckets
 
 
-local new_bucket=function(midi,size)
+local new_bucket=function(midi,base_size)
 	local bucket={}
 	
 	bucket.midi=midi
 	bucket.wavelen=midi_wavelen[midi]
-	bucket.size=size -- fixed size giving us a time sample resolution
+	bucket.size=base_size -- requested time sample resolution
 	bucket.probe_size=math.floor(0.5+(sample_rate*bucket.wavelen))
 	bucket.probe_cos=math.ceil(bucket.probe_size/4)
 	bucket.probe_idx=0
@@ -66,13 +67,17 @@ local new_bucket=function(midi,size)
 	bucket.ctotal=0
 	bucket.sdata={}
 	bucket.cdata={}
-	
---	bucket.size=math.ceil(bucket.size/bucket.probe_size)*bucket.probe_size
+
+-- keep bucket size to multiple of probe size.
+	bucket.size=math.ceil(bucket.size/bucket.probe_size)*bucket.probe_size
+
+-- probe must fit in the bucket ( eg low hz must increase bucket size )
+	if bucket.size<bucket.probe_size then bucket.size=bucket.probe_size end
 
 	bucket.wave=function(t)
 		return math.sin(math.pi*2*t)
 	end
--- square wave picks up more noise but maybe acceptable if faster?
+-- square wave picks up more noise and sub harmonic peaks but maybe acceptable if faster?
 	bucket.sqwave=function(t)
 		if t<0.5 then return 1 end
 		return -1
@@ -106,7 +111,7 @@ local new_bucket=function(midi,size)
 	end
 	bucket.get=function()
 		local t=math.sqrt( (bucket.stotal*bucket.stotal) + (bucket.ctotal*bucket.ctotal) )
-		local n=t/(bucket.size*0x7fff) -- aim for 0-1 ish might go a bit over
+		local n=t/(bucket.size*0x3fff) -- aim for 0-1 ish might go a bit over
 		return n
 	end
 	
@@ -115,7 +120,7 @@ end
 
 local buckets={}
 for m=min_bucket,max_bucket do
-	buckets[m]=new_bucket(m,2048)
+	buckets[m]=new_bucket(m,buffer_size)
 end
 
 local push_sample=function(num)
@@ -128,24 +133,30 @@ local print_buckets=function()
 	print("...")
 	local t={}
 	local tots=0
+	local best_num=0
+	local best_m=0
 	for m=min_bucket,max_bucket do
-		local num=math.floor(buckets[m].get()*128)
-		local mnum=num
+		local num=buckets[m].get()*128
+		local fnum=math.floor(num)
+		local mnum=fnum
 		if mnum>128 then mnum=128 end
 		tots=tots+num
-		print(m,math.floor(1/midi_wavelen[m]),num,string.rep("#",mnum))
-		buckets[m].reset()
+		print(m,math.floor(1/midi_wavelen[m]),fnum,string.rep("#",mnum))
+--		buckets[m].reset()
+		if num>best_num then
+			best_num=num
+			best_m=m
+		end
 	end
-	print("...",tots)
+	print("...",math.floor(1/midi_wavelen[best_m]),tots)
 end
 
-for f=40,540,100 do
-
-for i=1,4096 do 
+for m=6,127,16 do
+local f=sample_rate/buckets[m].probe_size
+for i=1,buffer_size do 
 	local w=math.sin( ( f*i/sample_rate )*math.pi*2 )
-	push_sample( math.floor(w*32767) )
+	push_sample( math.floor(w*0x7fff) )
 end
 print_buckets()
---for i=1,2048 do push_sample(0) end
 
 end
