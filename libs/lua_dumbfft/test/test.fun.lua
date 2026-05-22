@@ -1,64 +1,45 @@
 
 -- expect this many s16 audio samples per second
 local sample_rate=48000
-local buffer_size=sample_rate/16 -- bigger the buffer steadier/lower the signal ( 8hz is midi 0 ish )
+local buffer_size=math.floor(sample_rate/16) -- (sample_rate/buffer_rate)  ( 8hz is midi 0 ish )
 
--- here we choose the buckets we will fill up, specifically the midi notes 0-127
-local note_freq_octs={
-{ [4]=261.63 },
-{ [4]=277.18 },
-{ [4]=293.66 },
-{ [4]=311.13 },
-{ [4]=329.63 },
-{ [4]=349.23 },
-{ [4]=369.99 },
-{ [4]=392.00 },
-{ [4]=415.30 },
-{ [4]=440.00 },
-{ [4]=466.16 },
-{ [4]=493.88 },
-}
-for i,v in ipairs(note_freq_octs) do -- build other octaves
-	v[-1]=v[4]/32
-	v[0]=v[4]/16
-	v[1]=v[4]/8
-	v[2]=v[4]/4
-	v[3]=v[4]/2
-	--
-	v[5]=v[4]*2
-	v[6]=v[4]*4
-	v[7]=v[4]*8
-	v[8]=v[4]*16
-	v[9]=v[4]*32
+local midinote_to_freq=function(m)
+	return (2^((m-69)/12))*440
+end
+local midinote_to_wavelen=function(m)
+	return math.ceil(sample_rate/midinote_to_freq(m))
 end
 
-local midi_wavelen={} -- 0-127
-for o=-1,9 do
-	for n=1,12 do -- build other octaves
-		local f=note_freq_octs[n][o]
-		local m=((o+1)*12)+n-1
-		midi_wavelen[m]=1/f
-	end
+local math_log_2=math.log(2)
+
+local freq_to_midinote=function(f)
+	return 69+((math.log(f/440)/math_log_2)*12)
 end
 
--- the midi notes we plan to bucket
--- could also be worth doing the half notes so we get 256 outputs
-local min_bucket=0
-local max_bucket=127
+local wavelen_to_midinote=function(w)
+	return freq_to_midinote(sample_rate/w)
+end
+
+-- idx of max bucket
+local max_bucket=255
+
+-- we are zooming in here on the midinote range in a non linear array
+-- to get this quality of data from a standard FFT would need at least 16k? maybe 32k? of buckets
+-- most of which we would ignore and that huge bucket size means a "laggy" sample.
+-- So an FFT is only "faster" at generating data we do not want or need.
 
 --
--- Here begins the DumbFT code
+-- Here begins the DumbFourierTransform code, plenty of room for optimization
 --
 
 -- output buckets, each one has its own circular buffer to maintain a running total
 -- this buffer size does not slow us down but does increase memory usage
-local new_bucket=function(midi,base_size)
+local new_bucket=function(idx,base_size,probe_size)
 	local bucket={}
 	
-	bucket.midi=midi
-	bucket.wavelen=midi_wavelen[midi]
+	bucket.midinote=wavelen_to_midinote(probe_size)
+	bucket.probe_size=probe_size -- wavelength in samples
 	bucket.size=base_size -- requested time sample resolution
-	bucket.probe_size=math.floor(0.5+(sample_rate*bucket.wavelen))
 	bucket.probe_cos=math.ceil(bucket.probe_size/4)
 	bucket.probe_idx=0
 	bucket.probe_data={}
@@ -68,14 +49,18 @@ local new_bucket=function(midi,base_size)
 	bucket.sdata={}
 	bucket.cdata={}
 
--- keep bucket size to multiple of probe size.
-	bucket.size=math.floor(bucket.size/bucket.probe_size)*bucket.probe_size
+	-- prob must be a int number of samples, or we get garbage noise
+	bucket.probe_size=math.ceil(bucket.probe_size)
 
+-- round bucket size to a multiple of probe size?
+	bucket.size=math.floor(bucket.size/bucket.probe_size)*bucket.probe_size
 -- probe must fit in the bucket ( eg low hz will increase bucket size )
 	if bucket.size<bucket.probe_size then bucket.size=bucket.probe_size end
 
+	bucket.size=math.ceil(bucket.size) -- force int
+
 	bucket.wave=function(t)
-		return math.sin(math.pi*2*t)
+		return math.sin(math.pi*2*t) -- fucking radians
 	end
 -- square wave picks up more noise and sub harmonic peaks but maybe acceptable if faster?
 	bucket.sqwave=function(t)
@@ -120,20 +105,29 @@ local new_bucket=function(midi,base_size)
 	return bucket
 end
 
+-- max bucket has a wave length of 4 samples and we
+-- work backwards adding 1 sample each time for max resolution
+-- we also work midinotes upwards starting at midi 0
+-- switching when these two sequences meet
+-- the full midirange should be covered this way
+-- using integer length probe waves
 local buckets={}
-for m=min_bucket,max_bucket do
-	buckets[m]=new_bucket(m,buffer_size)
+for idx=0,max_bucket do
+	local min_wavelen=math.floor(midinote_to_wavelen(idx))
+	local wavelen=4+(max_bucket-idx)
+	if min_wavelen>wavelen then wavelen=min_wavelen end
+	buckets[idx]=new_bucket(idx, buffer_size , wavelen )
 end
 
 local push_sample=function(num)
-	for m=min_bucket,max_bucket do
+	for m=0,max_bucket do
 		buckets[m].push(num)
 	end
 end
 
 local pull_buckets=function()
 	local bs={}
-	for m=min_bucket,max_bucket do
+	for m=0,max_bucket do
 		bs[m]=buckets[m].get()
 	end
 	return bs
@@ -152,8 +146,8 @@ oven.opts.fun="" -- back to menu on reset
 sysopts={
 	mode="swordstone", -- select a characters+sprites on a 256x128 screen using the swanky32 palette.
 	update=function() update() end, -- called repeatedly to update+draw
-	lox=256,loy=192, -- minimum size
-	hix=256,hiy=256, -- maximum size
+	lox=256,loy=288, -- minimum size
+	hix=256,hiy=288, -- maximum size
 	autosize="lohi", -- flag that we want to auto resize
 }
 
@@ -194,18 +188,20 @@ update=function()
 	local tx=math.ceil(cscreen.hx/4)
 	local ty=math.ceil(cscreen.hy/8)
 
-	for m=min_bucket+(12*0),max_bucket do
-		local n=bs[m]
-		n=math.ceil((n^1)*4*2^(m/24))
+	for idx=0,max_bucket do
+		local bucket=buckets[idx]
+		local m=bucket.midinote
+		local n=bs[idx]
+		local o=math.floor(m/12)
+		n=math.ceil((n*(2^(m/12)))/2) -- *double loudness every octave* and tweak to view size
 		local s=string.rep("*",n)
 		local x=0
-		local y=m
-		fg=24
-		while y>=12 do
-			y=y-12
-			x=x+6
-			fg=fg-1
+		local y=idx
+		fg=23-o -- change color on octave
+		while y>=36 do
+			y=y-36
+			x=x+8
 		end
-		ctext.text_print(s,x-(6*0),y,fg,bg)
+		ctext.text_print(s,x,y,fg,fg)
 	end
 end
