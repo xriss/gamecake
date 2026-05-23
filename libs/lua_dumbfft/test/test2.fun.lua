@@ -1,7 +1,9 @@
 
 -- expect this many s16 audio samples per second
 local sample_rate=48000
-local buffer_size=math.floor(sample_rate/16) -- (sample_rate/buffer_rate)  ( 8hz is midi 0 ish )
+local buffer_size=math.floor(sample_rate/16)
+
+-- roughly, 8hz is midinote 0, 16hz=12, 32hz=24, 64hz=36, 128hz=48, etc...
 
 local midinote_to_freq=function(m)
 	return (2^((m-69)/12))*440
@@ -20,21 +22,25 @@ local wavelen_to_midinote=function(w)
 	return freq_to_midinote(sample_rate/w)
 end
 
--- idx of max bucket
-local max_bucket=255
+-- idx of max bucket ( bottom bucket is 0 not 1)
+local max_bucket=256
 
--- we are zooming in here on the midinote range in a non linear array
+-- we are zooming in here on the midinote 0-127 range in a non linear array
 -- to get this quality of data from a standard FFT would need at least 16k? maybe 32k? of buckets
--- most of which we would ignore and that huge bucket size means a "laggy" sample.
+-- most of which we would ignore and that huge bucket size means a "laggy"
+-- sample rate or running the "fast" code multiple times on the same samples.
 -- So an FFT is only "faster" at generating data we do not want or need.
+-- Also remember we are looking here at visualization so only need to be
+-- concerned with a one way transform, no rebuilding the original data.
 
 --
--- Here begins the DumbFourierTransform code, plenty of room for optimization
+-- Here begins the Dumb Fourier Transform code, plenty of room for optimization
+-- a lot of what is going on here is about giving me space to tweak and experiment
 --
 
 -- output buckets, each one has its own circular buffer to maintain a running total
 -- this buffer size does not slow us down but does increase memory usage
-local new_bucket=function(idx,base_size,probe_size)
+local new_bucket=function(base_size,probe_size)
 	local bucket={}
 	
 	bucket.midinote=wavelen_to_midinote(probe_size)
@@ -50,7 +56,7 @@ local new_bucket=function(idx,base_size,probe_size)
 	bucket.probe_cdata={}
 
 	-- prob must be a int number of samples, or we get garbage noise
-	-- the magical 0 output from probes breaks due to aliasing 
+	-- as the 0 output from failed probes breaks due to aliasing
 	bucket.probe_size=math.ceil(bucket.probe_size)
 
 -- round bucket size to a multiple of probe size?
@@ -110,28 +116,35 @@ local new_bucket=function(idx,base_size,probe_size)
 end
 
 -- max bucket has a wave length of 4 samples and we
--- work backwards adding 1 sample each time for max resolution
+-- work backwards adding 1 sample each time
 -- we also work midinotes upwards starting at midi 0
--- switching when these two sequences meet
--- the full midirange should be covered this way
--- using integer length probe waves
+-- by switching when these two sequences meet
+-- the full midirange 0-127 can be covered this way
+-- or you could just use one or the other...
 local buckets={}
-for idx=0,max_bucket do
-	local min_wavelen=math.floor(midinote_to_wavelen(idx/2))
-	local wavelen=4+(max_bucket-idx)
-	if min_wavelen>wavelen then wavelen=min_wavelen end
-	buckets[idx]=new_bucket(idx, buffer_size , wavelen )
+for idx=1,max_bucket do
+	local min_wavelen=math.floor(midinote_to_wavelen((idx-1)/2))
+	local max_wavelen=4+(max_bucket-idx)
+
+	-- merge the two bucket schemes, or comment out the logic and force one
+--	if min_wavelen>max_wavelen then
+--		wavelen=min_wavelen
+--	else
+		wavelen=max_wavelen
+--	end
+
+	buckets[idx]=new_bucket( buffer_size , wavelen )
 end
 
 local push_sample=function(num)
-	for m=0,max_bucket do
+	for m=1,max_bucket do
 		buckets[m].push(num)
 	end
 end
 
 local pull_buckets=function()
 	local bs={}
-	for m=0,max_bucket do
+	for m=1,max_bucket do
 		bs[m]=buckets[m].get()
 	end
 	return bs
@@ -149,23 +162,18 @@ oven.opts.fun="" -- back to menu on reset
 
 sysopts={
 	mode="fun64", -- select a characters+sprites on a 256x128 screen using the swanky32 palette.
-	update=function() update() end, -- called repeatedly to update+draw
-	hx=256,hy=256, -- set size
+	update=function() update() end, -- called repeatedly at 60hz to update+draw
+	hx=256,hy=256, -- set custom size
 }
 
 hardware,main=system.configurator(sysopts)
 
-local px,py=0,0
-local vx,vy=2,1
-local speed=0
-
 
 setup=function()
+	-- setup audio capture
 	oven.cake.sounds.start_capture()
-
+	-- setup custom glsl shader
 	system.components.copper.shader_name="fun_DFT"
-	system.components.copper.shader_function=func_dft
-	
 end
 
 local wgrd=require("wetgenes.grd")
@@ -215,13 +223,14 @@ local add_line=function(line)
 		grd_idx=(grd_idx+1)%256
 	end
 
-	copper.shader_uniforms.tex_info={grd_idx,amerge/amax,0,0} -- live line
+	copper.shader_uniforms.tex_info={ grd_idx , amerge/amax , 0 , 0 } -- live line
 
 	for i=1,256 do -- decay
 		oline[i]=(oline[i]+oline[i]+line[i])/3
 	end
 	grd_dft:pixels(0,grd_idx,256,1,oline) -- live data
 
+	-- uploaded grd will autobind to "copper_tex" in shader
 	copper.upload_grd(grd_dft)
 end
 
@@ -242,25 +251,17 @@ update=function()
 	local bs=pull_buckets()
 
 	local line={}
-	for idx=0,max_bucket do
+	for idx=1,max_bucket do
 		local bucket=buckets[idx]
 		local m=bucket.midinote
 		local n=bs[idx]
 --		local o=math.floor(m/12)
 		n=math.ceil((n*(2^(m/12)))*8) -- *double loudness every octave* and tweak to view size
-		line[idx+1]=n
+		line[idx]=n
 	end
 	add_line(line)
 end
 
-
--- need to upload our fft texture
-func_dft=function(p)
-
-	gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( p:uniform("tex"), 0 )
-	gl.BindTexture(gl.TEXTURE_2D, system.components.copper.gl_tex or 0)
-
-end
 
 --[=[
 #shader "fun_DFT"
@@ -298,8 +299,13 @@ void main()
 precision highp float; /* really need better numbers if possible */
 #endif
 
-uniform sampler2D tex;
+// 256x256 8bit texture, each line is the 256 buckets we calculated
+// tex_info[0] tells us the current line 0-255 
+// tex_info[1] is 0/16 to 15/16 for fractional animation to the next line
+// texture is scan filled, so we write a new smoothed line every 16 frames
+// but always update the current line each frame with latest data
 uniform vec4 tex_info;
+uniform sampler2D copper_tex;
 
 varying vec2  v_texcoord;
 varying vec4  v_color;
@@ -308,29 +314,28 @@ varying vec4  v_color;
 void draw_wave(inout vec4 c , float y , float vy , float fade)
 {
 	y=(256.0-y)/128.0;
+	if( ( y<0.0 ) || ( y>1.0 ) ) { return; } // out of range
 
-	float n1=texture2D(tex, vec2( (v_texcoord.x-2.0)/256.0 , vy ) ).r;
-	float n2=texture2D(tex, vec2( (v_texcoord.x-1.0)/256.0 , vy ) ).r;
-	float n3=texture2D(tex, vec2( (v_texcoord.x    )/256.0 , vy ) ).r;
-	float n4=texture2D(tex, vec2( (v_texcoord.x+1.0)/256.0 , vy ) ).r;
-	float n5=texture2D(tex, vec2( (v_texcoord.x+2.0)/256.0 , vy ) ).r;
+	float n1=texture2D(copper_tex, vec2( (v_texcoord.x-2.0)/256.0 , vy ) ).r;
+	float n2=texture2D(copper_tex, vec2( (v_texcoord.x-1.0)/256.0 , vy ) ).r;
+	float n3=texture2D(copper_tex, vec2( (v_texcoord.x    )/256.0 , vy ) ).r;
+	float n4=texture2D(copper_tex, vec2( (v_texcoord.x+1.0)/256.0 , vy ) ).r;
+	float n5=texture2D(copper_tex, vec2( (v_texcoord.x+2.0)/256.0 , vy ) ).r;
 	
 	float nn1=max(max(n1,n2),n3)*fade;
 	float nn2=max(max(n2,n3),n4)*fade;
 	float nn3=max(max(n3,n4),n5)*fade;
 
-	if( ( y>=0.0 ) && ( y<=1.0 ) )
+	// white edge
+	if( y-(2.0/256.0) <= nn2 )
 	{
-		// white edge
-		if( y-(2.0/256.0) <= nn2 )
-		{
-			c=vec4( 1.0 , 1.0 , 1.0 , 0.0 );
-		}
-		// black fill
-		if( ( y <= nn1 ) && ( y <= nn2 ) && ( y <= nn3 ) )
-		{
-			c=vec4( 0.0 , 0.0 , 0.0 , 0.0 );
-		}
+		c=vec4( 1.0 , 1.0 , 1.0 , 0.0 );
+	}
+
+	// black fill
+	if( ( y <= nn1 ) && ( y <= nn2 ) && ( y <= nn3 ) )
+	{
+		c=vec4( 0.0 , 0.0 , 0.0 , 0.0 );
 	}
 }
 
@@ -340,7 +345,7 @@ void main(void)
 
 	float fade=min( ( 128.0-abs(v_texcoord.x-128.0) ) , 128.0 )/128.0;
 
-	float v=texture2D(tex, vec2( v_texcoord.x/256.0 , fract( ( tex_info[0]+v_texcoord.y) /256.0 ) ) ).r;
+	float v=texture2D(copper_tex, vec2( v_texcoord.x/256.0 , fract( ( tex_info[0]+v_texcoord.y) /256.0 ) ) ).r;
 
 //	c=vec4( v , v , v , 0.0 );
 
@@ -349,21 +354,22 @@ void main(void)
 #define STEP 8.0
 	for(f=256.0 ; f>0.0 ; f-=STEP )
 	{
-	draw_wave( c , v_texcoord.y+f+mod(tex_info[0],STEP)  ,
-		fract( mod( tex_info[0]+256.0-f-mod(tex_info[0],STEP) , 256.0 ) /256.0 ) ,
-			pow(fade,0.5) );
+		// main waves
+		draw_wave( c , v_texcoord.y+f+mod(tex_info[0],STEP) ,
+			fract( mod( tex_info[0]+256.0-f-mod(tex_info[0],STEP) , 256.0 ) /256.0 ) ,
+				pow(fade,0.5) );
 	}
 
+	// last wave we want to slowly ease in as it scrolls up from the bottom
 	f=0.0;
 	draw_wave( c , v_texcoord.y+f+mod(tex_info[0],STEP)  ,
 		fract( mod( tex_info[0]+256.0-f-mod(tex_info[0],STEP) , 256.0 ) /256.0 ) ,
 			pow(fade,0.5)*((mod(tex_info[0],STEP)/STEP)+(tex_info[1]/STEP)) );
 
+	// live data bottom wave
 	draw_wave( c , mod( v_texcoord.y , 256.0 ) , fract( (tex_info[0])/256.0 ) , pow(fade,0.5) );
-
-	c=pow( c*pow(fade,2.0) , vec4(1.0/2.2) );
-	gl_FragColor=c;
-
+	
+	gl_FragColor=pow( c*pow(fade,2.0) , vec4(1.0/2.2) );
 }
 
 #endif

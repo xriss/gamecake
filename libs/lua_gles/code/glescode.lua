@@ -536,8 +536,17 @@ end
 
 -- load multiple shader sources from a single file
 	function code.shader_sources(text,filename)
-	
-		glslang.parse_chunks(text,filename,code.headers)
+
+		-- returns name map of chunks we added/changed
+		local headers,map=glslang.parse_chunks(text,filename,code.headers)
+
+		for n,v in pairs(code.programs) do
+			local name=wstr.split(n,"?")[1] or n	-- get base name
+			if map[name] then -- auto
+				code.forget_program( code.programs[n] ) -- forget all programs derived from this source
+				code.programs[n]=nil
+			end
+		end
 
 	end
 
@@ -576,6 +585,7 @@ end
 			end
 			p[0]=nil
 		end
+
 	end
 
 	
@@ -585,9 +595,9 @@ end
 --print("FORGETTING ALL PROGRAMS")
 		for n,p in pairs(code.programs) do
 			code.forget_program(p)
-			if p.base then -- this can be regenerated
+--			if p.base then -- this can be regenerated
 				code.programs[n]=nil
-			end
+--			end
 		end
 
 	end

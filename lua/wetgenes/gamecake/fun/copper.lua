@@ -6,6 +6,7 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- A copper like background, uses a glsl fragment program to fill the screen,
 
 local wzips=require("wetgenes.zips")
+local wgrd=require("wetgenes.grd")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -73,8 +74,17 @@ copper.create=function(it,opts)
 		it.gl_height=g.height
 		it.gl_type=gl.UNSIGNED_BYTE
 
-		it.gl_internal=gl.RED_OR_LUMINANCE
-		it.gl_format=gl.RED_OR_LUMINANCE
+		local fmt=(g.format%256)
+		if fmt==wgrd.GRD_FMT_U8_RGBA then
+			it.gl_internal=gl.RGBA
+			it.gl_format=gl.RGBA
+		elseif fmt==wgrd.GRD_FMT_U8_RGB then
+			it.gl_internal=gl.RGB
+			it.gl_format=gl.RGB
+		else -- assume 8bit texture
+			it.gl_internal=gl.RED_OR_LUMINANCE
+			it.gl_format=gl.RED_OR_LUMINANCE
+		end
 		
 		it.gl_grd=g
 		it.gl_data=g.data -- carefulnow
@@ -85,6 +95,7 @@ copper.create=function(it,opts)
 
 		gl.BindTexture( gl.TEXTURE_2D , it.gl_tex )
 		
+		-- can set these in copper or we provide default
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,it.TEXTURE_MIN_FILTER	or gl.NEAREST)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,it.TEXTURE_MAG_FILTER	or gl.NEAREST)
 		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	it.TEXTURE_WRAP_S		or gl.CLAMP_TO_EDGE)
@@ -167,6 +178,12 @@ copper.create=function(it,opts)
 				gl.Uniform1f( id, it.system.ticks/60 )
 			end
 
+			local id=p:uniform("copper_tex") -- allow a texture upload
+			if it.gl_tex and id then
+				gl.ActiveTexture(gl.TEXTURE0) gl.Uniform1i( id, 0 )
+				gl.BindTexture(gl.TEXTURE_2D, it.gl_tex or 0)
+			end
+			
 			if it.shader_function then -- more custom opengl shader p values
 				it.shader_function(p)
 			end

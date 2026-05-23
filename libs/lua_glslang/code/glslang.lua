@@ -176,13 +176,15 @@ glslang.parse_chunks=function(text,filename,headers,flags)
 	end		
 
 -- turn back into strings
+	local map={}
 	for n,v in pairs(headers) do
 		if type(v) == "table" then
 			headers[n]=table.concat(v,"\n")
+			map[n]=true
 		end
 	end
 
-	return headers
+	return headers,map -- map is just the headers we added
 end
 
 --[[#lua.glslang.replace_include

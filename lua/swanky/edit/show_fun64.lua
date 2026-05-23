@@ -59,9 +59,9 @@ M.bake=function(oven,show_fun64)
 
 		show_fun64.sys_setup=wrap(function(str)
 			gui.master.ids.runtext.hidden=true
-			str=str
 			system.clean()
 			gl.shader_sources( str , "" ) -- also try and load GLSL embeded in the lua file -> #SHADER
+--			gl.forget() -- forget old shaders, we shall rebuild them
 			system.setup(str,".")
 		end)
 		show_fun64.sys_update=wrap(function()
