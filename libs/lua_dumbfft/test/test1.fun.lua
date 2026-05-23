@@ -42,14 +42,16 @@ local new_bucket=function(idx,base_size,probe_size)
 	bucket.size=base_size -- requested time sample resolution
 	bucket.probe_cos=math.ceil(bucket.probe_size/4)
 	bucket.probe_idx=0
-	bucket.probe_data={}
 	bucket.idx=0
 	bucket.stotal=0
 	bucket.ctotal=0
 	bucket.sdata={}
 	bucket.cdata={}
+	bucket.probe_sdata={} -- should replace this with global wave
+	bucket.probe_cdata={}
 
 	-- prob must be a int number of samples, or we get garbage noise
+	-- the magical 0 output from probes breaks due to aliasing 
 	bucket.probe_size=math.ceil(bucket.probe_size)
 
 -- round bucket size to a multiple of probe size?
@@ -63,7 +65,9 @@ local new_bucket=function(idx,base_size,probe_size)
 		return math.sin(math.pi*2*t) -- fucking radians
 	end
 -- square wave picks up more noise and sub harmonic peaks but maybe acceptable if faster?
+-- also works badly for non even buckets and higher freqs, but possibly?
 	bucket.sqwave=function(t)
+		if t>1 then t=t-1 end
 		if t<0.5 then return 1 end
 		return -1
 	end
@@ -71,7 +75,8 @@ local new_bucket=function(idx,base_size,probe_size)
 	bucket.reset=function()
 		for i=0,bucket.size-1 do bucket.sdata[i]=0 end -- fill buffer with 0
 		for i=0,bucket.size-1 do bucket.cdata[i]=0 end -- fill buffer with 0
-		for i=0,bucket.probe_size-1 do bucket.probe_data[i]=bucket.wave( i/bucket.probe_size ) end -- probe wave
+		for i=0,bucket.probe_size-1 do bucket.probe_sdata[i]=bucket.wave( i/bucket.probe_size ) end -- probe wave
+		for i=0,bucket.probe_size-1 do bucket.probe_cdata[i]=bucket.wave( 0.25+(i/bucket.probe_size) ) end -- probe wave
 		bucket.probe_idx=0
 		bucket.idx=0
 		bucket.stotal=0
@@ -80,8 +85,8 @@ local new_bucket=function(idx,base_size,probe_size)
 	bucket.reset()
 	-- push a new s16 sample into the bucket
 	bucket.push=function(num)
-		local sf=math.floor(num*bucket.probe_data[bucket.probe_idx])
-		local cf=math.floor(num*bucket.probe_data[ (bucket.probe_idx+bucket.probe_cos)%bucket.probe_size ])
+		local sf=math.floor(num*bucket.probe_sdata[bucket.probe_idx])
+		local cf=math.floor(num*bucket.probe_cdata[bucket.probe_idx])
 		bucket.probe_idx=(bucket.probe_idx+1)%bucket.probe_size -- advance idx along rotational buffer
 
 		local sold=bucket.sdata[bucket.idx]

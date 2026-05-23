@@ -62,8 +62,47 @@ copper.create=function(it,opts)
 		cy3={0,0,0,1},
 		cy4={0,0,0,1},
 	}
-	it.shader_function=function()end
+	it.shader_function=function(p)end
 	
+
+	-- allocate a texture (first use) and upload grd data to it (everytime)
+	it.upload_grd=function(g)
+		if g.width==0 or g.height==0 then return it end -- no data to upload
+
+		it.gl_width=g.width
+		it.gl_height=g.height
+		it.gl_type=gl.UNSIGNED_BYTE
+
+		it.gl_internal=gl.RED_OR_LUMINANCE
+		it.gl_format=gl.RED_OR_LUMINANCE
+		
+		it.gl_grd=g
+		it.gl_data=g.data -- carefulnow
+
+		if not it.gl_tex then
+			it.gl_tex=assert(gl.GenTexture())
+		end
+
+		gl.BindTexture( gl.TEXTURE_2D , it.gl_tex )
+		
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,it.TEXTURE_MIN_FILTER	or gl.NEAREST)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,it.TEXTURE_MAG_FILTER	or gl.NEAREST)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,	it.TEXTURE_WRAP_S		or gl.CLAMP_TO_EDGE)
+		gl.TexParameter(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,	it.TEXTURE_WRAP_T		or gl.CLAMP_TO_EDGE)
+		
+		gl.TexImage2D(
+			gl.TEXTURE_2D,
+			0,
+			it.gl_internal,
+			it.gl_width,
+			it.gl_height,
+			0,
+			it.gl_format,
+			it.gl_type,
+			it.gl_data )
+
+	end
+
 	it.screen_resize=function(hx,hy)
 		if hx~=it.hx or hy~=it.hy then -- new size
 		
@@ -128,8 +167,9 @@ copper.create=function(it,opts)
 				gl.Uniform1f( id, it.system.ticks/60 )
 			end
 
-
-
+			if it.shader_function then -- more custom opengl shader p values
+				it.shader_function(p)
+			end
 
 		end)
 		gl.DepthMask(gl.TRUE)
