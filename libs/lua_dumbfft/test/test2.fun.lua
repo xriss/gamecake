@@ -174,6 +174,8 @@ local grd_idx=0
 
 local aline={}
 	for i=1,256 do aline[i]=0 end
+local oline={}
+	for i=1,256 do oline[i]=0 end
 local amerge=0
 local amax=16;
 local add_line=function(line)
@@ -215,7 +217,10 @@ local add_line=function(line)
 
 	copper.shader_uniforms.tex_info={grd_idx,amerge/amax,0,0} -- live line
 
-	grd_dft:pixels(0,grd_idx,256,1,line) -- live data
+	for i=1,256 do -- decay
+		oline[i]=(oline[i]+oline[i]+line[i])/3
+	end
+	grd_dft:pixels(0,grd_idx,256,1,oline) -- live data
 
 	copper.upload_grd(grd_dft)
 end
@@ -243,7 +248,6 @@ update=function()
 		local n=bs[idx]
 --		local o=math.floor(m/12)
 		n=math.ceil((n*(2^(m/12)))*8) -- *double loudness every octave* and tweak to view size
-		if n>255 then n=255 end -- clamp top
 		line[idx+1]=n
 	end
 	add_line(line)
@@ -357,7 +361,7 @@ void main(void)
 
 	draw_wave( c , mod( v_texcoord.y , 256.0 ) , fract( (tex_info[0])/256.0 ) , pow(fade,0.5) );
 
-	c=pow( c*fade*fade , vec4(1.0/2.2) );
+	c=pow( c*pow(fade,2.0) , vec4(1.0/2.2) );
 	gl_FragColor=c;
 
 }
