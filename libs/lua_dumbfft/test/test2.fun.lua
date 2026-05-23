@@ -173,7 +173,7 @@ local grd_dft=nil
 local grd_idx=0
 
 local aline={}
-	for i=0,255 do aline[i]=0 end
+	for i=1,256 do aline[i]=0 end
 local amerge=0
 local amax=16;
 local add_line=function(line)
@@ -181,19 +181,19 @@ local add_line=function(line)
 	local done=false
 	amerge=amerge+1
 	if amerge>=amax then
-		for i=0,255 do
+		for i=1,256 do
 			aline[i]=(aline[i]+line[i])/amerge
 		end
 		local t={} -- blur array left/right
-		t[0]=(aline[0]+aline[1])/3
-		t[255]=(aline[255]+aline[254])/3
-		for i=1,254 do
+		t[1]=(aline[1]+aline[2])/3
+		t[256]=(aline[255]+aline[256])/3
+		for i=2,255 do
 			t[i]=(aline[i-1]+aline[i]+aline[i+1])/3
 		end
 		aline=t
 		done=true
 	else
-		for i=0,255 do
+		for i=1,256 do
 			aline[i]=aline[i]+line[i]
 		end
 	end
@@ -244,7 +244,7 @@ update=function()
 --		local o=math.floor(m/12)
 		n=math.ceil((n*(2^(m/12)))*8) -- *double loudness every octave* and tweak to view size
 		if n>255 then n=255 end -- clamp top
-		line[idx]=n
+		line[idx+1]=n
 	end
 	add_line(line)
 end
@@ -347,15 +347,15 @@ void main(void)
 	{
 	draw_wave( c , v_texcoord.y+f+mod(tex_info[0],STEP)  ,
 		fract( mod( tex_info[0]+256.0-f-mod(tex_info[0],STEP) , 256.0 ) /256.0 ) ,
-			fade );
+			pow(fade,0.5) );
 	}
 
 	f=0.0;
 	draw_wave( c , v_texcoord.y+f+mod(tex_info[0],STEP)  ,
 		fract( mod( tex_info[0]+256.0-f-mod(tex_info[0],STEP) , 256.0 ) /256.0 ) ,
-			fade*(mod(tex_info[0],STEP)/STEP)+(tex_info[1]/STEP) );
+			pow(fade,0.5)*((mod(tex_info[0],STEP)/STEP)+(tex_info[1]/STEP)) );
 
-	draw_wave( c , mod( v_texcoord.y , 256.0 ) , fract( (tex_info[0])/256.0 ) , fade );
+	draw_wave( c , mod( v_texcoord.y , 256.0 ) , fract( (tex_info[0])/256.0 ) , pow(fade,0.5) );
 
 	c=pow( c*fade*fade , vec4(1.0/2.2) );
 	gl_FragColor=c;
