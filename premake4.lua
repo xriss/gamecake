@@ -732,8 +732,7 @@ end
 
 --print(_OPTIONS)
 --for n,v in pairs(_OPTIONS) do print(n,v) end
-
-if _OPTIONS["openal"]=="sys" then
+if _OPTIONS["openal"]=="sys" or EMCC then
 	print("USING SYSTEM PROVIDED OPENAL")
 	LIB_OPENAL=nil
 else
@@ -824,7 +823,7 @@ all_includes=all_includes or {
 	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 
 -- some OS will provide openal so do not need this.
-	{LIB_OPENAL,		WINDOWS		or		NIX		or		nil 		or		ANDROID		or	nil		},
+	{LIB_OPENAL,		WINDOWS		or		NIX		or		EMCC 		or		ANDROID		or	nil		},
 
 -- the output executables
 	{"exe_gamecake",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},

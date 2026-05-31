@@ -196,8 +196,6 @@ end
 -- might need to setup capture later
 function alc.setup_capture(dc,opts)
 	if not dc.capture_device then
---print("AL","CaptureOpenDevice")
---		dc.capture_device=alc.CaptureOpenDevice(nil,44100,alc.CAPTURE_SAMPLES,44100)
 		dc.capture_device=alc.CaptureOpenDevice(nil,48000,al.FORMAT_MONO16,48000)
 	end
 end

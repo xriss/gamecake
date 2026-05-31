@@ -7,14 +7,6 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-#if defined(EMCC)
-#define alcCaptureCloseDevice(a)
-#define alcCaptureOpenDevice(a,b,c,d) 0
-#define alcCaptureSamples(a,b,c)
-#define alcCaptureStart(a)
-#define alcCaptureStop(a)
-#endif
-
 //
 // we can use either these strings as a string identifier
 // or the address as a light userdata identifier, both unique
@@ -135,6 +127,9 @@ ALCdevice **device;
 }
 
 
+
+
+
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
 // open capture device
@@ -156,7 +151,7 @@ int length=lua_tonumber(l,4);	// 44100
 	lua_setmetatable(l, -2);
 
 //open the actual device
-	(*device)=alcCaptureOpenDevice(NULL,freq,format,length);
+	(*device)=alcCaptureOpenDevice(0,freq,format,length);
 	if(!(*device)) { return 0; }
 	
 //return the userdata	
@@ -314,7 +309,13 @@ const u8 *tmp=0;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_alc_GetError (lua_State *l)
 {
-	ALCdevice *device = lua_alc_check_any_device(l, 1 );
+	ALCdevice *device=0;
+
+	if( ! lua_isnoneornil(l,1) )
+	{
+		device = lua_alc_check_any_device(l, 1 );
+	}
+
 	lua_pushnumber(l,alcGetError(device));
 	return 1;
 }
@@ -426,6 +427,12 @@ void lua_alc_get_prop_info (int def, char *flag, int *num)
 		case ALC_CAPTURE_SAMPLES:
 			*num=1; *flag='i';
 		break;
+		case ALC_DEFAULT_DEVICE_SPECIFIER:
+			*num=1; *flag='s';
+		break;
+		case ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER:
+			*num=1; *flag='s';
+		break;
 	}
 }
 
@@ -443,6 +450,7 @@ char flag=' ';
 int num;
 
 int vi[16]={0};
+const char *cp=0;
 
 	device = lua_alc_check_any_device(l, 1); // try input or output device
 	
@@ -454,6 +462,13 @@ int vi[16]={0};
 	{
 		alcGetIntegerv(device,def,1,vi);
 		lua_pushnumber(l,(double)vi[0]);
+		return 1;
+	}
+	else
+	if(flag=='s')
+	{
+		cp=alcGetString(device,def);
+		lua_pushstring(l,cp);
 		return 1;
 	}
 

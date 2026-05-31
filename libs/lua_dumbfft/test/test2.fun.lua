@@ -26,7 +26,8 @@ end
 local max_bucket=256
 
 -- we are zooming in here on the midinote 0-127 range in a non linear array
--- to get this quality of data from a standard FFT would need at least 16k? maybe 32k? of buckets
+-- to get this quality of data from a standard FFT would need at least 16k of 
+-- buckets instead of the 256 we have here so 64x the number of buckets
 -- most of which we would ignore and that huge bucket size means a "laggy"
 -- sample rate or running the "fast" code multiple times on the same samples.
 -- So an FFT is only "faster" at generating data we do not want or need.
@@ -125,6 +126,7 @@ local buckets={}
 for idx=1,max_bucket do
 	local min_wavelen=math.floor(midinote_to_wavelen((idx-1)/2))
 	local max_wavelen=4+(max_bucket-idx)
+	local wavelen
 
 	-- merge the two bucket schemes, or comment out the logic and force one
 --	if min_wavelen>max_wavelen then

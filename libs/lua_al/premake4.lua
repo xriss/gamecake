@@ -19,4 +19,3 @@ links { "lib_lua" , "lua_pack" }
 
 
 KIND{lua="alc.core"}
-
