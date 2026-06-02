@@ -196,7 +196,7 @@ end
 -- might need to setup capture later
 function alc.setup_capture(dc,opts)
 	if not dc.capture_device then
-		dc.capture_device=alc.CaptureOpenDevice(nil,48000,al.FORMAT_MONO16,48000)
+		dc.capture_device=alc.CaptureOpenDevice(nil,48000,al.FORMAT_MONO16,0x1000)
 	end
 end
 

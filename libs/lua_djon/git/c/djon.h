@@ -28,7 +28,7 @@ SOFTWARE.
 #ifndef DJON_H
 #define DJON_H
 
-#define DJON_VERSION 1.260510
+#define DJON_VERSION 1.260601
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,13 +87,12 @@ extern "C" {
 #ifndef DJON_MEM
 #include <stdlib.h>
 #define DJON_MEM djon_mem
-// call with 0,?,?,? -> alloc a ctx ( siz can be a hint of future sizes)
-// call with 1,0,?,0 -> free a ctx
-// call with 1,0,?,1 -> alloc a ptr in given ctx
-// call with 1,1,?,0 -> free a ptr in given ctx
-// call with 1,1,?,1 -> realloc a ptr in given ctx
-extern void *djon_mem(void *ctx,void *ptr,int old,int siz);
-void *djon_mem(void *ctx,void *ptr,int old,int siz)
+// call with 0,?,?,? -> alloc a ctx
+// call with 1,0,0,0 -> free a ctx
+// call with 1,0,?,1 -> ctx:alloc a ptr of siz
+// call with 1,1,1,0 -> ctx:free a ptr of old 
+// call with 1,1,1,1 -> ctx:realloc a ptr of old to siz
+extern void *djon_mem(void *ctx,void *ptr,int old,int siz)
 {
 	if(!ctx) { return (void*)1; } // no context needed
 	else

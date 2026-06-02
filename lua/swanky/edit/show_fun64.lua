@@ -50,9 +50,13 @@ M.bake=function(oven,show_fun64)
 	do
 		local wrap=function(f)
 			return function(...)
+				local t=os.time()
 				local suc,err = pcall(f,...)
+				t=os.time()-t
+				if t>=2 then suc=false ; err="Something took too long, halting after "..t.."s" end
 				if not suc then
 					show.set_error(err)
+					system.clean()
 				end
 			end
 		end

@@ -1285,7 +1285,7 @@ get the lexxer cache for the given line
 
 		if string.lower(string.sub(cache.tokens,1,8))=="cccccccc" then -- must have at least this much comment to be valid
 			local t=string.sub(cache.string,3,8) -- first two chars can be any single line comment starter
-			if t=="SWED+{" or "SWED-{" then -- must have this magic string to be a tweakable value
+			if t=="SWED+{" or t=="SWED-{" then -- must have this magic string to be a tweakable value
 				-- we can disable display by changing from SWED+{ to SWED-{ in code so we can easily be reenabled by hand
 				local config ; pcall(function() config=wjson.decode( string.sub(cache.string,8) ) end)
 				local mode=string.sub(cache.string,7,7) 

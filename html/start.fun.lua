@@ -192,6 +192,7 @@ local add_line=function(line)
 
 	local done=false
 	amerge=amerge+1
+--[[
 	if amerge>=amax then
 		for i=1,256 do
 			aline[i]=(aline[i]+line[i])/amerge
@@ -209,6 +210,7 @@ local add_line=function(line)
 			aline[i]=aline[i]+line[i]
 		end
 	end
+]]
 
 	local copper=system.components.copper
 
@@ -217,9 +219,9 @@ local add_line=function(line)
 	end
 
 	if done then
-		grd_dft:pixels(0,grd_idx,256,1,aline) -- slow data
+		grd_dft:pixels(0,grd_idx,256,1,line) -- slow data
 
-		for i=0,255 do aline[i]=0 end
+--		for i=0,255 do aline[i]=0 end
 		amerge=0
 
 		grd_idx=(grd_idx+1)%256
@@ -227,10 +229,12 @@ local add_line=function(line)
 
 	copper.shader_uniforms.tex_info={ grd_idx , amerge/amax , 0 , 0 } -- live line
 
+--[[
 	for i=1,256 do -- decay
 		oline[i]=(oline[i]+oline[i]+line[i])/3
 	end
-	grd_dft:pixels(0,grd_idx,256,1,oline) -- live data
+]]
+	grd_dft:pixels(0,grd_idx,256,1,line) -- live data
 
 	-- uploaded grd will autobind to "copper_tex" in shader
 	copper.upload_grd(grd_dft)
@@ -243,6 +247,7 @@ update=function()
 	local buff,len=oven.cake.sounds.get_capture()
 	local s16s
 	if buff then
+		if #buff>256 then buff:sub(1,256) end
 		s16s=fats.int16s_to_table(buff)
 	else
 		s16s={}
@@ -344,23 +349,53 @@ void draw_wave(inout vec4 c , float y , float vy , float fade)
 void main(void)
 {
 	vec4 c=vec4(0.0);
-
 	float fade=min( ( 128.0-abs(v_texcoord.x-128.0) ) , 128.0 )/128.0;
+
 
 	float v=texture2D(copper_tex, vec2( v_texcoord.x/256.0 , fract( ( tex_info[0]+v_texcoord.y) /256.0 ) ) ).r;
 
 //	c=vec4( v , v , v , 0.0 );
 
 	float f;
-// must divide into 256
+
 #define STEP 8.0
-	for(f=256.0 ; f>0.0 ; f-=STEP )
-	{
-		// main waves
-		draw_wave( c , v_texcoord.y+f+mod(tex_info[0],STEP) ,
-			fract( mod( tex_info[0]+256.0-f-mod(tex_info[0],STEP) , 256.0 ) /256.0 ) ,
+#define DRAW_WAVE(DW) \
+		draw_wave( c , v_texcoord.y+(256.0-(DW*STEP))+mod(tex_info[0],STEP) ,\
+			fract( mod( tex_info[0]+256.0-(256.0-(DW*STEP))-mod(tex_info[0],STEP) , 256.0 ) /256.0 ) ,\
 				pow(fade,0.5) );
-	}
+
+DRAW_WAVE( 0.0)
+DRAW_WAVE( 1.0)
+DRAW_WAVE( 2.0)
+DRAW_WAVE( 3.0)
+DRAW_WAVE( 4.0)
+DRAW_WAVE( 5.0)
+DRAW_WAVE( 6.0)
+DRAW_WAVE( 7.0)
+DRAW_WAVE( 8.0)
+DRAW_WAVE( 9.0)
+DRAW_WAVE(10.0)
+DRAW_WAVE(11.0)
+DRAW_WAVE(12.0)
+DRAW_WAVE(13.0)
+DRAW_WAVE(14.0)
+DRAW_WAVE(15.0)
+DRAW_WAVE(16.0)
+DRAW_WAVE(17.0)
+DRAW_WAVE(18.0)
+DRAW_WAVE(19.0)
+DRAW_WAVE(20.0)
+DRAW_WAVE(21.0)
+DRAW_WAVE(22.0)
+DRAW_WAVE(23.0)
+DRAW_WAVE(24.0)
+DRAW_WAVE(25.0)
+DRAW_WAVE(26.0)
+DRAW_WAVE(27.0)
+DRAW_WAVE(28.0)
+DRAW_WAVE(29.0)
+DRAW_WAVE(30.0)
+DRAW_WAVE(31.0)
 
 	// last wave we want to slowly ease in as it scrolls up from the bottom
 	f=0.0;
@@ -370,6 +405,7 @@ void main(void)
 
 	// live data bottom wave
 	draw_wave( c , mod( v_texcoord.y , 256.0 ) , fract( (tex_info[0])/256.0 ) , pow(fade,0.5) );
+
 	
 	gl_FragColor=pow( c*pow(fade,2.0) , vec4(1.0/2.2) );
 }
