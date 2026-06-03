@@ -22,6 +22,57 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+									 ³}%=?+¬
+						   °I20µ3ÏYwYaõL05üazIóƒ?
+	   			     ¬tƒ%½LYr~ :¦uúû8AÔpÿžaõSfYCusCÏäàõ¡
+			      ¬t3šDàääñžiªí5ÞšÞÞûžúsIƒuççµµVzfñÖàç)í^¡¡:
+				  jóµä$qÔ¶xI=uYwfžeàOüó%¿)1cçxÙÿûZûSO¾sr½j?
+			   ¸cCwñÙKŽÔÔp$A8µÏüfüYs}¬|ª°+z½2ñd8ÿUä¥ñ¥L?=Lƒí
+			 °ç¥LçäñŠŠA8ÚGGÞšfkŸOC)ª²‘    ­¡ó5¥ã$2çe¾Oç1zSŸu^
+			 nðñUÚ8ÙŽWÁÄKKpÙäÖxàŸaì:‘³; ‚°|tOSûÒDÞèZ2† ¡ìDñõLt¯
+		 ‚)tçSãqðÿêÁêþÔqŠêggqœãS5+:ª;‹    *zžÿÒèp¶8ñ2‘  *wÿšüüw)
+		­0xÙŽÀÔKÄpÃÄ#qêÔœþ#Á#ÄÙñµ52óÏzuVuÏûpêð¶¶qdxnz*ci1aèÿ¾Uff
+	   *ä$$œÁBÈÃÄBWWWÄœŽqÔŠgÔã¶Ô$SC1ruí†1½3ÞpêðpÔAèò/õÙÞúÒŠAÒÿèûz>
+	  nkSÙŠŽêÀ#ÅÅÈÄB#BÔÔÀÔÚÒeÏzzuu1iÏOkäðÙšpÚµžäûD0½üûgpkèpÙ$8dÖ23¼
+	 ÏGÀGÚŽêK#ÀœBB#ÄÃØBKÔÿf3ri?†ƒ%1>>ƒLfµef¾¯ ½Ijxke¾ð¶ÔàÙfOàäÿÒšžf½
+	¸ÿ#ÀŽ¶KKþÄþþÁÅÀÀÃAOz­     }YüI†;         ;    L$ñO$xž¾CúðÒUû¥p8Z
+	%SÃBBþÅêAÁqœŠZèãpf=       ?                   ¿ñxúÙñÿßÁœÙÞÞããgpž
+	‚ƒðWÁþÃB#ÅgßDxxÙat³                           ¡í *†pqŠ8œKqgÄpgA½
+	 ¯%$ÄÃBÈÉÃÁÁkí³í+                                 ò¶ÿþBÄÁ#KêÀqqàí
+	  ¯uðÅBWBÃqGu°                                   iŸž$ðgþBÅÁþÄÞ¶§ü|
+	   û###A8KÙw½u«                                  ?¾xkçÙÚŽpãKKŠðÒä>
+	  ˜ÖWþŠKÔÙZàû¥ðGqðeI         ¨                 OãKÔkew¼fŠ8¶ÄBŠèG¥I
+	}uõ3þW#ÔŸì;:+òàðêKÅÃ§         ”¡¡ª‹           à¶8AÔÄqdñžZêþœŠßßGµ+
+	 =wœÈÈ#ðVìxŸi     SÀð‘       ²ƒ5§ÿÿû5c²      )äàÿÔèÙÔÙðGÞÔãêWÉÅGY
+	  wãØÈÁŠ¥ÔÁÀ#ÃÈãò ”Þÿ       :†ìc      aç     *ñðqÔÁqqÄŽAÅÅBBBÅÀãi
+	1¶ÈÉØÈŽßÔqãñ¬5ZÖ  °C         aèãÙABW¥}˜ì5¯   tñKpqAf5ÞàDêKŽþþÔÒü¿
+   žpÔÅÃÃÄðÖÒðÚZŸƒ    V«           ª:cÚgò        |UejÒ% uAAKÁWW#¶ÔÚÖ‹
+   §«|VBÁZ¿  †n†    }õŸ                           :r/ÏwãD§ãêÀŽœÀœŽèü
+	  ;òx0|        ³òà¼             ­:              ­ÏäàÚÖ8ÚÿwŸŽ#œV
+		¨a*        «ú‚                              ¨O¥ÖZI¬ ³}óêÁÙ
+		 s­        ñs                               %¶À83UU  …I¶KÖ­
+		 zVnò)    žAD0ª         ¸                   íðÔS`?¼‘ ‘wÖÖì
+		 iŸõÏ*  ì0ñAŽWþd½  a8t   ‚                   +%~‚~   12V`
+		 zäšüi‘¨¡¦ó¥ãqñ=°                               ‘   ¡ìì
+		 }žà¾í¨+?ƒSzzs¨                                    cC1
+		 ˜OÖµ/   ?Kqÿ5¡         |³                   ¸    Ï51;
+		  úÒ5~   ¯ü¾G$ñú*”²‚~)/)+xÙ=                +Öž”  ü3
+		  +fe¡   *¡ìƒtóús?                          ”    )2Y}
+		   }Ï3¸                                         °wósƒ)
+		   «+Cì˜                                        c=†/i%
+		   ¡=rVµú|                                     Y==/)«*+
+			¬s1cúw1                                  ‘zrr%ƒrìuƒ
+		  ²  +ž½~½õúj”                              iƒc½ItóCcƒI¬
+		  ?>   2ÿxƒVCƒƒcò%+²                       znÏt*cƒt1òzss­
+	  ‹2   …¿`   fpfr†c}>+^:                     ‚%¼nsI|ƒj1†j¼2V¯
+	 2½³     ?      ˜)«                         )%r¿i¯°¬)½ri¼5xç>
+   ½¾¥e       r²   *~                         1Ï%†¬~”‚?)ƒƒ3½Ï5õúw
+ *ç¾5ûú        >¡                           ªLwuí|?|)­¦rV½urcCYLàa
+/LõûñÖÿ½         |                          =¼t¿}ª”¿?‘``”/jc>¼nuÏ¾d¥i
+
+
+Wherein we will perform a Dumb Fourier Transform for visualization.
+
 */
 
 
@@ -86,12 +137,12 @@ typedef struct dft_bucket
 {
 	int32_t  idx;			// 0 .. wavlen-1 as we push data in
 	int32_t  wavlen;		// length of each probe and data buffers
-	int32_t  sin_total;		// running sin total
-	int32_t  cos_total;		// running cos total 
 	int16_t* sin_probe;		// sin probe
 	int16_t* cos_probe;		// cos probe
-	int16_t* sin_data;		// sin probe*data>>15
-	int16_t* cos_data;		// cos probe*data>>15
+	double   sin_wav;		// running sin total
+	double   cos_wav;		// running cos total 
+	double   sin_total;		// running sin total
+	double   cos_total;		// running cos total 
 	double   sqr_count;		// number of sqr samples ( incs every wavlen samples )
 	double   sqr_total;		// running total squared divide by sqr_count then sqrt it
 
@@ -102,8 +153,7 @@ typedef struct dft_state
 	int32_t     sizeof_mem;			// size of mem allocated
 	int32_t     numof_buckets;		// number of buckets allocated
 	void*       memctx;				// memory context
-	void*       mem;				// big chunk of allocated memory
-	dft_bucket* buckets;			// array of buckets
+	dft_bucket* buckets;			// array of buckets input
 	double*     waves;				// bucket output array
 
 } dft_state ;
@@ -137,7 +187,7 @@ extern dft_state* dft_setup( int32_t numof_buckets , int32_t* wavlens )
 	{
 		sizeof_mem+=sizeof(dft_bucket);
 		sizeof_mem+=sizeof(double);
-		sizeof_mem+=wavlens[idx]*2*4;	// 4 wavlen sized s16 buffers
+		sizeof_mem+=wavlens[idx]*2*2;	// 2 wavlen sized s16 sin/cos buffers
 	}
 	int8_t* ptr=(int8_t*)DFT_MEM_ALLOC(ctx,sizeof_mem); // all the mem we need
 	if(!ptr) { return 0; } // fail
@@ -145,7 +195,6 @@ extern dft_state* dft_setup( int32_t numof_buckets , int32_t* wavlens )
 	dft_state *ds=(dft_state*)ptr; ptr+=sizeof(dft_state);
 	ds->memctx=ctx;
 	ds->sizeof_mem=sizeof_mem;
-	ds->mem=ptr;
 	ds->numof_buckets=numof_buckets;
 	ds->buckets=(dft_bucket*)(ptr); ptr+=sizeof(dft_bucket)*ds->numof_buckets;
 	ds->waves=(double*)(ptr); ptr+=sizeof(double)*ds->numof_buckets;
@@ -156,8 +205,6 @@ extern dft_state* dft_setup( int32_t numof_buckets , int32_t* wavlens )
 		bucket->wavlen=wavlens[idx];
 		bucket->sin_probe=(int16_t*)ptr; ptr+=2*bucket->wavlen;
 		bucket->cos_probe=(int16_t*)ptr; ptr+=2*bucket->wavlen;
-		bucket->sin_data=(int16_t*)ptr; ptr+=2*bucket->wavlen;
-		bucket->cos_data=(int16_t*)ptr; ptr+=2*bucket->wavlen;
 	}
 
 	dft_reset(ds);
@@ -172,19 +219,18 @@ extern void       dft_reset( dft_state* ds )
 		dft_bucket *bucket=ds->buckets+idx;
 
 		bucket->idx=0;
-		bucket->sin_total=0;
-		bucket->cos_total=0;
-
+		bucket->sin_wav=0.0;
+		bucket->cos_wav=0.0;
+		bucket->sin_total=0.0;
+		bucket->cos_total=0.0;
 		bucket->sqr_count=0.0;
 		bucket->sqr_total=0.0;
 
 		for( int i=0 ; i<bucket->wavlen ; i++ )
 		{
-			double turns=((double)(i))/((double)(bucket->wavlen));
+			double turns=(0.5+(double)(i))/((double)(bucket->wavlen));
 			bucket->sin_probe[i]= (int16_t)( 32767.0 * sin( DFT_TAU*turns ) );
 			bucket->cos_probe[i]= (int16_t)( 32767.0 * cos( DFT_TAU*turns ) );
-			bucket->sin_data[i]=0;
-			bucket->cos_data[i]=0;
 		}
 	}
 }
@@ -192,7 +238,7 @@ extern void       dft_reset( dft_state* ds )
 extern void       dft_clean( dft_state* ds )
 {
 	void *ctx=ds->memctx; // remember ctx as it is stored in memory we are about to free
-	DFT_MEM_FREE(ctx,ds->mem,ds->sizeof_mem);	// free memory
+	DFT_MEM_FREE(ctx,ds,ds->sizeof_mem);	// free memory
 	DFT_MEM_FREE_CTX(ctx);	// free ctx
 }
 
@@ -202,24 +248,19 @@ extern void       dft_push( dft_state* ds , int32_t len, int16_t* samples)
 	{
 		dft_bucket *bucket=ds->buckets+idx;
 		for( int i=0 ; i<len ; i++ )
-		{
+		{			
+			bucket->sin_wav+=(double)bucket->sin_probe[bucket->idx]*samples[i];
+			bucket->cos_wav+=(double)bucket->cos_probe[bucket->idx]*samples[i];
 			bucket->idx++;
 			if( bucket->idx>=bucket->wavlen ) // next wave
 			{
 				bucket->idx=0;
-				double s=(double)(bucket->sin_total);
-				double c=(double)(bucket->cos_total);
-				bucket->sqr_total+= s*s + c*c ;
-				bucket->sqr_count+=1.0;
+				bucket->sqr_count+=bucket->wavlen;
+				bucket->sin_total+=bucket->sin_wav;	// total full waves only
+				bucket->cos_total+=bucket->cos_wav;
+				bucket->sin_wav=0.0;
+				bucket->cos_wav=0.0;
 			}
-
-			bucket->sin_total-=bucket->sin_data[bucket->idx];
-			bucket->sin_data[bucket->idx]=(bucket->sin_probe[bucket->idx]*samples[i])>>15;
-			bucket->sin_total+=bucket->sin_data[bucket->idx];
-
-			bucket->cos_total-=bucket->cos_data[bucket->idx];
-			bucket->cos_data[bucket->idx]=(bucket->cos_probe[bucket->idx]*samples[i])>>15;
-			bucket->cos_total+=bucket->cos_data[bucket->idx];
 		}
 	}
 }
@@ -231,14 +272,12 @@ extern double*    dft_pull( dft_state* ds )
 		dft_bucket *bucket=ds->buckets+idx;
 		if( bucket->sqr_count>0.0 )
 		{
-			ds->waves[idx]=sqrt( bucket->sqr_total / bucket->sqr_count );
+			bucket->sqr_total= bucket->sin_total*bucket->sin_total + bucket->cos_total*bucket->cos_total ;
+			ds->waves[idx]=sqrt( bucket->sqr_total )/(32768.0*16384.0*bucket->sqr_count);
+			bucket->sqr_count=0.0;
+			bucket->sin_total=0.0;
+			bucket->cos_total=0.0;
 		}
-		else
-		{
-			ds->waves[idx]=0.0;
-		}
-		bucket->sqr_total=0.0;
-		bucket->sqr_count=0.0;
 	}
 	return ds->waves;
 }

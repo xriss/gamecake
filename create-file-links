@@ -44,6 +44,7 @@ ln -f lua/wetgenes/pack.lua     libs/lua_pack/code/pack.lua
 ln -f lua/wetgenes/fats.lua     libs/lua_fats/code/fats.lua                  
 ln -f lua/wetgenes/ogg.lua      libs/lua_ogg/code/ogg.lua                    
 ln -f lua/djon.lua              libs/lua_djon/git/lua/djon.lua
+ln -f lua/dumbft.lua            libs/lua_dumbft/code/dumbft.lua
 
 
 

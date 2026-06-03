@@ -121,12 +121,15 @@ allocate and setup a dft state
 static int lua_dft_setup (lua_State *l)
 {
 dft_state **ptrptr;
+size_t len;
 const char *s;
 const char *opts=0;
 
 	ptrptr=lua_dft_alloc_ptr(l);
+	
+	s=lua_tolstring(l,1,&len);
 
-	(*ptrptr)=dft_setup(0,0);
+	(*ptrptr)=dft_setup(len/4,(int32_t*)s);
 
 	return 1;
 }
@@ -142,6 +145,35 @@ static int lua_dft_clean (lua_State *l)
 	return 0;
 }
 
+/*
+
+Push some data into the dft probes
+
+*/
+static int lua_dft_push (lua_State *l)
+{
+const char* s;
+size_t len;
+	dft_state* ds=lua_dft_check_ptr(l,1);
+	s=lua_tolstring(l,2,&len);
+	dft_push(ds,len/2,(int16_t*)s);
+	return 0;
+}
+
+/*
+
+Pull some data from the dft probes
+
+*/
+static int lua_dft_pull (lua_State *l)
+{
+int16_t *s;
+int len;
+	dft_state* ds=lua_dft_check_ptr(l,1);
+	dft_pull(ds);
+	lua_pushlstring(l,(const char*)ds->waves,ds->numof_buckets*8);
+	return 1;
+}
 
 LUALIB_API int luaopen_dumbft_core (lua_State *l)
 {
@@ -149,6 +181,8 @@ LUALIB_API int luaopen_dumbft_core (lua_State *l)
 	{
 		{"setup",					lua_dft_setup},
 		{"clean",					lua_dft_clean},
+		{"push",					lua_dft_push},
+		{"pull",					lua_dft_pull},
 
 		{0,0}
 	};
