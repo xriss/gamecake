@@ -123,13 +123,13 @@ static int lua_dft_setup (lua_State *l)
 dft_state **ptrptr;
 size_t len;
 const char *s;
-const char *opts=0;
+double n;
 
 	ptrptr=lua_dft_alloc_ptr(l);
 	
 	s=lua_tolstring(l,1,&len);
 
-	(*ptrptr)=dft_setup(len/4,(int32_t*)s);
+	(*ptrptr)=dft_setup(len/8,(int32_t*)s);
 
 	return 1;
 }

@@ -8,12 +8,18 @@ local M={ modname=(...) }
 package.loaded[M.modname]=M
 local dumbft=M
 
+--[[
 
-dumbft.create=function(wavlens)
+	probelens is array of probelengths in full samples then wavcount for this probe
+	two numbers per probe
+	so wavelens are fractional -> [1]/[2] , [3]/[4] , etc
+	
+]]
+dumbft.create=function(probelens)
 	local dft={}
-	dft.wavlens=wavlens
+	dft.probelens=probelens
 
-	dft[0]=core.setup( fats.table_to_int32s(wavlens) )
+	dft[0]=core.setup( fats.table_to_int32s(probelens) )
 	
 	dft.push=function(dft,s16s)
 		core.push( dft[0] , s16s )

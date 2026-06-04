@@ -11,7 +11,7 @@ local midinote_to_freq=function(m)
 	return (2^((m-69)/12))*440
 end
 local midinote_to_wavelen=function(m)
-	return math.ceil(sample_rate/midinote_to_freq(m))
+	return (sample_rate/midinote_to_freq(m))
 end
 
 local math_log_2=math.log(2)
@@ -36,128 +36,6 @@ local max_bucket=256
 -- Also remember we are looking here at visualization so only need to be
 -- concerned with a one way transform, no rebuilding the original data.
 
---
--- Here begins the Dumb Fourier Transform code, plenty of room for optimization
--- a lot of what is going on here is about giving me space to tweak and experiment
---
-
--- output buckets, each one has its own circular buffer to maintain a running total
--- this buffer size does not slow us down but does increase memory usage
---[[
-local new_bucket=function(base_size,probe_size)
-	local bucket={}
-	
-	bucket.midinote=wavelen_to_midinote(probe_size)
-	bucket.probe_size=probe_size -- wavelength in samples
-	bucket.size=base_size -- requested time sample resolution
-	bucket.probe_idx=0
-	bucket.idx=0
-	bucket.stotal=0
-	bucket.ctotal=0
-	bucket.sdata={}
-	bucket.cdata={}
-	bucket.probe_sdata={} -- should replace this with global wave
-	bucket.probe_cdata={}
-
-	-- prob must be a int number of samples, or we get garbage noise
-	-- as the 0 output from failed probes breaks due to aliasing
-	bucket.probe_size=math.ceil(bucket.probe_size)
-
--- round bucket size to a multiple of probe size?
-	bucket.size=math.ceil(bucket.size/bucket.probe_size)*bucket.probe_size
--- probe must fit in the bucket ( eg low hz will increase bucket size )
-	if bucket.size<bucket.probe_size then bucket.size=bucket.probe_size end
-
-	bucket.size=math.ceil(bucket.size) -- force int
-
-	bucket.wave=function(t)
-		return math.sin(math.pi*2*t) -- fucking radians
-	end
--- square wave picks up more noise and sub harmonic peaks but maybe acceptable if faster?
--- also works badly for non even buckets and higher freqs, but possibly?
-	bucket.sqwave=function(t)
-		if t>1 then t=t-1 end
-		if t<0.5 then return 1 end
-		return -1
-	end
-	
-	bucket.reset=function()
-		for i=0,bucket.size-1 do bucket.sdata[i]=0 end -- fill buffer with 0
-		for i=0,bucket.size-1 do bucket.cdata[i]=0 end -- fill buffer with 0
-		for i=0,bucket.probe_size-1 do bucket.probe_sdata[i]=bucket.wave( i/bucket.probe_size ) end -- probe wave
-		for i=0,bucket.probe_size-1 do bucket.probe_cdata[i]=bucket.wave( 0.25+(i/bucket.probe_size) ) end -- probe wave
-		bucket.probe_idx=0
-		bucket.idx=0
-		bucket.stotal=0
-		bucket.ctotal=0
-	end
-	bucket.reset()
-	-- push a new s16 sample into the bucket
-	bucket.push=function(num)
-		local sf=math.floor(num*bucket.probe_sdata[bucket.probe_idx])
-		local cf=math.floor(num*bucket.probe_cdata[bucket.probe_idx])
-		bucket.probe_idx=(bucket.probe_idx+1)%bucket.probe_size -- advance idx along rotational buffer
-
-		local sold=bucket.sdata[bucket.idx]
-		bucket.sdata[bucket.idx]=sf
-		bucket.stotal=bucket.stotal+sf-sold -- keep running total
-
-		local cold=bucket.cdata[bucket.idx]
-		bucket.cdata[bucket.idx]=cf
-		bucket.ctotal=bucket.ctotal+cf-cold -- keep running total
-
-		bucket.idx=(bucket.idx+1)%bucket.size -- advance idx along rotational buffer
-	end
-
-	-- get the current totals, can be called anytime
-	bucket.get=function()
-		local t=math.sqrt( (bucket.stotal*bucket.stotal) + (bucket.ctotal*bucket.ctotal) )
-		local n=t/(bucket.size*0x3fff) -- aim for 0-1 ish might go a bit over
-		return n
-	end
-	
-	return bucket
-end
-
--- max bucket has a wave length of 4 samples and we
--- work backwards adding 1 sample each time
--- we also work midinotes upwards starting at midi 0
--- by switching when these two sequences meet
--- the full midirange 0-127 can be covered this way
--- or you could just use one or the other...
-local buckets={}
-for idx=1,max_bucket do
-	local min_wavelen=math.floor(midinote_to_wavelen((idx-1)/2))
-	local max_wavelen=4+(max_bucket-idx)
-	local wavelen
-
-	-- merge the two bucket schemes, or comment out the logic and force one
---	if min_wavelen>max_wavelen then
---		wavelen=min_wavelen
---	else
-		wavelen=max_wavelen
---	end
-
-	buckets[idx]=buffer_size -- new_bucket( buffer_size , wavelen )
-end
-
-local push_sample=function(num)
-	for m=1,max_bucket do
-		buckets[m].push(num)
-	end
-end
-
-local pull_buckets=function()
-	local bs={}
-	for m=1,max_bucket do
-		bs[m]=buckets[m].get()
-	end
-	return bs
-end
-]]
---
--- Here ends the DumbFT code
---
 
 --
 -- This is fun64 code, you can copy paste it into https://xriss.github.io/fun64/pad/ to run it.
@@ -183,18 +61,14 @@ setup=function()
 	
 	local buckets={}
 	for idx=1,max_bucket do
-		local min_wavelen=math.floor(midinote_to_wavelen((idx-1)/2))
-		local max_wavelen=4+(max_bucket-idx)
-		local wavelen
+		local midinote=48+((idx-1)*64/256) -- so 48 to 112
+		local wavnum=math.ceil(128/midinote_to_wavelen(midinote)) -- must be at least 1
+		local problen=math.floor(midinote_to_wavelen(midinote)*wavnum)
+		buckets[idx*2-1]=problen -- number of samples in probe
+		buckets[idx*2]=wavnum  -- number of waves in probe
 
-		-- merge the two bucket schemes, or comment out the logic and force one
-	--	if min_wavelen>max_wavelen then
-	--		wavelen=min_wavelen
-	--	else
-			wavelen=max_wavelen
-	--	end
+--print(idx,midinote,problen,wavnum,problen/wavnum)
 
-		buckets[idx]=wavelen -- new_bucket( buffer_size , wavelen )
 	end
 	dft=dumbft.create(buckets)
 
@@ -206,30 +80,34 @@ local grd_idx=0
 
 local aline={}
 	for i=1,256 do aline[i]=0 end
+local bline={}
+	for i=1,256 do bline[i]=0 end
+local mline={}
+	for i=1,256 do mline[i]=0 end
 local oline={}
 	for i=1,256 do oline[i]=0 end
 local amerge=0
-local amax=16;
+local amax=60
 local add_line=function(line)
+
+	local t={} -- blur array left/right
+	t[1]=(line[1]+line[2])/3
+	t[256]=(line[255]+line[256])/3
+	for i=2,255 do
+		t[i]=(line[i-1]+line[i]+line[i+1])/3
+	end
+	bline=t
 
 	local done=false
 	amerge=amerge+1
+	for i=1,256 do
+		aline[i]=aline[i]+bline[i]
+	end
 	if amerge>=amax then
 		for i=1,256 do
-			aline[i]=(aline[i]+line[i])/amerge
+			mline[i]=aline[i]/amerge
 		end
-		local t={} -- blur array left/right
-		t[1]=(aline[1]+aline[2])/3
-		t[256]=(aline[255]+aline[256])/3
-		for i=2,255 do
-			t[i]=(aline[i-1]+aline[i]+aline[i+1])/3
-		end
-		aline=t
 		done=true
-	else
-		for i=1,256 do
-			aline[i]=aline[i]+line[i]
-		end
 	end
 
 	local copper=system.components.copper
@@ -239,7 +117,7 @@ local add_line=function(line)
 	end
 
 	if done then
-		grd_dft:pixels(0,grd_idx,256,1,aline) -- slow data
+		grd_dft:pixels(0,grd_idx,256,1,mline) -- slow data
 
 		for i=0,255 do aline[i]=0 end
 		amerge=0
@@ -249,8 +127,8 @@ local add_line=function(line)
 
 	copper.shader_uniforms.tex_info={ grd_idx , amerge/amax , 0 , 0 } -- live line
 
-	for i=1,256 do -- decay
-		oline[i]=(oline[i]+oline[i]+line[i])/3
+	for i=1,256 do -- decay 67% old 33% new
+		oline[i]=(oline[i]+oline[i]+bline[i])/3
 	end
 	grd_dft:pixels(0,grd_idx,256,1,oline) -- live data
 
@@ -258,32 +136,32 @@ local add_line=function(line)
 	copper.upload_grd(grd_dft)
 end
 
+local buff=""
 update=function()
 
     if setup then setup() ; setup=nil end
 
-	local buff,len=oven.cake.sounds.get_capture()
-	local s16s
-	if buff then
-		dft:push(buff)
---		s16s=fats.int16s_to_table(buff)
-	else
---		s16s={}
+	local nbuff,len=oven.cake.sounds.get_capture()
+	if nbuff then
+		buff=buff..nbuff
 	end
---	for i,v in ipairs(s16s) do
---		push_sample(v)
---	end
---	local bs=pull_buckets()
-	local bs=fats.doubles_to_table( dft:pull() )
-	local line={}
-	for idx=1,max_bucket do
-		local m=wavelen_to_midinote(dft.wavlens[idx])
-		local n=bs[idx]
---		local o=math.floor(m/12)
-		n=math.ceil((n*(2^(m/12)))*8) -- *double loudness every octave* and tweak to view size
-		line[idx]=n
+
+	local chunksize=400*2
+	while #buff>=chunksize do -- chunk process
+		dft:push(buff:sub(1,chunksize))
+		buff=buff:sub(chunksize+1,-1)
+
+		local bs=fats.doubles_to_table( dft:pull() )
+		local line={}
+		for idx=1,max_bucket do
+	--		local m=wavelen_to_midinote(dft.probelens[idx*2-1]/dft.probelens[idx*2])
+			local n=bs[idx]
+			-- scale to 0-255 range and tweak *4 since mic is usually low...
+			n=math.ceil(n*4*256)
+			line[idx]=n
+		end
+		add_line(line)
 	end
-	add_line(line)
 end
 
 
@@ -366,23 +244,53 @@ void draw_wave(inout vec4 c , float y , float vy , float fade)
 void main(void)
 {
 	vec4 c=vec4(0.0);
-
 	float fade=min( ( 128.0-abs(v_texcoord.x-128.0) ) , 128.0 )/128.0;
+
 
 	float v=texture2D(copper_tex, vec2( v_texcoord.x/256.0 , fract( ( tex_info[0]+v_texcoord.y) /256.0 ) ) ).r;
 
 //	c=vec4( v , v , v , 0.0 );
 
 	float f;
-// must divide into 256
+
 #define STEP 8.0
-	for(f=256.0 ; f>0.0 ; f-=STEP )
-	{
-		// main waves
-		draw_wave( c , v_texcoord.y+f+mod(tex_info[0],STEP) ,
-			fract( mod( tex_info[0]+256.0-f-mod(tex_info[0],STEP) , 256.0 ) /256.0 ) ,
+#define DRAW_WAVE(DW) \
+		draw_wave( c , v_texcoord.y+(256.0-(DW*STEP))+mod(tex_info[0],STEP) ,\
+			fract( mod( tex_info[0]+256.0-(256.0-(DW*STEP))-mod(tex_info[0],STEP) , 256.0 ) /256.0 ) ,\
 				pow(fade,0.5) );
-	}
+
+DRAW_WAVE( 0.0)
+DRAW_WAVE( 1.0)
+DRAW_WAVE( 2.0)
+DRAW_WAVE( 3.0)
+DRAW_WAVE( 4.0)
+DRAW_WAVE( 5.0)
+DRAW_WAVE( 6.0)
+DRAW_WAVE( 7.0)
+DRAW_WAVE( 8.0)
+DRAW_WAVE( 9.0)
+DRAW_WAVE(10.0)
+DRAW_WAVE(11.0)
+DRAW_WAVE(12.0)
+DRAW_WAVE(13.0)
+DRAW_WAVE(14.0)
+DRAW_WAVE(15.0)
+DRAW_WAVE(16.0)
+DRAW_WAVE(17.0)
+DRAW_WAVE(18.0)
+DRAW_WAVE(19.0)
+DRAW_WAVE(20.0)
+DRAW_WAVE(21.0)
+DRAW_WAVE(22.0)
+DRAW_WAVE(23.0)
+DRAW_WAVE(24.0)
+DRAW_WAVE(25.0)
+DRAW_WAVE(26.0)
+DRAW_WAVE(27.0)
+DRAW_WAVE(28.0)
+DRAW_WAVE(29.0)
+DRAW_WAVE(30.0)
+DRAW_WAVE(31.0)
 
 	// last wave we want to slowly ease in as it scrolls up from the bottom
 	f=0.0;
@@ -392,6 +300,7 @@ void main(void)
 
 	// live data bottom wave
 	draw_wave( c , mod( v_texcoord.y , 256.0 ) , fract( (tex_info[0])/256.0 ) , pow(fade,0.5) );
+
 	
 	gl_FragColor=pow( c*pow(fade,2.0) , vec4(1.0/2.2) );
 }

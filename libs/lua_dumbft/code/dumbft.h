@@ -135,15 +135,16 @@ extern void *dft_mem(void *ctx,void *ptr,int old,int siz)
 
 typedef struct dft_bucket
 {
-	int32_t  idx;			// 0 .. wavlen-1 as we push data in
-	int32_t  wavlen;		// length of each probe and data buffers
+	int32_t  idx;			// 0 .. probelen-1 as we push data in
+	int32_t  probelen;		// length of each probe buffer ( / by wavcount for wavlen )
+	int32_t  wavcount;		// number of waves in a probe must be 1 or more
 	int16_t* sin_probe;		// sin probe
 	int16_t* cos_probe;		// cos probe
 	double   sin_wav;		// running sin total
 	double   cos_wav;		// running cos total 
 	double   sin_total;		// running sin total
 	double   cos_total;		// running cos total 
-	double   sqr_count;		// number of sqr samples ( incs every wavlen samples )
+	double   sqr_count;		// number of sqr samples ( incs every probelen samples )
 	double   sqr_total;		// running total squared divide by sqr_count then sqrt it
 
 } dft_bucket ;
@@ -158,7 +159,7 @@ typedef struct dft_state
 
 } dft_state ;
 
-extern dft_state* dft_setup( int32_t numof_buckets , int32_t* wavlens );
+extern dft_state* dft_setup( int32_t numof_buckets , int32_t* probelens );
 extern void       dft_reset( dft_state* ds );
 extern void       dft_clean( dft_state* ds );
 extern void       dft_push( dft_state* ds , int32_t len, int16_t* samples);
@@ -177,7 +178,7 @@ extern double*    dft_pull( dft_state* ds );
 extern "C" {
 #endif
 
-extern dft_state* dft_setup( int32_t numof_buckets , int32_t* wavlens )
+extern dft_state* dft_setup( int32_t numof_buckets , int32_t* probelens )
 {
 	void *ctx=DFT_MEM_ALLOC_CTX(); // we don't use a context but you can
 	int sizeof_mem=0;
@@ -187,7 +188,7 @@ extern dft_state* dft_setup( int32_t numof_buckets , int32_t* wavlens )
 	{
 		sizeof_mem+=sizeof(dft_bucket);
 		sizeof_mem+=sizeof(double);
-		sizeof_mem+=wavlens[idx]*2*2;	// 2 wavlen sized s16 sin/cos buffers
+		sizeof_mem+=probelens[idx*2]*2*2;	// 2 probelen sized s16 sin/cos buffers
 	}
 	int8_t* ptr=(int8_t*)DFT_MEM_ALLOC(ctx,sizeof_mem); // all the mem we need
 	if(!ptr) { return 0; } // fail
@@ -202,11 +203,19 @@ extern dft_state* dft_setup( int32_t numof_buckets , int32_t* wavlens )
 	for( int idx=0 ; idx<ds->numof_buckets ; idx++ )
 	{
 		dft_bucket *bucket=ds->buckets+idx;
-		bucket->wavlen=wavlens[idx];
-		bucket->sin_probe=(int16_t*)ptr; ptr+=2*bucket->wavlen;
-		bucket->cos_probe=(int16_t*)ptr; ptr+=2*bucket->wavlen;
+		bucket->probelen=probelens[idx*2];
+		bucket->wavcount=probelens[idx*2+1];
+		bucket->sin_probe=(int16_t*)ptr; ptr+=2*bucket->probelen;
+		bucket->cos_probe=(int16_t*)ptr; ptr+=2*bucket->probelen;
 	}
 
+	// sanity
+	if( (ptr) != ((int8_t*)ds)+ds->sizeof_mem )
+	{
+		printf("bad dumbft allocations, aborting!\n");
+		return 0;
+	}
+	
 	dft_reset(ds);
 
 	return ds;
@@ -226,11 +235,13 @@ extern void       dft_reset( dft_state* ds )
 		bucket->sqr_count=0.0;
 		bucket->sqr_total=0.0;
 
-		for( int i=0 ; i<bucket->wavlen ; i++ )
+		for( int i=0 ; i<bucket->probelen ; i++ )
 		{
-			double turns=(0.5+(double)(i))/((double)(bucket->wavlen));
+			double turns=(0.5+(double)(i))/(((double)(bucket->probelen))/((double)(bucket->wavcount)));
 			bucket->sin_probe[i]= (int16_t)( 32767.0 * sin( DFT_TAU*turns ) );
 			bucket->cos_probe[i]= (int16_t)( 32767.0 * cos( DFT_TAU*turns ) );
+
+			ds->waves[i]=0.0;
 		}
 	}
 }
@@ -252,10 +263,10 @@ extern void       dft_push( dft_state* ds , int32_t len, int16_t* samples)
 			bucket->sin_wav+=(double)bucket->sin_probe[bucket->idx]*samples[i];
 			bucket->cos_wav+=(double)bucket->cos_probe[bucket->idx]*samples[i];
 			bucket->idx++;
-			if( bucket->idx>=bucket->wavlen ) // next wave
+			if( bucket->idx>=bucket->probelen ) // next wave
 			{
 				bucket->idx=0;
-				bucket->sqr_count+=bucket->wavlen;
+				bucket->sqr_count+=bucket->probelen;
 				bucket->sin_total+=bucket->sin_wav;	// total full waves only
 				bucket->cos_total+=bucket->cos_wav;
 				bucket->sin_wav=0.0;
@@ -273,7 +284,8 @@ extern double*    dft_pull( dft_state* ds )
 		if( bucket->sqr_count>0.0 )
 		{
 			bucket->sqr_total= bucket->sin_total*bucket->sin_total + bucket->cos_total*bucket->cos_total ;
-			ds->waves[idx]=sqrt( bucket->sqr_total )/(32768.0*16384.0*bucket->sqr_count);
+			// A full bucket should be a 1...ish
+			ds->waves[idx]=sqrt( bucket->sqr_total )/((32768.0*16384.0)*bucket->sqr_count);
 			bucket->sqr_count=0.0;
 			bucket->sin_total=0.0;
 			bucket->cos_total=0.0;
