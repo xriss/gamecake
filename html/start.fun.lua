@@ -11,7 +11,7 @@ local midinote_to_freq=function(m)
 	return (2^((m-69)/12))*440
 end
 local midinote_to_wavelen=function(m)
-	return math.ceil(sample_rate/midinote_to_freq(m))
+	return (sample_rate/midinote_to_freq(m))
 end
 
 local math_log_2=math.log(2)
@@ -61,18 +61,14 @@ setup=function()
 	
 	local buckets={}
 	for idx=1,max_bucket do
-		local min_wavelen=math.floor(midinote_to_wavelen((idx-1)/2))
-		local max_wavelen=4+(max_bucket-idx)
-		local wavelen
+		local midinote=48+((idx-1)*64/256) -- so 48 to 112
+		local wavnum=math.ceil(128/midinote_to_wavelen(midinote)) -- must be at least 1
+		local problen=math.floor(midinote_to_wavelen(midinote)*wavnum)
+		buckets[idx*2-1]=problen -- number of samples in probe
+		buckets[idx*2]=wavnum  -- number of waves in probe
 
-		-- merge the two bucket schemes, or comment out the logic and force one
---		if min_wavelen>max_wavelen then
---			wavelen=min_wavelen -- 8hz to 12000hz
---		else
-			wavelen=max_wavelen -- probably 184hz to 12000hz very non linear but every bucket is *good*
---		end
+--print(idx,midinote,problen,wavnum,problen/wavnum)
 
-		buckets[idx]=wavelen -- new_bucket( buffer_size , wavelen )
 	end
 	dft=dumbft.create(buckets)
 
@@ -91,7 +87,7 @@ local mline={}
 local oline={}
 	for i=1,256 do oline[i]=0 end
 local amerge=0
-local amax=16
+local amax=60
 local add_line=function(line)
 
 	local t={} -- blur array left/right
@@ -140,25 +136,32 @@ local add_line=function(line)
 	copper.upload_grd(grd_dft)
 end
 
+local buff=""
 update=function()
 
     if setup then setup() ; setup=nil end
 
-	local buff,len=oven.cake.sounds.get_capture()
-	if buff then
-		dft:push(buff)
+	local nbuff,len=oven.cake.sounds.get_capture()
+	if nbuff then
+		buff=buff..nbuff
 	end
 
-	local bs=fats.doubles_to_table( dft:pull() )
-	local line={}
-	for idx=1,max_bucket do
-		local m=wavelen_to_midinote(dft.wavlens[idx])
-		local n=bs[idx]
-		-- and tweak to 0-255 range
-		n=math.ceil(n*8*256)
-		line[idx]=n
+	local chunksize=400*2
+	while #buff>=chunksize do -- chunk process
+		dft:push(buff:sub(1,chunksize))
+		buff=buff:sub(chunksize+1,-1)
+
+		local bs=fats.doubles_to_table( dft:pull() )
+		local line={}
+		for idx=1,max_bucket do
+	--		local m=wavelen_to_midinote(dft.probelens[idx*2-1]/dft.probelens[idx*2])
+			local n=bs[idx]
+			-- scale to 0-255 range and tweak *4 since mic is usually low...
+			n=math.ceil(n*4*256)
+			line[idx]=n
+		end
+		add_line(line)
 	end
-	add_line(line)
 end
 
 
