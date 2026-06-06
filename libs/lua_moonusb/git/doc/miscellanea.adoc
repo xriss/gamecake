@@ -1,0 +1,41 @@
+
+[[miscellanea]]
+== Miscellanea
+
+[small]#Rfr: link:++http://libusb.sourceforge.net/api-1.0/group__libusb__misc.html++[Miscellaneous].#
+
+[[get_version]]
+* _major_, _minor_, _micro_, _nano_, _rc_ = *get_version*(&nbsp;) +
+[small]#Returns libusb version information. +
+Also available are the _usb._VERSION_ and _usb._LIBUSB_VERSION_ variables, that contain
+the string versions for MoonUSB and libusb, respectively. +
+Rfr: _libusb_get_version( )_.#
+
+[[set_locale]]
+* *set_locale*(_locale_) +
+[small]#_locale_: string. +
+Rfr: _libusb_set_locale( )_.#
+
+[[has_capability]]
+* *has_capability*(<<capability, _capability_>>) +
+[small]#Rfr: _libusb_has_capability( )_.#
+
+
+[[trace_objects]]
+* *trace_objects*(_boolean_) +
+[small]#Enable/disable tracing of objects creation and destruction (which by default
+is disabled). +
+If enabled, a printf is generated whenever an object is created or deleted,
+indicating the object type and the value of its raw handle.#
+
+[[now]]
+* _t_ = *now*(&nbsp;) +
+[small]#Returns the current time in seconds (a Lua number). +
+This is implemented with monotonic _clock_gettime(3)_, if available, or 
+with _gettimeofday(3)_ otherwise.#
+
+[[since]]
+* _dt_ = *since*(_t_) +
+[small]#Returns the time in seconds (a Lua number) elapsed since the time _t_, 
+previously obtained with the <<now, now>>(&nbsp;) function.#
+

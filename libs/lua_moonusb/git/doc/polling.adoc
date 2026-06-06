@@ -1,0 +1,26 @@
+
+[[polling]]
+== Polling
+
+[small]#Rfr: link:++http://libusb.sourceforge.net/api-1.0/group__libusb__poll.html++[Polling and timing].#
+
+The functions described in this section are to be used in the main event loop of the application.
+
+An event loop is required when using the <<asynchapi, asynchronous I/O>> API for transfers, and/or
+the <<hotplug, hotplug>> API for detecting devices, since callbacks registered via those APIs are
+executed within calls of the _context_:<<handle_events, handle_events>>( ) method described below.
+
+Note that MoonUSB does not support multithreading, so the related libusb functions are not exposed.
+
+[[handle_events]]
+* <<context, _context_>>++:++*handle_events*([_timeout_]) +
+[small]#Handle any pending events. +
+_timeout_: number of seconds to block waiting for events to handle. +
+Passing _timeout_=0 makes the function handle any pending event and return immediately. +
+Passing _timeout_=_nil_ (or not passing it at all) makes it block indefinitely. +
+Rfr: _libusb_handle_events( )_, _libusb_handle_events_timeout( )_.#
+
+* _next_timeout_ = <<context, _context_>>++:++*get_next_timeout*( ) +
+[small]#Returns the next internal timeout (in number of seconds) that libusb needs to handle, or _nil_ if none. +
+Rfr: _libusb_get_next_timeout( )_.#
+

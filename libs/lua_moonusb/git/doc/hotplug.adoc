@@ -1,0 +1,24 @@
+
+[[hotplug]]
+== Hotplug
+
+[small]#Rfr: link:++http://libusb.sourceforge.net/api-1.0/group__libusb__hotplug.html++[Device hotplug event notification].#
+
+This API needs an event loop. See the <<polling, polling>> section.
+
+* _hotplug_ = <<context, _context_>>++:++*hotplug_register*(_event_, _func_, [_enumerate_], [_vendor_id_], [_product_id_], [_device_class_] ) +
+[small]#Registers a hotplug callback function and returns the corresponding _hotplug_ object. +
+_event_: <<hotplugevent, hotplugevent>>, the event of interest, +
+_func_: the callback function, +
+_enumerate_: boolean, if _true_, the callback is executed also for already discovered devices, +
+_vendor_id_: integer (_nil_ means '_any_'), + 
+_product_id_: integer (_nil_ means '_any_'), + 
+_device_class_: integer (_nil_ means '_any_'), + 
+The _func_ callback is executed as *boolean = func(context, device, event)*. By returning _true_ it causes the hotplug to be deregistered. +
+The callback should free any device it is not interested in, by calling _device:free( )_. +
+Rfr: _libusb_hotplug_register_callback( )_.#
+
+* _hotplug_++:++*deregister*( ) +
+[small]#Deregisters the callback and deletes the _hotplug_ object. +
+Rfr: _libusb_hotplug_deregister_callback( )_.#
+

@@ -1,0 +1,97 @@
+
+[[structs]]
+== Structs
+
+* [[devicedescriptor]]
+[small]#*devicedescriptor* = { +
+_usb_version_: string (e.g. '_02.00_', _bcdUSB_), +
+_class_: <<class, class>> (_bDeviceClass_), +
+_subclass_: integer (_bDeviceSubClass_), +
+_protocol_: integer (_bDeviceProtocol_), +
+_max_packet_size_0_: integer (_bMaxPacketSize0_), +
+_vendor_id_: integer (_idVendor_), +
+_product_id_: integer (_idProduct_), +
+_release_number_: string (e.g. '_01.02_', _bcdDevice_), +
+_manufacturer_index_: integer (_iManufacturer_), +
+_product_index_: integer (_iProduct_), +
+_serial_number_index_: integer (_iSerialNumber_), +
+_num_configurations_: integer (_bNumConfigurations_), +
+_configuration_: {<<configdescriptor, configdescriptor>>}, +
+} (rfr: link:++http://libusb.sourceforge.net/api-1.0/structlibusb__device__descriptor.html++[libusb_device_descriptor])#
+
+* [[configdescriptor]]
+[small]#*configdescriptor* = { +
+_value_: integer (_bConfigurationValue_), +
+_index_: integer (_iConfiguration_), +
+_self_powered_: boolean (_bmAttributes_), +
+_remote_wakeup_: boolean (_bmAttributes_), +
+_max_power_: integer (_MaxPower_), +
+_num_interfaces_: integer (_bNumInterfaces_), +
+_interface_: {{<<interfacedescriptor, interfacedescriptor>>}}, +
+_extra_: binary string, +
+} (rfr: link:++http://libusb.sourceforge.net/api-1.0/structlibusb__config__descriptor.html++[libusb_config_descriptor])#
+
+* [[interfacedescriptor]]
+[small]#*interfacedescriptor* = { +
+_number_: integer (_bInterfaceNumber_), +
+_alt_setting_: integer (_bAlternateSetting_), +
+_class_: <<class, class>> (_bInterfaceClass_), +
+_subclass_: integer (_bInterfaceSubClass_), +
+_protocol_: integer (_bInterfaceProtocol_), +
+_index_: integer (_iInterface_), +
+_num_endpoints_: integer (_bNumEndpoints_), +
+_endpoint_: {<<endpointdescriptor, endpointdescriptor>>}, +
+_extra_: binary string, +
+} (rfr: link:++http://libusb.sourceforge.net/api-1.0/structlibusb__interface__descriptor.html++[libusb_interface_descriptor])#
+
+* [[endpointdescriptor]]
+[small]#*endpointdescriptor* = { +
+_address_: integer (_bEndpointAddress_), +
+_number_: integer (_bEndpointAddress_), +
+_direction_: <<direction, direction>> (_bEndpointAddress_), +
+_transfer_type_: <<transfertype, transfertype>> (_bmAttributes_), +
+_iso_sync_type_: <<isosynctype, isosynctype>> (_bmAttributes_, isochronous transfers only), +
+_iso_usage_type_: <<isousagetype, isousagetype>> (_bmAttributes_, isochronous transfers only), +
+_max_packet_size_: integer (_wMaxPacketSize_), +
+_interval_: integer (_bInterval_), +
+_refresh_: integer (_bRefresh_), +
+_synch_address_: integer (_bSynchAddress_), +
+_ss_endpoint_companion_descriptor_: <<ssendpointcompaniondescriptor, ssendpointcompaniondescriptor>> or _nil_, +
+_extra_: binary string, +
+} (rfr: link:++http://libusb.sourceforge.net/api-1.0/structlibusb__endpoint__descriptor.html++[libusb_endpoint_descriptor])#
+
+* [[ssendpointcompaniondescriptor]]
+[small]#*ssendpointcompaniondescriptor* = { +
+_max_burst_: integer (_bMaxBurst_), +
+_attributes_: integer (_bmAttributes_), +
+_bytes_per_interval_: integer (_wBytesPerInterval_), +
+} (rfr: link:++http://libusb.sourceforge.net/api-1.0/structlibusb__ss__endpoint__companion__descriptor.html++[libusb_ss_endpoint_companion_descriptor])#
+
+''''
+
+* [[bosdescriptor]]
+[small]#*bosdescriptor* = { +
+_num_capabilities_: integer (_bNumDeviceCaps_), +
+_capability_: {<<bosdevcapabilitydescriptor, bosdevcapabilitydescriptor>>}, +
+} (rfr: link:++http://libusb.sourceforge.net/api-1.0/structlibusb__bos__descriptor.html++[libusb_bos_descriptor])#
+
+* [[bosdevcapabilitydescriptor]]
+[small]#*bosdevcapabilitydescriptor* = { +
+	_type_ = integer (_bDevCapabilityType_), +
+	_data_ = binary string (_capability dependent data, see USB 3.2 Specification Table 9-13_), +
+} 
+(rfr: link:++http://libusb.sourceforge.net/api-1.0/structlibusb__bos__dev__capability__descriptor.html++[libusb_bos_dev_capability_descriptor])#
+
+'''
+
+* [[setup]]
+[small]#*setup* = { +
+	_request_type_ = <<requesttype, requesttype>>, +
+	_request_recipient_ = <<requestrecipient, requestrecipient>>, +
+	_direction_ = <<direction, direction>>, +
+	_request_ = <<standardrequest, standardrequest>> or integer (if _request_type_ is not '_standard_'), +
+	_value_ = integer, +
+	_index_ = integer, +
+	_length_ = integer. +
+} (rfr: link:++http://libusb.sourceforge.net/api-1.0/structlibusb__control__setup.html++[libusb_control_setup struct])#
+

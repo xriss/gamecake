@@ -1,0 +1,2324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="author" content="Stefano Trettel">
+<title>MoonUSB Reference Manual</title>
+<style>
+/*! normalize.css v2.1.2 | MIT License | git.io/normalize */
+/* ========================================================================== HTML5 display definitions ========================================================================== */
+/** Correct `block` display not defined in IE 8/9. */
+article, aside, details, figcaption, figure, footer, header, hgroup, main, nav, section, summary { display: block; }
+
+/** Correct `inline-block` display not defined in IE 8/9. */
+audio, canvas, video { display: inline-block; }
+
+/** Prevent modern browsers from displaying `audio` without controls. Remove excess height in iOS 5 devices. */
+audio:not([controls]) { display: none; height: 0; }
+
+/** Address `[hidden]` styling not present in IE 8/9. Hide the `template` element in IE, Safari, and Firefox < 22. */
+[hidden], template { display: none; }
+
+script { display: none !important; }
+
+/* ========================================================================== Base ========================================================================== */
+/** 1. Set default font family to sans-serif. 2. Prevent iOS text size adjust after orientation change, without disabling user zoom. */
+html { font-family: sans-serif; /* 1 */ -ms-text-size-adjust: 100%; /* 2 */ -webkit-text-size-adjust: 100%; /* 2 */ }
+
+/** Remove default margin. */
+body { margin: 0; }
+
+/* ========================================================================== Links ========================================================================== */
+/** Remove the gray background color from active links in IE 10. */
+a { background: transparent; }
+
+/** Address `outline` inconsistency between Chrome and other browsers. */
+a:focus { outline: thin dotted; }
+
+/** Improve readability when focused and also mouse hovered in all browsers. */
+a:active, a:hover { outline: 0; }
+
+/* ========================================================================== Typography ========================================================================== */
+/** Address variable `h1` font-size and margin within `section` and `article` contexts in Firefox 4+, Safari 5, and Chrome. */
+h1 { font-size: 2em; margin: 0.67em 0; }
+
+/** Address styling not present in IE 8/9, Safari 5, and Chrome. */
+abbr[title] { border-bottom: 1px dotted; }
+
+/** Address style set to `bolder` in Firefox 4+, Safari 5, and Chrome. */
+b, strong { font-weight: bold; }
+
+/** Address styling not present in Safari 5 and Chrome. */
+dfn { font-style: italic; }
+
+/** Address differences between Firefox and other browsers. */
+hr { -moz-box-sizing: content-box; box-sizing: content-box; height: 0; }
+
+/** Address styling not present in IE 8/9. */
+mark { background: #ff0; color: #000; }
+
+/** Correct font family set oddly in Safari 5 and Chrome. */
+code, kbd, pre, samp { font-family: monospace, serif; font-size: 1em; }
+
+/** Improve readability of pre-formatted text in all browsers. */
+pre { white-space: pre-wrap; }
+
+/** Set consistent quote types. */
+q { quotes: "\201C" "\201D" "\2018" "\2019"; }
+
+/** Address inconsistent and variable font size in all browsers. */
+small { font-size: 80%; }
+
+/** Prevent `sub` and `sup` affecting `line-height` in all browsers. */
+sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+
+sup { top: -0.5em; }
+
+sub { bottom: -0.25em; }
+
+/* ========================================================================== Embedded content ========================================================================== */
+/** Remove border when inside `a` element in IE 8/9. */
+img { border: 0; }
+
+/** Correct overflow displayed oddly in IE 9. */
+svg:not(:root) { overflow: hidden; }
+
+/* ========================================================================== Figures ========================================================================== */
+/** Address margin not present in IE 8/9 and Safari 5. */
+figure { margin: 0; }
+
+/* ========================================================================== Forms ========================================================================== */
+/** Define consistent border, margin, and padding. */
+fieldset { border: 1px solid #c0c0c0; margin: 0 2px; padding: 0.35em 0.625em 0.75em; }
+
+/** 1. Correct `color` not being inherited in IE 8/9. 2. Remove padding so people aren't caught out if they zero out fieldsets. */
+legend { border: 0; /* 1 */ padding: 0; /* 2 */ }
+
+/** 1. Correct font family not being inherited in all browsers. 2. Correct font size not being inherited in all browsers. 3. Address margins set differently in Firefox 4+, Safari 5, and Chrome. */
+button, input, select, textarea { font-family: inherit; /* 1 */ font-size: 100%; /* 2 */ margin: 0; /* 3 */ }
+
+/** Address Firefox 4+ setting `line-height` on `input` using `!important` in the UA stylesheet. */
+button, input { line-height: normal; }
+
+/** Address inconsistent `text-transform` inheritance for `button` and `select`. All other form control elements do not inherit `text-transform` values. Correct `button` style inheritance in Chrome, Safari 5+, and IE 8+. Correct `select` style inheritance in Firefox 4+ and Opera. */
+button, select { text-transform: none; }
+
+/** 1. Avoid the WebKit bug in Android 4.0.* where (2) destroys native `audio` and `video` controls. 2. Correct inability to style clickable `input` types in iOS. 3. Improve usability and consistency of cursor style between image-type `input` and others. */
+button, html input[type="button"], input[type="reset"], input[type="submit"] { -webkit-appearance: button; /* 2 */ cursor: pointer; /* 3 */ }
+
+/** Re-set default cursor for disabled elements. */
+button[disabled], html input[disabled] { cursor: default; }
+
+/** 1. Address box sizing set to `content-box` in IE 8/9. 2. Remove excess padding in IE 8/9. */
+input[type="checkbox"], input[type="radio"] { box-sizing: border-box; /* 1 */ padding: 0; /* 2 */ }
+
+/** 1. Address `appearance` set to `searchfield` in Safari 5 and Chrome. 2. Address `box-sizing` set to `border-box` in Safari 5 and Chrome (include `-moz` to future-proof). */
+input[type="search"] { -webkit-appearance: textfield; /* 1 */ -moz-box-sizing: content-box; -webkit-box-sizing: content-box; /* 2 */ box-sizing: content-box; }
+
+/** Remove inner padding and search cancel button in Safari 5 and Chrome on OS X. */
+input[type="search"]::-webkit-search-cancel-button, input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; }
+
+/** Remove inner padding and border in Firefox 4+. */
+button::-moz-focus-inner, input::-moz-focus-inner { border: 0; padding: 0; }
+
+/** 1. Remove default vertical scrollbar in IE 8/9. 2. Improve readability and alignment in all browsers. */
+textarea { overflow: auto; /* 1 */ vertical-align: top; /* 2 */ }
+
+/* ========================================================================== Tables ========================================================================== */
+/** Remove most spacing between table cells. */
+table { border-collapse: collapse; border-spacing: 0; }
+
+meta.foundation-mq-small { font-family: "only screen and (min-width: 768px)"; width: 768px; }
+
+meta.foundation-mq-medium { font-family: "only screen and (min-width:1280px)"; width: 1280px; }
+
+meta.foundation-mq-large { font-family: "only screen and (min-width:1440px)"; width: 1440px; }
+
+*, *:before, *:after { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+
+html, body { font-size: 100%; }
+
+body { background: white; color: #222222; padding: 0; margin: 0; font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif; font-weight: normal; font-style: normal; line-height: 1; position: relative; cursor: auto; }
+
+a:hover { cursor: pointer; }
+
+img, object, embed { max-width: 100%; height: auto; }
+
+object, embed { height: 100%; }
+
+img { -ms-interpolation-mode: bicubic; }
+
+#map_canvas img, #map_canvas embed, #map_canvas object, .map_canvas img, .map_canvas embed, .map_canvas object { max-width: none !important; }
+
+.left { float: left !important; }
+
+.right { float: right !important; }
+
+.text-left { text-align: left !important; }
+
+.text-right { text-align: right !important; }
+
+.text-center { text-align: center !important; }
+
+.text-justify { text-align: justify !important; }
+
+.hide { display: none; }
+
+.antialiased, body { -webkit-font-smoothing: antialiased; }
+
+img { display: inline-block; vertical-align: middle; }
+
+textarea { height: auto; min-height: 50px; }
+
+select { width: 100%; }
+
+p.lead, .paragraph.lead > p, #preamble > .sectionbody > .paragraph:first-of-type p { font-size: 1.21875em; line-height: 1.6; }
+
+.subheader, .admonitionblock td.content > .title, .audioblock > .title, .exampleblock > .title, .imageblock > .title, .listingblock > .title, .literalblock > .title, .stemblock > .title, .openblock > .title, .paragraph > .title, .quoteblock > .title, table.tableblock > .title, .verseblock > .title, .videoblock > .title, .dlist > .title, .olist > .title, .ulist > .title, .qlist > .title, .hdlist > .title { line-height: 1.4; color: #003b6b; font-weight: 300; margin-top: 0.2em; margin-bottom: 0.5em; }
+
+/* Typography resets */
+div, dl, dt, dd, ul, ol, li, h1, h2, h3, #toctitle, .sidebarblock > .content > .title, h4, h5, h6, pre, form, p, blockquote, th, td { margin: 0; padding: 0; direction: ltr; }
+
+/* Default Link Styles */
+a { color: #00579e; text-decoration: none; line-height: inherit; }
+a:hover, a:focus { color: #333333; }
+a img { border: none; }
+
+/* Default paragraph styles */
+p { font-family: Arial, sans-serif; font-weight: normal; font-size: 1em; line-height: 1.6; margin-bottom: 0.75em; text-rendering: optimizeLegibility; }
+p aside { font-size: 0.875em; line-height: 1.35; font-style: italic; }
+
+/* Default header styles */
+h1, h2, h3, #toctitle, .sidebarblock > .content > .title, h4, h5, h6 { font-family: Arial, sans-serif; font-weight: normal; font-style: normal; color: #7b2d00; text-rendering: optimizeLegibility; margin-top: 0.5em; margin-bottom: 0.5em; line-height: 1.2125em; }
+h1 small, h2 small, h3 small, #toctitle small, .sidebarblock > .content > .title small, h4 small, h5 small, h6 small { font-size: 60%; color: #ff6b15; line-height: 0; }
+
+h1 { font-size: 2.125em; }
+
+h2 { font-size: 1.6875em; }
+
+h3, #toctitle, .sidebarblock > .content > .title { font-size: 1.375em; }
+
+h4 { font-size: 1.125em; }
+
+h5 { font-size: 1.125em; }
+
+h6 { font-size: 1em; }
+
+hr { border: solid #dddddd; border-width: 1px 0 0; clear: both; margin: 1.25em 0 1.1875em; height: 0; }
+
+/* Helpful Typography Defaults */
+em, i { font-style: italic; line-height: inherit; }
+
+strong, b { font-weight: bold; line-height: inherit; }
+
+small { font-size: 60%; line-height: inherit; }
+
+code { font-family: Consolas, "Liberation Mono", Courier, monospace; font-weight: bold; color: #003426; }
+
+/* Lists */
+ul, ol, dl { font-size: 1em; line-height: 1.6; margin-bottom: 0.75em; list-style-position: outside; font-family: Arial, sans-serif; }
+
+ul, ol { margin-left: 1.5em; }
+ul.no-bullet, ol.no-bullet { margin-left: 1.5em; }
+
+/* Unordered Lists */
+ul li ul, ul li ol { margin-left: 1.25em; margin-bottom: 0; font-size: 1em; /* Override nested font-size change */ }
+ul.square li ul, ul.circle li ul, ul.disc li ul { list-style: inherit; }
+ul.square { list-style-type: square; }
+ul.circle { list-style-type: circle; }
+ul.disc { list-style-type: disc; }
+ul.no-bullet { list-style: none; }
+
+/* Ordered Lists */
+ol li ul, ol li ol { margin-left: 1.25em; margin-bottom: 0; }
+
+/* Definition Lists */
+dl dt { margin-bottom: 0.3em; font-weight: bold; }
+dl dd { margin-bottom: 0.75em; }
+
+/* Abbreviations */
+abbr, acronym { text-transform: uppercase; font-size: 90%; color: black; border-bottom: 1px dotted #dddddd; cursor: help; }
+
+abbr { text-transform: none; }
+
+/* Blockquotes */
+blockquote { margin: 0 0 0.75em; padding: 0.5625em 1.25em 0 1.1875em; border-left: 1px solid #dddddd; }
+blockquote cite { display: block; font-size: 0.8125em; color: #e15200; }
+blockquote cite:before { content: "\2014 \0020"; }
+blockquote cite a, blockquote cite a:visited { color: #e15200; }
+
+blockquote, blockquote p { line-height: 1.6; color: #333333; }
+
+/* Microformats */
+.vcard { display: inline-block; margin: 0 0 1.25em 0; border: 1px solid #dddddd; padding: 0.625em 0.75em; }
+.vcard li { margin: 0; display: block; }
+.vcard .fn { font-weight: bold; font-size: 0.9375em; }
+
+.vevent .summary { font-weight: bold; }
+.vevent abbr { cursor: auto; text-decoration: none; font-weight: bold; border: none; padding: 0 0.0625em; }
+
+@media only screen and (min-width: 768px) { h1, h2, h3, #toctitle, .sidebarblock > .content > .title, h4, h5, h6 { line-height: 1.4; }
+  h1 { font-size: 2.75em; }
+  h2 { font-size: 2.3125em; }
+  h3, #toctitle, .sidebarblock > .content > .title { font-size: 1.6875em; }
+  h4 { font-size: 1.4375em; } }
+/* Tables */
+table { background: white; margin-bottom: 1.25em; border: solid 1px #d8d8ce; }
+table thead, table tfoot { background: -webkit-linear-gradient(top, #add386, #90b66a); font-weight: bold; }
+table thead tr th, table thead tr td, table tfoot tr th, table tfoot tr td { padding: 0.5em 0.625em 0.625em; font-size: inherit; color: white; text-align: left; }
+table tr th, table tr td { padding: 0.5625em 0.625em; font-size: inherit; color: #6d6e71; }
+table tr.even, table tr.alt, table tr:nth-of-type(even) { background: #edf2f2; }
+table thead tr th, table tfoot tr th, table tbody tr td, table tr td, table tfoot tr td { display: table-cell; line-height: 1.4; }
+
+h1, h2, h3, #toctitle, .sidebarblock > .content > .title, h4, h5, h6 { line-height: 1.4; }
+
+a:hover, a:focus { text-decoration: underline; }
+
+.clearfix:before, .clearfix:after, .float-group:before, .float-group:after { content: " "; display: table; }
+.clearfix:after, .float-group:after { clear: both; }
+
+*:not(pre) > code { font-size: inherit; font-style: normal !important; letter-spacing: 0; padding: 3px 2px 1px 2px; background-color: #eeeeee; border: 1px solid #dddddd; -webkit-border-radius: 0; border-radius: 0; line-height: inherit; }
+
+pre, pre > code { line-height: 1.6; color: black; font-family: Consolas, "Liberation Mono", Courier, monospace; font-weight: normal; }
+
+.keyseq { color: #333333; }
+
+kbd { display: inline-block; color: black; font-size: 0.75em; line-height: 1.4; background-color: #f7f7f7; border: 1px solid #ccc; -webkit-border-radius: 3px; border-radius: 3px; -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 0.1em white inset; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 0.1em white inset; margin: -0.15em 0.15em 0 0.15em; padding: 0.2em 0.6em 0.2em 0.5em; vertical-align: middle; white-space: nowrap; }
+
+.keyseq kbd:first-child { margin-left: 0; }
+
+.keyseq kbd:last-child { margin-right: 0; }
+
+.menuseq, .menu { color: black; }
+
+b.button:before, b.button:after { position: relative; top: -1px; font-weight: normal; }
+
+b.button:before { content: "["; padding: 0 3px 0 2px; }
+
+b.button:after { content: "]"; padding: 0 2px 0 3px; }
+
+#header, #content, #footnotes, #footer { width: 100%; margin-left: auto; margin-right: auto; margin-top: 0; margin-bottom: 0; max-width: 62.5em; *zoom: 1; position: relative; padding-left: 1.5em; padding-right: 1.5em; }
+#header:before, #header:after, #content:before, #content:after, #footnotes:before, #footnotes:after, #footer:before, #footer:after { content: " "; display: table; }
+#header:after, #content:after, #footnotes:after, #footer:after { clear: both; }
+
+#content { margin-top: 1.25em; }
+
+#content:before { content: none; }
+
+#header > h1:first-child { color: #7b2d00; margin-top: 2.25rem; margin-bottom: 0; }
+#header > h1:first-child + #toc { margin-top: 8px; border-top: 1px solid #dddddd; }
+#header > h1:only-child, body.toc2 #header > h1:nth-last-child(2) { border-bottom: 1px solid #dddddd; padding-bottom: 8px; }
+#header .details { border-bottom: 1px solid #dddddd; line-height: 1.45; padding-top: 0.25em; padding-bottom: 0.25em; padding-left: 0.25em; color: #e15200; display: -ms-flexbox; display: -webkit-flex; display: flex; -ms-flex-flow: row wrap; -webkit-flex-flow: row wrap; flex-flow: row wrap; }
+#header .details span:first-child { margin-left: -0.125em; }
+#header .details span.email a { color: #333333; }
+#header .details br { display: none; }
+#header .details br + span:before { content: "\00a0\2013\00a0"; }
+#header .details br + span.author:before { content: "\00a0\22c5\00a0"; color: #333333; }
+#header .details br + span#revremark:before { content: "\00a0|\00a0"; }
+#header #revnumber { text-transform: capitalize; }
+#header #revnumber:after { content: "\00a0"; }
+
+#content > h1:first-child:not([class]) { color: #7b2d00; border-bottom: 1px solid #dddddd; padding-bottom: 8px; margin-top: 0; padding-top: 1rem; margin-bottom: 1.25rem; }
+
+#toc { border-bottom: 0 solid #dddddd; padding-bottom: 0.5em; }
+#toc > ul { margin-left: 0.125em; }
+#toc ul.sectlevel0 > li > a { font-style: italic; }
+#toc ul.sectlevel0 ul.sectlevel1 { margin: 0.5em 0; }
+#toc ul { font-family: Arial, sans-serif; list-style-type: none; }
+#toc a { text-decoration: none; }
+#toc a:active { text-decoration: underline; }
+
+#toctitle { color: #003b6b; font-size: 1.2em; }
+
+@media only screen and (min-width: 768px) { #toctitle { font-size: 1.375em; }
+  body.toc2 { padding-left: 15em; padding-right: 0; }
+  #toc.toc2 { margin-top: 0 !important; background-color: white; position: fixed; width: 15em; left: 0; top: 0; border-right: 1px solid #dddddd; border-top-width: 0 !important; border-bottom-width: 0 !important; z-index: 1000; padding: 1.25em 1em; height: 100%; overflow: auto; }
+  #toc.toc2 #toctitle { margin-top: 0; font-size: 1.2em; }
+  #toc.toc2 > ul { font-size: 0.9em; margin-bottom: 0; }
+  #toc.toc2 ul ul { margin-left: 0; padding-left: 1em; }
+  #toc.toc2 ul.sectlevel0 ul.sectlevel1 { padding-left: 0; margin-top: 0.5em; margin-bottom: 0.5em; }
+  body.toc2.toc-right { padding-left: 0; padding-right: 15em; }
+  body.toc2.toc-right #toc.toc2 { border-right-width: 0; border-left: 1px solid #dddddd; left: auto; right: 0; } }
+@media only screen and (min-width: 1280px) { body.toc2 { padding-left: 20em; padding-right: 0; }
+  #toc.toc2 { width: 20em; }
+  #toc.toc2 #toctitle { font-size: 1.375em; }
+  #toc.toc2 > ul { font-size: 0.95em; }
+  #toc.toc2 ul ul { padding-left: 1.25em; }
+  body.toc2.toc-right { padding-left: 0; padding-right: 20em; } }
+#content #toc { border-style: solid; border-width: 1px; border-color: #e6e6e6; margin-bottom: 1.25em; padding: 1.25em; background: white; -webkit-border-radius: 0; border-radius: 0; }
+#content #toc > :first-child { margin-top: 0; }
+#content #toc > :last-child { margin-bottom: 0; }
+
+#footer { max-width: 100%; background-color: none; padding: 1.25em; }
+
+#footer-text { color: black; line-height: 1.44; }
+
+.sect1 { padding-bottom: 0.625em; }
+
+@media only screen and (min-width: 768px) { .sect1 { padding-bottom: 1.25em; } }
+.sect1 + .sect1 { border-top: 0 solid #dddddd; }
+
+#content h1 > a.anchor, h2 > a.anchor, h3 > a.anchor, #toctitle > a.anchor, .sidebarblock > .content > .title > a.anchor, h4 > a.anchor, h5 > a.anchor, h6 > a.anchor { position: absolute; z-index: 1001; width: 1.5ex; margin-left: -1.5ex; display: block; text-decoration: none !important; visibility: hidden; text-align: center; font-weight: normal; }
+#content h1 > a.anchor:before, h2 > a.anchor:before, h3 > a.anchor:before, #toctitle > a.anchor:before, .sidebarblock > .content > .title > a.anchor:before, h4 > a.anchor:before, h5 > a.anchor:before, h6 > a.anchor:before { content: "\00A7"; font-size: 0.85em; display: block; padding-top: 0.1em; }
+#content h1:hover > a.anchor, #content h1 > a.anchor:hover, h2:hover > a.anchor, h2 > a.anchor:hover, h3:hover > a.anchor, #toctitle:hover > a.anchor, .sidebarblock > .content > .title:hover > a.anchor, h3 > a.anchor:hover, #toctitle > a.anchor:hover, .sidebarblock > .content > .title > a.anchor:hover, h4:hover > a.anchor, h4 > a.anchor:hover, h5:hover > a.anchor, h5 > a.anchor:hover, h6:hover > a.anchor, h6 > a.anchor:hover { visibility: visible; }
+#content h1 > a.link, h2 > a.link, h3 > a.link, #toctitle > a.link, .sidebarblock > .content > .title > a.link, h4 > a.link, h5 > a.link, h6 > a.link { color: #7b2d00; text-decoration: none; }
+#content h1 > a.link:hover, h2 > a.link:hover, h3 > a.link:hover, #toctitle > a.link:hover, .sidebarblock > .content > .title > a.link:hover, h4 > a.link:hover, h5 > a.link:hover, h6 > a.link:hover { color: #622400; }
+
+.audioblock, .imageblock, .literalblock, .listingblock, .stemblock, .videoblock { margin-bottom: 1.25em; }
+
+.admonitionblock td.content > .title, .audioblock > .title, .exampleblock > .title, .imageblock > .title, .listingblock > .title, .literalblock > .title, .stemblock > .title, .openblock > .title, .paragraph > .title, .quoteblock > .title, table.tableblock > .title, .verseblock > .title, .videoblock > .title, .dlist > .title, .olist > .title, .ulist > .title, .qlist > .title, .hdlist > .title { text-rendering: optimizeLegibility; text-align: left; }
+
+table.tableblock > caption.title { white-space: nowrap; overflow: visible; max-width: 0; }
+
+.paragraph.lead > p, #preamble > .sectionbody > .paragraph:first-of-type p { color: #7b2d00; }
+
+table.tableblock #preamble > .sectionbody > .paragraph:first-of-type p { font-size: inherit; }
+
+.admonitionblock > table { border-collapse: separate; border: 0; background: none; width: 100%; }
+.admonitionblock > table td.icon { text-align: center; width: 80px; }
+.admonitionblock > table td.icon img { max-width: none; }
+.admonitionblock > table td.icon .title { font-weight: bold; font-family: Arial, sans-serif; text-transform: uppercase; }
+.admonitionblock > table td.content { padding-left: 1.125em; padding-right: 1.25em; border-left: 1px solid #dddddd; color: #e15200; }
+.admonitionblock > table td.content > :last-child > :last-child { margin-bottom: 0; }
+
+.exampleblock > .content { border-style: solid; border-width: 1px; border-color: #e6e6e6; margin-bottom: 1.25em; padding: 1.25em; background: white; -webkit-border-radius: 0; border-radius: 0; }
+.exampleblock > .content > :first-child { margin-top: 0; }
+.exampleblock > .content > :last-child { margin-bottom: 0; }
+
+.sidebarblock { border-style: solid; border-width: 1px; border-color: #e6e6e6; margin-bottom: 1.25em; padding: 1.25em; background: white; -webkit-border-radius: 0; border-radius: 0; }
+.sidebarblock > :first-child { margin-top: 0; }
+.sidebarblock > :last-child { margin-bottom: 0; }
+.sidebarblock > .content > .title { color: #003b6b; margin-top: 0; }
+
+.exampleblock > .content > :last-child > :last-child, .exampleblock > .content .olist > ol > li:last-child > :last-child, .exampleblock > .content .ulist > ul > li:last-child > :last-child, .exampleblock > .content .qlist > ol > li:last-child > :last-child, .sidebarblock > .content > :last-child > :last-child, .sidebarblock > .content .olist > ol > li:last-child > :last-child, .sidebarblock > .content .ulist > ul > li:last-child > :last-child, .sidebarblock > .content .qlist > ol > li:last-child > :last-child { margin-bottom: 0; }
+
+.literalblock pre, .listingblock pre:not(.highlight), .listingblock pre[class="highlight"], .listingblock pre[class^="highlight "], .listingblock pre.CodeRay, .listingblock pre.prettyprint { background: #eeeeee; }
+.sidebarblock .literalblock pre, .sidebarblock .listingblock pre:not(.highlight), .sidebarblock .listingblock pre[class="highlight"], .sidebarblock .listingblock pre[class^="highlight "], .sidebarblock .listingblock pre.CodeRay, .sidebarblock .listingblock pre.prettyprint { background: #f2f1f1; }
+
+.literalblock pre, .literalblock pre[class], .listingblock pre, .listingblock pre[class] { border: 1px dashed #666666; -webkit-border-radius: 0; border-radius: 0; word-wrap: break-word; padding: 1.25em 1.5625em 1.125em 1.5625em; font-size: 0.8125em; }
+.literalblock pre.nowrap, .literalblock pre[class].nowrap, .listingblock pre.nowrap, .listingblock pre[class].nowrap { overflow-x: auto; white-space: pre; word-wrap: normal; }
+@media only screen and (min-width: 768px) { .literalblock pre, .literalblock pre[class], .listingblock pre, .listingblock pre[class] { font-size: 0.90625em; } }
+@media only screen and (min-width: 1280px) { .literalblock pre, .literalblock pre[class], .listingblock pre, .listingblock pre[class] { font-size: 1em; } }
+
+.literalblock.output pre { color: #eeeeee; background-color: black; }
+
+.listingblock pre.highlightjs { padding: 0; }
+.listingblock pre.highlightjs > code { padding: 1.25em 1.5625em 1.125em 1.5625em; -webkit-border-radius: 0; border-radius: 0; }
+
+.listingblock > .content { position: relative; }
+
+.listingblock code[data-lang]:before { display: none; content: attr(data-lang); position: absolute; font-size: 0.75em; top: 0.425rem; right: 0.5rem; line-height: 1; text-transform: uppercase; color: #999; }
+
+.listingblock:hover code[data-lang]:before { display: block; }
+
+.listingblock.terminal pre .command:before { content: attr(data-prompt); padding-right: 0.5em; color: #999; }
+
+.listingblock.terminal pre .command:not([data-prompt]):before { content: "$"; }
+
+table.pyhltable { border-collapse: separate; border: 0; margin-bottom: 0; background: none; }
+
+table.pyhltable td { vertical-align: top; padding-top: 0; padding-bottom: 0; }
+
+table.pyhltable td.code { padding-left: .75em; padding-right: 0; }
+
+pre.pygments .lineno, table.pyhltable td:not(.code) { color: #999; padding-left: 0; padding-right: .5em; border-right: 1px solid #dddddd; }
+
+pre.pygments .lineno { display: inline-block; margin-right: .25em; }
+
+table.pyhltable .linenodiv { background: none !important; padding-right: 0 !important; }
+
+.quoteblock { margin: 0 1em 0.75em 1.5em; display: table; }
+.quoteblock > .title { margin-left: -1.5em; margin-bottom: 0.75em; }
+.quoteblock blockquote, .quoteblock blockquote p { color: #333333; font-size: 1.15rem; line-height: 1.75; word-spacing: 0.1em; letter-spacing: 0; font-style: italic; text-align: justify; }
+.quoteblock blockquote { margin: 0; padding: 0; border: 0; }
+.quoteblock blockquote:before { content: "\201c"; float: left; font-size: 2.75em; font-weight: bold; line-height: 0.6em; margin-left: -0.6em; color: #003b6b; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
+.quoteblock blockquote > .paragraph:last-child p { margin-bottom: 0; }
+.quoteblock .attribution { margin-top: 0.5em; margin-right: 0.5ex; text-align: right; }
+.quoteblock .quoteblock { margin-left: 0; margin-right: 0; padding: 0.5em 0; border-left: 3px solid #e15200; }
+.quoteblock .quoteblock blockquote { padding: 0 0 0 0.75em; }
+.quoteblock .quoteblock blockquote:before { display: none; }
+
+.verseblock { margin: 0 1em 0.75em 1em; }
+.verseblock pre { font-family: "Open Sans", "DejaVu Sans", sans; font-size: 1.15rem; color: #333333; font-weight: 300; text-rendering: optimizeLegibility; }
+.verseblock pre strong { font-weight: 400; }
+.verseblock .attribution { margin-top: 1.25rem; margin-left: 0.5ex; }
+
+.quoteblock .attribution, .verseblock .attribution { font-size: 0.8125em; line-height: 1.45; font-style: italic; }
+.quoteblock .attribution br, .verseblock .attribution br { display: none; }
+.quoteblock .attribution cite, .verseblock .attribution cite { display: block; letter-spacing: -0.05em; color: #e15200; }
+
+.quoteblock.abstract { margin: 0 0 0.75em 0; display: block; }
+.quoteblock.abstract blockquote, .quoteblock.abstract blockquote p { text-align: left; word-spacing: 0; }
+.quoteblock.abstract blockquote:before, .quoteblock.abstract blockquote p:first-of-type:before { display: none; }
+
+table.tableblock { max-width: 100%; border-collapse: separate; }
+table.tableblock td > .paragraph:last-child p > p:last-child, table.tableblock th > p:last-child, table.tableblock td > p:last-child { margin-bottom: 0; }
+
+table.spread { width: 100%; }
+
+table.tableblock, th.tableblock, td.tableblock { border: 0 solid #d8d8ce; }
+
+table.grid-all th.tableblock, table.grid-all td.tableblock { border-width: 0 1px 1px 0; }
+
+table.grid-all tfoot > tr > th.tableblock, table.grid-all tfoot > tr > td.tableblock { border-width: 1px 1px 0 0; }
+
+table.grid-cols th.tableblock, table.grid-cols td.tableblock { border-width: 0 1px 0 0; }
+
+table.grid-all * > tr > .tableblock:last-child, table.grid-cols * > tr > .tableblock:last-child { border-right-width: 0; }
+
+table.grid-rows th.tableblock, table.grid-rows td.tableblock { border-width: 0 0 1px 0; }
+
+table.grid-all tbody > tr:last-child > th.tableblock, table.grid-all tbody > tr:last-child > td.tableblock, table.grid-all thead:last-child > tr > th.tableblock, table.grid-rows tbody > tr:last-child > th.tableblock, table.grid-rows tbody > tr:last-child > td.tableblock, table.grid-rows thead:last-child > tr > th.tableblock { border-bottom-width: 0; }
+
+table.grid-rows tfoot > tr > th.tableblock, table.grid-rows tfoot > tr > td.tableblock { border-width: 1px 0 0 0; }
+
+table.frame-all { border-width: 1px; }
+
+table.frame-sides { border-width: 0 1px; }
+
+table.frame-topbot { border-width: 1px 0; }
+
+th.halign-left, td.halign-left { text-align: left; }
+
+th.halign-right, td.halign-right { text-align: right; }
+
+th.halign-center, td.halign-center { text-align: center; }
+
+th.valign-top, td.valign-top { vertical-align: top; }
+
+th.valign-bottom, td.valign-bottom { vertical-align: bottom; }
+
+th.valign-middle, td.valign-middle { vertical-align: middle; }
+
+table thead th, table tfoot th { font-weight: bold; }
+
+tbody tr th { display: table-cell; line-height: 1.4; background: -webkit-linear-gradient(top, #add386, #90b66a); }
+
+tbody tr th, tbody tr th p, tfoot tr th, tfoot tr th p { color: white; font-weight: bold; }
+
+p.tableblock > code:only-child { background: none; padding: 0; }
+
+p.tableblock { font-size: 1em; }
+
+td > div.verse { white-space: pre; }
+
+ol { margin-left: 1.75em; }
+
+ul li ol { margin-left: 1.5em; }
+
+dl dd { margin-left: 1.125em; }
+
+dl dd:last-child, dl dd:last-child > :last-child { margin-bottom: 0; }
+
+ol > li p, ul > li p, ul dd, ol dd, .olist .olist, .ulist .ulist, .ulist .olist, .olist .ulist { margin-bottom: 0.375em; }
+
+ul.unstyled, ol.unnumbered, ul.checklist, ul.none { list-style-type: none; }
+
+ul.unstyled, ol.unnumbered, ul.checklist { margin-left: 0.625em; }
+
+ul.checklist li > p:first-child > .fa-square-o:first-child, ul.checklist li > p:first-child > .fa-check-square-o:first-child { width: 1em; font-size: 0.85em; }
+
+ul.checklist li > p:first-child > input[type="checkbox"]:first-child { width: 1em; position: relative; top: 1px; }
+
+ul.inline { margin: 0 auto 0.375em auto; margin-left: -1.375em; margin-right: 0; padding: 0; list-style: none; overflow: hidden; }
+ul.inline > li { list-style: none; float: left; margin-left: 1.375em; display: block; }
+ul.inline > li > * { display: block; }
+
+.unstyled dl dt { font-weight: normal; font-style: normal; }
+
+ol.arabic { list-style-type: decimal; }
+
+ol.decimal { list-style-type: decimal-leading-zero; }
+
+ol.loweralpha { list-style-type: lower-alpha; }
+
+ol.upperalpha { list-style-type: upper-alpha; }
+
+ol.lowerroman { list-style-type: lower-roman; }
+
+ol.upperroman { list-style-type: upper-roman; }
+
+ol.lowergreek { list-style-type: lower-greek; }
+
+.hdlist > table, .colist > table { border: 0; background: none; }
+.hdlist > table > tbody > tr, .colist > table > tbody > tr { background: none; }
+
+td.hdlist1 { padding-right: .75em; font-weight: bold; }
+
+td.hdlist1, td.hdlist2 { vertical-align: top; }
+
+.literalblock + .colist, .listingblock + .colist { margin-top: -0.5em; }
+
+.colist > table tr > td:first-of-type { padding: 0 0.75em; line-height: 1; }
+.colist > table tr > td:last-of-type { padding: 0.25em 0; }
+
+.thumb, .th { line-height: 0; display: inline-block; border: solid 4px white; -webkit-box-shadow: 0 0 0 1px #dddddd; box-shadow: 0 0 0 1px #dddddd; }
+
+.imageblock.left, .imageblock[style*="float: left"] { margin: 0.25em 0.625em 1.25em 0; }
+.imageblock.right, .imageblock[style*="float: right"] { margin: 0.25em 0 1.25em 0.625em; }
+.imageblock > .title { margin-bottom: 0; }
+.imageblock.thumb, .imageblock.th { border-width: 6px; }
+.imageblock.thumb > .title, .imageblock.th > .title { padding: 0 0.125em; }
+
+.image.left, .image.right { margin-top: 0.25em; margin-bottom: 0.25em; display: inline-block; line-height: 0; }
+.image.left { margin-right: 0.625em; }
+.image.right { margin-left: 0.625em; }
+
+a.image { text-decoration: none; }
+
+span.footnote, span.footnoteref { vertical-align: super; font-size: 0.875em; }
+span.footnote a, span.footnoteref a { text-decoration: none; }
+span.footnote a:active, span.footnoteref a:active { text-decoration: underline; }
+
+#footnotes { padding-top: 0.75em; padding-bottom: 0.75em; margin-bottom: 0.625em; }
+#footnotes hr { width: 20%; min-width: 6.25em; margin: -.25em 0 .75em 0; border-width: 1px 0 0 0; }
+#footnotes .footnote { padding: 0 0.375em; line-height: 1.3; font-size: 0.875em; margin-left: 1.2em; text-indent: -1.2em; margin-bottom: .2em; }
+#footnotes .footnote a:first-of-type { font-weight: bold; text-decoration: none; }
+#footnotes .footnote:last-of-type { margin-bottom: 0; }
+
+#content #footnotes { margin-top: -0.625em; margin-bottom: 0; padding: 0.75em 0; }
+
+.gist .file-data > table { border: 0; background: #fff; width: 100%; margin-bottom: 0; }
+.gist .file-data > table td.line-data { width: 99%; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+.big { font-size: larger; }
+
+.small { font-size: smaller; }
+
+.underline { text-decoration: underline; }
+
+.overline { text-decoration: overline; }
+
+.line-through { text-decoration: line-through; }
+
+.aqua { color: #00bfbf; }
+
+.aqua-background { background-color: #00fafa; }
+
+.black { color: black; }
+
+.black-background { background-color: black; }
+
+.blue { color: #0000bf; }
+
+.blue-background { background-color: #0000fa; }
+
+.fuchsia { color: #bf00bf; }
+
+.fuchsia-background { background-color: #fa00fa; }
+
+.gray { color: #606060; }
+
+.gray-background { background-color: #7d7d7d; }
+
+.green { color: #006000; }
+
+.green-background { background-color: #007d00; }
+
+.lime { color: #00bf00; }
+
+.lime-background { background-color: #00fa00; }
+
+.maroon { color: #600000; }
+
+.maroon-background { background-color: #7d0000; }
+
+.navy { color: #000060; }
+
+.navy-background { background-color: #00007d; }
+
+.olive { color: #606000; }
+
+.olive-background { background-color: #7d7d00; }
+
+.purple { color: #600060; }
+
+.purple-background { background-color: #7d007d; }
+
+.red { color: #bf0000; }
+
+.red-background { background-color: #fa0000; }
+
+.silver { color: #909090; }
+
+.silver-background { background-color: #bcbcbc; }
+
+.teal { color: #006060; }
+
+.teal-background { background-color: #007d7d; }
+
+.white { color: #bfbfbf; }
+
+.white-background { background-color: #fafafa; }
+
+.yellow { color: #bfbf00; }
+
+.yellow-background { background-color: #fafa00; }
+
+span.icon > .fa { cursor: default; }
+
+.admonitionblock td.icon [class^="fa icon-"] { font-size: 2.5em; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); cursor: default; }
+.admonitionblock td.icon .icon-note:before { content: "\f05a"; color: #004176; }
+.admonitionblock td.icon .icon-tip:before { content: "\f0eb"; text-shadow: 1px 1px 2px rgba(155, 155, 0, 0.8); color: #111; }
+.admonitionblock td.icon .icon-warning:before { content: "\f071"; color: #bf6900; }
+.admonitionblock td.icon .icon-caution:before { content: "\f06d"; color: #bf3400; }
+.admonitionblock td.icon .icon-important:before { content: "\f06a"; color: #bf0000; }
+
+.conum[data-value] { display: inline-block; color: #fff !important; background-color: black; -webkit-border-radius: 100px; border-radius: 100px; text-align: center; font-size: 0.75em; width: 1.67em; height: 1.67em; line-height: 1.67em; font-family: "Open Sans", "DejaVu Sans", sans-serif; font-style: normal; font-weight: bold; }
+.conum[data-value] * { color: #fff !important; }
+.conum[data-value] + b { display: none; }
+.conum[data-value]:after { content: attr(data-value); }
+pre .conum[data-value] { position: relative; top: -0.125em; }
+
+b.conum * { color: inherit !important; }
+
+.conum:not([data-value]):empty { display: none; }
+
+h1, h2, h3, #toctitle, .sidebarblock > .content > .title, h4, h5, h6 { border-bottom: 1px solid #dddddd; }
+
+.sect1 { padding-bottom: 0; }
+
+#toctitle { color: #00406F; font-weight: normal; margin-top: 1.5em; }
+
+.sidebarblock { border-color: #aaa; }
+
+code { -webkit-border-radius: 4px; border-radius: 4px; }
+
+p.tableblock.header { color: #6d6e71; }
+
+.literalblock pre, .listingblock pre { background: #eeeeee; }
+
+</style>
+<style>
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments { background: #ffffff; }
+pre.pygments .tok-c { color: #aaaaaa; font-style: italic } /* Comment */
+pre.pygments .tok-err { color: #FF0000; background-color: #FFAAAA } /* Error */
+pre.pygments .tok-k { color: #0000aa } /* Keyword */
+pre.pygments .tok-ch { color: #aaaaaa; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #aaaaaa; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #4c8317 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #aaaaaa; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #aaaaaa; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #0000aa; font-style: italic } /* Comment.Special */
+pre.pygments .tok-gd { color: #aa0000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #aa0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00aa00 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #555555 } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #aa0000 } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #0000aa } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #0000aa } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #0000aa } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #0000aa } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #0000aa } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #00aaaa } /* Keyword.Type */
+pre.pygments .tok-m { color: #009999 } /* Literal.Number */
+pre.pygments .tok-s { color: #aa5500 } /* Literal.String */
+pre.pygments .tok-na { color: #1e90ff } /* Name.Attribute */
+pre.pygments .tok-nb { color: #00aaaa } /* Name.Builtin */
+pre.pygments .tok-nc { color: #00aa00; text-decoration: underline } /* Name.Class */
+pre.pygments .tok-no { color: #aa0000 } /* Name.Constant */
+pre.pygments .tok-nd { color: #888888 } /* Name.Decorator */
+pre.pygments .tok-ni { color: #880000; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-nf { color: #00aa00 } /* Name.Function */
+pre.pygments .tok-nn { color: #00aaaa; text-decoration: underline } /* Name.Namespace */
+pre.pygments .tok-nt { color: #1e90ff; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #aa0000 } /* Name.Variable */
+pre.pygments .tok-ow { color: #0000aa } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #009999 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #009999 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #009999 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #009999 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #009999 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #aa5500 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #aa5500 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #aa5500 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #aa5500 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #aa5500 } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #aa5500 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #aa5500 } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #aa5500 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #aa5500 } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #aa5500 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #009999 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #aa5500 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #0000aa } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #00aaaa } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #00aa00 } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #aa0000 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #aa0000 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #aa0000 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #aa0000 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #009999 } /* Literal.Number.Integer.Long */
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>MoonUSB Reference Manual</h1>
+<div class="details">
+<span id="author" class="author">Stefano Trettel</span><br>
+<span id="revnumber">version 0.1,</span>
+<span id="revdate">2021-01-11</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_preface">Preface</a>
+<ul class="sectlevel2">
+<li><a href="#_getting_and_installing">Getting and installing</a></li>
+<li><a href="#_module_organization">Module organization</a></li>
+<li><a href="#_examples">Examples</a></li>
+<li><a href="#_license">License</a></li>
+<li><a href="#see-also">See also</a></li>
+</ul>
+</li>
+<li><a href="#_introduction">Introduction</a></li>
+<li><a href="#context">Contexts</a></li>
+<li><a href="#device">Devices and device handles</a>
+<ul class="sectlevel2">
+<li><a href="#_device_properties">Device properties</a></li>
+<li><a href="#descriptors">USB descriptors</a></li>
+<li><a href="#_devhandle_operations">Devhandle operations</a></li>
+<li><a href="#_claimingreleasing_interfaces">Claiming/releasing interfaces</a></li>
+</ul>
+</li>
+<li><a href="#hotplug">Hotplug</a></li>
+<li><a href="#asynchapi">Asynchronous I/O</a></li>
+<li><a href="#polling">Polling</a></li>
+<li><a href="#synchapi">Synchronous I/O</a></li>
+<li><a href="#hostmem">Host memory</a></li>
+<li><a href="#datahandling">Data handling</a></li>
+<li><a href="#miscellanea">Miscellanea</a></li>
+<li><a href="#structs">Structs</a></li>
+<li><a href="#enums">Enums</a></li>
+<li><a href="#emulator">Emulating USB devices</a>
+<ul class="sectlevel2">
+<li><a href="#_overview">Overview</a></li>
+<li><a href="#emulator_api">Emulator API</a></li>
+<li><a href="#_emulator_usage">Emulator usage</a></li>
+</ul>
+</li>
+<li><a href="#links">Useful links</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<a class="image" href="http://www.lua.org"><img src="powered-by-lua.gif" alt="Lua logo"></a>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_preface">Preface</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is the reference manual of <strong>MoonUSB</strong>, which is a
+<a href="https://www.lua.org"><strong>Lua</strong></a> binding library for <a href="https://libusb.info/"><strong>libusb</strong></a>.
+<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
+</div>
+<div class="paragraph">
+<p>It is assumed that the reader is familiar with both libusb and the Lua programming language.</p>
+</div>
+<div class="paragraph">
+<p>For convenience of reference, this document contains external (deep) links to the
+<a href="https://www.lua.org/manual/5.3/manual.html">Lua Reference Manual</a> and the
+<a href="http://libusb.sourceforge.net/api-1.0/">libusb-1.0 API Reference</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="_getting_and_installing">Getting and installing</h3>
+<div class="paragraph">
+<p>For installation intructions, refer to the README file in the
+<a href="https://github.com/stetre/moonusb"><strong>MoonUSB official repository</strong></a>
+on GitHub.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_module_organization">Module organization</h3>
+<div class="paragraph">
+<p>The MoonUSB module is loaded using Lua&#8217;s
+<a href="http://www.lua.org/manual/5.3/manual.html#pdf-require">require</a>() and
+returns a table containing the functions it provides
+(as usual with Lua modules). This manual assumes that such
+table is named <strong>usb</strong>, i.e. that it is loaded with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="lua"><span></span> <span class="tok-n">usb</span> <span class="tok-o">=</span> <span class="tok-nb">require</span><span class="tok-p">(</span><span class="tok-s2">&quot;moonusb&quot;</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>but nothing forbids the use of a different name.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_examples">Examples</h3>
+<div class="paragraph">
+<p>Complete examples can be found in the <strong>examples/</strong> directory of the release package.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_license">License</h3>
+<div class="paragraph">
+<p>MoonUSB is released under the <strong>MIT/X11 license</strong> (same as
+<a href="http://www.lua.org/license.html">Lua</a>, and with the same only requirement to give proper
+credits to the original author).
+The copyright notice is in the LICENSE file in the base directory
+of the <a href="https://github.com/stetre/moonusb">official repository</a> on GitHub.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="see-also">See also</h3>
+<div class="paragraph">
+<p>MoonUSB is part of <a href="https://github.com/stetre/moonlibs">MoonLibs</a>, a collection of
+Lua libraries for graphics and audio programming.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>MoonUSB is an almost one-to-one Lua binding library to  <a href="https://libusb.info/">libusb</a>.
+This means that by and large, it is intended to be used as described in the
+<a href="http://libusb.sourceforge.net/api-1.0/">libusb documentation</a>.</p>
+</div>
+<div class="paragraph">
+<p>MoonUSB binds libusb structs (contexts, devices, device handles, etc) to Lua userdata,
+exposing an <strong>object oriented</strong> interface to the Lua programmer. Most libusb functions are
+exposed by MoonUSB as methods of the relevant objects they act on.
+For example, the <em>libusb_open(&nbsp;)</em> and <em>libusb_close(&nbsp;)</em> functions are exposed
+as the <em>device:open(&nbsp;)</em> and  <em>devhandle:close(&nbsp;)</em> methods, respectively.</p>
+</div>
+<div class="paragraph">
+<p>Lua object types in MoonUSB are listed in the tree below, together with the corresponding
+structs in libusb, if any:</p>
+</div>
+<div class="paragraph">
+<p><span class="small"><a href="#context">context</a> <em>(libusb_context)</em><br>
+&#9500;&#9472;&#8192;<a href="#hotplug">hotplug</a> <em>(libusb_hotplug_callback_handle)</em><br>
+&#9500;&#9472;&#8192;<a href="#device">device</a> <em>(libusb_device)</em><br>
+&#9492;&#9472;&#8192;&#9492;&#9472;&#8192;<a href="#device">devhandle</a> <em>(libusb_device_handle)</em><br>
+&#8192;&#8192;&#8192;&#8192;&#8192;&#8192;&#8192;&#8192;&#9500;&#9472;&#8192;<a href="#device">interface</a> <em>(libusb_device_handle + interface number)</em><br>
+&#8192;&#8192;&#8192;&#8192;&#8192;&#8192;&#8192;&#8192;&#9500;&#9472;&#8192;<a href="#asynchapi">transfer</a> <em>(libusb_transfer)</em><br>
+&#8192;&#8192;&#8192;&#8192;&#8192;&#8192;&#8192;&#8192;&#9492;&#9472;&#8192;<a href="#hostmem">hostmem</a> <em>(none)</em><br>
+<a href="#hostmem">hostmem</a> <em>(none)</em></span></p>
+</div>
+<div class="paragraph">
+<p>The <a href="#hostmem">hostmem</a> object is a MoonUSB-specific object that encapsulates a memory
+area, to be (optionally) used as memory buffer in transfer functions. It is listed twice
+because it may be either standalone, or tied to a <a href="#device">devhandle</a> (possibly
+encapsulating DMA memory for that specific device).</p>
+</div>
+<div class="paragraph">
+<p>Objects are <strong>garbage collected at exit</strong> (which includes on error), and automatically
+deleted at the libusb level with graceful release whenever possible, so there is no need to
+explicitly invoke their deletion methods at exit for cleanup.</p>
+</div>
+<div class="paragraph">
+<p>Apart from at exit, however, objects are not automatically garbage collected
+<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup>
+and one must release them explicitly when needed, e.g. to release resources when the
+application is not exiting and some objects are no longer needed.</p>
+</div>
+<div class="paragraph">
+<p>Releasing an object causes the automatic (pre) destruction of all its children
+objects (as per the above tree), and the invalidation of any reference to the object and to
+its children.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup></p>
+</div>
+<div class="paragraph">
+<p>Unless otherwise stated, <strong>on error</strong> all MoonUSB functions and methods raise a
+<a href="http://www.lua.org/manual/5.3/manual.html#lua_error">Lua error</a>.
+If needed, this behaviour can be overridden by wrapping function calls in the standard Lua
+<a href="http://www.lua.org/manual/5.3/manual.html#pdf-pcall">pcall</a>(&nbsp;).</p>
+</div>
+<div class="paragraph">
+<p>MoonUSB supports multiple concurrent libusb <a href="#context">contexts</a> (that is, sessions), but
+it does not support multithreading.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="context">Contexts</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><span class="small">Rfr: <a href="http://libusb.sourceforge.net/api-1.0/group__libusb__lib.html">Library initialization/deinitialization</a>.</span></p>
+</div>
+<div class="paragraph">
+<p>A context represents a libusb session.
+There is no default context in MoonUSB, so an application must begin by creating at least
+one <em>context</em> object using the <a href="#init">init</a>( ) function.
+It will typically create just one context, but multiple concurrent contexts are allowed too.</p>
+</div>
+<div class="paragraph">
+<p>When a context exits, all the corresponding objects are deleted too, with graceful release
+of underlying resources whenever possible. Contexts exit automatically at program termination.</p>
+</div>
+<div id="init" class="ulist">
+<ul>
+<li>
+<p><em>context</em> = <strong>init</strong>( )<br>
+ <em>context</em>:<strong>exit</strong>( )<br>
+<span class="small">Initialize/deinitialize a libusb session, creating/deleting a context.<br>
+Rfr: <em>libusb_init( )</em>, <em>libusb_exit( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="set_option" class="ulist">
+<ul>
+<li>
+<p><strong>set_option</strong>([<em>context</em>], <a href="#option"><em>option</em></a>, [<em>&#8230;&#8203;</em>])<br>
+ <em>context</em>:<strong>set_option</strong>(<a href="#option">option</a>, [<em>&#8230;&#8203;</em>])<br>
+<span class="small">Set an option in the library. The currently available options are:<br>
+- set_option(<em>context</em>, '<em>log level</em>', <a href="#loglevel"><em>loglevel</em></a>)<br>
+- set_option(<em>context</em>, '<em>use usbdk</em>')<br>
+- set_option(<em>nil</em>, '<em>weak authority</em>')<br>
+Rfr: <em>libusb_set_option( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="set_log_cb" class="ulist">
+<ul>
+<li>
+<p><strong>set_log_cb</strong>([<em>context</em>], <em>func</em>)<br>
+ <em>context</em>:<strong>set_log_cb</strong>(<em>func</em>)<br>
+<span class="small">Set a log callback for context-related log messages (if <em>context</em> is given) or for
+global log messages (if <em>context</em> is not given).<br>
+The <em>func</em> callback, a function, is executed as <strong>func(context, <a href="#loglevel">loglevel</a>, message)</strong>, where
+<em>message</em> is a string, and <em>context</em> is <em>nil</em> if the callback is global.<br>
+Rfr: <em>libusb_set_log_cb( )</em>.</span></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="device">Devices and device handles</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><span class="small">Rfr: <a href="http://libusb.sourceforge.net/api-1.0/group__libusb__dev.html">Device handling and enumeration</a>.</span></p>
+</div>
+<div class="paragraph">
+<p>Devices are represented with two types of objects: a <strong>device</strong> object that represents
+a device that has been detected, and a <strong>devhandle</strong> object that represents a device
+that has been opened by the application.
+The former is sufficient to inspect the USB descriptors of a device, but to perform I/O and
+control operations on it, the latter is needed.</p>
+</div>
+<div class="paragraph">
+<p>To obtain <em>device</em> objects one can either use the <em>context</em>:<a href="#get_device_list">get_device_list</a>(&nbsp;)
+method, or the <a href="#hotplug">Hotplug API</a>.
+Any device of interest can then be opened with <em>device</em>:<a href="#open">open</a>(&nbsp;), that creates the corresponding <em>devhandle</em> object.
+Depending on the system, this operation may require access permissions.</p>
+</div>
+<div id="get_device_list" class="ulist">
+<ul>
+<li>
+<p><em>{device}</em> = <a href="#context"><em>context</em></a>:<strong>get_device_list</strong>( )<br>
+<em>device</em>:<strong>free</strong>( )<br>
+<span class="small">Returns a list of USB devices currently attached to the system.<br>
+An application should delete any <em>device</em> objects it obtains but it is not interested in, using the
+<em>device:free()</em> method.<br>
+Rfr: <em>libusb_get_device_list( )</em>, <em>libusb_unref_device( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="open" class="ulist">
+<ul>
+<li>
+<p><em>devhandle</em> = <em>device</em>:<strong>open</strong>( )<br>
+<em>devhandle</em>:<strong>close</strong>( )<br>
+<span class="small">Open/close a device, creating/deleting a <em>devhandle</em> object.<br>
+A <em>devhandle</em> object is automatically closed when its device is deleted.<br>
+Rfr: <em>libusb_open( )</em>, <em>libusb_close( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="open_device" class="ulist">
+<ul>
+<li>
+<p><em>device</em>, <em>devhandle</em> = <a href="#context"><em>context</em></a>:<strong>open_device</strong>(<em>vendor_id</em>, <em>product_id</em>)<br>
+<span class="small">Shortcut to locate and open a device with a particular <em>vendor_id</em> + <em>product_id</em> combination.<br>
+Creates and returns both the <em>device</em> and the <em>devhandle</em> objects, or raises an error if no such device is found.<br>
+Rfr: <em>libusb_open_device_with_vid_pid( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="lock_on_close" class="ulist">
+<ul>
+<li>
+<p><strong>lock_on_close</strong>(<em>boolean</em>)<br>
+<span class="small">If <em>true</em>, lock events when closing a device (defaults to not locking). See issues #1 and #2.</span></p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_device_properties">Device properties</h3>
+<div class="paragraph">
+<p>The methods described here can be used to query information about devices without the need
+to open them. The relevant information, if available, has already been retrieved during
+enumeration and cached by the lower levels (i.e. by libusb and the OS).</p>
+</div>
+<div id="get_port_number" class="ulist">
+<ul>
+<li>
+<p><em>bus_number</em> = <em>device</em>:<strong>get_bus_number</strong>( )<br>
+<em>port_number</em> = <em>device</em>:<strong>get_port_number</strong>( )<br>
+<em>{port_number}</em> = <em>device</em>:<strong>get_port_numbers</strong>( )<br>
+<span class="small">Get the number of the bus the device is connected to, the number of the port, and
+the list of all port numbers from root for the device.<br>
+Rfr: <em>libusb_get_bus_number( )</em>, <em>libusb_get_port_number( )</em>,  <em>libusb_get_port_numbers( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="get_parent" class="ulist">
+<ul>
+<li>
+<p><em>parent_device</em> = <em>device</em>:<strong>get_parent</strong>( )<br>
+<span class="small">Get the parent device of the specified device.<br>
+Rfr: <em>libusb_get_parent( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="get_address" class="ulist">
+<ul>
+<li>
+<p><em>address</em> = <em>device</em>:<strong>get_address</strong>( )<br>
+<span class="small">Get the address of the device on the bus it is connected to.<br>
+Rfr: <em>libusb_get_device_address( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="get_speed" class="ulist">
+<ul>
+<li>
+<p><a href="#speed"><em>speed</em></a> = <em>device</em>:<strong>get_speed</strong>( )<br>
+<span class="small">Get the negotiated connection speed for the device.<br>
+Rfr: <em>libusb_get_device_speed( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="get_max_packet_size" class="ulist">
+<ul>
+<li>
+<p><em>size</em> = <em>device</em>:<strong>get_max_packet_size</strong>(<em>endpoint</em>)<br>
+<em>size</em> = <em>device</em>:<strong>get_max_iso_packet_size</strong>(<em>endpoint</em>)<br>
+<span class="small">Get/calculate the wMaxPacketSize for the given endpoint in the active device configuration.<br>
+<em>endpoint</em>: endpoint address.<br>
+Rfr: <em>libusb_get_max_packet_size( )</em>, <em>libusb_get_max_iso_packet_size( )</em>.</span></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="descriptors">USB descriptors</h3>
+<div class="paragraph">
+<p><span class="small">Rfr: <a href="http://libusb.sourceforge.net/api-1.0/group__libusb__desc.html">USB descriptors</a>.</span></p>
+</div>
+<div id="get_device_descriptor" class="ulist">
+<ul>
+<li>
+<p><a href="#devicedescriptor"><em>devicedescriptor</em></a> = <em>device</em>:<strong>get_device_descriptor</strong>( )<br>
+<a href="#configdescriptor"><em>configdescriptor</em></a> = <em>device</em>:<strong>get_config_descriptor</strong>(<em>index</em>)<br>
+<a href="#configdescriptor"><em>configdescriptor</em></a> = <em>device</em>:<strong>get_config_descriptor_by_value</strong>(<em>value</em>)<br>
+<a href="#configdescriptor"><em>configdescriptor</em></a> = <em>device</em>:<strong>get_active_config_descriptor</strong>( )<br>
+<span class="small">Get a descriptor for <em>device</em>.<br>
+These methods return immediately since the descriptors are cached during enumeration.<br>
+<em>index</em>: configuration index (0, .., <em>bNumConfigurations</em>-1),<br>
+<em>value</em>: configuration value (<em>bConfigurationValue</em>).<br>
+Rfr:  <em>libusb_get_device_descriptor( )</em>, <em>libusb_get_config_descriptor( )</em>,  <em>libusb_get_config_descriptor_by_value( )</em>,  <em>libusb_get_active_config_descriptor( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="get_descriptor" class="ulist">
+<ul>
+<li>
+<p><em>string</em> = <em>devhandle</em>:<strong>get_string_descriptor</strong>(<em>index</em>)<br>
+<em>length</em> = <em>devhandle</em>:<strong>get_descriptor</strong>(<em>descriptor_type</em>, <em>descriptor_index</em>, <em>ptr</em>, <em>length</em>)<br>
+<a href="#bosdescriptor"><em>bosdecriptor</em></a> = <em>devhandle</em>:<strong>get_bos_descriptor</strong>( )<br>
+<span class="small">Retrieve a descriptor.<br>
+These methods are blocking since they involve transfers.<br>
+Rfr: <em>libusb_get_string_descriptor( )</em>,  <em>libusb_get_descriptor( )</em>,  <em>libusb_get_bos_descriptor( )</em>.</span></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_devhandle_operations">Devhandle operations</h3>
+<div class="paragraph">
+<p>Beware that the methods described hereafter perform operations that may involve control transfers,
+causing the calls to block until the transfers either complete or fail.
+For more details, refer to the libusb manual.</p>
+</div>
+<div id="get_configuration" class="ulist">
+<ul>
+<li>
+<p><em>value</em> = <em>devhandle</em>:<strong>get_configuration</strong>( )<br>
+<em>devhandle</em>:<strong>set_configuration</strong>(<em>value</em>)<br>
+<span class="small">Determine / set the bConfigurationValue for the currently active configuration. May block.<br>
+Rfr: <em>libusb_get_configuration( )</em>, <em>libusb_set_configuration( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="clear_halt" class="ulist">
+<ul>
+<li>
+<p><em>devhandle</em>:<strong>clear_halt</strong>(<em>endpoint</em>)<br>
+<span class="small">Clear the halt/stall condition for the given endpoint. Blocking.<br>
+Rfr: <em>libusb_clear_halt( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="reset_device" class="ulist">
+<ul>
+<li>
+<p><em>devhandle</em>:<strong>reset_device</strong>( )<br>
+<span class="small">Perform a USB reset to reinitialize the device. Blocking.<br>
+Rfr: <em>libusb_clear_halt( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="alloc_streams" class="ulist">
+<ul>
+<li>
+<p><em>n</em> = <em>devhandle</em>:<strong>alloc_streams</strong>(<em>num_streams</em>, <em>{endpoint}</em>)<br>
+<em>devhandle</em>:<strong>free_streams</strong>(<em>{endpoint}</em>)<br>
+<span class="small">Allocate up to <em>num_streams</em> USB bulk streams on the specified endpoints. <br>
+<em>{endpoints}</em>: list of endpoint addresses (must belong to the same interface).<br>
+Returns the number <em>n</em> of actually allocated streams, with stream identifiers 1 to <em>n</em>.<br>
+The streams are automatically released with the interface.<br>
+Rfr: <em>libusb_alloc_streams( )</em>, <em>libusb_free_streams( )</em>.</span></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_claimingreleasing_interfaces">Claiming/releasing interfaces</h3>
+<div id="interface" class="ulist">
+<ul>
+<li>
+<p><em>interface</em> = <a href="#device"><em>devhandle</em></a>:<strong>claim_interface</strong>(<em>interface_number</em>)<br>
+<span class="small">Claim an interface and create the corresponding <em>interface</em> object.<br>
+This also detaches the interface&#8217;s kernel driver (where applicable).<br>
+Rfr: <em>libusb_claim_interface( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="release_interface" class="ulist">
+<ul>
+<li>
+<p><em>interface</em>:<strong>release</strong>( )<br>
+<span class="small">Release the interface and delete the corresponding object.<br>
+This also reattaches the interface&#8217;s kernel driver (where applicable).<br>
+The interface is automatically released when its <em>devhandle</em> gets closed.<br>
+Rfr: <em>libusb_release_interface( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="set_interface_alt_setting" class="ulist">
+<ul>
+<li>
+<p><em>interface</em>:<strong>set_alt_setting</strong>(<em>alternate_setting</em>)<br>
+<span class="small">Activate an alternate setting for the interface.<br>
+Rfr: <em>libusb_set_interface_alt_setting( )</em>.</span></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="hotplug">Hotplug</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><span class="small">Rfr: <a href="http://libusb.sourceforge.net/api-1.0/group__libusb__hotplug.html">Device hotplug event notification</a>.</span></p>
+</div>
+<div class="paragraph">
+<p>This API needs an event loop. See the <a href="#polling">polling</a> section.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>hotplug</em> = <a href="#context"><em>context</em></a>:<strong>hotplug_register</strong>(<em>event</em>, <em>func</em>, [<em>enumerate</em>], [<em>vendor_id</em>], [<em>product_id</em>], [<em>device_class</em>] )<br>
+<span class="small">Registers a hotplug callback function and returns the corresponding <em>hotplug</em> object.<br>
+<em>event</em>: <a href="#hotplugevent">hotplugevent</a>, the event of interest,<br>
+<em>func</em>: the callback function,<br>
+<em>enumerate</em>: boolean, if <em>true</em>, the callback is executed also for already discovered devices,<br>
+<em>vendor_id</em>: integer (<em>nil</em> means '<em>any</em>'),<br>
+<em>product_id</em>: integer (<em>nil</em> means '<em>any</em>'),<br>
+<em>device_class</em>: integer (<em>nil</em> means '<em>any</em>'),<br>
+The <em>func</em> callback is executed as <strong>boolean = func(context, device, event)</strong>. By returning <em>true</em> it causes the hotplug to be deregistered.<br>
+The callback should free any device it is not interested in, by calling <em>device:free( )</em>.<br>
+Rfr: <em>libusb_hotplug_register_callback( )</em>.</span></p>
+</li>
+<li>
+<p><em>hotplug</em>:<strong>deregister</strong>( )<br>
+<span class="small">Deregisters the callback and deletes the <em>hotplug</em> object.<br>
+Rfr: <em>libusb_hotplug_deregister_callback( )</em>.</span></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="asynchapi">Asynchronous I/O</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><span class="small">Rfr: <a href="http://libusb.sourceforge.net/api-1.0/group__libusb__asyncio.html">Asynchronous device I//O</a>.</span></p>
+</div>
+<div class="paragraph">
+<p>This API needs an event loop. See the <a href="#polling">polling</a> section.</p>
+</div>
+<div id="transfer_callback" class="paragraph">
+<p><strong>Transfer submit methods</strong></p>
+</div>
+<div class="paragraph">
+<p>Asynchronous transfers are submitted using the <em>devhandle</em>:<strong>submit_xxx</strong>(&nbsp;) methods, that
+create and return a new <em>transfer</em> object.
+Each of these methods requires a function <em>func</em> as one of its arguments.
+This is the callback that will be executed,  as <strong>boolean=func(transfer, status)</strong>, when the
+transfer either completes, fails, or is canceled.
+As the callback returns, if its return value is <em>nil</em> or <em>false</em>, then the <em>transfer</em> object is
+automatically deleted, otherwise it is automatically resubmitted.</p>
+</div>
+<div class="paragraph">
+<p><span class="small">Rfr: <em>libusb_alloc_transfer( )</em>, <em>libusb_fill_xxx_transfer( )</em>, <em>libusb_submit_transfer( )</em>.</span></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>transfer</em> = <a href="#devhandle"><em>devhandle</em></a>:<strong>submit_control_transfer</strong>(<em>ptr</em>, <em>size</em>, <em>timeout</em>, <em>func</em>)<br>
+<span class="small">Submit a USB control transfer.<br>
+<em>ptr</em>: lightuserdata containing a pointer to at least <em>size</em> bytes of contiguous memory,<br>
+<em>timeout</em>: timeout in milliseconds (=0 for unlimited timeout).<br>
+<em>func</em>: the <a href="#transfer_callback">callback</a> function.<br>
+The first 8 bytes pointed to by <em>ptr</em> must contain an encoded control setup packet, and the <em>size</em>
+of the memory area must be at least <em>wLength</em>+8.<br>
+The setup packet must be followed by the <em>wLength</em> bytes of data to be transferred to the device ('out' transfers), or of space for the data to be received from the device ('in' transfers).<br>
+For host to device transfers ('<em>out</em>'), the setup packet must be followed by the <em>wLength</em> bytes of data to be transferred.<br>
+For device to host transfers ('<em>in</em>'), up the setup packet must be followed by at least <em>wLength</em> bytes of space where to receive data (the received data thus will start at <em>ptr</em>+8).<br>
+Rfr: <em>libusb_fill_control_transfer( )</em>.</span></p>
+</li>
+<li>
+<p><em>transfer</em> = <a href="#devhandle"><em>devhandle</em></a>:<strong>submit_interrupt_transfer</strong>(<em>endpoint</em>, <em>ptr</em>, <em>length</em>, <em>timeout</em>, <em>func</em>)<br>
+<em>transfer</em> = <a href="#devhandle"><em>devhandle</em></a>:<strong>submit_bulk_transfer</strong>(<em>endpoint</em>, <em>ptr</em>, <em>length</em>, <em>timeout</em>, <em>func</em>)<br>
+<em>transfer</em> = <a href="#devhandle"><em>devhandle</em></a>:<strong>submit_bulk_stream_transfer</strong>(<em>endpoint</em>, <em>stream_id</em>, <em>ptr</em>, <em>length</em>, <em>timeout</em>, <em>func</em>)<br>
+<span class="small">Submit a USB interrupt or bulk transfer.<br>
+<em>endpoint</em>: endpoint address,<br>
+<em>stream_id</em>: stream identifier, see <em>devhandle:<a href="#alloc_streams">alloc_streams</a>(&nbsp;)</em>,<br>
+<em>ptr</em>: lightuserdata containing a pointer to at least <em>length</em> bytes of contiguous memory,<br>
+<em>timeout</em>: timeout in milliseconds (=0 for unlimited timeout).<br>
+<em>func</em>: the <a href="#transfer_callback">callback</a> function.<br>
+For host to device transfers ('<em>out</em>'), the memory pointed to by <em>ptr</em> must contain the <em>length</em> bytes of data to be transferred.<br>
+For device to host transfers ('<em>in</em>'), up to <em>length</em> bytes of data will be received and store there, provided the transfer succeeds.<br>
+Rfr: <em>libusb_fill_interrupt_transfer( )</em>, <em>libusb_fill_bulk_transfer( )</em>, <em>libusb_fill_bulk_stream_transfer( )</em>.</span></p>
+</li>
+<li>
+<p><em>transfer</em> = <a href="#devhandle"><em>devhandle</em></a>:<strong>submit_iso_transfer</strong>(<em>endpoint</em>, <em>ptr</em>, <em>length</em>, <em>num_iso_packets</em>, <em>iso_packet_length</em>, <em>timeout</em>, <em>func</em>)<br>
+<span class="small">Submit a USB isochronous transfer.<br>
+<em>endpoint</em>: endpoint address,<br>
+<em>ptr</em>: lightuserdata containing a pointer to at least <em>length</em> bytes of contiguous memory,<br>
+<em>num_iso_packets</em>: the number of isochronous packets to be transferred.<br>
+<em>iso_packet_length</em>: the length of each isochronous packet.<br>
+<em>timeout</em>: timeout in milliseconds (=0 for unlimited timeout).<br>
+<em>func</em>: the <a href="#transfer_callback">callback</a> function.<br>
+For host to device transfers ('<em>out</em>'), the memory pointed to by <em>ptr</em> must contain the <em>length</em> bytes of data to be transferred, consisting of <em>num_iso_packets</em> concatenated packets of <em>iso_packet_length</em> bytes each.<br>
+For device to host transfers ('<em>in</em>'), up to <em>length</em> bytes of data will be received and store there, provided the transfer succeeds. To locate the
+actually received packets within the memory, use the <em>transfer:<a href="#get_iso_packet_descriptors">get_iso_packet_descriptors</a>(&nbsp;)</em> method.<br>
+Rfr: <em>libusb_fill_iso_transfer( )</em>.</span></p>
+</li>
+<li>
+<p><em>transfer</em>:<strong>cancel</strong>( )<br>
+<span class="small">Cancels the transfer and deletes the <em>transfer</em> object.<br>
+Note that <em>transfer</em> objects are automatically deleted at the end of the execution of their callback,
+so calling this method is usually not needed.<br>
+Rfr: <em>libusb_cancel_transfer( )</em>.</span></p>
+</li>
+<li>
+<p><a href="#transferstatus"><em>status</em></a> = <em>transfer</em>:<strong>get_status</strong>( )<br>
+<span class="small">Returns the current status of the transfer.</span></p>
+</li>
+<li>
+<p><em>endpoint</em> = <em>transfer</em>:<strong>get_endpoint</strong>( )<br>
+<span class="small">Returns the endpoint address for the endpoint involved in this transfer.</span></p>
+</li>
+<li>
+<p><em>length</em> = <em>transfer</em>:<strong>get_actual_length</strong>( )<br>
+<span class="small">Returns the no. of bytes of data actually transferred.<br>
+This method is meant to be called only within a transfer callback.</span></p>
+</li>
+<li>
+<p><em>id</em> = <em>transfer</em>:<strong>get_stream_id</strong>( )<br>
+<span class="small">Returns the stream id used in the transfer.<br>
+This method is meant to be called only within a bulk stream transfer callback.</span></p>
+</li>
+</ul>
+</div>
+<div id="get_iso_packet_descriptors" class="ulist">
+<ul>
+<li>
+<p><em>descr</em> = <em>transfer</em>:<strong>get_iso_packet_descriptors</strong>( )<br>
+<span class="small">Returns a list of descriptors for the packets of a completed isochronous transfer.<br>
+This method is meant to be called only within an isochronous transfer callback.<br>
+Returns <em>nil</em> if the transfer&#8217;s status is not '<em>completed</em>', otherwise returns a table
+containing <em>num_endpoints</em> tables, each describing a packet as follows:<br>
+- <em>descr[i].status</em>: <a href="#transferstatus">transferstatus</a>, status of the i-th packet,<br>
+- <em>descr[i].offset</em>: integer, offset of the i-th packet in the buffer (pointed to by <em>ptr</em>),<br>
+- <em>descr[i].length</em>: integer, actual length of the i-th packet.</span></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="polling">Polling</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><span class="small">Rfr: <a href="http://libusb.sourceforge.net/api-1.0/group__libusb__poll.html">Polling and timing</a>.</span></p>
+</div>
+<div class="paragraph">
+<p>The functions described in this section are to be used in the main event loop of the application.</p>
+</div>
+<div class="paragraph">
+<p>An event loop is required when using the <a href="#asynchapi">asynchronous I/O</a> API for transfers, and/or
+the <a href="#hotplug">hotplug</a> API for detecting devices, since callbacks registered via those APIs are
+executed within calls of the <em>context</em>:<a href="#handle_events">handle_events</a>( ) method described below.</p>
+</div>
+<div class="paragraph">
+<p>Note that MoonUSB does not support multithreading, so the related libusb functions are not exposed.</p>
+</div>
+<div id="handle_events" class="ulist">
+<ul>
+<li>
+<p><a href="#context"><em>context</em></a>:<strong>handle_events</strong>([<em>timeout</em>])<br>
+<span class="small">Handle any pending events.<br>
+<em>timeout</em>: number of seconds to block waiting for events to handle.<br>
+Passing <em>timeout</em>=0 makes the function handle any pending event and return immediately.<br>
+Passing <em>timeout</em>=<em>nil</em> (or not passing it at all) makes it block indefinitely.<br>
+Rfr: <em>libusb_handle_events( )</em>, <em>libusb_handle_events_timeout( )</em>.</span></p>
+</li>
+<li>
+<p><em>next_timeout</em> = <a href="#context"><em>context</em></a>:<strong>get_next_timeout</strong>( )<br>
+<span class="small">Returns the next internal timeout (in number of seconds) that libusb needs to handle, or <em>nil</em> if none.<br>
+Rfr: <em>libusb_get_next_timeout( )</em>.</span></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="synchapi">Synchronous I/O</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><span class="small">Rfr: <a href="http://libusb.sourceforge.net/api-1.0/group__libusb__synchio.html">Synchronous device I//O</a>.</span></p>
+</div>
+<div class="paragraph">
+<p>The functions listed in this section are blocking and return only when the requested transfer either completes or fails.
+This means that they do not require an event loop (see <a href="#polling">polling</a>), but also that
+they may block the application for long times, which may or may not be acceptable.
+If it is not, then the <a href="#asynchapi">asynchronous I/O</a> API should be used instead.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>transferred</em> = <a href="#devhandle"><em>devhandle</em></a>:<strong>control_transfer</strong>(<em>ptr</em>, <em>length</em>, <em>timeout</em>)<br>
+<span class="small">Perform a USB control transfer and returns the number of bytes of data actually transferred.<br>
+<em>ptr</em>: lightuserdata containing a pointer to at least <em>length</em> bytes of contiguous memory,<br>
+<em>timeout</em>: timeout in milliseconds (=0 for unlimited timeout).<br>
+The first 8 bytes pointed to by <em>ptr</em> must contain an encoded control setup packet, and the <em>length</em>
+of the memory area must be at least 8 + <em>wLength</em>.<br>
+The setup packet must be followed by the <em>wLength</em> bytes of data to be transferred to the device, or
+of space for the data to be received from the device.<br>
+Rfr: <em>libusb_control_transfer( )</em>.</span></p>
+</li>
+<li>
+<p><em>transferred</em> = <a href="#devhandle"><em>devhandle</em></a>:<strong>bulk_transfer</strong>(<em>endpoint</em>, <em>ptr</em>, <em>length</em>, <em>timeout</em>)<br>
+<em>transferred</em> = <a href="#devhandle"><em>devhandle</em></a>:<strong>interrupt_transfer</strong>(<em>endpoint</em>, <em>ptr</em>, <em>length</em>, <em>timeout</em>)<br>
+<span class="small">Perform a USB bulk or interrupt transfer and returns the number of bytes of data actually transferred.<br>
+<em>endpoint</em>: endpoint address,<br>
+<em>ptr</em>: lightuserdata containing a pointer to at least <em>length</em> bytes of contiguous memory,<br>
+<em>timeout</em>: timeout in milliseconds (=0 for unlimited timeout).<br>
+Rfr: <em>libusb_bulk_transfer( )</em>, <em>libusb_interrupt_transfer( )</em>.</span></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="hostmem">Host memory</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>An hostmem object encapsulates (a pointer to) host accessible memory, with methods
+to access it from Lua and to retrieve pointers to any of its locations in form of
+<a href="http://www.lua.org/manual/5.3/manual.html#lua_pushlightuserdata">lightuserdata</a>.</p>
+</div>
+<div class="paragraph">
+<p>(Note that hostmem objets are specific to MoonUSB, i.e. they do not
+correspond to libusb objects).</p>
+</div>
+<div class="paragraph">
+<p>The memory encapsulated by an hostmem object may be either host memory allocated via
+the <a href="#hostmem_malloc">usb.malloc</a>(&nbsp;) or the <a href="#hostmem_aligned_alloc">usb.aligned_alloc</a>(&nbsp;)
+functions, or memory obtained by other means and passed to the <a href="#hostmem_hostmem">usb.hostmem</a>(&nbsp;) constructor.</p>
+</div>
+<div class="paragraph">
+<p>Hostmem objects are automatically deleted at exit, but they may also be deleted manually
+via the <a href="#hostmem_free">usb.free</a>(&nbsp;) function or the corresponding method. Hostmem
+objects that are tied to a <a href="#devhandle">devhandle</a> object are automatically deleted when
+the <em>devhandle</em> is closed.</p>
+</div>
+<div class="paragraph">
+<p>Hostmem objects come in handy, for example, when issuing transfer commands either via the <a href="#asynchapi">asynchronous API</a> or vie the <a href="#synchap">synchronous API</a>.</p>
+</div>
+<div id="hostmem_malloc" class="ulist">
+<ul>
+<li>
+<p><em>hostmem</em> = <strong>malloc</strong>([<a href="#devhandle"><em>devhandle</em></a>], <em>size</em>)<br>
+<em>hostmem</em> = <strong>malloc</strong>([<a href="#devhandle"><em>devhandle</em></a>], <em>data</em>)<br>
+<em>hostmem</em> = <strong>malloc</strong>([<a href="#devhandle"><em>devhandle</em></a>], <a href="#type"><em>type</em></a>, {<em>value<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>value<sub>N</sub></em>})<br>
+<em>hostmem</em> = <strong>malloc</strong>([<a href="#devhandle"><em>devhandle</em></a>], <a href="#type"><em>type</em></a>, <em>value<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>value<sub>N</sub></em>)<br>
+<span class="small">Allocates host memory and creates an <em>hostmem</em> object to encapsulate it.<br>
+<strong>malloc</strong>(<em>devhandle</em>, <em>size</em>), where <em>size</em> is an integer, allocates <em>size</em> bytes of contiguous memory
+and initializes them to 0;<br>
+<strong>malloc</strong>(<em>devhandle</em>, <em>data</em>), where <em>data</em> is a binary string, allocates <em>#data</em> bytes of contiguous
+memory and initializes them with the contents of <em>data</em>;<br>
+<strong>malloc</strong>(<em>devhandle</em>, <em>type</em>, <em>&#8230;&#8203;</em>) is functionally equivalent to <em>malloc(usb.pack(type, &#8230;&#8203;))</em>.<br>
+If the <em>devhandle</em> argument is not <em>nil</em>, an attempt is made to allocate DMA memory for the given device (rfr: <em>libusb_dev_mem_alloc(&nbsp;)</em>).
+If the attempt fails, normal heap memory is allocated instead. In both cases the <em>hostmem</em> is automatically deleted (and its memory released) when the <em>devhandle</em> is closed.</span></p>
+</li>
+</ul>
+</div>
+<div id="hostmem_aligned_alloc" class="ulist">
+<ul>
+<li>
+<p><em>hostmem</em> = <strong>aligned_alloc</strong>(<em>alignment</em>, <em>size</em>)<br>
+<em>hostmem</em> = <strong>aligned_alloc</strong>(<em>alignment</em>, <em>data</em>)<br>
+<em>hostmem</em> = <strong>aligned_alloc</strong>(<em>alignment</em>, <a href="#type"><em>type</em></a>, {<em>value<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>value<sub>N</sub></em>})<br>
+<em>hostmem</em> = <strong>aligned_alloc</strong>(<em>alignment</em>, <a href="#type"><em>type</em></a>, <em>value<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>value<sub>N</sub></em>)<br>
+<span class="small">Same as <a href="#hostmem_malloc">malloc</a>(&nbsp;), with the additional <em>alignment</em> parameter to control
+memory address alignment (rfr. <em>aligned_alloc(3)</em>).</span></p>
+</li>
+</ul>
+</div>
+<div id="hostmem_hostmem" class="ulist">
+<ul>
+<li>
+<p><em>hostmem</em> = <strong>hostmem</strong>(<em>size</em>, <em>ptr</em>)<br>
+<em>hostmem</em> = <strong>hostmem</strong>(<em>data</em>)<br>
+<span class="small">Creates a <em>hostmem</em> object encapsulating user provided memory.<br>
+Such memory may be provided in form of a lightuserdata (<em>ptr</em>) containing a valid pointer to <em>size</em> bytes of contiguous memory, or as a binary string (<em>data</em>).<br>
+In both cases, care must be taken that the memory area remains valid until the <em>hostmem</em> object is
+deleted, or at least until it is accessed via its methods.
+In the <em>data</em> case, this means ensuring that <em>data</em> is not garbage collected during the hostmem object lifetime.<br>
+(Note that <em>malloc(data)</em> and <em>hostmem(data)</em> differ in that the former allocates memory and copies
+<em>data</em> in it, while the latter just stores a pointer to <em>data</em>).</span></p>
+</li>
+</ul>
+</div>
+<div id="hostmem_free" class="ulist">
+<ul>
+<li>
+<p><strong>free</strong>(<em>hostmem</em>)<br>
+hostmem:<strong>free</strong>( )<br>
+<span class="small">Deletes the <em>hostmem</em> object. If <em>hostmem</em> was created with
+<a href="#hostmem_malloc">usb.malloc</a>(&nbsp;) or <a href="#hostmem_aligned_alloc">usb.aligned_alloc</a>(&nbsp;), this function also releases the encapsulated memory.</span></p>
+</li>
+</ul>
+</div>
+<div id="hostmem_ptr" class="ulist">
+<ul>
+<li>
+<p><em>ptr</em>  = hostmem:<strong>ptr</strong>([<em>offset</em>=0], [<em>nbytes</em>=0])<br>
+<span class="small">Returns a pointer (lightuserdata) to the location at <em>offset</em> bytes from the beginning of the encapsulated memory.<br>
+Raises an error if the requested location is beyond the boundaries of the memory area, or if there are not at least <em>nbytes</em> of memory after it.</span></p>
+</li>
+</ul>
+</div>
+<div id="hostmem_size" class="ulist">
+<ul>
+<li>
+<p><em>nbytes</em> = hostmem:<strong>size</strong>([<em>offset</em>=0])<br>
+<em>nbytes</em> = hostmem:<strong>size</strong>(<em>ptr</em>)<br>
+<span class="small">Returns the number of bytes of memory available after <em>offset</em> bytes from the beginning
+of the encapsulated memory area, or after <em>ptr</em> (a lightuserdata obtained with hostmem:<a href="#hostmem_ptr">ptr</a>(&nbsp;)).</span></p>
+</li>
+</ul>
+</div>
+<div id="hostmem_read" class="ulist">
+<ul>
+<li>
+<p><em>data</em> = hostmem:<strong>read</strong>([<em>offset</em>], [<em>nbytes</em>])<br>
+{<em>val<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>val<sub>N</sub></em>} = hostmem:<strong>read</strong>([<em>offset</em>], [<em>nbytes</em>], <a href="#type"><em>type</em></a>)<br>
+<span class="small">Reads <em>nbytes</em> of data starting from <em>offset</em>, and returns it as a binary string or as
+a table of primitive values.<br>
+The <em>offset</em> parameter defaults to 0, and <em>nbytes</em> defaults to the memory size minus <em>offset</em>.<br>
+<em>hostmem:read(offset, nbytes, type)</em> is functionally equivalent to
+<em>cl.unpack(type, hostmem:read(offset, nbytes))</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="hostmem_write" class="ulist">
+<ul>
+<li>
+<p>hostmem:<strong>write</strong>(<em>offset</em>, <em>nil</em>, <em>data</em>)<br>
+hostmem:<strong>write</strong>(<em>offset</em>, <a href="#type"><em>type</em></a>, <em>val<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>val<sub>N</sub></em>)<br>
+hostmem:<strong>write</strong>(<em>offset</em>, <a href="#type"><em>type</em></a>, {<em>value<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>value<sub>N</sub></em>})<br>
+<span class="small">Writes to the encapsulated memory area, starting from the byte at <em>offset</em>.<br>
+<strong>write</strong>(<em>offset</em>, <em>nil</em>, <em>data</em>) writes the contents of <em>data</em> (a binary string);<br>
+<strong>write</strong>(<em>offset</em>, <em>type</em>, <em>&#8230;&#8203;</em>) is equivalent to <em>write(offset, nil, usb.pack(type, &#8230;&#8203;))</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="hostmem_copy" class="ulist">
+<ul>
+<li>
+<p>hostmem:<strong>copy</strong>(<em>offset</em>, <em>size</em>, <em>srcptr</em>)<br>
+hostmem:<strong>copy</strong>(<em>offset</em>, <em>size</em>, <em>srchostmem</em>, <em>srcoffset</em>)<br>
+<span class="small">Copies <em>size</em> bytes to the encapsulated memory area, starting from the byte at <em>offset</em>.<br>
+<strong>copy</strong>(<em>offset</em>, <em>size</em>, <em>srcptr</em>), copies the <em>size</em> bytes pointed to by <em>srcptr</em> (a lightuserdata).<br>
+<strong>copy</strong>(<em>offset</em>, <em>size</em>, <em>srchostmem</em>, <em>srcoffset</em>), copies <em>size</em> bytes from the memory encapsulated
+by <em>srchostmem</em> (a hostmem object), starting from the location at <em>srcoffset</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="hostmem_clear" class="ulist">
+<ul>
+<li>
+<p>hostmem:<strong>clear</strong>(<em>offset</em>, <em>nbytes</em>, [<em>val</em>=0])<br>
+<span class="small">Clears <em>nbytes</em> of memory starting from <em>offset</em>. If the <em>val</em> parameter is given,
+the bytes are set to its value instead of 0 (<em>val</em> may be an integer or a character, i.e.
+a string of length 1).</span></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="datahandling">Data handling</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section describes additional utilities that can be used to encode data from Lua
+variables to binary strings and viceversa.</p>
+</div>
+<div id="datahandling_flatten" class="ulist">
+<ul>
+<li>
+<p><em>val<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>val<sub>N</sub></em> = <strong>flatten</strong>(<em>table</em>)<br>
+<span class="small">Flattens out the given <em>table</em> and returns the terminal elements in the order they are found.<br>
+Similar to Lua&#8217;s
+<a href="http://www.lua.org/manual/5.3/manual.html#pdf-table.unpack">table.unpack</a>(&nbsp;), but it also unpacks
+any nested table. Only the array part of the table and of nested tables is considered.</span></p>
+</li>
+</ul>
+</div>
+<div id="datahandling_flatten_table" class="ulist">
+<ul>
+<li>
+<p>{<em>val<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>val<sub>N</sub></em>} = <strong>flatten_table</strong>(<em>table</em>)<br>
+<span class="small">Same as <a href="#datahandling_flatten">flatten</a>(&nbsp;), but returns the values in a flat table.
+Unlike <a href="#datahandling_flatten">flatten</a>(&nbsp;), this function can be used also with very large tables.</span></p>
+</li>
+</ul>
+</div>
+<div id="datahandling_sizeof" class="ulist">
+<ul>
+<li>
+<p><em>size</em> = <strong>sizeof</strong>(<a href="#type"><em>type</em></a>)<br>
+<span class="small">Returns the size in bytes of the given <em>type</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="datahandling_pack" class="ulist">
+<ul>
+<li>
+<p><em>data</em> = <strong>pack</strong>(<a href="#type"><em>type</em></a>, <em>val<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>val<sub>N</sub></em>)<br>
+<em>data</em> = <strong>pack</strong>(<a href="#type"><em>type</em></a>, <em>table</em>)<br>
+<span class="small">Packs the numbers <em>val<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>val<sub>N</sub></em>, encoding  them according to the given <em>type</em>, and returns the resulting binary string.<br>
+The values may also be passed in a (possibly nested) table. Only the array part of the table (and of nested tables) is considered.</span></p>
+</li>
+</ul>
+</div>
+<div id="datahandling_unpack" class="ulist">
+<ul>
+<li>
+<p>{<em>val<sub>1</sub></em>, <em>&#8230;&#8203;</em>, <em>val<sub>N</sub></em>} = <strong>unpack</strong>(<a href="#type"><em>type</em></a>, <em>data</em>)<br>
+<span class="small">Unpacks the binary string <em>data</em>, interpreting it as a sequence of values of the given <em>type</em>,
+and returns the extracted values in a flat table.<br>
+The length of <em>data</em> must be a multiple of <a href="#datahandling_sizeof">sizeof</a>(<em>type</em>).</span></p>
+</li>
+</ul>
+</div>
+<div id="encode_control_setup" class="ulist">
+<ul>
+<li>
+<p><strong>encode_control_setup</strong>(<em>ptr</em>, <a href="#setup"><em>setup</em></a>)<br>
+<em>bstring</em> = <strong>encode_control_setup</strong>(<em>nil</em>, <a href="#setup"><em>setup</em></a>)<br>
+<a href="#setup"><em>setup</em></a> = <strong>decode_control_setup</strong>(<em>ptr</em>)<br>
+<a href="#setup"><em>setup</em></a> = <strong>decode_control_setup</strong>(<em>bstring</em>)<br>
+<span class="small">Encode/decode a Setup packet for control transfers.<br>
+The packet is encoded to / decoded from the first 8 bytes pointed by <em>ptr</em>, or of the binary string <em>bstring</em>.<br>
+<em>ptr</em>: a lightuserdata containing a pointer to at least 8 bytes of memory,<br>
+<em>bstring</em>: a binary string with length greater or equal to 8.</span></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="miscellanea">Miscellanea</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><span class="small">Rfr: <a href="http://libusb.sourceforge.net/api-1.0/group__libusb__misc.html">Miscellaneous</a>.</span></p>
+</div>
+<div id="get_version" class="ulist">
+<ul>
+<li>
+<p><em>major</em>, <em>minor</em>, <em>micro</em>, <em>nano</em>, <em>rc</em> = <strong>get_version</strong>(&nbsp;)<br>
+<span class="small">Returns libusb version information.<br>
+Also available are the <em>usb._VERSION</em> and <em>usb._LIBUSB_VERSION</em> variables, that contain
+the string versions for MoonUSB and libusb, respectively.<br>
+Rfr: <em>libusb_get_version( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="set_locale" class="ulist">
+<ul>
+<li>
+<p><strong>set_locale</strong>(<em>locale</em>)<br>
+<span class="small"><em>locale</em>: string.<br>
+Rfr: <em>libusb_set_locale( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="has_capability" class="ulist">
+<ul>
+<li>
+<p><strong>has_capability</strong>(<a href="#capability"><em>capability</em></a>)<br>
+<span class="small">Rfr: <em>libusb_has_capability( )</em>.</span></p>
+</li>
+</ul>
+</div>
+<div id="trace_objects" class="ulist">
+<ul>
+<li>
+<p><strong>trace_objects</strong>(<em>boolean</em>)<br>
+<span class="small">Enable/disable tracing of objects creation and destruction (which by default
+is disabled).<br>
+If enabled, a printf is generated whenever an object is created or deleted,
+indicating the object type and the value of its raw handle.</span></p>
+</li>
+</ul>
+</div>
+<div id="now" class="ulist">
+<ul>
+<li>
+<p><em>t</em> = <strong>now</strong>(&nbsp;)<br>
+<span class="small">Returns the current time in seconds (a Lua number).<br>
+This is implemented with monotonic <em>clock_gettime(3)</em>, if available, or
+with <em>gettimeofday(3)</em> otherwise.</span></p>
+</li>
+</ul>
+</div>
+<div id="since" class="ulist">
+<ul>
+<li>
+<p><em>dt</em> = <strong>since</strong>(<em>t</em>)<br>
+<span class="small">Returns the time in seconds (a Lua number) elapsed since the time <em>t</em>,
+previously obtained with the <a href="#now">now</a>(&nbsp;) function.</span></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="structs">Structs</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a id="devicedescriptor"></a>
+<span class="small"><strong>devicedescriptor</strong> = {<br>
+<em>usb_version</em>: string (e.g. '<em>02.00</em>', <em>bcdUSB</em>),<br>
+<em>class</em>: <a href="#class">class</a> (<em>bDeviceClass</em>),<br>
+<em>subclass</em>: integer (<em>bDeviceSubClass</em>),<br>
+<em>protocol</em>: integer (<em>bDeviceProtocol</em>),<br>
+<em>max_packet_size_0</em>: integer (<em>bMaxPacketSize0</em>),<br>
+<em>vendor_id</em>: integer (<em>idVendor</em>),<br>
+<em>product_id</em>: integer (<em>idProduct</em>),<br>
+<em>release_number</em>: string (e.g. '<em>01.02</em>', <em>bcdDevice</em>),<br>
+<em>manufacturer_index</em>: integer (<em>iManufacturer</em>),<br>
+<em>product_index</em>: integer (<em>iProduct</em>),<br>
+<em>serial_number_index</em>: integer (<em>iSerialNumber</em>),<br>
+<em>num_configurations</em>: integer (<em>bNumConfigurations</em>),<br>
+<em>configuration</em>: {<a href="#configdescriptor">configdescriptor</a>},<br>
+} (rfr: <a href="http://libusb.sourceforge.net/api-1.0/structlibusb__device__descriptor.html">libusb_device_descriptor</a>)</span></p>
+</li>
+<li>
+<p><a id="configdescriptor"></a>
+<span class="small"><strong>configdescriptor</strong> = {<br>
+<em>value</em>: integer (<em>bConfigurationValue</em>),<br>
+<em>index</em>: integer (<em>iConfiguration</em>),<br>
+<em>self_powered</em>: boolean (<em>bmAttributes</em>),<br>
+<em>remote_wakeup</em>: boolean (<em>bmAttributes</em>),<br>
+<em>max_power</em>: integer (<em>MaxPower</em>),<br>
+<em>num_interfaces</em>: integer (<em>bNumInterfaces</em>),<br>
+<em>interface</em>: {{<a href="#interfacedescriptor">interfacedescriptor</a>}},<br>
+<em>extra</em>: binary string,<br>
+} (rfr: <a href="http://libusb.sourceforge.net/api-1.0/structlibusb__config__descriptor.html">libusb_config_descriptor</a>)</span></p>
+</li>
+<li>
+<p><a id="interfacedescriptor"></a>
+<span class="small"><strong>interfacedescriptor</strong> = {<br>
+<em>number</em>: integer (<em>bInterfaceNumber</em>),<br>
+<em>alt_setting</em>: integer (<em>bAlternateSetting</em>),<br>
+<em>class</em>: <a href="#class">class</a> (<em>bInterfaceClass</em>),<br>
+<em>subclass</em>: integer (<em>bInterfaceSubClass</em>),<br>
+<em>protocol</em>: integer (<em>bInterfaceProtocol</em>),<br>
+<em>index</em>: integer (<em>iInterface</em>),<br>
+<em>num_endpoints</em>: integer (<em>bNumEndpoints</em>),<br>
+<em>endpoint</em>: {<a href="#endpointdescriptor">endpointdescriptor</a>},<br>
+<em>extra</em>: binary string,<br>
+} (rfr: <a href="http://libusb.sourceforge.net/api-1.0/structlibusb__interface__descriptor.html">libusb_interface_descriptor</a>)</span></p>
+</li>
+<li>
+<p><a id="endpointdescriptor"></a>
+<span class="small"><strong>endpointdescriptor</strong> = {<br>
+<em>address</em>: integer (<em>bEndpointAddress</em>),<br>
+<em>number</em>: integer (<em>bEndpointAddress</em>),<br>
+<em>direction</em>: <a href="#direction">direction</a> (<em>bEndpointAddress</em>),<br>
+<em>transfer_type</em>: <a href="#transfertype">transfertype</a> (<em>bmAttributes</em>),<br>
+<em>iso_sync_type</em>: <a href="#isosynctype">isosynctype</a> (<em>bmAttributes</em>, isochronous transfers only),<br>
+<em>iso_usage_type</em>: <a href="#isousagetype">isousagetype</a> (<em>bmAttributes</em>, isochronous transfers only),<br>
+<em>max_packet_size</em>: integer (<em>wMaxPacketSize</em>),<br>
+<em>interval</em>: integer (<em>bInterval</em>),<br>
+<em>refresh</em>: integer (<em>bRefresh</em>),<br>
+<em>synch_address</em>: integer (<em>bSynchAddress</em>),<br>
+<em>ss_endpoint_companion_descriptor</em>: <a href="#ssendpointcompaniondescriptor">ssendpointcompaniondescriptor</a> or <em>nil</em>,<br>
+<em>extra</em>: binary string,<br>
+} (rfr: <a href="http://libusb.sourceforge.net/api-1.0/structlibusb__endpoint__descriptor.html">libusb_endpoint_descriptor</a>)</span></p>
+</li>
+<li>
+<p><a id="ssendpointcompaniondescriptor"></a>
+<span class="small"><strong>ssendpointcompaniondescriptor</strong> = {<br>
+<em>max_burst</em>: integer (<em>bMaxBurst</em>),<br>
+<em>attributes</em>: integer (<em>bmAttributes</em>),<br>
+<em>bytes_per_interval</em>: integer (<em>wBytesPerInterval</em>),<br>
+} (rfr: <a href="http://libusb.sourceforge.net/api-1.0/structlibusb__ss__endpoint__companion__descriptor.html">libusb_ss_endpoint_companion_descriptor</a>)</span></p>
+</li>
+</ul>
+</div>
+<hr>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="bosdescriptor"></a>
+<span class="small"><strong>bosdescriptor</strong> = {<br>
+<em>num_capabilities</em>: integer (<em>bNumDeviceCaps</em>),<br>
+<em>capability</em>: {<a href="#bosdevcapabilitydescriptor">bosdevcapabilitydescriptor</a>},<br>
+} (rfr: <a href="http://libusb.sourceforge.net/api-1.0/structlibusb__bos__descriptor.html">libusb_bos_descriptor</a>)</span></p>
+</li>
+<li>
+<p><a id="bosdevcapabilitydescriptor"></a>
+<span class="small"><strong>bosdevcapabilitydescriptor</strong> = {<br>
+	<em>type</em> = integer (<em>bDevCapabilityType</em>),<br>
+	<em>data</em> = binary string (<em>capability dependent data, see USB 3.2 Specification Table 9-13</em>),<br>
+}
+(rfr: <a href="http://libusb.sourceforge.net/api-1.0/structlibusb__bos__dev__capability__descriptor.html">libusb_bos_dev_capability_descriptor</a>)</span></p>
+</li>
+</ul>
+</div>
+<hr>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="setup"></a>
+<span class="small"><strong>setup</strong> = {<br>
+	<em>request_type</em> = <a href="#requesttype">requesttype</a>,<br>
+	<em>request_recipient</em> = <a href="#requestrecipient">requestrecipient</a>,<br>
+	<em>direction</em> = <a href="#direction">direction</a>,<br>
+	<em>request</em> = <a href="#standardrequest">standardrequest</a> or integer (if <em>request_type</em> is not '<em>standard</em>'),<br>
+	<em>value</em> = integer,<br>
+	<em>index</em> = integer,<br>
+	<em>length</em> = integer.<br>
+} (rfr: <a href="http://libusb.sourceforge.net/api-1.0/structlibusb__control__setup.html">libusb_control_setup struct</a>)</span></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="enums">Enums</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Libusb enums are mapped in MoonUSB to sets of string literals (as is customary in Lua).</p>
+</div>
+<div class="paragraph">
+<p>If needed, the following function can be used to obtain the list of literals admitted by
+a particular enum type.</p>
+</div>
+<div id="usb.enum" class="ulist">
+<ul>
+<li>
+<p>{<em>literal</em>} = <strong>usb.enum</strong>(<em>enumtype</em>)<br>
+<span class="small">Returns a table listing the literals admitted by <em>enumtype</em> (given as a string, e.g.
+'<em>blendop</em>', '<em>format</em>', etc).</span></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Below is the list of the enum types and the literals they admit.</p>
+</div>
+<div id="capability" class="paragraph">
+<p><span class="small"><strong>capability</strong>: <em>libusb_capability</em><br>
+Values: '<em>hotplug</em>', '<em>hid access</em>', '<em>detach kernel driver</em>'.</span></p>
+</div>
+<div id="class" class="paragraph">
+<p><span class="small"><strong>class</strong>: USB class codes (see: <a href="https://www.usb.org/defined-class-codes" class="bare">https://www.usb.org/defined-class-codes</a>).<br>
+Values: '<em>per interface</em>', '<em>audio</em>', '<em>cdc</em>', '<em>hid</em>', '<em>physical</em>', '<em>image</em>', '<em>printer</em>', '<em>mass storage</em>', '<em>hub</em>', '<em>cdc data</em>', '<em>smart card</em>', '<em>content security</em>', '<em>video</em>', '<em>personal healthcare</em>', '<em>audio video</em>', '<em>billboard</em>', '<em>type c bridge</em>', '<em>diagnostic</em>', '<em>wireless</em>', '<em>miscellaneous</em>', '<em>application specific</em>', '<em>vendor specific</em>'.</span></p>
+</div>
+<div id="direction" class="paragraph">
+<p><span class="small"><strong>direction</strong>: <em>libusb_endpoint_direction</em><br>
+Values: '<em>out</em>', '<em>in</em>'.</span></p>
+</div>
+<div id="errcode" class="paragraph">
+<p><span class="small"><strong>errcode</strong>: <em>libusb_error</em>, <em>libusb_transfer_status</em><br>
+Values: '<em>success</em>', '<em>io error</em>', '<em>invalid param</em>', '<em>access</em>', '<em>no device</em>', '<em>not found</em>', '<em>busy</em>', '<em>timeout</em>', '<em>overflow</em>', '<em>pipe</em>', '<em>interrupted</em>', '<em>no mem</em>', '<em>not supported</em>', '<em>other</em>', '<em>success</em>', '<em>error</em>', '<em>timeout</em>', '<em>cancelled</em>', '<em>stall</em>', '<em>no device</em>', '<em>overflow</em>'.</span></p>
+</div>
+<div id="hotplugevent" class="paragraph">
+<p><span class="small"><strong>hotplugevent</strong>: <em>libusb_hotplug_event + libusb_hotplug_flags</em><br>
+Values: '<em>attached</em>', '<em>detached</em>'.</span></p>
+</div>
+<div id="isosynctype" class="paragraph">
+<p><span class="small"><strong>isosynctype</strong>: <em>libusb_iso_sync_type</em><br>
+Values: '<em>none</em>', '<em>async</em>', '<em>adaptive</em>', '<em>sync</em>'.</span></p>
+</div>
+<div id="isousagetype" class="paragraph">
+<p><span class="small"><strong>isousagetype</strong>: <em>libusb_iso_usage_type</em><br>
+Values: '<em>data</em>', '<em>feedback</em>', '<em>implicit</em>'.</span></p>
+</div>
+<div id="loglevel" class="paragraph">
+<p><span class="small"><strong>loglevel</strong>: <em>libusb_log_level</em><br>
+Values: '<em>none</em>', '<em>error</em>', '<em>warning</em>', '<em>info</em>', '<em>debug</em>'.</span></p>
+</div>
+<div id="option" class="paragraph">
+<p><span class="small"><strong>option</strong>: <em>libusb_option</em><br>
+Values: '<em>log level</em>', '<em>use usbdk</em>', '<em>weak authority</em>'.</span></p>
+</div>
+<div id="requestrecipient" class="paragraph">
+<p><span class="small"><strong>requestrecipient</strong>: <em>libusb_request_recipient</em><br>
+Values: '<em>device</em>', '<em>interface</em>', '<em>endpoint</em>', '<em>other</em>'.</span></p>
+</div>
+<div id="requesttype" class="paragraph">
+<p><span class="small"><strong>requesttype</strong>: <em>libusb_request_type</em><br>
+Values: '<em>standard</em>', '<em>class</em>', '<em>vendor</em>', '<em>reserved</em>'.</span></p>
+</div>
+<div id="speed" class="paragraph">
+<p><span class="small"><strong>speed</strong>:  <em>libusb_speed</em><br>
+Values: '<em>unknown</em>', '<em>low</em>', '<em>full</em>', '<em>high</em>', '<em>super</em>', '<em>super plus</em>'.</span></p>
+</div>
+<div id="standardrequest" class="paragraph">
+<p><span class="small"><strong>standardrequest</strong>: <em>libusb_standard_request</em><br>
+Values: '<em>get status</em>', '<em>clear feature</em>', '<em>set feature</em>', '<em>set address</em>', '<em>get descriptor</em>', '<em>set descriptor</em>', '<em>get configuration</em>', '<em>set configuration</em>', '<em>get interface</em>', '<em>set interface</em>', '<em>synch frame</em>', '<em>set sel</em>', '<em>set isoch delay</em>'.</span></p>
+</div>
+<div id="transfertype" class="paragraph">
+<p><span class="small"><strong>transfertype</strong>: <em>libusb_endpoint_transfer_type</em><br>
+Values: '<em>control</em>', '<em>isochronous</em>', '<em>bulk</em>', '<em>interrupt</em>'.</span></p>
+</div>
+<div id="transferstatus" class="paragraph">
+<p><span class="small"><strong>transferstatus</strong>: <em>libusb_transfer_status</em><br>
+Values: '<em>completed</em>', '<em>error</em>', '<em>timeout</em>', '<em>cancelled</em>', '<em>stall</em>', '<em>no device</em>', '<em>overflow</em>'.</span></p>
+</div>
+<div id="type" class="paragraph">
+<p><span class="small"><strong>type</strong>: primitive type (char=8 bit, short=16 bit, int=32 bit, long=64 bit, float=32 bit, double=64 bit)<br>
+Values: '<em>char</em>', '<em>uchar</em>', '<em>short</em>', '<em>ushort</em>', '<em>int</em>', '<em>uint</em>', '<em>long</em>', '<em>ulong</em>', '<em>float</em>', '<em>double</em>'.</span></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="emulator">Emulating USB devices</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section describes the optional <strong>moonusb.emulator</strong> module, that can be loaded with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="lua"><span></span> <span class="tok-kd">local</span> <span class="tok-n">emulator</span> <span class="tok-o">=</span> <span class="tok-nb">require</span><span class="tok-p">(</span><span class="tok-s2">&quot;moonusb.emulator&quot;</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The module uses Diego Nehab&#8217;s
+<a href="http://w3.impa.br/~diego/software/luasocket/">LuaSocket</a> (required) and the
+<a href="https://github.com/stetre/moontimers">MoonTimers</a> module from the MoonLibs collection (optional).</p>
+</div>
+<div class="sect2">
+<h3 id="_overview">Overview</h3>
+<div class="paragraph">
+<p>The purpose of libusb, and hence of MoonUSB, is to implement USB user applications.
+That is, applications that use USB devices. MoonUSB however provides an additonal - and
+experimental - submodule named <strong>moonusb.emulator</strong> to emulate USB devices. The emulation
+leverages the <a href="http://usbip.sourceforge.net/">USB/IP</a> framework, which should be
+available by default on most GNU/Linux systems.</p>
+</div>
+<div class="paragraph">
+<p>The <strong>original goal of USB/IP</strong> is to allow applications to access USB devices that are plugged
+into a remote host, as if they were plugged into the local host. This is achieved as follows:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>on the remote host, a TCP server implements the
+<a href="https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt">USB/IP protocol</a> (server-side) to
+make USB devices plugged into that host available for export to clients that request them;</p>
+</li>
+<li>
+<p>on the local host, a USB/IP client - usually the <a href="https://www.mankier.com/8/usbip">usbip</a> tool -
+can then connect to the remote server, list the available devices, possibly import one
+or more of them and send them USB requests over the connection. The server relays the client&#8217;s
+requests to the remote devices and their responses back to the client over the TCP connection.
+If the <em>usbip</em> tool is used, once it has imported a device it handles the connection to the
+<a href="https://sourceforge.net/p/usb-vhci/wiki/Home/">VHCI</a> driver, which in turns makes the device
+available to user applications in the same way that real USB devices plugged in locally are
+made available by their drivers.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Even if it is not its original goal, USB/IP can be used also to <strong>emulate a USB device</strong>. This is
+what the <em>moonusb.emulator</em> module does: it implements a USB/IP server that runs locally and
+exports a fake USB device, as opposed to running remotely to export real devices (the emulation
+server could also run remotely, but I&#8217;m not sure USB/IP is safe enough to advise it).</p>
+</div>
+<div class="paragraph">
+<p>Since there are gazillions of USB device types out there, in order to fake a particular device
+the emulator module has to be customized by a <strong>user script</strong>.
+The emulator module implements the core, device-independent parts of the server: it manages
+the TCP connection, the reception and delivery of data over it, and encodes/decodes USB/IP
+protocol messages. The user script, on the other hand, is responsible for configuring
+the module and for implementing the device-specific parts of the emulation.
+Loosely speaking, the emulator module implements the USB/IP protocol (server-side),
+while the <strong>user script</strong> implements the USB protocol (device-side) on top of
+the <a href="#emulator_api">emulator API</a> described in a later section.</p>
+</div>
+<div class="paragraph">
+<p>The code snippet below shows the skeleton of a user script. More complete
+(and working) examples can be found in the <strong>examples/</strong> directory.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="lua"><span></span> <span class="tok-c1">-- Script: myfakedevice.lua</span>
+ <span class="tok-kd">local</span> <span class="tok-n">emulator</span> <span class="tok-o">=</span> <span class="tok-nb">require</span><span class="tok-p">(</span><span class="tok-s2">&quot;moonusb.emulator&quot;</span><span class="tok-p">)</span>
+ <span class="tok-c1">-- local timers = require(&quot;moontimers&quot;) -- optional</span>
+
+ <span class="tok-kd">local</span> <span class="tok-kr">function</span> <span class="tok-nf">attached</span><span class="tok-p">()</span>
+    <span class="tok-c1">-- callback executed when the device has been attached</span>
+ <span class="tok-kr">end</span>
+
+ <span class="tok-kd">local</span> <span class="tok-kr">function</span> <span class="tok-nf">detached</span><span class="tok-p">()</span>
+    <span class="tok-c1">-- callback executed when the device has been detached</span>
+ <span class="tok-kr">end</span>
+
+ <span class="tok-kd">local</span> <span class="tok-kr">function</span> <span class="tok-nf">receive_submit</span><span class="tok-p">(</span><span class="tok-n">submit</span><span class="tok-p">)</span>
+    <span class="tok-c1">-- callback executed when a &#39;submit&#39; command has been received</span>
+    <span class="tok-c1">-- ... process the command and prepare the response ...</span>
+    <span class="tok-n">emulator</span><span class="tok-p">.</span><span class="tok-n">send_submit_response</span><span class="tok-p">(</span><span class="tok-n">submit</span><span class="tok-p">,</span> <span class="tok-n">status</span><span class="tok-p">,</span> <span class="tok-n">error_count</span><span class="tok-p">,</span> <span class="tok-n">data</span><span class="tok-p">)</span>
+ <span class="tok-kr">end</span>
+
+ <span class="tok-kd">local</span> <span class="tok-kr">function</span> <span class="tok-nf">receive_unlink</span><span class="tok-p">(</span><span class="tok-n">unlink</span><span class="tok-p">)</span>
+    <span class="tok-c1">-- callback executed when a &#39;unlink&#39; command has been received</span>
+    <span class="tok-c1">-- ... process the command and prepare the response ...</span>
+    <span class="tok-n">emulator</span><span class="tok-p">.</span><span class="tok-n">send_unlink_response</span><span class="tok-p">(</span><span class="tok-n">unlink</span><span class="tok-p">,</span> <span class="tok-n">status</span><span class="tok-p">)</span>
+ <span class="tok-kr">end</span>
+
+ <span class="tok-c1">-- Configure the emulator and start the emulation</span>
+ <span class="tok-n">emulator</span><span class="tok-p">.</span><span class="tok-n">start</span><span class="tok-p">({</span>
+    <span class="tok-c1">-- ... --</span>
+    <span class="tok-n">busnum</span> <span class="tok-o">=</span> <span class="tok-mi">4</span><span class="tok-p">,</span>
+    <span class="tok-n">devnum</span> <span class="tok-o">=</span> <span class="tok-mi">5</span><span class="tok-p">,</span>
+    <span class="tok-n">vendor_id</span> <span class="tok-o">=</span> <span class="tok-mh">0x1234</span><span class="tok-p">,</span>
+    <span class="tok-n">product_id</span> <span class="tok-o">=</span> <span class="tok-mh">0x5678</span><span class="tok-p">,</span>
+    <span class="tok-c1">-- ... --</span>
+    <span class="tok-n">attached</span> <span class="tok-o">=</span> <span class="tok-n">attached</span><span class="tok-p">,</span>
+    <span class="tok-n">detached</span> <span class="tok-o">=</span> <span class="tok-n">detached</span><span class="tok-p">,</span>
+    <span class="tok-n">receive_submit</span> <span class="tok-o">=</span> <span class="tok-n">receive_submit</span><span class="tok-p">,</span>
+    <span class="tok-n">receive_unlink</span> <span class="tok-o">=</span> <span class="tok-n">receive_unlink</span><span class="tok-p">,</span>
+ <span class="tok-p">})</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="emulator_api">Emulator API</h3>
+<div class="paragraph">
+<p>This section describes the API exposed by the <strong>moonusb.emulator</strong> module to the
+user scripts that implement emulators for particular devices.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>emulator.start</strong>(<em>cfg</em>)<br>
+<span class="small">Configure the emulator and start the emulation.<br>
+<em>cfg</em>: <a href="#emulatorconfig">emulatorconfig</a>.</span></p>
+</li>
+<li>
+<p><strong>attached</strong>( ) <em>callback</em><br>
+<strong>detached</strong>( ) <em>callback</em><br>
+<span class="small">Signature for the <em>cfg.attached</em> and <em>cfg.detached</em> callbacks.<br>
+These callbacks are executed respectively when the fake device is attached (that
+is, imported by a client), and when it is detached (that is, the connection is
+closed either intentionally or due to an error).</span></p>
+</li>
+<li>
+<p><strong>receive_submit</strong>(<a href="#submit"><em>submit</em></a>) <em>callback</em><br>
+<strong>receive_unlink</strong>(<a href="#unlink"><em>unlink</em></a>) <em>callback</em><br>
+<span class="small">Signatures for the <em>cfg.receive_submit</em> and <em>cfg.receive_unlink</em> callbacks.<br>
+These callbacks are executed respectively when a USBIP_CMD_SUBMIT or a USBIP_CMD_UNLINK
+message is received on the connection in attached state. The user is expected to process
+the message, and possibly send a response using the <em>send_xxx_response(&nbsp;)</em> functions
+described below.<br>
+Rfr: <a href="https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt">USBIP_CMD_SUBMIT, USBIP_CMD_UNLINK</a>.</span></p>
+</li>
+<li>
+<p><strong>emulator.send_submit_response</strong>(<a href="#submit"><em>submit</em></a>, <em>status</em>, <em>error_count</em>, [<em>data</em>])<br>
+<strong>emulator.send_unlink_response</strong>(<a href="#unlink"><em>unlink</em></a>, <em>status</em>)<br>
+<span class="small">Respectively send a USBIP_RET_SUBMIT or a USBIP_RET_UNLINK response.<br>
+The first argument is the table received in the corresponding <em>receive_xxx(&nbsp;)</em> callback, unchanged.<br>
+<em>status</em>: signed integer, 0 for success, otherwise an error code.<br>
+<em>error_count</em>: integer.<br>
+<em>data</em>: binary string containing the data to be transferred, or <em>nil</em> if none.<br>
+(I presume that the error codes are from &lt;errno.h&gt;, but I am not sure. Neither am I sure
+about the meaning of the error count. The USB/IP specification is vague, to say the least.)<br>
+Rfr: <a href="https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt">USBIP_RET_SUBMIT, USBIP_RET_UNLINK</a>.</span></p>
+</li>
+</ul>
+</div>
+<hr>
+<div class="paragraph">
+<p><strong>Structs</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="emulatorconfig"></a>
+<span class="small"><strong>emulatorconfig</strong> = {<br>
+<em>usbip_ver</em>: string (opt. USB/P bcd version, defaults to '<em>01.11</em>'),<br>
+<em>ip</em>: string (opt. IP address, defaults to '<em>localhost</em>'),<br>
+<em>port</em>: integer (opt. TCP port, defaults to 3240),<br>
+<em>busnum</em>: integer (opt., defaults to 1),<br>
+<em>devnum</em>: integer (opt., defaults to 1),<br>
+<em>path</em>: string (opt., defaults to '<em>moonusb emulated device</em>'),<br>
+<em>vendor_id</em>: integer (opt., defaults to 0x0000),<br>
+<em>product_id</em>: integer (opt., defaults to 0x0000),<br>
+<em>release_number</em>: string (opt. bcd device version, defaults to '<em>00.00</em>'),<br>
+<em>speed</em>: <a href="#speed">speed</a> (opt., defaults to '<em>high</em>'),<br>
+<em>device_class</em>: <a href="#class">class</a> (opt., defaults to '<em>per interface</em>'),<br>
+<em>device_subclass</em>: integer (opt., defaults to 0),<br>
+<em>device_protocol</em>: integer (opt., defaults to 0),<br>
+<em>configuration_value</em>: integer (opt., defaults to 1),<br>
+<em>num_configurations</em>: integer (opt., defaults to 1),<br>
+<em>interfaces</em>: {{ <em>class</em>=<a href="#class">class</a>, <em>subclass</em>=integer, <em>protocol</em>=integer }},<br>
+<em>attached</em>: function (opt. callback, see signature above),<br>
+<em>detached</em>: function (opt. callback, see signature above),<br>
+<em>receive_submit</em>: function (callback, see signature above),<br>
+<em>receive_unlink</em>: function (callback, see signature above),<br>
+} (rfr: <a href="https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt">OP_REQ_DEVLIST</a>)</span></p>
+</li>
+<li>
+<p><a id="submit"></a>
+<span class="small"><strong>submit</strong> = {<br>
+<em>seqnum</em>: integer,<br>
+<em>devid</em>: integer,<br>
+<em>direction</em>: <a href="#direction">direction</a>,<br>
+<em>ep</em>: integer,<br>
+<em>transfer_flags</em>: integer,<br>
+<em>transfer_buffer_length</em>: integer,<br>
+<em>start_frame</em>: integer,<br>
+<em>number_of_packets</em>: integer,<br>
+<em>interval</em>: integer,<br>
+<em>setup</em>: binary strings (8 bytes long),<br>
+<em>data</em>: binary string or <em>nil</em>,<br>
+} (rfr: <a href="https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt">USBIP_CMD_SUBMIT</a>)</span></p>
+</li>
+<li>
+<p><a id="unlink"></a>
+<span class="small"><strong>unlink</strong> = {<br>
+<em>seqnum</em>: integer,<br>
+<em>devid</em>: integer,<br>
+<em>direction</em>: <a href="#direction">direction</a>,<br>
+<em>ep</em>: integer,<br>
+<em>victim_seqnum</em>: integer,<br>
+} (rfr: <a href="https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt">USBIP_CMD_UNLINK</a>)</span></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_emulator_usage">Emulator usage</h3>
+<div class="paragraph">
+<p>This section shows how to run a device emulation. It is assumed that the emulator
+is implemented in a user script named <strong>myfakedevice.lua</strong>, and a client application
+(using that particular USB device) is implemented in a script named <strong>myclient.lua</strong>.</p>
+</div>
+<div class="paragraph">
+<p>First of all, ensure that the needed kernel modules are loaded:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span> $ sudo modprobe usbip-core
+ $ sudo modprobe vhci-hcd</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then, launch the emulator:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span> $ lua myfakedevice.lua</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The emulator will open a TCP socket on the specified port and wait for clients to connect.</p>
+</div>
+<div class="paragraph">
+<p>From another shell, list the devices exported by the script, using the
+<a href="https://www.mankier.com/8/usbip">usbip</a> tool:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span> $ usbip list -r <span class="tok-m">127</span>.0.0.1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This command should list a single device, and indicate "4-5" as its <em>busid</em> (assuming
+<em>busnum</em>=4 and <em>devnum</em>=5). Import the device, again with the usbip tool:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span> $ sudo usbip attach -r <span class="tok-m">127</span>.0.0.1 -b <span class="tok-m">4</span>-5</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This should start the configuration of the device, with the vhci driver issuing commands
+(get descriptor, etc) and the fake device responding. At the end of this phase, the fake
+device should appear in the list of USB devices available on the system, which you can see
+using the
+<a href="https://www.mankier.com/8/lsusb">lsusb</a> tool:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span> $ lsusb</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Finally, launch the client application from yet another shell:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span> $ lua myclient.lua</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If everything goes as expected, the client should now be able to detect and use the
+fake device as if it were a real one.</p>
+</div>
+<div class="paragraph">
+<p>To detach the fake device, first see its 'port' number (likely 00), then issue the
+detach command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span> $ sudo usbip port                <span class="tok-c1"># list the imported devices</span>
+ $ sudo usbip detach -p <span class="tok-m">00</span>        <span class="tok-c1"># detach Port 00</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As a final note, the traffic between the emulator and the vhci driver can be captured
+and analized using
+<a href="https://www.wireshark.org/">Wireshark</a>,
+which has a built-in dissector for the USB/IP protocol.
+(The traffic travels on the loopback interface, assuming the server uses the 127.0.0.1 ip address.)</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="links">Useful links</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Lua Manuals:
+<a href="http://www.lua.org/manual/5.3/">5.3</a>,
+<a href="http://www.lua.org/manual/5.4/">5.4</a>.</p>
+</li>
+<li>
+<p><a href="http://libusb.sourceforge.net/api-1.0/">Libusb-1.0 API documentation</a>.</p>
+</li>
+<li>
+<p><a href="https://github.com/stetre/moonlibs">MoonLibs</a> collection.</p>
+</li>
+<li>
+<p><a href="https://www.usb.org/documents">USB-IF Document Library</a> (USB specifications).</p>
+</li>
+<li>
+<p><a href="http://www.linux-usb.org/usb-ids.html">The USB ID Repository</a> (vendor ids, product ids, etc).</p>
+</li>
+<li>
+<p><a href="https://gitlab.com/wireshark/wireshark/-/wikis/CaptureSetup/USB">Wireshark USB CaptureSetup</a>
+(how to capture USB packets with Wireshark).</p>
+</li>
+<li>
+<p>Frank Zhao&#8217;s
+<a href="http://eleccelerator.com/usbdescreqparser/">USB parser</a> and
+<a href="https://eleccelerator.com/tutorial-about-usb-hid-report-descriptors/">HID report tutorial</a>.</p>
+</li>
+<li>
+<p>USB/IP <a href="http://usbip.sourceforge.net/">project homepage</a> and
+<a href="https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt">protocol specification</a>.</p>
+</li>
+<li>
+<p><a href="https://www.mankier.com/8/usbip">usbip(8)</a>, <a href="https://www.mankier.com/8/lsusb">lsusb(8)</a> (manpages).</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. This manual is written in <a href="http://www.methods.co.nz/asciidoc/">AsciiDoc</a>, rendered with <a href="http://asciidoctor.org/">AsciiDoctor</a> and a CSS from the <a href="https://github.com/asciidoctor/asciidoctor-stylesheet-factory">AsciiDoctor Stylesheet Factory</a>.
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. Objects are anchored to the Lua registry at their creation, so even if the script does not have references to an object, a reference always exists on the registry and this prevents the GC to collect it.
+</div>
+<div class="footnote" id="_footnotedef_3">
+<a href="#_footnoteref_3">3</a>. It is good practice to not leave invalid references to objects around, because they prevent the GC to collect the memory associated with the userdata.
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 0.1<br>
+Last updated 2021-02-04 14:17:42 +0100
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+
+[[asynchapi]]
+== Asynchronous I/O
+
+[small]#Rfr: link:++http://libusb.sourceforge.net/api-1.0/group__libusb__asyncio.html++[Asynchronous device I//O].#
+
+This API needs an event loop. See the <<polling, polling>> section.
+
+[[transfer_callback]]
+*Transfer submit methods*
+
+Asynchronous transfers are submitted using the _devhandle_++:++*submit_xxx*(&nbsp;) methods, that
+create and return a new _transfer_ object.
+Each of these methods requires a function _func_ as one of its arguments.
+This is the callback that will be executed,  as *boolean=func(transfer, status)*, when the
+transfer either completes, fails, or is canceled.
+As the callback returns, if its return value is _nil_ or _false_, then the _transfer_ object is
+automatically deleted, otherwise it is automatically resubmitted.
+
+[small]#Rfr: _libusb_alloc_transfer( )_, _libusb_fill_xxx_transfer( )_, _libusb_submit_transfer( )_.#
+
+
+* _transfer_ = <<devhandle, _devhandle_>>++:++*submit_control_transfer*(_ptr_, _size_, _timeout_, _func_) +
+[small]#Submit a USB control transfer. +
+_ptr_: lightuserdata containing a pointer to at least _size_ bytes of contiguous memory, +
+_timeout_: timeout in milliseconds (=0 for unlimited timeout). +
+_func_: the <<transfer_callback, callback>> function. +
+The first 8 bytes pointed to by _ptr_ must contain an encoded control setup packet, and the _size_
+of the memory area must be at least _wLength_pass:[+]8. +
+The setup packet must be followed by the _wLength_ bytes of data to be transferred to the device ('out' transfers), or of space for the data to be received from the device ('in' transfers). +
+For host to device transfers ('_out_'), the setup packet must be followed by the _wLength_ bytes of data to be transferred. +
+For device to host transfers ('_in_'), up the setup packet must be followed by at least _wLength_ bytes of space where to receive data (the received data thus will start at _ptr_pass:[+]8). +
+Rfr: _libusb_fill_control_transfer( )_.#
+
+* _transfer_ = <<devhandle, _devhandle_>>++:++*submit_interrupt_transfer*(_endpoint_, _ptr_, _length_, _timeout_, _func_) +
+_transfer_ = <<devhandle, _devhandle_>>++:++*submit_bulk_transfer*(_endpoint_, _ptr_, _length_, _timeout_, _func_) +
+_transfer_ = <<devhandle, _devhandle_>>++:++*submit_bulk_stream_transfer*(_endpoint_, _stream_id_, _ptr_, _length_, _timeout_, _func_) +
+[small]#Submit a USB interrupt or bulk transfer. +
+_endpoint_: endpoint address, +
+_stream_id_: stream identifier, see _devhandle:<<alloc_streams, alloc_streams>>(&nbsp;)_, +
+_ptr_: lightuserdata containing a pointer to at least _length_ bytes of contiguous memory, +
+_timeout_: timeout in milliseconds (=0 for unlimited timeout). +
+_func_: the <<transfer_callback, callback>> function. +
+For host to device transfers ('_out_'), the memory pointed to by _ptr_ must contain the _length_ bytes of data to be transferred. +
+For device to host transfers ('_in_'), up to _length_ bytes of data will be received and store there, provided the transfer succeeds. +
+Rfr: _libusb_fill_interrupt_transfer( )_, _libusb_fill_bulk_transfer( )_, _libusb_fill_bulk_stream_transfer( )_.#
+
+* _transfer_ = <<devhandle, _devhandle_>>++:++*submit_iso_transfer*(_endpoint_, _ptr_, _length_, _num_iso_packets_, _iso_packet_length_, _timeout_, _func_) +
+[small]#Submit a USB isochronous transfer. +
+_endpoint_: endpoint address, +
+_ptr_: lightuserdata containing a pointer to at least _length_ bytes of contiguous memory, +
+_num_iso_packets_: the number of isochronous packets to be transferred. +
+_iso_packet_length_: the length of each isochronous packet. +
+_timeout_: timeout in milliseconds (=0 for unlimited timeout). +
+_func_: the <<transfer_callback, callback>> function. +
+For host to device transfers ('_out_'), the memory pointed to by _ptr_ must contain the _length_ bytes of data to be transferred, consisting of _num_iso_packets_ concatenated packets of _iso_packet_length_ bytes each. +
+For device to host transfers ('_in_'), up to _length_ bytes of data will be received and store there, provided the transfer succeeds. To locate the
+actually received packets within the memory, use the _transfer:<<get_iso_packet_descriptors, get_iso_packet_descriptors>>(&nbsp;)_ method. +
+Rfr: _libusb_fill_iso_transfer( )_.#
+
+* _transfer_++:++*cancel*( ) +
+[small]#Cancels the transfer and deletes the _transfer_ object. +
+Note that _transfer_ objects are automatically deleted at the end of the execution of their callback,
+so calling this method is usually not needed. +
+Rfr: _libusb_cancel_transfer( )_.#
+
+* <<transferstatus, _status_>> = _transfer_++:++*get_status*( ) +
+[small]#Returns the current status of the transfer.#
+
+* _endpoint_ = _transfer_++:++*get_endpoint*( ) +
+[small]#Returns the endpoint address for the endpoint involved in this transfer.#
+
+* _length_ = _transfer_++:++*get_actual_length*( ) +
+[small]#Returns the no. of bytes of data actually transferred. +
+This method is meant to be called only within a transfer callback.#
+
+* _id_ = _transfer_++:++*get_stream_id*( ) +
+[small]#Returns the stream id used in the transfer. +
+This method is meant to be called only within a bulk stream transfer callback.#
+
+[[get_iso_packet_descriptors]]
+* _descr_ = _transfer_++:++*get_iso_packet_descriptors*( ) +
+[small]#Returns a list of descriptors for the packets of a completed isochronous transfer. +
+This method is meant to be called only within an isochronous transfer callback. +
+Returns _nil_ if the transfer's status is not '_completed_', otherwise returns a table
+containing _num_endpoints_ tables, each describing a packet as follows: +
+pass:[-] _descr[i].status_: <<transferstatus, transferstatus>>, status of the i-th packet, +
+pass:[-] _descr[i].offset_: integer, offset of the i-th packet in the buffer (pointed to by _ptr_), +
+pass:[-] _descr[i].length_: integer, actual length of the i-th packet.#
+

@@ -1,0 +1,104 @@
+
+[[hostmem]]
+== Host memory
+
+An hostmem object encapsulates (a pointer to) host accessible memory, with methods
+to access it from Lua and to retrieve pointers to any of its locations in form of 
+http://www.lua.org/manual/5.3/manual.html#lua_pushlightuserdata[lightuserdata].
+
+(Note that hostmem objets are specific to MoonUSB, i.e. they do not 
+correspond to libusb objects).
+
+The memory encapsulated by an hostmem object may be either host memory allocated via 
+the <<hostmem_malloc, usb.malloc>>(&nbsp;) or the <<hostmem_aligned_alloc, usb.aligned_alloc>>(&nbsp;) 
+functions, or memory obtained by other means and passed to the <<hostmem_hostmem, usb.hostmem>>(&nbsp;) constructor.
+
+Hostmem objects are automatically deleted at exit, but they may also be deleted manually
+via the <<hostmem_free, usb.free>>(&nbsp;) function or the corresponding method. Hostmem
+objects that are tied to a <<devhandle, devhandle>> object are automatically deleted when
+the _devhandle_ is closed.
+
+Hostmem objects come in handy, for example, when issuing transfer commands either via the <<asynchapi, asynchronous API>> or vie the <<synchap, synchronous API>>.
+
+[[hostmem_malloc]]
+* _hostmem_ = *malloc*([<<devhandle, _devhandle_>>], _size_) +
+_hostmem_ = *malloc*([<<devhandle, _devhandle_>>], _data_) +
+_hostmem_ = *malloc*([<<devhandle, _devhandle_>>], <<type, _type_>>, {_value~1~_, _..._, _value~N~_}) +
+_hostmem_ = *malloc*([<<devhandle, _devhandle_>>], <<type, _type_>>, _value~1~_, _..._, _value~N~_) +
+[small]#Allocates host memory and creates an _hostmem_ object to encapsulate it. +
+*malloc*(_devhandle_, _size_), where _size_ is an integer, allocates _size_ bytes of contiguous memory
+and initializes them to 0; +
+*malloc*(_devhandle_, _data_), where _data_ is a binary string, allocates _#data_ bytes of contiguous
+memory and initializes them with the contents of _data_; +
+*malloc*(_devhandle_, _type_, _..._) is functionally equivalent to _malloc(usb.pack(type, ...))_. +
+If the _devhandle_ argument is not _nil_, an attempt is made to allocate DMA memory for the given device (rfr: _libusb_dev_mem_alloc(&nbsp;)_).
+If the attempt fails, normal heap memory is allocated instead. In both cases the _hostmem_ is automatically deleted (and its memory released) when the _devhandle_ is closed.#
+
+[[hostmem_aligned_alloc]]
+* _hostmem_ = *aligned_alloc*(_alignment_, _size_) +
+_hostmem_ = *aligned_alloc*(_alignment_, _data_) +
+_hostmem_ = *aligned_alloc*(_alignment_, <<type, _type_>>, {_value~1~_, _..._, _value~N~_}) +
+_hostmem_ = *aligned_alloc*(_alignment_, <<type, _type_>>, _value~1~_, _..._, _value~N~_) +
+[small]#Same as <<hostmem_malloc, malloc>>(&nbsp;), with the additional _alignment_ parameter to control
+memory address alignment (rfr. _aligned_alloc(3)_).#
+
+[[hostmem_hostmem]]
+* _hostmem_ = *hostmem*(_size_, _ptr_) +
+_hostmem_ = *hostmem*(_data_) +
+[small]#Creates a _hostmem_ object encapsulating user provided memory. +
+Such memory may be provided in form of a lightuserdata (_ptr_) containing a valid pointer to _size_ bytes of contiguous memory, or as a binary string (_data_). +
+In both cases, care must be taken that the memory area remains valid until the _hostmem_ object is 
+deleted, or at least until it is accessed via its methods. 
+In the _data_ case, this means ensuring that _data_ is not garbage collected during the hostmem object lifetime. +
+(Note that _malloc(data)_ and _hostmem(data)_ differ in that the former allocates memory and copies 
+_data_ in it, while the latter just stores a pointer to _data_).#
+
+[[hostmem_free]]
+* *free*(_hostmem_) +
+hostmem++:++*free*( ) +
+[small]#Deletes the _hostmem_ object. If _hostmem_ was created with 
+<<hostmem_malloc, usb.malloc>>(&nbsp;) or <<hostmem_aligned_alloc, usb.aligned_alloc>>(&nbsp;), this function also releases the encapsulated memory.#
+
+[[hostmem_ptr]]
+* _ptr_  = hostmem++:++*ptr*([_offset_=0], [_nbytes_=0]) +
+[small]#Returns a pointer (lightuserdata) to the location at _offset_ bytes from the beginning of the encapsulated memory. +
+Raises an error if the requested location is beyond the boundaries of the memory area, or if there are not at least _nbytes_ of memory after it.#
+
+[[hostmem_size]]
+* _nbytes_ = hostmem++:++*size*([_offset_=0]) +
+_nbytes_ = hostmem++:++*size*(_ptr_) +
+[small]#Returns the number of bytes of memory available after _offset_ bytes from the beginning 
+of the encapsulated memory area, or after _ptr_ (a lightuserdata obtained with hostmem:<<hostmem_ptr, ptr>>(&nbsp;)).#
+
+[[hostmem_read]]
+* _data_ = hostmem++:++*read*([_offset_], [_nbytes_]) +
+{_val~1~_, _..._, _val~N~_} = hostmem++:++*read*([_offset_], [_nbytes_], <<type, _type_>>) +
+[small]#Reads _nbytes_ of data starting from _offset_, and returns it as a binary string or as
+a table of primitive values. +
+The _offset_ parameter defaults to 0, and _nbytes_ defaults to the memory size minus _offset_. +
+_hostmem:read(offset, nbytes, type)_ is functionally equivalent to 
+_cl.unpack(type, hostmem:read(offset, nbytes))_.#
+
+[[hostmem_write]]
+* hostmem++:++*write*(_offset_, _nil_, _data_) +
+hostmem++:++*write*(_offset_, <<type, _type_>>, _val~1~_, _..._, _val~N~_) +
+hostmem++:++*write*(_offset_, <<type, _type_>>, {_value~1~_, _..._, _value~N~_}) +
+[small]#Writes to the encapsulated memory area, starting from the byte at _offset_. +
+*write*(_offset_, _nil_, _data_) writes the contents of _data_ (a binary string); +
+*write*(_offset_, _type_, _..._) is equivalent to _write(offset, nil, usb.pack(type, ...))_.#
+
+[[hostmem_copy]]
+* hostmem++:++*copy*(_offset_, _size_, _srcptr_) +
+hostmem++:++*copy*(_offset_, _size_, _srchostmem_, _srcoffset_) +
+[small]#Copies _size_ bytes to the encapsulated memory area, starting from the byte at _offset_. +
+*copy*(_offset_, _size_, _srcptr_), copies the _size_ bytes pointed to by _srcptr_ (a lightuserdata). +
+*copy*(_offset_, _size_, _srchostmem_, _srcoffset_), copies _size_ bytes from the memory encapsulated
+by _srchostmem_ (a hostmem object), starting from the location at _srcoffset_.#
+
+[[hostmem_clear]]
+* hostmem++:++*clear*(_offset_, _nbytes_, [_val_=0]) +
+[small]#Clears _nbytes_ of memory starting from _offset_. If the _val_ parameter is given,
+the bytes are set to its value instead of 0 (_val_ may be an integer or a character, i.e. 
+a string of length 1).#
+
+

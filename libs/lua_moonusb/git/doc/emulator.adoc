@@ -1,0 +1,261 @@
+
+[[emulator]]
+== Emulating USB devices
+
+This section describes the optional *moonusb.emulator* module, that can be loaded with:
+
+[source,lua,indent=1]
+----
+local emulator = require("moonusb.emulator")
+----
+
+The module uses Diego Nehab's
+http://w3.impa.br/~diego/software/luasocket/[LuaSocket] (required) and the
+https://github.com/stetre/moontimers[MoonTimers] module from the MoonLibs collection (optional).
+
+=== Overview
+
+The purpose of libusb, and hence of MoonUSB, is to implement USB user applications.
+That is, applications that use USB devices. MoonUSB however provides an additonal - and
+experimental - submodule named *moonusb.emulator* to emulate USB devices. The emulation
+leverages the http://usbip.sourceforge.net/[USB/IP] framework, which should be
+available by default on most GNU/Linux systems.
+
+The *original goal of USB/IP* is to allow applications to access USB devices that are plugged
+into a remote host, as if they were plugged into the local host. This is achieved as follows:
+
+* on the remote host, a TCP server implements the
+https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt[USB/IP protocol] (server-side) to
+make USB devices plugged into that host available for export to clients that request them;
+
+* on the local host, a USB/IP client - usually the https://www.mankier.com/8/usbip[usbip] tool -
+can then connect to the remote server, list the available devices, possibly import one
+or more of them and send them USB requests over the connection. The server relays the client's
+requests to the remote devices and their responses back to the client over the TCP connection.
+If the _usbip_ tool is used, once it has imported a device it handles the connection to the
+https://sourceforge.net/p/usb-vhci/wiki/Home/[VHCI] driver, which in turns makes the device
+available to user applications in the same way that real USB devices plugged in locally are
+made available by their drivers.
+
+Even if it is not its original goal, USB/IP can be used also to *emulate a USB device*. This is
+what the _moonusb.emulator_ module does: it implements a USB/IP server that runs locally and
+exports a fake USB device, as opposed to running remotely to export real devices (the emulation
+server could also run remotely, but I'm not sure USB/IP is safe enough to advise it).
+
+Since there are gazillions of USB device types out there, in order to fake a particular device
+the emulator module has to be customized by a *user script*.
+The emulator module implements the core, device-independent parts of the server: it manages
+the TCP connection, the reception and delivery of data over it, and encodes/decodes USB/IP
+protocol messages. The user script, on the other hand, is responsible for configuring
+the module and for implementing the device-specific parts of the emulation.
+Loosely speaking, the emulator module implements the USB/IP protocol (server-side),
+while the *user script* implements the USB protocol (device-side) on top of
+the <<emulator_api, emulator API>> described in a later section.
+
+The code snippet below shows the skeleton of a user script. More complete
+(and working) examples can be found in the *examples/* directory.
+
+[source,lua,indent=1]
+----
+-- Script: myfakedevice.lua
+local emulator = require("moonusb.emulator")
+-- local timers = require("moontimers") -- optional
+
+local function attached()
+   -- callback executed when the device has been attached
+end
+
+local function detached()
+   -- callback executed when the device has been detached
+end
+
+local function receive_submit(submit)
+   -- callback executed when a 'submit' command has been received
+   -- ... process the command and prepare the response ...
+   emulator.send_submit_response(submit, status, error_count, data)
+end
+
+local function receive_unlink(unlink)
+   -- callback executed when a 'unlink' command has been received
+   -- ... process the command and prepare the response ...
+   emulator.send_unlink_response(unlink, status)
+end
+
+-- Configure the emulator and start the emulation
+emulator.start({
+   -- ... --
+   busnum = 4,
+   devnum = 5,
+   vendor_id = 0x1234,
+   product_id = 0x5678,
+   -- ... --
+   attached = attached,
+   detached = detached,
+   receive_submit = receive_submit,
+   receive_unlink = receive_unlink,
+})
+----
+
+[[emulator_api]]
+=== Emulator API
+
+This section describes the API exposed by the *moonusb.emulator* module to the
+user scripts that implement emulators for particular devices.
+
+* *emulator.start*(_cfg_) +
+[small]#Configure the emulator and start the emulation. +
+_cfg_: <<emulatorconfig, emulatorconfig>>.#
+
+* *attached*( ) _callback_ +
+*detached*( ) _callback_ +
+[small]#Signature for the _cfg.attached_ and _cfg.detached_ callbacks. +
+These callbacks are executed respectively when the fake device is attached (that
+is, imported by a client), and when it is detached (that is, the connection is
+closed either intentionally or due to an error).#
+
+* *receive_submit*(<<submit, _submit_>>) _callback_ +
+*receive_unlink*(<<unlink, _unlink_>>) _callback_ +
+[small]#Signatures for the _cfg.receive_submit_ and _cfg.receive_unlink_ callbacks. +
+These callbacks are executed respectively when a USBIP_CMD_SUBMIT or a USBIP_CMD_UNLINK
+message is received on the connection in attached state. The user is expected to process
+the message, and possibly send a response using the _send_xxx_response(&nbsp;)_ functions
+described below. +
+Rfr: link:++https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt++[USBIP_CMD_SUBMIT, USBIP_CMD_UNLINK].#
+
+* *emulator.send_submit_response*(<<submit, _submit_>>, _status_, _error_count_, [_data_]) +
+*emulator.send_unlink_response*(<<unlink, _unlink_>>, _status_) +
+[small]#Respectively send a USBIP_RET_SUBMIT or a USBIP_RET_UNLINK response. +
+The first argument is the table received in the corresponding _receive_xxx(&nbsp;)_ callback, unchanged. +
+_status_: signed integer, 0 for success, otherwise an error code. +
+_error_count_: integer. +
+_data_: binary string containing the data to be transferred, or _nil_ if none. +
+(I presume that the error codes are from <errno.h>, but I am not sure. Neither am I sure
+about the meaning of the error count. The USB/IP specification is vague, to say the least.) +
+Rfr: link:++https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt++[USBIP_RET_SUBMIT, USBIP_RET_UNLINK].#
+
+
+'''
+*Structs*
+
+* [[emulatorconfig]]
+[small]#*emulatorconfig* = { +
+_usbip_ver_: string (opt. USB/P bcd version, defaults to '_01.11_'), +
+_ip_: string (opt. IP address, defaults to '_localhost_'), +
+_port_: integer (opt. TCP port, defaults to 3240), +
+_busnum_: integer (opt., defaults to 1), +
+_devnum_: integer (opt., defaults to 1), +
+_path_: string (opt., defaults to '_moonusb emulated device_'), +
+_vendor_id_: integer (opt., defaults to 0x0000), +
+_product_id_: integer (opt., defaults to 0x0000), +
+_release_number_: string (opt. bcd device version, defaults to '_00.00_'), +
+_speed_: <<speed, speed>> (opt., defaults to '_high_'), +
+_device_class_: <<class, class>> (opt., defaults to '_per interface_'), +
+_device_subclass_: integer (opt., defaults to 0), +
+_device_protocol_: integer (opt., defaults to 0), +
+_configuration_value_: integer (opt., defaults to 1), +
+_num_configurations_: integer (opt., defaults to 1), +
+_interfaces_: {{ _class_=<<class, class>>, _subclass_=integer, _protocol_=integer }}, +
+_attached_: function (opt. callback, see signature above), +
+_detached_: function (opt. callback, see signature above), +
+_receive_submit_: function (callback, see signature above), +
+_receive_unlink_: function (callback, see signature above), +
+} (rfr: link:++https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt++[OP_REQ_DEVLIST])#
+
+* [[submit]]
+[small]#*submit* = { +
+_seqnum_: integer, +
+_devid_: integer, +
+_direction_: <<direction, direction>>, +
+_ep_: integer, +
+_transfer_flags_: integer, +
+_transfer_buffer_length_: integer, +
+_start_frame_: integer, +
+_number_of_packets_: integer, +
+_interval_: integer, +
+_setup_: binary strings (8 bytes long), +
+_data_: binary string or _nil_, +
+} (rfr: link:++https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt++[USBIP_CMD_SUBMIT])#
+
+* [[unlink]]
+[small]#*unlink* = { +
+_seqnum_: integer, +
+_devid_: integer, +
+_direction_: <<direction, direction>>, +
+_ep_: integer, +
+_victim_seqnum_: integer, +
+} (rfr: link:++https://www.kernel.org/doc/Documentation/usb/usbip_protocol.txt++[USBIP_CMD_UNLINK])#
+
+=== Emulator usage
+
+This section shows how to run a device emulation. It is assumed that the emulator
+is implemented in a user script named *myfakedevice.lua*, and a client application
+(using that particular USB device) is implemented in a script named *myclient.lua*.
+
+First of all, ensure that the needed kernel modules are loaded:
+
+[source,bash,indent=1]
+----
+$ sudo modprobe usbip-core
+$ sudo modprobe vhci-hcd
+----
+
+Then, launch the emulator:
+
+[source,bash,indent=1]
+----
+$ lua myfakedevice.lua
+----
+
+The emulator will open a TCP socket on the specified port and wait for clients to connect.
+
+From another shell, list the devices exported by the script, using the 
+https://www.mankier.com/8/usbip[usbip] tool:
+
+[source,bash,indent=1]
+----
+$ usbip list -r 127.0.0.1
+----
+
+This command should list a single device, and indicate "4-5" as its _busid_ (assuming
+_busnum_=4 and _devnum_=5). Import the device, again with the usbip tool:
+
+[source,bash,indent=1]
+----
+$ sudo usbip attach -r 127.0.0.1 -b 4-5
+----
+
+This should start the configuration of the device, with the vhci driver issuing commands
+(get descriptor, etc) and the fake device responding. At the end of this phase, the fake
+device should appear in the list of USB devices available on the system, which you can see
+using the 
+https://www.mankier.com/8/lsusb[lsusb] tool:
+
+[source,bash,indent=1]
+----
+$ lsusb
+----
+
+Finally, launch the client application from yet another shell:
+[source,bash,indent=1]
+----
+$ lua myclient.lua
+----
+
+If everything goes as expected, the client should now be able to detect and use the
+fake device as if it were a real one.
+
+To detach the fake device, first see its 'port' number (likely 00), then issue the
+detach command:
+
+[source,bash,indent=1]
+----
+$ sudo usbip port                # list the imported devices
+$ sudo usbip detach -p 00        # detach Port 00
+----
+
+As a final note, the traffic between the emulator and the vhci driver can be captured
+and analized using 
+https://www.wireshark.org/[Wireshark],
+which has a built-in dissector for the USB/IP protocol.
+(The traffic travels on the loopback interface, assuming the server uses the 127.0.0.1 ip address.)
+

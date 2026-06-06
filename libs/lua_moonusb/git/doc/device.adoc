@@ -1,0 +1,154 @@
+
+[[device]]
+== Devices and device handles
+
+[small]#Rfr: link:++http://libusb.sourceforge.net/api-1.0/group__libusb__dev.html++[Device handling and enumeration].#
+
+Devices are represented with two types of objects: a *device* object that represents
+a device that has been detected, and a *devhandle* object that represents a device
+that has been opened by the application.
+The former is sufficient to inspect the USB descriptors of a device, but to perform I/O and
+control operations on it, the latter is needed.
+
+To obtain _device_ objects one can either use the _context_:<<get_device_list, get_device_list>>(&nbsp;)
+method, or the <<hotplug, Hotplug API>>.
+Any device of interest can then be opened with _device_:<<open, open>>(&nbsp;), that creates the corresponding _devhandle_ object.
+Depending on the system, this operation may require access permissions.
+
+[[get_device_list]]
+* _{device}_ = <<context, _context_>>++:++*get_device_list*( ) +
+_device_++:++*free*( ) +
+[small]#Returns a list of USB devices currently attached to the system. +
+An application should delete any _device_ objects it obtains but it is not interested in, using the
+_device:free()_ method. +
+Rfr: _libusb_get_device_list( )_, _libusb_unref_device( )_.#
+
+[[open]]
+ * _devhandle_ = _device_++:++*open*( ) +
+_devhandle_++:++*close*( ) +
+[small]#Open/close a device, creating/deleting a _devhandle_ object. +
+A _devhandle_ object is automatically closed when its device is deleted. +
+Rfr: _libusb_open( )_, _libusb_close( )_.#
+
+[[open_device]]
+ * _device_, _devhandle_ = <<context, _context_>>++:++*open_device*(_vendor_id_, _product_id_) +
+[small]#Shortcut to locate and open a device with a particular _vendor_id_ + _product_id_ combination. +
+Creates and returns both the _device_ and the _devhandle_ objects, or raises an error if no such device is found. +
+Rfr: _libusb_open_device_with_vid_pid( )_.#
+
+[[lock_on_close]]
+ * *lock_on_close*(_boolean_) +
+[small]#If _true_, lock events when closing a device (defaults to not locking). See issues #1 and #2.#
+
+=== Device properties
+
+The methods described here can be used to query information about devices without the need
+to open them. The relevant information, if available, has already been retrieved during
+enumeration and cached by the lower levels (i.e. by libusb and the OS).
+
+[[get_port_number]]
+* _bus_number_ = _device_++:++*get_bus_number*( ) +
+_port_number_ = _device_++:++*get_port_number*( ) +
+_{port_number}_ = _device_++:++*get_port_numbers*( ) +
+[small]#Get the number of the bus the device is connected to, the number of the port, and
+the list of all port numbers from root for the device. +
+Rfr: _libusb_get_bus_number( )_, _libusb_get_port_number( )_,  _libusb_get_port_numbers( )_.#
+
+[[get_parent]]
+* _parent_device_ = _device_++:++*get_parent*( ) +
+[small]#Get the parent device of the specified device. +
+Rfr: _libusb_get_parent( )_.#
+
+[[get_address]]
+* _address_ = _device_++:++*get_address*( ) +
+[small]#Get the address of the device on the bus it is connected to. +
+Rfr: _libusb_get_device_address( )_.#
+
+[[get_speed]]
+* <<speed, _speed_>> = _device_++:++*get_speed*( ) +
+[small]#Get the negotiated connection speed for the device. +
+Rfr: _libusb_get_device_speed( )_.#
+
+[[get_max_packet_size]]
+* _size_ = _device_++:++*get_max_packet_size*(_endpoint_) +
+_size_ = _device_++:++*get_max_iso_packet_size*(_endpoint_) +
+[small]#Get/calculate the wMaxPacketSize for the given endpoint in the active device configuration. +
+_endpoint_: endpoint address. +
+Rfr: _libusb_get_max_packet_size( )_, _libusb_get_max_iso_packet_size( )_.#
+
+[[descriptors]]
+=== USB descriptors
+
+[small]#Rfr: link:++http://libusb.sourceforge.net/api-1.0/group__libusb__desc.html++[USB descriptors].#
+
+[[get_device_descriptor]]
+* <<devicedescriptor, _devicedescriptor_>> = _device_++:++*get_device_descriptor*( ) +
+<<configdescriptor, _configdescriptor_>> = _device_++:++*get_config_descriptor*(_index_) +
+<<configdescriptor, _configdescriptor_>> = _device_++:++*get_config_descriptor_by_value*(_value_) +
+<<configdescriptor, _configdescriptor_>> = _device_++:++*get_active_config_descriptor*( ) +
+[small]#Get a descriptor for _device_. +
+These methods return immediately since the descriptors are cached during enumeration. +
+_index_: configuration index (0, .., _bNumConfigurations_-1), +
+_value_: configuration value (_bConfigurationValue_). +
+Rfr:  _libusb_get_device_descriptor( )_, _libusb_get_config_descriptor( )_,  _libusb_get_config_descriptor_by_value( )_,  _libusb_get_active_config_descriptor( )_.#
+
+[[get_descriptor]]
+* _string_ = _devhandle_++:++*get_string_descriptor*(_index_) +
+_length_ = _devhandle_++:++*get_descriptor*(_descriptor_type_, _descriptor_index_, _ptr_, _length_) +
+<<bosdescriptor, _bosdecriptor_>> = _devhandle_++:++*get_bos_descriptor*( ) +
+[small]#Retrieve a descriptor. +
+These methods are blocking since they involve transfers. +
+Rfr: _libusb_get_string_descriptor( )_,  _libusb_get_descriptor( )_,  _libusb_get_bos_descriptor( )_.#
+
+
+=== Devhandle operations
+
+Beware that the methods described hereafter perform operations that may involve control transfers,
+causing the calls to block until the transfers either complete or fail.
+For more details, refer to the libusb manual.
+
+[[get_configuration]]
+* _value_ = _devhandle_++:++*get_configuration*( ) +
+_devhandle_++:++*set_configuration*(_value_) +
+[small]#Determine / set the bConfigurationValue for the currently active configuration. May block. +
+Rfr: _libusb_get_configuration( )_, _libusb_set_configuration( )_.#
+
+[[clear_halt]]
+* _devhandle_++:++*clear_halt*(_endpoint_) +
+[small]#Clear the halt/stall condition for the given endpoint. Blocking. +
+Rfr: _libusb_clear_halt( )_.#
+
+[[reset_device]]
+* _devhandle_++:++*reset_device*( ) +
+[small]#Perform a USB reset to reinitialize the device. Blocking. +
+Rfr: _libusb_clear_halt( )_.#
+
+[[alloc_streams]]
+* _n_ = _devhandle_++:++*alloc_streams*(_num_streams_, _{endpoint}_) +
+_devhandle_++:++*free_streams*(_{endpoint}_) +
+[small]#Allocate up to _num_streams_ USB bulk streams on the specified endpoints.  +
+_{endpoints}_: list of endpoint addresses (must belong to the same interface). +
+Returns the number _n_ of actually allocated streams, with stream identifiers 1 to _n_. +
+The streams are automatically released with the interface. +
+Rfr: _libusb_alloc_streams( )_, _libusb_free_streams( )_.#
+
+=== Claiming/releasing interfaces
+
+[[interface]]
+* _interface_ = <<device, _devhandle_>>++:++*claim_interface*(_interface_number_) +
+[small]#Claim an interface and create the corresponding _interface_ object. +
+This also detaches the interface's kernel driver (where applicable). +
+Rfr: _libusb_claim_interface( )_.#
+
+[[release_interface]]
+* _interface_++:++*release*( ) +
+[small]#Release the interface and delete the corresponding object. +
+This also reattaches the interface's kernel driver (where applicable). +
+The interface is automatically released when its _devhandle_ gets closed. +
+Rfr: _libusb_release_interface( )_.#
+
+[[set_interface_alt_setting]]
+* _interface_++:++*set_alt_setting*(_alternate_setting_) +
+[small]#Activate an alternate setting for the interface. +
+Rfr: _libusb_set_interface_alt_setting( )_.#
+

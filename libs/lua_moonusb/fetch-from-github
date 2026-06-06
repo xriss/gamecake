@@ -1,0 +1,10 @@
+cd `dirname $0`
+
+rm -rf git
+git clone --depth 1 git@github.com:stetre/moonusb.git git
+rm -rf git/.git
+
+#we need to luajit the << bitopts in these files...
+#mkdir -p ../../lua/moonusb
+#cp git/moonusb/* ../../lua/moonusb/
+

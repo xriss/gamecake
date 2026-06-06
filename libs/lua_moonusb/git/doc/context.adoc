@@ -1,0 +1,39 @@
+
+[[context]]
+== Contexts
+
+[small]#Rfr: link:++http://libusb.sourceforge.net/api-1.0/group__libusb__lib.html++[Library initialization/deinitialization].#
+
+A context represents a libusb session. 
+There is no default context in MoonUSB, so an application must begin by creating at least
+one _context_ object using the <<init, init>>( ) function.
+It will typically create just one context, but multiple concurrent contexts are allowed too.
+
+When a context exits, all the corresponding objects are deleted too, with graceful release
+of underlying resources whenever possible. Contexts exit automatically at program termination.
+
+[[init]]
+* _context_ = *init*( ) +
+ _context_++:++*exit*( ) +
+[small]#Initialize/deinitialize a libusb session, creating/deleting a context. +
+Rfr: _libusb_init( )_, _libusb_exit( )_.#
+
+[[set_option]]
+* *set_option*([_context_], <<option, _option_>>, [_..._]) +
+ _context_++:++*set_option*(<<option, option>>, [_..._]) +
+[small]#Set an option in the library. The currently available options are: +
+pass:[-] set_option(_context_, '_log level_', <<loglevel, _loglevel_>>) +
+pass:[-] set_option(_context_, '_use usbdk_') +
+pass:[-] set_option(_nil_, '_weak authority_') +
+Rfr: _libusb_set_option( )_.#
+
+[[set_log_cb]]
+* *set_log_cb*([_context_], _func_) +
+ _context_++:++*set_log_cb*(_func_) +
+[small]#Set a log callback for context-related log messages (if _context_ is given) or for
+global log messages (if _context_ is not given). +
+The _func_ callback, a function, is executed as *func(context, <<loglevel, loglevel>>, message)*, where
+_message_ is a string, and _context_ is _nil_ if the callback is global. +
+Rfr: _libusb_set_log_cb( )_.#
+
+

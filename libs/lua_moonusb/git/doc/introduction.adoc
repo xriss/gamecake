@@ -1,0 +1,54 @@
+
+== Introduction
+
+MoonUSB is an almost one-to-one Lua binding library to  https://libusb.info/[libusb].
+This means that by and large, it is intended to be used as described in the 
+http://libusb.sourceforge.net/api-1.0/[libusb documentation].
+
+MoonUSB binds libusb structs (contexts, devices, device handles, etc) to Lua userdata,
+exposing an *object oriented* interface to the Lua programmer. Most libusb functions are
+exposed by MoonUSB as methods of the relevant objects they act on.
+For example, the _libusb_open(&nbsp;)_ and _libusb_close(&nbsp;)_ functions are exposed
+as the _device:open(&nbsp;)_ and  _devhandle:close(&nbsp;)_ methods, respectively.
+
+Lua object types in MoonUSB are listed in the tree below, together with the corresponding
+structs in libusb, if any:
+
+[small]#<<context, context>> _(libusb_context)_ +
+{tH}<<hotplug, hotplug>> _(libusb_hotplug_callback_handle)_ +
+{tH}<<device, device>> _(libusb_device)_ +
+{tL}{tL}<<device, devhandle>> _(libusb_device_handle)_ +
+{tS}{tS}{tH}<<device, interface>> _(libusb_device_handle + interface number)_ +
+{tS}{tS}{tH}<<asynchapi, transfer>> _(libusb_transfer)_ +
+{tS}{tS}{tL}<<hostmem, hostmem>> _(none)_ +
+<<hostmem, hostmem>> _(none)_#
+
+The <<hostmem, hostmem>> object is a MoonUSB-specific object that encapsulates a memory
+area, to be (optionally) used as memory buffer in transfer functions. It is listed twice
+because it may be either standalone, or tied to a <<device, devhandle>> (possibly 
+encapsulating DMA memory for that specific device).
+
+Objects are *garbage collected at exit* (which includes on error), and automatically
+deleted at the libusb level with graceful release whenever possible, so there is no need to
+explicitly invoke their deletion methods at exit for cleanup. 
+
+Apart from at exit, however, objects are not automatically garbage collected 
+footnote:[Objects are anchored to the Lua registry at their creation, so even if the script does not
+have references to an object, a reference always exists on the registry and this prevents the 
+GC to collect it.]
+and one must release them explicitly when needed, e.g. to release resources when the
+application is not exiting and some objects are no longer needed.
+
+Releasing an object causes the automatic (pre) destruction of all its children
+objects (as per the above tree), and the invalidation of any reference to the object and to
+its children.footnote:[It is good practice to not leave invalid references to objects around, because
+they prevent the GC to collect the memory associated with the userdata.]
+
+Unless otherwise stated, *on error* all MoonUSB functions and methods raise a 
+http://www.lua.org/manual/5.3/manual.html#lua_error[Lua error]. 
+If needed, this behaviour can be overridden by wrapping function calls in the standard Lua 
+http://www.lua.org/manual/5.3/manual.html#pdf-pcall[pcall](&nbsp;).
+
+MoonUSB supports multiple concurrent libusb <<context, contexts>> (that is, sessions), but
+it does not support multithreading.
+

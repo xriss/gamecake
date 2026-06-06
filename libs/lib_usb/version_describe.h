@@ -1,0 +1,4 @@
+
+
+
+#define LIBUSB_DESCRIBE "HAXTBH"

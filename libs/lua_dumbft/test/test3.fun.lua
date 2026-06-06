@@ -123,6 +123,19 @@ local add_line=function(line)
 		amerge=0
 
 		grd_idx=(grd_idx+1)%256
+
+		if grd_idx==0 or grd_idx==128 then
+			local copper=system.components.copper
+			local screen=system.components.screen
+			local layer=screen.layers[copper.layer]
+			local fbo=layer.fbo
+			local grd=screen.fbo:download()
+			print("save",grd.width,grd.height)
+			local png=grd:save({})
+			local fp=assert( io.open( "/home/kriss/wav"..os.time()..".png","wb") )
+			fp:write(png)
+			fp:close()
+		end
 	end
 
 	copper.shader_uniforms.tex_info={ grd_idx , amerge/amax , 0 , 0 } -- live line
@@ -140,7 +153,7 @@ local buff=""
 update=function()
 
     if setup then setup() ; setup=nil end
-
+    
 	local nbuff,len=oven.cake.sounds.get_capture()
 	if nbuff then
 		buff=buff..nbuff
