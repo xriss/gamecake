@@ -1,0 +1,62 @@
+0x0483  0x2023
+Device properties
+  bus number: 1
+  port number: 1
+  port path: 1
+  address: 17
+  speed: full
+Device descriptor
+  usb_version: 02.00
+  class: per interface
+  subclass: 0
+  protocol: 0
+  vendor_id: 0x0483
+  product_id: 0x2023
+  release_number: 01.00
+  num_configurations: 1
+  manufacturer: Printer
+  product: BAR PRINTER
+  serial number: 0125436789AB
+Configuration
+  value: 1
+  index: 0
+  self_powered: true
+  remote_wakeup: false
+  max_power: 16
+  num_interfaces: 1
+  extra bytes: -
+  Interface
+    number: 0
+    alt_setting: 0
+    class: printer
+    subclass: 1
+    protocol: 2
+    index: 0
+    num_endpoints: 2
+    extra bytes: -
+    Endpoint
+      address: 0x01
+      number: 1
+      direction: out
+      transfer_type: bulk
+      iso_sync_type: n.a.
+      iso_usage_type: n.a.
+      max_packet_size: 64
+      interval: 0
+      refresh: 0
+      synch_address: 0x00
+      extra bytes: -
+    Endpoint
+      address: 0x82
+      number: 2
+      direction: in
+      transfer_type: bulk
+      iso_sync_type: n.a.
+      iso_usage_type: n.a.
+      max_packet_size: 64
+      interval: 0
+      refresh: 0
+      synch_address: 0x00
+      extra bytes: -
+
+
