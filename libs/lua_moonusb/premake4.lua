@@ -7,6 +7,8 @@ links { "lib_lua" }
 
 defines { "COMPAT53_PREFIX=moonusb_compat_" }
 
+includedirs { "../lib_usb/git/libusb" }
+
 if WINDOWS then
 --	defines { "MINGW" }
 	defines { "LINUX" }
