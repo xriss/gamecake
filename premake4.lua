@@ -788,8 +788,8 @@ all_includes=all_includes or {
 
 -- These are mostly linux only bindings for linux only gamecake projects...
 
-	{"lua_moonusb",		nil			or		NIX		or		EMCC		or		ANDROID		or	nil		},
-	{"lib_usb",			nil			or		NIX		or		EMCC		or		ANDROID		or	nil		},
+	{"lua_moonusb",		nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lib_usb",			nil			or		NIX		or		nil			or		nil			or	nil		},
 
 --	{"lua_linenoise",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
 	{"lua_posix",		nil			or		NIX		or		nil			or		nil			or	OSX		},
