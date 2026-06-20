@@ -6,9 +6,10 @@ local require=require
 
 local ipairs=ipairs
 
-module(...)
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+--module(...)
 
-function build(tab)
+M.build=function(tab)
 
 	local bake=require("wetgenes.bake")
 	local bakejs=require("wetgenes.bake.js")

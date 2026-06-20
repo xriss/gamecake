@@ -18,7 +18,8 @@ local setmetatable=setmetatable
 local getfenv=getfenv
 local setfenv=setfenv
 
-module("wetgenes.pp")
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+--module(...)
 
 
 
@@ -39,7 +40,7 @@ module("wetgenes.pp")
 --
 -- returns a table of strings which can be table.concat into a string result
 
-function ppload(filename,chunk)
+function M.ppload(filename,chunk)
 
 local included
 
@@ -197,7 +198,7 @@ temp=string.format('_out %q\n',temp.."\n")
 end
 
 
-function loadsave(fname_in,fname_out)
+function M.loadsave(fname_in,fname_out)
 
 pp_input_cd=""
 
@@ -216,7 +217,7 @@ print ( "Lua pre processing " .. fname_in .. " into " .. fname_out .. "" )
 
 -- create input table, and its string
 
-pp_input_table=ppload(fname_in)
+pp_input_table=M.ppload(fname_in)
 
 pp_input_string=table.concat(pp_input_table)
 

@@ -12,7 +12,7 @@
 --+-----------------------------------------------------------------------------------------------------------------+--
 
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+--local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 --
 -- A thrown together build toool, well some useful lua functions for making a build.
@@ -30,9 +30,10 @@ local lfs=require("lfs_any")
 local wstr=require("wetgenes.string")
 local wsbox=require("wetgenes.sandbox")
 
-module("wetgenes.bake")
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+--module(...)
 
-osflavour="win"
+M.osflavour="win"
 	
 local os_shell=os.getenv("SHELL")
 if os_shell and string.sub(os_shell,1,5)== "/bin/" then
@@ -41,12 +42,12 @@ end
 
 -- fullpaths to usefull commands
 
-cmd={}
+M.cmd={}
 
 
 -- place to store options
 
-opt={}
+M.opt={}
 
 
 
@@ -54,12 +55,12 @@ opt={}
 --
 -- get/set current dir
 --
-get_cd=function()
+M.get_cd=function()
 
 	return string.gsub(lfs.currentdir(),'\\','/')
 
 end
-set_cd=function(str)
+M.set_cd=function(str)
 
 	lfs.chdir(str)
 
@@ -70,7 +71,7 @@ end
 -- combine strings and resolve . or .. and cancel out multiple // and switch \ to /
 -- so we should end up with a valid clean path
 --
-path_clean=function(...)
+M.path_clean=function(...)
 
 local str
 
@@ -84,9 +85,9 @@ end
 --
 -- as path_clean but add .exe (so we can easily not do this later if under unix)
 --
-path_clean_exe=function(...)
+M.path_clean_exe=function(...)
 
-if osflavour=="nix" then
+if M.osflavour=="nix" then
 	return(path_clean(...))
 else
 	return(path_clean(...)..'.exe')
@@ -98,7 +99,7 @@ end
 --
 -- return the substring after the last .
 --
-path_ext=function(str)
+M.path_ext=function(str)
 
 	return(str)
 
@@ -107,7 +108,7 @@ end
 --
 -- perform some substitutions and then execute the command from the given cwd
 --
-execute=function(cwd,cmd,arg)
+M.execute=function(cwd,cmd,arg)
 
 	if cwd then
 	
@@ -132,7 +133,7 @@ end
 --
 -- given a filename make sure that its containing directory exists
 --
-create_dir_for_file=function(n)
+M.create_dir_for_file=function(n)
 	local t={}
 	for w in string.gmatch(n, "[^/]+") do t[#t+1]=w end
 	local s=""
@@ -148,7 +149,7 @@ end
 --
 -- get the filenames (relative to the basedir) of all files matching the filter
 --
-findfiles=function(opts)
+M.findfiles=function(opts)
 if not opts then return end
 if not opts.dir then return end
 opts.basedir=opts.basedir or "." -- "." for current
@@ -187,42 +188,42 @@ end
 
 
 
-readfile=function(name)
+M.readfile=function(name)
 	local fp=assert(io.open(name,"rb"))
 	local d=fp:read("*all")
 	fp:close()
 	return d
 end
 
-isfile=function(name)
+M.isfile=function(name)
 	local fp=(io.open(name,"r"))
 --print(fp)
 	if fp then fp:close() return true end
 	return false
 end
-fileexists=isfile -- alias for old code, do not use in new code
-file_exists=isfile -- alias for old code, do not use in new code
+M.fileexists=isfile -- alias for old code, do not use in new code
+M.file_exists=isfile -- alias for old code, do not use in new code
 
-writefile=function(name,data)
+M.writefile=function(name,data)
 	local fp=assert(io.open(name,"wb"))
 	fp:write(data)
 	fp:close()
 end
 
-copyfile=function(frm,too)
-	local text=readfile(frm)
-	writefile(too,text)
+M.copyfile=function(frm,too)
+	local text=M.readfile(frm)
+	M.writefile(too,text)
 end
 
 -- copy but with macro replacements
-replacefile=function(frm,too,opts)
-	local text=readfile(frm)
+M.replacefile=function(frm,too,opts)
+	local text=M.readfile(frm)
 	text=wstr.replace(text,opts)
-	writefile(too,text)
+	M.writefile(too,text)
 end
 
 -- copy but with macro replacements
-deletefile=function(name)
+M.deletefile=function(name)
 	os.remove(name)
 end
 
@@ -234,7 +235,7 @@ end
 -- lets try not to releasemore than that, mkay :)
 --
 -----------------------------------------------------------------------------
-function version_from_time(t,vplus)
+function M.version_from_time(t,vplus)
 
 	vplus=vplus or 0 -- slight tweak if we need it
 
@@ -256,7 +257,7 @@ function version_from_time(t,vplus)
 end
 
 -- handle simple args map
-function args(args)
+function M.args(args)
 
 	local i=1 while i<=#args do local v=args[i]
 	
@@ -274,11 +275,11 @@ function args(args)
 	return args
 end
 -- update (or create) the lua/init_bake.lua file containing build timestamps
-function update_lson(fname,args)
+function M.update_lson(fname,args)
 
 	-- read last bake log
 	local lson
-	pcall( function() lson=readfile(fname) end )
+	pcall( function() lson=M.readfile(fname) end )
 	if lson then
 		lson=wsbox.lson(lson)
 	end
@@ -297,7 +298,7 @@ function update_lson(fname,args)
 	lson.stamp=os.time(),
 
 	-- write data bake log
-	writefile(fname,wstr.serialize(lson))
+	M.writefile(fname,wstr.serialize(lson))
 
 	return lson
 end

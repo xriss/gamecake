@@ -10,7 +10,8 @@ local pairs=pairs
 local core = require("box2d.core")
 
 
-module("box2d.wrap")
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+--module(...)
 
 --
 -- Call new to get a unique table full of functions associated
@@ -20,7 +21,7 @@ module("box2d.wrap")
 --
 -- local world=require("box2d.wrap").world()
 --
-function world(def) -- create a new world
+function M.world(def) -- create a new world
 
 local world={}
 

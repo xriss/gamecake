@@ -1,7 +1,7 @@
 --
 -- (C) 2013 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+--local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local pack=require("wetgenes.pack")
 local wwin=require("wetgenes.win")
@@ -63,7 +63,7 @@ gui.loads=function()
 end
 
 gui.setup=function()
-	oven.console.linehook_safety=true
+--	oven.console.linehook_safety=true
 
 	gui.loads()
 
@@ -74,7 +74,7 @@ gui.setup=function()
 --	gui.data_load("all")
 --	gui.plan_windows_load()
 
-	oven.console.linehook_safety=false
+--	oven.console.linehook_safety=false
 	return gui
 end
 
@@ -82,7 +82,7 @@ gui.clean=function()
 end
 
 gui.msg=function(m)
-	oven.console.linehook_safety=true
+--	oven.console.linehook_safety=true
 
 	if m.class=="action" and m.action==1 then -- deal with actions
 		gui.action(m)
@@ -96,14 +96,14 @@ gui.msg=function(m)
 
 	gui.master:msg(m)
 
-	oven.console.linehook_safety=false
+--	oven.console.linehook_safety=false
 end
 
 
 gui.do_actions={}
 gui.cursor=nil
 gui.update=function()
-	oven.console.linehook_safety=true
+--	oven.console.linehook_safety=true
 
 --	local it=gui.texteditor
 --	print( gui.testa.hx ,  gui.testb.hx , it.parent.hx , it.hx , it.scroll_widget.hx , it.scroll_widget.pan.hx )
@@ -128,15 +128,15 @@ gui.update=function()
 		gui.data_save_time=wwin.time()
 	end
 
-	oven.console.linehook_safety=false
+--	oven.console.linehook_safety=false
 end
 
 gui.draw=function()
-	oven.console.linehook_safety=true
+--	oven.console.linehook_safety=true
 	gl.PushMatrix()
 	gui.master:draw()		
 	gl.PopMatrix()
-	oven.console.linehook_safety=false
+--	oven.console.linehook_safety=false
 end
 
 	local datas=gui.master.datas
@@ -1103,9 +1103,9 @@ local lay=
 	gui.console_command=function(s)
 		s=s:match( "^>%s*(.-)%s*$" )
 		if s then
-			oven.console.linehook_safety=false
+--			oven.console.linehook_safety=false
 			oven.console.dump_eval(s)
-			oven.console.linehook_safety=true
+--			oven.console.linehook_safety=true
 		end
 	end
 

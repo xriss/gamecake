@@ -26,7 +26,8 @@ local setmetatable=setmetatable
 local ipairs=ipairs
 local type=type
 
-module("wetgenes.diff")
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+--module(...)
 
 -- java version of lua, not so good at strings, so might as well use numbers for these as they are now internal only
 local SAME = 0  -- token statuses
@@ -206,7 +207,7 @@ end
 -- this should be reasonably compact data
 --
 -----------------------------------------------------------------------------
-function diff(old, new, separator)
+function M.diff(old, new, separator)
 
 	local d=rev_diff(old, new, separator)
 
@@ -289,7 +290,7 @@ end
 -- s1==patch(s2,d,true)
 --
 -----------------------------------------------------------------------------
-function patch(s,t,undo)
+function M.patch(s,t,undo)
 
 	local o={}
 	local idx=1
@@ -331,5 +332,5 @@ function patch(s,t,undo)
 end
 
 -- a more readable way to unpatch
-function unpatch(s,t) return patch(s,t,true) end
+function M.unpatch(s,t) return patch(s,t,true) end
 

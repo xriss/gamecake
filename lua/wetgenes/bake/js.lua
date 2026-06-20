@@ -16,9 +16,10 @@ local table=table
 local io=io
 local os=os
 
-module(...)
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+--module(...)
 
-function build(tab)
+M.build=function (tab)
 
 local bake=require("wetgenes.bake")
 

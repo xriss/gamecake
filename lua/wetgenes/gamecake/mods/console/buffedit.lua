@@ -1,7 +1,7 @@
 --
 -- (C) 2013 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+--local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
 -- a 1 line buffer edit, how you display it is up to you
@@ -9,9 +9,10 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 -- this is intended for commandline style editing
 
 
-module("wetgenes.gamecake.mods.console.buffedit")
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+--module(...)
 
-function keypress(it,ascii,key,act)
+M.keypress=function (it,ascii,key,act)
 
 	if ascii then 
 		local c=string.byte(ascii)
@@ -152,7 +153,7 @@ function keypress(it,ascii,key,act)
 end
 
 
-function update(it)
+M.update=function (it)
 
 	it.throb=it.throb-4
 	if it.throb<0 then it.throb=255 end
@@ -160,7 +161,7 @@ function update(it)
 end
 
 
-function create()
+M.create=function ()
 
 local it={}
 
@@ -172,8 +173,8 @@ local it={}
 
 	it.throb=255
 	
-	it.keypress=keypress
-	it.update=update
+	it.keypress=M.keypress
+	it.update=M.update
 
 	return it
 end

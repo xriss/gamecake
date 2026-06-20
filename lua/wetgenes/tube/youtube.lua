@@ -1,7 +1,7 @@
 --
 -- (C) 2013 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+--local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
 -- An attempt to turn youtube IDs into links to video files.
@@ -10,12 +10,13 @@ local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,get
 
 local wstr=require("wetgenes.string")
 
-module("wetgenes.tube.youtube")
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+--module(...)
 
 
 -- overload this function if we are running in a strange environment
 -- notice the require, which means socket.http is not a forced dependency
-function get_url(url)
+function M.get_url(url)
 
 local http=require("socket.http")
 
@@ -32,7 +33,7 @@ local ret={}
 end
 
 
-function url_split(s)
+function M.url_split(s)
 	local ands=wstr.split(s,"&")
 	local vals={}
 	for i,v in ipairs(ands) do
@@ -42,7 +43,7 @@ function url_split(s)
 	return vals
 end
 
-function get_video_info(id)
+function M.get_video_info(id)
 
 	local url="http://www.youtube.com/get_video_info?video_id="..id.."&ps=default&eurl=&gl=US&hl=en"
 	local ret=get_url(url)
@@ -64,7 +65,7 @@ end
 
 -- return info about a youtube ID, most importantly a URL to stream it from
 -- this cleans up the data from get_video_info
-function info(id)
+function M.info(id)
 	local tab
 	
 	tab=get_video_info(id)

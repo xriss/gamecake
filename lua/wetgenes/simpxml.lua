@@ -13,7 +13,8 @@ local type=type
 local print=log or print
 local assert=assert
 
-module(...)
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+--module(...)
 
 
 -----------------------------------------------------------------------------
@@ -29,7 +30,7 @@ module(...)
 -- auxiliar function to parse tag attributes
 --
 -----------------------------------------------------------------------------
-function parse_args(s,label)
+function M.parse_args(s,label)
   local arg = {}
   arg[0]=label
   string.gsub(s, "([%w_]+)%s*=%s*([\"'])(.-)%2", function (w, _, a)
@@ -56,7 +57,7 @@ end
 -- [stringnames] == attributes IE all string keys
 --
 -----------------------------------------------------------------------------
-function parse(s)
+function M.parse(s)
   local stack = {}
   local top = {}
   table.insert(stack, top)
@@ -154,7 +155,7 @@ end
 -- convert everything within this chunk, back to a html string
 --
 -----------------------------------------------------------------------------
-function unparse(parent,opts)
+function M.unparse(parent,opts)
 	opts=opts or {tabjoin=true}
 
 	local tabjoin=opts.tabjoin -- only one of these recursive calls should have this flag
@@ -208,7 +209,7 @@ end
 -- get/set the attr tag of the given type (deals with silly case problems)
 --
 -----------------------------------------------------------------------------
-function attr(parent,name,set)
+function M.attr(parent,name,set)
 
 	name=string.lower(name)
 
@@ -234,7 +235,7 @@ end
 -- find the first child tag of the given type, this does not recurse
 --
 -----------------------------------------------------------------------------
-function child(parent,name)
+function M.child(parent,name)
 
 	name=string.lower(name)
 
@@ -251,7 +252,7 @@ end
 -- find all the children tag of the given type, this does not recurse
 --
 -----------------------------------------------------------------------------
-function childs(parent,name)
+function M.childs(parent,name)
 
 	name=string.lower(name)
 	
@@ -270,7 +271,7 @@ end
 -- find the first descendent tag of the given type, this does recurse
 --
 -----------------------------------------------------------------------------
-function descendent(parent,name)
+function M.descendent(parent,name)
 
 	name=string.lower(name)
 
@@ -293,7 +294,7 @@ end
 -- find **all** the descendent tags of the given type, this does recurse
 --
 -----------------------------------------------------------------------------
-function descendents(parent,name,opts)
+function M.descendents(parent,name,opts)
 	opts=opts or {}
 	opts.out=opts.out or {}
 	
@@ -319,7 +320,7 @@ end
 -- find the first descendent tag of the given class, this does recurse
 --
 -----------------------------------------------------------------------------
-function class(parent,name)
+function M.class(parent,name)
 
 	name=string.lower(name)
 
@@ -347,7 +348,7 @@ end
 -- find **all** the descendent tags of the given class, this does recurse
 --
 -----------------------------------------------------------------------------
-function classes(parent,name,opts)
+function M.classes(parent,name,opts)
 	opts=opts or {}
 	opts.out=opts.out or {}
 	

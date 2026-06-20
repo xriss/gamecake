@@ -1,18 +1,19 @@
 --
 -- (C) 2013 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+--local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
 -- my string functions
 local wstr=require("wetgenes.string")
 
-module("wetgenes.html")
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+--module(...)
 
 --
 -- use the replace function from wetgenes.string
 --
-replace=wstr.replace
+M.replace=wstr.replace
 
 
 -----------------------------------------------------------------------------
@@ -24,7 +25,7 @@ replace=wstr.replace
 -- even though the calling function is free to modify the table it gets
 --
 -----------------------------------------------------------------------------
-get=function(html,src,env)
+M.get=function(html,src,env)
 
 	local new_env={}
 	if env then setmetatable(new_env,{__index=env})	end -- wrap to protect
@@ -47,7 +48,7 @@ end
 -- We just turn a few important characters into entities.
 --
 -----------------------------------------------------------------------------
-function esc(s)
+function M.esc(s)
 	local escaped = { ['<']='&lt;', ['>']='&gt;', ["&"]='&amp;' }
 	return (s:gsub("[<>&]", function(c) return escaped[c] end))
 end
@@ -58,7 +59,7 @@ end
 -- so = & # % ? " ' are bad and get replaced with %xx
 --
 -----------------------------------------------------------------------------
-function url_esc(s)
+function M.url_esc(s)
 	return string.gsub(s, "([&=%%%#%?%'%\" ><])", function(c)
 		return string.format("%%%02x", string.byte(c))
 	end)
@@ -69,7 +70,7 @@ end
 -- a url escape, that only escapes the string deliminators ' and " 
 --
 -----------------------------------------------------------------------------
-function url_esc_string(s)
+function M.url_esc_string(s)
 	return string.gsub(s, "(['%\" ])", function(c)
 		return string.format("%%%02x", string.byte(c))
 	end)
@@ -80,7 +81,7 @@ end
 -- convert any %xx into single chars
 --
 -----------------------------------------------------------------------------
-function url_unesc(s)
+function M.url_unesc(s)
 	return string.gsub(s, "%%(%x%x)", function(hex)
 		return string.char(tonumber(hex, 16))
 	end)
@@ -106,7 +107,7 @@ end
 -- setting escape_html to true prevents any html from getting through by escaping special characters
 --
 -----------------------------------------------------------------------------
-function waka_to_html(input,opts)
+function M.waka_to_html(input,opts)
 	opts=opts or {}
 
 local base_url=opts.base_url or ""

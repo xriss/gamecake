@@ -1,7 +1,7 @@
 --
 -- (C) 2013 Kriss@XIXs.com
 --
-local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+--local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 --
 -- Simple sandboxing of lua functions
@@ -113,13 +113,14 @@ end
 
 
 
-module("wetgenes.sandbox")
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+--module(...)
 
 --
 -- get a functional environment full of useful but "safe" functions
 -- probably not safe
 --
-function make_env(opts)
+M.make_env=function (opts)
 
 	local env=local_make_env_safe()
 
@@ -130,7 +131,7 @@ end
 -- a duplicate env including unsafe function
 -- definitely not safe
 --
-function make_unsafe_env(opts)
+M.make_unsafe_env=function (opts)
 
 	local env=local_make_env_safe()
 
@@ -155,6 +156,21 @@ function make_unsafe_env(opts)
 	env.module=module
 	env.require=require
 
+-- safeish globals
+	env.assert=assert
+	env.error=error
+	env.ipairs=ipairs
+	env.pairs=pairs
+	env.next=next
+	env.pcall=pcall
+	env.select=select
+	env.tonumber=tonumber
+	env.tostring=tostring
+	env.type=type
+	env.unpack=unpack
+	env.xpcall=xpcall
+	env._VERSION=_VERSION
+
 -- we have our own loadstring with builtin setfenv
 --	env.loadstring=loadstring
 
@@ -165,9 +181,9 @@ end
 -- turns a string containing lua code into a table containing the globals it sets
 -- IE read an ini file, run it through this
 --
-function ini(s,import)
+M.ini=function (s,import)
 
-	local env=make_env()
+	local env=M.make_env()
 	for n,v in pairs(import or {}) do env[n]=v end
 	local tab={}
 	local meta={__index=env}
@@ -182,9 +198,9 @@ function ini(s,import)
 end
 
 -- this performs the opposite of a string.serialize
-function lson(s,import)
+M.lson=function (s,import)
 
-	local env=make_env()
+	local env=M.make_env()
 	for n,v in pairs(import or {}) do env[n]=v end
 	local tab={}
 	local meta={__index=env}
