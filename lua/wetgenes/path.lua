@@ -212,14 +212,21 @@ end
 
 --[[#lua.wetgenes.path.currentdir
 
-Get the current working directory, this requires lfs and if lfs is not 
+Get/Set the current working directory, this requires lfs and if lfs is not 
 available then it will return wpath.root this path will have a trailing 
 separator so can be joined directly to a filename.
 
 	wpath.currentdir().."filename.ext"
 
+	wpath.currentdir("/home/")
+
 ]]
-wpath.currentdir=function()
+wpath.currentdir=function(p,...)
+
+	if lfs and p then -- need lfs and a path if we want to set it
+		p=wpath.join(p,...)
+		lfs.chdir(p)
+	end
 
 	local d
 	if lfs then d=lfs.currentdir() end
@@ -263,6 +270,31 @@ wpath.resolve=function(...)
 	return wpath.normalize( wpath.currentdir()..p ) -- prepend currentdir
 end
 
+--[[#lua.wetgenes.path.relative_cd
+
+Resolve path and if the path begins with the currentdir then replace 
+that path with "./" so we *may* have a shorter path relative to the 
+current dir.
+
+	path = wpath.relative_cd(path)
+
+Note this only makes the path relative if makes sense to do so, if you 
+always want to force the path relative to the current dir then use
+
+	path = wpath.relative( wpath.currentdir() , path )
+
+]]
+wpath.relative_cd=function(...)
+
+	local p=wpath.resolve(...)
+	local c=wpath.currentdir()
+	
+	if c == p:sub(1,#c) then -- matches current dir
+		return wpath.relative(c,p)
+	end
+
+	return p
+end
 
 --[[#lua.wetgenes.path.relative
 

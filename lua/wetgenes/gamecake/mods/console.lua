@@ -65,9 +65,7 @@ function M.bake(oven,console)
 
 
 	function console.setup()
-print("replacing print",print,_G.print)
 		console.replace_print(_G)
-print("replaced print",print,_G.print)
 
 		oven.cake.fonts.loads({4}) -- load builtin font number 4 a basic 8x16 font
 
@@ -561,6 +559,7 @@ end
 			end
 		end
 		g.print=print_new
+		g.rawprint=print_old
 
 		return function()
 			if g.print==print_new then -- only change back if noone else changed it

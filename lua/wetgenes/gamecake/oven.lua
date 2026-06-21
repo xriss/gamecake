@@ -6,6 +6,7 @@
 --local log,dump,PRINT=require("wetgenes.logs"):export("log","dump","PRINT")
 local logs=require("wetgenes.logs")
 local global=require("global")
+global.rawprint=global.rawprint or global.print -- we will be overloading print
 
 local toaster=require("wetgenes.gamecake.toaster")
 -- help luajit work on android/arm

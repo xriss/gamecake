@@ -187,7 +187,7 @@ gui.data_setup=function()
 
 		datas.new({id="find_search"  ,class="string",  hooks=gui.hooks,str=""})
 		datas.new({id="find_replace"  ,class="string",  hooks=gui.hooks,str=""})
-		datas.new({id="find_files"  ,class="string",  hooks=gui.hooks,str=""})
+		datas.new({id="find_files"  ,class="string",  hooks=gui.hooks,str="%.lua$"})
 
 		datas.new({id="find_infiles"  ,class="string",  hooks=gui.hooks,str="in files"}) -- dynamic button text
 
@@ -436,7 +436,7 @@ PRINT("find_in_files")
 			finds.cancel_all() -- only 1 find at a time?
 		else
 			finds.cancel_all() -- only 1 find at a time?
-			local find=finds.create({match=f,word=s})
+			local find=finds.create({pattern=f,word=s})
 			find:scan() -- start search
 		end
 
@@ -932,6 +932,7 @@ local lay=
 		gui.screen=gui.master:add(lay)
 		
 		gui.master.ids.runtext.double_click=gui.double_click
+		gui.master.ids.console.double_click=gui.double_click
 
 --[[
 		gui.menu_datas={
@@ -1115,18 +1116,24 @@ local lay=
 
 		txt.mark(cy,1,cy+1,1)
 
---print(cy,cx,act)
-
--- in lua the chunk of the current editor text will be named .
--- so we can search for -> [string "."]:00000: <- where the number inside :: is the line
-
 		local s=txt.get_string(cy)
-
---print(s)
 		if not s then return end -- bad click
 
-		local fx,tx,line=string.find(s,"%[string \"%.\"%]%:(%d+)")
+		local fx,tx,fname,line=string.find(s,"^%w*(.+)%:(%d+):")
+		
+		if not ( fname and line ) then return end -- pattern not recognized
+		
 		line=tonumber(line)
+		
+		if fname then -- set current doc to filename
+-- in lua the chunk of the current editor text will be named .
+-- so we can search for -> [string "."]:00000: <- where the number inside :: is the line
+			if string.find(s,"^%[string \"%.\"%]$") then --current file pattern
+				-- use current file
+			else -- switch to this file
+				docs.show( docs.manifest(fname) )
+			end
+		end
 
 --print(line)
 

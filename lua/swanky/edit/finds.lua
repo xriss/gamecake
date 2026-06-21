@@ -165,6 +165,7 @@ print("cancel all")
 		find.dir=find.dir or ""
 		find.pattern=find.pattern or ".*"
 		
+--[[
 		if find.match then -- get a dir from the match and convert wildcards to lua pattern
 		
 			local m=find.match
@@ -177,6 +178,7 @@ print("cancel all")
 			find.pattern=wildcard_pattern( wpath.resolve( m ) ) -- full path of files to match
 		end
 print("MATCH",find.dir,find.pattern)
+]]
 
 		return find
 	end
@@ -230,7 +232,7 @@ print( "searching : ".. prefix )
 								end
 							elseif t.mode=="file" then							
 								local s,e=path:find(find.pattern)
-								if s==1 and e==#path then -- pattern must match full string
+								if s then -- lua pattern must match something
 									files[path]=true
 								end
 							end
@@ -262,13 +264,32 @@ print( "searching ".. count .." files.")
 				local d=fp:read("*all")
 				local cnt=0
 				local s,e=0,0
+				local ns,ne=0,0
+				local line=1
 				while s do
 					s,e=string.find(d,find.word,e+1,true) -- found it
-					if s then cnt=cnt+1 end
+					if s then
+						cnt=cnt+1
+						while ne < s do
+							local nns,nne=string.find(d,"\n",ne+1,true) -- count lines
+							if nns then
+								if nns<s then
+									ns=nns
+									ne=nne
+									line=line+1
+								else
+									break
+								end
+							else
+								break
+							end
+						end
+						print( wpath.relative_cd(file)..":"..line..":")
+					end
 				end
 				if cnt>0 then
 					find.filenames[file]=cnt
-print(file,cnt)
+--print(file,cnt)
 				end
 			end)
 			if not ok then print(file,err) end
