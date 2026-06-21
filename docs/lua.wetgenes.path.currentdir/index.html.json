@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 670,
+   "count": 671,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 659,
+   "count": 660,
    "name": "lua.wetgenes"
   },
   {
@@ -1634,7 +1634,7 @@
    "name": "lua.wetgenes.package.reload"
   },
   {
-   "count": 20,
+   "count": 21,
    "name": "lua.wetgenes.path"
   },
   {
@@ -1692,6 +1692,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.path.relative"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.path.relative_cd"
   },
   {
    "count": 1,
@@ -2875,7 +2879,7 @@
  },
  "_list": [
   {
-   "body": "<p>Get the current working directory, this requires lfs and if lfs is not \navailable then it will return wpath.root this path will have a trailing \nseparator so can be joined directly to a filename.</p>\n<pre><code>wpath.currentdir()..&quot;filename.ext&quot;\n</code></pre>\n",
+   "body": "<p>Get/Set the current working directory, this requires lfs and if lfs is not \navailable then it will return wpath.root this path will have a trailing \nseparator so can be joined directly to a filename.</p>\n<pre><code>wpath.currentdir()..&quot;filename.ext&quot;\n\nwpath.currentdir(&quot;/home/&quot;)\n</code></pre>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
    "line": 213,

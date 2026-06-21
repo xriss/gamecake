@@ -442,6 +442,7 @@
 <a class="sub" href="../../docs/lua.wetgenes.path.parent"><span>/lua.wetgenes.path.parent</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.parse"><span>/lua.wetgenes.path.parse</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.relative"><span>/lua.wetgenes.path.relative</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.path.relative_cd"><span>/lua.wetgenes.path.relative_cd</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.resolve"><span>/lua.wetgenes.path.resolve</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.root"><span>/lua.wetgenes.path.root</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.path.setup"><span>/lua.wetgenes.path.setup</span></a>
@@ -733,10 +734,12 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.path.currentdir">lua.wetgenes.path.currentdir</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua#L213">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/path.lua</a></div>
-<div><p>Get the current working directory, this requires lfs and if lfs is not 
+<div><p>Get/Set the current working directory, this requires lfs and if lfs is not 
 available then it will return wpath.root this path will have a trailing 
 separator so can be joined directly to a filename.</p>
 <pre><code>wpath.currentdir()..&quot;filename.ext&quot;
+
+wpath.currentdir(&quot;/home/&quot;)
 </code></pre>
 </div>
 </div>
