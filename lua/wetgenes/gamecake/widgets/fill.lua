@@ -57,7 +57,7 @@ function wfill.layoutresize(widget)
 	
 		for i,w in ipairs(widget) do
 			if not w.hidden then
-				if hx+w.hx>widget.hx then
+				if hx+w.hx>=widget.hx+1 then
 					if hx==0 then -- need one item per line so add it anyway
 						addone(w)
 						endofline()

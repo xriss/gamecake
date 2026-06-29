@@ -312,7 +312,10 @@ M.bake=function(oven,docs)
 		gui.master.ids.texteditor.set_txt(it.txt)
 		gui.master.ids.texteditor.hidden=false
 
-		gui.master.ids.infobar.text=it.filename
+		-- add some space around / to make it easier to read
+		-- the filename will be centered in the widget
+		-- and we will show part of the path in what space we have to the left
+		gui.master.ids.infobar.text=it.filename:gsub("/","/ ")
 		if it.meta.undo==it.txt.undo.index then
 			gui.master.ids.infobar.text_color=nil
 		else

@@ -847,6 +847,52 @@ end
 					elseif widget.text_align=="right" then
 						tx=(widget.hx-tx)-(fy/2)
 						ty=(widget.hy/2)-(fy*fontfix)+typ
+
+					elseif widget.text_align=="wordcenter" then
+
+						local wordsplit=widget.wordsplit or "%s"
+						local wordsplitfull="^"..wordsplit.."+$"
+						local text=widget.text
+						local idx=#text
+						if widget.class=="textedit" then
+							idx=widget.data.str_idx
+						end
+						local ws
+						for i=0,#text do -- find start
+							if idx-i>=1 then
+								if not text:sub(idx-i,idx-i):match(wordsplitfull) then
+									ws=idx-i
+									break
+								end
+							end
+							if idx+i<=#text then
+								if not text:sub(idx+i,idx+i):match(wordsplitfull) then
+									ws=idx+i
+									break
+								end
+							end
+						end
+						ws=ws or idx
+						local we=ws
+						while (ws-1)>=1 do
+							if not text:sub(ws-1,ws-1):match(wordsplitfull) then
+								ws=ws-1
+							else
+								break
+							end
+						end
+						while (we+1)<=#text do
+							if not text:sub(we+1,we+1):match(wordsplitfull) then
+								we=we+1
+							else
+								break
+							end
+						end
+						local left=font.width(text:sub(1,ws-1))
+						local word=font.width(text:sub(ws,we))
+						tx=(widget.hx/2) - (left+(word/2))
+						ty=(widget.hy/2)-(fy*fontfix)+typ
+						
 					else -- center everything by default
 						tx=(widget.hx-tx)/2
 						ty=(widget.hy/2)-(fy*fontfix)+typ

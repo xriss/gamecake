@@ -725,6 +725,20 @@ function wmeta.setup(def)
 	end
 
 
+	meta.call_and_walk=function(widget,callback)
+	
+		local callme
+		callme=function(widget,depth)
+			if callback(widget,depth) then -- return true to continue into children
+				for i,v in ipairs(widget) do
+					callme(v,depth+1)
+				end
+			end
+		end
+
+		callme(widget,1)
+	end
+
 end
 
 

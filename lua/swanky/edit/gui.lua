@@ -319,6 +319,21 @@ function gui.action(m)
 
 	elseif m.id=="search_find" then
 
+-- hacky print hook on ctrl+g
+--[[
+do
+print("next")
+
+local w=gui.master.ids.top
+
+	w:call_and_walk(function(w,d)
+		print(w.id or "",w.hx)
+		return true
+	end)
+
+end
+]]
+
 		local texteditor=gui.master.ids.texteditor
 		local txt=texteditor.txt
 
@@ -688,7 +703,6 @@ end
 		master=master or gui.master
 
 		local gsiz=master.theme.grid_size
-
 local lay=
 {
 	id="screen",
@@ -702,18 +716,25 @@ local lay=
 			fbo=true,
 			{
 				id="topbar",
-				size="minmax",smode="topleft",hx_min=gsiz*60,hy_max=gsiz*1,class="fill",
-				{
-					hx=gsiz*30,hy=gsiz*1,class="three",
+				size="minmax",smode="topleft",hx_min=gsiz*48,hy_max=gsiz*1,class="fill",
+				 -- we will hack these sizes so check the code for topbar changes
+				hx_min_single=gsiz*24,
+				hy_max_single=gsiz*2,
+				hx_min_double=gsiz*48,
+				hy_max_double=gsiz*1,
+
+			{
+					hx=gsiz*24,hy=gsiz*1,class="three",
 					{
 						hx=gsiz*4,hy=gsiz*1,class="menubar",id="menubar",always_draw=true,
 					},
 					{
 						hx=gsiz*1,hy=gsiz*1,text="Welcome to swed",id="infobar",solid=true,fbo=true, -- clip
+						text_align="wordcenter",--wordsplit="%/",
 					},
 				},
 				{
-					px=0,py=0,hx=gsiz*30,hy=gsiz*1,class="fill",id="infobar_part2",
+					px=0,py=0,hx=gsiz*24,hy=gsiz*1,class="fill",id="infobar_part2",
 				},
 			},
 		},
@@ -1042,14 +1063,15 @@ local lay=
 			local old=gui.master.ids.split.resize
 			gui.master.ids.split.resize=function(widget) -- super custom layout
 				local old_hx_min=gui.master.ids.topbar.hx_min
+				local topbar=gui.master.ids.topbar
 				if gui.screen.hx < gsiz*24 then
 --print("double bar")
-					gui.master.ids.topbar.hx_min=gsiz*24
-					gui.master.ids.topbar.hy_max=gsiz*2
+					topbar.hx_min=topbar.hx_min_single -- gsiz*24
+					topbar.hy_max=topbar.hy_max_single -- gsiz*2
 				else
 --print("single bar")
-					gui.master.ids.topbar.hx_min=gsiz*48
-					gui.master.ids.topbar.hy_max=gsiz*1
+					topbar.hx_min=topbar.hx_min_double -- gsiz*48
+					topbar.hy_max=topbar.hy_max_double -- gsiz*1
 				end
 				if old_hx_min ~= gui.master.ids.topbar.hx_min then -- double call on state change
 					old(widget)

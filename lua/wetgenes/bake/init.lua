@@ -180,7 +180,7 @@ opts.ret=opts.ret or {} -- return value is in opts.ret
 	local dir=opts.dir
 	for i,v in ipairs(subdirs) do
 		opts.dir=dir.."/"..v
-		findfiles(opts)
+		M.findfiles(opts)
 	end
 
 	return opts
