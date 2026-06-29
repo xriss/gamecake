@@ -6,6 +6,8 @@
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+local wwin=require("wetgenes.win")
+
 function M.bake(oven,wmenudrop)
 wmenudrop=wmenudrop or {}
 
@@ -76,6 +78,20 @@ function wmenudrop.drop(widget)
 end
 
 
+local showmenu_delay=function(widget)
+	local t=wwin.time()
+	local f
+	f=function()
+		if widget.master.over==widget then -- must hover
+			if wwin.time() >= t+0.5 then
+				wmenudrop.drop(widget)
+			else
+				widget.master.later_append(f) -- check again later
+			end
+		end
+	end
+	f()
+end
 
 function wmenudrop.class_hooks(hook,widget,dat)
 	if widget.drop then
@@ -83,7 +99,13 @@ function wmenudrop.class_hooks(hook,widget,dat)
 			wmenudrop.drop(widget)
 		end
 	else
-		if hook=="active" or hook=="over" then
+		if hook=="over" then
+			if widget.master.press then
+				wmenudrop.drop(widget)
+			else
+				showmenu_delay(widget)
+			end
+		elseif hook=="active" then
 			wmenudrop.drop(widget)
 		end
 	end
