@@ -855,19 +855,19 @@ end
 						local text=widget.text
 						local idx=#text
 						if widget.class=="textedit" then
-							idx=widget.data.str_idx
+							idx=widget.data.str_idx+1
 						end
 						local ws
 						for i=0,#text do -- find start
-							if idx-i>=1 then
-								if not text:sub(idx-i,idx-i):match(wordsplitfull) then
-									ws=idx-i
-									break
-								end
-							end
 							if idx+i<=#text then
 								if not text:sub(idx+i,idx+i):match(wordsplitfull) then
 									ws=idx+i
+									break
+								end
+							end
+							if idx-i>=1 then
+								if not text:sub(idx-i,idx-i):match(wordsplitfull) then
+									ws=idx-i
 									break
 								end
 							end

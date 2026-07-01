@@ -59,7 +59,7 @@ bitsynth.freq2note=function(freq)
 					return bitsynth.note_names[j]..i
 				end
 			end
-			return sound.note_names[1]..i
+			return bitsynth.note_names[1]..i
 		end
 	end
 end

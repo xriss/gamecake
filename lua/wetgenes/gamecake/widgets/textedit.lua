@@ -83,8 +83,8 @@ function wtextedit.mouse(widget,act,_x,_y,key)
 
 		elseif act==2 then
 		
-			widget.data.str_select=#widget.data.str
-			widget.data.str_idx=0
+			widget.data.str_select=-#widget.data.str
+			widget.data.str_idx=#widget.data.str
 
 			widget.master.throb=255
 			widget:set_dirty()
@@ -391,12 +391,12 @@ end
 
 
 function wtextedit.select_all(widget)
-	widget.data.str_idx=0
-	widget.data.str_select=#widget.data.str
+	widget.data.str_idx=#widget.data.str
+	widget.data.str_select=-#widget.data.str
 end
 
 function wtextedit.focus(widget)
-	wtextedit.select_all(widget)
+--	wtextedit.select_all(widget)
 end
 
 function wtextedit.unfocus(widget)

@@ -83,7 +83,7 @@ local showmenu_delay=function(widget)
 	local f
 	f=function()
 		if widget.master.over==widget then -- must hover
-			if wwin.time() >= t+0.5 then
+			if wwin.time() >= t+widget.master.time_to_hover then
 				wmenudrop.drop(widget)
 			else
 				widget.master.later_append(f) -- check again later

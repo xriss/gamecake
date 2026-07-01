@@ -18,7 +18,7 @@ function wmenuitem.update(widget)
 		if widget.hide_when_not and not widget.master.press then -- must stay over widget unless holding button
 			if widget:isover(widget.hide_when_not) then
 				widget.over_time=wwin.time()
-			elseif (not widget.over_time) or (wwin.time() >= widget.over_time+0.25) then -- delay hide
+			elseif (not widget.over_time) or (wwin.time() >= widget.over_time+widget.master.time_to_hover) then -- delay hide
 				widget.hidden=true
 				widget.hide_when_not=nil
 				widget.master.request_layout=true
@@ -233,7 +233,7 @@ local showmenu_delay=function()
 	local f
 	f=function()
 		if widget.master.over==widget then -- must hover
-			if wwin.time() >= t+0.25 then
+			if wwin.time() >= t+widget.master.time_to_hover then
 					showmenu()
 			else
 				widget.master.later_append(f) -- check again later

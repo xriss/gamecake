@@ -41,7 +41,8 @@ local wdatas=oven.rebake("wetgenes.gamecake.widgets.datas")
 function wmaster.setup(widget,def)
 
 
-
+	widget.time_to_hover=0.5
+	widget.time_to_clickclick=0.5
 
 
 	widget.solid=true -- catch background clicks
@@ -565,7 +566,7 @@ function wmaster.setup(widget,def)
 
 		if act==1 then
 			if master.last_mouse_click then
-				if master.last_mouse_click[1]+0.4 > wwin.time() then -- double click
+				if master.last_mouse_click[1]+master.time_to_clickclick > wwin.time() then -- double click
 					if keyname == master.last_mouse_click[2] then -- same key
 						local dx=master.last_mouse_click[3] - x
 						local dy=master.last_mouse_click[4] - y
