@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 671,
+   "count": 674,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 660,
+   "count": 663,
    "name": "lua.wetgenes"
   },
   {
@@ -634,7 +634,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 172,
+   "count": 175,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -742,8 +742,20 @@
    "name": "lua.wetgenes.gamecake.framebuffers.stop"
   },
   {
-   "count": 43,
+   "count": 46,
    "name": "lua.wetgenes.gamecake.fun"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.render"
   },
   {
    "count": 19,
@@ -2880,7 +2892,7 @@
  "_list": [
   {
    "body": "",
-   "count": 172,
+   "count": 175,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -3090,8 +3102,32 @@
   },
   {
    "body": "",
-   "count": 43,
+   "count": 46,
    "name": "lua.wetgenes.gamecake.fun"
+  },
+  {
+   "body": "<pre><code>local bitsynth_task=require(&quot;wetgenes.gamecake.fun.bitsynth_task&quot;)\n</code></pre>\n<p>Manages synth rendering in a subtask, possibly multiple subtasks, so as \nnot to block the main thread when generating synth sounds.</p>\n",
+   "count": 3,
+   "file": "../lua/wetgenes/gamecake/fun/bitsynth_task.lua",
+   "line": 8,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/bitsynth_task.lua"
+  },
+  {
+   "body": "<p>lanes task function for handling bitsynth rendering.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/bitsynth_task.lua",
+   "line": 83,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.code",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/bitsynth_task.lua"
+  },
+  {
+   "body": "<pre><code>local f=bitsynth_task.render(tasks,ot)\n\n-- busy check for result , dont do this :)\nrepeat\n    local dat,err=f()\n    if dat then -- we loaded it\n        -- use sound here\n    else\n        if err then error(err) end -- caught an error\n    end\nuntil dat\n</code></pre>\n<p>returns a function that will peek for a return msg and return data (s16 \nsound data string) on success.</p>\n<p>on error it will return nil,error so need to check the second return if \nyou want to handle errors.</p>\n<p>after a successful result then subsequent calls will return nil,&quot;done&quot; \nindicating that the task has already completed.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/bitsynth_task.lua",
+   "line": 25,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.render",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/bitsynth_task.lua"
   },
   {
    "body": "",

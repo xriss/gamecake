@@ -204,7 +204,10 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.framebuffers.fbo.snapshot"><span>/lua.wetgenes.gamecake.framebuffers.fbo.snapshot</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.framebuffers.start"><span>/lua.wetgenes.gamecake.framebuffers.start</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.framebuffers.stop"><span>/lua.wetgenes.gamecake.framebuffers.stop</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun"><span>/lua.wetgenes.gamecake.fun</span></a>
-<a class="par" href="../../docs/lua.wetgenes.gamecake.fun.chatdown"><span>/lua.wetgenes.gamecake.fun.chatdown</span></a>
+<a class="par" href="../../docs/lua.wetgenes.gamecake.fun.bitsynth_task"><span>/lua.wetgenes.gamecake.fun.bitsynth_task</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.bitsynth_task.code"><span>/lua.wetgenes.gamecake.fun.bitsynth_task.code</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.bitsynth_task.render"><span>/lua.wetgenes.gamecake.fun.bitsynth_task.render</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.fun.chatdown"><span>/lua.wetgenes.gamecake.fun.chatdown</span></a>
 <a class="par" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat"><span>/lua.wetgenes.gamecake.fun.chatdown.chat</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.fun.chatdown.chat.get_tag"><span>/lua.wetgenes.gamecake.fun.chatdown.chat.get_tag</span></a>
@@ -1061,6 +1064,47 @@ fbo.clean on each fbo to free the opengl resources.</p>
 <h1><a href="../../docs/lua.wetgenes.gamecake.fun">lua.wetgenes.gamecake.fun</a></h1>
 <div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
 <div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.bitsynth_task">lua.wetgenes.gamecake.fun.bitsynth_task</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/bitsynth_task.lua#L8">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/bitsynth_task.lua</a></div>
+<div><pre><code>local bitsynth_task=require(&quot;wetgenes.gamecake.fun.bitsynth_task&quot;)
+</code></pre>
+<p>Manages synth rendering in a subtask, possibly multiple subtasks, so as 
+not to block the main thread when generating synth sounds.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.bitsynth_task.code">lua.wetgenes.gamecake.fun.bitsynth_task.code</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/bitsynth_task.lua#L83">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/bitsynth_task.lua</a></div>
+<div><p>lanes task function for handling bitsynth rendering.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.gamecake.fun.bitsynth_task.render">lua.wetgenes.gamecake.fun.bitsynth_task.render</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/bitsynth_task.lua#L25">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/bitsynth_task.lua</a></div>
+<div><pre><code>local f=bitsynth_task.render(tasks,ot)
+
+-- busy check for result , dont do this :)
+repeat
+    local dat,err=f()
+    if dat then -- we loaded it
+        -- use sound here
+    else
+        if err then error(err) end -- caught an error
+    end
+until dat
+</code></pre>
+<p>returns a function that will peek for a return msg and return data (s16 
+sound data string) on success.</p>
+<p>on error it will return nil,error so need to check the second return if 
+you want to handle errors.</p>
+<p>after a successful result then subsequent calls will return nil,&quot;done&quot; 
+indicating that the task has already completed.</p>
+</div>
 </div>
 
 <div class="wrap">

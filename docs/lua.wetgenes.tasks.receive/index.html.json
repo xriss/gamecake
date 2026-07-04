@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 671,
+   "count": 674,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 660,
+   "count": 663,
    "name": "lua.wetgenes"
   },
   {
@@ -634,7 +634,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 172,
+   "count": 175,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -742,8 +742,20 @@
    "name": "lua.wetgenes.gamecake.framebuffers.stop"
   },
   {
-   "count": 43,
+   "count": 46,
    "name": "lua.wetgenes.gamecake.fun"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.render"
   },
   {
    "count": 19,
@@ -2879,7 +2891,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>memo = tasks:receive(memo,timeout)\nmemo = tasks:receive(memo)\n</code></pre>\n<p>Recieve a memo with optional timeout.</p>\n<p>This is intended to be run from within a coroutine task on the main \nthread. It will work outside of a task but that will block the main \nthread waiting for a response.</p>\n<p>The memo will be deleted after being recieved (ie we will have called \ndel_memo) so as to free up its comunication id for another memo.</p>\n<p>if the memo has not yet been sent or even been through add_memo (we \ncheck state for &quot;setup&quot; or nil) then it will be autosent with the same \ntimeout before we try and receive it.</p>\n<p>After calling check if memo.error is nil then you will find the result in \nmemo.result</p>\n",
+   "body": "<pre><code>memo = tasks:receive(memo,timeout)\nmemo = tasks:receive(memo)\n</code></pre>\n<p>Recieve a memo with optional timeout.</p>\n<p>This is intended to be run from within a coroutine task on the main \nthread. It will work outside of a task but that will block the main \nthread waiting for a response.</p>\n<p>The memo will be deleted after being recieved (ie we will have called \ndel_memo) so as to free up its comunication id for another memo.</p>\n<p>if the memo has not yet been sent or even been through add_memo (we \ncheck state for &quot;setup&quot; or nil) then it will be autosent with the same \ntimeout before we try and receive it.</p>\n<p>After calling check if memo.error is nil then you will find the result in \nmemo.result</p>\n<p>will return the memo or nil if a timeout</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
    "line": 464,

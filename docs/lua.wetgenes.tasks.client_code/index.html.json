@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 671,
+   "count": 674,
    "name": "lua"
   },
   {
@@ -174,7 +174,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 660,
+   "count": 663,
    "name": "lua.wetgenes"
   },
   {
@@ -634,7 +634,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 172,
+   "count": 175,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -742,8 +742,20 @@
    "name": "lua.wetgenes.gamecake.framebuffers.stop"
   },
   {
-   "count": 43,
+   "count": 46,
    "name": "lua.wetgenes.gamecake.fun"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.render"
   },
   {
    "count": 19,
@@ -2882,7 +2894,7 @@
    "body": "<p>A basic function to handle (web)socket client connection.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks.lua",
-   "line": 1103,
+   "line": 1109,
    "name": "lua.wetgenes.tasks.client_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   }
