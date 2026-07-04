@@ -74,6 +74,31 @@ sysopts={
 ]],
 }
 
+--------------------------------------------------------------------------------
+--
+--#sounds
+
+-- render some sounds ( the editor saves djon so cutnpaste here )
+sound_data=djon.load([[
+
+{
+ sounds = [
+  {
+   adsr = [ 1 0 0 0 0.2 ]
+   duty = 0.5
+   fm = { duty=0.5 ffreq=[ `freq_range` 261.630000000001 293.66 329.630000000001 1024 ] frequency=16 fwav=`sine` }
+   frequency = D4
+   fwav = square
+   name = jump
+   name_idx = 1
+   volume = 0.5
+  }
+ ]
+}
+
+]])
+
+
 hardware,main=system.configurator(sysopts)
 
 systems={}
@@ -142,28 +167,8 @@ end
 
 local main_setup=function()
 
-	-- render some sounds ( the editor writes djon so cutnpaste )
-	local snds=djon.load([[
-
-{
- sounds = [
-  {
-   adsr = [ 1 0 0 0 0.2 ]
-   duty = 0.5
-   fm = { duty=0.5 ffreq=[ `freq_range` 261.630000000001 293.66 329.630000000001 1024 ] frequency=16 fwav=`sine` }
-   frequency = D4
-   fwav = square
-   name = jump
-   name_idx = 1
-   volume = 0.5
-  }
- ]
-}
-
-]])
-	for _,snd in ipairs(snds.sounds) do
+	for _,snd in ipairs(sound_data) do
 		if snd.name then
-print("sound",snd.name)
 			system.components.sfx.render(snd)
 		end
 	end
@@ -982,6 +987,8 @@ if player.mode=="spawn" then -- we are spawning but not really here yet
 
 		local tile=level:get_tile_by_pos(player.pos)
 		player.vel=V3(tile.dir)*400
+
+		system.components.sfx.play("jump",1,0.5)
 	end
 
 	player.idle=player.idle+1
@@ -1114,21 +1121,23 @@ else
 	end
 
 	if ba_set then -- start jump
-		if player.onfloor>0 and player.jump_force==0 then -- can jump
+		if player.onfloor>0 then -- and player.jump_force==0 then -- can jump
 			player.onfloor=0
-			player.jump_force=11	-- (F*(F+1)/2)*-4 applied over F frames
+--			player.jump_force=11	-- (F*(F+1)/2)*-4 applied over F frames
 			player.jump_debounce=4
-			player.vel[2]=0 -- reset starting force
+--			player.vel[2]=0 -- reset starting force
+			player.vel[2]=-190 -- reset starting force
+
 			system.components.sfx.play("jump",1,0.5)
 		end
 	end
-	if ba_now then -- continue jump
-		player.vel[2]=player.vel[2]+(player.jump_force*-4)	-- apply jump force
-		player.jump_force=math.max(0,player.jump_force-1)	-- decay jump force
-	end
-	if ba_clr then -- end of jump
-		player.jump_force=0 -- 0 on jump force on release of jump
-	end
+--	if ba_now then -- continue jump
+--		player.vel[2]=player.vel[2]+(player.jump_force*-4)	-- apply jump force
+--		player.jump_force=math.max(0,player.jump_force-1)	-- decay jump force
+--	end
+--	if ba_clr then -- end of jump
+--		player.jump_force=0 -- 0 on jump force on release of jump
+--	end
 
 	local hold_pos=player.pos+V3(0,-10,0)
 	local hold=player:depend("hold")
