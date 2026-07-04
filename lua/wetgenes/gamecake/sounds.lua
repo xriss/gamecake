@@ -40,7 +40,8 @@ function M.bake(oven,sounds)
 	sounds.vol_beep=1
 	
 	sounds.data={}
-	
+	sounds.lazyload={}
+
 	sounds.prefix=opts.sodprefix or "data/"
 	sounds.postfix=opts.sodpostfix or ".wav"
 	
@@ -115,6 +116,46 @@ sounds.unload=function(id)
 	end
 end
 
+sounds.lazyload_check=function(func,t)
+
+	local dat,err=func()
+	if not dat and err then assert(dat,err) end
+	if dat then -- we did it
+
+		local it=sounds.lazyload[func]
+		local freq=it.freq
+		local buff=it.buff
+		al.BufferData(buff,al.FORMAT_MONO16,dat,#dat,freq or 48000) -- C4 hopefully?
+		
+		sounds.lazyload[func]=nil -- remove from update
+
+	end
+end
+
+-- load a generated sound in another task
+-- function should return wavtab or nil if not ready yet or nil,error on error
+sounds.lazyload_wavtab=function(func,id,freq)
+
+	local t=sounds.get(id)
+
+-- this is generated sounds so allow changes 
+--	if t then return t end --first check it is not already loaded
+	
+	t=t or {}
+	t.filename=tab
+	
+	t.loop=al.FALSE
+	
+	if t.buff then al.DeleteBuffer(t.buff) end -- free old buffer
+	t.buff=al.GenBuffer()
+
+-- we will set buffer data later
+	sounds.lazyload[func]={freq=freq,buff=t.buff,id=id,func=func}
+	
+	sounds.set(t,id) -- remember
+
+	return t
+end
 
 --
 -- load a generated sound, replace any other sound already loaded with this name
@@ -474,6 +515,10 @@ end
 sounds.update = function()
 
 	if not oven.focus then return end -- only play streams when focused
+	
+	for f,t in pairs(sounds.lazyload) do
+		sounds.lazyload_check(f,t)
+	end
 
 	for i,v in ipairs(sounds.strs) do
 		v:update()

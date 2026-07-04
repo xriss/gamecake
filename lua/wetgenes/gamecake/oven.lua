@@ -345,6 +345,15 @@ end
 			TASK_NAME="#SQL",
 		}
 	})
+-- and synth code
+	oven.tasks:add_global_thread({
+		count=2,
+		id="bitsynth",
+		code=require("wetgenes.gamecake.fun.bitsynth_task").code,
+		globals={
+			TASK_NAME="#SYNTH"
+		}
+	})
 -- so we can run off thread code and coroutines
 
 

@@ -24,19 +24,19 @@ local linda_receive=function(linda,timeout,name)
 	if wwin.sdl_platform=="Emscripten" then -- wasm hax
 --PRINT("wait",name)
 
-	local start_time=os.time()
-	repeat
-		ok,ret=linda:receive(0,name) -- peek
-		if not ok then
-			wwin.softcore.js_sleep(1/1024) -- sleep
---			PRINT("sleep")
-		end
-		if timeout then
-			if os.time()-start_time > timeout then
-				return -- fail
+		local start_time=os.time()
+		repeat
+			ok,ret=linda:receive(0,name) -- peek
+			if not ok then
+				wwin.softcore.js_sleep(1/1024) -- sleep
+	--			PRINT("sleep")
 			end
-		end
-	until ok
+			if timeout then
+				if os.time()-start_time > timeout then
+					return nil -- fail timeout
+				end
+			end
+		until ok
 	
 --PRINT("done",name)
 	else
@@ -482,6 +482,8 @@ timeout before we try and receive it.
 After calling check if memo.error is nil then you will find the result in 
 memo.result
 
+will return the memo or nil if a timeout
+
 ]]
 M.tasks.receive=function(tasks,memo,timeout)
 	if memo.error then return memo end
@@ -490,11 +492,15 @@ M.tasks.receive=function(tasks,memo,timeout)
 	end
 	memo.state="receiving"
 	local ok,result=linda_receive( tasks.linda , timeout , memo.id ) ;
-	tasks.linda:set(memo.id) -- cleanup
-	memo.state="done"
-	tasks:del_memo(memo)
+	if ok then -- we might be peeking with a 0 timeout
+		tasks.linda:set(memo.id) -- cleanup
+		memo.state="done"
+		tasks:del_memo(memo)
+	else
+		if not result then return nil end -- timeout
+	end
 
-	if not ok then memo.error="receive failed" return memo end
+	if not ok then memo.error="memo error" return memo end
 	memo.result=result
 
 	return memo

@@ -5,6 +5,11 @@
 local tardis=require("wetgenes.tardis")
 local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4")
 
+-- gonna render some sounds
+local djon=require("djon")
+local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
+local bitsynth_task=require("wetgenes.gamecake.fun.bitsynth_task")
+
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
 local wstr=require("wetgenes.string")
 
@@ -137,6 +142,32 @@ end
 
 local main_setup=function()
 
+	-- render some sounds ( the editor writes djon so cutnpaste )
+	local snds=djon.load([[
+
+{
+ sounds = [
+  {
+   adsr = [ 1 0 0 0 0.2 ]
+   duty = 0.5
+   fm = { duty=0.5 ffreq=[ `freq_range` 261.630000000001 293.66 329.630000000001 1024 ] frequency=16 fwav=`sine` }
+   frequency = D4
+   fwav = square
+   name = jump
+   name_idx = 1
+   volume = 0.5
+  }
+ ]
+}
+
+]])
+	for _,snd in ipairs(snds.sounds) do
+		if snd.name then
+print("sound",snd.name)
+			system.components.sfx.render(snd)
+		end
+	end
+	
 	-- reset tiles
     local ctiles=system.components.tiles
 	ctiles.reset_tiles()
@@ -1088,6 +1119,7 @@ else
 			player.jump_force=11	-- (F*(F+1)/2)*-4 applied over F frames
 			player.jump_debounce=4
 			player.vel[2]=0 -- reset starting force
+			system.components.sfx.play("jump",1,0.5)
 		end
 	end
 	if ba_now then -- continue jump
