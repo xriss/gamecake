@@ -1,0 +1,47 @@
+# Reference: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+# VS 2026 uses 20.1.8
+# https://releases.llvm.org/20.1.0/tools/clang/docs/ClangFormatStyleOptions.html
+# https://clang-format-configurator.site/
+# default values:
+# https://github.com/llvm/llvm-project/blob/main/clang/lib/Format/Format.cpp
+---
+Language: Cpp
+Standard: Latest
+BasedOnStyle: Microsoft
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterUnion: true
+  BeforeWhile: true
+
+ColumnLimit: 130
+PointerAlignment: Left
+UseTab: Always
+BreakConstructorInitializers: BeforeComma
+
+InsertNewlineAtEOF: true
+IncludeBlocks: Regroup
+
+IncludeCategories:
+  - Regex:           '^"[^/]+\.h"'
+    Priority:        1
+  - Regex:           '^"[^/]+\.inl"'
+    Priority:        2
+  - Regex:           '^"box2d/'
+    Priority:        3
+  - Regex:           '^<.*>'
+    Priority:        4
+
+IndentExternBlock: NoIndent
+IndentCaseLabels: true
+IndentAccessModifiers: false
+AccessModifierOffset: -4
+
+SpacesInParens: Custom
+SpacesInParensOptions:
+  ExceptDoubleParentheses: true
+  InConditionalStatements: true
+  InCStyleCasts: false
+  InEmptyParentheses: false
+  Other: true

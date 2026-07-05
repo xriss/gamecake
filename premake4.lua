@@ -826,6 +826,8 @@ all_includes=all_includes or {
 	{"lib_sqlite",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
+	{"lib_box2d",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lib_box3d",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- some OS will provide openal so do not need this.
 	{LIB_OPENAL,		WINDOWS		or		NIX		or		EMCC 		or		ANDROID		or	nil		},
