@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #include "constraint_graph.h"
@@ -8,7 +8,6 @@
 #include "contact.h"
 #include "joint.h"
 #include "physics_world.h"
-#include "solver_set.h"
 
 #include <string.h>
 
@@ -20,320 +19,310 @@
 // body for kinematic bodies. We cannot access a kinematic body from multiple threads efficiently because the SIMD solver body
 // scatter would write to the same kinematic body from multiple threads. Even if these writes don't modify the body, they will
 // cause horrible cache stalls. To make this feasible I would need a way to block these writes.
-// todo should be possible to branch on the scatters to avoid writing to kinematic bodies
 
 // This is used for debugging by making all constraints be assigned to overflow.
-#define B2_FORCE_OVERFLOW 0
+#define B3_FORCE_OVERFLOW 0
 
-void b2CreateGraph( b2ConstraintGraph* graph, const b2Capacity* capacity )
+static const b3HexColor b3_graphColors[B3_GRAPH_COLOR_COUNT] = {
+	b3_colorRed,	   b3_colorOrange,		b3_colorYellow,			b3_colorLimeGreen,		 b3_colorSpringGreen,
+	b3_colorAqua,	   b3_colorDodgerBlue,	b3_colorBlueViolet,		b3_colorMagenta,		 b3_colorDeepPink,
+	b3_colorCrimson,   b3_colorCoral,		b3_colorGold,			b3_colorGreenYellow,	 b3_colorMediumSeaGreen,
+	b3_colorTurquoise, b3_colorDeepSkyBlue, b3_colorCornflowerBlue, b3_colorMediumSlateBlue, b3_colorMediumOrchid,
+	b3_colorHotPink,   b3_colorTomato,		b3_colorKhaki,			b3_colorSilver,
+};
+
+b3HexColor b3GetGraphColor( int index )
 {
-	_Static_assert( B2_GRAPH_COLOR_COUNT >= 2, "must have at least two constraint graph colors" );
-	_Static_assert( B2_OVERFLOW_INDEX == B2_GRAPH_COLOR_COUNT - 1, "bad over flow index" );
-	_Static_assert( B2_DYNAMIC_COLOR_COUNT >= 2, "need more dynamic colors" );
+	B3_ASSERT( 0 <= index && index < B3_GRAPH_COLOR_COUNT );
+	return b3_graphColors[index];
+}
 
-	*graph = (b2ConstraintGraph){ 0 };
+void b3CreateGraph( b3ConstraintGraph* graph, int bodyCapacity )
+{
+	_Static_assert( B3_GRAPH_COLOR_COUNT >= 2, "must have at least two constraint graph colors" );
+	_Static_assert( B3_OVERFLOW_INDEX == B3_GRAPH_COLOR_COUNT - 1, "bad over flow index" );
 
-	int bodyCapacity = b2MaxInt( capacity->staticBodyCount + capacity->dynamicBodyCount, 16 );
+	*graph = (b3ConstraintGraph){ 0 };
+
+	bodyCapacity = b3MaxInt( bodyCapacity, 8 );
 
 	// Initialize graph color bit set.
 	// No bitset for overflow color.
-	for ( int i = 0; i < B2_OVERFLOW_INDEX; ++i )
+	for ( int i = 0; i < B3_OVERFLOW_INDEX; ++i )
 	{
-		b2GraphColor* color = graph->colors + i;
-		color->bodySet = b2CreateBitSet( bodyCapacity );
-		b2SetBitCountAndClear( &color->bodySet, bodyCapacity );
-		b2Array_Reserve( color->contactSims, 16 );
+		b3GraphColor* color = graph->colors + i;
+		color->bodySet = b3CreateBitSet( bodyCapacity );
+		b3SetBitCountAndClear( &color->bodySet, bodyCapacity );
 	}
 }
 
-void b2DestroyGraph( b2ConstraintGraph* graph )
+void b3DestroyGraph( b3ConstraintGraph* graph )
 {
-	for ( int i = 0; i < B2_GRAPH_COLOR_COUNT; ++i )
+	for ( int i = 0; i < B3_GRAPH_COLOR_COUNT; ++i )
 	{
-		b2GraphColor* color = graph->colors + i;
+		b3GraphColor* color = graph->colors + i;
 
 		// The bit set should never be used on the overflow color
-		B2_ASSERT( i != B2_OVERFLOW_INDEX || color->bodySet.bits == NULL );
+		B3_ASSERT( i != B3_OVERFLOW_INDEX || color->bodySet.bits == NULL );
 
-		b2DestroyBitSet( &color->bodySet );
-		b2Array_Destroy( color->contactSims );
-		b2Array_Destroy( color->jointSims );
+		b3DestroyBitSet( &color->bodySet );
+
+		b3Array_Destroy( color->convexContacts );
+		b3Array_Destroy( color->contacts );
+		b3Array_Destroy( color->jointSims );
 	}
 }
 
-// Contacts are always created as non-touching. They get moved into the constraint
+// Contacts are always created as non-touching. They get cloned into the constraint
 // graph once they are found to be touching.
-void b2AddContactToGraph( b2World* world, b2ContactSim* contactSim, b2Contact* contact )
+void b3AddContactToGraph( b3World* world, b3Contact* contact )
 {
-	B2_ASSERT( contactSim->manifold.pointCount > 0 );
-	B2_ASSERT( contactSim->simFlags & b2_simTouchingFlag );
-	B2_ASSERT( contact->flags & b2_contactTouchingFlag );
+	B3_ASSERT( contact->manifoldCount > 0 );
+	B3_ASSERT( contact->flags & b3_contactTouchingFlag );
 
-	b2ConstraintGraph* graph = &world->constraintGraph;
-	int colorIndex = B2_OVERFLOW_INDEX;
+	b3ConstraintGraph* graph = &world->constraintGraph;
+	int colorIndex = B3_OVERFLOW_INDEX;
 
 	int bodyIdA = contact->edges[0].bodyId;
 	int bodyIdB = contact->edges[1].bodyId;
-	b2Body* bodyA = b2Array_Get( world->bodies, bodyIdA );
-	b2Body* bodyB = b2Array_Get( world->bodies, bodyIdB );
+	b3Body* bodyA = b3Array_Get( world->bodies, bodyIdA );
+	b3Body* bodyB = b3Array_Get( world->bodies, bodyIdB );
 
-	b2BodyType typeA = bodyA->type;
-	b2BodyType typeB = bodyB->type;
-	B2_ASSERT( typeA == b2_dynamicBody || typeB == b2_dynamicBody );
+	b3BodyType typeA = bodyA->type;
+	b3BodyType typeB = bodyB->type;
+	B3_ASSERT( typeA == b3_dynamicBody || typeB == b3_dynamicBody );
 
-#if B2_FORCE_OVERFLOW == 0
-	if ( typeA == b2_dynamicBody && typeB == b2_dynamicBody )
+#if B3_FORCE_OVERFLOW == 0
+	if ( typeA == b3_dynamicBody && typeB == b3_dynamicBody )
 	{
 		// Dynamic constraint colors cannot encroach on colors reserved for static constraints
-		for ( int i = 0; i < B2_DYNAMIC_COLOR_COUNT; ++i )
+		for ( int i = 0; i < B3_DYNAMIC_COLOR_COUNT; ++i )
 		{
-			b2GraphColor* color = graph->colors + i;
-			if ( b2GetBit( &color->bodySet, bodyIdA ) || b2GetBit( &color->bodySet, bodyIdB ) )
+			b3GraphColor* color = graph->colors + i;
+			if ( b3GetBit( &color->bodySet, bodyIdA ) || b3GetBit( &color->bodySet, bodyIdB ) )
 			{
 				continue;
 			}
 
-			b2SetBitGrow( &color->bodySet, bodyIdA );
-			b2SetBitGrow( &color->bodySet, bodyIdB );
+			b3SetBitGrow( &color->bodySet, bodyIdA );
+			b3SetBitGrow( &color->bodySet, bodyIdB );
 			colorIndex = i;
 			break;
 		}
 	}
-	else if ( typeA == b2_dynamicBody )
+	else if ( typeA == b3_dynamicBody )
 	{
 		// Static constraint colors build from the end to get higher priority than dyn-dyn constraints
-		for ( int i = B2_OVERFLOW_INDEX - 1; i >= 1; --i )
+		for ( int i = B3_OVERFLOW_INDEX - 1; i >= 1; --i )
 		{
-			b2GraphColor* color = graph->colors + i;
-			if ( b2GetBit( &color->bodySet, bodyIdA ) )
+			b3GraphColor* color = graph->colors + i;
+			if ( b3GetBit( &color->bodySet, bodyIdA ) )
 			{
 				continue;
 			}
 
-			b2SetBitGrow( &color->bodySet, bodyIdA );
+			b3SetBitGrow( &color->bodySet, bodyIdA );
 			colorIndex = i;
 			break;
 		}
 	}
-	else if ( typeB == b2_dynamicBody )
+	else if ( typeB == b3_dynamicBody )
 	{
 		// Static constraint colors build from the end to get higher priority than dyn-dyn constraints
-		for ( int i = B2_OVERFLOW_INDEX - 1; i >= 1; --i )
+		for ( int i = B3_OVERFLOW_INDEX - 1; i >= 1; --i )
 		{
-			b2GraphColor* color = graph->colors + i;
-			if ( b2GetBit( &color->bodySet, bodyIdB ) )
+			b3GraphColor* color = graph->colors + i;
+			if ( b3GetBit( &color->bodySet, bodyIdB ) )
 			{
 				continue;
 			}
 
-			b2SetBitGrow( &color->bodySet, bodyIdB );
+			b3SetBitGrow( &color->bodySet, bodyIdB );
 			colorIndex = i;
 			break;
 		}
 	}
 #endif
 
-	b2GraphColor* color = graph->colors + colorIndex;
+	bool isScalar = ( contact->flags & b3_simMeshContact ) || colorIndex == B3_OVERFLOW_INDEX;
+
+	b3GraphColor* color = graph->colors + colorIndex;
 	contact->colorIndex = colorIndex;
-	contact->localIndex = color->contactSims.count;
+	contact->localIndex = isScalar ? color->contacts.count : color->convexContacts.count;
+	contact->bodySimIndexA = bodyA->type == b3_staticBody ? B3_NULL_INDEX : bodyA->localIndex;
+	contact->bodySimIndexB = bodyB->type == b3_staticBody ? B3_NULL_INDEX : bodyB->localIndex;
 
-	b2ContactSim* newContact = b2Array_Emplace( color->contactSims );
-	memcpy( newContact, contactSim, sizeof( b2ContactSim ) );
-
-	// todo perhaps skip this if the contact is already awake
-
-	if ( typeA == b2_staticBody )
+	if ( isScalar )
 	{
-		newContact->bodySimIndexA = B2_NULL_INDEX;
-		newContact->invMassA = 0.0f;
-		newContact->invIA = 0.0f;
+		B3_ASSERT( contact->manifoldCount < UINT16_MAX );
+		b3ContactSpec spec = {
+			.contactId = contact->contactId,
+			.manifoldStart = 0,
+			.manifoldCount = (uint16_t)contact->manifoldCount,
+		};
+		b3Array_Push( color->contacts, spec );
 	}
 	else
 	{
-		B2_ASSERT( bodyA->setIndex == b2_awakeSet );
-		b2SolverSet* awakeSet = b2Array_Get( world->solverSets, b2_awakeSet );
+		b3Array_Push( color->convexContacts, contact->contactId );
+	}
+}
 
-		int localIndex = bodyA->localIndex;
-		newContact->bodySimIndexA = localIndex;
+void b3RemoveContactFromGraph( b3World* world, int bodyIdA, int bodyIdB, int colorIndex, int localIndex, bool meshContact )
+{
+	b3ConstraintGraph* graph = &world->constraintGraph;
 
-		b2BodySim* bodySimA = b2Array_Get( awakeSet->bodySims, localIndex );
-		newContact->invMassA = bodySimA->invMass;
-		newContact->invIA = bodySimA->invInertia;
+	B3_ASSERT( 0 <= colorIndex && colorIndex < B3_GRAPH_COLOR_COUNT );
+	b3GraphColor* color = graph->colors + colorIndex;
+
+	if ( colorIndex != B3_OVERFLOW_INDEX )
+	{
+		// This might clear a bit for a static body, but this has no effect
+		b3ClearBit( &color->bodySet, bodyIdA );
+		b3ClearBit( &color->bodySet, bodyIdB );
 	}
 
-	if ( typeB == b2_staticBody )
+	if ( meshContact || colorIndex == B3_OVERFLOW_INDEX )
 	{
-		newContact->bodySimIndexB = B2_NULL_INDEX;
-		newContact->invMassB = 0.0f;
-		newContact->invIB = 0.0f;
+		int movedIndex = b3Array_RemoveSwap( color->contacts, localIndex );
+		if ( movedIndex != B3_NULL_INDEX )
+		{
+			// Fix index on swapped contact
+			int movedContactId = color->contacts.data[localIndex].contactId;
+			b3Contact* movedContact = b3Array_Get( world->contacts, movedContactId );
+			B3_ASSERT( movedContact->setIndex == b3_awakeSet );
+			B3_ASSERT( movedContact->colorIndex == colorIndex );
+			B3_ASSERT( movedContact->localIndex == movedIndex );
+			movedContact->localIndex = localIndex;
+		}
 	}
 	else
 	{
-		B2_ASSERT( bodyB->setIndex == b2_awakeSet );
-		b2SolverSet* awakeSet = b2Array_Get( world->solverSets, b2_awakeSet );
-
-		int localIndex = bodyB->localIndex;
-		newContact->bodySimIndexB = localIndex;
-
-		b2BodySim* bodySimB = b2Array_Get( awakeSet->bodySims, localIndex );
-		newContact->invMassB = bodySimB->invMass;
-		newContact->invIB = bodySimB->invInertia;
+		int movedIndex = b3Array_RemoveSwap( color->convexContacts, localIndex );
+		if ( movedIndex != B3_NULL_INDEX )
+		{
+			// Fix index on swapped contact
+			int movedContactId = color->convexContacts.data[localIndex];
+			b3Contact* movedContact = b3Array_Get( world->contacts, movedContactId );
+			B3_ASSERT( movedContact->setIndex == b3_awakeSet );
+			B3_ASSERT( movedContact->colorIndex == colorIndex );
+			B3_ASSERT( movedContact->localIndex == movedIndex );
+			B3_ASSERT( ( movedContact->flags & b3_simMeshContact ) == 0 );
+			movedContact->localIndex = localIndex;
+		}
 	}
 }
 
-void b2RemoveContactFromGraph( b2World* world, int bodyIdA, int bodyIdB, int colorIndex, int localIndex )
+static int b3AssignJointColor( b3ConstraintGraph* graph, int bodyIdA, int bodyIdB, b3BodyType typeA, b3BodyType typeB )
 {
-	b2ConstraintGraph* graph = &world->constraintGraph;
+	B3_ASSERT( typeA == b3_dynamicBody || typeB == b3_dynamicBody );
+	B3_UNUSED( graph );
+	B3_UNUSED( bodyIdA );
+	B3_UNUSED( bodyIdB );
+	B3_UNUSED( typeA );
+	B3_UNUSED( typeB );
 
-	B2_ASSERT( 0 <= colorIndex && colorIndex < B2_GRAPH_COLOR_COUNT );
-	b2GraphColor* color = graph->colors + colorIndex;
-
-	if ( colorIndex != B2_OVERFLOW_INDEX )
-	{
-		// This might clear a bit for a kinematic or static body, but this has no effect
-		b2ClearBit( &color->bodySet, bodyIdA );
-		b2ClearBit( &color->bodySet, bodyIdB );
-	}
-
-	int movedIndex = b2Array_RemoveSwap( color->contactSims, localIndex );
-	if ( movedIndex != B2_NULL_INDEX )
-	{
-		// Fix index on swapped contact
-		b2ContactSim* movedContactSim = color->contactSims.data + localIndex;
-
-		// Fix moved contact
-		int movedId = movedContactSim->contactId;
-		b2Contact* movedContact = b2Array_Get( world->contacts, movedId );
-		B2_ASSERT( movedContact->setIndex == b2_awakeSet );
-		B2_ASSERT( movedContact->colorIndex == colorIndex );
-		B2_ASSERT( movedContact->localIndex == movedIndex );
-		movedContact->localIndex = localIndex;
-	}
-}
-
-// Notice that a joint cannot share the same color as a contact between the same two bodies. This means I can solve contacts and
-// joints in parallel with each other within each color.
-static int b2AssignJointColor( b2ConstraintGraph* graph, int bodyIdA, int bodyIdB, b2BodyType typeA, b2BodyType typeB )
-{
-	B2_ASSERT( typeA == b2_dynamicBody || typeB == b2_dynamicBody );
-
-#if B2_FORCE_OVERFLOW == 0
-	if ( typeA == b2_dynamicBody && typeB == b2_dynamicBody )
+#if B3_FORCE_OVERFLOW == 0
+	if ( typeA == b3_dynamicBody && typeB == b3_dynamicBody )
 	{
 		// Dynamic constraint colors cannot encroach on colors reserved for static constraints
-		for ( int i = 0; i < B2_DYNAMIC_COLOR_COUNT; ++i )
+		for ( int i = 0; i < B3_DYNAMIC_COLOR_COUNT; ++i )
 		{
-			b2GraphColor* color = graph->colors + i;
-			if ( b2GetBit( &color->bodySet, bodyIdA ) || b2GetBit( &color->bodySet, bodyIdB ) )
+			b3GraphColor* color = graph->colors + i;
+			if ( b3GetBit( &color->bodySet, bodyIdA ) || b3GetBit( &color->bodySet, bodyIdB ) )
 			{
 				continue;
 			}
 
-			b2SetBitGrow( &color->bodySet, bodyIdA );
-			b2SetBitGrow( &color->bodySet, bodyIdB );
+			b3SetBitGrow( &color->bodySet, bodyIdA );
+			b3SetBitGrow( &color->bodySet, bodyIdB );
 			return i;
 		}
 	}
-	else if ( typeA == b2_dynamicBody )
+	else if ( typeA == b3_dynamicBody )
 	{
 		// Static constraint colors build from the end to get higher priority than dyn-dyn constraints
-		for ( int i = B2_OVERFLOW_INDEX - 1; i >= 1; --i )
+		for ( int i = B3_OVERFLOW_INDEX - 1; i >= 1; --i )
 		{
-			b2GraphColor* color = graph->colors + i;
-			if ( b2GetBit( &color->bodySet, bodyIdA ) )
+			b3GraphColor* color = graph->colors + i;
+			if ( b3GetBit( &color->bodySet, bodyIdA ) )
 			{
 				continue;
 			}
 
-			b2SetBitGrow( &color->bodySet, bodyIdA );
+			b3SetBitGrow( &color->bodySet, bodyIdA );
 			return i;
 		}
 	}
-	else if ( typeB == b2_dynamicBody )
+	else if ( typeB == b3_dynamicBody )
 	{
 		// Static constraint colors build from the end to get higher priority than dyn-dyn constraints
-		for ( int i = B2_OVERFLOW_INDEX - 1; i >= 1; --i )
+		for ( int i = B3_OVERFLOW_INDEX - 1; i >= 1; --i )
 		{
-			b2GraphColor* color = graph->colors + i;
-			if ( b2GetBit( &color->bodySet, bodyIdB ) )
+			b3GraphColor* color = graph->colors + i;
+			if ( b3GetBit( &color->bodySet, bodyIdB ) )
 			{
 				continue;
 			}
 
-			b2SetBitGrow( &color->bodySet, bodyIdB );
+			b3SetBitGrow( &color->bodySet, bodyIdB );
 			return i;
 		}
 	}
-#else
-	B2_UNUSED( graph, bodyIdA, bodyIdB );
 #endif
 
-	return B2_OVERFLOW_INDEX;
+	return B3_OVERFLOW_INDEX;
 }
 
-b2JointSim* b2CreateJointInGraph( b2World* world, b2Joint* joint )
+b3JointSim* b3CreateJointInGraph( b3World* world, b3Joint* joint )
 {
-	b2ConstraintGraph* graph = &world->constraintGraph;
+	b3ConstraintGraph* graph = &world->constraintGraph;
 
 	int bodyIdA = joint->edges[0].bodyId;
 	int bodyIdB = joint->edges[1].bodyId;
-	b2Body* bodyA = b2Array_Get( world->bodies, bodyIdA );
-	b2Body* bodyB = b2Array_Get( world->bodies, bodyIdB );
+	b3Body* bodyA = b3Array_Get( world->bodies, bodyIdA );
+	b3Body* bodyB = b3Array_Get( world->bodies, bodyIdB );
 
-	int colorIndex = b2AssignJointColor( graph, bodyIdA, bodyIdB, bodyA->type, bodyB->type );
+	int colorIndex = b3AssignJointColor( graph, bodyIdA, bodyIdB, bodyA->type, bodyB->type );
 
-	b2JointSim* jointSim = b2Array_Emplace( graph->colors[colorIndex].jointSims );
-	memset( jointSim, 0, sizeof( b2JointSim ) );
+	b3JointSim* jointSim = b3Array_Emplace( graph->colors[colorIndex].jointSims );
+	memset( jointSim, 0, sizeof( b3JointSim ) );
 
 	joint->colorIndex = colorIndex;
 	joint->localIndex = graph->colors[colorIndex].jointSims.count - 1;
 	return jointSim;
 }
 
-void b2AddJointToGraph( b2World* world, b2JointSim* jointSim, b2Joint* joint )
+void b3AddJointToGraph( b3World* world, b3JointSim* jointSim, b3Joint* joint )
 {
-	b2JointSim* jointDst = b2CreateJointInGraph( world, joint );
-	memcpy( jointDst, jointSim, sizeof( b2JointSim ) );
+	b3JointSim* jointDst = b3CreateJointInGraph( world, joint );
+	memcpy( jointDst, jointSim, sizeof( b3JointSim ) );
 }
 
-void b2RemoveJointFromGraph( b2World* world, int bodyIdA, int bodyIdB, int colorIndex, int localIndex )
+void b3RemoveJointFromGraph( b3World* world, int bodyIdA, int bodyIdB, int colorIndex, int localIndex )
 {
-	b2ConstraintGraph* graph = &world->constraintGraph;
+	b3ConstraintGraph* graph = &world->constraintGraph;
 
-	B2_ASSERT( 0 <= colorIndex && colorIndex < B2_GRAPH_COLOR_COUNT );
-	b2GraphColor* color = graph->colors + colorIndex;
+	B3_ASSERT( 0 <= colorIndex && colorIndex < B3_GRAPH_COLOR_COUNT );
+	b3GraphColor* color = graph->colors + colorIndex;
 
-	if ( colorIndex != B2_OVERFLOW_INDEX )
+	if ( colorIndex != B3_OVERFLOW_INDEX )
 	{
 		// May clear static bodies, no effect
-		b2ClearBit( &color->bodySet, bodyIdA );
-		b2ClearBit( &color->bodySet, bodyIdB );
+		b3ClearBit( &color->bodySet, bodyIdA );
+		b3ClearBit( &color->bodySet, bodyIdB );
 	}
 
-	int movedIndex = b2Array_RemoveSwap( color->jointSims, localIndex );
-	if ( movedIndex != B2_NULL_INDEX )
+	int movedIndex = b3Array_RemoveSwap( color->jointSims, localIndex );
+	if ( movedIndex != B3_NULL_INDEX )
 	{
 		// Fix moved joint
-		b2JointSim* movedJointSim = color->jointSims.data + localIndex;
+		b3JointSim* movedJointSim = color->jointSims.data + localIndex;
 		int movedId = movedJointSim->jointId;
-		b2Joint* movedJoint = b2Array_Get( world->joints, movedId );
-		B2_ASSERT( movedJoint->setIndex == b2_awakeSet );
-		B2_ASSERT( movedJoint->colorIndex == colorIndex );
-		B2_ASSERT( movedJoint->localIndex == movedIndex );
+		b3Joint* movedJoint = b3Array_Get( world->joints, movedId );
+		B3_ASSERT( movedJoint->setIndex == b3_awakeSet );
+		B3_ASSERT( movedJoint->colorIndex == colorIndex );
+		B3_ASSERT( movedJoint->localIndex == movedIndex );
 		movedJoint->localIndex = localIndex;
 	}
-}
-
-static const b2HexColor b2_graphColors[B2_GRAPH_COLOR_COUNT] = {
-	b2_colorRed,	   b2_colorOrange,		b2_colorYellow,			b2_colorLimeGreen,		 b2_colorSpringGreen,
-	b2_colorAqua,	   b2_colorDodgerBlue,	b2_colorBlueViolet,		b2_colorMagenta,		 b2_colorDeepPink,
-	b2_colorCrimson,   b2_colorCoral,		b2_colorGold,			b2_colorGreenYellow,	 b2_colorMediumSeaGreen,
-	b2_colorTurquoise, b2_colorDeepSkyBlue, b2_colorCornflowerBlue, b2_colorMediumSlateBlue, b2_colorMediumOrchid,
-	b2_colorHotPink,   b2_colorTomato,		b2_colorKhaki,			b2_colorSilver,
-};
-
-b2HexColor b2GetGraphColor( int index )
-{
-	B2_ASSERT( 0 <= index && index < B2_GRAPH_COLOR_COUNT );
-	return b2_graphColors[index];
 }

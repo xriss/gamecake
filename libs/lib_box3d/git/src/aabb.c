@@ -1,137 +1,176 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #include "aabb.h"
 
-#include "box2d/math_functions.h"
+#include "math_internal.h"
+
+#include "box3d/math_functions.h"
 
 #include <float.h>
 
-bool b2IsValidAABB( b2AABB a )
+// Similar to Real-time Collision Detection, p179.
+// todo try
+// https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection.html
+bool b3RayCastAABB( b3AABB a, b3Vec3 p1, b3Vec3 p2, float* minFraction, float* maxFraction )
 {
-	b2Vec2 d = b2Sub( a.upperBound, a.lowerBound );
-	bool valid = d.x >= 0.0f && d.y >= 0.0f;
-	valid = valid && b2IsValidVec2( a.lowerBound ) && b2IsValidVec2( a.upperBound );
-	return valid;
-}
+	// Ray direction and length
+	b3Vec3 d = b3Sub( p2, p1 );
+	float rayLength = b3Length( d );
 
-// From Real-time Collision Detection, p179.
-b2CastOutput b2AABB_RayCast( b2AABB a, b2Vec2 p1, b2Vec2 p2 )
-{
-	// Radius not handled
-	b2CastOutput output = { 0 };
-
-	float tMin = -FLT_MAX;
-	float tMax = FLT_MAX;
-
-	b2Vec2 p = p1;
-	b2Vec2 d = b2Sub( p2, p1 );
-	b2Vec2 absD = b2Abs( d );
-
-	b2Vec2 normal = b2Vec2_zero;
-
-	// x-coordinate
-	if ( absD.x < FLT_EPSILON )
+	// Handle degenerate ray
+	if ( rayLength < FLT_EPSILON )
 	{
-		// parallel
-		if ( p.x < a.lowerBound.x || a.upperBound.x < p.x )
+		// Check if point is inside AABB
+		if ( p1.x >= a.lowerBound.x && p1.x <= a.upperBound.x && p1.y >= a.lowerBound.y && p1.y <= a.upperBound.y &&
+			 p1.z >= a.lowerBound.z && p1.z <= a.upperBound.z )
 		{
-			return output;
-		}
-	}
-	else
-	{
-		float inv_d = 1.0f / d.x;
-		float t1 = ( a.lowerBound.x - p.x ) * inv_d;
-		float t2 = ( a.upperBound.x - p.x ) * inv_d;
-
-		// Sign of the normal vector.
-		float s = -1.0f;
-
-		if ( t1 > t2 )
-		{
-			float tmp = t1;
-			t1 = t2;
-			t2 = tmp;
-			s = 1.0f;
+			*minFraction = 0.0f;
+			*maxFraction = 0.0f;
+			return true;
 		}
 
-		// Push the min up
-		if ( t1 > tMin )
-		{
-			normal.y = 0.0f;
-			normal.x = s;
-			tMin = t1;
-		}
-
-		// Pull the max down
-		tMax = b2MinFloat( tMax, t2 );
-
-		if ( tMin > tMax )
-		{
-			return output;
-		}
+		return false;
 	}
 
-	// y-coordinate
-	if ( absD.y < FLT_EPSILON )
+	b3Vec3 rayDir = b3MulSV( 1.0f / rayLength, d );
+
+	// Slab method for ray-AABB intersection
+	float tMin = 0.0f;
+	float tMax = rayLength;
+
+	// x-axis
 	{
-		// parallel
-		if ( p.y < a.lowerBound.y || a.upperBound.y < p.y )
+		float rayComponent = rayDir.x;
+		float rayStart = p1.x;
+		float boxMin = a.lowerBound.x;
+		float boxMax = a.upperBound.x;
+
+		if ( b3AbsFloat( rayComponent ) < FLT_EPSILON )
 		{
-			return output;
+			// Ray is parallel to slab, check if ray origin is within slab
+			if ( rayStart < boxMin || rayStart > boxMax )
+			{
+				return false;
+			}
+		}
+		else
+		{
+			// Compute intersection distances
+			float t1 = ( boxMin - rayStart ) / rayComponent;
+			float t2 = ( boxMax - rayStart ) / rayComponent;
+
+			// Ensure t1 <= t2
+			if ( t1 > t2 )
+			{
+				float temp = t1;
+				t1 = t2;
+				t2 = temp;
+			}
+
+			// Update intersection interval
+			tMin = b3MaxFloat( tMin, t1 );
+			tMax = b3MinFloat( tMax, t2 );
+
+			// Check for no intersection
+			if ( tMin > tMax )
+			{
+				return false;
+			}
 		}
 	}
-	else
+	
+	// y-axis
 	{
-		float inv_d = 1.0f / d.y;
-		float t1 = ( a.lowerBound.y - p.y ) * inv_d;
-		float t2 = ( a.upperBound.y - p.y ) * inv_d;
+		float rayComponent = rayDir.y;
+		float rayStart = p1.y;
+		float boxMin = a.lowerBound.y;
+		float boxMax = a.upperBound.y;
 
-		// Sign of the normal vector.
-		float s = -1.0f;
-
-		if ( t1 > t2 )
+		if ( b3AbsFloat( rayComponent ) < FLT_EPSILON )
 		{
-			float tmp = t1;
-			t1 = t2;
-			t2 = tmp;
-			s = 1.0f;
+			// Ray is parallel to slab, check if ray origin is within slab
+			if ( rayStart < boxMin || rayStart > boxMax )
+			{
+				return false;
+			}
 		}
-
-		// Push the min up
-		if ( t1 > tMin )
+		else
 		{
-			normal.x = 0.0f;
-			normal.y = s;
-			tMin = t1;
-		}
+			// Compute intersection distances
+			float t1 = ( boxMin - rayStart ) / rayComponent;
+			float t2 = ( boxMax - rayStart ) / rayComponent;
 
-		// Pull the max down
-		tMax = b2MinFloat( tMax, t2 );
+			// Ensure t1 <= t2
+			if ( t1 > t2 )
+			{
+				float temp = t1;
+				t1 = t2;
+				t2 = temp;
+			}
 
-		if ( tMin > tMax )
-		{
-			return output;
+			// Update intersection interval
+			tMin = b3MaxFloat( tMin, t1 );
+			tMax = b3MinFloat( tMax, t2 );
+
+			// Check for no intersection
+			if ( tMin > tMax )
+			{
+				return false;
+			}
 		}
 	}
 
-	// Does the ray start inside the box?
-	if ( tMin < 0.0f )
+	// z-axis
 	{
-		return output;
+		float rayComponent = rayDir.z;
+		float rayStart = p1.z;
+		float boxMin = a.lowerBound.z;
+		float boxMax = a.upperBound.z;
+
+		if ( b3AbsFloat( rayComponent ) < FLT_EPSILON )
+		{
+			// Ray is parallel to slab, check if ray origin is within slab
+			if ( rayStart < boxMin || rayStart > boxMax )
+			{
+				return false;
+			}
+		}
+		else
+		{
+			// Compute intersection distances
+			float t1 = ( boxMin - rayStart ) / rayComponent;
+			float t2 = ( boxMax - rayStart ) / rayComponent;
+
+			// Ensure t1 <= t2
+			if ( t1 > t2 )
+			{
+				float temp = t1;
+				t1 = t2;
+				t2 = temp;
+			}
+
+			// Update intersection interval
+			tMin = b3MaxFloat( tMin, t1 );
+			tMax = b3MinFloat( tMax, t2 );
+
+			// Check for no intersection
+			if ( tMin > tMax )
+			{
+				return false;
+			}
+		}
 	}
 
-	// Does the ray intersect beyond the segment length?
-	if ( 1.0f < tMin )
+	// Check if intersection is behind ray start
+	if ( tMax < 0.0f )
 	{
-		return output;
+		return false;
 	}
 
-	// Intersection.
-	output.fraction = tMin;
-	output.normal = normal;
-	output.point = b2Lerp( p1, p2, tMin );
-	output.hit = true;
-	return output;
+	// Convert distances to fractions
+	*minFraction = b3ClampFloat( tMin / rayLength, 0.0f, 1.0f );
+	*maxFraction = b3ClampFloat( tMax / rayLength, 0.0f, 1.0f );
+
+	return true;
 }

@@ -5,192 +5,189 @@
 #include "shape.h"
 #include "test_macros.h"
 
-#include "box2d/collision.h"
-#include "box2d/math_functions.h"
+#include "box3d/collision.h"
+#include "box3d/math_functions.h"
+
+#include <float.h>
 
 static int AABBTest( void )
 {
-	b2AABB a;
-	a.lowerBound = (b2Vec2){ -1.0f, -1.0f };
-	a.upperBound = (b2Vec2){ -2.0f, -2.0f };
+	b3AABB a;
+	a.lowerBound = (b3Vec3){ -1.0f, -1.0f, -1.0f };
+	a.upperBound = (b3Vec3){ -2.0f, -2.0f, -2.0f };
 
-	ENSURE( b2IsValidAABB( a ) == false );
+	ENSURE( b3IsValidAABB( a ) == false );
 
-	a.upperBound = (b2Vec2){ 1.0f, 1.0f };
-	ENSURE( b2IsValidAABB( a ) == true );
+	a.upperBound = (b3Vec3){ 1.0f, 1.0f };
+	ENSURE( b3IsValidAABB( a ) == true );
 
-	b2AABB b = { { 2.0f, 2.0f }, { 4.0f, 4.0f } };
-	ENSURE( b2AABB_Overlaps( a, b ) == false );
-	ENSURE( b2AABB_Contains( a, b ) == false );
+	b3AABB b = { { 2.0f, 2.0f }, { 4.0f, 4.0f } };
+	ENSURE( b3AABB_Overlaps( a, b ) == false );
+	ENSURE( b3AABB_Contains( a, b ) == false );
 
 	return 0;
 }
 
-static int AABBRayCastTest( void )
+static int TestRayAABBIntersection( void )
 {
-	// Test AABB centered at origin with bounds [-1, -1] to [1, 1]
-	b2AABB aabb = { { -1.0f, -1.0f }, { 1.0f, 1.0f } };
-
-	// Test 1: Ray hits AABB from left side
+	// Test 1: Ray passing through center of AABB
 	{
-		b2Vec2 p1 = { -3.0f, 0.0f };
-		b2Vec2 p2 = { 3.0f, 0.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { -1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f, 1.0f } };
+		b3Vec3 p1 = { -2.0f, 0.0f, 0.0f };
+		b3Vec3 p2 = { 2.0f, 0.0f, 0.0f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == true );
-		ENSURE_SMALL( output.fraction - 1.0f / 3.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.x + 1.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.y, FLT_EPSILON );
-		ENSURE_SMALL( output.point.x + 1.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.point.y, FLT_EPSILON );
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
+
+		ENSURE( hit == true );
+		ENSURE( b3AbsFloat( minFraction - 0.25f ) < 0.001f ); // Enters at 25% of ray
+		ENSURE( b3AbsFloat( maxFraction - 0.75f ) < 0.001f ); // Exits at 75% of ray
 	}
 
-	// Test 2: Ray hits AABB from right side
+	// Test 2: Ray starting inside AABB
 	{
-		b2Vec2 p1 = { 3.0f, 0.0f };
-		b2Vec2 p2 = { -3.0f, 0.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { -1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f, 1.0f } };
+		b3Vec3 p1 = { 0.0f, 0.0f, 0.0f };
+		b3Vec3 p2 = { 2.0f, 0.0f, 0.0f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == true );
-		ENSURE_SMALL( output.fraction - 1.0f / 3.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.x - 1.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.y, FLT_EPSILON );
-		ENSURE_SMALL( output.point.x - 1.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.point.y, FLT_EPSILON );
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
+
+		ENSURE( hit == true );
+		ENSURE( minFraction == 0.0f );						 // Starts inside
+		ENSURE( b3AbsFloat( maxFraction - 0.5f ) < 0.001f ); // Exits at 50% of ray
 	}
 
-	// Test 3: Ray hits AABB from bottom
+	// Test 3: Ray ending inside AABB
 	{
-		b2Vec2 p1 = { 0.0f, -3.0f };
-		b2Vec2 p2 = { 0.0f, 3.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { -1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f, 1.0f } };
+		b3Vec3 p1 = { -2.0f, 0.0f, 0.0f };
+		b3Vec3 p2 = { 0.0f, 0.0f, 0.0f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == true );
-		ENSURE_SMALL( output.fraction - 1.0f / 3.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.x, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.y + 1.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.point.x, FLT_EPSILON );
-		ENSURE_SMALL( output.point.y + 1.0f, FLT_EPSILON );
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
+
+		ENSURE( hit == true );
+		ENSURE( b3AbsFloat( minFraction - 0.5f ) < 0.001f ); // Enters at 50% of ray
+		ENSURE( maxFraction == 1.0f );						 // Ends inside
 	}
 
-	// Test 4: Ray hits AABB from top
+	// Test 4: Ray completely inside AABB
 	{
-		b2Vec2 p1 = { 0.0f, 3.0f };
-		b2Vec2 p2 = { 0.0f, -3.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { -2.0f, -2.0f, -2.0f }, { 2.0f, 2.0f, 2.0f } };
+		b3Vec3 p1 = { -1.0f, 0.0f, 0.0f };
+		b3Vec3 p2 = { 1.0f, 0.0f, 0.0f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == true );
-		ENSURE_SMALL( output.fraction - 1.0f / 3.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.x, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.y - 1.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.point.x, FLT_EPSILON );
-		ENSURE_SMALL( output.point.y - 1.0f, FLT_EPSILON );
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
+
+		ENSURE( hit == true );
+		ENSURE( minFraction == 0.0f );
+		ENSURE( maxFraction == 1.0f );
 	}
 
-	// Test 5: Ray misses AABB completely (parallel to x-axis)
+	// Test 5: Ray missing AABB
 	{
-		b2Vec2 p1 = { -3.0f, 2.0f };
-		b2Vec2 p2 = { 3.0f, 2.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f } };
+		b3Vec3 p1 = { -1.0f, 2.0f, 0.5f };
+		b3Vec3 p2 = { 2.0f, 2.0f, 0.5f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == false );
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
+
+		ENSURE( hit == false );
 	}
 
-	// Test 6: Ray misses AABB completely (parallel to y-axis)
+	// Test 6: Ray parallel to AABB face (no intersection)
 	{
-		b2Vec2 p1 = { 2.0f, -3.0f };
-		b2Vec2 p2 = { 2.0f, 3.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f } };
+		b3Vec3 p1 = { -1.0f, 2.0f, 0.5f };
+		b3Vec3 p2 = { 2.0f, 2.0f, 0.5f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == false );
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
+
+		ENSURE( hit == false );
 	}
 
-	// Test 7: Ray starts inside AABB
+	// Test 7: Ray parallel to AABB face (within bounds)
 	{
-		b2Vec2 p1 = { 0.0f, 0.0f };
-		b2Vec2 p2 = { 2.0f, 0.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f } };
+		b3Vec3 p1 = { -1.0f, 0.5f, 0.5f };
+		b3Vec3 p2 = { 2.0f, 0.5f, 0.5f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == false );
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
+
+		ENSURE( hit == true );
+		ENSURE( b3AbsFloat( minFraction - 1.0f / 3.0f ) < 0.001f );
+		ENSURE( b3AbsFloat( maxFraction - 2.0f / 3.0f ) < 0.001f );
 	}
 
-	// Test 8: Ray hits corner of AABB (diagonal ray)
+	// Test 8: Degenerate ray (point) inside AABB
 	{
-		b2Vec2 p1 = { -2.0f, -2.0f };
-		b2Vec2 p2 = { 2.0f, 2.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f } };
+		b3Vec3 p1 = { 0.5f, 0.5f, 0.5f };
+		b3Vec3 p2 = { 0.5f, 0.5f, 0.5f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == true );
-		ENSURE_SMALL( output.fraction - 0.25f, FLT_EPSILON );
-		// Normal should be either (-1, 0) or (0, -1) depending on which edge is hit first
-		ENSURE( ( output.normal.x == -1.0f && output.normal.y == 0.0f ) ||
-				( output.normal.x == 0.0f && output.normal.y == -1.0f ) );
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
+
+		ENSURE( hit == true );
+		ENSURE( minFraction == 0.0f );
+		ENSURE( maxFraction == 0.0f );
 	}
 
-	// Test 9: Ray parallel to AABB edge but outside
+	// Test 9: Degenerate ray (point) outside AABB
 	{
-		b2Vec2 p1 = { -2.0f, 1.5f };
-		b2Vec2 p2 = { 2.0f, 1.5f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f } };
+		b3Vec3 p1 = { 2.0f, 2.0f, 2.0f };
+		b3Vec3 p2 = { 2.0f, 2.0f, 2.0f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == false );
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
+
+		ENSURE( hit == false );
 	}
 
-	// Test 10: Ray parallel to AABB edge and exactly on boundary
+	// Test 10: Ray pointing away from AABB
 	{
-		b2Vec2 p1 = { -2.0f, 1.0f };
-		b2Vec2 p2 = { 2.0f, 1.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f } };
+		b3Vec3 p1 = { -1.0f, 0.5f, 0.5f };
+		b3Vec3 p2 = { -2.0f, 0.5f, 0.5f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == true );
-		ENSURE_SMALL( output.fraction - 0.25f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.x + 1.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.y, FLT_EPSILON );
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
+
+		ENSURE( hit == false );
 	}
 
-	// Test 11: Very short ray that doesn't reach AABB
+	// Test 11: Ray hitting corner of AABB
 	{
-		b2Vec2 p1 = { -3.0f, 0.0f };
-		b2Vec2 p2 = { -2.5f, 0.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f } };
+		b3Vec3 p1 = { -1.0f, -1.0f, -1.0f };
+		b3Vec3 p2 = { 2.0f, 2.0f, 2.0f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == false );
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
+
+		ENSURE( hit == true );
+		ENSURE( b3AbsFloat( minFraction - 1.0f / 3.0f ) < 0.001f );
+		ENSURE( b3AbsFloat( maxFraction - 2.0f / 3.0f ) < 0.001f );
 	}
 
-	// Test 12: Zero-length ray (degenerate case)
+	// Test 12: Ray grazing edge of AABB
 	{
-		b2Vec2 p1 = { 0.0f, 0.0f };
-		b2Vec2 p2 = { 0.0f, 0.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
+		b3AABB a = { { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f } };
+		b3Vec3 p1 = { -1.0f, 0.0f, 0.5f };
+		b3Vec3 p2 = { 2.0f, 0.0f, 0.5f };
+		float minFraction, maxFraction;
 
-		ENSURE( output.hit == false );
-	}
+		bool hit = b3RayCastAABB( a, p1, p2, &minFraction, &maxFraction );
 
-	// Test 13: Ray hits AABB at exact boundary condition (t = 1.0)
-	{
-		b2Vec2 p1 = { -2.0f, 0.0f };
-		b2Vec2 p2 = { -1.0f, 0.0f };
-		b2CastOutput output = b2AABB_RayCast( aabb, p1, p2 );
-
-		ENSURE( output.hit == true );
-		ENSURE_SMALL( output.fraction - 1.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.x + 1.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.y, FLT_EPSILON );
-	}
-
-	// Test 14: Different AABB position (not centered at origin)
-	{
-		b2AABB offsetAABB = { { 2.0f, 3.0f }, { 4.0f, 5.0f } };
-		b2Vec2 p1 = { 0.0f, 4.0f };
-		b2Vec2 p2 = { 6.0f, 4.0f };
-		b2CastOutput output = b2AABB_RayCast( offsetAABB, p1, p2 );
-
-		ENSURE( output.hit == true );
-		ENSURE_SMALL( output.fraction - 1.0f / 3.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.x + 1.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.normal.y, FLT_EPSILON );
-		ENSURE_SMALL( output.point.x - 2.0f, FLT_EPSILON );
-		ENSURE_SMALL( output.point.y - 4.0f, FLT_EPSILON );
+		ENSURE( hit == true );
+		ENSURE( b3AbsFloat( minFraction - 1.0f / 3.0f ) < 0.001f );
+		ENSURE( b3AbsFloat( maxFraction - 2.0f / 3.0f ) < 0.001f );
 	}
 
 	return 0;
@@ -201,37 +198,53 @@ static int AABBRayCastTest( void )
 // ~1e7 m where the ULP grows larger than the overlap, which is the whole point of large world mode.
 static int LargeWorldManifoldTest( void )
 {
-	b2Polygon boxA = b2MakeBox( 0.5f, 0.5f );
-	b2Polygon boxB = b2MakeBox( 0.5f, 0.5f );
+	b3BoxHull boxA = b3MakeBoxHull( 0.5f, 0.5f, 0.5f );
+	b3BoxHull boxB = b3MakeBoxHull( 0.5f, 0.5f, 0.5f );
 
-	// Centers 0.9 apart so the boxes overlap by 0.1 along x
-	b2Vec2 sep = { 0.9f, 0.0f };
+	// Centers 0.9 apart so the cubes overlap by 0.1 along x
+	b3Vec3 sep = { 0.9f, 0.0f, 0.0f };
 
-	b2WorldTransform xfAo = b2WorldTransform_identity;
-	b2WorldTransform xfBo = { b2OffsetPos( b2Pos_zero, sep ), b2Rot_identity };
-	b2LocalManifold mOrigin = b2CollidePolygons( &boxA, &boxB, b2InvMulWorldTransforms( xfAo, xfBo ) );
+	b3LocalManifoldPoint pointsOrigin[8];
+	b3LocalManifold mOrigin = { 0 };
+	mOrigin.points = pointsOrigin;
 
-	ENSURE( mOrigin.pointCount == 2 );
-	ENSURE_SMALL( mOrigin.points[0].separation + 0.1f, 0.01f );
-	ENSURE_SMALL( mOrigin.points[1].separation + 0.1f, 0.01f );
+	b3WorldTransform xfAo = b3WorldTransform_identity;
+	b3WorldTransform xfBo = { b3OffsetPos( b3Pos_zero, sep ), b3Quat_identity };
+	b3SATCache cacheOrigin = { 0 };
+	b3CollideHulls( &mOrigin, 8, &boxA.base, &boxB.base, b3InvMulWorldTransforms( xfAo, xfBo ), &cacheOrigin );
 
-#if defined( BOX2D_DOUBLE_PRECISION )
+	// Two cube faces overlap, so the clipped manifold has four points
+	ENSURE( mOrigin.pointCount == 4 );
+	for ( int i = 0; i < mOrigin.pointCount; ++i )
+	{
+		ENSURE_SMALL( mOrigin.points[i].separation + 0.1f, 0.01f );
+	}
+
+#if defined( BOX3D_DOUBLE_PRECISION )
 	// Same relative configuration shifted far from the origin. The relative pose differences the
 	// world positions in double, so in double the frame A manifold is preserved to float precision.
 	// In float it would collapse since the offset is below the ULP.
-	b2Pos base = b2OffsetPos( b2Pos_zero, ( b2Vec2 ){ 1.0e7f, 1.0e7f } );
-	b2WorldTransform xfAl = { base, b2Rot_identity };
-	b2WorldTransform xfBl = { b2OffsetPos( base, sep ), b2Rot_identity };
-	b2LocalManifold mLarge = b2CollidePolygons( &boxA, &boxB, b2InvMulWorldTransforms( xfAl, xfBl ) );
+	b3Pos base = b3OffsetPos( b3Pos_zero, ( b3Vec3 ){ 1.0e7f, 1.0e7f, 1.0e7f } );
+
+	b3LocalManifoldPoint pointsLarge[8];
+	b3LocalManifold mLarge = { 0 };
+	mLarge.points = pointsLarge;
+
+	b3WorldTransform xfAl = { base, b3Quat_identity };
+	b3WorldTransform xfBl = { b3OffsetPos( base, sep ), b3Quat_identity };
+	b3SATCache cacheLarge = { 0 };
+	b3CollideHulls( &mLarge, 8, &boxA.base, &boxB.base, b3InvMulWorldTransforms( xfAl, xfBl ), &cacheLarge );
 
 	ENSURE( mLarge.pointCount == mOrigin.pointCount );
 	ENSURE_SMALL( mLarge.normal.x - mOrigin.normal.x, 1e-4f );
 	ENSURE_SMALL( mLarge.normal.y - mOrigin.normal.y, 1e-4f );
+	ENSURE_SMALL( mLarge.normal.z - mOrigin.normal.z, 1e-4f );
 	for ( int i = 0; i < mLarge.pointCount; ++i )
 	{
 		ENSURE_SMALL( mLarge.points[i].separation - mOrigin.points[i].separation, 1e-4f );
 		ENSURE_SMALL( mLarge.points[i].point.x - mOrigin.points[i].point.x, 1e-4f );
 		ENSURE_SMALL( mLarge.points[i].point.y - mOrigin.points[i].point.y, 1e-4f );
+		ENSURE_SMALL( mLarge.points[i].point.z - mOrigin.points[i].point.z, 1e-4f );
 	}
 #endif
 
@@ -243,37 +256,43 @@ static int LargeWorldManifoldTest( void )
 // round the extent away into the ULP (~1 m at 1e7) and clip the shape out of its own box.
 static int LargeWorldAABBTest( void )
 {
-	// Rounded box: 0.5 half extents plus 0.1 radius, so the tight extent is 0.6 each way
-	b2Polygon box = b2MakeRoundedBox( 0.5f, 0.5f, 0.1f );
+	// Unit cube, so the tight extent is 0.5 each way
+	b3BoxHull box = b3MakeBoxHull( 0.5f, 0.5f, 0.5f );
+	b3Shape shape = { 0 };
+	shape.type = b3_hullShape;
+	shape.hull = &box.base;
 
-	b2AABB aabbOrigin = b2ComputePolygonAABB( &box, b2WorldTransform_identity );
-	ENSURE_SMALL( aabbOrigin.lowerBound.x + 0.6f, FLT_EPSILON );
-	ENSURE_SMALL( aabbOrigin.lowerBound.y + 0.6f, FLT_EPSILON );
-	ENSURE_SMALL( aabbOrigin.upperBound.x - 0.6f, FLT_EPSILON );
-	ENSURE_SMALL( aabbOrigin.upperBound.y - 0.6f, FLT_EPSILON );
+	b3AABB aabbOrigin = b3ComputeFatShapeAABB( &shape, b3WorldTransform_identity, 0.0f );
+	ENSURE_SMALL( aabbOrigin.lowerBound.x + 0.5f, FLT_EPSILON );
+	ENSURE_SMALL( aabbOrigin.lowerBound.y + 0.5f, FLT_EPSILON );
+	ENSURE_SMALL( aabbOrigin.lowerBound.z + 0.5f, FLT_EPSILON );
+	ENSURE_SMALL( aabbOrigin.upperBound.x - 0.5f, FLT_EPSILON );
+	ENSURE_SMALL( aabbOrigin.upperBound.y - 0.5f, FLT_EPSILON );
+	ENSURE_SMALL( aabbOrigin.upperBound.z - 0.5f, FLT_EPSILON );
 
-#if defined( BOX2D_DOUBLE_PRECISION )
+#if defined( BOX3D_DOUBLE_PRECISION )
 	double d = 1.0e7;
-	b2WorldTransform xfLarge = { { d, d }, b2Rot_identity };
+	b3WorldTransform xfLarge = { { d, d, d }, b3Quat_identity };
 
-	// Tight world AABB still contains the 0.6 m extent
-	b2AABB tight = b2ComputePolygonAABB( &box, xfLarge );
-	ENSURE( (double)tight.lowerBound.x <= d - 0.6 );
-	ENSURE( (double)tight.lowerBound.y <= d - 0.6 );
-	ENSURE( (double)tight.upperBound.x >= d + 0.6 );
-	ENSURE( (double)tight.upperBound.y >= d + 0.6 );
+	// Tight world AABB still contains the 0.5 m extent
+	b3AABB tight = b3ComputeFatShapeAABB( &shape, xfLarge, 0.0f );
+	ENSURE( (double)tight.lowerBound.x <= d - 0.5 );
+	ENSURE( (double)tight.lowerBound.y <= d - 0.5 );
+	ENSURE( (double)tight.lowerBound.z <= d - 0.5 );
+	ENSURE( (double)tight.upperBound.x >= d + 0.5 );
+	ENSURE( (double)tight.upperBound.y >= d + 0.5 );
+	ENSURE( (double)tight.upperBound.z >= d + 0.5 );
 
 	// The fat helper folds the extra into the double step before the single outward rounding, so a
 	// margin smaller than a float ULP at this range survives instead of becoming a no-op subtract.
 	float extra = 0.05f;
-	b2Shape shape = { 0 };
-	shape.type = b2_polygonShape;
-	shape.polygon = box;
-	b2AABB fat = b2ComputeFatShapeAABB( &shape, xfLarge, extra );
-	ENSURE( (double)fat.lowerBound.x <= d - 0.6 - (double)extra );
-	ENSURE( (double)fat.lowerBound.y <= d - 0.6 - (double)extra );
-	ENSURE( (double)fat.upperBound.x >= d + 0.6 + (double)extra );
-	ENSURE( (double)fat.upperBound.y >= d + 0.6 + (double)extra );
+	b3AABB fat = b3ComputeFatShapeAABB( &shape, xfLarge, extra );
+	ENSURE( (double)fat.lowerBound.x <= d - 0.5 - (double)extra );
+	ENSURE( (double)fat.lowerBound.y <= d - 0.5 - (double)extra );
+	ENSURE( (double)fat.lowerBound.z <= d - 0.5 - (double)extra );
+	ENSURE( (double)fat.upperBound.x >= d + 0.5 + (double)extra );
+	ENSURE( (double)fat.upperBound.y >= d + 0.5 + (double)extra );
+	ENSURE( (double)fat.upperBound.z >= d + 0.5 + (double)extra );
 #endif
 
 	return 0;
@@ -282,7 +301,7 @@ static int LargeWorldAABBTest( void )
 int CollisionTest( void )
 {
 	RUN_SUBTEST( AABBTest );
-	RUN_SUBTEST( AABBRayCastTest );
+	RUN_SUBTEST( TestRayAABBIntersection );
 	RUN_SUBTEST( LargeWorldManifoldTest );
 	RUN_SUBTEST( LargeWorldAABBTest );
 

@@ -1,81 +1,87 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
 
-#include "container.h"
+#include "box3d/constants.h"
+#include "box3d/math_functions.h"
+#include "box3d/types.h"
 
-#include "box2d/constants.h"
-#include "box2d/math_functions.h"
-#include "box2d/types.h"
+typedef struct b3World b3World;
 
-typedef struct b2World b2World;
-
-enum b2BodyFlags
+enum b3BodyFlags
 {
 	// This body has fixed translation along the x-axis
-	b2_lockLinearX = 0x00000001,
+	b3_lockLinearX = 0x00000001,
 
 	// This body has fixed translation along the y-axis
-	b2_lockLinearY = 0x00000002,
+	b3_lockLinearY = 0x00000002,
 
-	// This body has fixed rotation
-	b2_lockAngularZ = 0x00000004,
+	// This body has fixed translation along the z-axis
+	b3_lockLinearZ = 0x00000004,
+
+	// This body has fixed rotation around the x-axis
+	b3_lockAngularX = 0x00000008,
+
+	// This body has fixed rotation around the y-axis
+	b3_lockAngularY = 0x00000010,
+
+	// This body has fixed rotation around the z-axis
+	b3_lockAngularZ = 0x00000020,
 
 	// This flag is used for debug draw
-	b2_isFast = 0x00000008,
+	b3_isFast = 0x00000040,
 
 	// This dynamic body does a final CCD pass against all body types, but not other bullets
-	b2_isBullet = 0x00000010,
+	b3_isBullet = 0x00000080,
 
 	// This body was speed capped in the current time step
-	b2_isSpeedCapped = 0x00000020,
+	b3_isSpeedCapped = 0x00000100,
 
 	// This body had a time of impact event in the current time step
-	b2_hadTimeOfImpact = 0x00000040,
+	b3_hadTimeOfImpact = 0x00000200,
 
 	// This body has no limit on angular velocity
-	b2_allowFastRotation = 0x00000080,
+	b3_allowFastRotation = 0x00000400,
 
 	// This body need's to have its AABB increased
-	b2_enlargeBounds = 0x00000100,
+	b3_enlargeBounds = 0x00000800,
 
 	// This body is dynamic so the solver should write to it.
 	// This prevents writing to kinematic bodies that causes a multithreaded sharing
 	// cache coherence problem even when the values are not changing.
-	// Used for b2BodyState flags.
-	b2_dynamicFlag = 0x00000200,
+	// Used for b3BodyState flags.
+	b3_dynamicFlag = 0x00001000,
 
-	// Flag to indicate the user has used the updateBodyMass option to defer mass
-	// computation but b2Body_ApplyMassFromShapes was not called before the world step.
-	b2_dirtyMass = 0x00000400,
+	b3_enableSleep = 0x00002000,
 
-	b2_enableSleep = 0x00000800,
+	b3_bodyEnableContactRecycling = 0x00004000,
 
-	b2_bodyEnableContactRecycling = 0x00001000,
+	// The user deferred mass computation via the updateBodyMass shape option and mass
+	// data still hasn't been set.
+	b3_dirtyMass = 0x00008000,
 
 	// All lock flags
-	b2_allLocks = b2_lockAngularZ | b2_lockLinearX | b2_lockLinearY,
+	b3_allLocks = b3_lockLinearX | b3_lockLinearY | b3_lockLinearZ | b3_lockAngularX | b3_lockAngularY | b3_lockAngularZ,
 
-	// If this flag is set then the body has fixed rotation
-	// todo use this to set the inverse inertia to zero
-	b2_fixedRotation = b2_lockAngularZ,
+	// If all these flags are set then the body has fixed rotation
+	b3_fixedRotation = b3_lockAngularX | b3_lockAngularY | b3_lockAngularZ,
 
-	// These flags are transient per time step. These may be different across b2Body, b2BodySim, and b2BodyState.
-	b2_bodyTransientFlags = b2_isFast | b2_isSpeedCapped | b2_hadTimeOfImpact,
+	// These flags are transient per time step. These may be different across b3Body, b3BodySim, and b3BodyState.
+	b3_bodyTransientFlags = b3_isFast | b3_isSpeedCapped | b3_hadTimeOfImpact,
 };
 
 // Body organizational details that are not used in the solver.
-typedef struct b2Body
+typedef struct b3Body
 {
 	void* userData;
 
-	// index of solver set stored in b2World
-	// may be B2_NULL_INDEX
+	// index of solver set stored in b3World
+	// may be B3_NULL_INDEX
 	int setIndex;
 
 	// body sim and state index within set
-	// may be B2_NULL_INDEX
+	// may be B3_NULL_INDEX
 	int localIndex;
 
 	// [31 : contactId | 1 : edgeIndex]
@@ -95,33 +101,34 @@ typedef struct b2Body
 	// All enabled dynamic and kinematic bodies are in an island.
 	int islandId;
 
-	// Need this island index for faster union-find
+	// Index into the island's bodies array for O(1) swap-removal.
+	// B3_NULL_INDEX when not in an island.
 	int islandIndex;
-
-	float mass;
-
-	// Rotational inertia about the center of mass.
-	float inertia;
 
 	float sleepThreshold;
 	float sleepTime;
+
+	float mass;
+
+	// local space inertia
+	b3Matrix3 inertia;
 
 	// this is used to adjust the fellAsleep flag in the body move array
 	int bodyMoveIndex;
 
 	int id;
 
-	// b2BodyFlags
+	// b3BodyFlags
 	uint32_t flags;
 
-	b2BodyType type;
+	b3BodyType type;
 
 	// This is monotonically advanced when a body is allocated in this slot
-	// Used to check for invalid b2BodyId
+	// Used to check for invalid b3BodyId
 	uint16_t generation;
 
-	char name[B2_NAME_LENGTH + 1];
-} b2Body;
+	char name[B3_BODY_NAME_LENGTH + 1];
+} b3Body;
 
 // Body State
 // The body state is designed for fast conversion to and from SIMD via scatter-gather.
@@ -148,99 +155,104 @@ typedef struct b2Body
 // I rotate joint anchors each sub-step but not contact anchors. Joint stability improves a lot by rotating joint anchors
 // according to substep progress. Contacts have reduced stability when anchors are rotated during substeps, especially for
 // round shapes.
-
-// 32 bytes
-typedef struct b2BodyState
+//
+// 56 bytes
+// todo_erin measure perf padding to 64 bytes
+typedef struct b3BodyState
 {
-	b2Vec2 linearVelocity; // 8
-	float angularVelocity; // 4
-
-	// b2BodyFlags
-	// Important flags: locking, dynamic
-	uint32_t flags; // 4
+	b3Vec3 linearVelocity;	// 12
+	b3Vec3 angularVelocity; // 12
 
 	// Using delta position reduces round-off error far from the origin
-	b2Vec2 deltaPosition; // 8
+	b3Vec3 deltaPosition; // 12
 
 	// Using delta rotation because I cannot access the full rotation on static bodies in
 	// the solver and must use zero delta rotation for static bodies (c,s) = (1,0)
-	b2Rot deltaRotation; // 8
-} b2BodyState;
+	b3Quat deltaRotation; // 16
 
-// Identity body state, notice the deltaRotation is {1, 0}
-static const b2BodyState b2_identityBodyState = { { 0.0f, 0.0f }, 0.0f, 0, { 0.0f, 0.0f }, { 1.0f, 0.0f } };
+	// b3BodyFlags
+	// Important flags: locking, dynamic
+	uint32_t flags; // 4
+} b3BodyState;
+
+// Identity body state, notice the deltaRotation is identity
+static const b3BodyState b3_identityBodyState = {
+	{ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { { 0.0f, 0.0f, 0.0f }, 1.0f }, 0,
+};
 
 // Body simulation data used for integration of position and velocity
 // Transform data used for collision and solver preparation.
-typedef struct b2BodySim
+typedef struct b3BodySim
 {
 	// transform for body origin, double translation in large world mode
-	b2WorldTransform transform;
+	b3WorldTransform transform;
 
 	// center of mass position in world space
-	b2Pos center;
+	b3Pos center;
 
 	// previous rotation and COM for TOI
-	b2Rot rotation0;
-	b2Pos center0;
+	b3Quat rotation0;
+	b3Pos center0;
 
 	// location of center of mass relative to the body origin
-	b2Vec2 localCenter;
+	b3Vec3 localCenter;
 
-	b2Vec2 force;
-	float torque;
+	b3Vec3 force;
+	b3Vec3 torque;
 
-	// inverse inertia
 	float invMass;
-	float invInertia;
+
+	// Rotational inertia about the center of mass. The world space inverse inertia tensor
+	// must be updated whenever the body rotation is modified.
+	b3Matrix3 invInertiaLocal;
+	b3Matrix3 invInertiaWorld;
 
 	float minExtent;
-	float maxExtent;
+	b3Vec3 maxExtent;
+	float maxAngularVelocity;
 	float linearDamping;
 	float angularDamping;
 	float gravityScale;
 
-	// Index of b2Body
+	// Index of b3Body
 	int bodyId;
 
-	// b2BodyFlags
+	// b3BodyFlags
 	uint32_t flags;
-} b2BodySim;
-
-b2DeclareArray( b2Body );
-b2DeclareArray( b2BodySim );
-b2DeclareArray( b2BodyState );
+} b3BodySim;
 
 // Get a validated body from a world using an id.
-b2Body* b2GetBodyFullId( b2World* world, b2BodyId bodyId );
+b3Body* b3GetBodyFullId( b3World* world, b3BodyId bodyId );
 
-b2WorldTransform b2GetBodyTransformQuick( b2World* world, b2Body* body );
-b2WorldTransform b2GetBodyTransform( b2World* world, int bodyId );
+b3WorldTransform b3GetBodyTransformQuick( b3World* world, b3Body* body );
+b3WorldTransform b3GetBodyTransform( b3World* world, int bodyId );
 
-// Create a b2BodyId from a raw id.
-b2BodyId b2MakeBodyId( b2World* world, int bodyId );
+// Create a b3BodyId from a raw id.
+b3BodyId b3MakeBodyId( b3World* world, int bodyId );
 
-bool b2ShouldBodiesCollide( b2World* world, b2Body* bodyA, b2Body* bodyB );
+bool b3ShouldBodiesCollide( b3World* world, b3Body* bodyA, b3Body* bodyB );
+bool b3IsBodyAwake( b3World* world, b3Body* body );
 
-b2BodySim* b2GetBodySim( b2World* world, b2Body* body );
-b2BodyState* b2GetBodyState( b2World* world, b2Body* body );
-void b2RemoveBodySim( b2Array( b2BodySim ) * bodySims, b2Array( b2Body ) * bodies, int localIndex );
+b3BodySim* b3GetBodySim( b3World* world, b3Body* body );
+b3BodyState* b3GetBodyState( b3World* world, b3Body* body );
 
 // careful calling this because it can invalidate body, state, joint, and contact pointers
-bool b2WakeBody( b2World* world, b2Body* body );
+bool b3WakeBody( b3World* world, b3Body* body );
+bool b3WakeBodyWithLock( b3World* world, b3Body* body );
 
-void b2UpdateBodyMassData( b2World* world, b2Body* body );
-void b2SyncBodyFlags( b2World* world, b2Body* body );
+void b3UpdateBodyMassData( b3World* world, b3Body* body );
+void b3SyncBodyFlags( b3World* world, b3Body* body );
+void b3DumpBody( b3World* world, b3Body* body );
 
-// Build a sweep relative to a base position so continuous collision keeps float precision far
-// from the origin. The base cancels out of the relative motion the TOI actually solves.
-static inline b2Sweep b2MakeRelativeSweep( const b2BodySim* bodySim, b2Pos base )
+// Make a sweep relative to a base position to keep TOI in float precision far from the origin.
+static inline b3Sweep b3MakeRelativeSweep( const b3BodySim* bodySim, b3Pos base )
 {
-	b2Sweep s;
-	s.c1 = b2SubPos( bodySim->center0, base );
-	s.c2 = b2SubPos( bodySim->center, base );
+	b3Sweep s;
+	s.c1 = b3SubPos( bodySim->center0, base );
+	s.c2 = b3SubPos( bodySim->center, base );
 	s.q1 = bodySim->rotation0;
 	s.q2 = bodySim->transform.q;
 	s.localCenter = bodySim->localCenter;
 	return s;
 }
+

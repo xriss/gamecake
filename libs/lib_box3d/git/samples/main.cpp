@@ -1,115 +1,47 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
-#if defined( _MSC_VER )
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-#define _CRTDBG_MAP_ALLOC
-#endif
-
-#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS 1
-
-#include "draw.h"
+#include "gfx/debug_adapter.h"
+#include "gfx/keycodes.h"
+#include "gfx/renderer.h"
+#include "host/gui.h"
 #include "sample.h"
-#include "utils.h"
+#include "sokol_app.h"
+#include "sokol_glue.h"
 
-#include "box2d/base.h"
-#include "box2d/box2d.h"
-#include "box2d/math_functions.h"
-
-// clang-format off
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
-// clang-format on
-
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-#include "implot.h"
+#include "box3d/box3d.h"
+#include "box3d/math_functions.h"
+#include "gfx/draw.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <thread>
 
-#ifdef TRACY_ENABLE
-#include <tracy/Tracy.hpp>
-#else
-#define FrameMark
-#endif
-
-#if defined( _MSC_VER )
-#include <crtdbg.h>
-static int MyAllocHook( int allocType, void* userData, size_t size, int blockType, long requestNumber,
-						const unsigned char* filename, int lineNumber )
-{
-	// This hook can help find leaks
-	if ( size == 143 )
-	{
-		size += 0;
-	}
-
-	return 1;
-}
+#if defined( _WIN32 )
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+// clang-format off
+#include <windows.h>
+#include <timeapi.h> // timeBeginPeriod for fine sleep granularity
+// clang-format on
+#pragma comment( lib, "winmm.lib" ) // MSVC auto-link
 #endif
 
 static SampleContext s_context;
-static bool s_rightMouseDown = false;
-static b2Pos s_clickPointWS = b2Pos_zero;
-static float s_framebufferScale = 1.0f;
-
-inline bool IsPowerOfTwo( int x )
-{
-	return ( x != 0 ) && ( ( x & ( x - 1 ) ) == 0 );
-}
-
-void* AllocFcn( size_t size, int alignment )
-{
-	// Allocation must be a multiple of alignment or risk a seg fault
-	// https://en.cppreference.com/w/c/memory/aligned_alloc
-	assert( IsPowerOfTwo( alignment ) );
-	size_t sizeAligned = ( ( size - 1 ) | ( alignment - 1 ) ) + 1;
-	assert( ( sizeAligned & ( alignment - 1 ) ) == 0 );
-
-#if defined( _MSC_VER ) || defined( __MINGW32__ ) || defined( __MINGW64__ )
-	void* ptr = _aligned_malloc( sizeAligned, alignment );
-#else
-	void* ptr = aligned_alloc( alignment, sizeAligned );
-#endif
-	assert( ptr != nullptr );
-	return ptr;
-}
-
-void FreeFcn( void* mem, size_t size )
-{
-	(void)size;
-
-#if defined( _MSC_VER ) || defined( __MINGW32__ ) || defined( __MINGW64__ )
-	_aligned_free( mem );
-#else
-	free( mem );
-#endif
-}
-
-int AssertFcn( const char* condition, const char* fileName, int lineNumber )
-{
-	printf( "SAMPLE ASSERTION: %s, %s, line %d\n", condition, fileName, lineNumber );
-	return 1;
-}
-
-void glfwErrorCallback( int error, const char* description )
-{
-	fprintf( stderr, "GLFW error occurred. Code: %d. Description: %s\n", error, description );
-}
+static int s_frame = 0;
+static int s_frameLimit = -1;
+static int s_sampleOverride = -1;
 
 static int CompareSamples( const void* a, const void* b )
 {
-	SampleEntry* sa = (SampleEntry*)a;
-	SampleEntry* sb = (SampleEntry*)b;
+	SampleEntry* entryA = (SampleEntry*)a;
+	SampleEntry* entryB = (SampleEntry*)b;
 
-	int result = strcmp( sa->category, sb->category );
+	int result = strcmp( entryA->Category, entryB->Category );
 	if ( result == 0 )
 	{
-		result = strcmp( sa->name, sb->name );
+		result = strcmp( entryA->Name, entryB->Name );
 	}
 
 	return result;
@@ -117,14 +49,15 @@ static int CompareSamples( const void* a, const void* b )
 
 static void SortSamples()
 {
-	SampleCreateFcn* replayFcn = ( g_replayIndex >= 0 ) ? g_sampleEntries[g_replayIndex].createFcn : nullptr;
+	// Sorting reorders the table, so recover the replay viewer's slot by identity.
+	SampleCreateFcn* replayFcn = ( g_replayIndex >= 0 ) ? g_sampleEntries[g_replayIndex].CreateFcn : nullptr;
 	qsort( g_sampleEntries, g_sampleCount, sizeof( SampleEntry ), CompareSamples );
 	if ( replayFcn != nullptr )
 	{
 		g_replayIndex = -1;
 		for ( int i = 0; i < g_sampleCount; ++i )
 		{
-			if ( g_sampleEntries[i].createFcn == replayFcn )
+			if ( g_sampleEntries[i].CreateFcn == replayFcn )
 			{
 				g_replayIndex = i;
 				break;
@@ -133,583 +66,463 @@ static void SortSamples()
 	}
 }
 
-static void ApplyUIStyle( void )
+// Single host UI callback fired from inside StartUIFrame: menu bar, panels, and
+// the active sample's drawer.
+static void OnDrawUI( void )
 {
-	ImGuiStyle& style = ImGui::GetStyle();
-
-	// Metrics: containers round at 4px, controls at 3px - one deliberate
-	// system instead of the stock mix. Padding gives rows room to breathe.
-	style.WindowPadding = ImVec2( 10.0f, 10.0f );
-	style.FramePadding = ImVec2( 8.0f, 4.0f );
-	style.CellPadding = ImVec2( 6.0f, 4.0f );
-	style.ItemSpacing = ImVec2( 8.0f, 7.0f );
-	style.ItemInnerSpacing = ImVec2( 7.0f, 4.0f );
-	style.IndentSpacing = 18.0f;
-	style.ScrollbarSize = 12.0f;
-	style.GrabMinSize = 10.0f;
-
-	style.WindowBorderSize = 1.0f;
-	style.FrameBorderSize = 0.0f;
-	style.PopupBorderSize = 1.0f;
-	style.TabBorderSize = 0.0f;
-	style.SeparatorTextBorderSize = 1.0f;
-
-	style.WindowRounding = 4.0f;
-	style.ChildRounding = 4.0f;
-	style.PopupRounding = 4.0f;
-	style.FrameRounding = 3.0f;
-	style.GrabRounding = 3.0f;
-	style.ScrollbarRounding = 3.0f;
-	style.TabRounding = 3.0f;
-
-	style.WindowTitleAlign = ImVec2( 0.0f, 0.5f );
-
-	// Palette: neutral charcoal surfaces, one steel-blue accent at three
-	// brightnesses. Replaces stock ImGui's saturated cornflower blue.
-	const ImVec4 accent = ImVec4( 0.28f, 0.48f, 0.66f, 1.00f );
-	const ImVec4 accentHi = ImVec4( 0.38f, 0.60f, 0.80f, 1.00f );
-	const ImVec4 accentLo = ImVec4( 0.22f, 0.36f, 0.50f, 1.00f );
-
-	ImVec4* c = style.Colors;
-	c[ImGuiCol_Text] = ImVec4( 0.90f, 0.91f, 0.93f, 1.00f );
-	c[ImGuiCol_TextDisabled] = ImVec4( 0.49f, 0.51f, 0.55f, 1.00f );
-	c[ImGuiCol_WindowBg] = ImVec4( 0.110f, 0.115f, 0.125f, 0.97f );
-	c[ImGuiCol_ChildBg] = ImVec4( 0.00f, 0.00f, 0.00f, 0.00f );
-	c[ImGuiCol_PopupBg] = ImVec4( 0.100f, 0.105f, 0.115f, 0.98f );
-	c[ImGuiCol_Border] = ImVec4( 0.00f, 0.00f, 0.00f, 0.45f );
-	c[ImGuiCol_BorderShadow] = ImVec4( 0.00f, 0.00f, 0.00f, 0.00f );
-	c[ImGuiCol_FrameBg] = ImVec4( 0.18f, 0.19f, 0.21f, 1.00f );
-	c[ImGuiCol_FrameBgHovered] = ImVec4( 0.24f, 0.26f, 0.29f, 1.00f );
-	c[ImGuiCol_FrameBgActive] = ImVec4( 0.29f, 0.32f, 0.36f, 1.00f );
-	c[ImGuiCol_TitleBg] = ImVec4( 0.090f, 0.095f, 0.105f, 1.00f );
-	c[ImGuiCol_TitleBgActive] = ImVec4( 0.14f, 0.16f, 0.19f, 1.00f );
-	c[ImGuiCol_TitleBgCollapsed] = ImVec4( 0.090f, 0.095f, 0.105f, 0.75f );
-	c[ImGuiCol_MenuBarBg] = ImVec4( 0.13f, 0.14f, 0.16f, 1.00f );
-	c[ImGuiCol_ScrollbarBg] = ImVec4( 0.06f, 0.06f, 0.07f, 0.55f );
-	c[ImGuiCol_ScrollbarGrab] = ImVec4( 0.28f, 0.30f, 0.33f, 1.00f );
-	c[ImGuiCol_ScrollbarGrabHovered] = ImVec4( 0.36f, 0.39f, 0.43f, 1.00f );
-	c[ImGuiCol_ScrollbarGrabActive] = accent;
-	c[ImGuiCol_CheckMark] = accentHi;
-	c[ImGuiCol_SliderGrab] = accent;
-	c[ImGuiCol_SliderGrabActive] = accentHi;
-	c[ImGuiCol_Button] = ImVec4( 0.22f, 0.24f, 0.27f, 1.00f );
-	c[ImGuiCol_ButtonHovered] = accentLo;
-	c[ImGuiCol_ButtonActive] = accent;
-	c[ImGuiCol_Header] = ImVec4( 0.19f, 0.21f, 0.24f, 1.00f );
-	c[ImGuiCol_HeaderHovered] = accentLo;
-	c[ImGuiCol_HeaderActive] = accent;
-	c[ImGuiCol_Separator] = ImVec4( 1.00f, 1.00f, 1.00f, 0.09f );
-	c[ImGuiCol_SeparatorHovered] = accentLo;
-	c[ImGuiCol_SeparatorActive] = accent;
-	c[ImGuiCol_ResizeGrip] = ImVec4( 1.00f, 1.00f, 1.00f, 0.06f );
-	c[ImGuiCol_ResizeGripHovered] = accentLo;
-	c[ImGuiCol_ResizeGripActive] = accent;
-	c[ImGuiCol_Tab] = ImVec4( 0.15f, 0.16f, 0.18f, 1.00f );
-	c[ImGuiCol_TabHovered] = accentLo;
-	c[ImGuiCol_TabSelected] = accent;
-	c[ImGuiCol_TabSelectedOverline] = accentHi;
-	c[ImGuiCol_TabDimmed] = ImVec4( 0.12f, 0.13f, 0.14f, 1.00f );
-	c[ImGuiCol_TabDimmedSelected] = accentLo;
-	c[ImGuiCol_TextSelectedBg] = ImVec4( accent.x, accent.y, accent.z, 0.40f );
-	c[ImGuiCol_DragDropTarget] = accentHi;
-	c[ImGuiCol_NavCursor] = accentHi;
-	c[ImGuiCol_PlotLines] = ImVec4( 0.70f, 0.72f, 0.75f, 1.00f );
-	c[ImGuiCol_PlotLinesHovered] = accentHi;
-	c[ImGuiCol_PlotHistogram] = accent;
-	c[ImGuiCol_PlotHistogramHovered] = accentHi;
+	DrawUI( &s_context );
 }
 
-static void CreateUI( GLFWwindow* window, const char* glslVersion )
+static void OnInit( void )
 {
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImPlot::CreateContext();
-
-	bool success = ImGui_ImplGlfw_InitForOpenGL( window, false );
-	if ( success == false )
-	{
-		printf( "ImGui_ImplGlfw_InitForOpenGL failed\n" );
-		assert( false );
-	}
-
-	success = ImGui_ImplOpenGL3_Init( glslVersion );
-	if ( success == false )
-	{
-		printf( "ImGui_ImplOpenGL3_Init failed\n" );
-		assert( false );
-	}
-
-	ImGuiIO& io = ImGui::GetIO();
-	ApplyUIStyle();
-
-	ImGuiStyle& style = ImGui::GetStyle();
-	style.ScaleAllSizes( s_context.uiScale );
-	style.FontSizeBase = floorf( 13.0f * s_context.uiScale );
-
-	if ( s_context.uiScale == 1.0f && s_framebufferScale == 1.0f )
-	{
-		io.Fonts->AddFontDefaultBitmap();
-	}
-	else
-	{
-		io.Fonts->AddFontDefaultVector();
-	}
-}
-
-static void DestroyUI()
-{
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImPlot::DestroyContext();
-	ImGui::DestroyContext();
-}
-
-static void ResizeWindowCallback( GLFWwindow*, int width, int height )
-{
-	s_context.camera.width = float( width );
-	s_context.camera.height = float( height );
-}
-
-static void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mods )
-{
-	ImGui_ImplGlfw_KeyCallback( window, key, scancode, action, mods );
-	if ( ImGui::GetIO().WantCaptureKeyboard )
-	{
-		return;
-	}
-
-	if ( action == GLFW_PRESS )
-	{
-		switch ( key )
-		{
-			case GLFW_KEY_ESCAPE:
-				// Quit
-				glfwSetWindowShouldClose( s_context.window, GL_TRUE );
-				break;
-
-			case GLFW_KEY_LEFT:
-				// Pan left
-				s_context.camera.center.x -= 0.5f;
-				break;
-
-			case GLFW_KEY_RIGHT:
-				// Pan right
-				s_context.camera.center.x += 0.5f;
-				break;
-
-			case GLFW_KEY_DOWN:
-				s_context.camera.center.y -= 0.5f;
-				break;
-
-			case GLFW_KEY_UP:
-				s_context.camera.center.y += 0.5f;
-				break;
-
-			case GLFW_KEY_HOME:
-				ResetView( &s_context.camera );
-				break;
-
-			case GLFW_KEY_R:
-				SelectSample( &s_context, s_context.sampleIndex, true );
-				break;
-
-			case GLFW_KEY_O:
-				if ( mods == GLFW_MOD_CONTROL )
-				{
-					s_context.showUI = true;
-					s_context.openSamplePicker = true;
-				}
-				else
-				{
-					s_context.singleStep = true;
-				}
-				break;
-
-			case GLFW_KEY_SPACE:
-				s_context.pause = !s_context.pause;
-				break;
-
-			case GLFW_KEY_LEFT_BRACKET:
-				// Switch to previous test
-				{
-					int selection = s_context.sampleIndex - 1;
-					if ( selection < 0 )
-					{
-						selection = g_sampleCount - 1;
-					}
-					SelectSample( &s_context, selection, false );
-				}
-				break;
-
-			case GLFW_KEY_RIGHT_BRACKET:
-				// Switch to next test
-				{
-					int selection = s_context.sampleIndex + 1;
-					if ( selection == g_sampleCount )
-					{
-						selection = 0;
-					}
-					SelectSample( &s_context, selection, false );
-				}
-				break;
-
-			case GLFW_KEY_TAB:
-				s_context.showUI = !s_context.showUI;
-				break;
-
-			case GLFW_KEY_M:
-				s_context.showMetrics = !s_context.showMetrics;
-				break;
-
-			default:
-				if ( s_context.sample != nullptr )
-				{
-					s_context.sample->Keyboard( key );
-				}
-		}
-	}
-}
-
-static void CharCallback( GLFWwindow* window, unsigned int c )
-{
-	ImGui_ImplGlfw_CharCallback( window, c );
-}
-
-static void MouseButtonCallback( GLFWwindow* window, int button, int action, int modifiers )
-{
-	ImGui_ImplGlfw_MouseButtonCallback( window, button, action, modifiers );
-
-	if ( ImGui::GetIO().WantCaptureMouse )
-	{
-		return;
-	}
-
-	double xd, yd;
-	glfwGetCursorPos( window, &xd, &yd );
-	b2Vec2 ps = { float( xd ), float( yd ) };
-
-	// Use the mouse to move things around.
-	if ( button == GLFW_MOUSE_BUTTON_1 )
-	{
-		b2Pos pw = ConvertScreenToWorld( &s_context.camera, ps );
-		if ( action == GLFW_PRESS )
-		{
-			s_context.sample->MouseDown( pw, button, modifiers );
-		}
-
-		if ( action == GLFW_RELEASE )
-		{
-			s_context.sample->MouseUp( pw, button );
-		}
-	}
-	else if ( button == GLFW_MOUSE_BUTTON_2 )
-	{
-		if ( action == GLFW_PRESS )
-		{
-			s_clickPointWS = ConvertScreenToWorld( &s_context.camera, ps );
-			s_rightMouseDown = true;
-		}
-
-		if ( action == GLFW_RELEASE )
-		{
-			s_rightMouseDown = false;
-		}
-	}
-}
-
-static void MouseMotionCallback( GLFWwindow* window, double xd, double yd )
-{
-	b2Vec2 ps = { float( xd ), float( yd ) };
-
-	ImGui_ImplGlfw_CursorPosCallback( window, ps.x, ps.y );
-
-	b2Pos pw = ConvertScreenToWorld( &s_context.camera, ps );
-	s_context.sample->MouseMove( pw );
-
-	if ( s_rightMouseDown )
-	{
-		b2Vec2 diff = pw - s_clickPointWS;
-		s_context.camera.center.x -= diff.x;
-		s_context.camera.center.y -= diff.y;
-		s_clickPointWS = ConvertScreenToWorld( &s_context.camera, ps );
-	}
-}
-
-static void ScrollCallback( GLFWwindow* window, double dx, double dy )
-{
-	ImGui_ImplGlfw_ScrollCallback( window, dx, dy );
-	if ( ImGui::GetIO().WantCaptureMouse )
-	{
-		return;
-	}
-
-	double xd, yd;
-	glfwGetCursorPos( window, &xd, &yd );
-	b2Vec2 ps = { (float)xd, (float)yd };
-	b2Pos pw1 = ConvertScreenToWorld( &s_context.camera, ps );
-
-	if ( dy > 0 )
-	{
-		s_context.camera.zoom /= 1.1f;
-	}
-	else
-	{
-		s_context.camera.zoom *= 1.1f;
-	}
-
-	b2Pos pw2 = ConvertScreenToWorld( &s_context.camera, ps );
-
-	// Keep the world point under the cursor fixed across the zoom.
-	b2Vec2 pan = pw2 - pw1;
-	s_context.camera.center.x -= pan.x;
-	s_context.camera.center.y -= pan.y;
-}
-
-int main( int argc, char** argv )
-{
-#if defined( _MSC_VER )
-	// Enable memory-leak reports
-	//_CrtSetBreakAlloc( 1418 );
-	_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_DEBUG | _CRTDBG_MODE_FILE );
-	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
-	//_CrtSetAllocHook(MyAllocHook);
+#if defined( _WIN32 )
+	timeBeginPeriod( 1 );
 #endif
 
-#ifdef TRACY_ENABLE
-	tracy::StartupProfiler();
-#endif
+	const sg_environment env = sglue_environment();
+	InitRenderer( &env );
+	InitUI( &env, OnDrawUI );
+	InitAdapter();
 
-	// Install memory hooks
-	b2SetAllocator( AllocFcn, FreeFcn );
-	b2SetAssertFcn( AssertFcn );
-
-	char buffer[128];
+	constexpr float DEG = 3.14159265358979323846f / 180.0f;
+	s_context.camera.SetFov( 50.0f * DEG );
+	s_context.camera.SetClip( 0.1f, Camera::kViewDistance );
 
 	s_context.Load();
-	s_context.workerCount = b2MinInt( 8, GetNumberOfCores() / 2 );
 
-	// A recording path on the command line opens straight into the replay viewer.
-	// Dragging a file onto the exe arrives here as argv[1] too.
-	if ( argc > 1 && g_replayIndex >= 0 )
-	{
-		snprintf( s_context.replayFile, sizeof( s_context.replayFile ), "%s", argv[1] );
-		s_context.sampleIndex = g_replayIndex;
-	}
+	// First run with no settings opens with the controls window up.
+	s_context.showControls = s_context.newUser;
+
+	int cores = (int)std::thread::hardware_concurrency();
+	s_context.workerCount = b3ClampInt( cores / 2, 1, 8 );
+	s_context.windowWidth = sapp_width();
+	s_context.windowHeight = sapp_height();
 
 	SortSamples();
 
-	glfwSetErrorCallback( glfwErrorCallback );
-
-	if ( glfwInit() == 0 )
+	// A first run with no settings opens straight into the replay viewer.
+	int index = s_context.sampleIndex;
+	if ( s_context.newUser && g_replayIndex >= 0 )
 	{
-		fprintf( stderr, "Failed to initialize GLFW\n" );
-		return -1;
+		index = g_replayIndex;
 	}
 
-#if __APPLE__
-	const char* glslVersion = "#version 150";
-#else
-	const char* glslVersion = nullptr;
-#endif
-
-	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
-	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
-	glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
-	glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
-
-	// MSAA
-	glfwWindowHint( GLFW_SAMPLES, 4 );
-
-	b2Version version = b2GetVersion();
-	const char* precision = b2IsDoublePrecision() ? "double" : "single";
-	snprintf( buffer, 128, "Box2D Version %d.%d.%d - %s precision", version.major, version.minor, version.revision, precision );
-
-	if ( GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor() )
+	// --sample N selects a registered sample by sorted index, overriding the
+	// persisted one. Lets a headless --frames run target a specific sample.
+	if ( s_sampleOverride >= 0 && s_sampleOverride < g_sampleCount )
 	{
-		float contentScale = 1.0f;
-		glfwGetMonitorContentScale( primaryMonitor, &contentScale, &contentScale );
-
-#ifdef __APPLE__
-		s_context.uiScale = 1.0f;
-		s_framebufferScale = contentScale;
-#else
-		s_context.uiScale = contentScale;
-		s_framebufferScale = 1.0f;
-#endif
+		index = s_sampleOverride;
 	}
 
-	bool fullscreen = false;
-	if ( fullscreen )
-	{
-		s_context.window = glfwCreateWindow( 1920, 1080, buffer, glfwGetPrimaryMonitor(), nullptr );
-	}
-	else
-	{
-		s_context.window =
-			glfwCreateWindow( int( s_context.camera.width ), int( s_context.camera.height ), buffer, nullptr, nullptr );
-	}
+	SelectSample( &s_context, index, false );
+}
 
-	if ( s_context.window == nullptr )
-	{
-		fprintf( stderr, "Failed to open GLFW window.\n" );
-		glfwTerminate();
-		return -1;
-	}
+static void OnEvent( const sapp_event* e )
+{
+	//if ( e->type == SAPP_EVENTTYPE_KEY_DOWN || e->type == SAPP_EVENTTYPE_CHAR )
+	//{
+	//	volatile int dummy = 0;
+	//	dummy = 32;
+	//}
 
-	glfwMakeContextCurrent( s_context.window );
-
-	// Load OpenGL functions using glad
-	if ( !gladLoadGL() )
+	bool uiCaptured = false;
+	if (s_context.camera.m_thirdPerson == false)
 	{
-		fprintf( stderr, "Failed to initialize glad\n" );
-		glfwTerminate();
-		return -1;
+		uiCaptured = HandleEvent( e );
 	}
 
+	// The camera must always see button releases and focus loss, even when the UI
+	// captures the event. Otherwise a release over an ImGui panel never clears the
+	// drag flag and the camera keeps orbiting.
+	const bool releaseOrUnfocus = e->type == SAPP_EVENTTYPE_MOUSE_UP || e->type == SAPP_EVENTTYPE_UNFOCUSED;
+	if ( uiCaptured == false || releaseOrUnfocus )
 	{
-		const char* glVersionString = (const char*)glGetString( GL_VERSION );
-		const char* glslVersionString = (const char*)glGetString( GL_SHADING_LANGUAGE_VERSION );
-		printf( "OpenGL %s, GLSL %s\n", glVersionString, glslVersionString );
+		s_context.camera.OnEvent( e );
 	}
 
-	glfwSetWindowSizeCallback( s_context.window, ResizeWindowCallback );
-	glfwSetKeyCallback( s_context.window, KeyCallback );
-	glfwSetCharCallback( s_context.window, CharCallback );
-	glfwSetMouseButtonCallback( s_context.window, MouseButtonCallback );
-	glfwSetCursorPosCallback( s_context.window, MouseMotionCallback );
-	glfwSetScrollCallback( s_context.window, ScrollCallback );
-
-	CreateUI( s_context.window, glslVersion );
-	s_context.draw = CreateDraw();
-
-	s_context.sampleIndex = b2ClampInt( s_context.sampleIndex, 0, g_sampleCount - 1 );
-
-	glClearColor( 0.2f, 0.2f, 0.2f, 1.0f );
-
-	float frameTime = 0.0;
-
-	while ( !glfwWindowShouldClose( s_context.window ) )
+	if ( uiCaptured )
 	{
-		double time1 = glfwGetTime();
+		return;
+	}
 
-		if ( glfwGetKey( s_context.window, GLFW_KEY_Z ) == GLFW_PRESS )
-		{
-			// Zoom out
-			s_context.camera.zoom = b2MinFloat( 1.005f * s_context.camera.zoom, 100.0f );
-		}
-		else if ( glfwGetKey( s_context.window, GLFW_KEY_X ) == GLFW_PRESS )
-		{
-			// Zoom in
-			s_context.camera.zoom = b2MaxFloat( 0.995f * s_context.camera.zoom, 0.5f );
-		}
+	// Keep keyboard mods only. sokol packs the held mouse button into modifiers
+	// (SAPP_MODIFIER_LMB == 0x100), which would defeat the sample's modifiers == 0 checks.
+	const int mods = e->modifiers & ( SAPP_MODIFIER_SHIFT | SAPP_MODIFIER_CTRL | SAPP_MODIFIER_ALT | SAPP_MODIFIER_SUPER );
 
-		int width, height;
-		glfwGetWindowSize( s_context.window, &width, &height );
-		s_context.camera.width = width;
-		s_context.camera.height = height;
+	switch ( e->type )
+	{
+		case SAPP_EVENTTYPE_KEY_DOWN:
+			SetKeyDown( e->key_code, true );
 
-		int bufferWidth, bufferHeight;
-		glfwGetFramebufferSize( s_context.window, &bufferWidth, &bufferHeight );
-		glViewport( 0, 0, bufferWidth, bufferHeight );
-
-		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-		// s_context.draw.DrawBackground();
-
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-
-		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize.x = s_context.camera.width;
-		io.DisplaySize.y = s_context.camera.height;
-
-		// These can be zero if the window is minimized
-		if ( s_context.camera.width > 0.0f && s_context.camera.height > 0.0f )
-		{
-			// Framebuffer/window ratio: 1 on Windows/Linux, 2 on a Retina display. Drives
-			// both UI magnification and font rasterizer density.
-			io.DisplayFramebufferScale.x = bufferWidth / s_context.camera.width;
-			io.DisplayFramebufferScale.y = bufferHeight / s_context.camera.height;
-		}
-
-		ImGui::NewFrame();
-
-		if ( s_context.sample == nullptr )
-		{
-			// delayed creation because imgui doesn't create fonts until NewFrame() is called
-			if ( g_sampleEntries[s_context.sampleIndex].capacityFcn != nullptr )
+			// Global shortcuts on first press; repeats are ignored. The sokol
+			// analog of Box2D's KeyCallback.
+			if ( e->key_repeat == false )
 			{
-				s_context.capacity = g_sampleEntries[s_context.sampleIndex].capacityFcn();
+				switch ( e->key_code )
+				{
+					case KEY_TAB:
+						s_context.showUI = !s_context.showUI;
+						break;
+
+					case KEY_ESCAPE:
+						// Layered cancel. An open picker is an ImGui popup that
+						// already swallowed this. So peel the controls window, then
+						// the selection. Quit lives on Ctrl+Q now.
+						if ( s_context.showControls )
+						{
+							s_context.showControls = false;
+						}
+						else
+						{
+							ClearSelection();
+						}
+						break;
+
+					case KEY_Q:
+						if ( mods & MOD_CTRL )
+						{
+							sapp_request_quit();
+							break;
+						}
+						s_context.sample->Keyboard( e->key_code, ACTION_PRESS, mods );
+						break;
+
+					case KEY_O:
+						if ( mods & MOD_CTRL )
+						{
+							// Ctrl+O opens the fuzzy picker. Force the UI visible so it shows.
+							s_context.showUI = true;
+							s_context.openSamplePicker = true;
+						}
+						else
+						{
+							s_context.singleStep += ( mods & MOD_SHIFT ) ? 5 : 1;
+						}
+						break;
+
+					case KEY_P:
+						// Pause stays on P. Space is not bound here on purpose. Global
+						// keys are dispatched before the sample sees them, so claiming
+						// Space would steal jump from the Mover sample.
+						s_context.pause = !s_context.pause;
+						break;
+
+					case KEY_M:
+						s_context.showMetrics = !s_context.showMetrics;
+						break;
+
+					case KEY_R:
+						SelectSample( &s_context, s_context.sampleIndex, true );
+						break;
+
+					case KEY_LEFT_BRACKET:
+						SelectSample( &s_context, b3MaxInt( 0, s_context.sampleIndex - 1 ), false );
+						break;
+
+					case KEY_RIGHT_BRACKET:
+						SelectSample( &s_context, b3MinInt( g_sampleCount - 1, s_context.sampleIndex + 1 ), false );
+						break;
+
+					case KEY_F:
+					{
+						// Frame the selection, or let the sample frame its whole scene when nothing is
+						// selected. A non-body selection such as a recorded query supplies its own bounds and
+						// takes priority over the hovered body. The replay viewer's scene lives in a
+						// player-owned world, not the base world, so the whole-scene case routes through
+						// FocusHome.
+						Camera& cam = s_context.camera;
+						float aspect = cam.m_height > 0 ? (float)cam.m_width / (float)cam.m_height : 1.0f;
+						b3AABB bounds;
+						if ( s_context.sample->FocusBounds( &bounds ) )
+						{
+							cam.Frame( bounds, aspect, 1.5f );
+						}
+						else
+						{
+							b3BodyId bodyId = s_context.sample->FocusBody();
+							if ( B3_IS_NON_NULL( bodyId ) )
+							{
+								cam.Frame( b3Body_ComputeAABB( bodyId ), aspect, 1.5f );
+							}
+							else
+							{
+								s_context.sample->FocusHome();
+							}
+						}
+					}
+					break;
+
+					default:
+						s_context.sample->Keyboard( e->key_code, ACTION_PRESS, mods );
+						break;
+				}
 			}
-			else
+			break;
+
+		case SAPP_EVENTTYPE_KEY_UP:
+			SetKeyDown( e->key_code, false );
+			break;
+
+		case SAPP_EVENTTYPE_CHAR:
+			// ? toggles the controls window. Read the typed character so it works
+			// on any layout and a text field can still type a literal ?, since the
+			// picker captures the event before it reaches here.
+			if ( e->char_code == '?' && e->key_repeat == false )
 			{
-				s_context.capacity = b2DefaultWorldDef().capacity;
+				s_context.showControls = !s_context.showControls;
 			}
-			s_context.sample = g_sampleEntries[s_context.sampleIndex].createFcn( &s_context );
-		}
+			break;
 
-		s_context.sample->ResetText();
+		case SAPP_EVENTTYPE_MOUSE_DOWN:
+			s_context.mouseX = e->mouse_x;
+			s_context.mouseY = e->mouse_y;
+			s_context.sample->MouseDown( { e->mouse_x, e->mouse_y }, e->mouse_button, mods );
+			break;
 
-		if ( s_context.showUI == false )
+		case SAPP_EVENTTYPE_MOUSE_UP:
+			s_context.sample->MouseUp( { e->mouse_x, e->mouse_y }, e->mouse_button );
+			break;
+
+		case SAPP_EVENTTYPE_MOUSE_MOVE:
+			s_context.mouseX = e->mouse_x;
+			s_context.mouseY = e->mouse_y;
+			s_context.mouseDX = e->mouse_dx;
+			s_context.mouseDY = e->mouse_dy;
+			s_context.sample->MouseMove( { e->mouse_x, e->mouse_y } );
+			break;
+
+		case SAPP_EVENTTYPE_RESIZED:
 		{
-			// Minimal hud
-			s_context.sample->DrawHud( frameTime );
+			int w = sapp_width();
+			int h = sapp_height();
+			s_context.minimized = ( w == 0 || h == 0 );
+			if ( s_context.minimized == false )
+			{
+				s_context.windowWidth = w;
+				s_context.windowHeight = h;
+			}
 		}
+		break;
 
-		// Draw relative to the camera so world draws get float coordinates near the origin, and stay exact
-		// far from it in large world mode. This must hold even for samples that drive their own Step without
-		// calling Sample::Step, otherwise their world draws ignore camera panning.
-		SetDrawOrigin( s_context.draw, s_context.camera.center );
+		default:
+			break;
+	}
+}
 
-		s_context.sample->Step();
+// Pace the loop to 60 Hz so the fixed 1/60 physics step plays at real time on any
+// display. Sleep the bulk of the idle time, then spin the last bit since sleep wakes
+// are only accurate to about a millisecond.
+static void LimitFrameRate( uint64_t frameStart )
+{
+	const float targetMs = 1000.0f / 60.0f;
+	const float spinMs = 2.0f;
 
-		FlushDraw( s_context.draw, &s_context.camera );
-
-		if ( s_context.showUI == true )
-		{
-			DrawUI( &s_context, frameTime );
-		}
-
-		// ImGui::ShowDemoWindow();
-
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
-
-		glfwSwapBuffers( s_context.window );
-
-		// For the Tracy profiler
-		FrameMark;
-
-		glfwPollEvents();
-
-		// Limit frame rate to 60Hz
-		double time2 = glfwGetTime();
-		double targetTime = time1 + 1.0 / 60.0;
-		while ( time2 < targetTime )
-		{
-			b2Yield();
-			time2 = glfwGetTime();
-		}
-
-		frameTime = float( time2 - time1 );
+	int sleepMs = (int)( targetMs - spinMs - b3GetMilliseconds( frameStart ) );
+	if ( sleepMs > 0 )
+	{
+		b3Sleep( sleepMs );
 	}
 
+	while ( b3GetMilliseconds( frameStart ) < targetMs )
+	{
+		b3Yield();
+	}
+}
+
+static void OnFrame( void )
+{
+	if ( s_frameLimit >= 0 && s_frame >= s_frameLimit )
+	{
+		sapp_quit();
+		return;
+	}
+
+	const uint64_t frameStart = b3GetTicks();
+
+	// Nothing to draw while minimized. sapp reports a 0x0 framebuffer then, which
+	// would drive the swapchain and every render target to zero size. Pace the
+	// loop so it doesn't spin and bail.
+	if ( s_context.minimized )
+	{
+		if ( s_frameLimit < 0 )
+		{
+			LimitFrameRate( frameStart );
+		}
+		return;
+	}
+
+	// Handle a deferred Replay > Open request before any GPU work this frame.
+	// The native picker blocks on a nested run loop. Running it here (no pass
+	// open, no buffers updated, no ImGui frame begun) keeps it from re-entering
+	// a half-built frame the way it did when invoked from inside the UI callback.
+	if ( s_context.openReplayPicker )
+	{
+		s_context.openReplayPicker = false;
+		OpenReplayFileDialog( &s_context );
+	}
+
+	const float dt = (float)sapp_frame_duration();
+	const int W = sapp_width();
+	const int H = sapp_height();
+
+	Camera& camera = s_context.camera;
+	camera.Update( dt, W, H );
+
+	// Push the current length scale and Z-up choice. The replay player sets length
+	// units from its header on load and restores them on close, so querying every
+	// frame tracks load/unload without extra wiring. Live samples sit at 1 unit per
+	// meter, leaving the transform identity.
+	camera.SetRenderTransform( b3GetLengthUnitsPerMeter(), s_context.viewZUp );
+	camera.SetDrawDistance( s_context.drawDistance );
+
+	// Sync the draw origin to the camera eye once per frame, before any drawing. This must hold even
+	// for samples that drive their own Step without calling Sample::Step. Render re-syncs after Step
+	// because a third person follow moves the eye while stepping. The draw origin is in simulation
+	// space; the view folds in the scale and up axis.
+	SetDrawOrigin( camera.DrawOrigin() );
+
+	ResetFrameArena();
+
+	// Apply the per-frame draw state the UI owns, then advance the sample. Step
+	// queues the HUD text; Render fills the instance and overlay arenas via the
+	// b3DebugDraw adapter and the sample's own Draw* calls.
+	SetTransparentDynamic( s_context.transparentDynamic );
+	s_context.sample->ResetText();
+
+	s_context.sample->Step();
+	s_context.sample->Render();
+
+	FrameInput fi{};
+	fi.view = camera.View();
+	fi.viewInv = camera.ViewInverse();
+	fi.proj = camera.Proj();
+	fi.projInv = camera.ProjInverse();
+	fi.cameraPosition = camera.Position();
+	// Read back the origin Render actually shifted to. A follow-cam sample can
+	// move it during Step/Render, so reuse the live value rather than the eye.
+	b3Pos drawOrigin = GetDrawOrigin();
+	fi.drawOrigin = b3ToVec3( drawOrigin );
+	// Wrap the origin to the grid period in double, before it narrows to float.
+	// A float can't resolve a 1 m cell at 1e7 m, so feeding the raw origin to
+	// the grid would shatter the lines. The pattern repeats every 10 cells, so
+	// the wrapped offset draws identical lines at any distance.
+	double gridPeriod = 10.0 * BOX3D_GROUND_GRID_CELL_SIZE;
+	fi.gridWrap.x = (float)fmod( (double)drawOrigin.x, gridPeriod );
+	fi.gridWrap.y = (float)fmod( (double)drawOrigin.z, gridPeriod );
+	fi.time = (float)sapp_frame_count() / 60.0f;
+	fi.debugMode = s_context.debugView;
+	fi.disableShadows = !s_context.enableShadows;
+	fi.disableAmbientOcclusion = !s_context.enableGtao;
+	fi.zUp = s_context.viewZUp;
+
+	const sg_swapchain sc = sglue_swapchain();
+	RenderFrame( &sc, &fi );
+
+	// StartUIFrame runs after RenderFrame: it drains the text arena with the
+	// camera state RenderFrame just latched and runs the UI draw callback.
+	StartUIFrame( dt );
+
+	RenderUI( &sc );
+	sg_commit();
+	++s_frame;
+
+	if ( s_frameLimit < 0 )
+	{
+		LimitFrameRate( frameStart );
+	}
+}
+
+static void OnCleanup( void )
+{
+	// Destroy the sample first because it will destroy debug shapes.
 	delete s_context.sample;
-
-	DestroyDraw( s_context.draw );
-
-	DestroyUI();
-	glfwTerminate();
-
+	s_context.sample = nullptr;
 	s_context.Save();
 
-#ifdef TRACY_ENABLE
-	tracy::ShutdownProfiler();
+	ShutdownUI();
+	ShutdownRenderer();
+
+	const int errors = GetRenderErrorCount();
+	fprintf( stderr, "samples: %d frames, %d sokol errors\n", s_frame, errors );
+
+#if defined( _WIN32 )
+	timeEndPeriod( 1 );
 #endif
 
-#if defined( _MSC_VER )
-	_CrtDumpMemoryLeaks();
-#endif
+	exit( errors == 0 ? 0 : 1 );
+}
 
-	return 0;
+static void OnAppLog( const char* tag, uint32_t logLevel, uint32_t logItemId, const char* message, uint32_t lineNumber,
+					  const char* filename, void* userData )
+{
+	(void)tag;
+	(void)logItemId;
+	(void)filename;
+	(void)userData;
+	(void)lineNumber;
+
+	const char* level = ( logLevel == 0 ) ? "panic" : ( logLevel == 1 ) ? "error" : ( logLevel == 2 ) ? "warn" : "info";
+	fprintf( stderr, "sokol(level %s) %s\n", level, message ? message : "(no message)" );
+
+	if ( logLevel == 0 )
+	{
+		fprintf( stderr, "Ensure you have OpenGL 4.5 if on Linux" );
+		exit( 1 );
+	}
+}
+
+sapp_desc sokol_main( int argc, char** argv )
+{
+	for ( int i = 1; i < argc; ++i )
+	{
+		if ( strcmp( argv[i], "--frames" ) == 0 && i + 1 < argc )
+		{
+			s_frameLimit = atoi( argv[++i] );
+		}
+		else if ( strcmp( argv[i], "--sample" ) == 0 && i + 1 < argc )
+		{
+			s_sampleOverride = atoi( argv[++i] );
+		}
+		else if ( strcmp( argv[i], "--replay" ) == 0 && i + 1 < argc )
+		{
+			const char* path = argv[++i];
+
+			if ( g_replayIndex >= 0 )
+			{
+				snprintf( s_context.replayFile, sizeof( s_context.replayFile ), "%s", path );
+				s_sampleOverride = g_replayIndex;
+			}
+		}
+	}
+
+	sapp_desc desc{};
+	desc.init_cb = OnInit;
+	desc.frame_cb = OnFrame;
+	desc.event_cb = OnEvent;
+	desc.cleanup_cb = OnCleanup;
+	desc.logger.func = OnAppLog;
+
+	// GL 4.5 for glClipControl (reverse-Z). Ignored on D3D11 / Metal.
+	desc.gl.major_version = 4;
+	desc.gl.minor_version = 5;
+
+	desc.width = 1920;
+	desc.height = 1080;
+
+	// No swap-chain MSAA. The renderer runs MSAA in its own scene target.
+	desc.sample_count = 1;
+
+	// Static so the pointer outlives sokol_main; sokol keeps it for the window lifetime.
+	b3Version version = b3GetVersion();
+	static char title[64];
+	snprintf( title, sizeof( title ), "Box3D %d.%d.%d - %s precision", version.major, version.minor,
+			  version.revision, b3IsDoublePrecision() ? "double" : "single" );
+	desc.window_title = title;
+
+	// Vsync off: the software limiter in OnFrame owns the cadence. A hard 60 Hz
+	// cap under vsync would beat against a non-60 display and pace to the wrong rate.
+	desc.swap_interval = 0;
+	desc.high_dpi = true;
+
+	return desc;
 }

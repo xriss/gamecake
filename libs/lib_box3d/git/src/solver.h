@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 // Solver work is partitioned into fixed-size blocks that worker threads claim
-// in parallel via atomic CAS on a per-block syncIndex. The descriptor (b2SolverBlock)
-// and the atomic counter sit in a wrapping b2SyncBlock so the CAS-winner can
+// in parallel via atomic CAS on a per-block syncIndex. The descriptor (b3SolverBlock)
+// and the atomic counter sit in a wrapping b3SyncBlock so the CAS-winner can
 // pass the descriptor by value into stage tasks without aliasing the atomic
 // memory other threads are CAS-writing. Three properties of this design
 // matter for performance:
@@ -48,111 +48,131 @@
 
 #pragma once
 
+#include "container.h"
 #include "core.h"
 
-#include "box2d/math_functions.h"
+#include "box3d/math_functions.h"
 
-#include <stdbool.h>
 #include <stdint.h>
 
-#if B2_SIMD_WIDTH == 8
-#define B2_SIMD_SHIFT 3
-#elif B2_SIMD_WIDTH == 4
-#define B2_SIMD_SHIFT 2
-#else
-#define B2_SIMD_SHIFT 0
-#endif
+typedef struct b3BodySim b3BodySim;
+typedef struct b3BodyState b3BodyState;
+typedef struct b3ContactConstraint b3ContactConstraint;
+typedef struct b3ContactConstraintWide b3ContactConstraintWide;
+typedef struct b3ContactSpec b3ContactSpec;
+typedef struct b3JointSim b3JointSim;
+typedef struct b3Manifold b3Manifold;
+typedef struct b3ManifoldConstraint b3ManifoldConstraint;
+typedef struct b3World b3World;
 
-typedef struct b2BodySim b2BodySim;
-typedef struct b2BodyState b2BodyState;
-typedef struct b2ContactSim b2ContactSim;
-typedef struct b2ContactConstraintWide b2ContactConstraintWide;
-typedef struct b2JointSim b2JointSim;
-typedef struct b2World b2World;
-
-// Solver stages. Prepare joints and prepare contacts are split up
-// because there is no need to store joint impulses.
-typedef enum b2SolverStageType
+// Solver stages
+typedef enum b3SolverStageType
 {
-	b2_stagePrepareJoints,
-	b2_stagePrepareContacts,
-	b2_stageIntegrateVelocities,
-	b2_stageWarmStart,
-	b2_stageSolve,
-	b2_stageIntegratePositions,
-	b2_stageRelax,
-	b2_stageRestitution,
-	b2_stageStoreImpulses
-} b2SolverStageType;
+	b3_stagePrepareJoints,
+	b3_stagePrepareWideContacts,
+	b3_stagePrepareContacts,
+	b3_stageIntegrateVelocities,
+	b3_stageWarmStart,
+	b3_stageSolve,
+	b3_stageIntegratePositions,
+	b3_stageRelax,
+	b3_stageRestitution,
+	b3_stageStoreWideImpulses,
+	b3_stageStoreImpulses,
+} b3SolverStageType;
 
-typedef enum b2SolverBlockType
+typedef enum b3SolverBlockType
 {
-	b2_bodyBlock,
-	b2_jointBlock,
-	b2_contactBlock,
-	b2_graphJointBlock,
-	b2_graphContactBlock
-} b2SolverBlockType;
+	// Block for iterating across bodies.
+	b3_bodyBlock,
+
+	// Block for iterating across joints. For prepare.
+	b3_jointBlock,
+
+	// Block for iterating across wide contacts. For prepare and store.
+	b3_wideContactBlock,
+
+	// Block for iterating across contacts. For prepare and store.
+	b3_contactBlock,
+
+	// Block for iterating across joints of a single graph color.
+	b3_graphJointBlock,
+
+	// Block for iterating across wide contacts of a single graph color.
+	b3_graphWideContactBlock,
+
+	// Block for iterating across contacts of a single graph color.
+	b3_graphContactBlock,
+
+	// Block for processing overflow constraints
+	b3_overflowBlock,
+} b3SolverBlockType;
 
 // Solver block describes a multithreaded unit of work.
-typedef struct b2SolverBlock
+typedef struct b3SolverBlock
 {
 	int startIndex;
 	uint16_t count;
-	// b2SolverBlockType
+	// b3SolverBlockType
 	uint8_t blockType;
 	uint8_t colorIndex;
-} b2SolverBlock;
+} b3SolverBlock;
 
 // A unit of multithreaded work along with atomic synchronization. The syncIndex grows
 // monotonically allowing the solver block to be re-used across sub-steps.
-typedef struct b2SyncBlock
+typedef struct b3SyncBlock
 {
-	b2SolverBlock block;
-	b2AtomicInt syncIndex;
-} b2SyncBlock;
+	b3SolverBlock block;
+	b3AtomicInt syncIndex;
+} b3SyncBlock;
 
 // Each stage must be completed before going to the next stage.
 // Non-iterative stages use a stage instance once while iterative stages re-use the same instance each iteration.
-typedef struct b2SolverStage
+typedef struct b3SolverStage
 {
-	b2SyncBlock* blocks;
-	b2SolverStageType type;
+	b3SyncBlock* blocks;
+	b3SolverStageType type;
 	int blockCount;
 	uint8_t colorIndex;
-	b2AtomicInt completionCount;
-} b2SolverStage;
+	b3AtomicInt completionCount;
+} b3SolverStage;
 
 // Constraint softness
-typedef struct b2Softness
+typedef struct b3Softness
 {
 	float biasRate;
 	float massScale;
 	float impulseScale;
-} b2Softness;
+} b3Softness;
 
 // Prepare/store run as a flat parallel-for over the whole wide-constraint
 // range. Each span maps a slice of that range back to the owning color's
 // contacts so workers can decode flat wide-slot indices without touching
 // graph state. The spans array has one entry per active color plus a sentinel
 // whose start == wideContactCount.
-typedef struct b2ContactPrepareSpan
+typedef struct b3WidePrepareSpan
 {
 	int start;
 	int count;
-	b2ContactSim* contacts;
-} b2ContactPrepareSpan;
+	int* contacts;
+} b3WidePrepareSpan;
 
-// Similar for joints
-typedef struct b2JointPrepareSpan
+typedef struct b3ContactPrepareSpan
 {
 	int start;
 	int count;
-	b2JointSim* joints;
-} b2JointPrepareSpan;
+	b3ContactSpec* contacts;
+} b3ContactPrepareSpan;
+
+typedef struct b3JointPrepareSpan
+{
+	int start;
+	int count;
+	b3JointSim* joints;
+} b3JointPrepareSpan;
 
 // Context for a time step. Recreated each time step.
-typedef struct b2StepContext
+typedef struct b3StepContext
 {
 	// time step
 	float dt;
@@ -166,20 +186,20 @@ typedef struct b2StepContext
 
 	int subStepCount;
 
-	b2Softness contactSoftness;
-	b2Softness staticSoftness;
+	b3Softness contactSoftness;
+	b3Softness staticSoftness;
 
 	float restitutionThreshold;
 	float maxLinearVelocity;
 
-	struct b2World* world;
-	struct b2ConstraintGraph* graph;
+	struct b3World* world;
+	struct b3ConstraintGraph* graph;
 
 	// shortcut to body states from awake set
-	b2BodyState* states;
+	b3BodyState* states;
 
 	// shortcut to body sims from awake set
-	b2BodySim* sims;
+	b3BodySim* sims;
 
 	// array of all shape ids for shapes that have enlarged AABBs
 	int* enlargedShapes;
@@ -187,27 +207,31 @@ typedef struct b2StepContext
 
 	// Array of bullet bodies that need continuous collision handling
 	int* bulletBodies;
-	b2AtomicInt bulletBodyCount;
+	b3AtomicInt bulletBodyCount;
 
-	// contact pointers for simplified parallel-for access.
-	// - parallel-for collide with no gaps, includes touching and non-touching
-	b2ContactSim** contactSims;
+	// Contact ids for simplified parallel-for access. Used in narrow-phase.
+	// These contacts may or may not be touching. They are associated with awake bodies.
+	int* awakeContactIndices;
 
 	// Flat view of the wide contact constraint array used by prepare and store.
 	// prepareSpans has activeColorCount + 1 entries, the last being a sentinel
 	// at wideContactCount. wideContactConstraints is the contiguous base
 	// pointer; per-color slices live at colors[i].wideConstraints.
-	b2ContactConstraintWide* wideContactConstraints;
-	b2ContactPrepareSpan* contactPrepareSpans;
+	struct b3ContactConstraintWide* wideConstraints;
+	b3WidePrepareSpan* widePrepareSpans;
 	int wideContactCount;
-	
-	b2JointPrepareSpan* jointPrepareSpans;
-	int jointCount;
+
+	// Similar for mesh/overflow contact constraints
+	struct b3ManifoldConstraint* manifoldConstraints;
+	struct b3ContactConstraint* contactConstraints;
+	b3ContactPrepareSpan* contactPrepareSpans;
+	b3ContactPrepareSpan* overflowSpans;
+	b3JointPrepareSpan* jointPrepareSpans;
 
 	int activeColorCount;
 	int workerCount;
 
-	b2SolverStage* stages;
+	b3SolverStage* stages;
 	int stageCount;
 	bool enableWarmStarting;
 
@@ -219,35 +243,36 @@ typedef struct b2StepContext
 	// This means a delayed worker thread will catch up without repeating already completed
 	// work (causing a race condition).
 	// sync index (16-bits) | stage type (16-bits)
-	b2AtomicU32 atomicSyncBits;
+	b3AtomicU32 atomicSyncBits;
 
 	// padding to prevent false sharing
 	char padding2[64];
 
-	// Race flag claimed by whichever runner reaches b2SolverTask with workerIndex 0 first.
-	// The calling thread of b2World_Step also races for this slot so the orchestrator can
+	// Race flag claimed by whichever runner reaches b3SolverTask with workerIndex 0 first.
+	// The calling thread of b3World_Step also races for this slot so the orchestrator can
 	// always make progress, regardless of how the user's task system schedules tasks (out
 	// of order, fewer threads than workers, or synchronously inside enqueueTaskFcn). The
 	// loser of the race no-ops as workerIndex 0.
-	b2AtomicInt mainClaimed;
+	b3AtomicInt mainClaimed;
 
 	// padding to prevent false sharing
 	char padding3[64];
+} b3StepContext;
 
-} b2StepContext;
+void b3Solve( b3World* world, b3StepContext* stepContext );
 
-static inline b2Softness b2MakeSoft( float hertz, float zeta, float h )
+static inline b3Softness b3MakeSoft( float hertz, float zeta, float h )
 {
 	if ( hertz == 0.0f )
 	{
-		return (b2Softness){
+		return B3_LITERAL( b3Softness ){
 			.biasRate = 0.0f,
 			.massScale = 0.0f,
 			.impulseScale = 0.0f,
 		};
 	}
 
-	float omega = 2.0f * B2_PI * hertz;
+	float omega = 2.0f * B3_PI * hertz;
 	float a1 = 2.0f * zeta + h * omega;
 	float a2 = h * omega * a1;
 	float a3 = 1.0f / ( 1.0f + a2 );
@@ -273,11 +298,9 @@ static inline b2Softness b2MakeSoft( float hertz, float zeta, float h )
 	// In all cases:
 	// massScale + impulseScale == 1
 
-	return (b2Softness){
+	return ( b3Softness ){
 		.biasRate = omega / a1,
 		.massScale = a2 * a3,
 		.impulseScale = a3,
 	};
 }
-
-void b2Solve( b2World* world, b2StepContext* stepContext );

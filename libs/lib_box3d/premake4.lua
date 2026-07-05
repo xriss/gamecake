@@ -7,7 +7,7 @@ files { "git/src/*.c" , "git/src/*.h" }
 
 if EMCC then
 
-defines { "BOX3D_DISABLE_SIMD" , "BOX2D_DISABLE_SIMD" }
+defines { "BOX3D_DISABLE_SIMD" }
 
 end
 

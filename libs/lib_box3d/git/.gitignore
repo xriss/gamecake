@@ -1,5 +1,4 @@
 build/
-api/
 imgui.ini
 settings.ini
 .vscode/
@@ -11,8 +10,5 @@ CMakeUserPresets.json
 .idea/
 .claude/
 .tmp/
-AGENTS.md
-GEMINI.md
-*.b2rec
-build-dp/
-build_float/
+.fetchcontent-cache/
+*.b3rec

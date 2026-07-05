@@ -1,53 +1,55 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
+#include "box3d/box3d.h"
 #include "determinism.h"
 #include "test_macros.h"
 
-#include "box2d/box2d.h"
-#include "box2d/types.h"
-
 #include <stdio.h>
+#include <stdlib.h>
 
-#ifdef BOX2D_PROFILE
-#include <tracy/TracyC.h>
+#ifdef BOX3D_PROFILE
+	#include <tracy/TracyC.h>
 #else
-#define TracyCFrameMark
+	#define TracyCFrameMark
 #endif
 
-#if defined( BOX2D_DOUBLE_PRECISION )
-#define EXPECTED_SLEEP_STEP 313
-#define EXPECTED_HASH 0xF7C3082A
+// Double precision accumulates body positions in double, so the settle/sleep step and the
+// state hash differ from the float build. Both modes are internally deterministic.
+#if defined( BOX3D_DOUBLE_PRECISION )
+#define EXPECTED_SLEEP_STEP 301
+#define EXPECTED_HASH 0xE4844A97
 #else
-#define EXPECTED_SLEEP_STEP 294
-#define EXPECTED_HASH 0x006F0F5E
+#define EXPECTED_SLEEP_STEP 269
+#define EXPECTED_HASH 0x50313037
 #endif
 
 static int SingleMultithreadingTest( int workerCount )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
+	b3WorldDef worldDef = b3DefaultWorldDef();
 	worldDef.workerCount = workerCount;
 
-	b2WorldId worldId = b2CreateWorld( &worldDef );
+	b3WorldId worldId = b3CreateWorld( &worldDef );
 
-	FallingHingeData data = CreateFallingHinges( worldId );
+	FallingRagdollData data = CreateFallingRagdolls( worldId );
 
 	float timeStep = 1.0f / 60.0f;
+
 	int stepLimit = 500;
 	for ( int i = 0; i < stepLimit; ++i )
 	{
 		int subStepCount = 4;
-		b2World_Step( worldId, timeStep, subStepCount );
+		b3World_Step( worldId, timeStep, subStepCount );
 		TracyCFrameMark;
 
-		bool done = UpdateFallingHinges( worldId, &data );
+		bool done = UpdateFallingRagdolls( worldId, &data );
 		if ( done )
 		{
 			break;
 		}
 	}
 
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
 
 	if ( data.sleepStep != EXPECTED_SLEEP_STEP || data.hash != EXPECTED_HASH )
 	{
@@ -57,7 +59,7 @@ static int SingleMultithreadingTest( int workerCount )
 	ENSURE( data.sleepStep == EXPECTED_SLEEP_STEP );
 	ENSURE( data.hash == EXPECTED_HASH );
 
-	DestroyFallingHinges( &data );
+	DestroyFallingRagdolls( &data );
 
 	return 0;
 }
@@ -65,73 +67,22 @@ static int SingleMultithreadingTest( int workerCount )
 // Test multithreaded determinism.
 static int MultithreadingTest( void )
 {
-	for ( int run = 0; run < 3; ++run )
+	for ( int workerCount = 1; workerCount < 6; ++workerCount )
 	{
-		for ( int workerCount = 1; workerCount < 16; workerCount += 2 )
-		{
-			int result = SingleMultithreadingTest( workerCount );
-			ENSURE( result == 0 );
-		}
-
-		for ( int workerCount = 32; workerCount >= 0; workerCount -= 5 )
-		{
-			int result = SingleMultithreadingTest( workerCount );
-			ENSURE( result == 0 );
-		}
+		int result = SingleMultithreadingTest( workerCount );
+		ENSURE( result == 0 );
 	}
 
 	return 0;
 }
 
-// Test determinism using the built-in scheduler (no external task system).
-static int BuiltInSchedulerTest( void )
-{
-	for ( int workerCount = 2; workerCount <= 8; workerCount += 2 )
-	{
-		b2WorldDef worldDef = b2DefaultWorldDef();
-		worldDef.workerCount = workerCount;
-
-		b2WorldId worldId = b2CreateWorld( &worldDef );
-
-		FallingHingeData data = CreateFallingHinges( worldId );
-
-		float timeStep = 1.0f / 60.0f;
-		int stepLimit = 1000;
-		for ( int i = 0; i < stepLimit; ++i )
-		{
-			int subStepCount = 4;
-			b2World_Step( worldId, timeStep, subStepCount );
-
-			bool done = UpdateFallingHinges( worldId, &data );
-			if ( done )
-			{
-				break;
-			}
-		}
-
-		b2DestroyWorld( worldId );
-
-		if ( data.sleepStep != EXPECTED_SLEEP_STEP || data.hash != EXPECTED_HASH )
-		{
-			printf( "  built-in scheduler workers=%d sleepStep=%d hash=0x%08X\n", workerCount, data.sleepStep, data.hash );
-		}
-
-		ENSURE( data.sleepStep == EXPECTED_SLEEP_STEP );
-		ENSURE( data.hash == EXPECTED_HASH );
-
-		DestroyFallingHinges( &data );
-	}
-
-	return 0;
-}
-
-// Test cross-platform determinism.
+// Test cross platform determinism.
 static int CrossPlatformTest( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	b2WorldId worldId = b2CreateWorld( &worldDef );
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
 
-	FallingHingeData data = CreateFallingHinges( worldId );
+	FallingRagdollData data = CreateFallingRagdolls( worldId );
 
 	float timeStep = 1.0f / 60.0f;
 
@@ -139,10 +90,10 @@ static int CrossPlatformTest( void )
 	while ( done == false )
 	{
 		int subStepCount = 4;
-		b2World_Step( worldId, timeStep, subStepCount );
+		b3World_Step( worldId, timeStep, subStepCount );
 		TracyCFrameMark;
 
-		done = UpdateFallingHinges( worldId, &data );
+		done = UpdateFallingRagdolls( worldId, &data );
 	}
 
 	if ( data.sleepStep != EXPECTED_SLEEP_STEP || data.hash != EXPECTED_HASH )
@@ -153,9 +104,9 @@ static int CrossPlatformTest( void )
 	ENSURE( data.sleepStep == EXPECTED_SLEEP_STEP );
 	ENSURE( data.hash == EXPECTED_HASH );
 
-	DestroyFallingHinges( &data );
+	DestroyFallingRagdolls( &data );
 
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
 
 	return 0;
 }
@@ -163,7 +114,6 @@ static int CrossPlatformTest( void )
 int DeterminismTest( void )
 {
 	RUN_SUBTEST( MultithreadingTest );
-	RUN_SUBTEST( BuiltInSchedulerTest );
 	RUN_SUBTEST( CrossPlatformTest );
 
 	return 0;

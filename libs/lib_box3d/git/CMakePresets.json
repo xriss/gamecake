@@ -13,14 +13,14 @@
       "displayName": "Linux Debug",
       "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" },
       "binaryDir": "${sourceDir}/build",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "GLFW_BUILD_WAYLAND": "OFF" }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     },
     {
       "name": "linux-release",
       "displayName": "Linux Release",
       "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" },
       "binaryDir": "${sourceDir}/build",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "GLFW_BUILD_WAYLAND": "OFF" }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     },
     {
       "name": "macos",

@@ -1,53 +1,53 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
 
+#include "box3d/constants.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
-#define B2_SHAPE_PAIR_KEY( K1, K2 ) K1 < K2 ? (uint64_t)K1 << 32 | (uint64_t)K2 : (uint64_t)K2 << 32 | (uint64_t)K1
-
-typedef struct b2SetItem
+typedef struct b3SetItem
 {
 	uint64_t key;
+	uint32_t hash;
+} b3SetItem;
 
-	// storing lower 32 bits of hash
-	// this is wasteful because I just need to know if the item is occupied
-	// I could require the key to be non-zero and use 0 to indicate an empty slot
-	// Update: looks like I store this to make growing the table faster, however this is wasteful once
-	// the table has hit the high water mark
-	//uint32_t hash;
-} b2SetItem;
-
-typedef struct b2HashSet
+typedef struct b3HashSet
 {
-	b2SetItem* items;
+	b3SetItem* items;
 	uint32_t capacity;
 	uint32_t count;
-} b2HashSet;
+} b3HashSet;
 
-b2HashSet b2CreateSet( int capacity );
-void b2DestroySet( b2HashSet* set );
+#define B3_SHAPE_MASK ( B3_MAX_SHAPES - 1 )
+#define B3_CHILD_MASK ( B3_MAX_CHILD_SHAPES - 1 )
 
-void b2ClearSet( b2HashSet* set );
+static inline uint64_t b3ShapePairKey( int s1, int s2, int c )
+{
+	if (s1 < s2)
+	{
+		return ( (uint64_t)( B3_SHAPE_MASK & s1 ) << ( 64 - B3_SHAPE_POWER ) ) |
+			   ( (uint64_t)( B3_SHAPE_MASK & s2 ) << ( 64 - 2 * B3_SHAPE_POWER ) ) | ( (uint64_t)( B3_CHILD_MASK & c ) );
+	}
+
+	return ( (uint64_t)( B3_SHAPE_MASK & s2 ) << ( 64 - B3_SHAPE_POWER ) ) |
+		   ( (uint64_t)( B3_SHAPE_MASK & s1 ) << ( 64 - 2 * B3_SHAPE_POWER ) ) |
+		   ( (uint64_t)( B3_CHILD_MASK & c ) );
+}
+
+b3HashSet b3CreateSet( int32_t capacity );
+void b3DestroySet( b3HashSet* set );
+
+void b3ClearSet( b3HashSet* set );
 
 // Returns true if key was already in set
-bool b2AddKey( b2HashSet* set, uint64_t key );
+bool b3AddKey( b3HashSet* set, uint64_t key );
 
 // Returns true if the key was found
-bool b2RemoveKey( b2HashSet* set, uint64_t key );
+bool b3RemoveKey( b3HashSet* set, uint64_t key );
 
-bool b2ContainsKey( const b2HashSet* set, uint64_t key );
+bool b3ContainsKey( const b3HashSet* set, uint64_t key );
 
-int b2GetHashSetBytes( b2HashSet* set );
-
-static inline int b2GetSetCount( b2HashSet* set )
-{
-	return set->count;
-}
-
-static inline int b2GetSetCapacity( b2HashSet* set )
-{
-	return set->capacity;
-}
+int b3GetHashSetBytes( b3HashSet* set );

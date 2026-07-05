@@ -1,10 +1,13 @@
-// SPDX-FileCopyrightText: 2022 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
-#include "draw.h"
+#include "overflow_color.h"
 #include "sample.h"
+#include "gfx/draw.h"
 
-#include "box2d/box2d.h"
+#include "box3d/box3d.h"
+#include "box3d/constants.h"
+#include "gfx/debug_adapter.h"
 
 #include <imgui.h>
 #include <stdlib.h>
@@ -18,25 +21,19 @@ public:
 	{
 		if ( m_context->restart == false )
 		{
-			m_context->camera.center = { 3.0f, 14.0f };
-			m_context->camera.zoom = 25.0f;
+			m_camera->SetView( 30.0f, 15.0f, 70.0f, b3Pos_zero );
+			
 		}
+
+		AddGroundBox( 50.0f );
 
 		float extent = 1.0f;
 
 		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Polygon box = b2MakeOffsetBox( 50.0f, 1.0f, { 0.0f, -1.0f }, b2Rot_identity );
-			b2CreatePolygonShape( groundId, &shapeDef, &box );
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			b2Polygon box = b2MakeBox( extent, extent );
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.type = b3_dynamicBody;
+			b3BoxHull box = b3MakeBoxHull( extent, extent, extent );
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
 
 			for ( int j = 0; j < 3; ++j )
 			{
@@ -50,11 +47,11 @@ public:
 						float coeff = i - 0.5f * count;
 
 						float yy = count == 1 ? y + 2.0f : y;
-						bodyDef.position = { 2.0f * coeff * extent + offset, yy };
-						b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
+						bodyDef.position = { 2.0f * coeff * extent + offset, yy, 0.0f };
+						b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
 
 						shapeDef.density = count == 1 ? ( j + 1.0f ) * 100.0f : 1.0f;
-						b2CreatePolygonShape( bodyId, &shapeDef, &box );
+						b3CreateHullShape( bodyId, &shapeDef, &box.base );
 					}
 
 					--count;
@@ -72,123 +69,64 @@ public:
 
 static int sampleHighMassRatio1 = RegisterSample( "Robustness", "HighMassRatio1", HighMassRatio1::Create );
 
-// Big box on small boxes
-class HighMassRatio2 : public Sample
+// A pyramid of 5cm boxes. Stacking tiny objects is challenging for physics engines due to rotational effects.
+// This is also challenging for Box3D because of the AABB margin and linear slop are close to the shape size. This
+// leads to many collision pairs and some shape overlap.
+class TinyPyramid : public Sample
 {
 public:
-	explicit HighMassRatio2( SampleContext* context )
+	explicit TinyPyramid( SampleContext* context )
 		: Sample( context )
 	{
 		if ( m_context->restart == false )
 		{
-			m_context->camera.center = { 0.0f, 16.5f };
-			m_context->camera.zoom = 25.0f;
+			m_camera->SetView( -30.0f, 20.0f, 10.0f, { 0.0f, 0.5f, 0.0f } );
 		}
+
+		AddGroundBox( 20.0f );
 
 		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Polygon box = b2MakeOffsetBox( 50.0f, 1.0f, { 0.0f, -1.0f }, b2Rot_identity );
-			b2CreatePolygonShape( groundId, &shapeDef, &box );
-		}
+			m_extent = 0.025f;
+			int baseCount = 30;
 
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.type = b3_dynamicBody;
 
-			float extent = 1.0f;
-			b2Polygon smallBox = b2MakeBox( 0.5f * extent, 0.5f * extent );
-			b2Polygon bigBox = b2MakeBox( 10.0f * extent, 10.0f * extent );
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
 
+			b3BoxHull box = b3MakeBoxHull( m_extent, m_extent, m_extent );
+
+			for ( int i = 0; i < baseCount; ++i )
 			{
-				bodyDef.position = { -9.0f * extent, 0.5f * extent };
-				b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-				b2CreatePolygonShape( bodyId, &shapeDef, &smallBox );
-			}
+				float y = ( 2.0f * i + 1.0f ) * m_extent;
 
-			{
-				bodyDef.position = { 9.0f * extent, 0.5f * extent };
-				b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-				b2CreatePolygonShape( bodyId, &shapeDef, &smallBox );
-			}
+				for ( int j = i; j < baseCount; ++j )
+				{
+					float x = ( i + 1.0f ) * m_extent + 2.0f * ( j - i ) * m_extent - baseCount * m_extent;
+					bodyDef.position = { x, y, 0.0f };
 
-			{
-				bodyDef.position = { 0.0f, ( 10.0f + 16.0f ) * extent };
-				b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-				b2CreatePolygonShape( bodyId, &shapeDef, &bigBox );
+					b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+					b3CreateHullShape( bodyId, &shapeDef, &box.base );
+				}
 			}
 		}
+	}
+
+	void Step() override
+	{
+		DrawTextLine( "%.1fcm boxes", 200.0f * m_extent );
+		Sample::Step();
 	}
 
 	static Sample* Create( SampleContext* context )
 	{
-		return new HighMassRatio2( context );
+		return new TinyPyramid( context );
 	}
+
+	float m_extent;
 };
 
-static int sampleHighMassRatio2 = RegisterSample( "Robustness", "HighMassRatio2", HighMassRatio2::Create );
-
-// Big box on small triangles
-class HighMassRatio3 : public Sample
-{
-public:
-	explicit HighMassRatio3( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 0.0f, 16.5f };
-			m_context->camera.zoom = 25.0f;
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Polygon box = b2MakeOffsetBox( 50.0f, 1.0f, { 0.0f, -1.0f }, b2Rot_identity );
-			b2CreatePolygonShape( groundId, &shapeDef, &box );
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-
-			float extent = 1.0f;
-			b2Vec2 points[3] = { { -0.5f * extent, 0.0f }, { 0.5f * extent, 0.0f }, { 0.0f, 1.0f * extent } };
-			b2Hull hull = b2ComputeHull( points, 3 );
-			b2Polygon smallTriangle = b2MakePolygon( &hull, 0.0f );
-			b2Polygon bigBox = b2MakeBox( 10.0f * extent, 10.0f * extent );
-
-			{
-				bodyDef.position = { -9.0f * extent, 0.5f * extent };
-				b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-				b2CreatePolygonShape( bodyId, &shapeDef, &smallTriangle );
-			}
-
-			{
-				bodyDef.position = { 9.0f * extent, 0.5f * extent };
-				b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-				b2CreatePolygonShape( bodyId, &shapeDef, &smallTriangle );
-			}
-
-			{
-				bodyDef.position = { 0.0f, ( 10.0f + 4.0f ) * extent };
-				b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-				b2CreatePolygonShape( bodyId, &shapeDef, &bigBox );
-			}
-		}
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new HighMassRatio3( context );
-	}
-};
-
-static int sampleHighMassRatio3 = RegisterSample( "Robustness", "HighMassRatio3", HighMassRatio3::Create );
+static int sampleTinyPyramid = RegisterSample( "Robustness", "Tiny Pyramid", TinyPyramid::Create );
 
 class OverlapRecovery : public Sample
 {
@@ -198,8 +136,7 @@ public:
 	{
 		if ( m_context->restart == false )
 		{
-			m_context->camera.center = { 0.0f, 2.5f };
-			m_context->camera.zoom = 3.75f;
+			m_camera->SetView( 45.0f, 20.0f, 15.0f, b3Pos_zero );
 		}
 
 		m_bodyIds = nullptr;
@@ -211,11 +148,7 @@ public:
 		m_hertz = 30.0f;
 		m_dampingRatio = 10.0f;
 
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		b2Segment segment = { { -40.0f, 0.0f }, { 40.0f, 0.0f } };
-		b2CreateSegmentShape( groundId, &shapeDef, &segment );
+		AddGroundBox( 20.0f );
 
 		CreateScene();
 	}
@@ -229,20 +162,20 @@ public:
 	{
 		for ( int i = 0; i < m_bodyCount; ++i )
 		{
-			b2DestroyBody( m_bodyIds[i] );
+			b3DestroyBody( m_bodyIds[i] );
 		}
 
-		b2World_SetContactTuning( m_worldId, m_hertz, m_dampingRatio, m_speed );
+		b3World_SetContactTuning( m_worldId, m_hertz, m_dampingRatio, m_speed );
 
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		bodyDef.type = b3_dynamicBody;
 
-		b2Polygon box = b2MakeBox( m_extent, m_extent );
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
+		b3BoxHull box = b3MakeBoxHull( m_extent, m_extent, m_extent );
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
 		shapeDef.density = 1.0f;
 
 		m_bodyCount = m_baseCount * ( m_baseCount + 1 ) / 2;
-		m_bodyIds = (b2BodyId*)realloc( m_bodyIds, m_bodyCount * sizeof( b2BodyId ) );
+		m_bodyIds = (b3BodyId*)realloc( m_bodyIds, m_bodyCount * sizeof( b3BodyId ) );
 
 		int bodyIndex = 0;
 		float fraction = 1.0f - m_overlap;
@@ -253,9 +186,9 @@ public:
 			for ( int j = i; j < m_baseCount; ++j )
 			{
 				bodyDef.position = { x, y };
-				b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
+				b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
 
-				b2CreatePolygonShape( bodyId, &shapeDef, &box );
+				b3CreateHullShape( bodyId, &shapeDef, &box.base );
 
 				m_bodyIds[bodyIndex++] = bodyId;
 
@@ -287,7 +220,6 @@ public:
 		}
 
 		ImGui::PopItemWidth();
-
 		return true;
 	}
 
@@ -296,7 +228,7 @@ public:
 		return new OverlapRecovery( context );
 	}
 
-	b2BodyId* m_bodyIds;
+	b3BodyId* m_bodyIds;
 	int m_bodyCount;
 	int m_baseCount;
 	float m_overlap;
@@ -308,295 +240,42 @@ public:
 
 static int sampleOverlapRecovery = RegisterSample( "Robustness", "Overlap Recovery", OverlapRecovery::Create );
 
-// A pyramid of 5cm squares. Stacking tiny objects is challenging for physics engines due to rotational effects.
-// This is also challenging for Box2D because of the AABB margin and linear slop are close to the shape size. This
-// leads to many collision pairs and some shape overlap.
-class TinyPyramid : public Sample
+// This forces a constraint graph color overflow
+class OverflowColorPile : public Sample
 {
 public:
-	explicit TinyPyramid( SampleContext* context )
+	explicit OverflowColorPile( SampleContext* context )
 		: Sample( context )
 	{
 		if ( m_context->restart == false )
 		{
-			m_context->camera.center = { 0.0f, 0.8f };
-			m_context->camera.zoom = 1.0f;
+			m_camera->SetView( 30.0f, 35.0f, 15.0f, b3Pos_zero );
+			
 		}
 
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Polygon box = b2MakeOffsetBox( 5.0f, 1.0f, { 0.0f, -1.0f }, b2Rot_identity );
-			b2CreatePolygonShape( groundId, &shapeDef, &box );
-		}
+		m_data = CreateOverflowColorPile( m_worldId );
 
-		{
-			m_extent = 0.025f;
-			int baseCount = 30;
-
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-
-			b2Polygon box = b2MakeSquare( m_extent );
-
-			for ( int i = 0; i < baseCount; ++i )
-			{
-				float y = ( 2.0f * i + 1.0f ) * m_extent;
-
-				for ( int j = i; j < baseCount; ++j )
-				{
-					float x = ( i + 1.0f ) * m_extent + 2.0f * ( j - i ) * m_extent - baseCount * m_extent;
-					bodyDef.position = { x, y };
-
-					b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-					b2CreatePolygonShape( bodyId, &shapeDef, &box );
-				}
-			}
-		}
+		SetGroundShape( m_data.groundShapeId );
 	}
 
 	void Step() override
 	{
-		DrawScreenTextLine( "%.1fcm squares", 200.0f * m_extent );
 		Sample::Step();
+
+		b3Counters counters = b3World_GetCounters( m_worldId );
+		int overflowContacts = counters.colorCounts[B3_GRAPH_COLOR_COUNT - 1];
+
+		DrawTextLine( "neighbors = %d", m_data.neighborCount );
+		DrawTextLine( "overflow contacts = %d", overflowContacts );
+		DrawTextLine( "total contacts = %d", counters.contactCount );
 	}
 
 	static Sample* Create( SampleContext* context )
 	{
-		return new TinyPyramid( context );
+		return new OverflowColorPile( context );
 	}
 
-	float m_extent;
+	OverflowColorPileData m_data;
 };
 
-static int sampleTinyPyramid = RegisterSample( "Robustness", "Tiny Pyramid", TinyPyramid::Create );
-
-// High gravity and high mass ratio. This shows how to tune contact and joint stiffness values to
-// achieve an improved result at a high sub-step count.
-// There is still a fair bit of bounce with some settings.
-class Cart : public Sample
-{
-public:
-	explicit Cart( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 0.0f, 1.0f };
-			m_context->camera.zoom = 1.5f;
-			m_context->subStepCount = 12;
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.position = { 0.0f, -1.0f };
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Polygon groundBox = b2MakeBox( 20.0f, 1.0f );
-			b2CreatePolygonShape( groundId, &shapeDef, &groundBox );
-		}
-
-		b2World_SetGravity( m_worldId, { 0, -22.0f } );
-
-		m_contactHertz = 240.0f;
-		m_contactDampingRatio = 10.0f;
-		m_contactSpeed = 0.5f;
-		b2World_SetContactTuning( m_worldId, m_contactHertz, m_contactDampingRatio, m_contactSpeed );
-
-		m_constraintHertz = 240.0f;
-		m_constraintDampingRatio = 0.0f;
-
-		m_chassisId = {};
-		m_wheelId1 = {};
-		m_wheelId2 = {};
-		m_jointId1 = {};
-		m_jointId2 = {};
-
-		CreateScene();
-	}
-
-	void CreateScene()
-	{
-		if ( B2_IS_NON_NULL( m_chassisId ) )
-		{
-			b2DestroyBody( m_chassisId );
-		}
-
-		if ( B2_IS_NON_NULL( m_wheelId1 ) )
-		{
-			b2DestroyBody( m_wheelId1 );
-		}
-
-		if ( B2_IS_NON_NULL( m_wheelId2 ) )
-		{
-			b2DestroyBody( m_wheelId2 );
-		}
-
-		float yBase = 2.0f;
-
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.position = { 0.0f, yBase };
-		m_chassisId = b2CreateBody( m_worldId, &bodyDef );
-
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		shapeDef.density = 1000.0f;
-
-		b2Polygon box = b2MakeOffsetBox( 1.0f, 0.25f, { 0.0f, 0.25f }, b2Rot_identity );
-		b2CreatePolygonShape( m_chassisId, &shapeDef, &box );
-
-		shapeDef = b2DefaultShapeDef();
-		shapeDef.material.rollingResistance = 0.02f;
-		shapeDef.density = 50.0f;
-
-		b2Circle circle = { b2Vec2_zero, 0.1f };
-		bodyDef.position = { -0.9f, yBase - 0.15f };
-		m_wheelId1 = b2CreateBody( m_worldId, &bodyDef );
-		b2CreateCircleShape( m_wheelId1, &shapeDef, &circle );
-
-		bodyDef.position = { 0.9f, yBase - 0.15f };
-		m_wheelId2 = b2CreateBody( m_worldId, &bodyDef );
-		b2CreateCircleShape( m_wheelId2, &shapeDef, &circle );
-
-		b2RevoluteJointDef jointDef = b2DefaultRevoluteJointDef();
-		jointDef.base.constraintHertz = 120.0f;
-		jointDef.base.constraintDampingRatio = 0.0f;
-
-		jointDef.base.bodyIdA = m_chassisId;
-		jointDef.base.bodyIdB = m_wheelId1;
-		jointDef.base.localFrameA.p = { -0.9f, -0.15f };
-		jointDef.base.localFrameB.p = { 0.0f, 0.0f };
-
-		m_jointId1 = b2CreateRevoluteJoint( m_worldId, &jointDef );
-		b2Joint_SetConstraintTuning( m_jointId1, m_constraintHertz, m_constraintDampingRatio );
-
-		jointDef.base.bodyIdA = m_chassisId;
-		jointDef.base.bodyIdB = m_wheelId2;
-		jointDef.base.localFrameA.p = { 0.9f, -0.15f };
-		jointDef.base.localFrameB.p = { 0.0f, 0.0f };
-
-		m_jointId2 = b2CreateRevoluteJoint( m_worldId, &jointDef );
-		b2Joint_SetConstraintTuning( m_jointId2, m_constraintHertz, m_constraintDampingRatio );
-	}
-
-	bool DrawControls() override
-	{
-		ImGui::PushItemWidth( 6.0f * ImGui::GetFontSize() );
-
-		bool changed = false;
-		ImGui::Text( "Contact" );
-		changed = changed || ImGui::SliderFloat( "Hertz##contact", &m_contactHertz, 0.0f, 240.0f, "%.f" );
-		changed = changed || ImGui::SliderFloat( "Damping Ratio##contact", &m_contactDampingRatio, 0.0f, 100.0f, "%.f" );
-		changed = changed || ImGui::SliderFloat( "Speed", &m_contactSpeed, 0.0f, 5.0f, "%.1f" );
-
-		if ( changed )
-		{
-			b2World_SetContactTuning( m_worldId, m_contactHertz, m_contactDampingRatio, m_contactSpeed );
-			CreateScene();
-		}
-
-		ImGui::Separator();
-
-		changed = false;
-		ImGui::Text( "Joint" );
-		changed = changed || ImGui::SliderFloat( "Hertz##joint", &m_constraintHertz, 0.0f, 240.0f, "%.f" );
-		changed = changed || ImGui::SliderFloat( "Damping Ratio##joint", &m_constraintDampingRatio, 0.0f, 20.0f, "%.f" );
-
-		ImGui::Separator();
-
-		changed = changed || ImGui::Button( "Reset Scene" );
-
-		if ( changed )
-		{
-			b2Joint_SetConstraintTuning( m_jointId1, m_constraintHertz, m_constraintDampingRatio );
-			b2Joint_SetConstraintTuning( m_jointId2, m_constraintHertz, m_constraintDampingRatio );
-			CreateScene();
-		}
-
-		ImGui::PopItemWidth();
-
-		return true;
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new Cart( context );
-	}
-
-	b2BodyId m_chassisId;
-	b2BodyId m_wheelId1;
-	b2BodyId m_wheelId2;
-	b2JointId m_jointId1;
-	b2JointId m_jointId2;
-
-	float m_contactHertz;
-	float m_contactDampingRatio;
-	float m_contactSpeed;
-	float m_constraintHertz;
-	float m_constraintDampingRatio;
-};
-
-static int sampleCart = RegisterSample( "Robustness", "Cart", Cart::Create );
-
-// Ensure prismatic joint stability when highly distorted
-class MultiplePrismatic : public Sample
-{
-public:
-	explicit MultiplePrismatic( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 0.0f, 8.0f };
-			m_context->camera.zoom = 25.0f * 0.5f;
-		}
-
-		b2BodyId groundId;
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			groundId = b2CreateBody( m_worldId, &bodyDef );
-		}
-
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		b2Polygon box = b2MakeBox( 0.5f, 0.5f );
-		b2PrismaticJointDef jointDef = b2DefaultPrismaticJointDef();
-		jointDef.base.bodyIdA = groundId;
-		jointDef.base.localFrameA.p = { 0.0f, 0.0f };
-		jointDef.base.localFrameB.p = { 0.0f, -0.6f };
-		jointDef.base.drawScale = 1.0f;
-		jointDef.base.constraintHertz = 240.0f;
-		jointDef.lowerTranslation = -6.0f;
-		jointDef.upperTranslation = 6.0f;
-		jointDef.enableLimit = true;
-
-		for ( int i = 0; i < 6; ++i )
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.position = { 0.0f, 0.6f + 1.2f * i };
-			bodyDef.type = b2_dynamicBody;
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2CreatePolygonShape( bodyId, &shapeDef, &box );
-
-			jointDef.base.bodyIdB = bodyId;
-			b2CreatePrismaticJoint( m_worldId, &jointDef );
-
-			jointDef.base.bodyIdA = bodyId;
-			jointDef.base.localFrameA.p = { 0.0f, 0.6f };
-		}
-
-		// Increase the mouse force
-		m_mouseForceScale = 100000.0f;
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new MultiplePrismatic( context );
-	}
-};
-
-static int sampleMultiplePrismatic = RegisterSample( "Robustness", "Multiple Prismatic", MultiplePrismatic::Create );
+static int sampleOverflowColorPile = RegisterSample( "Robustness", "Overflow Color Pile", OverflowColorPile::Create );

@@ -1,151 +1,213 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
 
-typedef struct b2Recording b2Recording;
-
 #include "arena_allocator.h"
 #include "bitset.h"
+#include "block_allocator.h"
 #include "broad_phase.h"
 #include "constraint_graph.h"
-#include "container.h"
 #include "id_pool.h"
-#include "sensor.h"
-#include "shape.h"
-#include "solver_set.h"
 
-#include "box2d/types.h"
+#include "box3d/types.h"
 
-b2DeclareArray( b2BodyMoveEvent );
-b2DeclareArray( b2ContactBeginTouchEvent );
-b2DeclareArray( b2ContactEndTouchEvent );
-b2DeclareArray( b2ContactHitEvent );
-b2DeclareArray( b2JointEvent );
-b2DeclareArray( b2SensorBeginTouchEvent );
-b2DeclareArray( b2SensorEndTouchEvent );
-b2DeclareArray( b2TaskContext );
+#define B3_DEBUG_POINT_CAPACITY 64
+#define B3_DEBUG_LINE_CAPACITY 64
+
+typedef struct b3Body b3Body;
+typedef struct b3Recording b3Recording;
+typedef struct b3Contact b3Contact;
+typedef struct b3Island b3Island;
+typedef struct b3Joint b3Joint;
+typedef struct b3Sensor b3Sensor;
+typedef struct b3SensorTaskContext b3SensorTaskContext;
+typedef struct b3SensorHit b3SensorHit;
+typedef struct b3Shape b3Shape;
+typedef struct b3SolverSet b3SolverSet;
+
+b3DeclareArray( b3BlockAllocator );
+b3DeclareArray( b3Body );
+b3DeclareArray( b3SolverSet );
+b3DeclareArray( b3Joint );
+b3DeclareArray( b3Contact );
+b3DeclareArray( b3Island );
+b3DeclareArray( b3Shape );
+b3DeclareArray( b3Sensor );
+b3DeclareArray( b3SensorTaskContext );
+b3DeclareArray( b3SensorHit );
+b3DeclareArray( b3BodyMoveEvent );
+b3DeclareArray( b3SensorBeginTouchEvent );
+b3DeclareArray( b3ContactBeginTouchEvent );
+b3DeclareArray( b3SensorEndTouchEvent );
+b3DeclareArray( b3ContactEndTouchEvent );
+b3DeclareArray( b3ContactHitEvent );
+b3DeclareArray( b3JointEvent );
+
+enum b3SetType
+{
+	b3_staticSet = 0,
+	b3_disabledSet = 1,
+	b3_awakeSet = 2,
+	b3_firstSleepingSet = 3,
+};
+
+typedef struct b3DebugPoint
+{
+	b3Pos p;
+	int label;
+	float value;
+	b3HexColor color;
+} b3DebugPoint;
+
+typedef struct b3DebugLine
+{
+	b3Pos p1, p2;
+	int label;
+	b3HexColor color;
+} b3DebugLine;
 
 // Per thread task storage
-typedef struct b2TaskContext
+typedef struct b3TaskContext
 {
-	// Collect per thread sensor continuous hit events.
-	b2Array(b2SensorHit) sensorHits;
+	b3Arena arena;
 
-	// These bits align with the contact id capacity and signal a change in contact status
-	b2BitSet contactStateBitSet;
+	// Collect per thread sensor continuous hit events.
+	b3Array( b3SensorHit ) sensorHits;
+
+	// These bits align with the b3ConstraintGraph::contactBlocks and signal a change in contact status
+	b3BitSet contactStateBitSet;
+
+	// These bits align with the joint id capacity and signal a change in contact status
+	b3BitSet jointStateBitSet;
 
 	// These bits align with the contact id capacity and signal a hit event.
-	b2BitSet hitEventBitSet;
+	b3BitSet hitEventBitSet;
 
 	// Fast-path flag: true when this worker set at least one bit in hitEventBitSet this step.
 	bool hasHitEvents;
 
-	// These bits align with the joint id capacity and signal a change in contact status
-	b2BitSet jointStateBitSet;
-
 	// Used to track bodies with shapes that have enlarged AABBs. This avoids having a bit array
 	// that is very large when there are many static shapes.
-	b2BitSet enlargedSimBitSet;
+	b3BitSet enlargedSimBitSet;
 
 	// Used to put islands to sleep
-	b2BitSet awakeIslandBitSet;
+	b3BitSet awakeIslandBitSet;
 
 	// Per worker split island candidate
 	float splitSleepTime;
 	int splitIslandId;
 
+	// Profiling
+	int satCallCount;
+	int satCacheHitCount;
+	int distanceIterations;
+	int pushBackIterations;
+	int rootIterations;
+
 	// Number of contacts recycled this step (collide pass).
 	int recycledContactCount;
 
-} b2TaskContext;
+	b3DebugPoint points[B3_DEBUG_POINT_CAPACITY];
+	int pointCount;
+
+	b3DebugLine lines[B3_DEBUG_LINE_CAPACITY];
+	int lineCount;
+
+	int manifoldCounts[B3_CONTACT_MANIFOLD_COUNT_BUCKETS];
+	// Prevent false sharing
+	char cacheLine[64];
+} b3TaskContext;
+
+b3DeclareArray( b3TaskContext );
 
 // The world struct manages all physics entities, dynamic simulation,  and asynchronous queries.
 // The world also contains efficient memory management facilities.
-typedef struct b2World
+typedef struct b3World
 {
-	b2Stack stack;
-	b2BroadPhase broadPhase;
-	b2ConstraintGraph constraintGraph;
+	b3Stack stack;
+	b3BroadPhase broadPhase;
+	b3ConstraintGraph constraintGraph;
+
+	// Manifold allocators have one allocator for each manifold count.
+	b3Array( b3BlockAllocator ) manifoldAllocators;
+	b3Mutex* manifoldAllocatorMutex;
 
 	// The body id pool is used to allocate and recycle body ids. Body ids
 	// provide a stable identifier for users, but incur caches misses when used
-	// to access body data. Aligns with b2Body.
-	b2IdPool bodyIdPool;
+	// to access body data. Aligns with b3Body.
+	b3IdPool bodyIdPool;
 
 	// This is a sparse array that maps body ids to the body data
 	// stored in solver sets. As sims move within a set or across set.
 	// Indices come from id pool.
-	b2Array( b2Body ) bodies;
+	b3Array( b3Body ) bodies;
 
 	// Provides free list for solver sets.
-	b2IdPool solverSetIdPool;
+	b3IdPool solverSetIdPool;
 
 	// Solvers sets allow sims to be stored in contiguous arrays. The first
 	// set is all static sims. The second set is active sims. The third set is disabled
 	// sims. The remaining sets are sleeping islands.
-	b2Array( b2SolverSet ) solverSets;
+	b3Array( b3SolverSet ) solverSets;
 
 	// Used to create stable ids for joints
-	b2IdPool jointIdPool;
+	b3IdPool jointIdPool;
 
 	// This is a sparse array that maps joint ids to the joint data stored in the constraint graph
 	// or in the solver sets.
-	b2Array( b2Joint ) joints;
+	b3Array( b3Joint ) joints;
 
 	// Used to create stable ids for contacts
-	b2IdPool contactIdPool;
+	b3IdPool contactIdPool;
 
 	// This is a sparse array that maps contact ids to the contact data stored in the constraint graph
 	// or in the solver sets.
-	b2Array( b2Contact ) contacts;
+	b3Array( b3Contact ) contacts;
 
 	// Used to create stable ids for islands
-	b2IdPool islandIdPool;
+	b3IdPool islandIdPool;
 
-	// Persistent islands
-	b2Array( b2Island ) islands;
+	// This is a sparse array that maps island ids to the island data stored in the solver sets.
+	b3Array( b3Island ) islands;
 
-	b2IdPool shapeIdPool;
-	b2IdPool chainIdPool;
+	b3IdPool shapeIdPool;
 
 	// These are sparse arrays that point into the pools above
-	b2Array( b2Shape ) shapes;
-	b2Array( b2ChainShape ) chainShapes;
+	b3Array( b3Shape ) shapes;
+
+	// Reference counted store of shared hull data keyed by content. Shapes hold a
+	// pointer to the owned copy here. Opaque to avoid leaking the verstable map
+	// type into this header.
+	void* hullDatabase;
 
 	// This is a dense array of sensor data.
-	b2Array( b2Sensor ) sensors;
+	b3Array( b3Sensor ) sensors;
 
 	// Per thread storage
-	b2Array( b2TaskContext ) taskContexts;
-	b2Array( b2SensorTaskContext ) sensorTaskContexts;
+	b3Array( b3TaskContext ) taskContexts;
+	b3Array( b3SensorTaskContext ) sensorTaskContexts;
 
-	b2Array( b2BodyMoveEvent ) bodyMoveEvents;
-	b2Array( b2SensorBeginTouchEvent ) sensorBeginEvents;
-	b2Array( b2ContactBeginTouchEvent ) contactBeginEvents;
+	b3Array( b3BodyMoveEvent ) bodyMoveEvents;
+	b3Array( b3SensorBeginTouchEvent ) sensorBeginEvents;
+	b3Array( b3ContactBeginTouchEvent ) contactBeginEvents;
 
 	// End events are double buffered so that the user doesn't need to flush events
-	b2Array( b2SensorEndTouchEvent ) sensorEndEvents[2];
-	b2Array( b2ContactEndTouchEvent ) contactEndEvents[2];
+	b3Array( b3SensorEndTouchEvent ) sensorEndEvents[2];
+	b3Array( b3ContactEndTouchEvent ) contactEndEvents[2];
 	int endEventArrayIndex;
 
-	b2Array( b2ContactHitEvent ) contactHitEvents;
-	b2Array( b2JointEvent ) jointEvents;
-
-	// todo consider deferred waking and impulses to make it possible
-	// to apply forces and impulses from multiple threads
-	// impulses must be deferred because sleeping bodies have no velocity state
-	// Problems:
-	// - multiple forces applied to the same body from multiple threads
-	// Deferred wake
-	// b2BitSet bodyWakeSet;
-	// b2ImpulseArray deferredImpulses;
+	b3Array( b3ContactHitEvent ) contactHitEvents;
+	b3Array( b3JointEvent ) jointEvents;
 
 	// Used to track debug draw
-	b2BitSet debugBodySet;
-	b2BitSet debugJointSet;
-	b2BitSet debugContactSet;
-	b2BitSet debugIslandSet;
+	b3BitSet debugBodySet;
+	b3BitSet debugJointSet;
+	b3BitSet debugContactSet;
+	b3BitSet debugIslandSet;
+	b3CreateDebugShapeCallback* createDebugShape;
+	b3DestroyDebugShapeCallback* destroyDebugShape;
+	void* userDebugShapeContext;
 
 	// Id that is incremented every time step
 	uint64_t stepIndex;
@@ -159,7 +221,7 @@ typedef struct b2World
 	// - if no bodies want to sleep then there is no reason to perform island splitting
 	int splitIslandId;
 
-	b2Vec2 gravity;
+	b3Vec3 gravity;
 	float hitEventThreshold;
 	float restitutionThreshold;
 	float maxLinearSpeed;
@@ -168,38 +230,38 @@ typedef struct b2World
 	float contactDampingRatio;
 	float contactRecycleDistance;
 
-	b2FrictionCallback* frictionCallback;
-	b2RestitutionCallback* restitutionCallback;
+	b3FrictionCallback* frictionCallback;
+	b3RestitutionCallback* restitutionCallback;
 
 	uint16_t generation;
 
-	b2Profile profile;
+	b3Profile profile;
+	int satCallCount;
+	int satCacheHitCount;
+	int manifoldCounts[B3_CONTACT_MANIFOLD_COUNT_BUCKETS];
 
-	b2Capacity maxCapacity;
+	b3Capacity maxCapacity;
 
-	b2PreSolveFcn* preSolveFcn;
+	b3PreSolveFcn* preSolveFcn;
 	void* preSolveContext;
 
-	b2CustomFilterFcn* customFilterFcn;
+	b3CustomFilterFcn* customFilterFcn;
 	void* customFilterContext;
 
 	int workerCount;
-	b2EnqueueTaskCallback* enqueueTaskFcn;
-	b2FinishTaskCallback* finishTaskFcn;
+	b3EnqueueTaskCallback* enqueueTaskFcn;
+	b3FinishTaskCallback* finishTaskFcn;
 	void* userTaskContext;
 	void* userTreeTask;
 
-	struct b2Scheduler* scheduler;
+	struct b3Scheduler* scheduler;
 
 	void* userData;
 
-	b2Recording* recording; // NULL unless b2World_StartRecording is active, owned by the host
-
-	// Remember type step used for reporting forces and torques
-	// inverse sub-step
+	// latest inverse sub-step
 	float inv_h;
 
-	// inverse full-step
+	// latest inverse full-step
 	float inv_dt;
 
 	int activeTaskCount;
@@ -208,22 +270,78 @@ typedef struct b2World
 	uint16_t worldId;
 
 	bool enableSleep;
+
+	// This indicates there is a world write operation in progress. This is for debugging and
+	// not a real mutex. This should have minimal performance impact.
 	bool locked;
+
+	// Non-NULL while a recording session is active. Set by b3World_StartRecording,
+	// cleared by b3World_StopRecording. Hooks in mutators check this before writing.
+	struct b3Recording* recording;
+
 	bool enableWarmStarting;
-	bool enableContactSoftening;
 	bool enableContinuous;
 	bool enableSpeculative;
 	bool inUse;
-} b2World;
+} b3World;
 
-b2World* b2GetWorldFromId( b2WorldId id );
-b2World* b2GetWorld( int index );
-b2World* b2GetWorldLocked( int index );
+b3World* b3GetUnlockedWorldFromId( b3WorldId id );
+b3World* b3GetWorldFromId( b3WorldId id );
 
-// Union of the broad-phase root bounds across all body types. Returns false when no tree holds a
-// proxy, so callers don't fold an empty world's origin into a running bounds.
-bool b2ComputeWorldBounds( b2World* world, b2AABB* bounds );
+b3World* b3GetUnlockedWorld( int index );
+b3World* b3GetWorld( int index );
 
-void b2ValidateConnectivity( b2World* world );
-void b2ValidateSolverSets( b2World* world );
-void b2ValidateContacts( b2World* world );
+void b3ValidateConnectivity( b3World* world );
+void b3ValidateSolverSets( b3World* world );
+void b3ValidateContacts( b3World* world );
+
+// Register a hull in the world database, returning the owned shared copy. Identical hulls
+// share one copy with a reference count. The input may be freed after this call.
+const b3HullData* b3AddHullToDatabase( b3World* world, const b3HullData* src );
+
+// Like b3AddHullToDatabase but takes ownership of a heap hull: inserted directly on a miss,
+// freed on a hit. Avoids cloning data the caller already allocated.
+const b3HullData* b3AddOwnedHullToDatabase( b3World* world, b3HullData* owned );
+
+// Release a reference to a shared hull. The owned copy is freed when the count reaches zero.
+void b3RemoveHullFromDatabase( b3World* world, const b3HullData* data );
+
+static inline b3Manifold* b3AllocateManifolds( b3World* world, int count )
+{
+	if ( count == 0 )
+	{
+		return NULL;
+	}
+
+	int index = count - 1;
+
+	// Need lock because this is called from the parallel narrow phase
+	b3LockMutex( world->manifoldAllocatorMutex );
+	int currentCount = world->manifoldAllocators.count;
+	for ( int i = currentCount; i < count; ++i )
+	{
+		b3BlockAllocator allocator = b3CreateBlockAllocator( ( i + 1 ) * sizeof( b3Manifold ), 2 * B3_BLOCK_SIZE );
+		b3Array_Push( world->manifoldAllocators, allocator );
+	}
+
+	b3BlockAllocator* allocator = b3Array_Get( world->manifoldAllocators, index );
+	b3Manifold* manifolds = (b3Manifold*)b3AllocateElement( allocator );
+	b3UnlockMutex( world->manifoldAllocatorMutex );
+	memset( manifolds, 0, count * sizeof( b3Manifold ) );
+	return manifolds;
+}
+
+static inline void b3FreeManifolds( b3World* world, b3Manifold* manifolds, int count )
+{
+	if ( count == 0 )
+	{
+		return;
+	}
+
+	int index = count - 1;
+	b3LockMutex( world->manifoldAllocatorMutex );
+	b3BlockAllocator* allocator = b3Array_Get( world->manifoldAllocators, index );
+	b3FreeElement( allocator, manifolds );
+	b3UnlockMutex( world->manifoldAllocatorMutex );
+}
+

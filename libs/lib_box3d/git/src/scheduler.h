@@ -3,13 +3,13 @@
 
 #pragma once
 
-typedef void b2TaskCallback( void* taskContext );
-typedef struct b2Scheduler b2Scheduler;
+typedef void b3TaskCallback( void* taskContext );
+typedef struct b3Scheduler b3Scheduler;
 
-b2Scheduler* b2CreateScheduler( int workerCount );
-void b2DestroyScheduler( b2Scheduler* scheduler );
-void b2ResetScheduler( b2Scheduler* scheduler );
+b3Scheduler* b3CreateScheduler( int workerCount );
+void b3DestroyScheduler( b3Scheduler* scheduler );
+void b3ResetScheduler( b3Scheduler* scheduler );
 
-// See b2EnqueueTaskCallback and b2FinishTaskCallback
-void* b2SchedulerEnqueueTask( b2TaskCallback* task, void* taskContext, void* userContext );
-void b2SchedulerFinishTask( void* userTask, void* userContext );
+// See b3EnqueueTaskCallback and b3FinishTaskCallback
+void* b3SchedulerEnqueueTask( b3TaskCallback* task, void* taskContext, void* userContext, const char* name );
+void b3SchedulerFinishTask( void* userTask, void* userContext );

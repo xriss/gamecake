@@ -1,14 +1,13 @@
-# Box2D 
+# Box3D
 
-Box2D is a 2D physics engine for games.
+[![Build Status](https://github.com/erincatto/box3d/actions/workflows/build.yml/badge.svg)](https://github.com/erincatto/box3d/actions)
+[![CLA assistant](https://cla-assistant.io/readme/badge/erincatto/box3d)](https://cla-assistant.io/erincatto/box3d)
 
-![Box2D Logo](https://box2d.org/images/logo.svg)
+![Box3D Logo](https://box2d.org/images/logo.svg)
 
-[![Box2D Version 3.0 Release Demo](https://img.youtube.com/vi/dAoM-xjOWtA/0.jpg)](https://www.youtube.com/watch?v=dAoM-xjOWtA)
+Box3D is a 3D physics engine for games.
 
-## Build Status
-
-[![Build Status](https://github.com/erincatto/box2d/actions/workflows/build.yml/badge.svg)](https://github.com/erincatto/box2d/actions)
+[![Introducing Box3D](https://img.youtube.com/vi/jr_Fzl2XwKU/maxresdefault.jpg)](https://www.youtube.com/watch?v=jr_Fzl2XwKU)
 
 ## Features
 
@@ -16,18 +15,19 @@ Box2D is a 2D physics engine for games.
 
 - Continuous collision detection
 - Contact events
-- Convex polygons, capsules, circles, rounded polygons, segments, and chains
+- Convex hulls, capsules, spheres, triangle meshes, and height fields
 - Multiple shapes per body
 - Collision filtering
 - Ray casts, shape casts, and overlap queries
 - Sensor system
+- Character mover
 
 ### Physics
 
 - Robust _Soft Step_ rigid body solver
 - Continuous physics for fast translations and rotations
 - Island based sleep
-- Revolute, prismatic, distance, mouse joint, weld, and wheel joints
+- Revolute, prismatic, distance, motor, weld, and wheel joints
 - Joint limits, motors, springs, and friction
 - Joint and contact forces
 - Body movement events and sleep notification
@@ -38,34 +38,40 @@ Box2D is a 2D physics engine for games.
 - Written in portable C17
 - Extensive multithreading and SIMD
 - Optimized for large piles of bodies
+- Cross platform determinism
+- Recording and replay
 
 ### Samples
 
-- OpenGL with GLFW
-- Graphical user interface with imgui
-- Many samples to demonstrate features and performance
+- Uses sokol to run with D3D11 on Windows, Metal on macOS, and OpenGL 4.5 on Linux.
+- Graphical user interface with imgui.
+- Many samples to demonstrate features and performance.
 
-## Building All Platforms
+## Building all platforms
 
 - Install [CMake](https://cmake.org/)
 - Install [git](https://git-scm.com/)
 - Ensure these run from the command line
 
-## Building with CMake presets
+## Building with CMake presets (recommended)
 
-The presets in `CMakePresets.json` give one build flow on every platform and are picked up automatically by Visual Studio, VS Code, and CLion (open the folder and choose a preset). From the command line:
+This uses the presets in `CMakePresets.json`.
 
 - Windows: `cmake --preset windows` then `cmake --build --preset windows-release`
 - Linux: `cmake --preset linux-release` then `cmake --build --preset linux-release`
 - macOS: `cmake --preset macos` then `cmake --build --preset macos-release`
 
-Use the `*-debug` build presets for a debug build (not recommended for the replay viewer). The presets use the default native toolchain (the installed Visual Studio on Windows, Make on Linux, Xcode on macOS), so no specific compiler version is required.
+Run the samples app (must be in the Box3D directory).
+
+- Windows: `.\build\bin\Release\samples.exe`
+- Linux: `./build/bin/samples`
+- macOS: `./build/bin/Release/samples`
 
 ## Building for Visual Studio
 
 - Install [Visual Studio](https://visualstudio.microsoft.com/)
-- Run `build_vs2026.bat` for Visual Studio 2026, or use the `windows` preset above for other versions
-- Open and build the generated solution in the `build` folder
+- Run `build_vs2026.bat`
+- Open and build `build/box3d.slnx`
 
 ## Building for Linux
 
@@ -77,9 +83,17 @@ Use the `*-debug` build presets for a debug build (not recommended for the repla
 - mkdir build
 - cd build
 - cmake -G Xcode ..
-- Open `box2d.xcodeproj`
+- Open `box3d.xcodeproj`
 - Select the samples scheme
 - Build and run the samples
+
+## Building for Web
+
+- [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html)
+- `emcmake cmake -B build -DBOX3D_SAMPLES=OFF`
+- `cmake --build build`
+
+Box3D uses SSE2 with WebAssembly. Define `BOX3D_DISABLE_SIMD` to disable SSE2.
 
 ## Building and installing
 
@@ -89,30 +103,54 @@ Use the `*-debug` build presets for a debug build (not recommended for the repla
 - cmake --build . --config Release
 - cmake --install . (might need sudo)
 
-## Replay viewer
+## Using Box3D in your project
 
-The samples app doubles as a viewer for Box2D recordings (`.b2rec` files). Any preset above builds it. Pass a recording on the command line to open it directly:
+The core library has no dependencies beyond the C runtime (and `libm` on Unix). Linking it
+gives you the `box3d::box3d` target.
 
-- Windows: `build\bin\Release\samples.exe path\to\session.b2rec`
-- Linux: `build/bin/samples path/to/session.b2rec`
-- macOS: `build/bin/Release/samples path/to/session.b2rec`
+I recommend to use FetchContent:
 
-On Windows you can also drag a `.b2rec` file onto `samples.exe`. The viewer runs from any directory. Without an argument, open a recording from the **Replay** menu. See [docs/recording.md](docs/recording.md) for how to make a recording.
+```cmake
+include(FetchContent)
+FetchContent_Declare(box3d
+  GIT_REPOSITORY https://github.com/erincatto/box3d.git
+  GIT_TAG v0.1.0)
+FetchContent_MakeAvailable(box3d)
+
+target_link_libraries(my_app PRIVATE box3d::box3d)
+```
+
+For a vendored copy or git submodule, point `add_subdirectory` at it:
+
+```cmake
+add_subdirectory(extern/box3d)
+
+target_link_libraries(my_app PRIVATE box3d::box3d)
+```
+
+To use a copy installed with `cmake --install`, find the package:
+
+```cmake
+find_package(box3d 0.1 REQUIRED)
+
+target_link_libraries(my_app PRIVATE box3d::box3d)
+```
+
+See [`docs/hello.md`](docs/hello.md) for a minimal first program.
 
 ## Compatibility
 
-The Box2D library and samples build and run on Windows, Linux, and Mac.
+The Box3D library and samples build and run on Windows, Linux, and Mac.
 
-You will need a compiler that supports C17 to build the Box2D library.
+You will need a compiler that supports C17 to build the Box3D library.
 
 You will need a compiler that supports C++20 to build the samples.
 
-Box2D uses SSE2 and Neon SIMD math to improve performance. This can be disabled by defining `BOX2D_DISABLE_SIMD`.
+Box3D uses SSE2 and Neon SIMD math to improve performance. SIMD can be disabled by defining `BOX3D_DISABLE_SIMD`.
 
 ## Documentation
 
-- [Manual](https://box2d.org/documentation/)
-- [Migration Guide](https://github.com/erincatto/box2d/blob/main/docs/migration.md)
+The user manual lives in [`docs/`](docs/) and is built with Doxygen. Enable the `BOX3D_DOCS` CMake option and build the `doc` target.
 
 ## Community
 
@@ -120,24 +158,31 @@ Box2D uses SSE2 and Neon SIMD math to improve performance. This can be disabled 
 
 ## Contributing
 
-Please do not submit pull requests. Instead, please file an issue for bugs or feature requests. For support, please visit the Discord server.
+Pull requests are currently disabled. Instead, please file an issue for bugs or feature requests. For support, please visit the Discord server.
 
-# Giving Feedback
+## Giving feedback
 
-Please file an issue or start a chat on discord. You can also use [GitHub Discussions](https://github.com/erincatto/box2d/discussions).
+Please file an issue or start a chat on discord. You can also use [GitHub Discussions](https://github.com/erincatto/box3d/discussions).
 
 ## License
 
-Box2D is developed by Erin Catto and uses the [MIT license](https://en.wikipedia.org/wiki/MIT_License).
+Box3D is developed by Erin Catto and uses the [MIT license](https://en.wikipedia.org/wiki/MIT_License).
 
 ## Sponsorship
 
-Support development of Box2D through [Github Sponsors](https://github.com/sponsors/erincatto).
+Support development of Box3D through [Github Sponsors](https://github.com/sponsors/erincatto).
 
 Please consider starring this repository and subscribing to my [YouTube channel](https://www.youtube.com/@erin_catto).
 
-## External ports, wrappers, and bindings (unsupported)
+## LLM Usage
 
-- Beef bindings - https://github.com/EnokViking/Box2DBeef
-- C++ bindings - https://github.com/HolyBlackCat/box2cpp
-- WASM - https://github.com/Birch-san/box2d3-wasm
+LLMs are used in the following areas:
+
+- unit tests
+- samples app
+- migrating code between Box2D and Box3D
+- build configuration
+- code reviews
+- benchmarking
+
+Elsewhere all code is developed and written by me. I take responsibility for every line of code in Box2D/3D.

@@ -1,166 +1,167 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #include "body.h"
 #include "core.h"
 #include "joint.h"
+#include "math_internal.h"
 #include "physics_world.h"
-#include "recording.h"
 #include "solver.h"
 #include "solver_set.h"
+#include "recording.h"
 
 // needed for dll export
-#include "box2d/box2d.h"
+#include "box3d/box3d.h"
 
-void b2MotorJoint_SetLinearVelocity( b2JointId jointId, b2Vec2 velocity )
+void b3MotorJoint_SetLinearVelocity( b3JointId jointId, b3Vec3 velocity )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, MotorJointSetLinearVelocity, jointId, velocity );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, MotorJointSetLinearVelocity, jointId, velocity );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	joint->motorJoint.linearVelocity = velocity;
 }
 
-b2Vec2 b2MotorJoint_GetLinearVelocity( b2JointId jointId )
+b3Vec3 b3MotorJoint_GetLinearVelocity( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	return joint->motorJoint.linearVelocity;
 }
 
-void b2MotorJoint_SetAngularVelocity( b2JointId jointId, float velocity )
+void b3MotorJoint_SetAngularVelocity( b3JointId jointId, b3Vec3 velocity )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, MotorJointSetAngularVelocity, jointId, velocity );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, MotorJointSetAngularVelocity, jointId, velocity );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	joint->motorJoint.angularVelocity = velocity;
 }
 
-float b2MotorJoint_GetAngularVelocity( b2JointId jointId )
+b3Vec3 b3MotorJoint_GetAngularVelocity( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	return joint->motorJoint.angularVelocity;
 }
 
-void b2MotorJoint_SetMaxVelocityTorque( b2JointId jointId, float maxTorque )
+void b3MotorJoint_SetMaxVelocityTorque( b3JointId jointId, float maxTorque )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, MotorJointSetMaxVelocityTorque, jointId, maxTorque );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, MotorJointSetMaxVelocityTorque, jointId, maxTorque );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	joint->motorJoint.maxVelocityTorque = maxTorque;
 }
 
-float b2MotorJoint_GetMaxVelocityTorque( b2JointId jointId )
+float b3MotorJoint_GetMaxVelocityTorque( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	return joint->motorJoint.maxVelocityTorque;
 }
 
-void b2MotorJoint_SetMaxVelocityForce( b2JointId jointId, float maxForce )
+void b3MotorJoint_SetMaxVelocityForce( b3JointId jointId, float maxForce )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, MotorJointSetMaxVelocityForce, jointId, maxForce );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, MotorJointSetMaxVelocityForce, jointId, maxForce );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	joint->motorJoint.maxVelocityForce = maxForce;
 }
 
-float b2MotorJoint_GetMaxVelocityForce( b2JointId jointId )
+float b3MotorJoint_GetMaxVelocityForce( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	return joint->motorJoint.maxVelocityForce;
 }
 
-void b2MotorJoint_SetLinearHertz( b2JointId jointId, float hertz )
+void b3MotorJoint_SetLinearHertz( b3JointId jointId, float hertz )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, MotorJointSetLinearHertz, jointId, hertz );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, MotorJointSetLinearHertz, jointId, hertz );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	joint->motorJoint.linearHertz = hertz;
 }
 
-float b2MotorJoint_GetLinearHertz( b2JointId jointId )
+float b3MotorJoint_GetLinearHertz( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	return joint->motorJoint.linearHertz;
 }
 
-void b2MotorJoint_SetLinearDampingRatio( b2JointId jointId, float damping )
+void b3MotorJoint_SetLinearDampingRatio( b3JointId jointId, float damping )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, MotorJointSetLinearDampingRatio, jointId, damping );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, MotorJointSetLinearDampingRatio, jointId, damping );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	joint->motorJoint.linearDampingRatio = damping;
 }
 
-float b2MotorJoint_GetLinearDampingRatio( b2JointId jointId )
+float b3MotorJoint_GetLinearDampingRatio( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	return joint->motorJoint.linearDampingRatio;
 }
 
-void b2MotorJoint_SetAngularHertz( b2JointId jointId, float hertz )
+void b3MotorJoint_SetAngularHertz( b3JointId jointId, float hertz )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, MotorJointSetAngularHertz, jointId, hertz );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, MotorJointSetAngularHertz, jointId, hertz );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	joint->motorJoint.angularHertz = hertz;
 }
 
-float b2MotorJoint_GetAngularHertz( b2JointId jointId )
+float b3MotorJoint_GetAngularHertz( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	return joint->motorJoint.angularHertz;
 }
 
-void b2MotorJoint_SetAngularDampingRatio( b2JointId jointId, float damping )
+void b3MotorJoint_SetAngularDampingRatio( b3JointId jointId, float damping )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, MotorJointSetAngularDampingRatio, jointId, damping );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, MotorJointSetAngularDampingRatio, jointId, damping );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	joint->motorJoint.angularDampingRatio = damping;
 }
 
-float b2MotorJoint_GetAngularDampingRatio( b2JointId jointId )
+float b3MotorJoint_GetAngularDampingRatio( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	return joint->motorJoint.angularDampingRatio;
 }
 
-void b2MotorJoint_SetMaxSpringForce( b2JointId jointId, float maxForce )
+void b3MotorJoint_SetMaxSpringForce( b3JointId jointId, float maxForce )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, MotorJointSetMaxSpringForce, jointId, maxForce );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
-	joint->motorJoint.maxSpringForce = b2MaxFloat( 0.0f, maxForce );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, MotorJointSetMaxSpringForce, jointId, maxForce );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
+	joint->motorJoint.maxSpringForce = b3MaxFloat( 0.0f, maxForce );
 }
 
-float b2MotorJoint_GetMaxSpringForce( b2JointId jointId )
+float b3MotorJoint_GetMaxSpringForce( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	return joint->motorJoint.maxSpringForce;
 }
 
-void b2MotorJoint_SetMaxSpringTorque( b2JointId jointId, float maxTorque )
+void b3MotorJoint_SetMaxSpringTorque( b3JointId jointId, float maxTorque )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, MotorJointSetMaxSpringTorque, jointId, maxTorque );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
-	joint->motorJoint.maxSpringTorque = b2MaxFloat( 0.0f, maxTorque );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, MotorJointSetMaxSpringTorque, jointId, maxTorque );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
+	joint->motorJoint.maxSpringTorque = b3MaxFloat( 0.0f, maxTorque );
 }
 
-float b2MotorJoint_GetMaxSpringTorque( b2JointId jointId )
+float b3MotorJoint_GetMaxSpringTorque( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_motorJoint );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_motorJoint );
 	return joint->motorJoint.maxSpringTorque;
 }
 
-b2Vec2 b2GetMotorJointForce( b2World* world, b2JointSim* base )
+b3Vec3 b3GetMotorJointForce( b3World* world, b3JointSim* base )
 {
-	b2Vec2 force = b2MulSV( world->inv_h, b2Add( base->motorJoint.linearVelocityImpulse, base->motorJoint.linearSpringImpulse ) );
+	b3Vec3 force = b3MulSV( world->inv_h, b3Add( base->motorJoint.linearVelocityImpulse, base->motorJoint.linearSpringImpulse ) );
 	return force;
 }
 
-float b2GetMotorJointTorque( b2World* world, b2JointSim* base )
+b3Vec3 b3GetMotorJointTorque( b3World* world, b3JointSim* base )
 {
-	return world->inv_h * ( base->motorJoint.angularVelocityImpulse + base->motorJoint.angularSpringImpulse );
+	return b3MulSV( world->inv_h, b3Add( base->motorJoint.angularVelocityImpulse, base->motorJoint.angularSpringImpulse ) );
 }
 
 // Point-to-point constraint
@@ -177,280 +178,262 @@ float b2GetMotorJointTorque( b2World* world, b2JointSim* base )
 // J = [0 0 -1 0 0 1]
 // K = invI1 + invI2
 
-void b2PrepareMotorJoint( b2JointSim* base, b2StepContext* context )
+void b3PrepareMotorJoint( b3JointSim* base, b3StepContext* context )
 {
-	B2_ASSERT( base->type == b2_motorJoint );
+	B3_ASSERT( base->type == b3_motorJoint );
 
 	// chase body id to the solver set where the body lives
 	int idA = base->bodyIdA;
 	int idB = base->bodyIdB;
 
-	b2World* world = context->world;
+	b3World* world = context->world;
 
-	b2Body* bodyA = b2Array_Get( world->bodies, idA );
-	b2Body* bodyB = b2Array_Get( world->bodies, idB );
+	b3Body* bodyA = b3Array_Get( world->bodies, idA  );
+	b3Body* bodyB = b3Array_Get( world->bodies, idB  );
 
-	B2_ASSERT( bodyA->setIndex == b2_awakeSet || bodyB->setIndex == b2_awakeSet );
+	B3_ASSERT( bodyA->setIndex == b3_awakeSet || bodyB->setIndex == b3_awakeSet );
 
-	b2SolverSet* setA = b2Array_Get( world->solverSets, bodyA->setIndex );
-	b2SolverSet* setB = b2Array_Get( world->solverSets, bodyB->setIndex );
+	b3SolverSet* setA = b3Array_Get( world->solverSets, bodyA->setIndex  );
+	b3SolverSet* setB = b3Array_Get( world->solverSets, bodyB->setIndex  );
 
 	int localIndexA = bodyA->localIndex;
 	int localIndexB = bodyB->localIndex;
 
-	b2BodySim* bodySimA = b2Array_Get( setA->bodySims, localIndexA );
-	b2BodySim* bodySimB = b2Array_Get( setB->bodySims, localIndexB );
+	b3BodySim* bodySimA = b3Array_Get( setA->bodySims, localIndexA  );
+	b3BodySim* bodySimB = b3Array_Get( setB->bodySims, localIndexB  );
 
-	float mA = bodySimA->invMass;
-	float iA = bodySimA->invInertia;
-	float mB = bodySimB->invMass;
-	float iB = bodySimB->invInertia;
+	base->invMassA = bodySimA->invMass;
+	base->invMassB = bodySimB->invMass;
+	base->invIA = bodySimA->invInertiaWorld;
+	base->invIB = bodySimB->invInertiaWorld;
 
-	base->invMassA = mA;
-	base->invMassB = mB;
-	base->invIA = iA;
-	base->invIB = iB;
+	b3Matrix3 invInertiaSum = b3AddMM( base->invIA, base->invIB );
+	base->fixedRotation = b3Det( invInertiaSum ) < 1000.0f * FLT_MIN;
 
-	b2MotorJoint* joint = &base->motorJoint;
-	joint->indexA = bodyA->setIndex == b2_awakeSet ? localIndexA : B2_NULL_INDEX;
-	joint->indexB = bodyB->setIndex == b2_awakeSet ? localIndexB : B2_NULL_INDEX;
+	b3MotorJoint* joint = &base->motorJoint;
+	joint->indexA = bodyA->setIndex == b3_awakeSet ? localIndexA : B3_NULL_INDEX;
+	joint->indexB = bodyB->setIndex == b3_awakeSet ? localIndexB : B3_NULL_INDEX;
 
 	// Compute joint anchor frames with world space rotation, relative to center of mass
-	joint->frameA.q = b2MulRot( bodySimA->transform.q, base->localFrameA.q );
-	joint->frameA.p = b2RotateVector( bodySimA->transform.q, b2Sub( base->localFrameA.p, bodySimA->localCenter ) );
-	joint->frameB.q = b2MulRot( bodySimB->transform.q, base->localFrameB.q );
-	joint->frameB.p = b2RotateVector( bodySimB->transform.q, b2Sub( base->localFrameB.p, bodySimB->localCenter ) );
+	joint->frameA.q = b3MulQuat( bodySimA->transform.q, base->localFrameA.q );
+	joint->frameA.p = b3RotateVector( bodySimA->transform.q, b3Sub( base->localFrameA.p, bodySimA->localCenter ) );
+	joint->frameB.q = b3MulQuat( bodySimB->transform.q, base->localFrameB.q );
+	joint->frameB.p = b3RotateVector( bodySimB->transform.q, b3Sub( base->localFrameB.p, bodySimB->localCenter ) );
 
 	// Compute the initial center delta. Incremental position updates are relative to this.
-	joint->deltaCenter = b2SubPos( bodySimB->center, bodySimA->center );
+	joint->deltaCenter = b3SubPos( bodySimB->center, bodySimA->center );
 
-	b2Vec2 rA = joint->frameA.p;
-	b2Vec2 rB = joint->frameB.p;
+	joint->linearSpring = b3MakeSoft( joint->linearHertz, joint->linearDampingRatio, context->h );
+	joint->angularSpring = b3MakeSoft( joint->angularHertz, joint->angularDampingRatio, context->h );
 
-	joint->linearSpring = b2MakeSoft( joint->linearHertz, joint->linearDampingRatio, context->h );
-	joint->angularSpring = b2MakeSoft( joint->angularHertz, joint->angularDampingRatio, context->h );
-
-	b2Mat22 kl;
-	kl.cx.x = mA + mB + rA.y * rA.y * iA + rB.y * rB.y * iB;
-	kl.cx.y = -rA.y * rA.x * iA - rB.y * rB.x * iB;
-	kl.cy.x = kl.cx.y;
-	kl.cy.y = mA + mB + rA.x * rA.x * iA + rB.x * rB.x * iB;
-	joint->linearMass = b2GetInverse22( kl );
-
-	float ka = iA + iB;
-	joint->angularMass = ka > 0.0f ? 1.0f / ka : 0.0f;
+	joint->angularMass = b3InvertMatrix( invInertiaSum );
 
 	if ( context->enableWarmStarting == false )
 	{
-		joint->linearVelocityImpulse = b2Vec2_zero;
-		joint->angularVelocityImpulse = 0.0f;
-		joint->linearSpringImpulse = b2Vec2_zero;
-		joint->angularSpringImpulse = 0.0f;
+		joint->linearVelocityImpulse = b3Vec3_zero;
+		joint->angularVelocityImpulse = b3Vec3_zero;
+		joint->linearSpringImpulse = b3Vec3_zero;
+		joint->angularSpringImpulse = b3Vec3_zero;
 	}
 }
 
-void b2WarmStartMotorJoint( b2JointSim* base, b2StepContext* context )
+void b3WarmStartMotorJoint( b3JointSim* base, b3StepContext* context )
 {
-	B2_ASSERT( base->type == b2_motorJoint );
+	B3_ASSERT( base->type == b3_motorJoint );
 
 	float mA = base->invMassA;
 	float mB = base->invMassB;
-	float iA = base->invIA;
-	float iB = base->invIB;
+	b3Matrix3 iA = base->invIA;
+	b3Matrix3 iB = base->invIB;
 
-	b2MotorJoint* joint = &base->motorJoint;
+	b3MotorJoint* joint = &base->motorJoint;
 
 	// dummy state for static bodies
-	b2BodyState dummyState = b2_identityBodyState;
+	b3BodyState dummyState = b3_identityBodyState;
 
-	b2BodyState* stateA = joint->indexA == B2_NULL_INDEX ? &dummyState : context->states + joint->indexA;
-	b2BodyState* stateB = joint->indexB == B2_NULL_INDEX ? &dummyState : context->states + joint->indexB;
+	b3BodyState* stateA = joint->indexA == B3_NULL_INDEX ? &dummyState : context->states + joint->indexA;
+	b3BodyState* stateB = joint->indexB == B3_NULL_INDEX ? &dummyState : context->states + joint->indexB;
 
-	b2Vec2 rA = b2RotateVector( stateA->deltaRotation, joint->frameA.p );
-	b2Vec2 rB = b2RotateVector( stateB->deltaRotation, joint->frameB.p );
+	b3Vec3 rA = b3RotateVector( stateA->deltaRotation, joint->frameA.p );
+	b3Vec3 rB = b3RotateVector( stateB->deltaRotation, joint->frameB.p );
 
-	b2Vec2 linearImpulse = b2Add( joint->linearVelocityImpulse, joint->linearSpringImpulse );
-	float angularImpulse = joint->angularVelocityImpulse + joint->angularSpringImpulse;
+	b3Vec3 linearImpulse = b3Add( joint->linearVelocityImpulse, joint->linearSpringImpulse );
+	b3Vec3 angularImpulse = b3Add( joint->angularVelocityImpulse, joint->angularSpringImpulse );
 
-	if ( stateA->flags & b2_dynamicFlag )
-	{
-		stateA->linearVelocity = b2MulSub( stateA->linearVelocity, mA, linearImpulse );
-		stateA->angularVelocity -= iA * ( b2Cross( rA, linearImpulse ) + angularImpulse );
-	}
-
-	if ( stateB->flags & b2_dynamicFlag )
-	{
-		stateB->linearVelocity = b2MulAdd( stateB->linearVelocity, mB, linearImpulse );
-		stateB->angularVelocity += iB * ( b2Cross( rB, linearImpulse ) + angularImpulse );
-	}
+	stateA->linearVelocity = b3MulSub( stateA->linearVelocity, mA, linearImpulse );
+	stateA->angularVelocity = b3Sub( stateA->angularVelocity, b3MulMV( iA, b3Add( b3Cross( rA, linearImpulse ), angularImpulse ) ) );
+	stateB->linearVelocity = b3MulAdd( stateB->linearVelocity, mB, linearImpulse );
+	stateB->angularVelocity = b3Add( stateB->angularVelocity, b3MulMV( iB, b3Add( b3Cross( rB, linearImpulse ), angularImpulse ) ) );
 }
 
-void b2SolveMotorJoint( b2JointSim* base, b2StepContext* context )
+void b3SolveMotorJoint( b3JointSim* base, b3StepContext* context )
 {
-	B2_ASSERT( base->type == b2_motorJoint );
+	B3_ASSERT( base->type == b3_motorJoint );
 
 	float mA = base->invMassA;
 	float mB = base->invMassB;
-	float iA = base->invIA;
-	float iB = base->invIB;
+	b3Matrix3 iA = base->invIA;
+	b3Matrix3 iB = base->invIB;
 
 	// dummy state for static bodies
-	b2BodyState dummyState = b2_identityBodyState;
+	b3BodyState dummyState = b3_identityBodyState;
 
-	b2MotorJoint* joint = &base->motorJoint;
-	b2BodyState* stateA = joint->indexA == B2_NULL_INDEX ? &dummyState : context->states + joint->indexA;
-	b2BodyState* stateB = joint->indexB == B2_NULL_INDEX ? &dummyState : context->states + joint->indexB;
+	b3MotorJoint* joint = &base->motorJoint;
+	b3BodyState* stateA = joint->indexA == B3_NULL_INDEX ? &dummyState : context->states + joint->indexA;
+	b3BodyState* stateB = joint->indexB == B3_NULL_INDEX ? &dummyState : context->states + joint->indexB;
 
-	b2Vec2 vA = stateA->linearVelocity;
-	float wA = stateA->angularVelocity;
-	b2Vec2 vB = stateB->linearVelocity;
-	float wB = stateB->angularVelocity;
+	b3Vec3 vA = stateA->linearVelocity;
+	b3Vec3 wA = stateA->angularVelocity;
+	b3Vec3 vB = stateB->linearVelocity;
+	b3Vec3 wB = stateB->angularVelocity;
+
+	b3Quat quatA = b3MulQuat( stateA->deltaRotation, joint->frameA.q );
+	b3Quat quatB = b3MulQuat( stateB->deltaRotation, joint->frameB.q );
+
+	if ( b3DotQuat( quatA, quatB ) < 0.0f )
+	{
+		// this keeps the rotation angle in the range [-pi, pi]
+		quatB = b3NegateQuat( quatB );
+	}
+
+	b3Quat relQ = b3InvMulQuat( quatA, quatB );
 
 	// angular spring
 	if ( joint->maxSpringTorque > 0.0f && joint->angularHertz > 0.0f )
 	{
-		b2Rot qA = b2MulRot( stateA->deltaRotation, joint->frameA.q );
-		b2Rot qB = b2MulRot( stateB->deltaRotation, joint->frameB.q );
-		b2Rot relQ = b2InvMulRot( qA, qB );
+		b3Quat targetQuat = b3Quat_identity;
+		b3Vec3 deltaRotation = b3DeltaQuatToRotation( relQ, targetQuat );
+		b3Vec3 c = b3Neg( b3RotateVector( quatA, deltaRotation ) );
 
-		float c = b2Rot_GetAngle( relQ );
-		float bias = joint->angularSpring.biasRate * c;
+		b3Vec3 bias = b3MulSV( joint->angularSpring.biasRate, c );
 		float massScale = joint->angularSpring.massScale;
 		float impulseScale = joint->angularSpring.impulseScale;
 
-		float cdot = wB - wA;
+		b3Vec3 cdot = b3Sub( wB, wA );
 
 		float maxImpulse = context->h * joint->maxSpringTorque;
-		float oldImpulse = joint->angularSpringImpulse;
-		float impulse = -massScale * joint->angularMass * ( cdot + bias ) - impulseScale * oldImpulse;
-		joint->angularSpringImpulse = b2ClampFloat( oldImpulse + impulse, -maxImpulse, maxImpulse );
-		impulse = joint->angularSpringImpulse - oldImpulse;
+		b3Vec3 oldImpulse = joint->angularSpringImpulse;
+		b3Vec3 impulse = b3MulSub( b3MulSV( -massScale, b3MulMV( joint->angularMass, b3Add( cdot, bias ) ) ), impulseScale, oldImpulse );
+		joint->angularSpringImpulse = b3Add( oldImpulse, impulse );
+		if ( b3LengthSquared( joint->angularSpringImpulse ) > maxImpulse * maxImpulse )
+		{
+			joint->angularSpringImpulse = b3MulSV( maxImpulse, b3Normalize( joint->angularSpringImpulse ) );
+		}
+		impulse = b3Sub( joint->angularSpringImpulse, oldImpulse );
 
-		wA -= iA * impulse;
-		wB += iB * impulse;
+		wA = b3Sub( wA, b3MulMV( iA, impulse ) );
+		wB = b3Add( wB, b3MulMV( iB, impulse ) );
 	}
 
 	// angular velocity
-	if ( joint->maxVelocityTorque > 0.0f )
+	if ( joint->maxVelocityTorque > 0.0 )
 	{
-		float cdot = wB - wA - joint->angularVelocity;
-		float impulse = -joint->angularMass * cdot;
+		b3Vec3 cdot = b3Sub( b3Sub( wB, wA ), joint->angularVelocity );
+		b3Vec3 impulse = b3Neg( b3MulMV( joint->angularMass, cdot ) );
 
 		float maxImpulse = context->h * joint->maxVelocityTorque;
-		float oldImpulse = joint->angularVelocityImpulse;
-		joint->angularVelocityImpulse = b2ClampFloat( oldImpulse + impulse, -maxImpulse, maxImpulse );
-		impulse = joint->angularVelocityImpulse - oldImpulse;
+		b3Vec3 oldImpulse = joint->angularVelocityImpulse;
+		joint->angularVelocityImpulse = b3Add( oldImpulse, impulse );
+		if ( b3LengthSquared( joint->angularVelocityImpulse ) > maxImpulse * maxImpulse )
+		{
+			joint->angularVelocityImpulse = b3MulSV( maxImpulse, b3Normalize( joint->angularVelocityImpulse ) );
+		}
+		impulse = b3Sub( joint->angularVelocityImpulse, oldImpulse );
 
-		wA -= iA * impulse;
-		wB += iB * impulse;
+		wA = b3Sub( wA, b3MulMV( iA, impulse ) );
+		wB = b3Add( wB, b3MulMV( iB, impulse ) );
 	}
 
-	b2Vec2 rA = b2RotateVector( stateA->deltaRotation, joint->frameA.p );
-	b2Vec2 rB = b2RotateVector( stateB->deltaRotation, joint->frameB.p );
+	b3Vec3 rA = b3RotateVector( stateA->deltaRotation, joint->frameA.p );
+	b3Vec3 rB = b3RotateVector( stateB->deltaRotation, joint->frameB.p );
 
 	// linear spring
 	if ( joint->maxSpringForce > 0.0f && joint->linearHertz > 0.0f )
 	{
-		b2Vec2 dcA = stateA->deltaPosition;
-		b2Vec2 dcB = stateB->deltaPosition;
-		b2Vec2 c = b2Add( b2Add( b2Sub( dcB, dcA ), b2Sub( rB, rA ) ), joint->deltaCenter );
+		b3Vec3 dcA = stateA->deltaPosition;
+		b3Vec3 dcB = stateB->deltaPosition;
+		b3Vec3 c = b3Add( b3Add( b3Sub( dcB, dcA ), b3Sub( rB, rA ) ), joint->deltaCenter );
 
-		b2Vec2 bias = b2MulSV( joint->linearSpring.biasRate, c );
+		b3Vec3 bias = b3MulSV( joint->linearSpring.biasRate, c );
 		float massScale = joint->linearSpring.massScale;
 		float impulseScale = joint->linearSpring.impulseScale;
 
-		b2Vec2 cdot = b2Sub( b2Add( vB, b2CrossSV( wB, rB ) ), b2Add( vA, b2CrossSV( wA, rA ) ) );
-		cdot = b2Add( cdot, bias );
+		b3Vec3 cdot = b3Sub( b3Add( vB, b3Cross( wB, rB ) ), b3Add( vA, b3Cross( wA, rA ) ) );
 
-		// Updating the effective mass here may be overkill
-		b2Mat22 kl;
-		kl.cx.x = mA + mB + rA.y * rA.y * iA + rB.y * rB.y * iB;
-		kl.cx.y = -rA.y * rA.x * iA - rB.y * rB.x * iB;
-		kl.cy.x = kl.cx.y;
-		kl.cy.y = mA + mB + rA.x * rA.x * iA + rB.x * rB.x * iB;
-		joint->linearMass = b2GetInverse22( kl );
+		//// K = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
+		b3Matrix3 sA = b3Skew( rA );
+		b3Matrix3 sB = b3Skew( rB );
+		b3Matrix3 kA = b3MulMM( sA, b3MulMM( base->invIA, sA ) );
+		b3Matrix3 kB = b3MulMM( sB, b3MulMM( base->invIB, sB ) );
+		b3Matrix3 k = b3NegateMat3( b3AddMM( kA, kB ) );
+		k.cx.x += mA + mB;
+		k.cy.y += mA + mB;
+		k.cz.z += mA + mB;
 
-		b2Vec2 b = b2MulMV( joint->linearMass, cdot );
+		b3Vec3 b = b3Solve3( k, b3Add( cdot, bias ) );
 
-		b2Vec2 oldImpulse = joint->linearSpringImpulse;
-		b2Vec2 impulse = {
-			-massScale * b.x - impulseScale * oldImpulse.x,
-			-massScale * b.y - impulseScale * oldImpulse.y,
-		};
-
+		b3Vec3 oldImpulse = joint->linearSpringImpulse;
+		b3Vec3 impulse = b3MulSub( b3MulSV( -massScale, b ), impulseScale, oldImpulse );
 		float maxImpulse = context->h * joint->maxSpringForce;
-		joint->linearSpringImpulse = b2Add( joint->linearSpringImpulse, impulse );
+		joint->linearSpringImpulse = b3Add( joint->linearSpringImpulse, impulse );
 
-		if ( b2LengthSquared( joint->linearSpringImpulse ) > maxImpulse * maxImpulse )
+		if ( b3LengthSquared( joint->linearSpringImpulse ) > maxImpulse * maxImpulse )
 		{
-			joint->linearSpringImpulse = b2Normalize( joint->linearSpringImpulse );
-			joint->linearSpringImpulse.x *= maxImpulse;
-			joint->linearSpringImpulse.y *= maxImpulse;
+			joint->linearSpringImpulse = b3MulSV( maxImpulse, b3Normalize( joint->linearSpringImpulse ) );
 		}
 
-		impulse = b2Sub( joint->linearSpringImpulse, oldImpulse );
+		impulse = b3Sub( joint->linearSpringImpulse, oldImpulse );
 
-		vA = b2MulSub( vA, mA, impulse );
-		wA -= iA * b2Cross( rA, impulse );
-		vB = b2MulAdd( vB, mB, impulse );
-		wB += iB * b2Cross( rB, impulse );
+		vA = b3MulSub( vA, mA, impulse );
+		wA = b3Sub( wA, b3MulMV( iA, b3Cross( rA, impulse ) ) );
+		vB = b3MulAdd( vB, mB, impulse );
+		wB = b3Add( wB, b3MulMV( iB, b3Cross( rB, impulse ) ) );
 	}
 
 	// linear velocity
 	if ( joint->maxVelocityForce > 0.0f )
 	{
-		b2Vec2 cdot = b2Sub( b2Add( vB, b2CrossSV( wB, rB ) ), b2Add( vA, b2CrossSV( wA, rA ) ) );
-		cdot = b2Sub( cdot, joint->linearVelocity );
-		b2Vec2 b = b2MulMV( joint->linearMass, cdot );
-		b2Vec2 impulse = { -b.x, -b.y };
+		b3Vec3 cdot = b3Sub( b3Add( vB, b3Cross( wB, rB ) ), b3Add( vA, b3Cross( wA, rA ) ) );
+		cdot = b3Sub( cdot, joint->linearVelocity );
+		//// K = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
+		b3Matrix3 sA = b3Skew( rA );
+		b3Matrix3 sB = b3Skew( rB );
+		b3Matrix3 kA = b3MulMM( sA, b3MulMM( base->invIA, sA ) );
+		b3Matrix3 kB = b3MulMM( sB, b3MulMM( base->invIB, sB ) );
+		b3Matrix3 k = b3NegateMat3( b3AddMM( kA, kB ) );
+		k.cx.x += mA + mB;
+		k.cy.y += mA + mB;
+		k.cz.z += mA + mB;
 
-		b2Vec2 oldImpulse = joint->linearVelocityImpulse;
+		b3Vec3 b = b3Solve3( k, cdot );
+		b3Vec3 impulse = b3Neg( b );
+
+		b3Vec3 oldImpulse = joint->linearVelocityImpulse;
 		float maxImpulse = context->h * joint->maxVelocityForce;
-		joint->linearVelocityImpulse = b2Add( joint->linearVelocityImpulse, impulse );
+		joint->linearVelocityImpulse = b3Add( joint->linearVelocityImpulse, impulse );
 
-		if ( b2LengthSquared( joint->linearVelocityImpulse ) > maxImpulse * maxImpulse )
+		if ( b3LengthSquared( joint->linearVelocityImpulse ) > maxImpulse * maxImpulse )
 		{
-			joint->linearVelocityImpulse = b2Normalize( joint->linearVelocityImpulse );
-			joint->linearVelocityImpulse.x *= maxImpulse;
-			joint->linearVelocityImpulse.y *= maxImpulse;
+			joint->linearVelocityImpulse = b3MulSV( maxImpulse, b3Normalize( joint->linearVelocityImpulse ) );
 		}
 
-		impulse = b2Sub( joint->linearVelocityImpulse, oldImpulse );
+		impulse = b3Sub( joint->linearVelocityImpulse, oldImpulse );
 
-		vA = b2MulSub( vA, mA, impulse );
-		wA -= iA * b2Cross( rA, impulse );
-		vB = b2MulAdd( vB, mB, impulse );
-		wB += iB * b2Cross( rB, impulse );
+		vA = b3MulSub( vA, mA, impulse );
+		wA = b3Sub( wA, b3MulMV( iA, b3Cross( rA, impulse ) ) );
+		vB = b3MulAdd( vB, mB, impulse );
+		wB = b3Add( wB, b3MulMV( iB, b3Cross( rB, impulse ) ) );
 	}
 
-	if ( stateA->flags & b2_dynamicFlag )
+	if ( stateA->flags & b3_dynamicFlag )
 	{
 		stateA->linearVelocity = vA;
 		stateA->angularVelocity = wA;
 	}
 
-	if ( stateB->flags & b2_dynamicFlag )
+	if ( stateB->flags & b3_dynamicFlag )
 	{
 		stateB->linearVelocity = vB;
 		stateB->angularVelocity = wB;
 	}
 }
-
-#if 0
-void b2DumpMotorJoint()
-{
-	int32 indexA = m_bodyA->m_islandIndex;
-	int32 indexB = m_bodyB->m_islandIndex;
-
-	b2Dump("  b2MotorJointDef jd;\n");
-	b2Dump("  jd.bodyA = sims[%d];\n", indexA);
-	b2Dump("  jd.bodyB = sims[%d];\n", indexB);
-	b2Dump("  jd.collideConnected = bool(%d);\n", m_collideConnected);
-	b2Dump("  jd.localAnchorA.Set(%.9g, %.9g);\n", m_localAnchorA.x, m_localAnchorA.y);
-	b2Dump("  jd.localAnchorB.Set(%.9g, %.9g);\n", m_localAnchorB.x, m_localAnchorB.y);
-	b2Dump("  jd.referenceAngle = %.9g;\n", m_referenceAngle);
-	b2Dump("  jd.stiffness = %.9g;\n", m_stiffness);
-	b2Dump("  jd.damping = %.9g;\n", m_damping);
-	b2Dump("  joints[%d] = m_world->CreateJoint(&jd);\n", m_index);
-}
-#endif

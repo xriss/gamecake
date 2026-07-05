@@ -1,179 +1,139 @@
-// SPDX-FileCopyrightText: 2022 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
-#include "draw.h"
-#include "human.h"
+#include "imgui.h"
 #include "sample.h"
+#include "gfx/draw.h"
+#include "stability.h"
 #include "utils.h"
 
-#include "box2d/box2d.h"
-#include "box2d/math_functions.h"
+#include "gfx/debug_adapter.h"
 
-#include <GLFW/glfw3.h>
-#include <imgui.h>
-#include <vector>
+#include "box3d/box3d.h"
 
-// extern "C" int b2_toiHitCount;
+#include <stdio.h>
+#include <stdlib.h>
+
+class ThinWall : public Sample
+{
+public:
+	explicit ThinWall( SampleContext* context )
+		: Sample( context )
+	{
+		if ( context->restart == false )
+		{
+			m_camera->SetView( 45.0f, 30.0f, 30.0f, b3Pos_zero );
+		}
+
+		AddGroundBox( 40.0f );
+
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+
+		bodyDef.position = { 0.0f, 10.0f, 0.0f };
+		bodyDef.rotation = b3MakeQuatFromAxisAngle( b3Vec3_axisX, 90.0f * B3_DEG_TO_RAD );
+		b3BodyId wallId = b3CreateBody( m_worldId, &bodyDef );
+		b3BoxHull wallBox = b3MakeBoxHull( 10.0f, 0.1f, 10.0f );
+		b3CreateHullShape( wallId, &shapeDef, &wallBox.base );
+
+		bodyDef.type = b3_dynamicBody;
+		bodyDef.rotation = b3Quat_identity;
+		shapeDef.baseMaterial.rollingResistance = 0.1f;
+
+		bodyDef.position = { -5.0, 10.0f, 20.0f };
+		bodyDef.linearVelocity = { 0.0f, 0.0, -180.0f };
+		bodyDef.angularVelocity = { 20.0f, 0.0f, 0.0f };
+		b3BodyId sphereBodyId = b3CreateBody( m_worldId, &bodyDef );
+
+		b3Sphere sphere = { b3Vec3_zero, 0.1f };
+		b3CreateSphereShape( sphereBodyId, &shapeDef, &sphere );
+
+		bodyDef.position = { 0.0, 10.0f, 20.0f };
+		bodyDef.linearVelocity = { 0.0f, 0.0, -180.0f };
+		bodyDef.angularVelocity = { 20.0f, -5.0f, 0.0f };
+		b3BodyId capsuleBodyId = b3CreateBody( m_worldId, &bodyDef );
+
+		b3Capsule capsule = { { -0.3f, 0.0f, 0.0f }, { 0.3f, 0.0f, 0.0f }, 0.1f };
+		b3CreateCapsuleShape( capsuleBodyId, &shapeDef, &capsule );
+
+		bodyDef.position = { 5.0, 10.0f, 20.0f };
+		bodyDef.linearVelocity = { 0.0f, 0.0, -180.0f };
+		bodyDef.angularVelocity = { 20.0f, 5.0f, 0.0f };
+		b3BodyId boxBodyId = b3CreateBody( m_worldId, &bodyDef );
+		b3BoxHull box = b3MakeBoxHull( 0.4f, 0.1f, 0.1f );
+		b3CreateHullShape( boxBodyId, &shapeDef, &box.base );
+	}
+
+	static Sample* Create( SampleContext* context )
+	{
+		return new ThinWall( context );
+	}
+};
+
+static int sampleThinWall = RegisterSample( "Continuous", "Thin Wall", ThinWall::Create );
 
 class BounceHouse : public Sample
 {
 public:
-	enum ShapeType
-	{
-		e_circleShape = 0,
-		e_capsuleShape,
-		e_boxShape
-	};
-
-	struct HitEvent
-	{
-		b2Pos point;
-		float speed;
-		int stepIndex;
-	};
-
 	explicit BounceHouse( SampleContext* context )
 		: Sample( context )
 	{
-		if ( m_context->restart == false )
+		if ( context->restart == false )
 		{
-			m_context->camera.center = { 0.0f, 0.0f };
-			m_context->camera.zoom = 25.0f * 0.45f;
+			m_camera->SetView( 45.0f, 45.0f, 50.0f, b3Pos_zero );
 		}
 
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
+		AddGroundBox( 10.0f );
 
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		{
-			b2Segment segment = { { -10.0f, -10.0f }, { 10.0f, -10.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-		}
+		b3BodyDef bodyDef = b3DefaultBodyDef();
 
-		{
-			b2Segment segment = { { 10.0f, -10.0f }, { 10.0f, 10.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-		}
+		bodyDef.position = { 0.0f, -1.0f, 0.0f };
+		b3BodyId groundBodyId = b3CreateBody( m_worldId, &bodyDef );
+
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
 
 		{
-			b2Segment segment = { { 10.0f, 10.0f }, { -10.0f, 10.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
+			b3Transform transform = { { 10.0f, 5.0f, 0.0f }, b3Quat_identity };
+			b3BoxHull wallBox = b3MakeTransformedBoxHull( 0.1f, 5.0f, 10.0f, transform );
+			b3CreateHullShape( groundBodyId, &shapeDef, &wallBox.base );
 		}
 
 		{
-			b2Segment segment = { { -10.0f, 10.0f }, { -10.0f, -10.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
+			b3Transform transform = { { -10.0f, 5.0f, 0.0f }, b3Quat_identity };
+			b3BoxHull wallBox = b3MakeTransformedBoxHull( 0.1f, 5.0f, 10.0f, transform );
+			b3CreateHullShape( groundBodyId, &shapeDef, &wallBox.base );
 		}
 
-		m_shapeType = e_circleShape;
-		m_bodyId = b2_nullBodyId;
-		m_enableHitEvents = true;
-
-		memset( m_hitEvents, 0, sizeof( m_hitEvents ) );
-
-		Launch();
-	}
-
-	void Launch()
-	{
-		if ( B2_IS_NON_NULL( m_bodyId ) )
 		{
-			b2DestroyBody( m_bodyId );
+			b3Transform transform = { { 0.0f, 5.0f, -10.0f }, b3Quat_identity };
+			b3BoxHull wallBox = b3MakeTransformedBoxHull( 10.0f, 5.0f, 0.1f, transform );
+			b3CreateHullShape( groundBodyId, &shapeDef, &wallBox.base );
 		}
 
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.linearVelocity = { 10.0f, 20.0f };
-		bodyDef.position = { 0.0f, 0.0f };
+		{
+			b3Transform transform = { { 0.0f, 5.0f, 10.0f }, b3Quat_identity };
+			b3BoxHull wallBox = b3MakeTransformedBoxHull( 10.0f, 5.0f, 0.1f, transform );
+			b3CreateHullShape( groundBodyId, &shapeDef, &wallBox.base );
+		}
+
+		bodyDef.type = b3_dynamicBody;
 		bodyDef.gravityScale = 0.0f;
-		bodyDef.isBullet = true;
+		bodyDef.position = { -8.0, 4.0f, 0.0f };
+		bodyDef.linearVelocity = { 120.0f, 0.0, 120.0f };
+		b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+		b3Sphere sphere = { b3Vec3_zero, 0.5f };
+		shapeDef.baseMaterial.friction = 0.0f;
+		shapeDef.baseMaterial.restitution = 1.0f;
+		b3CreateSphereShape( bodyId, &shapeDef, &sphere );
 
-		// Circle shapes centered on the body can spin fast without risk of tunnelling.
-		bodyDef.allowFastRotation = m_shapeType == e_circleShape;
-
-		m_bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		shapeDef.density = 1.0f;
-		shapeDef.material.restitution = 1.0f;
-		shapeDef.material.friction = 0.0f;
-		shapeDef.enableHitEvents = m_enableHitEvents;
-
-		if ( m_shapeType == e_circleShape )
-		{
-			b2Circle circle = { { 0.0f, 0.0f }, 0.5f };
-			b2CreateCircleShape( m_bodyId, &shapeDef, &circle );
-		}
-		else if ( m_shapeType == e_capsuleShape )
-		{
-			b2Capsule capsule = { { -0.5f, 0.0f }, { 0.5f, 0.0f }, 0.25f };
-			b2CreateCapsuleShape( m_bodyId, &shapeDef, &capsule );
-		}
-		else
-		{
-			float h = 0.1f;
-			b2Polygon box = b2MakeBox( 20.0f * h, h );
-			b2CreatePolygonShape( m_bodyId, &shapeDef, &box );
-		}
+		// This mesh tries to collide with the hulls. Not a good setup.
+		m_dummyMesh = b3CreateBoxMesh( b3Vec3_zero, { 0.8f, 0.4f, 0.4f }, true );
+		// b3CreateMeshShape( bodyId, &shapeDef, m_dummyMesh, b3Vec3_one );
 	}
 
-	bool DrawControls() override
+	~BounceHouse() override
 	{
-		ImGui::PushItemWidth( 6.0f * ImGui::GetFontSize() );
-		const char* shapeTypes[] = { "Circle", "Capsule", "Box" };
-		int shapeType = int( m_shapeType );
-		if ( ImGui::Combo( "Shape", &shapeType, shapeTypes, IM_ARRAYSIZE( shapeTypes ) ) )
-		{
-			m_shapeType = ShapeType( shapeType );
-			Launch();
-		}
-		ImGui::PopItemWidth();
-
-		if ( ImGui::Checkbox( "hit events", &m_enableHitEvents ) )
-		{
-			b2Body_EnableHitEvents( m_bodyId, m_enableHitEvents );
-		}
-
-		return true;
-	}
-
-	void Step() override
-	{
-		Sample::Step();
-
-		b2ContactEvents events = b2World_GetContactEvents( m_worldId );
-		for ( int i = 0; i < events.hitCount; ++i )
-		{
-			b2ContactHitEvent* event = events.hitEvents + i;
-
-			HitEvent* e = m_hitEvents + 0;
-			for ( int j = 1; j < 4; ++j )
-			{
-				if ( m_hitEvents[j].stepIndex < e->stepIndex )
-				{
-					e = m_hitEvents + j;
-				}
-			}
-
-			e->point = event->point;
-			e->speed = event->approachSpeed;
-			e->stepIndex = m_stepCount;
-		}
-
-		for ( int i = 0; i < 4; ++i )
-		{
-			HitEvent* e = m_hitEvents + i;
-			if ( e->stepIndex > 0 && m_stepCount <= e->stepIndex + 30 )
-			{
-				DrawCircle( m_draw, e->point, 0.1f, b2_colorOrangeRed );
-				DrawString( m_draw, m_camera, e->point, b2_colorWhite, "%.1f", e->speed );
-			}
-		}
-
-		if ( m_stepCount == 1000 )
-		{
-			m_stepCount += 0;
-		}
+		b3DestroyMesh( m_dummyMesh );
 	}
 
 	static Sample* Create( SampleContext* context )
@@ -181,1578 +141,938 @@ public:
 		return new BounceHouse( context );
 	}
 
-	HitEvent m_hitEvents[4];
-	b2BodyId m_bodyId;
-	ShapeType m_shapeType;
-	bool m_enableHitEvents;
+	b3MeshData* m_dummyMesh;
 };
 
 static int sampleBounceHouse = RegisterSample( "Continuous", "Bounce House", BounceHouse::Create );
 
-class BounceHumans : public Sample
+class SpinningStick : public Sample
 {
 public:
-	explicit BounceHumans( SampleContext* context )
+	explicit SpinningStick( SampleContext* context )
 		: Sample( context )
 	{
-		m_context->camera.center = { 0.0f, 0.0f };
-		m_context->camera.zoom = 12.0f;
-
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		shapeDef.material.restitution = 1.3f;
-		shapeDef.material.friction = 0.1f;
-
+		if ( context->restart == false )
 		{
-			b2Segment segment = { { -10.0f, -10.0f }, { 10.0f, -10.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
+			m_camera->SetView( 45.0f, 25.0f, 20.0f, { 0.0f, 2.0f, 0.0f } );
 		}
 
-		{
-			b2Segment segment = { { 10.0f, -10.0f }, { 10.0f, 10.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-		}
+		AddGroundBox( 10.0f );
 
-		{
-			b2Segment segment = { { 10.0f, 10.0f }, { -10.0f, 10.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-		}
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		bodyDef.position = { 0.0f, 0.5f, 0.0f };
+		b3BodyId wallBodyId = b3CreateBody( m_worldId, &bodyDef );
 
-		{
-			b2Segment segment = { { -10.0f, 10.0f }, { -10.0f, -10.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-		}
+		b3BoxHull wallBox = b3MakeBoxHull( 0.125f, 0.5f, 10.0f );
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+		b3CreateHullShape( wallBodyId, &shapeDef, &wallBox.base );
 
-		b2Circle circle = { { 0.0f, 0.0f }, 2.0f };
-		shapeDef.material.restitution = 2.0f;
-		b2CreateCircleShape( groundId, &shapeDef, &circle );
-	}
-
-	void Step() override
-	{
-		if ( m_humanCount < 5 && m_countDown <= 0.0f )
-		{
-			float jointFrictionTorque = 0.0f;
-			float jointHertz = 1.0f;
-			float jointDampingRatio = 0.1f;
-
-			CreateHuman( m_humans + m_humanCount, m_worldId, { 0.0f, 5.0f }, 1.0f, jointFrictionTorque, jointHertz,
-						 jointDampingRatio, 1, nullptr, true );
-			// Human_SetVelocity( m_humans + m_humanCount, { 10.0f - 5.0f * m_humanCount, -20.0f + 5.0f * m_humanCount } );
-
-			m_countDown = 2.0f;
-			m_humanCount += 1;
-		}
-
-		float timeStep = 1.0f / 60.0f;
-		b2CosSin cs1 = b2ComputeCosSin( 0.5f * m_time );
-		b2CosSin cs2 = b2ComputeCosSin( m_time );
-		float gravity = 10.0f;
-		b2Vec2 gravityVec = { gravity * cs1.sine, gravity * cs2.cosine };
-		DrawLine( m_draw, b2Pos_zero, b2ToPos( b2Vec2{ 3.0f * cs1.sine, 3.0f * cs2.cosine } ), b2_colorWhite );
-		m_time += timeStep;
-		m_countDown -= timeStep;
-		b2World_SetGravity( m_worldId, gravityVec );
-
-		Sample::Step();
+		bodyDef.type = b3_dynamicBody;
+		bodyDef.position = { 0.0f, 20.0f, 0.5f };
+		bodyDef.linearVelocity = { 0.0f, -100.0f, 0.0f };
+		b3Vec3 range = { 50.0f, 50.0f, 50.0f };
+		b3Vec3 omega = RandomVec3( -range, range );
+		bodyDef.angularVelocity = omega;
+		printf( "%f, %f, %f\n", omega.x, omega.y, omega.z );
+		b3BodyId stickBodyId = b3CreateBody( m_worldId, &bodyDef );
+		b3BoxHull stickBox = b3MakeBoxHull( 2.0f, 0.1f, 0.1f );
+		shapeDef.baseMaterial.rollingResistance = 0.1f;
+		b3CreateHullShape( stickBodyId, &shapeDef, &stickBox.base );
 	}
 
 	static Sample* Create( SampleContext* context )
 	{
-		return new BounceHumans( context );
+		return new SpinningStick( context );
 	}
-
-	Human m_humans[5] = {};
-	int m_humanCount = 0;
-	float m_countDown = 0.0f;
-	float m_time = 0.0f;
 };
 
-static int sampleBounceHumans = RegisterSample( "Continuous", "Bounce Humans", BounceHumans::Create );
+static int sampleSpinningStick = RegisterSample( "Continuous", "Spinning Stick", SpinningStick::Create );
 
-class ChainDrop : public Sample
+// This tests bullets and chain reactions
+class BulletVersusStack : public Sample
 {
 public:
-	explicit ChainDrop( SampleContext* context )
+	static Sample* Create( SampleContext* context )
+	{
+		return new BulletVersusStack( context );
+	}
+
+	explicit BulletVersusStack( SampleContext* context )
 		: Sample( context )
 	{
-		if ( m_context->restart == false )
+		if ( context->restart == false )
 		{
-			m_context->camera.center = { 0.0f, 0.0f };
-			m_context->camera.zoom = 25.0f * 0.35f;
+			m_camera->SetView( 15.0f, 20.0f, 30.0f, { 0.0f, 2.0f, 0.0f } );
 		}
 
-		//
-		// b2World_SetContactTuning( m_worldId, 30.0f, 1.0f, 100.0f );
+		AddGroundBox( 50.0f );
 
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.position = { 0.0f, -6.0f };
-		b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
+		{
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.position = { 0.0f, -1.0f, 0.0f };
+			b3BodyId groundBodyId = b3CreateBody( m_worldId, &bodyDef );
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			b3Transform transform = { { -1.0f, 5.0f, 0.0f }, b3Quat_identity };
+			b3BoxHull wallBox = b3MakeTransformedBoxHull( 0.1f, 5.0f, 10.0f, transform );
+			b3CreateHullShape( groundBodyId, &shapeDef, &wallBox.base );
+		}
 
-		b2Vec2 points[4] = { { -10.0f, -2.0f }, { 10.0f, -2.0f }, { 10.0f, 1.0f }, { -10.0f, 1.0f } };
+		b3BoxHull box = b3MakeBoxHull( 0.5f, 0.5f, 0.5f );
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		bodyDef.type = b3_dynamicBody;
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+		for ( int row = 0; row < 10; ++row )
+		{
+			bodyDef.position = { 0.0f, 0.5f + 1.1f * row, 0.0f };
+			b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+			b3CreateHullShape( bodyId, &shapeDef, &box.base );
+		}
 
-		b2ChainDef chainDef = b2DefaultChainDef();
-		chainDef.points = points;
-		chainDef.count = 4;
-		chainDef.isLoop = true;
-
-		b2CreateChain( groundId, &chainDef );
-
-		m_bodyId = b2_nullBodyId;
-		m_yOffset = -0.1f;
-		m_speed = -42.0f;
-
-		Launch();
+		m_bulletId = b3_nullBodyId;
 	}
 
 	void Launch()
 	{
-		if ( B2_IS_NON_NULL( m_bodyId ) )
+		if ( B3_IS_NON_NULL( m_bulletId ) )
 		{
-			b2DestroyBody( m_bodyId );
+			b3DestroyBody( m_bulletId );
 		}
 
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.linearVelocity = { 0.0f, m_speed };
-		bodyDef.position = { 0.0f, 10.0f + m_yOffset };
-		bodyDef.rotation = b2MakeRot( 0.5f * B2_PI );
-		bodyDef.motionLocks.angularZ = true;
-		m_bodyId = b2CreateBody( m_worldId, &bodyDef );
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		bodyDef.type = b3_dynamicBody;
+		bodyDef.isBullet = true;
+		bodyDef.position = { 20.5f, 5.5f, 0.0f };
+		bodyDef.linearVelocity = { -500.0f, 0.0f, 0.0f };
+		m_bulletId = b3CreateBody( m_worldId, &bodyDef );
 
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+		shapeDef.density *= 10.0f;
+		b3Sphere sphere = { b3Vec3_zero, 0.25f };
+		b3CreateSphereShape( m_bulletId, &shapeDef, &sphere );
+	}
 
-		b2Circle circle = { { 0.0f, 0.0f }, 0.5f };
-		m_shapeId = b2CreateCircleShape( m_bodyId, &shapeDef, &circle );
-
-		// b2Capsule capsule = { { -0.5f, 0.0f }, { 0.5f, 0.0f }, 0.25f };
-		// m_shapeId = b2CreateCapsuleShape( m_bodyId, &shapeDef, &capsule );
-
-		// float h = 0.5f;
-		// b2Polygon box = b2MakeBox( h, h );
-		// m_shapeId = b2CreatePolygonShape( m_bodyId, &shapeDef, &box );
+	void Keyboard( int key, int action, int mods ) override
+	{
+		if ( key == 'L' )
+		{
+			Launch();
+		}
 	}
 
 	bool DrawControls() override
 	{
 		ImGui::PushItemWidth( 6.0f * ImGui::GetFontSize() );
-		ImGui::SliderFloat( "Speed", &m_speed, -100.0f, 0.0f, "%.0f" );
-		ImGui::SliderFloat( "Y Offset", &m_yOffset, -1.0f, 1.0f, "%.1f" );
+
+		if ( ImGui::Button( "Launch" ) )
+		{
+			Launch();
+		}
+
 		ImGui::PopItemWidth();
 
-		if ( ImGui::Button( "Launch" ) )
-		{
-			Launch();
-		}
-
 		return true;
 	}
 
-	static Sample* Create( SampleContext* context )
-	{
-		return new ChainDrop( context );
-	}
-
-	b2BodyId m_bodyId;
-	b2ShapeId m_shapeId;
-	float m_yOffset;
-	float m_speed;
+	b3BodyId m_bulletId;
 };
 
-static int sampleChainDrop = RegisterSample( "Continuous", "Chain Drop", ChainDrop::Create );
+static int sampleContinuous6 = RegisterSample( "Continuous", "Bullet vs Stack", BulletVersusStack::Create );
 
-class ChainSlide : public Sample
+class NeedleMesh : public Sample
 {
 public:
-	explicit ChainSlide( SampleContext* context )
+	explicit NeedleMesh( SampleContext* context )
 		: Sample( context )
 	{
-		if ( m_context->restart == false )
+		if ( context->restart == false )
 		{
-			m_context->camera.center = { 0.0f, 10.0f };
-			m_context->camera.zoom = 15.0f;
+			m_camera->SetView( 45.0f, 25.0f, 4.0f, { 0.0f, 1.2f, 0.0f } );
 		}
 
-		// b2_toiHitCount = 0;
+		int slices = 8;
+		m_needle1 = CreateNeedle( 0.99f, 0.1f, { 0.2f, 0.0f, 0.2f }, slices );
+		m_needle2 = CreateNeedle( 1.01f, 0.1f, { 0.2f, 0.0f, -0.2f }, slices );
+		m_needle3 = CreateNeedle( 0.98f, 0.1f, { -0.2f, 0.0f, -0.2f }, slices );
+		m_needle4 = CreateNeedle( 1.02f, 0.1f, { -0.2f, 0.0f, 0.2f }, slices );
 
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		b3BodyId groundBodyId = b3CreateBody( m_worldId, &bodyDef );
 
-			constexpr int count = 80;
-			b2Vec2 points[count];
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+		b3CreateMeshShape( groundBodyId, &shapeDef, m_needle1, b3Vec3_one );
+		b3CreateMeshShape( groundBodyId, &shapeDef, m_needle2, b3Vec3_one );
+		b3CreateMeshShape( groundBodyId, &shapeDef, m_needle3, b3Vec3_one );
+		b3CreateMeshShape( groundBodyId, &shapeDef, m_needle4, b3Vec3_one );
 
-			float w = 2.0f;
-			float h = 1.0f;
-			float x = 20.0f, y = 0.0f;
-			for ( int i = 0; i < 20; ++i )
-			{
-				points[i] = { x, y };
-				x -= w;
-			}
+		bodyDef.type = b3_dynamicBody;
+		bodyDef.position = { 0.0f, 5.0f, 0.0f };
+		bodyDef.linearVelocity = { 0.0f, -10.0f, 0.0f };
+		b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
 
-			for ( int i = 20; i < 40; ++i )
-			{
-				points[i] = { x, y };
-				y += h;
-			}
-
-			for ( int i = 40; i < 60; ++i )
-			{
-				points[i] = { x, y };
-				x += w;
-			}
-
-			for ( int i = 60; i < 80; ++i )
-			{
-				points[i] = { x, y };
-				y -= h;
-			}
-
-			b2ChainDef chainDef = b2DefaultChainDef();
-			chainDef.points = points;
-			chainDef.count = count;
-			chainDef.isLoop = true;
-
-			b2CreateChain( groundId, &chainDef );
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.linearVelocity = { 100.0f, 0.0f };
-			bodyDef.position = { -19.5f, 0.0f + 0.5f };
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			shapeDef.material.friction = 0.0f;
-			b2Circle circle = { { 0.0f, 0.0f }, 0.5f };
-			b2CreateCircleShape( bodyId, &shapeDef, &circle );
-		}
+		b3BoxHull box = b3MakeBoxHull( 0.3f, 0.01f, 0.3f );
+		b3CreateHullShape( bodyId, &shapeDef, &box.base );
 	}
 
-	void Step() override
+	~NeedleMesh() override
 	{
-		Sample::Step();
+		b3DestroyMesh( m_needle4 );
+		b3DestroyMesh( m_needle3 );
+		b3DestroyMesh( m_needle2 );
+		b3DestroyMesh( m_needle1 );
+	}
 
-		// DrawTextLine( "toi hits = %d", b2_toiHitCount );
+	void Render() override
+	{
+		DrawGroundGrid( 10 );
+		Sample::Render();
+	}
+
+	b3MeshData* CreateNeedle( float height, float radius, b3Vec3 center, int slices ) const
+	{
+		// Vertices
+		int vertexCount = slices + 1;
+		b3Vec3* vertices = (b3Vec3*)malloc( vertexCount * sizeof( b3Vec3 ) );
+		B3_ASSERT( vertices );
+
+		float alpha = 0.0f;
+		float deltaAlpha = 2.0f * B3_PI / slices;
+
+		vertices[0] = b3Vec3{ 0.0f, height, 0.0f } + center;
+		for ( int index = 1; index < vertexCount; ++index )
+		{
+			b3CosSin cs = b3ComputeCosSin( alpha );
+			vertices[index] = b3Vec3{ radius * cs.cosine, 0.0f, radius * cs.sine } + center;
+			alpha += deltaAlpha;
+		}
+
+		// Indices
+		int triangleCount = slices;
+		int* indexBase = (int*)malloc( 3 * triangleCount * sizeof( int ) );
+		B3_ASSERT( indexBase );
+
+		int index1 = vertexCount - 1;
+		for ( int index = 0; index < triangleCount; ++index )
+		{
+			int index2 = index + 1;
+			indexBase[3 * index + 0] = 0;
+			indexBase[3 * index + 1] = index2;
+			indexBase[3 * index + 2] = index1;
+			index1 = index2;
+		}
+
+		b3MeshDef def = {};
+		def.vertexCount = vertexCount;
+		def.vertices = vertices;
+		def.triangleCount = triangleCount;
+		def.indices = indexBase;
+		def.useMedianSplit = true;
+
+		b3MeshData* data = b3CreateMesh( &def, nullptr, 0 );
+
+		free( vertices );
+		free( indexBase );
+
+		return data;
 	}
 
 	static Sample* Create( SampleContext* context )
 	{
-		return new ChainSlide( context );
+		return new NeedleMesh( context );
 	}
+
+	b3MeshData* m_needle1;
+	b3MeshData* m_needle2;
+	b3MeshData* m_needle3;
+	b3MeshData* m_needle4;
+	b3HullData* mConvex;
 };
 
-static int sampleChainSlide = RegisterSample( "Continuous", "Chain Slide", ChainSlide::Create );
+static int sampleNeedleMesh = RegisterSample( "Continuous", "Needle Mesh", NeedleMesh::Create );
 
-class SegmentSlide : public Sample
+struct IndexPair
 {
-public:
-	explicit SegmentSlide( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 0.0f, 10.0f };
-			m_context->camera.zoom = 15.0f;
-		}
-
-		// b2_toiHitCount = 0;
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Segment segment = { { -40.0f, 0.0f }, { 40.0f, 0.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-
-			segment = { { 40.0f, 0.0f }, { 40.0f, 10.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.linearVelocity = { 100.0f, 0.0f };
-			bodyDef.position = { -20.0f, 0.7f };
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			// shapeDef.friction = 0.0f;
-			b2Circle circle = { { 0.0f, 0.0f }, 0.5f };
-			b2CreateCircleShape( bodyId, &shapeDef, &circle );
-		}
-	}
-
-	void Step() override
-	{
-		Sample::Step();
-
-		// DrawTextLine("toi hits = %d", b2_toiHitCount );
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new SegmentSlide( context );
-	}
+	int index1;
+	int index2;
 };
 
-static int sampleSegmentSlide = RegisterSample( "Continuous", "Segment Slide", SegmentSlide::Create );
-
-class SkinnyBox : public Sample
+static inline IndexPair ConvertToPair( void* userData )
 {
-public:
-	explicit SkinnyBox( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 1.0f, 5.0f };
-			m_context->camera.zoom = 25.0f * 0.25f;
-		}
+	static_assert( sizeof( intptr_t ) >= 8 && sizeof( int ) == 4 );
+	intptr_t value = (intptr_t)userData;
+	int index1 = (int)value;
+	int index2 = (int)( value >> 32 );
+	return { index1, index2 };
+}
 
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
+static inline void* ConvertToUserData( IndexPair pair )
+{
+	intptr_t value = (intptr_t)pair.index2 << 32 | (intptr_t)pair.index1;
+	return (void*)value;
+}
 
-			b2Segment segment = { { -10.0f, 0.0f }, { 10.0f, 0.0f } };
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			shapeDef.material.friction = 0.9f;
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-
-			b2Polygon box = b2MakeOffsetBox( 0.1f, 1.0f, { 0.0f, 1.0f }, b2Rot_identity );
-			b2CreatePolygonShape( groundId, &shapeDef, &box );
-		}
-
-		m_autoTest = false;
-		m_bullet = false;
-		m_capsule = false;
-
-		m_bodyId = b2_nullBodyId;
-		m_bulletId = b2_nullBodyId;
-
-		Launch();
-	}
-
-	void Launch()
-	{
-		if ( B2_IS_NON_NULL( m_bodyId ) )
-		{
-			b2DestroyBody( m_bodyId );
-		}
-
-		if ( B2_IS_NON_NULL( m_bulletId ) )
-		{
-			b2DestroyBody( m_bulletId );
-		}
-
-		m_angularVelocity = RandomFloatRange( -50.0f, 50.0f );
-		// m_angularVelocity = -30.6695766f;
-
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.position = { 0.0f, 8.0f };
-		bodyDef.angularVelocity = m_angularVelocity;
-		bodyDef.linearVelocity = { 0.0f, -100.0f };
-
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		shapeDef.density = 1.0f;
-		shapeDef.material.friction = 0.9f;
-
-		m_bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-		if ( m_capsule )
-		{
-			b2Capsule capsule = { { 0.0f, -1.0f }, { 0.0f, 1.0f }, 0.1f };
-			b2CreateCapsuleShape( m_bodyId, &shapeDef, &capsule );
-		}
-		else
-		{
-			b2Polygon polygon = b2MakeBox( 2.0f, 0.05f );
-			b2CreatePolygonShape( m_bodyId, &shapeDef, &polygon );
-		}
-
-		if ( m_bullet )
-		{
-			b2Polygon polygon = b2MakeBox( 0.25f, 0.25f );
-			m_x = RandomFloatRange( -1.0f, 1.0f );
-			bodyDef.position = { m_x, 10.0f };
-			bodyDef.linearVelocity = { 0.0f, -50.0f };
-			m_bulletId = b2CreateBody( m_worldId, &bodyDef );
-			b2CreatePolygonShape( m_bulletId, &shapeDef, &polygon );
-		}
-	}
-
-	bool DrawControls() override
-	{
-		ImGui::Checkbox( "Capsule", &m_capsule );
-
-		if ( ImGui::Button( "Launch" ) )
-		{
-			Launch();
-		}
-
-		ImGui::Checkbox( "Auto Test", &m_autoTest );
-
-		return true;
-	}
-
-	void Step() override
-	{
-		Sample::Step();
-
-		if ( m_autoTest && m_stepCount % 60 == 0 )
-		{
-			Launch();
-		}
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new SkinnyBox( context );
-	}
-
-	b2BodyId m_bodyId, m_bulletId;
-	float m_angularVelocity;
-	float m_x;
-	bool m_capsule;
-	bool m_autoTest;
-	bool m_bullet;
-};
-
-static int sampleSkinnyBox = RegisterSample( "Continuous", "Skinny Box", SkinnyBox::Create );
-
-// This sample shows ghost bumps
-class GhostBumps : public Sample
+class MeshDrop : public Sample
 {
 public:
 	enum ShapeType
 	{
-		e_circleShape = 0,
-		e_capsuleShape,
-		e_boxShape
+		e_box,
+		e_capsule,
+		e_cylinder,
+		e_sphere,
 	};
 
-	explicit GhostBumps( SampleContext* context )
+	explicit MeshDrop( SampleContext* context )
 		: Sample( context )
 	{
-		if ( m_context->restart == false )
+		if ( context->restart == false )
 		{
-			m_context->camera.center = { 1.5f, 16.0f };
-			m_context->camera.zoom = 25.0f * 0.8f;
+			m_camera->SetView( 0.0f, 30.0f, 20.0f, b3Pos_zero );
+			GetGuiDraw()->forceScale = 0.1f;
 		}
 
-		m_groundId = b2_nullBodyId;
-		m_bodyId = b2_nullBodyId;
-		m_shapeId = b2_nullShapeId;
-		m_shapeType = e_circleShape;
-		m_round = 0.0f;
-		m_friction = 0.2f;
-		m_bevel = 0.0f;
-		m_useChain = true;
+		m_groundId = b3_nullBodyId;
+		m_groundMesh = nullptr;
+		m_groundAmplitude = 0.5f;
+		CreateGround();
 
-		CreateScene();
-		Launch();
+		m_bodies = new b3BodyId[m_bodyCount];
+		memset( m_bodies, 0, m_bodyCount * sizeof( b3BodyId ) );
+
+		m_cylinder = b3CreateCylinder( 0.4f, 0.05f, 0.0f, 6 );
+		m_shapeType = e_box;
+		m_runCount = 0;
+		m_failure = false;
+		m_autoGenerate = false;
+
+		m_stepWhilePaused = true;
+
+		Generate();
 	}
 
-	void CreateScene()
+	~MeshDrop() override
 	{
-		if ( B2_IS_NON_NULL( m_groundId ) )
+		delete[] m_bodies;
+		b3DestroyHull( m_cylinder );
+		b3DestroyMesh( m_groundMesh );
+	}
+
+	void CreateGround()
+	{
+		if ( B3_IS_NON_NULL( m_groundId ) )
 		{
-			b2DestroyBody( m_groundId );
+			b3DestroyBody( m_groundId );
+			m_groundId = b3_nullBodyId;
 		}
 
-		m_shapeId = b2_nullShapeId;
-
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		m_groundId = b2CreateBody( m_worldId, &bodyDef );
-
-		float m = 1.0f / sqrt( 2.0f );
-		float mm = 2.0f * ( sqrt( 2.0f ) - 1.0f );
-		float hx = 4.0f, hy = 0.25f;
-
-		if ( m_useChain )
+		if ( m_groundMesh != nullptr )
 		{
-			b2Vec2 points[20];
-			points[0] = { -3.0f * hx, hy };
-			points[1] = b2Add( points[0], { -2.0f * hx * m, 2.0f * hx * m } );
-			points[2] = b2Add( points[1], { -2.0f * hx * m, 2.0f * hx * m } );
-			points[3] = b2Add( points[2], { -2.0f * hx * m, 2.0f * hx * m } );
-			points[4] = b2Add( points[3], { -2.0f * hy * m, -2.0f * hy * m } );
-			points[5] = b2Add( points[4], { 2.0f * hx * m, -2.0f * hx * m } );
-			points[6] = b2Add( points[5], { 2.0f * hx * m, -2.0f * hx * m } );
-			points[7] =
-				b2Add( points[6], { 2.0f * hx * m + 2.0f * hy * ( 1.0f - m ), -2.0f * hx * m - 2.0f * hy * ( 1.0f - m ) } );
-			points[8] = b2Add( points[7], { 2.0f * hx + hy * mm, 0.0f } );
-			points[9] = b2Add( points[8], { 2.0f * hx, 0.0f } );
-			points[10] = b2Add( points[9], { 2.0f * hx + hy * mm, 0.0f } );
-			points[11] =
-				b2Add( points[10], { 2.0f * hx * m + 2.0f * hy * ( 1.0f - m ), 2.0f * hx * m + 2.0f * hy * ( 1.0f - m ) } );
-			points[12] = b2Add( points[11], { 2.0f * hx * m, 2.0f * hx * m } );
-			points[13] = b2Add( points[12], { 2.0f * hx * m, 2.0f * hx * m } );
-			points[14] = b2Add( points[13], { -2.0f * hy * m, 2.0f * hy * m } );
-			points[15] = b2Add( points[14], { -2.0f * hx * m, -2.0f * hx * m } );
-			points[16] = b2Add( points[15], { -2.0f * hx * m, -2.0f * hx * m } );
-			points[17] = b2Add( points[16], { -2.0f * hx * m, -2.0f * hx * m } );
-			points[18] = b2Add( points[17], { -2.0f * hx, 0.0f } );
-			points[19] = b2Add( points[18], { -2.0f * hx, 0.0f } );
-
-			b2SurfaceMaterial material = {};
-			material.friction = m_friction;
-
-			b2ChainDef chainDef = b2DefaultChainDef();
-			chainDef.points = points;
-			chainDef.count = 20;
-			chainDef.isLoop = true;
-			chainDef.materials = &material;
-			chainDef.materialCount = 1;
-
-			b2CreateChain( m_groundId, &chainDef );
+			b3DestroyMesh( m_groundMesh );
+			m_groundMesh = nullptr;
 		}
-		else
+
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		m_groundId = b3CreateBody( m_worldId, &bodyDef );
+
+		int gridCount = 40;
+		float cellWidth = 1.0f;
+		float rowHz = 0.1f;
+		float columnHz = 0.2f;
+
+		m_groundMesh = b3CreateWaveMesh( gridCount, gridCount, cellWidth, m_groundAmplitude, rowHz, columnHz );
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+		shapeDef.filter.categoryBits = 1;
+		b3CreateMeshShape( m_groundId, &shapeDef, m_groundMesh, b3Vec3_one );
+
+		float extent = 0.5f * gridCount * cellWidth;
+		float halfHeight = 1.0f;
+
 		{
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			shapeDef.material.friction = m_friction;
+			b3Transform transform;
+			transform.p = { 0.0f, halfHeight, -extent };
+			transform.q = b3Quat_identity;
+			b3BoxHull wallBox = b3MakeTransformedBoxHull( extent, halfHeight, 0.1f, transform );
+			b3CreateHullShape( m_groundId, &shapeDef, &wallBox.base );
+		}
 
-			b2Hull hull = {};
+		{
+			b3Transform transform;
+			transform.p = { 0.0f, halfHeight, extent };
+			transform.q = b3Quat_identity;
+			b3BoxHull wallBox = b3MakeTransformedBoxHull( extent, halfHeight, 0.1f, transform );
+			b3CreateHullShape( m_groundId, &shapeDef, &wallBox.base );
+		}
 
-			if ( m_bevel > 0.0f )
-			{
-				float hb = m_bevel;
-				b2Vec2 vs[8] = { { hx + hb, hy - 0.05f },	{ hx, hy },	  { -hx, hy }, { -hx - hb, hy - 0.05f },
-								 { -hx - hb, -hy + 0.05f }, { -hx, -hy }, { hx, -hy }, { hx + hb, -hy + 0.05f } };
-				hull = b2ComputeHull( vs, 8 );
-			}
-			else
-			{
-				b2Vec2 vs[4] = { { hx, hy }, { -hx, hy }, { -hx, -hy }, { hx, -hy } };
-				hull = b2ComputeHull( vs, 4 );
-			}
+		{
+			b3Transform transform;
+			transform.p = { -extent, halfHeight, 0.0f };
+			transform.q = b3Quat_identity;
+			b3BoxHull wallBox = b3MakeTransformedBoxHull( 0.1f, halfHeight, extent, transform );
+			b3CreateHullShape( m_groundId, &shapeDef, &wallBox.base );
+		}
 
-			b2Transform transform;
-			float x, y;
-
-			// Left slope
-			x = -3.0f * hx - m * hx - m * hy;
-			y = hy + m * hx - m * hy;
-			transform.q = b2MakeRot( -0.25f * B2_PI );
-
-			{
-				transform.p = { x, y };
-				b2Polygon polygon = b2MakeOffsetPolygon( &hull, transform.p, transform.q );
-				b2CreatePolygonShape( m_groundId, &shapeDef, &polygon );
-				x -= 2.0f * m * hx;
-				y += 2.0f * m * hx;
-			}
-			{
-				transform.p = { x, y };
-				b2Polygon polygon = b2MakeOffsetPolygon( &hull, transform.p, transform.q );
-				b2CreatePolygonShape( m_groundId, &shapeDef, &polygon );
-				x -= 2.0f * m * hx;
-				y += 2.0f * m * hx;
-			}
-			{
-				transform.p = { x, y };
-				b2Polygon polygon = b2MakeOffsetPolygon( &hull, transform.p, transform.q );
-				b2CreatePolygonShape( m_groundId, &shapeDef, &polygon );
-				x -= 2.0f * m * hx;
-				y += 2.0f * m * hx;
-			}
-
-			x = -2.0f * hx;
-			y = 0.0f;
-			transform.q = b2MakeRot( 0.0f );
-
-			{
-				transform.p = { x, y };
-				b2Polygon polygon = b2MakeOffsetPolygon( &hull, transform.p, transform.q );
-				b2CreatePolygonShape( m_groundId, &shapeDef, &polygon );
-				x += 2.0f * hx;
-			}
-			{
-				transform.p = { x, y };
-				b2Polygon polygon = b2MakeOffsetPolygon( &hull, transform.p, transform.q );
-				b2CreatePolygonShape( m_groundId, &shapeDef, &polygon );
-				x += 2.0f * hx;
-			}
-			{
-				transform.p = { x, y };
-				b2Polygon polygon = b2MakeOffsetPolygon( &hull, transform.p, transform.q );
-				b2CreatePolygonShape( m_groundId, &shapeDef, &polygon );
-				x += 2.0f * hx;
-			}
-
-			x = 3.0f * hx + m * hx + m * hy;
-			y = hy + m * hx - m * hy;
-			transform.q = b2MakeRot( 0.25f * B2_PI );
-
-			{
-				transform.p = { x, y };
-				b2Polygon polygon = b2MakeOffsetPolygon( &hull, transform.p, transform.q );
-				b2CreatePolygonShape( m_groundId, &shapeDef, &polygon );
-				x += 2.0f * m * hx;
-				y += 2.0f * m * hx;
-			}
-			{
-				transform.p = { x, y };
-				b2Polygon polygon = b2MakeOffsetPolygon( &hull, transform.p, transform.q );
-				b2CreatePolygonShape( m_groundId, &shapeDef, &polygon );
-				x += 2.0f * m * hx;
-				y += 2.0f * m * hx;
-			}
-			{
-				transform.p = { x, y };
-				b2Polygon polygon = b2MakeOffsetPolygon( &hull, transform.p, transform.q );
-				b2CreatePolygonShape( m_groundId, &shapeDef, &polygon );
-				x += 2.0f * m * hx;
-				y += 2.0f * m * hx;
-			}
+		{
+			b3Transform transform;
+			transform.p = { extent, halfHeight, 0.0f };
+			transform.q = b3Quat_identity;
+			b3BoxHull wallBox = b3MakeTransformedBoxHull( 0.1f, halfHeight, extent, transform );
+			b3CreateHullShape( m_groundId, &shapeDef, &wallBox.base );
 		}
 	}
 
-	void Launch()
+	void Generate()
 	{
-		if ( B2_IS_NON_NULL( m_bodyId ) )
+		for ( int i = 0; i < m_bodyCount; ++i )
 		{
-			b2DestroyBody( m_bodyId );
-			m_shapeId = b2_nullShapeId;
+			if ( B3_IS_NULL( m_bodies[i] ) )
+			{
+				continue;
+			}
+
+			b3DestroyBody( m_bodies[i] );
+			m_bodies[i] = b3_nullBodyId;
 		}
 
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.position = { -28.0f, 18.0f };
-		bodyDef.linearVelocity = { 0.0f, 0.0f };
-		m_bodyId = b2CreateBody( m_worldId, &bodyDef );
+		// The soft contact solver cannot always resolve this small shape at 4 sub-steps.
+		// Also this small shape has trouble moving advancing in the time of impact code
+		// because the size is very close to the tolerances used.
+		// b3BoxHull box = b3MakeBoxHull( 0.01f, 0.1f, 0.02f );
+		b3BoxHull box = b3MakeBoxHull( 0.02f, 0.2f, 0.04f );
+		b3Capsule capsule = { { 0.0f, -0.2f, 0.0f }, { 0.0f, 0.2f, 0.0f }, 0.05f };
+		b3Sphere sphere = { b3Vec3_zero, 0.05f };
 
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		shapeDef.density = 1.0f;
-		shapeDef.material.friction = m_friction;
+		int bodyIndex = 0;
 
-		if ( m_shapeType == e_circleShape )
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		bodyDef.type = b3_dynamicBody;
+
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+		shapeDef.baseMaterial.rollingResistance = m_shapeType == e_capsule ? 0.4f : 0.1f;
+
+		// Don't allow shapes to collide with each other. This
+		// makes isolating failures easier.
+		shapeDef.filter.categoryBits = 2;
+		shapeDef.filter.maskBits = 1;
+
+		g_randomSeed = (uint32_t)b3GetTicks();
+
+		bool simulateAll = true;
+		// g_randomSeed = 3963634789;
+
+		m_runCount += 1;
+		m_stepCount = 0;
+		printf( "run %d seed %u\n", m_runCount, g_randomSeed );
+
+		for ( int i = 0; i < m_gridCount; ++i )
 		{
-			b2Circle circle = { { 0.0f, 0.0f }, 0.5f };
-			m_shapeId = b2CreateCircleShape( m_bodyId, &shapeDef, &circle );
+			for ( int j = 0; j < m_gridCount; ++j )
+			{
+				b3Vec3 linearVelocity = RandomVec3Uniform( -1.0f, 1.0f );
+				b3Vec3 angularVelocity = RandomVec3Uniform( -5.0f, 5.0f );
+
+				if ( simulateAll || ( i == 5 && j == 4 ) )
+				{
+					bodyDef.position = { 0.5f * ( i - 0.5f * m_gridCount ), 5.0f, 0.5f * ( j - 0.5f * m_gridCount ) };
+					bodyDef.linearVelocity = linearVelocity;
+					bodyDef.angularVelocity = angularVelocity;
+					// bodyDef.angularDamping = 0.1f;
+					bodyDef.userData = ConvertToUserData( { i, j } );
+					b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+
+					if ( m_shapeType == e_box )
+					{
+						b3CreateHullShape( bodyId, &shapeDef, &box.base );
+					}
+					else if ( m_shapeType == e_capsule )
+					{
+						b3CreateCapsuleShape( bodyId, &shapeDef, &capsule );
+					}
+					else if ( m_shapeType == e_cylinder )
+					{
+						b3CreateHullShape( bodyId, &shapeDef, m_cylinder );
+					}
+					else
+					{
+						b3CreateSphereShape( bodyId, &shapeDef, &sphere );
+					}
+
+					m_bodies[bodyIndex] = bodyId;
+				}
+				else
+				{
+					m_bodies[bodyIndex] = b3_nullBodyId;
+				}
+				bodyIndex += 1;
+			}
 		}
-		else if ( m_shapeType == e_capsuleShape )
-		{
-			b2Capsule capsule = { { -0.5f, 0.0f }, { 0.5f, 0.0f }, 0.25f };
-			m_shapeId = b2CreateCapsuleShape( m_bodyId, &shapeDef, &capsule );
-		}
-		else
-		{
-			float h = 0.5f - m_round;
-			b2Polygon box = b2MakeRoundedBox( h, 2.0f * h, m_round );
-			m_shapeId = b2CreatePolygonShape( m_bodyId, &shapeDef, &box );
-		}
+
+		assert( bodyIndex == m_bodyCount );
 	}
 
 	bool DrawControls() override
 	{
-		ImGui::PushItemWidth( 6.0f * ImGui::GetFontSize() );
-
-		if ( ImGui::Checkbox( "Chain", &m_useChain ) )
+		const char* shapeTypes[] = { "box", "capsule", "cylinder", "sphere" };
+		int shapeType = (int)m_shapeType;
+		if ( ImGui::Combo( "Type", &shapeType, shapeTypes, IM_ARRAYSIZE( shapeTypes ) ) )
 		{
-			CreateScene();
-		}
-
-		if ( m_useChain == false )
-		{
-			if ( ImGui::SliderFloat( "Bevel", &m_bevel, 0.0f, 1.0f, "%.2f" ) )
-			{
-				CreateScene();
-			}
-		}
-
-		{
-			const char* shapeTypes[] = { "Circle", "Capsule", "Box" };
-			int shapeType = int( m_shapeType );
-			ImGui::Combo( "Shape", &shapeType, shapeTypes, IM_ARRAYSIZE( shapeTypes ) );
+			m_stepCount = 0;
 			m_shapeType = ShapeType( shapeType );
+			Generate();
 		}
 
-		if ( m_shapeType == e_boxShape )
+		if ( ImGui::SliderFloat( "Amplitude", &m_groundAmplitude, 0.0f, 1.0f ) )
 		{
-			ImGui::SliderFloat( "Round", &m_round, 0.0f, 0.4f, "%.1f" );
+			CreateGround();
+			Generate();
 		}
 
-		if ( ImGui::SliderFloat( "Friction", &m_friction, 0.0f, 1.0f, "%.1f" ) )
+		if ( ImGui::Button( "Generate" ) )
 		{
-			if ( B2_IS_NON_NULL( m_shapeId ) )
+			Generate();
+		}
+
+		if ( ImGui::Button( "Auto Generate" ) )
+		{
+			m_autoGenerate = !m_autoGenerate;
+			m_stepCount = 0;
+		}
+
+		return true;
+	}
+
+	void Step() override
+	{
+		Sample::Step();
+
+		{
+			PickRay pickRay = m_camera->BuildPickRay( m_context->mouseX, m_context->mouseY );
+
+			b3RayResult result =
+				b3World_CastRayClosest( m_worldId, pickRay.origin, pickRay.translation, b3DefaultQueryFilter() );
+
+			if ( result.hit )
 			{
-				b2Shape_SetFriction( m_shapeId, m_friction );
+				b3BodyId bodyId = b3Shape_GetBody( result.shapeId );
+				void* userData = b3Body_GetUserData( bodyId );
+				IndexPair pair = ConvertToPair( userData );
+				DrawTextLine( "indices: (%d, %d)\n", pair.index1, pair.index2 );
+			}
+		}
+
+		for ( int i = 0; i < m_bodyCount && m_failure == false; i += 1 )
+		{
+			b3BodyId bodyId = m_bodies[i];
+			if ( B3_IS_NULL( bodyId ) )
+			{
+				continue;
 			}
 
-			CreateScene();
+			b3Pos massCenter = b3Body_GetWorldCenter( bodyId );
+			if ( massCenter.y < -2.0f )
+			{
+				IndexPair pair = ConvertToPair( b3Body_GetUserData( bodyId ) );
+				printf( "index1: %d - index2: %d\n", pair.index1, pair.index2 );
+				printf( "(%6.2f, %6.2f, %6.2f)\n", massCenter.x, massCenter.y, massCenter.z );
+				m_context->pause = true;
+				m_failure = true;
+				m_autoGenerate = false;
+			}
+
+			// This is for debugging the fallback inner sphere
+			// b3Sphere sphere = {massCenter, 0.015f};
+			// DrawSphere( m_scene, b3Transform_identity, sphere, b3_colorLightGray );
 		}
 
+		if ( m_autoGenerate )
+		{
+			b3BodyEvents bodyEvents = b3World_GetBodyEvents( m_worldId );
+			if ( bodyEvents.moveCount == 0 )
+			{
+				Generate();
+			}
+
+			float timeStep = 0.0f;
+			if ( m_context->pause == false || m_context->singleStep > 0 )
+			{
+				timeStep = m_context->hertz > 0.0f ? 1.0f / m_context->hertz : 0.0f;
+				m_context->singleStep = b3MaxInt( 0, m_context->singleStep - 1 );
+			}
+
+			// Many steps
+			if ( timeStep > 0.0f )
+			{
+				int n = 20;
+				for ( int i = 0; i < n; ++i )
+				{
+					b3World_Step( m_worldId, timeStep, m_context->subStepCount );
+				}
+
+				m_stepCount += n;
+			}
+
+			int maxSteps = m_shapeType == e_capsule ? 3000 : 1000;
+			if ( m_stepCount > maxSteps )
+			{
+				m_context->pause = true;
+				m_failure = true;
+				m_autoGenerate = false;
+			}
+		}
+	}
+
+	static Sample* Create( SampleContext* context )
+	{
+		return new MeshDrop( context );
+	}
+
+	static constexpr int m_gridCount = 32;
+	// static constexpr int m_gridCount = 3;
+	static constexpr int m_bodyCount = m_gridCount * m_gridCount;
+
+	b3MeshData* m_groundMesh;
+	float m_groundAmplitude;
+	b3BodyId m_groundId;
+	b3HullData* m_cylinder;
+	b3BodyId* m_bodies;
+	ShapeType m_shapeType;
+	int m_runCount;
+	bool m_failure;
+	bool m_autoGenerate;
+};
+
+static int sampleMeshDrop = RegisterSample( "Continuous", "Mesh Drop", MeshDrop::Create );
+
+class MeshDropUnitTest : public Sample
+{
+public:
+	explicit MeshDropUnitTest( SampleContext* context )
+		: Sample( context )
+	{
+		if ( context->restart == false )
+		{
+			m_camera->SetView( 0.0f, 30.0f, 20.0f, b3Pos_zero );
+			GetGuiDraw()->forceScale = 0.1f;
+		}
+
+		m_data = CreateMeshDrop( m_worldId, b3Pos_zero );
+		m_failed = false;
+	}
+
+	~MeshDropUnitTest() override
+	{
+		DestroyMeshDrop( &m_data );
+	}
+
+	void Step() override
+	{
+		Sample::Step();
+
+		if ( m_failed == false )
+		{
+			if ( m_stepCount >= 300 )
+			{
+				b3BodyEvents bodyEvents = b3World_GetBodyEvents( m_worldId );
+				if ( bodyEvents.moveCount > 0 )
+				{
+					m_failed = true;
+				}
+			}
+		}
+
+		if ( m_failed == true )
+		{
+			DrawTextLine( "failed!" );
+		}
+	}
+
+	static Sample* Create( SampleContext* context )
+	{
+		return new MeshDropUnitTest( context );
+	}
+
+	MeshDropData m_data;
+	bool m_failed;
+};
+
+static int sampleMeshDropUnitTest = RegisterSample( "Continuous", "Mesh Drop Unit Test", MeshDropUnitTest::Create );
+
+// This sample shows that clustering based on the manifold normal can lead to clipping and/or tunneling.
+class HumpMesh : public Sample
+{
+public:
+	explicit HumpMesh( SampleContext* context )
+		: Sample( context )
+	{
+		if ( context->restart == false )
+		{
+			m_camera->SetView( 45.0f, 25.0f, 10.0f, { 0.0f, 1.2f, 0.0f } );
+		}
+
+		AddGroundBox( 20.0f );
+
+		m_hump = CreateHump( 8.0f );
+
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		b3BodyId groundBodyId = b3CreateBody( m_worldId, &bodyDef );
+
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+		b3CreateMeshShape( groundBodyId, &shapeDef, m_hump, b3Vec3_one );
+
+		bodyDef.type = b3_dynamicBody;
+		bodyDef.position = { 0.0f, 5.0f, 0.0f };
+		bodyDef.linearVelocity = { 0.0f, -50.0f, 0.0f };
+		b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+
+		b3BoxHull box = b3MakeBoxHull( 0.5f, 0.05f, 1.0f );
+		b3CreateHullShape( bodyId, &shapeDef, &box.base );
+	}
+
+	~HumpMesh() override
+	{
+		b3DestroyMesh( m_hump );
+	}
+
+	b3MeshData* CreateHump( float cellWidth ) const
+	{
+		// Vertices
+		b3Vec3 vertices[6];
+
+		int index = 0;
+		float x = -0.5f * cellWidth;
+		for ( int ix = 0; ix <= 1; ++ix )
+		{
+			float z = -cellWidth;
+			for ( int iz = 0; iz <= 2; ++iz )
+			{
+				vertices[index] = { x, 0.0f, z };
+				if ( iz == 1 )
+				{
+					vertices[index].y = 0.05f * cellWidth;
+				}
+				z += cellWidth;
+				index += 1;
+			}
+			x += cellWidth;
+		}
+		B3_ASSERT( index == 6 );
+
+		int triangleCount = 4;
+		int indices[3 * 4];
+
+		index = 0;
+		for ( int ix = 0; ix < 1; ++ix )
+		{
+			for ( int iz = 0; iz < 2; ++iz )
+			{
+				int index1 = iz + 3 * ix;
+				int index2 = index1 + 1;
+				int index3 = index2 + 3;
+				int index4 = index3 - 1;
+
+				B3_ASSERT( index1 < 6 );
+				B3_ASSERT( index2 < 6 );
+				B3_ASSERT( index3 < 6 );
+				B3_ASSERT( index4 < 6 );
+
+				indices[index + 0] = index1;
+				indices[index + 1] = index2;
+				indices[index + 2] = index3;
+
+				indices[index + 3] = index3;
+				indices[index + 4] = index4;
+				indices[index + 5] = index1;
+
+				index += 6;
+			}
+		}
+		B3_ASSERT( index == 3 * triangleCount );
+
+		b3MeshDef def = {};
+		def.vertexCount = 6;
+		def.vertices = vertices;
+		def.triangleCount = 4;
+		def.indices = indices;
+		def.useMedianSplit = true;
+		def.identifyEdges = true;
+
+		b3MeshData* meshData = b3CreateMesh( &def, nullptr, 0 );
+		return meshData;
+	}
+
+	static Sample* Create( SampleContext* context )
+	{
+		return new HumpMesh( context );
+	}
+
+	b3MeshData* m_hump;
+};
+
+static int sampleHumpMesh = RegisterSample( "Continuous", "Hump Mesh", HumpMesh::Create );
+
+class IsFast : public Sample
+{
+public:
+	explicit IsFast( SampleContext* context )
+		: Sample( context )
+	{
+		if ( context->restart == false )
+		{
+			m_camera->SetView( 0.0f, 15.0f, 50.0f, { 0.0f, 15.0f, 0.0f } );
+			
+		}
+
+		AddGroundBox( 40.0f );
+
+		b3BoxHull box = b3MakeBoxHull( 0.5f, 10.0f, 0.5f );
+		b3Capsule capsule = {{0.0f, -9.5f, 0.0f}, {0.0f, 9.5f, 0.0f}, 0.5f};
+
+		bool useCapsule = false;
+
+		{
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.type = b3_dynamicBody;
+			bodyDef.position = { -12.0f, 20.0f, 0.0f };
+			bodyDef.gravityScale = 0.0f;
+			bodyDef.angularVelocity = { 0.0f, 0.0f, 4.0f };
+			b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			if (useCapsule)
+			{
+				b3CreateCapsuleShape( bodyId, &shapeDef, &capsule );
+			}
+			else
+			{
+				b3CreateHullShape( bodyId, &shapeDef, &box.base );
+			}
+		}
+
+		{
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.type = b3_dynamicBody;
+			bodyDef.position = { 0.0f, 20.0f, 0.0f };
+			bodyDef.gravityScale = 0.0f;
+			bodyDef.angularVelocity = { 0.0f, 4.0f, 0.0f };
+			b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			if ( useCapsule )
+			{
+				b3CreateCapsuleShape( bodyId, &shapeDef, &capsule );
+			}
+			else
+			{
+				b3CreateHullShape( bodyId, &shapeDef, &box.base );
+			}
+		}
+
+		{
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.type = b3_dynamicBody;
+			bodyDef.position = { 12.0f, 20.0f, 0.0f };
+			bodyDef.gravityScale = 0.0f;
+			bodyDef.angularVelocity = { 4.0f, 0.0f, 0.0f };
+			b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			if ( useCapsule )
+			{
+				b3CreateCapsuleShape( bodyId, &shapeDef, &capsule );
+			}
+			else
+			{
+				b3CreateHullShape( bodyId, &shapeDef, &box.base );
+			}
+		}
+	}
+
+	static Sample* Create( SampleContext* context )
+	{
+		return new IsFast( context );
+	}
+};
+
+static int sampleIsFast = RegisterSample( "Continuous", "Is Fast", IsFast::Create );
+
+// CCD versus a dense mesh can stall the solver. CCD does an AABB query so it considers
+// along the sweep.
+class Stall : public Sample
+{
+public:
+	explicit Stall( SampleContext* context )
+		: Sample( context )
+	{
+		if ( context->restart == false )
+		{
+			m_camera->SetView( 130.0f, 15.0f, 15.0f, { 0.0f, 2.0f, 0.0f } );
+		}
+
+		AddGroundBox( 500.0f );
+
+		{
+			m_mesh = b3CreateTorusMesh( 200, 200, 2.0f, 1.0f );
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.name = "torus";
+			bodyDef.position.y = 2.0f;
+			b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			b3CreateMeshShape( bodyId, &shapeDef, m_mesh, b3Vec3_one );
+		}
+
+		m_savedThreshold = b3GetStallThreshold();
+
+		// Log any CCD that takes longer than 1 ms.
+		b3SetStallThreshold( 0.001f );
+
+		Launch();
+	}
+
+	void Launch()
+	{
+		if ( B3_IS_NON_NULL( m_bulletId ) )
+		{
+			b3DestroyBody( m_bulletId );
+		}
+
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		bodyDef.type = b3_dynamicBody;
+		bodyDef.isBullet = true;
+		bodyDef.name = "rock";
+		bodyDef.position = { 0.0f, 1.0f, -10.0f };
+		// This exceeds the default maximum speed.
+		bodyDef.linearVelocity = { 0.0f, 0.0f, 600.0f };
+		bodyDef.angularVelocity = { 0.0f, 0.0f, 20.0f };
+		m_bulletId = b3CreateBody( m_worldId, &bodyDef );
+
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+		b3HullData* rock = b3CreateRock( 0.25f );
+		b3CreateHullShape( m_bulletId, &shapeDef, rock );
+		b3DestroyHull( rock );
+	}
+
+	bool DrawControls() override
+	{
 		if ( ImGui::Button( "Launch" ) )
 		{
 			Launch();
 		}
 
-		ImGui::PopItemWidth();
-
 		return true;
 	}
 
-	static Sample* Create( SampleContext* context )
+	~Stall() override
 	{
-		return new GhostBumps( context );
-	}
-
-	b2BodyId m_groundId;
-	b2BodyId m_bodyId;
-	b2ShapeId m_shapeId;
-	ShapeType m_shapeType;
-	float m_round;
-	float m_friction;
-	float m_bevel;
-	bool m_useChain;
-};
-
-static int sampleGhostCollision = RegisterSample( "Continuous", "Ghost Bumps", GhostBumps::Create );
-
-// Speculative collision failure case suggested by Dirk Gregorius. This uses
-// a simple fallback scheme to prevent tunneling.
-class SpeculativeFallback : public Sample
-{
-public:
-	explicit SpeculativeFallback( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 1.0f, 5.0f };
-			m_context->camera.zoom = 25.0f * 0.25f;
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Segment segment = { { -10.0f, 0.0f }, { 10.0f, 0.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-
-			b2Vec2 points[5] = { { -2.0f, 4.0f }, { 2.0f, 4.0f }, { 2.0f, 4.1f }, { -0.5f, 4.2f }, { -2.0f, 4.2f } };
-			b2Hull hull = b2ComputeHull( points, 5 );
-			b2Polygon poly = b2MakePolygon( &hull, 0.0f );
-			b2CreatePolygonShape( groundId, &shapeDef, &poly );
-		}
-
-		// Fast moving skinny box. Also testing a large shape offset.
-		{
-			float offset = 8.0f;
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.position = { offset, 12.0f };
-			bodyDef.linearVelocity = { 0.0f, -100.0f };
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Polygon box = b2MakeOffsetBox( 2.0f, 0.05f, { -offset, 0.0f }, b2MakeRot( B2_PI ) );
-			b2CreatePolygonShape( bodyId, &shapeDef, &box );
-		}
+		b3DestroyMesh( m_mesh );
+		b3SetStallThreshold( m_savedThreshold );
 	}
 
 	static Sample* Create( SampleContext* context )
 	{
-		return new SpeculativeFallback( context );
+		return new Stall( context );
 	}
+
+	b3MeshData* m_mesh = nullptr;
+	b3BodyId m_bulletId = b3_nullBodyId;
+	float m_savedThreshold;
 };
 
-static int sampleSpeculativeFallback = RegisterSample( "Continuous", "Speculative Fallback", SpeculativeFallback::Create );
-
-class SpeculativeSliver : public Sample
-{
-public:
-	explicit SpeculativeSliver( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 0.0f, 1.75f };
-			m_context->camera.zoom = 2.5f;
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Segment segment = { { -10.0f, 0.0f }, { 10.0f, 0.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.position = { 0.0f, 12.0f };
-			bodyDef.linearVelocity = { 0.0f, -100.0f };
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Vec2 points[3] = { { -2.0f, 0.0f }, { -1.0f, 0.0f }, { 2.0f, 0.5f } };
-			b2Hull hull = b2ComputeHull( points, 3 );
-			b2Polygon poly = b2MakePolygon( &hull, 0.0f );
-			b2CreatePolygonShape( bodyId, &shapeDef, &poly );
-		}
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new SpeculativeSliver( context );
-	}
-};
-
-static int sampleSpeculativeSliver = RegisterSample( "Continuous", "Speculative Sliver", SpeculativeSliver::Create );
-
-// This shows that while Box2D uses speculative collision, it does not lead to speculative ghost collisions at small distances
-class SpeculativeGhost : public Sample
-{
-public:
-	explicit SpeculativeGhost( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 0.0f, 1.75f };
-			m_context->camera.zoom = 2.0f;
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Segment segment = { { -10.0f, 0.0f }, { 10.0f, 0.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-
-			b2Polygon box = b2MakeOffsetBox( 1.0f, 0.1f, { 0.0f, 0.9f }, b2Rot_identity );
-			b2CreatePolygonShape( groundId, &shapeDef, &box );
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-
-			// The speculative distance is 0.02 meters, so this avoid it
-			bodyDef.position = { 0.015f, 2.515f };
-			bodyDef.linearVelocity = { 0.1f * 1.25f * m_context->hertz, -0.1f * 1.25f * m_context->hertz };
-			bodyDef.gravityScale = 0.0f;
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Polygon box = b2MakeSquare( 0.25f );
-			b2CreatePolygonShape( bodyId, &shapeDef, &box );
-		}
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new SpeculativeGhost( context );
-	}
-};
-
-static int sampleSpeculativeGhost = RegisterSample( "Continuous", "Speculative Ghost", SpeculativeGhost::Create );
-
-// This shows that Box2D does not have pixel perfect collision.
-class PixelImperfect : public Sample
-{
-public:
-	explicit PixelImperfect( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 7.0f, 5.0f };
-			m_context->camera.zoom = 6.0f;
-		}
-
-		float pixelsPerMeter = 30.f;
-
-		{
-			b2BodyDef block4BodyDef = b2DefaultBodyDef();
-			block4BodyDef.type = b2_staticBody;
-			block4BodyDef.position = { 175.f / pixelsPerMeter, 150.f / pixelsPerMeter };
-			b2BodyId block4BodyId = b2CreateBody( m_worldId, &block4BodyDef );
-			b2Polygon block4Shape = b2MakeBox( 20.f / pixelsPerMeter, 10.f / pixelsPerMeter );
-			b2ShapeDef block4ShapeDef = b2DefaultShapeDef();
-			block4ShapeDef.material.friction = 0.f;
-			b2CreatePolygonShape( block4BodyId, &block4ShapeDef, &block4Shape );
-		}
-
-		{
-			b2BodyDef ballBodyDef = b2DefaultBodyDef();
-			ballBodyDef.type = b2_dynamicBody;
-			ballBodyDef.position = { 200.0f / pixelsPerMeter, 275.f / pixelsPerMeter };
-			ballBodyDef.gravityScale = 0.0f;
-
-			m_ballId = b2CreateBody( m_worldId, &ballBodyDef );
-			// Ball shape
-			// b2Polygon ballShape = b2MakeBox( 5.f / pixelsPerMeter, 5.f / pixelsPerMeter );
-			b2Polygon ballShape = b2MakeRoundedBox( 4.0f / pixelsPerMeter, 4.0f / pixelsPerMeter, 0.9f / pixelsPerMeter );
-			b2ShapeDef ballShapeDef = b2DefaultShapeDef();
-			ballShapeDef.material.friction = 0.f;
-			// ballShapeDef.restitution = 1.f;
-			b2CreatePolygonShape( m_ballId, &ballShapeDef, &ballShape );
-			b2Body_SetLinearVelocity( m_ballId, { 0.f, -5.0f } );
-			b2Body_SetMotionLocks( m_ballId, { false, false, true } );
-		}
-	}
-
-	void Step() override
-	{
-		b2ContactData data;
-		b2Body_GetContactData( m_ballId, &data, 1 );
-
-		b2Pos p = b2Body_GetPosition( m_ballId );
-		b2Vec2 v = b2Body_GetLinearVelocity( m_ballId );
-		DrawScreenTextLine( "p.x = %.9f, v.y = %.9f", p.x, v.y );
-
-		Sample::Step();
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new PixelImperfect( context );
-	}
-
-	b2BodyId m_ballId;
-};
-
-static int samplePixelImperfect = RegisterSample( "Continuous", "Pixel Imperfect", PixelImperfect::Create );
-
-class RestitutionThreshold : public Sample
-{
-public:
-	explicit RestitutionThreshold( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 7.0f, 5.0f };
-			m_context->camera.zoom = 6.0f;
-		}
-
-		float pixelsPerMeter = 30.f;
-
-		// With the default threshold the ball will not bounce.
-		b2World_SetRestitutionThreshold( m_worldId, 0.1f );
-
-		{
-			b2BodyDef block0BodyDef = b2DefaultBodyDef();
-			block0BodyDef.type = b2_staticBody;
-			block0BodyDef.position = { 205.f / pixelsPerMeter, 120.f / pixelsPerMeter };
-			block0BodyDef.rotation = b2MakeRot( 70.f * 3.14f / 180.f );
-			b2BodyId block0BodyId = b2CreateBody( m_worldId, &block0BodyDef );
-			b2Polygon block0Shape = b2MakeBox( 50.f / pixelsPerMeter, 5.f / pixelsPerMeter );
-			b2ShapeDef block0ShapeDef = b2DefaultShapeDef();
-			block0ShapeDef.material.friction = 0.f;
-			b2CreatePolygonShape( block0BodyId, &block0ShapeDef, &block0Shape );
-		}
-
-		{
-			// Make a ball
-			b2BodyDef ballBodyDef = b2DefaultBodyDef();
-			ballBodyDef.type = b2_dynamicBody;
-			ballBodyDef.position = { 200.f / pixelsPerMeter, 250.f / pixelsPerMeter };
-			m_ballId = b2CreateBody( m_worldId, &ballBodyDef );
-
-			b2Circle ballShape = {};
-			ballShape.radius = 5.f / pixelsPerMeter;
-			b2ShapeDef ballShapeDef = b2DefaultShapeDef();
-			ballShapeDef.material.friction = 0.f;
-			ballShapeDef.material.restitution = 1.f;
-			b2CreateCircleShape( m_ballId, &ballShapeDef, &ballShape );
-
-			b2Body_SetLinearVelocity( m_ballId, { 0.f, -2.9f } );	   // Initial velocity
-			b2Body_SetMotionLocks( m_ballId, { false, false, true } ); // Do not rotate a ball
-		}
-	}
-
-	void Step() override
-	{
-		b2ContactData data;
-		b2Body_GetContactData( m_ballId, &data, 1 );
-
-		b2Pos p = b2Body_GetPosition( m_ballId );
-		b2Vec2 v = b2Body_GetLinearVelocity( m_ballId );
-		DrawScreenTextLine( "p.x = %.9f, v.y = %.9f", p.x, v.y );
-
-		Sample::Step();
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new RestitutionThreshold( context );
-	}
-
-	b2BodyId m_ballId;
-};
-
-static int sampleRestitutionThreshold = RegisterSample( "Continuous", "Restitution Threshold", RestitutionThreshold::Create );
-
-class Drop : public Sample
-{
-public:
-	explicit Drop( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 0.0f, 1.5f };
-			m_context->camera.zoom = 3.0f;
-			m_context->enableSleep = false;
-			m_context->debugDraw.drawJoints = false;
-		}
-
-#if 0
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-
-			float w = 0.25f;
-			int count = 40;
-
-			float x = -0.5f * count * w;
-			float h = 0.05f;
-			for ( int j = 0; j <= count; ++j )
-			{
-				b2Polygon box = b2MakeOffsetBox( w, h, { x, -h }, b2Rot_identity );
-				b2CreatePolygonShape( groundId, &shapeDef, &box );
-				x += w;
-			}
-		}
-#endif
-
-		m_human = {};
-		m_frameSkip = 0;
-		m_frameCount = 0;
-		m_continuous = true;
-		m_speculative = true;
-
-		Scene1();
-	}
-
-	void Clear()
-	{
-		for ( int i = 0; i < m_bodyIds.size(); ++i )
-		{
-			b2DestroyBody( m_bodyIds[i] );
-		}
-
-		m_bodyIds.clear();
-
-		if ( m_human.isSpawned )
-		{
-			DestroyHuman( &m_human );
-		}
-	}
-
-	void CreateGround1()
-	{
-		for ( int i = 0; i < m_groundIds.size(); ++i )
-		{
-			b2DestroyBody( m_groundIds[i] );
-		}
-		m_groundIds.clear();
-
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-
-		float w = 0.25f;
-		int count = 40;
-		b2Segment segment = { { -0.5f * count * w, 0.0f }, { 0.5f * count * w, 0.0f } };
-		b2CreateSegmentShape( groundId, &shapeDef, &segment );
-
-		m_groundIds.push_back( groundId );
-	}
-
-	void CreateGround2()
-	{
-		for ( int i = 0; i < m_groundIds.size(); ++i )
-		{
-			b2DestroyBody( m_groundIds[i] );
-		}
-		m_groundIds.clear();
-
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-
-		float w = 0.25f;
-		int count = 40;
-
-		float x = -0.5f * count * w;
-		float h = 0.05f;
-		for ( int j = 0; j <= count; ++j )
-		{
-			b2Polygon box = b2MakeOffsetBox( 0.5f * w, h, { x, 0.0f }, b2Rot_identity );
-			b2CreatePolygonShape( groundId, &shapeDef, &box );
-			x += w;
-		}
-
-		m_groundIds.push_back( groundId );
-	}
-
-	void CreateGround3()
-	{
-		for ( int i = 0; i < m_groundIds.size(); ++i )
-		{
-			b2DestroyBody( m_groundIds[i] );
-		}
-		m_groundIds.clear();
-
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-
-		float w = 0.25f;
-		int count = 40;
-		b2Segment segment = { { -0.5f * count * w, 0.0f }, { 0.5f * count * w, 0.0f } };
-		b2CreateSegmentShape( groundId, &shapeDef, &segment );
-		segment = { { 3.0f, 0.0f }, { 3.0f, 8.0f } };
-		b2CreateSegmentShape( groundId, &shapeDef, &segment );
-
-		m_groundIds.push_back( groundId );
-	}
-
-	// ball
-	void Scene1()
-	{
-		Clear();
-		CreateGround2();
-
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.position = { 0.0f, 4.0f };
-		bodyDef.linearVelocity = { 0.0f, -100.0f };
-
-		b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		b2Circle circle = { { 0.0f, 0.0f }, 0.125f };
-		b2CreateCircleShape( bodyId, &shapeDef, &circle );
-
-		m_bodyIds.push_back( bodyId );
-		m_frameCount = 1;
-	}
-
-	// ruler
-	void Scene2()
-	{
-		Clear();
-		CreateGround1();
-
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.position = { 0.0f, 4.0f };
-		bodyDef.rotation = b2MakeRot( 0.5f * B2_PI );
-		bodyDef.linearVelocity = { 0.0f, 0.0f };
-		bodyDef.angularVelocity = -0.5f;
-
-		b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		b2Polygon box = b2MakeBox( 0.75f, 0.01f );
-		b2CreatePolygonShape( bodyId, &shapeDef, &box );
-
-		m_bodyIds.push_back( bodyId );
-		m_frameCount = 1;
-	}
-
-	// ragdoll
-	void Scene3()
-	{
-		Clear();
-		CreateGround2();
-
-		float jointFrictionTorque = 0.03f;
-		float jointHertz = 1.0f;
-		float jointDampingRatio = 0.5f;
-
-		CreateHuman( &m_human, m_worldId, { 0.0f, 40.0f }, 1.0f, jointFrictionTorque, jointHertz, jointDampingRatio, 1, nullptr,
-					 true );
-
-		m_frameCount = 1;
-	}
-
-	void Scene4()
-	{
-		Clear();
-		CreateGround3();
-
-		float a = 0.25f;
-		b2Polygon box = b2MakeSquare( a );
-
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-
-		float offset = 0.01f;
-
-		for ( int i = 0; i < 5; ++i )
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-
-			float shift = ( i % 2 == 0 ? -offset : offset );
-			bodyDef.position = { 2.5f + shift, a + 2.0f * a * i };
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-			m_bodyIds.push_back( bodyId );
-			b2CreatePolygonShape( bodyId, &shapeDef, &box );
-		}
-
-		b2Circle circle = { { 0.0f, 0.0f }, 0.125f };
-		shapeDef.density = 4.0f;
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.position = { -7.7f, 1.9f };
-			bodyDef.linearVelocity = { 200.0f, 0.0f };
-			bodyDef.isBullet = true;
-
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-			b2CreateCircleShape( bodyId, &shapeDef, &circle );
-			m_bodyIds.push_back( bodyId );
-		}
-
-		m_frameCount = 1;
-	}
-
-	void Keyboard( int key ) override
-	{
-		switch ( key )
-		{
-			case GLFW_KEY_1:
-				Scene1();
-				break;
-
-			case GLFW_KEY_2:
-				Scene2();
-				break;
-
-			case GLFW_KEY_3:
-				Scene3();
-				break;
-
-			case GLFW_KEY_4:
-				Scene4();
-				break;
-
-			case GLFW_KEY_C:
-				Clear();
-				m_continuous = !m_continuous;
-				break;
-
-			case GLFW_KEY_V:
-				Clear();
-				m_speculative = !m_speculative;
-				b2World_EnableSpeculative( m_worldId, m_speculative );
-				break;
-
-			case GLFW_KEY_S:
-				m_frameSkip = m_frameSkip > 0 ? 0 : 60;
-				break;
-
-			default:
-				Sample::Keyboard( key );
-				break;
-		}
-	}
-
-	void Step() override
-	{
-#if 0
-		ImGui::SetNextWindowPos( ImVec2( 0.0f, 0.0f ) );
-		ImGui::SetNextWindowSize( ImVec2( float( m_context->camera.width ), float( m_camera->height ) ) );
-		ImGui::SetNextWindowBgAlpha( 0.0f );
-		ImGui::Begin( "DropBackground", nullptr,
-					  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize |
-						  ImGuiWindowFlags_NoScrollbar );
-
-		ImDrawList* drawList = ImGui::GetWindowDrawList();
-
-		const char* ContinuousText = m_continuous && m_speculative ? "Continuous ON" : "Continuous OFF";
-		drawList->AddText( m_largeFont, m_largeFont->FontSize, { 40.0f, 40.0f }, IM_COL32_WHITE, ContinuousText );
-
-		if ( m_frameSkip > 0 )
-		{
-			drawList->AddText( m_mediumFont, m_mediumFont->FontSize, { 40.0f, 40.0f + 64.0f + 20.0f },
-							   IM_COL32( 200, 200, 200, 255 ), "Slow Time" );
-		}
-
-		ImGui::End();
-#endif
-
-		// if (m_frameCount == 165)
-		//{
-		//	settings.pause = true;
-		//	m_frameSkip = 30;
-		// }
-
-		m_context->enableContinuous = m_continuous;
-
-		if ( ( m_frameSkip == 0 || m_frameCount % m_frameSkip == 0 ) && m_context->pause == false )
-		{
-			Sample::Step();
-		}
-		else
-		{
-			bool pause = m_context->pause;
-			m_context->pause = true;
-			Sample::Step();
-			m_context->pause = pause;
-		}
-
-		m_frameCount += 1;
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new Drop( context );
-	}
-
-	std::vector<b2BodyId> m_groundIds;
-	std::vector<b2BodyId> m_bodyIds;
-	Human m_human;
-	int m_frameSkip;
-	int m_frameCount;
-	bool m_continuous;
-	bool m_speculative;
-};
-
-static int sampleDrop = RegisterSample( "Continuous", "Drop", Drop::Create );
-
-// This shows a fast moving body that uses continuous collision versus static and dynamic bodies.
-// This is achieved by setting the ball body as a *bullet*.
-class Pinball : public Sample
-{
-public:
-	explicit Pinball( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 0.0f, 9.0f };
-			m_context->camera.zoom = 25.0f * 0.5f;
-		}
-
-		m_context->debugDraw.drawJoints = false;
-
-		// Ground body
-		b2BodyId groundId = {};
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			groundId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2Vec2 vs[5] = { { -8.0f, 6.0f }, { -8.0f, 20.0f }, { 8.0f, 20.0f }, { 8.0f, 6.0f }, { 0.0f, -2.0f } };
-
-			b2ChainDef chainDef = b2DefaultChainDef();
-			chainDef.points = vs;
-			chainDef.count = 5;
-			chainDef.isLoop = true;
-			b2CreateChain( groundId, &chainDef );
-		}
-
-		// Flippers
-		{
-			b2Pos p1 = { -2.0f, 0.0f }, p2 = { 2.0f, 0.0f };
-
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.enableSleep = false;
-
-			bodyDef.position = p1;
-			b2BodyId leftFlipperId = b2CreateBody( m_worldId, &bodyDef );
-
-			bodyDef.position = p2;
-			b2BodyId rightFlipperId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2Polygon box = b2MakeBox( 1.75f, 0.2f );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-
-			b2CreatePolygonShape( leftFlipperId, &shapeDef, &box );
-			b2CreatePolygonShape( rightFlipperId, &shapeDef, &box );
-
-			b2RevoluteJointDef jointDef = b2DefaultRevoluteJointDef();
-			jointDef.base.bodyIdA = groundId;
-			jointDef.base.localFrameB.p = b2Vec2_zero;
-			jointDef.enableMotor = true;
-			jointDef.maxMotorTorque = 1000.0f;
-			jointDef.enableLimit = true;
-
-			jointDef.motorSpeed = 0.0f;
-			jointDef.base.localFrameA.p = b2ToVec2( p1 );
-			jointDef.base.bodyIdB = leftFlipperId;
-			jointDef.lowerAngle = -30.0f * B2_PI / 180.0f;
-			jointDef.upperAngle = 5.0f * B2_PI / 180.0f;
-			m_leftJointId = b2CreateRevoluteJoint( m_worldId, &jointDef );
-
-			jointDef.motorSpeed = 0.0f;
-			jointDef.base.localFrameA.p = b2ToVec2( p2 );
-			jointDef.base.bodyIdB = rightFlipperId;
-			jointDef.lowerAngle = -5.0f * B2_PI / 180.0f;
-			jointDef.upperAngle = 30.0f * B2_PI / 180.0f;
-			m_rightJointId = b2CreateRevoluteJoint( m_worldId, &jointDef );
-		}
-
-		// Spinners
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.position = { -4.0f, 17.0f };
-
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Polygon box1 = b2MakeBox( 1.5f, 0.125f );
-			b2Polygon box2 = b2MakeBox( 0.125f, 1.5f );
-
-			b2CreatePolygonShape( bodyId, &shapeDef, &box1 );
-			b2CreatePolygonShape( bodyId, &shapeDef, &box2 );
-
-			b2RevoluteJointDef jointDef = b2DefaultRevoluteJointDef();
-			jointDef.base.bodyIdA = groundId;
-			jointDef.base.bodyIdB = bodyId;
-			jointDef.base.localFrameA.p = b2ToVec2( bodyDef.position );
-			jointDef.base.localFrameB.p = b2Vec2_zero;
-			jointDef.enableMotor = true;
-			jointDef.maxMotorTorque = 0.1f;
-			b2CreateRevoluteJoint( m_worldId, &jointDef );
-
-			bodyDef.position = { 4.0f, 8.0f };
-			bodyId = b2CreateBody( m_worldId, &bodyDef );
-			b2CreatePolygonShape( bodyId, &shapeDef, &box1 );
-			b2CreatePolygonShape( bodyId, &shapeDef, &box2 );
-			jointDef.base.localFrameA.p = b2ToVec2( bodyDef.position );
-			jointDef.base.bodyIdB = bodyId;
-			b2CreateRevoluteJoint( m_worldId, &jointDef );
-		}
-
-		// Bumpers
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.position = { -4.0f, 8.0f };
-
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			shapeDef.material.restitution = 1.5f;
-
-			b2Circle circle = { { 0.0f, 0.0f }, 1.0f };
-			b2CreateCircleShape( bodyId, &shapeDef, &circle );
-
-			bodyDef.position = { 4.0f, 17.0f };
-			bodyId = b2CreateBody( m_worldId, &bodyDef );
-			b2CreateCircleShape( bodyId, &shapeDef, &circle );
-		}
-
-		// Ball
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.position = { 1.0f, 15.0f };
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.isBullet = true;
-
-			m_ballId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Circle circle = { { 0.0f, 0.0f }, 0.2f };
-			b2CreateCircleShape( m_ballId, &shapeDef, &circle );
-		}
-	}
-
-	bool DrawControls() override
-	{
-		ImGui::Text( "Flipper: press A" );
-		return true;
-	}
-
-	void Step() override
-	{
-		Sample::Step();
-
-		if ( glfwGetKey( m_context->window, GLFW_KEY_A ) == GLFW_PRESS )
-		{
-			b2RevoluteJoint_SetMotorSpeed( m_leftJointId, 20.0f );
-			b2RevoluteJoint_SetMotorSpeed( m_rightJointId, -20.0f );
-		}
-		else
-		{
-			b2RevoluteJoint_SetMotorSpeed( m_leftJointId, -10.0f );
-			b2RevoluteJoint_SetMotorSpeed( m_rightJointId, 10.0f );
-		}
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new Pinball( context );
-	}
-
-	b2JointId m_leftJointId;
-	b2JointId m_rightJointId;
-	b2BodyId m_ballId;
-};
-
-static int samplePinball = RegisterSample( "Continuous", "Pinball", Pinball::Create );
-
-// This shows the importance of secondary collisions in continuous physics.
-// This also shows a difficult setup for the solver with an acute angle.
-class Wedge : public Sample
-{
-public:
-	explicit Wedge( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 0.0f, 5.5f };
-			m_context->camera.zoom = 6.0f;
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Segment segment = { { -4.0f, 8.0f }, { 0.0f, 0.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-			segment = { { 0.0f, 0.0f }, { 0.0f, 8.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.position = { -0.45f, 10.75f };
-			bodyDef.linearVelocity = { 0.0f, -200.0f };
-
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2Circle circle = {};
-			circle.radius = 0.3f;
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			shapeDef.material.friction = 0.2f;
-			b2CreateCircleShape( bodyId, &shapeDef, &circle );
-		}
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new Wedge( context );
-	}
-};
-
-static int sampleWedge = RegisterSample( "Continuous", "Wedge", Wedge::Create );
+static int sampleStall = RegisterSample( "Continuous", "Stall", Stall::Create );

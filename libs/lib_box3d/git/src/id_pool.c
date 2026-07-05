@@ -1,27 +1,27 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #include "id_pool.h"
 
-b2IdPool b2CreateIdPool( void )
+b3IdPool b3CreateIdPool( void )
 {
-	b2IdPool pool = { 0 };
-	b2Array_CreateN( pool.freeArray, 32 );
+	b3IdPool pool = { 0 };
+	b3Array_Reserve( pool.freeArray, 32 );
 	return pool;
 }
 
-void b2DestroyIdPool( b2IdPool* pool )
+void b3DestroyIdPool( b3IdPool* pool )
 {
-	b2Array_Destroy( pool->freeArray );
-	*pool = ( b2IdPool ){ 0 };
+	b3Array_Destroy( pool->freeArray );
+	*pool = (b3IdPool){ 0 };
 }
 
-int b2AllocId( b2IdPool* pool )
+int b3AllocId( b3IdPool* pool )
 {
 	int count = pool->freeArray.count;
 	if ( count > 0 )
 	{
-		int id = b2Array_Pop( pool->freeArray );
+		int id = b3Array_Pop( pool->freeArray );
 		return id;
 	}
 
@@ -30,16 +30,25 @@ int b2AllocId( b2IdPool* pool )
 	return id;
 }
 
-void b2FreeId( b2IdPool* pool, int id )
+void b3FreeId( b3IdPool* pool, int id )
 {
-	B2_ASSERT( pool->nextIndex > 0 );
-	B2_ASSERT( 0 <= id && id < pool->nextIndex );
-	b2Array_Push( pool->freeArray, id );
+	B3_ASSERT( pool->nextIndex > 0 );
+	B3_ASSERT( 0 <= id && id < pool->nextIndex );
+
+	// todo does not work with assertion above
+	// should probably be `id == pool->nextIndex - 1`
+	if ( id == pool->nextIndex )
+	{
+		pool->nextIndex -= 1;
+		return;
+	}
+
+	b3Array_Push( pool->freeArray, id );
 }
 
-#if B2_ENABLE_VALIDATION
+#if B3_ENABLE_VALIDATION
 
-void b2ValidateFreeId( b2IdPool* pool, int id )
+void b3ValidateFreeId( const b3IdPool* pool, int id )
 {
 	int freeCount = pool->freeArray.count;
 	for ( int i = 0; i < freeCount; ++i )
@@ -50,30 +59,15 @@ void b2ValidateFreeId( b2IdPool* pool, int id )
 		}
 	}
 
-	B2_ASSERT( 0 );
-}
-
-void b2ValidateUsedId( b2IdPool* pool, int id )
-{
-	int freeCount = pool->freeArray.count;
-	for ( int i = 0; i < freeCount; ++i )
-	{
-		if ( pool->freeArray.data[i] == id )
-		{
-			B2_ASSERT( 0 );
-		}
-	}
+	B3_ASSERT( 0 );
 }
 
 #else
 
-void b2ValidateFreeId( b2IdPool* pool, int id )
+void b3ValidateFreeId( const b3IdPool* pool, int id )
 {
-	B2_UNUSED( pool, id );
+	B3_UNUSED( pool );
+	B3_UNUSED( id );
 }
 
-void b2ValidateUsedId( b2IdPool* pool, int id )
-{
-	B2_UNUSED( pool, id );
-}
 #endif

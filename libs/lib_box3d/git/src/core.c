@@ -1,11 +1,8 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
-#include "core.h"
-
-#include "box2d/math_functions.h"
-
-#if defined( B2_COMPILER_MSVC )
+#if defined( B3_COMPILER_MSVC )
+// CRTDBG requires these to be included first
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #include <stdlib.h>
@@ -13,228 +10,358 @@
 #include <stdlib.h>
 #endif
 
+#include "core.h"
+
+#include "box3d/constants.h"
+#include "box3d/math_functions.h"
+
 #include <stdarg.h>
-#include <stdio.h>
 #include <string.h>
 
 #ifdef BOX2D_PROFILE
 
 #include <tracy/TracyC.h>
-#define b2TracyCAlloc( ptr, size ) TracyCAlloc( ptr, size )
-#define b2TracyCFree( ptr ) TracyCFree( ptr )
+#define b3TracyCAlloc( ptr, size ) TracyCAlloc( ptr, size )
+#define b3TracyCFree( ptr ) TracyCFree( ptr )
 
 #else
 
-#define b2TracyCAlloc( ptr, size )
-#define b2TracyCFree( ptr )
+#define b3TracyCAlloc( ptr, size )
+#define b3TracyCFree( ptr )
 
 #endif
 
-#include "atomic.h"
+#include "platform.h"
+
+#include <stdio.h>
 
 // This allows the user to change the length units at runtime
-static float b2_lengthUnitsPerMeter = 1.0f;
+static float b3_lengthUnitsPerMeter = 1.0f;
 
-void b2SetLengthUnitsPerMeter( float lengthUnits )
+void b3SetLengthUnitsPerMeter( float lengthUnits )
 {
-	B2_ASSERT( b2IsValidFloat( lengthUnits ) && lengthUnits > 0.0f );
-	b2_lengthUnitsPerMeter = lengthUnits;
+	B3_ASSERT( b3IsValidFloat( lengthUnits ) && lengthUnits > 0.0f );
+	b3_lengthUnitsPerMeter = lengthUnits;
 }
 
-float b2GetLengthUnitsPerMeter( void )
+float b3GetLengthUnitsPerMeter( void )
 {
-	return b2_lengthUnitsPerMeter;
+	return b3_lengthUnitsPerMeter;
 }
 
-static int b2DefaultAssertFcn( const char* condition, const char* fileName, int lineNumber )
+static float b3_stallThreshold = FLT_MAX;
+
+void b3SetStallThreshold(float seconds)
 {
-	fprintf( stderr, "BOX2D ASSERTION: %s, %s, line %d\n", condition, fileName, lineNumber );
-	fflush( stderr );
+	B3_ASSERT( b3IsValidFloat( seconds ) && seconds > 0.0f );
+	b3_stallThreshold = seconds;
+}
+
+float b3GetStallThreshold(void)
+{
+	return b3_stallThreshold;
+}
+
+static int b3DefaultAssertFcn( const char* condition, const char* fileName, int lineNumber )
+{
+	printf( "BOX3D ASSERTION: %s, %s, line %d\n", condition, fileName, lineNumber );
 
 	// return non-zero to break to debugger
 	return 1;
 }
 
-static b2AssertFcn* b2AssertHandler = b2DefaultAssertFcn;
+b3AssertFcn* b3AssertHandler = b3DefaultAssertFcn;
 
-void b2SetAssertFcn( b2AssertFcn* assertFcn )
+void b3SetAssertFcn( b3AssertFcn* assertFcn )
 {
-	B2_ASSERT( assertFcn != NULL );
-	b2AssertHandler = assertFcn;
+	B3_ASSERT( assertFcn != NULL );
+	b3AssertHandler = assertFcn;
 }
 
-#if !defined( NDEBUG ) || defined( B2_ENABLE_ASSERT )
-int b2InternalAssert( const char* condition, const char* fileName, int lineNumber )
+#if !defined( NDEBUG ) || defined( B3_ENABLE_ASSERT )
+int b3InternalAssert( const char* condition, const char* fileName, int lineNumber )
 {
-	int result = b2AssertHandler( condition, fileName, lineNumber );
+	int result = b3AssertHandler( condition, fileName, lineNumber );
 	if ( result )
 	{
-		B2_BREAKPOINT;
+		B3_BREAKPOINT;
 	}
 	return result;
 }
 #endif
 
-static void b2DefaultLogFcn( const char* message )
+static void b3DefaultLogFcn( const char* message )
 {
-	printf( "Box2D: %s\n", message );
+	printf( "Box3D: %s\n", message );
 }
 
-static b2LogFcn* b2LogHandler = b2DefaultLogFcn;
+b3LogFcn* b3LogHandler = b3DefaultLogFcn;
 
-void b2SetLogFcn( b2LogFcn* logFcn )
+void b3SetLogFcn( b3LogFcn* logFcn )
 {
-	B2_ASSERT( logFcn != NULL );
-	b2LogHandler = logFcn;
+	B3_ASSERT( logFcn != NULL );
+	b3LogHandler = logFcn;
 }
 
-void b2Log( const char* format, ... )
+void b3Log( const char* format, ... )
 {
 	va_list args;
 	va_start( args, format );
 	char buffer[512];
 	vsnprintf( buffer, sizeof( buffer ), format, args );
-	b2LogHandler( buffer );
+	b3LogHandler( buffer );
 	va_end( args );
 }
 
-b2Version b2GetVersion( void )
+b3Version b3GetVersion( void )
 {
-	return (b2Version){
-		.major = 3,
-		.minor = 2,
-		.revision = 0,
-	};
+	return (b3Version){ 0, 1, 0 };
 }
 
-bool b2IsDoublePrecision( void )
+bool b3IsDoublePrecision( void )
 {
-#if defined( BOX2D_DOUBLE_PRECISION )
+#if defined( BOX3D_DOUBLE_PRECISION )
 	return true;
 #else
 	return false;
 #endif
 }
 
-static b2AllocFcn* b2_allocFcn = NULL;
-static b2FreeFcn* b2_freeFcn = NULL;
+static b3AllocFcn* b3_allocFcn = NULL;
+static b3FreeFcn* b3_freeFcn = NULL;
 
-static b2AtomicI64 b2_byteCount;
+b3AtomicInt b3_byteCount;
 
-void b2SetAllocator( b2AllocFcn* allocFcn, b2FreeFcn* freeFcn )
+void b3SetAllocator( b3AllocFcn* allocFcn, b3FreeFcn* freeFcn )
 {
-	b2_allocFcn = allocFcn;
-	b2_freeFcn = freeFcn;
+	b3_allocFcn = allocFcn;
+	b3_freeFcn = freeFcn;
 }
 
-// Use 32 byte alignment for everything. Works with 256bit SIMD.
-#define B2_ALIGNMENT 32
+// Use 64 byte alignment for everything to align to 64 byte cache line and works with 256bit SIMD.
+#define B3_ALIGNMENT 64
 
-void* b2Alloc( size_t size )
+void* b3Alloc( size_t size )
 {
 	if ( size == 0 )
 	{
 		return NULL;
 	}
 
-	// This could cause some sharing issues, however Box2D rarely calls b2Alloc.
-	b2AtomicFetchAddI64( &b2_byteCount, size );
+	// This could cause some sharing issues, however Box3D rarely calls b3Alloc.
+	// todo this is not true, Box3D allocates a lot.
+	b3AtomicFetchAddInt( &b3_byteCount, (int)size );
 
 	// Allocation must be a multiple of 32 or risk a seg fault
 	// https://en.cppreference.com/w/c/memory/aligned_alloc
-	size_t size32 = ( ( size - 1 ) | 0x1F ) + 1;
+	int size64 = ( ( (int)size - 1 ) | 0x3F ) + 1;
 
-	if ( b2_allocFcn != NULL )
+	if ( b3_allocFcn != NULL )
 	{
-		void* ptr = b2_allocFcn( size32, B2_ALIGNMENT );
-		b2TracyCAlloc( ptr, size );
+		void* ptr = b3_allocFcn( size64, B3_ALIGNMENT );
+		b3TracyCAlloc( ptr, size );
 
-		B2_ASSERT( ptr != NULL );
-		B2_ASSERT( ( (uintptr_t)ptr & 0x1F ) == 0 );
+		B3_ASSERT( ptr != NULL );
+		B3_ASSERT( ( (uintptr_t)ptr & 0x3F ) == 0 );
 
 		return ptr;
 	}
 
-#ifdef B2_PLATFORM_WINDOWS
-	void* ptr = _aligned_malloc( size32, B2_ALIGNMENT );
-#elif defined( B2_PLATFORM_ANDROID )
+#ifdef B3_PLATFORM_WINDOWS
+	void* ptr = _aligned_malloc( size64, B3_ALIGNMENT );
+#elif defined( B3_PLATFORM_ANDROID )
 	void* ptr = NULL;
-	if ( posix_memalign( &ptr, B2_ALIGNMENT, size32 ) != 0 )
+	if ( posix_memalign( &ptr, B3_ALIGNMENT, size64 ) != 0 )
 	{
 		// allocation failed, exit the application
 		exit( EXIT_FAILURE );
 	}
 #else
-	void* ptr = aligned_alloc( B2_ALIGNMENT, size32 );
+	void* ptr = aligned_alloc( B3_ALIGNMENT, size64 );
 #endif
 
-	b2TracyCAlloc( ptr, size );
+	b3TracyCAlloc( ptr, size );
 
-	B2_ASSERT( ptr != NULL );
-	B2_ASSERT( ( (uintptr_t)ptr & 0x1F ) == 0 );
+	B3_ASSERT( ptr != NULL );
+	B3_ASSERT( ( (uintptr_t)ptr & 0x3F ) == 0 );
 
 	return ptr;
 }
 
-void* b2AllocZeroInit( size_t size )
-{
-	void* memory = b2Alloc( size );
-	memset( memory, 0, size );
-	return memory;
-}
-
-void b2Free( void* mem, size_t size )
+void b3Free( void* mem, size_t size )
 {
 	if ( mem == NULL )
 	{
 		return;
 	}
 
-	b2TracyCFree( mem );
+	b3TracyCFree( mem );
 
-	if ( b2_freeFcn != NULL )
+	if ( b3_freeFcn != NULL )
 	{
-		b2_freeFcn( mem, size );
+		b3_freeFcn( mem );
 	}
 	else
 	{
-#ifdef B2_PLATFORM_WINDOWS
+#ifdef B3_PLATFORM_WINDOWS
 		_aligned_free( mem );
 #else
 		free( mem );
 #endif
 	}
 
-	b2AtomicFetchAddI64( &b2_byteCount, -(int64_t)size );
+	b3AtomicFetchAddInt( &b3_byteCount, -(int)size );
 }
 
-void* b2GrowAlloc( void* oldMem, size_t oldSize, size_t newSize )
+void* b3GrowAlloc( void* oldMem, int oldSize, int newSize )
 {
-	B2_ASSERT( newSize > oldSize );
-	void* newMem = b2Alloc( newSize );
+	// todo try _aligned_realloc
+
+	B3_ASSERT( newSize > oldSize );
+	void* newMem = b3Alloc( newSize );
 	if ( oldSize > 0 )
 	{
 		memcpy( newMem, oldMem, oldSize );
-		b2Free( oldMem, oldSize );
+		b3Free( oldMem, oldSize );
 	}
 	return newMem;
 }
 
-void* b2GrowAllocZeroInit( void* oldMem, size_t oldSize, size_t newSize )
+int b3GetByteCount( void )
 {
-	B2_ASSERT( newSize > oldSize );
-	void* newMem = b2Alloc( newSize );
-	if ( oldSize > 0 )
-	{
-		memcpy( newMem, oldMem, oldSize );
-		b2Free( oldMem, oldSize );
-	}
-
-	memset( (char*)newMem + oldSize, 0, newSize - oldSize );
-	return newMem;
+	return b3AtomicLoadInt( &b3_byteCount );
 }
 
-int64_t b2GetByteCount( void )
+void* b3AllocZeroed( size_t size )
 {
-	return b2AtomicLoadI64( &b2_byteCount );
+	void* mem = b3Alloc( size );
+	memset( mem, 0, size );
+	return mem;
+}
+
+static FILE* b3OpenFile( const char* fileName, const char* mode )
+{
+	FILE* file = NULL;
+
+#if defined( _MSC_VER )
+	errno_t e = fopen_s( &file, fileName, mode );
+	if ( e != 0 )
+	{
+		return NULL;
+	}
+#else
+	file = fopen( fileName, mode );
+	if ( file == NULL )
+	{
+		return NULL;
+	}
+#endif
+
+	return file;
+}
+
+FILE* b3_dumpFile = NULL;
+int b3_meshIndex = 0;
+
+void b3OpenDump( const char* fileName )
+{
+	B3_ASSERT( b3_dumpFile == NULL );
+	b3_dumpFile = b3OpenFile( fileName, "w" );
+}
+
+void b3Dump( const char* string, ... )
+{
+	if ( b3_dumpFile == NULL )
+	{
+		return;
+	}
+
+	va_list args;
+	va_start( args, string );
+	vfprintf( b3_dumpFile, string, args );
+	va_end( args );
+}
+
+void b3CloseDump( void )
+{
+	fclose( b3_dumpFile );
+	b3_dumpFile = NULL;
+}
+
+int b3FetchAddMeshDumpIndex( void )
+{
+	int result = b3_meshIndex;
+	b3_meshIndex += 1;
+	return result;
+}
+
+void b3WriteBinaryFile( void* data, int size, const char* fileName )
+{
+	if ( data == NULL || size <= 0 || fileName == NULL )
+	{
+		return;
+	}
+
+	FILE* file = b3OpenFile( fileName, "wb" );
+	if ( file == NULL )
+	{
+		return;
+	}
+
+	// Write binary blob; ignore partial-write errors for simplicity
+	(void)fwrite( data, 1, (size_t)size, file );
+	fclose( file );
+}
+
+void* b3ReadBinaryFile( const char* prefix, const char* fileName, int* memSize )
+{
+	*memSize = 0;
+
+	if ( prefix == NULL || fileName == NULL )
+	{
+		return NULL;
+	}
+
+	char buffer[128];
+	snprintf( buffer, sizeof( buffer ), "%s%s", prefix, fileName );
+
+	FILE* file = b3OpenFile( buffer, "rb" );
+	if ( file == NULL )
+	{
+		return NULL;
+	}
+
+	// Determine file size
+	if ( fseek( file, 0, SEEK_END ) != 0 )
+	{
+		fclose( file );
+		return NULL;
+	}
+
+	long size = ftell( file );
+	if ( size <= 0 )
+	{
+		fclose( file );
+		return NULL;
+	}
+
+	// Rewind
+	if ( fseek( file, 0, SEEK_SET ) != 0 )
+	{
+		fclose( file );
+		return NULL;
+	}
+
+	void* data = b3Alloc( (size_t)size );
+	size_t readCount = fread( data, 1, (size_t)size, file );
+	fclose( file );
+
+	if ( readCount != (size_t)size )
+	{
+		b3Free( data, (size_t)size );
+		return NULL;
+	}
+
+	*memSize = (int)size;
+	return data;
 }

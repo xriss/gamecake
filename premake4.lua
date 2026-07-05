@@ -803,6 +803,8 @@ all_includes=all_includes or {
 	{"lua_pgsql",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil			or		nil			or	nil		},
 
+	{"lua_boxxd",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+
 -- hid is now in SDL
 --	{"lua_hid",			nil			or		NIX		or		nil			or		nil			or	nil		},
 --	{"lib_hidapi",		nil			or		NIX		or		nil			or		nil			or	nil		},

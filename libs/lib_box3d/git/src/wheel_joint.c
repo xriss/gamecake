@@ -1,526 +1,993 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #include "body.h"
 #include "core.h"
 #include "joint.h"
+#include "math_internal.h"
 #include "physics_world.h"
-#include "recording.h"
 #include "solver.h"
 #include "solver_set.h"
+#include "recording.h"
 
 // needed for dll export
-#include "box2d/box2d.h"
+#include "box3d/box3d.h"
 
-#include <stdio.h>
-
-void b2WheelJoint_EnableSpring( b2JointId jointId, bool enableSpring )
+void b3WheelJoint_EnableSuspension( b3JointId jointId, bool enableSpring )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WheelJointEnableSpring, jointId, enableSpring );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointEnableSuspension, jointId, enableSpring );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
 
-	if ( enableSpring != joint->wheelJoint.enableSpring )
+	if ( enableSpring != joint->wheelJoint.enableSuspensionSpring )
 	{
-		joint->wheelJoint.enableSpring = enableSpring;
-		joint->wheelJoint.springImpulse = 0.0f;
+		joint->wheelJoint.enableSuspensionSpring = enableSpring;
+		joint->wheelJoint.suspensionSpringImpulse = 0.0f;
 	}
 }
 
-bool b2WheelJoint_IsSpringEnabled( b2JointId jointId )
+bool b3WheelJoint_IsSuspensionEnabled( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	return joint->wheelJoint.enableSpring;
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.enableSuspensionSpring;
 }
 
-void b2WheelJoint_SetSpringHertz( b2JointId jointId, float hertz )
+void b3WheelJoint_SetSuspensionHertz( b3JointId jointId, float hertz )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WheelJointSetSpringHertz, jointId, hertz );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	joint->wheelJoint.hertz = hertz;
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointSetSuspensionHertz, jointId, hertz );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	joint->wheelJoint.suspensionHertz = hertz;
 }
 
-float b2WheelJoint_GetSpringHertz( b2JointId jointId )
+float b3WheelJoint_GetSuspensionHertz( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	return joint->wheelJoint.hertz;
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.suspensionHertz;
 }
 
-void b2WheelJoint_SetSpringDampingRatio( b2JointId jointId, float dampingRatio )
+void b3WheelJoint_SetSuspensionDampingRatio( b3JointId jointId, float dampingRatio )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WheelJointSetSpringDampingRatio, jointId, dampingRatio );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	joint->wheelJoint.dampingRatio = dampingRatio;
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointSetSuspensionDampingRatio, jointId, dampingRatio );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	joint->wheelJoint.suspensionDampingRatio = dampingRatio;
 }
 
-float b2WheelJoint_GetSpringDampingRatio( b2JointId jointId )
+float b3WheelJoint_GetSuspensionDampingRatio( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	return joint->wheelJoint.dampingRatio;
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.suspensionDampingRatio;
 }
 
-void b2WheelJoint_EnableLimit( b2JointId jointId, bool enableLimit )
+void b3WheelJoint_EnableSuspensionLimit( b3JointId jointId, bool enableLimit )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WheelJointEnableLimit, jointId, enableLimit );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	if ( joint->wheelJoint.enableLimit != enableLimit )
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointEnableSuspensionLimit, jointId, enableLimit );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	if ( joint->wheelJoint.enableSuspensionLimit != enableLimit )
 	{
-		joint->wheelJoint.lowerImpulse = 0.0f;
-		joint->wheelJoint.upperImpulse = 0.0f;
-		joint->wheelJoint.enableLimit = enableLimit;
+		joint->wheelJoint.lowerSuspensionImpulse = 0.0f;
+		joint->wheelJoint.upperSuspensionImpulse = 0.0f;
+		joint->wheelJoint.enableSuspensionLimit = enableLimit;
 	}
 }
 
-bool b2WheelJoint_IsLimitEnabled( b2JointId jointId )
+bool b3WheelJoint_IsSuspensionLimitEnabled( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	return joint->wheelJoint.enableLimit;
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.enableSuspensionLimit;
 }
 
-float b2WheelJoint_GetLowerLimit( b2JointId jointId )
+float b3WheelJoint_GetLowerSuspensionLimit( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	return joint->wheelJoint.lowerTranslation;
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.lowerSuspensionLimit;
 }
 
-float b2WheelJoint_GetUpperLimit( b2JointId jointId )
+float b3WheelJoint_GetUpperSuspensionLimit( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	return joint->wheelJoint.upperTranslation;
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.upperSuspensionLimit;
 }
 
-void b2WheelJoint_SetLimits( b2JointId jointId, float lower, float upper )
+void b3WheelJoint_SetSuspensionLimits( b3JointId jointId, float lower, float upper )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WheelJointSetLimits, jointId, lower, upper );
-	B2_ASSERT( lower <= upper );
-
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	if ( lower != joint->wheelJoint.lowerTranslation || upper != joint->wheelJoint.upperTranslation )
+	B3_ASSERT( lower <= upper );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointSetSuspensionLimits, jointId, lower, upper );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	if ( lower != joint->wheelJoint.lowerSuspensionLimit || upper != joint->wheelJoint.upperSuspensionLimit )
 	{
-		joint->wheelJoint.lowerTranslation = b2MinFloat( lower, upper );
-		joint->wheelJoint.upperTranslation = b2MaxFloat( lower, upper );
-		joint->wheelJoint.lowerImpulse = 0.0f;
-		joint->wheelJoint.upperImpulse = 0.0f;
+		joint->wheelJoint.lowerSuspensionLimit = lower;
+		joint->wheelJoint.upperSuspensionLimit = upper;
+		joint->wheelJoint.lowerSuspensionImpulse = 0.0f;
+		joint->wheelJoint.upperSuspensionImpulse = 0.0f;
 	}
 }
 
-void b2WheelJoint_EnableMotor( b2JointId jointId, bool enableMotor )
+void b3WheelJoint_EnableSpinMotor( b3JointId jointId, bool enableMotor )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WheelJointEnableMotor, jointId, enableMotor );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	if ( joint->wheelJoint.enableMotor != enableMotor )
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointEnableSpinMotor, jointId, enableMotor );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	if ( joint->wheelJoint.enableSpinMotor != enableMotor )
 	{
-		joint->wheelJoint.motorImpulse = 0.0f;
-		joint->wheelJoint.enableMotor = enableMotor;
+		joint->wheelJoint.spinImpulse = 0.0f;
+		joint->wheelJoint.enableSpinMotor = enableMotor;
 	}
 }
 
-bool b2WheelJoint_IsMotorEnabled( b2JointId jointId )
+bool b3WheelJoint_IsSpinMotorEnabled( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	return joint->wheelJoint.enableMotor;
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.enableSpinMotor;
 }
 
-void b2WheelJoint_SetMotorSpeed( b2JointId jointId, float motorSpeed )
+void b3WheelJoint_SetSpinMotorSpeed( b3JointId jointId, float motorSpeed )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WheelJointSetMotorSpeed, jointId, motorSpeed );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	joint->wheelJoint.motorSpeed = motorSpeed;
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointSetSpinMotorSpeed, jointId, motorSpeed );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	joint->wheelJoint.spinSpeed = motorSpeed;
 }
 
-float b2WheelJoint_GetMotorSpeed( b2JointId jointId )
+float b3WheelJoint_GetSpinMotorSpeed( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	return joint->wheelJoint.motorSpeed;
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.spinSpeed;
 }
 
-float b2WheelJoint_GetMotorTorque( b2JointId jointId )
+void b3WheelJoint_SetMaxSpinTorque( b3JointId jointId, float torque )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	return world->inv_h * joint->wheelJoint.motorImpulse;
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointSetMaxSpinTorque, jointId, torque );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	joint->wheelJoint.maxSpinTorque = torque;
 }
 
-void b2WheelJoint_SetMaxMotorTorque( b2JointId jointId, float torque )
+float b3WheelJoint_GetMaxSpinTorque( b3JointId jointId )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WheelJointSetMaxMotorTorque, jointId, torque );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	joint->wheelJoint.maxMotorTorque = torque;
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.maxSpinTorque;
 }
 
-float b2WheelJoint_GetMaxMotorTorque( b2JointId jointId )
+void b3WheelJoint_EnableSteering( b3JointId jointId, bool flag )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_wheelJoint );
-	return joint->wheelJoint.maxMotorTorque;
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointEnableSteering, jointId, flag );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	if ( joint->wheelJoint.enableSteering != flag )
+	{
+		joint->wheelJoint.angularImpulse = (b3Vec2){ 0.0f, 0.0f };
+		joint->wheelJoint.enableSteering = flag;
+	}
 }
 
-b2Vec2 b2GetWheelJointForce( b2World* world, b2JointSim* base )
+bool b3WheelJoint_IsSteeringEnabled( b3JointId jointId )
 {
-	b2Rot qA = b2GetBodyTransform( world, base->bodyIdA ).q;
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.enableSteering;
+}
 
-	b2Vec2 localAxisA = b2RotateVector( base->localFrameA.q, (b2Vec2){ 1.0f, 0.0f } );
-	b2Vec2 axisA = b2RotateVector( qA, localAxisA );
-	b2Vec2 perpA = b2LeftPerp( axisA );
+void b3WheelJoint_SetSteeringHertz( b3JointId jointId, float hertz )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointSetSteeringHertz, jointId, hertz );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	joint->wheelJoint.steeringHertz = hertz;
+}
 
-	b2WheelJoint* joint = &base->wheelJoint;
+float b3WheelJoint_GetSteeringHertz( b3JointId jointId )
+{
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.steeringHertz;
+}
 
-	float perpForce = world->inv_h * joint->perpImpulse;
-	float axialForce = world->inv_h * ( joint->springImpulse + joint->lowerImpulse - joint->upperImpulse );
+void b3WheelJoint_SetSteeringDampingRatio( b3JointId jointId, float dampingRatio )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointSetSteeringDampingRatio, jointId, dampingRatio );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	joint->wheelJoint.steeringDampingRatio = dampingRatio;
+}
 
-	b2Vec2 force = b2Add( b2MulSV( perpForce, perpA ), b2MulSV( axialForce, axisA ) );
+float b3WheelJoint_GetSteeringDampingRatio( b3JointId jointId )
+{
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.steeringDampingRatio;
+}
+
+void b3WheelJoint_SetMaxSteeringTorque( b3JointId jointId, float maxTorque )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointSetMaxSteeringTorque, jointId, maxTorque );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	joint->wheelJoint.maxSteeringTorque = maxTorque;
+}
+
+float b3WheelJoint_GetMaxSteeringTorque( b3JointId jointId )
+{
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.maxSteeringTorque;
+}
+
+void b3WheelJoint_EnableSteeringLimit( b3JointId jointId, bool flag )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointEnableSteeringLimit, jointId, flag );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	if ( joint->wheelJoint.enableSteeringLimit != flag )
+	{
+		joint->wheelJoint.lowerSteeringImpulse = 0.0f;
+		joint->wheelJoint.upperSteeringImpulse = 0.0f;
+		joint->wheelJoint.enableSteeringLimit = flag;
+	}
+}
+
+bool b3WheelJoint_IsSteeringLimitEnabled( b3JointId jointId )
+{
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.enableSteeringLimit;
+}
+
+float b3WheelJoint_GetLowerSteeringLimit( b3JointId jointId )
+{
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.lowerSteeringLimit;
+}
+
+float b3WheelJoint_GetUpperSteeringLimit( b3JointId jointId )
+{
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.upperSteeringLimit;
+}
+
+void b3WheelJoint_SetSteeringLimits( b3JointId jointId, float lowerRadians, float upperRadians )
+{
+	B3_ASSERT( lowerRadians <= upperRadians );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointSetSteeringLimits, jointId, lowerRadians, upperRadians );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	joint->wheelJoint.lowerSteeringLimit = lowerRadians;
+	joint->wheelJoint.upperSteeringLimit = upperRadians;
+}
+
+void b3WheelJoint_SetTargetSteeringAngle( b3JointId jointId, float radians )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WheelJointSetTargetSteeringAngle, jointId, radians );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	joint->wheelJoint.targetSteeringAngle = radians;
+}
+
+float b3WheelJoint_GetTargetSteeringAngle( b3JointId jointId )
+{
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return joint->wheelJoint.targetSteeringAngle;
+}
+
+float b3WheelJoint_GetSpinSpeed( b3JointId jointId )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+
+	int idA = base->bodyIdA;
+	int idB = base->bodyIdB;
+
+	b3Body* bodyA = b3Array_Get( world->bodies, idA  );
+	b3Body* bodyB = b3Array_Get( world->bodies, idB  );
+
+	b3SolverSet* setB = b3Array_Get( world->solverSets, bodyB->setIndex  );
+	int localIndexB = bodyB->localIndex;
+	b3BodySim* bodySimB = b3Array_Get( setB->bodySims, localIndexB  );
+
+	b3Quat quatB = b3MulQuat( bodySimB->transform.q, base->localFrameB.q );
+	b3Vec3 spinAxis = b3RotateVector( quatB, b3Vec3_axisZ );
+
+	b3Vec3 wA = b3Vec3_zero;
+	b3BodyState* stateA = b3GetBodyState( world, bodyA );
+	if ( stateA != NULL )
+	{
+		wA = stateA->angularVelocity;
+	}
+
+	b3Vec3 wB = b3Vec3_zero;
+	b3BodyState* stateB = b3GetBodyState( world, bodyB );
+	if ( stateB != NULL )
+	{
+		wB = stateB->angularVelocity;
+	}
+
+	float speed = b3Dot( b3Sub( wB, wA ), spinAxis );
+	return speed;
+}
+
+float b3WheelJoint_GetSpinTorque( b3JointId jointId )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return world->inv_h * joint->wheelJoint.spinImpulse;
+}
+
+float b3WheelJoint_GetSteeringAngle( b3JointId jointId )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+
+	int idA = base->bodyIdA;
+	int idB = base->bodyIdB;
+
+	b3Body* bodyA = b3Array_Get( world->bodies, idA  );
+	b3Body* bodyB = b3Array_Get( world->bodies, idB  );
+
+	b3SolverSet* setA = b3Array_Get( world->solverSets, bodyA->setIndex  );
+	b3SolverSet* setB = b3Array_Get( world->solverSets, bodyB->setIndex  );
+
+	int localIndexA = bodyA->localIndex;
+	int localIndexB = bodyB->localIndex;
+
+	b3BodySim* bodySimA = b3Array_Get( setA->bodySims, localIndexA  );
+	b3BodySim* bodySimB = b3Array_Get( setB->bodySims, localIndexB  );
+
+	b3Quat quatA = b3MulQuat( bodySimA->transform.q, base->localFrameA.q );
+	b3Quat quatB = b3MulQuat( bodySimB->transform.q, base->localFrameB.q );
+
+	b3Matrix3 matrixA = b3MakeMatrixFromQuat( quatA );
+	b3Matrix3 matrixB = b3MakeMatrixFromQuat( quatB );
+
+	// Twist around x-axis
+	float cs = b3Dot( matrixB.cz, matrixA.cz );
+	float ss = -b3Dot( matrixB.cz, matrixA.cy );
+
+	return b3Atan2( ss, cs );
+}
+
+float b3WheelJoint_GetSteeringTorque( b3JointId jointId )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	b3JointSim* joint = b3GetJointSimCheckType( jointId, b3_wheelJoint );
+	return world->inv_h * joint->wheelJoint.steeringSpringImpulse;
+}
+
+b3Vec3 b3GetWheelJointForce( b3World* world, b3JointSim* base )
+{
+	b3WorldTransform transformA = b3GetBodyTransform( world, base->bodyIdA );
+	b3WheelJoint* joint = &base->wheelJoint;
+
+	// impulse in joint space
+	b3Vec3 impulse = {
+		joint->linearImpulse.x,
+		joint->linearImpulse.y,
+		joint->lowerSuspensionLimit + joint->upperSuspensionImpulse + joint->suspensionSpringImpulse,
+	};
+
+	// convert impulse to force
+	b3Vec3 force = b3MulSV( world->inv_h, impulse );
+
+	// convert to body space
+	force = b3RotateVector( base->localFrameA.q, force );
+
+	// convert to world space
+	force = b3RotateVector( transformA.q, force );
 	return force;
 }
 
-float b2GetWheelJointTorque( b2World* world, b2JointSim* base )
+b3Vec3 b3GetWheelJointTorque( b3World* world, b3JointSim* base )
 {
-	return world->inv_h * base->wheelJoint.motorImpulse;
+	B3_ASSERT( base->type == b3_wheelJoint );
+
+	// chase body id to the solver set where the body lives
+	int idA = base->bodyIdA;
+	// int idB = base->bodyIdB;
+
+	b3Body* bodyA = b3Array_Get( world->bodies, idA  );
+	// b3Body* bodyB = b3Array_Get( world->bodies, idB  );
+
+	b3SolverSet* setA = b3Array_Get( world->solverSets, bodyA->setIndex  );
+	// b3SolverSet* setB = b3Array_Get( world->solverSets, bodyB->setIndex  );
+
+	int localIndexA = bodyA->localIndex;
+	// int localIndexB = bodyB->localIndex;
+
+	b3BodySim* bodySimA = b3Array_Get( setA->bodySims, localIndexA  );
+	// b3BodySim* bodySimB = b3Array_Get( setB->bodySims, localIndexB  );
+
+	b3Quat qA = b3MulQuat( bodySimA->transform.q, base->localFrameA.q );
+
+	b3Matrix3 matrixA = b3MakeMatrixFromQuat( qA );
+
+	return b3MulSV( world->inv_h * base->wheelJoint.spinImpulse, matrixA.cz );
 }
 
-// Linear constraint (point-to-line)
-// d = pB - pA = xB + rB - xA - rA
-// C = dot(ay, d)
-// Cdot = dot(d, cross(wA, ay)) + dot(ay, vB + cross(wB, rB) - vA - cross(wA, rA))
-//      = -dot(ay, vA) - dot(cross(d + rA, ay), wA) + dot(ay, vB) + dot(cross(rB, ay), vB)
-// J = [-ay, -cross(d + rA, ay), ay, cross(rB, ay)]
+// See constraints.pdf
 
-// Spring linear constraint
-// C = dot(ax, d)
-// Cdot = = -dot(ax, vA) - dot(cross(d + rA, ax), wA) + dot(ax, vB) + dot(cross(rB, ax), vB)
-// J = [-ax -cross(d+rA, ax) ax cross(rB, ax)]
-
-// Motor rotational constraint
-// Cdot = wB - wA
-// J = [0 0 -1 0 0 1]
-
-void b2PrepareWheelJoint( b2JointSim* base, b2StepContext* context )
+void b3PrepareWheelJoint( b3JointSim* base, b3StepContext* context )
 {
-	B2_ASSERT( base->type == b2_wheelJoint );
+	B3_ASSERT( base->type == b3_wheelJoint );
 
 	// chase body id to the solver set where the body lives
 	int idA = base->bodyIdA;
 	int idB = base->bodyIdB;
 
-	b2World* world = context->world;
+	b3World* world = context->world;
 
-	b2Body* bodyA = b2Array_Get( world->bodies, idA );
-	b2Body* bodyB = b2Array_Get( world->bodies, idB );
+	b3Body* bodyA = b3Array_Get( world->bodies, idA  );
+	b3Body* bodyB = b3Array_Get( world->bodies, idB  );
 
-	B2_ASSERT( bodyA->setIndex == b2_awakeSet || bodyB->setIndex == b2_awakeSet );
-	b2SolverSet* setA = b2Array_Get( world->solverSets, bodyA->setIndex );
-	b2SolverSet* setB = b2Array_Get( world->solverSets, bodyB->setIndex );
+	B3_ASSERT( bodyA->setIndex == b3_awakeSet || bodyB->setIndex == b3_awakeSet );
+	b3SolverSet* setA = b3Array_Get( world->solverSets, bodyA->setIndex  );
+	b3SolverSet* setB = b3Array_Get( world->solverSets, bodyB->setIndex  );
 
 	int localIndexA = bodyA->localIndex;
 	int localIndexB = bodyB->localIndex;
 
-	b2BodySim* bodySimA = b2Array_Get( setA->bodySims, localIndexA );
-	b2BodySim* bodySimB = b2Array_Get( setB->bodySims, localIndexB );
+	b3BodySim* bodySimA = b3Array_Get( setA->bodySims, localIndexA  );
+	b3BodySim* bodySimB = b3Array_Get( setB->bodySims, localIndexB  );
 
-	float mA = bodySimA->invMass;
-	float iA = bodySimA->invInertia;
-	float mB = bodySimB->invMass;
-	float iB = bodySimB->invInertia;
+	base->invMassA = bodySimA->invMass;
+	base->invMassB = bodySimB->invMass;
+	base->invIA = bodySimA->invInertiaWorld;
+	base->invIB = bodySimB->invInertiaWorld;
 
-	base->invMassA = mA;
-	base->invMassB = mB;
-	base->invIA = iA;
-	base->invIB = iB;
+	b3Matrix3 invInertiaSum = b3AddMM( base->invIA, base->invIB );
+	base->fixedRotation = b3Det( invInertiaSum ) < 1000.0f * FLT_MIN;
 
-	b2WheelJoint* joint = &base->wheelJoint;
+	b3WheelJoint* joint = &base->wheelJoint;
 
-	joint->indexA = bodyA->setIndex == b2_awakeSet ? localIndexA : B2_NULL_INDEX;
-	joint->indexB = bodyB->setIndex == b2_awakeSet ? localIndexB : B2_NULL_INDEX;
+	joint->indexA = bodyA->setIndex == b3_awakeSet ? localIndexA : B3_NULL_INDEX;
+	joint->indexB = bodyB->setIndex == b3_awakeSet ? localIndexB : B3_NULL_INDEX;
 
 	// Compute joint anchor frames with world space rotation, relative to center of mass
-	joint->frameA.q = b2MulRot( bodySimA->transform.q, base->localFrameA.q );
-	joint->frameA.p = b2RotateVector( bodySimA->transform.q, b2Sub( base->localFrameA.p, bodySimA->localCenter ) );
-	joint->frameB.q = b2MulRot( bodySimB->transform.q, base->localFrameB.q );
-	joint->frameB.p = b2RotateVector( bodySimB->transform.q, b2Sub( base->localFrameB.p, bodySimB->localCenter ) );
+	joint->frameA.q = b3MulQuat( bodySimA->transform.q, base->localFrameA.q );
+	joint->frameA.p = b3RotateVector( bodySimA->transform.q, b3Sub( base->localFrameA.p, bodySimA->localCenter ) );
+	joint->frameB.q = b3MulQuat( bodySimB->transform.q, base->localFrameB.q );
+	joint->frameB.p = b3RotateVector( bodySimB->transform.q, b3Sub( base->localFrameB.p, bodySimB->localCenter ) );
 
 	// Compute the initial center delta. Incremental position updates are relative to this.
-	joint->deltaCenter = b2SubPos( bodySimB->center, bodySimA->center );
+	joint->deltaCenter = b3SubPos( bodySimB->center, bodySimA->center );
 
-	b2Vec2 rA = joint->frameA.p;
-	b2Vec2 rB = joint->frameB.p;
+	b3Vec3 rA = joint->frameA.p;
+	b3Vec3 rB = joint->frameB.p;
 
-	b2Vec2 d = b2Add( joint->deltaCenter, b2Sub( rB, rA ) );
-	b2Vec2 axisA = b2RotateVector( joint->frameA.q, (b2Vec2){ 1.0f, 0.0f } );
-	b2Vec2 perpA = b2LeftPerp( axisA );
+	b3Matrix3 matrixA = b3MakeMatrixFromQuat( joint->frameA.q );
+	b3Matrix3 matrixB = b3MakeMatrixFromQuat( joint->frameB.q );
 
-	// perpendicular constraint (keep wheel on line)
-	float s1 = b2Cross( b2Add( d, rA ), perpA );
-	float s2 = b2Cross( rB, perpA );
+	// todo use fresh effective masses in the sub-step to avoid divergence like I saw for the prismatic joint
 
-	float kp = mA + mB + iA * s1 * s1 + iB * s2 * s2;
-	joint->perpMass = kp > 0.0f ? 1.0f / kp : 0.0f;
+	{
+		b3Vec3 suspensionAxis = matrixA.cx;
+		b3Vec3 rAn = b3Cross( rA, suspensionAxis );
+		b3Vec3 rBn = b3Cross( rB, suspensionAxis );
 
-	// spring constraint
-	float a1 = b2Cross( b2Add( d, rA ), axisA );
-	float a2 = b2Cross( rB, axisA );
+		float k = base->invMassA + base->invMassB + b3Dot( rAn, b3MulMV( base->invIA, rAn ) ) +
+				  b3Dot( rBn, b3MulMV( base->invIB, rBn ) );
+		joint->suspensionMass = k > 0.0f ? 1.0f / k : 0.0f;
+	}
 
-	float ka = mA + mB + iA * a1 * a1 + iB * a2 * a2;
-	joint->axialMass = ka > 0.0f ? 1.0f / ka : 0.0f;
+	joint->suspensionSoftness = b3MakeSoft( joint->suspensionHertz, joint->suspensionDampingRatio, context->h );
+	joint->steeringSoftness = b3MakeSoft( joint->steeringHertz, joint->steeringDampingRatio, context->h );
 
-	joint->springSoftness = b2MakeSoft( joint->hertz, joint->dampingRatio, context->h );
+	{
+		// Rotation axis is the z-axis of body A.
+		b3Vec3 spinAxis = matrixB.cz;
+		float k = b3Dot( spinAxis, b3MulMV( invInertiaSum, spinAxis ) );
+		joint->spinMass = k > 0.0f ? 1.0f / k : 0.0f;
+	}
 
-	float km = iA + iB;
-	joint->motorMass = km > 0.0f ? 1.0f / km : 0.0f;
+	{
+		// Twist constraint around x-axis
+		float cs = b3Dot( matrixB.cz, matrixA.cz );
+		float ss = -b3Dot( matrixB.cz, matrixA.cy );
+		float den = cs * cs + ss * ss;
+		den = den > 0.0f ? 1.0f / den : 0.0f;
+		b3Vec3 steeringAxis =
+			b3MulSV( den, b3Cross( matrixB.cz, b3Sub( b3MulSV( -cs, matrixA.cy ), b3MulSV( ss, matrixA.cz ) ) ) );
+
+		float k = b3Dot( steeringAxis, b3MulMV( invInertiaSum, steeringAxis ) );
+		joint->steeringMass = k > 0.0f ? 1.0f / k : 0.0f;
+	}
 
 	if ( context->enableWarmStarting == false )
 	{
-		joint->perpImpulse = 0.0f;
-		joint->springImpulse = 0.0f;
-		joint->motorImpulse = 0.0f;
-		joint->lowerImpulse = 0.0f;
-		joint->upperImpulse = 0.0f;
+		joint->linearImpulse = (b3Vec2){ 0.0f, 0.0f };
+		joint->angularImpulse = (b3Vec2){ 0.0f, 0.0f };
+		joint->spinImpulse = 0.0f;
+		joint->suspensionSpringImpulse = 0.0f;
+		joint->lowerSuspensionImpulse = 0.0f;
+		joint->upperSuspensionImpulse = 0.0f;
+		joint->steeringSpringImpulse = 0.0f;
+		joint->lowerSteeringImpulse = 0.0f;
+		joint->upperSteeringImpulse = 0.0f;
 	}
 }
 
-void b2WarmStartWheelJoint( b2JointSim* base, b2StepContext* context )
+void b3WarmStartWheelJoint( b3JointSim* base, b3StepContext* context )
 {
-	B2_ASSERT( base->type == b2_wheelJoint );
+	B3_ASSERT( base->type == b3_wheelJoint );
 
 	float mA = base->invMassA;
 	float mB = base->invMassB;
-	float iA = base->invIA;
-	float iB = base->invIB;
+	b3Matrix3 iA = base->invIA;
+	b3Matrix3 iB = base->invIB;
 
 	// dummy state for static bodies
-	b2BodyState dummyState = b2_identityBodyState;
+	b3BodyState dummyState = b3_identityBodyState;
 
-	b2WheelJoint* joint = &base->wheelJoint;
+	b3WheelJoint* joint = &base->wheelJoint;
 
-	b2BodyState* stateA = joint->indexA == B2_NULL_INDEX ? &dummyState : context->states + joint->indexA;
-	b2BodyState* stateB = joint->indexB == B2_NULL_INDEX ? &dummyState : context->states + joint->indexB;
+	b3BodyState* stateA = joint->indexA == B3_NULL_INDEX ? &dummyState : context->states + joint->indexA;
+	b3BodyState* stateB = joint->indexB == B3_NULL_INDEX ? &dummyState : context->states + joint->indexB;
 
-	b2Vec2 rA = b2RotateVector( stateA->deltaRotation, joint->frameA.p );
-	b2Vec2 rB = b2RotateVector( stateB->deltaRotation, joint->frameB.p );
+	b3Vec3 rA = b3RotateVector( stateA->deltaRotation, joint->frameA.p );
+	b3Vec3 rB = b3RotateVector( stateB->deltaRotation, joint->frameB.p );
 
-	b2Vec2 d = b2Add( b2Add( b2Sub( stateB->deltaPosition, stateA->deltaPosition ), joint->deltaCenter ), b2Sub( rB, rA ) );
-	b2Vec2 axisA = b2RotateVector( joint->frameA.q, (b2Vec2){ 1.0f, 0.0f } );
-	axisA = b2RotateVector( stateA->deltaRotation, axisA );
-	b2Vec2 perpA = b2LeftPerp( axisA );
+	b3Vec3 d = b3Add( b3Add( b3Sub( stateB->deltaPosition, stateA->deltaPosition ), joint->deltaCenter ), b3Sub( rB, rA ) );
 
-	float a1 = b2Cross( b2Add( d, rA ), axisA );
-	float a2 = b2Cross( rB, axisA );
-	float s1 = b2Cross( b2Add( d, rA ), perpA );
-	float s2 = b2Cross( rB, perpA );
-
-	float axialImpulse = joint->springImpulse + joint->lowerImpulse - joint->upperImpulse;
-
-	b2Vec2 P = b2Add( b2MulSV( axialImpulse, axisA ), b2MulSV( joint->perpImpulse, perpA ) );
-	float LA = axialImpulse * a1 + joint->perpImpulse * s1 + joint->motorImpulse;
-	float LB = axialImpulse * a2 + joint->perpImpulse * s2 + joint->motorImpulse;
-
-	if ( stateA->flags & b2_dynamicFlag )
+	b3Quat quatA = b3MulQuat( stateA->deltaRotation, joint->frameA.q );
+	b3Quat quatB = b3MulQuat( stateB->deltaRotation, joint->frameB.q );
+	if ( b3DotQuat( quatA, quatB ) < 0.0f )
 	{
-		stateA->linearVelocity = b2MulSub( stateA->linearVelocity, mA, P );
-		stateA->angularVelocity -= iA * LA;
+		// this keeps the rotation angle in the range [-pi, pi]
+		quatB = b3NegateQuat( quatB );
 	}
 
-	if ( stateB->flags & b2_dynamicFlag )
+	b3Matrix3 matrixA = b3MakeMatrixFromQuat( quatA );
+	b3Matrix3 matrixB = b3MakeMatrixFromQuat( quatB );
+
+	b3Vec3 sAx = b3Cross( b3Add( d, rA ), matrixA.cx );
+	b3Vec3 sBx = b3Cross( rB, matrixA.cx );
+	b3Vec3 sAy = b3Cross( b3Add( d, rA ), matrixA.cy );
+	b3Vec3 sBy = b3Cross( rB, matrixA.cy );
+	b3Vec3 sAz = b3Cross( b3Add( d, rA ), matrixA.cz );
+	b3Vec3 sBz = b3Cross( rB, matrixA.cz );
+
+	float suspensionImpulse = joint->suspensionSpringImpulse + joint->lowerSuspensionImpulse - joint->upperSuspensionImpulse;
+
+	float linearImpulseY = joint->linearImpulse.x;
+	float linearImpulseZ = joint->linearImpulse.y;
+	float angularImpulseX = joint->angularImpulse.x;
+	float angularImpulseY = joint->angularImpulse.y;
+
+	b3Vec3 linearImpulse = b3Blend3( suspensionImpulse, matrixA.cx, linearImpulseY, matrixA.cy, linearImpulseZ, matrixA.cz );
+	b3Vec3 angularImpulseA = b3Blend3( suspensionImpulse, sAx, linearImpulseY, sAy, linearImpulseZ, sAz );
+	b3Vec3 angularImpulseB = b3Blend3( suspensionImpulse, sBx, linearImpulseY, sBy, linearImpulseZ, sBz );
+	b3Vec3 angularImpulse = b3MulSV( joint->spinImpulse, matrixA.cz );
+
+	b3Vec3 spinAxis = matrixB.cz;
+
+	if ( joint->enableSteering )
 	{
-		stateB->linearVelocity = b2MulAdd( stateB->linearVelocity, mB, P );
-		stateB->angularVelocity += iB * LB;
+		// Twist constraint around x-axis
+		float cs = b3Dot( matrixB.cz, matrixA.cz );
+		float ss = -b3Dot( matrixB.cz, matrixA.cy );
+		float den = cs * cs + ss * ss;
+		den = den > 0.0f ? 1.0f / den : 0.0f;
+		b3Vec3 steeringAxis =
+			b3MulSV( den, b3Cross( matrixB.cz, b3Sub( b3MulSV( -cs, matrixA.cy ), b3MulSV( ss, matrixA.cz ) ) ) );
+
+		b3Vec3 perpAxis = b3Cross( spinAxis, matrixA.cx );
+		float steeringImpulse = joint->steeringSpringImpulse + joint->lowerSteeringImpulse - joint->upperSteeringImpulse;
+		angularImpulse = b3Blend3( angularImpulseX, perpAxis, joint->spinImpulse, spinAxis, steeringImpulse, steeringAxis );
+	}
+	else
+	{
+		b3Quat relQ = b3InvMulQuat( quatA, quatB );
+		b3Vec3 perpAxisX = b3MulSV(
+			0.5f, b3RotateVector( quatA, b3Add( b3MulSV( relQ.s, b3Vec3_axisX ), b3Cross( relQ.v, b3Vec3_axisX ) ) ) );
+		b3Vec3 perpAxisY = b3MulSV(
+			0.5f, b3RotateVector( quatA, b3Add( b3MulSV( relQ.s, b3Vec3_axisY ), b3Cross( relQ.v, b3Vec3_axisY ) ) ) );
+		angularImpulse = b3Add(
+			angularImpulse,
+			b3Blend3( angularImpulseX, perpAxisX, angularImpulseY, perpAxisY, joint->spinImpulse, spinAxis ) );
+	}
+
+	if ( stateA->flags & b3_dynamicFlag )
+	{
+		stateA->linearVelocity = b3MulSub( stateA->linearVelocity, mA, linearImpulse );
+		stateA->angularVelocity = b3Sub( stateA->angularVelocity, b3MulMV( iA, b3Add( angularImpulseA, angularImpulse ) ) );
+	}
+
+	if ( stateB->flags & b3_dynamicFlag )
+	{
+		stateB->linearVelocity = b3MulAdd( stateB->linearVelocity, mB, linearImpulse );
+		stateB->angularVelocity = b3Add( stateB->angularVelocity, b3MulMV( iB, b3Add( angularImpulseB, angularImpulse ) ) );
 	}
 }
 
-void b2SolveWheelJoint( b2JointSim* base, b2StepContext* context, bool useBias )
+void b3SolveWheelJoint( b3JointSim* base, b3StepContext* context, bool useBias )
 {
-	B2_ASSERT( base->type == b2_wheelJoint );
+	B3_ASSERT( base->type == b3_wheelJoint );
 
 	float mA = base->invMassA;
 	float mB = base->invMassB;
-	float iA = base->invIA;
-	float iB = base->invIB;
+	b3Matrix3 iA = base->invIA;
+	b3Matrix3 iB = base->invIB;
 
 	// dummy state for static bodies
-	b2BodyState dummyState = b2_identityBodyState;
+	b3BodyState dummyState = b3_identityBodyState;
 
-	b2WheelJoint* joint = &base->wheelJoint;
+	b3WheelJoint* joint = &base->wheelJoint;
 
-	b2BodyState* stateA = joint->indexA == B2_NULL_INDEX ? &dummyState : context->states + joint->indexA;
-	b2BodyState* stateB = joint->indexB == B2_NULL_INDEX ? &dummyState : context->states + joint->indexB;
+	b3BodyState* stateA = joint->indexA == B3_NULL_INDEX ? &dummyState : context->states + joint->indexA;
+	b3BodyState* stateB = joint->indexB == B3_NULL_INDEX ? &dummyState : context->states + joint->indexB;
 
-	b2Vec2 vA = stateA->linearVelocity;
-	float wA = stateA->angularVelocity;
-	b2Vec2 vB = stateB->linearVelocity;
-	float wB = stateB->angularVelocity;
+	b3Vec3 vA = stateA->linearVelocity;
+	b3Vec3 wA = stateA->angularVelocity;
+	b3Vec3 vB = stateB->linearVelocity;
+	b3Vec3 wB = stateB->angularVelocity;
 
-	bool fixedRotation = ( iA + iB == 0.0f );
+	bool fixedRotation = base->fixedRotation;
 
 	// current anchors
-	b2Vec2 rA = b2RotateVector( stateA->deltaRotation, joint->frameA.p );
-	b2Vec2 rB = b2RotateVector( stateB->deltaRotation, joint->frameB.p );
+	b3Vec3 rA = b3RotateVector( stateA->deltaRotation, joint->frameA.p );
+	b3Vec3 rB = b3RotateVector( stateB->deltaRotation, joint->frameB.p );
 
-	b2Vec2 d = b2Add( b2Add( b2Sub( stateB->deltaPosition, stateA->deltaPosition ), joint->deltaCenter ), b2Sub( rB, rA ) );
-	b2Vec2 axisA = b2RotateVector( joint->frameA.q, (b2Vec2){ 1.0f, 0.0f } );
-	axisA = b2RotateVector( stateA->deltaRotation, axisA );
-	float translation = b2Dot( axisA, d );
+	b3Quat quatA = b3MulQuat( stateA->deltaRotation, joint->frameA.q );
+	b3Quat quatB = b3MulQuat( stateB->deltaRotation, joint->frameB.q );
 
-	float a1 = b2Cross( b2Add( d, rA ), axisA );
-	float a2 = b2Cross( rB, axisA );
+	if ( b3DotQuat( quatA, quatB ) < 0.0f )
+	{
+		// this keeps the rotation angle in the range [-pi, pi]
+		quatB = b3NegateQuat( quatB );
+	}
+
+	b3Quat relQ = b3InvMulQuat( quatA, quatB );
+	b3Matrix3 matrixA = b3MakeMatrixFromQuat( quatA );
+	b3Matrix3 matrixB = b3MakeMatrixFromQuat( quatB );
+
+	// b3Vec3 spinAxis = b3RotateVector( quatB, b3Vec3_axisZ );
+
+	b3Vec3 d = b3Add( b3Add( b3Sub( stateB->deltaPosition, stateA->deltaPosition ), joint->deltaCenter ), b3Sub( rB, rA ) );
+	b3Vec3 sAx = b3Cross( b3Add( d, rA ), matrixA.cx );
+	b3Vec3 sBx = b3Cross( rB, matrixA.cx );
+	b3Vec3 sAy = b3Cross( b3Add( d, rA ), matrixA.cy );
+	b3Vec3 sBy = b3Cross( rB, matrixA.cy );
+	b3Vec3 sAz = b3Cross( b3Add( d, rA ), matrixA.cz );
+	b3Vec3 sBz = b3Cross( rB, matrixA.cz );
+
+	float translation = b3Dot( matrixA.cx, d );
+
+	// Steering param ib = cz_b, ia = cz_a, ja = -cy_a
+	float cs = b3Dot( matrixB.cz, matrixA.cz );
+	float ss = -b3Dot( matrixB.cz, matrixA.cy );
+	float den = cs * cs + ss * ss;
+	den = den > 0.0f ? 1.0f / den : 0.0f;
+	b3Vec3 steeringAxis =
+		b3MulSV( den, b3Cross( matrixB.cz, b3Sub( b3MulSV( -cs, matrixA.cy ), b3MulSV( ss, matrixA.cz ) ) ) );
 
 	// motor constraint
-	if ( joint->enableMotor && fixedRotation == false )
+	if ( joint->enableSpinMotor && fixedRotation == false )
 	{
-		float Cdot = wB - wA - joint->motorSpeed;
-		float impulse = -joint->motorMass * Cdot;
-		float oldImpulse = joint->motorImpulse;
-		float maxImpulse = context->h * joint->maxMotorTorque;
-		joint->motorImpulse = b2ClampFloat( joint->motorImpulse + impulse, -maxImpulse, maxImpulse );
-		impulse = joint->motorImpulse - oldImpulse;
+		b3Vec3 spinAxis = matrixB.cz;
+		float cdot = b3Dot( b3Sub( wB, wA ), spinAxis ) - joint->spinSpeed;
+		float impulse = -joint->spinMass * cdot;
+		float oldImpulse = joint->spinImpulse;
+		float maxImpulse = context->h * joint->maxSpinTorque;
+		joint->spinImpulse = b3ClampFloat( joint->spinImpulse + impulse, -maxImpulse, maxImpulse );
+		impulse = joint->spinImpulse - oldImpulse;
 
-		wA -= iA * impulse;
-		wB += iB * impulse;
+		wA = b3Sub( wA, b3MulMV( iA, b3MulSV( impulse, spinAxis ) ) );
+		wB = b3Add( wB, b3MulMV( iB, b3MulSV( impulse, spinAxis ) ) );
 	}
 
-	// spring constraint
-	if ( joint->enableSpring )
+	// suspension
+	if ( joint->enableSuspensionSpring )
 	{
 		// This is a real spring and should be applied even during relax
-		float C = translation;
-		float bias = joint->springSoftness.biasRate * C;
-		float massScale = joint->springSoftness.massScale;
-		float impulseScale = joint->springSoftness.impulseScale;
+		float c = translation;
+		float bias = joint->suspensionSoftness.biasRate * c;
+		float massScale = joint->suspensionSoftness.massScale;
+		float impulseScale = joint->suspensionSoftness.impulseScale;
 
-		float Cdot = b2Dot( axisA, b2Sub( vB, vA ) ) + a2 * wB - a1 * wA;
-		float impulse = -massScale * joint->axialMass * ( Cdot + bias ) - impulseScale * joint->springImpulse;
-		joint->springImpulse += impulse;
+		float cdot = b3Dot( matrixA.cx, b3Sub( vB, vA ) ) + b3Dot( sBx, wB ) - b3Dot( sAx, wA );
+		float impulse = -massScale * joint->suspensionMass * ( cdot + bias ) - impulseScale * joint->suspensionSpringImpulse;
+		joint->suspensionSpringImpulse += impulse;
 
-		b2Vec2 P = b2MulSV( impulse, axisA );
-		float LA = impulse * a1;
-		float LB = impulse * a2;
+		b3Vec3 linearImpulse = b3MulSV( impulse, matrixA.cx );
+		b3Vec3 angularImpulseA = b3MulSV( impulse, sAx );
+		b3Vec3 angularImpulseB = b3MulSV( impulse, sBx );
 
-		vA = b2MulSub( vA, mA, P );
-		wA -= iA * LA;
-		vB = b2MulAdd( vB, mB, P );
-		wB += iB * LB;
+		vA = b3MulSub( vA, mA, linearImpulse );
+		wA = b3Sub( wA, b3MulMV( iA, angularImpulseA ) );
+		vB = b3MulAdd( vB, mB, linearImpulse );
+		wB = b3Add( wB, b3MulMV( iB, angularImpulseB ) );
 	}
 
-	if ( joint->enableLimit )
+	// steering
+	if ( joint->enableSteering && fixedRotation == false )
+	{
+		float steeringAngle = b3Atan2( ss, cs );
+
+		{
+			// This is a real spring and should be applied even during relax
+			float c = steeringAngle - joint->targetSteeringAngle;
+			float bias = joint->steeringSoftness.biasRate * c;
+			float massScale = joint->steeringSoftness.massScale;
+			float impulseScale = joint->steeringSoftness.impulseScale;
+
+			float cdot = b3Dot( steeringAxis, b3Sub( wB, wA ) );
+			float oldImpulse = joint->steeringSpringImpulse;
+			float impulse = -massScale * joint->steeringMass * ( cdot + bias ) - impulseScale * oldImpulse;
+			float maxImpulse = context->h * joint->maxSteeringTorque;
+			joint->steeringSpringImpulse = b3ClampFloat( oldImpulse + impulse, -maxImpulse, maxImpulse );
+			impulse = joint->steeringSpringImpulse - oldImpulse;
+
+			wA = b3Sub( wA, b3MulMV( iA, b3MulSV( impulse, steeringAxis ) ) );
+			wB = b3Add( wB, b3MulMV( iB, b3MulSV( impulse, steeringAxis ) ) );
+		}
+
+		if ( joint->enableSteeringLimit )
+		{
+			// Lower limit
+			{
+				float c = steeringAngle - joint->lowerSteeringLimit;
+				float bias = 0.0f;
+				float massScale = 1.0f;
+				float impulseScale = 0.0f;
+
+				if ( c > 0.0f )
+				{
+					// speculation
+					bias = c * context->inv_h;
+				}
+				else if ( useBias )
+				{
+					bias = base->constraintSoftness.biasRate * c;
+					massScale = base->constraintSoftness.massScale;
+					impulseScale = base->constraintSoftness.impulseScale;
+				}
+
+				float cdot = b3Dot( steeringAxis, b3Sub( wB, wA ) );
+				float oldImpulse = joint->lowerSteeringImpulse;
+				float impulse = -massScale * joint->steeringMass * ( cdot + bias ) - impulseScale * oldImpulse;
+				joint->lowerSteeringImpulse = b3MaxFloat( oldImpulse + impulse, 0.0f );
+				impulse = joint->lowerSteeringImpulse - oldImpulse;
+
+				wA = b3Sub( wA, b3MulMV( iA, b3MulSV( impulse, steeringAxis ) ) );
+				wB = b3Add( wB, b3MulMV( iB, b3MulSV( impulse, steeringAxis ) ) );
+			}
+
+			// Upper limit
+			// Note: signs are flipped to keep c positive when the constraint is satisfied.
+			// This also keeps the impulse positive when the limit is active.
+			{
+				// sign flipped
+				float c = joint->upperSteeringLimit - steeringAngle;
+				float bias = 0.0f;
+				float massScale = 1.0f;
+				float impulseScale = 0.0f;
+
+				if ( c > 0.0f )
+				{
+					// speculation
+					bias = c * context->inv_h;
+				}
+				else if ( useBias )
+				{
+					bias = base->constraintSoftness.biasRate * c;
+					massScale = base->constraintSoftness.massScale;
+					impulseScale = base->constraintSoftness.impulseScale;
+				}
+
+				// sign flipped on cdot
+				float cdot = b3Dot( steeringAxis, b3Sub( wA, wB ) );
+				float oldImpulse = joint->upperSteeringImpulse;
+				float impulse = -massScale * joint->steeringMass * ( cdot + bias ) - impulseScale * oldImpulse;
+				joint->upperSteeringImpulse = b3MaxFloat( oldImpulse + impulse, 0.0f );
+				impulse = joint->upperSteeringImpulse - oldImpulse;
+
+				// sign flipped on applied impulse
+				wA = b3Add( wA, b3MulMV( iA, b3MulSV( impulse, steeringAxis ) ) );
+				wB = b3Sub( wB, b3MulMV( iB, b3MulSV( impulse, steeringAxis ) ) );
+			}
+		}
+	}
+
+	if ( joint->enableSuspensionLimit )
 	{
 		// Lower limit
 		{
-			float C = translation - joint->lowerTranslation;
+			float c = translation - joint->lowerSuspensionLimit;
 			float bias = 0.0f;
 			float massScale = 1.0f;
 			float impulseScale = 0.0f;
 
-			if ( C > 0.0f )
+			if ( c > 0.0f )
 			{
 				// speculation
-				bias = C * context->inv_h;
+				bias = c * context->inv_h;
 			}
 			else if ( useBias )
 			{
-				bias = base->constraintSoftness.biasRate * C;
+				bias = base->constraintSoftness.biasRate * c;
 				massScale = base->constraintSoftness.massScale;
 				impulseScale = base->constraintSoftness.impulseScale;
 			}
 
-			float Cdot = b2Dot( axisA, b2Sub( vB, vA ) ) + a2 * wB - a1 * wA;
-			float impulse = -massScale * joint->axialMass * ( Cdot + bias ) - impulseScale * joint->lowerImpulse;
-			float oldImpulse = joint->lowerImpulse;
-			joint->lowerImpulse = b2MaxFloat( oldImpulse + impulse, 0.0f );
-			impulse = joint->lowerImpulse - oldImpulse;
+			float cdot = b3Dot( matrixA.cx, b3Sub( vB, vA ) ) + b3Dot( sBx, wB ) - b3Dot( sAx, wA );
+			float impulse = -massScale * joint->suspensionMass * ( cdot + bias ) - impulseScale * joint->lowerSuspensionImpulse;
+			float oldImpulse = joint->lowerSuspensionImpulse;
+			joint->lowerSuspensionImpulse = b3MaxFloat( oldImpulse + impulse, 0.0f );
+			impulse = joint->lowerSuspensionImpulse - oldImpulse;
 
-			b2Vec2 P = b2MulSV( impulse, axisA );
-			float LA = impulse * a1;
-			float LB = impulse * a2;
+			b3Vec3 linearImpulse = b3MulSV( impulse, matrixA.cx );
+			b3Vec3 angularImpulseA = b3MulSV( impulse, sAx );
+			b3Vec3 angularImpulseB = b3MulSV( impulse, sBx );
 
-			vA = b2MulSub( vA, mA, P );
-			wA -= iA * LA;
-			vB = b2MulAdd( vB, mB, P );
-			wB += iB * LB;
+			vA = b3MulSub( vA, mA, linearImpulse );
+			wA = b3Sub( wA, b3MulMV( iA, angularImpulseA ) );
+			vB = b3MulAdd( vB, mB, linearImpulse );
+			wB = b3Add( wB, b3MulMV( iB, angularImpulseB ) );
 		}
 
 		// Upper limit
-		// Note: signs are flipped to keep C positive when the constraint is satisfied.
+		// Note: signs are flipped to keep c positive when the constraint is satisfied.
 		// This also keeps the impulse positive when the limit is active.
 		{
 			// sign flipped
-			float C = joint->upperTranslation - translation;
+			float c = joint->upperSuspensionLimit - translation;
 			float bias = 0.0f;
 			float massScale = 1.0f;
 			float impulseScale = 0.0f;
 
-			if ( C > 0.0f )
+			if ( c > 0.0f )
 			{
 				// speculation
-				bias = C * context->inv_h;
+				bias = c * context->inv_h;
 			}
 			else if ( useBias )
 			{
-				bias = base->constraintSoftness.biasRate * C;
+				bias = base->constraintSoftness.biasRate * c;
 				massScale = base->constraintSoftness.massScale;
 				impulseScale = base->constraintSoftness.impulseScale;
 			}
 
-			// sign flipped on Cdot
-			float Cdot = b2Dot( axisA, b2Sub( vA, vB ) ) + a1 * wA - a2 * wB;
-			float impulse = -massScale * joint->axialMass * ( Cdot + bias ) - impulseScale * joint->upperImpulse;
-			float oldImpulse = joint->upperImpulse;
-			joint->upperImpulse = b2MaxFloat( oldImpulse + impulse, 0.0f );
-			impulse = joint->upperImpulse - oldImpulse;
+			// sign flipped on cdot
+			float cdot = b3Dot( matrixA.cx, b3Sub( vA, vB ) ) + b3Dot( sAx, wA ) - b3Dot( sBx, wB );
+			float impulse = -massScale * joint->suspensionMass * ( cdot + bias ) - impulseScale * joint->upperSuspensionImpulse;
+			float oldImpulse = joint->upperSuspensionImpulse;
+			joint->upperSuspensionImpulse = b3MaxFloat( oldImpulse + impulse, 0.0f );
+			impulse = joint->upperSuspensionImpulse - oldImpulse;
 
-			b2Vec2 P = b2MulSV( impulse, axisA );
-			float LA = impulse * a1;
-			float LB = impulse * a2;
+			b3Vec3 linearImpulse = b3MulSV( impulse, matrixA.cx );
+			b3Vec3 angularImpulseA = b3MulSV( impulse, sAx );
+			b3Vec3 angularImpulseB = b3MulSV( impulse, sBx );
 
 			// sign flipped on applied impulse
-			vA = b2MulAdd( vA, mA, P );
-			wA += iA * LA;
-			vB = b2MulSub( vB, mB, P );
-			wB -= iB * LB;
+			vA = b3MulAdd( vA, mA, linearImpulse );
+			wA = b3Add( wA, b3MulMV( iA, angularImpulseA ) );
+			vB = b3MulSub( vB, mB, linearImpulse );
+			wB = b3Sub( wB, b3MulMV( iB, angularImpulseB ) );
 		}
 	}
 
-	// point to line constraint
+	// Collinearity constraint
+	if ( fixedRotation == false )
 	{
-		b2Vec2 perpA = b2LeftPerp( axisA );
+		if ( joint->enableSteering == true )
+		{
+			float bias = 0.0f;
+			float massScale = 1.0f;
+			float impulseScale = 0.0f;
+			if ( useBias )
+			{
+				float c = b3Dot( matrixA.cx, matrixB.cz );
 
-		float bias = 0.0f;
+				bias = base->constraintSoftness.biasRate * c;
+				massScale = base->constraintSoftness.massScale;
+				impulseScale = base->constraintSoftness.impulseScale;
+			}
+
+			b3Vec3 u = b3Cross( matrixB.cz, matrixA.cx );
+			float cdot = b3Dot( b3Sub( wB, wA ), u );
+
+			b3Matrix3 invInertiaSum = b3AddMM( iA, iB );
+			float k = b3Dot( u, b3MulMV( invInertiaSum, u ) );
+			float perpMass = k > 0.0f ? 1.0f / k : 0.0f;
+
+			float deltaImpulse = -massScale * perpMass * ( cdot + bias ) - impulseScale * joint->angularImpulse.x;
+			joint->angularImpulse.x += deltaImpulse;
+
+			wA = b3MulSub( wA, deltaImpulse, b3MulMV( iA, u ) );
+			wB = b3MulAdd( wB, deltaImpulse, b3MulMV( iB, u ) );
+		}
+		else
+		{
+			b3Vec2 bias = { 0.0f, 0.0f };
+			float massScale = 1.0f;
+			float impulseScale = 0.0f;
+
+			if ( useBias )
+			{
+				b3Vec2 c = { relQ.v.x, relQ.v.y };
+				bias = (b3Vec2){ base->constraintSoftness.biasRate * c.x, base->constraintSoftness.biasRate * c.y };
+				massScale = base->constraintSoftness.massScale;
+				impulseScale = base->constraintSoftness.impulseScale;
+			}
+
+			// Collinearity constraint as 2-by-2
+			b3Vec3 perpAxisX = b3MulSV(
+				0.5f, b3RotateVector( quatA, b3Add( b3MulSV( relQ.s, b3Vec3_axisX ), b3Cross( relQ.v, b3Vec3_axisX ) ) ) );
+			b3Vec3 perpAxisY = b3MulSV(
+				0.5f, b3RotateVector( quatA, b3Add( b3MulSV( relQ.s, b3Vec3_axisY ), b3Cross( relQ.v, b3Vec3_axisY ) ) ) );
+
+			b3Matrix3 invInertiaSum = b3AddMM( iA, iB );
+			float kxx = b3Dot( perpAxisX, b3MulMV( invInertiaSum, perpAxisX ) );
+			float kyy = b3Dot( perpAxisY, b3MulMV( invInertiaSum, perpAxisY ) );
+			float kxy = b3Dot( perpAxisX, b3MulMV( invInertiaSum, perpAxisY ) );
+
+			b3Matrix2 k = { { kxx, kxy }, { kxy, kyy } };
+
+			b3Vec3 wRel = b3Sub( wB, wA );
+			b3Vec2 cdot = { b3Dot( wRel, perpAxisX ), b3Dot( wRel, perpAxisY ) };
+			b3Vec2 oldImpulse = joint->angularImpulse;
+			b3Vec2 cdotPlusBias = { cdot.x + bias.x, cdot.y + bias.y };
+			b3Vec2 sol = b3Solve2( k, cdotPlusBias );
+			b3Vec2 deltaImpulse = {
+				-massScale * sol.x - impulseScale * oldImpulse.x,
+				-massScale * sol.y - impulseScale * oldImpulse.y,
+			};
+			joint->angularImpulse = (b3Vec2){ oldImpulse.x + deltaImpulse.x, oldImpulse.y + deltaImpulse.y };
+
+			b3Vec3 angularImpulse = b3Blend2( deltaImpulse.x, perpAxisX, deltaImpulse.y, perpAxisY );
+			wA = b3Sub( wA, b3MulMV( iA, angularImpulse ) );
+			wB = b3Add( wB, b3MulMV( iB, angularImpulse ) );
+		}
+	}
+
+	// Solve point-to-line constraint
+	{
+		b3Vec3 perpY = matrixA.cy;
+		b3Vec3 perpZ = matrixA.cz;
+
+		b3Vec2 bias = { 0.0f, 0.0f };
 		float massScale = 1.0f;
 		float impulseScale = 0.0f;
 		if ( useBias )
 		{
-			float C = b2Dot( perpA, d );
-			bias = base->constraintSoftness.biasRate * C;
+			b3Vec2 c = { b3Dot( perpY, d ), b3Dot( perpZ, d ) };
+			bias = (b3Vec2){ base->constraintSoftness.biasRate * c.x, base->constraintSoftness.biasRate * c.y };
 			massScale = base->constraintSoftness.massScale;
 			impulseScale = base->constraintSoftness.impulseScale;
 		}
 
-		float s1 = b2Cross( b2Add( d, rA ), perpA );
-		float s2 = b2Cross( rB, perpA );
-		float Cdot = b2Dot( perpA, b2Sub( vB, vA ) ) + s2 * wB - s1 * wA;
+		b3Vec3 vRel = b3Sub( b3Sub( b3Add( vB, b3Cross( wB, rB ) ), vA ), b3Cross( wA, b3Add( rA, d ) ) );
+		b3Vec2 cdot = { b3Dot( perpY, vRel ), b3Dot( perpZ, vRel ) };
 
-		float impulse = -massScale * joint->perpMass * ( Cdot + bias ) - impulseScale * joint->perpImpulse;
-		joint->perpImpulse += impulse;
+		//// K = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
+		///// Jx = [-perpX, -cross(d + rA, perpX), perpX, cross(rB, perpX)]
 
-		b2Vec2 P = b2MulSV( impulse, perpA );
-		float LA = impulse * s1;
-		float LB = impulse * s2;
+		float kyy = mA + mB + b3Dot( sAy, b3MulMV( iA, sAy ) ) + b3Dot( sBy, b3MulMV( iB, sBy ) );
+		float kyz = b3Dot( sAy, b3MulMV( iA, sAz ) ) + b3Dot( sBy, b3MulMV( iB, sBz ) );
+		float kzz = mA + mB + b3Dot( sAz, b3MulMV( iA, sAz ) ) + b3Dot( sBz, b3MulMV( iB, sBz ) );
 
-		vA = b2MulSub( vA, mA, P );
-		wA -= iA * LA;
-		vB = b2MulAdd( vB, mB, P );
-		wB += iB * LB;
+		b3Matrix2 k = { { kyy, kyz }, { kyz, kzz } };
+
+		b3Vec2 oldImpulse = joint->linearImpulse;
+		b3Vec2 cdotPlusBias = { cdot.x + bias.x, cdot.y + bias.y };
+		b3Vec2 sol = b3Solve2( k, cdotPlusBias );
+		b3Vec2 deltaImpulse = {
+			-massScale * sol.x - impulseScale * oldImpulse.x,
+			-massScale * sol.y - impulseScale * oldImpulse.y,
+		};
+		joint->linearImpulse = (b3Vec2){ oldImpulse.x + deltaImpulse.x, oldImpulse.y + deltaImpulse.y };
+
+		b3Vec3 linearImpulse = b3Blend2( deltaImpulse.x, perpY, deltaImpulse.y, perpZ );
+
+		vA = b3MulSub( vA, mA, linearImpulse );
+		wA = b3Sub( wA, b3MulMV( iA, b3Blend2( deltaImpulse.x, sAy, deltaImpulse.y, sAz ) ) );
+		vB = b3MulAdd( vB, mB, linearImpulse );
+		wB = b3Add( wB, b3MulMV( iB, b3Blend2( deltaImpulse.x, sBy, deltaImpulse.y, sBz ) ) );
 	}
 
-	if ( stateA->flags & b2_dynamicFlag )
+	if ( stateA->flags & b3_dynamicFlag )
 	{
 		stateA->linearVelocity = vA;
 		stateA->angularVelocity = wA;
 	}
 
-	if ( stateB->flags & b2_dynamicFlag )
+	if ( stateB->flags & b3_dynamicFlag )
 	{
 		stateB->linearVelocity = vB;
 		stateB->angularVelocity = wB;
@@ -528,63 +995,111 @@ void b2SolveWheelJoint( b2JointSim* base, b2StepContext* context, bool useBias )
 }
 
 #if 0
-void b2WheelJoint_Dump()
+void b3WheelJoint_Dump()
 {
 	int32 indexA = joint->bodyA->joint->islandIndex;
 	int32 indexB = joint->bodyB->joint->islandIndex;
 
-	b2Dump("  b2WheelJointDef jd;\n");
-	b2Dump("  jd.bodyA = sims[%d];\n", indexA);
-	b2Dump("  jd.bodyB = sims[%d];\n", indexB);
-	b2Dump("  jd.collideConnected = bool(%d);\n", joint->collideConnected);
-	b2Dump("  jd.localAnchorA.Set(%.9g, %.9g);\n", joint->localAnchorA.x, joint->localAnchorA.y);
-	b2Dump("  jd.localAnchorB.Set(%.9g, %.9g);\n", joint->localAnchorB.x, joint->localAnchorB.y);
-	b2Dump("  jd.referenceAngle = %.9g;\n", joint->referenceAngle);
-	b2Dump("  jd.enableLimit = bool(%d);\n", joint->enableLimit);
-	b2Dump("  jd.lowerAngle = %.9g;\n", joint->lowerAngle);
-	b2Dump("  jd.upperAngle = %.9g;\n", joint->upperAngle);
-	b2Dump("  jd.enableMotor = bool(%d);\n", joint->enableMotor);
-	b2Dump("  jd.motorSpeed = %.9g;\n", joint->motorSpeed);
-	b2Dump("  jd.maxMotorTorque = %.9g;\n", joint->maxMotorTorque);
-	b2Dump("  joints[%d] = joint->world->CreateJoint(&jd);\n", joint->index);
+	b3Dump("  b3WheelJointDef jd;\n");
+	b3Dump("  jd.bodyA = sims[%d];\n", indexA);
+	b3Dump("  jd.bodyB = sims[%d];\n", indexB);
+	b3Dump("  jd.collideConnected = bool(%d);\n", joint->collideConnected);
+	b3Dump("  jd.localAnchorA.Set(%.9g, %.9g);\n", joint->localAnchorA.x, joint->localAnchorA.y);
+	b3Dump("  jd.localAnchorB.Set(%.9g, %.9g);\n", joint->localAnchorB.x, joint->localAnchorB.y);
+	b3Dump("  jd.referenceAngle = %.9g;\n", joint->referenceAngle);
+	b3Dump("  jd.enableLimit = bool(%d);\n", joint->enableLimit);
+	b3Dump("  jd.lowerAngle = %.9g;\n", joint->lowerAngle);
+	b3Dump("  jd.upperAngle = %.9g;\n", joint->upperAngle);
+	b3Dump("  jd.enableMotor = bool(%d);\n", joint->enableMotor);
+	b3Dump("  jd.motorSpeed = %.9g;\n", joint->motorSpeed);
+	b3Dump("  jd.maxMotorTorque = %.9g;\n", joint->maxMotorTorque);
+	b3Dump("  joints[%d] = joint->world->CreateJoint(&jd);\n", joint->index);
 }
 #endif
 
-void b2DrawWheelJoint( b2DebugDraw* draw, b2JointSim* base, b2WorldTransform transformA, b2WorldTransform transformB,
-					   float drawScale )
+void b3DrawWheelJoint( b3DebugDraw* draw, b3JointSim* base, b3WorldTransform transformA, b3WorldTransform transformB, float scale )
 {
-	B2_ASSERT( base->type == b2_wheelJoint );
+	B3_ASSERT( base->type == b3_wheelJoint );
 
-	b2WheelJoint* joint = &base->wheelJoint;
+	b3WheelJoint* joint = &base->wheelJoint;
 
-	b2WorldTransform frameA = b2OffsetWorldTransform( transformA, base->localFrameA );
-	b2WorldTransform frameB = b2OffsetWorldTransform( transformB, base->localFrameB );
-	b2Vec2 axisA = b2RotateVector( frameA.q, (b2Vec2){ 1.0f, 0.0f } );
+	b3WorldTransform frameA = b3MulWorldTransforms( transformA, base->localFrameA );
+	b3WorldTransform frameB = b3MulWorldTransforms( transformB, base->localFrameB );
 
-	b2HexColor c1 = b2_colorGray;
-	b2HexColor c2 = b2_colorGreen;
-	b2HexColor c3 = b2_colorRed;
-	b2HexColor c4 = b2_colorDimGray;
-	b2HexColor c5 = b2_colorBlue;
+	b3Matrix3 matrixA = b3MakeMatrixFromQuat( frameA.q );
+	b3Matrix3 matrixB = b3MakeMatrixFromQuat( frameB.q );
 
-	draw->DrawLineFcn( frameA.p, frameB.p, c5, draw->context );
+	draw->DrawSegmentFcn( frameA.p, frameB.p, b3_colorBlue, draw->context );
 
-	if ( joint->enableLimit )
+	if ( joint->enableSuspensionLimit )
 	{
-		b2Pos lower = b2OffsetPos( frameA.p, b2MulSV( joint->lowerTranslation, axisA ) );
-		b2Pos upper = b2OffsetPos( frameA.p, b2MulSV( joint->upperTranslation, axisA ) );
-		b2Vec2 perp = b2LeftPerp( axisA );
-		draw->DrawLineFcn( lower, upper, c1, draw->context );
-		draw->DrawLineFcn( b2OffsetPos( lower, b2MulSV( -0.1f * drawScale, perp ) ),
-						   b2OffsetPos( lower, b2MulSV( 0.1f * drawScale, perp ) ), c2, draw->context );
-		draw->DrawLineFcn( b2OffsetPos( upper, b2MulSV( -0.1f * drawScale, perp ) ),
-						   b2OffsetPos( upper, b2MulSV( 0.1f * drawScale, perp ) ), c3, draw->context );
+		b3Pos lower = b3OffsetPos( frameA.p, b3MulSV( joint->lowerSuspensionLimit, matrixA.cx ) );
+		b3Pos upper = b3OffsetPos( frameA.p, b3MulSV( joint->upperSuspensionLimit, matrixA.cx ) );
+		b3Vec3 perp = matrixA.cy;
+		draw->DrawSegmentFcn( lower, upper, b3_colorGray, draw->context );
+		draw->DrawSegmentFcn( b3OffsetPos( lower, b3MulSV( -0.1f * scale, perp ) ), b3OffsetPos( lower, b3MulSV( 0.1f * scale, perp ) ),
+							  b3_colorGreen, draw->context );
+		draw->DrawSegmentFcn( b3OffsetPos( upper, b3MulSV( -0.1f * scale, perp ) ), b3OffsetPos( upper, b3MulSV( 0.1f * scale, perp ) ),
+							  b3_colorRed, draw->context );
 	}
 	else
 	{
-		draw->DrawLineFcn( b2OffsetPos( frameA.p, b2Neg( axisA ) ), b2OffsetPos( frameA.p, axisA ), c1, draw->context );
+		draw->DrawSegmentFcn( b3OffsetPos( frameA.p, b3MulSV( -1.0f * scale, matrixA.cx ) ),
+							  b3OffsetPos( frameA.p, b3MulSV( 1.0f * scale, matrixA.cx ) ), b3_colorGray, draw->context );
 	}
 
-	draw->DrawPointFcn( frameA.p, 5.0f, c1, draw->context );
-	draw->DrawPointFcn( frameB.p, 5.0f, c4, draw->context );
+	if ( joint->enableSteering && joint->enableSteeringLimit )
+	{
+		// b3Quat quatA = frameA.q;
+		// b3Quat quatB = frameB.q;
+
+		// if ( b3DotQuat( quatA, quatB ) < 0.0f )
+		//{
+		//	// this keeps the twist angle in the range [-pi, pi]
+		//	quatB = -quatB;
+		// }
+
+		// b3Quat relQ = b3InvMulQuat( quatA, quatB );
+
+		b3WorldTransform frame = {
+			.p = frameB.p,
+			.q = frameA.q,
+		};
+
+		const float radius = 0.5f * scale;
+		const int sliceCount = 16;
+		float lower = joint->lowerSteeringLimit;
+		float upper = joint->upperSteeringLimit;
+
+		b3CosSin cs = b3ComputeCosSin( lower );
+		b3Pos vertex1 = b3TransformWorldPoint( frame, (b3Vec3){ 0.0f, -radius * cs.sine, radius * cs.cosine } );
+
+		for ( int index = 0; index < sliceCount; ++index )
+		{
+			float t2 = ( index + 1.0f ) / sliceCount;
+			float phi = b3LerpFloat( lower, upper, t2 );
+
+			cs = b3ComputeCosSin( phi );
+			b3Pos vertex2 = b3TransformWorldPoint( frame, (b3Vec3){ 0.0f, -radius * cs.sine, radius * cs.cosine } );
+
+			if ( index == 0 )
+			{
+				draw->DrawSegmentFcn( frame.p, vertex1, b3_colorCyan, draw->context );
+			}
+
+			if ( index == sliceCount - 1 )
+			{
+				draw->DrawSegmentFcn( vertex2, frame.p, b3_colorCyan, draw->context );
+			}
+			draw->DrawSegmentFcn( vertex1, vertex2, b3_colorCyan, draw->context );
+
+			vertex1 = vertex2;
+		}
+	}
+
+	draw->DrawSegmentFcn( b3OffsetPos( frameB.p, b3MulSV( -0.5f * scale, matrixB.cz ) ),
+						  b3OffsetPos( frameB.p, b3MulSV( 0.5f * scale, matrixB.cz ) ), b3_colorMagenta, draw->context );
+
+	draw->DrawPointFcn( frameA.p, 5.0f, b3_colorGray, draw->context );
+	draw->DrawPointFcn( frameB.p, 5.0f, b3_colorDimGray, draw->context );
 }

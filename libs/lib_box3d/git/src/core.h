@@ -1,188 +1,162 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
 
-#include "box2d/base.h"
+#include "box3d/base.h"
+
+#include <stddef.h>
 
 // clang-format off
 
-// for performance comparisons
-#define B2_RESTRICT restrict
-
 #ifdef NDEBUG
-	#define B2_DEBUG 0
+	#define B3_DEBUG 0
 #else
-	#define B2_DEBUG 1
+	#define B3_DEBUG 1
 #endif
 
 // Define platform
 #if defined(_WIN32) || defined(_WIN64)
-	#define B2_PLATFORM_WINDOWS
+	#define B3_PLATFORM_WINDOWS
 #elif defined( __ANDROID__ )
-	#define B2_PLATFORM_ANDROID
+	#define B3_PLATFORM_ANDROID
 #elif defined( __linux__ )
-	#define B2_PLATFORM_LINUX
+	#define B3_PLATFORM_LINUX
 #elif defined( __APPLE__ )
 	#include <TargetConditionals.h>
 	#if defined( TARGET_OS_IPHONE ) && !TARGET_OS_IPHONE
-		#define B2_PLATFORM_MACOS
+		#define B3_PLATFORM_MACOS
 	#else
-		#define B2_PLATFORM_IOS
+		#define B3_PLATFORM_IOS
 	#endif
 #elif defined( __EMSCRIPTEN__ )
-	#define B2_PLATFORM_WASM
+	#define B3_PLATFORM_WASM
 #else
-	#define B2_PLATFORM_UNKNOWN
+	#define B3_PLATFORM_UNKNOWN
 #endif
 
 // Define CPU
 #if defined( __x86_64__ ) || defined( _M_X64 ) || defined( __i386__ ) || defined( _M_IX86 )
-	#define B2_CPU_X86_X64
+	#define B3_CPU_X86_X64
 #elif defined( __aarch64__ ) || defined( _M_ARM64 ) || defined( __arm__ ) || defined( _M_ARM )
-	#define B2_CPU_ARM
+	#define B3_CPU_ARM
 #elif defined( __EMSCRIPTEN__ )
-	#define B2_CPU_WASM
+	#define B3_CPU_WASM
 #else
-	#define B2_CPU_UNKNOWN
+	#define B3_CPU_UNKNOWN
 #endif
 
 // Define SIMD
-#if defined( BOX2D_DISABLE_SIMD )
-	#define B2_SIMD_NONE
-	// note: I tried width of 1 and got no performance change
-	#define B2_SIMD_WIDTH 4
+#if defined( BOX3D_DISABLE_SIMD )
+	#define B3_SIMD_NONE
+	#define B3_SIMD_WIDTH 4
+	//#pragma message("B3_SIMD_NONE")
 #else
-	#if defined( B2_CPU_X86_X64 )
-		#if defined( BOX2D_AVX2 )
-			#define B2_SIMD_AVX2
-			#define B2_SIMD_WIDTH 8
-		#else
-			#define B2_SIMD_SSE2
-			#define B2_SIMD_WIDTH 4
-		#endif
-	#elif defined( B2_CPU_ARM )
-		#define B2_SIMD_NEON
-		#define B2_SIMD_WIDTH 4
-	#elif defined( B2_CPU_WASM )
-		#define B2_CPU_WASM
-		#define B2_SIMD_SSE2
-		#define B2_SIMD_WIDTH 4
+	#if defined( B3_CPU_X86_X64 )
+		#define B3_SIMD_SSE2
+		#define B3_SIMD_WIDTH 4
+		//#pragma message("B3_SIMD_SSE2")
+	#elif defined( B3_CPU_ARM )
+		#define B3_SIMD_NEON
+		#define B3_SIMD_WIDTH 4
+		//#pragma message("B3_SIMD_NEON")
+	#elif defined( B3_CPU_WASM )
+		#define B3_CPU_WASM
+		#define B3_SIMD_SSE2
+		#define B3_SIMD_WIDTH 4
+		//#pragma message("B3_SIMD_SSE2")
 	#else
-		#define B2_SIMD_NONE
-		#define B2_SIMD_WIDTH 4
+		#define B3_SIMD_NONE
+		#define B3_SIMD_WIDTH 4
+		//#pragma message("B3_SIMD_NONE")
 	#endif
 #endif
 
 // Define compiler
 #if defined( __clang__ )
-	#define B2_COMPILER_CLANG
+	#define B3_COMPILER_CLANG
 #elif defined( __GNUC__ )
-	#define B2_COMPILER_GCC
+	#define B3_COMPILER_GCC
 #elif defined( _MSC_VER )
-	#define B2_COMPILER_MSVC
+	#define B3_COMPILER_MSVC
 #endif
 
 /// Tracy profiler instrumentation
 /// https://github.com/wolfpld/tracy
-#ifdef BOX2D_PROFILE
+#ifdef BOX3D_PROFILE
 	#include <tracy/TracyC.h>
-	#define b2TracyCZoneC( ctx, color, active ) TracyCZoneC( ctx, color, active )
-	#define b2TracyCZoneNC( ctx, name, color, active ) TracyCZoneNC( ctx, name, color, active )
-	#define b2TracyCZoneEnd( ctx ) TracyCZoneEnd( ctx )
-	#define b2TracyCFrame TracyCFrameMark
-	#define b2TracyCSetThreadName( name ) TracyCSetThreadName( name )
+	#define b3TracyCZoneC( ctx, color, active ) TracyCZoneC( ctx, color, active )
+	#define b3TracyCZoneNC( ctx, name, color, active ) TracyCZoneNC( ctx, name, color, active )
+	#define b3TracyCZoneEnd( ctx ) TracyCZoneEnd( ctx )
+	#define b3TracyCFrame TracyCFrameMark
 #else
-	#define b2TracyCZoneC( ctx, color, active )
-	#define b2TracyCZoneNC( ctx, name, color, active )
-	#define b2TracyCZoneEnd( ctx )
-	#define b2TracyCFrame
-	#define b2TracyCSetThreadName( name )
+	#define b3TracyCZoneC( ctx, color, active )
+	#define b3TracyCZoneNC( ctx, name, color, active )
+	#define b3TracyCZoneEnd( ctx )
+	#define b3TracyCFrame
 #endif
 
 // clang-format on
 
-// Returns the number of elements of an array
-#define B2_ARRAY_COUNT( A ) ( (int)( sizeof( A ) / sizeof( *A ) ) )
-
-// Used to prevent the compiler from warning about unused variables
-#define B2_UNUSED( ... ) (void)sizeof(( __VA_ARGS__, 0 ))
-
-// Use to validate definitions. Do not take my cookie.
-#define B2_SECRET_COOKIE 1152023
-
-// Snoop counters. These should be disabled in optimized builds because they are expensive.
-#if defined( box2d_EXPORTS )
-#define B2_SNOOP_TABLE_COUNTERS B2_DEBUG
-#define B2_SNOOP_PAIR_COUNTERS B2_DEBUG
-#define B2_SNOOP_TOI_COUNTERS B2_DEBUG
-#else
-#define B2_SNOOP_TABLE_COUNTERS 0
-#define B2_SNOOP_PAIR_COUNTERS 0
-#define B2_SNOOP_TOI_COUNTERS 0
-#endif
-
-#ifdef __cplusplus
-#define B2_TYPE_OF( A ) decltype( A )
-#else
-#define B2_TYPE_OF( A ) __typeof__( A )
-#endif
-
-#define B2_SWAP( x, y )                                                                                                          \
-	do                                                                                                                           \
-	{                                                                                                                            \
-		B2_TYPE_OF( x ) B2_SWAP_TEMP = x;                                                                                        \
-		x = y;                                                                                                                   \
-		y = B2_SWAP_TEMP;                                                                                                        \
-	}                                                                                                                            \
-	while ( 0 )
-
-#define B2_CHECK_DEF( DEF ) B2_ASSERT( DEF->internalValue == B2_SECRET_COOKIE )
-
-typedef struct b2AtomicInt
+typedef struct b3AtomicInt
 {
 	int value;
-} b2AtomicInt;
+} b3AtomicInt;
 
-typedef struct b2AtomicU32
+typedef struct b3AtomicU32
 {
 	uint32_t value;
-} b2AtomicU32;
+} b3AtomicU32;
 
-typedef struct b2AtomicI64
+// Returns the number of elements of an array
+#define B3_ARRAY_COUNT( A ) (int)( sizeof( A ) / sizeof( A[0] ) )
+
+// Used to prevent the compiler from warning about unused variables
+#define B3_UNUSED( ... ) (void)sizeof( ( __VA_ARGS__, 0 ) )
+
+// Use to validate definitions. Do not take my cookie.
+#define B3_SECRET_COOKIE 1152023
+
+#define B3_CHECK_DEF( DEF ) B3_ASSERT( DEF->internalValue == B3_SECRET_COOKIE )
+#define B3_CHECK_JOINT_DEF( DEF ) B3_ASSERT( DEF->base.internalValue == B3_SECRET_COOKIE )
+
+// These macros help avoid sizeof bugs
+#define B3_ALLOC( T, N ) (T*)b3Alloc( N * sizeof( T ) );
+#define B3_FREE( M, T, N ) b3Free( M, N * sizeof( T ) );
+
+void* b3Alloc( size_t size );
+void* b3AllocZeroed( size_t size );
+void b3Free( void* mem, size_t size );
+void* b3GrowAlloc( void* oldMem, int oldSize, int newSize );
+
+void b3Log( const char* format, ... );
+
+// Geometry content hashes reserve zero to mean unhashed
+static inline uint32_t b3NonZeroHash( uint32_t hash )
 {
-	// 64-bit atomic wants 8-byte alignment
-	_Alignas( 8 ) int64_t value;
-} b2AtomicI64;
+	return hash != 0 ? hash : 1;
+}
 
-void* b2Alloc( size_t size );
-void* b2AllocZeroInit( size_t size );
-#define B2_ALLOC_STRUCT( type ) b2Alloc( sizeof( type ) )
-#define B2_ALLOC_ARRAY( count, type ) b2Alloc( count * sizeof( type ) )
+typedef struct b3Mutex b3Mutex;
+b3Mutex* b3CreateMutex( void );
+void b3DestroyMutex( b3Mutex* m );
+void b3LockMutex( b3Mutex* m );
+void b3UnlockMutex( b3Mutex* m );
 
-void b2Free( void* mem, size_t size );
-#define B2_FREE_STRUCT( mem, type ) b2Free( mem, sizeof( type ) );
-#define B2_FREE_ARRAY( mem, count, type ) b2Free( mem, count * sizeof( type ) )
+typedef struct b3Semaphore b3Semaphore;
+b3Semaphore* b3CreateSemaphore( int initCount );
+void b3DestroySemaphore( b3Semaphore* s );
+void b3WaitSemaphore( b3Semaphore* s );
+void b3SignalSemaphore( b3Semaphore* s );
 
-void* b2GrowAlloc( void* oldMem, size_t oldSize, size_t newSize );
-void* b2GrowAllocZeroInit( void* oldMem, size_t oldSize, size_t newSize );
-
-void b2Log( const char* format, ... );
-
-typedef struct b2Mutex b2Mutex;
-b2Mutex* b2CreateMutex( void );
-void b2DestroyMutex( b2Mutex* m );
-void b2LockMutex( b2Mutex* m );
-void b2UnlockMutex( b2Mutex* m );
-
-typedef struct b2Semaphore b2Semaphore;
-b2Semaphore* b2CreateSemaphore( int initCount );
-void b2DestroySemaphore( b2Semaphore* s );
-void b2WaitSemaphore( b2Semaphore* s );
-void b2SignalSemaphore( b2Semaphore* s );
-
-typedef void b2ThreadFunction( void* context );
-typedef struct b2Thread b2Thread;
+typedef void b3ThreadFunction( void* context );
+typedef struct b3Thread b3Thread;
 // Name may be NULL, otherwise it is copied.
-b2Thread* b2CreateThread( b2ThreadFunction* function, void* context, const char* name );
-void b2JoinThread( b2Thread* t );
+b3Thread* b3CreateThread( b3ThreadFunction* function, void* context, const char* name );
+void b3JoinThread( b3Thread* t );
+
+// Dump to a file. Only one dump file allowed at a time.
+void b3OpenDump( const char* fileName );
+void b3Dump( const char* string, ... );
+void b3CloseDump( void );
+int b3FetchAddMeshDumpIndex( void );

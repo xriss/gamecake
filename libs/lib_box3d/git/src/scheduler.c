@@ -1,41 +1,42 @@
 // SPDX-FileCopyrightText: 2026 Erin Catto
 // SPDX-License-Identifier: MIT
 
-#include "atomic.h"
+#include "platform.h"
 #include "core.h"
 #include "scheduler.h"
 
-#include "box2d/base.h"
-#include "box2d/constants.h"
+#include "box3d/base.h"
+#include "box3d/constants.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
-enum b2SchedulerTaskStatus
+enum b3SchedulerTaskStatus
 {
-	b2_schedulerFree = 0,
-	b2_schedulerPending = 1,
-	b2_schedulerClaimed = 2,
-	b2_schedulerComplete = 3,
+	b3_schedulerFree = 0,
+	b3_schedulerPending = 1,
+	b3_schedulerClaimed = 2,
+	b3_schedulerComplete = 3,
 };
 
-typedef struct b2SchedulerTask
+typedef struct b3SchedulerTask
 {
-	b2TaskCallback* callback;
+	b3TaskCallback* callback;
 	void* taskContext;
-	b2AtomicInt status;
-} b2SchedulerTask;
+	b3AtomicInt status;
+} b3SchedulerTask;
 
-typedef struct b2SchedulerWorkerContext
+typedef struct b3SchedulerWorkerContext
 {
-	struct b2Scheduler* scheduler;
+	struct b3Scheduler* scheduler;
 	int threadIndex;
-} b2SchedulerWorkerContext;
+} b3SchedulerWorkerContext;
 
-typedef struct b2Scheduler
+typedef struct b3Scheduler
 {
-	b2Thread* threads[B2_MAX_WORKERS];
-	b2SchedulerWorkerContext workerContexts[B2_MAX_WORKERS];
+	b3Thread* threads[B3_MAX_WORKERS];
+	b3SchedulerWorkerContext workerContexts[B3_MAX_WORKERS];
 
 	// total workers including main thread
 	int workerCount;
@@ -43,34 +44,34 @@ typedef struct b2Scheduler
 	// threads created = workerCount - 1
 	int threadCount;
 
-	b2SchedulerTask tasks[B2_MAX_TASKS];
-	b2AtomicInt nextSlot;
+	b3SchedulerTask tasks[B3_MAX_TASKS];
+	b3AtomicInt nextSlot;
 
-	b2Semaphore* taskSemaphore;
-	b2AtomicInt shutdown;
-} b2Scheduler;
+	b3Semaphore* taskSemaphore;
+	b3AtomicInt shutdown;
+} b3Scheduler;
 
 // Try to claim and execute one pending task.
 // Returns true if work was performed, false otherwise.
-static bool b2SchedulerExecuteOne( b2Scheduler* scheduler )
+static bool b3SchedulerExecuteOne( b3Scheduler* scheduler )
 {
-	int taskCount = b2AtomicLoadInt( &scheduler->nextSlot );
+	int taskCount = b3AtomicLoadInt( &scheduler->nextSlot );
 	for ( int t = 0; t < taskCount; ++t )
 	{
-		b2SchedulerTask* task = scheduler->tasks + t;
-		if ( b2AtomicLoadInt( &task->status ) != b2_schedulerPending )
+		b3SchedulerTask* task = scheduler->tasks + t;
+		if ( b3AtomicLoadInt( &task->status ) != b3_schedulerPending )
 		{
 			continue;
 		}
 
-		if ( b2AtomicCompareExchangeInt( &task->status, b2_schedulerPending, b2_schedulerClaimed ) == false )
+		if ( b3AtomicCompareExchangeInt( &task->status, b3_schedulerPending, b3_schedulerClaimed ) == false )
 		{
 			continue;
 		}
 
 		task->callback( task->taskContext );
 
-		b2AtomicStoreInt( &task->status, b2_schedulerComplete );
+		b3AtomicStoreInt( &task->status, b3_schedulerComplete );
 		return true;
 	}
 
@@ -78,40 +79,40 @@ static bool b2SchedulerExecuteOne( b2Scheduler* scheduler )
 }
 
 // Background worker thread entry point.
-static void b2SchedulerWorkerMain( void* context )
+static void b3SchedulerWorkerMain( void* context )
 {
-	b2SchedulerWorkerContext* workerContext = context;
-	b2Scheduler* scheduler = workerContext->scheduler;
+	b3SchedulerWorkerContext* workerContext = context;
+	b3Scheduler* scheduler = workerContext->scheduler;
 
 	while ( true )
 	{
-		b2WaitSemaphore( scheduler->taskSemaphore );
+		b3WaitSemaphore( scheduler->taskSemaphore );
 
-		if ( b2AtomicLoadInt( &scheduler->shutdown ) != 0 )
+		if ( b3AtomicLoadInt( &scheduler->shutdown ) != 0 )
 		{
 			break;
 		}
 
 		// Claim and execute all available work
-		while ( b2SchedulerExecuteOne( scheduler ) )
+		while ( b3SchedulerExecuteOne( scheduler ) )
 		{
 		}
 	}
 }
 
-b2Scheduler* b2CreateScheduler( int workerCount )
+b3Scheduler* b3CreateScheduler( int workerCount )
 {
-	B2_ASSERT( 0 < workerCount && workerCount <= B2_MAX_WORKERS );
+	B3_ASSERT( 0 < workerCount && workerCount <= B3_MAX_WORKERS );
 
-	b2Scheduler* scheduler = b2Alloc( sizeof( b2Scheduler ) );
-	memset( scheduler, 0, sizeof( b2Scheduler ) );
+	b3Scheduler* scheduler = b3Alloc( sizeof( b3Scheduler ) );
+	memset( scheduler, 0, sizeof( b3Scheduler ) );
 
 	scheduler->workerCount = workerCount;
 	int threadCount = workerCount - 1;
 	scheduler->threadCount = threadCount;
-	scheduler->taskSemaphore = b2CreateSemaphore( 0 );
-	b2AtomicStoreInt( &scheduler->shutdown, 0 );
-	b2AtomicStoreInt( &scheduler->nextSlot, 0 );
+	scheduler->taskSemaphore = b3CreateSemaphore( 0 );
+	b3AtomicStoreInt( &scheduler->shutdown, 0 );
+	b3AtomicStoreInt( &scheduler->nextSlot, 0 );
 
 	// Background threads use indices 1..workerCount-1.
 	// Main thread uses index 0.
@@ -122,75 +123,76 @@ b2Scheduler* b2CreateScheduler( int workerCount )
 
 		char name[16];
 		snprintf( name, sizeof( name ), "box2d_worker_%02d", i + 1 );
-		scheduler->threads[i] = b2CreateThread( b2SchedulerWorkerMain, scheduler->workerContexts + i, name );
+		scheduler->threads[i] = b3CreateThread( b3SchedulerWorkerMain, scheduler->workerContexts + i, name );
 	}
 
 	return scheduler;
 }
 
-void b2DestroyScheduler( b2Scheduler* scheduler )
+void b3DestroyScheduler( b3Scheduler* scheduler )
 {
-	b2AtomicStoreInt( &scheduler->shutdown, 1 );
+	b3AtomicStoreInt( &scheduler->shutdown, 1 );
 
 	// Wake all background threads so they see the shutdown flag
 	for ( int i = 0; i < scheduler->threadCount; ++i )
 	{
-		b2SignalSemaphore( scheduler->taskSemaphore );
+		b3SignalSemaphore( scheduler->taskSemaphore );
 	}
 
 	for ( int i = 0; i < scheduler->threadCount; ++i )
 	{
-		b2JoinThread( scheduler->threads[i] );
+		b3JoinThread( scheduler->threads[i] );
 		scheduler->threads[i] = NULL;
 	}
 
-	b2DestroySemaphore( scheduler->taskSemaphore );
-	b2Free( scheduler, sizeof( b2Scheduler ) );
+	b3DestroySemaphore( scheduler->taskSemaphore );
+	b3Free( scheduler, sizeof( b3Scheduler ) );
 }
 
-void b2ResetScheduler( b2Scheduler* scheduler )
+void b3ResetScheduler( b3Scheduler* scheduler )
 {
-	b2AtomicStoreInt( &scheduler->nextSlot, 0 );
+	b3AtomicStoreInt( &scheduler->nextSlot, 0 );
 }
 
-void* b2SchedulerEnqueueTask( b2TaskCallback* task, void* taskContext, void* userContext )
+void* b3SchedulerEnqueueTask( b3TaskCallback* task, void* taskContext, void* userContext, const char* name )
 {
-	b2Scheduler* scheduler = userContext;
+	B3_UNUSED( name );
+	b3Scheduler* scheduler = userContext;
 
-	int slot = b2AtomicFetchAddInt( &scheduler->nextSlot, 1 );
-	B2_ASSERT( slot < B2_MAX_TASKS );
+	int slot = b3AtomicFetchAddInt( &scheduler->nextSlot, 1 );
+	B3_ASSERT( slot < B3_MAX_TASKS );
 
-	b2SchedulerTask* schedulerTask = scheduler->tasks + slot;
+	b3SchedulerTask* schedulerTask = scheduler->tasks + slot;
 	schedulerTask->callback = task;
 	schedulerTask->taskContext = taskContext;
 
 	// Memory fence: status must be published after callback and context are written
-	b2AtomicStoreInt( &schedulerTask->status, b2_schedulerPending );
+	b3AtomicStoreInt( &schedulerTask->status, b3_schedulerPending );
 
 	// One wake per enqueue is enough: at most one worker picks up each task.
-	b2SignalSemaphore( scheduler->taskSemaphore );
+	b3SignalSemaphore( scheduler->taskSemaphore );
 
 	return schedulerTask;
 }
 
-void b2SchedulerFinishTask( void* userTask, void* userContext )
+void b3SchedulerFinishTask( void* userTask, void* userContext )
 {
 	if ( userTask == NULL )
 	{
 		return;
 	}
 
-	b2Scheduler* scheduler = userContext;
-	b2SchedulerTask* waitTask = userTask;
+	b3Scheduler* scheduler = userContext;
+	b3SchedulerTask* waitTask = userTask;
 
 	// Main thread helps execute any available work while waiting for the
 	// target task to complete. This keeps the main thread from idling when
 	// background threads are busy on other tasks from the same phase.
-	while ( b2AtomicLoadInt( &waitTask->status ) != b2_schedulerComplete )
+	while ( b3AtomicLoadInt( &waitTask->status ) != b3_schedulerComplete )
 	{
-		if ( b2SchedulerExecuteOne( scheduler ) == false )
+		if ( b3SchedulerExecuteOne( scheduler ) == false )
 		{
-			b2Yield();
+			b3Yield();
 		}
 	}
 }

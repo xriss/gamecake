@@ -1,5 +1,5 @@
 @echo off
-rem Use this batch file to generate Visual Studio 2026 project files for box2d.
+rem Use this batch file to generate Visual Studio 2026 project files for box3d.
 rem
 rem Usage:
 rem   build_vs2026.bat          Configure or update project files in build\

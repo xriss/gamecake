@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #if defined( _MSC_VER ) && !defined( _CRT_SECURE_NO_WARNINGS )
@@ -8,9 +8,9 @@
 #include "benchmarks.h"
 #include "utils.h"
 
-#include "box2d/box2d.h"
-#include "box2d/constants.h"
-#include "box2d/math_functions.h"
+#include "box3d/box3d.h"
+#include "box3d/constants.h"
+#include "box3d/math_functions.h"
 
 #include <assert.h>
 #include <stdbool.h>
@@ -25,29 +25,33 @@
 #define ARRAY_COUNT( A ) (int)( sizeof( A ) / sizeof( A[0] ) )
 #define MAYBE_UNUSED( x ) ( (void)( x ) )
 
-typedef void CreateFcn( b2WorldId worldId );
-typedef float StepFcn( b2WorldId worldId, int stepCount );
+typedef void CapacityFcn( b3Capacity* capacity );
+typedef void CreateFcn( b3WorldId worldId );
+typedef void DestroyFcn( void );
+typedef void StepFcn( b3WorldId worldId, int stepCount );
 
 typedef struct Benchmark
 {
 	const char* name;
+	CapacityFcn* capacityFcn;
 	CreateFcn* createFcn;
+	DestroyFcn* destroyFcn;
 	StepFcn* stepFcn;
 	int totalStepCount;
 } Benchmark;
 
-static void MinProfile( b2Profile* p1, const b2Profile* p2 )
+static void MinProfile( b3Profile* p1, const b3Profile* p2 )
 {
-	p1->step = b2MinFloat( p1->step, p2->step );
-	p1->pairs = b2MinFloat( p1->pairs, p2->pairs );
-	p1->collide = b2MinFloat( p1->collide, p2->collide );
-	p1->constraints = b2MinFloat( p1->constraints, p2->constraints );
-	p1->transforms = b2MinFloat( p1->transforms, p2->transforms );
-	p1->refit = b2MinFloat( p1->refit, p2->refit );
-	p1->sleepIslands = b2MinFloat( p1->sleepIslands, p2->sleepIslands );
+	p1->step = b3MinFloat( p1->step, p2->step );
+	p1->pairs = b3MinFloat( p1->pairs, p2->pairs );
+	p1->collide = b3MinFloat( p1->collide, p2->collide );
+	p1->constraints = b3MinFloat( p1->constraints, p2->constraints );
+	p1->transforms = b3MinFloat( p1->transforms, p2->transforms );
+	p1->refit = b3MinFloat( p1->refit, p2->refit );
+	p1->sleepIslands = b3MinFloat( p1->sleepIslands, p2->sleepIslands );
 }
 
-// Box2D benchmark application. On Windows it is important to use affinity avoid cross CCD
+// Box3D benchmark application. On Windows it is important to use affinity avoid cross CCD
 // usage or efficiency cores. Also on Windows create a power plan with Processor power management
 // Min/Max of 99%. This prevents boosting and makes the benchmarks more repeatable.
 // Affinity [0x01 0x02 0x04 0x08 0x10 0x20 0x40 0x80]
@@ -58,9 +62,10 @@ static void MinProfile( b2Profile* p1, const b2Profile* p2 )
 // Run all benchmarks with 4 workers only.
 // start /affinity 0x5555 .\build\bin\Release\benchmark.exe -t=4 -w=4
 
+// start /affinity 0x5555 .\build\bin\Release\benchmark.exe -t=4 -w=4 -b=5 -r=5
+
 // Run benchmark 3 with 4 workers and repeat 20 times. Record the step times.
 // start /affinity 0x5555 .\build\bin\Release\benchmark.exe -t=4 -w=4 -b=3 -r=20 -s
-// start /affinity 0x5555 .\build\bin\Release\benchmark.exe -t=8 -b=7
 
 // Run benchmark 3 with 4 workers and run once. Disable continuous collision. Record the step times.
 // start /affinity 0x5555 .\build\bin\Release\benchmark.exe -t=4 -w=4 -b=3 -r=1 -nc -s
@@ -72,16 +77,19 @@ int main( int argc, char** argv )
 #endif
 
 	Benchmark benchmarks[] = {
-		{ "compounds", CreateCompounds, NULL, 500 },
-		{ "joint_grid", CreateJointGrid, NULL, 500 },
-		{ "junkyard", CreateJunkyard, StepJunkyard, 800 },
-		{ "large_pyramid", CreateLargePyramid, NULL, 500 },
-		{ "many_pyramids", CreateManyPyramids, NULL, 200 },
-		{ "rain", CreateRain, StepRain, 1000 },
-		{ "smash", CreateSmash, NULL, 300 },
-		{ "spinner", CreateSpinner, StepSpinner, 500 },
-		{ "tumbler", CreateTumbler, NULL, 750 },
-		{ "washer", CreateWasher, NULL, 500 },
+		{ "trees100", NULL, CreateTrees100, DestroyTrees, NULL, 500 },
+		{ "trees50", NULL, CreateTrees50, DestroyTrees, NULL, 500 },
+		{ "trees25", NULL, CreateTrees25, DestroyTrees, NULL, 500 },
+		{ "joint_grid", NULL, CreateJointGrid, NULL, NULL, 100 },
+		{ "junkyard", NULL, CreateJunkyard, NULL, StepJunkyard, 500 },
+		{ "large_pyramid", NULL, CreateLargePyramid, NULL, NULL, 200 },
+		{ "many_pyramids", NULL, CreateManyPyramids, NULL, NULL, 100 },
+		{ "rain", GetRainCapacity, CreateRain, DestroyRain, StepRain, 400 },
+		{ "washer", GetWasherCapacity, CreateWasher, NULL, NULL, 1000 },
+		{ "large_world", GetLargeWorldCapacity, CreateLargeWorld, NULL, StepLargeWorld, 500 },
+		//{ "smash", CreateSmash, NULL, 300 },
+		//{ "spinner", CreateSpinner, StepSpinner, 1400 },
+		//{ "tumbler", CreateTumbler, NULL, 750 },
 	};
 
 	int benchmarkCount = ARRAY_COUNT( benchmarks );
@@ -89,10 +97,10 @@ int main( int argc, char** argv )
 	int maxSteps = benchmarks[0].totalStepCount;
 	for ( int i = 1; i < benchmarkCount; ++i )
 	{
-		maxSteps = b2MaxInt( maxSteps, benchmarks[i].totalStepCount );
+		maxSteps = b3MaxInt( maxSteps, benchmarks[i].totalStepCount );
 	}
 
-	b2Profile maxProfile = {
+	b3Profile maxProfile = {
 		.step = FLT_MAX,
 		.pairs = FLT_MAX,
 		.collide = FLT_MAX,
@@ -115,22 +123,21 @@ int main( int argc, char** argv )
 		.sleepIslands = FLT_MAX,
 	};
 
-	b2Profile* profiles = malloc( maxSteps * sizeof( b2Profile ) );
+	b3Profile* profiles = malloc( maxSteps * sizeof( b3Profile ) );
 	for ( int i = 0; i < maxSteps; ++i )
 	{
 		profiles[i] = maxProfile;
 	}
 
-	float* stepResults = malloc( maxSteps * sizeof( float ) );
-	memset( stepResults, 0, maxSteps * sizeof( float ) );
-
-	int maxThreadCount = b2MinInt(GetNumberOfCores(), B2_MAX_WORKERS);
+	int maxThreadCount = GetNumberOfCores();
 	int runCount = 4;
 	int singleBenchmark = -1;
 	int singleWorkerCount = -1;
-	b2Counters counters = { 0 };
+	b3Counters counters = { 0 };
 	bool enableContinuous = true;
 	bool recordStepTimes = false;
+
+	assert( maxThreadCount <= B3_MAX_WORKERS );
 
 	for ( int i = 1; i < argc; ++i )
 	{
@@ -138,12 +145,12 @@ int main( int argc, char** argv )
 		if ( strncmp( arg, "-t=", 3 ) == 0 )
 		{
 			int threadCount = atoi( arg + 3 );
-			maxThreadCount = b2ClampInt( threadCount, 1, maxThreadCount );
+			maxThreadCount = b3ClampInt( threadCount, 1, maxThreadCount );
 		}
 		else if ( strncmp( arg, "-b=", 3 ) == 0 )
 		{
 			singleBenchmark = atoi( arg + 3 );
-			singleBenchmark = b2ClampInt( singleBenchmark, 0, benchmarkCount - 1 );
+			singleBenchmark = b3ClampInt( singleBenchmark, 0, benchmarkCount - 1 );
 		}
 		else if ( strncmp( arg, "-w=", 3 ) == 0 )
 		{
@@ -151,7 +158,7 @@ int main( int argc, char** argv )
 		}
 		else if ( strncmp( arg, "-r=", 3 ) == 0 )
 		{
-			runCount = b2ClampInt( atoi( arg + 3 ), 1, 1000 );
+			runCount = b3ClampInt( atoi( arg + 3 ), 1, 1000 );
 		}
 		else if ( strncmp( arg, "-nc", 3 ) == 0 )
 		{
@@ -176,10 +183,10 @@ int main( int argc, char** argv )
 
 	if ( singleWorkerCount != -1 )
 	{
-		singleWorkerCount = b2ClampInt( singleWorkerCount, 1, maxThreadCount );
+		singleWorkerCount = b3ClampInt( singleWorkerCount, 1, maxThreadCount );
 	}
 
-	printf( "Starting Box2D benchmarks\n" );
+	printf( "Starting benchmarks\n" );
 	printf( "======================================\n" );
 
 	for ( int benchmarkIndex = 0; benchmarkIndex < benchmarkCount; ++benchmarkIndex )
@@ -201,7 +208,7 @@ int main( int argc, char** argv )
 
 		printf( "benchmark: %s, steps = %d\n", benchmarks[benchmarkIndex].name, stepCount );
 
-		float minTime[B2_MAX_WORKERS] = { 0 };
+		float minTime[B3_MAX_WORKERS] = { 0 };
 
 		for ( int threadCount = 1; threadCount <= maxThreadCount; ++threadCount )
 		{
@@ -214,10 +221,16 @@ int main( int argc, char** argv )
 
 			for ( int runIndex = 0; runIndex < runCount; ++runIndex )
 			{
-				b2WorldDef worldDef = b2DefaultWorldDef();
+				b3WorldDef worldDef = b3DefaultWorldDef();
 				worldDef.enableContinuous = enableContinuous;
 				worldDef.workerCount = threadCount;
-				b2WorldId worldId = b2CreateWorld( &worldDef );
+
+				if (benchmark->capacityFcn != NULL)
+				{
+					benchmark->capacityFcn( &worldDef.capacity );
+				}
+
+				b3WorldId worldId = b3CreateWorld( &worldDef );
 
 				benchmark->createFcn( worldId );
 
@@ -227,31 +240,32 @@ int main( int argc, char** argv )
 				// Initial step can be expensive and skew benchmark
 				if ( benchmark->stepFcn != NULL )
 				{
-					stepResults[0] = benchmark->stepFcn( worldId, 0 );
+					benchmark->stepFcn( worldId, 0 );
 				}
 
 				assert( stepCount <= maxSteps );
 
-				b2World_Step( worldId, timeStep, subStepCount );
-
-				b2Profile profile = b2World_GetProfile( worldId );
+				b3World_Step( worldId, timeStep, subStepCount );
+\
+				b3Profile profile = b3World_GetProfile( worldId );
 				MinProfile( profiles + 0, &profile );
 
-				uint64_t ticks = b2GetTicks();
+				uint64_t ticks = b3GetTicks();
 
 				for ( int stepIndex = 1; stepIndex < stepCount; ++stepIndex )
 				{
 					if ( benchmark->stepFcn != NULL )
 					{
-						stepResults[stepIndex] = benchmark->stepFcn( worldId, stepIndex );
+						benchmark->stepFcn( worldId, stepIndex );
 					}
 
-					b2World_Step( worldId, timeStep, subStepCount );
-					profile = b2World_GetProfile( worldId );
+					b3World_Step( worldId, timeStep, subStepCount );
+\
+					profile = b3World_GetProfile( worldId );
 					MinProfile( profiles + stepIndex, &profile );
 				}
 
-				float ms = b2GetMilliseconds( ticks );
+				float ms = b3GetMilliseconds( ticks );
 				printf( "run %d : %g (ms)\n", runIndex, ms );
 
 				if ( runIndex == 0 )
@@ -260,16 +274,21 @@ int main( int argc, char** argv )
 				}
 				else
 				{
-					minTime[threadCount - 1] = b2MinFloat( minTime[threadCount - 1], ms );
+					minTime[threadCount - 1] = b3MinFloat( minTime[threadCount - 1], ms );
 				}
 
 				if ( countersAcquired == false )
 				{
-					counters = b2World_GetCounters( worldId );
+					counters = b3World_GetCounters( worldId );
 					countersAcquired = true;
 				}
 
-				b2DestroyWorld( worldId );
+				if ( benchmark->destroyFcn != NULL )
+				{
+					benchmark->destroyFcn();
+				}
+
+				b3DestroyWorld( worldId );
 			}
 
 			if ( recordStepTimes )
@@ -284,7 +303,7 @@ int main( int argc, char** argv )
 
 				for ( int stepIndex = 0; stepIndex < stepCount; ++stepIndex )
 				{
-					b2Profile p = profiles[stepIndex];
+					b3Profile p = profiles[stepIndex];
 					fprintf( file, "%g %g %g %g %g %g %g\n", p.step, p.pairs, p.collide, p.constraints, p.transforms,
 							 p.refit, p.sleepIslands );
 				}
@@ -293,14 +312,8 @@ int main( int argc, char** argv )
 			}
 		}
 
-		printf( "body %d / shape %d / contact %d / joint %d / stack %d\n", counters.bodyCount, counters.shapeCount,
+		printf( "body %d / shape %d / contact %d / joint %d / stack %d\n\n", counters.bodyCount, counters.shapeCount,
 				counters.contactCount, counters.jointCount, counters.stackUsed );
-		printf( "color counts:" );
-		for ( int c = 0; c < ARRAY_COUNT( counters.colorCounts ); ++c )
-		{
-			printf( " %d", counters.colorCounts[c] );
-		}
-		printf( "\n\n" );
 
 		char fileName[64] = { 0 };
 		snprintf( fileName, 64, "%s.csv", benchmarks[benchmarkIndex].name );
@@ -320,13 +333,13 @@ int main( int argc, char** argv )
 	}
 
 	printf( "======================================\n" );
-	printf( "All Box2D benchmarks complete!\n" );
+	printf( "All benchmarks complete!\n" );
 
 	free( profiles );
-	free( stepResults );
 
 #ifdef TRACY_ENABLE
 	___tracy_shutdown_profiler();
 #endif
+
 	return 0;
 }

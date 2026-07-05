@@ -1,37 +1,36 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
 
 #include "container.h"
 
-#include <stdbool.h>
 #include <stdint.h>
 
-typedef struct b2Contact b2Contact;
-typedef struct b2Joint b2Joint;
-typedef struct b2World b2World;
+typedef struct b3Contact b3Contact;
+typedef struct b3Joint b3Joint;
+typedef struct b3World b3World;
 
 // Cached contact data stored in the island for fast contiguous iteration.
-// Avoids touching b2Contact during union-find in b2SplitIsland.
-typedef struct b2ContactLink
+// Avoids touching b3Contact during union-find in b3SplitIsland.
+typedef struct b3ContactLink
 {
 	int contactId;
 	int bodyIdA;
 	int bodyIdB;
-} b2ContactLink;
+} b3ContactLink;
 
-b2DeclareArray( b2ContactLink );
+b3DeclareArray( b3ContactLink );
 
 // Cached joint data stored in the island for fast contiguous iteration.
-typedef struct b2JointLink
+typedef struct b3JointLink
 {
 	int jointId;
 	int bodyIdA;
 	int bodyIdB;
-} b2JointLink;
+} b3JointLink;
 
-b2DeclareArray( b2JointLink );
+b3DeclareArray( b3JointLink );
 
 // Deterministic solver
 //
@@ -46,14 +45,14 @@ b2DeclareArray( b2JointLink );
 // Contacts and joints may connect to static bodies, but static bodies are not in the island.
 // https://en.wikipedia.org/wiki/Component_(graph_theory)
 // https://en.wikipedia.org/wiki/Dynamic_connectivity
-typedef struct b2Island
+typedef struct b3Island
 {
-	// index of solver set stored in b2World
-	// may be B2_NULL_INDEX
+	// index of solver set stored in b3World
+	// may be B3_NULL_INDEX
 	int setIndex;
 
 	// island index within set
-	// may be B2_NULL_INDEX
+	// may be B3_NULL_INDEX
 	int localIndex;
 
 	int islandId;
@@ -64,44 +63,39 @@ typedef struct b2Island
 
 	// I tried using a stack array for this but the data pointer goes out of
 	// sync when the world island array grows.
-	b2Array( int ) bodies;
+	b3Array( int ) bodies;
 
 	// Contacts and joints that belong to this island. May connect to static
 	// bodies not in the island.
-	// Each link has the two body ids so that b2SplitIsland's union-find pass
-	// never needs to touch b2Contact/b2Joint.
-	b2Array( b2ContactLink ) contacts;
-	b2Array( b2JointLink ) joints;
+	// Each link has the two body ids so that b3SplitIsland's union-find pass
+	// never needs to touch b3Contact/b3Joint.
+	b3Array( b3ContactLink ) contacts;
+	b3Array( b3JointLink ) joints;
 
-} b2Island;
-
-b2DeclareArray( b2Island );
+} b3Island;
 
 // This is used to move islands across solver sets
-typedef struct b2IslandSim
+typedef struct b3IslandSim
 {
 	int islandId;
-} b2IslandSim;
+} b3IslandSim;
 
-b2DeclareArray( b2IslandSim );
-
-b2Island* b2CreateIsland( b2World* world, int setIndex );
-void b2DestroyIsland( b2World* world, int islandId );
+b3Island* b3CreateIsland( b3World* world, int setIndex );
+void b3DestroyIsland( b3World* world, int islandId );
 
 // Link contacts into the island graph when it starts having contact points
-void b2LinkContact( b2World* world, b2Contact* contact );
+void b3LinkContact( b3World* world, b3Contact* contact );
 
 // Unlink contact from the island graph when it stops having contact points
-void b2UnlinkContact( b2World* world, b2Contact* contact );
+void b3UnlinkContact( b3World* world, b3Contact* contact );
 
 // Link a joint into the island graph when it is created
-void b2LinkJoint( b2World* world, b2Joint* joint );
+void b3LinkJoint( b3World* world, b3Joint* joint );
 
 // Unlink a joint from the island graph when it is destroyed
-void b2UnlinkJoint( b2World* world, b2Joint* joint );
+void b3UnlinkJoint( b3World* world, b3Joint* joint );
 
-void b2SplitIsland( b2World* world, int baseId );
-void b2SplitIslandTask( void* context );
+void b3SplitIsland( b3World* world, int baseId );
+void b3SplitIslandTask( void* context );
 
-void b2ValidateIsland( b2World* world, int islandId );
-
+void b3ValidateIsland( b3World* world, int islandId );

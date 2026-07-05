@@ -8,24 +8,25 @@
 #include "recording.h"
 
 #include "body.h"
+#include "compound.h"
 #include "physics_world.h"
 #include "world_snapshot.h"
 
-#include "box2d/box2d.h"
+#include "box3d/box3d.h"
+#include "box3d/constants.h"
 
 #include <limits.h>
 #include <stddef.h>
 
 // Buffer helpers
 
-void b2RecBufAppend( b2RecBuffer* buf, const void* data, int size )
+void b3RecBufAppend( b3RecBuffer* buf, const void* data, int size )
 {
 	if ( size <= 0 )
 	{
 		return;
 	}
 
-	// Sizing pass: tally bytes without allocating or copying
 	if ( buf->countOnly )
 	{
 		buf->size += size;
@@ -41,11 +42,11 @@ void b2RecBufAppend( b2RecBuffer* buf, const void* data, int size )
 		}
 		if ( buf->data == NULL )
 		{
-			buf->data = b2Alloc( newCap );
+			buf->data = b3Alloc( (size_t)newCap );
 		}
 		else
 		{
-			buf->data = b2GrowAlloc( buf->data, buf->capacity, newCap );
+			buf->data = b3GrowAlloc( buf->data, buf->capacity, newCap );
 		}
 		buf->capacity = newCap;
 	}
@@ -54,11 +55,11 @@ void b2RecBufAppend( b2RecBuffer* buf, const void* data, int size )
 	buf->size += size;
 }
 
-void b2RecBufFree( b2RecBuffer* buf )
+void b3RecBufFree( b3RecBuffer* buf )
 {
 	if ( buf->data != NULL )
 	{
-		b2Free( buf->data, buf->capacity );
+		b3Free( buf->data, (size_t)buf->capacity );
 		buf->data = NULL;
 		buf->capacity = 0;
 		buf->size = 0;
@@ -67,179 +68,232 @@ void b2RecBufFree( b2RecBuffer* buf )
 
 // Write primitives
 
-void b2RecW_U8( b2RecBuffer* buf, uint8_t v )
+void b3RecW_U8( b3RecBuffer* buf, uint8_t v )
 {
-	b2RecBufAppend( buf, &v, 1 );
+	b3RecBufAppend( buf, &v, 1 );
 }
 
-void b2RecW_U16( b2RecBuffer* buf, uint16_t v )
+void b3RecW_U16( b3RecBuffer* buf, uint16_t v )
 {
 	uint8_t b[2] = { (uint8_t)v, (uint8_t)( v >> 8 ) };
-	b2RecBufAppend( buf, b, 2 );
+	b3RecBufAppend( buf, b, 2 );
 }
 
-void b2RecW_U32( b2RecBuffer* buf, uint32_t v )
+void b3RecW_U32( b3RecBuffer* buf, uint32_t v )
 {
 	uint8_t b[4] = { (uint8_t)v, (uint8_t)( v >> 8 ), (uint8_t)( v >> 16 ), (uint8_t)( v >> 24 ) };
-	b2RecBufAppend( buf, b, 4 );
+	b3RecBufAppend( buf, b, 4 );
 }
 
-void b2RecW_U64( b2RecBuffer* buf, uint64_t v )
+void b3RecW_U64( b3RecBuffer* buf, uint64_t v )
 {
 	uint8_t b[8] = { (uint8_t)v,		   (uint8_t)( v >> 8 ),	 (uint8_t)( v >> 16 ), (uint8_t)( v >> 24 ),
 					 (uint8_t)( v >> 32 ), (uint8_t)( v >> 40 ), (uint8_t)( v >> 48 ), (uint8_t)( v >> 56 ) };
-	b2RecBufAppend( buf, b, 8 );
+	b3RecBufAppend( buf, b, 8 );
 }
 
-void b2RecW_I32( b2RecBuffer* buf, int32_t v )
+void b3RecW_I32( b3RecBuffer* buf, int32_t v )
 {
-	b2RecW_U32( buf, (uint32_t)v );
+	b3RecW_U32( buf, (uint32_t)v );
 }
 
-void b2RecW_F32( b2RecBuffer* buf, float v )
+void b3RecW_F32( b3RecBuffer* buf, float v )
 {
 	uint32_t bits;
 	memcpy( &bits, &v, 4 );
-	b2RecW_U32( buf, bits );
+	b3RecW_U32( buf, bits );
 }
 
-void b2RecW_BOOL( b2RecBuffer* buf, bool v )
-{
-	b2RecW_U8( buf, v ? 1u : 0u );
-}
-
-void b2RecW_VEC2( b2RecBuffer* buf, b2Vec2 v )
-{
-	b2RecW_F32( buf, v.x );
-	b2RecW_F32( buf, v.y );
-}
-
-void b2RecW_ROT( b2RecBuffer* buf, b2Rot v )
-{
-	b2RecW_F32( buf, v.c );
-	b2RecW_F32( buf, v.s );
-}
-
-void b2RecW_XF( b2RecBuffer* buf, b2Transform v )
-{
-	b2RecW_VEC2( buf, v.p );
-	b2RecW_ROT( buf, v.q );
-}
-
-void b2RecW_F64( b2RecBuffer* buf, double v )
+void b3RecW_F64( b3RecBuffer* buf, double v )
 {
 	uint64_t bits;
 	memcpy( &bits, &v, 8 );
-	b2RecW_U64( buf, bits );
+	b3RecW_U64( buf, bits );
 }
 
-// A world position keeps full precision on the wire so a recording reproduces the simulation far
-// from the origin. In the float build this is two floats, identical to VEC2.
-void b2RecW_POSITION( b2RecBuffer* buf, b2Pos v )
+void b3RecW_BOOL( b3RecBuffer* buf, bool v )
 {
-#if defined( BOX2D_DOUBLE_PRECISION )
-	b2RecW_F64( buf, v.x );
-	b2RecW_F64( buf, v.y );
+	b3RecW_U8( buf, v ? 1u : 0u );
+}
+
+void b3RecW_VEC3( b3RecBuffer* buf, b3Vec3 v )
+{
+	b3RecW_F32( buf, v.x );
+	b3RecW_F32( buf, v.y );
+	b3RecW_F32( buf, v.z );
+}
+
+void b3RecW_QUAT( b3RecBuffer* buf, b3Quat v )
+{
+	b3RecW_F32( buf, v.v.x );
+	b3RecW_F32( buf, v.v.y );
+	b3RecW_F32( buf, v.v.z );
+	b3RecW_F32( buf, v.s );
+}
+
+void b3RecW_TRANSFORM( b3RecBuffer* buf, b3Transform v )
+{
+	b3RecW_VEC3( buf, v.p );
+	b3RecW_QUAT( buf, v.q );
+}
+
+// World position at full precision so recordings reproduce the simulation far from the origin.
+// In the float build this is three floats, wire-identical to VEC3.
+void b3RecW_POSITION( b3RecBuffer* buf, b3Pos v )
+{
+#if defined( BOX3D_DOUBLE_PRECISION )
+	b3RecW_F64( buf, v.x );
+	b3RecW_F64( buf, v.y );
+	b3RecW_F64( buf, v.z );
 #else
-	b2RecW_F32( buf, v.x );
-	b2RecW_F32( buf, v.y );
+	b3RecW_F32( buf, v.x );
+	b3RecW_F32( buf, v.y );
+	b3RecW_F32( buf, v.z );
 #endif
 }
 
-void b2RecW_WORLDXF( b2RecBuffer* buf, b2WorldTransform v )
+void b3RecW_WORLDXF( b3RecBuffer* buf, b3WorldTransform v )
 {
-	b2RecW_POSITION( buf, v.p );
-	b2RecW_ROT( buf, v.q );
+	b3RecW_POSITION( buf, v.p );
+	b3RecW_QUAT( buf, v.q );
 }
 
-void b2RecW_WORLDID( b2RecBuffer* buf, b2WorldId v )
+void b3RecW_MATRIX3( b3RecBuffer* buf, b3Matrix3 v )
 {
-	b2RecW_U32( buf, b2StoreWorldId( v ) );
+	b3RecW_VEC3( buf, v.cx );
+	b3RecW_VEC3( buf, v.cy );
+	b3RecW_VEC3( buf, v.cz );
 }
 
-void b2RecW_BODYID( b2RecBuffer* buf, b2BodyId v )
+void b3RecW_AABB( b3RecBuffer* buf, b3AABB v )
 {
-	b2RecW_U64( buf, b2StoreBodyId( v ) );
+	b3RecW_VEC3( buf, v.lowerBound );
+	b3RecW_VEC3( buf, v.upperBound );
 }
 
-void b2RecW_SHAPEID( b2RecBuffer* buf, b2ShapeId v )
+void b3RecW_QUERYFILTER( b3RecBuffer* buf, b3QueryFilter v )
 {
-	b2RecW_U64( buf, b2StoreShapeId( v ) );
+	b3RecW_U64( buf, v.categoryBits );
+	b3RecW_U64( buf, v.maskBits );
 }
 
-void b2RecW_CHAINID( b2RecBuffer* buf, b2ChainId v )
+// Variable length: count, then count points, then radius. The point cloud lives behind a pointer so
+// it cannot ride along as POD.
+void b3RecW_SHAPEPROXY( b3RecBuffer* buf, b3ShapeProxy v )
 {
-	b2RecW_U64( buf, b2StoreChainId( v ) );
+	int count = v.count;
+	if ( count < 0 )
+		count = 0;
+	if ( count > B3_MAX_SHAPE_CAST_POINTS )
+		count = B3_MAX_SHAPE_CAST_POINTS;
+	b3RecW_I32( buf, count );
+	for ( int i = 0; i < count; ++i )
+	{
+		b3RecW_VEC3( buf, v.points[i] );
+	}
+	b3RecW_F32( buf, v.radius );
 }
 
-void b2RecW_JOINTID( b2RecBuffer* buf, b2JointId v )
+void b3RecW_TREESTATS( b3RecBuffer* buf, b3TreeStats v )
 {
-	b2RecW_U64( buf, b2StoreJointId( v ) );
+	b3RecW_I32( buf, v.nodeVisits );
+	b3RecW_I32( buf, v.leafVisits );
 }
 
-// Geometry is pointer-free POD, pointerWidth in the header gates the layout
-
-void b2RecW_CIRCLE( b2RecBuffer* buf, b2Circle v )
+void b3RecW_RAYRESULT( b3RecBuffer* buf, b3RayResult v )
 {
-	b2RecBufAppend( buf, &v, (int)sizeof( b2Circle ) );
+	b3RecW_SHAPEID( buf, v.shapeId );
+	b3RecW_POSITION( buf, v.point );
+	b3RecW_VEC3( buf, v.normal );
+	b3RecW_U64( buf, v.userMaterialId );
+	b3RecW_F32( buf, v.fraction );
+	b3RecW_I32( buf, v.triangleIndex );
+	b3RecW_I32( buf, v.childIndex );
+	b3RecW_BOOL( buf, v.hit );
 }
 
-void b2RecW_CAPSULE( b2RecBuffer* buf, b2Capsule v )
+void b3RecW_PLANERESULT( b3RecBuffer* buf, b3PlaneResult v )
 {
-	b2RecBufAppend( buf, &v, (int)sizeof( b2Capsule ) );
+	b3RecW_VEC3( buf, v.plane.normal );
+	b3RecW_F32( buf, v.plane.offset );
+	b3RecW_VEC3( buf, v.point );
 }
 
-void b2RecW_SEGMENT( b2RecBuffer* buf, b2Segment v )
+void b3RecW_WORLDID( b3RecBuffer* buf, b3WorldId v )
 {
-	b2RecBufAppend( buf, &v, (int)sizeof( b2Segment ) );
+	b3RecW_U32( buf, b3StoreWorldId( v ) );
 }
 
-void b2RecW_POLYGON( b2RecBuffer* buf, b2Polygon v )
+void b3RecW_BODYID( b3RecBuffer* buf, b3BodyId v )
 {
-	b2RecBufAppend( buf, &v, (int)sizeof( b2Polygon ) );
+	b3RecW_U64( buf, b3StoreBodyId( v ) );
 }
 
-void b2RecW_CHAINSEG( b2RecBuffer* buf, b2ChainSegment v )
+void b3RecW_SHAPEID( b3RecBuffer* buf, b3ShapeId v )
 {
-	b2RecBufAppend( buf, &v, (int)sizeof( b2ChainSegment ) );
+	b3RecW_U64( buf, b3StoreShapeId( v ) );
 }
 
-void b2RecW_FILTER( b2RecBuffer* buf, b2Filter v )
+void b3RecW_JOINTID( b3RecBuffer* buf, b3JointId v )
 {
-	b2RecW_U64( buf, v.categoryBits );
-	b2RecW_U64( buf, v.maskBits );
-	b2RecW_I32( buf, v.groupIndex );
+	b3RecW_U64( buf, b3StoreJointId( v ) );
 }
 
-void b2RecW_MATERIAL( b2RecBuffer* buf, b2SurfaceMaterial v )
+// Pointer-free POD; pointerWidth in the header gates the layout on replay
+void b3RecW_SPHERE( b3RecBuffer* buf, b3Sphere v )
 {
-	b2RecW_F32( buf, v.friction );
-	b2RecW_F32( buf, v.restitution );
-	b2RecW_F32( buf, v.rollingResistance );
-	b2RecW_F32( buf, v.tangentSpeed );
-	b2RecW_U64( buf, v.userMaterialId );
-	b2RecW_U32( buf, v.customColor );
+	b3RecBufAppend( buf, &v, (int)sizeof( b3Sphere ) );
 }
 
-void b2RecW_MASSDATA( b2RecBuffer* buf, b2MassData v )
+void b3RecW_CAPSULE( b3RecBuffer* buf, b3Capsule v )
 {
-	b2RecW_F32( buf, v.mass );
-	b2RecW_VEC2( buf, v.center );
-	b2RecW_F32( buf, v.rotationalInertia );
+	b3RecBufAppend( buf, &v, (int)sizeof( b3Capsule ) );
 }
 
-void b2RecW_LOCKS( b2RecBuffer* buf, b2MotionLocks v )
+void b3RecW_GEOMID( b3RecBuffer* buf, uint32_t v )
 {
-	b2RecW_BOOL( buf, v.linearX );
-	b2RecW_BOOL( buf, v.linearY );
-	b2RecW_BOOL( buf, v.angularZ );
+	b3RecW_U32( buf, v );
 }
 
-void b2RecW_STR( b2RecBuffer* buf, const char* s )
+void b3RecW_FILTER( b3RecBuffer* buf, b3Filter v )
+{
+	b3RecW_U64( buf, v.categoryBits );
+	b3RecW_U64( buf, v.maskBits );
+	b3RecW_I32( buf, v.groupIndex );
+}
+
+void b3RecW_MATERIAL( b3RecBuffer* buf, b3SurfaceMaterial v )
+{
+	b3RecW_F32( buf, v.friction );
+	b3RecW_F32( buf, v.restitution );
+	b3RecW_F32( buf, v.rollingResistance );
+	b3RecW_VEC3( buf, v.tangentVelocity );
+	b3RecW_U64( buf, v.userMaterialId );
+	b3RecW_U32( buf, v.customColor );
+}
+
+void b3RecW_MASSDATA( b3RecBuffer* buf, b3MassData v )
+{
+	b3RecW_F32( buf, v.mass );
+	b3RecW_VEC3( buf, v.center );
+	b3RecW_MATRIX3( buf, v.inertia );
+}
+
+void b3RecW_LOCKS( b3RecBuffer* buf, b3MotionLocks v )
+{
+	b3RecW_BOOL( buf, v.linearX );
+	b3RecW_BOOL( buf, v.linearY );
+	b3RecW_BOOL( buf, v.linearZ );
+	b3RecW_BOOL( buf, v.angularX );
+	b3RecW_BOOL( buf, v.angularY );
+	b3RecW_BOOL( buf, v.angularZ );
+}
+
+void b3RecW_STR( b3RecBuffer* buf, const char* s )
 {
 	if ( s == NULL )
 	{
-		b2RecW_U16( buf, 0xFFFFu );
+		b3RecW_U16( buf, 0xFFFFu );
 		return;
 	}
 	int len = 0;
@@ -247,270 +301,262 @@ void b2RecW_STR( b2RecBuffer* buf, const char* s )
 	{
 		len++;
 	}
-	b2RecW_U16( buf, (uint16_t)len );
+	b3RecW_U16( buf, (uint16_t)len );
 	if ( len > 0 )
 	{
-		b2RecBufAppend( buf, s, len );
+		b3RecBufAppend( buf, s, len );
 	}
 }
 
-// Hand-written def helpers. Zero all pointer and cookie fields before serializing
-// Readers call b2Default*Def() first to get the cookie, then overwrite fields
+// Hand-written def helpers. Zero pointer and cookie fields before serializing.
+// Readers call b3Default*Def() first to get the cookie, then overwrite fields.
 
-void b2RecW_BODYDEF( b2RecBuffer* buf, b2BodyDef v )
+// Tripwire: each def serializer below is paired with a reader in recording_replay.c, and the two must
+// stay field-for-field in sync. Add a field to a def and the size changes, firing the matching assert
+// so the writer and reader both get updated. Only enforced on the 64-bit target; each def lists the
+// single-precision and double-precision sizes (equal for most), so either build configuration passes.
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3ExplosionDef ) == 32 || sizeof( b3ExplosionDef ) == 48,
+				"b3ExplosionDef changed: update b3RecW_EXPLOSIONDEF and b3RecR_EXPLOSIONDEF together" );
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3BodyDef ) == 104 || sizeof( b3BodyDef ) == 120,
+				"b3BodyDef changed: update b3RecW_BODYDEF and b3RecR_BODYDEF together" );
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3ShapeDef ) == 112,
+				"b3ShapeDef changed: update b3RecW_SHAPEDEF and b3RecR_SHAPEDEF together" );
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3ParallelJointDef ) == 128,
+				"b3ParallelJointDef changed: update b3RecW_PARALLELJOINTDEF and its reader together" );
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3DistanceJointDef ) == 160,
+				"b3DistanceJointDef changed: update b3RecW_DISTANCEJOINTDEF and its reader together" );
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3FilterJointDef ) == 112,
+				"b3FilterJointDef changed: update b3RecW_FILTERJOINTDEF and its reader together" );
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3MotorJointDef ) == 168,
+				"b3MotorJointDef changed: update b3RecW_MOTORJOINTDEF and its reader together" );
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3PrismaticJointDef ) == 152,
+				"b3PrismaticJointDef changed: update b3RecW_PRISMATICJOINTDEF and its reader together" );
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3RevoluteJointDef ) == 152,
+				"b3RevoluteJointDef changed: update b3RecW_REVOLUTEJOINTDEF and its reader together" );
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3SphericalJointDef ) == 184,
+				"b3SphericalJointDef changed: update b3RecW_SPHERICALJOINTDEF and its reader together" );
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3WeldJointDef ) == 128,
+				"b3WeldJointDef changed: update b3RecW_WELDJOINTDEF and its reader together" );
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3WheelJointDef ) == 184,
+				"b3WheelJointDef changed: update b3RecW_WHEELJOINTDEF and its reader together" );
+
+void b3RecW_EXPLOSIONDEF( b3RecBuffer* buf, b3ExplosionDef v )
 {
-	b2RecW_I32( buf, (int32_t)v.type );
-	b2RecW_POSITION( buf, v.position );
-	b2RecW_ROT( buf, v.rotation );
-	b2RecW_VEC2( buf, v.linearVelocity );
-	b2RecW_F32( buf, v.angularVelocity );
-	b2RecW_F32( buf, v.linearDamping );
-	b2RecW_F32( buf, v.angularDamping );
-	b2RecW_F32( buf, v.gravityScale );
-	b2RecW_F32( buf, v.sleepThreshold );
-	b2RecW_STR( buf, v.name );
+	b3RecW_U64( buf, v.maskBits );
+	b3RecW_POSITION( buf, v.position );
+	b3RecW_F32( buf, v.radius );
+	b3RecW_F32( buf, v.falloff );
+	b3RecW_F32( buf, v.impulsePerArea );
+}
+
+void b3RecW_BODYDEF( b3RecBuffer* buf, b3BodyDef v )
+{
+	b3RecW_I32( buf, (int32_t)v.type );
+	b3RecW_POSITION( buf, v.position );
+	b3RecW_QUAT( buf, v.rotation );
+	b3RecW_VEC3( buf, v.linearVelocity );
+	b3RecW_VEC3( buf, v.angularVelocity );
+	b3RecW_F32( buf, v.linearDamping );
+	b3RecW_F32( buf, v.angularDamping );
+	b3RecW_F32( buf, v.gravityScale );
+	b3RecW_F32( buf, v.sleepThreshold );
+	b3RecW_STR( buf, v.name );
 	// userData: not preserved
-	b2RecW_U64( buf, 0u );
-	b2RecW_LOCKS( buf, v.motionLocks );
-	b2RecW_BOOL( buf, v.enableSleep );
-	b2RecW_BOOL( buf, v.isAwake );
-	b2RecW_BOOL( buf, v.isBullet );
-	b2RecW_BOOL( buf, v.isEnabled );
-	b2RecW_BOOL( buf, v.allowFastRotation );
-	b2RecW_BOOL( buf, v.enableContactRecycling );
+	b3RecW_U64( buf, 0u );
+	b3RecW_LOCKS( buf, v.motionLocks );
+	b3RecW_BOOL( buf, v.enableSleep );
+	b3RecW_BOOL( buf, v.isAwake );
+	b3RecW_BOOL( buf, v.isBullet );
+	b3RecW_BOOL( buf, v.isEnabled );
+	b3RecW_BOOL( buf, v.allowFastRotation );
+	b3RecW_BOOL( buf, v.enableContactRecycling );
 	// internalValue omitted
 }
 
-void b2RecW_SHAPEDEF( b2RecBuffer* buf, b2ShapeDef v )
+void b3RecW_SHAPEDEF( b3RecBuffer* buf, b3ShapeDef v )
 {
 	// userData: not preserved
-	b2RecW_U64( buf, 0u );
-	b2RecW_MATERIAL( buf, v.material );
-	b2RecW_F32( buf, v.density );
-	b2RecW_FILTER( buf, v.filter );
-	b2RecW_BOOL( buf, v.enableCustomFiltering );
-	b2RecW_BOOL( buf, v.isSensor );
-	b2RecW_BOOL( buf, v.enableSensorEvents );
-	b2RecW_BOOL( buf, v.enableContactEvents );
-	b2RecW_BOOL( buf, v.enableHitEvents );
-	b2RecW_BOOL( buf, v.enablePreSolveEvents );
-	b2RecW_BOOL( buf, v.invokeContactCreation );
-	b2RecW_BOOL( buf, v.updateBodyMass );
+	b3RecW_U64( buf, 0u );
+	// Per-triangle materials: length-prefixed so the reader can rebuild the array.
+	// Guard NULL so a default def (materialCount=0, materials=NULL) round-trips cleanly.
+	int matCount = ( v.materials != NULL ) ? v.materialCount : 0;
+	b3RecW_I32( buf, matCount );
+	for ( int i = 0; i < matCount; ++i )
+	{
+		b3RecW_MATERIAL( buf, v.materials[i] );
+	}
+	b3RecW_MATERIAL( buf, v.baseMaterial );
+	b3RecW_F32( buf, v.density );
+	b3RecW_F32( buf, v.explosionScale );
+	b3RecW_FILTER( buf, v.filter );
+	b3RecW_BOOL( buf, v.enableCustomFiltering );
+	b3RecW_BOOL( buf, v.isSensor );
+	b3RecW_BOOL( buf, v.enableSensorEvents );
+	b3RecW_BOOL( buf, v.enableContactEvents );
+	b3RecW_BOOL( buf, v.enableHitEvents );
+	b3RecW_BOOL( buf, v.enablePreSolveEvents );
+	b3RecW_BOOL( buf, v.invokeContactCreation );
+	b3RecW_BOOL( buf, v.updateBodyMass );
 	// internalValue omitted
 }
 
-// Variable-length def: point and material arrays are length-prefixed and inlined.
-// Arrays are cloned by b2CreateChain so they only need to outlive the dispatch call.
-void b2RecW_CHAINDEF( b2RecBuffer* buf, b2ChainDef v )
+// Joint defs share a base. Body ids are written as packed ids for replay remapping.
+static void b3RecW_JointBase( b3RecBuffer* buf, const b3JointDef* base )
 {
 	// userData: not preserved
-	b2RecW_U64( buf, 0u );
-	b2RecW_I32( buf, v.count );
-	for ( int i = 0; i < v.count; ++i )
-	{
-		b2RecW_VEC2( buf, v.points[i] );
-	}
-	b2RecW_I32( buf, v.materialCount );
-	for ( int i = 0; i < v.materialCount; ++i )
-	{
-		b2RecW_MATERIAL( buf, v.materials[i] );
-	}
-	b2RecW_FILTER( buf, v.filter );
-	b2RecW_BOOL( buf, v.isLoop );
-	b2RecW_BOOL( buf, v.enableSensorEvents );
+	b3RecW_U64( buf, 0u );
+	b3RecW_BODYID( buf, base->bodyIdA );
+	b3RecW_BODYID( buf, base->bodyIdB );
+	b3RecW_TRANSFORM( buf, base->localFrameA );
+	b3RecW_TRANSFORM( buf, base->localFrameB );
+	b3RecW_F32( buf, base->forceThreshold );
+	b3RecW_F32( buf, base->torqueThreshold );
+	b3RecW_F32( buf, base->constraintHertz );
+	b3RecW_F32( buf, base->constraintDampingRatio );
+	b3RecW_F32( buf, base->drawScale );
+	b3RecW_BOOL( buf, base->collideConnected );
 	// internalValue omitted
 }
 
-void b2RecW_EXPLOSIONDEF( b2RecBuffer* buf, b2ExplosionDef v )
+void b3RecW_PARALLELJOINTDEF( b3RecBuffer* buf, b3ParallelJointDef v )
 {
-	b2RecW_U64( buf, v.maskBits );
-	b2RecW_POSITION( buf, v.position );
-	b2RecW_F32( buf, v.radius );
-	b2RecW_F32( buf, v.falloff );
-	b2RecW_F32( buf, v.impulsePerLength );
+	b3RecW_JointBase( buf, &v.base );
+	b3RecW_F32( buf, v.hertz );
+	b3RecW_F32( buf, v.dampingRatio );
+	b3RecW_F32( buf, v.maxTorque );
 }
 
-// Joint defs share a base. Body ids are written as ids and remapped to the replay world on
-// read. userData and internalValue are not serialized.
-static void b2RecW_JointBase( b2RecBuffer* buf, const b2JointDef* base )
+void b3RecW_DISTANCEJOINTDEF( b3RecBuffer* buf, b3DistanceJointDef v )
 {
-	b2RecW_U64( buf, 0u ); // userData
-	b2RecW_BODYID( buf, base->bodyIdA );
-	b2RecW_BODYID( buf, base->bodyIdB );
-	b2RecW_XF( buf, base->localFrameA );
-	b2RecW_XF( buf, base->localFrameB );
-	b2RecW_F32( buf, base->forceThreshold );
-	b2RecW_F32( buf, base->torqueThreshold );
-	b2RecW_F32( buf, base->constraintHertz );
-	b2RecW_F32( buf, base->constraintDampingRatio );
-	b2RecW_F32( buf, base->drawScale );
-	b2RecW_BOOL( buf, base->collideConnected );
+	b3RecW_JointBase( buf, &v.base );
+	b3RecW_F32( buf, v.length );
+	b3RecW_BOOL( buf, v.enableSpring );
+	b3RecW_F32( buf, v.lowerSpringForce );
+	b3RecW_F32( buf, v.upperSpringForce );
+	b3RecW_F32( buf, v.hertz );
+	b3RecW_F32( buf, v.dampingRatio );
+	b3RecW_BOOL( buf, v.enableLimit );
+	b3RecW_F32( buf, v.minLength );
+	b3RecW_F32( buf, v.maxLength );
+	b3RecW_BOOL( buf, v.enableMotor );
+	b3RecW_F32( buf, v.maxMotorForce );
+	b3RecW_F32( buf, v.motorSpeed );
 }
 
-void b2RecW_DISTANCEJOINTDEF( b2RecBuffer* buf, b2DistanceJointDef v )
+void b3RecW_FILTERJOINTDEF( b3RecBuffer* buf, b3FilterJointDef v )
 {
-	b2RecW_JointBase( buf, &v.base );
-	b2RecW_F32( buf, v.length );
-	b2RecW_BOOL( buf, v.enableSpring );
-	b2RecW_F32( buf, v.lowerSpringForce );
-	b2RecW_F32( buf, v.upperSpringForce );
-	b2RecW_F32( buf, v.hertz );
-	b2RecW_F32( buf, v.dampingRatio );
-	b2RecW_BOOL( buf, v.enableLimit );
-	b2RecW_F32( buf, v.minLength );
-	b2RecW_F32( buf, v.maxLength );
-	b2RecW_BOOL( buf, v.enableMotor );
-	b2RecW_F32( buf, v.maxMotorForce );
-	b2RecW_F32( buf, v.motorSpeed );
+	b3RecW_JointBase( buf, &v.base );
 }
 
-void b2RecW_MOTORJOINTDEF( b2RecBuffer* buf, b2MotorJointDef v )
+void b3RecW_MOTORJOINTDEF( b3RecBuffer* buf, b3MotorJointDef v )
 {
-	b2RecW_JointBase( buf, &v.base );
-	b2RecW_VEC2( buf, v.linearVelocity );
-	b2RecW_F32( buf, v.maxVelocityForce );
-	b2RecW_F32( buf, v.angularVelocity );
-	b2RecW_F32( buf, v.maxVelocityTorque );
-	b2RecW_F32( buf, v.linearHertz );
-	b2RecW_F32( buf, v.linearDampingRatio );
-	b2RecW_F32( buf, v.maxSpringForce );
-	b2RecW_F32( buf, v.angularHertz );
-	b2RecW_F32( buf, v.angularDampingRatio );
-	b2RecW_F32( buf, v.maxSpringTorque );
+	b3RecW_JointBase( buf, &v.base );
+	b3RecW_VEC3( buf, v.linearVelocity );
+	b3RecW_F32( buf, v.maxVelocityForce );
+	b3RecW_VEC3( buf, v.angularVelocity );
+	b3RecW_F32( buf, v.maxVelocityTorque );
+	b3RecW_F32( buf, v.linearHertz );
+	b3RecW_F32( buf, v.linearDampingRatio );
+	b3RecW_F32( buf, v.maxSpringForce );
+	b3RecW_F32( buf, v.angularHertz );
+	b3RecW_F32( buf, v.angularDampingRatio );
+	b3RecW_F32( buf, v.maxSpringTorque );
 }
 
-void b2RecW_FILTERJOINTDEF( b2RecBuffer* buf, b2FilterJointDef v )
+void b3RecW_PRISMATICJOINTDEF( b3RecBuffer* buf, b3PrismaticJointDef v )
 {
-	b2RecW_JointBase( buf, &v.base );
+	b3RecW_JointBase( buf, &v.base );
+	b3RecW_BOOL( buf, v.enableSpring );
+	b3RecW_F32( buf, v.hertz );
+	b3RecW_F32( buf, v.dampingRatio );
+	b3RecW_F32( buf, v.targetTranslation );
+	b3RecW_BOOL( buf, v.enableLimit );
+	b3RecW_F32( buf, v.lowerTranslation );
+	b3RecW_F32( buf, v.upperTranslation );
+	b3RecW_BOOL( buf, v.enableMotor );
+	b3RecW_F32( buf, v.maxMotorForce );
+	b3RecW_F32( buf, v.motorSpeed );
 }
 
-void b2RecW_PRISMATICJOINTDEF( b2RecBuffer* buf, b2PrismaticJointDef v )
+void b3RecW_REVOLUTEJOINTDEF( b3RecBuffer* buf, b3RevoluteJointDef v )
 {
-	b2RecW_JointBase( buf, &v.base );
-	b2RecW_BOOL( buf, v.enableSpring );
-	b2RecW_F32( buf, v.hertz );
-	b2RecW_F32( buf, v.dampingRatio );
-	b2RecW_F32( buf, v.targetTranslation );
-	b2RecW_BOOL( buf, v.enableLimit );
-	b2RecW_F32( buf, v.lowerTranslation );
-	b2RecW_F32( buf, v.upperTranslation );
-	b2RecW_BOOL( buf, v.enableMotor );
-	b2RecW_F32( buf, v.maxMotorForce );
-	b2RecW_F32( buf, v.motorSpeed );
+	b3RecW_JointBase( buf, &v.base );
+	b3RecW_F32( buf, v.targetAngle );
+	b3RecW_BOOL( buf, v.enableSpring );
+	b3RecW_F32( buf, v.hertz );
+	b3RecW_F32( buf, v.dampingRatio );
+	b3RecW_BOOL( buf, v.enableLimit );
+	b3RecW_F32( buf, v.lowerAngle );
+	b3RecW_F32( buf, v.upperAngle );
+	b3RecW_BOOL( buf, v.enableMotor );
+	b3RecW_F32( buf, v.maxMotorTorque );
+	b3RecW_F32( buf, v.motorSpeed );
 }
 
-void b2RecW_REVOLUTEJOINTDEF( b2RecBuffer* buf, b2RevoluteJointDef v )
+void b3RecW_SPHERICALJOINTDEF( b3RecBuffer* buf, b3SphericalJointDef v )
 {
-	b2RecW_JointBase( buf, &v.base );
-	b2RecW_F32( buf, v.targetAngle );
-	b2RecW_BOOL( buf, v.enableSpring );
-	b2RecW_F32( buf, v.hertz );
-	b2RecW_F32( buf, v.dampingRatio );
-	b2RecW_BOOL( buf, v.enableLimit );
-	b2RecW_F32( buf, v.lowerAngle );
-	b2RecW_F32( buf, v.upperAngle );
-	b2RecW_BOOL( buf, v.enableMotor );
-	b2RecW_F32( buf, v.maxMotorTorque );
-	b2RecW_F32( buf, v.motorSpeed );
+	b3RecW_JointBase( buf, &v.base );
+	b3RecW_BOOL( buf, v.enableSpring );
+	b3RecW_F32( buf, v.hertz );
+	b3RecW_F32( buf, v.dampingRatio );
+	b3RecW_QUAT( buf, v.targetRotation );
+	b3RecW_BOOL( buf, v.enableConeLimit );
+	b3RecW_F32( buf, v.coneAngle );
+	b3RecW_BOOL( buf, v.enableTwistLimit );
+	b3RecW_F32( buf, v.lowerTwistAngle );
+	b3RecW_F32( buf, v.upperTwistAngle );
+	b3RecW_BOOL( buf, v.enableMotor );
+	b3RecW_F32( buf, v.maxMotorTorque );
+	b3RecW_VEC3( buf, v.motorVelocity );
 }
 
-void b2RecW_WELDJOINTDEF( b2RecBuffer* buf, b2WeldJointDef v )
+void b3RecW_WELDJOINTDEF( b3RecBuffer* buf, b3WeldJointDef v )
 {
-	b2RecW_JointBase( buf, &v.base );
-	b2RecW_F32( buf, v.linearHertz );
-	b2RecW_F32( buf, v.angularHertz );
-	b2RecW_F32( buf, v.linearDampingRatio );
-	b2RecW_F32( buf, v.angularDampingRatio );
+	b3RecW_JointBase( buf, &v.base );
+	b3RecW_F32( buf, v.linearHertz );
+	b3RecW_F32( buf, v.angularHertz );
+	b3RecW_F32( buf, v.linearDampingRatio );
+	b3RecW_F32( buf, v.angularDampingRatio );
 }
 
-void b2RecW_WHEELJOINTDEF( b2RecBuffer* buf, b2WheelJointDef v )
+void b3RecW_WHEELJOINTDEF( b3RecBuffer* buf, b3WheelJointDef v )
 {
-	b2RecW_JointBase( buf, &v.base );
-	b2RecW_BOOL( buf, v.enableSpring );
-	b2RecW_F32( buf, v.hertz );
-	b2RecW_F32( buf, v.dampingRatio );
-	b2RecW_BOOL( buf, v.enableLimit );
-	b2RecW_F32( buf, v.lowerTranslation );
-	b2RecW_F32( buf, v.upperTranslation );
-	b2RecW_BOOL( buf, v.enableMotor );
-	b2RecW_F32( buf, v.maxMotorTorque );
-	b2RecW_F32( buf, v.motorSpeed );
+	b3RecW_JointBase( buf, &v.base );
+	b3RecW_BOOL( buf, v.enableSuspensionSpring );
+	b3RecW_F32( buf, v.suspensionHertz );
+	b3RecW_F32( buf, v.suspensionDampingRatio );
+	b3RecW_BOOL( buf, v.enableSuspensionLimit );
+	b3RecW_F32( buf, v.lowerSuspensionLimit );
+	b3RecW_F32( buf, v.upperSuspensionLimit );
+	b3RecW_BOOL( buf, v.enableSpinMotor );
+	b3RecW_F32( buf, v.maxSpinTorque );
+	b3RecW_F32( buf, v.spinSpeed );
+	b3RecW_BOOL( buf, v.enableSteering );
+	b3RecW_F32( buf, v.steeringHertz );
+	b3RecW_F32( buf, v.steeringDampingRatio );
+	b3RecW_F32( buf, v.targetSteeringAngle );
+	b3RecW_F32( buf, v.maxSteeringTorque );
+	b3RecW_BOOL( buf, v.enableSteeringLimit );
+	b3RecW_F32( buf, v.lowerSteeringLimit );
+	b3RecW_F32( buf, v.upperSteeringLimit );
 }
 
-void b2RecW_AABB( b2RecBuffer* buf, b2AABB v )
-{
-	b2RecW_VEC2( buf, v.lowerBound );
-	b2RecW_VEC2( buf, v.upperBound );
-}
+// Query recording. A query collects a variable number of hits through a user callback, so the count
+// is not known until the callback stops firing. The record is built in a local buffer with a
+// reserved hit-count slot, then committed whole under the lock so concurrent query threads never
+// interleave records in the shared buffer.
 
-void b2RecW_QUERYFILTER( b2RecBuffer* buf, b2QueryFilter v )
-{
-	b2RecW_U64( buf, v.categoryBits );
-	b2RecW_U64( buf, v.maskBits );
-}
-
-void b2RecW_SHAPEPROXY( b2RecBuffer* buf, b2ShapeProxy v )
-{
-	int count = v.count;
-	if ( count < 0 )
-		count = 0;
-	if ( count > B2_MAX_POLYGON_VERTICES )
-		count = B2_MAX_POLYGON_VERTICES;
-	b2RecW_I32( buf, count );
-	for ( int i = 0; i < count; ++i )
-	{
-		b2RecW_VEC2( buf, v.points[i] );
-	}
-	b2RecW_F32( buf, v.radius );
-}
-
-void b2RecW_WORLDCASTOUTPUT( b2RecBuffer* buf, b2WorldCastOutput v )
-{
-	b2RecW_VEC2( buf, v.normal );
-	b2RecW_POSITION( buf, v.point );
-	b2RecW_F32( buf, v.fraction );
-	b2RecW_I32( buf, v.iterations );
-	b2RecW_BOOL( buf, v.hit );
-}
-
-void b2RecW_RAYRESULT( b2RecBuffer* buf, b2RayResult v )
-{
-	b2RecW_SHAPEID( buf, v.shapeId );
-	b2RecW_POSITION( buf, v.point );
-	b2RecW_VEC2( buf, v.normal );
-	b2RecW_F32( buf, v.fraction );
-	b2RecW_I32( buf, v.nodeVisits );
-	b2RecW_I32( buf, v.leafVisits );
-	b2RecW_BOOL( buf, v.hit );
-}
-
-void b2RecW_PLANERESULT( b2RecBuffer* buf, b2PlaneResult v )
-{
-	b2RecW_VEC2( buf, v.plane.normal );
-	b2RecW_F32( buf, v.plane.offset );
-	b2RecW_VEC2( buf, v.point );
-	b2RecW_BOOL( buf, v.hit );
-}
-
-void b2RecW_TREESTATS( b2RecBuffer* buf, b2TreeStats v )
-{
-	b2RecW_I32( buf, v.nodeVisits );
-	b2RecW_I32( buf, v.leafVisits );
-}
-
-// Patch helpers for query hit-count backfill
-
-int b2RecReserveU32( b2RecBuffer* buf )
+int b3RecReserveU32( b3RecBuffer* buf )
 {
 	int offset = buf->size;
 	uint8_t zero[4] = { 0, 0, 0, 0 };
-	b2RecBufAppend( buf, zero, 4 );
+	b3RecBufAppend( buf, zero, 4 );
 	return offset;
 }
 
-void b2RecPatchU32( b2RecBuffer* buf, int offset, uint32_t v )
+void b3RecPatchU32( b3RecBuffer* buf, int offset, uint32_t v )
 {
-	B2_ASSERT( offset >= 0 && offset + 4 <= buf->size );
+	B3_ASSERT( offset >= 0 && offset + 4 <= buf->size );
 	uint8_t* p = buf->data + offset;
 	p[0] = (uint8_t)v;
 	p[1] = (uint8_t)( v >> 8 );
@@ -518,279 +564,562 @@ void b2RecPatchU32( b2RecBuffer* buf, int offset, uint32_t v )
 	p[3] = (uint8_t)( v >> 24 );
 }
 
-// Concurrent query commits are serialized so records never interleave in the shared buffer
-void b2RecCommitRecord( b2Recording* rec, uint8_t opcode, const uint8_t* payload, int payloadSize )
+// Frame and append one record into the buffer. Caller holds rec->lock.
+static void b3RecCommitRecordLocked( b3Recording* rec, uint8_t opcode, const uint8_t* payload, int payloadSize )
 {
-	B2_ASSERT( payloadSize >= 0 && payloadSize < ( 1 << 24 ) );
-	b2LockMutex( rec->lock );
-	b2RecW_U8( &rec->buffer, opcode );
+	B3_ASSERT( payloadSize >= 0 && payloadSize < ( 1 << 24 ) );
+	b3RecW_U8( &rec->buffer, opcode );
 	uint8_t sz[3] = { (uint8_t)payloadSize, (uint8_t)( payloadSize >> 8 ), (uint8_t)( payloadSize >> 16 ) };
-	b2RecBufAppend( &rec->buffer, sz, 3 );
-	b2RecBufAppend( &rec->buffer, payload, payloadSize );
-	b2UnlockMutex( rec->lock );
+	b3RecBufAppend( &rec->buffer, sz, 3 );
+	b3RecBufAppend( &rec->buffer, payload, payloadSize );
 }
 
-void b2RecQueryBegin( b2RecQueryWriter* w, void* context )
+void b3RecCommitRecord( b3Recording* rec, uint8_t opcode, const uint8_t* payload, int payloadSize )
 {
-	w->buf = (b2RecBuffer){ 0 };
+	b3LockMutex( rec->lock );
+	b3RecCommitRecordLocked( rec, opcode, payload, payloadSize );
+	b3UnlockMutex( rec->lock );
+}
+
+void b3RecQueryBegin( b3RecQueryWriter* w, void* context, uint64_t tagId, const char* tagName )
+{
+	w->buf = (b3RecBuffer){ 0 };
 	w->userFcn.overlapFcn = NULL;
 	w->userContext = context;
 	w->hitCount = 0;
 	w->countOffset = 0;
+	w->tagId = tagId;
+	w->tagName = tagName;
 }
 
-void b2RecQueryCommit( b2Recording* rec, uint8_t opcode, b2RecQueryWriter* w )
+void b3RecQueryCommit( b3Recording* rec, uint8_t opcode, b3RecQueryWriter* w )
 {
-	b2RecCommitRecord( rec, opcode, w->buf.data, w->buf.size );
-	b2RecBufFree( &w->buf );
+	b3LockMutex( rec->lock );
+	// A tagged query writes its identity key right before the query record, under one lock so the pair
+	// stays adjacent even with concurrent queries. The key is the hash of the caller (id, name), which
+	// are interned once into the trailing tag table so the viewer can show them.
+	bool tagged = w->tagId != 0 || ( w->tagName != NULL && w->tagName[0] != '\0' );
+	if ( tagged )
+	{
+		uint64_t key = b3HashQueryTag( w->tagId, w->tagName );
+		b3RecInternTag( rec, key, w->tagId, w->tagName );
+		b3RecBuffer tagBuf = { 0 };
+		b3RecW_U64( &tagBuf, key );
+		b3RecCommitRecordLocked( rec, b3_recOpQueryTag, tagBuf.data, tagBuf.size );
+		b3RecBufFree( &tagBuf );
+	}
+	b3RecCommitRecordLocked( rec, opcode, w->buf.data, w->buf.size );
+	b3UnlockMutex( rec->lock );
+	b3RecBufFree( &w->buf );
 }
 
-bool b2RecOverlapTrampoline( b2ShapeId id, void* ctx )
+bool b3RecOverlapTrampoline( b3ShapeId id, void* ctx )
 {
-	b2RecQueryWriter* w = (b2RecQueryWriter*)ctx;
-	bool ret = w->userFcn.overlapFcn( id, w->userContext );
-	b2RecW_SHAPEID( &w->buf, id );
-	b2RecW_BOOL( &w->buf, ret );
+	b3RecQueryWriter* w = (b3RecQueryWriter*)ctx;
+	// The user fcn is NULL for an unfiltered mover cast: accept all, still record the decision so
+	// replay reproduces the same per-shape accept stream.
+	bool ret = w->userFcn.overlapFcn != NULL ? w->userFcn.overlapFcn( id, w->userContext ) : true;
+	b3RecW_SHAPEID( &w->buf, id );
+	b3RecW_BOOL( &w->buf, ret );
 	w->hitCount++;
 	return ret;
 }
 
-float b2RecCastTrampoline( b2ShapeId id, b2Pos point, b2Vec2 normal, float fraction, void* ctx )
+float b3RecCastTrampoline( b3ShapeId id, b3Pos point, b3Vec3 normal, float fraction, uint64_t userMaterialId, int triangleIndex,
+						   int childIndex, void* ctx )
 {
-	b2RecQueryWriter* w = (b2RecQueryWriter*)ctx;
-	float ret = w->userFcn.castFcn( id, point, normal, fraction, w->userContext );
-	b2RecW_SHAPEID( &w->buf, id );
-	b2RecW_POSITION( &w->buf, point );
-	b2RecW_VEC2( &w->buf, normal );
-	b2RecW_F32( &w->buf, fraction );
-	b2RecW_F32( &w->buf, ret );
+	b3RecQueryWriter* w = (b3RecQueryWriter*)ctx;
+	float ret = w->userFcn.castFcn( id, point, normal, fraction, userMaterialId, triangleIndex, childIndex, w->userContext );
+	b3RecW_SHAPEID( &w->buf, id );
+	b3RecW_POSITION( &w->buf, point );
+	b3RecW_VEC3( &w->buf, normal );
+	b3RecW_F32( &w->buf, fraction );
+	b3RecW_U64( &w->buf, userMaterialId );
+	b3RecW_I32( &w->buf, triangleIndex );
+	b3RecW_I32( &w->buf, childIndex );
+	b3RecW_F32( &w->buf, ret );
 	w->hitCount++;
 	return ret;
 }
 
-bool b2RecPlaneTrampoline( b2ShapeId id, const b2PlaneResult* plane, void* ctx )
+// 3D delivers every plane for one shape in a single call. Record the shape, its plane count, each
+// plane, then the user return so replay reproduces the same per-shape batch. One hit per shape.
+bool b3RecPlaneTrampoline( b3ShapeId id, const b3PlaneResult* planes, int planeCount, void* ctx )
 {
-	b2RecQueryWriter* w = (b2RecQueryWriter*)ctx;
-	bool ret = w->userFcn.planeFcn( id, plane, w->userContext );
-	b2RecW_SHAPEID( &w->buf, id );
-	b2RecW_PLANERESULT( &w->buf, *plane );
-	b2RecW_BOOL( &w->buf, ret );
+	b3RecQueryWriter* w = (b3RecQueryWriter*)ctx;
+	bool ret = w->userFcn.planeFcn( id, planes, planeCount, w->userContext );
+	b3RecW_SHAPEID( &w->buf, id );
+	b3RecW_I32( &w->buf, planeCount );
+	for ( int i = 0; i < planeCount; ++i )
+	{
+		b3RecW_PLANERESULT( &w->buf, planes[i] );
+	}
+	b3RecW_BOOL( &w->buf, ret );
 	w->hitCount++;
 	return ret;
 }
 
 // Record framing
 
-void b2RecBeginRecord( b2Recording* rec, uint8_t opcode )
+void b3RecBeginRecord( b3Recording* rec, uint8_t opcode )
 {
-	b2RecW_U8( &rec->buffer, opcode );
+	b3RecW_U8( &rec->buffer, opcode );
 	rec->recordStart = rec->buffer.size;
-	// Make space to hold a 24-bit payload size, which isn't known until b2RecEndRecord is called.
+	// Reserve 3 bytes for the u24 payload size, backpatched in b3RecEndRecord.
 	uint8_t zero[3] = { 0, 0, 0 };
-	b2RecBufAppend( &rec->buffer, zero, 3 );
+	b3RecBufAppend( &rec->buffer, zero, 3 );
 }
 
-void b2RecEndRecord( b2Recording* rec )
+void b3RecEndRecord( b3Recording* rec )
 {
-	// Compute the final payload size and record it in the 24-bit space reserved right after the opcode.
 	int payloadSize = rec->buffer.size - rec->recordStart - 3;
-	B2_ASSERT( payloadSize >= 0 && payloadSize < ( 1 << 24 ) );
+	B3_ASSERT( payloadSize >= 0 && payloadSize < ( 1 << 24 ) );
 	uint8_t* p = rec->buffer.data + rec->recordStart;
 	p[0] = (uint8_t)payloadSize;
 	p[1] = (uint8_t)( payloadSize >> 8 );
 	p[2] = (uint8_t)( payloadSize >> 16 );
 }
 
-// Codegen pass 1b: arg writers. Each generated function writes its struct fields to the buffer
-// Example:
-// B2_REC_OP( 0x80, Step, RET_NONE, ARG( WORLDID, world ) ARG( F32, dt ) ARG( I32, subStepCount ) )
-// Becomes:
-// void b2RecWriteArgs_Step( b2Recording* rec, const b2RecArgs_Step* a)
-// {
-//   b2RecW_WORLDID( &rec->buffer, a->world );
-//   b2RecW_F32( &rec->buffer, a->dt );
-//   b2RecW_I32( &rec->buffer, a->subStepCount );
-// }
-#define ARG( TAG, field ) b2RecW_##TAG( &rec->buffer, a->field );
-#define B2_REC_OP( op, Name, RET, ... )                                                                                          \
-	void b2RecWriteArgs_##Name( b2Recording* rec, const b2RecArgs_##Name* a )                                                    \
+// Codegen pass 1b: arg writers
+#define ARG( TAG, field ) b3RecW_##TAG( &rec->buffer, a->field );
+#define B3_REC_OP( op, Name, RET, ... )                                                                                          \
+	void b3RecWriteArgs_##Name( b3Recording* rec, const b3RecArgs_##Name* a )                                                    \
 	{                                                                                                                            \
 		__VA_ARGS__                                                                                                              \
 	}
 #include "recording_ops.inl"
-#undef B2_REC_OP
+#undef B3_REC_OP
 #undef ARG
 
-// Codegen: full writers wrapping begin, arg writer, end
-// Example:
-// B2_REC_OP( 0x80, Step, RET_NONE, ARG( WORLDID, world ) ARG( F32, dt ) ARG( I32, subStepCount ) )
-// Becomes:
-// void b2RecWrite_Step( b2Recording* rec, const b2RecArgs_Step* a)
-// {
-//   b2RecBeginRecord( rec, (uint8_t)( 0x80 ) );
-//   b2RecWriteArgs_Step( rec, a );
-//   b2RecEndRecord( rec );
-// }
-#define B2_REC_OP( op, Name, RET, ... )                                                                                          \
-	void b2RecWrite_##Name( b2Recording* rec, const b2RecArgs_##Name* a )                                                        \
+// Codegen: full writers. Setters may run on threads that each own a distinct object,
+// so hold the lock across the whole record. Without it a concurrent writer splices its bytes between
+// our begin and end and the record desyncs replay. Same lock the query commit path takes.
+#define B3_REC_OP( op, Name, RET, ... )                                                                                          \
+	void b3RecWrite_##Name( b3Recording* rec, const b3RecArgs_##Name* a )                                                        \
 	{                                                                                                                            \
-		b2RecBeginRecord( rec, (uint8_t)( op ) );                                                                                \
-		b2RecWriteArgs_##Name( rec, a );                                                                                         \
-		b2RecEndRecord( rec );                                                                                                   \
+		b3LockMutex( rec->lock );                                                                                                \
+		b3RecBeginRecord( rec, (uint8_t)( op ) );                                                                                \
+		b3RecWriteArgs_##Name( rec, a );                                                                                         \
+		b3RecEndRecord( rec );                                                                                                   \
+		b3UnlockMutex( rec->lock );                                                                                              \
 	}
 #include "recording_ops.inl"
-#undef B2_REC_OP
+#undef B3_REC_OP
 
-// Codegen: create-op writers that append the returned id inside the record. The RET tag
-// selects the id type and its write primitive. RET_NONE ops generate nothing.
-// Example:
-// B2_REC_OP( 0x40, CreateCircleShape, RET_SHAPEID, ARG( BODYID, body ) ARG( SHAPEDEF, def ) ARG( CIRCLE, circle ) )
-// Becomes:
-// 	void b2RecWriteRet_CreateCircleShape( b2Recording* rec, const b2RecArgs_CreateCircleShape* a, idType id )
-//	{
-//		b2RecBeginRecord( rec, (uint8_t)( 0x40 ) );
-//		b2RecWriteArgs_CreateCircleShape( rec, a );
-//		b2RecW_SHAPEID( &rec->buffer, id );
-//		b2RecEndRecord( rec );
-//	}
-
-#define B2_REC_RETWRITE( op, Name, idType, idW )                                                                                 \
-	void b2RecWriteRet_##Name( b2Recording* rec, const b2RecArgs_##Name* a, idType id )                                          \
+// Codegen: create-op writers that append the returned id inside the record
+#define B3_REC_RETWRITE( op, Name, idType, idW )                                                                                 \
+	void b3RecWriteRet_##Name( b3Recording* rec, const b3RecArgs_##Name* a, idType id )                                          \
 	{                                                                                                                            \
-		b2RecBeginRecord( rec, (uint8_t)( op ) );                                                                                \
-		b2RecWriteArgs_##Name( rec, a );                                                                                         \
+		b3LockMutex( rec->lock );                                                                                                \
+		b3RecBeginRecord( rec, (uint8_t)( op ) );                                                                                \
+		b3RecWriteArgs_##Name( rec, a );                                                                                         \
 		idW( &rec->buffer, id );                                                                                                 \
-		b2RecEndRecord( rec );                                                                                                   \
+		b3RecEndRecord( rec );                                                                                                   \
+		b3UnlockMutex( rec->lock );                                                                                              \
 	}
-#define B2_REC_RETWRITE_RET_NONE( op, Name )
-#define B2_REC_RETWRITE_RET_BODYID( op, Name ) B2_REC_RETWRITE( op, Name, b2BodyId, b2RecW_BODYID )
-#define B2_REC_RETWRITE_RET_SHAPEID( op, Name ) B2_REC_RETWRITE( op, Name, b2ShapeId, b2RecW_SHAPEID )
-#define B2_REC_RETWRITE_RET_CHAINID( op, Name ) B2_REC_RETWRITE( op, Name, b2ChainId, b2RecW_CHAINID )
-#define B2_REC_RETWRITE_RET_JOINTID( op, Name ) B2_REC_RETWRITE( op, Name, b2JointId, b2RecW_JOINTID )
-#define B2_REC_OP( op, Name, RET, ... ) B2_REC_RETWRITE_##RET( op, Name )
+#define B3_REC_RETWRITE_RET_NONE( op, Name )
+#define B3_REC_RETWRITE_RET_BODYID( op, Name ) B3_REC_RETWRITE( op, Name, b3BodyId, b3RecW_BODYID )
+#define B3_REC_RETWRITE_RET_SHAPEID( op, Name ) B3_REC_RETWRITE( op, Name, b3ShapeId, b3RecW_SHAPEID )
+#define B3_REC_RETWRITE_RET_JOINTID( op, Name ) B3_REC_RETWRITE( op, Name, b3JointId, b3RecW_JOINTID )
+#define B3_REC_OP( op, Name, RET, ... ) B3_REC_RETWRITE_##RET( op, Name )
 #include "recording_ops.inl"
-#undef B2_REC_OP
-#undef B2_REC_RETWRITE_RET_NONE
-#undef B2_REC_RETWRITE_RET_BODYID
-#undef B2_REC_RETWRITE_RET_SHAPEID
-#undef B2_REC_RETWRITE_RET_CHAINID
-#undef B2_REC_RETWRITE_RET_JOINTID
-#undef B2_REC_RETWRITE
+#undef B3_REC_OP
+#undef B3_REC_RETWRITE_RET_NONE
+#undef B3_REC_RETWRITE_RET_BODYID
+#undef B3_REC_RETWRITE_RET_SHAPEID
+#undef B3_REC_RETWRITE_RET_JOINTID
+#undef B3_REC_RETWRITE
+
+// Geometry registry
+
+// Full 64-bit content hash, so distinct blobs of the same length get independent bits. A reseeded
+// 32-bit djb2 cannot: djb2 is affine in its seed, so a same-length collision survives every seed and
+// the high word would just track the low one. Word folded for speed, byte order normalized on
+// big-endian to match b3Hash, then a splitmix64 finalizer so tiny inputs still spread across all bits.
+// From Fowler/Noll/Vo FNV-1a salted by length, then the splitmix64 mix.
+uint64_t b3Hash64Blob( const uint8_t* bytes, int n )
+{
+	uint64_t h = 0xcbf29ce484222325ull ^ (uint64_t)(uint32_t)n;
+	const uint64_t prime = 0x100000001b3ull;
+	int i = 0;
+
+	while ( i + 8 <= n )
+	{
+		uint64_t word;
+		memcpy( &word, bytes + i, sizeof( word ) );
+#if defined( __BYTE_ORDER__ ) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+		word = ( ( word & 0x00000000000000FFULL ) << 56 ) | ( ( word & 0x000000000000FF00ULL ) << 40 ) |
+			   ( ( word & 0x0000000000FF0000ULL ) << 24 ) | ( ( word & 0x00000000FF000000ULL ) << 8 ) |
+			   ( ( word & 0x000000FF00000000ULL ) >> 8 ) | ( ( word & 0x0000FF0000000000ULL ) >> 24 ) |
+			   ( ( word & 0x00FF000000000000ULL ) >> 40 ) | ( ( word & 0xFF00000000000000ULL ) >> 56 );
+#endif
+		h = ( h ^ word ) * prime;
+		i += 8;
+	}
+
+	while ( i < n )
+	{
+		h = ( h ^ (uint64_t)bytes[i] ) * prime;
+		i += 1;
+	}
+
+	h ^= h >> 30;
+	h *= 0xbf58476d1ce4e5b9ull;
+	h ^= h >> 27;
+	h *= 0x94d049bb133111ebull;
+	h ^= h >> 31;
+	return h;
+}
+
+// Content hash to chain head, so dedup is near O(1). Colliding hashes share a head and are walked
+// through b3GeometryEntry::hashNext, so the byteCount + memcmp check always finds an existing blob.
+#define NAME b3GeometryHashMap
+#define KEY_TY uint64_t
+#define VAL_TY uint32_t
+#define HASH_FN vt_hash_integer
+#define CMPR_FN vt_cmpr_integer
+#define MALLOC_FN b3Alloc
+#define FREE_FN b3Free
+#include "verstable.h"
+
+// Tag key to tag index, so interning a query tag is O(1) rather than a linear scan over the tag table.
+#define NAME b3RecTagMap
+#define KEY_TY uint64_t
+#define VAL_TY uint32_t
+#define HASH_FN vt_hash_integer
+#define CMPR_FN vt_cmpr_integer
+#define MALLOC_FN b3Alloc
+#define FREE_FN b3Free
+#include "verstable.h"
+
+// Append a fresh entry and splice it onto the front of its hash chain. The map value is the chain head.
+static uint32_t b3RegistryPush( b3GeometryRegistry* reg, b3GeometryHashMap* map, b3GeometryHashMap_itr itr, bool hashPresent,
+								b3GeometryKind kind, uint64_t contentHash, uint8_t* bytes, int byteCount )
+{
+	if ( reg->count >= reg->capacity )
+	{
+		int newCap = reg->capacity < 8 ? 8 : reg->capacity * 2;
+		reg->entries = (b3GeometryEntry*)b3GrowAlloc( reg->entries, reg->capacity * (int)sizeof( b3GeometryEntry ),
+													  newCap * (int)sizeof( b3GeometryEntry ) );
+		reg->capacity = newCap;
+	}
+
+	uint32_t id = (uint32_t)reg->count;
+	b3GeometryEntry* entry = reg->entries + reg->count;
+	entry->contentHash = contentHash;
+	entry->id = id;
+	entry->kind = kind;
+	entry->byteCount = byteCount;
+	entry->bytes = bytes; // take ownership
+	entry->hashNext = hashPresent ? (int)itr.data->val : B3_NULL_INDEX;
+	reg->count++;
+
+	if ( hashPresent )
+	{
+		itr.data->val = id;
+	}
+	else
+	{
+		b3GeometryHashMap_insert( map, contentHash, id );
+	}
+	return id;
+}
+
+static b3GeometryHashMap* b3RegistryMap( b3GeometryRegistry* reg )
+{
+	if ( reg->dedupMap == NULL )
+	{
+		b3GeometryHashMap* fresh = (b3GeometryHashMap*)b3Alloc( sizeof( b3GeometryHashMap ) );
+		b3GeometryHashMap_init( fresh );
+		reg->dedupMap = fresh;
+	}
+	return (b3GeometryHashMap*)reg->dedupMap;
+}
+
+uint32_t b3InternGeometry( b3GeometryRegistry* reg, b3GeometryKind kind, uint64_t contentHash, uint8_t* bytes, int byteCount )
+{
+	b3GeometryHashMap* map = b3RegistryMap( reg );
+
+	b3GeometryHashMap_itr itr = b3GeometryHashMap_get( map, contentHash );
+	bool hashPresent = b3GeometryHashMap_is_end( itr ) == false;
+	if ( hashPresent )
+	{
+		// Walk every entry sharing this hash so a collision still finds the identical blob.
+		for ( int idx = (int)itr.data->val; idx != B3_NULL_INDEX; idx = reg->entries[idx].hashNext )
+		{
+			b3GeometryEntry* e = reg->entries + idx;
+			if ( e->byteCount == byteCount && memcmp( e->bytes, bytes, (size_t)byteCount ) == 0 )
+			{
+				// Duplicate: the caller transferred ownership; return existing id
+				b3Free( bytes, (size_t)byteCount );
+				return e->id;
+			}
+		}
+	}
+
+	return b3RegistryPush( reg, map, itr, hashPresent, kind, contentHash, bytes, byteCount );
+}
+
+uint32_t b3AppendGeometry( b3GeometryRegistry* reg, b3GeometryKind kind, uint64_t contentHash, uint8_t* bytes, int byteCount )
+{
+	b3GeometryHashMap* map = b3RegistryMap( reg );
+	b3GeometryHashMap_itr itr = b3GeometryHashMap_get( map, contentHash );
+	bool hashPresent = b3GeometryHashMap_is_end( itr ) == false;
+	return b3RegistryPush( reg, map, itr, hashPresent, kind, contentHash, bytes, byteCount );
+}
+
+void b3FreeRegistry( b3GeometryRegistry* reg )
+{
+	for ( int i = 0; i < reg->count; ++i )
+	{
+		b3Free( reg->entries[i].bytes, (size_t)reg->entries[i].byteCount );
+	}
+	if ( reg->entries != NULL )
+	{
+		b3Free( reg->entries, (size_t)( reg->capacity * (int)sizeof( b3GeometryEntry ) ) );
+	}
+	if ( reg->dedupMap != NULL )
+	{
+		b3GeometryHashMap_cleanup( (b3GeometryHashMap*)reg->dedupMap );
+		b3Free( reg->dedupMap, sizeof( b3GeometryHashMap ) );
+	}
+	reg->entries = NULL;
+	reg->count = 0;
+	reg->capacity = 0;
+	reg->dedupMap = NULL;
+}
+
+uint64_t b3HashQueryTag( uint64_t id, const char* name )
+{
+	uint64_t h = B3_SNAP_FNV_INIT;
+	for ( int i = 0; i < 8; ++i )
+	{
+		h = ( h ^ ( ( id >> ( 8 * i ) ) & 0xFFu ) ) * B3_SNAP_FNV_PRIME;
+	}
+	if ( name != NULL )
+	{
+		for ( int i = 0; name[i] != '\0'; ++i )
+		{
+			h = ( h ^ (uint8_t)name[i] ) * B3_SNAP_FNV_PRIME;
+		}
+	}
+	// Never 0 so the key doubles as the tagged flag.
+	return h != 0 ? h : 1;
+}
+
+static b3RecTagMap* b3RecTags( b3Recording* rec )
+{
+	if ( rec->tagMap == NULL )
+	{
+		b3RecTagMap* fresh = b3Alloc( sizeof( b3RecTagMap ) );
+		b3RecTagMap_init( fresh );
+		rec->tagMap = fresh;
+	}
+	return rec->tagMap;
+}
+
+void b3RecInternTag( b3Recording* rec, uint64_t key, uint64_t id, const char* name )
+{
+	b3RecTagMap* map = b3RecTags( rec );
+	if ( b3RecTagMap_is_end( b3RecTagMap_get( map, key ) ) == false )
+	{
+		return; // first id/name for a key wins
+	}
+
+	if ( rec->tagCount == rec->tagCapacity )
+	{
+		int newCap = rec->tagCapacity == 0 ? 8 : 2 * rec->tagCapacity;
+		rec->tags = b3GrowAlloc( rec->tags, rec->tagCapacity * (int)sizeof( b3RecTag ), newCap * (int)sizeof( b3RecTag ) );
+		rec->tagCapacity = newCap;
+	}
+
+	uint32_t index = (uint32_t)rec->tagCount;
+	b3RecTag* tag = &rec->tags[rec->tagCount++];
+	tag->key = key;
+	tag->id = id;
+	int n = 0;
+	while ( name != NULL && name[n] != '\0' && n < B3_BODY_NAME_LENGTH )
+	{
+		tag->name[n] = name[n];
+		n++;
+	}
+	tag->name[n] = '\0';
+	b3RecTagMap_insert( map, key, index );
+}
+
+// Write the trailing registry block: u32 entryCount then per-entry { u8 kind, u32 byteCount, bytes },
+// followed by the query-tag table { u32 tagCount, per-tag uu64 id, STR name }. A reader built before
+// the tag table stops after the geometry entries and ignores the trailing tag bytes.
+void b3RecWriteRegistry( b3Recording* rec )
+{
+	b3RecW_U32( &rec->buffer, (uint32_t)rec->registry.count );
+	for ( int i = 0; i < rec->registry.count; ++i )
+	{
+		b3GeometryEntry* e = rec->registry.entries + i;
+		b3RecW_U8( &rec->buffer, (uint8_t)e->kind );
+		b3RecW_U32( &rec->buffer, (uint32_t)e->byteCount );
+		b3RecBufAppend( &rec->buffer, e->bytes, e->byteCount );
+	}
+
+	b3RecW_U32( &rec->buffer, (uint32_t)rec->tagCount );
+	for ( int i = 0; i < rec->tagCount; ++i )
+	{
+		b3RecW_U64( &rec->buffer, rec->tags[i].key );
+		b3RecW_U64( &rec->buffer, rec->tags[i].id );
+		b3RecW_STR( &rec->buffer, rec->tags[i].name );
+	}
+}
 
 // Lifecycle
 
-b2Recording* b2CreateRecording( int byteCapacity )
+b3Recording* b3CreateRecording( int byteCapacity )
 {
-	b2Recording* rec = b2Alloc( (int)sizeof( b2Recording ) );
-	*rec = (b2Recording){ 0 };
+	b3Recording* rec = (b3Recording*)b3Alloc( sizeof( b3Recording ) );
+	*rec = (b3Recording){ 0 };
 
-	// Pre-size to taste; the buffer still doubles on demand. A few hundred KiB is plenty for a
-	// short session and avoids early reallocations.
 	int initCap = byteCapacity > 0 ? byteCapacity : 65536;
-	rec->buffer.data = b2Alloc( initCap );
+	rec->buffer.data = (uint8_t*)b3Alloc( (size_t)initCap );
 	rec->buffer.capacity = initCap;
 	rec->buffer.size = 0;
-	rec->lock = b2CreateMutex();
+	rec->lock = b3CreateMutex();
 	return rec;
 }
 
-void b2DestroyRecording( b2Recording* recording )
+void b3DestroyRecording( b3Recording* recording )
 {
 	if ( recording == NULL )
 	{
 		return;
 	}
 
-	b2RecBufFree( &recording->buffer );
-	b2DestroyMutex( recording->lock );
-	b2Free( recording, (int)sizeof( b2Recording ) );
+	b3RecBufFree( &recording->buffer );
+	b3FreeRegistry( &recording->registry );
+	if ( recording->tags != NULL )
+	{
+		b3Free( recording->tags, (size_t)recording->tagCapacity * sizeof( b3RecTag ) );
+	}
+	if ( recording->tagMap != NULL )
+	{
+		b3RecTagMap_cleanup( (b3RecTagMap*)recording->tagMap );
+		b3Free( recording->tagMap, sizeof( b3RecTagMap ) );
+	}
+	b3DestroyMutex( recording->lock );
+	b3Free( recording, sizeof( b3Recording ) );
 }
 
-const uint8_t* b2Recording_GetData( const b2Recording* recording )
+const uint8_t* b3Recording_GetData( const b3Recording* recording )
 {
 	return recording->buffer.data;
 }
 
-int b2Recording_GetSize( const b2Recording* recording )
+int b3Recording_GetSize( const b3Recording* recording )
 {
 	return recording->buffer.size;
 }
 
-void b2RecAccumulateBounds( b2Recording* rec, b2AABB bounds )
+void b3RecAccumulateBounds( b3Recording* rec, b3AABB bounds )
 {
-	rec->accumulatedBounds = rec->haveBounds ? b2AABB_Union( rec->accumulatedBounds, bounds ) : bounds;
+	rec->accumulatedBounds = rec->haveBounds ? b3AABB_Union( rec->accumulatedBounds, bounds ) : bounds;
 	rec->haveBounds = true;
 }
 
-void b2StartRecordingIntoBuffer( b2World* world, b2Recording* recording )
+void b3StartRecordingIntoBuffer( b3World* world, b3Recording* recording )
 {
 	// Reset so a recording handle can be reused for a fresh session
 	recording->buffer.size = 0;
 	recording->recordStart = 0;
 	recording->haveBounds = false;
+	b3FreeRegistry( &recording->registry );
+	if ( recording->tags != NULL )
+	{
+		b3Free( recording->tags, (size_t)recording->tagCapacity * sizeof( b3RecTag ) );
+		recording->tags = NULL;
+	}
+	if ( recording->tagMap != NULL )
+	{
+		b3RecTagMap_cleanup( (b3RecTagMap*)recording->tagMap );
+		b3Free( recording->tagMap, sizeof( b3RecTagMap ) );
+		recording->tagMap = NULL;
+	}
+	recording->tagCount = 0;
+	recording->tagCapacity = 0;
 
-	// Serialize the live world into a blob that follows the header and seeds replay.
-	b2RecBuffer blob = { 0 };
-	b2SerializeWorld( world, &blob );
-
-	b2RecHeader hdr = { 0 };
-	hdr.magic = B2_REC_MAGIC;
-	hdr.versionMajor = B2_REC_VERSION_MAJOR;
-	hdr.versionMinor = B2_REC_VERSION_MINOR;
-	hdr.lengthScale = b2GetLengthUnitsPerMeter();
+	b3RecHeader hdr = { 0 };
+	hdr.magic = B3_REC_MAGIC;
+	hdr.versionMajor = B3_REC_VERSION_MAJOR;
+	hdr.versionMinor = B3_REC_VERSION_MINOR;
 	hdr.pointerWidth = (uint8_t)sizeof( void* );
 	hdr.bigEndian = 0;
-	hdr.validationEnabled = B2_ENABLE_VALIDATION ? 1u : 0u;
-	hdr.snapshotSize = (uint64_t)blob.size;
-	b2RecBufAppend( &recording->buffer, &hdr, (int)sizeof( hdr ) );
-	b2RecBufAppend( &recording->buffer, blob.data, blob.size );
-	b2RecBufFree( &blob );
+	hdr.validationEnabled = B3_ENABLE_VALIDATION ? 1u : 0u;
+	hdr.lengthScale = b3GetLengthUnitsPerMeter();
+	hdr.registryOffset = 0; // backpatched in b3StopRecordingInternal
+	hdr.registryByteCount = 0;
 
 	world->recording = recording;
 
-	// Seed the bounds with the snapshot state so frame 0 is framed even if nothing moves
-	b2AABB seed;
-	if ( b2ComputeWorldBounds( world, &seed ) )
-	{
-		b2RecAccumulateBounds( recording, seed );
-	}
+	// Every recording is snapshot-seeded. The seed blob follows the header so replay restores in
+	// place and the world id stays stable across a restart or backward scrub. An empty world still
+	// serializes a valid blob, so there is no from-creation special case.
+	b3RecBuffer snapBuf = { 0 };
+	b3SerializeWorld( world, &snapBuf, recording );
+	hdr.snapshotSize = (uint64_t)snapBuf.size;
 
-	// Anchor the recorded state hash so replay verifies the blob deserialized to the same world.
-	b2WorldId worldId = { (uint16_t)( world->worldId + 1 ), world->generation };
-	b2RecArgs_StateHash stateHash = { worldId, b2HashWorldState( world ) };
-	b2RecWrite_StateHash( recording, &stateHash );
+	b3RecBufAppend( &recording->buffer, &hdr, (int)sizeof( hdr ) );
+	b3RecBufAppend( &recording->buffer, snapBuf.data, snapBuf.size );
+	b3RecBufFree( &snapBuf );
+
+	// Anchor the recording with the current world state hash so replay can assert
+	// determinism from the very first step.
+	b3WorldId worldId = { (uint16_t)( world->worldId + 1 ), world->generation };
+	b3RecArgs_StateHash stateHash = { worldId, b3HashWorldState( world ) };
+	b3RecWrite_StateHash( recording, &stateHash );
 }
 
-void b2StopRecordingInternal( b2World* world )
+void b3StopRecordingInternal( b3World* world )
 {
 	if ( world->recording == NULL )
 	{
 		return;
 	}
 
-	b2Recording* rec = world->recording;
+	b3Recording* rec = world->recording;
 	world->recording = NULL;
 
-	// Stash the accumulated bounds so a viewer can frame the whole motion at open time. Sits in
-	// the op stream ahead of the end marker; absent in older recordings.
-	b2RecArgs_RecordingBounds rb = { 0 };
+	// Write accumulated bounds so a viewer can frame the whole recorded motion
+	b3RecArgs_RecordingBounds rb = { 0 };
 	if ( rec->haveBounds )
 	{
 		rb.bounds = rec->accumulatedBounds;
 	}
-	b2RecWrite_RecordingBounds( rec, &rb );
+	b3RecWrite_RecordingBounds( rec, &rb );
 
-	// Write DestroyWorld so the buffer is self-contained, an end marker the viewer reads. The
-	// buffer and handle belong to the user, freed with b2DestroyRecording.
-	b2WorldId wid = { (uint16_t)( world->worldId + 1 ), world->generation };
-	b2RecArgs_DestroyWorld a = { wid };
-	b2RecWrite_DestroyWorld( rec, &a );
+	// End-of-stream marker; the buffer is now self-contained
+	b3WorldId wid = { (uint16_t)( world->worldId + 1 ), world->generation };
+	b3RecArgs_DestroyWorld a = { wid };
+	b3RecWrite_DestroyWorld( rec, &a );
+
+	// Write the trailing registry block
+	int registryOffset = rec->buffer.size;
+	b3RecWriteRegistry( rec );
+	int registryByteCount = rec->buffer.size - registryOffset;
+
+	// Backpatch registryOffset and registryByteCount into the header
+	uint8_t* hdrBytes = rec->buffer.data;
+	uint64_t regOff = (uint64_t)registryOffset;
+	uint64_t regSz = (uint64_t)registryByteCount;
+	// Little-endian backpatch in place; offsetof keeps this correct if the header layout shifts
+	uint8_t* pOff = hdrBytes + offsetof( b3RecHeader, registryOffset );
+	uint8_t* pSz = hdrBytes + offsetof( b3RecHeader, registryByteCount );
+	for ( int i = 0; i < 8; ++i )
+	{
+		pOff[i] = (uint8_t)( regOff >> ( 8 * i ) );
+		pSz[i] = (uint8_t)( regSz >> ( 8 * i ) );
+	}
 }
 
-// Convenience file I/O. The library never opens files while recording. These let a host persist
-// or reload a recording buffer without writing its own I/O. fopen precedent: b2World_DumpMemoryStats.
+// Convenience file I/O
 
-bool b2SaveRecordingToFile( const b2Recording* recording, const char* path )
+bool b3SaveRecordingToFile( const b3Recording* recording, const char* path )
 {
 	if ( recording == NULL || path == NULL )
 	{
@@ -808,7 +1137,7 @@ bool b2SaveRecordingToFile( const b2Recording* recording, const char* path )
 	return (int)written == recording->buffer.size;
 }
 
-b2Recording* b2LoadRecordingFromFile( const char* path )
+b3Recording* b3LoadRecordingFromFile( const char* path )
 {
 	if ( path == NULL )
 	{
@@ -828,31 +1157,30 @@ b2Recording* b2LoadRecordingFromFile( const char* path )
 	}
 
 	long fileSize = ftell( f );
-	// Anything smaller than the fixed header can't be a recording, so reject it here rather than
-	// hand back a malformed buffer that only fails later
-	if ( fileSize < (long)sizeof( b2RecHeader ) || fileSize > INT_MAX )
+	// Anything smaller than the fixed header can't be a recording
+	if ( fileSize < (long)sizeof( b3RecHeader ) || fileSize > INT_MAX )
 	{
 		fclose( f );
 		return NULL;
 	}
 	fseek( f, 0, SEEK_SET );
 
-	b2Recording* rec = b2CreateRecording( (int)fileSize );
+	b3Recording* rec = b3CreateRecording( (int)fileSize );
 	size_t readSize = fread( rec->buffer.data, 1, (size_t)fileSize, f );
 	fclose( f );
 
 	if ( (long)readSize != fileSize )
 	{
-		b2DestroyRecording( rec );
+		b3DestroyRecording( rec );
 		return NULL;
 	}
 
-	// Validate the magic so a wrong file fails at load instead of deep in the player
-	b2RecHeader hdr;
+	// Validate magic so a wrong file fails at load rather than deep in the player
+	b3RecHeader hdr;
 	memcpy( &hdr, rec->buffer.data, sizeof( hdr ) );
-	if ( hdr.magic != B2_REC_MAGIC )
+	if ( hdr.magic != B3_REC_MAGIC )
 	{
-		b2DestroyRecording( rec );
+		b3DestroyRecording( rec );
 		return NULL;
 	}
 
@@ -860,43 +1188,88 @@ b2Recording* b2LoadRecordingFromFile( const char* path )
 	return rec;
 }
 
-// Hash transforms and velocities.
-uint64_t b2HashWorldState( b2World* world )
+// Geometry interning helpers
+
+uint32_t b3RecInternHull( b3Recording* rec, const b3HullData* hull )
 {
-	uint64_t hash = B2_SNAP_FNV_INIT;
-	const uint64_t prime = B2_SNAP_FNV_PRIME;
+	int byteCount = hull->byteCount;
+	uint8_t* bytes = (uint8_t*)b3Alloc( (size_t)byteCount );
+	memcpy( bytes, hull, (size_t)byteCount );
+	uint64_t h = b3Hash64Blob( bytes, byteCount );
+	return b3InternGeometry( &rec->registry, b3_geometryHull, h, bytes, byteCount );
+}
+
+uint32_t b3RecInternMesh( b3Recording* rec, const b3MeshData* mesh )
+{
+	int byteCount = mesh->byteCount;
+	uint8_t* bytes = (uint8_t*)b3Alloc( (size_t)byteCount );
+	memcpy( bytes, mesh, (size_t)byteCount );
+	uint64_t h = b3Hash64Blob( bytes, byteCount );
+	return b3InternGeometry( &rec->registry, b3_geometryMesh, h, bytes, byteCount );
+}
+
+uint32_t b3RecInternHeightField( b3Recording* rec, const b3HeightFieldData* hf )
+{
+	int byteCount = hf->byteCount;
+	uint8_t* bytes = (uint8_t*)b3Alloc( (size_t)byteCount );
+	memcpy( bytes, hf, (size_t)byteCount );
+	uint64_t h = b3Hash64Blob( bytes, byteCount );
+	return b3InternGeometry( &rec->registry, b3_geometryHeightField, h, bytes, byteCount );
+}
+
+uint32_t b3RecInternCompound( b3Recording* rec, const b3CompoundData* compound )
+{
+	int byteCount = compound->byteCount;
+	uint8_t* bytes = (uint8_t*)b3Alloc( (size_t)byteCount );
+	memcpy( bytes, compound, (size_t)byteCount );
+	// Null the tree node pointer in the copy so the canonical bytes are pointer-free.
+	// b3ConvertBytesToCompound fixes it back on load via nodeOffset.
+	( (b3CompoundData*)bytes )->tree.nodes = NULL;
+	uint64_t h = b3Hash64Blob( bytes, byteCount );
+	return b3InternGeometry( &rec->registry, b3_geometryCompound, h, bytes, byteCount );
+}
+
+uint64_t b3HashWorldState( b3World* world )
+{
+	uint64_t hash = B3_SNAP_FNV_INIT;
+	const uint64_t prime = B3_SNAP_FNV_PRIME;
 
 	int bodyCount = world->bodies.count;
 	for ( int i = 0; i < bodyCount; ++i )
 	{
-		b2Body* body = world->bodies.data + i;
+		b3Body* body = world->bodies.data + i;
 		if ( body->id != i )
 		{
 			// Free or never-used slot
 			continue;
 		}
 
-		b2BodySim* sim = b2GetBodySim( world, body );
+		b3BodySim* sim = b3GetBodySim( world, body );
 
 		uint32_t bits;
 
-#define B2_HASH_FLOAT( f )                                                                                                       \
+#define B3_HASH_FLOAT( f )                                                                                                       \
 	memcpy( &bits, &( f ), 4 );                                                                                                  \
 	hash = ( hash ^ (uint64_t)bits ) * prime;
 
-		hash = b2FnvMixPosition( hash, sim->transform.p );
-		B2_HASH_FLOAT( sim->transform.q.c )
-		B2_HASH_FLOAT( sim->transform.q.s )
+		hash = b3FnvMixPosition( hash, sim->transform.p );
+		B3_HASH_FLOAT( sim->transform.q.v.x )
+		B3_HASH_FLOAT( sim->transform.q.v.y )
+		B3_HASH_FLOAT( sim->transform.q.v.z )
+		B3_HASH_FLOAT( sim->transform.q.s )
 
-		b2BodyState* state = b2GetBodyState( world, body );
+		b3BodyState* state = b3GetBodyState( world, body );
 		if ( state != NULL )
 		{
-			B2_HASH_FLOAT( state->linearVelocity.x )
-			B2_HASH_FLOAT( state->linearVelocity.y )
-			B2_HASH_FLOAT( state->angularVelocity )
+			B3_HASH_FLOAT( state->linearVelocity.x )
+			B3_HASH_FLOAT( state->linearVelocity.y )
+			B3_HASH_FLOAT( state->linearVelocity.z )
+			B3_HASH_FLOAT( state->angularVelocity.x )
+			B3_HASH_FLOAT( state->angularVelocity.y )
+			B3_HASH_FLOAT( state->angularVelocity.z )
 		}
 
-#undef B2_HASH_FLOAT
+#undef B3_HASH_FLOAT
 	}
 
 	return hash;

@@ -1,67 +1,77 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
 
 #include "bitset.h"
 #include "contact.h"
-#include "joint.h"
-#include "box2d/constants.h"
+#include "container.h"
+#include "solver.h"
+#include "solver_set.h"
+#include "box3d/constants.h"
 
-#include "box2d/types.h"
-
-typedef struct b2Body b2Body;
-typedef struct b2Contact b2Contact;
-typedef struct b2StepContext b2StepContext;
-typedef struct b2World b2World;
+typedef struct b3Body b3Body;
+typedef struct b3Contact b3Contact;
+typedef struct b3JointSim b3JointSim;
+typedef struct b3Joint b3Joint;
+typedef struct b3StepContext b3StepContext;
+typedef struct b3World b3World;
 
 // This holds constraints that cannot fit the graph color limit. This happens when a single dynamic body
 // is touching many other bodies.
-#define B2_OVERFLOW_INDEX ( B2_GRAPH_COLOR_COUNT - 1 )
+#define B3_OVERFLOW_INDEX ( B3_GRAPH_COLOR_COUNT - 1 )
 
 // This keeps constraints involving two dynamic bodies at a lower solver priority than constraints
 // involving a dynamic and static bodies. This reduces tunneling due to push through.
-#define B2_DYNAMIC_COLOR_COUNT ( B2_GRAPH_COLOR_COUNT - 4 )
+#define B3_DYNAMIC_COLOR_COUNT ( B3_GRAPH_COLOR_COUNT - 4 )
 
-typedef struct b2GraphColor
+// todo optimize mesh contact constraints
+// They can be lumped with convex contacts and I can use the bitset event to re-link if the manifold count increases
+// Could also create a group for two wide manifolds and use bitset event
+// This could create ping-pong jitter so may need to pin to high water mark or introduce hysteresis somehow
+//
+// Dirk has the idea to do graph coloring based on manifolds. This suggests mesh contact will have manifolds
+// in multiple graph colors. So each manifold with have a color and local index.
+// Some concerns about this:
+// - manifolds don't have a strong identity, would this affect stability/jitter?
+// - this creates a lot of static graph colors and can overflow
+
+typedef struct b3GraphColor
 {
 	// This bitset is indexed by bodyId so this is over-sized to encompass static bodies
 	// however I never traverse these bits or use the bit count for anything
 	// This bitset is unused on the overflow color.
-	//
-	// Dirk suggested having a uint64_t per body that tracks the graph color membership
-	// but I think this would make debugging harder and be less flexible. With the bitset
-	// I can trivially increase the number of graph colors beyond 64. See usage of b2CountSetBits
-	// for validation.
-	b2BitSet bodySet;
+	b3BitSet bodySet;
 
 	// cache friendly arrays
-	b2Array( b2ContactSim ) contactSims;
-	b2Array( b2JointSim ) jointSims;
+	b3Array( b3JointSim ) jointSims;
 
-	// transient
-	union
-	{
-		struct b2ContactConstraintWide* wideConstraints;
-		struct b2ContactConstraint* overflowConstraints;
-	};
+	b3Array( int ) convexContacts;
+	b3Array( b3ContactSpec ) contacts;
 
+	// These are used for convex contacts
+	struct b3ContactConstraintWide* wideConstraints;
 	int wideConstraintCount;
 
-} b2GraphColor;
+	// These are used for mesh and overflow contacts
+	struct b3ManifoldConstraint* manifoldConstraints;
+	int manifoldConstraintCount;
+	struct b3ContactConstraint* contactConstraints;
+	int contactConstraintCount;
+} b3GraphColor;
 
-typedef struct b2ConstraintGraph
+typedef struct b3ConstraintGraph
 {
 	// including overflow at the end
-	b2GraphColor colors[B2_GRAPH_COLOR_COUNT];
-} b2ConstraintGraph;
+	b3GraphColor colors[B3_GRAPH_COLOR_COUNT];
+} b3ConstraintGraph;
 
-void b2CreateGraph( b2ConstraintGraph* graph, const b2Capacity* capacity );
-void b2DestroyGraph( b2ConstraintGraph* graph );
+void b3CreateGraph( b3ConstraintGraph* graph, int bodyCapacity );
+void b3DestroyGraph( b3ConstraintGraph* graph );
 
-void b2AddContactToGraph( b2World* world, b2ContactSim* contactSim, b2Contact* contact );
-void b2RemoveContactFromGraph( b2World* world, int bodyIdA, int bodyIdB, int colorIndex, int localIndex );
+void b3AddContactToGraph( b3World* world, b3Contact* contact );
+void b3RemoveContactFromGraph( b3World* world, int bodyIdA, int bodyIdB, int colorIndex, int localIndex, bool meshContact );
 
-b2JointSim* b2CreateJointInGraph( b2World* world, b2Joint* joint );
-void b2AddJointToGraph( b2World* world, b2JointSim* jointSim, b2Joint* joint );
-void b2RemoveJointFromGraph( b2World* world, int bodyIdA, int bodyIdB, int colorIndex, int localIndex );
+b3JointSim* b3CreateJointInGraph( b3World* world, b3Joint* joint );
+void b3AddJointToGraph( b3World* world, b3JointSim* jointSim, b3Joint* joint );
+void b3RemoveJointFromGraph( b3World* world, int bodyIdA, int bodyIdB, int colorIndex, int localIndex );

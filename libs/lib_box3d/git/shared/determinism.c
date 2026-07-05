@@ -3,126 +3,106 @@
 
 #include "determinism.h"
 
-#include "box2d/box2d.h"
+#include "human.h"
+
+#include "box3d/box3d.h"
 
 #include <assert.h>
 #include <stdlib.h>
 
-FallingHingeData CreateFallingHinges( b2WorldId worldId )
+#define GRID_SIZE 15.0f
+
+static void CreateGroup( FallingRagdollData* data, b3WorldId worldId, int rowIndex, int columnIndex )
 {
-	{
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.position = (b2Pos){ 0.0f, -1.0f };
-		b2BodyId groundId = b2CreateBody( worldId, &bodyDef );
+	assert( rowIndex < RAGDOLL_GRID_COUNT && columnIndex < RAGDOLL_GRID_COUNT );
 
-		b2Polygon box = b2MakeBox( 40.0f, 1.0f );
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		b2CreatePolygonShape( groundId, &shapeDef, &box );
+	int groupIndex = rowIndex * RAGDOLL_GRID_COUNT + columnIndex;
+
+	float span = RAGDOLL_GRID_COUNT * GRID_SIZE;
+	float groupDistance = 1.0f * span / RAGDOLL_GRID_COUNT;
+
+	b3Pos position;
+	position.x = -0.5f * span + groupDistance * ( columnIndex + 0.5f );
+	position.y = 15.0f;
+	position.z = -0.5f * span + groupDistance * ( rowIndex + 0.5f );
+
+	float frictionTorque = 5.0f;
+	float hertz = 1.0f;
+	float dampingRatio = 0.7f;
+	bool colorize = false;
+
+	for ( int i = 0; i < RAGDOLL_GROUP_SIZE; ++i )
+	{
+		Human* human = data->groups[groupIndex].humans + i;
+		CreateHuman( human, worldId, position, frictionTorque, hertz, dampingRatio, groupIndex, NULL, colorize );
+		position.x += 0.75f;
 	}
+}
 
-	int columnCount = 4;
-	int rowCount = 20;
-	int bodyCount = rowCount * columnCount;
+FallingRagdollData CreateFallingRagdolls( b3WorldId worldId )
+{
+	FallingRagdollData data = { 0 };
 
-	b2BodyId* bodyIds = calloc( bodyCount, sizeof( b2BodyId ) );
+	int halfMeshGridRows = 4;
+	float meshGridCellWidth = GRID_SIZE / ( 2.0f * halfMeshGridRows );
+	data.gridMesh = b3CreateGridMesh( 2 * halfMeshGridRows, 2 * halfMeshGridRows, meshGridCellWidth, 0, true );
+	data.torusMesh = b3CreateTorusMesh( 16, 16, 0.25f * GRID_SIZE, 1.0f );
 
-	float h = 0.25f;
-	float r = 0.1f * h;
-	b2Polygon box = b2MakeRoundedBox( h - r, h - r, r );
-	box = b2MakeSquare( h );
+	float span = GRID_SIZE * RAGDOLL_GRID_COUNT;
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
 
-	b2ShapeDef shapeDef = b2DefaultShapeDef();
-	// shapeDef.material.friction = 0.3f;
-
-	b2RevoluteJointDef jointDef = b2DefaultRevoluteJointDef();
-	jointDef.enableLimit = true;
-	jointDef.lowerAngle = -0.1f * B2_PI;
-	jointDef.upperAngle = 0.2f * B2_PI;
-	jointDef.enableSpring = true;
-	jointDef.hertz = 1.0f;
-	jointDef.dampingRatio = 1.0f;
-	jointDef.enableMotor = true;
-	jointDef.maxMotorTorque = 0.25f;
-	jointDef.base.localFrameA.p = (b2Vec2){ -h, h };
-	jointDef.base.localFrameB.p = (b2Vec2){ -h, -h };
-	jointDef.base.constraintHertz = 60.0f;
-	jointDef.base.constraintDampingRatio = 0.0f;
-	jointDef.base.drawScale = 0.5f;
-
-	int bodyIndex = 0;
-	float offset = 0.4f * h;
-	float dx = 10.0f * h;
-	float xBase = -0.5f * dx * ( columnCount - 1.0f );
-
-	for ( int j = 0; j < columnCount; ++j )
+	bodyDef.position.x = -0.5f * span + 0.5f * GRID_SIZE;
+	for ( int i = 0; i < RAGDOLL_GRID_COUNT; ++i )
 	{
-		float x = xBase + j * dx;
-
-		b2BodyId prevBodyId = b2_nullBodyId;
-
-		for ( int i = 0; i < rowCount; ++i )
+		bodyDef.position.z = -0.5f * span + 0.5f * GRID_SIZE;
+		for ( int j = 0; j < RAGDOLL_GRID_COUNT; ++j )
 		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
+			b3BodyId body = b3CreateBody( worldId, &bodyDef );
+			b3CreateMeshShape( body, &shapeDef, data.gridMesh, b3Vec3_one );
+			b3CreateMeshShape( body, &shapeDef, data.torusMesh, b3Vec3_one );
 
-			bodyDef.position.x = x + offset * i;
-			bodyDef.position.y = h + 2.0f * h * i;
+			CreateGroup( &data, worldId, i, j );
 
-			// this tests the deterministic cosine and sine functions
-			float angle = ( i & 1 ) == 0 ? -0.1f : 0.1f;
-			bodyDef.rotation = b2MakeRot( angle );
-
-			b2BodyId bodyId = b2CreateBody( worldId, &bodyDef );
-
-			if ( ( i & 1 ) == 0 )
-			{
-				prevBodyId = bodyId;
-			}
-			else
-			{
-				jointDef.base.bodyIdA = prevBodyId;
-				jointDef.base.bodyIdB = bodyId;
-				b2CreateRevoluteJoint( worldId, &jointDef );
-				prevBodyId = b2_nullBodyId;
-			}
-
-			b2CreatePolygonShape( bodyId, &shapeDef, &box );
-
-			assert( bodyIndex < bodyCount );
-			bodyIds[bodyIndex] = bodyId;
-
-			bodyIndex += 1;
+			bodyDef.position.z += GRID_SIZE;
 		}
+
+		bodyDef.position.x += GRID_SIZE;
 	}
 
-	assert( bodyIndex == bodyCount );
-
-	FallingHingeData data = {
-		.bodyIds = bodyIds,
-		.bodyCount = bodyCount,
-		.stepCount = 0,
-		.sleepStep = -1,
-		.hash = 0,
-	};
 	return data;
 }
 
-bool UpdateFallingHinges( b2WorldId worldId, FallingHingeData* data )
+bool UpdateFallingRagdolls( b3WorldId worldId, FallingRagdollData* data )
 {
 	if ( data->hash == 0 )
 	{
-		b2BodyEvents bodyEvents = b2World_GetBodyEvents( worldId );
+		b3BodyEvents bodyEvents = b3World_GetBodyEvents( worldId );
 
 		if ( bodyEvents.moveCount == 0 )
 		{
-			int awakeCount = b2World_GetAwakeBodyCount( worldId );
+			int awakeCount = b3World_GetAwakeBodyCount( worldId );
 			assert( awakeCount == 0 );
 
-			data->hash = B2_HASH_INIT;
-			for ( int i = 0; i < data->bodyCount; ++i )
+			data->hash = B3_HASH_INIT;
+			for ( int i = 0; i < RAGDOLL_GRID_COUNT; ++i )
 			{
-				b2WorldTransform transform = b2Body_GetTransform( data->bodyIds[i] );
-				data->hash = b2Hash( data->hash, (uint8_t*)( &transform ), sizeof( b2WorldTransform ) );
+				for ( int j = 0; j < RAGDOLL_GRID_COUNT; ++j )
+				{
+					for ( int k = 0; k < RAGDOLL_GROUP_SIZE; ++k )
+					{
+						int groupIndex = i * RAGDOLL_GRID_COUNT + j;
+
+						Human* human = data->groups[groupIndex].humans + k;
+
+						for ( int b = 0; b < bone_count; ++b )
+						{
+							b3BodyId bodyId = human->bones[b].bodyId;
+							b3WorldTransform xf = b3Body_GetTransform( bodyId );
+							data->hash = b3Hash( data->hash, (uint8_t*)( &xf ), sizeof( b3WorldTransform ) );
+						}
+					}
+				}
 			}
 
 			data->sleepStep = data->stepCount;
@@ -134,8 +114,11 @@ bool UpdateFallingHinges( b2WorldId worldId, FallingHingeData* data )
 	return data->hash != 0;
 }
 
-void DestroyFallingHinges( FallingHingeData* data )
+void DestroyFallingRagdolls( FallingRagdollData* data )
 {
-	free( data->bodyIds );
-	data->bodyIds = NULL;
+	b3DestroyMesh( data->gridMesh );
+	b3DestroyMesh( data->torusMesh );
+
+	data->gridMesh = NULL;
+	data->torusMesh = NULL;
 }

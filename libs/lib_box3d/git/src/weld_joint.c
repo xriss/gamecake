@@ -1,198 +1,126 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #include "body.h"
-#include "core.h"
 #include "joint.h"
 #include "physics_world.h"
-#include "recording.h"
 #include "solver.h"
 #include "solver_set.h"
+#include "recording.h"
 
 // needed for dll export
-#include "box2d/box2d.h"
+#include "box3d/box3d.h"
 
-#define B2_WELD_BLOCK_SOLVE 0
-
-#if B2_WELD_BLOCK_SOLVE
-typedef struct
+void b3WeldJoint_SetLinearHertz( b3JointId jointId, float hertz )
 {
-	float x, y, z;
-} b2Vec3;
-
-// A 3-by-3 matrix. Stored in column-major order.
-typedef struct
-{
-	b2Vec3 cx, cy, cz;
-} b2Mat33;
-
-static inline float b2Dot3( b2Vec3 a, b2Vec3 b )
-{
-	return a.x * b.x + a.y * b.y + a.z * b.z;
+	B3_ASSERT( b3IsValidFloat( hertz ) && hertz >= 0.0f );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WeldJointSetLinearHertz, jointId, hertz );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_weldJoint );
+	base->weldJoint.linearHertz = hertz;
 }
 
-static inline b2Vec3 b2Cross3( b2Vec3 a, b2Vec3 b )
+float b3WeldJoint_GetLinearHertz( b3JointId jointId )
 {
-	return (b2Vec3){ a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x };
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_weldJoint );
+	return base->weldJoint.linearHertz;
 }
 
-static inline b2Vec3 b2Solve33(const b2Mat33* m, b2Vec3 b )
+void b3WeldJoint_SetLinearDampingRatio( b3JointId jointId, float dampingRatio )
 {
-	float det = b2Dot3( m->cx, b2Cross3( m->cy, m->cz ) );
-	if ( det != 0.0f )
-	{
-		det = 1.0f / det;
-	}
-
-	b2Vec3 x;
-	x.x = det * b2Dot3( b, b2Cross3( m->cy, m->cz ) );
-	x.y = det * b2Dot3( m->cx, b2Cross3( b, m->cz ) );
-	x.z = det * b2Dot3( m->cx, b2Cross3( m->cy, b ) );
-	return x;
-}
-#endif
-
-void b2WeldJoint_SetLinearHertz( b2JointId jointId, float hertz )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WeldJointSetLinearHertz, jointId, hertz );
-	B2_ASSERT( b2IsValidFloat( hertz ) && hertz >= 0.0f );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_weldJoint );
-	joint->weldJoint.linearHertz = hertz;
+	B3_ASSERT( b3IsValidFloat( dampingRatio ) && dampingRatio >= 0.0f );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WeldJointSetLinearDampingRatio, jointId, dampingRatio );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_weldJoint );
+	base->weldJoint.linearDampingRatio = dampingRatio;
 }
 
-float b2WeldJoint_GetLinearHertz( b2JointId jointId )
+float b3WeldJoint_GetLinearDampingRatio( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_weldJoint );
-	return joint->weldJoint.linearHertz;
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_weldJoint );
+	return base->weldJoint.linearDampingRatio;
 }
 
-void b2WeldJoint_SetLinearDampingRatio( b2JointId jointId, float dampingRatio )
+void b3WeldJoint_SetAngularHertz( b3JointId jointId, float hertz )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WeldJointSetLinearDampingRatio, jointId, dampingRatio );
-	B2_ASSERT( b2IsValidFloat( dampingRatio ) && dampingRatio >= 0.0f );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_weldJoint );
-	joint->weldJoint.linearDampingRatio = dampingRatio;
+	B3_ASSERT( b3IsValidFloat( hertz ) && hertz >= 0.0f );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WeldJointSetAngularHertz, jointId, hertz );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_weldJoint );
+	base->weldJoint.angularHertz = hertz;
 }
 
-float b2WeldJoint_GetLinearDampingRatio( b2JointId jointId )
+float b3WeldJoint_GetAngularHertz( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_weldJoint );
-	return joint->weldJoint.linearDampingRatio;
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_weldJoint );
+	return base->weldJoint.angularHertz;
 }
 
-void b2WeldJoint_SetAngularHertz( b2JointId jointId, float hertz )
+void b3WeldJoint_SetAngularDampingRatio( b3JointId jointId, float dampingRatio )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WeldJointSetAngularHertz, jointId, hertz );
-	B2_ASSERT( b2IsValidFloat( hertz ) && hertz >= 0.0f );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_weldJoint );
-	joint->weldJoint.angularHertz = hertz;
+	B3_ASSERT( b3IsValidFloat( dampingRatio ) && dampingRatio >= 0.0f );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, WeldJointSetAngularDampingRatio, jointId, dampingRatio );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_weldJoint );
+	base->weldJoint.angularDampingRatio = dampingRatio;
 }
 
-float b2WeldJoint_GetAngularHertz( b2JointId jointId )
+float b3WeldJoint_GetAngularDampingRatio( b3JointId jointId )
 {
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_weldJoint );
-	return joint->weldJoint.angularHertz;
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_weldJoint );
+	return base->weldJoint.angularDampingRatio;
 }
 
-void b2WeldJoint_SetAngularDampingRatio( b2JointId jointId, float dampingRatio )
+b3Vec3 b3GetWeldJointForce( b3World* world, b3JointSim* base )
 {
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, WeldJointSetAngularDampingRatio, jointId, dampingRatio );
-	B2_ASSERT( b2IsValidFloat( dampingRatio ) && dampingRatio >= 0.0f );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_weldJoint );
-	joint->weldJoint.angularDampingRatio = dampingRatio;
-}
-
-float b2WeldJoint_GetAngularDampingRatio( b2JointId jointId )
-{
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_weldJoint );
-	return joint->weldJoint.angularDampingRatio;
-}
-
-b2Vec2 b2GetWeldJointForce( b2World* world, b2JointSim* base )
-{
-	b2Vec2 force = b2MulSV( world->inv_h, base->weldJoint.linearImpulse );
+	b3Vec3 force = b3MulSV( world->inv_h, base->weldJoint.linearImpulse );
 	return force;
 }
 
-float b2GetWeldJointTorque( b2World* world, b2JointSim* base )
+b3Vec3 b3GetWeldJointTorque( b3World* world, b3JointSim* base )
 {
-	return world->inv_h * base->weldJoint.angularImpulse;
+	return b3MulSV( world->inv_h, base->weldJoint.angularImpulse );
 }
 
-// Point-to-point constraint
-// C = p2 - p1
-// Cdot = v2 - v1
-//      = v2 + cross(w2, r2) - v1 - cross(w1, r1)
-// J = [-E -r1_skew E r2_skew ]
-// Identity used:
-// w k % (rx i + ry j) = w * (-ry i + rx j)
-
-// Angle constraint
-// C = angle2 - angle1 - referenceAngle
-// Cdot = w2 - w1
-// J = [0 0 -1 0 0 1]
-// K = invI1 + invI2
-
-// 3x3 Block
-// K = [J1] * invM * [J1T J2T]
-//     [J2]
-//   = [J1] * [invM * J1T invM * J2T]
-//     [J2]
-//   = [J1 * invM * J1T J1 * invM * J2T]
-//     [J2 * invM * J1T J2 * invM * J2T]
-
-void b2PrepareWeldJoint( b2JointSim* base, b2StepContext* context )
+void b3PrepareWeldJoint( b3JointSim* base, b3StepContext* context )
 {
-	B2_ASSERT( base->type == b2_weldJoint );
+	B3_ASSERT( base->type == b3_weldJoint );
 
-	// chase body id to the solver set where the body lives
-	int idA = base->bodyIdA;
-	int idB = base->bodyIdB;
+	b3World* world = context->world;
 
-	b2World* world = context->world;
+	b3Body* bodyA = b3Array_Get( world->bodies, base->bodyIdA  );
+	b3Body* bodyB = b3Array_Get( world->bodies, base->bodyIdB  );
 
-	b2Body* bodyA = b2Array_Get( world->bodies, idA );
-	b2Body* bodyB = b2Array_Get( world->bodies, idB );
-
-	B2_ASSERT( bodyA->setIndex == b2_awakeSet || bodyB->setIndex == b2_awakeSet );
-	b2SolverSet* setA = b2Array_Get( world->solverSets, bodyA->setIndex );
-	b2SolverSet* setB = b2Array_Get( world->solverSets, bodyB->setIndex );
+	B3_ASSERT( bodyB->setIndex == b3_awakeSet );
+	b3SolverSet* setA = b3Array_Get( world->solverSets, bodyA->setIndex  );
+	b3SolverSet* setB = b3Array_Get( world->solverSets, bodyB->setIndex  );
 
 	int localIndexA = bodyA->localIndex;
 	int localIndexB = bodyB->localIndex;
 
-	b2BodySim* bodySimA = b2Array_Get( setA->bodySims, localIndexA );
-	b2BodySim* bodySimB = b2Array_Get( setB->bodySims, localIndexB );
+	b3BodySim* bodySimA = b3Array_Get( setA->bodySims, localIndexA  );
+	b3BodySim* bodySimB = b3Array_Get( setB->bodySims, localIndexB  );
 
-	float mA = bodySimA->invMass;
-	float iA = bodySimA->invInertia;
-	float mB = bodySimB->invMass;
-	float iB = bodySimB->invInertia;
+	base->invMassA = bodySimA->invMass;
+	base->invMassB = bodySimB->invMass;
+	base->invIA = bodySimA->invInertiaWorld;
+	base->invIB = bodySimB->invInertiaWorld;
 
-	base->invMassA = mA;
-	base->invMassB = mB;
-	base->invIA = iA;
-	base->invIB = iB;
+	b3Matrix3 invInertiaSum = b3AddMM( base->invIA, base->invIB );
+	base->fixedRotation = b3Det( invInertiaSum ) < 1000.0f * FLT_MIN;
 
-	b2WeldJoint* joint = &base->weldJoint;
-	joint->indexA = bodyA->setIndex == b2_awakeSet ? localIndexA : B2_NULL_INDEX;
-	joint->indexB = bodyB->setIndex == b2_awakeSet ? localIndexB : B2_NULL_INDEX;
+	b3WeldJoint* joint = &base->weldJoint;
+	joint->indexA = bodyA->setIndex == b3_awakeSet ? localIndexA : B3_NULL_INDEX;
+	joint->indexB = bodyB->setIndex == b3_awakeSet ? localIndexB : B3_NULL_INDEX;
 
 	// Compute joint anchor frames with world space rotation, relative to center of mass
-	joint->frameA.q = b2MulRot( bodySimA->transform.q, base->localFrameA.q );
-	joint->frameA.p = b2RotateVector( bodySimA->transform.q, b2Sub( base->localFrameA.p, bodySimA->localCenter ) );
-	joint->frameB.q = b2MulRot( bodySimB->transform.q, base->localFrameB.q );
-	joint->frameB.p = b2RotateVector( bodySimB->transform.q, b2Sub( base->localFrameB.p, bodySimB->localCenter ) );
+	joint->frameA.q = b3MulQuat( bodySimA->transform.q, base->localFrameA.q );
+	joint->frameA.p = b3RotateVector( bodySimA->transform.q, b3Sub( base->localFrameA.p, bodySimA->localCenter ) );
+	joint->frameB.q = b3MulQuat( bodySimB->transform.q, base->localFrameB.q );
+	joint->frameB.p = b3RotateVector( bodySimB->transform.q, b3Sub( base->localFrameB.p, bodySimB->localCenter ) );
 
-	// Compute the initial center delta. Incremental position updates are relative to this.
-	joint->deltaCenter = b2SubPos( bodySimB->center, bodySimA->center );
-
-	float ka = iA + iB;
-	joint->axialMass = ka > 0.0f ? 1.0f / ka : 0.0f;
+	joint->deltaCenter = b3SubPos( bodySimB->center, bodySimA->center );
+	joint->angularMass = b3InvertMatrix( invInertiaSum );
 
 	if ( joint->linearHertz == 0.0f )
 	{
@@ -200,7 +128,7 @@ void b2PrepareWeldJoint( b2JointSim* base, b2StepContext* context )
 	}
 	else
 	{
-		joint->linearSpring = b2MakeSoft( joint->linearHertz, joint->linearDampingRatio, context->h );
+		joint->linearSpring = b3MakeSoft( joint->linearHertz, joint->linearDampingRatio, context->h );
 	}
 
 	if ( joint->angularHertz == 0.0f )
@@ -209,258 +137,178 @@ void b2PrepareWeldJoint( b2JointSim* base, b2StepContext* context )
 	}
 	else
 	{
-		joint->angularSpring = b2MakeSoft( joint->angularHertz, joint->angularDampingRatio, context->h );
+		joint->angularSpring = b3MakeSoft( joint->angularHertz, joint->angularDampingRatio, context->h );
 	}
 
 	if ( context->enableWarmStarting == false )
 	{
-		joint->linearImpulse = b2Vec2_zero;
-		joint->angularImpulse = 0.0f;
+		joint->linearImpulse = b3Vec3_zero;
+		joint->angularImpulse = b3Vec3_zero;
 	}
 }
 
-void b2WarmStartWeldJoint( b2JointSim* base, b2StepContext* context )
+void b3WarmStartWeldJoint( b3JointSim* base, b3StepContext* context )
 {
-	float mA = base->invMassA;
-	float mB = base->invMassB;
-	float iA = base->invIA;
-	float iB = base->invIB;
-
-	// dummy state for static bodies
-	b2BodyState dummyState = b2_identityBodyState;
-
-	b2WeldJoint* joint = &base->weldJoint;
-
-	b2BodyState* stateA = joint->indexA == B2_NULL_INDEX ? &dummyState : context->states + joint->indexA;
-	b2BodyState* stateB = joint->indexB == B2_NULL_INDEX ? &dummyState : context->states + joint->indexB;
-
-	b2Vec2 rA = b2RotateVector( stateA->deltaRotation, joint->frameA.p );
-	b2Vec2 rB = b2RotateVector( stateB->deltaRotation, joint->frameB.p );
-
-	if ( stateA->flags & b2_dynamicFlag )
-	{
-		stateA->linearVelocity = b2MulSub( stateA->linearVelocity, mA, joint->linearImpulse );
-		stateA->angularVelocity -= iA * ( b2Cross( rA, joint->linearImpulse ) + joint->angularImpulse );
-	}
-
-	if ( stateB->flags & b2_dynamicFlag )
-	{
-		stateB->linearVelocity = b2MulAdd( stateB->linearVelocity, mB, joint->linearImpulse );
-		stateB->angularVelocity += iB * ( b2Cross( rB, joint->linearImpulse ) + joint->angularImpulse );
-	}
-}
-
-void b2SolveWeldJoint( b2JointSim* base, b2StepContext* context, bool useBias )
-{
-	B2_ASSERT( base->type == b2_weldJoint );
+	B3_ASSERT( base->type == b3_weldJoint );
 
 	float mA = base->invMassA;
 	float mB = base->invMassB;
-	float iA = base->invIA;
-	float iB = base->invIB;
+	b3Matrix3 iA = base->invIA;
+	b3Matrix3 iB = base->invIB;
 
 	// dummy state for static bodies
-	b2BodyState dummyState = b2_identityBodyState;
+	b3BodyState dummyState = b3_identityBodyState;
 
-	b2WeldJoint* joint = &base->weldJoint;
+	b3WeldJoint* joint = &base->weldJoint;
 
-	b2BodyState* stateA = joint->indexA == B2_NULL_INDEX ? &dummyState : context->states + joint->indexA;
-	b2BodyState* stateB = joint->indexB == B2_NULL_INDEX ? &dummyState : context->states + joint->indexB;
+	b3BodyState* stateA = joint->indexA == B3_NULL_INDEX ? &dummyState : context->states + joint->indexA;
+	b3BodyState* stateB = joint->indexB == B3_NULL_INDEX ? &dummyState : context->states + joint->indexB;
 
-	b2Vec2 vA = stateA->linearVelocity;
-	float wA = stateA->angularVelocity;
-	b2Vec2 vB = stateB->linearVelocity;
-	float wB = stateB->angularVelocity;
+	b3Vec3 vA = stateA->linearVelocity;
+	b3Vec3 wA = stateA->angularVelocity;
+	b3Vec3 vB = stateB->linearVelocity;
+	b3Vec3 wB = stateB->angularVelocity;
 
-	// Block solve doesn't work correctly with mixed stiffness values
-#if B2_WELD_BLOCK_SOLVE
-	// J = [-I -r1_skew I r2_skew]
-	//     [ 0       -1 0       1]
-	// r_skew = [-ry; rx]
+	b3Vec3 rA = b3RotateVector( stateA->deltaRotation, joint->frameA.p );
+	b3Vec3 rB = b3RotateVector( stateB->deltaRotation, joint->frameB.p );
 
-	// Matlab
-	// K = [ mA+r1y^2*iA+mB+r2y^2*iB,  -r1y*iA*r1x-r2y*iB*r2x,          -r1y*iA-r2y*iB]
-	//     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB,           r1x*iA+r2x*iB]
-	//     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
-	b2Vec2 rA = b2RotateVector( stateA->deltaRotation, joint->frameA.p );
-	b2Vec2 rB = b2RotateVector( stateB->deltaRotation, joint->frameB.p );
+	vA = b3MulSub( vA, mA, joint->linearImpulse );
+	wA = b3Sub( wA, b3MulMV( iA, b3Add( b3Cross( rA, joint->linearImpulse ), joint->angularImpulse ) ) );
 
-	b2Mat33 K;
-	K.cx.x = mA + mB + rA.y * rA.y * iA + rB.y * rB.y * iB;
-	K.cy.x = -rA.y * rA.x * iA - rB.y * rB.x * iB;
-	K.cz.x = -rA.y * iA - rB.y * iB;
-	K.cx.y = K.cy.x;
-	K.cy.y = mA + mB + rA.x * rA.x * iA + rB.x * rB.x * iB;
-	K.cz.y = rA.x * iA + rB.x * iB;
-	K.cx.z = K.cz.x;
-	K.cy.z = K.cz.y;
-	K.cz.z = iA + iB;
+	vB = b3MulAdd( vB, mB, joint->linearImpulse );
+	wB = b3Add( wB, b3MulMV( iB, b3Add( b3Cross( rB, joint->linearImpulse ), joint->angularImpulse ) ) );
 
-	b2Vec3 bias = {0.0f, 0.0f, 0.0f};
-	float linearMassScale = 1.0f;
-	float linearImpulseScale = 0.0f;
-	if ( useBias || joint->linearHertz > 0.0f )
-	{
-		// linear
-		b2Vec2 dcA = stateA->deltaPosition;
-		b2Vec2 dcB = stateB->deltaPosition;
-		b2Vec2 jointTranslation = b2Add( b2Add( b2Sub( dcB, dcA ), b2Sub( rB, rA ) ), joint->deltaCenter );
-
-		bias.x = joint->linearSpring.biasRate * jointTranslation.x;
-		bias.y = joint->linearSpring.biasRate * jointTranslation.y;
-		
-		linearMassScale = joint->linearSpring.massScale;
-		linearImpulseScale = joint->linearSpring.impulseScale;
-	}
-
-	float angularMassScale = 1.0f;
-	float angularImpulseScale = 0.0f;
-	if ( useBias || joint->angularHertz > 0.0f )
-	{
-		// angular
-		b2Rot qA = b2MulRot( stateA->deltaRotation, joint->frameA.q );
-		b2Rot qB = b2MulRot( stateB->deltaRotation, joint->frameB.q );
-		b2Rot relQ = b2InvMulRot( qA, qB );
-		float jointAngle = b2Rot_GetAngle( relQ );
-
-		bias.z = joint->angularSpring.biasRate * jointAngle;
-
-		angularMassScale = joint->angularSpring.massScale;
-		angularImpulseScale = joint->angularSpring.impulseScale;
-	}
-
-	b2Vec2 Cdot1 = b2Sub( b2Add( vB, b2CrossSV( wB, rB ) ), b2Add( vA, b2CrossSV( wA, rA ) ) );
-	float Cdot2 = wB - wA;
-
-	b2Vec3 Cdot = {Cdot1.x + bias.x, Cdot1.y + bias.y, Cdot2 + bias.z};
-
-	b2Vec3 b = b2Solve33( &K, Cdot );
-
-	b2Vec2 linearImpulse = {
-		-linearMassScale * b.x - linearImpulseScale * joint->linearImpulse.x,
-		-linearMassScale * b.y - linearImpulseScale * joint->linearImpulse.y,
-	};
-	joint->linearImpulse = b2Add( joint->linearImpulse, linearImpulse );
-
-	float angularImpulse = -angularMassScale * b.z - angularImpulseScale * joint->angularImpulse;
-	joint->angularImpulse += angularImpulse;
-
-	vA = b2MulSub( vA, mA, linearImpulse );
-	wA -= iA * (b2Cross( rA, linearImpulse ) + angularImpulse);
-	vB = b2MulAdd( vB, mB, linearImpulse );
-	wB += iB * (b2Cross( rB, linearImpulse ) + angularImpulse);
-
-	// todo debugging
-	Cdot1 = b2Sub( b2Add( vB, b2CrossSV( wB, rB ) ), b2Add( vA, b2CrossSV( wA, rA ) ) );
-	Cdot2 = wB - wA;
-
-	if ( useBias == false && b2Length(Cdot1) > 0.0001f )
-	{
-		Cdot1.x += 0.0f;
-	}
-
-	if ( useBias == false && b2AbsFloat( Cdot2 ) > 0.0001f )
-	{
-		Cdot2 += 0.0f;
-	}
-
-#else
-
-	// angular constraint
-	{
-		b2Rot qA = b2MulRot( stateA->deltaRotation, joint->frameA.q );
-		b2Rot qB = b2MulRot( stateB->deltaRotation, joint->frameB.q );
-		b2Rot relQ = b2InvMulRot( qA, qB );
-		float jointAngle = b2Rot_GetAngle( relQ );
-
-		float bias = 0.0f;
-		float massScale = 1.0f;
-		float impulseScale = 0.0f;
-		if ( useBias || joint->angularHertz > 0.0f )
-		{
-			float C = jointAngle;
-			bias = joint->angularSpring.biasRate * C;
-			massScale = joint->angularSpring.massScale;
-			impulseScale = joint->angularSpring.impulseScale;
-		}
-
-		float Cdot = wB - wA;
-		float impulse = -massScale * joint->axialMass * ( Cdot + bias ) - impulseScale * joint->angularImpulse;
-		joint->angularImpulse += impulse;
-
-		wA -= iA * impulse;
-		wB += iB * impulse;
-	}
-
-	// linear constraint
-	{
-		b2Vec2 rA = b2RotateVector( stateA->deltaRotation, joint->frameA.p );
-		b2Vec2 rB = b2RotateVector( stateB->deltaRotation, joint->frameB.p );
-
-		b2Vec2 bias = b2Vec2_zero;
-		float massScale = 1.0f;
-		float impulseScale = 0.0f;
-		if ( useBias || joint->linearHertz > 0.0f )
-		{
-			b2Vec2 dcA = stateA->deltaPosition;
-			b2Vec2 dcB = stateB->deltaPosition;
-			b2Vec2 C = b2Add( b2Add( b2Sub( dcB, dcA ), b2Sub( rB, rA ) ), joint->deltaCenter );
-
-			bias = b2MulSV( joint->linearSpring.biasRate, C );
-			massScale = joint->linearSpring.massScale;
-			impulseScale = joint->linearSpring.impulseScale;
-		}
-
-		b2Vec2 Cdot = b2Sub( b2Add( vB, b2CrossSV( wB, rB ) ), b2Add( vA, b2CrossSV( wA, rA ) ) );
-
-		b2Mat22 K;
-		K.cx.x = mA + mB + rA.y * rA.y * iA + rB.y * rB.y * iB;
-		K.cy.x = -rA.y * rA.x * iA - rB.y * rB.x * iB;
-		K.cx.y = K.cy.x;
-		K.cy.y = mA + mB + rA.x * rA.x * iA + rB.x * rB.x * iB;
-		b2Vec2 b = b2Solve22( K, b2Add( Cdot, bias ) );
-
-		b2Vec2 impulse = {
-			-massScale * b.x - impulseScale * joint->linearImpulse.x,
-			-massScale * b.y - impulseScale * joint->linearImpulse.y,
-		};
-
-		joint->linearImpulse = b2Add( joint->linearImpulse, impulse );
-
-		vA = b2MulSub( vA, mA, impulse );
-		wA -= iA * b2Cross( rA, impulse );
-		vB = b2MulAdd( vB, mB, impulse );
-		wB += iB * b2Cross( rB, impulse );
-	}
-#endif
-
-	B2_ASSERT( b2IsValidVec2( vA ) );
-	B2_ASSERT( b2IsValidFloat( wA ) );
-	B2_ASSERT( b2IsValidVec2( vB ) );
-	B2_ASSERT( b2IsValidFloat( wB ) );
-
-	if ( stateA->flags & b2_dynamicFlag )
+	if ( stateA->flags & b3_dynamicFlag )
 	{
 		stateA->linearVelocity = vA;
 		stateA->angularVelocity = wA;
 	}
 
-	if ( stateB->flags & b2_dynamicFlag )
+	if ( stateB->flags & b3_dynamicFlag )
 	{
 		stateB->linearVelocity = vB;
 		stateB->angularVelocity = wB;
 	}
 }
 
-void b2DrawWeldJoint( b2DebugDraw* draw, b2JointSim* base, b2WorldTransform transformA, b2WorldTransform transformB,
-					  float drawScale )
+void b3SolveWeldJoint( b3JointSim* base, b3StepContext* context, bool useBias )
 {
-	B2_ASSERT( base->type == b2_weldJoint );
+	float mA = base->invMassA;
+	float mB = base->invMassB;
+	b3Matrix3 iA = base->invIA;
+	b3Matrix3 iB = base->invIB;
 
-	b2WorldTransform frameA = b2OffsetWorldTransform( transformA, base->localFrameA );
-	b2WorldTransform frameB = b2OffsetWorldTransform( transformB, base->localFrameB );
+	// dummy state for static bodies
+	b3BodyState dummyState = b3_identityBodyState;
 
-	b2Polygon box = b2MakeBox( 0.25f * drawScale, 0.125f * drawScale );
-	draw->DrawPolygonFcn( frameA, box.vertices, 4, b2_colorDarkOrange, draw->context );
-	draw->DrawPolygonFcn( frameB, box.vertices, 4, b2_colorDarkCyan, draw->context );
+	b3WeldJoint* joint = &base->weldJoint;
+	b3BodyState* stateA = joint->indexA == B3_NULL_INDEX ? &dummyState : context->states + joint->indexA;
+	b3BodyState* stateB = joint->indexB == B3_NULL_INDEX ? &dummyState : context->states + joint->indexB;
+
+	b3Vec3 vA = stateA->linearVelocity;
+	b3Vec3 wA = stateA->angularVelocity;
+	b3Vec3 vB = stateB->linearVelocity;
+	b3Vec3 wB = stateB->angularVelocity;
+
+	bool fixedRotation = base->fixedRotation;
+	b3Quat quatA = b3MulQuat( stateA->deltaRotation, joint->frameA.q );
+	b3Quat quatB = b3MulQuat( stateB->deltaRotation, joint->frameB.q );
+
+	if ( b3DotQuat( quatA, quatB ) < 0.0f )
+	{
+		// this keeps the rotation angle in the range [-pi, pi]
+		quatB = b3NegateQuat( quatB );
+	}
+
+	b3Quat relQ = b3InvMulQuat( quatA, quatB );
+
+	// angular constraint
+	if ( fixedRotation == false )
+	{
+		b3Vec3 bias = b3Vec3_zero;
+		float massScale = 1.0f;
+		float impulseScale = 0.0f;
+		if ( useBias || joint->angularHertz > 0.0f )
+		{
+			b3Quat targetQuat = b3Quat_identity;
+			b3Vec3 deltaRotation = b3DeltaQuatToRotation( relQ, targetQuat );
+			b3Vec3 c = b3Neg( b3RotateVector( quatA, deltaRotation ) );
+
+			bias = b3MulSV( joint->angularSpring.biasRate, c );
+			massScale = joint->angularSpring.massScale;
+			impulseScale = joint->angularSpring.impulseScale;
+		}
+
+		b3Vec3 cdot = b3Sub( wB, wA );
+		b3Vec3 impulse = b3MulSub( b3MulSV( -massScale, b3MulMV( joint->angularMass, b3Add( cdot, bias ) ) ), impulseScale, joint->angularImpulse );
+		joint->angularImpulse = b3Add( joint->angularImpulse, impulse );
+
+		wA = b3Sub( wA, b3MulMV( iA, impulse ) );
+		wB = b3Add( wB, b3MulMV( iB, impulse ) );
+	}
+
+	// linear constraint
+	{
+		b3Vec3 rA = b3RotateVector( stateA->deltaRotation, joint->frameA.p );
+		b3Vec3 rB = b3RotateVector( stateB->deltaRotation, joint->frameB.p );
+
+		b3Vec3 cdot = b3Sub( b3Add( vB, b3Cross( wB, rB ) ), b3Add( vA, b3Cross( wA, rA ) ) );
+
+		b3Vec3 bias = b3Vec3_zero;
+		float massScale = 1.0f;
+		float impulseScale = 0.0f;
+		if ( useBias || joint->linearHertz > 0.0f )
+		{
+			b3Vec3 dcA = stateA->deltaPosition;
+			b3Vec3 dcB = stateB->deltaPosition;
+
+			b3Vec3 separation = b3Add( b3Add( b3Sub( dcB, dcA ), b3Sub( rB, rA ) ), joint->deltaCenter );
+
+			bias = b3MulSV( joint->linearSpring.biasRate, separation );
+			massScale = joint->linearSpring.massScale;
+			impulseScale = joint->linearSpring.impulseScale;
+		}
+
+		//// K = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
+		b3Matrix3 sA = b3Skew( rA );
+		b3Matrix3 sB = b3Skew( rB );
+		b3Matrix3 kA = b3MulMM( sA, b3MulMM( base->invIA, sA ) );
+		b3Matrix3 kB = b3MulMM( sB, b3MulMM( base->invIB, sB ) );
+		b3Matrix3 k = b3NegateMat3( b3AddMM( kA, kB ) );
+		k.cx.x += mA + mB;
+		k.cy.y += mA + mB;
+		k.cz.z += mA + mB;
+
+		b3Vec3 b = b3Solve3( k, b3Add( cdot, bias ) );
+
+		b3Vec3 impulse = b3MulSub( b3MulSV( -massScale, b ), impulseScale, joint->linearImpulse );
+		joint->linearImpulse = b3Add( joint->linearImpulse, impulse );
+
+		vA = b3MulSub( vA, mA, impulse );
+		wA = b3Sub( wA, b3MulMV( iA, b3Cross( rA, impulse ) ) );
+		vB = b3MulAdd( vB, mB, impulse );
+		wB = b3Add( wB, b3MulMV( iB, b3Cross( rB, impulse ) ) );
+	}
+
+	if ( stateA->flags & b3_dynamicFlag )
+	{
+		stateA->linearVelocity = vA;
+		stateA->angularVelocity = wA;
+	}
+
+	if ( stateB->flags & b3_dynamicFlag )
+	{
+		stateB->linearVelocity = vB;
+		stateB->angularVelocity = wB;
+	}
+}
+
+void b3DrawWeldJoint( b3DebugDraw* draw, b3JointSim* base, b3WorldTransform transformA, b3WorldTransform transformB, float scale )
+{
+	b3WorldTransform frameA = b3MulWorldTransforms( transformA, base->localFrameA );
+	b3WorldTransform frameB = b3MulWorldTransforms( transformB, base->localFrameB );
+
+	b3Vec3 extents = { 0.1f * scale, 0.05f * scale, 0.025f * scale };
+	draw->DrawBoxFcn( extents, frameA, b3_colorDarkOrange, draw->context );
+	draw->DrawBoxFcn( extents, frameB, b3_colorDarkCyan, draw->context );
 }

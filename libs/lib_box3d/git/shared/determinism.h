@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include "box2d/id.h"
+#include "box3d/id.h"
 
+#include "human.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -11,18 +12,29 @@ extern "C"
 {
 #endif
 
-typedef struct FallingHingeData
+#define RAGDOLL_GROUP_SIZE 2
+#define RAGDOLL_GRID_COUNT 2
+
+typedef struct RagdollGroup
 {
-	b2BodyId* bodyIds;
-	int bodyCount;
+	Human humans[RAGDOLL_GROUP_SIZE];
+} RagdollGroup;
+
+typedef struct FallingRagdollData
+{
+	RagdollGroup groups[RAGDOLL_GRID_COUNT * RAGDOLL_GRID_COUNT];
+	b3MeshData* gridMesh;
+	b3MeshData* torusMesh;
+	int columnCount;
+	int columnIndex;
 	int stepCount;
 	int sleepStep;
 	uint32_t hash;
-} FallingHingeData;
+} FallingRagdollData;
 
-FallingHingeData CreateFallingHinges( b2WorldId worldId );
-bool UpdateFallingHinges( b2WorldId worldId, FallingHingeData* data );
-void DestroyFallingHinges( FallingHingeData* data );
+FallingRagdollData CreateFallingRagdolls( b3WorldId worldId );
+bool UpdateFallingRagdolls( b3WorldId worldId, FallingRagdollData* data );
+void DestroyFallingRagdolls( FallingRagdollData* data );
 
 #ifdef __cplusplus
 }

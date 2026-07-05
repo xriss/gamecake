@@ -1,42 +1,41 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
 
-#include "container.h"
+#include "math_internal.h"
 
-#include "box2d/types.h"
+#include "box3d/types.h"
 
-typedef struct b2BroadPhase b2BroadPhase;
-typedef struct b2World b2World;
+#include <stdbool.h>
 
-typedef struct b2Shape
+typedef struct b3BroadPhase b3BroadPhase;
+typedef struct b3World b3World;
+
+typedef struct b3Shape
 {
 	int id;
 	int bodyId;
 	int prevShapeId;
 	int nextShapeId;
 	int sensorIndex;
-	b2ShapeType type;
-	b2SurfaceMaterial material;
-	float density;
-	float aabbMargin;
-	b2AABB aabb;
-	b2AABB fatAABB;
-	b2Vec2 localCentroid;
 	int proxyKey;
+	b3ShapeType type;
+	float density;
+	float explosionScale;
+	float aabbMargin;
 
-	b2Filter filter;
+	b3AABB aabb;
+	b3AABB fatAABB;
+	b3Vec3 localCentroid;
+
+	b3SurfaceMaterial material;
+	int materialCount;
+	b3SurfaceMaterial* materials;
+
+	b3Filter filter;
 	void* userData;
-
-	union
-	{
-		b2Capsule capsule;
-		b2Circle circle;
-		b2Polygon polygon;
-		b2Segment segment;
-		b2ChainSegment chainSegment;
-	};
+	void* userShape;
 
 	uint16_t generation;
 	bool enableSensorEvents;
@@ -45,81 +44,93 @@ typedef struct b2Shape
 	bool enableHitEvents;
 	bool enablePreSolveEvents;
 	bool enlargedAABB;
-} b2Shape;
 
-typedef struct b2ChainShape
-{
-	int id;
-	int bodyId;
-	int nextChainId;
-	int count;
-	int materialCount;
-	int* shapeIndices;
-	b2SurfaceMaterial* materials;
-	uint16_t generation;
-} b2ChainShape;
-
-typedef struct b2ShapeExtent
-{
-	float minExtent;
-	float maxExtent;
-} b2ShapeExtent;
-
-// Sensors are shapes that live in the broad-phase but never have contacts.
-// At the end of the time step all sensors are queried for overlap with any other shapes.
-// Sensors ignore body type and sleeping.
-// Sensors generate events when there is a new overlap or and overlap disappears.
-// The sensor overlaps don't get cleared until the next time step regardless of the overlapped
-// shapes being destroyed.
-// When a sensor is destroyed.
-typedef struct
-{
-	b2Array( int ) overlaps;
-} b2SensorOverlaps;
-
-void b2CreateShapeProxy( b2Shape* shape, b2BroadPhase* bp, b2BodyType type, b2WorldTransform transform, bool forcePairCreation );
-void b2DestroyShapeProxy( b2Shape* shape, b2BroadPhase* bp );
-
-void b2FreeChainData( b2ChainShape* chain );
-
-b2MassData b2ComputeShapeMass( const b2Shape* shape );
-b2ShapeExtent b2ComputeShapeExtent( const b2Shape* shape, b2Vec2 localCenter );
-b2AABB b2ComputeShapeAABB( const b2Shape* shape, b2WorldTransform transform );
-
-// Conservative world AABB for a shape, inflated by extra margin. In large world mode this is
-// computed in double and rounded outward so the inflation is not lost far from the origin.
-b2AABB b2ComputeFatShapeAABB( const b2Shape* shape, b2WorldTransform transform, float extra );
-b2Vec2 b2GetShapeCentroid( const b2Shape* shape );
-float b2GetShapePerimeter( const b2Shape* shape );
-float b2GetShapeProjectedPerimeter( const b2Shape* shape, b2Vec2 line );
-
-b2ShapeProxy b2MakeShapeDistanceProxy( const b2Shape* shape );
-
-b2CastOutput b2RayCastShape( const b2RayCastInput* input, const b2Shape* shape, b2Transform transform );
-b2CastOutput b2ShapeCastShape( const b2ShapeCastInput* input, const b2Shape* shape, b2Transform transform );
-
-b2PlaneResult b2CollideMoverAndCircle( const b2Capsule* mover, const b2Circle* shape );
-b2PlaneResult b2CollideMoverAndCapsule( const b2Capsule* mover, const b2Capsule* shape );
-b2PlaneResult b2CollideMoverAndPolygon( const b2Capsule* mover, const b2Polygon* shape );
-b2PlaneResult b2CollideMoverAndSegment( const b2Capsule* mover, const b2Segment* shape );
-b2PlaneResult b2CollideMover( const b2Capsule* mover, const b2Shape* shape, b2Transform transform );
-
-static inline float b2GetShapeRadius( const b2Shape* shape )
-{
-	switch ( shape->type )
+	union
 	{
-		case b2_capsuleShape:
-			return shape->capsule.radius;
-		case b2_circleShape:
-			return shape->circle.radius;
-		case b2_polygonShape:
-			return shape->polygon.radius;
-		default:
-			return 0.0f;
-	}
+		b3Capsule capsule;
+		b3Sphere sphere;
+		const b3HullData* hull;
+		b3Mesh mesh;
+		const b3HeightFieldData* heightField;
+		const b3CompoundData* compound;
+	};
+
+} b3Shape;
+
+// A single material shape keeps its material inline. Multi material meshes and compounds own a heap
+// array. Reach the materials the same way for both: a single material shape presents its inline
+// material as a one element array. Do not cache the pointer, the shapes array can move.
+static inline b3SurfaceMaterial* b3GetShapeMaterials( const b3Shape* shape )
+{
+	return shape->materials != NULL ? shape->materials : (b3SurfaceMaterial*)&shape->material;
 }
 
-static inline bool b2ShouldShapesCollide( b2Filter filterA, b2Filter filterB )
+void b3CreateShapeProxy( b3Shape* shape, b3BroadPhase* bp, b3BodyType type, b3WorldTransform transform, bool forcePairCreation );
+void b3DestroyShapeProxy( b3Shape* shape, b3BroadPhase* bp );
+
+void b3DestroyShapeAllocations( b3World* world, b3Shape* shape );
+
+b3MassData b3ComputeShapeMass( const b3Shape* shape );
+b3ShapeExtent b3ComputeShapeExtent( const b3Shape* shape, b3Vec3 localCenter );
+
+b3AABB b3ComputeSweptSphereAABB( const b3Sphere* shape, b3Transform xf1, b3Transform xf2 );
+b3AABB b3ComputeSweptCapsuleAABB( const b3Capsule* shape, b3Transform xf1, b3Transform xf2 );
+
+b3AABB b3ComputeShapeAABB( const b3Shape* shape, b3Transform transform );
+
+// Conservative world AABB for a shape inflated by extra margin. In double precision mode the
+// box is built in the body local frame, translated by the double origin, and rounded outward.
+b3AABB b3ComputeFatShapeAABB( const b3Shape* shape, b3WorldTransform transform, float extra );
+b3AABB b3ComputeSweptShapeAABB( const b3Shape* shape, const b3Sweep* sweep, float time );
+b3Vec3 b3GetShapeCentroid( const b3Shape* shape );
+float b3GetShapeArea( const b3Shape* shape );
+float b3GetShapeProjectedArea( const b3Shape* shape, b3Vec3 planeNormal );
+uint64_t b3GetShapeUserMaterialId( const b3Shape* shape, int childIndex, int triangleIndex );
+
+b3ShapeProxy b3MakeShapeProxy( const b3Shape* shape );
+b3ShapeProxy b3MakeLocalProxy( const b3ShapeProxy* proxy, b3Transform transform, b3Vec3* buffer );
+b3AABB b3ComputeProxyAABB( const b3ShapeProxy* proxy );
+
+b3CastOutput b3RayCastShape( const b3Shape* shape, b3Transform transform, const b3RayCastInput* input );
+b3CastOutput b3ShapeCastShape( const b3Shape* shape, b3Transform transform, const b3ShapeCastInput* input );
+bool b3OverlapShape( const b3Shape* shape, b3Transform transform, const b3ShapeProxy* proxy );
+
+float b3GetShapeArea( const b3Shape* shape );
+float b3GetShapeProjectedArea( const b3Shape* shape, b3Vec3 planeNormal );
+b3TOIOutput b3ShapeTimeOfImpact( b3Shape* shapeA, b3Shape* shapeB, b3Sweep* sweepA, b3Sweep* sweepB, float maxFraction );
+
+int b3CollideMoverAndSphere( b3PlaneResult* result, const b3Sphere* shape, const b3Capsule* mover );
+int b3CollideMoverAndCapsule( b3PlaneResult* result, const b3Capsule* shape, const b3Capsule* mover );
+int b3CollideMoverAndHull( b3PlaneResult* result, const b3HullData* shape, const b3Capsule* mover );
+int b3CollideMoverAndMesh( b3PlaneResult* planes, int capacity, const b3Mesh* shape, const b3Capsule* mover );
+int b3CollideMoverAndHeightField( b3PlaneResult* results, int capacity, const b3HeightFieldData* shape, const b3Capsule* mover );
+int b3CollideMover( b3PlaneResult* planes, int planeCapacity, const b3Shape* shape, b3Transform transform,
+					const b3Capsule* mover );
+
+// Hull
+int b3FindHullSupportVertex( const b3HullData* hull, b3Vec3 direction );
+int b3FindHullSupportFace( const b3HullData* hull, b3Vec3 direction );
+bool b3IsValidHull( const b3HullData* hull );
+b3AABB b3ComputeSweptHullAABB( const b3HullData* shape, b3Transform xf1, b3Transform xf2 );
+b3ShapeExtent b3ComputeHullExtent( const b3HullData* hull, b3Vec3 origin );
+float b3ComputeHullProjectedArea( const b3HullData* hull, b3Vec3 direction );
+
+// Height field
+b3Triangle b3GetHeightFieldTriangle( const b3HeightFieldData* heightField, int triangleIndex );
+int b3GetHeightFieldMaterial( const b3HeightFieldData* heightField, int triangleIndex );
+
+static inline int b3GetHeightFieldTriangleCount( const b3HeightFieldData* heightField )
+{
+	int cellCount = ( heightField->rowCount - 1 ) * ( heightField->columnCount - 1 );
+	return 2 * cellCount;
+}
+
+// Mesh
+b3Triangle b3GetMeshTriangle( const b3Mesh* mesh, int triangleIndex );
+bool b3IsValidMesh( const b3MeshData* meshData );
+void b3DumpShape( b3World* world, int shapeIndex );
+
+static inline bool b3ShouldShapesCollide( b3Filter filterA, b3Filter filterB )
 {
 	if ( filterA.groupIndex == filterB.groupIndex && filterA.groupIndex != 0 )
 	{
@@ -129,10 +140,8 @@ static inline bool b2ShouldShapesCollide( b2Filter filterA, b2Filter filterB )
 	return ( filterA.maskBits & filterB.categoryBits ) != 0 && ( filterA.categoryBits & filterB.maskBits ) != 0;
 }
 
-static inline bool b2ShouldQueryCollide( b2Filter shapeFilter, b2QueryFilter queryFilter )
+static inline bool b3ShouldQueryCollide( const b3Filter* shapeFilter, const b3QueryFilter* queryFilter )
 {
-	return ( shapeFilter.categoryBits & queryFilter.maskBits ) != 0 && ( shapeFilter.maskBits & queryFilter.categoryBits ) != 0;
+	return ( shapeFilter->categoryBits & queryFilter->maskBits ) != 0 &&
+		   ( shapeFilter->maskBits & queryFilter->categoryBits ) != 0;
 }
-
-b2DeclareArray( b2Shape );
-b2DeclareArray( b2ChainShape );

@@ -3,8 +3,7 @@
 
 #pragma once
 
-#include "box2d/collision.h"
-#include "box2d/math_functions.h"
+#include "box3d/math_functions.h"
 
 #define RAND_LIMIT 32767
 #define RAND_SEED 12345
@@ -17,7 +16,6 @@ extern "C"
 #endif
 
 extern uint32_t g_randomSeed;
-b2Polygon RandomPolygon( float extent );
 
 int GetNumberOfCores( void );
 
@@ -25,8 +23,8 @@ int GetNumberOfCores( void );
 }
 #endif
 
-// Simple random number generator. Using this instead of rand() for cross-platform determinism.
-B2_INLINE int RandomInt()
+// Simple random number generator. Using this instead of rand() for cross platform determinism.
+B3_INLINE int RandomInt()
 {
 	// XorShift32 algorithm
 	uint32_t x = g_randomSeed;
@@ -40,13 +38,13 @@ B2_INLINE int RandomInt()
 }
 
 // Random integer in range [lo, hi]
-B2_INLINE int RandomIntRange( int lo, int hi )
+B3_INLINE float RandomIntRange( int lo, int hi )
 {
 	return lo + RandomInt() % ( hi - lo + 1 );
 }
 
 // Random number in range [-1,1]
-B2_INLINE float RandomFloat()
+B3_INLINE float RandomFloat()
 {
 	float r = (float)( RandomInt() & ( RAND_LIMIT ) );
 	r /= RAND_LIMIT;
@@ -55,7 +53,7 @@ B2_INLINE float RandomFloat()
 }
 
 // Random floating point number in range [lo, hi]
-B2_INLINE float RandomFloatRange( float lo, float hi )
+B3_INLINE float RandomFloatRange( float lo, float hi )
 {
 	float r = (float)( RandomInt() & ( RAND_LIMIT ) );
 	r /= RAND_LIMIT;
@@ -64,26 +62,71 @@ B2_INLINE float RandomFloatRange( float lo, float hi )
 }
 
 // Random vector with coordinates in range [lo, hi]
-B2_INLINE b2Vec2 RandomVec2( float lo, float hi )
+B3_INLINE b3Vec3 RandomVec3( b3Vec3 lo, b3Vec3 hi )
 {
-	b2Vec2 v;
-	v.x = RandomFloatRange( lo, hi );
-	v.y = RandomFloatRange( lo, hi );
+	b3Vec3 v;
+	v.x = RandomFloatRange( lo.x, hi.x );
+	v.y = RandomFloatRange( lo.y, hi.y );
+	v.z = RandomFloatRange( lo.z, hi.z );
 	return v;
 }
 
-// Random position with coordinates in range [lo, hi]
-B2_INLINE b2Pos RandomPos( float lo, float hi )
+// Random world position with coordinates in range [lo, hi]
+B3_INLINE b3Pos RandomPos( b3Vec3 lo, b3Vec3 hi )
 {
-	b2Pos v;
-	v.x = RandomFloatRange( lo, hi );
-	v.y = RandomFloatRange( lo, hi );
+	b3Pos v;
+	v.x = RandomFloatRange( lo.x, hi.x );
+	v.y = RandomFloatRange( lo.y, hi.y );
+	v.z = RandomFloatRange( lo.z, hi.z );
 	return v;
 }
 
-// Random rotation with angle in range [-pi, pi]
-B2_INLINE b2Rot RandomRot( void )
+B3_INLINE b3Vec3 RandomVec3Uniform( float lo, float hi )
 {
-	float angle = RandomFloatRange( -B2_PI, B2_PI );
-	return b2MakeRot( angle );
+	b3Vec3 v;
+	v.x = RandomFloatRange( lo, hi );
+	v.y = RandomFloatRange( lo, hi );
+	v.z = RandomFloatRange( lo, hi );
+	return v;
+}
+
+B3_INLINE b3Vec3 RandomUnitVector()
+{
+	// Generate uniformly distributed random quaternion using Shoemake's method
+	// Reference: "Uniform Random Rotations", Ken Shoemake, Graphics Gems III, 1992
+
+	float u1 = RandomFloatRange( 0.0f, 1.0f );
+	float u2 = RandomFloatRange( 0.0f, 2.0f * B3_PI );
+	float u3 = RandomFloatRange( 0.0f, 2.0f * B3_PI );
+
+	float sqrt1MinusU1 = sqrtf( 1.0f - u1 );
+	float sqrtU1 = sqrtf( u1 );
+
+	b3Vec3 v;
+	v.x = sqrt1MinusU1 * sinf( u2 );
+	v.y = sqrt1MinusU1 * cosf( u2 );
+	v.z = sqrtU1 * sinf( u3 );
+
+	return v;
+}
+
+B3_INLINE b3Quat RandomQuat()
+{
+	// Generate uniformly distributed random quaternion using Shoemake's method
+	// Reference: "Uniform Random Rotations", Ken Shoemake, Graphics Gems III, 1992
+
+	float u1 = RandomFloatRange( 0.0f, 1.0f );
+	float u2 = RandomFloatRange( 0.0f, 2.0f * B3_PI );
+	float u3 = RandomFloatRange( 0.0f, 2.0f * B3_PI );
+
+	float sqrt1MinusU1 = sqrtf( 1.0f - u1 );
+	float sqrtU1 = sqrtf( u1 );
+
+	b3Quat q;
+	q.v.x = sqrt1MinusU1 * sinf( u2 );
+	q.v.y = sqrt1MinusU1 * cosf( u2 );
+	q.v.z = sqrtU1 * sinf( u3 );
+	q.s = sqrtU1 * cosf( u3 );
+
+	return q;
 }

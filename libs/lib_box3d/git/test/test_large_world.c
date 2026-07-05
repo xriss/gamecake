@@ -1,437 +1,302 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
-#include "body.h"
-#include "physics_world.h"
+#include "box3d/box3d.h"
 #include "test_macros.h"
 
-#include "box2d/box2d.h"
-#include "box2d/math_functions.h"
-#include "box2d/types.h"
+#include <math.h>
 
-// Read a body center of mass relative to a base position, in double precision mode. The public
-// getters demote to float (~1 m resolution at 1e7), so the precision check reaches into the body
-// sim. In float mode this is the same demoted vector.
-static b2Vec2 BodyRelativeCenter( b2WorldId worldId, b2BodyId bodyId, b2Pos baseVec )
+#define STACK_COUNT 6
+#define MAX_STEPS 400
+
+typedef struct StackResult
 {
-	b2World* world = b2GetWorldFromId( worldId );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* sim = b2GetBodySim( world, body );
-	return b2SubPos( sim->center, baseVec );
-}
+	// Final body positions relative to the base, so origin and far runs are directly comparable
+	b3Vec3 relativePositions[STACK_COUNT];
 
-#define PYRAMID_BODY_COUNT 9
-
-typedef struct PyramidResult
-{
+	// First step on which the top body fell asleep, or -1 if it never settled
 	int sleepStep;
-	b2Vec2 rel[PYRAMID_BODY_COUNT];
-} PyramidResult;
+} StackResult;
 
-// Build a stepped pyramid of unit boxes on a base position, settle it, and report the sleep frame
-// and the settled centers relative to the base. Integer offsets keep every float bodyDef.position
-// exact even at 1e7 (the public position API is still float), so the origin and large world runs
-// start from an identical relative configuration.
-static PyramidResult RunPyramid( b2Pos baseVec )
+// Drop a short stack of boxes onto a ground box centered at baseX. Records each body's final
+// position relative to the base and the step on which the stack settles.
+static StackResult RunStack( float baseX )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	worldDef.workerCount = 1;
-	b2WorldId worldId = b2CreateWorld( &worldDef );
+	b3Pos base = (b3Pos){ baseX, 0.0f, 0.0f };
 
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+
+	b3BodyDef groundDef = b3DefaultBodyDef();
+	groundDef.position = base;
+	b3BodyId groundId = b3CreateBody( worldId, &groundDef );
+	b3BoxHull groundBox = b3MakeBoxHull( 10.0f, 1.0f, 10.0f );
+	b3ShapeDef groundShapeDef = b3DefaultShapeDef();
+	b3CreateHullShape( groundId, &groundShapeDef, &groundBox.base );
+
+	b3BodyId bodies[STACK_COUNT];
+	for ( int i = 0; i < STACK_COUNT; ++i )
 	{
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.position = baseVec;
-		b2BodyId groundId = b2CreateBody( worldId, &bodyDef );
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		bodyDef.type = b3_dynamicBody;
+		bodyDef.position = b3OffsetPos( base, (b3Vec3){ 0.0f, 2.0f + 1.05f * i, 0.0f } );
+		bodies[i] = b3CreateBody( worldId, &bodyDef );
 
-		// Ground top surface at baseY + 0.5
-		b2Polygon box = b2MakeBox( 10.0f, 0.5f );
-		b2ShapeDef shapeDef = b2DefaultShapeDef();
-		b2CreatePolygonShape( groundId, &shapeDef, &box );
+		b3BoxHull box = b3MakeCubeHull( 0.5f );
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+		shapeDef.density = 1.0f;
+		b3CreateHullShape( bodies[i], &shapeDef, &box.base );
 	}
 
-	// Each box is 1 m, centers on integer offsets. Row 0 rests on the ground, rows stack directly
-	// above so the configuration is stable and sleeps quickly.
-	static const b2Vec2 offsets[PYRAMID_BODY_COUNT] = {
-		{ -2.0f, 1.0f }, { -1.0f, 1.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f }, { 2.0f, 1.0f },
-		{ -1.0f, 2.0f }, { 0.0f, 2.0f },  { 1.0f, 2.0f }, { 0.0f, 3.0f },
-	};
+	StackResult result = { 0 };
+	result.sleepStep = -1;
 
-	b2BodyId bodyIds[PYRAMID_BODY_COUNT];
-	b2Polygon box = b2MakeBox( 0.5f, 0.5f );
-	b2ShapeDef shapeDef = b2DefaultShapeDef();
-	for ( int i = 0; i < PYRAMID_BODY_COUNT; ++i )
+	for ( int step = 0; step < MAX_STEPS; ++step )
 	{
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.position = (b2Pos){ baseVec.x + offsets[i].x, baseVec.y + offsets[i].y };
-		bodyIds[i] = b2CreateBody( worldId, &bodyDef );
-		b2CreatePolygonShape( bodyIds[i], &shapeDef, &box );
-	}
-
-	PyramidResult result = { .sleepStep = -1 };
-
-	for ( int step = 0; step < 250; ++step )
-	{
-		b2World_Step( worldId, 1.0f / 60.0f, 4 );
-
-		if ( result.sleepStep < 0 )
+		b3World_Step( worldId, 1.0f / 60.0f, 4 );
+		if ( result.sleepStep < 0 && b3Body_IsAwake( bodies[STACK_COUNT - 1] ) == false )
 		{
-			b2BodyEvents events = b2World_GetBodyEvents( worldId );
-			if ( events.moveCount == 0 && b2World_GetAwakeBodyCount( worldId ) == 0 )
-			{
-				result.sleepStep = step;
-			}
+			result.sleepStep = step;
 		}
 	}
 
-	for ( int i = 0; i < PYRAMID_BODY_COUNT; ++i )
+	for ( int i = 0; i < STACK_COUNT; ++i )
 	{
-		result.rel[i] = BodyRelativeCenter( worldId, bodyIds[i], baseVec );
+		b3Pos p = b3Body_GetPosition( bodies[i] );
+		result.relativePositions[i] = b3SubPos( p, base );
 	}
 
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
 	return result;
 }
 
-// Far from the origin the contact boundary is differenced in double, so a settling pyramid must
-// follow the same relative trajectory as one at the origin and sleep on the same frame. A float
-// build cannot resolve the body positions at 1e7, which is the whole point of large world mode.
-static int LargeWorldPyramidTest( void )
+// A stack at the origin and a stack far from the origin should behave identically in double
+// precision: same settle frame, same relative geometry.
+static int LargeWorldStackTest( void )
 {
-	PyramidResult origin = RunPyramid( (b2Pos){ 0.0f, 0.0f } );
-	ENSURE( origin.sleepStep > 0 );
+	StackResult origin = RunStack( 0.0f );
+	ENSURE( origin.sleepStep >= 0 );
 
-#if defined( BOX2D_DOUBLE_PRECISION )
-	PyramidResult large = RunPyramid( (b2Pos){ 1.0e7f, 0.0f } );
+#if defined( BOX3D_DOUBLE_PRECISION )
+	StackResult far = RunStack( 1.0e7f );
+	ENSURE( far.sleepStep >= 0 );
 
-	ENSURE( large.sleepStep == origin.sleepStep );
-	for ( int i = 0; i < PYRAMID_BODY_COUNT; ++i )
+	// Sleeps on the same frame and lands in the same relative configuration
+	ENSURE( far.sleepStep == origin.sleepStep );
+	for ( int i = 0; i < STACK_COUNT; ++i )
 	{
-		ENSURE_SMALL( large.rel[i].x - origin.rel[i].x, 1e-3f );
-		ENSURE_SMALL( large.rel[i].y - origin.rel[i].y, 1e-3f );
+		ENSURE_SMALL( far.relativePositions[i].x - origin.relativePositions[i].x, 1.0e-3f );
+		ENSURE_SMALL( far.relativePositions[i].y - origin.relativePositions[i].y, 1.0e-3f );
+		ENSURE_SMALL( far.relativePositions[i].z - origin.relativePositions[i].z, 1.0e-3f );
 	}
 #endif
 
 	return 0;
 }
 
-// Fire a bullet at a thin wall and report where it ends up relative to the base. With continuous
-// collision the bullet stops at the near face, without it the bullet tunnels far past the wall.
-static float RunBullet( b2Pos baseVec )
+// Fire a fast bullet at a thin wall. Returns the bullet's final x relative to the base. If
+// continuous collision works the bullet stops at the wall instead of tunneling past it.
+static float RunBullet( float baseX )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	worldDef.workerCount = 1;
-	b2WorldId worldId = b2CreateWorld( &worldDef );
+	b3Pos base = (b3Pos){ baseX, 0.0f, 0.0f };
 
-	// Thin tall wall centered on the base
-	b2BodyDef bodyDef = b2DefaultBodyDef();
-	bodyDef.type = b2_staticBody;
-	bodyDef.position = baseVec;
-	b2BodyId wallId = b2CreateBody( worldId, &bodyDef );
-	b2Polygon wall = b2MakeBox( 0.05f, 5.0f );
-	b2ShapeDef shapeDef = b2DefaultShapeDef();
-	b2CreatePolygonShape( wallId, &shapeDef, &wall );
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
 
-	// Bullet fired at the wall from the far side. At 200 m/s it crosses ~3.3 m per step, so without
-	// continuous collision it passes the 0.1 m wall in the first step.
-	bodyDef = b2DefaultBodyDef();
-	bodyDef.type = b2_dynamicBody;
-	bodyDef.isBullet = true;
-	bodyDef.gravityScale = 0.0f;
-	bodyDef.position = (b2Pos){ baseVec.x + 10.0f, baseVec.y };
-	bodyDef.linearVelocity = (b2Vec2){ -200.0f, 0.0f };
-	b2BodyId bulletId = b2CreateBody( worldId, &bodyDef );
-	b2Circle circle = { { 0.0f, 0.0f }, 0.1f };
-	shapeDef = b2DefaultShapeDef();
-	b2CreateCircleShape( bulletId, &shapeDef, &circle );
+	// Thin static wall at x = base + 5, spanning y and z
+	b3BodyDef wallDef = b3DefaultBodyDef();
+	wallDef.type = b3_staticBody;
+	wallDef.position = b3OffsetPos( base, (b3Vec3){ 5.0f, 0.0f, 0.0f } );
+	b3BodyId wallId = b3CreateBody( worldId, &wallDef );
+	b3BoxHull wallBox = b3MakeBoxHull( 0.05f, 5.0f, 5.0f );
+	b3ShapeDef wallShapeDef = b3DefaultShapeDef();
+	b3CreateHullShape( wallId, &wallShapeDef, &wallBox.base );
+
+	// Small fast bullet aimed at the wall, no gravity
+	b3BodyDef bulletDef = b3DefaultBodyDef();
+	bulletDef.type = b3_dynamicBody;
+	bulletDef.isBullet = true;
+	bulletDef.gravityScale = 0.0f;
+	bulletDef.position = base;
+	bulletDef.linearVelocity = (b3Vec3){ 200.0f, 0.0f, 0.0f };
+	b3BodyId bulletId = b3CreateBody( worldId, &bulletDef );
+	b3Sphere sphere = { { 0.0f, 0.0f, 0.0f }, 0.1f };
+	b3ShapeDef bulletShapeDef = b3DefaultShapeDef();
+	bulletShapeDef.density = 1.0f;
+	b3CreateSphereShape( bulletId, &bulletShapeDef, &sphere );
 
 	for ( int step = 0; step < 30; ++step )
 	{
-		b2World_Step( worldId, 1.0f / 60.0f, 4 );
+		b3World_Step( worldId, 1.0f / 60.0f, 4 );
 	}
 
-	float relX = BodyRelativeCenter( worldId, bulletId, baseVec ).x;
-	b2DestroyWorld( worldId );
-	return relX;
+	b3Vec3 relative = b3SubPos( b3Body_GetPosition( bulletId ), base );
+	b3DestroyWorld( worldId );
+	return relative.x;
 }
 
-// The swept query box is rounded back to world float, which at 1e7 has ~1 m resolution, the most
-// likely place to drop the hit. The re-centered TOI must still catch the wall with no tunneling.
+// The bullet must be caught by the wall, not tunnel through it. The blocking check is that this
+// still holds far from the origin where the swept query box rounds back to float with large ULP.
 static int LargeWorldBulletTest( void )
 {
-	// At the origin the bullet must stop at the near face in both precision modes. Wall face at
-	// 0.05 plus the 0.1 bullet radius puts the rest position near 0.15.
-	float relX = RunBullet( (b2Pos){ 0.0f, 0.0f } );
-	ENSURE( relX > 0.0f && relX < 0.5f );
+	// Wall front face is at x = 5 - 0.05; the bullet radius is 0.1, so a caught bullet stays well
+	// short of the wall center at x = 5.
+	float originX = RunBullet( 0.0f );
+	ENSURE( originX < 5.0f );
 
-#if defined( BOX2D_DOUBLE_PRECISION )
-	relX = RunBullet( (b2Pos){ 1.0e7f, 0.0f } );
-	ENSURE( relX > 0.0f && relX < 0.5f );
+#if defined( BOX3D_DOUBLE_PRECISION )
+	float farX = RunBullet( 1.0e7f );
+	ENSURE( farX < 5.0f );
 #endif
 
 	return 0;
 }
 
-// Cast a ray at a unit box on the base and report the hit point relative to the base. The ray
-// origin is differenced against the body position in double, so the hit must land on the box face
-// regardless of how far the base is from the origin.
-static b2Vec2 RunRayCast( b2Pos baseVec )
+typedef struct QueryResult
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	worldDef.workerCount = 1;
-	b2WorldId worldId = b2CreateWorld( &worldDef );
-
-	b2BodyDef bodyDef = b2DefaultBodyDef();
-	bodyDef.position = baseVec;
-	b2BodyId bodyId = b2CreateBody( worldId, &bodyDef );
-	b2Polygon box = b2MakeBox( 0.5f, 0.5f );
-	b2ShapeDef shapeDef = b2DefaultShapeDef();
-	b2CreatePolygonShape( bodyId, &shapeDef, &box );
-
-	// Ray from 5 m left of the box, traveling 10 m right. Hits the left face at base + {-0.5, 0}.
-	b2Pos origin = (b2Pos){ baseVec.x - 5.0f, baseVec.y };
-	b2Vec2 translation = { 10.0f, 0.0f };
-	b2RayResult result = b2World_CastRayClosest( worldId, origin, translation, b2DefaultQueryFilter() );
-
-	// A miss leaves the point at the origin, which the caller's position check rejects
-	b2Vec2 rel = b2SubPos( result.point, baseVec );
-	b2DestroyWorld( worldId );
-	return rel;
-}
-
-// A float ray cast at 1e7 would resolve the hit only to the ~1 m coordinate ULP. The double origin
-// plus per-shape re-centering keeps the analytic hit point accurate far from the origin.
-static int LargeWorldRayCastTest( void )
-{
-	b2Vec2 rel = RunRayCast( (b2Pos){ 0.0f, 0.0f } );
-	ENSURE_SMALL( rel.x + 0.5f, 1e-4f );
-	ENSURE_SMALL( rel.y, 1e-4f );
-
-#if defined( BOX2D_DOUBLE_PRECISION )
-	rel = RunRayCast( (b2Pos){ 1.0e7f, 0.0f } );
-	ENSURE_SMALL( rel.x + 0.5f, 1e-4f );
-	ENSURE_SMALL( rel.y, 1e-4f );
-#endif
-
-	return 0;
-}
-
-typedef struct OriginQueryData
-{
-	int overlapCount;
-	b2Pos castPoint;
-	float castFraction;
+	bool castHit;
+	float castRelX; // shape cast hit point x relative to the base
+	bool overlapHit;
 	float moverFraction;
 	int planeCount;
-	bool insidePoint;
-	b2Pos shapeRayPoint;
+	bool rayHit;
+	float rayRelX; // world ray cast hit point x relative to the base
 	bool shapeRayHit;
-} OriginQueryData;
+	float shapeRayRelX; // direct shape ray cast hit point x relative to the base
+} QueryResult;
 
-static bool OriginOverlapFcn( b2ShapeId id, void* ctx )
+typedef struct CastContext
 {
-	(void)id;
-	OriginQueryData* data = ctx;
-	data->overlapCount += 1;
-	return true;
-}
+	b3Pos base;
+	bool hit;
+	float relX;
+} CastContext;
 
-static float OriginCastFcn( b2ShapeId id, b2Pos point, b2Vec2 normal, float fraction, void* ctx )
+static float QueryCastCallback( b3ShapeId shapeId, b3Pos point, b3Vec3 normal, float fraction, uint64_t materialId,
+								int triangleIndex, int childIndex, void* context )
 {
-	(void)id;
-	(void)normal;
-	OriginQueryData* data = ctx;
-	data->castPoint = point;
-	data->castFraction = fraction;
+	(void)shapeId, (void)normal, (void)materialId, (void)triangleIndex, (void)childIndex;
+	CastContext* ctx = context;
+	ctx->hit = true;
+	ctx->relX = b3SubPos( point, ctx->base ).x;
 	return fraction;
 }
 
-static bool OriginPlaneFcn( b2ShapeId id, const b2PlaneResult* plane, void* ctx )
+static bool QueryOverlapCallback( b3ShapeId shapeId, void* context )
 {
-	(void)id;
-	(void)plane;
-	OriginQueryData* data = ctx;
-	data->planeCount += 1;
+	(void)shapeId;
+	*(bool*)context = true;
 	return true;
 }
 
-// Issue every origin taking query against a unit box on the base, with all geometry relative to
-// the base. The results must match an origin zero run, which is what makes the origin plumbing
-// (tree lift, per shape re-centering, output compose) non vacuous far from the origin.
-static OriginQueryData RunOriginQueries( b2Pos base )
+static bool QueryPlaneCallback( b3ShapeId shapeId, const b3PlaneResult* planes, int count, void* context )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	worldDef.workerCount = 1;
-	b2WorldId worldId = b2CreateWorld( &worldDef );
+	(void)shapeId, (void)planes;
+	*(int*)context += count;
+	return true;
+}
 
-	b2BodyDef bodyDef = b2DefaultBodyDef();
+// Run the four origin relative spatial queries against a static box centered at the base. The query
+// inputs are all relative to the base, so passing base as the origin keeps them precise far out.
+static QueryResult RunQueries( float baseX )
+{
+	b3Pos base = (b3Pos){ baseX, 0.0f, 0.0f };
+
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_staticBody;
 	bodyDef.position = base;
-	b2BodyId bodyId = b2CreateBody( worldId, &bodyDef );
-	b2Polygon box = b2MakeBox( 0.5f, 0.5f );
-	b2ShapeDef shapeDef = b2DefaultShapeDef();
-	b2ShapeId shapeId = b2CreatePolygonShape( bodyId, &shapeDef, &box );
+	b3BodyId bodyId = b3CreateBody( worldId, &bodyDef );
+	b3BoxHull box = b3MakeBoxHull( 1.0f, 1.0f, 1.0f );
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	b3ShapeId shapeId = b3CreateHullShape( bodyId, &shapeDef, &box.base );
 
-	b2QueryFilter filter = b2DefaultQueryFilter();
-	OriginQueryData data = { 0 };
-	data.castFraction = 1.0f;
+	b3World_Step( worldId, 1.0f / 60.0f, 1 );
 
-	// Overlap a small circle centered on the box
-	b2Vec2 center = { 0.0f, 0.0f };
-	b2ShapeProxy overlapProxy = b2MakeProxy( &center, 1, 0.1f );
-	b2World_OverlapShape( worldId, base, &overlapProxy, filter, OriginOverlapFcn, &data );
+	QueryResult result = { 0 };
 
-	// Cast a small circle at the left face. Center stops at -0.6, hit point on the face at -0.5.
-	b2Vec2 start = { -5.0f, 0.0f };
-	b2ShapeProxy castProxy = b2MakeProxy( &start, 1, 0.1f );
-	b2World_CastShape( worldId, base, &castProxy, (b2Vec2){ 10.0f, 0.0f }, filter, OriginCastFcn, &data );
+	// Sphere proxy swept from the left into the box, hitting the left face at relative x = -1
+	b3Vec3 castPoint = { -5.0f, 0.0f, 0.0f };
+	b3ShapeProxy castProxy = { &castPoint, 1, 0.25f };
+	CastContext castCtx = { base, false, 0.0f };
+	b3World_CastShape( worldId, base, &castProxy, (b3Vec3){ 10.0f, 0.0f, 0.0f }, b3DefaultQueryFilter(), QueryCastCallback,
+					   &castCtx );
+	result.castHit = castCtx.hit;
+	result.castRelX = castCtx.relX;
 
-	// Mover cast at the box
-	b2Capsule mover = { { -5.0f, -0.2f }, { -5.0f, 0.2f }, 0.3f };
-	data.moverFraction = b2World_CastMover( worldId, base, &mover, (b2Vec2){ 10.0f, 0.0f }, filter );
+	// Sphere proxy sitting at the box center
+	b3Vec3 overlapPoint = { 0.0f, 0.0f, 0.0f };
+	b3ShapeProxy overlapProxy = { &overlapPoint, 1, 0.5f };
+	bool overlapHit = false;
+	b3World_OverlapShape( worldId, base, &overlapProxy, b3DefaultQueryFilter(), QueryOverlapCallback, &overlapHit );
+	result.overlapHit = overlapHit;
 
-	// Mover overlapping the box gathers planes
-	b2Capsule touching = { { -0.9f, -0.2f }, { -0.9f, 0.2f }, 0.5f };
-	b2World_CollideMover( worldId, base, &touching, filter, OriginPlaneFcn, &data );
+	// Capsule swept from the left into the box
+	b3Capsule moverCast = { { -5.0f, -0.3f, 0.0f }, { -5.0f, 0.3f, 0.0f }, 0.25f };
+	result.moverFraction =
+		b3World_CastMover( worldId, base, &moverCast, (b3Vec3){ 10.0f, 0.0f, 0.0f }, b3DefaultQueryFilter(), NULL, NULL );
 
-	// Shape level queries at the base
-	data.insidePoint = b2Shape_TestPoint( shapeId, base );
+	// Capsule overlapping the left face, should report a contact plane
+	b3Capsule moverCollide = { { -1.1f, -0.3f, 0.0f }, { -1.1f, 0.3f, 0.0f }, 0.3f };
+	int planeCount = 0;
+	b3World_CollideMover( worldId, base, &moverCollide, b3DefaultQueryFilter(), QueryPlaneCallback, &planeCount );
+	result.planeCount = planeCount;
 
-	b2WorldCastOutput rayOutput =
-		b2Shape_RayCast( shapeId, b2OffsetPos( base, (b2Vec2){ -5.0f, 0.0f } ), (b2Vec2){ 10.0f, 0.0f } );
-	data.shapeRayHit = rayOutput.hit;
-	data.shapeRayPoint = rayOutput.point;
+	// World ray cast from the left into the box, hitting the left face at relative x = -1
+	b3Pos rayOrigin = b3OffsetPos( base, (b3Vec3){ -5.0f, 0.0f, 0.0f } );
+	b3RayResult ray = b3World_CastRayClosest( worldId, rayOrigin, (b3Vec3){ 10.0f, 0.0f, 0.0f }, b3DefaultQueryFilter() );
+	result.rayHit = ray.hit;
+	result.rayRelX = ray.hit ? b3SubPos( ray.point, base ).x : 0.0f;
 
-	b2DestroyWorld( worldId );
-	return data;
+	// Direct shape ray cast against the same box
+	b3WorldCastOutput shapeRay = b3Shape_RayCast( shapeId, rayOrigin, (b3Vec3){ 10.0f, 0.0f, 0.0f } );
+	result.shapeRayHit = shapeRay.hit;
+	result.shapeRayRelX = shapeRay.hit ? b3SubPos( shapeRay.point, base ).x : 0.0f;
+
+	b3DestroyWorld( worldId );
+	return result;
 }
 
-static int LargeWorldOriginQueryTest( void )
+// The origin relative queries hit at the origin and stay precise far from it: same hit geometry and
+// sweep fraction whether the box is at the origin or at 1e7.
+static int LargeWorldQueryTest( void )
 {
-	OriginQueryData origin = RunOriginQueries( b2Pos_zero );
-	ENSURE( origin.overlapCount == 1 );
-	ENSURE( origin.castFraction < 1.0f );
+	QueryResult origin = RunQueries( 0.0f );
+	ENSURE( origin.castHit );
+	ENSURE( origin.overlapHit );
 	ENSURE( origin.moverFraction < 1.0f );
-	ENSURE( origin.planeCount >= 1 );
-	ENSURE( origin.insidePoint == true );
-	ENSURE( origin.shapeRayHit == true );
+	ENSURE( origin.planeCount > 0 );
+	ENSURE_SMALL( origin.castRelX + 1.0f, 0.05f );
+	ENSURE( origin.rayHit );
+	ENSURE_SMALL( origin.rayRelX + 1.0f, 0.05f );
+	ENSURE( origin.shapeRayHit );
+	ENSURE_SMALL( origin.shapeRayRelX + 1.0f, 0.05f );
 
-	b2Vec2 castRel = b2SubPos( origin.castPoint, b2Pos_zero );
-	ENSURE_SMALL( castRel.x + 0.5f, 1e-3f );
-	b2Vec2 rayRel = b2SubPos( origin.shapeRayPoint, b2Pos_zero );
-	ENSURE_SMALL( rayRel.x + 0.5f, 1e-3f );
+#if defined( BOX3D_DOUBLE_PRECISION )
+	QueryResult far = RunQueries( 1.0e7f );
+	ENSURE( far.castHit );
+	ENSURE( far.overlapHit );
+	ENSURE( far.moverFraction < 1.0f );
+	ENSURE( far.planeCount > 0 );
+	ENSURE( far.rayHit );
+	ENSURE( far.shapeRayHit );
 
-#if defined( BOX2D_DOUBLE_PRECISION )
-	// The same relative queries far from the origin must reproduce the origin run. A float query
-	// at 1e7 could not resolve the faces below the coordinate ULP.
-	b2Pos base = { 1.0e7f, 0.0f };
-	OriginQueryData large = RunOriginQueries( base );
-	ENSURE( large.overlapCount == origin.overlapCount );
-	ENSURE( large.planeCount == origin.planeCount );
-	ENSURE( large.insidePoint == origin.insidePoint );
-	ENSURE( large.shapeRayHit == origin.shapeRayHit );
-	ENSURE_SMALL( large.castFraction - origin.castFraction, 1e-4f );
-	ENSURE_SMALL( large.moverFraction - origin.moverFraction, 1e-4f );
-
-	b2Vec2 castRelLarge = b2SubPos( large.castPoint, base );
-	ENSURE_SMALL( castRelLarge.x - castRel.x, 1e-3f );
-	ENSURE_SMALL( castRelLarge.y - castRel.y, 1e-3f );
-
-	b2Vec2 rayRelLarge = b2SubPos( large.shapeRayPoint, base );
-	ENSURE_SMALL( rayRelLarge.x - rayRel.x, 1e-3f );
-	ENSURE_SMALL( rayRelLarge.y - rayRel.y, 1e-3f );
+	ENSURE_SMALL( far.castRelX - origin.castRelX, 1.0e-3f );
+	ENSURE_SMALL( far.moverFraction - origin.moverFraction, 1.0e-3f );
+	ENSURE( far.planeCount == origin.planeCount );
+	ENSURE_SMALL( far.rayRelX - origin.rayRelX, 1.0e-3f );
+	ENSURE_SMALL( far.shapeRayRelX - origin.shapeRayRelX, 1.0e-3f );
 #endif
 
-	return 0;
-}
-
-// A recording made far from the origin must replay with no divergence. The recorded world positions
-// ride the double precision wire format added for large world mode; demoting them to float would snap
-// a replayed body off the recorded path and the per step state hash would diverge. Float build: the
-// positions are float either way, so this is a plain recording round trip.
-static int LargeWorldRecordingTest( void )
-{
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	worldDef.workerCount = 1;
-	b2WorldId worldId = b2CreateWorld( &worldDef );
-
-	// At 1e7 the double precision wire format is what keeps the replay on the recorded path. The
-	// float build has no large world range (the broad phase asserts |coord| < B2_HUGE = 1e5), so it
-	// records the same scene at the origin: a plain recording round trip.
-#if defined( BOX2D_DOUBLE_PRECISION )
-	b2Pos base = { 1.0e7f, 0.0f };
-#else
-	b2Pos base = { 0.0f, 0.0f };
-#endif
-
-	// Record from before any body exists so world positions ride the op stream (CreateBody,
-	// SetTransform), exercising the recorded position wire format rather than the seed snapshot.
-	b2Recording* rec = b2CreateRecording( 0 );
-	b2World_StartRecording( worldId, rec );
-
-	b2BodyDef groundDef = b2DefaultBodyDef();
-	groundDef.position = base;
-	b2BodyId groundId = b2CreateBody( worldId, &groundDef );
-	b2Polygon groundBox = b2MakeBox( 20.0f, 0.5f );
-	b2ShapeDef groundShapeDef = b2DefaultShapeDef();
-	b2CreatePolygonShape( groundId, &groundShapeDef, &groundBox );
-
-	// A box settling on the ground exercises the contact solver far from the origin.
-	b2BodyDef stackDef = b2DefaultBodyDef();
-	stackDef.type = b2_dynamicBody;
-	stackDef.position = (b2Pos){ base.x, base.y + 1.0f };
-	b2BodyId stackId = b2CreateBody( worldId, &stackDef );
-	b2Polygon box = b2MakeBox( 0.5f, 0.5f );
-	b2ShapeDef boxDef = b2DefaultShapeDef();
-	boxDef.density = 1.0f;
-	b2CreatePolygonShape( stackId, &boxDef, &box );
-
-	// A free body sliding along x so its center accrues sub-meter detail that float cannot hold at
-	// 1e7. Its evolved double transform is fed back through SetTransform mid recording, so the op
-	// stream carries a position no float could round trip.
-	b2BodyDef sliderDef = b2DefaultBodyDef();
-	sliderDef.type = b2_dynamicBody;
-	sliderDef.gravityScale = 0.0f;
-	sliderDef.position = (b2Pos){ base.x, base.y + 5.0f };
-	sliderDef.linearVelocity = (b2Vec2){ 3.0f, 0.0f };
-	b2BodyId sliderId = b2CreateBody( worldId, &sliderDef );
-	b2CreatePolygonShape( sliderId, &boxDef, &box );
-
-	for ( int step = 0; step < 30; ++step )
-	{
-		b2World_Step( worldId, 1.0f / 60.0f, 4 );
-	}
-
-	b2WorldTransform sliderXf = b2Body_GetTransform( sliderId );
-	b2Body_SetTransform( sliderId, sliderXf.p, sliderXf.q );
-
-	for ( int step = 0; step < 30; ++step )
-	{
-		b2World_Step( worldId, 1.0f / 60.0f, 4 );
-	}
-
-	b2World_StopRecording( worldId );
-	b2DestroyWorld( worldId );
-
-	const uint8_t* data = b2Recording_GetData( rec );
-	int size = b2Recording_GetSize( rec );
-	ENSURE( size > 0 );
-
-	// Replay at the recorded worker count and a different one. A demoted op stream position would
-	// diverge the state hash; the double precision wire format reproduces the run exactly.
-	ENSURE( b2ValidateReplay( data, size, 0 ) );
-	ENSURE( b2ValidateReplay( data, size, 4 ) );
-
-	b2DestroyRecording( rec );
 	return 0;
 }
 
 int LargeWorldTest( void )
 {
-	RUN_SUBTEST( LargeWorldPyramidTest );
+	RUN_SUBTEST( LargeWorldStackTest );
 	RUN_SUBTEST( LargeWorldBulletTest );
-	RUN_SUBTEST( LargeWorldRayCastTest );
-	RUN_SUBTEST( LargeWorldOriginQueryTest );
-	RUN_SUBTEST( LargeWorldRecordingTest );
-
+	RUN_SUBTEST( LargeWorldQueryTest );
 	return 0;
 }

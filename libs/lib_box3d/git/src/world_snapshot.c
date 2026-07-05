@@ -1,11 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Erin Catto
 // SPDX-License-Identifier: MIT
 
+#if defined( _MSC_VER ) && !defined( _CRT_SECURE_NO_WARNINGS )
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "world_snapshot.h"
 
 #include "bitset.h"
 #include "body.h"
 #include "broad_phase.h"
+#include "compound.h"
 #include "constraint_graph.h"
 #include "contact.h"
 #include "container.h"
@@ -20,90 +25,75 @@
 #include "solver_set.h"
 #include "table.h"
 
-#include "box2d/box2d.h"
-#include "box2d/collision.h"
-#include "box2d/types.h"
+#include "box3d/box3d.h"
+#include "box3d/collision.h"
+#include "box3d/types.h"
 
 #include <string.h>
 
-// Snapshot image magic and version
-#define B2_SNAP_MAGIC 0x32534E42u // 'BNS2'
+// Snapshot image magic 'BNS3' and version
+#define B3_SNAP_MAGIC 0x33534E42u
+#define B3_SNAP_VERSION 1u
 
-// Bump this if any of the data structures below get modified. The layout hash only catches
-// size changes, a same-size reinterpretation like the contact cache reshape needs this bump.
-#define B2_SNAP_VERSION 3u
+#define B3_SNAP_FLAG_VALIDATION 0x1u
+#define B3_SNAP_FLAG_DOUBLE_PRECISION 0x2u
 
-// Header flag bits
-#define B2_SNAP_FLAG_VALIDATION 0x1u	   // image was built with validation, only used for diagnostics
-#define B2_SNAP_FLAG_DOUBLE_PRECISION 0x2u // image was built with double precision world positions
-
-// Layout hash seeds from all structs we memcpy, plus key constants.
-// Changing any struct or constant updates the hash. Re-purposing or swapping
-// fields might not change the hash
-static uint32_t b2ComputeLayoutHash( void )
+// Layout hash over all POD-copied structs + key constants.
+// Changing a struct size updates this, catching ABI drift early.
+static uint32_t b3ComputeLayoutHash( void )
 {
-	// FNV-1a hash
 	uint32_t h = 2166136261u;
 #define MIX( x )                                                                                                                 \
 	h ^= (uint32_t)( x );                                                                                                        \
 	h *= 16777619u;
-	MIX( sizeof( b2Body ) )
-	MIX( sizeof( b2BodySim ) )
-	MIX( sizeof( b2BodyState ) )
-	MIX( sizeof( b2Shape ) )
-	MIX( sizeof( b2ChainShape ) )
-	MIX( sizeof( b2Contact ) )
-	MIX( sizeof( b2ContactSim ) )
-	MIX( sizeof( b2Joint ) )
-	MIX( sizeof( b2JointSim ) )
-	MIX( sizeof( b2Island ) )
-	MIX( sizeof( b2IslandSim ) )
-	MIX( sizeof( b2ContactLink ) )
-	MIX( sizeof( b2JointLink ) )
-	MIX( sizeof( b2Sensor ) )
-	MIX( sizeof( b2Visitor ) )
-	MIX( sizeof( b2SolverSet ) )
-	MIX( sizeof( b2GraphColor ) )
-	MIX( sizeof( b2DynamicTree ) )
-	MIX( sizeof( b2TreeNode ) )
-	MIX( sizeof( b2SetItem ) )
-	MIX( sizeof( b2IdPool ) )
-	MIX( sizeof( b2SurfaceMaterial ) )
-	MIX( B2_GRAPH_COLOR_COUNT )
-	MIX( b2_bodyTypeCount )
+	MIX( sizeof( b3Body ) )
+	MIX( sizeof( b3BodySim ) )
+	MIX( sizeof( b3BodyState ) )
+	MIX( sizeof( b3Shape ) )
+	MIX( sizeof( b3Contact ) )
+	MIX( sizeof( b3Manifold ) )
+	MIX( sizeof( b3Joint ) )
+	MIX( sizeof( b3JointSim ) )
+	MIX( sizeof( b3Island ) )
+	MIX( sizeof( b3IslandSim ) )
+	MIX( sizeof( b3ContactLink ) )
+	MIX( sizeof( b3JointLink ) )
+	MIX( sizeof( b3Sensor ) )
+	MIX( sizeof( b3Visitor ) )
+	MIX( sizeof( b3SolverSet ) )
+	MIX( sizeof( b3GraphColor ) )
+	MIX( sizeof( b3DynamicTree ) )
+	MIX( sizeof( b3TreeNode ) )
+	MIX( sizeof( b3SetItem ) )
+	MIX( sizeof( b3IdPool ) )
+	MIX( sizeof( b3SurfaceMaterial ) )
+	MIX( sizeof( b3ContactSpec ) )
+	MIX( sizeof( b3TriangleCache ) )
+	MIX( B3_GRAPH_COLOR_COUNT )
+	MIX( b3_bodyTypeCount )
 	MIX( sizeof( void* ) )
 #undef MIX
 	return h;
 }
 
-// Snapshot image header, written at offset 0
-typedef struct b2SnapHeader
+typedef struct b3SnapHeader
 {
 	uint32_t magic;
 	uint32_t version;
 	uint32_t layoutHash;
-	uint32_t flags; // B2_SNAP_FLAG_*, keeps 16-byte alignment
-} b2SnapHeader;
+	uint32_t flags;
+} b3SnapHeader;
 
-// Compile-time tripwires for the structs serialized field-by-field. If one fires, a field was added or
-// reordered: resync the matching code in b2SerializeWorld / b2DeserializeIntoShell and bump
-// B2_SNAP_VERSION.
-#if INTPTR_MAX == INT64_MAX
-_Static_assert( sizeof( b2ChainShape ) == 48, "b2ChainShape layout changed; resync snapshot chain serialization" );
-_Static_assert( sizeof( b2Sensor ) == 56, "b2Sensor layout changed; resync snapshot sensor serialization" );
-_Static_assert( sizeof( b2Island ) == 64, "b2Island layout changed; resync snapshot island serialization" );
-#endif
-
-// Bounds-checked read cursor, mirrors b2RecReader discipline
-typedef struct b2SnapReader
+// Bounds-checked read cursor
+typedef struct b3SnapReader
 {
 	const uint8_t* data;
 	int cursor;
 	int size;
 	bool ok;
-} b2SnapReader;
+} b3SnapReader;
 
-static void b2SnapRCheck( b2SnapReader* r, int need )
+static void b3SnapRCheck( b3SnapReader* r, int need )
 {
 	if ( need < 0 || (int64_t)r->cursor + (int64_t)need > (int64_t)r->size )
 	{
@@ -111,9 +101,9 @@ static void b2SnapRCheck( b2SnapReader* r, int need )
 	}
 }
 
-static void b2SnapR_Bytes( b2SnapReader* r, void* dst, int n )
+static void b3SnapR_Bytes( b3SnapReader* r, void* dst, int n )
 {
-	b2SnapRCheck( r, n );
+	b3SnapRCheck( r, n );
 	if ( !r->ok )
 	{
 		return;
@@ -122,46 +112,44 @@ static void b2SnapR_Bytes( b2SnapReader* r, void* dst, int n )
 	r->cursor += n;
 }
 
-static int b2SnapR_I32( b2SnapReader* r )
+static int b3SnapR_I32( b3SnapReader* r )
 {
 	int32_t v = 0;
-	b2SnapR_Bytes( r, &v, 4 );
+	b3SnapR_Bytes( r, &v, 4 );
 	return (int)v;
 }
 
-static uint32_t b2SnapR_U32( b2SnapReader* r )
+static uint32_t b3SnapR_U32( b3SnapReader* r )
 {
 	uint32_t v = 0;
-	b2SnapR_Bytes( r, &v, 4 );
+	b3SnapR_Bytes( r, &v, 4 );
 	return v;
 }
 
-static void b2SnapW_I32( b2RecBuffer* buf, int v )
+static void b3SnapW_I32( b3RecBuffer* buf, int v )
 {
 	int32_t w = (int32_t)v;
-	b2RecBufAppend( buf, &w, 4 );
+	b3RecBufAppend( buf, &w, 4 );
 }
 
-static void b2SnapW_U32( b2RecBuffer* buf, uint32_t v )
+static void b3SnapW_U32( b3RecBuffer* buf, uint32_t v )
 {
-	b2RecBufAppend( buf, &v, 4 );
+	b3RecBufAppend( buf, &v, 4 );
 }
 
-static void b2SnapW_Bytes( b2RecBuffer* buf, const void* src, int n )
+static void b3SnapW_Bytes( b3RecBuffer* buf, const void* src, int n )
 {
-	b2RecBufAppend( buf, src, n );
+	b3RecBufAppend( buf, src, n );
 }
 
-// Reject a count read from the image before it reaches an allocation or memset. count must be non
-// negative, its in-memory footprint must fit in int, and the stream must hold at least minStreamBytes
-// per element. A corrupt or truncated image then fails.
-static bool b2SnapCheckCount( const b2SnapReader* r, int count, int memSize, int minStreamBytes )
+// Bounds check before allocating from image
+static bool b3SnapCheckCount( const b3SnapReader* r, int count, int memSize, int minStreamBytes )
 {
 	if ( count < 0 || memSize < 0 || minStreamBytes < 0 )
 	{
 		return false;
 	}
-	if ( memSize > 0 && count > INT32_MAX / memSize )
+	if ( memSize > 0 && count > 0x7FFFFFFF / memSize )
 	{
 		return false;
 	}
@@ -169,48 +157,31 @@ static bool b2SnapCheckCount( const b2SnapReader* r, int count, int memSize, int
 	return (int64_t)count * (int64_t)minStreamBytes <= remaining;
 }
 
-// Serialize a POD array: count then raw bytes
-#define b2SerPodArray( buf, arr )                                                                                                \
+// POD array: count + raw bytes
+#define b3SerPodArray( buf, arr )                                                                                                \
 	do                                                                                                                           \
 	{                                                                                                                            \
-		b2SnapW_I32( buf, ( arr ).count );                                                                                       \
+		b3SnapW_I32( buf, ( arr ).count );                                                                                       \
 		if ( ( arr ).count > 0 )                                                                                                 \
 		{                                                                                                                        \
-			b2SnapW_Bytes( buf, ( arr ).data, ( arr ).count * (int)sizeof( *( arr ).data ) );                                    \
+			b3SnapW_Bytes( buf, ( arr ).data, ( arr ).count * (int)sizeof( *( arr ).data ) );                                    \
 		}                                                                                                                        \
 	}                                                                                                                            \
 	while ( 0 )
 
-// Serialize a sparse struct array whose element carries a host userData pointer. userData is host
-// wiring, not simulation state, so write it as NULL: images stay reproducible and never persist host
-// addresses across a save. On restore the field reads back NULL.
-#define b2SerSimArray( buf, arr, type )                                                                                          \
+#define b3DesPodArray( r, arr )                                                                                                  \
 	do                                                                                                                           \
 	{                                                                                                                            \
-		b2SnapW_I32( buf, ( arr ).count );                                                                                       \
-		for ( int slot = 0; slot < ( arr ).count; ++slot )                                                                       \
-		{                                                                                                                        \
-			type elem = ( arr ).data[slot];                                                                                      \
-			elem.userData = NULL;                                                                                                \
-			b2SnapW_Bytes( buf, &elem, (int)sizeof( type ) );                                                                    \
-		}                                                                                                                        \
-	}                                                                                                                            \
-	while ( 0 )
-
-// Deserialize a POD array: validate count, resize, then memcpy
-#define b2DesPodArray( r, arr )                                                                                                  \
-	do                                                                                                                           \
-	{                                                                                                                            \
-		int cnt = b2SnapR_I32( r );                                                                                              \
+		int cnt = b3SnapR_I32( r );                                                                                              \
 		int elemSize = (int)sizeof( *( arr ).data );                                                                             \
-		if ( ( r )->ok && b2SnapCheckCount( r, cnt, elemSize, elemSize ) == false )                                              \
+		if ( ( r )->ok && b3SnapCheckCount( r, cnt, elemSize, elemSize ) == false )                                              \
 		{                                                                                                                        \
 			( r )->ok = false;                                                                                                   \
 		}                                                                                                                        \
 		if ( ( r )->ok && cnt > 0 )                                                                                              \
 		{                                                                                                                        \
-			b2Array_Resize( arr, cnt );                                                                                          \
-			b2SnapR_Bytes( r, ( arr ).data, cnt * elemSize );                                                                    \
+			b3Array_Resize( arr, cnt );                                                                                          \
+			b3SnapR_Bytes( r, ( arr ).data, cnt * elemSize );                                                                    \
 		}                                                                                                                        \
 		else if ( ( r )->ok )                                                                                                    \
 		{                                                                                                                        \
@@ -220,89 +191,83 @@ static bool b2SnapCheckCount( const b2SnapReader* r, int count, int memSize, int
 	while ( 0 )
 
 // Id pool: nextIndex + freeArray
-static void b2SerIdPool( b2RecBuffer* buf, const b2IdPool* pool )
+static void b3SerIdPool( b3RecBuffer* buf, const b3IdPool* pool )
 {
-	b2SnapW_I32( buf, pool->nextIndex );
-	b2SerPodArray( buf, pool->freeArray );
+	b3SnapW_I32( buf, pool->nextIndex );
+	b3SerPodArray( buf, pool->freeArray );
 }
 
-static void b2DesIdPool( b2SnapReader* r, b2IdPool* pool )
+static void b3DesIdPool( b3SnapReader* r, b3IdPool* pool )
 {
-	pool->nextIndex = b2SnapR_I32( r );
-	b2DesPodArray( r, pool->freeArray );
+	pool->nextIndex = b3SnapR_I32( r );
+	b3DesPodArray( r, pool->freeArray );
 }
 
-// BitSet: blockCount + raw uint64_t words
-static void b2SerBitSet( b2RecBuffer* buf, const b2BitSet* bs )
+// BitSet: blockCount + raw words
+static void b3SerBitSet( b3RecBuffer* buf, const b3BitSet* bs )
 {
-	b2SnapW_U32( buf, bs->blockCount );
+	b3SnapW_U32( buf, bs->blockCount );
 	if ( bs->blockCount > 0 )
 	{
-		b2SnapW_Bytes( buf, bs->bits, (int)( bs->blockCount * sizeof( uint64_t ) ) );
+		b3SnapW_Bytes( buf, bs->bits, (int)( bs->blockCount * sizeof( uint64_t ) ) );
 	}
 }
 
-// Restore a bitset, leak-clean: destroy the existing one, alloc fresh at exact blockCount capacity.
-// Always keep bits non-NULL, matching b2CreateBitSet, so a later b2GrowBitSet on a count-0 bitset
-// has a buffer to grow from. An empty color bitset serializes as 0 blocks but must restore usable.
-static void b2DesBitSet( b2SnapReader* r, b2BitSet* bs )
+static void b3DesBitSet( b3SnapReader* r, b3BitSet* bs )
 {
-	uint32_t blockCount = b2SnapR_U32( r );
-	if ( r->ok && b2SnapCheckCount( r, (int)blockCount, (int)sizeof( uint64_t ), (int)sizeof( uint64_t ) ) == false )
+	uint32_t blockCount = b3SnapR_U32( r );
+	if ( r->ok && b3SnapCheckCount( r, (int)blockCount, (int)sizeof( uint64_t ), (int)sizeof( uint64_t ) ) == false )
 	{
 		r->ok = false;
 	}
-	b2DestroyBitSet( bs );
+	b3DestroyBitSet( bs );
 	if ( !r->ok )
 	{
 		return;
 	}
 	uint32_t blockCapacity = blockCount > 0 ? blockCount : 1;
-	bs->bits = b2Alloc( blockCapacity * sizeof( uint64_t ) );
+	bs->bits = (uint64_t*)b3Alloc( blockCapacity * sizeof( uint64_t ) );
 	memset( bs->bits, 0, blockCapacity * sizeof( uint64_t ) );
 	bs->blockCapacity = blockCapacity;
 	bs->blockCount = blockCount;
 	if ( blockCount > 0 )
 	{
-		b2SnapR_Bytes( r, bs->bits, (int)( blockCount * sizeof( uint64_t ) ) );
+		b3SnapR_Bytes( r, bs->bits, (int)( blockCount * sizeof( uint64_t ) ) );
 	}
 }
 
-// HashSet (pairSet): raw items at full capacity, probe order depends on it
-static void b2SerHashSet( b2RecBuffer* buf, const b2HashSet* hs )
+// HashSet: capacity + count + raw items (probe order depends on layout)
+static void b3SerHashSet( b3RecBuffer* buf, const b3HashSet* hs )
 {
-	b2SnapW_U32( buf, hs->capacity );
-	b2SnapW_U32( buf, hs->count );
+	b3SnapW_U32( buf, hs->capacity );
+	b3SnapW_U32( buf, hs->count );
 	if ( hs->capacity > 0 )
 	{
-		b2SnapW_Bytes( buf, hs->items, (int)( hs->capacity * sizeof( b2SetItem ) ) );
+		b3SnapW_Bytes( buf, hs->items, (int)( hs->capacity * sizeof( b3SetItem ) ) );
 	}
 }
 
-static void b2DesHashSet( b2SnapReader* r, b2HashSet* hs )
+static void b3DesHashSet( b3SnapReader* r, b3HashSet* hs )
 {
-	uint32_t cap = b2SnapR_U32( r );
-	uint32_t cnt = b2SnapR_U32( r );
-	// Probing masks with capacity-1, so capacity must be a power of two and count can't exceed it.
-	// (cap & (cap-1)) == 0 also accepts 0, which the empty branch handles.
-	bool valid = b2SnapCheckCount( r, (int)cap, (int)sizeof( b2SetItem ), (int)sizeof( b2SetItem ) ) && ( cap & ( cap - 1 ) ) == 0 &&
-				 cnt <= cap;
-	if ( r->ok && valid == false )
+	uint32_t cap = b3SnapR_U32( r );
+	uint32_t cnt = b3SnapR_U32( r );
+	bool valid = b3SnapCheckCount( r, (int)cap, (int)sizeof( b3SetItem ), (int)sizeof( b3SetItem ) ) &&
+				 ( cap & ( cap - 1 ) ) == 0 && cnt <= cap;
+	if ( r->ok && valid == false && ( cap != 0 || cnt != 0 ) )
 	{
 		r->ok = false;
 	}
-	// Destroy the fresh empty set the shell gave us
-	b2DestroySet( hs );
+	b3DestroySet( hs );
 	if ( !r->ok )
 	{
 		return;
 	}
 	if ( cap > 0 )
 	{
-		hs->items = b2Alloc( cap * sizeof( b2SetItem ) );
+		hs->items = (b3SetItem*)b3Alloc( cap * sizeof( b3SetItem ) );
 		hs->capacity = cap;
 		hs->count = cnt;
-		b2SnapR_Bytes( r, hs->items, (int)( cap * sizeof( b2SetItem ) ) );
+		b3SnapR_Bytes( r, hs->items, (int)( cap * sizeof( b3SetItem ) ) );
 	}
 	else
 	{
@@ -312,41 +277,42 @@ static void b2DesHashSet( b2SnapReader* r, b2HashSet* hs )
 	}
 }
 
-// DynamicTree: scalars + full nodeCapacity nodes (freeList chains through free slots)
-static void b2SerTree( b2RecBuffer* buf, const b2DynamicTree* tree )
+// DynamicTree: version, scalars, full nodeCapacity nodes (rebuild scratch excluded)
+static void b3SerTree( b3RecBuffer* buf, const b3DynamicTree* tree )
 {
-	b2SnapW_I32( buf, tree->root );
-	b2SnapW_I32( buf, tree->nodeCount );
-	b2SnapW_I32( buf, tree->nodeCapacity );
-	b2SnapW_I32( buf, tree->freeList );
-	b2SnapW_I32( buf, tree->proxyCount );
+	b3SnapW_Bytes( buf, &tree->version, sizeof( uint64_t ) );
+	b3SnapW_I32( buf, tree->root );
+	b3SnapW_I32( buf, tree->nodeCount );
+	b3SnapW_I32( buf, tree->nodeCapacity );
+	b3SnapW_I32( buf, tree->freeList );
+	b3SnapW_I32( buf, tree->proxyCount );
 	if ( tree->nodeCapacity > 0 )
 	{
-		b2SnapW_Bytes( buf, tree->nodes, tree->nodeCapacity * (int)sizeof( b2TreeNode ) );
+		b3SnapW_Bytes( buf, tree->nodes, tree->nodeCapacity * (int)sizeof( b3TreeNode ) );
 	}
 }
 
-static void b2DesTree( b2SnapReader* r, b2DynamicTree* tree )
+static void b3DesTree( b3SnapReader* r, b3DynamicTree* tree )
 {
-	int root = b2SnapR_I32( r );
-	int nodeCount = b2SnapR_I32( r );
-	int nodeCapacity = b2SnapR_I32( r );
-	int freeList = b2SnapR_I32( r );
-	int proxyCount = b2SnapR_I32( r );
+	uint64_t version;
+	b3SnapR_Bytes( r, &version, sizeof( uint64_t ) );
+	int root = b3SnapR_I32( r );
+	int nodeCount = b3SnapR_I32( r );
+	int nodeCapacity = b3SnapR_I32( r );
+	int freeList = b3SnapR_I32( r );
+	int proxyCount = b3SnapR_I32( r );
 
-	if ( r->ok && b2SnapCheckCount( r, nodeCapacity, (int)sizeof( b2TreeNode ), (int)sizeof( b2TreeNode ) ) == false )
+	if ( r->ok && b3SnapCheckCount( r, nodeCapacity, (int)sizeof( b3TreeNode ), (int)sizeof( b3TreeNode ) ) == false )
 	{
 		r->ok = false;
 	}
 
-	// Free what the shell or a live world holds. A live tree that ran a rebuild also owns
-	// rebuild scratch, so free that too. Null everything so a failure here leaves the tree
-	// safe to destroy.
-	b2Free( tree->nodes, tree->nodeCapacity * (int)sizeof( b2TreeNode ) );
-	b2Free( tree->leafIndices, tree->rebuildCapacity * (int)sizeof( int ) );
-	b2Free( tree->leafBoxes, tree->rebuildCapacity * (int)sizeof( b2AABB ) );
-	b2Free( tree->leafCenters, tree->rebuildCapacity * (int)sizeof( b2Vec2 ) );
-	b2Free( tree->binIndices, tree->rebuildCapacity * (int)sizeof( int ) );
+	// Free existing allocation including any rebuild scratch
+	b3Free( tree->nodes, tree->nodeCapacity * (int)sizeof( b3TreeNode ) );
+	b3Free( tree->leafIndices, tree->rebuildCapacity * (int)sizeof( int ) );
+	b3Free( tree->leafBoxes, tree->rebuildCapacity * (int)sizeof( b3AABB ) );
+	b3Free( tree->leafCenters, tree->rebuildCapacity * (int)sizeof( b3Vec3 ) );
+	b3Free( tree->binIndices, tree->rebuildCapacity * (int)sizeof( int ) );
 	tree->nodes = NULL;
 	tree->leafIndices = NULL;
 	tree->leafBoxes = NULL;
@@ -360,6 +326,7 @@ static void b2DesTree( b2SnapReader* r, b2DynamicTree* tree )
 		return;
 	}
 
+	tree->version = version;
 	tree->root = root;
 	tree->nodeCount = nodeCount;
 	tree->nodeCapacity = nodeCapacity;
@@ -368,792 +335,953 @@ static void b2DesTree( b2SnapReader* r, b2DynamicTree* tree )
 
 	if ( nodeCapacity > 0 )
 	{
-		tree->nodes = b2Alloc( nodeCapacity * (int)sizeof( b2TreeNode ) );
-		b2SnapR_Bytes( r, tree->nodes, nodeCapacity * (int)sizeof( b2TreeNode ) );
+		tree->nodes = (b3TreeNode*)b3Alloc( nodeCapacity * (int)sizeof( b3TreeNode ) );
+		b3SnapR_Bytes( r, tree->nodes, nodeCapacity * (int)sizeof( b3TreeNode ) );
 	}
 }
 
-// Solver set: setIndex + 5 POD arrays
-static void b2SerSolverSet( b2RecBuffer* buf, const b2SolverSet* set )
+// Solver set: setIndex + 4 arrays (note: contactIndices is int array, not contactSims)
+static void b3SerSolverSet( b3RecBuffer* buf, const b3SolverSet* set )
 {
-	b2SnapW_I32( buf, set->setIndex );
-	b2SerPodArray( buf, set->bodySims );
-	b2SerPodArray( buf, set->bodyStates );
-	b2SerPodArray( buf, set->jointSims );
-	b2SerPodArray( buf, set->contactSims );
-	b2SerPodArray( buf, set->islandSims );
+	b3SnapW_I32( buf, set->setIndex );
+	b3SerPodArray( buf, set->bodySims );
+	b3SerPodArray( buf, set->bodyStates );
+	b3SerPodArray( buf, set->jointSims );
+	b3SerPodArray( buf, set->contactIndices );
+	b3SerPodArray( buf, set->islandSims );
 }
 
-static void b2DesSolverSet( b2SnapReader* r, b2SolverSet* set )
+static void b3DesSolverSet( b3SnapReader* r, b3SolverSet* set )
 {
-	set->setIndex = b2SnapR_I32( r );
-	b2DesPodArray( r, set->bodySims );
-	b2DesPodArray( r, set->bodyStates );
-	b2DesPodArray( r, set->jointSims );
-	b2DesPodArray( r, set->contactSims );
-	b2DesPodArray( r, set->islandSims );
+	set->setIndex = b3SnapR_I32( r );
+	b3DesPodArray( r, set->bodySims );
+	b3DesPodArray( r, set->bodyStates );
+	b3DesPodArray( r, set->jointSims );
+	b3DesPodArray( r, set->contactIndices );
+	b3DesPodArray( r, set->islandSims );
 }
 
-// Graph color: bodySet + contactSims + jointSims (overflow color has no bodySet)
-static void b2SerGraphColor( b2RecBuffer* buf, const b2GraphColor* color, bool isOverflow )
+// Graph color: bodySet (non-overflow only) + jointSims + convexContacts + contacts
+static void b3SerGraphColor( b3RecBuffer* buf, const b3GraphColor* color, bool isOverflow )
 {
 	if ( !isOverflow )
 	{
-		b2SerBitSet( buf, &color->bodySet );
+		b3SerBitSet( buf, &color->bodySet );
 	}
-	b2SerPodArray( buf, color->contactSims );
-	b2SerPodArray( buf, color->jointSims );
+	b3SerPodArray( buf, color->jointSims );
+	b3SerPodArray( buf, color->convexContacts );
+	b3SerPodArray( buf, color->contacts );
+	// wideConstraints / manifoldConstraints / contactConstraints are transient, not serialized
 }
 
-static void b2DesGraphColor( b2SnapReader* r, b2GraphColor* color, bool isOverflow )
+static void b3DesGraphColor( b3SnapReader* r, b3GraphColor* color, bool isOverflow )
 {
 	if ( !isOverflow )
 	{
-		b2DesBitSet( r, &color->bodySet );
+		b3DesBitSet( r, &color->bodySet );
 	}
-	b2DesPodArray( r, color->contactSims );
-	b2DesPodArray( r, color->jointSims );
-	// Transient wideConstraints/overflowConstraints stay NULL, wideConstraintCount 0
+	b3DesPodArray( r, color->jointSims );
+	b3DesPodArray( r, color->convexContacts );
+	b3DesPodArray( r, color->contacts );
+	// Transient pointers left at NULL/0 from shell
 }
 
-// World scalar config (simulation settings only, no runtime/shell fields)
-// Only simulation scalars belong here, never host or worker state (workerCount,
-// scheduler, callbacks, user data). b2World_Restore relies on that so an in-place
-// restore preserves the live world's wiring.
-static void b2SerWorldConfig( b2RecBuffer* buf, const b2World* world )
+// World simulation scalars (never host/callback/worker state)
+static void b3SerWorldConfig( b3RecBuffer* buf, const b3World* world )
 {
-	b2SnapW_Bytes( buf, &world->gravity, sizeof( b2Vec2 ) );
-	b2SnapW_Bytes( buf, &world->hitEventThreshold, sizeof( float ) );
-	b2SnapW_Bytes( buf, &world->restitutionThreshold, sizeof( float ) );
-	b2SnapW_Bytes( buf, &world->maxLinearSpeed, sizeof( float ) );
-	b2SnapW_Bytes( buf, &world->contactSpeed, sizeof( float ) );
-	b2SnapW_Bytes( buf, &world->contactHertz, sizeof( float ) );
-	b2SnapW_Bytes( buf, &world->contactDampingRatio, sizeof( float ) );
-	b2SnapW_Bytes( buf, &world->contactRecycleDistance, sizeof( float ) );
-	b2SnapW_Bytes( buf, &world->stepIndex, sizeof( uint64_t ) );
-	b2SnapW_I32( buf, world->splitIslandId );
-	// Step scaling cached for the force/torque reporting getters, which run between steps
-	b2SnapW_Bytes( buf, &world->inv_h, sizeof( float ) );
-	b2SnapW_Bytes( buf, &world->inv_dt, sizeof( float ) );
-	// End-event double-buffer parity, so the first post-restore event query reads the right half
-	b2SnapW_I32( buf, world->endEventArrayIndex );
-	// maxCapacity (b2Capacity struct)
-	b2SnapW_Bytes( buf, &world->maxCapacity, sizeof( b2Capacity ) );
-	// bool flags packed as individual bytes for layout stability
+	b3SnapW_Bytes( buf, &world->gravity, sizeof( b3Vec3 ) );
+	b3SnapW_Bytes( buf, &world->hitEventThreshold, sizeof( float ) );
+	b3SnapW_Bytes( buf, &world->restitutionThreshold, sizeof( float ) );
+	b3SnapW_Bytes( buf, &world->maxLinearSpeed, sizeof( float ) );
+	b3SnapW_Bytes( buf, &world->contactSpeed, sizeof( float ) );
+	b3SnapW_Bytes( buf, &world->contactHertz, sizeof( float ) );
+	b3SnapW_Bytes( buf, &world->contactDampingRatio, sizeof( float ) );
+	b3SnapW_Bytes( buf, &world->contactRecycleDistance, sizeof( float ) );
+	b3SnapW_Bytes( buf, &world->stepIndex, sizeof( uint64_t ) );
+	b3SnapW_I32( buf, world->splitIslandId );
+	b3SnapW_Bytes( buf, &world->inv_h, sizeof( float ) );
+	b3SnapW_Bytes( buf, &world->inv_dt, sizeof( float ) );
+	b3SnapW_I32( buf, world->endEventArrayIndex );
+	b3SnapW_Bytes( buf, &world->maxCapacity, sizeof( b3Capacity ) );
 	uint8_t flags = 0;
 	flags |= world->enableSleep ? 0x01u : 0u;
 	flags |= world->enableWarmStarting ? 0x02u : 0u;
-	flags |= world->enableContactSoftening ? 0x04u : 0u;
-	flags |= world->enableContinuous ? 0x08u : 0u;
-	flags |= world->enableSpeculative ? 0x10u : 0u;
-	b2RecBufAppend( buf, &flags, 1 );
+	flags |= world->enableContinuous ? 0x04u : 0u;
+	flags |= world->enableSpeculative ? 0x08u : 0u;
+	b3RecBufAppend( buf, &flags, 1 );
 }
 
-static void b2DesWorldConfig( b2SnapReader* r, b2World* world )
+static void b3DesWorldConfig( b3SnapReader* r, b3World* world )
 {
-	b2SnapR_Bytes( r, &world->gravity, sizeof( b2Vec2 ) );
-	b2SnapR_Bytes( r, &world->hitEventThreshold, sizeof( float ) );
-	b2SnapR_Bytes( r, &world->restitutionThreshold, sizeof( float ) );
-	b2SnapR_Bytes( r, &world->maxLinearSpeed, sizeof( float ) );
-	b2SnapR_Bytes( r, &world->contactSpeed, sizeof( float ) );
-	b2SnapR_Bytes( r, &world->contactHertz, sizeof( float ) );
-	b2SnapR_Bytes( r, &world->contactDampingRatio, sizeof( float ) );
-	b2SnapR_Bytes( r, &world->contactRecycleDistance, sizeof( float ) );
-	b2SnapR_Bytes( r, &world->stepIndex, sizeof( uint64_t ) );
-	world->splitIslandId = b2SnapR_I32( r );
-	b2SnapR_Bytes( r, &world->inv_h, sizeof( float ) );
-	b2SnapR_Bytes( r, &world->inv_dt, sizeof( float ) );
-	world->endEventArrayIndex = b2SnapR_I32( r );
-	b2SnapR_Bytes( r, &world->maxCapacity, sizeof( b2Capacity ) );
+	b3SnapR_Bytes( r, &world->gravity, sizeof( b3Vec3 ) );
+	b3SnapR_Bytes( r, &world->hitEventThreshold, sizeof( float ) );
+	b3SnapR_Bytes( r, &world->restitutionThreshold, sizeof( float ) );
+	b3SnapR_Bytes( r, &world->maxLinearSpeed, sizeof( float ) );
+	b3SnapR_Bytes( r, &world->contactSpeed, sizeof( float ) );
+	b3SnapR_Bytes( r, &world->contactHertz, sizeof( float ) );
+	b3SnapR_Bytes( r, &world->contactDampingRatio, sizeof( float ) );
+	b3SnapR_Bytes( r, &world->contactRecycleDistance, sizeof( float ) );
+	b3SnapR_Bytes( r, &world->stepIndex, sizeof( uint64_t ) );
+	world->splitIslandId = b3SnapR_I32( r );
+	b3SnapR_Bytes( r, &world->inv_h, sizeof( float ) );
+	b3SnapR_Bytes( r, &world->inv_dt, sizeof( float ) );
+	world->endEventArrayIndex = b3SnapR_I32( r );
+	b3SnapR_Bytes( r, &world->maxCapacity, sizeof( b3Capacity ) );
 	uint8_t flags = 0;
-	b2SnapR_Bytes( r, &flags, 1 );
+	b3SnapR_Bytes( r, &flags, 1 );
 	world->enableSleep = ( flags & 0x01u ) != 0;
 	world->enableWarmStarting = ( flags & 0x02u ) != 0;
-	world->enableContactSoftening = ( flags & 0x04u ) != 0;
-	world->enableContinuous = ( flags & 0x08u ) != 0;
-	world->enableSpeculative = ( flags & 0x10u ) != 0;
+	world->enableContinuous = ( flags & 0x04u ) != 0;
+	world->enableSpeculative = ( flags & 0x08u ) != 0;
 }
 
-void b2SerializeWorld( b2World* world, b2RecBuffer* buf )
+// Shapes carry pointer fields: materials, userData, userShape, and the geometry union.
+// Serialize the POD scalars with pointers nulled, then the owned materials array, then geometry.
+// A single material lives inline in the struct image. The name is a fixed array, also inline.
+// Hull/mesh/heightField/compound are interned into the recording registry; sphere/capsule inline.
+static void b3SerShapes( b3RecBuffer* buf, b3World* world, b3Recording* rec )
 {
-	// Image header
-	b2SnapHeader hdr;
-	hdr.magic = B2_SNAP_MAGIC;
-	hdr.version = B2_SNAP_VERSION;
-	hdr.layoutHash = b2ComputeLayoutHash();
-	hdr.flags = B2_ENABLE_VALIDATION ? B2_SNAP_FLAG_VALIDATION : 0u;
-	if ( b2IsDoublePrecision() )
+	int count = world->shapes.count;
+	b3SnapW_I32( buf, count );
+
+	for ( int i = 0; i < count; ++i )
 	{
-		hdr.flags |= B2_SNAP_FLAG_DOUBLE_PRECISION;
-	}
-	b2SnapW_Bytes( buf, &hdr, (int)sizeof( hdr ) );
+		b3Shape shape = world->shapes.data[i];
+		bool isLive = ( shape.id == i );
 
-	// World config
-	b2SerWorldConfig( buf, world );
-
-	// 7 id pools
-	b2SerIdPool( buf, &world->bodyIdPool );
-	b2SerIdPool( buf, &world->shapeIdPool );
-	b2SerIdPool( buf, &world->chainIdPool );
-	b2SerIdPool( buf, &world->contactIdPool );
-	b2SerIdPool( buf, &world->jointIdPool );
-	b2SerIdPool( buf, &world->islandIdPool );
-	b2SerIdPool( buf, &world->solverSetIdPool );
-
-	// Solver sets
-	int setCount = world->solverSets.count;
-	b2SnapW_I32( buf, setCount );
-	for ( int i = 0; i < setCount; ++i )
-	{
-		b2SerSolverSet( buf, world->solverSets.data + i );
-	}
-
-	// Sparse arrays. Bodies, shapes and joints carry a host userData pointer scrubbed to NULL on write.
-	// Contacts have no userData, so they go out as raw POD.
-	b2SerSimArray( buf, world->bodies, b2Body );
-	b2SerSimArray( buf, world->shapes, b2Shape );
-	b2SerPodArray( buf, world->contacts );
-	b2SerSimArray( buf, world->joints, b2Joint );
-
-	// Chain shapes: POD scalars then per-live-slot heap arrays
-	int chainCount = world->chainShapes.count;
-	b2SnapW_I32( buf, chainCount );
-	for ( int i = 0; i < chainCount; ++i )
-	{
-		b2ChainShape* chain = world->chainShapes.data + i;
-		// Write POD scalars
-		b2SnapW_I32( buf, chain->id );
-		b2SnapW_I32( buf, chain->bodyId );
-		b2SnapW_I32( buf, chain->nextChainId );
-		b2SnapW_I32( buf, chain->count );
-		b2SnapW_I32( buf, chain->materialCount );
-		b2SnapW_Bytes( buf, &chain->generation, sizeof( uint16_t ) );
-		if ( chain->id != B2_NULL_INDEX )
+		// Null out pointer fields before writing the raw struct
+		shape.materials = NULL;
+		shape.userData = NULL;
+		shape.userShape = NULL;
+		// Zero the geometry union so free-slot images have deterministic bytes
+		if ( !isLive )
 		{
-			// Live slot: write the two heap arrays
-			b2SnapW_Bytes( buf, chain->shapeIndices, chain->count * (int)sizeof( int ) );
-			b2SnapW_Bytes( buf, chain->materials, chain->materialCount * (int)sizeof( b2SurfaceMaterial ) );
+			memset( &shape.capsule, 0, sizeof( shape.capsule ) );
+		}
+		b3SnapW_Bytes( buf, &shape, sizeof( b3Shape ) );
+
+		if ( !isLive )
+		{
+			// Free slot: no materials or geometry
+			b3SnapW_I32( buf, 0 );	// materialCount
+			b3SnapW_I32( buf, -1 ); // geometry kind sentinel
+			continue;
+		}
+
+		// Owned material array. Only multi material meshes and compounds have one. A single material
+		// already rode along inline in the struct image, so write a zero length for it.
+		const b3Shape* src = world->shapes.data + i;
+		if ( src->materials != NULL )
+		{
+			b3SnapW_I32( buf, src->materialCount );
+			b3SnapW_Bytes( buf, src->materials, src->materialCount * (int)sizeof( b3SurfaceMaterial ) );
+		}
+		else
+		{
+			b3SnapW_I32( buf, 0 );
+		}
+
+		// Geometry
+		switch ( src->type )
+		{
+			case b3_sphereShape:
+				b3SnapW_I32( buf, (int)b3_sphereShape );
+				b3SnapW_Bytes( buf, &src->sphere, sizeof( b3Sphere ) );
+				break;
+			case b3_capsuleShape:
+				b3SnapW_I32( buf, (int)b3_capsuleShape );
+				b3SnapW_Bytes( buf, &src->capsule, sizeof( b3Capsule ) );
+				break;
+			case b3_hullShape:
+			{
+				b3SnapW_I32( buf, (int)b3_hullShape );
+				uint32_t gid = b3RecInternHull( rec, src->hull );
+				b3SnapW_U32( buf, gid );
+				break;
+			}
+			case b3_meshShape:
+			{
+				b3SnapW_I32( buf, (int)b3_meshShape );
+				uint32_t gid = b3RecInternMesh( rec, src->mesh.data );
+				b3SnapW_U32( buf, gid );
+				b3SnapW_Bytes( buf, &src->mesh.scale, sizeof( b3Vec3 ) );
+				break;
+			}
+			case b3_heightShape:
+			{
+				b3SnapW_I32( buf, (int)b3_heightShape );
+				uint32_t gid = b3RecInternHeightField( rec, src->heightField );
+				b3SnapW_U32( buf, gid );
+				break;
+			}
+			case b3_compoundShape:
+			{
+				b3SnapW_I32( buf, (int)b3_compoundShape );
+				uint32_t gid = b3RecInternCompound( rec, src->compound );
+				b3SnapW_U32( buf, gid );
+				break;
+			}
+			default:
+				// A live shape must have a known geometry type. Fail loudly rather than emit a shape
+				// with no geometry that would silently lose its collision on restore.
+				B3_ASSERT( false );
+				b3SnapW_I32( buf, -1 );
+				break;
 		}
 	}
-
-	// Sensors: shapeId + 3 visitor arrays per slot
-	int sensorCount = world->sensors.count;
-	b2SnapW_I32( buf, sensorCount );
-	for ( int i = 0; i < sensorCount; ++i )
-	{
-		b2Sensor* s = world->sensors.data + i;
-		b2SnapW_I32( buf, s->shapeId );
-		b2SerPodArray( buf, s->hits );
-		b2SerPodArray( buf, s->overlaps1 );
-		b2SerPodArray( buf, s->overlaps2 );
-	}
-
-	// Islands: POD scalars + 3 inner arrays per slot
-	int islandCount = world->islands.count;
-	b2SnapW_I32( buf, islandCount );
-	for ( int i = 0; i < islandCount; ++i )
-	{
-		b2Island* island = world->islands.data + i;
-		b2SnapW_I32( buf, island->setIndex );
-		b2SnapW_I32( buf, island->localIndex );
-		b2SnapW_I32( buf, island->islandId );
-		b2SnapW_I32( buf, island->constraintRemoveCount );
-		b2SerPodArray( buf, island->bodies );
-		b2SerPodArray( buf, island->contacts );
-		b2SerPodArray( buf, island->joints );
-	}
-
-	// Broad phase
-	b2BroadPhase* bp = &world->broadPhase;
-	for ( int t = 0; t < b2_bodyTypeCount; ++t )
-	{
-		b2SerTree( buf, &bp->trees[t] );
-	}
-	for ( int t = 0; t < b2_bodyTypeCount; ++t )
-	{
-		b2SerBitSet( buf, &bp->movedProxies[t] );
-	}
-	b2SerPodArray( buf, bp->moveArray );
-	b2SerHashSet( buf, &bp->pairSet );
-
-	// Constraint graph: B2_GRAPH_COLOR_COUNT colors
-	b2ConstraintGraph* graph = &world->constraintGraph;
-	for ( int c = 0; c < B2_GRAPH_COLOR_COUNT; ++c )
-	{
-		b2SerGraphColor( buf, &graph->colors[c], c == B2_OVERFLOW_INDEX );
-	}
 }
 
-// Free per-object heap the overwrite steps below don't reach, so restoring over a
-// populated world doesn't leak. Outer arrays stay alive for the steps to reuse.
-// Mirrors the per-object teardown in b2DestroyWorld.
-static void b2FreeLiveSimElements( b2World* world )
+static void b3DesShapes( b3SnapReader* r, b3World* world, b3RecReader* rdr )
 {
-	for ( int i = 0; i < world->chainShapes.count; ++i )
-	{
-		b2ChainShape* chain = world->chainShapes.data + i;
-		if ( chain->id != B2_NULL_INDEX )
-		{
-			b2FreeChainData( chain );
-		}
-	}
-
-	for ( int i = 0; i < world->sensors.count; ++i )
-	{
-		b2Sensor* sensor = world->sensors.data + i;
-		b2Array_Destroy( sensor->hits );
-		b2Array_Destroy( sensor->overlaps1 );
-		b2Array_Destroy( sensor->overlaps2 );
-	}
-
-	for ( int i = 0; i < world->islands.count; ++i )
-	{
-		b2Island* island = world->islands.data + i;
-		b2Array_Destroy( island->bodies );
-		b2Array_Destroy( island->contacts );
-		b2Array_Destroy( island->joints );
-	}
-}
-
-// Overwrite a world with the simulation state from the reader. Mirrors the write
-// order in b2SerializeWorld. The world must be a clean shell from b2CreateWorld, or
-// a live world whose per-object heap was first freed by b2FreeLiveSimElements. Host
-// wiring (scheduler, callbacks, user data) is never touched. Returns false on a
-// corrupt image.
-static bool b2DeserializeIntoShell( b2SnapReader* r, b2World* world )
-{
-	// Step 1: world scalars
-	b2DesWorldConfig( r, world );
-
-	// Step 2: 7 id pools (overwrite entirely, including solverSetIdPool from the 3 pre-created sets)
-	b2DesIdPool( r, &world->bodyIdPool );
-	b2DesIdPool( r, &world->shapeIdPool );
-	b2DesIdPool( r, &world->chainIdPool );
-	b2DesIdPool( r, &world->contactIdPool );
-	b2DesIdPool( r, &world->jointIdPool );
-	b2DesIdPool( r, &world->islandIdPool );
-	b2DesIdPool( r, &world->solverSetIdPool );
-
-	// Step 3: solver sets
-	// (a) Destroy the 5 inner arrays of the 3 pre-created sets WITHOUT freeing the set id
-	//     (b2DestroySolverSet would do that, but we already authored the id pool above)
-	for ( int i = 0; i < world->solverSets.count; ++i )
-	{
-		b2SolverSet* set = world->solverSets.data + i;
-		b2Array_Destroy( set->bodySims );
-		b2Array_Destroy( set->bodyStates );
-		b2Array_Destroy( set->contactSims );
-		b2Array_Destroy( set->jointSims );
-		b2Array_Destroy( set->islandSims );
-	}
-
-	// Each set writes at least setIndex plus 5 array counts
-	int setCount = b2SnapR_I32( r );
-	if ( r->ok && b2SnapCheckCount( r, setCount, (int)sizeof( b2SolverSet ), 6 * (int)sizeof( int ) ) == false )
+	int count = b3SnapR_I32( r );
+	if ( r->ok && b3SnapCheckCount( r, count, (int)sizeof( b3Shape ), (int)sizeof( b3Shape ) ) == false )
 	{
 		r->ok = false;
 	}
-
-	if ( r->ok )
+	if ( !r->ok )
 	{
-		// (b) Resize outer array to hold all sets, zeroing new slots so their headers are clean
-		b2Array_ResizeAndSetZero( world->solverSets, setCount );
+		return;
+	}
 
-		// (c) Deserialize each set
-		for ( int i = 0; i < setCount; ++i )
+	// Save renderer handles before the array is wiped. A keyframe restore is a deterministic replay
+	// state, so a live shape that still occupies the same slot with the same generation is the same
+	// shape with the same geometry. Carrying its handle over avoids tearing down and rebuilding every
+	// GPU mesh on each seek, which the host (a 3D renderer) would otherwise pay for. Handles that are
+	// not reclaimed below belong to shapes that are gone or were replaced, and get released so the host
+	// pool does not leak across seeks. Box2D has no such handles, so its restore skips all of this.
+	int oldShapeCount = world->shapes.count;
+	void** savedUserShape = NULL;
+	uint16_t* savedGeneration = NULL;
+	if ( oldShapeCount > 0 )
+	{
+		savedUserShape = (void**)b3Alloc( (size_t)oldShapeCount * sizeof( void* ) );
+		savedGeneration = (uint16_t*)b3Alloc( (size_t)oldShapeCount * sizeof( uint16_t ) );
+		for ( int i = 0; i < oldShapeCount; ++i )
 		{
-			b2DesSolverSet( r, world->solverSets.data + i );
+			b3Shape* old = world->shapes.data + i;
+			bool oldLive = ( old->id == i );
+			savedUserShape[i] = oldLive ? old->userShape : NULL;
+			savedGeneration[i] = old->generation;
 		}
 	}
 
-	// Step 4: sparse arrays. userData was written as NULL by the serializer, so a plain copy restores
-	// it cleanly with no host pointers to scrub here.
-	b2DesPodArray( r, world->bodies );
-	b2DesPodArray( r, world->shapes );
-	b2DesPodArray( r, world->contacts );
-	b2DesPodArray( r, world->joints );
+	b3Array_Resize( world->shapes, count );
+	memset( world->shapes.data, 0, (size_t)count * sizeof( b3Shape ) );
 
-	// Step 5: chain shapes
+	for ( int i = 0; i < count && r->ok; ++i )
 	{
-		// Destroy the shell's chainShapes array (empty, but has a backing allocation)
-		b2Array_Destroy( world->chainShapes );
-		b2Array_Create( world->chainShapes );
+		b3Shape* dst = world->shapes.data + i;
+		b3SnapR_Bytes( r, dst, sizeof( b3Shape ) );
+		// Pointer fields were written as NULL; set them cleanly
+		dst->materials = NULL;
+		dst->userData = NULL;
+		dst->userShape = NULL;
+		memset( &dst->capsule, 0, sizeof( dst->capsule ) );
 
-		// Each chain writes 5 ints plus a uint16 generation
-		int chainCount = b2SnapR_I32( r );
-		if ( r->ok && b2SnapCheckCount( r, chainCount, (int)sizeof( b2ChainShape ), 5 * (int)sizeof( int ) + (int)sizeof( uint16_t ) ) == false )
+		bool isLive = ( dst->id == i );
+
+		// Carry the renderer handle over when the same shape still occupies this slot. Consumed
+		// handles are nulled so the teardown sweep only releases the ones that vanished.
+		if ( isLive && i < oldShapeCount && savedUserShape != NULL && savedUserShape[i] != NULL &&
+			 savedGeneration[i] == dst->generation )
 		{
-			r->ok = false;
-		}
-		if ( r->ok )
-		{
-			b2Array_Resize( world->chainShapes, chainCount );
-			// Zero the whole array so free slots have NULL pointers
-			memset( world->chainShapes.data, 0, chainCount * sizeof( b2ChainShape ) );
+			dst->userShape = savedUserShape[i];
+			savedUserShape[i] = NULL;
 		}
 
-		for ( int i = 0; i < chainCount && r->ok; ++i )
+		// Serializer writes: matCount, matData, geoKind, geoData
+		int matCount = b3SnapR_I32( r );
+
+		if ( !r->ok )
 		{
-			b2ChainShape* chain = world->chainShapes.data + i;
-			chain->id = b2SnapR_I32( r );
-			chain->bodyId = b2SnapR_I32( r );
-			chain->nextChainId = b2SnapR_I32( r );
-			chain->count = b2SnapR_I32( r );
-			chain->materialCount = b2SnapR_I32( r );
-			b2SnapR_Bytes( r, &chain->generation, sizeof( uint16_t ) );
-			// A partial read leaves id as 0, which is a valid slot value, so gate the live branch on r->ok
-			if ( r->ok && chain->id != B2_NULL_INDEX )
+			break;
+		}
+
+		if ( !isLive )
+		{
+			// Free slot: matCount=0, geoKind=-1
+			(void)matCount;
+			b3SnapR_I32( r ); // consume the geoKind sentinel
+			continue;
+		}
+
+		// Owned material array (written before geoKind in serializer). A zero length means the single
+		// material is already inline in the restored struct image, so leave materialCount as restored.
+		if ( matCount > 0 )
+		{
+			if ( b3SnapCheckCount( r, matCount, (int)sizeof( b3SurfaceMaterial ), (int)sizeof( b3SurfaceMaterial ) ) == false )
 			{
-				if ( b2SnapCheckCount( r, chain->count, (int)sizeof( int ), (int)sizeof( int ) ) == false ||
-					 b2SnapCheckCount( r, chain->materialCount, (int)sizeof( b2SurfaceMaterial ), (int)sizeof( b2SurfaceMaterial ) ) == false )
+				r->ok = false;
+				break;
+			}
+			dst->materialCount = matCount;
+			dst->materials = (b3SurfaceMaterial*)b3Alloc( (size_t)matCount * sizeof( b3SurfaceMaterial ) );
+			b3SnapR_Bytes( r, dst->materials, matCount * (int)sizeof( b3SurfaceMaterial ) );
+		}
+		else
+		{
+			dst->materials = NULL;
+		}
+
+		int geoKind = b3SnapR_I32( r );
+
+		// Geometry
+		switch ( (b3ShapeType)geoKind )
+		{
+			case b3_sphereShape:
+				b3SnapR_Bytes( r, &dst->sphere, sizeof( b3Sphere ) );
+				break;
+			case b3_capsuleShape:
+				b3SnapR_Bytes( r, &dst->capsule, sizeof( b3Capsule ) );
+				break;
+			case b3_hullShape:
+			{
+				uint32_t gid = b3SnapR_U32( r );
+				if ( !r->ok )
+				{
+					break;
+				}
+				if ( rdr == NULL || gid >= (uint32_t)rdr->slotCount )
 				{
 					r->ok = false;
 					break;
 				}
-				// Live slot: allocate and copy heap arrays
-				chain->shapeIndices = b2Alloc( chain->count * (int)sizeof( int ) );
-				b2SnapR_Bytes( r, chain->shapeIndices, chain->count * (int)sizeof( int ) );
-				chain->materials = b2Alloc( chain->materialCount * (int)sizeof( b2SurfaceMaterial ) );
-				b2SnapR_Bytes( r, chain->materials, chain->materialCount * (int)sizeof( b2SurfaceMaterial ) );
+				// Hull is cloned into the world DB; pass raw bytes directly
+				b3RegistrySlot* slot = rdr->slots + gid;
+				dst->hull = b3AddHullToDatabase( world, (const b3HullData*)slot->bytes );
+				break;
 			}
-			else
+			case b3_meshShape:
 			{
-				// Free slot must have NULL pointers; zero init above handles this
-				chain->shapeIndices = NULL;
-				chain->materials = NULL;
+				uint32_t gid = b3SnapR_U32( r );
+				b3Vec3 scale;
+				b3SnapR_Bytes( r, &scale, sizeof( b3Vec3 ) );
+				if ( !r->ok )
+				{
+					break;
+				}
+				if ( rdr == NULL || gid >= (uint32_t)rdr->slotCount )
+				{
+					r->ok = false;
+					break;
+				}
+				b3RegistrySlot* slot = rdr->slots + gid;
+				// Mesh is a self-contained blob used by reference; point straight at the pristine bytes.
+				dst->mesh.data = (const b3MeshData*)slot->bytes;
+				dst->mesh.scale = scale;
+				break;
+			}
+			case b3_heightShape:
+			{
+				uint32_t gid = b3SnapR_U32( r );
+				if ( !r->ok )
+				{
+					break;
+				}
+				if ( rdr == NULL || gid >= (uint32_t)rdr->slotCount )
+				{
+					r->ok = false;
+					break;
+				}
+				b3RegistrySlot* slot = rdr->slots + gid;
+				// Self-contained blob used by reference; point straight at the pristine bytes.
+				dst->heightField = (const b3HeightFieldData*)slot->bytes;
+				break;
+			}
+			case b3_compoundShape:
+			{
+				uint32_t gid = b3SnapR_U32( r );
+				if ( !r->ok )
+				{
+					break;
+				}
+				if ( rdr == NULL || gid >= (uint32_t)rdr->slotCount )
+				{
+					r->ok = false;
+					break;
+				}
+				b3RegistrySlot* slot = rdr->slots + gid;
+				if ( slot->live == NULL )
+				{
+					slot->live = b3Alloc( (size_t)slot->byteCount );
+					memcpy( slot->live, slot->bytes, (size_t)slot->byteCount );
+					b3ConvertBytesToCompound( (uint8_t*)slot->live, slot->byteCount );
+				}
+				dst->compound = (const b3CompoundData*)slot->live;
+				break;
+			}
+			default:
+				// Unknown geometry kind means a corrupt or unsupported snapshot. Fail the load instead
+				// of leaving a shape with no geometry.
+				r->ok = false;
+				break;
+		}
+	}
+
+	// Release handles for shapes that are gone or were replaced this restore, so the host pool and any
+	// GPU resources they pinned do not leak across seeks.
+	if ( savedUserShape != NULL )
+	{
+		for ( int i = 0; i < oldShapeCount; ++i )
+		{
+			if ( savedUserShape[i] != NULL && world->destroyDebugShape != NULL )
+			{
+				world->destroyDebugShape( savedUserShape[i], world->userDebugShapeContext );
+			}
+		}
+		b3Free( savedUserShape, (size_t)oldShapeCount * sizeof( void* ) );
+		b3Free( savedGeneration, (size_t)oldShapeCount * sizeof( uint16_t ) );
+	}
+}
+
+// Contact serialization. b3Contact is not fully POD:
+// - manifolds: heap array of b3Manifold, allocated via b3AllocateManifolds
+// - meshContact.triangleCache: heap b3Array, active when b3_simMeshContact flag is set
+// Serialize: raw struct (with nulled manifolds/triangleCache), then manifolds, then triangleCache.
+static void b3SerContacts( b3RecBuffer* buf, b3World* world )
+{
+	int count = world->contacts.count;
+	b3SnapW_I32( buf, count );
+
+	for ( int i = 0; i < count; ++i )
+	{
+		const b3Contact* c = world->contacts.data + i;
+		bool isLive = ( c->contactId == i );
+
+		// Write raw struct with pointer fields zeroed
+		b3Contact copy = *c;
+		copy.manifolds = NULL;
+		copy.bodySimIndexA = B3_NULL_INDEX;
+		copy.bodySimIndexB = B3_NULL_INDEX;
+		if ( copy.flags & b3_simMeshContact )
+		{
+			copy.meshContact.triangleCache.data = NULL;
+			copy.meshContact.triangleCache.count = 0;
+			copy.meshContact.triangleCache.capacity = 0;
+		}
+		b3SnapW_Bytes( buf, &copy, sizeof( b3Contact ) );
+
+		if ( !isLive )
+		{
+			// Free slot: no heap data
+			b3SnapW_I32( buf, 0 ); // manifoldCount
+			// No triangleCache
+			continue;
+		}
+
+		// Manifolds
+		b3SnapW_I32( buf, c->manifoldCount );
+		if ( c->manifoldCount > 0 && c->manifolds != NULL )
+		{
+			b3SnapW_Bytes( buf, c->manifolds, c->manifoldCount * (int)sizeof( b3Manifold ) );
+		}
+
+		// Mesh triangleCache
+		if ( c->flags & b3_simMeshContact )
+		{
+			b3SnapW_I32( buf, c->meshContact.triangleCache.count );
+			if ( c->meshContact.triangleCache.count > 0 )
+			{
+				b3SnapW_Bytes( buf, c->meshContact.triangleCache.data,
+							   c->meshContact.triangleCache.count * (int)sizeof( b3TriangleCache ) );
+			}
+		}
+	}
+}
+
+static void b3DesContacts( b3SnapReader* r, b3World* world )
+{
+	int count = b3SnapR_I32( r );
+	if ( r->ok && b3SnapCheckCount( r, count, (int)sizeof( b3Contact ), (int)sizeof( b3Contact ) ) == false )
+	{
+		r->ok = false;
+	}
+	if ( !r->ok )
+	{
+		return;
+	}
+
+	b3Array_Resize( world->contacts, count );
+	memset( world->contacts.data, 0, (size_t)count * sizeof( b3Contact ) );
+
+	for ( int i = 0; i < count && r->ok; ++i )
+	{
+		b3Contact* dst = world->contacts.data + i;
+		b3SnapR_Bytes( r, dst, sizeof( b3Contact ) );
+		dst->manifolds = NULL;
+		dst->bodySimIndexA = B3_NULL_INDEX;
+		dst->bodySimIndexB = B3_NULL_INDEX;
+		if ( dst->flags & b3_simMeshContact )
+		{
+			dst->meshContact.triangleCache.data = NULL;
+			dst->meshContact.triangleCache.count = 0;
+			dst->meshContact.triangleCache.capacity = 0;
+		}
+
+		bool isLive = ( dst->contactId == i );
+
+		int manifoldCount = b3SnapR_I32( r );
+
+		if ( !r->ok )
+		{
+			break;
+		}
+
+		if ( isLive && manifoldCount > 0 )
+		{
+			if ( b3SnapCheckCount( r, manifoldCount, (int)sizeof( b3Manifold ), (int)sizeof( b3Manifold ) ) == false )
+			{
+				r->ok = false;
+				break;
+			}
+			dst->manifolds = b3AllocateManifolds( world, manifoldCount );
+			dst->manifoldCount = manifoldCount;
+			b3SnapR_Bytes( r, dst->manifolds, manifoldCount * (int)sizeof( b3Manifold ) );
+		}
+		else
+		{
+			dst->manifolds = NULL;
+			dst->manifoldCount = 0;
+		}
+
+		// Mesh triangleCache
+		if ( isLive && ( dst->flags & b3_simMeshContact ) )
+		{
+			int cacheCount = b3SnapR_I32( r );
+			if ( !r->ok )
+			{
+				break;
+			}
+			if ( cacheCount > 0 )
+			{
+				if ( b3SnapCheckCount( r, cacheCount, (int)sizeof( b3TriangleCache ), (int)sizeof( b3TriangleCache ) ) == false )
+				{
+					r->ok = false;
+					break;
+				}
+				b3Array_Resize( dst->meshContact.triangleCache, cacheCount );
+				b3SnapR_Bytes( r, dst->meshContact.triangleCache.data, cacheCount * (int)sizeof( b3TriangleCache ) );
+			}
+		}
+	}
+}
+
+// Free per-object heap that b3DeserializeIntoShell will overwrite,
+// so restoring over a populated world doesn't leak.
+static void b3FreeLiveSimElements( b3World* world )
+{
+	// Shape heap: materials and hull DB references
+	for ( int i = 0; i < world->shapes.count; ++i )
+	{
+		b3Shape* s = world->shapes.data + i;
+		if ( s->id != i )
+		{
+			continue;
+		}
+		// A single material lives inline (materials == NULL). Multi material meshes and compounds own
+		// the array, so free it exactly as b3DestroyShapeAllocations does.
+		if ( s->materials != NULL )
+		{
+			b3Free( s->materials, (size_t)s->materialCount * sizeof( b3SurfaceMaterial ) );
+			s->materials = NULL;
+			s->materialCount = 0;
+		}
+		// Hull is ref-counted in the world DB; release before overwrite so re-adding is ref-neutral.
+		if ( s->type == b3_hullShape && s->hull != NULL )
+		{
+			b3RemoveHullFromDatabase( world, s->hull );
+			s->hull = NULL;
+		}
+		// name / userData / userShape are host-owned; do not free
+	}
+
+	// Contact heap: manifolds + mesh triangleCache
+	for ( int i = 0; i < world->contacts.count; ++i )
+	{
+		b3Contact* c = world->contacts.data + i;
+		if ( c->contactId == i )
+		{
+			if ( c->manifolds != NULL )
+			{
+				b3FreeManifolds( world, c->manifolds, c->manifoldCount );
+				c->manifolds = NULL;
+				c->manifoldCount = 0;
+			}
+			if ( c->flags & b3_simMeshContact )
+			{
+				b3Array_Destroy( c->meshContact.triangleCache );
 			}
 		}
 	}
 
-	// Step 6: sensors
+	// Sensor heap: inner arrays
+	for ( int i = 0; i < world->sensors.count; ++i )
 	{
-		// Destroy the shell's sensors array
-		b2Array_Destroy( world->sensors );
-		b2Array_Create( world->sensors );
+		b3Sensor* sensor = world->sensors.data + i;
+		b3Array_Destroy( sensor->hits );
+		b3Array_Destroy( sensor->overlaps1 );
+		b3Array_Destroy( sensor->overlaps2 );
+	}
 
-		// Each sensor writes shapeId plus 3 array counts
-		int sensorCount = b2SnapR_I32( r );
-		if ( r->ok && b2SnapCheckCount( r, sensorCount, (int)sizeof( b2Sensor ), 4 * (int)sizeof( int ) ) == false )
+	// Island heap: inner arrays
+	for ( int i = 0; i < world->islands.count; ++i )
+	{
+		b3Island* island = world->islands.data + i;
+		b3Array_Destroy( island->bodies );
+		b3Array_Destroy( island->contacts );
+		b3Array_Destroy( island->joints );
+	}
+}
+
+int b3SerializeWorld( b3World* world, b3RecBuffer* buf, b3Recording* rec )
+{
+	int startSize = buf->size;
+
+	// Snapshot header
+	b3SnapHeader hdr;
+	hdr.magic = B3_SNAP_MAGIC;
+	hdr.version = B3_SNAP_VERSION;
+	hdr.layoutHash = b3ComputeLayoutHash();
+	hdr.flags = B3_ENABLE_VALIDATION ? B3_SNAP_FLAG_VALIDATION : 0u;
+#if defined( BOX3D_DOUBLE_PRECISION )
+	hdr.flags |= B3_SNAP_FLAG_DOUBLE_PRECISION;
+#endif
+	b3SnapW_Bytes( buf, &hdr, (int)sizeof( hdr ) );
+
+	// World scalars
+	b3SerWorldConfig( buf, world );
+
+	// 6 id pools (Box3D has no chainIdPool)
+	b3SerIdPool( buf, &world->bodyIdPool );
+	b3SerIdPool( buf, &world->shapeIdPool );
+	b3SerIdPool( buf, &world->contactIdPool );
+	b3SerIdPool( buf, &world->jointIdPool );
+	b3SerIdPool( buf, &world->islandIdPool );
+	b3SerIdPool( buf, &world->solverSetIdPool );
+
+	// Solver sets
+	int setCount = world->solverSets.count;
+	b3SnapW_I32( buf, setCount );
+	for ( int i = 0; i < setCount; ++i )
+	{
+		b3SerSolverSet( buf, world->solverSets.data + i );
+	}
+
+	// Sparse body array (userData is host wiring, zero it on the copy)
+	{
+		int bodyCount = world->bodies.count;
+		b3SnapW_I32( buf, bodyCount );
+		for ( int i = 0; i < bodyCount; ++i )
+		{
+			b3Body elem = world->bodies.data[i];
+			elem.userData = NULL;
+			b3SnapW_Bytes( buf, &elem, sizeof( b3Body ) );
+		}
+	}
+
+	// Shape sparse array with geometry interning
+	b3SerShapes( buf, world, rec );
+
+	// Contact sparse array with manifold and mesh triangleCache
+	b3SerContacts( buf, world );
+
+	// Joint sparse array (userData scrubbed)
+	{
+		int jointCount = world->joints.count;
+		b3SnapW_I32( buf, jointCount );
+		for ( int i = 0; i < jointCount; ++i )
+		{
+			b3Joint elem = world->joints.data[i];
+			elem.userData = NULL;
+			b3SnapW_Bytes( buf, &elem, sizeof( b3Joint ) );
+		}
+	}
+
+	// Sensors: shapeId + 3 inner arrays each
+	{
+		int sensorCount = world->sensors.count;
+		b3SnapW_I32( buf, sensorCount );
+		for ( int i = 0; i < sensorCount; ++i )
+		{
+			b3Sensor* s = world->sensors.data + i;
+			b3SnapW_I32( buf, s->shapeId );
+			b3SerPodArray( buf, s->hits );
+			b3SerPodArray( buf, s->overlaps1 );
+			b3SerPodArray( buf, s->overlaps2 );
+		}
+	}
+
+	// Islands: 4 scalars + 3 inner arrays each
+	{
+		int islandCount = world->islands.count;
+		b3SnapW_I32( buf, islandCount );
+		for ( int i = 0; i < islandCount; ++i )
+		{
+			b3Island* island = world->islands.data + i;
+			b3SnapW_I32( buf, island->setIndex );
+			b3SnapW_I32( buf, island->localIndex );
+			b3SnapW_I32( buf, island->islandId );
+			b3SnapW_I32( buf, island->constraintRemoveCount );
+			b3SerPodArray( buf, island->bodies );
+			b3SerPodArray( buf, island->contacts );
+			b3SerPodArray( buf, island->joints );
+		}
+	}
+
+	// Broad phase
+	b3BroadPhase* bp = &world->broadPhase;
+	for ( int t = 0; t < b3_bodyTypeCount; ++t )
+	{
+		b3SerTree( buf, &bp->trees[t] );
+	}
+	for ( int t = 0; t < b3_bodyTypeCount; ++t )
+	{
+		b3SerBitSet( buf, &bp->movedProxies[t] );
+	}
+	b3SerPodArray( buf, bp->moveArray );
+	b3SerHashSet( buf, &bp->pairSet );
+
+	// Constraint graph
+	b3ConstraintGraph* graph = &world->constraintGraph;
+	for ( int c = 0; c < B3_GRAPH_COLOR_COUNT; ++c )
+	{
+		b3SerGraphColor( buf, &graph->colors[c], c == B3_OVERFLOW_INDEX );
+	}
+
+	return buf->size - startSize;
+}
+
+bool b3DeserializeIntoShell( const uint8_t* data, int size, b3World* world, b3RecReader* rdr )
+{
+	if ( data == NULL || size < (int)sizeof( b3SnapHeader ) )
+	{
+		return false;
+	}
+
+	// Validate header
+	b3SnapHeader hdr;
+	memcpy( &hdr, data, sizeof( hdr ) );
+	if ( hdr.magic != B3_SNAP_MAGIC || hdr.version != B3_SNAP_VERSION )
+	{
+		printf( "b3DeserializeIntoShell: bad magic/version\n" );
+		return false;
+	}
+	bool imageDouble = ( hdr.flags & B3_SNAP_FLAG_DOUBLE_PRECISION ) != 0;
+#if defined( BOX3D_DOUBLE_PRECISION )
+	bool buildDouble = true;
+#else
+	bool buildDouble = false;
+#endif
+	if ( imageDouble != buildDouble )
+	{
+		printf( "b3DeserializeIntoShell: precision mismatch\n" );
+		return false;
+	}
+	if ( hdr.layoutHash != b3ComputeLayoutHash() )
+	{
+		printf( "b3DeserializeIntoShell: layout hash mismatch\n" );
+		return false;
+	}
+
+	b3SnapReader readerStorage;
+	b3SnapReader* r = &readerStorage;
+	r->data = data;
+	r->cursor = (int)sizeof( b3SnapHeader );
+	r->size = size;
+	r->ok = true;
+
+	// Free existing per-object heap before overwriting
+	b3FreeLiveSimElements( world );
+
+	// 1. World scalars
+	b3DesWorldConfig( r, world );
+
+	// 2. 6 id pools; destroy the pre-created sets' pool state first
+	b3DesIdPool( r, &world->bodyIdPool );
+	b3DesIdPool( r, &world->shapeIdPool );
+	b3DesIdPool( r, &world->contactIdPool );
+	b3DesIdPool( r, &world->jointIdPool );
+	b3DesIdPool( r, &world->islandIdPool );
+	b3DesIdPool( r, &world->solverSetIdPool );
+
+	// 3. Solver sets: destroy inner arrays of existing sets first
+	for ( int i = 0; i < world->solverSets.count; ++i )
+	{
+		b3SolverSet* set = world->solverSets.data + i;
+		b3Array_Destroy( set->bodySims );
+		b3Array_Destroy( set->bodyStates );
+		b3Array_Destroy( set->jointSims );
+		b3Array_Destroy( set->contactIndices );
+		b3Array_Destroy( set->islandSims );
+	}
+
+	int setCount = b3SnapR_I32( r );
+	if ( r->ok && b3SnapCheckCount( r, setCount, (int)sizeof( b3SolverSet ), 6 * (int)sizeof( int ) ) == false )
+	{
+		r->ok = false;
+	}
+	if ( r->ok )
+	{
+		b3Array_Resize( world->solverSets, setCount );
+		memset( world->solverSets.data, 0, (size_t)setCount * sizeof( b3SolverSet ) );
+		for ( int i = 0; i < setCount; ++i )
+		{
+			b3DesSolverSet( r, world->solverSets.data + i );
+		}
+	}
+
+	if ( !r->ok )
+	{
+		return false;
+	}
+
+	// 4. Body sparse array
+	{
+		int bodyCount = b3SnapR_I32( r );
+		if ( r->ok && b3SnapCheckCount( r, bodyCount, (int)sizeof( b3Body ), (int)sizeof( b3Body ) ) == false )
 		{
 			r->ok = false;
 		}
 		if ( r->ok )
 		{
-			b2Array_Resize( world->sensors, sensorCount );
-			// Zero so inner array headers start clean
-			memset( world->sensors.data, 0, sensorCount * sizeof( b2Sensor ) );
+			b3Array_Resize( world->bodies, bodyCount );
+			for ( int i = 0; i < bodyCount; ++i )
+			{
+				b3SnapR_Bytes( r, world->bodies.data + i, sizeof( b3Body ) );
+				world->bodies.data[i].userData = NULL;
+			}
+		}
+	}
+
+	if ( !r->ok )
+	{
+		return false;
+	}
+
+	// 5. Shape sparse array
+	b3DesShapes( r, world, rdr );
+
+	if ( !r->ok )
+	{
+		return false;
+	}
+
+	// 6. Contact sparse array
+	b3DesContacts( r, world );
+
+	if ( !r->ok )
+	{
+		return false;
+	}
+
+	// 7. Joint sparse array
+	{
+		int jointCount = b3SnapR_I32( r );
+		if ( r->ok && b3SnapCheckCount( r, jointCount, (int)sizeof( b3Joint ), (int)sizeof( b3Joint ) ) == false )
+		{
+			r->ok = false;
+		}
+		if ( r->ok )
+		{
+			b3Array_Resize( world->joints, jointCount );
+			for ( int i = 0; i < jointCount; ++i )
+			{
+				b3SnapR_Bytes( r, world->joints.data + i, sizeof( b3Joint ) );
+				world->joints.data[i].userData = NULL;
+			}
+		}
+	}
+
+	// 8. Sensors
+	{
+		b3Array_Destroy( world->sensors );
+		b3Array_Create( world->sensors );
+
+		int sensorCount = b3SnapR_I32( r );
+		if ( r->ok && b3SnapCheckCount( r, sensorCount, (int)sizeof( b3Sensor ), 4 * (int)sizeof( int ) ) == false )
+		{
+			r->ok = false;
+		}
+		if ( r->ok )
+		{
+			b3Array_Resize( world->sensors, sensorCount );
+			memset( world->sensors.data, 0, (size_t)sensorCount * sizeof( b3Sensor ) );
 		}
 
 		for ( int i = 0; i < sensorCount && r->ok; ++i )
 		{
-			b2Sensor* s = world->sensors.data + i;
-			s->shapeId = b2SnapR_I32( r );
-			// Re-init inner arrays then fill them
-			b2Array_Create( s->hits );
-			b2Array_Create( s->overlaps1 );
-			b2Array_Create( s->overlaps2 );
-			b2DesPodArray( r, s->hits );
-			b2DesPodArray( r, s->overlaps1 );
-			b2DesPodArray( r, s->overlaps2 );
+			b3Sensor* s = world->sensors.data + i;
+			s->shapeId = b3SnapR_I32( r );
+			b3Array_Create( s->hits );
+			b3Array_Create( s->overlaps1 );
+			b3Array_Create( s->overlaps2 );
+			b3DesPodArray( r, s->hits );
+			b3DesPodArray( r, s->overlaps1 );
+			b3DesPodArray( r, s->overlaps2 );
 		}
 	}
 
-	// Step 7: islands
+	// 9. Islands
 	{
-		// Destroy the shell's islands array
-		b2Array_Destroy( world->islands );
-		b2Array_Create( world->islands );
+		b3Array_Destroy( world->islands );
+		b3Array_Create( world->islands );
 
-		// Each island writes 4 ints plus 3 array counts
-		int islandCount = b2SnapR_I32( r );
-		if ( r->ok && b2SnapCheckCount( r, islandCount, (int)sizeof( b2Island ), 7 * (int)sizeof( int ) ) == false )
+		int islandCount = b3SnapR_I32( r );
+		if ( r->ok && b3SnapCheckCount( r, islandCount, (int)sizeof( b3Island ), 7 * (int)sizeof( int ) ) == false )
 		{
 			r->ok = false;
 		}
 		if ( r->ok )
 		{
-			b2Array_Resize( world->islands, islandCount );
-			memset( world->islands.data, 0, islandCount * sizeof( b2Island ) );
+			b3Array_Resize( world->islands, islandCount );
+			memset( world->islands.data, 0, (size_t)islandCount * sizeof( b3Island ) );
 		}
 
 		for ( int i = 0; i < islandCount && r->ok; ++i )
 		{
-			b2Island* island = world->islands.data + i;
-			island->setIndex = b2SnapR_I32( r );
-			island->localIndex = b2SnapR_I32( r );
-			island->islandId = b2SnapR_I32( r );
-			island->constraintRemoveCount = b2SnapR_I32( r );
-			b2Array_Create( island->bodies );
-			b2Array_Create( island->contacts );
-			b2Array_Create( island->joints );
-			b2DesPodArray( r, island->bodies );
-			b2DesPodArray( r, island->contacts );
-			b2DesPodArray( r, island->joints );
+			b3Island* island = world->islands.data + i;
+			island->setIndex = b3SnapR_I32( r );
+			island->localIndex = b3SnapR_I32( r );
+			island->islandId = b3SnapR_I32( r );
+			island->constraintRemoveCount = b3SnapR_I32( r );
+			b3Array_Create( island->bodies );
+			b3Array_Create( island->contacts );
+			b3Array_Create( island->joints );
+			b3DesPodArray( r, island->bodies );
+			b3DesPodArray( r, island->contacts );
+			b3DesPodArray( r, island->joints );
 		}
 	}
 
-	// Step 8: broad phase
+	// 10. Broad phase
 	{
-		b2BroadPhase* bp = &world->broadPhase;
+		b3BroadPhase* bp = &world->broadPhase;
 
-		// Trees: the shell already allocated tree nodes; free them and replace
-		for ( int t = 0; t < b2_bodyTypeCount; ++t )
+		for ( int t = 0; t < b3_bodyTypeCount; ++t )
 		{
-			b2DesTree( r, &bp->trees[t] );
+			b3DesTree( r, &bp->trees[t] );
+		}
+		for ( int t = 0; t < b3_bodyTypeCount; ++t )
+		{
+			b3DesBitSet( r, &bp->movedProxies[t] );
 		}
 
-		// movedProxies bitsets: destroy shell's and replace
-		for ( int t = 0; t < b2_bodyTypeCount; ++t )
-		{
-			b2DesBitSet( r, &bp->movedProxies[t] );
-		}
+		b3Array_Destroy( bp->moveArray );
+		b3Array_Create( bp->moveArray );
+		b3DesPodArray( r, bp->moveArray );
 
-		// moveArray
-		b2Array_Destroy( bp->moveArray );
-		b2Array_Create( bp->moveArray );
-		b2DesPodArray( r, bp->moveArray );
-
-		// pairSet
-		b2DesHashSet( r, &bp->pairSet );
-
-		// Transient move results stay at shell's NULL/0
+		b3DesHashSet( r, &bp->pairSet );
+		// Transient moveResults/movePairs stay at shell's NULL/0
 	}
 
-	// Step 9: constraint graph
+	// 11. Constraint graph
 	{
-		b2ConstraintGraph* graph = &world->constraintGraph;
-		for ( int c = 0; c < B2_GRAPH_COLOR_COUNT; ++c )
+		b3ConstraintGraph* graph = &world->constraintGraph;
+		for ( int c = 0; c < B3_GRAPH_COLOR_COUNT; ++c )
 		{
-			b2DesGraphColor( r, &graph->colors[c], c == B2_OVERFLOW_INDEX );
+			b3DesGraphColor( r, &graph->colors[c], c == B3_OVERFLOW_INDEX );
 		}
 	}
 
 	return r->ok;
-}
-
-// Validate a snapshot image header and arm the reader just past it. Returns false on a rejected image
-// (too small, bad magic, wrong version, layout mismatch), leaving the caller's world untouched. A
-// layout mismatch caused purely by differing validation builds is called out, since the validation
-// gated fields change struct sizes and such images can never share a layout.
-static bool b2OpenSnapshotImage( const uint8_t* image, int size, b2SnapReader* r )
-{
-	if ( image == NULL || size < (int)sizeof( b2SnapHeader ) )
-	{
-		return false;
-	}
-
-	b2SnapHeader hdr;
-	memcpy( &hdr, image, sizeof( hdr ) );
-	if ( hdr.magic != B2_SNAP_MAGIC || hdr.version != B2_SNAP_VERSION )
-	{
-		return false;
-	}
-
-	// World positions are stored at the build precision, so the layout differs irreconcilably across
-	// modes. Called out before the layout hash so the cause is clear rather than a generic mismatch.
-	bool imageDouble = ( hdr.flags & B2_SNAP_FLAG_DOUBLE_PRECISION ) != 0;
-	bool buildDouble = b2IsDoublePrecision();
-	if ( imageDouble != buildDouble )
-	{
-		b2Log( "snapshot precision mismatch: image %s, this build %s\n", imageDouble ? "double" : "float",
-			   buildDouble ? "double" : "float" );
-		return false;
-	}
-
-	if ( hdr.layoutHash != b2ComputeLayoutHash() )
-	{
-		bool imageValidation = ( hdr.flags & B2_SNAP_FLAG_VALIDATION ) != 0;
-		if ( imageValidation != (bool)B2_ENABLE_VALIDATION )
-		{
-			b2Log( "snapshot layout mismatch: image built with validation %s, this build %s\n", imageValidation ? "on" : "off",
-				   B2_ENABLE_VALIDATION ? "on" : "off" );
-		}
-		else
-		{
-			b2Log( "snapshot layout mismatch\n" );
-		}
-		return false;
-	}
-
-	r->data = image;
-	r->cursor = (int)sizeof( hdr );
-	r->size = size;
-	r->ok = true;
-	return true;
-}
-
-b2WorldId b2CreateWorldFromSnapshot( const uint8_t* image, int size, int workerCount )
-{
-	b2WorldId nullId = b2_nullWorldId;
-
-	b2SnapReader readerStorage;
-	b2SnapReader* r = &readerStorage;
-	if ( b2OpenSnapshotImage( image, size, r ) == false )
-	{
-		return nullId;
-	}
-
-	// Build a minimal valid def so b2CreateWorld produces a fully valid shell
-	b2WorldDef def = b2DefaultWorldDef();
-	def.workerCount = workerCount;
-	def.enqueueTask = NULL;
-	def.finishTask = NULL;
-	def.userTaskContext = NULL;
-
-	// Capacity is only a sizing hint. Every container is resized from the image below
-	b2WorldId id = b2CreateWorld( &def );
-	if ( !b2World_IsValid( id ) )
-	{
-		return nullId;
-	}
-
-	b2World* world = b2GetWorldFromId( id );
-
-	if ( b2DeserializeIntoShell( r, world ) == false )
-	{
-		// Image was corrupt; clean up by destroying the world
-		b2DestroyWorld( id );
-		return nullId;
-	}
-
-	// A world loaded from scratch carries no host pointers
-	world->preSolveFcn = NULL;
-	world->preSolveContext = NULL;
-	world->customFilterFcn = NULL;
-	world->customFilterContext = NULL;
-	world->userData = NULL;
-
-	return id;
-}
-
-bool b2World_Restore( b2WorldId worldId, const uint8_t* image, int size )
-{
-	// Validate the image fully before touching the world so a bad image leaves it intact
-	b2SnapReader readerStorage;
-	b2SnapReader* r = &readerStorage;
-	if ( b2OpenSnapshotImage( image, size, r ) == false )
-	{
-		return false;
-	}
-
-	b2World* world = b2GetWorldFromId( worldId );
-
-	// Restoring mid step would corrupt an in-flight solve
-	B2_ASSERT( world->locked == false );
-	if ( world->locked )
-	{
-		return false;
-	}
-
-	// Point of no return. The slot, generation, and host wiring are kept, so held ids
-	// resolve into the rebuilt world. A truncated payload past here leaves the world
-	// unusable and the caller must destroy it.
-	b2FreeLiveSimElements( world );
-
-	return b2DeserializeIntoShell( r, world );
-}
-
-int b2World_Snapshot( b2WorldId worldId, uint8_t* image, int capacity )
-{
-	b2World* world = b2GetWorldFromId( worldId );
-
-	// Serializing mid step would capture an inconsistent, in-flight world
-	B2_ASSERT( world->locked == false );
-	if ( world->locked )
-	{
-		return 0;
-	}
-
-	// Size query: count the bytes without allocating or copying the whole image
-	if ( image == NULL )
-	{
-		b2RecBuffer counter = { 0 };
-		counter.countOnly = true;
-		b2SerializeWorld( world, &counter );
-		return counter.size;
-	}
-
-	b2RecBuffer buf = { 0 };
-	b2SerializeWorld( world, &buf );
-	int size = buf.size;
-
-	if ( size <= capacity )
-	{
-		memcpy( image, buf.data, size );
-	}
-
-	b2RecBufFree( &buf );
-	return size;
-}
-
-static uint64_t b2FnvMixBytes( uint64_t hash, const void* data, int n )
-{
-	const uint8_t* p = (const uint8_t*)data;
-	for ( int i = 0; i < n; ++i )
-	{
-		hash = ( hash ^ (uint64_t)p[i] ) * B2_SNAP_FNV_PRIME;
-	}
-	return hash;
-}
-
-static uint64_t b2FnvMixFloat( uint64_t hash, float f )
-{
-	uint32_t bits;
-	memcpy( &bits, &f, 4 );
-	return ( hash ^ (uint64_t)bits ) * B2_SNAP_FNV_PRIME;
-}
-
-static uint64_t b2FnvMixInt( uint64_t hash, int v )
-{
-	return ( hash ^ (uint64_t)(uint32_t)v ) * B2_SNAP_FNV_PRIME;
-}
-
-uint64_t b2HashWorldStateDeep( b2World* world )
-{
-	uint64_t hash = B2_SNAP_FNV_INIT;
-
-	// Bodies: same iteration order as b2HashWorldState (sparse array, skip free slots)
-	int bodyCount = world->bodies.count;
-	for ( int i = 0; i < bodyCount; ++i )
-	{
-		b2Body* body = world->bodies.data + i;
-		if ( body->id != i )
-		{
-			continue;
-		}
-
-		b2BodySim* sim = b2GetBodySim( world, body );
-
-		hash = b2FnvMixPosition( hash, sim->transform.p );
-		hash = b2FnvMixFloat( hash, sim->transform.q.c );
-		hash = b2FnvMixFloat( hash, sim->transform.q.s );
-
-		b2BodyState* state = b2GetBodyState( world, body );
-		if ( state != NULL )
-		{
-			hash = b2FnvMixFloat( hash, state->linearVelocity.x );
-			hash = b2FnvMixFloat( hash, state->linearVelocity.y );
-			hash = b2FnvMixFloat( hash, state->angularVelocity );
-		}
-
-		// Index bookkeeping
-		hash = b2FnvMixInt( hash, body->setIndex );
-		hash = b2FnvMixInt( hash, body->localIndex );
-	}
-
-	// Contacts: sparse array, skip free slots (colorIndex == B2_NULL_INDEX and setIndex == B2_NULL_INDEX for free)
-	int contactCount = world->contacts.count;
-	for ( int i = 0; i < contactCount; ++i )
-	{
-		b2Contact* contact = world->contacts.data + i;
-		if ( contact->contactId != i )
-		{
-			continue;
-		}
-
-		hash = b2FnvMixInt( hash, contact->setIndex );
-		hash = b2FnvMixInt( hash, contact->colorIndex );
-		hash = b2FnvMixInt( hash, contact->localIndex );
-
-		// Manifold points + impulses from the contact sim
-		// Exclude B2_ENABLE_VALIDATION-gated bodyIdA/bodyIdB for build-config stability
-		b2ContactSim* sim = b2GetContactSim( world, contact );
-		if ( sim != NULL )
-		{
-			b2Manifold* m = &sim->manifold;
-			hash = b2FnvMixInt( hash, m->pointCount );
-			for ( int p = 0; p < m->pointCount; ++p )
-			{
-				hash = b2FnvMixFloat( hash, m->points[p].normalImpulse );
-				hash = b2FnvMixFloat( hash, m->points[p].tangentImpulse );
-				hash = b2FnvMixFloat( hash, m->points[p].totalNormalImpulse );
-			}
-		}
-	}
-
-	// Joints: sparse array, skip free slots
-	int jointCount = world->joints.count;
-	for ( int i = 0; i < jointCount; ++i )
-	{
-		b2Joint* joint = world->joints.data + i;
-		if ( joint->jointId != i )
-		{
-			continue;
-		}
-
-		hash = b2FnvMixInt( hash, joint->setIndex );
-		hash = b2FnvMixInt( hash, joint->colorIndex );
-		hash = b2FnvMixInt( hash, joint->localIndex );
-
-		b2JointSim* sim = b2GetJointSim( world, joint );
-		if ( sim != NULL )
-		{
-			// Hash accumulated impulses per joint type
-			switch ( sim->type )
-			{
-				case b2_distanceJoint:
-					hash = b2FnvMixFloat( hash, sim->distanceJoint.impulse );
-					hash = b2FnvMixFloat( hash, sim->distanceJoint.lowerImpulse );
-					hash = b2FnvMixFloat( hash, sim->distanceJoint.upperImpulse );
-					hash = b2FnvMixFloat( hash, sim->distanceJoint.motorImpulse );
-					break;
-				case b2_motorJoint:
-					hash = b2FnvMixFloat( hash, sim->motorJoint.linearVelocityImpulse.x );
-					hash = b2FnvMixFloat( hash, sim->motorJoint.linearVelocityImpulse.y );
-					hash = b2FnvMixFloat( hash, sim->motorJoint.angularVelocityImpulse );
-					hash = b2FnvMixFloat( hash, sim->motorJoint.linearSpringImpulse.x );
-					hash = b2FnvMixFloat( hash, sim->motorJoint.linearSpringImpulse.y );
-					hash = b2FnvMixFloat( hash, sim->motorJoint.angularSpringImpulse );
-					break;
-				case b2_prismaticJoint:
-					hash = b2FnvMixBytes( hash, &sim->prismaticJoint.impulse, sizeof( b2Vec2 ) );
-					hash = b2FnvMixFloat( hash, sim->prismaticJoint.springImpulse );
-					hash = b2FnvMixFloat( hash, sim->prismaticJoint.motorImpulse );
-					hash = b2FnvMixFloat( hash, sim->prismaticJoint.lowerImpulse );
-					hash = b2FnvMixFloat( hash, sim->prismaticJoint.upperImpulse );
-					break;
-				case b2_revoluteJoint:
-					hash = b2FnvMixBytes( hash, &sim->revoluteJoint.linearImpulse, sizeof( b2Vec2 ) );
-					hash = b2FnvMixFloat( hash, sim->revoluteJoint.springImpulse );
-					hash = b2FnvMixFloat( hash, sim->revoluteJoint.motorImpulse );
-					hash = b2FnvMixFloat( hash, sim->revoluteJoint.lowerImpulse );
-					hash = b2FnvMixFloat( hash, sim->revoluteJoint.upperImpulse );
-					break;
-				case b2_weldJoint:
-					hash = b2FnvMixBytes( hash, &sim->weldJoint.linearImpulse, sizeof( b2Vec2 ) );
-					hash = b2FnvMixFloat( hash, sim->weldJoint.angularImpulse );
-					break;
-				case b2_wheelJoint:
-					hash = b2FnvMixFloat( hash, sim->wheelJoint.perpImpulse );
-					hash = b2FnvMixFloat( hash, sim->wheelJoint.motorImpulse );
-					hash = b2FnvMixFloat( hash, sim->wheelJoint.springImpulse );
-					hash = b2FnvMixFloat( hash, sim->wheelJoint.lowerImpulse );
-					hash = b2FnvMixFloat( hash, sim->wheelJoint.upperImpulse );
-					break;
-				default:
-					break;
-			}
-		}
-	}
-
-	// 7 id pools: nextIndex + count
-	hash = b2FnvMixInt( hash, world->bodyIdPool.nextIndex );
-	hash = b2FnvMixInt( hash, b2GetIdCount( &world->bodyIdPool ) );
-	hash = b2FnvMixInt( hash, world->shapeIdPool.nextIndex );
-	hash = b2FnvMixInt( hash, b2GetIdCount( &world->shapeIdPool ) );
-	hash = b2FnvMixInt( hash, world->chainIdPool.nextIndex );
-	hash = b2FnvMixInt( hash, b2GetIdCount( &world->chainIdPool ) );
-	hash = b2FnvMixInt( hash, world->contactIdPool.nextIndex );
-	hash = b2FnvMixInt( hash, b2GetIdCount( &world->contactIdPool ) );
-	hash = b2FnvMixInt( hash, world->jointIdPool.nextIndex );
-	hash = b2FnvMixInt( hash, b2GetIdCount( &world->jointIdPool ) );
-	hash = b2FnvMixInt( hash, world->islandIdPool.nextIndex );
-	hash = b2FnvMixInt( hash, b2GetIdCount( &world->islandIdPool ) );
-	hash = b2FnvMixInt( hash, world->solverSetIdPool.nextIndex );
-	hash = b2FnvMixInt( hash, b2GetIdCount( &world->solverSetIdPool ) );
-
-	// Solver set count
-	hash = b2FnvMixInt( hash, world->solverSets.count );
-
-	return hash;
 }

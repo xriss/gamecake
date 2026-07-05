@@ -1,56 +1,73 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
 
+#include "math_internal.h"
 #include "solver.h"
 
-typedef struct b2ContactSim b2ContactSim;
-
-typedef struct b2ContactConstraintPoint
+typedef struct b3ManifoldConstraintPoint
 {
-	b2Vec2 anchorA, anchorB;
+	b3Vec3 rA, rB;
 	float baseSeparation;
 	float relativeVelocity;
 	float normalImpulse;
-	float tangentImpulse;
 	float totalNormalImpulse;
 	float normalMass;
-	float tangentMass;
-} b2ContactConstraintPoint;
+	float leverArm;
+} b3ManifoldConstraintPoint;
 
-typedef struct b2ContactConstraint
+typedef struct b3ManifoldConstraint
 {
-	// base-1, 0 for null
+	// todo use pointer buffer
+	b3ManifoldConstraintPoint points[4];
+	int pointCount;
+	b3Vec3 normal;
+	b3Vec3 tangent1;
+	b3Vec3 tangent2;
+	b3Vec3 originA, originB;
+	float twistMass;
+	float twistImpulse;
+	b3Matrix2 tangentMass;
+	b3Vec2 frictionImpulse;
+	b3Vec3 rollingImpulse;
+	float tangentVelocity1;
+	float tangentVelocity2;
+} b3ManifoldConstraint;
+
+typedef struct b3ContactConstraint
+{
+	b3ManifoldConstraint* constraints;
+	struct b3Contact* contact;
 	int indexA;
 	int indexB;
-	b2ContactConstraintPoint points[2];
-	b2Vec2 normal;
 	float invMassA, invMassB;
-	float invIA, invIB;
+	b3Matrix3 invIA, invIB;
+	b3Softness softness;
+	b3Matrix3 rollingMass;
 	float friction;
 	float restitution;
-	float tangentSpeed;
 	float rollingResistance;
-	float rollingMass;
-	float rollingImpulse;
-	b2Softness softness;
-	int pointCount;
-} b2ContactConstraint;
+	int manifoldCount;
+} b3ContactConstraint;
 
-// This function allows hiding SIMD intrinsics in the source file to improve compilation performance.
-int b2GetWideContactConstraintByteCount( void );
+int b3GetWideContactConstraintByteCount( void );
 
 // Overflow contacts don't fit into the constraint graph coloring
-void b2PrepareContacts_Overflow( b2StepContext* context );
-void b2WarmStartContacts_Overflow( b2StepContext* context );
-void b2SolveContacts_Overflow( b2StepContext* context, bool useBias );
-void b2ApplyRestitution_Overflow( b2StepContext* context );
-void b2StoreImpulses_Overflow( b2StepContext* context );
+void b3PrepareContacts_Overflow( b3StepContext* context );
+void b3WarmStartContacts_Overflow( b3StepContext* context );
+void b3SolveContacts_Overflow( b3StepContext* context, bool useBias );
+void b3ApplyRestitution_Overflow( b3StepContext* context );
+void b3StoreImpulses_Overflow( b3StepContext* context );
 
-// Contacts that live within the constraint graph coloring
-void b2PrepareContactsTask( b2SolverBlock block, b2StepContext* context );
-void b2WarmStartContactsTask( b2SolverBlock block, b2StepContext* context );
-void b2SolveContactsTask( b2SolverBlock block, b2StepContext* context, bool useBias );
-void b2ApplyRestitutionTask( b2SolverBlock block, b2StepContext* context );
-void b2StoreImpulsesTask( b2SolverBlock block, b2StepContext* context, int workerIndex );
+void b3PrepareContacts_Mesh( b3SolverBlock block, b3StepContext* context );
+void b3WarmStartContacts_Mesh( b3SolverBlock block, b3StepContext* context );
+void b3SolveContacts_Mesh( b3SolverBlock block, b3StepContext* context, bool useBias );
+void b3ApplyRestitution_Mesh( b3SolverBlock block, b3StepContext* context );
+void b3StoreImpulses_Mesh( b3SolverBlock block, b3StepContext* context, int workerIndex );
+
+void b3PrepareContacts_Convex( b3SolverBlock block, b3StepContext* context );
+void b3WarmStartContacts_Convex( b3SolverBlock block, b3StepContext* context );
+void b3SolveContacts_Convex( b3SolverBlock block, b3StepContext* context, bool useBias );
+void b3ApplyRestitution_Convex( b3SolverBlock block, b3StepContext* context );
+void b3StoreImpulses_Convex( b3SolverBlock block, b3StepContext* context, int workerIndex );

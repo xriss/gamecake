@@ -1,91 +1,72 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
-
-#if defined( _MSC_VER ) && !defined( _CRT_SECURE_NO_WARNINGS )
-#define _CRT_SECURE_NO_WARNINGS
-#endif
 
 #include "broad_phase.h"
 
 #include "aabb.h"
 #include "arena_allocator.h"
-#include "atomic.h"
 #include "body.h"
 #include "contact.h"
 #include "core.h"
 #include "parallel_for.h"
 #include "physics_world.h"
+#include "platform.h"
 #include "shape.h"
 
-#include <stdbool.h>
 #include <string.h>
 
-// #include <stdio.h>
-
-// static FILE* s_file = NULL;
-
-void b2CreateBroadPhase( b2BroadPhase* bp, const b2Capacity* capacity )
+void b3CreateBroadPhase( b3BroadPhase* bp, const b3Capacity* capacity )
 {
-	_Static_assert( b2_bodyTypeCount == 3, "must be three body types" );
+	_Static_assert( b3_bodyTypeCount == 3, "must be three body types" );
 
-	// if (s_file == NULL)
-	//{
-	//	s_file = fopen("pairs01.txt", "a");
-	//	fprintf(s_file, "============\n\n");
-	// }
-
-	bp->movedProxies[b2_staticBody] = b2CreateBitSet( b2MaxInt( 16, capacity->staticShapeCount ) );
-	bp->movedProxies[b2_kinematicBody] = b2CreateBitSet( 16 );
-	bp->movedProxies[b2_dynamicBody] = b2CreateBitSet( b2MaxInt( 16, capacity->dynamicShapeCount ) );
-	b2Array_CreateN( bp->moveArray, b2MaxInt( 16, capacity->dynamicShapeCount ) );
+	bp->movedProxies[b3_staticBody] = b3CreateBitSet( b3MaxInt( 16, capacity->staticShapeCount ) );
+	bp->movedProxies[b3_kinematicBody] = b3CreateBitSet( 16 );
+	bp->movedProxies[b3_dynamicBody] = b3CreateBitSet( b3MaxInt( 16, capacity->dynamicShapeCount ) );
+	b3Array_Reserve( bp->moveArray, capacity->dynamicShapeCount );
 	bp->moveResults = NULL;
 	bp->movePairs = NULL;
 	bp->movePairCapacity = 0;
-	b2AtomicStoreInt( &bp->movePairIndex, 0 );
-	bp->pairSet = b2CreateSet( b2MaxInt( 32, 2 * capacity->contactCount ) );
+	b3AtomicStoreInt( &bp->movePairIndex, 0 );
+	bp->pairSet = b3CreateSet( 2 * capacity->contactCount );
 
-	int staticCapacity = b2MaxInt( 16, capacity->staticShapeCount );
-	bp->trees[b2_staticBody] = b2DynamicTree_Create( staticCapacity );
+	int staticCapacity = b3MaxInt( 16, capacity->staticShapeCount );
+	bp->trees[b3_staticBody] = b3DynamicTree_Create( staticCapacity );
 
 	int kinematicCapacity = 16;
-	bp->trees[b2_kinematicBody] = b2DynamicTree_Create( kinematicCapacity );
+	bp->trees[b3_kinematicBody] = b3DynamicTree_Create( kinematicCapacity );
 
-	int dynamicCapacity = b2MaxInt( 16, capacity->dynamicShapeCount );
-	bp->trees[b2_dynamicBody] = b2DynamicTree_Create( dynamicCapacity );
+	int dynamicCapacity = b3MaxInt( 16, capacity->dynamicShapeCount );
+	bp->trees[b3_dynamicBody] = b3DynamicTree_Create( dynamicCapacity );
 }
 
-void b2DestroyBroadPhase( b2BroadPhase* bp )
+void b3DestroyBroadPhase( b3BroadPhase* bp )
 {
-	for ( int i = 0; i < b2_bodyTypeCount; ++i )
+	for ( int i = 0; i < b3_bodyTypeCount; ++i )
 	{
-		b2DynamicTree_Destroy( bp->trees + i );
+		b3DynamicTree_Destroy( bp->trees + i );
 	}
 
-	for ( int i = 0; i < b2_bodyTypeCount; ++i )
+	for ( int i = 0; i < b3_bodyTypeCount; ++i )
 	{
-		b2DestroyBitSet( &bp->movedProxies[i] );
+		b3DestroyBitSet( &bp->movedProxies[i] );
 	}
-	b2Array_Destroy( bp->moveArray );
-	b2DestroySet( &bp->pairSet );
+	b3Array_Destroy( bp->moveArray );
+	b3DestroySet( &bp->pairSet );
 
-	memset( bp, 0, sizeof( b2BroadPhase ) );
+	*bp = (b3BroadPhase){ 0 };
 
-	// if (s_file != NULL)
-	//{
-	//	fclose(s_file);
-	//	s_file = NULL;
-	// }
+	memset( bp, 0, sizeof( b3BroadPhase ) );
 }
 
-static inline void b2UnBufferMove( b2BroadPhase* bp, int proxyKey )
+static void b3UnBufferMove( b3BroadPhase* bp, int proxyKey )
 {
-	b2BodyType proxyType = B2_PROXY_TYPE( proxyKey );
-	int proxyId = B2_PROXY_ID( proxyKey );
-	b2BitSet* set = &bp->movedProxies[proxyType];
+	b3BodyType proxyType = B3_PROXY_TYPE( proxyKey );
+	int proxyId = B3_PROXY_ID( proxyKey );
+	b3BitSet* set = &bp->movedProxies[proxyType];
 
-	if ( b2GetBit( set, proxyId ) )
+	if ( b3GetBit( set, proxyId ) )
 	{
-		b2ClearBit( set, proxyId );
+		b3ClearBit( set, proxyId );
 
 		// Purge from move buffer. Linear search.
 		// todo if I can iterate the move set then I don't need the moveArray
@@ -94,112 +75,153 @@ static inline void b2UnBufferMove( b2BroadPhase* bp, int proxyKey )
 		{
 			if ( bp->moveArray.data[i] == proxyKey )
 			{
-				b2Array_RemoveSwap( bp->moveArray, i );
+				b3Array_RemoveSwap( bp->moveArray, i );
 				break;
 			}
 		}
 	}
 }
 
-int b2BroadPhase_CreateProxy( b2BroadPhase* bp, b2BodyType proxyType, b2AABB aabb, uint64_t categoryBits, int shapeIndex,
+int b3BroadPhase_CreateProxy( b3BroadPhase* bp, b3BodyType proxyType, b3AABB aabb, uint64_t categoryBits, int shapeIndex,
 							  bool forcePairCreation )
 {
-	B2_ASSERT( 0 <= proxyType && proxyType < b2_bodyTypeCount );
-	int proxyId = b2DynamicTree_CreateProxy( bp->trees + proxyType, aabb, categoryBits, shapeIndex );
-	int proxyKey = B2_PROXY_KEY( proxyId, proxyType );
-	if ( proxyType != b2_staticBody || forcePairCreation )
+	B3_ASSERT( 0 <= proxyType && proxyType < b3_bodyTypeCount );
+	int proxyId = b3DynamicTree_CreateProxy( bp->trees + proxyType, aabb, categoryBits, shapeIndex );
+	int proxyKey = B3_PROXY_KEY( proxyId, proxyType );
+	if ( proxyType != b3_staticBody || forcePairCreation )
 	{
-		b2BufferMove( bp, proxyKey );
+		b3BufferMove( bp, proxyKey );
 	}
 	return proxyKey;
 }
 
-void b2BroadPhase_DestroyProxy( b2BroadPhase* bp, int proxyKey )
+void b3BroadPhase_DestroyProxy( b3BroadPhase* bp, int proxyKey )
 {
-	b2UnBufferMove( bp, proxyKey );
+	b3UnBufferMove( bp, proxyKey );
 
-	b2BodyType proxyType = B2_PROXY_TYPE( proxyKey );
-	int proxyId = B2_PROXY_ID( proxyKey );
+	b3BodyType proxyType = B3_PROXY_TYPE( proxyKey );
+	int proxyId = B3_PROXY_ID( proxyKey );
 
-	B2_ASSERT( 0 <= proxyType && proxyType <= b2_bodyTypeCount );
-	b2DynamicTree_DestroyProxy( bp->trees + proxyType, proxyId );
+	B3_ASSERT( 0 <= proxyType && proxyType <= b3_bodyTypeCount );
+	b3DynamicTree_DestroyProxy( bp->trees + proxyType, proxyId );
 }
 
-void b2BroadPhase_MoveProxy( b2BroadPhase* bp, int proxyKey, b2AABB aabb )
+void b3BroadPhase_MoveProxy( b3BroadPhase* bp, int proxyKey, b3AABB aabb )
 {
-	b2BodyType proxyType = B2_PROXY_TYPE( proxyKey );
-	int proxyId = B2_PROXY_ID( proxyKey );
+	b3BodyType proxyType = B3_PROXY_TYPE( proxyKey );
+	int proxyId = B3_PROXY_ID( proxyKey );
 
-	b2DynamicTree_MoveProxy( bp->trees + proxyType, proxyId, aabb );
-	b2BufferMove( bp, proxyKey );
+	b3DynamicTree_MoveProxy( bp->trees + proxyType, proxyId, aabb );
+	b3BufferMove( bp, proxyKey );
 }
 
-void b2BroadPhase_EnlargeProxy( b2BroadPhase* bp, int proxyKey, b2AABB aabb )
+void b3BroadPhase_EnlargeProxy( b3BroadPhase* bp, int proxyKey, b3AABB aabb )
 {
-	B2_ASSERT( proxyKey != B2_NULL_INDEX );
-	int typeIndex = B2_PROXY_TYPE( proxyKey );
-	int proxyId = B2_PROXY_ID( proxyKey );
+	B3_ASSERT( proxyKey != B3_NULL_INDEX );
+	int typeIndex = B3_PROXY_TYPE( proxyKey );
+	int proxyId = B3_PROXY_ID( proxyKey );
 
-	B2_ASSERT( typeIndex != b2_staticBody );
+	B3_ASSERT( typeIndex != b3_staticBody );
 
-	b2DynamicTree_EnlargeProxy( bp->trees + typeIndex, proxyId, aabb );
-	b2BufferMove( bp, proxyKey );
+	b3DynamicTree_EnlargeProxy( bp->trees + typeIndex, proxyId, aabb );
+	b3BufferMove( bp, proxyKey );
 }
 
-typedef struct b2MovePair
+typedef struct b3MovePair
 {
 	int shapeIndexA;
 	int shapeIndexB;
-	b2MovePair* next;
+	int childIndex;
+	b3MovePair* next;
 	bool heap;
-} b2MovePair;
+} b3MovePair;
 
-typedef struct b2MoveResult
+typedef struct b3MoveResult
 {
-	b2MovePair* pairList;
-} b2MoveResult;
+	b3MovePair* pairList;
+} b3MoveResult;
 
-typedef struct b2QueryPairContext
+typedef struct b3QueryPairContext
 {
-	b2World* world;
-	b2MoveResult* moveResult;
-	b2BodyType queryTreeType;
+	b3World* world;
+	b3MoveResult* moveResult;
+	b3AABB aabb;
+	b3BodyType queryTreeType;
 	int queryProxyKey;
 	int queryShapeIndex;
-} b2QueryPairContext;
 
-// This is called from b2DynamicTree::Query when we are gathering pairs.
-static bool b2PairQueryCallback( int proxyId, uint64_t userData, void* context )
+	int compoundProxyId;
+	int compoundShapeIndex;
+} b3QueryPairContext;
+
+// This is called from b3DynamicTree::Query when we are gathering pairs.
+static bool b3PairQueryCallback( int proxyId, uint64_t userData, void* context )
 {
-	int shapeId = (int)userData;
+	b3QueryPairContext* queryContext = (b3QueryPairContext*)context;
+	b3World* world = queryContext->world;
+	int shapeIndex;
+	int childIndex = 0;
 
-	b2QueryPairContext* queryContext = context;
-	b2BroadPhase* broadPhase = &queryContext->world->broadPhase;
+	if ( queryContext->compoundShapeIndex == B3_NULL_INDEX )
+	{
+		// Outer query: userData is a shape index.
+		shapeIndex = (int)userData;
 
-	int proxyKey = B2_PROXY_KEY( proxyId, queryContext->queryTreeType );
+		// A proxy cannot form a pair with itself.
+		if ( shapeIndex == queryContext->queryShapeIndex )
+		{
+			return true;
+		}
+
+		b3Shape* shape = b3Array_Get( world->shapes, shapeIndex );
+		if ( shape->type == b3_compoundShape )
+		{
+			// Query bounds are float world space, so the demoted transform is the matching float frame
+			b3Transform compoundTransform = b3ToRelativeTransform( b3GetBodyTransform( world, shape->bodyId ), b3Pos_zero );
+			b3AABB localAABB = b3AABB_Transform( b3InvertTransform( compoundTransform ), queryContext->aabb );
+
+			// recurse
+			queryContext->compoundShapeIndex = shapeIndex;
+			queryContext->compoundProxyId = proxyId;
+
+			b3DynamicTree_Query( &shape->compound->tree, localAABB, B3_DEFAULT_MASK_BITS, false, b3PairQueryCallback, context );
+			queryContext->compoundShapeIndex = B3_NULL_INDEX;
+			queryContext->compoundProxyId = B3_NULL_INDEX;
+			return true;
+		}
+	}
+	else
+	{
+		// Inner query into a compound shape: userData is the compound child index, not a shape
+		// index, so do not compare it against queryShapeIndex.
+		shapeIndex = queryContext->compoundShapeIndex;
+		proxyId = queryContext->compoundProxyId;
+		childIndex = (int)userData;
+	}
+
+	b3BroadPhase* broadPhase = &queryContext->world->broadPhase;
+
+	int proxyKey = B3_PROXY_KEY( proxyId, queryContext->queryTreeType );
 	int queryProxyKey = queryContext->queryProxyKey;
 
 	// A proxy cannot form a pair with itself.
-	if ( proxyKey == queryContext->queryProxyKey )
-	{
-		return true;
-	}
+	B3_ASSERT( proxyKey != queryContext->queryProxyKey );
 
-	b2BodyType treeType = queryContext->queryTreeType;
-	b2BodyType queryProxyType = B2_PROXY_TYPE( queryProxyKey );
+	b3BodyType treeType = queryContext->queryTreeType;
+	b3BodyType queryProxyType = B3_PROXY_TYPE( queryProxyKey );
 
 	// De-duplication
 	// It is important to prevent duplicate contacts from being created. Ideally I can prevent duplicates
 	// early and in the worker. Most of the time the movedProxies bit sets contain dynamic and kinematic
-	// proxies, but sometimes static proxies are in there too (b2ShapeDef::invokeContactCreation or a
+	// proxies, but sometimes static proxies are in there too (b3ShapeDef::invokeContactCreation or a
 	// modified static shape), so we always have to check.
 
 	// Is this proxy also moving?
-	if ( queryProxyType == b2_dynamicBody )
+	if ( queryProxyType == b3_dynamicBody )
 	{
-		if ( treeType == b2_dynamicBody && proxyKey < queryProxyKey )
+		if ( treeType == b3_dynamicBody && proxyKey < queryProxyKey )
 		{
-			bool moved = b2GetBit( &broadPhase->movedProxies[treeType], proxyId );
+			bool moved = b3GetBit( &broadPhase->movedProxies[treeType], proxyId );
 			if ( moved )
 			{
 				// Both proxies are moving. Avoid duplicate pairs.
@@ -209,8 +231,8 @@ static bool b2PairQueryCallback( int proxyId, uint64_t userData, void* context )
 	}
 	else
 	{
-		B2_ASSERT( treeType == b2_dynamicBody );
-		bool moved = b2GetBit( &broadPhase->movedProxies[treeType], proxyId );
+		B3_ASSERT( treeType == b3_dynamicBody );
+		bool moved = b3GetBit( &broadPhase->movedProxies[treeType], proxyId );
 		if ( moved )
 		{
 			// Both proxies are moving. Avoid duplicate pairs.
@@ -218,31 +240,18 @@ static bool b2PairQueryCallback( int proxyId, uint64_t userData, void* context )
 		}
 	}
 
-	uint64_t pairKey = B2_SHAPE_PAIR_KEY( shapeId, queryContext->queryShapeIndex );
-	bool pairExists = b2ContainsKey( &broadPhase->pairSet, pairKey );
-	if ( pairExists )
+	uint64_t pairKey = b3ShapePairKey( shapeIndex, queryContext->queryShapeIndex, childIndex );
+	if ( b3ContainsKey( &broadPhase->pairSet, pairKey ) )
 	{
 		// contact exists
 		return true;
 	}
 
-	int shapeIdA, shapeIdB;
-	if ( proxyKey < queryProxyKey )
-	{
-		shapeIdA = shapeId;
-		shapeIdB = queryContext->queryShapeIndex;
-	}
-	else
-	{
-		shapeIdA = queryContext->queryShapeIndex;
-		shapeIdB = shapeId;
-	}
-
-	b2World* world = queryContext->world;
-
-	b2Shape* shapeA = b2Array_Get( world->shapes, shapeIdA );
-	b2Shape* shapeB = b2Array_Get( world->shapes, shapeIdB );
-
+	// Order shapes so that B3_SHAPE_PAIR_KEY works correctly
+	int shapeIdA = shapeIndex;
+	int shapeIdB = queryContext->queryShapeIndex;
+	b3Shape* shapeA = b3Array_Get( world->shapes, shapeIdA );
+	b3Shape* shapeB = b3Array_Get( world->shapes, shapeIdB );
 	int bodyIdA = shapeA->bodyId;
 	int bodyIdB = shapeB->bodyId;
 
@@ -253,26 +262,20 @@ static bool b2PairQueryCallback( int proxyId, uint64_t userData, void* context )
 	}
 
 	// Sensors are handled elsewhere
-	if ( shapeA->sensorIndex != B2_NULL_INDEX || shapeB->sensorIndex != B2_NULL_INDEX )
+	if ( shapeA->sensorIndex != B3_NULL_INDEX || shapeB->sensorIndex != B3_NULL_INDEX )
 	{
 		return true;
 	}
 
-	if ( b2ShouldShapesCollide( shapeA->filter, shapeB->filter ) == false )
+	if ( b3ShouldShapesCollide( shapeA->filter, shapeB->filter ) == false )
 	{
-		return true;
-	}
-
-	if ( b2CanCollide( shapeA->type, shapeB->type ) == false )
-	{
-		// For example, no segment vs segment collision
 		return true;
 	}
 
 	// Does a joint override collision?
-	b2Body* bodyA = b2Array_Get( world->bodies, bodyIdA );
-	b2Body* bodyB = b2Array_Get( world->bodies, bodyIdB );
-	if ( b2ShouldBodiesCollide( world, bodyA, bodyB ) == false )
+	b3Body* bodyA = b3Array_Get( world->bodies, bodyIdA );
+	b3Body* bodyB = b3Array_Get( world->bodies, bodyIdB );
+	if ( b3ShouldBodiesCollide( world, bodyA, bodyB ) == false )
 	{
 		return true;
 	}
@@ -280,11 +283,11 @@ static bool b2PairQueryCallback( int proxyId, uint64_t userData, void* context )
 	// Custom user filter
 	if ( shapeA->enableCustomFiltering || shapeB->enableCustomFiltering )
 	{
-		b2CustomFilterFcn* customFilterFcn = queryContext->world->customFilterFcn;
+		b3CustomFilterFcn* customFilterFcn = queryContext->world->customFilterFcn;
 		if ( customFilterFcn != NULL )
 		{
-			b2ShapeId idA = { shapeIdA + 1, world->worldId, shapeA->generation };
-			b2ShapeId idB = { shapeIdB + 1, world->worldId, shapeB->generation };
+			b3ShapeId idA = { shapeIdA + 1, world->worldId, shapeA->generation };
+			b3ShapeId idB = { shapeIdB + 1, world->worldId, shapeB->generation };
 			bool shouldCollide = customFilterFcn( idA, idB, queryContext->world->customFilterContext );
 			if ( shouldCollide == false )
 			{
@@ -293,9 +296,10 @@ static bool b2PairQueryCallback( int proxyId, uint64_t userData, void* context )
 		}
 	}
 
-	int pairIndex = b2AtomicFetchAddInt( &broadPhase->movePairIndex, 1 );
+	// todo per thread to eliminate atomic?
+	int pairIndex = b3AtomicFetchAddInt( &broadPhase->movePairIndex, 1 );
 
-	b2MovePair* pair;
+	b3MovePair* pair;
 	if ( pairIndex < broadPhase->movePairCapacity )
 	{
 		pair = broadPhase->movePairs + pairIndex;
@@ -303,19 +307,15 @@ static bool b2PairQueryCallback( int proxyId, uint64_t userData, void* context )
 	}
 	else
 	{
-		static b2AtomicInt once = { 0 };
-		if ( b2AtomicCompareExchangeInt( &once, 0, 1 ) == 0 )
-		{
-			// This means you have too many overlapping objects.
-			b2Log( "Pair buffer capacity of %d exceeded, too many overlaps", broadPhase->movePairCapacity );
-		}
-
-		pair = b2Alloc( sizeof( b2MovePair ) );
-		pair->heap = true;
+		// todo experimenting with ignoring this pair if we ran out of space
+		return true;
+		// pair = (b3MovePair*)b3Alloc( sizeof( b3MovePair ) );
+		// pair->heap = true;
 	}
 
 	pair->shapeIndexA = shapeIdA;
 	pair->shapeIndexB = shapeIdB;
+	pair->childIndex = childIndex;
 	pair->next = queryContext->moveResult->pairList;
 	queryContext->moveResult->pairList = pair;
 
@@ -323,24 +323,18 @@ static bool b2PairQueryCallback( int proxyId, uint64_t userData, void* context )
 	return true;
 }
 
-// Warning: writing to these globals significantly slows multithreading performance
-#if B2_SNOOP_PAIR_COUNTERS
-b2TreeStats b2_dynamicStats;
-b2TreeStats b2_kinematicStats;
-b2TreeStats b2_staticStats;
-#endif
-
-static void b2FindPairsTask( int startIndex, int endIndex, int workerIndex, void* context )
+static void b3FindPairsTask( int startIndex, int endIndex, int workerIndex, void* context )
 {
-	B2_UNUSED( workerIndex );
+	b3TracyCZoneNC( pair_task, "Pair Task", b3_colorAquamarine, true );
 
-	b2TracyCZoneNC( pair_task, "Pair", b2_colorMediumSlateBlue, true );
+	B3_UNUSED( workerIndex );
 
-	b2World* world = context;
-	b2BroadPhase* bp = &world->broadPhase;
+	b3World* world = (b3World*)context;
+	b3BroadPhase* bp = &world->broadPhase;
 
-	b2QueryPairContext queryContext;
+	b3QueryPairContext queryContext = { 0 };
 	queryContext.world = world;
+	queryContext.compoundShapeIndex = B3_NULL_INDEX;
 
 	for ( int i = startIndex; i < endIndex; ++i )
 	{
@@ -349,71 +343,61 @@ static void b2FindPairsTask( int startIndex, int endIndex, int workerIndex, void
 		queryContext.moveResult->pairList = NULL;
 
 		int proxyKey = bp->moveArray.data[i];
-		if ( proxyKey == B2_NULL_INDEX )
-		{
-			// proxy was destroyed after it moved
-			continue;
-		}
+		b3BodyType proxyType = B3_PROXY_TYPE( proxyKey );
 
-		b2BodyType proxyType = B2_PROXY_TYPE( proxyKey );
-
-		int proxyId = B2_PROXY_ID( proxyKey );
+		int proxyId = B3_PROXY_ID( proxyKey );
 		queryContext.queryProxyKey = proxyKey;
 
-		const b2DynamicTree* baseTree = bp->trees + proxyType;
+		const b3DynamicTree* baseTree = bp->trees + proxyType;
 
 		// We have to query the tree with the fat AABB so that
 		// we don't fail to create a contact that may touch later.
-		b2AABB fatAABB = b2DynamicTree_GetAABB( baseTree, proxyId );
-		queryContext.queryShapeIndex = (int)b2DynamicTree_GetUserData( baseTree, proxyId );
+		b3AABB fatAABB = b3DynamicTree_GetAABB( baseTree, proxyId );
+		queryContext.queryShapeIndex = (int)b3DynamicTree_GetUserData( baseTree, proxyId );
+		queryContext.aabb = fatAABB;
+
+		// Compound shape collision invocation is not supported
+		B3_VALIDATE( world->shapes.data[queryContext.queryShapeIndex].type != b3_compoundShape );
 
 		// Query trees. Only dynamic proxies collide with kinematic and static proxies.
-		// Using B2_DEFAULT_MASK_BITS so that b2Filter::groupIndex works.
-		b2TreeStats stats = { 0 };
-		if ( proxyType == b2_dynamicBody )
+		// Using B3_DEFAULT_MASK_BITS so that b3Filter::groupIndex works.
+		// consider using bits = groupIndex > 0 ? B3_DEFAULT_MASK_BITS : maskBits
+		bool requireAllBits = false;
+		if ( proxyType == b3_dynamicBody )
 		{
-			// consider using bits = groupIndex > 0 ? B2_DEFAULT_MASK_BITS : maskBits
-			queryContext.queryTreeType = b2_kinematicBody;
-			b2TreeStats statsKinematic = b2DynamicTree_Query( bp->trees + b2_kinematicBody, fatAABB, B2_DEFAULT_MASK_BITS,
-															  b2PairQueryCallback, &queryContext );
-			stats.nodeVisits += statsKinematic.nodeVisits;
-			stats.leafVisits += statsKinematic.leafVisits;
+			queryContext.queryTreeType = b3_kinematicBody;
+			b3DynamicTree_Query( bp->trees + b3_kinematicBody, fatAABB, B3_DEFAULT_MASK_BITS, requireAllBits, b3PairQueryCallback,
+								 &queryContext );
 
-			queryContext.queryTreeType = b2_staticBody;
-			b2TreeStats statsStatic = b2DynamicTree_Query( bp->trees + b2_staticBody, fatAABB, B2_DEFAULT_MASK_BITS,
-														   b2PairQueryCallback, &queryContext );
-			stats.nodeVisits += statsStatic.nodeVisits;
-			stats.leafVisits += statsStatic.leafVisits;
+			queryContext.queryTreeType = b3_staticBody;
+			b3DynamicTree_Query( bp->trees + b3_staticBody, fatAABB, B3_DEFAULT_MASK_BITS, requireAllBits, b3PairQueryCallback,
+								 &queryContext );
 		}
 
 		// All proxies collide with dynamic proxies
-		// Using B2_DEFAULT_MASK_BITS so that b2Filter::groupIndex works.
-		queryContext.queryTreeType = b2_dynamicBody;
-		b2TreeStats statsDynamic =
-			b2DynamicTree_Query( bp->trees + b2_dynamicBody, fatAABB, B2_DEFAULT_MASK_BITS, b2PairQueryCallback, &queryContext );
-		stats.nodeVisits += statsDynamic.nodeVisits;
-		stats.leafVisits += statsDynamic.leafVisits;
+		// Using B3_DEFAULT_MASK_BITS so that b3Filter::groupIndex works.
+		queryContext.queryTreeType = b3_dynamicBody;
+		b3DynamicTree_Query( bp->trees + b3_dynamicBody, fatAABB, B3_DEFAULT_MASK_BITS, requireAllBits, b3PairQueryCallback,
+							 &queryContext );
 	}
 
-	b2TracyCZoneEnd( pair_task );
+	b3TracyCZoneEnd( pair_task );
 }
 
-static void b2UpdateTreesTask( void* context )
+static void b3UpdateTreesTask( void* context )
 {
-	b2TracyCZoneNC( tree_task, "Rebuild BVH", b2_colorFireBrick, true );
+	b3TracyCZoneNC( tree_task, "Rebuild Trees", b3_colorFireBrick, true );
 
-	b2World* world = context;
-	b2DynamicTree_Rebuild( world->broadPhase.trees + b2_dynamicBody, false );
-	b2DynamicTree_Rebuild( world->broadPhase.trees + b2_kinematicBody, false );
+	b3World* world = (b3World*)context;
+	b3DynamicTree_Rebuild( world->broadPhase.trees + b3_dynamicBody, false );
+	b3DynamicTree_Rebuild( world->broadPhase.trees + b3_kinematicBody, false );
 
-	b2TracyCZoneEnd( tree_task );
+	b3TracyCZoneEnd( tree_task );
 }
 
-void b2UpdateBroadPhasePairs( b2World* world )
+void b3UpdateBroadPhasePairs( b3World* world )
 {
-	b2BroadPhase* bp = &world->broadPhase;
-
-	b2ValidateMovedProxies( bp );
+	b3BroadPhase* bp = &world->broadPhase;
 
 	int moveCount = bp->moveArray.count;
 
@@ -422,173 +406,130 @@ void b2UpdateBroadPhasePairs( b2World* world )
 		return;
 	}
 
-	b2TracyCZoneNC( update_pairs, "Find Pairs", b2_colorMediumSlateBlue, true );
+	b3TracyCZoneNC( update_pairs, "Pairs", b3_colorMediumSlateBlue, true );
 
-	b2Stack* alloc = &world->stack;
+	b3Stack* alloc = &world->stack;
 
 	// todo these could be in the step context
-	bp->moveResults = b2StackAlloc( alloc, moveCount * sizeof( b2MoveResult ), "move results" );
+	bp->moveResults = (b3MoveResult*)b3StackAlloc( alloc, moveCount * sizeof( b3MoveResult ), "move results" );
+	bp->movePairCapacity = 16 * moveCount;
+	bp->movePairs = (b3MovePair*)b3StackAlloc( alloc, bp->movePairCapacity * sizeof( b3MovePair ), "move pairs" );
 
-	// This capacity can be exceeded if there are many overlapping pairs (e.g. all shapes at the origin)
-	bp->movePairCapacity = 32 * moveCount;
-	bp->movePairs = b2StackAlloc( alloc, bp->movePairCapacity * sizeof( b2MovePair ), "move pairs" );
-	b2AtomicStoreInt( &bp->movePairIndex, 0 );
+	b3AtomicStoreInt( &bp->movePairIndex, 0 );
 
-#if B2_SNOOP_TABLE_COUNTERS
-	extern b2AtomicInt b2_probeCount;
-	b2AtomicStoreInt( &b2_probeCount, 0 );
+#ifndef NDEBUG
+	extern b3AtomicInt b3_probeCount;
+	b3AtomicStoreInt( &b3_probeCount, 0 );
 #endif
 
 	int minRange = 64;
-	b2ParallelFor( world, &b2FindPairsTask, moveCount, minRange, world );
+	b3ParallelFor( world, b3FindPairsTask, moveCount, minRange, world, "pairs" );
 
-	b2TracyCZoneNC( create_contacts, "Create Contacts", b2_colorCoral, true );
+	b3TracyCZoneNC( create_contacts, "Create Contacts", b3_colorCoral, true );
 
 	// Task that can be done in parallel with the narrow-phase
 	// - rebuild the collision tree for dynamic and kinematic bodies to keep their query performance good
-	if (world->taskCount < B2_MAX_TASKS)
+	if ( world->taskCount < B3_MAX_TASKS )
 	{
-		world->userTreeTask = world->enqueueTaskFcn( &b2UpdateTreesTask, world, world->userTaskContext );
+		world->userTreeTask = world->enqueueTaskFcn( &b3UpdateTreesTask, world, world->userTaskContext, "rebuild tree" );
 		world->taskCount += 1;
 		world->activeTaskCount += world->userTreeTask == NULL ? 0 : 1;
 	}
 	else
 	{
 		world->userTreeTask = NULL;
-		b2UpdateTreesTask( world );
+		b3UpdateTreesTask( world );
 	}
 
 	// Single-threaded work
 	// - Clear move flags
 	// - Create contacts in deterministic order
-	// This is deterministic because the results follow the order of b2BroadPhase::moveArray.
 	for ( int i = 0; i < moveCount; ++i )
 	{
-		b2MoveResult* result = bp->moveResults + i;
-		b2MovePair* pair = result->pairList;
+		b3MoveResult* result = bp->moveResults + i;
+		b3MovePair* pair = result->pairList;
 		while ( pair != NULL )
 		{
 			int shapeIdA = pair->shapeIndexA;
 			int shapeIdB = pair->shapeIndexB;
+			int childIndex = pair->childIndex;
 
-			// if (s_file != NULL)
-			//{
-			//	fprintf(s_file, "%d %d\n", shapeIdA, shapeIdB);
-			// }
+			b3Shape* shapeA = b3Array_Get( world->shapes, shapeIdA );
+			b3Shape* shapeB = b3Array_Get( world->shapes, shapeIdB );
 
-			b2Shape* shapeA = b2Array_Get( world->shapes, shapeIdA );
-			b2Shape* shapeB = b2Array_Get( world->shapes, shapeIdB );
-
-			b2CreateContact( world, shapeA, shapeB );
+			b3CreateContact( world, shapeA, shapeB, childIndex );
 
 			if ( pair->heap )
 			{
-				// Note: I tried adding to the pair set in parallel with contact creation
-				// but that didn't work with with pair heap allocation. I could make it
-				// work with a task context bump allocator with heap fallback. The perf
-				// gain was small or zero.
-				b2MovePair* temp = pair;
+				b3MovePair* temp = pair;
 				pair = pair->next;
-				b2Free( temp, sizeof( b2MovePair ) );
+				b3Free( temp, sizeof( b3MovePair ) );
 			}
 			else
 			{
 				pair = pair->next;
 			}
 		}
-
-		// if (s_file != NULL)
-		//{
-		//	fprintf(s_file, "\n");
-		// }
 	}
-
-	// if (s_file != NULL)
-	//{
-	//	fprintf(s_file, "count = %d\n\n", pairCount);
-	// }
 
 	// Reset move buffer: clear only the bits that were set this step.
 	// Invariant: bit set in movedProxies[type] iff proxyKey is present in moveArray.
 	for ( int i = 0; i < bp->moveArray.count; ++i )
 	{
 		int proxyKey = bp->moveArray.data[i];
-		b2ClearBit( &bp->movedProxies[B2_PROXY_TYPE( proxyKey )], B2_PROXY_ID( proxyKey ) );
+		b3ClearBit( &bp->movedProxies[B3_PROXY_TYPE( proxyKey )], B3_PROXY_ID( proxyKey ) );
 	}
-	b2Array_Clear( bp->moveArray );
+	b3Array_Clear( bp->moveArray );
 
-	b2StackFree( alloc, bp->movePairs );
+	b3StackFree( alloc, bp->movePairs );
 	bp->movePairs = NULL;
-	b2StackFree( alloc, bp->moveResults );
+	b3StackFree( alloc, bp->moveResults );
 	bp->moveResults = NULL;
 
-	b2ValidateSolverSets( world );
+	b3ValidateSolverSets( world );
 
-	b2TracyCZoneEnd( create_contacts );
-	b2TracyCZoneEnd( update_pairs );
+	b3TracyCZoneEnd( create_contacts );
+
+	b3TracyCZoneEnd( update_pairs );
 }
 
-bool b2BroadPhase_TestOverlap( const b2BroadPhase* bp, int proxyKeyA, int proxyKeyB )
+bool b3BroadPhase_TestOverlap( const b3BroadPhase* bp, int proxyKeyA, int proxyKeyB )
 {
-	int typeIndexA = B2_PROXY_TYPE( proxyKeyA );
-	int proxyIdA = B2_PROXY_ID( proxyKeyA );
-	int typeIndexB = B2_PROXY_TYPE( proxyKeyB );
-	int proxyIdB = B2_PROXY_ID( proxyKeyB );
+	int typeIndexA = B3_PROXY_TYPE( proxyKeyA );
+	int proxyIdA = B3_PROXY_ID( proxyKeyA );
+	int typeIndexB = B3_PROXY_TYPE( proxyKeyB );
+	int proxyIdB = B3_PROXY_ID( proxyKeyB );
 
-	b2AABB aabbA = b2DynamicTree_GetAABB( bp->trees + typeIndexA, proxyIdA );
-	b2AABB aabbB = b2DynamicTree_GetAABB( bp->trees + typeIndexB, proxyIdB );
-	return b2AABB_Overlaps( aabbA, aabbB );
+	b3AABB aabbA = b3DynamicTree_GetAABB( bp->trees + typeIndexA, proxyIdA );
+	b3AABB aabbB = b3DynamicTree_GetAABB( bp->trees + typeIndexB, proxyIdB );
+	return b3AABB_Overlaps( aabbA, aabbB );
 }
 
-int b2BroadPhase_GetShapeIndex( b2BroadPhase* bp, int proxyKey )
+int b3BroadPhase_GetShapeIndex( b3BroadPhase* bp, int proxyKey )
 {
-	int typeIndex = B2_PROXY_TYPE( proxyKey );
-	int proxyId = B2_PROXY_ID( proxyKey );
+	int typeIndex = B3_PROXY_TYPE( proxyKey );
+	int proxyId = B3_PROXY_ID( proxyKey );
 
-	return (int)b2DynamicTree_GetUserData( bp->trees + typeIndex, proxyId );
+	return (int)b3DynamicTree_GetUserData( bp->trees + typeIndex, proxyId );
 }
 
-void b2ValidateBroadphase( const b2BroadPhase* bp )
+void b3ValidateBroadPhase( const b3BroadPhase* bp )
 {
-	b2DynamicTree_Validate( bp->trees + b2_dynamicBody );
-	b2DynamicTree_Validate( bp->trees + b2_kinematicBody );
+	b3DynamicTree_Validate( bp->trees + b3_dynamicBody );
+	b3DynamicTree_Validate( bp->trees + b3_kinematicBody );
 
-	// TODO_ERIN validate every shape AABB is contained in tree AABB
+	// todo validate every shape AABB is contained in tree AABB
 }
 
-void b2ValidateNoEnlarged( const b2BroadPhase* bp )
+void b3ValidateNoEnlarged( const b3BroadPhase* bp )
 {
-#if B2_ENABLE_VALIDATION == 1
-	for ( int j = 0; j < b2_bodyTypeCount; ++j )
+#if B3_ENABLE_VALIDATION == 1
+	for ( int j = 0; j < b3_bodyTypeCount; ++j )
 	{
-		const b2DynamicTree* tree = bp->trees + j;
-		b2DynamicTree_ValidateNoEnlarged( tree );
+		const b3DynamicTree* tree = bp->trees + j;
+		b3DynamicTree_ValidateNoEnlarged( tree );
 	}
 #else
-	B2_UNUSED( bp );
-#endif
-}
-
-void b2ValidateMovedProxies( const b2BroadPhase* bp )
-{
-#if B2_ENABLE_VALIDATION == 1
-	// Invariant: bit set in movedProxies[type] iff proxyKey is present in moveArray.
-	int moveCount = bp->moveArray.count;
-	for ( int i = 0; i < moveCount; ++i )
-	{
-		int proxyKey = bp->moveArray.data[i];
-		b2BodyType proxyType = B2_PROXY_TYPE( proxyKey );
-		int proxyId = B2_PROXY_ID( proxyKey );
-		B2_ASSERT( b2GetBit( &bp->movedProxies[proxyType], proxyId ) );
-	}
-
-	int totalSetBits = 0;
-	for ( int i = 0; i < b2_bodyTypeCount; ++i )
-	{
-		totalSetBits += b2CountSetBits( (b2BitSet*)&bp->movedProxies[i] );
-	}
-	B2_ASSERT( totalSetBits == moveCount );
-#else
-	B2_UNUSED( bp );
+	B3_UNUSED( bp );
 #endif
 }

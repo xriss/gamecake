@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
@@ -6,44 +6,36 @@
 #include "bitset.h"
 #include "container.h"
 
-typedef struct b2Shape b2Shape;
-typedef struct b2World b2World;
+typedef struct b3Shape b3Shape;
+typedef struct b3World b3World;
 
 // Used to track shapes that hit sensors using time of impact
-typedef struct b2SensorHit
+typedef struct b3SensorHit
 {
 	int sensorId;
 	int visitorId;
-} b2SensorHit;
+} b3SensorHit;
 
-b2DeclareArray( b2SensorHit );
-
-typedef struct b2Visitor
+typedef struct b3Visitor
 {
 	int shapeId;
 	uint16_t generation;
-} b2Visitor;
+} b3Visitor;
 
-b2DeclareArray( b2Visitor );
+b3DeclareArray( b3Visitor );
 
-typedef struct b2Sensor
+typedef struct b3Sensor
 {
-	// todo find a way to pool these
-	b2Array( b2Visitor ) hits;
-	b2Array( b2Visitor ) overlaps1;
-	b2Array( b2Visitor ) overlaps2;
+	b3Array( b3Visitor ) hits;
+	b3Array( b3Visitor ) overlaps1;
+	b3Array( b3Visitor ) overlaps2;
 	int shapeId;
-} b2Sensor;
+} b3Sensor;
 
-b2DeclareArray( b2Sensor );
-
-typedef struct b2SensorTaskContext
+typedef struct b3SensorTaskContext
 {
-	b2BitSet eventBits;
-} b2SensorTaskContext;
+	b3BitSet eventBits;
+} b3SensorTaskContext;
 
-b2DeclareArray( b2SensorTaskContext );
-
-void b2OverlapSensors( b2World* world );
-
-void b2DestroySensor( b2World* world, b2Shape* sensorShape );
+void b3OverlapSensors( b3World* world );
+void b3DestroySensor( b3World* world, b3Shape* sensorShape );

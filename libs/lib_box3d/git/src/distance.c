@@ -1,451 +1,784 @@
-
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2026 Erin Catto
 // SPDX-License-Identifier: MIT
 
-#include "core.h"
+// Dirk Gregorius contributed portions of this code
 
-#include "box2d/collision.h"
-#include "box2d/constants.h"
-#include "box2d/math_functions.h"
+#include "math_internal.h"
 
-#include <float.h>
-#include <stddef.h>
+#include "box3d/collision.h"
+#include "box3d/constants.h"
 
-b2Transform b2GetSweepTransform( const b2Sweep* sweep, float time )
+#define B3_MAX_SIMPLEX_VERTICES 4
+#define B3_MAX_GJK_ITERATIONS 32
+
+int b3GetProxySupport( const b3ShapeProxy* proxy, b3Vec3 axis )
 {
-	// https://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
-	b2Transform xf;
-	xf.p = b2Add( b2MulSV( 1.0f - time, sweep->c1 ), b2MulSV( time, sweep->c2 ) );
-
-	b2Rot q = {
-		( 1.0f - time ) * sweep->q1.c + time * sweep->q2.c,
-		( 1.0f - time ) * sweep->q1.s + time * sweep->q2.s,
-	};
-
-	xf.q = b2NormalizeRot( q );
-
-	// Shift to origin
-	xf.p = b2Sub( xf.p, b2RotateVector( xf.q, sweep->localCenter ) );
-	return xf;
-}
-
-/// Follows Ericson 5.1.9 Closest Points of Two Line Segments
-b2SegmentDistanceResult b2SegmentDistance( b2Vec2 p1, b2Vec2 q1, b2Vec2 p2, b2Vec2 q2 )
-{
-	b2SegmentDistanceResult result = { 0 };
-
-	b2Vec2 d1 = b2Sub( q1, p1 );
-	b2Vec2 d2 = b2Sub( q2, p2 );
-	b2Vec2 r = b2Sub( p1, p2 );
-	float dd1 = b2Dot( d1, d1 );
-	float dd2 = b2Dot( d2, d2 );
-	float rd1 = b2Dot( r, d1 );
-	float rd2 = b2Dot( r, d2 );
-
-	const float epsSqr = FLT_EPSILON * FLT_EPSILON;
-
-	if ( dd1 < epsSqr || dd2 < epsSqr )
-	{
-		// Handle all degeneracies
-		if ( dd1 >= epsSqr )
-		{
-			// Segment 2 is degenerate
-			result.fraction1 = b2ClampFloat( -rd1 / dd1, 0.0f, 1.0f );
-			result.fraction2 = 0.0f;
-		}
-		else if ( dd2 >= epsSqr )
-		{
-			// Segment 1 is degenerate
-			result.fraction1 = 0.0f;
-			result.fraction2 = b2ClampFloat( rd2 / dd2, 0.0f, 1.0f );
-		}
-		else
-		{
-			result.fraction1 = 0.0f;
-			result.fraction2 = 0.0f;
-		}
-	}
-	else
-	{
-		// Non-degenerate segments
-		float d12 = b2Dot( d1, d2 );
-
-		float denominator = dd1 * dd2 - d12 * d12;
-
-		// Fraction on segment 1
-		float f1 = 0.0f;
-		if ( denominator != 0.0f )
-		{
-			// not parallel
-			f1 = b2ClampFloat( ( d12 * rd2 - rd1 * dd2 ) / denominator, 0.0f, 1.0f );
-		}
-
-		// Compute point on segment 2 closest to p1 + f1 * d1
-		float f2 = ( d12 * f1 + rd2 ) / dd2;
-
-		// Clamping of segment 2 requires a do over on segment 1
-		if ( f2 < 0.0f )
-		{
-			f2 = 0.0f;
-			f1 = b2ClampFloat( -rd1 / dd1, 0.0f, 1.0f );
-		}
-		else if ( f2 > 1.0f )
-		{
-			f2 = 1.0f;
-			f1 = b2ClampFloat( ( d12 - rd1 ) / dd1, 0.0f, 1.0f );
-		}
-
-		result.fraction1 = f1;
-		result.fraction2 = f2;
-	}
-
-	result.closest1 = b2MulAdd( p1, result.fraction1, d1 );
-	result.closest2 = b2MulAdd( p2, result.fraction2, d2 );
-	result.distanceSquared = b2DistanceSquared( result.closest1, result.closest2 );
-	return result;
-}
-
-b2ShapeProxy b2MakeProxy( const b2Vec2* points, int count, float radius )
-{
-	count = b2MinInt( count, B2_MAX_POLYGON_VERTICES );
-	b2ShapeProxy proxy;
-	for ( int i = 0; i < count; ++i )
-	{
-		proxy.points[i] = points[i];
-	}
-	proxy.count = count;
-	proxy.radius = radius;
-	return proxy;
-}
-
-b2ShapeProxy b2MakeOffsetProxy( const b2Vec2* points, int count, float radius, b2Vec2 position, b2Rot rotation )
-{
-	count = b2MinInt( count, B2_MAX_POLYGON_VERTICES );
-	b2Transform transform = {
-		.p = position,
-		.q = rotation,
-	};
-	b2ShapeProxy proxy;
-	for ( int i = 0; i < count; ++i )
-	{
-		proxy.points[i] = b2TransformPoint( transform, points[i] );
-	}
-	proxy.count = count;
-	proxy.radius = radius;
-	return proxy;
-}
-
-static inline b2Vec2 b2Weight2( float a1, b2Vec2 w1, float a2, b2Vec2 w2 )
-{
-	return (b2Vec2){ a1 * w1.x + a2 * w2.x, a1 * w1.y + a2 * w2.y };
-}
-
-static inline b2Vec2 b2Weight3( float a1, b2Vec2 w1, float a2, b2Vec2 w2, float a3, b2Vec2 w3 )
-{
-	return (b2Vec2){ a1 * w1.x + a2 * w2.x + a3 * w3.x, a1 * w1.y + a2 * w2.y + a3 * w3.y };
-}
-
-static inline int b2FindSupport( const b2ShapeProxy* proxy, b2Vec2 direction )
-{
-	const b2Vec2* points = proxy->points;
 	int count = proxy->count;
+	const b3Vec3* points = proxy->points;
 
-	int bestIndex = 0;
-	float bestValue = b2Dot( points[0], direction );
-	for ( int i = 1; i < count; ++i )
+	B3_ASSERT( count > 0 );
+	B3_ASSERT( points != NULL );
+
+	// We move the first vertex into the origin for improved precision.
+	// This is necessary since we don't have shape transforms and
+	// vertices can potentially be far away from the origin (large).
+	b3Vec3 origin = points[0];
+	int maxIndex = 0;
+	float maxProjection = 0.0f;
+
+	for ( int index = 1; index < count; ++index )
 	{
-		float value = b2Dot( points[i], direction );
-		if ( value > bestValue )
+		// We subtract the first vertex since we are shifting into the origin.
+		float projection = b3Dot( axis, b3Sub( points[index], origin ) );
+		if ( projection > maxProjection )
 		{
-			bestIndex = i;
-			bestValue = value;
+			maxIndex = index;
+			maxProjection = projection;
 		}
 	}
 
-	return bestIndex;
+	return maxIndex;
 }
 
-static b2Simplex b2MakeSimplexFromCache( b2SimplexCache cache, const b2ShapeProxy* proxyA, const b2ShapeProxy* proxyB )
+int b3GetPointSupport( const b3Vec3* points, int count, b3Vec3 axis )
 {
-	B2_ASSERT( cache.count <= 3 );
-	b2Simplex s;
+	B3_ASSERT( count > 0 );
+	B3_ASSERT( points != NULL );
 
-	// Copy data from cache.
-	s.count = cache.count;
+	// We move the first vertex into the origin for improved precision.
+	// This is necessary since we don't have shape transforms and
+	// vertices can potentially be far away from the origin (large).
+	b3Vec3 origin = points[0];
+	int maxIndex = 0;
+	float maxProjection = 0.0f;
 
-	b2SimplexVertex* vertices[] = { &s.v1, &s.v2, &s.v3 };
-	for ( int i = 0; i < s.count; ++i )
+	for ( int index = 1; index < count; ++index )
 	{
-		b2SimplexVertex* v = vertices[i];
-		v->indexA = cache.indexA[i];
-		v->indexB = cache.indexB[i];
-		v->wA = proxyA->points[v->indexA];
-		v->wB = proxyB->points[v->indexB];
-		v->w = b2Sub( v->wA, v->wB );
-
-		// invalid
-		v->a = -1.0f;
+		// We subtract the first vertex since we are shifting into the origin.
+		float projection = b3Dot( axis, b3Sub( points[index], origin ) );
+		if ( projection > maxProjection )
+		{
+			maxIndex = index;
+			maxProjection = projection;
+		}
 	}
 
-	// If the cache is empty or invalid ...
-	if ( s.count == 0 )
-	{
-		b2SimplexVertex* v = vertices[0];
-		v->indexA = 0;
-		v->indexB = 0;
-		v->wA = proxyA->points[0];
-		v->wB = proxyB->points[0];
-		v->w = b2Sub( v->wA, v->wB );
-		v->a = 1.0f;
-		s.count = 1;
-	}
-
-	return s;
+	return maxIndex;
 }
 
-static b2SimplexCache b2MakeSimplexCache( const b2Simplex* simplex )
+static void b3BarycentricCoordsEdge( float out[3], b3Vec3 a, b3Vec3 b )
 {
-	b2SimplexCache cache = { 0 };
-	cache.count = (uint16_t)simplex->count;
-	const b2SimplexVertex* vertices[] = { &simplex->v1, &simplex->v2, &simplex->v3 };
-	for ( int i = 0; i < simplex->count; ++i )
-	{
-		cache.indexA[i] = (uint8_t)vertices[i]->indexA;
-		cache.indexB[i] = (uint8_t)vertices[i]->indexB;
-	}
+	b3Vec3 ab = b3Sub( b, a );
 
-	return cache;
+	// Last element is divisor
+	float divisor = b3Dot( ab, ab );
+
+	out[0] = b3Dot( b, ab );
+	out[1] = -b3Dot( a, ab );
+	out[2] = divisor;
 }
 
-static void b2ComputeWitnessPoints( const b2Simplex* s, b2Vec2* a, b2Vec2* b )
+static void b3BarycentricCoordsTri( float out[4], b3Vec3 a, b3Vec3 b, b3Vec3 c )
 {
-	switch ( s->count )
+	b3Vec3 ab = b3Sub( b, a );
+	b3Vec3 ac = b3Sub( c, a );
+
+	b3Vec3 bXC = b3Cross( b, c );
+	b3Vec3 cXA = b3Cross( c, a );
+	b3Vec3 aXB = b3Cross( a, b );
+
+	b3Vec3 abXAc = b3Cross( ab, ac );
+
+	// Last element is divisor
+	float divisor = b3Dot( abXAc, abXAc );
+
+	out[0] = b3Dot( bXC, abXAc );
+	out[1] = b3Dot( cXA, abXAc );
+	out[2] = b3Dot( aXB, abXAc );
+	out[3] = divisor;
+}
+
+static void b3BarycentricCoordsTet( float out[5], b3Vec3 a, b3Vec3 b, b3Vec3 c, b3Vec3 d )
+{
+	b3Vec3 ab = b3Sub( b, a );
+	b3Vec3 ac = b3Sub( c, a );
+	b3Vec3 ad = b3Sub( d, a );
+
+	// Last element is divisor (forced to be positive)
+	float divisor = b3ScalarTripleProduct( ab, ac, ad );
+
+	float sign = divisor < 0.0f ? -1.0f : 1.0f;
+	out[0] = sign * b3ScalarTripleProduct( b, c, d );
+	out[1] = sign * b3ScalarTripleProduct( a, d, c );
+	out[2] = sign * b3ScalarTripleProduct( a, b, d );
+	out[3] = sign * b3ScalarTripleProduct( a, c, b );
+	out[4] = sign * divisor;
+}
+
+static float b3GetMetric( const b3Simplex* simplex )
+{
+	int count = simplex->count;
+	B3_ASSERT( 1 <= count && count <= 4 );
+
+	const b3SimplexVertex* vertices = simplex->vertices;
+
+	switch ( count )
 	{
 		case 1:
-			*a = s->v1.wA;
-			*b = s->v1.wB;
+		{
+			return 0.0f;
+		}
+
+		case 2:
+		{
+			b3Vec3 a = vertices[0].w;
+			b3Vec3 b = vertices[1].w;
+			return b3Distance( a, b );
+		}
+
+		case 3:
+		{
+			b3Vec3 a = vertices[0].w;
+			b3Vec3 b = vertices[1].w;
+			b3Vec3 c = vertices[2].w;
+			return b3Length( b3Cross( b3Sub( b, a ), b3Sub( c, a ) ) ) / 2.0f;
+		}
+
+		case 4:
+		{
+			b3Vec3 a = vertices[0].w;
+			b3Vec3 b = vertices[1].w;
+			b3Vec3 c = vertices[2].w;
+			b3Vec3 d = vertices[3].w;
+			return b3ScalarTripleProduct( b3Sub( b, a ), b3Sub( c, a ), b3Sub( d, a ) ) / 6.0f;
+		}
+
+		default:
+			B3_ASSERT( !"Should never get here!" );
+			break;
+	}
+
+	return 0.0f;
+}
+
+static void b3WriteCache( b3SimplexCache* cache, const b3Simplex* simplex )
+{
+	int count = simplex->count;
+	cache->metric = b3GetMetric( simplex );
+	cache->count = (uint16_t)count;
+	for ( int index = 0; index < count; ++index )
+	{
+		cache->indexA[index] = (uint8_t)simplex->vertices[index].indexA;
+		cache->indexB[index] = (uint8_t)simplex->vertices[index].indexB;
+	}
+}
+
+static bool b3SolveSimplex2( b3Simplex* simplex )
+{
+	b3SimplexVertex* vs = simplex->vertices;
+	B3_ASSERT( simplex->count == 2 );
+
+	// Vertex regions
+	//float wAB[3];
+
+	b3Vec3 a = vs[0].w;
+	b3Vec3 b = vs[1].w;
+	b3Vec3 ab = b3Sub( b, a );
+
+	// Last element is divisor
+	float divisor = b3Dot( ab, ab );
+
+	float u = b3Dot( b, ab );
+	float v = -b3Dot( a, ab );
+	//wAB[2] = divisor;
+
+	// V( A )
+	if ( v <= 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 1;
+		vs[0].a = 1.0f;
+
+		return true;
+	}
+
+	// V( B )
+	if ( u <= 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 1;
+		vs[0] = vs[1];
+		vs[0].a = 1.0f;
+
+		return true;
+	}
+
+	// Edge region
+	if ( divisor <= 0.0f )
+	{
+		return false;
+	}
+
+	// VR( AB )
+	float denominator = 1.0f / divisor;
+	vs[0].a = denominator * u;
+	vs[1].a = denominator * v;
+
+	return true;
+}
+
+static bool b3SolveSimplex3( b3Simplex* simplex )
+{
+	b3SimplexVertex* vs = simplex->vertices;
+	B3_ASSERT( simplex->count == 3 );
+
+	// Get simplex (be aware of aliasing here!)
+	b3SimplexVertex v1 = vs[0];
+	b3SimplexVertex v2 = vs[1];
+	b3SimplexVertex v3 = vs[2];
+
+	// Vertex regions
+	float wAB[3], wBC[3], wCA[3];
+	b3BarycentricCoordsEdge( wAB, v1.w, v2.w );
+	b3BarycentricCoordsEdge( wBC, v2.w, v3.w );
+	b3BarycentricCoordsEdge( wCA, v3.w, v1.w );
+
+	// VR( A )
+	if ( wAB[1] <= 0.0f && wCA[0] <= 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 1;
+		vs[0] = v1;
+		vs[0].a = 1.0f;
+
+		return true;
+	}
+
+	// VR( B )
+	if ( wBC[1] <= 0.0f && wAB[0] <= 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 1;
+		vs[0] = v2;
+		vs[0].a = 1.0f;
+
+		return true;
+	}
+
+	// VR( C )
+	if ( wCA[1] <= 0.0f && wBC[0] <= 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 1;
+		vs[0] = v3;
+		vs[0].a = 1.0f;
+
+		return true;
+	}
+
+	// Edge regions
+	float wABC[4];
+	b3BarycentricCoordsTri( wABC, v1.w, v2.w, v3.w );
+
+	// VR( AB )
+	if ( wABC[2] <= 0.0f && wAB[0] > 0.0f && wAB[1] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 2;
+		vs[0] = v1;
+		vs[1] = v2;
+
+		// Normalize
+		float divisor = wAB[2];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wAB[0] / divisor;
+		vs[1].a = wAB[1] / divisor;
+
+		return true;
+	}
+
+	// VR( BC )
+	if ( wABC[0] <= 0.0f && wBC[0] > 0.0f && wBC[1] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 2;
+		vs[0] = v2;
+		vs[1] = v3;
+
+		// Normalize
+		float divisor = wBC[2];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wBC[0] / divisor;
+		vs[1].a = wBC[1] / divisor;
+
+		return true;
+	}
+
+	// VR( CA )
+	if ( wABC[1] <= 0.0f && wCA[0] > 0.0f && wCA[1] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 2;
+		vs[0] = v3;
+		vs[1] = v1;
+
+		// Normalize
+		float divisor = wCA[2];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wCA[0] / divisor;
+		vs[1].a = wCA[1] / divisor;
+
+		return true;
+	}
+
+	// Face region
+	float divisor = wABC[3];
+	if ( divisor <= 0.0f )
+	{
+		return false;
+	}
+
+	// VR( ABC )
+	vs[0].a = wABC[0] / divisor;
+	vs[1].a = wABC[1] / divisor;
+	vs[2].a = wABC[2] / divisor;
+
+	return true;
+}
+
+static bool b3SolveSimplex4( b3Simplex* simplex )
+{
+	b3SimplexVertex* vs = simplex->vertices;
+
+	// Get simplex (be aware of aliasing here!)
+	B3_ASSERT( simplex->count == 4 );
+	b3SimplexVertex vertexA = vs[0];
+	b3SimplexVertex vertexB = vs[1];
+	b3SimplexVertex vertexC = vs[2];
+	b3SimplexVertex vertexD = vs[3];
+
+	// Vertex region
+	float wAB[3], wAC[3], wAD[3], wBC[3], wCD[3], wDB[3];
+	b3BarycentricCoordsEdge( wAB, vertexA.w, vertexB.w );
+	b3BarycentricCoordsEdge( wAC, vertexA.w, vertexC.w );
+	b3BarycentricCoordsEdge( wAD, vertexA.w, vertexD.w );
+	b3BarycentricCoordsEdge( wBC, vertexB.w, vertexC.w );
+	b3BarycentricCoordsEdge( wCD, vertexC.w, vertexD.w );
+	b3BarycentricCoordsEdge( wDB, vertexD.w, vertexB.w );
+
+	// VR( A )
+	if ( wAB[1] <= 0.0f && wAC[1] <= 0.0f && wAD[1] <= 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 1;
+		vs[0] = vertexA;
+
+		vs[0].a = 1.0f;
+
+		return true;
+	}
+
+	// VR( B )
+	if ( wAB[0] <= 0.0f && wDB[0] <= 0.0f && wBC[1] <= 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 1;
+		vs[0] = vertexB;
+
+		vs[0].a = 1.0f;
+
+		return true;
+	}
+
+	// VR( C )
+	if ( wAC[0] <= 0.0f && wBC[0] <= 0.0f && wCD[1] <= 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 1;
+		vs[0] = vertexC;
+
+		vs[0].a = 1.0f;
+
+		return true;
+	}
+
+	// VR( D )
+	if ( wAD[0] <= 0.0f && wCD[0] <= 0.0f && wDB[1] <= 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 1;
+		vs[0] = vertexD;
+
+		vs[0].a = 1.0f;
+
+		return true;
+	}
+
+	// Edge region
+	float wACB[4], wABD[4], wADC[4], wBCD[4];
+	b3BarycentricCoordsTri( wACB, vertexA.w, vertexC.w, vertexB.w );
+	b3BarycentricCoordsTri( wABD, vertexA.w, vertexB.w, vertexD.w );
+	b3BarycentricCoordsTri( wADC, vertexA.w, vertexD.w, vertexC.w );
+	b3BarycentricCoordsTri( wBCD, vertexB.w, vertexC.w, vertexD.w );
+
+	// VR( AB )
+	if ( wABD[2] <= 0.0f && wACB[1] <= 0.0f && wAB[0] > 0.0f && wAB[1] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 2;
+		vs[0] = vertexA;
+		vs[1] = vertexB;
+
+		// Normalize
+		float divisor = wAB[2];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wAB[0] / divisor;
+		vs[1].a = wAB[1] / divisor;
+
+		return true;
+	}
+
+	// VR( AC )
+	if ( wACB[2] <= 0.0f && wADC[1] <= 0.0f && wAC[0] > 0.0f && wAC[1] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 2;
+		vs[0] = vertexA;
+		vs[1] = vertexC;
+
+		// Normalize
+		float divisor = wAC[2];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wAC[0] / divisor;
+		vs[1].a = wAC[1] / divisor;
+
+		return true;
+	}
+
+	// VR( AD )
+	if ( wADC[2] <= 0.0f && wABD[1] <= 0.0f && wAD[0] > 0.0f && wAD[1] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 2;
+		vs[0] = vertexA;
+		vs[1] = vertexD;
+
+		// Normalize
+		float divisor = wAD[2];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wAD[0] / divisor;
+		vs[1].a = wAD[1] / divisor;
+
+		return true;
+	}
+
+	// VR( BC )
+	if ( wACB[0] <= 0.0f && wBCD[2] <= 0.0f && wBC[0] > 0.0f && wBC[1] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 2;
+		vs[0] = vertexB;
+		vs[1] = vertexC;
+
+		// Normalize
+		float divisor = wBC[2];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wBC[0] / divisor;
+		vs[1].a = wBC[1] / divisor;
+
+		return true;
+	}
+
+	// VR( CD )
+	if ( wADC[0] <= 0.0f && wBCD[0] <= 0.0f && wCD[0] > 0.0f && wCD[1] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 2;
+		vs[0] = vertexC;
+		vs[1] = vertexD;
+
+		// Normalize
+		float divisor = wCD[2];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wCD[0] / divisor;
+		vs[1].a = wCD[1] / divisor;
+
+		return true;
+	}
+
+	// VR( DB )
+	if ( wABD[0] <= 0.0f && wBCD[1] <= 0.0f && wDB[0] > 0.0f && wDB[1] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 2;
+		vs[0] = vertexD;
+		vs[1] = vertexB;
+
+		// Normalize
+		float divisor = wDB[2];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wDB[0] / divisor;
+		vs[1].a = wDB[1] / divisor;
+
+		return true;
+	}
+
+	// Face regions
+	float wABCD[5];
+	b3BarycentricCoordsTet( wABCD, vertexA.w, vertexB.w, vertexC.w, vertexD.w );
+
+	// VR( ACB )
+	if ( wABCD[3] < 0.0f && wACB[0] > 0.0f && wACB[1] > 0.0f && wACB[2] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 3;
+		vs[0] = vertexA;
+		vs[1] = vertexC;
+		vs[2] = vertexB;
+
+		// Normalize
+		float divisor = wACB[3];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wACB[0] / divisor;
+		vs[1].a = wACB[1] / divisor;
+		vs[2].a = wACB[2] / divisor;
+
+		return true;
+	}
+
+	// VR( ABD )
+	if ( wABCD[2] < 0.0f && wABD[0] > 0.0f && wABD[1] > 0.0f && wABD[2] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 3;
+		vs[0] = vertexA;
+		vs[1] = vertexB;
+		vs[2] = vertexD;
+
+		// Normalize
+		float divisor = wABD[3];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wABD[0] / divisor;
+		vs[1].a = wABD[1] / divisor;
+		vs[2].a = wABD[2] / divisor;
+
+		return true;
+	}
+
+	// VR( ADC )
+	if ( wABCD[1] < 0.0f && wADC[0] > 0.0f && wADC[1] > 0.0f && wADC[2] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 3;
+		vs[0] = vertexA;
+		vs[1] = vertexD;
+		vs[2] = vertexC;
+
+		// Normalize
+		float divisor = wADC[3];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wADC[0] / divisor;
+		vs[1].a = wADC[1] / divisor;
+		vs[2].a = wADC[2] / divisor;
+
+		return true;
+	}
+
+	// VR( BCD )
+	if ( wABCD[0] < 0.0f && wBCD[0] > 0.0f && wBCD[1] > 0.0f && wBCD[2] > 0.0f )
+	{
+		// Reduce simplex
+		simplex->count = 3;
+		vs[0] = vertexB;
+		vs[1] = vertexC;
+		vs[2] = vertexD;
+
+		// Normalize
+		float divisor = wBCD[3];
+		if ( divisor <= 0.0f )
+		{
+			return false;
+		}
+
+		vs[0].a = wBCD[0] / divisor;
+		vs[1].a = wBCD[1] / divisor;
+		vs[2].a = wBCD[2] / divisor;
+
+		return true;
+	}
+
+	// *** Inside tetrahedron ***
+	float divisor = wABCD[4];
+	if ( divisor <= 0.0f )
+	{
+		return false;
+	}
+
+	// VR( ABCD )
+	vs[0].a = wABCD[0] / divisor;
+	vs[1].a = wABCD[1] / divisor;
+	vs[2].a = wABCD[2] / divisor;
+	vs[3].a = wABCD[3] / divisor;
+
+	return true;
+}
+
+static void b3ComputeWitnessPoints( const b3Simplex* simplex, b3Vec3* vertexA, b3Vec3* vertexB )
+{
+	const b3SimplexVertex* vs = simplex->vertices;
+	int count = simplex->count;
+	B3_ASSERT( 1 <= count && count <= 4 );
+
+	switch ( count )
+	{
+		case 1:
+			*vertexA = vs[0].wA;
+			*vertexB = vs[0].wB;
 			break;
 
 		case 2:
-			*a = b2Weight2( s->v1.a, s->v1.wA, s->v2.a, s->v2.wA );
-			*b = b2Weight2( s->v1.a, s->v1.wB, s->v2.a, s->v2.wB );
+			*vertexA = b3Blend2( vs[0].a, vs[0].wA, vs[1].a, vs[1].wA );
+			*vertexB = b3Blend2( vs[0].a, vs[0].wB, vs[1].a, vs[1].wB );
 			break;
 
 		case 3:
-			*a = b2Weight3( s->v1.a, s->v1.wA, s->v2.a, s->v2.wA, s->v3.a, s->v3.wA );
-			// todo why are these not equal?
-			//*b = b2Weight3(s->v1.a, s->v1.wB, s->v2.a, s->v2.wB, s->v3.a, s->v3.wB);
-			*b = *a;
+			*vertexA = b3Blend3( vs[0].a, vs[0].wA, vs[1].a, vs[1].wA, vs[2].a, vs[2].wA );
+			*vertexB = b3Blend3( vs[0].a, vs[0].wB, vs[1].a, vs[1].wB, vs[2].a, vs[2].wB );
 			break;
+
+		case 4:
+		{
+			// Force identical points and *zero* distance
+			b3Vec3 sum = b3Add( b3Blend2( vs[0].a, vs[0].wA, vs[1].a, vs[1].wA ),
+								b3Blend2( vs[2].a, vs[2].wA, vs[3].a, vs[3].wA ) );
+			*vertexA = sum;
+			*vertexB = sum;
+		}
+		break;
 
 		default:
-			*a = b2Vec2_zero;
-			*b = b2Vec2_zero;
-			B2_ASSERT( false );
+			B3_ASSERT( !"Should never get here!" );
 			break;
 	}
 }
 
-// Solve a line segment using barycentric coordinates.
-//
-// p = a1 * w1 + a2 * w2
-// a1 + a2 = 1
-//
-// The vector from the origin to the closest point on the line is
-// perpendicular to the line.
-// e12 = w2 - w1
-// dot(p, e) = 0
-// a1 * dot(w1, e) + a2 * dot(w2, e) = 0
-//
-// 2-by-2 linear system
-// [1      1     ][a1] = [1]
-// [w1.e12 w2.e12][a2] = [0]
-//
-// Define
-// d12_1 =  dot(w2, e12)
-// d12_2 = -dot(w1, e12)
-// d12 = d12_1 + d12_2
-//
-// Solution
-// a1 = d12_1 / d12
-// a2 = d12_2 / d12
-//
-// returns a vector that points towards the origin
-static b2Vec2 b2SolveSimplex2( b2Simplex* s )
+b3DistanceOutput b3ShapeDistance( const b3DistanceInput* input, b3SimplexCache* cache, b3Simplex* simplexes, int simplexCapacity )
 {
-	b2Vec2 w1 = s->v1.w;
-	b2Vec2 w2 = s->v2.w;
-	b2Vec2 e12 = b2Sub( w2, w1 );
+	// The query runs in frame A using the relative pose of B in A.
+	b3Transform xf = input->transform;
 
-	// w1 region
-	float d12_2 = -b2Dot( w1, e12 );
-	if ( d12_2 <= 0.0f )
+	// Use matrices for faster math
+	b3Matrix3 m = b3MakeMatrixFromQuat( xf.q );
+	b3Matrix3 mt = b3Transpose( m );
+
+	const b3ShapeProxy* proxyA = &input->proxyA;
+	const b3ShapeProxy* proxyB = &input->proxyB;
+
+	// Compute initial simplex from cache
+	B3_ASSERT( cache->count <= B3_MAX_SIMPLEX_VERTICES );
+
+	b3Simplex simplex = { 0 };
+	b3SimplexVertex* vs = simplex.vertices;
+
+	simplex.count = cache->count;
+	for ( int i = 0; i < cache->count; ++i )
 	{
-		// a2 <= 0, so we clamp it to 0
-		s->v1.a = 1.0f;
-		s->count = 1;
-		return b2Neg( w1 );
+		int index1 = cache->indexA[i];
+		int index2 = cache->indexB[i];
+
+		B3_ASSERT( 0 <= index1 && index1 < proxyA->count );
+		B3_ASSERT( 0 <= index2 && index2 < proxyB->count );
+
+		b3Vec3 vertex1 = proxyA->points[index1];
+		b3Vec3 vertex2 = b3Add( b3MulMV( m, proxyB->points[index2] ), xf.p );
+
+		vs[i].indexA = index1;
+		vs[i].indexB = index2;
+		vs[i].wA = vertex1;
+		vs[i].wB = vertex2;
+		vs[i].w = b3Sub( vertex2, vertex1 );
+		vs[i].a = 0.0f;
 	}
 
-	// w2 region
-	float d12_1 = b2Dot( w2, e12 );
-	if ( d12_1 <= 0.0f )
+	// Compute the new simplex metric, if it is substantially
+	// different than the old metric flush the simplex.
+	if ( simplex.count > 0 )
 	{
-		// a1 <= 0, so we clamp it to 0
-		s->v2.a = 1.0f;
-		s->count = 1;
-		s->v1 = s->v2;
-		return b2Neg( w2 );
-	}
+		float metric1 = cache->metric;
+		float metric2 = b3GetMetric( &simplex );
 
-	// Must be in e12 region.
-	float inv_d12 = 1.0f / ( d12_1 + d12_2 );
-	s->v1.a = d12_1 * inv_d12;
-	s->v2.a = d12_2 * inv_d12;
-	s->count = 2;
-	return b2CrossSV( b2Cross( b2Add( w1, w2 ), e12 ), e12 );
-}
-
-static b2Vec2 b2SolveSimplex3( b2Simplex* s )
-{
-	b2Vec2 w1 = s->v1.w;
-	b2Vec2 w2 = s->v2.w;
-	b2Vec2 w3 = s->v3.w;
-
-	// Edge12
-	// [1      1     ][a1] = [1]
-	// [w1.e12 w2.e12][a2] = [0]
-	// a3 = 0
-	b2Vec2 e12 = b2Sub( w2, w1 );
-	float w1e12 = b2Dot( w1, e12 );
-	float w2e12 = b2Dot( w2, e12 );
-	float d12_1 = w2e12;
-	float d12_2 = -w1e12;
-
-	// Edge13
-	// [1      1     ][a1] = [1]
-	// [w1.e13 w3.e13][a3] = [0]
-	// a2 = 0
-	b2Vec2 e13 = b2Sub( w3, w1 );
-	float w1e13 = b2Dot( w1, e13 );
-	float w3e13 = b2Dot( w3, e13 );
-	float d13_1 = w3e13;
-	float d13_2 = -w1e13;
-
-	// Edge23
-	// [1      1     ][a2] = [1]
-	// [w2.e23 w3.e23][a3] = [0]
-	// a1 = 0
-	b2Vec2 e23 = b2Sub( w3, w2 );
-	float w2e23 = b2Dot( w2, e23 );
-	float w3e23 = b2Dot( w3, e23 );
-	float d23_1 = w3e23;
-	float d23_2 = -w2e23;
-
-	// Triangle123
-	float n123 = b2Cross( e12, e13 );
-
-	float d123_1 = n123 * b2Cross( w2, w3 );
-	float d123_2 = n123 * b2Cross( w3, w1 );
-	float d123_3 = n123 * b2Cross( w1, w2 );
-
-	// w1 region
-	if ( d12_2 <= 0.0f && d13_2 <= 0.0f )
-	{
-		s->v1.a = 1.0f;
-		s->count = 1;
-		return b2Neg( w1 );
-	}
-
-	// e12
-	if ( d12_1 > 0.0f && d12_2 > 0.0f && d123_3 <= 0.0f )
-	{
-		float inv_d12 = 1.0f / ( d12_1 + d12_2 );
-		s->v1.a = d12_1 * inv_d12;
-		s->v2.a = d12_2 * inv_d12;
-		s->count = 2;
-		return b2CrossSV( b2Cross( b2Add( w1, w2 ), e12 ), e12 );
-	}
-
-	// e13
-	if ( d13_1 > 0.0f && d13_2 > 0.0f && d123_2 <= 0.0f )
-	{
-		float inv_d13 = 1.0f / ( d13_1 + d13_2 );
-		s->v1.a = d13_1 * inv_d13;
-		s->v3.a = d13_2 * inv_d13;
-		s->count = 2;
-		s->v2 = s->v3;
-		return b2CrossSV( b2Cross( b2Add( w1, w3 ), e13 ), e13 );
-	}
-
-	// w2 region
-	if ( d12_1 <= 0.0f && d23_2 <= 0.0f )
-	{
-		s->v2.a = 1.0f;
-		s->count = 1;
-		s->v1 = s->v2;
-		return b2Neg( w2 );
-	}
-
-	// w3 region
-	if ( d13_1 <= 0.0f && d23_1 <= 0.0f )
-	{
-		s->v3.a = 1.0f;
-		s->count = 1;
-		s->v1 = s->v3;
-		return b2Neg( w3 );
-	}
-
-	// e23
-	if ( d23_1 > 0.0f && d23_2 > 0.0f && d123_1 <= 0.0f )
-	{
-		float inv_d23 = 1.0f / ( d23_1 + d23_2 );
-		s->v2.a = d23_1 * inv_d23;
-		s->v3.a = d23_2 * inv_d23;
-		s->count = 2;
-		s->v1 = s->v3;
-		return b2CrossSV( b2Cross( b2Add( w2, w3 ), e23 ), e23 );
-	}
-
-	// Must be in triangle123
-	float inv_d123 = 1.0f / ( d123_1 + d123_2 + d123_3 );
-	s->v1.a = d123_1 * inv_d123;
-	s->v2.a = d123_2 * inv_d123;
-	s->v3.a = d123_3 * inv_d123;
-	s->count = 3;
-
-	// No search direction
-	return b2Vec2_zero;
-}
-
-// Uses GJK for computing the distance between convex shapes.
-// https://box2d.org/files/ErinCatto_GJK_GDC2010.pdf
-// I spent time optimizing this and could find no further significant gains 3/30/2025
-b2DistanceOutput b2ShapeDistance( const b2DistanceInput* input, b2SimplexCache* cache, b2Simplex* simplexes, int simplexCapacity )
-{
-	B2_UNUSED( simplexes, simplexCapacity );
-	B2_ASSERT( input->proxyA.count > 0 && input->proxyB.count > 0 );
-	B2_ASSERT( input->proxyA.radius >= 0.0f );
-	B2_ASSERT( input->proxyB.radius >= 0.0f );
-
-	b2DistanceOutput output = { 0 };
-
-	const b2ShapeProxy* proxyA = &input->proxyA;
-
-	// Get proxyB in frame A to avoid further transforms in the main loop.
-	// This is still a performance gain at 8 points.
-	b2ShapeProxy localProxyB;
-	{
-		localProxyB.count = input->proxyB.count;
-		localProxyB.radius = input->proxyB.radius;
-		for ( int i = 0; i < localProxyB.count; ++i )
+		// todo the tetrahedron metric can be negative
+		if ( 2.0f * metric1 < metric2 || metric2 < 0.5f * metric1 || metric2 < FLT_EPSILON )
 		{
-			localProxyB.points[i] = b2TransformPoint( input->transform, input->proxyB.points[i] );
+			// Flush the simplex
+			simplex.count = 0;
 		}
 	}
 
-	// Initialize the simplex.
-	b2Simplex simplex = b2MakeSimplexFromCache( *cache, proxyA, &localProxyB );
+	// If the cache is invalid or empty
+	if ( simplex.count == 0 )
+	{
+		b3Vec3 vertex1 = proxyA->points[0];
+		b3Vec3 vertex2 = b3Add( b3MulMV( m, proxyB->points[0] ), xf.p );
+
+		simplex.count = 1;
+		simplex.vertices[0].indexA = 0;
+		simplex.vertices[0].indexB = 0;
+		simplex.vertices[0].wA = vertex1;
+		simplex.vertices[0].wB = vertex2;
+		simplex.vertices[0].w = b3Sub( vertex2, vertex1 );
+		simplex.vertices[0].a = 0.0f;
+	}
+
+	b3Simplex backup = { 0 };
 
 	int simplexIndex = 0;
 	if ( simplexes != NULL && simplexIndex < simplexCapacity )
@@ -454,174 +787,264 @@ b2DistanceOutput b2ShapeDistance( const b2DistanceInput* input, b2SimplexCache* 
 		simplexIndex += 1;
 	}
 
-	// Get simplex vertices as an array.
-	b2SimplexVertex* vertices[] = { &simplex.v1, &simplex.v2, &simplex.v3 };
+	b3DistanceOutput distanceOutput = { 0 };
 
-	b2Vec2 nonUnitNormal = b2Vec2_zero;
+	// Keep track of squared distance
+	float distanceSq = FLT_MAX;
 
-	// These store the vertices of the last simplex so that we can check for duplicates and prevent cycling.
-	int saveA[3], saveB[3];
+	b3Vec3 normal = b3Vec3_zero;
 
-	// Main iteration loop. All computations are done in frame A.
-	const int maxIterations = 20;
+	// Run GJK
 	int iteration = 0;
-	while ( iteration < maxIterations )
+	for ( ; iteration < B3_MAX_GJK_ITERATIONS; ++iteration )
 	{
-		// Copy simplex so we can identify duplicates.
-		int saveCount = simplex.count;
-		for ( int i = 0; i < saveCount; ++i )
-		{
-			saveA[i] = vertices[i]->indexA;
-			saveB[i] = vertices[i]->indexB;
-		}
-
-		b2Vec2 d = { 0 };
+		// Solve simplex
+		bool solved = false;
 		switch ( simplex.count )
 		{
 			case 1:
-				d = b2Neg( simplex.v1.w );
+				simplex.vertices[0].a = 1.0f;
+				solved = true;
 				break;
 
 			case 2:
-				d = b2SolveSimplex2( &simplex );
+				solved = b3SolveSimplex2( &simplex );
 				break;
 
 			case 3:
-				d = b2SolveSimplex3( &simplex );
+				solved = b3SolveSimplex3( &simplex );
+				break;
+
+			case 4:
+				solved = b3SolveSimplex4( &simplex );
 				break;
 
 			default:
-				B2_ASSERT( false );
+				B3_ASSERT( !"Should never get here!" );
+				break;
 		}
 
-		// If we have 3 points, then the origin is in the corresponding triangle.
-		if ( simplex.count == 3 )
+		if ( solved == false )
 		{
-			// Overlap
-			b2Vec2 localPointA, localPointB;
-			b2ComputeWitnessPoints( &simplex, &localPointA, &localPointB );
-			output.pointA = localPointA;
-			output.pointB = localPointB;
-			return output;
+			// No progress - reconstruct last simplex
+			B3_ASSERT( backup.count != 0 );
+			simplex = backup;
+			break;
 		}
 
-#ifndef NDEBUG
 		if ( simplexes != NULL && simplexIndex < simplexCapacity )
 		{
 			simplexes[simplexIndex] = simplex;
 			simplexIndex += 1;
+			distanceOutput.iterations = iteration;
+			distanceOutput.simplexCount = simplexIndex;
 		}
-#endif
 
-		// Ensure the search direction is numerically fit.
-		if ( b2Dot( d, d ) < FLT_EPSILON * FLT_EPSILON )
+		if ( simplex.count == B3_MAX_SIMPLEX_VERTICES )
 		{
-			// This is unlikely but could lead to bad cycling.
-			// The branch predictor seems to make this check have low cost.
-
-			// The origin is probably contained by a line segment
-			// or triangle. Thus the shapes are overlapped.
-
-			// Must return overlap due to invalid normal.
-			b2Vec2 localPointA, localPointB;
-			b2ComputeWitnessPoints( &simplex, &localPointA, &localPointB );
-			output.pointA = localPointA;
-			output.pointB = localPointB;
-			return output;
+			// Overlap
+			b3Vec3 localPointA, localPointB;
+			b3ComputeWitnessPoints( &simplex, &localPointA, &localPointB );
+			distanceOutput.pointA = localPointA;
+			distanceOutput.pointB = localPointB;
+			return distanceOutput;
 		}
 
-		// Save the normal
-		nonUnitNormal = d;
+		// Assure distance progression
+		float oldDistanceSq = distanceSq;
 
-		// Compute a tentative new simplex vertex using support points.
-		// support = support(a, d) - support(b, -d)
-		b2SimplexVertex* vertex = vertices[simplex.count];
-		vertex->indexA = b2FindSupport( proxyA, d );
-		vertex->wA = proxyA->points[vertex->indexA];
-		vertex->indexB = b2FindSupport( &localProxyB, b2Neg( d ) );
-		vertex->wB = localProxyB.points[vertex->indexB];
-		vertex->w = b2Sub( vertex->wA, vertex->wB );
+		// Compute closest point
+		b3Vec3 closestPoint = { 0 };
 
-		// Iteration count is equated to the number of support point calls.
-		++iteration;
+		switch ( simplex.count )
+		{
+			case 1:
+				closestPoint = vs[0].w;
+				break;
+
+			case 2:
+				closestPoint = b3Blend2( vs[0].a, vs[0].w, vs[1].a, vs[1].w );
+				break;
+
+			case 3:
+				closestPoint = b3Blend3( vs[0].a, vs[0].w, vs[1].a, vs[1].w, vs[2].a, vs[2].w );
+				break;
+
+			case 4:
+				closestPoint = b3Add( b3Blend2( vs[0].a, vs[0].w, vs[1].a, vs[1].w ),
+									  b3Blend2( vs[2].a, vs[2].w, vs[3].a, vs[3].w ) );
+				break;
+
+			default:
+				B3_ASSERT( !"Should never get here!" );
+				break;
+		}
+
+		distanceSq = b3Dot( closestPoint, closestPoint );
+
+		if ( distanceSq >= oldDistanceSq )
+		{
+			// No progress - reconstruct last simplex
+			B3_ASSERT( backup.count != 0 );
+			simplex = backup;
+			break;
+		}
+
+		// Build new tentative support point
+		b3Vec3 searchDirection = { 0 };
+
+		switch ( simplex.count )
+		{
+			case 1:
+			{
+				// v = -A
+				searchDirection = b3Neg( vs[0].w );
+			}
+			break;
+
+			case 2:
+			{
+				// v = (AB x AO) x AB
+				b3Vec3 a = vs[0].w;
+				b3Vec3 b = vs[1].w;
+
+				b3Vec3 ab = b3Sub( b, a );
+
+				searchDirection = b3Cross( b3Cross( ab, b3Neg( a ) ), ab );
+			}
+			break;
+
+			case 3:
+			{
+				// v = AB x AC or v = AC x AB
+				b3Vec3 a = vs[0].w;
+				b3Vec3 b = vs[1].w;
+				b3Vec3 c = vs[2].w;
+
+				b3Vec3 ab = b3Sub( b, a );
+				b3Vec3 ac = b3Sub( c, a );
+
+				b3Vec3 n = b3Cross( ab, ac );
+
+				searchDirection = b3Dot( n, a ) < 0.0f ? n : b3Neg( n );
+			}
+			break;
+
+			default:
+				B3_ASSERT( !"Should never get here!" );
+				break;
+		}
+
+		if ( b3LengthSquared( searchDirection ) < 1000.0f * FLT_MIN )
+		{
+			// The origin is probably contained by a line segment or triangle.
+			// Thus the shapes are overlapped.
+			b3Vec3 localPointA, localPointB;
+			b3ComputeWitnessPoints( &simplex, &localPointA, &localPointB );
+			distanceOutput.pointA = localPointA;
+			distanceOutput.pointB = localPointB;
+			B3_VALIDATE( b3Distance( localPointA, localPointB ) < FLT_EPSILON );
+			return distanceOutput;
+		}
+
+		normal = b3Neg( searchDirection );
+
+		// Get new support points
+		b3Vec3 searchDirection1 = searchDirection;
+		int indexA = b3GetProxySupport( &input->proxyA, b3Neg( searchDirection1 ) );
+		b3Vec3 supportA = input->proxyA.points[indexA];
+		b3Vec3 searchDirection2 = b3MulMV( mt, searchDirection );
+		int indexB = b3GetProxySupport( &input->proxyB, searchDirection2 );
+		b3Vec3 supportB = b3Add( b3MulMV( m, input->proxyB.points[indexB] ), xf.p );
+
+		// Save current simplex and add new vertex - this can fail if we detect cycling
+		backup = simplex;
 
 		// Check for duplicate support points. This is the main termination criteria.
 		bool duplicate = false;
-		for ( int i = 0; i < saveCount; ++i )
+		for ( int i = 0; i < simplex.count; ++i )
 		{
-			if ( vertex->indexA == saveA[i] && vertex->indexB == saveB[i] )
+			if ( vs[i].indexA == indexA && vs[i].indexB == indexB )
 			{
 				duplicate = true;
 				break;
 			}
 		}
 
-		// If we found a duplicate support point we must exit to avoid cycling.
 		if ( duplicate )
 		{
 			break;
 		}
 
-		// New vertex is valid and needed.
+		vs[simplex.count].indexA = indexA;
+		vs[simplex.count].indexB = indexB;
+		vs[simplex.count].wA = supportA;
+		vs[simplex.count].wB = supportB;
+		vs[simplex.count].w = b3Sub( supportB, supportA );
 		simplex.count += 1;
 	}
 
-#ifndef NDEBUG
-	if ( simplexes != NULL && simplexIndex < simplexCapacity )
+	normal = b3Normalize( normal );
+	if ( b3IsNormalized( normal ) == false )
 	{
-		simplexes[simplexIndex] = simplex;
-		simplexIndex += 1;
+		// Treat as overlap
+		return distanceOutput;
 	}
-#endif
 
-	// Prepare output in frame A
-	b2Vec2 normal = b2Normalize( nonUnitNormal );
-	B2_ASSERT( b2IsNormalized( normal ) );
+	// Build witness points and safe cache
+	b3Vec3 localPointA, localPointB;
+	b3ComputeWitnessPoints( &simplex, &localPointA, &localPointB );
+	b3WriteCache( cache, &simplex );
 
-	b2Vec2 localPointA, localPointB;
-	b2ComputeWitnessPoints( &simplex, &localPointA, &localPointB );
-	output.normal = normal;
-	output.distance = b2Distance( localPointA, localPointB );
-	output.pointA = localPointA;
-	output.pointB = localPointB;
-	output.iterations = iteration;
-	output.simplexCount = simplexIndex;
-
-	// Cache the simplex
-	*cache = b2MakeSimplexCache( &simplex );
+	// Results stay in frame A
+	distanceOutput.pointA = localPointA;
+	distanceOutput.pointB = localPointB;
+	distanceOutput.distance = b3Distance( localPointA, localPointB );
+	distanceOutput.normal = normal;
+	distanceOutput.iterations = iteration;
+	distanceOutput.simplexCount = simplexIndex;
 
 	// Apply radii if requested
 	if ( input->useRadii )
 	{
-		float radiusA = input->proxyA.radius;
-		float radiusB = input->proxyB.radius;
-		output.distance = b2MaxFloat( 0.0f, output.distance - radiusA - radiusB );
+		float rA = input->proxyA.radius;
+		float rB = input->proxyB.radius;
+		distanceOutput.distance = b3MaxFloat( 0.0f, distanceOutput.distance - rA - rB );
 
 		// Keep closest points on perimeter even if overlapped, this way the points move smoothly.
-		output.pointA = b2MulAdd( output.pointA, radiusA, normal );
-		output.pointB = b2MulSub( output.pointB, radiusB, normal );
+		distanceOutput.pointA = b3Add( distanceOutput.pointA, b3MulSV( rA, normal ) );
+		distanceOutput.pointB = b3Sub( distanceOutput.pointB, b3MulSV( rB, normal ) );
 	}
 
-	return output;
+	return distanceOutput;
 }
 
-// Shape cast using conservative advancement
-b2CastOutput b2ShapeCast( const b2ShapeCastPairInput* input )
+
+// Separation function:
+// f(t) = (c2 + t * dp2 - c1 - t * dp1 ) * n
+
+// Root finding : f(t) - target = 0
+// (c2 + t * dp2 - c1 - t * dp1 ) * n - target = 0
+// (c2 - c1) * n + t * (dp2 - dp1) * n - target = 0
+// t = [target - (c2 - c1) * n] / [(dp2 - dp1) * n]
+// t = (target - d) / [(dp2 - dp1) * n]
+
+b3CastOutput b3ShapeCast( const b3ShapeCastPairInput* input )
 {
 	// Compute tolerance
-	float linearSlop = B2_LINEAR_SLOP;
+	float linearSlop = B3_LINEAR_SLOP;
 	float totalRadius = input->proxyA.radius + input->proxyB.radius;
-	float target = b2MaxFloat( linearSlop, totalRadius - linearSlop );
+	float target = b3MaxFloat( linearSlop, totalRadius - linearSlop );
 	float tolerance = 0.25f * linearSlop;
 
-	B2_ASSERT( target > tolerance );
+	B3_ASSERT( target > tolerance );
 
 	// Prepare input for distance query
-	b2SimplexCache cache = { 0 };
+	b3SimplexCache cache = { 0 };
 
-	float fraction = 0.0f;
+	float alpha = 0.0f;
 
-	b2DistanceInput distanceInput = { 0 };
+	b3DistanceInput distanceInput = { 0 };
 	distanceInput.proxyA = input->proxyA;
 	distanceInput.proxyB = input->proxyB;
 	distanceInput.useRadii = false;
@@ -630,8 +1053,10 @@ b2CastOutput b2ShapeCast( const b2ShapeCastPairInput* input )
 	// which keeps the math near the local origin and avoids re-relativizing world poses.
 	distanceInput.transform = input->transform;
 
-	b2Vec2 delta2 = input->translationB;
-	b2CastOutput output = { 0 };
+	b3Vec3 delta2 = input->translationB;
+	b3DistanceOutput distanceOutput = { 0 };
+	b3CastOutput output = { 0 };
+	output.triangleIndex = B3_NULL_INDEX;
 
 	int iteration = 0;
 	const int maxIterations = 20;
@@ -640,7 +1065,7 @@ b2CastOutput b2ShapeCast( const b2ShapeCastPairInput* input )
 	{
 		output.iterations += 1;
 
-		b2DistanceOutput distanceOutput = b2ShapeDistance( &distanceInput, &cache, NULL, 0 );
+		distanceOutput = b3ShapeDistance( &distanceInput, &cache, NULL, 0 );
 
 		if ( distanceOutput.distance < target + tolerance )
 		{
@@ -656,29 +1081,64 @@ b2CastOutput b2ShapeCast( const b2ShapeCastPairInput* input )
 					output.hit = true;
 
 					// Compute a common point
-					b2Vec2 c1 = b2MulAdd( distanceOutput.pointA, input->proxyA.radius, distanceOutput.normal );
-					b2Vec2 c2 = b2MulAdd( distanceOutput.pointB, -input->proxyB.radius, distanceOutput.normal );
-					output.point = b2Lerp( c1, c2, 0.5f );
+					b3Vec3 c1 = b3MulAdd( distanceOutput.pointA, input->proxyA.radius, distanceOutput.normal );
+					b3Vec3 c2 = b3MulAdd( distanceOutput.pointB, -input->proxyB.radius, distanceOutput.normal );
+					output.point = b3Lerp( c1, c2, 0.5f );
 					return output;
 				}
 			}
 			else
 			{
-				// Regular hit
-				B2_ASSERT( distanceOutput.distance > 0.0f && b2IsNormalized( distanceOutput.normal ) );
-				output.fraction = fraction;
-				output.point = b2MulAdd( distanceOutput.pointA, input->proxyA.radius, distanceOutput.normal );
+				// Logging for bad input data
+				if ( distanceOutput.distance > 0.0f && b3IsNormalized( distanceOutput.normal ) == false )
+				{
+					for ( int i = 0; i < input->proxyA.count; ++i )
+					{
+						b3Vec3 p = input->proxyA.points[i];
+						b3Log( "pointA[%d] = {%.9f, %.9f, %.9f}", i, p.x, p.y, p.z );
+					}
+					b3Log( "radiusA = %.9f", input->proxyA.radius );
+
+					for ( int i = 0; i < input->proxyB.count; ++i )
+					{
+						b3Vec3 p = input->proxyB.points[i];
+						b3Log( "pointB[%d] = {%.9f, %.9f, %.9f}", i, p.x, p.y, p.z );
+					}
+					b3Log( "radiusB = %.9f", input->proxyB.radius );
+
+					{
+						b3Transform xf = input->transform;
+						b3Log( "transform = {{%.9f, %.9f, %.9f}, {{%.9f, %.9f, %.9f}, %.9f}", xf.p.x, xf.p.y, xf.p.z, xf.q.v.x,
+							   xf.q.v.y, xf.q.v.z, xf.q.s );
+					}
+
+					{
+						b3Vec3 t = input->translationB;
+						b3Log( "t = {%.9f, %.9f, %.9f}", t.x, t.y, t.z );
+					}
+
+					b3Log( "maxFraction = %.9f, canEncroach = %d", input->maxFraction, input->canEncroach );
+
+					// Numerical problem. Likely extreme input.
+					return output;
+				}
+
+				// Hitting this assert implies that the algorithm brought the shapes too close.
+				// B3_ASSERT( distanceOutput.distance > 0.0f && b3IsNormalized( distanceOutput.normal ) );
+
+				output.fraction = alpha;
+				output.point = b3MulAdd( distanceOutput.pointA, input->proxyA.radius, distanceOutput.normal );
 				output.normal = distanceOutput.normal;
 				output.hit = true;
 				return output;
 			}
 		}
 
-		B2_ASSERT( distanceOutput.distance > 0.0f );
-		B2_ASSERT( b2IsNormalized( distanceOutput.normal ) );
+		B3_ASSERT( distanceOutput.distance > 0.0f );
+		B3_ASSERT( b3IsNormalized( distanceOutput.normal ) );
 
 		// Check if shapes are approaching each other
-		float denominator = b2Dot( delta2, distanceOutput.normal );
+		float denominator = b3Dot( delta2, distanceOutput.normal );
 		if ( denominator >= 0.0f )
 		{
 			// Miss
@@ -686,500 +1146,537 @@ b2CastOutput b2ShapeCast( const b2ShapeCastPairInput* input )
 		}
 
 		// Advance sweep
-		fraction += ( target - distanceOutput.distance ) / denominator;
-		if ( fraction >= input->maxFraction )
+		alpha += ( target - distanceOutput.distance ) / denominator;
+		if ( alpha >= input->maxFraction )
 		{
-			// Miss
+			// Success!
 			return output;
 		}
 
-		distanceInput.transform.p = b2MulAdd( input->transform.p, fraction, delta2 );
+		distanceInput.transform.p = b3MulAdd( input->transform.p, alpha, delta2 );
 	}
 
 	// Failure!
 	return output;
 }
 
-// Note: the code below is experimental and probably broken
-#if 0
-
-static inline b2Vec2 b2ComputeSimplexClosestPoint( const b2Simplex* s )
+b3Transform b3GetSweepTransform( const b3Sweep* sweep, float time )
 {
-	if ( s->count == 1 )
-	{
-		return s->v1.w;
-	}
-
-	if ( s->count == 2 )
-	{
-		return b2Weight2( s->v1.a, s->v1.w, s->v2.a, s->v2.w );
-	}
-
-	return b2Vec2_zero;
+	b3Transform transform;
+	transform.q = b3NLerp( sweep->q1, sweep->q2, time );
+	transform.p = b3Sub( b3Lerp( sweep->c1, sweep->c2, time ), b3RotateVector( transform.q, sweep->localCenter ) );
+	return transform;
 }
 
-typedef struct b2ShapeCastData
+static inline b3Transform b3GetFinalSweepTransform( const b3Sweep* sweep )
 {
-	b2Simplex simplex;
-	b2Vec2 closestA, closestB;
-	b2Vec2 normal;
-	b2Vec2 p0;
-	float fraction;
-} b2ShapeCastData;
+	b3Transform transform;
+	transform.q = sweep->q2;
+	transform.p = b3Sub( sweep->c2, b3RotateVector( transform.q, sweep->localCenter ) );
+	return transform;
+}
 
-// GJK-raycast
-// Algorithm by Gino van den Bergen.
-// "Smooth Mesh Contacts with GJK" in Game Physics Pearls. 2010
-// This needs the simplex of A - B because the translation is for B and this
-// is how the relative motion works out when both shapes are translating.
-// This is similar to ray vs polygon and involves plane clipping. See b2RayCastPolygon.
-// In this case the polygon is just points and there are no planes. This uses a modified
-// version of GJK to generate planes for clipping.
-// The algorithm works by incrementally building clipping planes using GJK. Once a valid
-// clip plane is found the simplex origin is moved to the current fraction on the ray.
-// This resets the simplex after every clip. Later I should compare performance.
-// However, adapting this to work with encroachment is tricky and confusing because encroachment
-// needs distance.
-// Note: this algorithm is difficult to debug and not worth the effort in my opinion 4/1/2025
-b2CastOutput b2ShapeCastMerged( const b2ShapeCastPairInput* input, b2ShapeCastData* debugData, int debugCapacity )
+static int b3UniqueCount( int vertexCount, int vertices[3] )
 {
-	B2_UNUSED( debugData, debugCapacity );
+	B3_ASSERT( 1 <= vertexCount && vertexCount <= 3 );
 
-	b2CastOutput output = { 0 };
-	output.fraction = input->maxFraction;
-
-	b2ShapeProxy proxyA = input->proxyA;
-
-	b2Transform xf = input->transform;
-
-	// Put proxyB in proxyA's frame to reduce round-off error
-	b2ShapeProxy proxyB;
-	proxyB.count = input->proxyB.count;
-	proxyB.radius = input->proxyB.radius;
-	B2_ASSERT( proxyB.count <= B2_MAX_POLYGON_VERTICES );
-
-	for ( int i = 0; i < proxyB.count; ++i )
+	switch ( vertexCount )
 	{
-		proxyB.points[i] = b2TransformPoint( xf, input->proxyB.points[i] );
-	}
+		case 1:
+			return 1;
 
-	float radius = proxyA.radius + proxyB.radius;
+		case 2:
+			return vertices[0] != vertices[1] ? 2 : 1;
 
-	b2Vec2 r = input->translationB;
-	float lambda = 0.0f;
-	float maxFraction = input->maxFraction;
-
-	// Initial simplex
-	b2Simplex simplex;
-	simplex.count = 0;
-
-	// Get simplex vertices as an array.
-	b2SimplexVertex* vertices[] = { &simplex.v1, &simplex.v2, &simplex.v3 };
-
-	// Get an initial point in A - B
-	b2Vec2 wA = proxyA.points[0];
-	b2Vec2 wB = proxyB.points[0];
-	b2Vec2 v = b2Sub( wA, wB );
-	b2Vec2 d = b2Neg( v );
-
-	// Sigma is the target distance between proxies
-	const float linearSlop = B2_LINEAR_SLOP;
-	const float sigma = b2MaxFloat( linearSlop, radius - linearSlop );
-	float tolerance = 0.5f * linearSlop;
-	float stolSquared = ( sigma + tolerance ) * ( sigma + tolerance );
-
-	// Main iteration loop.
-	const int maxIterations = 20;
-	int iteration = 0;
-	while ( iteration < maxIterations && b2LengthSquared( v ) > stolSquared )
-	{
-		B2_ASSERT( simplex.count < 3 );
-
-		// Support in direction d (A - B)
-		int indexA = b2FindSupport( &proxyA, d );
-		wA = proxyA.points[indexA];
-		int indexB = b2FindSupport( &proxyB, b2Neg( d ) );
-		wB = proxyB.points[indexB];
-		b2Vec2 p0 = b2Sub( wA, wB );
-
-		// d is a normal at p, normalize to work with sigma
-		b2Vec2 normal = b2Normalize( d );
-
-		// Intersect ray with plane
-		// p = origin + t * r
-		// dot(n, p - p0) = sigma
-		// dot(n, origin - p0) + t * dot(n, r) = sigma
-		// t = ( dot(n, p0) + sigma) / dot(n, r)
-		// if t < (dot(n, p0) + sigma) / dot(n, r) then t can be increased
-		// or (flipping sign because dot(n,r) < 0)
-		// dot(n, p0) + sigma < t * dot(n, r) && dot(n, r) < 0
-		float np0 = b2Dot( normal, p0 );
-		float nr = b2Dot( normal, r );
-		if ( np0 + sigma < lambda * nr )
-		{
-			if ( nr >= 0.0f )
+		case 3:
+			if ( vertices[0] != vertices[1] && vertices[0] != vertices[2] && vertices[1] != vertices[2] )
 			{
-				// miss
-				return output;
+				// All different
+				return 3;
 			}
 
-			lambda = ( np0 + sigma ) / nr;
-			if ( lambda > maxFraction )
+			if ( vertices[0] == vertices[1] && vertices[0] == vertices[2] && vertices[1] == vertices[2] )
 			{
-				// too far
-				return output;
+				// All equal
+				return 1;
 			}
 
-			// reset the simplex
-			simplex.count = 0;
-		}
+			return 2;
 
-		// Shift by lambda * r because we want the closest point to the current clip point.
-		// Note that the support point p is not shifted because we want the plane equation
-		// to be formed in un-shifted space.
-		b2SimplexVertex* vertex = vertices[simplex.count];
-		vertex->indexA = indexB;
-		vertex->wA = wA;
-		vertex->indexB = indexA;
-		vertex->wB = (b2Vec2){ wB.x + lambda * r.x, wB.y + lambda * r.y };
-		vertex->w = b2Sub( vertex->wA, vertex->wB );
-		vertex->a = 1.0f;
-		simplex.count += 1;
-
-		switch ( simplex.count )
-		{
-			case 1:
-				d = b2Neg( simplex.v1.w );
-				break;
-
-			case 2:
-				d = b2SolveSimplex2( &simplex );
-				break;
-
-			case 3:
-				d = b2SolveSimplex3( &simplex );
-				break;
-
-			default:
-				B2_ASSERT( false );
-		}
-
-#ifndef NDEBUG
-		if ( debugData != NULL && output.iterations < debugCapacity )
-		{
-			debugData[output.iterations].simplex = simplex;
-			debugData[output.iterations].normal = normal;
-			debugData[output.iterations].p0 = p0;
-			b2Vec2 cA, cB;
-			b2ComputeSimplexWitnessPoints( &cA, &cB, &simplex );
-			debugData[output.iterations].closestA = cA;
-			debugData[output.iterations].closestB = cB;
-			debugData[output.iterations].fraction = lambda;
-		}
-#endif
-
-		output.iterations += 1;
-
-		// If we have 3 points, then the origin is in the corresponding triangle.
-		if ( simplex.count == 3 )
-		{
-			// Overlap
-			return output;
-		}
-
-		// Get distance vector
-		v = b2ComputeSimplexClosestPoint( &simplex );
-
-		// Iteration count is equated to the number of support point calls.
-		++iteration;
+		default:
+			B3_ASSERT( !"Should never get here!" );
+			break;
 	}
 
-	if ( iteration == 0 || lambda == 0.0f )
-	{
-		// Initial overlap
-		return output;
-	}
-
-	// Prepare output.
-	b2Vec2 pointA, pointB;
-	b2ComputeSimplexWitnessPoints( &pointB, &pointA, &simplex );
-
-	b2Vec2 n = b2Normalize( b2Neg( v ) );
-	b2Vec2 point = { pointA.x + proxyA.radius * n.x, pointA.y + proxyA.radius * n.y };
-
-	// Results stay in frame A, matching b2ShapeCast
-	output.point = point;
-	output.normal = n;
-	output.fraction = lambda;
-	output.iterations = iteration;
-	output.hit = true;
-	return output;
-}
-#endif
-
-// Warning: writing to these globals significantly slows multithreading performance
-#if B2_SNOOP_TOI_COUNTERS
-float b2_toiTime, b2_toiMaxTime;
-int b2_toiCalls, b2_toiDistanceIterations, b2_toiMaxDistanceIterations;
-int b2_toiRootIterations, b2_toiMaxRootIterations;
-int b2_toiFailedCount;
-int b2_toiOverlappedCount;
-int b2_toiHitCount;
-int b2_toiSeparatedCount;
-#endif
-
-typedef enum b2SeparationType
-{
-	b2_pointsType,
-	b2_faceAType,
-	b2_faceBType
-} b2SeparationType;
-
-typedef struct b2SeparationFunction
-{
-	const b2ShapeProxy* proxyA;
-	const b2ShapeProxy* proxyB;
-	b2Sweep sweepA, sweepB;
-	b2Vec2 localPoint;
-	b2Vec2 axis;
-	b2SeparationType type;
-} b2SeparationFunction;
-
-static b2SeparationFunction b2MakeSeparationFunction( b2SimplexCache cache, const b2ShapeProxy* proxyA, const b2Sweep* sweepA,
-													  const b2ShapeProxy* proxyB, const b2Sweep* sweepB, float t1 )
-{
-	b2SeparationFunction f;
-
-	f.proxyA = proxyA;
-	f.proxyB = proxyB;
-	int count = cache.count;
-	B2_ASSERT( 0 < count && count < 3 );
-
-	f.sweepA = *sweepA;
-	f.sweepB = *sweepB;
-
-	b2Transform xfA = b2GetSweepTransform( sweepA, t1 );
-	b2Transform xfB = b2GetSweepTransform( sweepB, t1 );
-
-	if ( count == 1 )
-	{
-		f.type = b2_pointsType;
-		b2Vec2 localPointA = proxyA->points[cache.indexA[0]];
-		b2Vec2 localPointB = proxyB->points[cache.indexB[0]];
-		b2Vec2 pointA = b2TransformPoint( xfA, localPointA );
-		b2Vec2 pointB = b2TransformPoint( xfB, localPointB );
-		f.axis = b2Normalize( b2Sub( pointB, pointA ) );
-		f.localPoint = b2Vec2_zero;
-		return f;
-	}
-
-	if ( cache.indexA[0] == cache.indexA[1] )
-	{
-		// Two points on B and one on A.
-		f.type = b2_faceBType;
-		b2Vec2 localPointB1 = proxyB->points[cache.indexB[0]];
-		b2Vec2 localPointB2 = proxyB->points[cache.indexB[1]];
-
-		f.axis = b2CrossVS( b2Sub( localPointB2, localPointB1 ), 1.0f );
-		f.axis = b2Normalize( f.axis );
-		b2Vec2 normal = b2RotateVector( xfB.q, f.axis );
-
-		f.localPoint = (b2Vec2){ 0.5f * ( localPointB1.x + localPointB2.x ), 0.5f * ( localPointB1.y + localPointB2.y ) };
-		b2Vec2 pointB = b2TransformPoint( xfB, f.localPoint );
-
-		b2Vec2 localPointA = proxyA->points[cache.indexA[0]];
-		b2Vec2 pointA = b2TransformPoint( xfA, localPointA );
-
-		float s = b2Dot( b2Sub( pointA, pointB ), normal );
-		if ( s < 0.0f )
-		{
-			f.axis = b2Neg( f.axis );
-		}
-		return f;
-	}
-
-	// Two points on A and one or two points on B.
-	f.type = b2_faceAType;
-	b2Vec2 localPointA1 = proxyA->points[cache.indexA[0]];
-	b2Vec2 localPointA2 = proxyA->points[cache.indexA[1]];
-
-	f.axis = b2CrossVS( b2Sub( localPointA2, localPointA1 ), 1.0f );
-	f.axis = b2Normalize( f.axis );
-	b2Vec2 normal = b2RotateVector( xfA.q, f.axis );
-
-	f.localPoint = (b2Vec2){ 0.5f * ( localPointA1.x + localPointA2.x ), 0.5f * ( localPointA1.y + localPointA2.y ) };
-	b2Vec2 pointA = b2TransformPoint( xfA, f.localPoint );
-
-	b2Vec2 localPointB = proxyB->points[cache.indexB[0]];
-	b2Vec2 pointB = b2TransformPoint( xfB, localPointB );
-
-	float s = b2Dot( b2Sub( pointB, pointA ), normal );
-	if ( s < 0.0f )
-	{
-		f.axis = b2Neg( f.axis );
-	}
-	return f;
+	return 0;
 }
 
-static float b2FindMinSeparation( const b2SeparationFunction* f, int* indexA, int* indexB, float t )
+// This checks if the cross product of two edges switches direction.
+static inline bool b3CheckFastEdges( b3Transform xfA, b3Vec3 localEdgeA, b3Transform xfB, b3Vec3 localEdgeB, b3Vec3 axis0 )
 {
-	b2Transform xfA = b2GetSweepTransform( &f->sweepA, t );
-	b2Transform xfB = b2GetSweepTransform( &f->sweepB, t );
+	// By taking the local witness axes we make sure that we
+	// get the correct orientations (e.g. if one axis was flipped)!
+	b3Vec3 edgeA = b3RotateVector( xfA.q, localEdgeA );
+	b3Vec3 edgeB = b3RotateVector( xfB.q, localEdgeB );
+	b3Vec3 axis = b3Cross( edgeA, edgeB );
+	return b3Dot( axis, axis0 ) < 0.0f;
+}
 
-	switch ( f->type )
+typedef enum b3SeparationType
+{
+	b3_separationUnknown = 0,
+	b3_separationVertices,
+	b3_separationEdges,
+	b3_separationFaceA,
+	b3_separationFaceB,
+} b3SeparationType;
+
+typedef struct b3SeparationFunction
+{
+	const b3ShapeProxy* proxyA;
+	const b3ShapeProxy* proxyB;
+	b3Sweep sweepA;
+	b3Sweep sweepB;
+
+	// These are associated with different bodies depending on the separation function type.
+	// It could be two local vectors/points on the same body (for example, both on bodyA).
+	b3Vec3 witness1;
+	b3Vec3 witness2;
+
+	b3SeparationType type;
+} b3SeparationFunction;
+
+static b3SeparationFunction b3MakeSeparationFunction( const b3SimplexCache cache, const b3ShapeProxy* proxyA,
+													  const b3Sweep* sweepA, const b3ShapeProxy* proxyB, const b3Sweep* sweepB,
+													  b3Vec3 worldNormal, float t1 )
+{
+	B3_ASSERT( 1 <= cache.count && cache.count <= 3 );
+	B3_VALIDATE( b3IsNormalized( worldNormal ) );
+
+	b3SeparationFunction fcn = { 0 };
+	fcn.proxyA = proxyA;
+	fcn.proxyB = proxyB;
+	fcn.sweepA = *sweepA;
+	fcn.sweepB = *sweepB;
+	fcn.type = b3_separationUnknown;
+
+	int indexA[3] = { cache.indexA[0], cache.indexA[1], cache.indexA[2] };
+	int indexB[3] = { cache.indexB[0], cache.indexB[1], cache.indexB[2] };
+
+	int uniqueCountA = b3UniqueCount( cache.count, indexA );
+	int uniqueCountB = b3UniqueCount( cache.count, indexB );
+
+	b3Transform xfA1 = b3GetSweepTransform( sweepA, t1 );
+	b3Transform xfB1 = b3GetSweepTransform( sweepB, t1 );
+
+	b3Quat qA = xfA1.q;
+	b3Quat qB = xfB1.q;
+
+	// Minimize round-off
+	b3Vec3 deltaP = b3Sub( xfB1.p, xfA1.p );
+
+	switch ( cache.count )
 	{
-		case b2_pointsType:
+		case 1:
 		{
-			b2Vec2 axisA = b2InvRotateVector( xfA.q, f->axis );
-			b2Vec2 axisB = b2InvRotateVector( xfB.q, b2Neg( f->axis ) );
+			// Witness is the world space direction
+			fcn.type = b3_separationVertices;
+			fcn.witness1 = worldNormal;
+		}
+		break;
 
-			*indexA = b2FindSupport( f->proxyA, axisA );
-			*indexB = b2FindSupport( f->proxyB, axisB );
+		case 2:
+		{
+			if ( uniqueCountA == 2 && uniqueCountB == 2 )
+			{
+				// Edge/Edge
+				b3Vec3 vA1 = proxyA->points[indexA[0]];
+				b3Vec3 localEdgeA = b3Sub( proxyA->points[indexA[1]], vA1 );
+				localEdgeA = b3Normalize( localEdgeA );
+				b3Vec3 edgeA = b3RotateVector( qA, localEdgeA );
 
-			b2Vec2 localPointA = f->proxyA->points[*indexA];
-			b2Vec2 localPointB = f->proxyB->points[*indexB];
+				b3Vec3 vB1 = proxyB->points[indexB[0]];
+				b3Vec3 localEdgeB = b3Sub( proxyB->points[indexB[1]], vB1 );
+				localEdgeB = b3Normalize( localEdgeB );
+				b3Vec3 edgeB = b3RotateVector( qB, localEdgeB );
 
-			b2Vec2 pointA = b2TransformPoint( xfA, localPointA );
-			b2Vec2 pointB = b2TransformPoint( xfB, localPointB );
+				b3Vec3 axis = b3Cross( edgeA, edgeB );
+				float lengthSquared = b3LengthSquared( axis );
 
-			float separation = b2Dot( b2Sub( pointB, pointA ), f->axis );
-			return separation;
+				// Skip near parallel edges: |e1 x e1| = sin(alpha) * |e1| * |e2|
+				const float kToleranceSquared = 0.05f * 0.05f;
+				if ( lengthSquared < kToleranceSquared )
+				{
+					// The axis is not safe to normalize so we use a world axis instead!
+					fcn.type = b3_separationVertices;
+					fcn.witness1 = worldNormal;
+				}
+				else
+				{
+					b3Vec3 delta = b3Add( b3Sub( b3RotateVector( qB, vB1 ), b3RotateVector( qA, vA1 ) ), deltaP );
+					if ( b3Dot( delta, axis ) < 0.0f )
+					{
+						// Make axis point from A to B
+						axis = b3Neg( axis );
+						localEdgeB = b3Neg( localEdgeB );
+					}
+
+					// Check for possible sign flip in edge/edge cross product
+					b3Transform xfA2 = b3GetFinalSweepTransform( sweepA );
+					b3Transform xfB2 = b3GetFinalSweepTransform( sweepB );
+					bool fastEdges = b3CheckFastEdges( xfA2, localEdgeA, xfB2, localEdgeB, axis );
+					if ( fastEdges == true )
+					{
+						// Not safe to use local edges, fall back to initial world space axis instead
+						fcn.type = b3_separationVertices;
+						fcn.witness1 = b3Normalize( axis );
+					}
+					else
+					{
+						// Edge cross product is safe. This converges faster than a fixed axis.
+						fcn.type = b3_separationEdges;
+						fcn.witness1 = localEdgeA;
+						fcn.witness2 = localEdgeB;
+					}
+				}
+			}
+			else
+			{
+				B3_VALIDATE( b3IsNormalized( worldNormal ) );
+
+				// Vertex versus edge, use world axis witness
+				fcn.type = b3_separationVertices;
+				fcn.witness1 = worldNormal;
+			}
+		}
+		break;
+
+		case 3:
+		{
+			if ( uniqueCountA == 3 )
+			{
+				b3Vec3 vA1 = proxyA->points[indexA[0]];
+				b3Vec3 vA2 = proxyA->points[indexA[1]];
+				b3Vec3 vA3 = proxyA->points[indexA[2]];
+				b3Vec3 localAxisA = b3Cross( b3Sub( vA2, vA1 ), b3Sub( vA3, vA1 ) );
+				localAxisA = b3Normalize( localAxisA );
+				b3Vec3 axisA = b3RotateVector( qA, localAxisA );
+
+				b3Vec3 localPointA = b3MulSV( 1.0f / 3.0f, b3Add( b3Add( vA1, vA2 ), vA3 ) );
+				b3Vec3 localPointB = proxyB->points[indexB[0]];
+				b3Vec3 delta = b3Add( b3Sub( b3RotateVector( qB, localPointB ), b3RotateVector( qA, localPointA ) ), deltaP );
+
+				if ( b3Dot( delta, axisA ) < 0.0f )
+				{
+					// Make axis point from A to B
+					localAxisA = b3Neg( localAxisA );
+				}
+
+				// Witness is the local plane of faceA
+				fcn.type = b3_separationFaceA;
+				fcn.witness1 = localAxisA;
+				fcn.witness2 = localPointA;
+			}
+			else if ( uniqueCountB == 3 )
+			{
+				b3Vec3 vB1 = proxyB->points[indexB[0]];
+				b3Vec3 vB2 = proxyB->points[indexB[1]];
+				b3Vec3 vB3 = proxyB->points[indexB[2]];
+				b3Vec3 localAxisB = b3Cross( b3Sub( vB2, vB1 ), b3Sub( vB3, vB1 ) );
+				localAxisB = b3Normalize( localAxisB );
+				b3Vec3 axisB = b3RotateVector( qB, localAxisB );
+
+				b3Vec3 localPointA = proxyA->points[indexA[0]];
+				b3Vec3 localPointB = b3MulSV( 1.0f / 3.0f, b3Add( b3Add( vB1, vB2 ), vB3 ) );
+				b3Vec3 delta = b3Sub( b3Sub( b3RotateVector( qA, localPointA ), b3RotateVector( qB, localPointB ) ), deltaP );
+
+				if ( b3Dot( delta, axisB ) < 0.0f )
+				{
+					// Make axis point from B to A
+					localAxisB = b3Neg( localAxisB );
+				}
+
+				// Witness is the local plane of faceB
+				fcn.type = b3_separationFaceB;
+				fcn.witness1 = localAxisB;
+				fcn.witness2 = localPointB;
+			}
+			else
+			{
+				B3_ASSERT( uniqueCountA == 2 && uniqueCountB == 2 );
+
+				if ( indexA[0] == indexA[1] )
+				{
+					// Make first two indices are unique
+					indexA[1] = indexA[2];
+					B3_ASSERT( indexA[0] != indexA[1] );
+				}
+
+				b3Vec3 vA1 = proxyA->points[indexA[0]];
+				b3Vec3 vA2 = proxyA->points[indexA[1]];
+				b3Vec3 localEdgeA = b3Normalize( b3Sub( vA2, vA1 ) );
+				b3Vec3 edgeA = b3RotateVector( qA, localEdgeA );
+
+				if ( indexB[0] == indexB[1] )
+				{
+					// Make first two indices are unique
+					indexB[1] = indexB[2];
+					B3_ASSERT( indexB[0] != indexB[1] );
+				}
+
+				b3Vec3 vB1 = proxyB->points[indexB[0]];
+				b3Vec3 vB2 = proxyB->points[indexB[1]];
+				b3Vec3 localEdgeB = b3Normalize( b3Sub( vB2, vB1 ) );
+				b3Vec3 edgeB = b3RotateVector( qB, localEdgeB );
+
+				b3Vec3 axis = b3Cross( edgeA, edgeB );
+				float lengthSquared = b3LengthSquared( axis );
+
+				// Skip near parallel edges: |e1 x e1| = sin(alpha) * |e1| * |e2|
+				const float kToleranceSquared = 0.005f * 0.005f;
+				if ( lengthSquared < kToleranceSquared )
+				{
+					// The axis is not safe to normalize so we use a world axis instead!
+					fcn.type = b3_separationVertices;
+					fcn.witness1 = worldNormal;
+				}
+				else
+				{
+					b3Vec3 delta = b3Add( b3Sub( b3RotateVector( qB, vB1 ), b3RotateVector( qA, vA1 ) ), deltaP );
+					if ( b3Dot( delta, axis ) < 0.0f )
+					{
+						// Make axis point from A to B
+						axis = b3Neg( axis );
+						localEdgeB = b3Neg( localEdgeB );
+					}
+
+					// Check for possible sign flip in edge/edge cross product
+					b3Transform xfA2 = b3GetFinalSweepTransform( sweepA );
+					b3Transform xfB2 = b3GetFinalSweepTransform( sweepB );
+					bool fastEdges = b3CheckFastEdges( xfA2, localEdgeA, xfB2, localEdgeB, axis );
+					if ( fastEdges )
+					{
+						// Not safe to use local edges, fall back to initial world space axis instead
+						fcn.type = b3_separationVertices;
+						fcn.witness1 = b3Normalize( axis );
+					}
+					else
+					{
+						// Edge cross product is safe. This converges faster than a fixed axis.
+						fcn.type = b3_separationEdges;
+						fcn.witness1 = localEdgeA;
+						fcn.witness2 = localEdgeB;
+					}
+				}
+			}
+		}
+		break;
+
+		default:
+			B3_ASSERT( !"Should never get here!" );
+			break;
+	}
+
+	return fcn;
+}
+
+static float b3FindMinSeparation( b3SeparationFunction* fcn, int* indexA, int* indexB, float t )
+{
+	b3Transform xfA = b3GetSweepTransform( &fcn->sweepA, t );
+	b3Transform xfB = b3GetSweepTransform( &fcn->sweepB, t );
+
+	switch ( fcn->type )
+	{
+		case b3_separationVertices:
+		{
+			b3Vec3 axis = fcn->witness1;
+
+			b3Vec3 localAxisA = b3InvRotateVector( xfA.q, axis );
+			b3Vec3 localAxisB = b3InvRotateVector( xfB.q, b3Neg( axis ) );
+
+			*indexA = b3GetPointSupport( fcn->proxyA->points, fcn->proxyA->count, localAxisA );
+			*indexB = b3GetPointSupport( fcn->proxyB->points, fcn->proxyB->count, localAxisB );
+
+			b3Vec3 deltaP = b3Sub( xfB.p, xfA.p );
+			b3Vec3 localPointA = fcn->proxyA->points[*indexA];
+			b3Vec3 localPointB = fcn->proxyB->points[*indexB];
+			b3Vec3 delta = b3Add( b3Sub( b3RotateVector( xfB.q, localPointB ), b3RotateVector( xfA.q, localPointA ) ), deltaP );
+			return b3Dot( delta, axis );
 		}
 
-		case b2_faceAType:
+		case b3_separationEdges:
 		{
-			b2Vec2 normal = b2RotateVector( xfA.q, f->axis );
-			b2Vec2 pointA = b2TransformPoint( xfA, f->localPoint );
+			b3Vec3 edgeA = b3RotateVector( xfA.q, fcn->witness1 );
+			b3Vec3 edgeB = b3RotateVector( xfB.q, fcn->witness2 );
+			b3Vec3 axis = b3Cross( edgeA, edgeB );
+			B3_ASSERT( axis.x != 0.0f || axis.y != 0.0f || axis.z != 0.0f );
+			axis = b3Normalize( axis );
 
-			b2Vec2 axisB = b2InvRotateVector( xfB.q, b2Neg( normal ) );
+			b3Vec3 axisA = b3InvRotateVector( xfA.q, axis );
+			*indexA = b3GetPointSupport( fcn->proxyA->points, fcn->proxyA->count, axisA );
 
+			b3Vec3 axisB = b3InvRotateVector( xfB.q, axis );
+			*indexB = b3GetPointSupport( fcn->proxyB->points, fcn->proxyB->count, b3Neg( axisB ) );
+
+			b3Vec3 deltaP = b3Sub( xfB.p, xfA.p );
+			b3Vec3 localPointA = fcn->proxyA->points[*indexA];
+			b3Vec3 localPointB = fcn->proxyB->points[*indexB];
+			b3Vec3 delta = b3Add( b3Sub( b3RotateVector( xfB.q, localPointB ), b3RotateVector( xfA.q, localPointA ) ), deltaP );
+
+			return b3Dot( delta, axis );
+		}
+
+		case b3_separationFaceA:
+		{
+			b3Vec3 normal = b3RotateVector( xfA.q, fcn->witness1 );
 			*indexA = -1;
-			*indexB = b2FindSupport( f->proxyB, axisB );
+			b3Vec3 pointA = b3TransformPoint( xfA, fcn->witness2 );
 
-			b2Vec2 localPointB = f->proxyB->points[*indexB];
-			b2Vec2 pointB = b2TransformPoint( xfB, localPointB );
+			b3Vec3 axisB = b3InvRotateVector( xfB.q, normal );
+			*indexB = b3GetPointSupport( fcn->proxyB->points, fcn->proxyB->count, b3Neg( axisB ) );
+			b3Vec3 pointB = b3TransformPoint( xfB, fcn->proxyB->points[*indexB] );
 
-			float separation = b2Dot( b2Sub( pointB, pointA ), normal );
-			return separation;
+			return b3Dot( b3Sub( pointB, pointA ), normal );
 		}
 
-		case b2_faceBType:
+		case b3_separationFaceB:
 		{
-			b2Vec2 normal = b2RotateVector( xfB.q, f->axis );
-			b2Vec2 pointB = b2TransformPoint( xfB, f->localPoint );
+			b3Vec3 normal = b3RotateVector( xfB.q, fcn->witness1 );
 
-			b2Vec2 axisA = b2InvRotateVector( xfA.q, b2Neg( normal ) );
+			b3Vec3 axisA = b3InvRotateVector( xfA.q, normal );
+			*indexA = b3GetPointSupport( fcn->proxyA->points, fcn->proxyA->count, b3Neg( axisA ) );
+			b3Vec3 pointA = b3TransformPoint( xfA, fcn->proxyA->points[*indexA] );
 
 			*indexB = -1;
-			*indexA = b2FindSupport( f->proxyA, axisA );
+			b3Vec3 pointB = b3TransformPoint( xfB, fcn->witness2 );
 
-			b2Vec2 localPointA = f->proxyA->points[*indexA];
-			b2Vec2 pointA = b2TransformPoint( xfA, localPointA );
-
-			float separation = b2Dot( b2Sub( pointA, pointB ), normal );
-			return separation;
+			return b3Dot( b3Sub( pointA, pointB ), normal );
 		}
 
 		default:
-			B2_ASSERT( false );
-			*indexA = -1;
-			*indexB = -1;
-			return 0.0f;
+			B3_ASSERT( !"Should never get here!" );
+			break;
 	}
+
+	return 0.0f;
 }
 
-//
-static float b2EvaluateSeparation( const b2SeparationFunction* f, int indexA, int indexB, float t )
+static float b3EvaluateSeparation( b3SeparationFunction* fcn, int index1, int index2, float beta )
 {
-	b2Transform xfA = b2GetSweepTransform( &f->sweepA, t );
-	b2Transform xfB = b2GetSweepTransform( &f->sweepB, t );
+	b3Transform transform1 = b3GetSweepTransform( &fcn->sweepA, beta );
+	b3Transform transform2 = b3GetSweepTransform( &fcn->sweepB, beta );
 
-	switch ( f->type )
+	switch ( fcn->type )
 	{
-		case b2_pointsType:
+		case b3_separationVertices:
 		{
-			b2Vec2 localPointA = f->proxyA->points[indexA];
-			b2Vec2 localPointB = f->proxyB->points[indexB];
+			b3Vec3 axis = fcn->witness1;
 
-			b2Vec2 pointA = b2TransformPoint( xfA, localPointA );
-			b2Vec2 pointB = b2TransformPoint( xfB, localPointB );
+			b3Vec3 point1 = b3TransformPoint( transform1, fcn->proxyA->points[index1] );
+			b3Vec3 point2 = b3TransformPoint( transform2, fcn->proxyB->points[index2] );
 
-			float separation = b2Dot( b2Sub( pointB, pointA ), f->axis );
-			return separation;
+			return b3Dot( b3Sub( point2, point1 ), axis );
 		}
 
-		case b2_faceAType:
+		case b3_separationEdges:
 		{
-			b2Vec2 normal = b2RotateVector( xfA.q, f->axis );
-			b2Vec2 pointA = b2TransformPoint( xfA, f->localPoint );
+			b3Vec3 edge1 = b3RotateVector( transform1.q, fcn->witness1 );
+			b3Vec3 edge2 = b3RotateVector( transform2.q, fcn->witness2 );
+			b3Vec3 axis = b3Cross( edge1, edge2 );
+			axis = b3Normalize( axis );
 
-			b2Vec2 localPointB = f->proxyB->points[indexB];
-			b2Vec2 pointB = b2TransformPoint( xfB, localPointB );
+			b3Vec3 point1 = b3TransformPoint( transform1, fcn->proxyA->points[index1] );
+			b3Vec3 point2 = b3TransformPoint( transform2, fcn->proxyB->points[index2] );
 
-			float separation = b2Dot( b2Sub( pointB, pointA ), normal );
-			return separation;
+			return b3Dot( b3Sub( point2, point1 ), axis );
 		}
 
-		case b2_faceBType:
+		case b3_separationFaceA:
 		{
-			b2Vec2 normal = b2RotateVector( xfB.q, f->axis );
-			b2Vec2 pointB = b2TransformPoint( xfB, f->localPoint );
+			b3Vec3 axis = b3RotateVector( transform1.q, fcn->witness1 );
 
-			b2Vec2 localPointA = f->proxyA->points[indexA];
-			b2Vec2 pointA = b2TransformPoint( xfA, localPointA );
+			b3Vec3 point1 = b3TransformPoint( transform1, fcn->witness2 );
+			b3Vec3 point2 = b3TransformPoint( transform2, fcn->proxyB->points[index2] );
 
-			float separation = b2Dot( b2Sub( pointA, pointB ), normal );
-			return separation;
+			return b3Dot( b3Sub( point2, point1 ), axis );
+		}
+
+		case b3_separationFaceB:
+		{
+			b3Vec3 axis = b3RotateVector( transform2.q, fcn->witness1 );
+
+			b3Vec3 point1 = b3TransformPoint( transform1, fcn->proxyA->points[index1] );
+			b3Vec3 point2 = b3TransformPoint( transform2, fcn->witness2 );
+
+			return b3Dot( b3Sub( point1, point2 ), axis );
 		}
 
 		default:
-			B2_ASSERT( false );
-			return 0.0f;
+			B3_ASSERT( !"Should never get here!" );
+			break;
 	}
+
+	return 0.0f;
 }
 
-// CCD via the local separating axis method. This seeks progression
-// by computing the largest time at which separation is maintained.
-b2TOIOutput b2TimeOfImpact( const b2TOIInput* input )
+static void b3ForceFixedAxis( b3SeparationFunction* fcn, float beta )
 {
-#if B2_SNOOP_TOI_COUNTERS
-	uint64_t ticks = b2GetTicks();
-	++b2_toiCalls;
-#endif
+	B3_ASSERT( fcn->type == b3_separationEdges );
 
-	b2TOIOutput output = { 0 };
-	output.state = b2_toiStateUnknown;
-	output.fraction = input->maxFraction;
+	b3Transform transform1 = b3GetSweepTransform( &fcn->sweepA, beta );
+	b3Transform transform2 = b3GetSweepTransform( &fcn->sweepB, beta );
 
-	b2Sweep sweepA = input->sweepA;
-	b2Sweep sweepB = input->sweepB;
-	B2_ASSERT( b2IsNormalizedRot( sweepA.q1 ) && b2IsNormalizedRot( sweepA.q2 ) );
-	B2_ASSERT( b2IsNormalizedRot( sweepB.q1 ) && b2IsNormalizedRot( sweepB.q2 ) );
+	b3Vec3 edge1 = b3RotateVector( transform1.q, fcn->witness1 );
+	b3Vec3 edge2 = b3RotateVector( transform2.q, fcn->witness2 );
+	b3Vec3 axis = b3Cross( edge1, edge2 );
+	axis = b3Normalize( axis );
 
-	// todo_erin
-	// c1 can be at the origin yet the points are far away
-	// b2Vec2 origin = b2Add(sweepA.c1, input->proxyA.points[0]);
+	fcn->type = b3_separationVertices;
+	fcn->witness1 = axis;
+	fcn->witness2 = b3Vec3_zero;
+}
 
-	const b2ShapeProxy* proxyA = &input->proxyA;
-	const b2ShapeProxy* proxyB = &input->proxyB;
+// Time of Impact using root finding
+b3TOIOutput b3TimeOfImpact( const b3TOIInput* input )
+{
+	b3TOIOutput output = { 0 };
 
+	// Set these to invalid values so they can be validated on exit
+	output.state = b3_toiStateUnknown;
+	output.fraction = -1.0f;
+
+	b3Sweep sweepA = input->sweepA;
+	b3Sweep sweepB = input->sweepB;
+
+	// Shift to origin
+	b3Vec3 origin = sweepA.c1;
+	sweepA.c1 = b3Vec3_zero;
+	sweepA.c2 = b3Sub( sweepA.c2, origin );
+	sweepB.c1 = b3Sub( sweepB.c1, origin );
+	sweepB.c2 = b3Sub( sweepB.c2, origin );
+
+	b3ShapeProxy proxyA = input->proxyA;
+	b3ShapeProxy proxyB = input->proxyB;
+
+	int maxPushBackIterations = proxyA.count + proxyB.count;
 	float tMax = input->maxFraction;
 
 	// Setup target distance and tolerance
-	float totalRadius = proxyA->radius + proxyB->radius;
-	float target = b2MaxFloat( B2_LINEAR_SLOP, totalRadius - B2_LINEAR_SLOP );
-	float tolerance = 0.25f * B2_LINEAR_SLOP;
-	B2_ASSERT( target > tolerance );
+	float linearSlop = B3_LINEAR_SLOP;
+	float totalRadius = proxyA.radius + proxyB.radius;
+	float target = b3MaxFloat( linearSlop, totalRadius - linearSlop );
+	float tolerance = 0.25f * linearSlop;
+	B3_ASSERT( target > tolerance );
 
 	float t1 = 0.0f;
-	const int k_maxIterations = 20;
+	const int maxIterations = 25;
 	int distanceIterations = 0;
 
 	// Prepare input for distance query.
-	b2SimplexCache cache = { 0 };
-	b2DistanceInput distanceInput = { 0 };
-	distanceInput.proxyA = input->proxyA;
-	distanceInput.proxyB = input->proxyB;
+	b3SimplexCache cache = { 0 };
+	b3DistanceInput distanceInput = { 0 };
+	distanceInput.proxyA = proxyA;
+	distanceInput.proxyB = proxyB;
 	distanceInput.useRadii = false;
 
 	// The outer loop progressively attempts to compute new separating axes.
@@ -1187,44 +1684,24 @@ b2TOIOutput b2TimeOfImpact( const b2TOIInput* input )
 	for ( ;; )
 	{
 		// Get the distance between shapes. We can also use the results to get a separating axis.
-		b2Transform xfA = b2GetSweepTransform( &sweepA, t1 );
-		b2Transform xfB = b2GetSweepTransform( &sweepB, t1 );
-		distanceInput.transform = b2InvMulTransforms( xfA, xfB );
-		b2DistanceOutput distanceOutput = b2ShapeDistance( &distanceInput, &cache, NULL, 0 );
+		b3Transform xfA = b3GetSweepTransform( &sweepA, t1 );
+		b3Transform xfB = b3GetSweepTransform( &sweepB, t1 );
+		distanceInput.transform = b3InvMulTransforms( xfA, xfB );
+		b3DistanceOutput distanceOutput = b3ShapeDistance( &distanceInput, &cache, NULL, 0 );
+		output.distance = distanceOutput.distance;
 
-		// The distance query runs in frame A, project the witness data back to world
-		b2Vec2 worldNormal = b2RotateVector( xfA.q, distanceOutput.normal );
-		b2Vec2 worldPointA = b2TransformPoint( xfA, distanceOutput.pointA );
-		b2Vec2 worldPointB = b2TransformPoint( xfA, distanceOutput.pointB );
+		// The distance query runs in frame A, project the witness data back to the shifted world
+		b3Vec3 worldNormal = b3RotateVector( xfA.q, distanceOutput.normal );
+		b3Vec3 worldPointA = b3TransformPoint( xfA, distanceOutput.pointA );
+		b3Vec3 worldPointB = b3TransformPoint( xfA, distanceOutput.pointB );
 
-		// Progressive time of impact. This handles slender geometry well but introduces
-		// significant time loss.
-		// if (distanceIterations == 0)
-		//{
-		//	if ( distanceOutput.distance > totalRadius + B2_SPECULATIVE_DISTANCE )
-		//	{
-		//		target = totalRadius + B2_SPECULATIVE_DISTANCE - tolerance;
-		//	}
-		//	else
-		//	{
-		//		target = distanceOutput.distance - 1.5f * tolerance;
-		//		target = b2MaxFloat( target, 2.0f * tolerance );
-		//	}
-		//}
-
+		output.distanceIterations += 1;
 		distanceIterations += 1;
-#if B2_SNOOP_TOI_COUNTERS
-		b2_toiDistanceIterations += 1;
-#endif
 
 		// If the shapes are overlapped, we give up on continuous collision.
 		if ( distanceOutput.distance <= 0.0f )
 		{
-			// Failure!
-			output.state = b2_toiStateOverlapped;
-#if B2_SNOOP_TOI_COUNTERS
-			b2_toiOverlappedCount += 1;
-#endif
+			output.state = b3_toiStateOverlapped;
 			output.fraction = 0.0f;
 			break;
 		}
@@ -1232,107 +1709,104 @@ b2TOIOutput b2TimeOfImpact( const b2TOIInput* input )
 		if ( distanceOutput.distance <= target + tolerance )
 		{
 			// Success!
-			output.state = b2_toiStateHit;
-#if B2_SNOOP_TOI_COUNTERS
-			b2_toiHitCount += 1;
-#endif
+			output.state = b3_toiStateHit;
+
 			// Averaged hit point
-			b2Vec2 pA = b2MulAdd( worldPointA, proxyA->radius, worldNormal );
-			b2Vec2 pB = b2MulAdd( worldPointB, -proxyB->radius, worldNormal );
-			output.point = b2Lerp( pA, pB, 0.5f );
+			b3Vec3 pA = b3MulAdd( worldPointA, proxyA.radius, worldNormal );
+			b3Vec3 pB = b3MulAdd( worldPointB, -proxyB.radius, worldNormal );
+			output.point = b3Lerp( pA, pB, 0.5f );
+			output.point = b3Add( output.point, origin );
 			output.normal = worldNormal;
 			output.fraction = t1;
 			break;
 		}
 
-		// Initialize the separating axis.
-		b2SeparationFunction fcn = b2MakeSeparationFunction( cache, proxyA, &sweepA, proxyB, &sweepB, t1 );
-#if 0
-		// Dump the curve seen by the root finder
+		if ( distanceIterations == maxIterations )
 		{
-			const int N = 100;
-			float dx = 1.0f / N;
-			float xs[N + 1];
-			float fs[N + 1];
+			// Progress too slow. This can happen when a capsule rotates around a
+			// triangle vertex.
+			output.state = b3_toiStateFailed;
+			output.fraction = t1;
 
-			float x = 0.0f;
+			// Averaged hit point
+			b3Vec3 pA = b3MulAdd( worldPointA, input->proxyA.radius, worldNormal );
+			b3Vec3 pB = b3MulAdd( worldPointB, -input->proxyB.radius, worldNormal );
+			output.point = b3Lerp( pA, pB, 0.5f );
+			output.point = b3Add( output.point, origin );
+			output.normal = worldNormal;
+			break;
+		}
 
-			for (int i = 0; i <= N; ++i)
-			{
-				sweepA.GetTransform(&xfA, x);
-				sweepB.GetTransform(&xfB, x);
-				float f = fcn.Evaluate(xfA, xfB) - target;
+		// Initialize the separating axis.
+		b3SeparationFunction function =
+			b3MakeSeparationFunction( cache, &proxyA, &sweepA, &proxyB, &sweepB, worldNormal, t1 );
 
-				printf("%g %g\n", x, f);
-
-				xs[i] = x;
-				fs[i] = f;
-
-				x += dx;
-			}
+#if B3_ENABLE_VALIDATION && 0
+		// todo this can give a negative value for diagonal edge contact on faces, typical GJK problem
+		// to fix this I think the separation function would need to identify faces
+		{
+			int index1, index2;
+			float minSeparation = b3FindMinSeparation( &function, &index1, &index2, t1 );
+			// SAT should give a closer result than GJK
+			B3_VALIDATE( minSeparation > target - tolerance && minSeparation - distanceOutput.distance < 0.1f * B3_LINEAR_SLOP );
 		}
 #endif
 
-		// Compute the TOI on the separating axis. We do this by successively
-		// resolving the deepest point. This loop is bounded by the number of vertices.
+		// Compute the TOI on the separating axis. We do this by successively resolving the deepest point.
 		bool done = false;
 		float t2 = tMax;
 		int pushBackIterations = 0;
 		for ( ;; )
 		{
-			// Find the deepest point at t2. Store the witness point indices.
 			int indexA, indexB;
-			float s2 = b2FindMinSeparation( &fcn, &indexA, &indexB, t2 );
+			float s2 = b3FindMinSeparation( &function, &indexA, &indexB, t2 );
+
+			// Dump the function seen by the root finder
+			// 			for ( int Step = 0; Step <= 100; ++Step )
+			// 				{
+			// 				float Alpha = 0.01f * Step;
+			// 				float Separation = Function.Evaluate( Index1, Index2, Alpha );
+			//
+			// 				b3Report( "s(%4.2g) = %g\n", Alpha, Separation );
+			// 				}
 
 			// Is the final configuration separated?
-			if ( s2 > target + tolerance )
+			if ( s2 - target > tolerance )
 			{
-				// Victory!
-				output.state = b2_toiStateSeparated;
-#if B2_SNOOP_TOI_COUNTERS
-				b2_toiSeparatedCount += 1;
-#endif
-				output.fraction = tMax;
+				// Success!
+				output.state = b3_toiStateSeparated;
+				output.fraction = input->maxFraction;
 				done = true;
 				break;
 			}
 
 			// Has the separation reached tolerance?
-			if ( s2 > target - tolerance )
+			if ( s2 >= target - tolerance )
 			{
 				// Advance the sweeps
 				t1 = t2;
 				break;
 			}
 
-			// Compute the initial separation of the witness points.
-			float s1 = b2EvaluateSeparation( &fcn, indexA, indexB, t1 );
+			// Compute the initial separation of the witness points
+			float s1 = b3EvaluateSeparation( &function, indexA, indexB, t1 );
 
-			// Check for initial overlap. This might happen if the root finder runs out of iterations.
+			// Check for overlap. This might happen if the root finder runs out of iterations.
 			if ( s1 < target - tolerance )
 			{
-				output.state = b2_toiStateFailed;
-#if B2_SNOOP_TOI_COUNTERS
-				b2_toiFailedCount += 1;
-#endif
+				// Failed!
+				B3_VALIDATE( false );
+				output.state = b3_toiStateFailed;
 				output.fraction = t1;
 				done = true;
 				break;
 			}
 
-			// Check for touching
+			// Has the separation reached tolerance?
 			if ( s1 <= target + tolerance )
 			{
-				// Success! t1 should hold the TOI (could be 0.0).
-				output.state = b2_toiStateHit;
-#if B2_SNOOP_TOI_COUNTERS
-				b2_toiHitCount += 1;
-#endif
-				// Averaged hit point
-				b2Vec2 pA = b2MulAdd( worldPointA, proxyA->radius, worldNormal );
-				b2Vec2 pB = b2MulAdd( worldPointB, -proxyB->radius, worldNormal );
-				output.point = b2Lerp( pA, pB, 0.5f );
-				output.normal = worldNormal;
+				// Success! t1 should hold the TOI (could be 0.0)
+				output.state = b3_toiStateHit;
 				output.fraction = t1;
 				done = true;
 				break;
@@ -1340,7 +1814,9 @@ b2TOIOutput b2TimeOfImpact( const b2TOIInput* input )
 
 			// Compute 1D root of: f(x) - target = 0
 			int rootIterationCount = 0;
-			float a1 = t1, a2 = t2;
+			int maxRootIterations = 50;
+			float a1 = t1;
+			float a2 = t2;
 			for ( ;; )
 			{
 				// Use a mix of false position and bisection.
@@ -1356,16 +1832,13 @@ b2TOIOutput b2TimeOfImpact( const b2TOIInput* input )
 					t = 0.5f * ( a1 + a2 );
 				}
 
+				output.rootIterations += 1;
 				rootIterationCount += 1;
 
-#if B2_SNOOP_TOI_COUNTERS
-				++b2_toiRootIterations;
-#endif
-
-				float s = b2EvaluateSeparation( &fcn, indexA, indexB, t );
+				float s = b3EvaluateSeparation( &function, indexA, indexB, t );
 
 				// Has the separation reached tolerance?
-				if ( b2AbsFloat( s - target ) < tolerance )
+				if ( b3AbsFloat( s - target ) <= tolerance )
 				{
 					// t2 holds a tentative value for t1
 					t2 = t;
@@ -1384,19 +1857,28 @@ b2TOIOutput b2TimeOfImpact( const b2TOIInput* input )
 					s2 = s;
 				}
 
-				if ( rootIterationCount == 50 )
+				if ( rootIterationCount == maxRootIterations )
 				{
+					B3_VALIDATE( false );
 					break;
 				}
 			}
 
-#if B2_SNOOP_TOI_COUNTERS
-			b2_toiMaxRootIterations = b2MaxInt( b2_toiMaxRootIterations, rootIterationCount );
-#endif
+			// Restart the inner loop if we have a failing edge case.
+			if ( rootIterationCount == maxRootIterations - 1 && function.type == b3_separationEdges )
+			{
+				B3_VALIDATE( false );
 
+				rootIterationCount = 0;
+				t2 = input->maxFraction;
+				b3ForceFixedAxis( &function, t1 );
+				B3_ASSERT( function.type != b3_separationEdges );
+			}
+
+			output.pushBackIterations += 1;
 			pushBackIterations += 1;
 
-			if ( pushBackIterations == B2_MAX_POLYGON_VERTICES )
+			if ( pushBackIterations == maxPushBackIterations )
 			{
 				break;
 			}
@@ -1404,33 +1886,19 @@ b2TOIOutput b2TimeOfImpact( const b2TOIInput* input )
 
 		if ( done )
 		{
-			break;
-		}
-
-		if ( distanceIterations == k_maxIterations )
-		{
-			// Root finder got stuck. Semi-victory.
-			output.state = b2_toiStateFailed;
-#if B2_SNOOP_TOI_COUNTERS
-			b2_toiFailedCount += 1;
-#endif
 			// Averaged hit point
-			b2Vec2 pA = b2MulAdd( worldPointA, proxyA->radius, worldNormal );
-			b2Vec2 pB = b2MulAdd( worldPointB, -proxyB->radius, worldNormal );
-			output.point = b2Lerp( pA, pB, 0.5f );
+			b3Vec3 pA = b3MulAdd( worldPointA, input->proxyA.radius, worldNormal );
+			b3Vec3 pB = b3MulAdd( worldPointB, -input->proxyB.radius, worldNormal );
+			output.point = b3Lerp( pA, pB, 0.5f );
+			output.point = b3Add( output.point, origin );
 			output.normal = worldNormal;
-			output.fraction = t1;
 			break;
 		}
 	}
 
-#if B2_SNOOP_TOI_COUNTERS
-	b2_toiMaxDistanceIterations = b2MaxInt( b2_toiMaxDistanceIterations, distanceIterations );
-
-	float time = b2GetMilliseconds( ticks );
-	b2_toiMaxTime = b2MaxFloat( b2_toiMaxTime, time );
-	b2_toiTime += time;
-#endif
+	// It is expected that the state and fraction are set before reaching this
+	B3_ASSERT( output.state != b3_toiStateUnknown );
+	B3_ASSERT( output.fraction >= 0.0f );
 
 	return output;
 }

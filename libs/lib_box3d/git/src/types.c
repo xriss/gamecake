@@ -1,166 +1,154 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
-#include "box2d/types.h"
+#include "box3d/types.h"
 
 #include "core.h"
 
-#include "box2d/constants.h"
+#include "box3d/constants.h"
 
-b2WorldDef b2DefaultWorldDef( void )
+b3WorldDef b3DefaultWorldDef( void )
 {
-	float lengthUnits = b2GetLengthUnitsPerMeter();
-	b2WorldDef def = { 0 };
+	float lengthUnits = b3GetLengthUnitsPerMeter();
+
+	b3WorldDef def = { 0 };
 	def.gravity.x = 0.0f;
 	def.gravity.y = -10.0f;
 	def.hitEventThreshold = 1.0f * lengthUnits;
 	def.restitutionThreshold = 1.0f * lengthUnits;
 	def.contactSpeed = 3.0f * lengthUnits;
-	def.contactHertz = 30.0;
+	def.contactHertz = 30.0f;
 	def.contactDampingRatio = 10.0f;
 
 	// 400 meters per second, faster than the speed of sound
 	def.maximumLinearSpeed = 400.0f * lengthUnits;
+
 	def.enableSleep = true;
 	def.enableContinuous = true;
-	def.internalValue = B2_SECRET_COOKIE;
+	def.internalValue = B3_SECRET_COOKIE;
 	return def;
 }
 
-b2BodyDef b2DefaultBodyDef( void )
+b3BodyDef b3DefaultBodyDef( void )
 {
-	b2BodyDef def = { 0 };
-	def.type = b2_staticBody;
-	def.rotation = b2Rot_identity;
-	def.sleepThreshold = 0.05f * b2GetLengthUnitsPerMeter();
+	b3BodyDef def = { 0 };
+	def.type = b3_staticBody;
+	def.rotation = b3Quat_identity;
+	def.sleepThreshold = 0.05f * b3GetLengthUnitsPerMeter();
 	def.gravityScale = 1.0f;
 	def.enableSleep = true;
-	def.enableContactRecycling = true;
 	def.isAwake = true;
 	def.isEnabled = true;
-	def.internalValue = B2_SECRET_COOKIE;
+	def.enableContactRecycling = true;
+	def.internalValue = B3_SECRET_COOKIE;
 	return def;
 }
 
-b2Filter b2DefaultFilter( void )
+b3Filter b3DefaultFilter( void )
 {
-	b2Filter filter = { B2_DEFAULT_CATEGORY_BITS, B2_DEFAULT_MASK_BITS, 0 };
+	b3Filter filter = { B3_DEFAULT_CATEGORY_BITS, B3_DEFAULT_MASK_BITS, 0 };
 	return filter;
 }
 
-b2QueryFilter b2DefaultQueryFilter( void )
+b3QueryFilter b3DefaultQueryFilter( void )
 {
-	b2QueryFilter filter = { B2_DEFAULT_CATEGORY_BITS, B2_DEFAULT_MASK_BITS };
+	b3QueryFilter filter = { B3_DEFAULT_CATEGORY_BITS, B3_DEFAULT_MASK_BITS, 0, NULL };
 	return filter;
 }
 
-b2ShapeDef b2DefaultShapeDef( void )
+b3SurfaceMaterial b3DefaultSurfaceMaterial( void )
 {
-	b2ShapeDef def = { 0 };
-	def.material.friction = 0.6f;
-	def.density = 1.0f;
-	def.filter = b2DefaultFilter();
+	b3SurfaceMaterial surfaceMaterial = { 0 };
+	surfaceMaterial.friction = 0.6f;
+	return surfaceMaterial;
+}
+
+b3ShapeDef b3DefaultShapeDef( void )
+{
+	float lengthUnits = b3GetLengthUnitsPerMeter();
+
+	b3ShapeDef def = { 0 };
+	def.baseMaterial = b3DefaultSurfaceMaterial();
+	// density of water
+	def.density = 1000.0f / ( lengthUnits * lengthUnits * lengthUnits );
+	def.explosionScale = 1.0f;
+	def.filter = b3DefaultFilter();
 	def.updateBodyMass = true;
 	def.invokeContactCreation = true;
-	def.internalValue = B2_SECRET_COOKIE;
+	def.internalValue = B3_SECRET_COOKIE;
 	return def;
 }
 
-b2SurfaceMaterial b2DefaultSurfaceMaterial( void )
+static bool b3EmptyDrawShape( void* userShape, b3WorldTransform transform, b3HexColor color, void* context )
 {
-	b2SurfaceMaterial material = {
-		.friction = 0.6f,
-	};
-
-	return material;
+	B3_UNUSED( userShape, transform, color, context );
+	return false;
 }
 
-b2ChainDef b2DefaultChainDef( void )
+static void b3EmptyDrawSegment( b3Pos p1, b3Pos p2, b3HexColor color, void* context )
 {
-	static b2SurfaceMaterial defaultMaterial = {
-		.friction = 0.6f,
-	};
-
-	b2ChainDef def = { 0 };
-	def.materials = &defaultMaterial;
-	def.materialCount = 1;
-	def.filter = b2DefaultFilter();
-	def.internalValue = B2_SECRET_COOKIE;
-	return def;
+	B3_UNUSED( p1, p2, color, context );
 }
 
-static void b2EmptyDrawPolygon( b2WorldTransform transform, const b2Vec2* vertices, int vertexCount, b2HexColor color, void* context )
+static void b3EmptyDrawTransform( b3WorldTransform transform, void* context )
 {
-	B2_UNUSED( transform, vertices, vertexCount, color, context );
+	B3_UNUSED( transform, context );
 }
 
-static void b2EmptyDrawSolidPolygon( b2WorldTransform transform, const b2Vec2* vertices, int vertexCount, float radius,
-									 b2HexColor color, void* context )
+static void b3EmptyDrawPoint( b3Pos p, float size, b3HexColor color, void* context )
 {
-	B2_UNUSED( transform, vertices, vertexCount, radius, color, context );
+	B3_UNUSED( p, size, color, context );
 }
 
-static void b2EmptyDrawCircle( b2Pos center, float radius, b2HexColor color, void* context )
+static void b3EmptyDrawSphere( b3Pos p, float radius, b3HexColor color, float alpha, void* context )
 {
-	B2_UNUSED( center, radius, color, context );
+	B3_UNUSED( p, radius, color, alpha, context );
 }
 
-static void b2EmptyDrawSolidCircle( b2WorldTransform transform, b2Vec2 center, float radius, b2HexColor color, void* context )
+static void b3EmptyDrawCapsule( b3Pos p1, b3Pos p2, float radius, b3HexColor color, float alpha, void* context )
 {
-	B2_UNUSED( transform, center, radius, color, context );
+	B3_UNUSED( p1, p2, radius, color, alpha, context );
 }
 
-static void b2EmptyDrawSolidCapsule( b2Pos p1, b2Pos p2, float radius, b2HexColor color, void* context )
+static void b3EmptyDrawBounds( b3AABB aabb, b3HexColor color, void* context )
 {
-	B2_UNUSED( p1, p2, radius, color, context );
+	B3_UNUSED( aabb, color, context );
 }
 
-static void b2EmptyDrawSegment( b2Pos p1, b2Pos p2, b2HexColor color, void* context )
+static void b3EmptyDrawBox( b3Vec3 extents, b3WorldTransform transform, b3HexColor color, void* context )
 {
-	B2_UNUSED( p1, p2, color, context );
+	B3_UNUSED( extents, transform, color, context );
 }
 
-static void b2EmptyDrawTransform( b2WorldTransform transform, void* context )
+static void b3EmptyDrawString( b3Pos p, const char* s, b3HexColor color, void* context )
 {
-	B2_UNUSED( transform, context );
+	B3_UNUSED( p, s, color, context );
 }
 
-static void b2EmptyDrawPoint( b2Pos p, float size, b2HexColor color, void* context )
+b3DebugDraw b3DefaultDebugDraw( void )
 {
-	B2_UNUSED( p, size, color, context );
-}
-
-static void b2EmptyDrawString( b2Pos p, const char* s, b2HexColor color, void* context )
-{
-	B2_UNUSED( p, s, color, context );
-}
-
-static void b2EmptyDrawBounds( b2AABB aabb, b2HexColor color, void* context )
-{
-	B2_UNUSED( aabb, color, context );
-}
-
-b2DebugDraw b2DefaultDebugDraw( void )
-{
-	b2DebugDraw draw = { 0 };
+	b3DebugDraw draw = { 0 };
 
 	// These allow the user to skip some implementations and not hit null exceptions.
-	draw.DrawPolygonFcn = b2EmptyDrawPolygon;
-	draw.DrawSolidPolygonFcn = b2EmptyDrawSolidPolygon;
-	draw.DrawCircleFcn = b2EmptyDrawCircle;
-	draw.DrawSolidCircleFcn = b2EmptyDrawSolidCircle;
-	draw.DrawSolidCapsuleFcn = b2EmptyDrawSolidCapsule;
-	draw.DrawLineFcn = b2EmptyDrawSegment;
-	draw.DrawTransformFcn = b2EmptyDrawTransform;
-	draw.DrawPointFcn = b2EmptyDrawPoint;
-	draw.DrawStringFcn = b2EmptyDrawString;
-	draw.DrawBoundsFcn = b2EmptyDrawBounds;
+	draw.DrawShapeFcn = b3EmptyDrawShape;
+	draw.DrawSegmentFcn = b3EmptyDrawSegment;
+	draw.DrawTransformFcn = b3EmptyDrawTransform;
+	draw.DrawPointFcn = b3EmptyDrawPoint;
+	draw.DrawSphereFcn = b3EmptyDrawSphere;
+	draw.DrawCapsuleFcn = b3EmptyDrawCapsule;
+	draw.DrawBoundsFcn = b3EmptyDrawBounds;
+	draw.DrawBoxFcn = b3EmptyDrawBox;
+	draw.DrawStringFcn = b3EmptyDrawString;
 
-	draw.drawingBounds.lowerBound = (b2Vec2){ -FLT_MAX, -FLT_MAX };
-	draw.drawingBounds.upperBound = (b2Vec2){ FLT_MAX, FLT_MAX };
-	draw.forceScale = 1.0f;
+	// Not too small, not too big.
+	float h = 100.0f * b3GetLengthUnitsPerMeter();
+	draw.drawingBounds = (b3AABB){
+		.lowerBound = { -h, -h, -h },
+		.upperBound = { h, h, h },
+	};
+
 	draw.jointScale = 1.0f;
-	draw.drawShapes = true;
+	draw.forceScale = 1.0f;
 
 	return draw;
 }

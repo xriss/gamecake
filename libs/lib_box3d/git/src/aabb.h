@@ -1,24 +1,25 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
 
-#include "box2d/types.h"
+#include "box3d/types.h"
 
-// Ray cast an AABB
-b2CastOutput b2AABB_RayCast( b2AABB a, b2Vec2 p1, b2Vec2 p2 );
+// Ray cast an AABB. This is a custom function used by height fields.
+bool b3RayCastAABB( b3AABB a, b3Vec3 p1, b3Vec3 p2, float* minFraction, float* maxFraction );
 
-// Get surface area of an AABB (the perimeter length)
-static inline float b2Perimeter( b2AABB a )
+// Get the surface area (perimeter)
+static inline float b3Perimeter( b3AABB a )
 {
 	float wx = a.upperBound.x - a.lowerBound.x;
 	float wy = a.upperBound.y - a.lowerBound.y;
-	return 2.0f * ( wx + wy );
+	float wz = a.upperBound.z - a.lowerBound.z;
+	return 2.0f * ( wx * wz + wy * wx + wz * wy );
 }
 
 /// Enlarge a to contain b
 /// @return true if the AABB grew
-static inline bool b2EnlargeAABB( b2AABB* a, b2AABB b )
+static inline bool b3EnlargeAABB( b3AABB* a, b3AABB b )
 {
 	bool changed = false;
 	if ( b.lowerBound.x < a->lowerBound.x )
@@ -30,6 +31,12 @@ static inline bool b2EnlargeAABB( b2AABB* a, b2AABB b )
 	if ( b.lowerBound.y < a->lowerBound.y )
 	{
 		a->lowerBound.y = b.lowerBound.y;
+		changed = true;
+	}
+
+	if ( b.lowerBound.z < a->lowerBound.z )
+	{
+		a->lowerBound.z = b.lowerBound.z;
 		changed = true;
 	}
 
@@ -45,19 +52,29 @@ static inline bool b2EnlargeAABB( b2AABB* a, b2AABB b )
 		changed = true;
 	}
 
+	if ( a->upperBound.z < b.upperBound.z )
+	{
+		a->upperBound.z = b.upperBound.z;
+		changed = true;
+	}
+
 	return changed;
 }
 
-// Translate a relative AABB into world space, rounding outward so the float box always contains
-// the true box far from the origin where a float coordinate cannot resolve the shape extent.
-// Float ULP at 1e8 dwarfs the AABB margin, plain truncation could clip a shape out of its own
-// box. The broadphase pair order rides on the deterministic directed rounding.
-static inline b2AABB b2OffsetAABB( b2AABB box, b2Pos origin )
+#if 0
+/// Do a and b overlap
+inline bool b3OverlapAABBs( b3AABB a, b3AABB b )
 {
-	b2AABB result;
-	result.lowerBound.x = b2RoundDownFloat( origin.x + (double)box.lowerBound.x );
-	result.lowerBound.y = b2RoundDownFloat( origin.y + (double)box.lowerBound.y );
-	result.upperBound.x = b2RoundUpFloat( origin.x + (double)box.upperBound.x );
-	result.upperBound.y = b2RoundUpFloat( origin.y + (double)box.upperBound.y );
-	return result;
+	return !( b.lowerBound.x > a.upperBound.x || b.lowerBound.y > a.upperBound.y || b.lowerBound.z > a.upperBound.z ||
+			  a.lowerBound.x > b.upperBound.x || a.lowerBound.y > b.upperBound.y || a.lowerBound.z > b.upperBound.z );
+}
+#endif
+
+static inline b3Vec3 b3FarthestPointOnAABB( b3AABB b, b3Vec3 p )
+{
+	return (b3Vec3){
+		.x = ( p.x - b.lowerBound.x ) > ( b.upperBound.x - p.x ) ? b.lowerBound.x : b.upperBound.x,
+		.y = ( p.y - b.lowerBound.y ) > ( b.upperBound.y - p.y ) ? b.lowerBound.y : b.upperBound.y,
+		.z = ( p.z - b.lowerBound.z ) > ( b.upperBound.z - p.z ) ? b.lowerBound.z : b.upperBound.z,
+	};
 }

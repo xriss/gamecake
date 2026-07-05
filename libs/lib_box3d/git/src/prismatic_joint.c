@@ -1,281 +1,46 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #include "body.h"
 #include "core.h"
 #include "joint.h"
+#include "math_internal.h"
 #include "physics_world.h"
-#include "recording.h"
 #include "solver.h"
 #include "solver_set.h"
+#include "recording.h"
 
 // needed for dll export
-#include "box2d/box2d.h"
-
-#include <stdio.h>
-
-void b2PrismaticJoint_EnableSpring( b2JointId jointId, bool enableSpring )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, PrismaticJointEnableSpring, jointId, enableSpring );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	if ( enableSpring != joint->prismaticJoint.enableSpring )
-	{
-		joint->prismaticJoint.enableSpring = enableSpring;
-		joint->prismaticJoint.springImpulse = 0.0f;
-	}
-}
-
-bool b2PrismaticJoint_IsSpringEnabled( b2JointId jointId )
-{
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	return joint->prismaticJoint.enableSpring;
-}
-
-void b2PrismaticJoint_SetSpringHertz( b2JointId jointId, float hertz )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, PrismaticJointSetSpringHertz, jointId, hertz );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	joint->prismaticJoint.hertz = hertz;
-}
-
-float b2PrismaticJoint_GetSpringHertz( b2JointId jointId )
-{
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	return joint->prismaticJoint.hertz;
-}
-
-void b2PrismaticJoint_SetSpringDampingRatio( b2JointId jointId, float dampingRatio )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, PrismaticJointSetSpringDampingRatio, jointId, dampingRatio );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	joint->prismaticJoint.dampingRatio = dampingRatio;
-}
-
-float b2PrismaticJoint_GetSpringDampingRatio( b2JointId jointId )
-{
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	return joint->prismaticJoint.dampingRatio;
-}
-
-void b2PrismaticJoint_SetTargetTranslation( b2JointId jointId, float translation )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, PrismaticJointSetTargetTranslation, jointId, translation );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	joint->prismaticJoint.targetTranslation = translation;
-}
-
-float b2PrismaticJoint_GetTargetTranslation( b2JointId jointId )
-{
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	return joint->prismaticJoint.targetTranslation;
-}
-
-void b2PrismaticJoint_EnableLimit( b2JointId jointId, bool enableLimit )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, PrismaticJointEnableLimit, jointId, enableLimit );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	if ( enableLimit != joint->prismaticJoint.enableLimit )
-	{
-		joint->prismaticJoint.enableLimit = enableLimit;
-		joint->prismaticJoint.lowerImpulse = 0.0f;
-		joint->prismaticJoint.upperImpulse = 0.0f;
-	}
-}
-
-bool b2PrismaticJoint_IsLimitEnabled( b2JointId jointId )
-{
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	return joint->prismaticJoint.enableLimit;
-}
-
-float b2PrismaticJoint_GetLowerLimit( b2JointId jointId )
-{
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	return joint->prismaticJoint.lowerTranslation;
-}
-
-float b2PrismaticJoint_GetUpperLimit( b2JointId jointId )
-{
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	return joint->prismaticJoint.upperTranslation;
-}
-
-void b2PrismaticJoint_SetLimits( b2JointId jointId, float lower, float upper )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, PrismaticJointSetLimits, jointId, lower, upper );
-	B2_ASSERT( lower <= upper );
-
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	if ( lower != joint->prismaticJoint.lowerTranslation || upper != joint->prismaticJoint.upperTranslation )
-	{
-		joint->prismaticJoint.lowerTranslation = b2MinFloat( lower, upper );
-		joint->prismaticJoint.upperTranslation = b2MaxFloat( lower, upper );
-		joint->prismaticJoint.lowerImpulse = 0.0f;
-		joint->prismaticJoint.upperImpulse = 0.0f;
-	}
-}
-
-void b2PrismaticJoint_EnableMotor( b2JointId jointId, bool enableMotor )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, PrismaticJointEnableMotor, jointId, enableMotor );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	if ( enableMotor != joint->prismaticJoint.enableMotor )
-	{
-		joint->prismaticJoint.enableMotor = enableMotor;
-		joint->prismaticJoint.motorImpulse = 0.0f;
-	}
-}
-
-bool b2PrismaticJoint_IsMotorEnabled( b2JointId jointId )
-{
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	return joint->prismaticJoint.enableMotor;
-}
-
-void b2PrismaticJoint_SetMotorSpeed( b2JointId jointId, float motorSpeed )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, PrismaticJointSetMotorSpeed, jointId, motorSpeed );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	joint->prismaticJoint.motorSpeed = motorSpeed;
-}
-
-float b2PrismaticJoint_GetMotorSpeed( b2JointId jointId )
-{
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	return joint->prismaticJoint.motorSpeed;
-}
-
-float b2PrismaticJoint_GetMotorForce( b2JointId jointId )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	b2JointSim* base = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	return world->inv_h * base->prismaticJoint.motorImpulse;
-}
-
-void b2PrismaticJoint_SetMaxMotorForce( b2JointId jointId, float force )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	B2_REC( world, PrismaticJointSetMaxMotorForce, jointId, force );
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	joint->prismaticJoint.maxMotorForce = force;
-}
-
-float b2PrismaticJoint_GetMaxMotorForce( b2JointId jointId )
-{
-	b2JointSim* joint = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	return joint->prismaticJoint.maxMotorForce;
-}
-
-float b2PrismaticJoint_GetTranslation( b2JointId jointId )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	b2JointSim* jointSim = b2GetJointSimCheckType( jointId, b2_prismaticJoint );
-	// Relative to body A so the difference stays in float precision far from the origin
-	b2WorldTransform wxfA = b2GetBodyTransform( world, jointSim->bodyIdA );
-	b2Transform transformA = b2ToRelativeTransform( wxfA, wxfA.p );
-	b2Transform transformB = b2ToRelativeTransform( b2GetBodyTransform( world, jointSim->bodyIdB ), wxfA.p );
-
-	b2Vec2 localAxisA = b2RotateVector( jointSim->localFrameA.q, (b2Vec2){ 1.0f, 0.0f } );
-	b2Vec2 axisA = b2RotateVector( transformA.q, localAxisA );
-	b2Vec2 pA = b2TransformPoint( transformA, jointSim->localFrameA.p );
-	b2Vec2 pB = b2TransformPoint( transformB, jointSim->localFrameB.p );
-	b2Vec2 d = b2Sub( pB, pA );
-	float translation = b2Dot( d, axisA );
-	return translation;
-}
-
-float b2PrismaticJoint_GetSpeed( b2JointId jointId )
-{
-	b2World* world = b2GetWorld( jointId.world0 );
-	b2Joint* joint = b2GetJointFullId( world, jointId );
-	B2_ASSERT( joint->type == b2_prismaticJoint );
-	b2JointSim* base = b2GetJointSim( world, joint );
-	B2_ASSERT( base->type == b2_prismaticJoint );
-
-	b2Body* bodyA = b2Array_Get( world->bodies, base->bodyIdA );
-	b2Body* bodyB = b2Array_Get( world->bodies, base->bodyIdB );
-	b2BodySim* bodySimA = b2GetBodySim( world, bodyA );
-	b2BodySim* bodySimB = b2GetBodySim( world, bodyB );
-	b2BodyState* bodyStateA = b2GetBodyState( world, bodyA );
-	b2BodyState* bodyStateB = b2GetBodyState( world, bodyB );
-
-	b2Rot qA = bodySimA->transform.q;
-	b2Rot qB = bodySimB->transform.q;
-
-	b2Vec2 localAxisA = b2RotateVector( base->localFrameA.q, (b2Vec2){ 1.0f, 0.0f } );
-	b2Vec2 axisA = b2RotateVector( qA, localAxisA );
-	b2Vec2 rA = b2RotateVector( qA, b2Sub( base->localFrameA.p, bodySimA->localCenter ) );
-	b2Vec2 rB = b2RotateVector( qB, b2Sub( base->localFrameB.p, bodySimB->localCenter ) );
-
-	// Difference the centers in double so the speed stays exact far from the origin
-	b2Vec2 dc = b2SubPos( bodySimB->center, bodySimA->center );
-	b2Vec2 d = b2Add( dc, b2Sub( rB, rA ) );
-
-	b2Vec2 vA = bodyStateA ? bodyStateA->linearVelocity : b2Vec2_zero;
-	b2Vec2 vB = bodyStateB ? bodyStateB->linearVelocity : b2Vec2_zero;
-	float wA = bodyStateA ? bodyStateA->angularVelocity : 0.0f;
-	float wB = bodyStateB ? bodyStateB->angularVelocity : 0.0f;
-
-	b2Vec2 vRel = b2Sub( b2Add( vB, b2CrossSV( wB, rB ) ), b2Add( vA, b2CrossSV( wA, rA ) ) );
-	float speed = b2Dot( d, b2CrossSV( wA, axisA ) ) + b2Dot( axisA, vRel );
-	return speed;
-}
-
-b2Vec2 b2GetPrismaticJointForce( b2World* world, b2JointSim* base )
-{
-	b2Rot qA = b2GetBodyTransform( world, base->bodyIdA ).q;
-
-	b2PrismaticJoint* joint = &base->prismaticJoint;
-
-	b2Vec2 localAxisA = b2RotateVector( base->localFrameA.q, (b2Vec2){ 1.0f, 0.0f } );
-	b2Vec2 axisA = b2RotateVector( qA, localAxisA );
-	b2Vec2 perpA = b2LeftPerp( axisA );
-
-	float inv_h = world->inv_h;
-	float perpForce = inv_h * joint->impulse.x;
-	float axialForce = inv_h * ( joint->motorImpulse + joint->lowerImpulse - joint->upperImpulse );
-
-	b2Vec2 force = b2Add( b2MulSV( perpForce, perpA ), b2MulSV( axialForce, axisA ) );
-	return force;
-}
-
-float b2GetPrismaticJointTorque( b2World* world, b2JointSim* base )
-{
-	return world->inv_h * base->prismaticJoint.impulse.y;
-}
+#include "box3d/box3d.h"
 
 // Linear constraint (point-to-line)
+// joint axis is along joint frame A local z-axis
+// perpX and perpY are world vectors fixed in A
+//
 // d = pB - pA = xB + rB - xA - rA
-// C = dot(perp, d)
-// Cdot = dot(d, cross(wA, perp)) + dot(perp, vB + cross(wB, rB) - vA - cross(wA, rA))
-//      = -dot(perp, vA) - dot(cross(rA + d, perp), wA) + dot(perp, vB) + dot(cross(rB, perp), vB)
-// J = [-perp, -cross(rA + d, perp), perp, cross(rB, perp)]
-//
-// Angular constraint
-// C = aB - aA + a_initial
-// Cdot = wB - wA
-// J = [0 0 -1 0 0 1]
-//
-// K = J * invM * JT
-//
-// J = [-a -sA a sB]
-//     [0  -1  0  1]
-// a = perp
-// sA = cross(rA + d, a) = cross(pB - xA, a)
-// sB = cross(rB, a) = cross(pB - xB, a)
+// Cx = dot(perpX, d)
+// Cy = dot(perpY, d)
 
-// Motor/Limit linear constraint
-// C = dot(axA, d)
-// Cdot = -dot(axA, vA) - dot(cross(rA + d, axA), wA) + dot(axA, vB) + dot(cross(rB, axA), vB)
-// J = [-axA -cross(rA + d, axA) axA cross(rB, ax1)]
+// CdotX = dot(d, cross(wA, perpX)) + dot(perpX, vB + cross(wB, rB) - vA - cross(wA, rA))
+//      = -dot(perpX, vA) - dot(cross(d + rA, perpX), wA) + dot(perpX, vB) + dot(cross(rB, perpX), vB)
+// Jx = [-perpX, -cross(d + rA, perpX), perpX, cross(rB, perpX)]
+// similar for perpY
+//
+// Simplification dropping dot(d, cross(wA, perpX)) (todo needs testing)
+// CdotXs = dot(perpX, vB + cross(wB, rB) - vA - cross(wA, rA))
+// Jxs = [-perpX, -cross(rA, perpX), perpX, cross(rB, perpX)]
+
+// Motor/limit/spring linear constraint
+// axis is the world joint axis fixed in A
+
+// C = dot(axis, d)
+// Cdot = dot(d, cross(wA, axis)) + dot(axis, vB + cross(wB, rB) - vA - cross(wA, rA))
+// Cdot = -dot(axis, vA) - dot(cross(d + rA, axis), wA) + dot(axis, vB) + dot(cross(rB, axis), vB)
+// J = [-axis -cross(d + rA, axis) axis cross(rB, axis)]
+//
+// Simplified (todo needs testing)
+// Cdot = -dot(axis, vA) - dot(cross(rA, axis), wA) + dot(axis, vB) + dot(cross(rB, axis), vB)
+// J = [-axis -cross(rA, axis) axis cross(rB, axis)]
 
 // Predictive limit is applied even when the limit is not active.
 // Prevents a constraint speed that can lead to a constraint error in one time step.
@@ -286,259 +51,498 @@ float b2GetPrismaticJointTorque( b2World* world, b2JointSim* base )
 // So:
 // Cdot + max(C1, 0)/h >= 0
 
-// Block Solver
-// We develop a block solver that includes the angular and linear constraints. This makes the limit stiffer.
-//
-// The Jacobian has 2 rows:
-// J = [-uT -s1 uT s2] // linear
-//     [0   -1   0  1] // angular
-//
-// u = perp
-// s1 = cross(d + r1, u), s2 = cross(r2, u)
-// a1 = cross(d + r1, v), a2 = cross(r2, v)
-
-void b2PreparePrismaticJoint( b2JointSim* base, b2StepContext* context )
+void b3PrismaticJoint_EnableLimit( b3JointId jointId, bool enableLimit )
 {
-	B2_ASSERT( base->type == b2_prismaticJoint );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, PrismaticJointEnableLimit, jointId, enableLimit );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	if ( enableLimit != base->prismaticJoint.enableLimit )
+	{
+		base->prismaticJoint.lowerImpulse = 0.0f;
+		base->prismaticJoint.upperImpulse = 0.0f;
+	}
+	base->prismaticJoint.enableLimit = enableLimit;
+}
 
-	// chase body id to the solver set where the body lives
-	int idA = base->bodyIdA;
-	int idB = base->bodyIdB;
+bool b3PrismaticJoint_IsLimitEnabled( b3JointId jointId )
+{
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	return base->prismaticJoint.enableLimit;
+}
 
-	b2World* world = context->world;
+float b3PrismaticJoint_GetLowerLimit( b3JointId jointId )
+{
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	return base->prismaticJoint.lowerTranslation;
+}
 
-	b2Body* bodyA = b2Array_Get( world->bodies, idA );
-	b2Body* bodyB = b2Array_Get( world->bodies, idB );
+float b3PrismaticJoint_GetUpperLimit( b3JointId jointId )
+{
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	return base->prismaticJoint.upperTranslation;
+}
 
-	B2_ASSERT( bodyA->setIndex == b2_awakeSet || bodyB->setIndex == b2_awakeSet );
-	b2SolverSet* setA = b2Array_Get( world->solverSets, bodyA->setIndex );
-	b2SolverSet* setB = b2Array_Get( world->solverSets, bodyB->setIndex );
+void b3PrismaticJoint_SetLimits( b3JointId jointId, float lower, float upper )
+{
+	B3_ASSERT( b3IsValidFloat( lower ) && b3IsValidFloat( upper ) );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, PrismaticJointSetLimits, jointId, lower, upper );
+	float lowerAngle = b3MinFloat( lower, upper );
+	float upperAngle = b3MaxFloat( lower, upper );
+
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	base->prismaticJoint.lowerTranslation = lowerAngle;
+	base->prismaticJoint.upperTranslation = upperAngle;
+}
+
+float b3PrismaticJoint_GetTranslation( b3JointId jointId )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	b3WorldTransform transformA = b3GetBodyTransform( world, base->bodyIdA );
+	b3WorldTransform transformB = b3GetBodyTransform( world, base->bodyIdB );
+
+	b3Vec3 jointAxis = b3RotateVector( base->localFrameA.q, b3Vec3_axisX );
+	jointAxis = b3RotateVector( transformA.q, jointAxis );
+
+	b3Vec3 anchorA = b3RotateVector( transformA.q, base->localFrameA.p );
+	b3Vec3 anchorB = b3RotateVector( transformB.q, base->localFrameB.p );
+	b3Vec3 d = b3Add( b3SubPos( transformB.p, transformA.p ), b3Sub( anchorB, anchorA ) );
+	float translation = b3Dot( d, jointAxis );
+	return translation;
+}
+
+void b3PrismaticJoint_EnableSpring( b3JointId jointId, bool enableSpring )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, PrismaticJointEnableSpring, jointId, enableSpring );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	if ( enableSpring != base->prismaticJoint.enableSpring )
+	{
+		base->prismaticJoint.springImpulse = 0.0f;
+	}
+	base->prismaticJoint.enableSpring = enableSpring;
+}
+
+bool b3PrismaticJoint_IsSpringEnabled( b3JointId jointId )
+{
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	return base->prismaticJoint.enableSpring;
+}
+
+void b3PrismaticJoint_SetTargetTranslation( b3JointId jointId, float targetTranslation )
+{
+	B3_ASSERT( b3IsValidFloat( targetTranslation ) );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, PrismaticJointSetTargetTranslation, jointId, targetTranslation );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	base->prismaticJoint.targetTranslation = targetTranslation;
+}
+
+float b3PrismaticJoint_GetTargetTranslation( b3JointId jointId )
+{
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	return base->prismaticJoint.targetTranslation;
+}
+
+void b3PrismaticJoint_SetSpringHertz( b3JointId jointId, float hertz )
+{
+	B3_ASSERT( b3IsValidFloat( hertz ) && hertz >= 0.0f );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, PrismaticJointSetSpringHertz, jointId, hertz );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	base->prismaticJoint.hertz = hertz;
+}
+
+float b3PrismaticJoint_GetSpringHertz( b3JointId jointId )
+{
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	return base->prismaticJoint.hertz;
+}
+
+void b3PrismaticJoint_SetSpringDampingRatio( b3JointId jointId, float dampingRatio )
+{
+	B3_ASSERT( b3IsValidFloat( dampingRatio ) && dampingRatio >= 0.0f );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, PrismaticJointSetSpringDampingRatio, jointId, dampingRatio );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	base->prismaticJoint.dampingRatio = dampingRatio;
+}
+
+float b3PrismaticJoint_GetSpringDampingRatio( b3JointId jointId )
+{
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	return base->prismaticJoint.dampingRatio;
+}
+
+void b3PrismaticJoint_EnableMotor( b3JointId jointId, bool enableMotor )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, PrismaticJointEnableMotor, jointId, enableMotor );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	if ( enableMotor != base->prismaticJoint.enableMotor )
+	{
+		base->prismaticJoint.motorImpulse = 0.0f;
+	}
+	base->prismaticJoint.enableMotor = enableMotor;
+}
+
+bool b3PrismaticJoint_IsMotorEnabled( b3JointId jointId )
+{
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	return base->prismaticJoint.enableMotor;
+}
+
+void b3PrismaticJoint_SetMotorSpeed( b3JointId jointId, float motorSpeed )
+{
+	B3_ASSERT( b3IsValidFloat( motorSpeed ) );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, PrismaticJointSetMotorSpeed, jointId, motorSpeed );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	base->prismaticJoint.motorSpeed = motorSpeed;
+}
+
+float b3PrismaticJoint_GetMotorSpeed( b3JointId jointId )
+{
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	return base->prismaticJoint.motorSpeed;
+}
+
+void b3PrismaticJoint_SetMaxMotorForce( b3JointId jointId, float maxForce )
+{
+	B3_ASSERT( b3IsValidFloat( maxForce ) && maxForce >= 0.0f );
+	b3World* world = b3GetWorld( jointId.world0 );
+	B3_REC( world, PrismaticJointSetMaxMotorForce, jointId, maxForce );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	base->prismaticJoint.maxMotorForce = maxForce;
+}
+
+float b3PrismaticJoint_GetMaxMotorForce( b3JointId jointId )
+{
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	return base->prismaticJoint.maxMotorForce;
+}
+
+float b3PrismaticJoint_GetMotorForce( b3JointId jointId )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+	return world->inv_h * base->prismaticJoint.motorImpulse;
+}
+
+float b3PrismaticJoint_GetSpeed( b3JointId jointId )
+{
+	b3World* world = b3GetWorld( jointId.world0 );
+	b3JointSim* base = b3GetJointSimCheckType( jointId, b3_prismaticJoint );
+
+	b3Body* bodyA = b3Array_Get( world->bodies, base->bodyIdA );
+	b3Body* bodyB = b3Array_Get( world->bodies, base->bodyIdB );
+	b3BodySim* bodySimA = b3GetBodySim( world, bodyA );
+	b3BodySim* bodySimB = b3GetBodySim( world, bodyB );
+	b3BodyState* stateA = b3GetBodyState( world, bodyA );
+	b3BodyState* stateB = b3GetBodyState( world, bodyB );
+
+	b3Quat qA = bodySimA->transform.q;
+	b3Quat qB = bodySimB->transform.q;
+
+	b3Vec3 axisA = b3RotateVector( qA, b3RotateVector( base->localFrameA.q, b3Vec3_axisX ) );
+	b3Vec3 rA = b3RotateVector( qA, b3Sub( base->localFrameA.p, bodySimA->localCenter ) );
+	b3Vec3 rB = b3RotateVector( qB, b3Sub( base->localFrameB.p, bodySimB->localCenter ) );
+
+	// Difference the centers in double so the speed stays exact far from the origin.
+	b3Vec3 d = b3Add( b3SubPos( bodySimB->center, bodySimA->center ), b3Sub( rB, rA ) );
+
+	b3Vec3 vA = stateA ? stateA->linearVelocity : b3Vec3_zero;
+	b3Vec3 vB = stateB ? stateB->linearVelocity : b3Vec3_zero;
+	b3Vec3 wA = stateA ? stateA->angularVelocity : b3Vec3_zero;
+	b3Vec3 wB = stateB ? stateB->angularVelocity : b3Vec3_zero;
+
+	b3Vec3 vRel = b3Sub( b3Add( vB, b3Cross( wB, rB ) ), b3Add( vA, b3Cross( wA, rA ) ) );
+
+	// The axis moves with body A, so account for its rotation.
+	float speed = b3Dot( d, b3Cross( wA, axisA ) ) + b3Dot( axisA, vRel );
+	return speed;
+}
+
+b3Vec3 b3GetPrismaticJointForce( b3World* world, b3JointSim* base )
+{
+	b3WorldTransform transformA = b3GetBodyTransform( world, base->bodyIdA );
+	b3PrismaticJoint* joint = &base->prismaticJoint;
+
+	// impulse in joint space
+	b3Vec3 impulse = {
+		joint->perpImpulse.x,
+		joint->perpImpulse.y,
+		joint->motorImpulse + joint->lowerImpulse + joint->upperImpulse + joint->springImpulse,
+	};
+
+	// convert impulse to force
+	b3Vec3 force = b3MulSV( world->inv_h, impulse );
+
+	// convert to body space
+	force = b3RotateVector( base->localFrameA.q, force );
+
+	// convert to world space
+	force = b3RotateVector( transformA.q, force );
+	return force;
+}
+
+b3Vec3 b3GetPrismaticJointTorque( b3World* world, b3JointSim* base )
+{
+	b3WorldTransform transformA = b3GetBodyTransform( world, base->bodyIdA );
+	b3PrismaticJoint* joint = &base->prismaticJoint;
+
+	b3Vec3 torque = b3MulSV( world->inv_h, joint->angularImpulse );
+	torque = b3RotateVector( base->localFrameA.q, torque );
+	torque = b3RotateVector( transformA.q, torque );
+	return torque;
+}
+
+void b3PreparePrismaticJoint( b3JointSim* base, b3StepContext* context )
+{
+	B3_ASSERT( base->type == b3_prismaticJoint );
+
+	b3World* world = context->world;
+
+	b3Body* bodyA = b3Array_Get( world->bodies, base->bodyIdA  );
+	b3Body* bodyB = b3Array_Get( world->bodies, base->bodyIdB  );
+
+	B3_ASSERT( bodyB->setIndex == b3_awakeSet );
+	b3SolverSet* setA = b3Array_Get( world->solverSets, bodyA->setIndex  );
+	b3SolverSet* setB = b3Array_Get( world->solverSets, bodyB->setIndex  );
 
 	int localIndexA = bodyA->localIndex;
 	int localIndexB = bodyB->localIndex;
 
-	b2BodySim* bodySimA = b2Array_Get( setA->bodySims, localIndexA );
-	b2BodySim* bodySimB = b2Array_Get( setB->bodySims, localIndexB );
+	b3BodySim* bodySimA = b3Array_Get( setA->bodySims, localIndexA  );
+	b3BodySim* bodySimB = b3Array_Get( setB->bodySims, localIndexB  );
 
-	float mA = bodySimA->invMass;
-	float iA = bodySimA->invInertia;
-	float mB = bodySimB->invMass;
-	float iB = bodySimB->invInertia;
+	base->invMassA = bodySimA->invMass;
+	base->invMassB = bodySimB->invMass;
+	base->invIA = bodySimA->invInertiaWorld;
+	base->invIB = bodySimB->invInertiaWorld;
 
-	base->invMassA = mA;
-	base->invMassB = mB;
-	base->invIA = iA;
-	base->invIB = iB;
+	b3Matrix3 invInertiaSum = b3AddMM( base->invIA, base->invIB );
+	base->fixedRotation = b3Det( invInertiaSum ) < 1000.0f * FLT_MIN;
 
-	b2PrismaticJoint* joint = &base->prismaticJoint;
-	joint->indexA = bodyA->setIndex == b2_awakeSet ? localIndexA : B2_NULL_INDEX;
-	joint->indexB = bodyB->setIndex == b2_awakeSet ? localIndexB : B2_NULL_INDEX;
+	b3PrismaticJoint* joint = &base->prismaticJoint;
+	joint->indexA = bodyA->setIndex == b3_awakeSet ? localIndexA : B3_NULL_INDEX;
+	joint->indexB = bodyB->setIndex == b3_awakeSet ? localIndexB : B3_NULL_INDEX;
 
 	// Compute joint anchor frames with world space rotation, relative to center of mass
-	joint->frameA.q = b2MulRot( bodySimA->transform.q, base->localFrameA.q );
-	joint->frameA.p = b2RotateVector( bodySimA->transform.q, b2Sub( base->localFrameA.p, bodySimA->localCenter ) );
-	joint->frameB.q = b2MulRot( bodySimB->transform.q, base->localFrameB.q );
-	joint->frameB.p = b2RotateVector( bodySimB->transform.q, b2Sub( base->localFrameB.p, bodySimB->localCenter ) );
+	joint->frameA.q = b3MulQuat( bodySimA->transform.q, base->localFrameA.q );
+	joint->frameA.p = b3RotateVector( bodySimA->transform.q, b3Sub( base->localFrameA.p, bodySimA->localCenter ) );
+	joint->frameB.q = b3MulQuat( bodySimB->transform.q, base->localFrameB.q );
+	joint->frameB.p = b3RotateVector( bodySimB->transform.q, b3Sub( base->localFrameB.p, bodySimB->localCenter ) );
 
-	// Compute the initial center delta. Incremental position updates are relative to this.
-	joint->deltaCenter = b2SubPos( bodySimB->center, bodySimA->center );
+	joint->deltaCenter = b3SubPos( bodySimB->center, bodySimA->center );
+	joint->rotationMass = b3InvertMatrix( invInertiaSum );
 
-	joint->springSoftness = b2MakeSoft( joint->hertz, joint->dampingRatio, context->h );
+	// Initial joint axes in world space
+	b3Matrix3 matrixA = b3MakeMatrixFromQuat( joint->frameA.q );
+	joint->jointAxis = matrixA.cx;
+	joint->perpAxisY = matrixA.cy;
+	joint->perpAxisZ = matrixA.cz;
+
+	joint->springSoftness = b3MakeSoft( joint->hertz, joint->dampingRatio, context->h );
 
 	if ( context->enableWarmStarting == false )
 	{
-		joint->impulse = b2Vec2_zero;
-		joint->springImpulse = 0.0f;
+		joint->perpImpulse = (b3Vec2){ 0.0f, 0.0f };
+		joint->angularImpulse = (b3Vec3){ 0.0f, 0.0f, 0.0f };
 		joint->motorImpulse = 0.0f;
+		joint->springImpulse = 0.0f;
 		joint->lowerImpulse = 0.0f;
 		joint->upperImpulse = 0.0f;
 	}
 }
 
-void b2WarmStartPrismaticJoint( b2JointSim* base, b2StepContext* context )
+void b3WarmStartPrismaticJoint( b3JointSim* base, b3StepContext* context )
 {
-	B2_ASSERT( base->type == b2_prismaticJoint );
+	B3_ASSERT( base->type == b3_prismaticJoint );
 
 	float mA = base->invMassA;
 	float mB = base->invMassB;
-	float iA = base->invIA;
-	float iB = base->invIB;
+	b3Matrix3 iA = base->invIA;
+	b3Matrix3 iB = base->invIB;
 
 	// dummy state for static bodies
-	b2BodyState dummyState = b2_identityBodyState;
+	b3BodyState dummyState = b3_identityBodyState;
 
-	b2PrismaticJoint* joint = &base->prismaticJoint;
+	b3PrismaticJoint* joint = &base->prismaticJoint;
 
-	b2BodyState* stateA = joint->indexA == B2_NULL_INDEX ? &dummyState : context->states + joint->indexA;
-	b2BodyState* stateB = joint->indexB == B2_NULL_INDEX ? &dummyState : context->states + joint->indexB;
+	b3BodyState* stateA = joint->indexA == B3_NULL_INDEX ? &dummyState : context->states + joint->indexA;
+	b3BodyState* stateB = joint->indexB == B3_NULL_INDEX ? &dummyState : context->states + joint->indexB;
 
-	b2Vec2 rA = b2RotateVector( stateA->deltaRotation, joint->frameA.p );
-	b2Vec2 rB = b2RotateVector( stateB->deltaRotation, joint->frameB.p );
+	// todo make this code and the wheel joint more similar
 
-	b2Vec2 d = b2Add( b2Add( b2Sub( stateB->deltaPosition, stateA->deltaPosition ), joint->deltaCenter ), b2Sub( rB, rA ) );
+	b3Vec3 rA = b3RotateVector( stateA->deltaRotation, joint->frameA.p );
+	b3Vec3 rB = b3RotateVector( stateB->deltaRotation, joint->frameB.p );
+	b3Vec3 d = b3Add( b3Add( b3Sub( stateB->deltaPosition, stateA->deltaPosition ), joint->deltaCenter ), b3Sub( rB, rA ) );
+	b3Vec3 jointAxis = b3RotateVector( stateA->deltaRotation, joint->jointAxis );
+	b3Vec3 sAx = b3Cross( b3Add( rA, d ), jointAxis );
+	b3Vec3 sBx = b3Cross( rB, jointAxis );
 
-	b2Vec2 axisA = b2RotateVector( joint->frameA.q, (b2Vec2){ 1.0f, 0.0f } );
-	axisA = b2RotateVector( stateA->deltaRotation, axisA );
+	b3Vec3 perpY = b3RotateVector( stateA->deltaRotation, joint->perpAxisY );
+	b3Vec3 perpZ = b3RotateVector( stateA->deltaRotation, joint->perpAxisZ );
+	b3Vec3 sAy = b3Cross( b3Add( rA, d ), perpY );
+	b3Vec3 sBy = b3Cross( rB, perpY );
+	b3Vec3 sAz = b3Cross( b3Add( rA, d ), perpZ );
+	b3Vec3 sBz = b3Cross( rB, perpZ );
 
-	// impulse is applied at anchor point on body B
-	float a1 = b2Cross( b2Add( rA, d ), axisA );
-	float a2 = b2Cross( rB, axisA );
 	float axialImpulse = joint->springImpulse + joint->motorImpulse + joint->lowerImpulse - joint->upperImpulse;
+	b3Vec2 perpImpulse = joint->perpImpulse;
 
-	// perpendicular constraint
-	b2Vec2 perpA = b2LeftPerp( axisA );
-	float s1 = b2Cross( b2Add( rA, d ), perpA );
-	float s2 = b2Cross( rB, perpA );
-	float perpImpulse = joint->impulse.x;
-	float angleImpulse = joint->impulse.y;
+	b3Vec3 P = b3Blend3( axialImpulse, jointAxis, perpImpulse.x, perpY, perpImpulse.y, perpZ );
+	b3Vec3 LA = b3Add( b3Blend3( axialImpulse, sAx, perpImpulse.x, sAy, perpImpulse.y, sAz ), joint->angularImpulse );
+	b3Vec3 LB = b3Add( b3Blend3( axialImpulse, sBx, perpImpulse.x, sBy, perpImpulse.y, sBz ), joint->angularImpulse );
 
-	b2Vec2 P = b2Add( b2MulSV( axialImpulse, axisA ), b2MulSV( perpImpulse, perpA ) );
-	float LA = axialImpulse * a1 + perpImpulse * s1 + angleImpulse;
-	float LB = axialImpulse * a2 + perpImpulse * s2 + angleImpulse;
+	b3Vec3 vA = stateA->linearVelocity;
+	b3Vec3 wA = stateA->angularVelocity;
+	b3Vec3 vB = stateB->linearVelocity;
+	b3Vec3 wB = stateB->angularVelocity;
+	vA = b3MulSub( vA, mA, P );
+	wA = b3Sub( wA, b3MulMV( iA, LA ) );
+	vB = b3MulAdd( vB, mB, P );
+	wB = b3Add( wB, b3MulMV( iB, LB ) );
 
-	if ( stateA->flags & b2_dynamicFlag )
+	if ( stateA->flags & b3_dynamicFlag )
 	{
-		stateA->linearVelocity = b2MulSub( stateA->linearVelocity, mA, P );
-		stateA->angularVelocity -= iA * LA;
+		stateA->linearVelocity = vA;
+		stateA->angularVelocity = wA;
 	}
 
-	if ( stateB->flags & b2_dynamicFlag )
+	if ( stateB->flags & b3_dynamicFlag )
 	{
-		stateB->linearVelocity = b2MulAdd( stateB->linearVelocity, mB, P );
-		stateB->angularVelocity += iB * LB;
+		stateB->linearVelocity = vB;
+		stateB->angularVelocity = wB;
 	}
 }
 
-void b2SolvePrismaticJoint( b2JointSim* base, b2StepContext* context, bool useBias )
+void b3SolvePrismaticJoint( b3JointSim* base, b3StepContext* context, bool useBias )
 {
-	B2_ASSERT( base->type == b2_prismaticJoint );
-
 	float mA = base->invMassA;
 	float mB = base->invMassB;
-	float iA = base->invIA;
-	float iB = base->invIB;
+	b3Matrix3 iA = base->invIA;
+	b3Matrix3 iB = base->invIB;
 
 	// dummy state for static bodies
-	b2BodyState dummyState = b2_identityBodyState;
+	b3BodyState dummyState = b3_identityBodyState;
 
-	b2PrismaticJoint* joint = &base->prismaticJoint;
+	b3PrismaticJoint* joint = &base->prismaticJoint;
+	b3BodyState* stateA = joint->indexA == B3_NULL_INDEX ? &dummyState : context->states + joint->indexA;
+	b3BodyState* stateB = joint->indexB == B3_NULL_INDEX ? &dummyState : context->states + joint->indexB;
 
-	b2BodyState* stateA = joint->indexA == B2_NULL_INDEX ? &dummyState : context->states + joint->indexA;
-	b2BodyState* stateB = joint->indexB == B2_NULL_INDEX ? &dummyState : context->states + joint->indexB;
+	b3Vec3 vA = stateA->linearVelocity;
+	b3Vec3 wA = stateA->angularVelocity;
+	b3Vec3 vB = stateB->linearVelocity;
+	b3Vec3 wB = stateB->angularVelocity;
 
-	b2Vec2 vA = stateA->linearVelocity;
-	float wA = stateA->angularVelocity;
-	b2Vec2 vB = stateB->linearVelocity;
-	float wB = stateB->angularVelocity;
+	bool fixedRotation = base->fixedRotation;
+	b3Vec3 rA = b3RotateVector( stateA->deltaRotation, joint->frameA.p );
+	b3Vec3 rB = b3RotateVector( stateB->deltaRotation, joint->frameB.p );
 
-	b2Rot qA = b2MulRot( stateA->deltaRotation, joint->frameA.q );
-	b2Rot qB = b2MulRot( stateB->deltaRotation, joint->frameB.q );
-	b2Rot relQ = b2InvMulRot( qA, qB );
+	b3Vec3 dcA = stateA->deltaPosition;
+	b3Vec3 dcB = stateB->deltaPosition;
+	b3Vec3 d = b3Add( b3Add( b3Sub( dcB, dcA ), joint->deltaCenter ), b3Sub( rB, rA ) );
 
-	// current anchors
-	b2Vec2 rA = b2RotateVector( stateA->deltaRotation, joint->frameA.p );
-	b2Vec2 rB = b2RotateVector( stateB->deltaRotation, joint->frameB.p );
+	b3Vec3 jointAxis = b3RotateVector( stateA->deltaRotation, joint->jointAxis );
+	b3Vec3 sAx = b3Cross( b3Add( rA, d ), jointAxis );
+	b3Vec3 sBx = b3Cross( rB, jointAxis );
+	float jointTranslation = b3Dot( d, jointAxis );
+	float targetTranslation = joint->targetTranslation;
 
-	b2Vec2 d = b2Add( b2Add( b2Sub( stateB->deltaPosition, stateA->deltaPosition ), joint->deltaCenter ), b2Sub( rB, rA ) );
+	// The axial effective mass must be fresh to avoid divergence when the joint is stressed
+	float ka = mA + mB + b3Dot( sAx, b3MulMV( iA, sAx ) ) + b3Dot( sBx, b3MulMV( iB, sBx ) );
+	float axialMass = ka > 0.0f ? 1.0f / ka : 0.0f;
 
-	b2Vec2 axisA = b2RotateVector( joint->frameA.q, (b2Vec2){ 1.0f, 0.0f } );
-	axisA = b2RotateVector( stateA->deltaRotation, axisA );
-	float translation = b2Dot( axisA, d );
-
-	// These scalars are for torques generated by axial forces
-	float a1 = b2Cross( b2Add( rA, d ), axisA );
-	float a2 = b2Cross( rB, axisA );
-
-	float k = mA + mB + iA * a1 * a1 + iB * a2 * a2;
-	float axialMass = k > 0.0f ? 1.0f / k : 0.0f;
-
-	b2Softness softness = base->constraintSoftness;
-
-	// spring constraint
-	if ( joint->enableSpring )
+	// Solve spring
+	if ( joint->enableSpring && fixedRotation == false )
 	{
-		// This is a real spring and should be applied even during relax
-		float C = translation - joint->targetTranslation;
-		float bias = joint->springSoftness.biasRate * C;
+		// Get the substep relative rotation
+		float c = jointTranslation - targetTranslation;
+
+		float bias = joint->springSoftness.biasRate * c;
 		float massScale = joint->springSoftness.massScale;
 		float impulseScale = joint->springSoftness.impulseScale;
 
-		float Cdot = b2Dot( axisA, b2Sub( vB, vA ) ) + a2 * wB - a1 * wA;
-		float deltaImpulse = -massScale * axialMass * ( Cdot + bias ) - impulseScale * joint->springImpulse;
+		b3Vec3 vRel = b3Sub( b3Sub( b3Add( vB, b3Cross( wB, rB ) ), vA ), b3Cross( wA, b3Add( rA, d ) ) );
+		float cdot = b3Dot( vRel, jointAxis );
+		float deltaImpulse = -massScale * axialMass * ( cdot + bias ) - impulseScale * joint->springImpulse;
 		joint->springImpulse += deltaImpulse;
 
-		b2Vec2 P = b2MulSV( deltaImpulse, axisA );
-		float LA = deltaImpulse * a1;
-		float LB = deltaImpulse * a2;
+		b3Vec3 P = b3MulSV( deltaImpulse, jointAxis );
+		b3Vec3 LA = b3MulSV( deltaImpulse, sAx );
+		b3Vec3 LB = b3MulSV( deltaImpulse, sBx );
 
-		vA = b2MulSub( vA, mA, P );
-		wA -= iA * LA;
-		vB = b2MulAdd( vB, mB, P );
-		wB += iB * LB;
+		vA = b3MulSub( vA, mA, P );
+		wA = b3Sub( wA, b3MulMV( iA, LA ) );
+		vB = b3MulAdd( vB, mB, P );
+		wB = b3Add( wB, b3MulMV( iB, LB ) );
 	}
 
-	// Solve motor constraint
-	if ( joint->enableMotor )
+	if ( joint->enableMotor && fixedRotation == false )
 	{
-		float Cdot = b2Dot( axisA, b2Sub( vB, vA ) ) + a2 * wB - a1 * wA;
-		float impulse = axialMass * ( joint->motorSpeed - Cdot );
-		float oldImpulse = joint->motorImpulse;
-		float maxImpulse = context->h * joint->maxMotorForce;
-		joint->motorImpulse = b2ClampFloat( joint->motorImpulse + impulse, -maxImpulse, maxImpulse );
-		impulse = joint->motorImpulse - oldImpulse;
+		b3Vec3 vRel = b3Sub( b3Sub( b3Add( vB, b3Cross( wB, rB ) ), vA ), b3Cross( wA, b3Add( rA, d ) ) );
+		float cdot = b3Dot( vRel, jointAxis ) - joint->motorSpeed;
 
-		b2Vec2 P = b2MulSV( impulse, axisA );
-		float LA = impulse * a1;
-		float LB = impulse * a2;
+		float deltaImpulse = -axialMass * cdot;
+		float newImpulse = joint->motorImpulse + deltaImpulse;
+		float maxImpulse = joint->maxMotorForce * context->h;
+		newImpulse = b3ClampFloat( newImpulse, -maxImpulse, maxImpulse );
+		deltaImpulse = newImpulse - joint->motorImpulse;
+		joint->motorImpulse = newImpulse;
 
-		vA = b2MulSub( vA, mA, P );
-		wA -= iA * LA;
-		vB = b2MulAdd( vB, mB, P );
-		wB += iB * LB;
+		b3Vec3 P = b3MulSV( deltaImpulse, jointAxis );
+		b3Vec3 LA = b3MulSV( deltaImpulse, sAx );
+		b3Vec3 LB = b3MulSV( deltaImpulse, sBx );
+
+		vA = b3MulSub( vA, mA, P );
+		wA = b3Sub( wA, b3MulMV( iA, LA ) );
+		vB = b3MulAdd( vB, mB, P );
+		wB = b3Add( wB, b3MulMV( iB, LB ) );
 	}
 
-	if ( joint->enableLimit )
+	if ( joint->enableLimit && fixedRotation == false )
 	{
-		// Clamp the speculative distance to a reasonable value
 		float speculativeDistance = 0.25f * ( joint->upperTranslation - joint->lowerTranslation );
 
 		// Lower limit
 		{
-			float C = translation - joint->lowerTranslation;
+			float C = jointTranslation - joint->lowerTranslation;
 
 			if ( C < speculativeDistance )
 			{
 				float bias = 0.0f;
 				float massScale = 1.0f;
 				float impulseScale = 0.0f;
-
 				if ( C > 0.0f )
 				{
 					// speculation
-					float safe = b2GetLengthUnitsPerMeter();
-					bias = b2MinFloat( C, safe ) * context->inv_h;
+					bias = C * context->inv_h;
 				}
 				else if ( useBias )
 				{
-					bias = softness.biasRate * C;
-					massScale = softness.massScale;
-					impulseScale = softness.impulseScale;
+					bias = base->constraintSoftness.biasRate * C;
+					massScale = base->constraintSoftness.massScale;
+					impulseScale = base->constraintSoftness.impulseScale;
 				}
 
+				b3Vec3 vRel = b3Sub( b3Sub( b3Add( vB, b3Cross( wB, rB ) ), vA ), b3Cross( wA, b3Add( rA, d ) ) );
+				float cdot = b3Dot( vRel, jointAxis );
 				float oldImpulse = joint->lowerImpulse;
-				float Cdot = b2Dot( axisA, b2Sub( vB, vA ) ) + a2 * wB - a1 * wA;
-				float deltaImpulse = -axialMass * massScale * ( Cdot + bias ) - impulseScale * oldImpulse;
-				joint->lowerImpulse = b2MaxFloat( oldImpulse + deltaImpulse, 0.0f );
+				float deltaImpulse = -massScale * axialMass * ( cdot + bias ) - impulseScale * oldImpulse;
+				joint->lowerImpulse = b3MaxFloat( oldImpulse + deltaImpulse, 0.0f );
 				deltaImpulse = joint->lowerImpulse - oldImpulse;
 
-				b2Vec2 P = b2MulSV( deltaImpulse, axisA );
-				float LA = deltaImpulse * a1;
-				float LB = deltaImpulse * a2;
+				b3Vec3 P = b3MulSV( deltaImpulse, jointAxis );
+				b3Vec3 LA = b3MulSV( deltaImpulse, sAx );
+				b3Vec3 LB = b3MulSV( deltaImpulse, sBx );
 
-				vA = b2MulSub( vA, mA, P );
-				wA -= iA * LA;
-				vB = b2MulAdd( vB, mB, P );
-				wB += iB * LB;
+				vA = b3MulSub( vA, mA, P );
+				wA = b3Sub( wA, b3MulMV( iA, LA ) );
+				vB = b3MulAdd( vB, mB, P );
+				wB = b3Add( wB, b3MulMV( iB, LB ) );
 			}
 			else
 			{
@@ -547,48 +551,43 @@ void b2SolvePrismaticJoint( b2JointSim* base, b2StepContext* context, bool useBi
 		}
 
 		// Upper limit
-		// Note: signs are flipped to keep C positive when the constraint is satisfied.
-		// This also keeps the impulse positive when the limit is active.
 		{
-			// sign flipped
-			float C = joint->upperTranslation - translation;
+			float C = joint->upperTranslation - jointTranslation;
 
 			if ( C < speculativeDistance )
 			{
 				float bias = 0.0f;
 				float massScale = 1.0f;
 				float impulseScale = 0.0f;
-
 				if ( C > 0.0f )
 				{
 					// speculation
-					float safe = b2GetLengthUnitsPerMeter();
-					bias = b2MinFloat( C, safe ) * context->inv_h;
+					bias = C * context->inv_h;
 				}
 				else if ( useBias )
 				{
-					bias = softness.biasRate * C;
-					massScale = softness.massScale;
-					impulseScale = softness.impulseScale;
+					bias = base->constraintSoftness.biasRate * C;
+					massScale = base->constraintSoftness.massScale;
+					impulseScale = base->constraintSoftness.impulseScale;
 				}
 
+				// sign flipped on Cdot
+				b3Vec3 vRel = b3Sub( b3Sub( b3Add( vB, b3Cross( wB, rB ) ), vA ), b3Cross( wA, b3Add( rA, d ) ) );
+				float cdot = -b3Dot( vRel, jointAxis );
 				float oldImpulse = joint->upperImpulse;
+				float deltaImpulse = -massScale * axialMass * ( cdot + bias ) - impulseScale * oldImpulse;
+				joint->upperImpulse = b3MaxFloat( oldImpulse + deltaImpulse, 0.0f );
 
-				// sign flipped
-				float Cdot = b2Dot( axisA, b2Sub( vA, vB ) ) + a1 * wA - a2 * wB;
-				float deltaImpulse = -axialMass * massScale * ( Cdot + bias ) - impulseScale * oldImpulse;
-				joint->upperImpulse = b2MaxFloat( oldImpulse + deltaImpulse, 0.0f );
-				deltaImpulse = joint->upperImpulse - oldImpulse;
+				// sign flipped on applied impulse
+				float negDeltaImpulse = oldImpulse - joint->upperImpulse;
+				b3Vec3 P = b3MulSV( negDeltaImpulse, jointAxis );
+				b3Vec3 LA = b3MulSV( negDeltaImpulse, sAx );
+				b3Vec3 LB = b3MulSV( negDeltaImpulse, sBx );
 
-				b2Vec2 P = b2MulSV( deltaImpulse, axisA );
-				float LA = deltaImpulse * a1;
-				float LB = deltaImpulse * a2;
-
-				// sign flipped
-				vA = b2MulAdd( vA, mA, P );
-				wA += iA * LA;
-				vB = b2MulSub( vB, mB, P );
-				wB -= iB * LB;
+				vA = b3MulSub( vA, mA, P );
+				wA = b3Sub( wA, b3MulMV( iA, LA ) );
+				vB = b3MulAdd( vB, mB, P );
+				wB = b3Add( wB, b3MulMV( iB, LB ) );
 			}
 			else
 			{
@@ -597,116 +596,130 @@ void b2SolvePrismaticJoint( b2JointSim* base, b2StepContext* context, bool useBi
 		}
 	}
 
-	// Solve the prismatic constraint in block form
+	// Rotation constraint
+	if ( fixedRotation == false )
 	{
-		b2Vec2 perpA = b2LeftPerp( axisA );
+		b3Vec3 bias = { 0.0f, 0.0f, 0.0f };
+		float massScale = 1.0f;
+		float impulseScale = 0.0f;
 
-		// These scalars are for torques generated by the perpendicular constraint force
-		float s1 = b2Cross( b2Add( d, rA ), perpA );
-		float s2 = b2Cross( rB, perpA );
+		if ( useBias )
+		{
+			b3Quat quatA = b3MulQuat( stateA->deltaRotation, joint->frameA.q );
+			b3Quat quatB = b3MulQuat( stateB->deltaRotation, joint->frameB.q );
 
-		b2Vec2 Cdot;
-		Cdot.x = b2Dot( perpA, b2Sub( vB, vA ) ) + s2 * wB - s1 * wA;
-		Cdot.y = wB - wA;
+			b3Quat relQ = b3InvMulQuat( quatA, quatB );
+			b3Quat targetQuat = b3Quat_identity;
+			b3Vec3 deltaRotation = b3DeltaQuatToRotation( relQ, targetQuat );
+			b3Vec3 c = b3Neg( b3RotateVector( quatA, deltaRotation ) );
 
-		b2Vec2 bias = b2Vec2_zero;
+			bias = b3MulSV( base->constraintSoftness.biasRate, c );
+			massScale = base->constraintSoftness.massScale;
+			impulseScale = base->constraintSoftness.impulseScale;
+		}
+
+		b3Vec3 cdot = b3Sub( wB, wA );
+		b3Vec3 impulse = b3Sub(
+			b3MulSV( -massScale, b3MulMV( joint->rotationMass, b3Add( cdot, bias ) ) ),
+			b3MulSV( impulseScale, joint->angularImpulse ) );
+		joint->angularImpulse = b3Add( joint->angularImpulse, impulse );
+
+		wA = b3Sub( wA, b3MulMV( iA, impulse ) );
+		wB = b3Add( wB, b3MulMV( iB, impulse ) );
+	}
+
+	// Solve point-to-line constraint
+	{
+		b3Vec3 perpY = b3RotateVector( stateA->deltaRotation, joint->perpAxisY );
+		b3Vec3 perpZ = b3RotateVector( stateA->deltaRotation, joint->perpAxisZ );
+
+		b3Vec2 bias = { 0.0f, 0.0f };
 		float massScale = 1.0f;
 		float impulseScale = 0.0f;
 		if ( useBias )
 		{
-			b2Vec2 C;
-			C.x = b2Dot( perpA, d );
-			C.y = b2Rot_GetAngle( relQ );
-
-			bias = b2MulSV( softness.biasRate, C );
-			massScale = softness.massScale;
-			impulseScale = softness.impulseScale;
+			b3Vec2 c = { b3Dot( perpY, d ), b3Dot( perpZ, d ) };
+			bias = b3MulSV2( base->constraintSoftness.biasRate, c );
+			massScale = base->constraintSoftness.massScale;
+			impulseScale = base->constraintSoftness.impulseScale;
 		}
 
-		float k11 = mA + mB + iA * s1 * s1 + iB * s2 * s2;
-		float k12 = iA * s1 + iB * s2;
-		float k22 = iA + iB;
-		if ( k22 == 0.0f )
-		{
-			// For bodies with fixed rotation.
-			k22 = 1.0f;
-		}
+		b3Vec3 vRel = b3Sub( b3Sub( b3Add( vB, b3Cross( wB, rB ) ), vA ), b3Cross( wA, b3Add( rA, d ) ) );
+		b3Vec2 cdot = { b3Dot( perpY, vRel ), b3Dot( perpZ, vRel ) };
 
-		b2Mat22 K = { { k11, k12 }, { k12, k22 } };
+		// K = [(1/mA + 1/mB) * eye(2) - skew(rA) * invIA * skew(rA) - skew(rB) * invIB * skew(rB)]
+		// Jx = [-perpX, -cross(d + rA, perpX), perpX, cross(rB, perpX)]
+		b3Vec3 sAy = b3Cross( b3Add( rA, d ), perpY );
+		b3Vec3 sBy = b3Cross( rB, perpY );
+		b3Vec3 sAz = b3Cross( b3Add( rA, d ), perpZ );
+		b3Vec3 sBz = b3Cross( rB, perpZ );
 
-		b2Vec2 b = b2Solve22( K, b2Add( Cdot, bias ) );
-		b2Vec2 deltaImpulse;
-		deltaImpulse.x = -massScale * b.x - impulseScale * joint->impulse.x;
-		deltaImpulse.y = -massScale * b.y - impulseScale * joint->impulse.y;
+		float kyy = mA + mB + b3Dot( sAy, b3MulMV( iA, sAy ) ) + b3Dot( sBy, b3MulMV( iB, sBy ) );
+		float kyz = b3Dot( sAy, b3MulMV( iA, sAz ) ) + b3Dot( sBy, b3MulMV( iB, sBz ) );
+		float kzz = mA + mB + b3Dot( sAz, b3MulMV( iA, sAz ) ) + b3Dot( sBz, b3MulMV( iB, sBz ) );
 
-		joint->impulse.x += deltaImpulse.x;
-		joint->impulse.y += deltaImpulse.y;
+		b3Matrix2 K = { { kyy, kyz }, { kyz, kzz } };
 
-		b2Vec2 P = b2MulSV( deltaImpulse.x, perpA );
-		float LA = deltaImpulse.x * s1 + deltaImpulse.y;
-		float LB = deltaImpulse.x * s2 + deltaImpulse.y;
+		b3Vec2 oldImpulse = joint->perpImpulse;
+		b3Vec2 sol = b3Solve2( K, b3Add2( cdot, bias ) );
+		b3Vec2 deltaImpulse = b3Sub2( b3MulSV2( -massScale, sol ), b3MulSV2( impulseScale, oldImpulse ) );
+		joint->perpImpulse = b3Add2( oldImpulse, deltaImpulse );
 
-		vA = b2MulSub( vA, mA, P );
-		wA -= iA * LA;
-		vB = b2MulAdd( vB, mB, P );
-		wB += iB * LB;
+		b3Vec3 P = b3Blend2( deltaImpulse.x, perpY, deltaImpulse.y, perpZ );
+
+		vA = b3MulSub( vA, mA, P );
+		wA = b3Sub( wA, b3MulMV( iA, b3Blend2( deltaImpulse.x, sAy, deltaImpulse.y, sAz ) ) );
+		vB = b3MulAdd( vB, mB, P );
+		wB = b3Add( wB, b3MulMV( iB, b3Blend2( deltaImpulse.x, sBy, deltaImpulse.y, sBz ) ) );
 	}
 
-	B2_ASSERT( b2IsValidVec2( vA ) );
-	B2_ASSERT( b2IsValidFloat( wA ) );
-	B2_ASSERT( b2IsValidVec2( vB ) );
-	B2_ASSERT( b2IsValidFloat( wB ) );
+	B3_ASSERT( b3IsValidVec3( vA ) );
+	B3_ASSERT( b3IsValidVec3( wA ) );
+	B3_ASSERT( b3IsValidVec3( vB ) );
+	B3_ASSERT( b3IsValidVec3( wB ) );
 
-	if ( stateA->flags & b2_dynamicFlag )
+	if ( stateA->flags & b3_dynamicFlag )
 	{
 		stateA->linearVelocity = vA;
 		stateA->angularVelocity = wA;
 	}
 
-	if ( stateB->flags & b2_dynamicFlag )
+	if ( stateB->flags & b3_dynamicFlag )
 	{
 		stateB->linearVelocity = vB;
 		stateB->angularVelocity = wB;
 	}
 }
 
-void b2DrawPrismaticJoint( b2DebugDraw* draw, b2JointSim* base, b2WorldTransform transformA, b2WorldTransform transformB,
-						   float drawScale )
+void b3DrawPrismaticJoint( b3DebugDraw* draw, b3JointSim* base, b3WorldTransform transformA, b3WorldTransform transformB, float scale )
 {
-	B2_ASSERT( base->type == b2_prismaticJoint );
+	b3WorldTransform frameA = b3MulWorldTransforms( transformA, base->localFrameA );
+	b3WorldTransform frameB = b3MulWorldTransforms( transformB, base->localFrameB );
 
-	b2PrismaticJoint* joint = &base->prismaticJoint;
+	b3Matrix3 R = b3MakeMatrixFromQuat( frameA.q );
+	b3Vec3 axis = R.cx;
+	b3Vec3 perpY = R.cy;
+	b3Vec3 perpZ = R.cz;
 
-	b2WorldTransform frameA = b2OffsetWorldTransform( transformA, base->localFrameA );
-	b2WorldTransform frameB = b2OffsetWorldTransform( transformB, base->localFrameB );
-	b2Vec2 axisA = b2RotateVector( frameA.q, (b2Vec2){ 1.0f, 0.0f } );
+	float s = 0.2f * scale;
+	draw->DrawSegmentFcn( frameA.p, b3OffsetPos( frameA.p, b3MulSV( s, perpY ) ), b3_colorGreen, draw->context );
+	draw->DrawSegmentFcn( frameA.p, b3OffsetPos( frameA.p, b3MulSV( s, perpZ ) ), b3_colorBlue, draw->context );
 
-	draw->DrawLineFcn( frameA.p, frameB.p, b2_colorDimGray, draw->context );
-
+	b3PrismaticJoint* joint = &base->prismaticJoint;
 	if ( joint->enableLimit )
 	{
-		float b = 0.25f * drawScale;
-		b2Pos lower = b2OffsetPos( frameA.p, b2MulSV( joint->lowerTranslation, axisA ) );
-		b2Pos upper = b2OffsetPos( frameA.p, b2MulSV( joint->upperTranslation, axisA ) );
-		b2Vec2 perp = b2LeftPerp( axisA );
-		draw->DrawLineFcn( lower, upper, b2_colorGray, draw->context );
-		draw->DrawLineFcn( b2OffsetPos( lower, b2MulSV( -b, perp ) ), b2OffsetPos( lower, b2MulSV( b, perp ) ), b2_colorGreen,
-						   draw->context );
-		draw->DrawLineFcn( b2OffsetPos( upper, b2MulSV( -b, perp ) ), b2OffsetPos( upper, b2MulSV( b, perp ) ), b2_colorRed,
-						   draw->context );
+		b3Pos p1 = b3OffsetPos( frameA.p, b3MulSV( joint->lowerTranslation, axis ) );
+		b3Pos p2 = b3OffsetPos( frameA.p, b3MulSV( joint->upperTranslation, axis ) );
+		draw->DrawSegmentFcn( p1, p2, b3_colorOrange, draw->context );
+		draw->DrawPointFcn( p1, 10.0f, b3_colorGreen, draw->context );
+		draw->DrawPointFcn( p2, 10.0f, b3_colorRed, draw->context );
 	}
 	else
 	{
-		draw->DrawLineFcn( b2OffsetPos( frameA.p, b2Neg( axisA ) ), b2OffsetPos( frameA.p, axisA ), b2_colorGray,
-						   draw->context );
+		b3Pos p1 = b3OffsetPos( frameA.p, b3MulSV( -0.5f * scale, axis ) );
+		b3Pos p2 = b3OffsetPos( frameA.p, b3MulSV( 0.5f * scale, axis ) );
+		draw->DrawSegmentFcn( p1, p2, b3_colorOrange, draw->context );
 	}
 
-	if ( joint->enableSpring )
-	{
-		b2Pos p = b2OffsetPos( frameA.p, b2MulSV( joint->targetTranslation, axisA ) );
-		draw->DrawPointFcn( p, 8.0f, b2_colorViolet, draw->context );
-	}
-
-	draw->DrawPointFcn( frameA.p, 5.0f, b2_colorGray, draw->context );
-	draw->DrawPointFcn( frameB.p, 5.0f, b2_colorBlue, draw->context );
+	draw->DrawPointFcn( frameB.p, 8.0f, b3_colorViolet, draw->context );
 }

@@ -1,9 +1,7 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #include "body.h"
-
-#include "recording.h"
 
 #include "aabb.h"
 #include "contact.h"
@@ -12,127 +10,111 @@
 #include "island.h"
 #include "joint.h"
 #include "physics_world.h"
+#include "recording.h"
 #include "sensor.h"
 #include "shape.h"
 #include "solver_set.h"
 
-#include "box2d/box2d.h"
-#include "box2d/id.h"
+// needed for dll export
+#include "box3d/box3d.h"
+#include "box3d/id.h"
 
+#include <stddef.h>
 #include <string.h>
 
-_Static_assert( B2_NAME_LENGTH >= 0, "minimum name length" );
-
-static void b2LimitVelocity( b2BodyState* state, float maxLinearSpeed )
-{
-	float v2 = b2LengthSquared( state->linearVelocity );
-	if ( v2 > maxLinearSpeed * maxLinearSpeed )
-	{
-		state->linearVelocity = b2MulSV( maxLinearSpeed / sqrtf( v2 ), state->linearVelocity );
-	}
-}
-
-void b2RemoveBodySim( b2Array( b2BodySim ) * bodySims, b2Array( b2Body ) * bodies, int localIndex )
-{
-	B2_ASSERT( 0 <= localIndex && localIndex < bodySims->count );
-	int lastIndex = bodySims->count - 1;
-	bodySims->data[localIndex] = bodySims->data[lastIndex];
-	b2Body* movedBody = b2Array_Get( *bodies, bodySims->data[localIndex].bodyId );
-	B2_ASSERT( movedBody->localIndex == lastIndex );
-	movedBody->localIndex = localIndex;
-	bodySims->count -= 1;
-}
+_Static_assert( B3_BODY_NAME_LENGTH >= 0, "minimum name length" );
 
 // Get a validated body from a world using an id.
-b2Body* b2GetBodyFullId( b2World* world, b2BodyId bodyId )
+b3Body* b3GetBodyFullId( b3World* world, b3BodyId bodyId )
 {
-	B2_ASSERT( b2Body_IsValid( bodyId ) );
+	B3_ASSERT( b3Body_IsValid( bodyId ) );
 
 	// id index starts at one so that zero can represent null
-	return b2Array_Get( world->bodies, bodyId.index1 - 1 );
+	// id index starts at one so that zero can represent null
+	return b3Array_Get( world->bodies, bodyId.index1 - 1 );
 }
 
-b2WorldTransform b2GetBodyTransformQuick( b2World* world, b2Body* body )
+b3WorldTransform b3GetBodyTransformQuick( b3World* world, b3Body* body )
 {
-	b2SolverSet* set = b2Array_Get( world->solverSets, body->setIndex );
-	b2BodySim* bodySim = b2Array_Get( set->bodySims, body->localIndex );
+	b3SolverSet* set = b3Array_Get( world->solverSets, body->setIndex );
+	b3BodySim* bodySim = b3Array_Get( set->bodySims, body->localIndex );
 	return bodySim->transform;
 }
 
-b2WorldTransform b2GetBodyTransform( b2World* world, int bodyId )
+b3WorldTransform b3GetBodyTransform( b3World* world, int bodyId )
 {
-	b2Body* body = b2Array_Get( world->bodies, bodyId );
-	return b2GetBodyTransformQuick( world, body );
+	b3Body* body = b3Array_Get( world->bodies, bodyId );
+	return b3GetBodyTransformQuick( world, body );
 }
 
-// Create a b2BodyId from a raw id.
-b2BodyId b2MakeBodyId( b2World* world, int bodyId )
+// Create a b3BodyId from a raw id.
+b3BodyId b3MakeBodyId( b3World* world, int bodyId )
 {
-	b2Body* body = b2Array_Get( world->bodies, bodyId );
-	return (b2BodyId){ bodyId + 1, world->worldId, body->generation };
+	b3Body* body = b3Array_Get( world->bodies, bodyId );
+	return (b3BodyId){ bodyId + 1, world->worldId, body->generation };
 }
 
-b2BodySim* b2GetBodySim( b2World* world, b2Body* body )
+b3BodySim* b3GetBodySim( b3World* world, b3Body* body )
 {
-	b2SolverSet* set = b2Array_Get( world->solverSets, body->setIndex );
-	b2BodySim* bodySim = b2Array_Get( set->bodySims, body->localIndex );
+	b3SolverSet* set = b3Array_Get( world->solverSets, body->setIndex );
+	b3BodySim* bodySim = b3Array_Get( set->bodySims, body->localIndex );
 	return bodySim;
 }
 
-b2BodyState* b2GetBodyState( b2World* world, b2Body* body )
+b3BodyState* b3GetBodyState( b3World* world, b3Body* body )
 {
-	if ( body->setIndex == b2_awakeSet )
+	if ( body->setIndex == b3_awakeSet )
 	{
-		b2SolverSet* set = b2Array_Get( world->solverSets, b2_awakeSet );
-		return b2Array_Get( set->bodyStates, body->localIndex );
+		b3SolverSet* set = b3Array_Get( world->solverSets, b3_awakeSet );
+		return b3Array_Get( set->bodyStates, body->localIndex );
 	}
 
 	return NULL;
 }
 
-void b2SyncBodyFlags( b2World* world, b2Body* body )
+void b3SyncBodyFlags( b3World* world, b3Body* body )
 {
 	// Never sync transient flags
-	uint32_t flags = body->flags & ~b2_bodyTransientFlags;
+	uint32_t flags = body->flags & ~b3_bodyTransientFlags;
 
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
 	bodySim->flags = flags;
 
-	b2BodyState* bodyState = b2GetBodyState( world, body );
+	b3BodyState* bodyState = b3GetBodyState( world, body );
 	if ( bodyState != NULL )
 	{
 		bodyState->flags = flags;
 	}
 }
 
-static void b2CreateIslandForBody( b2World* world, int setIndex, b2Body* body )
+static void b3CreateIslandForBody( b3World* world, int setIndex, b3Body* body )
 {
-	B2_ASSERT( body->islandId == B2_NULL_INDEX );
-	B2_ASSERT( setIndex != b2_disabledSet );
+	B3_ASSERT( body->islandId == B3_NULL_INDEX );
+	B3_ASSERT( setIndex != b3_disabledSet );
 
-	b2Island* island = b2CreateIsland( world, setIndex );
-	b2Array_Push( island->bodies, body->id );
+	b3Island* island = b3CreateIsland( world, setIndex );
+	b3Array_Push( island->bodies, body->id );
 	body->islandId = island->islandId;
 	body->islandIndex = 0;
 
-	b2ValidateIsland( world, island->islandId );
+	b3ValidateIsland( world, island->islandId );
 }
 
-static void b2RemoveBodyFromIsland( b2World* world, b2Body* body )
+static void b3RemoveBodyFromIsland( b3World* world, b3Body* body )
 {
-	if ( body->islandId == B2_NULL_INDEX )
+	if ( body->islandId == B3_NULL_INDEX )
 	{
-		B2_ASSERT( body->islandIndex == B2_NULL_INDEX );
+		B3_ASSERT( body->islandIndex == B3_NULL_INDEX );
 		return;
 	}
 
 	int islandId = body->islandId;
-	b2Island* island = b2Array_Get( world->islands, islandId );
+	b3Island* island = b3Array_Get( world->islands, islandId );
 	{
 		int localIndex = body->islandIndex;
 		int movedBodyId = island->bodies.data[island->bodies.count - 1];
 		island->bodies.data[localIndex] = movedBodyId;
-		B2_VALIDATE( world->bodies.data[movedBodyId].islandIndex == island->bodies.count - 1 );
+		B3_VALIDATE( world->bodies.data[movedBodyId].islandIndex == island->bodies.count - 1 );
 		world->bodies.data[movedBodyId].islandIndex = localIndex;
 		island->bodies.count -= 1;
 	}
@@ -140,57 +122,58 @@ static void b2RemoveBodyFromIsland( b2World* world, b2Body* body )
 	if ( island->bodies.count == 0 )
 	{
 		// Destroy empty island
-		B2_ASSERT( island->contacts.count == 0 );
-		B2_ASSERT( island->joints.count == 0 );
+		B3_ASSERT( island->contacts.count == 0 );
+		B3_ASSERT( island->joints.count == 0 );
 
 		// Free the island
-		b2DestroyIsland( world, island->islandId );
+		b3DestroyIsland( world, island->islandId );
 	}
 	else
 	{
-		b2ValidateIsland( world, islandId );
+		b3ValidateIsland( world, islandId );
 	}
 
-	body->islandId = B2_NULL_INDEX;
-	body->islandIndex = B2_NULL_INDEX;
+	body->islandId = B3_NULL_INDEX;
+	body->islandIndex = B3_NULL_INDEX;
 }
 
-static void b2DestroyBodyContacts( b2World* world, b2Body* body, bool wakeBodies )
+static void b3DestroyBodyContacts( b3World* world, b3Body* body, bool wakeBodies )
 {
 	// Destroy the attached contacts
 	int edgeKey = body->headContactKey;
-	while ( edgeKey != B2_NULL_INDEX )
+	while ( edgeKey != B3_NULL_INDEX )
 	{
 		int contactId = edgeKey >> 1;
 		int edgeIndex = edgeKey & 1;
 
-		b2Contact* contact = b2Array_Get( world->contacts, contactId );
+		b3Contact* contact = b3Array_Get( world->contacts, contactId );
 		edgeKey = contact->edges[edgeIndex].nextKey;
-		b2DestroyContact( world, contact, wakeBodies );
+		b3DestroyContact( world, contact, wakeBodies );
 	}
 
-	b2ValidateSolverSets( world );
+	b3ValidateSolverSets( world );
 }
 
-b2BodyId b2CreateBody( b2WorldId worldId, const b2BodyDef* def )
+b3BodyId b3CreateBody( b3WorldId worldId, const b3BodyDef* def )
 {
-	B2_CHECK_DEF( def );
-	B2_ASSERT( b2IsValidPosition( def->position ) );
-	B2_ASSERT( b2IsValidRotation( def->rotation ) );
-	B2_ASSERT( b2IsValidVec2( def->linearVelocity ) );
-	B2_ASSERT( b2IsValidFloat( def->angularVelocity ) );
-	B2_ASSERT( b2IsValidFloat( def->linearDamping ) && def->linearDamping >= 0.0f );
-	B2_ASSERT( b2IsValidFloat( def->angularDamping ) && def->angularDamping >= 0.0f );
-	B2_ASSERT( b2IsValidFloat( def->sleepThreshold ) && def->sleepThreshold >= 0.0f );
-	B2_ASSERT( b2IsValidFloat( def->gravityScale ) );
+	B3_CHECK_DEF( def );
+	B3_ASSERT( b3IsValidPosition( def->position ) );
+	B3_ASSERT( b3IsValidQuat( def->rotation ) );
+	B3_ASSERT( b3IsValidVec3( def->linearVelocity ) );
+	B3_ASSERT( b3IsValidVec3( def->angularVelocity ) );
+	B3_ASSERT( b3IsValidFloat( def->linearDamping ) && def->linearDamping >= 0.0f );
+	B3_ASSERT( b3IsValidFloat( def->angularDamping ) && def->angularDamping >= 0.0f );
+	B3_ASSERT( b3IsValidFloat( def->sleepThreshold ) && def->sleepThreshold >= 0.0f );
+	B3_ASSERT( b3IsValidFloat( def->gravityScale ) );
 
-	b2World* world = b2GetWorldFromId( worldId );
-	B2_ASSERT( world->locked == false );
+	b3World* world = b3GetUnlockedWorldFromId( worldId );
 
-	if ( world->locked )
+	if ( world == NULL )
 	{
-		return b2_nullBodyId;
+		return b3_nullBodyId;
 	}
+
+	world->locked = true;
 
 	bool isAwake = ( def->isAwake || def->enableSleep == false ) && def->isEnabled;
 
@@ -199,93 +182,102 @@ b2BodyId b2CreateBody( b2WorldId worldId, const b2BodyDef* def )
 	if ( def->isEnabled == false )
 	{
 		// any body type can be disabled
-		setId = b2_disabledSet;
+		setId = b3_disabledSet;
 	}
-	else if ( def->type == b2_staticBody )
+	else if ( def->type == b3_staticBody )
 	{
-		setId = b2_staticSet;
+		setId = b3_staticSet;
 	}
 	else if ( isAwake == true )
 	{
-		setId = b2_awakeSet;
+		setId = b3_awakeSet;
 	}
 	else
 	{
 		// new set for a sleeping body in its own island
-		setId = b2AllocId( &world->solverSetIdPool );
+		setId = b3AllocId( &world->solverSetIdPool );
 		if ( setId == world->solverSets.count )
 		{
 			// Create a zero initialized solver set. All sub-arrays are also zero initialized.
-			b2Array_Push( world->solverSets, (b2SolverSet){ 0 } );
+			b3Array_Push( world->solverSets, (b3SolverSet){ 0 } );
 		}
 		else
 		{
-			B2_ASSERT( world->solverSets.data[setId].setIndex == B2_NULL_INDEX );
+			B3_ASSERT( world->solverSets.data[setId].setIndex == B3_NULL_INDEX );
 		}
 
 		world->solverSets.data[setId].setIndex = setId;
 	}
 
-	B2_ASSERT( 0 <= setId && setId < world->solverSets.count );
+	B3_ASSERT( 0 <= setId && setId < world->solverSets.count );
 
-	int bodyId = b2AllocId( &world->bodyIdPool );
+	int bodyId = b3AllocId( &world->bodyIdPool );
 
 	uint32_t lockFlags = 0;
-	lockFlags |= def->motionLocks.linearX ? b2_lockLinearX : 0;
-	lockFlags |= def->motionLocks.linearY ? b2_lockLinearY : 0;
-	lockFlags |= def->motionLocks.angularZ ? b2_lockAngularZ : 0;
+	lockFlags |= def->motionLocks.linearX ? b3_lockLinearX : 0;
+	lockFlags |= def->motionLocks.linearY ? b3_lockLinearY : 0;
+	lockFlags |= def->motionLocks.linearZ ? b3_lockLinearZ : 0;
+	lockFlags |= def->motionLocks.angularX ? b3_lockAngularX : 0;
+	lockFlags |= def->motionLocks.angularY ? b3_lockAngularY : 0;
+	lockFlags |= def->motionLocks.angularZ ? b3_lockAngularZ : 0;
 
-	b2SolverSet* set = b2Array_Get( world->solverSets, setId );
-	b2BodySim* bodySim = b2Array_Emplace( set->bodySims );
-	*bodySim = (b2BodySim){ 0 };
+	b3SolverSet* set = b3Array_Get( world->solverSets, setId );
+	b3BodySim* bodySim = b3Array_Emplace( set->bodySims );
+	*bodySim = (b3BodySim){ 0 };
 	bodySim->transform.p = def->position;
 	bodySim->transform.q = def->rotation;
 	bodySim->center = def->position;
 	bodySim->rotation0 = bodySim->transform.q;
 	bodySim->center0 = bodySim->center;
-	bodySim->minExtent = B2_HUGE;
-	bodySim->maxExtent = 0.0f;
+	bodySim->localCenter = b3Vec3_zero;
+	bodySim->force = b3Vec3_zero;
+	bodySim->torque = b3Vec3_zero;
+	bodySim->invMass = 0.0f;
+	bodySim->invInertiaLocal = b3Mat3_zero;
+	bodySim->minExtent = B3_HUGE;
+	bodySim->maxExtent = b3Vec3_zero;
 	bodySim->linearDamping = def->linearDamping;
 	bodySim->angularDamping = def->angularDamping;
 	bodySim->gravityScale = def->gravityScale;
 	bodySim->bodyId = bodyId;
 	bodySim->flags = lockFlags;
-	bodySim->flags |= def->isBullet ? b2_isBullet : 0;
-	bodySim->flags |= def->allowFastRotation ? b2_allowFastRotation : 0;
-	bodySim->flags |= def->type == b2_dynamicBody ? b2_dynamicFlag : 0;
-	bodySim->flags |= def->enableSleep ? b2_enableSleep : 0;
-	bodySim->flags |= def->enableContactRecycling ? b2_bodyEnableContactRecycling : 0;
+	bodySim->flags |= def->isBullet ? b3_isBullet : 0;
+	bodySim->flags |= def->allowFastRotation ? b3_allowFastRotation : 0;
+	bodySim->flags |= def->type == b3_dynamicBody ? b3_dynamicFlag : 0;
+	bodySim->flags |= def->enableSleep ? b3_enableSleep : 0;
+	bodySim->flags |= def->enableContactRecycling ? b3_bodyEnableContactRecycling : 0;
 
-	if ( setId == b2_awakeSet )
+	if ( setId == b3_awakeSet )
 	{
-		b2BodyState* bodyState = b2Array_Emplace( set->bodyStates );
-		B2_ASSERT( ( (uintptr_t)bodyState & 0x1F ) == 0 );
+		b3BodyState* bodyState = b3Array_Emplace( set->bodyStates );
 
-		*bodyState = (b2BodyState){ 0 };
+		*bodyState = (b3BodyState){ 0 };
 		bodyState->linearVelocity = def->linearVelocity;
 		bodyState->angularVelocity = def->angularVelocity;
-		bodyState->deltaRotation = b2Rot_identity;
+		bodyState->deltaRotation = b3Quat_identity;
 		bodyState->flags = bodySim->flags;
+
+		bodySim->maxAngularVelocity = b3Length( def->angularVelocity ) + 5.0f;
 	}
 
 	if ( bodyId == world->bodies.count )
 	{
-		b2Array_Push( world->bodies, (b2Body){ 0 } );
+		b3Array_Push( world->bodies, (b3Body){ 0 } );
 	}
 	else
 	{
-		B2_ASSERT( world->bodies.data[bodyId].id == B2_NULL_INDEX );
+		B3_ASSERT( world->bodies.data[bodyId].id == B3_NULL_INDEX );
 	}
 
-	b2Body* body = b2Array_Get( world->bodies, bodyId );
+	b3Body* body = b3Array_Get( world->bodies, bodyId );
 
 	if ( def->name )
 	{
 #if defined( _MSC_VER )
-		strncpy_s( body->name, B2_NAME_LENGTH + 1, def->name, B2_NAME_LENGTH );
+		strncpy_s( body->name, B3_BODY_NAME_LENGTH + 1, def->name, B3_BODY_NAME_LENGTH );
 #else
-		strncpy( body->name, def->name, B2_NAME_LENGTH );
-		body->name[B2_NAME_LENGTH] = 0;
+		strncpy( body->name, def->name, B3_BODY_NAME_LENGTH );
+		body->name[B3_BODY_NAME_LENGTH] = 0;
 #endif
 	}
 	else
@@ -297,266 +289,555 @@ b2BodyId b2CreateBody( b2WorldId worldId, const b2BodyDef* def )
 	body->setIndex = setId;
 	body->localIndex = set->bodySims.count - 1;
 	body->generation += 1;
-	body->headShapeId = B2_NULL_INDEX;
+	body->headShapeId = B3_NULL_INDEX;
 	body->shapeCount = 0;
-	body->headChainId = B2_NULL_INDEX;
-	body->headContactKey = B2_NULL_INDEX;
+	body->headChainId = B3_NULL_INDEX;
+	body->headContactKey = B3_NULL_INDEX;
 	body->contactCount = 0;
-	body->headJointKey = B2_NULL_INDEX;
+	body->headJointKey = B3_NULL_INDEX;
 	body->jointCount = 0;
-	body->islandId = B2_NULL_INDEX;
-	body->islandIndex = B2_NULL_INDEX;
-	body->bodyMoveIndex = B2_NULL_INDEX;
+	body->islandId = B3_NULL_INDEX;
+	body->islandIndex = B3_NULL_INDEX;
+	body->bodyMoveIndex = B3_NULL_INDEX;
 	body->id = bodyId;
-	body->mass = 0.0f;
-	body->inertia = 0.0f;
 	body->sleepThreshold = def->sleepThreshold;
 	body->sleepTime = 0.0f;
+	body->mass = 0.0f;
+	body->inertia = b3Mat3_zero;
 	body->type = def->type;
 	body->flags = bodySim->flags;
 
 	// dynamic and kinematic bodies that are enabled need a island
-	if ( setId >= b2_awakeSet )
+	if ( setId >= b3_awakeSet )
 	{
-		b2CreateIslandForBody( world, setId, body );
+		b3CreateIslandForBody( world, setId, body );
 	}
 
-	b2ValidateSolverSets( world );
+	b3ValidateSolverSets( world );
 
-	b2BodyId id = { bodyId + 1, world->worldId, body->generation };
+	b3BodyId id = { bodyId + 1, world->worldId, body->generation };
 
-	B2_REC_CREATE( world, CreateBody, id, worldId, *def );
+	world->locked = false;
+
+	B3_REC_CREATE( world, CreateBody, id, worldId, *def );
 
 	return id;
 }
 
-bool b2WakeBody( b2World* world, b2Body* body )
+bool b3IsBodyAwake( b3World* world, b3Body* body )
 {
-	if ( body->setIndex >= b2_firstSleepingSet )
+	B3_UNUSED( world );
+	return body->setIndex == b3_awakeSet;
+}
+
+bool b3WakeBody( b3World* world, b3Body* body )
+{
+	if ( body->setIndex >= b3_firstSleepingSet )
 	{
-		b2WakeSolverSet( world, body->setIndex );
-		b2ValidateSolverSets( world );
+		b3WakeSolverSet( world, body->setIndex );
+		b3ValidateSolverSets( world );
 		return true;
 	}
 
 	return false;
 }
 
-void b2DestroyBody( b2BodyId bodyId )
+bool b3WakeBodyWithLock( b3World* world, b3Body* body )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	B3_ASSERT( world->locked == false );
+	world->locked = true;
+	bool woke = b3WakeBody( world, body );
+	world->locked = false;
+	return woke;
+}
+
+void b3DestroyBody( b3BodyId bodyId )
+{
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	// Record before destroying (body must still be valid)
-	B2_REC( world, DestroyBody, bodyId );
+	B3_REC( world, DestroyBody, bodyId );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	world->locked = true;
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 
 	// Wake bodies attached to this body, even if this body is static.
 	bool wakeBodies = true;
 
 	// Destroy the attached joints
 	int edgeKey = body->headJointKey;
-	while ( edgeKey != B2_NULL_INDEX )
+	while ( edgeKey != B3_NULL_INDEX )
 	{
 		int jointId = edgeKey >> 1;
 		int edgeIndex = edgeKey & 1;
 
-		b2Joint* joint = b2Array_Get( world->joints, jointId );
+		b3Joint* joint = b3Array_Get( world->joints, jointId );
 		edgeKey = joint->edges[edgeIndex].nextKey;
 
 		// Careful because this modifies the list being traversed
-		b2DestroyJointInternal( world, joint, wakeBodies );
+		b3DestroyJointInternal( world, joint, wakeBodies );
 	}
 
 	// Destroy all contacts attached to this body.
-	b2DestroyBodyContacts( world, body, wakeBodies );
+	b3DestroyBodyContacts( world, body, wakeBodies );
 
 	// Destroy the attached shapes and their broad-phase proxies.
 	int shapeId = body->headShapeId;
-	while ( shapeId != B2_NULL_INDEX )
+	while ( shapeId != B3_NULL_INDEX )
 	{
-		b2Shape* shape = b2Array_Get( world->shapes, shapeId );
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
 
-		if ( shape->sensorIndex != B2_NULL_INDEX )
+		if ( shape->sensorIndex != B3_NULL_INDEX )
 		{
-			b2DestroySensor( world, shape );
+			b3DestroySensor( world, shape );
 		}
 
-		b2DestroyShapeProxy( shape, &world->broadPhase );
+		b3DestroyShapeProxy( shape, &world->broadPhase );
+
+		b3DestroyShapeAllocations( world, shape );
 
 		// Return shape to free list.
-		b2FreeId( &world->shapeIdPool, shapeId );
-		shape->id = B2_NULL_INDEX;
+		b3FreeId( &world->shapeIdPool, shapeId );
+		shape->id = B3_NULL_INDEX;
 
 		shapeId = shape->nextShapeId;
 	}
 
-	// Destroy the attached chains. The associated shapes have already been destroyed above.
-	int chainId = body->headChainId;
-	while ( chainId != B2_NULL_INDEX )
-	{
-		b2ChainShape* chain = b2Array_Get( world->chainShapes, chainId );
-
-		b2FreeChainData( chain );
-
-		// Return chain to free list.
-		b2FreeId( &world->chainIdPool, chainId );
-		chain->id = B2_NULL_INDEX;
-
-		chainId = chain->nextChainId;
-	}
-
-	b2RemoveBodyFromIsland( world, body );
+	b3RemoveBodyFromIsland( world, body );
 
 	// Remove body sim from solver set that owns it
-	b2SolverSet* set = b2Array_Get( world->solverSets, body->setIndex );
-	b2RemoveBodySim( &set->bodySims, &world->bodies, body->localIndex );
+	b3SolverSet* set = b3Array_Get( world->solverSets, body->setIndex );
+	int movedIndex = b3Array_RemoveSwap( set->bodySims, body->localIndex );
+	if ( movedIndex != B3_NULL_INDEX )
+	{
+		// Fix moved body index
+		b3BodySim* movedSim = set->bodySims.data + body->localIndex;
+		int movedId = movedSim->bodyId;
+		b3Body* movedBody = b3Array_Get( world->bodies, movedId );
+		B3_ASSERT( movedBody->localIndex == movedIndex );
+		movedBody->localIndex = body->localIndex;
+	}
 
 	// Remove body state from awake set
-	if ( body->setIndex == b2_awakeSet )
+	if ( body->setIndex == b3_awakeSet )
 	{
-		(void)b2Array_RemoveSwap( set->bodyStates, body->localIndex );
+		int result = b3Array_RemoveSwap( set->bodyStates, body->localIndex );
+		B3_UNUSED( result );
+		B3_ASSERT( result == movedIndex );
 	}
-	else if ( set->setIndex >= b2_firstSleepingSet && set->bodySims.count == 0 )
+	else if ( set->setIndex >= b3_firstSleepingSet && set->bodySims.count == 0 )
 	{
-		// Remove solver set if it is empty
-		b2DestroySolverSet( world, set->setIndex );
+		// Remove solver set if it's now an orphan.
+		b3DestroySolverSet( world, set->setIndex );
 	}
 
-	// Free body and id (preserve body generation)
-	b2FreeId( &world->bodyIdPool, body->id );
+	// Free body and id (preserve body revision)
+	b3FreeId( &world->bodyIdPool, body->id );
 
-	body->setIndex = B2_NULL_INDEX;
-	body->localIndex = B2_NULL_INDEX;
-	body->id = B2_NULL_INDEX;
+	body->setIndex = B3_NULL_INDEX;
+	body->localIndex = B3_NULL_INDEX;
+	body->id = B3_NULL_INDEX;
 
-	b2ValidateSolverSets( world );
+	b3ValidateSolverSets( world );
+
+	world->locked = false;
 }
 
-int b2Body_GetContactCapacity( b2BodyId bodyId )
+int b3Body_GetContactCapacity( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return 0;
 	}
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 
 	// Conservative and fast
 	return body->contactCount;
 }
 
-int b2Body_GetContactData( b2BodyId bodyId, b2ContactData* contactData, int capacity )
+int b3Body_GetContactData( b3BodyId bodyId, b3ContactData* contactData, int capacity )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return 0;
 	}
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 
 	int contactKey = body->headContactKey;
 	int index = 0;
-	while ( contactKey != B2_NULL_INDEX && index < capacity )
+	while ( contactKey != B3_NULL_INDEX && index < capacity )
 	{
 		int contactId = contactKey >> 1;
 		int edgeIndex = contactKey & 1;
 
-		b2Contact* contact = b2Array_Get( world->contacts, contactId );
+		b3Contact* contact = b3Array_Get( world->contacts, contactId );
 
 		// Is contact touching?
-		if ( contact->flags & b2_contactTouchingFlag )
+		if ( contact->flags & b3_contactTouchingFlag )
 		{
-			b2Shape* shapeA = b2Array_Get( world->shapes, contact->shapeIdA );
-			b2Shape* shapeB = b2Array_Get( world->shapes, contact->shapeIdB );
+			b3Shape* shapeA = b3Array_Get( world->shapes, contact->shapeIdA );
+			b3Shape* shapeB = b3Array_Get( world->shapes, contact->shapeIdB );
 
-			contactData[index].contactId = (b2ContactId){ contact->contactId + 1, bodyId.world0, 0, contact->generation };
-			contactData[index].shapeIdA = (b2ShapeId){ shapeA->id + 1, bodyId.world0, shapeA->generation };
-			contactData[index].shapeIdB = (b2ShapeId){ shapeB->id + 1, bodyId.world0, shapeB->generation };
-
-			b2ContactSim* contactSim = b2GetContactSim( world, contact );
-			contactData[index].manifold = contactSim->manifold;
-
+			contactData[index].contactId = (b3ContactId){ contact->contactId + 1, bodyId.world0, 0, contact->generation };
+			contactData[index].shapeIdA = (b3ShapeId){ shapeA->id + 1, bodyId.world0, shapeA->generation };
+			contactData[index].shapeIdB = (b3ShapeId){ shapeB->id + 1, bodyId.world0, shapeB->generation };
+			contactData[index].manifolds = contact->manifolds;
+			contactData[index].manifoldCount = contact->manifoldCount;
 			index += 1;
 		}
 
 		contactKey = contact->edges[edgeIndex].nextKey;
 	}
 
-	B2_ASSERT( index <= capacity );
+	B3_ASSERT( index <= capacity );
 
 	return index;
 }
 
-b2AABB b2Body_ComputeAABB( b2BodyId bodyId )
+b3AABB b3Body_ComputeAABB( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
-		return (b2AABB){ 0 };
+		return (b3AABB){ 0 };
 	}
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	if ( body->headShapeId == B2_NULL_INDEX )
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	if ( body->headShapeId == B3_NULL_INDEX )
 	{
-		// No shapes, bracket the body origin so the box still contains the true position far away
-		b2WorldTransform transform = b2GetBodyTransform( world, body->id );
-		b2Vec2 lower = { b2RoundDownFloat( transform.p.x ), b2RoundDownFloat( transform.p.y ) };
-		b2Vec2 upper = { b2RoundUpFloat( transform.p.x ), b2RoundUpFloat( transform.p.y ) };
-		return (b2AABB){ lower, upper };
+		b3WorldTransform transform = b3GetBodyTransform( world, body->id );
+		b3Vec3 p = b3ToVec3( transform.p );
+		return (b3AABB){ p, p };
 	}
 
-	b2Shape* shape = b2Array_Get( world->shapes, body->headShapeId );
-	b2AABB aabb = shape->aabb;
-	while ( shape->nextShapeId != B2_NULL_INDEX )
+	b3Shape* shape = b3Array_Get( world->shapes, body->headShapeId );
+	b3AABB aabb = shape->aabb;
+	while ( shape->nextShapeId != B3_NULL_INDEX )
 	{
-		shape = b2Array_Get( world->shapes, shape->nextShapeId );
-		aabb = b2AABB_Union( aabb, shape->aabb );
+		shape = b3Array_Get( world->shapes, shape->nextShapeId );
+		aabb = b3AABB_Union( aabb, shape->aabb );
 	}
 
 	return aabb;
 }
 
-void b2UpdateBodyMassData( b2World* world, b2Body* body )
+float b3Body_GetClosestPoint( b3BodyId bodyId, b3Vec3* result, b3Vec3 target )
 {
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
+	if ( world == NULL )
+	{
+		*result = (b3Vec3){ 0 };
+		return 0.0f;
+	}
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3WorldTransform worldTransform = b3GetBodyTransform( world, body->id );
+	b3Transform transform = b3ToRelativeTransform( worldTransform, b3Pos_zero );
+
+	float closestDistance = FLT_MAX;
+	b3Vec3 closestPoint = transform.p;
+
+	b3DistanceInput input = { 0 };
+	input.proxyA = (b3ShapeProxy){ &target, 1, 0.0f };
+
+	// Target rides in frame A at the origin, so the relative pose of the shape in A is the body transform
+	input.transform = transform;
+	input.useRadii = false;
+
+	int shapeId = body->headShapeId;
+	while ( shapeId != B3_NULL_INDEX )
+	{
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
+		shapeId = shape->nextShapeId;
+
+		b3ShapeType type = shape->type;
+		if ( type != b3_sphereShape && type != b3_capsuleShape && type != b3_hullShape )
+		{
+			continue;
+		}
+
+		input.proxyB = b3MakeShapeProxy( shape );
+
+		b3SimplexCache cache = { 0 };
+		b3DistanceOutput output = b3ShapeDistance( &input, &cache, NULL, 0 );
+		if ( output.distance < closestDistance )
+		{
+			closestDistance = output.distance;
+			closestPoint = output.pointB;
+		}
+	}
+
+	*result = closestPoint;
+	return closestDistance;
+}
+
+b3BodyCastResult b3Body_CastRay( b3BodyId bodyId, b3Pos origin, b3Vec3 translation, b3QueryFilter filter, float maxFraction,
+								 b3WorldTransform bodyTransform )
+{
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
+	if ( world == NULL )
+	{
+		return (b3BodyCastResult){ 0 };
+	}
+
+	b3BodyCastResult result = { 0 };
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	// The consistent framing is to center on the ray origin.
+	b3RayCastInput shapeInput = { 0 };
+	shapeInput.origin = b3Vec3_zero;
+	shapeInput.translation = translation;
+	shapeInput.maxFraction = maxFraction;
+
+	b3Transform transform = b3ToRelativeTransform( bodyTransform, origin );
+
+	int shapeId = body->headShapeId;
+	while ( shapeId != B3_NULL_INDEX )
+	{
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
+		shapeId = shape->nextShapeId;
+
+		if ( b3ShouldQueryCollide( &shape->filter, &filter ) == false )
+		{
+			continue;
+		}
+
+		b3CastOutput shapeOutput = b3RayCastShape( shape, transform, &shapeInput );
+
+		if ( shapeOutput.hit == false )
+		{
+			continue;
+		}
+
+		if ( shapeOutput.fraction > shapeInput.maxFraction )
+		{
+			continue;
+		}
+
+		// Careful with id, shapeId is the next shape.
+		b3ShapeId id = { shape->id + 1, bodyId.world0, shape->generation };
+
+		int materialIndex = b3ClampInt( shapeOutput.materialIndex, 0, shape->materialCount - 1 );
+		uint64_t userMaterialId = b3GetShapeMaterials( shape )[materialIndex].userMaterialId;
+
+		result = (b3BodyCastResult){
+			.shapeId = id,
+			.point = b3OffsetPos( origin, shapeOutput.point ),
+			.normal = shapeOutput.normal,
+			.fraction = shapeOutput.fraction,
+			.triangleIndex = shapeOutput.triangleIndex,
+			.userMaterialId = userMaterialId,
+			.iterations = shapeOutput.iterations,
+			.hit = true,
+		};
+
+		shapeInput.maxFraction = shapeOutput.fraction;
+	}
+
+	return result;
+}
+
+b3BodyCastResult b3Body_CastShape( b3BodyId bodyId, b3Pos origin, const b3ShapeProxy* proxy, b3Vec3 translation,
+								   b3QueryFilter filter, float maxFraction, bool canEncroach, b3WorldTransform bodyTransform )
+{
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
+	if ( world == NULL )
+	{
+		return (b3BodyCastResult){ 0 };
+	}
+
+	b3BodyCastResult result = { 0 };
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	b3Transform transform = b3ToRelativeTransform( bodyTransform, origin );
+
+	b3ShapeCastInput shapeInput = { 0 };
+	shapeInput.proxy = *proxy;
+	shapeInput.translation = translation;
+	shapeInput.maxFraction = maxFraction;
+	shapeInput.canEncroach = canEncroach;
+
+	int shapeId = body->headShapeId;
+	while ( shapeId != B3_NULL_INDEX )
+	{
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
+		shapeId = shape->nextShapeId;
+
+		if ( b3ShouldQueryCollide( &shape->filter, &filter ) == false )
+		{
+			continue;
+		}
+
+		b3CastOutput shapeOutput = b3ShapeCastShape( shape, transform, &shapeInput );
+
+		if ( shapeOutput.hit == false )
+		{
+			continue;
+		}
+
+		if ( shapeOutput.fraction > shapeInput.maxFraction )
+		{
+			continue;
+		}
+
+		// Careful with id, shapeId is the next shape.
+		b3ShapeId id = { shape->id + 1, bodyId.world0, shape->generation };
+		int materialIndex = b3ClampInt( shapeOutput.materialIndex, 0, shape->materialCount - 1 );
+		uint64_t userMaterialId = b3GetShapeMaterials( shape )[materialIndex].userMaterialId;
+
+		result = (b3BodyCastResult){
+			.shapeId = id,
+			.point = b3OffsetPos( origin, shapeOutput.point ),
+			.normal = shapeOutput.normal,
+			.fraction = shapeOutput.fraction,
+			.triangleIndex = shapeOutput.triangleIndex,
+			.userMaterialId = userMaterialId,
+			.iterations = shapeOutput.iterations,
+			.hit = true,
+		};
+
+		shapeInput.maxFraction = shapeOutput.fraction;
+	}
+
+	return result;
+}
+
+bool b3Body_OverlapShape( b3BodyId bodyId, b3Pos origin, const b3ShapeProxy* proxy, b3QueryFilter filter,
+						  b3WorldTransform bodyTransform )
+{
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
+	if ( world == NULL )
+	{
+		return false;
+	}
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3Transform transform = b3ToRelativeTransform( bodyTransform, origin );
+
+	int shapeId = body->headShapeId;
+	while ( shapeId != B3_NULL_INDEX )
+	{
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
+		shapeId = shape->nextShapeId;
+
+		if ( b3ShouldQueryCollide( &shape->filter, &filter ) == false )
+		{
+			continue;
+		}
+
+		bool overlaps = b3OverlapShape( shape, transform, proxy );
+		if ( overlaps )
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int b3Body_CollideMover( b3BodyId bodyId, b3BodyPlaneResult* bodyPlanes, int planeCapacity, b3Pos origin, const b3Capsule* mover,
+						 b3QueryFilter filter, b3WorldTransform bodyTransform )
+{
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
+	if ( world == NULL )
+	{
+		return 0;
+	}
+
+	if ( planeCapacity == 0 )
+	{
+		return 0;
+	}
+
+	int resultCount = 0;
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	b3Transform transform = b3ToRelativeTransform( bodyTransform, origin );
+
+	int shapeId = body->headShapeId;
+	while ( shapeId != B3_NULL_INDEX )
+	{
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
+		shapeId = shape->nextShapeId;
+
+		if ( b3ShouldQueryCollide( &shape->filter, &filter ) == false )
+		{
+			continue;
+		}
+
+		b3ShapeType type = shape->type;
+		if ( type != b3_sphereShape && type != b3_capsuleShape && type != b3_hullShape )
+		{
+			continue;
+		}
+
+		b3PlaneResult plane;
+		int count = b3CollideMover( &plane, 1, shape, transform, mover );
+
+		if ( count > 0 )
+		{
+			b3ShapeId id = { shape->id + 1, bodyId.world0, shape->generation };
+			bodyPlanes[resultCount] = (b3BodyPlaneResult){ .shapeId = id, .result = plane };
+			resultCount += 1;
+			if ( resultCount == planeCapacity )
+			{
+				return resultCount;
+			}
+		}
+	}
+
+	return resultCount;
+}
+
+void b3UpdateBodyMassData( b3World* world, b3Body* body )
+{
+	b3BodySim* bodySim = b3GetBodySim( world, body );
 
 	// Mass is no longer dirty
-	body->flags &= ~b2_dirtyMass;
+	body->flags &= ~b3_dirtyMass;
+	b3SyncBodyFlags( world, body );
 
 	// Compute mass data from shapes. Each shape has its own density.
 	body->mass = 0.0f;
-	body->inertia = 0.0f;
+	body->inertia = b3Mat3_zero;
 
 	bodySim->invMass = 0.0f;
-	bodySim->invInertia = 0.0f;
-	bodySim->localCenter = b2Vec2_zero;
-	bodySim->minExtent = B2_HUGE;
-	bodySim->maxExtent = 0.0f;
+	bodySim->invInertiaLocal = b3Mat3_zero;
+	bodySim->invInertiaWorld = b3Mat3_zero;
+	bodySim->localCenter = b3Vec3_zero;
+	bodySim->minExtent = B3_HUGE;
+	bodySim->maxExtent = b3Vec3_zero;
+
+	if ( body->headShapeId == B3_NULL_INDEX )
+	{
+		return;
+	}
 
 	// Static and kinematic sims have zero mass.
-	if ( body->type != b2_dynamicBody )
+	if ( body->type != b3_dynamicBody )
 	{
 		bodySim->center = bodySim->transform.p;
 		bodySim->center0 = bodySim->center;
 
 		// Need extents for kinematic bodies for sleeping to work correctly.
-		if ( body->type == b2_kinematicBody )
+		if ( body->type == b3_kinematicBody )
 		{
 			int shapeId = body->headShapeId;
-			while ( shapeId != B2_NULL_INDEX )
+			while ( shapeId != B3_NULL_INDEX )
 			{
-				const b2Shape* s = b2Array_Get( world->shapes, shapeId );
+				const b3Shape* s = b3Array_Get( world->shapes, shapeId );
 
-				b2ShapeExtent extent = b2ComputeShapeExtent( s, b2Vec2_zero );
-				bodySim->minExtent = b2MinFloat( bodySim->minExtent, extent.minExtent );
-				bodySim->maxExtent = b2MaxFloat( bodySim->maxExtent, extent.maxExtent );
+				b3ShapeExtent extent = b3ComputeShapeExtent( s, b3Vec3_zero );
+				bodySim->minExtent = b3MinFloat( bodySim->minExtent, extent.minExtent );
+				bodySim->maxExtent = b3Max( bodySim->maxExtent, extent.maxExtent );
 
 				shapeId = s->nextShapeId;
 			}
@@ -566,27 +847,27 @@ void b2UpdateBodyMassData( b2World* world, b2Body* body )
 	}
 
 	int shapeCount = body->shapeCount;
-	b2MassData* masses = b2StackAlloc( &world->stack, shapeCount * sizeof( b2MassData ), "mass data" );
+	b3MassData* masses = b3StackAlloc( &world->stack, shapeCount * sizeof( b3MassData ), "mass data" );
 
 	// Accumulate mass over all shapes.
-	b2Vec2 localCenter = b2Vec2_zero;
+	b3Vec3 localCenter = b3Vec3_zero;
 	int shapeId = body->headShapeId;
 	int shapeIndex = 0;
-	while ( shapeId != B2_NULL_INDEX )
+	while ( shapeId != B3_NULL_INDEX )
 	{
-		const b2Shape* s = b2Array_Get( world->shapes, shapeId );
+		const b3Shape* s = b3Array_Get( world->shapes, shapeId );
 		shapeId = s->nextShapeId;
 
 		if ( s->density == 0.0f )
 		{
-			masses[shapeIndex] = (b2MassData){ 0 };
+			masses[shapeIndex] = (b3MassData){ 0 };
 			shapeIndex += 1;
 			continue;
 		}
 
-		b2MassData massData = b2ComputeShapeMass( s );
+		b3MassData massData = b3ComputeShapeMass( s );
 		body->mass += massData.mass;
-		localCenter = b2MulAdd( localCenter, massData.mass, massData.center );
+		localCenter = b3MulAdd( localCenter, massData.mass, massData.center );
 
 		masses[shapeIndex] = massData;
 		shapeIndex += 1;
@@ -596,168 +877,233 @@ void b2UpdateBodyMassData( b2World* world, b2Body* body )
 	if ( body->mass > 0.0f )
 	{
 		bodySim->invMass = 1.0f / body->mass;
-		localCenter = b2MulSV( bodySim->invMass, localCenter );
+		localCenter = b3MulSV( bodySim->invMass, localCenter );
 	}
 
 	// Second loop to accumulate the rotational inertia about the center of mass
 	for ( shapeIndex = 0; shapeIndex < shapeCount; ++shapeIndex )
 	{
-		b2MassData massData = masses[shapeIndex];
+		b3MassData massData = masses[shapeIndex];
 		if ( massData.mass == 0.0f )
 		{
 			continue;
 		}
 
 		// Shift to center of mass. This is safe because it can only increase.
-		b2Vec2 offset = b2Sub( localCenter, massData.center );
-		float inertia = massData.rotationalInertia + massData.mass * b2Dot( offset, offset );
-		body->inertia += inertia;
+		b3Vec3 offset = b3Sub( localCenter, massData.center );
+		b3Matrix3 inertia = b3AddMM( massData.inertia, b3Steiner( massData.mass, offset ) );
+		body->inertia = b3AddMM( body->inertia, inertia );
 	}
 
-	b2StackFree( &world->stack, masses );
+	b3StackFree( &world->stack, masses );
 	masses = NULL;
 
-	B2_ASSERT( body->inertia >= 0.0f );
+	float det = b3Det( body->inertia );
+	B3_ASSERT( det >= 0.0f );
 
-	if ( body->inertia > 0.0f )
+	if ( det > 0.0f )
 	{
-		bodySim->invInertia = 1.0f / body->inertia;
-	}
-	else
-	{
-		body->inertia = 0.0f;
-		bodySim->invInertia = 0.0f;
+		// This call is faster than b3Invert
+		bodySim->invInertiaLocal = b3InvertT( body->inertia );
+
+		b3Matrix3 rotationMatrix = b3MakeMatrixFromQuat( bodySim->transform.q );
+		bodySim->invInertiaWorld = b3MulMM( b3MulMM( rotationMatrix, bodySim->invInertiaLocal ), b3Transpose( rotationMatrix ) );
 	}
 
 	// Move center of mass.
-	b2Pos oldCenter = bodySim->center;
+	b3Pos oldCenter = bodySim->center;
 	bodySim->localCenter = localCenter;
-	bodySim->center = b2TransformWorldPoint( bodySim->transform, bodySim->localCenter );
+	bodySim->center = b3TransformWorldPoint( bodySim->transform, bodySim->localCenter );
 	bodySim->center0 = bodySim->center;
 
 	// Update center of mass velocity
-	b2BodyState* state = b2GetBodyState( world, body );
+	b3BodyState* state = b3GetBodyState( world, body );
 	if ( state != NULL )
 	{
-		b2Vec2 deltaLinear = b2CrossSV( state->angularVelocity, b2SubPos( bodySim->center, oldCenter ) );
-		state->linearVelocity = b2Add( state->linearVelocity, deltaLinear );
+		b3Vec3 deltaLinear = b3Cross( state->angularVelocity, b3SubPos( bodySim->center, oldCenter ) );
+		state->linearVelocity = b3Add( state->linearVelocity, deltaLinear );
 	}
 
 	// Compute body extents relative to center of mass
 	shapeId = body->headShapeId;
-	while ( shapeId != B2_NULL_INDEX )
+	while ( shapeId != B3_NULL_INDEX )
 	{
-		const b2Shape* s = b2Array_Get( world->shapes, shapeId );
+		b3Shape* s = b3Array_Get( world->shapes, shapeId );
 
-		b2ShapeExtent extent = b2ComputeShapeExtent( s, localCenter );
-		bodySim->minExtent = b2MinFloat( bodySim->minExtent, extent.minExtent );
-		bodySim->maxExtent = b2MaxFloat( bodySim->maxExtent, extent.maxExtent );
+		b3ShapeExtent extent = b3ComputeShapeExtent( s, localCenter );
+		bodySim->minExtent = b3MinFloat( bodySim->minExtent, extent.minExtent );
+		bodySim->maxExtent = b3Max( bodySim->maxExtent, extent.maxExtent );
 
 		shapeId = s->nextShapeId;
 	}
+
+	// Apply fixed rotation
+	if ( ( bodySim->flags & b3_fixedRotation ) == b3_fixedRotation )
+	{
+		body->inertia = b3Mat3_zero;
+		bodySim->invInertiaLocal = b3Mat3_zero;
+		bodySim->invInertiaWorld = b3Mat3_zero;
+	}
 }
 
-b2Pos b2Body_GetPosition( b2BodyId bodyId )
+void b3DumpBody( b3World* world, b3Body* body )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2WorldTransform transform = b2GetBodyTransformQuick( world, body );
+	// int32 bodyIndex = m_islandIndex;
+
+	b3BodySim* sim = b3GetBodySim( world, body );
+	b3Vec3 p = b3ToVec3( sim->transform.p );
+	b3Quat q = sim->transform.q;
+
+	b3Vec3 v = b3Vec3_zero;
+	b3Vec3 w = b3Vec3_zero;
+	b3BodyState* state = b3GetBodyState( world, body );
+	if ( state != NULL )
+	{
+		v = state->linearVelocity;
+		w = state->angularVelocity;
+	}
+
+	// %.9g is sufficient to save and load the same value using text
+	// FLT_DECIMAL_DIG == 9
+	b3Dump( "{\n" );
+	b3Dump( "  b3BodyDef bd = b3DefaultBodyDef();\n" );
+	if ( body->name[0] != 0 )
+	{
+		b3Dump( "  bd.name = \"%s\";\n", body->name );
+	}
+	b3Dump( "  bd.type = b3BodyType(%d);\n", body->type );
+	b3Dump( "  bd.position = {%.9g, %.9g, %.9g};\n", p.x, p.y, p.z );
+	b3Dump( "  bd.rotation = {{%.9g, %.9g, %.9g}, %.9g};\n", q.v.x, q.v.y, q.v.z, q.s );
+	b3Dump( "  bd.linearVelocity = {%.9g, %.9g, %.9g};\n", v.x, v.y, v.z );
+	b3Dump( "  bd.angularVelocity = {%.9g, %.9g, %.9g};\n", w.x, w.y, w.z );
+	b3Dump( "  bd.linearDamping = %.9g;\n", sim->linearDamping );
+	b3Dump( "  bd.angularDamping = %.9g;\n", sim->angularDamping );
+	b3Dump( "  bd.enableSleep = bool(%d);\n", body->flags & b3_enableSleep );
+	b3Dump( "  bd.isAwake = bool(%d);\n", body->setIndex == b3_awakeSet );
+	b3Dump( "  bd.gravityScale = %.9g;\n", sim->gravityScale );
+	b3Dump( "  b3BodyId bodyId = b3CreateBody(m_worldId, &bd);\n" );
+	b3Dump( "  bodies.push_back(bodyId);\n" );
+	b3Dump( "\n" );
+
+	int shapeIndex = body->headShapeId;
+	while ( shapeIndex != B3_NULL_INDEX )
+	{
+		b3Dump( "  {\n" );
+		b3DumpShape( world, shapeIndex );
+		b3Dump( "  }\n" );
+
+		b3Shape* shape = b3Array_Get( world->shapes, shapeIndex );
+		shapeIndex = shape->nextShapeId;
+	}
+	b3Dump( "}\n" );
+}
+
+b3Pos b3Body_GetPosition( b3BodyId bodyId )
+{
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3WorldTransform transform = b3GetBodyTransformQuick( world, body );
 	return transform.p;
 }
 
-b2Rot b2Body_GetRotation( b2BodyId bodyId )
+b3Quat b3Body_GetRotation( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2WorldTransform transform = b2GetBodyTransformQuick( world, body );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3WorldTransform transform = b3GetBodyTransformQuick( world, body );
 	return transform.q;
 }
 
-b2WorldTransform b2Body_GetTransform( b2BodyId bodyId )
+b3WorldTransform b3Body_GetTransform( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	return b2GetBodyTransformQuick( world, body );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	return b3GetBodyTransformQuick( world, body );
 }
 
-b2Vec2 b2Body_GetLocalPoint( b2BodyId bodyId, b2Pos worldPoint )
+b3Vec3 b3Body_GetLocalPoint( b3BodyId bodyId, b3Pos worldPoint )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2WorldTransform transform = b2GetBodyTransformQuick( world, body );
-	return b2InvTransformWorldPoint( transform, worldPoint );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3WorldTransform transform = b3GetBodyTransformQuick( world, body );
+	return b3InvTransformWorldPoint( transform, worldPoint );
 }
 
-b2Pos b2Body_GetWorldPoint( b2BodyId bodyId, b2Vec2 localPoint )
+b3Pos b3Body_GetWorldPoint( b3BodyId bodyId, b3Vec3 localPoint )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2WorldTransform transform = b2GetBodyTransformQuick( world, body );
-	return b2TransformWorldPoint( transform, localPoint );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3WorldTransform transform = b3GetBodyTransformQuick( world, body );
+	return b3TransformWorldPoint( transform, localPoint );
 }
 
-b2Vec2 b2Body_GetLocalVector( b2BodyId bodyId, b2Vec2 worldVector )
+b3Vec3 b3Body_GetLocalVector( b3BodyId bodyId, b3Vec3 worldVector )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2WorldTransform transform = b2GetBodyTransformQuick( world, body );
-	return b2InvRotateVector( transform.q, worldVector );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3WorldTransform transform = b3GetBodyTransformQuick( world, body );
+	return b3InvRotateVector( transform.q, worldVector );
 }
 
-b2Vec2 b2Body_GetWorldVector( b2BodyId bodyId, b2Vec2 localVector )
+b3Vec3 b3Body_GetWorldVector( b3BodyId bodyId, b3Vec3 localVector )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2WorldTransform transform = b2GetBodyTransformQuick( world, body );
-	return b2RotateVector( transform.q, localVector );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3WorldTransform transform = b3GetBodyTransformQuick( world, body );
+	return b3RotateVector( transform.q, localVector );
 }
 
-void b2Body_SetTransform( b2BodyId bodyId, b2Pos position, b2Rot rotation )
+void b3Body_SetTransform( b3BodyId bodyId, b3Pos position, b3Quat rotation )
 {
-	B2_ASSERT( b2IsValidPosition( position ) );
-	B2_ASSERT( b2IsValidRotation( rotation ) );
-	B2_ASSERT( b2Body_IsValid( bodyId ) );
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_ASSERT( world->locked == false );
+	B3_ASSERT( b3IsValidPosition( position ) );
+	B3_ASSERT( b3IsValidQuat( rotation ) );
+	B3_ASSERT( b3Body_IsValid( bodyId ) );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	B3_ASSERT( world->locked == false );
 
-	B2_REC( world, BodySetTransform, bodyId, position, rotation );
+	B3_REC( world, BodySetTransform, bodyId, position, rotation );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
 
 	bodySim->transform.p = position;
 	bodySim->transform.q = rotation;
-	bodySim->center = b2TransformWorldPoint( bodySim->transform, bodySim->localCenter );
+	bodySim->center = b3TransformWorldPoint( bodySim->transform, bodySim->localCenter );
+
+	b3Matrix3 rotationMatrix = b3MakeMatrixFromQuat( bodySim->transform.q );
+	bodySim->invInertiaWorld = b3MulMM( b3MulMM( rotationMatrix, bodySim->invInertiaLocal ), b3Transpose( rotationMatrix ) );
 
 	bodySim->rotation0 = bodySim->transform.q;
 	bodySim->center0 = bodySim->center;
 
-	b2BroadPhase* broadPhase = &world->broadPhase;
+	b3BroadPhase* broadPhase = &world->broadPhase;
 
-	b2WorldTransform transform = bodySim->transform;
-	const float speculativeDistance = B2_SPECULATIVE_DISTANCE;
+	b3WorldTransform transform = bodySim->transform;
+	const float speculativeDistance = B3_SPECULATIVE_DISTANCE;
 
 	int shapeId = body->headShapeId;
-	while ( shapeId != B2_NULL_INDEX )
+	while ( shapeId != B3_NULL_INDEX )
 	{
-		b2Shape* shape = b2Array_Get( world->shapes, shapeId );
-		b2AABB aabb = b2ComputeFatShapeAABB( shape, transform, speculativeDistance );
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
+		b3AABB aabb = b3ComputeFatShapeAABB( shape, transform, speculativeDistance );
 		shape->aabb = aabb;
 
-		if ( b2AABB_Contains( shape->fatAABB, aabb ) == false )
+		if ( b3AABB_Contains( shape->fatAABB, aabb ) == false )
 		{
 			float margin = shape->aabbMargin;
-			b2AABB fatAABB;
+			b3AABB fatAABB;
 			fatAABB.lowerBound.x = aabb.lowerBound.x - margin;
 			fatAABB.lowerBound.y = aabb.lowerBound.y - margin;
+			fatAABB.lowerBound.z = aabb.lowerBound.z - margin;
 			fatAABB.upperBound.x = aabb.upperBound.x + margin;
 			fatAABB.upperBound.y = aabb.upperBound.y + margin;
+			fatAABB.upperBound.z = aabb.upperBound.z + margin;
 			shape->fatAABB = fatAABB;
 
-			// They body could be disabled
-			if ( shape->proxyKey != B2_NULL_INDEX )
+			// The body could be disabled
+			if ( shape->proxyKey != B3_NULL_INDEX )
 			{
-				b2BroadPhase_MoveProxy( broadPhase, shape->proxyKey, fatAABB );
+				b3BroadPhase_MoveProxy( broadPhase, shape->proxyKey, fatAABB );
 			}
 		}
 
@@ -765,49 +1111,51 @@ void b2Body_SetTransform( b2BodyId bodyId, b2Pos position, b2Rot rotation )
 	}
 }
 
-b2Vec2 b2Body_GetLinearVelocity( b2BodyId bodyId )
+b3Vec3 b3Body_GetLinearVelocity( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodyState* state = b2GetBodyState( world, body );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodyState* state = b3GetBodyState( world, body );
 	if ( state != NULL )
 	{
 		return state->linearVelocity;
 	}
-	return b2Vec2_zero;
+	return b3Vec3_zero;
 }
 
-float b2Body_GetAngularVelocity( b2BodyId bodyId )
+b3Vec3 b3Body_GetAngularVelocity( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodyState* state = b2GetBodyState( world, body );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodyState* state = b3GetBodyState( world, body );
 	if ( state != NULL )
 	{
 		return state->angularVelocity;
 	}
-	return 0.0;
+	return b3Vec3_zero;
 }
 
-void b2Body_SetLinearVelocity( b2BodyId bodyId, b2Vec2 linearVelocity )
+void b3Body_SetLinearVelocity( b3BodyId bodyId, b3Vec3 linearVelocity )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
+	B3_ASSERT( b3IsValidVec3( linearVelocity ) );
 
-	B2_REC( world, BodySetLinearVelocity, bodyId, linearVelocity );
+	b3World* world = b3GetWorld( bodyId.world0 );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	B3_REC( world, BodySetLinearVelocity, bodyId, linearVelocity );
 
-	if ( body->type == b2_staticBody )
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	if ( body->type == b3_staticBody )
 	{
 		return;
 	}
 
-	if ( b2LengthSquared( linearVelocity ) > 0.0f )
+	if ( b3LengthSquared( linearVelocity ) > 0.0f )
 	{
-		b2WakeBody( world, body );
+		b3WakeBodyWithLock( world, body );
 	}
 
-	b2BodyState* state = b2GetBodyState( world, body );
+	b3BodyState* state = b3GetBodyState( world, body );
 	if ( state == NULL )
 	{
 		return;
@@ -816,70 +1164,95 @@ void b2Body_SetLinearVelocity( b2BodyId bodyId, b2Vec2 linearVelocity )
 	state->linearVelocity = linearVelocity;
 }
 
-void b2Body_SetAngularVelocity( b2BodyId bodyId, float angularVelocity )
+void b3Body_SetAngularVelocity( b3BodyId bodyId, b3Vec3 angularVelocity )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodySetAngularVelocity, bodyId, angularVelocity );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	B3_ASSERT( b3IsValidVec3( angularVelocity ) );
 
-	if ( body->type == b2_staticBody || ( body->flags & b2_lockAngularZ ) )
+	b3World* world = b3GetWorld( bodyId.world0 );
+
+	B3_REC( world, BodySetAngularVelocity, bodyId, angularVelocity );
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	if ( body->type == b3_staticBody )
 	{
 		return;
 	}
 
-	if ( angularVelocity != 0.0f )
+	// Apply locks to avoid waking
+	b3Vec3 w;
+	w.x = ( body->flags & b3_lockAngularX ) ? 0.0f : angularVelocity.x;
+	w.y = ( body->flags & b3_lockAngularY ) ? 0.0f : angularVelocity.y;
+	w.z = ( body->flags & b3_lockAngularZ ) ? 0.0f : angularVelocity.z;
+
+	if ( b3LengthSquared( w ) != 0.0f )
 	{
-		b2WakeBody( world, body );
+		b3WakeBodyWithLock( world, body );
 	}
 
-	b2BodyState* state = b2GetBodyState( world, body );
+	b3BodyState* state = b3GetBodyState( world, body );
 	if ( state == NULL )
 	{
 		return;
 	}
 
-	state->angularVelocity = angularVelocity;
+	state->angularVelocity = w;
 }
 
-void b2Body_SetTargetTransform( b2BodyId bodyId, b2WorldTransform target, float timeStep, bool wake )
+void b3Body_SetTargetTransform( b3BodyId bodyId, b3WorldTransform target, float timeStep, bool wake )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
+	B3_ASSERT( b3IsValidWorldTransform( target ) );
 
-	B2_REC( world, BodySetTargetTransform, bodyId, target, timeStep, wake );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
 
-	if ( body->setIndex == b2_disabledSet )
+	B3_REC( world, BodySetTargetTransform, bodyId, target, timeStep, wake );
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	if ( body->setIndex == b3_disabledSet )
 	{
 		return;
 	}
 
-	if ( body->type == b2_staticBody || timeStep <= 0.0f )
+	if ( body->type == b3_staticBody || timeStep <= 0.0f )
 	{
 		return;
 	}
 
-	if ( body->setIndex != b2_awakeSet && wake == false )
+	if ( body->setIndex != b3_awakeSet && wake == false )
 	{
 		return;
 	}
 
-	b2BodySim* sim = b2GetBodySim( world, body );
+	b3BodySim* sim = b3GetBodySim( world, body );
 
-	// Compute linear velocity. The center difference is taken in world precision then demoted
-	b2Vec2 delta = b2SubPos( b2TransformWorldPoint( target, sim->localCenter ), sim->center );
+	// Compute linear velocity. The center difference is taken in world precision then demoted.
+	b3Pos center1 = sim->center;
+	b3Pos center2 = b3TransformWorldPoint( target, sim->localCenter );
 	float invTimeStep = 1.0f / timeStep;
-	b2Vec2 linearVelocity = b2MulSV( invTimeStep, delta );
+	b3Vec3 linearVelocity = b3MulSV( invTimeStep, b3SubPos( center2, center1 ) );
 
-	// Compute angular velocity
-	b2Rot q1 = sim->transform.q;
-	b2Rot q2 = target.q;
-	float deltaAngle = b2RelativeAngle( q1, q2 );
-	float angularVelocity = invTimeStep * deltaAngle;
+	// Compute angular velocity:
+	// q' = 0.5 * w * q
+	// <~> ( q2 - q1 ) / dt =  0.5 * w * q1
+	// <=> w = 2 * ( q2 - q1 ) * Conjugate( q1 ) / dt
+	b3Quat q1 = sim->transform.q;
+	b3Quat q2 = target.q;
+
+	// Use the shortest arc quaternion
+	if ( b3DotQuat( q1, q2 ) < 0.0f )
+	{
+		q2 = b3NegateQuat( q2 );
+	}
+
+	b3Quat dq = { b3Sub( q2.v, q1.v ), q2.s - q1.s };
+	b3Quat omega = b3MulQuat( dq, b3Conjugate( q1 ) );
+	b3Vec3 angularVelocity = b3MulSV( 2.0f * invTimeStep, omega.v );
 
 	// Early out if the body is asleep already and the desired movement is small
-	if ( body->setIndex != b2_awakeSet )
+	if ( body->setIndex != b3_awakeSet )
 	{
-		float maxVelocity = b2Length( linearVelocity ) + b2AbsFloat( angularVelocity ) * sim->maxExtent;
+		float maxVelocity = b3Length( linearVelocity ) + b3Length( b3Mul( angularVelocity, sim->maxExtent ) );
 
 		// Return if velocity would be sleepy
 		if ( maxVelocity < body->sleepThreshold )
@@ -888,221 +1261,223 @@ void b2Body_SetTargetTransform( b2BodyId bodyId, b2WorldTransform target, float 
 		}
 
 		// Must wake for state to exist
-		b2WakeBody( world, body );
+		b3WakeBodyWithLock( world, body );
 	}
 
-	B2_ASSERT( body->setIndex == b2_awakeSet );
+	B3_ASSERT( body->setIndex == b3_awakeSet );
 
-	b2BodyState* state = b2GetBodyState( world, body );
+	b3BodyState* state = b3GetBodyState( world, body );
 	state->linearVelocity = linearVelocity;
 	state->angularVelocity = angularVelocity;
 }
 
-b2Vec2 b2Body_GetLocalPointVelocity( b2BodyId bodyId, b2Vec2 localPoint )
+b3Vec3 b3Body_GetLocalPointVelocity( b3BodyId bodyId, b3Vec3 localPoint )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodyState* state = b2GetBodyState( world, body );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodyState* state = b3GetBodyState( world, body );
 	if ( state == NULL )
 	{
-		return b2Vec2_zero;
+		return b3Vec3_zero;
 	}
 
-	b2SolverSet* set = b2Array_Get( world->solverSets, body->setIndex );
-	b2BodySim* bodySim = b2Array_Get( set->bodySims, body->localIndex );
+	b3SolverSet* set = b3Array_Get( world->solverSets, body->setIndex );
+	b3BodySim* bodySim = b3Array_Get( set->bodySims, body->localIndex );
 
-	b2Vec2 r = b2RotateVector( bodySim->transform.q, b2Sub( localPoint, bodySim->localCenter ) );
-	b2Vec2 v = b2Add( state->linearVelocity, b2CrossSV( state->angularVelocity, r ) );
+	b3Vec3 r = b3RotateVector( bodySim->transform.q, b3Sub( localPoint, bodySim->localCenter ) );
+	b3Vec3 v = b3Add( state->linearVelocity, b3Cross( state->angularVelocity, r ) );
 	return v;
 }
 
-b2Vec2 b2Body_GetWorldPointVelocity( b2BodyId bodyId, b2Pos worldPoint )
+b3Vec3 b3Body_GetWorldPointVelocity( b3BodyId bodyId, b3Pos worldPoint )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodyState* state = b2GetBodyState( world, body );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodyState* state = b3GetBodyState( world, body );
 	if ( state == NULL )
 	{
-		return b2Vec2_zero;
+		return b3Vec3_zero;
 	}
 
-	b2SolverSet* set = b2Array_Get( world->solverSets, body->setIndex );
-	b2BodySim* bodySim = b2Array_Get( set->bodySims, body->localIndex );
+	b3SolverSet* set = b3Array_Get( world->solverSets, body->setIndex );
+	b3BodySim* bodySim = b3Array_Get( set->bodySims, body->localIndex );
 
-	b2Vec2 r = b2SubPos( worldPoint, bodySim->center );
-	b2Vec2 v = b2Add( state->linearVelocity, b2CrossSV( state->angularVelocity, r ) );
+	b3Vec3 r = b3SubPos( worldPoint, bodySim->center );
+	b3Vec3 v = b3Add( state->linearVelocity, b3Cross( state->angularVelocity, r ) );
 	return v;
 }
 
-void b2Body_ApplyForce( b2BodyId bodyId, b2Vec2 force, b2Pos point, bool wake )
+void b3Body_ApplyForce( b3BodyId bodyId, b3Vec3 force, b3Pos point, bool wake )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodyApplyForce, bodyId, force, point, wake );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	B3_ASSERT( b3IsValidVec3( force ) );
 
-	if ( body->type != b2_dynamicBody || body->setIndex == b2_disabledSet )
+	b3World* world = b3GetWorld( bodyId.world0 );
+
+	B3_REC( world, BodyApplyForce, bodyId, force, point, wake );
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	if ( wake && body->setIndex >= b3_firstSleepingSet )
 	{
-		return;
+		b3WakeBodyWithLock( world, body );
 	}
 
-	if ( wake && body->setIndex >= b2_firstSleepingSet )
+	if ( body->setIndex == b3_awakeSet )
 	{
-		b2WakeBody( world, body );
-	}
-
-	if ( body->setIndex == b2_awakeSet )
-	{
-		b2BodySim* bodySim = b2GetBodySim( world, body );
-		bodySim->force = b2Add( bodySim->force, force );
-		bodySim->torque += b2Cross( b2SubPos( point, bodySim->center ), force );
+		b3BodySim* bodySim = b3GetBodySim( world, body );
+		bodySim->force = b3Add( bodySim->force, force );
+		bodySim->torque = b3Add( bodySim->torque, b3Cross( b3SubPos( point, bodySim->center ), force ) );
 	}
 }
 
-void b2Body_ApplyForceToCenter( b2BodyId bodyId, b2Vec2 force, bool wake )
+void b3Body_ApplyForceToCenter( b3BodyId bodyId, b3Vec3 force, bool wake )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodyApplyForceToCenter, bodyId, force, wake );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	B3_ASSERT( b3IsValidVec3( force ) );
 
-	if ( body->type != b2_dynamicBody || body->setIndex == b2_disabledSet )
+	b3World* world = b3GetWorld( bodyId.world0 );
+
+	B3_REC( world, BodyApplyForceToCenter, bodyId, force, wake );
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	if ( wake && body->setIndex >= b3_firstSleepingSet )
 	{
-		return;
+		b3WakeBodyWithLock( world, body );
 	}
 
-	if ( wake && body->setIndex >= b2_firstSleepingSet )
+	if ( body->setIndex == b3_awakeSet )
 	{
-		b2WakeBody( world, body );
-	}
-
-	if ( body->setIndex == b2_awakeSet )
-	{
-		b2BodySim* bodySim = b2GetBodySim( world, body );
-		bodySim->force = b2Add( bodySim->force, force );
+		b3BodySim* bodySim = b3GetBodySim( world, body );
+		bodySim->force = b3Add( bodySim->force, force );
 	}
 }
 
-void b2Body_ApplyTorque( b2BodyId bodyId, float torque, bool wake )
+void b3Body_ApplyTorque( b3BodyId bodyId, b3Vec3 torque, bool wake )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodyApplyTorque, bodyId, torque, wake );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	B3_ASSERT( b3IsValidVec3( torque ) );
 
-	if ( body->type != b2_dynamicBody || body->setIndex == b2_disabledSet )
+	b3World* world = b3GetWorld( bodyId.world0 );
+
+	B3_REC( world, BodyApplyTorque, bodyId, torque, wake );
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	if ( wake && body->setIndex >= b3_firstSleepingSet )
 	{
-		return;
+		b3WakeBodyWithLock( world, body );
 	}
 
-	if ( wake && body->setIndex >= b2_firstSleepingSet )
+	if ( body->setIndex == b3_awakeSet )
 	{
-		b2WakeBody( world, body );
-	}
-
-	if ( body->setIndex == b2_awakeSet )
-	{
-		b2BodySim* bodySim = b2GetBodySim( world, body );
-		bodySim->torque += torque;
+		b3BodySim* bodySim = b3GetBodySim( world, body );
+		bodySim->torque = b3Add( bodySim->torque, torque );
 	}
 }
 
-void b2Body_ClearForces( b2BodyId bodyId )
+void b3Body_ApplyLinearImpulse( b3BodyId bodyId, b3Vec3 impulse, b3Pos point, bool wake )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodyClearForces, bodyId );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
-	bodySim->force = b2Vec2_zero;
-	bodySim->torque = 0.0f;
-}
+	B3_ASSERT( b3IsValidVec3( impulse ) );
+	B3_ASSERT( b3IsValidPosition( point ) );
 
-void b2Body_ApplyLinearImpulse( b2BodyId bodyId, b2Vec2 impulse, b2Pos point, bool wake )
-{
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodyApplyLinearImpulse, bodyId, impulse, point, wake );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
 
-	if ( body->type != b2_dynamicBody || body->setIndex == b2_disabledSet )
+	B3_REC( world, BodyApplyLinearImpulse, bodyId, impulse, point, wake );
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	if ( wake && body->setIndex >= b3_firstSleepingSet )
 	{
-		return;
+		b3WakeBodyWithLock( world, body );
 	}
 
-	if ( wake && body->setIndex >= b2_firstSleepingSet )
-	{
-		b2WakeBody( world, body );
-	}
-
-	if ( body->setIndex == b2_awakeSet )
+	if ( body->setIndex == b3_awakeSet )
 	{
 		int localIndex = body->localIndex;
-		b2SolverSet* set = b2Array_Get( world->solverSets, b2_awakeSet );
-		b2BodyState* state = b2Array_Get( set->bodyStates, localIndex );
-		b2BodySim* bodySim = b2Array_Get( set->bodySims, localIndex );
-		state->linearVelocity = b2MulAdd( state->linearVelocity, bodySim->invMass, impulse );
-		state->angularVelocity += bodySim->invInertia * b2Cross( b2SubPos( point, bodySim->center ), impulse );
+		b3SolverSet* set = b3Array_Get( world->solverSets, b3_awakeSet );
+		b3BodyState* state = b3Array_Get( set->bodyStates, localIndex );
+		b3BodySim* bodySim = b3Array_Get( set->bodySims, localIndex );
 
-		b2LimitVelocity( state, world->maxLinearSpeed );
+		state->linearVelocity = b3MulAdd( state->linearVelocity, bodySim->invMass, impulse );
+
+		float maxLinearSpeed = world->maxLinearSpeed;
+		if ( b3LengthSquared( state->linearVelocity ) > maxLinearSpeed * maxLinearSpeed )
+		{
+			state->linearVelocity = b3MulSV( maxLinearSpeed, b3Normalize( state->linearVelocity ) );
+		}
+
+		b3Vec3 delta = b3MulMV( bodySim->invInertiaWorld, b3Cross( b3SubPos( point, bodySim->center ), impulse ) );
+		state->angularVelocity = b3Add( state->angularVelocity, delta );
 	}
 }
 
-void b2Body_ApplyLinearImpulseToCenter( b2BodyId bodyId, b2Vec2 impulse, bool wake )
+void b3Body_ApplyLinearImpulseToCenter( b3BodyId bodyId, b3Vec3 impulse, bool wake )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodyApplyLinearImpulseToCenter, bodyId, impulse, wake );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	B3_ASSERT( b3IsValidVec3( impulse ) );
 
-	if ( body->type != b2_dynamicBody || body->setIndex == b2_disabledSet )
+	b3World* world = b3GetWorld( bodyId.world0 );
+
+	B3_REC( world, BodyApplyLinearImpulseToCenter, bodyId, impulse, wake );
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	if ( wake && body->setIndex >= b3_firstSleepingSet )
 	{
-		return;
+		b3WakeBodyWithLock( world, body );
 	}
 
-	if ( wake && body->setIndex >= b2_firstSleepingSet )
-	{
-		b2WakeBody( world, body );
-	}
-
-	if ( body->setIndex == b2_awakeSet )
+	if ( body->setIndex == b3_awakeSet )
 	{
 		int localIndex = body->localIndex;
-		b2SolverSet* set = b2Array_Get( world->solverSets, b2_awakeSet );
-		b2BodyState* state = b2Array_Get( set->bodyStates, localIndex );
-		b2BodySim* bodySim = b2Array_Get( set->bodySims, localIndex );
-		state->linearVelocity = b2MulAdd( state->linearVelocity, bodySim->invMass, impulse );
+		b3SolverSet* set = b3Array_Get( world->solverSets, b3_awakeSet );
+		b3BodyState* state = b3Array_Get( set->bodyStates, localIndex );
+		b3BodySim* bodySim = b3Array_Get( set->bodySims, localIndex );
+		state->linearVelocity = b3MulAdd( state->linearVelocity, bodySim->invMass, impulse );
 
-		b2LimitVelocity( state, world->maxLinearSpeed );
+		float maxLinearSpeed = world->maxLinearSpeed;
+		if ( b3LengthSquared( state->linearVelocity ) > maxLinearSpeed * maxLinearSpeed )
+		{
+			state->linearVelocity = b3MulSV( maxLinearSpeed, b3Normalize( state->linearVelocity ) );
+		}
 	}
 }
 
-void b2Body_ApplyAngularImpulse( b2BodyId bodyId, float impulse, bool wake )
+void b3Body_ApplyAngularImpulse( b3BodyId bodyId, b3Vec3 impulse, bool wake )
 {
-	B2_ASSERT( b2Body_IsValid( bodyId ) );
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodyApplyAngularImpulse, bodyId, impulse, wake );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	B3_ASSERT( b3IsValidVec3( impulse ) );
+	B3_ASSERT( b3Body_IsValid( bodyId ) );
 
-	if ( body->type != b2_dynamicBody || body->setIndex == b2_disabledSet )
-	{
-		return;
-	}
+	b3World* world = b3GetWorld( bodyId.world0 );
 
-	if ( wake && body->setIndex >= b2_firstSleepingSet )
+	B3_REC( world, BodyApplyAngularImpulse, bodyId, impulse, wake );
+
+	int id = bodyId.index1 - 1;
+	b3Body* body = b3Array_Get( world->bodies, id );
+	B3_ASSERT( body->generation == bodyId.generation );
+
+	if ( wake && body->setIndex >= b3_firstSleepingSet )
 	{
 		// this will not invalidate body pointer
-		b2WakeBody( world, body );
+		b3WakeBodyWithLock( world, body );
 	}
 
-	if ( body->setIndex == b2_awakeSet )
+	if ( body->setIndex == b3_awakeSet )
 	{
 		int localIndex = body->localIndex;
-		b2SolverSet* set = b2Array_Get( world->solverSets, b2_awakeSet );
-		b2BodyState* state = b2Array_Get( set->bodyStates, localIndex );
-		b2BodySim* bodySim = b2Array_Get( set->bodySims, localIndex );
-		state->angularVelocity += bodySim->invInertia * impulse;
+		b3SolverSet* set = b3Array_Get( world->solverSets, b3_awakeSet );
+		b3BodyState* state = b3Array_Get( set->bodyStates, localIndex );
+		b3BodySim* bodySim = b3Array_Get( set->bodySims, localIndex );
+
+		b3Vec3 localImpulse = b3InvRotateVector( bodySim->transform.q, impulse );
+		b3Vec3 localAngularVelocityDelta = b3MulMV( bodySim->invInertiaLocal, localImpulse );
+		state->angularVelocity =
+			b3Add( state->angularVelocity, b3RotateVector( bodySim->transform.q, localAngularVelocityDelta ) );
 	}
 }
 
-b2BodyType b2Body_GetType( b2BodyId bodyId )
+b3BodyType b3Body_GetType( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	return body->type;
 }
 
@@ -1133,206 +1508,239 @@ b2BodyType b2Body_GetType( b2BodyId bodyId )
 // Notes:
 // - the implementation below tries to minimize the number of predicates, so some
 //   operations may have no effect, such as transferring a joint to the same set
-void b2Body_SetType( b2BodyId bodyId, b2BodyType type )
+void b3Body_SetType( b3BodyId bodyId, b3BodyType type )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodySetType, bodyId, (int32_t)type );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-
-	b2BodyType originalType = body->type;
-	if ( originalType == type )
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
+	if ( world == NULL )
 	{
 		return;
 	}
 
+	B3_REC( world, BodySetType, bodyId, (int32_t)type );
+
+	world->locked = true;
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	b3BodyType originalType = body->type;
+	if ( originalType == type )
+	{
+		world->locked = false;
+		return;
+	}
+
+	if ( type != b3_staticBody )
+	{
+		int shapeId = body->headShapeId;
+		while ( shapeId != B3_NULL_INDEX )
+		{
+			b3Shape* shape = b3Array_Get( world->shapes, shapeId );
+			if ( shape->type == b3_compoundShape || shape->type == b3_heightShape )
+			{
+				// Setting the body type is not supported for bodies with compound shapes
+				return;
+			}
+
+			shapeId = shape->nextShapeId;
+		}
+	}
+
 	// Stage 1: skip disabled bodies
-	if ( body->setIndex == b2_disabledSet )
+	if ( body->setIndex == b3_disabledSet )
 	{
 		// Disabled bodies don't change solver sets or islands when they change type.
 		body->type = type;
 
-		if ( type == b2_dynamicBody )
+		if ( type == b3_dynamicBody )
 		{
-			body->flags |= b2_dynamicFlag;
+			body->flags |= b3_dynamicFlag;
 		}
 		else
 		{
-			body->flags &= ~b2_dynamicFlag;
+			body->flags &= ~b3_dynamicFlag;
 		}
 
-		b2SyncBodyFlags( world, body );
+		b3SyncBodyFlags( world, body );
 
 		// Body type affects the mass properties
-		b2UpdateBodyMassData( world, body );
+		b3UpdateBodyMassData( world, body );
+		world->locked = false;
 		return;
 	}
 
 	// Stage 2: destroy all contacts but don't wake bodies (because we don't need to)
 	bool wakeBodies = false;
-	b2DestroyBodyContacts( world, body, wakeBodies );
+	b3DestroyBodyContacts( world, body, wakeBodies );
 
 	// Stage 3: wake this body (does nothing if body is static), otherwise it will also wake
 	// all bodies in the same sleeping solver set.
-	b2WakeBody( world, body );
+	b3WakeBody( world, body );
 
 	// Stage 4: move joints to temporary storage
-	b2SolverSet* staticSet = b2Array_Get( world->solverSets, b2_staticSet );
+	b3SolverSet* staticSet = b3Array_Get( world->solverSets, b3_staticSet );
 
 	int jointKey = body->headJointKey;
-	while ( jointKey != B2_NULL_INDEX )
+	while ( jointKey != B3_NULL_INDEX )
 	{
 		int jointId = jointKey >> 1;
 		int edgeIndex = jointKey & 1;
 
-		b2Joint* joint = b2Array_Get( world->joints, jointId );
+		b3Joint* joint = b3Array_Get( world->joints, jointId );
 		jointKey = joint->edges[edgeIndex].nextKey;
 
 		// Joint may be disabled by other body
-		if ( joint->setIndex == b2_disabledSet )
+		if ( joint->setIndex == b3_disabledSet )
 		{
 			continue;
 		}
 
-		// Wake attached bodies. The b2WakeBody call above does not wake bodies
+		// Wake attached bodies. The b3WakeBody call above does not wake bodies
 		// attached to a static body. But it is necessary because the body may have
 		// no joints.
-		b2Body* bodyA = b2Array_Get( world->bodies, joint->edges[0].bodyId );
-		b2Body* bodyB = b2Array_Get( world->bodies, joint->edges[1].bodyId );
-		b2WakeBody( world, bodyA );
-		b2WakeBody( world, bodyB );
+		b3Body* bodyA = b3Array_Get( world->bodies, joint->edges[0].bodyId );
+		b3Body* bodyB = b3Array_Get( world->bodies, joint->edges[1].bodyId );
+		b3WakeBody( world, bodyA );
+		b3WakeBody( world, bodyB );
 
 		// Remove joint from island
-		b2UnlinkJoint( world, joint );
+		b3UnlinkJoint( world, joint );
 
 		// It is necessary to transfer all joints to the static set
 		// so they can be added to the constraint graph below and acquire consistent colors.
-		b2SolverSet* jointSourceSet = b2Array_Get( world->solverSets, joint->setIndex );
-		b2TransferJoint( world, staticSet, jointSourceSet, joint );
+		b3SolverSet* jointSourceSet = b3Array_Get( world->solverSets, joint->setIndex );
+		b3TransferJoint( world, staticSet, jointSourceSet, joint );
 	}
 
 	// Stage 5: change the body type and transfer body
 	body->type = type;
 
-	if ( type == b2_dynamicBody )
+	if ( type == b3_dynamicBody )
 	{
-		body->flags |= b2_dynamicFlag;
+		body->flags |= b3_dynamicFlag;
 	}
 	else
 	{
-		body->flags &= ~b2_dynamicFlag;
+		body->flags &= ~b3_dynamicFlag;
 	}
 
-	b2SolverSet* awakeSet = b2Array_Get( world->solverSets, b2_awakeSet );
-	b2SolverSet* sourceSet = b2Array_Get( world->solverSets, body->setIndex );
-	b2SolverSet* targetSet = type == b2_staticBody ? staticSet : awakeSet;
+	b3SolverSet* awakeSet = b3Array_Get( world->solverSets, b3_awakeSet );
+	b3SolverSet* sourceSet = b3Array_Get( world->solverSets, body->setIndex );
+	b3SolverSet* targetSet = type == b3_staticBody ? staticSet : awakeSet;
 
 	// Transfer body
-	b2TransferBody( world, targetSet, sourceSet, body );
+	b3TransferBody( world, targetSet, sourceSet, body );
 
 	// Stage 6: update island participation for the body
-	if ( originalType == b2_staticBody )
+	if ( originalType == b3_staticBody )
 	{
 		// Create island for body
-		b2CreateIslandForBody( world, b2_awakeSet, body );
+		b3CreateIslandForBody( world, b3_awakeSet, body );
 	}
-	else if ( type == b2_staticBody )
+	else if ( type == b3_staticBody )
 	{
 		// Remove body from island.
-		b2RemoveBodyFromIsland( world, body );
+		b3RemoveBodyFromIsland( world, body );
 	}
 
 	// Stage 7: Transfer joints to the target set
 	jointKey = body->headJointKey;
-	while ( jointKey != B2_NULL_INDEX )
+	while ( jointKey != B3_NULL_INDEX )
 	{
 		int jointId = jointKey >> 1;
 		int edgeIndex = jointKey & 1;
 
-		b2Joint* joint = b2Array_Get( world->joints, jointId );
+		b3Joint* joint = b3Array_Get( world->joints, jointId );
 
 		jointKey = joint->edges[edgeIndex].nextKey;
 
 		// Joint may be disabled by other body
-		if ( joint->setIndex == b2_disabledSet )
+		if ( joint->setIndex == b3_disabledSet )
 		{
 			continue;
 		}
 
 		// All joints were transferred to the static set in an earlier stage
-		B2_ASSERT( joint->setIndex == b2_staticSet );
+		B3_ASSERT( joint->setIndex == b3_staticSet );
 
-		b2Body* bodyA = b2Array_Get( world->bodies, joint->edges[0].bodyId );
-		b2Body* bodyB = b2Array_Get( world->bodies, joint->edges[1].bodyId );
-		B2_ASSERT( bodyA->setIndex == b2_staticSet || bodyA->setIndex == b2_awakeSet );
-		B2_ASSERT( bodyB->setIndex == b2_staticSet || bodyB->setIndex == b2_awakeSet );
+		b3Body* bodyA = b3Array_Get( world->bodies, joint->edges[0].bodyId );
+		b3Body* bodyB = b3Array_Get( world->bodies, joint->edges[1].bodyId );
+		B3_ASSERT( bodyA->setIndex == b3_staticSet || bodyA->setIndex == b3_awakeSet );
+		B3_ASSERT( bodyB->setIndex == b3_staticSet || bodyB->setIndex == b3_awakeSet );
 
-		if ( bodyA->type == b2_dynamicBody || bodyB->type == b2_dynamicBody )
+		if ( bodyA->type == b3_dynamicBody || bodyB->type == b3_dynamicBody )
 		{
-			b2TransferJoint( world, awakeSet, staticSet, joint );
+			b3TransferJoint( world, awakeSet, staticSet, joint );
 		}
 	}
 
 	// Recreate shape proxies in broadphase
-	b2WorldTransform transform = b2GetBodyTransformQuick( world, body );
+	b3WorldTransform transform = b3GetBodyTransformQuick( world, body );
 	int shapeId = body->headShapeId;
-	while ( shapeId != B2_NULL_INDEX )
+	while ( shapeId != B3_NULL_INDEX )
 	{
-		b2Shape* shape = b2Array_Get( world->shapes, shapeId );
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
+
+		// Setting the body type is not supported for bodies with compound shapes
+		B3_ASSERT( shape->type != b3_compoundShape );
+
 		shapeId = shape->nextShapeId;
-		b2DestroyShapeProxy( shape, &world->broadPhase );
+		b3DestroyShapeProxy( shape, &world->broadPhase );
 		bool forcePairCreation = true;
-		b2CreateShapeProxy( shape, &world->broadPhase, type, transform, forcePairCreation );
+		b3CreateShapeProxy( shape, &world->broadPhase, type, transform, forcePairCreation );
 	}
 
 	// Relink all joints
 	jointKey = body->headJointKey;
-	while ( jointKey != B2_NULL_INDEX )
+	while ( jointKey != B3_NULL_INDEX )
 	{
 		int jointId = jointKey >> 1;
 		int edgeIndex = jointKey & 1;
 
-		b2Joint* joint = b2Array_Get( world->joints, jointId );
+		b3Joint* joint = b3Array_Get( world->joints, jointId );
 		jointKey = joint->edges[edgeIndex].nextKey;
 
 		int otherEdgeIndex = edgeIndex ^ 1;
 		int otherBodyId = joint->edges[otherEdgeIndex].bodyId;
-		b2Body* otherBody = b2Array_Get( world->bodies, otherBodyId );
+		b3Body* otherBody = b3Array_Get( world->bodies, otherBodyId );
 
-		if ( otherBody->setIndex == b2_disabledSet )
+		if ( otherBody->setIndex == b3_disabledSet )
 		{
 			continue;
 		}
 
-		if ( body->type != b2_dynamicBody && otherBody->type != b2_dynamicBody )
+		if ( body->type != b3_dynamicBody && otherBody->type != b3_dynamicBody )
 		{
 			continue;
 		}
 
-		b2LinkJoint( world, joint );
+		b3LinkJoint( world, joint );
 	}
 
-	b2SyncBodyFlags( world, body );
+	b3SyncBodyFlags( world, body );
 
 	// Body type affects the mass
-	b2UpdateBodyMassData( world, body );
+	b3UpdateBodyMassData( world, body );
 
-	b2ValidateSolverSets( world );
-	b2ValidateIsland( world, body->islandId );
+	b3ValidateSolverSets( world );
+	b3ValidateIsland( world, body->islandId );
+
+	world->locked = false;
 }
 
-void b2Body_SetName( b2BodyId bodyId, const char* name )
+void b3Body_SetName( b3BodyId bodyId, const char* name )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodySetName, bodyId, name );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+
+	B3_REC( world, BodySetName, bodyId, name );
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 
 	if ( name )
 	{
 #if defined( _MSC_VER )
-		strncpy_s( body->name, B2_NAME_LENGTH + 1, name, B2_NAME_LENGTH );
+		strncpy_s( body->name, B3_BODY_NAME_LENGTH + 1, name, B3_BODY_NAME_LENGTH );
 #else
-		strncpy( body->name, name, B2_NAME_LENGTH );
-		body->name[B2_NAME_LENGTH] = 0;
+		strncpy( body->name, name, B3_BODY_NAME_LENGTH );
+		body->name[B3_BODY_NAME_LENGTH] = 0;
 #endif
 	}
 	else
@@ -1341,442 +1749,491 @@ void b2Body_SetName( b2BodyId bodyId, const char* name )
 	}
 }
 
-const char* b2Body_GetName( b2BodyId bodyId )
+const char* b3Body_GetName( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	return body->name;
 }
 
-void b2Body_SetUserData( b2BodyId bodyId, void* userData )
+void b3Body_SetUserData( b3BodyId bodyId, void* userData )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	body->userData = userData;
 }
 
-void* b2Body_GetUserData( b2BodyId bodyId )
+void* b3Body_GetUserData( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	return body->userData;
 }
 
-float b2Body_GetMass( b2BodyId bodyId )
+float b3Body_GetMass( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	return body->mass;
 }
 
-float b2Body_GetRotationalInertia( b2BodyId bodyId )
+b3Matrix3 b3Body_GetLocalRotationalInertia( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	return body->inertia;
 }
 
-b2Vec2 b2Body_GetLocalCenter( b2BodyId bodyId )
+float b3Body_GetInverseMass( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* sim = b3GetBodySim( world, body );
+	return sim->invMass;
+}
+
+b3Matrix3 b3Body_GetWorldInverseRotationalInertia( b3BodyId bodyId )
+{
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* sim = b3GetBodySim( world, body );
+	return sim->invInertiaWorld;
+}
+
+b3Vec3 b3Body_GetLocalCenter( b3BodyId bodyId )
+{
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
 	return bodySim->localCenter;
 }
 
-b2Pos b2Body_GetWorldCenter( b2BodyId bodyId )
+b3Pos b3Body_GetWorldCenter( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
 	return bodySim->center;
 }
 
-void b2Body_SetMassData( b2BodyId bodyId, b2MassData massData )
+void b3Body_SetMassData( b3BodyId bodyId, b3MassData massData )
 {
-	B2_ASSERT( b2IsValidFloat( massData.mass ) && massData.mass >= 0.0f );
-	B2_ASSERT( b2IsValidFloat( massData.rotationalInertia ) && massData.rotationalInertia >= 0.0f );
-	B2_ASSERT( b2IsValidVec2( massData.center ) );
+	B3_ASSERT( b3IsValidFloat( massData.mass ) && massData.mass >= 0.0f );
+	B3_ASSERT( b3IsValidMatrix3( massData.inertia ) );
+	B3_ASSERT( b3IsValidVec3( massData.center ) );
 
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodySetMassData, bodyId, massData );
+	B3_REC( world, BodySetMassData, bodyId, massData );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
+
+	// Mass is no longer dirty
+	body->flags &= ~b3_dirtyMass;
+	b3SyncBodyFlags( world, body );
 
 	body->mass = massData.mass;
-	body->inertia = massData.rotationalInertia;
+	body->inertia = massData.inertia;
 	bodySim->localCenter = massData.center;
 
-	b2Pos center = b2TransformWorldPoint( bodySim->transform, massData.center );
+	b3Pos oldCenter = bodySim->center;
+	b3Pos center = b3TransformWorldPoint( bodySim->transform, massData.center );
 	bodySim->center = center;
 	bodySim->center0 = center;
-
 	bodySim->invMass = body->mass > 0.0f ? 1.0f / body->mass : 0.0f;
-	bodySim->invInertia = body->inertia > 0.0f ? 1.0f / body->inertia : 0.0f;
+
+	// Update center of mass velocity
+	b3BodyState* state = b3GetBodyState( world, body );
+	if ( state != NULL )
+	{
+		b3Vec3 deltaLinear = b3Cross( state->angularVelocity, b3SubPos( bodySim->center, oldCenter ) );
+		state->linearVelocity = b3Add( state->linearVelocity, deltaLinear );
+	}
+
+	float det = b3Det( body->inertia );
+	B3_ASSERT( det >= 0.0f );
+
+	if ( det > 0.0f )
+	{
+		// This call is faster than b3Invert
+		bodySim->invInertiaLocal = b3InvertT( body->inertia );
+
+		b3Matrix3 rotationMatrix = b3MakeMatrixFromQuat( bodySim->transform.q );
+		bodySim->invInertiaWorld = b3MulMM( b3MulMM( rotationMatrix, bodySim->invInertiaLocal ), b3Transpose( rotationMatrix ) );
+	}
+	else
+	{
+		bodySim->invInertiaLocal = b3Mat3_zero;
+		bodySim->invInertiaWorld = b3Mat3_zero;
+	}
+
+	// Apply fixed rotation
+	if ( ( bodySim->flags & b3_fixedRotation ) == b3_fixedRotation )
+	{
+		body->inertia = b3Mat3_zero;
+		bodySim->invInertiaLocal = b3Mat3_zero;
+		bodySim->invInertiaWorld = b3Mat3_zero;
+	}
+
+	// Update extents using supplied mass center.
+	bodySim->minExtent = B3_HUGE;
+	bodySim->maxExtent = b3Vec3_zero;
+	int shapeId = body->headShapeId;
+	while ( shapeId != B3_NULL_INDEX )
+	{
+		const b3Shape* s = b3Array_Get( world->shapes, shapeId );
+		b3ShapeExtent extent = b3ComputeShapeExtent( s, massData.center );
+		bodySim->minExtent = b3MinFloat( bodySim->minExtent, extent.minExtent );
+		bodySim->maxExtent = b3Max( bodySim->maxExtent, extent.maxExtent );
+		shapeId = s->nextShapeId;
+	}
 }
 
-b2MassData b2Body_GetMassData( b2BodyId bodyId )
+b3MassData b3Body_GetMassData( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
-	b2MassData massData = { body->mass, bodySim->localCenter, body->inertia };
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
+	b3MassData massData = { body->mass, bodySim->localCenter, body->inertia };
 	return massData;
 }
 
-void b2Body_ApplyMassFromShapes( b2BodyId bodyId )
+void b3Body_ApplyMassFromShapes( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodyApplyMassFromShapes, bodyId );
+	B3_REC( world, BodyApplyMassFromShapes, bodyId );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2UpdateBodyMassData( world, body );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3UpdateBodyMassData( world, body );
 }
 
-void b2Body_SetLinearDamping( b2BodyId bodyId, float linearDamping )
+void b3Body_SetLinearDamping( b3BodyId bodyId, float linearDamping )
 {
-	B2_ASSERT( b2IsValidFloat( linearDamping ) && linearDamping >= 0.0f );
+	B3_ASSERT( b3IsValidFloat( linearDamping ) && linearDamping >= 0.0f );
 
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodySetLinearDamping, bodyId, linearDamping );
+	B3_REC( world, BodySetLinearDamping, bodyId, linearDamping );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
 	bodySim->linearDamping = linearDamping;
 }
 
-float b2Body_GetLinearDamping( b2BodyId bodyId )
+float b3Body_GetLinearDamping( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
 	return bodySim->linearDamping;
 }
 
-void b2Body_SetAngularDamping( b2BodyId bodyId, float angularDamping )
+void b3Body_SetAngularDamping( b3BodyId bodyId, float angularDamping )
 {
-	B2_ASSERT( b2IsValidFloat( angularDamping ) && angularDamping >= 0.0f );
+	B3_ASSERT( b3IsValidFloat( angularDamping ) && angularDamping >= 0.0f );
 
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodySetAngularDamping, bodyId, angularDamping );
+	B3_REC( world, BodySetAngularDamping, bodyId, angularDamping );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
 	bodySim->angularDamping = angularDamping;
 }
 
-float b2Body_GetAngularDamping( b2BodyId bodyId )
+float b3Body_GetAngularDamping( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
 	return bodySim->angularDamping;
 }
 
-void b2Body_SetGravityScale( b2BodyId bodyId, float gravityScale )
+void b3Body_SetGravityScale( b3BodyId bodyId, float gravityScale )
 {
-	B2_ASSERT( b2Body_IsValid( bodyId ) );
-	B2_ASSERT( b2IsValidFloat( gravityScale ) );
+	B3_ASSERT( b3Body_IsValid( bodyId ) );
+	B3_ASSERT( b3IsValidFloat( gravityScale ) );
 
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodySetGravityScale, bodyId, gravityScale );
+	B3_REC( world, BodySetGravityScale, bodyId, gravityScale );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
 	bodySim->gravityScale = gravityScale;
 }
 
-float b2Body_GetGravityScale( b2BodyId bodyId )
+float b3Body_GetGravityScale( b3BodyId bodyId )
 {
-	B2_ASSERT( b2Body_IsValid( bodyId ) );
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
+	B3_ASSERT( b3Body_IsValid( bodyId ) );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	b3BodySim* bodySim = b3GetBodySim( world, body );
 	return bodySim->gravityScale;
 }
 
-bool b2Body_IsAwake( b2BodyId bodyId )
+bool b3Body_IsAwake( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	return body->setIndex == b2_awakeSet;
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	return body->setIndex == b3_awakeSet;
 }
 
-void b2Body_SetAwake( b2BodyId bodyId, bool awake )
+void b3Body_SetAwake( b3BodyId bodyId, bool awake )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodySetAwake, bodyId, awake );
+	B3_REC( world, BodySetAwake, bodyId, awake );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	world->locked = true;
 
-	if ( awake && body->setIndex >= b2_firstSleepingSet )
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+
+	if ( awake && body->setIndex >= b3_firstSleepingSet )
 	{
-		b2WakeBody( world, body );
+		b3WakeBody( world, body );
 	}
-	else if ( awake == false && body->setIndex == b2_awakeSet )
+	else if ( awake == false && body->setIndex == b3_awakeSet )
 	{
-		b2Island* island = b2Array_Get( world->islands, body->islandId );
+		b3Island* island = b3Array_Get( world->islands, body->islandId );
 		if ( island->constraintRemoveCount > 0 )
 		{
 			// Must split the island before sleeping. This is expensive.
-			b2SplitIsland( world, body->islandId );
+			b3SplitIsland( world, body->islandId );
 		}
 
-		b2TrySleepIsland( world, body->islandId );
+		b3TrySleepIsland( world, body->islandId );
 	}
+
+	world->locked = false;
 }
 
-void b2Body_WakeTouching( b2BodyId bodyId )
+bool b3Body_IsEnabled( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodyWakeTouching, bodyId );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-
-	int contactKey = body->headContactKey;
-	while ( contactKey != B2_NULL_INDEX )
-	{
-		int contactId = contactKey >> 1;
-		int edgeIndex = contactKey & 1;
-
-		b2Contact* contact = b2Array_Get( world->contacts, contactId );
-		b2Shape* shapeA = b2Array_Get( world->shapes, contact->shapeIdA );
-		b2Shape* shapeB = b2Array_Get( world->shapes, contact->shapeIdB );
-
-		if ( shapeA->bodyId == bodyId.index1 - 1 )
-		{
-			b2Body* otherBody = b2Array_Get( world->bodies, shapeB->bodyId );
-			b2WakeBody( world, otherBody );
-		}
-		else
-		{
-			b2Body* otherBody = b2Array_Get( world->bodies, shapeA->bodyId );
-			b2WakeBody( world, otherBody );
-		}
-
-		contactKey = contact->edges[edgeIndex].nextKey;
-	}
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	return body->setIndex != b3_disabledSet;
 }
 
-bool b2Body_IsEnabled( b2BodyId bodyId )
+bool b3Body_IsSleepEnabled( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	return body->setIndex != b2_disabledSet;
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	return ( body->flags & b3_enableSleep ) == b3_enableSleep;
 }
 
-bool b2Body_IsSleepEnabled( b2BodyId bodyId )
+void b3Body_SetSleepThreshold( b3BodyId bodyId, float sleepThreshold )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	return ( body->flags & b2_enableSleep ) == b2_enableSleep;
-}
+	b3World* world = b3GetWorld( bodyId.world0 );
 
-void b2Body_SetSleepThreshold( b2BodyId bodyId, float sleepThreshold )
-{
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodySetSleepThreshold, bodyId, sleepThreshold );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	B3_REC( world, BodySetSleepThreshold, bodyId, sleepThreshold );
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	body->sleepThreshold = sleepThreshold;
 }
 
-float b2Body_GetSleepThreshold( b2BodyId bodyId )
+float b3Body_GetSleepThreshold( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	return body->sleepThreshold;
 }
 
-void b2Body_EnableSleep( b2BodyId bodyId, bool enableSleep )
+void b3Body_EnableSleep( b3BodyId bodyId, bool enableSleep )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodyEnableSleep, bodyId, enableSleep );
+	B3_REC( world, BodyEnableSleep, bodyId, enableSleep );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 
-	bool flag = ( body->flags & b2_enableSleep ) == b2_enableSleep;
+	bool flag = ( body->flags & b3_enableSleep ) == b3_enableSleep;
 	if ( enableSleep == flag )
 	{
 		return;
 	}
 
-	body->flags = enableSleep ? body->flags | b2_enableSleep : body->flags & ~b2_enableSleep;
-	b2SyncBodyFlags( world, body );
+	world->locked = true;
+
+	body->flags = enableSleep ? body->flags | b3_enableSleep : body->flags & ~b3_enableSleep;
+	b3SyncBodyFlags( world, body );
 
 	if ( enableSleep == false )
 	{
-		b2WakeBody( world, body );
+		b3WakeBody( world, body );
 	}
+
+	world->locked = false;
 }
 
 // Disabling a body requires a lot of detailed bookkeeping, but it is a valuable feature.
-// The most challenging aspect is that joints may connect to bodies that are not disabled.
-void b2Body_Disable( b2BodyId bodyId )
+// The most challenging aspect that joints may connect to bodies that are not disabled.
+void b3Body_Disable( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodyDisable, bodyId );
+	B3_REC( world, BodyDisable, bodyId );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	if ( body->setIndex == b2_disabledSet )
+	world->locked = true;
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	if ( body->setIndex == b3_disabledSet )
 	{
+		world->locked = false;
 		return;
 	}
 
 	// Destroy contacts and wake bodies touching this body. This avoid floating bodies.
 	// This is necessary even for static bodies.
 	bool wakeBodies = true;
-	b2DestroyBodyContacts( world, body, wakeBodies );
+	b3DestroyBodyContacts( world, body, wakeBodies );
 
 	// The current solver set of the body
-	b2SolverSet* set = b2Array_Get( world->solverSets, body->setIndex );
+	b3SolverSet* set = b3Array_Get( world->solverSets, body->setIndex );
 
 	// Disabled bodies and connected joints are moved to the disabled set
-	b2SolverSet* disabledSet = b2Array_Get( world->solverSets, b2_disabledSet );
+	b3SolverSet* disabledSet = b3Array_Get( world->solverSets, b3_disabledSet );
 
 	// Unlink joints and transfer them to the disabled set
 	int jointKey = body->headJointKey;
-	while ( jointKey != B2_NULL_INDEX )
+	while ( jointKey != B3_NULL_INDEX )
 	{
 		int jointId = jointKey >> 1;
 		int edgeIndex = jointKey & 1;
 
-		b2Joint* joint = b2Array_Get( world->joints, jointId );
+		b3Joint* joint = b3Array_Get( world->joints, jointId );
 		jointKey = joint->edges[edgeIndex].nextKey;
 
 		// joint may already be disabled by other body
-		if ( joint->setIndex == b2_disabledSet )
+		if ( joint->setIndex == b3_disabledSet )
 		{
 			continue;
 		}
 
-		B2_ASSERT( joint->setIndex == set->setIndex || set->setIndex == b2_staticSet );
+		B3_ASSERT( joint->setIndex == set->setIndex || set->setIndex == b3_staticSet );
 
 		// Remove joint from island
-		b2UnlinkJoint( world, joint );
+		b3UnlinkJoint( world, joint );
 
 		// Transfer joint to disabled set
-		b2SolverSet* jointSet = b2Array_Get( world->solverSets, joint->setIndex );
-		b2TransferJoint( world, disabledSet, jointSet, joint );
+		b3SolverSet* jointSet = b3Array_Get( world->solverSets, joint->setIndex );
+		b3TransferJoint( world, disabledSet, jointSet, joint );
 	}
 
 	// Remove shapes from broad-phase
 	int shapeId = body->headShapeId;
-	while ( shapeId != B2_NULL_INDEX )
+	while ( shapeId != B3_NULL_INDEX )
 	{
-		b2Shape* shape = b2Array_Get( world->shapes, shapeId );
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
 		shapeId = shape->nextShapeId;
-		b2DestroyShapeProxy( shape, &world->broadPhase );
+		b3DestroyShapeProxy( shape, &world->broadPhase );
 	}
 
 	// Disabled bodies are not in an island. If the island becomes empty it will be destroyed.
-	b2RemoveBodyFromIsland( world, body );
+	b3RemoveBodyFromIsland( world, body );
 
 	// Transfer body sim
-	b2TransferBody( world, disabledSet, set, body );
+	b3TransferBody( world, disabledSet, set, body );
 
-	b2ValidateConnectivity( world );
-	b2ValidateSolverSets( world );
+	b3ValidateConnectivity( world );
+	b3ValidateSolverSets( world );
+
+	world->locked = false;
 }
 
-void b2Body_Enable( b2BodyId bodyId )
+void b3Body_Enable( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodyEnable, bodyId );
+	B3_REC( world, BodyEnable, bodyId );
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	if ( body->setIndex != b2_disabledSet )
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	if ( body->setIndex != b3_disabledSet )
 	{
 		return;
 	}
 
-	b2SolverSet* disabledSet = b2Array_Get( world->solverSets, b2_disabledSet );
-	int setId = body->type == b2_staticBody ? b2_staticSet : b2_awakeSet;
-	b2SolverSet* targetSet = b2Array_Get( world->solverSets, setId );
+	b3SolverSet* disabledSet = b3Array_Get( world->solverSets, b3_disabledSet );
+	int setId = body->type == b3_staticBody ? b3_staticSet : b3_awakeSet;
+	b3SolverSet* targetSet = b3Array_Get( world->solverSets, setId );
 
-	b2TransferBody( world, targetSet, disabledSet, body );
+	b3TransferBody( world, targetSet, disabledSet, body );
 
-	b2WorldTransform transform = b2GetBodyTransformQuick( world, body );
+	b3WorldTransform transform = b3GetBodyTransformQuick( world, body );
 
 	// Add shapes to broad-phase
-	b2BodyType proxyType = body->type;
+	b3BodyType proxyType = body->type;
 	bool forcePairCreation = true;
 	int shapeId = body->headShapeId;
-	while ( shapeId != B2_NULL_INDEX )
+	while ( shapeId != B3_NULL_INDEX )
 	{
-		b2Shape* shape = b2Array_Get( world->shapes, shapeId );
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
 		shapeId = shape->nextShapeId;
 
-		b2CreateShapeProxy( shape, &world->broadPhase, proxyType, transform, forcePairCreation );
+		b3CreateShapeProxy( shape, &world->broadPhase, proxyType, transform, forcePairCreation );
 	}
 
-	if ( setId != b2_staticSet )
+	if ( setId != b3_staticSet )
 	{
-		b2CreateIslandForBody( world, setId, body );
+		b3CreateIslandForBody( world, setId, body );
 	}
 
 	// Transfer joints. If the other body is disabled, don't transfer.
 	// If the other body is sleeping, wake it.
 	int jointKey = body->headJointKey;
-	while ( jointKey != B2_NULL_INDEX )
+	while ( jointKey != B3_NULL_INDEX )
 	{
 		int jointId = jointKey >> 1;
 		int edgeIndex = jointKey & 1;
 
-		b2Joint* joint = b2Array_Get( world->joints, jointId );
-		B2_ASSERT( joint->setIndex == b2_disabledSet );
-		B2_ASSERT( joint->islandId == B2_NULL_INDEX );
+		b3Joint* joint = b3Array_Get( world->joints, jointId );
+		B3_ASSERT( joint->setIndex == b3_disabledSet );
+		B3_ASSERT( joint->islandId == B3_NULL_INDEX );
 
 		jointKey = joint->edges[edgeIndex].nextKey;
 
-		b2Body* bodyA = b2Array_Get( world->bodies, joint->edges[0].bodyId );
-		b2Body* bodyB = b2Array_Get( world->bodies, joint->edges[1].bodyId );
+		b3Body* bodyA = b3Array_Get( world->bodies, joint->edges[0].bodyId );
+		b3Body* bodyB = b3Array_Get( world->bodies, joint->edges[1].bodyId );
 
-		if ( bodyA->setIndex == b2_disabledSet || bodyB->setIndex == b2_disabledSet )
+		if ( bodyA->setIndex == b3_disabledSet || bodyB->setIndex == b3_disabledSet )
 		{
 			// one body is still disabled
 			continue;
@@ -1784,11 +2241,11 @@ void b2Body_Enable( b2BodyId bodyId )
 
 		// Transfer joint first
 		int jointSetId;
-		if ( bodyA->setIndex == b2_staticSet && bodyB->setIndex == b2_staticSet )
+		if ( bodyA->setIndex == b3_staticSet && bodyB->setIndex == b3_staticSet )
 		{
-			jointSetId = b2_staticSet;
+			jointSetId = b3_staticSet;
 		}
-		else if ( bodyA->setIndex == b2_staticSet )
+		else if ( bodyA->setIndex == b3_staticSet )
 		{
 			jointSetId = bodyB->setIndex;
 		}
@@ -1797,190 +2254,208 @@ void b2Body_Enable( b2BodyId bodyId )
 			jointSetId = bodyA->setIndex;
 		}
 
-		b2SolverSet* jointSet = b2Array_Get( world->solverSets, jointSetId );
-		b2TransferJoint( world, jointSet, disabledSet, joint );
+		b3SolverSet* jointSet = b3Array_Get( world->solverSets, jointSetId );
+		b3TransferJoint( world, jointSet, disabledSet, joint );
 
 		// Now that the joint is in the correct set, I can link the joint in the island.
-		if ( jointSetId != b2_staticSet )
+		if ( jointSetId != b3_staticSet )
 		{
-			b2LinkJoint( world, joint );
+			b3LinkJoint( world, joint );
 		}
 	}
 
-	b2ValidateSolverSets( world );
+	b3ValidateSolverSets( world );
 }
 
-void b2Body_SetMotionLocks( b2BodyId bodyId, b2MotionLocks locks )
+void b3Body_SetMotionLocks( b3BodyId bodyId, b3MotionLocks locks )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodySetMotionLocks, bodyId, locks );
+	B3_REC( world, BodySetMotionLocks, bodyId, locks );
 
-	uint32_t newFlags = 0;
-	newFlags |= locks.linearX ? b2_lockLinearX : 0;
-	newFlags |= locks.linearY ? b2_lockLinearY : 0;
-	newFlags |= locks.angularZ ? b2_lockAngularZ : 0;
+	uint32_t newLocks = 0;
+	newLocks |= locks.linearX ? b3_lockLinearX : 0;
+	newLocks |= locks.linearY ? b3_lockLinearY : 0;
+	newLocks |= locks.linearZ ? b3_lockLinearZ : 0;
+	newLocks |= locks.angularX ? b3_lockAngularX : 0;
+	newLocks |= locks.angularY ? b3_lockAngularY : 0;
+	newLocks |= locks.angularZ ? b3_lockAngularZ : 0;
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	if ( ( body->flags & b2_allLocks ) != newFlags )
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	if ( ( body->flags & b3_allLocks ) == newLocks )
 	{
-		body->flags &= ~b2_allLocks;
-		body->flags |= newFlags;
+		return;
+	}
 
-		b2SyncBodyFlags( world, body );
+	bool fixedRotation1 = ( body->flags & b3_fixedRotation ) == b3_fixedRotation;
+	bool fixedRotation2 = ( newLocks & b3_fixedRotation ) == b3_fixedRotation;
 
-		b2BodyState* state = b2GetBodyState( world, body );
+	body->flags &= ~b3_allLocks;
+	body->flags |= newLocks;
 
-		if ( state != NULL )
+	b3SyncBodyFlags( world, body );
+
+	b3BodyState* state = b3GetBodyState( world, body );
+
+	if ( state != NULL )
+	{
+		if ( locks.linearX )
 		{
-			if ( locks.linearX )
-			{
-				state->linearVelocity.x = 0.0f;
-			}
-
-			if ( locks.linearY )
-			{
-				state->linearVelocity.y = 0.0f;
-			}
-
-			if ( locks.angularZ )
-			{
-				state->angularVelocity = 0.0f;
-			}
+			state->linearVelocity.x = 0.0f;
 		}
+
+		if ( locks.linearY )
+		{
+			state->linearVelocity.y = 0.0f;
+		}
+
+		if ( locks.linearZ )
+		{
+			state->linearVelocity.z = 0.0f;
+		}
+
+		if ( locks.angularX )
+		{
+			state->angularVelocity.x = 0.0f;
+		}
+
+		if ( locks.angularY )
+		{
+			state->angularVelocity.y = 0.0f;
+		}
+
+		if ( locks.angularZ )
+		{
+			state->angularVelocity.z = 0.0f;
+		}
+	}
+
+	if ( fixedRotation1 != fixedRotation2 )
+	{
+		b3UpdateBodyMassData( world, body );
 	}
 }
 
-b2MotionLocks b2Body_GetMotionLocks( b2BodyId bodyId )
+b3MotionLocks b3Body_GetMotionLocks( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 
-	b2MotionLocks locks;
-	locks.linearX = ( body->flags & b2_lockLinearX );
-	locks.linearY = ( body->flags & b2_lockLinearY );
-	locks.angularZ = ( body->flags & b2_lockAngularZ );
+	b3MotionLocks locks;
+	locks.linearX = ( body->flags & b3_lockLinearX );
+	locks.linearY = ( body->flags & b3_lockLinearY );
+	locks.linearZ = ( body->flags & b3_lockLinearZ );
+	locks.angularX = ( body->flags & b3_lockAngularX );
+	locks.angularY = ( body->flags & b3_lockAngularY );
+	locks.angularZ = ( body->flags & b3_lockAngularZ );
 	return locks;
 }
 
-void b2Body_SetBullet( b2BodyId bodyId, bool flag )
+void b3Body_SetBullet( b3BodyId bodyId, bool flag )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodySetBullet, bodyId, flag );
+	B3_REC( world, BodySetBullet, bodyId, flag );
 
-	uint32_t newFlag = flag ? b2_isBullet : 0;
+	uint32_t newFlag = flag ? b3_isBullet : 0;
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	if ((body->flags & b2_isBullet) == newFlag)
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	if ( ( body->flags & b3_isBullet ) == newFlag )
 	{
 		return;
 	}
 
-	body->flags &= ~b2_isBullet;
+	body->flags &= ~b3_isBullet;
 	body->flags |= newFlag;
 
-	b2SyncBodyFlags( world, body );
+	b3SyncBodyFlags( world, body );
 }
 
-bool b2Body_IsBullet( b2BodyId bodyId )
+bool b3Body_IsBullet( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	b2BodySim* bodySim = b2GetBodySim( world, body );
-	return ( bodySim->flags & b2_isBullet ) != 0;
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	return ( body->flags & b3_isBullet ) != 0;
 }
 
-void b2Body_EnableContactRecycling( b2BodyId bodyId, bool flag )
+void b3Body_EnableContactRecycling( b3BodyId bodyId, bool flag )
 {
-	b2World* world = b2GetWorldLocked( bodyId.world0 );
+	b3World* world = b3GetUnlockedWorld( bodyId.world0 );
 	if ( world == NULL )
 	{
 		return;
 	}
 
-	B2_REC( world, BodyEnableContactRecycling, bodyId, flag );
+	B3_REC( world, BodyEnableContactRecycling, bodyId, flag );
 
-	uint32_t newFlag = flag ? b2_bodyEnableContactRecycling : 0;
+	uint32_t newFlag = flag ? b3_bodyEnableContactRecycling : 0;
 
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	if ( ( body->flags & b2_bodyEnableContactRecycling ) == newFlag )
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	if ( ( body->flags & b3_bodyEnableContactRecycling ) == newFlag )
 	{
 		return;
 	}
 
-	body->flags &= ~b2_bodyEnableContactRecycling;
+	body->flags &= ~b3_bodyEnableContactRecycling;
 	body->flags |= newFlag;
 
-	b2SyncBodyFlags( world, body );
+	b3SyncBodyFlags( world, body );
 }
 
-bool b2Body_IsContactRecyclingEnabled( b2BodyId bodyId )
+bool b3Body_IsContactRecyclingEnabled( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	return ( body->flags & b2_bodyEnableContactRecycling ) != 0;
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
+	return ( body->flags & b3_bodyEnableContactRecycling ) != 0;
 }
 
-void b2Body_EnableContactEvents( b2BodyId bodyId, bool flag )
+void b3Body_EnableHitEvents( b3BodyId bodyId, bool enableHitEvents )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodyEnableContactEvents, bodyId, flag );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+
+	B3_REC( world, BodyEnableHitEvents, bodyId, enableHitEvents );
+
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	int shapeId = body->headShapeId;
-	while ( shapeId != B2_NULL_INDEX )
+	while ( shapeId != B3_NULL_INDEX )
 	{
-		b2Shape* shape = b2Array_Get( world->shapes, shapeId );
-		shape->enableContactEvents = flag;
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
+		shape->enableHitEvents = enableHitEvents;
 		shapeId = shape->nextShapeId;
 	}
 }
 
-void b2Body_EnableHitEvents( b2BodyId bodyId, bool flag )
+b3WorldId b3Body_GetWorld( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	B2_REC( world, BodyEnableHitEvents, bodyId, flag );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
-	int shapeId = body->headShapeId;
-	while ( shapeId != B2_NULL_INDEX )
-	{
-		b2Shape* shape = b2Array_Get( world->shapes, shapeId );
-		shape->enableHitEvents = flag;
-		shapeId = shape->nextShapeId;
-	}
+	b3World* world = b3GetWorld( bodyId.world0 );
+	return (b3WorldId){ (uint16_t)( bodyId.world0 + 1 ), world->generation };
 }
 
-b2WorldId b2Body_GetWorld( b2BodyId bodyId )
+int b3Body_GetShapeCount( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	return (b2WorldId){ bodyId.world0 + 1, world->generation };
-}
-
-int b2Body_GetShapeCount( b2BodyId bodyId )
-{
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	return body->shapeCount;
 }
 
-int b2Body_GetShapes( b2BodyId bodyId, b2ShapeId* shapeArray, int capacity )
+int b3Body_GetShapes( b3BodyId bodyId, b3ShapeId* shapeArray, int capacity )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	int shapeId = body->headShapeId;
 	int shapeCount = 0;
-	while ( shapeId != B2_NULL_INDEX && shapeCount < capacity )
+	while ( shapeId != B3_NULL_INDEX && shapeCount < capacity )
 	{
-		b2Shape* shape = b2Array_Get( world->shapes, shapeId );
-		b2ShapeId id = { shape->id + 1, bodyId.world0, shape->generation };
+		b3Shape* shape = b3Array_Get( world->shapes, shapeId );
+		b3ShapeId id = { shape->id + 1, bodyId.world0, shape->generation };
 		shapeArray[shapeCount] = id;
 		shapeCount += 1;
 
@@ -1990,28 +2465,28 @@ int b2Body_GetShapes( b2BodyId bodyId, b2ShapeId* shapeArray, int capacity )
 	return shapeCount;
 }
 
-int b2Body_GetJointCount( b2BodyId bodyId )
+int b3Body_GetJointCount( b3BodyId bodyId )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	return body->jointCount;
 }
 
-int b2Body_GetJoints( b2BodyId bodyId, b2JointId* jointArray, int capacity )
+int b3Body_GetJoints( b3BodyId bodyId, b3JointId* jointArray, int capacity )
 {
-	b2World* world = b2GetWorld( bodyId.world0 );
-	b2Body* body = b2GetBodyFullId( world, bodyId );
+	b3World* world = b3GetWorld( bodyId.world0 );
+	b3Body* body = b3GetBodyFullId( world, bodyId );
 	int jointKey = body->headJointKey;
 
 	int jointCount = 0;
-	while ( jointKey != B2_NULL_INDEX && jointCount < capacity )
+	while ( jointKey != B3_NULL_INDEX && jointCount < capacity )
 	{
 		int jointId = jointKey >> 1;
 		int edgeIndex = jointKey & 1;
 
-		b2Joint* joint = b2Array_Get( world->joints, jointId );
+		b3Joint* joint = b3Array_Get( world->joints, jointId );
 
-		b2JointId id = { jointId + 1, bodyId.world0, joint->generation };
+		b3JointId id = { jointId + 1, bodyId.world0, joint->generation };
 		jointArray[jointCount] = id;
 		jointCount += 1;
 
@@ -2021,9 +2496,9 @@ int b2Body_GetJoints( b2BodyId bodyId, b2JointId* jointArray, int capacity )
 	return jointCount;
 }
 
-bool b2ShouldBodiesCollide( b2World* world, b2Body* bodyA, b2Body* bodyB )
+bool b3ShouldBodiesCollide( b3World* world, b3Body* bodyA, b3Body* bodyB )
 {
-	if ( bodyA->type != b2_dynamicBody && bodyB->type != b2_dynamicBody )
+	if ( bodyA->type != b3_dynamicBody && bodyB->type != b3_dynamicBody )
 	{
 		return false;
 	}
@@ -2041,13 +2516,13 @@ bool b2ShouldBodiesCollide( b2World* world, b2Body* bodyA, b2Body* bodyB )
 		otherBodyId = bodyA->id;
 	}
 
-	while ( jointKey != B2_NULL_INDEX )
+	while ( jointKey != B3_NULL_INDEX )
 	{
 		int jointId = jointKey >> 1;
 		int edgeIndex = jointKey & 1;
 		int otherEdgeIndex = edgeIndex ^ 1;
 
-		b2Joint* joint = b2Array_Get( world->joints, jointId );
+		b3Joint* joint = b3Array_Get( world->joints, jointId );
 		if ( joint->collideConnected == false && joint->edges[otherEdgeIndex].bodyId == otherBodyId )
 		{
 			return false;

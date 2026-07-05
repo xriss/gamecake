@@ -1,120 +1,103 @@
-#include "GLFW/glfw3.h"
+// SPDX-FileCopyrightText: 2025 Erin Catto
+// SPDX-License-Identifier: MIT
+
 #include "imgui.h"
+#include "mesh_loader.h"
 #include "sample.h"
+#include "gfx/draw.h"
 
-#include "box2d/box2d.h"
+#include "box3d/box3d.h"
 
-class BadSteiner : public Sample
+#include <vector>
+
+class DumpLoader : public Sample
 {
 public:
-	explicit BadSteiner( SampleContext* context )
+	explicit DumpLoader( SampleContext* context )
 		: Sample( context )
 	{
-		if ( m_context->restart == false )
+		if ( context->restart == false )
 		{
-			m_context->camera.center = { 0.0f, 1.75f };
-			m_context->camera.zoom = 2.5f;
+			m_camera->SetView( 45.0f, 30.0f, 15.0f, { 0.0f, 2.0f, 0.0f } );
+			// m_camera->SetView( 45.0f, 30.0f, 300.0f, { 3910.62109f, 9862.50293f, 875.395081f } );
 		}
 
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
+		b3SetLengthUnitsPerMeter( 1.0f );
 
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Segment segment = { { -100.0f, 0.0f }, { 100.0f, 0.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
+		const char* dumpPrefix = "data/dumps/single_box/";
+
+#include "dumps/single_box/box3d_dump.inl"
+	}
+
+	~DumpLoader() override
+	{
+		for ( b3MeshData* md : m_meshes )
+		{
+			b3DestroyMesh( md );
 		}
 
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.position = { -48.0f, 62.0f };
-			b2BodyId bodyId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-
-			b2Vec2 points[3] = {
-				{ 48.7599983f, -60.5699997f },
-				{ 48.7400017f, -60.5400009f },
-				{ 48.6800003f, -60.5600014f },
-			};
-
-			b2Hull hull = b2ComputeHull( points, 3 );
-			b2Polygon poly = b2MakePolygon( &hull, 0.0f );
-			b2CreatePolygonShape( bodyId, &shapeDef, &poly );
-		}
+		b3SetLengthUnitsPerMeter( 1.0f );
 	}
 
 	static Sample* Create( SampleContext* context )
 	{
-		return new BadSteiner( context );
+		return new DumpLoader( context );
 	}
+
+	std::vector<b3MeshData*> m_meshes;
 };
 
-static int sampleBadSteiner = RegisterSample( "Issues", "Bad Steiner", BadSteiner::Create );
+static int sampleDumpLoader = RegisterSample( "Issues", "Dump Loader", DumpLoader::Create );
 
-class DisableCrash : public Sample
+class Crash : public Sample
 {
 public:
-	explicit DisableCrash( SampleContext* context )
+	explicit Crash( SampleContext* context )
 		: Sample( context )
 	{
-		if ( m_context->restart == false )
+		if ( context->restart == false )
 		{
-			m_context->camera.center = { 0.8f, 6.4f };
-			m_context->camera.zoom = 25.0f * 0.4f;
+			m_camera->SetView( 45.0f, 30.0f, 15.0f, { 0.0f, 2.0f, 0.0f } );
 		}
 
-		m_isEnabled = true;
-
-		// Define attachment
+		b3BodyId groundId;
 		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.position = { -2.0f, 3.0f };
-			bodyDef.isEnabled = m_isEnabled;
-			m_attachmentId = b2CreateBody( m_worldId, &bodyDef );
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.position = { 0.0f, -1.0f, 0.0f };
+			groundId = b3CreateBody( m_worldId, &bodyDef );
 
-			b2Polygon box = b2MakeBox( 0.5f, 2.0f );
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2CreatePolygonShape( m_attachmentId, &shapeDef, &box );
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			m_gridMesh = b3CreateGridMesh( 20, 20, 2, 0, true );
+			b3CreateMeshShape( groundId, &shapeDef, m_gridMesh, b3Vec3_one );
 		}
 
-		// Define platform
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.position = { -4.0f, 5.0f };
-			m_platformId = b2CreateBody( m_worldId, &bodyDef );
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		bodyDef.type = b3_dynamicBody;
+		bodyDef.position = { 2.0f, 4.0f, 0.0f };
+		m_bodyId1 = b3CreateBody( m_worldId, &bodyDef );
 
-			b2Polygon box = b2MakeOffsetBox( 0.5f, 4.0f, { 4.0f, 0.0f }, b2MakeRot( 0.5f * B2_PI ) );
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+		b3BoxHull box = b3MakeBoxHull( 0.5f, 0.5f, 0.5f );
+		b3CreateHullShape( m_bodyId1, &shapeDef, &box.base );
 
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2CreatePolygonShape( m_platformId, &shapeDef, &box );
+		bodyDef.position = { -2.0f, 4.0f, 0.0f };
+		m_bodyId2 = b3CreateBody( m_worldId, &bodyDef );
+		b3CreateHullShape( m_bodyId2, &shapeDef, &box.base );
+	}
 
-			b2RevoluteJointDef revoluteDef = b2DefaultRevoluteJointDef();
-			b2Pos pivot = { -2.0f, 5.0f };
-			revoluteDef.base.bodyIdA = m_attachmentId;
-			revoluteDef.base.bodyIdB = m_platformId;
-			revoluteDef.base.localFrameA.p = b2Body_GetLocalPoint( m_attachmentId, pivot );
-			revoluteDef.base.localFrameB.p = b2Body_GetLocalPoint( m_platformId, pivot );
-			revoluteDef.maxMotorTorque = 50.0f;
-			revoluteDef.enableMotor = true;
-			b2CreateRevoluteJoint( m_worldId, &revoluteDef );
-		}
+	~Crash() override
+	{
+		b3DestroyMesh( m_gridMesh );
 	}
 
 	bool DrawControls() override
 	{
-		if ( ImGui::Checkbox( "Enable", &m_isEnabled ) )
+		if ( ImGui::Button( "Add Joint" ) )
 		{
-			if ( m_isEnabled )
-			{
-				b2Body_Enable( m_attachmentId );
-			}
-			else
-			{
-				b2Body_Disable( m_attachmentId );
-			}
+			b3WeldJointDef jointDef = b3DefaultWeldJointDef();
+			jointDef.base.bodyIdA = m_bodyId1;
+			jointDef.base.bodyIdB = m_bodyId2;
+			b3CreateWeldJoint( m_worldId, &jointDef );
 		}
 
 		return true;
@@ -122,386 +105,428 @@ public:
 
 	static Sample* Create( SampleContext* context )
 	{
-		return new DisableCrash( context );
+		return new Crash( context );
 	}
 
-	b2BodyId m_attachmentId;
-	b2BodyId m_platformId;
-	bool m_isEnabled;
+	b3BodyId m_bodyId1;
+	b3BodyId m_bodyId2;
+	b3MeshData* m_gridMesh;
 };
 
-static int sampleDisableCrash = RegisterSample( "Issues", "Disable", DisableCrash::Create );
+static int sampleCrash = RegisterSample( "Issues", "Crash", Crash::Create );
 
-class Crash01 : public Sample
+class MultiplePrismatic : public Sample
 {
 public:
-	explicit Crash01( SampleContext* context )
+	explicit MultiplePrismatic( SampleContext* context )
+		: Sample( context )
+	{
+		if ( context->restart == false )
+		{
+			m_camera->SetView( 0.0f, 0.0f, 25.0f, { 0.0f, 5.0f, 0.0f } );
+		}
+
+		b3BodyId groundId;
+		{
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			groundId = b3CreateBody( m_worldId, &bodyDef );
+		}
+
+		b3ShapeDef shapeDef = b3DefaultShapeDef();
+		b3BoxHull box = b3MakeBoxHull( 0.5f, 0.5f, 0.5f );
+		b3PrismaticJointDef jointDef = b3DefaultPrismaticJointDef();
+		jointDef.base.bodyIdA = groundId;
+		jointDef.base.localFrameA.p = { 0.0f, 0.0f, 0.0f };
+		jointDef.base.localFrameB.p = { 0.0f, -0.6f, 0.0f };
+		jointDef.base.drawScale = 2.0f;
+		jointDef.base.constraintHertz = 240.0f;
+		jointDef.lowerTranslation = -6.0f;
+		jointDef.upperTranslation = 6.0f;
+		jointDef.enableLimit = true;
+
+		for ( int i = 0; i < 6; ++i )
+		{
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.position = { 0.0f, 0.6f + 1.2f * i, 0.0f };
+			bodyDef.type = b3_dynamicBody;
+			b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+			b3CreateHullShape( bodyId, &shapeDef, &box.base );
+
+			jointDef.base.bodyIdB = bodyId;
+			b3CreatePrismaticJoint( m_worldId, &jointDef );
+
+			jointDef.base.bodyIdA = bodyId;
+			jointDef.base.localFrameA.p = { 0.0f, 0.6f, 0.0f };
+		}
+
+		// huge mouse force
+		m_mouseForceScale = 1000000.0f;
+	}
+
+	static Sample* Create( SampleContext* context )
+	{
+		return new MultiplePrismatic( context );
+	}
+};
+
+static int sampleMultiplePrismatic = RegisterSample( "Issues", "Multiple Prismatic", MultiplePrismatic::Create );
+
+class HullCrash : public Sample
+{
+public:
+	explicit HullCrash( SampleContext* context )
 		: Sample( context )
 	{
 		if ( m_context->restart == false )
 		{
-			m_context->camera.center = { 0.8f, 6.4f };
-			m_context->camera.zoom = 25.0f * 0.4f;
+			m_camera->SetView( 0.0f, 15.0f, 5.0f, b3Pos_zero );
 		}
 
-		m_type = b2_dynamicBody;
-		m_isEnabled = true;
+		m_hull = nullptr;
 
-		b2BodyId groundId = b2_nullBodyId;
+#if 0
+		// bad hull SM_Waterfall_MED_Wide_01
+		b3Vec3 points[] = {
+			{ 0.100183107, -498.925385, -1275.39966 }, { 0.100183107, -498.925415, 0.125000000 },
+			{ 0.100183107, 486.343750, 0.125000000 },  { 0.100183107, 486.343719, -1275.39966 },
+			{ -395.117462, 486.343781, -1462.43750 },  { -395.117462, 486.343750, -96.7426758 },
+			{ -395.117462, -498.925415, -96.7424469 }, { -395.117462, -498.925446, -1462.52612 },
+			{ -186.979691, 486.294891, -1462.47949 },  { -298.250000, 486.294891, 0.125000000 },
+			{ -395.121216, 486.294891, -1462.52612 },  { -186.984360, -498.913361, -1462.48413 },
+			{ -298.250000, -498.913361, 0.125000000 },
+		};
+
+#elif 1
+		b3Vec3 points[] = {
+			{ 100.000000, -142.292389, 130.826111 },  { 99.5354385, -71.3011093, 130.826111 },
+			{ 99.5930862, -80.1112213, -100.000000 }, { 100.000000, -142.292389, -100.000000 },
+			{ 99.5930862, -80.1112213, 130.826111 },
+		};
+#else
+		b3Vec3 points[] = {
+			{ -11.3861933, -24.2451687, -12.0037909 }, { -11.3889809, -24.2466526, -11.9013014 },
+			{ -11.3804407, -24.3151531, -12.0046492 }, { -11.3832273, -24.3166409, -11.9021587 },
+			{ -14.4396200, -24.3636723, -12.1324549 }, { -14.4432650, -24.3655701, -12.0299988 },
+			{ -14.4356947, -24.4337788, -12.1336164 }, { -14.4393377, -24.4356804, -12.0311594 },
+		};
+#endif
+
+		static_assert( sizeof( points ) / sizeof( points[0] ) < m_capacity, "bad" );
+
+		m_count = sizeof( points ) / sizeof( points[0] );
+		for ( int i = 0; i < m_count; ++i )
 		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.name = "ground";
-			groundId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2Segment segment = { { -20.0f, 0.0f }, { 20.0f, 0.0f } };
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
+			m_points[i] = 0.01f * points[i];
 		}
 
-		// Define attachment
+		// This shift shouldn't be necessary but I'm doing it so the hull
+		// appears on the screen.
+		// for ( int i = 0; i < m_count; ++i )
+		//{
+		//	m_points[i] -= m_points[0];
+		//	m_points[i] *= 0.01f;
+		//}
+
+		m_hull = b3CreateHull( m_points, m_count, m_count );
+
+		(void)m_hull;
+	}
+
+	~HullCrash() override
+	{
+		if ( m_hull != nullptr )
 		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = b2_dynamicBody;
-			bodyDef.position = { -2.0f, 3.0f };
-			bodyDef.name = "attach1";
-			m_attachmentId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2Polygon box = b2MakeBox( 0.5f, 2.0f );
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			shapeDef.density = 1.0f;
-			b2CreatePolygonShape( m_attachmentId, &shapeDef, &box );
-		}
-
-		// Define platform
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = m_type;
-			bodyDef.isEnabled = m_isEnabled;
-			bodyDef.position = { -4.0f, 5.0f };
-			bodyDef.name = "platform";
-			m_platformId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2Polygon box = b2MakeOffsetBox( 0.5f, 4.0f, { 4.0f, 0.0f }, b2MakeRot( 0.5f * B2_PI ) );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			shapeDef.density = 2.0f;
-			b2CreatePolygonShape( m_platformId, &shapeDef, &box );
-
-			b2RevoluteJointDef revoluteDef = b2DefaultRevoluteJointDef();
-			b2Pos pivot = { -2.0f, 5.0f };
-			revoluteDef.base.bodyIdA = m_attachmentId;
-			revoluteDef.base.bodyIdB = m_platformId;
-			revoluteDef.base.localFrameA.p = b2Body_GetLocalPoint( m_attachmentId, pivot );
-			revoluteDef.base.localFrameB.p = b2Body_GetLocalPoint( m_platformId, pivot );
-			revoluteDef.maxMotorTorque = 50.0f;
-			revoluteDef.enableMotor = true;
-			b2CreateRevoluteJoint( m_worldId, &revoluteDef );
-
-			b2PrismaticJointDef prismaticDef = b2DefaultPrismaticJointDef();
-			b2Pos anchor = { 0.0f, 5.0f };
-			prismaticDef.base.bodyIdA = groundId;
-			prismaticDef.base.bodyIdB = m_platformId;
-			prismaticDef.base.localFrameA.p = b2Body_GetLocalPoint( groundId, anchor );
-			prismaticDef.base.localFrameB.p = b2Body_GetLocalPoint( m_platformId, anchor );
-			prismaticDef.maxMotorForce = 1000.0f;
-			prismaticDef.motorSpeed = 0.0f;
-			prismaticDef.enableMotor = true;
-			prismaticDef.lowerTranslation = -10.0f;
-			prismaticDef.upperTranslation = 10.0f;
-			prismaticDef.enableLimit = true;
-
-			b2CreatePrismaticJoint( m_worldId, &prismaticDef );
+			b3DestroyHull( m_hull );
 		}
 	}
 
-	bool DrawControls() override
+	void Render() override
 	{
-		if ( ImGui::RadioButton( "Static", m_type == b2_staticBody ) )
+		if ( m_hull != nullptr )
 		{
-			m_type = b2_staticBody;
-			b2Body_SetType( m_platformId, b2_staticBody );
+			DrawHull( b3WorldTransform_identity, m_hull, MakeColor( b3_colorYellow ) );
 		}
-
-		if ( ImGui::RadioButton( "Kinematic", m_type == b2_kinematicBody ) )
+		else
 		{
-			m_type = b2_kinematicBody;
-			b2Body_SetType( m_platformId, b2_kinematicBody );
-			b2Body_SetLinearVelocity( m_platformId, { -0.1f, 0.0f } );
-		}
-
-		if ( ImGui::RadioButton( "Dynamic", m_type == b2_dynamicBody ) )
-		{
-			m_type = b2_dynamicBody;
-			b2Body_SetType( m_platformId, b2_dynamicBody );
-		}
-
-		if ( ImGui::Checkbox( "Enable", &m_isEnabled ) )
-		{
-			if ( m_isEnabled )
+			for ( int i = 0; i < m_count; ++i )
 			{
-				b2Body_Enable( m_attachmentId );
+				DrawPoint( b3ToPos( m_points[i] ), 5.0f, MakeColor( b3_colorWhite ) );
 			}
-			else
+		}
+
+		DrawAxes( b3WorldTransform_identity, 1.0f );
+
+		Sample::Render();
+	}
+
+	static Sample* Create( SampleContext* sampleContext )
+	{
+		return new HullCrash( sampleContext );
+	}
+
+	static constexpr int m_capacity = 64;
+	b3HullData* m_hull;
+	b3Vec3 m_points[m_capacity];
+	int m_count;
+};
+
+static int sampleHullCrash = RegisterSample( "Issues", "Hull Crash", HullCrash::Create );
+
+class ConvexJitter : public Sample
+{
+public:
+	explicit ConvexJitter( SampleContext* context )
+		: Sample( context )
+	{
+		if ( context->restart == false )
+		{
+			m_camera->SetView( 0.0f, 15.0f, 10.0f, { 0.0f, 2.0f, 0.0f } );
+			
+		}
+
+		AddGroundBox( 10.0f );
+
+		float s = 0.01f;
+
+		{
+			b3Vec3 b = { -459.292877f, 217.398331f, 1.00115335f };
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.position = { s * b.x, s * b.z + 2.0f, s * b.y };
+			bodyDef.rotation = { { 0.0f, -0.707106769f, 0.0f }, 0.707106769f };
+			b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+
+			constexpr int count = 16;
+			b3Vec3 points[count];
+			points[0] = { -44.8770714, -91.6598053, -1.92012548 };
+			points[1] = { -92.5001831, 51.0151291, 15.8006573 };
+			points[2] = { -91.0282211, -9.44371605, 15.6148796 };
+			points[3] = { 90.2375641, 77.3870087, 15.9356089 };
+			points[4] = { -85.5353241, 91.3750992, -1.36629653 };
+			points[5] = { 88.9092178, -87.2975464, -1.86754704 };
+			points[6] = { 83.7932816, -89.8572235, 15.4168339 };
+			points[7] = { 87.0243988, 88.9776535, -1.32423306 };
+			points[8] = { -91.6564941, -85.4949493, 15.3782759 };
+			points[9] = { -90.2922516, -87.2074127, -1.92012548 };
+			points[10] = { -87.2944870, 89.9510498, 15.9215889 };
+			points[11] = { 79.2338104, 89.9690781, 15.9724140 };
+			points[12] = { -91.6744461, 81.0823212, -1.39959598 };
+			points[13] = { 90.3452759, -76.4459610, 15.4588966 };
+			points[14] = { -87.4021912, -89.2263107, 15.3677588 };
+			points[15] = { 76.3258057, 92.0059967, 1.82873762 };
+
+			for ( int i = 0; i < count; ++i )
 			{
-				b2Body_Disable( m_attachmentId );
+				b3Vec3 p = points[i];
+				points[i] = { s * p.x, s * p.z, s * p.y };
 			}
+
+			b3HullData* hull = b3CreateHull( points, count, count );
+
+			b3CreateHullShape( bodyId, &shapeDef, hull );
+			b3DestroyHull( hull );
 		}
 
-		return true;
+		{
+			b3Vec3 b = { -402.321838f, 157.310364f, 16.8169250f };
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.position = { s * b.x, s * b.z + 2.0f, s * b.y };
+			bodyDef.rotation = { { 0.0f, -0.00152086187f, 0.0f }, 0.999998868f };
+			bodyDef.type = b3_dynamicBody;
+
+			b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			shapeDef.baseMaterial.rollingResistance = 0.1f;
+
+			constexpr int count = 18;
+			b3Vec3 points[count];
+			points[0] = { 29.5000000, 17.1488495, 0.175081104 };
+			points[1] = { 29.5000000, -17.2990532, 0.125000000 };
+			points[2] = { 29.4840164, -17.3057766, 24.0200863 };
+			points[3] = { 29.4840164, 17.1648350, 24.1781254 };
+			points[4] = { -29.1345520, 17.5529804, 0.125000000 };
+			points[5] = { -29.1345520, 17.5529804, 23.7899799 };
+			points[6] = { -29.1441040, 16.9679585, 24.3750000 };
+			points[7] = { -29.1345520, -17.2990532, 24.3750000 };
+			points[8] = { -29.1345520, -17.2990532, 0.175081253 };
+			points[9] = { 29.0720215, 17.5529785, 0.125000000 };
+			points[10] = { 29.0859070, 17.5629406, 23.8120594 };
+			points[11] = { 29.1401348, -17.2990532, 24.3750000 };
+			points[12] = { 29.1123581, 16.9722290, 24.4027710 };
+			points[13] = { 29.3944912, 17.2543602, 24.1206398 };
+			points[14] = { -29.1345520, -17.2990532, 24.0759430 };
+			points[15] = { -29.1345520, -16.9722252, 24.4027710 };
+			points[16] = { 29.1123619, -16.9722271, 24.4027729 };
+			points[17] = { 29.5000000, 17.3429642, 24.0000000 };
+
+			for ( int i = 0; i < count; ++i )
+			{
+				b3Vec3 p = points[i];
+				points[i] = { s * p.x, s * p.z, s * p.y };
+			}
+
+			b3HullData* hull = b3CreateHull( points, count, count );
+
+			b3CreateHullShape( bodyId, &shapeDef, hull );
+			b3DestroyHull( hull );
+		}
 	}
 
 	static Sample* Create( SampleContext* context )
 	{
-		return new Crash01( context );
+		return new ConvexJitter( context );
 	}
-
-	b2BodyId m_attachmentId;
-	b2BodyId m_platformId;
-	b2BodyType m_type;
-	bool m_isEnabled;
 };
 
-static int sampleBodyType = RegisterSample( "Issues", "Crash01", Crash01::Create );
+static int sampleConvexJitter = RegisterSample( "Issues", "Convex Jitter", ConvexJitter::Create );
 
-class StaticVsBulletBug : public Sample
+class SBoxMover : public Sample
 {
 public:
-	explicit StaticVsBulletBug( SampleContext* context )
+	explicit SBoxMover( SampleContext* context )
 		: Sample( context )
 	{
 		if ( m_context->restart == false )
 		{
-			m_context->camera.center = { 48.8525391, 68.1518555 };
-			m_context->camera.zoom = 100.0f * 0.5f;
+			m_camera->SetView( 45.0f, 30.0f, 12.0f, b3Pos_zero );
 		}
 
 		{
-			b2BodyDef bd = b2DefaultBodyDef();
-			bd.type = b2_dynamicBody; // NOTE(bug): Changing this to b2_staticBody fixes the issue
-			b2BodyId staticBodyId = b2CreateBody( m_worldId, &bd );
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.position = { -10.0f, 0.0f, -10.0f };
+			b3BodyId groundId = b3CreateBody( m_worldId, &bodyDef );
 
-			const b2Vec2 verts[] = {
-				{ 48.8525391, 68.1518555 }, { 49.1821289, 68.1152344 }, { 68.8476562, 68.1152344 },
-				{ 68.8476562, 70.2392578 }, { 48.8525391, 70.2392578 },
-			};
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			m_heightField = b3CreateGrid( 40, 40, { 0.5f, 1.0f, 0.5f }, false );
+			//m_heightField = b3CreateWave( 40, 40, {1.0f, 2.0f, 1.0f}, 0.02f, 0.04f, false );
+			b3CreateHeightFieldShape( groundId, &shapeDef, m_heightField );
 
-			const b2Hull hull = b2ComputeHull( verts, ARRAY_COUNT( verts ) );
-			const b2Polygon poly = b2MakePolygon( &hull, 0.0f );
-
-			b2ShapeDef sd = b2DefaultShapeDef();
-			sd.density = 1.0f;
-			sd.material.friction = 0.5f;
-			sd.material.restitution = 0.1f;
-
-			b2CreatePolygonShape( staticBodyId, &sd, &poly );
-			b2Body_SetType( staticBodyId, b2_staticBody );
+			m_gridMesh = b3CreateGridMesh( 40, 40, 0.5f, 1, true );
+			//b3CreateMeshShape( groundId, &shapeDef, m_gridMesh, b3Vec3_one );
 		}
 
 		{
-			b2BodyDef bd = b2DefaultBodyDef();
-			bd.position = { 58.9243050, 77.5401459 };
-			bd.type = b2_dynamicBody;
-			bd.motionLocks.angularZ = true;
-			bd.linearVelocity = { 104.868881, -281.073883 };
-			bd.isBullet = true;
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			b3BodyId groundId = b3CreateBody( m_worldId, &bodyDef );
 
-			b2BodyId ballBodyId = b2CreateBody( m_worldId, &bd );
-			const b2Circle ball = { .center = {}, .radius = 0.3f };
-
-			b2ShapeDef ballShape = b2DefaultShapeDef();
-			ballShape.density = 3.0f;
-			ballShape.material.friction = 0.2f;
-			ballShape.material.restitution = 0.9f;
-
-			b2CreateCircleShape( ballBodyId, &ballShape, &ball );
+			// m_boxMesh = b3CreateBoxMesh( { 0.0f, 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, true );
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			m_boxMesh = b3CreatePlatformMesh( { 0.0f, 0.5f, 0.0f }, 1.0f, 2.0f, 5.0f );
+			b3Vec3 scale = b3Vec3_one;
+			b3CreateMeshShape( groundId, &shapeDef, m_boxMesh, scale );
 		}
+
+		{
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.type = b3_dynamicBody;
+			bodyDef.position = { 0.0f, 3.5f, 0.0f };
+			bodyDef.motionLocks.angularX = true;
+			bodyDef.motionLocks.angularY = true;
+			bodyDef.motionLocks.angularZ = true;
+			bodyDef.enableContactRecycling = false;
+			b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
+
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			b3BoxHull box = b3MakeBoxHull( 0.25f, 1.0f, 0.25f );
+			b3CreateHullShape( bodyId, &shapeDef, &box.base );
+		}
+	}
+
+	~SBoxMover() override
+	{
+		b3DestroyMesh( m_boxMesh );
+		b3DestroyHeightField( m_heightField );
+		b3DestroyMesh( m_gridMesh );
+	}
+
+	void Render() override
+	{
+		Sample::Render();
+		b3Transform transform = { { 0.0f, 1.1f, 0.0f }, b3Quat_identity };
+		DrawAxes( b3MakeWorldTransform( transform ), 3.0f );
 	}
 
 	static Sample* Create( SampleContext* context )
 	{
-		return new StaticVsBulletBug( context );
+		return new SBoxMover( context );
 	}
+
+	b3MeshData* m_boxMesh;
+	b3HeightFieldData* m_heightField;
+	b3MeshData* m_gridMesh;
 };
 
-static int staticVsBulletBug = RegisterSample( "Issues", "StaticVsBulletBug", StaticVsBulletBug::Create );
+static int sampleBoxMesh = RegisterSample( "Issues", "s&box mover", SBoxMover::Create );
 
-// This simulations stresses the solver by putting a light mass between two bodies on a prismatic joint with a stiff spring.
-// This can be made stable by increasing the size of the middle circle and/or increasing the number of sub-steps.
-class UnstablePrismaticJoints : public Sample
+class CapsuleMeshBug : public Sample
 {
 public:
-	explicit UnstablePrismaticJoints( SampleContext* context )
+	explicit CapsuleMeshBug( SampleContext* context )
 		: Sample( context )
 	{
 		if ( m_context->restart == false )
 		{
-			m_context->camera.center = { 0.0f, 1.75f };
-			m_context->camera.zoom = 32.0f;
+			m_camera->SetView( 20.0f, 10.0f, 30.0f, { 0.0f, 2.0f, 0.0f } );
 		}
 
+		// --- Ground plane ---
 		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			b3BodyId body = b3CreateBody( m_worldId, &bodyDef );
 
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Segment segment = { { -100.0f, 0.0f }, { 100.0f, 0.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			b3BoxHull ground = b3MakeBoxHull( 50.0f, 0.1f, 50.0f );
+			b3CreateHullShape( body, &shapeDef, &ground.base );
 		}
 
-		b2BodyId centerId;
+		// --- Building mesh on top of ground ---
+		m_building = CreateMeshData( "data/meshes/building.obj", 1.0f, false, false, true, true );
 		{
-			b2BodyDef bd = b2DefaultBodyDef();
-			bd.type = b2_dynamicBody;
-			bd.position = { 0, 3 };
-			centerId = b2CreateBody( m_worldId, &bd );
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.position = { 0.0f, 0.1f, 0.0f };
+			b3BodyId body = b3CreateBody( m_worldId, &bodyDef );
 
-			b2ShapeDef sd = b2DefaultShapeDef();
-
-			b2Circle circle;
-			circle.center = { 0, 0 };
-
-			// Note: this will crash due to divergence (inf/nan) with a radius of 0.1
-			// circle.radius = 0.1f;
-			circle.radius = 0.5f;
-
-			b2CreateCircleShape( centerId, &sd, &circle );
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			b3CreateMeshShape( body, &shapeDef, m_building, b3Vec3_one );
 		}
 
-		b2PrismaticJointDef jd = b2DefaultPrismaticJointDef();
-		jd.enableSpring = true;
-		jd.hertz = 10.0f;
-		jd.dampingRatio = 2.0f;
-
+		// --- Locked capsule (same setup as player controller body) ---
 		{
-			b2BodyDef bd = b2DefaultBodyDef();
-			bd.type = b2_dynamicBody;
-			bd.position = { -3.5, 3 };
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			bodyDef.type = b3_dynamicBody;
+			bodyDef.position = { 0.0f, 4.0f, 10.0f };
+			bodyDef.motionLocks.angularX = true;
+			bodyDef.motionLocks.angularY = true;
+			bodyDef.motionLocks.angularZ = true;
+			bodyDef.enableSleep = false;
+			bodyDef.enableContactRecycling = false;
+			b3BodyId body = b3CreateBody( m_worldId, &bodyDef );
 
-			b2BodyId leftId = b2CreateBody( m_worldId, &bd );
+			b3ShapeDef shapeDef = b3DefaultShapeDef();
+			shapeDef.baseMaterial.friction = 0.3f;
+			shapeDef.baseMaterial.customColor = b3_colorMagenta;
 
-			b2ShapeDef sd = b2DefaultShapeDef();
-
-			b2Circle circle;
-			circle.center = { 0, 0 };
-			circle.radius = 2.0f;
-			b2CreateCircleShape( leftId, &sd, &circle );
-
-			jd.base.bodyIdA = centerId;
-			jd.base.bodyIdB = leftId;
-			jd.targetTranslation = -3.0f;
-			b2CreatePrismaticJoint( m_worldId, &jd );
+			b3Capsule capsule = { { 0.0f, -0.5f, 0.0f }, { 0.0f, 0.5f, 0.0f }, 0.3f };
+			b3CreateCapsuleShape( body, &shapeDef, &capsule );
 		}
+	}
 
+	~CapsuleMeshBug() override
+	{
+		if ( m_building )
 		{
-			b2BodyDef bd = b2DefaultBodyDef();
-			bd.type = b2_dynamicBody;
-			bd.position = { 3.5, 3 };
-			b2BodyId rightId = b2CreateBody( m_worldId, &bd );
-
-			b2ShapeDef sd = b2DefaultShapeDef();
-
-			b2Circle circle;
-			circle.center = { 0, 0 };
-			circle.radius = 2.0f;
-
-			b2CreateCircleShape( rightId, &sd, &circle );
-
-			jd.base.bodyIdA = centerId;
-			jd.base.bodyIdB = rightId;
-			jd.targetTranslation = 3.0f;
-			b2CreatePrismaticJoint( m_worldId, &jd );
+			b3DestroyMesh( m_building );
 		}
 	}
 
 	static Sample* Create( SampleContext* context )
 	{
-		return new UnstablePrismaticJoints( context );
+		return new CapsuleMeshBug( context );
 	}
+
+	b3MeshData* m_building = nullptr;
 };
 
-static int sampleUnstablePrismaticJoints =
-	RegisterSample( "Issues", "Unstable Prismatic Joints", UnstablePrismaticJoints::Create );
-
-class UnstableWindmill : public Sample
-{
-public:
-	explicit UnstableWindmill( SampleContext* context )
-		: Sample( context )
-	{
-		if ( m_context->restart == false )
-		{
-			m_context->camera.center = { 0.0f, 1.75f };
-			m_context->camera.zoom = 32.0f;
-		}
-
-		{
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2BodyId groundId = b2CreateBody( m_worldId, &bodyDef );
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			b2Segment segment = { { -100.0f, -10.0f }, { 100.0f, -10.0f } };
-			b2CreateSegmentShape( groundId, &shapeDef, &segment );
-		}
-
-		b2BodyDef bdef = b2DefaultBodyDef();
-		bdef.gravityScale = 0.0f;
-		bdef.type = b2_dynamicBody;
-		b2ShapeDef sdef = b2DefaultShapeDef();
-		sdef.material = b2DefaultSurfaceMaterial();
-		sdef.material.friction = 0.1f;
-
-		// center
-		bdef.position = { 10, 10 };
-		b2BodyId center = b2CreateBody( m_worldId, &bdef );
-		b2Circle circle = { .center = { 0, 0 }, .radius = 5 };
-		b2CreateCircleShape( center, &sdef, &circle );
-
-		// rotors
-		b2WeldJointDef wjdef = b2DefaultWeldJointDef();
-
-		// This simulation can be stabilized by using a lower constraint stiffness
-		wjdef.base.constraintHertz = 30.0f;
-		wjdef.base.bodyIdA = center;
-
-		b2Polygon polygon;
-
-		bdef.position = { 10, 0 };
-		b2BodyId body = b2CreateBody( m_worldId, &bdef );
-		b2CreatePolygonShape( body, &sdef, &( polygon = b2MakeBox( 4, 5 ) ) );
-		wjdef.base.localFrameA = { .p = { 0, -5 }, .q = b2Rot_identity };
-		wjdef.base.bodyIdB = body;
-		wjdef.base.localFrameB = { .p = { 0, 5 }, .q = b2Rot_identity };
-		b2CreateWeldJoint( m_worldId, &wjdef );
-
-		bdef.position = { 20, 10 };
-		body = b2CreateBody( m_worldId, &bdef );
-		b2CreatePolygonShape( body, &sdef, &( polygon = b2MakeBox( 5, 4 ) ) );
-		wjdef.base.localFrameA = { .p = { 5, 0 }, .q = b2Rot_identity };
-		wjdef.base.bodyIdB = body;
-		wjdef.base.localFrameB = { .p = { -5, 0 }, .q = b2Rot_identity };
-		b2CreateWeldJoint( m_worldId, &wjdef );
-
-		bdef.position = { 10, 20 };
-		body = b2CreateBody( m_worldId, &bdef );
-		b2CreatePolygonShape( body, &sdef, &( polygon = b2MakeBox( 4, 5 ) ) );
-		wjdef.base.localFrameA = { .p = { 0, 5 }, .q = b2Rot_identity };
-		wjdef.base.bodyIdB = body;
-		wjdef.base.localFrameB = { .p = { 0, -5 }, .q = b2Rot_identity };
-		b2CreateWeldJoint( m_worldId, &wjdef );
-
-		bdef.position = { 0, 10 };
-		body = b2CreateBody( m_worldId, &bdef );
-		b2CreatePolygonShape( body, &sdef, &( polygon = b2MakeBox( 5, 4 ) ) );
-		wjdef.base.localFrameA = { .p = { -5, 0 }, .q = b2Rot_identity };
-		wjdef.base.bodyIdB = body;
-		wjdef.base.localFrameB = { .p = { 5, 0 }, .q = b2Rot_identity };
-		b2CreateWeldJoint( m_worldId, &wjdef );
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new UnstableWindmill( context );
-	}
-};
-
-static int sampleUnstableWindmill = RegisterSample( "Issues", "Unstable Windmill", UnstableWindmill::Create );
+static int sampleIndex = RegisterSample( "Issues", "Capsule Mesh", CapsuleMeshBug::Create );

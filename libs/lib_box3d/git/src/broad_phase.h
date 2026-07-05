@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
@@ -7,74 +7,73 @@
 #include "container.h"
 #include "table.h"
 
-#include "box2d/collision.h"
-#include "box2d/types.h"
+#include "box3d/collision.h"
+#include "box3d/types.h"
 
-typedef struct b2Shape b2Shape;
-typedef struct b2MovePair b2MovePair;
-typedef struct b2MoveResult b2MoveResult;
-typedef struct b2Stack b2Stack;
-typedef struct b2World b2World;
+typedef struct b3Shape b3Shape;
+typedef struct b3MovePair b3MovePair;
+typedef struct b3MoveResult b3MoveResult;
+typedef struct b3Stack b3Stack;
+typedef struct b3World b3World;
 
 // Store the proxy type in the lower 2 bits of the proxy key. This leaves 30 bits for the id.
-#define B2_PROXY_TYPE( KEY ) ( (b2BodyType)( ( KEY ) & 3 ) )
-#define B2_PROXY_ID( KEY ) ( ( KEY ) >> 2 )
-#define B2_PROXY_KEY( ID, TYPE ) ( ( ( ID ) << 2 ) | ( TYPE ) )
+#define B3_PROXY_TYPE( KEY ) ( (b3BodyType)( ( KEY ) & 3 ) )
+#define B3_PROXY_ID( KEY ) ( ( KEY ) >> 2 )
+#define B3_PROXY_KEY( ID, TYPE ) ( ( ( ID ) << 2 ) | ( TYPE ) )
 
 /// The broad-phase is used for computing pairs and performing volume queries and ray casts.
 /// This broad-phase does not persist pairs. Instead, this reports potentially new pairs.
 /// It is up to the client to consume the new pairs and to track subsequent overlap.
-typedef struct b2BroadPhase
+typedef struct b3BroadPhase
 {
-	b2DynamicTree trees[b2_bodyTypeCount];
+	b3DynamicTree trees[b3_bodyTypeCount];
 
 	// Per body-type bit sets indexed by proxyId, marking proxies moved this step.
 	// Paired with moveArray which preserves deterministic insertion order for pair queries.
-	b2BitSet movedProxies[b2_bodyTypeCount];
-	b2Array( int ) moveArray;
+	b3BitSet movedProxies[b3_bodyTypeCount];
+	b3Array( int ) moveArray;
 
 	// These are the results from the pair query and are used to create new contacts
-	// in deterministic order. There is a move result linked list for each moving shape and
-	// these follow the dynamic tree query order for determinism.
-	b2MoveResult* moveResults;
-	b2MovePair* movePairs;
+	// in deterministic order.
+	// todo these could be in the step context
+	b3MoveResult* moveResults;
+	b3MovePair* movePairs;
 	int movePairCapacity;
-	b2AtomicInt movePairIndex;
+	b3AtomicInt movePairIndex;
 
-	// Tracks shape pairs that have a b2Contact
-	b2HashSet pairSet;
+	// Tracks shape pairs that have a b3Contact
+	// todo pairSet can grow quite large on the first time step and remain large
+	b3HashSet pairSet;
+} b3BroadPhase;
 
-} b2BroadPhase;
+void b3CreateBroadPhase( b3BroadPhase* bp, const b3Capacity* capacity );
+void b3DestroyBroadPhase( b3BroadPhase* bp );
 
-void b2CreateBroadPhase( b2BroadPhase* bp, const b2Capacity* capacity );
-void b2DestroyBroadPhase( b2BroadPhase* bp );
-
-int b2BroadPhase_CreateProxy( b2BroadPhase* bp, b2BodyType proxyType, b2AABB aabb, uint64_t categoryBits, int shapeIndex,
+int b3BroadPhase_CreateProxy( b3BroadPhase* bp, b3BodyType proxyType, b3AABB aabb, uint64_t categoryBits, int shapeIndex,
 							  bool forcePairCreation );
-void b2BroadPhase_DestroyProxy( b2BroadPhase* bp, int proxyKey );
+void b3BroadPhase_DestroyProxy( b3BroadPhase* bp, int proxyKey );
 
-void b2BroadPhase_MoveProxy( b2BroadPhase* bp, int proxyKey, b2AABB aabb );
-void b2BroadPhase_EnlargeProxy( b2BroadPhase* bp, int proxyKey, b2AABB aabb );
+void b3BroadPhase_MoveProxy( b3BroadPhase* bp, int proxyKey, b3AABB aabb );
+void b3BroadPhase_EnlargeProxy( b3BroadPhase* bp, int proxyKey, b3AABB aabb );
 
-int b2BroadPhase_GetShapeIndex( b2BroadPhase* bp, int proxyKey );
+int b3BroadPhase_GetShapeIndex( b3BroadPhase* bp, int proxyKey );
 
-void b2UpdateBroadPhasePairs( b2World* world );
-bool b2BroadPhase_TestOverlap( const b2BroadPhase* bp, int proxyKeyA, int proxyKeyB );
+void b3UpdateBroadPhasePairs( b3World* world );
+bool b3BroadPhase_TestOverlap( const b3BroadPhase* bp, int proxyKeyA, int proxyKeyB );
 
-void b2ValidateBroadphase( const b2BroadPhase* bp );
-void b2ValidateNoEnlarged( const b2BroadPhase* bp );
-void b2ValidateMovedProxies( const b2BroadPhase* bp );
+void b3ValidateBroadPhase( const b3BroadPhase* bp );
+void b3ValidateNoEnlarged( const b3BroadPhase* bp );
 
 // This is what triggers new contact pairs to be created
 // Warning: this must be called in deterministic order
-static inline void b2BufferMove( b2BroadPhase* bp, int queryProxy )
+static inline void b3BufferMove( b3BroadPhase* bp, int queryProxy )
 {
-	b2BodyType proxyType = B2_PROXY_TYPE( queryProxy );
-	int proxyId = B2_PROXY_ID( queryProxy );
-	b2BitSet* set = &bp->movedProxies[proxyType];
-	if ( b2GetBit( set, proxyId ) == false )
+	b3BodyType proxyType = B3_PROXY_TYPE( queryProxy );
+	int proxyId = B3_PROXY_ID( queryProxy );
+	b3BitSet* set = &bp->movedProxies[proxyType];
+	if ( b3GetBit( set, proxyId ) == false )
 	{
-		b2SetBitGrow( set, proxyId );
-		b2Array_Push( bp->moveArray, queryProxy );
+		b3SetBitGrow( set, proxyId );
+		b3Array_Push( bp->moveArray, queryProxy );
 	}
 }

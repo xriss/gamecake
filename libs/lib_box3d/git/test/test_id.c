@@ -3,41 +3,27 @@
 
 #include "test_macros.h"
 
-#include "box2d/id.h"
+#include "box3d/types.h"
 
 int IdTest( void )
 {
-	uint32_t a = 0x01234567;
-
-	{
-		b2WorldId id = b2LoadWorldId( a );
-		uint32_t b = b2StoreWorldId( id );
-		ENSURE( b == a );
-	}
-
 	uint64_t x = 0x0123456789ABCDEFull;
 
 	{
-		b2BodyId id = b2LoadBodyId( x );
-		uint64_t y = b2StoreBodyId( id );
+		b3BodyId id = b3LoadBodyId( x );
+		uint64_t y = b3StoreBodyId( id );
 		ENSURE( x == y );
 	}
 
 	{
-		b2ShapeId id = b2LoadShapeId( x );
-		uint64_t y = b2StoreShapeId( id );
+		b3ShapeId id = b3LoadShapeId( x );
+		uint64_t y = b3StoreShapeId( id );
 		ENSURE( x == y );
 	}
 
 	{
-		b2ChainId id = b2LoadChainId( x );
-		uint64_t y = b2StoreChainId( id );
-		ENSURE( x == y );
-	}
-
-	{
-		b2JointId id = b2LoadJointId( x );
-		uint64_t y = b2StoreJointId( id );
+		b3JointId id = b3LoadJointId( x );
+		uint64_t y = b3StoreJointId( id );
 		ENSURE( x == y );
 	}
 

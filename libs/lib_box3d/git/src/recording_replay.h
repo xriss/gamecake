@@ -8,192 +8,247 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef struct b2RecPlayer b2RecPlayer;
+typedef struct b3RecPlayer b3RecPlayer;
 
-// A single recorded callback hit, used both as reader scratch and as the per-frame draw store
-typedef struct b2RecRecordedHit
+// A single recorded callback hit, used both as reader scratch during a query replay and as the
+// per-frame draw store. For collide-mover, one hit is one plane, with planeCount and userReturnB
+// replicated across a shape's planes so the replay walker can re-group and compare per shape.
+typedef struct b3RecRecordedHit
 {
-	b2ShapeId id;
-	b2Pos point;
-	b2Vec2 normal;
+	b3ShapeId id;
+	b3Pos point;
+	b3Vec3 normal;
 	float fraction;
-	b2PlaneResult plane;
-	float userReturnF;
-	bool userReturnB;
-} b2RecRecordedHit;
+	uint64_t userMaterialId;
+	int triangleIndex;
+	int childIndex;
+	b3PlaneResult plane; // collide-mover: this plane
+	int planeCount;		 // collide-mover: planes in this hit's shape group (replicated)
+	float userReturnF;	 // cast queries
+	bool userReturnB;	 // overlap / collide-mover (per shape, replicated)
+} b3RecRecordedHit;
 
-// Per-frame draw record for one query call
-typedef enum b2RecQueryKind
+// Recorded query kind, matching the public b3RecQueryType order.
+typedef enum b3RecQueryKind
 {
-	B2_RECQ_OVERLAP_AABB,
-	B2_RECQ_OVERLAP_SHAPE,
-	B2_RECQ_CAST_RAY,
-	B2_RECQ_CAST_SHAPE,
-	B2_RECQ_COLLIDE_MOVER,
-	B2_RECQ_CAST_RAY_CLOSEST,
-	B2_RECQ_CAST_MOVER,
-	B2_RECQ_SHAPE_TEST_POINT,
-	B2_RECQ_SHAPE_RAY_CAST
-} b2RecQueryKind;
+	B3_RECQ_OVERLAP_AABB,
+	B3_RECQ_OVERLAP_SHAPE,
+	B3_RECQ_CAST_RAY,
+	B3_RECQ_CAST_SHAPE,
+	B3_RECQ_CAST_RAY_CLOSEST,
+	B3_RECQ_CAST_MOVER,
+	B3_RECQ_COLLIDE_MOVER,
+} b3RecQueryKind;
 
-typedef struct b2RecDrawQuery
+// Per-frame draw record for one query call. Self-contained (no aliased pointers) so the player's
+// frameQueries array can grow with a plain memcpy. Geometry is origin relative except the overlap
+// AABB, which is world space in 3D.
+typedef struct b3RecDrawQuery
 {
 	int kind;
-	b2QueryFilter filter;
-	b2AABB aabb;
-	b2ShapeProxy proxy;
-	b2Capsule mover;
-	b2Pos origin;
-	b2Vec2 translation;
-	bool boolResult;
-	float castFraction;
-	b2WorldCastOutput castOut;
-	b2ShapeId shape;
-	int hitStart;
+	uint64_t key; // identity key (hash of caller id+name), 0 = untagged
+	b3QueryFilter filter;
+	b3AABB aabb;								  // world-space bounds of the query, swept for casts
+	b3Vec3 proxyPoints[B3_MAX_SHAPE_CAST_POINTS]; // overlap/cast shape proxy, origin relative
+	int proxyCount;
+	float proxyRadius;
+	b3Capsule mover; // cast/collide mover, origin relative
+	b3Pos origin;
+	b3Vec3 translation;
+	float castFraction;	   // cast-mover result fraction
+	b3RayResult rayResult; // cast-ray-closest result
+	b3ShapeId shape;
+	int hitStart; // first hit in the player's frameHits store
 	int hitCount;
-} b2RecDrawQuery;
+} b3RecDrawQuery;
+
+// One slot in the preloaded geometry registry. Loaded from the trailing block before any
+// ops run; live pointer built lazily on first shape create that references the id.
+typedef struct b3RegistrySlot
+{
+	b3GeometryKind kind;
+	int byteCount;
+	uint8_t* bytes; // raw bytes from the file (always freed at teardown)
+	void* live;		// reconstructed live object, freed after b3DestroyWorld
+} b3RegistrySlot;
 
 // Reader state threaded through the replay loop and all dispatch functions
-typedef struct b2RecReader
+typedef struct b3RecReader
 {
 	const uint8_t* data;
 	int size;
 	int cursor;
-	b2WorldId replayWorldId; // world created during replay; valid after CreateWorld record
-	int workerCount;		 // 0 = use recorded count
-	bool ok;				 // false on read overrun or id mismatch, a fatal stop
-	bool diverged;			 // a StateHash failed to reproduce, non-fatal so a viewer can keep playing
+	b3WorldId replayWorldId;
+	bool ok;	   // false on read overrun or id mismatch, fatal stop
+	bool diverged; // a StateHash failed, non-fatal
 
-	// Scratch for variable-length defs (chain points/materials), grown on demand and
-	// freed with the player. Cloned by the create call so only valid during one dispatch.
-	b2Vec2* chainPoints;
-	int chainPointCap;
-	b2SurfaceMaterial* chainMaterials;
-	int chainMaterialCap;
+	// Player that owns this reader, or NULL during a headless b3ValidateReplay. Body
+	// create/destroy and the bounds record fold back into it for the outliner and camera framing.
+	b3RecPlayer* owner;
 
-	// Scratch for recorded query hits; grown on demand, freed with the player
-	b2RecRecordedHit* hits;
+	// Scratch for per-triangle materials in shape defs (grown on demand, freed at teardown)
+	b3SurfaceMaterial* matScratch;
+	int matScratchCap;
+
+	// Scratch for string reads: rotating slots, valid until the next 4 STR reads
+	char strBufs[4][B3_BODY_NAME_LENGTH + 1];
+	int strNext;
+
+	// Preloaded geometry registry
+	b3RegistrySlot* slots;
+	int slotCount;
+
+	// Preloaded query-tag table (key -> id, name), loaded with the registry. Resolves the caller id and
+	// label for the viewer. tagMap maps a key to its tag index for O(1) lookup; opaque, owned by the player.
+	b3RecTag* tags;
+	int tagCount;	 // tags that loaded; a truncated tail loads fewer
+	int tagCapacity; // tags allocated, used to free the array
+	void* tagMap;
+
+	// Key from the QueryTag op preceding the next query, consumed by the next stash. 0 = untagged.
+	uint64_t pendingQueryKey;
+
+	// Scratch for recorded query hits; grown on demand, freed with the player.
+	b3RecRecordedHit* hits;
 	int hitCap;
 
-	b2RecPlayer* owner; // player that owns this reader
-} b2RecReader;
+	// Scratch for a shape-proxy point cloud read from the stream. b3ShapeProxy holds the points
+	// behind a pointer, so a decoded proxy borrows this until the next proxy read or teardown.
+	b3Vec3* proxyScratch;
+	int proxyScratchCap;
+} b3RecReader;
 
-// A restore point captured during forward replay, so a backward seek can re-simulate only the gap
-// from the nearest keyframe instead of from frame 0. The image is a full b2SerializeWorld blob.
-typedef struct b2RecKeyframe
+// Stored snapshot for fast backward seek.
+typedef struct b3RecKeyframe
 {
-	uint8_t* image; // serialized world at the end of this frame
+	uint8_t* image; // serialized world image at the end of this frame
 	int imageSize;
-	int imageCapacity; // allocation size of image, which over-allocates, so the free size matches
-	int frame;		   // frame this restores to, a post-step boundary
-	int cursor;		   // op-stream offset where the next frame resumes
-	b2BodyId* bodyIds; // outliner list as of this frame
+	int imageCapacity; // allocation size (may exceed imageSize)
+	int frame;		   // frame index this restores to
+	int cursor;		   // op-stream cursor for the frame AFTER this one
+	int divergeFrame;  // divergeFrame state at capture
+	bool diverged;	   // rdr.diverged state at capture
+
+	// Outliner body list as it stood at this frame, restored verbatim so ordinals are stable.
+	b3BodyId* bodyIds;
 	int bodyIdCount;
-	int divergeFrame; // divergence latches as of this frame, so a seek reports the linear path's state
-	bool diverged;
-} b2RecKeyframe;
+} b3RecKeyframe;
 
-// Incremental player. Owns a private copy of the recording bytes and drives replay one step at a time.
-struct b2RecPlayer
+struct b3RecPlayer
 {
-	uint8_t* data; // recording bytes, a private copy owned here
+	uint8_t* data; // owned copy of recording bytes
 	int size;
-	int headerEnd;			   // first payload offset
-	float lengthScale;		   // length scale used in the recording
-	float previousLengthScale; // global length scale before this player overrode it, restored on destroy
-	int frame;				   // steps dispatched so far
-	int frameCount;			   // total recorded steps, counted once at open
-	int recordedWorkerCount;   // worker count the replay world runs at
-	float recordedDt;		   // dt of the first recorded step
-	int recordedSubStepCount;  // sub-steps of the first recorded step
-	b2AABB bounds;			   // accumulated world bounds, resolved by the open-time scan
-	int divergeFrame;		   // first step that diverged, -1 until then
-	bool atEnd;				   // a StepFrame ran out of records without reaching a step
-	b2RecReader rdr;		   // cursor and replay world, threaded into every dispatcher
+	int headerEnd;	 // first byte of op stream (past header + snapshot blob)
+	int registryEnd; // end of op stream = start of registry block (or size)
+	float lengthScale;
+	float previousLengthScale;
+	int frame;
+	int frameCount;
+	float recordedDt;
+	int recordedSubStepCount;
+	int recordedWorkerCount; // worker count requested for the replay world
+	b3AABB bounds;			 // accumulated world bounds, decoded from the trailing record
+	bool atEnd;
+	// Indicates all ops for the step have been consumed up to the world step op. The next sub-step
+	// will clear this and perform the world step.
+	bool atPreStep;
+	int divergeFrame; // first frame that diverged, -1 until then
 
-	// Per-frame query store, reset at the top of each StepFrame
-	b2RecDrawQuery* frameQueries;
+	// Outliner body list, indexed by creation ordinal. Holes (null ids) mark destroyed bodies so
+	// later ordinals never shift. Snapshotted into each keyframe and the frame-0 copy, not rebuilt
+	// from the world, so a stored selection survives backward seeks.
+	b3BodyId* bodyIds;
+	int bodyIdCount;
+	int bodyIdCap;
+	b3BodyId* frame0BodyIds;
+	int frame0BodyIdCount;
+
+	// Per-frame query store, reset at the top of each StepFrame and filled by the query dispatchers.
+	// Drawn by b3RecPlayer_DrawFrameQueries and inspected via the public GetFrameQuery API.
+	b3RecDrawQuery* frameQueries;
 	int frameQueryCount;
 	int frameQueryCap;
-	b2RecRecordedHit* frameHits;
+	b3RecRecordedHit* frameHits;
 	int frameHitCount;
 	int frameHitCap;
 
-	// Live bodies in creation order, tracked from create/destroy ops to drive the viewer outliner.
-	// Destroyed slots hold b2_nullBodyId so ordinals stay stable. Rebuilt deterministically on replay.
-	b2BodyId* bodyIds;
-	int bodyIdCount;
-	int bodyIdCap;
+	// Host debug-shape callbacks applied to every world the player creates. The 3D
+	// sample renderer builds GPU meshes here, so a replay world without them draws
+	// nothing. Set once via b3RecPlayer_SetDebugShapeCallbacks; persisted so a world
+	// rebuilt under new callbacks keeps drawing.
+	b3CreateDebugShapeCallback* createDebugShape;
+	b3DestroyDebugShapeCallback* destroyDebugShape;
+	void* debugShapeContext;
 
-	// Frame-0 image used to restart in place, so the replay world id stays stable across a
-	// restart or backward scrub. Points into the seed snapshot blob inside the owned copy.
+	b3RecReader rdr;
+
+	// Frame-0 restore image, points into the owned data copy. Restart and backward seek
+	// deserialize this in place so the replay world id stays stable.
 	const uint8_t* frame0Image;
 	int frame0Size;
-	b2BodyId* frame0BodyIds;
-	int frame0BodyIdCount;
 
-	// Keyframe ring for fast backward seeks. Captured in increasing-frame order as the replay plays
-	// forward. The spacing doubles and the off-grid keyframes are evicted once the memory budget is
-	// hit, so memory stays bounded and seek cost grows only once a recording outgrows the budget.
-	b2RecKeyframe* keyframes;
+	// Keyframe ring
+	b3RecKeyframe* keyframes;
 	int keyframeCount;
 	int keyframeCapacity;
-	size_t keyframeBudget;	 // memory cap in bytes for the kept snapshots
-	size_t keyframeBytes;	 // running total of kept snapshot + body-list bytes
-	int keyframeMinInterval; // finest spacing in frames
-	int keyframeInterval;	 // current spacing, a power-of-two multiple of the min, doubles on eviction
-	int lastKeyframeFrame;	 // highest frame captured, guards against re-capture while back-stepping
+	size_t keyframeBudget;
+	size_t keyframeBytes;
+	int keyframeMinInterval;
+	int keyframeInterval;
+	int lastKeyframeFrame;
+
+	// Pre-populated recording used by b3SerializeWorld during keyframe capture.
+	// Its registry mirrors rdr.slots so geometry ids stay stable.
+	b3Recording* keyframeRec;
 };
 
 // Read primitives
+uint8_t b3RecR_U8( b3RecReader* rdr );
+uint16_t b3RecR_U16( b3RecReader* rdr );
+uint32_t b3RecR_U24( b3RecReader* rdr );
+uint32_t b3RecR_U32( b3RecReader* rdr );
+uint64_t b3RecR_U64( b3RecReader* rdr );
+int32_t b3RecR_I32( b3RecReader* rdr );
+float b3RecR_F32( b3RecReader* rdr );
+double b3RecR_F64( b3RecReader* rdr );
+bool b3RecR_BOOL( b3RecReader* rdr );
+b3Vec3 b3RecR_VEC3( b3RecReader* rdr );
+b3Quat b3RecR_QUAT( b3RecReader* rdr );
+b3Transform b3RecR_TRANSFORM( b3RecReader* rdr );
+b3Pos b3RecR_POSITION( b3RecReader* rdr );
+b3WorldTransform b3RecR_WORLDXF( b3RecReader* rdr );
+b3Matrix3 b3RecR_MATRIX3( b3RecReader* rdr );
+b3AABB b3RecR_AABB( b3RecReader* rdr );
+b3WorldId b3RecR_WORLDID( b3RecReader* rdr );
+b3BodyId b3RecR_BODYID( b3RecReader* rdr );
+b3ShapeId b3RecR_SHAPEID( b3RecReader* rdr );
+b3JointId b3RecR_JOINTID( b3RecReader* rdr );
+b3Sphere b3RecR_SPHERE( b3RecReader* rdr );
+b3Capsule b3RecR_CAPSULE( b3RecReader* rdr );
+uint32_t b3RecR_GEOMID( b3RecReader* rdr );
+b3Filter b3RecR_FILTER( b3RecReader* rdr );
+b3SurfaceMaterial b3RecR_MATERIAL( b3RecReader* rdr );
+b3MassData b3RecR_MASSDATA( b3RecReader* rdr );
+b3MotionLocks b3RecR_LOCKS( b3RecReader* rdr );
+const char* b3RecR_STR( b3RecReader* rdr );
+b3ExplosionDef b3RecR_EXPLOSIONDEF( b3RecReader* rdr );
+b3BodyDef b3RecR_BODYDEF( b3RecReader* rdr );
+b3ShapeDef b3RecR_SHAPEDEF( b3RecReader* rdr );
+b3ParallelJointDef b3RecR_PARALLELJOINTDEF( b3RecReader* rdr );
+b3DistanceJointDef b3RecR_DISTANCEJOINTDEF( b3RecReader* rdr );
+b3FilterJointDef b3RecR_FILTERJOINTDEF( b3RecReader* rdr );
+b3MotorJointDef b3RecR_MOTORJOINTDEF( b3RecReader* rdr );
+b3PrismaticJointDef b3RecR_PRISMATICJOINTDEF( b3RecReader* rdr );
+b3RevoluteJointDef b3RecR_REVOLUTEJOINTDEF( b3RecReader* rdr );
+b3SphericalJointDef b3RecR_SPHERICALJOINTDEF( b3RecReader* rdr );
+b3WeldJointDef b3RecR_WELDJOINTDEF( b3RecReader* rdr );
+b3WheelJointDef b3RecR_WHEELJOINTDEF( b3RecReader* rdr );
+b3QueryFilter b3RecR_QUERYFILTER( b3RecReader* rdr );
+b3ShapeProxy b3RecR_SHAPEPROXY( b3RecReader* rdr );
+b3TreeStats b3RecR_TREESTATS( b3RecReader* rdr );
+b3RayResult b3RecR_RAYRESULT( b3RecReader* rdr );
+b3PlaneResult b3RecR_PLANERESULT( b3RecReader* rdr );
 
-uint8_t b2RecR_U8( b2RecReader* rdr );
-uint16_t b2RecR_U16( b2RecReader* rdr );
-uint32_t b2RecR_U24( b2RecReader* rdr );
-uint32_t b2RecR_U32( b2RecReader* rdr );
-uint64_t b2RecR_U64( b2RecReader* rdr );
-int32_t b2RecR_I32( b2RecReader* rdr );
-float b2RecR_F32( b2RecReader* rdr );
-bool b2RecR_BOOL( b2RecReader* rdr );
-b2Vec2 b2RecR_VEC2( b2RecReader* rdr );
-b2Rot b2RecR_ROT( b2RecReader* rdr );
-b2Transform b2RecR_XF( b2RecReader* rdr );
-double b2RecR_F64( b2RecReader* rdr );
-b2Pos b2RecR_POSITION( b2RecReader* rdr );
-b2WorldTransform b2RecR_WORLDXF( b2RecReader* rdr );
-b2WorldId b2RecR_WORLDID( b2RecReader* rdr );
-b2BodyId b2RecR_BODYID( b2RecReader* rdr );
-b2ShapeId b2RecR_SHAPEID( b2RecReader* rdr );
-b2ChainId b2RecR_CHAINID( b2RecReader* rdr );
-b2JointId b2RecR_JOINTID( b2RecReader* rdr );
-b2Circle b2RecR_CIRCLE( b2RecReader* rdr );
-b2Capsule b2RecR_CAPSULE( b2RecReader* rdr );
-b2Segment b2RecR_SEGMENT( b2RecReader* rdr );
-b2Polygon b2RecR_POLYGON( b2RecReader* rdr );
-b2ChainSegment b2RecR_CHAINSEG( b2RecReader* rdr );
-b2Filter b2RecR_FILTER( b2RecReader* rdr );
-b2SurfaceMaterial b2RecR_MATERIAL( b2RecReader* rdr );
-b2MassData b2RecR_MASSDATA( b2RecReader* rdr );
-b2MotionLocks b2RecR_LOCKS( b2RecReader* rdr );
-const char* b2RecR_STR( b2RecReader* rdr );
-b2ExplosionDef b2RecR_EXPLOSIONDEF( b2RecReader* rdr );
-b2BodyDef b2RecR_BODYDEF( b2RecReader* rdr );
-b2ShapeDef b2RecR_SHAPEDEF( b2RecReader* rdr );
-b2ChainDef b2RecR_CHAINDEF( b2RecReader* rdr );
-b2DistanceJointDef b2RecR_DISTANCEJOINTDEF( b2RecReader* rdr );
-b2MotorJointDef b2RecR_MOTORJOINTDEF( b2RecReader* rdr );
-b2FilterJointDef b2RecR_FILTERJOINTDEF( b2RecReader* rdr );
-b2PrismaticJointDef b2RecR_PRISMATICJOINTDEF( b2RecReader* rdr );
-b2RevoluteJointDef b2RecR_REVOLUTEJOINTDEF( b2RecReader* rdr );
-b2WeldJointDef b2RecR_WELDJOINTDEF( b2RecReader* rdr );
-b2WheelJointDef b2RecR_WHEELJOINTDEF( b2RecReader* rdr );
-b2AABB b2RecR_AABB( b2RecReader* rdr );
-b2QueryFilter b2RecR_QUERYFILTER( b2RecReader* rdr );
-b2ShapeProxy b2RecR_SHAPEPROXY( b2RecReader* rdr );
-b2WorldCastOutput b2RecR_WORLDCASTOUTPUT( b2RecReader* rdr );
-b2RayResult b2RecR_RAYRESULT( b2RecReader* rdr );
-b2PlaneResult b2RecR_PLANERESULT( b2RecReader* rdr );
-b2TreeStats b2RecR_TREESTATS( b2RecReader* rdr );
-
-// Grow the reader's hit scratch to at least n entries
-void b2RecEnsureHits( b2RecReader* rdr, int n );
+// Grow the reader's hit scratch to at least n entries, preserving contents. n is bounded by the
+// file size since every recorded hit consumes at least one byte.
+void b3RecEnsureHits( b3RecReader* rdr, int n );

@@ -1,7 +1,9 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
 #pragma once
+
+#include "box3d/base.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -12,7 +14,7 @@
 
 // https://en.wikipedia.org/wiki/Find_first_set
 
-static inline uint32_t b2CTZ32( uint32_t block )
+static inline uint32_t b3CTZ32( uint32_t block )
 {
 	unsigned long index;
 	_BitScanForward( &index, block );
@@ -20,9 +22,9 @@ static inline uint32_t b2CTZ32( uint32_t block )
 }
 
 // This function doesn't need to be fast, so using the Ivy Bridge fallback.
-static inline uint32_t b2CLZ32( uint32_t value )
+static inline uint32_t b3CLZ32( uint32_t value )
 {
-	#if 1
+#if 1
 
 	// Use BSR (Bit Scan Reverse) which is available on Ivy Bridge
 	unsigned long index;
@@ -39,20 +41,20 @@ static inline uint32_t b2CLZ32( uint32_t value )
 		return 32;
 	}
 
-	#else
+#else
 
 	return __lzcnt( value );
 
-	#endif
+#endif
 }
 
-static inline uint32_t b2CTZ64( uint64_t block )
+static inline uint32_t b3CTZ64( uint64_t block )
 {
 	unsigned long index;
 
-	#ifdef _WIN64
+#ifdef _WIN64
 	_BitScanForward64( &index, block );
-	#else
+#else
 	// 32-bit fall back
 	if ( (uint32_t)block != 0 )
 	{
@@ -63,59 +65,70 @@ static inline uint32_t b2CTZ64( uint64_t block )
 		_BitScanForward( &index, (uint32_t)( block >> 32 ) );
 		index += 32;
 	}
-	#endif
+#endif
 
 	return index;
 }
 
-static inline int b2PopCount64( uint64_t block )
+static inline int b3PopCount64( uint64_t block )
 {
 	return (int)__popcnt64( block );
 }
+
 #else
 
-static inline uint32_t b2CTZ32( uint32_t block )
+static inline uint32_t b3CTZ32( uint32_t block )
 {
 	return __builtin_ctz( block );
 }
 
-static inline uint32_t b2CLZ32( uint32_t value )
+static inline uint32_t b3CLZ32( uint32_t value )
 {
 	return __builtin_clz( value );
 }
 
-static inline uint32_t b2CTZ64( uint64_t block )
+static inline uint32_t b3CTZ64( uint64_t block )
 {
 	return __builtin_ctzll( block );
 }
 
-static inline int b2PopCount64( uint64_t block )
+static inline int b3PopCount64( uint64_t block )
 {
 	return __builtin_popcountll( block );
 }
+
 #endif
 
-static inline bool b2IsPowerOf2( int x )
+static inline bool b3IsPowerOf2( int x )
 {
 	return ( x & ( x - 1 ) ) == 0;
 }
 
-static inline int b2BoundingPowerOf2( int x )
+static inline int b3BoundingPowerOf2( int x )
 {
 	if ( x <= 1 )
 	{
 		return 1;
 	}
 
-	return 32 - (int)b2CLZ32( (uint32_t)x - 1 );
+	return 32 - (int)b3CLZ32( (uint32_t)x - 1 );
 }
 
-static inline int b2RoundUpPowerOf2( int x )
+static inline int b3RoundUpPowerOf2( int x )
 {
 	if ( x <= 1 )
 	{
 		return 1;
 	}
 
-	return 1 << ( 32 - (int)b2CLZ32( (uint32_t)x - 1 ) );
+	return 1 << ( 32 - (int)b3CLZ32( (uint32_t)x - 1 ) );
+}
+
+static inline int b3LowerPowerOf2Exponent( int x )
+{
+	B3_ASSERT( x > 0 );
+	int clz = (int)b3CLZ32( (uint32_t)x );
+
+	// Position of most significant bit = floor(log2(M))
+	return 31 - clz;
 }

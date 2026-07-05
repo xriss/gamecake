@@ -1,68 +1,70 @@
-// SPDX-FileCopyrightText: 2023 Erin Catto
+// SPDX-FileCopyrightText: 2026 Erin Catto
 // SPDX-License-Identifier: MIT
 
-#include "test_macros.h"
 #include "benchmarks.h"
+#include "overflow_color.h"
+#include "stability.h"
+#include "test_macros.h"
 
-#include "box2d/box2d.h"
-#include "box2d/collision.h"
-#include "box2d/constants.h"
-#include "box2d/math_functions.h"
+#include "box3d/box3d.h"
+#include "box3d/collision.h"
+#include "box3d/constants.h"
+#include "box3d/math_functions.h"
 
 #include <stdio.h>
 
 // This is a simple example of building and running a simulation
-// using Box2D. Here we create a large ground box and a small dynamic
+// using Box3D. Here we create a large ground box and a small dynamic
 // box.
-// There are no graphics for this example. Box2D is meant to be used
+// There are no graphics for this example. Box3D is meant to be used
 // with your rendering engine in your game engine.
 int HelloWorld( void )
 {
 	// Construct a world object, which will hold and simulate the rigid bodies.
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	worldDef.gravity = (b2Vec2){ 0.0f, -10.0f };
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	worldDef.gravity = (b3Vec3){ 0.0f, -10.0f, 0.0f };
 
-	b2WorldId worldId = b2CreateWorld( &worldDef );
-	ENSURE( b2World_IsValid( worldId ) );
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+	ENSURE( b3World_IsValid( worldId ) );
 
 	// Define the ground body.
-	b2BodyDef groundBodyDef = b2DefaultBodyDef();
-	groundBodyDef.position = (b2Pos){ 0.0f, -10.0f };
+	b3BodyDef groundBodyDef = b3DefaultBodyDef();
+	groundBodyDef.position = (b3Pos){ 0.0f, -10.0f, 0.0f };
 
 	// Call the body factory which allocates memory for the ground body
 	// from a pool and creates the ground box shape (also from a pool).
 	// The body is also added to the world.
-	b2BodyId groundId = b2CreateBody( worldId, &groundBodyDef );
-	ENSURE( b2Body_IsValid( groundId ) );
+	b3BodyId groundId = b3CreateBody( worldId, &groundBodyDef );
+	ENSURE( b3Body_IsValid( groundId ) );
 
 	// Define the ground box shape. The extents are the half-widths of the box.
-	b2Polygon groundBox = b2MakeBox( 50.0f, 10.0f );
+	b3BoxHull groundBox = b3MakeBoxHull( 50.0f, 10.0f, 50.0f );
 
 	// Add the box shape to the ground body.
-	b2ShapeDef groundShapeDef = b2DefaultShapeDef();
-	b2CreatePolygonShape( groundId, &groundShapeDef, &groundBox );
+	b3ShapeDef groundShapeDef = b3DefaultShapeDef();
+	b3CreateHullShape( groundId, &groundShapeDef, &groundBox.base );
 
 	// Define the dynamic body. We set its position and call the body factory.
-	b2BodyDef bodyDef = b2DefaultBodyDef();
-	bodyDef.type = b2_dynamicBody;
-	bodyDef.position = (b2Pos){ 0.0f, 4.0f };
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
+	bodyDef.position = (b3Pos){ 0.0f, 4.0f, 0.0f };
 
-	b2BodyId bodyId = b2CreateBody( worldId, &bodyDef );
+	b3BodyId bodyId = b3CreateBody( worldId, &bodyDef );
 
 	// Define another box shape for our dynamic body.
-	b2Polygon dynamicBox = b2MakeBox( 1.0f, 1.0f );
+	b3BoxHull dynamicBox = b3MakeCubeHull( 1.0f );
 
 	// Define the dynamic body shape
-	b2ShapeDef shapeDef = b2DefaultShapeDef();
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
 
 	// Set the box density to be non-zero, so it will be dynamic.
 	shapeDef.density = 1.0f;
 
 	// Override the default friction.
-	shapeDef.material.friction = 0.3f;
+	shapeDef.baseMaterial.friction = 0.3f;
 
 	// Add the shape to the body.
-	b2CreatePolygonShape( bodyId, &shapeDef, &dynamicBox );
+	b3CreateHullShape( bodyId, &shapeDef, &dynamicBox.base );
 
 	// Prepare for simulation. Typically we use a time step of 1/60 of a
 	// second (60Hz) and 4 sub-steps. This provides a high quality simulation
@@ -70,51 +72,51 @@ int HelloWorld( void )
 	float timeStep = 1.0f / 60.0f;
 	int subStepCount = 4;
 
-	b2Pos position = b2Body_GetPosition( bodyId );
-	b2Rot rotation = b2Body_GetRotation( bodyId );
+	b3Pos position = b3Body_GetPosition( bodyId );
+	b3Quat rotation = b3Body_GetRotation( bodyId );
 
 	// This is our little game loop.
 	for ( int i = 0; i < 90; ++i )
 	{
 		// Instruct the world to perform a single step of simulation.
 		// It is generally best to keep the time step and iterations fixed.
-		b2World_Step( worldId, timeStep, subStepCount );
+		b3World_Step( worldId, timeStep, subStepCount );
 
 		// Now print the position and angle of the body.
-		position = b2Body_GetPosition( bodyId );
-		rotation = b2Body_GetRotation( bodyId );
+		position = b3Body_GetPosition( bodyId );
+		rotation = b3Body_GetRotation( bodyId );
 
-		// printf("%4.2f %4.2f %4.2f\n", position.x, position.y, b2Rot_GetAngle(rotation));
+		// printf("%4.2f %4.2f %4.2f\n", position.x, position.y, b3Rot_GetAngle(rotation));
 	}
 
 	// When the world destructor is called, all bodies and joints are freed. This can
 	// create orphaned ids, so be careful about your world management.
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
 
-	ENSURE( b2AbsFloat( position.x ) < 0.01f );
-	ENSURE( b2AbsFloat( position.y - 1.00f ) < 0.01f );
-	ENSURE( b2AbsFloat( b2Rot_GetAngle( rotation ) ) < 0.01f );
+	ENSURE_SMALL( position.y - 1.00f, 0.01f );
+	ENSURE_SMALL( rotation.v.x, 0.01f );
+	ENSURE_SMALL( rotation.v.z, 0.01f );
 
 	return 0;
 }
 
 int EmptyWorld( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	b2WorldId worldId = b2CreateWorld( &worldDef );
-	ENSURE( b2World_IsValid( worldId ) == true );
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+	ENSURE( b3World_IsValid( worldId ) == true );
 
 	float timeStep = 1.0f / 60.0f;
-	int32_t subStepCount = 1;
+	int subStepCount = 1;
 
-	for ( int32_t i = 0; i < 60; ++i )
+	for ( int i = 0; i < 60; ++i )
 	{
-		b2World_Step( worldId, timeStep, subStepCount );
+		b3World_Step( worldId, timeStep, subStepCount );
 	}
 
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
 
-	ENSURE( b2World_IsValid( worldId ) == false );
+	ENSURE( b3World_IsValid( worldId ) == false );
 
 	return 0;
 }
@@ -122,28 +124,28 @@ int EmptyWorld( void )
 #define BODY_COUNT 10
 int DestroyAllBodiesWorld( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	b2WorldId worldId = b2CreateWorld( &worldDef );
-	ENSURE( b2World_IsValid( worldId ) == true );
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+	ENSURE( b3World_IsValid( worldId ) == true );
 
 	int count = 0;
 	bool creating = true;
 
-	b2BodyId bodyIds[BODY_COUNT];
-	b2BodyDef bodyDef = b2DefaultBodyDef();
-	bodyDef.type = b2_dynamicBody;
-	b2Polygon square = b2MakeSquare( 0.5f );
+	b3BodyId bodyIds[BODY_COUNT];
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
+	b3BoxHull cube = b3MakeCubeHull( 0.5f );
 
-	for ( int32_t i = 0; i < 2 * BODY_COUNT + 10; ++i )
+	for ( int i = 0; i < 2 * BODY_COUNT + 10; ++i )
 	{
 		if ( creating )
 		{
 			if ( count < BODY_COUNT )
 			{
-				bodyIds[count] = b2CreateBody( worldId, &bodyDef );
+				bodyIds[count] = b3CreateBody( worldId, &bodyDef );
 
-				b2ShapeDef shapeDef = b2DefaultShapeDef();
-				b2CreatePolygonShape( bodyIds[count], &shapeDef, &square );
+				b3ShapeDef shapeDef = b3DefaultShapeDef();
+				b3CreateHullShape( bodyIds[count], &shapeDef, &cube.base );
 				count += 1;
 			}
 			else
@@ -153,54 +155,54 @@ int DestroyAllBodiesWorld( void )
 		}
 		else if ( count > 0 )
 		{
-			b2DestroyBody( bodyIds[count - 1] );
-			bodyIds[count - 1] = b2_nullBodyId;
+			b3DestroyBody( bodyIds[count - 1] );
+			bodyIds[count - 1] = b3_nullBodyId;
 			count -= 1;
 		}
 
-		b2World_Step( worldId, 1.0f / 60.0f, 3 );
+		b3World_Step( worldId, 1.0f / 60.0f, 3 );
 	}
 
-	b2Counters counters = b2World_GetCounters( worldId );
+	b3Counters counters = b3World_GetCounters( worldId );
 	ENSURE( counters.bodyCount == 0 );
 
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
 
-	ENSURE( b2World_IsValid( worldId ) == false );
+	ENSURE( b3World_IsValid( worldId ) == false );
 
 	return 0;
 }
 
 static int TestIsValid( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	b2WorldId worldId = b2CreateWorld( &worldDef );
-	ENSURE( b2World_IsValid( worldId ) );
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+	ENSURE( b3World_IsValid( worldId ) );
 
-	b2BodyDef bodyDef = b2DefaultBodyDef();
+	b3BodyDef bodyDef = b3DefaultBodyDef();
 
-	b2BodyId bodyId1 = b2CreateBody( worldId, &bodyDef );
-	ENSURE( b2Body_IsValid( bodyId1 ) == true );
+	b3BodyId bodyId1 = b3CreateBody( worldId, &bodyDef );
+	ENSURE( b3Body_IsValid( bodyId1 ) == true );
 
-	b2BodyId bodyId2 = b2CreateBody( worldId, &bodyDef );
-	ENSURE( b2Body_IsValid( bodyId2 ) == true );
+	b3BodyId bodyId2 = b3CreateBody( worldId, &bodyDef );
+	ENSURE( b3Body_IsValid( bodyId2 ) == true );
 
-	b2DestroyBody( bodyId1 );
-	ENSURE( b2Body_IsValid( bodyId1 ) == false );
+	b3DestroyBody( bodyId1 );
+	ENSURE( b3Body_IsValid( bodyId1 ) == false );
 
-	b2DestroyBody( bodyId2 );
-	ENSURE( b2Body_IsValid( bodyId2 ) == false );
+	b3DestroyBody( bodyId2 );
+	ENSURE( b3Body_IsValid( bodyId2 ) == false );
 
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
 
-	ENSURE( b2World_IsValid( worldId ) == false );
-	ENSURE( b2Body_IsValid( bodyId2 ) == false );
-	ENSURE( b2Body_IsValid( bodyId1 ) == false );
+	ENSURE( b3World_IsValid( worldId ) == false );
+	ENSURE( b3Body_IsValid( bodyId2 ) == false );
+	ENSURE( b3Body_IsValid( bodyId1 ) == false );
 
 	return 0;
 }
 
-#define WORLD_COUNT ( B2_MAX_WORLDS / 2 )
+#define WORLD_COUNT ( B3_MAX_WORLDS / 2 )
 
 int TestWorldRecycle( void )
 {
@@ -208,18 +210,18 @@ int TestWorldRecycle( void )
 
 	int count = 100;
 
-	b2WorldId worldIds[WORLD_COUNT];
+	b3WorldId worldIds[WORLD_COUNT];
 
 	for ( int i = 0; i < count; ++i )
 	{
-		b2WorldDef worldDef = b2DefaultWorldDef();
+		b3WorldDef worldDef = b3DefaultWorldDef();
 		for ( int j = 0; j < WORLD_COUNT; ++j )
 		{
-			worldIds[j] = b2CreateWorld( &worldDef );
-			ENSURE( b2World_IsValid( worldIds[j] ) == true );
+			worldIds[j] = b3CreateWorld( &worldDef );
+			ENSURE( b3World_IsValid( worldIds[j] ) == true );
 
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			b2CreateBody( worldIds[j], &bodyDef );
+			b3BodyDef bodyDef = b3DefaultBodyDef();
+			b3CreateBody( worldIds[j], &bodyDef );
 		}
 
 		for ( int j = 0; j < WORLD_COUNT; ++j )
@@ -229,22 +231,22 @@ int TestWorldRecycle( void )
 
 			for ( int k = 0; k < 10; ++k )
 			{
-				b2World_Step( worldIds[j], timeStep, subStepCount );
+				b3World_Step( worldIds[j], timeStep, subStepCount );
 			}
 		}
 
 		for ( int j = WORLD_COUNT - 1; j >= 0; --j )
 		{
-			b2DestroyWorld( worldIds[j] );
-			ENSURE( b2World_IsValid( worldIds[j] ) == false );
-			worldIds[j] = b2_nullWorldId;
+			b3DestroyWorld( worldIds[j] );
+			ENSURE( b3World_IsValid( worldIds[j] ) == false );
+			worldIds[j] = b3_nullWorldId;
 		}
 	}
 
 	return 0;
 }
 
-static bool CustomFilter( b2ShapeId shapeIdA, b2ShapeId shapeIdB, void* context )
+static bool CustomFilter( b3ShapeId shapeIdA, b3ShapeId shapeIdB, void* context )
 {
 	(void)shapeIdA;
 	(void)shapeIdB;
@@ -252,7 +254,7 @@ static bool CustomFilter( b2ShapeId shapeIdA, b2ShapeId shapeIdB, void* context 
 	return true;
 }
 
-static bool PreSolveStatic( b2ShapeId shapeIdA, b2ShapeId shapeIdB, b2Pos point, b2Vec2 normal, void* context )
+static bool PreSolveStatic( b3ShapeId shapeIdA, b3ShapeId shapeIdB, b3Pos point, b3Vec3 normal, void* context )
 {
 	(void)shapeIdA;
 	(void)shapeIdB;
@@ -265,96 +267,95 @@ static bool PreSolveStatic( b2ShapeId shapeIdA, b2ShapeId shapeIdB, b2Pos point,
 // This test is here to ensure all API functions link correctly.
 int TestWorldCoverage( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
+	b3WorldDef worldDef = b3DefaultWorldDef();
 
-	b2WorldId worldId = b2CreateWorld( &worldDef );
-	ENSURE( b2World_IsValid( worldId ) );
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+	ENSURE( b3World_IsValid( worldId ) );
 
-	b2World_EnableSleeping( worldId, true );
-	b2World_EnableSleeping( worldId, false );
-	bool flag = b2World_IsSleepingEnabled( worldId );
+	b3World_EnableSleeping( worldId, true );
+	b3World_EnableSleeping( worldId, false );
+	bool flag = b3World_IsSleepingEnabled( worldId );
 	ENSURE( flag == false );
 
-	b2World_EnableContinuous( worldId, false );
-	b2World_EnableContinuous( worldId, true );
-	flag = b2World_IsContinuousEnabled( worldId );
+	b3World_EnableContinuous( worldId, false );
+	b3World_EnableContinuous( worldId, true );
+	flag = b3World_IsContinuousEnabled( worldId );
 	ENSURE( flag == true );
 
-	b2World_SetRestitutionThreshold( worldId, 0.0f );
-	b2World_SetRestitutionThreshold( worldId, 2.0f );
-	float value = b2World_GetRestitutionThreshold( worldId );
+	b3World_SetRestitutionThreshold( worldId, 0.0f );
+	b3World_SetRestitutionThreshold( worldId, 2.0f );
+	float value = b3World_GetRestitutionThreshold( worldId );
 	ENSURE( value == 2.0f );
 
-	b2World_SetHitEventThreshold( worldId, 0.0f );
-	b2World_SetHitEventThreshold( worldId, 100.0f );
-	value = b2World_GetHitEventThreshold( worldId );
+	b3World_SetHitEventThreshold( worldId, 0.0f );
+	b3World_SetHitEventThreshold( worldId, 100.0f );
+	value = b3World_GetHitEventThreshold( worldId );
 	ENSURE( value == 100.0f );
 
-	b2World_SetCustomFilterCallback( worldId, CustomFilter, NULL );
-	b2World_SetPreSolveCallback( worldId, PreSolveStatic, NULL );
+	b3World_SetCustomFilterCallback( worldId, CustomFilter, NULL );
+	b3World_SetPreSolveCallback( worldId, PreSolveStatic, NULL );
 
-	b2Vec2 g = { 1.0f, 2.0f };
-	b2World_SetGravity( worldId, g );
-	b2Vec2 v = b2World_GetGravity( worldId );
+	b3Vec3 g = { 1.0f, 2.0f };
+	b3World_SetGravity( worldId, g );
+	b3Vec3 v = b3World_GetGravity( worldId );
 	ENSURE( v.x == g.x );
 	ENSURE( v.y == g.y );
 
-	b2ExplosionDef explosionDef = b2DefaultExplosionDef();
-	b2World_Explode( worldId, &explosionDef );
+	b3ExplosionDef explosionDef = b3DefaultExplosionDef();
+	b3World_Explode( worldId, &explosionDef );
 
-	b2World_SetContactTuning( worldId, 10.0f, 2.0f, 4.0f );
+	b3World_SetContactTuning( worldId, 10.0f, 2.0f, 4.0f );
 
-	b2World_SetMaximumLinearSpeed( worldId, 10.0f );
-	value = b2World_GetMaximumLinearSpeed( worldId );
+	b3World_SetMaximumLinearSpeed( worldId, 10.0f );
+	value = b3World_GetMaximumLinearSpeed( worldId );
 	ENSURE( value == 10.0f );
 
-	b2World_EnableWarmStarting( worldId, true );
-	flag = b2World_IsWarmStartingEnabled( worldId );
+	b3World_EnableWarmStarting( worldId, true );
+	flag = b3World_IsWarmStartingEnabled( worldId );
 	ENSURE( flag == true );
 
-	int count = b2World_GetAwakeBodyCount( worldId );
+	int count = b3World_GetAwakeBodyCount( worldId );
 	ENSURE( count == 0 );
 
-	b2World_SetUserData( worldId, &value );
-	void* userData = b2World_GetUserData( worldId );
+	b3World_SetUserData( worldId, &value );
+	void* userData = b3World_GetUserData( worldId );
 	ENSURE( userData == &value );
 
-	b2World_Step( worldId, 1.0f, 1 );
+	b3World_Step( worldId, 1.0f, 1 );
 
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
 
 	return 0;
 }
 
 static int TestSensor( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	b2WorldId worldId = b2CreateWorld( &worldDef );
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
 
 	// Wall from x = 1 to x = 2
-	b2BodyDef bodyDef = b2DefaultBodyDef();
-	bodyDef.type = b2_staticBody;
-	bodyDef.position.x = 1.5f;
-	bodyDef.position.y = 11.0f;
-	b2BodyId wallId = b2CreateBody( worldId, &bodyDef );
-	b2Polygon box = b2MakeBox( 0.5f, 10.0f );
-	b2ShapeDef shapeDef = b2DefaultShapeDef();
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_staticBody;
+	bodyDef.position = (b3Pos){ 1.5f, 11.0f, 0.0f };
+	b3BodyId wallId = b3CreateBody( worldId, &bodyDef );
+	b3BoxHull box = b3MakeBoxHull( 0.5f, 10.0f, 1.0f );
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
 	shapeDef.enableSensorEvents = true;
-	b2CreatePolygonShape( wallId, &shapeDef, &box );
+	b3CreateHullShape( wallId, &shapeDef, &box.base );
 
 	// Bullet fired towards the wall
-	bodyDef = b2DefaultBodyDef();
-	bodyDef.type = b2_dynamicBody;
+	bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
 	bodyDef.isBullet = true;
 	bodyDef.gravityScale = 0.0f;
-	bodyDef.position = (b2Pos){ 7.39814f, 4.0f };
-	bodyDef.linearVelocity = (b2Vec2){ -20.0f, 0.0f };
-	b2BodyId bulletId = b2CreateBody( worldId, &bodyDef );
-	shapeDef = b2DefaultShapeDef();
+	bodyDef.position = (b3Pos){ 7.39814f, 4.0f, 0.0f };
+	bodyDef.linearVelocity = (b3Vec3){ -20.0f, 0.0f, 0.0f };
+	b3BodyId bulletId = b3CreateBody( worldId, &bodyDef );
+	shapeDef = b3DefaultShapeDef();
 	shapeDef.isSensor = true;
 	shapeDef.enableSensorEvents = true;
-	b2Circle circle = { { 0.0f, 0.0f }, 0.1f };
-	b2CreateCircleShape( bulletId, &shapeDef, &circle );
+	b3Sphere sphere = { { 0.0f, 0.0f, 0.0f }, 0.1f };
+	b3CreateSphereShape( bulletId, &shapeDef, &sphere );
 
 	int beginCount = 0;
 	int endCount = 0;
@@ -363,12 +364,12 @@ static int TestSensor( void )
 	{
 		float timeStep = 1.0f / 60.0f;
 		int subStepCount = 4;
-		b2World_Step( worldId, timeStep, subStepCount );
+		b3World_Step( worldId, timeStep, subStepCount );
 
-		b2Pos bulletPos = b2Body_GetPosition( bulletId );
+		b3Pos bulletPos = b3Body_GetPosition( bulletId );
 		// printf( "Bullet pos: %g %g\n", bulletPos.x, bulletPos.y );
 
-		b2SensorEvents events = b2World_GetSensorEvents( worldId );
+		b3SensorEvents events = b3World_GetSensorEvents( worldId );
 
 		if ( events.beginCount > 0 )
 		{
@@ -386,7 +387,7 @@ static int TestSensor( void )
 		}
 	}
 
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
 
 	ENSURE( beginCount == 1 );
 	ENSURE( endCount == 1 );
@@ -394,262 +395,674 @@ static int TestSensor( void )
 	return 0;
 }
 
+static int TestContactEvents( void )
+{
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+
+	// Static ground
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_staticBody;
+	bodyDef.position = (b3Pos){ 0.0f, -0.5f, 0.0f };
+	b3BodyId groundId = b3CreateBody( worldId, &bodyDef );
+	b3BoxHull groundBox = b3MakeBoxHull( 10.0f, 0.5f, 10.0f );
+	b3ShapeDef groundShapeDef = b3DefaultShapeDef();
+	b3ShapeId groundShapeId = b3CreateHullShape( groundId, &groundShapeDef, &groundBox.base );
+
+	// Dynamic sphere dropped onto the ground; restitution causes it to bounce so we get end events
+	bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
+	bodyDef.position = (b3Pos){ 0.0f, 5.0f, 0.0f };
+	b3BodyId sphereBodyId = b3CreateBody( worldId, &bodyDef );
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	shapeDef.density = 1.0f;
+	shapeDef.enableContactEvents = true;
+	shapeDef.baseMaterial.restitution = 0.6f;
+	b3Sphere sphere = { { 0.0f, 0.0f, 0.0f }, 0.5f };
+	b3ShapeId sphereShapeId = b3CreateSphereShape( sphereBodyId, &shapeDef, &sphere );
+
+	int beginCount = 0;
+	int endCount = 0;
+	bool idsChecked = false;
+
+	for ( int i = 0; i < 120; ++i )
+	{
+		b3World_Step( worldId, 1.0f / 60.0f, 4 );
+
+		b3ContactEvents events = b3World_GetContactEvents( worldId );
+
+		if ( events.beginCount > 0 && idsChecked == false )
+		{
+			b3ContactBeginTouchEvent be = events.beginEvents[0];
+			bool aIsSphere = B3_ID_EQUALS( be.shapeIdA, sphereShapeId );
+			bool bIsSphere = B3_ID_EQUALS( be.shapeIdB, sphereShapeId );
+			bool aIsGround = B3_ID_EQUALS( be.shapeIdA, groundShapeId );
+			bool bIsGround = B3_ID_EQUALS( be.shapeIdB, groundShapeId );
+			ENSURE( ( aIsSphere && bIsGround ) || ( aIsGround && bIsSphere ) );
+			ENSURE( b3Contact_IsValid( be.contactId ) );
+			idsChecked = true;
+		}
+
+		beginCount += events.beginCount;
+		endCount += events.endCount;
+	}
+
+	b3DestroyWorld( worldId );
+
+	ENSURE( idsChecked );
+	ENSURE( beginCount >= 1 );
+	ENSURE( endCount >= 1 );
+
+	return 0;
+}
+
+static int TestHitEvents( void )
+{
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	worldDef.hitEventThreshold = 1.0f;
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+
+	// Static ground
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_staticBody;
+	bodyDef.position = (b3Pos){ 0.0f, -0.5f, 0.0f };
+	b3BodyId groundId = b3CreateBody( worldId, &bodyDef );
+	b3BoxHull groundBox = b3MakeBoxHull( 10.0f, 0.5f, 10.0f );
+	b3ShapeDef groundShapeDef = b3DefaultShapeDef();
+	b3CreateHullShape( groundId, &groundShapeDef, &groundBox.base );
+
+	// Sphere driven into the ground fast enough to clear the hit threshold
+	bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
+	bodyDef.gravityScale = 0.0f;
+	bodyDef.position = (b3Pos){ 0.0f, 2.0f, 0.0f };
+	bodyDef.linearVelocity = (b3Vec3){ 0.0f, -30.0f, 0.0f };
+	b3BodyId sphereBodyId = b3CreateBody( worldId, &bodyDef );
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	shapeDef.density = 1.0f;
+	shapeDef.enableHitEvents = true;
+	shapeDef.baseMaterial.userMaterialId = 7;
+	b3Sphere sphere = { { 0.0f, 0.0f, 0.0f }, 0.5f };
+	b3CreateSphereShape( sphereBodyId, &shapeDef, &sphere );
+
+	int hitCount = 0;
+	float capturedSpeed = 0.0f;
+	uint64_t capturedMaterialA = 0;
+	uint64_t capturedMaterialB = 0;
+	b3Vec3 capturedNormal = { 0.0f, 0.0f, 0.0f };
+
+	for ( int i = 0; i < 30; ++i )
+	{
+		b3World_Step( worldId, 1.0f / 60.0f, 4 );
+
+		b3ContactEvents events = b3World_GetContactEvents( worldId );
+		if ( events.hitCount > 0 && hitCount == 0 )
+		{
+			b3ContactHitEvent hit = events.hitEvents[0];
+			capturedSpeed = hit.approachSpeed;
+			capturedNormal = hit.normal;
+			capturedMaterialA = hit.userMaterialIdA;
+			capturedMaterialB = hit.userMaterialIdB;
+		}
+
+		hitCount += events.hitCount;
+	}
+
+	b3DestroyWorld( worldId );
+
+	ENSURE( hitCount >= 1 );
+	ENSURE( capturedSpeed > 1.0f );
+	// Head-on vertical impact: normal lies along Y
+	ENSURE_SMALL( capturedNormal.x, 0.01f );
+	ENSURE_SMALL( capturedNormal.z, 0.01f );
+	// One side of the contact carries the sphere's user material
+	ENSURE( capturedMaterialA == 7 || capturedMaterialB == 7 );
+
+	return 0;
+}
+
+// Hit-event material lookup must respect the compound child that participated in the
+// contact. Two children with distinct userMaterialIds at separated positions, dropped
+// sphere strikes one specifically. Without the fix, both children would report
+// materials[0] and the strike on hull 1 would be misattributed.
+static int TestCompoundHitEvents( void )
+{
+	const uint64_t kHullMaterialA = 11;
+	const uint64_t kHullMaterialB = 22;
+	const uint64_t kSphereMaterial = 99;
+	const float kHullCenterX = 3.0f;
+
+	for ( int side = 0; side < 2; ++side )
+	{
+		uint64_t expectedHullMaterial = ( side == 0 ) ? kHullMaterialA : kHullMaterialB;
+		float spawnX = ( side == 0 ) ? -kHullCenterX : kHullCenterX;
+
+		b3WorldDef worldDef = b3DefaultWorldDef();
+		worldDef.hitEventThreshold = 1.0f;
+		b3WorldId worldId = b3CreateWorld( &worldDef );
+
+		// Build a compound with two hulls at opposite x positions, distinct userMaterialIds
+		b3BoxHull boxA = b3MakeBoxHull( 1.0f, 1.0f, 1.0f );
+		b3BoxHull boxB = b3MakeBoxHull( 1.0f, 1.0f, 1.0f );
+
+		b3SurfaceMaterial matA = b3DefaultSurfaceMaterial();
+		matA.userMaterialId = kHullMaterialA;
+
+		b3SurfaceMaterial matB = b3DefaultSurfaceMaterial();
+		matB.userMaterialId = kHullMaterialB;
+
+		b3CompoundHullDef hulls[2];
+		hulls[0].hull = &boxA.base;
+		hulls[0].transform = (b3Transform){ { -kHullCenterX, 0.0f, 0.0f }, b3Quat_identity };
+		hulls[0].material = matA;
+		hulls[1].hull = &boxB.base;
+		hulls[1].transform = (b3Transform){ { kHullCenterX, 0.0f, 0.0f }, b3Quat_identity };
+		hulls[1].material = matB;
+
+		b3CompoundDef compoundDef = { 0 };
+		compoundDef.hulls = hulls;
+		compoundDef.hullCount = 2;
+		b3CompoundData* compound = b3CreateCompound( &compoundDef );
+		ENSURE( compound != NULL );
+
+		// Static body holds the compound
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		bodyDef.type = b3_staticBody;
+		b3BodyId compoundBodyId = b3CreateBody( worldId, &bodyDef );
+		b3ShapeDef compoundShapeDef = b3DefaultShapeDef();
+		b3CreateCompoundShape( compoundBodyId, &compoundShapeDef, compound );
+
+		// Sphere driven straight down onto the chosen child
+		bodyDef = b3DefaultBodyDef();
+		bodyDef.type = b3_dynamicBody;
+		bodyDef.gravityScale = 0.0f;
+		bodyDef.position = (b3Pos){ spawnX, 3.0f, 0.0f };
+		bodyDef.linearVelocity = (b3Vec3){ 0.0f, -30.0f, 0.0f };
+		b3BodyId sphereBodyId = b3CreateBody( worldId, &bodyDef );
+		b3ShapeDef sphereShapeDef = b3DefaultShapeDef();
+		sphereShapeDef.density = 1.0f;
+		sphereShapeDef.enableHitEvents = true;
+		sphereShapeDef.baseMaterial.userMaterialId = kSphereMaterial;
+		b3Sphere sphere = { { 0.0f, 0.0f, 0.0f }, 0.5f };
+		b3CreateSphereShape( sphereBodyId, &sphereShapeDef, &sphere );
+
+		int hitCount = 0;
+		uint64_t capturedMaterialA = 0;
+		uint64_t capturedMaterialB = 0;
+
+		for ( int i = 0; i < 30; ++i )
+		{
+			b3World_Step( worldId, 1.0f / 60.0f, 4 );
+
+			b3ContactEvents events = b3World_GetContactEvents( worldId );
+			if ( events.hitCount > 0 && hitCount == 0 )
+			{
+				b3ContactHitEvent hit = events.hitEvents[0];
+				capturedMaterialA = hit.userMaterialIdA;
+				capturedMaterialB = hit.userMaterialIdB;
+			}
+			hitCount += events.hitCount;
+		}
+
+		b3DestroyWorld( worldId );
+		b3DestroyCompound( compound );
+
+		ENSURE( hitCount >= 1 );
+		// Sphere material on one side
+		ENSURE( capturedMaterialA == kSphereMaterial || capturedMaterialB == kSphereMaterial );
+		// Struck compound child's material on the other side. The pre-fix code returned
+		// materials[0] (kHullMaterialA) for both sides, so a strike on the +x child would fail.
+		ENSURE( capturedMaterialA == expectedHullMaterial || capturedMaterialB == expectedHullMaterial );
+	}
+
+	return 0;
+}
+
 static int TestSetWorkerCount( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
+	b3WorldDef worldDef = b3DefaultWorldDef();
 	worldDef.workerCount = 1;
-	b2WorldId worldId = b2CreateWorld( &worldDef );
-	ENSURE( b2World_IsValid( worldId ) );
-	ENSURE( b2World_GetWorkerCount( worldId ) == 1 );
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+	ENSURE( b3World_IsValid( worldId ) );
+	ENSURE( b3World_GetWorkerCount( worldId ) == 1 );
 
 	CreateJunkyard( worldId );
 	StepJunkyard( worldId, 1 );
 
-	b2World_SetWorkerCount( worldId, 4 );
-	ENSURE( b2World_GetWorkerCount( worldId ) == 4 );
+	b3World_SetWorkerCount( worldId, 4 );
+	ENSURE( b3World_GetWorkerCount( worldId ) == 4 );
 
 	StepJunkyard( worldId, 2 );
 
-	b2World_SetWorkerCount( worldId, 4 );
-	ENSURE( b2World_GetWorkerCount( worldId ) == 4 );
+	b3World_SetWorkerCount( worldId, 4 );
+	ENSURE( b3World_GetWorkerCount( worldId ) == 4 );
 
 	StepJunkyard( worldId, 3 );
 
-	b2World_SetWorkerCount( worldId, 0 );
-	ENSURE( b2World_GetWorkerCount( worldId ) == 1 );
+	b3World_SetWorkerCount( worldId, 0 );
+	ENSURE( b3World_GetWorkerCount( worldId ) == 1 );
 
 	StepJunkyard( worldId, 4 );
 
-	b2World_SetWorkerCount( worldId, -5 );
-	ENSURE( b2World_GetWorkerCount( worldId ) == 1 );
+	b3World_SetWorkerCount( worldId, -5 );
+	ENSURE( b3World_GetWorkerCount( worldId ) == 1 );
 
 	StepJunkyard( worldId, 5 );
 
-	b2World_SetWorkerCount( worldId, B2_MAX_WORKERS + 10 );
-	ENSURE( b2World_GetWorkerCount( worldId ) == B2_MAX_WORKERS );
+	b3World_SetWorkerCount( worldId, B3_MAX_WORKERS + 10 );
+	ENSURE( b3World_GetWorkerCount( worldId ) == B3_MAX_WORKERS );
 
 	StepJunkyard( worldId, 2 );
 
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
 
 	return 0;
 }
 
-static int ChainSegmentShapeTest( void )
+// This tests continuous collision and mesh contact stability
+static int TestMeshDrop( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	worldDef.gravity = (b2Vec2){ 0.0f, -10.0f };
-	b2WorldId worldId = b2CreateWorld( &worldDef );
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	// todo GetCoreCount
+	worldDef.workerCount = 4;
 
-	b2BodyDef bodyDef = b2DefaultBodyDef();
-	b2BodyId groundId = b2CreateBody( worldId, &bodyDef );
+	b3WorldId worldId = b3CreateWorld( &worldDef );
 
-	b2ChainSegment cs = { 0 };
-	cs.ghost1 = (b2Vec2){ 2.0f, 0.0f };
-	cs.segment.point1 = (b2Vec2){ 1.0f, 0.0f };
-	cs.segment.point2 = (b2Vec2){ -1.0f, 0.0f };
-	cs.ghost2 = (b2Vec2){ -2.0f, 0.0f };
-	cs.chainId = 99;
+	MeshDropData data = CreateMeshDrop( worldId, b3Pos_zero );
 
-	b2ShapeDef shapeDef = b2DefaultShapeDef();
-	b2ShapeId orphanShape = b2CreateChainSegmentShape( groundId, &shapeDef, &cs );
-	ENSURE( B2_IS_NON_NULL( orphanShape ) );
+	float timeStep = 1.0f / 60.0f;
 
-	ENSURE( b2Shape_GetType( orphanShape ) == b2_chainSegmentShape );
+	int stepIndex = 0;
+	int stepLimit = 400;
 
-	b2ChainId parentChain = b2Shape_GetParentChain( orphanShape );
-	ENSURE( B2_IS_NULL( parentChain ) );
-
-	b2ChainSegment got = b2Shape_GetChainSegment( orphanShape );
-	ENSURE_SMALL( got.ghost1.x - cs.ghost1.x, 1e-5f );
-	ENSURE_SMALL( got.ghost1.y - cs.ghost1.y, 1e-5f );
-	ENSURE_SMALL( got.segment.point1.x - cs.segment.point1.x, 1e-5f );
-	ENSURE_SMALL( got.segment.point1.y - cs.segment.point1.y, 1e-5f );
-	ENSURE_SMALL( got.segment.point2.x - cs.segment.point2.x, 1e-5f );
-	ENSURE_SMALL( got.segment.point2.y - cs.segment.point2.y, 1e-5f );
-	ENSURE_SMALL( got.ghost2.x - cs.ghost2.x, 1e-5f );
-	ENSURE_SMALL( got.ghost2.y - cs.ghost2.y, 1e-5f );
-	ENSURE( got.chainId == B2_NULL_INDEX );
-
-	b2BodyDef dynamicDef = b2DefaultBodyDef();
-	dynamicDef.type = b2_dynamicBody;
-	dynamicDef.position = (b2Pos){ 0.0f, 2.0f };
-	b2BodyId circleBodyId = b2CreateBody( worldId, &dynamicDef );
-	b2Circle circle = { { 0.0f, 0.0f }, 0.5f };
-	b2ShapeDef circleShapeDef = b2DefaultShapeDef();
-	b2CreateCircleShape( circleBodyId, &circleShapeDef, &circle );
-
-	for ( int i = 0; i < 120; ++i )
+	while ( stepIndex < stepLimit )
 	{
-		b2World_Step( worldId, 1.0f / 60.0f, 4 );
+		int subStepCount = 4;
+		b3World_Step( worldId, timeStep, subStepCount );
+
+		b3BodyEvents events = b3World_GetBodyEvents( worldId );
+		if ( events.moveCount == 0 )
+		{
+			// All bodies sleeping
+			break;
+		}
+
+		stepIndex += 1;
 	}
 
-	b2Pos circlePos = b2Body_GetPosition( circleBodyId );
-	ENSURE( circlePos.y > 0.0f );
+	printf( "  TestMeshDrop stepIndex = %d\n", stepIndex );
 
-	b2ChainSegment cs2 = { 0 };
-	cs2.ghost1 = (b2Vec2){ 3.0f, 0.0f };
-	cs2.segment.point1 = (b2Vec2){ 2.0f, 0.0f };
-	cs2.segment.point2 = (b2Vec2){ -2.0f, 0.0f };
-	cs2.ghost2 = (b2Vec2){ -3.0f, 0.0f };
-	cs2.chainId = B2_NULL_INDEX;
+	DestroyMeshDrop( &data );
+	b3DestroyWorld( worldId );
 
-	b2Shape_SetChainSegment( orphanShape, &cs2 );
-
-	b2ChainSegment got2 = b2Shape_GetChainSegment( orphanShape );
-	ENSURE_SMALL( got2.segment.point1.x - cs2.segment.point1.x, 1e-5f );
-	ENSURE_SMALL( got2.segment.point1.y - cs2.segment.point1.y, 1e-5f );
-	ENSURE_SMALL( got2.segment.point2.x - cs2.segment.point2.x, 1e-5f );
-	ENSURE_SMALL( got2.segment.point2.y - cs2.segment.point2.y, 1e-5f );
-	ENSURE_SMALL( got2.ghost1.x - cs2.ghost1.x, 1e-5f );
-	ENSURE_SMALL( got2.ghost1.y - cs2.ghost1.y, 1e-5f );
-	ENSURE_SMALL( got2.ghost2.x - cs2.ghost2.x, 1e-5f );
-	ENSURE_SMALL( got2.ghost2.y - cs2.ghost2.y, 1e-5f );
-	ENSURE( got2.chainId == B2_NULL_INDEX );
-
-	b2ChainId parentChain2 = b2Shape_GetParentChain( orphanShape );
-	ENSURE( B2_IS_NULL( parentChain2 ) );
-
-	b2BodyId convBody = b2CreateBody( worldId, &bodyDef );
-	b2Circle convCircle = { { 0.0f, 0.0f }, 0.25f };
-	b2ShapeId convShape = b2CreateCircleShape( convBody, &shapeDef, &convCircle );
-	ENSURE( b2Shape_GetType( convShape ) == b2_circleShape );
-
-	b2Shape_SetChainSegment( convShape, &cs2 );
-
-	ENSURE( b2Shape_GetType( convShape ) == b2_chainSegmentShape );
-	b2ChainSegment got3 = b2Shape_GetChainSegment( convShape );
-	ENSURE_SMALL( got3.ghost1.x - cs2.ghost1.x, 1e-5f );
-	ENSURE_SMALL( got3.ghost1.y - cs2.ghost1.y, 1e-5f );
-	ENSURE_SMALL( got3.ghost2.x - cs2.ghost2.x, 1e-5f );
-	ENSURE_SMALL( got3.ghost2.y - cs2.ghost2.y, 1e-5f );
-	ENSURE( got3.chainId == B2_NULL_INDEX );
-
-	b2ChainId parentChain3 = b2Shape_GetParentChain( convShape );
-	ENSURE( B2_IS_NULL( parentChain3 ) );
-
-	b2DestroyShape( orphanShape, true );
-	b2DestroyWorld( worldId );
+	ENSURE( stepIndex < stepLimit );
 
 	return 0;
 }
 
-static int DeferredMassFlagSyncTest( void )
+// Verifies the b3*_Overflow solver path. The scene puts >B3_DYNAMIC_COLOR_COUNT
+// dyn-dyn contacts on a single hub body so several land in the overflow color.
+// The new Prepare/Store contactId-pairing asserts in contact_solver.c fire here
+// if Store reads constraints from the wrong (base, spans) pair, so the test
+// catches the bug even though world state ends up plausible (memory layout is
+// stable within a build, so determinism alone is not a witness).
+static int TestOverflowColorPile( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	b2WorldId worldId = b2CreateWorld( &worldDef );
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	worldDef.workerCount = 1;
+	b3WorldId worldId = b3CreateWorld( &worldDef );
 
-	b2BodyDef bodyDef = b2DefaultBodyDef();
-	bodyDef.type = b2_dynamicBody;
-	b2BodyId bodyId = b2CreateBody( worldId, &bodyDef );
+	OverflowColorPileData data = CreateOverflowColorPile( worldId );
+	(void)data;
 
-	b2ShapeDef shapeDef = b2DefaultShapeDef();
-	shapeDef.updateBodyMass = false;
+	float timeStep = 1.0f / 60.0f;
+	int subStepCount = 4;
 
-	b2Circle circle = { { 0.0f, 0.0f }, 0.5f };
-	b2CreateCircleShape( bodyId, &shapeDef, &circle );
+	// One step would be enough to trip the asserts, but several steps also
+	// exercise the warm-start path (Store -> manifold impulse -> Prepare).
+	int stepCount = 10;
+	for ( int i = 0; i < stepCount; ++i )
+	{
+		b3World_Step( worldId, timeStep, subStepCount );
+	}
 
-	b2Body_ApplyMassFromShapes( bodyId );
+	// Confirm the scene actually populated the overflow color. Without this,
+	// a future change to graph coloring could silently turn the test into a
+	// no-op.
+	b3Counters counters = b3World_GetCounters( worldId );
+	int overflowContacts = counters.colorCounts[B3_GRAPH_COLOR_COUNT - 1];
 
-	b2World_Step( worldId, 1.0f / 60.0f, 4 );
+	b3DestroyWorld( worldId );
 
-	b2DestroyWorld( worldId );
+	ENSURE( overflowContacts > 0 );
 	return 0;
 }
 
+// Exposes that b3Body_EnableSleep mutates body->flags but never syncs
+// bodySim->flags / bodyState->flags. When a body created with
+// enableSleep=false is later flipped on, body->flags gains b3_enableSleep
+// but bodySim/bodyState do not. The flag-sync assertion in
+// b3ValidateSolverSets then fires on the next world step.
+//
+// Under Debug + BOX3D_VALIDATE this crashes; after b3Body_EnableSleep
+// calls b3SyncBodyFlags the test runs cleanly.
 static int EnableSleepFlagSyncTest( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	b2WorldId worldId = b2CreateWorld( &worldDef );
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
 
-	b2BodyDef bodyDef = b2DefaultBodyDef();
-	bodyDef.type = b2_dynamicBody;
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
 	bodyDef.enableSleep = false;
-	b2BodyId bodyId = b2CreateBody( worldId, &bodyDef );
+	b3BodyId bodyId = b3CreateBody( worldId, &bodyDef );
 
-	ENSURE( b2Body_IsSleepEnabled( bodyId ) == false );
+	ENSURE( b3Body_IsSleepEnabled( bodyId ) == false );
 
-	b2Body_EnableSleep( bodyId, true );
-	ENSURE( b2Body_IsSleepEnabled( bodyId ) == true );
+	b3Body_EnableSleep( bodyId, true );
+	ENSURE( b3Body_IsSleepEnabled( bodyId ) == true );
 
-	b2World_Step( worldId, 1.0f / 60.0f, 4 );
+	b3World_Step( worldId, 1.0f / 60.0f, 4 );
 
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
+	return 0;
+}
+
+// Exposes that b3Body_SetBullet writes only bodySim->flags without
+// touching body->flags, while b3SyncBodyFlags overwrites bodySim from
+// body->flags. Any subsequent b3Body_SetMotionLocks or b3Body_SetType
+// silently wipes (or re-asserts) the bullet bit.
+//
+// Reproducer A: create with isBullet=false, SetBullet(true), then
+// SetMotionLocks. b3Body_IsBullet returns false today (wiped); should be
+// true after fix.
+//
+// Reproducer B: create with isBullet=true, SetBullet(false), then
+// SetMotionLocks. b3Body_IsBullet returns true today (re-asserted); should
+// be false after fix.
+static int SetBulletDriftTest( void )
+{
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+
+	{
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		bodyDef.type = b3_dynamicBody;
+		bodyDef.isBullet = false;
+		b3BodyId bodyId = b3CreateBody( worldId, &bodyDef );
+
+		ENSURE( b3Body_IsBullet( bodyId ) == false );
+
+		b3Body_SetBullet( bodyId, true );
+		ENSURE( b3Body_IsBullet( bodyId ) == true );
+
+		b3MotionLocks locks = { 0 };
+		locks.linearX = true;
+		b3Body_SetMotionLocks( bodyId, locks );
+
+		ENSURE( b3Body_IsBullet( bodyId ) == true );
+	}
+
+	{
+		b3BodyDef bodyDef = b3DefaultBodyDef();
+		bodyDef.type = b3_dynamicBody;
+		bodyDef.isBullet = true;
+		b3BodyId bodyId = b3CreateBody( worldId, &bodyDef );
+
+		ENSURE( b3Body_IsBullet( bodyId ) == true );
+
+		b3Body_SetBullet( bodyId, false );
+		ENSURE( b3Body_IsBullet( bodyId ) == false );
+
+		b3MotionLocks locks = { 0 };
+		locks.linearX = true;
+		b3Body_SetMotionLocks( bodyId, locks );
+
+		ENSURE( b3Body_IsBullet( bodyId ) == false );
+	}
+
+	b3DestroyWorld( worldId );
+	return 0;
+}
+
+// Regression: b3Body_EnableSleep used to set world->locked = true before checking
+// for a no-op change, then early-return without unlocking. The next mutator call
+// would then trip the assert in b3GetUnlockedWorld.
+static int EnableSleepNoopUnlockTest( void )
+{
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
+	bodyDef.enableSleep = true;
+	b3BodyId bodyId = b3CreateBody( worldId, &bodyDef );
+
+	// No-op: enableSleep is already true. Must not leak the world lock.
+	b3Body_EnableSleep( bodyId, true );
+
+	// Would assert in b3GetUnlockedWorld if the lock had leaked.
+	b3Body_EnableSleep( bodyId, false );
+	ENSURE( b3Body_IsSleepEnabled( bodyId ) == false );
+
+	b3DestroyWorld( worldId );
 	return 0;
 }
 
 static int EnableContactRecyclingTest( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	b2WorldId worldId = b2CreateWorld( &worldDef );
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
 
-	b2BodyDef bodyDef = b2DefaultBodyDef();
-	bodyDef.type = b2_dynamicBody;
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
 
 	// Default is enabled
-	b2BodyId bodyA = b2CreateBody( worldId, &bodyDef );
-	ENSURE( b2Body_IsContactRecyclingEnabled( bodyA ) == true );
+	b3BodyId bodyA = b3CreateBody( worldId, &bodyDef );
+	ENSURE( b3Body_IsContactRecyclingEnabled( bodyA ) == true );
 
-	b2Body_EnableContactRecycling( bodyA, false );
-	ENSURE( b2Body_IsContactRecyclingEnabled( bodyA ) == false );
+	b3Body_EnableContactRecycling( bodyA, false );
+	ENSURE( b3Body_IsContactRecyclingEnabled( bodyA ) == false );
 
-	b2Body_EnableContactRecycling( bodyA, true );
-	ENSURE( b2Body_IsContactRecyclingEnabled( bodyA ) == true );
+	b3Body_EnableContactRecycling( bodyA, true );
+	ENSURE( b3Body_IsContactRecyclingEnabled( bodyA ) == true );
 
 	// Per-def opt-out at creation
 	bodyDef.enableContactRecycling = false;
-	b2BodyId bodyB = b2CreateBody( worldId, &bodyDef );
-	ENSURE( b2Body_IsContactRecyclingEnabled( bodyB ) == false );
+	b3BodyId bodyB = b3CreateBody( worldId, &bodyDef );
+	ENSURE( b3Body_IsContactRecyclingEnabled( bodyB ) == false );
 
 	// Stepping after toggling must not trip the flag-sync validator
-	b2World_Step( worldId, 1.0f / 60.0f, 4 );
+	b3World_Step( worldId, 1.0f / 60.0f, 4 );
 
-	b2DestroyWorld( worldId );
+	b3DestroyWorld( worldId );
 	return 0;
 }
 
-static int SetBulletDriftTest( void )
+// Identical hull data is shared through a reference counted world database.
+static int TestHullDatabase( void )
 {
-	b2WorldDef worldDef = b2DefaultWorldDef();
-	b2WorldId worldId = b2CreateWorld( &worldDef );
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
 
+	b3BoxHull box = b3MakeBoxHull( 0.5f, 0.5f, 0.5f );
+
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
+	b3BodyId bodyA = b3CreateBody( worldId, &bodyDef );
+	b3BodyId bodyB = b3CreateBody( worldId, &bodyDef );
+
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+
+	// Two shapes built from identical data share one owned copy in the world database.
+	b3ShapeId shapeA = b3CreateHullShape( bodyA, &shapeDef, &box.base );
+	b3ShapeId shapeB = b3CreateHullShape( bodyB, &shapeDef, &box.base );
+
+	const b3HullData* gotA = b3Shape_GetHull( shapeA );
+	const b3HullData* gotB = b3Shape_GetHull( shapeB );
+
+	// Both shapes point at the single shared copy
+	ENSURE( gotA == gotB );
+
+	// The shared copy is owned by the world, not the caller's stack hull
+	ENSURE( gotA != &box.base );
+
+	// A box built on an independent stack frame must de-duplicate to the same shared copy.
+	// This holds only if content hashing sees deterministic padding bytes.
+	b3BoxHull box2 = b3MakeBoxHull( 0.5f, 0.5f, 0.5f );
+	b3BodyId bodyC = b3CreateBody( worldId, &bodyDef );
+	b3ShapeId shapeC = b3CreateHullShape( bodyC, &shapeDef, &box2.base );
+	ENSURE( b3Shape_GetHull( shapeC ) == gotA );
+	b3DestroyShape( shapeC, true );
+
+	// Setting a shape's hull to its own sole shared copy must not free it mid update.
+	b3BoxHull box3 = b3MakeBoxHull( 0.3f, 0.3f, 0.3f );
+	b3BodyId bodyD = b3CreateBody( worldId, &bodyDef );
+	b3ShapeId shapeD = b3CreateHullShape( bodyD, &shapeDef, &box3.base );
+	const b3HullData* gotD = b3Shape_GetHull( shapeD );
+	b3Shape_SetHull( shapeD, gotD );
+	ENSURE( b3Shape_GetHull( shapeD ) == gotD );
+	b3DestroyShape( shapeD, true );
+
+	// Releasing one reference keeps the other alive
+	b3DestroyShape( shapeA, true );
+	const b3HullData* stillB = b3Shape_GetHull( shapeB );
+	ENSURE( stillB == gotB );
+
+	b3DestroyShape( shapeB, true );
+
+	// World destroy asserts the database drained to zero references
+	b3DestroyWorld( worldId );
+	return 0;
+}
+
+typedef struct ExplosionResult
+{
+	b3Vec3 linearVelocity;
+	b3Vec3 angularVelocity;
+} ExplosionResult;
+
+// Explode just off the +x side of a centered sphere and capture the impulse it receives.
+// The shape, the blast point, and the witness math all run in the body local frame, so the
+// result must not depend on how far the body sits from the world origin.
+static ExplosionResult RunExplosion( b3Pos base )
+{
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	worldDef.gravity = b3Vec3_zero;
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
+	bodyDef.position = base;
+	b3BodyId bodyId = b3CreateBody( worldId, &bodyDef );
+
+	b3Sphere sphere = { b3Vec3_zero, 1.0f };
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	b3CreateSphereShape( bodyId, &shapeDef, &sphere );
+
+	// Blast sits 3 units along +x, so the body is pushed back along -x
+	b3ExplosionDef explosionDef = b3DefaultExplosionDef();
+	explosionDef.position = b3OffsetPos( base, (b3Vec3){ 3.0f, 0.0f, 0.0f } );
+	explosionDef.radius = 5.0f;
+	explosionDef.falloff = 0.0f;
+	explosionDef.impulsePerArea = 10.0f;
+	b3World_Explode( worldId, &explosionDef );
+
+	ExplosionResult result;
+	result.linearVelocity = b3Body_GetLinearVelocity( bodyId );
+	result.angularVelocity = b3Body_GetAngularVelocity( bodyId );
+
+	b3DestroyWorld( worldId );
+	return result;
+}
+
+static int TestExplosion( void )
+{
+	ExplosionResult origin = RunExplosion( b3Pos_zero );
+
+	// Pushed away from the blast along -x. A centered sphere has no transverse or angular component.
+	ENSURE( origin.linearVelocity.x < -1.0e-4f );
+	ENSURE_SMALL( origin.linearVelocity.y, 1.0e-6f );
+	ENSURE_SMALL( origin.linearVelocity.z, 1.0e-6f );
+	ENSURE_SMALL( b3Length( origin.angularVelocity ), 1.0e-6f );
+
+	// The same blast far from the origin must produce the same impulse. The world position only
+	// reaches float in the relative difference, so the result holds where a naive cast would not.
+	ExplosionResult far = RunExplosion( (b3Pos){ 1.0e7f, 1.0e7f, 1.0e7f } );
+	ENSURE_SMALL( far.linearVelocity.x - origin.linearVelocity.x, 1.0e-5f );
+	ENSURE_SMALL( far.linearVelocity.y - origin.linearVelocity.y, 1.0e-5f );
+	ENSURE_SMALL( far.linearVelocity.z - origin.linearVelocity.z, 1.0e-5f );
+
+	return 0;
+}
+
+// Ensure correct move events from bodies involved in CCD.
+static int TestContinuousMoveEvent( void )
+{
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+	b3World_EnableContinuous( worldId, true );
+
+	// Thin static wall, near face at x = 0.1
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_staticBody;
+	bodyDef.position = (b3Pos){ 0.0f, 0.0f, 0.0f };
+	b3BodyId wallId = b3CreateBody( worldId, &bodyDef );
+	b3BoxHull wallBox = b3MakeBoxHull( 0.1f, 5.0f, 5.0f );
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	b3CreateHullShape( wallId, &shapeDef, &wallBox.base );
+
+	// Fast dynamic sphere fired at the wall.
+	bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
+	bodyDef.gravityScale = 0.0f;
+	bodyDef.position = (b3Pos){ 3.0f, 0.0f, 0.0f };
+	bodyDef.linearVelocity = (b3Vec3){ -30.0f, 0.0f, 0.0f };
+	b3BodyId ballId = b3CreateBody( worldId, &bodyDef );
+	shapeDef = b3DefaultShapeDef();
+	shapeDef.density = 1.0f;
+	b3Sphere sphere = { { 0.0f, 0.0f, 0.0f }, 0.25f };
+	b3CreateSphereShape( ballId, &shapeDef, &sphere );
+
+	float timeStep = 1.0f / 60.0f;
+	int subStepCount = 4;
+	bool haveMove = false;
+
+	for ( int step = 0; step < 30; ++step )
 	{
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.isBullet = false;
-		b2BodyId bodyId = b2CreateBody( worldId, &bodyDef );
+		b3World_Step( worldId, timeStep, subStepCount );
 
-		ENSURE( b2Body_IsBullet( bodyId ) == false );
+		b3WorldTransform xf = b3Body_GetTransform( ballId );
 
-		b2Body_SetBullet( bodyId, true );
-		ENSURE( b2Body_IsBullet( bodyId ) == true );
+		b3BodyEvents events = b3World_GetBodyEvents( worldId );
+		for ( int i = 0; i < events.moveCount; ++i )
+		{
+			b3BodyMoveEvent* event = events.moveEvents + i;
+			if ( B3_ID_EQUALS( event->bodyId, ballId ) == false )
+			{
+				continue;
+			}
 
-		b2MotionLocks locks = { 0 };
-		locks.linearX = true;
-		b2Body_SetMotionLocks( bodyId, locks );
+			haveMove = true;
 
-		ENSURE( b2Body_IsBullet( bodyId ) == true );
+			// The move event must carry the same pose the body reports, CCD rewind included
+			ENSURE( event->transform.p.x == xf.p.x );
+			ENSURE( event->transform.p.y == xf.p.y );
+			ENSURE( event->transform.p.z == xf.p.z );
+			ENSURE( event->transform.q.v.x == xf.q.v.x );
+			ENSURE( event->transform.q.v.y == xf.q.v.y );
+			ENSURE( event->transform.q.v.z == xf.q.v.z );
+			ENSURE( event->transform.q.s == xf.q.s );
+		}
 	}
 
-	{
-		b2BodyDef bodyDef = b2DefaultBodyDef();
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.isBullet = true;
-		b2BodyId bodyId = b2CreateBody( worldId, &bodyDef );
+	ENSURE( haveMove == true );
 
-		ENSURE( b2Body_IsBullet( bodyId ) == true );
+	// Tunnel check
+	b3Pos finalPos = b3Body_GetPosition( ballId );
+	ENSURE( 0.2f < finalPos.x && finalPos.x < 0.8f );
 
-		b2Body_SetBullet( bodyId, false );
-		ENSURE( b2Body_IsBullet( bodyId ) == false );
+	b3DestroyWorld( worldId );
 
-		b2MotionLocks locks = { 0 };
-		locks.linearX = true;
-		b2Body_SetMotionLocks( bodyId, locks );
-
-		ENSURE( b2Body_IsBullet( bodyId ) == false );
-	}
-
-	b2DestroyWorld( worldId );
 	return 0;
 }
 
@@ -661,13 +1074,20 @@ int WorldTest( void )
 	RUN_SUBTEST( TestIsValid );
 	RUN_SUBTEST( TestWorldRecycle );
 	RUN_SUBTEST( TestWorldCoverage );
+	RUN_SUBTEST( TestExplosion );
 	RUN_SUBTEST( TestSensor );
-	RUN_SUBTEST( TestSetWorkerCount );
-	RUN_SUBTEST( ChainSegmentShapeTest );
+	RUN_SUBTEST( TestContinuousMoveEvent );
+	RUN_SUBTEST( TestContactEvents );
+	RUN_SUBTEST( TestHitEvents );
+	RUN_SUBTEST( TestCompoundHitEvents );
+	RUN_SUBTEST( TestMeshDrop );
+	RUN_SUBTEST( TestOverflowColorPile );
 	RUN_SUBTEST( SetBulletDriftTest );
-	RUN_SUBTEST( DeferredMassFlagSyncTest );
 	RUN_SUBTEST( EnableSleepFlagSyncTest );
+	RUN_SUBTEST( EnableSleepNoopUnlockTest );
 	RUN_SUBTEST( EnableContactRecyclingTest );
+	RUN_SUBTEST( TestSetWorkerCount );
+	RUN_SUBTEST( TestHullDatabase );
 
 	return 0;
 }

@@ -1,18 +1,20 @@
 // SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
-#include "box2d/collision.h"
-#include "box2d/constants.h"
+#include "math_internal.h"
 
-b2PlaneSolverResult b2SolvePlanes( b2Vec2 targetDelta, b2CollisionPlane* planes, int count )
+#include "box3d/collision.h"
+#include "box3d/constants.h"
+
+b3PlaneSolverResult b3SolvePlanes( b3Vec3 targetDelta, b3CollisionPlane* planes, int count )
 {
 	for ( int i = 0; i < count; ++i )
 	{
 		planes[i].push = 0.0f;
 	}
 
-	b2Vec2 delta = targetDelta;
-	float tolerance = B2_LINEAR_SLOP;
+	b3Vec3 delta = targetDelta;
+	float tolerance = B3_LINEAR_SLOP;
 
 	int iteration;
 	for ( iteration = 0; iteration < 20; ++iteration )
@@ -20,25 +22,21 @@ b2PlaneSolverResult b2SolvePlanes( b2Vec2 targetDelta, b2CollisionPlane* planes,
 		float totalPush = 0.0f;
 		for ( int planeIndex = 0; planeIndex < count; ++planeIndex )
 		{
-			b2CollisionPlane* plane = planes + planeIndex;
+			b3CollisionPlane* plane = planes + planeIndex;
 
 			// Add slop to prevent jitter
-			float separation = b2PlaneSeparation( plane->plane, delta ) + B2_LINEAR_SLOP;
-			// if (separation > 0.0f)
-			//{
-			//	continue;
-			// }
+			float separation = b3PlaneSeparation( plane->plane, delta ) + B3_LINEAR_SLOP;
 
 			float push = -separation;
 
 			// Clamp accumulated push
 			float accumulatedPush = plane->push;
-			plane->push = b2ClampFloat( plane->push + push, 0.0f, plane->pushLimit );
+			plane->push = b3ClampFloat( plane->push + push, 0.0f, plane->pushLimit );
 			push = plane->push - accumulatedPush;
-			delta = b2MulAdd( delta, push, plane->plane.normal );
+			delta = b3MulAdd( delta, push, plane->plane.normal );
 
 			// Track maximum push for convergence
-			totalPush += b2AbsFloat( push );
+			totalPush += b3AbsFloat( push );
 		}
 
 		if ( totalPush < tolerance )
@@ -47,25 +45,25 @@ b2PlaneSolverResult b2SolvePlanes( b2Vec2 targetDelta, b2CollisionPlane* planes,
 		}
 	}
 
-	return (b2PlaneSolverResult){
-		.translation = delta,
+	return (b3PlaneSolverResult){
+		.delta = delta,
 		.iterationCount = iteration,
 	};
 }
 
-b2Vec2 b2ClipVector( b2Vec2 vector, const b2CollisionPlane* planes, int count )
+b3Vec3 b3ClipVector( b3Vec3 vector, const b3CollisionPlane* planes, int count )
 {
-	b2Vec2 v = vector;
+	b3Vec3 v = vector;
 
 	for ( int planeIndex = 0; planeIndex < count; ++planeIndex )
 	{
-		const b2CollisionPlane* plane = planes + planeIndex;
+		const b3CollisionPlane* plane = planes + planeIndex;
 		if ( plane->push == 0.0f || plane->clipVelocity == false )
 		{
 			continue;
 		}
 
-		v = b2MulSub( v, b2MinFloat( 0.0f, b2Dot( v, plane->plane.normal ) ), plane->plane.normal );
+		v = b3MulSub( v, b3MinFloat( 0.0f, b3Dot( v, plane->plane.normal ) ), plane->plane.normal );
 	}
 
 	return v;
