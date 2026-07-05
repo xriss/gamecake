@@ -46,6 +46,10 @@ ln -f lua/wetgenes/ogg.lua      libs/lua_ogg/code/ogg.lua
 ln -f lua/djon.lua              libs/lua_djon/git/lua/djon.lua
 ln -f lua/dumbft.lua            libs/lua_dumbft/code/dumbft.lua
 
+ln -f lua/boxxd.lua            libs/lua_boxxd/code/boxxd.lua
+ln -f lua/box2d.lua            libs/lua_boxxd/code/box2d.lua
+ln -f lua/box3d.lua            libs/lua_boxxd/code/box3d.lua
+
 
 
 echo "listing all linked files"
