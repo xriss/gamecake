@@ -51,8 +51,11 @@
 <a class="sub" href="../../docs/graphics"><span>/graphics</span></a>
 <a class="sub" href="../../docs/hardware"><span>/hardware</span></a>
 <a class="sub" href="../../docs/levels"><span>/levels</span></a><a class="par" href="../../docs/lua"><span>/lua</span></a>
+<a class="par" href="../../docs/lua.box2d"><span>/lua.box2d</span></a>
 
-<a class="sub" href="../../docs/lua.box2d"><span>/lua.box2d</span></a>
+<a class="sub" href="../../docs/lua.box2d.meter"><span>/lua.box2d.meter</span></a>
+<a class="sub" href="../../docs/lua.box2d.version"><span>/lua.box2d.version</span></a>
+<a class="sub" href="../../docs/lua.box2d.world"><span>/lua.box2d.world</span></a>
 <a class="sub" href="../../docs/lua.box3d"><span>/lua.box3d</span></a>
 <a class="sub" href="../../docs/lua.boxxd"><span>/lua.boxxd</span></a><a class="par" href="../../docs/lua.glslang"><span>/lua.glslang</span></a>
 
@@ -750,6 +753,36 @@
 </code></pre>
 <p>We use box2d as the local name of this library.</p>
 <p>A lua binding to the box2d physics library</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.box2d.meter">lua.box2d.meter</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L45">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>box2d.meter(16)
+</code></pre>
+<p>Set units per meter, should be done first before creating worlds.</p>
+<p>So we can use pixels for positions and sizes without breaking boxs 
+internal meter based constants.</p>
+<p>Defaults to 1.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.box2d.version">lua.box2d.version</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L36">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>major,minor,revision = box2d.version()
+</code></pre>
+<p>Get box2d library version, note this is a function.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.box2d.world">lua.box2d.world</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L59">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>world=chipmunk.world()
+</code></pre>
+<p>Create the world you will be simulating physics in.</p>
 </div>
 </div>
 

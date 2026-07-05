@@ -130,12 +130,24 @@
    "name": "levels"
   },
   {
-   "count": 677,
+   "count": 680,
    "name": "lua"
   },
   {
-   "count": 1,
+   "count": 4,
    "name": "lua.box2d"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.meter"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.version"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world"
   },
   {
    "count": 1,
@@ -2904,10 +2916,34 @@
  "_list": [
   {
    "body": "<pre><code>local box2d=require(&quot;box2d&quot;)\n</code></pre>\n<p>We use box2d as the local name of this library.</p>\n<p>A lua binding to the box2d physics library</p>\n",
-   "count": 1,
+   "count": 4,
    "file": "../lua/box2d.lua",
    "line": 5,
    "name": "lua.box2d",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
+  },
+  {
+   "body": "<pre><code>box2d.meter(16)\n</code></pre>\n<p>Set units per meter, should be done first before creating worlds.</p>\n<p>So we can use pixels for positions and sizes without breaking boxs \ninternal meter based constants.</p>\n<p>Defaults to 1.</p>\n",
+   "count": 1,
+   "file": "../lua/box2d.lua",
+   "line": 45,
+   "name": "lua.box2d.meter",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
+  },
+  {
+   "body": "<pre><code>major,minor,revision = box2d.version()\n</code></pre>\n<p>Get box2d library version, note this is a function.</p>\n",
+   "count": 1,
+   "file": "../lua/box2d.lua",
+   "line": 36,
+   "name": "lua.box2d.version",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
+  },
+  {
+   "body": "<pre><code>world=chipmunk.world()\n</code></pre>\n<p>Create the world you will be simulating physics in.</p>\n",
+   "count": 1,
+   "file": "../lua/box2d.lua",
+   "line": 59,
+   "name": "lua.box2d.world",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }
  ],

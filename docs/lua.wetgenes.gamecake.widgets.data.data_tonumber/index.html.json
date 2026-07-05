@@ -130,12 +130,24 @@
    "name": "levels"
   },
   {
-   "count": 677,
+   "count": 680,
    "name": "lua"
   },
   {
-   "count": 1,
+   "count": 4,
    "name": "lua.box2d"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.meter"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.version"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world"
   },
   {
    "count": 1,
