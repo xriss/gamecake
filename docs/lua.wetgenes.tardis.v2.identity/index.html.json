@@ -130,8 +130,20 @@
    "name": "levels"
   },
   {
-   "count": 674,
+   "count": 677,
    "name": "lua"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d"
+  },
+  {
+   "count": 1,
+   "name": "lua.boxxd"
   },
   {
    "count": 6,

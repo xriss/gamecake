@@ -130,8 +130,20 @@
    "name": "levels"
   },
   {
-   "count": 674,
+   "count": 677,
    "name": "lua"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d"
+  },
+  {
+   "count": 1,
+   "name": "lua.boxxd"
   },
   {
    "count": 6,
@@ -3139,8 +3151,32 @@
   },
   {
    "body": "",
-   "count": 674,
+   "count": 677,
    "name": "lua"
+  },
+  {
+   "body": "<pre><code>local box2d=require(&quot;box2d&quot;)\n</code></pre>\n<p>We use box2d as the local name of this library.</p>\n<p>A lua binding to the box2d physics library</p>\n",
+   "count": 1,
+   "file": "../lua/box2d.lua",
+   "line": 5,
+   "name": "lua.box2d",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
+  },
+  {
+   "body": "<pre><code>local box3d=require(&quot;box3d&quot;)\n</code></pre>\n<p>We use box3d as the local name of this library.</p>\n<p>A lua binding to the box3d physics library</p>\n",
+   "count": 1,
+   "file": "../lua/box3d.lua",
+   "line": 5,
+   "name": "lua.box3d",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
+  },
+  {
+   "body": "<pre><code>local boxxd=require(&quot;boxxd&quot;)\n</code></pre>\n<p>We use boxxd as the local name of this library.</p>\n<p>Shared code for the box2d / box3d physics library</p>\n",
+   "count": 1,
+   "file": "../lua/boxxd.lua",
+   "line": 5,
+   "name": "lua.boxxd",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/boxxd.lua"
   },
   {
    "body": "<p>Manage string embedding and the glsl compiler and language options.</p>\n<p>This is somewhat separate to the main GLES code and can be used without \nlinking to any system dependent GL libs.</p>\n",
