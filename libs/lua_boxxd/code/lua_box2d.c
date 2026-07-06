@@ -17,6 +17,7 @@ or its address as a light userdata identifier, both unique
 const char *lua_b2_world_meta_name="b2_world*ptr";
 const char *lua_b2_body_meta_name ="b2_body*ptr";
 const char *lua_b2_shape_meta_name="b2_shape*ptr";
+const char *lua_b2_joint_meta_name="b2_joint*ptr";
 
 
 /*+---------------------------------------------------------------------
@@ -94,8 +95,8 @@ b2WorldId *pp;
 		lua_getfield(l,2,"gravity");
 		if(!lua_isnil(l,-1))
 		{
-			lua_rawgeti(l,-1,1);
-			lua_rawgeti(l,-2,2);
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
 			def.gravity = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
 			lua_pop(l,2);
 		}
@@ -200,11 +201,15 @@ b2BodyId *pp;
 		lua_getfield(l,2,"enableSleep");
 		if(!lua_isnil(l,-1)) { def.enableSleep = lua_toboolean(l,-1); }
 		lua_pop(l,1);
-/*
-		lua_getfield(l,2,"fixedRotation");
-		if(!lua_isnil(l,-1)) { def.fixedRotation = lua_toboolean(l,-1); }
+		lua_getfield(l,2,"lock_linearX");
+		if(!lua_isnil(l,-1)) { def.motionLocks.linearX = lua_toboolean(l,-1); }
 		lua_pop(l,1);
-*/
+		lua_getfield(l,2,"lock_linearY");
+		if(!lua_isnil(l,-1)) { def.motionLocks.linearY = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"lock_angularZ");
+		if(!lua_isnil(l,-1)) { def.motionLocks.angularZ = lua_toboolean(l,-1); }
+		lua_pop(l,1);
 		lua_getfield(l,2,"gravityScale");
 		if(!lua_isnil(l,-1)) { def.gravityScale = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
@@ -223,8 +228,8 @@ b2BodyId *pp;
 		lua_getfield(l,2,"linearVelocity");
 		if(!lua_isnil(l,-1))
 		{
-			lua_rawgeti(l,-1,1);
-			lua_rawgeti(l,-2,2);
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
 			def.linearVelocity = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
 			lua_pop(l,2);
 		}
@@ -235,8 +240,8 @@ b2BodyId *pp;
 		lua_getfield(l,2,"position");
 		if(!lua_isnil(l,-1))
 		{
-			lua_rawgeti(l,-1,1);
-			lua_rawgeti(l,-2,2);
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
 			def.position = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
 			lua_pop(l,2);
 		}
@@ -339,9 +344,9 @@ b2ShapeId *pp;
 		lua_getfield(l,2,"filter"); // bitmasks are doubles so only 52 bits not 64
 		if(!lua_isnil(l,-1))
 		{
-			lua_rawgeti(l,-1,1);
-			lua_rawgeti(l,-2,2);
-			lua_rawgeti(l,-3,3);
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
+			lua_pushinteger(l,3);	lua_gettable(l,-4);
 			def.filter = (b2Filter){(uint64_t)lua_tonumber(l,-3),(int)lua_tonumber(l,-2),(uint64_t)lua_tonumber(l,-1)};
 			lua_pop(l,3);
 		}
@@ -389,7 +394,7 @@ b2ShapeId *pp;
 	body=lua_b2_body_ptr(l,1);
 
 	// get shape values
-	lua_getfield(l,3,"shape");
+	lua_getfield(l,3,"shape"); // the type of shape as lowercase string
 	char *shape_type=lua_tostring(l,-1);
 	if(strcmp(shape_type,"circle")==0)
 	{
@@ -399,8 +404,8 @@ b2ShapeId *pp;
 		lua_getfield(l,3,"center"); // bitmasks are doubles so only 52 bits not 64
 		if(!lua_isnil(l,-1))
 		{
-			lua_rawgeti(l,-1,1);
-			lua_rawgeti(l,-2,2);
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
 			circle.center = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
 			lua_pop(l,2);
 		}
@@ -420,8 +425,8 @@ b2ShapeId *pp;
 		lua_getfield(l,3,"point1");
 		if(!lua_isnil(l,-1))
 		{
-			lua_rawgeti(l,-1,1);
-			lua_rawgeti(l,-2,2);
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
 			segment.point1 = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
 			lua_pop(l,2);
 		}
@@ -429,8 +434,8 @@ b2ShapeId *pp;
 		lua_getfield(l,3,"point2");
 		if(!lua_isnil(l,-1))
 		{
-			lua_rawgeti(l,-1,1);
-			lua_rawgeti(l,-2,2);
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
 			segment.point2 = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
 			lua_pop(l,2);
 		}
@@ -447,8 +452,8 @@ b2ShapeId *pp;
 		lua_getfield(l,3,"center1");
 		if(!lua_isnil(l,-1))
 		{
-			lua_rawgeti(l,-1,1);
-			lua_rawgeti(l,-2,2);
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
 			capsule.center1 = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
 			lua_pop(l,2);
 		}
@@ -456,8 +461,8 @@ b2ShapeId *pp;
 		lua_getfield(l,3,"center2");
 		if(!lua_isnil(l,-1))
 		{
-			lua_rawgeti(l,-1,1);
-			lua_rawgeti(l,-2,2);
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
 			capsule.center2 = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
 			lua_pop(l,2);
 		}
@@ -489,8 +494,8 @@ b2ShapeId *pp;
 		lua_getfield(l,3,"center");
 		if(!lua_isnil(l,-1))
 		{
-			lua_rawgeti(l,-1,1);
-			lua_rawgeti(l,-2,2);
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
 			center = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
 			lua_pop(l,2);
 		}
@@ -541,6 +546,375 @@ b2ShapeId *pp=lua_b2_shape_ptr_ptr(l, 1 );
 	return 0;
 }
 
+
+/*+---------------------------------------------------------------------
+
+joint create/destroy
+
+*/
+b2JointId * lua_b2_joint_ptr_ptr (lua_State *l,int idx)
+{
+b2JointId *pp;
+	pp=(b2JointId*)luaL_checkudata(l, idx , lua_b2_joint_meta_name);
+	return pp;
+}
+
+b2JointId   lua_b2_joint_ptr (lua_State *l,int idx)
+{
+b2JointId *pp;
+	pp=lua_b2_joint_ptr_ptr(l,idx);
+	if(!pp) { luaL_error(l,"box2d joint is null"); }
+	return *pp;
+}
+
+static int lua_b2_joint_create (lua_State *l)
+{	
+b2JointId *pp;
+
+	b2WorldId world=lua_b2_world_ptr(l,1);
+
+// create ptr ptr userdata
+	pp=(b2JointId*)lua_newuserdata(l, sizeof(b2JointId));
+	*pp=(b2JointId){0};
+	luaL_getmetatable(l, lua_b2_joint_meta_name);
+	lua_setmetatable(l, -2);
+
+	b2JointDef joint;
+	// get generic joint values
+	lua_getfield(l,2,"bodyIdA");
+	if(!lua_isnil(l,-1)) { joint.bodyIdA=lua_b2_body_ptr(l,1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"bodyIdB");
+	if(!lua_isnil(l,-1)) { joint.bodyIdB=lua_b2_body_ptr(l,1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"localFrameA");
+	if(!lua_isnil(l,-1))
+	{
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
+			lua_pushinteger(l,3);	lua_gettable(l,-4);
+			joint.localFrameA.p = (b2Vec2){(float)lua_tonumber(l,-3),(float)lua_tonumber(l,-2)};
+			joint.localFrameA.q = b2MakeRot((float)lua_tonumber(l,-1));
+			lua_pop(l,3);
+	}
+	lua_pop(l,1);
+	lua_getfield(l,2,"localFrameB");
+	if(!lua_isnil(l,-1))
+	{
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
+			lua_pushinteger(l,3);	lua_gettable(l,-4);
+			joint.localFrameB.p = (b2Vec2){(float)lua_tonumber(l,-3),(float)lua_tonumber(l,-2)};
+			joint.localFrameB.q = b2MakeRot((float)lua_tonumber(l,-1));
+			lua_pop(l,3);
+	}
+	lua_pop(l,1);
+	lua_getfield(l,2,"forceThreshold");
+	if(!lua_isnil(l,-1)) { joint.forceThreshold = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"torqueThreshold");
+	if(!lua_isnil(l,-1)) { joint.torqueThreshold = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"constraintHertz");
+	if(!lua_isnil(l,-1)) { joint.constraintHertz = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"constraintDampingRatio");
+	if(!lua_isnil(l,-1)) { joint.constraintDampingRatio = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"collideConnected");
+	if(!lua_isnil(l,-1)) { joint.collideConnected = lua_toboolean(l,-1); }
+	lua_pop(l,1);
+
+	// get joint values
+	lua_getfield(l,2,"joint"); // the type of joint as lowercase string
+	char *joint_type=lua_tostring(l,-1);
+	if(strcmp(joint_type,"distance")==0)
+	{
+		lua_pop(l,1);
+// allocate b2JointId distance
+		b2DistanceJointDef distance;
+		distance.base=joint; // generic values
+
+		lua_getfield(l,2,"length");
+		if(!lua_isnil(l,-1)) { distance.length = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,2,"enableSpring");
+		if(!lua_isnil(l,-1)) { distance.enableSpring = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"lowerSpringForce");
+		if(!lua_isnil(l,-1)) { distance.lowerSpringForce = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"upperSpringForce");
+		if(!lua_isnil(l,-1)) { distance.upperSpringForce = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"hertz");
+		if(!lua_isnil(l,-1)) { distance.hertz = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"dampingRatio");
+		if(!lua_isnil(l,-1)) { distance.dampingRatio = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,2,"enableLimit");
+		if(!lua_isnil(l,-1)) { distance.enableLimit = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"minLength");
+		if(!lua_isnil(l,-1)) { distance.minLength = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"maxLength");
+		if(!lua_isnil(l,-1)) { distance.maxLength = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,2,"enableMotor");
+		if(!lua_isnil(l,-1)) { distance.enableMotor = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"maxMotorForce");
+		if(!lua_isnil(l,-1)) { distance.maxMotorForce = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"motorSpeed");
+		if(!lua_isnil(l,-1)) { distance.motorSpeed = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		*pp=b2CreateDistanceJoint(world,&distance);
+	}
+	else
+	if(strcmp(joint_type,"motor")==0)
+	{
+		lua_pop(l,1);
+// allocate b2JointId motor
+		b2MotorJointDef motor;
+		motor.base=joint; // generic values
+
+		lua_getfield(l,2,"linearVelocity");
+		if(!lua_isnil(l,-1))
+		{
+			lua_pushinteger(l,1);	lua_gettable(l,-2);
+			lua_pushinteger(l,2);	lua_gettable(l,-3);
+			motor.linearVelocity = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
+			lua_pop(l,2);
+		}
+		lua_pop(l,1);
+		lua_getfield(l,2,"maxVelocityForce");
+		if(!lua_isnil(l,-1)) { motor.maxVelocityForce = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"angularVelocity");
+		if(!lua_isnil(l,-1)) { motor.angularVelocity = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"maxVelocityTorque");
+		if(!lua_isnil(l,-1)) { motor.maxVelocityTorque = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"linearHertz");
+		if(!lua_isnil(l,-1)) { motor.linearHertz = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"linearDampingRatio");
+		if(!lua_isnil(l,-1)) { motor.linearDampingRatio = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"maxSpringForce");
+		if(!lua_isnil(l,-1)) { motor.maxSpringForce = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"angularHertz");
+		if(!lua_isnil(l,-1)) { motor.angularHertz = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"angularDampingRatio");
+		if(!lua_isnil(l,-1)) { motor.angularDampingRatio = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"maxSpringTorque");
+		if(!lua_isnil(l,-1)) { motor.maxSpringTorque = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		*pp=b2CreateMotorJoint(world,&motor);
+	}
+	else
+	if(strcmp(joint_type,"filter")==0)
+	{
+		lua_pop(l,1);
+// allocate b2JointId filter
+		b2FilterJointDef filter;
+		filter.base=joint; // generic values
+
+		*pp=b2CreateFilterJoint(world,&filter);
+	}
+	else
+	if(strcmp(joint_type,"prismatic")==0)
+	{
+		lua_pop(l,1);
+// allocate b2JointId prismatic
+		b2PrismaticJointDef prismatic;
+		prismatic.base=joint; // generic values
+
+		lua_getfield(l,2,"enableSpring");
+		if(!lua_isnil(l,-1)) { prismatic.enableSpring = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"hertz");
+		if(!lua_isnil(l,-1)) { prismatic.hertz = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"dampingRatio");
+		if(!lua_isnil(l,-1)) { prismatic.dampingRatio = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"targetTranslation");
+		if(!lua_isnil(l,-1)) { prismatic.targetTranslation = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,2,"enableLimit");
+		if(!lua_isnil(l,-1)) { prismatic.enableLimit = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"lowerTranslation");
+		if(!lua_isnil(l,-1)) { prismatic.lowerTranslation = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"upperTranslation");
+		if(!lua_isnil(l,-1)) { prismatic.upperTranslation = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,2,"enableMotor");
+		if(!lua_isnil(l,-1)) { prismatic.enableMotor = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"maxMotorForce");
+		if(!lua_isnil(l,-1)) { prismatic.maxMotorForce = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"motorSpeed");
+		if(!lua_isnil(l,-1)) { prismatic.motorSpeed = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		*pp=b2CreatePrismaticJoint(world,&prismatic);
+	}
+	else
+	if(strcmp(joint_type,"revolute")==0)
+	{
+		lua_pop(l,1);
+// allocate b2JointId revolute
+		b2RevoluteJointDef revolute;
+		revolute.base=joint; // generic values
+
+		lua_getfield(l,2,"targetAngle");
+		if(!lua_isnil(l,-1)) { revolute.targetAngle = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,2,"enableSpring");
+		if(!lua_isnil(l,-1)) { revolute.enableSpring = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"hertz");
+		if(!lua_isnil(l,-1)) { revolute.hertz = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"dampingRatio");
+		if(!lua_isnil(l,-1)) { revolute.dampingRatio = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,2,"enableLimit");
+		if(!lua_isnil(l,-1)) { revolute.enableLimit = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"lowerAngle");
+		if(!lua_isnil(l,-1)) { revolute.lowerAngle = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"upperAngle");
+		if(!lua_isnil(l,-1)) { revolute.upperAngle = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,2,"enableMotor");
+		if(!lua_isnil(l,-1)) { revolute.enableMotor = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"maxMotorTorque");
+		if(!lua_isnil(l,-1)) { revolute.maxMotorTorque = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"motorSpeed");
+		if(!lua_isnil(l,-1)) { revolute.motorSpeed = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		*pp=b2CreateRevoluteJoint(world,&revolute);
+	}
+	else
+	if(strcmp(joint_type,"weld")==0)
+	{
+		lua_pop(l,1);
+// allocate b2JointId weld
+		b2WeldJointDef weld;
+		weld.base=joint; // generic values
+
+		lua_getfield(l,2,"linearHertz");
+		if(!lua_isnil(l,-1)) { weld.linearHertz = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"angularHertz");
+		if(!lua_isnil(l,-1)) { weld.angularHertz = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"linearDampingRatio");
+		if(!lua_isnil(l,-1)) { weld.linearDampingRatio = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"angularDampingRatio");
+		if(!lua_isnil(l,-1)) { weld.angularDampingRatio = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		*pp=b2CreateWeldJoint(world,&weld);
+	}
+	else
+	if(strcmp(joint_type,"wheel")==0)
+	{
+		lua_pop(l,1);
+// allocate b2JointId wheel
+		b2WheelJointDef wheel;
+		wheel.base=joint; // generic values
+
+		lua_getfield(l,2,"enableSpring");
+		if(!lua_isnil(l,-1)) { wheel.enableSpring = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"hertz");
+		if(!lua_isnil(l,-1)) { wheel.hertz = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"dampingRatio");
+		if(!lua_isnil(l,-1)) { wheel.dampingRatio = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,2,"enableLimit");
+		if(!lua_isnil(l,-1)) { wheel.enableLimit = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"lowerTranslation");
+		if(!lua_isnil(l,-1)) { wheel.lowerTranslation = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"upperTranslation");
+		if(!lua_isnil(l,-1)) { wheel.upperTranslation = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		lua_getfield(l,2,"enableMotor");
+		if(!lua_isnil(l,-1)) { wheel.enableMotor = lua_toboolean(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"maxMotorTorque");
+		if(!lua_isnil(l,-1)) { wheel.maxMotorTorque = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"motorSpeed");
+		if(!lua_isnil(l,-1)) { wheel.motorSpeed = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+
+		*pp=b2CreateWheelJoint(world,&wheel);
+	}
+	else
+	{
+		lua_pop(l,1);
+		lua_pushstring(l,"unknown joint type");
+		lua_error(l);
+	}
+
+	return 1;
+}
+
+static int lua_b2_joint_destroy (lua_State *l)
+{	
+b2JointId *pp=lua_b2_joint_ptr_ptr(l, 1 );
+	if(B2_IS_NON_NULL(*pp))
+	{
+// remove registry link
+		lua_pushlightuserdata(l,pp);
+		lua_pushnil(l);
+		lua_settable(l,LUA_REGISTRYINDEX);
+		
+		int update=1;
+		if(!lua_isnil(l,2)) // optional
+		{
+			update=lua_toboolean(l,2);
+		}
+		b2DestroyJoint(*pp,update);
+		*pp=(b2JointId){0};
+	}	
+	return 0;
+}
+
 /*+---------------------------------------------------------------------
 
 open library.
@@ -558,6 +932,8 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"body_destroy",			lua_b2_body_destroy},
 		{"shape_create",			lua_b2_shape_create},
 		{"shape_destroy",			lua_b2_shape_destroy},
+		{"join_create",				lua_b2_joint_create},
+		{"joint_destroy",			lua_b2_joint_destroy},
 		{0,0}
 	};
 
@@ -579,6 +955,12 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{0,0}
 	};
 
+	const luaL_Reg meta_joint[] =
+	{
+		{"__gc",			lua_b2_joint_destroy},
+		{0,0}
+	};
+
 	luaL_newmetatable(l, lua_b2_world_meta_name);
 	luaL_openlib(l, NULL, meta_world, 0);
 	lua_pop(l,1);
@@ -589,6 +971,10 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 
 	luaL_newmetatable(l, lua_b2_shape_meta_name);
 	luaL_openlib(l, NULL, meta_shape, 0);
+	lua_pop(l,1);
+
+	luaL_newmetatable(l, lua_b2_joint_meta_name);
+	luaL_openlib(l, NULL, meta_joint, 0);
 	lua_pop(l,1);
 
 	lua_newtable(l);
