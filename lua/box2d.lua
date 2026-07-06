@@ -32,6 +32,9 @@ box2d.body_metatable={__index=box2d.body_functions}
 box2d.shape_functions={is="shape"}
 box2d.shape_metatable={__index=box2d.shape_functions}
 
+box2d.joint_functions={is="joint"}
+box2d.joint_metatable={__index=box2d.joint_functions}
+
 
 --[[#lua.box2d.version
 
@@ -41,6 +44,7 @@ Get box2d library version, note this is a function.
 
 ]]
 box2d.version=core.version
+
 
 --[[#lua.box2d.meter
 
@@ -56,26 +60,306 @@ Defaults to 1.
 ]]
 box2d.meter=core.meter
 
+
 --[[#lua.box2d.world
 
-	world=chipmunk.world()
+	world=box2d.world(def)
 
 Create the world you will be simulating physics in.
 
+def is a table containing the values that you can set in a b2WorldDef
+
+All of these are optional so can be nil.
+
+Vectors are a table containing { x , y } values,
+
+Booleans should be true or false
+
+	gravity
+	restitutionThreshold
+	hitEventThreshold
+	contactHertz
+	contactDampingRatio
+	contactSpeed
+	maximumLinearSpeed
+	enableSleep
+	enableContinuous
+	enableContactSoftening
+	
 ]]
 box2d.world=function(def)
 	local world={}
-	world.bodies={}
+
+	world.bodys={}	-- engrish
+	world.joints={}
 	world.shapes={}
 
 	setmetatable(world,box2d.world_metatable)
-	world[0]=core.world_create(world)
+	world[0]=core.world_create(world,def)
 
--- hack in this worlds default static body
--- we have a special case in the binding that automatically gets the static body from the space ptr
---	world.static=box2d.body(world[0])
---	world.static.in_world=world
-	
 	return world
 end
 
+--[[#lua.box2d.world.body
+
+	body=world:body(def)
+
+Create a body in the world.
+
+def contains the values that you can set in a b2BodyDef
+
+All of these are optional so can be nil.
+
+Vectors are a table containing { x , y } values,
+
+Booleans should be true or false
+
+name is a string that should be 31 chars or less and is only used to 
+help with debugging.
+
+Values prefixed by lock_ are found in motionLocks
+
+type is a string and must be "static" or "kinematic" or "dynamic"
+
+
+	allowFastRotation
+	angularDamping
+	angularVelocity
+	enableSleep
+	lock_linearX
+	lock_linearY
+	lock_angularZ
+	gravityScale
+	isAwake
+	isBullet
+	isEnabled
+	linearDamping
+	linearVelocity
+	name
+	position
+	rotation
+	sleepThreshold
+	type
+
+
+]]
+box2d.world_functions.body=function(world,def)
+	local body={}
+	
+	body.world=world
+	body.shapes={}
+
+	setmetatable(body,box2d.body_metatable)
+	body[0]=core.body_create(world[0],def)
+	
+	world.bodys[ body[0] ]=body
+
+	return body
+end
+
+--[[#lua.box2d.world.joint
+
+	joint=world:joint(def)
+
+Create a joint in the world.
+
+def contains the values that you can set in a b2jointDef
+
+All of these are optional so can be nil.
+
+Vectors are a table containing { x , y } values,
+
+Booleans should be true or false
+
+localFrameA/B is a transform which is a vector plus a rotation in 
+radians, so { x , y , r }
+
+The ID of a body can be found in body[0]
+
+	bodyIdA
+	bodyIdB
+	localFrameA
+	localFrameB
+	forceThreshold
+	torqueThreshold
+	constraintHertz
+	constraintDampingRatio
+	collideConnected
+
+if def.joint=="distance" then def also contains the values that you can 
+set in a b2DistanceJointDef
+
+	length
+	enableSpring
+	lowerSpringForce
+	upperSpringForce
+	hertz
+	dampingRatio
+	enableLimit
+	minLength
+	maxLength
+	enableMotor
+	maxMotorForce
+	motorSpeed
+
+if def.joint=="motor" then def also contains the values that you can 
+set in a b2MotorJointDef
+
+	linearVelocity
+	maxVelocityForce
+	angularVelocity
+	maxVelocityTorque
+	linearHertz
+	linearDampingRatio
+	maxSpringForce
+	angularHertz
+	angularDampingRatio
+	maxSpringTorque
+
+if def.joint=="filter" then def also contains the values that you can 
+set in a b2FilterJointDef
+
+	-- no extra values just those found in b2jointDef
+
+if def.joint=="prismatic" then def also contains the values that you can 
+set in a b2PrismaticJointDef
+
+	enableSpring
+	hertz
+	dampingRatio
+	targetTranslation
+	enableLimit
+	lowerTranslation
+	upperTranslation
+	enableMotor
+	maxMotorForce
+	motorSpeed
+
+if def.joint=="revolute" then def also contains the values that you can 
+set in a b2RevoluteJointDef
+
+	targetAngle
+	enableSpring
+	hertz
+	dampingRatio
+	enableLimit
+	lowerAngle
+	upperAngle
+	enableMotor
+	maxMotorTorque
+	motorSpeed
+
+if def.joint=="weld" then def also contains the values that you can 
+set in a b2WeldJointDef
+
+	linearHertz
+	angularHertz
+	linearDampingRatio
+	angularDampingRatio
+
+if def.joint=="wheel" then def also contains the values that you can 
+set in a b2WheelJointDef
+
+	enableSpring
+	hertz
+	dampingRatio
+	enableLimit
+	lowerTranslation
+	upperTranslation
+	enableMotor
+	maxMotorTorque
+	motorSpeed
+
+]]
+box2d.world_functions.body=function(world,def)
+	local joint={}
+	
+	joint.world=world
+
+	setmetatable(joint,box2d.joint_metatable)
+	joint[0]=core.joint_create(world[0],def)
+
+	world.joints[ joint[0] ]=joint
+
+	return joint
+end
+
+--[[#lua.box2d.world.body.shape
+
+	shape=body:shape(def)
+
+Create a shape in the body.
+
+def contains the values that you can set in a b2ShapeDef
+
+All of these are optional so can be nil.
+
+Vectors are a table containing { x , y } values,
+
+Booleans should be true or false
+
+filter is an array of 3 numbers { categoryBits , maskBits , groupIndex 
+} and since lua(jit) uses doubles these bit masks should *only* use 52 
+bits not 64 so the integers can fit into a double.
+
+material is a table containing named material values so { friction=1 , 
+restitution=1 }
+
+	density
+	enableContactEvents
+	enableHitEvents
+	enablePreSolveEvents
+	enableSensorEvents
+	filter
+	invokeContactCreation
+	isSensor
+	material.customColor
+	material.friction
+	material.restitution
+	material.rollingResistance
+	material.tangentSpeed
+	material.userMaterialId
+	updateBodyMass
+
+if def.shape=="circle" then def also contains the values that you can 
+set in a b2Circle
+
+	center
+	radius
+
+if def.shape=="segment" then def also contains the values that you can 
+set in a b2Segment
+
+	point1
+	point2
+
+if def.shape=="capsule" then def also contains the values that you can 
+set in a b2Capsule
+
+	center1
+	center2
+	radius
+
+if def.shape=="box" then def also contains the values that you can 
+set in a b2Polygon using b2MakeOffsetRoundedBox
+
+	halfWidth
+	halfHeight
+	center
+	rotation
+	radius
+
+]]
+box2d.body_functions.shape=function(body,def)
+	local shape={}
+	
+	shape.body=body
+
+	setmetatable(shape,box2d.shape_metatable)
+	shape[0]=core.shape_create(body[0],def)
+	
+	body.shapes[ shape[0] ]=shape
+	body.world.shapes[ shape[0] ]=shape
+
+	return shape
+end
