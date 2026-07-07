@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 683,
+   "count": 687,
    "name": "lua"
   },
   {
-   "count": 7,
+   "count": 11,
    "name": "lua.box2d"
   },
   {
@@ -146,7 +146,7 @@
    "name": "lua.box2d.version"
   },
   {
-   "count": 4,
+   "count": 8,
    "name": "lua.box2d.world"
   },
   {
@@ -159,7 +159,23 @@
   },
   {
    "count": 1,
+   "name": "lua.box2d.world.body_events"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.contact_events"
+  },
+  {
+   "count": 1,
    "name": "lua.box2d.world.joint"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.sensor_events"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.step"
   },
   {
    "count": 1,

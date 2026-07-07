@@ -58,7 +58,11 @@
 <a class="par" href="../../docs/lua.box2d.world.body"><span>/lua.box2d.world.body</span></a>
 
 <a class="sub" href="../../docs/lua.box2d.world.body.shape"><span>/lua.box2d.world.body.shape</span></a>
+<a class="sub" href="../../docs/lua.box2d.world.body_events"><span>/lua.box2d.world.body_events</span></a>
+<a class="sub" href="../../docs/lua.box2d.world.contact_events"><span>/lua.box2d.world.contact_events</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.joint"><span>/lua.box2d.world.joint</span></a>
+<a class="sub" href="../../docs/lua.box2d.world.sensor_events"><span>/lua.box2d.world.sensor_events</span></a>
+<a class="sub" href="../../docs/lua.box2d.world.step"><span>/lua.box2d.world.step</span></a>
 <a class="sub" href="../../docs/lua.box3d"><span>/lua.box3d</span></a>
 <a class="sub" href="../../docs/lua.boxxd"><span>/lua.boxxd</span></a><a class="par" href="../../docs/lua.glslang"><span>/lua.glslang</span></a>
 
@@ -755,7 +759,9 @@
 <p>Booleans should be true or false</p>
 <p>filter is an array of 3 numbers { categoryBits , maskBits , groupIndex 
 } and since lua(jit) uses doubles these bit masks should <em>only</em> use 52 
-bits not 64 so the integers can fit into a double.</p>
+bits not 64 so the integers can fit safely into a double. When using 
+hex the top 3 nibbles should always be 0 like so 0x000fffffffffffff 
+that is 13 Fs if you are counting.</p>
 <p>material is a table containing named material values so { friction=1 , 
 restitution=1 }</p>
 <pre><code>density
