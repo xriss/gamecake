@@ -1195,7 +1195,7 @@ int b;
 	{
 		b=lua_toboolean(l, 2 );
 
-		b2Body_SetAwake(pp,p);
+		b2Body_SetAwake(pp,b);
 	}
 
 	b=b2Body_IsAwake(pp);
