@@ -431,6 +431,18 @@ box2d.world_functions.contact_events=function(world)
 	return events
 end
 
+--[[#lua.box2d.body.awake
+
+	b = body:awake()
+	b = body:awake(b)
+
+get/set body sleeping state.
+
+]]
+box2d.body_functions.awake=function(body,b)
+	return core.body_awake(body[0],b)
+end
+
 --[[#lua.box2d.body.transform
 
 	x,y,r = body:transform()

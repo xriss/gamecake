@@ -1182,6 +1182,31 @@ static int lua_b2_world_contact_events (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
+Get/Set body awake
+
+*/
+static int lua_b2_body_awake (lua_State *l)
+{
+int b;
+
+	b2BodyId pp = lua_b2_body_ptr(l, 1 );
+
+	if(!lua_isnil(l,2)) // only set if given
+	{
+		b=lua_toboolean(l, 2 );
+
+		b2Body_SetAwake(pp,p);
+	}
+
+	b=b2Body_IsAwake(pp);
+
+	lua_pushboolean(l, b );
+
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
 Get/Set body transform
 
 */
@@ -1192,11 +1217,12 @@ b2Transform t;
 
 	b2BodyId pp = lua_b2_body_ptr(l, 1 );
 
-	if(!lua_isnil(l,4)) // only set if given 3 numbers
+	if(!lua_isnil(l,4)) // only set if given
 	{
 		t.p.x=(float)lua_tonumber(l, 2 );
 		t.p.y=(float)lua_tonumber(l, 3 );
 		r=(float)lua_tonumber(l, 4 );
+		t.q=b2MakeRot(r);
 
 		b2Body_SetTransform(pp,t.p,t.q);
 	}
@@ -1222,7 +1248,7 @@ float r;
 
 	b2BodyId pp = lua_b2_body_ptr(l, 1 );
 
-	if(!lua_isnil(l,4)) // only set if given 3 numbers
+	if(!lua_isnil(l,4)) // only set if given
 	{
 		p.x=(float)lua_tonumber(l, 2 );
 		p.y=(float)lua_tonumber(l, 3 );
@@ -1269,6 +1295,7 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"world_sensor_events",		lua_b2_world_sensor_events},
 		{"world_contact_events",	lua_b2_world_contact_events},
 
+		{"body_awake",				lua_b2_body_awake},
 		{"body_transform",			lua_b2_body_transform},
 		{"body_velocity",			lua_b2_body_velocity},
 
