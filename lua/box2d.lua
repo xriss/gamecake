@@ -48,12 +48,10 @@ box2d.version=core.version
 
 --[[#lua.box2d.meter
 
-	box2d.meter(16)
+	units = box2d.meter()
+	units = box2d.meter(units)
 
-Set units per meter, should be done first before creating worlds.
-
-So we can use pixels for positions and sizes without breaking boxs 
-internal meter based constants.
+Get/Set units per meter, should be set first before creating a world.
 
 Defaults to 1.
 
