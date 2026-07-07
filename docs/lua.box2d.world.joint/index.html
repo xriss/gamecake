@@ -753,7 +753,7 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.joint">lua.box2d.world.joint</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L159">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L168">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>joint=world:joint(def)
 </code></pre>
 <p>Create a joint in the world.</p>
@@ -763,7 +763,7 @@
 <p>Booleans should be true or false</p>
 <p>localFrameA/B is a transform which is a vector plus a rotation in 
 radians, so { x , y , r }</p>
-<p>The ID of a body can be found in body[0]</p>
+<p>The boxid of a body ( for bodyIdA and bodyIdB ) can be found in body.boxid</p>
 <pre><code>bodyIdA
 bodyIdB
 localFrameA

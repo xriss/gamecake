@@ -759,6 +759,13 @@ units = box2d.meter(units)
 </code></pre>
 <p>Get/Set units per meter, should be set first before creating a world.</p>
 <p>Defaults to 1.</p>
+<p>Obviously points and vectors should be divided by units to get their 
+value in meters but slightly less obviously density values end up 
+getting multiplied by units squared since they are area related.</p>
+<p>What that means is if you are thinking in meters eg you want to set 
+gravity to 10m/s you will need to multiply it by units. Density which 
+would normally be 1 should be 1/(units^2) in order to keep the results 
+close to what they would be if you did not change this.</p>
 </div>
 </div>
 

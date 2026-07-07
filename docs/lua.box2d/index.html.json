@@ -2975,7 +2975,7 @@
    "body": "<pre><code>b = body:awake()\nb = body:awake(b)\n</code></pre>\n<p>get/set body sleeping state.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 434,
+   "line": 443,
    "name": "lua.box2d.body.awake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -2983,7 +2983,7 @@
    "body": "<pre><code>x,y,r = body:transform()\nx,y,r = body:transform(x,y,r)\n</code></pre>\n<p>get/set body transform</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 446,
+   "line": 455,
    "name": "lua.box2d.body.transform",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -2991,12 +2991,12 @@
    "body": "<pre><code>x,y,r = body:velocity()\nx,y,r = body:velocity(x,y,r)\n</code></pre>\n<p>get/set body velocity</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 458,
+   "line": 467,
    "name": "lua.box2d.body.velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
   {
-   "body": "<pre><code>units = box2d.meter()\nunits = box2d.meter(units)\n</code></pre>\n<p>Get/Set units per meter, should be set first before creating a world.</p>\n<p>Defaults to 1.</p>\n",
+   "body": "<pre><code>units = box2d.meter()\nunits = box2d.meter(units)\n</code></pre>\n<p>Get/Set units per meter, should be set first before creating a world.</p>\n<p>Defaults to 1.</p>\n<p>Obviously points and vectors should be divided by units to get their \nvalue in meters but slightly less obviously density values end up \ngetting multiplied by units squared since they are area related.</p>\n<p>What that means is if you are thinking in meters eg you want to set \ngravity to 10m/s you will need to multiply it by units. Density which \nwould normally be 1 should be 1/(units^2) in order to keep the results \nclose to what they would be if you did not change this.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
    "line": 49,
@@ -3015,7 +3015,7 @@
    "body": "<pre><code>world=box2d.world(def)\n</code></pre>\n<p>Create the world you will be simulating physics in.</p>\n<p>def is a table containing the values that you can set in a b2WorldDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values, This may also be a \nfake table created by meta access.</p>\n<p>Booleans should be true or false</p>\n<pre><code>gravity\nrestitutionThreshold\nhitEventThreshold\ncontactHertz\ncontactDampingRatio\ncontactSpeed\nmaximumLinearSpeed\nenableSleep\nenableContinuous\nenableContactSoftening\n</code></pre>\n",
    "count": 8,
    "file": "../lua/box2d.lua",
-   "line": 62,
+   "line": 71,
    "name": "lua.box2d.world",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3023,7 +3023,7 @@
    "body": "<pre><code>body=world:body(def)\n</code></pre>\n<p>Create a body in the world.</p>\n<p>def contains the values that you can set in a b2BodyDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values,</p>\n<p>Booleans should be true or false</p>\n<p>name is a string that should be 31 chars or less and is only used to \nhelp with debugging.</p>\n<p>Values prefixed by lock_ are found in motionLocks</p>\n<p>type is a string and must be &quot;static&quot; or &quot;kinematic&quot; or &quot;dynamic&quot;\n<br/>\n<br/></p>\n<pre><code>allowFastRotation\nangularDamping\nangularVelocity\nenableSleep\nlock_linearX\nlock_linearY\nlock_angularZ\ngravityScale\nisAwake\nisBullet\nisEnabled\nlinearDamping\nlinearVelocity\nname\nposition\nrotation\nsleepThreshold\ntype\n</code></pre>\n",
    "count": 2,
    "file": "../lua/box2d.lua",
-   "line": 102,
+   "line": 111,
    "name": "lua.box2d.world.body",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3031,7 +3031,7 @@
    "body": "<pre><code>shape=body:shape(def)\n</code></pre>\n<p>Create a shape in the body.</p>\n<p>def contains the values that you can set in a b2ShapeDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values,</p>\n<p>Booleans should be true or false</p>\n<p>filter is an array of 3 numbers { categoryBits , maskBits , groupIndex \n} and since lua(jit) uses doubles these bit masks should <em>only</em> use 52 \nbits not 64 so the integers can fit safely into a double. When using \nhex the top 3 nibbles should always be 0 like so 0x000fffffffffffff \nthat is 13 Fs if you are counting.</p>\n<p>material is a table containing named material values so { friction=1 , \nrestitution=1 }</p>\n<pre><code>density\nenableContactEvents\nenableHitEvents\nenablePreSolveEvents\nenableSensorEvents\nfilter\ninvokeContactCreation\nisSensor\nmaterial.customColor\nmaterial.friction\nmaterial.restitution\nmaterial.rollingResistance\nmaterial.tangentSpeed\nmaterial.userMaterialId\nupdateBodyMass\n</code></pre>\n<p>if def.shape==&quot;circle&quot; then def also contains the values that you can \nset in a b2Circle</p>\n<pre><code>center\nradius\n</code></pre>\n<p>if def.shape==&quot;segment&quot; then def also contains the values that you can \nset in a b2Segment</p>\n<pre><code>point1\npoint2\n</code></pre>\n<p>if def.shape==&quot;capsule&quot; then def also contains the values that you can \nset in a b2Capsule</p>\n<pre><code>center1\ncenter2\nradius\n</code></pre>\n<p>if def.shape==&quot;box&quot; then def also contains the values that you can \nset in a b2Polygon using b2MakeOffsetRoundedBox</p>\n<pre><code>halfWidth\nhalfHeight\ncenter\nrotation\nradius\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 286,
+   "line": 295,
    "name": "lua.box2d.world.body.shape",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3039,7 +3039,7 @@
    "body": "<pre><code>events = world:body_events()\n</code></pre>\n<p>get body events generated by the last step</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 386,
+   "line": 395,
    "name": "lua.box2d.world.body_events",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3047,15 +3047,15 @@
    "body": "<pre><code>events = world:contact_events()\n</code></pre>\n<p>get contact events generated by the last step</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 418,
+   "line": 427,
    "name": "lua.box2d.world.contact_events",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
   {
-   "body": "<pre><code>joint=world:joint(def)\n</code></pre>\n<p>Create a joint in the world.</p>\n<p>def contains the values that you can set in a b2jointDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values,</p>\n<p>Booleans should be true or false</p>\n<p>localFrameA/B is a transform which is a vector plus a rotation in \nradians, so { x , y , r }</p>\n<p>The ID of a body can be found in body[0]</p>\n<pre><code>bodyIdA\nbodyIdB\nlocalFrameA\nlocalFrameB\nforceThreshold\ntorqueThreshold\nconstraintHertz\nconstraintDampingRatio\ncollideConnected\n</code></pre>\n<p>if def.joint==&quot;distance&quot; then def also contains the values that you can \nset in a b2DistanceJointDef</p>\n<pre><code>length\nenableSpring\nlowerSpringForce\nupperSpringForce\nhertz\ndampingRatio\nenableLimit\nminLength\nmaxLength\nenableMotor\nmaxMotorForce\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;motor&quot; then def also contains the values that you can \nset in a b2MotorJointDef</p>\n<pre><code>linearVelocity\nmaxVelocityForce\nangularVelocity\nmaxVelocityTorque\nlinearHertz\nlinearDampingRatio\nmaxSpringForce\nangularHertz\nangularDampingRatio\nmaxSpringTorque\n</code></pre>\n<p>if def.joint==&quot;filter&quot; then def also contains the values that you can \nset in a b2FilterJointDef</p>\n<pre><code>-- no extra values just those found in b2jointDef\n</code></pre>\n<p>if def.joint==&quot;prismatic&quot; then def also contains the values that you can \nset in a b2PrismaticJointDef</p>\n<pre><code>enableSpring\nhertz\ndampingRatio\ntargetTranslation\nenableLimit\nlowerTranslation\nupperTranslation\nenableMotor\nmaxMotorForce\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;revolute&quot; then def also contains the values that you can \nset in a b2RevoluteJointDef</p>\n<pre><code>targetAngle\nenableSpring\nhertz\ndampingRatio\nenableLimit\nlowerAngle\nupperAngle\nenableMotor\nmaxMotorTorque\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;weld&quot; then def also contains the values that you can \nset in a b2WeldJointDef</p>\n<pre><code>linearHertz\nangularHertz\nlinearDampingRatio\nangularDampingRatio\n</code></pre>\n<p>if def.joint==&quot;wheel&quot; then def also contains the values that you can \nset in a b2WheelJointDef</p>\n<pre><code>enableSpring\nhertz\ndampingRatio\nenableLimit\nlowerTranslation\nupperTranslation\nenableMotor\nmaxMotorTorque\nmotorSpeed\n</code></pre>\n",
+   "body": "<pre><code>joint=world:joint(def)\n</code></pre>\n<p>Create a joint in the world.</p>\n<p>def contains the values that you can set in a b2jointDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values,</p>\n<p>Booleans should be true or false</p>\n<p>localFrameA/B is a transform which is a vector plus a rotation in \nradians, so { x , y , r }</p>\n<p>The boxid of a body ( for bodyIdA and bodyIdB ) can be found in body.boxid</p>\n<pre><code>bodyIdA\nbodyIdB\nlocalFrameA\nlocalFrameB\nforceThreshold\ntorqueThreshold\nconstraintHertz\nconstraintDampingRatio\ncollideConnected\n</code></pre>\n<p>if def.joint==&quot;distance&quot; then def also contains the values that you can \nset in a b2DistanceJointDef</p>\n<pre><code>length\nenableSpring\nlowerSpringForce\nupperSpringForce\nhertz\ndampingRatio\nenableLimit\nminLength\nmaxLength\nenableMotor\nmaxMotorForce\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;motor&quot; then def also contains the values that you can \nset in a b2MotorJointDef</p>\n<pre><code>linearVelocity\nmaxVelocityForce\nangularVelocity\nmaxVelocityTorque\nlinearHertz\nlinearDampingRatio\nmaxSpringForce\nangularHertz\nangularDampingRatio\nmaxSpringTorque\n</code></pre>\n<p>if def.joint==&quot;filter&quot; then def also contains the values that you can \nset in a b2FilterJointDef</p>\n<pre><code>-- no extra values just those found in b2jointDef\n</code></pre>\n<p>if def.joint==&quot;prismatic&quot; then def also contains the values that you can \nset in a b2PrismaticJointDef</p>\n<pre><code>enableSpring\nhertz\ndampingRatio\ntargetTranslation\nenableLimit\nlowerTranslation\nupperTranslation\nenableMotor\nmaxMotorForce\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;revolute&quot; then def also contains the values that you can \nset in a b2RevoluteJointDef</p>\n<pre><code>targetAngle\nenableSpring\nhertz\ndampingRatio\nenableLimit\nlowerAngle\nupperAngle\nenableMotor\nmaxMotorTorque\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;weld&quot; then def also contains the values that you can \nset in a b2WeldJointDef</p>\n<pre><code>linearHertz\nangularHertz\nlinearDampingRatio\nangularDampingRatio\n</code></pre>\n<p>if def.joint==&quot;wheel&quot; then def also contains the values that you can \nset in a b2WheelJointDef</p>\n<pre><code>enableSpring\nhertz\ndampingRatio\nenableLimit\nlowerTranslation\nupperTranslation\nenableMotor\nmaxMotorTorque\nmotorSpeed\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 159,
+   "line": 168,
    "name": "lua.box2d.world.joint",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3063,7 +3063,7 @@
    "body": "<pre><code>events = world:sensor_events()\n</code></pre>\n<p>get sensor events generated by the last step</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 402,
+   "line": 411,
    "name": "lua.box2d.world.sensor_events",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3071,7 +3071,7 @@
    "body": "<pre><code>world:step(seconds,steps)\n</code></pre>\n<p>Advance the world &quot;seconds&quot; through time using &quot;steps&quot; number of \ndiscreet sub steps.</p>\n<p>Generally the simulation expects (1/seconds)*steps to be 240 ish. \nSo 240 substeps per second. 1/60 and 4 are the defaults.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 369,
+   "line": 378,
    "name": "lua.box2d.world.step",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }
