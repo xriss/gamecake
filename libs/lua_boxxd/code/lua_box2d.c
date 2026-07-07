@@ -137,7 +137,8 @@ b2WorldId *pp;
 	lua_pushvalue(l,1); // this will be the lua world table
 	lua_settable(l,LUA_REGISTRYINDEX);
 
-	return 1;
+	lua_pushlstring(l,(const char *)pp,sizeof(b2WorldId)); // id to (non printable) string
+	return 2;
 }
 
 static int lua_b2_world_destroy (lua_State *l)
@@ -274,7 +275,8 @@ b2BodyId *pp;
 // allocate b2BodyId
 	*pp=b2CreateBody(world,&def);
 
-	return 1;
+	lua_pushlstring(l,(const char *)pp,sizeof(b2BodyId)); // id to (non printable) string
+	return 2;
 }
 
 static int lua_b2_body_destroy (lua_State *l)
@@ -343,7 +345,7 @@ b2ShapeId *pp;
 		lua_pushinteger(l,1);	lua_gettable(l,-2);
 		lua_pushinteger(l,2);	lua_gettable(l,-3);
 		lua_pushinteger(l,3);	lua_gettable(l,-4);
-		def.filter = (b2Filter){(uint64_t)lua_tonumber(l,-3),(int)lua_tonumber(l,-2),(uint64_t)lua_tonumber(l,-1)};
+		def.filter = (b2Filter){(uint64_t)lua_tonumber(l,-3),(uint64_t)lua_tonumber(l,-2),(int)lua_tonumber(l,-1)};
 		lua_pop(l,3);
 	}
 	lua_pop(l,1);
@@ -517,7 +519,8 @@ b2ShapeId *pp;
 		lua_error(l);
 	}
 
-	return 1;
+	lua_pushlstring(l,(const char *)pp,sizeof(b2ShapeId)); // id to (non printable) string
+	return 2;
 }
 
 static int lua_b2_shape_destroy (lua_State *l)
@@ -886,7 +889,8 @@ b2JointId *pp;
 		lua_error(l);
 	}
 
-	return 1;
+	lua_pushlstring(l,(const char *)pp,sizeof(b2JointId)); // id to (non printable) string
+	return 2;
 }
 
 static int lua_b2_joint_destroy (lua_State *l)
@@ -912,6 +916,225 @@ b2JointId *pp=lua_b2_joint_ptr_ptr(l, 1 );
 
 /*+---------------------------------------------------------------------
 
+Move the world through time itself.
+
+*/
+static int lua_b2_world_step (lua_State *l)
+{
+	b2WorldId pp    = lua_b2_world_ptr(l, 1 );
+	float     time  = lua_tonumber(l,     2 );
+	int       count = lua_tointeger(l,    3 );
+
+	b2World_Step(pp,time,count);
+	
+	return 0;
+}
+
+/*+---------------------------------------------------------------------
+
+Get body events in a packed array where each event is 5 values
+
+	bodyId
+	fellAsleep
+	transform.p.x
+	transform.p.y
+	transform.q (converted into radians)
+	
+
+*/
+static int lua_b2_world_body_events (lua_State *l)
+{
+	b2WorldId pp    = lua_b2_world_ptr(l, 1 );
+
+	b2BodyEvents events = b2World_GetBodyEvents(pp);
+	
+	lua_newtable(l);
+	
+	for( int i=0 ; i < events.moveCount ; i++ )
+	{
+		b2BodyMoveEvent *event=events.moveEvents+i;
+
+		lua_pushlstring(l, (const char *)&event->bodyId,sizeof(b2BodyId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+1 );
+
+		lua_pushboolean(l, event->fellAsleep );
+		lua_rawseti(l, -2 , i*5+2 );
+
+		lua_pushnumber(l, event->transform.p.x );
+		lua_rawseti(l, -2 , i*5+3 );
+		lua_pushnumber(l, event->transform.p.y );
+		lua_rawseti(l, -2 , i*5+4 );
+		
+		lua_pushnumber(l, b2Rot_GetAngle(event->transform.q) );
+		lua_rawseti(l, -2 , i*5+5 );
+
+	}
+	
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
+Get sensor events in a packed array where each event is 2 values
+
+Returns two arrays, first is begin events second is end events both 
+contain pairs of shape ids like so.
+
+	sensorShapeId
+	visitorShapeId
+	
+
+*/
+static int lua_b2_world_sensor_events (lua_State *l)
+{
+	b2WorldId pp    = lua_b2_world_ptr(l, 1 );
+
+	b2SensorEvents events = b2World_GetSensorEvents(pp);
+	
+	lua_newtable(l);
+
+	for( int i=0 ; i < events.beginCount ; i++ )
+	{
+		b2SensorBeginTouchEvent *event=events.beginEvents+i;
+
+		lua_pushlstring(l, (const char *)&event->sensorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+1 );
+
+		lua_pushlstring(l, (const char *)&event->visitorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+2 );
+	}
+	
+	lua_newtable(l);
+
+	for( int i=0 ; i < events.endCount ; i++ )
+	{
+		b2SensorEndTouchEvent *event=events.endEvents+i;
+
+		lua_pushlstring(l, (const char *)&event->sensorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+1 );
+
+		lua_pushlstring(l, (const char *)&event->visitorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+2 );
+	}
+
+	return 2;
+}
+
+/*+---------------------------------------------------------------------
+
+Get contact events in a packed arrays
+
+Returns three arrays, first is begin events second is end events and third is hit events.
+
+begin events is 9 values per event
+
+	shapeIdA
+	shapeIdB
+	manifold.normal.x
+	manifold.normal.y
+	manifold.pointCount
+	manifold.points[0].x
+	manifold.points[0].y
+	manifold.points[1].x
+	manifold.points[1].y
+	
+end events is 2 values per event
+
+	shapeIdA
+	shapeIdB
+
+hit events is 7 values per event
+
+	shapeIdA
+	shapeIdB
+	approachSpeed
+	normal.x
+	normal.y
+	point.x
+	point.y
+
+*/
+static int lua_b2_world_contact_events (lua_State *l)
+{
+	b2WorldId pp    = lua_b2_world_ptr(l, 1 );
+
+	b2ContactEvents events = b2World_GetContactEvents(pp);
+	
+	lua_newtable(l);	
+
+	for( int i=0 ; i < events.beginCount ; i++ )
+	{
+		b2ContactBeginTouchEvent *event=events.beginEvents+i;
+
+		lua_pushlstring(l, (const char *)&event->shapeIdA,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+1 );
+
+		lua_pushlstring(l, (const char *)&event->shapeIdB,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+2 );
+
+		lua_pushnumber(l, event->manifold.normal.x );
+		lua_rawseti(l, -2 , i*5+3 );
+		lua_pushnumber(l, event->manifold.normal.y );
+		lua_rawseti(l, -2 , i*5+4 );
+
+		lua_pushnumber(l, event->manifold.pointCount );
+		lua_rawseti(l, -2 , i*5+5 );
+
+		lua_pushnumber(l, event->manifold.points[0].x );
+		lua_rawseti(l, -2 , i*5+6 );
+		lua_pushnumber(l, event->manifold.points[0].y );
+		lua_rawseti(l, -2 , i*5+7 );
+
+		lua_pushnumber(l, event->manifold.points[1].x );
+		lua_rawseti(l, -2 , i*5+8 );
+		lua_pushnumber(l, event->manifold.points[1].y );
+		lua_rawseti(l, -2 , i*5+9 );
+	}
+	
+	lua_newtable(l);
+
+	for( int i=0 ; i < events.endCount ; i++ )
+	{
+		b2ContactEndTouchEvent *event=events.endEvents+i;
+
+		lua_pushlstring(l, (const char *)&event->shapeIdA,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+1 );
+
+		lua_pushlstring(l, (const char *)&event->shapeIdB,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+2 );
+	}
+
+	lua_newtable(l);
+
+	for( int i=0 ; i < events.hitCount ; i++ )
+	{
+		b2ContactHitEvent *event=events.hitEvents+i;
+
+		lua_pushlstring(l, (const char *)&event->shapeIdA,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+1 );
+
+		lua_pushlstring(l, (const char *)&event->shapeIdB,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+2 );
+
+		lua_pushnumber(l, event->approachSpeed );
+		lua_rawseti(l, -2 , i*5+3 );
+
+		lua_pushnumber(l, event->normal.x );
+		lua_rawseti(l, -2 , i*5+4 );
+		lua_pushnumber(l, event->normal.y );
+		lua_rawseti(l, -2 , i*5+5 );
+
+		lua_pushnumber(l, event->point.x );
+		lua_rawseti(l, -2 , i*5+6 );
+		lua_pushnumber(l, event->point.y );
+		lua_rawseti(l, -2 , i*5+7 );
+	}
+
+	return 3;
+}
+
+/*+---------------------------------------------------------------------
+
 open library.
 
 */
@@ -929,6 +1152,12 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"shape_destroy",			lua_b2_shape_destroy},
 		{"joint_create",			lua_b2_joint_create},
 		{"joint_destroy",			lua_b2_joint_destroy},
+
+		{"world_step",				lua_b2_world_step},
+		{"world_body_events",		lua_b2_world_body_events},
+		{"world_sensor_events",		lua_b2_world_sensor_events},
+		{"world_contact_events",	lua_b2_world_contact_events},
+
 		{0,0}
 	};
 
