@@ -144,9 +144,9 @@ b2WorldId *pp;
 	b2WorldDef def=b2DefaultWorldDef();
 
 	// get def values if they are not nil
-	if(lua_istable(l,2)) // got defs
+	if(lua_istable(l,1)) // got defs
 	{
-		lua_getfield(l,2,"gravity");
+		lua_getfield(l,1,"gravity");
 		if(!lua_isnil(l,-1))
 		{
 			lua_pushinteger(l,1);	lua_gettable(l,-2);
@@ -155,34 +155,34 @@ b2WorldId *pp;
 			lua_pop(l,2);
 		}
 		lua_pop(l,1);
-		lua_getfield(l,2,"restitutionThreshold");
+		lua_getfield(l,1,"restitutionThreshold");
 		if(!lua_isnil(l,-1)) { def.restitutionThreshold = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,2,"hitEventThreshold");
+		lua_getfield(l,1,"hitEventThreshold");
 		if(!lua_isnil(l,-1)) { def.hitEventThreshold = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,2,"contactHertz");
+		lua_getfield(l,1,"contactHertz");
 		if(!lua_isnil(l,-1)) { def.contactHertz = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,2,"contactDampingRatio");
+		lua_getfield(l,1,"contactDampingRatio");
 		if(!lua_isnil(l,-1)) { def.contactDampingRatio = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,2,"contactSpeed");
+		lua_getfield(l,1,"contactSpeed");
 		if(!lua_isnil(l,-1)) { def.contactSpeed = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,2,"maximumLinearSpeed");
+		lua_getfield(l,1,"maximumLinearSpeed");
 		if(!lua_isnil(l,-1)) { def.maximumLinearSpeed = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
 
-		lua_getfield(l,2,"enableSleep");
+		lua_getfield(l,1,"enableSleep");
 		if(!lua_isnil(l,-1)) { def.enableSleep = lua_toboolean(l,-1); }
 		lua_pop(l,1);
 
-		lua_getfield(l,2,"enableContinuous");
+		lua_getfield(l,1,"enableContinuous");
 		if(!lua_isnil(l,-1)) { def.enableContinuous = lua_toboolean(l,-1); }
 		lua_pop(l,1);
 		
-		lua_getfield(l,2,"enableContactSoftening");
+		lua_getfield(l,1,"enableContactSoftening");
 		if(!lua_isnil(l,-1)) { def.enableContactSoftening = lua_toboolean(l,-1); }
 		lua_pop(l,1);
 	}
@@ -195,13 +195,6 @@ b2WorldId *pp;
 
 // allocate b2WorldId
 	*pp=b2CreateWorld(&def);
-
-// use registry so we can find the world table from world ptr,
-// this has the side effect that world MUST be destroyed,
-// it will not be GCd as this will keep it alive.
-	lua_pushlightuserdata(l,pp);
-	lua_pushvalue(l,1); // this will be the lua world table
-	lua_settable(l,LUA_REGISTRYINDEX);
 
 	lua_pushlstring(l,(const char *)pp,sizeof(b2WorldId)); // id to (non printable) string
 	return 2;
@@ -1189,6 +1182,68 @@ static int lua_b2_world_contact_events (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
+Get/Set body transform
+
+*/
+static int lua_b2_body_transform (lua_State *l)
+{
+float r;
+b2Transform t;
+
+	b2BodyId pp = lua_b2_body_ptr(l, 1 );
+
+	if(!lua_isnil(l,4)) // only set if given 3 numbers
+	{
+		t.p.x=(float)lua_tonumber(l, 2 );
+		t.p.y=(float)lua_tonumber(l, 3 );
+		r=(float)lua_tonumber(l, 4 );
+
+		b2Body_SetTransform(pp,t.p,t.q);
+	}
+
+	t=b2Body_GetTransform(pp);
+
+	lua_pushnumber(l, t.p.x );
+	lua_pushnumber(l, t.p.y );
+	lua_pushnumber(l, b2Rot_GetAngle(t.q) );
+
+	return 3;
+}
+
+/*+---------------------------------------------------------------------
+
+Get/Set body velocity
+
+*/
+static int lua_b2_body_velocity (lua_State *l)
+{
+b2Vec2 p;
+float r;
+
+	b2BodyId pp = lua_b2_body_ptr(l, 1 );
+
+	if(!lua_isnil(l,4)) // only set if given 3 numbers
+	{
+		p.x=(float)lua_tonumber(l, 2 );
+		p.y=(float)lua_tonumber(l, 3 );
+		r=(float)lua_tonumber(l, 4 );
+
+		b2Body_SetLinearVelocity(pp,p);
+		b2Body_SetAngularVelocity(pp,r);
+	}
+
+	p=b2Body_GetLinearVelocity(pp);
+	r=b2Body_GetAngularVelocity(pp);
+
+	lua_pushnumber(l, p.x );
+	lua_pushnumber(l, p.y );
+	lua_pushnumber(l, r );
+
+	return 3;
+}
+
+/*+---------------------------------------------------------------------
+
 open library.
 
 */
@@ -1213,6 +1268,9 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"world_body_events",		lua_b2_world_body_events},
 		{"world_sensor_events",		lua_b2_world_sensor_events},
 		{"world_contact_events",	lua_b2_world_contact_events},
+
+		{"body_transform",			lua_b2_body_transform},
+		{"body_velocity",			lua_b2_body_velocity},
 
 		{0,0}
 	};

@@ -69,7 +69,8 @@ def is a table containing the values that you can set in a b2WorldDef
 
 All of these are optional so can be nil.
 
-Vectors are a table containing { x , y } values,
+Vectors are a table containing { x , y } values, This may also be a 
+fake table created by meta access.
 
 Booleans should be true or false
 
@@ -93,7 +94,7 @@ box2d.world=function(def)
 	world.shapes={}
 
 	setmetatable(world,box2d.world_metatable)
-	world[0],world.b2id=core.world_create(world,def)
+	world[0],world.b2id=core.world_create(def)
 
 	return world
 end
@@ -428,4 +429,28 @@ box2d.world_functions.contact_events=function(world)
 	events.begin_data,events.end_data,events.hit_data=core.world_contact_events(world[0])
 
 	return events
+end
+
+--[[#lua.box2d.body.transform
+
+	x,y,r = body:transform()
+	x,y,r = body:transform(x,y,r)
+
+get/set body transform
+
+]]
+box2d.body_functions.transform=function(body,x,y,r)
+	return core.body_transform(body[0],x,y,r)
+end
+
+--[[#lua.box2d.body.velocity
+
+	x,y,r = body:velocity()
+	x,y,r = body:velocity(x,y,r)
+
+get/set body velocity
+
+]]
+box2d.body_functions.velocity=function(body,x,y,r)
+	return core.body_velocity(body[0],x,y,r)
 end
