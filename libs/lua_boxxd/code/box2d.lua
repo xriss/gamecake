@@ -55,6 +55,15 @@ Get/Set units per meter, should be set first before creating a world.
 
 Defaults to 1.
 
+Obviously points and vectors should be divided by units to get their 
+value in meters but slightly less obviously density values end up 
+getting multiplied by units squared since they are area related.
+
+What that means is if you are thinking in meters eg you want to set 
+gravity to 10m/s you will need to multiply it by units. Density which 
+would normally be 1 should be 1/(units^2) in order to keep the results 
+close to what they would be if you did not change this.
+
 ]]
 box2d.meter=core.meter
 
@@ -94,7 +103,7 @@ box2d.world=function(def)
 	world.shapes={}
 
 	setmetatable(world,box2d.world_metatable)
-	world[0],world.b2id=core.world_create(def)
+	world[0],world.boxid=core.world_create(def)
 
 	return world
 end
@@ -149,9 +158,9 @@ box2d.world_functions.body=function(world,def)
 	body.shapes={}
 
 	setmetatable(body,box2d.body_metatable)
-	body[0],body.b2id=core.body_create(world[0],def)
+	body[0],body.boxid=core.body_create(world[0],def)
 	
-	world.bodys[ body.b2id ]=body
+	world.bodys[ body.boxid ]=body
 
 	return body
 end
@@ -173,7 +182,7 @@ Booleans should be true or false
 localFrameA/B is a transform which is a vector plus a rotation in 
 radians, so { x , y , r }
 
-The ID of a body can be found in body[0]
+The boxid of a body ( for bodyIdA and bodyIdB ) can be found in body.boxid
 
 	bodyIdA
 	bodyIdB
@@ -276,9 +285,9 @@ box2d.world_functions.body=function(world,def)
 	joint.world=world
 
 	setmetatable(joint,box2d.joint_metatable)
-	joint[0],joint.b2id=core.joint_create(world[0],def)
+	joint[0],joint.boxid=core.joint_create(world[0],def)
 
-	world.joints[ joint.b2id ]=joint
+	world.joints[ joint.boxid ]=joint
 
 	return joint
 end
@@ -357,10 +366,10 @@ box2d.body_functions.shape=function(body,def)
 	shape.body=body
 
 	setmetatable(shape,box2d.shape_metatable)
-	shape[0],shape.b2id=core.shape_create(body[0],def)
+	shape[0],shape.boxid=core.shape_create(body[0],def)
 	
-	body.shapes[ shape.b2id ]=shape
-	body.world.shapes[ shape.b2id ]=shape
+	body.shapes[ shape.boxid ]=shape
+	body.world.shapes[ shape.boxid ]=shape
 
 	return shape
 end
