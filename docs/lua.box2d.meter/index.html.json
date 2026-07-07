@@ -2943,7 +2943,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>box2d.meter(16)\n</code></pre>\n<p>Set units per meter, should be done first before creating worlds.</p>\n<p>So we can use pixels for positions and sizes without breaking boxs \ninternal meter based constants.</p>\n<p>Defaults to 1.</p>\n",
+   "body": "<pre><code>units = box2d.meter()\nunits = box2d.meter(units)\n</code></pre>\n<p>Get/Set units per meter, should be set first before creating a world.</p>\n<p>Defaults to 1.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
    "line": 49,
