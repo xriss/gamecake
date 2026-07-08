@@ -4,6 +4,9 @@
  This file is distributed under the terms of the MIT license.
  http://en.wikipedia.org/wiki/MIT_License
 
+Note that much of the documentation for the C functions exposed to Lua 
+can be found in the associated box2d.lua file.
+
 */
 #include "all.h"
 #include "box2d/box2d.h"
@@ -22,40 +25,48 @@ const char *lua_b2_joint_meta_name="b2_joint*ptr";
 
 /*+---------------------------------------------------------------------
 
-Get library version as 3 numbers
+Get box2d variables
 
 */
-static int lua_b2_version (lua_State *l)
+static int lua_b2_get (lua_State *l)
 {
-b2Version v=b2GetVersion();
+	lua_newtable(l);
+	
+	b2Version version=b2GetVersion();
+	lua_newtable(l);
+	lua_pushnumber(l, version.major );
+	lua_rawseti(l, -2 , 1 );
+	lua_pushnumber(l, version.minor );
+	lua_rawseti(l, -2 , 2 );
+	lua_pushnumber(l, version.revision );
+	lua_rawseti(l, -2 , 3 );
+	lua_setfield(l, -2 , "Version" );
 
-	lua_pushnumber(l,v.major);
-	lua_pushnumber(l,v.minor);
-	lua_pushnumber(l,v.revision);
+	lua_pushnumber(l, b2GetLengthUnitsPerMeter() );
+	lua_setfield(l, -2 , "LengthUnitsPerMeter" );
 
-	return 3;
+	lua_pushnumber(l, b2GetByteCount() );
+	lua_setfield(l, -2 , "ByteCount" );
+
+	return 1;
 }
 
 /*+---------------------------------------------------------------------
 
-Get/Set units per meter
+Set box2d variables
 
 */
-static int lua_b2_meter (lua_State *l)
+static int lua_b2_set (lua_State *l)
 {
-float f=0.0f;
-
-	if(!lua_isnil(l,1))
+	lua_getfield(l,1,"LengthUnitsPerMeter");
+	if(!lua_isnil(l,-1))
 	{
-		f=(float)lua_tonumber(l,1);
-		b2SetLengthUnitsPerMeter(f);
+		b2SetLengthUnitsPerMeter( lua_tonumber(l,-1) );
 	}
+	lua_pop(l,1);
 
-	f=b2GetLengthUnitsPerMeter();
-	lua_pushnumber(l,f);
-	return 1;
+	return 0;
 }
-
 
 /*+---------------------------------------------------------------------
 
@@ -64,18 +75,17 @@ Get contact data given an ID
 */
 static int lua_b2_contact (lua_State *l)
 {
-
 	b2ContactId id=*((b2ContactId*)(lua_tostring(l,1))); // get ID from lua string
 
 	b2ContactData contact = b2Contact_GetData(id);
-	
+
 	lua_pushnumber(l, contact.manifold.normal.x );
 	lua_pushnumber(l, contact.manifold.normal.y );
-	
+
 	for( int i=0 ; i<contact.manifold.pointCount ; i++ )
 	{
 		b2ManifoldPoint p=contact.manifold.points[i];
-		
+
 		lua_newtable(l);
 
 		lua_pushnumber(l, p.anchorA.x );
@@ -137,7 +147,7 @@ b2WorldId *pp;
 }
 
 static int lua_b2_world_create (lua_State *l)
-{	
+{
 b2WorldId *pp;
 
 	// defaults
@@ -181,7 +191,7 @@ b2WorldId *pp;
 		lua_getfield(l,1,"enableContinuous");
 		if(!lua_isnil(l,-1)) { def.enableContinuous = lua_toboolean(l,-1); }
 		lua_pop(l,1);
-		
+
 		lua_getfield(l,1,"enableContactSoftening");
 		if(!lua_isnil(l,-1)) { def.enableContactSoftening = lua_toboolean(l,-1); }
 		lua_pop(l,1);
@@ -201,7 +211,7 @@ b2WorldId *pp;
 }
 
 static int lua_b2_world_destroy (lua_State *l)
-{	
+{
 b2WorldId *pp=lua_b2_world_ptr_ptr(l, 1 );
 	if(B2_IS_NON_NULL(*pp))
 	{
@@ -209,10 +219,10 @@ b2WorldId *pp=lua_b2_world_ptr_ptr(l, 1 );
 		lua_pushlightuserdata(l,pp);
 		lua_pushnil(l);
 		lua_settable(l,LUA_REGISTRYINDEX);
-		
+
 		b2DestroyWorld(*pp);
 		*pp=(b2WorldId){0};
-	}	
+	}
 	return 0;
 }
 
@@ -237,7 +247,7 @@ b2BodyId *pp;
 }
 
 static int lua_b2_body_create (lua_State *l)
-{	
+{
 b2WorldId world;
 b2BodyId *pp;
 
@@ -339,7 +349,7 @@ b2BodyId *pp;
 }
 
 static int lua_b2_body_destroy (lua_State *l)
-{	
+{
 b2BodyId *pp=lua_b2_body_ptr_ptr(l, 1 );
 	if(B2_IS_NON_NULL(*pp))
 	{
@@ -347,10 +357,10 @@ b2BodyId *pp=lua_b2_body_ptr_ptr(l, 1 );
 		lua_pushlightuserdata(l,pp);
 		lua_pushnil(l);
 		lua_settable(l,LUA_REGISTRYINDEX);
-		
+
 		b2DestroyBody(*pp);
 		*pp=(b2BodyId){0};
-	}	
+	}
 	return 0;
 }
 
@@ -375,7 +385,7 @@ b2ShapeId *pp;
 }
 
 static int lua_b2_shape_create (lua_State *l)
-{	
+{
 b2BodyId body;
 b2ShapeId *pp;
 
@@ -440,7 +450,7 @@ b2ShapeId *pp;
 	lua_getfield(l,2,"updateBodyMass");
 	if(!lua_isnil(l,-1)) { def.updateBodyMass = lua_toboolean(l,-1); }
 	lua_pop(l,1);
-	
+
 // create ptr ptr userdata
 	pp=(b2ShapeId*)lua_newuserdata(l, sizeof(b2ShapeId));
 	*pp=(b2ShapeId){0};
@@ -561,7 +571,7 @@ b2ShapeId *pp;
 		lua_getfield(l,2,"rotation");
 		if(!lua_isnil(l,-1)) { rotation = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
-		
+
 		float radius=0.0f;
 		lua_getfield(l,2,"radius");
 		if(!lua_isnil(l,-1)) { radius = (float)lua_tonumber(l,-1); }
@@ -583,7 +593,7 @@ b2ShapeId *pp;
 }
 
 static int lua_b2_shape_destroy (lua_State *l)
-{	
+{
 b2ShapeId *pp=lua_b2_shape_ptr_ptr(l, 1 );
 	if(B2_IS_NON_NULL(*pp))
 	{
@@ -591,7 +601,7 @@ b2ShapeId *pp=lua_b2_shape_ptr_ptr(l, 1 );
 		lua_pushlightuserdata(l,pp);
 		lua_pushnil(l);
 		lua_settable(l,LUA_REGISTRYINDEX);
-		
+
 		int update=1;
 		if(!lua_isnil(l,2)) // optional
 		{
@@ -599,7 +609,7 @@ b2ShapeId *pp=lua_b2_shape_ptr_ptr(l, 1 );
 		}
 		b2DestroyShape(*pp,update);
 		*pp=(b2ShapeId){0};
-	}	
+	}
 	return 0;
 }
 
@@ -625,7 +635,7 @@ b2JointId *pp;
 }
 
 static int lua_b2_joint_create (lua_State *l)
-{	
+{
 b2JointId *pp;
 
 	b2WorldId world=lua_b2_world_ptr(l,1);
@@ -953,7 +963,7 @@ b2JointId *pp;
 }
 
 static int lua_b2_joint_destroy (lua_State *l)
-{	
+{
 b2JointId *pp=lua_b2_joint_ptr_ptr(l, 1 );
 	if(B2_IS_NON_NULL(*pp))
 	{
@@ -961,7 +971,7 @@ b2JointId *pp=lua_b2_joint_ptr_ptr(l, 1 );
 		lua_pushlightuserdata(l,pp);
 		lua_pushnil(l);
 		lua_settable(l,LUA_REGISTRYINDEX);
-		
+
 		int update=1;
 		if(!lua_isnil(l,2)) // optional
 		{
@@ -969,7 +979,126 @@ b2JointId *pp=lua_b2_joint_ptr_ptr(l, 1 );
 		}
 		b2DestroyJoint(*pp,update);
 		*pp=(b2JointId){0};
-	}	
+	}
+	return 0;
+}
+
+/*+---------------------------------------------------------------------
+
+Get world variables
+
+*/
+static int lua_b2_world_get (lua_State *l)
+{
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
+
+	lua_newtable(l);
+
+	lua_pushboolean(l, b2World_IsSleepingEnabled(world) );
+	lua_setfield(l, -2 , "SleepingEnabled" );
+
+	lua_pushboolean(l, b2World_IsContinuousEnabled(world) );
+	lua_setfield(l, -2 , "ContinuousEnabled" );
+
+	lua_pushnumber(l, b2World_GetRestitutionThreshold(world) );
+	lua_setfield(l, -2 , "RestitutionThreshold" );
+
+	lua_pushnumber(l, b2World_GetHitEventThreshold(world) );
+	lua_setfield(l, -2 , "HitEventThreshold" );
+
+	b2Vec2 gravity = b2World_GetGravity(world);
+	lua_newtable(l);
+	lua_pushnumber(l, gravity.x );	lua_rawseti(l, -2 , 1 );
+	lua_pushnumber(l, gravity.y );	lua_rawseti(l, -2 , 2 );
+	lua_setfield(l, -2 , "Gravity" );
+
+	lua_pushnumber(l, b2World_GetMaximumLinearSpeed(world) );
+	lua_setfield(l, -2 , "MaximumLinearSpeed" );
+
+	lua_pushboolean(l, b2World_IsWarmStartingEnabled(world) );
+	lua_setfield(l, -2 , "WarmStartingEnabled" );
+
+
+	return 1;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Set world variables
+
+*/
+static int lua_b2_world_set (lua_State *l)
+{
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
+
+	lua_getfield(l,1,"SleepingEnabled");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_EnableSleeping(world, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"ContinuousEnabled");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_EnableContinuous(world, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"RestitutionThreshold");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_SetRestitutionThreshold(world, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"HitEventThreshold");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_SetHitEventThreshold(world, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"Gravity");
+	if(!lua_isnil(l,-1))
+	{
+		b2Vec2 gravity;
+		lua_pushinteger(l, 1 ); lua_gettable(l, -2 );
+		gravity.x = lua_tonumber(l, -1 ); lua_pop(l, 1 );
+		lua_pushinteger(l, 2 ); lua_gettable(l, -2 );
+		gravity.y = lua_tonumber(l, -1 ); lua_pop(l, 1 );
+		b2World_SetGravity(world, gravity );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"ContactTuning");
+	if(!lua_isnil(l,-1))
+	{
+		lua_pushinteger(l, 1 ); lua_gettable(l, -2 );
+		float hertz = lua_tonumber(l, -1 ); lua_pop(l, 1 );
+		lua_pushinteger(l, 2 ); lua_gettable(l, -2 );
+		float dampingRatio = lua_tonumber(l, -1 ); lua_pop(l, 1 );
+		lua_pushinteger(l, 3 ); lua_gettable(l, -2 );
+		float pushSpeed = lua_tonumber(l, -1 ); lua_pop(l, 1 );
+		b2World_SetContactTuning(world, hertz , dampingRatio , pushSpeed );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"MaximumLinearSpeed");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_SetMaximumLinearSpeed(world, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"WarmStartingEnabled");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_EnableWarmStarting(world, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
 	return 0;
 }
 
@@ -980,12 +1109,12 @@ Move the world through time itself.
 */
 static int lua_b2_world_step (lua_State *l)
 {
-	b2WorldId pp    = lua_b2_world_ptr(l, 1 );
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
 	float     time  = lua_tonumber(l,     2 );
 	int       count = lua_tointeger(l,    3 );
 
-	b2World_Step(pp,time,count);
-	
+	b2World_Step(world,time,count);
+
 	return 0;
 }
 
@@ -998,17 +1127,17 @@ Get body events in a packed array where each event is 5 values
 	transform.p.x
 	transform.p.y
 	transform.q (converted into radians)
-	
+
 
 */
 static int lua_b2_world_body_events (lua_State *l)
 {
-	b2WorldId pp    = lua_b2_world_ptr(l, 1 );
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
 
-	b2BodyEvents events = b2World_GetBodyEvents(pp);
-	
+	b2BodyEvents events = b2World_GetBodyEvents(world);
+
 	lua_newtable(l);
-	
+
 	for( int i=0 ; i < events.moveCount ; i++ )
 	{
 		b2BodyMoveEvent *event=events.moveEvents+i;
@@ -1023,12 +1152,12 @@ static int lua_b2_world_body_events (lua_State *l)
 		lua_rawseti(l, -2 , i*5+3 );
 		lua_pushnumber(l, event->transform.p.y );
 		lua_rawseti(l, -2 , i*5+4 );
-		
+
 		lua_pushnumber(l, b2Rot_GetAngle(event->transform.q) );
 		lua_rawseti(l, -2 , i*5+5 );
 
 	}
-	
+
 	return 1;
 }
 
@@ -1036,20 +1165,20 @@ static int lua_b2_world_body_events (lua_State *l)
 
 Get sensor events in a packed array where each event is 2 values
 
-Returns two arrays, first is begin events second is end events both 
+Returns two arrays, first is begin events second is end events both
 contain pairs of shape ids like so.
 
 	sensorShapeId
 	visitorShapeId
-	
+
 
 */
 static int lua_b2_world_sensor_events (lua_State *l)
 {
-	b2WorldId pp    = lua_b2_world_ptr(l, 1 );
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
 
-	b2SensorEvents events = b2World_GetSensorEvents(pp);
-	
+	b2SensorEvents events = b2World_GetSensorEvents(world);
+
 	lua_newtable(l);
 
 	for( int i=0 ; i < events.beginCount ; i++ )
@@ -1062,7 +1191,7 @@ static int lua_b2_world_sensor_events (lua_State *l)
 		lua_pushlstring(l, (const char *)&event->visitorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
 		lua_rawseti(l, -2 , i*2+2 );
 	}
-	
+
 	lua_newtable(l);
 
 	for( int i=0 ; i < events.endCount ; i++ )
@@ -1090,7 +1219,7 @@ begin events is 3 values per event
 	shapeIdA
 	shapeIdB
 	contactId
-	
+
 end events is 3 values per event
 
 	shapeIdA
@@ -1111,11 +1240,11 @@ hit events is 8 values per event
 */
 static int lua_b2_world_contact_events (lua_State *l)
 {
-	b2WorldId pp    = lua_b2_world_ptr(l, 1 );
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
 
-	b2ContactEvents events = b2World_GetContactEvents(pp);
-	
-	lua_newtable(l);	
+	b2ContactEvents events = b2World_GetContactEvents(world);
+
+	lua_newtable(l);
 
 	for( int i=0 ; i < events.beginCount ; i++ )
 	{
@@ -1131,7 +1260,7 @@ static int lua_b2_world_contact_events (lua_State *l)
 		lua_pushlstring(l, (const char *)&event->contactId,sizeof(b2ContactId)); // id to (non printable) string
 		lua_rawseti(l, -2 , i*3+3 );
 	}
-	
+
 	lua_newtable(l);
 
 	for( int i=0 ; i < events.endCount ; i++ )
@@ -1189,16 +1318,16 @@ static int lua_b2_body_awake (lua_State *l)
 {
 int b;
 
-	b2BodyId pp = lua_b2_body_ptr(l, 1 );
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
 
 	if(!lua_isnil(l,2)) // only set if given
 	{
 		b=lua_toboolean(l, 2 );
 
-		b2Body_SetAwake(pp,b);
+		b2Body_SetAwake(body,b);
 	}
 
-	b=b2Body_IsAwake(pp);
+	b=b2Body_IsAwake(body);
 
 	lua_pushboolean(l, b );
 
@@ -1215,7 +1344,7 @@ static int lua_b2_body_transform (lua_State *l)
 float r;
 b2Transform t;
 
-	b2BodyId pp = lua_b2_body_ptr(l, 1 );
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
 
 	if(!lua_isnil(l,4)) // only set if given
 	{
@@ -1224,10 +1353,10 @@ b2Transform t;
 		r=(float)lua_tonumber(l, 4 );
 		t.q=b2MakeRot(r);
 
-		b2Body_SetTransform(pp,t.p,t.q);
+		b2Body_SetTransform(body,t.p,t.q);
 	}
 
-	t=b2Body_GetTransform(pp);
+	t=b2Body_GetTransform(body);
 
 	lua_pushnumber(l, t.p.x );
 	lua_pushnumber(l, t.p.y );
@@ -1246,7 +1375,7 @@ static int lua_b2_body_velocity (lua_State *l)
 b2Vec2 p;
 float r;
 
-	b2BodyId pp = lua_b2_body_ptr(l, 1 );
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
 
 	if(!lua_isnil(l,4)) // only set if given
 	{
@@ -1254,12 +1383,12 @@ float r;
 		p.y=(float)lua_tonumber(l, 3 );
 		r=(float)lua_tonumber(l, 4 );
 
-		b2Body_SetLinearVelocity(pp,p);
-		b2Body_SetAngularVelocity(pp,r);
+		b2Body_SetLinearVelocity(body,p);
+		b2Body_SetAngularVelocity(body,r);
 	}
 
-	p=b2Body_GetLinearVelocity(pp);
-	r=b2Body_GetAngularVelocity(pp);
+	p=b2Body_GetLinearVelocity(body);
+	r=b2Body_GetAngularVelocity(body);
 
 	lua_pushnumber(l, p.x );
 	lua_pushnumber(l, p.y );
@@ -1277,8 +1406,8 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{
-		{"version",					lua_b2_version},
-		{"meter",					lua_b2_meter},
+		{"get",						lua_b2_get},
+		{"set",						lua_b2_set},
 		{"contact",					lua_b2_contact},
 
 		{"world_create",			lua_b2_world_create},
@@ -1294,10 +1423,20 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"world_body_events",		lua_b2_world_body_events},
 		{"world_sensor_events",		lua_b2_world_sensor_events},
 		{"world_contact_events",	lua_b2_world_contact_events},
+		{"world_get",				lua_b2_world_get},
+		{"world_set",				lua_b2_world_set},
 
 		{"body_awake",				lua_b2_body_awake},
 		{"body_transform",			lua_b2_body_transform},
 		{"body_velocity",			lua_b2_body_velocity},
+//		{"body_get",				lua_b2_body_get},
+//		{"body_set",				lua_b2_body_set},
+
+//		{"shape_get",				lua_b2_shape_get},
+//		{"shape_set",				lua_b2_shape_set},
+
+//		{"joint_get",				lua_b2_joint_get},
+//		{"joint_set",				lua_b2_joint_set},
 
 		{0,0}
 	};

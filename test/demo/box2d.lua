@@ -2,8 +2,32 @@
 
 local box2d=require("box2d")
 
-print( "box2d version", box2d.version() )
+-- important simulation values
+local METER=16
+local SQR_METER=METER*METER
 
-box2d.meter(16)
+local var_tostring=function(v)
+	if type(v)=="table" then -- any tables will be arrays of numbers
+		return "{ "..table.concat(v," , ").." }"
+	else
+		return tostring(v)
+	end
+end
 
-local w=box2d.world({},{})
+-- adjust default box2d variables
+box2d.set({
+	LengthUnitsPerMeter=METER,
+})
+
+for n,v in pairs( box2d:get() ) do
+	print("box2d",n,"=",var_tostring(v))
+end
+
+-- create a world
+local world=box2d.world({
+	gravity={0,10*METER,0},
+})
+
+for n,v in pairs( world:get() ) do
+	print("world",n,"=",var_tostring(v))
+end

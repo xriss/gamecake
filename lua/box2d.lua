@@ -1,5 +1,7 @@
 --
--- (C) 2026 Kriss@XIXs.com
+-- Copyright (C) 2026 Kriss Blank < Kriss@XIXs.com >
+-- This file is distributed under the terms of the MIT license.
+-- http://en.wikipedia.org/wiki/MIT_License
 --
 
 --[[#lua.box2d
@@ -8,7 +10,8 @@
 
 We use box2d as the local name of this library.
 
-A lua binding to the box2d physics library
+A lua binding to the box2d physics library see https://box2d.org/ for 
+more documentation on how box2d works.
 
 ]]
 
@@ -36,22 +39,39 @@ box2d.joint_functions={is="joint"}
 box2d.joint_metatable={__index=box2d.joint_functions}
 
 
---[[#lua.box2d.version
+--[[#lua.box2d.get
 
-	major,minor,revision = box2d.version()
+	vars = box2d.get()
 
-Get box2d library version, note this is a function.
+Get all box2d variables in a table. Returned table keys are.
+
+	Version
+
+A table containing 3 values
+
+	ByteCount
+
+Internal memory use.
+
+	LengthUnitsPerMeter
+
+Values that may also be set, see box2d.set for more information.
 
 ]]
-box2d.version=core.version
+box2d.get=function()
 
+	return core.get()
+end
 
---[[#lua.box2d.meter
+--[[#lua.box2d.set
 
-	units = box2d.meter()
-	units = box2d.meter(units)
+	box2d.set(vars)
 
-Get/Set units per meter, should be set first before creating a world.
+Set all box2d variables from a table. Possible table keys are.
+
+	LengthUnitsPerMeter
+	
+Units per meter, should be set first before creating a world.
 
 Defaults to 1.
 
@@ -62,11 +82,15 @@ getting multiplied by units squared since they are area related.
 What that means is if you are thinking in meters eg you want to set 
 gravity to 10m/s you will need to multiply it by units. Density which 
 would normally be 1 should be 1/(units^2) in order to keep the results 
-close to what they would be if you did not change this.
+close to defaults.
+
+Note that Box2d recommends not changing this, be we cool, yeah?
 
 ]]
-box2d.meter=core.meter
+box2d.set=function(vars)
 
+	core.set(vars)
+end
 
 --[[#lua.box2d.world
 
@@ -78,8 +102,8 @@ def is a table containing the values that you can set in a b2WorldDef
 
 All of these are optional so can be nil.
 
-Vectors are a table containing { x , y } values, This may also be a 
-fake table created by meta access.
+Vectors are a table containing { x , y } values. This may also be a 
+fake table created by lua meta.
 
 Booleans should be true or false
 
@@ -118,7 +142,8 @@ def contains the values that you can set in a b2BodyDef
 
 All of these are optional so can be nil.
 
-Vectors are a table containing { x , y } values,
+Vectors are a table containing { x , y } values. This may also be a 
+fake table created by lua meta.
 
 Booleans should be true or false
 
@@ -175,7 +200,8 @@ def contains the values that you can set in a b2jointDef
 
 All of these are optional so can be nil.
 
-Vectors are a table containing { x , y } values,
+Vectors are a table containing { x , y } values. This may also be a 
+fake table created by lua meta.
 
 Booleans should be true or false
 
@@ -302,7 +328,8 @@ def contains the values that you can set in a b2ShapeDef
 
 All of these are optional so can be nil.
 
-Vectors are a table containing { x , y } values,
+Vectors are a table containing { x , y } values. This may also be a 
+fake table created by lua meta.
 
 Booleans should be true or false
 
@@ -374,6 +401,30 @@ box2d.body_functions.shape=function(body,def)
 	return shape
 end
 
+
+--[[#lua.box2d.world.get
+
+	vars = world:get()
+
+Get all world variables in a table.
+
+]]
+box2d.world_functions.get=function(world)
+
+	return core.world_get(world[0])
+end
+
+--[[#lua.box2d.world.set
+
+	world:set(vars)
+
+Set all world variables from a table.
+
+]]
+box2d.world_functions.set=function(world,vars)
+
+	return core.world_set(world[0],vars)
+end
 
 --[[#lua.box2d.world.step
 
