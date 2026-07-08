@@ -130,20 +130,28 @@
    "name": "levels"
   },
   {
-   "count": 693,
+   "count": 695,
    "name": "lua"
   },
   {
-   "count": 17,
+   "count": 19,
    "name": "lua.box2d"
   },
   {
-   "count": 4,
+   "count": 6,
    "name": "lua.box2d.body"
   },
   {
    "count": 1,
    "name": "lua.box2d.body.awake"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.set"
   },
   {
    "count": 1,
@@ -2968,22 +2976,38 @@
  "_list": [
   {
    "body": "",
-   "count": 4,
+   "count": 6,
    "name": "lua.box2d.body"
   },
   {
    "body": "<pre><code>b = body:awake()\nb = body:awake(b)\n</code></pre>\n<p>get/set body sleeping state.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 494,
+   "line": 514,
    "name": "lua.box2d.body.awake",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
+  },
+  {
+   "body": "<pre><code>vars = body:get()\n</code></pre>\n<p>Get all body variables in a table.</p>\n",
+   "count": 1,
+   "file": "../lua/box2d.lua",
+   "line": 492,
+   "name": "lua.box2d.body.get",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
+  },
+  {
+   "body": "<pre><code>body:set(vars)\n</code></pre>\n<p>Set all body variables from a table.</p>\n",
+   "count": 1,
+   "file": "../lua/box2d.lua",
+   "line": 503,
+   "name": "lua.box2d.body.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
   {
    "body": "<pre><code>x,y,r = body:transform()\nx,y,r = body:transform(x,y,r)\n</code></pre>\n<p>get/set body transform</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 506,
+   "line": 526,
    "name": "lua.box2d.body.transform",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -2991,7 +3015,7 @@
    "body": "<pre><code>x,y,r = body:velocity()\nx,y,r = body:velocity(x,y,r)\n</code></pre>\n<p>get/set body velocity</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 518,
+   "line": 538,
    "name": "lua.box2d.body.velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

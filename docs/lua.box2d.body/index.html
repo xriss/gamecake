@@ -55,6 +55,8 @@
 <a class="par" href="../../docs/lua.box2d.body"><span>/lua.box2d.body</span></a>
 
 <a class="sub" href="../../docs/lua.box2d.body.awake"><span>/lua.box2d.body.awake</span></a>
+<a class="sub" href="../../docs/lua.box2d.body.get"><span>/lua.box2d.body.get</span></a>
+<a class="sub" href="../../docs/lua.box2d.body.set"><span>/lua.box2d.body.set</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.transform"><span>/lua.box2d.body.transform</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.velocity"><span>/lua.box2d.body.velocity</span></a>
 <a class="sub" href="../../docs/lua.box2d.get"><span>/lua.box2d.get</span></a>
@@ -761,7 +763,7 @@
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.awake">lua.box2d.body.awake</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L494">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L514">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>b = body:awake()
 b = body:awake(b)
 </code></pre>
@@ -770,8 +772,26 @@ b = body:awake(b)
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.box2d.body.get">lua.box2d.body.get</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L492">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>vars = body:get()
+</code></pre>
+<p>Get all body variables in a table.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.box2d.body.set">lua.box2d.body.set</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L503">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>body:set(vars)
+</code></pre>
+<p>Set all body variables from a table.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.transform">lua.box2d.body.transform</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L506">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L526">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>x,y,r = body:transform()
 x,y,r = body:transform(x,y,r)
 </code></pre>
@@ -781,7 +801,7 @@ x,y,r = body:transform(x,y,r)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.velocity">lua.box2d.body.velocity</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L518">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L538">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>x,y,r = body:velocity()
 x,y,r = body:velocity(x,y,r)
 </code></pre>
