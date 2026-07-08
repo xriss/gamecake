@@ -58,6 +58,7 @@
 <a class="sub" href="../../docs/lua.box2d.body.get"><span>/lua.box2d.body.get</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.set"><span>/lua.box2d.body.set</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.transform"><span>/lua.box2d.body.transform</span></a>
+<a class="sub" href="../../docs/lua.box2d.body.type"><span>/lua.box2d.body.type</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.velocity"><span>/lua.box2d.body.velocity</span></a>
 <a class="sub" href="../../docs/lua.box2d.get"><span>/lua.box2d.get</span></a>
 <a class="sub" href="../../docs/lua.box2d.set"><span>/lua.box2d.set</span></a><a class="par" href="../../docs/lua.box2d.world"><span>/lua.box2d.world</span></a>
@@ -774,7 +775,7 @@ more documentation on how box2d works.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.awake">lua.box2d.body.awake</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L514">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L530">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>b = body:awake()
 b = body:awake(b)
 </code></pre>
@@ -802,7 +803,7 @@ b = body:awake(b)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.transform">lua.box2d.body.transform</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L526">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L542">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>x,y,r = body:transform()
 x,y,r = body:transform(x,y,r)
 </code></pre>
@@ -811,8 +812,22 @@ x,y,r = body:transform(x,y,r)
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.box2d.body.type">lua.box2d.body.type</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L514">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>btype = body:type()
+btype = body:type(btype)
+</code></pre>
+<p>get/set body type. btype is a string, Possible values are</p>
+<pre><code>static
+kinematic
+dynamic
+</code></pre>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.velocity">lua.box2d.body.velocity</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L538">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L554">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>x,y,r = body:velocity()
 x,y,r = body:velocity(x,y,r)
 </code></pre>
