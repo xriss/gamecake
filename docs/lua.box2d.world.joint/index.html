@@ -57,15 +57,17 @@
 <a class="sub" href="../../docs/lua.box2d.body.awake"><span>/lua.box2d.body.awake</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.transform"><span>/lua.box2d.body.transform</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.velocity"><span>/lua.box2d.body.velocity</span></a>
-<a class="sub" href="../../docs/lua.box2d.meter"><span>/lua.box2d.meter</span></a>
-<a class="sub" href="../../docs/lua.box2d.version"><span>/lua.box2d.version</span></a><a class="par" href="../../docs/lua.box2d.world"><span>/lua.box2d.world</span></a>
+<a class="sub" href="../../docs/lua.box2d.get"><span>/lua.box2d.get</span></a>
+<a class="sub" href="../../docs/lua.box2d.set"><span>/lua.box2d.set</span></a><a class="par" href="../../docs/lua.box2d.world"><span>/lua.box2d.world</span></a>
 <a class="par" href="../../docs/lua.box2d.world.body"><span>/lua.box2d.world.body</span></a>
 
 <a class="sub" href="../../docs/lua.box2d.world.body.shape"><span>/lua.box2d.world.body.shape</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.body_events"><span>/lua.box2d.world.body_events</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.contact_events"><span>/lua.box2d.world.contact_events</span></a>
+<a class="sub" href="../../docs/lua.box2d.world.get"><span>/lua.box2d.world.get</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.joint"><span>/lua.box2d.world.joint</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.sensor_events"><span>/lua.box2d.world.sensor_events</span></a>
+<a class="sub" href="../../docs/lua.box2d.world.set"><span>/lua.box2d.world.set</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.step"><span>/lua.box2d.world.step</span></a>
 <a class="sub" href="../../docs/lua.box3d"><span>/lua.box3d</span></a>
 <a class="sub" href="../../docs/lua.boxxd"><span>/lua.boxxd</span></a><a class="par" href="../../docs/lua.glslang"><span>/lua.glslang</span></a>
@@ -753,13 +755,14 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.joint">lua.box2d.world.joint</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L168">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L193">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>joint=world:joint(def)
 </code></pre>
 <p>Create a joint in the world.</p>
 <p>def contains the values that you can set in a b2jointDef</p>
 <p>All of these are optional so can be nil.</p>
-<p>Vectors are a table containing { x , y } values,</p>
+<p>Vectors are a table containing { x , y } values. This may also be a 
+fake table created by lua meta.</p>
 <p>Booleans should be true or false</p>
 <p>localFrameA/B is a transform which is a vector plus a rotation in 
 radians, so { x , y , r }</p>

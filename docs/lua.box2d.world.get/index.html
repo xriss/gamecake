@@ -57,15 +57,17 @@
 <a class="sub" href="../../docs/lua.box2d.body.awake"><span>/lua.box2d.body.awake</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.transform"><span>/lua.box2d.body.transform</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.velocity"><span>/lua.box2d.body.velocity</span></a>
-<a class="sub" href="../../docs/lua.box2d.meter"><span>/lua.box2d.meter</span></a>
-<a class="sub" href="../../docs/lua.box2d.version"><span>/lua.box2d.version</span></a><a class="par" href="../../docs/lua.box2d.world"><span>/lua.box2d.world</span></a>
+<a class="sub" href="../../docs/lua.box2d.get"><span>/lua.box2d.get</span></a>
+<a class="sub" href="../../docs/lua.box2d.set"><span>/lua.box2d.set</span></a><a class="par" href="../../docs/lua.box2d.world"><span>/lua.box2d.world</span></a>
 <a class="par" href="../../docs/lua.box2d.world.body"><span>/lua.box2d.world.body</span></a>
 
 <a class="sub" href="../../docs/lua.box2d.world.body.shape"><span>/lua.box2d.world.body.shape</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.body_events"><span>/lua.box2d.world.body_events</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.contact_events"><span>/lua.box2d.world.contact_events</span></a>
+<a class="sub" href="../../docs/lua.box2d.world.get"><span>/lua.box2d.world.get</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.joint"><span>/lua.box2d.world.joint</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.sensor_events"><span>/lua.box2d.world.sensor_events</span></a>
+<a class="sub" href="../../docs/lua.box2d.world.set"><span>/lua.box2d.world.set</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.step"><span>/lua.box2d.world.step</span></a>
 <a class="sub" href="../../docs/lua.box3d"><span>/lua.box3d</span></a>
 <a class="sub" href="../../docs/lua.boxxd"><span>/lua.boxxd</span></a><a class="par" href="../../docs/lua.glslang"><span>/lua.glslang</span></a>
@@ -752,20 +754,11 @@
 	<div class="main">
 		
 <div class="wrap">
-<h1><a href="../../docs/lua.box2d.meter">lua.box2d.meter</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L49">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
-<div><pre><code>units = box2d.meter()
-units = box2d.meter(units)
+<h1><a href="../../docs/lua.box2d.world.get">lua.box2d.world.get</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L405">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>vars = world:get()
 </code></pre>
-<p>Get/Set units per meter, should be set first before creating a world.</p>
-<p>Defaults to 1.</p>
-<p>Obviously points and vectors should be divided by units to get their 
-value in meters but slightly less obviously density values end up 
-getting multiplied by units squared since they are area related.</p>
-<p>What that means is if you are thinking in meters eg you want to set 
-gravity to 10m/s you will need to multiply it by units. Density which 
-would normally be 1 should be 1/(units^2) in order to keep the results 
-close to what they would be if you did not change this.</p>
+<p>Get all world variables in a table.</p>
 </div>
 </div>
 

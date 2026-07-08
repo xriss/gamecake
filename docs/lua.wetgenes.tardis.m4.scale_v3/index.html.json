@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 691,
+   "count": 693,
    "name": "lua"
   },
   {
-   "count": 15,
+   "count": 17,
    "name": "lua.box2d"
   },
   {
@@ -155,14 +155,14 @@
   },
   {
    "count": 1,
-   "name": "lua.box2d.meter"
+   "name": "lua.box2d.get"
   },
   {
    "count": 1,
-   "name": "lua.box2d.version"
+   "name": "lua.box2d.set"
   },
   {
-   "count": 8,
+   "count": 10,
    "name": "lua.box2d.world"
   },
   {
@@ -183,11 +183,19 @@
   },
   {
    "count": 1,
+   "name": "lua.box2d.world.get"
+  },
+  {
+   "count": 1,
    "name": "lua.box2d.world.joint"
   },
   {
    "count": 1,
    "name": "lua.box2d.world.sensor_events"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.set"
   },
   {
    "count": 1,
