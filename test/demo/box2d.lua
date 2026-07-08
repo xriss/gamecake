@@ -19,6 +19,7 @@ box2d.set({
 	LengthUnitsPerMeter=METER,
 })
 
+print("box2d")
 for n,v in pairs( box2d:get() ) do
 	print("box2d",n,"=",var_tostring(v))
 end
@@ -28,6 +29,16 @@ local world=box2d.world({
 	gravity={0,10*METER,0},
 })
 
+print("world")
 for n,v in pairs( world:get() ) do
 	print("world",n,"=",var_tostring(v))
+end
+
+-- create body
+local body=world:body({
+})
+
+print("body")
+for n,v in pairs( body:get() ) do
+	print("body",n,"=",var_tostring(v))
 end

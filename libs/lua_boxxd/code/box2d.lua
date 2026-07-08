@@ -305,7 +305,7 @@ set in a b2WheelJointDef
 	motorSpeed
 
 ]]
-box2d.world_functions.body=function(world,def)
+box2d.world_functions.joint=function(world,def)
 	local joint={}
 	
 	joint.world=world
@@ -410,7 +410,6 @@ Get all world variables in a table.
 
 ]]
 box2d.world_functions.get=function(world)
-
 	return core.world_get(world[0])
 end
 
@@ -422,7 +421,6 @@ Set all world variables from a table.
 
 ]]
 box2d.world_functions.set=function(world,vars)
-
 	return core.world_set(world[0],vars)
 end
 
@@ -489,6 +487,28 @@ box2d.world_functions.contact_events=function(world)
 	events.begin_data,events.end_data,events.hit_data=core.world_contact_events(world[0])
 
 	return events
+end
+
+--[[#lua.box2d.body.get
+
+	vars = body:get()
+
+Get all body variables in a table.
+
+]]
+box2d.body_functions.get=function(body)
+	return core.body_get(body[0])
+end
+
+--[[#lua.box2d.body.set
+
+	body:set(vars)
+
+Set all body variables from a table.
+
+]]
+box2d.body_functions.set=function(body,vars)
+	return core.body_set(body[0],vars)
 end
 
 --[[#lua.box2d.body.awake

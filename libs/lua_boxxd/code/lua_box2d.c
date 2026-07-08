@@ -40,13 +40,13 @@ static int lua_b2_get (lua_State *l)
 	lua_rawseti(l, -2 , 2 );
 	lua_pushnumber(l, version.revision );
 	lua_rawseti(l, -2 , 3 );
-	lua_setfield(l, -2 , "Version" );
+	lua_setfield(l, -2 , "version" );
 
 	lua_pushnumber(l, b2GetLengthUnitsPerMeter() );
-	lua_setfield(l, -2 , "LengthUnitsPerMeter" );
+	lua_setfield(l, -2 , "lengthUnitsPerMeter" );
 
 	lua_pushnumber(l, b2GetByteCount() );
-	lua_setfield(l, -2 , "ByteCount" );
+	lua_setfield(l, -2 , "byteCount" );
 
 	return 1;
 }
@@ -58,7 +58,7 @@ Set box2d variables
 */
 static int lua_b2_set (lua_State *l)
 {
-	lua_getfield(l,1,"LengthUnitsPerMeter");
+	lua_getfield(l,1,"lengthUnitsPerMeter");
 	if(!lua_isnil(l,-1))
 	{
 		b2SetLengthUnitsPerMeter( lua_tonumber(l,-1) );
@@ -324,11 +324,9 @@ b2BodyId *pp;
 		if(lua_isstring(l,-1))
 		{
 			char *s=lua_tostring(l,-1);
-			if(strcmp(s,"static")==0) { def.type = b2_staticBody; }
-			else
-			if(strcmp(s,"kinematic")==0) { def.type = b2_kinematicBody; }
-			else
-			if(strcmp(s,"dynamic")==0) { def.type = b2_dynamicBody; }
+			if(strcmp(s,"static")==0)    { def.type = b2_staticBody;    } else
+			if(strcmp(s,"kinematic")==0) { def.type = b2_kinematicBody; } else
+			if(strcmp(s,"dynamic")==0)   { def.type = b2_dynamicBody;   }
 		}
 		lua_pop(l,1);
 	}
@@ -995,28 +993,28 @@ static int lua_b2_world_get (lua_State *l)
 	lua_newtable(l);
 
 	lua_pushboolean(l, b2World_IsSleepingEnabled(world) );
-	lua_setfield(l, -2 , "SleepingEnabled" );
+	lua_setfield(l, -2 , "sleepingEnabled" );
 
 	lua_pushboolean(l, b2World_IsContinuousEnabled(world) );
-	lua_setfield(l, -2 , "ContinuousEnabled" );
+	lua_setfield(l, -2 , "continuousEnabled" );
 
 	lua_pushnumber(l, b2World_GetRestitutionThreshold(world) );
-	lua_setfield(l, -2 , "RestitutionThreshold" );
+	lua_setfield(l, -2 , "restitutionThreshold" );
 
 	lua_pushnumber(l, b2World_GetHitEventThreshold(world) );
-	lua_setfield(l, -2 , "HitEventThreshold" );
+	lua_setfield(l, -2 , "hitEventThreshold" );
 
 	b2Vec2 gravity = b2World_GetGravity(world);
 	lua_newtable(l);
 	lua_pushnumber(l, gravity.x );	lua_rawseti(l, -2 , 1 );
 	lua_pushnumber(l, gravity.y );	lua_rawseti(l, -2 , 2 );
-	lua_setfield(l, -2 , "Gravity" );
+	lua_setfield(l, -2 , "gravity" );
 
 	lua_pushnumber(l, b2World_GetMaximumLinearSpeed(world) );
-	lua_setfield(l, -2 , "MaximumLinearSpeed" );
+	lua_setfield(l, -2 , "maximumLinearSpeed" );
 
 	lua_pushboolean(l, b2World_IsWarmStartingEnabled(world) );
-	lua_setfield(l, -2 , "WarmStartingEnabled" );
+	lua_setfield(l, -2 , "warmStartingEnabled" );
 
 
 	return 1;
@@ -1032,35 +1030,35 @@ static int lua_b2_world_set (lua_State *l)
 {
 	b2WorldId world = lua_b2_world_ptr(l, 1 );
 
-	lua_getfield(l,1,"SleepingEnabled");
+	lua_getfield(l,1,"sleepingEnabled");
 	if(!lua_isnil(l,-1))
 	{
 		b2World_EnableSleeping(world, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"ContinuousEnabled");
+	lua_getfield(l,1,"continuousEnabled");
 	if(!lua_isnil(l,-1))
 	{
 		b2World_EnableContinuous(world, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"RestitutionThreshold");
+	lua_getfield(l,1,"restitutionThreshold");
 	if(!lua_isnil(l,-1))
 	{
 		b2World_SetRestitutionThreshold(world, lua_tonumber(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"HitEventThreshold");
+	lua_getfield(l,1,"hitEventThreshold");
 	if(!lua_isnil(l,-1))
 	{
 		b2World_SetHitEventThreshold(world, lua_tonumber(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"Gravity");
+	lua_getfield(l,1,"gravity");
 	if(!lua_isnil(l,-1))
 	{
 		b2Vec2 gravity;
@@ -1072,7 +1070,7 @@ static int lua_b2_world_set (lua_State *l)
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"ContactTuning");
+	lua_getfield(l,1,"contactTuning");
 	if(!lua_isnil(l,-1))
 	{
 		lua_pushinteger(l, 1 ); lua_gettable(l, -2 );
@@ -1085,14 +1083,14 @@ static int lua_b2_world_set (lua_State *l)
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"MaximumLinearSpeed");
+	lua_getfield(l,1,"maximumLinearSpeed");
 	if(!lua_isnil(l,-1))
 	{
 		b2World_SetMaximumLinearSpeed(world, lua_tonumber(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"WarmStartingEnabled");
+	lua_getfield(l,1,"warmStartingEnabled");
 	if(!lua_isnil(l,-1))
 	{
 		b2World_EnableWarmStarting(world, lua_toboolean(l,-1) );
@@ -1311,6 +1309,169 @@ static int lua_b2_world_contact_events (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
+Get world variables
+
+*/
+static int lua_b2_body_get (lua_State *l)
+{
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	lua_newtable(l);
+
+	b2BodyType type = b2Body_GetType(body);
+	if(type==b2_staticBody)    { lua_pushstring(l,"static");    } else
+	if(type==b2_kinematicBody) { lua_pushstring(l,"kinematic"); } else
+	if(type==b2_dynamicBody)   { lua_pushstring(l,"dynamic");   }
+	lua_setfield(l, -2 , "type" );
+
+	lua_pushstring(l, b2Body_GetName(body) );
+	lua_setfield(l, -2 , "name" );
+
+	lua_pushnumber(l, b2Body_GetLinearDamping(body) );
+	lua_setfield(l, -2 , "linearDamping" );
+
+	lua_pushnumber(l, b2Body_GetAngularDamping(body) );
+	lua_setfield(l, -2 , "angularDamping" );
+
+	lua_pushnumber(l, b2Body_GetGravityScale(body) );
+	lua_setfield(l, -2 , "gravityScale" );
+
+	lua_pushboolean(l, b2Body_IsSleepEnabled(body) );
+	lua_setfield(l, -2 , "sleepEnabled" );
+
+	lua_pushnumber(l, b2Body_GetSleepThreshold(body) );
+	lua_setfield(l, -2 , "sleepThreshold" );
+
+	b2MotionLocks locks = b2Body_GetMotionLocks(body);
+	lua_pushboolean(l, locks.linearX );
+	lua_setfield(l, -2 , "lock_linearX" );
+	lua_pushboolean(l, locks.linearY );
+	lua_setfield(l, -2 , "lock_linearY" );
+	lua_pushboolean(l, locks.angularZ );
+	lua_setfield(l, -2 , "lock_angularZ" );
+
+	lua_pushboolean(l, b2Body_IsBullet(body) );
+	lua_setfield(l, -2 , "bullet" );
+
+	return 1;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Set world variables
+
+*/
+static int lua_b2_body_set (lua_State *l)
+{
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	lua_getfield(l,1,"type");
+	if(!lua_isnil(l,-1))
+	{
+		b2BodyType type;
+		char *s=lua_tostring(l,-1);
+		if(strcmp(s,"static")==0)    { type = b2_staticBody;    } else
+		if(strcmp(s,"kinematic")==0) { type = b2_kinematicBody; } else
+		if(strcmp(s,"dynamic")==0)   { type = b2_dynamicBody;   }
+		b2Body_SetType(body,type);
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"name");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetName(body, lua_tostring(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"linearDamping");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetLinearDamping(body, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"angularDamping");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetAngularDamping(body, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"gravityScale");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetGravityScale(body, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"sleepEnabled");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_EnableSleep(body, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"sleepThreshold");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetSleepThreshold(body, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+
+	int set_locks=0;
+	b2MotionLocks locks = b2Body_GetMotionLocks(body);
+	lua_getfield(l,1,"lock_linearX");
+	if(!lua_isnil(l,-1))
+	{
+		set_locks=1;
+		locks.linearX = lua_toboolean(l,-1) ;
+	}
+	lua_pop(l,1);
+	lua_getfield(l,1,"lock_linearY");
+	if(!lua_isnil(l,-1))
+	{
+		set_locks=1;
+		locks.linearY = lua_toboolean(l,-1) ;
+	}
+	lua_pop(l,1);
+	lua_getfield(l,1,"lock_angularZ");
+	if(!lua_isnil(l,-1))
+	{
+		set_locks=1;
+		locks.angularZ = lua_toboolean(l,-1) ;
+	}
+	lua_pop(l,1);
+	if(set_locks) { b2Body_SetMotionLocks(body,locks); }
+
+	lua_getfield(l,1,"bullet");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetBullet(body, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"contactEvents");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_EnableContactEvents(body, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"hitEvents");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_EnableHitEvents(body, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	return 0;
+}
+
+/*+---------------------------------------------------------------------
+
 Get/Set body awake
 
 */
@@ -1429,8 +1590,8 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"body_awake",				lua_b2_body_awake},
 		{"body_transform",			lua_b2_body_transform},
 		{"body_velocity",			lua_b2_body_velocity},
-//		{"body_get",				lua_b2_body_get},
-//		{"body_set",				lua_b2_body_set},
+		{"body_get",				lua_b2_body_get},
+		{"body_set",				lua_b2_body_set},
 
 //		{"shape_get",				lua_b2_shape_get},
 //		{"shape_set",				lua_b2_shape_set},
