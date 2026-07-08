@@ -1318,12 +1318,6 @@ static int lua_b2_body_get (lua_State *l)
 
 	lua_newtable(l);
 
-	b2BodyType type = b2Body_GetType(body);
-	if(type==b2_staticBody)    { lua_pushstring(l,"static");    } else
-	if(type==b2_kinematicBody) { lua_pushstring(l,"kinematic"); } else
-	if(type==b2_dynamicBody)   { lua_pushstring(l,"dynamic");   }
-	lua_setfield(l, -2 , "type" );
-
 	lua_pushstring(l, b2Body_GetName(body) );
 	lua_setfield(l, -2 , "name" );
 
@@ -1365,18 +1359,6 @@ Set world variables
 static int lua_b2_body_set (lua_State *l)
 {
 	b2BodyId body = lua_b2_body_ptr(l, 1 );
-
-	lua_getfield(l,1,"type");
-	if(!lua_isnil(l,-1))
-	{
-		b2BodyType type;
-		char *s=lua_tostring(l,-1);
-		if(strcmp(s,"static")==0)    { type = b2_staticBody;    } else
-		if(strcmp(s,"kinematic")==0) { type = b2_kinematicBody; } else
-		if(strcmp(s,"dynamic")==0)   { type = b2_dynamicBody;   }
-		b2Body_SetType(body,type);
-	}
-	lua_pop(l,1);
 
 	lua_getfield(l,1,"name");
 	if(!lua_isnil(l,-1))
@@ -1468,6 +1450,35 @@ static int lua_b2_body_set (lua_State *l)
 	lua_pop(l,1);
 
 	return 0;
+}
+
+/*+---------------------------------------------------------------------
+
+Get/Set body type
+
+*/
+static int lua_b2_body_type (lua_State *l)
+{
+int b;
+
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	if(!lua_isnil(l,2)) // only set if given
+	{
+		b2BodyType type;
+		char *s=lua_tostring(l,2);
+		if(strcmp(s,"static")==0)    { type = b2_staticBody;    } else
+		if(strcmp(s,"kinematic")==0) { type = b2_kinematicBody; } else
+		if(strcmp(s,"dynamic")==0)   { type = b2_dynamicBody;   }
+		b2Body_SetType(body,type);
+	}
+
+	b2BodyType type = b2Body_GetType(body);
+	if(type==b2_staticBody)    { lua_pushstring(l,"static");    } else
+	if(type==b2_kinematicBody) { lua_pushstring(l,"kinematic"); } else
+	if(type==b2_dynamicBody)   { lua_pushstring(l,"dynamic");   }
+
+	return 1;
 }
 
 /*+---------------------------------------------------------------------
@@ -1587,6 +1598,7 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"world_get",				lua_b2_world_get},
 		{"world_set",				lua_b2_world_set},
 
+		{"body_type",				lua_b2_body_type},
 		{"body_awake",				lua_b2_body_awake},
 		{"body_transform",			lua_b2_body_transform},
 		{"body_velocity",			lua_b2_body_velocity},

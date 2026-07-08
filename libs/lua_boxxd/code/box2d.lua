@@ -511,6 +511,22 @@ box2d.body_functions.set=function(body,vars)
 	return core.body_set(body[0],vars)
 end
 
+--[[#lua.box2d.body.type
+
+	btype = body:type()
+	btype = body:type(btype)
+
+get/set body type. btype is a string, Possible values are
+
+	static
+	kinematic
+	dynamic
+
+]]
+box2d.body_functions.type=function(body,btype)
+	return core.body_type(body[0],btype)
+end
+
 --[[#lua.box2d.body.awake
 
 	b = body:awake()
