@@ -1750,7 +1750,31 @@ static int lua_b2_joint_get (lua_State *l)
 	b2JointId joint = lua_b2_joint_ptr(l, 1 );
 
 	lua_newtable(l);
+
+	b2JointType type = b2Joint_GetType(joint);
+	if     ( type==b2_distanceJoint  ) { lua_pushstring(l, "distance"  ); }
+	else if( type==b2_filterJoint    ) { lua_pushstring(l, "filter"    ); }
+	else if( type==b2_motorJoint     ) { lua_pushstring(l, "motor"     ); }
+	else if( type==b2_prismaticJoint ) { lua_pushstring(l, "prismatic" ); }
+	else if( type==b2_revoluteJoint  ) { lua_pushstring(l, "revolute"  ); }
+	else if( type==b2_weldJoint      ) { lua_pushstring(l, "weld"      ); }
+	else if( type==b2_wheelJoint     ) { lua_pushstring(l, "wheel"     ); }
+	else                               { lua_pushstring(l, "unknown"   ); }
+	lua_setfield(l, -2 , "type" );
 	
+/*
+	b2BodyId bodyA = b2Joint_GetBodyA(joint);
+	lua_pushlstring(l,(const char *)&bodyA,sizeof(b2BodyId)); // id to (non printable) string
+	lua_setfield(l, -2 , "bodyIdA" );
+
+	b2BodyId bodyB = b2Joint_GetBodyB(joint);
+	lua_pushlstring(l,(const char *)&bodyB,sizeof(b2BodyId)); // id to (non printable) string
+	lua_setfield(l, -2 , "bodyIdB" );
+*/
+
+	lua_pushboolean(l, b2Joint_GetCollideConnected(joint) );
+	lua_setfield(l, -2 , "collideConnected" );
+
 	return 1;
 }
 
@@ -1764,6 +1788,14 @@ static int lua_b2_joint_set (lua_State *l)
 {
 	b2JointId joint = lua_b2_joint_ptr(l, 1 );
 
+	lua_getfield(l,1,"collideConnected");
+	if(!lua_isnil(l,-1))
+	{
+		b2Joint_SetCollideConnected(joint, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+
 	return 0;
 }
 
@@ -1773,12 +1805,12 @@ static int lua_b2_joint_set (lua_State *l)
 Lua Assert
 
 */
-static thread_local lua_State *lua_b2_assert_state=0; // does this work?
+static thread_local lua_State *lua_b2_lua_state=0; // does this work?
 static int lua_b2_assert (const char *condition, const char *fileName, int lineNumber)
 {
-	if( lua_b2_assert_state )
+	if( lua_b2_lua_state )
 	{
-		luaL_error( lua_b2_assert_state , "%s : %s : %d" , condition , fileName , lineNumber );
+		luaL_error( lua_b2_lua_state , "%s : %s : %d" , condition , fileName , lineNumber );
 	}
 	return 1;
 }
@@ -1873,8 +1905,8 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 	
 	// lua error on box assert, this assumes one lua state per thread.
 	// which is "reasonable" but could get you into trouble if you are doing something crazy.
-	lua_b2_assert_state=l; // remember lua state in a thread_local
-	b2SetAssertFcn( &lua_b2_assert ); // so we can have with nice lua style errors
+	lua_b2_lua_state=l; // remember lua state in a thread_local
+	b2SetAssertFcn( &lua_b2_assert ); // so we can have nice lua style errors
 	
 	return 1;
 }

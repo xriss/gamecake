@@ -598,7 +598,13 @@ Get all joint variables in a table.
 
 ]]
 box2d.joint_functions.get=function(joint)
-	return core.joint_get(joint[0])
+	local vars=core.joint_get(joint[0])
+
+-- not sure we should do this?
+--if vars.bodyIdA then vars.bodyIdA=joint.world.bodys[ vars.bodyIdA ] end
+--if vars.bodyIdB then vars.bodyIdB=joint.world.bodys[ vars.bodyIdB ] end
+
+	return vars
 end
 
 --[[#lua.box2d.joint.set

@@ -71,6 +71,7 @@ for n,v in pairs( shapeB:get() ) do
 end
 
 local joint=world:joint({
+	joint="distance",
 	bodyIdA=bodyA,
 	localFrameA={0,0,0},
 	bodyIdB=bodyB,
