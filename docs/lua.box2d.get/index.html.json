@@ -2979,7 +2979,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>vars = box2d.get()\n</code></pre>\n<p>Get all box2d variables in a table. Returned table keys are.</p>\n<pre><code>Version\n</code></pre>\n<p>A table containing 3 values</p>\n<pre><code>ByteCount\n</code></pre>\n<p>Internal memory use.</p>\n<pre><code>LengthUnitsPerMeter\n</code></pre>\n<p>Values that may also be set, see box2d.set for more information.</p>\n",
+   "body": "<pre><code>vars = box2d.get()\n</code></pre>\n<p>Get all box2d variables in a table. Returned table keys are.</p>\n<pre><code>version\n</code></pre>\n<p>A table containing 3 values\n<br/>\n<br/></p>\n<pre><code>byteCount\n</code></pre>\n<p>Internal memory use.\n<br/>\n<br/></p>\n<pre><code>lengthUnitsPerMeter\n</code></pre>\n<p>Values that may also be set, see box2d.set for more information.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
    "line": 42,
