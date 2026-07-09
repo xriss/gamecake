@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 699,
+   "count": 702,
    "name": "lua"
   },
   {
-   "count": 23,
+   "count": 26,
    "name": "lua.box2d"
   },
   {
@@ -168,6 +168,18 @@
   {
    "count": 1,
    "name": "lua.box2d.get"
+  },
+  {
+   "count": 3,
+   "name": "lua.box2d.joint"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.joint.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.joint.set"
   },
   {
    "count": 1,

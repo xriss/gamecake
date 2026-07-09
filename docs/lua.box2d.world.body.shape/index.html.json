@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 699,
+   "count": 702,
    "name": "lua"
   },
   {
-   "count": 23,
+   "count": 26,
    "name": "lua.box2d"
   },
   {
@@ -168,6 +168,18 @@
   {
    "count": 1,
    "name": "lua.box2d.get"
+  },
+  {
+   "count": 3,
+   "name": "lua.box2d.joint"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.joint.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.joint.set"
   },
   {
    "count": 1,
@@ -2991,10 +3003,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>shape=body:shape(def)\n</code></pre>\n<p>Create a shape in the body.</p>\n<p>def contains the values that you can set in a b2ShapeDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values. This may also be a \nfake table created by lua meta.</p>\n<p>Booleans should be true or false</p>\n<p>filter is an array of 3 numbers { categoryBits , maskBits , groupIndex \n} and since lua(jit) uses doubles these bit masks should <em>only</em> use 52 \nbits not 64 so the integers can fit safely into a double. When using \nhex the top 3 nibbles should always be 0 like so 0x000fffffffffffff \nthat is 13 Fs if you are counting.</p>\n<p>material is a table containing named material values so { friction=1 , \nrestitution=1 }</p>\n<pre><code>density\nenableContactEvents\nenableHitEvents\nenablePreSolveEvents\nenableSensorEvents\nfilter\ninvokeContactCreation\nisSensor\nmaterial.customColor\nmaterial.friction\nmaterial.restitution\nmaterial.rollingResistance\nmaterial.tangentSpeed\nmaterial.userMaterialId\nupdateBodyMass\n</code></pre>\n<p>if def.shape==&quot;circle&quot; then def also contains the values that you can \nset in a b2Circle</p>\n<pre><code>center\nradius\n</code></pre>\n<p>if def.shape==&quot;segment&quot; then def also contains the values that you can \nset in a b2Segment</p>\n<pre><code>point1\npoint2\n</code></pre>\n<p>if def.shape==&quot;capsule&quot; then def also contains the values that you can \nset in a b2Capsule</p>\n<pre><code>center1\ncenter2\nradius\n</code></pre>\n<p>if def.shape==&quot;box&quot; then def also contains the values that you can \nset in a b2Polygon using b2MakeOffsetRoundedBox</p>\n<pre><code>halfWidth\nhalfHeight\ncenter\nrotation\nradius\n</code></pre>\n",
+   "body": "<pre><code>shape=body:shape(def)\n</code></pre>\n<p>Create a shape in the body.</p>\n<p>def contains the values that you can set in a b2ShapeDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values. This may also be a \nfake table created by lua meta.</p>\n<p>Booleans should be true or false</p>\n<p>filter is an array of 3 numbers { categoryBits , maskBits , groupIndex \n} and since lua(jit) uses doubles these bit masks should <em>only</em> use 52 \nbits not 64 so the integers can fit safely into a double. When using \nhex the top 3 nibbles should always be 0 like so 0x000fffffffffffff \nthat is 13 Fs if you are counting.</p>\n<p>material is a table containing named material values so { friction=1 , \nrestitution=1 }</p>\n<pre><code>density\nenableContactEvents\nenableHitEvents\nenablePreSolveEvents\nenableSensorEvents\nfilter\ninvokeContactCreation\nisSensor\nmaterial_customColor\nmaterial_friction\nmaterial_restitution\nmaterial_rollingResistance\nmaterial_tangentSpeed\nmaterial_userMaterialId\nupdateBodyMass\n</code></pre>\n<p>if def.shape==&quot;circle&quot; then def also contains the values that you can \nset in a b2Circle</p>\n<pre><code>center\nradius\n</code></pre>\n<p>if def.shape==&quot;segment&quot; then def also contains the values that you can \nset in a b2Segment</p>\n<pre><code>point1\npoint2\n</code></pre>\n<p>if def.shape==&quot;capsule&quot; then def also contains the values that you can \nset in a b2Capsule</p>\n<pre><code>center1\ncenter2\nradius\n</code></pre>\n<p>if def.shape==&quot;box&quot; then def also contains the values that you can \nset in a b2Polygon using b2MakeOffsetRoundedBox</p>\n<pre><code>halfWidth\nhalfHeight\ncenter\nrotation\nradius\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 484,
+   "line": 357,
    "name": "lua.box2d.world.body.shape",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

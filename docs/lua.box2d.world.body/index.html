@@ -60,7 +60,10 @@
 <a class="sub" href="../../docs/lua.box2d.body.transform"><span>/lua.box2d.body.transform</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.type"><span>/lua.box2d.body.type</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.velocity"><span>/lua.box2d.body.velocity</span></a>
-<a class="sub" href="../../docs/lua.box2d.get"><span>/lua.box2d.get</span></a>
+<a class="sub" href="../../docs/lua.box2d.get"><span>/lua.box2d.get</span></a><a class="par" href="../../docs/lua.box2d.joint"><span>/lua.box2d.joint</span></a>
+
+<a class="sub" href="../../docs/lua.box2d.joint.get"><span>/lua.box2d.joint.get</span></a>
+<a class="sub" href="../../docs/lua.box2d.joint.set"><span>/lua.box2d.joint.set</span></a>
 <a class="sub" href="../../docs/lua.box2d.set"><span>/lua.box2d.set</span></a><a class="par" href="../../docs/lua.box2d.shape"><span>/lua.box2d.shape</span></a>
 
 <a class="sub" href="../../docs/lua.box2d.shape.get"><span>/lua.box2d.shape.get</span></a>
@@ -761,7 +764,7 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.body">lua.box2d.world.body</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L137">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L224">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>body=world:body(def)
 </code></pre>
 <p>Create a body in the world.</p>
@@ -769,10 +772,12 @@
 <p>All of these are optional so can be nil.</p>
 <p>Vectors are a table containing { x , y } values. This may also be a 
 fake table created by lua meta.</p>
+<p>Values with _ are sub structs eg motionLocks_linearX is motionLocks.linearX</p>
 <p>Booleans should be true or false</p>
 <p>name is a string that should be 31 chars or less and is only used to 
-help with debugging.</p>
-<p>Values prefixed by lock_ are found in motionLocks</p>
+help with debugging.
+<br/>
+<br/></p>
 <p>type is a string and must be &quot;static&quot; or &quot;kinematic&quot; or &quot;dynamic&quot;
 <br/>
 <br/></p>
@@ -780,9 +785,9 @@ help with debugging.</p>
 angularDamping
 angularVelocity
 enableSleep
-lock_linearX
-lock_linearY
-lock_angularZ
+motionLocks_linearX
+motionLocks_linearY
+motionLocks_angularZ
 gravityScale
 isAwake
 isBullet
@@ -800,7 +805,7 @@ type
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.body.shape">lua.box2d.world.body.shape</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L484">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L357">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>shape=body:shape(def)
 </code></pre>
 <p>Create a shape in the body.</p>
@@ -824,12 +829,12 @@ enableSensorEvents
 filter
 invokeContactCreation
 isSensor
-material.customColor
-material.friction
-material.restitution
-material.rollingResistance
-material.tangentSpeed
-material.userMaterialId
+material_customColor
+material_friction
+material_restitution
+material_rollingResistance
+material_tangentSpeed
+material_userMaterialId
 updateBodyMass
 </code></pre>
 <p>if def.shape==&quot;circle&quot; then def also contains the values that you can 
