@@ -5,7 +5,13 @@
  http://en.wikipedia.org/wiki/MIT_License
 
 */
-#include "all.h"
+
+#include <string.h>
+
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+
 #include "box3d/box3d.h"
 
 /*

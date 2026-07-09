@@ -8,7 +8,18 @@ Note that much of the documentation for the C functions exposed to Lua
 can be found in the associated box2d.lua file.
 
 */
-#include "all.h"
+
+//#include <stdio.h>
+//#include <stdarg.h>
+//#include <stdlib.h>
+//#include <assert.h>
+//#include <math.h>
+//#include <signal.h>
+
+#include <string.h>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 #include "box2d/box2d.h"
 
 /*

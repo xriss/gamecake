@@ -45,15 +45,17 @@ box2d.joint_metatable={__index=box2d.joint_functions}
 
 Get all box2d variables in a table. Returned table keys are.
 
-	Version
+	version
 
 A table containing 3 values
 
-	ByteCount
+
+	byteCount
 
 Internal memory use.
 
-	LengthUnitsPerMeter
+
+	lengthUnitsPerMeter
 
 Values that may also be set, see box2d.set for more information.
 
@@ -406,7 +408,7 @@ end
 
 	vars = world:get()
 
-Get all world variables in a table.
+Get all world variables into a table.
 
 ]]
 box2d.world_functions.get=function(world)
