@@ -42,3 +42,12 @@ print("body")
 for n,v in pairs( body:get() ) do
 	print("body",n,"=",var_tostring(v))
 end
+
+local shape=body:shape({
+--	shape="box",
+})
+
+print("shape")
+for n,v in pairs( shape:get() ) do
+	print("shape",n,"=",var_tostring(v))
+end

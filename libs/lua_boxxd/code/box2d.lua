@@ -320,90 +320,6 @@ box2d.world_functions.joint=function(world,def)
 	return joint
 end
 
---[[#lua.box2d.world.body.shape
-
-	shape=body:shape(def)
-
-Create a shape in the body.
-
-def contains the values that you can set in a b2ShapeDef
-
-All of these are optional so can be nil.
-
-Vectors are a table containing { x , y } values. This may also be a 
-fake table created by lua meta.
-
-Booleans should be true or false
-
-filter is an array of 3 numbers { categoryBits , maskBits , groupIndex 
-} and since lua(jit) uses doubles these bit masks should *only* use 52 
-bits not 64 so the integers can fit safely into a double. When using 
-hex the top 3 nibbles should always be 0 like so 0x000fffffffffffff 
-that is 13 Fs if you are counting.
-
-material is a table containing named material values so { friction=1 , 
-restitution=1 }
-
-	density
-	enableContactEvents
-	enableHitEvents
-	enablePreSolveEvents
-	enableSensorEvents
-	filter
-	invokeContactCreation
-	isSensor
-	material.customColor
-	material.friction
-	material.restitution
-	material.rollingResistance
-	material.tangentSpeed
-	material.userMaterialId
-	updateBodyMass
-
-if def.shape=="circle" then def also contains the values that you can 
-set in a b2Circle
-
-	center
-	radius
-
-if def.shape=="segment" then def also contains the values that you can 
-set in a b2Segment
-
-	point1
-	point2
-
-if def.shape=="capsule" then def also contains the values that you can 
-set in a b2Capsule
-
-	center1
-	center2
-	radius
-
-if def.shape=="box" then def also contains the values that you can 
-set in a b2Polygon using b2MakeOffsetRoundedBox
-
-	halfWidth
-	halfHeight
-	center
-	rotation
-	radius
-
-]]
-box2d.body_functions.shape=function(body,def)
-	local shape={}
-	
-	shape.body=body
-
-	setmetatable(shape,box2d.shape_metatable)
-	shape[0],shape.boxid=core.shape_create(body[0],def)
-	
-	body.shapes[ shape.boxid ]=shape
-	body.world.shapes[ shape.boxid ]=shape
-
-	return shape
-end
-
-
 --[[#lua.box2d.world.get
 
 	vars = world:get()
@@ -563,4 +479,108 @@ get/set body velocity
 ]]
 box2d.body_functions.velocity=function(body,x,y,r)
 	return core.body_velocity(body[0],x,y,r)
+end
+
+--[[#lua.box2d.world.body.shape
+
+	shape=body:shape(def)
+
+Create a shape in the body.
+
+def contains the values that you can set in a b2ShapeDef
+
+All of these are optional so can be nil.
+
+Vectors are a table containing { x , y } values. This may also be a 
+fake table created by lua meta.
+
+Booleans should be true or false
+
+filter is an array of 3 numbers { categoryBits , maskBits , groupIndex 
+} and since lua(jit) uses doubles these bit masks should *only* use 52 
+bits not 64 so the integers can fit safely into a double. When using 
+hex the top 3 nibbles should always be 0 like so 0x000fffffffffffff 
+that is 13 Fs if you are counting.
+
+material is a table containing named material values so { friction=1 , 
+restitution=1 }
+
+	density
+	enableContactEvents
+	enableHitEvents
+	enablePreSolveEvents
+	enableSensorEvents
+	filter
+	invokeContactCreation
+	isSensor
+	material.customColor
+	material.friction
+	material.restitution
+	material.rollingResistance
+	material.tangentSpeed
+	material.userMaterialId
+	updateBodyMass
+
+if def.shape=="circle" then def also contains the values that you can 
+set in a b2Circle
+
+	center
+	radius
+
+if def.shape=="segment" then def also contains the values that you can 
+set in a b2Segment
+
+	point1
+	point2
+
+if def.shape=="capsule" then def also contains the values that you can 
+set in a b2Capsule
+
+	center1
+	center2
+	radius
+
+if def.shape=="box" then def also contains the values that you can 
+set in a b2Polygon using b2MakeOffsetRoundedBox
+
+	halfWidth
+	halfHeight
+	center
+	rotation
+	radius
+
+]]
+box2d.body_functions.shape=function(body,def)
+	local shape={}
+	
+	shape.body=body
+	setmetatable(shape,box2d.shape_metatable)
+	shape[0],shape.boxid=core.shape_create(body[0],def)
+	
+	body.shapes[ shape.boxid ]=shape
+	body.world.shapes[ shape.boxid ]=shape
+
+	return shape
+end
+
+--[[#lua.box2d.shape.get
+
+	vars = shape:get()
+
+Get all shape variables in a table.
+
+]]
+box2d.shape_functions.get=function(shape)
+	return core.shape_get(shape[0])
+end
+
+--[[#lua.box2d.shape.set
+
+	shape:set(vars)
+
+Set all shape variables from a table.
+
+]]
+box2d.shape_functions.set=function(shape,vars)
+	return core.shape_set(shape[0],vars)
 end

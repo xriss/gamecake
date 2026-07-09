@@ -9,17 +9,12 @@ can be found in the associated box2d.lua file.
 
 */
 
-//#include <stdio.h>
-//#include <stdarg.h>
-//#include <stdlib.h>
-//#include <assert.h>
-//#include <math.h>
-//#include <signal.h>
-
 #include <string.h>
+
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
+
 #include "box2d/box2d.h"
 
 /*
@@ -237,6 +232,333 @@ b2WorldId *pp=lua_b2_world_ptr_ptr(l, 1 );
 	return 0;
 }
 
+
+/*+---------------------------------------------------------------------
+
+Get world variables
+
+*/
+static int lua_b2_world_get (lua_State *l)
+{
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
+
+	lua_newtable(l);
+
+	lua_pushboolean(l, b2World_IsSleepingEnabled(world) );
+	lua_setfield(l, -2 , "sleepingEnabled" );
+
+	lua_pushboolean(l, b2World_IsContinuousEnabled(world) );
+	lua_setfield(l, -2 , "continuousEnabled" );
+
+	lua_pushnumber(l, b2World_GetRestitutionThreshold(world) );
+	lua_setfield(l, -2 , "restitutionThreshold" );
+
+	lua_pushnumber(l, b2World_GetHitEventThreshold(world) );
+	lua_setfield(l, -2 , "hitEventThreshold" );
+
+	b2Vec2 gravity = b2World_GetGravity(world);
+	lua_newtable(l);
+	lua_pushnumber(l, gravity.x );	lua_rawseti(l, -2 , 1 );
+	lua_pushnumber(l, gravity.y );	lua_rawseti(l, -2 , 2 );
+	lua_setfield(l, -2 , "gravity" );
+
+	lua_pushnumber(l, b2World_GetMaximumLinearSpeed(world) );
+	lua_setfield(l, -2 , "maximumLinearSpeed" );
+
+	lua_pushboolean(l, b2World_IsWarmStartingEnabled(world) );
+	lua_setfield(l, -2 , "warmStartingEnabled" );
+
+
+	return 1;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Set world variables
+
+*/
+static int lua_b2_world_set (lua_State *l)
+{
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
+
+	lua_getfield(l,1,"sleepingEnabled");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_EnableSleeping(world, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"continuousEnabled");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_EnableContinuous(world, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"restitutionThreshold");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_SetRestitutionThreshold(world, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"hitEventThreshold");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_SetHitEventThreshold(world, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"gravity");
+	if(!lua_isnil(l,-1))
+	{
+		b2Vec2 gravity;
+		lua_pushinteger(l, 1 ); lua_gettable(l, -2 );
+		gravity.x = lua_tonumber(l, -1 ); lua_pop(l, 1 );
+		lua_pushinteger(l, 2 ); lua_gettable(l, -2 );
+		gravity.y = lua_tonumber(l, -1 ); lua_pop(l, 1 );
+		b2World_SetGravity(world, gravity );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"contactTuning");
+	if(!lua_isnil(l,-1))
+	{
+		lua_pushinteger(l, 1 ); lua_gettable(l, -2 );
+		float hertz = lua_tonumber(l, -1 ); lua_pop(l, 1 );
+		lua_pushinteger(l, 2 ); lua_gettable(l, -2 );
+		float dampingRatio = lua_tonumber(l, -1 ); lua_pop(l, 1 );
+		lua_pushinteger(l, 3 ); lua_gettable(l, -2 );
+		float pushSpeed = lua_tonumber(l, -1 ); lua_pop(l, 1 );
+		b2World_SetContactTuning(world, hertz , dampingRatio , pushSpeed );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"maximumLinearSpeed");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_SetMaximumLinearSpeed(world, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"warmStartingEnabled");
+	if(!lua_isnil(l,-1))
+	{
+		b2World_EnableWarmStarting(world, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	return 0;
+}
+
+/*+---------------------------------------------------------------------
+
+Move the world through time itself.
+
+*/
+static int lua_b2_world_step (lua_State *l)
+{
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
+	float     time  = lua_tonumber(l,     2 );
+	int       count = lua_tointeger(l,    3 );
+
+	b2World_Step(world,time,count);
+
+	return 0;
+}
+
+/*+---------------------------------------------------------------------
+
+Get body events in a packed array where each event is 5 values
+
+	bodyId
+	fellAsleep
+	transform.p.x
+	transform.p.y
+	transform.q (converted into radians)
+
+
+*/
+static int lua_b2_world_body_events (lua_State *l)
+{
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
+
+	b2BodyEvents events = b2World_GetBodyEvents(world);
+
+	lua_newtable(l);
+
+	for( int i=0 ; i < events.moveCount ; i++ )
+	{
+		b2BodyMoveEvent *event=events.moveEvents+i;
+
+		lua_pushlstring(l, (const char *)&event->bodyId,sizeof(b2BodyId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*5+1 );
+
+		lua_pushboolean(l, event->fellAsleep );
+		lua_rawseti(l, -2 , i*5+2 );
+
+		lua_pushnumber(l, event->transform.p.x );
+		lua_rawseti(l, -2 , i*5+3 );
+		lua_pushnumber(l, event->transform.p.y );
+		lua_rawseti(l, -2 , i*5+4 );
+
+		lua_pushnumber(l, b2Rot_GetAngle(event->transform.q) );
+		lua_rawseti(l, -2 , i*5+5 );
+
+	}
+
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
+Get sensor events in a packed array where each event is 2 values
+
+Returns two arrays, first is begin events second is end events both
+contain pairs of shape ids like so.
+
+	sensorShapeId
+	visitorShapeId
+
+
+*/
+static int lua_b2_world_sensor_events (lua_State *l)
+{
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
+
+	b2SensorEvents events = b2World_GetSensorEvents(world);
+
+	lua_newtable(l);
+
+	for( int i=0 ; i < events.beginCount ; i++ )
+	{
+		b2SensorBeginTouchEvent *event=events.beginEvents+i;
+
+		lua_pushlstring(l, (const char *)&event->sensorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*2+1 );
+
+		lua_pushlstring(l, (const char *)&event->visitorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*2+2 );
+	}
+
+	lua_newtable(l);
+
+	for( int i=0 ; i < events.endCount ; i++ )
+	{
+		b2SensorEndTouchEvent *event=events.endEvents+i;
+
+		lua_pushlstring(l, (const char *)&event->sensorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*2+1 );
+
+		lua_pushlstring(l, (const char *)&event->visitorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*2+2 );
+	}
+
+	return 2;
+}
+
+/*+---------------------------------------------------------------------
+
+Get contact events in a packed arrays
+
+Returns three arrays, first is begin events second is end events and third is hit events.
+
+begin events is 3 values per event
+
+	shapeIdA
+	shapeIdB
+	contactId
+
+end events is 3 values per event
+
+	shapeIdA
+	shapeIdB
+	contactId
+
+hit events is 8 values per event
+
+	shapeIdA
+	shapeIdB
+	contactId
+	approachSpeed
+	normal.x
+	normal.y
+	point.x
+	point.y
+
+*/
+static int lua_b2_world_contact_events (lua_State *l)
+{
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
+
+	b2ContactEvents events = b2World_GetContactEvents(world);
+
+	lua_newtable(l);
+
+	for( int i=0 ; i < events.beginCount ; i++ )
+	{
+		b2ContactBeginTouchEvent *event=events.beginEvents+i;
+		b2ContactData contact=b2Contact_GetData( event->contactId );
+
+		lua_pushlstring(l, (const char *)&event->shapeIdA,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*3+1 );
+
+		lua_pushlstring(l, (const char *)&event->shapeIdB,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*3+2 );
+
+		lua_pushlstring(l, (const char *)&event->contactId,sizeof(b2ContactId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*3+3 );
+	}
+
+	lua_newtable(l);
+
+	for( int i=0 ; i < events.endCount ; i++ )
+	{
+		b2ContactEndTouchEvent *event=events.endEvents+i;
+
+		lua_pushlstring(l, (const char *)&event->shapeIdA,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*3+1 );
+
+		lua_pushlstring(l, (const char *)&event->shapeIdB,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*3+2 );
+
+		lua_pushlstring(l, (const char *)&event->contactId,sizeof(b2ContactId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*3+3 );
+	}
+
+	lua_newtable(l);
+
+	for( int i=0 ; i < events.hitCount ; i++ )
+	{
+		b2ContactHitEvent *event=events.hitEvents+i;
+
+		lua_pushlstring(l, (const char *)&event->shapeIdA,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*8+1 );
+
+		lua_pushlstring(l, (const char *)&event->shapeIdB,sizeof(b2ShapeId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*8+2 );
+
+		lua_pushlstring(l, (const char *)&event->contactId,sizeof(b2ContactId)); // id to (non printable) string
+		lua_rawseti(l, -2 , i*8+3 );
+
+		lua_pushnumber(l, event->approachSpeed );
+		lua_rawseti(l, -2 , i*8+4 );
+
+		lua_pushnumber(l, event->normal.x );
+		lua_rawseti(l, -2 , i*8+5 );
+		lua_pushnumber(l, event->normal.y );
+		lua_rawseti(l, -2 , i*8+6 );
+
+		lua_pushnumber(l, event->point.x );
+		lua_rawseti(l, -2 , i*8+7 );
+		lua_pushnumber(l, event->point.y );
+		lua_rawseti(l, -2 , i*8+8 );
+	}
+
+	return 3;
+}
+
 /*+---------------------------------------------------------------------
 
 body create/destroy
@@ -373,6 +695,270 @@ b2BodyId *pp=lua_b2_body_ptr_ptr(l, 1 );
 	return 0;
 }
 
+
+/*+---------------------------------------------------------------------
+
+Get body variables
+
+*/
+static int lua_b2_body_get (lua_State *l)
+{
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	lua_newtable(l);
+
+	lua_pushstring(l, b2Body_GetName(body) );
+	lua_setfield(l, -2 , "name" );
+
+	lua_pushnumber(l, b2Body_GetLinearDamping(body) );
+	lua_setfield(l, -2 , "linearDamping" );
+
+	lua_pushnumber(l, b2Body_GetAngularDamping(body) );
+	lua_setfield(l, -2 , "angularDamping" );
+
+	lua_pushnumber(l, b2Body_GetGravityScale(body) );
+	lua_setfield(l, -2 , "gravityScale" );
+
+	lua_pushboolean(l, b2Body_IsSleepEnabled(body) );
+	lua_setfield(l, -2 , "sleepEnabled" );
+
+	lua_pushnumber(l, b2Body_GetSleepThreshold(body) );
+	lua_setfield(l, -2 , "sleepThreshold" );
+
+	b2MotionLocks locks = b2Body_GetMotionLocks(body);
+	lua_pushboolean(l, locks.linearX );
+	lua_setfield(l, -2 , "lock_linearX" );
+	lua_pushboolean(l, locks.linearY );
+	lua_setfield(l, -2 , "lock_linearY" );
+	lua_pushboolean(l, locks.angularZ );
+	lua_setfield(l, -2 , "lock_angularZ" );
+
+	lua_pushboolean(l, b2Body_IsBullet(body) );
+	lua_setfield(l, -2 , "bullet" );
+
+	return 1;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Set body variables
+
+*/
+static int lua_b2_body_set (lua_State *l)
+{
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	lua_getfield(l,1,"name");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetName(body, lua_tostring(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"linearDamping");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetLinearDamping(body, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"angularDamping");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetAngularDamping(body, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"gravityScale");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetGravityScale(body, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"sleepEnabled");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_EnableSleep(body, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"sleepThreshold");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetSleepThreshold(body, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+
+	int set_locks=0;
+	b2MotionLocks locks = b2Body_GetMotionLocks(body);
+	lua_getfield(l,1,"lock_linearX");
+	if(!lua_isnil(l,-1))
+	{
+		set_locks=1;
+		locks.linearX = lua_toboolean(l,-1) ;
+	}
+	lua_pop(l,1);
+	lua_getfield(l,1,"lock_linearY");
+	if(!lua_isnil(l,-1))
+	{
+		set_locks=1;
+		locks.linearY = lua_toboolean(l,-1) ;
+	}
+	lua_pop(l,1);
+	lua_getfield(l,1,"lock_angularZ");
+	if(!lua_isnil(l,-1))
+	{
+		set_locks=1;
+		locks.angularZ = lua_toboolean(l,-1) ;
+	}
+	lua_pop(l,1);
+	if(set_locks) { b2Body_SetMotionLocks(body,locks); }
+
+	lua_getfield(l,1,"bullet");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_SetBullet(body, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"contactEvents");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_EnableContactEvents(body, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"hitEvents");
+	if(!lua_isnil(l,-1))
+	{
+		b2Body_EnableHitEvents(body, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	return 0;
+}
+
+/*+---------------------------------------------------------------------
+
+Get/Set body type
+
+*/
+static int lua_b2_body_type (lua_State *l)
+{
+int b;
+
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	if(!lua_isnil(l,2)) // only set if given
+	{
+		b2BodyType type;
+		char *s=lua_tostring(l,2);
+		if(strcmp(s,"static")==0)    { type = b2_staticBody;    } else
+		if(strcmp(s,"kinematic")==0) { type = b2_kinematicBody; } else
+		if(strcmp(s,"dynamic")==0)   { type = b2_dynamicBody;   }
+		b2Body_SetType(body,type);
+	}
+
+	b2BodyType type = b2Body_GetType(body);
+	if(type==b2_staticBody)    { lua_pushstring(l,"static");    } else
+	if(type==b2_kinematicBody) { lua_pushstring(l,"kinematic"); } else
+	if(type==b2_dynamicBody)   { lua_pushstring(l,"dynamic");   }
+
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
+Get/Set body awake
+
+*/
+static int lua_b2_body_awake (lua_State *l)
+{
+int b;
+
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	if(!lua_isnil(l,2)) // only set if given
+	{
+		b=lua_toboolean(l, 2 );
+
+		b2Body_SetAwake(body,b);
+	}
+
+	b=b2Body_IsAwake(body);
+
+	lua_pushboolean(l, b );
+
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
+Get/Set body transform
+
+*/
+static int lua_b2_body_transform (lua_State *l)
+{
+float r;
+b2Transform t;
+
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	if(!lua_isnil(l,4)) // only set if given
+	{
+		t.p.x=(float)lua_tonumber(l, 2 );
+		t.p.y=(float)lua_tonumber(l, 3 );
+		r=(float)lua_tonumber(l, 4 );
+		t.q=b2MakeRot(r);
+
+		b2Body_SetTransform(body,t.p,t.q);
+	}
+
+	t=b2Body_GetTransform(body);
+
+	lua_pushnumber(l, t.p.x );
+	lua_pushnumber(l, t.p.y );
+	lua_pushnumber(l, b2Rot_GetAngle(t.q) );
+
+	return 3;
+}
+
+/*+---------------------------------------------------------------------
+
+Get/Set body velocity
+
+*/
+static int lua_b2_body_velocity (lua_State *l)
+{
+b2Vec2 p;
+float r;
+
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	if(!lua_isnil(l,4)) // only set if given
+	{
+		p.x=(float)lua_tonumber(l, 2 );
+		p.y=(float)lua_tonumber(l, 3 );
+		r=(float)lua_tonumber(l, 4 );
+
+		b2Body_SetLinearVelocity(body,p);
+		b2Body_SetAngularVelocity(body,r);
+	}
+
+	p=b2Body_GetLinearVelocity(body);
+	r=b2Body_GetAngularVelocity(body);
+
+	lua_pushnumber(l, p.x );
+	lua_pushnumber(l, p.y );
+	lua_pushnumber(l, r );
+
+	return 3;
+}
+
+
 /*+---------------------------------------------------------------------
 
 shape create/destroy
@@ -405,57 +991,74 @@ b2ShapeId *pp;
 	lua_getfield(l,2,"density");
 	if(!lua_isnil(l,-1)) { def.density = (float)lua_tonumber(l,-1); }
 	lua_pop(l,1);
+
 	lua_getfield(l,2,"enableContactEvents");
 	if(!lua_isnil(l,-1)) { def.enableContactEvents = lua_toboolean(l,-1); }
 	lua_pop(l,1);
+
 	lua_getfield(l,2,"enableHitEvents");
 	if(!lua_isnil(l,-1)) { def.enableHitEvents = lua_toboolean(l,-1); }
 	lua_pop(l,1);
+
 	lua_getfield(l,2,"enablePreSolveEvents");
 	if(!lua_isnil(l,-1)) { def.enablePreSolveEvents = lua_toboolean(l,-1); }
 	lua_pop(l,1);
+
 	lua_getfield(l,2,"enableSensorEvents");
 	if(!lua_isnil(l,-1)) { def.enableSensorEvents = lua_toboolean(l,-1); }
 	lua_pop(l,1);
-	lua_getfield(l,2,"filter"); // bitmasks are doubles so only 52 bits not 64
-	if(!lua_isnil(l,-1))
-	{
-		lua_pushinteger(l,1);	lua_gettable(l,-2);
-		lua_pushinteger(l,2);	lua_gettable(l,-3);
-		lua_pushinteger(l,3);	lua_gettable(l,-4);
-		def.filter = (b2Filter){(uint64_t)lua_tonumber(l,-3),(uint64_t)lua_tonumber(l,-2),(int)lua_tonumber(l,-1)};
-		lua_pop(l,3);
-	}
-	lua_pop(l,1);
+
+	b2Filter filter;
 	lua_getfield(l,2,"invokeContactCreation");
 	if(!lua_isnil(l,-1)) { def.invokeContactCreation = lua_toboolean(l,-1); }
 	lua_pop(l,1);
+
+	lua_getfield(l,2,"filter_categoryBits");
+	if(!lua_isnil(l,-1))
+	{
+		def.filter.categoryBits = lua_tonumber(l,-1) ;
+	}
+	lua_pop(l,1);
+	lua_getfield(l,2,"filter_groupIndex");
+	if(!lua_isnil(l,-1))
+	{
+		def.filter.categoryBits = lua_tonumber(l,-1) ;
+	}
+	lua_pop(l,1);
+	lua_getfield(l,2,"filter_maskBits");
+	if(!lua_isnil(l,-1))
+	{
+		def.filter.categoryBits = lua_tonumber(l,-1) ;
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"invokeContactCreation");
+	if(!lua_isnil(l,-1)) { def.invokeContactCreation = lua_toboolean(l,-1); }
+	lua_pop(l,1);
+
 	lua_getfield(l,2,"isSensor");
 	if(!lua_isnil(l,-1)) { def.isSensor = lua_toboolean(l,-1); }
 	lua_pop(l,1);
-	lua_getfield(l,2,"material");
-	if(!lua_isnil(l,-1))
-	{
-		lua_getfield(l,-1,"customColor");
-		if(!lua_isnil(l,-1)) { def.material.customColor = (uint32_t)lua_tonumber(l,-1); }
-		lua_pop(l,1);
-		lua_getfield(l,-1,"friction");
-		if(!lua_isnil(l,-1)) { def.material.friction = (float)lua_tonumber(l,-1); }
-		lua_pop(l,1);
-		lua_getfield(l,-1,"restitution");
-		if(!lua_isnil(l,-1)) { def.material.restitution = (float)lua_tonumber(l,-1); }
-		lua_pop(l,1);
-		lua_getfield(l,-1,"rollingResistance");
-		if(!lua_isnil(l,-1)) { def.material.rollingResistance = (float)lua_tonumber(l,-1); }
-		lua_pop(l,1);
-		lua_getfield(l,-1,"tangentSpeed");
-		if(!lua_isnil(l,-1)) { def.material.tangentSpeed = (float)lua_tonumber(l,-1); }
-		lua_pop(l,1);
-		lua_getfield(l,-1,"userMaterialId");
-		if(!lua_isnil(l,-1)) { def.material.userMaterialId = (int)lua_tonumber(l,-1); }
-		lua_pop(l,1);
-	}
+
+	lua_getfield(l,2,"material_customColor");
+	if(!lua_isnil(l,-1)) { def.material.customColor = (uint32_t)lua_tonumber(l,-1); }
 	lua_pop(l,1);
+	lua_getfield(l,2,"material_friction");
+	if(!lua_isnil(l,-1)) { def.material.friction = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"material_restitution");
+	if(!lua_isnil(l,-1)) { def.material.restitution = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"material_rollingResistance");
+	if(!lua_isnil(l,-1)) { def.material.rollingResistance = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"material_tangentSpeed");
+	if(!lua_isnil(l,-1)) { def.material.tangentSpeed = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"material_userMaterialId");
+	if(!lua_isnil(l,-1)) { def.material.userMaterialId = (int)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+
 	lua_getfield(l,2,"updateBodyMass");
 	if(!lua_isnil(l,-1)) { def.updateBodyMass = lua_toboolean(l,-1); }
 	lua_pop(l,1);
@@ -468,13 +1071,17 @@ b2ShapeId *pp;
 
 	body=lua_b2_body_ptr(l,1);
 
-	// get shape values
+	// shape type defaults to circle
+	char *shape_type="circle";
 	lua_getfield(l,2,"shape"); // the type of shape as lowercase string
-	char *shape_type=lua_tostring(l,-1);
+	if(lua_isstring(l,-1))
+	{
+		shape_type=lua_tostring(l,-1);
+	}
 	if(strcmp(shape_type,"circle")==0)
 	{
-		lua_pop(l,1);
-// allocate b2ShapeId circle
+		lua_pop(l,1); // shape_type is no longer valid
+
 		b2Circle circle;
 		lua_getfield(l,2,"center");
 		if(!lua_isnil(l,-1))
@@ -494,8 +1101,8 @@ b2ShapeId *pp;
 	else
 	if(strcmp(shape_type,"segment")==0)
 	{
-		lua_pop(l,1);
-// allocate b2ShapeId segment
+		lua_pop(l,1); // shape_type is no longer valid
+
 		b2Segment segment;
 		lua_getfield(l,2,"point1");
 		if(!lua_isnil(l,-1))
@@ -521,8 +1128,8 @@ b2ShapeId *pp;
 	else
 	if(strcmp(shape_type,"capsule")==0)
 	{
-		lua_pop(l,1);
-// allocate b2ShapeId capsule
+		lua_pop(l,1); // shape_type is no longer valid
+
 		b2Capsule capsule;
 		lua_getfield(l,2,"center1");
 		if(!lua_isnil(l,-1))
@@ -551,8 +1158,8 @@ b2ShapeId *pp;
 	else
 	if(strcmp(shape_type,"box")==0)
 	{
-		lua_pop(l,1);
-// allocate b2ShapeId capsule
+		lua_pop(l,1); // shape_type is no longer valid
+
 		b2Polygon polygon;
 
 		float halfWidth=0.0f;
@@ -592,7 +1199,8 @@ b2ShapeId *pp;
 	}
 	else
 	{
-		lua_pop(l,1);
+		lua_pop(l,1); // shape_type is no longer valid
+
 		lua_pushstring(l,"unknown shape type");
 		lua_error(l);
 	}
@@ -622,6 +1230,141 @@ b2ShapeId *pp=lua_b2_shape_ptr_ptr(l, 1 );
 	return 0;
 }
 
+/*+---------------------------------------------------------------------
+
+Get shape variables
+
+*/
+static int lua_b2_shape_get (lua_State *l)
+{
+	b2ShapeId shape = lua_b2_shape_ptr(l, 1 );
+
+	lua_newtable(l);
+	
+	b2ShapeType type = b2Shape_GetType(shape);
+	if     ( type==b2_circleShape       ) { lua_pushstring(l, "circle"       ); }
+	else if( type==b2_capsuleShape      ) { lua_pushstring(l, "capsule"      ); }
+	else if( type==b2_segmentShape      ) { lua_pushstring(l, "segment"      ); }
+	else if( type==b2_polygonShape      ) { lua_pushstring(l, "polygon"      ); }
+	else if( type==b2_chainSegmentShape ) { lua_pushstring(l, "chainSegment" ); }
+	else                                  { lua_pushstring(l, "unknown"      ); }
+	lua_setfield(l, -2 , "type" );
+
+	lua_pushnumber(l, b2Shape_GetFriction(shape) );
+	lua_setfield(l, -2 , "friction" );
+
+	lua_pushnumber(l, b2Shape_GetRestitution(shape) );
+	lua_setfield(l, -2 , "restitution" );
+
+	lua_pushnumber(l, b2Shape_GetUserMaterial(shape) );
+	lua_setfield(l, -2 , "material_userMaterialId" );
+
+	b2Filter filter = b2Shape_GetFilter(shape);
+	lua_pushnumber(l, filter.categoryBits );
+	lua_setfield(l, -2 , "filter_categoryBits" );
+	lua_pushnumber(l, filter.groupIndex );
+	lua_setfield(l, -2 , "filter_groupIndex" );
+	lua_pushnumber(l, filter.maskBits );
+	lua_setfield(l, -2 , "filter_maskBits" );
+	
+	lua_pushboolean(l, b2Shape_AreSensorEventsEnabled(shape) );
+	lua_setfield(l, -2 , "sensorEventsEnabled" );
+
+	lua_pushboolean(l, b2Shape_AreContactEventsEnabled(shape) );
+	lua_setfield(l, -2 , "contactEventsEnabled" );
+	
+	lua_pushboolean(l, b2Shape_AreHitEventsEnabled(shape) );
+	lua_setfield(l, -2 , "hitEventsEnabled" );
+
+	return 1;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Set shape variables
+
+*/
+static int lua_b2_shape_set (lua_State *l)
+{
+	b2ShapeId shape = lua_b2_shape_ptr(l, 1 );
+
+	lua_getfield(l,1,"friction");
+	if(!lua_isnil(l,-1))
+	{
+		b2Shape_SetFriction(shape, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"restitution");
+	if(!lua_isnil(l,-1))
+	{
+		b2Shape_SetRestitution(shape, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"material_userMaterialId");
+	if(!lua_isnil(l,-1))
+	{
+		b2Shape_SetUserMaterial(shape, lua_tonumber(l,-1) );
+	}
+	lua_pop(l,1);
+
+	int set_filter=0;
+	b2Filter filter = b2Shape_GetFilter(shape);
+	lua_getfield(l,1,"filter_categoryBits");
+	if(!lua_isnil(l,-1))
+	{
+		set_filter=1;
+		filter.categoryBits = lua_tonumber(l,-1) ;
+	}
+	lua_pop(l,1);
+	lua_getfield(l,1,"filter_groupIndex");
+	if(!lua_isnil(l,-1))
+	{
+		set_filter=1;
+		filter.categoryBits = lua_tonumber(l,-1) ;
+	}
+	lua_pop(l,1);
+	lua_getfield(l,1,"filter_maskBits");
+	if(!lua_isnil(l,-1))
+	{
+		set_filter=1;
+		filter.categoryBits = lua_tonumber(l,-1) ;
+	}
+	lua_pop(l,1);
+	if(set_filter) { b2Shape_SetFilter(shape,filter); }
+
+	lua_getfield(l,1,"sensorEventsEnabled");
+	if(!lua_isnil(l,-1))
+	{
+		b2Shape_EnableSensorEvents(shape, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+	
+	lua_getfield(l,1,"preSolveEvents");
+	if(!lua_isnil(l,-1))
+	{
+		b2Shape_EnablePreSolveEvents(shape, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"contactEventsEnabled");
+	if(!lua_isnil(l,-1))
+	{
+		b2Shape_EnableContactEvents(shape, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	lua_getfield(l,1,"hitEventsEnabled");
+	if(!lua_isnil(l,-1))
+	{
+		b2Shape_EnableHitEvents(shape, lua_toboolean(l,-1) );
+	}
+	lua_pop(l,1);
+
+	return 0;
+}
 
 /*+---------------------------------------------------------------------
 
@@ -994,594 +1737,6 @@ b2JointId *pp=lua_b2_joint_ptr_ptr(l, 1 );
 
 /*+---------------------------------------------------------------------
 
-Get world variables
-
-*/
-static int lua_b2_world_get (lua_State *l)
-{
-	b2WorldId world = lua_b2_world_ptr(l, 1 );
-
-	lua_newtable(l);
-
-	lua_pushboolean(l, b2World_IsSleepingEnabled(world) );
-	lua_setfield(l, -2 , "sleepingEnabled" );
-
-	lua_pushboolean(l, b2World_IsContinuousEnabled(world) );
-	lua_setfield(l, -2 , "continuousEnabled" );
-
-	lua_pushnumber(l, b2World_GetRestitutionThreshold(world) );
-	lua_setfield(l, -2 , "restitutionThreshold" );
-
-	lua_pushnumber(l, b2World_GetHitEventThreshold(world) );
-	lua_setfield(l, -2 , "hitEventThreshold" );
-
-	b2Vec2 gravity = b2World_GetGravity(world);
-	lua_newtable(l);
-	lua_pushnumber(l, gravity.x );	lua_rawseti(l, -2 , 1 );
-	lua_pushnumber(l, gravity.y );	lua_rawseti(l, -2 , 2 );
-	lua_setfield(l, -2 , "gravity" );
-
-	lua_pushnumber(l, b2World_GetMaximumLinearSpeed(world) );
-	lua_setfield(l, -2 , "maximumLinearSpeed" );
-
-	lua_pushboolean(l, b2World_IsWarmStartingEnabled(world) );
-	lua_setfield(l, -2 , "warmStartingEnabled" );
-
-
-	return 1;
-}
-
-
-/*+---------------------------------------------------------------------
-
-Set world variables
-
-*/
-static int lua_b2_world_set (lua_State *l)
-{
-	b2WorldId world = lua_b2_world_ptr(l, 1 );
-
-	lua_getfield(l,1,"sleepingEnabled");
-	if(!lua_isnil(l,-1))
-	{
-		b2World_EnableSleeping(world, lua_toboolean(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"continuousEnabled");
-	if(!lua_isnil(l,-1))
-	{
-		b2World_EnableContinuous(world, lua_toboolean(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"restitutionThreshold");
-	if(!lua_isnil(l,-1))
-	{
-		b2World_SetRestitutionThreshold(world, lua_tonumber(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"hitEventThreshold");
-	if(!lua_isnil(l,-1))
-	{
-		b2World_SetHitEventThreshold(world, lua_tonumber(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"gravity");
-	if(!lua_isnil(l,-1))
-	{
-		b2Vec2 gravity;
-		lua_pushinteger(l, 1 ); lua_gettable(l, -2 );
-		gravity.x = lua_tonumber(l, -1 ); lua_pop(l, 1 );
-		lua_pushinteger(l, 2 ); lua_gettable(l, -2 );
-		gravity.y = lua_tonumber(l, -1 ); lua_pop(l, 1 );
-		b2World_SetGravity(world, gravity );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"contactTuning");
-	if(!lua_isnil(l,-1))
-	{
-		lua_pushinteger(l, 1 ); lua_gettable(l, -2 );
-		float hertz = lua_tonumber(l, -1 ); lua_pop(l, 1 );
-		lua_pushinteger(l, 2 ); lua_gettable(l, -2 );
-		float dampingRatio = lua_tonumber(l, -1 ); lua_pop(l, 1 );
-		lua_pushinteger(l, 3 ); lua_gettable(l, -2 );
-		float pushSpeed = lua_tonumber(l, -1 ); lua_pop(l, 1 );
-		b2World_SetContactTuning(world, hertz , dampingRatio , pushSpeed );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"maximumLinearSpeed");
-	if(!lua_isnil(l,-1))
-	{
-		b2World_SetMaximumLinearSpeed(world, lua_tonumber(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"warmStartingEnabled");
-	if(!lua_isnil(l,-1))
-	{
-		b2World_EnableWarmStarting(world, lua_toboolean(l,-1) );
-	}
-	lua_pop(l,1);
-
-	return 0;
-}
-
-/*+---------------------------------------------------------------------
-
-Move the world through time itself.
-
-*/
-static int lua_b2_world_step (lua_State *l)
-{
-	b2WorldId world = lua_b2_world_ptr(l, 1 );
-	float     time  = lua_tonumber(l,     2 );
-	int       count = lua_tointeger(l,    3 );
-
-	b2World_Step(world,time,count);
-
-	return 0;
-}
-
-/*+---------------------------------------------------------------------
-
-Get body events in a packed array where each event is 5 values
-
-	bodyId
-	fellAsleep
-	transform.p.x
-	transform.p.y
-	transform.q (converted into radians)
-
-
-*/
-static int lua_b2_world_body_events (lua_State *l)
-{
-	b2WorldId world = lua_b2_world_ptr(l, 1 );
-
-	b2BodyEvents events = b2World_GetBodyEvents(world);
-
-	lua_newtable(l);
-
-	for( int i=0 ; i < events.moveCount ; i++ )
-	{
-		b2BodyMoveEvent *event=events.moveEvents+i;
-
-		lua_pushlstring(l, (const char *)&event->bodyId,sizeof(b2BodyId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*5+1 );
-
-		lua_pushboolean(l, event->fellAsleep );
-		lua_rawseti(l, -2 , i*5+2 );
-
-		lua_pushnumber(l, event->transform.p.x );
-		lua_rawseti(l, -2 , i*5+3 );
-		lua_pushnumber(l, event->transform.p.y );
-		lua_rawseti(l, -2 , i*5+4 );
-
-		lua_pushnumber(l, b2Rot_GetAngle(event->transform.q) );
-		lua_rawseti(l, -2 , i*5+5 );
-
-	}
-
-	return 1;
-}
-
-/*+---------------------------------------------------------------------
-
-Get sensor events in a packed array where each event is 2 values
-
-Returns two arrays, first is begin events second is end events both
-contain pairs of shape ids like so.
-
-	sensorShapeId
-	visitorShapeId
-
-
-*/
-static int lua_b2_world_sensor_events (lua_State *l)
-{
-	b2WorldId world = lua_b2_world_ptr(l, 1 );
-
-	b2SensorEvents events = b2World_GetSensorEvents(world);
-
-	lua_newtable(l);
-
-	for( int i=0 ; i < events.beginCount ; i++ )
-	{
-		b2SensorBeginTouchEvent *event=events.beginEvents+i;
-
-		lua_pushlstring(l, (const char *)&event->sensorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*2+1 );
-
-		lua_pushlstring(l, (const char *)&event->visitorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*2+2 );
-	}
-
-	lua_newtable(l);
-
-	for( int i=0 ; i < events.endCount ; i++ )
-	{
-		b2SensorEndTouchEvent *event=events.endEvents+i;
-
-		lua_pushlstring(l, (const char *)&event->sensorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*2+1 );
-
-		lua_pushlstring(l, (const char *)&event->visitorShapeId,sizeof(b2ShapeId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*2+2 );
-	}
-
-	return 2;
-}
-
-/*+---------------------------------------------------------------------
-
-Get contact events in a packed arrays
-
-Returns three arrays, first is begin events second is end events and third is hit events.
-
-begin events is 3 values per event
-
-	shapeIdA
-	shapeIdB
-	contactId
-
-end events is 3 values per event
-
-	shapeIdA
-	shapeIdB
-	contactId
-
-hit events is 8 values per event
-
-	shapeIdA
-	shapeIdB
-	contactId
-	approachSpeed
-	normal.x
-	normal.y
-	point.x
-	point.y
-
-*/
-static int lua_b2_world_contact_events (lua_State *l)
-{
-	b2WorldId world = lua_b2_world_ptr(l, 1 );
-
-	b2ContactEvents events = b2World_GetContactEvents(world);
-
-	lua_newtable(l);
-
-	for( int i=0 ; i < events.beginCount ; i++ )
-	{
-		b2ContactBeginTouchEvent *event=events.beginEvents+i;
-		b2ContactData contact=b2Contact_GetData( event->contactId );
-
-		lua_pushlstring(l, (const char *)&event->shapeIdA,sizeof(b2ShapeId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*3+1 );
-
-		lua_pushlstring(l, (const char *)&event->shapeIdB,sizeof(b2ShapeId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*3+2 );
-
-		lua_pushlstring(l, (const char *)&event->contactId,sizeof(b2ContactId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*3+3 );
-	}
-
-	lua_newtable(l);
-
-	for( int i=0 ; i < events.endCount ; i++ )
-	{
-		b2ContactEndTouchEvent *event=events.endEvents+i;
-
-		lua_pushlstring(l, (const char *)&event->shapeIdA,sizeof(b2ShapeId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*3+1 );
-
-		lua_pushlstring(l, (const char *)&event->shapeIdB,sizeof(b2ShapeId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*3+2 );
-
-		lua_pushlstring(l, (const char *)&event->contactId,sizeof(b2ContactId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*3+3 );
-	}
-
-	lua_newtable(l);
-
-	for( int i=0 ; i < events.hitCount ; i++ )
-	{
-		b2ContactHitEvent *event=events.hitEvents+i;
-
-		lua_pushlstring(l, (const char *)&event->shapeIdA,sizeof(b2ShapeId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*8+1 );
-
-		lua_pushlstring(l, (const char *)&event->shapeIdB,sizeof(b2ShapeId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*8+2 );
-
-		lua_pushlstring(l, (const char *)&event->contactId,sizeof(b2ContactId)); // id to (non printable) string
-		lua_rawseti(l, -2 , i*8+3 );
-
-		lua_pushnumber(l, event->approachSpeed );
-		lua_rawseti(l, -2 , i*8+4 );
-
-		lua_pushnumber(l, event->normal.x );
-		lua_rawseti(l, -2 , i*8+5 );
-		lua_pushnumber(l, event->normal.y );
-		lua_rawseti(l, -2 , i*8+6 );
-
-		lua_pushnumber(l, event->point.x );
-		lua_rawseti(l, -2 , i*8+7 );
-		lua_pushnumber(l, event->point.y );
-		lua_rawseti(l, -2 , i*8+8 );
-	}
-
-	return 3;
-}
-
-/*+---------------------------------------------------------------------
-
-Get world variables
-
-*/
-static int lua_b2_body_get (lua_State *l)
-{
-	b2BodyId body = lua_b2_body_ptr(l, 1 );
-
-	lua_newtable(l);
-
-	lua_pushstring(l, b2Body_GetName(body) );
-	lua_setfield(l, -2 , "name" );
-
-	lua_pushnumber(l, b2Body_GetLinearDamping(body) );
-	lua_setfield(l, -2 , "linearDamping" );
-
-	lua_pushnumber(l, b2Body_GetAngularDamping(body) );
-	lua_setfield(l, -2 , "angularDamping" );
-
-	lua_pushnumber(l, b2Body_GetGravityScale(body) );
-	lua_setfield(l, -2 , "gravityScale" );
-
-	lua_pushboolean(l, b2Body_IsSleepEnabled(body) );
-	lua_setfield(l, -2 , "sleepEnabled" );
-
-	lua_pushnumber(l, b2Body_GetSleepThreshold(body) );
-	lua_setfield(l, -2 , "sleepThreshold" );
-
-	b2MotionLocks locks = b2Body_GetMotionLocks(body);
-	lua_pushboolean(l, locks.linearX );
-	lua_setfield(l, -2 , "lock_linearX" );
-	lua_pushboolean(l, locks.linearY );
-	lua_setfield(l, -2 , "lock_linearY" );
-	lua_pushboolean(l, locks.angularZ );
-	lua_setfield(l, -2 , "lock_angularZ" );
-
-	lua_pushboolean(l, b2Body_IsBullet(body) );
-	lua_setfield(l, -2 , "bullet" );
-
-	return 1;
-}
-
-
-/*+---------------------------------------------------------------------
-
-Set world variables
-
-*/
-static int lua_b2_body_set (lua_State *l)
-{
-	b2BodyId body = lua_b2_body_ptr(l, 1 );
-
-	lua_getfield(l,1,"name");
-	if(!lua_isnil(l,-1))
-	{
-		b2Body_SetName(body, lua_tostring(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"linearDamping");
-	if(!lua_isnil(l,-1))
-	{
-		b2Body_SetLinearDamping(body, lua_tonumber(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"angularDamping");
-	if(!lua_isnil(l,-1))
-	{
-		b2Body_SetAngularDamping(body, lua_tonumber(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"gravityScale");
-	if(!lua_isnil(l,-1))
-	{
-		b2Body_SetGravityScale(body, lua_tonumber(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"sleepEnabled");
-	if(!lua_isnil(l,-1))
-	{
-		b2Body_EnableSleep(body, lua_toboolean(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"sleepThreshold");
-	if(!lua_isnil(l,-1))
-	{
-		b2Body_SetSleepThreshold(body, lua_tonumber(l,-1) );
-	}
-	lua_pop(l,1);
-
-
-	int set_locks=0;
-	b2MotionLocks locks = b2Body_GetMotionLocks(body);
-	lua_getfield(l,1,"lock_linearX");
-	if(!lua_isnil(l,-1))
-	{
-		set_locks=1;
-		locks.linearX = lua_toboolean(l,-1) ;
-	}
-	lua_pop(l,1);
-	lua_getfield(l,1,"lock_linearY");
-	if(!lua_isnil(l,-1))
-	{
-		set_locks=1;
-		locks.linearY = lua_toboolean(l,-1) ;
-	}
-	lua_pop(l,1);
-	lua_getfield(l,1,"lock_angularZ");
-	if(!lua_isnil(l,-1))
-	{
-		set_locks=1;
-		locks.angularZ = lua_toboolean(l,-1) ;
-	}
-	lua_pop(l,1);
-	if(set_locks) { b2Body_SetMotionLocks(body,locks); }
-
-	lua_getfield(l,1,"bullet");
-	if(!lua_isnil(l,-1))
-	{
-		b2Body_SetBullet(body, lua_toboolean(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"contactEvents");
-	if(!lua_isnil(l,-1))
-	{
-		b2Body_EnableContactEvents(body, lua_toboolean(l,-1) );
-	}
-	lua_pop(l,1);
-
-	lua_getfield(l,1,"hitEvents");
-	if(!lua_isnil(l,-1))
-	{
-		b2Body_EnableHitEvents(body, lua_toboolean(l,-1) );
-	}
-	lua_pop(l,1);
-
-	return 0;
-}
-
-/*+---------------------------------------------------------------------
-
-Get/Set body type
-
-*/
-static int lua_b2_body_type (lua_State *l)
-{
-int b;
-
-	b2BodyId body = lua_b2_body_ptr(l, 1 );
-
-	if(!lua_isnil(l,2)) // only set if given
-	{
-		b2BodyType type;
-		char *s=lua_tostring(l,2);
-		if(strcmp(s,"static")==0)    { type = b2_staticBody;    } else
-		if(strcmp(s,"kinematic")==0) { type = b2_kinematicBody; } else
-		if(strcmp(s,"dynamic")==0)   { type = b2_dynamicBody;   }
-		b2Body_SetType(body,type);
-	}
-
-	b2BodyType type = b2Body_GetType(body);
-	if(type==b2_staticBody)    { lua_pushstring(l,"static");    } else
-	if(type==b2_kinematicBody) { lua_pushstring(l,"kinematic"); } else
-	if(type==b2_dynamicBody)   { lua_pushstring(l,"dynamic");   }
-
-	return 1;
-}
-
-/*+---------------------------------------------------------------------
-
-Get/Set body awake
-
-*/
-static int lua_b2_body_awake (lua_State *l)
-{
-int b;
-
-	b2BodyId body = lua_b2_body_ptr(l, 1 );
-
-	if(!lua_isnil(l,2)) // only set if given
-	{
-		b=lua_toboolean(l, 2 );
-
-		b2Body_SetAwake(body,b);
-	}
-
-	b=b2Body_IsAwake(body);
-
-	lua_pushboolean(l, b );
-
-	return 1;
-}
-
-/*+---------------------------------------------------------------------
-
-Get/Set body transform
-
-*/
-static int lua_b2_body_transform (lua_State *l)
-{
-float r;
-b2Transform t;
-
-	b2BodyId body = lua_b2_body_ptr(l, 1 );
-
-	if(!lua_isnil(l,4)) // only set if given
-	{
-		t.p.x=(float)lua_tonumber(l, 2 );
-		t.p.y=(float)lua_tonumber(l, 3 );
-		r=(float)lua_tonumber(l, 4 );
-		t.q=b2MakeRot(r);
-
-		b2Body_SetTransform(body,t.p,t.q);
-	}
-
-	t=b2Body_GetTransform(body);
-
-	lua_pushnumber(l, t.p.x );
-	lua_pushnumber(l, t.p.y );
-	lua_pushnumber(l, b2Rot_GetAngle(t.q) );
-
-	return 3;
-}
-
-/*+---------------------------------------------------------------------
-
-Get/Set body velocity
-
-*/
-static int lua_b2_body_velocity (lua_State *l)
-{
-b2Vec2 p;
-float r;
-
-	b2BodyId body = lua_b2_body_ptr(l, 1 );
-
-	if(!lua_isnil(l,4)) // only set if given
-	{
-		p.x=(float)lua_tonumber(l, 2 );
-		p.y=(float)lua_tonumber(l, 3 );
-		r=(float)lua_tonumber(l, 4 );
-
-		b2Body_SetLinearVelocity(body,p);
-		b2Body_SetAngularVelocity(body,r);
-	}
-
-	p=b2Body_GetLinearVelocity(body);
-	r=b2Body_GetAngularVelocity(body);
-
-	lua_pushnumber(l, p.x );
-	lua_pushnumber(l, p.y );
-	lua_pushnumber(l, r );
-
-	return 3;
-}
-
-/*+---------------------------------------------------------------------
-
 open library.
 
 */
@@ -1595,30 +1750,29 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 
 		{"world_create",			lua_b2_world_create},
 		{"world_destroy",			lua_b2_world_destroy},
-		{"body_create",				lua_b2_body_create},
-		{"body_destroy",			lua_b2_body_destroy},
-		{"shape_create",			lua_b2_shape_create},
-		{"shape_destroy",			lua_b2_shape_destroy},
-		{"joint_create",			lua_b2_joint_create},
-		{"joint_destroy",			lua_b2_joint_destroy},
-
+		{"world_get",				lua_b2_world_get},
+		{"world_set",				lua_b2_world_set},
 		{"world_step",				lua_b2_world_step},
 		{"world_body_events",		lua_b2_world_body_events},
 		{"world_sensor_events",		lua_b2_world_sensor_events},
 		{"world_contact_events",	lua_b2_world_contact_events},
-		{"world_get",				lua_b2_world_get},
-		{"world_set",				lua_b2_world_set},
 
+		{"body_create",				lua_b2_body_create},
+		{"body_destroy",			lua_b2_body_destroy},
+		{"body_get",				lua_b2_body_get},
+		{"body_set",				lua_b2_body_set},
 		{"body_type",				lua_b2_body_type},
 		{"body_awake",				lua_b2_body_awake},
 		{"body_transform",			lua_b2_body_transform},
 		{"body_velocity",			lua_b2_body_velocity},
-		{"body_get",				lua_b2_body_get},
-		{"body_set",				lua_b2_body_set},
 
-//		{"shape_get",				lua_b2_shape_get},
-//		{"shape_set",				lua_b2_shape_set},
+		{"shape_create",			lua_b2_shape_create},
+		{"shape_destroy",			lua_b2_shape_destroy},
+		{"shape_get",				lua_b2_shape_get},
+		{"shape_set",				lua_b2_shape_set},
 
+		{"joint_create",			lua_b2_joint_create},
+		{"joint_destroy",			lua_b2_joint_destroy},
 //		{"joint_get",				lua_b2_joint_get},
 //		{"joint_set",				lua_b2_joint_set},
 
