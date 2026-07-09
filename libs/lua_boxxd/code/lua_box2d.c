@@ -1763,6 +1763,12 @@ static int lua_b2_joint_get (lua_State *l)
 	lua_setfield(l, -2 , "type" );
 	
 /*
+
+not sure about body ids, you cant change them and you must set them on creation
+they should probably just be cached in the lua joint table?
+
+maybe just cache the type too? Unsure.
+
 	b2BodyId bodyA = b2Joint_GetBodyA(joint);
 	lua_pushlstring(l,(const char *)&bodyA,sizeof(b2BodyId)); // id to (non printable) string
 	lua_setfield(l, -2 , "bodyIdA" );
@@ -1794,7 +1800,6 @@ static int lua_b2_joint_set (lua_State *l)
 		b2Joint_SetCollideConnected(joint, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
-
 
 	return 0;
 }
