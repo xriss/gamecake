@@ -35,19 +35,49 @@ for n,v in pairs( world:get() ) do
 end
 
 -- create body
-local body=world:body({
+local bodyA=world:body({
 })
 
-print("body")
-for n,v in pairs( body:get() ) do
+print("bodyA")
+for n,v in pairs( bodyA:get() ) do
 	print("body",n,"=",var_tostring(v))
 end
 
-local shape=body:shape({
+local shapeA=bodyA:shape({
 --	shape="box",
 })
 
-print("shape")
-for n,v in pairs( shape:get() ) do
+print("shapeA")
+for n,v in pairs( shapeA:get() ) do
 	print("shape",n,"=",var_tostring(v))
+end
+
+-- create body
+local bodyB=world:body({
+})
+
+print("bodyB")
+for n,v in pairs( bodyB:get() ) do
+	print("body",n,"=",var_tostring(v))
+end
+
+local shapeB=bodyB:shape({
+--	shape="box",
+})
+
+print("shapeB")
+for n,v in pairs( shapeB:get() ) do
+	print("shape",n,"=",var_tostring(v))
+end
+
+local joint=world:joint({
+	bodyIdA=bodyA,
+	localFrameA={0,0,0},
+	bodyIdB=bodyB,
+	localFrameB={0,0,0},
+})
+
+print("joint")
+for n,v in pairs( joint:get() ) do
+	print("joint",n,"=",var_tostring(v))
 end

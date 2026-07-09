@@ -245,10 +245,10 @@ static int lua_b2_world_get (lua_State *l)
 	lua_newtable(l);
 
 	lua_pushboolean(l, b2World_IsSleepingEnabled(world) );
-	lua_setfield(l, -2 , "sleepingEnabled" );
+	lua_setfield(l, -2 , "enableSleeping" );
 
 	lua_pushboolean(l, b2World_IsContinuousEnabled(world) );
-	lua_setfield(l, -2 , "continuousEnabled" );
+	lua_setfield(l, -2 , "enableContinuous" );
 
 	lua_pushnumber(l, b2World_GetRestitutionThreshold(world) );
 	lua_setfield(l, -2 , "restitutionThreshold" );
@@ -266,7 +266,7 @@ static int lua_b2_world_get (lua_State *l)
 	lua_setfield(l, -2 , "maximumLinearSpeed" );
 
 	lua_pushboolean(l, b2World_IsWarmStartingEnabled(world) );
-	lua_setfield(l, -2 , "warmStartingEnabled" );
+	lua_setfield(l, -2 , "enableWarmStarting" );
 
 
 	return 1;
@@ -282,14 +282,14 @@ static int lua_b2_world_set (lua_State *l)
 {
 	b2WorldId world = lua_b2_world_ptr(l, 1 );
 
-	lua_getfield(l,1,"sleepingEnabled");
+	lua_getfield(l,1,"enableSleeping");
 	if(!lua_isnil(l,-1))
 	{
 		b2World_EnableSleeping(world, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"continuousEnabled");
+	lua_getfield(l,1,"enableContinuous");
 	if(!lua_isnil(l,-1))
 	{
 		b2World_EnableContinuous(world, lua_toboolean(l,-1) );
@@ -342,7 +342,7 @@ static int lua_b2_world_set (lua_State *l)
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"warmStartingEnabled");
+	lua_getfield(l,1,"enableWarmStarting");
 	if(!lua_isnil(l,-1))
 	{
 		b2World_EnableWarmStarting(world, lua_toboolean(l,-1) );
@@ -602,13 +602,13 @@ b2BodyId *pp;
 		lua_getfield(l,2,"enableSleep");
 		if(!lua_isnil(l,-1)) { def.enableSleep = lua_toboolean(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,2,"lock_linearX");
+		lua_getfield(l,2,"motionLocks_linearX");
 		if(!lua_isnil(l,-1)) { def.motionLocks.linearX = lua_toboolean(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,2,"lock_linearY");
+		lua_getfield(l,2,"motionLocks_linearY");
 		if(!lua_isnil(l,-1)) { def.motionLocks.linearY = lua_toboolean(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,2,"lock_angularZ");
+		lua_getfield(l,2,"motionLocks_angularZ");
 		if(!lua_isnil(l,-1)) { def.motionLocks.angularZ = lua_toboolean(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"gravityScale");
@@ -720,18 +720,18 @@ static int lua_b2_body_get (lua_State *l)
 	lua_setfield(l, -2 , "gravityScale" );
 
 	lua_pushboolean(l, b2Body_IsSleepEnabled(body) );
-	lua_setfield(l, -2 , "sleepEnabled" );
+	lua_setfield(l, -2 , "enableSleep" );
 
 	lua_pushnumber(l, b2Body_GetSleepThreshold(body) );
 	lua_setfield(l, -2 , "sleepThreshold" );
 
 	b2MotionLocks locks = b2Body_GetMotionLocks(body);
 	lua_pushboolean(l, locks.linearX );
-	lua_setfield(l, -2 , "lock_linearX" );
+	lua_setfield(l, -2 , "motionLocks_linearX" );
 	lua_pushboolean(l, locks.linearY );
-	lua_setfield(l, -2 , "lock_linearY" );
+	lua_setfield(l, -2 , "motionLocks_linearY" );
 	lua_pushboolean(l, locks.angularZ );
-	lua_setfield(l, -2 , "lock_angularZ" );
+	lua_setfield(l, -2 , "motionLocks_angularZ" );
 
 	lua_pushboolean(l, b2Body_IsBullet(body) );
 	lua_setfield(l, -2 , "bullet" );
@@ -777,7 +777,7 @@ static int lua_b2_body_set (lua_State *l)
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"sleepEnabled");
+	lua_getfield(l,1,"enableSleep");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_EnableSleep(body, lua_toboolean(l,-1) );
@@ -794,21 +794,21 @@ static int lua_b2_body_set (lua_State *l)
 
 	int set_locks=0;
 	b2MotionLocks locks = b2Body_GetMotionLocks(body);
-	lua_getfield(l,1,"lock_linearX");
+	lua_getfield(l,1,"motionLocks_linearX");
 	if(!lua_isnil(l,-1))
 	{
 		set_locks=1;
 		locks.linearX = lua_toboolean(l,-1) ;
 	}
 	lua_pop(l,1);
-	lua_getfield(l,1,"lock_linearY");
+	lua_getfield(l,1,"motionLocks_linearY");
 	if(!lua_isnil(l,-1))
 	{
 		set_locks=1;
 		locks.linearY = lua_toboolean(l,-1) ;
 	}
 	lua_pop(l,1);
-	lua_getfield(l,1,"lock_angularZ");
+	lua_getfield(l,1,"motionLocks_angularZ");
 	if(!lua_isnil(l,-1))
 	{
 		set_locks=1;
@@ -824,14 +824,14 @@ static int lua_b2_body_set (lua_State *l)
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"contactEvents");
+	lua_getfield(l,1,"enableContactEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_EnableContactEvents(body, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"hitEvents");
+	lua_getfield(l,1,"enableHitEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_EnableHitEvents(body, lua_toboolean(l,-1) );
@@ -852,7 +852,7 @@ int b;
 
 	b2BodyId body = lua_b2_body_ptr(l, 1 );
 
-	if(!lua_isnil(l,2)) // only set if given
+	if(lua_isstring(l,2)) // only set if given
 	{
 		b2BodyType type;
 		char *s=lua_tostring(l,2);
@@ -1268,13 +1268,13 @@ static int lua_b2_shape_get (lua_State *l)
 	lua_setfield(l, -2 , "filter_maskBits" );
 	
 	lua_pushboolean(l, b2Shape_AreSensorEventsEnabled(shape) );
-	lua_setfield(l, -2 , "sensorEventsEnabled" );
+	lua_setfield(l, -2 , "enableSensorEvents" );
 
 	lua_pushboolean(l, b2Shape_AreContactEventsEnabled(shape) );
-	lua_setfield(l, -2 , "contactEventsEnabled" );
+	lua_setfield(l, -2 , "enableContactEvents" );
 	
 	lua_pushboolean(l, b2Shape_AreHitEventsEnabled(shape) );
-	lua_setfield(l, -2 , "hitEventsEnabled" );
+	lua_setfield(l, -2 , "enableHitEvents" );
 
 	return 1;
 }
@@ -1335,28 +1335,28 @@ static int lua_b2_shape_set (lua_State *l)
 	lua_pop(l,1);
 	if(set_filter) { b2Shape_SetFilter(shape,filter); }
 
-	lua_getfield(l,1,"sensorEventsEnabled");
+	lua_getfield(l,1,"enableSensorEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_EnableSensorEvents(shape, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 	
-	lua_getfield(l,1,"preSolveEvents");
+	lua_getfield(l,1,"enablePreSolveEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_EnablePreSolveEvents(shape, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"contactEventsEnabled");
+	lua_getfield(l,1,"enableContactEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_EnableContactEvents(shape, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"hitEventsEnabled");
+	lua_getfield(l,1,"enableHitEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_EnableHitEvents(shape, lua_toboolean(l,-1) );
@@ -1401,10 +1401,10 @@ b2JointId *pp;
 	b2JointDef joint;
 	// get generic joint values
 	lua_getfield(l,2,"bodyIdA");
-	if(!lua_isnil(l,-1)) { joint.bodyIdA=lua_b2_body_ptr(l,1); }
+	if(!lua_isnil(l,-1)) { joint.bodyIdA=*((b2BodyId*)(lua_tostring(l,-1))); }
 	lua_pop(l,1);
 	lua_getfield(l,2,"bodyIdB");
-	if(!lua_isnil(l,-1)) { joint.bodyIdB=lua_b2_body_ptr(l,1); }
+	if(!lua_isnil(l,-1)) { joint.bodyIdB=*((b2BodyId*)(lua_tostring(l,-1))); }
 	lua_pop(l,1);
 	lua_getfield(l,2,"localFrameA");
 	if(!lua_isnil(l,-1))
@@ -1444,14 +1444,18 @@ b2JointId *pp;
 	if(!lua_isnil(l,-1)) { joint.collideConnected = lua_toboolean(l,-1); }
 	lua_pop(l,1);
 
-	// get joint values
+	// joint type defaults to filter
+	char *joint_type="filter";
 	lua_getfield(l,2,"joint"); // the type of joint as lowercase string
-	char *joint_type=lua_tostring(l,-1);
+	if(lua_isstring(l,-1))
+	{
+		joint_type=lua_tostring(l,-1);
+	}
 	if(strcmp(joint_type,"distance")==0)
 	{
-		lua_pop(l,1);
-// allocate b2JointId distance
-		b2DistanceJointDef distance;
+		lua_pop(l,1); // joint_type is no longer valid
+
+		b2DistanceJointDef distance=b2DefaultDistanceJointDef();
 		distance.base=joint; // generic values
 
 		lua_getfield(l,2,"length");
@@ -1499,9 +1503,9 @@ b2JointId *pp;
 	else
 	if(strcmp(joint_type,"motor")==0)
 	{
-		lua_pop(l,1);
-// allocate b2JointId motor
-		b2MotorJointDef motor;
+		lua_pop(l,1); // joint_type is no longer valid
+
+		b2MotorJointDef motor=b2DefaultMotorJointDef();
 		motor.base=joint; // generic values
 
 		lua_getfield(l,2,"linearVelocity");
@@ -1546,9 +1550,9 @@ b2JointId *pp;
 	else
 	if(strcmp(joint_type,"filter")==0)
 	{
-		lua_pop(l,1);
-// allocate b2JointId filter
-		b2FilterJointDef filter;
+		lua_pop(l,1); // joint_type is no longer valid
+
+		b2FilterJointDef filter=b2DefaultFilterJointDef();
 		filter.base=joint; // generic values
 
 		*pp=b2CreateFilterJoint(world,&filter);
@@ -1556,9 +1560,9 @@ b2JointId *pp;
 	else
 	if(strcmp(joint_type,"prismatic")==0)
 	{
-		lua_pop(l,1);
-// allocate b2JointId prismatic
-		b2PrismaticJointDef prismatic;
+		lua_pop(l,1); // joint_type is no longer valid
+
+		b2PrismaticJointDef prismatic=b2DefaultPrismaticJointDef();
 		prismatic.base=joint; // generic values
 
 		lua_getfield(l,2,"enableSpring");
@@ -1599,9 +1603,9 @@ b2JointId *pp;
 	else
 	if(strcmp(joint_type,"revolute")==0)
 	{
-		lua_pop(l,1);
-// allocate b2JointId revolute
-		b2RevoluteJointDef revolute;
+		lua_pop(l,1); // joint_type is no longer valid
+
+		b2RevoluteJointDef revolute=b2DefaultRevoluteJointDef();
 		revolute.base=joint; // generic values
 
 		lua_getfield(l,2,"targetAngle");
@@ -1643,9 +1647,9 @@ b2JointId *pp;
 	else
 	if(strcmp(joint_type,"weld")==0)
 	{
-		lua_pop(l,1);
-// allocate b2JointId weld
-		b2WeldJointDef weld;
+		lua_pop(l,1); // joint_type is no longer valid
+
+		b2WeldJointDef weld=b2DefaultWeldJointDef();
 		weld.base=joint; // generic values
 
 		lua_getfield(l,2,"linearHertz");
@@ -1666,9 +1670,9 @@ b2JointId *pp;
 	else
 	if(strcmp(joint_type,"wheel")==0)
 	{
-		lua_pop(l,1);
-// allocate b2JointId wheel
-		b2WheelJointDef wheel;
+		lua_pop(l,1); // joint_type is no longer valid
+
+		b2WheelJointDef wheel=b2DefaultWheelJointDef();
 		wheel.base=joint; // generic values
 
 		lua_getfield(l,2,"enableSpring");
@@ -1705,7 +1709,8 @@ b2JointId *pp;
 	}
 	else
 	{
-		lua_pop(l,1);
+		lua_pop(l,1); // joint_type is no longer valid
+
 		lua_pushstring(l,"unknown joint type");
 		lua_error(l);
 	}
@@ -1734,6 +1739,50 @@ b2JointId *pp=lua_b2_joint_ptr_ptr(l, 1 );
 	}
 	return 0;
 }
+
+/*+---------------------------------------------------------------------
+
+Get joint variables
+
+*/
+static int lua_b2_joint_get (lua_State *l)
+{
+	b2JointId joint = lua_b2_joint_ptr(l, 1 );
+
+	lua_newtable(l);
+	
+	return 1;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Set joint variables
+
+*/
+static int lua_b2_joint_set (lua_State *l)
+{
+	b2JointId joint = lua_b2_joint_ptr(l, 1 );
+
+	return 0;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Lua Assert
+
+*/
+static thread_local lua_State *lua_b2_assert_state=0; // does this work?
+static int lua_b2_assert (const char *condition, const char *fileName, int lineNumber)
+{
+	if( lua_b2_assert_state )
+	{
+		luaL_error( lua_b2_assert_state , "%s : %s : %d" , condition , fileName , lineNumber );
+	}
+	return 1;
+}
+
 
 /*+---------------------------------------------------------------------
 
@@ -1773,8 +1822,8 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 
 		{"joint_create",			lua_b2_joint_create},
 		{"joint_destroy",			lua_b2_joint_destroy},
-//		{"joint_get",				lua_b2_joint_get},
-//		{"joint_set",				lua_b2_joint_set},
+		{"joint_get",				lua_b2_joint_get},
+		{"joint_set",				lua_b2_joint_set},
 
 		{0,0}
 	};
@@ -1821,6 +1870,12 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 
 	lua_newtable(l);
 	luaL_openlib(l, NULL, lib, 0);
+	
+	// lua error on box assert, this assumes one lua state per thread.
+	// which is "reasonable" but could get you into trouble if you are doing something crazy.
+	lua_b2_assert_state=l; // remember lua state in a thread_local
+	b2SetAssertFcn( &lua_b2_assert ); // so we can have with nice lua style errors
+	
 	return 1;
 }
 
