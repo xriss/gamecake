@@ -33,6 +33,70 @@ const char *lua_b2_body_meta_name ="b2_body*ptr";
 const char *lua_b2_shape_meta_name="b2_shape*ptr";
 const char *lua_b2_joint_meta_name="b2_joint*ptr";
 
+/*+---------------------------------------------------------------------
+
+get and return b2Vec2 from table on top of stack
+
+*/
+static b2Vec2 lua_b2_read_b2Vec2 (lua_State *l)
+{
+	b2Vec2 v;
+	lua_pushinteger(l,1);	lua_gettable(l,-2);
+	lua_pushinteger(l,2);	lua_gettable(l,-3);
+	v.x=(float)lua_tonumber(l,-2);
+	v.y=(float)lua_tonumber(l,-1);
+	lua_pop(l,2);
+	return v;
+}
+
+/*+---------------------------------------------------------------------
+
+push a new table to stack containing b2Vec2 values
+
+*/
+static void lua_b2_push_b2Vec2 (lua_State *l, b2Vec2 v)
+{
+	lua_newtable(l);
+	lua_pushnumber(l, v.x );
+	lua_rawseti(l, -2 , 1 );
+	lua_pushnumber(l, v.y );
+	lua_rawseti(l, -2 , 2 );
+}
+
+/*+---------------------------------------------------------------------
+
+get and return b2Vec2 from table on top of stack
+
+*/
+static b2Transform lua_b2_read_b2Transform (lua_State *l)
+{
+	b2Transform t;
+	lua_pushinteger(l,1);	lua_gettable(l,-2);
+	lua_pushinteger(l,2);	lua_gettable(l,-3);
+	lua_pushinteger(l,3);	lua_gettable(l,-4);
+	t.p.x=(float)lua_tonumber(l,-3);
+	t.p.y=(float)lua_tonumber(l,-2);
+	t.q=b2MakeRot((float)lua_tonumber(l,-1));
+	lua_pop(l,3);
+	return t;
+}
+
+/*+---------------------------------------------------------------------
+
+push a new table to stack containing b2Vec2 values
+
+*/
+static void lua_b2_push_b2Transform (lua_State *l, b2Transform t)
+{
+	lua_newtable(l);
+	lua_pushnumber(l, t.p.x );
+	lua_rawseti(l, -2 , 1 );
+	lua_pushnumber(l, t.p.y );
+	lua_rawseti(l, -2 , 2 );
+	lua_pushnumber(l, b2Rot_GetAngle(t.q) );
+	lua_rawseti(l, -2 , 3 );
+}
+
 
 /*+---------------------------------------------------------------------
 
@@ -168,13 +232,7 @@ b2WorldId *pp;
 	if(lua_istable(l,1)) // got defs
 	{
 		lua_getfield(l,1,"gravity");
-		if(!lua_isnil(l,-1))
-		{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			def.gravity = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
-			lua_pop(l,2);
-		}
+		if(!lua_isnil(l,-1)) { def.gravity=lua_b2_read_b2Vec2(l); }
 		lua_pop(l,1);
 		lua_getfield(l,1,"restitutionThreshold");
 		if(!lua_isnil(l,-1)) { def.restitutionThreshold = (float)lua_tonumber(l,-1); }
@@ -318,12 +376,7 @@ static int lua_b2_world_set (lua_State *l)
 	lua_getfield(l,1,"gravity");
 	if(!lua_isnil(l,-1))
 	{
-		b2Vec2 gravity;
-		lua_pushinteger(l, 1 ); lua_gettable(l, -2 );
-		gravity.x = lua_tonumber(l, -1 ); lua_pop(l, 1 );
-		lua_pushinteger(l, 2 ); lua_gettable(l, -2 );
-		gravity.y = lua_tonumber(l, -1 ); lua_pop(l, 1 );
-		b2World_SetGravity(world, gravity );
+		b2World_SetGravity(world, lua_b2_read_b2Vec2(l) );
 	}
 	lua_pop(l,1);
 
@@ -729,25 +782,13 @@ b2BodyId *pp;
 		if(!lua_isnil(l,-1)) { def.linearDamping = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"linearVelocity");
-		if(!lua_isnil(l,-1))
-		{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			def.linearVelocity = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
-			lua_pop(l,2);
-		}
+		if(!lua_isnil(l,-1)) { def.linearVelocity=lua_b2_read_b2Vec2(l); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"name");
 		if(!lua_isnil(l,-1)) { def.name = lua_tostring(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"position");
-		if(!lua_isnil(l,-1))
-		{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			def.position = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
-			lua_pop(l,2);
-		}
+		if(!lua_isnil(l,-1)) { def.position=lua_b2_read_b2Vec2(l); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"rotation");
 		if(!lua_isnil(l,-1)) { def.rotation = b2MakeRot((float)lua_tonumber(l,-1)); }
@@ -758,7 +799,7 @@ b2BodyId *pp;
 		lua_getfield(l,2,"type");
 		if(lua_isstring(l,-1))
 		{
-			char *s=lua_tostring(l,-1);
+			const char *s=lua_tostring(l,-1);
 			if(strcmp(s,"static")==0)    { def.type = b2_staticBody;    } else
 			if(strcmp(s,"kinematic")==0) { def.type = b2_kinematicBody; } else
 			if(strcmp(s,"dynamic")==0)   { def.type = b2_dynamicBody;   }
@@ -957,7 +998,7 @@ int b;
 	if(lua_isstring(l,2)) // only set if given
 	{
 		b2BodyType type;
-		char *s=lua_tostring(l,2);
+		const char *s=lua_tostring(l,2);
 		if(strcmp(s,"static")==0)    { type = b2_staticBody;    } else
 		if(strcmp(s,"kinematic")==0) { type = b2_kinematicBody; } else
 		if(strcmp(s,"dynamic")==0)   { type = b2_dynamicBody;   }
@@ -1174,7 +1215,7 @@ b2ShapeId *pp;
 	body=lua_b2_body_ptr(l,1);
 
 	// shape type defaults to circle
-	char *shape_type="circle";
+	const char *shape_type="circle";
 	lua_getfield(l,2,"shape"); // the type of shape as lowercase string
 	if(lua_isstring(l,-1))
 	{
@@ -1186,13 +1227,7 @@ b2ShapeId *pp;
 
 		b2Circle circle;
 		lua_getfield(l,2,"center");
-		if(!lua_isnil(l,-1))
-		{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			circle.center = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
-			lua_pop(l,2);
-		}
+		if(!lua_isnil(l,-1)) { circle.center=lua_b2_read_b2Vec2(l); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"radius");
 		if(!lua_isnil(l,-1)) { circle.radius = (float)lua_tonumber(l,-1); }
@@ -1207,22 +1242,10 @@ b2ShapeId *pp;
 
 		b2Segment segment;
 		lua_getfield(l,2,"point1");
-		if(!lua_isnil(l,-1))
-		{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			segment.point1 = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
-			lua_pop(l,2);
-		}
+		if(!lua_isnil(l,-1)) { segment.point1=lua_b2_read_b2Vec2(l); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"point2");
-		if(!lua_isnil(l,-1))
-		{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			segment.point2 = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
-			lua_pop(l,2);
-		}
+		if(!lua_isnil(l,-1)) { segment.point2=lua_b2_read_b2Vec2(l); }
 		lua_pop(l,1);
 
 		*pp=b2CreateSegmentShape(body,&def,&segment);
@@ -1234,22 +1257,10 @@ b2ShapeId *pp;
 
 		b2Capsule capsule;
 		lua_getfield(l,2,"center1");
-		if(!lua_isnil(l,-1))
-		{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			capsule.center1 = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
-			lua_pop(l,2);
-		}
+		if(!lua_isnil(l,-1)) { capsule.center1=lua_b2_read_b2Vec2(l); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"center2");
-		if(!lua_isnil(l,-1))
-		{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			capsule.center2 = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
-			lua_pop(l,2);
-		}
+		if(!lua_isnil(l,-1)) { capsule.center2=lua_b2_read_b2Vec2(l); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"radius");
 		if(!lua_isnil(l,-1)) { capsule.radius = (float)lua_tonumber(l,-1); }
@@ -1276,13 +1287,7 @@ b2ShapeId *pp;
 
 		b2Vec2 center=(b2Vec2){0.0f,0.0f};
 		lua_getfield(l,2,"center");
-		if(!lua_isnil(l,-1))
-		{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			center = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
-			lua_pop(l,2);
-		}
+		if(!lua_isnil(l,-1)) { center=lua_b2_read_b2Vec2(l); }
 		lua_pop(l,1);
 
 		float rotation=0.0f;
@@ -1499,7 +1504,7 @@ b2JointId *pp;
 	luaL_getmetatable(l, lua_b2_joint_meta_name);
 	lua_setmetatable(l, -2);
 
-	b2JointDef joint;
+	b2JointDef joint=(b2JointDef){0};
 	// get generic joint values
 	lua_getfield(l,2,"bodyIdA");
 	if(!lua_isnil(l,-1)) { joint.bodyIdA=*((b2BodyId*)(lua_tostring(l,-1))); }
@@ -1508,26 +1513,10 @@ b2JointId *pp;
 	if(!lua_isnil(l,-1)) { joint.bodyIdB=*((b2BodyId*)(lua_tostring(l,-1))); }
 	lua_pop(l,1);
 	lua_getfield(l,2,"localFrameA");
-	if(!lua_isnil(l,-1))
-	{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			lua_pushinteger(l,3);	lua_gettable(l,-4);
-			joint.localFrameA.p = (b2Vec2){(float)lua_tonumber(l,-3),(float)lua_tonumber(l,-2)};
-			joint.localFrameA.q = b2MakeRot((float)lua_tonumber(l,-1));
-			lua_pop(l,3);
-	}
+	if(!lua_isnil(l,-1)) { joint.localFrameA=lua_b2_read_b2Transform(l); }
 	lua_pop(l,1);
 	lua_getfield(l,2,"localFrameB");
-	if(!lua_isnil(l,-1))
-	{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			lua_pushinteger(l,3);	lua_gettable(l,-4);
-			joint.localFrameB.p = (b2Vec2){(float)lua_tonumber(l,-3),(float)lua_tonumber(l,-2)};
-			joint.localFrameB.q = b2MakeRot((float)lua_tonumber(l,-1));
-			lua_pop(l,3);
-	}
+	if(!lua_isnil(l,-1)) { joint.localFrameB=lua_b2_read_b2Transform(l); }
 	lua_pop(l,1);
 	lua_getfield(l,2,"forceThreshold");
 	if(!lua_isnil(l,-1)) { joint.forceThreshold = (float)lua_tonumber(l,-1); }
@@ -1546,7 +1535,7 @@ b2JointId *pp;
 	lua_pop(l,1);
 
 	// joint type defaults to filter
-	char *joint_type="filter";
+	const char *joint_type="filter";
 	lua_getfield(l,2,"joint"); // the type of joint as lowercase string
 	if(lua_isstring(l,-1))
 	{
@@ -1610,13 +1599,7 @@ b2JointId *pp;
 		motor.base=joint; // generic values
 
 		lua_getfield(l,2,"linearVelocity");
-		if(!lua_isnil(l,-1))
-		{
-			lua_pushinteger(l,1);	lua_gettable(l,-2);
-			lua_pushinteger(l,2);	lua_gettable(l,-3);
-			motor.linearVelocity = (b2Vec2){(float)lua_tonumber(l,-2),(float)lua_tonumber(l,-1)};
-			lua_pop(l,2);
-		}
+		if(!lua_isnil(l,-1)) { motor.linearVelocity=lua_b2_read_b2Vec2(l); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"maxVelocityForce");
 		if(!lua_isnil(l,-1)) { motor.maxVelocityForce = (float)lua_tonumber(l,-1); }

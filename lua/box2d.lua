@@ -596,9 +596,9 @@ box2d.world_functions.joint=function(world,def)
 	
 	joint.world=world
 	
-	-- auto convert tables to boxids
-	if type(def.bodyIdA)=="table" then def.bodyIdA=def.bodyIdA.boxid end
-	if type(def.bodyIdB)=="table" then def.bodyIdB=def.bodyIdB.boxid end
+	-- auto convert body tables to body boxids
+	if type(def.bodyA)=="table" then def.bodyIdA=def.bodyA.boxid end
+	if type(def.bodyB)=="table" then def.bodyIdB=def.bodyB.boxid end
 
 	setmetatable(joint,box2d.joint_metatable)
 	joint[0],joint.boxid=core.joint_create(world[0],def)

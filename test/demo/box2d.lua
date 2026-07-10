@@ -75,10 +75,11 @@ end
 
 local joint=world:joint({
 	joint="distance",
-	bodyIdA=bodyA,
+	bodyA=bodyA,
 	localFrameA={0,0,0},
-	bodyIdB=bodyB,
+	bodyB=bodyB,
 	localFrameB={0,0,0},
+	forceThreshold=0,
 })
 print("joint")
 for n,v in pairs( joint:get() ) do
