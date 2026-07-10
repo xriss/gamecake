@@ -387,14 +387,11 @@ fake table created by lua meta.
 
 Booleans should be true or false
 
-filter is an array of 3 numbers { categoryBits , maskBits , groupIndex 
-} and since lua(jit) uses doubles these bit masks should *only* use 52 
-bits not 64 so the integers can fit safely into a double. When using 
-hex the top 3 nibbles should always be 0 like so 0x000fffffffffffff 
-that is 13 Fs if you are counting.
-
-material is a table containing named material values so { friction=1 , 
-restitution=1 }
+Minor safety issue regarding filter bitmasks since lua(jit) uses 
+doubles these bit masks should *only* use 52 bits not 64 so the 
+integers can fit safely into a double. When using hex the top 3 nibbles 
+should always be 0 like so 0x000fffffffffffff that is 13 Fs if you are 
+counting.
 
 	density
 	enableContactEvents

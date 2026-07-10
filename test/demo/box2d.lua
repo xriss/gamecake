@@ -87,8 +87,8 @@ for n,v in pairs( joint:get() ) do
 end
 
 local hits=world:cast_ray({
-	origin_y=-100*METER,
-	translation_y=100*METER,
+	origin={0,-100*METER},
+	translation={0,100*METER},
 })
 print("raycast")
 for i,hit in ipairs(hits) do

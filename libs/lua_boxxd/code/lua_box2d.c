@@ -163,15 +163,11 @@ static int lua_b2_contact (lua_State *l)
 
 		lua_newtable(l);
 
-		lua_pushnumber(l, p.anchorA.x );
-		lua_setfield(l,-2,"anchorA_x");
-		lua_pushnumber(l, p.anchorA.y );
-		lua_setfield(l,-2,"anchorA_y");
+		lua_b2_push_b2Vec2(l,p.anchorA);
+		lua_setfield(l,-2,"anchorA");
 
-		lua_pushnumber(l, p.anchorB.x );
-		lua_setfield(l,-2,"anchorB_x");
-		lua_pushnumber(l, p.anchorB.y );
-		lua_setfield(l,-2,"anchorB_y");
+		lua_b2_push_b2Vec2(l,p.anchorB);
+		lua_setfield(l,-2,"anchorB");
 
 		lua_pushnumber(l, p.separation );
 		lua_setfield(l,-2,"separation");
@@ -633,15 +629,11 @@ static void lua_b2_world_cast_cb_push(b2ShapeId shapeId, b2Vec2 point, b2Vec2 no
 	lua_pushlstring(l, (const char *)&shapeId,sizeof(b2ShapeId)); // id to (non printable) string
 	lua_setfield(l, -2 , "shapeId" );
 
-	lua_pushnumber(l, point.x );
-	lua_setfield(l, -2 , "point_x" );
-	lua_pushnumber(l, point.y );
-	lua_setfield(l, -2 , "point_y" );
+	lua_b2_push_b2Vec2(l,point);
+	lua_setfield(l, -2 , "point" );
 
-	lua_pushnumber(l, normal.x );
-	lua_setfield(l, -2 , "normal_x" );
-	lua_pushnumber(l, normal.y );
-	lua_setfield(l, -2 , "normal_y" );
+	lua_b2_push_b2Vec2(l,normal);
+	lua_setfield(l, -2 , "normal" );
 
 	lua_pushnumber(l, fraction );
 	lua_setfield(l, -2 , "fraction" );
@@ -676,18 +668,12 @@ static int lua_b2_world_cast_ray (lua_State *l)
 	b2Vec2 translation=(b2Vec2){0,0};
 	b2QueryFilter filter=(b2QueryFilter){1,0xFFFFFFFFFFFFFFFFULL};
 
-	lua_getfield(l,2,"origin_x");
-	if(!lua_isnil(l,-1)) { origin.x = lua_tonumber(l,-1); }
-	lua_pop(l,1);
-	lua_getfield(l,2,"origin_y");
-	if(!lua_isnil(l,-1)) { origin.y = lua_tonumber(l,-1); }
+	lua_getfield(l,2,"origin");
+	if(!lua_isnil(l,-1)) { origin = lua_b2_read_b2Vec2(l); }
 	lua_pop(l,1);
 
-	lua_getfield(l,2,"translation_x");
-	if(!lua_isnil(l,-1)) { translation.x = lua_tonumber(l,-1); }
-	lua_pop(l,1);
-	lua_getfield(l,2,"translation_y");
-	if(!lua_isnil(l,-1)) { translation.y = lua_tonumber(l,-1); }
+	lua_getfield(l,2,"translation");
+	if(!lua_isnil(l,-1)) { translation = lua_b2_read_b2Vec2(l); }
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"filter_categoryBits");
