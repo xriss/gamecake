@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 702,
+   "count": 703,
    "name": "lua"
   },
   {
-   "count": 26,
+   "count": 27,
    "name": "lua.box2d"
   },
   {
@@ -198,7 +198,7 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 10,
+   "count": 11,
    "name": "lua.box2d.world"
   },
   {
@@ -212,6 +212,10 @@
   {
    "count": 1,
    "name": "lua.box2d.world.body_events"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.cast_ray"
   },
   {
    "count": 1,

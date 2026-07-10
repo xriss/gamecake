@@ -72,6 +72,7 @@
 
 <a class="sub" href="../../docs/lua.box2d.world.body.shape"><span>/lua.box2d.world.body.shape</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.body_events"><span>/lua.box2d.world.body_events</span></a>
+<a class="sub" href="../../docs/lua.box2d.world.cast_ray"><span>/lua.box2d.world.cast_ray</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.contact_events"><span>/lua.box2d.world.contact_events</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.get"><span>/lua.box2d.world.get</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.joint"><span>/lua.box2d.world.joint</span></a>
@@ -787,7 +788,7 @@ more documentation on how box2d works.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.awake">lua.box2d.body.awake</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L321">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L339">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>b = body:awake()
 b = body:awake(b)
 </code></pre>
@@ -797,7 +798,7 @@ b = body:awake(b)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.get">lua.box2d.body.get</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L283">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L301">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>vars = body:get()
 </code></pre>
 <p>Get all body variables in a table.</p>
@@ -806,7 +807,7 @@ b = body:awake(b)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.set">lua.box2d.body.set</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L294">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L312">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>body:set(vars)
 </code></pre>
 <p>Set all body variables from a table.</p>
@@ -815,7 +816,7 @@ b = body:awake(b)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.transform">lua.box2d.body.transform</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L333">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L351">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>x,y,r = body:transform()
 x,y,r = body:transform(x,y,r)
 </code></pre>
@@ -825,7 +826,7 @@ x,y,r = body:transform(x,y,r)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.type">lua.box2d.body.type</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L305">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L323">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>btype = body:type()
 btype = body:type(btype)
 </code></pre>
@@ -839,7 +840,7 @@ dynamic
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.velocity">lua.box2d.body.velocity</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L345">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L363">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>x,y,r = body:velocity()
 x,y,r = body:velocity(x,y,r)
 </code></pre>
@@ -877,7 +878,7 @@ x,y,r = body:velocity(x,y,r)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.joint.get">lua.box2d.joint.get</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L593">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L611">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>vars = joint:get()
 </code></pre>
 <p>Get all joint variables in a table.</p>
@@ -886,7 +887,7 @@ x,y,r = body:velocity(x,y,r)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.joint.set">lua.box2d.joint.set</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L610">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L628">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>joint:set(vars)
 </code></pre>
 <p>Set all joint variables from a table.</p>
@@ -922,7 +923,7 @@ close to defaults.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.shape.get">lua.box2d.shape.get</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L439">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L457">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>vars = shape:get()
 </code></pre>
 <p>Get all shape variables in a table.</p>
@@ -931,7 +932,7 @@ close to defaults.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.shape.set">lua.box2d.shape.set</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L450">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L468">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>shape:set(vars)
 </code></pre>
 <p>Set all shape variables from a table.</p>
@@ -965,7 +966,7 @@ enableContactSoftening
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.body">lua.box2d.world.body</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L224">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L242">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>body=world:body(def)
 </code></pre>
 <p>Create a body in the world.</p>
@@ -1006,7 +1007,7 @@ type
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.body.shape">lua.box2d.world.body.shape</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L357">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L375">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>shape=body:shape(def)
 </code></pre>
 <p>Create a shape in the body.</p>
@@ -1075,6 +1076,15 @@ radius
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.box2d.world.cast_ray">lua.box2d.world.cast_ray</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L224">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>hits = world:cast_ray(ray)
+</code></pre>
+<p>cast a ray and return an array of hits</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.contact_events">lua.box2d.world.contact_events</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L208">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>events = world:contact_events()
@@ -1094,7 +1104,7 @@ radius
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.joint">lua.box2d.world.joint</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L461">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L479">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>joint=world:joint(def)
 </code></pre>
 <p>Create a joint in the world.</p>
