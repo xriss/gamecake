@@ -774,13 +774,11 @@
 <p>Vectors are a table containing { x , y } values. This may also be a 
 fake table created by lua meta.</p>
 <p>Booleans should be true or false</p>
-<p>filter is an array of 3 numbers { categoryBits , maskBits , groupIndex 
-} and since lua(jit) uses doubles these bit masks should <em>only</em> use 52 
-bits not 64 so the integers can fit safely into a double. When using 
-hex the top 3 nibbles should always be 0 like so 0x000fffffffffffff 
-that is 13 Fs if you are counting.</p>
-<p>material is a table containing named material values so { friction=1 , 
-restitution=1 }</p>
+<p>Minor safety issue regarding filter bitmasks since lua(jit) uses 
+doubles these bit masks should <em>only</em> use 52 bits not 64 so the 
+integers can fit safely into a double. When using hex the top 3 nibbles 
+should always be 0 like so 0x000fffffffffffff that is 13 Fs if you are 
+counting.</p>
 <pre><code>density
 enableContactEvents
 enableHitEvents
