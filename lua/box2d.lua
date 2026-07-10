@@ -221,6 +221,24 @@ box2d.world_functions.contact_events=function(world)
 	return events
 end
 
+--[[#lua.box2d.world.cast_ray
+
+	hits = world:cast_ray(ray)
+
+cast a ray and return an array of hits
+
+]]
+box2d.world_functions.cast_ray=function(world,ray)
+
+	hits=core.world_cast_ray(world[0],ray)
+	
+	for i,hit in ipairs(hits) do -- auto get shape from id
+		if hit.shapeId then hit.shape=world.shapes[hit.shapeId] end
+	end
+
+	return hits
+end
+
 --[[#lua.box2d.world.body
 
 	body=world:body(def)

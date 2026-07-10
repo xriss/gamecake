@@ -8,7 +8,13 @@ local SQR_METER=METER*METER
 
 local var_tostring=function(v)
 	if type(v)=="table" then -- any tables will be arrays of numbers
-		return "{ "..table.concat(v," , ").." }"
+		if v.is then
+			local a={}
+			for n,v in pairs(v) do a[#a+1]=n.."="..tostring(v) end
+			return "{ "..table.concat(a," , ").." }"
+		else
+			return "{ "..table.concat(v," , ").." }"
+		end
 	else
 		return tostring(v)
 	end
@@ -28,7 +34,6 @@ end
 local world=box2d.world({
 	gravity={0,10*METER,0},
 })
-
 print("world")
 for n,v in pairs( world:get() ) do
 	print("world",n,"=",var_tostring(v))
@@ -37,16 +42,15 @@ end
 -- create body
 local bodyA=world:body({
 })
-
 print("bodyA")
 for n,v in pairs( bodyA:get() ) do
 	print("body",n,"=",var_tostring(v))
 end
 
 local shapeA=bodyA:shape({
---	shape="box",
+	shape="circle",
+	radius=1*METER,
 })
-
 print("shapeA")
 for n,v in pairs( shapeA:get() ) do
 	print("shape",n,"=",var_tostring(v))
@@ -55,16 +59,15 @@ end
 -- create body
 local bodyB=world:body({
 })
-
 print("bodyB")
 for n,v in pairs( bodyB:get() ) do
 	print("body",n,"=",var_tostring(v))
 end
 
 local shapeB=bodyB:shape({
---	shape="box",
+	shape="circle",
+	radius=1*METER,
 })
-
 print("shapeB")
 for n,v in pairs( shapeB:get() ) do
 	print("shape",n,"=",var_tostring(v))
@@ -77,8 +80,19 @@ local joint=world:joint({
 	bodyIdB=bodyB,
 	localFrameB={0,0,0},
 })
-
 print("joint")
 for n,v in pairs( joint:get() ) do
 	print("joint",n,"=",var_tostring(v))
 end
+
+local hits=world:cast_ray({
+	origin_y=-100*METER,
+	translation_y=100*METER,
+})
+print("raycast")
+for i,hit in ipairs(hits) do
+	for n,v in pairs( hit ) do
+		print("hit",i,n,"=",var_tostring(v))
+	end
+end
+

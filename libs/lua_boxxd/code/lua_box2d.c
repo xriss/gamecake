@@ -15,6 +15,11 @@ can be found in the associated box2d.lua file.
 #include "lualib.h"
 #include "lauxlib.h"
 
+// lua versions hax
+#if LUA_VERSION_NUM < 502
+#define lua_rawlen lua_objlen
+#endif
+
 #include "box2d/box2d.h"
 
 /*
@@ -561,6 +566,103 @@ static int lua_b2_world_contact_events (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
+helper ray functions
+
+*/
+static void lua_b2_world_cast_cb_push(b2ShapeId shapeId, b2Vec2 point, b2Vec2 normal, float fraction, void *context)
+{
+	lua_State *l=(lua_State *)context;
+
+	int len=(int)lua_rawlen(l,-1); // *expect* an array here
+
+	lua_newtable(l); // single result
+
+	lua_pushlstring(l, (const char *)&shapeId,sizeof(b2ShapeId)); // id to (non printable) string
+	lua_setfield(l, -2 , "shapeId" );
+
+	lua_pushnumber(l, point.x );
+	lua_setfield(l, -2 , "point_x" );
+	lua_pushnumber(l, point.y );
+	lua_setfield(l, -2 , "point_y" );
+
+	lua_pushnumber(l, normal.x );
+	lua_setfield(l, -2 , "normal_x" );
+	lua_pushnumber(l, normal.y );
+	lua_setfield(l, -2 , "normal_y" );
+
+	lua_pushnumber(l, fraction );
+	lua_setfield(l, -2 , "fraction" );
+
+	lua_rawseti(l, -2 , len+1 ); // append result to array
+
+}
+
+static float lua_b2_world_cast_cb_all(b2ShapeId shapeId, b2Vec2 point, b2Vec2 normal, float fraction, void *context)
+{
+	lua_b2_world_cast_cb_push(shapeId,point,normal,fraction,context);
+	return 1.0f;
+}
+
+static float lua_b2_world_cast_cb_one(b2ShapeId shapeId, b2Vec2 point, b2Vec2 normal, float fraction, void *context)
+{
+	lua_b2_world_cast_cb_push(shapeId,point,normal,fraction,context);
+	return 0.0f;
+}
+
+/*+---------------------------------------------------------------------
+
+cast a ray through the world
+
+*/
+static int lua_b2_world_cast_ray (lua_State *l)
+{
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
+	
+	b2CastResultFcn *cb = lua_b2_world_cast_cb_all; // all hits
+	b2Vec2 origin=(b2Vec2){0,0};
+	b2Vec2 translation=(b2Vec2){0,0};
+	b2QueryFilter filter=(b2QueryFilter){1,0xFFFFFFFFFFFFFFFFULL};
+
+	lua_getfield(l,2,"origin_x");
+	if(!lua_isnil(l,-1)) { origin.x = lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"origin_y");
+	if(!lua_isnil(l,-1)) { origin.y = lua_tonumber(l,-1); }
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"translation_x");
+	if(!lua_isnil(l,-1)) { translation.x = lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"translation_y");
+	if(!lua_isnil(l,-1)) { translation.y = lua_tonumber(l,-1); }
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"filter_categoryBits");
+	if(!lua_isnil(l,-1)) { filter.categoryBits = lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"filter_maskBits");
+	if(!lua_isnil(l,-1)) { filter.maskBits = lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	
+	// get all hits unless closest is set
+ 	lua_getfield(l,2,"closest");
+	if(lua_toboolean(l,-1)) { cb = lua_b2_world_cast_cb_one ; }
+	lua_pop(l,1);
+
+	lua_newtable(l); // return hits table
+	b2TreeStats stats = b2World_CastRay(world,origin,translation,filter,cb,l);
+
+	// include stats in hits table
+	lua_pushnumber(l, stats.leafVisits );
+	lua_setfield(l, -2 , "leafVisits" );
+	lua_pushnumber(l, stats.nodeVisits );
+	lua_setfield(l, -2 , "nodeVisits" );
+
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
 body create/destroy
 
 */
@@ -749,42 +851,42 @@ static int lua_b2_body_set (lua_State *l)
 {
 	b2BodyId body = lua_b2_body_ptr(l, 1 );
 
-	lua_getfield(l,1,"name");
+	lua_getfield(l,2,"name");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_SetName(body, lua_tostring(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"linearDamping");
+	lua_getfield(l,2,"linearDamping");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_SetLinearDamping(body, lua_tonumber(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"angularDamping");
+	lua_getfield(l,2,"angularDamping");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_SetAngularDamping(body, lua_tonumber(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"gravityScale");
+	lua_getfield(l,2,"gravityScale");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_SetGravityScale(body, lua_tonumber(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"enableSleep");
+	lua_getfield(l,2,"enableSleep");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_EnableSleep(body, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"sleepThreshold");
+	lua_getfield(l,2,"sleepThreshold");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_SetSleepThreshold(body, lua_tonumber(l,-1) );
@@ -794,21 +896,21 @@ static int lua_b2_body_set (lua_State *l)
 
 	int set_locks=0;
 	b2MotionLocks locks = b2Body_GetMotionLocks(body);
-	lua_getfield(l,1,"motionLocks_linearX");
+	lua_getfield(l,2,"motionLocks_linearX");
 	if(!lua_isnil(l,-1))
 	{
 		set_locks=1;
 		locks.linearX = lua_toboolean(l,-1) ;
 	}
 	lua_pop(l,1);
-	lua_getfield(l,1,"motionLocks_linearY");
+	lua_getfield(l,2,"motionLocks_linearY");
 	if(!lua_isnil(l,-1))
 	{
 		set_locks=1;
 		locks.linearY = lua_toboolean(l,-1) ;
 	}
 	lua_pop(l,1);
-	lua_getfield(l,1,"motionLocks_angularZ");
+	lua_getfield(l,2,"motionLocks_angularZ");
 	if(!lua_isnil(l,-1))
 	{
 		set_locks=1;
@@ -817,21 +919,21 @@ static int lua_b2_body_set (lua_State *l)
 	lua_pop(l,1);
 	if(set_locks) { b2Body_SetMotionLocks(body,locks); }
 
-	lua_getfield(l,1,"bullet");
+	lua_getfield(l,2,"bullet");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_SetBullet(body, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"enableContactEvents");
+	lua_getfield(l,2,"enableContactEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_EnableContactEvents(body, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"enableHitEvents");
+	lua_getfield(l,2,"enableHitEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_EnableHitEvents(body, lua_toboolean(l,-1) );
@@ -881,7 +983,7 @@ int b;
 
 	b2BodyId body = lua_b2_body_ptr(l, 1 );
 
-	if(!lua_isnil(l,2)) // only set if given
+	if(!lua_isnil(l, 2 )) // only set if given
 	{
 		b=lua_toboolean(l, 2 );
 
@@ -1201,8 +1303,7 @@ b2ShapeId *pp;
 	{
 		lua_pop(l,1); // shape_type is no longer valid
 
-		lua_pushstring(l,"unknown shape type");
-		lua_error(l);
+		luaL_error(l,"unknown shape type");
 	}
 
 	lua_pushlstring(l,(const char *)pp,sizeof(b2ShapeId)); // id to (non printable) string
@@ -1711,8 +1812,7 @@ b2JointId *pp;
 	{
 		lua_pop(l,1); // joint_type is no longer valid
 
-		lua_pushstring(l,"unknown joint type");
-		lua_error(l);
+		luaL_error(l,"unknown joint type");
 	}
 
 	lua_pushlstring(l,(const char *)pp,sizeof(b2JointId)); // id to (non printable) string
@@ -1842,6 +1942,8 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"world_body_events",		lua_b2_world_body_events},
 		{"world_sensor_events",		lua_b2_world_sensor_events},
 		{"world_contact_events",	lua_b2_world_contact_events},
+		{"world_cast_ray",			lua_b2_world_cast_ray},
+//		{"world_cast_shape",		lua_b2_world_cast_shape},
 
 		{"body_create",				lua_b2_body_create},
 		{"body_destroy",			lua_b2_body_destroy},
