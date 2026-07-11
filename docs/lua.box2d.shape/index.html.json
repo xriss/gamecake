@@ -3055,7 +3055,7 @@
    "body": "<pre><code>shape:destroy()\n</code></pre>\n<p>Destroy the shape and all sub objects (none)</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 596,
+   "line": 597,
    "name": "lua.box2d.shape.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3063,7 +3063,7 @@
    "body": "<pre><code>vars = shape:get()\n</code></pre>\n<p>Get all shape variables in a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 640,
+   "line": 641,
    "name": "lua.box2d.shape.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3071,7 +3071,7 @@
    "body": "<pre><code>info = shape:info()\n</code></pre>\n<p>This returns the def table used to create the shape along with as much \nupdated information as we have available, mostly intended as a \ndebugging aid.</p>\n<p>This is the actual def table (some values are hard to query later) so \nif you edit it or if you create this object using a non unique def \ntable things can get strange.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 610,
+   "line": 611,
    "name": "lua.box2d.shape.info",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3079,7 +3079,7 @@
    "body": "<pre><code>shape:set(vars)\n</code></pre>\n<p>Set all shape variables from a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 651,
+   "line": 652,
    "name": "lua.box2d.shape.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }
