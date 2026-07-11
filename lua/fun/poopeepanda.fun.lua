@@ -897,6 +897,7 @@ end
 players.collision_type=0x00040001	-- assigned type
 players.collision_bits=0x00000100	-- assigned bitmask
 players.collision_mask=0x00ffffff	-- interact bitmask
+--[[
 players.collision_handlers={
 	[{players.collision_type}]={
 		postsolve=function(arb)
@@ -914,24 +915,35 @@ players.collision_handlers={
 		end
 	}
 }
+]]
 
 players.item.reset_kinetic_ids=function(player)
-	player.shape:filter(player.uid,players.collision_bits,players.collision_mask)
-	player.shape:collision_type(players.collision_type)
+--	player.shape:filter(player.uid,players.collision_bits,players.collision_mask)
+--	player.shape:collision_type(players.collision_type)
+	player.shape:set({
+		filter_categoryBits=players.collision_bits,
+		filter_maskBits=players.collision_mask,
+		filter_groupIndex=players.collision_type,
+	})
 end
 
 
 players.item.setup_kinetic=function(player)
 	if player.body then return end -- only create once
-	local space=player:get_singular("kinetic").space
-	player.body=space:body(1,1)
+	local world=player:get_singular("kinetic").world
+	player.body=world:body({})
 	if player.mode=="spawn" or player.mode=="die" then
 		-- no collision when spawning
 	else
-		player.shape=player.body:shape("circle",4,0,0)
-		player.shape:friction(0.5)
-		player.shape:elasticity(0.5)
-		player:reset_kinetic_ids()
+		player.shape=player.body:shape({
+			shape="circle",
+			radius=4,
+			friction=0.5,
+			elasticity=0.5,
+			filter_categoryBits=players.collision_bits,
+			filter_maskBits=players.collision_mask,
+			filter_groupIndex=players.collision_type,
+		})
 		player.shape.uid=player.uid
 	end
 	player:set_body() -- set positon etc
@@ -939,11 +951,7 @@ end
 
 players.item.clean_kinetic=function(player)
 	if not player.body then return end -- auto clean
-	local kinetic=player:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	if player.shape then space:remove(player.shape) end
-	space:remove(player.body)
+	player.body:destroy()
 	player.body=nil
 	player.shape=nil
 end
@@ -1081,6 +1089,7 @@ else
 
 	local footspeed=0.25
 
+--[[
 	local space=player:get_singular("kinetic").space
 	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,2,player.uid,0x00000100,0x00ffffff)
 	if hit and hit.alpha and hit.alpha<0.75 then
@@ -1109,11 +1118,12 @@ else
 			end
 		end
 	else
+]]
 		if player.foot>11 then player.foot=player.foot-footspeed end
 		if player.foot<11 then player.foot=player.foot+footspeed end
 
 		player.acc:add(grav) -- gravity
-	end
+--	end
 
 	if player.jump_debounce>0 then -- force minimum time between jumps
 		player.jump_debounce=math.max(0,player.jump_debounce-1)
@@ -1145,7 +1155,7 @@ else
 	if bb_set and hold then -- throw
 		player:depend("hold",0)
 		hold:depend("held",0)
-		hold.shape:collision_type(junks.collision_type) -- become dangerous
+--		hold.shape:collision_type(junks.collision_type) -- become dangerous
 		local m=((player.holdtime-8)/16)
 		if m>1 then m=1 end -- full speed after 1.5 seconds
 		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
@@ -1160,6 +1170,7 @@ else
 		local v2=player.pos+V3( 24, 24,0)
 --		if player.side>0 then	v2[1]=v2[1]+16
 --		else					v1[1]=v1[1]-16	end
+--[[
 		local shapes=space:query_bounding_box(v1[1],v1[2],v2[1],v2[2],player.uid,0xffffffff,0xffffffff)
 		local its={}
 		for _,shape in ipairs(shapes) do
@@ -1183,6 +1194,7 @@ else
 			hold:depend("held",player.uid)
 			hold:set_value("danger",0)
 		end
+]]
 	end
 	if hold then
 		player.holdtime=player.holdtime+1
@@ -1191,7 +1203,7 @@ else
 			player.holdtime=player.holdtime+2
 		end
 		-- stop player coliding with held object
-		hold.shape:filter(player.uid,players.collision_bits,players.collision_mask)
+--		hold.shape:filter(player.uid,players.collision_bits,players.collision_mask)
 
 		hold:get_value("pos")
 		hold:get_value("vel")
@@ -1200,7 +1212,7 @@ else
 		if hold_len>40 then -- too far so just drop
 			player:depend("hold",0)
 			hold:depend("held",0)
-			hold.shape:filter(hold.uid,hold.collision_bits,hold.collision_mask)
+--			hold.shape:filter(hold.uid,hold.collision_bits,hold.collision_mask)
 		else
 			hold.vel:add( p*8 )
 			hold.vel:scale(1/2)
@@ -1414,29 +1426,40 @@ floaters.collision_bits=0x00010000	-- assigned bitmask
 floaters.collision_mask=0x00ffffff	-- interact bitmask
 
 floaters.item.reset_kinetic_ids=function(floater)
-	floater.shape:filter(floater.uid,floaters.collision_bits,floaters.collision_mask)
-	floater.shape:collision_type(floaters.collision_type)
+	floater.shape:set({
+		filter_categoryBits=floaters.collision_bits,
+		filter_maskBits=floaters.collision_mask,
+		filter_groupIndex=floaters.collision_type,
+	})
+--	floater.shape:filter(floater.uid,floaters.collision_bits,floaters.collision_mask)
+--	floater.shape:collision_type(floaters.collision_type)
 end
 
 floaters.item.setup_kinetic=function(floater)
 	if floater.body then return end -- already done
-	local space=floater:get_singular("kinetic").space
-	floater.body=space:body(1,1)
-	floater.shape=floater.body:shape("circle",6,0,0)
-	floater.shape:friction(0.5)
-	floater.shape:elasticity(0.5)
-	floater:reset_kinetic_ids()
+	local world=floater:get_singular("kinetic").world
+	floater.body=world:body({
+	})
+	floater.shape=floater.body:shape({
+		shape="circle",
+		radius=6,
+		friction=0.5,
+		elasticity=0.5,
+		filter_categoryBits=floaters.collision_bits,
+		filter_maskBits=floaters.collision_mask,
+		filter_groupIndex=floaters.collision_type,
+	})
+--	floater.shape=floater.body:shape("circle",6,0,0)
+--	floater.shape:friction(0.5)
+--	floater.shape:elasticity(0.5)
+--	floater:reset_kinetic_ids()
 	floater.shape.uid=floater.uid
 	floater:set_body()
 end
 
 floaters.item.clean_kinetic=function(floater)
 	if not floater.body then return end -- already done
-	local kinetic=floater:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(floater.shape)
-	space:remove(floater.body)
+	floater.body:destroy()
 	floater.body=nil
 	floater.shape=nil
 end
@@ -1634,29 +1657,42 @@ fauna_eggs.collision_bits=0x00010000	-- assigned bitmask
 fauna_eggs.collision_mask=0x00ffffff	-- interact bitmask
 
 fauna_eggs.item.reset_kinetic_ids=function(fauna)
-	fauna.shape:filter(fauna.uid,fauna_eggs.collision_bits,fauna_eggs.collision_mask)
-	fauna.shape:collision_type(fauna_eggs.collision_type)
+	fauna.shape:set({
+		filter_categoryBits=fauna_eggs.collision_bits,
+		filter_maskBits=fauna_eggs.collision_mask,
+		filter_groupIndex=fauna_eggs.collision_type,
+	})
+--	fauna.shape:filter(fauna.uid,fauna_eggs.collision_bits,fauna_eggs.collision_mask)
+--	fauna.shape:collision_type(fauna_eggs.collision_type)
 end
 
 fauna_eggs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
-	local space=fauna:get_singular("kinetic").space
-	fauna.body=space:body(1,1)
-	fauna.shape=fauna.body:shape("circle",4,0,0)
-	fauna.shape:friction(0.5)
-	fauna.shape:elasticity(0.5)
-	fauna:reset_kinetic_ids()
+	local world=fauna:get_singular("kinetic").world
+	fauna.body=world:body({
+	})
+	fauna.shape=fauna.body:shape({
+		shape="circle",
+		radius=4,
+		friction=0.5,
+		elasticity=0.5,
+		filter_categoryBits=fauna_eggs.collision_bits,
+		filter_maskBits=fauna_eggs.collision_mask,
+		filter_groupIndex=fauna_eggs.collision_type,
+	})
+--	local space=fauna:get_singular("kinetic").space
+--	fauna.body=space:body(1,1)
+--	fauna.shape=fauna.body:shape("circle",4,0,0)
+--	fauna.shape:friction(0.5)
+--	fauna.shape:elasticity(0.5)
+--	fauna:reset_kinetic_ids()
 	fauna.shape.uid=fauna.uid
 	fauna:set_body()
 end
 
 fauna_eggs.item.clean_kinetic=function(fauna)
 	if not fauna.body then return end -- already done
-	local kinetic=fauna:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(fauna.shape)
-	space:remove(fauna.body)
+	fauna.body:destroy()
 	fauna.body=nil
 	fauna.shape=nil
 end
@@ -1869,18 +1905,31 @@ fauna_slims.item.setup=function(fauna)
 	fauna:set_values()
 end
 
+fauna_slims.collision_type=0x00000001
 fauna_slims.collision_bits=0x00010000	-- assigned bitmask
 fauna_slims.collision_mask=0x00ffffff	-- interact bitmask
 
 fauna_slims.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
-	local space=fauna:get_singular("kinetic").space
-	fauna.body=space:body(1,1)
+	local world=floater:get_singular("kinetic").world
+	floater.body=world:body({
+	})
+--	local space=fauna:get_singular("kinetic").space
+--	fauna.body=space:body(1,1)
 	if not fauna:depend("held") then
-		fauna.shape=fauna.body:shape("circle",4,0,0)
-		fauna.shape:friction(0.5)
-		fauna.shape:elasticity(0.5)
-		fauna.shape:filter(fauna.uid,fauna_slims.collision_bits,fauna_slims.collision_mask)
+--		fauna.shape=fauna.body:shape("circle",4,0,0)
+--		fauna.shape:friction(0.5)
+--		fauna.shape:elasticity(0.5)
+--		fauna.shape:filter(fauna.uid,fauna_slims.collision_bits,fauna_slims.collision_mask)
+		floater.shape=floater.body:shape({
+			shape="circle",
+			radius=4,
+			friction=0.5,
+			elasticity=0.5,
+			filter_categoryBits=fauna_slims.collision_bits,
+			filter_maskBits=fauna_slims.collision_mask,
+			filter_groupIndex=fauna_slims.collision_type,
+		})
 		fauna.shape.uid=fauna.uid
 	end
 	fauna:set_body()
@@ -1888,9 +1937,7 @@ end
 
 fauna_slims.item.clean_kinetic=function(fauna)
 	if not fauna.body then return end -- already done
-	local space=fauna:get_singular("kinetic").space		
-	if fauna.shape then space:remove(fauna.shape) end
-	space:remove(fauna.body)
+	body:destroy()
 	fauna.body=nil
 	fauna.shape=nil
 end
@@ -1967,7 +2014,8 @@ fauna_slims.item.update=function(fauna)
 
 	local footspeed=0.25
 	local footbase=3
-	local space=fauna:get_singular("kinetic").space
+	local world=fauna:get_singular("kinetic").world
+--[[
 	local hit=space:query_segment_first(fauna.pos[1],fauna.pos[2],fauna.pos[1],fauna.pos[2]+16,2,fauna.uid,0x00010000,0x00ffffff)
 	if hit and hit.alpha and hit.alpha<((footbase+4)/16) then
 
@@ -2006,13 +2054,14 @@ fauna_slims.item.update=function(fauna)
 		end
 
 	else
+]]
 		fauna.floor_uid=0
 
 		if fauna.foot>3 then fauna.foot=3 end
 		if fauna.foot<3 then fauna.foot=fauna.foot+footspeed end
 
 		fauna.acc:add(grav) -- gravity
-	end
+--	end
 
 	if fauna.onfloor>0 and fauna.jump<=0 then -- meep meep jump	
 		if brain.jump then
@@ -2184,28 +2233,37 @@ fauna_trenchs.item.setup=function(fauna)
 	fauna:set_values()
 end
 
+fauna_trenchs.collision_type=0x00000001
 fauna_trenchs.collision_bits=0x00010000	-- assigned bitmask
 fauna_trenchs.collision_mask=0x00ffffff	-- interact bitmask
 
 fauna_trenchs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
-	local space=fauna:get_singular("kinetic").space
-	fauna.body=space:body(1,1)
-	fauna.shape=fauna.body:shape("circle",4,0,0)
-	fauna.shape:friction(0.5)
-	fauna.shape:elasticity(0.5)
-	fauna.shape:filter(fauna.uid,fauna_trenchs.collision_bits,fauna_trenchs.collision_mask)
+	local world=fauna:get_singular("kinetic").world
+	fauna.body=world:body({
+	})
+	fauna.shape=fauna.body:shape({
+		shape="circle",
+		radius=4,
+		friction=0.5,
+		elasticity=0.5,
+		filter_categoryBits=fauna_trenchs.collision_bits,
+		filter_maskBits=fauna_trenchs.collision_mask,
+		filter_groupIndex=fauna_trenchs.collision_type,
+	})
+--	local space=fauna:get_singular("kinetic").space
+--	fauna.body=space:body(1,1)
+--	fauna.shape=fauna.body:shape("circle",4,0,0)
+--	fauna.shape:friction(0.5)
+--	fauna.shape:elasticity(0.5)
+--	fauna.shape:filter(fauna.uid,fauna_trenchs.collision_bits,fauna_trenchs.collision_mask)
 	fauna.shape.uid=fauna.uid
 	fauna:set_body()
 end
 
 fauna_trenchs.item.clean_kinetic=function(fauna)
 	if not fauna.body then return end -- already done
-	local kinetic=fauna:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(fauna.shape)
-	space:remove(fauna.body)
+	fauna.body:destroy()
 	fauna.body=nil
 	fauna.shape=nil
 end
@@ -2467,6 +2525,7 @@ R R R R R R R .
 fruits.collision_type=0x00010002	-- unique ID
 fruits.collision_bits=0x00010000	-- assigned bitmask
 fruits.collision_mask=0x000001ff	-- interact bitmask
+--[[
 fruits.collision_handlers={
 	[{fruits.collision_type}]={
 		postsolve=function(arb)
@@ -2479,6 +2538,8 @@ fruits.collision_handlers={
 		end
 	}
 }
+]]
+
 -- called inside the physics loop so probably shouldnt do anything complex
 fruits.item.do_touch=function(fruit,touch,arb)
 	local oldtouch=fruit:get_value("touch")
@@ -2510,34 +2571,34 @@ fruits.item.setup=function(fruit)
 end
 
 fruits.item.setup_kinetic_reshape=function(fruit)
-	local space=fruit:get_singular("kinetic").space
 	if fruit.shape then
-		space:remove(fruit.shape)
+		fruit.shape:destroy()
 		fruit.shape=nil
 	end
-	fruit.shape=fruit.body:shape("circle",4,0,0)
---	fruit.shape=fruit.body:shape("box",-3,-3,3,3,0)
-	fruit.shape:friction(1.0)
-	fruit.shape:elasticity(0.5)
-	fruit.shape:filter(fruit.uid,fruits.collision_bits,fruits.collision_mask)
-	fruit.shape:collision_type(fruits.collision_type)
+	fruit.shape=fruit.body:shape({
+		shape="box",
+		halfWidth=3,
+		halfHeight=3,
+		friction=1.0,
+		elasticity=0.5,
+		filter_categoryBits=fruits.collision_bits,
+		filter_maskBits=fruits.collision_mask,
+		filter_groupIndex=fruits.collision_type,
+	})
 	fruit.shape.uid=fruit.uid
 end
 fruits.item.setup_kinetic=function(fruit)
 	if fruit.body then return end -- already done
-	local space=fruit:get_singular("kinetic").space
-	fruit.body=space:body(1,1)
+	local world=fruit:get_singular("kinetic").world
+	fruit.body=world:body({
+	})
 	fruit:setup_kinetic_reshape()
 	fruit:set_body()
 end
 
 fruits.item.clean_kinetic=function(fruit)
 	if not fruit.body then return end -- already done
-	local kinetic=fruit:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(fruit.shape)
-	space:remove(fruit.body)
+	fruit.body:destroy()
 	fruit.body=nil
 	fruit.shape=nil
 end
@@ -2651,6 +2712,7 @@ g G G G G G G g . g g G G g g . . . . g g . . . . . . . . . . .
 gibs.collision_type=0x00010001	-- unique ID
 gibs.collision_bits=0x01000000	-- assigned bitmask
 gibs.collision_mask=0x000000ff	-- interact bitmask
+--[[
 gibs.collision_handlers={
 	[{gibs.collision_type}]={
 		postsolve=function(it)
@@ -2662,7 +2724,7 @@ gibs.collision_handlers={
 		end
 	}
 }
-
+]]
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
@@ -2686,34 +2748,33 @@ gibs.item.setup=function(gib)
 end
 
 gibs.item.setup_kinetic_reshape=function(gib)
-	local space=gib:get_singular("kinetic").space
 	if gib.shape then
-		space:remove(gib.shape)
+		gib.shape:destroy()
 		gib.shape=nil
 	end
-	gib.shape=gib.body:shape("circle",gib.size,0,0)
---	gib.shape=gib.body:shape("box",-3,-3,3,3,0)
-	gib.shape:friction(1.0)
-	gib.shape:elasticity(0.5)
-	gib.shape:filter(gib.uid,gibs.collision_bits,gibs.collision_mask)
-	gib.shape:collision_type(gibs.collision_type)
-	gib.shape.uid=gib.uid
+	gib.shape=gib.body:shape({
+		shape="circle",
+		radius=gib.size,
+		friction=1.0,
+		elasticity=0.5,
+		filter_categoryBits=gibs.collision_bits,
+		filter_maskBits=gibs.collision_mask,
+		filter_groupIndex=gibs.collision_type,
+	})
+	fruit.shape.uid=fruit.uid
 end
 gibs.item.setup_kinetic=function(gib)
 	if gib.body then return end -- already done
-	local space=gib:get_singular("kinetic").space
-	gib.body=space:body(1,1)
+	local world=gib:get_singular("kinetic").world
+	gib.body=world:body({
+	})
 	gib:setup_kinetic_reshape()
 	gib:set_body()
 end
 
 gibs.item.clean_kinetic=function(gib)
 	if not gib.body then return end -- already done
-	local kinetic=gib:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(gib.shape)
-	space:remove(gib.body)
+	gib.body:destroy()
 	gib.body=nil
 	gib.shape=nil
 end
@@ -2812,6 +2873,7 @@ junks.graphics={
 junks.collision_type=0x00020001	-- weapon ID
 junks.collision_bits=0x00010000	-- assigned bitmask
 junks.collision_mask=0x00ffffff	-- interact bitmask
+--[[
 junks.collision_handlers={
 	[{junks.collision_type}]={
 		postsolve=function(arb)
@@ -2830,7 +2892,7 @@ junks.collision_handlers={
 		end
 	}
 }
-
+]]
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
@@ -2854,37 +2916,41 @@ junks.item.setup=function(junk)
 end
 
 junks.item.reset_kinetic_ids=function(junk)
-	junk.shape:filter(junk.uid,junks.collision_bits,junks.collision_mask)
-	junk.shape:collision_type(junks.collision_type)
+	junk.shape:set({
+		filter_categoryBits=junks.collision_bits,
+		filter_maskBits=junks.collision_mask,
+		filter_groupIndex=junks.collision_type,
+	})
 end
 junks.item.setup_kinetic_reshape=function(junk)
-	local space=junk:get_singular("kinetic").space
 	if junk.shape then
-		space:remove(junk.shape)
+		junk.shape:destroy()
 		junk.shape=nil
 	end
---	junk.shape=junk.body:shape("circle",8,0,0)
-	junk.shape=junk.body:shape("box",-4,-4,4,4,0)
-	junk.shape:friction(1.0)
-	junk.shape:elasticity(0.5)
+	junk.shape=junk.body:shape({
+		shape="box",
+		halfWidth=4,
+		halfHeight=4,
+		friction=1.0,
+		elasticity=0.5,
+		filter_categoryBits=junks.collision_bits,
+		filter_maskBits=junks.collision_mask,
+		filter_groupIndex=junks.collision_type,
+	})
 	junk.shape.uid=junk.uid
-	junk:reset_kinetic_ids()
 end
 junks.item.setup_kinetic=function(junk)
 	if junk.body then return end -- already done
-	local space=junk:get_singular("kinetic").space
-	junk.body=space:body(1,1)
+	local world=junk:get_singular("kinetic").world
+	junk.body=world:body({
+	})
 	junk:setup_kinetic_reshape()
 	junk:set_body()
 end
 
 junks.item.clean_kinetic=function(junk)
 	if not junk.body then return end -- already done
-	local kinetic=junk:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(junk.shape)
-	space:remove(junk.body)
+	junk.body:destroy()
 	junk.body=nil
 	junk.shape=nil
 end
@@ -3284,6 +3350,12 @@ end
 levels.system.clean=function(sys)
 end
 
+levels.item.clean=function(level)
+	if level.static_body then
+		level.static_body:destroy()
+		level.static_body=nil
+	end
+end
 -- state values are cached into the item for easy access on a get
 -- and must be set again if they are altered so setup and updates
 -- must begin and end with a get and a set
@@ -3291,7 +3363,10 @@ levels.item.setup=function(level)
 	level:get_values()
 
 	local names=system.components.tiles.names
-	local space=level:get_singular("kinetic").space
+	local world=level:get_singular("kinetic").world
+	local kinetic=level:get_singular("kinetic")
+	level.static_body=world:body({
+	})
 	
 	local info=levels.infos[level.idx]
 
@@ -3329,22 +3404,22 @@ levels.item.setup=function(level)
 				if (not get_tile(x,y-1,"solid") or not get_tile(x,y+1,"solid") ) then -- try to drag across
 					local otile=get_tile(x-1,y)
 					if otile and otile.shape and otile.solid==tile.solid then -- drag across
-						if otile.shape[5]-otile.shape[3] == 8 then -- check size
+						if otile.shape[4]-otile.shape[2] == 8 then -- check size
 							shape=otile.shape
-							shape[4]=shape[4]+8
+							shape[3]=shape[3]+8
 						end
 					end
 				elseif (not get_tile(x-1,y,"solid") or not get_tile(x+1,y,"solid") ) then -- try to drag down
 					local otile=get_tile(x,y-1)
 					if otile and otile.shape and otile.solid==tile.solid then -- drag across
-						if otile.shape[4]-otile.shape[2] == 8 then -- check size
+						if otile.shape[3]-otile.shape[1] == 8 then -- check size
 							shape=otile.shape
-							shape[5]=shape[5]+8
+							shape[4]=shape[4]+8
 						end
 					end
 				end
 				if not shape then -- start new shape
-					shape={"box",x*8,y*8,(x+1)*8,(y+1)*8,0}
+					shape={x*8,y*8,(x+1)*8,(y+1)*8}
 				end
 				tile.shape=shape
 			end
@@ -3355,12 +3430,16 @@ levels.item.setup=function(level)
 		for x,tile in pairs(line) do
 			local shape=tile.shape
 			tile.shape=nil
-			if shape and shape[2]==x*8 and shape[3]==y*8 then -- shape must start at this cell
+			if shape and shape[1]==x*8 and shape[2]==y*8 then -- shape must start at this cell
 --print("shape",unpack(shape))
-				tile.shape=space.static:shape(unpack(shape))
-				tile.shape:friction(tile.solid)
-				tile.shape:elasticity(tile.solid)
-				tile.shape:filter(0,0x00000001,0xffffffff)
+				level.static_body:shape({
+					shape="box",
+					halfWidth=(shape[3]-shape[1])/2,
+					halfHeight=(shape[4]-shape[2])/2,
+					center={(shape[3]+shape[1])/2,(shape[4]+shape[2])/2},
+					friction=tile.solid,
+					elasticity=tile.solid,
+				})
 			end
 			if tile.text then
 				tile.text_lines=wstr.smart_wrap(tile.text,(256-16)/8)

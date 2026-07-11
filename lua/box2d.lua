@@ -134,6 +134,25 @@ box2d.world=function(def)
 	return world
 end
 
+--[[#lua.box2d.world.destroy
+
+	world:destroy()
+
+Destroy the world and all sub objects ( body , joint , shape )
+
+]]
+box2d.world_functions.destroy=function(world)
+
+	for boxid,joint in pairs(world.joints) do
+		joint:destroy()
+	end
+	for boxid,body in pairs(world.bodys) do -- body will also destroy its shapes
+		body:destroy()
+	end
+	core.world_destroy(world[0])
+end
+
+
 --[[#lua.box2d.world.get
 
 	vars = world:get()
@@ -298,6 +317,22 @@ box2d.world_functions.body=function(world,def)
 	return body
 end
 
+--[[#lua.box2d.body.destroy
+
+	body:destroy()
+
+Destroy the body and all sub objects (shapes)
+
+]]
+box2d.body_functions.destroy=function(body)
+
+	for boxid,shape in pairs(body.shapes) do
+		shape:destroy()
+	end
+	core.body_destroy(body[0])
+	body.world.bodys[body.boxid]=nil
+end
+
 --[[#lua.box2d.body.get
 
 	vars = body:get()
@@ -449,6 +484,20 @@ box2d.body_functions.shape=function(body,def)
 	body.world.shapes[ shape.boxid ]=shape
 
 	return shape
+end
+
+--[[#lua.box2d.shape.destroy
+
+	shape:destroy()
+
+Destroy the shape and all sub objects (none)
+
+]]
+box2d.shape_functions.destroy=function(shape)
+
+	core.shape_destroy(shape[0])
+	shape.body.shapes[shape.boxid]=nil
+	shape.world.shapes[shape.boxid]=nil
 end
 
 --[[#lua.box2d.shape.get
@@ -603,6 +652,19 @@ box2d.world_functions.joint=function(world,def)
 	world.joints[ joint.boxid ]=joint
 
 	return joint
+end
+
+--[[#lua.box2d.joint.destroy
+
+	joint:destroy()
+
+Destroy the joint and all sub objects (none)
+
+]]
+box2d.joint_functions.destroy=function(joint)
+
+	core.joint_destroy(joint[0])
+	joint.world.joint[joint.boxid]=nil
 end
 
 --[[#lua.box2d.joint.get

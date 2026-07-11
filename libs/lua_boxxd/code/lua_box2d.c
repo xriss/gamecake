@@ -280,11 +280,6 @@ static int lua_b2_world_destroy (lua_State *l)
 b2WorldId *pp=lua_b2_world_ptr_ptr(l, 1 );
 	if(B2_IS_NON_NULL(*pp))
 	{
-// remove registry link
-		lua_pushlightuserdata(l,pp);
-		lua_pushnil(l);
-		lua_settable(l,LUA_REGISTRYINDEX);
-
 		b2DestroyWorld(*pp);
 		*pp=(b2WorldId){0};
 	}
@@ -813,11 +808,6 @@ static int lua_b2_body_destroy (lua_State *l)
 b2BodyId *pp=lua_b2_body_ptr_ptr(l, 1 );
 	if(B2_IS_NON_NULL(*pp))
 	{
-// remove registry link
-		lua_pushlightuserdata(l,pp);
-		lua_pushnil(l);
-		lua_settable(l,LUA_REGISTRYINDEX);
-
 		b2DestroyBody(*pp);
 		*pp=(b2BodyId){0};
 	}
@@ -1306,11 +1296,6 @@ static int lua_b2_shape_destroy (lua_State *l)
 b2ShapeId *pp=lua_b2_shape_ptr_ptr(l, 1 );
 	if(B2_IS_NON_NULL(*pp))
 	{
-// remove registry link
-		lua_pushlightuserdata(l,pp);
-		lua_pushnil(l);
-		lua_settable(l,LUA_REGISTRYINDEX);
-
 		int update=1;
 		if(!lua_isnil(l,2)) // optional
 		{
@@ -1793,11 +1778,6 @@ static int lua_b2_joint_destroy (lua_State *l)
 b2JointId *pp=lua_b2_joint_ptr_ptr(l, 1 );
 	if(B2_IS_NON_NULL(*pp))
 	{
-// remove registry link
-		lua_pushlightuserdata(l,pp);
-		lua_pushnil(l);
-		lua_settable(l,LUA_REGISTRYINDEX);
-
 		int update=1;
 		if(!lua_isnil(l,2)) // optional
 		{

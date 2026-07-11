@@ -46,46 +46,24 @@ kinetics.item.setup=function(kinetic)
 
 	kinetic:get_values()
 
-	local chipmunk=require("wetgenes.chipmunk")
-	kinetic.space=chipmunk.space()
-
--- uding gravity is bad, better to set it per body so we have more force control	
---	kinetic.space:gravity(0,200)
-	kinetic.space:damping(0.5)
-	kinetic.space:sleep_time_threshold(1)
-	kinetic.space:idle_speed_threshold(10)
-
-	kinetic.step=(1/16) -- amount of time to step each frame
-	kinetic.substeps=4 -- number of substeps
-	kinetic.fixedstep=kinetic.step/kinetic.substeps -- actual size of each discrete step
-
-	for name,info in pairs(kinetic.scene.infos) do
-		if info.collision_handlers then
-			for arg,arb in pairs(info.collision_handlers) do
-				kinetic.space:add_handler(arb,unpack(arg))
-			end
-		end
-	end
---[[
-	kinetic.world=bullet.world()
+	local box2d=require("box2d")
+	box2d.set({
+		LengthUnitsPerMeter=16,
+	})
+	kinetic.world=box2d.world({
+		gravity={0,0},
+	})
 
 	kinetic.step=(1/16) -- amount of time to step each frame
-	kinetic.substeps=4 -- number of substeps
-	kinetic.fixedstep=kinetic.step/kinetic.substeps -- actual size of each discrete step
-
-	kinetic.world:gravity( kinetic.gravity[1],kinetic.gravity[2],kinetic.gravity[3] )
-]]
+	kinetic.substeps=16 -- number of substeps
 
 	return kinetic
 end
 
 kinetics.item.clean=function(kinetic)
-	-- we need to call this so every sub part else is destroyed first
-	-- otherwise GC might do it in the wrong order if you just rely on it going out of scope
-	-- can cause a segfault
-	if kinetic.space then
---		kinetic.world:destroy()
-		kinetic.space=nil
+	if kinetic.world then
+		kinetic.world:destroy()
+		kinetic.world=nil
 	end
 end
 
@@ -94,23 +72,11 @@ kinetics.item.update=function(kinetic)
 
 	kinetic:get_values()
 
--- this resets gravity ( acc ) for all objects
---	kinetic.world:gravity( kinetic.gravity[1],kinetic.gravity[2],kinetic.gravity[3] )
-
 end
 
 kinetics.item.update_kinetic=function(kinetic)
 
---	kinetic.world:step( kinetic.fixedstep , kinetic.substeps )
-
-	for i=1,kinetic.substeps do
-		kinetic.space:step(kinetic.fixedstep)
-	end
-	
-	if kinetic.watch then
-		local it=kinetic.watch
-		display(it.caste,it.pos,it.rot,it.vel,it.ang)
-	end
+	kinetic.world:step(kinetic.step,kinetic.substeps)
 
 end
 
