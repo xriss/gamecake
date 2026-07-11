@@ -414,6 +414,7 @@ box2d.body_functions.info=function(body)
 	info.type = body:type()
 	info.transform = { body:transform() }
 	info.velocity = { body:velocity() }
+	info.isAwake = body:awake()
 	
 	return info
 end

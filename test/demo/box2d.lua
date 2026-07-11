@@ -7,19 +7,19 @@ local METER=16
 local SQR_METER=METER*METER
 
 local var_tostring=function(v)
-	if type(v)=="table" then -- any tables will be arrays of numbers
-		if v.is then
+	if type(v)=="table" then
+		if v.is then -- is it an object?
 			local a={}
 			for n,v in pairs(v) do a[#a+1]=n.."="..tostring(v) end
 			return "{ "..table.concat(a," , ").." }"
-		else
+		else -- or just an array
 			return "{ "..table.concat(v," , ").." }"
 		end
 	else
 		local s=tostring(v)
-		-- the second byte of a boxid is almost certainly 0
+		-- I think one byte of a boxid is almost certainly 0
 		-- unless you create more than 255 worlds, which you cant
-		-- without changing the box defaults
+		-- without changing B2_MAX_WORLDS
 		if s:find("\0") then -- find and convert boxids to hex
 			s="0x"..s:gsub(".", function(c) return ("%02x"):format(c:byte()) end)
 		end

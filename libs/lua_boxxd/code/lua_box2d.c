@@ -421,10 +421,7 @@ static int lua_b2_world_get (lua_State *l)
 	lua_pushnumber(l, b2World_GetHitEventThreshold(world) );
 	lua_setfield(l, -2 , "hitEventThreshold" );
 
-	b2Vec2 gravity = b2World_GetGravity(world);
-	lua_newtable(l);
-	lua_pushnumber(l, gravity.x );	lua_rawseti(l, -2 , 1 );
-	lua_pushnumber(l, gravity.y );	lua_rawseti(l, -2 , 2 );
+	lua_b2_push_b2Vec2(l, b2World_GetGravity(world) );
 	lua_setfield(l, -2 , "gravity" );
 
 	lua_pushnumber(l, b2World_GetMaximumLinearSpeed(world) );

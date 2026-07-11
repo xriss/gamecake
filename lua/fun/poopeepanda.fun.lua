@@ -931,15 +931,18 @@ end
 players.item.setup_kinetic=function(player)
 	if player.body then return end -- only create once
 	local world=player:get_singular("kinetic").world
-	player.body=world:body({})
+	player.body=world:body({
+		type="dynamic",
+	})
 	if player.mode=="spawn" or player.mode=="die" then
 		-- no collision when spawning
 	else
 		player.shape=player.body:shape({
 			shape="circle",
+			density=1/256,
 			radius=4,
-			friction=0.5,
-			elasticity=0.5,
+			material_friction=0.5,
+			material_restitution=0.5,
 			filter_categoryBits=players.collision_bits,
 			filter_maskBits=players.collision_mask,
 			filter_groupIndex=players.collision_type,
@@ -1227,6 +1230,8 @@ else
 --PRINT( ba_now , player.onfloor , player.jump )
 --PRINT( player.vel )
 
+PRINT( player.acc )
+
 end
 
 	player:set_values()
@@ -1439,12 +1444,14 @@ floaters.item.setup_kinetic=function(floater)
 	if floater.body then return end -- already done
 	local world=floater:get_singular("kinetic").world
 	floater.body=world:body({
+		type="dynamic",
 	})
 	floater.shape=floater.body:shape({
 		shape="circle",
+		density=1/256,
 		radius=6,
-		friction=0.5,
-		elasticity=0.5,
+		material_friction=0.5,
+		material_restitution=0.5,
 		filter_categoryBits=floaters.collision_bits,
 		filter_maskBits=floaters.collision_mask,
 		filter_groupIndex=floaters.collision_type,
@@ -1670,12 +1677,14 @@ fauna_eggs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local world=fauna:get_singular("kinetic").world
 	fauna.body=world:body({
+		type="dynamic",
 	})
 	fauna.shape=fauna.body:shape({
 		shape="circle",
+		density=1/256,
 		radius=4,
-		friction=0.5,
-		elasticity=0.5,
+		material_friction=0.5,
+		material_restitution=0.5,
 		filter_categoryBits=fauna_eggs.collision_bits,
 		filter_maskBits=fauna_eggs.collision_mask,
 		filter_groupIndex=fauna_eggs.collision_type,
@@ -1913,6 +1922,7 @@ fauna_slims.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local world=fauna:get_singular("kinetic").world
 	fauna.body=world:body({
+		type="dynamic",
 	})
 --	local space=fauna:get_singular("kinetic").space
 --	fauna.body=space:body(1,1)
@@ -1923,9 +1933,10 @@ fauna_slims.item.setup_kinetic=function(fauna)
 --		fauna.shape:filter(fauna.uid,fauna_slims.collision_bits,fauna_slims.collision_mask)
 		fauna.shape=fauna.body:shape({
 			shape="circle",
+			density=1/256,
 			radius=4,
-			friction=0.5,
-			elasticity=0.5,
+			material_friction=0.5,
+			material_restitution=0.5,
 			filter_categoryBits=fauna_slims.collision_bits,
 			filter_maskBits=fauna_slims.collision_mask,
 			filter_groupIndex=fauna_slims.collision_type,
@@ -2241,12 +2252,14 @@ fauna_trenchs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local world=fauna:get_singular("kinetic").world
 	fauna.body=world:body({
+		type="dynamic",
 	})
 	fauna.shape=fauna.body:shape({
 		shape="circle",
+		density=1/256,
 		radius=4,
-		friction=0.5,
-		elasticity=0.5,
+		material_friction=0.5,
+		material_restitution=0.5,
 		filter_categoryBits=fauna_trenchs.collision_bits,
 		filter_maskBits=fauna_trenchs.collision_mask,
 		filter_groupIndex=fauna_trenchs.collision_type,
@@ -2577,10 +2590,11 @@ fruits.item.setup_kinetic_reshape=function(fruit)
 	end
 	fruit.shape=fruit.body:shape({
 		shape="box",
+		density=1/256,
 		halfWidth=3,
 		halfHeight=3,
-		friction=1.0,
-		elasticity=0.5,
+		material_friction=1.0,
+		material_restitution=0.5,
 		filter_categoryBits=fruits.collision_bits,
 		filter_maskBits=fruits.collision_mask,
 		filter_groupIndex=fruits.collision_type,
@@ -2591,6 +2605,7 @@ fruits.item.setup_kinetic=function(fruit)
 	if fruit.body then return end -- already done
 	local world=fruit:get_singular("kinetic").world
 	fruit.body=world:body({
+		type="dynamic",
 	})
 	fruit:setup_kinetic_reshape()
 	fruit:set_body()
@@ -2754,9 +2769,10 @@ gibs.item.setup_kinetic_reshape=function(gib)
 	end
 	gib.shape=gib.body:shape({
 		shape="circle",
+		density=1/256,
 		radius=gib.size,
-		friction=1.0,
-		elasticity=0.5,
+		material_friction=1.0,
+		material_restitution=0.5,
 		filter_categoryBits=gibs.collision_bits,
 		filter_maskBits=gibs.collision_mask,
 		filter_groupIndex=gibs.collision_type,
@@ -2767,6 +2783,7 @@ gibs.item.setup_kinetic=function(gib)
 	if gib.body then return end -- already done
 	local world=gib:get_singular("kinetic").world
 	gib.body=world:body({
+		type="dynamic",
 	})
 	gib:setup_kinetic_reshape()
 	gib:set_body()
@@ -2929,10 +2946,11 @@ junks.item.setup_kinetic_reshape=function(junk)
 	end
 	junk.shape=junk.body:shape({
 		shape="box",
+		density=1/256,
 		halfWidth=4,
 		halfHeight=4,
-		friction=1.0,
-		elasticity=0.5,
+		material_friction=1.0,
+		material_restitution=0.5,
 		filter_categoryBits=junks.collision_bits,
 		filter_maskBits=junks.collision_mask,
 		filter_groupIndex=junks.collision_type,
@@ -2943,6 +2961,7 @@ junks.item.setup_kinetic=function(junk)
 	if junk.body then return end -- already done
 	local world=junk:get_singular("kinetic").world
 	junk.body=world:body({
+		type="dynamic",
 	})
 	junk:setup_kinetic_reshape()
 	junk:set_body()
@@ -3366,6 +3385,7 @@ levels.item.setup=function(level)
 	local world=level:get_singular("kinetic").world
 	local kinetic=level:get_singular("kinetic")
 	level.static_body=world:body({
+		type="static",
 	})
 	
 	local info=levels.infos[level.idx]
@@ -3434,11 +3454,12 @@ levels.item.setup=function(level)
 --print("shape",unpack(shape))
 				level.static_body:shape({
 					shape="box",
+					density=1/256,
 					halfWidth=(shape[3]-shape[1])/2,
 					halfHeight=(shape[4]-shape[2])/2,
 					center={(shape[3]+shape[1])/2,(shape[4]+shape[2])/2},
-					friction=tile.solid,
-					elasticity=tile.solid,
+					material_friction=tile.solid,
+					material_restitution=tile.solid,
 				})
 			end
 			if tile.text then
