@@ -130,20 +130,28 @@
    "name": "levels"
   },
   {
-   "count": 703,
+   "count": 708,
    "name": "lua"
   },
   {
-   "count": 27,
+   "count": 32,
    "name": "lua.box2d"
   },
   {
-   "count": 7,
+   "count": 9,
    "name": "lua.box2d.body"
   },
   {
    "count": 1,
    "name": "lua.box2d.body.awake"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.force"
   },
   {
    "count": 1,
@@ -170,8 +178,12 @@
    "name": "lua.box2d.get"
   },
   {
-   "count": 3,
+   "count": 4,
    "name": "lua.box2d.joint"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.joint.destroy"
   },
   {
    "count": 1,
@@ -186,8 +198,12 @@
    "name": "lua.box2d.set"
   },
   {
-   "count": 3,
+   "count": 4,
    "name": "lua.box2d.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.shape.destroy"
   },
   {
    "count": 1,
@@ -198,7 +214,7 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 11,
+   "count": 12,
    "name": "lua.box2d.world"
   },
   {
@@ -220,6 +236,10 @@
   {
    "count": 1,
    "name": "lua.box2d.world.contact_events"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.destroy"
   },
   {
    "count": 1,
@@ -3008,14 +3028,22 @@
  "_list": [
   {
    "body": "",
-   "count": 3,
+   "count": 4,
    "name": "lua.box2d.joint"
+  },
+  {
+   "body": "<pre><code>joint:destroy()\n</code></pre>\n<p>Destroy the joint and all sub objects (none)</p>\n",
+   "count": 1,
+   "file": "../lua/box2d.lua",
+   "line": 678,
+   "name": "lua.box2d.joint.destroy",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
   {
    "body": "<pre><code>vars = joint:get()\n</code></pre>\n<p>Get all joint variables in a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 608,
+   "line": 691,
    "name": "lua.box2d.joint.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3023,7 +3051,7 @@
    "body": "<pre><code>joint:set(vars)\n</code></pre>\n<p>Set all joint variables from a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 625,
+   "line": 708,
    "name": "lua.box2d.joint.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

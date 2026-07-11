@@ -130,20 +130,28 @@
    "name": "levels"
   },
   {
-   "count": 703,
+   "count": 708,
    "name": "lua"
   },
   {
-   "count": 27,
+   "count": 32,
    "name": "lua.box2d"
   },
   {
-   "count": 7,
+   "count": 9,
    "name": "lua.box2d.body"
   },
   {
    "count": 1,
    "name": "lua.box2d.body.awake"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.force"
   },
   {
    "count": 1,
@@ -170,8 +178,12 @@
    "name": "lua.box2d.get"
   },
   {
-   "count": 3,
+   "count": 4,
    "name": "lua.box2d.joint"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.joint.destroy"
   },
   {
    "count": 1,
@@ -186,8 +198,12 @@
    "name": "lua.box2d.set"
   },
   {
-   "count": 3,
+   "count": 4,
    "name": "lua.box2d.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.shape.destroy"
   },
   {
    "count": 1,
@@ -198,7 +214,7 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 11,
+   "count": 12,
    "name": "lua.box2d.world"
   },
   {
@@ -220,6 +236,10 @@
   {
    "count": 1,
    "name": "lua.box2d.world.contact_events"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.destroy"
   },
   {
    "count": 1,
@@ -3010,7 +3030,7 @@
    "body": "<pre><code>b = body:awake()\nb = body:awake(b)\n</code></pre>\n<p>get/set body sleeping state.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 339,
+   "line": 374,
    "name": "lua.box2d.body.awake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }
