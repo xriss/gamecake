@@ -130,15 +130,15 @@
    "name": "levels"
   },
   {
-   "count": 708,
+   "count": 713,
    "name": "lua"
   },
   {
-   "count": 32,
+   "count": 37,
    "name": "lua.box2d"
   },
   {
-   "count": 9,
+   "count": 10,
    "name": "lua.box2d.body"
   },
   {
@@ -156,6 +156,10 @@
   {
    "count": 1,
    "name": "lua.box2d.body.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.info"
   },
   {
    "count": 1,
@@ -178,7 +182,11 @@
    "name": "lua.box2d.get"
   },
   {
-   "count": 4,
+   "count": 1,
+   "name": "lua.box2d.info"
+  },
+  {
+   "count": 5,
    "name": "lua.box2d.joint"
   },
   {
@@ -191,6 +199,10 @@
   },
   {
    "count": 1,
+   "name": "lua.box2d.joint.info"
+  },
+  {
+   "count": 1,
    "name": "lua.box2d.joint.set"
   },
   {
@@ -198,7 +210,7 @@
    "name": "lua.box2d.set"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.box2d.shape"
   },
   {
@@ -211,10 +223,14 @@
   },
   {
    "count": 1,
+   "name": "lua.box2d.shape.info"
+  },
+  {
+   "count": 1,
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 12,
+   "count": 13,
    "name": "lua.box2d.world"
   },
   {
@@ -244,6 +260,10 @@
   {
    "count": 1,
    "name": "lua.box2d.world.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.info"
   },
   {
    "count": 1,
@@ -3030,7 +3050,7 @@
    "body": "<pre><code>world:destroy()\n</code></pre>\n<p>Destroy the world and all sub objects ( body , joint , shape )</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 137,
+   "line": 157,
    "name": "lua.box2d.world.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

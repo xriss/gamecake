@@ -130,15 +130,15 @@
    "name": "levels"
   },
   {
-   "count": 708,
+   "count": 713,
    "name": "lua"
   },
   {
-   "count": 32,
+   "count": 37,
    "name": "lua.box2d"
   },
   {
-   "count": 9,
+   "count": 10,
    "name": "lua.box2d.body"
   },
   {
@@ -156,6 +156,10 @@
   {
    "count": 1,
    "name": "lua.box2d.body.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.info"
   },
   {
    "count": 1,
@@ -178,7 +182,11 @@
    "name": "lua.box2d.get"
   },
   {
-   "count": 4,
+   "count": 1,
+   "name": "lua.box2d.info"
+  },
+  {
+   "count": 5,
    "name": "lua.box2d.joint"
   },
   {
@@ -191,6 +199,10 @@
   },
   {
    "count": 1,
+   "name": "lua.box2d.joint.info"
+  },
+  {
+   "count": 1,
    "name": "lua.box2d.joint.set"
   },
   {
@@ -198,7 +210,7 @@
    "name": "lua.box2d.set"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.box2d.shape"
   },
   {
@@ -211,10 +223,14 @@
   },
   {
    "count": 1,
+   "name": "lua.box2d.shape.info"
+  },
+  {
+   "count": 1,
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 12,
+   "count": 13,
    "name": "lua.box2d.world"
   },
   {
@@ -244,6 +260,10 @@
   {
    "count": 1,
    "name": "lua.box2d.world.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.info"
   },
   {
    "count": 1,
@@ -3030,7 +3050,7 @@
    "body": "<pre><code>box2d.set(vars)\n</code></pre>\n<p>Set all box2d variables from a table. Possible table keys are.</p>\n<pre><code>LengthUnitsPerMeter\n</code></pre>\n<p>Units per meter, should be set first before creating a world.</p>\n<p>Defaults to 1.</p>\n<p>Obviously points and vectors should be divided by units to get their \nvalue in meters but slightly less obviously density values end up \ngetting multiplied by units squared since they are area related.</p>\n<p>What that means is if you are thinking in meters eg you want to set \ngravity to 10m/s you will need to multiply it by units. Density which \nwould normally be 1 should be 1/(units^2) in order to keep the results \nclose to defaults.</p>\n<p>Note that Box2d recommends not changing this, be we cool, yeah?</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 68,
+   "line": 86,
    "name": "lua.box2d.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }
