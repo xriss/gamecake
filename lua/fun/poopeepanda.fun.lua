@@ -167,7 +167,7 @@ end
 
 local main_setup=function()
 
-	for _,snd in ipairs(sound_data) do
+	for _,snd in ipairs(sound_data.sounds) do
 		if snd.name then
 			system.components.sfx.render(snd)
 		end
@@ -1911,8 +1911,8 @@ fauna_slims.collision_mask=0x00ffffff	-- interact bitmask
 
 fauna_slims.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
-	local world=floater:get_singular("kinetic").world
-	floater.body=world:body({
+	local world=fauna:get_singular("kinetic").world
+	fauna.body=world:body({
 	})
 --	local space=fauna:get_singular("kinetic").space
 --	fauna.body=space:body(1,1)
@@ -1921,7 +1921,7 @@ fauna_slims.item.setup_kinetic=function(fauna)
 --		fauna.shape:friction(0.5)
 --		fauna.shape:elasticity(0.5)
 --		fauna.shape:filter(fauna.uid,fauna_slims.collision_bits,fauna_slims.collision_mask)
-		floater.shape=floater.body:shape({
+		fauna.shape=fauna.body:shape({
 			shape="circle",
 			radius=4,
 			friction=0.5,

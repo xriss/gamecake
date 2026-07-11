@@ -407,6 +407,27 @@ box2d.body_functions.velocity=function(body,x,y,r)
 	return core.body_velocity(body[0],x,y,r)
 end
 
+--[[#lua.box2d.body.force
+
+	body:force()
+	body:force(x,y)
+	body:force(x,y,r)
+
+set body force, note that this does not return the current force and 
+calling it without any values will clear the current force.
+
+x,y is applied to center mass, will be cleared if nil
+
+r is torque , will be cleared if nil
+
+force is applied then cleared during an update so this needs to be set 
+*every* frame if you want a constant force.
+
+]]
+box2d.body_functions.force=function(body,x,y,r)
+	return core.body_force(body[0],x,y,r)
+end
+
 --[[#lua.box2d.world.body.shape
 
 	shape=body:shape(def)
@@ -497,7 +518,7 @@ box2d.shape_functions.destroy=function(shape)
 
 	core.shape_destroy(shape[0])
 	shape.body.shapes[shape.boxid]=nil
-	shape.world.shapes[shape.boxid]=nil
+	shape.body.world.shapes[shape.boxid]=nil
 end
 
 --[[#lua.box2d.shape.get

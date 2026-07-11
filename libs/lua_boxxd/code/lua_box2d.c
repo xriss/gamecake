@@ -1080,6 +1080,39 @@ float r;
 
 /*+---------------------------------------------------------------------
 
+Set body force this is not accumulative, it is a reset of the current 
+force that will be used on this body at the next update.
+
+*/
+static int lua_b2_body_force (lua_State *l)
+{
+b2Vec2 p;
+float r;
+
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	b2Body_ClearForces(body); // always clear force and torque
+
+	if(!lua_isnil(l,3)) // only set if given
+	{
+		p.x=(float)lua_tonumber(l, 2 );
+		p.y=(float)lua_tonumber(l, 3 );
+
+		b2Body_ApplyForceToCenter(body,p,1);
+	}
+	if(!lua_isnil(l,4)) // only set torque if given ( 0 if missing )
+	{
+		r=(float)lua_tonumber(l, 4 );
+		
+		b2Body_ApplyTorque(body,r,1);
+	}
+
+	return 0;
+}
+
+
+/*+---------------------------------------------------------------------
+
 shape create/destroy
 
 */
@@ -1902,6 +1935,7 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"body_awake",				lua_b2_body_awake},
 		{"body_transform",			lua_b2_body_transform},
 		{"body_velocity",			lua_b2_body_velocity},
+		{"body_force",				lua_b2_body_force},
 
 		{"shape_create",			lua_b2_shape_create},
 		{"shape_destroy",			lua_b2_shape_destroy},

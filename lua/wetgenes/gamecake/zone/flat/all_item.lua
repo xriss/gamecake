@@ -304,26 +304,16 @@ all.item.set_body=function(it)
 
 	it:get_value("pos")
 	it:get_value("vel")
-	it:get_value("acc")
 	it:get_value("rot")
 	it:get_value("ang")
 	
 	it.body:transform( it.pos[1],it.pos[2], it.rot*(math.pi*2) )
 	it.body:velocity(  it.vel[1],it.vel[2], it.ang*(math.pi*2) )
 	
---	if it.acc then
---		it.body:force(it.acc[1],it.acc[2])
---	end
-
---[[
-	it.body:transform(
-		(it.pos[1]) , (it.pos[2]) , (it.pos[3]) ,
-		(it.rot[1]) , (it.rot[2]) , (it.rot[3]) , (it.rot[4]) )
-	it.body:velocity( (it.vel[1]) , (it.vel[2]) , (it.vel[3]) )
-	it.body:angular_velocity( (it.ang[1]) , (it.ang[2]) , (it.ang[3]) )
-
-	if it.body_active then it.body:active(true) end -- keep this body active
-]]
+	if it.acc then
+		it:get_value("acc")
+		it.body:force(it.acc[1],it.acc[2])
+	end
 
 end
 
@@ -342,25 +332,6 @@ all.item.get_body=function(it)
 	it:set_value("vel",it.vel)
 	it:set_value("rot",it.rot)
 	it:set_value("ang",it.ang)
-
---	if it.acc then
---		local ax,ay=it.body:force()
---		it.acc=V3(ax,ay,0)
---		it:set_value("acc",it.acc)
---	end
-
---[[
-	local px,py,pz,qx,qy,qz,qw=it.body:transform()
-	it.pos=V3(snap(px),snap(py),snap(pz))
-	it.rot=Q4(snap(qx),snap(qy),snap(qz),snap(qw))
-	it.rot:normalize()
-
-	local vx,vy,vz=it.body:velocity()
-	it.vel=V3( snap(vx),snap(vy),snap(vz) )
-
-	local ax,ay,az=it.body:angular_velocity()
-	it.ang=V3( snap(ax),snap(ay),snap(az) )
-]]
 
 end
 
