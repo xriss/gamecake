@@ -16,9 +16,25 @@ local var_tostring=function(v)
 			return "{ "..table.concat(v," , ").." }"
 		end
 	else
-		return tostring(v)
+		local s=tostring(v)
+		-- the second byte of a boxid is almost certainly 0
+		-- unless you create more than 255 worlds, which you cant
+		-- without changing the box defaults
+		if s:find("\0") then -- find and convert boxids to hex
+			s="0x"..s:gsub(".", function(c) return ("%02x"):format(c:byte()) end)
+		end
+		return s
 	end
 end
+local dump_vars=function(vs,prefix)
+	local t={}
+	for n,v in pairs(vs) do
+		t[#t+1]=string.format("%s%-32s = %s",prefix or "",n,var_tostring(v))
+	end
+	table.sort(t)
+	print( table.concat(t,"\n") )
+end
+
 
 -- adjust default box2d variables
 box2d.set({
@@ -26,52 +42,40 @@ box2d.set({
 })
 
 print("box2d")
-for n,v in pairs( box2d:get() ) do
-	print("box2d",n,"=",var_tostring(v))
-end
+dump_vars(box2d.info(),"box2d\t")
 
 -- create a world
 local world=box2d.world({
 	gravity={0,10*METER,0},
 })
 print("world")
-for n,v in pairs( world:get() ) do
-	print("world",n,"=",var_tostring(v))
-end
+dump_vars(world:info(),"world\t")
 
 -- create body
 local bodyA=world:body({
 })
 print("bodyA")
-for n,v in pairs( bodyA:get() ) do
-	print("body",n,"=",var_tostring(v))
-end
+dump_vars(bodyA:info(),"bodyA\t")
 
 local shapeA=bodyA:shape({
 	shape="circle",
 	radius=1*METER,
 })
 print("shapeA")
-for n,v in pairs( shapeA:get() ) do
-	print("shape",n,"=",var_tostring(v))
-end
+dump_vars(shapeA:info(),"shapeA\t")
 
 -- create body
 local bodyB=world:body({
 })
 print("bodyB")
-for n,v in pairs( bodyB:get() ) do
-	print("body",n,"=",var_tostring(v))
-end
+dump_vars(bodyB:info(),"bodyB\t")
 
 local shapeB=bodyB:shape({
 	shape="circle",
 	radius=1*METER,
 })
 print("shapeB")
-for n,v in pairs( shapeB:get() ) do
-	print("shape",n,"=",var_tostring(v))
-end
+dump_vars(shapeB:info(),"shapeB\t")
 
 local joint=world:joint({
 	joint="distance",
@@ -82,9 +86,7 @@ local joint=world:joint({
 	forceThreshold=0,
 })
 print("joint")
-for n,v in pairs( joint:get() ) do
-	print("joint",n,"=",var_tostring(v))
-end
+dump_vars(joint:info(),"joint\t")
 
 local hits=world:cast_ray({
 	origin={0,-100*METER},
@@ -92,8 +94,15 @@ local hits=world:cast_ray({
 })
 print("raycast")
 for i,hit in ipairs(hits) do
-	for n,v in pairs( hit ) do
-		print("hit",i,n,"=",var_tostring(v))
-	end
+	dump_vars(hit,"hit"..i.."\t")
 end
 
+-- advance a second
+world:step(1,256)
+
+print("world")
+dump_vars(world:info(),"world\t")
+print("bodyA")
+dump_vars(bodyA:info(),"bodyA\t")
+print("bodyB")
+dump_vars(bodyB:info(),"bodyB\t")

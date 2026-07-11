@@ -100,10 +100,10 @@ static void lua_b2_push_b2Transform (lua_State *l, b2Transform t)
 
 /*+---------------------------------------------------------------------
 
-Get box2d variables
+Get box2d information
 
 */
-static int lua_b2_get (lua_State *l)
+static int lua_b2_info (lua_State *l)
 {
 	lua_newtable(l);
 	
@@ -117,11 +117,23 @@ static int lua_b2_get (lua_State *l)
 	lua_rawseti(l, -2 , 3 );
 	lua_setfield(l, -2 , "version" );
 
-	lua_pushnumber(l, b2GetLengthUnitsPerMeter() );
-	lua_setfield(l, -2 , "lengthUnitsPerMeter" );
-
 	lua_pushnumber(l, b2GetByteCount() );
 	lua_setfield(l, -2 , "byteCount" );
+
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
+Get box2d variables
+
+*/
+static int lua_b2_get (lua_State *l)
+{
+	lua_newtable(l);
+	
+	lua_pushnumber(l, b2GetLengthUnitsPerMeter() );
+	lua_setfield(l, -2 , "lengthUnitsPerMeter" );
 
 	return 1;
 }
@@ -289,6 +301,105 @@ b2WorldId *pp=lua_b2_world_ptr_ptr(l, 1 );
 
 /*+---------------------------------------------------------------------
 
+Get world information
+
+*/
+static int lua_b2_world_info (lua_State *l)
+{
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
+
+	lua_newtable(l);
+
+	b2Profile 	profile = b2World_GetProfile (world);
+
+	lua_pushnumber(l,     profile.step );
+	lua_setfield(l, -2 , "profile_step" );
+	lua_pushnumber(l,     profile.pairs );
+	lua_setfield(l, -2 , "profile_pairs" );
+	lua_pushnumber(l,     profile.collide );
+	lua_setfield(l, -2 , "profile_collide" );
+	lua_pushnumber(l,     profile.solve );
+	lua_setfield(l, -2 , "profile_solve" );
+	lua_pushnumber(l,     profile.solverSetup );
+	lua_setfield(l, -2 , "profile_solverSetup" );
+	lua_pushnumber(l,     profile.constraints );
+	lua_setfield(l, -2 , "profile_constraints" );
+	lua_pushnumber(l,     profile.prepareConstraints );
+	lua_setfield(l, -2 , "profile_prepareConstraints" );
+	lua_pushnumber(l,     profile.integrateVelocities );
+	lua_setfield(l, -2 , "profile_integrateVelocities" );
+	lua_pushnumber(l,     profile.warmStart );
+	lua_setfield(l, -2 , "profile_warmStart" );
+	lua_pushnumber(l,     profile.solveImpulses );
+	lua_setfield(l, -2 , "profile_solveImpulses" );
+	lua_pushnumber(l,     profile.integratePositions );
+	lua_setfield(l, -2 , "profile_integratePositions" );
+	lua_pushnumber(l,     profile.relaxImpulses );
+	lua_setfield(l, -2 , "profile_relaxImpulses" );
+	lua_pushnumber(l,     profile.applyRestitution );
+	lua_setfield(l, -2 , "profile_applyRestitution" );
+	lua_pushnumber(l,     profile.storeImpulses );
+	lua_setfield(l, -2 , "profile_storeImpulses" );
+	lua_pushnumber(l,     profile.splitIslands );
+	lua_setfield(l, -2 , "profile_splitIslands" );
+	lua_pushnumber(l,     profile.transforms );
+	lua_setfield(l, -2 , "profile_transforms" );
+	lua_pushnumber(l,     profile.sensorHits );
+	lua_setfield(l, -2 , "profile_sensorHits" );
+	lua_pushnumber(l,     profile.jointEvents );
+	lua_setfield(l, -2 , "profile_jointEvents" );
+	lua_pushnumber(l,     profile.hitEvents );
+	lua_setfield(l, -2 , "profile_hitEvents" );
+	lua_pushnumber(l,     profile.refit );
+	lua_setfield(l, -2 , "profile_refit" );
+	lua_pushnumber(l,     profile.bullets );
+	lua_setfield(l, -2 , "profile_bullets" );
+	lua_pushnumber(l,     profile.sleepIslands );
+	lua_setfield(l, -2 , "profile_sleepIslands" );
+	lua_pushnumber(l,     profile.sensors );
+	lua_setfield(l, -2 , "profile_sensors" );
+
+	b2Counters 	counters = b2World_GetCounters (world);
+
+	lua_pushnumber(l,     counters.byteCount );
+	lua_setfield(l, -2 , "counters_byteCount" );
+	lua_pushnumber(l,     counters.bodyCount );
+	lua_setfield(l, -2 , "counters_bodyCount" );
+	lua_pushnumber(l,     counters.shapeCount );
+	lua_setfield(l, -2 , "counters_shapeCount" );
+	lua_pushnumber(l,     counters.contactCount );
+	lua_setfield(l, -2 , "counters_contactCount" );
+	lua_pushnumber(l,     counters.jointCount );
+	lua_setfield(l, -2 , "counters_jointCount" );
+	lua_pushnumber(l,     counters.islandCount );
+	lua_setfield(l, -2 , "counters_islandCount" );
+	lua_pushnumber(l,     counters.stackUsed );
+	lua_setfield(l, -2 , "counters_stackUsed" );
+	lua_pushnumber(l,     counters.staticTreeHeight );
+	lua_setfield(l, -2 , "counters_staticTreeHeight" );
+	lua_pushnumber(l,     counters.treeHeight );
+	lua_setfield(l, -2 , "counters_treeHeight" );
+	lua_pushnumber(l,     counters.taskCount );
+	lua_setfield(l, -2 , "counters_taskCount" );
+	lua_pushnumber(l,     counters.awakeContactCount );
+	lua_setfield(l, -2 , "counters_awakeContactCount" );
+	lua_pushnumber(l,     counters.recycledContactCount );
+	lua_setfield(l, -2 , "counters_recycledContactCount" );
+
+	lua_newtable(l);
+	for( int i=0 ; i<24 ; i++ )
+	{
+		lua_pushnumber(l,     counters.colorCounts[i] );
+		lua_rawseti(l, -2 , i+1 );
+	}
+	lua_setfield(l, -2 , "counters_colorCounts" );
+	
+	return 1;
+}
+
+
+/*+---------------------------------------------------------------------
+
 Get world variables
 
 */
@@ -325,7 +436,6 @@ static int lua_b2_world_get (lua_State *l)
 
 	return 1;
 }
-
 
 /*+---------------------------------------------------------------------
 
@@ -768,12 +878,23 @@ b2BodyId *pp;
 		lua_getfield(l,2,"name");
 		if(!lua_isnil(l,-1)) { def.name = lua_tostring(l,-1); }
 		lua_pop(l,1);
+
+		lua_getfield(l,2,"transform"); // position and rotation combined
+		if(!lua_isnil(l,-1))
+		{
+			b2Transform t=lua_b2_read_b2Transform(l);
+			def.position=t.p;
+			def.rotation=t.q;
+			lua_pop(l,1);
+		}
+		lua_pop(l,1);
 		lua_getfield(l,2,"position");
 		if(!lua_isnil(l,-1)) { def.position=lua_b2_read_b2Vec2(l); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"rotation");
 		if(!lua_isnil(l,-1)) { def.rotation = b2MakeRot((float)lua_tonumber(l,-1)); }
 		lua_pop(l,1);
+
 		lua_getfield(l,2,"sleepThreshold");
 		if(!lua_isnil(l,-1)) { def.sleepThreshold = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
@@ -812,6 +933,21 @@ b2BodyId *pp=lua_b2_body_ptr_ptr(l, 1 );
 		*pp=(b2BodyId){0};
 	}
 	return 0;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Get body information
+
+*/
+static int lua_b2_body_info (lua_State *l)
+{
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	lua_newtable(l);
+
+	return 1;
 }
 
 
@@ -1342,10 +1478,10 @@ b2ShapeId *pp=lua_b2_shape_ptr_ptr(l, 1 );
 
 /*+---------------------------------------------------------------------
 
-Get shape variables
+Get shape information
 
 */
-static int lua_b2_shape_get (lua_State *l)
+static int lua_b2_shape_info (lua_State *l)
 {
 	b2ShapeId shape = lua_b2_shape_ptr(l, 1 );
 
@@ -1360,6 +1496,21 @@ static int lua_b2_shape_get (lua_State *l)
 	else                                  { lua_pushstring(l, "unknown"      ); }
 	lua_setfield(l, -2 , "type" );
 
+	return 1;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Get shape variables
+
+*/
+static int lua_b2_shape_get (lua_State *l)
+{
+	b2ShapeId shape = lua_b2_shape_ptr(l, 1 );
+
+	lua_newtable(l);
+	
 	lua_pushnumber(l, b2Shape_GetFriction(shape) );
 	lua_setfield(l, -2 , "friction" );
 
@@ -1388,7 +1539,6 @@ static int lua_b2_shape_get (lua_State *l)
 
 	return 1;
 }
-
 
 /*+---------------------------------------------------------------------
 
@@ -1824,10 +1974,10 @@ b2JointId *pp=lua_b2_joint_ptr_ptr(l, 1 );
 
 /*+---------------------------------------------------------------------
 
-Get joint variables
+Get joint information
 
 */
-static int lua_b2_joint_get (lua_State *l)
+static int lua_b2_joint_info (lua_State *l)
 {
 	b2JointId joint = lua_b2_joint_ptr(l, 1 );
 
@@ -1844,13 +1994,6 @@ static int lua_b2_joint_get (lua_State *l)
 	else                               { lua_pushstring(l, "unknown"   ); }
 	lua_setfield(l, -2 , "type" );
 	
-/*
-
-not sure about body ids, you cant change them and you must set them on creation
-they should probably just be cached in the lua joint table?
-
-maybe just cache the type too? Unsure.
-
 	b2BodyId bodyA = b2Joint_GetBodyA(joint);
 	lua_pushlstring(l,(const char *)&bodyA,sizeof(b2BodyId)); // id to (non printable) string
 	lua_setfield(l, -2 , "bodyIdA" );
@@ -1858,7 +2001,21 @@ maybe just cache the type too? Unsure.
 	b2BodyId bodyB = b2Joint_GetBodyB(joint);
 	lua_pushlstring(l,(const char *)&bodyB,sizeof(b2BodyId)); // id to (non printable) string
 	lua_setfield(l, -2 , "bodyIdB" );
+
+	return 1;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Get joint variables
+
 */
+static int lua_b2_joint_get (lua_State *l)
+{
+	b2JointId joint = lua_b2_joint_ptr(l, 1 );
+
+	lua_newtable(l);
 
 	lua_pushboolean(l, b2Joint_GetCollideConnected(joint) );
 	lua_setfield(l, -2 , "collideConnected" );
@@ -1912,12 +2069,14 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{
+		{"info",					lua_b2_info},
 		{"get",						lua_b2_get},
 		{"set",						lua_b2_set},
 		{"contact",					lua_b2_contact},
 
 		{"world_create",			lua_b2_world_create},
 		{"world_destroy",			lua_b2_world_destroy},
+		{"world_info",				lua_b2_world_info},
 		{"world_get",				lua_b2_world_get},
 		{"world_set",				lua_b2_world_set},
 		{"world_step",				lua_b2_world_step},
@@ -1929,6 +2088,7 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 
 		{"body_create",				lua_b2_body_create},
 		{"body_destroy",			lua_b2_body_destroy},
+		{"body_info",				lua_b2_body_info},
 		{"body_get",				lua_b2_body_get},
 		{"body_set",				lua_b2_body_set},
 		{"body_type",				lua_b2_body_type},
@@ -1939,11 +2099,13 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 
 		{"shape_create",			lua_b2_shape_create},
 		{"shape_destroy",			lua_b2_shape_destroy},
+		{"shape_info",				lua_b2_shape_info},
 		{"shape_get",				lua_b2_shape_get},
 		{"shape_set",				lua_b2_shape_set},
 
 		{"joint_create",			lua_b2_joint_create},
 		{"joint_destroy",			lua_b2_joint_destroy},
+		{"joint_info",				lua_b2_joint_info},
 		{"joint_get",				lua_b2_joint_get},
 		{"joint_set",				lua_b2_joint_set},
 

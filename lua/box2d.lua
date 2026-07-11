@@ -39,25 +39,43 @@ box2d.joint_functions={is="joint"}
 box2d.joint_metatable={__index=box2d.joint_functions}
 
 
+--[[#lua.box2d.info
+
+	info = box2d.info()
+
+Get all box2d information in a table. Returned table keys are.
+
+	version
+
+A table containing 3 values
+
+	byteCount
+
+Internal memory use.
+
+This also includes everything returned by box2d.get
+
+]]
+box2d.info=function()
+
+	local info=core.info()
+
+	for n,v in pairs(core.get()) do
+		info[n]=v
+	end
+	
+	return info
+end
+
 --[[#lua.box2d.get
 
 	vars = box2d.get()
 
 Get all box2d variables in a table. Returned table keys are.
 
-	version
-
-A table containing 3 values
-
-
-	byteCount
-
-Internal memory use.
-
-
 	lengthUnitsPerMeter
 
-Values that may also be set, see box2d.set for more information.
+see box2d.set for more information.
 
 ]]
 box2d.get=function()
@@ -124,6 +142,8 @@ Booleans should be true or false
 box2d.world=function(def)
 	local world={}
 
+	world.def=def
+
 	world.bodys={}	-- engrish
 	world.joints={}
 	world.shapes={}
@@ -152,6 +172,36 @@ box2d.world_functions.destroy=function(world)
 	core.world_destroy(world[0])
 end
 
+
+--[[#lua.box2d.world.info
+
+	info = world:info()
+
+This returns the def table used to create the world along with as much 
+updated information as we have available, mostly intended as a 
+debugging aid.
+
+This is the actual def table (some values are hard to query later) so 
+if you edit it or if you create this object using a non unique def 
+table things can get strange.
+
+]]
+box2d.world_functions.info=function(world)
+
+	local info=world.def
+	
+	for n,v in pairs(core.world_info(world[0])) do
+		info[n]=v
+	end
+
+	for n,v in pairs(core.world_get(world[0])) do
+		info[n]=v
+	end
+
+	info.boxid=world.boxid
+	
+	return info
+end
 
 --[[#lua.box2d.world.get
 
@@ -306,6 +356,7 @@ type is a string and must be "static" or "kinematic" or "dynamic"
 box2d.world_functions.body=function(world,def)
 	local body={}
 	
+	body.def=def
 	body.world=world
 	body.shapes={}
 
@@ -331,6 +382,40 @@ box2d.body_functions.destroy=function(body)
 	end
 	core.body_destroy(body[0])
 	body.world.bodys[body.boxid]=nil
+end
+
+--[[#lua.box2d.body.info
+
+	info = body:info()
+
+This returns the def table used to create the body along with as much 
+updated information as we have available, mostly intended as a 
+debugging aid.
+
+This is the actual def table (some values are hard to query later) so 
+if you edit it or if you create this object using a non unique def 
+table things can get strange.
+
+]]
+box2d.body_functions.info=function(body)
+
+	local info=body.def
+	
+	for n,v in pairs(core.body_info(body[0])) do
+		info[n]=v
+	end
+
+	for n,v in pairs(core.body_get(body[0])) do
+		info[n]=v
+	end
+
+	info.boxid=body.boxid
+	
+	info.type = body:type()
+	info.transform = { body:transform() }
+	info.velocity = { body:velocity() }
+	
+	return info
 end
 
 --[[#lua.box2d.body.get
@@ -497,6 +582,7 @@ set in a b2Polygon using b2MakeOffsetRoundedBox
 box2d.body_functions.shape=function(body,def)
 	local shape={}
 	
+	shape.def=def
 	shape.body=body
 	setmetatable(shape,box2d.shape_metatable)
 	shape[0],shape.boxid=core.shape_create(body[0],def)
@@ -519,6 +605,36 @@ box2d.shape_functions.destroy=function(shape)
 	core.shape_destroy(shape[0])
 	shape.body.shapes[shape.boxid]=nil
 	shape.body.world.shapes[shape.boxid]=nil
+end
+
+--[[#lua.box2d.shape.info
+
+	info = shape:info()
+
+This returns the def table used to create the shape along with as much 
+updated information as we have available, mostly intended as a 
+debugging aid.
+
+This is the actual def table (some values are hard to query later) so 
+if you edit it or if you create this object using a non unique def 
+table things can get strange.
+
+]]
+box2d.shape_functions.info=function(shape)
+
+	local info=shape.def
+	
+	for n,v in pairs(core.shape_info(shape[0])) do
+		info[n]=v
+	end
+
+	for n,v in pairs(core.shape_get(shape[0])) do
+		info[n]=v
+	end
+	
+	info.boxid=shape.boxid
+
+	return info
 end
 
 --[[#lua.box2d.shape.get
@@ -661,6 +777,7 @@ set in a b2WheelJointDef
 box2d.world_functions.joint=function(world,def)
 	local joint={}
 	
+	joint.def=def
 	joint.world=world
 	
 	-- auto convert body tables to body boxids
@@ -688,6 +805,40 @@ box2d.joint_functions.destroy=function(joint)
 	joint.world.joint[joint.boxid]=nil
 end
 
+--[[#lua.box2d.joint.info
+
+	info = joint:info()
+
+This returns the def table used to create the joint along with as much 
+updated information as we have available, mostly intended as a 
+debugging aid.
+
+This is the actual def table (some values are hard to query later) so 
+if you edit it or if you create this object using a non unique def 
+table things can get strange.
+
+]]
+box2d.joint_functions.info=function(joint)
+
+	local info=joint.def
+	
+	for n,v in pairs(core.joint_info(joint[0])) do
+		info[n]=v
+	end
+
+	for n,v in pairs(core.joint_get(joint[0])) do
+		info[n]=v
+	end
+
+	-- auto map ids to current body , possibly nil if body is deleted
+	if info.bodyIdA then info.bodyA=joint.world.bodys[ info.bodyIdA ] end
+	if info.bodyIdB then info.bodyB=joint.world.bodys[ info.bodyIdB ] end
+
+	info.boxid=joint.boxid
+	
+	return info
+end
+
 --[[#lua.box2d.joint.get
 
 	vars = joint:get()
@@ -696,13 +847,7 @@ Get all joint variables in a table.
 
 ]]
 box2d.joint_functions.get=function(joint)
-	local vars=core.joint_get(joint[0])
-
--- not sure we should do this?
---if vars.bodyIdA then vars.bodyIdA=joint.world.bodys[ vars.bodyIdA ] end
---if vars.bodyIdB then vars.bodyIdB=joint.world.bodys[ vars.bodyIdB ] end
-
-	return vars
+	return core.joint_get(joint[0])
 end
 
 --[[#lua.box2d.joint.set
