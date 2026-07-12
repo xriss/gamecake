@@ -55,22 +55,22 @@ sysopts={
 		},
 	},
 	icon=[[
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 Y Y O O Y Y O O o o 0 0 0 0 
-0 0 0 0 0 Y Y O O Y Y O O o o 0 0 0 0 
-0 0 0 Y Y O O o o O O o o r r r r 0 0 
-0 0 0 Y Y O O o o O O o o r r r r 0 0 
-0 0 0 s s s s F F F F F F f f f f 0 0 
-0 0 0 s s s s F F F F F F f f f f 0 0 
-0 0 0 Y Y Y Y Y Y Y Y Y Y o o o o 0 0 
-0 0 0 Y Y Y Y Y Y Y Y Y Y o o o o 0 0 
-0 0 0 s s s s F F F F F F f f f f 0 0 
-0 0 0 s s s s F F F F F F f f f f 0 0 
-0 0 0 o o o o O O O O O O r r r r 0 0 
-0 0 0 o o o o O O O O O O r r r r 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+. . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . 
+. . . . . Y Y O O Y Y O O o o . . . . 
+. . . . . Y Y O O Y Y O O o o . . . . 
+. . . Y Y O O o o O O o o r r r r . . 
+. . . Y Y O O o o O O o o r r r r . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
+. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . o o o o O O O O O O r r r r . . 
+. . . o o o o O O O O O O r r r r . . 
+. . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . 
 ]],
 }
 
@@ -680,7 +680,6 @@ players.values={
 	foot=8,
 	onfloor=0,
 	flap=0,
-	jump_force=0,
 	jump_debounce=0,
 	holdtime=0,
 	walk=0,
@@ -896,7 +895,7 @@ end
 
 players.collision_type=0x00040001	-- assigned type
 players.collision_bits=0x00000100	-- assigned bitmask
-players.collision_mask=0x00ffffff	-- interact bitmask
+players.collision_mask=0x00fffeff	-- interact bitmask
 --[[
 players.collision_handlers={
 	[{players.collision_type}]={
@@ -917,16 +916,6 @@ players.collision_handlers={
 }
 ]]
 
-players.item.reset_kinetic_ids=function(player)
---	player.shape:filter(player.uid,players.collision_bits,players.collision_mask)
---	player.shape:collision_type(players.collision_type)
-	player.shape:set({
-		filter_categoryBits=players.collision_bits,
-		filter_maskBits=players.collision_mask,
-		filter_groupIndex=players.collision_type,
-	})
-end
-
 
 players.item.setup_kinetic=function(player)
 	if player.body then return end -- only create once
@@ -941,7 +930,7 @@ players.item.setup_kinetic=function(player)
 			shape="circle",
 			density=1/256,
 			radius=4,
-			material_friction=0.5,
+			material_friction=0.0, -- slide on walls
 			material_restitution=0.5,
 			filter_categoryBits=players.collision_bits,
 			filter_maskBits=players.collision_mask,
@@ -1047,20 +1036,14 @@ elseif player.mode=="die" then
 
 else
 	
-	if player.idle==0 then
---		grav=grav*0.5 -- reduce gravity while flapping arms
+	if player.idle==0 then -- flap arms while moving
 		player.flap=(player.flap+1)%4
 	else
 		player.flap=2
 	end
 
 	player.acc=V3( 0, 0 ,0) -- reset force
-	local va -- velocity we want to achieve
-	if player.onfloor>0 or player.jump_force>0 then -- when on floor
-		va=lx*512
-	else -- when in air
-		va=lx*256
-	end
+	local va=lx*400  -- velocity we want to achieve
 	if va then -- apply left/right movement
 		if va<0 and player.vel[1]>0 then player.vel[1]=0 end -- quick turn
 		if va>0 and player.vel[1]<0 then player.vel[1]=0 end -- quick turn
@@ -1113,7 +1096,7 @@ else
 			v=v-2
 		end
 
-		local a=v*32 -- force to adjust velocity by
+		local a=v*8 -- force to adjust velocity by
 
 		player.foot=d
 		if player.foot<7  then player.foot=7  end
@@ -1134,29 +1117,22 @@ else
 		player.acc:add(grav) -- gravity
 	end
 
-	if player.jump_debounce>0 then -- force minimum time between jumps
+	if player.jump_debounce>0 then -- may press jump a few frames before touching floor
 		player.jump_debounce=math.max(0,player.jump_debounce-1)
-		player.onfloor=0
+	elseif player.jump_debounce<0 then -- force minimum time between jumps
+		player.jump_debounce=math.min(0,player.jump_debounce+1)
 	end
-
-	if ba_set then -- start jump
-		if player.onfloor>0 then -- and player.jump_force==0 then -- can jump
+	if player.jump_debounce<0 then player.onfloor=0 end -- just jumped reset floor for a few frames
+	if ba_set and player.jump_debounce>=0 then player.jump_debounce=4 end -- start jump now or in the next few frames
+	if ba_now and player.jump_debounce>=0 and player.jump_debounce<=1 then player.jump_debounce=1 end -- continue jump only this frame
+	if player.jump_debounce>0 then -- start jump
+		if player.onfloor>0 then -- can jump
 			player.onfloor=0
---			player.jump_force=11	-- (F*(F+1)/2)*-4 applied over F frames
-			player.jump_debounce=4
---			player.vel[2]=0 -- reset starting force
-			player.vel[2]=-190 -- reset starting force
-
+			player.jump_debounce=-4
+			player.vel[2]=-180 -- reset starting force
 			system.components.sfx.play("jump",1,0.5)
 		end
 	end
---	if ba_now then -- continue jump
---		player.vel[2]=player.vel[2]+(player.jump_force*-4)	-- apply jump force
---		player.jump_force=math.max(0,player.jump_force-1)	-- decay jump force
---	end
---	if ba_clr then -- end of jump
---		player.jump_force=0 -- 0 on jump force on release of jump
---	end
 
 	local hold_pos=player.pos+V3(0,-10,0)
 	local hold=player:depend("hold")
@@ -1164,7 +1140,6 @@ else
 	if bb_set and hold then -- throw
 		player:depend("hold",0)
 		hold:depend("held",0)
---		hold.shape:collision_type(junks.collision_type) -- become dangerous
 		local m=((player.holdtime-8)/16)
 		if m>1 then m=1 end -- full speed after 1.5 seconds
 		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
@@ -1172,24 +1147,26 @@ else
 		aim:normalize()
 		hold:set_value("vel",aim*(400*m))
 		hold:set_value("danger",16*8)
+		hold:setup_kinetic_reshape()
 	end
 	if bb_set and not hold then -- pickup
 		player.holdtime=0
-		local v1=player.pos+V3(-24,-16,0)
-		local v2=player.pos+V3( 24, 24,0)
---		if player.side>0 then	v2[1]=v2[1]+16
---		else					v1[1]=v1[1]-16	end
---[[
-		local shapes=space:query_bounding_box(v1[1],v1[2],v2[1],v2[2],player.uid,0xffffffff,0xffffffff)
-		local its={}
-		for _,shape in ipairs(shapes) do
-			local it=scene:find_uid(shape.uid)
-			if it then its[it]=shape end
-		end
+		local v1=V3(-24,-16,0)
+		local v2=V3( 24, 24,0)
+
+		local overlaps = world:overlap_aabb({
+			origin=player.pos,
+			lowerBound=v1,
+			upperBound=v2,
+			filter_categoryBits=0xffffffff,
+			filter_maskBits=0xffffffff,
+		})
 		local best_d=math.huge
 		local best
-		for it,shape in pairs(its) do
-			if it.caste=="junk" then -- check distance
+		for _,shape in ipairs(overlaps.shapes) do
+			-- level shapes will not have a uid
+			local it=scene:find_uid(shape.uid)
+			if it and it.caste=="junk" then -- can only pickup junk
 				local d=hold_pos:distance(it.pos)
 				if d<best_d then
 					best_d=d
@@ -1202,8 +1179,8 @@ else
 			player:depend("hold",hold.uid)
 			hold:depend("held",player.uid)
 			hold:set_value("danger",0)
+			hold:setup_kinetic_reshape()
 		end
-]]
 	end
 	if hold then
 		player.holdtime=player.holdtime+1
@@ -1211,8 +1188,6 @@ else
 		if math.abs(lx)>0.5 then -- run to speed up spin timer
 			player.holdtime=player.holdtime+2
 		end
-		-- stop player coliding with held object
---		hold.shape:filter(player.uid,players.collision_bits,players.collision_mask)
 
 		hold:get_value("pos")
 		hold:get_value("vel")
@@ -1221,7 +1196,7 @@ else
 		if hold_len>40 then -- too far so just drop
 			player:depend("hold",0)
 			hold:depend("held",0)
---			hold.shape:filter(hold.uid,hold.collision_bits,hold.collision_mask)
+			hold:setup_kinetic_reshape()
 		else
 			hold.vel:add( p*8 )
 			hold.vel:scale(1/2)
@@ -1436,16 +1411,6 @@ floaters.collision_type=0x00020001	-- weapon
 floaters.collision_bits=0x00010000	-- assigned bitmask
 floaters.collision_mask=0x00ffffff	-- interact bitmask
 
-floaters.item.reset_kinetic_ids=function(floater)
-	floater.shape:set({
-		filter_categoryBits=floaters.collision_bits,
-		filter_maskBits=floaters.collision_mask,
-		filter_groupIndex=floaters.collision_type,
-	})
---	floater.shape:filter(floater.uid,floaters.collision_bits,floaters.collision_mask)
---	floater.shape:collision_type(floaters.collision_type)
-end
-
 floaters.item.setup_kinetic=function(floater)
 	if floater.body then return end -- already done
 	local world=floater:get_singular("kinetic").world
@@ -1462,10 +1427,6 @@ floaters.item.setup_kinetic=function(floater)
 		filter_maskBits=floaters.collision_mask,
 		filter_groupIndex=floaters.collision_type,
 	})
---	floater.shape=floater.body:shape("circle",6,0,0)
---	floater.shape:friction(0.5)
---	floater.shape:elasticity(0.5)
---	floater:reset_kinetic_ids()
 	floater.shape.uid=floater.uid
 	floater:set_body()
 end
@@ -1669,16 +1630,6 @@ fauna_eggs.collision_type=0x00020001	-- weapon
 fauna_eggs.collision_bits=0x00010000	-- assigned bitmask
 fauna_eggs.collision_mask=0x00ffffff	-- interact bitmask
 
-fauna_eggs.item.reset_kinetic_ids=function(fauna)
-	fauna.shape:set({
-		filter_categoryBits=fauna_eggs.collision_bits,
-		filter_maskBits=fauna_eggs.collision_mask,
-		filter_groupIndex=fauna_eggs.collision_type,
-	})
---	fauna.shape:filter(fauna.uid,fauna_eggs.collision_bits,fauna_eggs.collision_mask)
---	fauna.shape:collision_type(fauna_eggs.collision_type)
-end
-
 fauna_eggs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local world=fauna:get_singular("kinetic").world
@@ -1695,12 +1646,6 @@ fauna_eggs.item.setup_kinetic=function(fauna)
 		filter_maskBits=fauna_eggs.collision_mask,
 		filter_groupIndex=fauna_eggs.collision_type,
 	})
---	local space=fauna:get_singular("kinetic").space
---	fauna.body=space:body(1,1)
---	fauna.shape=fauna.body:shape("circle",4,0,0)
---	fauna.shape:friction(0.5)
---	fauna.shape:elasticity(0.5)
---	fauna:reset_kinetic_ids()
 	fauna.shape.uid=fauna.uid
 	fauna:set_body()
 end
@@ -2044,7 +1989,7 @@ fauna_slims.item.update=function(fauna)
 		local d=(hit.fraction*16) -- distance + radius
 		local o=fauna.vel[2] -- original velocity
 		local v=((d-(footbase+2))) -- distance to where we want to be
-		local a=v*32 -- force to adjust velocity by
+		local a=v*8 -- force to adjust velocity by
 
 		fauna.foot=d-(footbase+2)
 		if fauna.foot<0  then fauna.foot=0  end
@@ -2358,7 +2303,7 @@ fauna_trenchs.item.update=function(fauna)
 		local d=(hit.fraction*16) -- distance + radius
 		local o=fauna.vel[2] -- original velocity
 		local v=((d-(footbase+2))) -- distance to where we want to be
-		local a=v*32 -- force to adjust velocity by
+		local a=v*8 -- force to adjust velocity by
 
 		fauna.foot=d-(footbase+2)
 		if fauna.foot<0  then fauna.foot=0  end
@@ -2950,14 +2895,8 @@ junks.item.setup=function(junk)
 	junk:set_values()
 end
 
-junks.item.reset_kinetic_ids=function(junk)
-	junk.shape:set({
-		filter_categoryBits=junks.collision_bits,
-		filter_maskBits=junks.collision_mask,
-		filter_groupIndex=junks.collision_type,
-	})
-end
 junks.item.setup_kinetic_reshape=function(junk)
+	local held=junk:depend("held")
 	if junk.shape then
 		junk.shape:destroy()
 		junk.shape=nil
@@ -2969,8 +2908,8 @@ junks.item.setup_kinetic_reshape=function(junk)
 		halfHeight=4,
 		material_friction=1.0,
 		material_restitution=0.5,
-		filter_categoryBits=junks.collision_bits,
-		filter_maskBits=junks.collision_mask,
+		filter_categoryBits=held and players.collision_bits or junks.collision_bits,
+		filter_maskBits=held and players.collision_mask or junks.collision_mask,
 		filter_groupIndex=junks.collision_type,
 	})
 	junk.shape.uid=junk.uid
@@ -3263,9 +3202,9 @@ legend=levels.combine_legends(levels.legend,{
 	["Ta"]={ name="char_sign",				text="Welcome to the Dungeon, we got fun and games." },
 	["Tb"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
 	["Tc"]={ name="char_sign",				text="Congratulations on the coyote JUMP." },
-	["Td"]={ name="char_sign",				text="You may coyote JUMP in the air after walking off of a platform." },
+	["Td"]={ name="char_sign",				text="You may coyote JUMP in the air after walking off a platform." },
 	["T1"]={ name="char_sign",				text="Press Button A or . to JUMP in." },
-	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move. Hold JUMP to JUMP higher." },
+	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move." },
 	["T3"]={ name="char_sign",				text="MOVE down to crouch down." },
 	["T4"]={ name="char_sign",				text="Press Button B or / to GRAB object, press GRAB again to throw it." },
 	["T5"]={ name="char_sign",				text="Throw power is shown by object rotation, run for it to speed up." },
@@ -3283,8 +3222,8 @@ map=[[
 0 . . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 > . . . . . . . . . . . . . ^ . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 J1. Tc. . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 0 0 0 0 . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . Td. . . . 0 . . . . . . . . . . . . . . . . . . . . . . < . . . . 0 
+0 0 0 0 0 0 . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . Td. . . . 0 . . . . . . . . . . . . . . . . . . 0 . . . < . . . . 0 
 0 . . . . . . . . . . . . 0 0 0 . . . 0 . . . . . . . . . . . . . . . . . . 0 . . . . . . . , 0 
 0 P1P2. . . . . . . . . . 0 0 0 . . . 0 . ^ . . . J1. . . . . . . . . . . . 0 . . . ^ . . . . 0 
 0 . T1. . . . . . . . T2. 0 0 0 . T3. . . . T4. . 0 . . T5. . T6. . T7. . T80 . . . . . . . S10 
@@ -3476,8 +3415,8 @@ levels.item.setup=function(level)
 					halfWidth=(shape[3]-shape[1])/2,
 					halfHeight=(shape[4]-shape[2])/2,
 					center={(shape[3]+shape[1])/2,(shape[4]+shape[2])/2},
-					material_friction=tile.solid,
-					material_restitution=tile.solid,
+					material_friction=tile.solid*0.5,
+					material_restitution=tile.solid*0.5,
 				})
 			end
 			if tile.text then
@@ -3726,7 +3665,7 @@ cameras.uidmap={
 cameras.values={
 	pos=V3( 0,0,0 ),
 	focus=V3( 0,0,0 ),
-	slide=V3( 0,0,0 ),
+	slide=V3( 0,-(32*32),0 ),
 	idx=1,
 	tile=0x0000,
 }

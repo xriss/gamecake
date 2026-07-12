@@ -743,7 +743,6 @@ static void lua_b2_world_cast_cb_push(b2ShapeId shapeId, b2Vec2 point, b2Vec2 no
 	lua_rawseti(l, -2 , len+1 ); // append result to array
 
 }
-
 static float lua_b2_world_cast_cb_all(b2ShapeId shapeId, b2Vec2 point, b2Vec2 normal, float fraction, void *context)
 {
 	lua_b2_world_cast_cb_push(shapeId,point,normal,fraction,context);
@@ -759,7 +758,6 @@ static int lua_b2_world_cast_ray (lua_State *l)
 {
 	b2WorldId world = lua_b2_world_ptr(l, 1 );
 	
-	b2CastResultFcn *cb = lua_b2_world_cast_cb_all; // all hits
 	b2Vec2 origin=(b2Vec2){0,0};
 	b2Vec2 translation=(b2Vec2){0,0};
 	b2QueryFilter filter=(b2QueryFilter){1,0xFFFFFFFFFFFFFFFFULL};
@@ -804,7 +802,8 @@ static int lua_b2_world_cast_ray (lua_State *l)
 		lua_pop(l,1);
 		lua_newtable(l); // return hits table
 
-		b2TreeStats stats = b2World_CastRay(world,origin,translation,filter,cb,l);
+		b2TreeStats stats = b2World_CastRay(world,origin,translation,filter,
+			lua_b2_world_cast_cb_all,l);
 
 		// include stats in hits table
 		lua_pushnumber(l, stats.leafVisits );
@@ -812,6 +811,75 @@ static int lua_b2_world_cast_ray (lua_State *l)
 		lua_pushnumber(l, stats.nodeVisits );
 		lua_setfield(l, -2 , "nodeVisits" );
 	}
+
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
+helper overlap functions
+
+*/
+static void lua_b2_world_overlap_cb_push(b2ShapeId shapeId, void *context)
+{
+	lua_State *l=(lua_State *)context;
+
+	int len=(int)lua_rawlen(l,-1); // *expect* an array here
+
+	lua_pushlstring(l, (const char *)&shapeId,sizeof(b2ShapeId)); // id to (non printable) string
+	lua_rawseti(l, -2 , len+1 ); // append to array
+
+}
+static bool lua_b2_world_overlap_cb_all(b2ShapeId shapeId, void *context)
+{
+	lua_b2_world_overlap_cb_push(shapeId,context);
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
+get shapes overlapping an aabb
+
+*/
+static int lua_b2_world_overlap_aabb (lua_State *l)
+{
+	b2WorldId world = lua_b2_world_ptr(l, 1 );
+	
+	b2QueryFilter filter=(b2QueryFilter){1,0xFFFFFFFFFFFFFFFFULL};
+	b2AABB aabb=(b2AABB){0.0f,0.0f,0.0f,0.0f};
+
+	b2Vec2 origin=(b2Vec2){0,0};
+
+	lua_getfield(l,2,"origin");
+	if(!lua_isnil(l,-1)) { origin = lua_b2_read_b2Vec2(l); }
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"lowerBound");
+	if(!lua_isnil(l,-1)) { aabb.lowerBound = lua_b2_read_b2Vec2(l); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"upperBound");
+	if(!lua_isnil(l,-1)) { aabb.upperBound = lua_b2_read_b2Vec2(l); }
+	lua_pop(l,1);
+
+	lua_getfield(l,2,"filter_categoryBits");
+	if(!lua_isnil(l,-1)) { filter.categoryBits = lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,2,"filter_maskBits");
+	if(!lua_isnil(l,-1)) { filter.maskBits = lua_tonumber(l,-1); }
+	lua_pop(l,1);
+
+	lua_newtable(l); // return table
+
+	lua_newtable(l); // list of shapeIds
+	b2TreeStats r=b2World_OverlapAABB(world,origin,aabb,filter,
+			lua_b2_world_overlap_cb_all,l);
+	lua_setfield(l, -2 , "shapeIds" );
+
+	// include stats
+	lua_pushnumber(l, r.leafVisits );
+	lua_setfield(l, -2 , "leafVisits" );
+	lua_pushnumber(l, r.nodeVisits );
+	lua_setfield(l, -2 , "nodeVisits" );
 
 	return 1;
 }
@@ -1352,13 +1420,13 @@ b2ShapeId *pp;
 	lua_getfield(l,2,"filter_groupIndex");
 	if(!lua_isnil(l,-1))
 	{
-		def.filter.categoryBits = lua_tonumber(l,-1) ;
+		def.filter.groupIndex = lua_tonumber(l,-1) ;
 	}
 	lua_pop(l,1);
 	lua_getfield(l,2,"filter_maskBits");
 	if(!lua_isnil(l,-1))
 	{
-		def.filter.categoryBits = lua_tonumber(l,-1) ;
+		def.filter.maskBits = lua_tonumber(l,-1) ;
 	}
 	lua_pop(l,1);
 
@@ -1591,21 +1659,21 @@ static int lua_b2_shape_set (lua_State *l)
 {
 	b2ShapeId shape = lua_b2_shape_ptr(l, 1 );
 
-	lua_getfield(l,1,"friction");
+	lua_getfield(l,2,"friction");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_SetFriction(shape, lua_tonumber(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"restitution");
+	lua_getfield(l,2,"restitution");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_SetRestitution(shape, lua_tonumber(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"material_userMaterialId");
+	lua_getfield(l,2,"material_userMaterialId");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_SetUserMaterial(shape, lua_tonumber(l,-1) );
@@ -1614,51 +1682,51 @@ static int lua_b2_shape_set (lua_State *l)
 
 	int set_filter=0;
 	b2Filter filter = b2Shape_GetFilter(shape);
-	lua_getfield(l,1,"filter_categoryBits");
+	lua_getfield(l,2,"filter_categoryBits");
 	if(!lua_isnil(l,-1))
 	{
 		set_filter=1;
 		filter.categoryBits = lua_tonumber(l,-1) ;
 	}
 	lua_pop(l,1);
-	lua_getfield(l,1,"filter_groupIndex");
+	lua_getfield(l,2,"filter_groupIndex");
 	if(!lua_isnil(l,-1))
 	{
 		set_filter=1;
-		filter.categoryBits = lua_tonumber(l,-1) ;
+		filter.groupIndex = lua_tonumber(l,-1) ;
 	}
 	lua_pop(l,1);
-	lua_getfield(l,1,"filter_maskBits");
+	lua_getfield(l,2,"filter_maskBits");
 	if(!lua_isnil(l,-1))
 	{
 		set_filter=1;
-		filter.categoryBits = lua_tonumber(l,-1) ;
+		filter.maskBits = lua_tonumber(l,-1) ;
 	}
 	lua_pop(l,1);
 	if(set_filter) { b2Shape_SetFilter(shape,filter); }
 
-	lua_getfield(l,1,"enableSensorEvents");
+	lua_getfield(l,2,"enableSensorEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_EnableSensorEvents(shape, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 	
-	lua_getfield(l,1,"enablePreSolveEvents");
+	lua_getfield(l,2,"enablePreSolveEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_EnablePreSolveEvents(shape, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"enableContactEvents");
+	lua_getfield(l,2,"enableContactEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_EnableContactEvents(shape, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
 
-	lua_getfield(l,1,"enableHitEvents");
+	lua_getfield(l,2,"enableHitEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_EnableHitEvents(shape, lua_toboolean(l,-1) );
@@ -2075,7 +2143,7 @@ static int lua_b2_joint_set (lua_State *l)
 {
 	b2JointId joint = lua_b2_joint_ptr(l, 1 );
 
-	lua_getfield(l,1,"collideConnected");
+	lua_getfield(l,2,"collideConnected");
 	if(!lua_isnil(l,-1))
 	{
 		b2Joint_SetCollideConnected(joint, lua_toboolean(l,-1) );
@@ -2127,6 +2195,9 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"world_contact_events",	lua_b2_world_contact_events},
 		{"world_cast_ray",			lua_b2_world_cast_ray},
 //		{"world_cast_shape",		lua_b2_world_cast_shape},
+		{"world_overlap_aabb",		lua_b2_world_overlap_aabb},
+//		{"world_overlap_shape",		lua_b2_world_overlap_shape},
+
 
 		{"body_create",				lua_b2_body_create},
 		{"body_destroy",			lua_b2_body_destroy},

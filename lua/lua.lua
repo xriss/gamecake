@@ -320,30 +320,22 @@ local do_fun=function(fname,args)
 		fun=fname,
 		fps=60,
 		icon=[[
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g d d d d g d d g d d g d d d d d g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g d d d d g d d g d d g d d g d d g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g d d g g g d d d d d g d d g d d g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g d d d d d d g g d d g g d d g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g d d d d d d g g d d g g d d g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g d d g g g g g g d d g g d d g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g d d d d d d g g d d d d d d g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g d d d d d d g g d d d d d d g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g d d g g d d g g g g g g d d g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g d d d d d d g g g g g g d d g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
-g g g g g d d d d d d g g g g g g d d g g g g g 
-g g g g g g g g g g g g g g g g g g g g g g g g 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . d d d d d d d d d d d d . . 
+. . d d d d d d d d d d d d . . 
+. . d d d d d d d d d d d d . . 
+. . . . . d d d d d d . . . . . 
+. . . . . d d d d d d . . . . . 
+. . . . . d d d d d d . . . . . 
+. . d d d d d d d d d d d d . . 
+. . d d d d d d d d d d d d . . 
+. . d d d d d d d d d d d d . . 
+. . d d d . . . . . . d d d . . 
+. . d d d . . . . . . d d d . . 
+. . d d d . . . . . . d d d . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
 ]],
 		unpack(args)
 	}

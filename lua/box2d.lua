@@ -296,6 +296,44 @@ end
 
 cast a ray and return an array of hits
 
+
+	ray.closest
+
+Boolean value, set true to only return the closest hit in hits[1]. 
+Otherwise you must iterate over the returned array.
+
+
+	ray.origin
+
+Starting world point of ray
+
+
+	ray.translation
+
+The ray to cast
+
+
+	ray.filter_categoryBits
+	ray.filter_maskBits
+
+Filter masks
+
+
+	hit1=hits[1]
+	hit2=hits[2]
+	etc
+
+These are not in any useful order, unless you asked for 
+the closest in which case there will only be 1.
+
+If hits[1] is nil or #hits is 0 then there where no hits.
+
+
+	hits.leafVisits
+	hits.nodeVisits
+
+Contain extra debug information
+
 ]]
 box2d.world_functions.cast_ray=function(world,ray)
 
@@ -303,6 +341,61 @@ box2d.world_functions.cast_ray=function(world,ray)
 	
 	for i,hit in ipairs(hits) do -- auto get shape from id
 		if hit.shapeId then hit.shape=world.shapes[hit.shapeId] end
+	end
+
+	return hits
+end
+
+--[[#lua.box2d.world.overlap_aabb
+
+	overlaps = world:overlap_aabb(aabb)
+
+Get all shapes overlapping aabb , I believe this might get some shapes 
+that do not actually overlap the given box so should probably double 
+check.
+
+
+	aabb.origin
+
+Origin vector of bounds
+
+
+	aabb.lowerBound
+	aabb.upperBound
+
+Lower and upper aabb vectors ( will be added to origin )
+
+
+	aabb.filter_categoryBits
+	aabb.filter_maskBits
+
+Filter masks
+
+
+	overlaps.shapeIds
+
+An array of shapeIds
+
+
+	overlaps.shapes
+
+An array of shapes
+
+
+	overlaps.leafVisits
+	overlaps.nodeVisits
+
+Extra debug information
+
+]]
+box2d.world_functions.overlap_aabb=function(world,aabb)
+
+	local hits=core.world_overlap_aabb(world[0],aabb)
+	
+	-- convert shapeIds to shapes, no guarantee that these arrays match
+	hits.shapes={}
+	for i,shapeId in ipairs(hits.shapeIds) do -- auto get shape from id
+		hits.shapes[#hits.shapes+1]=world.shapes[shapeId]
 	end
 
 	return hits
