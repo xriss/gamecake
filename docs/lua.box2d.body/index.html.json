@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 714,
+   "count": 715,
    "name": "lua"
   },
   {
-   "count": 38,
+   "count": 39,
    "name": "lua.box2d"
   },
   {
@@ -234,7 +234,7 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.box2d.world"
   },
   {
@@ -272,6 +272,10 @@
   {
    "count": 1,
    "name": "lua.box2d.world.joint"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.overlap_aabb"
   },
   {
    "count": 1,
@@ -3059,7 +3063,7 @@
    "body": "<pre><code>body:acceleration()\nbody:acceleration(x,y)\nbody:acceleration(x,y,r)\nbody:acceleration(nil,nil,r)\n</code></pre>\n<p>set body acceleration, which is to say we set the body force multiplied \nby mass or rotational inertia.</p>\n<p>x,y is acceleration per second applied to center mass, will be cleared \nif nil</p>\n<p>r is rotational acceleration per second in radians , will be cleared if \nnil</p>\n<p>This will replace force and acceleration and as force is applied then \ncleared during a step, this needs to be set for <em>every</em> step.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 518,
+   "line": 611,
    "name": "lua.box2d.body.acceleration",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3067,7 +3071,7 @@
    "body": "<pre><code>b = body:awake()\nb = body:awake(b)\n</code></pre>\n<p>get/set body sleeping state.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 460,
+   "line": 553,
    "name": "lua.box2d.body.awake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3075,7 +3079,7 @@
    "body": "<pre><code>body:destroy()\n</code></pre>\n<p>Destroy the body and all sub objects (shapes)</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 371,
+   "line": 464,
    "name": "lua.box2d.body.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3083,7 +3087,7 @@
    "body": "<pre><code>body:force()\nbody:force(x,y)\nbody:force(x,y,r)\nbody:force(nil,nil,r)\n</code></pre>\n<p>set body force , note that this does not return the current force and \ncalling it without any values will clear the current force.</p>\n<p>x,y is force applied to center mass, will be cleared if nil</p>\n<p>r is torque , will be cleared if nil</p>\n<p>This will replace force and acceleration and as force is applied then \ncleared during a step, this needs to be set for <em>every</em> step.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 496,
+   "line": 589,
    "name": "lua.box2d.body.force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3091,7 +3095,7 @@
    "body": "<pre><code>vars = body:get()\n</code></pre>\n<p>Get all body variables in a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 422,
+   "line": 515,
    "name": "lua.box2d.body.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3099,7 +3103,7 @@
    "body": "<pre><code>info = body:info()\n</code></pre>\n<p>This returns the def table used to create the body along with as much \nupdated information as we have available, mostly intended as a \ndebugging aid.</p>\n<p>This is the actual def table (some values are hard to query later) so \nif you edit it or if you create this object using a non unique def \ntable things can get strange.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 387,
+   "line": 480,
    "name": "lua.box2d.body.info",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3107,7 +3111,7 @@
    "body": "<pre><code>body:set(vars)\n</code></pre>\n<p>Set all body variables from a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 433,
+   "line": 526,
    "name": "lua.box2d.body.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3115,7 +3119,7 @@
    "body": "<pre><code>x,y,r = body:transform()\nx,y,r = body:transform(x,y,r)\n</code></pre>\n<p>get/set body transform</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 472,
+   "line": 565,
    "name": "lua.box2d.body.transform",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3123,7 +3127,7 @@
    "body": "<pre><code>btype = body:type()\nbtype = body:type(btype)\n</code></pre>\n<p>get/set body type. btype is a string, Possible values are</p>\n<pre><code>static\nkinematic\ndynamic\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 444,
+   "line": 537,
    "name": "lua.box2d.body.type",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3131,7 +3135,7 @@
    "body": "<pre><code>x,y,r = body:velocity()\nx,y,r = body:velocity(x,y,r)\n</code></pre>\n<p>get/set body velocity</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 484,
+   "line": 577,
    "name": "lua.box2d.body.velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

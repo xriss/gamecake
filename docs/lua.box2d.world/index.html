@@ -87,6 +87,7 @@
 <a class="sub" href="../../docs/lua.box2d.world.get"><span>/lua.box2d.world.get</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.info"><span>/lua.box2d.world.info</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.joint"><span>/lua.box2d.world.joint</span></a>
+<a class="sub" href="../../docs/lua.box2d.world.overlap_aabb"><span>/lua.box2d.world.overlap_aabb</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.sensor_events"><span>/lua.box2d.world.sensor_events</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.set"><span>/lua.box2d.world.set</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.step"><span>/lua.box2d.world.step</span></a>
@@ -801,7 +802,7 @@ enableContactSoftening
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.body">lua.box2d.world.body</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L311">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L404">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>body=world:body(def)
 </code></pre>
 <p>Create a body in the world.</p>
@@ -842,7 +843,7 @@ type
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.body.shape">lua.box2d.world.body.shape</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L542">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L635">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>shape=body:shape(def)
 </code></pre>
 <p>Create a shape in the body.</p>
@@ -913,7 +914,44 @@ radius
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L293">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>hits = world:cast_ray(ray)
 </code></pre>
-<p>cast a ray and return an array of hits</p>
+<p>cast a ray and return an array of hits
+<br/>
+<br/></p>
+<pre><code>ray.closest
+</code></pre>
+<p>Boolean value, set true to only return the closest hit in hits[1]. 
+Otherwise you must iterate over the returned array.
+<br/>
+<br/></p>
+<pre><code>ray.origin
+</code></pre>
+<p>Starting world point of ray
+<br/>
+<br/></p>
+<pre><code>ray.translation
+</code></pre>
+<p>The ray to cast
+<br/>
+<br/></p>
+<pre><code>ray.filter_categoryBits
+ray.filter_maskBits
+</code></pre>
+<p>Filter masks
+<br/>
+<br/></p>
+<pre><code>hit1=hits[1]
+hit2=hits[2]
+etc
+</code></pre>
+<p>These are not in any useful order, unless you asked for 
+the closest in which case there will only be 1.</p>
+<p>If hits[1] is nil or #hits is 0 then there where no hits.
+<br/>
+<br/></p>
+<pre><code>hits.leafVisits
+hits.nodeVisits
+</code></pre>
+<p>Contain extra debug information</p>
 </div>
 </div>
 
@@ -960,7 +998,7 @@ table things can get strange.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.joint">lua.box2d.world.joint</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L688">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L781">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>joint=world:joint(def)
 </code></pre>
 <p>Create a joint in the world.</p>
@@ -1059,6 +1097,50 @@ enableMotor
 maxMotorTorque
 motorSpeed
 </code></pre>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.box2d.world.overlap_aabb">lua.box2d.world.overlap_aabb</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L349">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>overlaps = world:overlap_aabb(aabb)
+</code></pre>
+<p>Get all shapes overlapping aabb , I believe this might get some shapes 
+that do not actually overlap the given box so should probably double 
+check.
+<br/>
+<br/></p>
+<pre><code>aabb.origin
+</code></pre>
+<p>Origin vector of bounds
+<br/>
+<br/></p>
+<pre><code>aabb.lowerBound
+aabb.upperBound
+</code></pre>
+<p>Lower and upper aabb vectors ( will be added to origin )
+<br/>
+<br/></p>
+<pre><code>aabb.filter_categoryBits
+aabb.filter_maskBits
+</code></pre>
+<p>Filter masks
+<br/>
+<br/></p>
+<pre><code>overlaps.shapeIds
+</code></pre>
+<p>An array of shapeIds
+<br/>
+<br/></p>
+<pre><code>overlaps.shapes
+</code></pre>
+<p>An array of shapes
+<br/>
+<br/></p>
+<pre><code>overlaps.leafVisits
+overlaps.nodeVisits
+</code></pre>
+<p>Extra debug information</p>
 </div>
 </div>
 

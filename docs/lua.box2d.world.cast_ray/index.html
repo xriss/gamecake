@@ -87,6 +87,7 @@
 <a class="sub" href="../../docs/lua.box2d.world.get"><span>/lua.box2d.world.get</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.info"><span>/lua.box2d.world.info</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.joint"><span>/lua.box2d.world.joint</span></a>
+<a class="sub" href="../../docs/lua.box2d.world.overlap_aabb"><span>/lua.box2d.world.overlap_aabb</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.sensor_events"><span>/lua.box2d.world.sensor_events</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.set"><span>/lua.box2d.world.set</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.step"><span>/lua.box2d.world.step</span></a>
@@ -779,7 +780,44 @@
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L293">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>hits = world:cast_ray(ray)
 </code></pre>
-<p>cast a ray and return an array of hits</p>
+<p>cast a ray and return an array of hits
+<br/>
+<br/></p>
+<pre><code>ray.closest
+</code></pre>
+<p>Boolean value, set true to only return the closest hit in hits[1]. 
+Otherwise you must iterate over the returned array.
+<br/>
+<br/></p>
+<pre><code>ray.origin
+</code></pre>
+<p>Starting world point of ray
+<br/>
+<br/></p>
+<pre><code>ray.translation
+</code></pre>
+<p>The ray to cast
+<br/>
+<br/></p>
+<pre><code>ray.filter_categoryBits
+ray.filter_maskBits
+</code></pre>
+<p>Filter masks
+<br/>
+<br/></p>
+<pre><code>hit1=hits[1]
+hit2=hits[2]
+etc
+</code></pre>
+<p>These are not in any useful order, unless you asked for 
+the closest in which case there will only be 1.</p>
+<p>If hits[1] is nil or #hits is 0 then there where no hits.
+<br/>
+<br/></p>
+<pre><code>hits.leafVisits
+hits.nodeVisits
+</code></pre>
+<p>Contain extra debug information</p>
 </div>
 </div>
 
