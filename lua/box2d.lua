@@ -498,20 +498,45 @@ end
 	body:force()
 	body:force(x,y)
 	body:force(x,y,r)
+	body:force(nil,nil,r)
 
-set body force, note that this does not return the current force and 
+set body force , note that this does not return the current force and 
 calling it without any values will clear the current force.
 
-x,y is applied to center mass, will be cleared if nil
+x,y is force applied to center mass, will be cleared if nil
 
 r is torque , will be cleared if nil
 
-force is applied then cleared during an update so this needs to be set 
-*every* frame if you want a constant force.
+This will replace force and acceleration and as force is applied then 
+cleared during a step, this needs to be set for *every* step.
 
 ]]
 box2d.body_functions.force=function(body,x,y,r)
 	return core.body_force(body[0],x,y,r)
+end
+
+--[[#lua.box2d.body.acceleration
+
+	body:acceleration()
+	body:acceleration(x,y)
+	body:acceleration(x,y,r)
+	body:acceleration(nil,nil,r)
+
+set body acceleration, which is to say we set the body force multiplied 
+by mass or rotational inertia.
+
+x,y is acceleration per second applied to center mass, will be cleared 
+if nil
+
+r is rotational acceleration per second in radians , will be cleared if 
+nil
+
+This will replace force and acceleration and as force is applied then 
+cleared during a step, this needs to be set for *every* step.
+
+]]
+box2d.body_functions.acceleration=function(body,x,y,r)
+	return core.body_acceleration(body[0],x,y,r)
 end
 
 --[[#lua.box2d.world.body.shape

@@ -310,9 +310,9 @@ all.item.set_body=function(it)
 	it.body:transform( it.pos[1],it.pos[2], it.rot*(math.pi*2) )
 	it.body:velocity(  it.vel[1],it.vel[2], it.ang*(math.pi*2) )
 	
-	if it.acc then
+	if it.acc then -- set acceleration if it exists
 		it:get_value("acc")
-		it.body:force(it.acc[1],it.acc[2])
+		it.body:acceleration(it.acc[1],it.acc[2],nil)
 	end
 
 end
