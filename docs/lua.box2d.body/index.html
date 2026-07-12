@@ -54,6 +54,7 @@
 <a class="par" href="../../docs/lua.box2d"><span>/lua.box2d</span></a>
 <a class="par" href="../../docs/lua.box2d.body"><span>/lua.box2d.body</span></a>
 
+<a class="sub" href="../../docs/lua.box2d.body.acceleration"><span>/lua.box2d.body.acceleration</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.awake"><span>/lua.box2d.body.awake</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.destroy"><span>/lua.box2d.body.destroy</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.force"><span>/lua.box2d.body.force</span></a>
@@ -780,6 +781,25 @@
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.box2d.body.acceleration">lua.box2d.body.acceleration</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L518">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>body:acceleration()
+body:acceleration(x,y)
+body:acceleration(x,y,r)
+body:acceleration(nil,nil,r)
+</code></pre>
+<p>set body acceleration, which is to say we set the body force multiplied 
+by mass or rotational inertia.</p>
+<p>x,y is acceleration per second applied to center mass, will be cleared 
+if nil</p>
+<p>r is rotational acceleration per second in radians , will be cleared if 
+nil</p>
+<p>This will replace force and acceleration and as force is applied then 
+cleared during a step, this needs to be set for <em>every</em> step.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.awake">lua.box2d.body.awake</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L460">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>b = body:awake()
@@ -804,13 +824,14 @@ b = body:awake(b)
 <div><pre><code>body:force()
 body:force(x,y)
 body:force(x,y,r)
+body:force(nil,nil,r)
 </code></pre>
-<p>set body force, note that this does not return the current force and 
+<p>set body force , note that this does not return the current force and 
 calling it without any values will clear the current force.</p>
-<p>x,y is applied to center mass, will be cleared if nil</p>
+<p>x,y is force applied to center mass, will be cleared if nil</p>
 <p>r is torque , will be cleared if nil</p>
-<p>force is applied then cleared during an update so this needs to be set 
-<em>every</em> frame if you want a constant force.</p>
+<p>This will replace force and acceleration and as force is applied then 
+cleared during a step, this needs to be set for <em>every</em> step.</p>
 </div>
 </div>
 

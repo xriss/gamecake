@@ -130,16 +130,20 @@
    "name": "levels"
   },
   {
-   "count": 713,
+   "count": 714,
    "name": "lua"
   },
   {
-   "count": 37,
+   "count": 38,
    "name": "lua.box2d"
   },
   {
-   "count": 10,
+   "count": 11,
    "name": "lua.box2d.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.acceleration"
   },
   {
    "count": 1,
