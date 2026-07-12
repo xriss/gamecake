@@ -1092,11 +1092,20 @@ else
 
 	local footspeed=0.25
 
---[[
-	local space=player:get_singular("kinetic").space
-	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,2,player.uid,0x00000100,0x00ffffff)
-	if hit and hit.alpha and hit.alpha<0.75 then
-		local d=(hit.alpha*16)+2 -- distance + radius
+	local world=player:get_singular("kinetic").world
+	local hits=world:cast_ray({
+		closest=true, -- just want the closest hit
+		origin=player.pos,
+		translation={0,16},
+		filter_categoryBits=0x00000100,
+		filter_maskBits=0x00ffffff,
+	})
+	local hit=hits[1]
+--PRINT("hits",player.pos,player.shape)
+	if hit and hit.fraction and hit.fraction<0.75 then
+--PRINT("hit",hit.shape,hit.point[1],hit.point[2],hit.normal[1],hit.normal[2],hit.fraction)
+
+		local d=(hit.fraction*16) -- distance + radius
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
 
@@ -1121,12 +1130,11 @@ else
 			end
 		end
 	else
-]]
 		if player.foot>11 then player.foot=player.foot-footspeed end
 		if player.foot<11 then player.foot=player.foot+footspeed end
 
 		player.acc:add(grav) -- gravity
---	end
+	end
 
 	if player.jump_debounce>0 then -- force minimum time between jumps
 		player.jump_debounce=math.max(0,player.jump_debounce-1)
@@ -1230,7 +1238,7 @@ else
 --PRINT( ba_now , player.onfloor , player.jump )
 --PRINT( player.vel )
 
-PRINT( player.acc )
+--PRINT( player.acc )
 
 end
 

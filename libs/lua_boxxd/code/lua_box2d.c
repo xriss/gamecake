@@ -750,12 +750,6 @@ static float lua_b2_world_cast_cb_all(b2ShapeId shapeId, b2Vec2 point, b2Vec2 no
 	return 1.0f;
 }
 
-static float lua_b2_world_cast_cb_one(b2ShapeId shapeId, b2Vec2 point, b2Vec2 normal, float fraction, void *context)
-{
-	lua_b2_world_cast_cb_push(shapeId,point,normal,fraction,context);
-	return 0.0f;
-}
-
 /*+---------------------------------------------------------------------
 
 cast a ray through the world
@@ -787,17 +781,37 @@ static int lua_b2_world_cast_ray (lua_State *l)
 	
 	// get all hits unless closest is set
  	lua_getfield(l,2,"closest");
-	if(lua_toboolean(l,-1)) { cb = lua_b2_world_cast_cb_one ; }
-	lua_pop(l,1);
+	if(lua_toboolean(l,-1))
+	{
+		lua_pop(l,1);
+		lua_newtable(l); // return hits table
+		
+		b2RayResult r=b2World_CastRayClosest(world,origin,translation,filter);
+		if( r.hit )
+		{
+			lua_b2_world_cast_cb_push(r.shapeId,r.point,r.normal,r.fraction,l);
+		}
 
-	lua_newtable(l); // return hits table
-	b2TreeStats stats = b2World_CastRay(world,origin,translation,filter,cb,l);
+		// include stats in hits table of just one hit
+		lua_pushnumber(l, r.leafVisits );
+		lua_setfield(l, -2 , "leafVisits" );
+		lua_pushnumber(l, r.nodeVisits );
+		lua_setfield(l, -2 , "nodeVisits" );
 
-	// include stats in hits table
-	lua_pushnumber(l, stats.leafVisits );
-	lua_setfield(l, -2 , "leafVisits" );
-	lua_pushnumber(l, stats.nodeVisits );
-	lua_setfield(l, -2 , "nodeVisits" );
+	}
+	else
+	{
+		lua_pop(l,1);
+		lua_newtable(l); // return hits table
+
+		b2TreeStats stats = b2World_CastRay(world,origin,translation,filter,cb,l);
+
+		// include stats in hits table
+		lua_pushnumber(l, stats.leafVisits );
+		lua_setfield(l, -2 , "leafVisits" );
+		lua_pushnumber(l, stats.nodeVisits );
+		lua_setfield(l, -2 , "nodeVisits" );
+	}
 
 	return 1;
 }
