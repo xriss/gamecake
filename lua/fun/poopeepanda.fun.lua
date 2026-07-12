@@ -988,6 +988,12 @@ players.item.update=function(player)
 	local bb_clr=( up:get("b_clr") ) or false
 
 	local grav=level:get_gravity(player.pos)
+
+	player.idle=player.idle+1
+	local ll=lx*lx+ly*ly
+	if ll>0.25 or bb_set or bb_now or bb_clr or ba_set or ba_now or ba_clr then
+		player.idle=0 -- ticks since last controller input
+	end
 	
 if player.mode=="spawn" then -- we are spawning but not really here yet
 
@@ -1001,13 +1007,6 @@ if player.mode=="spawn" then -- we are spawning but not really here yet
 
 		system.components.sfx.play("jump",1,0.5)
 	end
-
-	player.idle=player.idle+1
-	local ll=lx*lx+ly*ly
-	if ll>0.25 or bb_set or bb_clr or ba_set or ba_clr then
-		player.idle=0 -- ticks since last controller input
-	end
-
 
 elseif player.mode=="egg" then
 
@@ -1048,7 +1047,7 @@ elseif player.mode=="die" then
 
 else
 	
-	if ba_now then
+	if player.idle==0 then
 --		grav=grav*0.5 -- reduce gravity while flapping arms
 		player.flap=(player.flap+1)%4
 	else
@@ -1093,14 +1092,13 @@ else
 	local footspeed=0.25
 
 	local world=player:get_singular("kinetic").world
-	local hits=world:cast_ray({
+	local hit=world:cast_ray({
 		closest=true, -- just want the closest hit
 		origin=player.pos,
 		translation={0,16},
 		filter_categoryBits=0x00000100,
 		filter_maskBits=0x00ffffff,
-	})
-	local hit=hits[1]
+	})[1]
 --PRINT("hits",player.pos,player.shape)
 	if hit and hit.fraction and hit.fraction<0.75 then
 --PRINT("hit",hit.shape,hit.point[1],hit.point[2],hit.normal[1],hit.normal[2],hit.fraction)
@@ -2034,11 +2032,16 @@ fauna_slims.item.update=function(fauna)
 	local footspeed=0.25
 	local footbase=3
 	local world=fauna:get_singular("kinetic").world
---[[
-	local hit=space:query_segment_first(fauna.pos[1],fauna.pos[2],fauna.pos[1],fauna.pos[2]+16,2,fauna.uid,0x00010000,0x00ffffff)
-	if hit and hit.alpha and hit.alpha<((footbase+4)/16) then
+	local hit=world:cast_ray({
+		closest=true, -- just want the closest hit
+		origin=fauna.pos,
+		translation={0,16},
+		filter_categoryBits=0x00010000,
+		filter_maskBits=0x00ffffff,
+	})[1]
+	if hit and hit.fraction and hit.fraction<((footbase+4)/16) then
 
-		local d=(hit.alpha*16)+2 -- distance + radius
+		local d=(hit.fraction*16) -- distance + radius
 		local o=fauna.vel[2] -- original velocity
 		local v=((d-(footbase+2))) -- distance to where we want to be
 		local a=v*32 -- force to adjust velocity by
@@ -2073,14 +2076,14 @@ fauna_slims.item.update=function(fauna)
 		end
 
 	else
-]]
+
 		fauna.floor_uid=0
 
 		if fauna.foot>3 then fauna.foot=3 end
 		if fauna.foot<3 then fauna.foot=fauna.foot+footspeed end
 
 		fauna.acc:add(grav) -- gravity
---	end
+	end
 
 	if fauna.onfloor>0 and fauna.jump<=0 then -- meep meep jump	
 		if brain.jump then
@@ -2342,11 +2345,17 @@ fauna_trenchs.item.update=function(fauna)
 
 	local footspeed=0.25
 	local footbase=3
-	local space=fauna:get_singular("kinetic").space
-	local hit=space:query_segment_first(fauna.pos[1],fauna.pos[2],fauna.pos[1],fauna.pos[2]+16,2,fauna.uid,0x00010000,0x00ffffff)
-	if hit and hit.alpha and hit.alpha<((footbase+4)/16) then
+	local world=fauna:get_singular("kinetic").world
+	local hit=world:cast_ray({
+		closest=true, -- just want the closest hit
+		origin=fauna.pos,
+		translation={0,16},
+		filter_categoryBits=0x00010000,
+		filter_maskBits=0x00ffffff,
+	})[1]
+	if hit and hit.fraction and hit.fraction<((footbase+4)/16) then
 
-		local d=(hit.alpha*16)+2 -- distance + radius
+		local d=(hit.fraction*16) -- distance + radius
 		local o=fauna.vel[2] -- original velocity
 		local v=((d-(footbase+2))) -- distance to where we want to be
 		local a=v*32 -- force to adjust velocity by
@@ -2361,6 +2370,7 @@ fauna_trenchs.item.update=function(fauna)
 
 
 	else
+
 		fauna.floor_uid=0
 	
 		if fauna.foot>3 then fauna.foot=3 end
@@ -3919,7 +3929,7 @@ huds.item.setup=function(hud)
 	hud:set_values()
 end
 
-local TEXT_DELAY_WAIT=16
+local TEXT_DELAY_WAIT=48
 huds.item.update=function(hud)
 	if hud.idx~=1 then return end -- only 1 hud
 
@@ -3944,15 +3954,15 @@ huds.item.update=function(hud)
 			hud.tile_time=TEXT_DELAY_WAIT
 		end
 	end
-	
-	if show_tile then
+
+	if show_tile and player.idle>0 then
 		hud.tile_time=hud.tile_time+1
-		if hud.tile_time > #show_tile.text_lines*32+16 then
-			hud.tile_time = #show_tile.text_lines*32+16
+		if hud.tile_time > #show_tile.text_lines*32+TEXT_DELAY_WAIT then
+			hud.tile_time = #show_tile.text_lines*32+TEXT_DELAY_WAIT
 		end
 	else
-		hud.tile_time=hud.tile_time-4
-		if hud.tile_time<TEXT_DELAY_WAIT then hud.tile_time=0 end
+		hud.tile_time=hud.tile_time-2
+		if hud.tile_time<0 then hud.tile_time=0 end
 	end
 
 -- 1 sec pause
