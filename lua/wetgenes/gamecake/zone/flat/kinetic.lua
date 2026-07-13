@@ -30,7 +30,11 @@ kinetics.uidmap={
 }
 
 kinetics.values={
-	gravity=V3( 0,100,0 ),
+	LengthUnitsPerMeter=16,
+	gravity=V3( 0,0,0 ),
+	step=1/16,
+	substeps=16,
+	defaults={},
 }
 
 -- methods added to system
@@ -48,14 +52,15 @@ kinetics.item.setup=function(kinetic)
 
 	local box2d=require("box2d")
 	box2d.set({
-		LengthUnitsPerMeter=16,
+		LengthUnitsPerMeter=kinetic.LengthUnitsPerMeter,
 	})
 	kinetic.world=box2d.world({
-		gravity={0,0},
+		gravity=kinetic.gravity,
 	})
-
-	kinetic.step=(1/16) -- amount of time to step each frame
-	kinetic.substeps=16 -- number of substeps
+	
+	for n,v in pairs(kinetic.defaults) do
+		kinetic.world:defaults(n,v)
+	end
 
 	return kinetic
 end
@@ -76,7 +81,22 @@ end
 
 kinetics.item.update_kinetic=function(kinetic)
 
+	kinetic:get_values()
+
 	kinetic.world:step(kinetic.step,kinetic.substeps)
+	
+	-- reset and fill in events from the last step
+	-- these are indexed by uid for objects
+	-- using the shape.uid if set
+	kinetic.events=kinetic.world:prepare_events() -- new events
+--	kinetic.world:body_events(kinetic.events)
+	kinetic.world:sensor_events(kinetic.events)
+	kinetic.world:contact_events(kinetic.events)
+	
+	PRINT("#events",#kinetic.events.all)
+	for i,event in ipairs(kinetic.events.all) do
+		PRINT("event.is",event.is)
+	end
 
 end
 

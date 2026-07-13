@@ -163,12 +163,17 @@ Get contact data given an ID
 static int lua_b2_contact (lua_State *l)
 {
 	b2ContactId id=*((b2ContactId*)(lua_tostring(l,1))); // get ID from lua string
+	
+	if(!b2Contact_IsValid(id)) { return 0; } // return nothing
 
 	b2ContactData contact = b2Contact_GetData(id);
 
-	lua_pushnumber(l, contact.manifold.normal.x );
-	lua_pushnumber(l, contact.manifold.normal.y );
+	lua_newtable(l);
 
+	lua_b2_push_b2Vec2(l,contact.manifold.normal);
+	lua_setfield(l,-2,"manifold_normal");
+
+	lua_newtable(l);
 	for( int i=0 ; i<contact.manifold.pointCount ; i++ )
 	{
 		b2ManifoldPoint p=contact.manifold.points[i];
@@ -204,9 +209,12 @@ static int lua_b2_contact (lua_State *l)
 
 		lua_pushboolean(l, p.persisted );
 		lua_setfield(l,-2,"persisted");
-	}
 
-	return 2+contact.manifold.pointCount;
+		lua_rawseti(l, -2 , i+1 );
+	}
+	lua_setfield(l,-2,"manifold_points");
+
+	return 1;
 }
 
 /*+---------------------------------------------------------------------

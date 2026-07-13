@@ -141,7 +141,23 @@ all.create_scene=function(scene)
 		scene:systems_cocall("setup")
 
 		local boots={
-			{"kinetic"},
+			{"kinetic",
+				LengthUnitsPerMeter=16,
+				gravity={0,0,0}, -- zero as we plan to control gravity for each object
+				step=(1/16), -- amount of time to step each frame
+				substeps=16, -- number of substeps
+				defaults={ -- world defaults when creating box2d objects
+					body={
+					},
+					shape={
+						density=1/256,
+						material_friction=0.5,
+						material_restitution=0.5,
+					},
+					joint={
+					},
+				}
+			},
 			{"level",idx=1},
 --			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
 		}
@@ -928,10 +944,8 @@ players.item.setup_kinetic=function(player)
 	else
 		player.shape=player.body:shape({
 			shape="circle",
-			density=1/256,
 			radius=4,
 			material_friction=0.0, -- slide on walls
-			material_restitution=0.5,
 			filter_categoryBits=players.collision_bits,
 			filter_maskBits=players.collision_mask,
 			filter_groupIndex=players.collision_type,
@@ -1419,10 +1433,7 @@ floaters.item.setup_kinetic=function(floater)
 	})
 	floater.shape=floater.body:shape({
 		shape="circle",
-		density=1/256,
 		radius=6,
-		material_friction=0.5,
-		material_restitution=0.5,
 		filter_categoryBits=floaters.collision_bits,
 		filter_maskBits=floaters.collision_mask,
 		filter_groupIndex=floaters.collision_type,
@@ -1638,10 +1649,7 @@ fauna_eggs.item.setup_kinetic=function(fauna)
 	})
 	fauna.shape=fauna.body:shape({
 		shape="circle",
-		density=1/256,
 		radius=4,
-		material_friction=0.5,
-		material_restitution=0.5,
 		filter_categoryBits=fauna_eggs.collision_bits,
 		filter_maskBits=fauna_eggs.collision_mask,
 		filter_groupIndex=fauna_eggs.collision_type,
@@ -1884,10 +1892,7 @@ fauna_slims.item.setup_kinetic=function(fauna)
 --		fauna.shape:filter(fauna.uid,fauna_slims.collision_bits,fauna_slims.collision_mask)
 		fauna.shape=fauna.body:shape({
 			shape="circle",
-			density=1/256,
 			radius=4,
-			material_friction=0.5,
-			material_restitution=0.5,
 			filter_categoryBits=fauna_slims.collision_bits,
 			filter_maskBits=fauna_slims.collision_mask,
 			filter_groupIndex=fauna_slims.collision_type,
@@ -2212,10 +2217,7 @@ fauna_trenchs.item.setup_kinetic=function(fauna)
 	})
 	fauna.shape=fauna.body:shape({
 		shape="circle",
-		density=1/256,
 		radius=4,
-		material_friction=0.5,
-		material_restitution=0.5,
 		filter_categoryBits=fauna_trenchs.collision_bits,
 		filter_maskBits=fauna_trenchs.collision_mask,
 		filter_groupIndex=fauna_trenchs.collision_type,
@@ -2553,11 +2555,9 @@ fruits.item.setup_kinetic_reshape=function(fruit)
 	end
 	fruit.shape=fruit.body:shape({
 		shape="box",
-		density=1/256,
 		halfWidth=3,
 		halfHeight=3,
 		material_friction=1.0,
-		material_restitution=0.5,
 		filter_categoryBits=fruits.collision_bits,
 		filter_maskBits=fruits.collision_mask,
 		filter_groupIndex=fruits.collision_type,
@@ -2732,10 +2732,8 @@ gibs.item.setup_kinetic_reshape=function(gib)
 	end
 	gib.shape=gib.body:shape({
 		shape="circle",
-		density=1/256,
 		radius=gib.size,
 		material_friction=1.0,
-		material_restitution=0.5,
 		filter_categoryBits=gibs.collision_bits,
 		filter_maskBits=gibs.collision_mask,
 		filter_groupIndex=gibs.collision_type,
@@ -2903,11 +2901,9 @@ junks.item.setup_kinetic_reshape=function(junk)
 	end
 	junk.shape=junk.body:shape({
 		shape="box",
-		density=1/256,
 		halfWidth=4,
 		halfHeight=4,
 		material_friction=1.0,
-		material_restitution=0.5,
 		filter_categoryBits=held and players.collision_bits or junks.collision_bits,
 		filter_maskBits=held and players.collision_mask or junks.collision_mask,
 		filter_groupIndex=junks.collision_type,
@@ -3320,7 +3316,7 @@ map=[[
 levels.system.setup=function(sys)
 
 	 system.components.tiles.upload_tiles( levels.graphics )
-
+	 
 end
 
 levels.system.clean=function(sys)
@@ -3411,7 +3407,6 @@ levels.item.setup=function(level)
 --print("shape",unpack(shape))
 				level.static_body:shape({
 					shape="box",
-					density=1/256,
 					halfWidth=(shape[3]-shape[1])/2,
 					halfHeight=(shape[4]-shape[2])/2,
 					center={(shape[3]+shape[1])/2,(shape[4]+shape[2])/2},
