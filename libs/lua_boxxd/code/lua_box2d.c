@@ -1369,6 +1369,58 @@ static int lua_b2_body_acceleration (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
+Convert a vec2 into a vec2 of a different space
+
+hex conversion code is encoded like so, first two digits are input, 
+last digit is output.
+
+	1=point
+	2=vector
+	3=local
+	4=world
+	5=velocity
+
+*/
+static int lua_b2_body_convert (lua_State *l)
+{
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	b2Vec2 pa;
+	b2Vec2 pb;
+
+	pa.x=(float)lua_tonumber(l, 2 );
+	pa.y=(float)lua_tonumber(l, 3 );
+
+	switch( (int)lua_tonumber(l, 4 ) )
+	{
+		case 0x134: // point_local_to_world
+			pb=b2Body_GetWorldPoint(body,pa);
+		break;
+		case 0x143: // point_world_to_local
+			pb=b2Body_GetLocalPoint(body,pa);
+		break;
+		case 0x234: // vector_local_to_world
+			pb=b2Body_GetWorldVector(body,pa);
+		break;
+		case 0x243: // vector_world_to_local
+			pb=b2Body_GetLocalVector(body,pa);
+		break;
+		case 0x135: // point_local_to_velocity
+			pb=b2Body_GetLocalPointVelocity(body,pa);
+		break;
+		case 0x145: // point_world_to_velocity
+			pb=b2Body_GetWorldPointVelocity(body,pa);
+		break;
+	}
+
+	lua_pushnumber(l, pb.x );
+	lua_pushnumber(l, pb.y );
+
+	return 2;
+}
+
+/*+---------------------------------------------------------------------
+
 shape create/destroy
 
 */
@@ -2220,6 +2272,7 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"body_velocity",			lua_b2_body_velocity},
 		{"body_force",				lua_b2_body_force},
 		{"body_acceleration",		lua_b2_body_acceleration},
+		{"body_convert",			lua_b2_body_convert},
 
 		{"shape_create",			lua_b2_shape_create},
 		{"shape_destroy",			lua_b2_shape_destroy},

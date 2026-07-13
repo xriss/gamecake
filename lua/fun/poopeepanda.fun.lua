@@ -137,7 +137,7 @@ all.create_scene=function(scene)
 --		scene.infos.all.scene.initialize(scene)
 	end
 	
-	scene.boot_level=function(scene,level)
+	scene.do_boot_level=function(scene,level)
 		local boots={
 			{"kinetic",
 				LengthUnitsPerMeter=16,
@@ -172,14 +172,14 @@ all.create_scene=function(scene)
 	
 	scene.do_setup=function(scene)
 		scene:systems_cocall("setup")
-		scene:boot_level(1)
+		scene:do_boot_level(1)
 	end
 
 	scene.do_level=function(scene,level)
 		scene:call("destroy")
 		scene:reset()
 		scene:reset_ticks()
-		scene:boot_level(level)
+		scene:do_boot_level(level)
 	end
 	
 	scene.infos.all.scene.initialize(scene)
@@ -1102,9 +1102,7 @@ else
 		filter_categoryBits=0x00000100,
 		filter_maskBits=0x00ffffff,
 	})[1]
---PRINT("hits",player.pos,player.shape)
 	if cast and cast.fraction and cast.fraction<0.75 then
---PRINT("hit",hit.shape,hit.point[1],hit.point[2],hit.normal[1],hit.normal[2],hit.fraction)
 
 		foot_touch=scene:find_uid(cast.shape.uid) -- remember foot touch for later
 
@@ -1155,7 +1153,7 @@ else
 		if player.onfloor>0 then -- can jump
 			player.onfloor=0
 			player.jump_debounce=-4
-			player.vel[2]=-166 -- reset starting force
+			player.vel[2]=-180 -- reset starting force
 			system.components.sfx.play("jump",1,0.5)
 		end
 	end
@@ -1264,10 +1262,7 @@ else
 		event_touch(foot_touch,{is="foot"})
 	end
 
---PRINT( ba_now , player.onfloor , player.jump )
---PRINT( player.vel )
-
---PRINT( player.acc )
+--RINT( player.body:convert(10,10,"point_local_to_world") )
 
 end
 
@@ -1900,6 +1895,7 @@ end
 fauna_slims.item.flag_touch=function(fauna,touch,event)
 	touch:get_value("danger")
 	if touch.danger and touch.danger>0 then
+PRINT("touch",fauna:get_singular("level"):get("time") )
 		fauna:set_value("touch",{uid=touch.uid})
 	end
 end
@@ -1982,6 +1978,7 @@ fauna_slims.item.update=function(fauna)
 	if fauna.touch.uid then
 		local hit=scene:find_uid(fauna.touch.uid)
 		if hit  then -- we are hit so turn into stunned floater
+PRINT("die",fauna:get_singular("level"):get("time") )
 			local floater=scene:create({"floater",
 				sname=fauna.sname, pos=fauna.pos, vel=fauna.vel+V2(0,-50), })
 			floater:depend("fauna",fauna.uid)
@@ -2092,8 +2089,6 @@ fauna_slims.item.update=function(fauna)
 		fauna.jump=fauna.jump-1 -- continue jump
 	end
 
---PRINT( ba_now , fauna.onfloor , fauna.jump )
---PRINT( fauna.vel )
 
 	fauna:set_values()
 end
@@ -2377,8 +2372,6 @@ fauna_trenchs.item.update=function(fauna)
 		fauna.jump=fauna.jump-1 -- continue jump
 	end
 
---PRINT( ba_now , fauna.onfloor , fauna.jump )
---PRINT( fauna.vel )
 
 	fauna:set_values()
 end

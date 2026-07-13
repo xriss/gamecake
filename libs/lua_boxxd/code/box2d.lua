@@ -934,6 +934,40 @@ box2d.body_functions.acceleration=function(body,x,y,r)
 	return core.body_acceleration(body[0],x,y,r)
 end
 
+
+--[[#lua.box2d.body.convert
+
+	x,y = body:convert(x,y,conversion)
+
+conversion must be one of the following strings indicating how the 
+input x,y should be transformed into the output x,y
+
+	x,y = body:convert(x,y,"point_local_to_world")
+	x,y = body:convert(x,y,"point_world_to_local")
+
+	x,y = body:convert(x,y,"vector_local_to_world")
+	x,y = body:convert(x,y,"vector_world_to_local")
+
+	x,y = body:convert(x,y,"point_local_to_velocity")
+	x,y = body:convert(x,y,"point_world_to_velocity")
+
+convert x,y between various spaces.
+
+]]
+do
+	local lookup={
+		point_local_to_world    = 0x134 ,
+		point_world_to_local    = 0x143 ,
+		vector_local_to_world   = 0x234 ,
+		vector_world_to_local   = 0x243 ,
+		point_local_to_velocity = 0x135 ,
+		point_world_to_velocity = 0x145 ,
+	}
+	box2d.body_functions.convert=function(body,x,y,str)
+		return core.body_convert( body[0], x,y, lookup[str] )
+	end
+end
+
 --[[#lua.box2d.world.body.shape
 
 	shape=body:shape(def)
