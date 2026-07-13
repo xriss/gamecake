@@ -811,6 +811,10 @@ explicitly requested later using the contactId provided by contact
 events.</p>
 <p>May possibly be nil if an invalid contact ID, eg this is old data and 
 you called world:step again and created new contacts.</p>
+<pre><code>for event in events:iterate(uid) do ... end
+</code></pre>
+<p>A simple iterator function for the events associated with the given 
+uid, or all events if uid is nil.</p>
 </div>
 </div>
 
