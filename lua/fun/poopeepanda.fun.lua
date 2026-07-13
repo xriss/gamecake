@@ -137,9 +137,7 @@ all.create_scene=function(scene)
 --		scene.infos.all.scene.initialize(scene)
 	end
 	
-	scene.do_setup=function(scene)
-		scene:systems_cocall("setup")
-
+	scene.boot_level=function(scene,level)
 		local boots={
 			{"kinetic",
 				LengthUnitsPerMeter=16,
@@ -147,34 +145,41 @@ all.create_scene=function(scene)
 				substeps=16, -- number of substeps
 				defaults={ -- world defaults when creating box2d objects
 					world={
-						gravity={0,0,0}, -- zero as we plan to control gravity for each object
+						gravity={0,400}, -- default gravity
+						sleepThreshold=1, -- meter adjust
 					},
 					body={
+						sleepThreshold=1, -- meter adjust
+--						linearDamping=1/64,
+--						angularDamping=1/64,
+						gravityScale=0, -- disable gravity
 					},
 					shape={
 						density=1/256,
 						material_friction=0.5,
 						material_restitution=0.5,
+--						material_rollingResistance=0.5,
 					},
 					joint={
 					},
 				}
 			},
-			{"level",idx=1},
+			{"level",idx=level},
 --			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
 		}
 		scene:creates(boots)
+	end
+	
+	scene.do_setup=function(scene)
+		scene:systems_cocall("setup")
+		scene:boot_level(1)
 	end
 
 	scene.do_level=function(scene,level)
 		scene:call("destroy")
 		scene:reset()
 		scene:reset_ticks()
-		local boots={
-			{"kinetic"},
-			{"level",idx=level},
-		}
-		scene:creates(boots)
+		scene:boot_level(level)
 	end
 	
 	scene.infos.all.scene.initialize(scene)
@@ -687,11 +692,11 @@ players.uidmap={
 }
 
 players.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,0,0 ),
+	acc=V2( 0,0 ),
 	idx=1,
 	mode="none",
 	side=1,
@@ -703,7 +708,7 @@ players.values={
 	walk=0,
 	score=0,
 	idle=0,
-	spawn=V3( 0,0,0 ),
+	spawn=V2( 0,0 ),
 }
 
 players.types={
@@ -1007,7 +1012,7 @@ if player.mode=="spawn" then -- we are spawning but not really here yet
 		player:setup_kinetic()
 
 		local tile=level:get_tile_by_pos(player.pos)
-		player.vel=V3(tile.dir)*400
+		player.vel=V2(tile.dir)*400
 
 		system.components.sfx.play("jump",1,0.5)
 	end
@@ -1031,7 +1036,7 @@ elseif player.mode=="die" then
 		player.vel[2]=player.vel[2]-200
 	end
 	
-	player.vel=player.vel+(grav/16) -- we have to apply gravity
+	player.vel=player.vel+(grav/16) -- 0 mass so we have to apply gravity
 
 	if player.pos[2] > 512 then -- fell way off of screen
 	
@@ -1040,11 +1045,11 @@ elseif player.mode=="die" then
 		player:clean_kinetic()
 		player:setup_kinetic()
 
-		player.pos=V3()+player.spawn
+		player.pos=V2()+player.spawn
 		player.rot=0
-		player.vel=V3()
+		player.vel=V2()
 		player.ang=0
-		player.acc=V3()
+		player.acc=V2()
 		player.onfloor=0
 
 	end
@@ -1057,7 +1062,7 @@ else
 		player.flap=2
 	end
 
-	player.acc=V3( 0, 0 ,0) -- reset force
+	player.acc=V2( 0 ,0) -- reset force
 	local va=lx*400  -- velocity we want to achieve
 	if va then -- apply left/right movement
 		if va<0 and player.vel[1]>0 then player.vel[1]=0 end -- quick turn
@@ -1087,7 +1092,7 @@ else
 
 --	player.pos=player.pos+player.vel
 
-	local footspeed=0.25
+	local footspeed=0.5
 
 	local foot_touch -- set this if our feet touched something
 	local cast=world:cast_ray({
@@ -1113,17 +1118,26 @@ else
 			v=v-2
 		end
 
-		local a=v*8 -- force to adjust velocity by
+		if     v>= 0.5 then
+			player.pos[2]=player.pos[2]+footspeed
+			player.vel[2]=player.vel[2]*8/16
+		elseif v<=-0.5 then
+			player.pos[2]=player.pos[2]-footspeed*2
+			player.vel[2]=player.vel[2]*8/16
+		else
+			player.pos[2]=player.pos[2]+v
+			player.vel[2]=player.vel[2]*8/16
+		end
 
 		player.foot=d
 		if player.foot<7  then player.foot=7  end
 		if player.foot>11 then player.foot=11 end
-		player.acc[2]=player.acc[2]+a --  hover
+--		player.acc[2]=player.acc[2]+a --  hover
 
 		player.onfloor=4
 
 	else
-		if player.foot>11 then player.foot=player.foot-footspeed end
+		if player.foot>11 then player.foot=11 end
 		if player.foot<11 then player.foot=player.foot+footspeed end
 
 		player.acc:add(grav) -- gravity
@@ -1137,7 +1151,7 @@ else
 	if player.jump_debounce<0 then player.onfloor=0 end -- just jumped reset floor for a few frames
 	if ba_set and player.jump_debounce>=0 then player.jump_debounce=4 end -- start jump now or in the next few frames
 	if ba_now and player.jump_debounce>=0 and player.jump_debounce<=1 then player.jump_debounce=1 end -- continue jump only this frame
-	if player.jump_debounce>0 then -- start jump
+	if player.jump_debounce>0 and player.vel[2]>-32 then -- start jump
 		if player.onfloor>0 then -- can jump
 			player.onfloor=0
 			player.jump_debounce=-4
@@ -1147,9 +1161,9 @@ else
 	end
 
 
-	local aim=V3( (player.side/128)+lx+(rx*256) , (1/256)+ly+(ry*256) , 0 )
+	local aim=V2( (player.side/128)+lx+(rx*256) , (1/256)+ly+(ry*256) )
 	aim:normalize()
-	local hold_pos=player.pos+V3(0,-8,0)+(aim*8)
+	local hold_pos=player.pos+V2(0,-8)+(aim*8)
 
 
 	local hold=player:depend("hold")
@@ -1168,8 +1182,8 @@ else
 	end
 	if bb_set and not hold then -- pickup
 		player.holdtime=0
-		local v1=V3(-24,-16,0)
-		local v2=V3( 24, 24,0)
+		local v1=V2(-24,-16)
+		local v2=V2( 24, 24)
 
 		local overlaps = world:overlap_aabb({
 			origin=player.pos,
@@ -1325,8 +1339,8 @@ scores.uidmap={
 }
 
 scores.values={
-	pos=V3( 0,0,0 ),
-	vel=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
+	vel=V2( 0,0 ),
 
 	num=0,
 	age=0,
@@ -1354,7 +1368,7 @@ end
 scores.item.update=function(score)
 	score:get_values()
 	
-	score.vel=score.vel+V3(0,-1,0)
+	score.vel=score.vel+V2(0,-1)
 	score.pos=score.pos+score.vel
 	
 	if score.pos[2] < -64 then -- off of top of screen
@@ -1395,15 +1409,15 @@ floaters.uidmap={
 }
 
 floaters.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,0,0 ),
+	acc=V2( 0,0 ),
 
 	touch={},
 	sname="fauna_slim",
-	spin=0,
+	spin=0.5,
 }
 
 floaters.types={
@@ -1508,9 +1522,8 @@ floaters.item.update=function(floater)
 	
 		 			floater:mark_deleted()
 					for i=1,16 do
-						local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
-									hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
-									0 )
+						local v=V2( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
+									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
 						local boots={
 							{"gib",sname="gib_green",size=4,pos=floater.pos,vel=v},
 						}
@@ -1521,9 +1534,8 @@ floaters.item.update=function(floater)
 					if r<=75 then r=1 elseif r<=95 then r=2 else r=3 end -- 1,2 or 3 drops
 
 					for i=1,r do -- 1-3 fruits
-						local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
-									hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
-									0 )
+						local v=V2( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
+									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
 						local f=math.min(8,number_of_fruits+i) -- maximum fruit
 						local boots={
 							{"fruit",sname="fruit_"..f,pos=floater.pos,vel=v*2,score=(2^(f-1))*100},
@@ -1580,11 +1592,11 @@ fauna_eggs.uidmap={
 }
 
 fauna_eggs.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,0,0 ),
+--	acc=V2( 0,0 ),
 	idx=1,
 	sname="fauna_egg",
 	egg="fauna_slim",
@@ -1674,6 +1686,7 @@ fauna_eggs.item.setup_kinetic=function(fauna)
 	local world=fauna:get_singular("kinetic").world
 	fauna.body=world:body({
 		type="dynamic",
+		gravityScale=1, -- use world gravity
 	})
 	fauna.shape=fauna.body:shape({
 		shape="circle",
@@ -1712,7 +1725,7 @@ fauna_eggs.item.update_hatch=function(fauna,player)
 		})
 	else
 		if math.sqrt(fauna.hatch*2)%1==0 then -- jiggle
-			local jump=V3(fauna.sys:get_rnd(-10,10),fauna.sys:get_rnd(-60,-30),0)
+			local jump=V2(fauna.sys:get_rnd(-10,10),fauna.sys:get_rnd(-60,-30))
 			fauna.vel=fauna.vel+jump
 		end
 	end
@@ -1727,7 +1740,7 @@ fauna_eggs.item.update=function(fauna)
 	local level=fauna:get_singular("level") -- only one level is active at a time
 	local grav=level:get_gravity(fauna.pos)
 
-	fauna.acc:set(grav) -- gravity
+--	fauna.acc:set(grav) -- gravity
 
 	fauna:set_values()
 end
@@ -1763,11 +1776,11 @@ fauna_slims.uidmap={
 }
 
 fauna_slims.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,200,0 ),
+	acc=V2( 0,0 ),
 	idx=1,
 	side=1,
 	foot=8,
@@ -1946,7 +1959,7 @@ fauna_slims.item.update_brain=function(fauna,brain)
 	fauna.thunk=fauna.thunk-1
 	if fauna.thunk<=0 then
 		fauna.thunk=fauna.sys:get_rnd(8,32)
-		brain.jump=V3(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160),0)
+		brain.jump=V2(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160))
 		brain.move[1]=brain.jump[1]<0 and -1 or 1
 	end
 end
@@ -1969,7 +1982,8 @@ fauna_slims.item.update=function(fauna)
 	if fauna.touch.uid then
 		local hit=scene:find_uid(fauna.touch.uid)
 		if hit  then -- we are hit so turn into stunned floater
-			local floater=scene:create({"floater", sname=fauna.sname, pos=fauna.pos, vel=fauna.vel, })
+			local floater=scene:create({"floater",
+				sname=fauna.sname, pos=fauna.pos, vel=fauna.vel+V2(0,-50), })
 			floater:depend("fauna",fauna.uid)
 			fauna:depend("held",floater.uid)
 			fauna:clean_kinetic() -- recreate body
@@ -1980,12 +1994,12 @@ fauna_slims.item.update=function(fauna)
 	end
 
 	local brain={}
-	brain.move=V3(0,0,0)
+	brain.move=V2(0,0)
 	brain.jump=nil
 	fauna:update_brain(brain)
 
 
-	fauna.acc=V3( 0, 0 ,0) -- reset force
+	fauna.acc=V2( 0 ,0) -- reset force
 	local va -- velocity we want to achieve
 	if fauna.onfloor>0 or fauna.jump>0 then -- when on floor
 		va=brain.move[1]*512
@@ -2139,11 +2153,11 @@ fauna_trenchs.uidmap={
 }
 
 fauna_trenchs.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,200,0 ),
+	acc=V2( 0,0 ),
 	idx=1,
 	side=1,
 	foot=8,
@@ -2270,7 +2284,7 @@ fauna_trenchs.item.update_brain=function(fauna,brain)
 	fauna.thunk=fauna.thunk-1
 	if fauna.thunk<=0 then
 		fauna.thunk=fauna.sys:get_rnd(8,32)
-		brain.jump=V3(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160),0)
+		brain.jump=V2(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160))
 		brain.move[1]=brain.jump[1]<0 and -1 or 1
 	end
 end
@@ -2284,13 +2298,13 @@ fauna_trenchs.item.update=function(fauna)
 	local level=fauna:get_singular("level") -- only one level is active at a time
 
 	local brain={}
-	brain.move=V3(0,0,0)
+	brain.move=V2(0,0)
 	brain.jump=nil
 	fauna:update_brain(brain)
 
 	local grav=level:get_gravity(fauna.pos)
 
-	fauna.acc=V3( 0, 0 ,0) -- reset force
+	fauna.acc=V2( 0 ,0) -- reset force
 	local va -- velocity we want to achieve
 	if fauna.onfloor>0 or fauna.jump>0 then -- when on floor
 		va=brain.move[1]*512
@@ -2401,11 +2415,11 @@ fruits.uidmap={
 }
 
 fruits.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,200,0 ),
+--	acc=V2( 0,0 ),
 	sname="fruit_1",
 	age=0,
 	score=100,
@@ -2591,6 +2605,7 @@ fruits.item.setup_kinetic=function(fruit)
 	local world=fruit:get_singular("kinetic").world
 	fruit.body=world:body({
 		type="dynamic",
+		gravityScale=1, -- use world gravity
 	})
 	fruit:setup_kinetic_reshape()
 	fruit:set_body()
@@ -2677,11 +2692,11 @@ gibs.uidmap={
 }
 
 gibs.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,200,0 ),
+--	acc=V2( 0,0 ),
 	sname="gib_green",
 	size=4,
 	touch=0,
@@ -2768,6 +2783,7 @@ gibs.item.setup_kinetic=function(gib)
 	local world=gib:get_singular("kinetic").world
 	gib.body=world:body({
 		type="dynamic",
+		gravityScale=1, -- use world gravity
 	})
 	gib:setup_kinetic_reshape()
 	gib:set_body()
@@ -2840,11 +2856,11 @@ junks.uidmap={
 }
 
 junks.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,200,0 ),
+--	acc=V2( 0,200 ),
 	sname="junk_green",
 	danger=0,
 }
@@ -2939,7 +2955,8 @@ junks.item.setup_kinetic=function(junk)
 	local world=junk:get_singular("kinetic").world
 	junk.body=world:body({
 		type="dynamic",
-	})
+		gravityScale=1, -- use world gravity
+ 	})
 	junk:setup_kinetic_reshape()
 	junk:set_body()
 end
@@ -3026,7 +3043,7 @@ fauna_pandas.uidmap={
 }
 
 fauna_pandas.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	sname="",
 	thunk=0,
 }
@@ -3144,8 +3161,8 @@ levels.uidmap={
 }
 
 levels.values={
-	pos=V3( 0,0,0 ),
-	focus=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
+	focus=V2( 0,0 ),
 	idx=1,
 	time=0,
 	complete=0,
@@ -3597,7 +3614,7 @@ levels.item.get_wind=function(level,pos)
 end
 
 levels.item.get_gravity=function(level,pos)
-	return V3(0,400,0)
+	return V3(0,400)
 --[[	
 	local tx=math.floor(pos[1]/8)
 	local ty=math.floor(pos[2]/8)
@@ -3701,9 +3718,9 @@ cameras.uidmap={
 }
 
 cameras.values={
-	pos=V3( 0,0,0 ),
-	focus=V3( 0,0,0 ),
-	slide=V3( 0,-(32*32),0 ),
+	pos=V2( 0,0 ),
+	focus=V2( 0,0 ),
+	slide=V2( 0,-(32*32) ),
 	idx=1,
 	tile=0x0000,
 }
@@ -3846,10 +3863,10 @@ huds.uidmap={
 }
 
 huds.values={
-	pos=V3( 0,0,0 ),
-	focus=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
+	focus=V2( 0,0 ),
 	idx=1,
-	dst=V3( 0,0,0 ),
+	dst=V2( 0,0 ),
 	tile_idx=0,
 	tile_time=0,
 }
@@ -3918,7 +3935,7 @@ huds.item.update=function(hud)
 	
 	local show_tile
 	local v=player:get("vel")
-		for _,t in level:each_tile_near( player.pos + V3(0,0,0), 1 ) do
+		for _,t in level:each_tile_near( player.pos + V2(0,0), 1 ) do
 			if t.name=="char_sign" then
 				show_tile=t
 				break
@@ -3944,9 +3961,9 @@ huds.item.update=function(hud)
 
 -- 1 sec pause
 	if hud.tile_time>TEXT_DELAY_WAIT and show_tile then
-		hud.dst=V3(0,#show_tile.text_lines*16+16,0)
+		hud.dst=V2(0,#show_tile.text_lines*16+16)
 	else
-		hud.dst=V3(0,0,0)
+		hud.dst=V2(0,0)
 	end
 
 

@@ -323,8 +323,8 @@ all.item.get_body=function(it)
 	local px,py,rz=it.body:transform()
 	local vx,vy,az=it.body:velocity()
 
-	it.pos=V3(px,py,0)
-	it.vel=V3(vx,vy,0)
+	it.pos=V2(px,py)
+	it.vel=V2(vx,vy)
 	it.rot=rz/(math.pi*2)
 	it.ang=az/(math.pi*2)
 

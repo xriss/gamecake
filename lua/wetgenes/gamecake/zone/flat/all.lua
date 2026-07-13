@@ -235,13 +235,13 @@ all.gene_body=function(boot)
 
 	boot=boot or {}
 
-	boot.siz=boot.siz or {1,1,1}
+--	boot.siz=boot.siz or {1,1}
 
-	boot.pos=boot.pos or {0,0,0}
-	boot.vel=boot.vel or {0,0,0}
+	boot.pos=boot.pos or {0,0}
+	boot.vel=boot.vel or {0,0}
 
-	boot.rot=boot.rot or {0,0,0,1}
-	boot.ang=boot.ang or {0,0,0} -- the axis of rotation and its magnitude
+	boot.rot=boot.rot or 0
+	boot.ang=boot.ang or 0 -- the axis of rotation and its magnitude
 
 	return boot
 end
