@@ -147,12 +147,13 @@ all.create_scene=function(scene)
 					world={
 						gravity={0,400}, -- default gravity
 						sleepThreshold=1, -- meter adjust
+						hitEventThreshold=0, -- any hit please
 					},
 					body={
 						sleepThreshold=1, -- meter adjust
 --						linearDamping=1/64,
 --						angularDamping=1/64,
-						gravityScale=0, -- disable gravity
+						gravityScale=0, -- disable gravity by default
 					},
 					shape={
 						density=1/256,
@@ -1895,7 +1896,7 @@ end
 fauna_slims.item.flag_touch=function(fauna,touch,event)
 	touch:get_value("danger")
 	if touch.danger and touch.danger>0 then
-PRINT("touch",fauna:get_singular("level"):get("time") )
+--RINT("touch",fauna:get_singular("level"):get("time") )
 		fauna:set_value("touch",{uid=touch.uid})
 	end
 end
@@ -1978,7 +1979,7 @@ fauna_slims.item.update=function(fauna)
 	if fauna.touch.uid then
 		local hit=scene:find_uid(fauna.touch.uid)
 		if hit  then -- we are hit so turn into stunned floater
-PRINT("die",fauna:get_singular("level"):get("time") )
+--RINT("die",fauna:get_singular("level"):get("time") )
 			local floater=scene:create({"floater",
 				sname=fauna.sname, pos=fauna.pos, vel=fauna.vel+V2(0,-50), })
 			floater:depend("fauna",fauna.uid)
@@ -2948,6 +2949,7 @@ junks.item.setup_kinetic=function(junk)
 	local world=junk:get_singular("kinetic").world
 	junk.body=world:body({
 		type="dynamic",
+		isBullet=true, -- we will throw junk at stuff
 		gravityScale=1, -- use world gravity
  	})
 	junk:setup_kinetic_reshape()
