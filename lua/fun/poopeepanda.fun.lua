@@ -951,8 +951,9 @@ players.item.setup_kinetic=function(player)
 			filter_categoryBits=players.collision_bits,
 			filter_maskBits=players.collision_mask,
 			filter_groupIndex=players.collision_type,
+			enableHitEvents=true,
+			uid=player.uid,
 		})
-		player.shape.uid=player.uid
 	end
 	player:set_body() -- set positon etc
 end
@@ -968,14 +969,12 @@ players.item.clean=function(player)
 	player:clean_kinetic()
 end
 
-players.item.do_die=function(player)
-		player:set_value("mode","die")
-end
-
 players.item.update=function(player)
 	player:get_values()
 	player:setup_kinetic() -- might need to recreate body
 	
+	local kinetic=player:get_singular("kinetic") -- we will do kinetic things
+	local world=kinetic.world
 	local level=player:get_singular("level") -- only one level is active at a time
 
 	local up=player.scene.ups[player.idx] or player.sys.oven.ups.empty
@@ -1031,13 +1030,12 @@ elseif player.mode=="die" then
 
 		player.vel[2]=player.vel[2]-200
 	end
-
-	player.acc=grav -- apply gravity
 	
+	player.vel=player.vel+(grav/16) -- we have to apply gravity
+
 	if player.pos[2] > 512 then -- fell way off of screen
 	
 		player.mode="spawn"
-
 		
 		player:clean_kinetic()
 		player:setup_kinetic()
@@ -1047,6 +1045,7 @@ elseif player.mode=="die" then
 		player.vel=V3()
 		player.ang=0
 		player.acc=V3()
+		player.onfloor=0
 
 	end
 
@@ -1090,8 +1089,8 @@ else
 
 	local footspeed=0.25
 
-	local world=player:get_singular("kinetic").world
-	local hit=world:cast_ray({
+	local foot_touch -- set this if our feet touched something
+	local cast=world:cast_ray({
 		closest=true, -- just want the closest hit
 		origin=player.pos,
 		translation={0,16},
@@ -1099,10 +1098,12 @@ else
 		filter_maskBits=0x00ffffff,
 	})[1]
 --PRINT("hits",player.pos,player.shape)
-	if hit and hit.fraction and hit.fraction<0.75 then
+	if cast and cast.fraction and cast.fraction<0.75 then
 --PRINT("hit",hit.shape,hit.point[1],hit.point[2],hit.normal[1],hit.normal[2],hit.fraction)
 
-		local d=(hit.fraction*16) -- distance + radius
+		foot_touch=scene:find_uid(cast.shape.uid) -- remember foot touch for later
+
+		local d=(cast.fraction*16) -- distance + radius
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
 
@@ -1120,12 +1121,7 @@ else
 		player.acc[2]=player.acc[2]+a --  hover
 
 		player.onfloor=4
-		if hit.shape.uid then
-			local it=scene:find_uid(hit.shape.uid)
-			if it and it.do_touch then -- sanity
-				it:do_touch(player,arb)
-			end
-		end
+
 	else
 		if player.foot>11 then player.foot=player.foot-footspeed end
 		if player.foot<11 then player.foot=player.foot+footspeed end
@@ -1145,12 +1141,17 @@ else
 		if player.onfloor>0 then -- can jump
 			player.onfloor=0
 			player.jump_debounce=-4
-			player.vel[2]=-180 -- reset starting force
+			player.vel[2]=-166 -- reset starting force
 			system.components.sfx.play("jump",1,0.5)
 		end
 	end
 
-	local hold_pos=player.pos+V3(0,-10,0)
+
+	local aim=V3( (player.side/128)+lx+(rx*256) , (1/256)+ly+(ry*256) , 0 )
+	aim:normalize()
+	local hold_pos=player.pos+V3(0,-8,0)+(aim*8)
+
+
 	local hold=player:depend("hold")
 	local hold_len -- how well held 0 is best
 	if bb_set and hold then -- throw
@@ -1159,8 +1160,8 @@ else
 		local m=((player.holdtime-8)/16)
 		if m>1 then m=1 end -- full speed after 1.5 seconds
 		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
-		local aim=V3( (player.side/128)+lx+(rx*256) , (1/256)+ly+(ry*256) , 0 )
-		aim:normalize()
+--		local aim=V3( (player.side/128)+lx+(rx*256) , (1/256)+ly+(ry*256) , 0 )
+--		aim:normalize()
 		hold:set_value("vel",aim*(400*m))
 		hold:set_value("danger",16*8)
 		hold:setup_kinetic_reshape()
@@ -1222,6 +1223,31 @@ else
 			if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
 			hold:set_value("ang",m*2*player.side)
 		end
+	end
+
+	-- what to do when we touch
+	local event_touch=function(it,event)
+		if it.flag_touch then -- flag a touch to be handled in this objects update
+			it:flag_touch(player,event)
+		end
+		if it.caste=="fauna_slim" then -- kill on touch
+			player.mode="die"
+		end
+	end
+	-- check events for anyone we touched
+	for event in kinetic.events:iterate(player.uid) do
+		if event.is=="contact_hit" then
+			local it=scene:find_uid(
+				(event.shapeA.uid == player.uid) and
+				event.shapeB.uid or
+				event.shapeA.uid ) -- we hit the one that is is not us
+			if it then
+				event_touch(it,event)
+			end
+		end
+	end
+	if foot_touch then -- also did we touched with our feet earlier
+		event_touch(foot_touch,{is="foot"})
 	end
 
 --PRINT( ba_now , player.onfloor , player.jump )
@@ -1439,8 +1465,8 @@ floaters.item.setup_kinetic=function(floater)
 		filter_categoryBits=floaters.collision_bits,
 		filter_maskBits=floaters.collision_mask,
 		filter_groupIndex=floaters.collision_type,
+		uid=floater.uid,
 	})
-	floater.shape.uid=floater.uid
 	floater:set_body()
 end
 
@@ -1456,8 +1482,8 @@ floaters.item.clean=function(floater)
 end
 
 
--- called inside the physics loop so probably shouldnt do anything complex
-floaters.item.do_touch=function(floater,touch,arb)
+-- flag functions set values for use in the next update
+floaters.item.flag_touch=function(floater,touch,event)
 	if touch.caste=="player" then
 		floater:set_value("touch",{uid=touch.uid})
 	end
@@ -1655,8 +1681,8 @@ fauna_eggs.item.setup_kinetic=function(fauna)
 		filter_categoryBits=fauna_eggs.collision_bits,
 		filter_maskBits=fauna_eggs.collision_mask,
 		filter_groupIndex=fauna_eggs.collision_type,
+		uid=fauna.uid,
 	})
-	fauna.shape.uid=fauna.uid
 	fauna:set_body()
 end
 
@@ -1857,8 +1883,8 @@ end
 fauna_slims.system.clean=function(sys)
 end
 
--- called inside the physics loop so probably shouldnt do anything complex
-fauna_slims.item.do_touch=function(fauna,touch,arb)
+-- flag functions set values for use in the next update
+fauna_slims.item.flag_touch=function(fauna,touch,event)
 	touch:get_value("danger")
 	if touch.danger and touch.danger>0 then
 		fauna:set_value("touch",{uid=touch.uid})
@@ -1898,15 +1924,15 @@ fauna_slims.item.setup_kinetic=function(fauna)
 			filter_categoryBits=fauna_slims.collision_bits,
 			filter_maskBits=fauna_slims.collision_mask,
 			filter_groupIndex=fauna_slims.collision_type,
+			uid=fauna.uid,
 		})
-		fauna.shape.uid=fauna.uid
 	end
 	fauna:set_body()
 end
 
 fauna_slims.item.clean_kinetic=function(fauna)
 	if not fauna.body then return end -- already done
-	body:destroy()
+	fauna.body:destroy()
 	fauna.body=nil
 	fauna.shape=nil
 end
@@ -2223,14 +2249,8 @@ fauna_trenchs.item.setup_kinetic=function(fauna)
 		filter_categoryBits=fauna_trenchs.collision_bits,
 		filter_maskBits=fauna_trenchs.collision_mask,
 		filter_groupIndex=fauna_trenchs.collision_type,
+		uid=fauna.uid,
 	})
---	local space=fauna:get_singular("kinetic").space
---	fauna.body=space:body(1,1)
---	fauna.shape=fauna.body:shape("circle",4,0,0)
---	fauna.shape:friction(0.5)
---	fauna.shape:elasticity(0.5)
---	fauna.shape:filter(fauna.uid,fauna_trenchs.collision_bits,fauna_trenchs.collision_mask)
-	fauna.shape.uid=fauna.uid
 	fauna:set_body()
 end
 
@@ -2520,8 +2540,8 @@ fruits.collision_handlers={
 }
 ]]
 
--- called inside the physics loop so probably shouldnt do anything complex
-fruits.item.do_touch=function(fruit,touch,arb)
+-- flag functions set values for use in the next update
+fruits.item.flag_touch=function(fruit,touch,event)
 	local oldtouch=fruit:get_value("touch")
 	if oldtouch.uid==0 or oldtouch.uid==-1 then -- replace with real uid
 		fruit:set_value("touch",{uid=touch and touch.uid or -1})
@@ -2563,8 +2583,8 @@ fruits.item.setup_kinetic_reshape=function(fruit)
 		filter_categoryBits=fruits.collision_bits,
 		filter_maskBits=fruits.collision_mask,
 		filter_groupIndex=fruits.collision_type,
+		uid=fruit.uid,
 	})
-	fruit.shape.uid=fruit.uid
 end
 fruits.item.setup_kinetic=function(fruit)
 	if fruit.body then return end -- already done
@@ -2739,8 +2759,9 @@ gibs.item.setup_kinetic_reshape=function(gib)
 		filter_categoryBits=gibs.collision_bits,
 		filter_maskBits=gibs.collision_mask,
 		filter_groupIndex=gibs.collision_type,
+		enableHitEvents=true,
+		uid=gib.uid,
 	})
-	fruit.shape.uid=fruit.uid
 end
 gibs.item.setup_kinetic=function(gib)
 	if gib.body then return end -- already done
@@ -2909,8 +2930,9 @@ junks.item.setup_kinetic_reshape=function(junk)
 		filter_categoryBits=held and players.collision_bits or junks.collision_bits,
 		filter_maskBits=held and players.collision_mask or junks.collision_mask,
 		filter_groupIndex=junks.collision_type,
+		enableHitEvents=true,
+		uid=junk.uid,
 	})
-	junk.shape.uid=junk.uid
 end
 junks.item.setup_kinetic=function(junk)
 	if junk.body then return end -- already done
@@ -2945,9 +2967,28 @@ junks.item.update=function(junk)
 			junk.danger=0
 		end
 	end
+
+	local kinetic=junk:get_singular("kinetic")
+	-- what to do when we touch
+	local event_touch=function(it,event)
+		if it.flag_touch then -- flag a touch to be handled in this objects update
+			it:flag_touch(junk,event)
+		end
+	end
+	-- check events for anyone we touched
+	for event in kinetic.events:iterate(junk.uid) do
+		if event.is=="contact_hit" then
+			local it=scene:find_uid(
+				(event.shapeA.uid == junk.uid) and
+				event.shapeB.uid or
+				event.shapeA.uid ) -- we hit the one that is is not us
+			if it then
+				event_touch(it,event)
+			end
+		end
+	end
 	
 	junk:set_values()
-
 end
 
 -- when drawing get will auto tween values

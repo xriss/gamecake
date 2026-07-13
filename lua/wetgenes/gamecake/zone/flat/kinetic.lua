@@ -62,6 +62,8 @@ kinetics.item.setup=function(kinetic)
 		kinetic.world:defaults(n,v)
 	end
 
+	kinetic.events=kinetic.world:prepare_events() -- an empty events
+
 	return kinetic
 end
 
@@ -93,13 +95,12 @@ kinetics.item.update_kinetic=function(kinetic)
 	kinetic.world:sensor_events(kinetic.events)
 	kinetic.world:contact_events(kinetic.events)
 	
-	PRINT("#events",#kinetic.events.all)
-	for i,event in ipairs(kinetic.events.all) do
-		PRINT("event.is",event.is)
-	end
+--	PRINT("#events",#kinetic.events.all)
+--	for i,event in ipairs(kinetic.events.all) do
+--		PRINT("event.is",event.is)
+--	end
 
 end
-
 
 kinetics.item.draw=function(kinetic)
 

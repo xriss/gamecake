@@ -1166,6 +1166,7 @@ static int lua_b2_body_set (lua_State *l)
 	}
 	lua_pop(l,1);
 
+/*
 	lua_getfield(l,2,"enableContactEvents");
 	if(!lua_isnil(l,-1))
 	{
@@ -1179,6 +1180,7 @@ static int lua_b2_body_set (lua_State *l)
 		b2Body_EnableHitEvents(body, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
+*/
 
 	return 0;
 }

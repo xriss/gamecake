@@ -283,6 +283,12 @@ events.
 May possibly be nil if an invalid contact ID, eg this is old data and 
 you called world:step again and created new contacts.
 
+	for event in events:iterate(uid) do ... end
+
+A simple iterator function for the events associated with the given 
+uid, or all events if uid is nil.
+
+
 ]]
 box2d.world_functions.prepare_events=function(world,events)
 	if not events then events={} end
@@ -309,6 +315,22 @@ box2d.world_functions.prepare_events=function(world,events)
 				events.contact_cache[id]=core.world_contact(id)
 			end
 			return events.contact_cache[id]
+		end
+	end
+	if not events.iterate then
+		events.iterate=function(events,uid)
+			local its=events.all
+			if uid then its=events.uids[uid] end
+			if its then -- iterate
+				local idx=0
+				return function()
+					idx=idx+1
+					return its[idx]
+				end
+			else -- empty
+				return function()
+				end
+			end
 		end
 	end
 	return events
@@ -370,7 +392,7 @@ box2d.world_functions.sensor_events=function(world,events)
 		event.sensorShape=world.shapes[event.sensorShapeId]
 		event.visitorShape=world.shapes[event.visitorShapeId]
 
-		events:insert(event,event.sensorShape,visitorShape)
+		events:insert(event,event.sensorShape,event.visitorShape)
 	end
 
 	local dat=events.sensor_end_data
@@ -384,7 +406,7 @@ box2d.world_functions.sensor_events=function(world,events)
 		event.sensorShape=world.shapes[event.sensorShapeId]
 		event.visitorShape=world.shapes[event.visitorShapeId]
 
-		events:insert(event,event.sensorShape,visitorShape)
+		events:insert(event,event.sensorShape,event.visitorShape)
 	end
 
 	return events
@@ -417,7 +439,7 @@ box2d.world_functions.contact_events=function(world,events)
 		event.shapeA=world.shapes[event.shapeIdA]
 		event.shapeB=world.shapes[event.shapeIdB]
 
-		events:insert(event,event.shapeA,shapeB)
+		events:insert(event,event.shapeA,event.shapeB)
 	end
 
 	local dat=events.contact_end_data
@@ -432,7 +454,7 @@ box2d.world_functions.contact_events=function(world,events)
 		event.shapeA=world.shapes[event.shapeIdA]
 		event.shapeB=world.shapes[event.shapeIdB]
 
-		events:insert(event,event.shapeA,shapeB)
+		events:insert(event,event.shapeA,event.shapeB)
 	end
 
 	local dat=events.contact_hit_data
@@ -450,7 +472,7 @@ box2d.world_functions.contact_events=function(world,events)
 		event.shapeA=world.shapes[event.shapeIdA]
 		event.shapeB=world.shapes[event.shapeIdB]
 
-		events:insert(event,event.shapeA,shapeB)
+		events:insert(event,event.shapeA,event.shapeB)
 	end
 
 	return events
@@ -727,6 +749,8 @@ box2d.world_functions.body=function(world,def)
 	
 	def=world:fill(def,"body")
 	
+	body.uid=def.uid -- can set uid in def
+
 	body.def=def
 	body.world=world
 	body.shapes={}
@@ -981,6 +1005,8 @@ box2d.body_functions.shape=function(body,def)
 	
 	def=body.world:fill(def,"shape")
 
+	shape.uid=def.uid -- can set uid in def
+
 	shape.def=def
 	shape.body=body
 	setmetatable(shape,box2d.shape_metatable)
@@ -1177,6 +1203,8 @@ box2d.world_functions.joint=function(world,def)
 	local joint={}
 	
 	def=world:fill(def,"joint")
+
+	joint.uid=def.uid -- can set uid in def
 
 	joint.def=def
 	joint.world=world
