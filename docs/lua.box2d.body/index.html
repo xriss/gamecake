@@ -56,6 +56,7 @@
 
 <a class="sub" href="../../docs/lua.box2d.body.acceleration"><span>/lua.box2d.body.acceleration</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.awake"><span>/lua.box2d.body.awake</span></a>
+<a class="sub" href="../../docs/lua.box2d.body.convert"><span>/lua.box2d.body.convert</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.destroy"><span>/lua.box2d.body.destroy</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.force"><span>/lua.box2d.body.force</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.get"><span>/lua.box2d.body.get</span></a>
@@ -811,6 +812,26 @@ cleared during a step, this needs to be set for <em>every</em> step.</p>
 b = body:awake(b)
 </code></pre>
 <p>get/set body sleeping state.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.box2d.body.convert">lua.box2d.body.convert</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L938">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>x,y = body:convert(x,y,conversion)
+</code></pre>
+<p>conversion must be one of the following strings indicating how the 
+input x,y should be transformed into the output x,y</p>
+<pre><code>x,y = body:convert(x,y,&quot;point_local_to_world&quot;)
+x,y = body:convert(x,y,&quot;point_world_to_local&quot;)
+
+x,y = body:convert(x,y,&quot;vector_local_to_world&quot;)
+x,y = body:convert(x,y,&quot;vector_world_to_local&quot;)
+
+x,y = body:convert(x,y,&quot;point_local_to_velocity&quot;)
+x,y = body:convert(x,y,&quot;point_world_to_velocity&quot;)
+</code></pre>
+<p>convert x,y between various spaces.</p>
 </div>
 </div>
 
