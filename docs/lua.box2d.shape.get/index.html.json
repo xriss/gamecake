@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 715,
+   "count": 719,
    "name": "lua"
   },
   {
-   "count": 39,
+   "count": 43,
    "name": "lua.box2d"
   },
   {
@@ -234,7 +234,7 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 14,
+   "count": 18,
    "name": "lua.box2d.world"
   },
   {
@@ -259,7 +259,19 @@
   },
   {
    "count": 1,
+   "name": "lua.box2d.world.defaults"
+  },
+  {
+   "count": 1,
    "name": "lua.box2d.world.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.fill"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.fills"
   },
   {
    "count": 1,
@@ -276,6 +288,10 @@
   {
    "count": 1,
    "name": "lua.box2d.world.overlap_aabb"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.prepare_events"
   },
   {
    "count": 1,
@@ -3058,7 +3074,7 @@
    "body": "<pre><code>vars = shape:get()\n</code></pre>\n<p>Get all shape variables in a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 759,
+   "line": 1039,
    "name": "lua.box2d.shape.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

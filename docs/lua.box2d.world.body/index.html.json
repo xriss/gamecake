@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 715,
+   "count": 719,
    "name": "lua"
   },
   {
-   "count": 39,
+   "count": 43,
    "name": "lua.box2d"
   },
   {
@@ -234,7 +234,7 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 14,
+   "count": 18,
    "name": "lua.box2d.world"
   },
   {
@@ -259,7 +259,19 @@
   },
   {
    "count": 1,
+   "name": "lua.box2d.world.defaults"
+  },
+  {
+   "count": 1,
    "name": "lua.box2d.world.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.fill"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.fills"
   },
   {
    "count": 1,
@@ -276,6 +288,10 @@
   {
    "count": 1,
    "name": "lua.box2d.world.overlap_aabb"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.prepare_events"
   },
   {
    "count": 1,
@@ -3058,7 +3074,7 @@
    "body": "<pre><code>body=world:body(def)\n</code></pre>\n<p>Create a body in the world.</p>\n<p>def contains the values that you can set in a b2BodyDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values. This may also be a \nfake table created by lua meta.</p>\n<p>Values with _ are sub structs eg motionLocks_linearX is motionLocks.linearX</p>\n<p>Booleans should be true or false</p>\n<p>name is a string that should be 31 chars or less and is only used to \nhelp with debugging.\n<br/>\n<br/></p>\n<p>type is a string and must be &quot;static&quot; or &quot;kinematic&quot; or &quot;dynamic&quot;\n<br/>\n<br/></p>\n<pre><code>allowFastRotation\nangularDamping\nangularVelocity\nenableSleep\nmotionLocks_linearX\nmotionLocks_linearY\nmotionLocks_angularZ\ngravityScale\nisAwake\nisBullet\nisEnabled\nlinearDamping\nlinearVelocity\nname\nposition\nrotation\nsleepThreshold\ntype\n</code></pre>\n",
    "count": 2,
    "file": "../lua/box2d.lua",
-   "line": 404,
+   "line": 680,
    "name": "lua.box2d.world.body",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3066,7 +3082,7 @@
    "body": "<pre><code>shape=body:shape(def)\n</code></pre>\n<p>Create a shape in the body.</p>\n<p>def contains the values that you can set in a b2ShapeDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values. This may also be a \nfake table created by lua meta.</p>\n<p>Booleans should be true or false</p>\n<p>Minor safety issue regarding filter bitmasks since lua(jit) uses \ndoubles these bit masks should <em>only</em> use 52 bits not 64 so the \nintegers can fit safely into a double. When using hex the top 3 nibbles \nshould always be 0 like so 0x000fffffffffffff that is 13 Fs if you are \ncounting.</p>\n<pre><code>density\nenableContactEvents\nenableHitEvents\nenablePreSolveEvents\nenableSensorEvents\nfilter\ninvokeContactCreation\nisSensor\nmaterial_customColor\nmaterial_friction\nmaterial_restitution\nmaterial_rollingResistance\nmaterial_tangentSpeed\nmaterial_userMaterialId\nupdateBodyMass\n</code></pre>\n<p>if def.shape==&quot;circle&quot; then def also contains the values that you can \nset in a b2Circle</p>\n<pre><code>center\nradius\n</code></pre>\n<p>if def.shape==&quot;segment&quot; then def also contains the values that you can \nset in a b2Segment</p>\n<pre><code>point1\npoint2\n</code></pre>\n<p>if def.shape==&quot;capsule&quot; then def also contains the values that you can \nset in a b2Capsule</p>\n<pre><code>center1\ncenter2\nradius\n</code></pre>\n<p>if def.shape==&quot;box&quot; then def also contains the values that you can \nset in a b2Polygon using b2MakeOffsetRoundedBox</p>\n<pre><code>halfWidth\nhalfHeight\ncenter\nrotation\nradius\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 635,
+   "line": 913,
    "name": "lua.box2d.world.body.shape",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

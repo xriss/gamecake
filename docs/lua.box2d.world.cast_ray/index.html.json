@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 715,
+   "count": 719,
    "name": "lua"
   },
   {
-   "count": 39,
+   "count": 43,
    "name": "lua.box2d"
   },
   {
@@ -234,7 +234,7 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 14,
+   "count": 18,
    "name": "lua.box2d.world"
   },
   {
@@ -259,7 +259,19 @@
   },
   {
    "count": 1,
+   "name": "lua.box2d.world.defaults"
+  },
+  {
+   "count": 1,
    "name": "lua.box2d.world.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.fill"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.fills"
   },
   {
    "count": 1,
@@ -276,6 +288,10 @@
   {
    "count": 1,
    "name": "lua.box2d.world.overlap_aabb"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.prepare_events"
   },
   {
    "count": 1,
@@ -3058,7 +3074,7 @@
    "body": "<pre><code>hits = world:cast_ray(ray)\n</code></pre>\n<p>cast a ray and return an array of hits\n<br/>\n<br/></p>\n<pre><code>ray.closest\n</code></pre>\n<p>Boolean value, set true to only return the closest hit in hits[1]. \nOtherwise you must iterate over the returned array.\n<br/>\n<br/></p>\n<pre><code>ray.origin\n</code></pre>\n<p>Starting world point of ray\n<br/>\n<br/></p>\n<pre><code>ray.translation\n</code></pre>\n<p>The ray to cast\n<br/>\n<br/></p>\n<pre><code>ray.filter_categoryBits\nray.filter_maskBits\n</code></pre>\n<p>Filter masks\n<br/>\n<br/></p>\n<pre><code>hit1=hits[1]\nhit2=hits[2]\netc\n</code></pre>\n<p>These are not in any useful order, unless you asked for \nthe closest in which case there will only be 1.</p>\n<p>If hits[1] is nil or #hits is 0 then there where no hits.\n<br/>\n<br/></p>\n<pre><code>hits.leafVisits\nhits.nodeVisits\n</code></pre>\n<p>Contain extra debug information</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 293,
+   "line": 459,
    "name": "lua.box2d.world.cast_ray",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }
