@@ -143,10 +143,12 @@ all.create_scene=function(scene)
 		local boots={
 			{"kinetic",
 				LengthUnitsPerMeter=16,
-				gravity={0,0,0}, -- zero as we plan to control gravity for each object
 				step=(1/16), -- amount of time to step each frame
 				substeps=16, -- number of substeps
 				defaults={ -- world defaults when creating box2d objects
+					world={
+						gravity={0,0,0}, -- zero as we plan to control gravity for each object
+					},
 					body={
 					},
 					shape={

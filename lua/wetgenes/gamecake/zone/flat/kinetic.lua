@@ -31,7 +31,6 @@ kinetics.uidmap={
 
 kinetics.values={
 	LengthUnitsPerMeter=16,
-	gravity=V3( 0,0,0 ),
 	step=1/16,
 	substeps=16,
 	defaults={},
@@ -54,10 +53,11 @@ kinetics.item.setup=function(kinetic)
 	box2d.set({
 		LengthUnitsPerMeter=kinetic.LengthUnitsPerMeter,
 	})
-	kinetic.world=box2d.world({
-		gravity=kinetic.gravity,
-	})
-	
+	local def={}
+	for n,v in pairs(kinetic.defaults.world or {}) do -- copy world defs
+		def[n]=v
+	end
+	kinetic.world=box2d.world(def)
 	for n,v in pairs(kinetic.defaults) do
 		kinetic.world:defaults(n,v)
 	end
