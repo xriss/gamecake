@@ -130,15 +130,15 @@
    "name": "levels"
   },
   {
-   "count": 720,
+   "count": 721,
    "name": "lua"
   },
   {
-   "count": 44,
+   "count": 45,
    "name": "lua.box2d"
   },
   {
-   "count": 12,
+   "count": 13,
    "name": "lua.box2d.body"
   },
   {
@@ -168,6 +168,10 @@
   {
    "count": 1,
    "name": "lua.box2d.body.info"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.mass"
   },
   {
    "count": 1,
@@ -3075,7 +3079,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>body:acceleration()\nbody:acceleration(x,y)\nbody:acceleration(x,y,r)\nbody:acceleration(nil,nil,r)\n</code></pre>\n<p>set body acceleration, which is to say we set the body force multiplied \nby mass or rotational inertia.</p>\n<p>x,y is acceleration per second applied to center mass, will be cleared \nif nil</p>\n<p>r is rotational acceleration per second in radians , will be cleared if \nnil</p>\n<p>This will replace force and acceleration and as force is applied then \ncleared during a step, this needs to be set for <em>every</em> step.</p>\n",
+   "body": "<pre><code>body:acceleration()\nbody:acceleration(x,y)\nbody:acceleration(x,y,r)\nbody:acceleration(nil,nil,r)\n</code></pre>\n<p>set body acceleration, which is to say we set the body force multiplied \nby mass or rotational inertia. Note that this will not work on a 0 mass \nbody, I think you have to fake a mass on a body with no shapes first.</p>\n<p>x,y is acceleration per second applied to center mass, will be cleared \nif nil</p>\n<p>r is rotational acceleration per second in radians , will be cleared if \nnil</p>\n<p>This will replace force and acceleration and as force is applied then \ncleared during a step, this needs to be set for <em>every</em> step.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
    "line": 913,

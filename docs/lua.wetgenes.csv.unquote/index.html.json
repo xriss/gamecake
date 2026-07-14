@@ -130,15 +130,15 @@
    "name": "levels"
   },
   {
-   "count": 720,
+   "count": 721,
    "name": "lua"
   },
   {
-   "count": 44,
+   "count": 45,
    "name": "lua.box2d"
   },
   {
-   "count": 12,
+   "count": 13,
    "name": "lua.box2d.body"
   },
   {
@@ -168,6 +168,10 @@
   {
    "count": 1,
    "name": "lua.box2d.body.info"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.mass"
   },
   {
    "count": 1,

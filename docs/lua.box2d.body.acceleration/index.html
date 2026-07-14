@@ -61,6 +61,7 @@
 <a class="sub" href="../../docs/lua.box2d.body.force"><span>/lua.box2d.body.force</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.get"><span>/lua.box2d.body.get</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.info"><span>/lua.box2d.body.info</span></a>
+<a class="sub" href="../../docs/lua.box2d.body.mass"><span>/lua.box2d.body.mass</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.set"><span>/lua.box2d.body.set</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.transform"><span>/lua.box2d.body.transform</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.type"><span>/lua.box2d.body.type</span></a>
@@ -789,7 +790,8 @@ body:acceleration(x,y,r)
 body:acceleration(nil,nil,r)
 </code></pre>
 <p>set body acceleration, which is to say we set the body force multiplied 
-by mass or rotational inertia.</p>
+by mass or rotational inertia. Note that this will not work on a 0 mass 
+body, I think you have to fake a mass on a body with no shapes first.</p>
 <p>x,y is acceleration per second applied to center mass, will be cleared 
 if nil</p>
 <p>r is rotational acceleration per second in radians , will be cleared if 

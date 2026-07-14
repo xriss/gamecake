@@ -61,6 +61,7 @@
 <a class="sub" href="../../docs/lua.box2d.body.force"><span>/lua.box2d.body.force</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.get"><span>/lua.box2d.body.get</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.info"><span>/lua.box2d.body.info</span></a>
+<a class="sub" href="../../docs/lua.box2d.body.mass"><span>/lua.box2d.body.mass</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.set"><span>/lua.box2d.body.set</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.transform"><span>/lua.box2d.body.transform</span></a>
 <a class="sub" href="../../docs/lua.box2d.body.type"><span>/lua.box2d.body.type</span></a>
@@ -795,7 +796,8 @@ body:acceleration(x,y,r)
 body:acceleration(nil,nil,r)
 </code></pre>
 <p>set body acceleration, which is to say we set the body force multiplied 
-by mass or rotational inertia.</p>
+by mass or rotational inertia. Note that this will not work on a 0 mass 
+body, I think you have to fake a mass on a body with no shapes first.</p>
 <p>x,y is acceleration per second applied to center mass, will be cleared 
 if nil</p>
 <p>r is rotational acceleration per second in radians , will be cleared if 
@@ -817,7 +819,7 @@ b = body:awake(b)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.body.convert">lua.box2d.body.convert</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L938">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L964">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>x,y = body:convert(x,y,conversion)
 </code></pre>
 <p>conversion must be one of the following strings indicating how the 
@@ -881,6 +883,24 @@ debugging aid.</p>
 <p>This is the actual def table (some values are hard to query later) so 
 if you edit it or if you create this object using a non unique def 
 table things can get strange.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.box2d.body.mass">lua.box2d.body.mass</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L939">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>mass , rotationalInertia , x,y = body:mass( mass , rotationalInertia , x,y )
+mass = ( body:mass(mass) )
+</code></pre>
+<p>get/set mass values, all values are optional but x,y must be a pair. Unset 
+values will remain unchanged.</p>
+<p>x,y is center of mass</p>
+<p>We return 4 values but as the first one is mass you can simply ignore 
+the rest by wrapping the function in ()</p>
+<p>Since adding shapes will auto generate these values, be aware that you 
+will be fighting auto mass generation when setting this value.</p>
+<p>Adding shapes or changing the body type will auto generate these 
+values.</p>
 </div>
 </div>
 
