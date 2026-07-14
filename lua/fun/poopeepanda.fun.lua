@@ -163,7 +163,45 @@ all.create_scene=function(scene)
 					},
 					joint={
 					},
-				}
+				},
+				bits={
+					player={		group=0,
+									bits=0x0000000000100,
+									mask=0x0000000fffeff,
+					},
+					floater={		group=0,
+									bits=0x0000000010000,
+									mask=0x0000000ffffff,
+					},
+					fauna_egg={		group=0,
+									bits=0x0000000010000,
+									mask=0x0000000ffffff,
+					},
+					fauna_slim={	group=0,
+									bits=0x0000000010000,
+									mask=0x0000000ffffff,
+					},
+					fauna_trench={
+									group=0,
+									bits=0x0000000010000,
+									mask=0x0000000ffffff,
+					},
+					fruit={
+									group=0,
+									bits=0x0000000010000,
+									mask=0x00000000001ff,
+					},
+					gib={
+									group=0,
+									bits=0x0000001000000,
+									mask=0x00000000000ff,
+					},
+					junk={
+									group=0,
+									bits=0x00010000,
+									mask=0x00ffffff,
+					},
+				},
 			},
 			{"level",idx=level},
 --			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
@@ -917,35 +955,12 @@ players.item.setup=function(player)
 	player:set_values()
 end
 
-players.collision_type=0x00040001	-- assigned type
-players.collision_bits=0x00000100	-- assigned bitmask
-players.collision_mask=0x00fffeff	-- interact bitmask
---[[
-players.collision_handlers={
-	[{players.collision_type}]={
-		postsolve=function(arb)
-			local player=scene:find_uid(arb.shape_a.uid)
-			local it=scene:find_uid(arb.shape_b.uid)
-			if player and it and it.do_touch then -- sanity
-				it:do_touch(player,arb)
-			end
-			if it then
-				if it.caste=="fauna_slim" then -- kill on touch
-					player:do_die(it,arb)
-				end
-			end
-			return true
-		end
-	}
-}
-]]
-
-
 players.item.setup_kinetic=function(player)
 	if player.body then return end -- only create once
 	local world=player:get_singular("kinetic").world
 	player.body=world:body({
 		type="dynamic",
+		transform={player.pos[1],player.pos[2],player.rot*(math.pi*2)},
 	})
 	if player.mode=="spawn" or player.mode=="die" then
 		-- no collision when spawning
@@ -954,9 +969,7 @@ players.item.setup_kinetic=function(player)
 			shape="circle",
 			radius=4,
 			material_friction=0.0, -- slide on walls
-			filter_categoryBits=players.collision_bits,
-			filter_maskBits=players.collision_mask,
-			filter_groupIndex=players.collision_type,
+			filter="player",
 			enableHitEvents=true,
 			uid=player.uid,
 		})
@@ -976,6 +989,7 @@ players.item.clean=function(player)
 end
 
 players.item.update=function(player)
+
 	player:get_values()
 	player:setup_kinetic() -- might need to recreate body
 	
@@ -1004,7 +1018,46 @@ players.item.update=function(player)
 	if ll>0.25 or bb_set or bb_now or bb_clr or ba_set or ba_now or ba_clr then
 		player.idle=0 -- ticks since last controller input
 	end
-	
+
+	local foot_touch -- set this if our feet touched something
+	local foot_cast=world:cast_ray({ -- this is part of the collision so run it here
+		closest=true, -- just want the closest hit
+		origin=player.pos,
+		translation={0,16},
+		filter_categoryBits=0x00000100,
+		filter_maskBits=0x00ffffff,
+	})[1]
+	if foot_cast and foot_cast.fraction and foot_cast.fraction<0.75 then
+		foot_touch=scene:find_uid(foot_cast.shape.uid) -- remember foot touch for later
+	end
+
+	local event_touch=function(it,event)
+		if player.mode~="none" then return end -- only if player is in this state
+
+		if it.flag_touch then
+			it:flag_touch(player,event)
+		end
+		if it.caste=="fauna_slim" then -- kill us on touch
+			player.mode="die"
+		end
+	end
+
+	-- check events for anyone we touched
+	for event in kinetic.events:iterate(player.uid) do
+		if event.is=="contact_hit" then
+			local it=scene:find_uid(
+				(event.shapeA.uid == player.uid) and
+				event.shapeB.uid or
+				event.shapeA.uid ) -- we hit the one that is is not us
+			if it then
+				event_touch(it,event)
+			end
+		end
+	end
+	if foot_touch then -- also did we touched with our feet earlier
+		event_touch(foot_touch,{is="foot"})
+	end
+
 if player.mode=="spawn" then -- we are spawning but not really here yet
 
 	if ba_set and ( player.idx==1 or player.idle<16*10 ) then -- hide p2 after 10 secs
@@ -1094,20 +1147,9 @@ else
 --	player.pos=player.pos+player.vel
 
 	local footspeed=0.5
+	if foot_cast and foot_cast.fraction and foot_cast.fraction<0.75 then
 
-	local foot_touch -- set this if our feet touched something
-	local cast=world:cast_ray({
-		closest=true, -- just want the closest hit
-		origin=player.pos,
-		translation={0,16},
-		filter_categoryBits=0x00000100,
-		filter_maskBits=0x00ffffff,
-	})[1]
-	if cast and cast.fraction and cast.fraction<0.75 then
-
-		foot_touch=scene:find_uid(cast.shape.uid) -- remember foot touch for later
-
-		local d=(cast.fraction*16) -- distance + radius
+		local d=(foot_cast.fraction*16) -- distance + radius
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
 
@@ -1238,36 +1280,12 @@ else
 		end
 	end
 
-	-- what to do when we touch
-	local event_touch=function(it,event)
-		if it.flag_touch then -- flag a touch to be handled in this objects update
-			it:flag_touch(player,event)
-		end
-		if it.caste=="fauna_slim" then -- kill on touch
-			player.mode="die"
-		end
-	end
-	-- check events for anyone we touched
-	for event in kinetic.events:iterate(player.uid) do
-		if event.is=="contact_hit" then
-			local it=scene:find_uid(
-				(event.shapeA.uid == player.uid) and
-				event.shapeB.uid or
-				event.shapeA.uid ) -- we hit the one that is is not us
-			if it then
-				event_touch(it,event)
-			end
-		end
-	end
-	if foot_touch then -- also did we touched with our feet earlier
-		event_touch(foot_touch,{is="foot"})
-	end
-
 --RINT( player.body:convert(10,10,"point_local_to_world") )
 
 end
 
 	player:set_values()
+
 end
 
 -- when drawing get will auto tween values
@@ -1459,22 +1477,18 @@ floaters.item.setup=function(floater)
 	floater:set_values()
 end
 
-floaters.collision_type=0x00020001	-- weapon
-floaters.collision_bits=0x00010000	-- assigned bitmask
-floaters.collision_mask=0x00ffffff	-- interact bitmask
 
 floaters.item.setup_kinetic=function(floater)
 	if floater.body then return end -- already done
 	local world=floater:get_singular("kinetic").world
 	floater.body=world:body({
 		type="dynamic",
+		transform={floater.pos[1],floater.pos[2],floater.rot*(math.pi*2)},
 	})
 	floater.shape=floater.body:shape({
 		shape="circle",
 		radius=6,
-		filter_categoryBits=floaters.collision_bits,
-		filter_maskBits=floaters.collision_mask,
-		filter_groupIndex=floaters.collision_type,
+		filter="floater",
 		uid=floater.uid,
 	})
 	floater:set_body()
@@ -1673,23 +1687,19 @@ fauna_eggs.item.setup=function(fauna)
 	fauna:set_values()
 end
 
-fauna_eggs.collision_type=0x00020001	-- weapon
-fauna_eggs.collision_bits=0x00010000	-- assigned bitmask
-fauna_eggs.collision_mask=0x00ffffff	-- interact bitmask
 
 fauna_eggs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local world=fauna:get_singular("kinetic").world
 	fauna.body=world:body({
 		type="dynamic",
+		transform={fauna.pos[1],fauna.pos[2],fauna.rot*(math.pi*2)},
 		gravityScale=1, -- use world gravity
 	})
 	fauna.shape=fauna.body:shape({
 		shape="circle",
 		radius=4,
-		filter_categoryBits=fauna_eggs.collision_bits,
-		filter_maskBits=fauna_eggs.collision_mask,
-		filter_groupIndex=fauna_eggs.collision_type,
+		filter="fauna_egg",
 		uid=fauna.uid,
 	})
 	fauna:set_body()
@@ -1911,15 +1921,13 @@ fauna_slims.item.setup=function(fauna)
 	fauna:set_values()
 end
 
-fauna_slims.collision_type=0x00000001
-fauna_slims.collision_bits=0x00010000	-- assigned bitmask
-fauna_slims.collision_mask=0x00ffffff	-- interact bitmask
 
 fauna_slims.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local world=fauna:get_singular("kinetic").world
 	fauna.body=world:body({
 		type="dynamic",
+		transform={fauna.pos[1],fauna.pos[2],fauna.rot*(math.pi*2)},
 	})
 --	local space=fauna:get_singular("kinetic").space
 --	fauna.body=space:body(1,1)
@@ -1931,9 +1939,7 @@ fauna_slims.item.setup_kinetic=function(fauna)
 		fauna.shape=fauna.body:shape({
 			shape="circle",
 			radius=4,
-			filter_categoryBits=fauna_slims.collision_bits,
-			filter_maskBits=fauna_slims.collision_mask,
-			filter_groupIndex=fauna_slims.collision_type,
+			filter="fauna_slim",
 			uid=fauna.uid,
 		})
 	end
@@ -2243,22 +2249,18 @@ fauna_trenchs.item.setup=function(fauna)
 	fauna:set_values()
 end
 
-fauna_trenchs.collision_type=0x00000001
-fauna_trenchs.collision_bits=0x00010000	-- assigned bitmask
-fauna_trenchs.collision_mask=0x00ffffff	-- interact bitmask
 
 fauna_trenchs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
 	local world=fauna:get_singular("kinetic").world
 	fauna.body=world:body({
 		type="dynamic",
+		transform={fauna.pos[1],fauna.pos[2],fauna.rot*(math.pi*2)},
 	})
 	fauna.shape=fauna.body:shape({
 		shape="circle",
 		radius=4,
-		filter_categoryBits=fauna_trenchs.collision_bits,
-		filter_maskBits=fauna_trenchs.collision_mask,
-		filter_groupIndex=fauna_trenchs.collision_type,
+		filter="fauna_trench",
 		uid=fauna.uid,
 	})
 	fauna:set_body()
@@ -2530,23 +2532,6 @@ R R R R R R R .
 
 }
 
-fruits.collision_type=0x00010002	-- unique ID
-fruits.collision_bits=0x00010000	-- assigned bitmask
-fruits.collision_mask=0x000001ff	-- interact bitmask
---[[
-fruits.collision_handlers={
-	[{fruits.collision_type}]={
-		postsolve=function(arb)
-			local fruit=scene:find_uid(arb.shape_a.uid)
-			local touch=scene:find_uid(arb.shape_b.uid)
-			if fruit and fruit.caste=="fruit" then -- sanity
-				fruit:do_touch(touch,arb) -- set value for update
-			end
-			return true
-		end
-	}
-}
-]]
 
 -- flag functions set values for use in the next update
 fruits.item.flag_touch=function(fruit,touch,event)
@@ -2588,9 +2573,7 @@ fruits.item.setup_kinetic_reshape=function(fruit)
 		halfWidth=3,
 		halfHeight=3,
 		material_friction=1.0,
-		filter_categoryBits=fruits.collision_bits,
-		filter_maskBits=fruits.collision_mask,
-		filter_groupIndex=fruits.collision_type,
+		filter="fruit",
 		uid=fruit.uid,
 	})
 end
@@ -2599,6 +2582,7 @@ fruits.item.setup_kinetic=function(fruit)
 	local world=fruit:get_singular("kinetic").world
 	fruit.body=world:body({
 		type="dynamic",
+		transform={fruit.pos[1],fruit.pos[2],fruit.rot*(math.pi*2)},
 		gravityScale=1, -- use world gravity
 	})
 	fruit:setup_kinetic_reshape()
@@ -2718,22 +2702,6 @@ g G G G G G G g . g g G G g g . . . . g g . . . . . . . . . . .
 
 }
 
-gibs.collision_type=0x00010001	-- unique ID
-gibs.collision_bits=0x01000000	-- assigned bitmask
-gibs.collision_mask=0x000000ff	-- interact bitmask
---[[
-gibs.collision_handlers={
-	[{gibs.collision_type}]={
-		postsolve=function(it)
-			local gib=scene:find_uid(it.shape_a.uid)
-			if gib and gib.caste=="gib" then -- sanity
-				gib:set("touch",it.shape_b.uid or -1) -- set value for update
-			end
-			return true
-		end
-	}
-}
-]]
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
@@ -2765,9 +2733,7 @@ gibs.item.setup_kinetic_reshape=function(gib)
 		shape="circle",
 		radius=gib.size,
 		material_friction=1.0,
-		filter_categoryBits=gibs.collision_bits,
-		filter_maskBits=gibs.collision_mask,
-		filter_groupIndex=gibs.collision_type,
+		filter="gib",
 		enableHitEvents=true,
 		uid=gib.uid,
 	})
@@ -2777,6 +2743,7 @@ gibs.item.setup_kinetic=function(gib)
 	local world=gib:get_singular("kinetic").world
 	gib.body=world:body({
 		type="dynamic",
+		transform={gib.pos[1],gib.pos[2],gib.rot*(math.pi*2)},
 		gravityScale=1, -- use world gravity
 	})
 	gib:setup_kinetic_reshape()
@@ -2881,29 +2848,6 @@ junks.graphics={
 
 }
 
-junks.collision_type=0x00020001	-- weapon ID
-junks.collision_bits=0x00010000	-- assigned bitmask
-junks.collision_mask=0x00ffffff	-- interact bitmask
---[[
-junks.collision_handlers={
-	[{junks.collision_type}]={
-		postsolve=function(arb)
-			local junk=scene:find_uid(arb.shape_a.uid)
-			local it=scene:find_uid(arb.shape_b.uid)
-			if junk then
-				local held=junk:depend("held")
-				if not held then
-					junk:reset_kinetic_ids()
-				end
-			end
-			if junk and it and it.do_touch then -- sanity
-				it:do_touch(junk,arb)
-			end
-			return true
-		end
-	}
-}
-]]
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
@@ -2937,9 +2881,7 @@ junks.item.setup_kinetic_reshape=function(junk)
 		halfWidth=4,
 		halfHeight=4,
 		material_friction=1.0,
-		filter_categoryBits=held and players.collision_bits or junks.collision_bits,
-		filter_maskBits=held and players.collision_mask or junks.collision_mask,
-		filter_groupIndex=junks.collision_type,
+		filter=held and "player" or "junk",
 		enableHitEvents=true,
 		uid=junk.uid,
 	})
@@ -2949,6 +2891,7 @@ junks.item.setup_kinetic=function(junk)
 	local world=junk:get_singular("kinetic").world
 	junk.body=world:body({
 		type="dynamic",
+		transform={junk.pos[1],junk.pos[2],junk.rot*(math.pi*2)},
 		isBullet=true, -- we will throw junk at stuff
 		gravityScale=1, -- use world gravity
  	})
@@ -3789,8 +3732,8 @@ cameras.item.update=function(camera)
 	end
 
 	camera.slide[2]=0
-	if level.start<32 then
-		local t=(32-level.start)
+	if level.start<16 then
+		local t=(16-level.start)
 		camera.slide[2]=-(t*t)
 	end
 

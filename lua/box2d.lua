@@ -144,7 +144,8 @@ box2d.world=function(def)
 
 	world.def=def
 
-	world.caches={} -- cached defaults
+	world.cache_defs={} -- cached defaults
+	world.cache_bits={default={mask=0xfffffffffffff,bits=0x0000000000001,group=0}} -- cached filters
 
 	world.bodys={}	-- engrish
 	world.joints={}
@@ -503,8 +504,11 @@ The ray to cast
 
 	ray.filter_categoryBits
 	ray.filter_maskBits
+	ray.filter
 
-Filter masks
+Filter masks, ray.filter is a previously set name that we will convert 
+using world:bits(name) into filter_categoryBits and filter_maskBits 
+unless they are already set.
 
 
 	hit1=hits[1]
@@ -526,6 +530,12 @@ Contain extra debug information
 box2d.world_functions.cast_ray=function(world,ray)
 
 	local hits=core.world_cast_ray(world[0],ray)
+	
+	if ray.filter then
+		local bits=world:bits(ray.filter)
+		if not ray.filter_categoryBits then ray.filter_categoryBits = bits.bits end
+		if not ray.filter_maskBits     then ray.filter_maskBits     = bits.mask end
+	end
 	
 	for i,hit in ipairs(hits) do -- auto get shape from id
 		if hit.shapeId then hit.shape=world.shapes[hit.shapeId] end
@@ -580,6 +590,12 @@ box2d.world_functions.overlap_aabb=function(world,aabb)
 
 	local hits=core.world_overlap_aabb(world[0],aabb)
 	
+	if aabb.filter then
+		local bits=world:bits(aabb.filter)
+		if not aabb.filter_categoryBits then aabb.filter_categoryBits = bits.bits end
+		if not aabb.filter_maskBits     then aabb.filter_maskBits     = bits.mask end
+	end
+
 	-- convert shapeIds to shapes, no guarantee that these arrays match
 	hits.shapes={}
 	for i,shapeId in ipairs(hits.shapeIds) do -- auto get shape from id
@@ -618,7 +634,7 @@ box2d.world_functions.fill=function(world,def,name)
 
 	if not def then def={} end
 	
-	local cache=world.caches[name]
+	local cache=world.cache_defs[name]
 	if cache then
 		for n,v in pairs(cache) do
 			if type(def[n])=="nil" then -- replace only nil values
@@ -685,18 +701,70 @@ You can also use this to fill in special object defaults like so.
 box2d.world_functions.defaults=function(world,name,def)
 	
 	if not def then
-		world.caches[name]=nil
+		world.cache_defs[name]=nil
 		return
 	end
 	
-	if not world.caches[name] then world.caches[name]={} end
+	if not world.cache_defs[name] then world.cache_defs[name]={} end
 	
-	local cache=world.caches[name]
+	local cache=world.cache_defs[name]
 	for n,v in pairs(def) do
 		cache[n]=v
 	end
 
 	return cache
+end
+
+--[[#lua.box2d.world.bits
+
+	bits=world:bits(name)
+	bits=world:bits(name,{mask=0xfffffffffffff,bits=0x0000000000001,group=0})
+	bits=world:bits(name,false)
+
+get/set named bits, to help with keeping all your bitmasks in one place 
+so you don't get yourself confuzzled.
+
+bits is must be a table containing mask, bits and group then instead of 
+setting these numbers explicitly we can use this name in shape creation 
+or casting, anywhere a filter is expected.
+
+This helper code adds the following logic to shape creation etc
+
+	if filter is set then get bits using world:bits(filter) then
+	filter_categoryBits    will be set from    bits.bits	if nil
+	filter_maskBits        will be set from    bits.mask	if nil
+	filter_groupIndex      will be set from    bits.group	if nil
+
+So you probably do not want to create default values for 
+filter_categoryBits using world:defaults as these will not be replace.
+
+Pass in false to unset the named bits.
+
+If bits does not exist then we will return the default values of 
+{mask=0xfffffffffffff,bits=0x0000000000001,group=0} which can be 
+modified by setting the bits named "default" to whatever you want.
+
+Since this default is always available you can use filter="default" in 
+shape creation to use your default values.
+
+Note that 0xfffffffffffff (13 hex digits) is an integer that fits 
+safely in a double and you should not use a larger number.
+
+]] 
+box2d.world_functions.bits=function(world,name,bits)
+
+	if type(bits)=="boolean" then -- use false to unset
+		world.cache_bits[name]=nil
+	elseif bits then
+		world.cache_bits[name]=bits
+	end
+	
+	bits=world.cache_bits[name]
+	if not bits then -- get default
+		bits=world.cache_bits.default
+	end
+	
+	return bits
 end
 
 --[[#lua.box2d.world.body
@@ -1064,6 +1132,13 @@ box2d.body_functions.shape=function(body,def)
 	local shape={}
 	
 	def=body.world:fill(def,"shape")
+
+	if def.filter then
+		local bits=body.world:bits(def.filter)
+		if not def.filter_categoryBits then def.filter_categoryBits = bits.bits  end
+		if not def.filter_maskBits     then def.filter_maskBits     = bits.mask  end
+		if not def.filter_groupIndex   then def.filter_groupIndex   = bits.group end
+	end
 
 	shape.uid=def.uid -- can set uid in def
 

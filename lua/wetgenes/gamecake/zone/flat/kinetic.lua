@@ -34,6 +34,7 @@ kinetics.values={
 	step=1/16,
 	substeps=16,
 	defaults={},
+	bits={},
 }
 
 -- methods added to system
@@ -60,6 +61,9 @@ kinetics.item.setup=function(kinetic)
 	kinetic.world=box2d.world(def)
 	for n,v in pairs(kinetic.defaults) do
 		kinetic.world:defaults(n,v)
+	end
+	for n,v in pairs(kinetic.bits) do
+		kinetic.world:bits(n,v)
 	end
 
 	kinetic.events=kinetic.world:prepare_events() -- an empty events

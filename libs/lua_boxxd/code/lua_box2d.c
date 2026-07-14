@@ -972,7 +972,6 @@ b2BodyId *pp;
 			b2Transform t=lua_b2_read_b2Transform(l);
 			def.position=t.p;
 			def.rotation=t.q;
-			lua_pop(l,1);
 		}
 		lua_pop(l,1);
 		lua_getfield(l,2,"position");
@@ -1166,7 +1165,6 @@ static int lua_b2_body_set (lua_State *l)
 	}
 	lua_pop(l,1);
 
-/*
 	lua_getfield(l,2,"enableContactEvents");
 	if(!lua_isnil(l,-1))
 	{
@@ -1180,7 +1178,6 @@ static int lua_b2_body_set (lua_State *l)
 		b2Body_EnableHitEvents(body, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
-*/
 
 	return 0;
 }
@@ -1511,7 +1508,7 @@ b2ShapeId *pp;
 	if(!lua_isnil(l,-1)) { def.enableSensorEvents = lua_toboolean(l,-1); }
 	lua_pop(l,1);
 
-	b2Filter filter;
+//	b2Filter filter;
 	lua_getfield(l,2,"invokeContactCreation");
 	if(!lua_isnil(l,-1)) { def.invokeContactCreation = lua_toboolean(l,-1); }
 	lua_pop(l,1);
