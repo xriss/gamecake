@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 721,
+   "count": 722,
    "name": "lua"
   },
   {
-   "count": 45,
+   "count": 46,
    "name": "lua.box2d"
   },
   {
@@ -242,8 +242,12 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 18,
+   "count": 19,
    "name": "lua.box2d.world"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.bits"
   },
   {
    "count": 2,
@@ -3082,7 +3086,7 @@
    "body": "<pre><code>body:force()\nbody:force(x,y)\nbody:force(x,y,r)\nbody:force(nil,nil,r)\n</code></pre>\n<p>set body force , note that this does not return the current force and \ncalling it without any values will clear the current force.</p>\n<p>x,y is force applied to center mass, will be cleared if nil</p>\n<p>r is torque , will be cleared if nil</p>\n<p>This will replace force and acceleration and as force is applied then \ncleared during a step, this needs to be set for <em>every</em> step.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 891,
+   "line": 959,
    "name": "lua.box2d.body.force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

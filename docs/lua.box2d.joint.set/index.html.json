@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 721,
+   "count": 722,
    "name": "lua"
   },
   {
-   "count": 45,
+   "count": 46,
    "name": "lua.box2d"
   },
   {
@@ -242,8 +242,12 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 18,
+   "count": 19,
    "name": "lua.box2d.world"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.bits"
   },
   {
    "count": 2,
@@ -3082,7 +3086,7 @@
    "body": "<pre><code>joint:set(vars)\n</code></pre>\n<p>Set all joint variables from a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1342,
+   "line": 1417,
    "name": "lua.box2d.joint.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

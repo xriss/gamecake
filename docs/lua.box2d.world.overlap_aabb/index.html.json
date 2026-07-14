@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 721,
+   "count": 722,
    "name": "lua"
   },
   {
-   "count": 45,
+   "count": 46,
    "name": "lua.box2d"
   },
   {
@@ -242,8 +242,12 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 18,
+   "count": 19,
    "name": "lua.box2d.world"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.bits"
   },
   {
    "count": 2,
@@ -3082,7 +3086,7 @@
    "body": "<pre><code>overlaps = world:overlap_aabb(aabb)\n</code></pre>\n<p>Get all shapes overlapping aabb , I believe this might get some shapes \nthat do not actually overlap the given box so should probably double \ncheck.\n<br/>\n<br/></p>\n<pre><code>aabb.origin\n</code></pre>\n<p>Origin vector of bounds\n<br/>\n<br/></p>\n<pre><code>aabb.lowerBound\naabb.upperBound\n</code></pre>\n<p>Lower and upper aabb vectors ( will be added to origin )\n<br/>\n<br/></p>\n<pre><code>aabb.filter_categoryBits\naabb.filter_maskBits\n</code></pre>\n<p>Filter masks\n<br/>\n<br/></p>\n<pre><code>overlaps.shapeIds\n</code></pre>\n<p>An array of shapeIds\n<br/>\n<br/></p>\n<pre><code>overlaps.shapes\n</code></pre>\n<p>An array of shapes\n<br/>\n<br/></p>\n<pre><code>overlaps.leafVisits\noverlaps.nodeVisits\n</code></pre>\n<p>Extra debug information</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 537,
+   "line": 547,
    "name": "lua.box2d.world.overlap_aabb",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

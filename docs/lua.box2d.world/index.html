@@ -79,7 +79,8 @@
 <a class="sub" href="../../docs/lua.box2d.shape.get"><span>/lua.box2d.shape.get</span></a>
 <a class="sub" href="../../docs/lua.box2d.shape.info"><span>/lua.box2d.shape.info</span></a>
 <a class="sub" href="../../docs/lua.box2d.shape.set"><span>/lua.box2d.shape.set</span></a><a class="par" href="../../docs/lua.box2d.world"><span>/lua.box2d.world</span></a>
-<a class="par" href="../../docs/lua.box2d.world.body"><span>/lua.box2d.world.body</span></a>
+
+<a class="sub" href="../../docs/lua.box2d.world.bits"><span>/lua.box2d.world.bits</span></a><a class="par" href="../../docs/lua.box2d.world.body"><span>/lua.box2d.world.body</span></a>
 
 <a class="sub" href="../../docs/lua.box2d.world.body.shape"><span>/lua.box2d.world.body.shape</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.body_events"><span>/lua.box2d.world.body_events</span></a>
@@ -807,8 +808,39 @@ enableContactSoftening
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.box2d.world.bits">lua.box2d.world.bits</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L718">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div><pre><code>bits=world:bits(name)
+bits=world:bits(name,{mask=0xfffffffffffff,bits=0x0000000000001,group=0})
+bits=world:bits(name,false)
+</code></pre>
+<p>get/set named bits, to help with keeping all your bitmasks in one place 
+so you don&#39;t get yourself confuzzled.</p>
+<p>bits is must be a table containing mask, bits and group then instead of 
+setting these numbers explicitly we can use this name in shape creation 
+or casting, anywhere a filter is expected.</p>
+<p>This helper code adds the following logic to shape creation etc</p>
+<pre><code>if filter is set then get bits using world:bits(filter) then
+filter_categoryBits    will be set from    bits.bits	if nil
+filter_maskBits        will be set from    bits.mask	if nil
+filter_groupIndex      will be set from    bits.group	if nil
+</code></pre>
+<p>So you probably do not want to create default values for 
+filter_categoryBits using world:defaults as these will not be replace.</p>
+<p>Pass in false to unset the named bits.</p>
+<p>If bits does not exist then we will return the default values of 
+{mask=0xfffffffffffff,bits=0x0000000000001,group=0} which can be 
+modified by setting the bits named &quot;default&quot; to whatever you want.</p>
+<p>Since this default is always available you can use filter=&quot;default&quot; in 
+shape creation to use your default values.</p>
+<p>Note that 0xfffffffffffff (13 hex digits) is an integer that fits 
+safely in a double and you should not use a larger number.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.body">lua.box2d.world.body</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L702">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L770">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>body=world:body(def)
 </code></pre>
 <p>Create a body in the world.</p>
@@ -849,7 +881,7 @@ type
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.body.shape">lua.box2d.world.body.shape</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L997">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L1065">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>shape=body:shape(def)
 </code></pre>
 <p>Create a shape in the body.</p>
@@ -908,7 +940,7 @@ radius
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.body_events">lua.box2d.world.body_events</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L338">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L339">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>events = world:body_events()
 events = world:body_events(events)
 </code></pre>
@@ -918,7 +950,7 @@ events = world:body_events(events)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.cast_ray">lua.box2d.world.cast_ray</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L481">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L482">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>hits = world:cast_ray(ray)
 </code></pre>
 <p>cast a ray and return an array of hits
@@ -942,8 +974,11 @@ Otherwise you must iterate over the returned array.
 <br/></p>
 <pre><code>ray.filter_categoryBits
 ray.filter_maskBits
+ray.filter
 </code></pre>
-<p>Filter masks
+<p>Filter masks, ray.filter is a previously set name that we will convert 
+using world:bits(name) into filter_categoryBits and filter_maskBits 
+unless they are already set.
 <br/>
 <br/></p>
 <pre><code>hit1=hits[1]
@@ -964,7 +999,7 @@ hits.nodeVisits
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.contact_events">lua.box2d.world.contact_events</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L415">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L416">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>events = world:contact_events()
 events = world:contact_events(events)
 </code></pre>
@@ -974,7 +1009,7 @@ events = world:contact_events(events)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.defaults">lua.box2d.world.defaults</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L655">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L671">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>cache=world:defaults(name)
 cache=world:defaults(name,def)
 </code></pre>
@@ -1000,7 +1035,7 @@ body:shape(world:fill({...},&quot;shape_bouncy&quot;))
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.destroy">lua.box2d.world.destroy</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L159">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L160">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>world:destroy()
 </code></pre>
 <p>Destroy the world and all sub objects ( body , joint , shape )</p>
@@ -1009,7 +1044,7 @@ body:shape(world:fill({...},&quot;shape_bouncy&quot;))
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.fill">lua.box2d.world.fill</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L592">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L608">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>def=world:fill(def,name)
 </code></pre>
 <p>Set previously cached default values under name into the def table unless a 
@@ -1031,7 +1066,7 @@ will be kept within the new object and returned by the info function.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.fills">lua.box2d.world.fills</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L633">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L649">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>def=world:fills(def,...)
 </code></pre>
 <p>Same as fill except multiple names may be given and each applied from 
@@ -1042,7 +1077,7 @@ values will be filled in as we travel left to right.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.get">lua.box2d.world.get</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L208">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L209">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>vars = world:get()
 </code></pre>
 <p>Get all world variables into a table.</p>
@@ -1051,7 +1086,7 @@ values will be filled in as we travel left to right.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.info">lua.box2d.world.info</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L178">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L179">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>info = world:info()
 </code></pre>
 <p>This returns the def table used to create the world along with as much 
@@ -1065,7 +1100,7 @@ table things can get strange.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.joint">lua.box2d.world.joint</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L1147">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L1222">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>joint=world:joint(def)
 </code></pre>
 <p>Create a joint in the world.</p>
@@ -1169,7 +1204,7 @@ motorSpeed
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.overlap_aabb">lua.box2d.world.overlap_aabb</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L537">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L547">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>overlaps = world:overlap_aabb(aabb)
 </code></pre>
 <p>Get all shapes overlapping aabb , I believe this might get some shapes 
@@ -1213,7 +1248,7 @@ overlaps.nodeVisits
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.prepare_events">lua.box2d.world.prepare_events</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L247">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L248">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>events = world:prepare_events()
 events = world:prepare_events(events)
 </code></pre>
@@ -1252,7 +1287,7 @@ uid, or all events if uid is nil.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.sensor_events">lua.box2d.world.sensor_events</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L369">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L370">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>events = world:sensor_events()
 events = world:sensor_events(events)
 </code></pre>
@@ -1262,7 +1297,7 @@ events = world:sensor_events(events)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.set">lua.box2d.world.set</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L219">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L220">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>world:set(vars)
 </code></pre>
 <p>Set all world variables from a table.</p>
@@ -1271,7 +1306,7 @@ events = world:sensor_events(events)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.step">lua.box2d.world.step</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L230">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L231">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>world:step(seconds,steps)
 </code></pre>
 <p>Advance the world &quot;seconds&quot; through time using &quot;steps&quot; number of 

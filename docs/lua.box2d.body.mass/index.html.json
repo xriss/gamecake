@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 721,
+   "count": 722,
    "name": "lua"
   },
   {
-   "count": 45,
+   "count": 46,
    "name": "lua.box2d"
   },
   {
@@ -242,8 +242,12 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 18,
+   "count": 19,
    "name": "lua.box2d.world"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.bits"
   },
   {
    "count": 2,
@@ -3082,7 +3086,7 @@
    "body": "<pre><code>mass , rotationalInertia , x,y = body:mass( mass , rotationalInertia , x,y )\nmass = ( body:mass(mass) )\n</code></pre>\n<p>get/set mass values, all values are optional but x,y must be a pair. Unset \nvalues will remain unchanged.</p>\n<p>x,y is center of mass</p>\n<p>We return 4 values but as the first one is mass you can simply ignore \nthe rest by wrapping the function in ()</p>\n<p>Since adding shapes will auto generate these values, be aware that you \nwill be fighting auto mass generation when setting this value.</p>\n<p>Adding shapes or changing the body type will auto generate these \nvalues.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 939,
+   "line": 1007,
    "name": "lua.box2d.body.mass",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

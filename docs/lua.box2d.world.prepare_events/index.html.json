@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 721,
+   "count": 722,
    "name": "lua"
   },
   {
-   "count": 45,
+   "count": 46,
    "name": "lua.box2d"
   },
   {
@@ -242,8 +242,12 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 18,
+   "count": 19,
    "name": "lua.box2d.world"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.bits"
   },
   {
    "count": 2,
@@ -3082,7 +3086,7 @@
    "body": "<pre><code>events = world:prepare_events()\nevents = world:prepare_events(events)\n</code></pre>\n<p>Prepare a table to be filled with all events.</p>\n<pre><code>events.uids\n</code></pre>\n<p>Lookup table by uid of events by body.uid or shape.uid\nA single event may appear multiple times but it will be the same table.</p>\n<pre><code>events.all\n</code></pre>\n<p>A list of all events regardless of a uid being set.</p>\n<pre><code>events:insert(event,ita,itb)\n</code></pre>\n<p>Helper function to place an event in uids and all. ita and itb may be \nnil or a shape or a body. We look for ita.uid and itb.uid to fill the \nuids map.</p>\n<pre><code>events.contact_cache\n</code></pre>\n<p>cache of contacts for multiple calls to events.contact to reuse</p>\n<pre><code>events:contact(id)\n</code></pre>\n<p>Get contact information from a contact id, we cache results in \nevents.contact_cache so multiple calls will return the same table so is \nsafe to call multiple times with the same id.</p>\n<p>A contact is a large chunk of possibly unwanted data so has to be \nexplicitly requested later using the contactId provided by contact \nevents.</p>\n<p>May possibly be nil if an invalid contact ID, eg this is old data and \nyou called world:step again and created new contacts.</p>\n<pre><code>for event in events:iterate(uid) do ... end\n</code></pre>\n<p>A simple iterator function for the events associated with the given \nuid, or all events if uid is nil.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 247,
+   "line": 248,
    "name": "lua.box2d.world.prepare_events",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

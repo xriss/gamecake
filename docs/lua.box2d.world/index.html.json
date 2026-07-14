@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 721,
+   "count": 722,
    "name": "lua"
   },
   {
-   "count": 45,
+   "count": 46,
    "name": "lua.box2d"
   },
   {
@@ -242,8 +242,12 @@
    "name": "lua.box2d.shape.set"
   },
   {
-   "count": 18,
+   "count": 19,
    "name": "lua.box2d.world"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.world.bits"
   },
   {
    "count": 2,
@@ -3080,17 +3084,25 @@
  "_list": [
   {
    "body": "<pre><code>world=box2d.world(def)\n</code></pre>\n<p>Create the world you will be simulating physics in.</p>\n<p>def is a table containing the values that you can set in a b2WorldDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values. This may also be a \nfake table created by lua meta.</p>\n<p>Booleans should be true or false</p>\n<pre><code>gravity\nrestitutionThreshold\nhitEventThreshold\ncontactHertz\ncontactDampingRatio\ncontactSpeed\nmaximumLinearSpeed\nenableSleep\nenableContinuous\nenableContactSoftening\n</code></pre>\n",
-   "count": 18,
+   "count": 19,
    "file": "../lua/box2d.lua",
    "line": 115,
    "name": "lua.box2d.world",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
   {
+   "body": "<pre><code>bits=world:bits(name)\nbits=world:bits(name,{mask=0xfffffffffffff,bits=0x0000000000001,group=0})\nbits=world:bits(name,false)\n</code></pre>\n<p>get/set named bits, to help with keeping all your bitmasks in one place \nso you don&#39;t get yourself confuzzled.</p>\n<p>bits is must be a table containing mask, bits and group then instead of \nsetting these numbers explicitly we can use this name in shape creation \nor casting, anywhere a filter is expected.</p>\n<p>This helper code adds the following logic to shape creation etc</p>\n<pre><code>if filter is set then get bits using world:bits(filter) then\nfilter_categoryBits    will be set from    bits.bits\tif nil\nfilter_maskBits        will be set from    bits.mask\tif nil\nfilter_groupIndex      will be set from    bits.group\tif nil\n</code></pre>\n<p>So you probably do not want to create default values for \nfilter_categoryBits using world:defaults as these will not be replace.</p>\n<p>Pass in false to unset the named bits.</p>\n<p>If bits does not exist then we will return the default values of \n{mask=0xfffffffffffff,bits=0x0000000000001,group=0} which can be \nmodified by setting the bits named &quot;default&quot; to whatever you want.</p>\n<p>Since this default is always available you can use filter=&quot;default&quot; in \nshape creation to use your default values.</p>\n<p>Note that 0xfffffffffffff (13 hex digits) is an integer that fits \nsafely in a double and you should not use a larger number.</p>\n",
+   "count": 1,
+   "file": "../lua/box2d.lua",
+   "line": 718,
+   "name": "lua.box2d.world.bits",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
+  },
+  {
    "body": "<pre><code>body=world:body(def)\n</code></pre>\n<p>Create a body in the world.</p>\n<p>def contains the values that you can set in a b2BodyDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values. This may also be a \nfake table created by lua meta.</p>\n<p>Values with _ are sub structs eg motionLocks_linearX is motionLocks.linearX</p>\n<p>Booleans should be true or false</p>\n<p>name is a string that should be 31 chars or less and is only used to \nhelp with debugging.\n<br/>\n<br/></p>\n<p>type is a string and must be &quot;static&quot; or &quot;kinematic&quot; or &quot;dynamic&quot;\n<br/>\n<br/></p>\n<pre><code>allowFastRotation\nangularDamping\nangularVelocity\nenableSleep\nmotionLocks_linearX\nmotionLocks_linearY\nmotionLocks_angularZ\ngravityScale\nisAwake\nisBullet\nisEnabled\nlinearDamping\nlinearVelocity\nname\nposition\nrotation\nsleepThreshold\ntype\n</code></pre>\n",
    "count": 2,
    "file": "../lua/box2d.lua",
-   "line": 702,
+   "line": 770,
    "name": "lua.box2d.world.body",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3098,7 +3110,7 @@
    "body": "<pre><code>shape=body:shape(def)\n</code></pre>\n<p>Create a shape in the body.</p>\n<p>def contains the values that you can set in a b2ShapeDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values. This may also be a \nfake table created by lua meta.</p>\n<p>Booleans should be true or false</p>\n<p>Minor safety issue regarding filter bitmasks since lua(jit) uses \ndoubles these bit masks should <em>only</em> use 52 bits not 64 so the \nintegers can fit safely into a double. When using hex the top 3 nibbles \nshould always be 0 like so 0x000fffffffffffff that is 13 Fs if you are \ncounting.</p>\n<pre><code>density\nenableContactEvents\nenableHitEvents\nenablePreSolveEvents\nenableSensorEvents\nfilter\ninvokeContactCreation\nisSensor\nmaterial_customColor\nmaterial_friction\nmaterial_restitution\nmaterial_rollingResistance\nmaterial_tangentSpeed\nmaterial_userMaterialId\nupdateBodyMass\n</code></pre>\n<p>if def.shape==&quot;circle&quot; then def also contains the values that you can \nset in a b2Circle</p>\n<pre><code>center\nradius\n</code></pre>\n<p>if def.shape==&quot;segment&quot; then def also contains the values that you can \nset in a b2Segment</p>\n<pre><code>point1\npoint2\n</code></pre>\n<p>if def.shape==&quot;capsule&quot; then def also contains the values that you can \nset in a b2Capsule</p>\n<pre><code>center1\ncenter2\nradius\n</code></pre>\n<p>if def.shape==&quot;box&quot; then def also contains the values that you can \nset in a b2Polygon using b2MakeOffsetRoundedBox</p>\n<pre><code>halfWidth\nhalfHeight\ncenter\nrotation\nradius\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 997,
+   "line": 1065,
    "name": "lua.box2d.world.body.shape",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3106,15 +3118,15 @@
    "body": "<pre><code>events = world:body_events()\nevents = world:body_events(events)\n</code></pre>\n<p>get body events generated by the last step</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 338,
+   "line": 339,
    "name": "lua.box2d.world.body_events",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
   {
-   "body": "<pre><code>hits = world:cast_ray(ray)\n</code></pre>\n<p>cast a ray and return an array of hits\n<br/>\n<br/></p>\n<pre><code>ray.closest\n</code></pre>\n<p>Boolean value, set true to only return the closest hit in hits[1]. \nOtherwise you must iterate over the returned array.\n<br/>\n<br/></p>\n<pre><code>ray.origin\n</code></pre>\n<p>Starting world point of ray\n<br/>\n<br/></p>\n<pre><code>ray.translation\n</code></pre>\n<p>The ray to cast\n<br/>\n<br/></p>\n<pre><code>ray.filter_categoryBits\nray.filter_maskBits\n</code></pre>\n<p>Filter masks\n<br/>\n<br/></p>\n<pre><code>hit1=hits[1]\nhit2=hits[2]\netc\n</code></pre>\n<p>These are not in any useful order, unless you asked for \nthe closest in which case there will only be 1.</p>\n<p>If hits[1] is nil or #hits is 0 then there where no hits.\n<br/>\n<br/></p>\n<pre><code>hits.leafVisits\nhits.nodeVisits\n</code></pre>\n<p>Contain extra debug information</p>\n",
+   "body": "<pre><code>hits = world:cast_ray(ray)\n</code></pre>\n<p>cast a ray and return an array of hits\n<br/>\n<br/></p>\n<pre><code>ray.closest\n</code></pre>\n<p>Boolean value, set true to only return the closest hit in hits[1]. \nOtherwise you must iterate over the returned array.\n<br/>\n<br/></p>\n<pre><code>ray.origin\n</code></pre>\n<p>Starting world point of ray\n<br/>\n<br/></p>\n<pre><code>ray.translation\n</code></pre>\n<p>The ray to cast\n<br/>\n<br/></p>\n<pre><code>ray.filter_categoryBits\nray.filter_maskBits\nray.filter\n</code></pre>\n<p>Filter masks, ray.filter is a previously set name that we will convert \nusing world:bits(name) into filter_categoryBits and filter_maskBits \nunless they are already set.\n<br/>\n<br/></p>\n<pre><code>hit1=hits[1]\nhit2=hits[2]\netc\n</code></pre>\n<p>These are not in any useful order, unless you asked for \nthe closest in which case there will only be 1.</p>\n<p>If hits[1] is nil or #hits is 0 then there where no hits.\n<br/>\n<br/></p>\n<pre><code>hits.leafVisits\nhits.nodeVisits\n</code></pre>\n<p>Contain extra debug information</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 481,
+   "line": 482,
    "name": "lua.box2d.world.cast_ray",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3122,7 +3134,7 @@
    "body": "<pre><code>events = world:contact_events()\nevents = world:contact_events(events)\n</code></pre>\n<p>get contact events generated by the last step</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 415,
+   "line": 416,
    "name": "lua.box2d.world.contact_events",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3130,7 +3142,7 @@
    "body": "<pre><code>cache=world:defaults(name)\ncache=world:defaults(name,def)\n</code></pre>\n<p>Remember default values in the world cache, this is intended for \ngeneric body/shape/joint creation.</p>\n<p>Returns the current def cache for the name.</p>\n<p>The def table will be copied ( top level only ) into a cache of the \ngiven values adding or replacing them.</p>\n<p>if def table is nil then the current cached values will be cleared.</p>\n<p>For example to cache a constant density value ( because you changed \nthe global units per meters )</p>\n<pre><code>world:defaults(&quot;shape&quot;,{density=1/256})\n</code></pre>\n<p>When shapes are created they will automatically use the &quot;shape&quot; cache \nto fill in missing values. Same for &quot;body&quot; and &quot;joint&quot; caches.</p>\n<p>You can also use this to fill in special object defaults like so.</p>\n<pre><code>world:defaults(&quot;shape_bouncy&quot;,{material_restitution=1})\n...\nbody:shape(world:fill({...},&quot;shape_bouncy&quot;))\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 655,
+   "line": 671,
    "name": "lua.box2d.world.defaults",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3138,7 +3150,7 @@
    "body": "<pre><code>world:destroy()\n</code></pre>\n<p>Destroy the world and all sub objects ( body , joint , shape )</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 159,
+   "line": 160,
    "name": "lua.box2d.world.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3146,7 +3158,7 @@
    "body": "<pre><code>def=world:fill(def,name)\n</code></pre>\n<p>Set previously cached default values under name into the def table unless a \nvalue already exists. This is intended to be used in body/shape/joint \ncreation as a way of applying generic settings for each.</p>\n<p>def may be nil in which case a new table is created and returned,</p>\n<p>If we do not have any cached values for name then def will not be \naltered. </p>\n<p>This is automatically called to fill in body/shape/joint values that have \npreviously been cached with the generic name &quot;body&quot;.&quot;shape&quot;,&quot;joint&quot; \nwhen creating a new body/shape/joint</p>\n<p>You may call it explicitly for slightly less generic defaults, eg</p>\n<pre><code>body:shape( world:fill({...},&quot;shape_special&quot;) )\n</code></pre>\n<p>Note that when creating objects def should always be a new table as it \nwill be kept within the new object and returned by the info function.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 592,
+   "line": 608,
    "name": "lua.box2d.world.fill",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3154,7 +3166,7 @@
    "body": "<pre><code>def=world:fills(def,...)\n</code></pre>\n<p>Same as fill except multiple names may be given and each applied from \nleft to right. So the left most values will have precedence and missing \nvalues will be filled in as we travel left to right.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 633,
+   "line": 649,
    "name": "lua.box2d.world.fills",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3162,7 +3174,7 @@
    "body": "<pre><code>vars = world:get()\n</code></pre>\n<p>Get all world variables into a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 208,
+   "line": 209,
    "name": "lua.box2d.world.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3170,7 +3182,7 @@
    "body": "<pre><code>info = world:info()\n</code></pre>\n<p>This returns the def table used to create the world along with as much \nupdated information as we have available, mostly intended as a \ndebugging aid.</p>\n<p>This is the actual def table (some values are hard to query later) so \nif you edit it or if you create this object using a non unique def \ntable things can get strange.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 178,
+   "line": 179,
    "name": "lua.box2d.world.info",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3178,7 +3190,7 @@
    "body": "<pre><code>joint=world:joint(def)\n</code></pre>\n<p>Create a joint in the world.</p>\n<p>def contains the values that you can set in a b2jointDef</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values. This may also be a \nfake table created by lua meta.</p>\n<p>Booleans should be true or false</p>\n<p>localFrameA/B is a transform which is a vector plus a rotation in \nradians, so { x , y , r }</p>\n<p>The boxid of a body ( for bodyIdA and bodyIdB ) can be found in body.boxid</p>\n<pre><code>bodyIdA\nbodyIdB\nlocalFrameA\nlocalFrameB\nforceThreshold\ntorqueThreshold\nconstraintHertz\nconstraintDampingRatio\ncollideConnected\n</code></pre>\n<p>if def.joint==&quot;distance&quot; then def also contains the values that you can \nset in a b2DistanceJointDef</p>\n<pre><code>length\nenableSpring\nlowerSpringForce\nupperSpringForce\nhertz\ndampingRatio\nenableLimit\nminLength\nmaxLength\nenableMotor\nmaxMotorForce\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;motor&quot; then def also contains the values that you can \nset in a b2MotorJointDef</p>\n<pre><code>linearVelocity\nmaxVelocityForce\nangularVelocity\nmaxVelocityTorque\nlinearHertz\nlinearDampingRatio\nmaxSpringForce\nangularHertz\nangularDampingRatio\nmaxSpringTorque\n</code></pre>\n<p>if def.joint==&quot;filter&quot; then def also contains the values that you can \nset in a b2FilterJointDef</p>\n<pre><code>-- no extra values just those found in b2jointDef\n</code></pre>\n<p>if def.joint==&quot;prismatic&quot; then def also contains the values that you can \nset in a b2PrismaticJointDef</p>\n<pre><code>enableSpring\nhertz\ndampingRatio\ntargetTranslation\nenableLimit\nlowerTranslation\nupperTranslation\nenableMotor\nmaxMotorForce\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;revolute&quot; then def also contains the values that you can \nset in a b2RevoluteJointDef</p>\n<pre><code>targetAngle\nenableSpring\nhertz\ndampingRatio\nenableLimit\nlowerAngle\nupperAngle\nenableMotor\nmaxMotorTorque\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;weld&quot; then def also contains the values that you can \nset in a b2WeldJointDef</p>\n<pre><code>linearHertz\nangularHertz\nlinearDampingRatio\nangularDampingRatio\n</code></pre>\n<p>if def.joint==&quot;wheel&quot; then def also contains the values that you can \nset in a b2WheelJointDef</p>\n<pre><code>enableSpring\nhertz\ndampingRatio\nenableLimit\nlowerTranslation\nupperTranslation\nenableMotor\nmaxMotorTorque\nmotorSpeed\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1147,
+   "line": 1222,
    "name": "lua.box2d.world.joint",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3186,7 +3198,7 @@
    "body": "<pre><code>overlaps = world:overlap_aabb(aabb)\n</code></pre>\n<p>Get all shapes overlapping aabb , I believe this might get some shapes \nthat do not actually overlap the given box so should probably double \ncheck.\n<br/>\n<br/></p>\n<pre><code>aabb.origin\n</code></pre>\n<p>Origin vector of bounds\n<br/>\n<br/></p>\n<pre><code>aabb.lowerBound\naabb.upperBound\n</code></pre>\n<p>Lower and upper aabb vectors ( will be added to origin )\n<br/>\n<br/></p>\n<pre><code>aabb.filter_categoryBits\naabb.filter_maskBits\n</code></pre>\n<p>Filter masks\n<br/>\n<br/></p>\n<pre><code>overlaps.shapeIds\n</code></pre>\n<p>An array of shapeIds\n<br/>\n<br/></p>\n<pre><code>overlaps.shapes\n</code></pre>\n<p>An array of shapes\n<br/>\n<br/></p>\n<pre><code>overlaps.leafVisits\noverlaps.nodeVisits\n</code></pre>\n<p>Extra debug information</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 537,
+   "line": 547,
    "name": "lua.box2d.world.overlap_aabb",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3194,7 +3206,7 @@
    "body": "<pre><code>events = world:prepare_events()\nevents = world:prepare_events(events)\n</code></pre>\n<p>Prepare a table to be filled with all events.</p>\n<pre><code>events.uids\n</code></pre>\n<p>Lookup table by uid of events by body.uid or shape.uid\nA single event may appear multiple times but it will be the same table.</p>\n<pre><code>events.all\n</code></pre>\n<p>A list of all events regardless of a uid being set.</p>\n<pre><code>events:insert(event,ita,itb)\n</code></pre>\n<p>Helper function to place an event in uids and all. ita and itb may be \nnil or a shape or a body. We look for ita.uid and itb.uid to fill the \nuids map.</p>\n<pre><code>events.contact_cache\n</code></pre>\n<p>cache of contacts for multiple calls to events.contact to reuse</p>\n<pre><code>events:contact(id)\n</code></pre>\n<p>Get contact information from a contact id, we cache results in \nevents.contact_cache so multiple calls will return the same table so is \nsafe to call multiple times with the same id.</p>\n<p>A contact is a large chunk of possibly unwanted data so has to be \nexplicitly requested later using the contactId provided by contact \nevents.</p>\n<p>May possibly be nil if an invalid contact ID, eg this is old data and \nyou called world:step again and created new contacts.</p>\n<pre><code>for event in events:iterate(uid) do ... end\n</code></pre>\n<p>A simple iterator function for the events associated with the given \nuid, or all events if uid is nil.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 247,
+   "line": 248,
    "name": "lua.box2d.world.prepare_events",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3202,7 +3214,7 @@
    "body": "<pre><code>events = world:sensor_events()\nevents = world:sensor_events(events)\n</code></pre>\n<p>get sensor events generated by the last step</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 369,
+   "line": 370,
    "name": "lua.box2d.world.sensor_events",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3210,7 +3222,7 @@
    "body": "<pre><code>world:set(vars)\n</code></pre>\n<p>Set all world variables from a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 219,
+   "line": 220,
    "name": "lua.box2d.world.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3218,7 +3230,7 @@
    "body": "<pre><code>world:step(seconds,steps)\n</code></pre>\n<p>Advance the world &quot;seconds&quot; through time using &quot;steps&quot; number of \ndiscreet sub steps.</p>\n<p>Generally the simulation expects (1/seconds)*steps to be 240 ish. \nSo 240 substeps per second. 1/60 and 4 are the defaults.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 230,
+   "line": 231,
    "name": "lua.box2d.world.step",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

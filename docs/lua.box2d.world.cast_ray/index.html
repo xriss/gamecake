@@ -79,7 +79,8 @@
 <a class="sub" href="../../docs/lua.box2d.shape.get"><span>/lua.box2d.shape.get</span></a>
 <a class="sub" href="../../docs/lua.box2d.shape.info"><span>/lua.box2d.shape.info</span></a>
 <a class="sub" href="../../docs/lua.box2d.shape.set"><span>/lua.box2d.shape.set</span></a><a class="par" href="../../docs/lua.box2d.world"><span>/lua.box2d.world</span></a>
-<a class="par" href="../../docs/lua.box2d.world.body"><span>/lua.box2d.world.body</span></a>
+
+<a class="sub" href="../../docs/lua.box2d.world.bits"><span>/lua.box2d.world.bits</span></a><a class="par" href="../../docs/lua.box2d.world.body"><span>/lua.box2d.world.body</span></a>
 
 <a class="sub" href="../../docs/lua.box2d.world.body.shape"><span>/lua.box2d.world.body.shape</span></a>
 <a class="sub" href="../../docs/lua.box2d.world.body_events"><span>/lua.box2d.world.body_events</span></a>
@@ -783,7 +784,7 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.box2d.world.cast_ray">lua.box2d.world.cast_ray</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L481">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/box2d.lua#L482">https://github.com/xriss/gamecake/blob/master/lua/box2d.lua</a></div>
 <div><pre><code>hits = world:cast_ray(ray)
 </code></pre>
 <p>cast a ray and return an array of hits
@@ -807,8 +808,11 @@ Otherwise you must iterate over the returned array.
 <br/></p>
 <pre><code>ray.filter_categoryBits
 ray.filter_maskBits
+ray.filter
 </code></pre>
-<p>Filter masks
+<p>Filter masks, ray.filter is a previously set name that we will convert 
+using world:bits(name) into filter_categoryBits and filter_maskBits 
+unless they are already set.
 <br/>
 <br/></p>
 <pre><code>hit1=hits[1]
