@@ -2673,6 +2673,7 @@ gibs.values={
 --	acc=V2( 0,0 ),
 	sname="gib_green",
 	size=4,
+	age=0,
 	touch=0,
 }
 
@@ -2762,19 +2763,41 @@ gibs.item.update=function(gib)
 	gib:get_values()
 	gib:setup_kinetic() -- might need to recreate body
 	
+	local bounce=false
 
-	if gib.touch~=0 then
-		local touch=scene:find_uid(gib.touch)
-		gib.touch=0
-		if touch and touch.caste=="gib" then
-			-- self touch?`
-		else
-			if gib.size>1 then
-				gib.size=gib.size-1
-				gib:setup_kinetic_reshape()
-			else
-				gib:mark_deleted()
+	gib.age=gib.age+1
+	if gib.age>64 then bounce=true end
+	
+
+	local kinetic=gib:get_singular("kinetic")
+	-- what to do when we touch
+	local event_touch=function(it,event)
+		if gib.age>8 then
+			if not it or it.caste~="gib" then -- no self touch
+				bounce=true
 			end
+		end
+	end
+
+	-- check events for anyone we touched
+	for event in kinetic.events:iterate(gib.uid) do
+		if event.is=="contact_hit" then
+			local it=scene:find_uid(
+				(event.shapeA.uid == gib.uid) and
+				event.shapeB.uid or
+				event.shapeA.uid ) -- we hit the one that is is not us
+			event_touch(it,event) -- it may be nil, when hitting level
+		end
+	end
+
+
+	if bounce then
+		if gib.size>1 then
+			gib.size=gib.size-1
+			gib:setup_kinetic_reshape()
+			gib.age=0
+		else
+			gib:mark_deleted()
 		end
 	end
 
@@ -2818,7 +2841,7 @@ junks.values={
 	vel=V2( 0,0 ),
 	ang=0,
 --	acc=V2( 0,200 ),
-	sname="junk_green",
+	sname="junk_box",
 	danger=0,
 }
 
@@ -2831,13 +2854,24 @@ junks.types={
 junks.graphics={
 
 
-{nil,"junk_green",[[
+{nil,"junk_box",[[
 4 4 4 4 4 4 4 4 
 4 3 3 3 3 3 3 4 
 4 3 4 4 4 4 3 4 
 4 3 3 4 4 3 3 4 
 4 3 4 4 4 4 3 4 
 4 3 4 3 3 4 3 4 
+4 3 3 3 3 3 3 4 
+4 4 4 4 4 4 4 4 
+]]},
+
+{nil,"junk_box_danger",[[
+4 4 4 4 4 4 4 4 
+4 3 3 3 3 3 3 4 
+4 3 Y Y Y Y 3 4 
+4 3 3 Y Y 3 3 4 
+4 3 Y Y Y Y 3 4 
+4 3 Y 3 3 Y 3 4 
 4 3 3 3 3 3 3 4 
 4 4 4 4 4 4 4 4 
 ]]},
@@ -2868,6 +2902,8 @@ end
 
 junks.item.setup_kinetic_reshape=function(junk)
 	local held=junk:depend("held")
+	local danger=junk:get_value("danger")
+
 	if junk.shape then
 		junk.shape:destroy()
 		junk.shape=nil
@@ -2877,7 +2913,7 @@ junks.item.setup_kinetic_reshape=function(junk)
 		halfWidth=4,
 		halfHeight=4,
 		material_friction=1.0,
-		filter=held and "player" or "junk",
+		filter=( held or danger>0 ) and "player" or "junk",
 		enableHitEvents=true,
 		uid=junk.uid,
 	})
@@ -2916,6 +2952,8 @@ junks.item.update=function(junk)
 		local len=junk.vel:len()
 		if len<2 then -- limit if stopped moving
 			junk.danger=0
+			junk:set_value("danger",0)
+			junk:setup_kinetic_reshape()
 		end
 	end
 
@@ -2949,12 +2987,11 @@ junks.item.draw=function(junk)
 	junk:get_values()
 
 	local p=V3( junk.pos[1] , junk.pos[2], junk.pos[1]+junk.pos[2] )
-	draws.sprite{ n=junk.sname          , p=p , rz=junk.rot , }
 	
 	if junk.danger>0 then
-
-		draws.sprite{ n=junk.sname          , p=p , rz=junk.rot  , s=1.25 }
-
+		draws.sprite{ n=junk.sname.."_danger" , p=p , rz=junk.rot , }
+	else
+		draws.sprite{ n=junk.sname          , p=p , rz=junk.rot , }
 	end
 
 end
@@ -3197,7 +3234,7 @@ legend=levels.combine_legends(levels.legend,{
 	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move." },
 	["T3"]={ name="char_sign",				text="MOVE down to crouch down." },
 	["T4"]={ name="char_sign",				text="Press Button B or / to GRAB object, press GRAB again to throw it." },
-	["T5"]={ name="char_sign",				text="Throw power is shown by object rotation, run for it to speed up." },
+	["T5"]={ name="char_sign",				text="Throw power is shown by rotation speed, run for it to speed up." },
 	["T6"]={ name="char_sign",				text="Aim throw with Right Stick or Cursor Keys." },
 	["T7"]={ name="char_sign",				text="Throw object at Slim Slimy to stun him." },
 	["T8"]={ name="char_sign",				text="Stomp stunned Slim Slimy to finish him." },
