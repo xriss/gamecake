@@ -164,7 +164,7 @@ all.create_scene=function(scene)
 					joint={
 					},
 				},
-				bits={
+				bits={ -- named collision bit masks
 					player={		group=0,
 									bits=0x0000000000100,
 									mask=0x0000000fffeff,
@@ -181,25 +181,21 @@ all.create_scene=function(scene)
 									bits=0x0000000010000,
 									mask=0x0000000ffffff,
 					},
-					fauna_trench={
-									group=0,
+					fauna_trench={	group=0,
 									bits=0x0000000010000,
 									mask=0x0000000ffffff,
 					},
-					fruit={
-									group=0,
+					fruit={			group=0,
 									bits=0x0000000010000,
 									mask=0x00000000001ff,
 					},
-					gib={
-									group=0,
+					gib={			group=0,
 									bits=0x0000001000000,
 									mask=0x00000000000ff,
 					},
-					junk={
-									group=0,
-									bits=0x00010000,
-									mask=0x00ffffff,
+					junk={			group=0,
+									bits=0x0000000010000,
+									mask=0x0000000ffffff,
 					},
 				},
 			},
@@ -266,6 +262,45 @@ end
 --------------------------------------------------------------------------------
 --
 --#draws
+do
+	local snaps={}
+	snaps[#snaps+1]=1
+	for i,n in ipairs({ 0.00 , 0.25 , 0.50 , 0.75 }) do
+		snaps[#snaps+1]=n
+		snaps[#snaps+1]=n+0.125
+		for i,d in ipairs({
+			1/5 , 1/4 , 1/3 , 1/2 ,
+			2/5 ,       2/3 ,
+			3/5 , 3/4 ,
+			4/5 , }) do
+			snaps[#snaps+1]=n+(math.atan(d)/(math.pi*2))
+			snaps[#snaps+1]=n-(math.atan(d)/(math.pi*2))
+			if snaps[#snaps] < 0 then snaps[#snaps]=snaps[#snaps]+1 end
+		end
+	end
+	local turn_snap=function(n)
+		n=n%1
+		if n<0 then n=n+1 end
+		local idx=math.floor(n*#snaps)+1
+		repeat -- should be close inc/dec until it is close
+			local sidx=idx
+			local b=math.abs(snaps[idx]-n)
+			if idx<#snaps and math.abs(snaps[idx+1]-n) < b then
+				idx=idx+1
+			end
+			if idx>1 and math.abs(snaps[idx-1]-n) < b then
+				idx=idx-1
+			end
+		until idx==sidx
+		return snaps[idx]
+	end
+	table.sort(snaps)
+DUMP(snaps)
+for i=1,100 do
+	local n=math.random()
+	local s=turn_snap(n)
+	print(n,s)
+end
 
 draws={}
 draws.sprite=function(it) -- note that we will modify this table
@@ -288,9 +323,10 @@ draws.sprite=function(it) -- note that we will modify this table
 	it.px=math.floor(it.px+0.5)
 	it.py=math.floor(it.py+0.5)
 	if it.rz then
-		it.rz=360*math.floor(it.rz*16+0.5)/16
+		it.rz=360*it.rz -- *turn_snap(it.rz) -- math.floor(it.rz*16+0.5)/16
 	end
 	system.components.sprites.list_add(it)
+end
 end
 
 draws.char16=function(s,x,y)
@@ -2838,10 +2874,10 @@ junks.graphics={
 {nil,"junk_green",[[
 4 4 4 4 4 4 4 4 
 4 3 3 3 3 3 3 4 
-4 3 3 3 3 3 3 4 
-4 3 3 3 3 3 3 4 
-4 3 3 3 3 3 3 4 
-4 3 3 3 3 3 3 4 
+4 3 4 4 4 4 3 4 
+4 3 3 4 4 3 3 4 
+4 3 4 4 4 4 3 4 
+4 3 4 3 3 4 3 4 
 4 3 3 3 3 3 3 4 
 4 4 4 4 4 4 4 4 
 ]]},
