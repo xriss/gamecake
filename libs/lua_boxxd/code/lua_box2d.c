@@ -1369,6 +1369,49 @@ static int lua_b2_body_acceleration (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
+get/set mass
+
+Note that this function will fight auto mass calculation from shapes.
+
+*/
+static int lua_b2_body_mass (lua_State *l)
+{
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+	
+	b2MassData md=b2Body_GetMassData(body);
+	int changed=0;
+
+	if(!lua_isnil(l,2)) // only set if given
+	{
+		changed=1;
+		md.mass=(float)lua_tonumber(l, 2 );
+	}
+	if(!lua_isnil(l,3)) // only set if given
+	{
+		changed=1;
+		md.rotationalInertia=(float)lua_tonumber(l, 3 );
+	}
+	if(!lua_isnil(l,5)) // only set if given
+	{
+		changed=1;
+		md.center.x=(float)lua_tonumber(l, 4 );
+		md.center.y=(float)lua_tonumber(l, 5 );
+	}
+	if(changed)
+	{
+		b2Body_SetMassData(body,md);
+	}
+
+	lua_pushnumber(l, md.mass );
+	lua_pushnumber(l, md.rotationalInertia );
+	lua_pushnumber(l, md.center.x );
+	lua_pushnumber(l, md.center.y );
+
+	return 4;
+}
+
+/*+---------------------------------------------------------------------
+
 Convert a vec2 into a vec2 of a different space
 
 hex conversion code is encoded like so, first two digits are input, 
@@ -2272,6 +2315,7 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"body_velocity",			lua_b2_body_velocity},
 		{"body_force",				lua_b2_body_force},
 		{"body_acceleration",		lua_b2_body_acceleration},
+		{"body_mass",				lua_b2_body_mass},
 		{"body_convert",			lua_b2_body_convert},
 
 		{"shape_create",			lua_b2_shape_create},

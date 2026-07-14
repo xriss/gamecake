@@ -918,7 +918,8 @@ end
 	body:acceleration(nil,nil,r)
 
 set body acceleration, which is to say we set the body force multiplied 
-by mass or rotational inertia.
+by mass or rotational inertia. Note that this will not work on a 0 mass 
+body, I think you have to fake a mass on a body with no shapes first.
 
 x,y is acceleration per second applied to center mass, will be cleared 
 if nil
@@ -932,6 +933,31 @@ cleared during a step, this needs to be set for *every* step.
 ]]
 box2d.body_functions.acceleration=function(body,x,y,r)
 	return core.body_acceleration(body[0],x,y,r)
+end
+
+
+--[[#lua.box2d.body.mass
+
+	mass , rotationalInertia , x,y = body:mass( mass , rotationalInertia , x,y )
+	mass = ( body:mass(mass) )
+
+get/set mass values, all values are optional but x,y must be a pair. Unset 
+values will remain unchanged.
+
+x,y is center of mass
+
+We return 4 values but as the first one is mass you can simply ignore 
+the rest by wrapping the function in ()
+
+Since adding shapes will auto generate these values, be aware that you 
+will be fighting auto mass generation when setting this value.
+
+Adding shapes or changing the body type will auto generate these 
+values.
+
+]]
+box2d.body_functions.mass=function(body,mass,ri,x,y)
+	return core.body_mass(body[0],mass,ri,x,y)
 end
 
 
