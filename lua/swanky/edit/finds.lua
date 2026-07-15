@@ -129,7 +129,7 @@ M.bake=function(oven,finds)
 		if idx and total then
 			gui.datas.set_string("find_infiles",""..idx.."/"..total.."")
 		else
-			gui.datas.set_string("find_infiles","in files")
+			gui.datas.set_string("find_infiles","Search in files")
 		end
 	end
 

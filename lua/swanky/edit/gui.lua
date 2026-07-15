@@ -189,7 +189,7 @@ gui.data_setup=function()
 		datas.new({id="find_replace"  ,class="string",  hooks=gui.hooks,str=""})
 		datas.new({id="find_files"  ,class="string",  hooks=gui.hooks,str="%.lua$"})
 
-		datas.new({id="find_infiles"  ,class="string",  hooks=gui.hooks,str="in files"}) -- dynamic button text
+		datas.new({id="find_infiles"  ,class="string",  hooks=gui.hooks,str="Search in files"}) -- dynamic button text
 
 	end
 end
@@ -751,7 +751,7 @@ local lay=
 			},
 			{
 --
-				class="split",split_axis="y",split_order=1,split_num=gsiz*1,hx=200,
+				class="split",split_axis="y",split_order=1,split_num=gsiz*1,hx=12*gsiz,
 				{
 --					id="bar1",class="fill",
 --					style="flat",highlight="none",color=0,
@@ -770,7 +770,7 @@ local lay=
 				},
 				{
 
-					class="split",split_axis="y",split_order=2,split_num=gsiz*1,hx=300,
+					class="split",split_axis="y",split_order=2,split_num=gsiz*1,hx=12*gsiz,
 					{
 						id="dock_split",
 						class="split_drag",split_axis="y",split_order=2,--split_aspect=1.00,
@@ -796,7 +796,7 @@ local lay=
 						{
 							id="dock2",
 							style="flat",highlight="none",color=0,
-							hy=300,
+							hy=gsiz*7,
 							{
 								size="full",
 								{
@@ -829,18 +829,18 @@ local lay=
 									size="full",style="flat",
 									fbo=true,
 									{
-										class="text",size="fullx",hx=gsiz*1,hy=gsiz*1,
-										text=" Search for: ",
-									},
-									{
 										id="find_search_text",hooks=gui.hooks,
 										class="textedit",size="fullx",hx=gsiz*1,hy=gsiz*1,
 										color=0,
 										data="find_search",
 									},
 									{
-										class="text",size="fullx",hx=gsiz*1,hy=gsiz*1,
-										text=" Replace with: ",
+									   hx=gsiz*9/3,hy=gsiz,
+										{
+											id="find_goto",hooks=gui.hooks,
+											class="button",hx=gsiz*6/3,hy=gsiz*1,color=1,
+											text="Find",
+										},
 									},
 									{
 										class="textedit",size="fullx",hx=gsiz*1,hy=gsiz*1,
@@ -848,55 +848,46 @@ local lay=
 										data="find_replace",
 									},
 									{
-										class="split",size="fullx",hx=gsiz*1,hy=gsiz*1,
-										split_axis="x",split_order=1,
+									   hx=gsiz*17/3,hy=gsiz,
 										{
-											class="text",hx=gsiz*1,hy=gsiz*1,
-											text=" Allow : ",
-										},
-										{
-											class="textedit",hx=gsiz*1,hy=gsiz*1,
-											color=0,
-											data="find_files",
+											id="find_replace",hooks=gui.hooks,
+											class="button",hx=gsiz*14/3,hy=gsiz*1,color=1,
+											text="Replace with",
 										},
 									},
 									{
-										class="text",size="fullx",hx=gsiz*1,hy=gsiz*1,
-										text="",
+									   hx=gsiz*16/3,hy=gsiz,
+										{
+											id="find_replace_all",hooks=gui.hooks,
+											class="button",hx=gsiz*13/3,hy=gsiz*1,color=1,
+											text="Replace all",
+										},
 									},
 									{
-										id="find_goto",hooks=gui.hooks,
-										class="button",hx=gsiz*3,hy=gsiz*1,color=1,
-										text="find",
+									   hx=gsiz*25/3,hy=gsiz,
+										{
+											id="find_replace_selection",hooks=gui.hooks,
+											class="button",hx=gsiz*22/3,hy=gsiz*1,color=1,
+											text="Replace in selection",
+										},
 									},
 									{
-										id="find_in_files",hooks=gui.hooks,
+										class="textedit",size="fullx",hx=gsiz*1,hy=gsiz*1,
+										color=0,
+										data="find_files",
+									},
+									{
+										id="find_in_files",size="fullx",hooks=gui.hooks,
 										class="button",hx=gsiz*4,hy=gsiz*1,color=1,
---										text="in files",
+--										text="in files", -- Value set by code
 										data="find_infiles",
 									},
 --[[
 									{
-										id="find_in_files_cancel",hooks=gui.hooks,
-										class="button",hx=gsiz*1,hy=gsiz*1,color=1,
-										text="X",
+									   class="text",size="fullx",hx=gsiz*1,hy=gsiz*1,
+									   text=" Path : ",
 									},
 ]]
-									{
-										id="find_replace",hooks=gui.hooks,
-										class="button",hx=gsiz*3,hy=gsiz*1,color=1,
-										text="Replace",
-									},
-									{
-										id="find_replace_all",hooks=gui.hooks,
-										class="button",hx=gsiz*4,hy=gsiz*1,color=1,
-										text="Replace all",
-									},
-									{
-										id="find_replace_selection",hooks=gui.hooks,
-										class="button",hx=gsiz*7,hy=gsiz*1,color=1,
-										text="Replace in selection",
-									},
 								}
 							}
 						},							
