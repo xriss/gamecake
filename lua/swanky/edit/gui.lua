@@ -188,6 +188,7 @@ gui.data_setup=function()
 		datas.new({id="find_search"  ,class="string",  hooks=gui.hooks,str=""})
 		datas.new({id="find_replace"  ,class="string",  hooks=gui.hooks,str=""})
 		datas.new({id="find_files"  ,class="string",  hooks=gui.hooks,str="%.lua$"})
+		datas.new({id="find_dir"  ,class="string",  hooks=gui.hooks,str="."})
 
 		datas.new({id="find_infiles"  ,class="string",  hooks=gui.hooks,str="Search in files"}) -- dynamic button text
 
@@ -438,22 +439,32 @@ end
 			texteditor:cursor_sync()
 		end
 
-	elseif m.id=="find_in_files" then
+	elseif m.id=="find_set_dir" then
+		
+		local doc=docs.doc
+		if doc then -- must have file
+			local dir=wpath.relative_cd( wpath.dir( doc.filename ) ) 
+			gui.datas.set_string("find_dir",dir)
+		end
 
-PRINT("find_in_files")
+	elseif m.id=="find_in_files" then
 
 		local s=gui.datas.get_string("find_search")
 		local f=gui.datas.get_string("find_files")
+		local d=gui.datas.get_string("find_dir")
 		
 		local t=gui.datas.get_string("find_infiles")
 
-		if t~="in files" then -- cancel
+		if t~="Search in files" then -- cancel
 			finds.cancel_all() -- only 1 find at a time?
 		else
 			finds.cancel_all() -- only 1 find at a time?
-			local find=finds.create({pattern=f,word=s})
+			local find=finds.create({pattern=f,word=s,dir=d})
 			find:scan() -- start search
 		end
+
+		-- show console which will contain results
+		gui.datas.set_string("list_top","console")
 
 	elseif m.id=="find_in_files_cancel" then
 
@@ -596,28 +607,8 @@ function gui.hooks(act,w,dat)
 			
 --			gui.master.dirty_by_data(gui.datas.get("run_state"))
 
-		elseif w.id=="find_goto" then
+		else -- upgrade to action
 		
-			gui.do_actions[#gui.do_actions+1]={id=w.id}
-
-		elseif w.id=="find_replace" then
-
-			gui.do_actions[#gui.do_actions+1]={id=w.id}
-
-		elseif w.id=="find_replace_all" then
-
-			gui.do_actions[#gui.do_actions+1]={id=w.id}
-
-		elseif w.id=="find_in_files" then
-
-			gui.do_actions[#gui.do_actions+1]={id=w.id}
-
-		elseif w.id=="find_in_files_cancel" then
-
-			gui.do_actions[#gui.do_actions+1]={id=w.id}
-
-		elseif w.id=="find_replace_selection" then
-
 			gui.do_actions[#gui.do_actions+1]={id=w.id}
 
 		end
@@ -882,6 +873,19 @@ local lay=
 --          text="in files", -- Value set by code
           data="find_infiles",
          },
+         {
+          class="textedit",size="fullx",hx=gsiz*1,hy=gsiz*1,
+          color=0,
+          data="find_dir",
+         },
+         {
+            hx=gsiz*16/3,hy=gsiz,
+          {
+           id="find_set_dir",hooks=gui.hooks,
+           class="button",hx=gsiz*14/3,hy=gsiz*1,color=1,
+           text="Set file dir",
+          },
+         },
 --[[
          {
             class="text",size="fullx",hx=gsiz*1,hy=gsiz*1,
@@ -959,83 +963,86 @@ local lay=
 		}
 ]]
 
-		widgets_menuitem.menu_add(gui.master.ids.menubar,{top=gui.master.ids.menubar,menu_data={
+		widgets_menuitem.menu_add(gui.master.ids.menubar,
+{top=gui.master.ids.menubar,menu_data={
 --			menu_px=0,menu_py=1,
-	--		func_text=func_text,
-			hooks=gui.hooks,
-			inherit=true,
+--		func_text=func_text,
+hooks=gui.hooks,
+inherit=true,
 
-			{id="menu_file",top_menu=true,menu_data={
-				{id="file_new"},
-				{id="file_open"},
-				{id="file_close"},
-				{id="file_reload"},
-				{id="file_save"},
-				{id="file_saveas"},
-				{id="file_saveall"},
-				{id="menu_docs",menu_data={
-					{id="docs_prev"},
-					{id="docs_close_other"},
-				}},
-				{id="menu_collection",menu_data={
---					{id="collection_name"},
-					{id="collection_switch"},
-					{id="collection_purge_file"},
-					{id="collection_purge_all"},
-				}},
-				{id="menu_theme",text="Theme",menu_data={
-					{id="theme_dark_tiny"},
-					{id="theme_dark_small"},
-					{id="theme_dark_medium"},
-					{id="theme_dark_large"},
-					{id="theme_dark_huge"},
-					{id="theme_bright_tiny"},
-					{id="theme_bright_small"},
-					{id="theme_bright_medium"},
-					{id="theme_bright_large"},
-					{id="theme_bright_huge"},
-				}},
-				{id="file_quit"},
-			}},
---			{id="menu_window",text="Windows",top_menu=true,menu_data={
---				{id="dialog",user="1",text="Dialogue 1"},
---			}},
-			{id="menu_edit",top_menu=true,menu_data={
-				{id="select_all"},
-				{id="clip_copy"},
-				{id="clip_cut"},
-				{id="clip_paste"},
-				{id="clip_cutline"},
-				{id="edit_justify"},
-				{id="edit_align"},
-				{id="history_undo"},
-				{id="history_redo"},
-			}},
+{id="menu_file",top_menu=true,menu_data=
+   {
+    {id="file_new"},
+    {id="file_open"},
+    {id="file_close"},
+    {id="file_reload"},
+    {id="file_save"},
+    {id="file_saveas"},
+    {id="file_saveall"},
+    {id="menu_docs",menu_data={
+     {id="docs_prev"},
+     {id="docs_close_other"},
+    }},
+    {id="menu_collection",menu_data={
+--     {id="collection_name"},
+     {id="collection_switch"},
+     {id="collection_purge_file"},
+     {id="collection_purge_all"},
+    }},
+    {id="menu_theme",text="Theme",menu_data={
+     {id="theme_dark_tiny"},
+     {id="theme_dark_small"},
+     {id="theme_dark_medium"},
+     {id="theme_dark_large"},
+     {id="theme_dark_huge"},
+     {id="theme_bright_tiny"},
+     {id="theme_bright_small"},
+     {id="theme_bright_medium"},
+     {id="theme_bright_large"},
+     {id="theme_bright_huge"},
+    }},
+    {id="file_quit"},
+   }},
+--   {id="menu_window",text="Windows",top_menu=true,menu_data={
+--    {id="dialog",user="1",text="Dialogue 1"},
+--   }},
+   {id="menu_edit",top_menu=true,menu_data={
+    {id="select_all"},
+    {id="clip_copy"},
+    {id="clip_cut"},
+    {id="clip_paste"},
+    {id="clip_cutline"},
+    {id="edit_justify"},
+    {id="edit_align"},
+    {id="history_undo"},
+    {id="history_redo"},
+   }},
 
-			{id="menu_search",top_menu=true,menu_data={
-				{id="search_find"},
-				{id="search_next"},
-				{id="search_prev"},
-			}},
+   {id="menu_search",top_menu=true,menu_data={
+    {id="search_find"},
+    {id="search_next"},
+    {id="search_prev"},
+   }},
 
-			{id="menu_view",top_menu=true,menu_data={
-				{id="view_hex"},
-				{id="view_txt"},
-				{id="view_txt_wrap"},
-				{id="view_lex_txt"},
-				{id="view_lex_lua"},
-				{id="view_lex_js"},
-				{id="view_lex_glsl"},
-			}},
+   {id="menu_view",top_menu=true,menu_data={
+    {id="view_hex"},
+    {id="view_txt"},
+    {id="view_txt_wrap"},
+    {id="view_lex_txt"},
+    {id="view_lex_lua"},
+    {id="view_lex_js"},
+    {id="view_lex_glsl"},
+   }},
 
---			{id="menu_font",text="Font",top_menu=true,menu_data=gui.menu_datas.font_size},
+--   {id="menu_font",text="Font",top_menu=true,menu_data=gui.menu_datas.font_size},
 --[[
-			{id="topmenu",text="Run",top_menu=true,menu_data={
-				{id="run",user="hide",text="Hide"},
-				{id="run",user="glsl",text="GLSL"},
-			}},
+   {id="topmenu",text="Run",top_menu=true,menu_data={
+    {id="run",user="hide",text="Hide"},
+    {id="run",user="glsl",text="GLSL"},
+   }},
 ]]
-		}})
+}}
+		)
 
 
 
@@ -1141,7 +1148,7 @@ local lay=
 		if fname then -- set current doc to filename
 -- in lua the chunk of the current editor text will be named .
 -- so we can search for -> [string "."]:00000: <- where the number inside :: is the line
-			if string.find(s,"^%[string \"%.\"%]$") then --current file pattern
+			if string.find(fname,"^%[string ") then --if string assume current file
 				-- use current file
 			else -- switch to this file
 				docs.show( docs.manifest(fname) )

@@ -401,11 +401,16 @@ M.bake=function(oven,show)
 		end
 	end
 
+	show.old_error=""
 	show.set_error=function(err)
 		gui.master.ids.runtext.hidden=false
-
-		gui.master.ids.runtext.txt.set_text(err,"error.txt")
-		gui.master.ids.runtext.txt.set_lexer()
+		
+		if show.old_error~=err then
+			show.old_error=err
+			print(err)
+			gui.master.ids.runtext.txt.set_text(err,"error.txt")
+			gui.master.ids.runtext.txt.set_lexer()
+		end
 	end
 
 	show.update_draw=function()

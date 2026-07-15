@@ -134,7 +134,7 @@ M.bake=function(oven,finds)
 	end
 
 	finds.cancel_all=function()
-print("cancel all")
+
 		for i=#finds.list,1,-1 do
 			local task=finds.list[i]
 			finds.tasks[task]=nil
@@ -248,7 +248,7 @@ print( "searching : ".. prefix )
 		local count=0
 		for file,_ in pairs(files) do count=count+1 end
 
-print( "searching ".. count .." files.")
+print( "found ".. count .." files matching "..find.pattern)
 
 		local idx=0
 		for file,_ in pairs(files) do
@@ -308,7 +308,7 @@ print( "searching ".. count .." files.")
 		for p,c in pairs( find.filenames ) do
 			cnt=cnt+1
 		end
-		print("found "..cnt.."/"..count)
+		print("found "..cnt.."/"..count.." files containing search string")
 
 --[[		
 -- update tree
