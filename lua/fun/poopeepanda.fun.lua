@@ -1033,8 +1033,10 @@ players.item.update=function(player)
 		if it.flag_touch then
 			it:flag_touch(player,event)
 		end
+
 		if it.caste=="fauna_slim" then -- kill us on touch
 			player.mode="die"
+			it:do_stun(player,event) -- also kill them
 		end
 	end
 
@@ -1056,13 +1058,20 @@ players.item.update=function(player)
 
 if player.mode=="spawn" then -- we are spawning but not really here yet
 
+	local aim=V2( lx+(rx*256) , (-1/256)+ly+(ry*256) )
+	aim:normalize()
+
+	local dest=player.spawn + aim*4 -- move to choose launch direction
+	
+	player.pos=player.pos + ( dest -player.pos )*0.25 -- aim
+
+
 	if ba_set and ( player.idx==1 or player.idle<16*10 ) then -- hide p2 after 10 secs
 		player.mode="none"
 		player:clean_kinetic()
 		player:setup_kinetic()
 
-		local tile=level:get_tile_by_pos(player.pos)
-		player.vel=V2(tile.dir)*400
+		player.vel=aim*200
 
 		system.components.sfx.play("jump",1,0.5)
 	end
@@ -1259,7 +1268,7 @@ else
 
 		hold:get_value("pos")
 		hold:get_value("vel")
-		local p=hold_pos-hold.pos
+		local p=hold_pos - hold.pos
 		hold_len=p:len() -- distance
 		if hold_len>40 then -- too far so just drop
 			player:depend("hold",0)
@@ -1773,7 +1782,7 @@ fauna_slims.item={}
 fauna_slims.caste="fauna_slim"
 
 fauna_slims.uidmap={
-	held=1,
+	floater=1,
 	length=1,
 }
 
@@ -1794,7 +1803,7 @@ fauna_slims.values={
 	thunk=0,
 	floor_uid=0,
 	mode="none",
-	touch={},
+--	touch={},
 --	slap=0,
 --	stun=0,
 }
@@ -1898,13 +1907,19 @@ end
 fauna_slims.system.clean=function(sys)
 end
 
--- flag functions set values for use in the next update
-fauna_slims.item.flag_touch=function(fauna,touch,event)
-	touch:get_value("danger")
-	if touch.danger and touch.danger>0 then
---RINT("touch",fauna:get_singular("level"):get("time") )
-		fauna:set_value("touch",{uid=touch.uid})
-	end
+
+-- turn into a floater
+fauna_slims.item.do_stun=function(fauna,touch,event)
+
+	local floater=scene:create({"floater",
+		sname=fauna.sname, pos=fauna.pos, vel=fauna.vel+V2(0,-50), })
+
+	-- link us to floater
+	floater:depend("fauna",fauna.uid)
+	fauna:depend("floater",floater.uid) -- we are turned into a floater
+
+	fauna:clean_kinetic() -- remove body
+
 end
 
 -- state values are cached into the item for easy access on a get
@@ -1925,13 +1940,7 @@ fauna_slims.item.setup_kinetic=function(fauna)
 		type="dynamic",
 		transform={fauna.pos[1],fauna.pos[2],fauna.rot*(math.pi*2)},
 	})
---	local space=fauna:get_singular("kinetic").space
---	fauna.body=space:body(1,1)
-	if not fauna:depend("held") then
---		fauna.shape=fauna.body:shape("circle",4,0,0)
---		fauna.shape:friction(0.5)
---		fauna.shape:elasticity(0.5)
---		fauna.shape:filter(fauna.uid,fauna_slims.collision_bits,fauna_slims.collision_mask)
+	if not fauna:depend("floater") then
 		fauna.shape=fauna.body:shape({
 			shape="circle",
 			radius=4,
@@ -1964,6 +1973,11 @@ fauna_slims.item.update_brain=function(fauna,brain)
 end
 
 fauna_slims.item.update=function(fauna)
+
+	if fauna:depend("floater") then -- we are floater, do nothing
+		return
+	end
+
 	fauna:get_values()
 	fauna:setup_kinetic() -- might need to recreate body
 	
@@ -1973,25 +1987,6 @@ fauna_slims.item.update=function(fauna)
 	local level=fauna:get_singular("level") -- only one level is active at a time
 
 	local grav=level:get_gravity(fauna.pos)
-
-	if fauna:depend("held") then
-		return
-	end
-	
-	if fauna.touch.uid then
-		local hit=scene:find_uid(fauna.touch.uid)
-		if hit  then -- we are hit so turn into stunned floater
---RINT("die",fauna:get_singular("level"):get("time") )
-			local floater=scene:create({"floater",
-				sname=fauna.sname, pos=fauna.pos, vel=fauna.vel+V2(0,-50), })
-			floater:depend("fauna",fauna.uid)
-			fauna:depend("held",floater.uid)
-			fauna:clean_kinetic() -- recreate body
-			fauna:setup_kinetic()
-			return
-		end
-		fauna.touch={} -- remove hit as it has been dealt with
-	end
 
 	local brain={}
 	brain.move=V2(0,0)
@@ -2120,16 +2115,17 @@ end
 -- so it can be called multiple times between updates for different results
 fauna_slims.item.draw=function(fauna)
 
+	if fauna:depend("floater") then -- we are floater, do nothing
+		return
+	end
+
 	fauna:get_values()
 
 	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
 	
-	if fauna:depend("held") then
-		-- no draw
-	else
-		draws.sprite( { n=fauna.sname , p=p, sx=fauna.side } )
-		draws.sprite( { n=fauna.sname.."_feet" , p=p+V3(0,fauna.foot,8) , sx=fauna.side } )
-	end
+	draws.sprite( { n=fauna.sname , p=p, sx=fauna.side } )
+	draws.sprite( { n=fauna.sname.."_feet" , p=p+V3(0,fauna.foot,8) , sx=fauna.side } )
+
 end
 
 
@@ -2960,9 +2956,11 @@ junks.item.update=function(junk)
 	local kinetic=junk:get_singular("kinetic")
 	-- what to do when we touch
 	local event_touch=function(it,event)
-		if it.flag_touch then -- flag a touch to be handled in this objects update
-			it:flag_touch(junk,event)
+
+		if it.do_stun and junk.danger>0 then -- can stun
+			it:do_stun(junk,event)
 		end
+
 	end
 	-- check events for anyone we touched
 	for event in kinetic.events:iterate(junk.uid) do
