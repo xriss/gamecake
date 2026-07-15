@@ -454,17 +454,21 @@ end
 		local d=gui.datas.get_string("find_dir")
 		
 		local t=gui.datas.get_string("find_infiles")
+		
+		if s~="" then -- must search for something
 
-		if t~="Search in files" then -- cancel
-			finds.cancel_all() -- only 1 find at a time?
-		else
-			finds.cancel_all() -- only 1 find at a time?
-			local find=finds.create({pattern=f,word=s,dir=d})
-			find:scan() -- start search
+			if t~="Search in files" then -- cancel
+				finds.cancel_all() -- only 1 find at a time?
+			else
+				finds.cancel_all() -- only 1 find at a time?
+				local find=finds.create({pattern=f,word=s,dir=d})
+				find:scan() -- start search
+			end
+
+			-- show console which will contain results
+			gui.datas.set_string("list_top","console")
+			
 		end
-
-		-- show console which will contain results
-		gui.datas.set_string("list_top","console")
 
 	elseif m.id=="find_in_files_cancel" then
 
@@ -1162,11 +1166,15 @@ inherit=true,
 
 			txt.mark(cy,fx,cy,tx+1)
 
-			w.txt.mark(line+1,1,line,1)
+			w.txt.mark(line,1,line,1)
 			w.mark_area={txt.markget()}
 			w.click_area={unpack(texteditor.mark_area)}
 			w:cursor_sync()
 			w:scroll_to_line(line-4)
+			
+-- auto focus
+			gui.master.set_focus( gui.master.ids.texteditor )
+
 --			gui.master.next_focus=w	-- change focus to editor
 
 		end
