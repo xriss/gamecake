@@ -366,6 +366,7 @@ end
 		gui.datas.set_string("list_mode","search")
 		
 		gui.master.set_focus( gui.master.ids.find_search_text )
+		gui.master.ids.find_search_text:select_all()
 
 	elseif m.id=="find_goto" then
 

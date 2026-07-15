@@ -451,6 +451,7 @@ function wtextedit.setup(widget,def)
 
 	widget.replace_selected_chars=wtextedit.replace_selected_chars
 	widget.get_selected_chars=wtextedit.get_selected_chars
+	widget.select_all=wtextedit.select_all
 	
 	widget.msg=wtextedit.msg
 	widget.key=wtextedit.key
