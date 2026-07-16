@@ -500,12 +500,6 @@ radius and a single point at the origin.
 Radius of the shape to cast, does not work unless you also set points.
 
 
-	ray.closest
-
-Boolean value, set true to only return the closest hit in hits[1]. 
-Otherwise you must iterate over the returned array.
-
-
 	ray.origin
 
 Starting world point of ray
@@ -529,10 +523,10 @@ unless they are already set.
 	hit2=hits[2]
 	etc
 
-These are not in any useful order, unless you asked for 
-the closest in which case there will only be 1.
+Returned hits which are sorted by fraction so hits[1] should be the 
+closest, or at least one of the closest if fraction is 0.
 
-If hits[1] is nil or #hits is 0 then there where no hits.
+If hits[1] is nil then there where no hits.
 
 
 	hits.leafVisits
@@ -771,8 +765,8 @@ This helper code adds the following logic to shape creation etc
 	filter_maskBits        will be set from    bits.mask	if nil
 	filter_groupIndex      will be set from    bits.group	if nil
 
-So you probably do not want to create default values for 
-filter_categoryBits using world:defaults as these will not be replace.
+You probably do not want to create default values for these values 
+using world:defaults as these will not be replace by this helper.
 
 Pass in false to unset the named bits.
 
@@ -781,10 +775,10 @@ If bits does not exist then we will return the default values of
 modified by setting the bits named "default" to whatever you want.
 
 Since this default is always available you can use filter="default" in 
-shape creation to use your default values.
+shape creation to use these default values.
 
 Note that 0xfffffffffffff (13 hex digits) is an integer that fits 
-safely in a double and you should not use a larger number.
+safely in a double and you should not use any more bits.
 
 ]] 
 box2d.world_functions.bits=function(world,name,bits)
@@ -814,8 +808,8 @@ unique table as it will be retained.
 
 All of these are optional so can be nil.
 
-Vectors are a table containing { x , y } values. This may also be a 
-fake table created by lua meta.
+Vectors are a table containing values in the integer indexes. This may 
+also be a fake table created by lua meta.
 
 Values with _ are sub structs eg motionLocks_linearX is motionLocks.linearX
 
