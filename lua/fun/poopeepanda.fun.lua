@@ -143,61 +143,8 @@ all.create_scene=function(scene)
 				LengthUnitsPerMeter=16,
 				step=(1/16), -- amount of time to step each frame
 				substeps=16, -- number of substeps
-				defaults={ -- world defaults when creating box2d objects
-					world={
-						gravity={0,400}, -- default gravity
-						sleepThreshold=1, -- meter adjust
-						hitEventThreshold=0, -- any hit please
-					},
-					body={
-						sleepThreshold=1, -- meter adjust
---						linearDamping=1/64,
---						angularDamping=1/64,
-						gravityScale=0, -- disable gravity by default
-					},
-					shape={
-						density=1/256,
-						material_friction=0.5,
-						material_restitution=0.5,
---						material_rollingResistance=0.5,
-					},
-					joint={
-					},
-				},
-				bits={ -- named collision bit masks
-					player={		group=0,
-									bits=0x0000000000100,
-									mask=0x0000000fffeff,
-					},
-					floater={		group=0,
-									bits=0x0000000010000,
-									mask=0x0000000ffffff,
-					},
-					fauna_egg={		group=0,
-									bits=0x0000000010000,
-									mask=0x0000000ffffff,
-					},
-					fauna_slim={	group=0,
-									bits=0x0000000010000,
-									mask=0x0000000ffffff,
-					},
-					fauna_trench={	group=0,
-									bits=0x0000000010000,
-									mask=0x0000000ffffff,
-					},
-					fruit={			group=0,
-									bits=0x0000000010000,
-									mask=0x00000000001ff,
-					},
-					gib={			group=0,
-									bits=0x0000001000000,
-									mask=0x00000000000ff,
-					},
-					junk={			group=0,
-									bits=0x0000000010000,
-									mask=0x0000000ffffff,
-					},
-				},
+				defaults=kinetics.defaults,
+				bits=kinetics.bits,
 			},
 			{"level",idx=level},
 --			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
@@ -258,6 +205,106 @@ draw=function()
 	scene:do_draw()
 end
 
+--------------------------------------------------------------------------------
+--
+--#kinetics
+--
+kinetics={}
+
+kinetics.defaults={ -- world defaults when creating box2d objects
+	world={
+		gravity={0,400}, -- default gravity
+		sleepThreshold=1, -- meter adjust
+		hitEventThreshold=0, -- any hit please
+	},
+	body={
+		sleepThreshold=1, -- meter adjust
+--						linearDamping=1/64,
+--						angularDamping=1/64,
+		gravityScale=0, -- disable gravity by default
+	},
+	shape={
+		density=1/256,
+		material_friction=0.5,
+		material_restitution=0.5,
+--						material_rollingResistance=0.5,
+	},
+	joint={
+	},
+}
+kinetics.bits={ -- named collision bit masks
+	player={		group=0,
+					bits=0x0000000000100,
+					mask=0x0000000fffeff,
+	},
+	floater={		group=0,
+					bits=0x0000000010000,
+					mask=0x0000000ffffff,
+	},
+	fauna_egg={		group=0,
+					bits=0x0000000010000,
+					mask=0x0000000ffffff,
+	},
+	fauna_slim={	group=0,
+					bits=0x0000000010000,
+					mask=0x0000000ffffff,
+	},
+	fauna_trench={	group=0,
+					bits=0x0000000010000,
+					mask=0x0000000ffffff,
+	},
+	fruit={			group=0,
+					bits=0x0000000010000,
+					mask=0x00000000001ff,
+	},
+	gib={			group=0,
+					bits=0x0000001000000,
+					mask=0x00000000000ff,
+	},
+	junk={			group=0,
+					bits=0x0000000010000,
+					mask=0x0000000ffffff,
+	},
+}
+
+-- find out what we might be standing on
+-- ray translation is expected to be y only and origin is body origin
+-- we will ignore "bad" shapes and fill in the length of the ray
+kinetics.cast_feet=function(world,ray)
+	local hits=world:cast(ray)
+	local pass={}
+
+	 -- force meta and calc ray values
+	ray.origin=V2(ray.origin)
+
+	for _,hit in ipairs(hits) do
+		if hit.shape then
+			hit.ray=ray
+			hit.closest=V2(hit.shape:convert(ray.origin[1],ray.origin[2],"closest"))
+			hit.delta=hit.closest-ray.origin
+			hit.feet=hit.delta[2]
+			if hit.feet>=2 then -- must hit bellow body
+print(hit.delta)
+				return hit
+			end
+		end
+	end
+--[[
+	local foot_cast=world:cast({ -- this is part of the collision so run it here
+		closest=true, -- just want the closest hit
+		origin=player.pos,
+		points={0,0},
+		radius=4,
+		translation={0,8},
+		filter_categoryBits=0x00000100,
+		filter_maskBits=0x00ffffff,
+	})[1]
+	if foot_cast then
+		foot_cast.length=foot_cast.fraction*8+4
+		foot_touch=scene:find_uid(foot_cast.shape.uid) -- remember foot touch for later
+	end
+]]
+end
 
 --------------------------------------------------------------------------------
 --
@@ -1016,14 +1063,16 @@ players.item.update=function(player)
 	end
 
 	local foot_touch -- set this if our feet touched something
-	local foot_cast=world:cast_ray({ -- this is part of the collision so run it here
+	local foot_cast=kinetics.cast_feet(world,{ -- this is part of the collision so run it here
 		closest=true, -- just want the closest hit
 		origin=player.pos,
-		translation={0,16},
+		points={0,0},
+		radius=4,
+		translation={0,8},
 		filter_categoryBits=0x00000100,
 		filter_maskBits=0x00ffffff,
-	})[1]
-	if foot_cast and foot_cast.fraction and foot_cast.fraction<0.75 then
+	})
+	if foot_cast then
 		foot_touch=scene:find_uid(foot_cast.shape.uid) -- remember foot touch for later
 	end
 
@@ -1152,9 +1201,9 @@ else
 --	player.pos=player.pos+player.vel
 
 	local footspeed=0.5
-	if foot_cast and foot_cast.fraction and foot_cast.fraction<0.75 then
+	if foot_cast then
 
-		local d=(foot_cast.fraction*16) -- distance + radius
+		local d=foot_cast.feet
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
 
@@ -1231,7 +1280,7 @@ else
 		local v1=V2(-24,-16)
 		local v2=V2( 24, 24)
 
-		local overlaps = world:overlap_aabb({
+		local overlaps = world:overlap({
 			origin=player.pos,
 			lowerBound=v1,
 			upperBound=v2,
@@ -2019,7 +2068,7 @@ fauna_slims.item.update=function(fauna)
 	local footspeed=0.25
 	local footbase=3
 	local world=fauna:get_singular("kinetic").world
-	local hit=world:cast_ray({
+	local hit=world:cast({
 		closest=true, -- just want the closest hit
 		origin=fauna.pos,
 		translation={0,16},
@@ -2319,7 +2368,7 @@ fauna_trenchs.item.update=function(fauna)
 	local footspeed=0.25
 	local footbase=3
 	local world=fauna:get_singular("kinetic").world
-	local hit=world:cast_ray({
+	local hit=world:cast({
 		closest=true, -- just want the closest hit
 		origin=fauna.pos,
 		translation={0,16},

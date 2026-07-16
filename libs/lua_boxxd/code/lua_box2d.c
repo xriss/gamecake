@@ -17,7 +17,19 @@ can be found in the associated box2d.lua file.
 
 // lua versions hax
 #if LUA_VERSION_NUM < 502
+
 #define lua_rawlen lua_objlen
+
+static int lua_absindex (lua_State *l, int idx) {
+	if(idx<0)
+	{
+		return lua_gettop(l)+1+idx;
+	}
+	else
+	{
+		return idx;
+	}
+}
 #endif
 
 #include "box2d/box2d.h"
@@ -35,14 +47,16 @@ const char *lua_b2_joint_meta_name="b2_joint*ptr";
 
 /*+---------------------------------------------------------------------
 
-get and return b2Vec2 from table on top of stack
+get and return b2Vec2 from table at "top" of stack
 
 */
-static b2Vec2 lua_b2_read_b2Vec2 (lua_State *l)
+static b2Vec2 lua_b2_read_b2Vec2 (lua_State *l, int top)
 {
+	top=lua_absindex(l,top); // use -1 for real top
+
 	b2Vec2 v;
-	lua_pushinteger(l,1);	lua_gettable(l,-2);
-	lua_pushinteger(l,2);	lua_gettable(l,-3);
+	lua_pushinteger(l,1);	lua_gettable(l,top);
+	lua_pushinteger(l,2);	lua_gettable(l,top);
 	v.x=(float)lua_tonumber(l,-2);
 	v.y=(float)lua_tonumber(l,-1);
 	lua_pop(l,2);
@@ -65,15 +79,17 @@ static void lua_b2_push_b2Vec2 (lua_State *l, b2Vec2 v)
 
 /*+---------------------------------------------------------------------
 
-get and return b2Vec2 from table on top of stack
+get and return b2Vec2 from table at "top" of stack
 
 */
-static b2Transform lua_b2_read_b2Transform (lua_State *l)
+static b2Transform lua_b2_read_b2Transform (lua_State *l, int top)
 {
+	top=lua_absindex(l,top); // use -1 for real top
+
 	b2Transform t;
-	lua_pushinteger(l,1);	lua_gettable(l,-2);
-	lua_pushinteger(l,2);	lua_gettable(l,-3);
-	lua_pushinteger(l,3);	lua_gettable(l,-4);
+	lua_pushinteger(l,1);	lua_gettable(l,top);
+	lua_pushinteger(l,2);	lua_gettable(l,top);
+	lua_pushinteger(l,3);	lua_gettable(l,top);
 	t.p.x=(float)lua_tonumber(l,-3);
 	t.p.y=(float)lua_tonumber(l,-2);
 	t.q=b2MakeRot((float)lua_tonumber(l,-1));
@@ -96,6 +112,54 @@ static void lua_b2_push_b2Transform (lua_State *l, b2Transform t)
 	lua_pushnumber(l, b2Rot_GetAngle(t.q) );
 	lua_rawseti(l, -2 , 3 );
 }
+
+/*+---------------------------------------------------------------------
+
+get and return b2ShapeProxy from table at "top" of stack
+
+*/
+static b2ShapeProxy lua_b2_read_b2ShapeProxy (lua_State *l, int top)
+{
+	top=lua_absindex(l,top); // use -1 for real top
+
+	b2ShapeProxy s;
+	lua_getfield(l,top,"radius");
+	if(!lua_isnil(l,-1)) { s.radius = lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	
+	lua_getfield(l,top,"points");
+	if(!lua_isnil(l,-1))
+	{
+		int idx=0;
+		while(1)
+		{
+			idx=idx+1;
+			lua_pushinteger(l,idx);	lua_gettable(l,-2); // can be fake array
+			if( lua_isnil(l,-1) || idx>(B2_MAX_POLYGON_VERTICES*2) ) // end
+			{
+				lua_pop(l,1);
+				s.count=(idx-1)/2;
+				break;
+			}
+			else
+			{
+				if(idx&1)
+				{
+					s.points[(idx-1)/2].x=(float)lua_tonumber(l,-1);
+				}
+				else
+				{
+					s.points[(idx-1)/2].y=(float)lua_tonumber(l,-1);
+				}
+				lua_pop(l,1);
+			}
+		}
+	}
+	lua_pop(l,1);
+
+	return s;
+}
+
 
 
 /*+---------------------------------------------------------------------
@@ -248,7 +312,7 @@ b2WorldId *pp;
 	if(lua_istable(l,1)) // got defs
 	{
 		lua_getfield(l,1,"gravity");
-		if(!lua_isnil(l,-1)) { def.gravity=lua_b2_read_b2Vec2(l); }
+		if(!lua_isnil(l,-1)) { def.gravity=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,1,"restitutionThreshold");
 		if(!lua_isnil(l,-1)) { def.restitutionThreshold = (float)lua_tonumber(l,-1); }
@@ -482,7 +546,7 @@ static int lua_b2_world_set (lua_State *l)
 	lua_getfield(l,1,"gravity");
 	if(!lua_isnil(l,-1))
 	{
-		b2World_SetGravity(world, lua_b2_read_b2Vec2(l) );
+		b2World_SetGravity(world, lua_b2_read_b2Vec2(l,-1) );
 	}
 	lua_pop(l,1);
 
@@ -759,10 +823,10 @@ static float lua_b2_world_cast_cb_all(b2ShapeId shapeId, b2Vec2 point, b2Vec2 no
 
 /*+---------------------------------------------------------------------
 
-cast a ray through the world
+cast a ray or shape through the world
 
 */
-static int lua_b2_world_cast_ray (lua_State *l)
+static int lua_b2_world_cast (lua_State *l)
 {
 	b2WorldId world = lua_b2_world_ptr(l, 1 );
 	
@@ -771,11 +835,11 @@ static int lua_b2_world_cast_ray (lua_State *l)
 	b2QueryFilter filter=(b2QueryFilter){1,0xFFFFFFFFFFFFFFFFULL};
 
 	lua_getfield(l,2,"origin");
-	if(!lua_isnil(l,-1)) { origin = lua_b2_read_b2Vec2(l); }
+	if(!lua_isnil(l,-1)) { origin = lua_b2_read_b2Vec2(l,-1); }
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"translation");
-	if(!lua_isnil(l,-1)) { translation = lua_b2_read_b2Vec2(l); }
+	if(!lua_isnil(l,-1)) { translation = lua_b2_read_b2Vec2(l,-1); }
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"filter_categoryBits");
@@ -784,41 +848,41 @@ static int lua_b2_world_cast_ray (lua_State *l)
 	lua_getfield(l,2,"filter_maskBits");
 	if(!lua_isnil(l,-1)) { filter.maskBits = lua_tonumber(l,-1); }
 	lua_pop(l,1);
-	
-	// get all hits unless closest is set
- 	lua_getfield(l,2,"closest");
-	if(lua_toboolean(l,-1))
+		
+	b2ShapeProxy shape={0};
+	b2ShapeProxy *pshape=0; // use ptr as a flag
+	lua_getfield(l,2,"points"); // use points as a flag
+	if(!lua_isnil(l,-1))
 	{
 		lua_pop(l,1);
-		lua_newtable(l); // return hits table
-		
-		b2RayResult r=b2World_CastRayClosest(world,origin,translation,filter);
-		if( r.hit )
-		{
-			lua_b2_world_cast_cb_push(r.shapeId,r.point,r.normal,r.fraction,l);
-		}
-
-		// include stats in hits table of just one hit
-		lua_pushnumber(l, r.leafVisits );
-		lua_setfield(l, -2 , "leafVisits" );
-		lua_pushnumber(l, r.nodeVisits );
-		lua_setfield(l, -2 , "nodeVisits" );
-
+		shape = lua_b2_read_b2ShapeProxy(l,2);
+		pshape=&shape;
 	}
 	else
 	{
 		lua_pop(l,1);
-		lua_newtable(l); // return hits table
-
-		b2TreeStats stats = b2World_CastRay(world,origin,translation,filter,
-			lua_b2_world_cast_cb_all,l);
-
-		// include stats in hits table
-		lua_pushnumber(l, stats.leafVisits );
-		lua_setfield(l, -2 , "leafVisits" );
-		lua_pushnumber(l, stats.nodeVisits );
-		lua_setfield(l, -2 , "nodeVisits" );
 	}
+	
+	lua_pop(l,1);
+	lua_newtable(l); // return hits table
+
+	b2TreeStats stats;
+	
+	lua_newtable(l); // return hits table
+	if(pshape) // shape cast
+	{
+		stats = b2World_CastShape(world,origin,pshape,translation,filter,lua_b2_world_cast_cb_all,l);
+	}
+	else
+	{
+		stats = b2World_CastRay(world,origin,translation,filter,lua_b2_world_cast_cb_all,l);
+	}
+
+	// include stats in hits table
+	lua_pushnumber(l, stats.leafVisits );
+	lua_setfield(l, -2 , "leafVisits" );
+	lua_pushnumber(l, stats.nodeVisits );
+	lua_setfield(l, -2 , "nodeVisits" );
 
 	return 1;
 }
@@ -846,27 +910,40 @@ static bool lua_b2_world_overlap_cb_all(b2ShapeId shapeId, void *context)
 
 /*+---------------------------------------------------------------------
 
-get shapes overlapping an aabb
+get shapes overlapping an aabb or a shape
 
 */
-static int lua_b2_world_overlap_aabb (lua_State *l)
+static int lua_b2_world_overlap (lua_State *l)
 {
 	b2WorldId world = lua_b2_world_ptr(l, 1 );
 	
 	b2QueryFilter filter=(b2QueryFilter){1,0xFFFFFFFFFFFFFFFFULL};
 	b2AABB aabb=(b2AABB){0.0f,0.0f,0.0f,0.0f};
 
+	b2ShapeProxy shape={0};
+	b2ShapeProxy *pshape=0; // use ptr as a flag
+	lua_getfield(l,2,"points"); // use points as a flag
+	if(!lua_isnil(l,-1))
+	{
+		lua_pop(l,1);
+		shape = lua_b2_read_b2ShapeProxy(l,2);
+		pshape=&shape;
+	}
+	else
+	{
+		lua_pop(l,1);
+		lua_getfield(l,2,"lowerBound");
+		if(!lua_isnil(l,-1)) { aabb.lowerBound = lua_b2_read_b2Vec2(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,2,"upperBound");
+		if(!lua_isnil(l,-1)) { aabb.upperBound = lua_b2_read_b2Vec2(l,-1); }
+		lua_pop(l,1);
+	}
+
 	b2Vec2 origin=(b2Vec2){0,0};
 
 	lua_getfield(l,2,"origin");
-	if(!lua_isnil(l,-1)) { origin = lua_b2_read_b2Vec2(l); }
-	lua_pop(l,1);
-
-	lua_getfield(l,2,"lowerBound");
-	if(!lua_isnil(l,-1)) { aabb.lowerBound = lua_b2_read_b2Vec2(l); }
-	lua_pop(l,1);
-	lua_getfield(l,2,"upperBound");
-	if(!lua_isnil(l,-1)) { aabb.upperBound = lua_b2_read_b2Vec2(l); }
+	if(!lua_isnil(l,-1)) { origin = lua_b2_read_b2Vec2(l,-1); }
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"filter_categoryBits");
@@ -878,10 +955,19 @@ static int lua_b2_world_overlap_aabb (lua_State *l)
 
 	lua_newtable(l); // return table
 
-	lua_newtable(l); // list of shapeIds
-	b2TreeStats r=b2World_OverlapAABB(world,origin,aabb,filter,
-			lua_b2_world_overlap_cb_all,l);
-	lua_setfield(l, -2 , "shapeIds" );
+	b2TreeStats r;
+	if(pshape)
+	{
+		lua_newtable(l); // list of shapeIds
+		r=b2World_OverlapShape(world,origin,pshape,filter,lua_b2_world_overlap_cb_all,l);
+		lua_setfield(l, -2 , "shapeIds" );
+	}
+	else
+	{
+		lua_newtable(l); // list of shapeIds
+		r=b2World_OverlapAABB(world,origin,aabb,filter,lua_b2_world_overlap_cb_all,l);
+		lua_setfield(l, -2 , "shapeIds" );
+	}
 
 	// include stats
 	lua_pushnumber(l, r.leafVisits );
@@ -891,6 +977,7 @@ static int lua_b2_world_overlap_aabb (lua_State *l)
 
 	return 1;
 }
+
 
 /*+---------------------------------------------------------------------
 
@@ -960,7 +1047,7 @@ b2BodyId *pp;
 		if(!lua_isnil(l,-1)) { def.linearDamping = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"linearVelocity");
-		if(!lua_isnil(l,-1)) { def.linearVelocity=lua_b2_read_b2Vec2(l); }
+		if(!lua_isnil(l,-1)) { def.linearVelocity=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"name");
 		if(!lua_isnil(l,-1)) { def.name = lua_tostring(l,-1); }
@@ -969,13 +1056,13 @@ b2BodyId *pp;
 		lua_getfield(l,2,"transform"); // position and rotation combined
 		if(!lua_isnil(l,-1))
 		{
-			b2Transform t=lua_b2_read_b2Transform(l);
+			b2Transform t=lua_b2_read_b2Transform(l,-1);
 			def.position=t.p;
 			def.rotation=t.q;
 		}
 		lua_pop(l,1);
 		lua_getfield(l,2,"position");
-		if(!lua_isnil(l,-1)) { def.position=lua_b2_read_b2Vec2(l); }
+		if(!lua_isnil(l,-1)) { def.position=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"rotation");
 		if(!lua_isnil(l,-1)) { def.rotation = b2MakeRot((float)lua_tonumber(l,-1)); }
@@ -1409,7 +1496,7 @@ static int lua_b2_body_mass (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
-Convert a vec2 into a vec2 of a different space
+Convert a vector into a vector of a different space
 
 hex conversion code is encoded like so, first two digits are input, 
 last digit is output.
@@ -1584,7 +1671,7 @@ b2ShapeId *pp;
 
 		b2Circle circle;
 		lua_getfield(l,2,"center");
-		if(!lua_isnil(l,-1)) { circle.center=lua_b2_read_b2Vec2(l); }
+		if(!lua_isnil(l,-1)) { circle.center=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"radius");
 		if(!lua_isnil(l,-1)) { circle.radius = (float)lua_tonumber(l,-1); }
@@ -1599,10 +1686,10 @@ b2ShapeId *pp;
 
 		b2Segment segment;
 		lua_getfield(l,2,"point1");
-		if(!lua_isnil(l,-1)) { segment.point1=lua_b2_read_b2Vec2(l); }
+		if(!lua_isnil(l,-1)) { segment.point1=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"point2");
-		if(!lua_isnil(l,-1)) { segment.point2=lua_b2_read_b2Vec2(l); }
+		if(!lua_isnil(l,-1)) { segment.point2=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 
 		*pp=b2CreateSegmentShape(body,&def,&segment);
@@ -1614,10 +1701,10 @@ b2ShapeId *pp;
 
 		b2Capsule capsule;
 		lua_getfield(l,2,"center1");
-		if(!lua_isnil(l,-1)) { capsule.center1=lua_b2_read_b2Vec2(l); }
+		if(!lua_isnil(l,-1)) { capsule.center1=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"center2");
-		if(!lua_isnil(l,-1)) { capsule.center2=lua_b2_read_b2Vec2(l); }
+		if(!lua_isnil(l,-1)) { capsule.center2=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"radius");
 		if(!lua_isnil(l,-1)) { capsule.radius = (float)lua_tonumber(l,-1); }
@@ -1644,7 +1731,7 @@ b2ShapeId *pp;
 
 		b2Vec2 center=(b2Vec2){0.0f,0.0f};
 		lua_getfield(l,2,"center");
-		if(!lua_isnil(l,-1)) { center=lua_b2_read_b2Vec2(l); }
+		if(!lua_isnil(l,-1)) { center=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 
 		float rotation=0.0f;
@@ -1838,6 +1925,35 @@ static int lua_b2_shape_set (lua_State *l)
 	return 0;
 }
 
+
+/*+---------------------------------------------------------------------
+
+Convert a vector into a vector of a different space
+
+Currently only one conversion which is from world point to closest 
+world point on shape.
+
+*/
+static int lua_b2_shape_convert (lua_State *l)
+{
+	b2ShapeId shape = lua_b2_shape_ptr(l, 1 );
+
+	b2Vec2 pa;
+	b2Vec2 pb;
+
+	pa.x=(float)lua_tonumber(l, 2 );
+	pa.y=(float)lua_tonumber(l, 3 );
+
+	pb=b2Shape_GetClosestPoint(shape,pa);
+
+	lua_pushnumber(l, pb.x );
+	lua_pushnumber(l, pb.y );
+
+	return 2;
+}
+
+
+
 /*+---------------------------------------------------------------------
 
 joint create/destroy
@@ -1879,10 +1995,10 @@ b2JointId *pp;
 	if(!lua_isnil(l,-1)) { joint.bodyIdB=*((b2BodyId*)(lua_tostring(l,-1))); }
 	lua_pop(l,1);
 	lua_getfield(l,2,"localFrameA");
-	if(!lua_isnil(l,-1)) { joint.localFrameA=lua_b2_read_b2Transform(l); }
+	if(!lua_isnil(l,-1)) { joint.localFrameA=lua_b2_read_b2Transform(l,-1); }
 	lua_pop(l,1);
 	lua_getfield(l,2,"localFrameB");
-	if(!lua_isnil(l,-1)) { joint.localFrameB=lua_b2_read_b2Transform(l); }
+	if(!lua_isnil(l,-1)) { joint.localFrameB=lua_b2_read_b2Transform(l,-1); }
 	lua_pop(l,1);
 	lua_getfield(l,2,"forceThreshold");
 	if(!lua_isnil(l,-1)) { joint.forceThreshold = (float)lua_tonumber(l,-1); }
@@ -1965,7 +2081,7 @@ b2JointId *pp;
 		motor.base=joint; // generic values
 
 		lua_getfield(l,2,"linearVelocity");
-		if(!lua_isnil(l,-1)) { motor.linearVelocity=lua_b2_read_b2Vec2(l); }
+		if(!lua_isnil(l,-1)) { motor.linearVelocity=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"maxVelocityForce");
 		if(!lua_isnil(l,-1)) { motor.maxVelocityForce = (float)lua_tonumber(l,-1); }
@@ -2295,11 +2411,8 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"world_body_events",		lua_b2_world_body_events},
 		{"world_sensor_events",		lua_b2_world_sensor_events},
 		{"world_contact_events",	lua_b2_world_contact_events},
-		{"world_cast_ray",			lua_b2_world_cast_ray},
-//		{"world_cast_shape",		lua_b2_world_cast_shape},
-		{"world_overlap_aabb",		lua_b2_world_overlap_aabb},
-//		{"world_overlap_shape",		lua_b2_world_overlap_shape},
-
+		{"world_cast",				lua_b2_world_cast},
+		{"world_overlap",			lua_b2_world_overlap},
 
 		{"body_create",				lua_b2_body_create},
 		{"body_destroy",			lua_b2_body_destroy},
@@ -2320,6 +2433,7 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"shape_info",				lua_b2_shape_info},
 		{"shape_get",				lua_b2_shape_get},
 		{"shape_set",				lua_b2_shape_set},
+		{"shape_convert",			lua_b2_shape_convert},
 
 		{"joint_create",			lua_b2_joint_create},
 		{"joint_destroy",			lua_b2_joint_destroy},

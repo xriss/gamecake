@@ -88,7 +88,7 @@ local joint=world:joint({
 print("joint")
 dump_vars(joint:info(),"joint\t")
 
-local hits=world:cast_ray({
+local hits=world:cast({
 	origin={0,-100*METER},
 	translation={0,100*METER},
 })

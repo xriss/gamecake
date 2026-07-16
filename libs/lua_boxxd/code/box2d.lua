@@ -22,8 +22,6 @@ local box2d=M
 
 local core=require("box2d.core")
 
-local boxxd=require("boxxd")
-
 -- meta methods bound to the various objects
 
 box2d.world_functions={is="world"}
@@ -118,7 +116,8 @@ end
 
 Create the world you will be simulating physics in.
 
-def is a table containing the values that you can set in a b2WorldDef
+def contains the values that you can set in a b2WorldDef and must be a 
+unique table as it will be retained.
 
 All of these are optional so can be nil.
 
@@ -479,11 +478,26 @@ box2d.world_functions.contact_events=function(world,events)
 	return events
 end
 
---[[#lua.box2d.world.cast_ray
+--[[#lua.box2d.world.cast
 
-	hits = world:cast_ray(ray)
+	hits = world:cast(ray)
+
+if ray.points is set then this is a polygon shape cast, otherwise 
+this is an ray cast.
 
 cast a ray and return an array of hits
+
+
+	ray.points
+	
+Tightly packed array of points for the shape. Maximum number of points 
+is B2_MAX_POLYGON_VERTICES (8) To cast a circle shape, just use a 
+radius and a single point at the origin.
+
+
+	ray.radius
+	
+Radius of the shape to cast, does not work unless you also set points.
 
 
 	ray.closest
@@ -527,16 +541,19 @@ If hits[1] is nil or #hits is 0 then there where no hits.
 Contain extra debug information
 
 ]]
-box2d.world_functions.cast_ray=function(world,ray)
+box2d.world_functions.cast=function(world,ray)
 
-	local hits=core.world_cast_ray(world[0],ray)
-	
 	if ray.filter then
 		local bits=world:bits(ray.filter)
 		if not ray.filter_categoryBits then ray.filter_categoryBits = bits.bits end
 		if not ray.filter_maskBits     then ray.filter_maskBits     = bits.mask end
 	end
 	
+	local hits=core.world_cast(world[0],ray)
+	
+	-- sort hits in case they are out of order?
+	table.sort(hits,function(a,b) return a.fraction<b.fraction end)
+
 	for i,hit in ipairs(hits) do -- auto get shape from id
 		if hit.shapeId then hit.shape=world.shapes[hit.shapeId] end
 	end
@@ -544,28 +561,44 @@ box2d.world_functions.cast_ray=function(world,ray)
 	return hits
 end
 
---[[#lua.box2d.world.overlap_aabb
 
-	overlaps = world:overlap_aabb(aabb)
+--[[#lua.box2d.world.overlap
 
-Get all shapes overlapping aabb , I believe this might get some shapes 
-that do not actually overlap the given box so should probably double 
-check.
+	overlaps = world:overlap(shape)
 
+if shape.points is set then this is a polygon shape overlap, otherwise 
+this is an aabb overlap.
 
-	aabb.origin
-
-Origin vector of bounds
-
-
-	aabb.lowerBound
-	aabb.upperBound
-
-Lower and upper aabb vectors ( will be added to origin )
+Get all shapes overlapping aabb or shape , I believe this might return 
+some shapes that do not actually overlap the given box so should 
+probably double check.
 
 
-	aabb.filter_categoryBits
-	aabb.filter_maskBits
+	shape.points
+	
+Tightly packed array of points for the shape. Maximum number of points 
+is B2_MAX_POLYGON_VERTICES (8) To cast a circle shape, just use a 
+radius and a single point at the origin.
+
+	shape.radius
+	
+Radius of the shape to cast, does not work with aabb.
+
+
+	shape.lowerBound
+	shape.upperBound
+
+Lower and upper aabb vectors ( will be added to origin ) this is 
+ignored if shape.points is set.
+
+
+	shape.origin
+
+Origin vector of shape
+
+
+	shape.filter_categoryBits
+	shape.filter_maskBits
 
 Filter masks
 
@@ -586,15 +619,17 @@ An array of shapes
 Extra debug information
 
 ]]
-box2d.world_functions.overlap_aabb=function(world,aabb)
+box2d.world_functions.overlap=function(world,shape)
 
-	local hits=core.world_overlap_aabb(world[0],aabb)
-	
-	if aabb.filter then
-		local bits=world:bits(aabb.filter)
-		if not aabb.filter_categoryBits then aabb.filter_categoryBits = bits.bits end
-		if not aabb.filter_maskBits     then aabb.filter_maskBits     = bits.mask end
+	if shape.filter then
+		local bits=world:bits(shape.filter)
+		if not shape.filter_categoryBits then shape.filter_categoryBits = bits.bits end
+		if not shape.filter_maskBits     then shape.filter_maskBits     = bits.mask end
 	end
+
+	local hits
+	
+	hits=core.world_overlap(world[0],shape)
 
 	-- convert shapeIds to shapes, no guarantee that these arrays match
 	hits.shapes={}
@@ -604,6 +639,7 @@ box2d.world_functions.overlap_aabb=function(world,aabb)
 
 	return hits
 end
+
 
 --[[#lua.box2d.world.fill
 
@@ -773,7 +809,8 @@ end
 
 Create a body in the world.
 
-def contains the values that you can set in a b2BodyDef
+def contains the values that you can set in a b2BodyDef and must be a 
+unique table as it will be retained.
 
 All of these are optional so can be nil.
 
@@ -1058,7 +1095,7 @@ do
 		point_world_to_velocity = 0x145 ,
 	}
 	box2d.body_functions.convert=function(body,x,y,str)
-		return core.body_convert( body[0], x,y, lookup[str] )
+		return core.body_convert( body[0], x,y, assert( lookup[str] ) )
 	end
 end
 
@@ -1068,7 +1105,8 @@ end
 
 Create a shape in the body.
 
-def contains the values that you can set in a b2ShapeDef
+def contains the values that you can set in a b2ShapeDef and must be a 
+unique table as it will be retained.
 
 All of these are optional so can be nil.
 
@@ -1219,13 +1257,31 @@ box2d.shape_functions.set=function(shape,vars)
 	return core.shape_set(shape[0],vars)
 end
 
+--[[#lua.box2d.shape.convert
+
+	x,y = shape:convert(x,y,conversion)
+
+conversion must be one of the following strings indicating how the 
+input x,y should be transformed into the output x,y
+
+	x,y = shape:convert(x,y,"closest")
+
+convert x,y point in world space into x,y closest point on shape.
+
+]]
+box2d.shape_functions.convert=function(shape,x,y,conversion)
+	assert(conversion=="closest") -- the only valid option
+	return core.shape_convert( shape[0], x,y )
+end
+
 --[[#lua.box2d.world.joint
 
 	joint=world:joint(def)
 
 Create a joint in the world.
 
-def contains the values that you can set in a b2jointDef
+def contains the values that you can set in a b2jointDef and must be a 
+unique table as it will be retained.
 
 All of these are optional so can be nil.
 
