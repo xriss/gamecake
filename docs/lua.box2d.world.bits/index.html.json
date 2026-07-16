@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 722,
+   "count": 723,
    "name": "lua"
   },
   {
-   "count": 46,
+   "count": 47,
    "name": "lua.box2d"
   },
   {
@@ -222,8 +222,12 @@
    "name": "lua.box2d.set"
   },
   {
-   "count": 5,
+   "count": 6,
    "name": "lua.box2d.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.shape.convert"
   },
   {
    "count": 1,
@@ -263,7 +267,7 @@
   },
   {
    "count": 1,
-   "name": "lua.box2d.world.cast_ray"
+   "name": "lua.box2d.world.cast"
   },
   {
    "count": 1,
@@ -299,7 +303,7 @@
   },
   {
    "count": 1,
-   "name": "lua.box2d.world.overlap_aabb"
+   "name": "lua.box2d.world.overlap"
   },
   {
    "count": 1,
@@ -3086,7 +3090,7 @@
    "body": "<pre><code>bits=world:bits(name)\nbits=world:bits(name,{mask=0xfffffffffffff,bits=0x0000000000001,group=0})\nbits=world:bits(name,false)\n</code></pre>\n<p>get/set named bits, to help with keeping all your bitmasks in one place \nso you don&#39;t get yourself confuzzled.</p>\n<p>bits is must be a table containing mask, bits and group then instead of \nsetting these numbers explicitly we can use this name in shape creation \nor casting, anywhere a filter is expected.</p>\n<p>This helper code adds the following logic to shape creation etc</p>\n<pre><code>if filter is set then get bits using world:bits(filter) then\nfilter_categoryBits    will be set from    bits.bits\tif nil\nfilter_maskBits        will be set from    bits.mask\tif nil\nfilter_groupIndex      will be set from    bits.group\tif nil\n</code></pre>\n<p>So you probably do not want to create default values for \nfilter_categoryBits using world:defaults as these will not be replace.</p>\n<p>Pass in false to unset the named bits.</p>\n<p>If bits does not exist then we will return the default values of \n{mask=0xfffffffffffff,bits=0x0000000000001,group=0} which can be \nmodified by setting the bits named &quot;default&quot; to whatever you want.</p>\n<p>Since this default is always available you can use filter=&quot;default&quot; in \nshape creation to use your default values.</p>\n<p>Note that 0xfffffffffffff (13 hex digits) is an integer that fits \nsafely in a double and you should not use a larger number.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 718,
+   "line": 754,
    "name": "lua.box2d.world.bits",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

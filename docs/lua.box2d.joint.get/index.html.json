@@ -130,11 +130,11 @@
    "name": "levels"
   },
   {
-   "count": 722,
+   "count": 723,
    "name": "lua"
   },
   {
-   "count": 46,
+   "count": 47,
    "name": "lua.box2d"
   },
   {
@@ -222,8 +222,12 @@
    "name": "lua.box2d.set"
   },
   {
-   "count": 5,
+   "count": 6,
    "name": "lua.box2d.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.shape.convert"
   },
   {
    "count": 1,
@@ -263,7 +267,7 @@
   },
   {
    "count": 1,
-   "name": "lua.box2d.world.cast_ray"
+   "name": "lua.box2d.world.cast"
   },
   {
    "count": 1,
@@ -299,7 +303,7 @@
   },
   {
    "count": 1,
-   "name": "lua.box2d.world.overlap_aabb"
+   "name": "lua.box2d.world.overlap"
   },
   {
    "count": 1,
@@ -3086,7 +3090,7 @@
    "body": "<pre><code>vars = joint:get()\n</code></pre>\n<p>Get all joint variables in a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1406,
+   "line": 1462,
    "name": "lua.box2d.joint.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }
