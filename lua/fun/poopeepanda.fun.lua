@@ -280,30 +280,19 @@ kinetics.cast_feet=function(world,ray)
 	for _,hit in ipairs(hits) do
 		if hit.shape then
 			hit.ray=ray
-			hit.closest=V2(hit.shape:convert(ray.origin[1],ray.origin[2],"closest"))
-			hit.delta=hit.closest-ray.origin
+--			hit.closest=V2(hit.shape:convert(ray.origin[1],ray.origin[2],"closest"))
+			hit.point=V2(hit.point)
+			hit.normal=V2(hit.normal)
+			hit.delta=hit.point-ray.origin
 			hit.feet=hit.delta[2]
-			if hit.feet>=2 then -- must hit bellow body
-print(hit.delta)
+			if		hit.feet>=2 and 
+					hit.normal[2]<0.5 and
+					math.abs(hit.delta[1])<(ray.radius-1) then -- filter out bad hits
+--print(hit.delta,hit.normal)
 				return hit
 			end
 		end
 	end
---[[
-	local foot_cast=world:cast({ -- this is part of the collision so run it here
-		closest=true, -- just want the closest hit
-		origin=player.pos,
-		points={0,0},
-		radius=4,
-		translation={0,8},
-		filter_categoryBits=0x00000100,
-		filter_maskBits=0x00ffffff,
-	})[1]
-	if foot_cast then
-		foot_cast.length=foot_cast.fraction*8+4
-		foot_touch=scene:find_uid(foot_cast.shape.uid) -- remember foot touch for later
-	end
-]]
 end
 
 --------------------------------------------------------------------------------
@@ -1055,6 +1044,7 @@ players.item.update=function(player)
 	local bb_clr=( up:get("b_clr") ) or false
 
 	local grav=level:get_gravity(player.pos)
+	if player.vel[2]>16 then grav=grav*1.5 end -- fall faster
 
 	player.idle=player.idle+1
 	local ll=lx*lx+ly*ly
@@ -1062,7 +1052,7 @@ players.item.update=function(player)
 		player.idle=0 -- ticks since last controller input
 	end
 
-	local foot_touch -- set this if our feet touched something
+	local foot_touch -- set this if our feet touched something ( not the level )
 	local foot_cast=kinetics.cast_feet(world,{ -- this is part of the collision so run it here
 		closest=true, -- just want the closest hit
 		origin=player.pos,
@@ -1213,15 +1203,13 @@ else
 			v=v-2
 		end
 
+		player.vel[2]=player.vel[2]*8/16 -- decay bouncy-ness
 		if     v>= 0.5 then
-			player.pos[2]=player.pos[2]+footspeed
-			player.vel[2]=player.vel[2]*8/16
+			player.acc[2]=footspeed*128
 		elseif v<=-0.5 then
-			player.pos[2]=player.pos[2]-footspeed*2
-			player.vel[2]=player.vel[2]*8/16
+			player.acc[2]=footspeed*-256
 		else
-			player.pos[2]=player.pos[2]+v
-			player.vel[2]=player.vel[2]*8/16
+			player.acc[2]=v*16
 		end
 
 		player.foot=d
@@ -2068,16 +2056,17 @@ fauna_slims.item.update=function(fauna)
 	local footspeed=0.25
 	local footbase=3
 	local world=fauna:get_singular("kinetic").world
-	local hit=world:cast({
-		closest=true, -- just want the closest hit
+	local foot_cast=kinetics.cast_feet(world,{
 		origin=fauna.pos,
+		points={0,0},
+		radius=4,
 		translation={0,16},
 		filter_categoryBits=0x00010000,
 		filter_maskBits=0x00ffffff,
-	})[1]
-	if hit and hit.fraction and hit.fraction<((footbase+4)/16) then
+	})
+	if foot_cast then
 
-		local d=(hit.fraction*16) -- distance + radius
+		local d=foot_cast.feet -- distance + radius
 		local o=fauna.vel[2] -- original velocity
 		local v=((d-(footbase+2))) -- distance to where we want to be
 		local a=v*8 -- force to adjust velocity by
@@ -2368,16 +2357,17 @@ fauna_trenchs.item.update=function(fauna)
 	local footspeed=0.25
 	local footbase=3
 	local world=fauna:get_singular("kinetic").world
-	local hit=world:cast({
-		closest=true, -- just want the closest hit
+	local foot_cast=kinetics.cast_feet(world,{
 		origin=fauna.pos,
+		points={0,0},
+		radius=4,
 		translation={0,16},
 		filter_categoryBits=0x00010000,
 		filter_maskBits=0x00ffffff,
-	})[1]
-	if hit and hit.fraction and hit.fraction<((footbase+4)/16) then
+	})
+	if foot_cast then
 
-		local d=(hit.fraction*16) -- distance + radius
+		local d=foot_cast.feet -- distance + radius
 		local o=fauna.vel[2] -- original velocity
 		local v=((d-(footbase+2))) -- distance to where we want to be
 		local a=v*8 -- force to adjust velocity by
@@ -2771,14 +2761,16 @@ gibs.item.setup_kinetic_reshape=function(gib)
 		gib.shape:destroy()
 		gib.shape=nil
 	end
-	gib.shape=gib.body:shape({
-		shape="circle",
-		radius=gib.size,
-		material_friction=1.0,
-		filter="gib",
-		enableHitEvents=true,
-		uid=gib.uid,
-	})
+	if gib.size>0 then
+		gib.shape=gib.body:shape({
+			shape="circle",
+			radius=gib.size,
+			material_friction=1.0,
+			filter="gib",
+			enableHitEvents=true,
+			uid=gib.uid,
+		})
+	end
 end
 gibs.item.setup_kinetic=function(gib)
 	if gib.body then return end -- already done
@@ -3300,7 +3292,7 @@ map=[[
 0 . . . . . . . . . . . . . Td. . . . 0 . . . . . . . . . . . . . . . . . . 0 . . . < . . . . 0 
 0 . . . . . . . . . . . . 0 0 0 . . . 0 . . . . . . . . . . . . . . . . . . 0 . . . . . . . , 0 
 0 P1P2. . . . . . . . . . 0 0 0 . . . 0 . ^ . . . J1. . . . . . . . . . . . 0 . . . ^ . . . . 0 
-0 . T1. . . . . . . . T2. 0 0 0 . T3. . . . T4. . 0 . . T5. . T6. . T7. . T80 . . . . . . . S10 
+0 . T2. . . . . . . . T1. 0 0 0 . T3. . . . T4. . 0 . . T5. . T6. . T7. . T80 . . . . . . . S10 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 ]],
 }

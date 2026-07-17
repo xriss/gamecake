@@ -15,12 +15,30 @@ can be found in the associated box2d.lua file.
 #include "lualib.h"
 #include "lauxlib.h"
 
+
+/*
+
+Conditional code generation defines, these defines get mutated between 
+2D and 3D constants. Do not edit.
+
+*/
+
+// BOX_2 or BOX_3 is defined here
+#define BOX_2 2
+// count of numbers in a vector
+#define BOX_V_COUNT 2
+// count of numbers in a rotation
+#define BOX_R_COUNT 1
+
+
+
 // lua versions hax
 #if LUA_VERSION_NUM < 502
 
 #define lua_rawlen lua_objlen
 
-static int lua_absindex (lua_State *l, int idx) {
+static int lua_absindex (lua_State *l, int idx)
+{
 	if(idx<0)
 	{
 		return lua_gettop(l)+1+idx;
@@ -33,13 +51,6 @@ static int lua_absindex (lua_State *l, int idx) {
 #endif
 
 #include "box2d/box2d.h"
-
-//
-// BTWO or BTHREE will be defined here for conditional code gen
-//
-#define BTWO 2
-#define BSIZE 2
-
 
 /*
 
