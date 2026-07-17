@@ -140,6 +140,7 @@ Booleans should be true or false
 ]]
 box2d.world=function(def)
 	local world={}
+	setmetatable(world,box2d.world_metatable)
 
 	world.def=def
 
@@ -150,7 +151,6 @@ box2d.world=function(def)
 	world.joints={}
 	world.shapes={}
 
-	setmetatable(world,box2d.world_metatable)
 	world[0],world.boxid=core.world_create(def)
 
 	return world
@@ -845,6 +845,7 @@ type is a string and must be "static" or "kinematic" or "dynamic"
 ]]
 box2d.world_functions.body=function(world,def)
 	local body={}
+	setmetatable(body,box2d.body_metatable)
 	
 	def=world:fill(def,"body")
 	
@@ -854,7 +855,6 @@ box2d.world_functions.body=function(world,def)
 	body.world=world
 	body.shapes={}
 
-	setmetatable(body,box2d.body_metatable)
 	body[0],body.boxid=core.body_create(world[0],def)
 	
 	world.bodys[ body.boxid ]=body
@@ -1093,6 +1093,20 @@ do
 	end
 end
 
+--[[#lua.box2d.body.aabb
+
+	xa,ya,xb,yb = body:aabb()
+
+Get body aabb as stream of numbers, lower bounds first then upper.
+
+Note this value has to be calculated.
+
+]]
+box2d.body_functions.aabb=function(body)
+	return core.body_aabb( body[0] )
+end
+
+
 --[[#lua.box2d.world.body.shape
 
 	shape=body:shape(def)
@@ -1162,6 +1176,7 @@ set in a b2Polygon using b2MakeOffsetRoundedBox
 ]]
 box2d.body_functions.shape=function(body,def)
 	local shape={}
+	setmetatable(shape,box2d.shape_metatable)
 	
 	def=body.world:fill(def,"shape")
 
@@ -1176,7 +1191,6 @@ box2d.body_functions.shape=function(body,def)
 
 	shape.def=def
 	shape.body=body
-	setmetatable(shape,box2d.shape_metatable)
 	shape[0],shape.boxid=core.shape_create(body[0],def)
 	
 	body.shapes[ shape.boxid ]=shape
@@ -1267,6 +1281,18 @@ box2d.shape_functions.convert=function(shape,x,y,conversion)
 	assert(conversion=="closest") -- the only valid option
 	return core.shape_convert( shape[0], x,y )
 end
+
+--[[#lua.box2d.shape.aabb
+
+	xa,ya,xb,yb = shape:aabb()
+
+Get shapes aabb as stream of numbers, lower bounds first then upper.
+
+]]
+box2d.shape_functions.aabb=function(shape)
+	return core.shape_aabb( shape[0] )
+end
+
 
 --[[#lua.box2d.world.joint
 
@@ -1386,6 +1412,7 @@ set in a b2WheelJointDef
 ]]
 box2d.world_functions.joint=function(world,def)
 	local joint={}
+	setmetatable(joint,box2d.joint_metatable)
 	
 	def=world:fill(def,"joint")
 
@@ -1398,7 +1425,6 @@ box2d.world_functions.joint=function(world,def)
 	if type(def.bodyA)=="table" then def.bodyIdA=def.bodyA.boxid end
 	if type(def.bodyB)=="table" then def.bodyIdB=def.bodyB.boxid end
 
-	setmetatable(joint,box2d.joint_metatable)
 	joint[0],joint.boxid=core.joint_create(world[0],def)
 
 	world.joints[ joint.boxid ]=joint

@@ -34,6 +34,13 @@ static int lua_absindex (lua_State *l, int idx) {
 
 #include "box2d/box2d.h"
 
+//
+// BTWO or BTHREE will be defined here for conditional code gen
+//
+#define BTWO 2
+#define BSIZE 2
+
+
 /*
 
 we can use either this string as a string identifier
@@ -1548,6 +1555,25 @@ static int lua_b2_body_convert (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
+get body aabb lower then upper values
+
+*/
+static int lua_b2_body_aabb (lua_State *l)
+{
+	b2BodyId body = lua_b2_body_ptr(l, 1 );
+
+	b2AABB aabb=b2Body_ComputeAABB(body);
+
+	lua_pushnumber(l, aabb.lowerBound.x );
+	lua_pushnumber(l, aabb.lowerBound.y );
+	lua_pushnumber(l, aabb.upperBound.x );
+	lua_pushnumber(l, aabb.upperBound.y );
+
+	return 4;
+}
+
+/*+---------------------------------------------------------------------
+
 shape create/destroy
 
 */
@@ -1953,6 +1979,24 @@ static int lua_b2_shape_convert (lua_State *l)
 }
 
 
+/*+---------------------------------------------------------------------
+
+get shape aabb lower then upper values
+
+*/
+static int lua_b2_shape_aabb (lua_State *l)
+{
+	b2ShapeId shape = lua_b2_shape_ptr(l, 1 );
+
+	b2AABB aabb=b2Shape_GetAABB(shape);
+
+	lua_pushnumber(l, aabb.lowerBound.x );
+	lua_pushnumber(l, aabb.lowerBound.y );
+	lua_pushnumber(l, aabb.upperBound.x );
+	lua_pushnumber(l, aabb.upperBound.y );
+
+	return 4;
+}
 
 /*+---------------------------------------------------------------------
 
@@ -2427,6 +2471,7 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"body_acceleration",		lua_b2_body_acceleration},
 		{"body_mass",				lua_b2_body_mass},
 		{"body_convert",			lua_b2_body_convert},
+		{"body_aabb",				lua_b2_body_aabb},
 
 		{"shape_create",			lua_b2_shape_create},
 		{"shape_destroy",			lua_b2_shape_destroy},
@@ -2434,6 +2479,7 @@ LUALIB_API int luaopen_box2d_core (lua_State *l)
 		{"shape_get",				lua_b2_shape_get},
 		{"shape_set",				lua_b2_shape_set},
 		{"shape_convert",			lua_b2_shape_convert},
+		{"shape_aabb",				lua_b2_shape_aabb},
 
 		{"joint_create",			lua_b2_joint_create},
 		{"joint_destroy",			lua_b2_joint_destroy},

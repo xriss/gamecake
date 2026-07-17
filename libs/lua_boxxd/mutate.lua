@@ -1,17 +1,75 @@
 #!/usr/bin/env gamecake
 
-mutate_from="2d"
-mutate_into="3d"
+-- start by 2d to 3d only with a plan to mutate both ways...
+
+-- all input changes should be checked into git before running this
+-- since the output files are checked into git then we can use git
+-- to revert and check changes
+
+mutate_from = mutate_from or "2"
+mutate_into = mutate_into or "3"
+
+
+-- input output filenames
 
 mutate_files={
-	["data/box"..mutate_from..".lua"] = "data/box"..mutate_into..".lua",
-	["data/lua_box"..mutate_from..".c"] = "data/lua_box"..mutate_into..".c",
+	{  "code/box"..mutate_from.."d.lua"    ,  "code/box"..mutate_into.."d.lua"    , },
+	{  "code/lua_box"..mutate_from.."d.c"  ,  "code/lua_box"..mutate_into.."d.c"  , },
 }
 
-print("Mutating box"..mutate_from.." code into box"..mutate_into.." code.")
 
-for from_filename,into_filename in pairs(mutate_files) do
+-- start with some basic string replacement, fixes plenty
+-- provided we are careful with how we do everything
 
-	print("Mutating "..from_filename.." into "..into_filename)
+mutate_strings={
+}
 
+if mutate_from=="2" then
+	for i,v in ipairs({
+	-- swap the defines around
+	{  "#define BTWO 2"         ,  "#define BTHREE 3"       , },
+	{  "#define BVSIZE 2"       ,  "#define BVSIZE 3"       , },
+	{  "#define BRSIZE 1"       ,  "#define BRSIZE 4"       , },
+	-- swap generic names
+	{  "b2"                     ,  "b3"                     , },
+	{  "B2"                     ,  "B3"                     , },
+	{  "box2"                   ,  "box3"                   , },
+	{  "Vec2"                   ,  "Vec3"                   , },
+	}) do
+		mutate_strings[#mutate_strings+1]=v	
+	end
+else
+	for i,v in ipairs({
+	-- swap the defines around
+	{  "#define BTHREE 3"       ,  "#define BTWO 2"         , },
+	{  "#define BVSIZE 3"       ,  "#define BVSIZE 2"       , },
+	{  "#define BRSIZE 4"       ,  "#define BRSIZE 1"       , },
+	-- swap generic names
+	{  "b3"                     ,  "b2"                     , },
+	{  "B3"                     ,  "B2"                     , },
+	{  "box3"                   ,  "box2"                   , },
+	{  "Vec3"                   ,  "Vec2"                   , },
+	}) do
+		mutate_strings[#mutate_strings+1]=v
+	end
+end
+
+
+for _ , filenames in ipairs(mutate_files) do
+
+	local from_filename , into_filename = filenames[1] , filenames[2]
+
+	print("Mutating from "..from_filename.." into "..into_filename)
+	
+	local fp=assert( io.open(from_filename,"rb") )
+	local data=fp:read("*all")
+	fp:close()
+	
+	for _,ss in ipairs(mutate_strings) do
+		data=data:gsub(ss[1],ss[2])
+	end
+
+	local fp=assert( io.open(into_filename,"wb") )
+	fp:write(data)
+	fp:close()
 end
