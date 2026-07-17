@@ -116,7 +116,7 @@ M.bake=function(oven,main)
 		gui.refresh_tree()
 		
 		if cmd.args and cmd.args.data.run then
-			main.fullshow=true
+			main.fullshow_start(true)
 		end
 
 		oven.upnet.setup()
@@ -129,11 +129,21 @@ M.bake=function(oven,main)
 	end
 
 	main.fullshow=false
+	main.fullshow_start=function(val)
+		main.fullshow=val
+		if main.fullshow then -- starting so restart code
+			local state=gui.datas.get_string("run_state")
+			if state=="stop" then -- auto start on switching to fullscreen
+				show.start_doc()
+			end
+		end
+	end
+	
 	main.msg=function(m)
 
 		-- toggle fullshow
 		if m.class=="key" and m.keyname=="escape" and m.action==-1 then
-			main.fullshow=not main.fullshow
+			main.fullshow_start(not main.fullshow)
 		end
 
 
@@ -196,7 +206,9 @@ M.bake=function(oven,main)
 	main.draw=function()
 
 		local state=gui.datas.get_string("run_state")
-		if state=="play" then -- update and draw
+		if state=="play" or
+			( state=="stop" and main.fullshow ) -- always update draw on fullscreen
+			then
 			show.update_draw() -- called outside of the gui to prepare fbos
 		end
 

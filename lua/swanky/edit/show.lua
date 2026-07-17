@@ -395,7 +395,6 @@ M.bake=function(oven,show)
 				gui.master.ids.texteditor.txt.get_text()
 			end
 			it.start(str)
-
 			-- clear auto flags
 			show.autostart = false
 		end

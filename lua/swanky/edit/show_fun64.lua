@@ -87,7 +87,9 @@ M.bake=function(oven,show_fun64)
 	show_fun64.update_draw=function()
 	
 		local state=gui.datas.get_string("run_state")
-		if state=="play" then -- update and draw
+		if state=="play" or
+			( state=="stop" and main.fullshow ) -- always update draw on fullscreen
+			then -- update and draw
 			show_fun64.sys_update()
 			show_fun64.sys_draw()
 		elseif state=="pause" then -- draw only
@@ -99,7 +101,7 @@ M.bake=function(oven,show_fun64)
 	show_fun64.widget_draw=function(px,py,hx,hy) -- draw a widget of this size using opengl
 	
 		local state=gui.datas.get_string("run_state")
-		if state=="stop" then -- no draw
+		if state=="stop" and not main.fullshow then -- no draw
 			return
 		end
 		
