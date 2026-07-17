@@ -130,16 +130,20 @@
    "name": "levels"
   },
   {
-   "count": 723,
+   "count": 773,
    "name": "lua"
   },
   {
-   "count": 47,
+   "count": 49,
    "name": "lua.box2d"
   },
   {
-   "count": 13,
+   "count": 14,
    "name": "lua.box2d.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.body.aabb"
   },
   {
    "count": 1,
@@ -222,8 +226,12 @@
    "name": "lua.box2d.set"
   },
   {
-   "count": 6,
+   "count": 7,
    "name": "lua.box2d.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.box2d.shape.aabb"
   },
   {
    "count": 1,
@@ -322,8 +330,200 @@
    "name": "lua.box2d.world.step"
   },
   {
-   "count": 1,
+   "count": 49,
    "name": "lua.box3d"
+  },
+  {
+   "count": 14,
+   "name": "lua.box3d.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.aabb"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.acceleration"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.awake"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.convert"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.force"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.info"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.mass"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.transform"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.type"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.body.velocity"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.info"
+  },
+  {
+   "count": 5,
+   "name": "lua.box3d.joint"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.joint.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.joint.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.joint.info"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.joint.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.set"
+  },
+  {
+   "count": 7,
+   "name": "lua.box3d.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.shape.aabb"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.shape.convert"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.shape.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.shape.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.shape.info"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.shape.set"
+  },
+  {
+   "count": 19,
+   "name": "lua.box3d.world"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.bits"
+  },
+  {
+   "count": 2,
+   "name": "lua.box3d.world.body"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.body.shape"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.body_events"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.cast"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.contact_events"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.defaults"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.destroy"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.fill"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.fills"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.info"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.joint"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.overlap"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.prepare_events"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.sensor_events"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.set"
+  },
+  {
+   "count": 1,
+   "name": "lua.box3d.world.step"
   },
   {
    "count": 1,
@@ -3090,7 +3290,7 @@
    "body": "<pre><code>body:force()\nbody:force(x,y)\nbody:force(x,y,r)\nbody:force(nil,nil,r)\n</code></pre>\n<p>set body force , note that this does not return the current force and \ncalling it without any values will clear the current force.</p>\n<p>x,y is force applied to center mass, will be cleared if nil</p>\n<p>r is torque , will be cleared if nil</p>\n<p>This will replace force and acceleration and as force is applied then \ncleared during a step, this needs to be set for <em>every</em> step.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 996,
+   "line": 990,
    "name": "lua.box2d.body.force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }
