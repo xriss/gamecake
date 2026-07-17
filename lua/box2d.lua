@@ -140,6 +140,7 @@ Booleans should be true or false
 ]]
 box2d.world=function(def)
 	local world={}
+	setmetatable(world,box2d.world_metatable)
 
 	world.def=def
 
@@ -150,7 +151,6 @@ box2d.world=function(def)
 	world.joints={}
 	world.shapes={}
 
-	setmetatable(world,box2d.world_metatable)
 	world[0],world.boxid=core.world_create(def)
 
 	return world
@@ -500,12 +500,6 @@ radius and a single point at the origin.
 Radius of the shape to cast, does not work unless you also set points.
 
 
-	ray.closest
-
-Boolean value, set true to only return the closest hit in hits[1]. 
-Otherwise you must iterate over the returned array.
-
-
 	ray.origin
 
 Starting world point of ray
@@ -529,10 +523,10 @@ unless they are already set.
 	hit2=hits[2]
 	etc
 
-These are not in any useful order, unless you asked for 
-the closest in which case there will only be 1.
+Returned hits which are sorted by fraction so hits[1] should be the 
+closest, or at least one of the closest if fraction is 0.
 
-If hits[1] is nil or #hits is 0 then there where no hits.
+If hits[1] is nil then there where no hits.
 
 
 	hits.leafVisits
@@ -771,8 +765,8 @@ This helper code adds the following logic to shape creation etc
 	filter_maskBits        will be set from    bits.mask	if nil
 	filter_groupIndex      will be set from    bits.group	if nil
 
-So you probably do not want to create default values for 
-filter_categoryBits using world:defaults as these will not be replace.
+You probably do not want to create default values for these values 
+using world:defaults as these will not be replace by this helper.
 
 Pass in false to unset the named bits.
 
@@ -781,10 +775,10 @@ If bits does not exist then we will return the default values of
 modified by setting the bits named "default" to whatever you want.
 
 Since this default is always available you can use filter="default" in 
-shape creation to use your default values.
+shape creation to use these default values.
 
 Note that 0xfffffffffffff (13 hex digits) is an integer that fits 
-safely in a double and you should not use a larger number.
+safely in a double and you should not use any more bits.
 
 ]] 
 box2d.world_functions.bits=function(world,name,bits)
@@ -814,8 +808,8 @@ unique table as it will be retained.
 
 All of these are optional so can be nil.
 
-Vectors are a table containing { x , y } values. This may also be a 
-fake table created by lua meta.
+Vectors are a table containing values in the integer indexes. This may 
+also be a fake table created by lua meta.
 
 Values with _ are sub structs eg motionLocks_linearX is motionLocks.linearX
 
@@ -851,6 +845,7 @@ type is a string and must be "static" or "kinematic" or "dynamic"
 ]]
 box2d.world_functions.body=function(world,def)
 	local body={}
+	setmetatable(body,box2d.body_metatable)
 	
 	def=world:fill(def,"body")
 	
@@ -860,7 +855,6 @@ box2d.world_functions.body=function(world,def)
 	body.world=world
 	body.shapes={}
 
-	setmetatable(body,box2d.body_metatable)
 	body[0],body.boxid=core.body_create(world[0],def)
 	
 	world.bodys[ body.boxid ]=body
@@ -1099,6 +1093,20 @@ do
 	end
 end
 
+--[[#lua.box2d.body.aabb
+
+	xa,ya,xb,yb = body:aabb()
+
+Get body aabb as stream of numbers, lower bounds first then upper.
+
+Note this value has to be calculated.
+
+]]
+box2d.body_functions.aabb=function(body)
+	return core.body_aabb( body[0] )
+end
+
+
 --[[#lua.box2d.world.body.shape
 
 	shape=body:shape(def)
@@ -1168,6 +1176,7 @@ set in a b2Polygon using b2MakeOffsetRoundedBox
 ]]
 box2d.body_functions.shape=function(body,def)
 	local shape={}
+	setmetatable(shape,box2d.shape_metatable)
 	
 	def=body.world:fill(def,"shape")
 
@@ -1182,7 +1191,6 @@ box2d.body_functions.shape=function(body,def)
 
 	shape.def=def
 	shape.body=body
-	setmetatable(shape,box2d.shape_metatable)
 	shape[0],shape.boxid=core.shape_create(body[0],def)
 	
 	body.shapes[ shape.boxid ]=shape
@@ -1273,6 +1281,18 @@ box2d.shape_functions.convert=function(shape,x,y,conversion)
 	assert(conversion=="closest") -- the only valid option
 	return core.shape_convert( shape[0], x,y )
 end
+
+--[[#lua.box2d.shape.aabb
+
+	xa,ya,xb,yb = shape:aabb()
+
+Get shapes aabb as stream of numbers, lower bounds first then upper.
+
+]]
+box2d.shape_functions.aabb=function(shape)
+	return core.shape_aabb( shape[0] )
+end
+
 
 --[[#lua.box2d.world.joint
 
@@ -1392,6 +1412,7 @@ set in a b2WheelJointDef
 ]]
 box2d.world_functions.joint=function(world,def)
 	local joint={}
+	setmetatable(joint,box2d.joint_metatable)
 	
 	def=world:fill(def,"joint")
 
@@ -1404,7 +1425,6 @@ box2d.world_functions.joint=function(world,def)
 	if type(def.bodyA)=="table" then def.bodyIdA=def.bodyA.boxid end
 	if type(def.bodyB)=="table" then def.bodyIdB=def.bodyB.boxid end
 
-	setmetatable(joint,box2d.joint_metatable)
 	joint[0],joint.boxid=core.joint_create(world[0],def)
 
 	world.joints[ joint.boxid ]=joint

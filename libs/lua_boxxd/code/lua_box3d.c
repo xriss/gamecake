@@ -348,9 +348,9 @@ b3WorldId *pp;
 		if(!lua_isnil(l,-1)) { def.enableContinuous = lua_toboolean(l,-1); }
 		lua_pop(l,1);
 
-		lua_getfield(l,1,"enableContactSoftening");
-		if(!lua_isnil(l,-1)) { def.enableContactSoftening = lua_toboolean(l,-1); }
-		lua_pop(l,1);
+//		lua_getfield(l,1,"enableContactSoftening");
+//		if(!lua_isnil(l,-1)) { def.enableContactSoftening = lua_toboolean(l,-1); }
+//		lua_pop(l,1);
 	}
 
 // create ptr ptr userdata
