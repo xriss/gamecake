@@ -162,7 +162,7 @@ gui.data_setup=function()
 			{str="console"},
 		}})
 
-		datas.new({id="list_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
+		datas.new({id="list_mode"  ,class="list",  hooks=gui.hooks,num=2,list={
 			{str="play"},
 --			{str="console"},
 			{str="search"},
@@ -175,7 +175,7 @@ gui.data_setup=function()
 			{str="fun64"},
 		}})
 
-		datas.new({id="run_state"  ,class="list",  hooks=gui.hooks,num=3,list={
+		datas.new({id="run_state"  ,class="list",  hooks=gui.hooks,num=1,list={
 			{str="stop"},
 			{str="pause"},
 			{str="play"},
@@ -796,7 +796,7 @@ local lay=
        {
         size="full",
         {
-         id="play",hidden=false,
+         id="play",hidden=true,
          color=0xff000000,
          skin=0,
          size="full",
@@ -821,7 +821,7 @@ local lay=
          },
         },
         {
-         id="search",hidden=true,class="fill",
+         id="search",hidden=false,class="fill",
          size="full",style="flat",
          fbo=true,
          {
