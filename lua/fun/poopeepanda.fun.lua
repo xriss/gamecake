@@ -1573,8 +1573,9 @@ floaters.item.update=function(floater)
 	
 		 			floater:mark_deleted()
 					for i=1,16 do
-						local v=V2( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
-									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
+--						local v=V2( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
+--									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
+						local v=V2( hit.sys:get_rnd(-1000,1000)/10 , hit.sys:get_rnd(-1000,1000)/10 )
 						local boots={
 							{"gib",sname="gib_green",size=4,pos=floater.pos,vel=v},
 						}
@@ -1585,11 +1586,12 @@ floaters.item.update=function(floater)
 					if r<=75 then r=1 elseif r<=95 then r=2 else r=3 end -- 1,2 or 3 drops
 
 					for i=1,r do -- 1-3 fruits
-						local v=V2( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
-									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
+--						local v=V2( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
+--									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
+						local v=V2( hit.sys:get_rnd(-1000,1000)/10 , hit.sys:get_rnd(-1000,1000)/10 )
 						local f=math.min(8,number_of_fruits+i) -- maximum fruit
 						local boots={
-							{"fruit",sname="fruit_"..f,pos=floater.pos,vel=v*2,score=(2^(f-1))*100},
+							{"fruit",sname="fruit_"..f,pos=floater.pos,vel=v,score=(2^(f-1))*100},
 						}
 						scene:creates(boots)
 					end
