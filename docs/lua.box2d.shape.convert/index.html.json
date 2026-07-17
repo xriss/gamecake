@@ -3290,7 +3290,7 @@
    "body": "<pre><code>x,y = shape:convert(x,y,conversion)\n</code></pre>\n<p>conversion must be one of the following strings indicating how the \ninput x,y should be transformed into the output x,y</p>\n<pre><code>x,y = shape:convert(x,y,&quot;closest&quot;)\n</code></pre>\n<p>convert x,y point in world space into x,y closest point on shape.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1268,
+   "line": 1298,
    "name": "lua.box2d.shape.convert",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

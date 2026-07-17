@@ -3290,7 +3290,7 @@
    "body": "<pre><code>xa,ya,xb,yb = body:aabb()\n</code></pre>\n<p>Get body aabb as stream of numbers, lower bounds first then upper.</p>\n<p>Note this value has to be calculated.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1096,
+   "line": 1126,
    "name": "lua.box2d.body.aabb",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

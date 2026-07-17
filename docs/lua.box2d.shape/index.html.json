@@ -3295,7 +3295,7 @@
    "body": "<pre><code>xa,ya,xb,yb = shape:aabb()\n</code></pre>\n<p>Get shapes aabb as stream of numbers, lower bounds first then upper.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1285,
+   "line": 1315,
    "name": "lua.box2d.shape.aabb",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3303,7 +3303,7 @@
    "body": "<pre><code>x,y = shape:convert(x,y,conversion)\n</code></pre>\n<p>conversion must be one of the following strings indicating how the \ninput x,y should be transformed into the output x,y</p>\n<pre><code>x,y = shape:convert(x,y,&quot;closest&quot;)\n</code></pre>\n<p>convert x,y point in world space into x,y closest point on shape.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1268,
+   "line": 1298,
    "name": "lua.box2d.shape.convert",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3311,7 +3311,7 @@
    "body": "<pre><code>shape:destroy()\n</code></pre>\n<p>Destroy the shape and all sub objects (none)</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1202,
+   "line": 1232,
    "name": "lua.box2d.shape.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3319,7 +3319,7 @@
    "body": "<pre><code>vars = shape:get()\n</code></pre>\n<p>Get all shape variables in a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1246,
+   "line": 1276,
    "name": "lua.box2d.shape.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3327,7 +3327,7 @@
    "body": "<pre><code>info = shape:info()\n</code></pre>\n<p>This returns the def table used to create the shape along with as much \nupdated information as we have available, mostly intended as a \ndebugging aid.</p>\n<p>This is the actual def table (some values are hard to query later) so \nif you edit it or if you create this object using a non unique def \ntable things can get strange.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1216,
+   "line": 1246,
    "name": "lua.box2d.shape.info",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3335,7 +3335,7 @@
    "body": "<pre><code>shape:set(vars)\n</code></pre>\n<p>Set all shape variables from a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1257,
+   "line": 1287,
    "name": "lua.box2d.shape.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

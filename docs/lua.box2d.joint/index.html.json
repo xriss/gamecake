@@ -3295,7 +3295,7 @@
    "body": "<pre><code>joint:destroy()\n</code></pre>\n<p>Destroy the joint and all sub objects (none)</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1435,
+   "line": 1465,
    "name": "lua.box2d.joint.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3303,7 +3303,7 @@
    "body": "<pre><code>vars = joint:get()\n</code></pre>\n<p>Get all joint variables in a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1482,
+   "line": 1512,
    "name": "lua.box2d.joint.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3311,7 +3311,7 @@
    "body": "<pre><code>info = joint:info()\n</code></pre>\n<p>This returns the def table used to create the joint along with as much \nupdated information as we have available, mostly intended as a \ndebugging aid.</p>\n<p>This is the actual def table (some values are hard to query later) so \nif you edit it or if you create this object using a non unique def \ntable things can get strange.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1448,
+   "line": 1478,
    "name": "lua.box2d.joint.info",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   },
@@ -3319,7 +3319,7 @@
    "body": "<pre><code>joint:set(vars)\n</code></pre>\n<p>Set all joint variables from a table.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 1493,
+   "line": 1523,
    "name": "lua.box2d.joint.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

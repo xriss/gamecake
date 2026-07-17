@@ -3290,7 +3290,7 @@
    "body": "<pre><code>def=world:fill(def,name)\n</code></pre>\n<p>Set previously cached default values under name into the def table unless a \nvalue already exists. This is intended to be used in body/shape/joint \ncreation as a way of applying generic settings for each.</p>\n<p>def may be nil in which case a new table is created and returned,</p>\n<p>If we do not have any cached values for name then def will not be \naltered. </p>\n<p>This is automatically called to fill in body/shape/joint values that have \npreviously been cached with the generic name &quot;body&quot;.&quot;shape&quot;,&quot;joint&quot; \nwhen creating a new body/shape/joint</p>\n<p>You may call it explicitly for slightly less generic defaults, eg</p>\n<pre><code>body:shape( world:fill({...},&quot;shape_special&quot;) )\n</code></pre>\n<p>Note that when creating objects def should always be a new table as it \nwill be kept within the new object and returned by the info function.</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 638,
+   "line": 668,
    "name": "lua.box2d.world.fill",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }

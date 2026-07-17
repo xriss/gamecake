@@ -3290,7 +3290,7 @@
    "body": "<pre><code>overlaps = world:overlap(shape)\n</code></pre>\n<p>if shape.points is set then this is a polygon shape overlap, otherwise \nthis is an aabb overlap.</p>\n<p>Get all shapes overlapping aabb or shape , I believe this might return \nsome shapes that do not actually overlap the given box so should \nprobably double check.\n<br/>\n<br/></p>\n<pre><code>shape.points\n</code></pre>\n<p>Tightly packed array of points for the shape. Maximum number of points \nis B2_MAX_POLYGON_VERTICES (8) To cast a circle shape, just use a \nradius and a single point at the origin.</p>\n<pre><code>shape.radius\n</code></pre>\n<p>Radius of the shape to cast, does not work with aabb.\n<br/>\n<br/></p>\n<pre><code>shape.lowerBound\nshape.upperBound\n</code></pre>\n<p>Lower and upper aabb vectors ( will be added to origin ) this is \nignored if shape.points is set.\n<br/>\n<br/></p>\n<pre><code>shape.origin\n</code></pre>\n<p>Origin vector of shape\n<br/>\n<br/></p>\n<pre><code>shape.filter_categoryBits\nshape.filter_maskBits\n</code></pre>\n<p>Filter masks\n<br/>\n<br/></p>\n<pre><code>overlaps.shapeIds\n</code></pre>\n<p>An array of shapeIds\n<br/>\n<br/></p>\n<pre><code>overlaps.shapes\n</code></pre>\n<p>An array of shapes\n<br/>\n<br/></p>\n<pre><code>overlaps.leafVisits\noverlaps.nodeVisits\n</code></pre>\n<p>Extra debug information</p>\n",
    "count": 1,
    "file": "../lua/box2d.lua",
-   "line": 559,
+   "line": 589,
    "name": "lua.box2d.world.overlap",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box2d.lua"
   }
