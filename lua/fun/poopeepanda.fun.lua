@@ -284,8 +284,8 @@ kinetics.cast_feet=function(world,ray)
 			hit.point=V2(hit.point)
 			hit.normal=V2(hit.normal)
 			hit.delta=hit.point-ray.origin
-			hit.feet=hit.delta[2]
-			if		hit.feet>=2 and 
+			hit.floor=hit.delta[2] -- delta distance to floor
+			if		hit.floor>=2 and 
 					hit.normal[2]<0.5 and
 					math.abs(hit.delta[1])<(ray.radius-1) then -- filter out bad hits
 --print(hit.delta,hit.normal)
@@ -1043,8 +1043,7 @@ players.item.update=function(player)
 	local bb_set=( up:get("b_set") ) or false
 	local bb_clr=( up:get("b_clr") ) or false
 
-	local grav=level:get_gravity(player.pos)
-	if player.vel[2]>16 then grav=grav*1.5 end -- fall faster
+	local grav=level:get_gravity(player.pos,player.vel)
 
 	player.idle=player.idle+1
 	local ll=lx*lx+ly*ly
@@ -1053,7 +1052,7 @@ players.item.update=function(player)
 	end
 
 	local foot_touch -- set this if our feet touched something ( not the level )
-	local foot_cast=kinetics.cast_feet(world,{ -- this is part of the collision so run it here
+	local feet=kinetics.cast_feet(world,{ -- this is part of the collision so run it here
 		closest=true, -- just want the closest hit
 		origin=player.pos,
 		points={0,0},
@@ -1062,8 +1061,8 @@ players.item.update=function(player)
 		filter_categoryBits=0x00000100,
 		filter_maskBits=0x00ffffff,
 	})
-	if foot_cast then
-		foot_touch=scene:find_uid(foot_cast.shape.uid) -- remember foot touch for later
+	if feet then
+		foot_touch=scene:find_uid(feet.shape.uid) -- remember foot touch for later
 	end
 
 	local event_touch=function(it,event)
@@ -1191,9 +1190,9 @@ else
 --	player.pos=player.pos+player.vel
 
 	local footspeed=0.5
-	if foot_cast then
+	if feet then
 
-		local d=foot_cast.feet
+		local d=feet.floor -- Y distance to floor
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
 
@@ -1786,8 +1785,9 @@ fauna_eggs.item.update=function(fauna)
 	fauna:setup_kinetic() -- might need to recreate body
 
 	local level=fauna:get_singular("level") -- only one level is active at a time
-	local grav=level:get_gravity(fauna.pos)
 
+-- use global gravity
+--	local grav=level:get_gravity(fauna.pos,fauna.vel)
 --	fauna.acc:set(grav) -- gravity
 
 	fauna:set_values()
@@ -2023,7 +2023,7 @@ fauna_slims.item.update=function(fauna)
 
 	local level=fauna:get_singular("level") -- only one level is active at a time
 
-	local grav=level:get_gravity(fauna.pos)
+	local grav=level:get_gravity(fauna.pos,fauna.vel)
 
 	local brain={}
 	brain.move=V2(0,0)
@@ -2056,17 +2056,17 @@ fauna_slims.item.update=function(fauna)
 	local footspeed=0.25
 	local footbase=3
 	local world=fauna:get_singular("kinetic").world
-	local foot_cast=kinetics.cast_feet(world,{
+	local feet=kinetics.cast_feet(world,{
 		origin=fauna.pos,
 		points={0,0},
 		radius=4,
-		translation={0,16},
+		translation={0,6},
 		filter_categoryBits=0x00010000,
 		filter_maskBits=0x00ffffff,
 	})
-	if foot_cast then
+	if feet then
 
-		local d=foot_cast.feet -- distance + radius
+		local d=feet.floor -- Y distance to floor
 		local o=fauna.vel[2] -- original velocity
 		local v=((d-(footbase+2))) -- distance to where we want to be
 		local a=v*8 -- force to adjust velocity by
@@ -2078,7 +2078,7 @@ fauna_slims.item.update=function(fauna)
 
 		fauna.onfloor=4
 
-		fauna.floor_uid=hit.shape.uid or -1
+		fauna.floor_uid=feet.shape.uid or -1
 		
 		local f2=scene:find_uid(fauna.floor_uid)
 		if f2 then
@@ -2330,7 +2330,7 @@ fauna_trenchs.item.update=function(fauna)
 	brain.jump=nil
 	fauna:update_brain(brain)
 
-	local grav=level:get_gravity(fauna.pos)
+	local grav=level:get_gravity(fauna.pos,fauna.vel)
 
 	fauna.acc=V2( 0 ,0) -- reset force
 	local va -- velocity we want to achieve
@@ -2357,17 +2357,17 @@ fauna_trenchs.item.update=function(fauna)
 	local footspeed=0.25
 	local footbase=3
 	local world=fauna:get_singular("kinetic").world
-	local foot_cast=kinetics.cast_feet(world,{
+	local feet=kinetics.cast_feet(world,{
 		origin=fauna.pos,
 		points={0,0},
 		radius=4,
-		translation={0,16},
+		translation={0,6},
 		filter_categoryBits=0x00010000,
 		filter_maskBits=0x00ffffff,
 	})
-	if foot_cast then
+	if feet then
 
-		local d=foot_cast.feet -- distance + radius
+		local d=feet.floor -- Y distance to floor
 		local o=fauna.vel[2] -- original velocity
 		local v=((d-(footbase+2))) -- distance to where we want to be
 		local a=v*8 -- force to adjust velocity by
@@ -3623,35 +3623,9 @@ levels.item.get_wind=function(level,pos)
 	return V3( t and t.dir )
 end
 
-levels.item.get_gravity=function(level,pos)
+levels.item.get_gravity=function(level,pos,vel)
+	if vel[2]>16 then return V3(0,600) end -- fall faster
 	return V3(0,400)
---[[	
-	local tx=math.floor(pos[1]/8)
-	local ty=math.floor(pos[2]/8)
-
-	local map=level.map
-	local get_tile=function(x,y,name)
-		local t=map[y] and map[y][x]
-		if name then return t and t[name] else return t end
-	end
-	
-	local dir=get_tile(ty,tx,"dir")
-
-	return V3( dir or V2(0,1)*400 )
-]]
---[[
-	local n=pos-V3(128,96,0)
-	local d=n:len()
-	n:normalize()
-	d=d-100
-	if d>0 then
-		d=0
-	else
-		d=math.abs(d*d)
-		if d>800 then d=800 end
-	end
-	return n*-d
-]]
 end
 
 levels.item.get_tile_by_idx=function(level,idx,name)
