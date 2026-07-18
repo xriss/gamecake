@@ -332,11 +332,17 @@ b2WorldId *pp;
 		lua_getfield(l,1,"gravity");
 		if(!lua_isnil(l,-1)) { def.gravity=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
+		lua_getfield(l,1,"hitEventThreshold");
+		if(!lua_isnil(l,-1)) { def.hitEventThreshold = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
 		lua_getfield(l,1,"restitutionThreshold");
 		if(!lua_isnil(l,-1)) { def.restitutionThreshold = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,1,"hitEventThreshold");
-		if(!lua_isnil(l,-1)) { def.hitEventThreshold = (float)lua_tonumber(l,-1); }
+		lua_getfield(l,1,"maximumLinearSpeed");
+		if(!lua_isnil(l,-1)) { def.maximumLinearSpeed = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,1,"contactSpeed");
+		if(!lua_isnil(l,-1)) { def.contactSpeed = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,1,"contactHertz");
 		if(!lua_isnil(l,-1)) { def.contactHertz = (float)lua_tonumber(l,-1); }
@@ -344,12 +350,7 @@ b2WorldId *pp;
 		lua_getfield(l,1,"contactDampingRatio");
 		if(!lua_isnil(l,-1)) { def.contactDampingRatio = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,1,"contactSpeed");
-		if(!lua_isnil(l,-1)) { def.contactSpeed = (float)lua_tonumber(l,-1); }
-		lua_pop(l,1);
-		lua_getfield(l,1,"maximumLinearSpeed");
-		if(!lua_isnil(l,-1)) { def.maximumLinearSpeed = (float)lua_tonumber(l,-1); }
-		lua_pop(l,1);
+
 
 		lua_getfield(l,1,"enableSleep");
 		if(!lua_isnil(l,-1)) { def.enableSleep = lua_toboolean(l,-1); }

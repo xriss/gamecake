@@ -214,13 +214,16 @@ kinetics={}
 kinetics.defaults={ -- world defaults when creating box2d objects
 	world={
 		gravity={0,400}, -- default gravity
-		sleepThreshold=1, -- meter adjust
-		hitEventThreshold=0, -- any hit please
+		sleepThreshold=0*16, -- *16 meter adjust
+		hitEventThreshold = 0.0*16, -- any hit please
+		restitutionThreshold = 0.0*16, -- bouncy
+		contactSpeed = 16*16,
+--		maximumLinearSpeed = 400*16,
 	},
 	body={
 		sleepThreshold=1, -- meter adjust
---						linearDamping=1/64,
---						angularDamping=1/64,
+--        linearDamping=1/64,
+--        angularDamping=1/64,
 		gravityScale=0, -- disable gravity by default
 	},
 	shape={
@@ -1568,7 +1571,7 @@ floaters.item.update=function(floater)
 			if fauna then
 		 		if fauna:mark_deleted() then -- remove fauna
 		 		
-		 			local number_of_floaters=scene:get_number_of("floater")
+		 			local number_of_fauna_slim=scene:get_number_of("fauna_slim")
 		 			local number_of_fruits=scene:get_number_of("fruit")
 	
 		 			floater:mark_deleted()
@@ -1577,7 +1580,7 @@ floaters.item.update=function(floater)
 --									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
 						local v=V2( hit.sys:get_rnd(-1000,1000)/10 , hit.sys:get_rnd(-1000,1000)/10 )
 						local boots={
-							{"gib",sname="gib_green",size=4,pos=floater.pos,vel=v},
+							{"gib",sname="gib_green",size=4,pos=floater.pos+(v/16),vel=v},
 						}
 						scene:creates(boots)
 					end
@@ -1589,9 +1592,9 @@ floaters.item.update=function(floater)
 --						local v=V2( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
 --									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
 						local v=V2( hit.sys:get_rnd(-1000,1000)/10 , hit.sys:get_rnd(-1000,1000)/10 )
-						local f=math.min(8,number_of_fruits+i) -- maximum fruit
+						local f=math.min(8,number_of_fauna_slim+i) -- maximum fruit
 						local boots={
-							{"fruit",sname="fruit_"..f,pos=floater.pos,vel=v,score=(2^(f-1))*100},
+							{"fruit",sname="fruit_"..f,pos=floater.pos+(v/16),vel=v,score=(2^(f-1))*100},
 						}
 						scene:creates(boots)
 					end
@@ -1833,18 +1836,17 @@ fauna_slims.values={
 	acc=V2( 0,0 ),
 	idx=1,
 	side=1,
-	foot=8,
+	foot=0,
 	onfloor=0,
 	floor_uid=0,
-	jump=0,
-	flap=0,
 	sname="fauna_slim",
-	thunk=0,
 	floor_uid=0,
 	mode="none",
---	touch={},
---	slap=0,
---	stun=0,
+
+-- brain values
+
+	brain_thunk=0,
+
 }
 
 fauna_slims.types={
@@ -1855,11 +1857,8 @@ fauna_slims.types={
 
 fauna_slims.graphics={
 
+
 {nil,"fauna_slim",[[
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
@@ -1872,6 +1871,10 @@ fauna_slims.graphics={
 . d d d d d d d d d d G G G G . 
 . G G d d d d d d d G G G G G . 
 . . G G G G G G G G G G G G . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
 ]]},
 
 
@@ -1882,7 +1885,7 @@ fauna_slims.graphics={
 . . . . . . d d d G . . . . . . 
 . . . . d d d d d d G G . . . . 
 . . . d d d d d d d d G G . . . 
-. . d d 7 0 d 7 0 d d d G G . . 
+. . d d d d d d d d d d G G . . 
 . . d d 0 0 d 0 0 d d d G G . . 
 . d d d d d d d d d d d G G G . 
 . d d d d d d d d d d G G G G . 
@@ -1894,30 +1897,8 @@ fauna_slims.graphics={
 . . . . . . . . . . . . . . . . 
 ]]},
 
-{nil,"fauna_slim_splat",[[
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . d d d d d d G G . . . . . . . . 
-. . . . . . . d d d d d d d d G G . . . . . . . 
-. . . . . . d d 7 0 d 7 0 d d d G G . . . . . . 
-. . . . G G d d 0 0 d 0 0 d d d G G G G . . . . 
-G G G G G G G G G G G G G G G G G G G G G G G G 
-]]},
 
 {nil,"fauna_slim_feet",[[
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
@@ -1930,6 +1911,10 @@ G G G G G G G G G G G G G G G G G G G G G G G G
 . . G G G G G G G G G G G G . . 
 . . . G G G G G G G G G G . . . 
 . . . . . G G G G G G G . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
 ]]},
 
 }
@@ -1949,6 +1934,10 @@ end
 
 -- turn into a floater
 fauna_slims.item.do_stun=function(fauna,touch,event)
+
+	if fauna:depend("floater") then -- we are floater, do nothing
+		return
+	end
 
 	local floater=scene:create({"floater",
 		sname=fauna.sname, pos=fauna.pos, vel=fauna.vel+V2(0,-50), })
@@ -1978,11 +1967,15 @@ fauna_slims.item.setup_kinetic=function(fauna)
 	fauna.body=world:body({
 		type="dynamic",
 		transform={fauna.pos[1],fauna.pos[2],fauna.rot*(math.pi*2)},
+		enableSleep=false,
+		gravityScale=0,
+		motionLocks_angularZ=true,
 	})
 	if not fauna:depend("floater") then
 		fauna.shape=fauna.body:shape({
-			shape="circle",
-			radius=4,
+			shape="box",
+			halfWidth=6,
+			halfHeight=4,
 			filter="fauna_slim",
 			uid=fauna.uid,
 		})
@@ -2001,16 +1994,6 @@ fauna_slims.item.clean=function(fauna)
 	fauna:clean_kinetic()
 end
 
-fauna_slims.item.update_brain=function(fauna,brain)
-
-	fauna.thunk=fauna.thunk-1
-	if fauna.thunk<=0 then
-		fauna.thunk=fauna.sys:get_rnd(8,32)
-		brain.jump=V2(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160))
-		brain.move[1]=brain.jump[1]<0 and -1 or 1
-	end
-end
-
 fauna_slims.item.update=function(fauna)
 
 	if fauna:depend("floater") then -- we are floater, do nothing
@@ -2019,137 +2002,79 @@ fauna_slims.item.update=function(fauna)
 
 	fauna:get_values()
 	fauna:setup_kinetic() -- might need to recreate body
-	
-	
---	local up=fauna.scene.ups[fauna.idx] or fauna.sys.oven.ups.empty
 
+	local world=fauna:get_singular("kinetic").world
 	local level=fauna:get_singular("level") -- only one level is active at a time
 
 	local grav=level:get_gravity(fauna.pos,fauna.vel)
 
-	local brain={}
-	brain.move=V2(0,0)
-	brain.jump=nil
-	fauna:update_brain(brain)
-
-
-	fauna.acc=V2( 0 ,0) -- reset force
-	local va -- velocity we want to achieve
-	if fauna.onfloor>0 or fauna.jump>0 then -- when on floor
-		va=brain.move[1]*512
-	else -- when in air
-		va=brain.move[1]*256
-	end
-	if va then -- apply left/right movement
-		if va<0 and fauna.vel[1]>0 then fauna.vel[1]=0 end -- quick turn
-		if va>0 and fauna.vel[1]<0 then fauna.vel[1]=0 end -- quick turn
-		local vb=va-fauna.vel[1] -- diff from current velocity
-		fauna.acc[1]=fauna.acc[1]+(vb) -- apply force to make us move at requested speed
-	end
-	
-	fauna.vel[1]=fauna.vel[1]*12/16 --  dampen horizontal velocity
-	fauna.vel[2]=fauna.vel[2]*14/16 --  dampen vertical velocity
-	
-	if brain.move[1]<0 then fauna.side= 1 end
-	if brain.move[1]>0 then fauna.side=-1 end
-
---	fauna.pos=fauna.pos+fauna.vel
-
-	local footspeed=0.25
-	local footbase=3
-	local world=fauna:get_singular("kinetic").world
-	local feet=kinetics.cast_feet(world,{
+	local foot_touch -- set this if our feet touched something ( not the level )
+	local feet=kinetics.cast_feet(world,{ -- this is part of the collision so run it here
+		closest=true, -- just want the closest hit
 		origin=fauna.pos,
 		points={0,0},
 		radius=4,
-		translation={0,6},
-		filter_categoryBits=0x00010000,
+		translation={0,7},
+		filter_categoryBits=0x00000100,
 		filter_maskBits=0x00ffffff,
 	})
+	local footspeed=0.5
 	if feet then
+		foot_touch=scene:find_uid(feet.shape.uid) -- remember foot touch for later
 
-		local d=feet.floor -- Y distance to floor
-		local o=fauna.vel[2] -- original velocity
-		local v=((d-(footbase+2))) -- distance to where we want to be
-		local a=v*8 -- force to adjust velocity by
+		local floor=feet.floor-4 -- distance to where we want to be
 
-		fauna.foot=d-(footbase+2)
-		if fauna.foot<0  then fauna.foot=0  end
-		if fauna.foot>3 then fauna.foot=3 end
-		fauna.acc[2]=fauna.acc[2]+a --  hover
-
-		fauna.onfloor=4
-
-		fauna.floor_uid=feet.shape.uid or -1
-		
-		local f2=scene:find_uid(fauna.floor_uid)
-		if f2 then
-			local f3=scene:find_uid(f2.floor_uid)
-			if f2 and f3 and f2.caste==fauna.caste and f3.caste==fauna.caste then
-				if fauna.uid~=f2.uid and fauna.uid~=f3.uid and f2.uid~=f3.uid then 
-
--- upgrade to trench...
-					fauna:mark_deleted()
-					f2:mark_deleted()
-					f3:mark_deleted()
-
-					local boots={
-						{"fauna_trench",pos=f2.pos},
-					}
-					scene:creates(boots)
-
-				end
-			end
+--[[
+		fauna.vel[2]=fauna.vel[2]*8/16 -- decay bouncy-ness
+		if     floor>= 0.5 then
+			fauna.acc[2]=footspeed*128
+		elseif floor<=-0.5 then
+			fauna.acc[2]=footspeed*-256
+		else
+			fauna.acc[2]=floor*16
 		end
+]]
+
+		fauna.foot=floor
+		if fauna.foot<0 then fauna.foot=0 end
+		if fauna.foot>3 then fauna.foot=3 end
+
+		fauna.onfloor=1
 
 	else
-
-		fauna.floor_uid=0
-
 		if fauna.foot>3 then fauna.foot=3 end
 		if fauna.foot<3 then fauna.foot=fauna.foot+footspeed end
 
-		fauna.acc:add(grav) -- gravity
 	end
 
-	if fauna.onfloor>0 and fauna.jump<=0 then -- meep meep jump	
-		if brain.jump then
-			fauna.onfloor=0
-			fauna.jump=4
-			fauna.acc[2]=0
-			fauna.vel:add(brain.jump) --[2]=-120
+	fauna.acc:set(grav) -- gravity
+
+--	fauna.vel[1]=fauna.vel[1]*12/16 --  dampen horizontal velocity
+--	fauna.vel[2]=fauna.vel[2]*14/16 --  dampen vertical velocity
+
+
+	fauna.brain_thunk=fauna.brain_thunk-1
+	if fauna.brain_thunk<=0 then
+		fauna.brain_thunk=fauna.sys:get_rnd(16,64)
+		
+		if fauna.onfloor > 0 then -- we can jump
+
+			fauna.vel:set( V2( fauna.sys:get_rnd(-10,-100)*fauna.side , fauna.sys:get_rnd(-20,-200) ) )
+			
+			if fauna.sys:get_rnd(1,100)>=50 then -- flip direction 50%
+				fauna.side=fauna.side*-1
+			end
 		end
-	end
-	if fauna.onfloor>0 then fauna.onfloor=fauna.onfloor-1 end
 
-	if fauna.jump>0 then -- jump higher while button is held down
-		fauna.onfloor=0 -- no foot grab while jumping
-		fauna.jump=fauna.jump-1 -- continue jump
+--		brain.jump=V2(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160))
+--		brain.move[1]=brain.jump[1]<0 and -1 or 1
+
 	end
 
+--rint( fauna.vel , fauna.pos , grav)
 
 	fauna:set_values()
 end
-
--- who stomps this (it)
---[[
-fauna_slims.item.stomp=function(it,who)
-	if who.caste=="player" then
-		if it.stun>0 then
-	 		if it:mark_deleted() then
-				who.score=who.score+100
-				for i=1,16 do
-					local v=V3( who.vel[1]*-2+(100*((who.sys:get_rnd()-0.5)*2)) , who.vel[2]*-2+(-100*who.sys:get_rnd()) , 0 )
-					local boots={
-						{"gib",sname="gib_green",life=0,size=4,pos=it.pos,vel=v},
-					}
-					scene:creates(boots)
-				end
-			end
-		end
-	end
-end
-]]
 
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
@@ -2161,7 +2086,7 @@ fauna_slims.item.draw=function(fauna)
 
 	fauna:get_values()
 
-	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
+	local p=V3( fauna.pos[1] , fauna.pos[2], fauna.pos[1]+fauna.pos[2] )
 	
 	draws.sprite( { n=fauna.sname , p=p, sx=fauna.side } )
 	draws.sprite( { n=fauna.sname.."_feet" , p=p+V3(0,fauna.foot,8) , sx=fauna.side } )
@@ -3622,12 +3547,12 @@ end
 
 levels.item.get_wind=function(level,pos)
 	local t=level:get_tile_by_pos(pos)
-	return V3( t and t.dir )
+	return V2( t and t.dir )
 end
 
 levels.item.get_gravity=function(level,pos,vel)
-	if vel[2]>16 then return V3(0,600) end -- fall faster
-	return V3(0,400)
+	if vel[2]>16 then return V2(0,600) end -- fall faster
+	return V2(0,400)
 end
 
 levels.item.get_tile_by_idx=function(level,idx,name)
