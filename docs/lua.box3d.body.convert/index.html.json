@@ -3290,7 +3290,7 @@
    "body": "<pre><code>x,y = body:convert(x,y,conversion)\n</code></pre>\n<p>conversion must be one of the following strings indicating how the \ninput x,y should be transformed into the output x,y</p>\n<pre><code>x,y = body:convert(x,y,&quot;point_local_to_world&quot;)\nx,y = body:convert(x,y,&quot;point_world_to_local&quot;)\n\nx,y = body:convert(x,y,&quot;vector_local_to_world&quot;)\nx,y = body:convert(x,y,&quot;vector_world_to_local&quot;)\n\nx,y = body:convert(x,y,&quot;point_local_to_velocity&quot;)\nx,y = body:convert(x,y,&quot;point_world_to_velocity&quot;)\n</code></pre>\n<p>convert x,y between various spaces.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1063,
+   "line": 1093,
    "name": "lua.box3d.body.convert",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   }

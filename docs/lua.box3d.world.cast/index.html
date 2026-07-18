@@ -874,13 +874,42 @@ using world:bits(name) into filter_categoryBits and filter_maskBits
 unless they are already set.
 <br/>
 <br/></p>
-<pre><code>hit1=hits[1]
-hit2=hits[2]
+<pre><code>hit=hits[1]
+hit=hits[2]
 etc
 </code></pre>
-<p>Returned hits which are sorted by fraction so hits[1] should be the 
-closest, or at least one of the closest if fraction is 0.</p>
+<p>Returned hits which are sorted by fraction from low to high.</p>
+<p>Initial overlaps are returned with a fraction of 0 and normal of 0. If 
+you want the first actual hit you should ignore these and get the first 
+hit with a non zero normal.</p>
 <p>If hits[1] is nil then there where no hits.
+<br/>
+<br/></p>
+<pre><code>hit.shapeID
+</code></pre>
+<p>BoxID of the shape we hit.
+<br/>
+<br/></p>
+<pre><code>hit.shape
+</code></pre>
+<p>Table of the shape we hit. Filled in from shapeID for your convenience, 
+if somehow (?) shapeID is invalid then this will be nil. Shapes have a 
+uid that you can use to map shapes to game objects.
+<br/>
+<br/></p>
+<pre><code>hit.fraction
+</code></pre>
+<p>0-1 value, indicating how far from the origin the ray traveled.
+<br/>
+<br/></p>
+<pre><code>hit.point
+</code></pre>
+<p>Table containing world coordinates of the hit point.
+<br/>
+<br/></p>
+<pre><code>hit.normal
+</code></pre>
+<p>Table containing shape normal at the hit point.
 <br/>
 <br/></p>
 <pre><code>hits.leafVisits

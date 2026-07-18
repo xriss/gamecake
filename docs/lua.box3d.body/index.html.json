@@ -3295,7 +3295,7 @@
    "body": "<pre><code>xa,ya,xb,yb = body:aabb()\n</code></pre>\n<p>Get body aabb as stream of numbers, lower bounds first then upper.</p>\n<p>Note this value has to be calculated.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1096,
+   "line": 1126,
    "name": "lua.box3d.body.aabb",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3303,7 +3303,7 @@
    "body": "<pre><code>body:acceleration()\nbody:acceleration(x,y)\nbody:acceleration(x,y,r)\nbody:acceleration(nil,nil,r)\n</code></pre>\n<p>set body acceleration, which is to say we set the body force multiplied \nby mass or rotational inertia. Note that this will not work on a 0 mass \nbody, I think you have to fake a mass on a body with no shapes first.</p>\n<p>x,y is acceleration per second applied to center mass, will be cleared \nif nil</p>\n<p>r is rotational acceleration per second in radians , will be cleared if \nnil</p>\n<p>This will replace force and acceleration and as force is applied then \ncleared during a step, this needs to be set for <em>every</em> step.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1012,
+   "line": 1042,
    "name": "lua.box3d.body.acceleration",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3311,7 +3311,7 @@
    "body": "<pre><code>b = body:awake()\nb = body:awake(b)\n</code></pre>\n<p>get/set body sleeping state.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 954,
+   "line": 984,
    "name": "lua.box3d.body.awake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3319,7 +3319,7 @@
    "body": "<pre><code>x,y = body:convert(x,y,conversion)\n</code></pre>\n<p>conversion must be one of the following strings indicating how the \ninput x,y should be transformed into the output x,y</p>\n<pre><code>x,y = body:convert(x,y,&quot;point_local_to_world&quot;)\nx,y = body:convert(x,y,&quot;point_world_to_local&quot;)\n\nx,y = body:convert(x,y,&quot;vector_local_to_world&quot;)\nx,y = body:convert(x,y,&quot;vector_world_to_local&quot;)\n\nx,y = body:convert(x,y,&quot;point_local_to_velocity&quot;)\nx,y = body:convert(x,y,&quot;point_world_to_velocity&quot;)\n</code></pre>\n<p>convert x,y between various spaces.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1063,
+   "line": 1093,
    "name": "lua.box3d.body.convert",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3327,7 +3327,7 @@
    "body": "<pre><code>body:destroy()\n</code></pre>\n<p>Destroy the body and all sub objects (shapes)</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 865,
+   "line": 895,
    "name": "lua.box3d.body.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3335,7 +3335,7 @@
    "body": "<pre><code>body:force()\nbody:force(x,y)\nbody:force(x,y,r)\nbody:force(nil,nil,r)\n</code></pre>\n<p>set body force , note that this does not return the current force and \ncalling it without any values will clear the current force.</p>\n<p>x,y is force applied to center mass, will be cleared if nil</p>\n<p>r is torque , will be cleared if nil</p>\n<p>This will replace force and acceleration and as force is applied then \ncleared during a step, this needs to be set for <em>every</em> step.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 990,
+   "line": 1020,
    "name": "lua.box3d.body.force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3343,7 +3343,7 @@
    "body": "<pre><code>vars = body:get()\n</code></pre>\n<p>Get all body variables in a table.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 916,
+   "line": 946,
    "name": "lua.box3d.body.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3351,7 +3351,7 @@
    "body": "<pre><code>info = body:info()\n</code></pre>\n<p>This returns the def table used to create the body along with as much \nupdated information as we have available, mostly intended as a \ndebugging aid.</p>\n<p>This is the actual def table (some values are hard to query later) so \nif you edit it or if you create this object using a non unique def \ntable things can get strange.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 881,
+   "line": 911,
    "name": "lua.box3d.body.info",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3359,7 +3359,7 @@
    "body": "<pre><code>mass , rotationalInertia , x,y = body:mass( mass , rotationalInertia , x,y )\nmass = ( body:mass(mass) )\n</code></pre>\n<p>get/set mass values, all values are optional but x,y must be a pair. Unset \nvalues will remain unchanged.</p>\n<p>x,y is center of mass</p>\n<p>We return 4 values but as the first one is mass you can simply ignore \nthe rest by wrapping the function in ()</p>\n<p>Since adding shapes will auto generate these values, be aware that you \nwill be fighting auto mass generation when setting this value.</p>\n<p>Adding shapes or changing the body type will auto generate these \nvalues.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1038,
+   "line": 1068,
    "name": "lua.box3d.body.mass",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3367,7 +3367,7 @@
    "body": "<pre><code>body:set(vars)\n</code></pre>\n<p>Set all body variables from a table.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 927,
+   "line": 957,
    "name": "lua.box3d.body.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3375,7 +3375,7 @@
    "body": "<pre><code>x,y,r = body:transform()\nx,y,r = body:transform(x,y,r)\n</code></pre>\n<p>get/set body transform</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 966,
+   "line": 996,
    "name": "lua.box3d.body.transform",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3383,7 +3383,7 @@
    "body": "<pre><code>btype = body:type()\nbtype = body:type(btype)\n</code></pre>\n<p>get/set body type. btype is a string, Possible values are</p>\n<pre><code>static\nkinematic\ndynamic\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 938,
+   "line": 968,
    "name": "lua.box3d.body.type",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3391,7 +3391,7 @@
    "body": "<pre><code>x,y,r = body:velocity()\nx,y,r = body:velocity(x,y,r)\n</code></pre>\n<p>get/set body velocity</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 978,
+   "line": 1008,
    "name": "lua.box3d.body.velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   }

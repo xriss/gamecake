@@ -3303,7 +3303,7 @@
    "body": "<pre><code>xa,ya,xb,yb = body:aabb()\n</code></pre>\n<p>Get body aabb as stream of numbers, lower bounds first then upper.</p>\n<p>Note this value has to be calculated.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1096,
+   "line": 1126,
    "name": "lua.box3d.body.aabb",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3311,7 +3311,7 @@
    "body": "<pre><code>body:acceleration()\nbody:acceleration(x,y)\nbody:acceleration(x,y,r)\nbody:acceleration(nil,nil,r)\n</code></pre>\n<p>set body acceleration, which is to say we set the body force multiplied \nby mass or rotational inertia. Note that this will not work on a 0 mass \nbody, I think you have to fake a mass on a body with no shapes first.</p>\n<p>x,y is acceleration per second applied to center mass, will be cleared \nif nil</p>\n<p>r is rotational acceleration per second in radians , will be cleared if \nnil</p>\n<p>This will replace force and acceleration and as force is applied then \ncleared during a step, this needs to be set for <em>every</em> step.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1012,
+   "line": 1042,
    "name": "lua.box3d.body.acceleration",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3319,7 +3319,7 @@
    "body": "<pre><code>b = body:awake()\nb = body:awake(b)\n</code></pre>\n<p>get/set body sleeping state.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 954,
+   "line": 984,
    "name": "lua.box3d.body.awake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3327,7 +3327,7 @@
    "body": "<pre><code>x,y = body:convert(x,y,conversion)\n</code></pre>\n<p>conversion must be one of the following strings indicating how the \ninput x,y should be transformed into the output x,y</p>\n<pre><code>x,y = body:convert(x,y,&quot;point_local_to_world&quot;)\nx,y = body:convert(x,y,&quot;point_world_to_local&quot;)\n\nx,y = body:convert(x,y,&quot;vector_local_to_world&quot;)\nx,y = body:convert(x,y,&quot;vector_world_to_local&quot;)\n\nx,y = body:convert(x,y,&quot;point_local_to_velocity&quot;)\nx,y = body:convert(x,y,&quot;point_world_to_velocity&quot;)\n</code></pre>\n<p>convert x,y between various spaces.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1063,
+   "line": 1093,
    "name": "lua.box3d.body.convert",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3335,7 +3335,7 @@
    "body": "<pre><code>body:destroy()\n</code></pre>\n<p>Destroy the body and all sub objects (shapes)</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 865,
+   "line": 895,
    "name": "lua.box3d.body.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3343,7 +3343,7 @@
    "body": "<pre><code>body:force()\nbody:force(x,y)\nbody:force(x,y,r)\nbody:force(nil,nil,r)\n</code></pre>\n<p>set body force , note that this does not return the current force and \ncalling it without any values will clear the current force.</p>\n<p>x,y is force applied to center mass, will be cleared if nil</p>\n<p>r is torque , will be cleared if nil</p>\n<p>This will replace force and acceleration and as force is applied then \ncleared during a step, this needs to be set for <em>every</em> step.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 990,
+   "line": 1020,
    "name": "lua.box3d.body.force",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3351,7 +3351,7 @@
    "body": "<pre><code>vars = body:get()\n</code></pre>\n<p>Get all body variables in a table.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 916,
+   "line": 946,
    "name": "lua.box3d.body.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3359,7 +3359,7 @@
    "body": "<pre><code>info = body:info()\n</code></pre>\n<p>This returns the def table used to create the body along with as much \nupdated information as we have available, mostly intended as a \ndebugging aid.</p>\n<p>This is the actual def table (some values are hard to query later) so \nif you edit it or if you create this object using a non unique def \ntable things can get strange.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 881,
+   "line": 911,
    "name": "lua.box3d.body.info",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3367,7 +3367,7 @@
    "body": "<pre><code>mass , rotationalInertia , x,y = body:mass( mass , rotationalInertia , x,y )\nmass = ( body:mass(mass) )\n</code></pre>\n<p>get/set mass values, all values are optional but x,y must be a pair. Unset \nvalues will remain unchanged.</p>\n<p>x,y is center of mass</p>\n<p>We return 4 values but as the first one is mass you can simply ignore \nthe rest by wrapping the function in ()</p>\n<p>Since adding shapes will auto generate these values, be aware that you \nwill be fighting auto mass generation when setting this value.</p>\n<p>Adding shapes or changing the body type will auto generate these \nvalues.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1038,
+   "line": 1068,
    "name": "lua.box3d.body.mass",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3375,7 +3375,7 @@
    "body": "<pre><code>body:set(vars)\n</code></pre>\n<p>Set all body variables from a table.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 927,
+   "line": 957,
    "name": "lua.box3d.body.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3383,7 +3383,7 @@
    "body": "<pre><code>x,y,r = body:transform()\nx,y,r = body:transform(x,y,r)\n</code></pre>\n<p>get/set body transform</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 966,
+   "line": 996,
    "name": "lua.box3d.body.transform",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3391,7 +3391,7 @@
    "body": "<pre><code>btype = body:type()\nbtype = body:type(btype)\n</code></pre>\n<p>get/set body type. btype is a string, Possible values are</p>\n<pre><code>static\nkinematic\ndynamic\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 938,
+   "line": 968,
    "name": "lua.box3d.body.type",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3399,7 +3399,7 @@
    "body": "<pre><code>x,y,r = body:velocity()\nx,y,r = body:velocity(x,y,r)\n</code></pre>\n<p>get/set body velocity</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 978,
+   "line": 1008,
    "name": "lua.box3d.body.velocity",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3428,7 +3428,7 @@
    "body": "<pre><code>joint:destroy()\n</code></pre>\n<p>Destroy the joint and all sub objects (none)</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1435,
+   "line": 1465,
    "name": "lua.box3d.joint.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3436,7 +3436,7 @@
    "body": "<pre><code>vars = joint:get()\n</code></pre>\n<p>Get all joint variables in a table.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1482,
+   "line": 1512,
    "name": "lua.box3d.joint.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3444,7 +3444,7 @@
    "body": "<pre><code>info = joint:info()\n</code></pre>\n<p>This returns the def table used to create the joint along with as much \nupdated information as we have available, mostly intended as a \ndebugging aid.</p>\n<p>This is the actual def table (some values are hard to query later) so \nif you edit it or if you create this object using a non unique def \ntable things can get strange.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1448,
+   "line": 1478,
    "name": "lua.box3d.joint.info",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3452,7 +3452,7 @@
    "body": "<pre><code>joint:set(vars)\n</code></pre>\n<p>Set all joint variables from a table.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1493,
+   "line": 1523,
    "name": "lua.box3d.joint.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3473,7 +3473,7 @@
    "body": "<pre><code>xa,ya,xb,yb = shape:aabb()\n</code></pre>\n<p>Get shapes aabb as stream of numbers, lower bounds first then upper.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1285,
+   "line": 1315,
    "name": "lua.box3d.shape.aabb",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3481,7 +3481,7 @@
    "body": "<pre><code>x,y = shape:convert(x,y,conversion)\n</code></pre>\n<p>conversion must be one of the following strings indicating how the \ninput x,y should be transformed into the output x,y</p>\n<pre><code>x,y = shape:convert(x,y,&quot;closest&quot;)\n</code></pre>\n<p>convert x,y point in world space into x,y closest point on shape.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1268,
+   "line": 1298,
    "name": "lua.box3d.shape.convert",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3489,7 +3489,7 @@
    "body": "<pre><code>shape:destroy()\n</code></pre>\n<p>Destroy the shape and all sub objects (none)</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1202,
+   "line": 1232,
    "name": "lua.box3d.shape.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3497,7 +3497,7 @@
    "body": "<pre><code>vars = shape:get()\n</code></pre>\n<p>Get all shape variables in a table.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1246,
+   "line": 1276,
    "name": "lua.box3d.shape.get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3505,7 +3505,7 @@
    "body": "<pre><code>info = shape:info()\n</code></pre>\n<p>This returns the def table used to create the shape along with as much \nupdated information as we have available, mostly intended as a \ndebugging aid.</p>\n<p>This is the actual def table (some values are hard to query later) so \nif you edit it or if you create this object using a non unique def \ntable things can get strange.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1216,
+   "line": 1246,
    "name": "lua.box3d.shape.info",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3513,7 +3513,7 @@
    "body": "<pre><code>shape:set(vars)\n</code></pre>\n<p>Set all shape variables from a table.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1257,
+   "line": 1287,
    "name": "lua.box3d.shape.set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3529,7 +3529,7 @@
    "body": "<pre><code>bits=world:bits(name)\nbits=world:bits(name,{mask=0xfffffffffffff,bits=0x0000000000001,group=0})\nbits=world:bits(name,false)\n</code></pre>\n<p>get/set named bits, to help with keeping all your bitmasks in one place \nso you don&#39;t get yourself confuzzled.</p>\n<p>bits is must be a table containing mask, bits and group then instead of \nsetting these numbers explicitly we can use this name in shape creation \nor casting, anywhere a filter is expected.</p>\n<p>This helper code adds the following logic to shape creation etc</p>\n<pre><code>if filter is set then get bits using world:bits(filter) then\nfilter_categoryBits    will be set from    bits.bits\tif nil\nfilter_maskBits        will be set from    bits.mask\tif nil\nfilter_groupIndex      will be set from    bits.group\tif nil\n</code></pre>\n<p>You probably do not want to create default values for these values \nusing world:defaults as these will not be replace by this helper.</p>\n<p>Pass in false to unset the named bits.</p>\n<p>If bits does not exist then we will return the default values of \n{mask=0xfffffffffffff,bits=0x0000000000001,group=0} which can be \nmodified by setting the bits named &quot;default&quot; to whatever you want.</p>\n<p>Since this default is always available you can use filter=&quot;default&quot; in \nshape creation to use these default values.</p>\n<p>Note that 0xfffffffffffff (13 hex digits) is an integer that fits \nsafely in a double and you should not use any more bits.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 748,
+   "line": 778,
    "name": "lua.box3d.world.bits",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3537,7 +3537,7 @@
    "body": "<pre><code>body=world:body(def)\n</code></pre>\n<p>Create a body in the world.</p>\n<p>def contains the values that you can set in a b3BodyDef and must be a \nunique table as it will be retained.</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing values in the integer indexes. This may \nalso be a fake table created by lua meta.</p>\n<p>Values with _ are sub structs eg motionLocks_linearX is motionLocks.linearX</p>\n<p>Booleans should be true or false</p>\n<p>name is a string that should be 31 chars or less and is only used to \nhelp with debugging.\n<br/>\n<br/></p>\n<p>type is a string and must be &quot;static&quot; or &quot;kinematic&quot; or &quot;dynamic&quot;\n<br/>\n<br/></p>\n<pre><code>allowFastRotation\nangularDamping\nangularVelocity\nenableSleep\nmotionLocks_linearX\nmotionLocks_linearY\nmotionLocks_angularZ\ngravityScale\nisAwake\nisBullet\nisEnabled\nlinearDamping\nlinearVelocity\nname\nposition\nrotation\nsleepThreshold\ntype\n</code></pre>\n",
    "count": 2,
    "file": "../lua/box3d.lua",
-   "line": 800,
+   "line": 830,
    "name": "lua.box3d.world.body",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3545,7 +3545,7 @@
    "body": "<pre><code>shape=body:shape(def)\n</code></pre>\n<p>Create a shape in the body.</p>\n<p>def contains the values that you can set in a b3ShapeDef and must be a \nunique table as it will be retained.</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values. This may also be a \nfake table created by lua meta.</p>\n<p>Booleans should be true or false</p>\n<p>Minor safety issue regarding filter bitmasks since lua(jit) uses \ndoubles these bit masks should <em>only</em> use 52 bits not 64 so the \nintegers can fit safely into a double. When using hex the top 3 nibbles \nshould always be 0 like so 0x000fffffffffffff that is 13 Fs if you are \ncounting.</p>\n<pre><code>density\nenableContactEvents\nenableHitEvents\nenablePreSolveEvents\nenableSensorEvents\nfilter\ninvokeContactCreation\nisSensor\nmaterial_customColor\nmaterial_friction\nmaterial_restitution\nmaterial_rollingResistance\nmaterial_tangentSpeed\nmaterial_userMaterialId\nupdateBodyMass\n</code></pre>\n<p>if def.shape==&quot;circle&quot; then def also contains the values that you can \nset in a b3Circle</p>\n<pre><code>center\nradius\n</code></pre>\n<p>if def.shape==&quot;segment&quot; then def also contains the values that you can \nset in a b3Segment</p>\n<pre><code>point1\npoint2\n</code></pre>\n<p>if def.shape==&quot;capsule&quot; then def also contains the values that you can \nset in a b3Capsule</p>\n<pre><code>center1\ncenter2\nradius\n</code></pre>\n<p>if def.shape==&quot;box&quot; then def also contains the values that you can \nset in a b3Polygon using b3MakeOffsetRoundedBox</p>\n<pre><code>halfWidth\nhalfHeight\ncenter\nrotation\nradius\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1110,
+   "line": 1140,
    "name": "lua.box3d.world.body.shape",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3558,7 +3558,7 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
   {
-   "body": "<pre><code>hits = world:cast(ray)\n</code></pre>\n<p>if ray.points is set then this is a polygon shape cast, otherwise \nthis is an ray cast.</p>\n<p>cast a ray and return an array of hits\n<br/>\n<br/></p>\n<pre><code>ray.points\n</code></pre>\n<p>Tightly packed array of points for the shape. Maximum number of points \nis B3_MAX_POLYGON_VERTICES (8) To cast a circle shape, just use a \nradius and a single point at the origin.\n<br/>\n<br/></p>\n<pre><code>ray.radius\n</code></pre>\n<p>Radius of the shape to cast, does not work unless you also set points.\n<br/>\n<br/></p>\n<pre><code>ray.origin\n</code></pre>\n<p>Starting world point of ray\n<br/>\n<br/></p>\n<pre><code>ray.translation\n</code></pre>\n<p>The ray to cast\n<br/>\n<br/></p>\n<pre><code>ray.filter_categoryBits\nray.filter_maskBits\nray.filter\n</code></pre>\n<p>Filter masks, ray.filter is a previously set name that we will convert \nusing world:bits(name) into filter_categoryBits and filter_maskBits \nunless they are already set.\n<br/>\n<br/></p>\n<pre><code>hit1=hits[1]\nhit2=hits[2]\netc\n</code></pre>\n<p>Returned hits which are sorted by fraction so hits[1] should be the \nclosest, or at least one of the closest if fraction is 0.</p>\n<p>If hits[1] is nil then there where no hits.\n<br/>\n<br/></p>\n<pre><code>hits.leafVisits\nhits.nodeVisits\n</code></pre>\n<p>Contain extra debug information</p>\n",
+   "body": "<pre><code>hits = world:cast(ray)\n</code></pre>\n<p>if ray.points is set then this is a polygon shape cast, otherwise \nthis is an ray cast.</p>\n<p>cast a ray and return an array of hits\n<br/>\n<br/></p>\n<pre><code>ray.points\n</code></pre>\n<p>Tightly packed array of points for the shape. Maximum number of points \nis B3_MAX_POLYGON_VERTICES (8) To cast a circle shape, just use a \nradius and a single point at the origin.\n<br/>\n<br/></p>\n<pre><code>ray.radius\n</code></pre>\n<p>Radius of the shape to cast, does not work unless you also set points.\n<br/>\n<br/></p>\n<pre><code>ray.origin\n</code></pre>\n<p>Starting world point of ray\n<br/>\n<br/></p>\n<pre><code>ray.translation\n</code></pre>\n<p>The ray to cast\n<br/>\n<br/></p>\n<pre><code>ray.filter_categoryBits\nray.filter_maskBits\nray.filter\n</code></pre>\n<p>Filter masks, ray.filter is a previously set name that we will convert \nusing world:bits(name) into filter_categoryBits and filter_maskBits \nunless they are already set.\n<br/>\n<br/></p>\n<pre><code>hit=hits[1]\nhit=hits[2]\netc\n</code></pre>\n<p>Returned hits which are sorted by fraction from low to high.</p>\n<p>Initial overlaps are returned with a fraction of 0 and normal of 0. If \nyou want the first actual hit you should ignore these and get the first \nhit with a non zero normal.</p>\n<p>If hits[1] is nil then there where no hits.\n<br/>\n<br/></p>\n<pre><code>hit.shapeID\n</code></pre>\n<p>BoxID of the shape we hit.\n<br/>\n<br/></p>\n<pre><code>hit.shape\n</code></pre>\n<p>Table of the shape we hit. Filled in from shapeID for your convenience, \nif somehow (?) shapeID is invalid then this will be nil. Shapes have a \nuid that you can use to map shapes to game objects.\n<br/>\n<br/></p>\n<pre><code>hit.fraction\n</code></pre>\n<p>0-1 value, indicating how far from the origin the ray traveled.\n<br/>\n<br/></p>\n<pre><code>hit.point\n</code></pre>\n<p>Table containing world coordinates of the hit point.\n<br/>\n<br/></p>\n<pre><code>hit.normal\n</code></pre>\n<p>Table containing shape normal at the hit point.\n<br/>\n<br/></p>\n<pre><code>hits.leafVisits\nhits.nodeVisits\n</code></pre>\n<p>Contain extra debug information</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
    "line": 481,
@@ -3577,7 +3577,7 @@
    "body": "<pre><code>cache=world:defaults(name)\ncache=world:defaults(name,def)\n</code></pre>\n<p>Remember default values in the world cache, this is intended for \ngeneric body/shape/joint creation.</p>\n<p>Returns the current def cache for the name.</p>\n<p>The def table will be copied ( top level only ) into a cache of the \ngiven values adding or replacing them.</p>\n<p>if def table is nil then the current cached values will be cleared.</p>\n<p>For example to cache a constant density value ( because you changed \nthe global units per meters )</p>\n<pre><code>world:defaults(&quot;shape&quot;,{density=1/256})\n</code></pre>\n<p>When shapes are created they will automatically use the &quot;shape&quot; cache \nto fill in missing values. Same for &quot;body&quot; and &quot;joint&quot; caches.</p>\n<p>You can also use this to fill in special object defaults like so.</p>\n<pre><code>world:defaults(&quot;shape_bouncy&quot;,{material_restitution=1})\n...\nbody:shape(world:fill({...},&quot;shape_bouncy&quot;))\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 701,
+   "line": 731,
    "name": "lua.box3d.world.defaults",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3593,7 +3593,7 @@
    "body": "<pre><code>def=world:fill(def,name)\n</code></pre>\n<p>Set previously cached default values under name into the def table unless a \nvalue already exists. This is intended to be used in body/shape/joint \ncreation as a way of applying generic settings for each.</p>\n<p>def may be nil in which case a new table is created and returned,</p>\n<p>If we do not have any cached values for name then def will not be \naltered. </p>\n<p>This is automatically called to fill in body/shape/joint values that have \npreviously been cached with the generic name &quot;body&quot;.&quot;shape&quot;,&quot;joint&quot; \nwhen creating a new body/shape/joint</p>\n<p>You may call it explicitly for slightly less generic defaults, eg</p>\n<pre><code>body:shape( world:fill({...},&quot;shape_special&quot;) )\n</code></pre>\n<p>Note that when creating objects def should always be a new table as it \nwill be kept within the new object and returned by the info function.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 638,
+   "line": 668,
    "name": "lua.box3d.world.fill",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3601,7 +3601,7 @@
    "body": "<pre><code>def=world:fills(def,...)\n</code></pre>\n<p>Same as fill except multiple names may be given and each applied from \nleft to right. So the left most values will have precedence and missing \nvalues will be filled in as we travel left to right.</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 679,
+   "line": 709,
    "name": "lua.box3d.world.fills",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3625,7 +3625,7 @@
    "body": "<pre><code>joint=world:joint(def)\n</code></pre>\n<p>Create a joint in the world.</p>\n<p>def contains the values that you can set in a b3jointDef and must be a \nunique table as it will be retained.</p>\n<p>All of these are optional so can be nil.</p>\n<p>Vectors are a table containing { x , y } values. This may also be a \nfake table created by lua meta.</p>\n<p>Booleans should be true or false</p>\n<p>localFrameA/B is a transform which is a vector plus a rotation in \nradians, so { x , y , r }</p>\n<p>The boxid of a body ( for bodyIdA and bodyIdB ) can be found in body.boxid</p>\n<pre><code>bodyIdA\nbodyIdB\nlocalFrameA\nlocalFrameB\nforceThreshold\ntorqueThreshold\nconstraintHertz\nconstraintDampingRatio\ncollideConnected\n</code></pre>\n<p>if def.joint==&quot;distance&quot; then def also contains the values that you can \nset in a b3DistanceJointDef</p>\n<pre><code>length\nenableSpring\nlowerSpringForce\nupperSpringForce\nhertz\ndampingRatio\nenableLimit\nminLength\nmaxLength\nenableMotor\nmaxMotorForce\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;motor&quot; then def also contains the values that you can \nset in a b3MotorJointDef</p>\n<pre><code>linearVelocity\nmaxVelocityForce\nangularVelocity\nmaxVelocityTorque\nlinearHertz\nlinearDampingRatio\nmaxSpringForce\nangularHertz\nangularDampingRatio\nmaxSpringTorque\n</code></pre>\n<p>if def.joint==&quot;filter&quot; then def also contains the values that you can \nset in a b3FilterJointDef</p>\n<pre><code>-- no extra values just those found in b3jointDef\n</code></pre>\n<p>if def.joint==&quot;prismatic&quot; then def also contains the values that you can \nset in a b3PrismaticJointDef</p>\n<pre><code>enableSpring\nhertz\ndampingRatio\ntargetTranslation\nenableLimit\nlowerTranslation\nupperTranslation\nenableMotor\nmaxMotorForce\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;revolute&quot; then def also contains the values that you can \nset in a b3RevoluteJointDef</p>\n<pre><code>targetAngle\nenableSpring\nhertz\ndampingRatio\nenableLimit\nlowerAngle\nupperAngle\nenableMotor\nmaxMotorTorque\nmotorSpeed\n</code></pre>\n<p>if def.joint==&quot;weld&quot; then def also contains the values that you can \nset in a b3WeldJointDef</p>\n<pre><code>linearHertz\nangularHertz\nlinearDampingRatio\nangularDampingRatio\n</code></pre>\n<p>if def.joint==&quot;wheel&quot; then def also contains the values that you can \nset in a b3WheelJointDef</p>\n<pre><code>enableSpring\nhertz\ndampingRatio\nenableLimit\nlowerTranslation\nupperTranslation\nenableMotor\nmaxMotorTorque\nmotorSpeed\n</code></pre>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1297,
+   "line": 1327,
    "name": "lua.box3d.world.joint",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },
@@ -3633,7 +3633,7 @@
    "body": "<pre><code>overlaps = world:overlap(shape)\n</code></pre>\n<p>if shape.points is set then this is a polygon shape overlap, otherwise \nthis is an aabb overlap.</p>\n<p>Get all shapes overlapping aabb or shape , I believe this might return \nsome shapes that do not actually overlap the given box so should \nprobably double check.\n<br/>\n<br/></p>\n<pre><code>shape.points\n</code></pre>\n<p>Tightly packed array of points for the shape. Maximum number of points \nis B3_MAX_POLYGON_VERTICES (8) To cast a circle shape, just use a \nradius and a single point at the origin.</p>\n<pre><code>shape.radius\n</code></pre>\n<p>Radius of the shape to cast, does not work with aabb.\n<br/>\n<br/></p>\n<pre><code>shape.lowerBound\nshape.upperBound\n</code></pre>\n<p>Lower and upper aabb vectors ( will be added to origin ) this is \nignored if shape.points is set.\n<br/>\n<br/></p>\n<pre><code>shape.origin\n</code></pre>\n<p>Origin vector of shape\n<br/>\n<br/></p>\n<pre><code>shape.filter_categoryBits\nshape.filter_maskBits\n</code></pre>\n<p>Filter masks\n<br/>\n<br/></p>\n<pre><code>overlaps.shapeIds\n</code></pre>\n<p>An array of shapeIds\n<br/>\n<br/></p>\n<pre><code>overlaps.shapes\n</code></pre>\n<p>An array of shapes\n<br/>\n<br/></p>\n<pre><code>overlaps.leafVisits\noverlaps.nodeVisits\n</code></pre>\n<p>Extra debug information</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 559,
+   "line": 589,
    "name": "lua.box3d.world.overlap",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   },

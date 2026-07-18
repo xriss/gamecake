@@ -3290,7 +3290,7 @@
    "body": "<pre><code>shape:destroy()\n</code></pre>\n<p>Destroy the shape and all sub objects (none)</p>\n",
    "count": 1,
    "file": "../lua/box3d.lua",
-   "line": 1202,
+   "line": 1232,
    "name": "lua.box3d.shape.destroy",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
   }
