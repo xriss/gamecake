@@ -1571,6 +1571,7 @@ floaters.item.update=function(floater)
 			if fauna then
 		 		if fauna:mark_deleted() then -- remove fauna
 		 		
+		 			-- these need to be live counts
 		 			local number_of_fauna_slim=scene:get_number_of("fauna_slim")
 		 			local number_of_fruits=scene:get_number_of("fruit")
 	
@@ -1578,7 +1579,7 @@ floaters.item.update=function(floater)
 					for i=1,16 do
 --						local v=V2( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
 --									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
-						local v=V2( hit.sys:get_rnd(-1000,1000)/10 , hit.sys:get_rnd(-1000,1000)/10 )
+						local v=V2( floater.sys:get_rnd(-1000,1000)/10 , floater.sys:get_rnd(-1000,1000)/10 )
 						local boots={
 							{"gib",sname="gib_green",size=4,pos=floater.pos+(v/16),vel=v},
 						}
@@ -1591,7 +1592,7 @@ floaters.item.update=function(floater)
 					for i=1,r do -- 1-3 fruits
 --						local v=V2( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
 --									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
-						local v=V2( hit.sys:get_rnd(-1000,1000)/10 , hit.sys:get_rnd(-1000,1000)/10 )
+						local v=V2( floater.sys:get_rnd(-1000,1000)/10 , floater.sys:get_rnd(-1000,1000)/10 )
 						local f=math.min(8,number_of_fauna_slim+i) -- maximum fruit
 						local boots={
 							{"fruit",sname="fruit_"..f,pos=floater.pos+(v/16),vel=v,score=(2^(f-1))*100},
