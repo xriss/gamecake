@@ -30,7 +30,11 @@ if mutate_from=="2" then
 	{  "#define BOX_2 2"        ,  "#define BOX_3 3"        , },
 	{  "#define BOX_V_COUNT 2"  ,  "#define BOX_V_COUNT 3"  , },
 	{  "#define BOX_R_COUNT 1"  ,  "#define BOX_R_COUNT 4"  , },
-	-- swap generic names
+
+	-- swap explicit names
+	{  "b2Rot"                  ,  "b3Quat"                  , },
+
+	-- swap generic names	
 	{  "b2"                     ,  "b3"                     , },
 	{  "B2"                     ,  "B3"                     , },
 	{  "box2"                   ,  "box3"                   , },

@@ -15,12 +15,30 @@ can be found in the associated box3d.lua file.
 #include "lualib.h"
 #include "lauxlib.h"
 
+
+/*
+
+Conditional code generation defines, these defines get mutated between 
+2D and 3D constants. Do not edit.
+
+*/
+
+// BOX_2 or BOX_3 is defined here
+#define BOX_3 3
+// count of numbers in a vector
+#define BOX_V_COUNT 3
+// count of numbers in a rotation
+#define BOX_R_COUNT 4
+
+
+
 // lua versions hax
 #if LUA_VERSION_NUM < 502
 
 #define lua_rawlen lua_objlen
 
-static int lua_absindex (lua_State *l, int idx) {
+static int lua_absindex (lua_State *l, int idx)
+{
 	if(idx<0)
 	{
 		return lua_gettop(l)+1+idx;
@@ -34,13 +52,6 @@ static int lua_absindex (lua_State *l, int idx) {
 
 #include "box3d/box3d.h"
 
-//
-// BTWO or BTHREE will be defined here for conditional code gen
-//
-#define BTHREE 3
-#define BSIZE 2
-
-
 /*
 
 we can use either this string as a string identifier
@@ -51,6 +62,78 @@ const char *lua_b3_world_meta_name="b3_world*ptr";
 const char *lua_b3_body_meta_name ="b3_body*ptr";
 const char *lua_b3_shape_meta_name="b3_shape*ptr";
 const char *lua_b3_joint_meta_name="b3_joint*ptr";
+
+
+/*+---------------------------------------------------------------------
+
+return a zero rotation b3Quat
+
+*/
+static b3Quat lua_b3_zero_b3Quat ()
+{
+#ifdef BOX_2
+	return (b3Quat){1,0};
+#else // BOX_3
+	return (b3Quat){1,0,0,0};
+#endif
+}
+
+/*+---------------------------------------------------------------------
+
+get and return b3Quat from table at "top" of stack
+
+*/
+static b3Quat lua_b3_read_b3Quat (lua_State *l, int top)
+{
+	top=lua_absindex(l,top); // use -1 for real top
+
+#ifdef BOX_2
+	b3Quat r = b3MakeRot( (float)lua_tonumber(l,top) );
+#else // BOX_3
+	b3Quat r;
+	if( lua_isnumber(l,top) ) // raw list
+	{
+		r.v.x=(float)lua_tonumber(l,top);
+		r.v.y=(float)lua_tonumber(l,top+1);
+		r.v.z=(float)lua_tonumber(l,top+2);
+		r.s  =(float)lua_tonumber(l,top+3);
+	}
+	else // table
+	{
+		lua_pushinteger(l,1);	lua_gettable(l,top);
+		lua_pushinteger(l,2);	lua_gettable(l,top);
+		lua_pushinteger(l,3);	lua_gettable(l,top);
+		lua_pushinteger(l,4);	lua_gettable(l,top);
+		r.v.x=(float)lua_tonumber(l,-4);
+		r.v.y=(float)lua_tonumber(l,-3);
+		r.v.z=(float)lua_tonumber(l,-2);
+		r.s  =(float)lua_tonumber(l,-1);
+		lua_pop(l,4);
+	}
+#endif
+
+	return r;
+}
+
+/*+---------------------------------------------------------------------
+
+push a rotation to stack from a b3Quat values
+
+*/
+static int lua_b3_push_b3Quat (lua_State *l, b3Quat r)
+{
+	
+#ifdef BOX_2
+	lua_pushnumber(l, b3Quat_GetAngle(r) );
+#else // BOX_3
+	lua_pushnumber(l, r.v.x );
+	lua_pushnumber(l, r.v.y );
+	lua_pushnumber(l, r.v.z );
+	lua_pushnumber(l, r.s );
+#endif
+	
+	return BOX_R_COUNT;
+}
 
 /*+---------------------------------------------------------------------
 
@@ -96,10 +179,17 @@ static b3Transform lua_b3_read_b3Transform (lua_State *l, int top)
 	b3Transform t;
 	lua_pushinteger(l,1);	lua_gettable(l,top);
 	lua_pushinteger(l,2);	lua_gettable(l,top);
-	lua_pushinteger(l,3);	lua_gettable(l,top);
 	t.p.x=(float)lua_tonumber(l,-3);
 	t.p.y=(float)lua_tonumber(l,-2);
-	t.q=b3MakeRot((float)lua_tonumber(l,-1));
+
+	for(int i=1; i<=BOX_R_COUNT ; i++ )
+	{
+		lua_pushinteger(l,BOX_V_COUNT+i);	lua_gettable(l,top);
+	}
+	t.q=lua_b3_read_b3Quat(l,-BOX_R_COUNT);
+
+//	t.q=b3MakeRot((float)lua_tonumber(l,-1));
+
 	lua_pop(l,3);
 	return t;
 }
@@ -116,8 +206,11 @@ static void lua_b3_push_b3Transform (lua_State *l, b3Transform t)
 	lua_rawseti(l, -2 , 1 );
 	lua_pushnumber(l, t.p.y );
 	lua_rawseti(l, -2 , 2 );
-	lua_pushnumber(l, b3Rot_GetAngle(t.q) );
-	lua_rawseti(l, -2 , 3 );
+
+	for( int i=lua_b3_push_b3Quat(l,t.q) ; i>0 ; i-- )
+	{
+		lua_rawseti(l, -(1+i) , 2+i );
+	}
 }
 
 /*+---------------------------------------------------------------------
@@ -321,11 +414,17 @@ b3WorldId *pp;
 		lua_getfield(l,1,"gravity");
 		if(!lua_isnil(l,-1)) { def.gravity=lua_b3_read_b3Vec3(l,-1); }
 		lua_pop(l,1);
+		lua_getfield(l,1,"hitEventThreshold");
+		if(!lua_isnil(l,-1)) { def.hitEventThreshold = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
 		lua_getfield(l,1,"restitutionThreshold");
 		if(!lua_isnil(l,-1)) { def.restitutionThreshold = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,1,"hitEventThreshold");
-		if(!lua_isnil(l,-1)) { def.hitEventThreshold = (float)lua_tonumber(l,-1); }
+		lua_getfield(l,1,"maximumLinearSpeed");
+		if(!lua_isnil(l,-1)) { def.maximumLinearSpeed = (float)lua_tonumber(l,-1); }
+		lua_pop(l,1);
+		lua_getfield(l,1,"contactSpeed");
+		if(!lua_isnil(l,-1)) { def.contactSpeed = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,1,"contactHertz");
 		if(!lua_isnil(l,-1)) { def.contactHertz = (float)lua_tonumber(l,-1); }
@@ -333,12 +432,7 @@ b3WorldId *pp;
 		lua_getfield(l,1,"contactDampingRatio");
 		if(!lua_isnil(l,-1)) { def.contactDampingRatio = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
-		lua_getfield(l,1,"contactSpeed");
-		if(!lua_isnil(l,-1)) { def.contactSpeed = (float)lua_tonumber(l,-1); }
-		lua_pop(l,1);
-		lua_getfield(l,1,"maximumLinearSpeed");
-		if(!lua_isnil(l,-1)) { def.maximumLinearSpeed = (float)lua_tonumber(l,-1); }
-		lua_pop(l,1);
+
 
 		lua_getfield(l,1,"enableSleep");
 		if(!lua_isnil(l,-1)) { def.enableSleep = lua_toboolean(l,-1); }
@@ -638,8 +732,10 @@ static int lua_b3_world_body_events (lua_State *l)
 		lua_pushnumber(l, event->transform.p.y );
 		lua_rawseti(l, -2 , i*5+4 );
 
-		lua_pushnumber(l, b3Rot_GetAngle(event->transform.q) );
-		lua_rawseti(l, -2 , i*5+5 );
+		for( int j=lua_b3_push_b3Quat(l,event->transform.q) ; i>0 ; j-- )
+		{
+			lua_rawseti(l, -(1+j) , i*5+4+j );
+		}
 
 	}
 
@@ -1072,7 +1168,7 @@ b3BodyId *pp;
 		if(!lua_isnil(l,-1)) { def.position=lua_b3_read_b3Vec3(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"rotation");
-		if(!lua_isnil(l,-1)) { def.rotation = b3MakeRot((float)lua_tonumber(l,-1)); }
+		if(!lua_isnil(l,-1)) { def.rotation = lua_b3_read_b3Quat(l,-1); }
 		lua_pop(l,1);
 
 		lua_getfield(l,2,"sleepThreshold");
@@ -1346,8 +1442,7 @@ b3Transform t;
 	{
 		t.p.x=(float)lua_tonumber(l, 2 );
 		t.p.y=(float)lua_tonumber(l, 3 );
-		r=(float)lua_tonumber(l, 4 );
-		t.q=b3MakeRot(r);
+		t.q=lua_b3_read_b3Quat(l,4);
 
 		b3Body_SetTransform(body,t.p,t.q);
 	}
@@ -1356,7 +1451,7 @@ b3Transform t;
 
 	lua_pushnumber(l, t.p.x );
 	lua_pushnumber(l, t.p.y );
-	lua_pushnumber(l, b3Rot_GetAngle(t.q) );
+	lua_b3_push_b3Quat(l,t.q);
 
 	return 3;
 }
@@ -1760,9 +1855,9 @@ b3ShapeId *pp;
 		if(!lua_isnil(l,-1)) { center=lua_b3_read_b3Vec3(l,-1); }
 		lua_pop(l,1);
 
-		float rotation=0.0f;
+		b3Quat rotation=lua_b3_zero_b3Quat();
 		lua_getfield(l,2,"rotation");
-		if(!lua_isnil(l,-1)) { rotation = (float)lua_tonumber(l,-1); }
+		if(!lua_isnil(l,-1)) { rotation = lua_b3_read_b3Quat(l,-1); }
 		lua_pop(l,1);
 
 		float radius=0.0f;
@@ -1770,7 +1865,7 @@ b3ShapeId *pp;
 		if(!lua_isnil(l,-1)) { radius = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
 
-		polygon=b3MakeOffsetRoundedBox(halfWidth,halfHeight,center,b3MakeRot(rotation),radius);
+		polygon=b3MakeOffsetRoundedBox(halfWidth,halfHeight,center,rotation,radius);
 
 		*pp=b3CreatePolygonShape(body,&def,&polygon);
 	}

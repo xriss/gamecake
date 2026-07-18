@@ -63,6 +63,78 @@ const char *lua_b2_body_meta_name ="b2_body*ptr";
 const char *lua_b2_shape_meta_name="b2_shape*ptr";
 const char *lua_b2_joint_meta_name="b2_joint*ptr";
 
+
+/*+---------------------------------------------------------------------
+
+return a zero rotation b2Rot
+
+*/
+static b2Rot lua_b2_zero_b2Rot ()
+{
+#ifdef BOX_2
+	return (b2Rot){1,0};
+#else // BOX_3
+	return (b2Rot){1,0,0,0};
+#endif
+}
+
+/*+---------------------------------------------------------------------
+
+get and return b2Rot from table at "top" of stack
+
+*/
+static b2Rot lua_b2_read_b2Rot (lua_State *l, int top)
+{
+	top=lua_absindex(l,top); // use -1 for real top
+
+#ifdef BOX_2
+	b2Rot r = b2MakeRot( (float)lua_tonumber(l,top) );
+#else // BOX_3
+	b2Rot r;
+	if( lua_isnumber(l,top) ) // raw list
+	{
+		r.v.x=(float)lua_tonumber(l,top);
+		r.v.y=(float)lua_tonumber(l,top+1);
+		r.v.z=(float)lua_tonumber(l,top+2);
+		r.s  =(float)lua_tonumber(l,top+3);
+	}
+	else // table
+	{
+		lua_pushinteger(l,1);	lua_gettable(l,top);
+		lua_pushinteger(l,2);	lua_gettable(l,top);
+		lua_pushinteger(l,3);	lua_gettable(l,top);
+		lua_pushinteger(l,4);	lua_gettable(l,top);
+		r.v.x=(float)lua_tonumber(l,-4);
+		r.v.y=(float)lua_tonumber(l,-3);
+		r.v.z=(float)lua_tonumber(l,-2);
+		r.s  =(float)lua_tonumber(l,-1);
+		lua_pop(l,4);
+	}
+#endif
+
+	return r;
+}
+
+/*+---------------------------------------------------------------------
+
+push a rotation to stack from a b2Rot values
+
+*/
+static int lua_b2_push_b2Rot (lua_State *l, b2Rot r)
+{
+	
+#ifdef BOX_2
+	lua_pushnumber(l, b2Rot_GetAngle(r) );
+#else // BOX_3
+	lua_pushnumber(l, r.v.x );
+	lua_pushnumber(l, r.v.y );
+	lua_pushnumber(l, r.v.z );
+	lua_pushnumber(l, r.s );
+#endif
+	
+	return BOX_R_COUNT;
+}
+
 /*+---------------------------------------------------------------------
 
 get and return b2Vec2 from table at "top" of stack
@@ -107,10 +179,17 @@ static b2Transform lua_b2_read_b2Transform (lua_State *l, int top)
 	b2Transform t;
 	lua_pushinteger(l,1);	lua_gettable(l,top);
 	lua_pushinteger(l,2);	lua_gettable(l,top);
-	lua_pushinteger(l,3);	lua_gettable(l,top);
 	t.p.x=(float)lua_tonumber(l,-3);
 	t.p.y=(float)lua_tonumber(l,-2);
-	t.q=b2MakeRot((float)lua_tonumber(l,-1));
+
+	for(int i=1; i<=BOX_R_COUNT ; i++ )
+	{
+		lua_pushinteger(l,BOX_V_COUNT+i);	lua_gettable(l,top);
+	}
+	t.q=lua_b2_read_b2Rot(l,-BOX_R_COUNT);
+
+//	t.q=b2MakeRot((float)lua_tonumber(l,-1));
+
 	lua_pop(l,3);
 	return t;
 }
@@ -127,8 +206,11 @@ static void lua_b2_push_b2Transform (lua_State *l, b2Transform t)
 	lua_rawseti(l, -2 , 1 );
 	lua_pushnumber(l, t.p.y );
 	lua_rawseti(l, -2 , 2 );
-	lua_pushnumber(l, b2Rot_GetAngle(t.q) );
-	lua_rawseti(l, -2 , 3 );
+
+	for( int i=lua_b2_push_b2Rot(l,t.q) ; i>0 ; i-- )
+	{
+		lua_rawseti(l, -(1+i) , 2+i );
+	}
 }
 
 /*+---------------------------------------------------------------------
@@ -650,8 +732,10 @@ static int lua_b2_world_body_events (lua_State *l)
 		lua_pushnumber(l, event->transform.p.y );
 		lua_rawseti(l, -2 , i*5+4 );
 
-		lua_pushnumber(l, b2Rot_GetAngle(event->transform.q) );
-		lua_rawseti(l, -2 , i*5+5 );
+		for( int j=lua_b2_push_b2Rot(l,event->transform.q) ; i>0 ; j-- )
+		{
+			lua_rawseti(l, -(1+j) , i*5+4+j );
+		}
 
 	}
 
@@ -1084,7 +1168,7 @@ b2BodyId *pp;
 		if(!lua_isnil(l,-1)) { def.position=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 		lua_getfield(l,2,"rotation");
-		if(!lua_isnil(l,-1)) { def.rotation = b2MakeRot((float)lua_tonumber(l,-1)); }
+		if(!lua_isnil(l,-1)) { def.rotation = lua_b2_read_b2Rot(l,-1); }
 		lua_pop(l,1);
 
 		lua_getfield(l,2,"sleepThreshold");
@@ -1358,8 +1442,7 @@ b2Transform t;
 	{
 		t.p.x=(float)lua_tonumber(l, 2 );
 		t.p.y=(float)lua_tonumber(l, 3 );
-		r=(float)lua_tonumber(l, 4 );
-		t.q=b2MakeRot(r);
+		t.q=lua_b2_read_b2Rot(l,4);
 
 		b2Body_SetTransform(body,t.p,t.q);
 	}
@@ -1368,7 +1451,7 @@ b2Transform t;
 
 	lua_pushnumber(l, t.p.x );
 	lua_pushnumber(l, t.p.y );
-	lua_pushnumber(l, b2Rot_GetAngle(t.q) );
+	lua_b2_push_b2Rot(l,t.q);
 
 	return 3;
 }
@@ -1772,9 +1855,9 @@ b2ShapeId *pp;
 		if(!lua_isnil(l,-1)) { center=lua_b2_read_b2Vec2(l,-1); }
 		lua_pop(l,1);
 
-		float rotation=0.0f;
+		b2Rot rotation=lua_b2_zero_b2Rot();
 		lua_getfield(l,2,"rotation");
-		if(!lua_isnil(l,-1)) { rotation = (float)lua_tonumber(l,-1); }
+		if(!lua_isnil(l,-1)) { rotation = lua_b2_read_b2Rot(l,-1); }
 		lua_pop(l,1);
 
 		float radius=0.0f;
@@ -1782,7 +1865,7 @@ b2ShapeId *pp;
 		if(!lua_isnil(l,-1)) { radius = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
 
-		polygon=b2MakeOffsetRoundedBox(halfWidth,halfHeight,center,b2MakeRot(rotation),radius);
+		polygon=b2MakeOffsetRoundedBox(halfWidth,halfHeight,center,rotation,radius);
 
 		*pp=b2CreatePolygonShape(body,&def,&polygon);
 	}
