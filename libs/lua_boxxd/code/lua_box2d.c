@@ -196,7 +196,7 @@ static b2Transform lua_b2_read_b2Transform (lua_State *l, int top)
 
 /*+---------------------------------------------------------------------
 
-push a new table to stack containing b2Vec2 values
+push a new table to stack containing b2Transform values
 
 */
 static void lua_b2_push_b2Transform (lua_State *l, b2Transform t)
