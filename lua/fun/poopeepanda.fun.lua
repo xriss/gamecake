@@ -142,7 +142,7 @@ all.create_scene=function(scene)
 			{"kinetic",
 				LengthUnitsPerMeter=16,
 				step=(1/16), -- amount of time to step each frame
-				substeps=16, -- number of substeps
+				substeps=64, -- number of substeps per step ( should be about 256 per sec)
 				defaults=kinetics.defaults,
 				bits=kinetics.bits,
 			},
@@ -216,8 +216,8 @@ kinetics.defaults={ -- world defaults when creating box2d objects
 		gravity={0,400}, -- default gravity
 		sleepThreshold=0*16, -- *16 meter adjust
 		hitEventThreshold = 0.0*16, -- any hit please
-		restitutionThreshold = 0.0*16, -- bouncy
-		contactSpeed = 16*16,
+--		restitutionThreshold = 0.0*16, -- bouncy
+		contactSpeed = 16*16, -- push out 1 pix per step
 --		maximumLinearSpeed = 400*16,
 	},
 	body={
@@ -258,7 +258,7 @@ kinetics.bits={ -- named collision bit masks
 	},
 	fruit={			group=0,
 					bits=0x0000000010000,
-					mask=0x00000000001ff,
+					mask=0x0000000ffffff,
 	},
 	gib={			group=0,
 					bits=0x0000001000000,
@@ -2679,7 +2679,9 @@ end
 -- must begin and end with a get and a set
 gibs.item.setup=function(gib)
 	gib:get_values()
-	
+
+PRINT("gib",gib.pos,gib.vel)
+
 	gib:setup_kinetic()
 	gib:set_values()
 end
@@ -3197,8 +3199,8 @@ legend=levels.combine_legends(levels.legend,{
 	["Tb"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
 	["Tc"]={ name="char_sign",				text="Congratulations on the coyote JUMP." },
 	["Td"]={ name="char_sign",				text="You may coyote JUMP in the air after walking off a platform." },
-	["T1"]={ name="char_sign",				text="Press Button A or . to JUMP in." },
-	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move." },
+	["T1"]={ name="char_sign",				text="" },
+	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move. Press Button A or . to JUMP in." },
 	["T3"]={ name="char_sign",				text="MOVE down to crouch down." },
 	["T4"]={ name="char_sign",				text="Press Button B or / to GRAB object, press GRAB again to throw it." },
 	["T5"]={ name="char_sign",				text="Throw power is shown by rotation speed, run for it to speed up." },
@@ -3217,10 +3219,10 @@ map=[[
 0 > . . . . . . . . . . . . . ^ . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 J1. Tc. . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 0 0 0 0 0 . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . Td. . . . 0 . . . . . . . . . . . . . . . . . . 0 . . . < . . . . 0 
-0 . . . . . . . . . . . . 0 0 0 . . . 0 . . . . . . . . . . . . . . . . . . 0 . . . . . . . , 0 
-0 P1P2. . . . . . . . . . 0 0 0 . . . 0 . ^ . . . J1. . . . . . . . . . . . 0 . . . ^ . . . . 0 
-0 . T2. . . . . . . . T1. 0 0 0 . T3. . . . T4. . 0 . . T5. . T6. . T7. . T80 . . . . . . . S10 
+0 . . . . . . . . . . . . . Td. . . . 0 . . . . . . . . . . . . . . . . . . . 0 . . < . . . . 0 
+0 . . . . . . . . . . . . 0 0 0 . . . 0 . . . . . . . . . . . . . . . . . . . 0 . . . . . . , 0 
+0 P1P2. . . . . . . . . . 0 0 0 . . . 0 . ^ . . . J1. . . . . . . . . . . . . 0 . . ^ . . . . 0 
+0 . T2. . . . . . . . . . 0 0 0 . T3. . . . T4. . 0 . . T5. . T6. . T7. . T8. 0 . . . . . . S10 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 ]],
 }
