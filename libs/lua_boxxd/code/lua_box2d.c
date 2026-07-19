@@ -23,8 +23,8 @@ Conditional code generation defines, these defines get mutated between
 
 */
 
-// BOX_2 or BOX_3 is defined here
-#define BOX_2 2
+// BOX_2D or BOX_3D is defined here
+#define BOX_2D 2
 // count of numbers in a vector
 #define BOX_V_COUNT 2
 // count of numbers in a rotation
@@ -71,7 +71,7 @@ return a zero rotation b2Rot
 */
 static b2Rot lua_b2_zero_b2Rot ()
 {
-#ifdef BOX_2
+#ifdef BOX_2D
 	return (b2Rot){1,0};
 #else // BOX_3
 	return (b2Rot){1,0,0,0};
@@ -87,7 +87,7 @@ static b2Rot lua_b2_read_b2Rot (lua_State *l, int top)
 {
 	top=lua_absindex(l,top); // use -1 for real top
 
-#ifdef BOX_2
+#ifdef BOX_2D
 	b2Rot r = b2MakeRot( (float)lua_tonumber(l,top) );
 #else // BOX_3
 	b2Rot r;
@@ -123,7 +123,7 @@ push a rotation to stack from a b2Rot values
 static int lua_b2_push_b2Rot (lua_State *l, b2Rot r)
 {
 	
-#ifdef BOX_2
+#ifdef BOX_2D
 	lua_pushnumber(l, b2Rot_GetAngle(r) );
 #else // BOX_3
 	lua_pushnumber(l, r.v.x );
@@ -235,6 +235,7 @@ static b2ShapeProxy lua_b2_read_b2ShapeProxy (lua_State *l, int top)
 		{
 			idx=idx+1;
 			lua_pushinteger(l,idx);	lua_gettable(l,-2); // can be fake array
+#ifdef BOX_2D
 			if( lua_isnil(l,-1) || idx>(B2_MAX_POLYGON_VERTICES*2) ) // end
 			{
 				lua_pop(l,1);
@@ -253,6 +254,11 @@ static b2ShapeProxy lua_b2_read_b2ShapeProxy (lua_State *l, int top)
 				}
 				lua_pop(l,1);
 			}
+#else
+
+//			if( lua_isnil(l,-1) || idx>(B3_MAX_SHAPE_CAST_POINTS*2) ) // end
+
+#endif
 		}
 	}
 	lua_pop(l,1);
@@ -332,6 +338,8 @@ static int lua_b2_contact (lua_State *l)
 
 	b2ContactData contact = b2Contact_GetData(id);
 
+#ifdef BOX_2D
+
 	lua_newtable(l);
 
 	lua_b2_push_b2Vec2(l,contact.manifold.normal);
@@ -379,6 +387,12 @@ static int lua_b2_contact (lua_State *l)
 	lua_setfield(l,-2,"manifold_points");
 
 	return 1;
+
+#else
+
+	return 0;
+
+#endif
 }
 
 /*+---------------------------------------------------------------------
@@ -463,7 +477,7 @@ b2WorldId *pp;
 static int lua_b2_world_destroy (lua_State *l)
 {
 b2WorldId *pp=lua_b2_world_ptr_ptr(l, 1 );
-	if(B2_IS_NON_NULL(*pp))
+	if(B2_IS_NON_NULL( (*pp) ))
 	{
 		b2DestroyWorld(*pp);
 		*pp=(b2WorldId){0};
@@ -933,6 +947,8 @@ static int lua_b2_world_cast (lua_State *l)
 {
 	b2WorldId world = lua_b2_world_ptr(l, 1 );
 	
+#ifdef BOX_2D
+
 	b2Vec2 origin=(b2Vec2){0,0};
 	b2Vec2 translation=(b2Vec2){0,0};
 	b2QueryFilter filter=(b2QueryFilter){1,0xFFFFFFFFFFFFFFFFULL};
@@ -988,6 +1004,10 @@ static int lua_b2_world_cast (lua_State *l)
 	lua_setfield(l, -2 , "nodeVisits" );
 
 	return 1;
+#else
+
+	return 0;
+#endif
 }
 
 /*+---------------------------------------------------------------------
@@ -1019,7 +1039,9 @@ get shapes overlapping an aabb or a shape
 static int lua_b2_world_overlap (lua_State *l)
 {
 	b2WorldId world = lua_b2_world_ptr(l, 1 );
-	
+
+#ifdef BOX_2D
+
 	b2QueryFilter filter=(b2QueryFilter){1,0xFFFFFFFFFFFFFFFFULL};
 	b2AABB aabb=(b2AABB){0.0f,0.0f,0.0f,0.0f};
 
@@ -1079,6 +1101,12 @@ static int lua_b2_world_overlap (lua_State *l)
 	lua_setfield(l, -2 , "nodeVisits" );
 
 	return 1;
+
+#else
+
+	return 0;
+
+#endif
 }
 
 
@@ -1119,9 +1147,11 @@ b2BodyId *pp;
 		lua_getfield(l,2,"angularDamping");
 		if(!lua_isnil(l,-1)) { def.angularDamping = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
+#ifdef BOX_2D
 		lua_getfield(l,2,"angularVelocity");
 		if(!lua_isnil(l,-1)) { def.angularVelocity = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
+#endif
 		lua_getfield(l,2,"enableSleep");
 		if(!lua_isnil(l,-1)) { def.enableSleep = lua_toboolean(l,-1); }
 		lua_pop(l,1);
@@ -1203,7 +1233,7 @@ b2BodyId *pp;
 static int lua_b2_body_destroy (lua_State *l)
 {
 b2BodyId *pp=lua_b2_body_ptr_ptr(l, 1 );
-	if(B2_IS_NON_NULL(*pp))
+	if(B2_IS_NON_NULL( (*pp) ))
 	{
 		b2DestroyBody(*pp);
 		*pp=(b2BodyId){0};
@@ -1355,12 +1385,14 @@ static int lua_b2_body_set (lua_State *l)
 	}
 	lua_pop(l,1);
 
+#ifdef BOX_2D
 	lua_getfield(l,2,"enableContactEvents");
 	if(!lua_isnil(l,-1))
 	{
 		b2Body_EnableContactEvents(body, lua_toboolean(l,-1) );
 	}
 	lua_pop(l,1);
+#endif
 
 	lua_getfield(l,2,"enableHitEvents");
 	if(!lua_isnil(l,-1))
@@ -1475,11 +1507,15 @@ float r;
 		r=(float)lua_tonumber(l, 4 );
 
 		b2Body_SetLinearVelocity(body,p);
+#ifdef BOX_2D
 		b2Body_SetAngularVelocity(body,r);
+#endif
 	}
 
 	p=b2Body_GetLinearVelocity(body);
+#ifdef BOX_2D
 	r=b2Body_GetAngularVelocity(body);
+#endif
 
 	lua_pushnumber(l, p.x );
 	lua_pushnumber(l, p.y );
@@ -1499,7 +1535,9 @@ static int lua_b2_body_force (lua_State *l)
 {
 	b2BodyId body = lua_b2_body_ptr(l, 1 );
 
+#ifdef BOX_2D
 	b2Body_ClearForces(body); // always clear force and torque
+#endif
 
 
 	if(!lua_isnil(l,3)) // only set if given
@@ -1514,7 +1552,9 @@ static int lua_b2_body_force (lua_State *l)
 	{
 		float r=(float)lua_tonumber(l, 4 );
 		
+#ifdef BOX_2D
 		b2Body_ApplyTorque(body,r,1);
+#endif
 	}
 
 	return 0;
@@ -1531,7 +1571,9 @@ static int lua_b2_body_acceleration (lua_State *l)
 {
 	b2BodyId body = lua_b2_body_ptr(l, 1 );
 
+#ifdef BOX_2D
 	b2Body_ClearForces(body); // always clear force and torque
+#endif
 
 	if(!lua_isnil(l,3)) // only set if given
 	{
@@ -1542,6 +1584,8 @@ static int lua_b2_body_acceleration (lua_State *l)
 
 		b2Body_ApplyForceToCenter(body,p,1);
 	}
+
+#ifdef BOX_2D
 	if(!lua_isnil(l,4)) // only set torque if given ( 0 if missing )
 	{
 		float rotational_inertia=b2Body_GetRotationalInertia(body);
@@ -1549,6 +1593,7 @@ static int lua_b2_body_acceleration (lua_State *l)
 		
 		b2Body_ApplyTorque(body,r,1);
 	}
+#endif
 
 	return 0;
 }
@@ -1572,11 +1617,13 @@ static int lua_b2_body_mass (lua_State *l)
 		changed=1;
 		md.mass=(float)lua_tonumber(l, 2 );
 	}
+#ifdef BOX_2D
 	if(!lua_isnil(l,3)) // only set if given
 	{
 		changed=1;
 		md.rotationalInertia=(float)lua_tonumber(l, 3 );
 	}
+#endif
 	if(!lua_isnil(l,5)) // only set if given
 	{
 		changed=1;
@@ -1589,7 +1636,9 @@ static int lua_b2_body_mass (lua_State *l)
 	}
 
 	lua_pushnumber(l, md.mass );
+#ifdef BOX_2D
 	lua_pushnumber(l, md.rotationalInertia );
+#endif
 	lua_pushnumber(l, md.center.x );
 	lua_pushnumber(l, md.center.y );
 
@@ -1748,6 +1797,7 @@ b2ShapeId *pp;
 	if(!lua_isnil(l,-1)) { def.isSensor = lua_toboolean(l,-1); }
 	lua_pop(l,1);
 
+#ifdef BOX_2D
 	lua_getfield(l,2,"material_customColor");
 	if(!lua_isnil(l,-1)) { def.material.customColor = (uint32_t)lua_tonumber(l,-1); }
 	lua_pop(l,1);
@@ -1766,6 +1816,7 @@ b2ShapeId *pp;
 	lua_getfield(l,2,"material_userMaterialId");
 	if(!lua_isnil(l,-1)) { def.material.userMaterialId = (int)lua_tonumber(l,-1); }
 	lua_pop(l,1);
+#endif
 
 	lua_getfield(l,2,"updateBodyMass");
 	if(!lua_isnil(l,-1)) { def.updateBodyMass = lua_toboolean(l,-1); }
@@ -1786,6 +1837,7 @@ b2ShapeId *pp;
 	{
 		shape_type=lua_tostring(l,-1);
 	}
+#ifdef BOX_2D
 	if(strcmp(shape_type,"circle")==0)
 	{
 		lua_pop(l,1); // shape_type is no longer valid
@@ -1875,6 +1927,7 @@ b2ShapeId *pp;
 
 		luaL_error(l,"unknown shape type");
 	}
+#endif
 
 	lua_pushlstring(l,(const char *)pp,sizeof(b2ShapeId)); // id to (non printable) string
 	return 2;
@@ -1883,7 +1936,7 @@ b2ShapeId *pp;
 static int lua_b2_shape_destroy (lua_State *l)
 {
 b2ShapeId *pp=lua_b2_shape_ptr_ptr(l, 1 );
-	if(B2_IS_NON_NULL(*pp))
+	if(B2_IS_NON_NULL( (*pp) ))
 	{
 		int update=1;
 		if(!lua_isnil(l,2)) // optional
@@ -1907,6 +1960,7 @@ static int lua_b2_shape_info (lua_State *l)
 
 	lua_newtable(l);
 	
+#ifdef BOX_2D
 	b2ShapeType type = b2Shape_GetType(shape);
 	if     ( type==b2_circleShape       ) { lua_pushstring(l, "circle"       ); }
 	else if( type==b2_capsuleShape      ) { lua_pushstring(l, "capsule"      ); }
@@ -1915,6 +1969,7 @@ static int lua_b2_shape_info (lua_State *l)
 	else if( type==b2_chainSegmentShape ) { lua_pushstring(l, "chainSegment" ); }
 	else                                  { lua_pushstring(l, "unknown"      ); }
 	lua_setfield(l, -2 , "type" );
+#endif
 
 	return 1;
 }
@@ -1937,8 +1992,10 @@ static int lua_b2_shape_get (lua_State *l)
 	lua_pushnumber(l, b2Shape_GetRestitution(shape) );
 	lua_setfield(l, -2 , "restitution" );
 
+#ifdef BOX_2D
 	lua_pushnumber(l, b2Shape_GetUserMaterial(shape) );
 	lua_setfield(l, -2 , "material_userMaterialId" );
+#endif
 
 	b2Filter filter = b2Shape_GetFilter(shape);
 	lua_pushnumber(l, filter.categoryBits );
@@ -1983,12 +2040,14 @@ static int lua_b2_shape_set (lua_State *l)
 	}
 	lua_pop(l,1);
 
+#ifdef BOX_2D
 	lua_getfield(l,2,"material_userMaterialId");
 	if(!lua_isnil(l,-1))
 	{
 		b2Shape_SetUserMaterial(shape, lua_tonumber(l,-1) );
 	}
 	lua_pop(l,1);
+#endif
 
 	int set_filter=0;
 	b2Filter filter = b2Shape_GetFilter(shape);
@@ -2013,7 +2072,9 @@ static int lua_b2_shape_set (lua_State *l)
 		filter.maskBits = lua_tonumber(l,-1) ;
 	}
 	lua_pop(l,1);
+#ifdef BOX_2D
 	if(set_filter) { b2Shape_SetFilter(shape,filter); }
+#endif
 
 	lua_getfield(l,2,"enableSensorEvents");
 	if(!lua_isnil(l,-1))
@@ -2225,9 +2286,11 @@ b2JointId *pp;
 		lua_getfield(l,2,"maxVelocityForce");
 		if(!lua_isnil(l,-1)) { motor.maxVelocityForce = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
+#ifdef BOX_2D
 		lua_getfield(l,2,"angularVelocity");
 		if(!lua_isnil(l,-1)) { motor.angularVelocity = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
+#endif
 		lua_getfield(l,2,"maxVelocityTorque");
 		if(!lua_isnil(l,-1)) { motor.maxVelocityTorque = (float)lua_tonumber(l,-1); }
 		lua_pop(l,1);
@@ -2372,6 +2435,7 @@ b2JointId *pp;
 
 		*pp=b2CreateWeldJoint(world,&weld);
 	}
+#ifdef BOX_2D
 	else
 	if(strcmp(joint_type,"wheel")==0)
 	{
@@ -2412,6 +2476,7 @@ b2JointId *pp;
 
 		*pp=b2CreateWheelJoint(world,&wheel);
 	}
+#endif
 	else
 	{
 		lua_pop(l,1); // joint_type is no longer valid
@@ -2426,7 +2491,7 @@ b2JointId *pp;
 static int lua_b2_joint_destroy (lua_State *l)
 {
 b2JointId *pp=lua_b2_joint_ptr_ptr(l, 1 );
-	if(B2_IS_NON_NULL(*pp))
+	if(B2_IS_NON_NULL( (*pp) ))
 	{
 		int update=1;
 		if(!lua_isnil(l,2)) // optional

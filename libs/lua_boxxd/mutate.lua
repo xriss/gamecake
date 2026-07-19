@@ -27,7 +27,7 @@ mutate_strings={
 if mutate_from=="2" then
 	for i,v in ipairs({
 	-- swap the defines around
-	{  "#define BOX_2 2"        ,  "#define BOX_3 3"        , },
+	{  "#define BOX_2D 2"       ,  "#define BOX_3D 3"       , },
 	{  "#define BOX_V_COUNT 2"  ,  "#define BOX_V_COUNT 3"  , },
 	{  "#define BOX_R_COUNT 1"  ,  "#define BOX_R_COUNT 4"  , },
 
@@ -45,9 +45,13 @@ if mutate_from=="2" then
 else
 	for i,v in ipairs({
 	-- swap the defines around
-	{  "#define BOX_3 3"        ,  "#define BOX_2 2"        , },
+	{  "#define BOX_3D 3"       ,  "#define BOX_2D 2"       , },
 	{  "#define BOX_V_COUNT 3"  ,  "#define BOX_V_COUNT 2"  , },
 	{  "#define BOX_R_COUNT 4"  ,  "#define BOX_R_COUNT 1"  , },
+
+	-- swap explicit names
+	{  "b3Quat"                 ,  "b2Rot"                  , },
+
 	-- swap generic names
 	{  "b3"                     ,  "b2"                     , },
 	{  "B3"                     ,  "B2"                     , },
