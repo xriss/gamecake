@@ -291,7 +291,7 @@ kinetics.cast_feet=function(world,ray)
 			if		hit.floor>=2 and 
 					hit.normal[2]<0.5 and
 					math.abs(hit.delta[1])<(ray.radius-1) then -- filter out bad hits
---print(hit.delta,hit.normal)
+--rint(hit.delta,hit.normal)
 				return hit
 			end
 		end
@@ -567,7 +567,7 @@ overshade.update=function(overshade)
 				end
 			end
 			if touch then
---print(id,action,pos,touch)
+--rint(id,action,pos,touch)
 			    overshade.last_touch=oven.time()
 
 				touch.pos=V2(pos)
@@ -602,7 +602,7 @@ overshade.update=function(overshade)
 				end
 			end
 		end
---		print(id,act,x,y)
+--rint(id,act,x,y)
 	end
 
 	local age=(oven.time()-overshade.last_touch)
@@ -1696,7 +1696,7 @@ end
 fauna_eggs.system.update=function(sys)
 	local list_eggs=scene:caste("fauna_egg")
 	local list_players=scene:caste("player")
---	print(#list_eggs)
+--rint(#list_eggs)
 	local best_egg,best_player
 	local best_d=math.huge
 	for i,egg in ipairs(list_eggs) do
@@ -1729,6 +1729,8 @@ end
 -- must begin and end with a get and a set
 fauna_eggs.item.setup=function(fauna)
 	fauna:get_values()
+
+--RINT("egg setup",fauna.uid,fauna.pos,fauna.vel,fauna.rot)
 
 	fauna:setup_kinetic()
 	fauna:set_values()
@@ -1791,6 +1793,8 @@ fauna_eggs.item.update=function(fauna)
 	fauna:setup_kinetic() -- might need to recreate body
 
 	local level=fauna:get_singular("level") -- only one level is active at a time
+
+--RINT("egg",fauna.uid,fauna.pos,fauna.vel,fauna.rot,fauna.ang)
 
 -- use global gravity
 --	local grav=level:get_gravity(fauna.pos,fauna.vel)
@@ -2680,8 +2684,6 @@ end
 gibs.item.setup=function(gib)
 	gib:get_values()
 
-PRINT("gib",gib.pos,gib.vel)
-
 	gib:setup_kinetic()
 	gib:set_values()
 end
@@ -3311,6 +3313,9 @@ map=[[
 ]],
 }
 
+-- debug level start
+levels.infos[1]=levels.infos[4]
+
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
 levels.system.setup=function(sys)
@@ -3350,7 +3355,7 @@ levels.item.setup=function(level)
 		end
 	end
 	local hx,hy=bitdown.pix_size(info.map)
---print("mapsize",hx,hy)
+--rint("mapsize",hx,hy)
 	system.components.map.autosize=nil -- turn off autosize
 	system.components.map.screen_resize(hx*8,hy*8)
 	system.components.map.tilemap_grd:clear(0)
@@ -3404,7 +3409,7 @@ levels.item.setup=function(level)
 			local shape=tile.shape
 			tile.shape=nil
 			if shape and shape[1]==x*8 and shape[2]==y*8 then -- shape must start at this cell
---print("shape",unpack(shape))
+--rint("shape",unpack(shape))
 				level.static_body:shape({
 					shape="box",
 					halfWidth=(shape[3]-shape[1])/2,
@@ -3905,9 +3910,6 @@ huds.item.draw=function(hud)
 
     local bg=24
 --	text.text_clear(0x01000000*bg) -- clear text forcing a background color
-
---	text.text_print("This is the hud, 4 lives and 10 secs",0,0,31,24) -- (text,x,y,color,background)
---	text.text_print2("This is the hud, 4 lives and 10 secs",0,1,31,24) -- (text,x,y,color,background)
 
 	if hud.tile_idx>=0 then
 		local maxchar=math.floor((hud.tile_time-TEXT_DELAY_WAIT)/1)
