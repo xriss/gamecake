@@ -71,6 +71,8 @@ gui.setup=function()
 
 	gui.plan_windows()
 	
+	gui.datas.set_string("list_mode","search")
+
 --	gui.data_load("all")
 --	gui.plan_windows_load()
 
@@ -162,7 +164,7 @@ gui.data_setup=function()
 			{str="console"},
 		}})
 
-		datas.new({id="list_mode"  ,class="list",  hooks=gui.hooks,num=2,list={
+		datas.new({id="list_mode"  ,class="list",  hooks=gui.hooks,num=1,list={
 			{str="play"},
 --			{str="console"},
 			{str="search"},
