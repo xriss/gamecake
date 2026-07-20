@@ -142,7 +142,7 @@ all.create_scene=function(scene)
 			{"kinetic",
 				LengthUnitsPerMeter=16,
 				step=(1/16), -- amount of time to step each frame
-				substeps=64, -- number of substeps per step ( should be about 256 per sec)
+				substeps=16, -- number of substeps per step ( should be about 256 per sec)
 				defaults=kinetics.defaults,
 				bits=kinetics.bits,
 			},
@@ -3314,7 +3314,7 @@ map=[[
 }
 
 -- debug level start
-levels.infos[1]=levels.infos[4]
+--levels.infos[1]=levels.infos[4]
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
