@@ -1,8 +1,8 @@
-Resolving SDK alias 'latest' to '6.0.0'
-Resolving SDK version '6.0.0' to 'sdk-releases-772bb4648be4a897ca062d6adc65bc70223d2703-64bit'
+Resolving SDK alias 'latest' to '6.0.3'
+Resolving SDK version '6.0.3' to 'sdk-releases-9074aa513b501925adb1361e208932ad32a29a5f-64bit'
 Setting the following tools as active:
    node-22.16.0-64bit
-   releases-772bb4648be4a897ca062d6adc65bc70223d2703-64bit
+   releases-9074aa513b501925adb1361e208932ad32a29a5f-64bit
 
 Next steps:
 - To conveniently access emsdk tools from the command line,

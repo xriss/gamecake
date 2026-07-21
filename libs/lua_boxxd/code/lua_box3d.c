@@ -1842,7 +1842,7 @@ b3ShapeId *pp;
 	{
 		lua_pop(l,1); // shape_type is no longer valid
 
-		b3Circle circle;
+		b3Circle circle={0};
 		lua_getfield(l,2,"center");
 		if(!lua_isnil(l,-1)) { circle.center=lua_b3_read_b3Vec3(l,-1); }
 		lua_pop(l,1);
@@ -1857,7 +1857,7 @@ b3ShapeId *pp;
 	{
 		lua_pop(l,1); // shape_type is no longer valid
 
-		b3Segment segment;
+		b3Segment segment={0};
 		lua_getfield(l,2,"point1");
 		if(!lua_isnil(l,-1)) { segment.point1=lua_b3_read_b3Vec3(l,-1); }
 		lua_pop(l,1);
@@ -1872,7 +1872,7 @@ b3ShapeId *pp;
 	{
 		lua_pop(l,1); // shape_type is no longer valid
 
-		b3Capsule capsule;
+		b3Capsule capsule={0};
 		lua_getfield(l,2,"center1");
 		if(!lua_isnil(l,-1)) { capsule.center1=lua_b3_read_b3Vec3(l,-1); }
 		lua_pop(l,1);
@@ -1890,7 +1890,7 @@ b3ShapeId *pp;
 	{
 		lua_pop(l,1); // shape_type is no longer valid
 
-		b3Polygon polygon;
+		b3Polygon polygon={0};
 
 		float halfWidth=0.0f;
 		lua_getfield(l,2,"halfWidth");
@@ -2174,6 +2174,41 @@ b3JointId *pp;
 	return *pp;
 }
 
+static void lua_b3_joint_fill (lua_State *l, int top , b3JointDef *joint )
+{
+	top=lua_absindex(l,top); // use -1 for real top
+	
+	// get generic joint values
+	lua_getfield(l,top,"bodyIdA");
+	if(!lua_isnil(l,-1)) { joint->bodyIdA=*((b3BodyId*)(lua_tostring(l,-1))); }
+	lua_pop(l,1);
+	lua_getfield(l,top,"bodyIdB");
+	if(!lua_isnil(l,-1)) { joint->bodyIdB=*((b3BodyId*)(lua_tostring(l,-1))); }
+	lua_pop(l,1);
+	lua_getfield(l,top,"localFrameA");
+	if(!lua_isnil(l,-1)) { joint->localFrameA=lua_b3_read_b3Transform(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,top,"localFrameB");
+	if(!lua_isnil(l,-1)) { joint->localFrameB=lua_b3_read_b3Transform(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,top,"forceThreshold");
+	if(!lua_isnil(l,-1)) { joint->forceThreshold = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,top,"torqueThreshold");
+	if(!lua_isnil(l,-1)) { joint->torqueThreshold = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,top,"constraintHertz");
+	if(!lua_isnil(l,-1)) { joint->constraintHertz = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,top,"constraintDampingRatio");
+	if(!lua_isnil(l,-1)) { joint->constraintDampingRatio = (float)lua_tonumber(l,-1); }
+	lua_pop(l,1);
+	lua_getfield(l,top,"collideConnected");
+	if(!lua_isnil(l,-1)) { joint->collideConnected = lua_toboolean(l,-1); }
+	lua_pop(l,1);
+
+}
+
 static int lua_b3_joint_create (lua_State *l)
 {
 b3JointId *pp;
@@ -2185,36 +2220,6 @@ b3JointId *pp;
 	*pp=(b3JointId){0};
 	luaL_getmetatable(l, lua_b3_joint_meta_name);
 	lua_setmetatable(l, -2);
-
-	b3JointDef joint=(b3JointDef){0};
-	// get generic joint values
-	lua_getfield(l,2,"bodyIdA");
-	if(!lua_isnil(l,-1)) { joint.bodyIdA=*((b3BodyId*)(lua_tostring(l,-1))); }
-	lua_pop(l,1);
-	lua_getfield(l,2,"bodyIdB");
-	if(!lua_isnil(l,-1)) { joint.bodyIdB=*((b3BodyId*)(lua_tostring(l,-1))); }
-	lua_pop(l,1);
-	lua_getfield(l,2,"localFrameA");
-	if(!lua_isnil(l,-1)) { joint.localFrameA=lua_b3_read_b3Transform(l,-1); }
-	lua_pop(l,1);
-	lua_getfield(l,2,"localFrameB");
-	if(!lua_isnil(l,-1)) { joint.localFrameB=lua_b3_read_b3Transform(l,-1); }
-	lua_pop(l,1);
-	lua_getfield(l,2,"forceThreshold");
-	if(!lua_isnil(l,-1)) { joint.forceThreshold = (float)lua_tonumber(l,-1); }
-	lua_pop(l,1);
-	lua_getfield(l,2,"torqueThreshold");
-	if(!lua_isnil(l,-1)) { joint.torqueThreshold = (float)lua_tonumber(l,-1); }
-	lua_pop(l,1);
-	lua_getfield(l,2,"constraintHertz");
-	if(!lua_isnil(l,-1)) { joint.constraintHertz = (float)lua_tonumber(l,-1); }
-	lua_pop(l,1);
-	lua_getfield(l,2,"constraintDampingRatio");
-	if(!lua_isnil(l,-1)) { joint.constraintDampingRatio = (float)lua_tonumber(l,-1); }
-	lua_pop(l,1);
-	lua_getfield(l,2,"collideConnected");
-	if(!lua_isnil(l,-1)) { joint.collideConnected = lua_toboolean(l,-1); }
-	lua_pop(l,1);
 
 	// joint type defaults to filter
 	const char *joint_type="filter";
@@ -2228,7 +2233,7 @@ b3JointId *pp;
 		lua_pop(l,1); // joint_type is no longer valid
 
 		b3DistanceJointDef distance=b3DefaultDistanceJointDef();
-		distance.base=joint; // generic values
+		lua_b3_joint_fill(l,2,&distance.base); // generic values
 
 		lua_getfield(l,2,"length");
 		if(!lua_isnil(l,-1)) { distance.length = (float)lua_tonumber(l,-1); }
@@ -2278,7 +2283,7 @@ b3JointId *pp;
 		lua_pop(l,1); // joint_type is no longer valid
 
 		b3MotorJointDef motor=b3DefaultMotorJointDef();
-		motor.base=joint; // generic values
+		lua_b3_joint_fill(l,2,&motor.base); // generic values
 
 		lua_getfield(l,2,"linearVelocity");
 		if(!lua_isnil(l,-1)) { motor.linearVelocity=lua_b3_read_b3Vec3(l,-1); }
@@ -2321,7 +2326,7 @@ b3JointId *pp;
 		lua_pop(l,1); // joint_type is no longer valid
 
 		b3FilterJointDef filter=b3DefaultFilterJointDef();
-		filter.base=joint; // generic values
+		lua_b3_joint_fill(l,2,&filter.base); // generic values
 
 		*pp=b3CreateFilterJoint(world,&filter);
 	}
@@ -2331,7 +2336,7 @@ b3JointId *pp;
 		lua_pop(l,1); // joint_type is no longer valid
 
 		b3PrismaticJointDef prismatic=b3DefaultPrismaticJointDef();
-		prismatic.base=joint; // generic values
+		lua_b3_joint_fill(l,2,&prismatic.base); // generic values
 
 		lua_getfield(l,2,"enableSpring");
 		if(!lua_isnil(l,-1)) { prismatic.enableSpring = lua_toboolean(l,-1); }
@@ -2374,7 +2379,7 @@ b3JointId *pp;
 		lua_pop(l,1); // joint_type is no longer valid
 
 		b3RevoluteJointDef revolute=b3DefaultRevoluteJointDef();
-		revolute.base=joint; // generic values
+		lua_b3_joint_fill(l,2,&revolute.base); // generic values
 
 		lua_getfield(l,2,"targetAngle");
 		if(!lua_isnil(l,-1)) { revolute.targetAngle = (float)lua_tonumber(l,-1); }
@@ -2418,7 +2423,7 @@ b3JointId *pp;
 		lua_pop(l,1); // joint_type is no longer valid
 
 		b3WeldJointDef weld=b3DefaultWeldJointDef();
-		weld.base=joint; // generic values
+		lua_b3_joint_fill(l,2,&weld.base); // generic values
 
 		lua_getfield(l,2,"linearHertz");
 		if(!lua_isnil(l,-1)) { weld.linearHertz = (float)lua_tonumber(l,-1); }
@@ -2442,7 +2447,7 @@ b3JointId *pp;
 		lua_pop(l,1); // joint_type is no longer valid
 
 		b3WheelJointDef wheel=b3DefaultWheelJointDef();
-		wheel.base=joint; // generic values
+		lua_b3_joint_fill(l,2,&wheel.base); // generic values
 
 		lua_getfield(l,2,"enableSpring");
 		if(!lua_isnil(l,-1)) { wheel.enableSpring = lua_toboolean(l,-1); }
@@ -2581,7 +2586,11 @@ static int lua_b3_joint_set (lua_State *l)
 Lua Assert
 
 */
-static thread_local lua_State *lua_b3_lua_state=0; // does this work?
+#ifdef __linux__
+static thread_local lua_State *lua_b3_lua_state=0; // works on linux
+#else
+static lua_State *lua_b3_lua_state=0; // breaks on thread use
+#endif
 static int lua_b3_assert (const char *condition, const char *fileName, int lineNumber)
 {
 	if( lua_b3_lua_state )
