@@ -1,0 +1,14 @@
+
+*.exe
+*.x32
+*.x64
+*.arm
+*.nix
+*.osx
+*.so
+*.dll
+*.dylib
+
+
+
+
