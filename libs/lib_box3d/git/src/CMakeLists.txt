@@ -47,6 +47,8 @@ set(BOX3D_SOURCE_FILES
 	mesh_contact.c
 	motor_joint.c
 	mover.c
+	name_cache.c
+	name_cache.h
 	parallel_for.c
 	parallel_for.h
 	parallel_joint.c
@@ -152,7 +154,8 @@ if (BOX3D_PROFILE)
 endif()
 
 if(BOX3D_VALIDATE)
-	message(STATUS "Box3D validation ON")	
+	# Only effective when NDEBUG is undefined, see base.h
+	message(STATUS "Box3D validation ON (debug builds)")
 	target_compile_definitions(box3d PRIVATE BOX3D_VALIDATE)
 endif()
 
@@ -167,8 +170,11 @@ if (BOX3D_DOUBLE_PRECISION)
 	target_compile_definitions(box3d PUBLIC BOX3D_DOUBLE_PRECISION)
 endif()
 
+# Enable asserts in release with debug info
+target_compile_definitions(box3d PUBLIC "$<$<CONFIG:RELWITHDEBINFO>:B3_ENABLE_ASSERT>")
+
 if (MSVC)
-	message(STATUS "Box3D on MSVC")	
+	message(STATUS "Box3D on MSVC")
 	if (BUILD_SHARED_LIBS)
 		# this is needed by DLL users to import Box3D symbols
 		target_compile_definitions(box3d INTERFACE BOX3D_DLL)
@@ -176,9 +182,6 @@ if (MSVC)
 
 	# Visual Studio won't load the natvis unless it is in the project
 	target_sources(box3d PRIVATE box3d.natvis)
-
-	# Enable asserts in release with debug info
-	target_compile_definitions(box3d PUBLIC "$<$<CONFIG:RELWITHDEBINFO>:B3_ENABLE_ASSERT>")
 
 	# Warnings Wall is problematic in mixed C/C++, so using W4
 	target_compile_options(box3d PRIVATE /W4)

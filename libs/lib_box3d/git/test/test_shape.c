@@ -3,11 +3,13 @@
 
 #include "test_macros.h"
 
+#include "box3d/box3d.h"
 #include "box3d/collision.h"
 #include "box3d/math_functions.h"
 
 #include <float.h>
 #include <math.h>
+#include <string.h>
 
 static b3Capsule capsule = { { -1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, 1.0f };
 static b3Sphere sphere = { { 1.0f, 0.0f, 0.0f }, 1.0f };
@@ -275,8 +277,8 @@ static int PointInShapeTest( void )
 
 // Shared assertions for a surface hit. The normal points outward toward the ray,
 // the point sits on the surface, and the point lies on the ray at the reported fraction.
-static int CheckCastHit( b3CastOutput out, b3Vec3 origin, b3Vec3 translation, b3Vec3 point, b3Vec3 normal,
-						 float fraction, float tol )
+static int CheckCastHit( b3CastOutput out, b3Vec3 origin, b3Vec3 translation, b3Vec3 point, b3Vec3 normal, float fraction,
+						 float tol )
 {
 	ENSURE( out.hit );
 	ENSURE_SMALL( out.fraction - fraction, tol );
@@ -311,22 +313,22 @@ static int RayCastSphereHitTest( void )
 	{
 		b3RayCastInput input = { { -4.0f, 0.0f, 0.0f }, { 8.0f, 0.0f, 0.0f }, 1.0f };
 		b3CastOutput out = b3RayCastSphere( &s, &input );
-		if ( CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ -1.0f, 0.0f, 0.0f },
-						   ( b3Vec3 ){ -1.0f, 0.0f, 0.0f }, 3.0f / 8.0f, 1e-5f ) )
+		if ( CheckCastHit( out, input.origin, input.translation, (b3Vec3){ -1.0f, 0.0f, 0.0f }, (b3Vec3){ -1.0f, 0.0f, 0.0f },
+						   3.0f / 8.0f, 1e-5f ) )
 			return 1;
 	}
 	{
 		b3RayCastInput input = { { 0.0f, 4.0f, 0.0f }, { 0.0f, -8.0f, 0.0f }, 1.0f };
 		b3CastOutput out = b3RayCastSphere( &s, &input );
-		if ( CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ 0.0f, 1.0f, 0.0f },
-						   ( b3Vec3 ){ 0.0f, 1.0f, 0.0f }, 3.0f / 8.0f, 1e-5f ) )
+		if ( CheckCastHit( out, input.origin, input.translation, (b3Vec3){ 0.0f, 1.0f, 0.0f }, (b3Vec3){ 0.0f, 1.0f, 0.0f },
+						   3.0f / 8.0f, 1e-5f ) )
 			return 1;
 	}
 	{
 		b3RayCastInput input = { { 0.0f, 0.0f, -4.0f }, { 0.0f, 0.0f, 8.0f }, 1.0f };
 		b3CastOutput out = b3RayCastSphere( &s, &input );
-		if ( CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ 0.0f, 0.0f, -1.0f },
-						   ( b3Vec3 ){ 0.0f, 0.0f, -1.0f }, 3.0f / 8.0f, 1e-5f ) )
+		if ( CheckCastHit( out, input.origin, input.translation, (b3Vec3){ 0.0f, 0.0f, -1.0f }, (b3Vec3){ 0.0f, 0.0f, -1.0f },
+						   3.0f / 8.0f, 1e-5f ) )
 			return 1;
 	}
 
@@ -335,8 +337,8 @@ static int RayCastSphereHitTest( void )
 		b3Sphere s2 = { { 5.0f, 0.0f, 0.0f }, 2.0f };
 		b3RayCastInput input = { { 0.0f, 0.0f, 0.0f }, { 10.0f, 0.0f, 0.0f }, 1.0f };
 		b3CastOutput out = b3RayCastSphere( &s2, &input );
-		if ( CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ 3.0f, 0.0f, 0.0f },
-						   ( b3Vec3 ){ -1.0f, 0.0f, 0.0f }, 0.3f, 1e-5f ) )
+		if ( CheckCastHit( out, input.origin, input.translation, (b3Vec3){ 3.0f, 0.0f, 0.0f }, (b3Vec3){ -1.0f, 0.0f, 0.0f },
+						   0.3f, 1e-5f ) )
 			return 1;
 	}
 
@@ -345,8 +347,8 @@ static int RayCastSphereHitTest( void )
 		float k = 0.70710678f;
 		b3RayCastInput input = { { -3.0f, -3.0f, 0.0f }, { 6.0f, 6.0f, 0.0f }, 1.0f };
 		b3CastOutput out = b3RayCastSphere( &s, &input );
-		if ( CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ -k, -k, 0.0f },
-						   ( b3Vec3 ){ -k, -k, 0.0f }, 0.382149f, 1e-4f ) )
+		if ( CheckCastHit( out, input.origin, input.translation, (b3Vec3){ -k, -k, 0.0f }, (b3Vec3){ -k, -k, 0.0f }, 0.382149f,
+						   1e-4f ) )
 			return 1;
 	}
 
@@ -445,24 +447,24 @@ static int RayCastCapsuleSideTest( void )
 	{
 		b3RayCastInput input = { { 0.0f, 3.0f, 0.0f }, { 0.0f, -6.0f, 0.0f }, 1.0f };
 		b3CastOutput out = b3RayCastCapsule( &rayCapsule, &input );
-		if ( CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ 0.0f, 1.0f, 0.0f },
-						   ( b3Vec3 ){ 0.0f, 1.0f, 0.0f }, 1.0f / 3.0f, 1e-5f ) )
+		if ( CheckCastHit( out, input.origin, input.translation, (b3Vec3){ 0.0f, 1.0f, 0.0f }, (b3Vec3){ 0.0f, 1.0f, 0.0f },
+						   1.0f / 3.0f, 1e-5f ) )
 			return 1;
 	}
 	// Same from +z to exercise the other transverse direction.
 	{
 		b3RayCastInput input = { { 0.0f, 0.0f, 3.0f }, { 0.0f, 0.0f, -6.0f }, 1.0f };
 		b3CastOutput out = b3RayCastCapsule( &rayCapsule, &input );
-		if ( CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ 0.0f, 0.0f, 1.0f },
-						   ( b3Vec3 ){ 0.0f, 0.0f, 1.0f }, 1.0f / 3.0f, 1e-5f ) )
+		if ( CheckCastHit( out, input.origin, input.translation, (b3Vec3){ 0.0f, 0.0f, 1.0f }, (b3Vec3){ 0.0f, 0.0f, 1.0f },
+						   1.0f / 3.0f, 1e-5f ) )
 			return 1;
 	}
 	// Side hit nearer the c1 end.
 	{
 		b3RayCastInput input = { { -1.0f, 3.0f, 0.0f }, { 0.0f, -6.0f, 0.0f }, 1.0f };
 		b3CastOutput out = b3RayCastCapsule( &rayCapsule, &input );
-		if ( CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ -1.0f, 1.0f, 0.0f },
-						   ( b3Vec3 ){ 0.0f, 1.0f, 0.0f }, 1.0f / 3.0f, 1e-5f ) )
+		if ( CheckCastHit( out, input.origin, input.translation, (b3Vec3){ -1.0f, 1.0f, 0.0f }, (b3Vec3){ 0.0f, 1.0f, 0.0f },
+						   1.0f / 3.0f, 1e-5f ) )
 			return 1;
 	}
 	return 0;
@@ -475,8 +477,8 @@ static int RayCastCapsuleObliqueTest( void )
 	// dot(axis, rayAxis) != 0.
 	b3RayCastInput input = { { -3.0f, 3.0f, 0.0f }, { 4.0f, -4.0f, 0.0f }, 1.0f };
 	b3CastOutput out = b3RayCastCapsule( &rayCapsule, &input );
-	return CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ -1.0f, 1.0f, 0.0f },
-						( b3Vec3 ){ 0.0f, 1.0f, 0.0f }, 0.5f, 1e-4f );
+	return CheckCastHit( out, input.origin, input.translation, (b3Vec3){ -1.0f, 1.0f, 0.0f }, (b3Vec3){ 0.0f, 1.0f, 0.0f }, 0.5f,
+						 1e-4f );
 }
 
 static int RayCastCapsuleCapTest( void )
@@ -487,24 +489,24 @@ static int RayCastCapsuleCapTest( void )
 	{
 		b3RayCastInput input = { { 5.0f, 0.0f, 0.0f }, { -8.0f, 0.0f, 0.0f }, 1.0f };
 		b3CastOutput out = b3RayCastCapsule( &rayCapsule, &input );
-		if ( CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ 3.0f, 0.0f, 0.0f },
-						   ( b3Vec3 ){ 1.0f, 0.0f, 0.0f }, 1.0f / 4.0f, 1e-5f ) )
+		if ( CheckCastHit( out, input.origin, input.translation, (b3Vec3){ 3.0f, 0.0f, 0.0f }, (b3Vec3){ 1.0f, 0.0f, 0.0f },
+						   1.0f / 4.0f, 1e-5f ) )
 			return 1;
 	}
 	// Off-axis ray through the c2 cap center, approaching from outside the cylinder.
 	{
 		b3RayCastInput input = { { 4.0f, 2.0f, 0.0f }, { -4.0f, -4.0f, 0.0f }, 1.0f };
 		b3CastOutput out = b3RayCastCapsule( &rayCapsule, &input );
-		if ( CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ 2.0f + k, k, 0.0f },
-						   ( b3Vec3 ){ k, k, 0.0f }, 0.323223f, 1e-4f ) )
+		if ( CheckCastHit( out, input.origin, input.translation, (b3Vec3){ 2.0f + k, k, 0.0f }, (b3Vec3){ k, k, 0.0f }, 0.323223f,
+						   1e-4f ) )
 			return 1;
 	}
 	// Mirror through the c1 cap center.
 	{
 		b3RayCastInput input = { { -4.0f, 2.0f, 0.0f }, { 4.0f, -4.0f, 0.0f }, 1.0f };
 		b3CastOutput out = b3RayCastCapsule( &rayCapsule, &input );
-		if ( CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ -2.0f - k, k, 0.0f },
-						   ( b3Vec3 ){ -k, k, 0.0f }, 0.323223f, 1e-4f ) )
+		if ( CheckCastHit( out, input.origin, input.translation, (b3Vec3){ -2.0f - k, k, 0.0f }, (b3Vec3){ -k, k, 0.0f },
+						   0.323223f, 1e-4f ) )
 			return 1;
 	}
 	return 0;
@@ -579,8 +581,8 @@ static int RayCastCapsuleDegenerateTest( void )
 	b3Capsule c = { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, 1.0f };
 	b3RayCastInput input = { { -4.0f, 0.0f, 0.0f }, { 8.0f, 0.0f, 0.0f }, 1.0f };
 	b3CastOutput out = b3RayCastCapsule( &c, &input );
-	return CheckCastHit( out, input.origin, input.translation, ( b3Vec3 ){ -1.0f, 0.0f, 0.0f },
-						( b3Vec3 ){ -1.0f, 0.0f, 0.0f }, 3.0f / 8.0f, 1e-5f );
+	return CheckCastHit( out, input.origin, input.translation, (b3Vec3){ -1.0f, 0.0f, 0.0f }, (b3Vec3){ -1.0f, 0.0f, 0.0f },
+						 3.0f / 8.0f, 1e-5f );
 }
 
 static int RayCastCapsuleClipTest( void )
@@ -772,7 +774,7 @@ static int RayCastFarOriginTest( void )
 		{
 			for ( int ib = 0; ib < ARRAY_COUNT( offsets ); ++ib )
 			{
-				b3Vec3 u = b3Normalize( ( b3Vec3 ){ offsets[ia], offsets[ib], 1.0f } );
+				b3Vec3 u = b3Normalize( (b3Vec3){ offsets[ia], offsets[ib], 1.0f } );
 				b3Vec3 origin = b3MulAdd( h, d, u );
 				b3Vec3 translation = b3MulSV( -2.0f * d, u );
 				b3RayCastInput input = { origin, translation, 1.0f };
@@ -852,12 +854,131 @@ static int RayCastShapeTest( void )
 	return 0;
 }
 
+static int CheckShapeName( b3ShapeId shapeId, const char* expected )
+{
+	const char* got = b3Shape_GetName( shapeId );
+	ENSURE( got != NULL || expected == NULL );
+	if ( got == NULL )
+	{
+		return 0;
+	}
+
+	int srcLen = expected != NULL ? (int)strlen( expected ) : 0;
+	ENSURE( (int)strlen( got ) == srcLen );
+	if ( srcLen > 0 )
+	{
+		ENSURE( strncmp( got, expected, (size_t)srcLen ) == 0 );
+	}
+	return 0;
+}
+
+// Cover the def path, the setter, over-length truncation, and the NULL clear. A zero cap collapses every
+// case to the empty string, which the length-derived check handles without a special branch.
+static int ShapeNameTest( void )
+{
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
+	b3BodyId bodyId = b3CreateBody( worldId, &bodyDef );
+
+	b3Sphere s = { { 0.0f, 0.0f, 0.0f }, 0.5f };
+
+	// Default def leaves the name empty.
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	shapeDef.density = 1.0f;
+	b3ShapeId shapeId = b3CreateSphereShape( bodyId, &shapeDef, &s );
+	if ( CheckShapeName( shapeId, NULL ) )
+		return 1;
+
+	// Name carried on the def.
+	shapeDef.name = "box";
+	b3ShapeId namedId = b3CreateSphereShape( bodyId, &shapeDef, &s );
+	if ( CheckShapeName( namedId, "box" ) )
+		return 1;
+
+	// Setter overwrites.
+	b3Shape_SetName( shapeId, "wheel" );
+	if ( CheckShapeName( shapeId, "wheel" ) )
+		return 1;
+
+	// Over-length name truncates to the cap.
+	b3Shape_SetName( shapeId, "abcdefghijklmnopqrstuvwxyz" );
+	if ( CheckShapeName( shapeId, "abcdefghijklmnopqrstuvwxyz" ) )
+		return 1;
+
+	// NULL clears the name.
+	b3Shape_SetName( shapeId, NULL );
+	if ( CheckShapeName( shapeId, NULL ) )
+		return 1;
+
+	b3DestroyWorld( worldId );
+	return 0;
+}
+
+// The event enables moved from separate bools to a shared bit field. Each accessor must touch only its own
+// bit, so start with all set and flip them one at a time, checking the rest hold.
+static int ShapeFlagsTest( void )
+{
+	b3WorldDef worldDef = b3DefaultWorldDef();
+	b3WorldId worldId = b3CreateWorld( &worldDef );
+
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.type = b3_dynamicBody;
+	b3BodyId bodyId = b3CreateBody( worldId, &bodyDef );
+
+	b3Sphere s = { { 0.0f, 0.0f, 0.0f }, 0.5f };
+
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	shapeDef.density = 1.0f;
+	shapeDef.enableSensorEvents = true;
+	shapeDef.enableContactEvents = true;
+	shapeDef.enableHitEvents = true;
+	shapeDef.enablePreSolveEvents = true;
+	b3ShapeId shapeId = b3CreateSphereShape( bodyId, &shapeDef, &s );
+
+	// The def carries every enable through to the shape.
+	ENSURE( b3Shape_AreSensorEventsEnabled( shapeId ) );
+	ENSURE( b3Shape_AreContactEventsEnabled( shapeId ) );
+	ENSURE( b3Shape_AreHitEventsEnabled( shapeId ) );
+	ENSURE( b3Shape_ArePreSolveEventsEnabled( shapeId ) );
+
+	// Clearing one leaves the rest set.
+	b3Shape_EnableSensorEvents( shapeId, false );
+	ENSURE( b3Shape_AreSensorEventsEnabled( shapeId ) == false );
+	ENSURE( b3Shape_AreContactEventsEnabled( shapeId ) );
+	ENSURE( b3Shape_AreHitEventsEnabled( shapeId ) );
+	ENSURE( b3Shape_ArePreSolveEventsEnabled( shapeId ) );
+
+	// Setting it back does not disturb the others.
+	b3Shape_EnableSensorEvents( shapeId, true );
+	b3Shape_EnableHitEvents( shapeId, false );
+	ENSURE( b3Shape_AreSensorEventsEnabled( shapeId ) );
+	ENSURE( b3Shape_AreContactEventsEnabled( shapeId ) );
+	ENSURE( b3Shape_AreHitEventsEnabled( shapeId ) == false );
+	ENSURE( b3Shape_ArePreSolveEventsEnabled( shapeId ) );
+
+	// Clear two more and confirm only the remaining bit stays set.
+	b3Shape_EnableContactEvents( shapeId, false );
+	b3Shape_EnablePreSolveEvents( shapeId, false );
+	ENSURE( b3Shape_AreSensorEventsEnabled( shapeId ) );
+	ENSURE( b3Shape_AreContactEventsEnabled( shapeId ) == false );
+	ENSURE( b3Shape_AreHitEventsEnabled( shapeId ) == false );
+	ENSURE( b3Shape_ArePreSolveEventsEnabled( shapeId ) == false );
+
+	b3DestroyWorld( worldId );
+	return 0;
+}
+
 int ShapeTest( void )
 {
 	box = b3MakeBoxHull( 1.0f, 1.0f, 1.0f );
 
 	RUN_SUBTEST( ShapeMassTest );
 	RUN_SUBTEST( ShapeAABBTest );
+	RUN_SUBTEST( ShapeNameTest );
+	RUN_SUBTEST( ShapeFlagsTest );
 	// RUN_SUBTEST( PointInShapeTest );
 	RUN_SUBTEST( RayCastShapeTest );
 

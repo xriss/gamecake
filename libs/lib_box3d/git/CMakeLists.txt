@@ -8,13 +8,6 @@ project(box3d
 	LANGUAGES C CXX
 )
 
-# sokol's Metal backend is Objective-C; samples/host/sokol_app_impl.c and
-# samples/gfx/sokol_impl.c compile as OBJC on Apple. Enable the language here
-# so those source properties are honored.
-if(APPLE)
-	enable_language(OBJC)
-endif()
-
 # stuff to help debug cmake
 # message(STATUS "cmake tool chain: ${CMAKE_TOOLCHAIN_FILE}")
 # message(STATUS "cmake source dir: ${CMAKE_SOURCE_DIR}")
@@ -41,15 +34,16 @@ if (MSVC OR APPLE OR UNIX)
 			add_link_options("$<$<CONFIG:Debug>:/INCREMENTAL:NO>")
 		elseif(APPLE)
 			# more sanitizers on Apple clang
+			# UBSan recovers by default, no-recover makes the first report fatal so CI fails
 			if(BOX3D_SANITIZER_TYPE STREQUAL "thread")
 				add_compile_options(-fsanitize=thread -fno-omit-frame-pointer)
 				add_link_options(-fsanitize=thread)
 			elseif(BOX3D_SANITIZER_TYPE STREQUAL "undefined")
-				add_compile_options(-fsanitize=undefined -fno-omit-frame-pointer)
+				add_compile_options(-fsanitize=undefined -fno-sanitize-recover=all -fno-omit-frame-pointer)
 				add_link_options(-fsanitize=undefined)
 			else()
 				# default to address sanitizer
-				add_compile_options(-fsanitize=address -fsanitize-address-use-after-scope -fsanitize=undefined)
+				add_compile_options(-fsanitize=address -fsanitize-address-use-after-scope -fsanitize=undefined -fno-sanitize-recover=all)
 				add_link_options(-fsanitize=address -fsanitize-address-use-after-scope -fsanitize=undefined)
 			endif()
 		elseif(UNIX)
@@ -60,7 +54,7 @@ if (MSVC OR APPLE OR UNIX)
 				add_compile_options(-fsanitize=thread -fno-omit-frame-pointer -fPIE)
 				add_link_options(-fsanitize=thread -pie)
 			elseif(BOX3D_SANITIZER_TYPE STREQUAL "undefined")
-				add_compile_options(-fsanitize=undefined -fno-omit-frame-pointer)
+				add_compile_options(-fsanitize=undefined -fno-sanitize-recover=all -fno-omit-frame-pointer)
 				add_link_options(-fsanitize=undefined)
 			elseif(BOX3D_SANITIZER_TYPE STREQUAL "memory")
 				add_compile_options(-fsanitize=memory -fno-omit-frame-pointer)
@@ -89,6 +83,14 @@ endif()
 option(BOX3D_DISABLE_SIMD "Disable SIMD math (slower)" OFF)
 option(BOX3D_COMPILE_WARNING_AS_ERROR "Compile warnings as errors" OFF)
 option(BOX3D_DOUBLE_PRECISION "Enable double precision for large worlds" OFF)
+
+# These are read by the library build, so they must precede add_subdirectory(src),
+# otherwise the first configure and a re-configure produce different libraries.
+# Top level only, so they stay hidden from FetchContent consumers.
+if(PROJECT_IS_TOP_LEVEL)
+	option(BOX3D_PROFILE "Enable profiling with Tracy" OFF)
+	option(BOX3D_VALIDATE "Enable heavy validation" ON)
+endif()
 
 # Emscripten maps the SSE2 path onto wasm SIMD128. simd.h is a header included by
 # non-library targets like the tests, so these flags must be directory-wide, not
@@ -133,8 +135,6 @@ if(PROJECT_IS_TOP_LEVEL)
 	option(BOX3D_SAMPLES "Build the Box3D samples" ON)
 	option(BOX3D_BENCHMARKS "Build the Box3D benchmarks" OFF)
 	option(BOX3D_DOCS "Build the Box3D documentation" OFF)
-	option(BOX3D_PROFILE "Enable profiling with Tracy" OFF)
-	option(BOX3D_VALIDATE "Enable heavy validation" ON)
 	option(BOX3D_UNIT_TESTS "Build the Box3D unit tests" ON)
 
 	# Enable this for shader development using sokol-shdc.

@@ -1,13 +1,11 @@
 // SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
+#include "gfx/debug_adapter.h"
+#include "gfx/draw.h"
 #include "imgui.h"
 #include "sample.h"
-#include "gfx/draw.h"
-#include "stability.h"
 #include "utils.h"
-
-#include "gfx/debug_adapter.h"
 
 #include "box3d/box3d.h"
 
@@ -443,7 +441,7 @@ public:
 		m_runCount = 0;
 		m_failure = false;
 		m_autoGenerate = false;
-
+		m_collide = true;
 		m_stepWhilePaused = true;
 
 		Generate();
@@ -550,13 +548,16 @@ public:
 
 		// Don't allow shapes to collide with each other. This
 		// makes isolating failures easier.
-		shapeDef.filter.categoryBits = 2;
-		shapeDef.filter.maskBits = 1;
+		if ( m_collide == false )
+		{
+			shapeDef.filter.categoryBits = 2;
+			shapeDef.filter.maskBits = 1;
+		}
 
 		g_randomSeed = (uint32_t)b3GetTicks();
 
 		bool simulateAll = true;
-		// g_randomSeed = 3963634789;
+		// g_randomSeed = 1910133196;
 
 		m_runCount += 1;
 		m_stepCount = 0;
@@ -569,7 +570,7 @@ public:
 				b3Vec3 linearVelocity = RandomVec3Uniform( -1.0f, 1.0f );
 				b3Vec3 angularVelocity = RandomVec3Uniform( -5.0f, 5.0f );
 
-				if ( simulateAll || ( i == 5 && j == 4 ) )
+				if ( simulateAll || ( i == 19 && j == 20 ) )
 				{
 					bodyDef.position = { 0.5f * ( i - 0.5f * m_gridCount ), 5.0f, 0.5f * ( j - 0.5f * m_gridCount ) };
 					bodyDef.linearVelocity = linearVelocity;
@@ -625,6 +626,11 @@ public:
 			Generate();
 		}
 
+		if ( ImGui::Checkbox( "Collide", &m_collide ) )
+		{
+			Generate();
+		}
+
 		if ( ImGui::Button( "Generate" ) )
 		{
 			Generate();
@@ -646,8 +652,7 @@ public:
 		{
 			PickRay pickRay = m_camera->BuildPickRay( m_context->mouseX, m_context->mouseY );
 
-			b3RayResult result =
-				b3World_CastRayClosest( m_worldId, pickRay.origin, pickRay.translation, b3DefaultQueryFilter() );
+			b3RayResult result = b3World_CastRayClosest( m_worldId, pickRay.origin, pickRay.translation, b3DefaultQueryFilter() );
 
 			if ( result.hit )
 			{
@@ -737,63 +742,10 @@ public:
 	int m_runCount;
 	bool m_failure;
 	bool m_autoGenerate;
+	bool m_collide;
 };
 
 static int sampleMeshDrop = RegisterSample( "Continuous", "Mesh Drop", MeshDrop::Create );
-
-class MeshDropUnitTest : public Sample
-{
-public:
-	explicit MeshDropUnitTest( SampleContext* context )
-		: Sample( context )
-	{
-		if ( context->restart == false )
-		{
-			m_camera->SetView( 0.0f, 30.0f, 20.0f, b3Pos_zero );
-			GetGuiDraw()->forceScale = 0.1f;
-		}
-
-		m_data = CreateMeshDrop( m_worldId, b3Pos_zero );
-		m_failed = false;
-	}
-
-	~MeshDropUnitTest() override
-	{
-		DestroyMeshDrop( &m_data );
-	}
-
-	void Step() override
-	{
-		Sample::Step();
-
-		if ( m_failed == false )
-		{
-			if ( m_stepCount >= 300 )
-			{
-				b3BodyEvents bodyEvents = b3World_GetBodyEvents( m_worldId );
-				if ( bodyEvents.moveCount > 0 )
-				{
-					m_failed = true;
-				}
-			}
-		}
-
-		if ( m_failed == true )
-		{
-			DrawTextLine( "failed!" );
-		}
-	}
-
-	static Sample* Create( SampleContext* context )
-	{
-		return new MeshDropUnitTest( context );
-	}
-
-	MeshDropData m_data;
-	bool m_failed;
-};
-
-static int sampleMeshDropUnitTest = RegisterSample( "Continuous", "Mesh Drop Unit Test", MeshDropUnitTest::Create );
 
 // This sample shows that clustering based on the manifold normal can lead to clipping and/or tunneling.
 class HumpMesh : public Sample
@@ -917,13 +869,12 @@ public:
 		if ( context->restart == false )
 		{
 			m_camera->SetView( 0.0f, 15.0f, 50.0f, { 0.0f, 15.0f, 0.0f } );
-			
 		}
 
 		AddGroundBox( 40.0f );
 
 		b3BoxHull box = b3MakeBoxHull( 0.5f, 10.0f, 0.5f );
-		b3Capsule capsule = {{0.0f, -9.5f, 0.0f}, {0.0f, 9.5f, 0.0f}, 0.5f};
+		b3Capsule capsule = { { 0.0f, -9.5f, 0.0f }, { 0.0f, 9.5f, 0.0f }, 0.5f };
 
 		bool useCapsule = false;
 
@@ -936,7 +887,7 @@ public:
 			b3BodyId bodyId = b3CreateBody( m_worldId, &bodyDef );
 
 			b3ShapeDef shapeDef = b3DefaultShapeDef();
-			if (useCapsule)
+			if ( useCapsule )
 			{
 				b3CreateCapsuleShape( bodyId, &shapeDef, &capsule );
 			}

@@ -1,6 +1,16 @@
 // SPDX-FileCopyrightText: 2025 Erin Catto
 // SPDX-License-Identifier: MIT
 
+#if defined( _MSC_VER )
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#define _CRTDBG_MAP_ALLOC
+// stdlib before crtdbg so the malloc->_malloc_dbg remap lands after the real prototype
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 #include "gfx/debug_adapter.h"
 #include "gfx/keycodes.h"
 #include "gfx/renderer.h"
@@ -18,6 +28,12 @@
 #include <string.h>
 #include <thread>
 
+#ifdef TRACY_ENABLE
+#include <tracy/Tracy.hpp>
+#else
+#define FrameMark
+#endif
+
 #if defined( _WIN32 )
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -32,6 +48,7 @@ static SampleContext s_context;
 static int s_frame = 0;
 static int s_frameLimit = -1;
 static int s_sampleOverride = -1;
+static int s_exitCode = 0;
 
 static int CompareSamples( const void* a, const void* b )
 {
@@ -75,6 +92,10 @@ static void OnDrawUI( void )
 
 static void OnInit( void )
 {
+#ifdef TRACY_ENABLE
+	tracy::StartupProfiler();
+#endif
+
 #if defined( _WIN32 )
 	timeBeginPeriod( 1 );
 #endif
@@ -160,11 +181,11 @@ static void OnEvent( const sapp_event* e )
 			{
 				switch ( e->key_code )
 				{
-					case KEY_TAB:
+					case SAPP_KEYCODE_TAB:
 						s_context.showUI = !s_context.showUI;
 						break;
 
-					case KEY_ESCAPE:
+					case SAPP_KEYCODE_ESCAPE:
 						// Layered cancel. An open picker is an ImGui popup that
 						// already swallowed this. So peel the controls window, then
 						// the selection. Quit lives on Ctrl+Q now.
@@ -179,7 +200,7 @@ static void OnEvent( const sapp_event* e )
 						break;
 
 					case KEY_Q:
-						if ( mods & MOD_CTRL )
+						if ( mods & SAPP_MODIFIER_CTRL )
 						{
 							sapp_request_quit();
 							break;
@@ -188,7 +209,7 @@ static void OnEvent( const sapp_event* e )
 						break;
 
 					case KEY_O:
-						if ( mods & MOD_CTRL )
+						if ( mods & SAPP_MODIFIER_CTRL )
 						{
 							// Ctrl+O opens the fuzzy picker. Force the UI visible so it shows.
 							s_context.showUI = true;
@@ -196,34 +217,32 @@ static void OnEvent( const sapp_event* e )
 						}
 						else
 						{
-							s_context.singleStep += ( mods & MOD_SHIFT ) ? 5 : 1;
+							s_context.singleStep += ( mods & SAPP_MODIFIER_SHIFT ) ? 5 : 1;
 						}
 						break;
 
-					case KEY_P:
-						// Pause stays on P. Space is not bound here on purpose. Global
-						// keys are dispatched before the sample sees them, so claiming
-						// Space would steal jump from the Mover sample.
+					case SAPP_KEYCODE_P:
+					case SAPP_KEYCODE_PAUSE:
 						s_context.pause = !s_context.pause;
 						break;
 
-					case KEY_M:
+					case SAPP_KEYCODE_M:
 						s_context.showMetrics = !s_context.showMetrics;
 						break;
 
-					case KEY_R:
+					case SAPP_KEYCODE_R:
 						SelectSample( &s_context, s_context.sampleIndex, true );
 						break;
 
-					case KEY_LEFT_BRACKET:
+					case SAPP_KEYCODE_LEFT_BRACKET:
 						SelectSample( &s_context, b3MaxInt( 0, s_context.sampleIndex - 1 ), false );
 						break;
 
-					case KEY_RIGHT_BRACKET:
+					case SAPP_KEYCODE_RIGHT_BRACKET:
 						SelectSample( &s_context, b3MinInt( g_sampleCount - 1, s_context.sampleIndex + 1 ), false );
 						break;
 
-					case KEY_F:
+					case SAPP_KEYCODE_F:
 					{
 						// Frame the selection, or let the sample frame its whole scene when nothing is
 						// selected. A non-body selection such as a recorded query supplies its own bounds and
@@ -309,12 +328,17 @@ static void OnEvent( const sapp_event* e )
 	}
 }
 
-// Pace the loop to 60 Hz so the fixed 1/60 physics step plays at real time on any
-// display. Sleep the bulk of the idle time, then spin the last bit since sleep wakes
-// are only accurate to about a millisecond.
+// This limits the render rate to the simulation rate. Physics debugging
+// ergonomics require render frames and simulation frames to be one to one.
+// I don't recommend this setup for games, where a decoupled render
+// and simulation rate is desirable.
 static void LimitFrameRate( uint64_t frameStart )
 {
-	const float targetMs = 1000.0f / 60.0f;
+	// By limiting to the simulation hertz, this allows me to run the simulation
+	// at 240Hz and render at that rate when using a 240Hz monitor. It also allows
+	// me to run a 10Hz simulation in at the wall clock rate.
+	float hertz = b3ClampFloat(s_context.hertz, 5.0f, 1000.0f);
+	const float targetMs = 1000.0f / hertz;
 	const float spinMs = 2.0f;
 
 	int sleepMs = (int)( targetMs - spinMs - b3GetMilliseconds( frameStart ) );
@@ -387,6 +411,7 @@ static void OnFrame( void )
 	// queues the HUD text; Render fills the instance and overlay arenas via the
 	// b3DebugDraw adapter and the sample's own Draw* calls.
 	SetTransparentDynamic( s_context.transparentDynamic );
+	SetTransparentKinematic( s_context.transparentKinematic );
 	s_context.sample->ResetText();
 
 	s_context.sample->Step();
@@ -426,6 +451,9 @@ static void OnFrame( void )
 	sg_commit();
 	++s_frame;
 
+	// For the Tracy profiler
+	FrameMark;
+
 	if ( s_frameLimit < 0 )
 	{
 		LimitFrameRate( frameStart );
@@ -449,7 +477,13 @@ static void OnCleanup( void )
 	timeEndPeriod( 1 );
 #endif
 
-	exit( errors == 0 ? 0 : 1 );
+	#ifdef TRACY_ENABLE
+	tracy::ShutdownProfiler();
+#endif
+
+	// Return instead of exit so sokol frees its own window and context. main
+	// dumps CRT leaks once sapp_run returns, past that teardown.
+	s_exitCode = errors == 0 ? 0 : 1;
 }
 
 static void OnAppLog( const char* tag, uint32_t logLevel, uint32_t logItemId, const char* message, uint32_t lineNumber,
@@ -471,7 +505,7 @@ static void OnAppLog( const char* tag, uint32_t logLevel, uint32_t logItemId, co
 	}
 }
 
-sapp_desc sokol_main( int argc, char** argv )
+static sapp_desc BuildAppDesc( int argc, char** argv )
 {
 	for ( int i = 1; i < argc; ++i )
 	{
@@ -492,6 +526,10 @@ sapp_desc sokol_main( int argc, char** argv )
 				snprintf( s_context.replayFile, sizeof( s_context.replayFile ), "%s", path );
 				s_sampleOverride = g_replayIndex;
 			}
+		}
+		else if ( strcmp( argv[i], "--zup" ) == 0 )
+		{
+			s_context.viewZUp = true;
 		}
 	}
 
@@ -525,4 +563,24 @@ sapp_desc sokol_main( int argc, char** argv )
 	desc.high_dpi = true;
 
 	return desc;
+}
+
+// We own main (SOKOL_NO_ENTRY) so the leak dump can run after sapp_run returns,
+// once sokol has torn down its window and context. On Windows sapp_run returns
+// after that teardown; on macOS it may not return, so the dump is Windows only.
+int main( int argc, char** argv )
+{
+#if defined( _MSC_VER )
+	_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_DEBUG | _CRTDBG_MODE_FILE );
+	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
+#endif
+
+	sapp_desc desc = BuildAppDesc( argc, argv );
+	sapp_run( &desc );
+
+#if defined( _MSC_VER )
+	_CrtDumpMemoryLeaks();
+#endif
+
+	return s_exitCode;
 }

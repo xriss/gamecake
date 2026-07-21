@@ -75,14 +75,14 @@ b3ShapeDef b3DefaultShapeDef( void )
 	def.filter = b3DefaultFilter();
 	def.updateBodyMass = true;
 	def.invokeContactCreation = true;
+	def.enableSpeculativeContact = true;
 	def.internalValue = B3_SECRET_COOKIE;
 	return def;
 }
 
-static bool b3EmptyDrawShape( void* userShape, b3WorldTransform transform, b3HexColor color, void* context )
+static void b3EmptyDrawShape( void* userShape, b3WorldTransform transform, b3HexColor color, void* context )
 {
 	B3_UNUSED( userShape, transform, color, context );
-	return false;
 }
 
 static void b3EmptyDrawSegment( b3Pos p1, b3Pos p2, b3HexColor color, void* context )

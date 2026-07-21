@@ -24,6 +24,8 @@
 #include <stddef.h>
 #include <stdio.h>
 
+_Static_assert( B3_RESTITUTION_ITERATIONS >= 1, "must be 1 or more" );
+
 // these are useful for solver testing
 #define ITERATIONS 1
 #define RELAX_ITERATIONS 1
@@ -118,33 +120,33 @@ static void b3IntegrateVelocitiesTask( b3SolverBlock block, b3StepContext* conte
 			b3Vec3 omega2 = omega1;
 
 			// Symmetric inertia tensor: 6 unique entries (column-major)
-			const float i00 = inertiaLocal.cx.x;
-			const float i01 = inertiaLocal.cy.x;
-			const float i02 = inertiaLocal.cz.x;
-			const float i11 = inertiaLocal.cy.y;
-			const float i12 = inertiaLocal.cz.y;
-			const float i22 = inertiaLocal.cz.z;
+			float i00 = inertiaLocal.cx.x;
+			float i01 = inertiaLocal.cy.x;
+			float i02 = inertiaLocal.cz.x;
+			float i11 = inertiaLocal.cy.y;
+			float i12 = inertiaLocal.cz.y;
+			float i22 = inertiaLocal.cz.z;
 
-			for ( int gyroIteration = 0; gyroIteration < 1; ++gyroIteration )
+			for ( int gyroIteration = 0; gyroIteration < B3_GYROSCOPIC_ITERATIONS; ++gyroIteration )
 			{
-				const float w1 = omega2.x;
-				const float w2 = omega2.y;
-				const float w3 = omega2.z;
+				float w1 = omega2.x;
+				float w2 = omega2.y;
+				float w3 = omega2.z;
 
 				// Iw = I * omega2 (shared between residual and Jacobian)
-				const float Iw1 = i00 * w1 + i01 * w2 + i02 * w3;
-				const float Iw2 = i01 * w1 + i11 * w2 + i12 * w3;
-				const float Iw3 = i02 * w1 + i12 * w2 + i22 * w3;
+				float Iw1 = i00 * w1 + i01 * w2 + i02 * w3;
+				float Iw2 = i01 * w1 + i11 * w2 + i12 * w3;
+				float Iw3 = i02 * w1 + i12 * w2 + i22 * w3;
 
-				// Residual: b = I*(omega2 - omega1) + h * (omega2 × I*omega2)
-				const b3Vec3 dw = b3Sub( omega2, omega1 );
+				// Residual: b = I * (omega2 - omega1) + h * cross(omega2, I * omega2)
+				b3Vec3 dw = b3Sub( omega2, omega1 );
 				b3Vec3 b = {
 					i00 * dw.x + i01 * dw.y + i02 * dw.z + h * ( w2 * Iw3 - w3 * Iw2 ),
 					i01 * dw.x + i11 * dw.y + i12 * dw.z + h * ( w3 * Iw1 - w1 * Iw3 ),
 					i02 * dw.x + i12 * dw.y + i22 * dw.z + h * ( w1 * Iw2 - w2 * Iw1 ),
 				};
 
-				// Jacobian J = I + h * (skew(omega2) * I - skew(I*omega2))
+				// Jacobian J = I + h * (skew(omega2) * I - skew(I * omega2))
 				// Jacobian derived by Erin Catto, Ph.D. Do not attempt to do this without a Ph.D.
 				// Doubled inertia terms above fold into Iw, e.g. row 2 col 1: i00*w3 - i02*w1 - Iw3.
 				b3Matrix3 J = {
@@ -362,9 +364,9 @@ static bool b3ContinuousQueryCallback( int proxyId, uint64_t userData, void* con
 		return true;
 	}
 
-	// Skip sensors unless the shapes want sensor events
+	// Skip sensors unless both shapes want sensor events
 	bool isSensor = shape->sensorIndex != B3_NULL_INDEX;
-	if ( isSensor && ( shape->enableSensorEvents == false || fastShape->enableSensorEvents == false ) )
+	if ( isSensor && ( ( shape->flags & b3_enableSensorEvents ) == 0 || ( fastShape->flags & b3_enableSensorEvents ) == 0 ) )
 	{
 		return true;
 	}
@@ -396,7 +398,7 @@ static bool b3ContinuousQueryCallback( int proxyId, uint64_t userData, void* con
 	}
 
 	// Custom user filtering
-	if ( shape->enableCustomFiltering || fastShape->enableCustomFiltering )
+	if ( ( shape->flags & b3_enableCustomFiltering ) != 0 || ( fastShape->flags & b3_enableCustomFiltering ) != 0 )
 	{
 		b3CustomFilterFcn* customFilterFcn = world->customFilterFcn;
 		if ( customFilterFcn != NULL )
@@ -440,7 +442,7 @@ static bool b3ContinuousQueryCallback( int proxyId, uint64_t userData, void* con
 	{
 		bool didHit = true;
 
-		if ( didHit && ( shape->enablePreSolveEvents || fastShape->enablePreSolveEvents ) )
+		if ( didHit && ( ( shape->flags & b3_enablePreSolveEvents ) || ( fastShape->flags & b3_enablePreSolveEvents ) ) )
 		{
 			b3ShapeId shapeIdA = { shape->id + 1, world->worldId, shape->generation };
 			b3ShapeId shapeIdB = { fastShape->id + 1, world->worldId, fastShape->generation };
@@ -461,7 +463,9 @@ static bool b3ContinuousQueryCallback( int proxyId, uint64_t userData, void* con
 	float ms = b3GetMilliseconds( ticks );
 	if ( ms > 1000.0f * b3GetStallThreshold() )
 	{
-		b3Log( "CCD stall: duration %.1f ms for %s versus %s", ms, fastBody->name, body->name );
+		const char* nameFast = b3FindNameWithDefault( &world->names, fastBody->nameId, "NULL" );
+		const char* name = b3FindNameWithDefault( &world->names, body->nameId, "NULL" );
+		b3Log( "CCD stall: duration %.1f ms for %s versus %s", ms, nameFast, name );
 	}
 
 	// Continue query
@@ -585,7 +589,7 @@ static void b3SolveContinuous( b3World* world, int bodySimIndex, b3TaskContext* 
 				b3Vec3 aabbMargin = { marginScalar, marginScalar, marginScalar };
 				shape->fatAABB = (b3AABB){ b3Sub( aabb.lowerBound, aabbMargin ), b3Add( aabb.upperBound, aabbMargin ) };
 
-				shape->enlargedAABB = true;
+				shape->flags |= b3_enlargedAABB;
 				fastBodySim->flags |= b3_enlargeBounds;
 			}
 
@@ -617,7 +621,7 @@ static void b3SolveContinuous( b3World* world, int bodySimIndex, b3TaskContext* 
 					.upperBound = b3Add( shape->aabb.upperBound, aabbMargin ),
 				};
 
-				shape->enlargedAABB = true;
+				shape->flags |= b3_enlargedAABB;
 				fastBodySim->flags |= b3_enlargeBounds;
 			}
 
@@ -642,11 +646,12 @@ static void b3SolveContinuous( b3World* world, int bodySimIndex, b3TaskContext* 
 	float ms = b3GetMilliseconds( ticks );
 	if ( ms > 1000.0f * b3GetStallThreshold() )
 	{
+		const char* nameFast = b3FindNameWithDefault( &world->names, fastBody->nameId, "NULL" );
 		b3Vec3 c1 = sweep.c1;
 		b3Vec3 c2 = sweep.c2;
 		int vc = context.visitCount;
-		b3Log( "CCD stall: duration %.1f ms and visit count %d for %s: c1 = (%g, %g, %g), c2 = (%g, %g, %g)", ms, vc,
-			   fastBody->name, c1.x, c1.y, c1.z, c2.x, c2.y, c2.z );
+		b3Log( "CCD stall: duration %.1f ms and visit count %d for %s: c1 = (%g, %g, %g), c2 = (%g, %g, %g)", ms, vc, nameFast,
+			   c1.x, c1.y, c1.z, c2.x, c2.y, c2.z );
 	}
 
 	b3TracyCZoneEnd( ccd );
@@ -692,7 +697,8 @@ static void b3FinalizeBodiesTask( int startIndex, int endIndex, int workerIndex,
 
 		if ( b3IsValidVec3( v ) == false || b3IsValidVec3( w ) == false )
 		{
-			b3Log( "unstable: %s", bodies[sim->bodyId].name );
+			const char* name = b3FindNameWithDefault( &world->names, bodies[sim->bodyId].nameId, "NULL" );
+			b3Log( "unstable: %s", name );
 		}
 
 		B3_ASSERT( b3IsValidVec3( v ) );
@@ -724,6 +730,8 @@ static void b3FinalizeBodiesTask( int startIndex, int endIndex, int workerIndex,
 		// cache miss here, however I need the shape list below
 		b3Body* body = bodies + sim->bodyId;
 		body->bodyMoveIndex = simIndex;
+		body->sleepVelocity = sleepVelocity;
+
 		moveEvents[simIndex].userData = body->userData;
 		moveEvents[simIndex].transform = sim->transform;
 		moveEvents[simIndex].bodyId = (b3BodyId){ sim->bodyId + 1, worldId, body->generation };
@@ -830,14 +838,14 @@ static void b3FinalizeBodiesTask( int startIndex, int endIndex, int workerIndex,
 				b3AABB aabb = b3ComputeFatShapeAABB( shape, transform, speculativeScalar );
 				shape->aabb = aabb;
 
-				B3_ASSERT( shape->enlargedAABB == false );
+				B3_ASSERT( ( shape->flags & b3_enlargedAABB ) == 0 );
 
 				if ( b3AABB_Contains( shape->fatAABB, aabb ) == false )
 				{
 					float marginScalar = shape->aabbMargin;
 					b3Vec3 aabbMargin = { marginScalar, marginScalar, marginScalar };
 					shape->fatAABB = (b3AABB){ b3Sub( aabb.lowerBound, aabbMargin ), b3Add( aabb.upperBound, aabbMargin ) };
-					shape->enlargedAABB = true;
+					shape->flags |= b3_enlargedAABB;
 
 					// Bit-set to keep the move array sorted
 					b3SetBit( enlargedSimBitSet, simIndex );
@@ -1307,6 +1315,7 @@ static void b3SolverTask( void* taskContext )
 		stageIndex += 1 + activeColorCount + ITERATIONS * activeColorCount + 1 + RELAX_ITERATIONS * activeColorCount;
 
 		// Restitution
+		for ( int iteration = 0; iteration < B3_RESTITUTION_ITERATIONS; ++iteration )
 		{
 			b3ApplyRestitution_Overflow( context );
 
@@ -1318,7 +1327,7 @@ static void b3SolverTask( void* taskContext )
 				b3ExecuteMainStage( stages + iterStageIndex, context, syncBits );
 				iterStageIndex += 1;
 			}
-			// graphSyncIndex += 1;
+			graphSyncIndex += 1;
 			stageIndex += activeColorCount;
 		}
 
@@ -1684,7 +1693,7 @@ void b3Solve( b3World* world, b3StepContext* stepContext )
 		// b3_stageRelax
 		stageCount += RELAX_ITERATIONS * activeColorCount;
 		// b3_stageRestitution
-		stageCount += activeColorCount;
+		stageCount += B3_RESTITUTION_ITERATIONS * activeColorCount;
 		// b3_stageStoreWideImpulses
 		stageCount += 1;
 		// b3_stageStoreImpulses
@@ -1769,8 +1778,8 @@ void b3Solve( b3World* world, b3StepContext* stepContext )
 		stage = b3InitColorStages( stage, b3_stageRelax, RELAX_ITERATIONS, activeColorCount, graphColorBlocks, graphBlockCounts,
 								   activeColorIndices );
 		// Note: joint blocks mixed in, could have joint limit restitution
-		stage = b3InitColorStages( stage, b3_stageRestitution, 1, activeColorCount, graphColorBlocks, graphBlockCounts,
-								   activeColorIndices );
+		stage = b3InitColorStages( stage, b3_stageRestitution, B3_RESTITUTION_ITERATIONS, activeColorCount, graphColorBlocks,
+								   graphBlockCounts, activeColorIndices );
 		stage = b3InitStage( stage, b3_stageStoreWideImpulses, convexBlocks, convexPrepareDim.count, UINT8_MAX );
 		stage = b3InitStage( stage, b3_stageStoreImpulses, meshBlocks, meshPrepareDim.count, UINT8_MAX );
 
@@ -2134,10 +2143,10 @@ void b3Solve( b3World* world, b3StepContext* stepContext )
 							// The AABB may not have been enlarged, despite the body being flagged as enlarged.
 							// For example, a body with multiple shapes may have not have all shapes enlarged.
 							// A fast body may have been flagged as enlarged despite having no shapes enlarged.
-							if ( shape->enlargedAABB )
+							if ( shape->flags & b3_enlargedAABB )
 							{
 								b3BroadPhase_EnlargeProxy( broadPhase, shape->proxyKey, shape->fatAABB );
-								shape->enlargedAABB = false;
+								shape->flags &= ~b3_enlargedAABB;
 							}
 
 							shapeId = shape->nextShapeId;
@@ -2199,14 +2208,14 @@ void b3Solve( b3World* world, b3StepContext* stepContext )
 			while ( shapeId != B3_NULL_INDEX )
 			{
 				b3Shape* shape = shapeArray + shapeId;
-				if ( shape->enlargedAABB == false )
+				if ( ( shape->flags & b3_enlargedAABB ) == 0 )
 				{
 					shapeId = shape->nextShapeId;
 					continue;
 				}
 
 				// clear flag
-				shape->enlargedAABB = false;
+				shape->flags &= ~b3_enlargedAABB;
 
 				int proxyKey = shape->proxyKey;
 				int proxyId = B3_PROXY_ID( proxyKey );

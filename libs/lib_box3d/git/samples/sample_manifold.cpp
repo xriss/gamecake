@@ -232,7 +232,7 @@ public:
 			{
 				const b3LocalManifoldPoint& manifoldPoint = m_manifold.points[pointIndex];
 
-				b3Pos point = b3TransformWorldPoint(m_transformB, manifoldPoint.point );
+				b3Pos point = b3TransformWorldPoint( m_transformB, manifoldPoint.point );
 				DrawLine( point, point + length * normal, MakeColor( b3_colorWhite ) );
 
 				if ( manifoldPoint.separation > 0.0f )
@@ -244,11 +244,11 @@ public:
 					DrawPoint( point, 10.0f, MakeColor( b3_colorYellow ) );
 				}
 
-				DrawString3D( point, MakeColor( b3_colorWhite ), "   %.2f", 100.0f * manifoldPoint.separation );
+				DrawString3D( point, MakeColor( b3_colorWhite ), "  %.2f", 100.0f * manifoldPoint.separation );
 
 				b3FeaturePair pair = manifoldPoint.pair;
-				DrawString3D( point + 0.025f * normal, MakeColor( b3_colorPapayaWhip ), "  %X:%X %X:%X", pair.owner1,
-							  pair.index1, pair.owner2, pair.index2 );
+				DrawString3D( point + 0.025f * normal, MakeColor( b3_colorPapayaWhip ), "  %X:%X %X:%X", pair.owner1, pair.index1,
+							  pair.owner2, pair.index2 );
 			}
 		}
 
@@ -517,7 +517,7 @@ public:
 			b3TransformPoint( xf, m_triangle[2] ),
 		};
 
-		b3CollideSphereAndTriangle( &m_manifold, m_pointCapacity, &m_sphere, localTriangle );
+		b3CollideTriangleAndSphere( &m_manifold, m_pointCapacity, localTriangle, &m_sphere );
 	}
 
 	b3Sphere m_sphere;
@@ -572,7 +572,7 @@ public:
 			m_camera->SetView( 0.0f, 30.0f, 5.0f, b3Pos_zero );
 		}
 
-		m_capsule = { { -1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, 0.5f };
+		m_capsule = { { -1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, 0.15f };
 		m_hull = b3MakeBoxHull( 1.0f, 0.5f, 0.5f );
 
 		m_transformA = { { 0.0f, 0.0f, 0.0f }, b3Quat_identity };
@@ -636,17 +636,13 @@ public:
 			m_camera->SetView( 0.0f, 30.0f, 10.0f, b3Pos_zero );
 		}
 
-		m_capsule = { { 0.0f, -0.2f, 0.0f }, { 0.0f, 0.2f, 0.0f }, 0.05f };
+		m_capsule = { { -0.5f, 0.0f, 0.0f }, { 0.5f, 0.0f, 0.0f }, 0.05f };
 		m_triangle[0] = { -4.0f, 0.0f, -4.0f };
 		m_triangle[1] = { -4.0f, 0.0f, 0.0f };
 		m_triangle[2] = { 0.0f, 0.0f, 0.0f };
 
 		m_transformA = b3WorldTransform_identity;
-		m_transformB = { { 0.0f, 0.5f, 0.0f }, b3Quat_identity };
-		m_transformB.q = b3MakeQuatFromAxisAngle( { 0.0f, 0.0f, 1.0f }, 0.5f * B3_PI );
-
-		m_transformB = { { -0.500000000, 0.123778239, -0.500000000 },
-						 { { -0.157559350, 0.294042289, 0.821513653 }, -0.462417006 } };
+		m_transformB = { { -1.0f, 0.0f, -1.0f }, b3Quat_identity };
 	}
 
 	void Render() override
@@ -672,7 +668,7 @@ public:
 			b3TransformPoint( xf, m_triangle[2] ),
 		};
 
-		b3CollideCapsuleAndTriangle( &m_manifold, m_pointCapacity, &m_capsule, localTriangle, &m_simplexCache );
+		b3CollideTriangleAndCapsule( &m_manifold, m_pointCapacity, localTriangle, &m_capsule, &m_simplexCache );
 	}
 
 	b3Capsule m_capsule;
@@ -829,15 +825,22 @@ public:
 			m_camera->SetView( 0.0f, 30.0f, 3.0f, b3Pos_zero );
 		}
 
-		m_triangle[0] = { 1.00000000, 0, 1.00000000 };
-		m_triangle[1] = { 1.00000000, 0, 0.00000000 };
-		m_triangle[2] = { 0.00000000, 0, 0.00000000 };
+		//m_triangle[0] = { 1.00000000, 0, 1.00000000 };
+		//m_triangle[1] = { 1.00000000, 0, 0.00000000 };
+		//m_triangle[2] = { 0.00000000, 0, 0.00000000 };
 
-		m_boxHull = b3MakeBoxHull( 0.5f, 0.5f, 0.5f );
+		m_triangle[0] = { 0.299769998f, -1.01549578f, -0.744717002f };
+		m_triangle[1] = { 0.299769998f, -1.01549578f, 1.28728306f   };
+		m_triangle[2] = { 0.299769998f, -0.913895786f, 0.271283031f };
+
+		float bodyHalfWidth = 0.304800004f;
+		float bodyHalfHeight = 0.914399981f;
+
+		m_boxHull = b3MakeBoxHull( bodyHalfWidth, bodyHalfHeight, bodyHalfWidth );
 
 		m_transformA = b3WorldTransform_identity;
 		m_transformB = b3WorldTransform_identity;
-		m_transformB.p = { 0.0f, 0.45f, 0.1f };
+		//m_transformB.p = { -2.16650009f, 0.912535489f, 0.00000000f };
 
 		// b3MeshEdgeFlags
 		m_flags = 0;
@@ -910,8 +913,8 @@ public:
 			b3TransformPoint( xf, m_triangle[2] ),
 		};
 
-		b3CollideHullAndTriangle( &m_manifold, m_pointCapacity, m_hull, localTriangle[0], localTriangle[1], localTriangle[2],
-								  m_flags, &m_satCache );
+		b3CollideTriangleAndHull( &m_manifold, m_pointCapacity, localTriangle[0], localTriangle[1], localTriangle[2],
+								  m_flags, m_hull, &m_satCache, true );
 	}
 
 	int m_flags;

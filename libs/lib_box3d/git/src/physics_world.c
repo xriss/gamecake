@@ -3,8 +3,6 @@
 
 #include "physics_world.h"
 
-#include "recording.h"
-
 #include "arena_allocator.h"
 #include "bitset.h"
 #include "body.h"
@@ -18,6 +16,7 @@
 #include "joint.h"
 #include "parallel_for.h"
 #include "platform.h"
+#include "recording.h"
 #include "scheduler.h"
 #include "sensor.h"
 #include "shape.h"
@@ -28,6 +27,7 @@
 #include "box3d/constants.h"
 
 #include <float.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -291,6 +291,8 @@ b3WorldId b3CreateWorld( const b3WorldDef* def )
 	world->hullDatabase = b3Alloc( sizeof( b3HullMap ) );
 	b3HullMap_init( world->hullDatabase );
 
+	world->names = b3CreateNameCache();
+
 	world->contactIdPool = b3CreateIdPool();
 	b3Array_Reserve( world->contacts, b3MaxInt( 16, def->capacity.contactCount ) );
 
@@ -473,6 +475,8 @@ void b3DestroyWorld( b3WorldId worldId )
 	b3HullMap_cleanup( world->hullDatabase );
 	b3Free( world->hullDatabase, sizeof( b3HullMap ) );
 	world->hullDatabase = NULL;
+
+	b3DestroyNameCache( &world->names );
 
 	b3Array_Destroy( world->shapes );
 	b3Array_Destroy( world->contacts );
@@ -1173,7 +1177,7 @@ void b3World_Step( b3WorldId worldId, float timeStep, int subStepCount )
 
 		// Fold this step's world bounds into the recording so a viewer can frame the whole motion.
 		b3AABB worldBounds = { 0 };
-		bool   haveBounds = false;
+		bool haveBounds = false;
 		for ( int i = 0; i < b3_bodyTypeCount; ++i )
 		{
 			b3DynamicTree* tree = world->broadPhase.trees + i;
@@ -1182,8 +1186,8 @@ void b3World_Step( b3WorldId worldId, float timeStep, int subStepCount )
 				continue;
 			}
 			b3AABB bounds = b3DynamicTree_GetRootBounds( tree );
-			worldBounds   = haveBounds ? b3AABB_Union( worldBounds, bounds ) : bounds;
-			haveBounds    = true;
+			worldBounds = haveBounds ? b3AABB_Union( worldBounds, bounds ) : bounds;
+			haveBounds = true;
 		}
 		if ( haveBounds )
 		{
@@ -1414,12 +1418,16 @@ void b3World_Draw( b3WorldId worldId, b3DebugDraw* draw, uint64_t maskBits )
 			b3Body* body = b3Array_Get( world->bodies, bodyId );
 			b3BodySim* bodySim = b3GetBodySim( world, body );
 
-			if ( draw->drawBodyNames && body->name[0] != 0 )
+			if ( draw->drawBodyNames && body->nameId != B3_NULL_NAME )
 			{
 				b3Vec3 offset = { 0.05f, 0.05f, 0.05f };
 				b3WorldTransform transform = { bodySim->center, bodySim->transform.q };
 				b3Pos p = b3TransformWorldPoint( transform, offset );
-				draw->DrawStringFcn( p, body->name, b3_colorOrange, draw->context );
+				const char* name = b3FindName( &world->names, body->nameId );
+				if ( name != NULL )
+				{
+					draw->DrawStringFcn( p, name, b3_colorOrange, draw->context );
+				}
 			}
 
 			if ( draw->drawMass && body->type == b3_dynamicBody )
@@ -1433,6 +1441,34 @@ void b3World_Draw( b3WorldId worldId, b3DebugDraw* draw, uint64_t maskBits )
 				char buffer[32];
 				snprintf( buffer, 32, "  %.2f", body->mass );
 				draw->DrawStringFcn( p, buffer, b3_colorWhite, draw->context );
+			}
+
+			if ( draw->drawSleep )
+			{
+				b3BodyState* bodyState = b3GetBodyState( world, body );
+
+				if ( bodyState != NULL )
+				{
+					b3HexColor colors[4] = { b3_colorBlue, b3_colorSkyBlue, b3_colorOrange, b3_colorRed };
+
+					b3HexColor color = b3_colorBlack;
+					if ( body->sleepThreshold > 0.0f )
+					{
+						float ratio = body->sleepVelocity / body->sleepThreshold;
+						int index = b3ClampInt( (int)ratio, 0, 3 );
+						color = colors[index];
+					}
+
+					b3Pos center = bodySim->center;
+					draw->DrawPointFcn( center, 10.0f, color, draw->context );
+
+					b3Vec3 offset = { 0.1f, 0.1f, 0.1f };
+					b3Pos p = b3OffsetPos( center, offset );
+
+					char buffer[32];
+					snprintf( buffer, 32, "  %.3f", body->sleepVelocity );
+					draw->DrawStringFcn( p, buffer, color, draw->context );
+				}
 			}
 
 			if ( draw->drawJoints )
@@ -1487,8 +1523,10 @@ void b3World_Draw( b3WorldId worldId, b3DebugDraw* draw, uint64_t maskBits )
 							b3Vec3 normal = manifold->normal;
 
 							// Average the anchors not the world points so the friction center stays exact far from the origin
-							b3Pos contactCenter = draw->drawAnchorA == 1 ? bodySimA->center : bodySimB->center;
-							b3Vec3 anchorSum = b3Vec3_zero;
+							b3Pos contactCenter = draw->drawAnchorA ? bodySimA->center : bodySimB->center;
+							b3Vec3 frictionAnchor = b3Vec3_zero;
+							float totalWeight = 0.0f;
+							float invTau = 1.0f / B3_SPECULATIVE_DISTANCE;
 
 							const b3ManifoldPoint* points = manifold->points;
 							for ( int pointIndex = 0; pointIndex < manifold->pointCount; ++pointIndex )
@@ -1497,10 +1535,13 @@ void b3World_Draw( b3WorldId worldId, b3DebugDraw* draw, uint64_t maskBits )
 
 								char buffer[32];
 
-								b3Vec3 anchor = draw->drawAnchorA == 1 ? mp->anchorA : mp->anchorB;
+								b3Vec3 anchor = draw->drawAnchorA ? mp->anchorA : mp->anchorB;
 								b3Pos p = b3OffsetPos( contactCenter, anchor );
 
-								anchorSum = b3Add( anchorSum, anchor );
+								// See similar friction anchor weights in b3PrepareContacts_Mesh.
+								float weight = b3ClampFloat( 2.0f - mp->separation * invTau, B3_MIN_FRICTION_WEIGHT, 1.0f );
+								frictionAnchor = b3MulAdd( frictionAnchor, weight, anchor );
+								totalWeight += weight;
 
 								if ( draw->drawContactNormals )
 								{
@@ -1563,15 +1604,14 @@ void b3World_Draw( b3WorldId worldId, b3DebugDraw* draw, uint64_t maskBits )
 							{
 								// Hack inv_dt for single step debugging
 								float inv_dt = world->inv_dt > 0.0f ? world->inv_dt : 60.0f;
-
-								b3Vec3 avgAnchor = b3MulSV( 1.0f / manifold->pointCount, anchorSum );
-								b3Pos p1 = b3OffsetPos( contactCenter, avgAnchor );
+								frictionAnchor = b3MulSV( 1.0f / totalWeight, frictionAnchor );
+								b3Pos p1 = b3OffsetPos( contactCenter, frictionAnchor );
 								b3Vec3 frictionForce = b3MulSV( 0.5f * inv_dt, manifold->frictionImpulse );
 								b3Pos p2 = b3OffsetPos( p1, b3MulSV( draw->forceScale, frictionForce ) );
 								draw->DrawSegmentFcn( p1, p2, frictionColor, draw->context );
 								draw->DrawPointFcn( p1, 5.0f, frictionColor, draw->context );
 
-								p1 = b3OffsetPos( p1, b3MulSV(0.05f * lengthScale, normal) );
+								p1 = b3OffsetPos( p1, b3MulSV( 0.05f * lengthScale, normal ) );
 								char buffer[32];
 								snprintf( buffer, B3_ARRAY_COUNT( buffer ), "%.2f", b3Length( frictionForce ) );
 								draw->DrawStringFcn( p1, buffer, b3_colorWhite, draw->context );
@@ -2278,23 +2318,6 @@ void b3World_StopRecording( b3WorldId worldId )
 	b3StopRecordingInternal( world );
 }
 
-static FILE* b3OpenFile( const char* fileName )
-{
-	FILE* file = NULL;
-
-#if defined( _MSC_VER )
-	errno_t e = fopen_s( &file, fileName, "w" );
-	if ( e != 0 )
-	{
-		return NULL;
-	}
-#else
-	file = fopen( fileName, "w" );
-#endif
-
-	return file;
-}
-
 void b3World_DumpMemoryStats( b3WorldId worldId )
 {
 	b3World* world = b3GetUnlockedWorldFromId( worldId );
@@ -2382,8 +2405,8 @@ void b3World_DumpMemoryStats( b3WorldId worldId )
 	total += hullMapBytes + hullDataBytes;
 
 	b3Log( "hulls" );
-	b3Log( "database: %llu (%d, %d)", (unsigned long long)hullMapBytes, hullCount, hullBucketCount );
-	b3Log( "hull data: %llu", (unsigned long long)hullDataBytes );
+	b3Log( "database: %d (%d, %d)", (int)hullMapBytes, hullCount, hullBucketCount );
+	b3Log( "hull data: %d", (int)hullDataBytes );
 
 	// broad-phase
 	int staticTreeBytes = b3DynamicTree_GetByteCount( world->broadPhase.trees + b3_staticBody );
@@ -2530,44 +2553,7 @@ void b3World_DumpMemoryStats( b3WorldId worldId )
 	total += world->stack.capacity;
 	b3Log( "stack allocator: %d", world->stack.capacity );
 
-	b3Log( "total: %llu", (unsigned long long)total );
-}
-
-void b3World_DumpShapeBounds( b3WorldId worldId, b3BodyType type )
-{
-	B3_ASSERT( b3_staticBody <= type && type <= b3_dynamicBody );
-	b3World* world = b3GetUnlockedWorldFromId( worldId );
-	if ( world == NULL )
-	{
-		return;
-	}
-
-	FILE* file = b3OpenFile( "box3d_bounds.txt" );
-	if ( file == NULL )
-	{
-		return;
-	}
-
-	b3DynamicTree* tree = world->broadPhase.trees + type;
-	b3TreeNode* nodes = tree->nodes;
-
-	uint16_t requiredFlags = b3_allocatedNode | b3_leafNode;
-	int capacity = tree->nodeCapacity;
-	for ( int i = 0; i < capacity; ++i )
-	{
-		b3TreeNode* node = nodes + i;
-		if ( ( node->flags & requiredFlags ) != requiredFlags )
-		{
-			// skip internal and free nodes
-			continue;
-		}
-
-		b3Vec3 a = node->aabb.lowerBound;
-		b3Vec3 b = node->aabb.upperBound;
-		fprintf( file, "%.9f %.9f %.9f %.9f %.9f %.9f\n", a.x, a.y, a.z, b.x, b.y, b.z );
-	}
-
-	fclose( file );
+	b3Log( "total: %u KB", (uint32_t)( total / 1024 ) );
 }
 
 typedef struct WorldQueryContext
@@ -4115,123 +4101,3 @@ void b3ValidateContacts( b3World* world )
 }
 
 #endif
-
-#define NAME int_set
-#define KEY_TY int
-#define MALLOC_FN b3Alloc
-#define FREE_FN b3Free
-#define HASH_FN vt_hash_integer
-#define CMPR_FN vt_cmpr_integer
-#include "verstable.h"
-
-void b3World_DumpAwake( b3WorldId worldId )
-{
-	b3World* world = b3GetWorldFromId( worldId );
-	if ( world->locked == true )
-	{
-		return;
-	}
-
-	b3OpenDump( "box3d_dump.inl" );
-
-	b3Vec3 g = world->gravity;
-	b3Dump( "b3Vec3 gravity = {%.9g, %.9g, %.9g};\n", g.x, g.y, g.z );
-	b3Dump( "b3World_SetGravity(m_worldId, gravity);\n" );
-
-	b3Dump( "std::vector<b3BodyId> bodies;\n" );
-	b3Dump( "std::vector<b3JointId> joints;\n\n" );
-
-	int_set staticBodies;
-	int_set_init( &staticBodies );
-
-	b3Body* bodies = world->bodies.data;
-	for ( int i = 0; i < world->bodies.count; ++i )
-	{
-		b3Body* body = bodies + i;
-
-		if ( body->id == B3_NULL_INDEX )
-		{
-			continue;
-		}
-
-		if ( body->setIndex != b3_awakeSet )
-		{
-			continue;
-		}
-
-		b3DumpBody( world, body );
-
-		// Gather
-		int edgeKey = body->headContactKey;
-		while ( edgeKey != B3_NULL_INDEX )
-		{
-			int contactId = edgeKey >> 1;
-			int edgeIndex = edgeKey & 1;
-
-			b3Contact* contact = b3Array_Get( world->contacts, contactId );
-			edgeKey = contact->edges[edgeIndex].nextKey;
-
-			if ( ( contact->flags & b3_contactTouchingFlag ) == 0 )
-			{
-				continue;
-			}
-
-			int otherIndex = 1 - edgeIndex;
-			b3Body* otherBody = b3Array_Get( world->bodies, contact->edges[otherIndex].bodyId );
-			if ( otherBody->setIndex == b3_staticSet )
-			{
-				(void)int_set_insert( &staticBodies, otherBody->id );
-			}
-		}
-	}
-
-	// Dump the bodies that are touching
-	for ( int_set_itr itr = int_set_first( &staticBodies ); int_set_is_end( itr ) == false; itr = int_set_next( itr ) )
-	{
-		b3Body* body = b3Array_Get( world->bodies, itr.data->key );
-		b3DumpBody( world, body );
-	}
-
-	int_set_cleanup( &staticBodies );
-
-	b3CloseDump();
-}
-
-void b3World_Dump( b3WorldId worldId )
-{
-	b3World* world = b3GetWorldFromId( worldId );
-
-	if ( world->locked == true )
-	{
-		return;
-	}
-
-	b3OpenDump( "box3d_dump.inl" );
-
-	b3Vec3 g = world->gravity;
-	b3Dump( "b3Vec3 gravity = {%.9g, %.9g, %.9g};\n", g.x, g.y, g.z );
-	b3Dump( "b3World_SetGravity(m_worldId, gravity);\n" );
-
-	b3Dump( "std::vector<b3BodyId> bodies;\n" );
-	b3Dump( "std::vector<b3JointId> joints;\n\n" );
-
-	b3Body* bodies = world->bodies.data;
-	for ( int i = 0; i < world->bodies.count; ++i )
-	{
-		b3Body* body = bodies + i;
-
-		if ( body->id == B3_NULL_INDEX )
-		{
-			continue;
-		}
-
-		if ( body->setIndex != b3_awakeSet )
-		{
-			continue;
-		}
-
-		b3DumpBody( world, body );
-	}
-
-	b3CloseDump();
-}

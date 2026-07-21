@@ -38,7 +38,7 @@
 #ifdef __cplusplus
 	#define B3_API extern "C" BOX3D_EXPORT
 	#define B3_INLINE inline
-
+	#define B3_ALIGN_AS(N) alignas(N)
 #if defined( _MSC_VER )
 	#define B3_FORCE_INLINE __forceinline
 #elif defined( __GNUC__ ) || defined( __clang__ )
@@ -52,6 +52,7 @@
 #else
 	#define B3_API BOX3D_EXPORT
 	#define B3_INLINE static inline
+	#define B3_ALIGN_AS(N) _Alignas(N)
 
 #if defined( _MSC_VER )
 	#define B3_FORCE_INLINE static __forceinline
@@ -102,7 +103,7 @@ typedef void b3LogFcn( const char* message );
 B3_API void b3SetAllocator( b3AllocFcn* allocFcn, b3FreeFcn* freeFcn );
 
 /// Total bytes allocated by Box3D
-B3_API int32_t b3GetByteCount( void );
+B3_API int b3GetByteCount( void );
 
 /// Override the default assert callback.
 ///	@param assertFcn a non-null assert callback
@@ -185,9 +186,5 @@ B3_API void b3Sleep( int milliseconds );
 // Simple djb2 hash function for determinism testing
 #define B3_HASH_INIT 5381
 B3_API uint32_t b3Hash( uint32_t hash, const uint8_t* data, int count );
-
-// Dump file support functions
-B3_API void b3WriteBinaryFile( void* data, int size, const char* fileName );
-B3_API void* b3ReadBinaryFile( const char* prefix, const char* fileName, int* memSize );
 
 //! @endcond

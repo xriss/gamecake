@@ -289,7 +289,7 @@ void b3RecW_LOCKS( b3RecBuffer* buf, b3MotionLocks v )
 	b3RecW_BOOL( buf, v.angularZ );
 }
 
-void b3RecW_STR( b3RecBuffer* buf, const char* s )
+static void b3RecW_STR( b3RecBuffer* buf, const char* s )
 {
 	if ( s == NULL )
 	{
@@ -319,7 +319,7 @@ _Static_assert( sizeof( void* ) != 8 || sizeof( b3ExplosionDef ) == 32 || sizeof
 				"b3ExplosionDef changed: update b3RecW_EXPLOSIONDEF and b3RecR_EXPLOSIONDEF together" );
 _Static_assert( sizeof( void* ) != 8 || sizeof( b3BodyDef ) == 104 || sizeof( b3BodyDef ) == 120,
 				"b3BodyDef changed: update b3RecW_BODYDEF and b3RecR_BODYDEF together" );
-_Static_assert( sizeof( void* ) != 8 || sizeof( b3ShapeDef ) == 112,
+_Static_assert( sizeof( void* ) != 8 || sizeof( b3ShapeDef ) == 120,
 				"b3ShapeDef changed: update b3RecW_SHAPEDEF and b3RecR_SHAPEDEF together" );
 _Static_assert( sizeof( void* ) != 8 || sizeof( b3ParallelJointDef ) == 128,
 				"b3ParallelJointDef changed: update b3RecW_PARALLELJOINTDEF and its reader together" );
@@ -375,6 +375,8 @@ void b3RecW_BODYDEF( b3RecBuffer* buf, b3BodyDef v )
 
 void b3RecW_SHAPEDEF( b3RecBuffer* buf, b3ShapeDef v )
 {
+	b3RecW_STR( buf, v.name );
+
 	// userData: not preserved
 	b3RecW_U64( buf, 0u );
 	// Per-triangle materials: length-prefixed so the reader can rebuild the array.
@@ -397,6 +399,7 @@ void b3RecW_SHAPEDEF( b3RecBuffer* buf, b3ShapeDef v )
 	b3RecW_BOOL( buf, v.enablePreSolveEvents );
 	b3RecW_BOOL( buf, v.invokeContactCreation );
 	b3RecW_BOOL( buf, v.updateBodyMass );
+	b3RecW_BOOL( buf, v.enableSpeculativeContact );
 	// internalValue omitted
 }
 
@@ -938,12 +941,12 @@ void b3RecInternTag( b3Recording* rec, uint64_t key, uint64_t id, const char* na
 	tag->key = key;
 	tag->id = id;
 	int n = 0;
-	while ( name != NULL && name[n] != '\0' && n < B3_BODY_NAME_LENGTH )
+	while ( name != NULL && name[n] != '\0' && n < B3_MAX_QUERY_NAME_LENGTH )
 	{
-		tag->name[n] = name[n];
+		tag->queryName[n] = name[n];
 		n++;
 	}
-	tag->name[n] = '\0';
+	tag->queryName[n] = '\0';
 	b3RecTagMap_insert( map, key, index );
 }
 
@@ -966,7 +969,7 @@ void b3RecWriteRegistry( b3Recording* rec )
 	{
 		b3RecW_U64( &rec->buffer, rec->tags[i].key );
 		b3RecW_U64( &rec->buffer, rec->tags[i].id );
-		b3RecW_STR( &rec->buffer, rec->tags[i].name );
+		b3RecW_STR( &rec->buffer, rec->tags[i].queryName );
 	}
 }
 
