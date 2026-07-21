@@ -33,6 +33,7 @@ preopts.commandline=[[ "]]..preopts.fun_file..[[" , "--" , "--logs" , "--show=fu
 
 print(basedir)
 local info=wgfun.get_info(basedir)
+print(info)
 preopts.name=info.android_class or "fun"
 preopts.title=info.title or "fun"
 preopts.icon=info.icon or [[
@@ -146,11 +147,11 @@ end
 
 
 -- patch init.lua if it exists
-if bake.file_exists( basedir.."/lua/init.lua" ) then
+if bake.isfile( basedir.."/lua/init.lua" ) then
 	bake.replacefile(basedir.."/lua/init.lua","gamecake/src/main/"..zips.apk_munge_filename("lua/init.lua"),opts)
 end
 
-if bake.file_exists(basedir.."/lua/init_bake.lua") then
+if bake.isfile(basedir.."/lua/init_bake.lua") then
 	local lson=bake.readfile(basedir.."/lua/init_bake.lua")
 	if lson then
 		local data=sbox.lson(lson)
@@ -163,11 +164,11 @@ end
 
 
 local ficon=basedir.."/art/icons/android_icon.png"
-if not bake.file_exists(ficon) then
+if not bake.isfile(ficon) then
 	ficon="art/icons/android_icon.png"
 end
 
-if bake.file_exists(ficon) then
+if bake.isfile(ficon) then
 
 	for i,v in ipairs{
 		{s=192,o="xxxhdpi"},

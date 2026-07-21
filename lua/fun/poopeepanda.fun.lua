@@ -73,6 +73,7 @@ sysopts={
 . . . . . . . . . . . . . . . . . . . 
 ]],
 }
+hardware,main=system.configurator(sysopts)
 
 --------------------------------------------------------------------------------
 --
@@ -97,9 +98,6 @@ sound_data=djon.load([[
 }
 
 ]])
-
-
-hardware,main=system.configurator(sysopts)
 
 systems={}
 

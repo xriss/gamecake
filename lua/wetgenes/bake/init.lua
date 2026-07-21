@@ -201,8 +201,8 @@ M.isfile=function(name)
 	if fp then fp:close() return true end
 	return false
 end
-M.fileexists=isfile -- alias for old code, do not use in new code
-M.file_exists=isfile -- alias for old code, do not use in new code
+M.fileexists=M.isfile -- alias for old code, do not use in new code
+M.file_exists=M.isfile -- alias for old code, do not use in new code
 
 M.writefile=function(name,data)
 	local fp=assert(io.open(name,"wb"))

@@ -29,13 +29,12 @@ M.get_info=function(fname)
 	env.oven={}
 	env.oven.opts={}
 	env.system={}
-	env.system.configurator=function(a) return a end
+	env.system.configurator=function(a) return a.hardware end
 	pcall( function()
 		local f=assert(loadstring(text))
 		setfenv(f,env)
 		assert(pcall(f))
 	end )
-	
 	return env.hardware
 end
 

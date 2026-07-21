@@ -5,6 +5,11 @@
 local tardis=require("wetgenes.tardis")
 local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3","M4","Q4")
 
+-- gonna render some sounds
+local djon=require("djon")
+local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
+local bitsynth_task=require("wetgenes.gamecake.fun.bitsynth_task")
+
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
 local wstr=require("wetgenes.string")
 
@@ -50,26 +55,49 @@ sysopts={
 		},
 	},
 	icon=[[
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 Y Y O O Y Y O O o o 0 0 0 0 
-0 0 0 0 0 Y Y O O Y Y O O o o 0 0 0 0 
-0 0 0 Y Y O O o o O O o o r r r r 0 0 
-0 0 0 Y Y O O o o O O o o r r r r 0 0 
-0 0 0 s s s s F F F F F F f f f f 0 0 
-0 0 0 s s s s F F F F F F f f f f 0 0 
-0 0 0 Y Y Y Y Y Y Y Y Y Y o o o o 0 0 
-0 0 0 Y Y Y Y Y Y Y Y Y Y o o o o 0 0 
-0 0 0 s s s s F F F F F F f f f f 0 0 
-0 0 0 s s s s F F F F F F f f f f 0 0 
-0 0 0 o o o o O O O O O O r r r r 0 0 
-0 0 0 o o o o O O O O O O r r r r 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+. . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . 
+. . . . . Y Y O O Y Y O O o o . . . . 
+. . . . . Y Y O O Y Y O O o o . . . . 
+. . . Y Y O O o o O O o o r r r r . . 
+. . . Y Y O O o o O O o o r r r r . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
+. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . s s s s F F F F F F f f f f . . 
+. . . o o o o O O O O O O r r r r . . 
+. . . o o o o O O O O O O r r r r . . 
+. . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . . . . 
 ]],
 }
-
 hardware,main=system.configurator(sysopts)
+
+--------------------------------------------------------------------------------
+--
+--#sounds
+
+-- render some sounds ( the editor saves djon so cutnpaste here )
+sound_data=djon.load([[
+
+{
+ sounds = [
+  {
+   adsr = [ 1 0 0 0 0.2 ]
+   duty = 0.5
+   fm = { duty=0.5 ffreq=[ `freq_range` 261.630000000001 293.66 329.630000000001 1024 ] frequency=16 fwav=`sine` }
+   frequency = D4
+   fwav = square
+   name = jump
+   name_idx = 1
+   volume = 0.5
+  }
+ ]
+}
+
+]])
 
 systems={}
 
@@ -107,26 +135,31 @@ all.create_scene=function(scene)
 --		scene.infos.all.scene.initialize(scene)
 	end
 	
-	scene.do_setup=function(scene)
-		scene:systems_cocall("setup")
-
+	scene.do_boot_level=function(scene,level)
 		local boots={
-			{"kinetic"},
-			{"level",idx=1},
+			{"kinetic",
+				LengthUnitsPerMeter=16,
+				step=(1/16), -- amount of time to step each frame
+				substeps=16, -- number of substeps per step ( should be about 256 per sec)
+				defaults=kinetics.defaults,
+				bits=kinetics.bits,
+			},
+			{"level",idx=level},
 --			{"fauna_panda",sname="fauna_panda",pos={192,32,0}},
 		}
 		scene:creates(boots)
+	end
+	
+	scene.do_setup=function(scene)
+		scene:systems_cocall("setup")
+		scene:do_boot_level(1)
 	end
 
 	scene.do_level=function(scene,level)
 		scene:call("destroy")
 		scene:reset()
 		scene:reset_ticks()
-		local boots={
-			{"kinetic"},
-			{"level",idx=level},
-		}
-		scene:creates(boots)
+		scene:do_boot_level(level)
 	end
 	
 	scene.infos.all.scene.initialize(scene)
@@ -137,6 +170,12 @@ end
 
 local main_setup=function()
 
+	for _,snd in ipairs(sound_data.sounds) do
+		if snd.name then
+			system.components.sfx.render(snd)
+		end
+	end
+	
 	-- reset tiles
     local ctiles=system.components.tiles
 	ctiles.reset_tiles()
@@ -164,6 +203,98 @@ draw=function()
 	scene:do_draw()
 end
 
+--------------------------------------------------------------------------------
+--
+--#kinetics
+--
+kinetics={}
+
+kinetics.defaults={ -- world defaults when creating box2d objects
+	world={
+		gravity={0,400}, -- default gravity
+		sleepThreshold=0*16, -- *16 meter adjust
+		hitEventThreshold = 0.0*16, -- any hit please
+--		restitutionThreshold = 0.0*16, -- bouncy
+		contactSpeed = 16*16, -- push out 1 pix per step
+--		maximumLinearSpeed = 400*16,
+	},
+	body={
+		sleepThreshold=1, -- meter adjust
+--        linearDamping=1/64,
+--        angularDamping=1/64,
+		gravityScale=0, -- disable gravity by default
+	},
+	shape={
+		density=1/256,
+		material_friction=0.5,
+		material_restitution=0.5,
+--						material_rollingResistance=0.5,
+	},
+	joint={
+	},
+}
+kinetics.bits={ -- named collision bit masks
+	player={		group=0,
+					bits=0x0000000000100,
+					mask=0x0000000fffeff,
+	},
+	floater={		group=0,
+					bits=0x0000000010000,
+					mask=0x0000000ffffff,
+	},
+	fauna_egg={		group=0,
+					bits=0x0000000010000,
+					mask=0x0000000ffffff,
+	},
+	fauna_slim={	group=0,
+					bits=0x0000000010000,
+					mask=0x0000000ffffff,
+	},
+	fauna_trench={	group=0,
+					bits=0x0000000010000,
+					mask=0x0000000ffffff,
+	},
+	fruit={			group=0,
+					bits=0x0000000010000,
+					mask=0x0000000ffffff,
+	},
+	gib={			group=0,
+					bits=0x0000001000000,
+					mask=0x00000000000ff,
+	},
+	junk={			group=0,
+					bits=0x0000000010000,
+					mask=0x0000000ffffff,
+	},
+}
+
+-- find out what we might be standing on
+-- ray translation is expected to be y only and origin is body origin
+-- we will ignore "bad" shapes and fill in the length of the ray
+kinetics.cast_feet=function(world,ray)
+	local hits=world:cast(ray)
+	local pass={}
+
+	 -- force meta and calc ray values
+	ray.origin=V2(ray.origin)
+
+	for _,hit in ipairs(hits) do
+		if hit.shape then
+			hit.ray=ray
+--			hit.closest=V2(hit.shape:convert(ray.origin[1],ray.origin[2],"closest"))
+			hit.point=V2(hit.point)
+			hit.normal=V2(hit.normal)
+			hit.delta=hit.point-ray.origin
+			hit.floor=hit.delta[2] -- delta distance to floor
+			if		hit.floor>=2 and 
+					hit.normal[2]<0.5 and
+					math.abs(hit.delta[1])<(ray.radius-1) then -- filter out bad hits
+--rint(hit.delta,hit.normal)
+				return hit
+			end
+		end
+	end
+end
 
 --------------------------------------------------------------------------------
 --
@@ -190,7 +321,7 @@ draws.sprite=function(it) -- note that we will modify this table
 	it.px=math.floor(it.px+0.5)
 	it.py=math.floor(it.py+0.5)
 	if it.rz then
-		it.rz=360*math.floor(it.rz*16+0.5)/16
+		it.rz=360*it.rz
 	end
 	system.components.sprites.list_add(it)
 end
@@ -434,7 +565,7 @@ overshade.update=function(overshade)
 				end
 			end
 			if touch then
---print(id,action,pos,touch)
+--rint(id,action,pos,touch)
 			    overshade.last_touch=oven.time()
 
 				touch.pos=V2(pos)
@@ -469,7 +600,7 @@ overshade.update=function(overshade)
 				end
 			end
 		end
---		print(id,act,x,y)
+--rint(id,act,x,y)
 	end
 
 	local age=(oven.time()-overshade.last_touch)
@@ -633,24 +764,23 @@ players.uidmap={
 }
 
 players.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,0,0 ),
+	acc=V2( 0,0 ),
 	idx=1,
 	mode="none",
 	side=1,
 	foot=8,
 	onfloor=0,
 	flap=0,
-	jump_force=0,
 	jump_debounce=0,
 	holdtime=0,
 	walk=0,
 	score=0,
 	idle=0,
-	spawn=V3( 0,0,0 ),
+	spawn=V2( 0,0 ),
 }
 
 players.types={
@@ -858,56 +988,31 @@ players.item.setup=function(player)
 	player:set_values()
 end
 
-players.collision_type=0x00040001	-- assigned type
-players.collision_bits=0x00000100	-- assigned bitmask
-players.collision_mask=0x00ffffff	-- interact bitmask
-players.collision_handlers={
-	[{players.collision_type}]={
-		postsolve=function(arb)
-			local player=scene:find_uid(arb.shape_a.uid)
-			local it=scene:find_uid(arb.shape_b.uid)
-			if player and it and it.do_touch then -- sanity
-				it:do_touch(player,arb)
-			end
-			if it then
-				if it.caste=="fauna_slim" then -- kill on touch
-					player:do_die(it,arb)
-				end
-			end
-			return true
-		end
-	}
-}
-
-players.item.reset_kinetic_ids=function(player)
-	player.shape:filter(player.uid,players.collision_bits,players.collision_mask)
-	player.shape:collision_type(players.collision_type)
-end
-
-
 players.item.setup_kinetic=function(player)
 	if player.body then return end -- only create once
-	local space=player:get_singular("kinetic").space
-	player.body=space:body(1,1)
+	local world=player:get_singular("kinetic").world
+	player.body=world:body({
+		type="dynamic",
+		transform={player.pos[1],player.pos[2],player.rot*(math.pi*2)},
+	})
 	if player.mode=="spawn" or player.mode=="die" then
 		-- no collision when spawning
 	else
-		player.shape=player.body:shape("circle",4,0,0)
-		player.shape:friction(0.5)
-		player.shape:elasticity(0.5)
-		player:reset_kinetic_ids()
-		player.shape.uid=player.uid
+		player.shape=player.body:shape({
+			shape="circle",
+			radius=4,
+			material_friction=0.0, -- slide on walls
+			filter="player",
+			enableHitEvents=true,
+			uid=player.uid,
+		})
 	end
 	player:set_body() -- set positon etc
 end
 
 players.item.clean_kinetic=function(player)
 	if not player.body then return end -- auto clean
-	local kinetic=player:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	if player.shape then space:remove(player.shape) end
-	space:remove(player.body)
+	player.body:destroy()
 	player.body=nil
 	player.shape=nil
 end
@@ -916,14 +1021,13 @@ players.item.clean=function(player)
 	player:clean_kinetic()
 end
 
-players.item.do_die=function(player)
-		player:set_value("mode","die")
-end
-
 players.item.update=function(player)
+
 	player:get_values()
 	player:setup_kinetic() -- might need to recreate body
 	
+	local kinetic=player:get_singular("kinetic") -- we will do kinetic things
+	local world=kinetic.world
 	local level=player:get_singular("level") -- only one level is active at a time
 
 	local up=player.scene.ups[player.idx] or player.sys.oven.ups.empty
@@ -940,25 +1044,76 @@ players.item.update=function(player)
 	local bb_set=( up:get("b_set") ) or false
 	local bb_clr=( up:get("b_clr") ) or false
 
-	local grav=level:get_gravity(player.pos)
-	
+	local grav=level:get_gravity(player.pos,player.vel)
+
+	player.idle=player.idle+1
+	local ll=lx*lx+ly*ly
+	if ll>0.25 or bb_set or bb_now or bb_clr or ba_set or ba_now or ba_clr then
+		player.idle=0 -- ticks since last controller input
+	end
+
+	local foot_touch -- set this if our feet touched something ( not the level )
+	local feet=kinetics.cast_feet(world,{ -- this is part of the collision so run it here
+		closest=true, -- just want the closest hit
+		origin=player.pos,
+		points={0,0},
+		radius=4,
+		translation={0,8},
+		filter_categoryBits=0x00000100,
+		filter_maskBits=0x00ffffff,
+	})
+	if feet then
+		foot_touch=scene:find_uid(feet.shape.uid) -- remember foot touch for later
+	end
+
+	local event_touch=function(it,event)
+		if player.mode~="none" then return end -- only if player is in this state
+
+		if it.flag_touch then
+			it:flag_touch(player,event)
+		end
+
+		if it.caste=="fauna_slim" then -- kill us on touch
+			player.mode="die"
+			it:do_stun(player,event) -- also kill them
+		end
+	end
+
+	-- check events for anyone we touched
+	for event in kinetic.events:iterate(player.uid) do
+		if event.is=="contact_hit" then
+			local it=scene:find_uid(
+				(event.shapeA.uid == player.uid) and
+				event.shapeB.uid or
+				event.shapeA.uid ) -- we hit the one that is is not us
+			if it then
+				event_touch(it,event)
+			end
+		end
+	end
+	if foot_touch then -- also did we touched with our feet earlier
+		event_touch(foot_touch,{is="foot"})
+	end
+
 if player.mode=="spawn" then -- we are spawning but not really here yet
+
+	local aim=V2( lx+(rx*256) , (-1/256)+ly+(ry*256) )
+	aim:normalize()
+
+	local dest=player.spawn + aim*4 -- move to choose launch direction
+	
+	player.pos=player.pos + ( dest -player.pos )*0.25 -- aim
+
 
 	if ba_set and ( player.idx==1 or player.idle<16*10 ) then -- hide p2 after 10 secs
 		player.mode="none"
 		player:clean_kinetic()
 		player:setup_kinetic()
 
-		local tile=level:get_tile_by_pos(player.pos)
-		player.vel=V3(tile.dir)*400
-	end
+		player.vel=aim*200
 
-	player.idle=player.idle+1
-	local ll=lx*lx+ly*ly
-	if ll>0.25 or bb_set or bb_clr or ba_set or ba_clr then
-		player.idle=0 -- ticks since last controller input
+		system.components.sfx.play("jump",1,0.5)
 	end
-
 
 elseif player.mode=="egg" then
 
@@ -978,41 +1133,35 @@ elseif player.mode=="die" then
 
 		player.vel[2]=player.vel[2]-200
 	end
-
-	player.acc=grav -- apply gravity
 	
+	player.vel=player.vel+(grav/16) -- 0 mass so we have to apply gravity
+
 	if player.pos[2] > 512 then -- fell way off of screen
 	
 		player.mode="spawn"
-
 		
 		player:clean_kinetic()
 		player:setup_kinetic()
 
-		player.pos=V3()+player.spawn
+		player.pos=V2()+player.spawn
 		player.rot=0
-		player.vel=V3()
+		player.vel=V2()
 		player.ang=0
-		player.acc=V3()
+		player.acc=V2()
+		player.onfloor=0
 
 	end
 
 else
 	
-	if ba_now then
---		grav=grav*0.5 -- reduce gravity while flapping arms
+	if player.idle==0 then -- flap arms while moving
 		player.flap=(player.flap+1)%4
 	else
 		player.flap=2
 	end
 
-	player.acc=V3( 0, 0 ,0) -- reset force
-	local va -- velocity we want to achieve
-	if player.onfloor>0 or player.jump_force>0 then -- when on floor
-		va=lx*512
-	else -- when in air
-		va=lx*256
-	end
+	player.acc=V2( 0 ,0) -- reset force
+	local va=lx*400  -- velocity we want to achieve
 	if va then -- apply left/right movement
 		if va<0 and player.vel[1]>0 then player.vel[1]=0 end -- quick turn
 		if va>0 and player.vel[1]<0 then player.vel[1]=0 end -- quick turn
@@ -1041,12 +1190,10 @@ else
 
 --	player.pos=player.pos+player.vel
 
-	local footspeed=0.25
+	local footspeed=0.5
+	if feet then
 
-	local space=player:get_singular("kinetic").space
-	local hit=space:query_segment_first(player.pos[1],player.pos[2],player.pos[1],player.pos[2]+16,2,player.uid,0x00000100,0x00ffffff)
-	if hit and hit.alpha and hit.alpha<0.75 then
-		local d=(hit.alpha*16)+2 -- distance + radius
+		local d=feet.floor -- Y distance to floor
 		local o=player.vel[2] -- original velocity
 		local v=((d-9)) -- distance to where we want to be
 
@@ -1056,79 +1203,84 @@ else
 			v=v-2
 		end
 
-		local a=v*32 -- force to adjust velocity by
+		player.vel[2]=player.vel[2]*8/16 -- decay bouncy-ness
+		if     v>= 0.5 then
+			player.acc[2]=footspeed*128
+		elseif v<=-0.5 then
+			player.acc[2]=footspeed*-256
+		else
+			player.acc[2]=v*16
+		end
 
 		player.foot=d
 		if player.foot<7  then player.foot=7  end
 		if player.foot>11 then player.foot=11 end
-		player.acc[2]=player.acc[2]+a --  hover
+--		player.acc[2]=player.acc[2]+a --  hover
 
 		player.onfloor=4
-		if hit.shape.uid then
-			local it=scene:find_uid(hit.shape.uid)
-			if it and it.do_touch then -- sanity
-				it:do_touch(player,arb)
-			end
-		end
+
 	else
-		if player.foot>11 then player.foot=player.foot-footspeed end
+		if player.foot>11 then player.foot=11 end
 		if player.foot<11 then player.foot=player.foot+footspeed end
 
 		player.acc:add(grav) -- gravity
 	end
 
-	if player.jump_debounce>0 then -- force minimum time between jumps
+	if player.jump_debounce>0 then -- may press jump a few frames before touching floor
 		player.jump_debounce=math.max(0,player.jump_debounce-1)
-		player.onfloor=0
+	elseif player.jump_debounce<0 then -- force minimum time between jumps
+		player.jump_debounce=math.min(0,player.jump_debounce+1)
 	end
-
-	if ba_set then -- start jump
-		if player.onfloor>0 and player.jump_force==0 then -- can jump
+	if player.jump_debounce<0 then player.onfloor=0 end -- just jumped reset floor for a few frames
+	if ba_set and player.jump_debounce>=0 then player.jump_debounce=4 end -- start jump now or in the next few frames
+	if ba_now and player.jump_debounce>=0 and player.jump_debounce<=1 then player.jump_debounce=1 end -- continue jump only this frame
+	if player.jump_debounce>0 and player.vel[2]>-32 then -- start jump
+		if player.onfloor>0 then -- can jump
 			player.onfloor=0
-			player.jump_force=11	-- (F*(F+1)/2)*-4 applied over F frames
-			player.jump_debounce=4
-			player.vel[2]=0 -- reset starting force
+			player.jump_debounce=-4
+			player.vel[2]=-180 -- reset starting force
+			system.components.sfx.play("jump",1,0.5)
 		end
 	end
-	if ba_now then -- continue jump
-		player.vel[2]=player.vel[2]+(player.jump_force*-4)	-- apply jump force
-		player.jump_force=math.max(0,player.jump_force-1)	-- decay jump force
-	end
-	if ba_clr then -- end of jump
-		player.jump_force=0 -- 0 on jump force on release of jump
-	end
 
-	local hold_pos=player.pos+V3(0,-10,0)
+
+	local aim=V2( (player.side/128)+lx+(rx*256) , (1/256)+ly+(ry*256) )
+	aim:normalize()
+	local hold_pos=player.pos+V2(0,-8)+(aim*8)
+
+
 	local hold=player:depend("hold")
 	local hold_len -- how well held 0 is best
 	if bb_set and hold then -- throw
 		player:depend("hold",0)
 		hold:depend("held",0)
-		hold.shape:collision_type(junks.collision_type) -- become dangerous
 		local m=((player.holdtime-8)/16)
 		if m>1 then m=1 end -- full speed after 1.5 seconds
 		if m<0 then m=0 end -- must hold for at least 0.5 seconds before we can throw
-		local aim=V3( (player.side/128)+lx+(rx*256) , (1/256)+ly+(ry*256) , 0 )
-		aim:normalize()
+--		local aim=V3( (player.side/128)+lx+(rx*256) , (1/256)+ly+(ry*256) , 0 )
+--		aim:normalize()
 		hold:set_value("vel",aim*(400*m))
 		hold:set_value("danger",16*8)
+		hold:setup_kinetic_reshape()
 	end
 	if bb_set and not hold then -- pickup
 		player.holdtime=0
-		local v1=player.pos+V3(-24,-16,0)
-		local v2=player.pos+V3( 24, 24,0)
---		if player.side>0 then	v2[1]=v2[1]+16
---		else					v1[1]=v1[1]-16	end
-		local shapes=space:query_bounding_box(v1[1],v1[2],v2[1],v2[2],player.uid,0xffffffff,0xffffffff)
-		local its={}
-		for _,shape in ipairs(shapes) do
-			local it=scene:find_uid(shape.uid)
-			if it then its[it]=shape end
-		end
+		local v1=V2(-24,-16)
+		local v2=V2( 24, 24)
+
+		local overlaps = world:overlap({
+			origin=player.pos,
+			lowerBound=v1,
+			upperBound=v2,
+			filter_categoryBits=0xffffffff,
+			filter_maskBits=0xffffffff,
+		})
 		local best_d=math.huge
 		local best
-		for it,shape in pairs(its) do
-			if it.caste=="junk" then -- check distance
+		for _,shape in ipairs(overlaps.shapes) do
+			-- level shapes will not have a uid
+			local it=scene:find_uid(shape.uid)
+			if it and it.caste=="junk" then -- can only pickup junk
 				local d=hold_pos:distance(it.pos)
 				if d<best_d then
 					best_d=d
@@ -1141,6 +1293,7 @@ else
 			player:depend("hold",hold.uid)
 			hold:depend("held",player.uid)
 			hold:set_value("danger",0)
+			hold:setup_kinetic_reshape()
 		end
 	end
 	if hold then
@@ -1149,17 +1302,15 @@ else
 		if math.abs(lx)>0.5 then -- run to speed up spin timer
 			player.holdtime=player.holdtime+2
 		end
-		-- stop player coliding with held object
-		hold.shape:filter(player.uid,players.collision_bits,players.collision_mask)
 
 		hold:get_value("pos")
 		hold:get_value("vel")
-		local p=hold_pos-hold.pos
+		local p=hold_pos - hold.pos
 		hold_len=p:len() -- distance
 		if hold_len>40 then -- too far so just drop
 			player:depend("hold",0)
 			hold:depend("held",0)
-			hold.shape:filter(hold.uid,hold.collision_bits,hold.collision_mask)
+			hold:setup_kinetic_reshape()
 		else
 			hold.vel:add( p*8 )
 			hold.vel:scale(1/2)
@@ -1171,12 +1322,12 @@ else
 		end
 	end
 
---PRINT( ba_now , player.onfloor , player.jump )
---PRINT( player.vel )
+--RINT( player.body:convert(10,10,"point_local_to_world") )
 
 end
 
 	player:set_values()
+
 end
 
 -- when drawing get will auto tween values
@@ -1244,8 +1395,8 @@ scores.uidmap={
 }
 
 scores.values={
-	pos=V3( 0,0,0 ),
-	vel=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
+	vel=V2( 0,0 ),
 
 	num=0,
 	age=0,
@@ -1273,7 +1424,7 @@ end
 scores.item.update=function(score)
 	score:get_values()
 	
-	score.vel=score.vel+V3(0,-1,0)
+	score.vel=score.vel+V2(0,-1)
 	score.pos=score.pos+score.vel
 	
 	if score.pos[2] < -64 then -- off of top of screen
@@ -1314,15 +1465,15 @@ floaters.uidmap={
 }
 
 floaters.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,0,0 ),
+	acc=V2( 0,0 ),
 
 	touch={},
 	sname="fauna_slim",
-	spin=0,
+	spin=0.5,
 }
 
 floaters.types={
@@ -1368,34 +1519,26 @@ floaters.item.setup=function(floater)
 	floater:set_values()
 end
 
-floaters.collision_type=0x00020001	-- weapon
-floaters.collision_bits=0x00010000	-- assigned bitmask
-floaters.collision_mask=0x00ffffff	-- interact bitmask
-
-floaters.item.reset_kinetic_ids=function(floater)
-	floater.shape:filter(floater.uid,floaters.collision_bits,floaters.collision_mask)
-	floater.shape:collision_type(floaters.collision_type)
-end
 
 floaters.item.setup_kinetic=function(floater)
 	if floater.body then return end -- already done
-	local space=floater:get_singular("kinetic").space
-	floater.body=space:body(1,1)
-	floater.shape=floater.body:shape("circle",6,0,0)
-	floater.shape:friction(0.5)
-	floater.shape:elasticity(0.5)
-	floater:reset_kinetic_ids()
-	floater.shape.uid=floater.uid
+	local world=floater:get_singular("kinetic").world
+	floater.body=world:body({
+		type="dynamic",
+		transform={floater.pos[1],floater.pos[2],floater.rot*(math.pi*2)},
+	})
+	floater.shape=floater.body:shape({
+		shape="circle",
+		radius=6,
+		filter="floater",
+		uid=floater.uid,
+	})
 	floater:set_body()
 end
 
 floaters.item.clean_kinetic=function(floater)
 	if not floater.body then return end -- already done
-	local kinetic=floater:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(floater.shape)
-	space:remove(floater.body)
+	floater.body:destroy()
 	floater.body=nil
 	floater.shape=nil
 end
@@ -1405,8 +1548,8 @@ floaters.item.clean=function(floater)
 end
 
 
--- called inside the physics loop so probably shouldnt do anything complex
-floaters.item.do_touch=function(floater,touch,arb)
+-- flag functions set values for use in the next update
+floaters.item.flag_touch=function(floater,touch,event)
 	if touch.caste=="player" then
 		floater:set_value("touch",{uid=touch.uid})
 	end
@@ -1426,16 +1569,17 @@ floaters.item.update=function(floater)
 			if fauna then
 		 		if fauna:mark_deleted() then -- remove fauna
 		 		
-		 			local number_of_floaters=scene:get_number_of("floater")
+		 			-- these need to be live counts
+		 			local number_of_fauna_slim=scene:get_number_of("fauna_slim")
 		 			local number_of_fruits=scene:get_number_of("fruit")
 	
 		 			floater:mark_deleted()
 					for i=1,16 do
-						local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
-									hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
-									0 )
+--						local v=V2( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
+--									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
+						local v=V2( floater.sys:get_rnd(-1000,1000)/10 , floater.sys:get_rnd(-1000,1000)/10 )
 						local boots={
-							{"gib",sname="gib_green",size=4,pos=floater.pos,vel=v},
+							{"gib",sname="gib_green",size=4,pos=floater.pos+(v/16),vel=v},
 						}
 						scene:creates(boots)
 					end
@@ -1444,12 +1588,12 @@ floaters.item.update=function(floater)
 					if r<=75 then r=1 elseif r<=95 then r=2 else r=3 end -- 1,2 or 3 drops
 
 					for i=1,r do -- 1-3 fruits
-						local v=V3( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
-									hit.vel[2]*2+(-100*hit.sys:get_rnd()) ,
-									0 )
-						local f=math.min(8,number_of_fruits+i) -- maximum fruit
+--						local v=V2( hit.vel[1]*2+(100*((hit.sys:get_rnd()-0.5)*2)) ,
+--									hit.vel[2]*2+(-100*hit.sys:get_rnd()) )
+						local v=V2( floater.sys:get_rnd(-1000,1000)/10 , floater.sys:get_rnd(-1000,1000)/10 )
+						local f=math.min(8,number_of_fauna_slim+i) -- maximum fruit
 						local boots={
-							{"fruit",sname="fruit_"..f,pos=floater.pos,vel=v*2,score=(2^(f-1))*100},
+							{"fruit",sname="fruit_"..f,pos=floater.pos+(v/16),vel=v,score=(2^(f-1))*100},
 						}
 						scene:creates(boots)
 					end
@@ -1503,11 +1647,11 @@ fauna_eggs.uidmap={
 }
 
 fauna_eggs.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,0,0 ),
+--	acc=V2( 0,0 ),
 	idx=1,
 	sname="fauna_egg",
 	egg="fauna_slim",
@@ -1550,7 +1694,7 @@ end
 fauna_eggs.system.update=function(sys)
 	local list_eggs=scene:caste("fauna_egg")
 	local list_players=scene:caste("player")
---	print(#list_eggs)
+--rint(#list_eggs)
 	local best_egg,best_player
 	local best_d=math.huge
 	for i,egg in ipairs(list_eggs) do
@@ -1584,38 +1728,33 @@ end
 fauna_eggs.item.setup=function(fauna)
 	fauna:get_values()
 
+--RINT("egg setup",fauna.uid,fauna.pos,fauna.vel,fauna.rot)
+
 	fauna:setup_kinetic()
 	fauna:set_values()
 end
 
-fauna_eggs.collision_type=0x00020001	-- weapon
-fauna_eggs.collision_bits=0x00010000	-- assigned bitmask
-fauna_eggs.collision_mask=0x00ffffff	-- interact bitmask
-
-fauna_eggs.item.reset_kinetic_ids=function(fauna)
-	fauna.shape:filter(fauna.uid,fauna_eggs.collision_bits,fauna_eggs.collision_mask)
-	fauna.shape:collision_type(fauna_eggs.collision_type)
-end
 
 fauna_eggs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
-	local space=fauna:get_singular("kinetic").space
-	fauna.body=space:body(1,1)
-	fauna.shape=fauna.body:shape("circle",4,0,0)
-	fauna.shape:friction(0.5)
-	fauna.shape:elasticity(0.5)
-	fauna:reset_kinetic_ids()
-	fauna.shape.uid=fauna.uid
+	local world=fauna:get_singular("kinetic").world
+	fauna.body=world:body({
+		type="dynamic",
+		transform={fauna.pos[1],fauna.pos[2],fauna.rot*(math.pi*2)},
+		gravityScale=1, -- use world gravity
+	})
+	fauna.shape=fauna.body:shape({
+		shape="circle",
+		radius=4,
+		filter="fauna_egg",
+		uid=fauna.uid,
+	})
 	fauna:set_body()
 end
 
 fauna_eggs.item.clean_kinetic=function(fauna)
 	if not fauna.body then return end -- already done
-	local kinetic=fauna:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(fauna.shape)
-	space:remove(fauna.body)
+	fauna.body:destroy()
 	fauna.body=nil
 	fauna.shape=nil
 end
@@ -1639,7 +1778,7 @@ fauna_eggs.item.update_hatch=function(fauna,player)
 		})
 	else
 		if math.sqrt(fauna.hatch*2)%1==0 then -- jiggle
-			local jump=V3(fauna.sys:get_rnd(-10,10),fauna.sys:get_rnd(-60,-30),0)
+			local jump=V2(fauna.sys:get_rnd(-10,10),fauna.sys:get_rnd(-60,-30))
 			fauna.vel=fauna.vel+jump
 		end
 	end
@@ -1652,9 +1791,12 @@ fauna_eggs.item.update=function(fauna)
 	fauna:setup_kinetic() -- might need to recreate body
 
 	local level=fauna:get_singular("level") -- only one level is active at a time
-	local grav=level:get_gravity(fauna.pos)
 
-	fauna.acc:set(grav) -- gravity
+--RINT("egg",fauna.uid,fauna.pos,fauna.vel,fauna.rot,fauna.ang)
+
+-- use global gravity
+--	local grav=level:get_gravity(fauna.pos,fauna.vel)
+--	fauna.acc:set(grav) -- gravity
 
 	fauna:set_values()
 end
@@ -1685,30 +1827,29 @@ fauna_slims.item={}
 fauna_slims.caste="fauna_slim"
 
 fauna_slims.uidmap={
-	held=1,
+	floater=1,
 	length=1,
 }
 
 fauna_slims.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,200,0 ),
+	acc=V2( 0,0 ),
 	idx=1,
 	side=1,
-	foot=8,
+	foot=0,
 	onfloor=0,
 	floor_uid=0,
-	jump=0,
-	flap=0,
 	sname="fauna_slim",
-	thunk=0,
 	floor_uid=0,
 	mode="none",
-	touch={},
---	slap=0,
---	stun=0,
+
+-- brain values
+
+	brain_thunk=0,
+
 }
 
 fauna_slims.types={
@@ -1719,11 +1860,8 @@ fauna_slims.types={
 
 fauna_slims.graphics={
 
+
 {nil,"fauna_slim",[[
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
@@ -1736,6 +1874,10 @@ fauna_slims.graphics={
 . d d d d d d d d d d G G G G . 
 . G G d d d d d d d G G G G G . 
 . . G G G G G G G G G G G G . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
 ]]},
 
 
@@ -1746,7 +1888,7 @@ fauna_slims.graphics={
 . . . . . . d d d G . . . . . . 
 . . . . d d d d d d G G . . . . 
 . . . d d d d d d d d G G . . . 
-. . d d 7 0 d 7 0 d d d G G . . 
+. . d d d d d d d d d d G G . . 
 . . d d 0 0 d 0 0 d d d G G . . 
 . d d d d d d d d d d d G G G . 
 . d d d d d d d d d d G G G G . 
@@ -1758,30 +1900,8 @@ fauna_slims.graphics={
 . . . . . . . . . . . . . . . . 
 ]]},
 
-{nil,"fauna_slim_splat",[[
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . . . . . . 
-. . . . . . . . d d d d d d G G . . . . . . . . 
-. . . . . . . d d d d d d d d G G . . . . . . . 
-. . . . . . d d 7 0 d 7 0 d d d G G . . . . . . 
-. . . . G G d d 0 0 d 0 0 d d d G G G G . . . . 
-G G G G G G G G G G G G G G G G G G G G G G G G 
-]]},
 
 {nil,"fauna_slim_feet",[[
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . 
@@ -1794,6 +1914,10 @@ G G G G G G G G G G G G G G G G G G G G G G G G
 . . G G G G G G G G G G G G . . 
 . . . G G G G G G G G G G . . . 
 . . . . . G G G G G G G . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
 ]]},
 
 }
@@ -1810,12 +1934,23 @@ end
 fauna_slims.system.clean=function(sys)
 end
 
--- called inside the physics loop so probably shouldnt do anything complex
-fauna_slims.item.do_touch=function(fauna,touch,arb)
-	touch:get_value("danger")
-	if touch.danger and touch.danger>0 then
-		fauna:set_value("touch",{uid=touch.uid})
+
+-- turn into a floater
+fauna_slims.item.do_stun=function(fauna,touch,event)
+
+	if fauna:depend("floater") then -- we are floater, do nothing
+		return
 	end
+
+	local floater=scene:create({"floater",
+		sname=fauna.sname, pos=fauna.pos, vel=fauna.vel+V2(0,-50), })
+
+	-- link us to floater
+	floater:depend("fauna",fauna.uid)
+	fauna:depend("floater",floater.uid) -- we are turned into a floater
+
+	fauna:clean_kinetic() -- remove body
+
 end
 
 -- state values are cached into the item for easy access on a get
@@ -1828,28 +1963,32 @@ fauna_slims.item.setup=function(fauna)
 	fauna:set_values()
 end
 
-fauna_slims.collision_bits=0x00010000	-- assigned bitmask
-fauna_slims.collision_mask=0x00ffffff	-- interact bitmask
 
 fauna_slims.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
-	local space=fauna:get_singular("kinetic").space
-	fauna.body=space:body(1,1)
-	if not fauna:depend("held") then
-		fauna.shape=fauna.body:shape("circle",4,0,0)
-		fauna.shape:friction(0.5)
-		fauna.shape:elasticity(0.5)
-		fauna.shape:filter(fauna.uid,fauna_slims.collision_bits,fauna_slims.collision_mask)
-		fauna.shape.uid=fauna.uid
+	local world=fauna:get_singular("kinetic").world
+	fauna.body=world:body({
+		type="dynamic",
+		transform={fauna.pos[1],fauna.pos[2],fauna.rot*(math.pi*2)},
+		enableSleep=false,
+		gravityScale=0,
+		motionLocks_angularZ=true,
+	})
+	if not fauna:depend("floater") then
+		fauna.shape=fauna.body:shape({
+			shape="box",
+			halfWidth=6,
+			halfHeight=4,
+			filter="fauna_slim",
+			uid=fauna.uid,
+		})
 	end
 	fauna:set_body()
 end
 
 fauna_slims.item.clean_kinetic=function(fauna)
 	if not fauna.body then return end -- already done
-	local space=fauna:get_singular("kinetic").space		
-	if fauna.shape then space:remove(fauna.shape) end
-	space:remove(fauna.body)
+	fauna.body:destroy()
 	fauna.body=nil
 	fauna.shape=nil
 end
@@ -1858,176 +1997,103 @@ fauna_slims.item.clean=function(fauna)
 	fauna:clean_kinetic()
 end
 
-fauna_slims.item.update_brain=function(fauna,brain)
-
-	fauna.thunk=fauna.thunk-1
-	if fauna.thunk<=0 then
-		fauna.thunk=fauna.sys:get_rnd(8,32)
-		brain.jump=V3(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160),0)
-		brain.move[1]=brain.jump[1]<0 and -1 or 1
-	end
-end
-
 fauna_slims.item.update=function(fauna)
-	fauna:get_values()
-	fauna:setup_kinetic() -- might need to recreate body
-	
-	
---	local up=fauna.scene.ups[fauna.idx] or fauna.sys.oven.ups.empty
 
-	local level=fauna:get_singular("level") -- only one level is active at a time
-
-	local grav=level:get_gravity(fauna.pos)
-
-	if fauna:depend("held") then
+	if fauna:depend("floater") then -- we are floater, do nothing
 		return
 	end
-	
-	if fauna.touch.uid then
-		local hit=scene:find_uid(fauna.touch.uid)
-		if hit  then -- we are hit so turn into stunned floater
-			local floater=scene:create({"floater", sname=fauna.sname, pos=fauna.pos, vel=fauna.vel, })
-			floater:depend("fauna",fauna.uid)
-			fauna:depend("held",floater.uid)
-			fauna:clean_kinetic() -- recreate body
-			fauna:setup_kinetic()
-			return
+
+	fauna:get_values()
+	fauna:setup_kinetic() -- might need to recreate body
+
+	local world=fauna:get_singular("kinetic").world
+	local level=fauna:get_singular("level") -- only one level is active at a time
+
+	local grav=level:get_gravity(fauna.pos,fauna.vel)
+
+	local foot_touch -- set this if our feet touched something ( not the level )
+	local feet=kinetics.cast_feet(world,{ -- this is part of the collision so run it here
+		closest=true, -- just want the closest hit
+		origin=fauna.pos,
+		points={0,0},
+		radius=4,
+		translation={0,7},
+		filter_categoryBits=0x00000100,
+		filter_maskBits=0x00ffffff,
+	})
+	local footspeed=0.5
+	if feet then
+		foot_touch=scene:find_uid(feet.shape.uid) -- remember foot touch for later
+
+		local floor=feet.floor-4 -- distance to where we want to be
+
+--[[
+		fauna.vel[2]=fauna.vel[2]*8/16 -- decay bouncy-ness
+		if     floor>= 0.5 then
+			fauna.acc[2]=footspeed*128
+		elseif floor<=-0.5 then
+			fauna.acc[2]=footspeed*-256
+		else
+			fauna.acc[2]=floor*16
 		end
-		fauna.touch={} -- remove hit as it has been dealt with
-	end
+]]
 
-	local brain={}
-	brain.move=V3(0,0,0)
-	brain.jump=nil
-	fauna:update_brain(brain)
-
-
-	fauna.acc=V3( 0, 0 ,0) -- reset force
-	local va -- velocity we want to achieve
-	if fauna.onfloor>0 or fauna.jump>0 then -- when on floor
-		va=brain.move[1]*512
-	else -- when in air
-		va=brain.move[1]*256
-	end
-	if va then -- apply left/right movement
-		if va<0 and fauna.vel[1]>0 then fauna.vel[1]=0 end -- quick turn
-		if va>0 and fauna.vel[1]<0 then fauna.vel[1]=0 end -- quick turn
-		local vb=va-fauna.vel[1] -- diff from current velocity
-		fauna.acc[1]=fauna.acc[1]+(vb) -- apply force to make us move at requested speed
-	end
-	
-	fauna.vel[1]=fauna.vel[1]*12/16 --  dampen horizontal velocity
-	fauna.vel[2]=fauna.vel[2]*14/16 --  dampen vertical velocity
-	
-	if brain.move[1]<0 then fauna.side= 1 end
-	if brain.move[1]>0 then fauna.side=-1 end
-
---	fauna.pos=fauna.pos+fauna.vel
-
-	local footspeed=0.25
-	local footbase=3
-	local space=fauna:get_singular("kinetic").space
-	local hit=space:query_segment_first(fauna.pos[1],fauna.pos[2],fauna.pos[1],fauna.pos[2]+16,2,fauna.uid,0x00010000,0x00ffffff)
-	if hit and hit.alpha and hit.alpha<((footbase+4)/16) then
-
-		local d=(hit.alpha*16)+2 -- distance + radius
-		local o=fauna.vel[2] -- original velocity
-		local v=((d-(footbase+2))) -- distance to where we want to be
-		local a=v*32 -- force to adjust velocity by
-
-		fauna.foot=d-(footbase+2)
-		if fauna.foot<0  then fauna.foot=0  end
+		fauna.foot=floor
+		if fauna.foot<0 then fauna.foot=0 end
 		if fauna.foot>3 then fauna.foot=3 end
-		fauna.acc[2]=fauna.acc[2]+a --  hover
 
-		fauna.onfloor=4
-
-		fauna.floor_uid=hit.shape.uid or -1
-		
-		local f2=scene:find_uid(fauna.floor_uid)
-		if f2 then
-			local f3=scene:find_uid(f2.floor_uid)
-			if f2 and f3 and f2.caste==fauna.caste and f3.caste==fauna.caste then
-				if fauna.uid~=f2.uid and fauna.uid~=f3.uid and f2.uid~=f3.uid then 
-
--- upgrade to trench...
-					fauna:mark_deleted()
-					f2:mark_deleted()
-					f3:mark_deleted()
-
-					local boots={
-						{"fauna_trench",pos=f2.pos},
-					}
-					scene:creates(boots)
-
-				end
-			end
-		end
+		fauna.onfloor=1
 
 	else
-		fauna.floor_uid=0
-
 		if fauna.foot>3 then fauna.foot=3 end
 		if fauna.foot<3 then fauna.foot=fauna.foot+footspeed end
 
-		fauna.acc:add(grav) -- gravity
 	end
 
-	if fauna.onfloor>0 and fauna.jump<=0 then -- meep meep jump	
-		if brain.jump then
-			fauna.onfloor=0
-			fauna.jump=4
-			fauna.acc[2]=0
-			fauna.vel:add(brain.jump) --[2]=-120
+	fauna.acc:set(grav) -- gravity
+
+--	fauna.vel[1]=fauna.vel[1]*12/16 --  dampen horizontal velocity
+--	fauna.vel[2]=fauna.vel[2]*14/16 --  dampen vertical velocity
+
+
+	fauna.brain_thunk=fauna.brain_thunk-1
+	if fauna.brain_thunk<=0 then
+		fauna.brain_thunk=fauna.sys:get_rnd(16,64)
+		
+		if fauna.onfloor > 0 then -- we can jump
+
+			fauna.vel:set( V2( fauna.sys:get_rnd(-10,-100)*fauna.side , fauna.sys:get_rnd(-20,-200) ) )
+			
+			if fauna.sys:get_rnd(1,100)>=50 then -- flip direction 50%
+				fauna.side=fauna.side*-1
+			end
 		end
-	end
-	if fauna.onfloor>0 then fauna.onfloor=fauna.onfloor-1 end
 
-	if fauna.jump>0 then -- jump higher while button is held down
-		fauna.onfloor=0 -- no foot grab while jumping
-		fauna.jump=fauna.jump-1 -- continue jump
+--		brain.jump=V2(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160))
+--		brain.move[1]=brain.jump[1]<0 and -1 or 1
+
 	end
 
---PRINT( ba_now , fauna.onfloor , fauna.jump )
---PRINT( fauna.vel )
+--rint( fauna.vel , fauna.pos , grav)
 
 	fauna:set_values()
 end
-
--- who stomps this (it)
---[[
-fauna_slims.item.stomp=function(it,who)
-	if who.caste=="player" then
-		if it.stun>0 then
-	 		if it:mark_deleted() then
-				who.score=who.score+100
-				for i=1,16 do
-					local v=V3( who.vel[1]*-2+(100*((who.sys:get_rnd()-0.5)*2)) , who.vel[2]*-2+(-100*who.sys:get_rnd()) , 0 )
-					local boots={
-						{"gib",sname="gib_green",life=0,size=4,pos=it.pos,vel=v},
-					}
-					scene:creates(boots)
-				end
-			end
-		end
-	end
-end
-]]
 
 -- when drawing get will auto tween values
 -- so it can be called multiple times between updates for different results
 fauna_slims.item.draw=function(fauna)
 
+	if fauna:depend("floater") then -- we are floater, do nothing
+		return
+	end
+
 	fauna:get_values()
 
-	local p=V3( fauna.pos[1] , fauna.pos[2]-3, fauna.pos[1]+fauna.pos[2] )
+	local p=V3( fauna.pos[1] , fauna.pos[2], fauna.pos[1]+fauna.pos[2] )
 	
-	if fauna:depend("held") then
-		-- no draw
-	else
-		draws.sprite( { n=fauna.sname , p=p, sx=fauna.side } )
-		draws.sprite( { n=fauna.sname.."_feet" , p=p+V3(0,fauna.foot,8) , sx=fauna.side } )
-	end
+	draws.sprite( { n=fauna.sname , p=p, sx=fauna.side } )
+	draws.sprite( { n=fauna.sname.."_feet" , p=p+V3(0,fauna.foot,8) , sx=fauna.side } )
+
 end
 
 
@@ -2049,11 +2115,11 @@ fauna_trenchs.uidmap={
 }
 
 fauna_trenchs.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,200,0 ),
+	acc=V2( 0,0 ),
 	idx=1,
 	side=1,
 	foot=8,
@@ -2143,28 +2209,26 @@ fauna_trenchs.item.setup=function(fauna)
 	fauna:set_values()
 end
 
-fauna_trenchs.collision_bits=0x00010000	-- assigned bitmask
-fauna_trenchs.collision_mask=0x00ffffff	-- interact bitmask
 
 fauna_trenchs.item.setup_kinetic=function(fauna)
 	if fauna.body then return end -- already done
-	local space=fauna:get_singular("kinetic").space
-	fauna.body=space:body(1,1)
-	fauna.shape=fauna.body:shape("circle",4,0,0)
-	fauna.shape:friction(0.5)
-	fauna.shape:elasticity(0.5)
-	fauna.shape:filter(fauna.uid,fauna_trenchs.collision_bits,fauna_trenchs.collision_mask)
-	fauna.shape.uid=fauna.uid
+	local world=fauna:get_singular("kinetic").world
+	fauna.body=world:body({
+		type="dynamic",
+		transform={fauna.pos[1],fauna.pos[2],fauna.rot*(math.pi*2)},
+	})
+	fauna.shape=fauna.body:shape({
+		shape="circle",
+		radius=4,
+		filter="fauna_trench",
+		uid=fauna.uid,
+	})
 	fauna:set_body()
 end
 
 fauna_trenchs.item.clean_kinetic=function(fauna)
 	if not fauna.body then return end -- already done
-	local kinetic=fauna:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(fauna.shape)
-	space:remove(fauna.body)
+	fauna.body:destroy()
 	fauna.body=nil
 	fauna.shape=nil
 end
@@ -2178,7 +2242,7 @@ fauna_trenchs.item.update_brain=function(fauna,brain)
 	fauna.thunk=fauna.thunk-1
 	if fauna.thunk<=0 then
 		fauna.thunk=fauna.sys:get_rnd(8,32)
-		brain.jump=V3(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160),0)
+		brain.jump=V2(fauna.sys:get_rnd(-180,180),fauna.sys:get_rnd(-10,-160))
 		brain.move[1]=brain.jump[1]<0 and -1 or 1
 	end
 end
@@ -2192,13 +2256,13 @@ fauna_trenchs.item.update=function(fauna)
 	local level=fauna:get_singular("level") -- only one level is active at a time
 
 	local brain={}
-	brain.move=V3(0,0,0)
+	brain.move=V2(0,0)
 	brain.jump=nil
 	fauna:update_brain(brain)
 
-	local grav=level:get_gravity(fauna.pos)
+	local grav=level:get_gravity(fauna.pos,fauna.vel)
 
-	fauna.acc=V3( 0, 0 ,0) -- reset force
+	fauna.acc=V2( 0 ,0) -- reset force
 	local va -- velocity we want to achieve
 	if fauna.onfloor>0 or fauna.jump>0 then -- when on floor
 		va=brain.move[1]*512
@@ -2222,14 +2286,21 @@ fauna_trenchs.item.update=function(fauna)
 
 	local footspeed=0.25
 	local footbase=3
-	local space=fauna:get_singular("kinetic").space
-	local hit=space:query_segment_first(fauna.pos[1],fauna.pos[2],fauna.pos[1],fauna.pos[2]+16,2,fauna.uid,0x00010000,0x00ffffff)
-	if hit and hit.alpha and hit.alpha<((footbase+4)/16) then
+	local world=fauna:get_singular("kinetic").world
+	local feet=kinetics.cast_feet(world,{
+		origin=fauna.pos,
+		points={0,0},
+		radius=4,
+		translation={0,6},
+		filter_categoryBits=0x00010000,
+		filter_maskBits=0x00ffffff,
+	})
+	if feet then
 
-		local d=(hit.alpha*16)+2 -- distance + radius
+		local d=feet.floor -- Y distance to floor
 		local o=fauna.vel[2] -- original velocity
 		local v=((d-(footbase+2))) -- distance to where we want to be
-		local a=v*32 -- force to adjust velocity by
+		local a=v*8 -- force to adjust velocity by
 
 		fauna.foot=d-(footbase+2)
 		if fauna.foot<0  then fauna.foot=0  end
@@ -2241,6 +2312,7 @@ fauna_trenchs.item.update=function(fauna)
 
 
 	else
+
 		fauna.floor_uid=0
 	
 		if fauna.foot>3 then fauna.foot=3 end
@@ -2264,8 +2336,6 @@ fauna_trenchs.item.update=function(fauna)
 		fauna.jump=fauna.jump-1 -- continue jump
 	end
 
---PRINT( ba_now , fauna.onfloor , fauna.jump )
---PRINT( fauna.vel )
 
 	fauna:set_values()
 end
@@ -2302,11 +2372,11 @@ fruits.uidmap={
 }
 
 fruits.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,200,0 ),
+--	acc=V2( 0,0 ),
 	sname="fruit_1",
 	age=0,
 	score=100,
@@ -2423,23 +2493,9 @@ R R R R R R R .
 
 }
 
-fruits.collision_type=0x00010002	-- unique ID
-fruits.collision_bits=0x00010000	-- assigned bitmask
-fruits.collision_mask=0x000001ff	-- interact bitmask
-fruits.collision_handlers={
-	[{fruits.collision_type}]={
-		postsolve=function(arb)
-			local fruit=scene:find_uid(arb.shape_a.uid)
-			local touch=scene:find_uid(arb.shape_b.uid)
-			if fruit and fruit.caste=="fruit" then -- sanity
-				fruit:do_touch(touch,arb) -- set value for update
-			end
-			return true
-		end
-	}
-}
--- called inside the physics loop so probably shouldnt do anything complex
-fruits.item.do_touch=function(fruit,touch,arb)
+
+-- flag functions set values for use in the next update
+fruits.item.flag_touch=function(fruit,touch,event)
 	local oldtouch=fruit:get_value("touch")
 	if oldtouch.uid==0 or oldtouch.uid==-1 then -- replace with real uid
 		fruit:set_value("touch",{uid=touch and touch.uid or -1})
@@ -2469,34 +2525,34 @@ fruits.item.setup=function(fruit)
 end
 
 fruits.item.setup_kinetic_reshape=function(fruit)
-	local space=fruit:get_singular("kinetic").space
 	if fruit.shape then
-		space:remove(fruit.shape)
+		fruit.shape:destroy()
 		fruit.shape=nil
 	end
-	fruit.shape=fruit.body:shape("circle",4,0,0)
---	fruit.shape=fruit.body:shape("box",-3,-3,3,3,0)
-	fruit.shape:friction(1.0)
-	fruit.shape:elasticity(0.5)
-	fruit.shape:filter(fruit.uid,fruits.collision_bits,fruits.collision_mask)
-	fruit.shape:collision_type(fruits.collision_type)
-	fruit.shape.uid=fruit.uid
+	fruit.shape=fruit.body:shape({
+		shape="box",
+		halfWidth=3,
+		halfHeight=3,
+		material_friction=1.0,
+		filter="fruit",
+		uid=fruit.uid,
+	})
 end
 fruits.item.setup_kinetic=function(fruit)
 	if fruit.body then return end -- already done
-	local space=fruit:get_singular("kinetic").space
-	fruit.body=space:body(1,1)
+	local world=fruit:get_singular("kinetic").world
+	fruit.body=world:body({
+		type="dynamic",
+		transform={fruit.pos[1],fruit.pos[2],fruit.rot*(math.pi*2)},
+		gravityScale=1, -- use world gravity
+	})
 	fruit:setup_kinetic_reshape()
 	fruit:set_body()
 end
 
 fruits.item.clean_kinetic=function(fruit)
 	if not fruit.body then return end -- already done
-	local kinetic=fruit:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(fruit.shape)
-	space:remove(fruit.body)
+	fruit.body:destroy()
 	fruit.body=nil
 	fruit.shape=nil
 end
@@ -2575,13 +2631,14 @@ gibs.uidmap={
 }
 
 gibs.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,200,0 ),
+--	acc=V2( 0,0 ),
 	sname="gib_green",
 	size=4,
+	age=0,
 	touch=0,
 }
 
@@ -2607,21 +2664,6 @@ g G G G G G G g . g g G G g g . . . . g g . . . . . . . . . . .
 
 }
 
-gibs.collision_type=0x00010001	-- unique ID
-gibs.collision_bits=0x01000000	-- assigned bitmask
-gibs.collision_mask=0x000000ff	-- interact bitmask
-gibs.collision_handlers={
-	[{gibs.collision_type}]={
-		postsolve=function(it)
-			local gib=scene:find_uid(it.shape_a.uid)
-			if gib and gib.caste=="gib" then -- sanity
-				gib:set("touch",it.shape_b.uid or -1) -- set value for update
-			end
-			return true
-		end
-	}
-}
-
 
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
@@ -2639,40 +2681,42 @@ end
 -- must begin and end with a get and a set
 gibs.item.setup=function(gib)
 	gib:get_values()
-	
+
 	gib:setup_kinetic()
 	gib:set_values()
 end
 
 gibs.item.setup_kinetic_reshape=function(gib)
-	local space=gib:get_singular("kinetic").space
 	if gib.shape then
-		space:remove(gib.shape)
+		gib.shape:destroy()
 		gib.shape=nil
 	end
-	gib.shape=gib.body:shape("circle",gib.size,0,0)
---	gib.shape=gib.body:shape("box",-3,-3,3,3,0)
-	gib.shape:friction(1.0)
-	gib.shape:elasticity(0.5)
-	gib.shape:filter(gib.uid,gibs.collision_bits,gibs.collision_mask)
-	gib.shape:collision_type(gibs.collision_type)
-	gib.shape.uid=gib.uid
+	if gib.size>0 then
+		gib.shape=gib.body:shape({
+			shape="circle",
+			radius=gib.size,
+			material_friction=1.0,
+			filter="gib",
+			enableHitEvents=true,
+			uid=gib.uid,
+		})
+	end
 end
 gibs.item.setup_kinetic=function(gib)
 	if gib.body then return end -- already done
-	local space=gib:get_singular("kinetic").space
-	gib.body=space:body(1,1)
+	local world=gib:get_singular("kinetic").world
+	gib.body=world:body({
+		type="dynamic",
+		transform={gib.pos[1],gib.pos[2],gib.rot*(math.pi*2)},
+		gravityScale=1, -- use world gravity
+	})
 	gib:setup_kinetic_reshape()
 	gib:set_body()
 end
 
 gibs.item.clean_kinetic=function(gib)
 	if not gib.body then return end -- already done
-	local kinetic=gib:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(gib.shape)
-	space:remove(gib.body)
+	gib.body:destroy()
 	gib.body=nil
 	gib.shape=nil
 end
@@ -2686,19 +2730,41 @@ gibs.item.update=function(gib)
 	gib:get_values()
 	gib:setup_kinetic() -- might need to recreate body
 	
+	local bounce=false
 
-	if gib.touch~=0 then
-		local touch=scene:find_uid(gib.touch)
-		gib.touch=0
-		if touch and touch.caste=="gib" then
-			-- self touch?`
-		else
-			if gib.size>1 then
-				gib.size=gib.size-1
-				gib:setup_kinetic_reshape()
-			else
-				gib:mark_deleted()
+	gib.age=gib.age+1
+	if gib.age>64 then bounce=true end
+	
+
+	local kinetic=gib:get_singular("kinetic")
+	-- what to do when we touch
+	local event_touch=function(it,event)
+		if gib.age>8 then
+			if not it or it.caste~="gib" then -- no self touch
+				bounce=true
 			end
+		end
+	end
+
+	-- check events for anyone we touched
+	for event in kinetic.events:iterate(gib.uid) do
+		if event.is=="contact_hit" then
+			local it=scene:find_uid(
+				(event.shapeA.uid == gib.uid) and
+				event.shapeB.uid or
+				event.shapeA.uid ) -- we hit the one that is is not us
+			event_touch(it,event) -- it may be nil, when hitting level
+		end
+	end
+
+
+	if bounce then
+		if gib.size>1 then
+			gib.size=gib.size-1
+			gib:setup_kinetic_reshape()
+			gib.age=0
+		else
+			gib:mark_deleted()
 		end
 	end
 
@@ -2737,12 +2803,12 @@ junks.uidmap={
 }
 
 junks.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	rot=0,
-	vel=V3( 0,0,0 ),
+	vel=V2( 0,0 ),
 	ang=0,
-	acc=V3( 0,200,0 ),
-	sname="junk_green",
+--	acc=V2( 0,200 ),
+	sname="junk_box",
 	danger=0,
 }
 
@@ -2755,39 +2821,28 @@ junks.types={
 junks.graphics={
 
 
-{nil,"junk_green",[[
+{nil,"junk_box",[[
 4 4 4 4 4 4 4 4 
 4 3 3 3 3 3 3 4 
-4 3 3 3 3 3 3 4 
-4 3 3 3 3 3 3 4 
-4 3 3 3 3 3 3 4 
-4 3 3 3 3 3 3 4 
+4 3 4 4 4 4 3 4 
+4 3 3 4 4 3 3 4 
+4 3 4 4 4 4 3 4 
+4 3 4 3 3 4 3 4 
 4 3 3 3 3 3 3 4 
 4 4 4 4 4 4 4 4 
 ]]},
 
-}
+{nil,"junk_box_danger",[[
+4 4 4 4 4 4 4 4 
+4 3 3 3 3 3 3 4 
+4 3 Y Y Y Y 3 4 
+4 3 3 Y Y 3 3 4 
+4 3 Y Y Y Y 3 4 
+4 3 Y 3 3 Y 3 4 
+4 3 3 3 3 3 3 4 
+4 4 4 4 4 4 4 4 
+]]},
 
-junks.collision_type=0x00020001	-- weapon ID
-junks.collision_bits=0x00010000	-- assigned bitmask
-junks.collision_mask=0x00ffffff	-- interact bitmask
-junks.collision_handlers={
-	[{junks.collision_type}]={
-		postsolve=function(arb)
-			local junk=scene:find_uid(arb.shape_a.uid)
-			local it=scene:find_uid(arb.shape_b.uid)
-			if junk then
-				local held=junk:depend("held")
-				if not held then
-					junk:reset_kinetic_ids()
-				end
-			end
-			if junk and it and it.do_touch then -- sanity
-				it:do_touch(junk,arb)
-			end
-			return true
-		end
-	}
 }
 
 
@@ -2812,38 +2867,40 @@ junks.item.setup=function(junk)
 	junk:set_values()
 end
 
-junks.item.reset_kinetic_ids=function(junk)
-	junk.shape:filter(junk.uid,junks.collision_bits,junks.collision_mask)
-	junk.shape:collision_type(junks.collision_type)
-end
 junks.item.setup_kinetic_reshape=function(junk)
-	local space=junk:get_singular("kinetic").space
+	local held=junk:depend("held")
+	local danger=junk:get_value("danger")
+
 	if junk.shape then
-		space:remove(junk.shape)
+		junk.shape:destroy()
 		junk.shape=nil
 	end
---	junk.shape=junk.body:shape("circle",8,0,0)
-	junk.shape=junk.body:shape("box",-4,-4,4,4,0)
-	junk.shape:friction(1.0)
-	junk.shape:elasticity(0.5)
-	junk.shape.uid=junk.uid
-	junk:reset_kinetic_ids()
+	junk.shape=junk.body:shape({
+		shape="box",
+		halfWidth=4,
+		halfHeight=4,
+		material_friction=1.0,
+		filter=( held or danger>0 ) and "player" or "junk",
+		enableHitEvents=true,
+		uid=junk.uid,
+	})
 end
 junks.item.setup_kinetic=function(junk)
 	if junk.body then return end -- already done
-	local space=junk:get_singular("kinetic").space
-	junk.body=space:body(1,1)
+	local world=junk:get_singular("kinetic").world
+	junk.body=world:body({
+		type="dynamic",
+		transform={junk.pos[1],junk.pos[2],junk.rot*(math.pi*2)},
+		isBullet=true, -- we will throw junk at stuff
+		gravityScale=1, -- use world gravity
+ 	})
 	junk:setup_kinetic_reshape()
 	junk:set_body()
 end
 
 junks.item.clean_kinetic=function(junk)
 	if not junk.body then return end -- already done
-	local kinetic=junk:get_singular("kinetic")
-	if not kinetic then return end -- already done
-	local space=kinetic.space		
-	space:remove(junk.shape)
-	space:remove(junk.body)
+	junk.body:destroy()
 	junk.body=nil
 	junk.shape=nil
 end
@@ -2862,11 +2919,34 @@ junks.item.update=function(junk)
 		local len=junk.vel:len()
 		if len<2 then -- limit if stopped moving
 			junk.danger=0
+			junk:set_value("danger",0)
+			junk:setup_kinetic_reshape()
+		end
+	end
+
+	local kinetic=junk:get_singular("kinetic")
+	-- what to do when we touch
+	local event_touch=function(it,event)
+
+		if it.do_stun and junk.danger>0 then -- can stun
+			it:do_stun(junk,event)
+		end
+
+	end
+	-- check events for anyone we touched
+	for event in kinetic.events:iterate(junk.uid) do
+		if event.is=="contact_hit" then
+			local it=scene:find_uid(
+				(event.shapeA.uid == junk.uid) and
+				event.shapeB.uid or
+				event.shapeA.uid ) -- we hit the one that is is not us
+			if it then
+				event_touch(it,event)
+			end
 		end
 	end
 	
 	junk:set_values()
-
 end
 
 -- when drawing get will auto tween values
@@ -2876,12 +2956,11 @@ junks.item.draw=function(junk)
 	junk:get_values()
 
 	local p=V3( junk.pos[1] , junk.pos[2], junk.pos[1]+junk.pos[2] )
-	draws.sprite{ n=junk.sname          , p=p , rz=junk.rot , }
 	
 	if junk.danger>0 then
-
-		draws.sprite{ n=junk.sname          , p=p , rz=junk.rot  , s=1.25 }
-
+		draws.sprite{ n=junk.sname.."_danger" , p=p , rz=junk.rot , }
+	else
+		draws.sprite{ n=junk.sname          , p=p , rz=junk.rot , }
 	end
 
 end
@@ -2904,7 +2983,7 @@ fauna_pandas.uidmap={
 }
 
 fauna_pandas.values={
-	pos=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
 	sname="",
 	thunk=0,
 }
@@ -3022,8 +3101,8 @@ levels.uidmap={
 }
 
 levels.values={
-	pos=V3( 0,0,0 ),
-	focus=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
+	focus=V2( 0,0 ),
 	idx=1,
 	time=0,
 	complete=0,
@@ -3119,15 +3198,15 @@ legend=levels.combine_legends(levels.legend,{
 	["Ta"]={ name="char_sign",				text="Welcome to the Dungeon, we got fun and games." },
 	["Tb"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
 	["Tc"]={ name="char_sign",				text="Congratulations on the coyote JUMP." },
-	["Td"]={ name="char_sign",				text="You may coyote JUMP in the air after walking off of a platform." },
-	["T1"]={ name="char_sign",				text="Press Button A or . to JUMP in." },
-	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move. Hold JUMP to JUMP higher." },
-	["T3"]={ name="char_sign",				text="MOVE down to crouch down." },
+	["Td"]={ name="char_sign",				text="You may coyote JUMP in the air at any time, but only once." },
+	["T1"]={ name="char_sign",				text="Slims always jump forwards never backwards." },
+	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move. Press Button A or . to JUMP in." },
+	["T3"]={ name="char_sign",				text="MOVE down to crouch. MOVE up to tiptoe" },
 	["T4"]={ name="char_sign",				text="Press Button B or / to GRAB object, press GRAB again to throw it." },
-	["T5"]={ name="char_sign",				text="Throw power is shown by object rotation, run for it to speed up." },
+	["T5"]={ name="char_sign",				text="Throw power is shown by rotation." },
 	["T6"]={ name="char_sign",				text="Aim throw with Right Stick or Cursor Keys." },
-	["T7"]={ name="char_sign",				text="Throw object at Slim Slimy to stun him." },
-	["T8"]={ name="char_sign",				text="Stomp stunned Slim Slimy to finish him." },
+	["T7"]={ name="char_sign",				text="Throw object at Slim Slimy to stun them." },
+	["T8"]={ name="char_sign",				text="Stomp stunned Slim Slimy to finish them." },
 }),
 title="Test.",
 map=[[
@@ -3139,11 +3218,11 @@ map=[[
 0 . . . . . . . . . . . . . . . . 0 0 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 > . . . . . . . . . . . . . ^ . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
 0 J1. Tc. . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 0 0 0 0 . . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
-0 . . . . . . . . . . . . . Td. . . . 0 . . . . . . . . . . . . . . . . . . . . . . < . . . . 0 
-0 . . . . . . . . . . . . 0 0 0 . . . 0 . . . . . . . . . . . . . . . . . . 0 . . . . . . . , 0 
-0 P1P2. . . . . . . . . . 0 0 0 . . . 0 . ^ . . . J1. . . . . . . . . . . . 0 . . . ^ . . . . 0 
-0 . T1. . . . . . . . T2. 0 0 0 . T3. . . . T4. . 0 . . T5. . T6. . T7. . T80 . . . . . . . S10 
+0 0 0 0 0 0 . . . . . . . . . . . . . 0 . . . . . . . . . . . . . . . . . . . . . . . . . . . 0 
+0 . . . . . . . . . . . . . Td. . . . 0 . . . . . . . . . . . . . . . . . . . 0 . . < . . . . 0 
+0 . . . . . . . . . . . . 0 0 0 . . . 0 . . . . . . . . . . . . . . . . . . . 0 . . . . . . , 0 
+0 P1P2. . . . . . . . . . 0 0 0 . . . 0 . ^ . . . J1. . . . . . . . . . . . . 0 . . ^ . . . . 0 
+0 . T2. . . . . . . . . . 0 0 0 . T3. . . . T4. . 0 . . T5. . T6. . T7. . T8. 0 . T1. . . . S10 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 ]],
 }
@@ -3232,17 +3311,26 @@ map=[[
 ]],
 }
 
+-- debug level start
+--levels.infos[1]=levels.infos[4]
+
 -- the system has no state values but can still perform generic actions
 -- eg allocate shared resources for later use
 levels.system.setup=function(sys)
 
 	 system.components.tiles.upload_tiles( levels.graphics )
-
+	 
 end
 
 levels.system.clean=function(sys)
 end
 
+levels.item.clean=function(level)
+	if level.static_body then
+		level.static_body:destroy()
+		level.static_body=nil
+	end
+end
 -- state values are cached into the item for easy access on a get
 -- and must be set again if they are altered so setup and updates
 -- must begin and end with a get and a set
@@ -3250,7 +3338,11 @@ levels.item.setup=function(level)
 	level:get_values()
 
 	local names=system.components.tiles.names
-	local space=level:get_singular("kinetic").space
+	local world=level:get_singular("kinetic").world
+	local kinetic=level:get_singular("kinetic")
+	level.static_body=world:body({
+		type="static",
+	})
 	
 	local info=levels.infos[level.idx]
 
@@ -3261,7 +3353,7 @@ levels.item.setup=function(level)
 		end
 	end
 	local hx,hy=bitdown.pix_size(info.map)
---print("mapsize",hx,hy)
+--rint("mapsize",hx,hy)
 	system.components.map.autosize=nil -- turn off autosize
 	system.components.map.screen_resize(hx*8,hy*8)
 	system.components.map.tilemap_grd:clear(0)
@@ -3288,22 +3380,22 @@ levels.item.setup=function(level)
 				if (not get_tile(x,y-1,"solid") or not get_tile(x,y+1,"solid") ) then -- try to drag across
 					local otile=get_tile(x-1,y)
 					if otile and otile.shape and otile.solid==tile.solid then -- drag across
-						if otile.shape[5]-otile.shape[3] == 8 then -- check size
+						if otile.shape[4]-otile.shape[2] == 8 then -- check size
 							shape=otile.shape
-							shape[4]=shape[4]+8
+							shape[3]=shape[3]+8
 						end
 					end
 				elseif (not get_tile(x-1,y,"solid") or not get_tile(x+1,y,"solid") ) then -- try to drag down
 					local otile=get_tile(x,y-1)
 					if otile and otile.shape and otile.solid==tile.solid then -- drag across
-						if otile.shape[4]-otile.shape[2] == 8 then -- check size
+						if otile.shape[3]-otile.shape[1] == 8 then -- check size
 							shape=otile.shape
-							shape[5]=shape[5]+8
+							shape[4]=shape[4]+8
 						end
 					end
 				end
 				if not shape then -- start new shape
-					shape={"box",x*8,y*8,(x+1)*8,(y+1)*8,0}
+					shape={x*8,y*8,(x+1)*8,(y+1)*8}
 				end
 				tile.shape=shape
 			end
@@ -3314,15 +3406,19 @@ levels.item.setup=function(level)
 		for x,tile in pairs(line) do
 			local shape=tile.shape
 			tile.shape=nil
-			if shape and shape[2]==x*8 and shape[3]==y*8 then -- shape must start at this cell
---print("shape",unpack(shape))
-				tile.shape=space.static:shape(unpack(shape))
-				tile.shape:friction(tile.solid)
-				tile.shape:elasticity(tile.solid)
-				tile.shape:filter(0,0x00000001,0xffffffff)
+			if shape and shape[1]==x*8 and shape[2]==y*8 then -- shape must start at this cell
+--rint("shape",unpack(shape))
+				level.static_body:shape({
+					shape="box",
+					halfWidth=(shape[3]-shape[1])/2,
+					halfHeight=(shape[4]-shape[2])/2,
+					center={(shape[3]+shape[1])/2,(shape[4]+shape[2])/2},
+					material_friction=tile.solid*0.5,
+					material_restitution=tile.solid*0.5,
+				})
 			end
 			if tile.text then
-				tile.text_lines=wstr.smart_wrap(tile.text,(256-16)/8)
+				tile.text_lines=wstr.smart_wrap(tile.text,30)
 			end
 			tile.dir_left  = tile.dir_left  or math.huge
 			tile.dir_right = tile.dir_right or math.huge
@@ -3457,38 +3553,12 @@ end
 
 levels.item.get_wind=function(level,pos)
 	local t=level:get_tile_by_pos(pos)
-	return V3( t and t.dir )
+	return V2( t and t.dir )
 end
 
-levels.item.get_gravity=function(level,pos)
-	return V3(0,400,0)
---[[	
-	local tx=math.floor(pos[1]/8)
-	local ty=math.floor(pos[2]/8)
-
-	local map=level.map
-	local get_tile=function(x,y,name)
-		local t=map[y] and map[y][x]
-		if name then return t and t[name] else return t end
-	end
-	
-	local dir=get_tile(ty,tx,"dir")
-
-	return V3( dir or V2(0,1)*400 )
-]]
---[[
-	local n=pos-V3(128,96,0)
-	local d=n:len()
-	n:normalize()
-	d=d-100
-	if d>0 then
-		d=0
-	else
-		d=math.abs(d*d)
-		if d>800 then d=800 end
-	end
-	return n*-d
-]]
+levels.item.get_gravity=function(level,pos,vel)
+	if vel[2]>16 then return V2(0,600) end -- fall faster
+	return V2(0,400)
 end
 
 levels.item.get_tile_by_idx=function(level,idx,name)
@@ -3565,9 +3635,9 @@ cameras.uidmap={
 }
 
 cameras.values={
-	pos=V3( 0,0,0 ),
-	focus=V3( 0,0,0 ),
-	slide=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
+	focus=V2( 0,0 ),
+	slide=V2( 0,-(32*32) ),
 	idx=1,
 	tile=0x0000,
 }
@@ -3641,8 +3711,8 @@ cameras.item.update=function(camera)
 	end
 
 	camera.slide[2]=0
-	if level.start<32 then
-		local t=(32-level.start)
+	if level.start<16 then
+		local t=(16-level.start)
 		camera.slide[2]=-(t*t)
 	end
 
@@ -3710,10 +3780,10 @@ huds.uidmap={
 }
 
 huds.values={
-	pos=V3( 0,0,0 ),
-	focus=V3( 0,0,0 ),
+	pos=V2( 0,0 ),
+	focus=V2( 0,0 ),
 	idx=1,
-	dst=V3( 0,0,0 ),
+	dst=V2( 0,0 ),
 	tile_idx=0,
 	tile_time=0,
 }
@@ -3770,7 +3840,7 @@ huds.item.setup=function(hud)
 	hud:set_values()
 end
 
-local TEXT_DELAY_WAIT=16
+local TEXT_DELAY_WAIT=48
 huds.item.update=function(hud)
 	if hud.idx~=1 then return end -- only 1 hud
 
@@ -3781,8 +3851,8 @@ huds.item.update=function(hud)
 	local level=hud:get_singular("level") -- only one level is active at a time
 	
 	local show_tile
-	local v=player:get("vel")
-		for _,t in level:each_tile_near( player.pos + V3(0,0,0), 1 ) do
+--	local v=player:get("vel")
+		for _,t in level:each_tile_near( player.pos + V2(0,0), 2 ) do
 			if t.name=="char_sign" then
 				show_tile=t
 				break
@@ -3790,27 +3860,33 @@ huds.item.update=function(hud)
 		end
 
 	if show_tile and hud.tile_idx~=show_tile.idx then -- new text
-		hud.tile_idx=show_tile.idx
-		if hud.tile_time>TEXT_DELAY_WAIT then
-			hud.tile_time=TEXT_DELAY_WAIT
+		if hud.tile_time<TEXT_DELAY_WAIT then -- only switch tile after text is removed
+			hud.tile_idx=show_tile.idx
 		end
+--		if hud.tile_time>TEXT_DELAY_WAIT then
+--			hud.tile_time=TEXT_DELAY_WAIT
+--		end
 	end
-	
-	if show_tile then
+
+	if show_tile and player.idle>0 and hud.tile_idx==show_tile.idx then -- player must be idle over sign to show text
 		hud.tile_time=hud.tile_time+1
-		if hud.tile_time > #show_tile.text_lines*32+16 then
-			hud.tile_time = #show_tile.text_lines*32+16
+		if hud.tile_time > #show_tile.text_lines*30+TEXT_DELAY_WAIT then
+			hud.tile_time = #show_tile.text_lines*30+TEXT_DELAY_WAIT
 		end
 	else
 		hud.tile_time=hud.tile_time-4
-		if hud.tile_time<TEXT_DELAY_WAIT then hud.tile_time=0 end
+		if hud.tile_time<0 then hud.tile_time=0 end
 	end
 
--- 1 sec pause
-	if hud.tile_time>TEXT_DELAY_WAIT and show_tile then
-		hud.dst=V3(0,#show_tile.text_lines*16+16,0)
+-- slide text in or out
+	if hud.tile_time>TEXT_DELAY_WAIT then -- wait to show text
+--		if show_tile and hud.tile_idx==show_tile.idx then
+			local maxchar=math.floor((hud.tile_time-TEXT_DELAY_WAIT)/1)
+			
+			hud.dst=V2(0,math.ceil(maxchar/30)*16+16)
+--		end
 	else
-		hud.dst=V3(0,0,0)
+		hud.dst=V2(0,0)
 	end
 
 
@@ -3839,15 +3915,12 @@ huds.item.draw=function(hud)
     local bg=24
 --	text.text_clear(0x01000000*bg) -- clear text forcing a background color
 
---	text.text_print("This is the hud, 4 lives and 10 secs",0,0,31,24) -- (text,x,y,color,background)
---	text.text_print2("This is the hud, 4 lives and 10 secs",0,1,31,24) -- (text,x,y,color,background)
-
 	if hud.tile_idx>=0 then
-		local maxchar=math.floor((hud.tile_time-TEXT_DELAY_WAIT)/1)
 		
 		local tile=level:get_tile_by_idx(hud.tile_idx)
 		if tile and tile.text_lines then
 			for i,line in ipairs(tile.text_lines) do
+				local maxchar=math.floor((hud.tile_time-TEXT_DELAY_WAIT)/1)-((i-1)*30)
 				if maxchar>0 then
 					local s=line:sub(1,maxchar)
 					maxchar=maxchar-#s
