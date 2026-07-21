@@ -2586,10 +2586,10 @@ static int lua_b3_joint_set (lua_State *l)
 Lua Assert
 
 */
+static __thread lua_State *lua_b3_lua_state=0; // works on linux
 #ifdef __linux__
-static thread_local lua_State *lua_b3_lua_state=0; // works on linux
 #else
-static lua_State *lua_b3_lua_state=0; // breaks on thread use
+//static lua_State *lua_b3_lua_state=0; // breaks on thread use
 #endif
 static int lua_b3_assert (const char *condition, const char *fileName, int lineNumber)
 {
