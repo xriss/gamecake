@@ -3200,15 +3200,15 @@ legend=levels.combine_legends(levels.legend,{
 	["Ta"]={ name="char_sign",				text="Welcome to the Dungeon, we got fun and games." },
 	["Tb"]={ name="char_sign",				text="We got everything you want, honey, we got the Memes." },
 	["Tc"]={ name="char_sign",				text="Congratulations on the coyote JUMP." },
-	["Td"]={ name="char_sign",				text="You may coyote JUMP in the air after walking off a platform." },
-	["T1"]={ name="char_sign",				text="" },
+	["Td"]={ name="char_sign",				text="You may coyote JUMP in the air at any time, but only once." },
+	["T1"]={ name="char_sign",				text="Slims always jump forwards never backwards." },
 	["T2"]={ name="char_sign",				text="Use Left Stick or WASD to move. Press Button A or . to JUMP in." },
-	["T3"]={ name="char_sign",				text="MOVE down to crouch down." },
+	["T3"]={ name="char_sign",				text="MOVE down to crouch. MOVE up to tiptoe" },
 	["T4"]={ name="char_sign",				text="Press Button B or / to GRAB object, press GRAB again to throw it." },
-	["T5"]={ name="char_sign",				text="Throw power is shown by rotation speed, run for it to speed up." },
+	["T5"]={ name="char_sign",				text="Throw power is shown by rotation." },
 	["T6"]={ name="char_sign",				text="Aim throw with Right Stick or Cursor Keys." },
-	["T7"]={ name="char_sign",				text="Throw object at Slim Slimy to stun him." },
-	["T8"]={ name="char_sign",				text="Stomp stunned Slim Slimy to finish him." },
+	["T7"]={ name="char_sign",				text="Throw object at Slim Slimy to stun them." },
+	["T8"]={ name="char_sign",				text="Stomp stunned Slim Slimy to finish them." },
 }),
 title="Test.",
 map=[[
@@ -3224,7 +3224,7 @@ map=[[
 0 . . . . . . . . . . . . . Td. . . . 0 . . . . . . . . . . . . . . . . . . . 0 . . < . . . . 0 
 0 . . . . . . . . . . . . 0 0 0 . . . 0 . . . . . . . . . . . . . . . . . . . 0 . . . . . . , 0 
 0 P1P2. . . . . . . . . . 0 0 0 . . . 0 . ^ . . . J1. . . . . . . . . . . . . 0 . . ^ . . . . 0 
-0 . T2. . . . . . . . . . 0 0 0 . T3. . . . T4. . 0 . . T5. . T6. . T7. . T8. 0 . . . . . . S10 
+0 . T2. . . . . . . . . . 0 0 0 . T3. . . . T4. . 0 . . T5. . T6. . T7. . T8. 0 . T1. . . . S10 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 ]],
 }
@@ -3420,7 +3420,7 @@ levels.item.setup=function(level)
 				})
 			end
 			if tile.text then
-				tile.text_lines=wstr.smart_wrap(tile.text,(256-16)/8)
+				tile.text_lines=wstr.smart_wrap(tile.text,30)
 			end
 			tile.dir_left  = tile.dir_left  or math.huge
 			tile.dir_right = tile.dir_right or math.huge
@@ -3853,8 +3853,8 @@ huds.item.update=function(hud)
 	local level=hud:get_singular("level") -- only one level is active at a time
 	
 	local show_tile
-	local v=player:get("vel")
-		for _,t in level:each_tile_near( player.pos + V2(0,0), 1 ) do
+--	local v=player:get("vel")
+		for _,t in level:each_tile_near( player.pos + V2(0,0), 2 ) do
 			if t.name=="char_sign" then
 				show_tile=t
 				break
@@ -3862,25 +3862,31 @@ huds.item.update=function(hud)
 		end
 
 	if show_tile and hud.tile_idx~=show_tile.idx then -- new text
-		hud.tile_idx=show_tile.idx
-		if hud.tile_time>TEXT_DELAY_WAIT then
-			hud.tile_time=TEXT_DELAY_WAIT
+		if hud.tile_time<TEXT_DELAY_WAIT then -- only switch tile after text is removed
+			hud.tile_idx=show_tile.idx
 		end
+--		if hud.tile_time>TEXT_DELAY_WAIT then
+--			hud.tile_time=TEXT_DELAY_WAIT
+--		end
 	end
 
-	if show_tile and player.idle>0 then
+	if show_tile and player.idle>0 and hud.tile_idx==show_tile.idx then -- player must be idle over sign to show text
 		hud.tile_time=hud.tile_time+1
-		if hud.tile_time > #show_tile.text_lines*32+TEXT_DELAY_WAIT then
-			hud.tile_time = #show_tile.text_lines*32+TEXT_DELAY_WAIT
+		if hud.tile_time > #show_tile.text_lines*30+TEXT_DELAY_WAIT then
+			hud.tile_time = #show_tile.text_lines*30+TEXT_DELAY_WAIT
 		end
 	else
-		hud.tile_time=hud.tile_time-2
+		hud.tile_time=hud.tile_time-4
 		if hud.tile_time<0 then hud.tile_time=0 end
 	end
 
--- 1 sec pause
-	if hud.tile_time>TEXT_DELAY_WAIT and show_tile then
-		hud.dst=V2(0,#show_tile.text_lines*16+16)
+-- slide text in or out
+	if hud.tile_time>TEXT_DELAY_WAIT then -- wait to show text
+--		if show_tile and hud.tile_idx==show_tile.idx then
+			local maxchar=math.floor((hud.tile_time-TEXT_DELAY_WAIT)/1)
+			
+			hud.dst=V2(0,math.ceil(maxchar/30)*16+16)
+--		end
 	else
 		hud.dst=V2(0,0)
 	end
@@ -3912,11 +3918,11 @@ huds.item.draw=function(hud)
 --	text.text_clear(0x01000000*bg) -- clear text forcing a background color
 
 	if hud.tile_idx>=0 then
-		local maxchar=math.floor((hud.tile_time-TEXT_DELAY_WAIT)/1)
 		
 		local tile=level:get_tile_by_idx(hud.tile_idx)
 		if tile and tile.text_lines then
 			for i,line in ipairs(tile.text_lines) do
+				local maxchar=math.floor((hud.tile_time-TEXT_DELAY_WAIT)/1)-((i-1)*30)
 				if maxchar>0 then
 					local s=line:sub(1,maxchar)
 					maxchar=maxchar-#s
