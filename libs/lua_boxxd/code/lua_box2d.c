@@ -15,6 +15,9 @@ can be found in the associated box2d.lua file.
 #include "lualib.h"
 #include "lauxlib.h"
 
+// currently need mingw hax for windows, must also link with small c file
+// https://github.com/jtsiomb/c11threads
+#include "c11threads.h"
 
 /*
 
@@ -2586,7 +2589,7 @@ static int lua_b2_joint_set (lua_State *l)
 Lua Assert
 
 */
-static __thread lua_State *lua_b2_lua_state=0; // works on linux unsure about other systems :)
+static thread_local lua_State *lua_b2_lua_state=0; // works on linux unsure about other systems :)
 static int lua_b2_assert (const char *condition, const char *fileName, int lineNumber)
 {
 	if( lua_b2_lua_state )

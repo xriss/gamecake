@@ -51,4 +51,19 @@ update=function()
 	
 	ctext.text_print("Hello World!",px,py,fg,bg) -- (text,x,y,color,background)
 
+--[[
+local fnt=require("wetgenes.gamecake.fun.funfont64").data4x8
+	for y=0,8 do
+		for x=0,63 do
+			local c ; repeat c=math.random(33,255) until fnt[c]
+--			if c>=128 then c=c+32 end
+			local s=string.char(c)
+			local fg=math.random(1,31)
+			local bg=0--math.random(1,30)
+--			if bg==fg then bg=bg+1 end
+			ctext.text_print(s,x,y,fg,bg)
+		end
+	end
+]]
+
 end

@@ -1,0 +1,12 @@
+﻿*.o
+*.d
+*.swp
+*.obj
+*.wo
+*.exe
+*.suo
+*.ncb
+*.user
+Debug*/
+Release*/
+test/test
