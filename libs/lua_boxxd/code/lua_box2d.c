@@ -17,7 +17,11 @@ can be found in the associated box2d.lua file.
 
 // currently need mingw hax for windows, must also link with small c file
 // https://github.com/jtsiomb/c11threads
+#ifdef __MINGW32__
 #include "c11threads.h"
+#else
+#include "threads.h"
+#endif
 
 /*
 
@@ -76,7 +80,7 @@ static b2Rot lua_b2_zero_b2Rot ()
 {
 #ifdef BOX_2D
 	return (b2Rot){1,0};
-#else // BOX_3
+#else // BOX_3D
 	return (b2Rot){1,0,0,0};
 #endif
 }
@@ -92,7 +96,7 @@ static b2Rot lua_b2_read_b2Rot (lua_State *l, int top)
 
 #ifdef BOX_2D
 	b2Rot r = b2MakeRot( (float)lua_tonumber(l,top) );
-#else // BOX_3
+#else // BOX_3D
 	b2Rot r;
 	if( lua_isnumber(l,top) ) // raw list
 	{
@@ -128,7 +132,7 @@ static int lua_b2_push_b2Rot (lua_State *l, b2Rot r)
 	
 #ifdef BOX_2D
 	lua_pushnumber(l, b2Rot_GetAngle(r) );
-#else // BOX_3
+#else // BOX_3D
 	lua_pushnumber(l, r.v.x );
 	lua_pushnumber(l, r.v.y );
 	lua_pushnumber(l, r.v.z );

@@ -17,7 +17,11 @@ can be found in the associated box3d.lua file.
 
 // currently need mingw hax for windows, must also link with small c file
 // https://github.com/jtsiomb/c11threads
+#ifdef __MINGW32__
 #include "c11threads.h"
+#else
+#include "threads.h"
+#endif
 
 /*
 

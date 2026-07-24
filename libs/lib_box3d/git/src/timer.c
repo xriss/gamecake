@@ -23,6 +23,7 @@
 #define WIN32_LEAN_AND_MEAN 1
 #endif
 
+#define _WIN32_WINNT 0x0600
 // Lower-case windows.h intentionally for cross compiling on mingw.
 #include <windows.h>
 #include <limits.h>
