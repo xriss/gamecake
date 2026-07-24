@@ -12,6 +12,7 @@ can be found in the associated box2d.lua file.
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 // currently need mingw hax for windows, must also link with small c file
 // https://github.com/jtsiomb/c11threads
@@ -26,12 +27,11 @@ can be found in the associated box2d.lua file.
 #include "lauxlib.h"
 
 
-
 // allocate this many empty threads/fifos in a single chunk
 #define WIRE_SLOTS_CHUNK_SIZE 64
 
 // size of internal array of chunks
-#define WIRE_SLOTS_CHUNK_COUNT 64
+#define WIRE_SLOTS_CHUNK_COUNT 256
 
 // total number of slots, this is a hard limit to threads and fifos
 #define WIRE_SLOTS_MAX (WIRE_SLOTS_CHUNK_SIZE*WIRE_SLOTS_CHUNK_COUNT)
@@ -39,7 +39,7 @@ can be found in the associated box2d.lua file.
 typedef struct wire_msg
 {
 	struct wire_msg *next; // we are a linked list
-	int handle; // handle of the thread that sent this message
+	int sender; // handle of the thread that sent this message
 	const void *id; // unique id for lifetime of this msg (used to reply)
 	const int size; // size of data
 	const char *data; // ptr to data
@@ -48,8 +48,10 @@ typedef struct wire_msg
 
 typedef struct wire_fifo
 {
-	mtx_t mutex; // lock for this fifo
 	int handle; // may be 0 if this is the corpse of a dead fifo
+				// must have wire_slots lock before changing handle
+
+	mtx_t mutex; // must have this lock before read/write this struct
 	int count; // length of linked list updated as we add and remove
 	wire_msg *first; // first message ptr, 0 if none
 } wire_fifo ;
@@ -57,8 +59,13 @@ typedef struct wire_fifo
 
 typedef struct wire_thread
 {
-	mtx_t mutex; // lock for this thread
 	int handle; // may be 0 if this is the corpse of a dead thread
+				// must have wire_slots lock before changing handle
+	
+	lua_CFunction preload; // optional function to preload lua libs ( setup loaders )
+	const char *start; // lua code string to load then free then run
+
+	mtx_t mutex; // must have this lock before read/write this struct
 	thrd_t thread; // actual thread handle
 	wire_fifo fifo; // this threads reply fifo
 } wire_thread ;
@@ -66,25 +73,39 @@ typedef struct wire_thread
 
 typedef struct wire_slots
 {
-	mtx_t mutex;	// we only need to lock on write
-
+	mtx_t mutex; // must have this lock before write this struct
 	int used_idx; 	// max used idx ( only ever increases )
-
 	int free_idx;	// max available idx ( only ever increases )
 					// will be a multiple of WIRE_SLOTS_CHUNK_SIZE
-
 	int item_size;	// size of each item
 	void * (*item_init)( void * fifo ); // init function for each item
-
 	void *chunks[WIRE_SLOTS_CHUNK_COUNT]; // fixed size array of pointers
 	// each of these pointers represents [WIRE_SLOTS_CHUNK_SIZE] items
-
 } wire_slots ;
 
 
 wire_slots wire_threads={0};
 wire_slots wire_fifos={0};
 
+
+/*+---------------------------------------------------------------------
+
+Allocate a duplicate string.
+
+returns 0 on error
+
+*/
+static const char * wire_dupe_string( const char *str )
+{
+	int len=strlen(str);
+
+	char *s=(char *)calloc(1,len+1);
+	if(!s){ return 0; }
+	
+	strcpy(s,str);
+
+	return (const char *)s;
+}
 
 /*+---------------------------------------------------------------------
 
@@ -155,6 +176,8 @@ static wire_slots * wire_slots_grow( wire_slots * slots , int idx )
 
 Return the given item, growing available slots if need be.
 
+returns 0 on error
+
 */
 static void * wire_slots_get( wire_slots * slots , int idx )
 {
@@ -170,6 +193,23 @@ static void * wire_slots_get( wire_slots * slots , int idx )
 	ptr=ptr+(inum*slots->item_size);
 	
 	return (void *)ptr;
+}
+
+/*+---------------------------------------------------------------------
+
+Allocate and return a new slot idx.
+
+returns idx or 0 if empty
+
+*/
+static int wire_slots_alloc( wire_slots * slots , int idx )
+{	
+	if(idx==0) { idx=slots->used_idx+1; } // take next slot
+	void *ptr=wire_slots_get( slots , idx ); // maybe grow
+	if(!ptr){ return 0; } // check
+	if( idx>slots->used_idx ) { slots->used_idx=idx; } // update used
+
+	return idx;
 }
 
 /*+---------------------------------------------------------------------
@@ -192,6 +232,216 @@ static wire_slots * wire_slots_init( wire_slots * slots )
 
 /*+---------------------------------------------------------------------
 
+Check if this item exists or is available, may call with no locks 
+but the answer may be stale immediately.
+
+returns handle or 0 if empty
+
+*/
+static int wire_slots_handle( wire_slots * slots , int idx )
+{
+	if( slots->free_idx < idx ) // nothing to check
+	{
+		return 0;
+	}
+	
+	int cnum=(idx-1) / WIRE_SLOTS_CHUNK_SIZE ;
+	int inum=(idx-1) - ( WIRE_SLOTS_CHUNK_SIZE * cnum );
+	char *ptr = (char*)slots->chunks[cnum];
+	ptr=ptr+(inum*slots->item_size);
+	
+	return *((int *)ptr); // first int must be handle
+}
+
+/*+---------------------------------------------------------------------
+
+Lock and unlock with lua errors on fail.
+
+*/
+static int lua_wire_slots_lock (lua_State *l, int lock , wire_slots *slots)
+{
+	if(lock) // do lock
+	{
+		if( thrd_success!=mtx_lock(&slots->mutex) )
+		{ luaL_error(l, "wire slots lock failed"); }
+	}
+	else // do unlock
+	{
+		if( thrd_success!=mtx_unlock(&slots->mutex) )
+		{ luaL_error(l, "wire slots unlock failed"); }
+	}
+	return 0;
+}
+static int lua_wire_thread_lock (lua_State *l, int lock , wire_thread *thread)
+{
+	if(lock) // do lock
+	{
+		if( thrd_success!=mtx_lock(&thread->mutex) )
+		{ luaL_error(l, "wire thread lock failed"); }
+	}
+	else // do unlock
+	{
+		if( thrd_success!=mtx_unlock(&thread->mutex) )
+		{ luaL_error(l, "wire thread unlock failed"); }
+	}
+	return 0;
+}
+static int lua_wire_fifo_lock (lua_State *l, int lock , wire_fifo *fifo)
+{
+	if(lock) // do lock
+	{
+		if( thrd_success!=mtx_lock(&fifo->mutex) )
+		{ luaL_error(l, "wire fifo lock failed"); }
+	}
+	else // do unlock
+	{
+		if( thrd_success!=mtx_unlock(&fifo->mutex) )
+		{ luaL_error(l, "wire fifo unlock failed"); }
+	}
+	return 0;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Take a nap.
+
+*/
+static int lua_wire_thread_sleep (lua_State *l)
+{
+	double d=lua_tonumber(l,1); // time in seconds to sleep for
+	
+	struct timespec duration = { d } ; // should get seconds
+	duration.tv_nsec = (d-floor(d))*1000000000.0 ; // and the fraction
+
+	thrd_sleep(&duration,0);
+	
+	return 0;
+}
+/*+---------------------------------------------------------------------
+
+C function to start a lua state in a new thread
+
+*/
+static int lua_wire_thread_create_start ( void *context )
+{
+	wire_thread *thread=(wire_thread *)context; // our thread struct
+	
+	lua_State *l=lua_open();
+	luaL_openlibs(l);
+	if( thread->preload ) { thread->preload(l); } // make more code available
+
+	luaL_loadstring(l, thread->start); // start lua code
+	free(thread->start); thread->start=0; // free code
+
+	lua_pushnumber(l, thread->handle); // is called with thread handle as 1st arg
+	lua_call(l, 1, 0); // no returns
+
+	lua_close(l); // close/free everything
+	
+	return 0;
+}
+
+/*+---------------------------------------------------------------------
+
+Create a thread and start it running
+
+*/
+static int lua_wire_thread_create (lua_State *l)
+{
+	int handle=(int)lua_tonumber(l,1); // handle may be 0
+	const char *start=lua_tostring(l,2); // run this string
+	lua_CFunction preload=0; // optional cfunction to preload more libs in a new lua state
+	if(!lua_isnil(l,3)) { preload=lua_tocfunction(l,3); }
+	
+	if( (handle>0) || (handle<-WIRE_SLOTS_MAX) ) { luaL_error(l, "invalid thread handle"); }
+	int idx=-handle;
+	
+	lua_wire_slots_lock(l,1,&wire_threads);
+	
+	if( (idx) && wire_slots_handle(&wire_threads,idx) ) // thread already exists
+	{ lua_wire_slots_lock(l,0,&wire_threads); luaL_error(l, "thread %d already exists",handle); }
+	
+	handle=-wire_slots_alloc(&wire_threads,idx); // get new thread handle
+	if(!handle)
+	{
+		lua_wire_slots_lock(l,0,&wire_threads);
+		luaL_error(l, "thread slots alloc failed");
+	}
+	
+	wire_thread *thread=(wire_thread *)wire_slots_get( &wire_threads , -handle ); 
+	// this will work, as it has already been called once
+
+	lua_wire_thread_lock(l,1,thread); // we will be updating the thread
+	
+	thread->handle=handle;
+	thread->fifo.handle=handle;
+
+	thread->preload = preload;
+	
+	thread->start = wire_dupe_string(start); // need to free this in new thread
+	if(!thread->start)
+	{
+		lua_wire_thread_lock(l,0,thread);
+		lua_wire_slots_lock(l,0,&wire_threads);
+		luaL_error(l, "alloc failed");
+	}
+	
+	if( thrd_success!=thrd_create( &thread->thread , lua_wire_thread_create_start , (void*)thread ) )
+	{
+		free(thread->start);
+		thread->start=0;
+		lua_wire_thread_lock(l,0,thread);
+		lua_wire_slots_lock(l,0,&wire_threads);
+		luaL_error(l, "thread start failed");
+	}
+
+	lua_wire_thread_lock(l,0,thread);
+	lua_wire_slots_lock(l,0,&wire_threads);
+	lua_pushnumber(l,handle);
+	return 1;
+}
+
+
+/*+---------------------------------------------------------------------
+
+Destroy a thread, this waits for the thred to exit. So before calling 
+this you should have signaled the thread to end or this will just wait 
+forever.
+
+*/
+static int lua_wire_thread_destroy (lua_State *l)
+{
+	int handle=(int)lua_tonumber(l,1); // thread handle
+	if( (handle>0) || (handle<-WIRE_SLOTS_MAX) ) { luaL_error(l, "invalid thread handle"); }
+
+	if( !wire_slots_handle(&wire_threads,-handle) ) // check thread exists
+	{ luaL_error(l, "no thread %d",handle); }
+
+	lua_wire_slots_lock(l,1,&wire_threads);
+	wire_thread *thread=(wire_thread *)wire_slots_get( &wire_threads , -handle ); 
+	if(!thread)
+	{
+		lua_wire_slots_lock(l,0,&wire_threads);
+		luaL_error(l, "missing thread %d",handle);
+	}
+	lua_wire_thread_lock(l,1,thread); // we will be updating the thread
+
+	thrd_t t = thread->thread ;
+
+	thread->handle=0;
+	thread->thread=(thrd_t){0};
+
+	lua_wire_thread_lock(l,0,thread);
+	lua_wire_slots_lock(l,0,&wire_threads);
+
+	int res=0;
+	thrd_join( t , &res ); // wait for thread to actually end
+
+	return 0;
+}
+/*+---------------------------------------------------------------------
+
 open library.
 
 */
@@ -199,29 +449,31 @@ LUALIB_API int luaopen_wire_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{
-//		{"thread_create",				lua_wire_thread_create},
-//		{"thread_destroy",				lua_wire_thread_destroy},
+		{"thread_sleep",				lua_wire_thread_sleep},
+		{"thread_create",				lua_wire_thread_create},
+		{"thread_destroy",				lua_wire_thread_destroy},
 
 		{0,0}
 	};
 	
 	// first open must be on the main thread
-	// so allocate and fill in main thread ( -1 handle )
+	// dont need locks because they do not exist yet
+	// allocate and fill in main thread ( -1 handle )
 	if( wire_threads.free_idx==0 )
 	{
 		wire_fifos.item_size=sizeof(wire_fifo);
 		wire_fifos.item_init=(void * (*)(void *))wire_fifo_init;
-		if( !wire_slots_init(&wire_fifos) ) { luaL_error(l, "wire slots alloc failed"); }
+		if( !wire_slots_init(&wire_fifos) ) { luaL_error(l, "alloc wire slots fifos failed"); }
 
 		wire_threads.item_size=sizeof(wire_thread);
 		wire_threads.item_init=(void * (*)(void *))wire_thread_init;
-		if( !wire_slots_init(&wire_threads) ) { luaL_error(l, "wire slots alloc failed"); }
+		if( !wire_slots_init(&wire_threads) ) { luaL_error(l, "alloc wire slots threads failed"); }
 		
 		wire_thread *thread=(wire_thread *)wire_slots_get(&wire_threads,1);
-		if( !thread ) { luaL_error(l, "wire slots alloc failed"); }
+		if( !thread ) { luaL_error(l, "grow wire slots threads failed"); }
 		wire_threads.used_idx=1; //  thread 1 is always the main thread
 
-		thread->fifo.handle = -1;
+		thread->fifo.handle = -1; // threads have negative handles
 		thread->handle = -1;
 		thread->thread = thrd_current(); // main thread
 	}
