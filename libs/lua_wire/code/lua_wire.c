@@ -44,7 +44,7 @@ found them etc etc. But for all I know this may actually make it worse.
 typedef struct wire_msg
 {
 	struct wire_msg *next; // we are a linked list
-	int sender; // handle of the thread that sent this message
+	int sender; // handle of the thread that sent this message (used to reply)
 	void *id; // unique id for lifetime of this msg (used to reply)
 	int size; // size of data
 	const char *data; // ptr to data
@@ -57,8 +57,11 @@ typedef struct wire_fifo
 				// must have wire_slots lock before changing handle
 
 	mtx_t mutex; // must have this lock before read/write this struct
+	cnd_t msg; // condition wait for msg
+
 	int count; // length of linked list updated as we add and remove
 	wire_msg *first; // first message ptr, 0 if none
+
 } wire_fifo ;
 
 
@@ -67,21 +70,22 @@ typedef struct wire_thread
 	int handle; // may be 0 if this is the corpse of a dead thread
 				// must have wire_slots lock before changing handle
 	
+	mtx_t mutex; // must have this lock before read/write this struct
+
 	lua_CFunction preload; // optional function to preload lua libs ( setup loaders )
 	const char *start; // lua code string to load then free then run
-
 	int status; // 0 not running , 1 running , -1 running but please halt
 	lua_State *l; // the lua state running in this thread
-
-	mtx_t mutex; // must have this lock before read/write this struct
 	thrd_t thread; // actual thread handle
 	wire_fifo fifo; // this threads reply fifo
+	
 } wire_thread ;
 
 
 typedef struct wire_slots
 {
 	mtx_t mutex; // must have this lock before write this struct
+
 	int used_idx; 	// max used idx ( only ever increases )
 	int free_idx;	// max available idx ( only ever increases )
 					// will be a multiple of WIRE_SLOTS_CHUNK_SIZE
@@ -150,9 +154,12 @@ returns 0 on error
 */
 static wire_fifo * wire_fifo_init( wire_fifo * fifo )
 {
-	if( thrd_success != mtx_init( &(fifo->mutex) , mtx_timed ) )
+	if( thrd_success != cnd_init( &(fifo->msg) ) )
 	{ return 0; }
 	
+	if( thrd_success != mtx_init( &(fifo->mutex) , mtx_plain ) )
+	{ return 0; }
+
 	return fifo;
 }
 
@@ -169,7 +176,7 @@ static wire_thread * wire_thread_init( wire_thread * thread )
 	if( !wire_fifo_init( &thread->fifo ) )
 	{ return 0; }
 
-	if( thrd_success != mtx_init( &(thread->mutex) , mtx_timed ) )
+	if( thrd_success != mtx_init( &(thread->mutex) , mtx_plain ) )
 	{ return 0; }
 	
 	return thread;
@@ -272,7 +279,7 @@ returns 0 on error
 */
 static wire_slots * wire_slots_init( wire_slots * slots )
 {
-	if( thrd_success != mtx_init( &(slots->mutex) , mtx_timed ) )
+	if( thrd_success != mtx_init( &(slots->mutex) , mtx_plain ) )
 	{ return 0; }
 	
 	if( ! wire_slots_grow(slots , 1 ) ) // force first chunk
@@ -751,8 +758,35 @@ static int lua_wire_fifo_push (lua_State *l)
 		}
 
 	lua_wire_fifo_lock(l,0,fifo);
+	
+	cnd_signal( &(fifo->msg) ); // send wake up 
+
 	return 0;
 }
+
+/*+---------------------------------------------------------------------
+
+fifo wait
+
+*/
+static int lua_wire_fifo_wait (lua_State *l)
+{
+	wire_fifo *fifo=lua_wire_fifo(l , 1 );
+
+	double d=lua_tonumber(l,2); // max time in seconds to wait
+
+	// add now to d and create till with that time
+	struct timespec now; timespec_get(&now, TIME_UTC);
+	d+=((double)(now.tv_sec))+(((double)(now.tv_nsec))/1000000000.0 );
+	struct timespec till = { floor(d) ,   (d-floor(d))*1000000000.0 };
+
+	lua_wire_fifo_lock(l,1,fifo); // need to lock in order to wait...
+	cnd_timedwait( &(fifo->msg) , &(fifo->mutex) , &till ); // do wait
+	lua_wire_fifo_lock(l,0,fifo);
+
+	return 0;
+}
+
 /*+---------------------------------------------------------------------
 
 open library.
@@ -774,6 +808,7 @@ LUALIB_API int luaopen_wire_core (lua_State *l)
 		{"fifo_peek",					lua_wire_fifo_peek},
 		{"fifo_pull",					lua_wire_fifo_pull},
 		{"fifo_push",					lua_wire_fifo_push},
+		{"fifo_wait",					lua_wire_fifo_wait},
 
 		{0,0}
 	};
