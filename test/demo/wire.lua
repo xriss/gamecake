@@ -31,7 +31,7 @@ print("thread",...)
 ]],gamecake.preloadlibs )
 
 
-core.thread_sleep(3);
+core.sleep(3);
 
 core.thread_destroy(T1)
 core.thread_destroy(T2)
