@@ -1,6 +1,9 @@
 
 local gamecake=require("wetgenes.gamecake.core")
 
+local wire=require("wire")
+
+
 local core=require("wire.core")
 
 print(core)

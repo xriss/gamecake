@@ -85,6 +85,7 @@ typedef struct wire_thread
 typedef struct wire_slots
 {
 	mtx_t mutex; // must have this lock before write this struct
+	cnd_t msg; // condition wait for any msg in any fifo or thread
 
 	int used_idx; 	// max used idx ( only ever increases )
 	int free_idx;	// max available idx ( only ever increases )
@@ -383,6 +384,29 @@ static int lua_wire_sleep (lua_State *l)
 	
 	return 0;
 }
+
+/*+---------------------------------------------------------------------
+
+get a light userdata from a string/table/userdata/thread/function. We 
+use this function to generate an ID from a table. This is currently 
+unique ( across threads ) and constant while the table remains on the 
+stack. Future versions of lua(jit) may update GC to move tables around 
+and break this assumption but that seems unlikely.
+
+Anyway, it works for now...
+
+*/
+static int lua_wire_pointer (lua_State *l)
+{
+	void *ptr=lua_topointer(l, 1);
+	
+	if(!ptr) { return 0; }
+
+	lua_pushlightuserdata(l, ptr);
+	
+	return 1;
+}
+
 /*+---------------------------------------------------------------------
 
 C function to start a lua state in a new thread
@@ -410,7 +434,7 @@ static int lua_wire_thread_create_start ( void *context )
 
 	lua_wire_thread_lock(l,0,thread);
 
-	lua_pushnumber(l, thread->handle); // is called with thread handle as 1st arg
+	lua_pushnumber(l, thread->handle); // is called with thread handle as 1st arg ?
 	lua_call(l, 1, 0); // no returns
 
 // lock the thread before modifying it...
@@ -746,6 +770,8 @@ static int lua_wire_fifo_push (lua_State *l)
 
 	lua_wire_fifo_lock(l,1,fifo);
 	
+//		int handle=fifo->handle); // remember fifo handle
+	
 		if(!fifo->first)
 		{
 			fifo->first=msg; // entire list is just this msg
@@ -759,14 +785,23 @@ static int lua_wire_fifo_push (lua_State *l)
 
 	lua_wire_fifo_lock(l,0,fifo);
 	
-	cnd_signal( &(fifo->msg) ); // send wake up 
+	cnd_signal( &(fifo->msg) ); // waiting for a msg to this fifo
+
+// not sure what use this would be?
+//	if( handle < 0 ) // this is a thread msg
+//	{
+//		cnd_broadcast( &(wire_threads->msg) ); // wake up threads only if this is sent to a threads fifo
+//	}
+// so only use the one in wire_fifos
+
+	cnd_broadcast( &(wire_fifos.msg) ); // waiting for a msg to any fifo
 
 	return 0;
 }
 
 /*+---------------------------------------------------------------------
 
-fifo wait
+fifo wait on msg
 
 */
 static int lua_wire_fifo_wait (lua_State *l)
@@ -789,6 +824,94 @@ static int lua_wire_fifo_wait (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
+wait on any msg in any fifo
+
+*/
+static int lua_wire_wait (lua_State *l)
+{
+	double d=lua_tonumber(l,1); // max time in seconds to wait
+
+	// add now to d and create till with that time
+	struct timespec now; timespec_get(&now, TIME_UTC);
+	d+=((double)(now.tv_sec))+(((double)(now.tv_nsec))/1000000000.0 );
+	struct timespec till = { floor(d) ,   (d-floor(d))*1000000000.0 };
+
+	lua_wire_slots_lock(l,1,&wire_fifos); // need to lock in order to wait...
+	cnd_timedwait( &(wire_fifos.msg) , &(wire_fifos.mutex) , &till ); // do wait
+	lua_wire_slots_lock(l,0,&wire_fifos);
+
+	return 0;
+}
+
+/*+---------------------------------------------------------------------
+
+check if a handle is valid, returns handle or nil
+
+*/
+static int lua_wire_handle (lua_State *l)
+{
+	if( lua_isnil(l, 1 ) ) { return 0; }
+
+	int handle=(int)lua_tonumber(l, 1 );
+	if( (handle==0) ) { return 0; }
+
+	wire_fifo *fifo=0;
+	if( (handle<0) )
+	{
+		if( ((-handle)>WIRE_SLOTS_MAX) ) { return 0; }
+		wire_thread *thread=(wire_thread *)wire_slots_get( &wire_threads , -handle ); 
+		if( !thread ) { return 0; }
+		if( thread->handle != handle ) { return 0; }
+	}
+	else
+	{
+		if( ((handle)>WIRE_SLOTS_MAX) ) { return 0; }
+		fifo=(wire_fifo *)wire_slots_get( &wire_fifos , handle );
+		if( !fifo ) { return 0; }
+		if( fifo->handle != handle ) { return 0; }
+	}
+
+	lua_pushnumber(l, handle );
+	return 1;
+}
+
+
+/*+---------------------------------------------------------------------
+
+find the handle for the calling thread, this is an expensive search
+
+*/
+static int lua_wire_thread (lua_State *l)
+{
+	int handle=0;
+	thrd_t us=thrd_current();
+
+	lua_wire_slots_lock(l,1,&wire_threads);
+	
+	// usually requested shortly after creation so search backwards
+	for( int idx=wire_threads.used_idx ; idx>=1 ; idx-- )
+	{
+		wire_thread *thread=(wire_thread *)wire_slots_get( &wire_threads , idx );
+		
+		if( thrd_equal( thread->thread , us ) )
+		{
+			handle=thread->handle;
+		}
+
+		if(handle) // found thread and it is a valid handle
+		{
+			lua_wire_slots_lock(l,0,&wire_threads);
+			lua_pushnumber(l, handle );
+			return 1;
+		}
+	}
+	// thread not found
+	lua_wire_slots_lock(l,0,&wire_threads);
+	return 0;
+}
+
+/*+---------------------------------------------------------------------
+
 open library.
 
 */
@@ -796,7 +919,11 @@ LUALIB_API int luaopen_wire_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{
+		{"pointer",						lua_wire_pointer},
 		{"sleep",						lua_wire_sleep},
+		{"wait",						lua_wire_wait},
+		{"handle",						lua_wire_handle},
+		{"thread",						lua_wire_thread},
 
 		{"thread_create",				lua_wire_thread_create},
 		{"thread_destroy",				lua_wire_thread_destroy},
