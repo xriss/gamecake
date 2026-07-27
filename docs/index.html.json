@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 773,
+   "count": 777,
    "name": "lua"
   },
   {
@@ -524,10 +524,6 @@
   {
    "count": 1,
    "name": "lua.box3d.world.step"
-  },
-  {
-   "count": 1,
-   "name": "lua.boxxd"
   },
   {
    "count": 6,
@@ -3222,6 +3218,26 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
+   "count": 5,
+   "name": "lua.wire"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.fifo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.prepare_start"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.serialize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.thread"
+  },
+  {
    "count": 1,
    "name": "prefabs"
   },
@@ -3535,7 +3551,7 @@
   },
   {
    "body": "",
-   "count": 773,
+   "count": 777,
    "name": "lua"
   },
   {
@@ -4303,14 +4319,6 @@
    "line": 230,
    "name": "lua.box3d.world.step",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/box3d.lua"
-  },
-  {
-   "body": "<pre><code>local boxxd=require(&quot;boxxd&quot;)\n</code></pre>\n<p>We use boxxd as the local name of this library.</p>\n<p>Shared code for the box2d / box3d physics library</p>\n",
-   "count": 1,
-   "file": "../lua/boxxd.lua",
-   "line": 5,
-   "name": "lua.boxxd",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/boxxd.lua"
   },
   {
    "body": "<p>Manage string embedding and the glsl compiler and language options.</p>\n<p>This is somewhat separate to the main GLES code and can be used without \nlinking to any system dependent GL libs.</p>\n",
@@ -9644,6 +9652,46 @@
    "line": 161,
    "name": "lua.wetgenes.txt.words.transform",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua"
+  },
+  {
+   "body": "<pre><code>local wire=require(&quot;wire&quot;)\n</code></pre>\n<p>We use wire as the local name of this library.</p>\n<p>Multiple long lived lua states managed via standard c11 threads and \nmutexs with simple fifo message handling. A small compatibility library \nis needed for building for windows using mingw. No problems with \nlinux/android/wasm</p>\n<p>We are not doing anything clever.</p>\n<p>Only data is passed and that data must fit in messagepack, eg json like but \nbinary strings are allowed.</p>\n<p>No lua tables that are both arrays and objects, messagepack does not \nunderstand them.</p>\n<p>No userdata, no functions.</p>\n<p>When in doubt, send a string, remember they can be binary strings, then \nunpack it at the other end.</p>\n<p>Finally any lua libs required in a thread <em>must</em> be thread safe.</p>\n",
+   "count": 5,
+   "file": "../lua/wire.lua",
+   "line": 12,
+   "name": "lua.wire",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+  },
+  {
+   "body": "",
+   "count": 1,
+   "file": "../lua/wire.lua",
+   "line": 107,
+   "name": "lua.wire.fifo",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+  },
+  {
+   "body": "<pre><code>start = wire.prepare_start( { start=&quot;...&quot; , data={} } )\n</code></pre>\n",
+   "count": 1,
+   "file": "../lua/wire.lua",
+   "line": 239,
+   "name": "lua.wire.prepare_start",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+  },
+  {
+   "body": "<pre><code>luastr = wire.serialize(tab)\nluastr = wire.serialize(tab,{ indent=&quot;\\t&quot; , newline=&quot;\\n&quot; , errors=true  })\n</code></pre>\n<p>Turn a table into a valid lua string that will recreate the table.</p>\n<p>Optionally pass in an opts table that we will use during serialization \nso must be unique.</p>\n<p>Possible options are.</p>\n<pre><code>indent=&quot; &quot;\n</code></pre>\n<p>Indention per level. set to &quot;&quot; for compact output.</p>\n<pre><code>newline=&quot;\\n&quot;\n</code></pre>\n<p>Line ending, set to &quot;&quot; for overly compact output.</p>\n<pre><code>errors=nil\n</code></pre>\n<p>Set this to true and we will raise errors rather than simply adding \ncomments to the output. EG unknown types or recursion.</p>\n",
+   "count": 1,
+   "file": "../lua/wire.lua",
+   "line": 128,
+   "name": "lua.wire.serialize",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+  },
+  {
+   "body": "<pre><code>thread = wire.thread(opts)\n</code></pre>\n<p>Create or wrap a thread handle.</p>\n<pre><code>opts.handle=nil\n</code></pre>\n<p>The handle to wrap or use in creation. If a valid handle we will simply \nwrap it with a thread table and return it. No thread will be created.</p>\n<pre><code>opts.start=&quot;...&quot;\n</code></pre>\n<p>Create a new thread and run this code.</p>\n<pre><code>opts.data={}\n</code></pre>\n<p>Optional data for the new thread. Will become part of the start string \ninside a local called start_data</p>\n",
+   "count": 1,
+   "file": "../lua/wire.lua",
+   "line": 62,
+   "name": "lua.wire.thread",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
   {
    "body": "<p>The yarn building blocks, recipes to build items from, multiple rules \ncan be assigned to each item.</p>\n",

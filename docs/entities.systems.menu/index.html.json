@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 773,
+   "count": 777,
    "name": "lua"
   },
   {
@@ -524,10 +524,6 @@
   {
    "count": 1,
    "name": "lua.box3d.world.step"
-  },
-  {
-   "count": 1,
-   "name": "lua.boxxd"
   },
   {
    "count": 6,
@@ -3220,6 +3216,26 @@
   {
    "count": 1,
    "name": "lua.wetgenes.txt.words.transform"
+  },
+  {
+   "count": 5,
+   "name": "lua.wire"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.fifo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.prepare_start"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.serialize"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.thread"
   },
   {
    "count": 1,

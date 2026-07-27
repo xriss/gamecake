@@ -149,8 +149,7 @@
 <a class="sub" href="../docs/lua.box3d.world.prepare_events"><span>/lua.box3d.world.prepare_events</span></a>
 <a class="sub" href="../docs/lua.box3d.world.sensor_events"><span>/lua.box3d.world.sensor_events</span></a>
 <a class="sub" href="../docs/lua.box3d.world.set"><span>/lua.box3d.world.set</span></a>
-<a class="sub" href="../docs/lua.box3d.world.step"><span>/lua.box3d.world.step</span></a>
-<a class="sub" href="../docs/lua.boxxd"><span>/lua.boxxd</span></a><a class="par" href="../docs/lua.glslang"><span>/lua.glslang</span></a>
+<a class="sub" href="../docs/lua.box3d.world.step"><span>/lua.box3d.world.step</span></a><a class="par" href="../docs/lua.glslang"><span>/lua.glslang</span></a>
 
 <a class="sub" href="../docs/lua.glslang.lint_gles2"><span>/lua.glslang.lint_gles2</span></a>
 <a class="sub" href="../docs/lua.glslang.parse_chunks"><span>/lua.glslang.parse_chunks</span></a>
@@ -823,7 +822,12 @@
 <a class="sub" href="../docs/lua.wetgenes.txt.utf.string"><span>/lua.wetgenes.txt.utf.string</span></a><a class="par" href="../docs/lua.wetgenes.txt.words"><span>/lua.wetgenes.txt.words</span></a>
 
 <a class="sub" href="../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
-<a class="sub" href="../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a>
+<a class="sub" href="../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../docs/lua.wire"><span>/lua.wire</span></a>
+
+<a class="sub" href="../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
+<a class="sub" href="../docs/lua.wire.prepare_start"><span>/lua.wire.prepare_start</span></a>
+<a class="sub" href="../docs/lua.wire.serialize"><span>/lua.wire.serialize</span></a>
+<a class="sub" href="../docs/lua.wire.thread"><span>/lua.wire.thread</span></a>
 <a class="sub" href="../docs/prefabs"><span>/prefabs</span></a>
 <a class="sub" href="../docs/rules"><span>/rules</span></a>
 <a class="sub" href="../docs/setup"><span>/setup</span></a>
@@ -3148,16 +3152,6 @@ events = world:sensor_events(events)
 discreet sub steps.</p>
 <p>Generally the simulation expects (1/seconds)*steps to be 240 ish. 
 So 240 substeps per second. 1/60 and 4 are the defaults.</p>
-</div>
-</div>
-
-<div class="wrap">
-<h1><a href="../docs/lua.boxxd">lua.boxxd</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/boxxd.lua#L5">https://github.com/xriss/gamecake/blob/master/lua/boxxd.lua</a></div>
-<div><pre><code>local boxxd=require(&quot;boxxd&quot;)
-</code></pre>
-<p>We use boxxd as the local name of this library.</p>
-<p>Shared code for the box2d / box3d physics library</p>
 </div>
 </div>
 
@@ -11294,6 +11288,85 @@ transforms on them and see if they match any of the transforms we built
 from our starting word. A match then means we can add up the number of 
 transforms on both sides and that is how many steps it would take to 
 get from one word to another by adding and subtracting letters.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire">lua.wire</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L12">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>local wire=require(&quot;wire&quot;)
+</code></pre>
+<p>We use wire as the local name of this library.</p>
+<p>Multiple long lived lua states managed via standard c11 threads and 
+mutexs with simple fifo message handling. A small compatibility library 
+is needed for building for windows using mingw. No problems with 
+linux/android/wasm</p>
+<p>We are not doing anything clever.</p>
+<p>Only data is passed and that data must fit in messagepack, eg json like but 
+binary strings are allowed.</p>
+<p>No lua tables that are both arrays and objects, messagepack does not 
+understand them.</p>
+<p>No userdata, no functions.</p>
+<p>When in doubt, send a string, remember they can be binary strings, then 
+unpack it at the other end.</p>
+<p>Finally any lua libs required in a thread <em>must</em> be thread safe.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.fifo">lua.wire.fifo</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L107">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.prepare_start">lua.wire.prepare_start</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L239">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>start = wire.prepare_start( { start=&quot;...&quot; , data={} } )
+</code></pre>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.serialize">lua.wire.serialize</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L128">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>luastr = wire.serialize(tab)
+luastr = wire.serialize(tab,{ indent=&quot;\t&quot; , newline=&quot;\n&quot; , errors=true  })
+</code></pre>
+<p>Turn a table into a valid lua string that will recreate the table.</p>
+<p>Optionally pass in an opts table that we will use during serialization 
+so must be unique.</p>
+<p>Possible options are.</p>
+<pre><code>indent=&quot; &quot;
+</code></pre>
+<p>Indention per level. set to &quot;&quot; for compact output.</p>
+<pre><code>newline=&quot;\n&quot;
+</code></pre>
+<p>Line ending, set to &quot;&quot; for overly compact output.</p>
+<pre><code>errors=nil
+</code></pre>
+<p>Set this to true and we will raise errors rather than simply adding 
+comments to the output. EG unknown types or recursion.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.thread">lua.wire.thread</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L62">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>thread = wire.thread(opts)
+</code></pre>
+<p>Create or wrap a thread handle.</p>
+<pre><code>opts.handle=nil
+</code></pre>
+<p>The handle to wrap or use in creation. If a valid handle we will simply 
+wrap it with a thread table and return it. No thread will be created.</p>
+<pre><code>opts.start=&quot;...&quot;
+</code></pre>
+<p>Create a new thread and run this code.</p>
+<pre><code>opts.data={}
+</code></pre>
+<p>Optional data for the new thread. Will become part of the start string 
+inside a local called start_data</p>
 </div>
 </div>
 

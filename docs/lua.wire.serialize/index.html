@@ -149,8 +149,7 @@
 <a class="sub" href="../../docs/lua.box3d.world.prepare_events"><span>/lua.box3d.world.prepare_events</span></a>
 <a class="sub" href="../../docs/lua.box3d.world.sensor_events"><span>/lua.box3d.world.sensor_events</span></a>
 <a class="sub" href="../../docs/lua.box3d.world.set"><span>/lua.box3d.world.set</span></a>
-<a class="sub" href="../../docs/lua.box3d.world.step"><span>/lua.box3d.world.step</span></a>
-<a class="sub" href="../../docs/lua.boxxd"><span>/lua.boxxd</span></a><a class="par" href="../../docs/lua.glslang"><span>/lua.glslang</span></a>
+<a class="sub" href="../../docs/lua.box3d.world.step"><span>/lua.box3d.world.step</span></a><a class="par" href="../../docs/lua.glslang"><span>/lua.glslang</span></a>
 
 <a class="sub" href="../../docs/lua.glslang.lint_gles2"><span>/lua.glslang.lint_gles2</span></a>
 <a class="sub" href="../../docs/lua.glslang.parse_chunks"><span>/lua.glslang.parse_chunks</span></a>
@@ -823,7 +822,12 @@
 <a class="sub" href="../../docs/lua.wetgenes.txt.utf.string"><span>/lua.wetgenes.txt.utf.string</span></a><a class="par" href="../../docs/lua.wetgenes.txt.words"><span>/lua.wetgenes.txt.words</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
+
+<a class="sub" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
+<a class="sub" href="../../docs/lua.wire.prepare_start"><span>/lua.wire.prepare_start</span></a>
+<a class="sub" href="../../docs/lua.wire.serialize"><span>/lua.wire.serialize</span></a>
+<a class="sub" href="../../docs/lua.wire.thread"><span>/lua.wire.thread</span></a>
 <a class="sub" href="../../docs/prefabs"><span>/prefabs</span></a>
 <a class="sub" href="../../docs/rules"><span>/rules</span></a>
 <a class="sub" href="../../docs/setup"><span>/setup</span></a>
@@ -834,12 +838,25 @@
 	<div class="main">
 		
 <div class="wrap">
-<h1><a href="../../docs/lua.boxxd">lua.boxxd</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/boxxd.lua#L5">https://github.com/xriss/gamecake/blob/master/lua/boxxd.lua</a></div>
-<div><pre><code>local boxxd=require(&quot;boxxd&quot;)
+<h1><a href="../../docs/lua.wire.serialize">lua.wire.serialize</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L128">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>luastr = wire.serialize(tab)
+luastr = wire.serialize(tab,{ indent=&quot;\t&quot; , newline=&quot;\n&quot; , errors=true  })
 </code></pre>
-<p>We use boxxd as the local name of this library.</p>
-<p>Shared code for the box2d / box3d physics library</p>
+<p>Turn a table into a valid lua string that will recreate the table.</p>
+<p>Optionally pass in an opts table that we will use during serialization 
+so must be unique.</p>
+<p>Possible options are.</p>
+<pre><code>indent=&quot; &quot;
+</code></pre>
+<p>Indention per level. set to &quot;&quot; for compact output.</p>
+<pre><code>newline=&quot;\n&quot;
+</code></pre>
+<p>Line ending, set to &quot;&quot; for overly compact output.</p>
+<pre><code>errors=nil
+</code></pre>
+<p>Set this to true and we will raise errors rather than simply adding 
+comments to the output. EG unknown types or recursion.</p>
 </div>
 </div>
 
