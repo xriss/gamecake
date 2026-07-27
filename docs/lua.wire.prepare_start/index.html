@@ -827,7 +827,9 @@
 <a class="sub" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
 <a class="sub" href="../../docs/lua.wire.prepare_start"><span>/lua.wire.prepare_start</span></a>
 <a class="sub" href="../../docs/lua.wire.serialize"><span>/lua.wire.serialize</span></a>
+<a class="sub" href="../../docs/lua.wire.sleep"><span>/lua.wire.sleep</span></a>
 <a class="sub" href="../../docs/lua.wire.thread"><span>/lua.wire.thread</span></a>
+<a class="sub" href="../../docs/lua.wire.wait"><span>/lua.wire.wait</span></a>
 <a class="sub" href="../../docs/prefabs"><span>/prefabs</span></a>
 <a class="sub" href="../../docs/rules"><span>/rules</span></a>
 <a class="sub" href="../../docs/setup"><span>/setup</span></a>
@@ -839,9 +841,16 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.prepare_start">lua.wire.prepare_start</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L239">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
-<div><pre><code>start = wire.prepare_start( { start=&quot;...&quot; , data={} } )
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L348">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>start = wire.prepare_start( { start=&quot;...&quot; , globals={} } )
+
+opts.start=nil
+opts.globals={}
+opts.header=&quot;...&quot;
+opts.footer=&quot;...&quot;
 </code></pre>
+<p>See wire.thread for documentation on these opts, we just pass the opts 
+table down into this function to prepare the start string.</p>
 </div>
 </div>
 

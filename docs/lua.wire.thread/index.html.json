@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 777,
+   "count": 779,
    "name": "lua"
   },
   {
@@ -3218,7 +3218,7 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 5,
+   "count": 7,
    "name": "lua.wire"
   },
   {
@@ -3235,7 +3235,15 @@
   },
   {
    "count": 1,
+   "name": "lua.wire.sleep"
+  },
+  {
+   "count": 1,
    "name": "lua.wire.thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.wait"
   },
   {
    "count": 1,
@@ -3303,10 +3311,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>thread = wire.thread(opts)\n</code></pre>\n<p>Create or wrap a thread handle.</p>\n<pre><code>opts.handle=nil\n</code></pre>\n<p>The handle to wrap or use in creation. If a valid handle we will simply \nwrap it with a thread table and return it. No thread will be created.</p>\n<pre><code>opts.start=&quot;...&quot;\n</code></pre>\n<p>Create a new thread and run this code.</p>\n<pre><code>opts.data={}\n</code></pre>\n<p>Optional data for the new thread. Will become part of the start string \ninside a local called start_data</p>\n",
+   "body": "<pre><code>thread = wire.thread(handle)\nthread = wire.thread(name)\nthread = wire.thread(opts)\n</code></pre>\n<p>Create or get a thread table. Threads are not GC&#39;d they must be created \nand destroyed explicitly.</p>\n<p>When called with a handle (number) we return a previously created \nthread with that handle.</p>\n<p>When called with a name (string) we return a previously created \nthread with that name.</p>\n<p>When called with opts (table) we do the following based on the \ncontents.</p>\n<pre><code>opts.handle=nil\n</code></pre>\n<p>The handle to wrap or use in creation. If a valid handle we will simply \nwrap it with a thread table and return that new table.</p>\n<pre><code>opts.start=nil\n</code></pre>\n<p>Run this string as lua code in a new thread. Usually just a require and \na call to a function in that module. eg &quot;require(&#39;modname&#39;).funcname()&quot;</p>\n<pre><code>opts.globals={}\n</code></pre>\n<p>Optional globals for the new thread. Will be serialized and become part \nof the start string.</p>\n<pre><code>opts.preloadlibs=wire.preloadlibs\n</code></pre>\n<p>Must be a cfunction to be run in new thread. Use false to not preload \nany custom libs.</p>\n<pre><code>opts.header=...\nopts.footer=...\n</code></pre>\n<p>internal setup so best not to change this. It uses wire.do_start to \nwrap your code with error handles etc.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 62,
+   "line": 105,
    "name": "lua.wire.thread",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

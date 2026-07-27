@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 777,
+   "count": 779,
    "name": "lua"
   },
   {
@@ -3218,7 +3218,7 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 5,
+   "count": 7,
    "name": "lua.wire"
   },
   {
@@ -3235,7 +3235,15 @@
   },
   {
    "count": 1,
+   "name": "lua.wire.sleep"
+  },
+  {
+   "count": 1,
    "name": "lua.wire.thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.wait"
   },
   {
    "count": 1,
@@ -3303,10 +3311,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>start = wire.prepare_start( { start=&quot;...&quot; , data={} } )\n</code></pre>\n",
+   "body": "<pre><code>start = wire.prepare_start( { start=&quot;...&quot; , globals={} } )\n\nopts.start=nil\nopts.globals={}\nopts.header=&quot;...&quot;\nopts.footer=&quot;...&quot;\n</code></pre>\n<p>See wire.thread for documentation on these opts, we just pass the opts \ntable down into this function to prepare the start string.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 239,
+   "line": 348,
    "name": "lua.wire.prepare_start",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

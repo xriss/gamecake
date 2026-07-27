@@ -827,7 +827,9 @@
 <a class="sub" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
 <a class="sub" href="../../docs/lua.wire.prepare_start"><span>/lua.wire.prepare_start</span></a>
 <a class="sub" href="../../docs/lua.wire.serialize"><span>/lua.wire.serialize</span></a>
+<a class="sub" href="../../docs/lua.wire.sleep"><span>/lua.wire.sleep</span></a>
 <a class="sub" href="../../docs/lua.wire.thread"><span>/lua.wire.thread</span></a>
+<a class="sub" href="../../docs/lua.wire.wait"><span>/lua.wire.wait</span></a>
 <a class="sub" href="../../docs/prefabs"><span>/prefabs</span></a>
 <a class="sub" href="../../docs/rules"><span>/rules</span></a>
 <a class="sub" href="../../docs/setup"><span>/setup</span></a>
@@ -839,21 +841,40 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.thread">lua.wire.thread</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L62">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
-<div><pre><code>thread = wire.thread(opts)
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L105">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>thread = wire.thread(handle)
+thread = wire.thread(name)
+thread = wire.thread(opts)
 </code></pre>
-<p>Create or wrap a thread handle.</p>
+<p>Create or get a thread table. Threads are not GC&#39;d they must be created 
+and destroyed explicitly.</p>
+<p>When called with a handle (number) we return a previously created 
+thread with that handle.</p>
+<p>When called with a name (string) we return a previously created 
+thread with that name.</p>
+<p>When called with opts (table) we do the following based on the 
+contents.</p>
 <pre><code>opts.handle=nil
 </code></pre>
 <p>The handle to wrap or use in creation. If a valid handle we will simply 
-wrap it with a thread table and return it. No thread will be created.</p>
-<pre><code>opts.start=&quot;...&quot;
+wrap it with a thread table and return that new table.</p>
+<pre><code>opts.start=nil
 </code></pre>
-<p>Create a new thread and run this code.</p>
-<pre><code>opts.data={}
+<p>Run this string as lua code in a new thread. Usually just a require and 
+a call to a function in that module. eg &quot;require(&#39;modname&#39;).funcname()&quot;</p>
+<pre><code>opts.globals={}
 </code></pre>
-<p>Optional data for the new thread. Will become part of the start string 
-inside a local called start_data</p>
+<p>Optional globals for the new thread. Will be serialized and become part 
+of the start string.</p>
+<pre><code>opts.preloadlibs=wire.preloadlibs
+</code></pre>
+<p>Must be a cfunction to be run in new thread. Use false to not preload 
+any custom libs.</p>
+<pre><code>opts.header=...
+opts.footer=...
+</code></pre>
+<p>internal setup so best not to change this. It uses wire.do_start to 
+wrap your code with error handles etc.</p>
 </div>
 </div>
 

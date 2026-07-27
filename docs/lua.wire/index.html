@@ -827,7 +827,9 @@
 <a class="sub" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
 <a class="sub" href="../../docs/lua.wire.prepare_start"><span>/lua.wire.prepare_start</span></a>
 <a class="sub" href="../../docs/lua.wire.serialize"><span>/lua.wire.serialize</span></a>
+<a class="sub" href="../../docs/lua.wire.sleep"><span>/lua.wire.sleep</span></a>
 <a class="sub" href="../../docs/lua.wire.thread"><span>/lua.wire.thread</span></a>
+<a class="sub" href="../../docs/lua.wire.wait"><span>/lua.wire.wait</span></a>
 <a class="sub" href="../../docs/prefabs"><span>/prefabs</span></a>
 <a class="sub" href="../../docs/rules"><span>/rules</span></a>
 <a class="sub" href="../../docs/setup"><span>/setup</span></a>
@@ -839,43 +841,61 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wire">lua.wire</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L12">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L8">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>local wire=require(&quot;wire&quot;)
 </code></pre>
-<p>We use wire as the local name of this library.</p>
-<p>Multiple long lived lua states managed via standard c11 threads and 
-mutexs with simple fifo message handling. A small compatibility library 
-is needed for building for windows using mingw. No problems with 
-linux/android/wasm</p>
-<p>We are not doing anything clever.</p>
-<p>Only data is passed and that data must fit in messagepack, eg json like but 
-binary strings are allowed.</p>
-<p>No lua tables that are both arrays and objects, messagepack does not 
-understand them.</p>
+<p>We use wire as the local name of this library. So we can uhh, wire 
+things together?</p>
+<p>Wire provides multiple long lived lua states managed via standard c11 
+threads and mutexs with simple fifo message handling between threads.</p>
+<p>A small compatibility library is needed for building for windows using 
+mingw. Native windows builds might work if your compiler supports the 
+C11 standard.</p>
+<p>We are not doing anything clever, so beware of the following:</p>
+<p>Only data is passed and that data must fit in messagepack, eg json like 
+but binary strings are allowed.</p>
+<p>Do not use lua tables that are both arrays and objects. Pick one or the 
+other.</p>
 <p>No userdata, no functions.</p>
-<p>When in doubt, send a string, remember they can be binary strings, then 
-unpack it at the other end.</p>
-<p>Finally any lua libs required in a thread <em>must</em> be thread safe.</p>
+<p>When in doubt, send a string, then unpack it in the thread. Binary 
+strings will be escaped into lua code, eg \0 for null etc.</p>
+<p>Any lua libs required in a thread <em>must</em> be thread safe or they will 
+break in strange and uncomfortable ways. WG Check that luaopen_ 
+functions do not try and initialise anything twice if opened in another 
+thread.</p>
+<p>This library does not reuse handles ( as this is intended for long 
+lived threads ) and the number of handles is a hard limit set in the C 
+code. Defaults to 4096 threads and 4096 fifos. Bump it at compile time 
+if you need more.</p>
+<p>You can reuse handles, but it must be self managed and be done 
+explicitly.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo">lua.wire.fifo</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L107">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L196">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div></div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.prepare_start">lua.wire.prepare_start</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L239">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
-<div><pre><code>start = wire.prepare_start( { start=&quot;...&quot; , data={} } )
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L348">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>start = wire.prepare_start( { start=&quot;...&quot; , globals={} } )
+
+opts.start=nil
+opts.globals={}
+opts.header=&quot;...&quot;
+opts.footer=&quot;...&quot;
 </code></pre>
+<p>See wire.thread for documentation on these opts, we just pass the opts 
+table down into this function to prepare the start string.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.serialize">lua.wire.serialize</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L128">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L237">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>luastr = wire.serialize(tab)
 luastr = wire.serialize(tab,{ indent=&quot;\t&quot; , newline=&quot;\n&quot; , errors=true  })
 </code></pre>
@@ -897,22 +917,61 @@ comments to the output. EG unknown types or recursion.</p>
 </div>
 
 <div class="wrap">
-<h1><a href="../../docs/lua.wire.thread">lua.wire.thread</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L62">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
-<div><pre><code>thread = wire.thread(opts)
+<h1><a href="../../docs/lua.wire.sleep">lua.wire.sleep</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L83">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>wire.sleep(secs)
 </code></pre>
-<p>Create or wrap a thread handle.</p>
+<p>Take a nap for at least the given amount of seconds, probably a little 
+bit longer.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wire.thread">lua.wire.thread</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L105">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>thread = wire.thread(handle)
+thread = wire.thread(name)
+thread = wire.thread(opts)
+</code></pre>
+<p>Create or get a thread table. Threads are not GC&#39;d they must be created 
+and destroyed explicitly.</p>
+<p>When called with a handle (number) we return a previously created 
+thread with that handle.</p>
+<p>When called with a name (string) we return a previously created 
+thread with that name.</p>
+<p>When called with opts (table) we do the following based on the 
+contents.</p>
 <pre><code>opts.handle=nil
 </code></pre>
 <p>The handle to wrap or use in creation. If a valid handle we will simply 
-wrap it with a thread table and return it. No thread will be created.</p>
-<pre><code>opts.start=&quot;...&quot;
+wrap it with a thread table and return that new table.</p>
+<pre><code>opts.start=nil
 </code></pre>
-<p>Create a new thread and run this code.</p>
-<pre><code>opts.data={}
+<p>Run this string as lua code in a new thread. Usually just a require and 
+a call to a function in that module. eg &quot;require(&#39;modname&#39;).funcname()&quot;</p>
+<pre><code>opts.globals={}
 </code></pre>
-<p>Optional data for the new thread. Will become part of the start string 
-inside a local called start_data</p>
+<p>Optional globals for the new thread. Will be serialized and become part 
+of the start string.</p>
+<pre><code>opts.preloadlibs=wire.preloadlibs
+</code></pre>
+<p>Must be a cfunction to be run in new thread. Use false to not preload 
+any custom libs.</p>
+<pre><code>opts.header=...
+opts.footer=...
+</code></pre>
+<p>internal setup so best not to change this. It uses wire.do_start to 
+wrap your code with error handles etc.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wire.wait">lua.wire.wait</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L93">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>wire.wait(secs)
+</code></pre>
+<p>Take a nap for upto the given amount of seconds. We will wakeup 
+whenever a new msg is sent to any fifo or when this time has passed.</p>
 </div>
 </div>
 
