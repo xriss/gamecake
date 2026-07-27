@@ -881,7 +881,7 @@ static int lua_wire_handle (lua_State *l)
 find the handle for the calling thread, this is an expensive search
 
 */
-static int lua_wire_thread (lua_State *l)
+static int lua_wire_thread_handle (lua_State *l)
 {
 	int handle=0;
 	thrd_t us=thrd_current();
@@ -919,19 +919,23 @@ LUALIB_API int luaopen_wire_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{
+		// internal helper functions
 		{"pointer",						lua_wire_pointer},
+		{"thread_handle",				lua_wire_thread_handle},
+		{"handle",						lua_wire_handle},
+
+		// global function
 		{"sleep",						lua_wire_sleep},
 		{"wait",						lua_wire_wait},
-		{"handle",						lua_wire_handle},
-		{"thread",						lua_wire_thread},
 
+		// thread function
 		{"thread_create",				lua_wire_thread_create},
 		{"thread_destroy",				lua_wire_thread_destroy},
 		{"thread_status",				lua_wire_thread_status},
 
+		// fifo functions
 		{"fifo_create",					lua_wire_fifo_create},
 		{"fifo_destroy",				lua_wire_fifo_destroy},
-
 		{"fifo_peek",					lua_wire_fifo_peek},
 		{"fifo_pull",					lua_wire_fifo_pull},
 		{"fifo_push",					lua_wire_fifo_push},

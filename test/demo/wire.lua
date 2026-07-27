@@ -1,41 +1,25 @@
 
-local gamecake=require("wetgenes.gamecake.core")
-
 local wire=require("wire")
 
-
-local core=require("wire.core")
-
-print(core)
-
-print(gamecake.preloadlibs)
-
-T1=core.thread_create( 0 , [[
-
-print("thread",...)
-
-local gamecake=require("wetgenes.gamecake.core")
-print(gamecake.preloadlibs)
-
-]],gamecake.preloadlibs )
+print(  )
+print( "wire starting" )
+print( "we are " , wire.threads.us.name , wire.threads.us.handle )
 
 
-T2=core.thread_create( 0 , [[
+wire.thread({
+	start=[[
+	
+local wire=require("wire")
 
-print("thread",...)
+print(  )
+print( "thread starting" )
+print( "we are " , wire.threads.us.name , wire.threads.us.handle )
+	
+]],
+})
 
-]],gamecake.preloadlibs )
+for i=3,1,-1 do
+	print("sleep" , i)
+	wire.sleep(1)
+end
 
-
-T3=core.thread_create( 0 , [[
-
-print("thread",...)
-
-]],gamecake.preloadlibs )
-
-
-core.sleep(3);
-
-core.thread_destroy(T1)
-core.thread_destroy(T2)
-core.thread_destroy(T3)
