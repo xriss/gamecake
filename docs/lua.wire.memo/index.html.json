@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 790,
+   "count": 792,
    "name": "lua"
   },
   {
@@ -3218,8 +3218,12 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 18,
+   "count": 20,
    "name": "lua.wire"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.active"
   },
   {
    "count": 1,
@@ -3250,8 +3254,12 @@
    "name": "lua.wire.manifest"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.wire.memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.memo.remove"
   },
   {
    "count": 1,
@@ -3355,34 +3363,42 @@
  },
  "_list": [
   {
-   "body": "<pre><code>memo = wire.memo( { sender=handle , id=id } )\n</code></pre>\n<p>Create a memo and return it.</p>\n<p>memo.sender can be provided or it will be set to our handle ( which is \nwire.thread.us.handle )</p>\n<p>memo.id can be provided or it will be generated.</p>\n<p>The memo will also be placed in wire.memos for later processing.</p>\n",
-   "count": 4,
+   "body": "<pre><code>memo = wire.memo( { sender=handle , id=id } )\n</code></pre>\n<p>Create a memo and return it.</p>\n<p>memo.sender can be provided or it will be set to our handle ( which is \nwire.thread.us.handle )</p>\n<p>memo.id can be provided or it will be generated.</p>\n<p>The memo will also be placed in wire.memos for later processing.</p>\n<p>memo.state will be set to &quot;setup&quot;</p>\n<p>CRAZY HAX TBH : memo.id is set to a light userdata of the memo tables \npointer, this should be unique across multiple lua states and threads \nin the same process, for as long as the table stays on the stack. A \nfuture lua garbage collection system could break this by moving tables \naround in system memory but I believe this is currently &quot;safe&quot; as of \n2026 in all available versions of lua/luajit and if that changes I will \nfix it.</p>\n",
+   "count": 5,
    "file": "../lua/wire.lua",
-   "line": 333,
+   "line": 400,
    "name": "lua.wire.memo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
   {
-   "body": "<pre><code>result = memo:resolve(fifo)\n</code></pre>\n<p>Push the memo into the fifo and then wait for a result on our thread \nfifo before returning.</p>\n<p>result is returned and can also be found in memo.result</p>\n",
+   "body": "<pre><code>memo:remove()\n</code></pre>\n<p>Remove a memo from wire.memos</p>\n<p>memo.state will be changed to &quot;removed&quot; and it can no longer be found \nin wire.memos .</p>\n<p>This means it is no longer a live memo as far as wire is concerned.</p>\n<p>You may of course keep this memo around if you need it.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 408,
+   "line": 443,
+   "name": "lua.wire.memo.remove",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+  },
+  {
+   "body": "<pre><code>result = memo:resolve()\n</code></pre>\n<p>Wait for a result on our thread fifo ( wire.threads.us ) before \nreturning.</p>\n<p>Other memos may have been pulled and ignored for now. These memos can \nbe found later in wire.memos</p>\n<p>result is returned and can also be found in memo.result this should \nalways be a table containing the result of the memo provided by the \nthread.</p>\n<p>If a result was returned with result.fail set then the thread replied \nwith a hard fail. A hard fail means the thread could not deal with your \nmemo, so lua code broke, memo was invalid etc. This is a hard fail and \nwill raise an error rather than return a result.</p>\n<p>If the thread does not reply but is still running then this will lock.</p>\n",
+   "count": 1,
+   "file": "../lua/wire.lua",
+   "line": 526,
    "name": "lua.wire.memo.resolve",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
   {
-   "body": "<pre><code>memo:send()\n</code></pre>\n<p>Send a memo</p>\n",
+   "body": "<pre><code>memo:reply()\n</code></pre>\n<p>Reply to a memo, this uses the senders handle as a fifo without it \nneeding to be wrapped in a full fifo/thread.</p>\n<p>memo.state will be changed to &quot;reply&quot;</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 385,
+   "line": 507,
    "name": "lua.wire.memo.send",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
   {
-   "body": "<pre><code>memo:status(state)\n</code></pre>\n<p>Change status of memo, moving it between caches.</p>\n<p>This is an internal function.</p>\n",
+   "body": "<pre><code>memo:status(state)\n</code></pre>\n<p>Change status of memo, moving it between wire.memos[ memo.state ] \ncaches.</p>\n<p>This is a local function for local people. It should not be used by \nyou.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 366,
+   "line": 465,
    "name": "lua.wire.memo.status",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

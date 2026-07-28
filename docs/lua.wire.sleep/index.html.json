@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 790,
+   "count": 792,
    "name": "lua"
   },
   {
@@ -3218,8 +3218,12 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 18,
+   "count": 20,
    "name": "lua.wire"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.active"
   },
   {
    "count": 1,
@@ -3250,8 +3254,12 @@
    "name": "lua.wire.manifest"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.wire.memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.memo.remove"
   },
   {
    "count": 1,
@@ -3358,7 +3366,7 @@
    "body": "<pre><code>wire.sleep(secs)\n</code></pre>\n<p>Take a nap for at least the given amount of seconds, probably a little \nbit longer.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 105,
+   "line": 148,
    "name": "lua.wire.sleep",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

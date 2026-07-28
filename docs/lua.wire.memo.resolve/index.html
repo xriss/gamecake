@@ -824,6 +824,7 @@
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
 
+<a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a>
 <a class="sub" href="../../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a><a class="par" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
 
 <a class="sub" href="../../docs/lua.wire.fifo.peek"><span>/lua.wire.fifo.peek</span></a>
@@ -832,6 +833,7 @@
 <a class="sub" href="../../docs/lua.wire.fifo.wait"><span>/lua.wire.fifo.wait</span></a>
 <a class="sub" href="../../docs/lua.wire.manifest"><span>/lua.wire.manifest</span></a><a class="par" href="../../docs/lua.wire.memo"><span>/lua.wire.memo</span></a>
 
+<a class="sub" href="../../docs/lua.wire.memo.remove"><span>/lua.wire.memo.remove</span></a>
 <a class="sub" href="../../docs/lua.wire.memo.resolve"><span>/lua.wire.memo.resolve</span></a>
 <a class="sub" href="../../docs/lua.wire.memo.send"><span>/lua.wire.memo.send</span></a>
 <a class="sub" href="../../docs/lua.wire.memo.status"><span>/lua.wire.memo.status</span></a>
@@ -852,12 +854,21 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.memo.resolve">lua.wire.memo.resolve</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L408">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
-<div><pre><code>result = memo:resolve(fifo)
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L526">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>result = memo:resolve()
 </code></pre>
-<p>Push the memo into the fifo and then wait for a result on our thread 
-fifo before returning.</p>
-<p>result is returned and can also be found in memo.result</p>
+<p>Wait for a result on our thread fifo ( wire.threads.us ) before 
+returning.</p>
+<p>Other memos may have been pulled and ignored for now. These memos can 
+be found later in wire.memos</p>
+<p>result is returned and can also be found in memo.result this should 
+always be a table containing the result of the memo provided by the 
+thread.</p>
+<p>If a result was returned with result.fail set then the thread replied 
+with a hard fail. A hard fail means the thread could not deal with your 
+memo, so lua code broke, memo was invalid etc. This is a hard fail and 
+will raise an error rather than return a result.</p>
+<p>If the thread does not reply but is still running then this will lock.</p>
 </div>
 </div>
 

@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 790,
+   "count": 792,
    "name": "lua"
   },
   {
@@ -3218,8 +3218,12 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 18,
+   "count": 20,
    "name": "lua.wire"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.active"
   },
   {
    "count": 1,
@@ -3250,8 +3254,12 @@
    "name": "lua.wire.manifest"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.wire.memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.memo.remove"
   },
   {
    "count": 1,
@@ -3358,7 +3366,7 @@
    "body": "<pre><code>bool = fifo:peek()\nbool = thread:peek()\n</code></pre>\n<p>Peek and see if there is a memo to pull but do not pull it.</p>\n<p>Note that a pull, even immediately after a successful peek has no \nguarantee to work.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 439,
+   "line": 570,
    "name": "lua.wire.fifo.peek",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

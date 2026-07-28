@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 790,
+   "count": 792,
    "name": "lua"
   },
   {
@@ -3218,8 +3218,12 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 18,
+   "count": 20,
    "name": "lua.wire"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.active"
   },
   {
    "count": 1,
@@ -3250,8 +3254,12 @@
    "name": "lua.wire.manifest"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.wire.memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.memo.remove"
   },
   {
    "count": 1,
@@ -3355,10 +3363,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>memo:send()\n</code></pre>\n<p>Send a memo</p>\n",
+   "body": "<pre><code>memo:reply()\n</code></pre>\n<p>Reply to a memo, this uses the senders handle as a fifo without it \nneeding to be wrapped in a full fifo/thread.</p>\n<p>memo.state will be changed to &quot;reply&quot;</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 385,
+   "line": 507,
    "name": "lua.wire.memo.send",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

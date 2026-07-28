@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 790,
+   "count": 792,
    "name": "lua"
   },
   {
@@ -3218,8 +3218,12 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 18,
+   "count": 20,
    "name": "lua.wire"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.active"
   },
   {
    "count": 1,
@@ -3250,8 +3254,12 @@
    "name": "lua.wire.manifest"
   },
   {
-   "count": 4,
+   "count": 5,
    "name": "lua.wire.memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.memo.remove"
   },
   {
    "count": 1,
@@ -3355,10 +3363,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>fifo:wait(secs)\nthread:wait(secs)\n</code></pre>\n<p>Wait upto the given number of seconds for a new memo to arrive.</p>\n",
+   "body": "<pre><code>fifo:wait(secs)\nthread:wait(secs)\n</code></pre>\n<p>Wait upto the given number of seconds for a new memo to arrive in this \nfifo.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 514,
+   "line": 655,
    "name": "lua.wire.fifo.wait",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }
