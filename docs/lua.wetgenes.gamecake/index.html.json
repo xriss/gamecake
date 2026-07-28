@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 792,
+   "count": 794,
    "name": "lua"
   },
   {
@@ -3218,7 +3218,7 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 20,
+   "count": 22,
    "name": "lua.wire"
   },
   {
@@ -3292,6 +3292,14 @@
   {
    "count": 1,
    "name": "lua.wire.thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.time"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.timeres"
   },
   {
    "count": 1,

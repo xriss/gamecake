@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 792,
+   "count": 794,
    "name": "lua"
   },
   {
@@ -3218,7 +3218,7 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 20,
+   "count": 22,
    "name": "lua.wire"
   },
   {
@@ -3292,6 +3292,14 @@
   {
    "count": 1,
    "name": "lua.wire.thread"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.time"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.timeres"
   },
   {
    "count": 1,
@@ -3526,7 +3534,7 @@
    "body": "<p>A basic subtask to handle http memos.</p>\n<p>Note that this function requires external libraries that must be \navailable in order to work.</p>\n<p>One of the main reasons to use threads is so you can do multiple non \nblocking http requests.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 898,
+   "line": 919,
    "name": "lua.wetgenes.tasks.http_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
