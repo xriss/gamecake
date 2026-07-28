@@ -108,6 +108,9 @@ wire.memos={
 	got={},
 }
 
+-- generic callbacks, referenced by name
+wire.callbacks={}
+
 --[[#lua.wire.table_to_data
 
 	data = wire.table_to_data( table )
@@ -212,42 +215,115 @@ wire.active=function(handle)
 	return false -- thread is halting or halted
 end
 
+--[[#lua.wire.wrap
+
+	it = wire.wrap(name,handle)
+
+We *know* that this handle exists. So either return a previously cached 
+fifo/thread or create a new one with the given name and return that.
+
+The returned value may be a fifo or a thread, it.is will be "thread" or 
+"fifo" for the different results.
+
+Always returns a valid table.
+
+]]
+wire.wrap=function(name,handle)
+
+	-- first try our cache
+	if handle<0 then
+		if wire.cache_threads[handle] then
+			return wire.cache_threads[handle]
+		end
+	else
+		if wire.cache_fifos[handle] then
+			return wire.cache_fifos[handle]
+		end
+	end
+
+	-- create wrapper for handle that we know exists
+	if handle<0 then
+		local thread = {}
+		setmetatable(thread,wire.thread_metatable)
+		thread.handle=handle
+		thread.name=name
+
+		wire.cache_threads[thread.handle]=thread
+		wire.cache_names[name]=thread.handle
+		wire.threads[name]=thread
+
+		return thread
+	else
+		local fifo = {}
+		setmetatable(fifo,wire.fifo_metatable)
+		fifo.handle=handle
+		fifo.name=name
+
+		fifo.cache_fifos[fifo.handle]=fifo
+		fifo.cache_names[name]=fifo.handle
+		fifo.fifos[name]=fifo
+
+		return fifo
+	end
+
+end
+
 --[[#lua.wire.manifest
 
-	fifo = wire.manifest(name)
+	it = wire.manifest(name)
+	it = wire.manifest(handle)
 
-Get a named fifo/thread from the house thread.
+Return a fifo or thread if it exists otherwise returns nil.
 
-	fifo = wire.manifest(handle)
+We may talk to the house thread to check for the existence of name or 
+handle, so this can block for a while before returning.
 
-Manifest a fifo/thread with this handle
-
-Note that the returned value may be a fifo or a thread.
+The returned value may be a fifo or a thread, it.is will be "thread" or 
+"fifo" for the different results.
 
 ]]
 wire.manifest=function(name)
 
-	-- try local cache
+	local handle
 	if type(name)=="number" then
-		if name<0 then
-			if wire.cache_threads[name] then
-				return wire.cache_threads[name]
+		handle=name
+		name=nil
+	else
+		handle=wire.cache_names[ name ] -- try our cache
+	end
+
+	if handle then -- try this handle
+		if handle<0 then
+			if wire.cache_threads[handle] then
+				return wire.cache_threads[handle]
 			end
 		else
-			if wire.cache_fifos[name] then
-				return wire.cache_fifos[name]
+			if wire.cache_fifos[handle] then
+				return wire.cache_fifos[handle]
 			end
 		end
-	else -- turn name into handle
+	end
+
+	-- check with house if we only have a handle or a name
+	if ( ( name and ( not handle ) ) or ( handle and ( not name ) ) )
+		and ( wire.thread_handle ~= -2 ) then -- unless we are house
+		
 		local memo=wire.memo({
-			fifo=wire.fifos.house,
+			fifo=wire.threads.house,
 			data={
-				cmd="handle",
-				name=name,
+				action="handle",
+				name=name,handle=handle, -- one of these is nil
 			},
 		})
 		memo:send()
 		memo:resolve()
+		
+		handle=memo.result.handle
+		name=memo.result.name
+		
+		if name and handle then -- house says it exists, so make it so
+			return wire.wrap(name,handle)
+		end
 	end
 
 end
@@ -331,10 +407,12 @@ wire.thread=function(opts)
 		local start=wire.prepare_start(opts)
 		assert( loadstring(start) , "wire thread start string" ) -- make sure the code is valid
 
-		thread.handle=core.thread_create( thread.handle or 0 , start , preloadlibs or nil )
-		
-		 -- auto generate name , might get changed later by house thread
+		thread.handle=core.thread_create( thread.handle or 0 )
+		 -- auto generate name 
 		if not name then name="thread"..thread.handle end
+		
+		core.thread_start( thread.handle , name , start , preloadlibs or nil )
+
 	end
 	
 	if not core.handle( thread.handle ) then
@@ -346,6 +424,22 @@ wire.thread=function(opts)
 		thread.name=name
 		wire.cache_names[name]=thread.handle
 		wire.threads[name]=thread
+
+		-- if the thread is not main or house
+		if thread.handle<-2 then
+			-- unless we are house
+			if wire.thread_handle ~= -2 then
+				wire.memo({
+					fifo=wire.threads.house,
+					callback=wire.callbacks.remove, -- auto remove
+					data={
+						action="handle",
+						name=thread.name,
+						handle=thread.handle,
+					},
+				}):send()
+			end
+		end
 	end
 	
 	return thread
@@ -407,8 +501,22 @@ wire.fifo=function(opts)
 
 	wire.cache_fifos[fifo.handle]=fifo
 	if name then
+		fifo.name=name
 		wire.cache_names[name]=fifo.handle
 		wire.fifos[name]=fifo
+
+		-- tell house about this unless we are house
+		if wire.thread_handle ~= -2 then
+			wire.memo({
+				fifo=wire.threads.house,
+				callback=wire.callbacks.remove, -- auto remove
+				data={
+					action="handle",
+					name=fifo.name,
+					handle=fifo.handle,
+				},
+			}):send()
+		end
 	end
 
 	return fifo
@@ -416,9 +524,12 @@ end
 
 --[[#lua.wire.memo
 
-	memo = wire.memo( { sender=handle , id=id } )
+	memo = wire.memo( )
+	memo = wire.memo( {} )
+	memo = wire.memo( { sender=handle , id=id , callback=callback } )
 
-Create a memo and return it.
+Create a memo and return it, if you pass in a new table with settings 
+then that is the table we will modify and return.
 
 memo.sender can be provided or it will be set to our handle ( which is 
 wire.thread.us.handle )
@@ -429,7 +540,13 @@ The memo will also be placed in wire.memos for later processing.
 
 memo.state will be set to "setup"
 
-CRAZY HAX TBH : memo.id is set to a light userdata of the memo tables 
+if memo.callback is provided then it will be called during wire.update 
+after we get a reply. It will be called like so:
+	
+	memo.callback(memo)
+
+
+FYI HAX TBH : memo.id is set to a light userdata of the memo tables 
 pointer, this should be unique across multiple lua states and threads 
 in the same process, for as long as the table stays on the stack. A 
 future lua garbage collection system could break this by moving tables 
@@ -448,7 +565,7 @@ wire.memo=function(memo)
 		memo.id=core.pointer(memo) -- address of table
 	end
 	if not memo.sender then
-		memo.sender = wire.threads.us.handle -- we is who we is
+		memo.sender = wire.thread_handle -- we is who we is
 	end
 
 	wire.memos.all[ memo.id ]=memo
@@ -461,10 +578,10 @@ end
 
 	memo:remove()
 
-Remove a memo from wire.memos
+Remove a memo from wire.memos.
 
 memo.state will be changed to "removed" and it can no longer be found 
-in wire.memos .
+in wire.memos
 
 This means it is no longer a live memo as far as wire is concerned.
 
@@ -473,11 +590,31 @@ You may of course keep this memo around if you need it.
 ]]
 wire.memo_functions.remove=function( memo )
 
-	assert( memo.state~="removed" )
 	wire.memos.all[ memo.id ]=nil
-	wire.memos.all[ memo.state ]=nil
+	if memo.state and wire.memos[ memo.state ] then
+		wire.memos[ memo.state ][ memo.id ]=nil
+	end
+	memo.state="removed"
 
 end
+
+--[[#lua.wire.callbacks.discard
+
+	wire.memo({ callback=wire.callbacks.discard })
+
+This is a generic callback to be used when you do not care about a 
+memos result.
+
+This callback will remove the memo, eg it will call memo:remove()
+
+If you do not remove memos when you are finished with them then they 
+will just accumulate inside the wire.memos table. So it is important to 
+always use this callback if you are not going to check on a memo result 
+later.
+
+]]
+wire.callbacks.discard=wire.memo_functions.remove
+
 
 --[[#lua.wire.memo.status
 
@@ -491,13 +628,13 @@ you.
 
 ]]
 wire.memo_functions.status=function( memo , state )
-
-	if memo.state then
+	if memo.state and wire.memos[ memo.state ] then
 		wire.memos[ memo.state ][ memo.id ]=nil
 	end
 	memo.state=state
-	wire.memos[ memo.state ][ memo.id ]=memo
-
+	if memo.state and wire.memos[ memo.state ] then
+		wire.memos[ memo.state ][ memo.id ]=memo
+	end
 end
 
 --[[#lua.wire.memo.send
@@ -510,16 +647,15 @@ memo.state will be changed to "sent"
 
 ]]
 wire.memo_functions.send=function( memo )
-
 	assert(memo.fifo) -- memo must have destination fifo / handle
 	local handle=0
 	if type(memo.fifo)=="number" then handle=memo.fifo else handle=memo.fifo.handle end
 
 	local data=wire.table_to_data(memo.data)
-	core.fifo_push( handle , data , wire.threads.us.handle , memo.id )
+	core.fifo_push( handle , data , wire.thread_handle , memo.id )
 	memo:status("sent")
 	-- remember the time we sent
-	-- old memos waiting on a reply can produce warnings
+	-- old memos waiting on a reply can produce debug warnings, eventually
 	memo.send_time=wire.time()
 
 end
@@ -568,7 +704,7 @@ If the thread does not reply but is still running then this will lock.
 wire.memo_functions.resolve=function( memo )
 
 	-- wait for result , memos we ignore here can be handled later
-	while wire.active( wire.threads.us.handle ) do
+	while wire.active( wire.thread_handle ) do
 		local m = wire.threads.us:pull()
 
 		if memo.result then -- got a result
@@ -582,7 +718,7 @@ wire.memo_functions.resolve=function( memo )
 		end
 	end
 	
-	error("thread asked to halt")
+	error("thread halted in a memo:resolve")
 
 end
 
@@ -636,7 +772,7 @@ wire.fifo_functions.pull=function( fifo )
 	data=wire.data_to_table(data) -- unpack
 	
 	-- this is a reply sent back to us as it used our handle
-	if wire.threads.us.handle == sender then
+	if wire.thread_handle == sender then
 
 		local memo=assert( wire.memos.all[ id ] ) -- must match a sent memo
 
@@ -667,7 +803,7 @@ Push memo into this fifo.
 wire.fifo_functions.push=function( fifo , memo )
 
 	local data=wire.table_to_data(memo.data)
-	core.fifo_push( fifo.handle , data , wire.threads.us.handle , memo.id )
+	core.fifo_push( fifo.handle , data , wire.thread_handle , memo.id )
 	memo:status("sent")
 
 end
@@ -860,7 +996,7 @@ wire.do_start=function( func )
 	global.PRINT=print
 	global.DUMP=print
 	global.LOG=print
-	global.TASK_NAME=wire.threads.us.name and "#"..wire.threads.us.name
+	global.TASK_NAME=THREAD_NAME and "#"..THREAD_NAME
 	global.TRACEBACK=function(err) LOG( TASKNAME , debug.traceback( err ) ) return err end
 
 -- try and setup wetgenes.logs
@@ -879,25 +1015,54 @@ end
 
 wire.do_start_house=function()
 
-	local do_memo=function(data)
-		local result={}
+	local consume=function(data)
+		local result={fail="unknown"} -- unknown error
 
-DUMP(data)
+			if data.action=="handles" then -- get all the names->handles we know			
+
+				result.handles=wire.cache_names
+
+			elseif data.action=="handle" then -- get/set a single handle/name pair
+
+				if data.name and data.handle then
+
+					wire.cache_names[ data.name ] = data.handle
+					
+					result.name=data.name
+					result.handle=data.handle
+					
+					result.fail=nil -- success
+
+				elseif data.name and (not data.handle) then
+
+					result.name=data.name
+					result.handle=wire.cache_names[ data.name ]
+
+					result.fail=nil -- success
+
+				elseif (not data.name) and data.handle then
+
+					result.handle=data.handle
+
+					result.fail=nil -- success
+
+				end
+			end
 
 		return result
 	end
 
 	-- deal with memos sent directly to us ( -2 ) 
-	while wire.active( wire.threads.us.handle ) do
+	while wire.active( wire.thread_handle ) do
 		local memo = wire.threads.us:pull()
 		
 		if memo then
 
 			-- this will print a TRACEBACK on error but keep going
-			local ok,result = xpcall( function() return do_memo( memo.data ) end , TRACEBACK )
+			local ok,result = xpcall( function() return consume( memo.data ) end , TRACEBACK )
 
 			if ok then
-				memo.result=result -- do_memo gave us a result to reply with
+				memo.result=result -- consume gave us a result to reply with
 			else
 				memo.result={ fail=(result or "fail") } -- reply with fail reason
 			end
@@ -1044,20 +1209,9 @@ wire.do_start_http=function()
 	local fifo = wire.manifest("http")
 
 	-- loop until our thread is asked to halt
-	while wire.active( wire.threads.us.handle ) do
+	while wire.active( wire.thread_handle ) do
 		
 		local memo 
---[[
-		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
-		
-		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
-			if not ok then ret={error=ret or true} end -- reformat errors
-			if memo.id then -- result requested
-				linda:send( nil , memo.id , ret )
-			end
-		end
-]]
 
 	end
 	-- we have been gracefully halted so cleanup and return
@@ -1067,38 +1221,40 @@ end
 
 
 -- thread -1 will always exist and thread -2 will be auto created here
+do
+	-- get our thread handle and name
+	wire.thread_handle , wire.thread_name = core.thread_handle()
 
-local our_thread_handle = assert( core.thread_handle() )-- get our thread handle 
-
-wire.thread( { handle=-1 , name="main"} ) -- Wrap the main thread
-
-if core.handle( -2 ) then -- check if house thread exists
-
-	wire.thread( { handle=-2 , name="house" } ) -- Wrap the house thread
-
-else -- Create the house thread ( we are the main thread and no other threads exist yet )
-
-	assert( our_thread_handle == -1 ) -- main thread check
-	wire.thread( { handle=-2 , name="house" , start="require('wire').do_start_house()" , globals={house="yes"} , } )
-
-end
-
-if our_thread_handle<-2 then -- we are not main or house so also wrap our thread handle
-
-	wire.thread( { handle=our_thread_handle } ) -- just wrap
-
-end
-
--- make sure threads shortcuts exist
-wire.threads.main  = assert( wire.thread( -1 ) )
-wire.threads.house = assert( wire.thread( -2 ) )
-wire.threads.us    = assert( wire.thread( our_thread_handle ) )
-
-if our_thread_handle == -1 then
-	wire.do_start() -- set thready globals on main thread
---UMP(wire)
-	if wire.timeres()>0.001 then -- check for crazy OS
-		PRINT( string.format("WARNING wire.time resolution (%.9f) is greater than 0.001",wire.timeres()) )
+	-- if we are main thread do some thread setup
+	if wire.thread_handle == -1 then
+		wire.do_start() -- set thready globals on main thread
+		if wire.timeres()>0.001 then -- check for crazy OS
+			PRINT( string.format("WARNING wire.time resolution (%.9f) is greater than 0.001",wire.timeres()) )
+		end
 	end
-end
 
+	-- create main thread
+	wire.wrap( "main" , -1 ) -- Wrap the main thread
+	if wire.thread_handle == -1 then
+		wire.thread_name="main"
+		wire.threads.us = wire.threads.main -- we are the main thread
+	end
+
+	-- create house thread
+	if core.handle( -2 ) then -- check if house thread exists
+		wire.wrap( "house" , -2 ) -- Wrap the house thread
+	else -- Create the house thread ( we are the main thread and no other threads exist yet )
+		assert( wire.thread_handle == -1 ) -- main thread check
+		wire.thread( { handle=-2 , name="house" , start="require('wire').do_start_house()" , globals={house="yes"} , } )
+	end
+	if wire.thread_handle == -2 then
+		wire.thread_name="house"
+		wire.threads.us = wire.threads.house -- we are the house thread
+	end
+
+	-- create us thread
+	if wire.thread_handle<-2 then -- we are not main or house
+		wire.threads.us = wire.wrap( wire.thread_name , wire.thread_handle )
+	end
+
+end

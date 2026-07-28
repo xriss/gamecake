@@ -18,17 +18,15 @@ print( "we are " , wire.threads.us.name , wire.threads.us.handle )
 ]],
 })
 
---UMP( wire.threads )
 local memo=wire.memo({
 	fifo=wire.threads.house,
 	data={
-		cmd="handle",
+		action="handle",
 		name="test",
 	},
 })
 memo:send()
 memo:resolve()
-DUMP(memo)
 
 for i=3,1,-1 do
 	print("sleep" , i , wire.time() )
