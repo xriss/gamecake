@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 794,
+   "count": 797,
    "name": "lua"
   },
   {
@@ -3218,12 +3218,20 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 22,
+   "count": 25,
    "name": "lua.wire"
   },
   {
    "count": 1,
    "name": "lua.wire.active"
+  },
+  {
+   "count": 2,
+   "name": "lua.wire.callbacks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.callbacks.discard"
   },
   {
    "count": 1,
@@ -3307,6 +3315,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wire.wrap"
+  },
+  {
+   "count": 1,
    "name": "prefabs"
   },
   {
@@ -3371,10 +3383,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>fifo = wire.manifest(name)\n</code></pre>\n<p>Get a named fifo/thread from the house thread.</p>\n<pre><code>fifo = wire.manifest(handle)\n</code></pre>\n<p>Manifest a fifo/thread with this handle</p>\n<p>Note that the returned value may be a fifo or a thread.</p>\n",
+   "body": "<pre><code>it = wire.manifest(name)\nit = wire.manifest(handle)\n</code></pre>\n<p>Return a fifo or thread if it exists otherwise returns nil.</p>\n<p>We may talk to the house thread to check for the existence of name or \nhandle, so this can block for a while before returning.</p>\n<p>The returned value may be a fifo or a thread, it.is will be &quot;thread&quot; or \n&quot;fifo&quot; for the different results.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 215,
+   "line": 271,
    "name": "lua.wire.manifest",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

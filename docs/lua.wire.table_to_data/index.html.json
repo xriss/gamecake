@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 794,
+   "count": 797,
    "name": "lua"
   },
   {
@@ -3218,12 +3218,20 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 22,
+   "count": 25,
    "name": "lua.wire"
   },
   {
    "count": 1,
    "name": "lua.wire.active"
+  },
+  {
+   "count": 2,
+   "name": "lua.wire.callbacks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.callbacks.discard"
   },
   {
    "count": 1,
@@ -3307,6 +3315,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wire.wrap"
+  },
+  {
+   "count": 1,
    "name": "prefabs"
   },
   {
@@ -3374,7 +3386,7 @@
    "body": "<pre><code>data = wire.table_to_data( table )\n</code></pre>\n<p>Convert a lua table into a data (string).</p>\n<p>We currently use cmsgpack but this may change to another system and can \nnot be relied upon. It is even possible that data may not be a string \nin future versions.</p>\n<p>This is a local function for local people. It should not be used by \nyou.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 111,
+   "line": 114,
    "name": "lua.wire.table_to_data",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

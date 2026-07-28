@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 794,
+   "count": 797,
    "name": "lua"
   },
   {
@@ -3218,12 +3218,20 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 22,
+   "count": 25,
    "name": "lua.wire"
   },
   {
    "count": 1,
    "name": "lua.wire.active"
+  },
+  {
+   "count": 2,
+   "name": "lua.wire.callbacks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.callbacks.discard"
   },
   {
    "count": 1,
@@ -3307,6 +3315,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wire.wrap"
+  },
+  {
+   "count": 1,
    "name": "prefabs"
   },
   {
@@ -3371,10 +3383,10 @@
  },
  "_list": [
   {
-   "body": "<pre><code>memo:remove()\n</code></pre>\n<p>Remove a memo from wire.memos</p>\n<p>memo.state will be changed to &quot;removed&quot; and it can no longer be found \nin wire.memos .</p>\n<p>This means it is no longer a live memo as far as wire is concerned.</p>\n<p>You may of course keep this memo around if you need it.</p>\n",
+   "body": "<pre><code>memo:remove()\n</code></pre>\n<p>Remove a memo from wire.memos.</p>\n<p>memo.state will be changed to &quot;removed&quot; and it can no longer be found \nin wire.memos</p>\n<p>This means it is no longer a live memo as far as wire is concerned.</p>\n<p>You may of course keep this memo around if you need it.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 460,
+   "line": 577,
    "name": "lua.wire.memo.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

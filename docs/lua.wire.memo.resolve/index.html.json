@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 794,
+   "count": 797,
    "name": "lua"
   },
   {
@@ -3218,12 +3218,20 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 22,
+   "count": 25,
    "name": "lua.wire"
   },
   {
    "count": 1,
    "name": "lua.wire.active"
+  },
+  {
+   "count": 2,
+   "name": "lua.wire.callbacks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.callbacks.discard"
   },
   {
    "count": 1,
@@ -3307,6 +3315,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wire.wrap"
+  },
+  {
+   "count": 1,
    "name": "prefabs"
   },
   {
@@ -3374,7 +3386,7 @@
    "body": "<pre><code>result = memo:resolve()\n</code></pre>\n<p>Wait for a result on our thread fifo ( wire.threads.us ) before \nreturning.</p>\n<p>Other memos may have been pulled and ignored for now. These memos can \nbe found later in wire.memos</p>\n<p>result is returned and can also be found in memo.result this should \nalways be a table containing the result of the memo provided by the \nthread.</p>\n<p>If a result was returned with result.fail set then the thread replied \nwith a hard fail. A hard fail means the thread could not deal with your \nmemo, so lua code broke, memo was invalid etc. This is a hard fail and \nwill raise an error rather than return a result.</p>\n<p>If the thread does not reply but is still running then this will lock.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 546,
+   "line": 682,
    "name": "lua.wire.memo.resolve",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }
