@@ -4,7 +4,6 @@
 -- http://en.wikipedia.org/wiki/MIT_License
 --
 
-
 --[[#lua.wire
 
 	local wire=require("wire")
@@ -33,7 +32,7 @@ When in doubt, send a string, then unpack it in the thread. Binary
 strings will be escaped into lua code, eg \0 for null etc.
 
 Any lua libs required in a thread *must* be thread safe or they will 
-break in strange and uncomfortable ways. WG Check that luaopen_ 
+break in strange and uncomfortable ways. So check that luaopen_ 
 functions do not try and initialise anything twice if opened in another 
 thread.
 
@@ -42,7 +41,7 @@ lived threads ) and the number of handles is a hard limit set in the C
 code. Defaults to 4096 threads and 4096 fifos. Bump it at compile time 
 if you need more.
 
-You can reuse handles, but it must be self managed and be done 
+You can reuse handles, but it must be self managed and must be done 
 explicitly.
 
 ]]
@@ -65,6 +64,9 @@ wire.thread_metatable={__index=wire.thread_functions}
 wire.fifo_functions={is="fifo"}
 wire.fifo_metatable={__index=wire.fifo_functions}
 
+wire.memo_functions={is="memo"}
+wire.memo_metatable={__index=wire.memo_functions}
+
 -- keep cache of threads and fifos by handle
 wire.cache_threads={}
 wire.cache_fifos={}
@@ -80,6 +82,26 @@ wire.threads={}
 -- cache names to fifo for easy access of named resources.
 wire.fifos={}
 
+--[[#lua.wire.table_to_data
+
+	data = wire.table_to_data( table )
+
+Convert a lua table into a data string.
+
+]]
+wire.table_to_data = require("cmsgpack").pack
+
+
+--[[#lua.wire.data_to_table
+
+	table = wire.data_to_table( data )
+
+Convert a data string into a lua table.
+
+]]
+wire.data_to_table = require("cmsgpack").unpack
+
+
 --[[#lua.wire.sleep
 
 	wire.sleep(secs)
@@ -88,7 +110,7 @@ Take a nap for at least the given amount of seconds, probably a little
 bit longer.
 
 ]]
-wire.sleep=core.sleep
+wire.sleep=core.sleep -- copy the core cfunction
 
 --[[#lua.wire.wait
 
@@ -98,9 +120,57 @@ Take a nap for upto the given amount of seconds. We will wakeup
 whenever a new msg is sent to any fifo or when this time has passed.
 
 ]]
-wire.wait=core.wait
+wire.wait=core.wait -- copy the core cfunction
+
+-- active memos for this thread grouped by status
+wire.memos={
+	all={},
+	setup={},
+	sent={},
+	reply={},
+	result={},
+	got={},
+}
 
 
+--[[#lua.wire.manifest
+
+	fifo = wire.manifest(name)
+
+Get a named fifo/thread from the house thread.
+
+	fifo = wire.manifest(handle)
+
+Manifest a fifo/thread with this handle
+
+Note that the returned value may be a fifo or a thread.
+
+]]
+wire.manifest=function(name)
+
+	-- try local cache
+	if type(name)=="number" then
+		if name<0 then
+			if wire.cache_threads[name] then
+				return wire.cache_threads[name]
+			end
+		else
+			if wire.cache_fifos[name] then
+				return wire.cache_fifos[name]
+			end
+		end
+	else -- turn name into handle
+		local memo=wire.memo({
+			fifo=wire.fifos.house,
+			data={
+				cmd="handle",
+				name=name,
+			},
+		})
+		memo:resolve()
+	end
+
+end
 
 --[[#lua.wire.thread
 
@@ -116,6 +186,9 @@ thread with that handle.
 
 When called with a name (string) we return a previously created 
 thread with that name.
+
+We will assert if no thread is found with that handle or name, so no 
+need to check returns.
 
 When called with opts (table) we do the following based on the 
 contents.
@@ -144,7 +217,7 @@ any custom libs.
 	opts.footer=...
 
 internal setup so best not to change this. It uses wire.do_start to 
-wrap your code with error handles etc.
+wrap your code with error handlers etc.
 
 ]]
 wire.thread=function(opts)
@@ -153,7 +226,7 @@ wire.thread=function(opts)
 		if t=="number" then
 			return assert(wire.cache_threads[opts])
 		elseif t=="string" then
-			return assert(wire.cache_threads[ assert(wire.cache_names[opts]) ])
+			return assert(wire.threads[opts])
 		end
 	end
 	
@@ -195,6 +268,30 @@ end
 
 --[[#lua.wire.fifo
 
+	fifo = wire.fifo(handle)
+	fifo = wire.fifo(name)
+	fifo = wire.fifo(opts)
+
+Create or get a fifo. Fifos are not GC'd they must be created 
+and destroyed explicitly.
+
+When called with a handle (number) we return a previously created 
+fifo with that handle.
+
+When called with a name (string) we return a previously created 
+fifo with that name.
+
+We will assert if no fifo is found with that handle or name, so no 
+need to check returns.
+
+When called with opts (table) we do the following based on the 
+contents.
+
+	opts.handle=nil
+
+The handle to wrap or use in creation. If a valid handle we will simply 
+wrap it with a fifo.
+
 ]]
 wire.fifo=function(opts)
 	do
@@ -202,7 +299,7 @@ wire.fifo=function(opts)
 		if t=="number" then
 			return assert( wire.cache_fifos[opts] )
 		elseif t=="string" then
-			return assert( wire.fifos[ opts] )
+			return assert( wire.fifos[opts] )
 		end
 	end
 
@@ -232,6 +329,202 @@ wire.fifo=function(opts)
 
 	return fifo
 end
+
+--[[#lua.wire.memo
+
+	memo = wire.memo( { sender=handle , id=id } )
+
+Create a memo and return it.
+
+memo.sender can be provided or it will be set to our handle ( which is 
+wire.thread.us.handle )
+
+memo.id can be provided or it will be generated.
+
+The memo will also be placed in wire.memos for later processing.
+
+]]
+wire.memo=function(memo)
+
+	if not memo then memo={} end
+	setmetatable(memo,wire.memo_metatable)
+	
+	-- auto fill if missing
+	if not memo.id then
+		memo.id=core.pointer(memo) -- address of table
+	end
+	if not memo.sender then
+		memo.sender = wire.threads.us.handle -- we is who we is
+	end
+
+	wire.memos.all[ memo.id ]=memo
+	memo:status("setup")
+
+	return memo
+end
+
+--[[#lua.wire.memo.status
+
+	memo:status(state)
+
+Change status of memo, moving it between caches.
+
+This is an internal function.
+
+]]
+wire.memo_functions.status=function( memo , state )
+
+	if memo.state then
+		wire.memos[ memo.state ][ memo.id ]=nil
+	end
+	memo.state=state
+	wire.memos[ memo.state ][ memo.id ]=memo
+
+end
+
+--[[#lua.wire.memo.send
+
+	memo:send()
+
+Send a memo
+
+]]
+wire.memo_functions.send=function( memo )
+
+	if memo.result then -- reply
+
+		local data=wire.table_to_data(memo.result)
+		core.fifo_push( memo.sender , data , memo.sender , memo.id )
+		memo:status("reply")
+
+	else
+		assert(memo.fifo) -- memo must have destination fifo
+		memo.fifo:push(memo)
+	end
+
+end
+
+
+--[[#lua.wire.memo.resolve
+
+	result = memo:resolve(fifo)
+
+Push the memo into the fifo and then wait for a result on our thread 
+fifo before returning.
+
+result is returned and can also be found in memo.result
+
+]]
+wire.memo_functions.resolve=function( memo )
+
+	memo:send()
+	
+	-- wait for result , memos we ignore here will be handled by thread later
+	while true do
+		local m = wire.threads.us:pull()
+
+		if memo.result then -- got a result
+			if memo.result.fail then error(memo.result.fail) end -- hard fail
+			return memo.result
+		end
+
+		if not m then -- only wait if we pulled nothing
+			wire.threads.us:wait(1/1024)
+		end
+	end
+
+end
+
+
+--[[#lua.wire.fifo.peek
+
+	bool = fifo:peek()
+	bool = thread:peek()
+
+Peek and see if there is a memo to pull but do not pull it.
+
+Note that a pull, even immediately after a successful peek has no 
+guarantee to work.
+
+]]
+wire.fifo_functions.peek=function( fifo )
+
+	local data,sender,id=core.fifo_peek( fifo.handle )
+
+	return id and true or false
+
+end
+wire.thread_functions.peek=wire.fifo_functions.peek
+
+
+--[[#lua.wire.fifo.pull
+
+	memo = fifo:pull()
+	memo = thread:pull()
+
+Pull memo out of this fifo.
+
+If this is a result we will return the sent memo filled with result data.
+
+Returns nil if there is no memo available.
+
+]]
+wire.fifo_functions.pull=function( fifo )
+
+	local data,sender,id=core.fifo_pull( fifo.handle )
+	if not data then return end
+	data=wire.data_to_table(data) -- unpack
+	
+	if wire.threads.us.handle == sender then -- this is a reply back to us
+
+		local memo=assert( wire.memos.all[ id ] ) -- must match a sent memo
+
+		memo.result=data
+		memo:status("result")
+		return memo
+
+	else
+
+		local memo=wire.memo({data=data,sender=sender,id=id}) -- new incoming memo
+		memo:status("got")
+		return memo
+
+	end
+end
+wire.thread_functions.pull=wire.fifo_functions.pull
+
+
+--[[#lua.wire.fifo.push
+
+	fifo:push(memo)
+	thread:push(memo)
+
+Push memo into this fifo.
+
+]]
+wire.fifo_functions.push=function( fifo , memo )
+
+	local data=wire.table_to_data(memo.data)
+	core.fifo_push( fifo.handle , data , wire.threads.us.handle , memo.id )
+	memo:status("sent")
+
+end
+wire.thread_functions.push=wire.fifo_functions.push
+
+--[[#lua.wire.fifo.wait
+
+	fifo:wait(secs)
+	thread:wait(secs)
+
+Wait upto the given number of seconds for a new memo to arrive.
+
+]]
+wire.fifo_functions.wait=function( fifo , secs )
+
+	core.fifo_wait( fifo.handle , secs )
+
+end
+wire.thread_functions.wait=wire.fifo_functions.wait
 
 
 --[[#lua.wire.serialize
@@ -364,13 +657,12 @@ wire.prepare_start=function( opts )
 	local fout=function(...)
 		for i,v in ipairs({...}) do ret[#ret+1]=v end
 	end
-	
+
+-- build simple data header for globals
 	for n,v in pairs( opts.globals or {} ) do
 		fout(n," = ", wire.serialize(v) ) -- simple global data
 	end
 
-	-- we cannot communicate without wire functions.
-	-- 
 	fout(opts.header or [[
 
 require("wire").do_start(function()
@@ -383,6 +675,7 @@ end )
 
 ]])
 
+	-- returns globals and a wrapped user function in a single string
 	return table.concat(ret)
 end
 
@@ -391,7 +684,7 @@ wire.do_start=function( func )
 	-- optional global module so we can protect them from accidental use
 	local global=_G ; pcall(function() global=require("global") end)
 
--- replace print with one a little bit more thready
+-- replace print with a new print that is a little bit more thready
 	global.print=function(...) -- if we concat first we have less threads fighting over output
 		local t={}
 		for i=1,select("#", ...) do
@@ -400,15 +693,16 @@ wire.do_start=function( func )
 		io.write(table.concat(t,"\t").."\n")
 	end
 
--- set dumb log shortcuts as fallback for missing logs module
+-- set dumb log shortcuts as fallback when missing a logs module
 	global.PRINT=print
 	global.DUMP=print
 	global.LOG=print
-	global.TRACEBACK=function(err) LOG( "????", wire.threads.us.name --[[debug.traceback( err )]] ) return err end
+	global.TASKNAME=wire.threads.us.name
+	global.TRACEBACK=function(err) LOG( TASKNAME , debug.traceback( err ) ) return err end
 
 -- try and setup wetgenes.logs
 	pcall( function()
-		local logs=require("wetgenes.logs2")
+		local logs=require("wetgenes.logs")
 		if OVEN_OPTS and OVEN_OPTS.args then logs.setup(OVEN_OPTS.args) end
 		global.PRINT=logs.print
 		global.DUMP=logs.dump
@@ -422,7 +716,36 @@ end
 
 wire.do_start_house=function()
 
-	print("i am house code",house)
+	local do_memo=function(data)
+		local result={}
+
+DUMP(data)
+		
+		return result
+	end
+
+	-- deal with memos sent directly to us ( -2 )
+	while true do
+		local memo = wire.threads.us:pull()
+		
+		if memo then
+
+			local ok,result = pcall( function() return do_memo( memo.data ) end , TRACEBACK )
+
+			if ok then
+				memo.result=result
+			else
+				memo.result={ fail=result }
+			end
+			memo:send()
+
+		else
+
+			wire.threads.us:wait(1/1024)
+
+		end
+	end
+
 end
 
 
@@ -434,6 +757,9 @@ A basic subtask to handle http memos.
 Note that this function requires external libraries that must be 
 available in order to work.
 
+One of the main reasons to use threads is so you can do non blocking 
+http requests.
+
 ]]
 wire.do_start_http=function()
 
@@ -442,7 +768,7 @@ wire.do_start_http=function()
 
 	local http = require("socket.http")
 	local ltn12 = require("ltn12")
-	local djon = require("djon")
+	local djon = require("djon") -- read write json
 
 -- we need a special case for emcc as we can only use websockets or javascript requests
 	local request_js
@@ -548,8 +874,12 @@ wire.do_start_http=function()
 	end
 
 
-	while true do
+	 -- this named fifo will have been created before this thread
+	local fifo = wire.manifest("http")
 
+	while true do
+		
+		local memo 
 --[[
 		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
 		
@@ -581,7 +911,7 @@ if core.handle( -2 ) then -- check if house thread exists
 else -- Create the house thread ( we are the main thread and no other threads exist yet )
 
 	assert( our_thread_handle == -1 ) -- main thread check
-	wire.thread( { handle=-2 , start="require('wire').do_start_house()" , globals={house="yes"} , } )
+	wire.thread( { handle=-2 , name="house" , start="require('wire').do_start_house()" , globals={house="yes"} , } )
 
 end
 
@@ -596,5 +926,8 @@ wire.threads.main  = assert( wire.thread( -1 ) )
 wire.threads.house = assert( wire.thread( -2 ) )
 wire.threads.us    = assert( wire.thread( our_thread_handle ) )
 
-wire.do_start() -- set thready globals
+if our_thread_handle == -1 then
+	wire.do_start() -- set thready globals on main thread
+DUMP(wire)
+end
 

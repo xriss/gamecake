@@ -6,12 +6,14 @@
 --local log,dump,PRINT=require("wetgenes.logs"):export("log","dump","PRINT")
 local logs=require("wetgenes.logs")
 local global=require("global")
-global.rawprint=global.rawprint or global.print -- we will be overloading print
 
 local toaster=require("wetgenes.gamecake.toaster")
 -- help luajit work on android/arm
 toaster.jit_prealloc()
 local profile ; pcall(function() profile = require("jit.profile") end)
+
+local wire=require("wire") -- manage tasks
+
 
 --[[#lua.wetgenes.gamecake.oven
 
@@ -36,8 +38,8 @@ local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
 local wtongues=require("wetgenes.tongues")
 
-local function print(...) return _G.print(...) end
-local dprint=function(a) print(wstr.dump(a)) end
+--local function print(...) return _G.print(...) end
+--local dprint=function(a) print(wstr.dump(a)) end
 
 local function assert_resume(co)
 
@@ -163,8 +165,10 @@ modules and sharing state between them.
 function M.bake(opts)
 
 	local oven={}
+	oven.time=toaster.time
 	oven.newticks=toaster.newticks
 	oven.is={}
+	
 
 	if opts.hints then -- pass hints from opts to sdl
 		wwin.hints(opts.hints)
@@ -174,11 +178,6 @@ function M.bake(opts)
 
 	oven.opts=opts or {}
 	global.OVEN_OPTS=oven.opts -- remember last oven opts in global
-	global.TASK_NAME="#MAIN"
-	global.PRINT=logs.print
-	global.DUMP=logs.dump
-	global.LOG=logs.log
-	global.TRACEBACK=logs.traceback
 
 	if type(opts[1])=="table" then -- probably passed in from nacl
 		for n,v in pairs(opts[1]) do -- copy it all into opts
@@ -205,7 +204,7 @@ function M.bake(opts)
 			end
 		end
 	end
---dprint(opts)
+--RINT(opts)
 
 	if opts.args.help then
 
@@ -222,22 +221,6 @@ function M.bake(opts)
 	end
 
 	require("wetgenes.logs").setup(opts.args)
-
-do	-- get best time we can, should have at least ms accuracy, possibly slightly more
-	local ok=pcall(function()
-		local socket = require("socket")
-		oven.time=socket.gettime
-		LOG( "oven" , "using time from socket" )
-	end) or pcall(function()
-		local lanes = require("lanes")
-		oven.time=lanes.now_secs
-		LOG( "oven" , "using time from lanes" )
-	end) or pcall(function()
-		local wwin = require("wetgenes.win") -- probably SDL
-		oven.time=wwin.time
-		LOG( "oven" , "using time from wetgenes.win" )
-	end)
-end
 
 if jit then -- now logs are setup, dump basic jit info
 	local t={jit.version,jit.status()}

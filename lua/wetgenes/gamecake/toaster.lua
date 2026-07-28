@@ -2,15 +2,6 @@
 -- (C) 2023 Kriss@XIXs.com
 --
 
--- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
---local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
---     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-
-
-
-local log,dump=require("wetgenes.logs"):export("log","dump")
-
-
 --[[#lua.wetgenes.gamecake.toaster
 
 	oven=require("wetgenes.gamecake.toaster").bake(opts)
@@ -34,9 +25,6 @@ do
 		local socket = require("socket")
 		get_time=function() return socket.gettime() end
 	end) or pcall(function()
-		local lanes = require("lanes")
-		get_time=lanes.now_secs
-	end) or pcall(function()
 		local wwin = require("wetgenes.win") -- probably SDL
 		get_time=wwin.time
 	end)
@@ -44,6 +32,7 @@ end
 
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+M.time=get_time
 
 -- calling this once a frame, turns off gc and forces gc to only happen here
 
