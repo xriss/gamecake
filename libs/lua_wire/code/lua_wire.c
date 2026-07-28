@@ -445,8 +445,6 @@ static int lua_wire_thread_start_lua ( void *context )
 	
 	lua_State *l=lua_open();
 	luaL_openlibs(l);
-	
-	// TODO: insert ourselves into lua error handling
 
 	lua_wire_thread_lock(l,1,thread);
 	
@@ -459,14 +457,19 @@ static int lua_wire_thread_start_lua ( void *context )
 		
 	lua_wire_thread_lock(l,0,thread);
 
-	lua_pushnumber(l, thread->handle); // is called with thread handle as 1st arg ?
-	lua_call(l, 1, 0); // no returns
+	lua_call(l, 0, 0); // no returns
 
 // lock the thread before modifying it...
 	lua_wire_thread_lock(l,1,thread);
 
 		thread->handle=0; // mark thread as deleted
 		thread->status=0; // we have halted
+
+		if(thread->name) // free thread name
+		{
+			free(thread->name);
+			thread->name=0;
+		}
 		
 	lua_wire_thread_lock(l,0,thread);
 	lua_close(l); // close/free everything
@@ -963,7 +966,14 @@ static int lua_wire_thread_handle (lua_State *l)
 		if(handle) // found thread and it is a valid handle
 		{
 			lua_pushnumber(l, thread->handle );
-			lua_pushstring(l, thread->name );
+			if(thread->handle==-1) // main is missing a name so bodge it here
+			{
+				lua_pushstring(l, "main" );
+			}
+			else
+			{
+				lua_pushstring(l, thread->name );
+			}
 			lua_wire_slots_lock(l,0,&wire_threads);
 			return 2;
 		}

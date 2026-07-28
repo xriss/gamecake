@@ -996,8 +996,7 @@ wire.do_start=function( func )
 	global.PRINT=print
 	global.DUMP=print
 	global.LOG=print
-	global.TASK_NAME=THREAD_NAME and "#"..THREAD_NAME
-	global.TRACEBACK=function(err) LOG( TASKNAME , debug.traceback( err ) ) return err end
+	global.TRACEBACK=function(err) LOG( "TASK" , debug.traceback( err ) ) return err end
 
 -- try and setup wetgenes.logs
 	pcall( function()
@@ -1222,8 +1221,12 @@ end
 
 -- thread -1 will always exist and thread -2 will be auto created here
 do
+	-- optional global module so we can protect them from accidental use
+	local global=_G ; pcall(function() global=require("global") end)
+
 	-- get our thread handle and name
 	wire.thread_handle , wire.thread_name = core.thread_handle()
+	global.TASK_NAME=wire.thread_name
 
 	-- if we are main thread do some thread setup
 	if wire.thread_handle == -1 then
@@ -1236,7 +1239,6 @@ do
 	-- create main thread
 	wire.wrap( "main" , -1 ) -- Wrap the main thread
 	if wire.thread_handle == -1 then
-		wire.thread_name="main"
 		wire.threads.us = wire.threads.main -- we are the main thread
 	end
 
@@ -1248,7 +1250,6 @@ do
 		wire.thread( { handle=-2 , name="house" , start="require('wire').do_start_house()" , globals={house="yes"} , } )
 	end
 	if wire.thread_handle == -2 then
-		wire.thread_name="house"
 		wire.threads.us = wire.threads.house -- we are the house thread
 	end
 
@@ -1256,5 +1257,8 @@ do
 	if wire.thread_handle<-2 then -- we are not main or house
 		wire.threads.us = wire.wrap( wire.thread_name , wire.thread_handle )
 	end
+
+	-- name may have changed
+	global.TASK_NAME=wire.thread_name
 
 end
