@@ -264,7 +264,7 @@
     "name": "levels"
    },
    {
-    "count": 779,
+    "count": 790,
     "name": "lua"
    },
    {
@@ -3352,12 +3352,52 @@
     "name": "lua.wetgenes.txt.words.transform"
    },
    {
-    "count": 7,
+    "count": 18,
     "name": "lua.wire"
    },
    {
     "count": 1,
+    "name": "lua.wire.data_to_table"
+   },
+   {
+    "count": 5,
     "name": "lua.wire.fifo"
+   },
+   {
+    "count": 1,
+    "name": "lua.wire.fifo.peek"
+   },
+   {
+    "count": 1,
+    "name": "lua.wire.fifo.pull"
+   },
+   {
+    "count": 1,
+    "name": "lua.wire.fifo.push"
+   },
+   {
+    "count": 1,
+    "name": "lua.wire.fifo.wait"
+   },
+   {
+    "count": 1,
+    "name": "lua.wire.manifest"
+   },
+   {
+    "count": 4,
+    "name": "lua.wire.memo"
+   },
+   {
+    "count": 1,
+    "name": "lua.wire.memo.resolve"
+   },
+   {
+    "count": 1,
+    "name": "lua.wire.memo.send"
+   },
+   {
+    "count": 1,
+    "name": "lua.wire.memo.status"
    },
    {
     "count": 1,
@@ -3370,6 +3410,10 @@
    {
     "count": 1,
     "name": "lua.wire.sleep"
+   },
+   {
+    "count": 1,
+    "name": "lua.wire.table_to_data"
    },
    {
     "count": 1,
@@ -3681,7 +3725,7 @@
    },
    {
     "body": "",
-    "count": 779,
+    "count": 790,
     "name": "lua"
    },
    {
@@ -6002,7 +6046,7 @@
     "body": "<pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)\n</code></pre>\n<p>The oven module must be baked so only exposes a bake function.</p>\n<p>All the other functions are returned from within the bake function.</p>\n<p>possible ENV settings</p>\n<pre><code>gamecake_tongue=english\n</code></pre>\n",
     "count": 2,
     "file": "../lua/wetgenes/gamecake/oven.lua",
-    "line": 16,
+    "line": 18,
     "name": "lua.wetgenes.gamecake.oven",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
    },
@@ -6010,7 +6054,7 @@
     "body": "<pre><code>oven=wetgenes.gamecake.oven.bake(opts)\n</code></pre>\n<p>Bake creates an instance of a lua module bound to a state. Here we\nare creating the main state that other modules will then bind to.</p>\n<p>We call each state an OVEN to fit into the gamecake naming scheme\nthen we bake a module in this oven to bind them to the common state.</p>\n<p>Think of it as a sub version of require, so require gets the global\npointer for a module and bake is used to get the a module bound to\nan oven.</p>\n<p>By using this bound state we reduce the verbosity of connecting\nmodules and sharing state between them.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/gamecake/oven.lua",
-    "line": 143,
+    "line": 145,
     "name": "lua.wetgenes.gamecake.oven.bake",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
    },
@@ -6018,7 +6062,7 @@
     "body": "<pre><code>oven=require(&quot;wetgenes.gamecake.toaster&quot;).bake(opts)\n</code></pre>\n<p>A cut down oven without opengl or even file access intended to be used \nin a sub process or task.</p>\n",
     "count": 3,
     "file": "../lua/wetgenes/gamecake/toaster.lua",
-    "line": 14,
+    "line": 5,
     "name": "lua.wetgenes.gamecake.toaster",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua"
    },
@@ -6026,7 +6070,7 @@
     "body": "<pre><code>oven=wetgenes.gamecake.toaster.bake(opts)\n</code></pre>\n<p>Bake creates an instance of a lua module bound to an oven state. Here \nwe are creating the main state that other modules will then bind to.</p>\n<p>Modules are then bound together using rebake...</p>\n<pre><code>b=oven.rebake(nameb)\nc=oven.rebake(namec)\n</code></pre>\n<p>All of these will be connected by the same oven and circular \ndependencies should work with the caveat that just because you have the \ntable for a baked module does not mean that it has all been filled in \nyet.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/gamecake/toaster.lua",
-    "line": 145,
+    "line": 134,
     "name": "lua.wetgenes.gamecake.toaster.bake",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua"
    },
@@ -6034,7 +6078,7 @@
     "body": "<pre><code>ticks=require(&quot;wetgenes.gamecake.toaster&quot;).newticks(rate,jump)\n</code></pre>\n<p>create a ticks time controller for updates.</p>\n<p>rate is time between steps , jump is how far behind we should get \nbefore giving up ( eg callback takes longer than rate allows ) these \nvalues are in seconds and default to 1/60 and 1 respectively.</p>\n<p>Then we perform one or more update steps like so</p>\n<pre><code>ticks.step( callback ) -- callback may be called zero or more times\n</code></pre>\n<p>After that we should wait a bit (maybe draw a frame) and then call \nagain.</p>\n",
     "count": 1,
     "file": "../lua/wetgenes/gamecake/toaster.lua",
-    "line": 98,
+    "line": 87,
     "name": "lua.wetgenes.gamecake.toaster.newticks",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua"
    },
@@ -9403,10 +9447,10 @@
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
    {
-    "body": "<p>A basic subtask to handle http memos.</p>\n<p>Note that this function requires external libraries that must be \navailable in order to work.</p>\n",
+    "body": "<p>A basic subtask to handle http memos.</p>\n<p>Note that this function requires external libraries that must be \navailable in order to work.</p>\n<p>One of the main reasons to use threads is so you can do non blocking \nhttp requests.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 430,
+    "line": 753,
     "name": "lua.wetgenes.tasks.http_code",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9784,26 +9828,106 @@
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/txt/words.lua"
    },
    {
-    "body": "<pre><code>local wire=require(&quot;wire&quot;)\n</code></pre>\n<p>We use wire as the local name of this library. So we can uhh, wire \nthings together?</p>\n<p>Wire provides multiple long lived lua states managed via standard c11 \nthreads and mutexs with simple fifo message handling between threads.</p>\n<p>A small compatibility library is needed for building for windows using \nmingw. Native windows builds might work if your compiler supports the \nC11 standard.</p>\n<p>We are not doing anything clever, so beware of the following:</p>\n<p>Only data is passed and that data must fit in messagepack, eg json like \nbut binary strings are allowed.</p>\n<p>Do not use lua tables that are both arrays and objects. Pick one or the \nother.</p>\n<p>No userdata, no functions.</p>\n<p>When in doubt, send a string, then unpack it in the thread. Binary \nstrings will be escaped into lua code, eg \\0 for null etc.</p>\n<p>Any lua libs required in a thread <em>must</em> be thread safe or they will \nbreak in strange and uncomfortable ways. WG Check that luaopen_ \nfunctions do not try and initialise anything twice if opened in another \nthread.</p>\n<p>This library does not reuse handles ( as this is intended for long \nlived threads ) and the number of handles is a hard limit set in the C \ncode. Defaults to 4096 threads and 4096 fifos. Bump it at compile time \nif you need more.</p>\n<p>You can reuse handles, but it must be self managed and be done \nexplicitly.</p>\n",
-    "count": 7,
+    "body": "<pre><code>local wire=require(&quot;wire&quot;)\n</code></pre>\n<p>We use wire as the local name of this library. So we can uhh, wire \nthings together?</p>\n<p>Wire provides multiple long lived lua states managed via standard c11 \nthreads and mutexs with simple fifo message handling between threads.</p>\n<p>A small compatibility library is needed for building for windows using \nmingw. Native windows builds might work if your compiler supports the \nC11 standard.</p>\n<p>We are not doing anything clever, so beware of the following:</p>\n<p>Only data is passed and that data must fit in messagepack, eg json like \nbut binary strings are allowed.</p>\n<p>Do not use lua tables that are both arrays and objects. Pick one or the \nother.</p>\n<p>No userdata, no functions.</p>\n<p>When in doubt, send a string, then unpack it in the thread. Binary \nstrings will be escaped into lua code, eg \\0 for null etc.</p>\n<p>Any lua libs required in a thread <em>must</em> be thread safe or they will \nbreak in strange and uncomfortable ways. So check that luaopen_ \nfunctions do not try and initialise anything twice if opened in another \nthread.</p>\n<p>This library does not reuse handles ( as this is intended for long \nlived threads ) and the number of handles is a hard limit set in the C \ncode. Defaults to 4096 threads and 4096 fifos. Bump it at compile time \nif you need more.</p>\n<p>You can reuse handles, but it must be self managed and must be done \nexplicitly.</p>\n",
+    "count": 18,
     "file": "../lua/wire.lua",
-    "line": 8,
+    "line": 7,
     "name": "lua.wire",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
    {
-    "body": "",
+    "body": "<pre><code>table = wire.data_to_table( data )\n</code></pre>\n<p>Convert a data string into a lua table.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 196,
+    "line": 95,
+    "name": "lua.wire.data_to_table",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>fifo = wire.fifo(handle)\nfifo = wire.fifo(name)\nfifo = wire.fifo(opts)\n</code></pre>\n<p>Create or get a fifo. Fifos are not GC&#39;d they must be created \nand destroyed explicitly.</p>\n<p>When called with a handle (number) we return a previously created \nfifo with that handle.</p>\n<p>When called with a name (string) we return a previously created \nfifo with that name.</p>\n<p>We will assert if no fifo is found with that handle or name, so no \nneed to check returns.</p>\n<p>When called with opts (table) we do the following based on the \ncontents.</p>\n<pre><code>opts.handle=nil\n</code></pre>\n<p>The handle to wrap or use in creation. If a valid handle we will simply \nwrap it with a fifo.</p>\n",
+    "count": 5,
+    "file": "../lua/wire.lua",
+    "line": 269,
     "name": "lua.wire.fifo",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>bool = fifo:peek()\nbool = thread:peek()\n</code></pre>\n<p>Peek and see if there is a memo to pull but do not pull it.</p>\n<p>Note that a pull, even immediately after a successful peek has no \nguarantee to work.</p>\n",
+    "count": 1,
+    "file": "../lua/wire.lua",
+    "line": 439,
+    "name": "lua.wire.fifo.peek",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>memo = fifo:pull()\nmemo = thread:pull()\n</code></pre>\n<p>Pull memo out of this fifo.</p>\n<p>If this is a result we will return the sent memo filled with result data.</p>\n<p>Returns nil if there is no memo available.</p>\n",
+    "count": 1,
+    "file": "../lua/wire.lua",
+    "line": 460,
+    "name": "lua.wire.fifo.pull",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>fifo:push(memo)\nthread:push(memo)\n</code></pre>\n<p>Push memo into this fifo.</p>\n",
+    "count": 1,
+    "file": "../lua/wire.lua",
+    "line": 497,
+    "name": "lua.wire.fifo.push",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>fifo:wait(secs)\nthread:wait(secs)\n</code></pre>\n<p>Wait upto the given number of seconds for a new memo to arrive.</p>\n",
+    "count": 1,
+    "file": "../lua/wire.lua",
+    "line": 514,
+    "name": "lua.wire.fifo.wait",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>fifo = wire.manifest(name)\n</code></pre>\n<p>Get a named fifo/thread from the house thread.</p>\n<pre><code>fifo = wire.manifest(handle)\n</code></pre>\n<p>Manifest a fifo/thread with this handle</p>\n<p>Note that the returned value may be a fifo or a thread.</p>\n",
+    "count": 1,
+    "file": "../lua/wire.lua",
+    "line": 136,
+    "name": "lua.wire.manifest",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>memo = wire.memo( { sender=handle , id=id } )\n</code></pre>\n<p>Create a memo and return it.</p>\n<p>memo.sender can be provided or it will be set to our handle ( which is \nwire.thread.us.handle )</p>\n<p>memo.id can be provided or it will be generated.</p>\n<p>The memo will also be placed in wire.memos for later processing.</p>\n",
+    "count": 4,
+    "file": "../lua/wire.lua",
+    "line": 333,
+    "name": "lua.wire.memo",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>result = memo:resolve(fifo)\n</code></pre>\n<p>Push the memo into the fifo and then wait for a result on our thread \nfifo before returning.</p>\n<p>result is returned and can also be found in memo.result</p>\n",
+    "count": 1,
+    "file": "../lua/wire.lua",
+    "line": 408,
+    "name": "lua.wire.memo.resolve",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>memo:send()\n</code></pre>\n<p>Send a memo</p>\n",
+    "count": 1,
+    "file": "../lua/wire.lua",
+    "line": 385,
+    "name": "lua.wire.memo.send",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>memo:status(state)\n</code></pre>\n<p>Change status of memo, moving it between caches.</p>\n<p>This is an internal function.</p>\n",
+    "count": 1,
+    "file": "../lua/wire.lua",
+    "line": 366,
+    "name": "lua.wire.memo.status",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
    {
     "body": "<pre><code>start = wire.prepare_start( { start=&quot;...&quot; , globals={} } )\n\nopts.start=nil\nopts.globals={}\nopts.header=&quot;...&quot;\nopts.footer=&quot;...&quot;\n</code></pre>\n<p>See wire.thread for documentation on these opts, we just pass the opts \ntable down into this function to prepare the start string.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 348,
+    "line": 641,
     "name": "lua.wire.prepare_start",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9811,7 +9935,7 @@
     "body": "<pre><code>luastr = wire.serialize(tab)\nluastr = wire.serialize(tab,{ indent=&quot;\\t&quot; , newline=&quot;\\n&quot; , errors=true  })\n</code></pre>\n<p>Turn a table into a valid lua string that will recreate the table.</p>\n<p>Optionally pass in an opts table that we will use during serialization \nso must be unique.</p>\n<p>Possible options are.</p>\n<pre><code>indent=&quot; &quot;\n</code></pre>\n<p>Indention per level. set to &quot;&quot; for compact output.</p>\n<pre><code>newline=&quot;\\n&quot;\n</code></pre>\n<p>Line ending, set to &quot;&quot; for overly compact output.</p>\n<pre><code>errors=nil\n</code></pre>\n<p>Set this to true and we will raise errors rather than simply adding \ncomments to the output. EG unknown types or recursion.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 237,
+    "line": 530,
     "name": "lua.wire.serialize",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9819,15 +9943,23 @@
     "body": "<pre><code>wire.sleep(secs)\n</code></pre>\n<p>Take a nap for at least the given amount of seconds, probably a little \nbit longer.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 83,
+    "line": 105,
     "name": "lua.wire.sleep",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
    {
-    "body": "<pre><code>thread = wire.thread(handle)\nthread = wire.thread(name)\nthread = wire.thread(opts)\n</code></pre>\n<p>Create or get a thread table. Threads are not GC&#39;d they must be created \nand destroyed explicitly.</p>\n<p>When called with a handle (number) we return a previously created \nthread with that handle.</p>\n<p>When called with a name (string) we return a previously created \nthread with that name.</p>\n<p>When called with opts (table) we do the following based on the \ncontents.</p>\n<pre><code>opts.handle=nil\n</code></pre>\n<p>The handle to wrap or use in creation. If a valid handle we will simply \nwrap it with a thread table and return that new table.</p>\n<pre><code>opts.start=nil\n</code></pre>\n<p>Run this string as lua code in a new thread. Usually just a require and \na call to a function in that module. eg &quot;require(&#39;modname&#39;).funcname()&quot;</p>\n<pre><code>opts.globals={}\n</code></pre>\n<p>Optional globals for the new thread. Will be serialized and become part \nof the start string.</p>\n<pre><code>opts.preloadlibs=wire.preloadlibs\n</code></pre>\n<p>Must be a cfunction to be run in new thread. Use false to not preload \nany custom libs.</p>\n<pre><code>opts.header=...\nopts.footer=...\n</code></pre>\n<p>internal setup so best not to change this. It uses wire.do_start to \nwrap your code with error handles etc.</p>\n",
+    "body": "<pre><code>data = wire.table_to_data( table )\n</code></pre>\n<p>Convert a lua table into a data string.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 105,
+    "line": 85,
+    "name": "lua.wire.table_to_data",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>thread = wire.thread(handle)\nthread = wire.thread(name)\nthread = wire.thread(opts)\n</code></pre>\n<p>Create or get a thread table. Threads are not GC&#39;d they must be created \nand destroyed explicitly.</p>\n<p>When called with a handle (number) we return a previously created \nthread with that handle.</p>\n<p>When called with a name (string) we return a previously created \nthread with that name.</p>\n<p>We will assert if no thread is found with that handle or name, so no \nneed to check returns.</p>\n<p>When called with opts (table) we do the following based on the \ncontents.</p>\n<pre><code>opts.handle=nil\n</code></pre>\n<p>The handle to wrap or use in creation. If a valid handle we will simply \nwrap it with a thread table and return that new table.</p>\n<pre><code>opts.start=nil\n</code></pre>\n<p>Run this string as lua code in a new thread. Usually just a require and \na call to a function in that module. eg &quot;require(&#39;modname&#39;).funcname()&quot;</p>\n<pre><code>opts.globals={}\n</code></pre>\n<p>Optional globals for the new thread. Will be serialized and become part \nof the start string.</p>\n<pre><code>opts.preloadlibs=wire.preloadlibs\n</code></pre>\n<p>Must be a cfunction to be run in new thread. Use false to not preload \nany custom libs.</p>\n<pre><code>opts.header=...\nopts.footer=...\n</code></pre>\n<p>internal setup so best not to change this. It uses wire.do_start to \nwrap your code with error handlers etc.</p>\n",
+    "count": 1,
+    "file": "../lua/wire.lua",
+    "line": 175,
     "name": "lua.wire.thread",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9835,7 +9967,7 @@
     "body": "<pre><code>wire.wait(secs)\n</code></pre>\n<p>Take a nap for upto the given amount of seconds. We will wakeup \nwhenever a new msg is sent to any fifo or when this time has passed.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 93,
+    "line": 115,
     "name": "lua.wire.wait",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },

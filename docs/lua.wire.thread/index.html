@@ -824,10 +824,21 @@
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
 
-<a class="sub" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
+<a class="sub" href="../../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a><a class="par" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
+
+<a class="sub" href="../../docs/lua.wire.fifo.peek"><span>/lua.wire.fifo.peek</span></a>
+<a class="sub" href="../../docs/lua.wire.fifo.pull"><span>/lua.wire.fifo.pull</span></a>
+<a class="sub" href="../../docs/lua.wire.fifo.push"><span>/lua.wire.fifo.push</span></a>
+<a class="sub" href="../../docs/lua.wire.fifo.wait"><span>/lua.wire.fifo.wait</span></a>
+<a class="sub" href="../../docs/lua.wire.manifest"><span>/lua.wire.manifest</span></a><a class="par" href="../../docs/lua.wire.memo"><span>/lua.wire.memo</span></a>
+
+<a class="sub" href="../../docs/lua.wire.memo.resolve"><span>/lua.wire.memo.resolve</span></a>
+<a class="sub" href="../../docs/lua.wire.memo.send"><span>/lua.wire.memo.send</span></a>
+<a class="sub" href="../../docs/lua.wire.memo.status"><span>/lua.wire.memo.status</span></a>
 <a class="sub" href="../../docs/lua.wire.prepare_start"><span>/lua.wire.prepare_start</span></a>
 <a class="sub" href="../../docs/lua.wire.serialize"><span>/lua.wire.serialize</span></a>
 <a class="sub" href="../../docs/lua.wire.sleep"><span>/lua.wire.sleep</span></a>
+<a class="sub" href="../../docs/lua.wire.table_to_data"><span>/lua.wire.table_to_data</span></a>
 <a class="sub" href="../../docs/lua.wire.thread"><span>/lua.wire.thread</span></a>
 <a class="sub" href="../../docs/lua.wire.wait"><span>/lua.wire.wait</span></a>
 <a class="sub" href="../../docs/prefabs"><span>/prefabs</span></a>
@@ -841,7 +852,7 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.thread">lua.wire.thread</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L105">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L175">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>thread = wire.thread(handle)
 thread = wire.thread(name)
 thread = wire.thread(opts)
@@ -852,6 +863,8 @@ and destroyed explicitly.</p>
 thread with that handle.</p>
 <p>When called with a name (string) we return a previously created 
 thread with that name.</p>
+<p>We will assert if no thread is found with that handle or name, so no 
+need to check returns.</p>
 <p>When called with opts (table) we do the following based on the 
 contents.</p>
 <pre><code>opts.handle=nil
@@ -874,7 +887,7 @@ any custom libs.</p>
 opts.footer=...
 </code></pre>
 <p>internal setup so best not to change this. It uses wire.do_start to 
-wrap your code with error handles etc.</p>
+wrap your code with error handlers etc.</p>
 </div>
 </div>
 

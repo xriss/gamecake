@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 779,
+   "count": 790,
    "name": "lua"
   },
   {
@@ -3218,12 +3218,52 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 7,
+   "count": 18,
    "name": "lua.wire"
   },
   {
    "count": 1,
+   "name": "lua.wire.data_to_table"
+  },
+  {
+   "count": 5,
    "name": "lua.wire.fifo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.fifo.peek"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.fifo.pull"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.fifo.push"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.fifo.wait"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.manifest"
+  },
+  {
+   "count": 4,
+   "name": "lua.wire.memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.memo.resolve"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.memo.send"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.memo.status"
   },
   {
    "count": 1,
@@ -3236,6 +3276,10 @@
   {
    "count": 1,
    "name": "lua.wire.sleep"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.table_to_data"
   },
   {
    "count": 1,
@@ -3877,7 +3921,7 @@
    "body": "<pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)\n</code></pre>\n<p>The oven module must be baked so only exposes a bake function.</p>\n<p>All the other functions are returned from within the bake function.</p>\n<p>possible ENV settings</p>\n<pre><code>gamecake_tongue=english\n</code></pre>\n",
    "count": 2,
    "file": "../lua/wetgenes/gamecake/oven.lua",
-   "line": 16,
+   "line": 18,
    "name": "lua.wetgenes.gamecake.oven",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
   },
@@ -3885,7 +3929,7 @@
    "body": "<pre><code>oven=wetgenes.gamecake.oven.bake(opts)\n</code></pre>\n<p>Bake creates an instance of a lua module bound to a state. Here we\nare creating the main state that other modules will then bind to.</p>\n<p>We call each state an OVEN to fit into the gamecake naming scheme\nthen we bake a module in this oven to bind them to the common state.</p>\n<p>Think of it as a sub version of require, so require gets the global\npointer for a module and bake is used to get the a module bound to\nan oven.</p>\n<p>By using this bound state we reduce the verbosity of connecting\nmodules and sharing state between them.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/oven.lua",
-   "line": 143,
+   "line": 145,
    "name": "lua.wetgenes.gamecake.oven.bake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua"
   },
@@ -3893,7 +3937,7 @@
    "body": "<pre><code>oven=require(&quot;wetgenes.gamecake.toaster&quot;).bake(opts)\n</code></pre>\n<p>A cut down oven without opengl or even file access intended to be used \nin a sub process or task.</p>\n",
    "count": 3,
    "file": "../lua/wetgenes/gamecake/toaster.lua",
-   "line": 14,
+   "line": 5,
    "name": "lua.wetgenes.gamecake.toaster",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua"
   },
@@ -3901,7 +3945,7 @@
    "body": "<pre><code>oven=wetgenes.gamecake.toaster.bake(opts)\n</code></pre>\n<p>Bake creates an instance of a lua module bound to an oven state. Here \nwe are creating the main state that other modules will then bind to.</p>\n<p>Modules are then bound together using rebake...</p>\n<pre><code>b=oven.rebake(nameb)\nc=oven.rebake(namec)\n</code></pre>\n<p>All of these will be connected by the same oven and circular \ndependencies should work with the caveat that just because you have the \ntable for a baked module does not mean that it has all been filled in \nyet.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/toaster.lua",
-   "line": 145,
+   "line": 134,
    "name": "lua.wetgenes.gamecake.toaster.bake",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua"
   },
@@ -3909,7 +3953,7 @@
    "body": "<pre><code>ticks=require(&quot;wetgenes.gamecake.toaster&quot;).newticks(rate,jump)\n</code></pre>\n<p>create a ticks time controller for updates.</p>\n<p>rate is time between steps , jump is how far behind we should get \nbefore giving up ( eg callback takes longer than rate allows ) these \nvalues are in seconds and default to 1/60 and 1 respectively.</p>\n<p>Then we perform one or more update steps like so</p>\n<pre><code>ticks.step( callback ) -- callback may be called zero or more times\n</code></pre>\n<p>After that we should wait a bit (maybe draw a frame) and then call \nagain.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/gamecake/toaster.lua",
-   "line": 98,
+   "line": 87,
    "name": "lua.wetgenes.gamecake.toaster.newticks",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua"
   },

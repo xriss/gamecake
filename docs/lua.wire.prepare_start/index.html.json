@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 779,
+   "count": 790,
    "name": "lua"
   },
   {
@@ -3218,12 +3218,52 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 7,
+   "count": 18,
    "name": "lua.wire"
   },
   {
    "count": 1,
+   "name": "lua.wire.data_to_table"
+  },
+  {
+   "count": 5,
    "name": "lua.wire.fifo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.fifo.peek"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.fifo.pull"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.fifo.push"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.fifo.wait"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.manifest"
+  },
+  {
+   "count": 4,
+   "name": "lua.wire.memo"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.memo.resolve"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.memo.send"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.memo.status"
   },
   {
    "count": 1,
@@ -3236,6 +3276,10 @@
   {
    "count": 1,
    "name": "lua.wire.sleep"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.table_to_data"
   },
   {
    "count": 1,
@@ -3314,7 +3358,7 @@
    "body": "<pre><code>start = wire.prepare_start( { start=&quot;...&quot; , globals={} } )\n\nopts.start=nil\nopts.globals={}\nopts.header=&quot;...&quot;\nopts.footer=&quot;...&quot;\n</code></pre>\n<p>See wire.thread for documentation on these opts, we just pass the opts \ntable down into this function to prepare the start string.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 348,
+   "line": 641,
    "name": "lua.wire.prepare_start",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

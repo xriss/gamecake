@@ -824,10 +824,21 @@
 <a class="sub" href="../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
 <a class="sub" href="../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../docs/lua.wire"><span>/lua.wire</span></a>
 
-<a class="sub" href="../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
+<a class="sub" href="../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a><a class="par" href="../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
+
+<a class="sub" href="../docs/lua.wire.fifo.peek"><span>/lua.wire.fifo.peek</span></a>
+<a class="sub" href="../docs/lua.wire.fifo.pull"><span>/lua.wire.fifo.pull</span></a>
+<a class="sub" href="../docs/lua.wire.fifo.push"><span>/lua.wire.fifo.push</span></a>
+<a class="sub" href="../docs/lua.wire.fifo.wait"><span>/lua.wire.fifo.wait</span></a>
+<a class="sub" href="../docs/lua.wire.manifest"><span>/lua.wire.manifest</span></a><a class="par" href="../docs/lua.wire.memo"><span>/lua.wire.memo</span></a>
+
+<a class="sub" href="../docs/lua.wire.memo.resolve"><span>/lua.wire.memo.resolve</span></a>
+<a class="sub" href="../docs/lua.wire.memo.send"><span>/lua.wire.memo.send</span></a>
+<a class="sub" href="../docs/lua.wire.memo.status"><span>/lua.wire.memo.status</span></a>
 <a class="sub" href="../docs/lua.wire.prepare_start"><span>/lua.wire.prepare_start</span></a>
 <a class="sub" href="../docs/lua.wire.serialize"><span>/lua.wire.serialize</span></a>
 <a class="sub" href="../docs/lua.wire.sleep"><span>/lua.wire.sleep</span></a>
+<a class="sub" href="../docs/lua.wire.table_to_data"><span>/lua.wire.table_to_data</span></a>
 <a class="sub" href="../docs/lua.wire.thread"><span>/lua.wire.thread</span></a>
 <a class="sub" href="../docs/lua.wire.wait"><span>/lua.wire.wait</span></a>
 <a class="sub" href="../docs/prefabs"><span>/prefabs</span></a>
@@ -5687,7 +5698,7 @@ in the order listed.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.oven">lua.wetgenes.gamecake.oven</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L16">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L18">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
 <div><pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)
 </code></pre>
 <p>The oven module must be baked so only exposes a bake function.</p>
@@ -5700,7 +5711,7 @@ in the order listed.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.oven.bake">lua.wetgenes.gamecake.oven.bake</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L143">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L145">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
 <div><pre><code>oven=wetgenes.gamecake.oven.bake(opts)
 </code></pre>
 <p>Bake creates an instance of a lua module bound to a state. Here we
@@ -5717,7 +5728,7 @@ modules and sharing state between them.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.toaster">lua.wetgenes.gamecake.toaster</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L14">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L5">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
 <div><pre><code>oven=require(&quot;wetgenes.gamecake.toaster&quot;).bake(opts)
 </code></pre>
 <p>A cut down oven without opengl or even file access intended to be used 
@@ -5727,7 +5738,7 @@ in a sub process or task.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.toaster.bake">lua.wetgenes.gamecake.toaster.bake</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L145">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L134">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
 <div><pre><code>oven=wetgenes.gamecake.toaster.bake(opts)
 </code></pre>
 <p>Bake creates an instance of a lua module bound to an oven state. Here 
@@ -5745,7 +5756,7 @@ yet.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.gamecake.toaster.newticks">lua.wetgenes.gamecake.toaster.newticks</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L98">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L87">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
 <div><pre><code>ticks=require(&quot;wetgenes.gamecake.toaster&quot;).newticks(rate,jump)
 </code></pre>
 <p>create a ticks time controller for updates.</p>
@@ -10651,10 +10662,12 @@ assert wrapper.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wetgenes.tasks.http_code">lua.wetgenes.tasks.http_code</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L430">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L753">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><p>A basic subtask to handle http memos.</p>
 <p>Note that this function requires external libraries that must be 
 available in order to work.</p>
+<p>One of the main reasons to use threads is so you can do non blocking 
+http requests.</p>
 </div>
 </div>
 
@@ -11297,7 +11310,7 @@ get from one word to another by adding and subtracting letters.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire">lua.wire</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L8">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L7">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>local wire=require(&quot;wire&quot;)
 </code></pre>
 <p>We use wire as the local name of this library. So we can uhh, wire 
@@ -11316,27 +11329,154 @@ other.</p>
 <p>When in doubt, send a string, then unpack it in the thread. Binary 
 strings will be escaped into lua code, eg \0 for null etc.</p>
 <p>Any lua libs required in a thread <em>must</em> be thread safe or they will 
-break in strange and uncomfortable ways. WG Check that luaopen_ 
+break in strange and uncomfortable ways. So check that luaopen_ 
 functions do not try and initialise anything twice if opened in another 
 thread.</p>
 <p>This library does not reuse handles ( as this is intended for long 
 lived threads ) and the number of handles is a hard limit set in the C 
 code. Defaults to 4096 threads and 4096 fifos. Bump it at compile time 
 if you need more.</p>
-<p>You can reuse handles, but it must be self managed and be done 
+<p>You can reuse handles, but it must be self managed and must be done 
 explicitly.</p>
 </div>
 </div>
 
 <div class="wrap">
+<h1><a href="../docs/lua.wire.data_to_table">lua.wire.data_to_table</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L95">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>table = wire.data_to_table( data )
+</code></pre>
+<p>Convert a data string into a lua table.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../docs/lua.wire.fifo">lua.wire.fifo</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L196">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
-<div></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L269">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>fifo = wire.fifo(handle)
+fifo = wire.fifo(name)
+fifo = wire.fifo(opts)
+</code></pre>
+<p>Create or get a fifo. Fifos are not GC&#39;d they must be created 
+and destroyed explicitly.</p>
+<p>When called with a handle (number) we return a previously created 
+fifo with that handle.</p>
+<p>When called with a name (string) we return a previously created 
+fifo with that name.</p>
+<p>We will assert if no fifo is found with that handle or name, so no 
+need to check returns.</p>
+<p>When called with opts (table) we do the following based on the 
+contents.</p>
+<pre><code>opts.handle=nil
+</code></pre>
+<p>The handle to wrap or use in creation. If a valid handle we will simply 
+wrap it with a fifo.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.fifo.peek">lua.wire.fifo.peek</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L439">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>bool = fifo:peek()
+bool = thread:peek()
+</code></pre>
+<p>Peek and see if there is a memo to pull but do not pull it.</p>
+<p>Note that a pull, even immediately after a successful peek has no 
+guarantee to work.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.fifo.pull">lua.wire.fifo.pull</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L460">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>memo = fifo:pull()
+memo = thread:pull()
+</code></pre>
+<p>Pull memo out of this fifo.</p>
+<p>If this is a result we will return the sent memo filled with result data.</p>
+<p>Returns nil if there is no memo available.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.fifo.push">lua.wire.fifo.push</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L497">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>fifo:push(memo)
+thread:push(memo)
+</code></pre>
+<p>Push memo into this fifo.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.fifo.wait">lua.wire.fifo.wait</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L514">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>fifo:wait(secs)
+thread:wait(secs)
+</code></pre>
+<p>Wait upto the given number of seconds for a new memo to arrive.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.manifest">lua.wire.manifest</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L136">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>fifo = wire.manifest(name)
+</code></pre>
+<p>Get a named fifo/thread from the house thread.</p>
+<pre><code>fifo = wire.manifest(handle)
+</code></pre>
+<p>Manifest a fifo/thread with this handle</p>
+<p>Note that the returned value may be a fifo or a thread.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.memo">lua.wire.memo</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L333">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>memo = wire.memo( { sender=handle , id=id } )
+</code></pre>
+<p>Create a memo and return it.</p>
+<p>memo.sender can be provided or it will be set to our handle ( which is 
+wire.thread.us.handle )</p>
+<p>memo.id can be provided or it will be generated.</p>
+<p>The memo will also be placed in wire.memos for later processing.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.memo.resolve">lua.wire.memo.resolve</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L408">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>result = memo:resolve(fifo)
+</code></pre>
+<p>Push the memo into the fifo and then wait for a result on our thread 
+fifo before returning.</p>
+<p>result is returned and can also be found in memo.result</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.memo.send">lua.wire.memo.send</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L385">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>memo:send()
+</code></pre>
+<p>Send a memo</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wire.memo.status">lua.wire.memo.status</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L366">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>memo:status(state)
+</code></pre>
+<p>Change status of memo, moving it between caches.</p>
+<p>This is an internal function.</p>
+</div>
 </div>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.prepare_start">lua.wire.prepare_start</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L348">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L641">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>start = wire.prepare_start( { start=&quot;...&quot; , globals={} } )
 
 opts.start=nil
@@ -11351,7 +11491,7 @@ table down into this function to prepare the start string.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.serialize">lua.wire.serialize</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L237">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L530">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>luastr = wire.serialize(tab)
 luastr = wire.serialize(tab,{ indent=&quot;\t&quot; , newline=&quot;\n&quot; , errors=true  })
 </code></pre>
@@ -11374,7 +11514,7 @@ comments to the output. EG unknown types or recursion.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.sleep">lua.wire.sleep</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L83">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L105">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>wire.sleep(secs)
 </code></pre>
 <p>Take a nap for at least the given amount of seconds, probably a little 
@@ -11383,8 +11523,17 @@ bit longer.</p>
 </div>
 
 <div class="wrap">
+<h1><a href="../docs/lua.wire.table_to_data">lua.wire.table_to_data</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L85">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>data = wire.table_to_data( table )
+</code></pre>
+<p>Convert a lua table into a data string.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../docs/lua.wire.thread">lua.wire.thread</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L105">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L175">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>thread = wire.thread(handle)
 thread = wire.thread(name)
 thread = wire.thread(opts)
@@ -11395,6 +11544,8 @@ and destroyed explicitly.</p>
 thread with that handle.</p>
 <p>When called with a name (string) we return a previously created 
 thread with that name.</p>
+<p>We will assert if no thread is found with that handle or name, so no 
+need to check returns.</p>
 <p>When called with opts (table) we do the following based on the 
 contents.</p>
 <pre><code>opts.handle=nil
@@ -11417,13 +11568,13 @@ any custom libs.</p>
 opts.footer=...
 </code></pre>
 <p>internal setup so best not to change this. It uses wire.do_start to 
-wrap your code with error handles etc.</p>
+wrap your code with error handlers etc.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.wait">lua.wire.wait</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L93">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L115">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>wire.wait(secs)
 </code></pre>
 <p>Take a nap for upto the given amount of seconds. We will wakeup 

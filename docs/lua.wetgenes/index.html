@@ -824,10 +824,21 @@
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
 
-<a class="sub" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
+<a class="sub" href="../../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a><a class="par" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
+
+<a class="sub" href="../../docs/lua.wire.fifo.peek"><span>/lua.wire.fifo.peek</span></a>
+<a class="sub" href="../../docs/lua.wire.fifo.pull"><span>/lua.wire.fifo.pull</span></a>
+<a class="sub" href="../../docs/lua.wire.fifo.push"><span>/lua.wire.fifo.push</span></a>
+<a class="sub" href="../../docs/lua.wire.fifo.wait"><span>/lua.wire.fifo.wait</span></a>
+<a class="sub" href="../../docs/lua.wire.manifest"><span>/lua.wire.manifest</span></a><a class="par" href="../../docs/lua.wire.memo"><span>/lua.wire.memo</span></a>
+
+<a class="sub" href="../../docs/lua.wire.memo.resolve"><span>/lua.wire.memo.resolve</span></a>
+<a class="sub" href="../../docs/lua.wire.memo.send"><span>/lua.wire.memo.send</span></a>
+<a class="sub" href="../../docs/lua.wire.memo.status"><span>/lua.wire.memo.status</span></a>
 <a class="sub" href="../../docs/lua.wire.prepare_start"><span>/lua.wire.prepare_start</span></a>
 <a class="sub" href="../../docs/lua.wire.serialize"><span>/lua.wire.serialize</span></a>
 <a class="sub" href="../../docs/lua.wire.sleep"><span>/lua.wire.sleep</span></a>
+<a class="sub" href="../../docs/lua.wire.table_to_data"><span>/lua.wire.table_to_data</span></a>
 <a class="sub" href="../../docs/lua.wire.thread"><span>/lua.wire.thread</span></a>
 <a class="sub" href="../../docs/lua.wire.wait"><span>/lua.wire.wait</span></a>
 <a class="sub" href="../../docs/prefabs"><span>/prefabs</span></a>
@@ -3257,7 +3268,7 @@ in the order listed.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.oven">lua.wetgenes.gamecake.oven</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L16">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L18">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
 <div><pre><code>oven=require(&quot;wetgenes.gamecake.oven&quot;).bake(opts)
 </code></pre>
 <p>The oven module must be baked so only exposes a bake function.</p>
@@ -3270,7 +3281,7 @@ in the order listed.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.oven.bake">lua.wetgenes.gamecake.oven.bake</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L143">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua#L145">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/oven.lua</a></div>
 <div><pre><code>oven=wetgenes.gamecake.oven.bake(opts)
 </code></pre>
 <p>Bake creates an instance of a lua module bound to a state. Here we
@@ -3287,7 +3298,7 @@ modules and sharing state between them.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.toaster">lua.wetgenes.gamecake.toaster</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L14">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L5">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
 <div><pre><code>oven=require(&quot;wetgenes.gamecake.toaster&quot;).bake(opts)
 </code></pre>
 <p>A cut down oven without opengl or even file access intended to be used 
@@ -3297,7 +3308,7 @@ in a sub process or task.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.toaster.bake">lua.wetgenes.gamecake.toaster.bake</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L145">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L134">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
 <div><pre><code>oven=wetgenes.gamecake.toaster.bake(opts)
 </code></pre>
 <p>Bake creates an instance of a lua module bound to an oven state. Here 
@@ -3315,7 +3326,7 @@ yet.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.gamecake.toaster.newticks">lua.wetgenes.gamecake.toaster.newticks</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L98">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua#L87">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/toaster.lua</a></div>
 <div><pre><code>ticks=require(&quot;wetgenes.gamecake.toaster&quot;).newticks(rate,jump)
 </code></pre>
 <p>create a ticks time controller for updates.</p>
@@ -8221,10 +8232,12 @@ assert wrapper.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.tasks.http_code">lua.wetgenes.tasks.http_code</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L430">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L753">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><p>A basic subtask to handle http memos.</p>
 <p>Note that this function requires external libraries that must be 
 available in order to work.</p>
+<p>One of the main reasons to use threads is so you can do non blocking 
+http requests.</p>
 </div>
 </div>
 
