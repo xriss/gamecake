@@ -430,8 +430,6 @@ static int lua_wire_thread_create_start ( void *context )
 		luaL_loadstring(l, thread->start); // start lua code
 		free(thread->start); thread->start=0; // free code
 		
-		thread->status=1; // we are now running
-
 	lua_wire_thread_lock(l,0,thread);
 
 	lua_pushnumber(l, thread->handle); // is called with thread handle as 1st arg ?
@@ -440,6 +438,7 @@ static int lua_wire_thread_create_start ( void *context )
 // lock the thread before modifying it...
 	lua_wire_thread_lock(l,1,thread);
 
+		thread->handle=0; // mark thread as deleted
 		thread->status=0; // we have halted
 		
 	lua_wire_thread_lock(l,0,thread);
@@ -464,50 +463,54 @@ static int lua_wire_thread_create (lua_State *l)
 	
 	lua_wire_slots_lock(l,1,&wire_threads);
 	
-	if( (handle) && wire_slots_handle(&wire_threads,-handle) ) // thread already exists
-	{ lua_wire_slots_lock(l,0,&wire_threads); luaL_error(l, "thread %d already exists",handle); }
-	
-	handle=-wire_slots_alloc(&wire_threads,-handle); // allocate thread handle
-	if(!handle)
-	{
-		lua_wire_slots_lock(l,0,&wire_threads);
-		luaL_error(l, "thread slots alloc failed");
-	}
-	
-	wire_thread *thread=(wire_thread *)wire_slots_grow_and_get( &wire_threads , -handle ); 
-	if(!thread)
-	{
-		lua_wire_slots_lock(l,0,&wire_threads);
-		luaL_error(l, "thread slots alloc failed");
-	}
+		if( (handle) && wire_slots_handle(&wire_threads,-handle) ) // thread already exists
+		{
+			lua_wire_slots_lock(l,0,&wire_threads);
+			luaL_error(l, "thread %d already exists",handle);
+		}
+		
+		handle=-wire_slots_alloc(&wire_threads,-handle); // allocate thread handle
+		if(!handle)
+		{
+			lua_wire_slots_lock(l,0,&wire_threads);
+			luaL_error(l, "thread slots alloc failed");
+		}
+		
+		wire_thread *thread=(wire_thread *)wire_slots_grow_and_get( &wire_threads , -handle ); 
+		if(!thread)
+		{
+			lua_wire_slots_lock(l,0,&wire_threads);
+			luaL_error(l, "thread slots alloc failed");
+		}
 
-	lua_wire_thread_lock(l,1,thread); // we will be updating the thread
-	
-	thread->handle=handle;
-	thread->fifo.handle=handle;
+		lua_wire_thread_lock(l,1,thread); // we will be updating the thread
+		
+			thread->handle=handle;
+			thread->fifo.handle=handle;
 
-	thread->preload = preload;
-	
-	thread->start = wire_dupe_string(start); // need to free this in new thread
-	if(!thread->start)
-	{
+			thread->preload = preload;
+			
+			thread->start = wire_dupe_string(start); // need to free this in new thread
+			if(!thread->start)
+			{
+				lua_wire_thread_lock(l,0,thread);
+				lua_wire_slots_lock(l,0,&wire_threads);
+				luaL_error(l, "alloc failed");
+			}
+			
+			thread->status = 1; // mark as running
+			if( thrd_success!=thrd_create( &thread->thread , lua_wire_thread_create_start , (void*)thread ) )
+			{
+				thread->status=0;
+				free(thread->start);
+				thread->start=0;
+				lua_wire_thread_lock(l,0,thread);
+				lua_wire_slots_lock(l,0,&wire_threads);
+				luaL_error(l, "thread start failed");
+			}
+
 		lua_wire_thread_lock(l,0,thread);
-		lua_wire_slots_lock(l,0,&wire_threads);
-		luaL_error(l, "alloc failed");
-	}
-	
-	if( thrd_success!=thrd_create( &thread->thread , lua_wire_thread_create_start , (void*)thread ) )
-	{
-		free(thread->start);
-		thread->start=0;
-		lua_wire_thread_lock(l,0,thread);
-		lua_wire_slots_lock(l,0,&wire_threads);
-		luaL_error(l, "thread start failed");
-	}
-	
-	thread->status = 1; // mark as running
-
-	lua_wire_thread_lock(l,0,thread);
+		
 	lua_wire_slots_lock(l,0,&wire_threads);
 	lua_pushnumber(l,handle);
 	return 1;
@@ -516,9 +519,8 @@ static int lua_wire_thread_create (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
-Destroy a thread, this waits for the thred to exit. So before calling 
-this you should have signaled the thread to end or this will just wait 
-forever.
+Destroy a thread, this signals the thread to end and waits for the 
+thread to exit.
 
 */
 static int lua_wire_thread_destroy (lua_State *l)
@@ -526,44 +528,48 @@ static int lua_wire_thread_destroy (lua_State *l)
 	int handle=(int)lua_tonumber(l,1); // thread handle
 	if( (handle>0) || ((-handle)>WIRE_SLOTS_MAX) ) { luaL_error(l, "invalid thread handle"); }
 
-	if( !wire_slots_handle(&wire_threads,-handle) ) // check thread exists
-	{ luaL_error(l, "no thread %d",handle); }
-
 	lua_wire_slots_lock(l,1,&wire_threads);
-	wire_thread *thread=(wire_thread *)wire_slots_grow_and_get( &wire_threads , -handle ); 
-	if(!thread)
-	{
-		lua_wire_slots_lock(l,0,&wire_threads);
-		luaL_error(l, "missing thread %d",handle);
-	}
-	lua_wire_thread_lock(l,1,thread); // we will be updating the thread
+		wire_thread *thread=(wire_thread *)wire_slots_get( &wire_threads , -handle ); 
+		if(!thread)
+		{
+			lua_wire_slots_lock(l,0,&wire_threads);
+			luaL_error(l, "missing thread %d",handle);
+		}
+		lua_wire_thread_lock(l,1,thread); // we will be updating the thread
 
-	thrd_t t = thread->thread ; // read thread while locked...
+			thrd_t t = thread->thread ; // cache thread while locked...
 
-	thread->handle=0; // mark thread as deleted ( handle reuse is not automatic )
-	if(thread->status) { thread->status=-1; } // request halt if running
+			if(thread->status) { thread->status=-1; } // request halt if running
 
-	lua_wire_thread_lock(l,0,thread);
+		lua_wire_thread_lock(l,0,thread);
 	lua_wire_slots_lock(l,0,&wire_threads);
 
 	int res=0;
 	thrd_join( t , &res ); // wait for thread to actually end
+
+	lua_wire_thread_lock(l,1,thread);
+
+		// make sure the threads handle and status has been set to 0
+		thread->status=0;
+		thread->handle=0;
+
+	lua_wire_thread_lock(l,0,thread);
 
 	return 0;
 }
 
 /*+---------------------------------------------------------------------
 
-check thread status
+check thread status , returns nil if unknown thread does not error
 
 */
 static int lua_wire_thread_status (lua_State *l)
 {
 	int handle=(int)lua_tonumber(l,1); // thread handle
-	if( (handle>=0) || ((-handle)>WIRE_SLOTS_MAX) ) { luaL_error(l, "invalid thread handle"); }
+	if( (handle>=0) || ((-handle)>WIRE_SLOTS_MAX) ) { return 0; }
 
 	wire_thread *thread=(wire_thread *)wire_slots_get( &wire_threads , -handle );
-	if(!thread)	{ luaL_error(l, "inactive thread handle %d",handle); }
+	if(!thread)	{ return 0; }
 
 	lua_pushnumber(l,thread->status); // no real point in locking?
 
@@ -961,6 +967,7 @@ LUALIB_API int luaopen_wire_core (lua_State *l)
 		if( !thread ) { luaL_error(l, "grow wire slots threads failed"); }
 		wire_threads.used_idx=1; //  thread 1 is always the main thread
 
+		thread->status = 1; // we are this thread and we are running
 		thread->fifo.handle = -1; // threads have negative handles
 		thread->handle = -1;
 		thread->thread = thrd_current(); // main thread
