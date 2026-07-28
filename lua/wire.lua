@@ -139,10 +139,7 @@ This is a local function for local people. It should not be used by
 you.
 
 ]]
-wire.data_to_table = function(data)
-	-- cmsgpack packs an empty table as nil...
-	return cmsgpack.unpack(data) or {}
-end
+wire.data_to_table = cmsgpack.unpack
 
 
 --[[#lua.wire.sleep
@@ -164,6 +161,26 @@ whenever a new msg is sent to any fifo or when this time has passed.
 
 ]]
 wire.wait=core.wait -- copy the core cfunction
+
+--[[#lua.wire.time
+
+	secs = wire.time()
+
+Get the current TIME_UTC via a timespec_get and converted into a 
+double.
+
+]]
+wire.time=core.time -- copy the core cfunction
+
+--[[#lua.wire.timeres
+
+	secs = wire.timeres()
+
+Get the TIME_UTC resolution via a timespec_getres and converted into a 
+double.
+
+]]
+wire.timeres=core.timeres -- copy the core cfunction
 
 --[[#lua.wire.active
 
@@ -496,11 +513,14 @@ wire.memo_functions.send=function( memo )
 
 	assert(memo.fifo) -- memo must have destination fifo / handle
 	local handle=0
-	if type(memo.fifo)=="number" then handle=memo.fifo else handle=memo end
+	if type(memo.fifo)=="number" then handle=memo.fifo else handle=memo.fifo.handle end
 
 	local data=wire.table_to_data(memo.data)
 	core.fifo_push( handle , data , wire.threads.us.handle , memo.id )
 	memo:status("sent")
+	-- remember the time we sent
+	-- old memos waiting on a reply can produce warnings
+	memo.send_time=wire.time()
 
 end
 
@@ -514,7 +534,7 @@ needing to be wrapped in a full fifo/thread.
 memo.state will be changed to "reply"
 
 ]]
-wire.memo_functions.send=function( memo )
+wire.memo_functions.reply=function( memo )
 
 	local data=wire.table_to_data(memo.result)
 	core.fifo_push( memo.sender , data , memo.sender , memo.id )
@@ -620,6 +640,7 @@ wire.fifo_functions.pull=function( fifo )
 
 		local memo=assert( wire.memos.all[ id ] ) -- must match a sent memo
 
+		memo.reply_time=wire.time() -- so we can compare with send_time
 		memo.result=data
 		memo:status("result")
 		return memo
@@ -839,7 +860,7 @@ wire.do_start=function( func )
 	global.PRINT=print
 	global.DUMP=print
 	global.LOG=print
-	global.TASKNAME=wire.threads.us.name
+	global.TASK_NAME=wire.threads.us.name and "#"..wire.threads.us.name
 	global.TRACEBACK=function(err) LOG( TASKNAME , debug.traceback( err ) ) return err end
 
 -- try and setup wetgenes.logs
@@ -1076,5 +1097,8 @@ wire.threads.us    = assert( wire.thread( our_thread_handle ) )
 if our_thread_handle == -1 then
 	wire.do_start() -- set thready globals on main thread
 --UMP(wire)
+	if wire.timeres()>0.001 then -- check for crazy OS
+		PRINT( string.format("WARNING wire.time resolution (%.9f) is greater than 0.001",wire.timeres()) )
+	end
 end
 

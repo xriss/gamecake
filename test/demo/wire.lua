@@ -31,7 +31,7 @@ memo:resolve()
 DUMP(memo)
 
 for i=3,1,-1 do
-	print("sleep" , i)
+	print("sleep" , i , wire.time() )
 	wire.sleep(1)
 end
 

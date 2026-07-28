@@ -387,6 +387,32 @@ static int lua_wire_sleep (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
+get the current time with a timespec_get TIME_UTC
+
+*/
+static int lua_wire_time (lua_State *l)
+{
+	struct timespec now; timespec_get(&now, TIME_UTC);
+	double d=((double)(now.tv_sec))+(((double)(now.tv_nsec))/1000000000.0 );
+	lua_pushnumber(l, d);
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
+get the current time res with a timespec_getres TIME_UTC
+
+*/
+static int lua_wire_timeres (lua_State *l)
+{
+	struct timespec now; timespec_getres(&now, TIME_UTC);
+	double d=((double)(now.tv_sec))+(((double)(now.tv_nsec))/1000000000.0 );
+	lua_pushnumber(l, d);
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
 get a light userdata from a string/table/userdata/thread/function. We 
 use this function to generate an ID from a table. This is currently 
 unique ( across threads ) and constant while the table remains on the 
@@ -926,6 +952,8 @@ LUALIB_API int luaopen_wire_core (lua_State *l)
 	const luaL_Reg lib[] =
 	{
 		// internal helper functions
+		{"time",						lua_wire_time},
+		{"timeres",						lua_wire_timeres},
 		{"pointer",						lua_wire_pointer},
 		{"thread_handle",				lua_wire_thread_handle},
 		{"handle",						lua_wire_handle},
