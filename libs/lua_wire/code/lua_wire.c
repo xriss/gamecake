@@ -966,14 +966,7 @@ static int lua_wire_thread_handle (lua_State *l)
 		if(handle) // found thread and it is a valid handle
 		{
 			lua_pushnumber(l, thread->handle );
-			if(thread->handle==-1) // main is missing a name so bodge it here
-			{
-				lua_pushstring(l, "main" );
-			}
-			else
-			{
-				lua_pushstring(l, thread->name );
-			}
+			lua_pushstring(l, thread->name );
 			lua_wire_slots_lock(l,0,&wire_threads);
 			return 2;
 		}
@@ -1040,6 +1033,7 @@ LUALIB_API int luaopen_wire_core (lua_State *l)
 		thread->status = 1; // we are this thread and we are running
 		thread->fifo.handle = -1; // threads have negative handles
 		thread->handle = -1;
+		thread->name = wire_dupe_string( "main" );
 		thread->thread = thrd_current(); // main thread
 	}
 
