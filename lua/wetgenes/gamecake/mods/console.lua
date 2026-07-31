@@ -559,7 +559,7 @@ end
 			end
 		end
 		g.print=print_new
-		g.rawprint=print_old
+--		g.rawprint=print_old
 
 		return function()
 			if g.print==print_new then -- only change back if noone else changed it
