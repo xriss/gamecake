@@ -31,7 +31,7 @@ require.sh /usr/include/X11/X.h
 require.sh /usr/include/alsa/asoundlib.h
 require.sh /usr/include/libudev.h
 require.sh /usr/include/pulse/pulseaudio.h
-require.sh /usr/include/luajit-2.0/lua.h
+#require.sh /usr/include/luajit-2.0/lua.h
 require.sh /usr/include/luajit-2.1/lua.h
 require.sh /usr/include/SDL2/SDL.h
 require.sh /usr/include/openssl/ssl.h
@@ -44,6 +44,7 @@ if [ "$1" = "--extra" ]; then
 # commands
 
 	require.sh upx
+	require.sh luarocks
 	require.sh /usr/bin/i686-w64-mingw32-gcc
 
 #vagrant and virtualbox for building in controlled environments
