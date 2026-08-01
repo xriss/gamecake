@@ -978,6 +978,12 @@ end )
 	return table.concat(ret)
 end
 
+--[[#lua.wire.do_start
+
+Wrapper code used in a new thread to set things up and handle errors 
+etc.
+
+]]
 wire.do_start=function( func )
 
 	-- optional global module so we can protect them from accidental use
@@ -1012,7 +1018,42 @@ wire.do_start=function( func )
 
 end
 
-wire.do_start_house=function()
+--[[#lua.wire.execute
+
+	wire.execute(name,count,code)
+
+Start or halt the named tasks, we plan to be running count number of 
+named tasks after calling this.
+
+name is the type of task, eg "http". A fifo of that name will be 
+created when creating tasks ( if one does not already exist ) for 
+sending mwmo work request to and all tasks created will have their 
+names prefixed with this name.
+
+count is the number of tasks we want, call with 0 and we will halt all 
+named tasks.
+
+code is the string of lua code to run in each task, eg for http tasks 
+it would be "require('wire').http_code()" to run the wire.http_code 
+function in each task.
+
+We will try and reuse old tasks, if stopping and starting, but really 
+all you should need to do is call at startup and then you are good to 
+go until the process shuts down.
+
+]]
+wire.execute=function(name,count,code)
+
+
+end
+
+--[[#lua.wire.house_code
+
+The message loop code we run in the house thread (-2) to synchronize 
+process wide task names and handles.
+
+]]
+wire.house_code=function()
 
 	local consume=function(data)
 		local result={fail="unknown"} -- unknown error
@@ -1068,30 +1109,74 @@ wire.do_start_house=function()
 			memo:reply()
 			memo:remove()
 
-		else
+		else -- no memo, sleep a bit
 
-			wire.threads.us:wait(1/1024)
+			wire.threads.us:wait( 1/16 )
 
 		end
 	end
-	-- we have been gracefully halted so cleanup and return
+	-- we have gracefully halted so cleanup and return
 
 end
 
 
+--[[#lua.wire.http_code
 
---[[#lua.wetgenes.tasks.http_code
+	wire.execute("http",4,"require('wire').http_code()")
+	result = wire.memo({...}):resolve()
+	wire.execute("http",0)
 
-A basic subtask to handle http memos.
+The code we run in http_tasks to handle http request via memos.
 
 Note that this function requires external libraries that must be 
 available in order to work.
 
-One of the main reasons to use threads is so you can do multiple non 
-blocking http requests.
+Every memo is a http request, the keys set in memo control the type of 
+request.
+
+	memo.url = "http://google.com/"
+
+The url we will be talking to.
+
+	memo.get = { a=1 , b=2 }
+
+If set then send a GET request with this table in the query string, eg 
+append "?a=1&b=2" to the url.
+
+	memo.json = { a=1 , b=2 }
+
+If set then encode as json and send as body of a POST also setting 
+"Content-Type" to "application/json" in memo.headers
+
+	memo.post = { a=1 , b=2 }
+
+If set then encode as a query string and send as body of a POST also 
+setting "Content-Type" to "application/x-www-form-urlencoded" in 
+memo.headers
+
+	memo.body = "a=1&b=2"
+
+Force a request body string.
+
+	memo.method = "GET"
+
+Force a request method.
+
+	memo.headers = { ["Content-Type"]="application/json" , ... }
+
+Force extra headers.
+
+	result.body
+	result.code
+	result.headers
+	result.status
+
+The result of the request, may also raise an error for catastrophic 
+failures, eg host not found. Otherwise check the result.code is 200 and 
+then read the body returned if you are expecting data.
 
 ]]
-wire.do_start_http=function()
+wire.http_code=function()
 
 	local js_http -- function call into javascript if we are an emcc build
 	pcall( function() js_http = require("wetgenes.win.core").js_http end )
@@ -1113,7 +1198,7 @@ wire.do_start_http=function()
 			
 			local rets=js_http( djon.save(opts) )
 			local ret=djon.load( rets or "{}" ) or {}
-			if not ret.body then ret.error=ret.code or true end
+			if not ret.body then ret.fail=ret.code or true end
 
 			return ret
 		end
@@ -1124,7 +1209,8 @@ wire.do_start_http=function()
 		memo.headers=memo.headers or {}
 
 		local urlencode=function(s)
-			return tostring(s):gsub("([^%w_%%%-%.~])", function(c) return string.format("%%%02X", string.byte(c)) end )
+			return tostring(s):gsub("([^%w_%%%-%.~])",
+				function(c) return string.format("%%%02X", string.byte(c)) end )
 		end
 
 		-- check for values passed by table that we shouold encode
@@ -1189,18 +1275,18 @@ wire.do_start_http=function()
 		req.redirect=memo.redirect
 
 		local body , code, headers, status = http.request(req)
-		local ret={}
+		local result={}
 
-		if not body then -- error message is in code
-			ret.error=code or true
+		if not body then -- error message is in 2nd return ( code )
+			result.fail=code or true
 		else
-			ret.body=table.concat(out)
-			ret.code=code
-			ret.headers=headers
-			ret.status=status
+			result.body=table.concat(out)
+			result.code=code
+			result.headers=headers
+			result.status=status
 		end
 		
-		return ret
+		return result
 	end
 
 
@@ -1209,24 +1295,44 @@ wire.do_start_http=function()
 
 	-- loop until our thread is asked to halt
 	while wire.active( wire.thread_handle ) do
+		local memo = fifo:pull()
 		
-		local memo 
+		if memo then
+
+			-- this will print a TRACEBACK on error but keep going
+			local ok,result = xpcall( function() return consume( memo.data ) end , TRACEBACK )
+
+			if ok then
+				memo.result=result -- consume gave us a result to reply with
+			else
+				memo.result={ fail=(result or "fail") } -- reply with fail reason
+			end
+			memo:reply()
+			memo:remove()
+
+		else -- no memo, sleep a bit
+		
+			fifo:wait(1/16)
+
+		end
 
 	end
-	-- we have been gracefully halted so cleanup and return
+	-- we have gracefully halted so cleanup and return
 
 end
 
 
+------------------------------------------------------------------------
+-- auto setup
 
 -- thread -1 will always exist and thread -2 will be auto created here
 do
-	-- optional global module so we can protect them from accidental use
+	-- use global ( if it exists ) to protect globals from accidental use
 	local global=_G ; pcall(function() global=require("global") end)
 
 	-- get our thread handle and name
 	wire.thread_handle , wire.thread_name = core.thread_handle()
-	global.TASK_NAME=wire.thread_name
+	global.TASK_NAME=wire.thread_name -- used by log code
 
 	-- if we are main thread do some thread setup
 	if wire.thread_handle == -1 then
@@ -1247,7 +1353,7 @@ do
 		wire.wrap( "house" , -2 ) -- Wrap the house thread
 	else -- Create the house thread ( we are the main thread and no other threads exist yet )
 		assert( wire.thread_handle == -1 ) -- main thread check
-		wire.thread( { handle=-2 , name="house" , start="require('wire').do_start_house()" , globals={house="yes"} , } )
+		wire.thread( { handle=-2 , name="house" , start="require('wire').house_code()" , globals={house="yes"} , } )
 	end
 	if wire.thread_handle == -2 then
 		wire.threads.us = wire.threads.house -- we are the house thread
