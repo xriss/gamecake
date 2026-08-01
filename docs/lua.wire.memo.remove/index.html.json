@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 801,
+   "count": 802,
    "name": "lua"
   },
   {
@@ -3218,7 +3218,7 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 29,
+   "count": 30,
    "name": "lua.wire"
   },
   {
@@ -3240,10 +3240,6 @@
   {
    "count": 1,
    "name": "lua.wire.do_start"
-  },
-  {
-   "count": 1,
-   "name": "lua.wire.execute"
   },
   {
    "count": 5,
@@ -3315,6 +3311,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wire.tasks"
+  },
+  {
+   "count": 1,
    "name": "lua.wire.thread"
   },
   {
@@ -3324,6 +3324,10 @@
   {
    "count": 1,
    "name": "lua.wire.timeres"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.update"
   },
   {
    "count": 1,
@@ -3402,7 +3406,7 @@
    "body": "<pre><code>memo:remove()\n</code></pre>\n<p>Remove a memo from wire.memos.</p>\n<p>memo.state will be changed to &quot;removed&quot; and it can no longer be found \nin wire.memos</p>\n<p>This means it is no longer a live memo as far as wire is concerned.</p>\n<p>You may of course keep this memo around if you need it.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 577,
+   "line": 623,
    "name": "lua.wire.memo.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

@@ -828,8 +828,7 @@
 
 <a class="sub" href="../../docs/lua.wire.callbacks.discard"><span>/lua.wire.callbacks.discard</span></a>
 <a class="sub" href="../../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a>
-<a class="sub" href="../../docs/lua.wire.do_start"><span>/lua.wire.do_start</span></a>
-<a class="sub" href="../../docs/lua.wire.execute"><span>/lua.wire.execute</span></a><a class="par" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
+<a class="sub" href="../../docs/lua.wire.do_start"><span>/lua.wire.do_start</span></a><a class="par" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
 
 <a class="sub" href="../../docs/lua.wire.fifo.peek"><span>/lua.wire.fifo.peek</span></a>
 <a class="sub" href="../../docs/lua.wire.fifo.pull"><span>/lua.wire.fifo.pull</span></a>
@@ -847,9 +846,11 @@
 <a class="sub" href="../../docs/lua.wire.serialize"><span>/lua.wire.serialize</span></a>
 <a class="sub" href="../../docs/lua.wire.sleep"><span>/lua.wire.sleep</span></a>
 <a class="sub" href="../../docs/lua.wire.table_to_data"><span>/lua.wire.table_to_data</span></a>
+<a class="sub" href="../../docs/lua.wire.tasks"><span>/lua.wire.tasks</span></a>
 <a class="sub" href="../../docs/lua.wire.thread"><span>/lua.wire.thread</span></a>
 <a class="sub" href="../../docs/lua.wire.time"><span>/lua.wire.time</span></a>
 <a class="sub" href="../../docs/lua.wire.timeres"><span>/lua.wire.timeres</span></a>
+<a class="sub" href="../../docs/lua.wire.update"><span>/lua.wire.update</span></a>
 <a class="sub" href="../../docs/lua.wire.wait"><span>/lua.wire.wait</span></a>
 <a class="sub" href="../../docs/lua.wire.wrap"><span>/lua.wire.wrap</span></a>
 <a class="sub" href="../../docs/prefabs"><span>/prefabs</span></a>
@@ -862,24 +863,13 @@
 	<div class="main">
 		
 <div class="wrap">
-<h1><a href="../../docs/lua.wire.execute">lua.wire.execute</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1021">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
-<div><pre><code>wire.execute(name,count,code)
+<h1><a href="../../docs/lua.wire.update">lua.wire.update</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L544">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>wire.update()
 </code></pre>
-<p>Start or halt the named tasks, we plan to be running count number of 
-named tasks after calling this.</p>
-<p>name is the type of task, eg &quot;http&quot;. A fifo of that name will be 
-created when creating tasks ( if one does not already exist ) for 
-sending mwmo work request to and all tasks created will have their 
-names prefixed with this name.</p>
-<p>count is the number of tasks we want, call with 0 and we will halt all 
-named tasks.</p>
-<p>code is the string of lua code to run in each task, eg for http tasks 
-it would be &quot;require(&#39;wire&#39;).http_code()&quot; to run the wire.http_code 
-function in each task.</p>
-<p>We will try and reuse old tasks, if stopping and starting, but really 
-all you should need to do is call at startup and then you are good to 
-go until the process shuts down.</p>
+<p>Fetch and process memos, should be called at least once a second to 
+deal with memo replies.</p>
+<p>memo callbacks will be launched from this function.</p>
 </div>
 </div>
 

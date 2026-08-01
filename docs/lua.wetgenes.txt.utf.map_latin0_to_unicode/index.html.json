@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 801,
+   "count": 802,
    "name": "lua"
   },
   {
@@ -3218,7 +3218,7 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 29,
+   "count": 30,
    "name": "lua.wire"
   },
   {
@@ -3240,10 +3240,6 @@
   {
    "count": 1,
    "name": "lua.wire.do_start"
-  },
-  {
-   "count": 1,
-   "name": "lua.wire.execute"
   },
   {
    "count": 5,
@@ -3315,6 +3311,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wire.tasks"
+  },
+  {
+   "count": 1,
    "name": "lua.wire.thread"
   },
   {
@@ -3324,6 +3324,10 @@
   {
    "count": 1,
    "name": "lua.wire.timeres"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.update"
   },
   {
    "count": 1,

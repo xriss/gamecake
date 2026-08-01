@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 801,
+   "count": 802,
    "name": "lua"
   },
   {
@@ -3218,7 +3218,7 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 29,
+   "count": 30,
    "name": "lua.wire"
   },
   {
@@ -3240,10 +3240,6 @@
   {
    "count": 1,
    "name": "lua.wire.do_start"
-  },
-  {
-   "count": 1,
-   "name": "lua.wire.execute"
   },
   {
    "count": 5,
@@ -3315,6 +3311,10 @@
   },
   {
    "count": 1,
+   "name": "lua.wire.tasks"
+  },
+  {
+   "count": 1,
    "name": "lua.wire.thread"
   },
   {
@@ -3324,6 +3324,10 @@
   {
    "count": 1,
    "name": "lua.wire.timeres"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.update"
   },
   {
    "count": 1,
@@ -3399,7 +3403,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>active = wire.active(handle)\nactive = wire.active(thread)\n</code></pre>\n<p>Check if this handle is an active thread, Eg the thread is running and \nshould be dealing with memos.</p>\n<p>returns false if not a thread or thread has halted or thread has been \nasked to halt.</p>\n<p>returns true if thread exists and is running.</p>\n<p>This function should be used in a running thread to check if that \nthread has been asked to halt.</p>\n",
+   "body": "<pre><code>active = wire.active(handle)\nactive = wire.active(thread)\n</code></pre>\n<p>If handle is nil then use wire.thread_handle</p>\n<p>Check if this handle is an active thread, Eg the thread is running and \nshould be dealing with memos.</p>\n<p>returns false if not a thread or thread has halted or thread has been \nasked to halt.</p>\n<p>returns true if thread exists and is running.</p>\n<p>This function should be used in a running thread to check if that \nthread has been asked to halt.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
    "line": 188,
