@@ -1,5 +1,5 @@
 
-require("apps").default_paths()
+--require("apps").default_paths()
 
 -- this is a short comment
 

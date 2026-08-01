@@ -2,7 +2,7 @@
 
 DISABLE_WETGENES_TARDIS_CORE=false
 
-require("apps").default_paths()
+--require("apps").default_paths()
 
 
 local tardis=require("wetgenes.tardis")

@@ -4,7 +4,6 @@ local wire=require("wire")
 print(  )
 print( "wire starting" )
 print( "we are " , wire.threads.us.name , wire.threads.us.handle )
-DUMP( package.path )
 
 wire.tasks("http",4,"require('wire').http_code()")
 
@@ -15,7 +14,6 @@ local wire=require("wire")
 
 print(  )
 print( "thread starting" , wire.threads.us.name , wire.threads.us.handle )
-DUMP( package.path )
 
 local result=wire.memo({
 	fifo=wire.threads.house,
@@ -38,8 +36,22 @@ local result=wire.memo({
 	},
 }):resolve()
 
+-- check http
+local memo_get=wire.memo({
+	fifo=wire.manifest("http"),
+	data={
+		url="http://google.com/",
+	},
+}):send()
+print("sent http request")
+
+
 for i=3,1,-1 do
 	print("sleep" , i , wire.time() )
 	wire.sleep(1)
+	wire.update()
 end
+
+-- http fetch will have happened in the background unless its very slow
+if memo_get.result then print("got http",memo_get.result.status) end
 

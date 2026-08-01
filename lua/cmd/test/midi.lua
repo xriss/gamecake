@@ -1,5 +1,5 @@
 
-require("apps").default_paths()
+--require("apps").default_paths()
 
 
 local wstr=require("wetgenes.string")

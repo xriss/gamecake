@@ -53,8 +53,10 @@ function setpaths(dll,dirs)
 			cpath[#cpath+1]=v .. "?." .. dll
 			cpath[#cpath+1]=v .. "?/init." .. dll
 		end
-		cpath[#cpath+1]=package.cpath
-		package.cpath=table.concat(cpath,";")
+		local newpath=table.concat(cpath,";")
+		if not string.find(package.cpath,newpath,1,true) then -- only add once
+			package.cpath=newpath..";"..package.cpath
+		end
 	end
 	
 	local path={}
@@ -64,8 +66,10 @@ function setpaths(dll,dirs)
 		path[#path+1]=v .. "lua/?.lua"
 		path[#path+1]=v .. "lua/?/init.lua"
 	end
-	path[#path+1]=package.path
-	package.path=table.concat(path,";")
+	local newpath=table.concat(path,";")
+	if not string.find(package.path,newpath,1,true) then -- only add once
+		package.path=newpath..";"..package.path
+	end
 
 end
 

@@ -4,7 +4,7 @@ local global=_G ; pcall(function() global=require("global") end)
 local logs=require("wetgenes.logs")
 local djon=require("djon")
 
-require("apps").default_paths() -- default search paths so things can easily be found
+--require("apps").default_paths() -- default search paths so things can easily be found
 
 print("starting http task")
 

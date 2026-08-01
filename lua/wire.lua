@@ -262,9 +262,9 @@ wire.wrap=function(name,handle)
 		fifo.handle=handle
 		fifo.name=name
 
-		fifo.cache_fifos[fifo.handle]=fifo
-		fifo.cache_names[name]=fifo.handle
-		fifo.fifos[name]=fifo
+		wire.cache_fifos[fifo.handle]=fifo
+		wire.cache_names[name]=fifo.handle
+		wire.fifos[name]=fifo
 
 		return fifo
 	end
@@ -538,6 +538,34 @@ wire.fifo=function(opts)
 	end
 
 	return fifo
+end
+
+
+--[[#lua.wire.update
+
+	wire.update()
+
+Fetch and process memos, should be called at least once a second to 
+deal with memo replies.
+
+memo callbacks will be launched from this function.
+
+]]
+wire.update=function()
+
+	-- pull all waiting memos ?
+	while wire.active( wire.thread_handle ) do
+		local m = wire.threads.us:pull()
+		if not m then break end -- we pulled nothing
+	end
+	
+	-- memos with results
+	for id , memo in pairs(wire.memos.result) do
+		if memo.callback then
+			memo.callback(memo) -- this must remove the memo or it will be called repeatedly
+		end
+	end
+
 end
 
 --[[#lua.wire.memo
@@ -998,6 +1026,9 @@ wire.prepare_start=function( opts )
 	for n,v in pairs( opts.globals or {} ) do
 		fout(n," = ", wire.serialize(v) ) -- simple global data
 	end
+	-- pass paths into children
+	fout("package.path = ", wire.serialize(package.path) )
+	fout("package.cpath = ", wire.serialize(package.cpath) )
 
 	fout(opts.header or [[
 
@@ -1022,12 +1053,6 @@ etc.
 
 ]]
 wire.do_start=function( func )
-	-- attempt to find lua code relative to executable,
-	-- this helps us override old lua modules that may be in your path.
-	pcall(function()
-		local apps=require("apps")
-		apps.default_paths()
-	end)
 
 	-- optional global module so we can protect them from accidental use
 	local global=_G ; pcall(function() global=require("global") end)
@@ -1143,6 +1168,12 @@ wire.tasks=function(name,count,code)
 					})
 			end
 		end
+	end
+
+	-- create new fifo unless it exists
+	if not wire.fifos[name] then
+print("creating fifo ",name)
+		wire.fifo({name=name})
 	end
 
 	return result
@@ -1285,10 +1316,6 @@ then read the body returned if you are expecting data.
 ]]
 wire.http_code=function()
 
-print( "we are " , wire.threads.us.name , wire.threads.us.handle )
-DUMP( package.loaders )
-
-
 	local js_http -- function call into javascript if we are an emcc build
 	pcall( function() js_http = require("wetgenes.win.core").js_http end )
 
@@ -1315,7 +1342,7 @@ DUMP( package.loaders )
 		end
 	end
 
-	local function request(memo)
+	local function consume(memo)
 	
 		memo.headers=memo.headers or {}
 
@@ -1402,7 +1429,7 @@ DUMP( package.loaders )
 
 
 	 -- this named fifo will have been created before this thread
-	local fifo = wire.fifo("http")
+	local fifo = wire.manifest("http")
 
 	-- loop until our thread is asked to halt
 	while wire.active( wire.thread_handle ) do

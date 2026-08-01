@@ -2,7 +2,7 @@
 
 local global=_G ; pcall(function() global=require("global") end)
 
-require("apps").default_paths() -- default search paths so things can easily be found
+--require("apps").default_paths() -- default search paths so things can easily be found
 
 
 local msgp=require("wetgenes.tasks_msgp")
