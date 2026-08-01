@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 797,
+   "count": 801,
    "name": "lua"
   },
   {
@@ -3218,7 +3218,7 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 25,
+   "count": 29,
    "name": "lua.wire"
   },
   {
@@ -3236,6 +3236,14 @@
   {
    "count": 1,
    "name": "lua.wire.data_to_table"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.do_start"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.execute"
   },
   {
    "count": 5,
@@ -3256,6 +3264,14 @@
   {
    "count": 1,
    "name": "lua.wire.fifo.wait"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.house_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.http_code"
   },
   {
    "count": 1,

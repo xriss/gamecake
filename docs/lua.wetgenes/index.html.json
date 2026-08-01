@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 797,
+   "count": 801,
    "name": "lua"
   },
   {
@@ -3218,7 +3218,7 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 25,
+   "count": 29,
    "name": "lua.wire"
   },
   {
@@ -3236,6 +3236,14 @@
   {
    "count": 1,
    "name": "lua.wire.data_to_table"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.do_start"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.execute"
   },
   {
    "count": 5,
@@ -3256,6 +3264,14 @@
   {
    "count": 1,
    "name": "lua.wire.fifo.wait"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.house_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.http_code"
   },
   {
    "count": 1,
@@ -8264,12 +8280,12 @@
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
   {
-   "body": "<p>A basic subtask to handle http memos.</p>\n<p>Note that this function requires external libraries that must be \navailable in order to work.</p>\n<p>One of the main reasons to use threads is so you can do multiple non \nblocking http requests.</p>\n",
+   "body": "<p>A basic function to handle http memos.</p>\n",
    "count": 1,
-   "file": "../lua/wire.lua",
-   "line": 1083,
+   "file": "../lua/wetgenes/tasks.lua",
+   "line": 831,
    "name": "lua.wetgenes.tasks.http_code",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
   },
   {
    "body": "<pre><code>-- just grab this function \nlocal do_memo=require(&quot;wetgenes.tasks&quot;).do_memo\n\nlocal r=do_memo(linda,{task=&quot;taskname&quot;})\nlocal r=do_memo(linda,{task=&quot;taskname&quot;},timeout)\ndo_memo(linda,{task=&quot;taskname&quot;,id=false})\n</code></pre>\n<p>A basic memo send and receive that can be used when all you have is the \ntasks.linda and you know you are in a thread ( or do not care about \nblocking while waiting for another thread ) Pretty much everything else \nin this module is about managing coroutines to pretended to be threads \nand keeping track of state for debugging but this is all you actually \nneed to use to simply communicate with a task. Especially useful if you \nare in a task and want to talk to another task.</p>\n",

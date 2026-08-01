@@ -827,12 +827,16 @@
 <a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a><a class="par" href="../../docs/lua.wire.callbacks"><span>/lua.wire.callbacks</span></a>
 
 <a class="sub" href="../../docs/lua.wire.callbacks.discard"><span>/lua.wire.callbacks.discard</span></a>
-<a class="sub" href="../../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a><a class="par" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
+<a class="sub" href="../../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a>
+<a class="sub" href="../../docs/lua.wire.do_start"><span>/lua.wire.do_start</span></a>
+<a class="sub" href="../../docs/lua.wire.execute"><span>/lua.wire.execute</span></a><a class="par" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
 
 <a class="sub" href="../../docs/lua.wire.fifo.peek"><span>/lua.wire.fifo.peek</span></a>
 <a class="sub" href="../../docs/lua.wire.fifo.pull"><span>/lua.wire.fifo.pull</span></a>
 <a class="sub" href="../../docs/lua.wire.fifo.push"><span>/lua.wire.fifo.push</span></a>
 <a class="sub" href="../../docs/lua.wire.fifo.wait"><span>/lua.wire.fifo.wait</span></a>
+<a class="sub" href="../../docs/lua.wire.house_code"><span>/lua.wire.house_code</span></a>
+<a class="sub" href="../../docs/lua.wire.http_code"><span>/lua.wire.http_code</span></a>
 <a class="sub" href="../../docs/lua.wire.manifest"><span>/lua.wire.manifest</span></a><a class="par" href="../../docs/lua.wire.memo"><span>/lua.wire.memo</span></a>
 
 <a class="sub" href="../../docs/lua.wire.memo.remove"><span>/lua.wire.memo.remove</span></a>
@@ -954,6 +958,36 @@ you.</p>
 </div>
 
 <div class="wrap">
+<h1><a href="../../docs/lua.wire.do_start">lua.wire.do_start</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L981">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><p>Wrapper code used in a new thread to set things up and handle errors 
+etc.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wire.execute">lua.wire.execute</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1021">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>wire.execute(name,count,code)
+</code></pre>
+<p>Start or halt the named tasks, we plan to be running count number of 
+named tasks after calling this.</p>
+<p>name is the type of task, eg &quot;http&quot;. A fifo of that name will be 
+created when creating tasks ( if one does not already exist ) for 
+sending mwmo work request to and all tasks created will have their 
+names prefixed with this name.</p>
+<p>count is the number of tasks we want, call with 0 and we will halt all 
+named tasks.</p>
+<p>code is the string of lua code to run in each task, eg for http tasks 
+it would be &quot;require(&#39;wire&#39;).http_code()&quot; to run the wire.http_code 
+function in each task.</p>
+<p>We will try and reuse old tasks, if stopping and starting, but really 
+all you should need to do is call at startup and then you are good to 
+go until the process shuts down.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo">lua.wire.fifo</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L448">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>fifo = wire.fifo(handle)
@@ -1024,6 +1058,62 @@ thread:wait(secs)
 </code></pre>
 <p>Wait upto the given number of seconds for a new memo to arrive in this 
 fifo.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wire.house_code">lua.wire.house_code</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1050">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><p>The message loop code we run in the house thread (-2) to synchronize 
+process wide task names and handles.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wire.http_code">lua.wire.http_code</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1123">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>wire.execute(&quot;http&quot;,4,&quot;require(&#39;wire&#39;).http_code()&quot;)
+result = wire.memo({...}):resolve()
+wire.execute(&quot;http&quot;,0)
+</code></pre>
+<p>The code we run in http_tasks to handle http request via memos.</p>
+<p>Note that this function requires external libraries that must be 
+available in order to work.</p>
+<p>Every memo is a http request, the keys set in memo control the type of 
+request.</p>
+<pre><code>memo.url = &quot;http://google.com/&quot;
+</code></pre>
+<p>The url we will be talking to.</p>
+<pre><code>memo.get = { a=1 , b=2 }
+</code></pre>
+<p>If set then send a GET request with this table in the query string, eg 
+append &quot;?a=1&amp;b=2&quot; to the url.</p>
+<pre><code>memo.json = { a=1 , b=2 }
+</code></pre>
+<p>If set then encode as json and send as body of a POST also setting 
+&quot;Content-Type&quot; to &quot;application/json&quot; in memo.headers</p>
+<pre><code>memo.post = { a=1 , b=2 }
+</code></pre>
+<p>If set then encode as a query string and send as body of a POST also 
+setting &quot;Content-Type&quot; to &quot;application/x-www-form-urlencoded&quot; in 
+memo.headers</p>
+<pre><code>memo.body = &quot;a=1&amp;b=2&quot;
+</code></pre>
+<p>Force a request body string.</p>
+<pre><code>memo.method = &quot;GET&quot;
+</code></pre>
+<p>Force a request method.</p>
+<pre><code>memo.headers = { [&quot;Content-Type&quot;]=&quot;application/json&quot; , ... }
+</code></pre>
+<p>Force extra headers.</p>
+<pre><code>result.body
+result.code
+result.headers
+result.status
+</code></pre>
+<p>The result of the request, may also raise an error for catastrophic 
+failures, eg host not found. Otherwise check the result.code is 200 and 
+then read the body returned if you are expecting data.</p>
 </div>
 </div>
 
