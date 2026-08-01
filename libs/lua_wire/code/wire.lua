@@ -190,6 +190,8 @@ wire.timeres=core.timeres -- copy the core cfunction
 	active = wire.active(handle)
 	active = wire.active(thread)
 
+If handle is nil then use wire.thread_handle
+
 Check if this handle is an active thread, Eg the thread is running and 
 should be dealing with memos.
 
@@ -205,6 +207,7 @@ thread has been asked to halt.
 wire.active=function(handle)
 
 	if type(handle)=="table" then handle=handle.handle end
+	if not handle then handle=wire.thread_handle end
 	
 	local status = core.thread_status(handle)
 
@@ -273,7 +276,10 @@ end
 	it = wire.manifest(name)
 	it = wire.manifest(handle)
 
-Return a fifo or thread if it exists otherwise returns nil.
+Return a fifo or thread if it exists, this is a way of wrapping a 
+handle/name that you hope already exists but you are not 100% sure.
+
+Will returns nil if the name or handle does not exist.
 
 We may talk to the house thread to check for the existence of name or 
 handle, so this can block for a while before returning.
@@ -308,18 +314,16 @@ wire.manifest=function(name)
 	if ( ( name and ( not handle ) ) or ( handle and ( not name ) ) )
 		and ( wire.thread_handle ~= -2 ) then -- unless we are house
 		
-		local memo=wire.memo({
+		local result=wire.memo({
 			fifo=wire.threads.house,
 			data={
 				action="handle",
 				name=name,handle=handle, -- one of these is nil
 			},
-		})
-		memo:send()
-		memo:resolve()
+		}):resolve()
 		
-		handle=memo.result.handle
-		name=memo.result.name
+		handle=result.handle
+		name=result.name
 		
 		if name and handle then -- house says it exists, so make it so
 			return wire.wrap(name,handle)
@@ -444,6 +448,20 @@ wire.thread=function(opts)
 	
 	return thread
 end
+
+wire.thread_start=function(opts)
+
+	local name=opts.name
+	local preloadlibs=opts.preloadlibs -- set to false for no preload
+	if type(preloadlibs)=="nil" then preloadlibs=wire.preloadlibs end
+
+	local start=wire.prepare_start(opts)
+	assert( loadstring(start) , "wire thread start string" ) -- make sure the code is valid
+
+	core.thread_start( opts.handle , name , start , preloadlibs or nil )
+
+end
+
 
 --[[#lua.wire.fifo
 
@@ -596,6 +614,7 @@ wire.memo_functions.remove=function( memo )
 	end
 	memo.state="removed"
 
+	return memo
 end
 
 --[[#lua.wire.callbacks.discard
@@ -635,6 +654,7 @@ wire.memo_functions.status=function( memo , state )
 	if memo.state and wire.memos[ memo.state ] then
 		wire.memos[ memo.state ][ memo.id ]=memo
 	end
+	return memo
 end
 
 --[[#lua.wire.memo.send
@@ -658,6 +678,7 @@ wire.memo_functions.send=function( memo )
 	-- old memos waiting on a reply can produce debug warnings, eventually
 	memo.send_time=wire.time()
 
+	return memo -- chainable
 end
 
 --[[#lua.wire.memo.send
@@ -676,12 +697,17 @@ wire.memo_functions.reply=function( memo )
 	core.fifo_push( memo.sender , data , memo.sender , memo.id )
 	memo:status("reply")
 
+	return memo
 end
 
 
 --[[#lua.wire.memo.resolve
 
 	result = memo:resolve()
+	result = wire.memo(...):resolve()
+
+If memo.state is "setup" then we memo:send() the memo. "setup" is the 
+state a newly created memo will be in.
 
 Wait for a result on our thread fifo ( wire.threads.us ) before 
 returning.
@@ -698,10 +724,17 @@ with a hard fail. A hard fail means the thread could not deal with your
 memo, so lua code broke, memo was invalid etc. This is a hard fail and 
 will raise an error rather than return a result.
 
-If the thread does not reply but is still running then this will lock.
+If the thread does not reply then this will lock.
+
+If the currently running thread is asked to halt then this will raise 
+an error rather than return.
 
 ]]
 wire.memo_functions.resolve=function( memo )
+
+	if memo.state=="setup" then -- auto send
+		memo:send()
+	end
 
 	-- wait for result , memos we ignore here can be handled later
 	while wire.active( wire.thread_handle ) do
@@ -718,7 +751,7 @@ wire.memo_functions.resolve=function( memo )
 		end
 	end
 	
-	error("thread halted in a memo:resolve")
+	error("thread halted in memo:resolve")
 
 end
 
@@ -732,6 +765,10 @@ Peek and see if there is a memo to pull but do not pull it.
 
 Note that a pull, even immediately after a successful peek has no 
 guarantee to work.
+
+If you wish to actually look at the contents of the memo then pull a 
+memo and then push it back into the fifo. This will of course change 
+the order of memos in the fifo.
 
 ]]
 wire.fifo_functions.peek=function( fifo )
@@ -985,6 +1022,12 @@ etc.
 
 ]]
 wire.do_start=function( func )
+	-- attempt to find lua code relative to executable,
+	-- this helps us override old lua modules that may be in your path.
+	pcall(function()
+		local apps=require("apps")
+		apps.default_paths()
+	end)
 
 	-- optional global module so we can protect them from accidental use
 	local global=_G ; pcall(function() global=require("global") end)
@@ -1018,9 +1061,10 @@ wire.do_start=function( func )
 
 end
 
---[[#lua.wire.execute
+--[[#lua.wire.tasks
 
-	wire.execute(name,count,code)
+	wire.tasks(name,count,code)
+	wire.tasks(name,0)
 
 Start or halt the named tasks, we plan to be running count number of 
 named tasks after calling this.
@@ -1035,16 +1079,73 @@ named tasks.
 
 code is the string of lua code to run in each task, eg for http tasks 
 it would be "require('wire').http_code()" to run the wire.http_code 
-function in each task.
+function in each task. If count zero, this may be skipped.
 
 We will try and reuse old tasks, if stopping and starting, but really 
 all you should need to do is call at startup and then you are good to 
 go until the process shuts down.
 
 ]]
-wire.execute=function(name,count,code)
+wire.tasks=function(name,count,code)
 
+	-- easiest to just run on the house thread, so auto promote
+	if wire.threads.us.name~="house" then
+		return wire.memo({
+			fifo=wire.threads.house,
+			data={
+				action="tasks",
+				name=name,
+				count=count,
+				code=code,
+			},
+		}):resolve()
+	end
+	-- we are now house so do the thing
+	
+	local result={}
 
+	if not wire.cache_tasks then wire.cache_tasks={} end
+	
+	if wire.cache_tasks[name] then
+		result.task=wire.cache_tasks[name]
+	else
+		result.task={count=0,name=name,code=code,list={}}
+		wire.cache_tasks[name]=result.task -- remember task
+	end
+	local task=result.task
+
+	if task.count==count then --nothing to change
+		return result
+	end
+
+	-- ask the extra tasks to halt but we do not wait for them
+	for idx,handle in ipairs( task.list ) do
+		if idx>count then
+			core.thread_status(handle,-1) -- ask to halt
+		end
+	end
+
+	-- create new threads
+	for idx=1,count do
+		local handle=task.list[idx]
+		if not handle then -- create task
+			local thread=wire.thread( {
+				name=name.."-"..idx ,
+				start=code } )
+			task.list[idx]=thread.handle
+		else -- task exists but may not be running, ask it to start again
+			local thread=wire.thread(handle) -- get thread from handle
+			if not wire.active(handle) then -- need to restart
+				wire.thread_start({
+						name=name.."-"..idx ,
+						handle=handle,
+						start=code,
+					})
+			end
+		end
+	end
+
+	return result
 end
 
 --[[#lua.wire.house_code
@@ -1087,7 +1188,13 @@ wire.house_code=function()
 					result.fail=nil -- success
 
 				end
+
+			elseif data.action=="tasks" then -- wire.tasks
+			
+				result=wire.tasks( data.name , data.count , data.code )
+
 			end
+
 
 		return result
 	end
@@ -1177,6 +1284,10 @@ then read the body returned if you are expecting data.
 
 ]]
 wire.http_code=function()
+
+print( "we are " , wire.threads.us.name , wire.threads.us.handle )
+DUMP( package.loaders )
+
 
 	local js_http -- function call into javascript if we are an emcc build
 	pcall( function() js_http = require("wetgenes.win.core").js_http end )
@@ -1291,7 +1402,7 @@ wire.http_code=function()
 
 
 	 -- this named fifo will have been created before this thread
-	local fifo = wire.manifest("http")
+	local fifo = wire.fifo("http")
 
 	-- loop until our thread is asked to halt
 	while wire.active( wire.thread_handle ) do

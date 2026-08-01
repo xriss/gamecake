@@ -488,7 +488,7 @@ static int lua_wire_thread_start (lua_State *l)
 	const char *name=lua_tostring(l,2); // name of thread
 	const char *start=lua_tostring(l,3); // run this string
 	lua_CFunction preload=0; // optional cfunction to preload more libs in a new lua state
-	if(!lua_isnil(l,4)) { preload=lua_tocfunction(l,4); }
+	if(!lua_isnoneornil(l,4)) { preload=lua_tocfunction(l,4); }
 	
 	if( (handle>=0) || ((-handle)>WIRE_SLOTS_MAX) ) { luaL_error(l, "invalid thread handle"); }
 
@@ -619,16 +619,30 @@ static int lua_wire_thread_destroy (lua_State *l)
 
 /*+---------------------------------------------------------------------
 
-check thread status , returns nil if unknown thread does not error
+get/set thread status , returns nil if unknown thread does not error
 
 */
 static int lua_wire_thread_status (lua_State *l)
 {
 	int handle=(int)lua_tonumber(l,1); // thread handle
 	if( (handle>=0) || ((-handle)>WIRE_SLOTS_MAX) ) { return 0; }
-
+	int status=0;
+	if( lua_isnumber(l,2) ) // we want to set the status ( to halt if running )
+	{
+		status=(int)lua_tonumber(l,2);
+	}
+	
 	wire_thread *thread=(wire_thread *)wire_slots_get( &wire_threads , -handle );
 	if(!thread)	{ return 0; }
+
+	if( status==-1 ) // we want to set the status ( to halt if running )
+	{
+		lua_wire_slots_lock(l,1,&wire_threads);
+			lua_wire_thread_lock(l,1,thread); // we will be updating the thread
+ 				if(thread->status) { thread->status=-1; } // request halt if running
+			lua_wire_thread_lock(l,0,thread);
+		lua_wire_slots_lock(l,0,&wire_threads);
+	}
 
 	lua_pushnumber(l,thread->status); // no real point in locking?
 
@@ -915,7 +929,7 @@ check if a handle is valid, returns handle or nil
 */
 static int lua_wire_handle (lua_State *l)
 {
-	if( lua_isnil(l, 1 ) ) { return 0; }
+	if( lua_isnoneornil(l, 1 ) ) { return 0; }
 
 	int handle=(int)lua_tonumber(l, 1 );
 	if( (handle==0) ) { return 0; }

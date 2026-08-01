@@ -171,7 +171,7 @@ logstring= function(o,opts)
 
 	elseif type(o) == "table" then
 
-		if opts.done[o] and opts.no_duplicates then
+		if opts.done[o] then
 			fout(opts.indent,"\n",opts.indent,"{--[[DUPLICATE]]}\n")
 			return
 		else
