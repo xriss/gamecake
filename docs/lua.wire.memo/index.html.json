@@ -3406,7 +3406,7 @@
    "body": "<pre><code>memo = wire.memo( )\nmemo = wire.memo( {} )\nmemo = wire.memo( { sender=handle , id=id , callback=callback } )\n</code></pre>\n<p>Create a memo and return it, if you pass in a new table with settings \nthen that is the table we will modify and return.</p>\n<p>memo.sender can be provided or it will be set to our handle ( which is \nwire.thread.us.handle )</p>\n<p>memo.id can be provided or it will be generated.</p>\n<p>The memo will also be placed in wire.memos for later processing.</p>\n<p>memo.state will be set to &quot;setup&quot;</p>\n<p>if memo.callback is provided then it will be called during wire.update \nafter we get a reply. It will be called like so:</p>\n<pre><code>memo.callback(memo)\n</code></pre>\n<br/>\n<br/>\n\n<p>FYI HAX TBH : memo.id is set to a light userdata of the memo tables \npointer, this should be unique across multiple lua states and threads \nin the same process, for as long as the table stays on the stack. A \nfuture lua garbage collection system could break this by moving tables \naround in system memory but I believe this is currently &quot;safe&quot; as of \n2026 in all available versions of lua/luajit and if that changes I will \nfix it.</p>\n",
    "count": 5,
    "file": "../lua/wire.lua",
-   "line": 571,
+   "line": 579,
    "name": "lua.wire.memo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
@@ -3414,7 +3414,7 @@
    "body": "<pre><code>memo:remove()\n</code></pre>\n<p>Remove a memo from wire.memos.</p>\n<p>memo.state will be changed to &quot;removed&quot; and it can no longer be found \nin wire.memos</p>\n<p>This means it is no longer a live memo as far as wire is concerned.</p>\n<p>You may of course keep this memo around if you need it.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 623,
+   "line": 631,
    "name": "lua.wire.memo.remove",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
@@ -3422,7 +3422,7 @@
    "body": "<pre><code>result = memo:resolve()\nresult = wire.memo(...):resolve()\n</code></pre>\n<p>If memo.state is &quot;setup&quot; then we memo:send() the memo. &quot;setup&quot; is the \nstate a newly created memo will be in.</p>\n<p>Wait for a result on our thread fifo ( wire.threads.us ) before \nreturning.</p>\n<p>Other memos may have been pulled and ignored for now. These memos can \nbe found later in wire.memos</p>\n<p>result is returned and can also be found in memo.result this should \nalways be a table containing the result of the memo provided by the \nthread.</p>\n<p>If a result was returned with result.fail set then the thread replied \nwith a hard fail. A hard fail means the thread could not deal with your \nmemo, so lua code broke, memo was invalid etc. This is a hard fail and \nwill raise an error rather than return a result.</p>\n<p>If the thread does not reply then this will lock.</p>\n<p>If the currently running thread is asked to halt then this will raise \nan error rather than return.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 732,
+   "line": 740,
    "name": "lua.wire.memo.resolve",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
@@ -3430,7 +3430,7 @@
    "body": "<pre><code>memo:reply()\n</code></pre>\n<p>Reply to a memo, this uses the senders handle as a fifo without it \nneeding to be wrapped in a full fifo/thread.</p>\n<p>memo.state will be changed to &quot;reply&quot;</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 712,
+   "line": 720,
    "name": "lua.wire.memo.send",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
@@ -3438,7 +3438,7 @@
    "body": "<pre><code>memo:status(state)\n</code></pre>\n<p>Change status of memo, moving it between wire.memos[ memo.state ] \ncaches.</p>\n<p>This is a local function for local people. It should not be used by \nyou.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 666,
+   "line": 674,
    "name": "lua.wire.memo.status",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }
