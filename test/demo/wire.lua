@@ -42,6 +42,7 @@ local memo_get=wire.memo({
 	data={
 		url="http://google.com/",
 	},
+	callback=wire.callbacks.discard, -- removes completed memo
 }):send()
 print("sent http request")
 
@@ -49,9 +50,9 @@ print("sent http request")
 for i=3,1,-1 do
 	print("sleep" , i , wire.time() )
 	wire.sleep(1)
-	wire.update()
+	wire.update() -- check for reply and run callbacks
 end
 
--- http fetch will have happened in the background unless its very slow
+-- http fetch will have happened in the background by now unless its very slow
 if memo_get.result then print("got http",memo_get.result.status) end
 

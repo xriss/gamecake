@@ -555,14 +555,22 @@ wire.update=function()
 
 	-- pull all waiting memos ?
 	while wire.active( wire.thread_handle ) do
-		local m = wire.threads.us:pull()
-		if not m then break end -- we pulled nothing
+		local m
+		-- this may raise an error, just print and continue
+		local suc,err=xpcall(
+			function() m = wire.threads.us:pull() end ,
+			TRACEBACK )
+		if suc and not m then break end -- we pulled nothing
 	end
 	
 	-- memos with results
 	for id , memo in pairs(wire.memos.result) do
 		if memo.callback then
-			memo.callback(memo) -- this must remove the memo or it will be called repeatedly
+			-- this may raise an error, just print and continue
+			local suc,err=xpcall(
+				function() memo.callback(memo) end ,
+				TRACEBACK )
+			memo:remove() -- do not call again
 		end
 	end
 
