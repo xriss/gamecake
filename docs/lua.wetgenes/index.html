@@ -822,7 +822,10 @@
 <a class="sub" href="../../docs/lua.wetgenes.txt.utf.string"><span>/lua.wetgenes.txt.utf.string</span></a><a class="par" href="../../docs/lua.wetgenes.txt.words"><span>/lua.wetgenes.txt.words</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
-<a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../../docs/lua.wetgenes.wiretasks"><span>/lua.wetgenes.wiretasks</span></a>
+
+<a class="sub" href="../../docs/lua.wetgenes.wiretasks.sock_code"><span>/lua.wetgenes.wiretasks.sock_code</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.wiretasks.sqlite_code"><span>/lua.wetgenes.wiretasks.sqlite_code</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
 
 <a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a><a class="par" href="../../docs/lua.wire.callbacks"><span>/lua.wire.callbacks</span></a>
 
@@ -851,7 +854,9 @@
 <a class="sub" href="../../docs/lua.wire.timeres"><span>/lua.wire.timeres</span></a>
 <a class="sub" href="../../docs/lua.wire.update"><span>/lua.wire.update</span></a>
 <a class="sub" href="../../docs/lua.wire.wait"><span>/lua.wire.wait</span></a>
-<a class="sub" href="../../docs/lua.wire.wrap"><span>/lua.wire.wrap</span></a>
+<a class="sub" href="../../docs/lua.wire.wrap"><span>/lua.wire.wrap</span></a><a class="par" href="../../docs/lua.wiretasks"><span>/lua.wiretasks</span></a>
+
+<a class="sub" href="../../docs/lua.wiretasks.http_code"><span>/lua.wiretasks.http_code</span></a>
 <a class="sub" href="../../docs/prefabs"><span>/prefabs</span></a>
 <a class="sub" href="../../docs/rules"><span>/rules</span></a>
 <a class="sub" href="../../docs/setup"><span>/setup</span></a>
@@ -8882,6 +8887,28 @@ transforms on them and see if they match any of the transforms we built
 from our starting word. A match then means we can add up the number of 
 transforms on both sides and that is how many steps it would take to 
 get from one word to another by adding and subtracting letters.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.wiretasks">lua.wetgenes.wiretasks</a></h1>
+<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
+<div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.wiretasks.sock_code">lua.wetgenes.wiretasks.sock_code</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L377">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
+<div><p>A basic function to handle (web)socket client connection.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../../docs/lua.wetgenes.wiretasks.sqlite_code">lua.wetgenes.wiretasks.sqlite_code</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L242">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
+<div><p>As we are opening an sqlite database here it wont help much to have 
+more than one thread per database as they will just fight over file 
+access.</p>
 </div>
 </div>
 

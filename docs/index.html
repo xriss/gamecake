@@ -822,7 +822,10 @@
 <a class="sub" href="../docs/lua.wetgenes.txt.utf.string"><span>/lua.wetgenes.txt.utf.string</span></a><a class="par" href="../docs/lua.wetgenes.txt.words"><span>/lua.wetgenes.txt.words</span></a>
 
 <a class="sub" href="../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
-<a class="sub" href="../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../docs/lua.wire"><span>/lua.wire</span></a>
+<a class="sub" href="../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../docs/lua.wetgenes.wiretasks"><span>/lua.wetgenes.wiretasks</span></a>
+
+<a class="sub" href="../docs/lua.wetgenes.wiretasks.sock_code"><span>/lua.wetgenes.wiretasks.sock_code</span></a>
+<a class="sub" href="../docs/lua.wetgenes.wiretasks.sqlite_code"><span>/lua.wetgenes.wiretasks.sqlite_code</span></a><a class="par" href="../docs/lua.wire"><span>/lua.wire</span></a>
 
 <a class="sub" href="../docs/lua.wire.active"><span>/lua.wire.active</span></a><a class="par" href="../docs/lua.wire.callbacks"><span>/lua.wire.callbacks</span></a>
 
@@ -851,7 +854,9 @@
 <a class="sub" href="../docs/lua.wire.timeres"><span>/lua.wire.timeres</span></a>
 <a class="sub" href="../docs/lua.wire.update"><span>/lua.wire.update</span></a>
 <a class="sub" href="../docs/lua.wire.wait"><span>/lua.wire.wait</span></a>
-<a class="sub" href="../docs/lua.wire.wrap"><span>/lua.wire.wrap</span></a>
+<a class="sub" href="../docs/lua.wire.wrap"><span>/lua.wire.wrap</span></a><a class="par" href="../docs/lua.wiretasks"><span>/lua.wiretasks</span></a>
+
+<a class="sub" href="../docs/lua.wiretasks.http_code"><span>/lua.wiretasks.http_code</span></a>
 <a class="sub" href="../docs/prefabs"><span>/prefabs</span></a>
 <a class="sub" href="../docs/rules"><span>/rules</span></a>
 <a class="sub" href="../docs/setup"><span>/setup</span></a>
@@ -11316,6 +11321,28 @@ get from one word to another by adding and subtracting letters.</p>
 </div>
 
 <div class="wrap">
+<h1><a href="../docs/lua.wetgenes.wiretasks">lua.wetgenes.wiretasks</a></h1>
+<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
+<div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wetgenes.wiretasks.sock_code">lua.wetgenes.wiretasks.sock_code</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L377">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
+<div><p>A basic function to handle (web)socket client connection.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wetgenes.wiretasks.sqlite_code">lua.wetgenes.wiretasks.sqlite_code</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L242">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
+<div><p>As we are opening an sqlite database here it wont help much to have 
+more than one thread per database as they will just fight over file 
+access.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../docs/lua.wire">lua.wire</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L9">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>local wire=require(&quot;wire&quot;)
@@ -11795,6 +11822,79 @@ fifo/thread or create a new one with the given name and return that.</p>
 <p>The returned value may be a fifo or a thread, it.is will be &quot;thread&quot; or 
 &quot;fifo&quot; for the different results.</p>
 <p>Always returns a valid table.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wiretasks">lua.wiretasks</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L7">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
+<div><pre><code>local wiretasks=require(&quot;wiretasks&quot;)
+</code></pre>
+<p>This is a small collection of useful tasks for running via wire. Each 
+task has its own specific module dependencies, eg lua socket is needed 
+for http fetching. This module is usually used in a task start code 
+string passed to wire.tasks. So &quot;require(&#39;wiretasks&#39;).http_code()&quot; 
+would be used to start the http task.</p>
+<p>We also include some wrapper functions that make use of memos and 
+require certain tasks to already be running.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wiretasks.http_code">lua.wiretasks.http_code</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L29">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
+<div><pre><code>wire.tasks(&quot;http&quot;,4,&quot;require(&#39;wiretasks&#39;).http_code()&quot;)
+
+result = wire.memo({
+    fifo=wire.manifest(&quot;http&quot;),
+    data={
+        url=&quot;http://google.com/&quot;,
+    },
+    callback=function() end,
+}):resolve()
+</code></pre>
+<p>The code we run in &quot;http&quot; tasks to handle http requests via memos.</p>
+<p>This function requires the following libraries to be available.</p>
+<pre><code>require(&quot;socket.http&quot;)
+require(&quot;ltn12&quot;)
+</code></pre>
+<p>Every memo sent is a http fetch request, the keys set in memo.data 
+control the type of request.</p>
+<pre><code>data.url = &quot;http://google.com/&quot;
+</code></pre>
+<p>The url we will be talking to. This is all you need for a basic GET.</p>
+<pre><code>data.get = { a=1 , b=2 }
+</code></pre>
+<p>If this exists then we send a GET request with this table in the query 
+string, eg append &quot;?a=1&amp;b=2&quot; to the url.</p>
+<pre><code>data.json = { a=1 , b=2 }
+</code></pre>
+<p>If this exists then we encode as json and send as body of a POST also 
+setting &quot;Content-Type&quot; to &quot;application/json&quot; in data.headers</p>
+<pre><code>data.post = { a=1 , b=2 }
+</code></pre>
+<p>If this exists then we encode as a query string and send as body of a 
+POST also setting &quot;Content-Type&quot; to &quot;application/x-www-form-urlencoded&quot; 
+in data.headers</p>
+<pre><code>data.body = &quot;a=1&amp;b=2&quot;
+</code></pre>
+<p>Force a request body string.</p>
+<pre><code>data.method = &quot;GET&quot;
+</code></pre>
+<p>Force a request method.</p>
+<pre><code>data.headers = { [&quot;Content-Type&quot;]=&quot;application/json&quot; , ... }
+</code></pre>
+<p>Force extra headers.</p>
+<pre><code>result.code
+result.status
+result.headers
+result.body
+</code></pre>
+<p>The result of the http.request, may also raise an error for 
+catastrophic failures, eg host not found.</p>
+<p>Many things can go wrong so always check that result.fail is not set 
+and the result.code is as expected ( eg 200 ) and only then is it safe 
+to read the result.body</p>
 </div>
 </div>
 
