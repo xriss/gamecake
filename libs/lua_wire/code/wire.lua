@@ -1468,6 +1468,306 @@ wire.http_code=function()
 end
 
 
+--[[#lua.wetgenes.wire.sqlite_code
+
+As we are opening an sqlite database here it wont help much to have 
+more than one thread per database as they will just fight over file 
+access.
+
+]]
+wire.sqlite_code=function(linda,task_id,task_idx)
+
+	local lanes = require("lanes")
+	local sqlite3 = lanes.require("lsqlite3")
+
+	local db
+
+	if sqlite_filename then	db = assert(sqlite3.open(sqlite_filename)) end -- auto open
+	if sqlite_pragmas and db then db:exec(sqlite_pragmas) end -- auto configure
+
+	local function request(memo)
+	
+		local ret={}
+	
+		if memo.cmd then -- this is a special cmd eg to close or open the database
+		
+			if memo.cmd=="close" then -- probably good to "try" and do this before exiting
+				db:close()
+				db=nil
+				ret.rows={}
+			end
+
+		elseif memo.sql then -- execute some sql
+		
+			if not db then
+				ret.error="no database"
+				return ret
+			end
+
+			local rows={}
+			
+			
+			local err
+			
+			if memo.binds or memo.blobs then -- use prepared statement
+			
+				local stmt = db:prepare(memo.sql)
+				if not stmt then
+					ret.error=db:errmsg()
+					return ret
+				end
+
+				local bmax=stmt:bind_parameter_count()
+				local bs={}
+				for i=1,bmax do
+					local n=stmt:bind_parameter_name(i)
+					if n then
+						bs[n]=i
+						bs[n:sub(2)]=i
+					end
+				end
+
+				
+				local blobs=memo.blobs or {}
+				for n,v in pairs( memo.binds or {} ) do
+					if bs[n] and not blobs[n] then -- a blob might be in both places
+						stmt:bind( bs[n] , v )
+					end
+				end
+				for n,v in pairs( memo.blobs or {} ) do -- these binds should be treated as blobs
+					if bs[n] then
+						stmt:bind_blob( bs[n] , v )
+					end
+				end
+				
+				if memo.compact then
+					rows.names=stmt:get_names()
+					for it in stmt:rows() do
+						rows[#rows+1]=it
+					end
+				else
+					for it in stmt:nrows() do
+						rows[#rows+1]=it
+					end
+				end
+
+				err=stmt:finalize()
+			
+			else
+			
+				if memo.compact then -- return data in a slightly more compact format
+
+					err=db:exec(memo.sql,function(udata,cols,values,names)
+						rows.names=names
+						rows[#rows+1]=values
+						return 0
+					end,"udata")
+				
+				else
+
+					err=db:exec(memo.sql,function(udata,cols,values,names)
+						local it={}
+						for i=1,cols do it[ names[i] ] = values[i] end
+						rows[#rows+1]=it
+						return 0
+					end,"udata")
+
+				end
+
+			end
+
+			if err~=sqlite3.OK then
+				ret.error=db:errmsg()
+			else
+				ret.rows=rows
+			end
+
+		end
+		
+		return ret
+	end
+
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+		
+		if memo then
+			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+
+	end
+
+end
+
+--[[#lua.wetgenes.wire.client_code
+
+A basic function to handle (web)socket client connection.
+
+]]
+wire.client_code=function(linda,task_id,task_idx)
+
+	local lanes=require("lanes")
+	if lane_threadname then lane_threadname(task_id) end
+
+	local wjson = lanes.require("wetgenes.json")
+	local js_eval -- function call into javascript if we are an emcc build
+	do
+		local ok,lib=pcall(function() return lanes.require("wetgenes.win.core") end )
+		if ok and lib then js_eval=lib.js_eval end
+	end
+	local js_call=function(script,opts)
+		local js=[[
+(function(opts){
+	var ret={};
+]]..script..[[
+	return JSON.stringify(ret);
+})(]]..wjson.encode(opts or {})..[[);
+]]
+		local rets=js_eval(js)
+		return wjson.decode( rets or "{}" ) or {}
+	end
+	
+	local socket = lanes.require("socket")
+	local err
+	local client
+	if js_eval then -- js mode
+
+		js_call([[
+
+globalThis.wetgenes_tasks=globalThis.wetgenes_tasks || {};
+globalThis.wetgenes_tasks[opts.task_id]=globalThis.wetgenes_tasks[opts.task_id] || {};
+
+var data=globalThis.wetgenes_tasks[opts.task_id];
+data.send=[];
+data.recv=[];
+
+data.onmessage=function(e){
+	console.log("onmessage OK");
+	data.recv.push(e.data);
+}
+data.onopen=function(e){
+	console.log("onopen OK");
+	console.log(e);
+}
+data.onclose=function(e){
+	console.log("onclose OK");
+	console.log(e);
+}
+data.onerror=function(e){
+	console.log("onerror OK");
+	console.log(e);
+}
+
+if(opts.url)
+{
+	data.sock=new WebSocket(opts.url);
+	data.sock.onmessage=data.onmessage;
+	data.sock.onopen=data.onopen;
+	data.sock.onclose=data.onclose;
+	data.sock.onerror=data.onerror;
+console.log(data.sock);
+}
+
+]],{task_id=task_id,url=client_url})
+	else
+		if client_host and client_port then -- auto open a client connection
+			client , err = socket.connect(client_host,client_port)
+			if client then client:settimeout(0.00001) end
+		end
+	end
+
+	local request=function(memo)
+	
+		if js_eval then -- need js mode
+			local ret=js_call([[
+
+var data=globalThis.wetgenes_tasks[opts.task_id];
+
+if(opts.data)
+{
+console.log("QUEUE:"+opts.data);
+	data.send.push(opts.data);
+}
+
+if(data.sock)
+{
+	if(data.sock.readyState==1)
+	{
+		while(data.send.length>0)
+		{
+console.log("SEND:"+send[0]);
+			data.sock.send(data.send.shift());
+		}
+	}
+	else
+	{
+//console.log("SOCK:"+data.sock.readyState);
+	}
+}
+while(data.recv.length>0)
+{
+console.log("RECV:"+recv[0]);
+	ret.data=(ret.data || "")+data.recv.shift();
+}
+
+]],{task_id=task_id,data=memo.data})
+
+			return ret
+		end -- end js mode
+		
+		local ret={}
+	
+		if memo.cmd then -- this is a special cmd eg to close or open a socket
+			if     memo.cmd=="connect" and not client then
+				client , err = socket.connect(memo.host,memo.port)
+				if client then client:settimeout(0.00001) end
+				if err then		ret.error=err
+				else			ret.data=true
+				end
+			elseif memo.cmd=="close" and client then
+				client:close()
+				client=nil
+				ret.data=true
+			end
+		end
+
+		if memo.data then -- something to send
+			if not client then return {error=err or true} end
+			client:send(memo.data)
+		end
+		
+		if client then -- try and read some data from server
+			local part,e,part2=client:receive("*a")
+			if e=="timeout" then ret.warning=e e=nil err=nil part=part or part2 end -- ignore timeouts, they are not errors just partial data
+			if part~="" then ret.data=part end
+			if e then ret.error=e end
+		end
+		
+		return ret
+	end
+	
+	while true do
+
+		local _,memo= linda:receive( nil , task_id ) -- wait for any memos coming into this thread
+		
+		if memo then
+			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
+			if not ok then ret={error=ret or true} end -- reformat errors
+			if memo.id then -- result requested
+				linda:send( nil , memo.id , ret )
+			end
+		end
+
+	end
+	
+end
+
+
+
 ------------------------------------------------------------------------
 -- auto setup
 

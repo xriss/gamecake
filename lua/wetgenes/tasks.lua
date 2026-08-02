@@ -1,6 +1,10 @@
 --
 -- (C) 2022 Kriss@XIXs.com
 --
+-- this has been replaced with a more generic wire module
+-- keeping it around for now
+-- but expect it to be disabled soon
+-- the task_* modules will remain and work with wire
 
 local M={ modname = (...) } package.loaded[M.modname] = M 
 
