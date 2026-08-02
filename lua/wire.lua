@@ -1111,7 +1111,7 @@ count is the number of tasks we want, call with 0 and we will halt all
 named tasks.
 
 code is the string of lua code to run in each task, eg for http tasks 
-it would be "require('wire').http_code()" to run the wire.http_code 
+it would be "require('wiretasks').http_code()" to run the wire.http_code 
 function in each task. If count zero, this may be skipped.
 
 We will try and reuse old tasks, if stopping and starting, but really 

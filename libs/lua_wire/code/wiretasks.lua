@@ -8,70 +8,92 @@
 
 	local wiretasks=require("wiretasks")
 
+This is a small collection of useful tasks for running via wire. Each 
+task has its own specific module dependencies, eg lua socket is needed 
+for http fetching. This module is usually used in a task start code 
+string passed to wire.tasks. So "require('wiretasks').http_code()" 
+would be used to start the http task.
+
+We also include some wrapper functions that make use of memos and 
+require certain tasks to already be running.
+
 ]]
+
+local wire=require("wire")
 
 --module
 local M={ modname=(...) }
 package.loaded[M.modname]=M
 local wiretasks=M
 
---[[#lua.wire.http_code
+--[[#lua.wiretasks.http_code
 
-	wire.execute("http",4,"require('wire').http_code()")
-	result = wire.memo({...}):resolve()
-	wire.execute("http",0)
+	wire.tasks("http",4,"require('wiretasks').http_code()")
 
-The code we run in http_tasks to handle http request via memos.
+	result = wire.memo({
+		fifo=wire.manifest("http"),
+		data={
+			url="http://google.com/",
+		},
+		callback=function() end,
+	}):resolve()
 
-Note that this function requires external libraries that must be 
-available in order to work.
+The code we run in "http" tasks to handle http requests via memos.
 
-Every memo is a http request, the keys set in memo control the type of 
-request.
+This function requires the following libraries to be available.
 
-	memo.url = "http://google.com/"
+	require("socket.http")
+	require("ltn12")
 
-The url we will be talking to.
+Every memo sent is a http fetch request, the keys set in memo.data 
+control the type of request.
 
-	memo.get = { a=1 , b=2 }
+	data.url = "http://google.com/"
 
-If set then send a GET request with this table in the query string, eg 
-append "?a=1&b=2" to the url.
+The url we will be talking to. This is all you need for a basic GET.
 
-	memo.json = { a=1 , b=2 }
+	data.get = { a=1 , b=2 }
 
-If set then encode as json and send as body of a POST also setting 
-"Content-Type" to "application/json" in memo.headers
+If this exists then we send a GET request with this table in the query 
+string, eg append "?a=1&b=2" to the url.
 
-	memo.post = { a=1 , b=2 }
+	data.json = { a=1 , b=2 }
 
-If set then encode as a query string and send as body of a POST also 
-setting "Content-Type" to "application/x-www-form-urlencoded" in 
-memo.headers
+If this exists then we encode as json and send as body of a POST also 
+setting "Content-Type" to "application/json" in data.headers
 
-	memo.body = "a=1&b=2"
+	data.post = { a=1 , b=2 }
+
+If this exists then we encode as a query string and send as body of a 
+POST also setting "Content-Type" to "application/x-www-form-urlencoded" 
+in data.headers
+
+	data.body = "a=1&b=2"
 
 Force a request body string.
 
-	memo.method = "GET"
+	data.method = "GET"
 
 Force a request method.
 
-	memo.headers = { ["Content-Type"]="application/json" , ... }
+	data.headers = { ["Content-Type"]="application/json" , ... }
 
 Force extra headers.
 
-	result.body
 	result.code
-	result.headers
 	result.status
+	result.headers
+	result.body
 
-The result of the request, may also raise an error for catastrophic 
-failures, eg host not found. Otherwise check the result.code is 200 and 
-then read the body returned if you are expecting data.
+The result of the http.request, may also raise an error for 
+catastrophic failures, eg host not found.
+
+Many things can go wrong so always check that result.fail is not set 
+and the result.code is as expected ( eg 200 ) and only then is it safe 
+to read the result.body
 
 ]]
-wire.http_code=function()
+wiretasks.http_code=function()
 
 	local js_http -- function call into javascript if we are an emcc build
 	pcall( function() js_http = require("wetgenes.win.core").js_http end )
@@ -217,14 +239,14 @@ wire.http_code=function()
 end
 
 
---[[#lua.wetgenes.wire.sqlite_code
+--[[#lua.wetgenes.wiretasks.sqlite_code
 
 As we are opening an sqlite database here it wont help much to have 
 more than one thread per database as they will just fight over file 
 access.
 
 ]]
-wire.sqlite_code=function(linda,task_id,task_idx)
+wiretasks.sqlite_code=function(linda,task_id,task_idx)
 
 	local lanes = require("lanes")
 	local sqlite3 = lanes.require("lsqlite3")
@@ -352,12 +374,12 @@ wire.sqlite_code=function(linda,task_id,task_idx)
 
 end
 
---[[#lua.wetgenes.wire.client_code
+--[[#lua.wetgenes.wiretasks.sock_code
 
 A basic function to handle (web)socket client connection.
 
 ]]
-wire.sock_code=function(linda,task_id,task_idx)
+wiretasks.sock_code=function(linda,task_id,task_idx)
 
 	local lanes=require("lanes")
 	if lane_threadname then lane_threadname(task_id) end

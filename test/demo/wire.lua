@@ -54,5 +54,5 @@ for i=3,1,-1 do
 end
 
 -- http fetch will have happened in the background by now unless its very slow
-if memo_get.result then print("got http",memo_get.result.status) end
+if memo_get.result then print("got http",memo_get.result.code,memo_get.result.status) end
 
