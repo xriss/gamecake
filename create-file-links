@@ -50,6 +50,7 @@ ln -f lua/box2d.lua            libs/lua_boxxd/code/box2d.lua
 ln -f lua/box3d.lua            libs/lua_boxxd/code/box3d.lua
 
 ln -f lua/wire.lua            libs/lua_wire/code/wire.lua
+ln -f lua/wiretasks.lua       libs/lua_wire/code/wiretasks.lua
 
 
 echo "listing all linked files"
