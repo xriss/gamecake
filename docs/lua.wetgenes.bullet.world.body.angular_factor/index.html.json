@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 802,
+   "count": 805,
    "name": "lua"
   },
   {
@@ -566,7 +566,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 663,
+   "count": 666,
    "name": "lua.wetgenes"
   },
   {
@@ -3216,6 +3216,18 @@
   {
    "count": 1,
    "name": "lua.wetgenes.txt.words.transform"
+  },
+  {
+   "count": 3,
+   "name": "lua.wetgenes.wire"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.wire.client_code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.wire.sqlite_code"
   },
   {
    "count": 30,
