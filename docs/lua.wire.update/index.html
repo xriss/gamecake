@@ -824,12 +824,9 @@
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../../docs/lua.wetgenes.wiretasks"><span>/lua.wetgenes.wiretasks</span></a>
 
-<a class="sub" href="../../docs/lua.wetgenes.wiretasks.sock_code"><span>/lua.wetgenes.wiretasks.sock_code</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.wiretasks.sqlite_code"><span>/lua.wetgenes.wiretasks.sqlite_code</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
 
-<a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a><a class="par" href="../../docs/lua.wire.callbacks"><span>/lua.wire.callbacks</span></a>
-
-<a class="sub" href="../../docs/lua.wire.callbacks.discard"><span>/lua.wire.callbacks.discard</span></a>
+<a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a>
 <a class="sub" href="../../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a>
 <a class="sub" href="../../docs/lua.wire.do_start"><span>/lua.wire.do_start</span></a><a class="par" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
 
@@ -868,12 +865,15 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.update">lua.wire.update</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L544">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L539">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>wire.update()
 </code></pre>
 <p>Fetch and process memos, should be called at least once a second to 
-deal with memo replies.</p>
-<p>memo callbacks will be launched from this function.</p>
+deal with memo replies or callbacks will not fire in a reasonable time.</p>
+<p>memo callbacks on_result will only be launched from this function. Note 
+that a result may be a fail if result.fail is set.</p>
+<p>After calling this all memos that got a reply will have been removed 
+from the wire cache as we no longer need to deal with them.</p>
 </div>
 </div>
 

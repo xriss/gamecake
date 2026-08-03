@@ -824,12 +824,9 @@
 <a class="sub" href="../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
 <a class="sub" href="../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../docs/lua.wetgenes.wiretasks"><span>/lua.wetgenes.wiretasks</span></a>
 
-<a class="sub" href="../docs/lua.wetgenes.wiretasks.sock_code"><span>/lua.wetgenes.wiretasks.sock_code</span></a>
 <a class="sub" href="../docs/lua.wetgenes.wiretasks.sqlite_code"><span>/lua.wetgenes.wiretasks.sqlite_code</span></a><a class="par" href="../docs/lua.wire"><span>/lua.wire</span></a>
 
-<a class="sub" href="../docs/lua.wire.active"><span>/lua.wire.active</span></a><a class="par" href="../docs/lua.wire.callbacks"><span>/lua.wire.callbacks</span></a>
-
-<a class="sub" href="../docs/lua.wire.callbacks.discard"><span>/lua.wire.callbacks.discard</span></a>
+<a class="sub" href="../docs/lua.wire.active"><span>/lua.wire.active</span></a>
 <a class="sub" href="../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a>
 <a class="sub" href="../docs/lua.wire.do_start"><span>/lua.wire.do_start</span></a><a class="par" href="../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
 
@@ -11327,18 +11324,58 @@ get from one word to another by adding and subtracting letters.</p>
 </div>
 
 <div class="wrap">
-<h1><a href="../docs/lua.wetgenes.wiretasks.sock_code">lua.wetgenes.wiretasks.sock_code</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L377">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
-<div><p>A basic function to handle (web)socket client connection.</p>
-</div>
-</div>
-
-<div class="wrap">
 <h1><a href="../docs/lua.wetgenes.wiretasks.sqlite_code">lua.wetgenes.wiretasks.sqlite_code</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L242">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
-<div><p>As we are opening an sqlite database here it wont help much to have 
-more than one thread per database as they will just fight over file 
-access.</p>
+<div><pre><code>wire.tasks(&quot;sqlite&quot;,1,&quot;require(&#39;wiretasks&#39;).sqlite_code()&quot;,{
+        sqlite_filename = &quot;./test.sql&quot; ,
+        sqlite_pragmas = &quot;&quot; ,
+    })
+
+result = wire.memo({
+    fifo=wire.manifest(&quot;sqlite&quot;),
+    data={
+        sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,
+    },
+    on_result=function() end,
+}):resolve()
+</code></pre>
+<p>The code we run in &quot;sqlite&quot; tasks to handle sqlite requests via memos.</p>
+<p>This function requires the following libraries to be available.</p>
+<pre><code>require(&quot;lsqlite3&quot;)
+</code></pre>
+<p>As we are opening an sqlite database here it probably wont help you 
+much to have more than one thread per database as they will just fight 
+over file access. To open multiple sqlite databases create multiple 
+tasks with different names.</p>
+<p>Globals passed into the thread control the startup actions, primarily 
+you should provide an sqlite_filename to open.</p>
+<pre><code>sqlite_filename=&quot;./test.sql&quot;
+</code></pre>
+<p>The sqlite database to open when this thread starts.</p>
+<p>Most memos are simple SQL queries, but some extra commands exist via 
+data.action</p>
+<pre><code>data.action=&quot;close&quot;
+</code></pre>
+<p>Shut down the sqlite database, this combined with waiting for the 
+thread to halt allows sqlite to clean up before exiting the process.</p>
+<p>When data.action is not set we are performing an SQL query.</p>
+<pre><code>data.sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,
+</code></pre>
+<p>Will return result.rows filled with data.</p>
+<pre><code>data.compact=true
+</code></pre>
+<p>If this boolean is set then we will return compact rows, data.rows will 
+contain rows that are arrays and data.names will be an array of column 
+names. If not set then we return rows as [name]=value objects.</p>
+<pre><code>data.binds={ name=value , ... }
+</code></pre>
+<p>Bind these values to an sqlite statement.</p>
+<pre><code>data.blobs={ name=value , ... }
+</code></pre>
+<p>Bind these values to an sqlite statement as blobs. This must be used 
+for sending binary data.
+<br/>
+<br/></p>
 </div>
 </div>
 
@@ -11389,7 +11426,7 @@ must be written to cooperate with the shut down.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.active">lua.wire.active</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L188">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L185">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>active = wire.active(handle)
 active = wire.active(thread)
 </code></pre>
@@ -11405,29 +11442,8 @@ thread has been asked to halt.</p>
 </div>
 
 <div class="wrap">
-<h1><a href="../docs/lua.wire.callbacks">lua.wire.callbacks</a></h1>
-<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
-<div></div>
-</div>
-
-<div class="wrap">
-<h1><a href="../docs/lua.wire.callbacks.discard">lua.wire.callbacks.discard</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L656">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
-<div><pre><code>wire.memo({ callback=wire.callbacks.discard })
-</code></pre>
-<p>This is a generic callback to be used when you do not care about a 
-memos result.</p>
-<p>This callback will remove the memo, eg it will call memo:remove()</p>
-<p>If you do not remove memos when you are finished with them then they 
-will just accumulate inside the wire.memos table. So it is important to 
-always use this callback if you are not going to check on a memo result 
-later.</p>
-</div>
-</div>
-
-<div class="wrap">
 <h1><a href="../docs/lua.wire.data_to_table">lua.wire.data_to_table</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L131">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L128">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>table = wire.data_to_table( data )
 </code></pre>
 <p>Convert a data (string) into a lua table.</p>
@@ -11441,7 +11457,7 @@ you.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.do_start">lua.wire.do_start</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1057">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1068">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><p>Wrapper code used in a new thread to set things up and handle errors 
 etc.</p>
 </div>
@@ -11449,7 +11465,7 @@ etc.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.fifo">lua.wire.fifo</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L466">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L462">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>fifo = wire.fifo(handle)
 fifo = wire.fifo(name)
 fifo = wire.fifo(opts)
@@ -11472,7 +11488,7 @@ wrap it with a fifo.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.fifo.peek">lua.wire.fifo.peek</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L795">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L803">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>bool = fifo:peek()
 bool = thread:peek()
 </code></pre>
@@ -11487,7 +11503,7 @@ the order of memos in the fifo.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.fifo.pull">lua.wire.fifo.pull</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L820">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L828">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>memo = fifo:pull()
 memo = thread:pull()
 </code></pre>
@@ -11500,12 +11516,14 @@ wire.memos.</p>
 <p>This is useful if you are waiting for a specific reply and want to keep 
 pulling until you find it.</p>
 <p>Returns nil if there is no memo available.</p>
+<p>May raise an error if we get a reply with an id that we do not 
+recognize.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.fifo.push">lua.wire.fifo.push</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L868">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L879">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>fifo:push(memo)
 thread:push(memo)
 </code></pre>
@@ -11515,7 +11533,7 @@ thread:push(memo)
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.fifo.wait">lua.wire.fifo.wait</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L885">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L896">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>fifo:wait(secs)
 thread:wait(secs)
 </code></pre>
@@ -11526,7 +11544,7 @@ fifo.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.house_code">lua.wire.house_code</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1189">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1213">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><p>The message loop code we run in the house thread (-2) to synchronize 
 process wide task names and handles.</p>
 </div>
@@ -11534,7 +11552,7 @@ process wide task names and handles.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.manifest">lua.wire.manifest</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L274">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L271">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>it = wire.manifest(name)
 it = wire.manifest(handle)
 </code></pre>
@@ -11550,38 +11568,54 @@ handle, so this can block for a while before returning.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.memo">lua.wire.memo</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L579">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
-<div><pre><code>memo = wire.memo( )
-memo = wire.memo( {} )
-memo = wire.memo( { sender=handle , id=id , callback=callback } )
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L578">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>memo = wire.memo()
+memo = wire.memo( { fifo=handle , data={} , on_result=callback } )
 </code></pre>
-<p>Create a memo and return it, if you pass in a new table with settings 
-then that is the table we will modify and return.</p>
+<p>Create a memo and return it, if you pass in a new table then that is 
+the table we will modify and return.</p>
+<p>So you can either get a fresh memo and then fill it or pass in a new 
+table with values already set and have that tables meta adjusted to 
+make it a memo.</p>
+<p>memo.fifo must be provided as it is the destination. May be a 
+fifo/thread (table) or a handle (number).</p>
+<p>memo.data is the data to send and must be a table.</p>
+<p>memo.result must be nil and will be set to the result when we receive 
+it.</p>
 <p>memo.sender can be provided or it will be set to our handle ( which is 
-wire.thread.us.handle )</p>
-<p>memo.id can be provided or it will be generated.</p>
-<p>The memo will also be placed in wire.memos for later processing.</p>
+wire.thread.us.handle ) It must be a handle and it is where replies are 
+sent.</p>
+<p>memo.id can be provided or it will be generated. When receiving a memo, 
+we <em>must</em> use the sent id or will not be able to reply. This will be 
+handled by fifo.pull so best to consider it an internal value and not 
+mess with it.</p>
+<p>The memo will also be placed in wire.memos for later processing by 
+wire, it will remain there until wire.update deals with result/fail 
+callbacks and removes it. You may keep your own memo reference or rely 
+on the callbacks to remind you. If you create a memo that does not get 
+sent and replied to then you will have to remove it manually.</p>
 <p>memo.state will be set to &quot;setup&quot;</p>
-<p>if memo.callback is provided then it will be called during wire.update 
-after we get a reply. It will be called like so:</p>
-<pre><code>memo.callback(memo)
+<p>if memo.on_result is provided then it will be called during wire.update 
+after we get a reply. Note that a result may be a fail if result.fail 
+is set. on_result will be called like so:</p>
+<pre><code>memo.on_result(memo)
 </code></pre>
-<br/>
-<br/>
-
+<p>With or without a callback, the memos that had results will then be 
+removed by wire.update as there is nothing else for wire to do.</p>
 <p>FYI HAX TBH : memo.id is set to a light userdata of the memo tables 
 pointer, this should be unique across multiple lua states and threads 
 in the same process, for as long as the table stays on the stack. A 
 future lua garbage collection system could break this by moving tables 
 around in system memory but I believe this is currently &quot;safe&quot; as of 
-2026 in all available versions of lua/luajit and if that changes I will 
-fix it.</p>
+2026 in currently available versions of lua/luajit and if that changes 
+I will fix it. There exists some reqritw of lua from c to java etc, 
+these probably work but you might want to double check.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.memo.remove">lua.wire.memo.remove</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L631">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L653">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>memo:remove()
 </code></pre>
 <p>Remove a memo from wire.memos.</p>
@@ -11594,7 +11628,7 @@ in wire.memos</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.memo.resolve">lua.wire.memo.resolve</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L740">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L744">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>result = memo:resolve()
 result = wire.memo(...):resolve()
 </code></pre>
@@ -11611,15 +11645,18 @@ thread.</p>
 with a hard fail. A hard fail means the thread could not deal with your 
 memo, so lua code broke, memo was invalid etc. This is a hard fail and 
 will raise an error rather than return a result.</p>
-<p>If the thread does not reply then this will lock.</p>
+<p>If the thread does not reply (probably a broken or missing task) then 
+this will lock waiting on a result.</p>
 <p>If the currently running thread is asked to halt then this will raise 
 an error rather than return.</p>
+<p>Note that this function ignores callbacks which are only called during 
+wire.result</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.memo.send">lua.wire.memo.send</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L720">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L724">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>memo:reply()
 </code></pre>
 <p>Reply to a memo, this uses the senders handle as a fifo without it 
@@ -11630,7 +11667,7 @@ needing to be wrapped in a full fifo/thread.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.memo.status">lua.wire.memo.status</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L674">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L678">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>memo:status(state)
 </code></pre>
 <p>Change status of memo, moving it between wire.memos[ memo.state ] 
@@ -11642,7 +11679,7 @@ you.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.prepare_start">lua.wire.prepare_start</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1013">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1024">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>start = wire.prepare_start( { start=&quot;...&quot; , globals={} } )
 
 opts.start=nil
@@ -11657,7 +11694,7 @@ table down into this function to prepare the start string.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.serialize">lua.wire.serialize</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L902">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L913">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>luastr = wire.serialize(tab)
 luastr = wire.serialize(tab,{ indent=&quot;\t&quot; , newline=&quot;\n&quot; , errors=true  })
 </code></pre>
@@ -11680,7 +11717,7 @@ comments to the output. EG unknown types or recursion.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.sleep">lua.wire.sleep</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L148">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L145">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>wire.sleep(secs)
 </code></pre>
 <p>Take a nap for at least the given amount of seconds, probably a little 
@@ -11690,7 +11727,7 @@ bit longer.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.table_to_data">lua.wire.table_to_data</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L114">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L111">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>data = wire.table_to_data( table )
 </code></pre>
 <p>Convert a lua table into a data (string).</p>
@@ -11704,7 +11741,7 @@ you.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.tasks">lua.wire.tasks</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1097">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L1108">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>wire.tasks(name,count,code)
 wire.tasks(name,0)
 </code></pre>
@@ -11727,7 +11764,7 @@ go until the process shuts down.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.thread">lua.wire.thread</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L335">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L332">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>thread = wire.thread(handle)
 thread = wire.thread(name)
 thread = wire.thread(opts)
@@ -11773,7 +11810,7 @@ handlers etc.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.time">lua.wire.time</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L168">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L165">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>secs = wire.time()
 </code></pre>
 <p>Get the current TIME_UTC via a timespec_get and converted into a 
@@ -11783,7 +11820,7 @@ double.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.timeres">lua.wire.timeres</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L178">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L175">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>secs = wire.timeres()
 </code></pre>
 <p>Get the TIME_UTC resolution via a timespec_getres and converted into a 
@@ -11793,18 +11830,21 @@ double.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.update">lua.wire.update</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L544">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L539">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>wire.update()
 </code></pre>
 <p>Fetch and process memos, should be called at least once a second to 
-deal with memo replies.</p>
-<p>memo callbacks will be launched from this function.</p>
+deal with memo replies or callbacks will not fire in a reasonable time.</p>
+<p>memo callbacks on_result will only be launched from this function. Note 
+that a result may be a fail if result.fail is set.</p>
+<p>After calling this all memos that got a reply will have been removed 
+from the wire cache as we no longer need to deal with them.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.wait">lua.wire.wait</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L158">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L155">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>wire.wait(secs)
 </code></pre>
 <p>Take a nap for upto the given amount of seconds. We will wakeup 
@@ -11814,7 +11854,7 @@ whenever a new msg is sent to any fifo or when this time has passed.</p>
 
 <div class="wrap">
 <h1><a href="../docs/lua.wire.wrap">lua.wire.wrap</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L221">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L218">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>it = wire.wrap(name,handle)
 </code></pre>
 <p>We <em>know</em> that this handle exists. So either return a previously cached 
@@ -11850,7 +11890,7 @@ result = wire.memo({
     data={
         url=&quot;http://google.com/&quot;,
     },
-    callback=function() end,
+    on_result=function() end,
 }):resolve()
 </code></pre>
 <p>The code we run in &quot;http&quot; tasks to handle http requests via memos.</p>

@@ -824,12 +824,9 @@
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../../docs/lua.wetgenes.wiretasks"><span>/lua.wetgenes.wiretasks</span></a>
 
-<a class="sub" href="../../docs/lua.wetgenes.wiretasks.sock_code"><span>/lua.wetgenes.wiretasks.sock_code</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.wiretasks.sqlite_code"><span>/lua.wetgenes.wiretasks.sqlite_code</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
 
-<a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a><a class="par" href="../../docs/lua.wire.callbacks"><span>/lua.wire.callbacks</span></a>
-
-<a class="sub" href="../../docs/lua.wire.callbacks.discard"><span>/lua.wire.callbacks.discard</span></a>
+<a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a>
 <a class="sub" href="../../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a>
 <a class="sub" href="../../docs/lua.wire.do_start"><span>/lua.wire.do_start</span></a><a class="par" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
 
@@ -868,7 +865,7 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo">lua.wire.fifo</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L466">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L462">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>fifo = wire.fifo(handle)
 fifo = wire.fifo(name)
 fifo = wire.fifo(opts)
@@ -891,7 +888,7 @@ wrap it with a fifo.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo.peek">lua.wire.fifo.peek</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L795">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L803">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>bool = fifo:peek()
 bool = thread:peek()
 </code></pre>
@@ -906,7 +903,7 @@ the order of memos in the fifo.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo.pull">lua.wire.fifo.pull</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L820">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L828">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>memo = fifo:pull()
 memo = thread:pull()
 </code></pre>
@@ -919,12 +916,14 @@ wire.memos.</p>
 <p>This is useful if you are waiting for a specific reply and want to keep 
 pulling until you find it.</p>
 <p>Returns nil if there is no memo available.</p>
+<p>May raise an error if we get a reply with an id that we do not 
+recognize.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo.push">lua.wire.fifo.push</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L868">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L879">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>fifo:push(memo)
 thread:push(memo)
 </code></pre>
@@ -934,7 +933,7 @@ thread:push(memo)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo.wait">lua.wire.fifo.wait</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L885">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L896">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>fifo:wait(secs)
 thread:wait(secs)
 </code></pre>

@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 806,
+   "count": 803,
    "name": "lua"
   },
   {
@@ -566,7 +566,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 666,
+   "count": 665,
    "name": "lua.wetgenes"
   },
   {
@@ -3218,32 +3218,20 @@
    "name": "lua.wetgenes.txt.words.transform"
   },
   {
-   "count": 3,
+   "count": 2,
    "name": "lua.wetgenes.wiretasks"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.wiretasks.sock_code"
   },
   {
    "count": 1,
    "name": "lua.wetgenes.wiretasks.sqlite_code"
   },
   {
-   "count": 29,
+   "count": 27,
    "name": "lua.wire"
   },
   {
    "count": 1,
    "name": "lua.wire.active"
-  },
-  {
-   "count": 2,
-   "name": "lua.wire.callbacks"
-  },
-  {
-   "count": 1,
-   "name": "lua.wire.callbacks.discard"
   },
   {
    "count": 1,
@@ -3422,7 +3410,7 @@
    "body": "<pre><code>luastr = wire.serialize(tab)\nluastr = wire.serialize(tab,{ indent=&quot;\\t&quot; , newline=&quot;\\n&quot; , errors=true  })\n</code></pre>\n<p>Turn a table into a valid lua string that will recreate the table.</p>\n<p>Optionally pass in an opts table that we will use during serialization \nso must be unique.</p>\n<p>Possible options are.</p>\n<pre><code>indent=&quot; &quot;\n</code></pre>\n<p>Indention per level. set to &quot;&quot; for compact output.</p>\n<pre><code>newline=&quot;\\n&quot;\n</code></pre>\n<p>Line ending, set to &quot;&quot; for overly compact output.</p>\n<pre><code>errors=nil\n</code></pre>\n<p>Set this to true and we will raise errors rather than simply adding \ncomments to the output. EG unknown types or recursion.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 902,
+   "line": 913,
    "name": "lua.wire.serialize",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

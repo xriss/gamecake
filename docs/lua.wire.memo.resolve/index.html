@@ -824,12 +824,9 @@
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../../docs/lua.wetgenes.wiretasks"><span>/lua.wetgenes.wiretasks</span></a>
 
-<a class="sub" href="../../docs/lua.wetgenes.wiretasks.sock_code"><span>/lua.wetgenes.wiretasks.sock_code</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.wiretasks.sqlite_code"><span>/lua.wetgenes.wiretasks.sqlite_code</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
 
-<a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a><a class="par" href="../../docs/lua.wire.callbacks"><span>/lua.wire.callbacks</span></a>
-
-<a class="sub" href="../../docs/lua.wire.callbacks.discard"><span>/lua.wire.callbacks.discard</span></a>
+<a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a>
 <a class="sub" href="../../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a>
 <a class="sub" href="../../docs/lua.wire.do_start"><span>/lua.wire.do_start</span></a><a class="par" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
 
@@ -868,7 +865,7 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.memo.resolve">lua.wire.memo.resolve</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L740">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L744">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>result = memo:resolve()
 result = wire.memo(...):resolve()
 </code></pre>
@@ -885,9 +882,12 @@ thread.</p>
 with a hard fail. A hard fail means the thread could not deal with your 
 memo, so lua code broke, memo was invalid etc. This is a hard fail and 
 will raise an error rather than return a result.</p>
-<p>If the thread does not reply then this will lock.</p>
+<p>If the thread does not reply (probably a broken or missing task) then 
+this will lock waiting on a result.</p>
 <p>If the currently running thread is asked to halt then this will raise 
 an error rather than return.</p>
+<p>Note that this function ignores callbacks which are only called during 
+wire.result</p>
 </div>
 </div>
 

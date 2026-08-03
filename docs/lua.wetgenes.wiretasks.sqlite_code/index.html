@@ -824,12 +824,9 @@
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../../docs/lua.wetgenes.wiretasks"><span>/lua.wetgenes.wiretasks</span></a>
 
-<a class="sub" href="../../docs/lua.wetgenes.wiretasks.sock_code"><span>/lua.wetgenes.wiretasks.sock_code</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.wiretasks.sqlite_code"><span>/lua.wetgenes.wiretasks.sqlite_code</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
 
-<a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a><a class="par" href="../../docs/lua.wire.callbacks"><span>/lua.wire.callbacks</span></a>
-
-<a class="sub" href="../../docs/lua.wire.callbacks.discard"><span>/lua.wire.callbacks.discard</span></a>
+<a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a>
 <a class="sub" href="../../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a>
 <a class="sub" href="../../docs/lua.wire.do_start"><span>/lua.wire.do_start</span></a><a class="par" href="../../docs/lua.wire.fifo"><span>/lua.wire.fifo</span></a>
 
@@ -869,9 +866,56 @@
 <div class="wrap">
 <h1><a href="../../docs/lua.wetgenes.wiretasks.sqlite_code">lua.wetgenes.wiretasks.sqlite_code</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L242">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
-<div><p>As we are opening an sqlite database here it wont help much to have 
-more than one thread per database as they will just fight over file 
-access.</p>
+<div><pre><code>wire.tasks(&quot;sqlite&quot;,1,&quot;require(&#39;wiretasks&#39;).sqlite_code()&quot;,{
+        sqlite_filename = &quot;./test.sql&quot; ,
+        sqlite_pragmas = &quot;&quot; ,
+    })
+
+result = wire.memo({
+    fifo=wire.manifest(&quot;sqlite&quot;),
+    data={
+        sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,
+    },
+    on_result=function() end,
+}):resolve()
+</code></pre>
+<p>The code we run in &quot;sqlite&quot; tasks to handle sqlite requests via memos.</p>
+<p>This function requires the following libraries to be available.</p>
+<pre><code>require(&quot;lsqlite3&quot;)
+</code></pre>
+<p>As we are opening an sqlite database here it probably wont help you 
+much to have more than one thread per database as they will just fight 
+over file access. To open multiple sqlite databases create multiple 
+tasks with different names.</p>
+<p>Globals passed into the thread control the startup actions, primarily 
+you should provide an sqlite_filename to open.</p>
+<pre><code>sqlite_filename=&quot;./test.sql&quot;
+</code></pre>
+<p>The sqlite database to open when this thread starts.</p>
+<p>Most memos are simple SQL queries, but some extra commands exist via 
+data.action</p>
+<pre><code>data.action=&quot;close&quot;
+</code></pre>
+<p>Shut down the sqlite database, this combined with waiting for the 
+thread to halt allows sqlite to clean up before exiting the process.</p>
+<p>When data.action is not set we are performing an SQL query.</p>
+<pre><code>data.sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,
+</code></pre>
+<p>Will return result.rows filled with data.</p>
+<pre><code>data.compact=true
+</code></pre>
+<p>If this boolean is set then we will return compact rows, data.rows will 
+contain rows that are arrays and data.names will be an array of column 
+names. If not set then we return rows as [name]=value objects.</p>
+<pre><code>data.binds={ name=value , ... }
+</code></pre>
+<p>Bind these values to an sqlite statement.</p>
+<pre><code>data.blobs={ name=value , ... }
+</code></pre>
+<p>Bind these values to an sqlite statement as blobs. This must be used 
+for sending binary data.
+<br/>
+<br/></p>
 </div>
 </div>
 
