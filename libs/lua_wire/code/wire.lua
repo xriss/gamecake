@@ -108,9 +108,6 @@ wire.memos={
 	got={},
 }
 
--- generic callbacks, referenced by name
-wire.callbacks={}
-
 --[[#lua.wire.table_to_data
 
 	data = wire.table_to_data( table )
@@ -435,7 +432,6 @@ wire.thread=function(opts)
 			if wire.thread_handle ~= -2 then
 				wire.memo({
 					fifo=wire.threads.house,
-					callback=wire.callbacks.remove, -- auto remove
 					data={
 						action="handle",
 						name=thread.name,
@@ -527,7 +523,6 @@ wire.fifo=function(opts)
 		if wire.thread_handle ~= -2 then
 			wire.memo({
 				fifo=wire.threads.house,
-				callback=wire.callbacks.remove, -- auto remove
 				data={
 					action="handle",
 					name=fifo.name,
@@ -546,14 +541,18 @@ end
 	wire.update()
 
 Fetch and process memos, should be called at least once a second to 
-deal with memo replies.
+deal with memo replies or callbacks will not fire in a reasonable time.
 
-memo callbacks will be launched from this function.
+memo callbacks on_result will only be launched from this function. Note 
+that a result may be a fail if result.fail is set.
+
+After calling this all memos that got a reply will have been removed 
+from the wire cache as we no longer need to deal with them.
 
 ]]
 wire.update=function()
 
-	-- pull all waiting memos ?
+	-- pull all waiting memos
 	while wire.active( wire.thread_handle ) do
 		local m
 		-- this may raise an error, just print and continue
@@ -565,48 +564,71 @@ wire.update=function()
 	
 	-- memos with results
 	for id , memo in pairs(wire.memos.result) do
-		if memo.callback then
+		if memo.on_result then
 			-- this may raise an error, just print and continue
 			local suc,err=xpcall(
-				function() memo.callback(memo) end ,
+				function() memo.on_result(memo) end ,
 				TRACEBACK )
-			memo:remove() -- do not call again
 		end
+		memo:remove() -- do not call again
 	end
 
 end
 
 --[[#lua.wire.memo
 
-	memo = wire.memo( )
-	memo = wire.memo( {} )
-	memo = wire.memo( { sender=handle , id=id , callback=callback } )
+	memo = wire.memo()
+	memo = wire.memo( { fifo=handle , data={} , on_result=callback } )
 
-Create a memo and return it, if you pass in a new table with settings 
-then that is the table we will modify and return.
+Create a memo and return it, if you pass in a new table then that is 
+the table we will modify and return.
+
+So you can either get a fresh memo and then fill it or pass in a new 
+table with values already set and have that tables meta adjusted to 
+make it a memo.
+
+memo.fifo must be provided as it is the destination. May be a 
+fifo/thread (table) or a handle (number).
+
+memo.data is the data to send and must be a table.
+
+memo.result must be nil and will be set to the result when we receive 
+it.
 
 memo.sender can be provided or it will be set to our handle ( which is 
-wire.thread.us.handle )
+wire.thread.us.handle ) It must be a handle and it is where replies are 
+sent.
 
-memo.id can be provided or it will be generated.
+memo.id can be provided or it will be generated. When receiving a memo, 
+we *must* use the sent id or will not be able to reply. This will be 
+handled by fifo.pull so best to consider it an internal value and not 
+mess with it.
 
-The memo will also be placed in wire.memos for later processing.
+The memo will also be placed in wire.memos for later processing by 
+wire, it will remain there until wire.update deals with result/fail 
+callbacks and removes it. You may keep your own memo reference or rely 
+on the callbacks to remind you. If you create a memo that does not get 
+sent and replied to then you will have to remove it manually.
 
 memo.state will be set to "setup"
 
-if memo.callback is provided then it will be called during wire.update 
-after we get a reply. It will be called like so:
-	
-	memo.callback(memo)
+if memo.on_result is provided then it will be called during wire.update 
+after we get a reply. Note that a result may be a fail if result.fail 
+is set. on_result will be called like so:
 
+	memo.on_result(memo)
+
+With or without a callback, the memos that had results will then be 
+removed by wire.update as there is nothing else for wire to do.
 
 FYI HAX TBH : memo.id is set to a light userdata of the memo tables 
 pointer, this should be unique across multiple lua states and threads 
 in the same process, for as long as the table stays on the stack. A 
 future lua garbage collection system could break this by moving tables 
 around in system memory but I believe this is currently "safe" as of 
-2026 in all available versions of lua/luajit and if that changes I will 
-fix it.
+2026 in currently available versions of lua/luajit and if that changes 
+I will fix it. There exists some reqritw of lua from c to java etc, 
+these probably work but you might want to double check.
 
 ]]
 wire.memo=function(memo)
@@ -652,24 +674,6 @@ wire.memo_functions.remove=function( memo )
 
 	return memo
 end
-
---[[#lua.wire.callbacks.discard
-
-	wire.memo({ callback=wire.callbacks.discard })
-
-This is a generic callback to be used when you do not care about a 
-memos result.
-
-This callback will remove the memo, eg it will call memo:remove()
-
-If you do not remove memos when you are finished with them then they 
-will just accumulate inside the wire.memos table. So it is important to 
-always use this callback if you are not going to check on a memo result 
-later.
-
-]]
-wire.callbacks.discard=wire.memo_functions.remove
-
 
 --[[#lua.wire.memo.status
 
@@ -760,10 +764,14 @@ with a hard fail. A hard fail means the thread could not deal with your
 memo, so lua code broke, memo was invalid etc. This is a hard fail and 
 will raise an error rather than return a result.
 
-If the thread does not reply then this will lock.
+If the thread does not reply (probably a broken or missing task) then 
+this will lock waiting on a result.
 
 If the currently running thread is asked to halt then this will raise 
 an error rather than return.
+
+Note that this function ignores callbacks which are only called during 
+wire.result
 
 ]]
 wire.memo_functions.resolve=function( memo )
@@ -836,6 +844,9 @@ This is useful if you are waiting for a specific reply and want to keep
 pulling until you find it.
 
 Returns nil if there is no memo available.
+
+May raise an error if we get a reply with an id that we do not 
+recognize.
 
 ]]
 wire.fifo_functions.pull=function( fifo )
@@ -1119,7 +1130,7 @@ all you should need to do is call at startup and then you are good to
 go until the process shuts down.
 
 ]]
-wire.tasks=function(name,count,code)
+wire.tasks=function(name,count,code,globals)
 
 	-- easiest to just run on the house thread, so auto promote
 	if wire.threads.us.name~="house" then
@@ -1130,10 +1141,18 @@ wire.tasks=function(name,count,code)
 				name=name,
 				count=count,
 				code=code,
+				globals=globals,
 			},
 		}):resolve()
 	end
 	-- we are now house so do the thing
+	
+	globals=globals or {} -- may be nil 
+	
+	-- fill in our tasks globals prefixed with wire_tasks_
+	globals.wire_tasks_name=name
+	globals.wire_tasks_count=count
+	globals.wire_tasks_index=0 -- changed in task creation loop
 	
 	local result={}
 
@@ -1160,11 +1179,15 @@ wire.tasks=function(name,count,code)
 
 	-- create new threads
 	for idx=1,count do
+		globals.wire_tasks_index=idx
+
 		local handle=task.list[idx]
 		if not handle then -- create task
 			local thread=wire.thread( {
 				name=name.."-"..idx ,
-				start=code } )
+				start=code,
+				globals=globals,
+			})
 			task.list[idx]=thread.handle
 		else -- task exists but may not be running, ask it to start again
 			local thread=wire.thread(handle) -- get thread from handle
@@ -1173,6 +1196,7 @@ wire.tasks=function(name,count,code)
 						name=name.."-"..idx ,
 						handle=handle,
 						start=code,
+						globals=globals,
 					})
 			end
 		end
@@ -1229,7 +1253,7 @@ wire.house_code=function()
 
 			elseif data.action=="tasks" then -- wire.tasks
 			
-				result=wire.tasks( data.name , data.count , data.code )
+				result=wire.tasks( data.name , data.count , data.code , data.globals )
 
 			end
 

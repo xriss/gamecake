@@ -5,7 +5,7 @@ print(  )
 print( "wire starting" )
 print( "we are " , wire.threads.us.name , wire.threads.us.handle )
 
-wire.tasks("http",4,"require('wire').http_code()")
+wire.tasks("http",4,"require('wiretasks').http_code()")
 
 wire.thread({
 	start=[[
@@ -42,7 +42,6 @@ local memo_get=wire.memo({
 	data={
 		url="http://google.com/",
 	},
-	callback=wire.callbacks.discard, -- removes completed memo
 }):send()
 print("sent http request")
 
