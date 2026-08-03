@@ -306,6 +306,19 @@ end
 
 
 -- setup tasks early so we can use recipes.sqlite for data management and run loading tasks on another thread
+
+wire.tasks("http",4,[[ require("wiretasks").http_code(); ]])
+
+wire.tasks("recipes",1,[[ require("wiretasks").sqlite_code(); ]],{
+			sqlite_filename=wwin.files_prefix.."recipes.sqlite",
+			sqlite_pragmas=[[ PRAGMA synchronous=0; ]],		
+	})
+
+wire.tasks("bitsynth",2,[[ require("wetgenes.gamecake.fun.bitsynth").task_code(); ]])
+
+-- so we can run off thread code and coroutines
+
+--[=[
 	oven.tasks=require("wetgenes.tasks").create()
 
 -- and http requests
@@ -338,7 +351,7 @@ end
 		}
 	})
 -- so we can run off thread code and coroutines
-
+]=]
 
 --[[
 print(wwin.files_prefix)
@@ -784,9 +797,11 @@ end
 				oven.update_co=coroutine.create(f)
 			end
 			while coroutine.status(oven.update_co)~="dead" do
-				if oven.tasks then -- update generic coroutines
-					oven.tasks:update()
-				end
+--				if oven.tasks then -- update generic coroutines
+--					oven.tasks:update()
+--				end
+				wire.update()
+
 				assert_resume(oven.update_co) -- run it, may need more than one resume before it finishes
 
 --log( "oven" , debug.traceback(oven.update_co) ) -- debug where we are?
@@ -1056,9 +1071,15 @@ LOG("oven","caught : ",m.class,m.cmd)
 			if oven.win then
 				oven.win:show("win") -- this may restore original resolution
 			end
-			oven.tasks:sqlite({cmd="close"}) -- shut down the default sqlite databsase so we finish with any out standing writes
+			wire.memo({
+				fifo=wire.manifest("recipes"),
+				data={
+					action="close",
+				},
+			}):resolve()
+--			oven.tasks:sqlite({cmd="close"}) -- shut down the default sqlite databsase so we finish with any out standing writes
 			wtongues.save() -- last thing we do is remember any new text ids used in this run
-			oven.tasks:delete()
+--			oven.tasks:delete()
 		end
 
 	return oven

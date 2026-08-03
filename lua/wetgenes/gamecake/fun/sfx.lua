@@ -5,10 +5,11 @@
 
 -- A copper like background, uses a glsl fragment program to fill the screen,
 
+local wire=require("wire")
+
 local wzips=require("wetgenes.zips")
 
 local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
-local bitsynth_task=require("wetgenes.gamecake.fun.bitsynth_task")
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -38,8 +39,20 @@ sfx.create=function(it,opts)
 	it.bitsynth=bitsynth
 
 	it.render=function(ot) -- render a bitsynth sound
-		local f=bitsynth_task.render(oven.tasks,ot)
-		return sounds.lazyload_wavtab( f, ot.name , bitsynth.frequency )
+		local memo = wire.memo({
+			fifo=wire.manifest("bitsynth"),
+			data={
+				action="bitsynth",
+				ot=ot, -- bitsynth options table
+			},
+		}):send()
+		local result=function()
+			if memo.result.fail then
+				error(memo.result.fail)
+			end
+			return memo.result.dat
+		end
+		return sounds.lazyload_wavtab( result, ot.name , bitsynth.frequency )
 	end
 
 	it.get=function(name)

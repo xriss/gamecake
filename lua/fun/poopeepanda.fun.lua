@@ -8,7 +8,6 @@ local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3
 -- gonna render some sounds
 local djon=require("djon")
 local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
-local bitsynth_task=require("wetgenes.gamecake.fun.bitsynth_task")
 
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
 local wstr=require("wetgenes.string")

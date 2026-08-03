@@ -2,6 +2,8 @@
 -- (C) 2024 Kriss@XIXs.com
 --
 
+local wire=require("wire")
+
 -- module
 local M={ modname = (...) } package.loaded[M.modname] = M
 
@@ -119,13 +121,6 @@ single packet. Think of this as something of a raw UDP packet in terms
 of how it works.
 
 ]]
-
-
-
--- only cache this stuff on main thread
-do
---local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
---     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 M.functions={}
 M.metatable={__index=M.functions}
@@ -530,24 +525,14 @@ M.functions.pack=function(a)
 	end
 end
 
-
-------------------------------------------------------------------------
-end -- The functions below are free running tasks and should not depend on any locals
-------------------------------------------------------------------------
-
 --[[#lua.wetgenes.tasks_msgp.msgp_code
 
 lanes task function for handling msgp communication.
 
 ]]
-M.functions.msgp_code=function(linda,task_id,task_idx)
-	local M -- hide M for thread safety
-	local global=require("global") -- lock accidental globals
+M.functions.msgp_code=function()
 
-	local task_id_msg=task_id..":msg"
-
-	local lanes=require("lanes")
-	if lane_threadname then lane_threadname(task_id) end
+--	local task_id_msg=task_id..":msg"
 
 	local msgp=require("wetgenes.tasks_msgp")
 	local socket = require("socket")
@@ -707,7 +692,11 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		return p
 	end
 	local send_msg=function(msg)
-		linda:send( nil , task_id_msg , msg )
+		local memo=wire.memo({
+			fifo=wire.manifest(task_id_msg),
+			data=msg,
+		}):send()
+--		linda:send( nil , task_id_msg , msg )
 	end
 	local update_client=function(client)
 		if client.state=="msg" or client.state=="handshake" then -- connected
@@ -762,18 +751,18 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 		end
 	end
 
-	local request=function(memo)
-		local ret={}
+	local consume=function(data)
+		local result={}
 
-		if memo.cmd=="host" then
+		if data.action=="host" then
 
 			clients={} -- forget all clients
 
-			if memo.baseport then
-				baseport=memo.baseport
+			if data.baseport then
+				baseport=data.baseport
 			end
-			if memo.basepack then
-				basepack=memo.basepack
+			if data.basepack then
+				basepack=data.basepack
 			end
 
 			if ip6 then
@@ -800,25 +789,25 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 			end
 			if not hostport then ret.error="could not bind to port" end
 
-			ret.port=hostport
-			ret.name=hostname
-			ret.ip4=ip4
-			ret.ip6=ip6
+			result.port=hostport
+			result.name=hostname
+			result.ip4=ip4
+			result.ip6=ip6
 
 			-- preferred connection addr
 			local list=msgp.addr_to_list(ip6 or ip4,hostport)
-			ret.addr=msgp.list_to_addr(list)
+			result.addr=msgp.list_to_addr(list)
 
-		elseif memo.cmd=="join" then
+		elseif data.action=="join" then
 
 			assert(hostport) -- must be connected
 
-			local client=manifest_client(memo.addr)
+			local client=manifest_client(data.addr)
 
-			ret.client={}
-			ret.client.addr=client.addr
-			ret.client.ip=client.ip
-			ret.client.port=client.port
+			result.client={}
+			result.client.addr=client.addr
+			result.client.ip=client.ip
+			result.client.port=client.port
 
 			client.state="handshake"
 			send_packet( client , {
@@ -827,26 +816,26 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 				data=hostname.."\0"..ip4.."\0"..ip6.."\0"..tostring(hostport).."\0"..client.addr.."\0",
 			} )
 
-		elseif memo.cmd=="pulse" then
+		elseif data.action=="pulse" then
 
-			local client=manifest_client(memo.addr)
+			local client=manifest_client(data.addr)
 
 			send_packet_pulse( client , {
-				data=memo.data,
+				data=data.data,
 			} )
 
-		elseif memo.cmd=="send" then
+		elseif data.action=="send" then
 
-			local client=manifest_client(memo.addr)
+			local client=manifest_client(data.addr)
 
-			local size=string.len(memo.data)
+			local size=string.len(data.data)
 
 			if size<=msgp.PACKET_SIZE then -- send a single bit
 
 				send_packet( client , {
 					bit=1,
 					bits=1,
-					data=memo.data,
+					data=data.data,
 				} )
 
 			else -- send in multiple bits
@@ -861,14 +850,14 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 						idx=idx,
 						bit=bit,
 						bits=bits,
-						data=string.sub( memo.data , 1+((bit-1)*msgp.PACKET_SIZE) , (bit*msgp.PACKET_SIZE) ),
+						data=string.sub( data.data , 1+((bit-1)*msgp.PACKET_SIZE) , (bit*msgp.PACKET_SIZE) ),
 					} )
 				end
 
 			end
 		end
 
-		return ret
+		return result
 	end
 
 	local packet=function(dat,ip,port)
@@ -1041,42 +1030,58 @@ M.functions.msgp_code=function(linda,task_id,task_idx)
 	end
 
 
-	while true do
+	 -- this named fifo will have been created before this thread
+	local fifo = wire.manifest(wire_tasks_name)
 
-		local _,memo= linda:receive( 0 , task_id ) -- wait for any memos coming into this thread
-
+	-- loop until our thread is asked to halt
+	while wire.active( wire.thread_handle ) do
+		local memo = fifo:pull()
+		
 		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
-			if not ok then ret={error=ret or true} end -- reformat errors
-			if memo.id then -- result requested
-				linda:send( nil , memo.id , ret )
-			end
-		end
 
-		local socks=socket.select({udp4,udp6},{},msgp.TIME.SELECT) -- wait for any udp packets
-		for _,sock in ipairs(socks or {}) do
-			while true do
-				local dat,ip,port=sock:receivefrom(msgp.PACKET_SIZE_RAW)
-				if dat then
-					if not msgp.PACKET_DROP_TEST
-					or math.random()>=msgp.PACKET_DROP_TEST
-					then
-						packet(dat,ip,port)
+			-- this will print a TRACEBACK on error but keep going
+			local ok,result = xpcall( function() return consume( memo.data ) end , TRACEBACK )
+
+			if ok then
+				memo.result=result -- consume gave us a result to reply with
+			else
+				memo.result={ fail=(result or "fail") } -- reply with fail reason
+			end
+			memo:reply()
+			memo:remove()
+
+		else -- no memo, sleep a bit / process packets
+		
+			local socks=socket.select({udp4,udp6},{},msgp.TIME.SELECT) -- wait for any udp packets
+			for _,sock in ipairs(socks or {}) do
+				while true do
+					local dat,ip,port=sock:receivefrom(msgp.PACKET_SIZE_RAW)
+					if dat then
+						if not msgp.PACKET_DROP_TEST
+						or math.random()>=msgp.PACKET_DROP_TEST
+						then
+							packet(dat,ip,port)
+						else
+							print(task_id,"packet drop test")
+						end
 					else
-						print(task_id,"packet drop test")
+						break
 					end
-				else
-					break
 				end
 			end
+
+			wire.update()
+
+			if (now()-update_time) > msgp.TIME.UPDATE then
+				update_time=now()
+				for ip,client in pairs(clients) do
+					update_client(client)
+				end
+			end
+
 		end
 
-		if (now()-update_time) > msgp.TIME.UPDATE then
-			update_time=now()
-			for ip,client in pairs(clients) do
-				update_client(client)
-			end
-		end
 	end
+	-- we have gracefully halted so cleanup and return
 
 end

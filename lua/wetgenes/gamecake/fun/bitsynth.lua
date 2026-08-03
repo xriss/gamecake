@@ -575,3 +575,61 @@ bitsynth.float_to_8bit=function(t,scale)
 end
 
 
+--[[#lua.wetgenes.gamecake.fun.bitsynth.task_code
+
+lanes task function for handling bitsynth rendering.
+
+]]
+bitsynth.task_code=function()
+	
+	local wire=require("wire")
+	local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
+	local fats=require("wetgenes.fats")
+
+	local consume=function(data)
+		local result={}
+		
+		if data.action=="bitsynth" then
+			
+			local it=bitsynth.prepare(data.ot)
+			local tt=bitsynth.render(it)
+			local tab=bitsynth.float_to_16bit(tt)
+			local dat=fats.table_to_int16s(tab)
+
+			result.dat=dat -- return 16bit data string from bitsynth
+		end
+	
+		return result
+	end
+
+	 -- this named fifo will have been created before this thread
+	local fifo = wire.manifest(wire_tasks_name)
+
+	-- loop until our thread is asked to halt
+	while wire.active( wire.thread_handle ) do
+		local memo = fifo:pull()
+		
+		if memo then
+
+			-- this will print a TRACEBACK on error but keep going
+			local ok,result = xpcall( function() return consume( memo.data ) end , TRACEBACK )
+
+			if ok then
+				memo.result=result -- consume gave us a result to reply with
+			else
+				memo.result={ fail=(result or "fail") } -- reply with fail reason
+			end
+			memo:reply()
+			memo:remove()
+
+		else -- no memo, sleep a bit
+		
+			fifo:wait(1/16)
+
+		end
+
+	end
+	-- we have gracefully halted so cleanup and return
+
+end
+

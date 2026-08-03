@@ -13,16 +13,11 @@ clients.
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 
-------------------------------------------------------------------------
-do -- stop these locals from poisoning task functions
-------------------------------------------------------------------------
-
---local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
---     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-
 local Ox=function(n) return string.format("%012x",n or 0) end
 
 local log,dump,dlog=require("wetgenes.logs"):export("log","dump","dlog")
+
+local wire=require("wire")
 
 local wwin=require("wetgenes.win")
 local wgups=require("wetgenes.gamecake.ups")
@@ -48,6 +43,9 @@ M.bake=function(oven,upnet)
 		-- create msgp handling thread if it does not exist
 		if wwin.sdl_platform~="Emscripten" then -- disable msgp on wasm
 
+			wire.tasks("msgp",1,[[ require("wetgenes.tasks_msgp").msgp_code(); ]])
+
+--[[
 			oven.tasks:add_global_thread({
 				count=1,
 				id="msgp",
@@ -56,10 +54,14 @@ M.bake=function(oven,upnet)
 					TASK_NAME="#MSGP"
 				}
 			})
+]]
 			
 		end
 
+		wire.tasks("upnet",1,[[ require("wetgenes.gamecake.upnet").upnet_code(); ]])
+
 		-- create upnet handling thread if it does not exist
+--[[
 		oven.tasks:add_global_thread({
 			count=1,
 			id="upnet",
@@ -68,25 +70,28 @@ M.bake=function(oven,upnet)
 				TASK_NAME="#UPNET"
 			}
 		})
-		
+]]
+		wire.fifo({name="upnet/ups"}) -- create fifo
 		oven.ups.subscribe("upnet/ups") -- request all ups to be sent here
 	end
 	
 	upnet.setup=function()
-		oven.tasks:do_memo({
-			task="upnet",
-			id=false,
-			cmd="setup",
-			args={}, -- oven.opts.args,
-		})
+		wire.memo({
+			fifo=wire.manifest("upnet"),
+			data={
+				action="setup",
+				args={},
+			},
+		}):resolve()
 	end
 	
 	upnet.clean=function()
-		oven.tasks:do_memo({
-			task="upnet",
-			id=false,
-			cmd="clean",
-		})
+		wire.memo({
+			fifo=wire.manifest("upnet"),
+			data={
+				action="cleam",
+			},
+		}):resolve()
 	end
 
 	upnet.update=function()
@@ -94,65 +99,75 @@ M.bake=function(oven,upnet)
 	end
 
 	upnet.catchup=function()
-		oven.tasks:do_memo({
-			task="upnet",
-			id=false,
-			cmd="catchup",
-		})
+		wire.memo({
+			fifo=wire.manifest("upnet"),
+			data={
+				action="catchup",
+			},
+		}):resolve()
 	end
 	
 	upnet.subscribe=function(subid)
-		oven.tasks:do_memo({
-			task="upnet",
-			id=false,
-			cmd="subscribe",
-			subid=subid,
-		})
+		wire.memo({
+			fifo=wire.manifest("upnet"),
+			data={
+				action="subscribe",
+				subid=subid,
+			},
+		}):resolve()
 	end
 
 	upnet.unsubscribe=function(subid)
-		oven.tasks:do_memo({
-			task="upnet",
-			id=false,
-			cmd="unsubscribe",
-			subid=subid,
-		})
+		wire.memo({
+			fifo=wire.manifest("upnet"),
+			data={
+				action="unsubscribe",
+				subid=subid,
+			},
+		}):resolve()
 	end
 	
 	upnet.broadcast=function(data)
-		oven.tasks:do_memo({
-			task="upnet",
-			id=false,
-			cmd="broadcast",
-			data=data,
-		})
+		wire.memo({
+			fifo=wire.manifest("upnet"),
+			data={
+				action="broadcast",
+				data=data,
+			},
+		}):resolve()
 	end
 
 	upnet.reset_tick=function(tick)
-		oven.tasks:do_memo({
-			task="upnet",
-			id=false,
-			cmd="reset_tick",
-			tick=tick
-		})
+		wire.memo({
+			fifo=wire.manifest("upnet"),
+			data={
+				action="reset_tick",
+				tick=tick,
+			},
+		}):resolve()
 	end
 
 	upnet.get_ticks=function()
-		local r=oven.tasks:do_memo({
-			task="upnet",
-			cmd="get_ticks",
-		})
-		return r.ticks
+		local result=wire.memo({
+			fifo=wire.manifest("upnet"),
+			data={
+				action="get_ticks",
+			},
+		}):resolve()
+		return result.ticks
 	end
 
 	upnet.get_ups=function(tick)
-		local r=oven.tasks:do_memo({
-			task="upnet",
-			cmd="get_ups",
-			tick=tick,
-		})
+		local result=wire.memo({
+			fifo=wire.manifest("upnet"),
+			data={
+				action="get_ups",
+				tick=tick,
+			},
+		}):resolve()
+
 		local ups={}
-		for i,v in pairs(r.ups) do
+		for i,v in pairs(result.ups) do
 			ups[i]=wgups.up.create()
 			ups[i]:load(v)
 		end
@@ -472,12 +487,22 @@ print("WELCOME",client.idx)
 		if tonumber( args.host ) then baseport=tonumber( args.host ) end
 
 		-- and tell it to start listening
-		local host_ret=upnet.do_memo({
+		local host_ret=wire.memo({
+			fifo=wire.manifest("msgp"),
+			data={
+				action="host",
+				baseport=baseport,
+				basepack=basepack,
+			},
+		}):resolve()
+--[[
+		upnet.do_memo({
 			task="msgp",
 			cmd="host",
 			baseport=baseport,
 			basepack=basepack,
 		})
+]]
 		-- the client of this host
 		local client=upnet.manifest_client(host_ret)
 		client.us=true -- remember that this is us
@@ -511,11 +536,21 @@ print("WELCOME",client.idx)
 		upnet.ticks.pause="join"
 
 print("joining",addr)
+		local ret=wire.memo({
+			fifo=wire.manifest("msgp"),
+			data={
+				action="join",
+				addr=addr,
+			},
+		}):resolve()
+
+--[[
 		local ret=upnet.do_memo({
 			task="msgp",
 			cmd="join",
 			addr=addr,
 		})
+]]
 
 	end
 
@@ -775,14 +810,31 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 			end
 		end
 
+		 -- this named fifo will have been created before this thread
+		 do
+			local fifo = wire.manifest("upnet/ups")
+			repeat
+				local memo = fifo:pull()
+				if memo and then
+					upnet.upcache:merge( memo.states[1] ) -- merge as we update
+				end
+			until not memo
+		end
 
---		local up=oven.ups.manifest(1)
---		local up=wgups.empty
+		 do
+			local fifo = wire.manifest("msgp")
+			repeat
+				local memo = fifo:pull()
+				if memo then
+					upnet.domsg(memo.data)
+				end
+			until not memo
+		end
+
+--[[
 		for memo in function() local _,memo= upnet.linda:receive( 0 , "upnet/ups" ) ; return memo end do
---print(wstr.dump(memo))
 			if memo.states and memo.states[1] then
 				upnet.upcache:merge( memo.states[1] ) -- merge as we update
---print("upsin", (now()-upnet.ticks.epoch)/upnet.ticks.length )
 			end
 		end
 
@@ -796,6 +848,7 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 			end
 
 		until not memo
+]]
 
 		if not pause then
 
@@ -837,21 +890,12 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 end
 
 
-------------------------------------------------------------------------
-end -- The functions below are free running tasks and should not depend on any locals
-------------------------------------------------------------------------
-
-M.upnet_code=function(linda,task_id,task_idx)
-	local M -- hide M for thread safety
-	local global=require("global") -- lock accidental globals
-
-	local lanes=require("lanes")
-	if lane_threadname then lane_threadname(task_id) end
+M.upnet_code=function()
 
 	local toaster=require("wetgenes.gamecake.toaster")
 	toaster.jit_prealloc()	-- help luajit work on android/arm
 
-	local wtasks=require("wetgenes.tasks")
+--	local wtasks=require("wetgenes.tasks")
 	local wwin=require("wetgenes.win")
 	local now=wwin.time -- function to get time now in seconds with ms accuracy, probs
 	local wgups=require("wetgenes.gamecake.ups")
@@ -859,52 +903,42 @@ M.upnet_code=function(linda,task_id,task_idx)
 
 	-- create main state
 	local upnet=wgupnet.create()
-	upnet.linda=linda
-	upnet.do_memo=function(memo,timeout)
-		if wwin.sdl_platform=="Emscripten" then -- disable msgp on wasm
-			if memo.task=="msgp" then
-				return
-			end
-		end
 
-		return wtasks.do_memo(linda,memo,timeout)
-	end
-
-	local request=function(memo)
-		local ret={}
+	local consume=function(data)
+		local result={}
 		
-		if memo.cmd=="setup" then
+		if data.action=="setup" then
 
-			upnet.args=memo.args or {}
+			upnet.args=data.args or {}
 			upnet.setup()
 
-		elseif memo.cmd=="clean" then
+		elseif data.action=="clean" then
 
 			upnet.clean()
 
-		elseif memo.cmd=="catchup" then
+		elseif data.action=="catchup" then
 
 			upnet.catchup()
 
-		elseif memo.cmd=="subscribe" then
+		elseif data.action=="subscribe" then
 
-			upnet.subscribed[memo.subid]={}
+			upnet.subscribed[data.subid]={}
 
-		elseif memo.cmd=="unsubscribe" then
+		elseif data.action=="unsubscribe" then
 
-			upnet.subscribed[memo.subid]=nil
+			upnet.subscribed[data.subid]=nil
 
-		elseif memo.cmd=="broadcast" then
+		elseif data.action=="broadcast" then
 
 			for _,client in pairs(upnet.clients) do
 				if not client.us then
-					client:send(memo.data)
+					client:send(data.data)
 				end
 			end
 
-		elseif memo.cmd=="reset_tick" then
+		elseif data.action=="reset_tick" then
 		
-			upnet.ticks.now=memo.tick
+			upnet.ticks.now=data.tick
 			upnet.ticks.base=upnet.ticks.now
 			upnet.ticks.agreed=upnet.ticks.now
 			upnet.ticks.input=upnet.ticks.now
@@ -912,39 +946,55 @@ M.upnet_code=function(linda,task_id,task_idx)
 			upnet.hashs={} -- reset hashes
 			upnet.inputs={} -- reset inputs
 
-		elseif memo.cmd=="get_ticks" then
+		elseif data.action=="get_ticks" then
 		
-			ret.ticks=upnet.ticks
+			result.ticks=upnet.ticks
 
-		elseif memo.cmd=="get_ups" then
+		elseif data.action=="get_ups" then
 		
-			local ups=upnet.get_ups(memo.tick)
-			ret.ups={}
+			local ups=upnet.get_ups(data.tick)
+			result.ups={}
 			for i,up in pairs(ups) do
-				ret.ups[i]=up:save()
+				result.ups[i]=up:save()
 			end
 
 		end
 
-		return ret
+		return result
 	end
 
-	while true do
-		local timeout=0.001 -- first receive will be 1ms or less
-		repeat
-			local _,memo= linda:receive( timeout , task_id ) -- wait for any memos coming into this thread
---			timeout=0 -- repeat receive are instant
-			upnet.update() -- probably getting called every 1ms ish
-			if memo then
-				local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
-				if not ok then ret={error=ret or true} end -- reformat errors
-				if memo.id then -- result requested
-					linda:send( nil , memo.id , ret )
-				end
+
+	 -- this named fifo will have been created before this thread
+	local fifo = wire.manifest("upnet")
+
+	-- loop until our thread is asked to halt
+	while wire.active( wire.thread_handle ) do
+		local memo = fifo:pull()
+		
+		if memo then
+
+			-- this will print a TRACEBACK on error but keep going
+			local ok,result = xpcall( function() return consume( memo.data ) end , TRACEBACK )
+
+			if ok then
+				memo.result=result -- consume gave us a result to reply with
+			else
+				memo.result={ fail=(result or "fail") } -- reply with fail reason
 			end
-		until not memo
-		toaster.garbage_collect_step() -- try and avoid gc glitching
+			memo:reply()
+			memo:remove()
+
+		else -- no memo, sleep a bit
+		
+			upnet.update() -- probably getting called every 1ms ish
+			wire.update()
+			toaster.garbage_collect_step() -- try and avoid gc glitching
+			fifo:wait(1/1024)
+
+		end
+
 	end
+	-- we have gracefully halted so cleanup and return
 
 end
 

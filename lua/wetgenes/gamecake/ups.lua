@@ -42,12 +42,7 @@ is that we provide.
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-
-------------------------------------------------------------------------
-do -- stop these locals from poisoning task functions
-------------------------------------------------------------------------
-
---local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
+local wire=require("wire")
 
 local wstr=require("wetgenes.string")
 
@@ -672,19 +667,7 @@ M.bake=function(oven,ups)
 
 	ups=ups or {}
 
-	-- can override the default name and :msg stream
-	ups.ups_task_id=ups.ups_task_id or "ups"
-
-	-- create ups handling thread if it does not exist
-	oven.tasks:add_global_thread({
-		count=1,
-		id=ups.ups_task_id,
-		code=M.ups_code,
-		globals={
-			TASK_NAME="#UPS"
-		}
-	})
-
+	wire.tasks("ups",1,[[ require("wetgenes.gamecake.ups").task_code(); ]])
 
 	ups.empty=M.empty
 
@@ -695,58 +678,64 @@ M.bake=function(oven,ups)
 	ups.reset=function()
 		ups.upish={states={},msgs={}}
 		ups.msgs={}
-		oven.tasks:do_memo({
-			task=ups.ups_task_id,
-			id=false,
-			cmd="reset",
-		})
+		wire.memo({
+			fifo=wire.manifest("ups"),
+			data={
+				action="reset",
+			},
+		}):send()
 	end
 
 	-- set keymap for this idx
 	ups.keymap=function(idx,map)
-		oven.tasks:do_memo({
-			task=ups.ups_task_id,
-			id=false,
-			cmd="map",
-			keymaps={{idx,map}},
-		})
+		wire.memo({
+			fifo=wire.manifest("ups"),
+			data={
+				action="map",
+				keymaps={{idx,map}},
+			},
+		}):send()
 	end
 
 	-- set mousemap to this idx
 	ups.mousemap=function(...)
-		oven.tasks:do_memo({
-			task=ups.ups_task_id,
-			id=false,
-			cmd="map",
-			mousemaps={...},
-		})
+		wire.memo({
+			fifo=wire.manifest("ups"),
+			data={
+				action="map",
+				mousemaps={...},
+			},
+		}):send()
 	end
 
 	-- set padmap to these idxs
 	ups.padmap=function(...)
-		oven.tasks:do_memo({
-			task=ups.ups_task_id,
-			id=false,
-			cmd="map",
-			padmaps={...},
-		})
+		wire.memo({
+			fifo=wire.manifest("ups"),
+			data={
+				action="map",
+				padmaps={...},
+			},
+		}):send()
 	end
 
 	ups.subscribe=function(subid)
-		oven.tasks:do_memo({
-			task=ups.ups_task_id,
-			id=false,
-			cmd="subscribe",
-			subid=subid,
-		})
+		wire.memo({
+			fifo=wire.manifest("ups"),
+			data={
+				action="subscribe",
+				subid=subid,
+			},
+		}):send()
 	end
 	ups.unsubscribe=function(subid)
-		oven.tasks:do_memo({
-			task=ups.ups_task_id,
-			id=false,
-			cmd="unsubscribe",
-			subid=subid,
-		})
+		wire.memo({
+			fifo=wire.manifest("ups"),
+			data={
+				action="unsubscribe",
+				subid=subid,
+			},
+		}):send()
 	end	
 	
 	-- create a state
@@ -755,12 +744,13 @@ M.bake=function(oven,ups)
 -- this is called as each msg is recieved and should be as fast as possible
 -- so just copy the msg into our volatile state for processing on next update
 	ups.msg=function(mm)
-		oven.tasks:do_memo({
-			task=ups.ups_task_id,
-			id=false,
-			cmd="msg",
-			msg=mm,
-		})
+		wire.memo({
+			fifo=wire.manifest("ups"),
+			data={
+				action="msg",
+				msg=mm,
+			},
+		}):send()
 	end
 -- shorthand for special state value msgs use for eg gui button on/off state
 	ups.msg_set=function(name,value)
@@ -778,10 +768,13 @@ M.bake=function(oven,ups)
 
 	-- manual advance
 	ups.advance=function()
-		ups.upish=oven.tasks:do_memo({
-			task=ups.ups_task_id,
-			cmd="update",
-		})
+		ups.upish=wire.memo({
+			fifo=wire.manifest("ups"),
+			data={
+				action="update",
+			},
+		}):resolve()
+
 		ups.msgs=ups.upish.msgs or {}
 	end
 
@@ -830,98 +823,105 @@ M.bake=function(oven,ups)
 	return ups
 end
 
+M.task_code=function()
 
-------------------------------------------------------------------------
-end -- The functions below are free running tasks and should not depend on any locals
-------------------------------------------------------------------------
-
-M.ups_code=function(linda,task_id,task_idx)
-	local M -- hide M for thread safety
-	local global=require("global") -- lock accidental globals
-
-	local lanes=require("lanes")
-	if lane_threadname then lane_threadname(task_id) end
-
---	local wtasks=require("wetgenes.tasks")
---	local wwin=require("wetgenes.win")
---	local now=wwin.time -- function to get time now in seconds with ms accuracy, probs
 	local wgups=require("wetgenes.gamecake.ups")
 	
 	local ups=wgups.ups.create()
 	
 	local subscriptions={}
 
-	local request=function(memo)
-		local ret={}
+	local consume=function(data)
+		local result={}
 		
-		if memo.cmd=="reset" then
+		if data.action=="reset" then
 		
 			ups:reset()
 
-		elseif memo.cmd=="map" then
+		elseif data.action=="map" then
 
-			if memo.keymaps then
-				for i,v in ipairs(memo.keymaps) do
+			if data.keymaps then
+				for i,v in ipairs(data.keymaps) do
 					ups:keymap(unpack(v))
 				end
 			end
-			if memo.mousemap then ups:mousemap(unpack(memo.mousemap)) end
-			if memo.padmap   then ups:padmap(unpack(memo.padmap))     end
+			if data.mousemap then ups:mousemap(unpack(data.mousemap)) end
+			if data.padmap   then ups:padmap(unpack(data.padmap))     end
 
-		elseif memo.cmd=="msg" then
+		elseif data.action=="msg" then
 
 			-- just store, they get applied on update
 			ups.new_msgs[#ups.new_msgs+1]=memo.msg
 
-		elseif memo.cmd=="subscribe" then
+		elseif data.action=="subscribe" then
 		
-			subscriptions[memo.subid]=true
+			subscriptions[data.subid]=true
 
-		elseif memo.cmd=="unsubscribe" then
+		elseif data.action=="unsubscribe" then
 		
 			subscriptions[memo.subid]=nil
 
-		elseif ( memo.cmd=="get" ) or ( memo.cmd=="update" ) then
+		elseif ( data.action=="get" ) or ( data.action=="update" ) then
 		
-			if memo.cmd=="update" then
+			if data.action=="update" then
 				ups:update()
 			end
 			
-			ret.states={}
+			result.states={}
 			for idx,up in pairs(ups.states) do
-				ret.states[idx]=up:save()
+				result.states[idx]=up:save()
 			end
-			ret.msgs=ups.msgs
+			result.msgs=ups.msgs
 			
-			if memo.cmd=="update" then
-				for subid,_ in pairs(subscriptions) do
-					local sub={
-						cmd="ups_subscription",
-						states=ret.states,
-						msgs=ret.msgs,
-					}
-					linda:send( nil , subid , sub )
+			if data.action=="update" then
+				for fifo,_ in pairs(subscriptions) do
+					wire.memo({
+						fifo=fifo,
+						data={
+							action="ups_subscription",
+							states=result.states,
+							msgs=result.msgs,
+						},
+					}):send()
 				end
 			end
 
+		else
+			result.fail="unknown action"
 		end
 
-		return ret
+		return result
 	end
 
-	while true do
+	 -- this named fifo will have been created before this thread
+	local fifo = wire.manifest(wire_tasks_name)
 
-		local _,memo= linda:receive( 0.001 , task_id ) -- wait for any memos coming into this thread
-
+	-- loop until our thread is asked to halt
+	while wire.active( wire.thread_handle ) do
+		local memo = fifo:pull()
+		
 		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
-			if not ok then ret={error=ret or true} end -- reformat errors
-			if memo.id then -- result requested
-				linda:send( nil , memo.id , ret )
+
+			-- this will print a TRACEBACK on error but keep going
+			local ok,result = xpcall( function() return consume( memo.data ) end , TRACEBACK )
+
+			if ok then
+				memo.result=result -- consume gave us a result to reply with
+			else
+				memo.result={ fail=(result or "fail") } -- reply with fail reason
 			end
+			memo:reply()
+			memo:remove()
+
+		else -- no memo, sleep a bit
+		
+			wire.update()
+			fifo:wait(1/16)
+
 		end
 
 	end
+	-- we have gracefully halted so cleanup and return
 
 end
 
