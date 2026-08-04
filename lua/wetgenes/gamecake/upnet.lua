@@ -30,7 +30,7 @@ local json_pack=require("wetgenes.json_pack")
 local baseport=2342
 local basepack=2342
 
-local msgp=require("wetgenes.tasks_msgp")
+local msgp=require("wetgenes.msgp")
 
 
 M.bake=function(oven,upnet)
@@ -43,7 +43,7 @@ M.bake=function(oven,upnet)
 		-- create msgp handling thread if it does not exist
 		if wwin.sdl_platform~="Emscripten" then -- disable msgp on wasm
 
-			wire.tasks("msgp",1,[[ require("wetgenes.tasks_msgp").msgp_code(); ]])
+			wire.tasks("msgp",1,[[ require("wetgenes.msgp").code(); ]])
 
 --[[
 			oven.tasks:add_global_thread({

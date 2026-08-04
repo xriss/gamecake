@@ -8,9 +8,9 @@ local wire=require("wire")
 local M={ modname = (...) } package.loaded[M.modname] = M
 local msgp=M
 
---[[#lua.wetgenes.tasks_msgp
+--[[#lua.wetgenes.msgp
 
-	local msgp=require("wetgenes.tasks_msgp")
+	local msgp=require("wetgenes.msgp")
 
 A stream of lowlevel udp packets with automatic resend ( data will get
 there eventual ) but hopefully without clogging up an ongoing pulse of
@@ -170,7 +170,7 @@ M.ENCODE5="0123456789abcdefghjkmnpqrtuvwxyz" -- 32 chars 5bits
 
 
 
---[[#lua.wetgenes.tasks_msgp.clean_name
+--[[#lua.wetgenes.msgp.clean_name
 
 Clean a hostname so it becomes upercase letters and numbers with
 possible underscores where any other chars would be, eg whitespace.
@@ -188,7 +188,7 @@ M.functions.clean_name=function(name)
 end
 
 
---[[#lua.wetgenes.tasks_msgp.ip6_to_addr
+--[[#lua.wetgenes.msgp.ip6_to_addr
 
 Parse an array of 8 numbers into an ip6 address with :: in the first
 longest run of zeros if needed and lowercase hex letters.
@@ -228,7 +228,7 @@ M.functions.ip6_to_addr=function(list)
 	return s
 end
 
---[[#lua.wetgenes.tasks_msgp.list_to_addr
+--[[#lua.wetgenes.msgp.list_to_addr
 
 Parse an array of numbers into an ip address and maybe port.
 
@@ -253,7 +253,7 @@ M.functions.list_to_addr=function(list)
 
 end
 
---[[#lua.wetgenes.tasks_msgp.addr_to_list
+--[[#lua.wetgenes.msgp.addr_to_list
 
 parse an ip address + maybe port encoded as a string into a list of
 numbers, the length of the list represents the type so
@@ -397,7 +397,7 @@ M.functions.addr_to_list=function(addr,port)
 	return list
 end
 
---[[#lua.wetgenes.tasks_msgp.addr_to_ip_port
+--[[#lua.wetgenes.msgp.addr_to_ip_port
 
 parse an ip string and port number from an addr/addr+port/addr_list
 
@@ -422,7 +422,7 @@ M.functions.addr_to_ip_port=function(addr,port)
 	return M.functions.list_to_addr(ip),port
 end
 
---[[#lua.wetgenes.tasks_msgp.ipsniff
+--[[#lua.wetgenes.msgp.ipsniff
 
 Use ( google by default ) public dns servers to check if we can connect
 to the internet and if we have ipv4 and/or ipv6 available.
@@ -481,7 +481,7 @@ M.functions.ipsniff=function(dns4,dns6)
 end
 
 
---[[#lua.wetgenes.tasks_msgp.pack
+--[[#lua.wetgenes.msgp.pack
 
 If given aa udp data packet string, convert it to a table.
 
@@ -526,16 +526,16 @@ M.functions.pack=function(a)
 	end
 end
 
---[[#lua.wetgenes.tasks_msgp.msgp_code
+--[[#lua.wetgenes.msgp.code
 
 lanes task function for handling msgp communication.
 
 ]]
-M.functions.msgp_code=function()
+M.functions.code=function()
 
 --	local task_id_msg=task_id..":msg"
 
-	local msgp=require("wetgenes.tasks_msgp")
+	local msgp=require("wetgenes.msgp")
 	local socket = require("socket")
 	local now=function() return socket.gettime() end -- time now
 
