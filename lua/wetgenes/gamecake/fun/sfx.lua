@@ -40,7 +40,7 @@ sfx.create=function(it,opts)
 
 	it.render=function(ot) -- render a bitsynth sound
 		local memo = wire.memo({
-			fifo=wire.manifest("bitsynth"),
+			fifo=wire.fifo("bitsynth"),
 			data={
 				action="bitsynth",
 				ot=ot, -- bitsynth options table

@@ -679,7 +679,7 @@ M.bake=function(oven,ups)
 		ups.upish={states={},msgs={}}
 		ups.msgs={}
 		wire.memo({
-			fifo=wire.manifest("ups"),
+			fifo=wire.fifo("ups"),
 			data={
 				action="reset",
 			},
@@ -689,7 +689,7 @@ M.bake=function(oven,ups)
 	-- set keymap for this idx
 	ups.keymap=function(idx,map)
 		wire.memo({
-			fifo=wire.manifest("ups"),
+			fifo=wire.fifo("ups"),
 			data={
 				action="map",
 				keymaps={{idx,map}},
@@ -700,7 +700,7 @@ M.bake=function(oven,ups)
 	-- set mousemap to this idx
 	ups.mousemap=function(...)
 		wire.memo({
-			fifo=wire.manifest("ups"),
+			fifo=wire.fifo("ups"),
 			data={
 				action="map",
 				mousemaps={...},
@@ -711,7 +711,7 @@ M.bake=function(oven,ups)
 	-- set padmap to these idxs
 	ups.padmap=function(...)
 		wire.memo({
-			fifo=wire.manifest("ups"),
+			fifo=wire.fifo("ups"),
 			data={
 				action="map",
 				padmaps={...},
@@ -721,7 +721,7 @@ M.bake=function(oven,ups)
 
 	ups.subscribe=function(subid)
 		wire.memo({
-			fifo=wire.manifest("ups"),
+			fifo=wire.fifo("ups"),
 			data={
 				action="subscribe",
 				subid=subid,
@@ -730,7 +730,7 @@ M.bake=function(oven,ups)
 	end
 	ups.unsubscribe=function(subid)
 		wire.memo({
-			fifo=wire.manifest("ups"),
+			fifo=wire.fifo("ups"),
 			data={
 				action="unsubscribe",
 				subid=subid,
@@ -745,7 +745,7 @@ M.bake=function(oven,ups)
 -- so just copy the msg into our volatile state for processing on next update
 	ups.msg=function(mm)
 		wire.memo({
-			fifo=wire.manifest("ups"),
+			fifo=wire.fifo("ups"),
 			data={
 				action="msg",
 				msg=mm,
@@ -769,7 +769,7 @@ M.bake=function(oven,ups)
 	-- manual advance
 	ups.advance=function()
 		ups.upish=wire.memo({
-			fifo=wire.manifest("ups"),
+			fifo=wire.fifo("ups"),
 			data={
 				action="update",
 			},
@@ -876,7 +876,7 @@ M.task_code=function()
 			if data.action=="update" then
 				for fifo,_ in pairs(subscriptions) do
 					wire.memo({
-						fifo=wire.manifest(fifo),
+						fifo=wire.reference(fifo),
 						data={
 							action="ups_subscription",
 							states=result.states,
@@ -894,7 +894,7 @@ M.task_code=function()
 	end
 
 	 -- this named fifo will have been created before this thread
-	local fifo = wire.manifest(wire_tasks_name)
+	local fifo = wire.fifo(wire_tasks_name)
 
 	-- loop until our thread is asked to halt
 	while wire.active( wire.thread_handle ) do

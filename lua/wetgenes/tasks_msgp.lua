@@ -694,7 +694,7 @@ M.functions.msgp_code=function()
 	end
 	local send_msg=function(msg)
 		local memo=wire.memo({
-			fifo=wire.manifest("upnet/msgp"),
+			fifo=wire.fifo("upnet/msgp"), -- we send state change msgs to upnet
 			data=msg,
 		}):send()
 --		linda:send( nil , task_id_msg , msg )
@@ -1032,7 +1032,7 @@ M.functions.msgp_code=function()
 
 
 	 -- this named fifo will have been created before this thread
-	local fifo = wire.manifest(wire_tasks_name)
+	local fifo = wire.fifo(wire_tasks_name)
 
 	-- loop until our thread is asked to halt
 	while wire.active( wire.thread_handle ) do

@@ -31,7 +31,7 @@ local wiretasks=M
 	wire.tasks("http",4,"require('wiretasks').http_code()")
 
 	result = wire.memo({
-		fifo=wire.manifest("http"),
+		fifo=wire.fifo("http"),
 		data={
 			url="http://google.com/",
 		},
@@ -208,7 +208,7 @@ wiretasks.http_code=function()
 
 
 	 -- this named fifo will have been created before this thread
-	local fifo = wire.manifest(wire_tasks_name)
+	local fifo = wire.fifo(wire_tasks_name)
 
 	-- loop until our thread is asked to halt
 	while wire.active( wire.thread_handle ) do
@@ -247,7 +247,7 @@ end
 		})
 
 	result = wire.memo({
-		fifo=wire.manifest("sqlite"),
+		fifo=wire.fifo("sqlite"),
 		data={
 			sql="SELECT name FROM sqlite_master WHERE type='table';",
 		},
@@ -419,7 +419,7 @@ wiretasks.sqlite_code=function()
 	end
 
 	 -- this named fifo will have been created before this thread
-	local fifo = wire.manifest(wire_tasks_name)
+	local fifo = wire.fifo(wire_tasks_name)
 
 	-- loop until our thread is asked to halt
 	while wire.active( wire.thread_handle ) do

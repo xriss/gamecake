@@ -4,6 +4,8 @@
 -- http://en.wikipedia.org/wiki/MIT_License
 --
 
+-- gonna need a new cmsgpack that can pack/unpacks to memory
+-- so we can skip the pointless copy into lua string when sending data
 local cmsgpack = require("cmsgpack")
 
 --[[#lua.wire
@@ -268,15 +270,15 @@ wire.wrap=function(name,handle)
 
 end
 
---[[#lua.wire.manifest
+--[[#lua.wire.reference
 
-	it = wire.manifest(name)
-	it = wire.manifest(handle)
+	it = wire.reference(name)
+	it = wire.reference(handle)
 
 Return a fifo or thread if it exists, this is a way of wrapping a 
 handle/name that you hope already exists but you are not 100% sure.
 
-Will returns nil if the name or handle does not exist.
+Will return nil if the name or handle does not exist.
 
 We may talk to the house thread to check for the existence of name or 
 handle, so this can block for a while before returning.
@@ -285,7 +287,7 @@ The returned value may be a fifo or a thread, it.is will be "thread" or
 "fifo" for the different results.
 
 ]]
-wire.manifest=function(name)
+wire.reference=function(name)
 
 	local handle
 	if type(name)=="number" then
@@ -461,37 +463,73 @@ end
 
 --[[#lua.wire.fifo
 
-	fifo = wire.fifo(handle)
 	fifo = wire.fifo(name)
+
+	fifo = wire.fifo(handle)
 	fifo = wire.fifo(opts)
 
 Create or get a fifo. Fifos are not GC'd they must be created 
 and destroyed explicitly.
 
-When called with a handle (number) we return a previously created 
-fifo with that handle.
+When called with a name (string) we return a previously created fifo 
+with that name or create a new one ( via house so can take some time ) 
+This is the preferred may to safely create a named fifo.
 
-When called with a name (string) we return a previously created 
-fifo with that name.
+When called with a handle (number) we return a previously created fifo 
+with that handle ( via house so can take some time ).
 
-We will raise an error if no fifo is found with that handle or name.
+We will raise an error if no fifo is found with that handle, so if this 
+function returns you will always have a fifo.
 
 When called with opts (table) we do the following based on the 
 contents.
 
 	opts.handle=nil
 
-The handle to wrap or use in creation. If a valid handle we will simply 
-wrap it with a fifo.
+The handle to use in creation ( so we may reuse an old handle ). If nil 
+we will assign a new one.
+
+	opts.name="namedfifo"
+
+The name to use in fifo creation. Usually the only value needed but the 
+creation happens on this thread rather than house so this is a 
+dangerous thing to do.
 
 ]]
 wire.fifo=function(opts)
 	do
 		local t=type(opts)
-		if t=="number" then
-			return assert( wire.cache_fifos[opts] )
-		elseif t=="string" then
-			return assert( wire.fifos[opts] )
+		if t=="number" then -- lookup a fifo by handle or assert
+			local handle=opts
+			return assert( wire.reference( handle ) )
+		end
+
+		if t=="string" then -- lookup or create a fifo by name
+			local name=opts
+			local fifo
+			local handle=wire.cache_names[ name ] -- try our cache
+			if handle and handle<0 then error(name.." is not a fifo name") end
+			if handle and handle>0 then
+				fifo=wire.cache_fifos[handle]
+			end
+			if fifo then return fifo end -- cache sucess
+			-- we need to auto create/get in house
+			local result=wire.memo({
+				fifo=wire.threads.house,
+				data={
+					action="fifo",
+					name=name,
+				},
+			}):resolve()
+			
+			handle=result.handle
+			name=result.name
+			
+			if name and handle then -- house says it exists, so make it so
+				return wire.wrap(name,handle)
+			end
+
+			error("failed to create fifo "..name)
 		end
 	end
 
@@ -1202,7 +1240,7 @@ wire.tasks=function(name,count,code,globals)
 		end
 	end
 
-	-- create new fifo unless it exists
+	-- create new fifo unless it exists ( we are house )
 	if not wire.fifos[name] then
 		wire.fifo({name=name})
 	end
@@ -1254,6 +1292,17 @@ wire.house_code=function()
 			elseif data.action=="tasks" then -- wire.tasks
 			
 				result=wire.tasks( data.name , data.count , data.code , data.globals )
+
+			elseif data.action=="fifo" then -- create a named fifo and return handle
+
+				local fifo=wire.reference(data.name) -- does it exist?
+				if fifo and fifo.is~="fifo" then error(data.name.." is not a fifo") end
+				if not fifo then -- create
+					fifo=wire.fifo({name=data.name})
+				end
+				result.name=fifo.name
+				result.handle=fifo.handle
+				result.fail=nil
 
 			end
 

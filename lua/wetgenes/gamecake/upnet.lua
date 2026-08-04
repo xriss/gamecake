@@ -71,15 +71,15 @@ M.bake=function(oven,upnet)
 			}
 		})
 ]]
-		wire.fifo({name="upnet/ups"}) -- create fifo
-		wire.fifo({name="upnet/msgp"}) -- create fifo
+		wire.fifo("upnet/ups") -- create fifo
+		wire.fifo("upnet/msgp") -- create fifo
 
 		oven.ups.subscribe("upnet/ups") -- request all ups to be sent here
 	end
 	
 	upnet.setup=function()
 		wire.memo({
-			fifo=wire.manifest("upnet"),
+			fifo=wire.fifo("upnet"),
 			data={
 				action="setup",
 				args={},
@@ -89,7 +89,7 @@ M.bake=function(oven,upnet)
 	
 	upnet.clean=function()
 		wire.memo({
-			fifo=wire.manifest("upnet"),
+			fifo=wire.fifo("upnet"),
 			data={
 				action="cleam",
 			},
@@ -102,7 +102,7 @@ M.bake=function(oven,upnet)
 
 	upnet.catchup=function()
 		wire.memo({
-			fifo=wire.manifest("upnet"),
+			fifo=wire.fifo("upnet"),
 			data={
 				action="catchup",
 			},
@@ -111,7 +111,7 @@ M.bake=function(oven,upnet)
 	
 	upnet.subscribe=function(subid)
 		wire.memo({
-			fifo=wire.manifest("upnet"),
+			fifo=wire.fifo("upnet"),
 			data={
 				action="subscribe",
 				subid=subid,
@@ -121,7 +121,7 @@ M.bake=function(oven,upnet)
 
 	upnet.unsubscribe=function(subid)
 		wire.memo({
-			fifo=wire.manifest("upnet"),
+			fifo=wire.fifo("upnet"),
 			data={
 				action="unsubscribe",
 				subid=subid,
@@ -131,7 +131,7 @@ M.bake=function(oven,upnet)
 	
 	upnet.broadcast=function(data)
 		wire.memo({
-			fifo=wire.manifest("upnet"),
+			fifo=wire.fifo("upnet"),
 			data={
 				action="broadcast",
 				data=data,
@@ -141,7 +141,7 @@ M.bake=function(oven,upnet)
 
 	upnet.reset_tick=function(tick)
 		wire.memo({
-			fifo=wire.manifest("upnet"),
+			fifo=wire.fifo("upnet"),
 			data={
 				action="reset_tick",
 				tick=tick,
@@ -151,7 +151,7 @@ M.bake=function(oven,upnet)
 
 	upnet.get_ticks=function()
 		local result=wire.memo({
-			fifo=wire.manifest("upnet"),
+			fifo=wire.fifo("upnet"),
 			data={
 				action="get_ticks",
 			},
@@ -161,7 +161,7 @@ M.bake=function(oven,upnet)
 
 	upnet.get_ups=function(tick)
 		local result=wire.memo({
-			fifo=wire.manifest("upnet"),
+			fifo=wire.fifo("upnet"),
 			data={
 				action="get_ups",
 				tick=tick,
@@ -490,7 +490,7 @@ print("WELCOME",client.idx)
 
 		-- and tell it to start listening
 		local host_ret=wire.memo({
-			fifo=wire.manifest("msgp"),
+			fifo=wire.fifo("msgp"),
 			data={
 				action="host",
 				baseport=baseport,
@@ -539,7 +539,7 @@ print("WELCOME",client.idx)
 
 print("joining",addr)
 		local ret=wire.memo({
-			fifo=wire.manifest("msgp"),
+			fifo=wire.fifo("msgp"),
 			data={
 				action="join",
 				addr=addr,
@@ -814,7 +814,7 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 
 		 -- this named fifo will have been created before this thread
 		 do
-			local fifo = wire.manifest("upnet/ups")
+			local fifo = wire.fifo("upnet/ups")
 			repeat
 				local memo = fifo:pull()
 				if memo then
@@ -824,7 +824,7 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 		end
 
 		 do
-			local fifo = wire.manifest("upnet/msgp")
+			local fifo = wire.fifo("upnet/msgp")
 			repeat
 				local memo = fifo:pull()
 				if memo then
@@ -967,7 +967,7 @@ M.upnet_code=function()
 
 
 	 -- this named fifo will have been created before this thread
-	local fifo = wire.manifest("upnet")
+	local fifo = wire.fifo("upnet")
 
 	-- loop until our thread is asked to halt
 	while wire.active( wire.thread_handle ) do

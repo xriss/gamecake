@@ -1072,7 +1072,7 @@ LOG("oven","caught : ",m.class,m.cmd)
 				oven.win:show("win") -- this may restore original resolution
 			end
 			wire.memo({
-				fifo=wire.manifest("recipes"),
+				fifo=wire.fifo("recipes"),
 				data={
 					action="close",
 				},

@@ -603,7 +603,7 @@ bitsynth.task_code=function()
 	end
 
 	 -- this named fifo will have been created before this thread
-	local fifo = wire.manifest(wire_tasks_name)
+	local fifo = wire.fifo(wire_tasks_name)
 
 	-- loop until our thread is asked to halt
 	while wire.active( wire.thread_handle ) do
