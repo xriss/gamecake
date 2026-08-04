@@ -85,8 +85,8 @@ end
 
 -- grab basic memo functions from tasks
 -- these require a linda as first arg and may block
-all.do_memo=require("wetgenes.tasks").do_memo
-all.memos=require("wetgenes.tasks").memos
+--all.do_memo=require("wetgenes.tasks").do_memo
+--all.memos=require("wetgenes.tasks").memos
 
 all.caste="all"
 

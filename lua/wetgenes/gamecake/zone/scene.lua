@@ -324,7 +324,7 @@ If fname is a function then it will be called as if it was a method.
 				end
 			end
 		end
-		require("wetgenes.tasks").cocall(functions)
+		require("wetgenes").cocall(functions)
 		return count -- number of systems called
 	end
 
