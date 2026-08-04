@@ -3262,10 +3262,6 @@
    "name": "lua.wire.house_code"
   },
   {
-   "count": 1,
-   "name": "lua.wire.manifest"
-  },
-  {
    "count": 5,
    "name": "lua.wire.memo"
   },
@@ -3288,6 +3284,10 @@
   {
    "count": 1,
    "name": "lua.wire.prepare_start"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.reference"
   },
   {
    "count": 1,
@@ -3406,7 +3406,7 @@
    "body": "<pre><code>memo = fifo:pull()\nmemo = thread:pull()\n</code></pre>\n<p>Pull memo out of this fifo.</p>\n<p>If this is a memo for us to deal with memo.state will be set to &quot;got&quot;</p>\n<p>If this is a result we will return the sent memo with memo.result set \nto the reply data and the memo state will be changed to &quot;result&quot;.</p>\n<p>memo may be ignored for now and dealt with later by finding it in \nwire.memos.</p>\n<p>This is useful if you are waiting for a specific reply and want to keep \npulling until you find it.</p>\n<p>Returns nil if there is no memo available.</p>\n<p>May raise an error if we get a reply with an id that we do not \nrecognize.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 828,
+   "line": 866,
    "name": "lua.wire.fifo.pull",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

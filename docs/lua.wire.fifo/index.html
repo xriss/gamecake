@@ -833,14 +833,14 @@
 <a class="sub" href="../../docs/lua.wire.fifo.pull"><span>/lua.wire.fifo.pull</span></a>
 <a class="sub" href="../../docs/lua.wire.fifo.push"><span>/lua.wire.fifo.push</span></a>
 <a class="sub" href="../../docs/lua.wire.fifo.wait"><span>/lua.wire.fifo.wait</span></a>
-<a class="sub" href="../../docs/lua.wire.house_code"><span>/lua.wire.house_code</span></a>
-<a class="sub" href="../../docs/lua.wire.manifest"><span>/lua.wire.manifest</span></a><a class="par" href="../../docs/lua.wire.memo"><span>/lua.wire.memo</span></a>
+<a class="sub" href="../../docs/lua.wire.house_code"><span>/lua.wire.house_code</span></a><a class="par" href="../../docs/lua.wire.memo"><span>/lua.wire.memo</span></a>
 
 <a class="sub" href="../../docs/lua.wire.memo.remove"><span>/lua.wire.memo.remove</span></a>
 <a class="sub" href="../../docs/lua.wire.memo.resolve"><span>/lua.wire.memo.resolve</span></a>
 <a class="sub" href="../../docs/lua.wire.memo.send"><span>/lua.wire.memo.send</span></a>
 <a class="sub" href="../../docs/lua.wire.memo.status"><span>/lua.wire.memo.status</span></a>
 <a class="sub" href="../../docs/lua.wire.prepare_start"><span>/lua.wire.prepare_start</span></a>
+<a class="sub" href="../../docs/lua.wire.reference"><span>/lua.wire.reference</span></a>
 <a class="sub" href="../../docs/lua.wire.serialize"><span>/lua.wire.serialize</span></a>
 <a class="sub" href="../../docs/lua.wire.sleep"><span>/lua.wire.sleep</span></a>
 <a class="sub" href="../../docs/lua.wire.table_to_data"><span>/lua.wire.table_to_data</span></a>
@@ -864,30 +864,38 @@
 		
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo">lua.wire.fifo</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L462">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
-<div><pre><code>fifo = wire.fifo(handle)
-fifo = wire.fifo(name)
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L464">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>fifo = wire.fifo(name)
+
+fifo = wire.fifo(handle)
 fifo = wire.fifo(opts)
 </code></pre>
 <p>Create or get a fifo. Fifos are not GC&#39;d they must be created 
 and destroyed explicitly.</p>
-<p>When called with a handle (number) we return a previously created 
-fifo with that handle.</p>
-<p>When called with a name (string) we return a previously created 
-fifo with that name.</p>
-<p>We will raise an error if no fifo is found with that handle or name.</p>
+<p>When called with a name (string) we return a previously created fifo 
+with that name or create a new one ( via house so can take some time ) 
+This is the preferred may to safely create a named fifo.</p>
+<p>When called with a handle (number) we return a previously created fifo 
+with that handle ( via house so can take some time ).</p>
+<p>We will raise an error if no fifo is found with that handle, so if this 
+function returns you will always have a fifo.</p>
 <p>When called with opts (table) we do the following based on the 
 contents.</p>
 <pre><code>opts.handle=nil
 </code></pre>
-<p>The handle to wrap or use in creation. If a valid handle we will simply 
-wrap it with a fifo.</p>
+<p>The handle to use in creation ( so we may reuse an old handle ). If nil 
+we will assign a new one.</p>
+<pre><code>opts.name=&quot;namedfifo&quot;
+</code></pre>
+<p>The name to use in fifo creation. Usually the only value needed but the 
+creation happens on this thread rather than house so this is a 
+dangerous thing to do.</p>
 </div>
 </div>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo.peek">lua.wire.fifo.peek</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L803">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L841">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>bool = fifo:peek()
 bool = thread:peek()
 </code></pre>
@@ -902,7 +910,7 @@ the order of memos in the fifo.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo.pull">lua.wire.fifo.pull</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L828">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L866">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>memo = fifo:pull()
 memo = thread:pull()
 </code></pre>
@@ -922,7 +930,7 @@ recognize.</p>
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo.push">lua.wire.fifo.push</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L879">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L917">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>fifo:push(memo)
 thread:push(memo)
 </code></pre>
@@ -932,7 +940,7 @@ thread:push(memo)
 
 <div class="wrap">
 <h1><a href="../../docs/lua.wire.fifo.wait">lua.wire.fifo.wait</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L896">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L934">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>fifo:wait(secs)
 thread:wait(secs)
 </code></pre>

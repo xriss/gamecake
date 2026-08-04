@@ -3262,10 +3262,6 @@
    "name": "lua.wire.house_code"
   },
   {
-   "count": 1,
-   "name": "lua.wire.manifest"
-  },
-  {
    "count": 5,
    "name": "lua.wire.memo"
   },
@@ -3288,6 +3284,10 @@
   {
    "count": 1,
    "name": "lua.wire.prepare_start"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.reference"
   },
   {
    "count": 1,
@@ -3406,7 +3406,7 @@
    "body": "<pre><code>active = wire.active(handle)\nactive = wire.active(thread)\n</code></pre>\n<p>If handle is nil then use wire.thread_handle</p>\n<p>Check if this handle is an active thread, Eg the thread is running and \nshould be dealing with memos.</p>\n<p>returns false if not a thread or thread has halted or thread has been \nasked to halt.</p>\n<p>returns true if thread exists and is running.</p>\n<p>This function should be used in a running thread to check if that \nthread has been asked to halt.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 185,
+   "line": 187,
    "name": "lua.wire.active",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

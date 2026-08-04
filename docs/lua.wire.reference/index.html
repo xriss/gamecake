@@ -833,14 +833,14 @@
 <a class="sub" href="../../docs/lua.wire.fifo.pull"><span>/lua.wire.fifo.pull</span></a>
 <a class="sub" href="../../docs/lua.wire.fifo.push"><span>/lua.wire.fifo.push</span></a>
 <a class="sub" href="../../docs/lua.wire.fifo.wait"><span>/lua.wire.fifo.wait</span></a>
-<a class="sub" href="../../docs/lua.wire.house_code"><span>/lua.wire.house_code</span></a>
-<a class="sub" href="../../docs/lua.wire.manifest"><span>/lua.wire.manifest</span></a><a class="par" href="../../docs/lua.wire.memo"><span>/lua.wire.memo</span></a>
+<a class="sub" href="../../docs/lua.wire.house_code"><span>/lua.wire.house_code</span></a><a class="par" href="../../docs/lua.wire.memo"><span>/lua.wire.memo</span></a>
 
 <a class="sub" href="../../docs/lua.wire.memo.remove"><span>/lua.wire.memo.remove</span></a>
 <a class="sub" href="../../docs/lua.wire.memo.resolve"><span>/lua.wire.memo.resolve</span></a>
 <a class="sub" href="../../docs/lua.wire.memo.send"><span>/lua.wire.memo.send</span></a>
 <a class="sub" href="../../docs/lua.wire.memo.status"><span>/lua.wire.memo.status</span></a>
 <a class="sub" href="../../docs/lua.wire.prepare_start"><span>/lua.wire.prepare_start</span></a>
+<a class="sub" href="../../docs/lua.wire.reference"><span>/lua.wire.reference</span></a>
 <a class="sub" href="../../docs/lua.wire.serialize"><span>/lua.wire.serialize</span></a>
 <a class="sub" href="../../docs/lua.wire.sleep"><span>/lua.wire.sleep</span></a>
 <a class="sub" href="../../docs/lua.wire.table_to_data"><span>/lua.wire.table_to_data</span></a>
@@ -863,14 +863,14 @@
 	<div class="main">
 		
 <div class="wrap">
-<h1><a href="../../docs/lua.wire.manifest">lua.wire.manifest</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L271">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
-<div><pre><code>it = wire.manifest(name)
-it = wire.manifest(handle)
+<h1><a href="../../docs/lua.wire.reference">lua.wire.reference</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L273">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
+<div><pre><code>it = wire.reference(name)
+it = wire.reference(handle)
 </code></pre>
 <p>Return a fifo or thread if it exists, this is a way of wrapping a 
 handle/name that you hope already exists but you are not 100% sure.</p>
-<p>Will returns nil if the name or handle does not exist.</p>
+<p>Will return nil if the name or handle does not exist.</p>
 <p>We may talk to the house thread to check for the existence of name or 
 handle, so this can block for a while before returning.</p>
 <p>The returned value may be a fifo or a thread, it.is will be &quot;thread&quot; or 

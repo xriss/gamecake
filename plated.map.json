@@ -3396,10 +3396,6 @@
     "name": "lua.wire.house_code"
    },
    {
-    "count": 1,
-    "name": "lua.wire.manifest"
-   },
-   {
     "count": 5,
     "name": "lua.wire.memo"
    },
@@ -3422,6 +3418,10 @@
    {
     "count": 1,
     "name": "lua.wire.prepare_start"
+   },
+   {
+    "count": 1,
+    "name": "lua.wire.reference"
    },
    {
     "count": 1,
@@ -9870,7 +9870,7 @@
     "name": "lua.wetgenes.wiretasks"
    },
    {
-    "body": "<pre><code>wire.tasks(&quot;sqlite&quot;,1,&quot;require(&#39;wiretasks&#39;).sqlite_code()&quot;,{\n        sqlite_filename = &quot;./test.sql&quot; ,\n        sqlite_pragmas = &quot;&quot; ,\n    })\n\nresult = wire.memo({\n    fifo=wire.manifest(&quot;sqlite&quot;),\n    data={\n        sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,\n    },\n    on_result=function() end,\n}):resolve()\n</code></pre>\n<p>The code we run in &quot;sqlite&quot; tasks to handle sqlite requests via memos.</p>\n<p>This function requires the following libraries to be available.</p>\n<pre><code>require(&quot;lsqlite3&quot;)\n</code></pre>\n<p>As we are opening an sqlite database here it probably wont help you \nmuch to have more than one thread per database as they will just fight \nover file access. To open multiple sqlite databases create multiple \ntasks with different names.</p>\n<p>Globals passed into the thread control the startup actions, primarily \nyou should provide an sqlite_filename to open.</p>\n<pre><code>sqlite_filename=&quot;./test.sql&quot;\n</code></pre>\n<p>The sqlite database to open when this thread starts.</p>\n<p>Most memos are simple SQL queries, but some extra commands exist via \ndata.action</p>\n<pre><code>data.action=&quot;close&quot;\n</code></pre>\n<p>Shut down the sqlite database, this combined with waiting for the \nthread to halt allows sqlite to clean up before exiting the process.</p>\n<p>When data.action is not set we are performing an SQL query.</p>\n<pre><code>data.sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,\n</code></pre>\n<p>Will return result.rows filled with data.</p>\n<pre><code>data.compact=true\n</code></pre>\n<p>If this boolean is set then we will return compact rows, data.rows will \ncontain rows that are arrays and data.names will be an array of column \nnames. If not set then we return rows as [name]=value objects.</p>\n<pre><code>data.binds={ name=value , ... }\n</code></pre>\n<p>Bind these values to an sqlite statement.</p>\n<pre><code>data.blobs={ name=value , ... }\n</code></pre>\n<p>Bind these values to an sqlite statement as blobs. This must be used \nfor sending binary data.\n<br/>\n<br/></p>\n",
+    "body": "<pre><code>wire.tasks(&quot;sqlite&quot;,1,&quot;require(&#39;wiretasks&#39;).sqlite_code()&quot;,{\n        sqlite_filename = &quot;./test.sql&quot; ,\n        sqlite_pragmas = &quot;&quot; ,\n    })\n\nresult = wire.memo({\n    fifo=wire.fifo(&quot;sqlite&quot;),\n    data={\n        sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,\n    },\n    on_result=function() end,\n}):resolve()\n</code></pre>\n<p>The code we run in &quot;sqlite&quot; tasks to handle sqlite requests via memos.</p>\n<p>This function requires the following libraries to be available.</p>\n<pre><code>require(&quot;lsqlite3&quot;)\n</code></pre>\n<p>As we are opening an sqlite database here it probably wont help you \nmuch to have more than one thread per database as they will just fight \nover file access. To open multiple sqlite databases create multiple \ntasks with different names.</p>\n<p>Globals passed into the thread control the startup actions, primarily \nyou should provide an sqlite_filename to open.</p>\n<pre><code>sqlite_filename=&quot;./test.sql&quot;\n</code></pre>\n<p>The sqlite database to open when this thread starts.</p>\n<p>Most memos are simple SQL queries, but some extra commands exist via \ndata.action</p>\n<pre><code>data.action=&quot;close&quot;\n</code></pre>\n<p>Shut down the sqlite database, this combined with waiting for the \nthread to halt allows sqlite to clean up before exiting the process.</p>\n<p>When data.action is not set we are performing an SQL query.</p>\n<pre><code>data.sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,\n</code></pre>\n<p>Will return result.rows filled with data.</p>\n<pre><code>data.compact=true\n</code></pre>\n<p>If this boolean is set then we will return compact rows, data.rows will \ncontain rows that are arrays and data.names will be an array of column \nnames. If not set then we return rows as [name]=value objects.</p>\n<pre><code>data.binds={ name=value , ... }\n</code></pre>\n<p>Bind these values to an sqlite statement.</p>\n<pre><code>data.blobs={ name=value , ... }\n</code></pre>\n<p>Bind these values to an sqlite statement as blobs. This must be used \nfor sending binary data.\n<br/>\n<br/></p>\n",
     "count": 1,
     "file": "../lua/wiretasks.lua",
     "line": 242,
@@ -9881,7 +9881,7 @@
     "body": "<pre><code>local wire=require(&quot;wire&quot;)\n</code></pre>\n<p>We use wire as the local name of this library. So we can, uhh, wire \nthings together?</p>\n<p>Wire provides multiple long lived lua states managed via standard c11 \nthreads and mutexs with simple fifo message handling between threads.</p>\n<p>May try and change to atomic fifos in the future to reduce the \npossibility of deadlocks but for now I think mutexs are the right \nchoice. Partially due to the lua overhead and partially because this is \nnot intended for sending millions of packets per second between tightly \ncoupled threads.</p>\n<p>A small compatibility library is needed for building for windows using \nmingw. Native windows builds might work if your compiler supports the \nC11 standard.</p>\n<p>We are not doing anything clever, so beware of the following:</p>\n<p>Only data is passed and that data must fit in messagepack, eg json like \nbut binary strings are allowed.</p>\n<p>Do not use lua tables that are both arrays and objects. Pick one or the \nother it will probably work but do not do it in case I have to break \nthat in the future.</p>\n<p>No userdata, no functions.</p>\n<p>When in doubt, send a string, then unpack it in the thread. Binary \nstrings will sometimes need to be escaped into lua code, eg \\0 for null \netc but this only happens to globals passed into a thread. Data is \nusually passed in message pack streams.</p>\n<p>Any lua libs required in a thread <em>must</em> be thread safe or they will \nbreak in strange and uncomfortable ways. So check that any library you \nare using has luaopen_ functions do not try and initialize anything \ntwice if opened in another thread.</p>\n<p>This library does not reuse handles ( as this is intended for long \nlived threads ) and the number of handles is a hard limit set in the C \ncode. Defaults to 4096 threads and 4096 fifos. Bump it at compile time \nif you need more.</p>\n<p>You can reuse handles, but it must be self managed and must be done \nexplicitly.</p>\n<p>EG: You might want to shut down threads, clear out any pending data and \nthen restart game logic threads using the same handles and names. This \nis possible but it is up to you to do it right. For instance the thread \nmust be written to cooperate with the shut down.</p>\n",
     "count": 27,
     "file": "../lua/wire.lua",
-    "line": 9,
+    "line": 11,
     "name": "lua.wire",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9889,7 +9889,7 @@
     "body": "<pre><code>active = wire.active(handle)\nactive = wire.active(thread)\n</code></pre>\n<p>If handle is nil then use wire.thread_handle</p>\n<p>Check if this handle is an active thread, Eg the thread is running and \nshould be dealing with memos.</p>\n<p>returns false if not a thread or thread has halted or thread has been \nasked to halt.</p>\n<p>returns true if thread exists and is running.</p>\n<p>This function should be used in a running thread to check if that \nthread has been asked to halt.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 185,
+    "line": 187,
     "name": "lua.wire.active",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9897,7 +9897,7 @@
     "body": "<pre><code>table = wire.data_to_table( data )\n</code></pre>\n<p>Convert a data (string) into a lua table.</p>\n<p>We currently use cmsgpack but this may change to another system and can \nnot be relied upon. It is even possible that data may not be a string \nin future versions.</p>\n<p>This is a local function for local people. It should not be used by \nyou.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 128,
+    "line": 130,
     "name": "lua.wire.data_to_table",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9905,15 +9905,15 @@
     "body": "<p>Wrapper code used in a new thread to set things up and handle errors \netc.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 1068,
+    "line": 1106,
     "name": "lua.wire.do_start",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
    {
-    "body": "<pre><code>fifo = wire.fifo(handle)\nfifo = wire.fifo(name)\nfifo = wire.fifo(opts)\n</code></pre>\n<p>Create or get a fifo. Fifos are not GC&#39;d they must be created \nand destroyed explicitly.</p>\n<p>When called with a handle (number) we return a previously created \nfifo with that handle.</p>\n<p>When called with a name (string) we return a previously created \nfifo with that name.</p>\n<p>We will raise an error if no fifo is found with that handle or name.</p>\n<p>When called with opts (table) we do the following based on the \ncontents.</p>\n<pre><code>opts.handle=nil\n</code></pre>\n<p>The handle to wrap or use in creation. If a valid handle we will simply \nwrap it with a fifo.</p>\n",
+    "body": "<pre><code>fifo = wire.fifo(name)\n\nfifo = wire.fifo(handle)\nfifo = wire.fifo(opts)\n</code></pre>\n<p>Create or get a fifo. Fifos are not GC&#39;d they must be created \nand destroyed explicitly.</p>\n<p>When called with a name (string) we return a previously created fifo \nwith that name or create a new one ( via house so can take some time ) \nThis is the preferred may to safely create a named fifo.</p>\n<p>When called with a handle (number) we return a previously created fifo \nwith that handle ( via house so can take some time ).</p>\n<p>We will raise an error if no fifo is found with that handle, so if this \nfunction returns you will always have a fifo.</p>\n<p>When called with opts (table) we do the following based on the \ncontents.</p>\n<pre><code>opts.handle=nil\n</code></pre>\n<p>The handle to use in creation ( so we may reuse an old handle ). If nil \nwe will assign a new one.</p>\n<pre><code>opts.name=&quot;namedfifo&quot;\n</code></pre>\n<p>The name to use in fifo creation. Usually the only value needed but the \ncreation happens on this thread rather than house so this is a \ndangerous thing to do.</p>\n",
     "count": 5,
     "file": "../lua/wire.lua",
-    "line": 462,
+    "line": 464,
     "name": "lua.wire.fifo",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9921,7 +9921,7 @@
     "body": "<pre><code>bool = fifo:peek()\nbool = thread:peek()\n</code></pre>\n<p>Peek and see if there is a memo to pull but do not pull it.</p>\n<p>Note that a pull, even immediately after a successful peek has no \nguarantee to work.</p>\n<p>If you wish to actually look at the contents of the memo then pull a \nmemo and then push it back into the fifo. This will of course change \nthe order of memos in the fifo.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 803,
+    "line": 841,
     "name": "lua.wire.fifo.peek",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9929,7 +9929,7 @@
     "body": "<pre><code>memo = fifo:pull()\nmemo = thread:pull()\n</code></pre>\n<p>Pull memo out of this fifo.</p>\n<p>If this is a memo for us to deal with memo.state will be set to &quot;got&quot;</p>\n<p>If this is a result we will return the sent memo with memo.result set \nto the reply data and the memo state will be changed to &quot;result&quot;.</p>\n<p>memo may be ignored for now and dealt with later by finding it in \nwire.memos.</p>\n<p>This is useful if you are waiting for a specific reply and want to keep \npulling until you find it.</p>\n<p>Returns nil if there is no memo available.</p>\n<p>May raise an error if we get a reply with an id that we do not \nrecognize.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 828,
+    "line": 866,
     "name": "lua.wire.fifo.pull",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9937,7 +9937,7 @@
     "body": "<pre><code>fifo:push(memo)\nthread:push(memo)\n</code></pre>\n<p>Push memo into this fifo.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 879,
+    "line": 917,
     "name": "lua.wire.fifo.push",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9945,7 +9945,7 @@
     "body": "<pre><code>fifo:wait(secs)\nthread:wait(secs)\n</code></pre>\n<p>Wait upto the given number of seconds for a new memo to arrive in this \nfifo.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 896,
+    "line": 934,
     "name": "lua.wire.fifo.wait",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9953,23 +9953,15 @@
     "body": "<p>The message loop code we run in the house thread (-2) to synchronize \nprocess wide task names and handles.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 1213,
+    "line": 1251,
     "name": "lua.wire.house_code",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
-   },
-   {
-    "body": "<pre><code>it = wire.manifest(name)\nit = wire.manifest(handle)\n</code></pre>\n<p>Return a fifo or thread if it exists, this is a way of wrapping a \nhandle/name that you hope already exists but you are not 100% sure.</p>\n<p>Will returns nil if the name or handle does not exist.</p>\n<p>We may talk to the house thread to check for the existence of name or \nhandle, so this can block for a while before returning.</p>\n<p>The returned value may be a fifo or a thread, it.is will be &quot;thread&quot; or \n&quot;fifo&quot; for the different results.</p>\n",
-    "count": 1,
-    "file": "../lua/wire.lua",
-    "line": 271,
-    "name": "lua.wire.manifest",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
    {
     "body": "<pre><code>memo = wire.memo()\nmemo = wire.memo( { fifo=handle , data={} , on_result=callback } )\n</code></pre>\n<p>Create a memo and return it, if you pass in a new table then that is \nthe table we will modify and return.</p>\n<p>So you can either get a fresh memo and then fill it or pass in a new \ntable with values already set and have that tables meta adjusted to \nmake it a memo.</p>\n<p>memo.fifo must be provided as it is the destination. May be a \nfifo/thread (table) or a handle (number).</p>\n<p>memo.data is the data to send and must be a table.</p>\n<p>memo.result must be nil and will be set to the result when we receive \nit.</p>\n<p>memo.sender can be provided or it will be set to our handle ( which is \nwire.thread.us.handle ) It must be a handle and it is where replies are \nsent.</p>\n<p>memo.id can be provided or it will be generated. When receiving a memo, \nwe <em>must</em> use the sent id or will not be able to reply. This will be \nhandled by fifo.pull so best to consider it an internal value and not \nmess with it.</p>\n<p>The memo will also be placed in wire.memos for later processing by \nwire, it will remain there until wire.update deals with result/fail \ncallbacks and removes it. You may keep your own memo reference or rely \non the callbacks to remind you. If you create a memo that does not get \nsent and replied to then you will have to remove it manually.</p>\n<p>memo.state will be set to &quot;setup&quot;</p>\n<p>if memo.on_result is provided then it will be called during wire.update \nafter we get a reply. Note that a result may be a fail if result.fail \nis set. on_result will be called like so:</p>\n<pre><code>memo.on_result(memo)\n</code></pre>\n<p>With or without a callback, the memos that had results will then be \nremoved by wire.update as there is nothing else for wire to do.</p>\n<p>FYI HAX TBH : memo.id is set to a light userdata of the memo tables \npointer, this should be unique across multiple lua states and threads \nin the same process, for as long as the table stays on the stack. A \nfuture lua garbage collection system could break this by moving tables \naround in system memory but I believe this is currently &quot;safe&quot; as of \n2026 in currently available versions of lua/luajit and if that changes \nI will fix it. There exists some reqritw of lua from c to java etc, \nthese probably work but you might want to double check.</p>\n",
     "count": 5,
     "file": "../lua/wire.lua",
-    "line": 578,
+    "line": 616,
     "name": "lua.wire.memo",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9977,7 +9969,7 @@
     "body": "<pre><code>memo:remove()\n</code></pre>\n<p>Remove a memo from wire.memos.</p>\n<p>memo.state will be changed to &quot;removed&quot; and it can no longer be found \nin wire.memos</p>\n<p>This means it is no longer a live memo as far as wire is concerned.</p>\n<p>You may of course keep this memo around if you need it.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 653,
+    "line": 691,
     "name": "lua.wire.memo.remove",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9985,7 +9977,7 @@
     "body": "<pre><code>result = memo:resolve()\nresult = wire.memo(...):resolve()\n</code></pre>\n<p>If memo.state is &quot;setup&quot; then we memo:send() the memo. &quot;setup&quot; is the \nstate a newly created memo will be in.</p>\n<p>Wait for a result on our thread fifo ( wire.threads.us ) before \nreturning.</p>\n<p>Other memos may have been pulled and ignored for now. These memos can \nbe found later in wire.memos</p>\n<p>result is returned and can also be found in memo.result this should \nalways be a table containing the result of the memo provided by the \nthread.</p>\n<p>If a result was returned with result.fail set then the thread replied \nwith a hard fail. A hard fail means the thread could not deal with your \nmemo, so lua code broke, memo was invalid etc. This is a hard fail and \nwill raise an error rather than return a result.</p>\n<p>If the thread does not reply (probably a broken or missing task) then \nthis will lock waiting on a result.</p>\n<p>If the currently running thread is asked to halt then this will raise \nan error rather than return.</p>\n<p>Note that this function ignores callbacks which are only called during \nwire.result</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 744,
+    "line": 782,
     "name": "lua.wire.memo.resolve",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -9993,7 +9985,7 @@
     "body": "<pre><code>memo:reply()\n</code></pre>\n<p>Reply to a memo, this uses the senders handle as a fifo without it \nneeding to be wrapped in a full fifo/thread.</p>\n<p>memo.state will be changed to &quot;reply&quot;</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 724,
+    "line": 762,
     "name": "lua.wire.memo.send",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10001,7 +9993,7 @@
     "body": "<pre><code>memo:status(state)\n</code></pre>\n<p>Change status of memo, moving it between wire.memos[ memo.state ] \ncaches.</p>\n<p>This is a local function for local people. It should not be used by \nyou.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 678,
+    "line": 716,
     "name": "lua.wire.memo.status",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10009,15 +10001,23 @@
     "body": "<pre><code>start = wire.prepare_start( { start=&quot;...&quot; , globals={} } )\n\nopts.start=nil\nopts.globals={}\nopts.header=&quot;...&quot;\nopts.footer=&quot;...&quot;\n</code></pre>\n<p>See wire.thread for documentation on these opts, we just pass the opts \ntable down into this function to prepare the start string.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 1024,
+    "line": 1062,
     "name": "lua.wire.prepare_start",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
+   },
+   {
+    "body": "<pre><code>it = wire.reference(name)\nit = wire.reference(handle)\n</code></pre>\n<p>Return a fifo or thread if it exists, this is a way of wrapping a \nhandle/name that you hope already exists but you are not 100% sure.</p>\n<p>Will return nil if the name or handle does not exist.</p>\n<p>We may talk to the house thread to check for the existence of name or \nhandle, so this can block for a while before returning.</p>\n<p>The returned value may be a fifo or a thread, it.is will be &quot;thread&quot; or \n&quot;fifo&quot; for the different results.</p>\n",
+    "count": 1,
+    "file": "../lua/wire.lua",
+    "line": 273,
+    "name": "lua.wire.reference",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
    {
     "body": "<pre><code>luastr = wire.serialize(tab)\nluastr = wire.serialize(tab,{ indent=&quot;\\t&quot; , newline=&quot;\\n&quot; , errors=true  })\n</code></pre>\n<p>Turn a table into a valid lua string that will recreate the table.</p>\n<p>Optionally pass in an opts table that we will use during serialization \nso must be unique.</p>\n<p>Possible options are.</p>\n<pre><code>indent=&quot; &quot;\n</code></pre>\n<p>Indention per level. set to &quot;&quot; for compact output.</p>\n<pre><code>newline=&quot;\\n&quot;\n</code></pre>\n<p>Line ending, set to &quot;&quot; for overly compact output.</p>\n<pre><code>errors=nil\n</code></pre>\n<p>Set this to true and we will raise errors rather than simply adding \ncomments to the output. EG unknown types or recursion.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 913,
+    "line": 951,
     "name": "lua.wire.serialize",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10025,7 +10025,7 @@
     "body": "<pre><code>wire.sleep(secs)\n</code></pre>\n<p>Take a nap for at least the given amount of seconds, probably a little \nbit longer.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 145,
+    "line": 147,
     "name": "lua.wire.sleep",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10033,7 +10033,7 @@
     "body": "<pre><code>data = wire.table_to_data( table )\n</code></pre>\n<p>Convert a lua table into a data (string).</p>\n<p>We currently use cmsgpack but this may change to another system and can \nnot be relied upon. It is even possible that data may not be a string \nin future versions.</p>\n<p>This is a local function for local people. It should not be used by \nyou.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 111,
+    "line": 113,
     "name": "lua.wire.table_to_data",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10041,7 +10041,7 @@
     "body": "<pre><code>wire.tasks(name,count,code)\nwire.tasks(name,0)\n</code></pre>\n<p>Start or halt the named tasks, we plan to be running count number of \nnamed tasks after calling this.</p>\n<p>name is the type of task, eg &quot;http&quot;. A fifo of that name will be \ncreated when creating tasks ( if one does not already exist ) for \nsending mwmo work request to and all tasks created will have their \nnames prefixed with this name.</p>\n<p>count is the number of tasks we want, call with 0 and we will halt all \nnamed tasks.</p>\n<p>code is the string of lua code to run in each task, eg for http tasks \nit would be &quot;require(&#39;wiretasks&#39;).http_code()&quot; to run the wire.http_code \nfunction in each task. If count zero, this may be skipped.</p>\n<p>We will try and reuse old tasks, if stopping and starting, but really \nall you should need to do is call at startup and then you are good to \ngo until the process shuts down.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 1108,
+    "line": 1146,
     "name": "lua.wire.tasks",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10049,7 +10049,7 @@
     "body": "<pre><code>thread = wire.thread(handle)\nthread = wire.thread(name)\nthread = wire.thread(opts)\n</code></pre>\n<p>Create or get a thread table. Threads are not GC&#39;d they must be created \nand destroyed explicitly.</p>\n<p>When called with a handle (number) we return a previously created \nthread with that handle.</p>\n<p>When called with a name (string) we return a previously created \nthread with that name.</p>\n<p>We will assert if no thread is found with that handle or name, so no \nneed to check returns.</p>\n<p>When called with opts (table) we do the following based on the \ncontents.</p>\n<pre><code>opts.handle=nil\n</code></pre>\n<p>The handle to wrap or use in creation. If a valid handle we will simply \nwrap it with a thread table and return that new table.</p>\n<pre><code>opts.start=nil\n</code></pre>\n<p>Run this string as lua code in a new thread. Usually just a require and \na call to a function in that module. eg &quot;require(&#39;modname&#39;).funcname()&quot;</p>\n<pre><code>opts.globals={}\n</code></pre>\n<p>Optional globals for the new thread. Will be serialized and become part \nof the start string. So binary data strings are not ideal but will \nwork.</p>\n<pre><code>opts.preloadlibs=wire.preloadlibs\n</code></pre>\n<p>Must be a cfunction to be run in new thread. Use false to not preload \nany custom libs. When running under gamecake this is automatically \nfilled in and makes all the internal modules available. If you want to \nuse this module outside of gamecake ( possible but not overly tested ) \nthen you may need to provide your own.</p>\n<pre><code>opts.header=...\nopts.footer=...\n</code></pre>\n<p>internal setup so best not to change this. It is used by \nwire.prepare_start to wrap your start code string with helpful error \nhandlers etc.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 332,
+    "line": 334,
     "name": "lua.wire.thread",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10057,7 +10057,7 @@
     "body": "<pre><code>secs = wire.time()\n</code></pre>\n<p>Get the current TIME_UTC via a timespec_get and converted into a \ndouble.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 165,
+    "line": 167,
     "name": "lua.wire.time",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10065,7 +10065,7 @@
     "body": "<pre><code>secs = wire.timeres()\n</code></pre>\n<p>Get the TIME_UTC resolution via a timespec_getres and converted into a \ndouble.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 175,
+    "line": 177,
     "name": "lua.wire.timeres",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10073,7 +10073,7 @@
     "body": "<pre><code>wire.update()\n</code></pre>\n<p>Fetch and process memos, should be called at least once a second to \ndeal with memo replies or callbacks will not fire in a reasonable time.</p>\n<p>memo callbacks on_result will only be launched from this function. Note \nthat a result may be a fail if result.fail is set.</p>\n<p>After calling this all memos that got a reply will have been removed \nfrom the wire cache as we no longer need to deal with them.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 539,
+    "line": 577,
     "name": "lua.wire.update",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10081,7 +10081,7 @@
     "body": "<pre><code>wire.wait(secs)\n</code></pre>\n<p>Take a nap for upto the given amount of seconds. We will wakeup \nwhenever a new msg is sent to any fifo or when this time has passed.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 155,
+    "line": 157,
     "name": "lua.wire.wait",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10089,7 +10089,7 @@
     "body": "<pre><code>it = wire.wrap(name,handle)\n</code></pre>\n<p>We <em>know</em> that this handle exists. So either return a previously cached \nfifo/thread or create a new one with the given name and return that.</p>\n<p>The returned value may be a fifo or a thread, it.is will be &quot;thread&quot; or \n&quot;fifo&quot; for the different results.</p>\n<p>Always returns a valid table.</p>\n",
     "count": 1,
     "file": "../lua/wire.lua",
-    "line": 218,
+    "line": 220,
     "name": "lua.wire.wrap",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
    },
@@ -10102,7 +10102,7 @@
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
    },
    {
-    "body": "<pre><code>wire.tasks(&quot;http&quot;,4,&quot;require(&#39;wiretasks&#39;).http_code()&quot;)\n\nresult = wire.memo({\n    fifo=wire.manifest(&quot;http&quot;),\n    data={\n        url=&quot;http://google.com/&quot;,\n    },\n    on_result=function() end,\n}):resolve()\n</code></pre>\n<p>The code we run in &quot;http&quot; tasks to handle http requests via memos.</p>\n<p>This function requires the following libraries to be available.</p>\n<pre><code>require(&quot;socket.http&quot;)\nrequire(&quot;ltn12&quot;)\n</code></pre>\n<p>Every memo sent is a http fetch request, the keys set in memo.data \ncontrol the type of request.</p>\n<pre><code>data.url = &quot;http://google.com/&quot;\n</code></pre>\n<p>The url we will be talking to. This is all you need for a basic GET.</p>\n<pre><code>data.get = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we send a GET request with this table in the query \nstring, eg append &quot;?a=1&amp;b=2&quot; to the url.</p>\n<pre><code>data.json = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we encode as json and send as body of a POST also \nsetting &quot;Content-Type&quot; to &quot;application/json&quot; in data.headers</p>\n<pre><code>data.post = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we encode as a query string and send as body of a \nPOST also setting &quot;Content-Type&quot; to &quot;application/x-www-form-urlencoded&quot; \nin data.headers</p>\n<pre><code>data.body = &quot;a=1&amp;b=2&quot;\n</code></pre>\n<p>Force a request body string.</p>\n<pre><code>data.method = &quot;GET&quot;\n</code></pre>\n<p>Force a request method.</p>\n<pre><code>data.headers = { [&quot;Content-Type&quot;]=&quot;application/json&quot; , ... }\n</code></pre>\n<p>Force extra headers.</p>\n<pre><code>result.code\nresult.status\nresult.headers\nresult.body\n</code></pre>\n<p>The result of the http.request, may also raise an error for \ncatastrophic failures, eg host not found.</p>\n<p>Many things can go wrong so always check that result.fail is not set \nand the result.code is as expected ( eg 200 ) and only then is it safe \nto read the result.body</p>\n",
+    "body": "<pre><code>wire.tasks(&quot;http&quot;,4,&quot;require(&#39;wiretasks&#39;).http_code()&quot;)\n\nresult = wire.memo({\n    fifo=wire.fifo(&quot;http&quot;),\n    data={\n        url=&quot;http://google.com/&quot;,\n    },\n    on_result=function() end,\n}):resolve()\n</code></pre>\n<p>The code we run in &quot;http&quot; tasks to handle http requests via memos.</p>\n<p>This function requires the following libraries to be available.</p>\n<pre><code>require(&quot;socket.http&quot;)\nrequire(&quot;ltn12&quot;)\n</code></pre>\n<p>Every memo sent is a http fetch request, the keys set in memo.data \ncontrol the type of request.</p>\n<pre><code>data.url = &quot;http://google.com/&quot;\n</code></pre>\n<p>The url we will be talking to. This is all you need for a basic GET.</p>\n<pre><code>data.get = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we send a GET request with this table in the query \nstring, eg append &quot;?a=1&amp;b=2&quot; to the url.</p>\n<pre><code>data.json = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we encode as json and send as body of a POST also \nsetting &quot;Content-Type&quot; to &quot;application/json&quot; in data.headers</p>\n<pre><code>data.post = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we encode as a query string and send as body of a \nPOST also setting &quot;Content-Type&quot; to &quot;application/x-www-form-urlencoded&quot; \nin data.headers</p>\n<pre><code>data.body = &quot;a=1&amp;b=2&quot;\n</code></pre>\n<p>Force a request body string.</p>\n<pre><code>data.method = &quot;GET&quot;\n</code></pre>\n<p>Force a request method.</p>\n<pre><code>data.headers = { [&quot;Content-Type&quot;]=&quot;application/json&quot; , ... }\n</code></pre>\n<p>Force extra headers.</p>\n<pre><code>result.code\nresult.status\nresult.headers\nresult.body\n</code></pre>\n<p>The result of the http.request, may also raise an error for \ncatastrophic failures, eg host not found.</p>\n<p>Many things can go wrong so always check that result.fail is not set \nand the result.code is as expected ( eg 200 ) and only then is it safe \nto read the result.body</p>\n",
     "count": 1,
     "file": "../lua/wiretasks.lua",
     "line": 29,

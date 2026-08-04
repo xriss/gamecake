@@ -3262,10 +3262,6 @@
    "name": "lua.wire.house_code"
   },
   {
-   "count": 1,
-   "name": "lua.wire.manifest"
-  },
-  {
    "count": 5,
    "name": "lua.wire.memo"
   },
@@ -3288,6 +3284,10 @@
   {
    "count": 1,
    "name": "lua.wire.prepare_start"
+  },
+  {
+   "count": 1,
+   "name": "lua.wire.reference"
   },
   {
    "count": 1,
