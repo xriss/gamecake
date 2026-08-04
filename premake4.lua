@@ -780,7 +780,11 @@ all_includes=all_includes or {
 	{"lua_cmsgpack",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_brimworkszip",WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lua_lanes",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_wire",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+
+
+-- lanes has been replaced with wire
+--	{"lua_lanes",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- emcc needs a little bit of special sauce
 --	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
@@ -804,7 +808,6 @@ all_includes=all_includes or {
 	{"lib_pq",			nil			or		NIX		or		nil			or		nil			or	nil		},
 
 	{"lua_boxxd",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lua_wire",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- hid is now in SDL
 --	{"lua_hid",			nil			or		NIX		or		nil			or		nil			or	nil		},
