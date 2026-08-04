@@ -6,7 +6,7 @@
 local djon=require("djon")
 local wpath=require("wetgenes.path")
 local lfs ; pcall( function() lfs=require("lfs") end )
-local wgist=require("wetgenes.tasks_gist")
+local wiretasks=require("wiretasks")
 
 
 --module
@@ -512,7 +512,7 @@ M.gist.fetch_dir=function(gist,path)
 		opts.tasks=gist.collect.oven.tasks
 		opts.gid=gid
 
-		local result=wgist.get(opts)
+		local result=wiretasks.gist_get(opts)
 		for n,v in pairs(result.files or {}) do
 			dir[#dir+1]=gist:new_item(n)
 		end
@@ -541,8 +541,8 @@ M.gist.age_file=function(gist,path)
 		opts.tasks=gist.collect.oven.tasks
 		opts.gid=gid
 
-		local result=wgist.get(opts)
-		return wgist.parse_iso8601( result.updated_at ) -- into os.time() comparable value
+		local result=wiretasks.gist_get(opts)
+		return wiretasks.gist_parse_iso8601( result.updated_at ) -- into os.time() comparable value
 	end
 
 end
@@ -566,7 +566,7 @@ PRINT("read_gist",path)
 		opts.tasks=gist.collect.oven.tasks
 		opts.gid=gid
 
-		local result=wgist.get(opts)
+		local result=wiretasks.gist_get(opts)
 		if gfname==".meta" then
 			return djon.save({
 				description=result.description,
@@ -613,7 +613,7 @@ PRINT("write_gist",path)
 		else
 			opts.body={files={}}
 			opts.body.files[gfname]={content=data}
-			local result=wgist.set(opts)
+			local result=wiretasks.gist_set(opts)
 -- we get result?
 			return result.files and result.files[gfname] and result.files[gfname].content
 		end
