@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 803,
+   "count": 802,
    "name": "lua"
   },
   {
@@ -566,7 +566,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 665,
+   "count": 664,
    "name": "lua.wetgenes"
   },
   {
@@ -1026,7 +1026,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 175,
+   "count": 174,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -1134,20 +1134,16 @@
    "name": "lua.wetgenes.gamecake.framebuffers.stop"
   },
   {
-   "count": 46,
+   "count": 45,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
-   "count": 3,
-   "name": "lua.wetgenes.gamecake.fun.bitsynth_task"
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth"
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.code"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.render"
+   "name": "lua.wetgenes.gamecake.fun.bitsynth.task_code"
   },
   {
    "count": 19,
@@ -3410,7 +3406,7 @@
    "body": "<p>Use ( google by default ) public dns servers to check if we can connect\nto the internet and if we have ipv4 and/or ipv6 available.</p>\n<p>To use alternative dns pass in an ipv4 and ipv6 address as the first\ntwo args, eg to use cloudflare.</p>\n<pre><code>ipsniff(&quot;1.1.1.1&quot;,&quot;2606:4700:4700::1111&quot;)\n</code></pre>\n<p>returns the ipv4,ipv6 address of this host when connecting to that dns\nor nil if no connection possible.</p>\n<p>This result can be used as a bool to indicate working ipv6 or ipv4\ninternet and is also a best guess as to our ip when connecting to other\ndevices.</p>\n<p>Note that this will only work if we are connected to the internet can\nreach the dns servers etc etc, standard networks can be crazy\ndisclaimer applies.</p>\n<p>So great if this works but still need a fallback plan, eg assuming\nlocal ipv4 network is available.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
-   "line": 429,
+   "line": 425,
    "name": "lua.wetgenes.tasks_msgp.ipsniff",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
   }

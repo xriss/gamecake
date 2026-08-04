@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 803,
+   "count": 802,
    "name": "lua"
   },
   {
@@ -566,7 +566,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 665,
+   "count": 664,
    "name": "lua.wetgenes"
   },
   {
@@ -1026,7 +1026,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 175,
+   "count": 174,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -1134,20 +1134,16 @@
    "name": "lua.wetgenes.gamecake.framebuffers.stop"
   },
   {
-   "count": 46,
+   "count": 45,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
-   "count": 3,
-   "name": "lua.wetgenes.gamecake.fun.bitsynth_task"
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth"
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.code"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.render"
+   "name": "lua.wetgenes.gamecake.fun.bitsynth.task_code"
   },
   {
    "count": 19,

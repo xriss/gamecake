@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 803,
+   "count": 802,
    "name": "lua"
   },
   {
@@ -566,7 +566,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 665,
+   "count": 664,
    "name": "lua.wetgenes"
   },
   {
@@ -1026,7 +1026,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 175,
+   "count": 174,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -1134,20 +1134,16 @@
    "name": "lua.wetgenes.gamecake.framebuffers.stop"
   },
   {
-   "count": 46,
+   "count": 45,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
-   "count": 3,
-   "name": "lua.wetgenes.gamecake.fun.bitsynth_task"
+   "count": 2,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth"
   },
   {
    "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.code"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.gamecake.fun.bitsynth_task.render"
+   "name": "lua.wetgenes.gamecake.fun.bitsynth.task_code"
   },
   {
    "count": 19,
@@ -3410,7 +3406,7 @@
    "body": "<p>Clean a hostname so it becomes upercase letters and numbers with\npossible underscores where any other chars would be, eg whitespace.</p>\n<p>we also try not to start or end with an _</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tasks_msgp.lua",
-   "line": 177,
+   "line": 173,
    "name": "lua.wetgenes.tasks_msgp.clean_name",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
   }
