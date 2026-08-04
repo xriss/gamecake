@@ -72,6 +72,8 @@ M.bake=function(oven,upnet)
 		})
 ]]
 		wire.fifo({name="upnet/ups"}) -- create fifo
+		wire.fifo({name="upnet/msgp"}) -- create fifo
+
 		oven.ups.subscribe("upnet/ups") -- request all ups to be sent here
 	end
 	
@@ -815,14 +817,14 @@ dlog(upnet.dmode("sync"),upnet.ticks.agreed+1,unpack(hs))
 			local fifo = wire.manifest("upnet/ups")
 			repeat
 				local memo = fifo:pull()
-				if memo and then
-					upnet.upcache:merge( memo.states[1] ) -- merge as we update
+				if memo then
+					upnet.upcache:merge( memo.data.states[1] ) -- merge as we update
 				end
 			until not memo
 		end
 
 		 do
-			local fifo = wire.manifest("msgp")
+			local fifo = wire.manifest("upnet/msgp")
 			repeat
 				local memo = fifo:pull()
 				if memo then

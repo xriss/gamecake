@@ -851,7 +851,7 @@ M.task_code=function()
 		elseif data.action=="msg" then
 
 			-- just store, they get applied on update
-			ups.new_msgs[#ups.new_msgs+1]=memo.msg
+			ups.new_msgs[#ups.new_msgs+1]=data.msg
 
 		elseif data.action=="subscribe" then
 		
@@ -859,7 +859,7 @@ M.task_code=function()
 
 		elseif data.action=="unsubscribe" then
 		
-			subscriptions[memo.subid]=nil
+			subscriptions[data.subid]=nil
 
 		elseif ( data.action=="get" ) or ( data.action=="update" ) then
 		
@@ -876,7 +876,7 @@ M.task_code=function()
 			if data.action=="update" then
 				for fifo,_ in pairs(subscriptions) do
 					wire.memo({
-						fifo=fifo,
+						fifo=wire.manifest(fifo),
 						data={
 							action="ups_subscription",
 							states=result.states,

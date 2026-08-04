@@ -6,6 +6,7 @@ local wire=require("wire")
 
 -- module
 local M={ modname = (...) } package.loaded[M.modname] = M
+local msgp=M
 
 --[[#lua.wetgenes.tasks_msgp
 
@@ -693,7 +694,7 @@ M.functions.msgp_code=function()
 	end
 	local send_msg=function(msg)
 		local memo=wire.memo({
-			fifo=wire.manifest(task_id_msg),
+			fifo=wire.manifest("upnet/msgp"),
 			data=msg,
 		}):send()
 --		linda:send( nil , task_id_msg , msg )
