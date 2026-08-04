@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 802,
+   "count": 804,
    "name": "lua"
   },
   {
@@ -566,7 +566,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 664,
+   "count": 662,
    "name": "lua.wetgenes"
   },
   {
@@ -2026,6 +2026,42 @@
    "name": "lua.wetgenes.midi.unsubscribe"
   },
   {
+   "count": 9,
+   "name": "lua.wetgenes.msgp"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.addr_to_ip_port"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.addr_to_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.clean_name"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.ip6_to_addr"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.ipsniff"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.list_to_addr"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.pack"
+  },
+  {
    "count": 2,
    "name": "lua.wetgenes.package"
   },
@@ -3058,50 +3094,6 @@
    "name": "lua.wetgenes.tasks.thread_code"
   },
   {
-   "count": 2,
-   "name": "lua.wetgenes.tasks_gist"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_gist.list"
-  },
-  {
-   "count": 9,
-   "name": "lua.wetgenes.tasks_msgp"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.addr_to_ip_port"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.addr_to_list"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.clean_name"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.ip6_to_addr"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.ipsniff"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.list_to_addr"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.msgp_code"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.pack"
-  },
-  {
    "count": 5,
    "name": "lua.wetgenes.tsv"
   },
@@ -3330,8 +3322,24 @@
    "name": "lua.wire.wrap"
   },
   {
-   "count": 2,
+   "count": 6,
    "name": "lua.wiretasks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_parse_iso8601"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_set"
   },
   {
    "count": 1,
@@ -3404,17 +3412,49 @@
  "_list": [
   {
    "body": "<pre><code>local wiretasks=require(&quot;wiretasks&quot;)\n</code></pre>\n<p>This is a small collection of useful tasks for running via wire. Each \ntask has its own specific module dependencies, eg lua socket is needed \nfor http fetching. This module is usually used in a task start code \nstring passed to wire.tasks. So &quot;require(&#39;wiretasks&#39;).http_code()&quot; \nwould be used to start the http task.</p>\n<p>We also include some wrapper functions that make use of memos and \nrequire certain tasks to already be running.</p>\n",
-   "count": 2,
+   "count": 6,
    "file": "../lua/wiretasks.lua",
    "line": 7,
    "name": "lua.wiretasks",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
   },
   {
+   "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Get a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Optional token to read this gist</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wiretasks.gist_baseurl and can also be changed globally \nthere.</p>\n",
+   "count": 1,
+   "file": "../lua/wiretasks.lua",
+   "line": 569,
+   "name": "lua.wiretasks.gist_get",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
+  },
+  {
+   "body": "<pre><code>local list=gist.list(opts)\n</code></pre>\n<p>The http task must be running and this will block waiting on results.</p>\n<p>List some gists from github using options found in opts, see \n<a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; which is \nset in wiretasks.gist_baseurl and can also be changed globally there.</p>\n<pre><code>opts.token\n</code></pre>\n<p>Should be set to a github access token and is required for writing data \nor accessing non public information.</p>\n<pre><code>opts.username\n</code></pre>\n<p>Is the name of a github user we wish to list gists for</p>\n<pre><code>opts.filter\n</code></pre>\n<p>Can be &quot;public&quot; to request only public gists or &quot;starred&quot; to request \nonly starred gists.</p>\n<pre><code>opts.since\n</code></pre>\n<p>An ISO_8601 timestamp in a string and should be set if we are only \ninterested in gists since this time.</p>\n<pre><code>opts.per_page\n</code></pre>\n<p>The number of results we want, the api limits this to 100 but defaults \nto 30. Probably a good idea to set this to 100 unless you want to deal \nwith paging code and even then you can only get the first 3000 results.</p>\n<pre><code>opts.page\n</code></pre>\n<p>The page of results we are requesting, It defaults to 1 so can be \nomitted unless you are going to request multiple pages.</p>\n",
+   "count": 1,
+   "file": "../lua/wiretasks.lua",
+   "line": 482,
+   "name": "lua.wiretasks.gist_list",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
+  },
+  {
+   "body": "<pre><code>seconds = wiretasks.gist_parse_iso8601(text)\n</code></pre>\n<p>Parse a string in iso8601 format into a linux time ( seconds since 1970 )</p>\n",
+   "count": 1,
+   "file": "../lua/wiretasks.lua",
+   "line": 462,
+   "name": "lua.wiretasks.gist_parse_iso8601",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
+  },
+  {
+   "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Set a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Token to write this gist</p>\n<pre><code>opts.body\n</code></pre>\n<p>Gist data</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wiretasks.gist_baseurl and can also be changed globally \nthere.</p>\n",
+   "count": 1,
+   "file": "../lua/wiretasks.lua",
+   "line": 613,
+   "name": "lua.wiretasks.gist_set",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
+  },
+  {
    "body": "<pre><code>wire.tasks(&quot;http&quot;,4,&quot;require(&#39;wiretasks&#39;).http_code()&quot;)\n\nresult = wire.memo({\n    fifo=wire.fifo(&quot;http&quot;),\n    data={\n        url=&quot;http://google.com/&quot;,\n    },\n    on_result=function() end,\n}):resolve()\n</code></pre>\n<p>The code we run in &quot;http&quot; tasks to handle http requests via memos.</p>\n<p>This function requires the following libraries to be available.</p>\n<pre><code>require(&quot;socket.http&quot;)\nrequire(&quot;ltn12&quot;)\n</code></pre>\n<p>Every memo sent is a http fetch request, the keys set in memo.data \ncontrol the type of request.</p>\n<pre><code>data.url = &quot;http://google.com/&quot;\n</code></pre>\n<p>The url we will be talking to. This is all you need for a basic GET.</p>\n<pre><code>data.get = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we send a GET request with this table in the query \nstring, eg append &quot;?a=1&amp;b=2&quot; to the url.</p>\n<pre><code>data.json = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we encode as json and send as body of a POST also \nsetting &quot;Content-Type&quot; to &quot;application/json&quot; in data.headers</p>\n<pre><code>data.post = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we encode as a query string and send as body of a \nPOST also setting &quot;Content-Type&quot; to &quot;application/x-www-form-urlencoded&quot; \nin data.headers</p>\n<pre><code>data.body = &quot;a=1&amp;b=2&quot;\n</code></pre>\n<p>Force a request body string.</p>\n<pre><code>data.method = &quot;GET&quot;\n</code></pre>\n<p>Force a request method.</p>\n<pre><code>data.headers = { [&quot;Content-Type&quot;]=&quot;application/json&quot; , ... }\n</code></pre>\n<p>Force extra headers.</p>\n<pre><code>result.code\nresult.status\nresult.headers\nresult.body\n</code></pre>\n<p>The result of the http.request, may also raise an error for \ncatastrophic failures, eg host not found.</p>\n<p>Many things can go wrong so always check that result.fail is not set \nand the result.code is as expected ( eg 200 ) and only then is it safe \nto read the result.body</p>\n",
    "count": 1,
    "file": "../lua/wiretasks.lua",
-   "line": 29,
+   "line": 30,
    "name": "lua.wiretasks.http_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
   }

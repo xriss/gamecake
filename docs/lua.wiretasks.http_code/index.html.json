@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 802,
+   "count": 804,
    "name": "lua"
   },
   {
@@ -566,7 +566,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 664,
+   "count": 662,
    "name": "lua.wetgenes"
   },
   {
@@ -2026,6 +2026,42 @@
    "name": "lua.wetgenes.midi.unsubscribe"
   },
   {
+   "count": 9,
+   "name": "lua.wetgenes.msgp"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.addr_to_ip_port"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.addr_to_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.clean_name"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.ip6_to_addr"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.ipsniff"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.list_to_addr"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.pack"
+  },
+  {
    "count": 2,
    "name": "lua.wetgenes.package"
   },
@@ -3058,50 +3094,6 @@
    "name": "lua.wetgenes.tasks.thread_code"
   },
   {
-   "count": 2,
-   "name": "lua.wetgenes.tasks_gist"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_gist.list"
-  },
-  {
-   "count": 9,
-   "name": "lua.wetgenes.tasks_msgp"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.addr_to_ip_port"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.addr_to_list"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.clean_name"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.ip6_to_addr"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.ipsniff"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.list_to_addr"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.msgp_code"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.pack"
-  },
-  {
    "count": 5,
    "name": "lua.wetgenes.tsv"
   },
@@ -3330,8 +3322,24 @@
    "name": "lua.wire.wrap"
   },
   {
-   "count": 2,
+   "count": 6,
    "name": "lua.wiretasks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_parse_iso8601"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_set"
   },
   {
    "count": 1,
@@ -3406,7 +3414,7 @@
    "body": "<pre><code>wire.tasks(&quot;http&quot;,4,&quot;require(&#39;wiretasks&#39;).http_code()&quot;)\n\nresult = wire.memo({\n    fifo=wire.fifo(&quot;http&quot;),\n    data={\n        url=&quot;http://google.com/&quot;,\n    },\n    on_result=function() end,\n}):resolve()\n</code></pre>\n<p>The code we run in &quot;http&quot; tasks to handle http requests via memos.</p>\n<p>This function requires the following libraries to be available.</p>\n<pre><code>require(&quot;socket.http&quot;)\nrequire(&quot;ltn12&quot;)\n</code></pre>\n<p>Every memo sent is a http fetch request, the keys set in memo.data \ncontrol the type of request.</p>\n<pre><code>data.url = &quot;http://google.com/&quot;\n</code></pre>\n<p>The url we will be talking to. This is all you need for a basic GET.</p>\n<pre><code>data.get = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we send a GET request with this table in the query \nstring, eg append &quot;?a=1&amp;b=2&quot; to the url.</p>\n<pre><code>data.json = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we encode as json and send as body of a POST also \nsetting &quot;Content-Type&quot; to &quot;application/json&quot; in data.headers</p>\n<pre><code>data.post = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we encode as a query string and send as body of a \nPOST also setting &quot;Content-Type&quot; to &quot;application/x-www-form-urlencoded&quot; \nin data.headers</p>\n<pre><code>data.body = &quot;a=1&amp;b=2&quot;\n</code></pre>\n<p>Force a request body string.</p>\n<pre><code>data.method = &quot;GET&quot;\n</code></pre>\n<p>Force a request method.</p>\n<pre><code>data.headers = { [&quot;Content-Type&quot;]=&quot;application/json&quot; , ... }\n</code></pre>\n<p>Force extra headers.</p>\n<pre><code>result.code\nresult.status\nresult.headers\nresult.body\n</code></pre>\n<p>The result of the http.request, may also raise an error for \ncatastrophic failures, eg host not found.</p>\n<p>Many things can go wrong so always check that result.fail is not set \nand the result.code is as expected ( eg 200 ) and only then is it safe \nto read the result.body</p>\n",
    "count": 1,
    "file": "../lua/wiretasks.lua",
-   "line": 29,
+   "line": 30,
    "name": "lua.wiretasks.http_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
   }

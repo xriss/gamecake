@@ -264,7 +264,7 @@
     "name": "levels"
    },
    {
-    "count": 802,
+    "count": 804,
     "name": "lua"
    },
    {
@@ -700,7 +700,7 @@
     "name": "lua.swanky.edit.collect.task_code"
    },
    {
-    "count": 664,
+    "count": 662,
     "name": "lua.wetgenes"
    },
    {
@@ -2160,6 +2160,42 @@
     "name": "lua.wetgenes.midi.unsubscribe"
    },
    {
+    "count": 9,
+    "name": "lua.wetgenes.msgp"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.msgp.addr_to_ip_port"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.msgp.addr_to_list"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.msgp.clean_name"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.msgp.code"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.msgp.ip6_to_addr"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.msgp.ipsniff"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.msgp.list_to_addr"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.msgp.pack"
+   },
+   {
     "count": 2,
     "name": "lua.wetgenes.package"
    },
@@ -3192,50 +3228,6 @@
     "name": "lua.wetgenes.tasks.thread_code"
    },
    {
-    "count": 2,
-    "name": "lua.wetgenes.tasks_gist"
-   },
-   {
-    "count": 1,
-    "name": "lua.wetgenes.tasks_gist.list"
-   },
-   {
-    "count": 9,
-    "name": "lua.wetgenes.tasks_msgp"
-   },
-   {
-    "count": 1,
-    "name": "lua.wetgenes.tasks_msgp.addr_to_ip_port"
-   },
-   {
-    "count": 1,
-    "name": "lua.wetgenes.tasks_msgp.addr_to_list"
-   },
-   {
-    "count": 1,
-    "name": "lua.wetgenes.tasks_msgp.clean_name"
-   },
-   {
-    "count": 1,
-    "name": "lua.wetgenes.tasks_msgp.ip6_to_addr"
-   },
-   {
-    "count": 1,
-    "name": "lua.wetgenes.tasks_msgp.ipsniff"
-   },
-   {
-    "count": 1,
-    "name": "lua.wetgenes.tasks_msgp.list_to_addr"
-   },
-   {
-    "count": 1,
-    "name": "lua.wetgenes.tasks_msgp.msgp_code"
-   },
-   {
-    "count": 1,
-    "name": "lua.wetgenes.tasks_msgp.pack"
-   },
-   {
     "count": 5,
     "name": "lua.wetgenes.tsv"
    },
@@ -3464,8 +3456,24 @@
     "name": "lua.wire.wrap"
    },
    {
-    "count": 2,
+    "count": 6,
     "name": "lua.wiretasks"
+   },
+   {
+    "count": 1,
+    "name": "lua.wiretasks.gist_get"
+   },
+   {
+    "count": 1,
+    "name": "lua.wiretasks.gist_list"
+   },
+   {
+    "count": 1,
+    "name": "lua.wiretasks.gist_parse_iso8601"
+   },
+   {
+    "count": 1,
+    "name": "lua.wiretasks.gist_set"
    },
    {
     "count": 1,
@@ -3773,7 +3781,7 @@
    },
    {
     "body": "",
-    "count": 802,
+    "count": 804,
     "name": "lua"
    },
    {
@@ -4615,7 +4623,7 @@
    },
    {
     "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-    "count": 664,
+    "count": 662,
     "file": "../lua/wetgenes/init.lua",
     "line": 5,
     "name": "lua.wetgenes",
@@ -7495,6 +7503,78 @@
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/midi.lua"
    },
    {
+    "body": "<pre><code>local msgp=require(&quot;wetgenes.msgp&quot;)\n</code></pre>\n<p>A stream of lowlevel udp packets with automatic resend ( data will get\nthere eventual ) but hopefully without clogging up an ongoing pulse of\nsmaller packets that contain EG controller state.</p>\n<p>We use lua sockets and lanes with some help from wetgenes.tasks to\nmanage the lanes.\n<br/>\n<br/></p>\n<p>Simple UDP data packets with auto resend, little endian with this 6 byte header.</p>\n<pre><code>u16\t\tidx\t\t\t//\tincrementing and wrapping idx of this packet\nu16\t\tack\t\t\t//\twe acknowledge all the packets before this idx so please send this one next (or again maybe)\nu8\t\tbit\t\t\t//\twhich bit this is, all bits should be joined before parsing\nu8\t\tbits\t\t//\thow many bits in total ( all bits will be in adjacent idxs )\nu8\t\tdata[*]\t\t//\tThe payload, if multiple bits then all payloads should be concatenated\n</code></pre>\n<p>A maximum packet size of 63k seems to give good throughput, letting the\nlower level code split and recombine packets is probably going to be\nmore efficient than us. Note that we care about best case speed, when\nshit lags and packets drop we care less about performance and more\nabout maintaining a connection with correct state. IE its important\nthat we recover not that we pretend there is no problem. At 255 bits *\n63k bit size we can seen a data of about 15.6m.</p>\n<p>Technically 63k UDP packets might just get dropped as too big but I\nsuspect modern hardware is not really going to cause problems.</p>\n<p>bit/bits only goes up to 255. the 0 value in either of these is\nreserved as a flag for possible slightly strange packets in the future\neg maybe we need a ping? and should be ignored as a bad packet if you\ndo not understand them.</p>\n<p>An ack of 0x1234 also implies that 0x9234 to 0x1233 are in the past and\n0x1234 to 0x9233 are in the future.</p>\n<p>Also if we have nothing new to say after 100ms but have received new\npackets then we can send a packet with empty data (0 length) as an ack\nonly packet.</p>\n<p>When connecting to a port for the first time, the idx value must start\nat a special number, that number is configurable and should be\ndifferent for each app. An extra bit of sanity during introductions to\nindicate that the data stream will be understood by both parties.</p>\n<p>Special packets that do not add to the stream of user data but instead\nare used internally by this protocol.</p>\n<pre><code>id\t\tbits\tbit\nPING\t0x00\t0x02\nPONG\t0x00\t0x03\nHAND\t0x00\t0x04\nSHAKE\t0x00\t0x05\nRESEND\t0x00\t0x08\nPULSE\t0x00\t0x10\n</code></pre>\n<p>A PING packet will be accepted and acknowledged after handshaking.\nSending a PING packet will cause a PONG response with the same data.</p>\n<p>A PONG packet will be accepted and acknowledged after handshaking, its\ndata should be the same as the PING it is responding too.</p>\n<p>A HAND packet begins handshaking, the payload data is a string array.\nConsisting of a series of null terminated utf8 strings.</p>\n<p>A SHAKE packet ends handshaking The payload data is a string array.\nConsisting of a series of null terminated utf8 strings.</p>\n<p>Both the HAND and the SHAKE packets contain the same payload data which\nconsists of the following utf8 strings, each terminated by a 0 byte.</p>\n<pre><code>host name\nhost ip4\nhost ip6\nhost port\nclient addr\n</code></pre>\n<p>When received, each of the strings should to be clamped to 255 bytes\nand the values validated or replaced with empty strings before use.</p>\n<p>host name is maybe best considered a random string, it could be anything.</p>\n<p>host ip4 will be the hosts best guess at their ip4, it is the ip4 they\nare listening on.</p>\n<p>host ip6 will be the hosts best guess at their ip6, it is the ip6 they\nare listening on.</p>\n<p>host port will be the local port the host is listening on, ip4 and ip6,\nbut as they may be port forwarding we might connect on a different\nport.</p>\n<p>client addr is the client ip and port the sender sent this packet too.\nIf ipv4 it will be a string of the format &quot;1.2.3.4:5&quot; and if 1pv6 then\n&quot;[1::2]:3&quot; So the ip possibly wrapped in square brackets (ipv6) and\nthen a colon followed by the port in url style format.</p>\n<p>A RESEND packet consists of a payload of little endian 16bit idxs to\npackets we would like to be resent to fill in missing data.</p>\n<p>A PULSE packet contains user data but does not get resent or\nacknowledged, its IDX must be set to 0 and this IDX should be ignored\nwhen received as this is out of stream data. Pulse packets are small\nregular packets of user data, eg current client input state. Data sent\nis included as part of the normal received data stream but there is no\nguarantee that it will be delivered or when it will be delivered\nrelative to other data. The data must be small enough to fit in a\nsingle packet. Think of this as something of a raw UDP packet in terms\nof how it works.</p>\n",
+    "count": 9,
+    "file": "../lua/wetgenes/msgp.lua",
+    "line": 11,
+    "name": "lua.wetgenes.msgp",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/msgp.lua"
+   },
+   {
+    "body": "<p>parse an ip string and port number from an addr/addr+port/addr_list</p>\n<p>returns addr,port that we can then use with luasocket</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/msgp.lua",
+    "line": 400,
+    "name": "lua.wetgenes.msgp.addr_to_ip_port",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/msgp.lua"
+   },
+   {
+    "body": "<p>parse an ip address + maybe port encoded as a string into a list of\nnumbers, the length of the list represents the type so</p>\n<pre><code>#4 {1,2,3,4} -- ip4\n#5 {1,2,3,4,5} -- ip4:port\n#8 {1,2,3,4,5,6,7,8} -- ip6\n#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port\n</code></pre>\n<p>Optionally include a numeric port to add/replace in the list after\nparsing.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/msgp.lua",
+    "line": 256,
+    "name": "lua.wetgenes.msgp.addr_to_list",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/msgp.lua"
+   },
+   {
+    "body": "<p>Clean a hostname so it becomes upercase letters and numbers with\npossible underscores where any other chars would be, eg whitespace.</p>\n<p>we also try not to start or end with an _</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/msgp.lua",
+    "line": 173,
+    "name": "lua.wetgenes.msgp.clean_name",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/msgp.lua"
+   },
+   {
+    "body": "<p>lanes task function for handling msgp communication.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/msgp.lua",
+    "line": 529,
+    "name": "lua.wetgenes.msgp.code",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/msgp.lua"
+   },
+   {
+    "body": "<p>Parse an array of 8 numbers into an ip6 address with :: in the first\nlongest run of zeros if needed and lowercase hex letters.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/msgp.lua",
+    "line": 191,
+    "name": "lua.wetgenes.msgp.ip6_to_addr",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/msgp.lua"
+   },
+   {
+    "body": "<p>Use ( google by default ) public dns servers to check if we can connect\nto the internet and if we have ipv4 and/or ipv6 available.</p>\n<p>To use alternative dns pass in an ipv4 and ipv6 address as the first\ntwo args, eg to use cloudflare.</p>\n<pre><code>ipsniff(&quot;1.1.1.1&quot;,&quot;2606:4700:4700::1111&quot;)\n</code></pre>\n<p>returns the ipv4,ipv6 address of this host when connecting to that dns\nor nil if no connection possible.</p>\n<p>This result can be used as a bool to indicate working ipv6 or ipv4\ninternet and is also a best guess as to our ip when connecting to other\ndevices.</p>\n<p>Note that this will only work if we are connected to the internet can\nreach the dns servers etc etc, standard networks can be crazy\ndisclaimer applies.</p>\n<p>So great if this works but still need a fallback plan, eg assuming\nlocal ipv4 network is available.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/msgp.lua",
+    "line": 425,
+    "name": "lua.wetgenes.msgp.ipsniff",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/msgp.lua"
+   },
+   {
+    "body": "<p>Parse an array of numbers into an ip address and maybe port.</p>\n<pre><code>#4 {1,2,3,4} -- ip4\n#5 {1,2,3,4,5} -- ip4:port\n#8 {1,2,3,4,5,6,7,8} -- ip6\n#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port\n</code></pre>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/msgp.lua",
+    "line": 231,
+    "name": "lua.wetgenes.msgp.list_to_addr",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/msgp.lua"
+   },
+   {
+    "body": "<p>If given aa udp data packet string, convert it to a table.</p>\n<p>If given table, convert it to a udp data packet string. little endian</p>\n<pre><code>u16\t\tidx\t\t\t//\tincrementing and wrapping idx of this packet\nu16\t\tack\t\t\t//\twe acknowledge all the packets before this idx so please send this one next (or again maybe)\nu8\t\tbit\t\t\t//\twhich bit this is, all bits should be joined before parsing\nu8\t\tbits\t\t//\thow many bits in total ( all bits will be in adjacent idxs )\nu8\t\tdata[*]\t\t//\tThe payload, if multiple bits then all payloads should be concatenated\n</code></pre>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/msgp.lua",
+    "line": 484,
+    "name": "lua.wetgenes.msgp.pack",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/msgp.lua"
+   },
+   {
     "body": "<pre><code>wpackage=require(&quot;wetgenes.package&quot;)\n</code></pre>\n<p>Some generic lowlevel functions for messing about with how lua works, \neg how modules are loaded.</p>\n",
     "count": 2,
     "file": "../lua/wetgenes/package.lua",
@@ -9556,94 +9636,6 @@
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks.lua"
    },
    {
-    "body": "<pre><code>local gist=require(&quot;wetgenes.tasks_gist&quot;)\n</code></pre>\n<p>Access github gists using the github api via the http tasks.</p>\n",
-    "count": 2,
-    "file": "../lua/wetgenes/tasks_gist.lua",
-    "line": 8,
-    "name": "lua.wetgenes.tasks_gist",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_gist.lua"
-   },
-   {
-    "body": "<pre><code>local tasks=require(&quot;wetgenes.tasks&quot;).create()\nlocal gist=require(&quot;wetgenes.tasks_gist&quot;)\nlocal opts={\n    tasks=tasks, -- required\n}\nlocal list=gist.list(opts)\n</code></pre>\n<p>List some gists from github using options found in opts, valid options are...</p>\n<p>baseurl can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot;</p>\n<p>tasks is always <em>required</em> as we use it for http access.</p>\n<p>token should be set to a github access token and is required for \nwritting data or accessing non public information.</p>\n<p>username is the name of a github user we wish to list gists for</p>\n<p>filter can be &quot;public&quot; to request only public gists or &quot;starred&quot; to \nrequest only starred gists.</p>\n<p>since is an ISO_8601 timestamp in a string and should be set if we are \nonly interested in gists since this time.</p>\n<p>per_page is the number of results we want, the api limits this to 100 \nbut defaults to 30. Probably a good idea to set this to 100 unless you \nwant to deal with paging code and even then you can only get the first \n3000 results.</p>\n<p>page is the page of results we are requesting, It defaults to 1 so can \nbe omitted unless you are going to request multiple pages.</p>\n",
-    "count": 1,
-    "file": "../lua/wetgenes/tasks_gist.lua",
-    "line": 43,
-    "name": "lua.wetgenes.tasks_gist.list",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_gist.lua"
-   },
-   {
-    "body": "<pre><code>local msgp=require(&quot;wetgenes.tasks_msgp&quot;)\n</code></pre>\n<p>A stream of lowlevel udp packets with automatic resend ( data will get\nthere eventual ) but hopefully without clogging up an ongoing pulse of\nsmaller packets that contain EG controller state.</p>\n<p>We use lua sockets and lanes with some help from wetgenes.tasks to\nmanage the lanes.\n<br/>\n<br/></p>\n<p>Simple UDP data packets with auto resend, little endian with this 6 byte header.</p>\n<pre><code>u16\t\tidx\t\t\t//\tincrementing and wrapping idx of this packet\nu16\t\tack\t\t\t//\twe acknowledge all the packets before this idx so please send this one next (or again maybe)\nu8\t\tbit\t\t\t//\twhich bit this is, all bits should be joined before parsing\nu8\t\tbits\t\t//\thow many bits in total ( all bits will be in adjacent idxs )\nu8\t\tdata[*]\t\t//\tThe payload, if multiple bits then all payloads should be concatenated\n</code></pre>\n<p>A maximum packet size of 63k seems to give good throughput, letting the\nlower level code split and recombine packets is probably going to be\nmore efficient than us. Note that we care about best case speed, when\nshit lags and packets drop we care less about performance and more\nabout maintaining a connection with correct state. IE its important\nthat we recover not that we pretend there is no problem. At 255 bits *\n63k bit size we can seen a data of about 15.6m.</p>\n<p>Technically 63k UDP packets might just get dropped as too big but I\nsuspect modern hardware is not really going to cause problems.</p>\n<p>bit/bits only goes up to 255. the 0 value in either of these is\nreserved as a flag for possible slightly strange packets in the future\neg maybe we need a ping? and should be ignored as a bad packet if you\ndo not understand them.</p>\n<p>An ack of 0x1234 also implies that 0x9234 to 0x1233 are in the past and\n0x1234 to 0x9233 are in the future.</p>\n<p>Also if we have nothing new to say after 100ms but have received new\npackets then we can send a packet with empty data (0 length) as an ack\nonly packet.</p>\n<p>When connecting to a port for the first time, the idx value must start\nat a special number, that number is configurable and should be\ndifferent for each app. An extra bit of sanity during introductions to\nindicate that the data stream will be understood by both parties.</p>\n<p>Special packets that do not add to the stream of user data but instead\nare used internally by this protocol.</p>\n<pre><code>id\t\tbits\tbit\nPING\t0x00\t0x02\nPONG\t0x00\t0x03\nHAND\t0x00\t0x04\nSHAKE\t0x00\t0x05\nRESEND\t0x00\t0x08\nPULSE\t0x00\t0x10\n</code></pre>\n<p>A PING packet will be accepted and acknowledged after handshaking.\nSending a PING packet will cause a PONG response with the same data.</p>\n<p>A PONG packet will be accepted and acknowledged after handshaking, its\ndata should be the same as the PING it is responding too.</p>\n<p>A HAND packet begins handshaking, the payload data is a string array.\nConsisting of a series of null terminated utf8 strings.</p>\n<p>A SHAKE packet ends handshaking The payload data is a string array.\nConsisting of a series of null terminated utf8 strings.</p>\n<p>Both the HAND and the SHAKE packets contain the same payload data which\nconsists of the following utf8 strings, each terminated by a 0 byte.</p>\n<pre><code>host name\nhost ip4\nhost ip6\nhost port\nclient addr\n</code></pre>\n<p>When received, each of the strings should to be clamped to 255 bytes\nand the values validated or replaced with empty strings before use.</p>\n<p>host name is maybe best considered a random string, it could be anything.</p>\n<p>host ip4 will be the hosts best guess at their ip4, it is the ip4 they\nare listening on.</p>\n<p>host ip6 will be the hosts best guess at their ip6, it is the ip6 they\nare listening on.</p>\n<p>host port will be the local port the host is listening on, ip4 and ip6,\nbut as they may be port forwarding we might connect on a different\nport.</p>\n<p>client addr is the client ip and port the sender sent this packet too.\nIf ipv4 it will be a string of the format &quot;1.2.3.4:5&quot; and if 1pv6 then\n&quot;[1::2]:3&quot; So the ip possibly wrapped in square brackets (ipv6) and\nthen a colon followed by the port in url style format.</p>\n<p>A RESEND packet consists of a payload of little endian 16bit idxs to\npackets we would like to be resent to fill in missing data.</p>\n<p>A PULSE packet contains user data but does not get resent or\nacknowledged, its IDX must be set to 0 and this IDX should be ignored\nwhen received as this is out of stream data. Pulse packets are small\nregular packets of user data, eg current client input state. Data sent\nis included as part of the normal received data stream but there is no\nguarantee that it will be delivered or when it will be delivered\nrelative to other data. The data must be small enough to fit in a\nsingle packet. Think of this as something of a raw UDP packet in terms\nof how it works.</p>\n",
-    "count": 9,
-    "file": "../lua/wetgenes/tasks_msgp.lua",
-    "line": 11,
-    "name": "lua.wetgenes.tasks_msgp",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
-   },
-   {
-    "body": "<p>parse an ip string and port number from an addr/addr+port/addr_list</p>\n<p>returns addr,port that we can then use with luasocket</p>\n",
-    "count": 1,
-    "file": "../lua/wetgenes/tasks_msgp.lua",
-    "line": 400,
-    "name": "lua.wetgenes.tasks_msgp.addr_to_ip_port",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
-   },
-   {
-    "body": "<p>parse an ip address + maybe port encoded as a string into a list of\nnumbers, the length of the list represents the type so</p>\n<pre><code>#4 {1,2,3,4} -- ip4\n#5 {1,2,3,4,5} -- ip4:port\n#8 {1,2,3,4,5,6,7,8} -- ip6\n#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port\n</code></pre>\n<p>Optionally include a numeric port to add/replace in the list after\nparsing.</p>\n",
-    "count": 1,
-    "file": "../lua/wetgenes/tasks_msgp.lua",
-    "line": 256,
-    "name": "lua.wetgenes.tasks_msgp.addr_to_list",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
-   },
-   {
-    "body": "<p>Clean a hostname so it becomes upercase letters and numbers with\npossible underscores where any other chars would be, eg whitespace.</p>\n<p>we also try not to start or end with an _</p>\n",
-    "count": 1,
-    "file": "../lua/wetgenes/tasks_msgp.lua",
-    "line": 173,
-    "name": "lua.wetgenes.tasks_msgp.clean_name",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
-   },
-   {
-    "body": "<p>Parse an array of 8 numbers into an ip6 address with :: in the first\nlongest run of zeros if needed and lowercase hex letters.</p>\n",
-    "count": 1,
-    "file": "../lua/wetgenes/tasks_msgp.lua",
-    "line": 191,
-    "name": "lua.wetgenes.tasks_msgp.ip6_to_addr",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
-   },
-   {
-    "body": "<p>Use ( google by default ) public dns servers to check if we can connect\nto the internet and if we have ipv4 and/or ipv6 available.</p>\n<p>To use alternative dns pass in an ipv4 and ipv6 address as the first\ntwo args, eg to use cloudflare.</p>\n<pre><code>ipsniff(&quot;1.1.1.1&quot;,&quot;2606:4700:4700::1111&quot;)\n</code></pre>\n<p>returns the ipv4,ipv6 address of this host when connecting to that dns\nor nil if no connection possible.</p>\n<p>This result can be used as a bool to indicate working ipv6 or ipv4\ninternet and is also a best guess as to our ip when connecting to other\ndevices.</p>\n<p>Note that this will only work if we are connected to the internet can\nreach the dns servers etc etc, standard networks can be crazy\ndisclaimer applies.</p>\n<p>So great if this works but still need a fallback plan, eg assuming\nlocal ipv4 network is available.</p>\n",
-    "count": 1,
-    "file": "../lua/wetgenes/tasks_msgp.lua",
-    "line": 425,
-    "name": "lua.wetgenes.tasks_msgp.ipsniff",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
-   },
-   {
-    "body": "<p>Parse an array of numbers into an ip address and maybe port.</p>\n<pre><code>#4 {1,2,3,4} -- ip4\n#5 {1,2,3,4,5} -- ip4:port\n#8 {1,2,3,4,5,6,7,8} -- ip6\n#9 {1,2,3,4,5,6,7,8,9} -- [ip6]:port\n</code></pre>\n",
-    "count": 1,
-    "file": "../lua/wetgenes/tasks_msgp.lua",
-    "line": 231,
-    "name": "lua.wetgenes.tasks_msgp.list_to_addr",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
-   },
-   {
-    "body": "<p>lanes task function for handling msgp communication.</p>\n",
-    "count": 1,
-    "file": "../lua/wetgenes/tasks_msgp.lua",
-    "line": 529,
-    "name": "lua.wetgenes.tasks_msgp.msgp_code",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
-   },
-   {
-    "body": "<p>If given aa udp data packet string, convert it to a table.</p>\n<p>If given table, convert it to a udp data packet string. little endian</p>\n<pre><code>u16\t\tidx\t\t\t//\tincrementing and wrapping idx of this packet\nu16\t\tack\t\t\t//\twe acknowledge all the packets before this idx so please send this one next (or again maybe)\nu8\t\tbit\t\t\t//\twhich bit this is, all bits should be joined before parsing\nu8\t\tbits\t\t//\thow many bits in total ( all bits will be in adjacent idxs )\nu8\t\tdata[*]\t\t//\tThe payload, if multiple bits then all payloads should be concatenated\n</code></pre>\n",
-    "count": 1,
-    "file": "../lua/wetgenes/tasks_msgp.lua",
-    "line": 484,
-    "name": "lua.wetgenes.tasks_msgp.pack",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tasks_msgp.lua"
-   },
-   {
     "body": "<p>(C) 2020 Kriss Blank under the <a href=\"https://opensource.org/licenses/MIT\">https://opensource.org/licenses/MIT</a></p>\n<pre><code>local wtsv = require(&quot;wetgenes.tsv&quot;)\n</code></pre>\n<p>Load and save tsv files <a href=\"https://pypi.org/project/linear-tsv/1.0.0/\">https://pypi.org/project/linear-tsv/1.0.0/</a></p>\n<p>The following need to be escaped with a \\ when used in each column.</p>\n<pre><code>\\n for newline,\n\\t for tab,\n\\r for carriage return,\n\\\\ for backslash.\n</code></pre>\n<p>When loading we read the entire file and keep all the text in one string \nwith function lookups to cut out sections of that string as needed.</p>\n",
     "count": 5,
     "file": "../lua/wetgenes/tsv.lua",
@@ -9873,7 +9865,7 @@
     "body": "<pre><code>wire.tasks(&quot;sqlite&quot;,1,&quot;require(&#39;wiretasks&#39;).sqlite_code()&quot;,{\n        sqlite_filename = &quot;./test.sql&quot; ,\n        sqlite_pragmas = &quot;&quot; ,\n    })\n\nresult = wire.memo({\n    fifo=wire.fifo(&quot;sqlite&quot;),\n    data={\n        sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,\n    },\n    on_result=function() end,\n}):resolve()\n</code></pre>\n<p>The code we run in &quot;sqlite&quot; tasks to handle sqlite requests via memos.</p>\n<p>This function requires the following libraries to be available.</p>\n<pre><code>require(&quot;lsqlite3&quot;)\n</code></pre>\n<p>As we are opening an sqlite database here it probably wont help you \nmuch to have more than one thread per database as they will just fight \nover file access. To open multiple sqlite databases create multiple \ntasks with different names.</p>\n<p>Globals passed into the thread control the startup actions, primarily \nyou should provide an sqlite_filename to open.</p>\n<pre><code>sqlite_filename=&quot;./test.sql&quot;\n</code></pre>\n<p>The sqlite database to open when this thread starts.</p>\n<p>Most memos are simple SQL queries, but some extra commands exist via \ndata.action</p>\n<pre><code>data.action=&quot;close&quot;\n</code></pre>\n<p>Shut down the sqlite database, this combined with waiting for the \nthread to halt allows sqlite to clean up before exiting the process.</p>\n<p>When data.action is not set we are performing an SQL query.</p>\n<pre><code>data.sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,\n</code></pre>\n<p>Will return result.rows filled with data.</p>\n<pre><code>data.compact=true\n</code></pre>\n<p>If this boolean is set then we will return compact rows, data.rows will \ncontain rows that are arrays and data.names will be an array of column \nnames. If not set then we return rows as [name]=value objects.</p>\n<pre><code>data.binds={ name=value , ... }\n</code></pre>\n<p>Bind these values to an sqlite statement.</p>\n<pre><code>data.blobs={ name=value , ... }\n</code></pre>\n<p>Bind these values to an sqlite statement as blobs. This must be used \nfor sending binary data.\n<br/>\n<br/></p>\n",
     "count": 1,
     "file": "../lua/wiretasks.lua",
-    "line": 242,
+    "line": 243,
     "name": "lua.wetgenes.wiretasks.sqlite_code",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
    },
@@ -10095,17 +10087,49 @@
    },
    {
     "body": "<pre><code>local wiretasks=require(&quot;wiretasks&quot;)\n</code></pre>\n<p>This is a small collection of useful tasks for running via wire. Each \ntask has its own specific module dependencies, eg lua socket is needed \nfor http fetching. This module is usually used in a task start code \nstring passed to wire.tasks. So &quot;require(&#39;wiretasks&#39;).http_code()&quot; \nwould be used to start the http task.</p>\n<p>We also include some wrapper functions that make use of memos and \nrequire certain tasks to already be running.</p>\n",
-    "count": 2,
+    "count": 6,
     "file": "../lua/wiretasks.lua",
     "line": 7,
     "name": "lua.wiretasks",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
    },
    {
+    "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Get a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Optional token to read this gist</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wiretasks.gist_baseurl and can also be changed globally \nthere.</p>\n",
+    "count": 1,
+    "file": "../lua/wiretasks.lua",
+    "line": 569,
+    "name": "lua.wiretasks.gist_get",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
+   },
+   {
+    "body": "<pre><code>local list=gist.list(opts)\n</code></pre>\n<p>The http task must be running and this will block waiting on results.</p>\n<p>List some gists from github using options found in opts, see \n<a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; which is \nset in wiretasks.gist_baseurl and can also be changed globally there.</p>\n<pre><code>opts.token\n</code></pre>\n<p>Should be set to a github access token and is required for writing data \nor accessing non public information.</p>\n<pre><code>opts.username\n</code></pre>\n<p>Is the name of a github user we wish to list gists for</p>\n<pre><code>opts.filter\n</code></pre>\n<p>Can be &quot;public&quot; to request only public gists or &quot;starred&quot; to request \nonly starred gists.</p>\n<pre><code>opts.since\n</code></pre>\n<p>An ISO_8601 timestamp in a string and should be set if we are only \ninterested in gists since this time.</p>\n<pre><code>opts.per_page\n</code></pre>\n<p>The number of results we want, the api limits this to 100 but defaults \nto 30. Probably a good idea to set this to 100 unless you want to deal \nwith paging code and even then you can only get the first 3000 results.</p>\n<pre><code>opts.page\n</code></pre>\n<p>The page of results we are requesting, It defaults to 1 so can be \nomitted unless you are going to request multiple pages.</p>\n",
+    "count": 1,
+    "file": "../lua/wiretasks.lua",
+    "line": 482,
+    "name": "lua.wiretasks.gist_list",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
+   },
+   {
+    "body": "<pre><code>seconds = wiretasks.gist_parse_iso8601(text)\n</code></pre>\n<p>Parse a string in iso8601 format into a linux time ( seconds since 1970 )</p>\n",
+    "count": 1,
+    "file": "../lua/wiretasks.lua",
+    "line": 462,
+    "name": "lua.wiretasks.gist_parse_iso8601",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
+   },
+   {
+    "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Set a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Token to write this gist</p>\n<pre><code>opts.body\n</code></pre>\n<p>Gist data</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wiretasks.gist_baseurl and can also be changed globally \nthere.</p>\n",
+    "count": 1,
+    "file": "../lua/wiretasks.lua",
+    "line": 613,
+    "name": "lua.wiretasks.gist_set",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
+   },
+   {
     "body": "<pre><code>wire.tasks(&quot;http&quot;,4,&quot;require(&#39;wiretasks&#39;).http_code()&quot;)\n\nresult = wire.memo({\n    fifo=wire.fifo(&quot;http&quot;),\n    data={\n        url=&quot;http://google.com/&quot;,\n    },\n    on_result=function() end,\n}):resolve()\n</code></pre>\n<p>The code we run in &quot;http&quot; tasks to handle http requests via memos.</p>\n<p>This function requires the following libraries to be available.</p>\n<pre><code>require(&quot;socket.http&quot;)\nrequire(&quot;ltn12&quot;)\n</code></pre>\n<p>Every memo sent is a http fetch request, the keys set in memo.data \ncontrol the type of request.</p>\n<pre><code>data.url = &quot;http://google.com/&quot;\n</code></pre>\n<p>The url we will be talking to. This is all you need for a basic GET.</p>\n<pre><code>data.get = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we send a GET request with this table in the query \nstring, eg append &quot;?a=1&amp;b=2&quot; to the url.</p>\n<pre><code>data.json = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we encode as json and send as body of a POST also \nsetting &quot;Content-Type&quot; to &quot;application/json&quot; in data.headers</p>\n<pre><code>data.post = { a=1 , b=2 }\n</code></pre>\n<p>If this exists then we encode as a query string and send as body of a \nPOST also setting &quot;Content-Type&quot; to &quot;application/x-www-form-urlencoded&quot; \nin data.headers</p>\n<pre><code>data.body = &quot;a=1&amp;b=2&quot;\n</code></pre>\n<p>Force a request body string.</p>\n<pre><code>data.method = &quot;GET&quot;\n</code></pre>\n<p>Force a request method.</p>\n<pre><code>data.headers = { [&quot;Content-Type&quot;]=&quot;application/json&quot; , ... }\n</code></pre>\n<p>Force extra headers.</p>\n<pre><code>result.code\nresult.status\nresult.headers\nresult.body\n</code></pre>\n<p>The result of the http.request, may also raise an error for \ncatastrophic failures, eg host not found.</p>\n<p>Many things can go wrong so always check that result.fail is not set \nand the result.code is as expected ( eg 200 ) and only then is it safe \nto read the result.body</p>\n",
     "count": 1,
     "file": "../lua/wiretasks.lua",
-    "line": 29,
+    "line": 30,
     "name": "lua.wiretasks.http_code",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
    },

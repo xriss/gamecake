@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 802,
+   "count": 804,
    "name": "lua"
   },
   {
@@ -566,7 +566,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 664,
+   "count": 662,
    "name": "lua.wetgenes"
   },
   {
@@ -2026,6 +2026,42 @@
    "name": "lua.wetgenes.midi.unsubscribe"
   },
   {
+   "count": 9,
+   "name": "lua.wetgenes.msgp"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.addr_to_ip_port"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.addr_to_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.clean_name"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.ip6_to_addr"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.ipsniff"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.list_to_addr"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.pack"
+  },
+  {
    "count": 2,
    "name": "lua.wetgenes.package"
   },
@@ -3058,50 +3094,6 @@
    "name": "lua.wetgenes.tasks.thread_code"
   },
   {
-   "count": 2,
-   "name": "lua.wetgenes.tasks_gist"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_gist.list"
-  },
-  {
-   "count": 9,
-   "name": "lua.wetgenes.tasks_msgp"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.addr_to_ip_port"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.addr_to_list"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.clean_name"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.ip6_to_addr"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.ipsniff"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.list_to_addr"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.msgp_code"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.pack"
-  },
-  {
    "count": 5,
    "name": "lua.wetgenes.tsv"
   },
@@ -3330,8 +3322,24 @@
    "name": "lua.wire.wrap"
   },
   {
-   "count": 2,
+   "count": 6,
    "name": "lua.wiretasks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_parse_iso8601"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_set"
   },
   {
    "count": 1,
@@ -3411,7 +3419,7 @@
    "body": "<pre><code>wire.tasks(&quot;sqlite&quot;,1,&quot;require(&#39;wiretasks&#39;).sqlite_code()&quot;,{\n        sqlite_filename = &quot;./test.sql&quot; ,\n        sqlite_pragmas = &quot;&quot; ,\n    })\n\nresult = wire.memo({\n    fifo=wire.fifo(&quot;sqlite&quot;),\n    data={\n        sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,\n    },\n    on_result=function() end,\n}):resolve()\n</code></pre>\n<p>The code we run in &quot;sqlite&quot; tasks to handle sqlite requests via memos.</p>\n<p>This function requires the following libraries to be available.</p>\n<pre><code>require(&quot;lsqlite3&quot;)\n</code></pre>\n<p>As we are opening an sqlite database here it probably wont help you \nmuch to have more than one thread per database as they will just fight \nover file access. To open multiple sqlite databases create multiple \ntasks with different names.</p>\n<p>Globals passed into the thread control the startup actions, primarily \nyou should provide an sqlite_filename to open.</p>\n<pre><code>sqlite_filename=&quot;./test.sql&quot;\n</code></pre>\n<p>The sqlite database to open when this thread starts.</p>\n<p>Most memos are simple SQL queries, but some extra commands exist via \ndata.action</p>\n<pre><code>data.action=&quot;close&quot;\n</code></pre>\n<p>Shut down the sqlite database, this combined with waiting for the \nthread to halt allows sqlite to clean up before exiting the process.</p>\n<p>When data.action is not set we are performing an SQL query.</p>\n<pre><code>data.sql=&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;,\n</code></pre>\n<p>Will return result.rows filled with data.</p>\n<pre><code>data.compact=true\n</code></pre>\n<p>If this boolean is set then we will return compact rows, data.rows will \ncontain rows that are arrays and data.names will be an array of column \nnames. If not set then we return rows as [name]=value objects.</p>\n<pre><code>data.binds={ name=value , ... }\n</code></pre>\n<p>Bind these values to an sqlite statement.</p>\n<pre><code>data.blobs={ name=value , ... }\n</code></pre>\n<p>Bind these values to an sqlite statement as blobs. This must be used \nfor sending binary data.\n<br/>\n<br/></p>\n",
    "count": 1,
    "file": "../lua/wiretasks.lua",
-   "line": 242,
+   "line": 243,
    "name": "lua.wetgenes.wiretasks.sqlite_code",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
   }

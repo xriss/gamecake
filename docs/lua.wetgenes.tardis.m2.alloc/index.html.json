@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 802,
+   "count": 804,
    "name": "lua"
   },
   {
@@ -566,7 +566,7 @@
    "name": "lua.swanky.edit.collect.task_code"
   },
   {
-   "count": 664,
+   "count": 662,
    "name": "lua.wetgenes"
   },
   {
@@ -2026,6 +2026,42 @@
    "name": "lua.wetgenes.midi.unsubscribe"
   },
   {
+   "count": 9,
+   "name": "lua.wetgenes.msgp"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.addr_to_ip_port"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.addr_to_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.clean_name"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.code"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.ip6_to_addr"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.ipsniff"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.list_to_addr"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.msgp.pack"
+  },
+  {
    "count": 2,
    "name": "lua.wetgenes.package"
   },
@@ -3058,50 +3094,6 @@
    "name": "lua.wetgenes.tasks.thread_code"
   },
   {
-   "count": 2,
-   "name": "lua.wetgenes.tasks_gist"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_gist.list"
-  },
-  {
-   "count": 9,
-   "name": "lua.wetgenes.tasks_msgp"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.addr_to_ip_port"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.addr_to_list"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.clean_name"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.ip6_to_addr"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.ipsniff"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.list_to_addr"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.msgp_code"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.tasks_msgp.pack"
-  },
-  {
    "count": 5,
    "name": "lua.wetgenes.tsv"
   },
@@ -3330,8 +3322,24 @@
    "name": "lua.wire.wrap"
   },
   {
-   "count": 2,
+   "count": 6,
    "name": "lua.wiretasks"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_parse_iso8601"
+  },
+  {
+   "count": 1,
+   "name": "lua.wiretasks.gist_set"
   },
   {
    "count": 1,
