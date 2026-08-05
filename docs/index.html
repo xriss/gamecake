@@ -445,7 +445,8 @@
 <a class="sub" href="../docs/lua.wetgenes.gamecake.zone.scene.values.unpush"><span>/lua.wetgenes.gamecake.zone.scene.values.unpush</span></a>
 <a class="sub" href="../docs/lua.wetgenes.gamecake.zone.scene.values_call"><span>/lua.wetgenes.gamecake.zone.scene.values_call</span></a><a class="par" href="../docs/lua.wetgenes.gamecake.zone.system"><span>/lua.wetgenes.gamecake.zone.system</span></a>
 
-<a class="sub" href="../docs/lua.wetgenes.gamecake.zone.system.items"><span>/lua.wetgenes.gamecake.zone.system.items</span></a><a class="par" href="../docs/lua.wetgenes.grd"><span>/lua.wetgenes.grd</span></a>
+<a class="sub" href="../docs/lua.wetgenes.gamecake.zone.system.items"><span>/lua.wetgenes.gamecake.zone.system.items</span></a>
+<a class="sub" href="../docs/lua.wetgenes.gists"><span>/lua.wetgenes.gists</span></a><a class="par" href="../docs/lua.wetgenes.grd"><span>/lua.wetgenes.grd</span></a>
 
 <a class="sub" href="../docs/lua.wetgenes.grd.adjust_contrast"><span>/lua.wetgenes.grd.adjust_contrast</span></a>
 <a class="sub" href="../docs/lua.wetgenes.grd.adjust_hsv"><span>/lua.wetgenes.grd.adjust_hsv</span></a>
@@ -789,7 +790,12 @@
 <a class="sub" href="../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
 <a class="sub" href="../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../docs/lua.wetgenes.wiretasks"><span>/lua.wetgenes.wiretasks</span></a>
 
-<a class="sub" href="../docs/lua.wetgenes.wiretasks.sqlite_code"><span>/lua.wetgenes.wiretasks.sqlite_code</span></a><a class="par" href="../docs/lua.wire"><span>/lua.wire</span></a>
+<a class="sub" href="../docs/lua.wetgenes.wiretasks.sqlite_code"><span>/lua.wetgenes.wiretasks.sqlite_code</span></a><a class="par" href="../docs/lua.wgists"><span>/lua.wgists</span></a>
+
+<a class="sub" href="../docs/lua.wgists.get"><span>/lua.wgists.get</span></a>
+<a class="sub" href="../docs/lua.wgists.list"><span>/lua.wgists.list</span></a>
+<a class="sub" href="../docs/lua.wgists.parse_iso8601"><span>/lua.wgists.parse_iso8601</span></a>
+<a class="sub" href="../docs/lua.wgists.set"><span>/lua.wgists.set</span></a><a class="par" href="../docs/lua.wire"><span>/lua.wire</span></a>
 
 <a class="sub" href="../docs/lua.wire.active"><span>/lua.wire.active</span></a>
 <a class="sub" href="../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a>
@@ -818,10 +824,6 @@
 <a class="sub" href="../docs/lua.wire.wait"><span>/lua.wire.wait</span></a>
 <a class="sub" href="../docs/lua.wire.wrap"><span>/lua.wire.wrap</span></a><a class="par" href="../docs/lua.wiretasks"><span>/lua.wiretasks</span></a>
 
-<a class="sub" href="../docs/lua.wiretasks.gist_get"><span>/lua.wiretasks.gist_get</span></a>
-<a class="sub" href="../docs/lua.wiretasks.gist_list"><span>/lua.wiretasks.gist_list</span></a>
-<a class="sub" href="../docs/lua.wiretasks.gist_parse_iso8601"><span>/lua.wiretasks.gist_parse_iso8601</span></a>
-<a class="sub" href="../docs/lua.wiretasks.gist_set"><span>/lua.wiretasks.gist_set</span></a>
 <a class="sub" href="../docs/lua.wiretasks.http_code"><span>/lua.wiretasks.http_code</span></a>
 <a class="sub" href="../docs/prefabs"><span>/prefabs</span></a>
 <a class="sub" href="../docs/rules"><span>/rules</span></a>
@@ -6676,6 +6678,20 @@ objects as necessary.</p>
 </div>
 
 <div class="wrap">
+<h1><a href="../docs/lua.wetgenes.gists">lua.wetgenes.gists</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua#L7">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua</a></div>
+<div><pre><code>local wgists=require(&quot;wetgenes.gists&quot;)
+</code></pre>
+<p>Functions that query the gists API </p>
+<p><a href="https://docs.github.com/en/rest/gists">https://docs.github.com/en/rest/gists</a></p>
+<p>This module requires wire http tasks to be up and running as that is 
+how they send http requests. Also be aware that these busy wait on 
+results from a webserver and anything can and will go wrong in that 
+situation.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../docs/lua.wetgenes.grd">lua.wetgenes.grd</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua#L6">https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grd.lua</a></div>
 <div><pre><code>local wgrd=require(&quot;wetgenes.grd&quot;)
@@ -10926,6 +10942,105 @@ for sending binary data.
 </div>
 
 <div class="wrap">
+<h1><a href="../docs/lua.wgists">lua.wgists</a></h1>
+<div class="source"><a href="{_it.url}#L{_it.line}">{_it.url}</a></div>
+<div></div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wgists.get">lua.wgists.get</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua#L146">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua</a></div>
+<div><p>The http task must be running and this will block waiting on results.
+<br/>
+<br/></p>
+<p>Get a gist, see <a href="https://docs.github.com/en/rest/gists">https://docs.github.com/en/rest/gists</a></p>
+<pre><code>opts.gid
+</code></pre>
+<p>Must be set to the gist id</p>
+<pre><code>opts.token
+</code></pre>
+<p>Optional token to read this gist</p>
+<pre><code>opts.baseurl
+</code></pre>
+<p>Can be used to overide the default of &quot;<a href="https://api.github.com">https://api.github.com</a>&quot; 
+which is set in wgists.baseurl and can also be changed globally 
+there.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wgists.list">lua.wgists.list</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua#L59">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua</a></div>
+<div><pre><code>local list=gist.list(opts)
+</code></pre>
+<p>The http task must be running and this will block waiting on results.</p>
+<p>List some gists from github using options found in opts, see 
+<a href="https://docs.github.com/en/rest/gists">https://docs.github.com/en/rest/gists</a></p>
+<pre><code>opts.baseurl
+</code></pre>
+<p>Can be used to overide the default of &quot;<a href="https://api.github.com">https://api.github.com</a>&quot; which is 
+set in wgists.baseurl and can also be changed globally there.</p>
+<pre><code>opts.token
+</code></pre>
+<p>Should be set to a github access token and is required for writing data 
+or accessing non public information.</p>
+<pre><code>opts.username
+</code></pre>
+<p>Is the name of a github user we wish to list gists for</p>
+<pre><code>opts.filter
+</code></pre>
+<p>Can be &quot;public&quot; to request only public gists or &quot;starred&quot; to request 
+only starred gists.</p>
+<pre><code>opts.since
+</code></pre>
+<p>An ISO_8601 timestamp in a string and should be set if we are only 
+interested in gists since this time.</p>
+<pre><code>opts.per_page
+</code></pre>
+<p>The number of results we want, the api limits this to 100 but defaults 
+to 30. Probably a good idea to set this to 100 unless you want to deal 
+with paging code and even then you can only get the first 3000 results.</p>
+<pre><code>opts.page
+</code></pre>
+<p>The page of results we are requesting, It defaults to 1 so can be 
+omitted unless you are going to request multiple pages.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wgists.parse_iso8601">lua.wgists.parse_iso8601</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua#L39">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua</a></div>
+<div><pre><code>seconds = wgists.parse_iso8601(text)
+</code></pre>
+<p>Parse a string in iso8601 format into a linux time ( seconds since 1970 )</p>
+</div>
+</div>
+
+<div class="wrap">
+<h1><a href="../docs/lua.wgists.set">lua.wgists.set</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua#L190">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua</a></div>
+<div><p>The http task must be running and this will block waiting on results.
+<br/>
+<br/></p>
+<p>Set a gist, see <a href="https://docs.github.com/en/rest/gists">https://docs.github.com/en/rest/gists</a></p>
+<pre><code>opts.gid
+</code></pre>
+<p>Must be set to the gist id</p>
+<pre><code>opts.token
+</code></pre>
+<p>Token to write this gist</p>
+<pre><code>opts.body
+</code></pre>
+<p>Gist data</p>
+<pre><code>opts.baseurl
+</code></pre>
+<p>Can be used to overide the default of &quot;<a href="https://api.github.com">https://api.github.com</a>&quot; 
+which is set in wgists.baseurl and can also be changed globally 
+there.</p>
+</div>
+</div>
+
+<div class="wrap">
 <h1><a href="../docs/lua.wire">lua.wire</a></h1>
 <div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wire.lua#L11">https://github.com/xriss/gamecake/blob/master/lua/wire.lua</a></div>
 <div><pre><code>local wire=require(&quot;wire&quot;)
@@ -11431,99 +11546,6 @@ string passed to wire.tasks. So &quot;require(&#39;wiretasks&#39;).http_code()&q
 would be used to start the http task.</p>
 <p>We also include some wrapper functions that make use of memos and 
 require certain tasks to already be running.</p>
-</div>
-</div>
-
-<div class="wrap">
-<h1><a href="../docs/lua.wiretasks.gist_get">lua.wiretasks.gist_get</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L656">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
-<div><p>The http task must be running and this will block waiting on results.
-<br/>
-<br/></p>
-<p>Get a gist, see <a href="https://docs.github.com/en/rest/gists">https://docs.github.com/en/rest/gists</a></p>
-<pre><code>opts.gid
-</code></pre>
-<p>Must be set to the gist id</p>
-<pre><code>opts.token
-</code></pre>
-<p>Optional token to read this gist</p>
-<pre><code>opts.baseurl
-</code></pre>
-<p>Can be used to overide the default of &quot;<a href="https://api.github.com">https://api.github.com</a>&quot; 
-which is set in wiretasks.gist_baseurl and can also be changed globally 
-there.</p>
-</div>
-</div>
-
-<div class="wrap">
-<h1><a href="../docs/lua.wiretasks.gist_list">lua.wiretasks.gist_list</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L569">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
-<div><pre><code>local list=gist.list(opts)
-</code></pre>
-<p>The http task must be running and this will block waiting on results.</p>
-<p>List some gists from github using options found in opts, see 
-<a href="https://docs.github.com/en/rest/gists">https://docs.github.com/en/rest/gists</a></p>
-<pre><code>opts.baseurl
-</code></pre>
-<p>Can be used to overide the default of &quot;<a href="https://api.github.com">https://api.github.com</a>&quot; which is 
-set in wiretasks.gist_baseurl and can also be changed globally there.</p>
-<pre><code>opts.token
-</code></pre>
-<p>Should be set to a github access token and is required for writing data 
-or accessing non public information.</p>
-<pre><code>opts.username
-</code></pre>
-<p>Is the name of a github user we wish to list gists for</p>
-<pre><code>opts.filter
-</code></pre>
-<p>Can be &quot;public&quot; to request only public gists or &quot;starred&quot; to request 
-only starred gists.</p>
-<pre><code>opts.since
-</code></pre>
-<p>An ISO_8601 timestamp in a string and should be set if we are only 
-interested in gists since this time.</p>
-<pre><code>opts.per_page
-</code></pre>
-<p>The number of results we want, the api limits this to 100 but defaults 
-to 30. Probably a good idea to set this to 100 unless you want to deal 
-with paging code and even then you can only get the first 3000 results.</p>
-<pre><code>opts.page
-</code></pre>
-<p>The page of results we are requesting, It defaults to 1 so can be 
-omitted unless you are going to request multiple pages.</p>
-</div>
-</div>
-
-<div class="wrap">
-<h1><a href="../docs/lua.wiretasks.gist_parse_iso8601">lua.wiretasks.gist_parse_iso8601</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L549">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
-<div><pre><code>seconds = wiretasks.gist_parse_iso8601(text)
-</code></pre>
-<p>Parse a string in iso8601 format into a linux time ( seconds since 1970 )</p>
-</div>
-</div>
-
-<div class="wrap">
-<h1><a href="../docs/lua.wiretasks.gist_set">lua.wiretasks.gist_set</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L700">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
-<div><p>The http task must be running and this will block waiting on results.
-<br/>
-<br/></p>
-<p>Set a gist, see <a href="https://docs.github.com/en/rest/gists">https://docs.github.com/en/rest/gists</a></p>
-<pre><code>opts.gid
-</code></pre>
-<p>Must be set to the gist id</p>
-<pre><code>opts.token
-</code></pre>
-<p>Token to write this gist</p>
-<pre><code>opts.body
-</code></pre>
-<p>Gist data</p>
-<pre><code>opts.baseurl
-</code></pre>
-<p>Can be used to overide the default of &quot;<a href="https://api.github.com">https://api.github.com</a>&quot; 
-which is set in wiretasks.gist_baseurl and can also be changed globally 
-there.</p>
 </div>
 </div>
 

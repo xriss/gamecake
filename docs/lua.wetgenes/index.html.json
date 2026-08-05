@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 772,
+   "count": 774,
    "name": "lua"
   },
   {
@@ -550,7 +550,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 634,
+   "count": 635,
    "name": "lua.wetgenes"
   },
   {
@@ -1708,6 +1708,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.system.items"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gists"
   },
   {
    "count": 37,
@@ -3086,6 +3090,26 @@
    "name": "lua.wetgenes.wiretasks.sqlite_code"
   },
   {
+   "count": 5,
+   "name": "lua.wgists"
+  },
+  {
+   "count": 1,
+   "name": "lua.wgists.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wgists.list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wgists.parse_iso8601"
+  },
+  {
+   "count": 1,
+   "name": "lua.wgists.set"
+  },
+  {
    "count": 27,
    "name": "lua.wire"
   },
@@ -3194,24 +3218,8 @@
    "name": "lua.wire.wrap"
   },
   {
-   "count": 6,
+   "count": 2,
    "name": "lua.wiretasks"
-  },
-  {
-   "count": 1,
-   "name": "lua.wiretasks.gist_get"
-  },
-  {
-   "count": 1,
-   "name": "lua.wiretasks.gist_list"
-  },
-  {
-   "count": 1,
-   "name": "lua.wiretasks.gist_parse_iso8601"
-  },
-  {
-   "count": 1,
-   "name": "lua.wiretasks.gist_set"
   },
   {
    "count": 1,
@@ -3284,7 +3292,7 @@
  "_list": [
   {
    "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-   "count": 634,
+   "count": 635,
    "file": "../lua/wetgenes/init.lua",
    "line": 5,
    "name": "lua.wetgenes",
@@ -5565,6 +5573,14 @@
    "line": 7,
    "name": "lua.wetgenes.gamecake.zone.system.items",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/system/old/items.lua"
+  },
+  {
+   "body": "<pre><code>local wgists=require(&quot;wetgenes.gists&quot;)\n</code></pre>\n<p>Functions that query the gists API </p>\n<p><a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<p>This module requires wire http tasks to be up and running as that is \nhow they send http requests. Also be aware that these busy wait on \nresults from a webserver and anything can and will go wrong in that \nsituation.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gists.lua",
+   "line": 7,
+   "name": "lua.wetgenes.gists",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua"
   },
   {
    "body": "<pre><code>local wgrd=require(&quot;wetgenes.grd&quot;)\n</code></pre>\n<p>We use wgrd as the local name of this library.</p>\n<p>Handle bitmap creation, loading, saving and blitting. The bitmap and \nthe colormap for indexed bitmaps are represented by the same data \nstructure which describes a continuous chunk of memory with optional \nability to select an area of a larger chunk using simple byte spans.</p>\n<p>Swanky Paint uses this to manage its bitmaps and its also used to \nconvert art into data at build time for use in the GameCake engine. The \nPageCake engine uses this for image management, creating live thumbnails \nand so on.</p>\n<p>We load and save jpeg, png and gif. The png lib contains extensions for \napng which allows animation chunks. Animations are contained in the Z \n(depth) dimension of the grd.</p>\n<p>The following are possible format options that we support. Most of them \nare OpenGL friendly.</p>\n<pre><code>wgrd.FMT_U8_RGBA\n</code></pre>\n<p>32 bits per pixel with a byte order of red, green, blue, alpha and a \nlittle endian U32 of ABGR. We prefer this byte order because OpenGL.</p>\n<pre><code>wgrd.FMT_U8_ARGB\n</code></pre>\n<p>32 bits per pixel with a byte order of alpha, red, green, blue and a \nlittle endian U32 of BGRA.</p>\n<pre><code>wgrd.FMT_U8_RGB\n</code></pre>\n<p>24 bits per pixel with a byte order of red, green, blue.</p>\n<pre><code>wgrd.FMT_U8_INDEXED\n</code></pre>\n<p>8 bits per pixel which indexes a wgrd.FMT_U8_RGBA palette.</p>\n<pre><code>wgrd.FMT_U8_LUMINANCE\n</code></pre>\n<p>8 bits per pixel, grey scale only.</p>\n<pre><code>wgrd.FMT_U8_ALPHA\n</code></pre>\n<p>8 bits per pixel, alpha only.</p>\n<pre><code>wgrd.FMT_U16_RGBA_5551\n</code></pre>\n<p>16 bits per pixel with 5 bits each of red,green,blue and 1 bit of alpha \npacked into a single U16.</p>\n<pre><code>wgrd.FMT_U16_RGBA_4444\n</code></pre>\n<p>16 bits per pixel with 4 bits each of red,green,blue,alpha packed into \na single U16.</p>\n<pre><code>wgrd.FMT_U16_RGBA_5650\n</code></pre>\n<p>16 bits per pixel with 4 bits of red, 5 bits of green and 4 bits of \nblue packed into a single U16.\n<br/>\n<br/></p>\n<pre><code>wgrd.FMT_U8_RGBA_PREMULT\nwgrd.FMT_U8_ARGB_PREMULT\nwgrd.FMT_U8_INDEXED_PREMULT\nwgrd.FMT_U16_RGBA_5551_PREMULT\nwgrd.FMT_U16_RGBA_4444_PREMULT\nwgrd.FMT_U16_RGBA_5650_PREMULT\n</code></pre>\n<p>Are all just pre-multiplied alpha versions of the base format described \nabove.</p>\n<p>Check this link out for why pre-multiplied alpha is a good idea for any \nimage that will be used as a texture \n<a href=\"http://blogs.msdn.com/b/shawnhar/archive/2009/11/06/premultiplied-alpha.aspx\">http://blogs.msdn.com/b/shawnhar/archive/2009/11/06/premultiplied-alpha.aspx</a>\n<br/>\n<br/></p>\n<pre><code>wgrd.GRD_FMT_HINT_PNG\nwgrd.GRD_FMT_HINT_JPG\nwgrd.GRD_FMT_HINT_GIF\n</code></pre>\n<p>These are used to choose a specific file format when loading or saving.</p>\n",

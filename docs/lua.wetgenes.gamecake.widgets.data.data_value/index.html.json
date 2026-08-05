@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 772,
+   "count": 774,
    "name": "lua"
   },
   {
@@ -550,7 +550,7 @@
    "name": "lua.glslang.yank_shader_versions"
   },
   {
-   "count": 634,
+   "count": 635,
    "name": "lua.wetgenes"
   },
   {
@@ -1708,6 +1708,10 @@
   {
    "count": 1,
    "name": "lua.wetgenes.gamecake.zone.system.items"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gists"
   },
   {
    "count": 37,
@@ -3086,6 +3090,26 @@
    "name": "lua.wetgenes.wiretasks.sqlite_code"
   },
   {
+   "count": 5,
+   "name": "lua.wgists"
+  },
+  {
+   "count": 1,
+   "name": "lua.wgists.get"
+  },
+  {
+   "count": 1,
+   "name": "lua.wgists.list"
+  },
+  {
+   "count": 1,
+   "name": "lua.wgists.parse_iso8601"
+  },
+  {
+   "count": 1,
+   "name": "lua.wgists.set"
+  },
+  {
    "count": 27,
    "name": "lua.wire"
   },
@@ -3194,24 +3218,8 @@
    "name": "lua.wire.wrap"
   },
   {
-   "count": 6,
+   "count": 2,
    "name": "lua.wiretasks"
-  },
-  {
-   "count": 1,
-   "name": "lua.wiretasks.gist_get"
-  },
-  {
-   "count": 1,
-   "name": "lua.wiretasks.gist_list"
-  },
-  {
-   "count": 1,
-   "name": "lua.wiretasks.gist_parse_iso8601"
-  },
-  {
-   "count": 1,
-   "name": "lua.wiretasks.gist_set"
   },
   {
    "count": 1,

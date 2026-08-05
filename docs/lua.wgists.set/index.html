@@ -445,7 +445,8 @@
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values.unpush"><span>/lua.wetgenes.gamecake.zone.scene.values.unpush</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.scene.values_call"><span>/lua.wetgenes.gamecake.zone.scene.values_call</span></a><a class="par" href="../../docs/lua.wetgenes.gamecake.zone.system"><span>/lua.wetgenes.gamecake.zone.system</span></a>
 
-<a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.system.items"><span>/lua.wetgenes.gamecake.zone.system.items</span></a><a class="par" href="../../docs/lua.wetgenes.grd"><span>/lua.wetgenes.grd</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gamecake.zone.system.items"><span>/lua.wetgenes.gamecake.zone.system.items</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.gists"><span>/lua.wetgenes.gists</span></a><a class="par" href="../../docs/lua.wetgenes.grd"><span>/lua.wetgenes.grd</span></a>
 
 <a class="sub" href="../../docs/lua.wetgenes.grd.adjust_contrast"><span>/lua.wetgenes.grd.adjust_contrast</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.grd.adjust_hsv"><span>/lua.wetgenes.grd.adjust_hsv</span></a>
@@ -789,7 +790,12 @@
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.load"><span>/lua.wetgenes.txt.words.load</span></a>
 <a class="sub" href="../../docs/lua.wetgenes.txt.words.transform"><span>/lua.wetgenes.txt.words.transform</span></a><a class="par" href="../../docs/lua.wetgenes.wiretasks"><span>/lua.wetgenes.wiretasks</span></a>
 
-<a class="sub" href="../../docs/lua.wetgenes.wiretasks.sqlite_code"><span>/lua.wetgenes.wiretasks.sqlite_code</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
+<a class="sub" href="../../docs/lua.wetgenes.wiretasks.sqlite_code"><span>/lua.wetgenes.wiretasks.sqlite_code</span></a><a class="par" href="../../docs/lua.wgists"><span>/lua.wgists</span></a>
+
+<a class="sub" href="../../docs/lua.wgists.get"><span>/lua.wgists.get</span></a>
+<a class="sub" href="../../docs/lua.wgists.list"><span>/lua.wgists.list</span></a>
+<a class="sub" href="../../docs/lua.wgists.parse_iso8601"><span>/lua.wgists.parse_iso8601</span></a>
+<a class="sub" href="../../docs/lua.wgists.set"><span>/lua.wgists.set</span></a><a class="par" href="../../docs/lua.wire"><span>/lua.wire</span></a>
 
 <a class="sub" href="../../docs/lua.wire.active"><span>/lua.wire.active</span></a>
 <a class="sub" href="../../docs/lua.wire.data_to_table"><span>/lua.wire.data_to_table</span></a>
@@ -818,10 +824,6 @@
 <a class="sub" href="../../docs/lua.wire.wait"><span>/lua.wire.wait</span></a>
 <a class="sub" href="../../docs/lua.wire.wrap"><span>/lua.wire.wrap</span></a><a class="par" href="../../docs/lua.wiretasks"><span>/lua.wiretasks</span></a>
 
-<a class="sub" href="../../docs/lua.wiretasks.gist_get"><span>/lua.wiretasks.gist_get</span></a>
-<a class="sub" href="../../docs/lua.wiretasks.gist_list"><span>/lua.wiretasks.gist_list</span></a>
-<a class="sub" href="../../docs/lua.wiretasks.gist_parse_iso8601"><span>/lua.wiretasks.gist_parse_iso8601</span></a>
-<a class="sub" href="../../docs/lua.wiretasks.gist_set"><span>/lua.wiretasks.gist_set</span></a>
 <a class="sub" href="../../docs/lua.wiretasks.http_code"><span>/lua.wiretasks.http_code</span></a>
 <a class="sub" href="../../docs/prefabs"><span>/prefabs</span></a>
 <a class="sub" href="../../docs/rules"><span>/rules</span></a>
@@ -833,11 +835,26 @@
 	<div class="main">
 		
 <div class="wrap">
-<h1><a href="../../docs/lua.wiretasks.gist_parse_iso8601">lua.wiretasks.gist_parse_iso8601</a></h1>
-<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua#L549">https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua</a></div>
-<div><pre><code>seconds = wiretasks.gist_parse_iso8601(text)
+<h1><a href="../../docs/lua.wgists.set">lua.wgists.set</a></h1>
+<div class="source"><a href="https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua#L190">https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua</a></div>
+<div><p>The http task must be running and this will block waiting on results.
+<br/>
+<br/></p>
+<p>Set a gist, see <a href="https://docs.github.com/en/rest/gists">https://docs.github.com/en/rest/gists</a></p>
+<pre><code>opts.gid
 </code></pre>
-<p>Parse a string in iso8601 format into a linux time ( seconds since 1970 )</p>
+<p>Must be set to the gist id</p>
+<pre><code>opts.token
+</code></pre>
+<p>Token to write this gist</p>
+<pre><code>opts.body
+</code></pre>
+<p>Gist data</p>
+<pre><code>opts.baseurl
+</code></pre>
+<p>Can be used to overide the default of &quot;<a href="https://api.github.com">https://api.github.com</a>&quot; 
+which is set in wgists.baseurl and can also be changed globally 
+there.</p>
 </div>
 </div>
 

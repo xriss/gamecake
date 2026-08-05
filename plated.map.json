@@ -264,7 +264,7 @@
     "name": "levels"
    },
    {
-    "count": 772,
+    "count": 774,
     "name": "lua"
    },
    {
@@ -684,7 +684,7 @@
     "name": "lua.glslang.yank_shader_versions"
    },
    {
-    "count": 634,
+    "count": 635,
     "name": "lua.wetgenes"
    },
    {
@@ -1842,6 +1842,10 @@
    {
     "count": 1,
     "name": "lua.wetgenes.gamecake.zone.system.items"
+   },
+   {
+    "count": 1,
+    "name": "lua.wetgenes.gists"
    },
    {
     "count": 37,
@@ -3220,6 +3224,26 @@
     "name": "lua.wetgenes.wiretasks.sqlite_code"
    },
    {
+    "count": 5,
+    "name": "lua.wgists"
+   },
+   {
+    "count": 1,
+    "name": "lua.wgists.get"
+   },
+   {
+    "count": 1,
+    "name": "lua.wgists.list"
+   },
+   {
+    "count": 1,
+    "name": "lua.wgists.parse_iso8601"
+   },
+   {
+    "count": 1,
+    "name": "lua.wgists.set"
+   },
+   {
     "count": 27,
     "name": "lua.wire"
    },
@@ -3328,24 +3352,8 @@
     "name": "lua.wire.wrap"
    },
    {
-    "count": 6,
+    "count": 2,
     "name": "lua.wiretasks"
-   },
-   {
-    "count": 1,
-    "name": "lua.wiretasks.gist_get"
-   },
-   {
-    "count": 1,
-    "name": "lua.wiretasks.gist_list"
-   },
-   {
-    "count": 1,
-    "name": "lua.wiretasks.gist_parse_iso8601"
-   },
-   {
-    "count": 1,
-    "name": "lua.wiretasks.gist_set"
    },
    {
     "count": 1,
@@ -3653,7 +3661,7 @@
    },
    {
     "body": "",
-    "count": 772,
+    "count": 774,
     "name": "lua"
    },
    {
@@ -4472,7 +4480,7 @@
    },
    {
     "body": "<pre><code>local wetgenes=require(&quot;wetgenes&quot;)\n</code></pre>\n<p>Simple generic functions that are intended to be useful for all \nwetgenes.* modules.</p>\n<p>Probably best to cherry pick a few functions you need and export then like so.</p>\n<pre><code>local export,lookup,deepcopy=require(&quot;wetgenes&quot;):export(&quot;export&quot;,&quot;lookup&quot;,&quot;deepcopy&quot;)\n</code></pre>\n",
-    "count": 634,
+    "count": 635,
     "file": "../lua/wetgenes/init.lua",
     "line": 5,
     "name": "lua.wetgenes",
@@ -6753,6 +6761,14 @@
     "line": 7,
     "name": "lua.wetgenes.gamecake.zone.system.items",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/zone/system/old/items.lua"
+   },
+   {
+    "body": "<pre><code>local wgists=require(&quot;wetgenes.gists&quot;)\n</code></pre>\n<p>Functions that query the gists API </p>\n<p><a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<p>This module requires wire http tasks to be up and running as that is \nhow they send http requests. Also be aware that these busy wait on \nresults from a webserver and anything can and will go wrong in that \nsituation.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/gists.lua",
+    "line": 7,
+    "name": "lua.wetgenes.gists",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua"
    },
    {
     "body": "<pre><code>local wgrd=require(&quot;wetgenes.grd&quot;)\n</code></pre>\n<p>We use wgrd as the local name of this library.</p>\n<p>Handle bitmap creation, loading, saving and blitting. The bitmap and \nthe colormap for indexed bitmaps are represented by the same data \nstructure which describes a continuous chunk of memory with optional \nability to select an area of a larger chunk using simple byte spans.</p>\n<p>Swanky Paint uses this to manage its bitmaps and its also used to \nconvert art into data at build time for use in the GameCake engine. The \nPageCake engine uses this for image management, creating live thumbnails \nand so on.</p>\n<p>We load and save jpeg, png and gif. The png lib contains extensions for \napng which allows animation chunks. Animations are contained in the Z \n(depth) dimension of the grd.</p>\n<p>The following are possible format options that we support. Most of them \nare OpenGL friendly.</p>\n<pre><code>wgrd.FMT_U8_RGBA\n</code></pre>\n<p>32 bits per pixel with a byte order of red, green, blue, alpha and a \nlittle endian U32 of ABGR. We prefer this byte order because OpenGL.</p>\n<pre><code>wgrd.FMT_U8_ARGB\n</code></pre>\n<p>32 bits per pixel with a byte order of alpha, red, green, blue and a \nlittle endian U32 of BGRA.</p>\n<pre><code>wgrd.FMT_U8_RGB\n</code></pre>\n<p>24 bits per pixel with a byte order of red, green, blue.</p>\n<pre><code>wgrd.FMT_U8_INDEXED\n</code></pre>\n<p>8 bits per pixel which indexes a wgrd.FMT_U8_RGBA palette.</p>\n<pre><code>wgrd.FMT_U8_LUMINANCE\n</code></pre>\n<p>8 bits per pixel, grey scale only.</p>\n<pre><code>wgrd.FMT_U8_ALPHA\n</code></pre>\n<p>8 bits per pixel, alpha only.</p>\n<pre><code>wgrd.FMT_U16_RGBA_5551\n</code></pre>\n<p>16 bits per pixel with 5 bits each of red,green,blue and 1 bit of alpha \npacked into a single U16.</p>\n<pre><code>wgrd.FMT_U16_RGBA_4444\n</code></pre>\n<p>16 bits per pixel with 4 bits each of red,green,blue,alpha packed into \na single U16.</p>\n<pre><code>wgrd.FMT_U16_RGBA_5650\n</code></pre>\n<p>16 bits per pixel with 4 bits of red, 5 bits of green and 4 bits of \nblue packed into a single U16.\n<br/>\n<br/></p>\n<pre><code>wgrd.FMT_U8_RGBA_PREMULT\nwgrd.FMT_U8_ARGB_PREMULT\nwgrd.FMT_U8_INDEXED_PREMULT\nwgrd.FMT_U16_RGBA_5551_PREMULT\nwgrd.FMT_U16_RGBA_4444_PREMULT\nwgrd.FMT_U16_RGBA_5650_PREMULT\n</code></pre>\n<p>Are all just pre-multiplied alpha versions of the base format described \nabove.</p>\n<p>Check this link out for why pre-multiplied alpha is a good idea for any \nimage that will be used as a texture \n<a href=\"http://blogs.msdn.com/b/shawnhar/archive/2009/11/06/premultiplied-alpha.aspx\">http://blogs.msdn.com/b/shawnhar/archive/2009/11/06/premultiplied-alpha.aspx</a>\n<br/>\n<br/></p>\n<pre><code>wgrd.GRD_FMT_HINT_PNG\nwgrd.GRD_FMT_HINT_JPG\nwgrd.GRD_FMT_HINT_GIF\n</code></pre>\n<p>These are used to choose a specific file format when loading or saving.</p>\n",
@@ -9495,6 +9511,43 @@
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
    },
    {
+    "body": "",
+    "count": 5,
+    "name": "lua.wgists"
+   },
+   {
+    "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Get a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Optional token to read this gist</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wgists.baseurl and can also be changed globally \nthere.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/gists.lua",
+    "line": 146,
+    "name": "lua.wgists.get",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua"
+   },
+   {
+    "body": "<pre><code>local list=gist.list(opts)\n</code></pre>\n<p>The http task must be running and this will block waiting on results.</p>\n<p>List some gists from github using options found in opts, see \n<a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; which is \nset in wgists.baseurl and can also be changed globally there.</p>\n<pre><code>opts.token\n</code></pre>\n<p>Should be set to a github access token and is required for writing data \nor accessing non public information.</p>\n<pre><code>opts.username\n</code></pre>\n<p>Is the name of a github user we wish to list gists for</p>\n<pre><code>opts.filter\n</code></pre>\n<p>Can be &quot;public&quot; to request only public gists or &quot;starred&quot; to request \nonly starred gists.</p>\n<pre><code>opts.since\n</code></pre>\n<p>An ISO_8601 timestamp in a string and should be set if we are only \ninterested in gists since this time.</p>\n<pre><code>opts.per_page\n</code></pre>\n<p>The number of results we want, the api limits this to 100 but defaults \nto 30. Probably a good idea to set this to 100 unless you want to deal \nwith paging code and even then you can only get the first 3000 results.</p>\n<pre><code>opts.page\n</code></pre>\n<p>The page of results we are requesting, It defaults to 1 so can be \nomitted unless you are going to request multiple pages.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/gists.lua",
+    "line": 59,
+    "name": "lua.wgists.list",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua"
+   },
+   {
+    "body": "<pre><code>seconds = wgists.parse_iso8601(text)\n</code></pre>\n<p>Parse a string in iso8601 format into a linux time ( seconds since 1970 )</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/gists.lua",
+    "line": 39,
+    "name": "lua.wgists.parse_iso8601",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua"
+   },
+   {
+    "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Set a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Token to write this gist</p>\n<pre><code>opts.body\n</code></pre>\n<p>Gist data</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wgists.baseurl and can also be changed globally \nthere.</p>\n",
+    "count": 1,
+    "file": "../lua/wetgenes/gists.lua",
+    "line": 190,
+    "name": "lua.wgists.set",
+    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gists.lua"
+   },
+   {
     "body": "<pre><code>local wire=require(&quot;wire&quot;)\n</code></pre>\n<p>We use wire as the local name of this library. So we can, uhh, wire \nthings together?</p>\n<p>Wire provides multiple long lived lua states managed via standard c11 \nthreads and mutexs with simple fifo message handling between threads.</p>\n<p>May try and change to atomic fifos in the future to reduce the \npossibility of deadlocks but for now I think mutexs are the right \nchoice. Partially due to the lua overhead and partially because this is \nnot intended for sending millions of packets per second between tightly \ncoupled threads.</p>\n<p>A small compatibility library is needed for building for windows using \nmingw. Native windows builds might work if your compiler supports the \nC11 standard.</p>\n<p>We are not doing anything clever, so beware of the following:</p>\n<p>Only data is passed and that data must fit in messagepack, eg json like \nbut binary strings are allowed.</p>\n<p>Do not use lua tables that are both arrays and objects. Pick one or the \nother it will probably work but do not do it in case I have to break \nthat in the future.</p>\n<p>No userdata, no functions.</p>\n<p>When in doubt, send a string, then unpack it in the thread. Binary \nstrings will sometimes need to be escaped into lua code, eg \\0 for null \netc but this only happens to globals passed into a thread. Data is \nusually passed in message pack streams.</p>\n<p>Any lua libs required in a thread <em>must</em> be thread safe or they will \nbreak in strange and uncomfortable ways. So check that any library you \nare using has luaopen_ functions do not try and initialize anything \ntwice if opened in another thread.</p>\n<p>This library does not reuse handles ( as this is intended for long \nlived threads ) and the number of handles is a hard limit set in the C \ncode. Defaults to 4096 threads and 4096 fifos. Bump it at compile time \nif you need more.</p>\n<p>You can reuse handles, but it must be self managed and must be done \nexplicitly.</p>\n<p>EG: You might want to shut down threads, clear out any pending data and \nthen restart game logic threads using the same handles and names. This \nis possible but it is up to you to do it right. For instance the thread \nmust be written to cooperate with the shut down.</p>\n",
     "count": 27,
     "file": "../lua/wire.lua",
@@ -9712,42 +9765,10 @@
    },
    {
     "body": "<pre><code>local wiretasks=require(&quot;wiretasks&quot;)\n</code></pre>\n<p>This is a small collection of useful tasks for running via wire. Each \ntask has its own specific module dependencies, eg lua socket is needed \nfor http fetching. This module is usually used in a task start code \nstring passed to wire.tasks. So &quot;require(&#39;wiretasks&#39;).http_code()&quot; \nwould be used to start the http task.</p>\n<p>We also include some wrapper functions that make use of memos and \nrequire certain tasks to already be running.</p>\n",
-    "count": 6,
+    "count": 2,
     "file": "../lua/wiretasks.lua",
     "line": 7,
     "name": "lua.wiretasks",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
-   },
-   {
-    "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Get a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Optional token to read this gist</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wiretasks.gist_baseurl and can also be changed globally \nthere.</p>\n",
-    "count": 1,
-    "file": "../lua/wiretasks.lua",
-    "line": 656,
-    "name": "lua.wiretasks.gist_get",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
-   },
-   {
-    "body": "<pre><code>local list=gist.list(opts)\n</code></pre>\n<p>The http task must be running and this will block waiting on results.</p>\n<p>List some gists from github using options found in opts, see \n<a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; which is \nset in wiretasks.gist_baseurl and can also be changed globally there.</p>\n<pre><code>opts.token\n</code></pre>\n<p>Should be set to a github access token and is required for writing data \nor accessing non public information.</p>\n<pre><code>opts.username\n</code></pre>\n<p>Is the name of a github user we wish to list gists for</p>\n<pre><code>opts.filter\n</code></pre>\n<p>Can be &quot;public&quot; to request only public gists or &quot;starred&quot; to request \nonly starred gists.</p>\n<pre><code>opts.since\n</code></pre>\n<p>An ISO_8601 timestamp in a string and should be set if we are only \ninterested in gists since this time.</p>\n<pre><code>opts.per_page\n</code></pre>\n<p>The number of results we want, the api limits this to 100 but defaults \nto 30. Probably a good idea to set this to 100 unless you want to deal \nwith paging code and even then you can only get the first 3000 results.</p>\n<pre><code>opts.page\n</code></pre>\n<p>The page of results we are requesting, It defaults to 1 so can be \nomitted unless you are going to request multiple pages.</p>\n",
-    "count": 1,
-    "file": "../lua/wiretasks.lua",
-    "line": 569,
-    "name": "lua.wiretasks.gist_list",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
-   },
-   {
-    "body": "<pre><code>seconds = wiretasks.gist_parse_iso8601(text)\n</code></pre>\n<p>Parse a string in iso8601 format into a linux time ( seconds since 1970 )</p>\n",
-    "count": 1,
-    "file": "../lua/wiretasks.lua",
-    "line": 549,
-    "name": "lua.wiretasks.gist_parse_iso8601",
-    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
-   },
-   {
-    "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Set a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Token to write this gist</p>\n<pre><code>opts.body\n</code></pre>\n<p>Gist data</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wiretasks.gist_baseurl and can also be changed globally \nthere.</p>\n",
-    "count": 1,
-    "file": "../lua/wiretasks.lua",
-    "line": 700,
-    "name": "lua.wiretasks.gist_set",
     "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
    },
    {
