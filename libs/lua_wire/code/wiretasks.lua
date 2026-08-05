@@ -346,8 +346,27 @@ wiretasks.sqlite_code=function()
 		
 		if autoset then -- auto set data if not exists
 		
-			for _,tab in ipairs( autoset ) do -- TODO
+			for tabname,tab in pairs( autoset ) do
 
+				local keys={}
+				for key in db:urows([[
+					SELECT ]]..tab.keyname..[[ FROM ]]..tabname..[[ ;
+				]]) do
+					keys[key]=true
+				end
+				for _,row in pairs(tab.rows) do
+					local key=row[ tab.keyname ]
+					if not keys[key] then
+						local names={}
+						for n,v in pairs(row) do names[#names+1]=":"..n end
+						local names=table.concat(names," , ")
+						local stmt = db:prepare[[ INSERT INTO ]]..tabname..[[ VALUES (]]..names..[[) ]]
+						stmt:bind_names(row)
+						stmt:step()
+						stmt:finalize()
+					end
+				end
+--[=[
 				local keys={}
 				for key in db:urows([[
 					SELECT key FROM config ;
@@ -363,7 +382,7 @@ wiretasks.sqlite_code=function()
 						stmt:finalize()
 					end
 				end
-				
+]=]
 			end
 
 		end
@@ -381,7 +400,10 @@ wiretasks.sqlite_code=function()
 
 			if data.action=="open" then -- gonna need to do this first or set sqlite_filename to auto open
 
-				if db then error("database already open") end
+				if db then -- auto close
+					db:close()
+					db=nil
+				end
 				opendb( memo.filename , memo.pragmas , memo.tables , memo.autoset )
 
 			elseif data.action=="close" then -- probably good to "try" and do this before exiting
