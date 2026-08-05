@@ -178,6 +178,8 @@ wire.time=core.time -- copy the core cfunction
 
 	secs = wire.timeres()
 
+Removed since mingw does not like...
+
 Get the TIME_UTC resolution via a timespec_getres and converted into a 
 double.
 
@@ -1354,9 +1356,10 @@ do
 	-- if we are main thread do some thread setup
 	if wire.thread_handle == -1 then
 		wire.do_start() -- set thready globals on main thread
-		if wire.timeres()>0.001 then -- check for crazy OS
-			PRINT( string.format("WARNING wire.time resolution (%.9f) is greater than 0.001",wire.timeres()) )
-		end
+-- windows no worky
+--		if wire.timeres()>0.001 then -- check for crazy OS
+--			PRINT( string.format("WARNING wire.time resolution (%.9f) is greater than 0.001",wire.timeres()) )
+--		end
 	end
 
 	-- create main thread

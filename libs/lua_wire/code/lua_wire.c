@@ -140,7 +140,7 @@ static wire_msg * wire_msg_alloc( const char *data , int size )
 	{
 		msg->data=(const char *)(msg+1);
 		msg->size=size;
-		memcpy( msg->data , data , size );
+		memcpy( (void*)msg->data , data , size );
 	}
 
 	return msg;
@@ -404,6 +404,8 @@ static int lua_wire_time (lua_State *l)
 get the current time res with a timespec_getres TIME_UTC
 
 */
+// no worky on windows
+#if 0
 static int lua_wire_timeres (lua_State *l)
 {
 	struct timespec now; timespec_getres(&now, TIME_UTC);
@@ -411,6 +413,7 @@ static int lua_wire_timeres (lua_State *l)
 	lua_pushnumber(l, d);
 	return 1;
 }
+#endif
 
 /*+---------------------------------------------------------------------
 
@@ -425,7 +428,7 @@ Anyway, it works for now...
 */
 static int lua_wire_pointer (lua_State *l)
 {
-	void *ptr=lua_topointer(l, 1);
+	void *ptr=(void*)lua_topointer(l, 1);
 	
 	if(!ptr) { return 0; }
 
@@ -453,7 +456,7 @@ static int lua_wire_thread_start_lua ( void *context )
 		if( thread->preload ) { thread->preload(l); } // make more code available
 
 		luaL_loadstring(l, thread->start); // start lua code
-		free(thread->start); thread->start=0; // free code
+		free((void*)thread->start); thread->start=0; // free code
 		
 	lua_wire_thread_lock(l,0,thread);
 
@@ -467,7 +470,7 @@ static int lua_wire_thread_start_lua ( void *context )
 
 		if(thread->name) // free thread name
 		{
-			free(thread->name);
+			free((void*)thread->name);
 			thread->name=0;
 		}
 		
@@ -519,7 +522,7 @@ static int lua_wire_thread_start (lua_State *l)
 		if( thrd_success!=thrd_create( &thread->thread , lua_wire_thread_start_lua , (void*)thread ) )
 		{
 			thread->status=0;
-			free(thread->start);
+			free((void*)thread->start);
 			thread->start=0;
 			lua_wire_thread_lock(l,0,thread);
 			luaL_error(l, "thread start failed");
@@ -780,7 +783,7 @@ to access.
 static int lua_wire_fifo_peek (lua_State *l)
 {
 	// volatile helps maybe, need to check?
-	volatile wire_fifo *fifo=lua_wire_fifo(l , 1 );
+	wire_fifo *fifo=lua_wire_fifo(l , 1 );
 
 	lua_wire_fifo_lock(l,1,fifo);
 	
@@ -789,7 +792,7 @@ static int lua_wire_fifo_peek (lua_State *l)
 		if(msg)
 		{
 
-			lua_pushlightuserdata(l,msg->data);
+			lua_pushlightuserdata(l,(void*)msg->data);
 			lua_pushnumber(l, msg->sender); // fifo handle
 			lua_pushlightuserdata(l, msg->id); // Unique ptr
 
@@ -845,7 +848,7 @@ static int lua_wire_fifo_push (lua_State *l)
 	if(!msg) { luaL_error(l, "wire msg alloc failed"); }
 
 	msg->sender=lua_tonumber(l , 3 ); // fifo handle
-	msg->id=lua_topointer(l , 4 ); // unique ptr
+	msg->id=(void*)lua_topointer(l , 4 ); // unique ptr
 
 	lua_wire_fifo_lock(l,1,fifo);
 	
@@ -972,7 +975,8 @@ static int lua_wire_thread_handle (lua_State *l)
 	{
 		wire_thread *thread=(wire_thread *)wire_slots_get( &wire_threads , idx );
 		
-		if( thrd_equal( thread->thread , us ) )
+//		if( thrd_equal( thread->thread , us ) )
+		if( thread->thread == us )
 		{
 			handle=thread->handle;
 		}
@@ -1001,10 +1005,11 @@ LUALIB_API int luaopen_wire_core (lua_State *l)
 	{
 		// internal helper functions
 		{"time",						lua_wire_time},
-		{"timeres",						lua_wire_timeres},
 		{"pointer",						lua_wire_pointer},
 		{"thread_handle",				lua_wire_thread_handle},
 		{"handle",						lua_wire_handle},
+// no worky on windows
+//		{"timeres",						lua_wire_timeres},
 
 		// global function
 		{"sleep",						lua_wire_sleep},

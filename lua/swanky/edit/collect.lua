@@ -34,6 +34,12 @@ local wgw_mounts=require("wetgenes.gamecake.widgets.mounts")
 
 local function dprint(a) print(wstr.dump(a)) end
 
+M.memo=function(memo)
+	if not memo then memo={} end
+	memo.fifo=wire.fifo("collect")
+	return wire.memo(memo)
+end
+
 M.default_configs={}
 do
 	local default_config_filename="lua/swanky/edit/config.djon"
@@ -120,6 +126,8 @@ M.bake=function(oven,collect)
 	local finds=oven.rebake(oven.modname..".finds")
 	local gui=oven.rebake(oven.modname..".gui")
 	local docs=oven.rebake(oven.modname..".docs")
+	
+	collect.memo=M.memo
 	
 	collect.finds=finds
 
@@ -245,8 +253,7 @@ M.bake=function(oven,collect)
 ]]
 	
 	local load_meta=function(path)
-		local it=wire.memo({
-			fifo=wire.fifo("collect"),
+		local it=M.memo({
 			data={
 				binds={
 					PATH=path,
@@ -276,8 +283,7 @@ M.bake=function(oven,collect)
 		meta.state="manifest" -- this is a new file
 
 		-- write meta
-		local result=wire.memo({
-			fifo=wire.fifo("collect"),
+		local result=M.memo({
 			data={
 				binds={
 					PATH=path,
@@ -301,8 +307,7 @@ M.bake=function(oven,collect)
 	local save_meta=function(meta)
 
 		-- write meta to sqlite
-		local result=wire.memo({
-			fifo=wire.fifo("collect"),
+		local result=M.memo({
 			data={
 				binds={
 					ID=meta.id,
@@ -362,8 +367,7 @@ wire.tasks("collect",1,[[ require("wiretasks").sqlite_code(); ]],{
 		collect.config={}
 
 		-- block and read all the json
-		local result=wire.memo({
-			fifo=wire.fifo("collect"),
+		local result=M.memo({
 			data={
 				sql=[[
 
@@ -387,8 +391,7 @@ SELECT key,value FROM config ;
 	collect.save_config=function(name)
 
 		--  load comments
-		local row=wire.memo({
-			fifo=wire.fifo("collect"),
+		local row=M.memo({
 			data={
 				binds={
 					KEY=name
@@ -411,8 +414,7 @@ SELECT key,value FROM config WHERE key=$KEY ;
 			value=djon.save(collect.config[name],"djon")
 		end
 		-- save with comments
-		local result=wire.memo({
-			fifo=wire.fifo("collect"),
+		local result=M.memo({
 			data={
 				binds={
 					KEY=name,
@@ -441,8 +443,7 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 			it.fileage=text_age
 		
 			-- write data only if we have some
-			local result=wire.memo({
-				fifo=wire.fifo("collect"),
+			local result=M.memo({
 				data={
 					binds={
 						ID=it.meta.id,
@@ -469,8 +470,7 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 
 -- always load from sqlite even if we just saved to it
 
-		local data=wire.memo({
-			fifo=wire.fifo("collect"),
+		local data=M.memo({
 			data={
 				binds={
 					ID=it.meta.id,
@@ -489,8 +489,7 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 			data=nil -- dont bother keeping the compressed data around
 		end
 
-		local undos=wire.memo({
-			fifo=wire.fifo("collect"),
+		local undos=M.memo({
 			data={
 				binds={
 					ID=it.meta.id,
@@ -514,8 +513,7 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 	collect.undo_update=function(it,index,data)
 		if not it.meta then return end -- need meta id
 
-		wire.memo({
-		fifo=wire.fifo("collect"),
+		M.memo({
 			data={
 				binds={
 					ID=it.meta.id,
@@ -540,8 +538,7 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 	collect.undo_trim=function(it,index)
 		if not it.meta then return end -- need meta id
 
-		local result=wire.memo({
-			fifo=wire.fifo("collect"),
+		local result=M.memo({
 			data={
 				binds={
 					ID=it.meta.id,
@@ -583,8 +580,7 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 		save_meta(it.meta)
 
 		-- write data to sqlite
-		local result=wire.memo({
-			fifo=wire.fifo("collect"),
+		local result=M.memo({
 			data={
 				binds={
 					ID=it.meta.id,

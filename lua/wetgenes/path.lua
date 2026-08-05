@@ -239,7 +239,7 @@ wpath.currentdir=function(p,...)
 		return wpath.join(ds)
 	end
 
-	return wpath.root -- default root
+	return wpath._root -- default root
 end
 
 
@@ -338,7 +338,7 @@ Resolve input and go up a single directory level, ideally you should
 pass in a directory, IE a string that ends in / or \ and we will return 
 the parent of this directory.
 
-If called repeatedly, then eventually we will return wpath.root
+If called repeatedly, then eventually we will return wpath._root 
 
 ]]
 wpath.parent=function(...)
@@ -451,17 +451,17 @@ wpath.setup=function(flavour)
 
 	if flavour == "win" then
 	
-		wpath.root="C:\\"
+		wpath._root="C:\\" -- assumption
 		wpath.separator="\\"
-		wpath.delimiter=":"
+--		wpath.delimiter=":"
 		wpath.winhax=true
 		wpath.home=os.getenv("USERPROFILE")
 
 	elseif flavour == "nix" then
 
-		wpath.root="/"
+		wpath._root="/"
 		wpath.separator="/"
-		wpath.delimiter=";"
+--		wpath.delimiter=";"
 		wpath.winhax=true
 		wpath.home=os.getenv("HOME")
 

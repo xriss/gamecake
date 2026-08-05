@@ -61,6 +61,28 @@ print("walk",it.path)
 end
 
 M.meta.find_prefix=function(meta,path)
+
+	-- make sure that root is mounted
+	local root=wpath.root(path)
+	local slash
+	for _,it in pairs(meta.mounts or {}) do -- root must match one of these
+		if it.path=="/" then slash=it end -- copy this one
+		if it.path==root then root=nil end -- no need to add
+	end
+	if slash and root then -- auto mount
+print("created ",root,path)
+		local mount=M.file.setup({
+			collect=slash.collect, -- back link to collect state data
+			name=root,
+			path=root,
+			mounts={},
+			dir={},
+			keep=true,
+		})
+		meta.mounts[#meta.mounts+1]=mount
+	end
+
+
 	local best=meta
 	for _,it in pairs(meta.mounts or {}) do -- find best dir prefix for this path ( mount points )
 		local c=path:sub(1,#it.path) -- path must begin with
@@ -681,13 +703,15 @@ M.config.fetch_dir=function(config,path)
 
 	if path=="/../config/" then
 
-		local rows=config.collect.do_memo({
-			sql=[[
+		local rows=config.collect.memo({
+			data={
+				sql=[[
 
 	SELECT key FROM config ;
 
-			]],
-		}).rows
+				]],
+			},
+		}):resolve().rows
 		for i,v in ipairs(rows) do
 			dir[#dir+1]=config:new_item(v.key..".djon")
 		end
@@ -702,16 +726,18 @@ PRINT("read_config",path)
 	if path:sub(1,#"/../config/")=="/../config/" then
 		local key=path:sub(1+#"/../config/")
 		if key:sub(-#".djon")==".djon" then key=key:sub(1,-(1+#".djon")) end -- remove extension
-		local rows=config.collect.do_memo({
-			binds={
-				KEY=key,
-			},
-			sql=[[
+		local rows=config.collect.memo({
+			data={
+				binds={
+					KEY=key,
+				},
+				sql=[[
 
 	SELECT key,value FROM config WHERE key=$KEY;
 
-			]],
-		}).rows
+				]],
+			},
+		}):resolve().rows
 		return rows and rows[1] and rows[1].value
 	end
 end
@@ -731,17 +757,19 @@ PRINT("write_config",path)
 		tab=tab or {{}} -- maybe wipe on error , undo to get old text back
 		local newdata=djon.save(tab,"djon","comments")  -- reformat keeping comments
 
-		local rows=config.collect.do_memo({
-			binds={
-				KEY=key,
-				VALUE=newdata,
-			},
-			sql=[[
+		local rows=config.collect.memo({
+			data={
+				binds={
+					KEY=key,
+					VALUE=newdata,
+				},
+				sql=[[
 
 	INSERT INTO config(key,value) VALUES( $KEY , $VALUE ) ON CONFLICT(key) DO UPDATE SET value=$VALUE ;
 
-			]],
-		})
+				]],
+			},
+		}):resolve()
 
 		return newdata
 	end

@@ -56,11 +56,7 @@ elseif WINDOWS then
 
 --	links { "opengl32" , "glu32" }
 	links {  "ws2_32" , "gdi32"}
-	
-	if GCC then
-		links { "stdc++" , "mingw32" }
-	end
-		
+			
 	links { "winmm" }
 
 	links { "psapi" }
