@@ -3291,7 +3291,7 @@
  },
  "_list": [
   {
-   "body": "<pre><code>secs = wire.timeres()\n</code></pre>\n<p>Get the TIME_UTC resolution via a timespec_getres and converted into a \ndouble.</p>\n",
+   "body": "<pre><code>secs = wire.timeres()\n</code></pre>\n<p>Removed since mingw does not like...</p>\n<p>Get the TIME_UTC resolution via a timespec_getres and converted into a \ndouble.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
    "line": 177,

@@ -3294,7 +3294,7 @@
    "body": "<pre><code>fifo = wire.fifo(name)\n\nfifo = wire.fifo(handle)\nfifo = wire.fifo(opts)\n</code></pre>\n<p>Create or get a fifo. Fifos are not GC&#39;d they must be created \nand destroyed explicitly.</p>\n<p>When called with a name (string) we return a previously created fifo \nwith that name or create a new one ( via house so can take some time ) \nThis is the preferred may to safely create a named fifo.</p>\n<p>When called with a handle (number) we return a previously created fifo \nwith that handle ( via house so can take some time ).</p>\n<p>We will raise an error if no fifo is found with that handle, so if this \nfunction returns you will always have a fifo.</p>\n<p>When called with opts (table) we do the following based on the \ncontents.</p>\n<pre><code>opts.handle=nil\n</code></pre>\n<p>The handle to use in creation ( so we may reuse an old handle ). If nil \nwe will assign a new one.</p>\n<pre><code>opts.name=&quot;namedfifo&quot;\n</code></pre>\n<p>The name to use in fifo creation. Usually the only value needed but the \ncreation happens on this thread rather than house so this is a \ndangerous thing to do.</p>\n",
    "count": 5,
    "file": "../lua/wire.lua",
-   "line": 464,
+   "line": 466,
    "name": "lua.wire.fifo",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
@@ -3302,7 +3302,7 @@
    "body": "<pre><code>bool = fifo:peek()\nbool = thread:peek()\n</code></pre>\n<p>Peek and see if there is a memo to pull but do not pull it.</p>\n<p>Note that a pull, even immediately after a successful peek has no \nguarantee to work.</p>\n<p>If you wish to actually look at the contents of the memo then pull a \nmemo and then push it back into the fifo. This will of course change \nthe order of memos in the fifo.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 841,
+   "line": 843,
    "name": "lua.wire.fifo.peek",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
@@ -3310,7 +3310,7 @@
    "body": "<pre><code>memo = fifo:pull()\nmemo = thread:pull()\n</code></pre>\n<p>Pull memo out of this fifo.</p>\n<p>If this is a memo for us to deal with memo.state will be set to &quot;got&quot;</p>\n<p>If this is a result we will return the sent memo with memo.result set \nto the reply data and the memo state will be changed to &quot;result&quot;.</p>\n<p>memo may be ignored for now and dealt with later by finding it in \nwire.memos.</p>\n<p>This is useful if you are waiting for a specific reply and want to keep \npulling until you find it.</p>\n<p>Returns nil if there is no memo available.</p>\n<p>May raise an error if we get a reply with an id that we do not \nrecognize.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 866,
+   "line": 868,
    "name": "lua.wire.fifo.pull",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
@@ -3318,7 +3318,7 @@
    "body": "<pre><code>fifo:push(memo)\nthread:push(memo)\n</code></pre>\n<p>Push memo into this fifo.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 917,
+   "line": 919,
    "name": "lua.wire.fifo.push",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   },
@@ -3326,7 +3326,7 @@
    "body": "<pre><code>fifo:wait(secs)\nthread:wait(secs)\n</code></pre>\n<p>Wait upto the given number of seconds for a new memo to arrive in this \nfifo.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 934,
+   "line": 936,
    "name": "lua.wire.fifo.wait",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

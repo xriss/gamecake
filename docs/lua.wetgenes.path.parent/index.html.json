@@ -3291,7 +3291,7 @@
  },
  "_list": [
   {
-   "body": "<p>Resolve input and go up a single directory level, ideally you should \npass in a directory, IE a string that ends in / or \\ and we will return \nthe parent of this directory.</p>\n<p>If called repeatedly, then eventually we will return wpath.root</p>\n",
+   "body": "<p>Resolve input and go up a single directory level, ideally you should \npass in a directory, IE a string that ends in / or \\ and we will return \nthe parent of this directory.</p>\n<p>If called repeatedly, then eventually we will return wpath._root </p>\n",
    "count": 1,
    "file": "../lua/wetgenes/path.lua",
    "line": 335,
