@@ -9600,7 +9600,7 @@
    "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Get a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Optional token to read this gist</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wiretasks.gist_baseurl and can also be changed globally \nthere.</p>\n",
    "count": 1,
    "file": "../lua/wiretasks.lua",
-   "line": 657,
+   "line": 656,
    "name": "lua.wiretasks.gist_get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
   },
@@ -9608,7 +9608,7 @@
    "body": "<pre><code>local list=gist.list(opts)\n</code></pre>\n<p>The http task must be running and this will block waiting on results.</p>\n<p>List some gists from github using options found in opts, see \n<a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; which is \nset in wiretasks.gist_baseurl and can also be changed globally there.</p>\n<pre><code>opts.token\n</code></pre>\n<p>Should be set to a github access token and is required for writing data \nor accessing non public information.</p>\n<pre><code>opts.username\n</code></pre>\n<p>Is the name of a github user we wish to list gists for</p>\n<pre><code>opts.filter\n</code></pre>\n<p>Can be &quot;public&quot; to request only public gists or &quot;starred&quot; to request \nonly starred gists.</p>\n<pre><code>opts.since\n</code></pre>\n<p>An ISO_8601 timestamp in a string and should be set if we are only \ninterested in gists since this time.</p>\n<pre><code>opts.per_page\n</code></pre>\n<p>The number of results we want, the api limits this to 100 but defaults \nto 30. Probably a good idea to set this to 100 unless you want to deal \nwith paging code and even then you can only get the first 3000 results.</p>\n<pre><code>opts.page\n</code></pre>\n<p>The page of results we are requesting, It defaults to 1 so can be \nomitted unless you are going to request multiple pages.</p>\n",
    "count": 1,
    "file": "../lua/wiretasks.lua",
-   "line": 570,
+   "line": 569,
    "name": "lua.wiretasks.gist_list",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
   },
@@ -9616,7 +9616,7 @@
    "body": "<pre><code>seconds = wiretasks.gist_parse_iso8601(text)\n</code></pre>\n<p>Parse a string in iso8601 format into a linux time ( seconds since 1970 )</p>\n",
    "count": 1,
    "file": "../lua/wiretasks.lua",
-   "line": 550,
+   "line": 549,
    "name": "lua.wiretasks.gist_parse_iso8601",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
   },
@@ -9624,7 +9624,7 @@
    "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Set a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Token to write this gist</p>\n<pre><code>opts.body\n</code></pre>\n<p>Gist data</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wiretasks.gist_baseurl and can also be changed globally \nthere.</p>\n",
    "count": 1,
    "file": "../lua/wiretasks.lua",
-   "line": 701,
+   "line": 700,
    "name": "lua.wiretasks.gist_set",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
   },
