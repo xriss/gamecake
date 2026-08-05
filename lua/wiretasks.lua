@@ -309,10 +309,69 @@ wiretasks.sqlite_code=function()
 
 	local sqlite3 = require("lsqlite3")
 
+	-- only if available , will error if you try and use when nil
+	local wgetsql ; pcall( function() wgetsql=require("wetgenes.getsql") end )
+
 	local db
 
-	if sqlite_filename then	db = assert(sqlite3.open(sqlite_filename)) end -- auto open
-	if sqlite_pragmas and db then db:exec(sqlite_pragmas) end -- auto configure
+--	if sqlite_filename then	db = assert(sqlite3.open(sqlite_filename)) end -- auto open
+--	if sqlite_pragmas and db then db:exec(sqlite_pragmas) end -- auto configure
+
+	local opendb=function(filename,pragmas,tables,autoset)
+
+		if not filename then -- for wasm problems
+			db = assert(sqlite3.open_memory())
+		else
+			db = assert(sqlite3.open(filename))
+		end
+		
+		if pragmas then
+			db:exec(pragmas)
+		end
+		
+		if tables then
+			if not wgetsql then error("wetgenes.getsql module not available") end
+
+			for tabname,tab in pairs(tables) do
+				local sql=wgetsql.sqlite.create_table(tab.name,tab)
+				db:exec(sql)
+				for _,sql in ipairs( wgetsql.sqlite.alter_table(tab.name,tab) ) do
+					db:exec(sql)
+				end
+				for _,sql in ipairs( wgetsql.sqlite.create_table_indexs(tab.name,tab) ) do
+					db:exec(sql)
+				end
+			end
+		end
+		
+		if autoset then -- auto set data if not exists
+		
+			for _,tab in ipairs( autoset ) do -- TODO
+
+				local keys={}
+				for key in db:urows([[
+					SELECT key FROM config ;
+				]]) do
+					keys[key]=true
+				end
+			
+				for key,value in pairs(tab.values) do
+					if not keys[key] then
+						local stmt = db:prepare[[ INSERT INTO config VALUES (:key, :value) ]]
+						stmt:bind_names{  key = key,  value = value    }
+						stmt:step()
+						stmt:finalize()
+					end
+				end
+				
+			end
+
+		end
+		
+		return db
+	end
+	opendb( sqlite_filename , sqlite_pragmas , sqlite_tables , sqlite_autoset ) -- auto open and pragma and create tables
+
 
 	local consume=function(data)
 	
@@ -320,9 +379,16 @@ wiretasks.sqlite_code=function()
 	
 		if data.action then -- this is a special action eg to close or open the database
 
-			if data.action=="close" then -- probably good to "try" and do this before exiting
-				db:close()
+			if data.action=="open" then -- gonna need to do this first or set sqlite_filename to auto open
+
+				if db then error("database already open") end
+				opendb( memo.filename , memo.pragmas , memo.tables , memo.autoset )
+
+			elseif data.action=="close" then -- probably good to "try" and do this before exiting
+
+				if db then db:close() end
 				db=nil
+
 			else
 				result={fail="unknown action"}
 			end
@@ -526,7 +592,7 @@ omitted unless you are going to request multiple pages.
 ]]
 wiretasks.gist_list=function(opts)
 	
-	local baseurl=opts.baseurl or M.baseurl
+	local baseurl=opts.baseurl or wiretasks.gist_baseurl
 	local username=""
 	if opts.username then -- request gists from this username (does not have to match token)
 		username="/users/"..opts.username
@@ -591,7 +657,7 @@ there.
 ]]
 wiretasks.gist_get=function(opts)
 
-	local baseurl=opts.baseurl or M.baseurl
+	local baseurl=opts.baseurl or wiretasks.gist_baseurl
 
 	local headers={}
 	headers["Accept"]="application/vnd.github+json"
@@ -639,7 +705,7 @@ there.
 ]]
 wiretasks.gist_set=function(opts)
 
-	local baseurl=opts.baseurl or M.baseurl
+	local baseurl=opts.baseurl or wiretasks.gist_baseurl
 
 	local headers={}
 	headers["Accept"]="application/vnd.github+json"

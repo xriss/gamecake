@@ -9,13 +9,8 @@ local M={ modname = (...) } package.loaded[M.modname] = M
 -- unix paths and we use /../ for internal data so /../data/ is not expected to hit the filesystem
 
 
-------------------------------------------------------------------------
-do -- only cache this stuff on main thread
-------------------------------------------------------------------------
---local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
---     =coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs, load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
-
 local bit=require("bit")
+local wire=require("wire")
 
 
 M.functions={}
@@ -231,7 +226,8 @@ M.bake=function(oven,collect)
 		end
 		walk(collect.mounts)
 	end
-	
+
+--[[
 	collect.task_id=collect.task_id or "collect"
 	collect.task_id_msg=collect.task_id..":msg"
 
@@ -246,18 +242,23 @@ M.bake=function(oven,collect)
 		if ret.error and ( not noerror ) then error(ret.error) end -- auto raise any SQL errors
 		return ret
 	end
+]]
 	
 	local load_meta=function(path)
-		local it=collect.do_memo({
-			binds={
-				PATH=path,
-			},
-			sql=[[
+		local it=wire.memo({
+			fifo=wire.fifo("collect"),
+			data={
+				binds={
+					PATH=path,
+				},
+				sql=[[
 
 	SELECT id,path,json(meta) AS meta FROM file WHERE path=$PATH;
 
-			]],
-		}).rows[1]
+				]],
+			},
+		}):resolve().rows[1]
+
 		if it then -- maybe null
 			it.meta=djon.load(it.meta)
 			it.meta.id=it.id
@@ -275,20 +276,23 @@ M.bake=function(oven,collect)
 		meta.state="manifest" -- this is a new file
 
 		-- write meta
-		collect.do_memo({
-			binds={
-				PATH=path,
-				DIR=wpath.unslash( wpath.dir(path) ),
-				NAME=wpath.file(path),
-				META=djon.save( meta ,"compact" ),
-			},
-			sql=[[
+		local result=wire.memo({
+			fifo=wire.fifo("collect"),
+			data={
+				binds={
+					PATH=path,
+					DIR=wpath.unslash( wpath.dir(path) ),
+					NAME=wpath.file(path),
+					META=djon.save( meta ,"compact" ),
+				},
+				sql=[[
 
 	INSERT INTO file (path,dir,name,meta)
 	VALUES ( $PATH,$DIR,$NAME,jsonb($META) )
 
-			]],
-		})
+				]],
+			},
+		}):resolve()
 
 		-- read meta so we know ID
 		return load_meta(path)
@@ -297,17 +301,20 @@ M.bake=function(oven,collect)
 	local save_meta=function(meta)
 
 		-- write meta to sqlite
-		collect.do_memo({
-			binds={
-				ID=meta.id,
-				META=djon.save( meta ,"compact" ),
-			},
-			sql=[[
+		local result=wire.memo({
+			fifo=wire.fifo("collect"),
+			data={
+				binds={
+					ID=meta.id,
+					META=djon.save( meta ,"compact" ),
+				},
+				sql=[[
 
 	UPDATE file SET meta=jsonb($META) WHERE id=$ID;
 
-			]],
-		})
+				]],
+			},
+		}):resolve()
 
 	end
 
@@ -318,6 +325,15 @@ M.bake=function(oven,collect)
 		if wwin.sdl_platform=="Emscripten" then -- use memory db
 			sqlite_filename=nil
 		end
+
+wire.tasks("collect",1,[[ require("wiretasks").sqlite_code(); ]],{
+			sqlite_filename=sqlite_filename,
+			sqlite_pragmas=[[ PRAGMA synchronous=0; ]],	
+			sqlite_tables=M.tables,
+--			sqlite_autoset=M.default_configs,
+	})
+
+--[=[
 		collect.thread=oven.tasks:add_global_thread({
 			count=1,
 			id=collect.task_id,
@@ -330,19 +346,23 @@ M.bake=function(oven,collect)
 			},
 			code=M.task_code,
 		})
+]=]
 
 		-- global json state data contained in keys, read on startup and should be written when changed
 		collect.config={}
 
 		-- block and read all the json
-		local djon_config=collect.do_memo({
-			sql=[[
+		local result=wire.memo({
+			fifo=wire.fifo("collect"),
+			data={
+				sql=[[
 
 SELECT key,value FROM config ;
 
-			]],
-		})
-		for i,v in ipairs(djon_config.rows) do
+				]],
+			},
+		}):resolve()
+		for i,v in ipairs(result.rows) do
 			if v.key and v.value and v.value~="" then
 				collect.config[v.key]=djon.load(v.value) -- this loses comments
 			end
@@ -357,16 +377,19 @@ SELECT key,value FROM config ;
 	collect.save_config=function(name)
 
 		--  load comments
-		local row=collect.do_memo({
-			binds={
-				KEY=name
-			},
-			sql=[[
+		local row=wire.memo({
+			fifo=wire.fifo("collect"),
+			data={
+				binds={
+					KEY=name
+				},
+				sql=[[
 
 SELECT key,value FROM config WHERE key=$KEY ;
 
-			]],
-		}).rows[1]
+				]],
+			},
+		}):resolve().rows[1]
 
 		-- merge with current data
 		local value
@@ -378,17 +401,20 @@ SELECT key,value FROM config WHERE key=$KEY ;
 			value=djon.save(collect.config[name],"djon")
 		end
 		-- save with comments
-		local r=collect.do_memo({
-			binds={
-				KEY=name,
-				VALUE=value,
-			},
-			sql=[[
+		local result=wire.memo({
+			fifo=wire.fifo("collect"),
+			data={
+				binds={
+					KEY=name,
+					VALUE=value,
+				},
+				sql=[[
 
 UPDATE config SET value=$VALUE WHERE key=$KEY ;
 
-			]],
-		})
+				]],
+			},
+		}):resolve()
 
 	end
 
@@ -405,23 +431,26 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 			it.fileage=text_age
 		
 			-- write data only if we have some
-			collect.do_memo({
-				binds={
-					ID=it.meta.id,
-					UD=0,
-				},
-				blobs={
-					DATA=zip_deflate(text),
-				},
-				sql=[[
+			local result=wire.memo({
+				fifo=wire.fifo("collect"),
+				data={
+					binds={
+						ID=it.meta.id,
+						UD=0,
+					},
+					blobs={
+						DATA=zip_deflate(text),
+					},
+					sql=[[
 
 	INSERT INTO file_data (id,ud,value)
 	VALUES ( $ID,$UD,$DATA )
 	ON CONFLICT DO UPDATE SET
 	id=$ID,	ud=$UD,	value=$DATA ;
 
-				]],
-			})
+					]],
+				},
+			}):resolve()
 			
 			it.meta.state="new"
 			save_meta(it.meta)
@@ -430,16 +459,19 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 
 -- always load from sqlite even if we just saved to it
 
-		local data=collect.do_memo({
-			binds={
-				ID=it.meta.id,
-			},
-			sql=[[
+		local data=wire.memo({
+			fifo=wire.fifo("collect"),
+			data={
+				binds={
+					ID=it.meta.id,
+				},
+				sql=[[
 
 	SELECT id,ud,value FROM file_data WHERE id=$ID;
 
-			]],
-		}).rows[1]
+				]],
+			},
+		}):resolve().rows[1]
 		if data then
 			it.meta.undo=data.ud -- the undo point that this data was saved at
 			it.txt.set_text( zip_inflate(data.value) ,filename) -- set the uncompressed text
@@ -447,16 +479,19 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 			data=nil -- dont bother keeping the compressed data around
 		end
 
-		local undos=collect.do_memo({
-			binds={
-				ID=it.meta.id,
-			},
-			sql=[[
+		local undos=wire.memo({
+			fifo=wire.fifo("collect"),
+			data={
+				binds={
+					ID=it.meta.id,
+				},
+				sql=[[
 
 	SELECT id,ud,value FROM file_undo WHERE id=$ID;
 
-			]],
-		}).rows or {}
+				]],
+			},
+		}):resolve().rows or {}
 		it.txt.undo.list_set_fromsql(undos,it.meta.undo)
 		if not it.txt.undo.redo_all() then -- fail and reset undos
 			it.txt.undo.list_reset()
@@ -469,40 +504,46 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 	collect.undo_update=function(it,index,data)
 		if not it.meta then return end -- need meta id
 
-		collect.send_memo({
-			binds={
-				ID=it.meta.id,
-				UD=index,
-			},
-			blobs={
-				DATA=data,
-			},
-			sql=[[
+		wire.memo({
+		fifo=wire.fifo("collect"),
+			data={
+				binds={
+					ID=it.meta.id,
+					UD=index,
+				},
+				blobs={
+					DATA=data,
+				},
+				sql=[[
 
 	INSERT INTO file_undo ( id, ud, value )
 	VALUES ( $ID, $UD, $DATA )
 	ON CONFLICT DO UPDATE SET
 	id=$ID,	ud=$UD,	value=$DATA ;
 
-			]],
-		})
+				]],
+			},
+		}):send()
 	end
 
 -- trim undos to the given index
 	collect.undo_trim=function(it,index)
 		if not it.meta then return end -- need meta id
 
-		collect.do_memo({
-			binds={
-				ID=it.meta.id,
-				UD=index,
-			},
-			sql=[[
+		local result=wire.memo({
+			fifo=wire.fifo("collect"),
+			data={
+				binds={
+					ID=it.meta.id,
+					UD=index,
+				},
+				sql=[[
 
 	DELETE FROM file_undo WHERE id=$ID AND ud>$UD;
 
-			]],
-		})
+				]],
+			},
+		}):resolve()
 	end
 
 -- save the file from database first then disk
@@ -532,220 +573,26 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 		save_meta(it.meta)
 
 		-- write data to sqlite
-		collect.do_memo({
-			binds={
-				ID=it.meta.id,
-				UD=it.meta.undo,
-			},
-			blobs={
-				DATA=zip_deflate(text),
-			},
-			sql=[[
+		local result=wire.memo({
+			fifo=wire.fifo("collect"),
+			data={
+				binds={
+					ID=it.meta.id,
+					UD=it.meta.undo,
+				},
+				blobs={
+					DATA=zip_deflate(text),
+				},
+				sql=[[
 
 	UPDATE file_data SET ud=$UD,value=$DATA WHERE id=$ID;
 
-			]],
-		})
+				]],
+			},
+		}):resolve()
 
 
 	end
 	
 	return collect
-end
-
-------------------------------------------------------------------------
-end -- The functions below are free running tasks and should not depend on any locals
-------------------------------------------------------------------------
-
-
---[[#lua.swanky.edit.collect.task_code
-
-lanes task function for handling collect communication.
-
-Mostly we are read/writing an sqlite database containing constantly updated state info.
-
-]]
-M.task_code=function(linda,task_id,task_idx)
-	local M -- hide M for thread safety
-	local global=require("global") -- lock accidental globals
-	local lanes=require("lanes")
-	local task_id_collect=task_id..":collect"
-	if lane_threadname then lane_threadname(task_id) end
-
-	local wgetsql=require("wetgenes.getsql")
-	
-	local sqlite3 = lanes.require("lsqlite3")
-	local db
-	
-	local opendb=function(filename,pragmas,tables)
-
-		if not filename then -- for wasm problems
-			db = assert(sqlite3.open_memory())
-		else
-			db = assert(sqlite3.open(filename))
-		end
-		
-		if pragmas then
-			db:exec(pragmas)
-		end
-		
-		if tables then
-			for tabname,tab in pairs(tables) do
-				local sql=wgetsql.sqlite.create_table(tab.name,tab)
-				db:exec(sql)
-				for _,sql in ipairs( wgetsql.sqlite.alter_table(tab.name,tab) ) do
-					db:exec(sql)
-				end
-				for _,sql in ipairs( wgetsql.sqlite.create_table_indexs(tab.name,tab) ) do
-					db:exec(sql)
-				end
-			end
-		end
-		
-		if default_configs then -- auto create
-		
-			local keys={}
-			for key in db:urows([[
-				SELECT key FROM config ;
-			]]) do
-				keys[key]=true
-			end
-			
-			for key,value in pairs(default_configs) do
-				if not keys[key] then
-					local stmt = db:prepare[[ INSERT INTO config VALUES (:key, :value) ]]
-					stmt:bind_names{  key = key,  value = value    }
-					stmt:step()
-					stmt:finalize()
-				end
-			end
-
-		end
-		
-		return db
-	end
-	opendb( sqlite_filename , sqlite_pragmas , sqlite_tables , default_configs ) -- auto open and pragma and create tables
-
-	local request=function(memo)
-	
-		local ret={}
-	
-		if memo.cmd then -- this is a special cmd eg to close or open the database
-		
-			if memo.cmd=="open" then -- gonna need to do this first or set sqlite_filename to auto open
-
-				opendb( memo.filename , memo.pragmas , memo.tables )
-
-			elseif memo.cmd=="close" then -- probably good to "try" and do this before exiting
-
-				if db then db:close() end
-				db=nil
-
-			end
-
-		elseif memo.sql then -- execute some sql
-		
-			if not db then
-				ret.error="no database"
-				return ret
-			end
-
-			local rows={}
-			
-			
-			local err
-			
-			if memo.binds or memo.blobs then -- use prepared statement
-			
-				local stmt = db:prepare(memo.sql)
-				if not stmt then
-					ret.error=db:errmsg()
-					return ret
-				end
-
-				local bmax=stmt:bind_parameter_count()
-				local bs={}
-				for i=1,bmax do
-					local n=stmt:bind_parameter_name(i)
-					if n then
-						bs[n]=i
-						bs[n:sub(2)]=i
-					end
-				end
-
-				
-				local blobs=memo.blobs or {}
-				for n,v in pairs( memo.binds or {} ) do
-					if bs[n] and not blobs[n] then -- a blob might be in both places
-						stmt:bind( bs[n] , v )
-					end
-				end
-				for n,v in pairs( memo.blobs or {} ) do -- these binds should be treated as blobs
-					if bs[n] then
-						stmt:bind_blob( bs[n] , v )
-					end
-				end
-				
-				if memo.compact then
-					rows.names=stmt:get_names()
-					for it in stmt:rows() do
-						rows[#rows+1]=it
-					end
-				else
-					for it in stmt:nrows() do
-						rows[#rows+1]=it
-					end
-				end
-
-				err=stmt:finalize()
-			
-			else
-			
-				if memo.compact then -- return data in a slightly more compact format
-
-					err=db:exec(memo.sql,function(udata,cols,values,names)
-						rows.names=names
-						rows[#rows+1]=values
-						return 0
-					end,"udata")
-				
-				else
-
-					err=db:exec(memo.sql,function(udata,cols,values,names)
-						local it={}
-						for i=1,cols do it[ names[i] ] = values[i] end
-						rows[#rows+1]=it
-						return 0
-					end,"udata")
-
-				end
-
-			end
-
-			if err~=sqlite3.OK then
-				ret.error=db:errmsg()
-			else
-				ret.rows=rows
-			end
-
-		end
-
-		return ret
-	end
-
-
-	while true do
-
-		local _,memo= linda:receive( 0 , task_id ) -- wait for any memos coming into this thread
-
-		if memo then
-			local ok,ret=xpcall(function() return request(memo) end,print_lanes_error) -- in case of uncaught error
-			if not ok then ret={error=ret or true} end -- reformat errors
-			if memo.id then -- result requested
-				linda:send( nil , memo.id , ret )
-			end
-		end
-
-	end
-
 end

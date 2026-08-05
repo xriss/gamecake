@@ -774,13 +774,16 @@ all_includes=all_includes or {
 	{"lua_sqlite",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_lash",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_sdl2",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lua_bullet",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lua_chipmunk",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_utf8",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_cmsgpack",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_brimworkszip",WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_wire",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+
+	{"lua_bullet",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+	{"lua_chipmunk",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+-- boxxd will replace bullet and chipmunk
+	{"lua_boxxd",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 
 -- lanes has been replaced with wire
@@ -806,8 +809,6 @@ all_includes=all_includes or {
 
 	{"lua_pgsql",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil			or		nil			or	nil		},
-
-	{"lua_boxxd",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- hid is now in SDL
 --	{"lua_hid",			nil			or		NIX		or		nil			or		nil			or	nil		},

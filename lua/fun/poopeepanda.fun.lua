@@ -3939,6 +3939,7 @@ huds.item.draw=function(hud)
 	local s=tm..":"..("0"..ts):sub(-2)
 	draws.string16(s,128-(#s*4),0)
 
+
 	local players=scene:caste("player")
 	for i,p in ipairs(players) do
 		if p.idx==1 then
