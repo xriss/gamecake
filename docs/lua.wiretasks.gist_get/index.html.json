@@ -3286,7 +3286,7 @@
    "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Get a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Optional token to read this gist</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wiretasks.gist_baseurl and can also be changed globally \nthere.</p>\n",
    "count": 1,
    "file": "../lua/wiretasks.lua",
-   "line": 635,
+   "line": 657,
    "name": "lua.wiretasks.gist_get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
   }
