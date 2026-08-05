@@ -325,12 +325,22 @@ M.bake=function(oven,collect)
 		if wwin.sdl_platform=="Emscripten" then -- use memory db
 			sqlite_filename=nil
 		end
+		
+		local rows={}
+		for k,v in pairs( M.default_configs ) do
+			rows[#rows+1]={ key=k , values=v }
+		end
 
 wire.tasks("collect",1,[[ require("wiretasks").sqlite_code(); ]],{
 			sqlite_filename=sqlite_filename,
 			sqlite_pragmas=[[ PRAGMA synchronous=0; ]],	
 			sqlite_tables=M.tables,
---			sqlite_autoset=M.default_configs,
+			sqlite_autoset={
+				config={ -- name of table
+					keyname="key", -- name of key to check
+					rows=rows, -- data to insert if row[keyname] does not already exist
+				},
+			},
 	})
 
 --[=[

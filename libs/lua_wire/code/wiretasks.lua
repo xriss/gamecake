@@ -347,7 +347,6 @@ wiretasks.sqlite_code=function()
 		if autoset then -- auto set data if not exists
 		
 			for tabname,tab in pairs( autoset ) do
-
 				local keys={}
 				for key in db:urows([[
 					SELECT ]]..tab.keyname..[[ FROM ]]..tabname..[[ ;
@@ -359,7 +358,7 @@ wiretasks.sqlite_code=function()
 					if not keys[key] then
 						local names={}
 						for n,v in pairs(row) do names[#names+1]=":"..n end
-						local names=table.concat(names," , ")
+						names=table.concat(names," , ")
 						local stmt = db:prepare[[ INSERT INTO ]]..tabname..[[ VALUES (]]..names..[[) ]]
 						stmt:bind_names(row)
 						stmt:step()
