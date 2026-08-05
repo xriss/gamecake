@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 776,
+   "count": 772,
    "name": "lua"
   },
   {
@@ -548,22 +548,6 @@
   {
    "count": 1,
    "name": "lua.glslang.yank_shader_versions"
-  },
-  {
-   "count": 4,
-   "name": "lua.swanky"
-  },
-  {
-   "count": 3,
-   "name": "lua.swanky.edit"
-  },
-  {
-   "count": 2,
-   "name": "lua.swanky.edit.collect"
-  },
-  {
-   "count": 1,
-   "name": "lua.swanky.edit.collect.task_code"
   },
   {
    "count": 634,
@@ -3302,7 +3286,7 @@
    "body": "<p>The http task must be running and this will block waiting on results.\n<br/>\n<br/></p>\n<p>Get a gist, see <a href=\"https://docs.github.com/en/rest/gists\">https://docs.github.com/en/rest/gists</a></p>\n<pre><code>opts.gid\n</code></pre>\n<p>Must be set to the gist id</p>\n<pre><code>opts.token\n</code></pre>\n<p>Optional token to read this gist</p>\n<pre><code>opts.baseurl\n</code></pre>\n<p>Can be used to overide the default of &quot;<a href=\"https://api.github.com\">https://api.github.com</a>&quot; \nwhich is set in wiretasks.gist_baseurl and can also be changed globally \nthere.</p>\n",
    "count": 1,
    "file": "../lua/wiretasks.lua",
-   "line": 569,
+   "line": 635,
    "name": "lua.wiretasks.gist_get",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
   }

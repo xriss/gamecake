@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 776,
+   "count": 772,
    "name": "lua"
   },
   {
@@ -548,22 +548,6 @@
   {
    "count": 1,
    "name": "lua.glslang.yank_shader_versions"
-  },
-  {
-   "count": 4,
-   "name": "lua.swanky"
-  },
-  {
-   "count": 3,
-   "name": "lua.swanky.edit"
-  },
-  {
-   "count": 2,
-   "name": "lua.swanky.edit.collect"
-  },
-  {
-   "count": 1,
-   "name": "lua.swanky.edit.collect.task_code"
   },
   {
    "count": 634,

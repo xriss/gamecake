@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 776,
+   "count": 772,
    "name": "lua"
   },
   {
@@ -548,22 +548,6 @@
   {
    "count": 1,
    "name": "lua.glslang.yank_shader_versions"
-  },
-  {
-   "count": 4,
-   "name": "lua.swanky"
-  },
-  {
-   "count": 3,
-   "name": "lua.swanky.edit"
-  },
-  {
-   "count": 2,
-   "name": "lua.swanky.edit.collect"
-  },
-  {
-   "count": 1,
-   "name": "lua.swanky.edit.collect.task_code"
   },
   {
    "count": 634,
@@ -3302,7 +3286,7 @@
    "body": "<pre><code>seconds = wiretasks.gist_parse_iso8601(text)\n</code></pre>\n<p>Parse a string in iso8601 format into a linux time ( seconds since 1970 )</p>\n",
    "count": 1,
    "file": "../lua/wiretasks.lua",
-   "line": 462,
+   "line": 528,
    "name": "lua.wiretasks.gist_parse_iso8601",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wiretasks.lua"
   }
