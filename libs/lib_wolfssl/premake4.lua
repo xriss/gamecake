@@ -331,9 +331,9 @@ defines{
 
 if WINDOWS then
 
-	defines "USE_WINDOWS_API"
-	
+--	defines "USE_WINDOWS_API"
 	defines "_WIN32_WINNT=0x0600"
+--	defines "WINVER=0x0600"
 
 	links { "ws2_32" }
 
