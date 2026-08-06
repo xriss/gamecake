@@ -449,22 +449,25 @@ wpath.setup=function(flavour)
 		end
 	end
 
-	if flavour == "win" then
-	
-		wpath._root="C:\\" -- assumption
-		wpath.separator="\\"
---		wpath.delimiter=":"
-		wpath.winhax=true
+-- building winth mingw we can mostly pretend it is linux
+-- it seems safe to use / everywhere
+	wpath.separator="/"
+
+-- this root kinda works on mingw but you cant get a dir of "/"
+-- you can dir "/." so uhm?
+	wpath._root="/"
+
+-- enabling winhax allows \ or / when parsing
+-- but will still produce / in output paths
+-- We also consider C:/ or any other letter to be a root
+-- this seems like the safest option for working under windows
+	wpath.winhax=true
+
+-- home is a different ENV on windows...
+	if flavour == "win" then	
 		wpath.home=os.getenv("USERPROFILE")
-
 	elseif flavour == "nix" then
-
-		wpath._root="/"
-		wpath.separator="/"
---		wpath.delimiter=";"
-		wpath.winhax=true
 		wpath.home=os.getenv("HOME")
-
 	end
 	
 	if wpath.home then

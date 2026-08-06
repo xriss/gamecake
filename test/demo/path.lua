@@ -18,7 +18,7 @@ for n,v in pairs( dd ) do
 	print( "currentdir" , n , v )
 end
 
-dir="/."
+dir="c:/"
 print("dir",dir)
 for nam in lfs.dir(dir) do
 	if nam~="." and nam~=".." then
