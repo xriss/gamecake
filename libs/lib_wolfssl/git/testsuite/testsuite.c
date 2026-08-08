@@ -1,12 +1,12 @@
 /* testsuite.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -24,7 +24,15 @@
     #include <config.h>
 #endif
 
+#ifndef WOLFSSL_USER_SETTINGS
+    #include <wolfssl/options.h>
+#endif
 #include <wolfssl/wolfcrypt/settings.h>
+
+#undef TEST_OPENSSL_COEXIST /* can't use this option with this example */
+#undef OPENSSL_COEXIST /* can't use this option with this example */
+
+#include <wolfssl/wolfcrypt/types.h>
 
 #include <wolfssl/ssl.h>
 #include <wolfssl/test.h>
@@ -39,17 +47,29 @@
 #include <wolfssl/wolfcrypt/sha256.h>
 #include <wolfssl/wolfcrypt/ecc.h>
 
+#ifdef WOLFSSL_SWDEV
+    #include "../tests/swdev/swdev_loader.h"
+#endif
+
 #include <examples/echoclient/echoclient.h>
 #include <examples/echoserver/echoserver.h>
 #include <examples/server/server.h>
 #include <examples/client/client.h>
+#if defined(HAVE_OCSP) && defined(HAVE_OCSP_RESPONDER) && \
+    !defined(NO_FILESYSTEM)
+#include <examples/ocsp_responder/ocsp_responder.h>
+#endif
 
+#include <testsuite/utils.h>
+/* include source file to not change all the testsuite build systems */
+#include <testsuite/utils.c>
 
 #ifndef NO_SHA256
 void file_test(const char* file, byte* check);
 #endif
 
-#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT)
+#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT) && \
+    !defined(NO_TLS)
 
 #ifdef HAVE_STACK_SIZE
 static THREAD_RETURN simple_test(func_args *args);
@@ -57,6 +77,16 @@ static THREAD_RETURN simple_test(func_args *args);
 static void simple_test(func_args *args);
 #endif
 static int test_tls(func_args* server_args);
+#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT) && \
+    defined(HAVE_CRL) && defined(HAVE_CRL_MONITOR)
+static int test_crl_monitor(void);
+#endif
+#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT) && \
+    !defined(NO_TLS) && !defined(NETOS) && defined(HAVE_OCSP) && \
+    defined(HAVE_OCSP_RESPONDER) && !defined(NO_FILESYSTEM) && \
+    !defined(NO_RSA) && defined(HAVE_CERTIFICATE_STATUS_REQUEST)
+static int test_ocsp_responder(void);
+#endif
 static void show_ciphers(void);
 static void cleanup_output(void);
 static int validate_cleanup_output(void);
@@ -97,25 +127,46 @@ static void *echoclient_test_wrapper(void* args) {
 
 int testsuite_test(int argc, char** argv)
 {
-#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT)
+#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT) && \
+    !defined(NO_TLS) && \
+    (defined(WOLFSSL_SWDEV) || \
+     (!defined(WOLF_CRYPTO_CB_ONLY_RSA) && !defined(WOLF_CRYPTO_CB_ONLY_ECC)))
     func_args server_args;
 
     tcp_ready ready;
+#if !defined(NETOS)
     THREAD_TYPE serverThread;
 
+    int ret;
+#endif
+
 #ifndef USE_WINDOWS_API
-    char tempName[] = "/tmp/output-XXXXXX";
-    int len = 18;
-    int num = 6;
+    const char *tempDir = NULL;
+    char tempName[128];
+    int tempName_len;
+    int tempName_Xnum;
 #else
     char tempName[] = "fnXXXXXX";
-    int len = 8;
-    int num = 6;
+    const int tempName_len = 8;
+    const int tempName_Xnum = 6;
 #endif
 #ifdef HAVE_STACK_SIZE
     void *serverThreadStackContext = NULL;
 #endif
-    int ret;
+
+#ifndef USE_WINDOWS_API
+#ifdef XGETENV
+    tempDir = XGETENV("TMPDIR");
+    if (tempDir == NULL)
+#endif
+    {
+        tempDir = "/tmp";
+    }
+    XSTRLCPY(tempName, tempDir, sizeof(tempName));
+    XSTRLCAT(tempName, "/testsuite-output-XXXXXX", sizeof(tempName));
+    tempName_len = (int)XSTRLEN(tempName);
+    tempName_Xnum = 6;
+#endif /* !USE_WINDOWS_API */
 
 #ifdef HAVE_WNR
     if (wc_InitNetRandom(wnrConfig, NULL, 5000) != 0) {
@@ -145,6 +196,13 @@ int testsuite_test(int argc, char** argv)
     server_args.signal = &ready;
     InitTcpReady(&ready);
 
+#ifdef WOLFSSL_SWDEV
+    if (wc_SwDev_Init() != 0) {
+        printf("wc_SwDev_Init failed\n");
+        return EXIT_FAILURE;
+    }
+#endif
+
 #ifndef NO_CRYPT_TEST
     /* wc_ test */
     #ifdef HAVE_STACK_SIZE
@@ -161,8 +219,11 @@ int testsuite_test(int argc, char** argv)
     #else
         simple_test(&server_args);
     #endif
-    if (server_args.return_code != 0) return server_args.return_code;
+    if (server_args.return_code != 0)
+        return server_args.return_code;
 #if !defined(NETOS)
+    FreeTcpReady(&ready);
+    InitTcpReady(&ready);
     /* Echo input wolfSSL client server test */
     #ifdef HAVE_STACK_SIZE
         StackSizeCheck_launch(&server_args, echoserver_test, &serverThread,
@@ -172,7 +233,7 @@ int testsuite_test(int argc, char** argv)
     #endif
 
     /* Create unique file name */
-    outputName = mymktemp(tempName, len, num);
+    outputName = mymktemp(tempName, tempName_len, tempName_Xnum);
     if (outputName == NULL) {
         printf("Could not create unique file name");
         return EXIT_FAILURE;
@@ -195,6 +256,27 @@ int testsuite_test(int argc, char** argv)
         cleanup_output();
         return server_args.return_code;
     }
+
+#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT) && \
+    defined(HAVE_CRL) && defined(HAVE_CRL_MONITOR)
+    ret = test_crl_monitor();
+    if (ret != 0) {
+        cleanup_output();
+        return ret;
+    }
+#endif
+
+#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT) && \
+    !defined(NO_TLS) && !defined(NETOS) && defined(HAVE_OCSP) && \
+    defined(HAVE_OCSP_RESPONDER) && !defined(NO_FILESYSTEM) && \
+    !defined(NO_RSA) && defined(HAVE_CERTIFICATE_STATUS_REQUEST)
+    ret = test_ocsp_responder();
+    if (ret != 0) {
+        cleanup_output();
+        return ret;
+    }
+#endif
+
 #endif /* !NETOS */
 
     show_ciphers();
@@ -203,6 +285,10 @@ int testsuite_test(int argc, char** argv)
     ret = validate_cleanup_output();
     if (ret != 0)
         return EXIT_FAILURE;
+#endif
+
+#ifdef WOLFSSL_SWDEV
+    wc_SwDev_Cleanup();
 #endif
 
     wolfSSL_Cleanup();
@@ -227,7 +313,311 @@ int testsuite_test(int argc, char** argv)
     return EXIT_SUCCESS;
 }
 
-#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT)
+#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT) && \
+    defined(HAVE_CRL) && defined(HAVE_CRL_MONITOR)
+#define CRL_MONITOR_TEST_ROUNDS 6
+#define CRL_MONITOR_REM_FILE_ATTEMPTS 20
+
+static int test_crl_monitor(void)
+{
+    func_args server_args;
+    func_args client_args;
+    THREAD_TYPE serverThread;
+    tcp_ready ready;
+    char buf[128];
+    char tmpDir[16];
+    char rounds[4];
+    char portNum[8];
+    const char* serverArgv[] = {
+        "testsuite",
+        "-A", "certs/ca-cert.pem",
+        "--crl-dir", tmpDir,
+        "-C", rounds,
+        "--quieter",
+        "-x",
+        "-p", "0"
+    };
+    const char* clientArgv[] = {
+        "testsuite",
+        "-C",
+        "-c", "certs/server-cert.pem",
+        "-k", "certs/server-key.pem",
+        "--quieter",
+        "-H", "exitWithRet",
+        "-p", portNum
+    };
+    int ret = -1;
+    int i = -1, j;
+
+    XMEMSET(tmpDir, '\0', sizeof(tmpDir));
+
+    printf("\nRunning CRL monitor test\n");
+
+    (void)XSNPRINTF(rounds, sizeof(rounds), "%d", CRL_MONITOR_TEST_ROUNDS);
+
+    XMEMSET(&server_args, 0, sizeof(func_args));
+    XMEMSET(&client_args, 0, sizeof(func_args));
+
+    /* Create temp dir */
+    if (create_tmp_dir(tmpDir, sizeof(tmpDir) - 1) == NULL) {
+        fprintf(stderr, "Failed to create tmp dir");
+        goto cleanup;
+    }
+
+    server_args.argv = (char**)serverArgv;
+    server_args.argc = sizeof(serverArgv) / sizeof(*serverArgv);
+    client_args.signal = server_args.signal = &ready;
+    client_args.argv = (char**)clientArgv;
+    client_args.argc = sizeof(clientArgv) / sizeof(*clientArgv);
+
+    InitTcpReady(&ready);
+    start_thread(server_test, &server_args, &serverThread);
+    wait_tcp_ready(&server_args);
+    (void)XSNPRINTF(portNum, sizeof(portNum), "%d", server_args.signal->port);
+
+    for (i = 0; i < CRL_MONITOR_TEST_ROUNDS; i++) {
+        int expectFail;
+        if (i % 2 == 0) {
+            /* succeed on even rounds */
+            (void)XSNPRINTF(buf, sizeof(buf), "%s/%s", tmpDir, "crl.pem");
+            if (STAGE_FILE("certs/crl/crl.pem", buf) != 0) {
+                fprintf(stderr, "[%d] Failed to copy file to %s\n", i, buf);
+                goto cleanup;
+            }
+            (void)XSNPRINTF(buf, sizeof(buf), "%s/%s", tmpDir, "crl.revoked");
+            /* The monitor can be holding the file handle and this will cause
+             * the remove call to fail. Let's give the monitor a some time to
+             * finish up. */
+            for (j = 0; j < CRL_MONITOR_REM_FILE_ATTEMPTS; j++) {
+                /* i == 0 since there is nothing to delete in the first round */
+                if (i == 0 || rem_file(buf) == 0)
+                    break;
+                XSLEEP_MS(100);
+            }
+            if (j == CRL_MONITOR_REM_FILE_ATTEMPTS) {
+                fprintf(stderr, "[%d] Failed to remove file %s\n", i, buf);
+                goto cleanup;
+            }
+            expectFail = 0;
+        }
+        else {
+            /* fail on odd rounds */
+            (void)XSNPRINTF(buf, sizeof(buf), "%s/%s", tmpDir, "crl.revoked");
+            if (STAGE_FILE("certs/crl/crl.revoked", buf) != 0) {
+                fprintf(stderr, "[%d] Failed to copy file to %s\n", i, buf);
+                goto cleanup;
+            }
+            (void)XSNPRINTF(buf, sizeof(buf), "%s/%s", tmpDir, "crl.pem");
+            /* The monitor can be holding the file handle and this will cause
+             * the remove call to fail. Let's give the monitor a some time to
+             * finish up. */
+            for (j = 0; j < CRL_MONITOR_REM_FILE_ATTEMPTS; j++) {
+                if (rem_file(buf) == 0)
+                    break;
+                XSLEEP_MS(100);
+            }
+            if (j == CRL_MONITOR_REM_FILE_ATTEMPTS) {
+                fprintf(stderr, "[%d] Failed to remove file %s\n", i, buf);
+                goto cleanup;
+            }
+        #ifndef WOLFSSL_NO_CLIENT_AUTH
+            expectFail = 1;
+        #else
+            expectFail = 0;
+        #endif
+        }
+        /* Give server a moment to register the file change */
+        XSLEEP_MS(100);
+
+        client_args.return_code = 0;
+        client_test(&client_args);
+
+        if (!expectFail) {
+            if (client_args.return_code != 0) {
+                fprintf(stderr, "[%d] Incorrect return %d\n", i,
+                        client_args.return_code);
+                goto cleanup;
+            }
+        }
+        else {
+            if (client_args.return_code == 0) {
+                fprintf(stderr, "[%d] Expected failure\n", i);
+                goto cleanup;
+            }
+        }
+    }
+
+    join_thread(serverThread);
+    ret = 0;
+cleanup:
+    if (ret != 0 && i >= 0)
+        fprintf(stderr, "test_crl_monitor failed on iteration %d\n", i);
+    (void)XSNPRINTF(buf, sizeof(buf), "%s/%s", tmpDir, "crl.pem");
+    rem_file(buf);
+    (void)XSNPRINTF(buf, sizeof(buf), "%s/%s", tmpDir, "crl.revoked");
+    rem_file(buf);
+    (void)rem_dir(tmpDir);
+    return ret;
+}
+#endif
+
+#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT) && \
+    !defined(NO_TLS) && !defined(NETOS) && defined(HAVE_OCSP) && \
+    defined(HAVE_OCSP_RESPONDER) && !defined(NO_FILESYSTEM) && \
+    !defined(NO_RSA) && defined(HAVE_CERTIFICATE_STATUS_REQUEST)
+
+/* Run a single OCSP-responder-backed stapling test.
+ *   serverCert   - path to the TLS server certificate (chain file)
+ *   serverKey    - path to the TLS server private key
+ *   expectPass   - non-zero if the client handshake should succeed
+ * Returns 0 on success, non-zero on failure. */
+static int run_ocsp_responder_test_case(const char* serverCert,
+                                         const char* serverKey,
+                                         int expectPass)
+{
+    func_args respArgs;
+    func_args svrArgs;
+    func_args cliArgs;
+    THREAD_TYPE respThread;
+    THREAD_TYPE svrThread;
+    tcp_ready respReady;
+    tcp_ready svrReady;
+    /* Buffers for runtime-built argv entries */
+    char ocspUrl[64];
+    char svrPortStr[8];
+    /* argv arrays (non-const so they can be assigned to char**) */
+    char* respArgv[12];
+    char* svrArgv[15];
+    char* cliArgv[12];
+    int ret = -1;
+
+    /* OCSP responder argv */
+    respArgv[0]  = (char*)"ocsp_responder";
+    respArgv[1]  = (char*)"-p";  respArgv[2]  = (char*)"0";
+    respArgv[3]  = (char*)"-n";  respArgv[4]  = (char*)"1";
+    respArgv[5]  = (char*)"-c";
+    respArgv[6]  = (char*)"certs/ocsp/intermediate1-ca-cert.pem";
+    respArgv[7]  = (char*)"-k";
+    respArgv[8]  = (char*)"certs/ocsp/intermediate1-ca-key.pem";
+    respArgv[9]  = (char*)"-i";
+    respArgv[10] = (char*)"certs/ocsp/index-intermediate1-ca-issued-certs.txt";
+    respArgv[11] = NULL;
+
+    XMEMSET(&respArgs, 0, sizeof(respArgs));
+    InitTcpReady(&respReady);
+    respArgs.signal = &respReady;
+    respArgs.argc = 11;
+    respArgs.argv = respArgv;
+    start_thread(ocsp_responder_test, &respArgs, &respThread);
+    wait_tcp_ready(&respArgs);
+
+    /* Build OCSP URL override pointing at the dynamic responder port */
+    (void)XSNPRINTF(ocspUrl, sizeof(ocspUrl),
+                    "http://127.0.0.1:%d", (int)respReady.port);
+
+    /* TLS server argv */
+    svrArgv[0]  = (char*)"testsuite";
+    svrArgv[1]  = (char*)"-c";  svrArgv[2]  = (char*)serverCert;
+    svrArgv[3]  = (char*)"-k";  svrArgv[4]  = (char*)serverKey;
+    svrArgv[5]  = (char*)"-d";             /* no client cert required */
+    svrArgv[6]  = (char*)"-x";             /* runWithErrors: don't exit on SSL_accept fail */
+    svrArgv[7]  = (char*)"-C";  svrArgv[8]  = (char*)"1"; /* one connection */
+    svrArgv[9]  = (char*)"-O";  svrArgv[10] = ocspUrl;    /* OCSP override  */
+    svrArgv[11] = (char*)"--quieter";
+    svrArgv[12] = (char*)"-p";  svrArgv[13] = (char*)"0";
+    svrArgv[14] = NULL;
+
+    XMEMSET(&svrArgs, 0, sizeof(svrArgs));
+    InitTcpReady(&svrReady);
+    svrArgs.signal = &svrReady;
+    svrArgs.argc = 14;
+    svrArgs.argv = svrArgv;
+    start_thread(server_test, &svrArgs, &svrThread);
+    wait_tcp_ready(&svrArgs);
+
+    /* Build server port string now that it is bound */
+    (void)XSNPRINTF(svrPortStr, sizeof(svrPortStr), "%d",
+                    (int)svrArgs.signal->port);
+
+    /* TLS client argv */
+    cliArgv[0]  = (char*)"testsuite";
+    cliArgv[1]  = (char*)"-A";
+    cliArgv[2]  = (char*)"certs/ocsp/root-ca-cert.pem";
+    cliArgv[3]  = (char*)"-C";             /* disable CRL */
+    cliArgv[4]  = (char*)"-W";  cliArgv[5]  = (char*)"1"; /* OCSP stapling */
+    cliArgv[6]  = (char*)"-H";  cliArgv[7]  = (char*)"exitWithRet";
+    cliArgv[8]  = (char*)"--quieter";
+    cliArgv[9]  = (char*)"-p";  cliArgv[10] = svrPortStr;
+    cliArgv[11] = NULL;
+
+    XMEMSET(&cliArgs, 0, sizeof(cliArgs));
+    cliArgs.signal = &svrReady;
+    cliArgs.argc = 11;
+    cliArgs.argv = cliArgv;
+    client_test(&cliArgs);
+
+    join_thread(svrThread);
+    join_thread(respThread);
+    FreeTcpReady(&svrReady);
+    FreeTcpReady(&respReady);
+
+    if (expectPass) {
+        if (cliArgs.return_code != 0) {
+            fprintf(stderr, "OCSP stapling test: expected success, "
+                    "client returned %d\n", cliArgs.return_code);
+        }
+        else {
+            ret = 0;
+        }
+    }
+    else {
+        if (cliArgs.return_code == 0) {
+            fprintf(stderr, "OCSP stapling test: expected failure "
+                    "(revoked cert), but client returned 0\n");
+        }
+        else {
+            ret = 0;
+        }
+    }
+
+    return ret;
+}
+
+/* Test the OCSP responder example together with TLS OCSP stapling.
+ *
+ * Case 1: server cert is valid   -> client handshake must succeed.
+ * Case 2: server cert is revoked -> client handshake must fail.
+ */
+static int test_ocsp_responder(void)
+{
+    int ret;
+
+    printf("\nRunning OCSP responder test\n");
+
+    /* Test 1: valid certificate - connection should succeed */
+    ret = run_ocsp_responder_test_case("certs/ocsp/server1-cert.pem",
+                                       "certs/ocsp/server1-key.pem", 1);
+    if (ret != 0) {
+        fprintf(stderr, "OCSP responder test (good cert) failed\n");
+        return ret;
+    }
+
+    /* Test 2: revoked certificate - connection should be rejected */
+    ret = run_ocsp_responder_test_case("certs/ocsp/server2-cert.pem",
+                                       "certs/ocsp/server2-key.pem", 0);
+    if (ret != 0) {
+        fprintf(stderr, "OCSP responder test (revoked cert) failed\n");
+        return ret;
+    }
+
+    return 0;
+}
+#endif /* HAVE_OCSP && HAVE_OCSP_RESPONDER */
+
+#if !defined(NO_WOLFSSL_SERVER) && !defined(NO_WOLFSSL_CLIENT) && \
+    !defined(NO_TLS) && \
+   (defined(WOLFSSL_SWDEV) || \
+    (!defined(WOLF_CRYPTO_CB_ONLY_RSA) && !defined(WOLF_CRYPTO_CB_ONLY_ECC)))
 /* Perform a basic TLS handshake.
  *
  * First connection to echo a file.
@@ -241,7 +631,9 @@ static int test_tls(func_args* server_args)
 {
     func_args echo_args;
     char* myArgv[NUMARGS];
-    char arg[3][32];
+    char arg[3][128];
+
+    printf("\nRunning TLS test\n");
 
     /* Set up command line arguments for echoclient to send input file
      * and write echoed data to temporary output file. */
@@ -272,11 +664,6 @@ static int test_tls(func_args* server_args)
     if (echo_args.return_code != 0)
         return echo_args.return_code;
 
-#ifdef WOLFSSL_DTLS
-    /* Ensure server is ready for UDP data. */
-    wait_tcp_ready(server_args);
-#endif
-
     /* Next client connection - send quit to shutdown server. */
     echo_args.argc = 2;
     XSTRLCPY(arg[1], "quit", sizeof(arg[1]));
@@ -295,7 +682,7 @@ static int test_tls(func_args* server_args)
 }
 
 /* Show cipher suites available. */
-static void show_ciphers()
+static void show_ciphers(void)
 {
     char ciphers[WOLFSSL_CIPHER_LIST_MAX_SIZE];
     XMEMSET(ciphers, 0, sizeof(ciphers));
@@ -304,9 +691,13 @@ static void show_ciphers()
 }
 
 /* Cleanup temporary output file. */
-static void cleanup_output()
+static void cleanup_output(void)
 {
-    remove(outputName);
+    int ret = 0;
+    ret = remove(outputName);
+    if (ret < 0) {
+        fprintf(stderr, "remove(%s) failed: %d\n", outputName, ret);
+    }
 }
 
 /* Validate output equals input using a hash. Remove temporary output file.
@@ -314,7 +705,7 @@ static void cleanup_output()
  * @return  0 on success.
  * @return  1 on failure.
  */
-static int validate_cleanup_output()
+static int validate_cleanup_output(void)
 {
 #ifndef NO_SHA256
     byte input[WC_SHA256_DIGEST_SIZE];
@@ -354,6 +745,8 @@ static void simple_test(func_args* args)
     char *cliArgv[NUMARGS];
     char argvc[3][32];
 
+    printf("\nRunning simple test\n");
+
     for (i = 0; i < 9; i++)
         svrArgv[i] = argvs[i];
     for (i = 0; i < 3; i++)
@@ -382,7 +775,7 @@ static void simple_test(func_args* args)
 #ifndef USE_WINDOWS_API
     cliArgs.argc = NUMARGS;
     XSTRLCPY(argvc[1], "-p", sizeof(argvc[1]));
-    snprintf(argvc[2], sizeof(argvc[2]), "%d", (int)svrArgs.signal->port);
+    (void)snprintf(argvc[2], sizeof(argvc[2]), "%d", (int)svrArgs.signal->port);
 #else
     cliArgs.argc = 1;
 #endif
@@ -404,141 +797,11 @@ static void simple_test(func_args* args)
 }
 #endif /* !NO_WOLFSSL_SERVER && !NO_WOLFSSL_CLIENT */
 
-
-/* Wait for the server to be ready for a connection.
- *
- * @param [in] args  Object to send to thread.
- */
-void wait_tcp_ready(func_args* args)
-{
-#if defined(_POSIX_THREADS) && !defined(__MINGW32__)
-    pthread_mutex_lock(&args->signal->mutex);
-
-    if (!args->signal->ready)
-        pthread_cond_wait(&args->signal->cond, &args->signal->mutex);
-    args->signal->ready = 0; /* reset */
-
-    pthread_mutex_unlock(&args->signal->mutex);
-#elif defined(NETOS)
-    (void)tx_mutex_get(&args->signal->mutex, TX_WAIT_FOREVER);
-
-    /* TODO:
-     * if (!args->signal->ready)
-     *    pthread_cond_wait(&args->signal->cond, &args->signal->mutex);
-     * args->signal->ready = 0; */
-
-    (void)tx_mutex_put(&args->signal->mutex);
-
-#else
-    (void)args;
-#endif
-}
-
-
-/* Start a thread.
- *
- * @param [in]  fun     Function to executre in thread.
- * @param [in]  args    Object to send to function in thread.
- * @param [out] thread  Handle to thread.
- */
-void start_thread(THREAD_FUNC fun, func_args* args, THREAD_TYPE* thread)
-{
-#if defined(_POSIX_THREADS) && !defined(__MINGW32__)
-    pthread_create(thread, 0, fun, args);
-    return;
-#elif defined(WOLFSSL_TIRTOS)
-    /* Initialize the defaults and set the parameters. */
-    Task_Params taskParams;
-    Task_Params_init(&taskParams);
-    taskParams.arg0 = (UArg)args;
-    taskParams.stackSize = 65535;
-    *thread = Task_create((Task_FuncPtr)fun, &taskParams, NULL);
-    if (*thread == NULL) {
-        printf("Failed to create new Task\n");
-    }
-    Task_yield();
-#elif defined(NETOS)
-    /* This can be adjusted by defining in user_settings.h, will default to 65k
-     * in the event it is undefined */
-    #ifndef TESTSUITE_THREAD_STACK_SZ
-        #define TESTSUITE_THREAD_STACK_SZ 65535
-    #endif
-    int result;
-    static void * TestSuiteThreadStack = NULL;
-
-    /* Assume only one additional thread is created concurrently. */
-    if (TestSuiteThreadStack == NULL)
-    {
-        TestSuiteThreadStack = (void *)malloc(TESTSUITE_THREAD_STACK_SZ);
-        if (TestSuiteThreadStack == NULL)
-        {
-            printf ("Stack allocation failure.\n");
-            return;
-        }
-    }
-
-    memset (thread, 0, sizeof *thread);
-
-    /* first create the idle thread:
-     * ARGS:
-     * Param1: pointer to thread
-     * Param2: name
-     * Param3 and 4: entry function and input
-     * Param5: pointer to thread stack
-     * Param6: stack size
-     * Param7 and 8: priority level and preempt threshold
-     * Param9 and 10: time slice and auto-start indicator */
-    result = tx_thread_create(thread,
-                       "WolfSSL TestSuiteThread",
-                       (entry_functionType)fun, (ULONG)args,
-                       TestSuiteThreadStack,
-                       TESTSUITE_THREAD_STACK_SZ,
-                       2, 2,
-                       1, TX_AUTO_START);
-    if (result != TX_SUCCESS)
-    {
-        printf("Ethernet Bypass Application: failed to create idle thread!\n");
-    }
-
-#else
-    *thread = (THREAD_TYPE)_beginthreadex(0, 0, fun, args, 0, 0);
-#endif
-}
-
-
-/* Join thread to wait for completion.
- *
- * @param [in] thread  Handle to thread.
- */
-void join_thread(THREAD_TYPE thread)
-{
-#if defined(_POSIX_THREADS) && !defined(__MINGW32__)
-    pthread_join(thread, 0);
-#elif defined(WOLFSSL_TIRTOS)
-    while(1) {
-        if (Task_getMode(thread) == Task_Mode_TERMINATED) {
-            Task_sleep(5);
-            break;
-        }
-        Task_yield();
-    }
-#elif defined(NETOS)
-    /* TODO: */
-#else
-    int res = WaitForSingleObject((HANDLE)thread, INFINITE);
-    assert(res == WAIT_OBJECT_0);
-    res = CloseHandle((HANDLE)thread);
-    assert(res);
-    (void)res; /* Suppress un-used variable warning */
-#endif
-}
-
-
 #ifndef NO_SHA256
 /* Create SHA-256 hash of the file based on filename.
  *
  * @param [in]  file   Name of file.
- * @parma [out] check  Buffer to hold SHA-256 hash.
+ * @param [out] check  Buffer to hold SHA-256 hash.
  */
 void file_test(const char* file, byte* check)
 {
@@ -558,12 +821,19 @@ void file_test(const char* file, byte* check)
         return;
     }
     while( ( i = (int)fread(buf, 1, sizeof(buf), f )) > 0 ) {
-        ret = wc_Sha256Update(&sha256, buf, i);
+        if (ferror(f)) {
+            printf("I/O error reading %s\n", file);
+            fclose(f);
+            return;
+        }
+        ret = wc_Sha256Update(&sha256, buf, (word32)i);
         if (ret != 0) {
             printf("Can't wc_Sha256Update %d\n", ret);
             fclose(f);
             return;
         }
+        if (feof(f))
+            break;
     }
 
     ret = wc_Sha256Final(&sha256, shasum);
@@ -603,15 +873,23 @@ int main(int argc, char** argv)
     wolfSSL_Init();
     ChangeToWolfRoot();
 
+#ifdef WOLFSSL_SWDEV
+    if (wc_SwDev_Init() != 0) {
+        printf("wc_SwDev_Init failed\n");
+        return EXIT_FAILURE;
+    }
+#endif
     /* No TLS - only doing cryptographic algorithm testing. */
     wolfcrypt_test(&wolfcrypt_test_args);
+#ifdef WOLFSSL_SWDEV
+    wc_SwDev_Cleanup();
+#endif
     if (wolfcrypt_test_args.return_code != 0)
         return wolfcrypt_test_args.return_code;
 
     wolfSSL_Cleanup();
     printf("\nAll tests passed!\n");
-
-    EXIT_TEST(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
 
 

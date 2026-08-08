@@ -1,12 +1,12 @@
 /* wolfcaam.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -28,11 +28,30 @@
 /* include for porting layer */
 #ifdef WOLFSSL_QNX_CAAM
     #include <wolfssl/wolfcrypt/port/caam/wolfcaam_qnx.h>
+#elif defined(WOLFSSL_SECO_CAAM)
+    #include <wolfssl/wolfcrypt/port/caam/wolfcaam_seco.h>
+#elif defined(WOLFSSL_IMXRT1170_CAAM)
+    #include <wolfssl/wolfcrypt/port/caam/wolfcaam_fsl_nxp.h>
 #endif
 
 #if defined(WOLFSSL_IMX6_CAAM) || defined(WOLFSSL_IMX6_CAAM_RNG) || \
-    defined(WOLFSSL_QNX_CAAM)
+    defined(WOLFSSL_QNX_CAAM) || defined(WOLFSSL_SECO_CAAM) || \
+        defined(WOLFSSL_IMXRT1170_CAAM)
 
+
+/* unique devId for CAAM use on crypto callbacks */
+#ifndef WOLFSSL_CAAM_DEVID
+    #define WOLFSSL_CAAM_DEVID 7
+#endif
+
+/* black key stored in secure memory location */
+#define CAAM_BLACK_KEY_SM 1
+
+/* black key encrypted with AES-CCM (has MAC) */
+#define CAAM_BLACK_KEY_CCM 2
+
+/* black key encrypted with AES-ECB (no MAC) */
+#define CAAM_BLACK_KEY_ECB 3
 
 #if defined(__INTEGRITY) || defined(INTEGRITY)
     #include <INTEGRITY.h>
@@ -56,9 +75,9 @@ WOLFSSL_LOCAL int caamWriteToPartition(CAAM_ADDRESS addr, const unsigned char* i
 WOLFSSL_LOCAL int caamReadPartition(CAAM_ADDRESS addr, unsigned char* out, int outSz);
 
 WOLFSSL_API int wc_caamOpenBlob(byte* data, word32 dataSz, byte* out,
-	word32* outSz);
+        word32* outSz);
 WOLFSSL_API int wc_caamCreateBlob(byte* data, word32 dataSz, byte* out,
-	word32* outSz);
+        word32* outSz);
 
 WOLFSSL_API int wc_caamOpenBlob_ex(byte* data, word32 dataSz, byte* out,
         word32* outSz, int type, byte* mod, word32 modSz);
@@ -72,11 +91,13 @@ WOLFSSL_API int wc_caamCoverKey(byte* in, word32 inSz, byte* out, word32* outSz,
 #define WC_CAAM_MAC_SZ 16
 #define WC_CAAM_BLOB_RED   1
 #define WC_CAAM_BLOB_BLACK 2
-#define WC_CAAM_RED_KEYMOD_SZ 8
+#define WC_CAAM_RED_KEYMOD_SZ 16
 #define WC_CAAM_BLACK_KEYMOD_SZ 16
+#define WC_SM_BLOB_KEYMOD_SZ 8
 #define WC_CAAM_MAX_ENTROPY 44
 
-#ifndef WOLFSSL_QNX_CAAM
+#if !defined(WOLFSSL_QNX_CAAM) && !defined(WOLFSSL_SECO_CAAM) && \
+        !defined(WOLFSSL_IMXRT1170_CAAM)
     WOLFSSL_API int wc_caamSetResource(IODevice ioDev);
     #ifndef WC_CAAM_READ
         #define WC_CAAM_READ(reg)      wc_caamReadRegister((reg))
@@ -94,6 +115,7 @@ WOLFSSL_API int wc_caamCoverKey(byte* in, word32 inSz, byte* out, word32* outSz,
 #define CAAM_AESOFB 0x00100400
 #define CAAM_CMAC   0x00100600
 #define CAAM_AESCCM 0x00100800
+#define CAAM_AESGCM 0x00100900
 
 #define CAAM_MD5    0x00400000
 #define CAAM_SHA    0x00410000

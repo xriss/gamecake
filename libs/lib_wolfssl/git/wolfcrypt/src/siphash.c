@@ -1,12 +1,12 @@
 /* siphash.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -19,16 +19,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
+#include <wolfssl/wolfcrypt/libwolfssl_sources.h>
 
-#ifdef HAVE_CONFIG_H
-    #include <config.h>
+#if defined(WC_SIPHASH_NO_ASM) && !defined(WOLFSSL_NO_ASM)
+    #define WOLFSSL_NO_ASM
 #endif
 
-#include <wolfssl/wolfcrypt/settings.h>
-#include <wolfssl/wolfcrypt/types.h>
-
 #include <wolfssl/wolfcrypt/siphash.h>
-#include <wolfssl/wolfcrypt/error-crypt.h>
 
 #ifdef NO_INLINE
     #include <wolfssl/wolfcrypt/misc.h>
@@ -69,28 +66,28 @@
  * @param [in] a  Little-endian byte array.
  * @return 64-bit number.
  */
-#define GET_U64(a)      (*(word64*)(a))
+#define GET_U64(a)      readUnalignedWord64(a)
 /**
  * Decode little-endian byte array to 32-bit number.
  *
  * @param [in] a  Little-endian byte array.
  * @return 32-bit number.
  */
-#define GET_U32(a)      (*(word32*)(a))
+#define GET_U32(a)      readUnalignedWord32(a)
 /**
  * Decode little-endian byte array to 16-bit number.
  *
  * @param [in] a  Little-endian byte array.
  * @return 16-bit number.
  */
-#define GET_U16(a)      (*(word16*)(a))
+#define GET_U16(a)      readUnalignedWord16(a)
 /**
- * Encode 64-bit nuumber to a little-endian byte array.
+ * Encode 64-bit number to a little-endian byte array.
  *
  * @param [out] a  Byte array to write into.
  * @param [in]  n  Number to encode.
  */
-#define SET_U64(a, n)   ((*(word64*)(a)) = n)
+#define SET_U64(a, n)   writeUnalignedWord64(a, n)
 #else
 /**
  * Decode little-endian byte array to 64-bit number.
@@ -112,7 +109,7 @@
  * @param [in] a  Little-endian byte array.
  * @return 32-bit number.
  */
-#define GET_U32(a)      (((word64)((a)[3]) << 24) |     \
+#define GET_U32(a)      (((word32)((a)[3]) << 24) |     \
                          ((word32)((a)[2]) << 16) |     \
                          ((word32)((a)[1]) <<  8) |     \
                          ((word32)((a)[0])      ))
@@ -125,7 +122,7 @@
 #define GET_U16(a)      (((word16)((a)[1]) <<  8) |     \
                          ((word16)((a)[0])      ))
 /**
- * Encode 64-bit nuumber to a little-endian byte array.
+ * Encode 64-bit number to a little-endian byte array.
  *
  * @param [out] a  Byte array to write into.
  * @param [in]  n  Number to encode.
@@ -165,15 +162,15 @@ int wc_InitSipHash(SipHash* sipHash, const unsigned char* key,
         word64 k1 = GET_U64(key + 8);
 
         /* Initialize state with key. */
-        sipHash->v[0] = 0x736f6d6570736575UL;
+        sipHash->v[0] = W64LIT(0x736f6d6570736575);
         if (outSz == SIPHASH_MAC_SIZE_8) {
-            sipHash->v[1] = 0x646f72616e646f6dUL;
+            sipHash->v[1] = W64LIT(0x646f72616e646f6d);
         }
         else {
-            sipHash->v[1] = 0x646f72616e646f83UL;
+            sipHash->v[1] = W64LIT(0x646f72616e646f83);
         }
-        sipHash->v[2] = 0x6c7967656e657261UL;
-        sipHash->v[3] = 0x7465646279746573UL;
+        sipHash->v[2] = W64LIT(0x6c7967656e657261);
+        sipHash->v[3] = W64LIT(0x7465646279746573);
 
         sipHash->v[0] ^= k0;
         sipHash->v[1] ^= k1;
@@ -256,18 +253,19 @@ int wc_SipHashUpdate(SipHash* sipHash, const unsigned char* in, word32 inSz)
     if ((ret == 0) && (inSz > 0)) {
         /* Add to cache if already started. */
         if (sipHash->cacheCnt > 0) {
-            byte len = SIPHASH_BLOCK_SIZE - sipHash->cacheCnt;
+            byte len = (byte)(SIPHASH_BLOCK_SIZE - sipHash->cacheCnt);
             if (len > inSz) {
-                len = inSz;
+                len = (byte)inSz;
             }
             XMEMCPY(sipHash->cache + sipHash->cacheCnt, in, len);
             in += len;
             inSz -= len;
-            sipHash->cacheCnt += len;
+            sipHash->cacheCnt = (byte)(sipHash->cacheCnt + len);
 
             if (sipHash->cacheCnt == SIPHASH_BLOCK_SIZE) {
                 /* Compress the block from the cache. */
                 SipHashCompress(sipHash, sipHash->cache);
+                sipHash->inCnt += SIPHASH_BLOCK_SIZE;
                 sipHash->cacheCnt = 0;
             }
         }
@@ -284,7 +282,7 @@ int wc_SipHashUpdate(SipHash* sipHash, const unsigned char* in, word32 inSz)
         if (inSz > 0) {
             /* Cache remaining message bytes less than a block. */
             XMEMCPY(sipHash->cache, in, inSz);
-            sipHash->cacheCnt = inSz;
+            sipHash->cacheCnt = (byte)inSz;
         }
     }
 
@@ -314,7 +312,7 @@ static WC_INLINE void SipHashOut(SipHash* sipHash, byte* out)
  *
  * @param [in, out] sipHash  SipHash object.
  * @param [out]     out      Buffer to place MAC into.
- * @param [in]      outSz    Size of ouput MAC. 8 or 16 only.
+ * @param [in]      outSz    Size of output MAC. 8 or 16 only.
  * @return  BAD_FUNC_ARG when sipHash or out is NULL.
  * @return  BAD_FUNC_ARG when outSz is not the same as initialized value.
  * @return  0 on success.
@@ -329,8 +327,8 @@ int wc_SipHashFinal(SipHash* sipHash, unsigned char* out, unsigned char outSz)
     }
 
     if (ret == 0) {
-        /* Put int remaining cached message bytes. */
-        XMEMSET(sipHash->cache + sipHash->cacheCnt, 0, 7 - sipHash->cacheCnt);
+        /* Put in remaining cached message bytes. */
+        XMEMSET(sipHash->cache + sipHash->cacheCnt, 0, 7U - sipHash->cacheCnt);
         sipHash->cache[7] = (byte)(sipHash->inCnt + sipHash->cacheCnt);
 
         SipHashCompress(sipHash, sipHash->cache);
@@ -352,7 +350,7 @@ int wc_SipHashFinal(SipHash* sipHash, unsigned char* out, unsigned char outSz)
     return ret;
 }
 
-#if defined(__GNUC__) && defined(__x86_64__) && \
+#if !defined(WOLFSSL_NO_ASM) && defined(__GNUC__) && defined(__x86_64__) && \
     (WOLFSSL_SIPHASH_CROUNDS == 1 || WOLFSSL_SIPHASH_CROUNDS == 2) && \
     (WOLFSSL_SIPHASH_DROUNDS == 2 || WOLFSSL_SIPHASH_DROUNDS == 4)
 
@@ -392,7 +390,7 @@ int wc_SipHashFinal(SipHash* sipHash, unsigned char* out, unsigned char outSz)
  * @param [in]      in       Input message.
  * @param [in]      inSz     Size of input message.
  * @param [out]     out      Buffer to place MAC into.
- * @param [in]      outSz    Size of ouput MAC. 8 or 16 only.
+ * @param [in]      outSz    Size of output MAC. 8 or 16 only.
  * @return  BAD_FUNC_ARG when key or out is NULL.
  * @return  BAD_FUNC_ARG when in is NULL and inSz is not zero.
  * @return  BAD_FUNC_ARG when outSz is neither 8 nor 16.
@@ -401,51 +399,51 @@ int wc_SipHashFinal(SipHash* sipHash, unsigned char* out, unsigned char outSz)
 int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
     unsigned char* out, unsigned char outSz)
 {
+    word64 v0 = 0x736f6d6570736575L;
+    word64 v1 = 0x646f72616e646f6dL;
+    word64 v2 = 0x6c7967656e657261L;
+    word64 v3 = 0x7465646279746573L;
+    word64 k0;
+    word64 k1;
+
     if ((key == NULL) || ((in == NULL) && (inSz != 0)) || (out == NULL) ||
             ((outSz != SIPHASH_MAC_SIZE_8) && (outSz != SIPHASH_MAC_SIZE_16))) {
         return BAD_FUNC_ARG;
     }
 
-    /* v0=%r8, v1=%r9, v2=%r10, v3=%r11 */
+    k0 = GET_U64(key);
+    k1 = GET_U64(key + 8);
     __asm__ __volatile__ (
-        "movq   (%[key]), %%r12\n\t"
-        "movq   8(%[key]), %%r13\n\t"
-
-        "movabsq        $0x736f6d6570736575, %%r8\n\t"
-        "movabsq        $0x646f72616e646f6d, %%r9\n\t"
-        "movabsq        $0x6c7967656e657261, %%r10\n\t"
-        "movabsq        $0x7465646279746573, %%r11\n\t"
-
-        "xorq   %%r12, %%r8\n\t"
-        "xorq   %%r13, %%r9\n\t"
-        "xorq   %%r12, %%r10\n\t"
-        "xorq   %%r13, %%r11\n\t"
+        "xorq   %[k0], %[v0]\n\t"
+        "xorq   %[k1], %[v1]\n\t"
+        "xorq   %[k0], %[v2]\n\t"
+        "xorq   %[k1], %[v3]\n\t"
 
         "cmp    $8, %[outSz]\n\t"
-        "mov    %[inSz], %%r13d\n\t"
+        "mov    %[inSz], %k[k1]\n\t"
         "je     L_siphash_8_top\n\t"
-        "xorq   $0xee, %%r9\n\t"
+        "xorq   $0xee, %[v1]\n\t"
         "L_siphash_8_top:\n\t"
 
         "sub    $8, %[inSz]\n\t"
         "jb     L_siphash_done_input_8\n\t"
         "L_siphash_input:\n\t"
-        "movq   (%[in]), %%r12\n\t"
+        "movq   (%[in]), %[k0]\n\t"
         "addq   $8, %[in]\n\t"
-        "xorq   %%r12, %%r11\n\t"
+        "xorq   %[k0], %[v3]\n\t"
 #if WOLFSSL_SIPHASH_CROUNDS == 1
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #elif WOLFSSL_SIPHASH_CROUNDS == 2
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #endif
-        "xorq   %%r12, %%r8\n\t"
+        "xorq   %[k0], %[v0]\n\t"
         "sub    $8, %[inSz]\n\t"
         "jge    L_siphash_input\n\t"
         "L_siphash_done_input_8:\n\t"
         "add    $8, %[inSz]\n\t"
 
-        "shlq   $56, %%r13\n\t"
+        "shlq   $56, %[k1]\n\t"
         "cmp    $0, %[inSz]\n\t"
         "je     L_siphash_last_done\n\t"
         "cmp    $4, %[inSz]\n\t"
@@ -453,27 +451,34 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
 
         "cmp    $7, %[inSz]\n\t"
         "jl     L_siphash_n7\n\t"
-        "movzxb 6(%[in]), %%r12\n\t"
-        "shlq   $48, %%r12\n\t"
-        "orq    %%r12, %%r13\n\t"
+        "movzbq 6(%[in]), %[k0]\n\t"
+        "shlq   $48, %[k0]\n\t"
+        "orq    %[k0], %[k1]\n\t"
         "L_siphash_n7:\n\t"
 
         "cmp    $6, %[inSz]\n\t"
         "jl     L_siphash_n6\n\t"
-        "movzxb 5(%[in]), %%r12\n\t"
-        "shlq   $40, %%r12\n\t"
-        "orq    %%r12, %%r13\n\t"
+        "movzbq 5(%[in]), %[k0]\n\t"
+        "shlq   $40, %[k0]\n\t"
+        "orq    %[k0], %[k1]\n\t"
         "L_siphash_n6:\n\t"
 
+        : [in] "+r" (in), [inSz] "+r" (inSz), [k0] "+r" (k0), [k1] "+r" (k1),
+          [v0] "+r" (v0), [v1] "+r" (v1), [v2] "+r" (v2), [v3] "+r" (v3)
+        : [out] "r" (out) , [outSz] "r" (outSz)
+        : "memory"
+    );
+
+    __asm__ __volatile__ (
         "cmp    $5, %[inSz]\n\t"
         "jl     L_siphash_n5\n\t"
-        "movzxb 4(%[in]), %%r12\n\t"
-        "shlq   $32, %%r12\n\t"
-        "orq    %%r12, %%r13\n\t"
+        "movzbq 4(%[in]), %[k0]\n\t"
+        "shlq   $32, %[k0]\n\t"
+        "orq    %[k0], %[k1]\n\t"
         "L_siphash_n5:\n\t"
 
-        "mov    (%[in]), %%r12d\n\t"
-        "orq    %%r12, %%r13\n\t"
+        "mov    (%[in]), %k[k0]\n\t"
+        "orq    %[k0], %[k1]\n\t"
         "jmp    L_siphash_last_done\n\t"
 
         "L_siphash_last_lt4:\n\t"
@@ -483,90 +488,98 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
 
         "cmp    $3, %[inSz]\n\t"
         "jl     L_siphash_n3\n\t"
-        "movzxb 2(%[in]), %%r12\n\t"
-        "shlq   $16, %%r12\n\t"
-        "orq    %%r12, %%r13\n\t"
+        "movzbq 2(%[in]), %[k0]\n\t"
+        "shlq   $16, %[k0]\n\t"
+        "orq    %[k0], %[k1]\n\t"
         "L_siphash_n3:\n\t"
 
-        "movw   (%[in]), %%r12w\n\t"
-        "or     %%r12w, %%r13w\n\t"
+        "movw   (%[in]), %w[k0]\n\t"
+        "or     %w[k0], %w[k1]\n\t"
         "jmp    L_siphash_last_done\n\t"
 
         "L_siphash_last_1:\n\t"
-        "movb   (%[in]), %%r12b\n\t"
-        "or     %%r12b, %%r13b\n\t"
+        "movb   (%[in]), %b[k0]\n\t"
+        "or     %b[k0], %b[k1]\n\t"
 
         "L_siphash_last_done:\n\t"
 
-        "xorq   %%r13, %%r11\n\t"
+        "xorq   %[k1], %[v3]\n\t"
 #if WOLFSSL_SIPHASH_CROUNDS == 1
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #elif WOLFSSL_SIPHASH_CROUNDS == 2
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #endif
-        "xorq   %%r13, %%r8\n\t"
+        "xorq   %[k1], %[v0]\n\t"
 
+        : [in] "+r" (in), [inSz] "+r" (inSz), [k0] "+r" (k0), [k1] "+r" (k1),
+          [v0] "+r" (v0), [v1] "+r" (v1), [v2] "+r" (v2), [v3] "+r" (v3)
+        : [out] "r" (out) , [outSz] "r" (outSz)
+        : "memory"
+    );
+
+    __asm__ __volatile__ (
         "cmp    $8, %[outSz]\n\t"
         "je     L_siphash_8_end\n\t"
 
-        "xor    $0xee, %%r10b\n\t"
+        "xor    $0xee, %b[v2]\n\t"
 #if WOLFSSL_SIPHASH_DROUNDS == 2
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #elif WOLFSSL_SIPHASH_DROUNDS == 4
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #endif
-        "movq   %%r8, %%r12\n\t"
-        "xorq   %%r9, %%r12\n\t"
-        "xorq   %%r10, %%r12\n\t"
-        "xorq   %%r11, %%r12\n\t"
-        "movq   %%r12, (%[out])\n\t"
+        "movq   %[v0], %[k0]\n\t"
+        "xorq   %[v1], %[k0]\n\t"
+        "xorq   %[v2], %[k0]\n\t"
+        "xorq   %[v3], %[k0]\n\t"
+        "movq   %[k0], (%[out])\n\t"
 
-        "xor    $0xdd, %%r9b\n\t"
+        "xor    $0xdd, %b[v1]\n\t"
 #if WOLFSSL_SIPHASH_DROUNDS == 2
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_LAST_ROUND(%%r8, %%r9, %%r10, %%r11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_LAST_ROUND(%[v0], %[v1], %[v2], %[v3])
 #elif WOLFSSL_SIPHASH_DROUNDS == 4
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_LAST_ROUND(%%r8, %%r9, %%r10, %%r11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_LAST_ROUND(%[v0], %[v1], %[v2], %[v3])
 #endif
-        "xorq   %%r11, %%r9\n\t"
-        "xorq   %%r10, %%r9\n\t"
-        "movq   %%r9, 8(%[out])\n\t"
+        "xorq   %[v3], %[v1]\n\t"
+        "xorq   %[v2], %[v1]\n\t"
+        "movq   %[v1], 8(%[out])\n\t"
         "jmp    L_siphash_done\n\t"
 
         "L_siphash_8_end:\n\t"
-        "xor    $0xff, %%r10b\n\t"
+        "xor    $0xff, %b[v2]\n\t"
 #if WOLFSSL_SIPHASH_DROUNDS == 2
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_LAST_ROUND(%%r8, %%r9, %%r10, %%r11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_LAST_ROUND(%[v0], %[v1], %[v2], %[v3])
 #elif WOLFSSL_SIPHASH_DROUNDS == 4
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_ROUND(%%r8, %%r9, %%r10, %%r11)
-        SIPHASH_LAST_ROUND(%%r8, %%r9, %%r10, %%r11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_LAST_ROUND(%[v0], %[v1], %[v2], %[v3])
 #endif
-        "xorq   %%r11, %%r9\n\t"
-        "xorq   %%r10, %%r9\n\t"
-        "movq   %%r9, (%[out])\n\t"
+        "xorq   %[v3], %[v1]\n\t"
+        "xorq   %[v2], %[v1]\n\t"
+        "movq   %[v1], (%[out])\n\t"
 
         "L_siphash_done:\n\t"
 
-    : [in] "+r" (in), [inSz] "+r" (inSz)
-    : [key] "r" (key), [out] "r" (out) , [outSz] "r" (outSz)
-    : "memory", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13"
+        : [in] "+r" (in), [inSz] "+r" (inSz), [k0] "+r" (k0), [k1] "+r" (k1),
+          [v0] "+r" (v0), [v1] "+r" (v1), [v2] "+r" (v2), [v3] "+r" (v3)
+        : [out] "r" (out) , [outSz] "r" (outSz)
+        : "memory"
     );
 
     return 0;
 }
 
-#elif defined(__GNUC__) && defined(__aarch64__) && \
+#elif defined(WOLFSSL_ARMASM) && defined(__GNUC__) && defined(__aarch64__) && \
     (WOLFSSL_SIPHASH_CROUNDS == 1 || WOLFSSL_SIPHASH_CROUNDS == 2) && \
     (WOLFSSL_SIPHASH_DROUNDS == 2 || WOLFSSL_SIPHASH_DROUNDS == 4)
 
@@ -606,7 +619,7 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
  * @param [in]      in       Input message.
  * @param [in]      inSz     Size of input message.
  * @param [out]     out      Buffer to place MAC into.
- * @param [in]      outSz    Size of ouput MAC. 8 or 16 only.
+ * @param [in]      outSz    Size of output MAC. 8 or 16 only.
  * @return  BAD_FUNC_ARG when key or out is NULL.
  * @return  BAD_FUNC_ARG when in is NULL and inSz is not zero.
  * @return  BAD_FUNC_ARG when outSz is not 8 nor 16.
@@ -615,62 +628,51 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
 int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
     unsigned char* out, unsigned char outSz)
 {
+    word64 v0 = 0x736f6d6570736575L;
+    word64 v1 = 0x646f72616e646f6dL;
+    word64 v2 = 0x6c7967656e657261L;
+    word64 v3 = 0x7465646279746573L;
+    word64 k0;
+    word64 k1;
+
     if ((key == NULL) || ((in == NULL) && (inSz != 0)) || (out == NULL) ||
             ((outSz != SIPHASH_MAC_SIZE_8) && (outSz != SIPHASH_MAC_SIZE_16))) {
         return BAD_FUNC_ARG;
     }
 
-    /* v0=x8, v1=x9, v2=x10, v3=x11 */
+    k0 = GET_U64(key + 0);
+    k1 = GET_U64(key + 8);
     __asm__ __volatile__ (
-        "ldp    x12, x13, [%[key]]\n\t"
+        "eor    %[v0], %[v0], %[k0]\n\t"
+        "eor    %[v1], %[v1], %[k1]\n\t"
+        "eor    %[v2], %[v2], %[k0]\n\t"
+        "eor    %[v3], %[v3], %[k1]\n\t"
 
-        "mov    x8, #0x6575\n\t"
-        "movk   x8, #0x7073, lsl #16\n\t"
-        "movk   x8, #0x6d65, lsl #32\n\t"
-        "movk   x8, #0x736f, lsl #48\n\t"
-        "mov    x9, #0x6f6d\n\t"
-        "movk   x9, #0x6e64, lsl #16\n\t"
-        "movk   x9, #0x7261, lsl #32\n\t"
-        "movk   x9, #0x646f, lsl #48\n\t"
-        "mov    x10, #0x7261\n\t"
-        "movk   x10, #0x6e65, lsl #16\n\t"
-        "movk   x10, #0x6765, lsl #32\n\t"
-        "movk   x10, #0x6c79, lsl #48\n\t"
-        "mov    x11, #0x6573\n\t"
-        "movk   x11, #0x7974, lsl #16\n\t"
-        "movk   x11, #0x6462, lsl #32\n\t"
-        "movk   x11, #0x7465, lsl #48\n\t"
-
-        "eor    x8, x8, x12\n\t"
-        "eor    x9, x9, x13\n\t"
-        "eor    x10, x10, x12\n\t"
-        "eor    x11, x11, x13\n\t"
-
-        "mov    w13, %w[inSz]\n\t"
+        "mov    %w[k1], %w[inSz]\n\t"
         "cmp    %w[outSz], #8\n\t"
         "b.eq   L_siphash_8_top\n\t"
-        "mov    w12, #0xee\n\t"
-        "eor    x9, x9, x12\n\t"
+        "mov    %w[k0], #0xee\n\t"
+        "eor    %[v1], %[v1], %[k0]\n\t"
         "L_siphash_8_top:\n\t"
 
         "subs   %w[inSz], %w[inSz], #8\n\t"
         "b.mi   L_siphash_done_input_8\n\t"
         "L_siphash_input:\n\t"
-        "ldr    x12, [%[in]], #8\n\t"
-        "eor    x11, x11, x12\n\t"
+        "ldr    %[k0], [%[in]], #8\n\t"
+        "eor    %[v3], %[v3], %[k0]\n\t"
 #if WOLFSSL_SIPHASH_CROUNDS == 1
-        SIPHASH_ROUND(x8, x9, x10, x11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #elif WOLFSSL_SIPHASH_CROUNDS == 2
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_ROUND(x8, x9, x10, x11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #endif
-        "eor    x8, x8, x12\n\t"
+        "eor    %[v0], %[v0], %[k0]\n\t"
         "subs   %w[inSz], %w[inSz], #8\n\t"
         "b.ge   L_siphash_input\n\t"
         "L_siphash_done_input_8:\n\t"
         "add    %w[inSz], %w[inSz], #8\n\t"
 
-        "lsl    x13, x13, #56\n\t"
+        "lsl    %[k1], %[k1], #56\n\t"
         "cmp    %w[inSz], #0\n\t"
         "b.eq   L_siphash_last_done\n\t"
         "cmp    %w[inSz], #4\n\t"
@@ -678,24 +680,24 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
 
         "cmp    %w[inSz], #7\n\t"
         "b.lt   L_siphash_n7\n\t"
-        "ldrb   w12, [%[in], 6]\n\t"
-        "orr    x13, x13, x12, lsl 48\n\t"
+        "ldrb   %w[k0], [%[in], 6]\n\t"
+        "orr    %[k1], %[k1], %[k0], lsl 48\n\t"
         "L_siphash_n7:\n\t"
 
         "cmp    %w[inSz], #6\n\t"
         "b.lt   L_siphash_n6\n\t"
-        "ldrb   w12, [%[in], 5]\n\t"
-        "orr    x13, x13, x12, lsl 40\n\t"
+        "ldrb   %w[k0], [%[in], 5]\n\t"
+        "orr    %[k1], %[k1], %[k0], lsl 40\n\t"
         "L_siphash_n6:\n\t"
 
         "cmp    %w[inSz], #5\n\t"
         "b.lt   L_siphash_n5\n\t"
-        "ldrb   w12, [%[in], 4]\n\t"
-        "orr    x13, x13, x12, lsl 32\n\t"
+        "ldrb   %w[k0], [%[in], 4]\n\t"
+        "orr    %[k1], %[k1], %[k0], lsl 32\n\t"
         "L_siphash_n5:\n\t"
 
-        "ldr    w12, [%[in]]\n\t"
-        "orr    x13, x13, x12\n\t"
+        "ldr    %w[k0], [%[in]]\n\t"
+        "orr    %[k1], %[k1], %[k0]\n\t"
         "b      L_siphash_last_done\n\t"
 
         "L_siphash_last_lt4:\n\t"
@@ -705,84 +707,93 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
 
         "cmp    %w[inSz], #3\n\t"
         "b.lt   L_siphash_n3\n\t"
-        "ldrb   w12, [%[in], 2]\n\t"
-        "orr    x13, x13, x12, lsl 16\n\t"
+        "ldrb   %w[k0], [%[in], 2]\n\t"
+        "orr    %[k1], %[k1], %[k0], lsl 16\n\t"
         "L_siphash_n3:\n\t"
 
-        "ldrh   w12, [%[in]]\n\t"
-        "orr    x13, x13, x12\n\t"
+        "ldrh   %w[k0], [%[in]]\n\t"
+        "orr    %[k1], %[k1], %[k0]\n\t"
         "b      L_siphash_last_done\n\t"
 
         "L_siphash_last_1:\n\t"
-        "ldrb   w12, [%[in]]\n\t"
-        "orr    x13, x13, x12\n\t"
+        "ldrb   %w[k0], [%[in]]\n\t"
+        "orr    %[k1], %[k1], %[k0]\n\t"
 
         "L_siphash_last_done:\n\t"
 
-        "eor    x11, x11, x13\n\t"
+        "eor    %[v3], %[v3], %[k1]\n\t"
 #if WOLFSSL_SIPHASH_CROUNDS == 1
-        SIPHASH_ROUND(x8, x9, x10, x11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #elif WOLFSSL_SIPHASH_CROUNDS == 2
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_ROUND(x8, x9, x10, x11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #endif
-        "eor    x8, x8, x13\n\t"
+        "eor    %[v0], %[v0], %[k1]\n\t"
 
         "cmp    %w[outSz], #8\n\t"
         "b.eq   L_siphash_8_end\n\t"
 
-        "mov    w13, #0xee\n\t"
-        "eor    x10, x10, x13\n\t"
-#if WOLFSSL_SIPHASH_DROUNDS == 2
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_ROUND(x8, x9, x10, x11)
-#elif WOLFSSL_SIPHASH_DROUNDS == 4
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_ROUND(x8, x9, x10, x11)
-#endif
-        "eor    x12, x8, x9\n\t"
-        "eor    x13, x10, x11\n\t"
-        "eor    x12, x12, x13\n\t"
+        : [in] "+r" (in), [inSz] "+r" (inSz), [k0] "+r" (k0), [k1] "+r" (k1),
+          [v0] "+r" (v0), [v1] "+r" (v1), [v2] "+r" (v2), [v3] "+r" (v3)
+        : [key] "r" (key), [out] "r" (out) , [outSz] "r" (outSz)
+        : "memory"
+    );
 
-        "mov    w13, #0xdd\n\t"
-        "eor    x9, x9, x13\n\t"
+    __asm__ __volatile__ (
+
+        "mov    %w[k1], #0xee\n\t"
+        "eor    %[v2], %[v2], %[k1]\n\t"
 #if WOLFSSL_SIPHASH_DROUNDS == 2
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_LAST_ROUND(x8, x9, x10, x11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #elif WOLFSSL_SIPHASH_DROUNDS == 4
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_LAST_ROUND(x8, x9, x10, x11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
 #endif
-        "eor    x13, x11, x9\n\t"
-        "eor    x13, x13, x10\n\t"
-        "stp    x12, x13, [%[out]]\n\t"
+        "eor    %[k0], %[v0], %[v1]\n\t"
+        "eor    %[k1], %[v2], %[v3]\n\t"
+        "eor    %[k0], %[k0], %[k1]\n\t"
+
+        "mov    %w[k1], #0xdd\n\t"
+        "eor    %[v1], %[v1], %[k1]\n\t"
+#if WOLFSSL_SIPHASH_DROUNDS == 2
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_LAST_ROUND(%[v0], %[v1], %[v2], %[v3])
+#elif WOLFSSL_SIPHASH_DROUNDS == 4
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_LAST_ROUND(%[v0], %[v1], %[v2], %[v3])
+#endif
+        "eor    %[k1], %[v3], %[v1]\n\t"
+        "eor    %[k1], %[k1], %[v2]\n\t"
+        "stp    %[k0], %[k1], [%[out]]\n\t"
         "b      L_siphash_done\n\t"
 
         "L_siphash_8_end:\n\t"
-        "mov    w13, #0xff\n\t"
-        "eor    x10, x10, x13\n\t"
+        "mov    %w[k1], #0xff\n\t"
+        "eor    %[v2], %[v2], %[k1]\n\t"
 #if WOLFSSL_SIPHASH_DROUNDS == 2
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_LAST_ROUND(x8, x9, x10, x11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_LAST_ROUND(%[v0], %[v1], %[v2], %[v3])
 #elif WOLFSSL_SIPHASH_DROUNDS == 4
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_ROUND(x8, x9, x10, x11)
-        SIPHASH_LAST_ROUND(x8, x9, x10, x11)
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_ROUND(%[v0], %[v1], %[v2], %[v3])
+        SIPHASH_LAST_ROUND(%[v0], %[v1], %[v2], %[v3])
 #endif
-        "eor    x13, x11, x9\n\t"
-        "eor    x13, x13, x10\n\t"
-        "str    x13, [%[out]]\n\t"
+        "eor    %[k1], %[v3], %[v1]\n\t"
+        "eor    %[k1], %[k1], %[v2]\n\t"
+        "str    %[k1], [%[out]]\n\t"
 
         "L_siphash_done:\n\t"
 
-    : [in] "+r" (in), [inSz] "+r" (inSz)
-    : [key] "r" (key), [out] "r" (out) , [outSz] "r" (outSz)
-    : "memory", "x8", "x9", "x10", "x11", "x12", "x13"
+        : [in] "+r" (in), [inSz] "+r" (inSz), [k0] "+r" (k0), [k1] "+r" (k1),
+          [v0] "+r" (v0), [v1] "+r" (v1), [v2] "+r" (v2), [v3] "+r" (v3)
+        : [key] "r" (key), [out] "r" (out) , [outSz] "r" (outSz)
+        : "memory"
     );
 
     return 0;
@@ -791,29 +802,29 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
 #else
 
 #define SipRoundV(v0, v1, v2, v3)   \
-    v0 += v1;                       \
-    v2 += v3;                       \
-    v1 = rotlFixed64(v1, 13);       \
-    v3 = rotlFixed64(v3, 16);       \
-    v1 ^= v0;                       \
-    v3 ^= v2;                       \
-    v0 = rotlFixed64(v0, 32);       \
-    v2 += v1;                       \
-    v0 += v3;                       \
-    v1 = rotlFixed64(v1, 17);       \
-    v3 = rotlFixed64(v3, 21);       \
-    v1 ^= v2;                       \
-    v3 ^= v0;                       \
-    v2 = rotlFixed64(v2, 32);
+    (v0) += (v1);                   \
+    (v2) += (v3);                   \
+    (v1) = rotlFixed64(v1, 13);     \
+    (v3) = rotlFixed64(v3, 16);     \
+    (v1) ^= (v0);                   \
+    (v3) ^= (v2);                   \
+    (v0) = rotlFixed64(v0, 32);     \
+    (v2) += (v1);                   \
+    (v0) += (v3);                   \
+    (v1) = rotlFixed64(v1, 17);     \
+    (v3) = rotlFixed64(v3, 21);     \
+    (v1) ^= (v2);                   \
+    (v3) ^= (v0);                   \
+    (v2) = rotlFixed64(v2, 32);
 
 #define SipHashCompressV(v0, v1, v2, v3, m)             \
     do {                                                \
         int i;                                          \
-        v3 ^= m;                                        \
+        (v3) ^= (m);                                    \
         for (i = 0; i < WOLFSSL_SIPHASH_CROUNDS; i++) { \
             SipRoundV(v0, v1, v2, v3);                  \
         }                                               \
-        v0 ^= m;                                        \
+        (v0) ^= (m);                                    \
     }                                                   \
     while (0)
 
@@ -825,7 +836,7 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
         for (i = 0; i < WOLFSSL_SIPHASH_DROUNDS; i++) { \
             SipRoundV(v0, v1, v2, v3);                  \
         }                                               \
-        n = v0 ^ v1 ^ v2 ^ v3;                          \
+        n = (v0) ^ (v1) ^ (v2) ^ (v3);                  \
         SET_U64(out, n);                                \
     }                                                   \
     while (0)
@@ -837,7 +848,7 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
  * @param [in]      in       Input message.
  * @param [in]      inSz     Size of input message.
  * @param [out]     out      Buffer to place MAC into.
- * @param [in]      outSz    Size of ouput MAC. 8 or 16 only.
+ * @param [in]      outSz    Size of output MAC. 8 or 16 only.
  * @return  BAD_FUNC_ARG when key or out is NULL.
  * @return  BAD_FUNC_ARG when in is NULL and inSz is not zero.
  * @return  BAD_FUNC_ARG when outSz is not 8 nor 16.
@@ -860,10 +871,10 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
         word64 b = (word64)((word64)inSz << 56);
 
         /* Initialize state with key. */
-        v0 = 0x736f6d6570736575UL;
-        v1 = 0x646f72616e646f6dUL;
-        v2 = 0x6c7967656e657261UL;
-        v3 = 0x7465646279746573UL;
+        v0 = 0x736f6d6570736575ULL;
+        v1 = 0x646f72616e646f6dULL;
+        v2 = 0x6c7967656e657261ULL;
+        v3 = 0x7465646279746573ULL;
 
         if (outSz == SIPHASH_MAC_SIZE_16) {
             v1 ^= 0xee;
@@ -886,19 +897,19 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
         switch (inSz) {
             case 7:
                 b |= (word64)in[6] << 48;
-                /* fall-through */
+                FALL_THROUGH;
             case 6:
                 b |= (word64)in[5] << 40;
-                /* fall-through */
+                FALL_THROUGH;
             case 5:
                 b |= (word64)in[4] << 32;
-                /* fall-through */
+                FALL_THROUGH;
             case 4:
                 b |= (word64)GET_U32(in);
                 break;
             case 3:
                 b |= (word64)in[2] << 16;
-                /* fall-through */
+                FALL_THROUGH;
             case 2:
                 b |= (word64)GET_U16(in);
                 break;

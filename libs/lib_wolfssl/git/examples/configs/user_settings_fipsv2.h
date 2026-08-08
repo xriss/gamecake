@@ -1,12 +1,12 @@
 /* user_settings_fipsv2.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -103,13 +103,13 @@ extern "C" {
 #define NO_MD4
 #define NO_PSK
 #define NO_PWDBASED
-#define NO_RABBIT
 #define NO_RC4
 #define WOLFSSL_NO_SHAKE256
-
+#define NO_RABBIT
+#define NO_HC128
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* WOLFSSL_OPTIONS_H */
+#endif /* WOLFSSL_USER_SETTINGS_H */

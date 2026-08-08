@@ -1,12 +1,12 @@
 /* time-STM32F2xx.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -32,7 +32,7 @@
  *----------------------------------------------------------------------------*/
 #include "stm32f2xx.h"
 
-#define assert_param(a)
+#define assert_param(a) /* null expansion */
 
 #define RTC_RSF_MASK         ((uint32_t)0xFFFFFF5F)
 #define SYNCHRO_TIMEOUT      ((uint32_t) 0x00008000)

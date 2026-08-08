@@ -3,21 +3,21 @@
 # Create configure and makefile stuff...
 #
 
-# Git hooks should come before autoreconf.
-if [ -d .git ]; then
-    if [ ! -d .git/hooks ]; then
-	mkdir .git/hooks || exit $?
-    fi
-    if [ ! -e .git/hooks/pre-commit ]; then
-	ln -s ../../pre-commit.sh .git/hooks/pre-commit || exit $?
-    fi
-    if [ ! -e .git/hooks/pre-push ]; then
-	ln -s ../../pre-push.sh .git/hooks/pre-push || exit $?
+# Check environment
+if [ -n "$WSL_DISTRO_NAME" ]; then
+    # we found a non-blank WSL environment distro name
+    current_path="$(pwd)"
+    pattern="/mnt/?"
+    if [ "$(echo "$current_path" | grep -E "^$pattern")" ]; then
+        # if we are in WSL and shared Windows file system, 'ln' does not work.
+        no_links=true
+    else
+        no_links=
     fi
 fi
 
 # if and as needed, create empty dummy versions of various files, mostly
-# associated with fips/self-test and asynccrypt:
+# associated with fips/self-test:
 
 for dir in \
         ./wolfssl/wolfcrypt/port/intel \
@@ -30,22 +30,12 @@ done
 
 for file in \
         ./wolfssl/options.h \
-        ./ctaocrypt/src/fips.c \
-        ./ctaocrypt/src/fips_test.c \
         ./wolfcrypt/src/fips.c \
         ./wolfcrypt/src/fips_test.c \
         ./wolfcrypt/src/wolfcrypt_first.c \
         ./wolfcrypt/src/wolfcrypt_last.c \
         ./wolfssl/wolfcrypt/fips.h \
-        ./wolfcrypt/src/selftest.c \
-        ./wolfcrypt/src/async.c \
-        ./wolfssl/wolfcrypt/async.h \
-        ./wolfcrypt/src/port/intel/quickassist.c \
-        ./wolfcrypt/src/port/intel/quickassist_mem.c \
-        ./wolfcrypt/src/port/cavium/cavium_nitrox.c \
-        ./wolfssl/wolfcrypt/port/intel/quickassist.h \
-        ./wolfssl/wolfcrypt/port/intel/quickassist_mem.h \
-        ./wolfssl/wolfcrypt/port/cavium/cavium_nitrox.h
+        ./wolfcrypt/src/selftest.c
 do
     if [ ! -e "$file" ]; then
         > "$file" || exit $?

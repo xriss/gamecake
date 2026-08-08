@@ -1,12 +1,12 @@
 /* sha3.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -27,6 +27,7 @@
 
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/sha3.h>
 
 #ifdef WOLFSSL_PREFIX
 #include "prefix_sha.h"
@@ -41,16 +42,21 @@
  * to Sha3 is expected to also be 16 byte aligned addresses.  */
 struct WOLFSSL_SHA3_CTX {
     /* big enough to hold wolfcrypt Sha3, but check on init */
+#ifdef WOLFSSL_SHA3
+    ALIGN16 void* holder[sizeof(wc_Sha3)];
+#else
     ALIGN16 void* holder[(424 + WC_ASYNC_DEV_SIZE) / sizeof(void*)];
+#endif
 };
 
 #ifndef WOLFSSL_NOSHA3_224
 typedef struct WOLFSSL_SHA3_CTX WOLFSSL_SHA3_224_CTX;
 
-WOLFSSL_API int wolfSSL_SHA3_224_Init(WOLFSSL_SHA3_224_CTX*);
-WOLFSSL_API int wolfSSL_SHA3_224_Update(WOLFSSL_SHA3_224_CTX*, const void*,
-                                     unsigned long);
-WOLFSSL_API int wolfSSL_SHA3_224_Final(unsigned char*, WOLFSSL_SHA3_224_CTX*);
+WOLFSSL_API int wolfSSL_SHA3_224_Init(WOLFSSL_SHA3_224_CTX* sha);
+WOLFSSL_API int wolfSSL_SHA3_224_Update(WOLFSSL_SHA3_224_CTX* sha, const void* input,
+                           unsigned long sz);
+WOLFSSL_API int wolfSSL_SHA3_224_Final(unsigned char* output,
+                           WOLFSSL_SHA3_224_CTX* sha);
 
 enum {
     SHA3_224_DIGEST_LENGTH = 28
@@ -71,10 +77,11 @@ typedef WOLFSSL_SHA3_224_CTX SHA3_224_CTX;
 typedef struct WOLFSSL_SHA3_CTX WOLFSSL_SHA3_256_CTX;
 
 
-WOLFSSL_API int wolfSSL_SHA3_256_Init(WOLFSSL_SHA3_256_CTX*);
-WOLFSSL_API int wolfSSL_SHA3_256_Update(WOLFSSL_SHA3_256_CTX*, const void*,
-                                     unsigned long);
-WOLFSSL_API int wolfSSL_SHA3_256_Final(unsigned char*, WOLFSSL_SHA3_256_CTX*);
+WOLFSSL_API int wolfSSL_SHA3_256_Init(WOLFSSL_SHA3_256_CTX* sha);
+WOLFSSL_API int wolfSSL_SHA3_256_Update(WOLFSSL_SHA3_256_CTX* sha,
+                                        const void* input, unsigned long sz);
+WOLFSSL_API int wolfSSL_SHA3_256_Final(unsigned char* output,
+                                       WOLFSSL_SHA3_256_CTX* sha);
 
 enum {
     SHA3_256_DIGEST_LENGTH = 32
@@ -94,10 +101,11 @@ typedef WOLFSSL_SHA3_256_CTX SHA3_256_CTX;
 
 typedef struct WOLFSSL_SHA3_CTX WOLFSSL_SHA3_384_CTX;
 
-WOLFSSL_API int wolfSSL_SHA3_384_Init(WOLFSSL_SHA3_384_CTX*);
-WOLFSSL_API int wolfSSL_SHA3_384_Update(WOLFSSL_SHA3_384_CTX*, const void*,
-                                         unsigned long);
-WOLFSSL_API int wolfSSL_SHA3_384_Final(unsigned char*, WOLFSSL_SHA3_384_CTX*);
+WOLFSSL_API int wolfSSL_SHA3_384_Init(WOLFSSL_SHA3_384_CTX* sha);
+WOLFSSL_API int wolfSSL_SHA3_384_Update(WOLFSSL_SHA3_384_CTX* sha,
+                                        const void* input, unsigned long sz);
+WOLFSSL_API int wolfSSL_SHA3_384_Final(unsigned char* output,
+                                       WOLFSSL_SHA3_384_CTX* sha);
 
 enum {
     SHA3_384_DIGEST_LENGTH = 48
@@ -117,10 +125,11 @@ typedef WOLFSSL_SHA3_384_CTX SHA3_384_CTX;
 
 typedef struct WOLFSSL_SHA3_CTX WOLFSSL_SHA3_512_CTX;
 
-WOLFSSL_API int wolfSSL_SHA3_512_Init(WOLFSSL_SHA3_512_CTX*);
-WOLFSSL_API int wolfSSL_SHA3_512_Update(WOLFSSL_SHA3_512_CTX*, const void*,
-                                         unsigned long);
-WOLFSSL_API int wolfSSL_SHA3_512_Final(unsigned char*, WOLFSSL_SHA3_512_CTX*);
+WOLFSSL_API int wolfSSL_SHA3_512_Init(WOLFSSL_SHA3_512_CTX* sha);
+WOLFSSL_API int wolfSSL_SHA3_512_Update(WOLFSSL_SHA3_512_CTX* sha,
+                                        const void* input, unsigned long sz);
+WOLFSSL_API int wolfSSL_SHA3_512_Final(unsigned char* output,
+                                       WOLFSSL_SHA3_512_CTX* sha);
 
 enum {
     SHA3_512_DIGEST_LENGTH = 64

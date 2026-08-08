@@ -1,9 +1,21 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
+# timeout(1) is GNU coreutils and absent on macOS; where it's missing, run the
+# command unbounded (the flaky hang this guards against is Linux-only CI).
+if ! command -v timeout >/dev/null 2>&1; then
+    timeout() { while [ "${1:-}" = "-s" ] || [ "${1:-}" = "-k" ]; do shift 2; done; shift; "$@"; }
+fi
+
 
 #resume.test
 
 # if we can, isolate the network namespace to eliminate port collisions.
-if [ "${AM_BWRAPPED-}" != "yes" ]; then
+if [[ -n "$NETWORK_UNSHARE_HELPER" ]]; then
+     if [[ -z "$NETWORK_UNSHARE_HELPER_CALLED" ]]; then
+         export NETWORK_UNSHARE_HELPER_CALLED=yes
+         exec "$NETWORK_UNSHARE_HELPER" "$0" "$@" || exit $?
+     fi
+elif [ "${AM_BWRAPPED-}" != "yes" ]; then
     bwrap_path="$(command -v bwrap)"
     if [ -n "$bwrap_path" ]; then
         export AM_BWRAPPED=yes
@@ -39,8 +51,10 @@ remove_ready_file() {
 do_cleanup() {
     echo "in cleanup"
 
-    if  [ $server_pid != $no_pid ]
+    if [ $server_pid != $no_pid ] && kill -0 $server_pid 2>&-
     then
+        # sleep to give sanitizers time to dump backtraces.
+        sleep 1
         echo "killing server"
         kill -9 $server_pid
     fi
@@ -50,7 +64,7 @@ do_cleanup() {
 do_trap() {
     echo "got trap"
     do_cleanup
-    exit -1
+    exit 1
 }
 
 do_test() {
@@ -69,10 +83,11 @@ do_test() {
     esac
 
     remove_ready_file
-    echo "./examples/server/server -r -R "$ready_file" -p $resume_port"
-    ./examples/server/server -r -R "$ready_file" -p $resume_port &
+    echo "./examples/server/server -r -R \"$ready_file\" -p $resume_port"
+    timeout -s KILL 2m ./examples/server/server -r -R "$ready_file" -p $resume_port &
     server_pid=$!
 
+    counter=0
     while [ ! -s "$ready_file" -a "$counter" -lt 20 ]; do
         echo -e "waiting for ready file..."
         sleep 0.1

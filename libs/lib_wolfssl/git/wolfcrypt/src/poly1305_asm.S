@@ -1,12 +1,12 @@
-/* poly1305_asm
- *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+/* poly1305_asm.S */
+/*
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -19,23 +19,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
+#define _WC_BUILDING_POLY1305_ASM_S
+
+#include <wolfssl/wolfcrypt/libwolfssl_sources_asm.h>
+
 #ifndef HAVE_INTEL_AVX1
 #define HAVE_INTEL_AVX1
 #endif /* HAVE_INTEL_AVX1 */
 #ifndef NO_AVX2_SUPPORT
+#ifndef HAVE_INTEL_AVX2
 #define HAVE_INTEL_AVX2
+#endif /* HAVE_INTEL_AVX2 */
 #endif /* NO_AVX2_SUPPORT */
+#ifndef NO_VAES_SUPPORT
+#ifndef HAVE_INTEL_VAES
+#define HAVE_INTEL_VAES
+#endif /* HAVE_INTEL_VAES */
+#endif /* NO_VAES_SUPPORT */
+#ifndef NO_AVX512_SUPPORT
+#ifndef HAVE_INTEL_AVX512
+#define HAVE_INTEL_AVX512
+#endif /* HAVE_INTEL_AVX512 */
+#endif /* NO_AVX512_SUPPORT */
 
+#ifdef WOLFSSL_X86_64_BUILD
 #ifdef HAVE_INTEL_AVX1
 #ifndef __APPLE__
 .text
 .globl	poly1305_setkey_avx
+WC_ASM_ATT_HIDDEN(poly1305_setkey_avx)
 .type	poly1305_setkey_avx,@function
 .align	16
 poly1305_setkey_avx:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_setkey_avx
+WC_ASM_ATT_HIDDEN(_poly1305_setkey_avx)
 .p2align	4
 _poly1305_setkey_avx:
 #endif /* __APPLE__ */
@@ -90,12 +109,14 @@ _poly1305_setkey_avx:
 #ifndef __APPLE__
 .text
 .globl	poly1305_block_avx
+WC_ASM_ATT_HIDDEN(poly1305_block_avx)
 .type	poly1305_block_avx,@function
 .align	16
 poly1305_block_avx:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_block_avx
+WC_ASM_ATT_HIDDEN(_poly1305_block_avx)
 .p2align	4
 _poly1305_block_avx:
 #endif /* __APPLE__ */
@@ -174,12 +195,14 @@ _poly1305_block_avx:
 #ifndef __APPLE__
 .text
 .globl	poly1305_blocks_avx
+WC_ASM_ATT_HIDDEN(poly1305_blocks_avx)
 .type	poly1305_blocks_avx,@function
 .align	16
 poly1305_blocks_avx:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_blocks_avx
+WC_ASM_ATT_HIDDEN(_poly1305_blocks_avx)
 .p2align	4
 _poly1305_blocks_avx:
 #endif /* __APPLE__ */
@@ -262,12 +285,14 @@ L_poly1305_avx_blocks_start:
 #ifndef __APPLE__
 .text
 .globl	poly1305_final_avx
+WC_ASM_ATT_HIDDEN(poly1305_final_avx)
 .type	poly1305_final_avx,@function
 .align	16
 poly1305_final_avx:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_final_avx
+WC_ASM_ATT_HIDDEN(_poly1305_final_avx)
 .p2align	4
 _poly1305_final_avx:
 #endif /* __APPLE__ */
@@ -287,11 +312,13 @@ L_poly1305_avx_final_cmp_rem:
         jl	L_poly1305_avx_final_zero_rem
         movb	$0x00, 616(%rdi)
         leaq	480(%rdi), %rsi
+        subq	$8, %rsp
 #ifndef __APPLE__
         callq	poly1305_block_avx@plt
 #else
         callq	_poly1305_block_avx
 #endif /* __APPLE__ */
+        addq	$8, %rsp
 L_poly1305_avx_final_no_more:
         movq	24(%rdi), %rax
         movq	32(%rdi), %rdx
@@ -304,7 +331,7 @@ L_poly1305_avx_final_no_more:
         movq	%rcx, %r8
         andq	$3, %rcx
         shrq	$2, %r8
-        #   Multily by 5
+        #   Multiply by 5
         leaq	0(%r8,%r8,4), %r8
         addq	%r8, %rax
         adcq	$0x00, %rdx
@@ -345,12 +372,14 @@ L_poly1305_avx_final_no_more:
 #ifndef __APPLE__
 .text
 .globl	poly1305_calc_powers_avx2
+WC_ASM_ATT_HIDDEN(poly1305_calc_powers_avx2)
 .type	poly1305_calc_powers_avx2,@function
 .align	16
 poly1305_calc_powers_avx2:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_calc_powers_avx2
+WC_ASM_ATT_HIDDEN(_poly1305_calc_powers_avx2)
 .p2align	4
 _poly1305_calc_powers_avx2:
 #endif /* __APPLE__ */
@@ -482,7 +511,6 @@ _poly1305_calc_powers_avx2:
         # Reduce 260-bit to 130-bit
         movq	%r15, %rax
         movq	%rsi, %rdx
-        movq	%rbx, %rbx
         andq	$-4, %rax
         andq	$3, %r15
         addq	%rax, %r13
@@ -613,20 +641,24 @@ _poly1305_calc_powers_avx2:
 #ifndef __APPLE__
 .text
 .globl	poly1305_setkey_avx2
+WC_ASM_ATT_HIDDEN(poly1305_setkey_avx2)
 .type	poly1305_setkey_avx2,@function
 .align	16
 poly1305_setkey_avx2:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_setkey_avx2
+WC_ASM_ATT_HIDDEN(_poly1305_setkey_avx2)
 .p2align	4
 _poly1305_setkey_avx2:
 #endif /* __APPLE__ */
+        subq	$8, %rsp
 #ifndef __APPLE__
         callq	poly1305_setkey_avx@plt
 #else
         callq	_poly1305_setkey_avx
 #endif /* __APPLE__ */
+        addq	$8, %rsp
         vpxor	%ymm0, %ymm0, %ymm0
         vmovdqu	%ymm0, 64(%rdi)
         vmovdqu	%ymm0, 96(%rdi)
@@ -650,8 +682,8 @@ _poly1305_setkey_avx2:
 .p2align	5
 #endif /* __APPLE__ */
 L_poly1305_avx2_blocks_mask:
-.quad	0x3ffffff, 0x3ffffff
-.quad	0x3ffffff, 0x3ffffff
+.quad	0x0000000003ffffff,0x0000000003ffffff
+.quad	0x0000000003ffffff,0x0000000003ffffff
 #ifndef __APPLE__
 .data
 #else
@@ -663,23 +695,29 @@ L_poly1305_avx2_blocks_mask:
 .p2align	5
 #endif /* __APPLE__ */
 L_poly1305_avx2_blocks_hibit:
-.quad	0x1000000, 0x1000000
-.quad	0x1000000, 0x1000000
+.quad	0x0000000001000000,0x0000000001000000
+.quad	0x0000000001000000,0x0000000001000000
 #ifndef __APPLE__
 .text
 .globl	poly1305_blocks_avx2
+WC_ASM_ATT_HIDDEN(poly1305_blocks_avx2)
 .type	poly1305_blocks_avx2,@function
 .align	16
 poly1305_blocks_avx2:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_blocks_avx2
+WC_ASM_ATT_HIDDEN(_poly1305_blocks_avx2)
 .p2align	4
 _poly1305_blocks_avx2:
 #endif /* __APPLE__ */
         pushq	%r12
         pushq	%rbx
-        subq	$0x140, %rsp
+        pushq	%r13
+        pushq	%r14
+        subq	$0x148, %rsp
+        leaq	L_poly1305_avx2_blocks_mask(%rip), %r13
+        leaq	L_poly1305_avx2_blocks_hibit(%rip), %r14
         movq	%rsp, %rcx
         andq	$-32, %rcx
         addq	$32, %rcx
@@ -700,11 +738,11 @@ _poly1305_blocks_avx2:
         vpunpckhdq	%ymm15, %ymm1, %ymm1
         vpunpckldq	%ymm15, %ymm3, %ymm2
         vpunpckhdq	%ymm15, %ymm3, %ymm3
-        vmovdqu	L_poly1305_avx2_blocks_hibit(%rip), %ymm4
+        vmovdqu	(%r14), %ymm4
         vpsllq	$6, %ymm1, %ymm1
         vpsllq	$12, %ymm2, %ymm2
         vpsllq	$18, %ymm3, %ymm3
-        vmovdqu	L_poly1305_avx2_blocks_mask(%rip), %ymm14
+        vmovdqu	(%r13), %ymm14
         # Reduce, in place, the message data
         vpsrlq	$26, %ymm0, %ymm10
         vpsrlq	$26, %ymm3, %ymm11
@@ -791,7 +829,7 @@ L_poly1305_avx2_blocks_mul_5:
         vmovdqa	%ymm7, 64(%rcx)
         vmovdqa	%ymm8, 96(%rcx)
         vmovdqa	%ymm9, 128(%rcx)
-        vmovdqu	L_poly1305_avx2_blocks_mask(%rip), %ymm14
+        vmovdqu	(%r13), %ymm14
         # If not finished then loop over data
         cmpb	$0x01, 616(%rdi)
         jne	L_poly1305_avx2_blocks_start
@@ -902,7 +940,7 @@ L_poly1305_avx2_blocks_start:
         vpunpckhdq	%ymm15, %ymm6, %ymm6
         vpunpckldq	%ymm15, %ymm8, %ymm7
         vpunpckhdq	%ymm15, %ymm8, %ymm8
-        vmovdqu	L_poly1305_avx2_blocks_hibit(%rip), %ymm9
+        vmovdqu	(%r14), %ymm9
         vpsllq	$6, %ymm6, %ymm6
         vpsllq	$12, %ymm7, %ymm7
         vpsllq	$18, %ymm8, %ymm8
@@ -1018,7 +1056,10 @@ L_poly1305_avx2_blocks_end_calc:
         movq	%rcx, 40(%rdi)
 L_poly1305_avx2_blocks_complete:
         movb	$0x01, 617(%rdi)
-        addq	$0x140, %rsp
+        vzeroupper
+        addq	$0x148, %rsp
+        popq	%r14
+        popq	%r13
         popq	%rbx
         popq	%r12
         repz retq
@@ -1028,12 +1069,14 @@ L_poly1305_avx2_blocks_complete:
 #ifndef __APPLE__
 .text
 .globl	poly1305_final_avx2
+WC_ASM_ATT_HIDDEN(poly1305_final_avx2)
 .type	poly1305_final_avx2,@function
 .align	16
 poly1305_final_avx2:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_final_avx2
+WC_ASM_ATT_HIDDEN(_poly1305_final_avx2)
 .p2align	4
 _poly1305_final_avx2:
 #endif /* __APPLE__ */
@@ -1079,13 +1122,15 @@ L_poly1305_avx2_final_start_copy:
         incb	%cl
         incb	%dl
 L_poly1305_avx2_final_cmp_copy:
-        cmp	%rcx, %rax
+        cmpb	%cl, %al
         jne	L_poly1305_avx2_final_start_copy
+        subq	$8, %rsp
 #ifndef __APPLE__
         callq	poly1305_final_avx@plt
 #else
         callq	_poly1305_final_avx
 #endif /* __APPLE__ */
+        addq	$8, %rsp
         vpxor	%ymm0, %ymm0, %ymm0
         vmovdqu	%ymm0, 64(%rdi)
         vmovdqu	%ymm0, 96(%rdi)
@@ -1098,11 +1143,13 @@ L_poly1305_avx2_final_cmp_copy:
         vmovdqu	%ymm0, 320(%rdi)
         movq	$0x00, 608(%rdi)
         movw	$0x00, 616(%rdi)
+        vzeroupper
         repz retq
 #ifndef __APPLE__
 .size	poly1305_final_avx2,.-poly1305_final_avx2
 #endif /* __APPLE__ */
 #endif /* HAVE_INTEL_AVX2 */
+#endif /* WOLFSSL_X86_64_BUILD */
 
 #if defined(__linux__) && defined(__ELF__)
 .section	.note.GNU-stack,"",%progbits

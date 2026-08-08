@@ -6,6 +6,7 @@
     \defgroup Camellia Algorithms - Camellia
     \defgroup ChaCha Algorithms - ChaCha
     \defgroup ChaCha20Poly1305 Algorithms - ChaCha20_Poly1305
+    \defgroup CMAC Algorithm - CMAC
     \defgroup Crypto Callbacks - CryptoCb
     \defgroup Curve25519 Algorithms - Curve25519
     \defgroup Curve448 Algorithms - Curve448
@@ -14,6 +15,91 @@
     \defgroup ECC Algorithms - ECC
     \defgroup ED25519 Algorithms - ED25519
     \defgroup ED448 Algorithms - ED448
+    \defgroup Falcon Algorithms - Falcon
+    Falcon is a quantum-resistant lattice-based digital signature scheme
+    (NTRU / fast Fourier sampling). It has not been standardized by NIST yet;
+    because the algorithm is not yet standardized and its API name is subject
+    to change, wolfCrypt gates it behind --enable-experimental, and the
+    wc_falcon_* / falcon_key spelling is expected to follow the standardized
+    name once it is final. Two parameter sets are supported, selected with
+    wc_falcon_set_level(): level 1 (Falcon-512) and level 5 (Falcon-1024).
+    See <wolfssl/wolfcrypt/falcon.h>.
+    \defgroup ML_DSA Algorithms - ML-DSA (FIPS 204)
+    ML-DSA (Module-Lattice-based Digital Signature Algorithm) is a
+    quantum-resistant digital signature scheme standardized by NIST as
+    FIPS 204. The pre-standardization name was Dilithium; legacy
+    Dilithium type and macro names remain as aliases for unmigrated
+    consumer code (see <wolfssl/wolfcrypt/dilithium.h>).
+
+    ML-DSA defines three parameter sets identified by NIST security
+    category: ML-DSA-44 (level 2), ML-DSA-65 (level 3) and ML-DSA-87
+    (level 5). All three are supported by the same wc_MlDsaKey object;
+    the parameter set is selected with wc_MlDsaKey_SetParams().
+
+    \defgroup ML_KEM Algorithms - ML-KEM (FIPS 203)
+    ML-KEM (Module-Lattice-based Key Encapsulation Mechanism) is a
+    quantum-resistant key encapsulation mechanism standardized by NIST
+    as FIPS 203. The pre-standardization name was Kyber; legacy Kyber
+    type and macro names remain as aliases for unmigrated consumer
+    code.
+
+    ML-KEM defines three parameter sets: ML-KEM-512 (NIST level 1),
+    ML-KEM-768 (level 3) and ML-KEM-1024 (level 5). The variant is
+    selected when the key is initialized via wc_MlKemKey_Init() or
+    wc_MlKemKey_New().
+
+    \defgroup FRODO_KEM Algorithms - FrodoKEM
+    FrodoKEM is a conservative, unstructured-lattice (plain LWE) key
+    encapsulation mechanism. This is an experimental reference
+    implementation following the ISO/CFRG (salted) FrodoKEM and the
+    ephemeral eFrodoKEM (salt-less) variants. Three parameter sets are
+    provided - FrodoKEM-640 (NIST level 1), FrodoKEM-976 (level 3) and
+    FrodoKEM-1344 (level 5) - each with either SHAKE-128 or AES-128
+    generation of the public matrix A. The variant is selected by the
+    key type (a base parameter set optionally OR'd with FRODOKEM_AES
+    and/or FRODOKEM_EPHEMERAL) when the key is initialized via
+    wc_FrodoKemKey_Init() or wc_FrodoKemKey_New().
+
+    \defgroup SLH_DSA Algorithms - SLH-DSA (FIPS 205)
+    SLH-DSA (Stateless Hash-based Digital Signature Algorithm) is a
+    quantum-resistant signature scheme standardized by NIST as
+    FIPS 205. It descends from the SPHINCS+ submission and is
+    stateless: signing does not mutate the private key, so there is no
+    key-state synchronization burden on the application.
+
+    Twelve parameter sets are supported, formed by combining a hash
+    family (SHAKE or SHA2), a security category (128/192/256) and a
+    speed/size tradeoff (s = small signatures, f = fast signing). The
+    parameter set is selected when the key is initialized via
+    wc_SlhDsaKey_Init().
+
+    \defgroup LMS Algorithms - LMS / HSS (RFC 8554)
+    LMS (Leighton-Micali Signatures) and its multi-tree composition
+    HSS (Hierarchical Signature System) are stateful hash-based
+    signature schemes specified in RFC 8554 and NIST SP 800-208. Each
+    signature consumes a one-time component of the private key, so the
+    application MUST persist the private key state (via the read/write
+    callbacks registered with wc_LmsKey_SetReadCb() and
+    wc_LmsKey_SetWriteCb()) between signing operations. Reusing a
+    one-time key destroys the security of the scheme.
+
+    The number of signatures available from a key is bounded by the
+    parameter set; query the remaining count with
+    wc_LmsKey_SigsLeft().
+
+    \defgroup XMSS Algorithms - XMSS / XMSS^MT (RFC 8391)
+    XMSS (eXtended Merkle Signature Scheme) and its multi-tree variant
+    XMSS^MT are stateful hash-based signature schemes specified in
+    RFC 8391 and NIST SP 800-208. As with LMS, each signature consumes
+    a one-time component of the private key, so the application MUST
+    persist the private key state via the callbacks registered with
+    wc_XmssKey_SetReadCb() and wc_XmssKey_SetWriteCb(). Reusing a
+    one-time key destroys the security of the scheme.
+
+    The number of signatures available from a key is bounded by the
+    parameter set; query the remaining count with
+    wc_XmssKey_SigsLeft().
+
     \defgroup ECCSI_Overview Overview of ECCSI
     ECCSI (Elliptic Curve-Based Certificateless Signatures for Identity-Based Encryption) is specified in RFC 6507 (https://tools.ietf.org/html/rfc6507).
 
@@ -153,7 +239,7 @@
       -# Set the RSK and, optionally precomputation table: wc_SetSakkeRsk()
       -# Derive SSV and auth data: wc_DeriveSakkeSSV()
       -# Free SAKKE Key: wc_FreeSakkeKey()
-    
+
     \defgroup SAKKE_Setup Setup SAKKE Key
     Operations for establishing a SAKKE key.
 
@@ -194,19 +280,21 @@
     Derive the SSV, (wc_DeriveSakkeSSV()) on the recipient from the encapsulated SSV.
 
     \defgroup HMAC Algorithms - HMAC
-    \defgroup IDEA Algorithms - IDEA
     \defgroup MD2 Algorithms - MD2
     \defgroup MD4 Algorithms - MD4
     \defgroup MD5 Algorithms - MD5
     \defgroup PKCS7 Algorithms - PKCS7
+    \defgroup TSP Time-Stamp Protocol (RFC 3161)
     \defgroup PKCS11 Algorithms - PKCS11
     \defgroup Password Algorithms - Password Based
     \defgroup Poly1305 Algorithms - Poly1305
+    \defgroup PUF Algorithms - PUF
     \defgroup RIPEMD Algorithms - RIPEMD
     \defgroup RSA Algorithms - RSA
-    \defgroup Rabbit Algorithms - Rabbit
     \defgroup SHA Algorithms - SHA 128/224/256/384/512
+    \defgroup SHE Algorithms - SHE
     \defgroup SipHash Algorithm - SipHash
+    \defgroup SrtpKdf Algorithm - SRTP KDF
     \defgroup SRP Algorithms - SRP
 
     \defgroup ASN ASN.1
@@ -222,13 +310,13 @@
     key operations and reducing the attack surface by restricting access to certificate and keys
     to the SIM.
 
-    IoT-Safe support can be enabled on an existing WOLFSSL_CTX contex, using wolfSSL_CTX_iotsafe_enable().\n
+    IoT-Safe support can be enabled on an existing WOLFSSL_CTX context, using wolfSSL_CTX_iotsafe_enable().\n
     Session created within the context can set the parameters for IoT-Safe key and files usage, and enable
     the public keys callback, with wolfSSL_iotsafe_on().
 
     If compiled in, the module supports IoT-Safe random number generator as source of entropy for wolfCrypt.
 
-
+    \defgroup PSA Platform Security Architecture (PSA) API
     \defgroup Keys Key and Cert Conversion
     \defgroup Logging Logging
     \defgroup Math Math API
@@ -242,4 +330,5 @@
     \defgroup Setup wolfSSL Context and Session Set Up
     \defgroup IO wolfSSL Connection, Session, and I/O
     \defgroup Debug wolfSSL Error Handling and Reporting
+    \defgroup STM32 STM32 Hardware Crypto Port
 */

@@ -1,12 +1,12 @@
 /* sctp-client.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -18,6 +18,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
+
+#ifdef HAVE_CONFIG_H
+    #include <config.h>
+#endif
 
 #ifndef WOLFSSL_USER_SETTINGS
     #include <wolfssl/options.h>
@@ -38,8 +42,10 @@
 #include <unistd.h>
 #endif /* WOLFSSL_SCTP */
 
-int main()
+int main(int argc, char **argv)
 {
+    (void)argc;
+    (void)argv;
 #ifdef WOLFSSL_SCTP
     int sd = socket(PF_INET, SOCK_STREAM, IPPROTO_SCTP);
 

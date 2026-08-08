@@ -1,12 +1,12 @@
 /* sha.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -31,33 +31,39 @@
 
 #ifndef NO_SHA
 
-#if defined(HAVE_FIPS) && \
-    defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2)
+#if FIPS_VERSION3_GE(2,0,0)
     #include <wolfssl/wolfcrypt/fips.h>
 #endif /* HAVE_FIPS_VERSION >= 2 */
 
-#if defined(HAVE_FIPS) && \
-        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-#define wc_Sha             Sha
-#define WC_SHA             SHA
-#define WC_SHA_BLOCK_SIZE  SHA_BLOCK_SIZE
-#define WC_SHA_DIGEST_SIZE SHA_DIGEST_SIZE
-#define WC_SHA_PAD_SIZE    SHA_PAD_SIZE
-
-/* for fips @wc_fips */
-#include <cyassl/ctaocrypt/sha.h>
-#endif
-
 #ifdef FREESCALE_LTC_SHA
     #include "fsl_ltc.h"
+#endif
+
+#if defined(WOLFSSL_IMXRT1170_CAAM)
+    #include "fsl_device_registers.h"
+    #include "fsl_caam.h"
 #endif
 
 #ifdef WOLFSSL_IMXRT_DCP
     #include "fsl_dcp.h"
 #endif
 
+#if defined(WOLFSSL_PSOC6_CRYPTO)
+    #include <wolfssl/wolfcrypt/port/cypress/psoc6_crypto.h>
+
+    #include "cy_crypto_core_sha.h"
+    #include "cy_device_headers.h"
+    #include "cy_crypto_common.h"
+    #include "cy_crypto_core.h"
+#endif
+
 #ifdef __cplusplus
     extern "C" {
+#endif
+
+#if FIPS_VERSION3_GE(6,0,0)
+    extern const unsigned int wolfCrypt_FIPS_sha_ro_sanity[2];
+    WOLFSSL_LOCAL int wolfCrypt_FIPS_SHA_sanity(void);
 #endif
 
 /* avoid redefinition of structs */
@@ -73,11 +79,14 @@
 #ifdef WOLFSSL_ASYNC_CRYPT
     #include <wolfssl/wolfcrypt/async.h>
 #endif
-#ifdef WOLFSSL_ESP32WROOM32_CRYPT
+#ifdef WOLFSSL_ESP32_CRYPT
     #include <wolfssl/wolfcrypt/port/Espressif/esp32-crypt.h>
 #endif
 #if defined(WOLFSSL_SILABS_SE_ACCEL)
     #include <wolfssl/wolfcrypt/port/silabs/silabs_hash.h>
+#endif
+#if defined(WOLFSSL_MAX3266X) || defined(WOLFSSL_MAX3266X_OLD)
+    #include <wolfssl/wolfcrypt/port/maxim/max3266x.h>
 #endif
 
 #if !defined(NO_OLD_SHA_NAMES)
@@ -92,12 +101,10 @@
 #endif
 
 /* in bytes */
-enum {
-    WC_SHA              =  WC_HASH_TYPE_SHA,
-    WC_SHA_BLOCK_SIZE   = 64,
-    WC_SHA_DIGEST_SIZE  = 20,
-    WC_SHA_PAD_SIZE     = 56
-};
+#define WC_SHA              WC_HASH_TYPE_SHA
+#define WC_SHA_BLOCK_SIZE   64
+#define WC_SHA_DIGEST_SIZE  20
+#define WC_SHA_PAD_SIZE     56
 
 
 #if defined(WOLFSSL_TI_HASH)
@@ -105,52 +112,78 @@ enum {
 
 #elif defined(WOLFSSL_IMX6_CAAM) && !defined(WOLFSSL_QNX_CAAM)
     #include "wolfssl/wolfcrypt/port/caam/wolfcaam_sha.h"
-#elif defined(WOLFSSL_RENESAS_TSIP_CRYPT) && \
+#elif (defined(WOLFSSL_RENESAS_TSIP_TLS) || \
+       defined(WOLFSSL_RENESAS_TSIP_CRYPTONLY)) && \
    !defined(NO_WOLFSSL_RENESAS_TSIP_CRYPT_HASH)
-    #include "wolfssl/wolfcrypt/port/Renesas/renesas-tsip-crypt.h"
+    #include "wolfssl/wolfcrypt/port/Renesas/renesas_tsip_types.h"
+#elif defined(WOLFSSL_RENESAS_RX64_HASH)
+    #include "wolfssl/wolfcrypt/port/Renesas/renesas-rx64-hw-crypt.h"
+#elif defined(WOLFSSL_RENESAS_RSIP) && \
+    !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    #include "wolfssl/wolfcrypt/port/Renesas/renesas_fspsm_internal.h"
 #else
 
 #if defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_HASH)
     #include "wolfssl/wolfcrypt/port/nxp/se050_port.h"
 #endif
 
+#if defined(WOLFSSL_HAVE_PSA) && !defined(WOLFSSL_PSA_NO_HASH)
+#include <psa/crypto.h>
+#undef  WOLFSSL_NO_HASH_RAW
+#define WOLFSSL_NO_HASH_RAW
+#endif
+
 /* Sha digest */
 struct wc_Sha {
 #ifdef FREESCALE_LTC_SHA
-        ltc_hash_ctx_t ctx;
+    ltc_hash_ctx_t ctx;
 #elif defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_HASH)
-        SE050_HASH_Context se050Ctx;
+    SE050_HASH_Context se050Ctx;
 #elif defined(STM32_HASH)
-        STM32_HASH_Context stmCtx;
+    STM32_HASH_Context stmCtx;
 #elif defined(WOLFSSL_SILABS_SE_ACCEL)
-        wc_silabs_sha_t silabsCtx;
+    wc_silabs_sha_t silabsCtx;
 #elif defined(WOLFSSL_IMXRT_DCP)
-        dcp_handle_t handle;
-        dcp_hash_ctx_t ctx;
+    dcp_handle_t handle;
+    dcp_hash_ctx_t ctx;
+#elif defined(WOLFSSL_HAVE_PSA) && !defined(WOLFSSL_PSA_NO_HASH)
+    psa_hash_operation_t psa_ctx;
+#elif defined(PSOC6_HASH_SHA1)
+    cy_stc_crypto_sha_state_t hash_state;
+    cy_stc_crypto_v2_sha1_buffers_t sha_buffers;
 #else
-        word32  buffLen;   /* in bytes          */
-        word32  loLen;     /* length in bytes   */
-        word32  hiLen;     /* length in bytes   */
-        word32  buffer[WC_SHA_BLOCK_SIZE  / sizeof(word32)];
+    word32  buffLen;   /* in bytes          */
+    word32  loLen;     /* length in bytes   */
+    word32  hiLen;     /* length in bytes   */
+    word32  buffer[WC_SHA_BLOCK_SIZE  / sizeof(word32)];
     #ifdef WOLFSSL_PIC32MZ_HASH
-        word32  digest[PIC32_DIGEST_SIZE / sizeof(word32)];
+    word32  digest[PIC32_DIGEST_SIZE / sizeof(word32)];
     #else
-        word32  digest[WC_SHA_DIGEST_SIZE / sizeof(word32)];
-    #endif
-        void*   heap;
-    #ifdef WOLFSSL_PIC32MZ_HASH
-        hashUpdCache cache; /* cache for updates */
-    #endif
-    #ifdef WOLFSSL_ASYNC_CRYPT
-        WC_ASYNC_DEV asyncDev;
-    #endif /* WOLFSSL_ASYNC_CRYPT */
-    #ifdef WOLF_CRYPTO_CB
-        int    devId;
-        void*  devCtx; /* generic crypto callback context */
+    word32  digest[WC_SHA_DIGEST_SIZE / sizeof(word32)];
     #endif
 #endif
-#if defined(WOLFSSL_ESP32WROOM32_CRYPT) && \
-   !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
+    void*   heap;
+#ifdef WOLFSSL_PIC32MZ_HASH
+    hashUpdCache cache; /* cache for updates */
+#endif
+#ifdef WOLFSSL_ASYNC_CRYPT
+    WC_ASYNC_DEV asyncDev;
+#endif /* WOLFSSL_ASYNC_CRYPT */
+#ifdef WOLF_CRYPTO_CB
+    int    devId;
+    void*  devCtx; /* generic crypto callback context */
+#endif
+#ifdef WOLFSSL_IMXRT1170_CAAM
+    caam_hash_ctx_t ctx;
+    caam_handle_t hndl;
+#endif
+#if defined(WOLFSSL_DEVCRYPTO_HASH) || defined(WOLFSSL_HASH_KEEP)
+    byte*  msg;
+    word32 used;
+    word32 len;
+#endif
+#if defined(WOLFSSL_ESP32_CRYPT) && \
+   !defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
     WC_ESP32SHA ctx;
 #endif
 #ifdef WOLFSSL_HASH_FLAGS
@@ -168,17 +201,17 @@ struct wc_Sha {
 
 #endif /* HAVE_FIPS */
 
-WOLFSSL_API int wc_InitSha(wc_Sha*);
+WOLFSSL_API int wc_InitSha(wc_Sha* sha);
 WOLFSSL_API int wc_InitSha_ex(wc_Sha* sha, void* heap, int devId);
-WOLFSSL_API int wc_ShaUpdate(wc_Sha*, const byte*, word32);
-WOLFSSL_API int wc_ShaFinalRaw(wc_Sha*, byte*);
-WOLFSSL_API int wc_ShaFinal(wc_Sha*, byte*);
-WOLFSSL_API void wc_ShaFree(wc_Sha*);
+WOLFSSL_API int wc_ShaUpdate(wc_Sha* sha, const byte* data, word32 len);
+WOLFSSL_API int wc_ShaFinalRaw(wc_Sha* sha, byte* hash);
+WOLFSSL_API int wc_ShaFinal(wc_Sha* sha, byte* hash);
+WOLFSSL_API void wc_ShaFree(wc_Sha* sha);
 
-WOLFSSL_API int wc_ShaGetHash(wc_Sha*, byte*);
-WOLFSSL_API int wc_ShaCopy(wc_Sha*, wc_Sha*);
-#if defined(OPENSSL_EXTRA)
-WOLFSSL_API int wc_ShaTransform(wc_Sha*, const byte*);
+WOLFSSL_API int wc_ShaGetHash(wc_Sha* sha, byte* hash);
+WOLFSSL_API int wc_ShaCopy(wc_Sha* src, wc_Sha* dst);
+#if defined(OPENSSL_EXTRA) || defined(HAVE_CURL)
+WOLFSSL_API int wc_ShaTransform(wc_Sha* sha, const unsigned char* data);
 #endif
 
 #ifdef WOLFSSL_PIC32MZ_HASH

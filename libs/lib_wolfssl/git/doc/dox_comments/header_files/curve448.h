@@ -38,7 +38,7 @@
 
     \sa wc_curve448_init
 */
-WOLFSSL_API
+
 int wc_curve448_make_key(WC_RNG* rng, int keysize, curve448_key* key);
 
 /*!
@@ -81,7 +81,7 @@ int wc_curve448_make_key(WC_RNG* rng, int keysize, curve448_key* key);
     \sa wc_curve448_make_key
     \sa wc_curve448_shared_secret_ex
 */
-WOLFSSL_API
+
 int wc_curve448_shared_secret(curve448_key* private_key,
                                 curve448_key* public_key,
                                 byte* out, word32* outlen);
@@ -130,7 +130,7 @@ int wc_curve448_shared_secret(curve448_key* private_key,
     \sa wc_curve448_make_key
     \sa wc_curve448_shared_secret
 */
-WOLFSSL_API
+
 int wc_curve448_shared_secret_ex(curve448_key* private_key,
                                    curve448_key* public_key,
                                    byte* out, word32* outlen, int endian);
@@ -155,7 +155,7 @@ int wc_curve448_shared_secret_ex(curve448_key* private_key,
 
     \sa wc_curve448_make_key
 */
-WOLFSSL_API
+
 int wc_curve448_init(curve448_key* key);
 
 /*!
@@ -175,7 +175,7 @@ int wc_curve448_init(curve448_key* key);
     \sa wc_curve448_init
     \sa wc_curve448_make_key
 */
-WOLFSSL_API
+
 void wc_curve448_free(curve448_key* key);
 
 /*!
@@ -209,7 +209,7 @@ void wc_curve448_free(curve448_key* key);
     \sa wc_curve448_import_private_ex
     \sa wc_curve448_size
 */
-WOLFSSL_API
+
 int wc_curve448_import_private(const byte* priv, word32 privSz,
                                  curve448_key* key);
 
@@ -248,7 +248,7 @@ int wc_curve448_import_private(const byte* priv, word32 privSz,
     \sa wc_curve448_import_private
     \sa wc_curve448_size
 */
-WOLFSSL_API
+
 int wc_curve448_import_private_ex(const byte* priv, word32 privSz,
                                     curve448_key* key, int endian);
 
@@ -294,7 +294,7 @@ int wc_curve448_import_private_ex(const byte* priv, word32 privSz,
     \sa wc_curve448_import_public
     \sa wc_curve448_export_private_raw
 */
-WOLFSSL_API
+
 int wc_curve448_import_private_raw(const byte* priv, word32 privSz,
                             const byte* pub, word32 pubSz, curve448_key* key);
 
@@ -342,7 +342,7 @@ int wc_curve448_import_private_raw(const byte* priv, word32 privSz,
     \sa wc_curve448_export_private_raw
     \sa wc_curve448_import_private_raw
 */
-WOLFSSL_API
+
 int wc_curve448_import_private_raw_ex(const byte* priv, word32 privSz,
                                         const byte* pub, word32 pubSz,
                                         curve448_key* key, int endian);
@@ -384,7 +384,7 @@ int wc_curve448_import_private_raw_ex(const byte* priv, word32 privSz,
     \sa wc_curve448_import_private_raw
     \sa wc_curve448_export_private_raw_ex
 */
-WOLFSSL_API
+
 int wc_curve448_export_private_raw(curve448_key* key, byte* out,
                                      word32* outLen);
 
@@ -428,7 +428,7 @@ int wc_curve448_export_private_raw(curve448_key* key, byte* out,
     \sa wc_curve448_export_private_raw
     \sa wc_curve448_size
 */
-WOLFSSL_API
+
 int wc_curve448_export_private_raw_ex(curve448_key* key, byte* out,
                                         word32* outLen, int endian);
 
@@ -472,7 +472,7 @@ int wc_curve448_export_private_raw_ex(curve448_key* key, byte* out,
     \sa wc_curve448_check_public
     \sa wc_curve448_size
 */
-WOLFSSL_API
+
 int wc_curve448_import_public(const byte* in, word32 inLen,
                                 curve448_key* key);
 
@@ -518,7 +518,7 @@ int wc_curve448_import_public(const byte* in, word32 inLen,
     \sa wc_curve448_check_public
     \sa wc_curve448_size
 */
-WOLFSSL_API
+
 int wc_curve448_import_public_ex(const byte* in, word32 inLen,
                                    curve448_key* key, int endian);
 
@@ -533,7 +533,7 @@ int wc_curve448_import_public_ex(const byte* in, word32 inLen,
     \return BAD_FUNC_ARG Returned if any of the input parameters are NULL.
 
     \param [in] pub Pointer to the buffer containing the public key to check.
-    \param [in] pubLen Length of the public key to check.
+    \param [in] pubSz Length of the public key to check.
     \param [in] endian EC448_BIG_ENDIAN or EC448_LITTLE_ENDIAN to set which
     form to use.
 
@@ -554,7 +554,7 @@ int wc_curve448_import_public_ex(const byte* in, word32 inLen,
     \sa wc_curve448_import_public_ex
     \sa wc_curve448_size
 */
-WOLFSSL_API
+
 int wc_curve448_check_public(const byte* pub, word32 pubSz, int endian);
 
 /*!
@@ -594,7 +594,7 @@ int wc_curve448_check_public(const byte* pub, word32 pubSz, int endian);
     \sa wc_curve448_export_private_raw
     \sa wc_curve448_import_public
 */
-WOLFSSL_API
+
 int wc_curve448_export_public(curve448_key* key, byte* out, word32* outLen);
 
 /*!
@@ -636,7 +636,7 @@ int wc_curve448_export_public(curve448_key* key, byte* out, word32* outLen);
     \sa wc_curve448_export_private_raw
     \sa wc_curve448_import_public
 */
-WOLFSSL_API
+
 int wc_curve448_export_public_ex(curve448_key* key, byte* out,
                                    word32* outLen, int endian);
 
@@ -682,7 +682,7 @@ int wc_curve448_export_public_ex(curve448_key* key, byte* out,
     \sa wc_curve448_export_key_raw_ex
     \sa wc_curve448_export_private_raw
 */
-WOLFSSL_API
+
 int wc_curve448_export_key_raw(curve448_key* key,
                                  byte* priv, word32 *privSz,
                                  byte* pub, word32 *pubSz);
@@ -733,7 +733,7 @@ int wc_curve448_export_key_raw(curve448_key* key,
     \sa wc_curve448_export_private_raw_ex
     \sa wc_curve448_export_public_ex
 */
-WOLFSSL_API
+
 int wc_curve448_export_key_raw_ex(curve448_key* key,
                                     byte* priv, word32 *privSz,
                                     byte* pub, word32 *pubSz,
@@ -764,5 +764,39 @@ int wc_curve448_export_key_raw_ex(curve448_key* key,
     \sa wc_curve448_init
     \sa wc_curve448_make_key
 */
-WOLFSSL_API
+
 int wc_curve448_size(curve448_key* key);
+
+/*!
+    \ingroup Curve448
+    \brief This function generates a Curve448 public key from a given
+    private key. It computes the public key by performing scalar
+    multiplication of the base point with the private key.
+
+    \return 0 On success.
+    \return ECC_BAD_ARG_E If public_size is not CURVE448_PUB_KEY_SIZE or
+    if private_size is not CURVE448_KEY_SIZE.
+    \return BAD_FUNC_ARG If pub or priv is NULL.
+
+    \param public_size size of the public key buffer (must be 56 bytes)
+    \param pub pointer to buffer to store the generated public key
+    \param private_size size of the private key (must be 56 bytes)
+    \param priv pointer to the private key buffer
+
+    _Example_
+    \code
+    byte priv[CURVE448_KEY_SIZE] = { }; // private key
+    byte pub[CURVE448_PUB_KEY_SIZE];
+
+    int ret = wc_curve448_make_pub(CURVE448_PUB_KEY_SIZE, pub,
+                                    CURVE448_KEY_SIZE, priv);
+    if (ret != 0) {
+        // error generating public key
+    }
+    \endcode
+
+    \sa wc_curve448_make_key
+    \sa wc_curve448_import_private
+*/
+int wc_curve448_make_pub(int public_size, byte* pub, int private_size,
+                         const byte* priv);

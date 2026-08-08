@@ -1,12 +1,12 @@
 /* tls_wolfssl.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -31,19 +31,19 @@ int setupTransport(clientConnectionHandleType* connectionHandle,
                    char* connectionId) {
     int ret, error;
     void * sendBuffer;
-    DWORD bufferSizeInBytes;
+    size_t bufferSizeInBytes;
 
     if ((ret = socketTransportInitialize("mailbox-transport.config",
                                          "transportConfigurationId",
-                                         (DWORD)waitIndefinitely,&error)) != transportSuccess)
+                                         waitIndefinitely,&error)) != transportSuccess)
         printf("Initialize 0x%x, error=%d\n", ret, error);
 
-    else if ((ret = socketTransportClientInitialize((DWORD)waitIndefinitely,
+    else if ((ret = socketTransportClientInitialize(waitIndefinitely,
                                                     &error)) != transportSuccess)
         printf("ClientInitialize 0x%x, error=%d\n", ret, error);
 
     else if ((ret = socketTransportCreateConnection(connectionId,
-                                                    (DWORD)waitIndefinitely,
+                                                    waitIndefinitely,
                                                     COMPATIBILITY_ID_2,
                                                     connectionHandle,
                                                     &sendBuffer,
@@ -53,7 +53,7 @@ int setupTransport(clientConnectionHandleType* connectionHandle,
 
     else if ((ret = socketTransportSetConnectionForThread(currentThreadHandle(),
                                                           *connectionHandle,
-                                                          (DWORD)waitIndefinitely,
+                                                          waitIndefinitely,
                                                           &error)) != transportSuccess)
         printf("SetConnectionForThread 0x%x, error=%d\n", ret, error);
 
@@ -162,7 +162,7 @@ void wolfssl_client_test(uintData_t statusPtr) {
                     TCP_SERVER_IP_ADDR, TCP_SERVER_PORT);
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr = inet_addr(TCP_SERVER_IP_ADDR);
+    server_addr.sin_addr.s_addr = inet_addr(TCP_SERVER_IP_ADDR);
     server_addr.sin_port = htons(TCP_SERVER_PORT);
 
     printf("Calling connect on socket\n");
@@ -407,7 +407,7 @@ void wolfssl_server_test(uintData_t statusPtr)
 
     printf("Setting up server_addr struct\n");
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr = INADDR_ANY;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(TLS_SERVER_PORT);
 
     bindStatus = bind(sock_listen, (sockaddr *) &server_addr, sizeof(server_addr));
@@ -510,7 +510,7 @@ void wolfssl_server_test(uintData_t statusPtr)
                 wolfSSL_CTX_free(ctx);
                 return;
             }
-            /* goToSleep() for 500 milli sec*/
+            /* goToSleep() for 500 milliseconds */
         }
     } while ((ret != SSL_SUCCESS) && (error == SSL_ERROR_WANT_READ));
 
@@ -580,14 +580,14 @@ int  wolfsslRunTests (void)
         ts = createThread("TCPclient", "TCPThreadTemplate", wolfssl_client_test,
                           0, &TCPhandle );
         if (ts != threadSuccess) {
-            printf("Unable to create TCP client thread, %i ", (DWORD)ts);
+            printf("Unable to create TCP client thread, %i ", (size_t)ts);
         }
     #endif
     #if !defined(NO_WOLFSSL_SERVER)
         ts = createThread("TCPserver", "TCPThreadTemplate", wolfssl_server_test,
                           0, &TCPhandle );
         if (ts != threadSuccess) {
-            printf("Unable to create TCP server thread, %i ", (DWORD)ts);
+            printf("Unable to create TCP server thread, %i ", (size_t)ts);
         }
     #endif
 

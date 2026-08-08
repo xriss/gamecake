@@ -19,9 +19,15 @@
         <Path>src\wolfssl_demo.h</Path>
         <Path>..\common\wolfssl_dummy.c</Path>
         <Category Name="smc_gen">
+          <Category Name="Config_TMR0">
+            <Path>src\smc_gen\Config_TMR0\Config_TMR0.c</Path>
+            <Path>src\smc_gen\Config_TMR0\Config_TMR0.h</Path>
+            <Path>src\smc_gen\Config_TMR0\Config_TMR0_user.c</Path>
+          </Category>
           <Category Name="general">
             <Path>src\smc_gen\general\r_cg_hardware_setup.c</Path>
             <Path>src\smc_gen\general\r_cg_macrodriver.h</Path>
+            <Path>src\smc_gen\general\r_cg_tmr.h</Path>
             <Path>src\smc_gen\general\r_cg_userdefine.h</Path>
             <Path>src\smc_gen\general\r_smc_cgc.c</Path>
             <Path>src\smc_gen\general\r_smc_cgc.h</Path>
@@ -237,21 +243,18 @@
             <Path>src\smc_gen\r_tsip_rx\readme.txt</Path>
             <Category Name="doc">
               <Category Name="en">
-                <Path>src\smc_gen\r_tsip_rx\doc\en\r20an0548ej0114-rx-tsip-security.pdf</Path>
+                <Path>src\smc_gen\r_tsip_rx\doc\en\r20an0548ej0115-rx-tsip-security.pdf</Path>
               </Category>
               <Category Name="ja">
-                <Path>src\smc_gen\r_tsip_rx\doc\ja\r20an0548jj0114-rx-tsip-security.pdf</Path>
+                <Path>src\smc_gen\r_tsip_rx\doc\ja\r20an0548jj0115-rx-tsip-security.pdf</Path>
               </Category>
-            </Category>
-            <Category Name="ref">
-              <Path>src\smc_gen\r_tsip_rx\ref\r_tsip_rx_config_reference.h</Path>
             </Category>
           </Category>
         </Category>
       </Category>
     </Files>
     <Device Category="com.renesas.cdt.managedbuild.renesas.ccrx.common.option.cpu.rx600" Series="RX">R5F565NEHxFP</Device>
-    <BuildOptions Name="CC-RX" Version="v3.03.00">
+    <BuildOptions Name="CC-RX" Version="v3.04.00">
       <BuildMode Active="True" Name="HardwareDebug">
         <GeneralOptions/>
         <CompileOptions>
@@ -262,7 +265,6 @@
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\r_bsp"</Option>
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\r_config"</Option>
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\r_tsip_rx"</Option>
-          <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\r_tsip_rx\src\targets\rx65n"</Option>
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\r_cmt_rx"</Option>
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\r_cmt_rx\src"</Option>
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\r_t4_driver_rx"</Option>
@@ -274,6 +276,7 @@
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\r_sys_time_rx\src"</Option>
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\general"</Option>
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\r_pincfg"</Option>
+          <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\Config_TMR0"</Option>
           <Option>-define=DEBUG_CONSOLE,WOLFSSL_USER_SETTINGS</Option>
           <Option>-utf8</Option>
           <Option>-nomessage</Option>
@@ -309,7 +312,7 @@
           <Option>-library="${ProjDirPath}/../${ProjName}/src/smc_gen/r_t4_rx/lib/ccrx/T4_Library_ether_ccrx_rxv1_little_debug.lib"</Option>
           <Option>-library="${ProjDirPath}/../${ProjName}/src/smc_gen/r_tsip_rx/lib/ccrx/r_tsip_rx65n_little.lib"</Option>
           <Option>-library="${ProjDirPath}/../wolfssl/Debug/wolfssl.lib"</Option>
-          <Option>-start=SU,SI,B_1,R_1,B_2,R_2,B,R/04,B_ETHERNET_BUFFERS_1,B_RX_DESC_1,B_TX_DESC_1/020000,C_1,C_2,C,C$*,D*,W*,L,P*/0FFE00000,EXCEPTVECT/0FFFFFF80,RESETVECT/0FFFFFFFC</Option>
+          <Option>-start=SU,SI,B_1,R_1,B_2,R_2,B,R/04,B_ETHERNET_BUFFERS_1,B_RX_DESC_1,B_TX_DESC_1/03C000,C_1,C_2,C,C$*,D*,W*,L,P/0FFE00000,EXCEPTVECT/0FFFFFF80,RESETVECT/0FFFFFFFC</Option>
           <PreLinker>Auto</PreLinker>
         </LinkOptions>
         <LibraryGenerateOptions>
@@ -324,6 +327,8 @@
         <LinkOrder>
           <Path>HardwareDebug\benchmark.obj</Path>
           <Path>HardwareDebug\key_data.obj</Path>
+          <Path>HardwareDebug\Config_TMR0.obj</Path>
+          <Path>HardwareDebug\Config_TMR0_user.obj</Path>
           <Path>HardwareDebug\r_cg_hardware_setup.obj</Path>
           <Path>HardwareDebug\r_smc_cgc.obj</Path>
           <Path>HardwareDebug\r_smc_cgc_user.obj</Path>
@@ -371,7 +376,6 @@
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_bsp"</IncludePathForC>
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_config"</IncludePathForC>
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_tsip_rx"</IncludePathForC>
-          <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_tsip_rx\src\targets\rx65n"</IncludePathForC>
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_cmt_rx"</IncludePathForC>
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_cmt_rx\src"</IncludePathForC>
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_t4_driver_rx"</IncludePathForC>
@@ -383,6 +387,7 @@
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_sys_time_rx\src"</IncludePathForC>
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\general"</IncludePathForC>
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_pincfg"</IncludePathForC>
+          <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\Config_TMR0"</IncludePathForC>
           <IncludePathForAsm>"${ProjDirPath}\..\${ProjName}\src\smc_gen\general"</IncludePathForAsm>
           <IncludePathForAsm>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_pincfg"</IncludePathForAsm>
           <MacroForC>DEBUG_CONSOLE</MacroForC>
@@ -411,6 +416,7 @@
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\r_sys_time_rx\src"</Option>
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\general"</Option>
           <Option>-include="${ProjDirPath}\..\${ProjName}\src\smc_gen\r_pincfg"</Option>
+          <Option>-include="${ProjDirPath}\generate"</Option>
           <Option>-define=DEBUG_CONSOLE</Option>
           <Option>-utf8</Option>
           <Option>-nomessage</Option>
@@ -458,6 +464,8 @@
         <LinkOrder>
           <Path>Debug\benchmark.obj</Path>
           <Path>Debug\key_data.obj</Path>
+          <Path>Debug\Config_TMR0.obj</Path>
+          <Path>Debug\Config_TMR0_user.obj</Path>
           <Path>Debug\r_cg_hardware_setup.obj</Path>
           <Path>Debug\r_smc_cgc.obj</Path>
           <Path>Debug\r_smc_cgc_user.obj</Path>
@@ -517,6 +525,7 @@
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_sys_time_rx\src"</IncludePathForC>
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\general"</IncludePathForC>
           <IncludePathForC>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_pincfg"</IncludePathForC>
+          <IncludePathForC>"${ProjDirPath}\generate"</IncludePathForC>
           <IncludePathForAsm>"${ProjDirPath}\..\${ProjName}\src\smc_gen\general"</IncludePathForAsm>
           <IncludePathForAsm>"${ProjDirPath}\..\${ProjName}\src\smc_gen\r_pincfg"</IncludePathForAsm>
           <MacroForC>DEBUG_CONSOLE</MacroForC>

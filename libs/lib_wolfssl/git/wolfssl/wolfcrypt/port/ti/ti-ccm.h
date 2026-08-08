@@ -1,12 +1,12 @@
 /* port/ti/ti_ccm.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -27,7 +27,7 @@
     #include <config.h>
 #endif
 
-#include <wolfssl/wolfcrypt/settings.h>
+#include <wolfssl/wolfcrypt/types.h>
 
 #if defined(WOLFSSL_TI_CRYPT) ||  defined(WOLFSSL_TI_HASH)
 
@@ -37,8 +37,8 @@ int wolfSSL_TI_CCMInit(void) ;
 void wolfSSL_TI_lockCCM(void) ;
 void wolfSSL_TI_unlockCCM(void) ;
 #else
-#define wolfSSL_TI_lockCCM()
-#define wolfSSL_TI_unlockCCM()
+#define wolfSSL_TI_lockCCM() WC_DO_NOTHING
+#define wolfSSL_TI_unlockCCM() WC_DO_NOTHING
 #endif
 
 #endif

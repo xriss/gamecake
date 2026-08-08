@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 SIGOPT=rsa_padding_mode:pss
 SIGOPT2=rsa_pss_saltlen:-1
@@ -29,6 +29,6 @@ openssl dgst -sha256 -sign $1 -sigopt $SIGOPT -sigopt $SIGOPT2 -out $3.sign $3
 echo verify by private key
 openssl dgst -sha256 -prverify $1 -sigopt $SIGOPT -sigopt $SIGOPT2 -signature $3.sign $3
 
-echo verifiy by public key
+echo verify by public key
 openssl dgst -sha256 -verify $2 -sigopt $SIGOPT -sigopt $SIGOPT2 -signature $3.sign $3
 

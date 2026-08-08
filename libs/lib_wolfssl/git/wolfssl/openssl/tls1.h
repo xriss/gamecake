@@ -1,12 +1,12 @@
 /* tls1.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -42,5 +42,23 @@
 #ifndef TLS_MAX_VERSION
 #define TLS_MAX_VERSION                 TLS1_3_VERSION
 #endif
+
+#ifdef WOLFSSL_QUIC
+/* from rfc9001 */
+#define WOLFSSL_TLSEXT_TYPE_quic_transport_parameters_draft   \
+    TLSXT_KEY_QUIC_TP_PARAMS_DRAFT
+#define WOLFSSL_TLSEXT_TYPE_quic_transport_parameters         \
+    TLSXT_KEY_QUIC_TP_PARAMS
+
+#ifndef OPENSSL_COEXIST
+
+#define TLSEXT_TYPE_quic_transport_parameters_draft   \
+    TLSXT_KEY_QUIC_TP_PARAMS_DRAFT
+#define TLSEXT_TYPE_quic_transport_parameters         \
+    TLSXT_KEY_QUIC_TP_PARAMS
+
+#endif /* !OPENSSL_COEXIST */
+
+#endif /* WOLFSSL_QUIC */
 
 #endif /* WOLFSSL_OPENSSL_TLS1_H_ */

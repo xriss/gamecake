@@ -1,0 +1,41 @@
+name: PUF Tests
+
+# START OF COMMON SECTION
+on:
+  push:
+    branches: [ 'release/**' ]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [ '*' ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+# END OF COMMON SECTION
+
+jobs:
+  puf_host_test:
+    name: PUF host test
+    if: ${{ (github.repository_owner == 'wolfssl') && (github.event_name != 'pull_request' || github.event.pull_request.draft == false) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v5
+        name: Checkout wolfSSL
+
+      - name: Build and test PUF
+        run: |
+          ./autogen.sh
+          ./configure --enable-puf --enable-puf-test
+          make
+          ./wolfcrypt/test/testwolfcrypt
+
+      - name: Print errors
+        if: ${{ failure() }}
+        run: |
+          if [ -f test-suite.log ] ; then
+            cat test-suite.log
+          fi

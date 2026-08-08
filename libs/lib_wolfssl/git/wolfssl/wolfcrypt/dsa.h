@@ -1,12 +1,12 @@
 /* dsa.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -30,7 +30,7 @@
 
 #ifndef NO_DSA
 
-#include <wolfssl/wolfcrypt/integer.h>
+#include <wolfssl/wolfcrypt/wolfmath.h>
 #include <wolfssl/wolfcrypt/random.h>
 
 /* for DSA reverse compatibility */
@@ -56,8 +56,8 @@ enum {
     /* 160 bit q length */
     DSA_160_HALF_SIZE = 20,            /* r and s size  */
     DSA_160_SIG_SIZE  = 40,            /* signature size */
-    DSA_HALF_SIZE = DSA_160_HALF_SIZE, /* kept for compatiblity  */
-    DSA_SIG_SIZE = DSA_160_SIG_SIZE,   /* kept for compatiblity */
+    DSA_HALF_SIZE = DSA_160_HALF_SIZE, /* kept for compatibility  */
+    DSA_SIG_SIZE = DSA_160_SIG_SIZE,   /* kept for compatibility */
     /* 256 bit q length */
     DSA_256_HALF_SIZE = 32,            /* r and s size  */
     DSA_256_SIG_SIZE  = 64,            /* signature size */
@@ -66,7 +66,7 @@ enum {
     DSA_MIN_SIG_SIZE = DSA_160_SIG_SIZE,
 
     DSA_MAX_HALF_SIZE = DSA_256_HALF_SIZE,
-    DSA_MAX_SIG_SIZE = DSA_256_SIG_SIZE,
+    DSA_MAX_SIG_SIZE = DSA_256_SIG_SIZE
 };
 
 /* DSA */
@@ -81,16 +81,21 @@ WOLFSSL_API int wc_InitDsaKey_h(DsaKey* key, void* h);
 WOLFSSL_API void wc_FreeDsaKey(DsaKey* key);
 WOLFSSL_API int wc_DsaSign(const byte* digest, byte* out,
                            DsaKey* key, WC_RNG* rng);
+WOLFSSL_API int wc_DsaSign_ex(const byte* digest, word32 digestSz, byte* out,
+                           DsaKey* key, WC_RNG* rng);
 WOLFSSL_API int wc_DsaVerify(const byte* digest, const byte* sig,
                              DsaKey* key, int* answer);
+WOLFSSL_API int wc_DsaVerify_ex(const byte* digest, word32 digestSz,
+                                const byte* sig, DsaKey* key, int* answer);
 WOLFSSL_API int wc_DsaPublicKeyDecode(const byte* input, word32* inOutIdx,
-                                      DsaKey*, word32);
+                                      DsaKey* key, word32 inSz);
 WOLFSSL_API int wc_DsaPrivateKeyDecode(const byte* input, word32* inOutIdx,
-                                       DsaKey*, word32);
-WOLFSSL_API int wc_DsaKeyToDer(DsaKey* key, byte* output, word32 inLen);
+                                       DsaKey* key, word32 inSz);
+WOLFSSL_API int wc_DsaKeyToDer(DsaKey* key, byte* output, word32 outLen);
 WOLFSSL_API int wc_SetDsaPublicKey(byte* output, DsaKey* key,
                                    int outLen, int with_header);
-WOLFSSL_API int wc_DsaKeyToPublicDer(DsaKey* key, byte* output, word32 inLen);
+WOLFSSL_API int wc_DsaKeyToPublicDer(DsaKey* key, byte* output, word32 outLen);
+WOLFSSL_API int wc_DsaCheckPubKey(DsaKey* key);
 
 #ifdef WOLFSSL_KEY_GEN
 WOLFSSL_API int wc_MakeDsaKey(WC_RNG *rng, DsaKey *dsa);

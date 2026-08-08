@@ -1,6 +1,6 @@
-# CMakeList.txt
+# CMakeLists.txt
 #
-# Copyright (C) 2006-2020 wolfSSL Inc.
+# Copyright (C) 2006-2024 wolfSSL Inc.
 #
 # This file is part of wolfSSL. (formerly known as CyaSSL)
 #
@@ -21,6 +21,12 @@
 
 cmake_minimum_required(VERSION 3.16)
 
+if(${CMAKE_VERSION} VERSION_LESS "3.22")
+    message(STATUS "This project recommends using CMake version 3.22 or higher. You are using ${CMAKE_VERSION}.")
+else()
+    cmake_policy(SET CMP0128 NEW)
+endif()
+
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source builds are not allowed.\
      Run cmake from a separate directory from where CMakeLists.txt lives.\
@@ -28,23 +34,42 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
      You must delete them, or cmake will refuse to work.")
 endif()
 
-project(wolfssl VERSION 5.1.2 LANGUAGES C)
+project(wolfssl VERSION 5.9.2 LANGUAGES C ASM)
+
+# Set WOLFSSL_ROOT if not already defined
+if ("${WOLFSSL_ROOT}" STREQUAL "")
+    # we'll assume this CMakeLists.txt is in the root of wolfSSL
+    if (EXISTS "${CMAKE_SOURCE_DIR}/wolfcrypt/src/")
+        get_filename_component(WOLFSSL_ROOT "${CMAKE_SOURCE_DIR}" ABSOLUTE)
+        message(STATUS "Found WOLFSSL_ROOT = ${WOLFSSL_ROOT}")
+    endif()
+else()
+    message(STATUS "Using predefined WOLFSSL_ROOT = ${WOLFSSL_ROOT}")
+endif()
 
 # shared library versioning
-# increment if interfaces have been added, removed or changed
-set(LIBTOOL_CURRENT 31)
-# increment if source code has changed  set to zero if current is incremented
-set(LIBTOOL_REVISION 2)
-# increment if interfaces have been added set to zero if interfaces have been
-# removed or changed
-set(LIBTOOL_AGE 1)
+# increment if interfaces have been removed or changed
+set(WOLFSSL_LIBRARY_VERSION_FIRST 45)
 
-math(EXPR LIBTOOL_SO_VERSION "${LIBTOOL_CURRENT} - ${LIBTOOL_AGE}")
-set(LIBTOOL_FULL_VERSION ${LIBTOOL_SO_VERSION}.${LIBTOOL_AGE}.${LIBTOOL_REVISION})
+# increment if interfaces have been added
+# set to zero if WOLFSSL_LIBRARY_VERSION_FIRST is incremented
+set(WOLFSSL_LIBRARY_VERSION_SECOND 0)
+
+# increment if source code has changed
+# set to zero if WOLFSSL_LIBRARY_VERSION_FIRST is incremented or
+# WOLFSSL_LIBRARY_VERSION_SECOND is incremented
+set(WOLFSSL_LIBRARY_VERSION_THIRD 0)
+
+set(LIBTOOL_FULL_VERSION ${WOLFSSL_LIBRARY_VERSION_FIRST}.${WOLFSSL_LIBRARY_VERSION_SECOND}.${WOLFSSL_LIBRARY_VERSION_THIRD})
 
 set(WOLFSSL_DEFINITIONS)
 set(WOLFSSL_LINK_LIBS)
+set(WOLFSSL_INCLUDE_DIRS)
 
+# Initialize pkg-config private variables
+set(PC_LIBS_PRIVATE "")
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/functions.cmake)
 
 ####################################################
@@ -88,6 +113,14 @@ check_include_file("sys/stat.h" HAVE_SYS_STAT_H)
 check_include_file("sys/types.h" HAVE_SYS_TYPES_H)
 check_include_file("unistd.h" HAVE_UNISTD_H)
 
+# types.h depends on HAVE_LIMITS_H, and it is defined in options.h (rather than
+# config.h) so that applications consuming wolfSSL headers see it. The in-tree
+# build, however, is configured through config.h/compile definitions and does
+# not include options.h, so define it here as well.
+if(HAVE_LIMITS_H)
+    add_definitions("-DHAVE_LIMITS_H")
+endif()
+
 include(CheckFunctionExists)
 
 # TODO: Also check if these functions are declared by the
@@ -101,6 +134,11 @@ check_function_exists("inet_ntoa" HAVE_INET_NTOA)
 check_function_exists("memset" HAVE_MEMSET)
 check_function_exists("socket" HAVE_SOCKET)
 check_function_exists("strftime" HAVE_STRFTIME)
+check_function_exists("__atomic_fetch_add" HAVE_C___ATOMIC)
+check_function_exists("getpid" HAVE_GETPID)
+
+include(CheckSymbolExists)
+check_symbol_exists(isascii "ctype.h" HAVE_ISASCII)
 
 include(CheckTypeSize)
 
@@ -108,23 +146,36 @@ check_type_size("__uint128_t" __UINT128_T)
 check_type_size("long long" SIZEOF_LONG_LONG)
 check_type_size("long" SIZEOF_LONG)
 check_type_size("time_t" SIZEOF_TIME_T)
+check_type_size("uintptr_t" HAVE_UINTPTR_T)
 
 # By default, HAVE___UINT128_T gets defined as TRUE,
 # but we want it as 1.
 if(HAVE___UINT128_T)
     set(HAVE___UINT128_T "1" CACHE INTERNAL "Result of TRY_COMPILE" FORCE)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE___UINT128_T")
 endif()
 
-include(TestBigEndian)
-
-test_big_endian(WORDS_BIGENDIAN)
+if(CMAKE_VERSION VERSION_LESS "3.20")
+    # TestBigEndian was deprecated in 3.20
+    include(TestBigEndian)
+    test_big_endian(IS_BIG_ENDIAN)
+    set(CMAKE_C_BYTE_ORDER "LITTLE_ENDIAN")
+    if(IS_BIG_ENDIAN)
+        set(CMAKE_C_BYTE_ORDER "BIG_ENDIAN")
+    endif()
+endif()
 
 # Thread local storage
 include(CheckCSourceCompiles)
 
-set(TLS_KEYWORDS "__thread" "__declspec(thread)")
-foreach(TLS_KEYWORD IN LISTS TLS_KEYWORDS)
-    set(TLS_CODE "#include <stdlib.h>
+if(CMAKE_C_COMPILER_ID STREQUAL "OpenWatcom")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_THREAD_LS")
+    endif()
+else()
+    set(TLS_KEYWORDS "__thread" "__declspec(thread)")
+    foreach(TLS_KEYWORD IN LISTS TLS_KEYWORDS)
+        set(TLS_CODE "#include <stdlib.h>
                   static void foo(void) {
                      static ${TLS_KEYWORD} int bar\;
                      exit(1)\;
@@ -133,21 +184,22 @@ foreach(TLS_KEYWORD IN LISTS TLS_KEYWORDS)
                   int main() {
                     return 0\;
                   }"
-    )
-    check_c_source_compiles(${TLS_CODE} THREAD_LS_ON)
+        )
+        check_c_source_compiles(${TLS_CODE} THREAD_LS_ON)
 
-    if(THREAD_LS_ON)
-        list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_THREAD_LS")
-        break()
-    else()
-        # THREAD_LS_ON is cached after each call to
-        # check_c_source_compiles, and the function
-        # won't run subsequent times if the variable
-        # is in the cache. To make it run again, we
-        # need to remove the variable from the cache.
-        unset(THREAD_LS_ON CACHE)
-    endif()
-endforeach()
+        if(THREAD_LS_ON)
+            list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_THREAD_LS")
+            break()
+        else()
+            # THREAD_LS_ON is cached after each call to
+            # check_c_source_compiles, and the function
+            # won't run subsequent times if the variable
+            # is in the cache. To make it run again, we
+            # need to remove the variable from the cache.
+            unset(THREAD_LS_ON CACHE)
+        endif()
+    endforeach()
+endif()
 
 # TODO: AX_PTHREAD does a lot. Need to implement the
 #       rest of its logic.
@@ -167,11 +219,26 @@ find_package(Threads)
 # Example for map file and custom linker script
 #set(CMAKE_EXE_LINKER_FLAGS " -Xlinker -Map=output.map -T\"${CMAKE_CURRENT_SOURCE_DIR}/linker.ld\"")
 
+message(STATUS "C Compiler ID: ${CMAKE_C_COMPILER_ID}")
+
+if(DEFINED WARNING_C_FLAGS)
+    set(CMAKE_C_FLAGS "${WARNING_C_FLAGS} ${CMAKE_C_FLAGS}")
+endif()
+
+if(CMAKE_C_COMPILER_ID STREQUAL "OpenWatcom")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wx -wcd=202")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_HAVE_MIN -DWOLFSSL_HAVE_MAX -DNO_WRITEV")
+elseif(WIN32)
+    # Windows cl.exe does not support the -Wextra, -Wno-unused and -Werror flags.
+    set(CMAKE_C_FLAGS "-Wall ${CMAKE_C_FLAGS}")
+else()
+    set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused -Werror ${CMAKE_C_FLAGS}")
+endif()
+
 ####################################################
 # Build Options
 ####################################################
-# TODO: - Debug
-#       - FIPS
+# TODO: - FIPS
 #       - Distro
 #       - Linux Kernel Module
 #       - Single precision math
@@ -181,8 +248,305 @@ find_package(Threads)
 # For reproducible build, gate out from the build anything that might
 # introduce semantically frivolous jitter, maximizing chance of
 # identical object files.
-set(WOLFSSL_REPRODUCIBLE_BUILD_HELP_STRING "Enable maximally reproducible build (default: disabled)")
-add_option("WOLFSSL_REPRODUCIBLE_BUILD" ${WOLFSSL_REPRODUCIBLE_BUILD_HELP_STRING} "no" "yes;no")
+
+####################################################
+# Application / integration support bundles (parity with configure.ac)
+####################################################
+
+add_option("WOLFSSL_OPENSSH" "Enable OpenSSH support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_OPENSSH)
+    foreach(_o WOLFSSL_AES WOLFSSL_ARC4 WOLFSSL_CURVE25519 WOLFSSL_DES3 WOLFSSL_DSA WOLFSSL_MD5 WOLFSSL_RIPEMD)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DFORTRESS" "-DHAVE_ED25519" "-DHAVE_EX_DATA" "-DOPENSSL_EXTRA" "-DWC_RNG_SEED_CB" "-DWOLFSSL_AES_COUNTER" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_ALLOW_RC4" "-DWOLFSSL_ALWAYS_VERIFY_CB" "-DWOLFSSL_BASE16" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_DER_LOAD" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_OPENSSH")
+endif()
+
+add_option("WOLFSSL_OPENVPN" "Enable OpenVPN support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_OPENVPN)
+    foreach(_o WOLFSSL_AES WOLFSSL_CRL WOLFSSL_DES3 WOLFSSL_DSA WOLFSSL_MD5 WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_COMP_KEY" "-DHAVE_CRL" "-DHAVE_EX_DATA" "-DHAVE_KEYING_MATERIAL" "-DHAVE_OPENSSL_CMD" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DSESSION_CERTS" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_AES_COUNTER" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_CERT_EXT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_DES_ECB" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_OPENVPN" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_NGINX" "Enable nginx support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_NGINX)
+    foreach(_o WOLFSSL_CRL WOLFSSL_DSA WOLFSSL_MD5 WOLFSSL_OCSP WOLFSSL_OCSPSTAPLING WOLFSSL_OCSPSTAPLING_V2)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ALPN" "-DHAVE_ANON" "-DHAVE_COMP_KEY" "-DHAVE_CRL" "-DHAVE_EXT_CACHE" "-DHAVE_EX_DATA" "-DHAVE_MAX_FRAGMENT" "-DHAVE_OPENSSL_CMD" "-DHAVE_SESSION_TICKET" "-DHAVE_TRUNCATED_HMAC" "-DHAVE_TRUSTED_CA" "-DKEEP_OUR_CERT" "-DKEEP_PEER_CERT" "-DNO_SESSION_CACHE_REF" "-DOPENSSL_ALL" "-DOPENSSL_COMPATIBLE_DEFAULTS" "-DOPENSSL_EXTRA" "-DSESSION_CERTS" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_ALT_CERT_CHAINS" "-DWOLFSSL_ALWAYS_KEEP_SNI" "-DWOLFSSL_ALWAYS_VERIFY_CB" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CHECK_ALERT_ON_ERR" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_NGINX" "-DWOLFSSL_PRIORITIZE_PSK" "-DWOLFSSL_SIGNER_DER_CERT" "-DWOLFSSL_TICKET_HAVE_ID" "-DWOLFSSL_TLS13_NO_PEEK_HANDSHAKE_DONE" "-DWOLFSSL_TRUST_PEER_CERT")
+endif()
+
+add_option("WOLFSSL_HAPROXY" "Enable HAProxy support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_HAPROXY)
+    foreach(_o WOLFSSL_CRL WOLFSSL_MD5 WOLFSSL_OCSP WOLFSSL_OCSPSTAPLING WOLFSSL_OCSPSTAPLING_V2 WOLFSSL_OLD_TLS)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DFP_MAX_BITS=16384" "-DHAVE_ALPN" "-DHAVE_ANON" "-DHAVE_COMP_KEY" "-DHAVE_CRL" "-DHAVE_EXT_CACHE" "-DHAVE_EX_DATA" "-DHAVE_MAX_FRAGMENT" "-DHAVE_OPENSSL_CMD" "-DHAVE_SECURE_RENEGOTIATION" "-DHAVE_SESSION_TICKET" "-DHAVE_TRUNCATED_HMAC" "-DHAVE_TRUSTED_CA" "-DKEEP_OUR_CERT" "-DKEEP_PEER_CERT" "-DNO_SESSION_CACHE_REF" "-DOPENSSL_ALL" "-DOPENSSL_COMPATIBLE_DEFAULTS" "-DOPENSSL_EXTRA" "-DRSA_MAX_SIZE=8192" "-DSESSION_CERTS" "-DSP_INT_BITS=8192" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_ALLOW_SSLV3" "-DWOLFSSL_ALT_CERT_CHAINS" "-DWOLFSSL_ALWAYS_KEEP_SNI" "-DWOLFSSL_ALWAYS_VERIFY_CB" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CERT_REQ" "-DWOLFSSL_CHECK_ALERT_ON_ERR" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_HAPROXY" "-DWOLFSSL_KEEP_RNG_SEED_FD_OPEN" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_PRIORITIZE_PSK" "-DWOLFSSL_SIGNER_DER_CERT" "-DWOLFSSL_TICKET_HAVE_ID" "-DWOLFSSL_TLS13_NO_PEEK_HANDSHAKE_DONE" "-DWOLFSSL_TRUST_PEER_CERT")
+endif()
+
+add_option("WOLFSSL_LIGHTY" "Enable lighttpd/lighty support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_LIGHTY)
+    foreach(_o WOLFSSL_CRL WOLFSSL_MD5 WOLFSSL_OCSP WOLFSSL_OCSPSTAPLING WOLFSSL_OCSPSTAPLING_V2)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ALPN" "-DHAVE_CRL" "-DHAVE_EXT_CACHE" "-DHAVE_EX_DATA" "-DHAVE_LIGHTY" "-DHAVE_MAX_FRAGMENT" "-DHAVE_OPENSSL_CMD" "-DHAVE_SESSION_TICKET" "-DHAVE_TRUNCATED_HMAC" "-DHAVE_TRUSTED_CA" "-DHAVE_WOLFSSL_SSL_H=1" "-DKEEP_OUR_CERT" "-DKEEP_PEER_CERT" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DOPENSSL_NO_COMP" "-DOPENSSL_NO_SSL2" "-DOPENSSL_NO_SSL3" "-DSESSION_CERTS" "-DSINGLE_THREADED" "-DWOLFSSL_ALWAYS_KEEP_SNI" "-DWOLFSSL_ALWAYS_VERIFY_CB" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_ENCRYPTED_KEYS" "-DWOLFSSL_KEY_GEN")
+endif()
+
+add_option("WOLFSSL_WPAS" "Enable wpa_supplicant support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_WPAS)
+    foreach(_o WOLFSSL_AES WOLFSSL_ARC4 WOLFSSL_CRL WOLFSSL_DES3 WOLFSSL_DSA WOLFSSL_MD4 WOLFSSL_MD5 WOLFSSL_OCSP WOLFSSL_OCSPSTAPLING WOLFSSL_OCSPSTAPLING_V2)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DATOMIC_USER" "-DHAVE_AES_KEYWRAP" "-DHAVE_ANON" "-DHAVE_COMP_KEY" "-DHAVE_CRL" "-DHAVE_EXT_CACHE" "-DHAVE_EX_DATA" "-DHAVE_KEYING_MATERIAL" "-DHAVE_MAX_FRAGMENT" "-DHAVE_OPENSSL_CMD" "-DHAVE_SECRET_CALLBACK" "-DHAVE_SESSION_TICKET" "-DHAVE_STUNNEL" "-DHAVE_TRUNCATED_HMAC" "-DKEEP_OUR_CERT" "-DKEEP_PEER_CERT" "-DNO_SESSION_CACHE_REF" "-DOPENSSL_COMPATIBLE_DEFAULTS" "-DOPENSSL_EXTRA" "-DOPENSSL_EXTRA_X509_SMALL" "-DSESSION_CERTS" "-DWC_CTC_NAME_SIZE=128" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_ALLOW_RC4" "-DWOLFSSL_ALT_CERT_CHAINS" "-DWOLFSSL_ALWAYS_KEEP_SNI" "-DWOLFSSL_ALWAYS_VERIFY_CB" "-DWOLFSSL_CERT_EXT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CHECK_ALERT_ON_ERR" "-DWOLFSSL_CMAC" "-DWOLFSSL_DER_LOAD" "-DWOLFSSL_DES_ECB" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ENCRYPTED_KEYS" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_PRIORITIZE_PSK" "-DWOLFSSL_PUBLIC_ECC_ADD_DBL" "-DWOLFSSL_PUBLIC_MP" "-DWOLFSSL_SIGNER_DER_CERT" "-DWOLFSSL_TICKET_HAVE_ID" "-DWOLFSSL_TLS13_NO_PEEK_HANDSHAKE_DONE" "-DWOLFSSL_TRUST_PEER_CERT" "-DWOLFSSL_VALIDATE_ECC_IMPORT" "-DWOLFSSL_WPAS")
+endif()
+
+add_option("WOLFSSL_OPENLDAP" "Enable OpenLDAP support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_OPENLDAP)
+    foreach(_o WOLFSSL_MD5 WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_COMP_KEY" "-DHAVE_OPENSSL_CMD" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_SIGNER_DER_CERT" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_NETSNMP" "Enable net-snmp support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_NETSNMP)
+    foreach(_o WOLFSSL_CRL WOLFSSL_DES3 WOLFSSL_DTLS WOLFSSL_MD5 WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_COMP_KEY" "-DHAVE_CRL" "-DHAVE_EX_DATA" "-DHAVE_OPENSSL_CMD" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DSESSION_CERTS" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_AES_CFB" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_HITCH" "Enable Hitch support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_HITCH)
+    foreach(_o WOLFSSL_MD5 WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ALPN" "-DHAVE_COMP_KEY" "-DHAVE_EX_DATA" "-DHAVE_OPENSSL_CMD" "-DNO_SESSION_CACHE_REF" "-DOPENSSL_ALL" "-DOPENSSL_COMPATIBLE_DEFAULTS" "-DOPENSSL_EXTRA" "-DSESSION_CERTS" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_ALT_CERT_CHAINS" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CHECK_ALERT_ON_ERR" "-DWOLFSSL_CIPHER_INTERNALNAME" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ENCRYPTED_KEYS" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_HITCH" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_PRIORITIZE_PSK" "-DWOLFSSL_SIGNER_DER_CERT" "-DWOLFSSL_TICKET_HAVE_ID" "-DWOLFSSL_TLS13_NO_PEEK_HANDSHAKE_DONE" "-DWOLFSSL_TRUST_PEER_CERT")
+endif()
+
+add_option("WOLFSSL_MEMCACHED" "Enable Memcached support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_MEMCACHED)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_EXT_CACHE" "-DHAVE_MEMCACHED" "-DWOLFSSL_SESSION_ID_CTX")
+endif()
+
+add_option("WOLFSSL_RSYSLOG" "Enable rsyslog support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_RSYSLOG)
+    foreach(_o WOLFSSL_MD5 WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ANON" "-DHAVE_COMP_KEY" "-DHAVE_EX_DATA" "-DHAVE_OPENSSL_CMD" "-DNO_SESSION_CACHE_REF" "-DOPENSSL_ALL" "-DOPENSSL_COMPATIBLE_DEFAULTS" "-DOPENSSL_EXTRA" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_ALT_CERT_CHAINS" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CHECK_ALERT_ON_ERR" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_PRIORITIZE_PSK" "-DWOLFSSL_RSYSLOG" "-DWOLFSSL_TICKET_HAVE_ID" "-DWOLFSSL_TLS13_NO_PEEK_HANDSHAKE_DONE" "-DWOLFSSL_TRUST_PEER_CERT")
+endif()
+
+add_option("WOLFSSL_BIND" "Enable BIND DNS support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_BIND)
+    foreach(_o WOLFSSL_AES WOLFSSL_DSA WOLFSSL_MD5 WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_AES_ECB" "-DHAVE_ALPN" "-DHAVE_COMP_KEY" "-DHAVE_OPENSSL_CMD" "-DNO_SESSION_CACHE_REF" "-DOPENSSL_ALL" "-DOPENSSL_COMPATIBLE_DEFAULTS" "-DOPENSSL_EXTRA" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_ALT_CERT_CHAINS" "-DWOLFSSL_BIND" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CHECK_ALERT_ON_ERR" "-DWOLFSSL_DES_ECB" "-DWOLFSSL_DSA_768_MODULUS" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_PRIORITIZE_PSK" "-DWOLFSSL_TICKET_HAVE_ID" "-DWOLFSSL_TLS13_NO_PEEK_HANDSHAKE_DONE" "-DWOLFSSL_TRUST_PEER_CERT")
+endif()
+
+add_option("WOLFSSL_NTP" "Enable ntp support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_NTP)
+    foreach(_o WOLFSSL_AES WOLFSSL_DSA WOLFSSL_MD5 WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_COMP_KEY" "-DHAVE_OPENSSL_CMD" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CMAC" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_LIBSSH2" "Enable libssh2 support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_LIBSSH2)
+    foreach(_o WOLFSSL_AES WOLFSSL_DES3 WOLFSSL_DSA WOLFSSL_MD5)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DOPENSSL_EXTRA" "-DWOLFSSL_AES_COUNTER" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_KEY_GEN")
+endif()
+
+add_option("WOLFSSL_STRONGSWAN" "Enable strongSwan support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_STRONGSWAN)
+    foreach(_o WOLFSSL_CRL WOLFSSL_DES3 WOLFSSL_DTLS WOLFSSL_MD5 WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_COMP_KEY" "-DHAVE_CRL" "-DHAVE_EX_DATA" "-DHAVE_OPENSSL_CMD" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DSESSION_CERTS" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_CERT_EXT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CERT_REQ" "-DWOLFSSL_DES_ECB" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_LOG_PRINTF" "-DWOLFSSL_PUBLIC_MP" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_QT" "Enable Qt support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_QT)
+    foreach(_o WOLFSSL_ARC4 WOLFSSL_DES3 WOLFSSL_DSA WOLFSSL_MD5 WOLFSSL_OCSP WOLFSSL_OLD_TLS)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ECC_BRAINPOOL" "-DHAVE_ECC_KOBLITZ" "-DHAVE_ECC_SECPR2" "-DHAVE_ECC_SECPR3" "-DHAVE_EX_DATA" "-DHAVE_OPENSSL_CMD" "-DNO_OLD_MD5_NAME" "-DNO_OLD_RNGNAME" "-DNO_OLD_SHA_NAMES" "-DNO_OLD_SSL_NAMES" "-DNO_OLD_WC_NAMES" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DOPENSSL_NO_SSL2" "-DSESSION_CERTS" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_ALLOW_RC4" "-DWOLFSSL_ALLOW_SSLV3" "-DWOLFSSL_ALLOW_TLSV10" "-DWOLFSSL_CERT_EXT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CUSTOM_CURVES" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ENCRYPTED_KEYS" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_QT" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_APACHE_HTTPD" "Enable Apache httpd support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_APACHE_HTTPD)
+    foreach(_o WOLFSSL_CRL WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ALPN" "-DHAVE_CRL" "-DHAVE_EX_DATA" "-DHAVE_OPENSSL_CMD" "-DHAVE_SECURE_RENEGOTIATION" "-DNO_SESSION_CACHE_REF" "-DOPENSSL_ALL" "-DOPENSSL_COMPATIBLE_DEFAULTS" "-DOPENSSL_EXTRA" "-DOPENSSL_NO_COMP" "-DOPENSSL_NO_SSL2" "-DOPENSSL_NO_SSL3" "-DSESSION_CERTS" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_ALT_CERT_CHAINS" "-DWOLFSSL_ALWAYS_KEEP_SNI" "-DWOLFSSL_APACHE_HTTPD" "-DWOLFSSL_CERT_EXT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CERT_REQ" "-DWOLFSSL_CHECK_ALERT_ON_ERR" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ENCRYPTED_KEYS" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_NO_OCSP_ISSUER_CHECK" "-DWOLFSSL_PRIORITIZE_PSK" "-DWOLFSSL_SIGNER_DER_CERT" "-DWOLFSSL_TICKET_HAVE_ID" "-DWOLFSSL_TLS13_NO_PEEK_HANDSHAKE_DONE" "-DWOLFSSL_TRUST_PEER_CERT")
+endif()
+
+add_option("WOLFSSL_JNI" "Enable wolfSSL JNI support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_JNI)
+    foreach(_o WOLFSSL_AES WOLFSSL_CRL WOLFSSL_CRL_MONITOR WOLFSSL_DTLS WOLFSSL_DTLS13 WOLFSSL_OCSP WOLFSSL_PKCALLBACKS)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DATOMIC_USER" "-DHAVE_ALPN" "-DHAVE_CRL" "-DHAVE_CTS" "-DHAVE_EX_DATA" "-DHAVE_OPENSSL_CMD" "-DKEEP_PEER_CERT" "-DNO_ERROR_QUEUE" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DPERSIST_CERT_CACHE" "-DPERSIST_SESSION_CACHE" "-DSESSION_CERTS" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_ALT_CERT_CHAINS" "-DWOLFSSL_ALT_NAMES" "-DWOLFSSL_ALWAYS_KEEP_SNI" "-DWOLFSSL_ALWAYS_VERIFY_CB" "-DWOLFSSL_CERT_EXT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CERT_REQ" "-DWOLFSSL_DTLS_CH_FRAG" "-DWOLFSSL_DTLS_DROP_STATS" "-DWOLFSSL_DTLS_MTU" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ENCRYPTED_KEYS" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_JNI" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_PUBLIC_MP" "-DWOLFSSL_SEND_HRR_COOKIE" "-DWOLFSSL_TICKET_HAVE_ID" "-DWOLFSSL_TLS13_MIDDLEBOX_COMPAT")
+endif()
+
+add_option("WOLFSSL_WOLFCLU" "Enable wolfCLU support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_WOLFCLU)
+    foreach(_o WOLFSSL_AES WOLFSSL_DES3 WOLFSSL_MD5 WOLFSSL_OCSP WOLFSSL_PKCS7)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_AES_KEYWRAP" "-DHAVE_ED25519" "-DHAVE_OCSP_RESPONDER" "-DHAVE_OID_ENCODING" "-DHAVE_OPENSSL_CMD" "-DHAVE_X963_KDF" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DWC_RSA_NO_PADDING" "-DWC_SIG_MIN_HASH_TYPE=WC_HASH_TYPE_MD5" "-DWOLFSSL_AES_COUNTER" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_ALT_NAMES" "-DWOLFSSL_CERT_EXT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CERT_REQ" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_NO_ASN_STRICT" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_SBLIM_SFCB" "Enable SBLIM SFCB support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_SBLIM_SFCB)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_SBLIM_SFCB" "-DOPENSSL_EXTRA" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_ENCRYPTED_KEYS" "-DWOLFSSL_SIGNER_DER_CERT")
+endif()
+
+add_option("WOLFSSL_TAILSCALE" "Enable Tailscale support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_TAILSCALE)
+    foreach(_o WOLFSSL_MD5 WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ALPN" "-DHAVE_COMP_KEY" "-DHAVE_OPENSSL_CMD" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DSESSION_CERTS" "-DWC_CTC_NAME_SIZE=128" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_ACME_OID" "-DWOLFSSL_AESGCM_STREAM" "-DWOLFSSL_ALWAYS_KEEP_SNI" "-DWOLFSSL_BASE16" "-DWOLFSSL_CERT_EXT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CERT_REQ" "-DWOLFSSL_CERT_SETUP_CB" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_NO_INIT_CTX_KEY" "-DWOLFSSL_PUBLIC_MP" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_CHRONY" "Enable chrony support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_CHRONY)
+    foreach(_o WOLFSSL_AES WOLFSSL_MD5 WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ALPN" "-DHAVE_COMP_KEY" "-DHAVE_ED25519" "-DHAVE_KEYING_MATERIAL" "-DHAVE_MAX_FRAGMENT" "-DHAVE_OPENSSL_CMD" "-DHAVE_TRUNCATED_HMAC" "-DHAVE_TRUSTED_CA" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_AES_COUNTER" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_AES_SIV" "-DWOLFSSL_ALWAYS_KEEP_SNI" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CMAC" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_LIBEST" "Enable libest support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_LIBEST)
+    foreach(_o WOLFSSL_AES WOLFSSL_CRL WOLFSSL_OCSP WOLFSSL_PKCS7 WOLFSSL_SRP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_AES_KEYWRAP" "-DHAVE_CRL" "-DHAVE_EX_DATA" "-DHAVE_LIBEST" "-DHAVE_OPENSSL_CMD" "-DHAVE_X963_KDF" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DSESSION_CERTS" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_ALT_NAMES" "-DWOLFSSL_CERT_EXT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CERT_REQ" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ENCRYPTED_KEYS" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_PSS_SALT_LEN_DISCOVER" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_OPENRESTY" "Enable OpenResty support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_OPENRESTY)
+    foreach(_o WOLFSSL_CRL WOLFSSL_DSA WOLFSSL_MD5 WOLFSSL_OCSP WOLFSSL_OCSPSTAPLING WOLFSSL_OCSPSTAPLING_V2)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ALPN" "-DHAVE_ANON" "-DHAVE_COMP_KEY" "-DHAVE_CRL" "-DHAVE_EXT_CACHE" "-DHAVE_EX_DATA" "-DHAVE_MAX_FRAGMENT" "-DHAVE_OPENSSL_CMD" "-DHAVE_SESSION_TICKET" "-DHAVE_TRUNCATED_HMAC" "-DHAVE_TRUSTED_CA" "-DKEEP_OUR_CERT" "-DKEEP_PEER_CERT" "-DNO_SESSION_CACHE_REF" "-DOPENSSL_ALL" "-DOPENSSL_COMPATIBLE_DEFAULTS" "-DOPENSSL_EXTRA" "-DSESSION_CERTS" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_ALT_CERT_CHAINS" "-DWOLFSSL_ALWAYS_KEEP_SNI" "-DWOLFSSL_ALWAYS_VERIFY_CB" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CHECK_ALERT_ON_ERR" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_NGINX" "-DWOLFSSL_PRIORITIZE_PSK" "-DWOLFSSL_SIGNER_DER_CERT" "-DWOLFSSL_TICKET_HAVE_ID" "-DWOLFSSL_TLS13_NO_PEEK_HANDSHAKE_DONE" "-DWOLFSSL_TRUST_PEER_CERT")
+endif()
+
+add_option("WOLFSSL_LIBWEBSOCKETS" "Enable libwebsockets support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_LIBWEBSOCKETS)
+    foreach(_o WOLFSSL_MD5 WOLFSSL_OCSP)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_COMP_KEY" "-DHAVE_EX_DATA" "-DHAVE_OPENSSL_CMD" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DOPENSSL_NO_EC" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_LIBWEBSOCKETS" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_FORTRESS" "Enable wolfSSL fortress build (default: disabled)" "no" "yes;no")
+if(WOLFSSL_FORTRESS)
+    foreach(_o WOLFSSL_AES WOLFSSL_MD5)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DFORTRESS" "-DOPENSSL_EXTRA" "-DWOLFSSL_AES_COUNTER" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_ALWAYS_VERIFY_CB" "-DWOLFSSL_DER_LOAD" "-DWOLFSSL_KEY_GEN")
+endif()
+
+add_option("WOLFSSL_BUMP" "Enable SSL bump support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_BUMP)
+    foreach(_o WOLFSSL_MD2 WOLFSSL_MD5)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DFP_MAX_BITS=8192" "-DHUGE_SESSION_CACHE" "-DLARGE_STATIC_BUFFERS" "-DOPENSSL_EXTRA" "-DRSA_MAX_SIZE=4096" "-DSP_INT_BITS=4096" "-DWOLFSSL_ALT_NAMES" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_DER_LOAD" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_TEST_CERT")
+endif()
+
+add_option("WOLFSSL_KRB" "Enable Kerberos 5 support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_KRB)
+    foreach(_o WOLFSSL_AES WOLFSSL_ARC4 WOLFSSL_CRL WOLFSSL_DES3 WOLFSSL_MD4 WOLFSSL_MD5 WOLFSSL_OCSP WOLFSSL_PKCS7)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_AES_KEYWRAP" "-DHAVE_COMP_KEY" "-DHAVE_CRL" "-DHAVE_EX_DATA" "-DHAVE_OPENSSL_CMD" "-DHAVE_X963_KDF" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_ALLOW_RC4" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_DES_ECB" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KRB" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_SMIME" "Enable S/MIME support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_SMIME)
+    foreach(_o WOLFSSL_AES WOLFSSL_MD5 WOLFSSL_OCSP WOLFSSL_PKCS7)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_AES_KEYWRAP" "-DHAVE_COMP_KEY" "-DHAVE_OPENSSL_CMD" "-DHAVE_SMIME" "-DHAVE_X963_KDF" "-DOPENSSL_ALL" "-DOPENSSL_EXTRA" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_TICKET_HAVE_ID")
+endif()
+
+add_option("WOLFSSL_SCEP" "Enable wolfSCEP support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_SCEP)
+    foreach(_o WOLFSSL_AES WOLFSSL_PKCS7)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_AES_KEYWRAP" "-DHAVE_X963_KDF" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_CERT_EXT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_REQ" "-DWOLFSSL_HAVE_WOLFSCEP" "-DWOLFSSL_KEY_GEN")
+endif()
+
+add_option("WOLFSSL_MCAST" "Enable DTLS multicast support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_MCAST)
+    foreach(_o WOLFSSL_DTLS)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_NULL_CIPHER" "-DWOLFSSL_MULTICAST")
+endif()
+
+add_option("WOLFSSL_WPAS_DPP" "Enable wpa_supplicant DPP support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_WPAS_DPP)
+    foreach(_o WOLFSSL_AES WOLFSSL_ARC4 WOLFSSL_CRL WOLFSSL_DES3 WOLFSSL_DSA WOLFSSL_MD4 WOLFSSL_MD5 WOLFSSL_OCSP WOLFSSL_OCSPSTAPLING WOLFSSL_OCSPSTAPLING_V2 WOLFSSL_PKCS7)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DATOMIC_USER" "-DHAVE_AES_KEYWRAP" "-DHAVE_ANON" "-DHAVE_COMP_KEY" "-DHAVE_CRL" "-DHAVE_ECC_BRAINPOOL" "-DHAVE_ECC_CDH" "-DHAVE_ECC_KOBLITZ" "-DHAVE_ECC_SECPR2" "-DHAVE_ECC_SECPR3" "-DHAVE_EXT_CACHE" "-DHAVE_EX_DATA" "-DHAVE_KEYING_MATERIAL" "-DHAVE_MAX_FRAGMENT" "-DHAVE_OPENSSL_CMD" "-DHAVE_SECRET_CALLBACK" "-DHAVE_SESSION_TICKET" "-DHAVE_STUNNEL" "-DHAVE_TRUNCATED_HMAC" "-DHAVE_X963_KDF" "-DKEEP_OUR_CERT" "-DKEEP_PEER_CERT" "-DNO_SESSION_CACHE_REF" "-DOPENSSL_ALL" "-DOPENSSL_COMPATIBLE_DEFAULTS" "-DOPENSSL_EXTRA" "-DOPENSSL_EXTRA_X509_SMALL" "-DSESSION_CERTS" "-DWC_CTC_NAME_SIZE=128" "-DWC_RSA_NO_PADDING" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_ALLOW_RC4" "-DWOLFSSL_ALT_CERT_CHAINS" "-DWOLFSSL_ALWAYS_KEEP_SNI" "-DWOLFSSL_ALWAYS_VERIFY_CB" "-DWOLFSSL_CERT_EXT" "-DWOLFSSL_CERT_GEN" "-DWOLFSSL_CERT_NAME_ALL" "-DWOLFSSL_CERT_REQ" "-DWOLFSSL_CHECK_ALERT_ON_ERR" "-DWOLFSSL_CMAC" "-DWOLFSSL_CUSTOM_CURVES" "-DWOLFSSL_DER_LOAD" "-DWOLFSSL_DES_ECB" "-DWOLFSSL_EITHER_SIDE" "-DWOLFSSL_ENCRYPTED_KEYS" "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_KEY_GEN" "-DWOLFSSL_PRIORITIZE_PSK" "-DWOLFSSL_PUBLIC_ECC_ADD_DBL" "-DWOLFSSL_PUBLIC_MP" "-DWOLFSSL_SIGNER_DER_CERT" "-DWOLFSSL_TICKET_HAVE_ID" "-DWOLFSSL_TLS13_NO_PEEK_HANDSHAKE_DONE" "-DWOLFSSL_TRUST_PEER_CERT" "-DWOLFSSL_VALIDATE_ECC_IMPORT" "-DWOLFSSL_WPAS")
+endif()
+
+add_option("WOLFSSL_QT_TEST" "Enable Qt test support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_QT_TEST)
+    list(APPEND WOLFSSL_DEFINITIONS "-DOPENSSL_NO_SSL3" "-DWOLFSSL_STATIC_PSK" "-DWOLFSSL_STATIC_RSA")
+endif()
+
+add_option("WOLFSSL_SIGNAL" "Enable Signal Protocol support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_SIGNAL)
+    foreach(_o WOLFSSL_AES)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ALPN" "-DHAVE_MAX_FRAGMENT" "-DHAVE_TRUNCATED_HMAC" "-DHAVE_TRUSTED_CA" "-DOPENSSL_EXTRA" "-DWOLFSSL_AES_COUNTER" "-DWOLFSSL_AES_DIRECT" "-DWOLFSSL_ENCRYPTED_KEYS" "-DWOLFSSL_SIGNAL")
+endif()
+
+add_option("WOLFSSL_IOTSAFE" "Enable IoT-Safe support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_IOTSAFE)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_IOTSAFE")
+endif()
+
+add_option("WOLFSSL_VAULTIC" "Enable WISeKey/SealSQ VaultIC support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_VAULTIC)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_VAULTIC")
+    # VaultIC port supports PK callbacks and crypto callbacks (mirror autotools
+    # --enable-vaultic). These options are declared later, so force them before
+    # their add_option() calls.
+    force_option(WOLFSSL_PKCALLBACKS "yes")
+    force_option(WOLFSSL_CRYPTOCB "yes")
+endif()
+
+add_option("WOLFSSL_WOLFSENTRY" "Enable wolfSentry support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_WOLFSENTRY)
+    foreach(_o WOLFSSL_MD5)
+        force_option(${_o} "yes")
+    endforeach()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_EX_DATA" "-DHAVE_EX_DATA_CLEANUP_HOOKS" "-DOPENSSL_EXTRA" "-DWOLFSSL_ENCRYPTED_KEYS" "-DWOLFSSL_WOLFSENTRY_HOOKS")
+endif()
+
+add_option("WOLFSSL_OLD_EXTDATA_FMT" "Enable old external data format (default: disabled)" "no" "yes;no")
+if(WOLFSSL_OLD_EXTDATA_FMT)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_OLD_EXTDATA_FMT")
+endif()
+
+add_option("WOLFSSL_REPRODUCIBLE_BUILD"
+    "Enable maximally reproducible build (default: disabled)"
+    "no" "yes;no")
 
 if(WOLFSSL_REPRODUCIBLE_BUILD)
     list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_REPRODUCIBLE_BUILD")
@@ -191,21 +555,29 @@ if(WOLFSSL_REPRODUCIBLE_BUILD)
     set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -D <TARGET>")
 endif()
 
+add_option("WOLFSSL_INSTALL" "Create install target for WolfSSL project" "yes" "yes;no")
+
 # Support for forcing 32-bit mode
 # TODO: detect platform from other options
-set(WOLFSSL_32BIT_HELP_STRING "Enables 32-bit support (default: disabled)")
-add_option("WOLFSSL_32BIT" ${WOLFSSL_32BIT_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_32BIT"
+    "Enables 32-bit support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_32BIT)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWC_32BIT_CPU")
+endif()
 
 # 16-bit compiler support
-set(WOLFSSL_16BIT_HELP_STRING "Enables 16-bit support (default: disabled)")
-add_option("WOLFSSL_16BIT" ${WOLFSSL_16BIT_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_16BIT"
+    "Enables 16-bit support (default: disabled)"
+    "no" "yes;no")
 if(WOLFSSL_16BIT)
     list(APPEND WOLFSSL_DEFINITIONS "-DWC_16BIT_CPU")
 endif()
 
 # Support for disabling all ASM
-set(WOLFSSL_ASM_HELP_STRING "Enables option for assembly (default: enabled)")
-add_option("WOLFSSL_ASM" ${WOLFSSL_ASM_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_ASM"
+    "Enables option for assembly (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_ASM)
     list(APPEND WOLFSSL_DEFINITIONS
@@ -213,41 +585,269 @@ if(NOT WOLFSSL_ASM)
         "-DWOLFSSL_NO_ASM")
 endif()
 
+# Enable Debugging
+add_option("WOLFSSL_DEBUG"
+    "Enables option for debug (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_DEBUG)
+    # Optional variable inspection
+    if (0)
+        get_cmake_property(_variableNames VARIABLES)
+        list (SORT _variableNames)
+        message(STATUS "")
+        message(STATUS "ALL VARIABLES BEGIN")
+        message(STATUS "")
+        foreach (_variableName ${_variableNames})
+            message(STATUS "${_variableName}=${${_variableName}}")
+        endforeach()
+        message(STATUS "")
+        message(STATUS "ALL VARIABLES END")
+        message(STATUS "")
+    endif()
+
+    if (CMAKE_C_COMPILER_ID STREQUAL "Watcom" OR CMAKE_C_COMPILER_ID STREQUAL "OpenWatcom" OR CMAKE_GENERATOR STREQUAL "Watcom WMake")
+        # Open Watcom v2 does not support -g debugging
+        message(STATUS "Detected Watcom compiler, using CMAKE_C_FLAGS_DEBUG -d2")
+        set(CMAKE_C_FLAGS_DEBUG "-d2 ${CMAKE_C_FLAGS_DEBUG}")
+    else()
+        set(CMAKE_C_FLAGS "-g ${CMAKE_C_FLAGS}")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DDEBUG_WOLFSSL"
+        "-DDEBUG")
+endif()
+
+
 # Single threaded
-set(WOLFSSL_SINGLE_THREADED_HELP_STRING "Enable wolfSSL single threaded (default: disabled)")
-add_option("WOLFSSL_SINGLE_THREADED" ${WOLFSSL_SINGLE_THREADED_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_SINGLE_THREADED"
+    "Enable wolfSSL single threaded (default: disabled)"
+    "no" "yes;no")
 
 # TODO: Logic here isn't complete, yet (see AX_PTHREAD)
 if(NOT WOLFSSL_SINGLE_THREADED)
     if(CMAKE_USE_PTHREADS_INIT)
         list(APPEND WOLFSSL_LINK_LIBS Threads::Threads)
-        list(APPEND WOLFSSL_DEFINITIONS
-            "-DHAVE_PTHREAD"
-            "-D_POSIX_THREADS")
+        set(HAVE_PTHREAD 1)
+        list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_PTHREAD")
     endif()
+else()
+    list(APPEND WOLFSSL_DEFINITIONS "-DSINGLE_THREADED")
 endif()
 
-# TODO: - DTLS
-#       - TLS v1.3 Draft 18
+# DTLS-SRTP
+add_option("WOLFSSL_SRTP"
+    "Enables wolfSSL DTLS-SRTP (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_SRTP)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_SRTP")
+    set(WOLFSSL_DTLS "yes")
+    set(WOLFSSL_KEYING_MATERIAL "yes")
+endif()
+
+
+# DTLS
+add_option("WOLFSSL_DTLS"
+    "Enables wolfSSL DTLS (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_DTLS)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_DTLS")
+endif()
+
 
 # TLS v1.3
-set(WOLFSSL_TLS13_HELP_STRING "Enable wolfSSL TLS v1.3 (default: enabled)")
-add_option("WOLFSSL_TLS13" ${WOLFSSL_TLS13_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_TLS13"
+    "Enable wolfSSL TLS v1.3 (default: enabled)"
+    "yes" "yes;no")
 
 if("${FIPS_VERSION}" STREQUAL "v1")
     override_cache(WOLFSSL_TLS13 "no")
 endif()
 
-# TODO: Post-handshake authentication
-#       Hello retry request cookie
+# Post-handshake authentication
+add_option("WOLFSSL_POSTAUTH"
+    "Enable wolfSSL Post-handshake Authentication (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_POSTAUTH)
+    if(NOT WOLFSSL_TLS13)
+        message(WARNING "TLS 1.3 is disabled - disabling Post-handshake Authentication")
+        override_cache(WOLFSSL_POSTAUTH "no")
+    else()
+        list(APPEND WOLFSSL_DEFINITIONS
+            "-DWOLFSSL_POST_HANDSHAKE_AUTH")
+    endif()
+endif()
+
+# Certificate Authentication with External PSK (RFC 8773bis)
+add_option("WOLFSSL_CERT_WITH_EXTERN_PSK"
+    "Enable Certificate Authentication with External PSKs for TLS 1.3 (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_CERT_WITH_EXTERN_PSK)
+    if(NOT WOLFSSL_TLS13)
+        message(WARNING "TLS 1.3 is disabled - disabling cert-with-extern-psk")
+        override_cache(WOLFSSL_CERT_WITH_EXTERN_PSK "no")
+    elseif(NOT WOLFSSL_PSK)
+        message(WARNING "PSK is disabled - disabling cert-with-extern-psk")
+        override_cache(WOLFSSL_CERT_WITH_EXTERN_PSK "no")
+    else()
+        list(APPEND WOLFSSL_DEFINITIONS
+            "-DWOLFSSL_CERT_WITH_EXTERN_PSK")
+    endif()
+endif()
+
+# Hello Retry Request Cookie
+add_option("WOLFSSL_HRR_COOKIE"
+    "Enable the server to send Cookie Extension in HRR with state (default: disabled)"
+    "undefined" "yes;no;undefined")
+
+if("${WOLFSSL_HRR_COOKIE}" STREQUAL "yes")
+    if(NOT WOLFSSL_TLS13)
+        message(WARNING "TLS 1.3 is disabled - disabling HRR Cookie")
+        override_cache(WOLFSSL_HRR_COOKIE "no")
+    else()
+        list(APPEND WOLFSSL_DEFINITIONS
+            "-DWOLFSSL_SEND_HRR_COOKIE")
+    endif()
+endif()
+
+# DTLS v1.3
+add_option("WOLFSSL_DTLS13"
+    "Enable wolfSSL DTLS v1.3 (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_DTLS13)
+    if (NOT WOLFSSL_DTLS)
+      message(FATAL_ERROR "DTLS13 requires DTLS")
+    endif()
+    if (NOT WOLFSSL_TLS13)
+      message(FATAL_ERROR "DTLS13 requires TLS13")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_DTLS13")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_W64_WRAPPER")
+    if ("${WOLFSSL_HRR_COOKIE}" STREQUAL "undefined")
+      message(WARNING "DTLS1.3 is enabled - enabling HRR Cookie")
+      override_cache(WOLFSSL_HRR_COOKIE "yes")
+      list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SEND_HRR_COOKIE")
+    endif()
+    if (WOLFSSL_AES)
+      list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_AES_DIRECT")
+    endif()
+endif()
+
+# DTLS ConnectionID support
+add_option("WOLFSSL_DTLS_CID"
+    "Enables wolfSSL DTLS CID (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_DTLS_CID)
+    if(NOT WOLFSSL_DTLS)
+        message(FATAL_ERROR "CID requires DTLS")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_DTLS_CID")
+endif()
+
+# DTLS 1.3 Fragment ClientHello
+add_option("WOLFSSL_DTLS_CH_FRAG"
+    "Enable wolfSSL DTLS 1.3 Fragment ClientHello (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_DTLS_CH_FRAG)
+    if(NOT WOLFSSL_DTLS13)
+        message(FATAL_ERROR "DTLS 1.3 Fragment ClientHello is supported only for DTLSv1.3")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_DTLS_CH_FRAG")
+endif()
 
 # RNG
-set(WOLFSSL_RNG_HELP_STRING "Enable compiling and using RNG (default: enabled)")
-add_option("WOLFSSL_RNG" ${WOLFSSL_RNG_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_RNG"
+    "Enable compiling and using RNG (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_RNG)
     list(APPEND WOLFSSL_DEFINITIONS "-DWC_NO_RNG")
 endif()
+
+# QUIC
+add_option(WOLFSSL_QUIC
+    "Enable QUIC support (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_QUIC)
+    set(WOLFSSL_ALPN "yes")
+    set(WOLFSSL_OPENSSLEXTRA "yes")
+    set(WOLFSSL_AESCTR "yes")
+    set(WOLFSSL_CURVE25519 "yes")
+    set(WOLFSSL_SNI "yes")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_QUIC" "-DHAVE_EX_DATA")
+endif()
+
+# Curl
+add_option(WOLFSSL_CURL
+    "Enable CURL support (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_CURL)
+    set(WOLFSSL_MD4 "yes")
+    set(WOLFSSL_DES3 "yes")
+    set(WOLFSSL_ALPN "yes")
+    set(WOLFSSL_EX_DATA "yes")
+    set(WOLFSSL_WOLFSSH "yes")
+    set(WOLFSSL_OPENSSLEXTRA "yes")
+    set(WOLFSSL_CRL "yes")
+    set(WOLFSSL_OCSP "yes")
+    set(WOLFSSL_OCSPSTAPLING "yes")
+    set(WOLFSSL_OCSPSTAPLING_V2 "yes")
+    # Note: OCSP sets requisite HAVE_TLS_EXTENSIONS and HAVE_CERTIFICATE_STATUS_REQUEST(_V2)
+    set(WOLFSSL_SNI "yes")
+    set(WOLFSSL_ALT_CERT_CHAINS "yes")
+    set(WOLFSSL_IP_ALT_NAME "yes")
+    set(WOLFSSL_SESSION_TICKET "yes")
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DNO_SESSION_CACHE_REF" "-DWOLFSSL_DES_ECB")
+endif()
+
+# ALPN
+add_option(WOLFSSL_ALPN
+    "Enable ALPN support (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_ALPN)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ALPN" "-DHAVE_TLS_EXTENSIONS")
+endif()
+
+# altcertchains
+add_option(WOLFSSL_ALT_CERT_CHAINS
+    "Enable support for Alternate certification chains (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_ALT_CERT_CHAINS)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_ALT_CERT_CHAINS")
+endif()
+
+# ip-alt-name
+add_option(WOLFSSL_IP_ALT_NAME
+    "Enable support for IP alternative name (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_IP_ALT_NAME)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_IP_ALT_NAME")
+endif()
+
+# wolfSSH
+add_option(WOLFSSL_WOLFSSH
+    "Enable support for wolfSSH (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_WOLFSSH)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_WOLFSSH")
+endif()
+
 
 # TODO: - DTLS-SCTP
 #       - DTLS multicast
@@ -258,19 +858,17 @@ endif()
 #       - wpa_supplicant
 #       - Fortress
 #       - libwebsockets
-#       - IP alternative name
 #       - Qt
 #       - SSL bump
 #       - sniffer
 #       - Signal
 #       - OpenSSL coexist
-#       - OpenSSL compatibility all
-#       - OpenSSL compatibility extra
 #       - Max strength
 
 # Harden, enable Timing Resistance and Blinding by default
-set(WOLFSSL_HARDEN_HELP_STRING "Enable Hardened build, Enables Timing Resistance and Blinding (default: enabled)")
-add_option("WOLFSSL_HARDEN" ${WOLFSSL_HARDEN_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_HARDEN"
+    "Enable Hardened build, Enables Timing Resistance and Blinding (default: enabled)"
+    "yes" "yes;no")
 
 if(WOLFSSL_HARDEN)
     list(APPEND WOLFSSL_DEFINITIONS "-DTFM_TIMING_RESISTANT" "-DECC_TIMING_RESISTANT")
@@ -282,55 +880,479 @@ else()
     list(APPEND WOLFSSL_DEFINITIONS "-DWC_NO_HARDEN")
 endif()
 
-set(WOLFSSL_OPENSSLEXTRA_HELP_STRING "Enable extra OpenSSL API, size+ (default: disabled)")
-add_option(WOLFSSL_OPENSSLEXTRA ${WOLFSSL_OPENSSLEXTRA_HELP_STRING} "no" "yes;no")
+add_option(WOLFSSL_OPENSSLEXTRA
+    "Enable extra OpenSSL API, size+ (default: disabled)"
+    "no" "yes;no")
+
+add_option(WOLFSSL_OPENSSLALL
+    "Enable all OpenSSL API, size++ (default: disabled)"
+    "no" "yes;no")
+
+add_option(WOLFSSL_ASIO
+    "Enable asio support (default: disabled)"
+    "no" "yes;no")
+
+if (WOLFSSL_ASIO)
+    list(APPEND WOLFSSL_DEFINITIONS
+    "-DWOLFSSL_ASIO" "-DASIO_USE_WOLFSSL"
+    "-DBOOST_ASIO_USE_WOLFSSL" "-DHAVE_EX_DATA"
+    "-DSSL_TXT_TLSV1_2" "-DOPENSSL_NO_SSL2" "-DOPENSSL_NO_SSL3"
+    "-DHAVE_OCSP" "-DWOLFSSL_KEY_GEN")
+    override_cache(WOLFSSL_OPENSSLALL "yes")
+    override_cache(WOLFSSL_OPENSSLEXTRA "yes")
+endif()
 
 if (WOLFSSL_OPENSSLEXTRA AND NOT WOLFSSL_OPENSSLCOEXIST)
     list(APPEND WOLFSSL_DEFINITIONS
-      "-DOPENSSL_EXTRA"
-      "-DWOLFSSL_ALWAYS_VERIFY_CB"
-      "-DWOLFSSL_VERIFY_CB_ALL_CERTS"
-      "-DWOLFSSL_EXTRA_ALERTS"
-      "-DHAVE_EXT_CACHE"
-      "-DWOLFSSL_FORCE_CACHE_ON_TICKET")
+      "-DOPENSSL_EXTRA")
+endif()
+
+if (WOLFSSL_OPENSSLALL)
+    list(APPEND WOLFSSL_DEFINITIONS
+      "-DOPENSSL_ALL" "-DWOLFSSL_EITHER_SIDE" "-DWC_RSA_NO_PADDING"
+      "-DWC_RSA_PSS" "-DWOLFSSL_PSS_LONG_SALT" "-DWOLFSSL_TICKET_HAVE_ID"
+      "-DWOLFSSL_ERROR_CODE_OPENSSL" "-DWOLFSSL_CERT_NAME_ALL")
+endif()
+
+add_option(WOLFSSL_NO_STUB
+    "Removes OpenSSL compatibility stub functions (default: disabled)"
+    "no" "yes;no")
+
+if (WOLFSSL_NO_STUB)
+    list(APPEND WOLFSSL_DEFINITIONS
+      "-DNO_WOLFSSL_STUB")
 endif()
 
 # TODO: - IPv6 test apps
 
 set(WOLFSSL_SLOW_MATH "yes")
 
+# ML-KEM/Kyber
+add_option(WOLFSSL_MLKEM
+    "Enable the wolfSSL PQ ML-KEM library (default: disabled)"
+    "yes" "yes;no")
+
+if (WOLFSSL_MLKEM)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_HAVE_MLKEM")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHA3")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHAKE128")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHAKE256")
+
+    set_wolfssl_definitions("WOLFSSL_HAVE_MLKEM" RESULT)
+    set_wolfssl_definitions("WOLFSSL_SHA3"       RESULT)
+    set_wolfssl_definitions("WOLFSSL_SHAKE128"   RESULT)
+    set_wolfssl_definitions("WOLFSSL_SHAKE256"   RESULT)
+endif()
+
+# When MLKEM and DTLS 1.3 are both enabled, DTLS ClientHello fragmenting is
+# required (PQC keys in ClientHello can exceed MTU), so enable it automatically.
+if(WOLFSSL_MLKEM AND WOLFSSL_DTLS13 AND NOT WOLFSSL_DTLS_CH_FRAG)
+    message(STATUS "MLKEM and DTLS 1.3 are enabled; enabling DTLS ClientHello fragmenting")
+    override_cache(WOLFSSL_DTLS_CH_FRAG "yes")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_DTLS_CH_FRAG")
+endif()
+
+# Disable ML-KEM as standalone TLS key exchange (non-hybrid); when enabled (default), standalone is disabled
+add_option(WOLFSSL_TLS_NO_MLKEM_STANDALONE
+    "Disable ML-KEM as standalone TLS key exchange (non-hybrid) (default: enabled, i.e. standalone disabled)"
+    "yes" "yes;no")
+
+if (WOLFSSL_TLS_NO_MLKEM_STANDALONE)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_TLS_NO_MLKEM_STANDALONE")
+endif()
+
+# PQ/T hybrid combinations
+add_option(WOLFSSL_PQC_HYBRIDS
+    "Enable PQ/T hybrid combinations (default: enabled)"
+    "yes" "yes;no")
+
+if (WOLFSSL_PQC_HYBRIDS)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_PQC_HYBRIDS")
+endif()
+
+# ML-DSA (FIPS 204)
+add_option(WOLFSSL_MLDSA
+    "Enable the wolfSSL PQ ML-DSA (FIPS 204) implementation (default: disabled)"
+    "no" "yes;no")
+# Legacy alias: WOLFSSL_DILITHIUM. Kept for backward compatibility.
+add_option(WOLFSSL_DILITHIUM
+    "Legacy alias for WOLFSSL_MLDSA (default: disabled)"
+    "no" "yes;no")
+
+if (WOLFSSL_DILITHIUM)
+    message(DEPRECATION
+        "WOLFSSL_DILITHIUM is the legacy alias for WOLFSSL_MLDSA and will be "
+        "removed in a future release. Set -DWOLFSSL_MLDSA=yes instead.")
+endif()
+
+if (WOLFSSL_MLDSA OR WOLFSSL_DILITHIUM)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_HAVE_MLDSA")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHA3")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHAKE128")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHAKE256")
+
+    set_wolfssl_definitions("WOLFSSL_HAVE_MLDSA" RESULT)
+    set_wolfssl_definitions("WOLFSSL_SHA3"       RESULT)
+    set_wolfssl_definitions("WOLFSSL_SHAKE128"   RESULT)
+    set_wolfssl_definitions("WOLFSSL_SHAKE256"   RESULT)
+endif()
+
+# Native Falcon. Native implementation: no liboqs dependency. Needs SHA-3 /
+# SHAKE256 for hash-to-point.
+add_option(WOLFSSL_FALCON
+    "Enable the native wolfSSL PQ Falcon implementation (default: disabled)"
+    "no" "yes;no")
+
+if (WOLFSSL_FALCON)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_FALCON")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHA3")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHAKE256")
+
+    set_wolfssl_definitions("HAVE_FALCON" RESULT)
+    set_wolfssl_definitions("WOLFSSL_SHA3"       RESULT)
+    set_wolfssl_definitions("WOLFSSL_SHAKE256"   RESULT)
+endif()
+
+# LMS
+add_option(WOLFSSL_LMS
+    "Enable the PQ LMS Stateful Hash-based Signature Scheme (default: disabled)"
+    "no" "yes;no")
+
+add_option(WOLFSSL_LMSSHA256192
+    "Enable the LMS SHA_256_192 truncated variant (default: disabled)"
+    "no" "yes;no")
+
+add_option(WOLFSSL_LMSNOSHA256256
+    "Disable the LMS SHA_256_256 standard variant (default: disabled)"
+    "no" "yes;no")
+
+add_option(WOLFSSL_LMSVERIFYONLY
+    "Enable the LMS/HSS verify-only implementation (default: disabled)"
+    "no" "yes;no")
+
+add_option(WOLFSSL_LMSSMALL
+    "Enable the smaller, slower LMS/HSS implementation (default: disabled)"
+    "no" "yes;no")
+
+add_option(WOLFSSL_LMSSHAKE256
+    "Enable the LMS SHAKE256 variant (default: disabled)"
+    "no" "yes;no")
+
+if (WOLFSSL_LMS)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_HAVE_LMS")
+
+    set_wolfssl_definitions("WOLFSSL_HAVE_LMS" RESULT)
+
+    if (WOLFSSL_LMSSHA256192)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_LMS_SHA256_192")
+
+        set_wolfssl_definitions("WOLFSSL_LMS_SHA256_192"    RESULT)
+    endif()
+
+    if (WOLFSSL_LMSNOSHA256256)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_NO_LMS_SHA256_256")
+
+        set_wolfssl_definitions("WOLFSSL_NO_LMS_SHA256_256" RESULT)
+    endif()
+
+    if (WOLFSSL_LMSVERIFYONLY)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_LMS_VERIFY_ONLY")
+
+        set_wolfssl_definitions("WOLFSSL_LMS_VERIFY_ONLY"   RESULT)
+    endif()
+
+    if (WOLFSSL_LMSSMALL)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_WC_LMS_SMALL")
+
+        set_wolfssl_definitions("WOLFSSL_WC_LMS_SMALL"      RESULT)
+    endif()
+
+    if (WOLFSSL_LMSSHAKE256)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_LMS_SHAKE256")
+
+        set_wolfssl_definitions("WOLFSSL_LMS_SHAKE256"      RESULT)
+    endif()
+endif()
+
+# Experimental features
+add_option(WOLFSSL_EXPERIMENTAL
+    "Enable experimental features (default: disabled)"
+    "no" "yes;no")
+
+add_option(WOLFSSL_EXTRA_PQC_HYBRIDS
+    "Enable extra PQ/T hybrid combinations (default: disabled)"
+    "no" "yes;no")
+
+# FrodoKEM reference implementation (experimental)
+add_option(WOLFSSL_FRODOKEM
+    "Enable the wolfSSL FrodoKEM reference implementation (requires WOLFSSL_EXPERIMENTAL) (default: disabled)"
+    "no" "yes;no")
+# FrodoKEM matrix A generation with SHAKE-128 (default: enabled when FrodoKEM on)
+add_option(WOLFSSL_FRODOKEM_SHAKE
+    "Enable FrodoKEM SHAKE-128 matrix A generation (default: enabled)"
+    "yes" "yes;no")
+# FrodoKEM matrix A generation with AES-128 (default: disabled)
+add_option(WOLFSSL_FRODOKEM_AES
+    "Enable FrodoKEM AES-128 matrix A generation (default: disabled)"
+    "no" "yes;no")
+# eFrodoKEM (ephemeral, salt-less) variants (default: disabled)
+add_option(WOLFSSL_FRODOKEM_EPHEMERAL
+    "Enable eFrodoKEM (ephemeral) variants (default: disabled)"
+    "no" "yes;no")
+# FrodoKEM parameter sets (each default: enabled)
+add_option(WOLFSSL_FRODOKEM_640
+    "Enable the FrodoKEM-640 parameter set (default: enabled)"
+    "yes" "yes;no")
+add_option(WOLFSSL_FRODOKEM_976
+    "Enable the FrodoKEM-976 parameter set (default: enabled)"
+    "yes" "yes;no")
+add_option(WOLFSSL_FRODOKEM_1344
+    "Enable the FrodoKEM-1344 parameter set (default: enabled)"
+    "yes" "yes;no")
+# FrodoKEM operations (each default: enabled)
+add_option(WOLFSSL_FRODOKEM_MAKE_KEY
+    "Enable FrodoKEM key generation (default: enabled)"
+    "yes" "yes;no")
+add_option(WOLFSSL_FRODOKEM_ENCAPSULATE
+    "Enable FrodoKEM encapsulation (default: enabled)"
+    "yes" "yes;no")
+add_option(WOLFSSL_FRODOKEM_DECAPSULATE
+    "Enable FrodoKEM decapsulation (default: enabled)"
+    "yes" "yes;no")
+# Small-footprint FrodoKEM: looped (not unrolled) matrix arithmetic
+# (default: disabled)
+add_option(WOLFSSL_FRODOKEM_SMALL
+    "Enable small-footprint FrodoKEM (default: disabled)"
+    "no" "yes;no")
+
+# FrodoKEM AArch64 SVE / SME acceleration (default: disabled; AArch64 asm only)
+add_option(WOLFSSL_FRODOKEM_SVE
+    "Enable FrodoKEM AArch64 SVE acceleration (default: disabled)"
+    "no" "yes;no")
+add_option(WOLFSSL_FRODOKEM_SME
+    "Enable FrodoKEM AArch64 SME acceleration (default: disabled)"
+    "no" "yes;no")
+
+message(STATUS "Looking for WOLFSSL_EXPERIMENTAL")
+if (WOLFSSL_EXPERIMENTAL)
+    message(STATUS "Looking for WOLFSSL_EXPERIMENTAL - found")
+
+    # We've enabled the experimental environment, but let's
+    # check if any experimental features are also enabled:
+    set(WOLFSSL_FOUND_EXPERIMENTAL_FEATURE 0)
+
+    set_wolfssl_definitions("WOLFSSL_EXPERIMENTAL_SETTINGS" RESULT)
+
+    # Native Falcon is an experimental feature (unstandardized; API name
+    # subject to change). It has no liboqs dependency.
+    if (WOLFSSL_FALCON)
+        set(WOLFSSL_FOUND_EXPERIMENTAL_FEATURE 1)
+    endif()
+
+    # Checking for experimental feature: extra PQ/T hybrid combinations
+    message(STATUS "Looking for WOLFSSL_EXTRA_PQC_HYBRIDS")
+    if (WOLFSSL_EXTRA_PQC_HYBRIDS)
+        set(WOLFSSL_FOUND_EXPERIMENTAL_FEATURE 1)
+        message(STATUS "Looking for WOLFSSL_EXTRA_PQC_HYBRIDS - found")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_EXTRA_PQC_HYBRIDS")
+    else()
+        message(STATUS "Looking for WOLFSSL_EXTRA_PQC_HYBRIDS - not found")
+    endif()
+
+    # Checking for experimental feature: FrodoKEM
+    message(STATUS "Looking for WOLFSSL_FRODOKEM")
+    if (WOLFSSL_FRODOKEM)
+        set(WOLFSSL_FOUND_EXPERIMENTAL_FEATURE 1)
+        message(STATUS "Looking for WOLFSSL_FRODOKEM - found")
+
+        # At least one matrix A generation method must be enabled.
+        if (NOT WOLFSSL_FRODOKEM_SHAKE AND NOT WOLFSSL_FRODOKEM_AES)
+            message(FATAL_ERROR
+                "WOLFSSL_FRODOKEM requires WOLFSSL_FRODOKEM_SHAKE and/or WOLFSSL_FRODOKEM_AES.")
+        endif()
+        # At least one parameter set must be enabled.
+        if (NOT WOLFSSL_FRODOKEM_640 AND NOT WOLFSSL_FRODOKEM_976 AND
+            NOT WOLFSSL_FRODOKEM_1344)
+            message(FATAL_ERROR
+                "WOLFSSL_FRODOKEM requires at least one of WOLFSSL_FRODOKEM_640, WOLFSSL_FRODOKEM_976 or WOLFSSL_FRODOKEM_1344.")
+        endif()
+        # At least one operation must be enabled.
+        if (NOT WOLFSSL_FRODOKEM_MAKE_KEY AND NOT WOLFSSL_FRODOKEM_ENCAPSULATE
+            AND NOT WOLFSSL_FRODOKEM_DECAPSULATE)
+            message(FATAL_ERROR
+                "WOLFSSL_FRODOKEM requires at least one of WOLFSSL_FRODOKEM_MAKE_KEY, WOLFSSL_FRODOKEM_ENCAPSULATE or WOLFSSL_FRODOKEM_DECAPSULATE.")
+        endif()
+
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_HAVE_FRODOKEM")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHA3")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHAKE128")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHAKE256")
+
+        set_wolfssl_definitions("WOLFSSL_HAVE_FRODOKEM" RESULT)
+        set_wolfssl_definitions("WOLFSSL_SHA3"          RESULT)
+        set_wolfssl_definitions("WOLFSSL_SHAKE128"      RESULT)
+        set_wolfssl_definitions("WOLFSSL_SHAKE256"      RESULT)
+
+        if (WOLFSSL_FRODOKEM_SHAKE)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_FRODOKEM_SHAKE")
+            set_wolfssl_definitions("WOLFSSL_FRODOKEM_SHAKE" RESULT)
+        endif()
+        if (WOLFSSL_FRODOKEM_AES)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_FRODOKEM_AES")
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_AES_DIRECT")
+            list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_AES_ECB")
+            set_wolfssl_definitions("WOLFSSL_FRODOKEM_AES" RESULT)
+            set_wolfssl_definitions("WOLFSSL_AES_DIRECT"   RESULT)
+            set_wolfssl_definitions("HAVE_AES_ECB"         RESULT)
+        endif()
+        if (WOLFSSL_FRODOKEM_EPHEMERAL)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_FRODOKEM_EPHEMERAL")
+            set_wolfssl_definitions("WOLFSSL_FRODOKEM_EPHEMERAL" RESULT)
+        endif()
+        if (WOLFSSL_FRODOKEM_SMALL)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_FRODOKEM_SMALL")
+            set_wolfssl_definitions("WOLFSSL_FRODOKEM_SMALL" RESULT)
+        endif()
+        if (WOLFSSL_FRODOKEM_SVE)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_FRODOKEM_SVE")
+            set_wolfssl_definitions("WOLFSSL_FRODOKEM_SVE" RESULT)
+        endif()
+        if (WOLFSSL_FRODOKEM_SME)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_FRODOKEM_SME")
+            set_wolfssl_definitions("WOLFSSL_FRODOKEM_SME" RESULT)
+        endif()
+        # Excluded parameter sets.
+        if (NOT WOLFSSL_FRODOKEM_640)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_NO_FRODOKEM_640")
+            set_wolfssl_definitions("WOLFSSL_NO_FRODOKEM_640" RESULT)
+        endif()
+        if (NOT WOLFSSL_FRODOKEM_976)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_NO_FRODOKEM_976")
+            set_wolfssl_definitions("WOLFSSL_NO_FRODOKEM_976" RESULT)
+        endif()
+        if (NOT WOLFSSL_FRODOKEM_1344)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_NO_FRODOKEM_1344")
+            set_wolfssl_definitions("WOLFSSL_NO_FRODOKEM_1344" RESULT)
+        endif()
+        # Excluded operations.
+        if (NOT WOLFSSL_FRODOKEM_MAKE_KEY)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_FRODOKEM_NO_MAKE_KEY")
+            set_wolfssl_definitions("WOLFSSL_FRODOKEM_NO_MAKE_KEY" RESULT)
+        endif()
+        if (NOT WOLFSSL_FRODOKEM_ENCAPSULATE)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_FRODOKEM_NO_ENCAPSULATE")
+            set_wolfssl_definitions("WOLFSSL_FRODOKEM_NO_ENCAPSULATE" RESULT)
+        endif()
+        if (NOT WOLFSSL_FRODOKEM_DECAPSULATE)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_FRODOKEM_NO_DECAPSULATE")
+            set_wolfssl_definitions("WOLFSSL_FRODOKEM_NO_DECAPSULATE" RESULT)
+        endif()
+    else()
+        message(STATUS "Looking for WOLFSSL_FRODOKEM - not found")
+    endif()
+
+    # Other experimental feature detection can be added here...
+
+    # Were any experimental features found? Display a message.
+    if(WOLFSSL_FOUND_EXPERIMENTAL_FEATURE)
+        message(STATUS "WOLFSSL_EXPERIMENTAL enabled, experimental features enabled.")
+    else()
+        message(STATUS "Warning: WOLFSSL_EXPERIMENTAL enabled, but no experimental features enabled.")
+    endif()
+
+else()
+    # Experimental mode not enabled, but were any experimental features enabled? Error out if so:
+    message(STATUS "Looking for WOLFSSL_EXPERIMENTAL - not found")
+    if (WOLFSSL_FALCON)
+        message(FATAL_ERROR "Error: WOLFSSL_FALCON requires WOLFSSL_EXPERIMENTAL at this time.")
+    endif()
+    if (WOLFSSL_FRODOKEM)
+        message(FATAL_ERROR "Error: WOLFSSL_FRODOKEM requires WOLFSSL_EXPERIMENTAL at this time.")
+    endif()
+endif()
+
+# LMS
+add_option(WOLFSSL_LMS
+    "Enable the wolfSSL LMS implementation (default: disabled)"
+    "no" "yes;no")
+
+# XMSS
+add_option(WOLFSSL_XMSS
+    "Enable the wolfSSL XMSS implementation (default: disabled)"
+    "no" "yes;no")
+
+add_option(WOLFSSL_XMSSVERIFYONLY
+    "Enable the XMSS/XMSS^MT verify-only implementation (default: disabled)"
+    "no" "yes;no")
+
+add_option(WOLFSSL_XMSSSMALL
+    "Enable the smaller, slower XMSS/XMSS^MT implementation (default: disabled)"
+    "no" "yes;no")
+
+if (WOLFSSL_XMSS)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_HAVE_XMSS")
+
+    set_wolfssl_definitions("WOLFSSL_HAVE_XMSS" RESULT)
+
+    if (WOLFSSL_XMSSVERIFYONLY)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_XMSS_VERIFY_ONLY")
+
+        set_wolfssl_definitions("WOLFSSL_XMSS_VERIFY_ONLY" RESULT)
+    endif()
+
+    if (WOLFSSL_XMSSSMALL)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_WC_XMSS_SMALL")
+
+        set_wolfssl_definitions("WOLFSSL_WC_XMSS_SMALL"    RESULT)
+    endif()
+endif()
+
+# SLH-DSA
+add_option(WOLFSSL_SLHDSA
+    "Enable the wolfSSL SLH-DSA implementation (default: disabled)"
+    "no" "yes;no")
+
+if (WOLFSSL_SLHDSA)
+    message(STATUS "Automatically set related requirements for SLH-DSA")
+    add_definitions("-DWOLFSSL_HAVE_SLHDSA")
+    add_definitions("-DWOLFSSL_WC_SLHDSA")
+    add_definitions("-DWOLFSSL_SHAKE256")
+
+    set_wolfssl_definitions("WOLFSSL_HAVE_SLHDSA" RESULT)
+    set_wolfssl_definitions("WOLFSSL_WC_SLHDSA"   RESULT)
+    set_wolfssl_definitions("WOLFSSL_SHAKE256"    RESULT)
+    message(STATUS "Looking for WOLFSSL_SLHDSA - found")
+endif()
+
 # TODO: - Lean PSK
 #       - Lean TLS
 #       - Low resource
-#       - Titan cache
-#       - Huge cache
-#       - Big cache
-#       - Small cache
-#       - Persistent session cache
-#       - Persistent cert cache
-#       - Write duplicate
-#       - Atomic user record layer
 #       - Public key callbacks
 #       - Microchip/Atmel CryptoAuthLib
+#       - dual-certs
+# Session/cert cache sizing, persistent caches, write-dup and the atomic user
+# record layer are handled in the parity block near the end of this file.
 
 # AES-CBC
-set(WOLFSSL_AESCBC_HELP_STRING "Enable wolfSSL AES-CBC support (default: enabled)")
-add_option("WOLFSSL_AESCBC" ${WOLFSSL_AESCBC_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_AESCBC"
+    "Enable wolfSSL AES-CBC support (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_AESCBC)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_AES_CBC")
 endif()
 
 # AES-GCM
-set(WOLFSSL_AESGCM_HELP_STRING "Enable wolfSSL AES-GCM support (default: enabled)")
-add_option("WOLFSSL_AESGCM" ${WOLFSSL_AESGCM_HELP_STRING} "yes" "yes;no;table;small;word32;4bit")
+add_option("WOLFSSL_AESGCM"
+    "Enable wolfSSL AES-GCM support (default: enabled)"
+    "yes" "yes;no;table;small;word32;4bit")
 
 # leanpsk and leantls don't need gcm
 if(WOLFSSL_LEAN_PSK OR (WOLFSSL_LEAN_TLS AND NOT WOLFSSL_TLS13))
     override_cache(WOLFSSL_AESGCM "no")
 endif()
 
-if(WOLFSSL_AESGCM AND NOT WORDS_BIGENDIAN)
+if(WOLFSSL_AESGCM AND CMAKE_C_BYTE_ORDER STREQUAL "LITTLE_ENDIAN")
     override_cache(WOLFSSL_AESGCM "4bit")
 endif()
 
@@ -358,21 +1380,45 @@ if(WOLFSSL_AESGCM)
     list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_AESGCM")
 endif()
 
+if(WOLFSSL_QUIC)
+    if(NOT WOLFSSL_TLS13)
+        message(FATAL_ERROR "TLS 1.3 is disabled - necessary for QUIC")
+    endif()
+    if(NOT WOLFSSL_AESGCM)
+        message(FATAL_ERROR "AES-GCM is disabled - necessary for QUIC")
+    endif()
+endif()
+
 # AES-SIV
-set(WOLFSSL_AESSIV_HELP_STRING "Enable wolfSSL AES-SIV support (default: disabled)")
-add_option("WOLFSSL_AESSIV" ${WOLFSSL_AESSIV_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_AESSIV"
+    "Enable wolfSSL AES-SIV support (default: disabled)"
+    "no" "yes;no")
 
 if(WOLFSSL_AESSIV)
     list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_AES_SIV")
 endif()
 
+# AES-GCM-SIV
+add_option("WOLFSSL_AESGCMSIV"
+    "Enable AES-GCM-SIV (RFC 8452) support (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_AESGCMSIV)
+    if(NOT WOLFSSL_AESGCM)
+        message(FATAL_ERROR "AES-GCM-SIV requires AES-GCM. Please enable WOLFSSL_AESGCM.")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_AESGCM_SIV")
+endif()
+
 # AES-CTR
-set(WOLFSSL_AESCTR_HELP_STRING "Enable wolfSSL AES-CTR support (default: disabled)")
-add_option("WOLFSSL_AESCTR" ${WOLFSSL_AESCTR_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_AESCTR"
+    "Enable wolfSSL AES-CTR support (default: disabled)"
+    "no" "yes;no")
 
 if(WOLFSSL_OPENVPN OR
    WOLFSSL_LIBSSH2 OR
-   WOLFSSL_AESSIV)
+   WOLFSSL_AESSIV OR
+   WOLFSSL_CLU)
     override_cache(WOLFSSL_AESCTR "yes")
 endif()
 
@@ -382,10 +1428,43 @@ if(WOLFSSL_AESCTR AND NOT WOLFSSL_FORTRESS)
         "-DWOLFSSL_AES_DIRECT")
 endif()
 
-# TODO: - AES-CCM
-#       - AES-GCM stream
-#       - AES-OFB
-#       - AES-CFB
+# ARIA
+add_option("WOLFSSL_ARIA"
+    "Enable wolfSSL ARIA support (default: disabled)"
+    "no" "yes;no")
+
+# AES-CCM
+add_option("WOLFSSL_AESCCM"
+    "Enable wolfSSL AES-CCM support (default: disabled)"
+    "no" "yes;no")
+
+# AES-OFB
+add_option("WOLFSSL_AESOFB"
+    "Enable wolfSSL AES-OFB support (default: disabled)"
+    "no" "yes;no")
+
+# AES-ECB
+add_option("WOLFSSL_AESECB"
+    "Enable wolfSSL AES-ECB support (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_AESECB)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_AES_ECB")
+endif()
+
+# AES-CTS
+add_option("WOLFSSL_AESCTS"
+    "Enable wolfSSL AES-CTS support (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_AESCTS)
+    if(NOT WOLFSSL_AESCBC)
+        message(FATAL_ERROR "AES-CTS requires AES-CBC.")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_AES_CTS")
+endif()
+
+# TODO: - AES-GCM stream
 #       - AES-ARM
 #       - Xilinx hardened crypto
 #       - Intel AES-NI
@@ -395,48 +1474,84 @@ endif()
 #       - Linux dev crpyto calls
 #       - Camellia
 #       - MD2
-#       - NULL cipher
 #       - RIPEMD
 #       - BLAKE2
 
+add_option("WOLFSSL_AESCFB"
+    "Enable wolfSSL AES-CFB support (default: disabled)"
+    "no" "yes;no")
 
 # Align data
-set(WOLFSSL_ALIGN_DATA_HELP_STRING "Align data for ciphers (default: enabled)")
-add_option("WOLFSSL_ALIGN_DATA" ${WOLFSSL_ALIGN_DATA_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_ALIGN_DATA"
+    "Align data for ciphers (default: enabled)"
+    "yes" "yes;no")
 if(WOLFSSL_ALIGN_DATA)
     list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_USE_ALIGN")
 endif()
 
 # SHA224
 set(SHA224_DEFAULT "no")
-if(("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64") OR
+if(("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64|AMD64|arm64") OR
     ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64"))
     if(NOT WOLFSSL_AFALG AND NOT WOLFSSL_DEVCRYPTO AND
        (NOT WOLFSSL_FIPS OR ("${FIPS_VERSION}" STREQUAL "v2")))
         set(SHA224_DEFAULT "yes")
     endif()
 endif()
-set(WOLFSSL_SHA224_HELP_STRING "Enable wolfSSL SHA-224 support (default: enabled on x86_64/aarch64)")
-add_option("WOLFSSL_SHA224" ${WOLFSSL_SHA224_HELP_STRING} ${SHA224_DEFAULT} "yes;no")
+
+add_option("WOLFSSL_SHA224"
+    "Enable wolfSSL SHA-224 support (default: enabled on x86_64/aarch64)"
+    ${SHA224_DEFAULT} "yes;no")
 
 # SHA3
 set(SHA3_DEFAULT "no")
-if(("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64") OR
+if(("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64|AMD64|arm64") OR
     ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64"))
     if(NOT WOLFSSL_FIPS OR ("${FIPS_VERSION}" STREQUAL "v2"))
         set(SHA3_DEFAULT "yes")
     endif()
 endif()
-set(WOLFSSL_SHA3_HELP_STRING "Enable wolfSSL SHA-3 support (default: enabled on x86_64/aarch64)")
-add_option("WOLFSSL_SHA3" ${WOLFSSL_SHA3_HELP_STRING} ${SHA3_DEFAULT} "yes;no;small")
+
+add_option("WOLFSSL_SHA3"
+    "Enable wolfSSL SHA-3 support (default: enabled on x86_64/aarch64)"
+     ${SHA3_DEFAULT} "yes;no;small")
 
 # SHAKE256
-set(WOLFSSL_SHAKE256_HELP_STRING "Enable wolfSSL SHAKE256 support (default: enabled on x86_64/aarch64)")
-add_option("WOLFSSL_SHAKE256" ${WOLFSSL_SHAKE256_HELP_STRING} "no" "yes;no;small")
+add_option("WOLFSSL_SHAKE256"
+    "Enable wolfSSL SHAKE256 support (default: enabled on x86_64/aarch64)"
+    "no" "yes;no;small")
+
+# SHAKE128
+add_option("WOLFSSL_SHAKE128"
+    "Enable wolfSSL SHAKE128 support (default: enabled on x86_64/aarch64)"
+    "no" "yes;no;small")
+
+# cSHAKE and KMAC (NIST SP 800-185), both built on SHAKE. KMAC is built on
+# cSHAKE, so enabling KMAC also enables cSHAKE; cSHAKE can be enabled on its own.
+add_option("WOLFSSL_CSHAKE"
+    "Enable wolfSSL cSHAKE support (default: disabled)"
+    "no" "yes;no")
+
+add_option("WOLFSSL_KMAC"
+    "Enable wolfSSL KMAC support (default: disabled)"
+    "no" "yes;no")
+
+# KMAC is built on cSHAKE - enabling KMAC enables cSHAKE.
+if(WOLFSSL_KMAC)
+    override_cache(WOLFSSL_CSHAKE "yes")
+endif()
+
+# cSHAKE (and thus KMAC) require SHA-3 and SHAKE. Force-enable them.
+if(WOLFSSL_CSHAKE)
+    override_cache(WOLFSSL_SHA3 "yes")
+    override_cache(WOLFSSL_SHAKE128 "yes")
+    override_cache(WOLFSSL_SHAKE256 "yes")
+endif()
 
 # SHA512
-set(WOLFSSL_SHA512_HELP_STRING "Enable wolfSSL SHA-512 support (default: enabled)")
-add_option("WOLFSSL_SHA512" ${WOLFSSL_SHA512_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_SHA512"
+    "Enable wolfSSL SHA-512 support (default: enabled)"
+    "yes" "yes;no")
 
 # options that don't require sha512
 if(WOLFSSL_LEAN_PSK OR
@@ -458,8 +1573,9 @@ if(WOLFSSL_SHA512)
 endif()
 
 # SHA384
-set(WOLFSSL_SHA384_HELP_STRING "Enable wolfSSL SHA-384 support (default: enabled)")
-add_option("WOLFSSL_SHA384" ${WOLFSSL_SHA384_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_SHA384"
+    "Enable wolfSSL SHA-384 support (default: enabled)"
+    "yes" "yes;no")
 
 # options that don't require sha384
 if(WOLFSSL_LEAN_PSK OR
@@ -481,16 +1597,32 @@ if(WOLFSSL_SHA384)
 endif()
 
 # TODO: - Session certs
-#       - Key generation
-#       - Cert generation
-#       - Cert request generation
-#       - Cert request extension
-#       - Decoded cert cache
 #       - SEP
 
+add_option("WOLFSSL_KEYGEN"
+    "Enable key generation (default: disabled)"
+    "no" "yes;no")
+
+add_option("WOLFSSL_CERTGEN"
+    "Enable cert generation (default: disabled)"
+    "no" "yes;no")
+
+add_option("WOLFSSL_CERTREQ"
+    "Enable cert request generation (default: disabled)"
+    "no" "yes;no")
+
+add_option("WOLFSSL_CERTEXT"
+    "Enable cert request extensions (default: disabled)"
+    "no" "yes;no")
+
+add_option("WOLFSSL_CERTGENCACHE"
+    "Enable decoded cert caching (default: disabled)"
+    "no" "yes;no")
+
 # HKDF
-set(WOLFSSL_HKDF_HELP_STRING "Enable HKDF (HMAC-KDF) support (default: disabled)")
-add_option("WOLFSSL_HKDF" ${WOLFSSL_HKDF_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_HKDF"
+    "Enable HKDF (HMAC-KDF) support (default: disabled)"
+    "no" "yes;no")
 
 if(WOLFSSL_TLS13)
     override_cache(WOLFSSL_HKDF "yes")
@@ -500,23 +1632,24 @@ if(WOLFSSL_HKDF)
     list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_HKDF")
 endif()
 
-# TODO: - X9.63 KDF
-
 # DSA
-set(WOLFSSL_DSA_HELP_STRING "Enable DSA (default: disabled)")
-add_option("WOLFSSL_DSA" ${WOLFSSL_DSA_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_DSA"
+    "Enable DSA (default: disabled)"
+    "no" "yes;no")
 
 if(NOT WOLFSSL_DSA AND NOT WOLFSSL_OPENSSH)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_DSA")
 endif()
 
 # ECC Shamir
-set(WOLFSSL_ECCSHAMIR_HELP_STRING "Enable ECC Shamir (default: enabled)")
-add_option("WOLFSSL_ECCSHAMIR" ${WOLFSSL_ECCSHAMIR_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_ECCSHAMIR"
+    "Enable ECC Shamir (default: enabled)"
+    "yes" "yes;no")
 
 # ECC
-set(WOLFSSL_ECC_HELP_STRING "Enable ECC (default: enabled)")
-add_option("WOLFSSL_ECC" ${WOLFSSL_ECC_HELP_STRING} "yes" "yes;no;nonblock")
+add_option("WOLFSSL_ECC"
+    "Enable ECC (default: enabled)"
+    "yes" "yes;no;nonblock")
 
 # lean psk doesn't need ecc
 if(WOLFSSL_LEAN_PSK)
@@ -541,17 +1674,81 @@ if(WOLFSSL_ECC)
     endif()
 endif()
 
-# TODO: - ECC custom curves
-#       - Compressed key
+# ECCSI
+add_option("WOLFSSL_ECCSI"
+    "Enable ECCSI (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_ECCSI)
+    if (NOT WOLFSSL_ECC)
+        message(FATAL_ERROR "cannot enable ECCSI without enabling ECC.")
+    endif()
+
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFCRYPT_HAVE_ECCSI")
+endif()
+
+# SAKKE
+add_option("WOLFSSL_SAKKE"
+    "Enable SAKKE (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_SAKKE)
+    if (NOT WOLFSSL_ECC)
+        message(FATAL_ERROR "cannot enable SAKKE without enabling ECC.")
+    endif()
+
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFCRYPT_HAVE_SAKKE")
+endif()
+
+# SipHash
+add_option("WOLFSSL_SIPHASH"
+    "Enable SipHash (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_SIPHASH)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SIPHASH")
+endif()
+
+add_option("WOLFSSL_PUBLIC_MP"
+    "Enable public MP API (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_WOLFSSH OR WOLFSSL_WPAS OR WOLFSSL_ECCSI)
+    override_cache(WOLFSSL_PUBLIC_MP "yes")
+endif()
+
+if(WOLFSSL_PUBLIC_MP)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_PUBLIC_MP")
+endif()
+
+# TODO: - Compressed key
 #       - FP ECC, fixed point cache ECC
 #       - ECC encrypt
 #       - PSK
 #       - Single PSK identity
 
+# ECC custom curves
+add_option("WOLFSSL_ECCCUSTCURVES"
+    "Enable ECC Custom Curves (default: disabled)"
+    "no" "yes;no;all")
+
+if(WOLFSSL_ECCCUSTCURVES)
+    if("${WOLFSSL_ECCCUSTCURVES}" STREQUAL "all")
+        list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ECC_SECPR2")
+        list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ECC_SECPR3")
+        list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ECC_BRAINPOOL")
+        list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ECC_KOBLITZ")
+        list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ECC_CDH")
+    endif()
+
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_CUSTOM_CURVES")
+endif()
+
 # CURVE25519
 set(WOLFSSL_CURVE25519_SMALL "no")
-set(WOLFSSL_CURVE25519_HELP_STRING "Enable Curve25519 (default: disabled)")
-add_option("WOLFSSL_CURVE25519" ${WOLFSSL_CURVE25519_HELP_STRING} "no" "yes;no;small;no128bit")
+add_option("WOLFSSL_CURVE25519"
+    "Enable Curve25519 (default: disabled)"
+    "no" "yes;no;small;no128bit")
 
 if(WOLFSSL_OPENSSH)
     override_cache(WOLFSSL_CURVE25519 "yes")
@@ -573,10 +1770,11 @@ endif()
 
 # ED25519
 set(WOLFSSL_ED25519_SMALL "no")
-set(WOLFSSL_ED25519_HELP_STRING "Enable ED25519 (default: disabled)")
-add_option("WOLFSSL_ED25519" ${WOLFSSL_ED25519_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_ED25519"
+    "Enable ED25519 (default: disabled)"
+    "no" "yes;no")
 
-if(WOLFSSL_OPENSSH)
+if(WOLFSSL_OPENSSH OR WOLFSSL_CLU)
     override_cache(WOLFSSL_ED25519 "yes")
 endif()
 
@@ -598,8 +1796,9 @@ endif()
 
 # CURVE448
 set(WOLFSSL_CURVE448_SMALL "no")
-set(WOLFSSL_CURVE448_HELP_STRING "Enable Curve448 (default: disabled)")
-add_option("WOLFSSL_CURVE448" ${WOLFSSL_CURVE448_HELP_STRING} "no" "yes;no;small")
+add_option("WOLFSSL_CURVE448"
+    "Enable Curve448 (default: disabled)"
+    "no" "yes;no;small")
 
 if(WOLFSSL_CURVE448)
     if("${WOLFSSL_CURVE448}" STREQUAL "small" OR WOLFSSL_LOW_RESOURCE)
@@ -617,8 +1816,9 @@ endif()
 
 # ED448
 set(WOLFSSL_ED448_SMALL "no")
-set(WOLFSSL_ED448_HELP_STRING "Enable ED448 (default: disabled)")
-add_option("WOLFSSL_ED448" ${WOLFSSL_ED448_HELP_STRING} "no" "yes;no;small")
+add_option("WOLFSSL_ED448"
+    "Enable ED448 (default: disabled)"
+    "no" "yes;no;small")
 
 if(WOLFSSL_ED448 AND NOT WOLFSSL_32BIT)
     if("${WOLFSSL_ED448}" STREQUAL "small" OR WOLFSSL_LOW_RESOURCE)
@@ -640,8 +1840,9 @@ if(WOLFSSL_ED448 AND NOT WOLFSSL_32BIT)
 endif()
 
 # Error strings
-set(WOLFSSL_ERROR_STRINGS_HELP_STRING "Enable error strings table (default: enabled)")
-add_option("WOLFSSL_ERROR_STRINGS" ${WOLFSSL_ERROR_STRINGS_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_ERROR_STRINGS"
+    "Enable error strings table (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_ERROR_STRINGS)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_ERROR_STRINGS")
@@ -654,16 +1855,18 @@ else()
 endif()
 
 # Error queue
-set(WOLFSSL_ERROR_QUEUE_HELP_STRING "Enables adding nodes to error queue when compiled with OPENSSL_EXTRA (default: enabled)")
-add_option("WOLFSSL_ERROR_QUEUE" ${WOLFSSL_ERROR_QUEUE_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_ERROR_QUEUE"
+    "Enables adding nodes to error queue when compiled with OPENSSL_EXTRA (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_ERROR_QUEUE)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_ERROR_QUEUE")
 endif()
 
 # Old TLS
-set(WOLFSSL_OLD_TLS_HELP_STRING "Enable old TLS versions < 1.2 (default: enabled)")
-add_option("WOLFSSL_OLD_TLS" ${WOLFSSL_OLD_TLS_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_OLD_TLS"
+    "Enable old TLS versions < 1.2 (default: disabled)"
+    "no" "yes;no")
 
 if(NOT WOLFSSL_OLD_TLS)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_OLD_TLS")
@@ -676,8 +1879,9 @@ else()
 endif()
 
 # TLSv1.2
-set(WOLFSSL_TLSV12_HELP_STRING "Enable TLS versions 1.2 (default: enabled)")
-add_option("WOLFSSL_TLSV12" ${WOLFSSL_TLSV12_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_TLSV12"
+    "Enable TLS versions 1.2 (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_TLSV12)
     list(APPEND WOLFSSL_DEFINITIONS
@@ -691,16 +1895,16 @@ endif()
 #       - Stack size verbose
 
 # Memory
-set(WOLFSSL_MEMORY_HELP_STRING "Enable memory callbacks (default: enabled)")
-add_option("WOLFSSL_MEMORY" ${WOLFSSL_MEMORY_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_MEMORY"
+    "Enable memory callbacks (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_MEMORY)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_WOLFSSL_MEMORY")
 else()
     # turn off memory cb if leanpsk or leantls on
     if(WOLFSSL_LEAN_PSK OR WOLFSSL_LEAN_TLS)
-        # but don't turn on NO_WOLFSSL_MEMORY because using own
-        override_cache(WOLFSSL_MEMORY "no")
+        list(APPEND WOLFSSL_DEFINITIONS "-DNO_WOLFSSL_MEMORY")
     endif()
 endif()
 
@@ -709,8 +1913,9 @@ endif()
 #       - Stack log
 
 # RSA
-set(WOLFSSL_RSA_HELP_STRING "Enable RSA (default: enabled)")
-add_option("WOLFSSL_RSA" ${WOLFSSL_RSA_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_RSA"
+    "Enable RSA (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_RSA)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_RSA")
@@ -721,9 +1926,19 @@ else()
     endif()
 endif()
 
+# RSA Direct
+add_option("WOLFSSL_WC_RSA_DIRECT"
+    "Enable RSA Direct (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_RSA AND WOLFSSL_WC_RSA_DIRECT)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWC_RSA_DIRECT")
+endif()
+
 # OAEP
-set(WOLFSSL_OAEP_HELP_STRING "Enable RSA OAEP (default: enabled)")
-add_option("WOLFSSL_OAEP" ${WOLFSSL_OAEP_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_OAEP"
+    "Enable RSA OAEP (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_OAEP)
     list(APPEND WOLFSSL_DEFINITIONS "-DWC_NO_RSA_OAEP")
@@ -733,8 +1948,9 @@ endif()
 #       - RSA verify inline only
 
 # RSA-PSS
-set(WOLFSSL_RSA_PSS_HELP_STRING "Enable RSA-PSS (default: disabled)")
-add_option("WOLFSSL_RSA_PSS" ${WOLFSSL_RSA_PSS_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_RSA_PSS"
+    "Enable RSA-PSS (default: disabled)"
+    "no" "yes;no")
 
 if(NOT WOLFSSL_RSA)
     override_cache(WOLFSSL_RSA_PSS "no")
@@ -745,11 +1961,13 @@ else()
 endif()
 if(WOLFSSL_RSA_PSS)
     list(APPEND WOLFSSL_DEFINITIONS "-DWC_RSA_PSS")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_PSS_LONG_SALT")
 endif()
 
 # DH
-set(WOLFSSL_DH_HELP_STRING "Enable DH (default: enabled)")
-add_option("WOLFSSL_DH" ${WOLFSSL_DH_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_DH"
+    "Enable DH (default: enabled)"
+    "yes" "yes;no;const")
 
 if(WOLFSSL_OPENSSH)
     override_cache(WOLFSSL_DH "yes")
@@ -764,13 +1982,19 @@ else()
     endif()
 endif()
 
+if("${WOLFSSL_DH}" STREQUAL "const")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_DH_CONST")
+    set(WOLFSSL_DH_CONST "yes")
+endif()
+
 # TODO: - Anonymous
 
 # ASN
 # turn off asn, which means no certs, no rsa, no dsa, no ecc,
 # and no big int (unless dh is on)
-set(WOLFSSL_ASN_HELP_STRING "Enable ASN (default: enabled)")
-add_option("WOLFSSL_ASN" ${WOLFSSL_ASN_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_ASN"
+    "Enable ASN (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_ASN)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_ASN" "-DNO_CERTS")
@@ -814,8 +2038,9 @@ if(NOT WOLFSSL_ASN AND
 endif()
 
 # AES
-set(WOLFSSL_AES_HELP_STRING "Enable AES (default: enabled)")
-add_option("WOLFSSL_AES" ${WOLFSSL_AES_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_AES"
+    "Enable AES (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_AES)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_AES")
@@ -835,6 +2060,12 @@ if(NOT WOLFSSL_AES)
     if(WOLFSSL_AESCTR)
         message(FATAL_ERROR "AESCTR requires AES.")
     endif()
+    if(WOLFSSL_AESECB)
+        message(FATAL_ERROR "AES-ECB requires AES.")
+    endif()
+    if(WOLFSSL_AESCTS)
+        message(FATAL_ERROR "AES-CTS requires AES.")
+    endif()
 else()
     if(WOLFSSL_LEAN_PSK)
         list(APPEND WOLFSSL_DEFINITIONS "-DNO_AES")
@@ -843,8 +2074,9 @@ else()
 endif()
 
 # Coding
-set(WOLFSSL_CODING_HELP_STRING "Enable coding base 16/64 (default: enabled)")
-add_option("WOLFSSL_CODING" ${WOLFSSL_CODING_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_CODING"
+    "Enable coding base 16/64 (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_CODING)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_CODING")
@@ -858,7 +2090,7 @@ endif()
 
 # Base64
 set(BASE64_ENCODE_DEFAULT "no")
-if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
+if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64|AMD64|arm64")
     set(BASE64_ENCODE_DEFAULT "yes")
 endif()
 
@@ -878,11 +2110,18 @@ add_option("WOLFSSL_DES3" ${WOLFSSL_DES3_HELP_STRING} "no" "yes;no")
 if(WOLFSSL_OPENSSH OR
    WOLFSSL_QT OR
    WOLFSSL_OPENVPN OR
-   WOLFSSL_WPAS)
+   WOLFSSL_WPAS OR
+   WOLFSSL_ASIO)
     override_cache(WOLFSSL_DES3 "yes")
 endif()
 
-# TODO: - IDEA
+# DES3 TLS Suites
+set(WOLFSSL_DES3_TLS_SUITES_STRING "Enable DES3 TLS cipher suites (default: disabled)")
+add_option("WOLFSSL_DES3_TLS_SUITES" ${WOLFSSL_DES3_TLS_SUITES_STRING} "no" "yes;no")
+
+if(NOT WOLFSSL_DES3_TLS_SUITES)
+    list(APPEND WOLFSSL_DEFINITIONS "-DNO_DES3_TLS_SUITES")
+endif()
 
 # ARC4
 set(WOLFSSL_ARC4_HELP_STRING "Enable ARC4 (default: disabled)")
@@ -893,22 +2132,31 @@ if(WOLFSSL_OPENSSH OR WOLFSSL_WPAS)
 endif()
 
 # MD5
-set(WOLFSSL_MD5_HELP_STRING "Enable MD5 (default: enabled)")
-add_option("WOLFSSL_MD5" ${WOLFSSL_MD5_HELP_STRING} "yes" "yes;no")
+set(WOLFSSL_MD5_HELP_STRING "Enable MD5 (default: disabled)")
+add_option("WOLFSSL_MD5" ${WOLFSSL_MD5_HELP_STRING} "no" "yes;no")
+
+if(WOLFSSL_WPAS OR
+   WOLFSSL_HAPROXY OR
+   WOLFSSL_NGINX OR
+   WOLFSSL_OPENSSH OR
+   WOLFSSL_OPENSSLEXTRA OR
+   WOLFSSL_OPENVPN OR
+   WOLFSSL_OLD_TLS OR
+   WOLFSSL_FORTRESS OR
+   WOLFSSL_LIGHTY OR
+   WOLFSSL_DES3 OR
+   WOLFSSL_OPENSSLALL)
+    override_cache(WOLFSSL_MD5 "yes")
+endif()
 
 if(NOT WOLFSSL_MD5)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_MD5" "-DNO_OLD_TLS")
-else()
-    # turn off MD5 if leanpsk or leantls on
-    if(WOLFSSL_LEAN_PSK OR WOLFSSL_LEAN_TLS)
-        list(APPEND WOLFSSL_DEFINITIONS "-DNO_MD5" "-DNO_OLD_TLS")
-        override_cache(WOLFSSL_MD5 "no")
-    endif()
 endif()
 
 # SHA
-set(WOLFSSL_SHA_HELP_STRING "Enable SHA (default: enabled)")
-add_option("WOLFSSL_SHA" ${WOLFSSL_SHA_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_SHA"
+    "Enable SHA (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_SHA)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_SHA" "-DNO_OLD_TLS")
@@ -923,8 +2171,9 @@ endif()
 # TODO: - AES-XTS
 #       - Web server
 #       - Web client
-set(WOLFSSL_CMAC_HELP_STRING "Enable CMAC (default: disabled)")
-add_option("WOLFSSL_CMAC" ${WOLFSSL_CMAC_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_CMAC"
+    "Enable CMAC (default: disabled)"
+    "no" "yes;no")
 
 if(WOLFSSL_WPAS OR
    WOLFSSL_NTP OR
@@ -942,15 +2191,32 @@ if(WOLFSSL_CMAC)
     endif()
 endif()
 
-# RABBIT
-if(NOT WOLFSSL_RABBIT)
-    list(APPEND WOLFSSL_DEFINITIONS "-DNO_RABBIT")
-else()
-    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_RABBIT")
+# SHE (Secure Hardware Extension) key update message generation
+# standard: core SHE support, extended: adds custom KDF/header overrides
+add_option("WOLFSSL_SHE"
+    "Enable SHE key update support (standard|extended|no)"
+    "no" "standard;extended;no")
+
+if(WOLFSSL_SHE STREQUAL "standard" OR WOLFSSL_SHE STREQUAL "extended")
+    if (NOT WOLFSSL_AES)
+        message(FATAL_ERROR "Cannot use SHE without AES.")
+    else()
+        list(APPEND WOLFSSL_DEFINITIONS
+            "-DWOLFSSL_SHE"
+            "-DWOLFSSL_CMAC"
+            "-DWOLFSSL_AES_DIRECT")
+        override_cache(WOLFSSL_CMAC "yes")
+        override_cache(WOLFSSL_AESCBC "yes")
+    endif()
+endif()
+
+if(WOLFSSL_SHE STREQUAL "extended")
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_SHE_EXTENDED")
 endif()
 
 # TODO: - RC2
-#       - FIPS, again (there's more logic for FIPS after RABBIT in configure.ac)
+#       - FIPS, again (there's more logic for FIPS in configure.ac)
 #       - Selftest
 
 # SHA224
@@ -975,6 +2241,36 @@ if(WOLFSSL_SHAKE256)
 
         if(NOT WOLFSSL_SHA3)
             message(FATAL_ERROR "Must have SHA-3 enabled: --enable-sha3")
+        endif()
+    endif()
+else()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_NO_SHAKE256")
+endif()
+
+# SHAKE128
+if(WOLFSSL_SHAKE128)
+    if(NOT WOLFSSL_32BIT)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SHAKE128")
+
+        if(NOT WOLFSSL_SHA3)
+            message(FATAL_ERROR "Must have SHA-3 enabled: --enable-sha3")
+        endif()
+    endif()
+else()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_NO_SHAKE128")
+endif()
+
+# cSHAKE / KMAC
+if(WOLFSSL_CSHAKE)
+    if(NOT WOLFSSL_SHA3)
+        message(FATAL_ERROR "Must have SHA-3 enabled: --enable-sha3")
+    endif()
+    # SHA-3 (and hence SHAKE/cSHAKE/KMAC) is only emitted for non-32-bit builds;
+    # keep these in step so they are never defined without SHAKE.
+    if(NOT WOLFSSL_32BIT)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_CSHAKE")
+        if(WOLFSSL_KMAC)
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_KMAC")
         endif()
     endif()
 endif()
@@ -1005,8 +2301,9 @@ if(WOLFSSL_FIPS)
     set(CHACHA_DEFAULT "no")
 endif()
 
-set(WOLFSSL_CHACHA_HELP_STRING "Enable CHACHA (default: enabled). Use `=noasm` to disable ASM AVX/AVX2 speedups")
-add_option("WOLFSSL_CHACHA" ${WOLFSSL_CHACHA_HELP_STRING} ${CHACHA_DEFAULT} "yes;no;noasm")
+add_option("WOLFSSL_CHACHA"
+    "Enable CHACHA (default: enabled). Use `=noasm` to disable ASM AVX/AVX2 speedups"
+    ${CHACHA_DEFAULT} "yes;no;noasm")
 
 # leanpsk and leantls don't need chacha
 if(WOLFSSL_LEAN_PSK OR WOLFSSL_LEAN_TLS)
@@ -1023,9 +2320,32 @@ endif()
 
 # TODO: - XCHACHA
 
+# SRAM PUF
+add_option("WOLFSSL_PUF"
+    "Enable SRAM PUF support (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_PUF)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_PUF"
+        "-DWOLFSSL_PUF_SRAM"
+        "-DHAVE_HKDF")
+    override_cache(WOLFSSL_HKDF "yes")
+endif()
+
+# PUF test mode (synthetic SRAM data injection)
+add_option("WOLFSSL_PUF_TEST"
+    "Enable PUF test mode with synthetic data (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_PUF_TEST)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_PUF_TEST")
+endif()
+
 # Hash DRBG
-set(WOLFSSL_HASH_DRBG_HELP_STRING "Enable Hash DRBG support (default: enabled)")
-add_option("WOLFSSL_HASH_DRBG" ${WOLFSSL_HASH_DRBG_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_HASH_DRBG"
+    "Enable Hash DRBG support (default: enabled)"
+    "yes" "yes;no")
 
 if(WOLFSSL_HASH_DRBG)
     list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_HASHDRBG")
@@ -1046,8 +2366,9 @@ else()
     set(FILESYSTEM_DEFAULT "yes")
 endif()
 
-set(WOLFSSL_FILESYSTEM_HELP_STRING "Enable Filesystem support (default: enabled)")
-add_option("WOLFSSL_FILESYSTEM" ${WOLFSSL_FILESYSTEM_HELP_STRING} ${FILESYSTEM_DEFAULT} "yes;no")
+add_option("WOLFSSL_FILESYSTEM"
+    "Enable Filesystem support (default: enabled)"
+    ${FILESYSTEM_DEFAULT} "yes;no")
 
 if(NOT WOLFSSL_FILESYSTEM)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_FILESYSTEM")
@@ -1059,57 +2380,65 @@ else()
 endif()
 
 # Inline function support
-set(WOLFSSL_INLINE_HELP_STRING "Enable inline functions (default: enabled)")
-add_option("WOLFSSL_INLINE" ${WOLFSSL_INLINE_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_INLINE"
+    "Enable inline functions (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_INLINE)
     list(APPEND WOLFSSL_DEFINITIONS "-DNO_INLINE")
 endif()
 
-# TODO: - OCSP
-#       - OCSP stapling
-#       - OCSP stapling v2
-#       - CRL
+add_option("WOLFSSL_ARMASM_INLINE"
+    "Enable ARM assembly inline functions (default: disabled)"
+    "no" "yes;no")
+
+if (WOLFSSL_ARMASM_INLINE)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_ARMASM_INLINE")
+endif()
+
+# TODO:
 #       - CRL monitor
 #       - User crypto
 #       - Whitewood netRandom client library
-#       - SNI
 #       - Max fragment length
 #       - ALPN
 #       - Trusted CA indication
 #       - Truncated HMAC
 #       - Renegotiation indication
 #       - Secure renegotiation
-#       - Fallback SCSV
 
-set(WOLFSSL_SNI_HELP_STRING "Enable SNI (default: disabled)")
-add_option(WOLFSSL_SNI ${WOLFSSL_SNI_HELP_STRING} "no" "yes;no")
+add_option(WOLFSSL_OCSP "Enable OCSP (default: disabled)" "no" "yes;no")
+add_option(WOLFSSL_OCSPSTAPLING "Enable OCSP Stapling (default: disabled)" "no" "yes;no")
+add_option(WOLFSSL_OCSPSTAPLING_V2 "Enable OCSP Stapling v2 (default: disabled)" "no" "yes;no")
+add_option(WOLFSSL_CRL
+    "Enable CRL (Use =io for inline CRL HTTP GET) (default: disabled)"
+    "no" "yes;no;io")
 
-if (WOLFSSL_SNI)
-   list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_TLS_EXTENSIONS" "-DHAVE_SNI")
+
+set(SNI_DEFAULT "no")
+if(("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64|x86|AMD64|arm64") OR
+    ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64"))
+    set(SNI_DEFAULT "yes")
 endif()
-
+set(WOLFSSL_SNI_HELP_STRING "Enable SNI (default: disabled)")
+add_option(WOLFSSL_SNI ${WOLFSSL_SNI_HELP_STRING} ${SNI_DEFAULT} "yes;no")
 
 set(WOLFSSL_TLSX_HELP_STRING "Enable all TLS Extensions (default: disabled)")
 add_option(WOLFSSL_TLSX ${WOLFSSL_TLSX_HELP_STRING} "no" "yes;no")
 
-if (WOLFSSL_TLSX)
-  list(APPEND WOLFSSL_DEFINITIONS
-    "-DHAVE_TLS_EXTENSIONS"
-    "-DHAVE_SNI"
-    "-DHAVE_MAX_FRAGMENT"
-    "-DHAVE_TRUNCATED_HMAC"
-    "-DHAVE_ALPN"
-    "-DHAVE_TRUSTED_CA")
-    if (WOLFSSL_ECC OR WOLFSSL_CURVE25519 OR WOLFSSL_CURVE448 OR WOLFSSL_TLS13)
-       list(APPEND WOLFSSL_DEFINITIONS  "-DHAVE_SUPPORTED_CURVES")
-    endif()
+add_option(WOLFSSL_EX_DATA
+    "Enable app data (default: disabled)"
+    "no" "yes;no")
+
+if (WOLFSSL_EX_DATA)
+    list(APPEND WOLFSSL_DEFINITIONS
+      "-DHAVE_EX_DATA")
 endif()
 
-
 # Supported elliptic curves extensions
-set(WOLFSSL_SUPPORTED_CURVES_HELP_STRING "Enable Supported Elliptic Curves (default: enabled)")
-add_option("WOLFSSL_SUPPORTED_CURVES" ${WOLFSSL_SUPPORTED_CURVES_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_SUPPORTED_CURVES"
+    "Enable Supported Elliptic Curves (default: enabled)"
+    "yes" "yes;no")
 
 if(WOLFSSL_SUPPORTED_CURVES)
     if(NOT WOLFSSL_ECC AND NOT WOLFSSL_CURVE25519 AND NOT WOLFSSL_CURVE448)
@@ -1146,8 +2475,9 @@ if (WOLFSSL_TLS13)
 endif()
 
 # Session Ticket Extension
-set(WOLFSSL_SESSION_TICKET_HELP_STRING "Enable Session Ticket (default: disabled)")
-add_option("WOLFSSL_SESSION_TICKET" ${WOLFSSL_SESSION_TICKET_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_SESSION_TICKET"
+    "Enable Session Ticket (default: disabled)"
+    "no" "yes;no")
 
 if(WOLFSSL_NGINX OR WOLFSSL_WPAS OR WOLFSSL_HAPROXY OR WOLFSSL_LIGHTY)
     override_cache(WOLFSSL_SESSION_TICKET "yes")
@@ -1159,9 +2489,19 @@ if(WOLFSSL_SESSION_TICKET)
         "-DHAVE_SESSION_TICKET")
 endif()
 
+add_option("WOLFSSL_TICKET_NONCE_MALLOC"
+    "Enable dynamic allocation of ticket nonces (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_TICKET_NONCE_MALLOC)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_TICKET_NONCE_MALLOC")
+endif()
+
 # Extended master secret extension
-set(WOLFSSL_EXTENDED_MASTER_HELP_STRING "Enable Extended Master Secret (default: enabled)")
-add_option("WOLFSSL_EXTENDED_MASTER" ${WOLFSSL_EXTENDED_MASTER_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_EXTENDED_MASTER"
+    "Enable Extended Master Secret (default: enabled)"
+    "yes" "yes;no")
 
 if(WOLFSSL_EXTENDED_MASTER)
     list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_EXTENDED_MASTER")
@@ -1180,8 +2520,6 @@ endif()
 
 # TODO: - TLS extensions
 #       - Early data handshake
-#       - PKCS7
-#       - wolfSSH options
 #       - SCEP
 #       - Secure remote password
 #       - Indefinite length encoded messages
@@ -1196,9 +2534,31 @@ endif()
 #       - Asio
 #       - Apache HTTPD
 
+set(WOLFSSL_PKCS7_HELP_STRING "Enable PKCS7 (default: disabled)")
+add_option(WOLFSSL_PKCS7 ${WOLFSSL_PKCS7_HELP_STRING} "no" "yes;no")
+
+set(WOLFSSL_TSP_HELP_STRING "Enable RFC 3161 Time-Stamp Protocol (default: disabled)")
+add_option(WOLFSSL_TSP ${WOLFSSL_TSP_HELP_STRING} "no" "yes;no")
+
+set(WOLFSSL_TPM_HELP_STRING "Enable wolfTPM options (default: disabled)")
+add_option(WOLFSSL_TPM ${WOLFSSL_TPM_HELP_STRING} "no" "yes;no")
+
+set(WOLFSSL_CLU_HELP_STRING "Enable wolfCLU options (default: disabled)")
+add_option(WOLFSSL_CLU ${WOLFSSL_CLU_HELP_STRING} "no" "yes;no")
+
+set(WOLFSSL_AESKEYWRAP_HELP_STRING "Enable AES key wrap support (default: disabled)")
+add_option(WOLFSSL_AESKEYWRAP ${WOLFSSL_AESKEYWRAP_HELP_STRING} "no" "yes;no")
+
+set(WOLFSSL_X963KDF_HELP_STRING "Enable X9.63 KDF support (default: disabled)")
+add_option(WOLFSSL_X963KDF ${WOLFSSL_X963KDF_HELP_STRING} "no" "yes;no")
+
+set(WOLFSSL_NULL_CIPHER_HELP_STRING "Enable NULL cipher support (default: disabled)")
+add_option(WOLFSSL_NULL_CIPHER ${WOLFSSL_NULL_CIPHER_HELP_STRING} "no" "yes;no")
+
 # Encrypt-then-mac
-set(WOLFSSL_ENC_THEN_MAC_HELP_STRING "Enable Encryptr-Then-Mac extension (default: enabled)")
-add_option("WOLFSSL_ENC_THEN_MAC" ${WOLFSSL_ENC_THEN_MAC_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_ENC_THEN_MAC"
+    "Enable Encryptr-Then-Mac extension (default: enabled)"
+    "yes" "yes;no")
 
 if(WOLFSSL_APACHE_HTTPD)
     override_cache(WOLFSSL_ENC_THEN_MAC "no")
@@ -1214,8 +2574,9 @@ endif()
 
 # stunnel Support
 # TODO: rest of stunnel support
-set(WOLFSSL_STUNNEL_HELP_STRING "Enable stunnel (default: disabled)")
-add_option("WOLFSSL_STUNNEL" ${WOLFSSL_STUNNEL_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_STUNNEL"
+    "Enable stunnel (default: disabled)"
+    "no" "yes;no")
 
 if(WOLFSSL_ENC_THEN_MAC)
     list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ENCRYPT_THEN_MAC")
@@ -1241,8 +2602,9 @@ if(NOT WOLFSSL_MD4)
 endif()
 
 #  Encrypted keys
-set(WOLFSSL_ENCKEYS_HELP_STRING "Enable PEM encrypted key support (default: disabled)")
-add_option("WOLFSSL_ENCKEYS" ${WOLFSSL_ENCKEYS_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_ENCKEYS"
+    "Enable PEM encrypted key support (default: disabled)"
+    "no" "yes;no")
 
 if(NOT WOLFSSL_ENCKEYS)
     if(WOLFSSL_OPENSSLEXTRA OR
@@ -1268,11 +2630,22 @@ if(NOT WOLFSSL_PKCS12)
   list(APPEND WOLFSSL_DEFINITIONS "-DNO_PKCS12")
 endif()
 
+# PKCS#11
+add_option("WOLFSSL_PKCS11"
+    "Enable PKCS#11 (default: disabled)"
+    "no" "yes;no")
+
+if(WOLFSSL_PKCS11 AND NOT WIN32)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_PKCS11 -DHAVE_WOLF_BIGINT")
+    list(APPEND WOLFSSL_LINK_LIBS ${CMAKE_DL_LIBS})
+endif()
+
 
 # PWDBASED has to come after certservice since we want it on w/o explicit on
 # PWDBASED
-set(WOLFSSL_PWDBASED_HELP_STRING "Enable PWDBASED (default: disabled)")
-add_option("WOLFSSL_PWDBASED" ${WOLFSSL_PWDBASED_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_PWDBASED"
+    "Enable PWDBASED (default: disabled)"
+    "no" "yes;no")
 
 if(NOT WOLFSSL_PWDBASED)
     if(WOLFSSL_OPENSSLEXTRA OR
@@ -1291,23 +2664,9 @@ endif()
 #       - wolfCrypt only
 
 # fastmath
-set(FASTMATH_DEFAULT "no")
-
-if(("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64") OR
-    ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64"))
-    set(FASTMATH_DEFAULT "yes")
-endif()
-
-if(WOLFSSL_LINUXKM_DEFAULTS)
-    set(FASTMATH_DEFAULT "no")
-endif()
-
-if(WOLFSSL_SP_MATH)
-    set(FASTMATH_DEFAULT "no")
-endif()
-
-set(WOLFSSL_FAST_MATH_HELP_STRING "Enable fast math ops (default: enabled on x86_64/aarch64)")
-add_option("WOLFSSL_FAST_MATH" ${WOLFSSL_FAST_MATH_HELP_STRING} ${FASTMATH_DEFAULT} "yes;no")
+add_option("WOLFSSL_FAST_MATH"
+    "Enable fast math ops (default: disabled)"
+    "no" "yes;no")
 
 if(WOLFSSL_FAST_MATH)
     # turn off fastmath if leanpsk on or asn off (w/o DH and ECC)
@@ -1324,14 +2683,23 @@ if(WOLFSSL_FAST_MATH)
         list(APPEND WOLFSSL_DEFINITIONS "-DUSE_FAST_MATH")
         set(WOLFSSL_SLOWMATH "no")
     endif()
-
-    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
-        # Have settings.h set FP_MAX_BITS higher if user didn't set directly
-        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_X86_64_BUILD")
-    endif()
 endif()
 
 # TODO: - Fast huge math
+
+# Set processor-specific build macros
+if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64|AMD64")
+    set(WOLFSSL_X86_64_BUILD ON)
+    add_option("WOLFSSL_X86_64_BUILD_ASM" "Build ASM files" "yes" "yes;no")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_X86_64_BUILD")
+elseif("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64|arm64")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_AARCH64_BUILD")
+endif()
+
+# SP math all
+add_option("WOLFSSL_SP_MATH_ALL"
+    "Enable Single Precision math implementation for full algorithm suite (default: enabled)"
+    "yes" "yes;no")
 
 # Enable examples, used to disable examples
 if(WOLFSSL_LINUX_KM)
@@ -1340,8 +2708,9 @@ else()
     set(EXAMPLES_DEFAULT "yes")
 endif()
 
-set(WOLFSSL_EXAMPLES_HELP_STRING "Enable examples (default: enabled)")
-add_option("WOLFSSL_EXAMPLES" ${WOLFSSL_EXAMPLES_HELP_STRING} ${EXAMPLES_DEFAULT} "yes;no")
+add_option("WOLFSSL_EXAMPLES"
+    "Enable examples (default: enabled)"
+    ${EXAMPLES_DEFAULT} "yes;no")
 
 if(NOT WOLFSSL_FILESYSTEM OR
    NOT WOLFSSL_INLINE OR
@@ -1356,14 +2725,19 @@ else()
     set(CRYPT_TESTS_DEFAULT "yes")
 endif()
 
-set(WOLFSSL_CRYPT_TESTS_HELP_STRING "Enable Crypt Bench/Test (default: enabled)")
-add_option("WOLFSSL_CRYPT_TESTS" ${WOLFSSL_CRYPT_TESTS_HELP_STRING} ${CRYPT_TESTS_DEFAULT} "yes;no")
+add_option("WOLFSSL_CRYPT_TESTS"
+    "Enable Crypt Bench/Test (default: enabled)"
+    ${CRYPT_TESTS_DEFAULT} "yes;no")
 
-set(WOLFSSL_CRYPT_TESTS_LIBS_HELP_STRING "Build static libraries from the wolfCrypt test and benchmark sources (default: disabled)")
-add_option("WOLFSSL_CRYPT_TESTS_LIBS" ${WOLFSSL_CRYPT_TESTS_LIBS_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_CRYPT_TESTS_LIBS"
+    "Build static libraries from the wolfCrypt test and benchmark sources (default: disabled)"
+    "no" "yes;no")
+
+add_option("WOLFSSL_CRYPT_TESTS_HELP"
+    "Add help text to wolfCrypt test (default: disabled)"
+    "no" "yes;no")
 
 # TODO: - LIBZ
-#       - PKCS#11
 #       - Cavium
 #       - Cavium V
 #       - Cavium Octeon
@@ -1375,8 +2749,9 @@ add_option("WOLFSSL_CRYPT_TESTS_LIBS" ${WOLFSSL_CRYPT_TESTS_LIBS_HELP_STRING} "n
 #       - Asynchronous crypto
 
 # Asynchronous threading
-set(WOLFSSL_ASYNC_THREADS_HELP_STRING "Enable Asynchronous Threading (default: enabled)")
-add_option("WOLFSSL_ASYNC_THREADS" ${WOLFSSL_ASYNC_THREADS_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_ASYNC_THREADS"
+    "Enable Asynchronous Threading (default: enabled)"
+    "yes" "yes;no")
 
 if(WOLFSSL_ASYNC_CRYPT AND WOLFSSL_ASYNC_THREADS)
     if(CMAKE_USE_PTHREADS_INIT)
@@ -1395,13 +2770,27 @@ else()
     list(APPEND WOLFSSL_DEFINITIONS "-DWC_NO_ASYNC_THREADING")
 endif()
 
-# TODO: - cryptodev
-#       - cryptocb
-#       - Session export
-#       - AES key wrap
+# TODO: - Session export
 
-set(WOLFSSL_OLD_NAMES_HELP_STRING "Keep backwards compat with old names (default: enabled)")
-add_option("WOLFSSL_OLD_NAMES" ${WOLFSSL_OLD_NAMES_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_CRYPTOCB"
+    "Enable crypto callbacks (default: disabled)"
+    "no" "yes;no")
+
+add_option("WOLFSSL_CRYPTOCB_NO_SW_TEST"
+    "Disable crypto callback SW testing (default: disabled)"
+    "no" "yes;no")
+
+add_option("WOLFSSL_CRYPTOCB_RSA_PAD"
+    "Enable RSA padding aware crypto callbacks (default: disabled)"
+    "no" "yes;no")
+
+add_option("WOLFSSL_PKCALLBACKS"
+    "Enable public key callbacks (default: disabled)"
+    "no" "yes;no")
+
+add_option("WOLFSSL_OLD_NAMES"
+    "Keep backwards compat with old names (default: enabled)"
+    "yes" "yes;no")
 
 if(NOT WOLFSSL_OLD_NAMES AND NOT WOLFSSL_OPENSSL_COEXIST)
     list(APPEND WOLFSSL_DEFINITIONS
@@ -1415,8 +2804,9 @@ endif()
 #       - Hash flags
 
 # Support for enabling setting default DH parameters
-set(WOLFSSL_DH_DEFAULT_PARAMS_HELP_STRING "Enables option for default dh parameters (default: disabled)")
-add_option("WOLFSSL_DH_DEFAULT_PARAMS" ${WOLFSSL_DH_DEFAULT_PARAMS_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_DH_DEFAULT_PARAMS"
+    "Enables option for default dh parameters (default: disabled)"
+    "no" "yes;no")
 
 if(WOLFSSL_DH_DEFAULT_PARAMS OR NOT WOLFSSL_QT)
     override_cache(WOLFSSL_DH_DEFAULT_PARAMS "yes")
@@ -1433,11 +2823,1177 @@ else()
     endif()
 endif()
 
-set(WOLFSSL_USER_SETTINGS_HELP_STRING "Use your own user_settings.h and do not add Makefile CFLAGS (default: disabled)")
-add_option("WOLFSSL_USER_SETTINGS" ${WOLFSSL_USER_SETTINGS_HELP_STRING} "no" "yes;no")
+add_option("WOLFSSL_USER_SETTINGS"
+    "Use your own user_settings.h and do not add Makefile CFLAGS (default: disabled)"
+    "no" "yes;no")
 
-set(WOLFSSL_OPTFLAGS_HELP_STRING "Enable default optimization CFLAGS for the compiler (default: enabled)")
-add_option("WOLFSSL_OPTFLAGS" ${WOLFSSL_OPTFLAGS_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_USER_SETTINGS_ASM"
+    "Enable use of user_settings_asm.h in assembly files (default: disabled)"
+    "no" "yes;no")
+
+add_option("WOLFSSL_OPTFLAGS"
+    "Enable default optimization CFLAGS for the compiler (default: enabled)"
+    "yes" "yes;no")
+
+add_option("WOLFSSL_SYS_CA_CERTS"
+    "Enable ability to load CA certs from OS (default: enabled)"
+    "yes" "yes;no")
+
+if(WOLFSSL_SYS_CA_CERTS)
+    if(APPLE)
+        # Headers used for MacOS default system CA certs behavior. Only MacOS SDK will have this header
+        check_include_file("Security/SecTrustSettings.h" HAVE_SECURITY_SECTRUSTSETTINGS_H)
+        # Headers used for Apple native cert validation. All device SDKs should have these headers
+        check_include_file("Security/SecCertificate.h" HAVE_SECURITY_SECCERTIFICATE_H)
+        check_include_file("Security/SecTrust.h" HAVE_SECURITY_SECTRUST_H)
+        check_include_file("Security/SecPolicy.h" HAVE_SECURITY_SECPOLICY_H)
+        # Either Security/SecTrustSettings (for MacOS cert loading), or the
+        # trio of Security/SecCertificate.h, Security/SecTrust.h, and
+        # Security/SecPolicy.h (for native trust APIs on other apple devices)
+        # must be present. Default to SecTrustSettings method on MacOS.
+        if(HAVE_SECURITY_SECTRUSTSETTINGS_H OR (HAVE_SECURITY_SECCERTIFICATE_H
+                                                AND HAVE_SECURITY_SECTRUST_H
+                                                AND HAVE_SECURITY_SECPOLICY_H))
+            find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
+            if(NOT CORE_FOUNDATION_FRAMEWORK)
+                message(FATAL_ERROR "Can't enable system CA certs without CoreFoundation framework.")
+            else()
+                find_library(SECURITY_FRAMEWORK Security)
+                if(NOT SECURITY_FRAMEWORK)
+                    message(FATAL_ERROR "Can't enable system CA certs without Security framework.")
+                endif()
+            endif()
+
+            # MacOS should not use native cert validation by default, but other apple devices should.
+            if(NOT HAVE_SECURITY_SECTRUSTSETTINGS_H AND HAVE_SECURITY_SECCERTIFICATE_H
+                                                    AND HAVE_SECURITY_SECTRUST_H
+                                                    AND HAVE_SECURITY_SECPOLICY_H)
+                list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_APPLE_NATIVE_CERT_VALIDATION")
+            endif()
+
+        else()
+            message(FATAL_ERROR "Can't enable system CA certs without Apple Security.framework headers.")
+        endif()
+    elseif(NOT WIN32 AND NOT WOLFSSL_FILESYSTEM)
+        message("Can't enable system CA certs without a filesystem.")
+        override_cache(WOLFSSL_SYS_CA_CERTS "no")
+    endif()
+
+
+    if(WOLFSSL_SYS_CA_CERTS)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SYS_CA_CERTS")
+    endif()
+endif()
+
+# FLAGS operations
+
+if(WOLFSSL_AESCCM)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_AESCCM")
+endif()
+
+if(WOLFSSL_AESOFB)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_AES_OFB" "-DWOLFSSL_AES_DIRECT")
+endif()
+
+if(WOLFSSL_TPM)
+    override_cache(WOLFSSL_KEYGEN    "yes")
+    override_cache(WOLFSSL_CERTGEN   "yes")
+    override_cache(WOLFSSL_CRYPTOCB  "yes")
+    override_cache(WOLFSSL_CERTREQ   "yes")
+    override_cache(WOLFSSL_CERTEXT   "yes")
+    override_cache(WOLFSSL_PKCS7     "yes")
+    override_cache(WOLFSSL_AESCFB    "yes")
+    override_cache(WOLFSSL_PUBLIC_MP "yes")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_ALLOW_ENCODING_CA_FALSE")
+endif()
+
+if(WOLFSSL_CLU)
+    override_cache(WOLFSSL_CERTGEN  "yes")
+    override_cache(WOLFSSL_CERTREQ  "yes")
+    override_cache(WOLFSSL_CERTEXT  "yes")
+    override_cache(WOLFSSL_MD5      "yes")
+    override_cache(WOLFSSL_AESCTR   "yes")
+    override_cache(WOLFSSL_KEYGEN   "yes")
+    override_cache(WOLFSSL_OPENSSLALL "yes")
+    override_cache(WOLFSSL_ED25519  "yes")
+    override_cache(WOLFSSL_SHA512   "yes")
+    override_cache(WOLFSSL_DES3     "yes")
+    override_cache(WOLFSSL_PKCS7    "yes")
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_OID_ENCODING" "-DWOLFSSL_NO_ASN_STRICT" "-DWOLFSSL_ALT_NAMES")
+    # Add OPENSSL_ALL definition to ensure OpenSSL compatibility functions are available
+    list(APPEND WOLFSSL_DEFINITIONS "-DOPENSSL_ALL")
+    # Remove NO_DES3 from WOLFSSL_DEFINITIONS to ensure DES3 is enabled
+    list(REMOVE_ITEM WOLFSSL_DEFINITIONS "-DNO_DES3")
+endif()
+
+if(WOLFSSL_AESCFB)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_AES_CFB")
+endif()
+
+
+if(WOLFSSL_TSP)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_TSP")
+    # Requires PKCS7 for time-stamp token creation and verification
+    override_cache(WOLFSSL_PKCS7 "yes")
+endif()
+
+if(WOLFSSL_PKCS7)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_PKCS7")
+    override_cache(WOLFSSL_AESKEYWRAP "yes")
+    # Enable prereqs if not already enabled
+    if(WOLFSSL_ECC)
+        override_cache(WOLFSSL_X963KDF "yes")
+    endif()
+endif()
+
+if(WOLFSSL_X963KDF)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_X963_KDF")
+endif()
+
+if(WOLFSSL_AESKEYWRAP)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_AES_KEYWRAP"
+        "-DWOLFSSL_AES_DIRECT"
+        )
+endif()
+
+if(WOLFSSL_NULL_CIPHER)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_NULL_CIPHER")
+endif()
+
+# Hybrid Public Key Encryption (RFC9180)
+add_option("WOLFSSL_HPKE"
+        "Enable wolfSSL hybrid public key encryption (default: disabled)"
+        "no" "yes;no")
+
+# Encrypted Client Hello (ECH)
+add_option("WOLFSSL_ECH"
+        "Enable wolfSSL encrypted client hello (default: disabled)"
+        "no" "yes;no")
+
+# Keying Material Exporter / TLS Exporter
+add_option("WOLFSSL_KEYING_MATERIAL"
+        "Enable wolfSSL keying material export (default: disabled)"
+        "no" "yes;no")
+
+if(WOLFSSL_HPKE)
+    if(NOT WOLFSSL_ECC)
+        message(FATAL_ERROR "HPKE supported only with ECC (WOLFSSL_ECC)")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_HPKE")
+    override_cache(WOLFSSL_HKDF "yes")
+endif()
+
+if(WOLFSSL_ECH)
+    if(NOT WOLFSSL_HPKE)
+        message(FATAL_ERROR "ECH supported only with HPKE (WOLFSSL_HPKE)")
+    endif()
+    if(NOT WOLFSSL_SNI)
+        message(FATAL_ERROR "ECH supported only with SNI (WOLFSSL_SNI)")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ECH")
+endif()
+
+if(WOLFSSL_KEYING_MATERIAL)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_KEYING_MATERIAL")
+endif()
+
+if(WOLFSSL_KEYGEN)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_KEY_GEN")
+endif()
+if(WOLFSSL_CERTGEN)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_CERT_GEN")
+endif()
+if(WOLFSSL_CERTREQ)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_CERT_REQ")
+endif()
+if(WOLFSSL_CERTEXT)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_CERT_EXT")
+endif()
+if(WOLFSSL_CERTGENCACHE)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_CERT_GEN_CACHE")
+endif()
+
+if(WOLFSSL_CRYPTOCB)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLF_CRYPTO_CB")
+endif()
+
+if(WOLFSSL_CRYPTOCB_NO_SW_TEST)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWC_TEST_NO_CRYPTOCB_SW_TEST")
+endif()
+
+if(WOLFSSL_CRYPTOCB_RSA_PAD)
+    if(NOT WOLFSSL_CRYPTOCB)
+        message(FATAL_ERROR "WOLFSSL_CRYPTOCB_RSA_PAD requires WOLFSSL_CRYPTOCB")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLF_CRYPTO_CB_RSA_PAD")
+endif()
+
+# Public Key Callbacks
+if(WOLFSSL_PKCALLBACKS)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_PK_CALLBACKS")
+endif()
+
+if(WOLFSSL_OCSPSTAPLING)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_CERTIFICATE_STATUS_REQUEST" "-DHAVE_TLS_EXTENSIONS")
+    override_cache(WOLFSSL_OCSP "yes")
+endif()
+
+if(WOLFSSL_OCSPSTAPLING_V2)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_CERTIFICATE_STATUS_REQUEST_V2" "-DHAVE_TLS_EXTENSIONS")
+    override_cache(WOLFSSL_OCSP "yes")
+endif()
+
+# must be below OCSP stapling options to allow override
+if (WOLFSSL_OCSP)
+   list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_OCSP")
+endif()
+
+if (WOLFSSL_CRL STREQUAL "yes")
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_CRL")
+elseif(WOLFSSL_CRL STREQUAL "io")
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_CRL" "-DHAVE_CRL_IO")
+endif()
+
+if (WOLFSSL_SNI)
+   list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_TLS_EXTENSIONS" "-DHAVE_SNI")
+endif()
+
+if (WOLFSSL_TLSX)
+  list(APPEND WOLFSSL_DEFINITIONS
+    "-DHAVE_TLS_EXTENSIONS"
+    "-DHAVE_SNI"
+    "-DHAVE_MAX_FRAGMENT"
+    "-DHAVE_TRUNCATED_HMAC"
+    "-DHAVE_ALPN"
+    "-DHAVE_TRUSTED_CA")
+    if (WOLFSSL_ECC OR WOLFSSL_CURVE25519 OR WOLFSSL_CURVE448 OR WOLFSSL_TLS13)
+       list(APPEND WOLFSSL_DEFINITIONS  "-DHAVE_SUPPORTED_CURVES")
+    endif()
+endif()
+
+
+add_option("WOLFSSL_CAAM"
+    "Enable use of CAAM with NXP (default: disabled)"
+    "no" "yes;no")
+if (WOLFSSL_CAAM)
+   list(APPEND WOLFSSL_DEFINITIONS  "-DWOLFSSL_CAAM")
+endif()
+
+if (WOLFSSL_ARIA)
+   list(APPEND WOLFSSL_DEFINITIONS  "-DHAVE_ARIA")
+endif()
+
+# ---- Additional configuration options relocated here so their WOLFSSL_* cache
+# ---- vars (and any force_option() from bundles) are set BEFORE
+# ---- generate_build_flags() selects source files and BEFORE the
+# ---- WOLFSSL_USER_SETTINGS reset below.
+####################################################
+# Additional configuration options (parity with configure.ac)
+####################################################
+
+add_option("WOLFSSL_KERNEL_BENCHMARKS"
+    "Enable crypto benchmarking autorun at module load time for kernel module (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_KERNEL_BENCHMARKS)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_KERNEL_BENCHMARKS"
+        )
+endif()
+
+add_option("WOLFSSL_KERNEL_VERBOSE_DEBUG"
+    "Enable supplementary runtime debugging messages for kernel module (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_KERNEL_VERBOSE_DEBUG)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_KERNEL_VERBOSE_DEBUG"
+        )
+endif()
+
+add_option("WOLFSSL_KERNEL_STACK_DEBUG"
+    "Enable runtime reporting of stack usage in kernel module (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_KERNEL_STACK_DEBUG)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_KERNEL_STACK_DEBUG"
+        )
+endif()
+
+add_option("WOLFSSL_LINUXKM_DEFAULTS"
+    "Enable default settings appropriate for kernel modules (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_LINUXKM_DEFAULTS)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_KERNEL_MODE_DEFAULTS"
+        )
+endif()
+
+add_option("WOLFSSL_LINUXKM_PIE"
+    "Alias for kernel relocation tables, requires Linux kernel module build (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_LINUXKM_PIE)
+    if(WOLFSSL_LINUX_KM)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWC_SYM_RELOC_TABLES")
+    else()
+        message(WARNING "WOLFSSL_LINUXKM_PIE requires WOLFSSL_LINUX_KM; ignoring (no effect).")
+    endif()
+endif()
+
+add_option("WOLFSSL_LINUXKM_BENCHMARKS"
+    "Enable crypto benchmarking autorun at module load time for Linux kernel module (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_LINUXKM_BENCHMARKS)
+    if(WOLFSSL_LINUX_KM)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_LINUXKM_BENCHMARKS")
+    else()
+        message(WARNING "WOLFSSL_LINUXKM_BENCHMARKS requires WOLFSSL_LINUX_KM; ignoring (no effect).")
+    endif()
+endif()
+
+add_option("WOLFSSL_DEBUG_CODE_POINTS"
+    "Enable debug code points (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_DEBUG_CODE_POINTS)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_DEBUG_CODEPOINTS"
+        )
+endif()
+
+add_option("WOLFSSL_MEMORYLOG"
+    "Enable memory logging (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_MEMORYLOG)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_MEMORY_LOG"
+        )
+endif()
+
+add_option("WOLFSSL_STACKLOG"
+    "Enable stack logging (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_STACKLOG)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_STACK_LOG"
+        )
+endif()
+
+add_option("WOLFSSL_CAMELLIA"
+    "Enable wolfSSL Camellia support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_CAMELLIA)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_CAMELLIA"
+        )
+endif()
+
+add_option("WOLFSSL_BLAKE2"
+    "Enable wolfSSL BLAKE2b support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_BLAKE2)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_BLAKE2B"
+        )
+    # generate_build_flags() selects blake2b.c based on WOLFSSL_BLAKE2B.
+    set(WOLFSSL_BLAKE2B "yes")
+endif()
+
+add_option("WOLFSSL_BLAKE2S"
+    "Enable wolfSSL BLAKE2s support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_BLAKE2S)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_BLAKE2S"
+        )
+endif()
+
+add_option("WOLFSSL_RC2"
+    "Enable RC2 encryption (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_RC2)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWC_RC2"
+        )
+endif()
+
+add_option("WOLFSSL_ASCON"
+    "Enable ASCON support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_ASCON)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_ASCON"
+        )
+endif()
+
+add_option("WOLFSSL_AESEAX"
+    "Enable AES-EAX support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_AESEAX)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_AES_EAX"
+        )
+endif()
+
+add_option("WOLFSSL_AESCBC_LENGTH_CHECKS"
+    "Enable AES-CBC length checks (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_AESCBC_LENGTH_CHECKS)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_AES_CBC_LENGTH_CHECKS"
+        )
+endif()
+
+add_option("WOLFSSL_INTELRAND"
+    "Enable Intel RDRAND instruction as a seed source (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_INTELRAND)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_INTEL_RDRAND"
+        )
+endif()
+
+add_option("WOLFSSL_INTELRDSEED"
+    "Enable Intel RDSEED instruction as a seed source (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_INTELRDSEED)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_INTEL_RDSEED"
+        )
+endif()
+
+add_option("WOLFSSL_AMDRAND"
+    "Enable AMD RDSEED instruction as a seed source (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_AMDRAND)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_AMD_RDSEED"
+        )
+endif()
+
+add_option("WOLFSSL_TITANCACHE"
+    "Enable titan session cache (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_TITANCACHE)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DTITAN_SESSION_CACHE"
+        )
+endif()
+
+add_option("WOLFSSL_HUGECACHE"
+    "Enable huge session cache (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_HUGECACHE)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHUGE_SESSION_CACHE"
+        )
+endif()
+
+add_option("WOLFSSL_BIGCACHE"
+    "Enable big session cache (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_BIGCACHE)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DBIG_SESSION_CACHE"
+        )
+endif()
+
+add_option("WOLFSSL_SMALLCACHE"
+    "Enable small session cache (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_SMALLCACHE)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DSMALL_SESSION_CACHE"
+        )
+endif()
+
+add_option("WOLFSSL_SAVESESSION"
+    "Enable persistent session cache (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_SAVESESSION)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DPERSIST_SESSION_CACHE"
+        )
+endif()
+
+add_option("WOLFSSL_SAVECERT"
+    "Enable persistent cert cache (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_SAVECERT)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DPERSIST_CERT_CACHE"
+        )
+endif()
+
+add_option("WOLFSSL_TLSV10"
+    "Enable TLS 1.0 support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_TLSV10)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_ALLOW_TLSV10"
+        )
+endif()
+
+add_option("WOLFSSL_RENEGOTIATION_INDICATION"
+    "Enable renegotiation indication SCSV (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_RENEGOTIATION_INDICATION)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_RENEGOTIATION_INDICATION"
+        )
+endif()
+
+add_option("WOLFSSL_FALLBACK_SCSV"
+    "Enable TLS_FALLBACK_SCSV support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_FALLBACK_SCSV)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_FALLBACK_SCSV"
+        )
+endif()
+
+add_option("WOLFSSL_WRITEDUP"
+    "Enable write duplication of SSL objects (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_WRITEDUP)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_WRITE_DUP"
+        )
+endif()
+
+add_option("WOLFSSL_ATOMICUSER"
+    "Enable atomic user record layer (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_ATOMICUSER)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DATOMIC_USER"
+        )
+endif()
+
+add_option("WOLFSSL_RWLOCK"
+    "Enable read/write lock support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_RWLOCK)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_USE_RWLOCK"
+        )
+endif()
+
+add_option("WOLFSSL_DTLS_MTU"
+    "Enable setting the MTU size for wolfSSL DTLS (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_DTLS_MTU)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_DTLS_MTU"
+        )
+endif()
+
+add_option("WOLFSSL_HMAC_COPY"
+    "Enable HMAC hash-state copy support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_HMAC_COPY)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_HMAC_COPY_HASH"
+        )
+endif()
+
+add_option("WOLFSSL_CERTSIGNCB"
+    "Enable certificate signing callback (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_CERTSIGNCB)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_CERT_SIGN_CB"
+        )
+endif()
+
+add_option("WOLFSSL_SEP"
+    "Enable SEP extensions (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_SEP)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_SEP" "-DKEEP_PEER_CERT"
+        )
+endif()
+
+add_option("WOLFSSL_ASN_PRINT"
+    "Enable ASN Print API (default: enabled)"
+    "yes" "yes;no")
+if(WOLFSSL_ASN_PRINT)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_ASN_PRINT"
+        )
+endif()
+
+add_option("WOLFSSL_INDEF"
+    "Enable parsing of indefinite length encoded messages (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_INDEF)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DASN_BER_TO_DER"
+        )
+endif()
+
+add_option("WOLFSSL_TESTCERT"
+    "Enable testing of certificate parsing structures (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_TESTCERT)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_TEST_CERT"
+        )
+endif()
+
+add_option("WOLFSSL_SRP"
+    "Enable Secure Remote Password (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_SRP)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFCRYPT_HAVE_SRP"
+        )
+endif()
+
+add_option("WOLFSSL_MOSQUITTO"
+    "Enable Mosquitto support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_MOSQUITTO)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_MOSQUITTO"
+        )
+endif()
+
+add_option("WOLFSSL_WEBSERVER"
+    "Enable Web Server support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_WEBSERVER)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_WEBSERVER"
+        )
+endif()
+
+add_option("WOLFSSL_WEBCLIENT"
+    "Enable HTTP client support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_WEBCLIENT)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_HTTP_CLIENT"
+        )
+endif()
+
+add_option("WOLFSSL_CUDA"
+    "Enable NVIDIA CUDA support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_CUDA)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWC_CUDA" "-DHAVE_CUDA"
+        )
+endif()
+
+add_option("WOLFSSL_C89"
+    "Enable C89 compatibility (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_C89)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLF_C89"
+        )
+endif()
+
+add_option("WOLFSSL_AUTOSAR"
+    "Enable AUTOSAR support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_AUTOSAR)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_AUTOSAR"
+        )
+endif()
+
+add_option("WOLFSSL_HASHFLAGS"
+    "Enable support for hash flags (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_HASHFLAGS)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_HASH_FLAGS"
+        )
+endif()
+
+add_option("WOLFSSL_XILINX"
+    "Enable wolfSSL support for Xilinx hardened crypto (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_XILINX)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_XILINX" "-DWOLFSSL_XILINX_CRYPT"
+        )
+endif()
+
+add_option("WOLFSSL_FAULTHARDEN"
+    "Enable fault-hardened build (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_FAULTHARDEN)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_CHECK_SIG_FAULTS" "-DWOLFSSL_CHECK_VER_FAULTS" "-DWC_SHA3_FAULT_HARDEN" "-DWC_MLKEM_FAULT_HARDEN" "-DWC_MLDSA_FAULT_HARDEN"
+        )
+endif()
+
+add_option("WOLFSSL_SM3"
+    "Enable wolfSSL SM3 support (default: disabled)"
+    "no" "no;yes;small")
+if(NOT WOLFSSL_SM3 STREQUAL "no")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SM3")
+    if(WOLFSSL_SM3 STREQUAL "small")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SM3_SMALL")
+    endif()
+endif()
+
+add_option("WOLFSSL_MEMTEST"
+    "Memory testing option, for internal use (default: disabled)"
+    "no" "no;yes;fail")
+if(NOT WOLFSSL_MEMTEST STREQUAL "no")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_TRACK_MEMORY" "-DWOLFSSL_DEBUG_MEMORY")
+    if(WOLFSSL_MEMTEST STREQUAL "fail")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_FORCE_MALLOC_FAIL_TEST")
+    endif()
+endif()
+
+add_option("WOLFSSL_DEBUG_TRACE_ERRCODES"
+    "Print trace messages when library errors are thrown (default: disabled)"
+    "no" "no;yes;backtrace")
+if(NOT WOLFSSL_DEBUG_TRACE_ERRCODES STREQUAL "no")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_DEBUG_TRACE_ERROR_CODES")
+    if(WOLFSSL_DEBUG_TRACE_ERRCODES STREQUAL "backtrace")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_DEBUG_BACKTRACE_ERROR_CODES")
+        set(CMAKE_C_FLAGS "-g -funwind-tables ${CMAKE_C_FLAGS}")
+        list(APPEND WOLFSSL_LINK_LIBS backtrace)
+    endif()
+endif()
+
+add_option("WOLFSSL_DO178"
+    "Enable DO-178, will NOT work without a DO-178 license (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_DO178)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_DO178")
+else()
+    list(APPEND WOLFSSL_DEFINITIONS "-DNO_DO178")
+endif()
+
+
+####################################################
+# Additional options with dependencies / values (parity with configure.ac)
+####################################################
+
+# XChaCha (depends on ChaCha)
+add_option("WOLFSSL_XCHACHA"
+    "Enable XChaCha support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_XCHACHA)
+    if(NOT WOLFSSL_CHACHA)
+        message(FATAL_ERROR "XChaCha (WOLFSSL_XCHACHA) depends on ChaCha (WOLFSSL_CHACHA).")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_XCHACHA")
+endif()
+
+# CMAC-KDF
+add_option("WOLFSSL_CMAC_KDF"
+    "Enable CMAC-KDF support (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_CMAC_KDF)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_CMAC_KDF")
+endif()
+
+# Fixed Point cache ECC (depends on ECC)
+add_option("WOLFSSL_FPECC"
+    "Enable Fixed Point cache ECC (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_FPECC)
+    if(NOT WOLFSSL_ECC)
+        message(FATAL_ERROR "Cannot enable fpecc (WOLFSSL_FPECC) without enabling ECC (WOLFSSL_ECC).")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DFP_ECC")
+endif()
+
+# RNG banks (depends on RNG)
+add_option("WOLFSSL_RNG_BANK"
+    "Enable compiling and using RNG banks (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_RNG_BANK)
+    if(NOT WOLFSSL_RNG)
+        message(FATAL_ERROR "WOLFSSL_RNG_BANK requires WOLFSSL_RNG.")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWC_RNG_BANK_SUPPORT")
+endif()
+
+# Valgrind (for unit tests)
+add_option("WOLFSSL_VALGRIND"
+    "Enable valgrind for unit tests (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_VALGRIND)
+    find_program(VALGRIND_PROG valgrind)
+    if(NOT VALGRIND_PROG)
+        message(FATAL_ERROR "Valgrind not found.")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_VALGRIND")
+endif()
+
+# CRL monitor (Linux/macOS/FreeBSD, requires threading)
+add_option("WOLFSSL_CRL_MONITOR"
+    "Enable CRL monitor (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_CRL_MONITOR)
+    if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
+            CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
+            CMAKE_SYSTEM_NAME STREQUAL "FreeBSD"))
+        message(FATAL_ERROR "CRL monitor only allowed on Linux, macOS, or FreeBSD.")
+    endif()
+    if(WOLFSSL_SINGLE_THREADED)
+        message(FATAL_ERROR "CRL monitor requires threading / pthread.")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_CRL_MONITOR")
+endif()
+
+# Track memory (no/yes/verbose, requires wolfSSL memory)
+add_option("WOLFSSL_TRACKMEMORY"
+    "Enable memory use info on wolfCrypt and wolfSSL cleanup (default: disabled)"
+    "no" "no;yes;verbose")
+if(NOT WOLFSSL_TRACKMEMORY STREQUAL "no")
+    if(NOT WOLFSSL_MEMORY)
+        message(FATAL_ERROR "WOLFSSL_TRACKMEMORY requires wolfSSL memory (WOLFSSL_MEMORY).")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_TRACK_MEMORY")
+    if(WOLFSSL_TRACKMEMORY STREQUAL "verbose")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_TRACK_MEMORY_VERBOSE")
+    endif()
+endif()
+
+# Stack size info on examples (no/yes/verbose)
+add_option("WOLFSSL_STACKSIZE"
+    "Enable stack size info on examples (default: disabled)"
+    "no" "no;yes;verbose")
+if(NOT WOLFSSL_STACKSIZE STREQUAL "no")
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_STACK_SIZE")
+    if(WOLFSSL_STACKSIZE STREQUAL "verbose")
+        list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_STACK_SIZE_VERBOSE")
+    endif()
+endif()
+
+# Context extra user data (no/yes/<1-9999 number of slots>)
+# Uses a plain cache STRING (not add_option) so a numeric value is preserved
+# rather than being coerced to yes/no.
+set(WOLFSSL_CONTEXT_EXTRA_USER_DATA "no" CACHE STRING
+    "Enable storing user-defined data in TLS API contexts, optional value is number of slots (default: disabled)")
+if(NOT WOLFSSL_CONTEXT_EXTRA_USER_DATA STREQUAL "no")
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_EX_DATA")
+    if(NOT WOLFSSL_CONTEXT_EXTRA_USER_DATA STREQUAL "yes")
+        if(NOT WOLFSSL_CONTEXT_EXTRA_USER_DATA MATCHES "^[1-9][0-9]?[0-9]?[0-9]?$")
+            message(FATAL_ERROR "Invalid WOLFSSL_CONTEXT_EXTRA_USER_DATA -- must be yes, no, or a number from 1 to 9999.")
+        endif()
+        list(APPEND WOLFSSL_DEFINITIONS "-DMAX_EX_DATA=${WOLFSSL_CONTEXT_EXTRA_USER_DATA}")
+    endif()
+endif()
+
+# ECC minimum key size (bits)
+if(WOLFSSL_FIPS)
+    set(WOLFSSL_ECC_MIN_KEY_SZ_DEFAULT "192")
+else()
+    set(WOLFSSL_ECC_MIN_KEY_SZ_DEFAULT "224")
+endif()
+set(WOLFSSL_ECC_MIN_KEY_SZ "${WOLFSSL_ECC_MIN_KEY_SZ_DEFAULT}" CACHE STRING
+    "Set the ECC minimum key size in bits (default: 224 non-FIPS / 192 FIPS)")
+if(WOLFSSL_ECC AND WOLFSSL_ECC_MIN_KEY_SZ)
+    list(APPEND WOLFSSL_DEFINITIONS "-DECC_MIN_KEY_SZ=${WOLFSSL_ECC_MIN_KEY_SZ}")
+endif()
+
+
+####################################################
+# Additional crypto/TLS feature options (parity with configure.ac)
+####################################################
+
+# MD2
+add_option("WOLFSSL_MD2" "Enable MD2 (default: disabled)" "no" "yes;no")
+if(WOLFSSL_MD2)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_MD2")
+endif()
+
+# RIPEMD
+add_option("WOLFSSL_RIPEMD" "Enable RIPEMD-160 (default: disabled)" "no" "yes;no")
+if(WOLFSSL_RIPEMD)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_RIPEMD")
+endif()
+
+# Base16 / hex encoding
+add_option("WOLFSSL_BASE16" "Enable Base16/hex encoding support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_BASE16)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_BASE16")
+endif()
+
+# PSK with single identity
+add_option("WOLFSSL_PSK_ONE_ID" "Enable PSK with a single identity (default: disabled)" "no" "yes;no")
+if(WOLFSSL_PSK_ONE_ID)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_PSK_ONE_ID")
+endif()
+
+# RSA public-key-only
+add_option("WOLFSSL_RSAPUB" "Enable RSA public-key-only operations (default: disabled)" "no" "yes;no")
+if(WOLFSSL_RSAPUB)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_RSA_PUBLIC_ONLY")
+endif()
+
+# RSA verify-only
+add_option("WOLFSSL_RSAVFY" "Enable RSA verify-only operations (default: disabled)" "no" "yes;no")
+if(WOLFSSL_RSAVFY)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DWOLFSSL_RSA_PUBLIC_ONLY" "-DWOLFSSL_RSA_VERIFY_ONLY"
+        "-DWOLFSSL_RSA_VERIFY_INLINE" "-DNO_SIG_WRAPPER" "-DNO_CHECK_PRIVATE_KEY")
+endif()
+
+# SSL 3.0 (insecure, off by default)
+add_option("WOLFSSL_SSLV3" "Enable SSL 3.0 (insecure, default: disabled)" "no" "yes;no")
+if(WOLFSSL_SSLV3)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_ALLOW_SSLV3")
+endif()
+
+# Small stack
+add_option("WOLFSSL_SMALLSTACK" "Enable small stack usage (default: disabled)" "no" "yes;no")
+# Small stack cache (implies small stack)
+add_option("WOLFSSL_SMALLSTACKCACHE" "Enable small stack cache (default: disabled)" "no" "yes;no")
+if(WOLFSSL_SMALLSTACKCACHE)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SMALL_STACK_CACHE")
+    set(WOLFSSL_SMALLSTACK "yes")
+endif()
+if(WOLFSSL_SMALLSTACK)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SMALL_STACK")
+endif()
+
+# Session certificates
+add_option("WOLFSSL_SESSIONCERTS" "Enable session certificate storing (default: disabled)" "no" "yes;no")
+if(WOLFSSL_SESSIONCERTS)
+    list(APPEND WOLFSSL_DEFINITIONS "-DSESSION_CERTS")
+endif()
+
+# Secure renegotiation
+add_option("WOLFSSL_SECURE_RENEGOTIATION" "Enable secure renegotiation (default: disabled)" "no" "yes;no")
+if(WOLFSSL_SECURE_RENEGOTIATION)
+    if(WOLFSSL_RENEGOTIATION_INDICATION)
+        message(FATAL_ERROR "Cannot enable renegotiation-indication and secure-renegotiation.")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DHAVE_TLS_EXTENSIONS" "-DHAVE_SECURE_RENEGOTIATION"
+        "-DHAVE_SERVER_RENEGOTIATION_INFO")
+endif()
+
+# Per-thread OpenSSL-compat error queue
+add_option("WOLFSSL_ERROR_QUEUE_PER_THREAD" "Enable a per-thread OpenSSL-compatible error queue (default: disabled)" "no" "yes;no")
+if(WOLFSSL_ERROR_QUEUE_PER_THREAD)
+    list(APPEND WOLFSSL_DEFINITIONS "-DERROR_QUEUE_PER_THREAD")
+endif()
+
+# Anonymous cipher suites (requires DH)
+add_option("WOLFSSL_ANON" "Enable anonymous cipher suites (default: disabled)" "no" "yes;no")
+if(WOLFSSL_ANON)
+    if(NOT WOLFSSL_DH)
+        message(FATAL_ERROR "Anonymous suite (WOLFSSL_ANON) requires DH (WOLFSSL_DH).")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ANON")
+endif()
+
+# TLS 1.3 early data (no/yes/group)
+add_option("WOLFSSL_EARLYDATA" "Enable TLS 1.3 early data, use group to group with ClientHello (default: disabled)" "no" "no;yes;group")
+if(NOT WOLFSSL_EARLYDATA STREQUAL "no")
+    if(NOT WOLFSSL_TLS13)
+        message(FATAL_ERROR "Early data (WOLFSSL_EARLYDATA) requires TLS 1.3 (WOLFSSL_TLS13).")
+    endif()
+    if(NOT WOLFSSL_SESSION_TICKET AND NOT WOLFSSL_PSK)
+        message(FATAL_ERROR "Early data (WOLFSSL_EARLYDATA) requires session tickets (WOLFSSL_SESSION_TICKET) and/or PSK (WOLFSSL_PSK).")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_EARLY_DATA")
+    if(WOLFSSL_EARLYDATA STREQUAL "group")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_EARLY_DATA_GROUP")
+    endif()
+endif()
+
+# SM2 (requires ECC and external wolfsm sources)
+add_option("WOLFSSL_SM2" "Enable SM2 support, requires external wolfsm sources (default: disabled)" "no" "yes;no")
+if(WOLFSSL_SM2)
+    if(NOT WOLFSSL_ECC)
+        message(FATAL_ERROR "Cannot enable SM2 (WOLFSSL_SM2) without enabling ECC (WOLFSSL_ECC).")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SM2" "-DWOLFSSL_BASE16")
+endif()
+
+# SM4 modes (each no/yes/small; require external wolfsm sources)
+foreach(SM4MODE CBC CTR ECB GCM CCM)
+    add_option("WOLFSSL_SM4_${SM4MODE}" "Enable SM4-${SM4MODE}, requires external wolfsm sources (default: disabled)" "no" "no;yes;small")
+    if(NOT WOLFSSL_SM4_${SM4MODE} STREQUAL "no")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SM4_${SM4MODE}" "-DWOLFSSL_SM4")
+        if(WOLFSSL_SM4_${SM4MODE} STREQUAL "small")
+            list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_SM4_SMALL")
+        endif()
+    endif()
+endforeach()
+
+# Static memory (no/yes/small/lean/debug)
+add_option("WOLFSSL_STATICMEMORY" "Enable static memory allocation (default: disabled)" "no" "no;yes;small;lean;debug")
+if(NOT WOLFSSL_STATICMEMORY STREQUAL "no")
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_STATIC_MEMORY")
+    if(WOLFSSL_STATICMEMORY STREQUAL "small" OR WOLFSSL_STATICMEMORY STREQUAL "lean")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_STATIC_MEMORY_LEAN")
+    endif()
+    if(WOLFSSL_STATICMEMORY STREQUAL "debug")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_STATIC_MEMORY_DEBUG_CALLBACK")
+    endif()
+endif()
+
+# TLS (enabled by default; disable for wolfCrypt-only)
+add_option("WOLFSSL_TLS" "Enable TLS (default: enabled)" "yes" "yes;no")
+if(NOT WOLFSSL_TLS)
+    list(APPEND WOLFSSL_DEFINITIONS "-DNO_TLS")
+endif()
+
+# SHA-256 (enabled by default)
+add_option("WOLFSSL_SHA256" "Enable SHA-256 (default: enabled)" "yes" "yes;no")
+if(NOT WOLFSSL_SHA256)
+    list(APPEND WOLFSSL_DEFINITIONS "-DNO_SHA256")
+endif()
+
+# PKCS#8 (enabled by default)
+add_option("WOLFSSL_PKCS8" "Enable PKCS#8 support (default: enabled)" "yes" "yes;no")
+if(NOT WOLFSSL_PKCS8)
+    list(APPEND WOLFSSL_DEFINITIONS "-DNO_PKCS8")
+endif()
+
+# Old function/type names (enabled by default)
+add_option("WOLFSSL_OLDNAMES" "Keep old function and type names (default: enabled)" "yes" "yes;no")
+if(NOT WOLFSSL_OLDNAMES AND NOT WOLFSSL_OPENSSL_COEXIST)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DNO_OLD_RNGNAME" "-DNO_OLD_WC_NAMES" "-DNO_OLD_SSL_NAMES"
+        "-DNO_OLD_SHA_NAMES" "-DNO_OLD_MD5_NAME")
+endif()
+
+
+####################################################
+# Additional feature options with values/deps (parity with configure.ac)
+####################################################
+
+# OpenSSL coexistence (disables old names so wolfSSL can coexist with OpenSSL)
+add_option("WOLFSSL_OPENSSL_COEXIST" "Enable coexistence with OpenSSL by disabling old names (default: disabled)" "no" "yes;no")
+if(WOLFSSL_OPENSSL_COEXIST)
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DNO_OLD_WC_NAMES" "-DNO_OLD_SSL_NAMES"
+        "-DNO_OLD_SHA_NAMES" "-DNO_OLD_MD5_NAME" "-DOPENSSL_COEXIST")
+endif()
+
+# Bit-sliced AES (constant-time)
+add_option("WOLFSSL_AES_BITSLICED" "Enable bit-sliced implementation of AES (default: disabled)" "no" "yes;no")
+if(WOLFSSL_AES_BITSLICED)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWC_AES_BITSLICED" "-DHAVE_AES_ECB" "-DWOLFSSL_AES_DIRECT")
+endif()
+
+# ECC encryption / ECIES (no/yes/old/iso18033/geniv), requires ECC and HKDF
+add_option("WOLFSSL_ECC_ENCRYPT" "Enable ECC encrypt (ECIES). yes=SEC1, old=original, iso18033=ISO 18033, geniv=generate IV (default: disabled)" "no" "no;yes;old;iso18033;geniv")
+if(NOT WOLFSSL_ECC_ENCRYPT STREQUAL "no")
+    if(NOT WOLFSSL_ECC)
+        message(FATAL_ERROR "Cannot enable eccencrypt (WOLFSSL_ECC_ENCRYPT) without enabling ECC (WOLFSSL_ECC).")
+    endif()
+    if(NOT WOLFSSL_HKDF)
+        message(FATAL_ERROR "Cannot enable eccencrypt (WOLFSSL_ECC_ENCRYPT) without enabling HKDF (WOLFSSL_HKDF).")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ECC_ENCRYPT")
+    if(WOLFSSL_ECC_ENCRYPT STREQUAL "old")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_ECIES_OLD")
+    elseif(WOLFSSL_ECC_ENCRYPT STREQUAL "iso18033")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_ECIES_ISO18033")
+    elseif(WOLFSSL_ECC_ENCRYPT STREQUAL "geniv")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_ECIES_GEN_IV")
+    endif()
+endif()
+
+# TLS hardening per RFC 9325 (no/yes/112/128)
+# Raw cache STRING (not add_option) so an out-of-range value is preserved rather
+# than being coerced to yes/no, allowing the validation below to reject it.
+set(WOLFSSL_HARDEN_TLS "no" CACHE STRING
+    "Enable RFC 9325 TLS hardening at the given security level in bits, one of no/yes/112/128 (default: no)")
+set_property(CACHE WOLFSSL_HARDEN_TLS PROPERTY STRINGS "no;yes;112;128")
+if(NOT WOLFSSL_HARDEN_TLS STREQUAL "no")
+    if(WOLFSSL_HARDEN_TLS STREQUAL "yes" OR WOLFSSL_HARDEN_TLS STREQUAL "112")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_HARDEN_TLS=112")
+    elseif(WOLFSSL_HARDEN_TLS STREQUAL "128")
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_HARDEN_TLS=128")
+    else()
+        message(FATAL_ERROR "Invalid value for WOLFSSL_HARDEN_TLS -- must be yes, no, 112, or 128.")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_EXTRA_ALERTS" "-DWOLFSSL_CHECK_ALERT_ON_ERR")
+endif()
+
+# zlib compression support
+add_option("WOLFSSL_LIBZ" "Enable zlib compression support (default: disabled)" "no" "yes;no")
+if(WOLFSSL_LIBZ)
+    find_package(ZLIB REQUIRED)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_LIBZ")
+    list(APPEND WOLFSSL_LINK_LIBS ZLIB::ZLIB)
+    list(APPEND WOLFSSL_INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS})
+endif()
+
+
+####################################################
+# Maximum key size options (parity with configure.ac)
+####################################################
+
+# Maximum bit size for classic asymmetric (RSA/DH/DSA) keys
+set(WOLFSSL_MAX_RSA_BITS "" CACHE STRING
+    "Maximum bit size to support for RSA, DH, and DSA keys (1024-16384)")
+# Maximum bit size for ECC algorithms
+set(WOLFSSL_MAX_ECC_BITS "" CACHE STRING
+    "Maximum bit size to support for ECC algorithms (112-1024)")
+
+set(WOLFSSL_MPI_MAX_KEY_BITS "")
+if(WOLFSSL_MAX_RSA_BITS)
+    if(NOT WOLFSSL_MAX_RSA_BITS MATCHES "^[0-9]+$" OR
+       WOLFSSL_MAX_RSA_BITS LESS 1024 OR WOLFSSL_MAX_RSA_BITS GREATER 16384)
+        message(FATAL_ERROR "WOLFSSL_MAX_RSA_BITS must be an integer between 1024 and 16384 inclusive.")
+    endif()
+    if(NOT WOLFSSL_FIPS)
+        list(APPEND WOLFSSL_DEFINITIONS "-DRSA_MAX_SIZE=${WOLFSSL_MAX_RSA_BITS}")
+    endif()
+    set(WOLFSSL_MPI_MAX_KEY_BITS ${WOLFSSL_MAX_RSA_BITS})
+endif()
+if(WOLFSSL_MAX_ECC_BITS)
+    if(NOT WOLFSSL_MAX_ECC_BITS MATCHES "^[0-9]+$" OR
+       WOLFSSL_MAX_ECC_BITS LESS 112 OR WOLFSSL_MAX_ECC_BITS GREATER 1024)
+        message(FATAL_ERROR "WOLFSSL_MAX_ECC_BITS must be an integer between 112 and 1024 inclusive.")
+    endif()
+    list(APPEND WOLFSSL_DEFINITIONS "-DMAX_ECC_BITS=${WOLFSSL_MAX_ECC_BITS}")
+    if(WOLFSSL_MPI_MAX_KEY_BITS STREQUAL "" OR
+       WOLFSSL_MPI_MAX_KEY_BITS LESS WOLFSSL_MAX_ECC_BITS)
+        set(WOLFSSL_MPI_MAX_KEY_BITS ${WOLFSSL_MAX_ECC_BITS})
+    endif()
+endif()
+if(NOT WOLFSSL_MPI_MAX_KEY_BITS STREQUAL "" AND WOLFSSL_MPI_MAX_KEY_BITS GREATER 1024)
+    math(EXPR WOLFSSL_FP_MAX_BITS "${WOLFSSL_MPI_MAX_KEY_BITS} * 2")
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DFP_MAX_BITS=${WOLFSSL_FP_MAX_BITS}"
+        "-DSP_INT_BITS=${WOLFSSL_MPI_MAX_KEY_BITS}")
+endif()
+
+
+####################################################
+# Assembly acceleration options (parity with configure.ac)
+####################################################
+
+# RISC-V assembly
+add_option("WOLFSSL_RISCV_ASM" "Enable RISC-V assembly acceleration (default: disabled)" "no" "yes;no")
+if(WOLFSSL_RISCV_ASM AND WOLFSSL_ASM)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_RISCV_ASM")
+endif()
+
+# PowerPC 32-bit assembly
+add_option("WOLFSSL_PPC32_ASM" "Enable PowerPC 32-bit assembly acceleration (default: disabled)" "no" "yes;no")
+if(WOLFSSL_PPC32_ASM AND WOLFSSL_ASM)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_PPC32_ASM")
+endif()
+
+# PowerPC 64-bit assembly
+add_option("WOLFSSL_PPC64_ASM" "Enable PowerPC 64-bit assembly acceleration (default: disabled)" "no" "yes;no")
+if(WOLFSSL_PPC64_ASM AND WOLFSSL_ASM)
+    list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_PPC64_ASM")
+endif()
+
+# All options are declared by this point; report any force_option() that no
+# add_option() consumed (would otherwise be a silent no-op).
+wolfssl_warn_unconsumed_forces()
 
 # Generates the BUILD_* flags. These control what source files are included in
 # the library. A series of AM_CONDITIONALs handle this in configure.ac.
@@ -1452,12 +4008,34 @@ if(WOLFSSL_USER_SETTINGS)
     set(WOLFSSL_DEFINITIONS "-DWOLFSSL_USER_SETTINGS")
 endif()
 
-# TODO: Applying definitions to everything like this, rather than
-#       individual targets, is discouraged in CMake.
-add_definitions(${WOLFSSL_DEFINITIONS})
+if(WOLFSSL_USER_SETTINGS_ASM)
+    if(WOLFSSL_USER_SETTINGS)
+        list(APPEND WOLFSSL_DEFINITIONS "-DWOLFSSL_USER_SETTINGS_ASM")
+        # Create user_settings_asm.h for use in assembly files (e.g. .S files).
+        if(WIN32)
+            execute_process(COMMAND
+            $ENV{SHELL} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/user_settings_asm.sh
+            "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}"
+            RESULT_VARIABLE USER_SETTINGS_ASM_RET)
+        else()
+            execute_process(COMMAND
+            ${CMAKE_CURRENT_SOURCE_DIR}/scripts/user_settings_asm.sh
+            "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}"
+            RESULT_VARIABLE USER_SETTINGS_ASM_RET)
+        endif()
+        if (NOT USER_SETTINGS_ASM_RET EQUAL 0)
+            message(FATAL_ERROR
+            "${CMAKE_CURRENT_SOURCE_DIR}/scripts/user_settings_asm.sh failed.")
+        endif()
+    else()
+        message(FATAL_ERROR
+        "Must have WOLFSSL_USER_SETTINGS to enable WOLFSSL_USER_SETTINGS_ASM.")
+    endif()
+endif()
 
-set(WOLFSSL_CONFIG_H_HELP_STRING "Enable generation of config.h and define HAVE_CONFIG_H (default: enabled)")
-add_option("WOLFSSL_CONFIG_H" ${WOLFSSL_CONFIG_H_HELP_STRING} "yes" "yes;no")
+add_option("WOLFSSL_CONFIG_H"
+    "Enable generation of config.h and define HAVE_CONFIG_H (default: enabled)"
+    "yes" "yes;no")
 
 if(WOLFSSL_CONFIG_H)
     add_definitions("-DHAVE_CONFIG_H")
@@ -1469,48 +4047,87 @@ if(WOLFSSL_CONFIG_H)
                    "${CMAKE_CURRENT_BINARY_DIR}/wolfcrypt/test/test_paths.h" )
 endif()
 
+# If config.h or wolfssl/options.h exists, delete it to avoid
+# a mixup with build/wolfssl/options.h.
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/wolfssl/options.h")
+    file(REMOVE "${CMAKE_CURRENT_SOURCE_DIR}/wolfssl/options.h")
+endif()
+
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/config.h")
+    file(REMOVE "${CMAKE_CURRENT_SOURCE_DIR}/config.h")
+endif()
+
 # Suppress some warnings about separate compilation, inlining
 add_definitions("-DWOLFSSL_IGNORE_FILE_WARN")
 
 # Generate user options header
-message("Generating user options header...")
-set(OPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/wolfssl/options.h")
+message(STATUS "Generating user options header...")
+if (${CMAKE_DISABLE_SOURCE_CHANGES})
+    set(WOLFSSL_BUILD_OUT_OF_TREE_DEFAULT "${CMAKE_DISABLE_SOURCE_CHANGES}")
+else()
+    set(WOLFSSL_BUILD_OUT_OF_TREE_DEFAULT "yes")
+endif()
+add_option("WOLFSSL_BUILD_OUT_OF_TREE"
+    "Don't generate files in the source tree (default: ${WOLFSSL_BUILD_OUT_OF_TREE_DEFAULT})"
+    "${WOLFSSL_BUILD_OUT_OF_TREE_DEFAULT}" "yes;no")
+if (${WOLFSSL_BUILD_OUT_OF_TREE})
+   set(WOLFSSL_OUTPUT_BASE ${CMAKE_CURRENT_BINARY_DIR})
+else()
+   set(WOLFSSL_OUTPUT_BASE ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+set(OPTION_FILE "${WOLFSSL_OUTPUT_BASE}/wolfssl/options.h")
+
+# sccache
+add_option("ENABLE_SCCACHE"
+        "Enable sccache (default: disabled)"
+        "no" "yes;no")
+
+if (ENABLE_SCCACHE AND (NOT WOLFSSL_SCCACHE_ALREADY_SET_FLAG))
+    find_program(SCCACHE sccache REQUIRED)
+    if(SCCACHE)
+        message(STATUS "Enable sccache")
+
+        if(CMAKE_C_COMPILER_LAUNCHER)
+            set(CMAKE_C_COMPILER_LAUNCHER "${CMAKE_C_COMPILER_LAUNCHER}" "${SCCACHE}")
+        else()
+            set(CMAKE_C_COMPILER_LAUNCHER "${SCCACHE}")
+        endif()
+        if(CMAKE_CXX_COMPILER_LAUNCHER)
+            set(CMAKE_CXX_COMPILER_LAUNCHER "${CMAKE_CXX_COMPILER_LAUNCHER}" "${SCCACHE}")
+        else()
+            set(CMAKE_CXX_COMPILER_LAUNCHER "${SCCACHE}")
+        endif()
+
+        if (MSVC)
+            if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+                string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+                string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+            elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+                string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+                string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+            elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+                string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+                string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+            endif()
+        endif()
+        set(WOLFSSL_SCCACHE_ALREADY_SET_FLAG ON)
+    endif()
+endif()
+
+add_option("WOLFSSL_KEYLOG_EXPORT"
+    "Enable insecure export of TLS secrets to an NSS keylog file (default: disabled)"
+    "no" "yes;no")
+if(WOLFSSL_KEYLOG_EXPORT)
+    message(WARNING "Keylog export enabled -- Sensitive key data will be stored insecurely.")
+    list(APPEND WOLFSSL_DEFINITIONS
+        "-DSHOW_SECRETS"
+        "-DHAVE_SECRET_CALLBACK"
+        "-DWOLFSSL_SSLKEYLOGFILE"
+        "-DWOLFSSL_KEYLOG_EXPORT_WARNED")
+endif()
+
+
 file(REMOVE ${OPTION_FILE})
-
-file(APPEND ${OPTION_FILE} "/* wolfssl options.h\n")
-file(APPEND ${OPTION_FILE} " * generated from configure options\n")
-file(APPEND ${OPTION_FILE} " *\n")
-file(APPEND ${OPTION_FILE} " * Copyright (C) 2006-2020 wolfSSL Inc.\n")
-file(APPEND ${OPTION_FILE} " *\n")
-file(APPEND ${OPTION_FILE} " * This file is part of wolfSSL. (formerly known as CyaSSL)\n")
-file(APPEND ${OPTION_FILE} " *\n")
-file(APPEND ${OPTION_FILE} " */\n\n")
-file(APPEND ${OPTION_FILE} "#ifndef WOLFSSL_OPTIONS_H\n")
-file(APPEND ${OPTION_FILE} "#define WOLFSSL_OPTIONS_H\n\n\n")
-file(APPEND ${OPTION_FILE} "#ifdef __cplusplus\n")
-file(APPEND ${OPTION_FILE} "extern \"C\" {\n")
-file(APPEND ${OPTION_FILE} "#endif\n\n")
-
-add_to_options_file("${WOLFSSL_DEFINITIONS}" "${OPTION_FILE}")
-# CMAKE_C_FLAGS is just a string of space-separated flags to pass to the C
-# compiler. We need to replace those spaces with semicolons in order to treat it
-# as a CMake list.
-string(REPLACE " " ";" CMAKE_C_FLAGS_LIST "${CMAKE_C_FLAGS}")
-add_to_options_file("${CMAKE_C_FLAGS_LIST}" "${OPTION_FILE}")
-
-file(APPEND ${OPTION_FILE} "\n#ifdef __cplusplus\n")
-file(APPEND ${OPTION_FILE} "}\n")
-file(APPEND ${OPTION_FILE} "#endif\n\n\n")
-file(APPEND ${OPTION_FILE} "#endif /* WOLFSSL_OPTIONS_H */\n\n")
-
-# backwards compatibility for those who have included options or version
-set(CYASSL_OPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cyassl/options.h")
-file(REMOVE ${CYASSL_OPTION_FILE})
-file(APPEND ${CYASSL_OPTION_FILE} "/* cyassl options.h\n")
-file(APPEND ${CYASSL_OPTION_FILE} " * generated from wolfssl/options.h\n")
-file(APPEND ${CYASSL_OPTION_FILE} " */\n")
-file(READ ${OPTION_FILE} OPTION_FILE_CONTENTS)
-file(APPEND ${CYASSL_OPTION_FILE} ${OPTION_FILE_CONTENTS})
 
 ####################################################
 # Library Target
@@ -1525,26 +4142,136 @@ set(LIB_SOURCES "")
 # Corresponds to the instances of "src_libwolfssl_la_SOURCES += ..."
 # in the *.am files.
 generate_lib_src_list("${LIB_SOURCES}")
-add_library(wolfssl ${LIB_SOURCES})
+if(BUILD_SHARED_LIBS)
+    message(STATUS "BUILD_SHARED_LIBS enabled: ${LIB_SOURCES}")
+    add_library(wolfssl SHARED ${LIB_SOURCES})
+else()
+    message(STATUS "Static Libs: ${LIB_SOURCES}")
+    add_library(wolfssl STATIC ${LIB_SOURCES})
+endif()
+
+add_library(wolfssl::wolfssl ALIAS wolfssl)
+
+if (NOT "$ENV{ARIA_DIR}" STREQUAL "")
+    message(STATUS "Found Environment variable ARIA_DIR=$ENV{ARIA_DIR}")
+    if(WOLFSSL_ARIA)
+        message(STATUS "wolfSSL WOLFSSL_ARIA is enabled")
+    else()
+        message(STATUS "wolfSSL WOLFSSL_ARIA is not enabled. To enable, specify a user_settings.h file or run: cmake .. -DWOLFSSL_ARIA=yes")
+        message(STATUS "Clear the ARIA_DIR environment variable to otherwise suppress this message when not using ARIA ciphers.")
+    endif()
+endif()
+
+# ARIA Check
+if(WOLFSSL_ARIA)
+    message(STATUS "WOLFSSL_ARIA is enabled")
+
+    find_package(ARIA)
+
+    if(ARIA_FOUND)
+        message(STATUS "ARIA find_package() success.")
+    else()
+        message(FATAL_ERROR "WOLFSSL_ARIA is enabled, but find_package() did not find ARIA MagicCrypto.\n"
+                            "Check ARIA_DIR environment variable and/or copy MagicCrypto directory locally.")
+    endif()
+
+    list(APPEND WOLFSSL_LINK_LIBS "${ARIA_LIB_FILE}")
+
+    # The cmake target_include_directories() will complain about local directories,
+    # so we'll handle MagicCrypto differently when found in wolfssl.
+    # see below to use include_directories() instead.
+    if(ARIA_IS_LOCAL)
+        # there's also a wolfssl port API to include, plus local ARIA include
+        include_directories("wolfssl/wolfcrypt/port/aria" "MagicCrypto/include")
+    else()
+        # see below for target_include_directories() instead
+        include_directories("wolfssl/wolfcrypt/port/aria")
+        message(STATUS "ARIA_IS_LOCAL is false, appending ${ARIA_INCLUDE_DIR} to WOLFSSL_INCLUDE_DIRS")
+        list(APPEND WOLFSSL_INCLUDE_DIRS "${ARIA_INCLUDE_DIR}")
+    endif()
+
+    add_library(MagicCrypto_lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/wolfcrypt/src/port/aria/aria-crypt.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/wolfcrypt/src/port/aria/aria-cryptocb.c
+    )
+
+    set_target_properties(MagicCrypto_lib PROPERTIES OUTPUT_NAME "MagicCrypto")
+    target_link_libraries(MagicCrypto_lib wolfssl)
+    target_compile_options(MagicCrypto_lib PRIVATE "-DHAVE_ARIA")
+
+    # ARIA was enabled and we successfully found it.
+    set(HAVE_ARIA 1)
+    list(APPEND WOLFSSL_DEFINITIONS "-DHAVE_ARIA")
+
+    message(STATUS "ARIA Check: WOLFSSL_LINK_LIBS    = ${WOLFSSL_LINK_LIBS}")
+endif()
+
+# Resolve conflicting/duplicate build defines before they are consumed below.
+# Numeric size macros can be appended by multiple sources (application bundles
+# and the max-key-size options) with different values; collapse each to a single
+# largest value so the compile line and the generated options.h agree and there
+# is no -Wmacro-redefined / order-dependent result.
+foreach(_szmacro FP_MAX_BITS SP_INT_BITS RSA_MAX_SIZE MAX_ECC_BITS)
+    set(_szmax "")
+    foreach(_def IN LISTS WOLFSSL_DEFINITIONS)
+        if(_def MATCHES "^-D${_szmacro}=([0-9]+)$")
+            if(_szmax STREQUAL "" OR CMAKE_MATCH_1 GREATER _szmax)
+                set(_szmax "${CMAKE_MATCH_1}")
+            endif()
+        endif()
+    endforeach()
+    if(NOT _szmax STREQUAL "")
+        list(FILTER WOLFSSL_DEFINITIONS EXCLUDE REGEX "^-D${_szmacro}=[0-9]+$")
+        list(APPEND WOLFSSL_DEFINITIONS "-D${_szmacro}=${_szmax}")
+    endif()
+endforeach()
+
+# Drop exact-duplicate -D flags (e.g. a bundle and the source option it forces
+# both emitting the same feature define).
+list(REMOVE_DUPLICATES WOLFSSL_DEFINITIONS)
+
+foreach(DEF IN LISTS WOLFSSL_DEFINITIONS)
+    string(REGEX MATCH "^(-D)?([^=]+)(=(.*))?$" DEF_MATCH ${DEF})
+    if (NOT "${CMAKE_MATCH_4}" STREQUAL "")
+        set(${CMAKE_MATCH_2} ${CMAKE_MATCH_4})
+        # message("set(${CMAKE_MATCH_2} ${CMAKE_MATCH_4})")
+    else()
+        set(${CMAKE_MATCH_2} 1)
+        # message("set(${CMAKE_MATCH_2} 1)")
+    endif()
+endforeach()
+
+# If new build options are added please update the cmake/options.h.in
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/options.h.in ${OPTION_FILE})
 
 set_target_properties(wolfssl
     PROPERTIES
-        SOVERSION ${LIBTOOL_SO_VERSION}
+        SOVERSION ${WOLFSSL_LIBRARY_VERSION_FIRST}
         VERSION ${LIBTOOL_FULL_VERSION}
 )
 
-target_compile_options(wolfssl PRIVATE "-DBUILDING_WOLFSSL")
-
+target_compile_definitions(wolfssl PRIVATE "BUILDING_WOLFSSL")
+if(${BUILD_SHARED_LIBS})
+    target_compile_definitions(wolfssl PUBLIC "WOLFSSL_DLL")
+endif()
+target_compile_definitions(wolfssl PRIVATE ${WOLFSSL_DEFINITIONS})
 
 ####################################################
 # Include Directories
 ####################################################
 
+if("${WOLFSSL_INCLUDE_DIRS}" STREQUAL "")
+    message(STATUS "WOLFSSL_INCLUDE_DIRS is blank. No additional directories will be added.")
+else()
+    message(STATUS "WOLFSSL_INCLUDE_DIRS = ${WOLFSSL_INCLUDE_DIRS}")
+endif()
+
 target_include_directories(wolfssl
     PUBLIC
-        $<INSTALL_INTERFACE:wolfssl>
+        $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        ${WOLFSSL_INCLUDE_DIRS}
 )
 
 ####################################################
@@ -1553,37 +4280,56 @@ target_include_directories(wolfssl
 
 target_link_libraries(wolfssl PUBLIC ${WOLFSSL_LINK_LIBS})
 
-if(WIN32)
-    # For Windows link ws2_32
+if(CMAKE_C_COMPILER_ID STREQUAL "OpenWatcom")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        target_link_libraries(wolfssl PUBLIC ws2_32 crypt32)
+    endif()
+elseif (WIN32 OR ${CMAKE_SYSTEM_NAME} MATCHES "^MSYS" OR ${CMAKE_SYSTEM_NAME} MATCHES "^MINGW")
+    # For Windows link required libraries
+    message("Building on Windows/MSYS/MINGW")
     target_link_libraries(wolfssl PUBLIC
-        $<$<PLATFORM_ID:Windows>:ws2_32>)
+        ws2_32 crypt32 advapi32)
+elseif(APPLE)
+    message("Building on Apple")
+    if(WOLFSSL_SYS_CA_CERTS)
+        target_link_libraries(wolfssl PUBLIC
+            ${CORE_FOUNDATION_FRAMEWORK}
+            ${SECURITY_FRAMEWORK})
+    endif()
 else()
-    # DH requires math (m) library
-    target_link_libraries(wolfssl
-        PUBLIC
-            m)
+    message("Building on Linux (or other)")
+    if(WOLFSSL_DH AND NOT WOLFSSL_DH_CONST)
+        # DH requires math (m) library
+        target_link_libraries(wolfssl
+            PUBLIC
+                m)
+    endif()
 endif()
 
 ####################################################
 # Tests and Examples
 ####################################################
 
+enable_testing()
 if(WOLFSSL_EXAMPLES)
+
     # Build wolfSSL client example
     add_executable(client
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/client/client.c)
     target_link_libraries(client wolfssl)
+    target_compile_definitions(client PRIVATE ${WOLFSSL_DEFINITIONS})
     set_property(TARGET client
                  PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                 ${CMAKE_CURRENT_SOURCE_DIR}/examples/client)
+                 ${WOLFSSL_OUTPUT_BASE}/examples/client)
 
     # Build wolfSSL server example
     add_executable(server
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/server/server.c)
     target_link_libraries(server wolfssl)
+    target_compile_definitions(server PRIVATE ${WOLFSSL_DEFINITIONS})
     set_property(TARGET server
                  PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                 ${CMAKE_CURRENT_SOURCE_DIR}/examples/server)
+                 ${WOLFSSL_OUTPUT_BASE}/examples/server)
 
     # Build echo client example
     add_executable(echoclient
@@ -1591,9 +4337,10 @@ if(WOLFSSL_EXAMPLES)
     target_include_directories(echoclient PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR})
     target_link_libraries(echoclient wolfssl)
+    target_compile_definitions(echoclient PRIVATE ${WOLFSSL_DEFINITIONS})
     set_property(TARGET echoclient
                  PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                 ${CMAKE_CURRENT_SOURCE_DIR}/examples/echoclient)
+                 ${WOLFSSL_OUTPUT_BASE}/examples/echoclient)
 
     # Build echo server example
     add_executable(echoserver
@@ -1601,41 +4348,163 @@ if(WOLFSSL_EXAMPLES)
     target_include_directories(echoserver PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR})
     target_link_libraries(echoserver wolfssl)
+    target_compile_definitions(echoserver PRIVATE ${WOLFSSL_DEFINITIONS})
     set_property(TARGET echoserver
                  PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                 ${CMAKE_CURRENT_SOURCE_DIR}/examples/echoserver)
+                 ${WOLFSSL_OUTPUT_BASE}/examples/echoserver)
 
-    if(NOT WIN32)
+    if(NOT WIN32 AND NOT WOLFSSL_SINGLE_THREADED)
         # Build TLS benchmark example
         add_executable(tls_bench
             ${CMAKE_CURRENT_SOURCE_DIR}/examples/benchmark/tls_bench.c)
         target_link_libraries(tls_bench wolfssl)
-        target_link_libraries(tls_bench Threads::Threads)
+        target_compile_definitions(tls_bench PRIVATE ${WOLFSSL_DEFINITIONS})
+        if(CMAKE_USE_PTHREADS_INIT)
+            target_link_libraries(tls_bench Threads::Threads)
+        endif()
         set_property(TARGET tls_bench
                  PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                 ${CMAKE_CURRENT_SOURCE_DIR}/examples/benchmark)
+                 ${WOLFSSL_OUTPUT_BASE}/examples/benchmark)
     endif()
 
     # Build unit tests
     add_executable(unit_test
         tests/api.c
-        tests/hash.c
+        tests/api/test_md2.c
+        tests/api/test_md4.c
+        tests/api/test_md5.c
+        tests/api/test_sha.c
+        tests/api/test_sha256.c
+        tests/api/test_sha512.c
+        tests/api/test_sha3.c
+        tests/api/test_blake2.c
+        tests/api/test_sm3.c
+        tests/api/test_ripemd.c
+        tests/api/test_hash.c
+        tests/api/test_hmac.c
+        tests/api/test_cmac.c
+        tests/api/test_siphash.c
+        tests/api/test_srp.c
+        tests/api/test_eccsi.c
+        tests/api/test_sakke.c
+        tests/api/test_hpke.c
+        tests/api/test_kdf.c
+        tests/api/test_she.c
+        tests/api/test_des3.c
+        tests/api/test_chacha.c
+        tests/api/test_poly1305.c
+        tests/api/test_chacha20_poly1305.c
+        tests/api/test_camellia.c
+        tests/api/test_arc4.c
+        tests/api/test_rc2.c
+        tests/api/test_aes.c
+        tests/api/test_ascon.c
+        tests/api/test_sm4.c
+        tests/api/test_wc_encrypt.c
+        tests/api/test_coding.c
+        tests/api/test_error.c
+        tests/api/test_random.c
+        tests/api/test_wolfentropy.c
+        tests/api/test_wolfevent.c
+        tests/api/test_port.c
+        tests/api/test_compress.c
+        tests/api/test_wolfmath.c
+        tests/api/test_rsa.c
+        tests/api/test_dsa.c
+        tests/api/test_dh.c
+        tests/api/test_ecc.c
+        tests/api/test_sm2.c
+        tests/api/test_curve25519.c
+        tests/api/test_ed25519.c
+        tests/api/test_curve448.c
+        tests/api/test_ed448.c
+        tests/api/test_frodokem.c
+        tests/api/test_mlkem.c
+        tests/api/test_mldsa.c
+        tests/api/test_mldsa_legacy.c
+        tests/api/test_slhdsa.c
+        tests/api/test_falcon.c
+        tests/api/test_signature.c
+        tests/api/test_lms_xmss.c
+        tests/api/test_dtls.c
+        tests/api/test_dtls13.c
+        tests/api/test_ssl_cert.c
+        tests/api/test_ssl_crl_ocsp.c
+        tests/api/test_ssl_pk.c
+        tests/api/test_ssl_ext.c
+        tests/api/test_ssl_rw.c
+        tests/api/test_ssl_hs.c
+        tests/api/test_ocsp.c
+        tests/api/test_evp.c
+        tests/api/test_tls_ext.c
+        tests/api/test_tls.c
+        tests/api/test_session.c
+        tests/api/test_x509.c
+        tests/api/test_asn.c
+        tests/api/test_pkcs7.c
+        tests/api/test_pkcs12.c
+        tests/api/test_tsp.c
+        tests/api/test_ossl_tsp.c
+        tests/api/test_pwdbased.c
+        tests/api/test_ossl_asn1.c
+        tests/api/test_ossl_bio.c
+        tests/api/test_ossl_bn.c
+        tests/api/test_ossl_cipher.c
+        tests/api/test_ossl_dh.c
+        tests/api/test_ossl_dgst.c
+        tests/api/test_ossl_dsa.c
+        tests/api/test_ossl_ec.c
+        tests/api/test_ossl_ecx.c
+        tests/api/test_ossl_mac.c
+        tests/api/test_ossl_rsa.c
+        tests/api/test_ossl_sk.c
+        tests/api/test_ossl_x509.c
+        tests/api/test_ossl_x509_ext.c
+        tests/api/test_ossl_x509_name.c
+        tests/api/test_ossl_x509_pk.c
+        tests/api/test_ossl_x509_vp.c
+        tests/api/test_ossl_x509_io.c
+        tests/api/test_ossl_x509_crypto.c
+        tests/api/test_ossl_x509_acert.c
+        tests/api/test_ossl_x509_info.c
+        tests/api/test_ossl_x509_str.c
+        tests/api/test_ossl_x509_lu.c
+        tests/api/test_ossl_pem.c
+        tests/api/test_ossl_rand.c
+        tests/api/test_ossl_obj.c
+        tests/api/test_ossl_p7p12.c
+        tests/api/test_evp_digest.c
+        tests/api/test_evp_cipher.c
+        tests/api/test_evp_pkey.c
+        tests/api/test_certman.c
+        tests/api/test_tls13.c
         tests/srp.c
         tests/suites.c
+        tests/w64wrapper.c
         tests/unit.c
+        tests/quic.c
+        tests/utils.c
+        testsuite/utils.c
         examples/server/server.c
-        examples/client/client.c)
+        examples/client/client.c
+        wolfcrypt/test/test.c)
     target_include_directories(unit_test PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR})
     target_compile_options(unit_test PUBLIC "-DNO_MAIN_DRIVER")
     target_link_libraries(unit_test wolfssl)
-    target_link_libraries(unit_test Threads::Threads)
+    target_compile_definitions(unit_test PRIVATE ${WOLFSSL_DEFINITIONS})
+    if(CMAKE_USE_PTHREADS_INIT)
+        target_link_libraries(unit_test Threads::Threads)
+    endif()
     set_property(TARGET unit_test
                  PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/)
+                 ${WOLFSSL_OUTPUT_BASE}/tests/)
     set_property(TARGET unit_test
                  PROPERTY RUNTIME_OUTPUT_NAME
                  unit.test)
+    add_test(NAME unit_test
+             COMMAND $<TARGET_FILE:unit_test>
+             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 if(WOLFSSL_CRYPT_TESTS)
@@ -1649,13 +4518,18 @@ if(WOLFSSL_CRYPT_TESTS)
             ${CMAKE_CURRENT_SOURCE_DIR}/wolfcrypt/test/test.c)
         set_target_properties(wolfcrypttest_lib PROPERTIES OUTPUT_NAME "wolfcrypttest")
         target_link_libraries(wolfcrypttest_lib wolfssl)
+        target_compile_definitions(wolfcrypttest_lib PRIVATE ${WOLFSSL_DEFINITIONS})
         target_compile_options(wolfcrypttest_lib PRIVATE "-DNO_MAIN_DRIVER")
+        if(WOLFSSL_CRYPT_TESTS_HELP)
+            target_compile_options(wolfcrypttest_lib PRIVATE "-DHAVE_WOLFCRYPT_TEST_OPTIONS")
+        endif()
 
         # Make another library for the wolfCrypt benchmark code.
         add_library(wolfcryptbench_lib
             ${CMAKE_CURRENT_SOURCE_DIR}/wolfcrypt/benchmark/benchmark.c)
         set_target_properties(wolfcryptbench_lib PROPERTIES OUTPUT_NAME "wolfcryptbench")
         target_link_libraries(wolfcryptbench_lib wolfssl)
+        target_compile_definitions(wolfcryptbench_lib PRIVATE ${WOLFSSL_DEFINITIONS})
         target_compile_options(wolfcryptbench_lib PRIVATE "-DNO_MAIN_DRIVER")
     endif()
 
@@ -1663,12 +4537,19 @@ if(WOLFSSL_CRYPT_TESTS)
     add_executable(wolfcrypttest
         ${CMAKE_CURRENT_SOURCE_DIR}/wolfcrypt/test/test.c)
     target_link_libraries(wolfcrypttest wolfssl)
+    target_compile_definitions(wolfcrypttest PRIVATE ${WOLFSSL_DEFINITIONS})
     set_property(TARGET wolfcrypttest
                  PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                 ${CMAKE_CURRENT_SOURCE_DIR}/wolfcrypt/test)
+                 ${WOLFSSL_OUTPUT_BASE}/wolfcrypt/test)
     set_property(TARGET wolfcrypttest
                  PROPERTY RUNTIME_OUTPUT_NAME
                  testwolfcrypt)
+    if(WOLFSSL_CRYPT_TESTS_HELP)
+        target_compile_options(wolfcrypttest PRIVATE "-DHAVE_WOLFCRYPT_TEST_OPTIONS")
+    endif()
+    add_test(NAME wolfcrypttest
+             COMMAND $<TARGET_FILE:wolfcrypttest>
+             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
     # Build wolfCrypt benchmark executable.
     add_executable(wolfcryptbench
@@ -1676,9 +4557,10 @@ if(WOLFSSL_CRYPT_TESTS)
     target_include_directories(wolfcryptbench PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR})
     target_link_libraries(wolfcryptbench wolfssl)
+    target_compile_definitions(wolfcryptbench PRIVATE ${WOLFSSL_DEFINITIONS})
     set_property(TARGET wolfcryptbench
                  PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                 ${CMAKE_CURRENT_SOURCE_DIR}/wolfcrypt/benchmark)
+                 ${WOLFSSL_OUTPUT_BASE}/wolfcrypt/benchmark)
     set_property(TARGET wolfcryptbench
                  PROPERTY RUNTIME_OUTPUT_NAME
                  benchmark)
@@ -1692,7 +4574,6 @@ include(GNUInstallDirs)
 
 set(HEADER_EXCLUDE
   "internal.h"
-  "cyassl/ctaocrypt/port"
   "wolfssl/wolfcrypt/port/nrf51.h"
   "wolfssl/wolfcrypt/port/arm"
   "wolfssl/wolfcrypt/port/cypress"
@@ -1719,6 +4600,11 @@ endif()
 if(NOT BUILD_CRYPTOAUTHLIB)
   list(APPEND HEADER_EXCLUDE
     "wolfssl/wolfcrypt/port/atmel")
+endif()
+
+if(NOT BUILD_VAULTIC)
+  list(APPEND HEADER_EXCLUDE
+    "wolfssl/wolfcrypt/port/sealsq")
 endif()
 
 if(NOT BUILD_AFALG)
@@ -1785,7 +4671,11 @@ endif()
 
 if(NOT BUILD_SP)
   list(APPEND HEADER_EXCLUDE
-    "wolfssl/wolfcrypt/sp.h"
+    "wolfssl/wolfcrypt/sp.h")
+endif()
+
+if(NOT BUILD_SP_INT)
+  list(APPEND HEADER_EXCLUDE
     "wolfssl/wolfcrypt/sp_int.h")
 endif()
 
@@ -1799,7 +4689,7 @@ if(NOT BUILD_FIPS OR BUILD_FIPS_V1)
     "wolfssl/wolfcrypt/fips.h")
 endif()
 
-if(NOT BUILD_QNXCAAM)
+if(NOT BUILD_QNXCAAM OR BUILD_CAAM)
   list(APPEND HEADER_EXCLUDE
     "wolfssl/wolfcrypt/port/caam"
     )
@@ -1810,55 +4700,109 @@ list(JOIN HEADER_EXCLUDE "|" EXCLUDED_HEADERS_REGEX)
 string(PREPEND EXCLUDED_HEADERS_REGEX "(")
 string(APPEND  EXCLUDED_HEADERS_REGEX ")")
 
-set(INSTALLED_EXAMPLES
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/echoserver/echoserver.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/sctp/sctp-server.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/sctp/sctp-client-dtls.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/sctp/sctp-client.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/sctp/sctp-server-dtls.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/echoclient/echoclient.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/server/server.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/benchmark/tls_bench.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/client/client.c)
+if(WOLFSSL_INSTALL)
 
-# Install the library
-install(TARGETS wolfssl
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        EXPORT wolfssl-targets
-        LIBRARY)
-# Install the headers
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/wolfssl/
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/wolfssl
-        FILES_MATCHING PATTERN "*.h"
-        REGEX ${EXCLUDED_HEADERS_REGEX} EXCLUDE)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cyassl/
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cyassl
-        FILES_MATCHING PATTERN "*.h"
-        REGEX ${EXCLUDED_HEADERS_REGEX} EXCLUDE)
+    set(INSTALLED_EXAMPLES
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/echoserver/echoserver.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/sctp/sctp-server.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/sctp/sctp-client-dtls.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/sctp/sctp-client.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/sctp/sctp-server-dtls.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/echoclient/echoclient.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/server/server.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/benchmark/tls_bench.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/client/client.c)
 
 
-# Install the examples
-install(FILES ${INSTALLED_EXAMPLES}
-        DESTINATION ${CMAKE_INSTALL_DOCDIR}/example)
-# Install README.txt and taoCert.txt
-install(FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/doc/README.txt
-        ${CMAKE_CURRENT_SOURCE_DIR}/certs/taoCert.txt
-        DESTINATION ${CMAKE_INSTALL_DOCDIR})
-# Install the export set
-install(EXPORT wolfssl-targets
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/wolfssl
-        FILE wolfssl-config.cmake)
+    # Install the library
+    install(TARGETS wolfssl
+            EXPORT wolfssl-targets
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            )
+    # Install the headers
+    install(DIRECTORY ${WOLFSSL_OUTPUT_BASE}/wolfssl/
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/wolfssl
+            FILES_MATCHING PATTERN "*.h"
+            REGEX ${EXCLUDED_HEADERS_REGEX} EXCLUDE)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/wolfssl/
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/wolfssl
+            FILES_MATCHING PATTERN "*.h"
+            REGEX ${EXCLUDED_HEADERS_REGEX} EXCLUDE)
 
-# TODO: Distro build + rules for what to include in the distro.
-#       See various include.am files.
+    # Install the examples
+    install(FILES ${INSTALLED_EXAMPLES}
+            DESTINATION ${CMAKE_INSTALL_DOCDIR}/example)
+    # Install README.txt and taoCert.txt
+    install(FILES
+            ${CMAKE_CURRENT_SOURCE_DIR}/doc/README.txt
+            ${CMAKE_CURRENT_SOURCE_DIR}/certs/taoCert.txt
+            DESTINATION ${CMAKE_INSTALL_DOCDIR})
+    # Install the export set
+    install(EXPORT wolfssl-targets
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/wolfssl
+            FILE wolfssl-targets.cmake
+            NAMESPACE wolfssl::)
 
-set(prefix ${CMAKE_INSTALL_PREFIX})
-set(exec_prefix "\${prefix}")
-set(libdir "\${exec_prefix}/lib")
-set(includedir "\${prefix}/include")
-set(VERSION ${PROJECT_VERSION})
+    # TODO: Distro build + rules for what to include in the distro.
+    #       See various include.am files.
 
-configure_file(support/wolfssl.pc.in ${CMAKE_CURRENT_BINARY_DIR}/support/wolfssl.pc @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/support/wolfssl.pc
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    set(prefix ${CMAKE_INSTALL_PREFIX})
+    set(exec_prefix "\${prefix}")
+    set(libdir "\${exec_prefix}/lib")
+    set(includedir "\${prefix}/include")
+    set(VERSION ${PROJECT_VERSION})
+
+    if(CMAKE_C_COMPILER_ID STREQUAL "OpenWatcom")
+    else()
+        # Setting libm in Libs.private of wolfssl.pc.
+        # See "Link Libraries" in above about `m` insertion to LINK_LIBRARIES
+        get_target_property(_wolfssl_dep_libs wolfssl LINK_LIBRARIES)
+        list(FIND _wolfssl_dep_libs m _dep_libm)
+        if ("${_dep_libm}" GREATER -1)
+            set(LIBM -lm)
+        else()
+            set(LIBM)
+        endif()
+    endif()
+
+    # Add required frameworks for static linking on Apple platforms
+    if(APPLE AND NOT BUILD_SHARED_LIBS)
+        if(WOLFSSL_SYS_CA_CERTS)
+            list(APPEND PC_LIBS_PRIVATE "-framework CoreFoundation" "-framework Security")
+        endif()
+    endif()
+
+    # Convert lists to space-separated strings for pkg-config
+    string(JOIN " " PC_LIBS_PRIVATE ${PC_LIBS_PRIVATE})
+
+    configure_file(support/wolfssl.pc.in ${CMAKE_CURRENT_BINARY_DIR}/support/wolfssl.pc @ONLY)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/support/wolfssl.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/wolfssl-config.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/wolfssl"
+    NO_SET_AND_CHECK_MACRO
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO
+    )
+
+    export(EXPORT wolfssl-targets
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/wolfssl-targets.cmake"
+    NAMESPACE wolfssl::
+    )
+
+    write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/wolfssl-config-version.cmake"
+    VERSION "${wolfssl_VERSION_MAJOR}.${wolfssl_VERSION_MINOR}"
+    COMPATIBILITY AnyNewerVersion
+    )
+
+    install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/wolfssl-config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/wolfssl-config-version.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/wolfssl
+    )
+endif()

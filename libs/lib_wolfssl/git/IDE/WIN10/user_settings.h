@@ -1,21 +1,35 @@
 #ifndef _WIN_USER_SETTINGS_H_
 #define _WIN_USER_SETTINGS_H_
 
-/* Set the following to 1 for WCv5.0 build. */
+/* For FIPS 140-2 3389 build set to "#if 1" */
 #if 0
+#undef HAVE_FIPS
+#define HAVE_FIPS
+#undef HAVE_FIPS_VERSION
+#define HAVE_FIPS_VERSION 2
+#undef HAVE_FIPS_VERSION_MINOR
+#define HAVE_FIPS_VERSION_MINOR 0
+#endif
+
+/* Set the following to 1 for WCv5.0-RC12 build. */
+#if 0
+#undef HAVE_FIPS
+#define HAVE_FIPS
 #undef HAVE_FIPS_VERSION
 #define HAVE_FIPS_VERSION 5
 #undef HAVE_FIPS_VERSION_MINOR
-#define HAVE_FIPS_VERSION_MINOR 1
+#define HAVE_FIPS_VERSION_MINOR 2
 #endif
 
 /* For FIPS Ready, uncomment the following: */
 /* #define WOLFSSL_FIPS_READY */
 #ifdef WOLFSSL_FIPS_READY
+    #undef HAVE_FIPS
+    #define HAVE_FIPS
     #undef HAVE_FIPS_VERSION
     #define HAVE_FIPS_VERSION 5
     #undef HAVE_FIPS_VERSION_MINOR
-    #define HAVE_FIPS_VERSION_MINOR 2
+    #define HAVE_FIPS_VERSION_MINOR 3
 #endif
 
 
@@ -36,7 +50,6 @@
     #define WOLFSSL_SHA512
     #define NO_PSK
     #define NO_RC4
-    #define NO_RABBIT
     #define NO_DSA
     #define NO_MD4
 
@@ -46,6 +59,10 @@
         #define WC_RSA_PSS
         #define WC_RSA_NO_PADDING
         #define HAVE_ECC
+        #define HAVE_ECC384
+        #define HAVE_ECC521
+        #define HAVE_SUPPORTED_CURVES
+        #define HAVE_TLS_EXTENSIONS
         #define ECC_SHAMIR
         #define HAVE_ECC_CDH
         #define ECC_TIMING_RESISTANT
@@ -60,8 +77,10 @@
         #define WOLFSSL_VALIDATE_FFC_IMPORT
         #define HAVE_FFDHE_Q
         #define HAVE_PUBLIC_FFDHE
+    #ifdef _WIN64
         #define WOLFSSL_AESNI
         #define HAVE_INTEL_RDSEED
+    #endif
         #define FORCE_FAILURE_RDSEED
     #endif /* FIPS v2 */
     #if defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 5)
@@ -100,6 +119,9 @@
         #define WOLFSSL_AES_OFB
         #define FP_MAX_BITS 16384
     #endif /* FIPS v5 */
+    #if defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 6)
+        #define WOLFSSL_AES_XTS
+    #endif
 #else
     /* Enables blinding mode, to prevent timing attacks */
     #define WC_RSA_BLINDING
@@ -114,6 +136,7 @@
         #define HAVE_SECURE_RENEGOTIATION
 
         #define HAVE_AESGCM
+        #define WOLFSSL_AES_XTS
         #define WOLFSSL_SHA384
         #define WOLFSSL_SHA512
 

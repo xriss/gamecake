@@ -1,0 +1,323 @@
+name: Ubuntu-Macos-Windows Tests
+
+# START OF COMMON SECTION
+on:
+  push:
+    branches: [ 'release/**' ]
+    # Docs-only changes cannot affect the build/test matrix - skip the
+    # run for them. Keep this list narrow (markdown + doc/ only);
+    # do not add cert/test data extensions here.
+    paths-ignore:
+      - '**/*.md'
+      - 'doc/**'
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [ '*' ]
+    paths-ignore:
+      - '**/*.md'
+      - 'doc/**'
+  # Weekday-morning cron (10:00 UTC) seeds the master-scoped ccache that PR runs restore: the
+  # linux and macOS jobs re-run --build-only (compile only, no tests) on the
+  # default branch, where their ccache writes are visible to every PR. Only
+  # Windows is skipped on a seed run (see its job `if`) - seeding the linux
+  # and macOS shards is where the cold-cache cost lives.
+  #
+  # The two platforms do not seed identically, so do not read "the seed" as
+  # one mechanism. Linux sets CCACHE_RECACHE on a seed run and saves only on
+  # one, so its cache is rebuilt from scratch by seed runs alone. macOS does
+  # neither: it never sets CCACHE_RECACHE, so a macOS seed only accumulates
+  # deltas, and its ccache-setup step is read-only purely on pull_request, so
+  # any non-PR run writes it. Left as-is deliberately; the note is here so
+  # the difference is not rediscovered from a surprising cache.
+  schedule:
+    - cron: '0 10 * * 1-5'
+  # Runs the same seed on demand. Needed whenever the cache is empty and
+  # waiting up to a day for the next cron is not acceptable - after a
+  # stretch where this workflow was not running, for instance, since a
+  # cache untouched for 7 days is evicted and only the seed refills it.
+  # Every PR run stays cold until it is refilled.
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: >
+          Seed the ccache: compile only, no tests, and save the result.
+          Untick to run the full checks instead.
+        type: boolean
+        default: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+# END OF COMMON SECTION
+
+jobs:
+  # Ubuntu config matrix. macOS is covered separately by make_check_macos
+  # below with a curated subset; configs here either have equivalent macOS
+  # coverage there or exercise no Darwin-specific code.
+  #
+  # The config list is built by a small fixed pool of shard runners: every
+  # shard job runs the generic .github/scripts/parallel-make-check.py on
+  # the same JSON list below with --shard K/N, which deals the configs
+  # across the N shards greedily by their "minutes" weight so every shard
+  # carries a similar load. Within a shard each config builds in its own
+  # out-of-tree ("VPATH") build directory off one checkout/autogen, and
+  # the checks run on a pool of one-per-CPU worker threads, longest first;
+  # per-config times and thread/CPU efficiency land in each shard's step
+  # summary (same machinery as smoke-test.yml). bubblewrap lets the script
+  # tests re-exec under bwrap --unshare-net so concurrent checks cannot
+  # collide on TCP/UDP ports (do not set AM_BWRAPPED here - that would
+  # disable it).
+  make_check_linux:
+    name: make check linux
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    if: ${{ (github.repository_owner == 'wolfssl') && (github.event_name != 'pull_request' || github.event.pull_request.draft == false) }}
+    runs-on: ubuntu-24.04
+    # Measured cold on a completely empty cache (2026-08-03): ~102
+    # thread-minutes per shard / 4 worker threads, i.e. 24-27 min of wall
+    # per shard including checkout/deps/autogen; warm is well under 10.
+    # The timeout is set well above the cold figure on purpose - a cold
+    # run is normal whenever the seed has not run recently, and a shard
+    # dying on the timeout would look like a test failure rather than a
+    # cold cache.
+    timeout-minutes: 40
+    env:
+      CCACHE_MAXSIZE: 500M
+    steps:
+      - uses: actions/checkout@v5
+
+      # tlslite-ng is consumed by scripts/multi-msg-record.test (run from
+      # `make check`); without it that test is SKIPped.
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - run: pip install tlslite-ng
+
+      - name: Install dependencies
+        uses: ./.github/actions/install-apt-deps
+        with:
+          packages: autoconf automake libtool build-essential bubblewrap ccache
+          ghcr-debs-tag: ubuntu-24.04-minimal
+
+      # Ubuntu 24.04 can restrict unprivileged user namespaces via AppArmor,
+      # which would stop the test scripts from re-execing under
+      # bwrap --unshare-net (their port-isolation mechanism).
+      - name: Allow unprivileged user namespaces (for bwrap)
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+
+      # ccache's default cache dir (XDG ~/.cache/ccache) is what the
+      # actions/cache step below saves; pin it explicitly so the two
+      # cannot drift apart (e.g. if a later change sets CCACHE_DIR).
+      - name: Pin ccache directory
+        run: echo "CCACHE_DIR=$HOME/.cache/ccache" >> "$GITHUB_ENV"
+
+      # PRs restore the cache a seed run writes but never save it, so PR
+      # runs add no per-shard ccache entries to the Actions cache. Only a
+      # seed run (the cron, or a manual dispatch) saves, below.
+      - name: Restore ccache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.cache/ccache
+          # Per-shard cache lineage: each shard compiles a distinct config
+          # subset. Re-balancing "minutes" can move configs between shards;
+          # that costs one rebuild of whatever moved.
+          key: os-check-linux-ccache-${{ matrix.shard }}-${{ github.base_ref || github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            os-check-linux-ccache-${{ matrix.shard }}-${{ github.base_ref || github.ref_name }}-
+            os-check-linux-ccache-${{ matrix.shard }}-
+            os-check-linux-ccache-
+
+      # On a seed run, force clean recompiles (CCACHE_RECACHE) so the saved
+      # master ccache is reseeded from scratch rather than only accumulating
+      # deltas. PR/push runs leave it unset and keep their warm hits.
+      - name: Force fresh compiles on a reseed
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.seed != 'false') }}
+        run: echo "CCACHE_RECACHE=1" >> "$GITHUB_ENV"
+
+      - name: autogen
+        run: |
+          ccache -z
+          ./autogen.sh
+
+      # The config list lives in .github/configs/os-check-linux.json; add new
+      # configs there as new entries (a "comment" key is allowed for notes).
+      # It is kept out of this file on purpose: a single `run:` step is
+      # capped at 21000 characters by GitHub, and inlining the list as a
+      # heredoc silently pushed this workflow past that cap - GitHub then
+      # refused to load the whole file and every run failed with zero jobs.
+      # "minutes" is the expected duration driving longest-first scheduling
+      # and shard balancing: take it from the Minutes column of a previous
+      # run's step summary, or omit it for a new config (defaults to 1) and
+      # refresh later - a stale value only packs the schedule worse. The
+      # list is kept sorted by minutes for readability, but the schedule
+      # sorts by the values, not list order.
+      # The CFLAGS that were previously passed to configure are applied at
+      # make time via --cflags, unchanged. --private-dir=certs gives every
+      # build dir its own certs/ copy: crl-gen-openssl.test writes generated
+      # CRLs under certs/crl/, which would race through the shared VPATH
+      # certs symlink.
+      - name: Build and make check this shard's configs (parallel, out-of-tree)
+        run: |
+          .github/scripts/parallel-make-check.py \
+            ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.seed != 'false')) && '--build-only' || '' }} \
+            --shard "${{ matrix.shard }}/${{ strategy.job-total }}" \
+            --cflags='-pedantic -Wdeclaration-after-statement -Wnull-dereference -Wno-overlength-strings -DTEST_LIBWOLFSSL_SOURCES_INCLUSION_SEQUENCE' \
+            --private-dir=certs .github/configs/os-check-linux.json
+
+      # Seed runs (the cron, or a manual dispatch with `seed` ticked) refresh
+      # the master-scoped ccache that PR runs restore above; PR/push runs
+      # never save, so PRs add nothing.
+      - name: Save ccache (seed only)
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.seed != 'false') }}
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.cache/ccache
+          key: os-check-linux-ccache-${{ matrix.shard }}-${{ github.ref_name }}-${{ github.sha }}
+
+      - name: ccache stats
+        if: always()
+        run: ccache -s || true
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          retention-days: 7
+          name: os-check-linux-logs-${{ matrix.shard }}
+          path: |
+            build-*/make-check.log
+            build-*/test-suite.log
+            build-*/config.log
+          if-no-files-found: ignore
+
+  # Curated macOS subset. Each config exists for a Darwin-specific reason;
+  # do not add entries that only re-test platform-agnostic crypto already
+  # covered by the corresponding Linux run.
+  #
+  # All configs build on ONE macos runner via
+  # .github/scripts/parallel-make-check.py, each in its own out-of-tree
+  # ("VPATH") build directory. Unlike Linux, the checks run one config at
+  # a time (--threads 1): macOS has no bubblewrap, so concurrent make
+  # checks would race on TCP/UDP ports. The user_settings_all.h entry is
+  # the former macOS half of the make_user_settings job, and the
+  # apple-native-cert-validation entry is the former standalone
+  # macos-apple-native-cert-validation.yml workflow.
+  make_check_macos:
+    name: make check macos
+    # Runs on PRs/pushes and on a seed run (the cron or a manual dispatch),
+    # where it --build-only-seeds the macOS ccache like the linux shards.
+    # Windows is the only job skipped on a seed run (no ccache to seed).
+    if: ${{ (github.repository_owner == 'wolfssl') && (github.event_name != 'pull_request' || github.event.pull_request.draft == false) }}
+    runs-on: macos-latest
+    # Serial checks: roughly the sum of the per-config minutes plus
+    # one-time setup, with headroom for a cold ccache.
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      # tlslite-ng is consumed by scripts/multi-msg-record.test (run from
+      # `make check`); without it that test is SKIPped.
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - run: pip install tlslite-ng
+
+      # The macos runner images ship without autotools (the old per-config
+      # matrix got them via wolfSSL/actions-build-autotools-project).
+      - name: Install autotools (brew)
+        run: brew install autoconf automake libtool
+
+      # ccache via the cross-platform composite (brew install; compiler
+      # symlinks on PATH). The script is told --cc= so it does not also
+      # prefix the compiler with "ccache" - the PATH masquerade already
+      # intercepts cc/clang.
+      - name: Set up ccache
+        uses: ./.github/actions/ccache-setup
+        with:
+          workflow-id: os-check-macos
+          max-size: 500M
+          # PRs read the seeded macOS ccache and never write it. Note this
+          # is not the linux rule: there, saving is gated to seed runs, so
+          # a push writes nothing. Here every non-PR run writes, seed or
+          # not, so a release/** push and a dispatch with `seed` unticked
+          # both land in the shared macOS cache.
+          read-only: ${{ github.event_name == 'pull_request' }}
+
+      # Same JSON config format as make_check_linux above, in
+      # .github/configs/os-check-macos.json; "minutes" only orders the
+      # serial schedule here (longest first).
+      - name: Build and make check all configs (serial checks, out-of-tree)
+        run: |
+          .github/scripts/parallel-make-check.py \
+            ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.seed != 'false')) && '--build-only' || '' }} \
+            --threads 1 --cc= \
+            --cflags='-pedantic -Wdeclaration-after-statement -Wnull-dereference -Wno-overlength-strings -DTEST_LIBWOLFSSL_SOURCES_INCLUSION_SEQUENCE' \
+            --private-dir=certs .github/configs/os-check-macos.json
+
+      - name: ccache stats
+        if: always()
+        run: ccache -s || true
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          retention-days: 7
+          name: os-check-macos-logs
+          path: |
+            build-*/make-check.log
+            build-*/test-suite.log
+            build-*/config.log
+          if-no-files-found: ignore
+
+  windows_build:
+    name: Windows Build Test
+    # Skipped on any seed run - the cron, or a manual dispatch that left
+    # `seed` ticked: there is no ccache to seed here.
+    if: ${{ (github.repository_owner == 'wolfssl') && (github.event_name != 'schedule') && (github.event_name != 'workflow_dispatch' || github.event.inputs.seed == 'false') && (github.event_name != 'pull_request' || github.event.pull_request.draft == false) }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [ x64, Win32, ARM64 ]
+        asm: [ false ]
+        include:
+          # Intel assembly build (x64 only): assembles the crypto .asm files
+          # and enables the matching USE_INTEL_SPEEDUP code paths.
+          - arch: x64
+            asm: true
+    # This should be a safe limit for the tests to run.
+    timeout-minutes: 6
+    env:
+      # Path to the solution file relative to the root of the project.
+      SOLUTION_FILE_PATH: wolfssl64.sln
+
+      # Configuration type to build.
+      # You can convert this to a build matrix if you need coverage of multiple configuration types.
+      # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+      BUILD_CONFIGURATION: Release
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v3
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:PlatformToolset=v142 /p:Platform=${{matrix.arch}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:WolfSSLIntelAsm=${{matrix.asm}} ${{env.SOLUTION_FILE_PATH}}
+
+    - if: ${{ matrix.arch != 'ARM64' }}
+      name: Run Test
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: Release/${{matrix.arch}}/testsuite.exe

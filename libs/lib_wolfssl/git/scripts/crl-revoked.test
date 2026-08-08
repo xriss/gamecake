@@ -1,10 +1,33 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# timeout(1) is GNU coreutils and absent on macOS; where it's missing, run the
+# command unbounded (the flaky hang this guards against is Linux-only CI).
+if ! command -v timeout >/dev/null 2>&1; then
+    timeout() { while [ "${1:-}" = "-s" ] || [ "${1:-}" = "-k" ]; do shift 2; done; shift; "$@"; }
+fi
+
+
+[ ! -x ./examples/client/client ] && printf '\n\n%s\n' "Client doesn't exist" \
+                                  && exit 1
+
+if ./examples/client/client -? 2>&1 | grep "Client not compiled in!" ; then
+    echo 'skipping crl-revoked.test because client not compiled in.' 1>&2
+    exit 77
+fi
+
+if ./examples/server/server -? 2>&1 | grep "Server not compiled in!" ; then
+    echo 'skipping crl-revoked.test because server not compiled in.' 1>&2
+    exit 77
+fi
 
 #crl.test
-CERT_DIR=certs
-
 # if we can, isolate the network namespace to eliminate port collisions.
-if [ "${AM_BWRAPPED-}" != "yes" ]; then
+if [[ -n "$NETWORK_UNSHARE_HELPER" ]]; then
+     if [[ -z "$NETWORK_UNSHARE_HELPER_CALLED" ]]; then
+         export NETWORK_UNSHARE_HELPER_CALLED=yes
+         exec "$NETWORK_UNSHARE_HELPER" "$0" "$@" || exit $?
+     fi
+elif [ "${AM_BWRAPPED-}" != "yes" ]; then
     bwrap_path="$(command -v bwrap)"
     if [ -n "$bwrap_path" ]; then
         export AM_BWRAPPED=yes
@@ -14,6 +37,7 @@ if [ "${AM_BWRAPPED-}" != "yes" ]; then
 fi
 
 revocation_code="-361"
+revocation_code_openssl="23"
 exit_code=1
 counter=0
 # need a unique resume port since may run the same time as testsuite
@@ -29,10 +53,7 @@ server_pid=$no_pid
 ready_file=`pwd`/wolfssl_crl_ready$$
 
 remove_ready_file() {
-    if test -e "$ready_file"; then
-        echo -e "removing existing ready file"
-        rm "$ready_file"
-    fi
+    rm -f "$ready_file"
 }
 
 # trap this function so if user aborts with ^C or other kill signal we still
@@ -40,8 +61,10 @@ remove_ready_file() {
 abort_trap() {
     echo "script aborted"
 
-    if  [ $server_pid != $no_pid ]
+    if [ $server_pid != $no_pid ] && kill -0 $server_pid 2>&-
     then
+        # sleep to give sanitizers time to dump backtraces.
+        sleep 1
         echo "killing server"
         kill -9 $server_pid
     fi
@@ -59,8 +82,21 @@ trap abort_trap INT TERM
 # instead use "exit <some value>" and this function will run automatically
 restore_file_system() {
     remove_ready_file
+    if [ -n "$TMP_DIR" ]; then
+        rm -rf "$TMP_DIR"
+    fi
 }
 trap restore_file_system EXIT
+
+# Workaround to not pollute the certs folder with our files that can impact other tests
+TMP_DIR=$(mktemp -d) || exit $?
+SRC_DIR="$PWD"
+pushd "$TMP_DIR" || exit $?
+if ! cp -R --symbolic-link "${SRC_DIR}/certs" . 2>/dev/null; then
+    cp -pR "${SRC_DIR}/certs" . || exit $?
+fi
+popd || exit $?
+CERT_DIR="${TMP_DIR}/certs"
 
 run_test() {
     echo -e "\nStarting example server for crl test...\n"
@@ -70,11 +106,12 @@ run_test() {
     # starts the server on crl_port, -R generates ready file to be used as a
     # mutex lock, -c loads the revoked certificate. We capture the processid
     # into the variable server_pid
-    ./examples/server/server -R "$ready_file" -p $crl_port \
+    timeout -s KILL 2m ./examples/server/server -R "$ready_file" -p $crl_port \
                              -c ${CERT_DIR}/server-revoked-cert.pem \
                              -k ${CERT_DIR}/server-revoked-key.pem &
     server_pid=$!
 
+    counter=0
     while [ ! -s "$ready_file" -a "$counter" -lt 20 ]; do
         echo -e "waiting for ready file..."
         sleep 0.1
@@ -95,14 +132,14 @@ run_test() {
     crl_port="$(cat "$ready_file")"
 
     # starts client on crl_port and captures the output from client
-    capture_out=$(./examples/client/client -p $crl_port 2>&1)
+    capture_out=$(cd "${CERT_DIR}/.." && "${SRC_DIR}/examples/client/client" -p $crl_port 2>&1)
     client_result=$?
 
     wait $server_pid
     server_result=$?
 
     case  "$capture_out" in
-    *$revocation_code*)
+    *"$revocation_code"*|*"$revocation_code_openssl"*)
         # only exit with zero on detection of the expected error code
         echo ""
         echo "Successful Revocation!!!!"
@@ -143,14 +180,15 @@ run_hashdir_test() {
   fi
   ln -s ./crl/crl.pem "$crl_hash_name".r0
   popd
-  
+
   # starts the server on crl_port, -R generates ready file to be used as a
   # mutex lock, -c loads the revoked certificate. We capture the processid
   # into the variable server_pid
-  ./examples/server/server -R "$ready_file" -p $crl_port \
+  timeout -s KILL 2m ./examples/server/server -R "$ready_file" -p $crl_port \
                              -c ${CERT_DIR}/server-revoked-cert.pem \
                              -k ${CERT_DIR}/server-revoked-key.pem &
   server_pid=$!
+  counter=0
   while [ ! -s "$ready_file" -a "$counter" -lt 20 ]; do
         echo -e "waiting for ready file..."
         sleep 0.1
@@ -159,16 +197,16 @@ run_hashdir_test() {
 
   # get created port 0 ephemeral port
   crl_port="$(cat "$ready_file")"
-  
+
   # starts client on crl_port and captures the output from client
-  capture_out=$(./examples/client/client -p $crl_port -9 2>&1)
+  capture_out=$(cd "${CERT_DIR}/.." && "${SRC_DIR}/examples/client/client" -p $crl_port -9 2>&1)
   client_result=$?
-  
+
   wait $server_pid
   server_result=$?
 
   case  "$capture_out" in
-    *$revocation_code*)
+    *"$revocation_code"*|*"$revocation_code_openssl"*)
         # only exit with zero on detection of the expected error code
         echo ""
         echo "Successful Revocation!!!! with hash dir"
@@ -183,7 +221,7 @@ run_hashdir_test() {
         echo ""
         exit_hash_dir_code=1
     esac
-  
+
   # clean up hashed cert and crl
   pushd ${CERT_DIR}
   rm "$ca_hash_name".0
@@ -206,11 +244,16 @@ else
    exit_hash_dir_code=0
 fi
 
-# run the test
-run_test
+# Check that server is enabled
+./examples/server/server -? 2>&1 | grep -- 'Create Ready file'
+if [ $? -eq 0 ]; then
+    # run the test
+    run_test
+else
+    exit_code=0
+fi
 
 # If we get to this exit, exit_code will be a 1 signaling failure
 echo "exiting with $exit_code certificate was not revoked"
 exit $exit_code
 ########## end program ##########
-

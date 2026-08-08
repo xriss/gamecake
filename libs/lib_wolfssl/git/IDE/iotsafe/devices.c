@@ -1,12 +1,12 @@
 /* devices.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -62,10 +62,10 @@ static void usart1_init(void)
     GPIO_MODE(GPIOB_BASE) = reg | (0x02 << (USART1_PIN_TX * 2));
 
     reg = GPIO_PUPD(GPIOG_BASE) & (0x03 << (USART1_PIN_RX * 2));
-    
+
     reg = GPIO_PUPD(GPIOB_BASE) & (0x03 << (USART1_PIN_TX * 2));
     GPIO_PUPD(GPIOB_BASE) = reg | (0x01 << (USART1_PIN_TX * 2));
-    
+
 #if RTSCTS
     reg = GPIO_MODE(GPIOG_BASE) & ~(0x03 << (USART1_PIN_RTS * 2));
     GPIO_MODE(GPIOG_BASE) = reg | (0x02 << (USART1_PIN_RTS * 2));
@@ -150,7 +150,6 @@ int usart_rx(uint32_t dev, uint8_t *c)
 
 int usart_init(uint32_t dev, uint32_t bitrate, uint8_t data, char parity, uint8_t stop)
 {
-    uint32_t reg;
     int rtscts = 0;
 
     if (dev == USART1_BASE) {
@@ -219,7 +218,6 @@ int usart_init(uint32_t dev, uint32_t bitrate, uint8_t data, char parity, uint8_
 int _write(void *r, uint8_t *text, int len)
 {
     char *p = (char *)text;
-    int i;
     (void)r;
     while(*p && (p < (char *)(text + len))) {
         usart_tx(USART2_BASE, *p);
@@ -232,17 +230,6 @@ int _write(void *r, uint8_t *text, int len)
 
 extern unsigned int _start_heap;
 void * _sbrk(unsigned int incr)
-{
-    static unsigned char *heap = NULL;
-    void *old_heap = heap;
-    if (((incr >> 2) << 2) != incr)
-        incr = ((incr >> 2) + 1) << 2;
-    if (old_heap == NULL)
-        old_heap = heap = (unsigned char *)&_start_heap;
-    heap += incr;
-    return old_heap;
-}
-void * _sbrk_r(unsigned int incr)
 {
     static unsigned char *heap = NULL;
     void *old_heap = heap;
@@ -378,7 +365,7 @@ static void stmod_pin_init(void)
     /* RST pin */
     reg = GPIO_MODE(STMOD_MODEM_RST_PORT) & ~(0x03 << (STMOD_MODEM_RST_PIN * 2));
     GPIO_MODE(STMOD_MODEM_RST_PORT) = reg | (0x01 << (STMOD_MODEM_RST_PIN * 2));
-    
+
     /* DTR pin */
     reg = GPIO_MODE(STMOD_MODEM_DTR_PORT) & ~(0x03 << (STMOD_MODEM_DTR_PIN * 2));
     GPIO_MODE(STMOD_MODEM_DTR_PORT) = reg | (0x01 << (STMOD_MODEM_DTR_PIN * 2));

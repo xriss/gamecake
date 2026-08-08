@@ -30,10 +30,10 @@ Renesas社製MCU RX65Nを搭載した評価ボードGR-ROSEをターゲットと
 |:--|:--|
 |評価ボード|GR-ROSE|
 |Device|R5F565NEHxFP|
-|IDE| Renesas e2Studio Version:2021-10 |
+|IDE| Renesas e2Studio Version:2024-04 (24.4.0) |
 |エミュレーター| E1, E2エミュレーターLite |
-|Toolchain|CCRX v3.03.00|
-|TSIP| TSIP v1.14|
+|Toolchain|CCRX v3.06.00|
+|TSIP| TSIP v1.21|
 <br>
 
 本サンプルプログラムのプロジェクトには以下のFITコンポーネントを使用する設定ファイルが用意されています。
@@ -50,10 +50,7 @@ Renesas社製MCU RX65Nを搭載した評価ボードGR-ROSEをターゲットと
 |Generic system timer for RX MCUs|1.01|r_sys_time_rx|
 |TCP/IP protocol stack[M3S-T4-Tiny] - RX Ethernet Driver Interface|1.09|r_t4_driver_rx|
 |TCP/IP protocol stack[M3S-T4-Tiny] for Renesas MCUs|2.10|r_t4_rx|
-|TSIP(Trusted Secure IP) driver|1.14|r_tsip_rx|
-
-（注意）2021年12月現在、TIPSv1.14はFITコンポーネントとしてスマートコンフィギュレータパースペクティブのコンポーネントの追加操作では追加できないようです。後ほど説明する手動での追加方法を使って追加してください。<br>
-
+|TSIP(Trusted Secure IP) driver|1.21|r_tsip_rx|
 
 <br><br>
 
@@ -63,7 +60,7 @@ Renesas社製MCU RX65Nを搭載した評価ボードGR-ROSEをターゲットと
 サンプルプログラムは新規作成する必要はありません。すでにプロジェクトファイルが用意されていますからIDEから以下の手順でプロジェクトをインポートしてください。
 
 
-+ 1.e2studioの"ファイル"メニュー > "ファイル・システムからプロジェクトを開く..." > "ディレクトリ(R)..."インポート元ボタンを押して、プロジェクトのインポート元となるフォルダーを選択します。本READMEファイルが存在するフォルダ(Renesas/e2studio/\<MCU>/\<borad-name-folder\>/))を選択してください。
++ 1.e2studioの"ファイル"メニュー > "ファイル・システムからプロジェクトを開く..." > "ディレクトリ(R)..."インポート元ボタンを押して、プロジェクトのインポート元となるフォルダーを選択します。本READMEファイルが存在するフォルダ(Renesas/e2studio/{MCU}/{board-name-folder})を選択してください。
 
 + インポートできるプロジェクトが４つリストアップされますが、"smc", "test" と"wolfssl"の3プロジェクトにのみチェックを入れて”終了”ボタンを押してください。
 
@@ -143,26 +140,110 @@ testアプリケーションのビルドの準備が整ったので、ビルド�
 -----
 <br>
 
-### 8.1 TLS対向アプリケーションの生成と実行
+### 8.1 testアプリケーションのサポートするTLSバージョン
+<br>
+TLS1.2に加えてTLS1.3プロトコルが使用できます。{board-name-folder}/common/user_settings.hに既定で以下のマクロ定義が設定されています。
+<br><br>
+
+```
+#define WOLFSSL_TLS13
+```
+この定義によりTLS1.3プロトコルを使用する設定となります。TLS1.2を使用する場合には、このマクロ定義をコメントアウトしてして、testアプリケーションを再ビルドしてください。
+
+<br>
+
+### 8.2 使用する証明書のタイプ
+
+<br>
+
+testアプリケーションとサーバーアプリケーションではTLS通信時に使用する証明書（RootCA証明書、サーバー証明書、クライアント証明書）のタイプが選択できます。証明書に含まれている公開鍵がRSA公開鍵であるRSA証明書とECC公開鍵を含むECDSA証明書が選択できます。既定ではECDSA証明書を使用するようになっています。
+
+<br>
+{board-name-folder}/common/user_settings.h に既定で以下のマクロ定義が設定されています。RSA証明書を使用する場合には上記定義をコメントアウトして、testアプリケーションを再ビルドしてください。
+<br><br>
+
+```
+#define USE_ECC_CERT
+```
+
+<br>
+この定義により、testアプリケーションはサーバーの提示するECC公開鍵を含んだサーバー証明書を検証できるRootCA証明書を使うようになります。また、クライアント認証に用いるクライアント証明書もECDSA証明書が使われます。
+<br><br>
+
+
+### 8.3 暗号化スイートの選択
+
+<br>
+testアプリケーションでは、TLSバージョンと証明書のタイプにより、testアプリケーションで使用する暗号化スイートを決定します。下表に使用できる暗号化スイートを示します。
+
+<br>
+
+
+|バージョン|証明書|暗号化スイート|
+|:--|:--|:--|
+|TLS1.3|RSA/ECDSA証明書|  |
+|||TLS_AES_128_GCM_SHA256|
+|||TLS_AES_128_CCM_SHA256|
+|TLS1.2|RSA証明書|
+|||TLS_RSA_WITH_AES_128_CBC_SHA|
+|||TLS_RSA_WITH_AES_256_CBC_SHA|
+|||TLS_RSA_WITH_AES_128_CBC_SHA256|
+|||TLS_RSA_WITH_AES_256_CBC_SHA256|
+|||TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256|
+|||TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256|
+||ECDSA証明書||
+|||TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256|
+|||TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256|
+
+
+<br>
+
+### 8.4 TLS対向アプリケーションのビルドと実行
+
 <br>
 
 testアプリケーションをTLS_Clientとしての動作を行わせる場合には、TLS通信の相手方となる対向アプリケーションが必要となります。wolfSSLパッケージにはこの用途に使用できるTLSserverサンプルアプリケーションが用意されています。このプログラムはwolfsslをビルドすることで生成されます。wolfSSLのビルドにはgccがインストールされているLinux(MacOS, WSLも含む)でのビルドとVisualStudioを使ってのビルドが可能です。以下ではWSL上でのビルドを紹介します。
 <br><br>
 
+コンフィギュレーションオプションは使用する証明書タイプによって変更する必要があります。
+
+<br>
+
+#### 8.4.1 ECDSA証明書を使用する場合のコンフィギュレーション
+
+<br>
+
 ```
-$ cd <wolfssl-folder>
+$ cd {wolfssl-folder}
 $ ./autogen.sh
-$ ./configure CFLAGS="-DWOLFSSL_STATIC_RSA -DHAVEAES_CBC"
+$ ./configure --enable-ecc --enable-dsa --enable-aesccm CFLAGS="-DWOLFSSL_STATIC_RSA -DHAVE_AES_CBC -DHAVE_DSA -DHAVE_ALL_CURVES -DHAVE_ECC -DNO_RSA"
+$ make
+```
+(注意）"-DNO_RSA"の指定をわすれないこと
+
+<br>
+
+#### 8.4.2 RSA証明書を使用する場合のコンフィギュレーション
+
+<br>
+
+```
+$ cd {wolfssl-folder}
+$ ./autogen.sh
+$ ./configure --enable-ecc --enable-dsa --enable-aesccm CFLAGS="-DWOLFSSL_STATIC_RSA -DHAVE_AES_CBC -DHAVE_DSA -DHAVE_ALL_CURVES -DHAVE_ECC"
 $ make
 ```
 
 <br>
-上記のビルドによって、<wolfssl-folder\>/examples/server/server
-が生成されます。この実行プログラムがサーバーアプリケーションとして機能します。以下のオプションを与えて実行させるとTLS_Clientからの接続を待ち受け状態になります。
+
+#### 8.4.3 サーバーアプリケーションの実行
+<br>
+上記のビルドによって、{wolfssl-folder}/examples/server/server
+が生成されます。この実行プログラムがサーバーアプリケーションとして機能します。以下のオプションを与えて実行させるとtestアプリケーションからの接続を待ち受け状態になります。　使用するTLSバージョンとして TLS1.3を使用する場合には "-v4"を指定し、TLS1.2を使用する場合には"-v3"を指定してください。
 <br><br>
 
 ```
-$ examples/server/server -b -d -i
+$ examples/server/server -b -v 4 -i
 ```
 <br>
 testアプリケーションには、サーバーアプリケーションに割り当てられたIPアドレスを指定します。
@@ -177,7 +258,8 @@ wolf_client.cを開き、#define SIMPLE_TLSSEVER_IPにアドレスを指定し�
 ...
 ```
 <br>
-ファイルをセーブしてtestアプリケーションを再ビルドしてください。testアプリケーションを実行すると、対向アプリケーションとの間でTLS接続が行われ、その後簡単な文字列を交換して標準出力に以下のような表示を行います。
+ファイルをセーブしてtestアプリケーションを再ビルドしてください。testアプリケーションを実行すると、対向アプリケーションとの間でTLS接続が行われ、その後簡単な文字列を交換して標準出力に以下のような表示を行います。表示される暗号化スイートはTLSバージョンと証明書タイプの組み合わせによって異なります。
+
 <br><br>
 
 ```
@@ -201,41 +283,6 @@ Received: I hear you fa shizzle!
 ```
 <br>
 
-### 8.2 サーバー証明書の変更（認証方式の変更）
-
-<br>
-上記はサーバーアプリケーションが提示すサーバー証明書にRSA公開鍵が含まれている（RSA認証）場合の実行例です。TSIPにはこのほかにサーバー証明書にECC公開鍵を含む場合（ECDSA認証）も扱えます。
-
-<br>
-ECDSAを含む暗号化スイートを使用したい場合には、testアプリケーションの設定を変更して再ビルドが必要となります。\<board-name-folder\>/common/user_settings.h を開き、USE_ECC_CERT定義を有効化して再ビルドしてください。
-<br><br>
-
-```
-#define USE_ECC_CERT
-```
-
-<br>
-この定義により、testアプリケーションはサーバーの提示するECC公開鍵を含んだサーバー証明書を検証できるRootCA証明書を使うようになります。
-<br><br>
-
-さらに対向するサーバーアプリケーションの方でも以下のようにECC公開鍵を含んだサーバー証明書と秘密鍵ファイルをオプションで指定して実行する必要があります。
-<br><br>
-
-```
-$ ./examples/server/server -b -d -i -c ./certs/server-ecc.pem -k ./certs/ecc-key.pem
-```
-<br>
-実行結果として以下が表示されます。
-<br><br>
-
-```
-cipher : ECDHE-ECDSA-AES128-SHA256
-Received: I hear you fa shizzle!
-
-cipher : ECDHE-ECDSA-AES128-GCM-SHA256
-Received: I hear you fa shizzle!
-```
-<br>
 
 ## 9. ユーザーが用意したRootCA証明書を利用する際に必要なこと
 -----
@@ -247,3 +294,49 @@ Received: I hear you fa shizzle!
  3. RootCA証明書を上記２の秘密鍵で生成した署名
 
 が必要になります。それらの生成方法はRenesas社提供のマニュアルを参照してください。
+
+<br>
+
+## 10. クライアント認証を行うための必要事項
+-----
+
+クライアント認証機能は以下のようにサポートしています。
+-	ECDSA証明書あるいはRSA証明書はTSIPを使って処理します。
+
+
+(1) クライアント証明書のロード
+wolfSSL_CTX_use_certificate_buffer あるいはwolfSSL_CTX_use_certificate_chain_buffer_format を使ってクライアント証明書をロードしてください。
+
+(2) クライアント秘密鍵/公開鍵のロード
+
+クライアント証明書の種類に応じてロードすべき鍵が決まります。以下に従って必要な鍵をロードしてください。
+
+a) ECDSA証明書の場合：
+- tsip_use_PrivateKey_bufferを使って秘密鍵をロードしてください。
+
+b) RSA証明書の場合：
+- tsip_use_PrivateKey_bufferを使って秘密鍵をロードしてください。
+- tsip_use_PublicKey_bufferを使って公開鍵をロードしてください。
+
+RSA証明書の場合には署名処理を内部で検証する目的で公開鍵も使用します。その為に、公開鍵のロードが必要です。
+
+(3) encrypted keyの作成
+
+鍵ロードすべき秘密鍵あるいは公開鍵はRensas　Secure Flash ProgrammerあるいはSecurityKeyManagementToolを使って出力されたencrypted keyを渡してください。encrypted keyの作成方法はアプリケーションノート“RXファミリ TSIPモジュールFirmware Integration Technology” の7.1.4”encrypted key, encrypted provisioning keyの使用方法“に説明されています。
+
+(4) 必要なマクロ定義
+
+user_settings.hにWOLF_PRIVATE_KEY_IDの定義を行ってください。
+
+
+<br>
+
+## 11. 制限事項
+-----
+TSIPv1.21をサポートしたwolfSSLでは以下の機能制限があります。
+
+1. TLSハンドシェーク中にサーバーと交換したメッセージパケットが平文でメモリ上に蓄積されています。これはハンドシェークメッセージのハッシュ計算に使用されます。内容はセッション終了時に削除されます。
+
+2. TSIPを使ってのセッション再開およびearly dataはサポートされません。
+
+上記制限事項は次版以降のTSIPあるいはwolfSSLによって改善が見込まれています。

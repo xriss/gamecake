@@ -1,12 +1,12 @@
 /* des.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -49,8 +49,8 @@ typedef unsigned int WOLFSSL_DES_LONG;
 
 
 enum {
-    DES_ENCRYPT = 1,
-    DES_DECRYPT = 0
+    WC_DES_ENCRYPT = 1,
+    WC_DES_DECRYPT = 0
 };
 
 
@@ -62,8 +62,8 @@ WOLFSSL_API int wolfSSL_DES_set_key(WOLFSSL_const_DES_cblock* myDes,
                                                WOLFSSL_DES_key_schedule* key);
 WOLFSSL_API int wolfSSL_DES_set_key_checked(WOLFSSL_const_DES_cblock* myDes,
                                                WOLFSSL_DES_key_schedule* key);
-WOLFSSL_API void wolfSSL_DES_set_key_unchecked(WOLFSSL_const_DES_cblock*,
-                                             WOLFSSL_DES_key_schedule*);
+WOLFSSL_API void wolfSSL_DES_set_key_unchecked(WOLFSSL_const_DES_cblock* myDes,
+                                               WOLFSSL_DES_key_schedule* key);
 WOLFSSL_API int  wolfSSL_DES_key_sched(WOLFSSL_const_DES_cblock* key,
                                      WOLFSSL_DES_key_schedule* schedule);
 WOLFSSL_API void wolfSSL_DES_cbc_encrypt(const unsigned char* input,
@@ -81,11 +81,18 @@ WOLFSSL_API void wolfSSL_DES_ncbc_encrypt(const unsigned char* input,
                       WOLFSSL_DES_key_schedule* schedule,
                       WOLFSSL_DES_cblock* ivec, int enc);
 
-WOLFSSL_API void wolfSSL_DES_set_odd_parity(WOLFSSL_DES_cblock*);
-WOLFSSL_API void wolfSSL_DES_ecb_encrypt(WOLFSSL_DES_cblock*, WOLFSSL_DES_cblock*,
-                                       WOLFSSL_DES_key_schedule*, int);
-WOLFSSL_API int wolfSSL_DES_check_key_parity(WOLFSSL_DES_cblock*);
+WOLFSSL_API void wolfSSL_DES_set_odd_parity(WOLFSSL_DES_cblock* myDes);
+WOLFSSL_API void wolfSSL_DES_ecb_encrypt(WOLFSSL_DES_cblock* desa,
+             WOLFSSL_DES_cblock* desb, WOLFSSL_DES_key_schedule* key, int enc);
+WOLFSSL_API int wolfSSL_DES_check_key_parity(WOLFSSL_DES_cblock *myDes);
 
+
+#ifndef OPENSSL_COEXIST
+
+enum {
+    DES_ENCRYPT = WC_DES_ENCRYPT,
+    DES_DECRYPT = WC_DES_DECRYPT
+};
 
 typedef WOLFSSL_DES_cblock DES_cblock;
 typedef WOLFSSL_const_DES_cblock const_DES_cblock;
@@ -105,6 +112,8 @@ typedef WOLFSSL_DES_LONG DES_LONG;
 #define DES_ede3_cbc_encrypt  wolfSSL_DES_ede3_cbc_encrypt
 #define DES_cbc_cksum         wolfSSL_DES_cbc_cksum
 #define DES_check_key_parity  wolfSSL_DES_check_key_parity
+
+#endif /* !OPENSSL_COEXIST */
 
 #ifdef __cplusplus
     } /* extern "C" */

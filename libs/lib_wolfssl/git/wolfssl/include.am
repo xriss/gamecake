@@ -3,9 +3,13 @@
 #
 
 include wolfssl/wolfcrypt/include.am
+if BUILD_OPENSSL_COMPAT
 include wolfssl/openssl/include.am
+endif
 
 EXTRA_DIST+= wolfssl/sniffer_error.rc
+EXTRA_DIST+= wolfssl/debug-trace-error-codes.h
+EXTRA_DIST+= wolfssl/debug-untrace-error-codes.h
 
 nobase_include_HEADERS+= \
                          wolfssl/error-ssl.h \
@@ -14,9 +18,11 @@ nobase_include_HEADERS+= \
                          wolfssl/sniffer.h \
                          wolfssl/callbacks.h \
                          wolfssl/certs_test.h \
+                         wolfssl/certs_test_sm.h \
                          wolfssl/test.h \
                          wolfssl/version.h \
                          wolfssl/ocsp.h \
+                         wolfssl/quic.h \
                          wolfssl/crl.h \
                          wolfssl/wolfio.h
 
@@ -30,3 +36,6 @@ noinst_HEADERS+=         wolfssl/options.h
 else
 nobase_include_HEADERS+= wolfssl/options.h
 endif
+
+wolfssl/debug-trace-error-codes.h wolfssl/debug-untrace-error-codes.h: wolfssl/wolfcrypt/error-crypt.h wolfssl/error-ssl.h
+	@$(SHELL) $(top_srcdir)/support/gen-debug-trace-error-codes.sh $(top_srcdir)

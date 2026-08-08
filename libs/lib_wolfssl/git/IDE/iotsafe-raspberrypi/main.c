@@ -1,12 +1,12 @@
 /* main.c
  *
- * Copyright (C) 2006-2022 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
- * This file is part of wolfSSL. (formerly known as CyaSSL)
+ * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
 /* IoT-SAFE example
@@ -203,27 +203,27 @@ int main(int argc, char** argv)
 
     if (argc == 11)
     {
-        if (strcmp(argv[1], "-ip") == 0)
-           strcpy((char*)&ip, argv[2]);
+        if (strcmp(argv[1], "-ip") == 0 && strlen(argv[2]) < sizeof(ip))
+            strcpy((char*)&ip, argv[2]);
         else
             show_usage(argv[0]);
 
-        if (strcmp(argv[3], "-h") == 0)
+        if (strcmp(argv[3], "-h") == 0 && strlen(argv[4]) < sizeof(name))
             strcpy((char*)&name, argv[4]);
         else
             show_usage(argv[0]);
 
-        if (strcmp(argv[5], "-p") == 0)
+        if (strcmp(argv[5], "-p") == 0 && strlen(argv[6]) < sizeof(port))
             strcpy((char*)&port, argv[6]);
         else
             show_usage(argv[0]);
 
-        if (strcmp(argv[7], "-t") == 0)
+        if (strcmp(argv[7], "-t") == 0 && strlen(argv[8]) < sizeof(temperature))
             strcpy((char*)&temperature, argv[8]);
         else
             show_usage(argv[0]);
 
-        if (strcmp(argv[9], "-d") == 0)
+        if (strcmp(argv[9], "-d") == 0 && strlen(argv[10]) < sizeof(device))
             strcpy((char*)&device, argv[10]);
         else
             show_usage(argv[0]);

@@ -1,12 +1,12 @@
 /* app_entry.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -18,6 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
+
 
 
 #include "app.h"
@@ -36,14 +37,14 @@ extern void initialise_monitor_handles(void);
 
 #include "nx_api.h"
 #define CONNECTION_TIMES 100
-#define SERVER_IP IP_ADDRESS(10,22,73,128)
-#define TLS_PORT 11111
-#define TCP_PORT 11112
+#define SERVER_IP IP_ADDRESS(192,168,3,10)
+#define TLS_PORT 11112
+#define TCP_PORT 11111
 
-static double miliseconds = 0;
+static double milliseconds = 0;
 void  timer_callback(timer_callback_args_t * args)
 {
-    miliseconds++;
+    milliseconds++;
     (void)args;
 }
 
@@ -126,7 +127,7 @@ static void benchmark_TLS(int version, char* suites, int group)
 
     printf("Trying to connect to 0x%lX on port %d\n", TEST_IP, TEST_PORT);
 
-    miliseconds = 0;
+    milliseconds = 0;
     g_timer0.p_api->open(g_timer0.p_ctrl, g_timer0.p_cfg);
     g_timer0.p_api->start(g_timer0.p_ctrl);
 
@@ -194,7 +195,7 @@ static void benchmark_TLS(int version, char* suites, int group)
     g_timer0.p_api->close(g_timer0.p_ctrl);
 
     printf("%d TLS connections took %f seconds and %f tx_time ticks\n",
-            CONNECTION_TIMES, (miliseconds / 10), start);
+            CONNECTION_TIMES, (milliseconds / 10), start);
     wolfSSL_CTX_free(ctx);
 }
 

@@ -1,12 +1,12 @@
 /* sniffer_error.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -138,6 +138,12 @@
 #define CHAIN_INPUT_STR 93
 #define GOT_ENC_EXT_STR 94
 #define GOT_HELLO_RETRY_REQ_STR 95
+
+#define SNIFFER_KEY_SETUP_STR 96
+#define UNSUPPORTED_TLS_VER_STR 97
+#define KEY_MISMATCH_STR 98
+
+#define KEYLOG_FILE_INVALID 99
 /* !!!! also add to msgTable in sniffer.c and .rc file !!!! */
 
 

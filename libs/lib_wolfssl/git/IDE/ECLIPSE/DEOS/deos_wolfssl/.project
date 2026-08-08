@@ -240,9 +240,9 @@
 			<locationURI>WOLFSSL_ROOT/wolfcrypt/src/fe_operations.c</locationURI>
 		</link>
 		<link>
-			<name>wolfcrypt/src/fe_x25519_128.i</name>
+			<name>wolfcrypt/src/fe_x25519_128.h</name>
 			<type>1</type>
-			<locationURI>WOLFSSL_ROOT/wolfcrypt/src/fe_x25519_128.i</locationURI>
+			<locationURI>WOLFSSL_ROOT/wolfcrypt/src/fe_x25519_128.h</locationURI>
 		</link>
 		<link>
 			<name>wolfcrypt/src/fp_mont_small.i</name>
@@ -430,11 +430,6 @@
 			<locationURI>WOLFSSL_ROOT/wolfcrypt/src/hmac.c</locationURI>
 		</link>
 		<link>
-			<name>wolfcrypt/src/idea.c</name>
-			<type>1</type>
-			<locationURI>WOLFSSL_ROOT/wolfcrypt/src/idea.c</locationURI>
-		</link>
-		<link>
 			<name>wolfcrypt/src/integer.c</name>
 			<type>1</type>
 			<locationURI>WOLFSSL_ROOT/wolfcrypt/src/integer.c</locationURI>
@@ -483,11 +478,6 @@
 			<name>wolfcrypt/src/pwdbased.c</name>
 			<type>1</type>
 			<locationURI>WOLFSSL_ROOT/wolfcrypt/src/pwdbased.c</locationURI>
-		</link>
-		<link>
-			<name>wolfcrypt/src/rabbit.c</name>
-			<type>1</type>
-			<locationURI>WOLFSSL_ROOT/wolfcrypt/src/rabbit.c</locationURI>
 		</link>
 		<link>
 			<name>wolfcrypt/src/random.c</name>

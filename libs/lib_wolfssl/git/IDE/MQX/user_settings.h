@@ -34,7 +34,6 @@
 #define WC_RSA_PSS
 #define WOLFSSL_BASE64_ENCODE
 #define NO_RC4
-#define NO_RABBIT
 #define WOLFSSL_SHA224
 #define WOLFSSL_SHA3
 #define WOLFSSL_SHAKE256
@@ -60,3 +59,14 @@
 #define FREESCALE_MQX
 #define FREESCALE_NO_RNG
 
+/* FREESCALE forced-on algorithms - moved from settings.h */
+#ifndef NO_AES
+    #undef  HAVE_AESCCM
+    #define HAVE_AESCCM
+    #undef  HAVE_AESGCM
+    #define HAVE_AESGCM
+    #undef  WOLFSSL_AES_COUNTER
+    #define WOLFSSL_AES_COUNTER
+    #undef  WOLFSSL_AES_DIRECT
+    #define WOLFSSL_AES_DIRECT
+#endif

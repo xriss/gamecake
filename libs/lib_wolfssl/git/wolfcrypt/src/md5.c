@@ -1,12 +1,12 @@
 /* md5.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -19,13 +19,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
+/*
+ * MD5 Build Options:
+ *
+ * NO_MD5:                   Disable MD5 support entirely          default: off
+ * HAVE_MD5_CUST_API:        Enable custom MD5 API                 default: off
+ * STM32_NOMD5:              Disable STM32 hardware MD5            default: off
+ *
+ * Hardware Acceleration (MD5-specific):
+ * WC_ASYNC_ENABLE_MD5:      Enable async MD5 operations           default: off
+ */
 
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <wolfssl/wolfcrypt/settings.h>
+#include <wolfssl/wolfcrypt/libwolfssl_sources.h>
 
 #if !defined(NO_MD5)
 
@@ -35,8 +40,6 @@
 #else
 
 #include <wolfssl/wolfcrypt/md5.h>
-#include <wolfssl/wolfcrypt/error-crypt.h>
-#include <wolfssl/wolfcrypt/logging.h>
 #include <wolfssl/wolfcrypt/hash.h>
 
 #ifdef NO_INLINE
@@ -48,7 +51,7 @@
 
 
 /* Hardware Acceleration */
-#if defined(STM32_HASH)
+#if defined(STM32_HASH) && !defined(STM32_NOMD5)
 
 /* Supports CubeMX HAL or Standard Peripheral Library */
 #define HAVE_MD5_CUST_API
@@ -78,7 +81,7 @@ int wc_Md5Update(wc_Md5* md5, const byte* data, word32 len)
     ret = wolfSSL_CryptHwMutexLock();
     if (ret == 0) {
         ret = wc_Stm32_Hash_Update(&md5->stmCtx, HASH_AlgoSelection_MD5,
-                                   data, len);
+                                   data, len, WC_MD5_BLOCK_SIZE);
         wolfSSL_CryptHwMutexUnLock();
     }
     return ret;
@@ -355,8 +358,8 @@ int wc_Md5Update(wc_Md5* md5, const byte* data, word32 len)
     if (md5->buffLen >= WC_MD5_BLOCK_SIZE)
         return BUFFER_E;
 
-    if (data == NULL && len == 0) {
-        /* valid, but do nothing */
+    if (data == NULL) {
+        /* len is 0 here: valid, but do nothing */
         return 0;
     }
 
@@ -450,13 +453,21 @@ int wc_Md5Final(wc_Md5* md5, byte* hash)
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
 
-    local = (byte*)md5->buffer;
+    local = (byte*)md5->buffer; /* buffer allocated in word32 size */
+
+    /* ensure we have a valid buffer length; (-1 to append a byte to length) */
+    if (md5->buffLen > WC_MD5_BLOCK_SIZE - 1) {
+        /* some places consider this BAD_STATE_E */
+        return BUFFER_E;
+    }
 
     local[md5->buffLen++] = 0x80;  /* add 1 */
 
     /* pad with zeros */
     if (md5->buffLen > WC_MD5_PAD_SIZE) {
-        XMEMSET(&local[md5->buffLen], 0, WC_MD5_BLOCK_SIZE - md5->buffLen);
+        if (md5->buffLen < WC_MD5_BLOCK_SIZE) {
+            XMEMSET(&local[md5->buffLen], 0, WC_MD5_BLOCK_SIZE - md5->buffLen);
+        }
         md5->buffLen += WC_MD5_BLOCK_SIZE - md5->buffLen;
 
 #if defined(BIG_ENDIAN_ORDER) && !defined(FREESCALE_MMCAU_SHA)
@@ -522,6 +533,7 @@ int wc_Md5GetHash(wc_Md5* md5, byte* hash)
     if (md5 == NULL || hash == NULL)
         return BAD_FUNC_ARG;
 
+    XMEMSET(&tmpMd5, 0, sizeof(tmpMd5));
     ret = wc_Md5Copy(md5, &tmpMd5);
     if (ret == 0) {
         ret = wc_Md5Final(&tmpMd5, hash);
@@ -537,9 +549,12 @@ int wc_Md5Copy(wc_Md5* src, wc_Md5* dst)
     if (src == NULL || dst == NULL)
         return BAD_FUNC_ARG;
 
+    /* Free dst resources before copy to prevent memory leaks (e.g.,
+     * hardware contexts). XMEMCPY overwrites dst. */
+    wc_Md5Free(dst);
     XMEMCPY(dst, src, sizeof(wc_Md5));
 
-#ifdef WOLFSSL_ASYNC_CRYPT
+#if defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_MD5)
     ret = wolfAsync_DevCopy(&src->asyncDev, &dst->asyncDev);
 #endif
 #ifdef WOLFSSL_PIC32MZ_HASH
@@ -551,7 +566,8 @@ int wc_Md5Copy(wc_Md5* src, wc_Md5* dst)
 
     return ret;
 }
-#ifdef OPENSSL_EXTRA
+
+#if defined(OPENSSL_EXTRA) || defined(HAVE_CURL)
 /* Apply MD5 transformation to the data                   */
 /* @param md5  a pointer to wc_MD5 structure              */
 /* @param data data to be applied MD5 transformation      */
@@ -562,9 +578,14 @@ int wc_Md5Transform(wc_Md5* md5, const byte* data)
     if (md5 == NULL || data == NULL) {
         return BAD_FUNC_ARG;
     }
+#ifndef HAVE_MD5_CUST_API
     return Transform(md5, data);
-}
+#else
+    return NOT_COMPILED_IN;
 #endif
+}
+#endif /* OPENSSL_EXTRA */
+
 #ifdef WOLFSSL_HASH_FLAGS
 int wc_Md5SetFlags(wc_Md5* md5, word32 flags)
 {

@@ -12,10 +12,8 @@
     during function execution.
 
     \param [in] key Pointer to the ed448_key for which to generate a key.
-    \param [out] out Pointer to the buffer in which to store the public key.
-    \param [in,out] outLen Pointer to a word32 object with the size available
-    in out. Set with the number of bytes written to out after successfully
-    exporting the public key.
+    \param [out] pubKey Pointer to the buffer in which to store the public key.
+    \param [in] pubKeySz Size of the pubKey buffer in bytes.
 
     _Example_
     \code
@@ -38,7 +36,7 @@
     \sa wc_ed448_import_private_only
     \sa wc_ed448_make_key
 */
-WOLFSSL_API
+
 int wc_ed448_make_public(ed448_key* key, unsigned char* pubKey,
                          word32 pubKeySz);
 
@@ -76,7 +74,7 @@ int wc_ed448_make_public(ed448_key* key, unsigned char* pubKey,
 
     \sa wc_ed448_init
 */
-WOLFSSL_API
+
 int wc_ed448_make_key(WC_RNG* rng, int keysize, ed448_key* key);
 
 /*!
@@ -93,12 +91,15 @@ int wc_ed448_make_key(WC_RNG* rng, int keysize, ed448_key* key);
     function execution.
 
     \param [in] in Pointer to the buffer containing the message to sign.
-    \param [in] inlen Length of the message to sign.
+    \param [in] inLen Length of the message to sign.
     \param [out] out Buffer in which to store the generated signature.
-    \param [in,out] outlen Maximum length of the output buffer. Will store the
+    \param [in,out] outLen Maximum length of the output buffer. Will store the
     bytes written to out upon successfully generating a message signature.
     \param [in] key Pointer to a private ed448_key with which to generate the
     signature.
+    \param [in] context Pointer to the buffer containing the context for which
+    message is being signed.
+    \param [in] contextLen Length of the context buffer.
 
     _Example_
     \code
@@ -123,9 +124,10 @@ int wc_ed448_make_key(WC_RNG* rng, int keysize, ed448_key* key);
     \sa wc_ed448ph_sign_msg
     \sa wc_ed448_verify_msg
 */
-WOLFSSL_API
-int wc_ed448_sign_msg(const byte* in, word32 inlen, byte* out,
-                        word32 *outlen, ed448_key* key);
+
+int wc_ed448_sign_msg(const byte* in, word32 inLen, byte* out,
+                        word32 *outLen, ed448_key* key,
+                        const byte* context, byte contextLen);
 
 /*!
     \ingroup ED448
@@ -133,7 +135,6 @@ int wc_ed448_sign_msg(const byte* in, word32 inlen, byte* out,
     \brief This function signs a message digest using an ed448_key object
     to guarantee authenticity. The context is included as part of the data
     signed. The hash is the pre-hashed message before signature calculation.
-    The hash algorithm used to create message digest must be SHAKE-256.
 
     \return 0 Returned upon successfully generating a signature for the
     message digest.
@@ -146,7 +147,7 @@ int wc_ed448_sign_msg(const byte* in, word32 inlen, byte* out,
     to sign.
     \param [in] hashLen Length of the hash of the message to sign.
     \param [out] out Buffer in which to store the generated signature.
-    \param [in,out] outlen Maximum length of the output buffer. Will store the
+    \param [in,out] outLen Maximum length of the output buffer. Will store the
     bytes written to out upon successfully generating a message signature.
     \param [in] key Pointer to a private ed448_key with which to generate the
     signature.
@@ -162,7 +163,7 @@ int wc_ed448_sign_msg(const byte* in, word32 inlen, byte* out,
 
     byte sig[114]; // will hold generated signature
     sigSz = sizeof(sig);
-    byte hash[] = { initialize with SHAKE-256 hash of message };
+    byte hash[] = { initialize hash of message };
     byte context[] = { initialize with context of signing };
 
     wc_InitRng(&rng); // initialize rng
@@ -179,7 +180,7 @@ int wc_ed448_sign_msg(const byte* in, word32 inlen, byte* out,
     \sa wc_ed448ph_sign_msg
     \sa wc_ed448ph_verify_hash
 */
-WOLFSSL_API
+
 int wc_ed448ph_sign_hash(const byte* hash, word32 hashLen, byte* out,
                          word32 *outLen, ed448_key* key,
                          const byte* context, byte contextLen);
@@ -199,9 +200,9 @@ int wc_ed448ph_sign_hash(const byte* hash, word32 hashLen, byte* out,
     function execution.
 
     \param [in] in Pointer to the buffer containing the message to sign.
-    \param [in] inlen Length of the message to sign.
+    \param [in] inLen Length of the message to sign.
     \param [out] out Buffer in which to store the generated signature.
-    \param [in,out] outlen Maximum length of the output buffer. Will store the
+    \param [in,out] outLen Maximum length of the output buffer. Will store the
     bytes written to out upon successfully generating a message signature.
     \param [in] key Pointer to a private ed448_key with which to generate the
     signature.
@@ -234,7 +235,7 @@ int wc_ed448ph_sign_hash(const byte* hash, word32 hashLen, byte* out,
     \sa wc_ed448ph_sign_hash
     \sa wc_ed448ph_verify_msg
 */
-WOLFSSL_API
+
 int wc_ed448ph_sign_msg(const byte* in, word32 inLen, byte* out,
                         word32 *outLen, ed448_key* key, const byte* context,
                         byte contextLen);
@@ -258,6 +259,8 @@ int wc_ed448ph_sign_msg(const byte* in, word32 inLen, byte* out,
     \param [in] siglen Length of the signature to verify.
     \param [in] msg Pointer to the buffer containing the message to verify.
     \param [in] msgLen Length of the message to verify.
+    \param [out] res Pointer to an int that will be set to 1 for a valid
+    signature or 0 for an invalid signature after verification completes.
     \param [in] key Pointer to a public Ed448 key with which to verify the
     signature.
     \param [in] context Pointer to the buffer containing the context for which
@@ -286,7 +289,7 @@ int wc_ed448ph_sign_msg(const byte* in, word32 inLen, byte* out,
     \sa wc_ed448ph_verify_msg
     \sa wc_ed448_sign_msg
 */
-WOLFSSL_API
+
 int wc_ed448_verify_msg(const byte* sig, word32 siglen, const byte* msg,
                           word32 msgLen, int* res, ed448_key* key,
                           const byte* context, byte contextLen);
@@ -297,7 +300,6 @@ int wc_ed448_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     \brief This function verifies the Ed448 signature of the digest of a message
     to ensure authenticity. The context is included as part of the data
     verified. The hash is the pre-hashed message before signature calculation.
-    The hash algorithm used to create message digest must be SHAKE-256.
     The answer is returned through res, with 1 corresponding to a valid
     signature, and 0 corresponding to an invalid signature.
 
@@ -312,7 +314,9 @@ int wc_ed448_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     \param [in] siglen Length of the signature to verify.
     \param [in] hash Pointer to the buffer containing the hash of the message
     to verify.
-    \param [in] hashLen Length of the hash to verify.
+    \param [in] hashlen Length of the hash to verify.
+    \param [out] res Pointer to an int that will be set to 1 for a valid
+    signature or 0 for an invalid signature after verification completes.
     \param [in] key Pointer to a public Ed448 key with which to verify the
     signature.
     \param [in] context Pointer to the buffer containing the context for which
@@ -325,7 +329,7 @@ int wc_ed448_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     int ret, verified = 0;
 
     byte sig[] { initialize with received signature };
-    byte hash[] = { initialize with SHAKE-256 hash of message };
+    byte hash[] = { initialize hash of message };
     byte context[] = { initialize with context of signature };
     // initialize key with received public key
     ret = wc_ed448ph_verify_hash(sig, sizeof(sig), hash, sizeof(hash),
@@ -341,7 +345,7 @@ int wc_ed448_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     \sa wc_ed448ph_verify_msg
     \sa wc_ed448ph_sign_hash
 */
-WOLFSSL_API
+
 int wc_ed448ph_verify_hash(const byte* sig, word32 siglen, const byte* hash,
                           word32 hashlen, int* res, ed448_key* key,
                           const byte* context, byte contextLen);
@@ -366,6 +370,8 @@ int wc_ed448ph_verify_hash(const byte* sig, word32 siglen, const byte* hash,
     \param [in] siglen Length of the signature to verify.
     \param [in] msg Pointer to the buffer containing the message to verify.
     \param [in] msgLen Length of the message to verify.
+    \param [out] res Pointer to an int that will be set to 1 for a valid
+    signature or 0 for an invalid signature after verification completes.
     \param [in] key Pointer to a public Ed448 key with which to verify the
     signature.
     \param [in] context Pointer to the buffer containing the context for which
@@ -394,7 +400,7 @@ int wc_ed448ph_verify_hash(const byte* sig, word32 siglen, const byte* hash,
     \sa wc_ed448ph_verify_hash
     \sa wc_ed448ph_sign_msg
 */
-WOLFSSL_API
+
 int wc_ed448ph_verify_msg(const byte* sig, word32 siglen, const byte* msg,
                           word32 msgLen, int* res, ed448_key* key,
                           const byte* context, byte contextLen);
@@ -419,7 +425,7 @@ int wc_ed448ph_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     \sa wc_ed448_make_key
     \sa wc_ed448_free
 */
-WOLFSSL_API
+
 int wc_ed448_init(ed448_key* key);
 
 /*!
@@ -439,7 +445,7 @@ int wc_ed448_init(ed448_key* key);
 
     \sa wc_ed448_init
 */
-WOLFSSL_API
+
 void wc_ed448_free(ed448_key* key);
 
 /*!
@@ -447,7 +453,8 @@ void wc_ed448_free(ed448_key* key);
 
     \brief This function imports a public ed448_key pair from a buffer
     containing the public key. This function will handle both compressed and
-    uncompressed keys.
+    uncompressed keys. The public key is checked that it matches the private
+    key when one is present.
 
     \return 0 Returned on successfully importing the ed448_key.
     \return BAD_FUNC_ARG Returned if in or key evaluate to NULL, or inLen is
@@ -471,11 +478,53 @@ void wc_ed448_free(ed448_key* key);
     }
     \endcode
 
+    \sa wc_ed448_import_public_ex
     \sa wc_ed448_import_private_key
+    \sa wc_ed448_import_private_key_ex
     \sa wc_ed448_export_public
 */
-WOLFSSL_API
+
 int wc_ed448_import_public(const byte* in, word32 inLen, ed448_key* key);
+
+/*!
+    \ingroup ED448
+
+    \brief This function imports a public ed448_key pair from a buffer
+    containing the public key. This function will handle both compressed and
+    uncompressed keys. Check public key matches private key, when present,
+    when not trusted.
+
+    \return 0 Returned on successfully importing the ed448_key.
+    \return BAD_FUNC_ARG Returned if in or key evaluate to NULL, or inLen is
+    less than the size of an Ed448 key.
+
+    \param [in] in Pointer to the buffer containing the public key.
+    \param [in] inLen Length of the buffer containing the public key.
+    \param [in,out] key Pointer to the ed448_key object in which to store the
+    public key.
+    \param [in] trusted Public key data is trusted or not.
+
+    _Example_
+    \code
+    int ret;
+    byte pub[] = { initialize Ed448 public key };
+
+    ed_448 key;
+    wc_ed448_init_key(&key);
+    ret = wc_ed448_import_public_ex(pub, sizeof(pub), &key, 1);
+    if (ret != 0) {
+        // error importing key
+    }
+    \endcode
+
+    \sa wc_ed448_import_public
+    \sa wc_ed448_import_private_key
+    \sa wc_ed448_import_private_key_ex
+    \sa wc_ed448_export_public
+*/
+
+int wc_ed448_import_public_ex(const byte* in, word32 inLen, ed448_key* key,
+    int trusted);
 
 /*!
     \ingroup ED448
@@ -506,10 +555,12 @@ int wc_ed448_import_public(const byte* in, word32 inLen, ed448_key* key);
     \endcode
 
     \sa wc_ed448_import_public
+    \sa wc_ed448_import_public_ex
     \sa wc_ed448_import_private_key
+    \sa wc_ed448_import_private_key_ex
     \sa wc_ed448_export_private_only
 */
-WOLFSSL_API
+
 int wc_ed448_import_private_only(const byte* priv, word32 privSz,
                                  ed448_key* key);
 
@@ -548,12 +599,59 @@ int wc_ed448_import_private_only(const byte* priv, word32 privSz,
     \endcode
 
     \sa wc_ed448_import_public
+    \sa wc_ed448_import_public_ex
     \sa wc_ed448_import_private_only
+    \sa wc_ed448_import_private_key_ex
     \sa wc_ed448_export_private
 */
-WOLFSSL_API
+
 int wc_ed448_import_private_key(const byte* priv, word32 privSz,
                                const byte* pub, word32 pubSz, ed448_key* key);
+
+/*!
+    \ingroup ED448
+
+    \brief This function imports a public/private Ed448 key pair from a
+    pair of buffers. This function will handle both compressed and
+    uncompressed keys. The public is checked against private key if not trusted.
+
+    \return 0 Returned on successfully importing the Ed448 key.
+    \return BAD_FUNC_ARG Returned if in or key evaluate to NULL, or if
+    either privSz is less than ED448_KEY_SIZE or pubSz is less than
+    ED448_PUB_KEY_SIZE.
+
+    \param [in] priv Pointer to the buffer containing the private key.
+    \param [in] privSz Length of the private key.
+    \param [in] pub Pointer to the buffer containing the public key.
+    \param [in] pubSz Length of the public key.
+    \param [in,out] key Pointer to the ed448_key object in which to store the
+    imported private/public key pair.
+    \param [in] trusted Public key data is trusted or not.
+
+    _Example_
+    \code
+    int ret;
+    byte priv[] = { initialize with 57 byte private key };
+    byte pub[]  = { initialize with the corresponding public key };
+
+    ed448_key key;
+    wc_ed448_init_key(&key);
+    ret = wc_ed448_import_private_key_ex(priv, sizeof(priv), pub, sizeof(pub),
+            &key, 1);
+    if (ret != 0) {
+        // error importing key
+    }
+    \endcode
+
+    \sa wc_ed448_import_public
+    \sa wc_ed448_import_public_ex
+    \sa wc_ed448_import_private_only
+    \sa wc_ed448_import_private_key
+    \sa wc_ed448_export_private
+*/
+
+int wc_ed448_import_private_key_ex(const byte* priv, word32 privSz,
+    const byte* pub, word32 pubSz, ed448_key* key, int trusted);
 
 /*!
     \ingroup ED448
@@ -567,6 +665,7 @@ int wc_ed448_import_private_key(const byte* priv, word32 privSz,
     \return BUFFER_E Returned if the buffer provided is not large enough to
     store the private key. Upon returning this error, the function sets the
     size required in outLen.
+    \return PUBLIC_KEY_E the given key only has a private key present.
 
     \param [in] key Pointer to an ed448_key structure from which to export the
     public key.
@@ -591,10 +690,11 @@ int wc_ed448_import_private_key(const byte* priv, word32 privSz,
     \endcode
 
     \sa wc_ed448_import_public
+    \sa wc_ed448_import_public_ex
     \sa wc_ed448_export_private_only
 */
-WOLFSSL_API
-int wc_ed448_export_public(ed448_key*, byte* out, word32* outLen);
+
+int wc_ed448_export_public(const ed448_key* key, byte* out, word32* outLen);
 
 /*!
     \ingroup ED448
@@ -631,9 +731,11 @@ int wc_ed448_export_public(ed448_key*, byte* out, word32* outLen);
 
     \sa wc_ed448_export_public
     \sa wc_ed448_import_private_key
+    \sa wc_ed448_import_private_key_ex
 */
-WOLFSSL_API
-int wc_ed448_export_private_only(ed448_key* key, byte* out, word32* outLen);
+
+int wc_ed448_export_private_only(const ed448_key* key, byte* out,
+                                 word32* outLen);
 
 /*!
     \ingroup ED448
@@ -675,8 +777,8 @@ int wc_ed448_export_private_only(ed448_key* key, byte* out, word32* outLen);
     \sa wc_ed448_import_private
     \sa wc_ed448_export_private_only
 */
-WOLFSSL_API
-int wc_ed448_export_private(ed448_key* key, byte* out, word32* outLen);
+
+int wc_ed448_export_private(const ed448_key* key, byte* out, word32* outLen);
 
 /*!
     \ingroup ED448
@@ -690,6 +792,7 @@ int wc_ed448_export_private(ed448_key* key, byte* out, word32* outLen);
     \return ECC_BAD_ARG_E Returned if any of the input values evaluate to NULL.
     \return BUFFER_E Returned if the buffer provided is not large enough
     to store the key pair.
+    \return PUBLIC_KEY_E the given key only has a private key present.
 
     \param [in] key Pointer to an ed448_key structure from which to export
     the key pair.
@@ -722,8 +825,8 @@ int wc_ed448_export_private(ed448_key* key, byte* out, word32* outLen);
     \sa wc_ed448_export_private
     \sa wc_ed448_export_public
 */
-WOLFSSL_API
-int wc_ed448_export_key(ed448_key* key,
+
+int wc_ed448_export_key(const ed448_key* key,
                           byte* priv, word32 *privSz,
                           byte* pub, word32 *pubSz);
 
@@ -747,7 +850,8 @@ int wc_ed448_export_key(ed448_key* key,
 
     ed448_key key;
     wc_ed448_init_key(&key);
-    wc_ed448_import_private_key(priv, sizeof(priv), pub, sizeof(pub), &key);
+    wc_ed448_import_private_key_ex(priv, sizeof(priv), pub, sizeof(pub), &key,
+        1);
     ret = wc_ed448_check_key(&key);
     if (ret != 0) {
         // error checking key
@@ -755,8 +859,9 @@ int wc_ed448_export_key(ed448_key* key,
     \endcode
 
     \sa wc_ed448_import_private_key
+    \sa wc_ed448_import_private_key_ex
 */
-WOLFSSL_API
+
 int wc_ed448_check_key(ed448_key* key);
 
 
@@ -784,8 +889,8 @@ int wc_ed448_check_key(ed448_key* key);
 
     \sa wc_ed448_make_key
 */
-WOLFSSL_API
-int wc_ed448_size(ed448_key* key);
+
+int wc_ed448_size(const ed448_key* key);
 
 /*!
     \ingroup ED448
@@ -813,8 +918,8 @@ int wc_ed448_size(ed448_key* key);
 
     \sa wc_ed448_pub_size
 */
-WOLFSSL_API
-int wc_ed448_priv_size(ed448_key* key);
+
+int wc_ed448_priv_size(const ed448_key* key);
 
 /*!
     \ingroup ED448
@@ -840,8 +945,8 @@ int wc_ed448_priv_size(ed448_key* key);
 
     \sa wc_ed448_priv_size
 */
-WOLFSSL_API
-int wc_ed448_pub_size(ed448_key* key);
+
+int wc_ed448_pub_size(const ed448_key* key);
 
 /*!
     \ingroup ED448
@@ -868,5 +973,5 @@ int wc_ed448_pub_size(ed448_key* key);
 
     \sa wc_ed448_sign_msg
 */
-WOLFSSL_API
-int wc_ed448_sig_size(ed448_key* key);
+
+int wc_ed448_sig_size(const ed448_key* key);

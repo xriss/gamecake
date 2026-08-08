@@ -1,0 +1,100 @@
+name: 'Install apt dependencies'
+description: 'Install apt packages with retry logic and an optional offline ghcr bundle'
+inputs:
+  packages:
+    description: 'Space-separated list of apt packages to install'
+    required: true
+  retries:
+    description: 'Number of retry attempts'
+    required: false
+    default: '3'
+  retry-delay:
+    description: 'Initial delay between retries (seconds, doubles each attempt)'
+    required: false
+    default: '5'
+  no-install-recommends:
+    description: 'Pass --no-install-recommends to apt-get install'
+    required: false
+    default: 'false'
+  ghcr-debs-tag:
+    description: >
+      Tag of a prebuilt .deb bundle published to
+      ghcr.io/<owner>/wolfssl-ci-debs by the ci-deps-image workflow
+      (e.g. "ubuntu-24.04-minimal"). When set, the packages are installed
+      offline from that bundle and the apt path below is skipped; on
+      that happy path the apt mirror is not contacted. The offline install
+      is all-or-nothing (a single --no-download install of the whole set),
+      so any failure - bundle missing, not public, or not covering every
+      requested package - falls back to the apt path. Always safe to set;
+      leave empty to use apt only.
+    required: false
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    # Preferred path: install from a prebuilt .deb bundle pulled from ghcr,
+    # entirely offline (--no-download), so a flaky/timing-out apt mirror
+    # cannot break the build. Best-effort: on any failure we leave
+    # "satisfied" unset and the apt step below runs unchanged. The bundle
+    # image must be PUBLIC so anonymous `docker pull` works (including from
+    # fork PRs whose GITHUB_TOKEN cannot read private packages).
+    - name: Install from ghcr .deb bundle (offline)
+      id: ghcr
+      if: inputs.ghcr-debs-tag != ''
+      shell: bash
+      run: |
+        set -u
+        command -v docker >/dev/null 2>&1 || { echo "::notice::docker unavailable; using apt"; exit 0; }
+        # Hardcode the upstream owner: the bundle is only ever published under
+        # ghcr.io/wolfssl by ci-deps-image (gated to the wolfssl org), so fork
+        # PRs read the public upstream image too rather than a nonexistent
+        # ghcr.io/<fork>/wolfssl-ci-debs.
+        IMG="ghcr.io/wolfssl/wolfssl-ci-debs:${{ inputs.ghcr-debs-tag }}"
+        if ! docker pull -q "$IMG" >/dev/null 2>&1; then
+          echo "::notice::ghcr bundle $IMG unavailable; using apt"
+          exit 0
+        fi
+        cid=$(docker create "$IMG" 2>/dev/null) || { echo "::notice::cannot open bundle; using apt"; exit 0; }
+        rm -rf "$RUNNER_TEMP/ghcr-debs"; mkdir -p "$RUNNER_TEMP/ghcr-debs"
+        docker cp "$cid:/debs/." "$RUNNER_TEMP/ghcr-debs/" >/dev/null 2>&1 || true
+        docker rm "$cid" >/dev/null 2>&1 || true
+        ls "$RUNNER_TEMP"/ghcr-debs/*.deb >/dev/null 2>&1 || { echo "::notice::bundle had no .debs; using apt"; exit 0; }
+        sudo cp "$RUNNER_TEMP"/ghcr-debs/*.deb /var/cache/apt/archives/
+        NO_REC=""
+        if [ "${{ inputs.no-install-recommends }}" = "true" ]; then
+          NO_REC="--no-install-recommends"
+        fi
+        # --no-download forbids any network fetch: if the bundle is missing
+        # a package this fails cleanly (nothing installed) and we fall back.
+        if sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $NO_REC --no-download ${{ inputs.packages }}; then
+          echo "satisfied=true" >> "$GITHUB_OUTPUT"
+          echo "Installed offline from $IMG: ${{ inputs.packages }}"
+        else
+          echo "::notice::offline install incomplete for $IMG; using apt"
+        fi
+
+    - name: Install packages
+      if: steps.ghcr.outputs.satisfied != 'true'
+      shell: bash
+      run: |
+        export DEBIAN_FRONTEND=noninteractive
+        RETRIES=${{ inputs.retries }}
+        DELAY=${{ inputs.retry-delay }}
+        NO_REC=""
+        if [ "${{ inputs.no-install-recommends }}" = "true" ]; then
+          NO_REC="--no-install-recommends"
+        fi
+
+        for i in $(seq 1 $RETRIES); do
+          if sudo apt-get update -q && \
+             sudo apt-get install -y $NO_REC ${{ inputs.packages }}; then
+            exit 0
+          fi
+          if [ "$i" -eq "$RETRIES" ]; then
+            echo "::error::apt-get failed after $RETRIES attempts"
+            exit 1
+          fi
+          echo "::warning::apt-get failed (attempt $i/$RETRIES), retrying in ${DELAY}s..."
+          sleep $DELAY
+          DELAY=$((DELAY * 2))
+        done

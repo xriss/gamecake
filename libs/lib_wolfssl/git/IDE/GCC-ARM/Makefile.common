@@ -1,11 +1,11 @@
 # Set to @ if you want to suppress command echo
-CMD_ECHO = 
+CMD_ECHO =
 
 # Important directories
 BUILD_DIR = ./Build
 
 # Toolchain location and prefix
-#TOOLCHAIN = 
+#TOOLCHAIN =
 TOOLCHAIN ?= /opt/gcc-arm-none-eabi/bin/arm-none-eabi-
 
 # Tools selection
@@ -89,6 +89,8 @@ SRC_C += ../../src/sniffer.c
 SRC_C += ../../src/ssl.c
 SRC_C += ../../src/tls.c
 SRC_C += ../../src/tls13.c
+SRC_C += ../../src/dtls.c
+SRC_C += ../../src/dtls13.c
 SRC_C += ../../src/wolfio.c
 
 # wolfCrypt Core (FIPS)
@@ -101,6 +103,7 @@ SRC_C += ../../wolfcrypt/src/des3.c
 SRC_C += ../../wolfcrypt/src/dh.c
 SRC_C += ../../wolfcrypt/src/ecc.c
 SRC_C += ../../wolfcrypt/src/hmac.c
+SRC_C += ../../wolfcrypt/src/kdf.c
 SRC_C += ../../wolfcrypt/src/random.c
 SRC_C += ../../wolfcrypt/src/rsa.c
 SRC_C += ../../wolfcrypt/src/sha.c
@@ -138,7 +141,6 @@ SRC_C += ../../wolfcrypt/src/ge_448.c
 SRC_C += ../../wolfcrypt/src/ge_low_mem.c
 SRC_C += ../../wolfcrypt/src/ge_operations.c
 SRC_C += ../../wolfcrypt/src/hash.c
-SRC_C += ../../wolfcrypt/src/kdf.c
 SRC_C += ../../wolfcrypt/src/integer.c
 SRC_C += ../../wolfcrypt/src/logging.c
 SRC_C += ../../wolfcrypt/src/md5.c
@@ -182,11 +184,12 @@ SRC_C += ../../wolfcrypt/src/arc4.c
 SRC_C += ../../wolfcrypt/src/blake2b.c
 SRC_C += ../../wolfcrypt/src/camellia.c
 SRC_C += ../../wolfcrypt/src/dsa.c
-SRC_C += ../../wolfcrypt/src/idea.c
 SRC_C += ../../wolfcrypt/src/md2.c
 SRC_C += ../../wolfcrypt/src/md4.c
-SRC_C += ../../wolfcrypt/src/rabbit.c
 SRC_C += ../../wolfcrypt/src/ripemd.c
+SRC_C += ../../wolfcrypt/src/wc_mldsa.c
+SRC_C += ../../wolfcrypt/src/wc_mlkem.c
+SRC_C += ../../wolfcrypt/src/wc_mlkem_poly.c
 
 
 FILENAMES_C = $(notdir $(SRC_C))

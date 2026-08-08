@@ -93,7 +93,6 @@ HMAC-SHA512 test passed!
 X963-KDF    test passed!
 GMAC     test passed!
 ARC4     test passed!
-Rabbit   test passed!
 DES      test passed!
 DES3     test passed!
 AES      test passed!
@@ -171,4 +170,4 @@ ED     25519 verify          2 ops took 1.000 sec, avg 500.000 ms, 2.000 ops/sec
 
 ## References
 
-For more information please contact info@wolfssl.com.
+For more information please contact facts@wolfssl.com.

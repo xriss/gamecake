@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # google.test
 
@@ -6,10 +6,18 @@ server=www.google.com
 
 [ ! -x ./examples/client/client ] && echo -e "\n\nClient doesn't exist" && exit 1
 
-./examples/client/client -v 3 2>&1 | grep -- 'Bad SSL version'
-if [ $? -eq 0 ]; then
-    echo -e "\n\nClient doesn't support TLS v1.2"
-    exit 0
+if ! test -n "$WOLFSSL_EXTERNAL_TEST"; then
+    echo "WOLFSSL_EXTERNAL_TEST not set, won't run"
+    exit 77
+fi
+if test "$WOLFSSL_EXTERNAL_TEST" == "0"; then
+    echo "WOLFSSL_EXTERNAL_TEST is defined to zero, won't run"
+    exit 77
+fi
+
+if ! ./examples/client/client -V | grep -q 3; then
+    echo 'skipping google.test because TLS1.2 is not available.' 1>&2
+    exit 77
 fi
 
 # is our desired server there?
@@ -17,15 +25,30 @@ fi
 RESULT=$?
 [ $RESULT -ne 0 ] && exit 0
 
+# Run the client against the server. The server may answer ping but still drop
+# or throttle TCP connections from this host (Google does this to busy CI
+# egress IPs). Failing to open the TCP connection exercises no wolfSSL code,
+# so treat it like the unreachable-server case above and skip instead of
+# failing.
+run_client() {
+    OUTPUT="$(./examples/client/client "$@" 2>&1)"
+    RESULT=$?
+    echo "$OUTPUT"
+    if [ $RESULT -ne 0 ] && echo "$OUTPUT" | grep -q 'tcp connect failed'; then
+        echo -e "\n\ntcp connect to $server failed, skipping"
+        exit 77
+    fi
+    return $RESULT
+}
+
 # client test against the server
-./examples/client/client -X -C -h $server -p 443 -g -d
+run_client -X -C -h $server -p 443 -g -d
 RESULT=$?
 [ $RESULT -ne 0 ] && echo -e "\n\nClient connection failed" && exit 1
 
-./examples/client/client -v 4 2>&1 | grep -- 'Bad SSL version'
-if [ $? -ne 0 ]; then
+if ./examples/client/client -V | grep -q 4; then
     # client test against the server using TLS v1.3
-    ./examples/client/client -v 4 -X -C -h $server -p 443 -g -d
+    run_client -v 4 -X -C -h $server -p 443 -g -d
     RESULT=$?
     [ $RESULT -ne 0 ] && echo -e "\n\nTLSv1.3 Client connection failed" && exit 1
 fi

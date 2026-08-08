@@ -1,12 +1,12 @@
 /* test_main.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -35,6 +35,7 @@ extern "C" {
 
 
 #if defined(TLS_CLIENT) || defined(TLS_SERVER)
+    #include "r_tsip_rx_if.h"
     #include "r_t4_itcpip.h"
     #include "r_sys_time_rx_if.h"
     #include "Pin.h"
@@ -50,6 +51,17 @@ extern "C" {
     extern const st_key_block_data_t g_key_block_data;
     user_PKCbInfo            guser_PKCbInfo;
 #endif
+
+#if defined(TLS_CLIENT)
+#if defined(WOLFSSL_RENESAS_TSIP_TLS) && defined(WOLFSSL_STATIC_MEMORY)
+    #include <wolfssl/wolfcrypt/memory.h>
+    WOLFSSL_HEAP_HINT*  heapHint = NULL;
+
+    #define  BUFFSIZE_GEN  (110 * 1024)
+    unsigned char heapBufGen[BUFFSIZE_GEN];
+
+#endif /* WOLFSSL_RENESAS_TSIP_TLS && WOLFSSL_STATIC_MEMORY */
+#endif /* TLS_CLIENT */
 
 static long tick;
 static void timeTick(void *pdata)
@@ -77,14 +89,14 @@ double current_time(int reset)
 
 int SetTsiptlsKey()
 {
-#if defined(WOLFSSL_RENESAS_TSIP) && (WOLFSSL_RENESAS_TSIP_VER >=109)   
-    
+#if defined(WOLFSSL_RENESAS_TSIP) && (WOLFSSL_RENESAS_TSIP_VER >=109)
+
 #if defined(TLS_CLIENT)
 
-    #if defined(USE_ECC_CERT)    
+    #if defined(USE_ECC_CERT)
     /* Root CA cert has ECC-P256 public key */
     tsip_inform_cert_sign((const byte *)ca_ecc_cert_der_sig);
-    #else    
+    #else
     /* Root CA cert has RSA public key */
     tsip_inform_cert_sign((const byte *)ca_cert_der_sig);
     #endif
@@ -95,9 +107,6 @@ int SetTsiptlsKey()
             (byte*)&g_key_block_data.encrypted_user_rsa2048_ne_key,
             encrypted_user_key_type);
 
-    #if defined(WOLFSSL_RENESAS_TSIP_TLS) 
-    guser_PKCbInfo.user_key_id = 0;
-    #endif
 
 #elif defined(TLS_SERVER)
 
@@ -111,24 +120,24 @@ int SetTsiptlsKey()
 #endif
 
 #elif defined(WOLFSSL_RENESAS_TSIP) && (WOLFSSL_RENESAS_TSIP_VER < 109)
-    
+
     #if defined(TLS_CLIENT)
- 
+
         tsip_inform_cert_sign((const byte *)ca_cert_sig);
         tsip_inform_user_keys((byte*)&g_key_block_data.encrypted_session_key,
                             (byte*)&g_key_block_data.iv,
                             (byte*)&g_key_block_data.encrypted_user_rsa2048_ne_key);
- 
+
     #elif defined(TLS_SERVER)
- 
+
         tsip_inform_cert_sign((const byte *)client_cert_der_sign);
         tsip_inform_user_keys((byte*)&g_key_block_data.encrypted_session_key,
                             (byte*)&g_key_block_data.iv,
                             (byte*)&g_key_block_data.encrypted_user_rsa2048_ne_key);
- 
+
     #endif
 
-#endif    
+#endif
     return 0;
 }
 
@@ -138,6 +147,9 @@ int Open_tcp( )
     W   size;
     sys_time_err_t sys_ercd;
     char ver[128];
+
+    /* initialize TSIP since t4 seems to call R_TSIP_RandomNumber */
+    R_TSIP_Open(NULL,NULL);
 
     /* cast from uint8_t to char* */
     strcpy(ver, (char*)R_t4_version.library);
@@ -171,16 +183,66 @@ void Close_tcp()
     tcpudp_close();
     lan_close();
     R_SYS_TIME_Close();
+    R_TSIP_Close();
 }
 #endif
 
 void main(void)
 {
+    int i = 0;
+    int ret;
+    int doClientCheck = 0;
+    uint32_t channel;
+
+#if defined(WOLFSSL_RENESAS_TSIP_TLS) && \
+    defined(TLS_CLIENT)
+    #ifdef USE_ECC_CERT
+    const char* cipherlist[] = {
+    #if defined(WOLFSSL_TLS13)
+        "TLS13-AES128-GCM-SHA256",
+        "TLS13-AES128-CCM-SHA256",
+    #endif
+        "ECDHE-ECDSA-AES128-GCM-SHA256",
+        "ECDHE-ECDSA-AES128-SHA256"
+    };
+    int cipherlist_sz;
+    #if defined(WOLFSSL_TLS13)
+        cipherlist_sz = 2;
+    #else
+        cipherlist_sz = 2;
+    #endif
+
+    #else
+    const char* cipherlist[] = {
+    #if defined(WOLFSSL_TLS13)
+        "TLS13-AES128-GCM-SHA256",
+        "TLS13-AES128-CCM-SHA256",
+    #endif
+        "ECDHE-RSA-AES128-GCM-SHA256",
+        "ECDHE-RSA-AES128-SHA256",
+        "AES128-SHA",
+        "AES128-SHA256",
+        "AES256-SHA",
+        "AES256-SHA256"
+    };
+    int cipherlist_sz;
+    #if defined(WOLFSSL_TLS13)
+        cipherlist_sz = 2;
+    #else
+        cipherlist_sz = 6;
+    #endif /* WOLFSSL_TLS13 */
+
+    #endif
+#endif
+
     (void)timeTick;
+    (void)i;
+    (void)ret;
+    (void)channel;
+    (void)doClientCheck;
 
 #if defined(CRYPT_TEST) || defined(BENCHMARK)
 #if defined(CRYPT_TEST)
-    int ret;
     func_args args = { 0 };
 
     if ((ret = wolfCrypt_Init()) != 0) {
@@ -198,7 +260,6 @@ void main(void)
 #if defined(BENCHMARK)
     #include "r_cmt_rx_if.h"
 
-    uint32_t channel;
     R_CMT_CreatePeriodic(FREQ, &timeTick, &channel);
 
     printf("Start wolfCrypt Benchmark\n");
@@ -208,41 +269,21 @@ void main(void)
 #elif defined(TLS_CLIENT)
     #include "r_cmt_rx_if.h"
 
-#if defined(WOLFSSL_RENESAS_TSIP_TLS)
 
-    #ifdef USE_ECC_CERT
-    const char* cipherlist[] = {
-        "ECDHE-ECDSA-AES128-GCM-SHA256",
-        "ECDHE-ECDSA-AES128-SHA256"
-    };
-    const int cipherlist_sz = 2;
-
-    #else
-    const char* cipherlist[] = {
-        "ECDHE-RSA-AES128-GCM-SHA256",
-        "ECDHE-RSA-AES128-SHA256",
-        "AES128-SHA",
-        "AES128-SHA256",
-        "AES256-SHA",
-        "AES256-SHA256"
-    };
-    const int cipherlist_sz = 6;
-
-    #endif
-
-#else
-    const char* cipherlist[] = { NULL };
-    const int cipherlist_sz = 0;
-
-#endif
-    int i = 0;
+#if defined(WOLFSSL_STATIC_MEMORY)
+    if (wc_LoadStaticMemory(&heapHint, heapBufGen, sizeof(heapBufGen),
+                                            WOLFMEM_GENERAL, 1) !=0) {
+        printf("unable to load static memory.\n");
+        return;
+    }
+#endif /* WOLFSSL_STATIC_MEMORY */
 
     Open_tcp();
 
 #if defined(WOLFSSL_RENESAS_TSIP_TLS)
     SetTsiptlsKey();
 #endif
-    
+
     do {
         if(cipherlist_sz > 0 ) printf("cipher : %s\n", cipherlist[i]);
 
@@ -261,7 +302,7 @@ void main(void)
     SetTsiptlsKey();
 #endif
 
-    wolfSSL_TLS_server_init();
+    wolfSSL_TLS_server_init(doClientCheck);
     wolfSSL_TLS_server();
 
     Close_tcp();

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------------
- * LuaSec 1.0.2
+ * LuaSec 1.3.2
  *
- * Copyright (C) 2006-2021 Bruno Silvestre.
+ * Copyright (C) 2006-2023 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -73,6 +73,12 @@ LSEC_API int luaopen_ssl_config(lua_State *L)
   lua_pushstring(L, "alpn");
   lua_pushboolean(L, 1);
   lua_rawset(L, -3);
+
+#ifdef LSEC_ENABLE_PSK
+  lua_pushstring(L, "psk");
+  lua_pushboolean(L, 1);
+  lua_rawset(L, -3);
+#endif
 
 #ifdef LSEC_ENABLE_DANE
   // DANE

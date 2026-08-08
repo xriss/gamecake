@@ -1,12 +1,12 @@
 /* wolf_server.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -126,7 +126,7 @@ void wolfSSL_TLS_server_init(byte doClientCheck)
     #if !defined(NO_FILESYSTEM)
         ret = wolfSSL_CTX_use_PrivateKey_file(server_ctx, key, 0);
     #else
-        ret = wolfSSL_CTX_use_PrivateKey_buffer(server_ctx, key, sizeof_key, 
+        ret = wolfSSL_CTX_use_PrivateKey_buffer(server_ctx, key, sizeof_key,
                                                         SSL_FILETYPE_ASN1);
     #endif
         if (ret != SSL_SUCCESS) {
@@ -140,20 +140,20 @@ void wolfSSL_TLS_server_init(byte doClientCheck)
             wolfSSL_CTX_set_verify(server_ctx, WOLFSSL_VERIFY_PEER |
                                 WOLFSSL_VERIFY_FAIL_IF_NO_PEER_CERT, 0);
 #if !defined(NO_FILESYSTEM)
-            if (wolfSSL_CTX_load_verify_locations(server_ctx, clientCert, 0) 
+            if (wolfSSL_CTX_load_verify_locations(server_ctx, clientCert, 0)
                                                                 != WOLFSSL_SUCCESS)
 #else
-            if (wolfSSL_CTX_load_verify_buffer(server_ctx, clientCert, 
+            if (wolfSSL_CTX_load_verify_buffer(server_ctx, clientCert,
                                                sizeof_clicert,
                                                SSL_FILETYPE_ASN1) != SSL_SUCCESS)
 #endif
                 printf("can't load ca file, Please run from wolfSSL home dir\n");
         }
-   
+
    /* Register callbacks */
    wolfSSL_SetIORecv(server_ctx, my_IORecv);
    wolfSSL_SetIOSend(server_ctx, my_IOSend);
-   
+
 }
 
 void wolfSSL_TLS_server( )
@@ -163,7 +163,7 @@ void wolfSSL_TLS_server( )
     ER ercd;
     WOLFSSL_CTX *ctx = (WOLFSSL_CTX *)server_ctx;
 
-    WOLFSSL *ssl;
+    WOLFSSL *ssl = NULL;
     int len;
     #define BUFF_SIZE 256
     char buff[BUFF_SIZE];
@@ -171,12 +171,12 @@ void wolfSSL_TLS_server( )
 
     if((ercd = tcp_acp_cep(cepid, repid, &dst_addr, TMO_FEVR)) != E_OK) {
         printf("ERROR TCP Accept: %d\n", ercd);
-        return;
+        goto out;
     }
 
     if((ssl = wolfSSL_new(ctx)) == NULL) {
         printf("ERROR: failed wolfSSL_new\n");
-        return;
+        goto out;
     }
 
     wolfSSL_SetIOReadCtx(ssl, (void *)&cepid);
@@ -184,12 +184,12 @@ void wolfSSL_TLS_server( )
 
     if (wolfSSL_accept(ssl) < 0) {
         printf("ERROR: SSL Accept(%d)\n", wolfSSL_get_error(ssl, 0));
-        return;
+        goto out;
     }
 
     if ((len = wolfSSL_read(ssl, buff, sizeof(buff) - 1)) < 0) {
         printf("ERROR: SSL Read(%d)\n", wolfSSL_get_error(ssl, 0));
-        return;
+        goto out;
     }
 
     buff[len] = '\0';
@@ -197,11 +197,18 @@ void wolfSSL_TLS_server( )
 
     if (wolfSSL_write(ssl, buff, len) != len) {
         printf("ERROR: SSL Write(%d)\n", wolfSSL_get_error(ssl, 0));
-        return;
     }
 
-    wolfSSL_free(ssl);
-    wolfSSL_CTX_free(ctx);
+out:
+    if (ssl) {
+        wolfSSL_shutdown(ssl);
+        wolfSSL_free(ssl);
+    }
+    if (ctx) {
+        wolfSSL_CTX_free(ctx);
+    };
+
     wolfSSL_Cleanup();
     tcp_sht_cep(cepid);
+    tcp_cls_cep(cepid, TMO_FEVR);
 }

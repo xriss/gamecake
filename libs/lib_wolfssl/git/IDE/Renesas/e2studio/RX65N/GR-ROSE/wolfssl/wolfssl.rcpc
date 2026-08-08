@@ -22,6 +22,7 @@
         <Category Name="port">
           <Path>..\..\..\..\..\..\wolfcrypt\src\port\Renesas\renesas_common.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\port\Renesas\renesas_tsip_aes.c</Path>
+          <Path>..\..\..\..\..\..\wolfcrypt\src\port\Renesas\renesas_tsip_rsa.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\port\Renesas\renesas_tsip_sha.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\port\Renesas\renesas_tsip_util.c</Path>
         </Category>
@@ -53,7 +54,6 @@
           <Path>..\..\..\..\..\..\wolfcrypt\src\ge_operations.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\hash.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\hmac.c</Path>
-          <Path>..\..\..\..\..\..\wolfcrypt\src\idea.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\integer.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\kdf.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\logging.c</Path>
@@ -65,7 +65,6 @@
           <Path>..\..\..\..\..\..\wolfcrypt\src\pkcs7.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\poly1305.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\pwdbased.c</Path>
-          <Path>..\..\..\..\..\..\wolfcrypt\src\rabbit.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\random.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\ripemd.c</Path>
           <Path>..\..\..\..\..\..\wolfcrypt\src\rsa.c</Path>
@@ -89,12 +88,13 @@
         </Category>
       </Category>
     </Files>
-    <Device Category="com.renesas.cdt.managedbuild.renesas.ccrx.common.option.cpu.rx600" Series="RX">R5F571MLCxFC</Device>
-    <BuildOptions Name="CC-RX" Version="v3.03.00">
+    <Device Category="com.renesas.cdt.managedbuild.renesas.ccrx.common.option.cpu.rx600" Series="RX">R5F565NEHxFP</Device>
+    <BuildOptions Name="CC-RX" Version="v3.04.00">
       <BuildMode Active="True" Name="Debug">
         <GeneralOptions/>
         <CompileOptions>
           <Option>-isa=rxv2</Option>
+          <Option>-fpu</Option>
           <Option>-include="${ProjDirPath}\..\common"</Option>
           <Option>-include="${ProjDirPath}\\..\..\..\..\..\..\"</Option>
           <Option>-include="${ProjDirPath}\..\test\src\smc_gen\"</Option>
@@ -102,8 +102,10 @@
           <Option>-include="${ProjDirPath}\..\test\src\smc_gen\r_config"</Option>
           <Option>-include="${ProjDirPath}\..\test\src\smc_gen\r_tsip_rx"</Option>
           <Option>-define=WOLFSSL_USER_SETTINGS</Option>
+          <Option>-utf8</Option>
           <Option>-nomessage</Option>
           <Option>-debug</Option>
+          <Option>-outcode=utf8</Option>
           <Option>-optimize=0</Option>
           <Option>-nologo</Option>
           <Option>-lang=c99</Option>
@@ -113,6 +115,8 @@
         </CompileOptions>
         <AssembleOptions>
           <Option>-isa=rxv2</Option>
+          <Option>-fpu</Option>
+          <Option>-utf8</Option>
           <Option>-debug</Option>
           <Option>-nologo</Option>
           <Option>-output=${CONFIGDIR}</Option>
@@ -140,6 +144,7 @@
           <Path>Debug\wolfio.obj</Path>
           <Path>Debug\renesas_common.obj</Path>
           <Path>Debug\renesas_tsip_aes.obj</Path>
+          <Path>Debug\renesas_tsip_rsa.obj</Path>
           <Path>Debug\renesas_tsip_sha.obj</Path>
           <Path>Debug\renesas_tsip_util.obj</Path>
           <Path>Debug\aes.obj</Path>
@@ -169,7 +174,6 @@
           <Path>Debug\ge_operations.obj</Path>
           <Path>Debug\hash.obj</Path>
           <Path>Debug\hmac.obj</Path>
-          <Path>Debug\idea.obj</Path>
           <Path>Debug\integer.obj</Path>
           <Path>Debug\kdf.obj</Path>
           <Path>Debug\logging.obj</Path>
@@ -181,7 +185,6 @@
           <Path>Debug\pkcs7.obj</Path>
           <Path>Debug\poly1305.obj</Path>
           <Path>Debug\pwdbased.obj</Path>
-          <Path>Debug\rabbit.obj</Path>
           <Path>Debug\random.obj</Path>
           <Path>Debug\ripemd.obj</Path>
           <Path>Debug\rsa.obj</Path>

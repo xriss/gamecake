@@ -24,17 +24,17 @@
     \param iterations number of times to process the hash
     \param kLen desired length of the derived key. Should not be longer
     than the digest size of the hash chosen
-    \param hashType the hashing algorithm to use. Valid choices are MD5 and SHA
+    \param hashType the hashing algorithm to use. Valid choices are WC_MD5 and WC_SHA
 
     _Example_
     \code
     int ret;
-    byte key[MD5_DIGEST_SIZE];
+    byte key[WC_MD5_DIGEST_SIZE];
     byte pass[] = { }; // initialize with password
     byte salt[] = { }; // initialize with salt
 
     ret = wc_PBKDF1(key, pass, sizeof(pass), salt, sizeof(salt), 1000,
-    sizeof(key), MD5);
+    sizeof(key), WC_MD5);
     if ( ret != 0 ) {
     	// error deriving key from password
     }
@@ -43,9 +43,9 @@
     \sa wc_PBKDF2
     \sa wc_PKCS12_PBKDF
 */
-WOLFSSL_API int wc_PBKDF1(byte* output, const byte* passwd, int pLen,
+int wc_PBKDF1(byte* output, const byte* passwd, int pLen,
                       const byte* salt, int sLen, int iterations, int kLen,
-                      int typeH);
+                      int hashType);
 
 /*!
     \ingroup Password
@@ -53,8 +53,9 @@ WOLFSSL_API int wc_PBKDF1(byte* output, const byte* passwd, int pLen,
     \brief This function implements the Password Based Key Derivation
     Function 2 (PBKDF2), converting an input password with a concatenated
     salt into a more secure key, which it stores in output. It allows the user
-    to select any of the supported HMAC hash functions, including: MD5, SHA,
-    SHA256, SHA384, SHA512, and BLAKE2B
+    to select any of the supported HMAC hash functions, including: WC_MD5,
+    WC_SHA, WC_SHA256, WC_SHA384, WC_SHA512, WC_SHA3_224, WC_SHA3_256,
+    WC_SHA3_384 or WC_SHA3_512
 
     \return 0 Returned on successfully deriving a key from the input password
     \return BAD_FUNC_ARG Returned if there is an invalid hash type given or
@@ -72,8 +73,9 @@ WOLFSSL_API int wc_PBKDF1(byte* output, const byte* passwd, int pLen,
     \param sLen length of the salt
     \param iterations number of times to process the hash
     \param kLen desired length of the derived key
-    \param hashType the hashing algorithm to use. Valid choices are: MD5,
-    SHA, SHA256, SHA384, SHA512, and BLAKE2B
+    \param hashType the hashing algorithm to use. Valid choices are: WC_MD5,
+    WC_SHA, WC_SHA256, WC_SHA384, WC_SHA512, WC_SHA3_224, WC_SHA3_256,
+    WC_SHA3_384 or WC_SHA3_512
 
     _Example_
     \code
@@ -83,7 +85,7 @@ WOLFSSL_API int wc_PBKDF1(byte* output, const byte* passwd, int pLen,
     byte salt[] = { }; // initialize with salt
 
     ret = wc_PBKDF2(key, pass, sizeof(pass), salt, sizeof(salt), 2048, sizeof(key),
-    SHA512);
+    WC_SHA512);
     if ( ret != 0 ) {
     	// error deriving key from password
     }
@@ -92,9 +94,9 @@ WOLFSSL_API int wc_PBKDF1(byte* output, const byte* passwd, int pLen,
     \sa wc_PBKDF1
     \sa wc_PKCS12_PBKDF
 */
-WOLFSSL_API int wc_PBKDF2(byte* output, const byte* passwd, int pLen,
+int wc_PBKDF2(byte* output, const byte* passwd, int pLen,
                       const byte* salt, int sLen, int iterations, int kLen,
-                      int typeH);
+                      int hashType);
 
 /*!
     \ingroup Password
@@ -103,7 +105,8 @@ WOLFSSL_API int wc_PBKDF2(byte* output, const byte* passwd, int pLen,
     (PBKDF) described in RFC 7292 Appendix B. This function converts an input
     password with a concatenated salt into a more secure key, which it stores
     in output. It allows the user to select any of the supported HMAC hash
-    functions, including: MD5, SHA, SHA256, SHA384, SHA512, and BLAKE2B.
+    functions, including: WC_MD5, WC_SHA, WC_SHA256, WC_SHA384, WC_SHA512,
+    WC_SHA3_224, WC_SHA3_256, WC_SHA3_384 or WC_SHA3_512
 
     \return 0 Returned on successfully deriving a key from the input password
     \return BAD_FUNC_ARG Returned if there is an invalid hash type given,
@@ -129,15 +132,16 @@ WOLFSSL_API int wc_PBKDF2(byte* output, const byte* passwd, int pLen,
     Should be kLen long
     \param passwd pointer to the buffer containing the password to use for
     the key derivation
-    \param pLen length of the password to use for key derivation
+    \param passLen length of the password to use for key derivation
     \param salt pointer to the buffer containing the salt to use
     for key derivation
-    \param sLen length of the salt
+    \param saltLen length of the salt
     \param iterations number of times to process the hash
     \param kLen desired length of the derived key
-    \param hashType the hashing algorithm to use. Valid choices are: MD5,
-    SHA, SHA256, SHA384, SHA512, and BLAKE2B
-    \param id this is a byte indetifier indicating the purpose of key
+    \param hashType the hashing algorithm to use. Valid choices are: WC_MD5,
+    WC_SHA, WC_SHA256, WC_SHA384, WC_SHA512, WC_SHA3_224, WC_SHA3_256,
+    WC_SHA3_384 or WC_SHA3_512
+    \param id this is a byte identifier indicating the purpose of key
     generation. It is used to diversify the key output, and should be
     assigned as follows: ID=1: pseudorandom bits are to be used as key
     material for performing encryption or decryption. ID=2: pseudorandom
@@ -151,8 +155,8 @@ WOLFSSL_API int wc_PBKDF2(byte* output, const byte* passwd, int pLen,
     byte pass[] = { }; // initialize with password
     byte salt[] = { }; // initialize with salt
 
-    ret = wc_PKCS512_PBKDF(key, pass, sizeof(pass), salt, sizeof(salt), 2048,
-    sizeof(key), SHA512, 1);
+    ret = wc_PKCS12_PBKDF(key, pass, sizeof(pass), salt, sizeof(salt), 2048,
+    sizeof(key), WC_SHA512, 1);
     if ( ret != 0 ) {
     	// error deriving key from password
     }
@@ -161,6 +165,226 @@ WOLFSSL_API int wc_PBKDF2(byte* output, const byte* passwd, int pLen,
     \sa wc_PBKDF1
     \sa wc_PBKDF2
 */
-WOLFSSL_API int wc_PKCS12_PBKDF(byte* output, const byte* passwd, int pLen,
-                            const byte* salt, int sLen, int iterations,
-                            int kLen, int typeH, int purpose);
+int wc_PKCS12_PBKDF(byte* output, const byte* passwd, int passLen,
+                            const byte* salt, int saltLen, int iterations,
+                            int kLen, int hashType, int id);
+
+/*!
+    \ingroup Password
+    \brief Extended version of PBKDF1 with heap hint.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG on invalid arguments or iterations is greater than
+    current_wc_pbkdf_max_iterations
+    \return MEMORY_E on memory allocation error
+
+    \param key Output key buffer
+    \param keyLen Key length
+    \param iv Output IV buffer
+    \param ivLen IV length
+    \param passwd Password buffer
+    \param passwdLen Password length
+    \param salt Salt buffer
+    \param saltLen Salt length
+    \param iterations Iteration count
+    \param hashType Hash algorithm type
+    \param heap Heap hint for memory allocation
+
+    _Example_
+    \code
+    byte key[16], iv[16];
+    byte pass[] = "password";
+    byte salt[] = "salt";
+    int ret = wc_PBKDF1_ex(key, sizeof(key), iv, sizeof(iv),
+        pass, sizeof(pass), salt, sizeof(salt), 1000, WC_SHA, NULL);
+    \endcode
+
+    \sa wc_PBKDF1
+    \sa wc_PBKDF_max_iterations_set
+    \sa wc_PBKDF_max_iterations_get
+*/
+int wc_PBKDF1_ex(byte* key, int keyLen, byte* iv, int ivLen,
+    const byte* passwd, int passwdLen, const byte* salt, int saltLen,
+    int iterations, int hashType, void* heap);
+
+/*!
+    \ingroup Password
+    \brief Extended version of PBKDF2 with heap hint and device ID.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG on invalid arguments or iterations is greater than
+    current_wc_pbkdf_max_iterations
+    \return MEMORY_E on memory allocation error
+
+    \param output Output key buffer
+    \param passwd Password buffer
+    \param pLen Password length
+    \param salt Salt buffer
+    \param sLen Salt length
+    \param iterations Iteration count
+    \param kLen Key length
+    \param hashType Hash algorithm type
+    \param heap Heap hint for memory allocation
+    \param devId Device ID for hardware acceleration
+
+    _Example_
+    \code
+    byte key[32];
+    byte pass[] = "password";
+    byte salt[] = "salt";
+    int ret = wc_PBKDF2_ex(key, pass, sizeof(pass), salt,
+        sizeof(salt), 2048, sizeof(key), WC_SHA256, NULL,
+        INVALID_DEVID);
+    \endcode
+
+    \sa wc_PBKDF2
+    \sa wc_PBKDF_max_iterations_set
+    \sa wc_PBKDF_max_iterations_get
+*/
+int wc_PBKDF2_ex(byte* output, const byte* passwd, int pLen,
+    const byte* salt, int sLen, int iterations, int kLen,
+    int hashType, void* heap, int devId);
+
+/*!
+    \ingroup Password
+    \brief Extended version of PKCS12_PBKDF with heap hint.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG on invalid arguments or iterations is greater than
+    current_wc_pbkdf_max_iterations
+    \return MEMORY_E on memory allocation error
+
+    \param output Output key buffer
+    \param passwd Password buffer
+    \param passLen Password length
+    \param salt Salt buffer
+    \param saltLen Salt length
+    \param iterations Iteration count
+    \param kLen Key length
+    \param hashType Hash algorithm type
+    \param id Purpose identifier (1=key, 2=IV, 3=MAC)
+    \param heap Heap hint for memory allocation
+
+    _Example_
+    \code
+    byte key[32];
+    byte pass[] = "password";
+    byte salt[] = "salt";
+    int ret = wc_PKCS12_PBKDF_ex(key, pass, sizeof(pass), salt,
+        sizeof(salt), 2048, sizeof(key), WC_SHA256, 1, NULL);
+    \endcode
+
+    \sa wc_PKCS12_PBKDF
+    \sa wc_PBKDF_max_iterations_set
+    \sa wc_PBKDF_max_iterations_get
+*/
+int wc_PKCS12_PBKDF_ex(byte* output, const byte* passwd,int passLen,
+    const byte* salt, int saltLen, int iterations, int kLen,
+    int hashType, int id, void* heap);
+
+/*!
+    \ingroup Password
+    \brief Implements scrypt key derivation function.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG on invalid arguments
+    \return MEMORY_E on memory allocation error
+
+    \param output Output key buffer
+    \param passwd Password buffer
+    \param passLen Password length
+    \param salt Salt buffer
+    \param saltLen Salt length
+    \param cost CPU/memory cost parameter (N)
+    \param blockSize Block size parameter (r)
+    \param parallel Parallelization parameter (p)
+    \param dkLen Derived key length
+
+    _Example_
+    \code
+    byte key[32];
+    byte pass[] = "password";
+    byte salt[] = "salt";
+    int ret = wc_scrypt(key, pass, sizeof(pass), salt,
+        sizeof(salt), 16384, 8, 1, sizeof(key));
+    \endcode
+
+    \sa wc_scrypt_ex
+*/
+int wc_scrypt(byte* output, const byte* passwd, int passLen,
+    const byte* salt, int saltLen, int cost, int blockSize,
+    int parallel, int dkLen);
+
+/*!
+    \ingroup Password
+    \brief Extended scrypt with iteration count instead of cost.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG on invalid arguments
+    \return MEMORY_E on memory allocation error
+
+    \param output Output key buffer
+    \param passwd Password buffer
+    \param passLen Password length
+    \param salt Salt buffer
+    \param saltLen Salt length
+    \param iterations Iteration count
+    \param blockSize Block size parameter (r)
+    \param parallel Parallelization parameter (p)
+    \param dkLen Derived key length
+
+    _Example_
+    \code
+    byte key[32];
+    byte pass[] = "password";
+    byte salt[] = "salt";
+    int ret = wc_scrypt_ex(key, pass, sizeof(pass), salt,
+        sizeof(salt), 16384, 8, 1, sizeof(key));
+    \endcode
+
+    \sa wc_scrypt
+*/
+int wc_scrypt_ex(byte* output, const byte* passwd, int passLen,
+    const byte* salt, int saltLen, word32 iterations, int blockSize,
+    int parallel, int dkLen);
+
+/*!
+    \ingroup Password
+    \brief Set the current iteration limit for PBKDF.
+
+    By default, the iteration limit is set to WC_PBKDF_DEFAULT_MAX_ITERATIONS,
+    which can be overridden at build time.  This function allows runtime
+    override of the limit.
+
+    Note that `wc_PBKDF_max_iterations_set()` has no provisions for thread
+    synchronization.  Users should arrange to call it at startup or idle times,
+    when there are no other PBKDF calls in progress.
+
+    \return Previous iteration limit on success
+    \return BAD_FUNC_ARG on invalid arguments
+
+    \param iters The new iteration limit.
+
+    _Example_
+    \code
+    int prev_iter_limit = wc_PBKDF_max_iterations_set(100000000);
+    \endcode
+
+    \sa wc_scrypt
+*/
+int wc_PBKDF_max_iterations_set(int iters);
+
+/*!
+    \ingroup Password
+    \brief Get the current iteration limit for PBKDF.
+
+    \return Current iteration limit
+
+    _Example_
+    \code
+    int cur_iter_limit = wc_PBKDF_max_iterations_get();
+    \endcode
+
+    \sa wc_scrypt
+*/
+int wc_PBKDF_max_iterations_get(void);

@@ -19,7 +19,92 @@
     \sa wc_MakeCert
     \sa wc_MakeCertReq
 */
-WOLFSSL_API int wc_InitCert(Cert*);
+int wc_InitCert(Cert* cert);
+
+/*!
+     \ingroup ASN
+
+     \brief This function allocates a new Cert structure for use during
+     cert operations without the application having to allocate the structure
+     itself. The Cert structure is also initialized by this function thus
+     removing the need to call wc_InitCert(). When the application is finished
+     using the allocated Cert structure wc_CertFree() must be called.
+
+     \return pointer If successful the call will return a pointer to the
+     newly allocated and initialized Cert.
+     \return NULL On a memory allocation failure.
+
+     \param A pointer to the heap used for dynamic allocation. Can be NULL.
+
+     _Example_
+     \code
+     Cert*   myCert;
+
+     myCert = wc_CertNew(NULL);
+     if (myCert == NULL) {
+         // Cert creation failure
+     }
+     \endcode
+
+     \sa wc_InitCert
+     \sa wc_MakeCert
+     \sa wc_CertFree
+
+*/
+Cert* wc_CertNew(void* heap);
+
+/*!
+    \ingroup ASN
+    \brief Initializes certificate with heap hint and device ID.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG if cert is NULL
+
+    \param cert Cert structure to initialize
+    \param heap Heap hint for memory allocation
+    \param devId Device ID for hardware acceleration
+
+    _Example_
+    \code
+    Cert myCert;
+    int ret = wc_InitCert_ex(&myCert, NULL, INVALID_DEVID);
+    if (ret != 0) {
+        // error initializing cert
+    }
+    \endcode
+
+    \sa wc_InitCert
+    \sa wc_MakeCert_ex
+*/
+int wc_InitCert_ex(Cert* cert, void* heap, int devId);
+
+/*!
+     \ingroup ASN
+
+     \brief This function frees the memory allocated for a cert structure
+     by a previous call to wc_CertNew().
+
+     \return None.
+
+     \param A pointer to the cert structure to free.
+
+     _Example_
+     \code
+     Cert*   myCert;
+
+     myCert = wc_CertNew(NULL);
+
+     // Perform cert operations.
+
+     wc_CertFree(myCert);
+     \endcode
+
+     \sa wc_InitCert
+     \sa wc_MakeCert
+     \sa wc_CertNew
+
+*/
+void  wc_CertFree(Cert* cert);
 
 /*!
     \ingroup ASN
@@ -64,8 +149,250 @@ WOLFSSL_API int wc_InitCert(Cert*);
     \sa wc_InitCert
     \sa wc_MakeCertReq
 */
-WOLFSSL_API int  wc_MakeCert(Cert*, byte* derBuffer, word32 derSz, RsaKey*,
-                             ecc_key*, WC_RNG*);
+int  wc_MakeCert(Cert* cert, byte* derBuffer, word32 derSz, RsaKey* rsaKey,
+                             ecc_key* eccKey, WC_RNG* rng);
+
+/*!
+    \ingroup ASN
+    \brief Makes certificate with generic key type support.
+
+    \return Size of certificate on success
+    \return MEMORY_E if memory allocation fails
+    \return BUFFER_E if buffer too small
+    \return Other error codes on failure
+
+    \param cert Initialized cert structure
+    \param derBuffer Buffer for generated certificate
+    \param derSz Size of derBuffer
+    \param keyType Key type (RSA_TYPE, ECC_TYPE, ED25519_TYPE, etc.)
+    \param key Pointer to key structure
+    \param rng Random number generator
+
+    _Example_
+    \code
+    Cert myCert;
+    wc_InitCert(&myCert);
+    byte derCert[4096];
+    RsaKey key;
+    WC_RNG rng;
+    int certSz = wc_MakeCert_ex(&myCert, derCert, sizeof(derCert),
+                                RSA_TYPE, &key, &rng);
+    \endcode
+
+    \sa wc_MakeCert
+    \sa wc_SignCert_ex
+*/
+int wc_MakeCert_ex(Cert* cert, byte* derBuffer, word32 derSz,
+                  int keyType, void* key, WC_RNG* rng);
+
+/*!
+    \ingroup ASN
+    \brief Makes certificate request with generic key type support.
+
+    \return Size of certificate request on success
+    \return MEMORY_E if memory allocation fails
+    \return BUFFER_E if buffer too small
+    \return Other error codes on failure
+
+    \param cert Initialized cert structure
+    \param derBuffer Buffer for generated certificate request
+    \param derSz Size of derBuffer
+    \param keyType Key type (RSA_TYPE, ECC_TYPE, ED25519_TYPE, etc.)
+    \param key Pointer to key structure
+
+    _Example_
+    \code
+    Cert myCert;
+    wc_InitCert(&myCert);
+    byte derCert[4096];
+    EccKey key;
+    int certSz = wc_MakeCertReq_ex(&myCert, derCert, sizeof(derCert),
+                                   ECC_TYPE, &key);
+    \endcode
+
+    \sa wc_MakeCertReq
+    \sa wc_SignCert_ex
+*/
+int wc_MakeCertReq_ex(Cert* cert, byte* derBuffer, word32 derSz,
+                     int keyType, void* key);
+
+/*!
+    \ingroup ASN
+    \brief Signs certificate with generic key type support.
+
+    \return New size of certificate with signature on success
+    \return MEMORY_E if memory allocation fails
+    \return BUFFER_E if buffer too small
+    \return Other error codes on failure
+
+    \param requestSz Size of certificate body to sign
+    \param sType Signature type
+    \param buf Buffer containing certificate to sign
+    \param buffSz Total size of buffer
+    \param keyType Key type (RSA_TYPE, ECC_TYPE, ED25519_TYPE, etc.)
+    \param key Pointer to key structure
+    \param rng Random number generator
+
+    _Example_
+    \code
+    Cert myCert;
+    byte derCert[4096];
+    RsaKey key;
+    WC_RNG rng;
+    // Initialize cert and set fields (issuer, subject, dates, etc.)
+    wc_InitCert(&myCert);
+    // ... set myCert fields ...
+    // Generate certificate body (TBS - To Be Signed)
+    int bodySz = wc_MakeCert_ex(&myCert, derCert, sizeof(derCert),
+                                RSA_TYPE, &key, &rng);
+    if (bodySz > 0) {
+        // bodySz is the size of the unsigned certificate body
+        // Sign the certificate body and append signature
+        int certSz = wc_SignCert_ex(bodySz, CTC_SHA256wRSA,
+                                    derCert, sizeof(derCert), RSA_TYPE,
+                                    &key, &rng);
+        // derCert now contains complete signed certificate of size certSz
+    }
+    \endcode
+
+    \sa wc_SignCert
+    \sa wc_MakeCert_ex
+*/
+int wc_SignCert_ex(int requestSz, int sType, byte* buf, word32 buffSz,
+                  int keyType, void* key, WC_RNG* rng);
+
+/*!
+    \ingroup ASN
+    \brief Makes signature with bit string encoding. This function is used
+    for dual algorithm certificate signing, where an alternative signature
+    is created using a secondary key algorithm (e.g., a post-quantum algorithm
+    alongside a traditional algorithm).
+
+    \note This API is only available when WOLFSSL_DUAL_ALG_CERTS is defined,
+    which enables support for dual algorithm certificates used in Post-Quantum
+    cryptography to provide hybrid signing with both traditional and PQ
+    algorithms.
+
+    \return Size of signature on success
+    \return Negative on error
+
+    \param sig Output buffer for signature
+    \param sigSz Size of signature buffer
+    \param sType Signature type
+    \param buf Data to sign (typically the TBS - To Be Signed -
+    certificate data)
+    \param bufSz Size of data
+    \param keyType Key type (RSA_TYPE, ECC_TYPE, ED25519_TYPE, etc.)
+    \param key Pointer to key structure
+    \param rng Random number generator
+
+    _Example_
+    \code
+    byte sig[512], data[256];
+    RsaKey key;
+    WC_RNG rng;
+    int sigSz = wc_MakeSigWithBitStr(sig, sizeof(sig), CTC_SHA256wRSA,
+                                     data, sizeof(data), RSA_TYPE,
+                                     &key, &rng);
+    \endcode
+
+    \sa wc_SignCert_ex
+    \sa wc_GeneratePreTBS
+*/
+int wc_MakeSigWithBitStr(byte *sig, int sigSz, int sType, byte* buf,
+                         word32 bufSz, int keyType, void* key,
+                         WC_RNG* rng);
+
+/*!
+    \ingroup ASN
+    \brief Gets certificate validity dates.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG if parameters invalid
+
+    \param cert Certificate structure
+    \param before Output for notBefore date
+    \param after Output for notAfter date
+
+    _Example_
+    \code
+    Cert myCert;
+    struct tm beforeDate, afterDate;
+    int ret = wc_GetCertDates(&myCert, &beforeDate, &afterDate);
+    \endcode
+
+    \sa wc_InitCert
+*/
+int wc_GetCertDates(Cert* cert, struct tm* before, struct tm* after);
+
+/*!
+    \ingroup ASN
+    \brief Extracts date information from certificate date field. This
+    function parses an ASN.1 encoded date (including tag and length) and
+    returns a pointer to the raw date value bytes, the ASN.1 time type,
+    and the length of the date value.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG if parameters invalid
+    \return ASN_PARSE_E if date parsing fails
+
+    \param certDate Certificate date buffer containing ASN.1 encoded date
+    (tag + length + value)
+    \param certDateSz Size of certificate date buffer
+    \param date Output pointer set to the raw date value bytes (without
+    tag/length)
+    \param format Output byte indicating ASN.1 time type: ASN_UTC_TIME
+    (0x17) or ASN_GENERALIZED_TIME (0x18)
+    \param length Output length of the raw date value in bytes
+
+    _Example_
+    \code
+    const byte* certDate;
+    const byte* date;
+    byte format;
+    int length;
+    int ret = wc_GetDateInfo(certDate, certDateSz, &date,
+                             &format, &length);
+    if (ret == 0) {
+        // date points to raw time bytes, format indicates UTC or
+        // Generalized time, length is the number of date value bytes
+    }
+    \endcode
+
+    \sa wc_GetCertDates
+    \sa wc_GetDateAsCalendarTime
+*/
+int wc_GetDateInfo(const byte* certDate, int certDateSz,
+                   const byte** date, byte* format, int* length);
+
+/*!
+    \ingroup ASN
+    \brief Converts certificate date to calendar time structure.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG if parameters invalid
+    \return ASN_TIME_E if time conversion fails
+
+    \param date Date buffer
+    \param length Length of date buffer
+    \param format Date format (ASN_UTC_TIME or ASN_GENERALIZED_TIME)
+    \param timearg Pointer to tm structure to fill
+
+    _Example_
+    \code
+    const byte* date;
+    int length;
+    byte format;
+    struct tm timeInfo;
+    int ret = wc_GetDateAsCalendarTime(date, length, format,
+                                       &timeInfo);
+    \endcode
+
+    \sa wc_GetDateInfo
+    \sa wc_GetCertDates
+*/
+int wc_GetDateAsCalendarTime(const byte* date, int length,
+                              byte format, struct tm* timearg);
 
 /*!
     \ingroup ASN
@@ -111,8 +438,8 @@ WOLFSSL_API int  wc_MakeCert(Cert*, byte* derBuffer, word32 derSz, RsaKey*,
     \sa wc_InitCert
     \sa wc_MakeCert
 */
-WOLFSSL_API int  wc_MakeCertReq(Cert*, byte* derBuffer, word32 derSz,
-                                    RsaKey*, ecc_key*);
+int  wc_MakeCertReq(Cert* cert, byte* derBuffer, word32 derSz,
+                                    RsaKey* rsaKey, ecc_key* eccKey);
 
 /*!
     \ingroup ASN
@@ -133,7 +460,7 @@ WOLFSSL_API int  wc_MakeCertReq(Cert*, byte* derBuffer, word32 derSz,
     \param requestSz the size of the certificate body we’re requesting
     to have signed
     \param sType Type of signature to create. Valid options are: CTC_MD5wRSA,
-    CTC_SHAwRSA, CTC_SHAwECDSA, CTC_SHA256wECDSA, andCTC_SHA256wRSA
+    CTC_SHAwRSA, CTC_SHAwECDSA, CTC_SHA256wECDSA, and CTC_SHA256wRSA
     \param buffer pointer to the buffer containing the certificate to be
     signed. On success: will hold the newly signed certificate
     \param buffSz the (total) size of the buffer in which to store the newly
@@ -164,8 +491,8 @@ WOLFSSL_API int  wc_MakeCertReq(Cert*, byte* derBuffer, word32 derSz,
     \sa wc_InitCert
     \sa wc_MakeCert
 */
-WOLFSSL_API int  wc_SignCert(int requestSz, int sigType, byte* derBuffer,
-                             word32 derSz, RsaKey*, ecc_key*, WC_RNG*);
+int  wc_SignCert(int requestSz, int sigType, byte* derBuffer,
+                 word32 derSz, RsaKey* rsaKey, ecc_key* eccKey, WC_RNG* rng);
 
 /*!
     \ingroup ASN
@@ -210,8 +537,8 @@ WOLFSSL_API int  wc_SignCert(int requestSz, int sigType, byte* derBuffer,
     \sa wc_MakeCert
     \sa wc_SignCert
 */
-WOLFSSL_API int  wc_MakeSelfCert(Cert*, byte* derBuffer, word32 derSz, RsaKey*,
-                             WC_RNG*);
+int  wc_MakeSelfCert(Cert* cert, byte* derBuffer, word32 derSz, RsaKey* key,
+                             WC_RNG* rng);
 
 /*!
     \ingroup ASN
@@ -272,7 +599,7 @@ WOLFSSL_API int  wc_MakeSelfCert(Cert*, byte* derBuffer, word32 derSz, RsaKey*,
     \sa wc_SetSubject
     \sa wc_SetIssuerBuffer
 */
-WOLFSSL_API int  wc_SetIssuer(Cert*, const char*);
+int  wc_SetIssuer(Cert* cert, const char* issuerFile);
 
 /*!
     \ingroup ASN
@@ -329,7 +656,7 @@ WOLFSSL_API int  wc_SetIssuer(Cert*, const char*);
     \sa wc_InitCert
     \sa wc_SetIssuer
 */
-WOLFSSL_API int  wc_SetSubject(Cert*, const char*);
+int  wc_SetSubject(Cert* cert, const char* subjectFile);
 
 
 /*!
@@ -394,7 +721,7 @@ WOLFSSL_API int  wc_SetSubject(Cert*, const char*);
     \sa wc_InitCert
     \sa wc_SetSubject
 */
-WOLFSSL_API int  wc_SetSubjectRaw(Cert* cert, const byte* der, int derSz);
+int  wc_SetSubjectRaw(Cert* cert, const byte* der, int derSz);
 
 /*!
     \ingroup ASN
@@ -422,7 +749,7 @@ WOLFSSL_API int  wc_SetSubjectRaw(Cert* cert, const byte* der, int derSz);
     \sa wc_InitCert
     \sa wc_SetSubjectRaw
 */
-WOLFSSL_API int  wc_GetSubjectRaw(byte **subjectRaw, Cert *cert);
+int  wc_GetSubjectRaw(byte **subjectRaw, Cert *cert);
 
 /*!
     \ingroup ASN
@@ -481,7 +808,7 @@ WOLFSSL_API int  wc_GetSubjectRaw(byte **subjectRaw, Cert *cert);
     \sa wc_InitCert
     \sa wc_SetIssuer
 */
-WOLFSSL_API int  wc_SetAltNames(Cert*, const char*);
+int  wc_SetAltNames(Cert* cert, const char* file);
 
 /*!
     \ingroup ASN
@@ -545,7 +872,7 @@ WOLFSSL_API int  wc_SetAltNames(Cert*, const char*);
     \sa wc_InitCert
     \sa wc_SetIssuer
 */
-WOLFSSL_API int  wc_SetIssuerBuffer(Cert*, const byte*, int);
+int  wc_SetIssuerBuffer(Cert* cert, const byte* der, int derSz);
 
 /*!
     \ingroup ASN
@@ -609,7 +936,7 @@ WOLFSSL_API int  wc_SetIssuerBuffer(Cert*, const byte*, int);
     \sa wc_InitCert
     \sa wc_SetIssuer
 */
-WOLFSSL_API int  wc_SetIssuerRaw(Cert* cert, const byte* der, int derSz);
+int  wc_SetIssuerRaw(Cert* cert, const byte* der, int derSz);
 
 /*!
     \ingroup ASN
@@ -672,7 +999,7 @@ WOLFSSL_API int  wc_SetIssuerRaw(Cert* cert, const byte* der, int derSz);
     \sa wc_InitCert
     \sa wc_SetSubject
 */
-WOLFSSL_API int  wc_SetSubjectBuffer(Cert*, const byte*, int);
+int  wc_SetSubjectBuffer(Cert* cert, const byte* der, int derSz);
 
 /*!
     \ingroup ASN
@@ -738,7 +1065,162 @@ WOLFSSL_API int  wc_SetSubjectBuffer(Cert*, const byte*, int);
     \sa wc_InitCert
     \sa wc_SetAltNames
 */
-WOLFSSL_API int  wc_SetAltNamesBuffer(Cert*, const byte*, int);
+int  wc_SetAltNamesBuffer(Cert* cert, const byte* der, int derSz);
+
+/*!
+    \ingroup ASN
+
+    \brief This function allocates a single subject alternative name (SAN)
+    entry, copies the supplied name into it, sets its GeneralName type and
+    length, and appends it to the linked list pointed to by entries. The name
+    is duplicated internally, so the caller's buffer need not outlive the call.
+    The resulting list can be encoded with wc_FlattenAltNames and must be freed
+    with FreeAltNames.
+
+    \return 0 Returned on success.
+    \return MEMORY_E Returned if dynamic memory allocation fails.
+    \return BAD_FUNC_ARG Returned if str or entries is NULL, strLen is
+    negative, or type is not a supported GeneralName type; also returned for an
+    ASN_IP_TYPE entry whose length is not a valid IPv4/IPv6 address, or an
+    ASN_RID_TYPE entry with malformed contents.
+    \return BUFFER_E Returned if the string representation of an ASN_IP_TYPE or
+    ASN_RID_TYPE entry does not fit its internal buffer.
+    \return Other negative error codes may propagate from generating the string
+    form of ASN_IP_TYPE and ASN_RID_TYPE entries.
+
+    \param heap pointer to the heap hint used for allocations (may be NULL)
+    \param str pointer to the name bytes (e.g. a DNS string, or raw IP octets
+    for ASN_IP_TYPE)
+    \param strLen length of str in bytes
+    \param type GeneralName type (e.g. ASN_DNS_TYPE, ASN_IP_TYPE,
+    ASN_RFC822_TYPE, ASN_URI_TYPE)
+    \param entries in/out pointer to the head of the alt-name linked list; a new
+    entry is appended
+
+    _Example_
+    \code
+    DNS_entry* list = NULL;
+    if (wc_SetDNSEntry(NULL, "example.com", 11, ASN_DNS_TYPE, &list) != 0) {
+        // error adding alt name
+    }
+    // ... encode with wc_FlattenAltNames, then:
+    FreeAltNames(list, NULL);
+    \endcode
+
+    \note This helper (along with wc_FlattenAltNames and FreeAltNames) is
+    exported from the library only when WOLFSSL_PUBLIC_ASN, OPENSSL_EXTRA,
+    OPENSSL_EXTRA_X509_SMALL, or WOLFSSL_TEST_CERT is defined; its prototype
+    lives in wolfssl/wolfcrypt/asn.h (not asn_public.h) because it uses the
+    DNS_entry type.
+
+    \note This function additionally requires WOLFSSL_ASN_TEMPLATE (its
+    internal SetDNSEntry/AddDNSEntryToList helpers are template-only), on top of
+    the WOLFSSL_CERT_GEN && WOLFSSL_ALT_NAMES gating shared with its companions
+    wc_FlattenAltNames and wc_SetAltNamesFromList, which do not require
+    WOLFSSL_ASN_TEMPLATE. Because this builder is the more restrictive of the
+    set, a DNS_entry list built here can always be encoded by a public API in
+    the same build; in non-template builds the public list can only be sourced
+    from a parsed DecodedCert.altNames.
+
+    \sa wc_FlattenAltNames
+    \sa FreeAltNames
+*/
+int wc_SetDNSEntry(void* heap, const char* str, int strLen, int type,
+                   DNS_entry** entries);
+
+/*!
+    \ingroup ASN
+
+    \brief This function encodes a linked list of subject alternative name
+    entries into the DER GeneralNames SEQUENCE used as the value of the
+    subjectAltName certificate extension. The output is suitable for assigning
+    to Cert.altNames (with the return value stored in Cert.altNamesSz) prior to
+    signing.
+
+    \return >0 the number of bytes written to output (the full SEQUENCE,
+    including its tag and length).
+    \return 0 Returned when names is NULL (nothing to encode).
+    \return BAD_FUNC_ARG Returned if output is NULL.
+    \return BUFFER_E Returned if output is too small to hold the encoding.
+
+    \param output buffer that receives the DER GeneralNames SEQUENCE; size it to
+    hold the full extension value (e.g. CTC_MAX_ALT_SIZE)
+    \param outputSz capacity of output in bytes
+    \param names head of the alt-name linked list to encode (e.g. built with
+    wc_SetDNSEntry, or taken from a parsed DecodedCert.altNames)
+
+    _Example_
+    \code
+    Cert cert;
+    DNS_entry* list = NULL;
+    // ... populate list with wc_SetDNSEntry ...
+    int n = wc_FlattenAltNames(cert.altNames, sizeof(cert.altNames), list);
+    if (n < 0) {
+        // error encoding alt names
+    }
+    cert.altNamesSz = n;
+    FreeAltNames(list, NULL);
+    \endcode
+
+    \note This helper (along with wc_SetDNSEntry and FreeAltNames) is exported
+    from the library only when WOLFSSL_PUBLIC_ASN, OPENSSL_EXTRA,
+    OPENSSL_EXTRA_X509_SMALL, or WOLFSSL_TEST_CERT is defined; its prototype
+    lives in wolfssl/wolfcrypt/asn.h (not asn_public.h) because it uses the
+    DNS_entry type.
+
+    \sa wc_SetDNSEntry
+    \sa wc_SetAltNamesFromList
+    \sa FreeAltNames
+    \sa wc_SetAltNamesBuffer
+*/
+int wc_FlattenAltNames(byte* output, word32 outputSz, const DNS_entry* names);
+
+/*!
+    \ingroup ASN
+
+    \brief This function encodes a linked list of subject alternative name
+    entries directly into a Cert structure, ready for signing. It is a
+    convenience wrapper around wc_FlattenAltNames: the list is encoded into
+    cert->altNames and the encoded length is stored in cert->altNamesSz, so the
+    caller does not have to manage the buffer or size bookkeeping. The supplied
+    list is not consumed and must still be freed by the caller with
+    FreeAltNames.
+
+    \return 0 Returned on success.
+    \return BAD_FUNC_ARG Returned if cert is NULL.
+    \return BUFFER_E Returned if the encoded names do not fit in cert->altNames.
+
+    \param cert pointer to the Cert whose altNames/altNamesSz fields are set
+    \param names head of the alt-name linked list to encode (e.g. built with
+    wc_SetDNSEntry, or taken from a parsed DecodedCert.altNames); may be NULL,
+    in which case cert->altNamesSz is set to 0
+
+    _Example_
+    \code
+    Cert cert;
+    DNS_entry* list = NULL;
+    wc_InitCert(&cert);
+    // ... populate list with wc_SetDNSEntry ...
+    if (wc_SetAltNamesFromList(&cert, list) != 0) {
+        // error encoding alt names
+    }
+    FreeAltNames(list, NULL);
+    // ... wc_MakeCert / wc_SignCert ...
+    \endcode
+
+    \note This helper (along with wc_SetDNSEntry, wc_FlattenAltNames, and
+    FreeAltNames) is exported from the library only when WOLFSSL_PUBLIC_ASN,
+    OPENSSL_EXTRA, OPENSSL_EXTRA_X509_SMALL, or WOLFSSL_TEST_CERT is defined;
+    its prototype lives in wolfssl/wolfcrypt/asn.h (not asn_public.h) because it
+    uses the DNS_entry type. Its DER-input sibling wc_SetAltNamesBuffer is
+    always exported.
+
+    \sa wc_SetDNSEntry
+    \sa wc_FlattenAltNames
+    \sa wc_SetAltNamesBuffer
+    \sa FreeAltNames
+*/
+int wc_SetAltNamesFromList(Cert* cert, const DNS_entry* names);
 
 /*!
     \ingroup ASN
@@ -801,7 +1283,7 @@ WOLFSSL_API int  wc_SetAltNamesBuffer(Cert*, const byte*, int);
 
     \sa wc_InitCert
 */
-WOLFSSL_API int  wc_SetDatesBuffer(Cert*, const byte*, int);
+int  wc_SetDatesBuffer(Cert* cert, const byte* der, int derSz);
 
 /*!
     \ingroup ASN
@@ -835,8 +1317,34 @@ WOLFSSL_API int  wc_SetDatesBuffer(Cert*, const byte*, int);
     \sa wc_SetAuthKeyId
     \sa wc_SetAuthKeyIdFromCert
 */
-WOLFSSL_API int wc_SetAuthKeyIdFromPublicKey(Cert *cert, RsaKey *rsakey,
+int wc_SetAuthKeyIdFromPublicKey(Cert *cert, RsaKey *rsakey,
                                              ecc_key *eckey);
+
+/*!
+    \ingroup ASN
+    \brief Sets authority key ID from public key with generic key type.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG if parameters invalid
+    \return MEMORY_E if memory allocation fails
+
+    \param cert Certificate structure
+    \param keyType Key type (RSA_TYPE, ECC_TYPE, ED25519_TYPE, etc.)
+    \param key Pointer to key structure
+
+    _Example_
+    \code
+    Cert myCert;
+    wc_InitCert(&myCert);
+    RsaKey key;
+    int ret = wc_SetAuthKeyIdFromPublicKey_ex(&myCert, RSA_TYPE,
+                                              &key);
+    \endcode
+
+    \sa wc_SetAuthKeyIdFromPublicKey
+*/
+int wc_SetAuthKeyIdFromPublicKey_ex(Cert *cert, int keyType,
+                                    void* key);
 
 /*!
     \ingroup ASN
@@ -866,7 +1374,7 @@ WOLFSSL_API int wc_SetAuthKeyIdFromPublicKey(Cert *cert, RsaKey *rsakey,
     \sa wc_SetAuthKeyIdFromPublicKey
     \sa wc_SetAuthKeyId
 */
-WOLFSSL_API int wc_SetAuthKeyIdFromCert(Cert *cert, const byte *der, int derSz);
+int wc_SetAuthKeyIdFromCert(Cert *cert, const byte *der, int derSz);
 
 /*!
     \ingroup ASN
@@ -895,7 +1403,7 @@ WOLFSSL_API int wc_SetAuthKeyIdFromCert(Cert *cert, const byte *der, int derSz);
     \sa wc_SetAuthKeyIdFromPublicKey
     \sa wc_SetAuthKeyIdFromCert
 */
-WOLFSSL_API int wc_SetAuthKeyId(Cert *cert, const char* file);
+int wc_SetAuthKeyId(Cert *cert, const char* file);
 
 /*!
     \ingroup ASN
@@ -903,7 +1411,7 @@ WOLFSSL_API int wc_SetAuthKeyId(Cert *cert, const char* file);
     \brief Set SKID from RSA or ECC public key.
 
     \return 0 Success
-    \return BAD_FUNC_ARG Returned if cert or rsakey and eckey is null.
+    \return BAD_FUNC_ARG Returned if cert or rsakey and eckey are null.
     \return MEMORY_E Returned if there is an error allocating memory.
     \return PUBLIC_KEY_E Returned if there is an error getting the public key.
 
@@ -926,8 +1434,35 @@ WOLFSSL_API int wc_SetAuthKeyId(Cert *cert, const char* file);
 
     \sa wc_SetSubjectKeyId
 */
-WOLFSSL_API int wc_SetSubjectKeyIdFromPublicKey(Cert *cert, RsaKey *rsakey,
+int wc_SetSubjectKeyIdFromPublicKey(Cert *cert, RsaKey *rsakey,
                                                 ecc_key *eckey);
+
+/*!
+    \ingroup ASN
+    \brief Sets subject key ID from public key with generic key type.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG if parameters invalid
+    \return MEMORY_E if memory allocation fails
+    \return PUBLIC_KEY_E if error getting public key
+
+    \param cert Certificate structure
+    \param keyType Key type (RSA_TYPE, ECC_TYPE, ED25519_TYPE, etc.)
+    \param key Pointer to key structure
+
+    _Example_
+    \code
+    Cert myCert;
+    wc_InitCert(&myCert);
+    EccKey key;
+    int ret = wc_SetSubjectKeyIdFromPublicKey_ex(&myCert, ECC_TYPE,
+                                                 &key);
+    \endcode
+
+    \sa wc_SetSubjectKeyIdFromPublicKey
+*/
+int wc_SetSubjectKeyIdFromPublicKey_ex(Cert *cert, int keyType,
+                                       void* key);
 
 /*!
     \ingroup ASN
@@ -957,7 +1492,7 @@ WOLFSSL_API int wc_SetSubjectKeyIdFromPublicKey(Cert *cert, RsaKey *rsakey,
 
     \sa wc_SetSubjectKeyIdFromPublicKey
 */
-WOLFSSL_API int wc_SetSubjectKeyId(Cert *cert, const char* file);
+int wc_SetSubjectKeyId(Cert *cert, const char* file);
 
 /*!
     \ingroup RSA
@@ -991,7 +1526,59 @@ WOLFSSL_API int wc_SetSubjectKeyId(Cert *cert, const char* file);
     \sa wc_InitCert
     \sa wc_MakeRsaKey
 */
-WOLFSSL_API int wc_SetKeyUsage(Cert *cert, const char *value);
+int wc_SetKeyUsage(Cert *cert, const char *value);
+
+/*!
+    \ingroup ASN
+    \brief Sets extended key usage using comma-delimited string.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG if parameters invalid
+    \return MEMORY_E if memory allocation fails
+
+    \param cert Certificate structure
+    \param value Comma-delimited string of extended key usage values
+
+    _Example_
+    \code
+    Cert myCert;
+    wc_InitCert(&myCert);
+    int ret = wc_SetExtKeyUsage(&myCert,
+                                "serverAuth,clientAuth");
+    \endcode
+
+    \sa wc_SetKeyUsage
+    \sa wc_SetExtKeyUsageOID
+*/
+int wc_SetExtKeyUsage(Cert *cert, const char *value);
+
+/*!
+    \ingroup ASN
+    \brief Sets extended key usage using OID string.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG if parameters invalid
+    \return MEMORY_E if memory allocation fails
+
+    \param cert Certificate structure
+    \param oid OID string
+    \param sz Length of OID string
+    \param idx Index for multiple OIDs
+    \param heap Heap hint for memory allocation
+
+    _Example_
+    \code
+    Cert myCert;
+    wc_InitCert(&myCert);
+    const char* oid = "1.3.6.1.5.5.7.3.1";
+    int ret = wc_SetExtKeyUsageOID(&myCert, oid, strlen(oid),
+                                   0, NULL);
+    \endcode
+
+    \sa wc_SetExtKeyUsage
+*/
+int wc_SetExtKeyUsageOID(Cert *cert, const char *oid, word32 sz,
+                         byte idx, void* heap);
 
 /*!
     \ingroup ASN
@@ -1021,8 +1608,33 @@ WOLFSSL_API int wc_SetKeyUsage(Cert *cert, const char *value);
 
     \sa wc_PubKeyPemToDer
 */
-WOLFSSL_API int wc_PemPubKeyToDer(const char* fileName,
+int wc_PemPubKeyToDer(const char* fileName,
                                        unsigned char* derBuf, int derSz);
+
+/*!
+    \ingroup ASN
+    \brief Loads PEM public key from file to DER buffer.
+
+    \return 0 on success
+    \return negative on error
+
+    \param fileName Path to PEM file
+    \param der Pointer to DerBuffer pointer to allocate
+
+    _Example_
+    \code
+    DerBuffer* der = NULL;
+    int ret = wc_PemPubKeyToDer_ex("pubkey.pem", &der);
+    if (ret == 0) {
+        // Use der->buffer and der->length
+        wc_FreeDer(&der);
+    }
+    \endcode
+
+    \sa wc_PemPubKeyToDer
+    \sa wc_FreeDer
+*/
+int wc_PemPubKeyToDer_ex(const char* fileName, DerBuffer** der);
 
 /*!
     \ingroup ASN
@@ -1053,8 +1665,113 @@ WOLFSSL_API int wc_PemPubKeyToDer(const char* fileName,
 
     \sa wc_PemPubKeyToDer
 */
-WOLFSSL_API int wc_PubKeyPemToDer(const unsigned char*, int,
-                                      unsigned char*, int);
+int wc_PubKeyPemToDer(const unsigned char* pem, int pemSz,
+                                      unsigned char* buff, int buffSz);
+
+/*!
+    \ingroup ASN
+    \brief Gets PEM header and footer strings for given type.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG if parameters invalid
+
+    \param type PEM type (CERT_TYPE, PRIVATEKEY_TYPE, etc.)
+    \param header Pointer to header string pointer
+    \param footer Pointer to footer string pointer
+
+    _Example_
+    \code
+    const char* header;
+    const char* footer;
+    int ret = wc_PemGetHeaderFooter(CERT_TYPE, &header, &footer);
+    \endcode
+
+    \sa wc_PemToDer
+*/
+int wc_PemGetHeaderFooter(int type, const char** header,
+                          const char** footer);
+
+/*!
+    \ingroup ASN
+    \brief Allocates DER buffer with specified length and type.
+
+    \return 0 on success
+    \return BAD_FUNC_ARG if pDer is NULL
+    \return MEMORY_E if allocation fails
+
+    \param pDer Pointer to DerBuffer pointer to allocate
+    \param length Length of buffer to allocate
+    \param type Buffer type for tracking
+    \param heap Heap hint for memory allocation
+
+    _Example_
+    \code
+    DerBuffer* der = NULL;
+    int ret = wc_AllocDer(&der, 1024, CERT_TYPE, NULL);
+    if (ret == 0) {
+        // Use der->buffer
+        wc_FreeDer(&der);
+    }
+    \endcode
+
+    \sa wc_FreeDer
+*/
+int wc_AllocDer(DerBuffer** pDer, word32 length, int type,
+                void* heap);
+
+/*!
+    \ingroup ASN
+    \brief Frees DER buffer allocated by wc_AllocDer or wc_PemToDer.
+
+    \param pDer Pointer to DerBuffer pointer to free
+
+    _Example_
+    \code
+    DerBuffer* der = NULL;
+    wc_AllocDer(&der, 1024, CERT_TYPE, NULL);
+    // Use der
+    wc_FreeDer(&der);
+    \endcode
+
+    \sa wc_AllocDer
+    \sa wc_PemToDer
+*/
+void wc_FreeDer(DerBuffer** pDer);
+
+/*!
+    \ingroup ASN
+    \brief Converts PEM to DER format with encryption info support.
+
+    \return 0 on success
+    \return negative on error
+
+    \param buff PEM buffer
+    \param longSz Size of PEM buffer
+    \param type PEM type (CERT_TYPE, PRIVATEKEY_TYPE, etc.)
+    \param pDer Pointer to DerBuffer pointer to allocate
+    \param heap Heap hint for memory allocation
+    \param info Encryption info for encrypted PEM
+    \param keyFormat Pointer to store key format
+
+    _Example_
+    \code
+    const unsigned char* pem;
+    DerBuffer* der = NULL;
+    EncryptedInfo info;
+    int keyFormat;
+    int ret = wc_PemToDer(pem, pemSz, PRIVATEKEY_TYPE, &der,
+                          NULL, &info, &keyFormat);
+    if (ret == 0) {
+        wc_FreeDer(&der);
+    }
+    \endcode
+
+    \sa wc_PemCertToDer
+    \sa wc_FreeDer
+*/
+int wc_PemToDer(const unsigned char* buff, long longSz, int type,
+                DerBuffer** pDer, void* heap, EncryptedInfo* info,
+                int* keyFormat);
 
 /*!
     \ingroup ASN
@@ -1088,7 +1805,7 @@ WOLFSSL_API int wc_PubKeyPemToDer(const unsigned char*, int,
 
     \sa none
 */
-WOLFSSL_API
+
 int wc_PemCertToDer(const char* fileName, unsigned char* derBuf, int derSz);
 
 /*!
@@ -1131,8 +1848,8 @@ int wc_PemCertToDer(const char* fileName, unsigned char* derBuf, int derSz);
 
     \sa wc_PemCertToDer
 */
-WOLFSSL_API int wc_DerToPem(const byte* der, word32 derSz, byte* output,
-                                word32 outputSz, int type);
+int wc_DerToPem(const byte* der, word32 derSz, byte* output,
+                                word32 outSz, int type);
 
 /*!
     \ingroup ASN
@@ -1159,7 +1876,7 @@ WOLFSSL_API int wc_DerToPem(const byte* der, word32 derSz, byte* output,
     formatted certificate
     \param outSz size of the buffer in which to store the pem formatted
     certificate
-    \param cipher_inf Additional cipher information.
+    \param cipher_info Additional cipher information.
     \param type the type of certificate to generate. Valid types are:
     CERT_TYPE, PRIVATEKEY_TYPE, ECC_PRIVATEKEY_TYPE, and CERTREQ_TYPE.
 
@@ -1171,13 +1888,13 @@ WOLFSSL_API int wc_DerToPem(const byte* der, word32 derSz, byte* output,
 
     word32 pemSz;
     byte* cipher_info[] { Additional cipher info. }
-    pemSz = wc_DerToPemEx(der, derSz,pemFormatted,FOURK_BUF, ,CERT_TYPE);
+    pemSz = wc_DerToPemEx(der, derSz, pemFormatted, FOURK_BUF, cipher_info, CERT_TYPE);
     \endcode
 
     \sa wc_PemCertToDer
 */
-WOLFSSL_API int wc_DerToPemEx(const byte* der, word32 derSz, byte* output,
-                                word32 outputSz, byte *cipherIno, int type);
+int wc_DerToPemEx(const byte* der, word32 derSz, byte* output,
+                                word32 outSz, byte *cipher_info, int type);
 
 /*!
     \ingroup CertsKeys
@@ -1214,8 +1931,8 @@ WOLFSSL_API int wc_DerToPemEx(const byte* der, word32 derSz, byte* output,
 
     \sa wc_PemToDer
 */
-WOLFSSL_API int wc_KeyPemToDer(const unsigned char*, int,
-                                    unsigned char*, int, const char*);
+int wc_KeyPemToDer(const unsigned char* pem, int pemSz,
+                                    unsigned char* buff, int buffSz, const char* pass);
 
 /*!
     \ingroup CertsKeys
@@ -1246,8 +1963,140 @@ WOLFSSL_API int wc_KeyPemToDer(const unsigned char*, int,
 
     \sa wc_PemToDer
 */
-WOLFSSL_API int wc_CertPemToDer(const unsigned char*, int,
-                                     unsigned char*, int, int);
+int wc_CertPemToDer(const unsigned char* pem, int pemSz,
+                    unsigned char* buff, int buffSz, int type);
+
+/*!
+    \ingroup ASN
+    \brief Loads PEM certificate from file to DER buffer.
+
+    \return 0 on success
+    \return negative on error
+
+    \param fileName Path to PEM certificate file
+    \param der Pointer to DerBuffer pointer to allocate
+
+    _Example_
+    \code
+    DerBuffer* der = NULL;
+    int ret = wc_PemCertToDer_ex("cert.pem", &der);
+    if (ret == 0) {
+        // Use der->buffer and der->length
+        wc_FreeDer(&der);
+    }
+    \endcode
+
+    \sa wc_CertPemToDer
+    \sa wc_FreeDer
+*/
+int wc_PemCertToDer_ex(const char* fileName, DerBuffer** der);
+
+/*!
+    \ingroup ASN
+    \brief Adds PKCS padding to buffer for RSA encryption.
+
+    \return Padded size on success
+    \return 0 on error
+
+    \param buf Buffer to pad
+    \param sz Current size of data in buffer
+    \param blockSz Block size for padding
+
+    _Example_
+    \code
+    byte buffer[256];
+    word32 dataSz = 100;
+    word32 paddedSz = wc_PkcsPad(buffer, dataSz, 256);
+    \endcode
+
+    \sa wc_RsaPublicEncrypt
+*/
+word32 wc_PkcsPad(byte* buf, word32 sz, word32 blockSz);
+
+/*!
+    \ingroup RSA
+    \brief Decodes RSA public key and extracts modulus and exponent.
+
+    \return 0 on success
+    \return negative on error
+
+    \param input DER encoded RSA public key buffer
+    \param inOutIdx Pointer to index in buffer
+    \param inSz Size of input buffer
+    \param n Pointer to modulus pointer
+    \param nSz Pointer to modulus size
+    \param e Pointer to exponent pointer
+    \param eSz Pointer to exponent size
+
+    _Example_
+    \code
+    const byte* n;
+    const byte* e;
+    word32 nSz, eSz, idx = 0;
+    int ret = wc_RsaPublicKeyDecode_ex(derBuf, &idx, derSz,
+                                       &n, &nSz, &e, &eSz);
+    \endcode
+
+    \sa wc_RsaPublicKeyDecode
+*/
+int wc_RsaPublicKeyDecode_ex(const byte* input, word32* inOutIdx,
+                              word32 inSz, const byte** n, word32* nSz,
+                              const byte** e, word32* eSz);
+
+/*!
+    \ingroup RSA
+    \brief Calculates DER encoded RSA public key size.
+
+    \return Size on success
+    \return negative on error
+
+    \param key RSA key structure
+    \param with_header Include sequence header if non-zero
+
+    _Example_
+    \code
+    RsaKey key;
+    int derSz = wc_RsaPublicKeyDerSize(&key, 1);
+    \endcode
+
+    \sa wc_RsaKeyToDer
+*/
+int wc_RsaPublicKeyDerSize(RsaKey* key, int with_header);
+
+/*!
+    \ingroup RSA
+    \brief Validates DER encoded RSA private key format. This function
+    validates the ASN.1 syntax and structure of the RSA private key
+    (sequences, integer tags, and lengths) without loading the key values
+    into an RsaKey structure. It does not perform mathematical validation
+    of the RSA key parameters (e.g., checking if p and q are prime, or if
+    the key components satisfy RSA mathematical relationships).
+
+    \return 0 on success (valid ASN.1 structure)
+    \return ASN_PARSE_E if ASN.1 parsing fails
+    \return ASN_RSA_KEY_E if RSA key structure is invalid
+    \return BAD_FUNC_ARG if parameters are invalid
+
+    \param input DER encoded RSA private key buffer
+    \param inOutIdx Pointer to index in buffer (updated on success)
+    \param keySz Pointer to store modulus size in bytes
+    \param inSz Size of input buffer
+
+    _Example_
+    \code
+    word32 idx = 0;
+    int keySz;
+    int ret = wc_RsaPrivateKeyValidate(derBuf, &idx, &keySz,
+                                       derSz);
+    if (ret == 0) {
+        // ASN.1 structure is valid, keySz contains modulus size
+    }
+    \endcode
+
+    \sa wc_RsaPrivateKeyDecode
+*/
+int wc_RsaPrivateKeyValidate(const byte* input, word32* inOutIdx,
+                              int* keySz, word32 inSz);
 
 /*!
     \ingroup CertsKeys
@@ -1269,8 +2118,147 @@ WOLFSSL_API int wc_CertPemToDer(const unsigned char*, int,
 
     \sa wc_GetPubKeyDerFromCert
 */
-WOLFSSL_API int wc_GetPubKeyDerFromCert(struct DecodedCert* cert,
+int wc_GetPubKeyDerFromCert(struct DecodedCert* cert,
                                         byte* derKey, word32* derKeySz);
+
+/*!
+    \ingroup DSA
+    \brief Decodes DSA parameters from DER format.
+
+    \return 0 on success
+    \return negative on error
+
+    \param input DER encoded DSA parameters buffer
+    \param inOutIdx Pointer to index in buffer
+    \param key DSA key structure to store parameters
+    \param inSz Size of input buffer
+
+    _Example_
+    \code
+    DsaKey key;
+    word32 idx = 0;
+    int ret = wc_DsaParamsDecode(derBuf, &idx, &key, derSz);
+    \endcode
+
+    \sa wc_DsaKeyToParamsDer
+*/
+int wc_DsaParamsDecode(const byte* input, word32* inOutIdx,
+                       DsaKey* key, word32 inSz);
+
+/*!
+    \ingroup DSA
+    \brief Encodes DSA parameters to DER format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key DSA key structure with parameters
+    \param output Buffer for DER encoded parameters
+    \param outLen Size of output buffer
+
+    _Example_
+    \code
+    DsaKey key;
+    byte der[1024];
+    int derSz = wc_DsaKeyToParamsDer(&key, der, sizeof(der));
+    \endcode
+
+    \sa wc_DsaParamsDecode
+*/
+int wc_DsaKeyToParamsDer(DsaKey* key, byte* output, word32 outLen);
+
+/*!
+    \ingroup DSA
+    \brief Encodes DSA parameters to DER with size output.
+
+    \return 0 on success
+    \return negative on error
+
+    \param key DSA key structure with parameters
+    \param output Buffer for DER encoded parameters
+    \param outLen Pointer to buffer size (in/out)
+
+    _Example_
+    \code
+    DsaKey key;
+    byte der[1024];
+    word32 derSz = sizeof(der);
+    int ret = wc_DsaKeyToParamsDer_ex(&key, der, &derSz);
+    \endcode
+
+    \sa wc_DsaKeyToParamsDer
+*/
+int wc_DsaKeyToParamsDer_ex(DsaKey* key, byte* output,
+                             word32* outLen);
+
+/*!
+    \ingroup DH
+    \brief Encodes DH parameters to DER format.
+
+    \return 0 on success
+    \return negative on error
+
+    \param key DH key structure with parameters
+    \param out Buffer for DER encoded parameters
+    \param outSz Pointer to buffer size (in/out)
+
+    _Example_
+    \code
+    DhKey key;
+    byte der[1024];
+    word32 derSz = sizeof(der);
+    int ret = wc_DhParamsToDer(&key, der, &derSz);
+    \endcode
+
+    \sa wc_DhKeyToDer
+*/
+int wc_DhParamsToDer(DhKey* key, byte* out, word32* outSz);
+
+/*!
+    \ingroup DH
+    \brief Encodes DH public key to DER format.
+
+    \return 0 on success
+    \return negative on error
+
+    \param key DH key structure with public key
+    \param out Buffer for DER encoded public key
+    \param outSz Pointer to buffer size (in/out)
+
+    _Example_
+    \code
+    DhKey key;
+    byte der[1024];
+    word32 derSz = sizeof(der);
+    int ret = wc_DhPubKeyToDer(&key, der, &derSz);
+    \endcode
+
+    \sa wc_DhKeyToDer
+*/
+int wc_DhPubKeyToDer(DhKey* key, byte* out, word32* outSz);
+
+/*!
+    \ingroup DH
+    \brief Encodes DH private key to DER format.
+
+    \return 0 on success
+    \return negative on error
+
+    \param key DH key structure with private key
+    \param out Buffer for DER encoded private key
+    \param outSz Pointer to buffer size (in/out)
+
+    _Example_
+    \code
+    DhKey key;
+    byte der[1024];
+    word32 derSz = sizeof(der);
+    int ret = wc_DhPrivKeyToDer(&key, der, &derSz);
+    \endcode
+
+    \sa wc_DhKeyToDer
+*/
+int wc_DhPrivKeyToDer(DhKey* key, byte* out, word32* outSz);
 
 /*!
     \ingroup ASN
@@ -1329,8 +2317,119 @@ WOLFSSL_API int wc_GetPubKeyDerFromCert(struct DecodedCert* cert,
 
     \sa wc_RSA_PrivateKeyDecode
 */
-WOLFSSL_API int wc_EccPrivateKeyDecode(const byte*, word32*,
-                                           ecc_key*, word32);
+int wc_EccPrivateKeyDecode(const byte* input, word32* inOutIdx,
+                                           ecc_key* key, word32 inSz);
+
+/*!
+    \ingroup ECC
+    \brief Encodes ECC private key to DER format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key ECC key structure with private key
+    \param output Buffer for DER encoded private key
+    \param outLen Size of output buffer
+
+    _Example_
+    \code
+    ecc_key key;
+    byte der[1024];
+    int derSz = wc_EccPrivateKeyToDer(&key, der, sizeof(der));
+    \endcode
+
+    \sa wc_EccPrivateKeyDecode
+*/
+int wc_EccPrivateKeyToDer(ecc_key* key, byte* output,
+                          word32 outLen);
+
+/*!
+    \ingroup ECC
+    \brief Calculates DER encoded ECC key size.
+
+    \return Size on success
+    \return negative on error
+
+    \param key ECC key structure
+    \param pub Non-zero to include public key
+
+    _Example_
+    \code
+    ecc_key key;
+    int derSz = wc_EccKeyDerSize(&key, 1);
+    \endcode
+
+    \sa wc_EccPrivateKeyToDer
+*/
+int wc_EccKeyDerSize(ecc_key* key, int pub);
+
+/*!
+    \ingroup ECC
+    \brief Encodes ECC private key to PKCS#8 format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key ECC key structure with private key
+    \param output Buffer for PKCS#8 encoded key
+    \param outLen Pointer to buffer size (in/out)
+
+    _Example_
+    \code
+    ecc_key key;
+    byte pkcs8[1024];
+    word32 pkcs8Sz = sizeof(pkcs8);
+    int ret = wc_EccPrivateKeyToPKCS8(&key, pkcs8, &pkcs8Sz);
+    \endcode
+
+    \sa wc_EccPrivateKeyToDer
+*/
+int wc_EccPrivateKeyToPKCS8(ecc_key* key, byte* output,
+                             word32* outLen);
+
+/*!
+    \ingroup ECC
+    \brief Encodes ECC key pair to PKCS#8 format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key ECC key structure with key pair
+    \param output Buffer for PKCS#8 encoded key
+    \param outLen Pointer to buffer size (in/out)
+
+    _Example_
+    \code
+    ecc_key key;
+    byte pkcs8[1024];
+    word32 pkcs8Sz = sizeof(pkcs8);
+    int ret = wc_EccKeyToPKCS8(&key, pkcs8, &pkcs8Sz);
+    \endcode
+
+    \sa wc_EccPrivateKeyToPKCS8
+*/
+int wc_EccKeyToPKCS8(ecc_key* key, byte* output,
+                     word32* outLen);
+
+/*!
+    \ingroup ECC
+    \brief Calculates DER encoded ECC public key size.
+
+    \return Size on success
+    \return negative on error
+
+    \param key ECC key structure
+    \param with_AlgCurve Include algorithm and curve if non-zero
+
+    _Example_
+    \code
+    ecc_key key;
+    int derSz = wc_EccPublicKeyDerSize(&key, 1);
+    \endcode
+
+    \sa wc_EccPublicKeyToDer
+*/
+int wc_EccPublicKeyDerSize(ecc_key* key, int with_AlgCurve);
 
 /*!
     \ingroup ASN
@@ -1339,7 +2438,7 @@ WOLFSSL_API int wc_EccPrivateKeyDecode(const byte*, word32*,
 
     \return Success On successfully writing the ECC key to der format,
     returns the length written to the buffer
-    \return BAD_FUNC_ARG Returned if key or output is null, or inLen equals zero
+    \return BAD_FUNC_ARG Returned if key or output is null, or outLen equals zero
     \return MEMORY_E Returned if there is an error allocating memory
     with XMALLOC
     \return BUFFER_E Returned if the converted certificate is too large
@@ -1355,7 +2454,7 @@ WOLFSSL_API int wc_EccPrivateKeyDecode(const byte*, word32*,
 
     \param key pointer to the buffer containing the input ecc key
     \param output pointer to a buffer in which to store the der formatted key
-    \param inLen the length of the buffer in which to store the
+    \param outLen the length of the buffer in which to store the
     der formatted key
 
     _Example_
@@ -1374,7 +2473,7 @@ WOLFSSL_API int wc_EccPrivateKeyDecode(const byte*, word32*,
 
     \sa wc_RsaKeyToDer
 */
-WOLFSSL_API int wc_EccKeyToDer(ecc_key*, byte* output, word32 inLen);
+int wc_EccKeyToDer(ecc_key* key, byte* output, word32 outLen);
 
 /*!
     \ingroup ASN
@@ -1408,16 +2507,16 @@ WOLFSSL_API int wc_EccKeyToDer(ecc_key*, byte* output, word32 inLen);
 
     \sa wc_ecc_import_x963
 */
-WOLFSSL_API int wc_EccPublicKeyDecode(const byte*, word32*,
-                                              ecc_key*, word32);
+int wc_EccPublicKeyDecode(const byte* input, word32* inOutIdx,
+                          ecc_key* key, word32 inSz);
 
 /*!
     \ingroup ASN
 
     \brief This function converts the ECC public key to DER format. It
     returns the size of buffer used. The public ECC key in DER format is stored
-    in output buffer. with_AlgCurve is a flag for when to include a header that
-    has the Algorithm and Curve information.
+    in output buffer. The with_AlgCurve flag will include a header that
+    has the Algorithm and Curve information
 
     \return >0 Success, size of buffer used
     \return BAD_FUNC_ARG Returned if output or key is null.
@@ -1426,7 +2525,7 @@ WOLFSSL_API int wc_EccPublicKeyDecode(const byte*, word32*,
 
     \param key Pointer to ECC key
     \param output Pointer to output buffer to write to.
-    \param inLen Size of buffer.
+    \param outLen Size of buffer.
     \param with_AlgCurve a flag for when to include a header that has the
     Algorithm and Curve information.
 
@@ -1434,9 +2533,9 @@ WOLFSSL_API int wc_EccPublicKeyDecode(const byte*, word32*,
     \code
     ecc_key key;
     wc_ecc_init(&key);
-    WC_WC_RNG rng;
+    WC_RNG rng;
     wc_InitRng(&rng);
-    wc_ecc_make_key(&rng, 24, &key);
+    wc_ecc_make_key(&rng, 32, &key);
     int derSz = // Some appropriate size for der;
     byte der[derSz];
 
@@ -1449,8 +2548,683 @@ WOLFSSL_API int wc_EccPublicKeyDecode(const byte*, word32*,
     \sa wc_EccKeyToDer
     \sa wc_EccPrivateKeyDecode
 */
-WOLFSSL_API int wc_EccPublicKeyToDer(ecc_key*, byte* output,
-                                         word32 inLen, int with_AlgCurve);
+int wc_EccPublicKeyToDer(ecc_key* key, byte* output,
+                                         word32 outLen, int with_AlgCurve);
+
+/*!
+    \ingroup ASN
+
+    \brief This function converts the ECC public key to DER format. It
+    returns the size of buffer used. The public ECC key in DER format is stored
+    in output buffer. The with_AlgCurve flag will include a header that
+    has the Algorithm and Curve information. The comp parameter determines if
+    the public key will be exported as compressed.
+
+    \return >0 Success, size of buffer used
+    \return BAD_FUNC_ARG Returned if output or key is null.
+    \return LENGTH_ONLY_E Error in getting ECC public key size.
+    \return BUFFER_E Returned when output buffer is too small.
+
+    \param key Pointer to ECC key
+    \param output Pointer to output buffer to write to.
+    \param outLen Size of buffer.
+    \param with_AlgCurve a flag for when to include a header that has the
+    Algorithm and Curve information.
+    \param comp If 1 (non-zero) the ECC public key will be written in
+    compressed form. If 0 it will be written in an uncompressed format.
+
+    _Example_
+    \code
+    ecc_key key;
+    wc_ecc_init(&key);
+    WC_RNG rng;
+    wc_InitRng(&rng);
+    wc_ecc_make_key(&rng, 32, &key);
+    int derSz = // Some appropriate size for der;
+    byte der[derSz];
+
+    // Write out a compressed ECC key
+    if(wc_EccPublicKeyToDer_ex(&key, der, derSz, 1, 1) < 0)
+    {
+        // Error converting ECC public key to der
+    }
+    \endcode
+
+    \sa wc_EccKeyToDer
+    \sa wc_EccPublicKeyDecode
+*/
+int wc_EccPublicKeyToDer_ex(ecc_key* key, byte* output,
+                                     word32 outLen, int with_AlgCurve, int comp);
+
+
+/*!
+    \ingroup ASN
+
+    \brief This function decodes a Curve25519 private key (only) from a DER
+    encoded buffer
+
+    \return 0 Success
+    \return BAD_FUNC_ARG Returns if input, inOutIdx or key is null
+    \return ASN_PARSE_E Returns if there is an error parsing the DER encoded
+    data
+    \return ECC_BAD_ARG_E Returns if the key length is not CURVE25519_KEYSIZE or
+    the DER key contains other issues despite being properly formatted.
+    \return BUFFER_E Returns if the input buffer is too small to contain a
+    valid DER encoded key.
+
+    \param input Pointer to buffer containing DER encoded private key
+    \param inOutIdx Index to start reading input buffer from.  On output,
+    index is set to last position parsed of input buffer.
+    \param key Pointer to curve25519_key structure to store decoded key
+    \param inSz Size of input DER buffer
+
+    \sa wc_Curve25519KeyDecode
+    \sa wc_Curve25519PublicKeyDecode
+
+    _Example_
+    \code
+    byte der[] = { // DER encoded key };
+    word32 idx = 0;
+    curve25519_key key;
+    wc_curve25519_init(&key);
+
+    if (wc_Curve25519PrivateKeyDecode(der, &idx, &key, sizeof(der)) != 0) {
+        // Error decoding private key
+    }
+    \endcode
+*/
+int wc_Curve25519PrivateKeyDecode(const byte* input, word32* inOutIdx,
+                                  curve25519_key* key, word32 inSz);
+
+/*!
+    \ingroup ASN
+
+    \brief This function decodes a Curve25519 public key (only) from a DER
+    encoded buffer.
+
+    \return 0 Success
+    \return BAD_FUNC_ARG Returns if input, inOutIdx or key is null
+    \return ASN_PARSE_E Returns if there is an error parsing the DER encoded
+    data
+    \return ECC_BAD_ARG_E Returns if the key length is not CURVE25519_KEYSIZE or
+    the DER key contains other issues despite being properly formatted.
+    \return BUFFER_E Returns if the input buffer is too small to contain a
+    valid DER encoded key.
+
+    \param input Pointer to buffer containing DER encoded public key
+    \param inOutIdx Index to start reading input buffer from.  On output,
+    index is set to last position parsed of input buffer.
+    \param key Pointer to curve25519_key structure to store decoded key
+    \param inSz Size of input DER buffer
+
+    \sa wc_Curve25519KeyDecode
+    \sa wc_Curve25519PrivateKeyDecode
+
+    _Example_
+    \code
+    byte der[] = { // DER encoded key };
+    word32 idx = 0;
+    curve25519_key key;
+    wc_curve25519_init(&key);
+    if (wc_Curve25519PublicKeyDecode(der, &idx, &key, sizeof(der)) != 0) {
+        // Error decoding public key
+    }
+    \endcode
+*/
+int wc_Curve25519PublicKeyDecode(const byte* input, word32* inOutIdx,
+                                 curve25519_key* key, word32 inSz);
+
+/*!
+    \ingroup ASN
+
+    \brief This function decodes a Curve25519 key from a DER encoded buffer. It
+    can decode either a private key, a public key, or both.
+
+    \return 0 Success
+    \return BAD_FUNC_ARG Returns if input, inOutIdx or key is null
+    \return ASN_PARSE_E Returns if there is an error parsing the DER encoded
+    data
+    \return ECC_BAD_ARG_E Returns if the key length is not CURVE25519_KEYSIZE or
+    the DER key contains other issues despite being properly formatted.
+    \return BUFFER_E Returns if the input buffer is too small to contain a
+    valid DER encoded key.
+
+    \param input Pointer to buffer containing DER encoded key
+    \param inOutIdx Index to start reading input buffer from.  On output,
+    index is set to last position parsed of input buffer.
+    \param key Pointer to curve25519_key structure to store decoded key
+    \param inSz Size of input DER buffer
+
+    \sa wc_Curve25519PrivateKeyDecode
+    \sa wc_Curve25519PublicKeyDecode
+
+    _Example_
+    \code
+    byte der[] = { // DER encoded key };
+    word32 idx = 0;
+    curve25519_key key;
+    wc_curve25519_init(&key);
+    if (wc_Curve25519KeyDecode(der, &idx, &key, sizeof(der)) != 0) {
+        // Error decoding key
+    }
+    \endcode
+*/
+int wc_Curve25519KeyDecode(const byte* input, word32* inOutIdx,
+                           curve25519_key* key, word32 inSz);
+
+/*!
+    \ingroup ASN
+
+    \brief This function encodes a Curve25519 private key to DER format. If the
+    input key structure contains a public key, it will be ignored.
+
+    \return >0 Success, length of DER encoding
+    \return BAD_FUNC_ARG Returns if key or output is null
+    \return MEMORY_E Returns if there is an allocation failure
+    \return BUFFER_E Returns if output buffer is too small
+
+    \param key Pointer to curve25519_key structure containing private key to
+    encode
+    \param output Buffer to hold DER encoding
+    \param outLen Size of output buffer
+
+    \sa wc_Curve25519KeyToDer
+    \sa wc_Curve25519PublicKeyToDer
+
+    _Example_
+    \code
+    curve25519_key key;
+    wc_curve25519_init(&key);
+    ...
+    int derSz = 128; // Some appropriate size for output DER
+    byte der[derSz];
+    wc_Curve25519PrivateKeyToDer(&key, der, derSz);
+    \endcode
+*/
+int wc_Curve25519PrivateKeyToDer(curve25519_key* key, byte* output,
+                                 word32 outLen);
+
+/*!
+    \ingroup ASN
+
+    \brief This function encodes a Curve25519 public key to DER format. If the
+    input key structure contains a private key, it will be ignored.
+
+    \return >0 Success, length of DER encoding
+    \return BAD_FUNC_ARG Returns if key or output is null
+    \return MEMORY_E Returns if there is an allocation failure
+    \return BUFFER_E Returns if output buffer is too small
+
+    \param key Pointer to curve25519_key structure containing public key to
+    encode
+    \param output Buffer to hold DER encoding
+    \param outLen Size of output buffer
+    \param withAlg Whether to include algorithm identifier in the DER encoding
+
+    \sa wc_Curve25519KeyToDer
+    \sa wc_Curve25519PrivateKeyToDer
+
+    _Example_
+    \code
+    curve25519_key key;
+    wc_curve25519_init(&key);
+    ...
+    int derSz = 128; // Some appropriate size for output DER
+    byte der[derSz];
+    wc_Curve25519PublicKeyToDer(&key, der, derSz, 1);
+    \endcode
+*/
+int wc_Curve25519PublicKeyToDer(curve25519_key* key, byte* output, word32 outLen,
+                                int withAlg);
+
+/*!
+    \ingroup ASN
+
+    \brief This function encodes a Curve25519 key to DER format. It can encode
+    either a private key, a public key, or both.
+
+    \return >0 Success, length of DER encoding
+    \return BAD_FUNC_ARG Returns if key or output is null
+    \return MEMORY_E Returns if there is an allocation failure
+    \return BUFFER_E Returns if output buffer is too small
+
+    \param key Pointer to curve25519_key structure containing key to encode
+    \param output Buffer to hold DER encoding
+    \param outLen Size of output buffer
+    \param withAlg Whether to include algorithm identifier in the DER encoding
+
+    \sa wc_Curve25519PrivateKeyToDer
+    \sa wc_Curve25519PublicKeyToDer
+
+    _Example_
+    \code
+    curve25519_key key;
+    wc_curve25519_init(&key);
+    ...
+    int derSz = 128; // Some appropriate size for output DER
+    byte der[derSz];
+    wc_Curve25519KeyToDer(&key, der, derSz, 1);
+    \endcode
+*/
+int wc_Curve25519KeyToDer(curve25519_key* key, byte* output, word32 outLen,
+                          int withAlg);
+
+/*!
+    \ingroup Ed25519
+    \brief Decodes Ed25519 private key from DER format.
+
+    \return 0 on success
+    \return negative on error
+
+    \param input DER encoded Ed25519 private key buffer
+    \param inOutIdx Pointer to index in buffer
+    \param key Ed25519 key structure to store key
+    \param inSz Size of input buffer
+
+    _Example_
+    \code
+    ed25519_key key;
+    word32 idx = 0;
+    int ret = wc_Ed25519PrivateKeyDecode(derBuf, &idx, &key,
+                                         derSz);
+    \endcode
+
+    \sa wc_Ed25519PrivateKeyToDer
+    \sa wc_Ed25519PrivateKeyDecode_ex
+*/
+int wc_Ed25519PrivateKeyDecode(const byte* input, word32* inOutIdx,
+                                ed25519_key* key, word32 inSz);
+
+/*!
+    \ingroup Ed25519
+    \brief Decodes Ed25519 private key from DER format with control over
+    validation of a bundled public key. When the DER contains a public key
+    and trusted is 0, the public key is validated with
+    wc_ed25519_check_key(), including a check that it matches the private
+    key. When trusted is 1 all validation of the bundled public key is
+    skipped, so trusted should only be set with known-good key material.
+    wc_Ed25519PrivateKeyDecode() behaves as trusted set to 0.
+
+    \return 0 on success
+    \return negative on error
+
+    \param input DER encoded Ed25519 private key buffer
+    \param inOutIdx Pointer to index in buffer
+    \param key Ed25519 key structure to store key
+    \param inSz Size of input buffer
+    \param trusted Indicates whether the bundled public key data is trusted.
+    When 0, the public key is validated with wc_ed25519_check_key().
+    When 1, the public key is imported without any validation.
+
+    _Example_
+    \code
+    ed25519_key key;
+    word32 idx = 0;
+    // key material comes from this application's own storage
+    int ret = wc_Ed25519PrivateKeyDecode_ex(derBuf, &idx, &key,
+                                            derSz, 1);
+    \endcode
+
+    \sa wc_Ed25519PrivateKeyDecode
+    \sa wc_Ed25519PrivateKeyToDer
+    \sa wc_ed25519_import_private_key_ex
+*/
+int wc_Ed25519PrivateKeyDecode_ex(const byte* input, word32* inOutIdx,
+                                  ed25519_key* key, word32 inSz, int trusted);
+
+/*!
+    \ingroup Ed25519
+    \brief Decodes Ed25519 public key from DER format.
+
+    \return 0 on success
+    \return negative on error
+
+    \param input DER encoded Ed25519 public key buffer
+    \param inOutIdx Pointer to index in buffer
+    \param key Ed25519 key structure to store key
+    \param inSz Size of input buffer
+
+    _Example_
+    \code
+    ed25519_key key;
+    word32 idx = 0;
+    int ret = wc_Ed25519PublicKeyDecode(derBuf, &idx, &key,
+                                        derSz);
+    \endcode
+
+    \sa wc_Ed25519PublicKeyToDer
+*/
+int wc_Ed25519PublicKeyDecode(const byte* input, word32* inOutIdx,
+                               ed25519_key* key, word32 inSz);
+
+/*!
+    \ingroup Ed25519
+    \brief Encodes Ed25519 key to DER format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key Ed25519 key structure
+    \param output Buffer for DER encoded key
+    \param outLen Size of output buffer
+
+    _Example_
+    \code
+    ed25519_key key;
+    byte der[1024];
+    int derSz = wc_Ed25519KeyToDer(&key, der, sizeof(der));
+    \endcode
+
+    \sa wc_Ed25519PrivateKeyToDer
+*/
+int wc_Ed25519KeyToDer(const ed25519_key* key, byte* output,
+                       word32 outLen);
+
+/*!
+    \ingroup Ed25519
+    \brief Encodes Ed25519 private key to DER format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key Ed25519 key structure with private key
+    \param output Buffer for DER encoded private key
+    \param outLen Size of output buffer
+
+    _Example_
+    \code
+    ed25519_key key;
+    byte der[1024];
+    int derSz = wc_Ed25519PrivateKeyToDer(&key, der,
+                                          sizeof(der));
+    \endcode
+
+    \sa wc_Ed25519PrivateKeyDecode
+*/
+int wc_Ed25519PrivateKeyToDer(const ed25519_key* key, byte* output,
+                               word32 outLen);
+
+/*!
+    \ingroup Ed25519
+    \brief Encodes Ed25519 public key to DER format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key Ed25519 key structure with public key
+    \param output Buffer for DER encoded public key
+    \param outLen Size of output buffer
+    \param withAlg Whether to use SubjectPublicKeyInfo format.
+
+    _Example_
+    \code
+    ed25519_key key;
+    byte der[1024];
+    int derSz = wc_Ed25519PublicKeyToDer(&key, der,
+                                         sizeof(der));
+    \endcode
+
+    \sa wc_Ed25519PublicKeyDecode
+*/
+int wc_Ed25519PublicKeyToDer(const ed25519_key* key, byte* output,
+        word32 outLen, int withAlg);
+
+/*!
+    \ingroup Ed448
+    \brief Decodes Ed448 private key from DER format.
+
+    \return 0 on success
+    \return negative on error
+
+    \param input DER encoded Ed448 private key buffer
+    \param inOutIdx Pointer to index in buffer
+    \param key Ed448 key structure to store key
+    \param inSz Size of input buffer
+
+    _Example_
+    \code
+    ed448_key key;
+    word32 idx = 0;
+    int ret = wc_Ed448PrivateKeyDecode(derBuf, &idx, &key,
+                                       derSz);
+    \endcode
+
+    \sa wc_Ed448PrivateKeyToDer
+    \sa wc_Ed448PrivateKeyDecode_ex
+*/
+int wc_Ed448PrivateKeyDecode(const byte* input, word32* inOutIdx,
+                              ed448_key* key, word32 inSz);
+
+/*!
+    \ingroup Ed448
+    \brief Decodes Ed448 private key from DER format with control over
+    validation of a bundled public key. When the DER contains a public key
+    and trusted is 0, the public key is validated with wc_ed448_check_key(),
+    including a check that it matches the private key. When trusted is 1
+    all validation of the bundled public key is skipped, so trusted should
+    only be set with known-good key material. wc_Ed448PrivateKeyDecode()
+    behaves as trusted set to 0.
+
+    \return 0 on success
+    \return negative on error
+
+    \param input DER encoded Ed448 private key buffer
+    \param inOutIdx Pointer to index in buffer
+    \param key Ed448 key structure to store key
+    \param inSz Size of input buffer
+    \param trusted Indicates whether the bundled public key data is trusted.
+    When 0, the public key is validated with wc_ed448_check_key().
+    When 1, the public key is imported without any validation.
+
+    _Example_
+    \code
+    ed448_key key;
+    word32 idx = 0;
+    // key material comes from this application's own storage
+    int ret = wc_Ed448PrivateKeyDecode_ex(derBuf, &idx, &key,
+                                          derSz, 1);
+    \endcode
+
+    \sa wc_Ed448PrivateKeyDecode
+    \sa wc_Ed448PrivateKeyToDer
+    \sa wc_ed448_import_private_key_ex
+*/
+int wc_Ed448PrivateKeyDecode_ex(const byte* input, word32* inOutIdx,
+                                ed448_key* key, word32 inSz, int trusted);
+
+/*!
+    \ingroup Ed448
+    \brief Decodes Ed448 public key from DER format.
+
+    \return 0 on success
+    \return negative on error
+
+    \param input DER encoded Ed448 public key buffer
+    \param inOutIdx Pointer to index in buffer
+    \param key Ed448 key structure to store key
+    \param inSz Size of input buffer
+
+    _Example_
+    \code
+    ed448_key key;
+    word32 idx = 0;
+    int ret = wc_Ed448PublicKeyDecode(derBuf, &idx, &key,
+                                      derSz);
+    \endcode
+
+    \sa wc_Ed448PublicKeyToDer
+*/
+int wc_Ed448PublicKeyDecode(const byte* input, word32* inOutIdx,
+                             ed448_key* key, word32 inSz);
+
+/*!
+    \ingroup Ed448
+    \brief Encodes Ed448 key to DER format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key Ed448 key structure
+    \param output Buffer for DER encoded key
+    \param outLen Size of output buffer
+
+    _Example_
+    \code
+    ed448_key key;
+    byte der[1024];
+    int derSz = wc_Ed448KeyToDer(&key, der, sizeof(der));
+    \endcode
+
+    \sa wc_Ed448PrivateKeyToDer
+*/
+int wc_Ed448KeyToDer(const ed448_key* key, byte* output, word32 outLen);
+
+/*!
+    \ingroup Ed448
+    \brief Encodes Ed448 private key to DER format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key Ed448 key structure with private key
+    \param output Buffer for DER encoded private key
+    \param outLen Size of output buffer
+
+    _Example_
+    \code
+    ed448_key key;
+    byte der[1024];
+    int derSz = wc_Ed448PrivateKeyToDer(&key, der,
+                                        sizeof(der));
+    \endcode
+
+    \sa wc_Ed448PrivateKeyDecode
+*/
+int wc_Ed448PrivateKeyToDer(const ed448_key* key, byte* output,
+                             word32 outLen);
+
+/*!
+    \ingroup Ed448
+    \brief Encodes Ed448 public key to DER format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key Ed448 key structure with public key
+    \param output Buffer for DER encoded public key
+    \param outLen Size of output buffer
+    \param withAlg 1 to include algorithm identifier, 0 for key data only
+
+    _Example_
+    \code
+    ed448_key key;
+    byte der[1024];
+    int derSz = wc_Ed448PublicKeyToDer(&key, der,
+                                       sizeof(der), 1);
+    \endcode
+
+    \sa wc_Ed448PublicKeyDecode
+*/
+int wc_Ed448PublicKeyToDer(const ed448_key* key, byte* output,
+                            word32 outLen, int withAlg);
+
+/*!
+    \ingroup Curve448
+    \brief Decodes Curve448 private key from DER format.
+
+    \return 0 on success
+    \return negative on error
+
+    \param input DER encoded Curve448 private key buffer
+    \param inOutIdx Pointer to index in buffer
+    \param key Curve448 key structure to store key
+    \param inSz Size of input buffer
+
+    _Example_
+    \code
+    curve448_key key;
+    word32 idx = 0;
+    int ret = wc_Curve448PrivateKeyDecode(derBuf, &idx, &key,
+                                          derSz);
+    \endcode
+
+    \sa wc_Curve448PrivateKeyToDer
+*/
+int wc_Curve448PrivateKeyDecode(const byte* input, word32* inOutIdx,
+                                 curve448_key* key, word32 inSz);
+
+/*!
+    \ingroup Curve448
+    \brief Decodes Curve448 public key from DER format.
+
+    \return 0 on success
+    \return negative on error
+
+    \param input DER encoded Curve448 public key buffer
+    \param inOutIdx Pointer to index in buffer
+    \param key Curve448 key structure to store key
+    \param inSz Size of input buffer
+
+    _Example_
+    \code
+    curve448_key key;
+    word32 idx = 0;
+    int ret = wc_Curve448PublicKeyDecode(derBuf, &idx, &key,
+                                         derSz);
+    \endcode
+
+    \sa wc_Curve448PublicKeyToDer
+*/
+int wc_Curve448PublicKeyDecode(const byte* input, word32* inOutIdx,
+                                curve448_key* key, word32 inSz);
+
+/*!
+    \ingroup Curve448
+    \brief Encodes Curve448 private key to DER format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key Curve448 key structure with private key
+    \param output Buffer for DER encoded private key
+    \param outLen Size of output buffer
+
+    _Example_
+    \code
+    curve448_key key;
+    byte der[1024];
+    int derSz = wc_Curve448PrivateKeyToDer(&key, der,
+                                           sizeof(der));
+    \endcode
+
+    \sa wc_Curve448PrivateKeyDecode
+*/
+int wc_Curve448PrivateKeyToDer(curve448_key* key, byte* output,
+                                word32 outLen);
+
+/*!
+    \ingroup Curve448
+    \brief Encodes Curve448 public key to DER format.
+
+    \return Size on success
+    \return negative on error
+
+    \param key Curve448 key structure with public key
+    \param output Buffer for DER encoded public key
+    \param outLen Size of output buffer
+
+    _Example_
+    \code
+    curve448_key key;
+    byte der[1024];
+    int derSz = wc_Curve448PublicKeyToDer(&key, der,
+                                          sizeof(der));
+    \endcode
+
+    \sa wc_Curve448PublicKeyDecode
+*/
+int wc_Curve448PublicKeyToDer(curve448_key* key, byte* output,
+                               word32 outLen);
 
 /*!
     \ingroup ASN
@@ -1477,22 +3251,22 @@ WOLFSSL_API int wc_EccPublicKeyToDer(ecc_key*, byte* output,
     Sha256 sha256;
     // initialize sha256 for hashing
 
-    byte* dig = = (byte*)malloc(SHA256_DIGEST_SIZE);
+    byte* dig = = (byte*)malloc(WC_SHA256_DIGEST_SIZE);
     // perform hashing and hash updating so dig stores SHA-256 hash
     // (see wc_InitSha256, wc_Sha256Update and wc_Sha256Final)
-    signSz = wc_EncodeSignature(encodedSig, dig, SHA256_DIGEST_SIZE,SHA256h);
+    signSz = wc_EncodeSignature(encodedSig, dig, WC_SHA256_DIGEST_SIZE, SHA256h);
     \endcode
 
     \sa none
 */
-WOLFSSL_API word32 wc_EncodeSignature(byte* out, const byte* digest,
+word32 wc_EncodeSignature(byte* out, const byte* digest,
                                       word32 digSz, int hashOID);
 
 /*!
     \ingroup ASN
 
     \brief This function returns the hash OID that corresponds to a hashing
-    type. For example, when given the type: SHA512, this function returns the
+    type. For example, when given the type: WC_SHA512, this function returns the
     identifier corresponding to a SHA512 hash, SHA512h.
 
     \return Success On success, returns the OID corresponding to the
@@ -1500,14 +3274,14 @@ WOLFSSL_API word32 wc_EncodeSignature(byte* out, const byte* digest,
     \return 0 Returned if an unrecognized hash type is passed in as argument.
 
     \param type the hash type for which to find the OID. Valid options,
-    depending on build configuration, include: MD2, MD5, SHA, SHA256, SHA512,
-    SHA384, and SHA512.
+    depending on build configuration, include: WC_MD5, WC_SHA, WC_SHA256,
+    WC_SHA384, WC_SHA512, WC_SHA3_224, WC_SHA3_256, WC_SHA3_384 or WC_SHA3_512
 
     _Example_
     \code
     int hashOID;
 
-    hashOID = wc_GetCTC_HashOID(SHA512);
+    hashOID = wc_GetCTC_HashOID(WC_SHA512);
     if (hashOID == 0) {
 	    // WOLFSSL_SHA512 not defined
     }
@@ -1515,7 +3289,7 @@ WOLFSSL_API word32 wc_EncodeSignature(byte* out, const byte* digest,
 
     \sa none
 */
-WOLFSSL_API int wc_GetCTC_HashOID(int type);
+int wc_GetCTC_HashOID(int type);
 
 /*!
     \ingroup ASN
@@ -1546,7 +3320,7 @@ WOLFSSL_API int wc_GetCTC_HashOID(int type);
     \sa wc_SetAltNamesBuffer
     \sa wc_SetDatesBuffer
 */
-WOLFSSL_API void wc_SetCert_Free(Cert* cert);
+void wc_SetCert_Free(Cert* cert);
 
 /*!
     \ingroup ASN
@@ -1557,7 +3331,7 @@ WOLFSSL_API void wc_SetCert_Free(Cert* cert);
     \return Length of traditional private key on success.
     \return Negative values on failure.
 
-    \param input Buffer containing unencrypted PKCS#8 private key. 
+    \param input Buffer containing unencrypted PKCS#8 private key.
     \param inOutIdx Index into the input buffer. On input, it should be a byte
     offset to the beginning of the the PKCS#8 buffer. On output, it will be the
     byte offset to the traditional private key within the input buffer.
@@ -1578,7 +3352,7 @@ WOLFSSL_API void wc_SetCert_Free(Cert* cert);
     \sa wc_DecryptPKCS8Key
     \sa wc_CreateEncryptedPKCS8Key
 */
-WOLFSSL_API int wc_GetPkcs8TraditionalOffset(byte* input,
+int wc_GetPkcs8TraditionalOffset(byte* input,
                                              word32* inOutIdx, word32 sz);
 
 /*!
@@ -1586,7 +3360,7 @@ WOLFSSL_API int wc_GetPkcs8TraditionalOffset(byte* input,
 
     \brief This function takes in a DER private key and converts it to PKCS#8
     format. Also used in creating PKCS#12 shrouded key bags. See RFC 5208.
-    
+
     \return The size of the PKCS#8 key placed into out on success.
     \return LENGTH_ONLY_E if out is NULL, with required output buffer size in
     outSz.
@@ -1629,7 +3403,7 @@ WOLFSSL_API int wc_GetPkcs8TraditionalOffset(byte* input,
     \sa wc_DecryptPKCS8Key
     \sa wc_CreateEncryptedPKCS8Key
 */
-WOLFSSL_API int wc_CreatePKCS8Key(byte* out, word32* outSz,
+int wc_CreatePKCS8Key(byte* out, word32* outSz,
         byte* key, word32 keySz, int algoID, const byte* curveOID,
         word32 oidSz);
 
@@ -1690,16 +3464,420 @@ WOLFSSL_API int wc_CreatePKCS8Key(byte* out, word32* outSz,
     \sa wc_DecryptPKCS8Key
     \sa wc_CreateEncryptedPKCS8Key
 */
-WOLFSSL_API int wc_EncryptPKCS8Key(byte* key, word32 keySz, byte* out,
+int wc_EncryptPKCS8Key(byte* key, word32 keySz, byte* out,
         word32* outSz, const char* password, int passwordSz, int vPKCS,
         int pbeOid, int encAlgId, byte* salt, word32 saltSz, int itt,
         WC_RNG* rng, void* heap);
 
 /*!
     \ingroup ASN
+    \brief Encrypts PKCS#8 key with extended parameters.
+
+    \return Size on success
+    \return negative on error
+
+    \param key Private key buffer
+    \param keySz Size of private key
+    \param out Output buffer for encrypted key
+    \param outSz Pointer to output buffer size (in/out)
+    \param password Password for encryption
+    \param passwordSz Password length
+    \param vPKCS PKCS version
+    \param pbeOid PBE algorithm OID
+    \param encAlgId Encryption algorithm ID
+    \param salt Salt buffer
+    \param saltSz Salt size
+    \param itt Iteration count
+    \param rng Random number generator
+    \param heap Heap hint for memory allocation
+    \param devId Device ID for hardware acceleration
+
+    _Example_
+    \code
+    byte key[256], encrypted[512];
+    word32 encSz = sizeof(encrypted);
+    WC_RNG rng;
+    int ret = wc_EncryptPKCS8Key_ex(key, keySz, encrypted,
+                                    &encSz, "password", 8,
+                                    PKCS5, PBES2, AES256CBCb,
+                                    NULL, 0, 2048, &rng, NULL,
+                                    INVALID_DEVID);
+    \endcode
+
+    \sa wc_EncryptPKCS8Key
+*/
+int wc_EncryptPKCS8Key_ex(byte* key, word32 keySz, byte* out,
+                          word32* outSz, const char* password,
+                          int passwordSz, int vPKCS, int pbeOid,
+                          int encAlgId, byte* salt, word32 saltSz,
+                          int itt, WC_RNG* rng, void* heap,
+                          int devId);
+
+/*!
+    \ingroup ASN
+    \brief Gets current time for certificate operations.
+
+    \return 0 on success
+    \return negative on error
+
+    \param timePtr Pointer to time buffer
+    \param timeSize Size of time buffer
+
+    _Example_
+    \code
+    time_t currentTime;
+    int ret = wc_GetTime(&currentTime, sizeof(currentTime));
+    \endcode
+
+    \sa wc_GetDateInfo
+*/
+int wc_GetTime(void* timePtr, word32 timeSize);
+
+/*!
+    \ingroup ASN
+    \brief Gets encryption info from encrypted PEM.
+
+    \return 0 on success
+    \return negative on error
+
+    \param info EncryptedInfo structure to populate
+    \param cipherName Cipher name string
+
+    _Example_
+    \code
+    EncryptedInfo info;
+    int ret = wc_EncryptedInfoGet(&info, "AES-256-CBC");
+    \endcode
+
+    \sa wc_PemToDer
+*/
+int wc_EncryptedInfoGet(EncryptedInfo* info,
+                        const char* cipherName);
+
+/*!
+    \ingroup ASN
+    \brief Parses PIV certificate format.
+
+    \return 0 on success
+    \return negative on error
+
+    \param cert PIV certificate structure to populate
+    \param buf Buffer containing PIV certificate
+    \param totalSz Size of buffer
+
+    _Example_
+    \code
+    wc_CertPIV cert;
+    int ret = wc_ParseCertPIV(&cert, pivBuf, pivSz);
+    \endcode
+
+    \sa wc_InitDecodedCert
+*/
+int wc_ParseCertPIV(wc_CertPIV* cert, const byte* buf,
+                    word32 totalSz);
+
+/*!
+    \ingroup ASN
+    \brief Extracts subject public key info from certificate.
+
+    \return Size on success
+    \return negative on error
+
+    \param certDer DER encoded certificate buffer
+    \param certDerSz Size of certificate
+    \param pubKeyDer Output buffer for public key
+    \param pubKeyDerSz Pointer to output buffer size (in/out)
+
+    _Example_
+    \code
+    byte pubKey[1024];
+    word32 pubKeySz = sizeof(pubKey);
+    int ret = wc_GetSubjectPubKeyInfoDerFromCert(certDer,
+                                                 certSz,
+                                                 pubKey,
+                                                 &pubKeySz);
+    \endcode
+
+    \sa wc_GetPubKeyDerFromCert
+*/
+int wc_GetSubjectPubKeyInfoDerFromCert(const byte* certDer,
+                                       word32 certDerSz,
+                                       byte* pubKeyDer,
+                                       word32* pubKeyDerSz);
+
+/*!
+    \ingroup ASN
+
+    \brief Retrieves the subject name from a decoded certificate.
+
+    This function copies the subject name string from a DecodedCert
+    structure into the provided buffer. The string uses a one-line
+    distinguished name format with "/" delimiters
+    (e.g. "/C=US/O=Org/CN=example.com"). The output is NOT
+    NUL-terminated; the caller should append a NUL byte if needed.
+    If buf is NULL, the required buffer size is returned
+    in bufSz and LENGTH_ONLY_E is returned.
+
+    \param cert   Pointer to the DecodedCert (must have been parsed).
+    \param buf    Output buffer to receive the subject name string,
+                  or NULL to query the required size.
+    \param bufSz  Pointer to the buffer size. On input, the available
+                  buffer size. On output, the number of bytes written
+                  (excluding any NUL terminator) or the required size
+                  if buf is NULL.
+
+    \return 0 on success.
+    \return LENGTH_ONLY_E when buf is NULL (bufSz contains required size).
+    \return BAD_FUNC_ARG if cert or bufSz is NULL.
+    \return BUFFER_E if the provided buffer is too small.
+
+    \sa wc_GetDecodedCertIssuer
+    \sa wc_GetDecodedCertSerial
+    \sa wc_InitDecodedCert
+    \sa wc_ParseCert
+*/
+int wc_GetDecodedCertSubject(const struct DecodedCert* cert,
+                             char* buf, word32* bufSz);
+
+/*!
+    \ingroup ASN
+
+    \brief Retrieves the issuer name from a decoded certificate.
+
+    This function copies the issuer name string from a DecodedCert
+    structure into the provided buffer. The string uses a one-line
+    distinguished name format with "/" delimiters
+    (e.g. "/C=US/O=Org/CN=example.com"). The output is NOT
+    NUL-terminated; the caller should append a NUL byte if needed.
+    If buf is NULL, the required buffer size is returned
+    in bufSz and LENGTH_ONLY_E is returned.
+
+    \param cert   Pointer to the DecodedCert (must have been parsed).
+    \param buf    Output buffer to receive the issuer name string,
+                  or NULL to query the required size.
+    \param bufSz  Pointer to the buffer size. On input, the available
+                  buffer size. On output, the number of bytes written
+                  (excluding any NUL terminator) or the required size
+                  if buf is NULL.
+
+    \return 0 on success.
+    \return LENGTH_ONLY_E when buf is NULL (bufSz contains required size).
+    \return BAD_FUNC_ARG if cert or bufSz is NULL.
+    \return BUFFER_E if the provided buffer is too small.
+
+    \sa wc_GetDecodedCertSubject
+    \sa wc_GetDecodedCertSerial
+    \sa wc_InitDecodedCert
+    \sa wc_ParseCert
+*/
+int wc_GetDecodedCertIssuer(const struct DecodedCert* cert,
+                            char* buf, word32* bufSz);
+
+/*!
+    \ingroup ASN
+
+    \brief Retrieves the serial number from a decoded certificate.
+
+    This function copies the serial number bytes from a DecodedCert
+    structure into the provided buffer. If buf is NULL, the required
+    buffer size is returned in bufSz and LENGTH_ONLY_E is returned.
+
+    \param cert   Pointer to the DecodedCert (must have been parsed).
+    \param buf    Output buffer to receive the serial number bytes,
+                  or NULL to query the required size.
+    \param bufSz  Pointer to the buffer size. On input, the available
+                  buffer size. On output, the number of bytes written
+                  or the required size if buf is NULL.
+
+    \return 0 on success.
+    \return LENGTH_ONLY_E when buf is NULL (bufSz contains required size).
+    \return BAD_FUNC_ARG if cert or bufSz is NULL.
+    \return BUFFER_E if the provided buffer is too small.
+
+    \sa wc_GetDecodedCertSubject
+    \sa wc_GetDecodedCertIssuer
+    \sa wc_InitDecodedCert
+    \sa wc_ParseCert
+*/
+int wc_GetDecodedCertSerial(const struct DecodedCert* cert,
+                            byte* buf, word32* bufSz);
+
+/*!
+    \ingroup ASN
+    \brief Extracts UUID from certificate.
+
+    \return 0 on success
+    \return negative on error
+
+    \param cert Decoded certificate structure
+    \param uuid Output buffer for UUID
+    \param uuidSz Pointer to UUID buffer size (in/out)
+
+    _Example_
+    \code
+    DecodedCert cert;
+    byte uuid[16];
+    int uuidSz = sizeof(uuid);
+    int ret = wc_GetUUIDFromCert(&cert, uuid, &uuidSz);
+    \endcode
+
+    \sa wc_ParseCert
+*/
+int wc_GetUUIDFromCert(struct DecodedCert* cert,
+                       byte* uuid, int* uuidSz);
+
+/*!
+    \ingroup ASN
+    \brief Extracts FASCN from certificate.
+
+    \return 0 on success
+    \return negative on error
+
+    \param cert Decoded certificate structure
+    \param fascn Output buffer for FASCN
+    \param fascnSz Pointer to FASCN buffer size (in/out)
+
+    _Example_
+    \code
+    DecodedCert cert;
+    byte fascn[25];
+    int fascnSz = sizeof(fascn);
+    int ret = wc_GetFASCNFromCert(&cert, fascn, &fascnSz);
+    \endcode
+
+    \sa wc_ParseCert
+*/
+int wc_GetFASCNFromCert(struct DecodedCert* cert,
+                        byte* fascn, int* fascnSz);
+
+/*!
+    \ingroup ASN
+    \brief Generates the pre-TBS (To Be Signed) certificate data from a
+    decoded certificate. The TBS portion is the certificate data that gets
+    signed by the certificate authority. This function is used in dual
+    algorithm certificate creation where the TBS data needs to be extracted
+    for signing with an alternative algorithm (e.g., a post-quantum algorithm).
+
+    \note This API is only available when WOLFSSL_DUAL_ALG_CERTS is defined,
+    which enables support for dual algorithm certificates used in Post-Quantum
+    cryptography to provide hybrid signing with both traditional and PQ
+    algorithms.
+
+    \return Size of the pre-TBS data on success
+    \return Negative error code on failure
+
+    \param cert Decoded certificate structure containing the certificate to
+    extract TBS data from
+    \param der Output buffer for the pre-TBS DER-encoded data
+    \param derSz Size of output buffer in bytes
+
+    _Example_
+    \code
+    DecodedCert cert;
+    byte preTbs[2048];
+    int ret = wc_GeneratePreTBS(&cert, preTbs, sizeof(preTbs));
+    if (ret > 0) {
+        // ret contains the size of the pre-TBS data
+        // preTbs can now be signed with an alternative algorithm
+    }
+    \endcode
+
+    \sa wc_MakeCert
+    \sa wc_MakeSigWithBitStr
+*/
+int wc_GeneratePreTBS(struct DecodedCert* cert, byte *der,
+                      int derSz);
+
+/*!
+    \ingroup ASN
+    \brief Initializes decoded attribute certificate structure.
+
+    \return void
+
+    \param acert Attribute certificate structure to initialize
+    \param heap Heap hint for memory allocation
+
+    _Example_
+    \code
+    DecodedAcert acert;
+    wc_InitDecodedAcert(&acert, NULL);
+    \endcode
+
+    \sa wc_FreeDecodedAcert
+*/
+void wc_InitDecodedAcert(struct DecodedAcert* acert,
+                         void* heap);
+
+/*!
+    \ingroup ASN
+    \brief Frees decoded attribute certificate structure.
+
+    \return void
+
+    \param acert Attribute certificate structure to free
+
+    _Example_
+    \code
+    DecodedAcert acert;
+    wc_InitDecodedAcert(&acert, NULL);
+    wc_FreeDecodedAcert(&acert);
+    \endcode
+
+    \sa wc_InitDecodedAcert
+*/
+void wc_FreeDecodedAcert(struct DecodedAcert * acert);
+
+/*!
+    \ingroup ASN
+    \brief Parses X.509 attribute certificate.
+
+    \return 0 on success
+    \return negative on error
+
+    \param acert Decoded attribute certificate structure
+    \param verify Non-zero to verify signature
+
+    _Example_
+    \code
+    DecodedAcert acert;
+    wc_InitDecodedAcert(&acert, NULL);
+    int ret = wc_ParseX509Acert(&acert, 1);
+    \endcode
+
+    \sa wc_VerifyX509Acert
+*/
+int wc_ParseX509Acert(struct DecodedAcert* acert, int verify);
+
+/*!
+    \ingroup ASN
+    \brief Verifies X.509 attribute certificate.
+
+    \return 0 on success
+    \return negative on error
+
+    \param acert Attribute certificate buffer
+    \param acertSz Size of attribute certificate
+    \param issuerCert Issuer certificate buffer
+    \param issuerCertSz Size of issuer certificate
+    \param cm Certificate manager
+
+    _Example_
+    \code
+    int ret = wc_VerifyX509Acert(acertBuf, acertSz,
+                                 issuerBuf, issuerSz, cm);
+    \endcode
+
+    \sa wc_ParseX509Acert
+*/
+int wc_VerifyX509Acert(const byte* acert, word32 acertSz,
+                       const byte* issuerCert,
+                       word32 issuerCertSz, void* cm);
+
+/*!
+    \ingroup ASN
 
     \brief This function takes an encrypted PKCS#8 DER key and decrypts it to
-     PKCS#8 unencrypted DER. Undoes the encryption done by wc_EncryptPKCS8Key.
+     PKCS#8 unencrypted DER.Undoes the encryption done by wc_EncryptPKCS8Key.
      See RFC5208. The input buffer is overwritten with the decrypted data.
 
     \return The length of the decrypted buffer on success.
@@ -1727,7 +3905,7 @@ WOLFSSL_API int wc_EncryptPKCS8Key(byte* key, word32 keySz, byte* out,
     \sa wc_EncryptPKCS8Key
     \sa wc_CreateEncryptedPKCS8Key
 */
-WOLFSSL_API int wc_DecryptPKCS8Key(byte* input, word32 sz, const char* password,
+int wc_DecryptPKCS8Key(byte* input, word32 sz, const char* password,
         int passwordSz);
 
 /*!
@@ -1735,7 +3913,7 @@ WOLFSSL_API int wc_DecryptPKCS8Key(byte* input, word32 sz, const char* password,
 
     \brief This function takes a traditional, DER key, converts it to PKCS#8
      format, and encrypts it. It uses wc_CreatePKCS8Key and wc_EncryptPKCS8Key
-     to do this. 
+     to do this.
 
     \return The size of the encrypted key placed in out on success.
     \return LENGTH_ONLY_E if out is NULL, with required output buffer size in
@@ -1786,7 +3964,7 @@ WOLFSSL_API int wc_DecryptPKCS8Key(byte* input, word32 sz, const char* password,
     \sa wc_EncryptPKCS8Key
     \sa wc_DecryptPKCS8Key
 */
-WOLFSSL_API int wc_CreateEncryptedPKCS8Key(byte* key, word32 keySz, byte* out,
+int wc_CreateEncryptedPKCS8Key(byte* key, word32 keySz, byte* out,
         word32* outSz, const char* password, int passwordSz, int vPKCS,
         int pbeOid, int encAlgId, byte* salt, word32 saltSz, int itt,
         WC_RNG* rng, void* heap);
@@ -1816,7 +3994,7 @@ WOLFSSL_API int wc_CreateEncryptedPKCS8Key(byte* key, word32 keySz, byte* out,
     \sa wc_ParseCert
     \sa wc_FreeDecodedCert
 */
-WOLFSSL_API void wc_InitDecodedCert(struct DecodedCert* cert,
+void wc_InitDecodedCert(struct DecodedCert* cert,
     const byte* source, word32 inSz, void* heap);
 
 /*!
@@ -1855,7 +4033,7 @@ WOLFSSL_API void wc_InitDecodedCert(struct DecodedCert* cert,
     \sa wc_InitDecodedCert
     \sa wc_FreeDecodedCert
 */
-WOLFSSL_API int wc_ParseCert(DecodedCert* cert, int type, int verify, void* cm);
+int wc_ParseCert(DecodedCert* cert, int type, int verify, void* cm);
 
 /*!
     \ingroup ASN
@@ -1883,7 +4061,7 @@ WOLFSSL_API int wc_ParseCert(DecodedCert* cert, int type, int verify, void* cm);
     \sa wc_InitDecodedCert
     \sa wc_ParseCert
 */
-WOLFSSL_API void wc_FreeDecodedCert(struct DecodedCert* cert);
+void wc_FreeDecodedCert(struct DecodedCert* cert);
 
 /*!
     \ingroup ASN
@@ -1914,7 +4092,7 @@ WOLFSSL_API void wc_FreeDecodedCert(struct DecodedCert* cert);
 
     \sa wc_Time
 */
-WOLFSSL_API int wc_SetTimeCb(wc_time_cb f);
+int wc_SetTimeCb(wc_time_cb f);
 
 /*!
     \ingroup ASN
@@ -1936,4 +4114,294 @@ WOLFSSL_API int wc_SetTimeCb(wc_time_cb f);
 
     \sa wc_SetTimeCb
 */
-WOLFSSL_API time_t wc_Time(time_t* t);
+time_t wc_Time(time_t* t);
+
+/*!
+    \ingroup ASN
+
+    \brief This function injects a custom extension in to an X.509 certificate.
+     note: The content at the address pointed to by any of the parameters that
+           are pointers must not be modified until the certificate is generated
+           and you have the der output. This function does NOT copy the
+           contents to another buffer.
+
+    \return 0 Returned on success.
+    \return Other negative values on failure.
+
+    \param cert Pointer to an initialized DecodedCert object.
+    \param critical If 0, the extension will not be marked critical, otherwise
+     it will be marked critical.
+    \param oid Dot separated oid as a string. For example "1.2.840.10045.3.1.7"
+    \param der The der encoding of the content of the extension.
+    \param derSz The size in bytes of the der encoding.
+
+
+    _Example_
+    \code
+    int ret = 0;
+    Cert newCert;
+    wc_InitCert(&newCert);
+
+    // Code to setup subject, public key, issuer, and other things goes here.
+
+    ret = wc_SetCustomExtension(&newCert, 1, "1.2.3.4.5",
+              (const byte *)"This is a critical extension", 28);
+    if (ret < 0) {
+        // Failed to set the extension.
+    }
+
+    ret = wc_SetCustomExtension(&newCert, 0, "1.2.3.4.6",
+              (const byte *)"This is NOT a critical extension", 32)
+    if (ret < 0) {
+        // Failed to set the extension.
+    }
+
+    // Code to sign the certificate and then write it out goes here.
+
+    \endcode
+
+    \sa wc_InitCert
+    \sa wc_SetUnknownExtCallback
+*/
+int wc_SetCustomExtension(Cert *cert, int critical, const char *oid,
+                                      const byte *der, word32 derSz);
+
+/*!
+    \ingroup ASN
+
+    \brief This function registers a callback that will be used anytime
+    wolfSSL encounters an unknown X.509 extension in a certificate while parsing
+    a certificate. The prototype of the callback should be:
+
+    \return 0 Returned on success.
+    \return Other negative values on failure.
+
+    \param cert the DecodedCert struct that is to be associated with this
+    callback.
+    \param cb function to register as the time callback.
+
+    _Example_
+    \code
+    int ret = 0;
+    // Unknown extension callback prototype
+    int myUnknownExtCallback(const word16* oid, word32 oidSz, int crit,
+                             const unsigned char* der, word32 derSz);
+
+    // Register it
+    ret = wc_SetUnknownExtCallback(cert, myUnknownExtCallback);
+    if (ret != 0) {
+        // failed to set the callback
+    }
+
+    // oid: Array of integers that are the dot separated values in an oid.
+    // oidSz: Number of values in oid.
+    // crit: Whether the extension was mark critical.
+    // der: The der encoding of the content of the extension.
+    // derSz: The size in bytes of the der encoding.
+    int myCustomExtCallback(const word16* oid, word32 oidSz, int crit,
+                            const unsigned char* der, word32 derSz) {
+
+        // Logic to parse extension goes here.
+
+        // NOTE: by returning zero, we are accepting this extension and
+        // informing wolfSSL that it is acceptable. If you find an extension
+        // that you do not find acceptable, you should return an error. The
+        // standard behavior upon encountering an unknown extension with the
+        // critical flag set is to return ASN_CRIT_EXT_E. For the sake of
+        // brevity, this example is always accepting every extension; you
+        // should use different logic.
+        return 0;
+    }
+    \endcode
+
+    \sa ParseCert
+    \sa wc_SetCustomExtension
+*/
+int wc_SetUnknownExtCallback(DecodedCert* cert,
+                                             wc_UnknownExtCallback cb);
+/*!
+    \ingroup ASN
+
+    \brief This function verifies the signature in the der form of an X.509
+    certificate against a public key. The public key is expected to be the full
+    subject public key info in der form.
+
+    \return 0 Returned on success.
+    \return Other negative values on failure.
+
+    \param cert The der encoding of the X.509 certificate.
+    \param certSz The size in bytes of cert.
+    \param heap A pointer to the heap used for dynamic allocation. Can be NULL.
+    \param pubKey The der encoding of the public key.
+    \param pubKeySz The size in bytes of pubKey.
+    \param pubKeyOID OID identifying the algorithm of the public key.
+    (ie: ECDSAk, DSAk or RSAk)
+*/
+int wc_CheckCertSigPubKey(const byte* cert, word32 certSz,
+                                      void* heap, const byte* pubKey,
+                                      word32 pubKeySz, int pubKeyOID);
+
+/*!
+    \ingroup ASN
+
+    \brief This function initializes the ASN.1 print options.
+
+    \return  0 on success.
+    \return  BAD_FUNC_ARG when asn1 is NULL.
+
+    \param opts  The ASN.1 options for printing.
+
+    _Example_
+    \code
+    Asn1PrintOptions opt;
+
+    // Initialize ASN.1 print options before use.
+    wc_Asn1PrintOptions_Init(&opt);
+    \endcode
+
+    \sa wc_Asn1PrintOptions_Set
+    \sa wc_Asn1_PrintAll
+*/
+int wc_Asn1PrintOptions_Init(Asn1PrintOptions* opts);
+
+/*!
+    \ingroup ASN
+
+    \brief This function sets a print option into an ASN.1 print options object.
+
+    \return  0 on success.
+    \return  BAD_FUNC_ARG when asn1 is NULL.
+    \return  BAD_FUNC_ARG when val is out of range for option.
+
+    \param opts  The ASN.1 options for printing.
+    \param opt   An option to set value for.
+    \param val   The value to set.
+
+    _Example_
+    \code
+    Asn1PrintOptions opt;
+
+    // Initialize ASN.1 print options before use.
+    wc_Asn1PrintOptions_Init(&opt);
+    // Set the number of indents when printing tag name to be 1.
+    wc_Asn1PrintOptions_Set(&opt, ASN1_PRINT_OPT_INDENT, 1);
+    \endcode
+
+    \sa wc_Asn1PrintOptions_Init
+    \sa wc_Asn1_PrintAll
+*/
+int wc_Asn1PrintOptions_Set(Asn1PrintOptions* opts, enum Asn1PrintOpt opt,
+    word32 val);
+
+/*!
+    \ingroup ASN
+
+    \brief This function initializes an ASN.1 parsing object.
+
+    \return  0 on success.
+    \return  BAD_FUNC_ARG when asn1 is NULL.
+
+    \param asn1  ASN.1 parse object.
+
+    _Example_
+    \code
+    Asn1 asn1;
+
+    // Initialize ASN.1 parse object before use.
+    wc_Asn1_Init(&asn1);
+    \endcode
+
+    \sa wc_Asn1_SetFile
+    \sa wc_Asn1_PrintAll
+ */
+int wc_Asn1_Init(Asn1* asn1);
+
+/*!
+    \ingroup ASN
+
+    \brief This function sets the file to use when printing into an ASN.1
+    parsing object.
+
+    \return  0 on success.
+    \return  BAD_FUNC_ARG when asn1 is NULL.
+    \return  BAD_FUNC_ARG when file is XBADFILE.
+
+    \param asn1  The ASN.1 parse object.
+    \param file  File to print to.
+
+    _Example_
+    \code
+    Asn1 asn1;
+
+    // Initialize ASN.1 parse object before use.
+    wc_Asn1_Init(&asn1);
+    // Set standard out to be the file descriptor to write to.
+    wc_Asn1_SetFile(&asn1, stdout);
+    \endcode
+
+    \sa wc_Asn1_Init
+    \sa wc_Asn1_PrintAll
+ */
+int wc_Asn1_SetFile(Asn1* asn1, XFILE file);
+
+/*!
+    \ingroup ASN
+
+    \brief Print all ASN.1 items.
+
+    \return  0 on success.
+    \return  BAD_FUNC_ARG when asn1 or opts is NULL.
+    \return  ASN_LEN_E when ASN.1 item's length too long.
+    \return  ASN_DEPTH_E when end offset invalid.
+    \return  ASN_PARSE_E when not all of an ASN.1 item parsed.
+
+    \param asn1  The ASN.1 parse object.
+    \param opts  The ASN.1 print options.
+    \param data  Buffer containing BER/DER data to print.
+    \param len   Length of data to print in bytes.
+
+    \code
+    Asn1PrintOptions opts;
+    Asn1 asn1;
+    unsigned char data[] = { Initialize with DER/BER data };
+    word32 len = sizeof(data);
+
+    // Initialize ASN.1 print options before use.
+    wc_Asn1PrintOptions_Init(&opt);
+    // Set the number of indents when printing tag name to be 1.
+    wc_Asn1PrintOptions_Set(&opt, ASN1_PRINT_OPT_INDENT, 1);
+
+    // Initialize ASN.1 parse object before use.
+    wc_Asn1_Init(&asn1);
+    // Set standard out to be the file descriptor to write to.
+    wc_Asn1_SetFile(&asn1, stdout);
+    // Print all ASN.1 items in buffer with the specified print options.
+    wc_Asn1_PrintAll(&asn1, &opts, data, len);
+    \endcode
+
+    \sa wc_Asn1_Init
+    \sa wc_Asn1_SetFile
+ */
+int wc_Asn1_PrintAll(Asn1* asn1, Asn1PrintOptions* opts, unsigned char* data,
+    word32 len);
+
+/*!
+    \ingroup ASN
+    \brief Sets OID to name callback for ASN.1 parsing.
+
+    \return 0 on success
+    \return negative on error
+
+    \param asn1 ASN.1 structure
+    \param nameCb Callback function to convert OID to name
+
+    _Example_
+    \code
+    Asn1 asn1;
+    int ret = wc_Asn1_SetOidToNameCb(&asn1, myOidToNameCb);
+    \endcode
+
+    \sa wc_Asn1_PrintAll
+*/
+int wc_Asn1_SetOidToNameCb(Asn1* asn1, Asn1OidToNameCb nameCb);
+
