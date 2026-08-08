@@ -17,6 +17,7 @@
 #define WOLFSSL_TLS13
 //#define WOLFSSL_NO_TLS12
 #define WOLFSSL_ALLOW_TLSV10
+#define WOLFSSL_ALT_CERT_CHAINS
 
 
 //#define WOLFSSL_DTLS
@@ -71,7 +72,7 @@
 #define WOLFSSL_ENCRYPTED_KEYS
 #define HAVE_KEYING_MATERIAL
 #define NO_OLD_TLS
-#define NO_CHECK_PRIVATE_KEY
+//#define NO_CHECK_PRIVATE_KEY
 
 /* enable PK callback support for signing operations to key store */
 #define HAVE_PK_CALLBACKS
@@ -141,7 +142,7 @@
 
 #define NO_DSA
 #define NO_RC4
-#define NO_PSK
+//#define NO_PSK
 #define WOLFSSL_NO_SHAKE256
 #define NO_MD4
 #define NO_OLD_MD5_NAME

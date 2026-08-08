@@ -33,17 +33,9 @@
 
 
 #ifndef LSEC_API_OPENSSL_1_1_0
-
 #define SSL_is_server(s) (s->server)
 #define SSL_up_ref(ssl)  CRYPTO_add(&(ssl)->references, 1, CRYPTO_LOCK_SSL)
 #define X509_up_ref(c)   CRYPTO_add(&c->references, 1, CRYPTO_LOCK_X509)
-
-#else
-
-#define SSL_is_server(s) (0)
-#define SSL_up_ref(ssl)  ;
-#define X509_up_ref(c)   ;
-
 #endif
 
 
@@ -459,7 +451,7 @@ static int meth_want(lua_State *L)
   case SSL_NOTHING: lua_pushstring(L, "nothing"); break;
   case SSL_READING: lua_pushstring(L, "read"); break;
   case SSL_WRITING: lua_pushstring(L, "write"); break;
-//  case SSL_X509_LOOKUP: lua_pushstring(L, "x509lookup"); break;
+  case SSL_X509_LOOKUP: lua_pushstring(L, "x509lookup"); break;
   }
   return 1;
 }
@@ -790,14 +782,14 @@ static int meth_exportkeyingmaterial(lua_State *L)
   /* Temporary buffer memory-managed by Lua itself */
   unsigned char *out = (unsigned char*)lua_newuserdata(L, olen);
 
-//  if(SSL_export_keying_material(ssl->ssl, out, olen, label, llen, context, contextlen, context != NULL) != 1) {
+  if(SSL_export_keying_material(ssl->ssl, out, olen, label, llen, context, contextlen, context != NULL) != 1) {
     lua_pushnil(L);
     lua_pushstring(L, "error exporting keying material");
     return 2;
-//  }
+  }
 
-//  lua_pushlstring(L, (char*)out, olen);
-//  return 1;
+  lua_pushlstring(L, (char*)out, olen);
+  return 1;
 }
 
 /**
