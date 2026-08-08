@@ -16,7 +16,7 @@
 
 #define WOLFSSL_TLS13
 //#define WOLFSSL_NO_TLS12
-//#define WOLFSSL_ALLOW_TLSV10
+#define WOLFSSL_ALLOW_TLSV10
 
 
 //#define WOLFSSL_DTLS
