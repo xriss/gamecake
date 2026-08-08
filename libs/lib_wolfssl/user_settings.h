@@ -1,140 +1,157 @@
+/* Custom build settings for Android */
 
-#ifndef _WIN32
+#ifndef _WOLF_USER_SETTINGS_H_
+#define _WOLF_USER_SETTINGS_H_
 
 
-#undef  _POSIX_THREADS
-#define _POSIX_THREADS
 
-#undef  HAVE_THREAD_LS
-#define HAVE_THREAD_LS
+#define WOLFSSL_MAX_ERROR_SZ 160
 
+#define OPENSSL_EXTRA
+#define OPENSSL_ALL
+
+#define SESSION_CERTS
+#define WOLFSSL_CERT_GEN
+#define HAVE_ALPN
+
+#define WOLFSSL_TLS13
+//#define WOLFSSL_NO_TLS12
+//#define WOLFSSL_ALLOW_TLSV10
+
+
+//#define WOLFSSL_DTLS
+//#define WOLFSSL_DTLS13
+//#define WOLFSSL_SEND_HRR_COOKIE
+
+
+
+#if 0
+    #define HAVE_FIPS_VERSION 2
+    #define HAVE_FIPS
 #endif
 
+#ifdef __aarch64__
+    #if !defined(__clang__) || \
+        (defined(__clang__) && defined(__clang_major__) && __clang_major__ >= 5)
+        /* older clang v4 has issue with inline assembly constraints */
+        #define WOLFSSL_ARMASM
+    #endif
+#endif
 
-#undef  TFM_TIMING_RESISTANT
+#if 1 /* SP Assembly Speedups (wPAA) */
+    #define WOLFSSL_SP
+    #define WOLFSSL_SP_SMALL      /* use smaller version of code */
+    #define WOLFSSL_HAVE_SP_RSA
+    #define WOLFSSL_HAVE_SP_DH
+    #define WOLFSSL_HAVE_SP_ECC
+    #ifdef WOLFSSL_ARMASM
+        #define WOLFSSL_SP_ARM64_ASM
+    #endif
+#endif
+
+/* WPA Supplicant Support */
+#define WOLFSSL_WPAS_SMALL
+//#define OPENSSL_ALL
+#define HAVE_THREAD_LS
+
+#define USE_FAST_MATH
+#define FP_MAX_BITS (4096*2) /* Maximum math bits (Max RSA key bits * 2) */
 #define TFM_TIMING_RESISTANT
-
-#undef  ECC_TIMING_RESISTANT
 #define ECC_TIMING_RESISTANT
-
-#undef  WC_RSA_BLINDING
 #define WC_RSA_BLINDING
 
-#undef  WOLFSSL_USE_ALIGN
-#define WOLFSSL_USE_ALIGN
-
-#undef  WOLFSSL_SHA224
-#define WOLFSSL_SHA224
-
-#undef  WOLFSSL_SHA512
-#define WOLFSSL_SHA512
-
-#undef  WOLFSSL_SHA384
-#define WOLFSSL_SHA384
-
-#undef  HAVE_HKDF
-#define HAVE_HKDF
-
-#undef  NO_DSA
-#define NO_DSA
-
-#undef  HAVE_ECC
-#define HAVE_ECC
-
-#undef  TFM_ECC256
-#define TFM_ECC256
-
-#undef  ECC_SHAMIR
-#define ECC_SHAMIR
-
-#undef  WC_RSA_PSS
-#define WC_RSA_PSS
-
-#undef  WOLFSSL_BASE64_ENCODE
-#define WOLFSSL_BASE64_ENCODE
-
-#undef  NO_RABBIT
-#define NO_RABBIT
-
-#undef  WOLFSSL_SHA3
-#define WOLFSSL_SHA3
-
-#undef  HAVE_POLY1305
-#define HAVE_POLY1305
-
-#undef  HAVE_ONE_TIME_AUTH
-#define HAVE_ONE_TIME_AUTH
-
-#undef  HAVE_CHACHA
-#define HAVE_CHACHA
-
-#undef  HAVE_HASHDRBG
 #define HAVE_HASHDRBG
 
-#undef  HAVE_TLS_EXTENSIONS
+#define WC_RSA_PSS
+#define HAVE_SESSION_TICKET
 #define HAVE_TLS_EXTENSIONS
-
-#undef  HAVE_SUPPORTED_CURVES
 #define HAVE_SUPPORTED_CURVES
-
-#undef  HAVE_FFDHE_2048
-#define HAVE_FFDHE_2048
-
-#undef  HAVE_SUPPORTED_CURVES
-#define HAVE_SUPPORTED_CURVES
-
-#undef  WOLFSSL_TLS13
-#define WOLFSSL_TLS13
-
-#undef  HAVE_TLS_EXTENSIONS
-#define HAVE_TLS_EXTENSIONS
-
-#undef  HAVE_EXTENDED_MASTER
 #define HAVE_EXTENDED_MASTER
-
-#undef  NO_RC4
-#define NO_RC4
-
-#undef  HAVE_ENCRYPT_THEN_MAC
 #define HAVE_ENCRYPT_THEN_MAC
+#define WOLFSSL_ENCRYPTED_KEYS
+#define HAVE_KEYING_MATERIAL
+#define NO_OLD_TLS
+#define NO_CHECK_PRIVATE_KEY
 
-#undef  NO_PSK
-#define NO_PSK
+/* enable PK callback support for signing operations to key store */
+#define HAVE_PK_CALLBACKS
+/* crypto callback support is not in FIPS 3389 */
+#ifndef HAVE_FIPS
+    #define WOLF_CRYPTO_CB
+#endif
 
-#undef  NO_MD4
-#define NO_MD4
+#define KEEP_OUR_CERT
+#define KEEP_PEER_CERT
+#define WOLFSSL_ALWAYS_VERIFY_CB
+#define WOLFSSL_ALWAYS_KEEP_SNI
+#define HAVE_EX_DATA
+#define HAVE_EXT_CACHE
+#define WOLFSSL_EITHER_SIDE
+#define WOLFSSL_PUBLIC_MP
+#define WOLFSSL_DER_LOAD
 
-//#undef  USE_FAST_MATH
-//#define USE_FAST_MATH
+#define WOLFSSL_CERT_GEN
+#define WOLFSSL_CERT_EXT
+#define WOLFSSL_CERT_REQ
 
-//#undef  WOLFSSL_X86_64_BUILD
-//#define WOLFSSL_X86_64_BUILD
+#define WOLFSSL_KEY_GEN
+#define WC_RSA_NO_PADDING
 
-#undef  WC_NO_ASYNC_THREADING
-#define WC_NO_ASYNC_THREADING
-
-#undef  HAVE_DH_DEFAULT_PARAMS
+#define WOLFSSL_DH_CONST
+#define HAVE_FFDHE_2048
+#define HAVE_FFDHE_3072
+#define HAVE_FFDHE_4096
 #define HAVE_DH_DEFAULT_PARAMS
+#ifdef HAVE_FIPS
+    #define WOLFSSL_VALIDATE_FFC_IMPORT
+    #define HAVE_FFDHE_Q
+#endif
 
-#undef  NO_DES3
-#define NO_DES3
+#define WOLFSSL_SHA224
+#define WOLFSSL_SHA512
+#define WOLFSSL_SHA384
+#define WOLFSSL_NOSHA512_256
+#define WOLFSSL_NOSHA512_224
+#define WOLFSSL_SHA3
 
-#undef  GCM_TABLE_4BIT
-#define GCM_TABLE_4BIT
+#define HAVE_HKDF
+#define HAVE_PKCS8
 
-#undef  HAVE_AESGCM
+#define HAVE_ECC
+#define TFM_ECC256
+#define ECC_SHAMIR
+#define HAVE_COMP_KEY
+#ifdef HAVE_FIPS
+    #define HAVE_ECC_CDH
+    #define WOLFSSL_VALIDATE_ECC_IMPORT
+#endif
+#ifdef __i386
+    #define TFM_NO_ASM
+#endif
+
 #define HAVE_AESGCM
+#define HAVE_AESCCM
+#define WOLFSSL_AES_DIRECT
+#define WOLFSSL_AES_COUNTER
+#define HAVE_AES_ECB
+#define WOLFSSL_CMAC
 
-#undef  HAVE_TLS_EXTENSIONS
-#define HAVE_TLS_EXTENSIONS
+#define WOLFSSL_BASE64_ENCODE
+#define HAVE_CRL
 
-#undef  HAVE_SERVER_RENEGOTIATION_INFO
-#define HAVE_SERVER_RENEGOTIATION_INFO
+#define NO_DSA
+#define NO_RC4
+#define NO_PSK
+#define WOLFSSL_NO_SHAKE256
+#define NO_MD4
+#define NO_OLD_MD5_NAME
+#define NO_OLD_SHA_NAMES
+#define NO_OLD_SHA256_NAMES
+#define NO_OLD_WC_NAMES
 
-//#undef  HAVE___UINT128_T
-//#define HAVE___UINT128_T 1
+#if 0
+    #define DEBUG_WOLFSSL
+    #define WOLFSSL_ANDROID_DEBUG
+#endif
 
-#undef  HAVE_WC_INTROSPECTION
-#define HAVE_WC_INTROSPECTION
-
-
+#endif /* _WOLF_USER_SETTINGS_H_ */

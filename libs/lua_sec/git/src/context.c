@@ -255,8 +255,8 @@ static int cert_verify_cb(X509_STORE_CTX *x509_ctx, void *ptr)
     /* Set parameters to ignore the server purpose */
     X509_VERIFY_PARAM *param = X509_STORE_CTX_get0_param(x509_ctx);
     if (param) {
-      X509_VERIFY_PARAM_set_purpose(param, X509_PURPOSE_SSL_SERVER);
-      X509_VERIFY_PARAM_set_trust(param, X509_TRUST_SSL_SERVER);
+//      X509_VERIFY_PARAM_set_purpose(param, X509_PURPOSE_SSL_SERVER);
+//      X509_VERIFY_PARAM_set_trust(param, X509_TRUST_SSL_SERVER);
     }
   }
   /* Call OpenSSL standard verification function */
@@ -425,7 +425,8 @@ static int load_key(lua_State *L)
 static int check_key(lua_State *L)
 {
   SSL_CTX *ctx = lsec_checkcontext(L, 1);
-  lua_pushboolean(L, SSL_CTX_check_private_key(ctx));
+//  lua_pushboolean(L, SSL_CTX_check_private_key(ctx));
+  lua_pushboolean(L, 0);
   return 1;
 }
 
@@ -758,7 +759,7 @@ static int set_server_psk_cb(lua_State *L)
   lua_pushvalue(L, 2);
   lua_settable(L, -3);
 
-  SSL_CTX_set_psk_server_callback(ctx->context, server_psk_cb);
+//  SSL_CTX_set_psk_server_callback(ctx->context, server_psk_cb);
 
   lua_pushboolean(L, 1);
   return 1;
@@ -771,7 +772,9 @@ static int set_psk_identity_hint(lua_State *L)
 {
   p_context ctx = checkctx(L, 1);
   const char *hint = luaL_checkstring(L, 2);
-  int ret = SSL_CTX_use_psk_identity_hint(ctx->context, hint);
+
+int ret=0;
+//  int ret = SSL_CTX_use_psk_identity_hint(ctx->context, hint);
   lua_pushboolean(L, ret);
   return 1;
 }
@@ -837,7 +840,7 @@ static int set_client_psk_cb(lua_State *L) {
   lua_pushvalue(L, 2);
   lua_settable(L, -3);
 
-  SSL_CTX_set_psk_client_callback(ctx->context, client_psk_cb);
+//  SSL_CTX_set_psk_client_callback(ctx->context, client_psk_cb);
 
   lua_pushboolean(L, 1);
   return 1;

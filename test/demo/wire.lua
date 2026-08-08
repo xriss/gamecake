@@ -38,9 +38,9 @@ local result=wire.memo({
 
 -- check http
 local memo_get=wire.memo({
-	fifo=wire.manifest("http"),
+	fifo=wire.fifo("http"),
 	data={
-		url="http://google.com/",
+		url="https://google.com",
 	},
 }):send()
 print("sent http request")

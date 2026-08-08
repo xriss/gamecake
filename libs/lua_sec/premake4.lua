@@ -8,19 +8,16 @@ includedirs{
 	"../lib_wolfssl/git/wolfssl",
 }
 
+-- wolfssl
 defines{
-	"HAVE_EX_DATA",
-	"SESSION_CERTS",
-	"HAVE_ALPN",
-	"WOLFSSL_ALLOW_TLSV10",
-	"WOLFSSL_CERT_GEN",
+-- put it all in user_settings.h
 	"WOLFSSL_USER_SETTINGS",
-	"OPENSSL_EXTRA",
-	"OPENSSL_ALL",
-	"WOLFSSL_ALT_CERT_CHAINS",
---	"DEBUG_WOLFSSL",
 }
 
+defines{
+	"LSEC_API_OPENSSL_1_1_0",
+	"TLS1_3_VERSION",
+}
 
 if WINDOWS then
 
