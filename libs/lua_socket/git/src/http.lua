@@ -41,9 +41,6 @@ local SCHEMES = {
             https.tcp, 'LuaSocket: Function tcp() not available from LuaSec')
           return tcp(t) end }}
 
--- default scheme and port for document retrieval
-local SCHEME = 'http'
-local PORT = SCHEMES[SCHEME].port
 -----------------------------------------------------------------------------
 -- Reads MIME headers from a connection, unfolding where needed
 -----------------------------------------------------------------------------
@@ -57,7 +54,7 @@ local function receiveheaders(sock, headers)
     while line ~= "" do
         -- get field-name and value
         name, value = socket.skip(2, string.find(line, "^(.-):%s*(.*)"))
-        if not (name and value) then return nil, "malformed reponse headers" end
+        if not (name and value) then return nil, "malformed response headers" end
         name = string.lower(name)
         -- get next line (value might be folded)
         line, err  = sock:receive()
@@ -65,7 +62,7 @@ local function receiveheaders(sock, headers)
         -- unfold any folded values
         while string.find(line, "^%s") do
             value = value .. line
-            line = sock:receive()
+            line, err = sock:receive()
             if err then return nil, err end
         end
         -- save pair in table
@@ -84,7 +81,7 @@ socket.sourcet["http-chunked"] = function(sock, headers)
         dirty = function() return sock:dirty() end
     }, {
         __call = function()
-            -- get chunk size, skip extention
+            -- get chunk size, skip extension
             local line, err = sock:receive()
             if err then return nil, err end
             local size = base.tonumber(string.gsub(line, ";.*", ""), 16)
@@ -92,7 +89,7 @@ socket.sourcet["http-chunked"] = function(sock, headers)
             -- was it the last chunk?
             if size > 0 then
                 -- if not, get chunk and skip terminating CRLF
-                local chunk, err, part = sock:receive(size)
+                local chunk, err, _ = sock:receive(size)
                 if chunk then sock:receive() end
                 return chunk, err
             else
@@ -166,8 +163,8 @@ function metat.__index:receivestatusline()
     if status ~= "HTTP/" then
         if ec == "timeout" then
             return 408
-        end 
-        return nil, status 
+        end
+        return nil, status
     end
     -- otherwise proceed reading a status line
     status = self.try(self.c:receive("*l", status))
@@ -222,9 +219,11 @@ local function adjustproxy(reqt)
     local proxy = reqt.proxy or _M.PROXY
     if proxy then
         proxy = url.parse(proxy)
-        return proxy.host, proxy.port or 3128
+        proxy.port = proxy.port or 3128
+        proxy.create = SCHEMES[proxy.scheme].create(reqt)
+        return proxy.host, proxy.port, proxy.create
     else
-        return reqt.host, reqt.port
+        return reqt.host, reqt.port, reqt.create
     end
 end
 
@@ -282,12 +281,22 @@ local function adjustrequest(reqt)
     if not (host and host ~= "") then
         socket.try(nil, "invalid host '" .. base.tostring(nreqt.host) .. "'")
     end
-    -- compute uri if user hasn't overriden
+    -- compute uri if user hasn't overridden
     nreqt.uri = reqt.uri or adjusturi(nreqt)
     -- adjust headers in request
     nreqt.headers = adjustheaders(nreqt)
+    if nreqt.source
+        and not nreqt.headers["content-length"]
+        and not nreqt.headers["transfer-encoding"]
+    then
+        nreqt.headers["transfer-encoding"] = "chunked"
+    end
+
     -- ajust host and port if there is a proxy
-    nreqt.host, nreqt.port = adjustproxy(nreqt)
+    local proxy_create
+    nreqt.host, nreqt.port, proxy_create = adjustproxy(nreqt)
+    if not reqt.create then nreqt.create = proxy_create end
+
     return nreqt
 end
 
@@ -296,6 +305,8 @@ local function shouldredirect(reqt, code, headers)
     if not location then return false end
     location = string.gsub(location, "%s", "")
     if location == "" then return false end
+    -- the RFC says the redirect URL may be relative
+    location = url.absolute(reqt.url, location)
     local scheme = url.parse(location).scheme
     if scheme and (not SCHEMES[scheme]) then return false end
     -- avoid https downgrades
@@ -319,8 +330,7 @@ end
 local trequest, tredirect
 
 --[[local]] function tredirect(reqt, location)
-    -- the RFC says the redirect URL has to be absolute, but some
-    -- servers do not respect that
+    -- the RFC says the redirect URL may be relative
     local newurl = url.absolute(reqt.url, location)
     -- if switching schemes, reset port and create function
     if url.parse(newurl).scheme ~= reqt.scheme then
@@ -366,7 +376,7 @@ end
     local headers
     -- ignore any 100-continue messages
     while code == 100 do
-        headers = h:receiveheaders()
+        h:receiveheaders()
         code, status = h:receivestatusline()
     end
     headers = h:receiveheaders()
