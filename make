@@ -1,4 +1,4 @@
 cd `dirname $0`
-build/make $*
+build/make "$@"
 
 

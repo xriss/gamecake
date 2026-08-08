@@ -5,6 +5,13 @@ language "C"
 
 includedirs { ".", "git", }
 
+files{ "git/src/**.c" }
+
+files{ "git/wolfcrypt/src/**.c" }
+
+
+--[[
+
 files{
 --	"git/src/bio.c",
 --	"git/src/conf.c",
@@ -156,7 +163,6 @@ files{
 }
 
 -- newer
---[[
 files{
 --	"git/src/bio.c",
 --	"git/src/conf.c",
