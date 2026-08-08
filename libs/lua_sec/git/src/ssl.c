@@ -33,9 +33,9 @@
 
 
 #ifndef LSEC_API_OPENSSL_1_1_0
-#define SSL_is_server(s) (s->server)
-#define SSL_up_ref(ssl)  CRYPTO_add(&(ssl)->references, 1, CRYPTO_LOCK_SSL)
-#define X509_up_ref(c)   CRYPTO_add(&c->references, 1, CRYPTO_LOCK_X509)
+//#define SSL_is_server(s) (s->server)
+//#define SSL_up_ref(ssl)  CRYPTO_add(&(ssl)->references, 1, CRYPTO_LOCK_SSL)
+//#define X509_up_ref(c)   CRYPTO_add(&c->references, 1, CRYPTO_LOCK_X509)
 #endif
 
 

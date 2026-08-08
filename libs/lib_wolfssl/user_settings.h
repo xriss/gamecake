@@ -71,7 +71,7 @@
 #define HAVE_ENCRYPT_THEN_MAC
 #define WOLFSSL_ENCRYPTED_KEYS
 #define HAVE_KEYING_MATERIAL
-#define NO_OLD_TLS
+//#define NO_OLD_TLS
 //#define NO_CHECK_PRIVATE_KEY
 
 /* enable PK callback support for signing operations to key store */

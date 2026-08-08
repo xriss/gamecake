@@ -10,6 +10,8 @@ compat hacks
 #define X509_VERIFY_PARAM_set_purpose(a,b) ( printf("\nERROR WOLFSSL X509_VERIFY_PARAM_set_purpose missing.\n\n") & 0  )
 #define X509_VERIFY_PARAM_set_trust(a,b) ( printf("\nERROR WOLFSSL X509_VERIFY_PARAM_set_trust missing.\n\n") & 0  )
 
+#define SSL_get_current_compression(a) ((void*)( printf("\nERROR WOLFSSL SSL_get_current_compression missing.\n\n") & 0  ))
+#define X509_STORE_CTX_get0_param(a) ((void*)( printf("\nERROR WOLFSSL X509_STORE_CTX_get0_param missing.\n\n") & 0  ))
 
 ]]
 
@@ -30,8 +32,10 @@ defines{
 }
 
 defines{
-	"LSEC_API_OPENSSL_1_1_0",
-	"TLS1_3_VERSION",
+
+-- I thinkk this breaks things ??
+--	"LSEC_API_OPENSSL_1_1_0",
+--	"TLS1_3_VERSION",
 }
 
 if WINDOWS then

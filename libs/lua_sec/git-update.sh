@@ -2,7 +2,7 @@ cd `dirname $0`
 
 
 rm -rf git
-#git clone --branch v0.9 git@github.com:brunoos/luasec.git git
+#git clone --branch v1.0.2 git@github.com:brunoos/luasec.git git
 git clone git@github.com:brunoos/luasec.git git
 rm -rf git/.git
 
