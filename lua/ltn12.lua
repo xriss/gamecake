@@ -15,7 +15,7 @@ local select = select
 
 local _M = {}
 if module then -- heuristic for exporting a global package table
-    ltn12 = _M  -- luacheck: ignore
+--    ltn12 = _M  -- luacheck: ignore
 end
 local filter,source,sink,pump = {},{},{},{}
 
