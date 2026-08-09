@@ -9,7 +9,16 @@ files{ "git/src/**.c" }
 
 files{ "git/wolfcrypt/src/**.c" }
 
-
+excludes{
+	"git/src/conf*",
+	"git/src/bio*",
+	"git/src/x509*",
+	"git/src/ssl_*",
+	"git/src/pk*",
+	"git/wolfcrypt/src/asn_*",
+	"git/wolfcrypt/src/evp*",
+	"git/wolfcrypt/src/misc*",
+}
 
 defines{
 -- put it all in user_settings.h

@@ -4,7 +4,6 @@
 #define _WOLF_USER_SETTINGS_H_
 
 
-
 #define WOLFSSL_MAX_ERROR_SZ 160
 
 #define OPENSSL_EXTRA

@@ -60,9 +60,7 @@
 
 //------------------------------------------------------------------------------
 
-#define SSL_is_server(a) ( printf("\nERROR WOLFSSL SSL_is_server missing.\n\n") & 0  )
 #define SSL_up_ref(a) ( printf("\nERROR WOLFSSL SSL_up_ref missing.\n\n") & 0  )
-#define X509_up_ref(a) ( printf("\nERROR WOLFSSL X509_up_ref missing.\n\n") & 0  )
 #define SSL_X509_LOOKUP 0
 #define X509_VERIFY_PARAM_set_purpose(a,b) ( printf("\nERROR WOLFSSL X509_VERIFY_PARAM_set_purpose missing.\n\n") & 0  )
 #define X509_VERIFY_PARAM_set_trust(a,b) ( printf("\nERROR WOLFSSL X509_VERIFY_PARAM_set_trust missing.\n\n") & 0  )
