@@ -38,7 +38,8 @@
 
 #define CERT_FILE "libs/lib_wolfssl/git/certs/client-cert.pem"
 #define KEY_FILE  "libs/lib_wolfssl/git/certs/client-key.pem"
-#define CA_FILE   "libs/lib_wolfssl/git/certs/ca-cert.pem"
+//#define CA_FILE   "libs/lib_wolfssl/git/certs/ca-cert.pem"
+#define CA_FILE   "/etc/ssl/certs/ca-certificates.crt"
 
 
 
@@ -103,9 +104,9 @@ int main(int argc, char** argv)
 
     /* Create and initialize WOLFSSL_CTX */
 //#ifdef USE_TLSV13
-    ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
+//    ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
 //#else
-//    ctx = wolfSSL_CTX_new(wolfTLSv1_2_client_method());
+    ctx = wolfSSL_CTX_new(wolfTLSv1_2_client_method());
 //#endif
     if (ctx == NULL) {
         fprintf(stderr, "ERROR: failed to create WOLFSSL_CTX\n");
@@ -114,6 +115,7 @@ int main(int argc, char** argv)
     }
 
     /* Load client certificate into WOLFSSL_CTX */
+/*
     if ((ret = wolfSSL_CTX_use_certificate_file(ctx, CERT_FILE,
             WOLFSSL_FILETYPE_PEM)) != WOLFSSL_SUCCESS) {
         fprintf(stderr, "ERROR: failed to load %s, please check the file.\n",
@@ -121,8 +123,10 @@ int main(int argc, char** argv)
         ret = -1;
         goto ctx_cleanup;
     }
+*/
 
     /* Load client key into WOLFSSL_CTX */
+/*
     if ((ret = wolfSSL_CTX_use_PrivateKey_file(ctx, KEY_FILE,
             WOLFSSL_FILETYPE_PEM)) != WOLFSSL_SUCCESS) {
         fprintf(stderr, "ERROR: failed to load %s, please check the file.\n",
@@ -130,6 +134,7 @@ int main(int argc, char** argv)
         ret = -1;
         goto ctx_cleanup;
     }
+*/
 
     /* Load CA certificate into WOLFSSL_CTX */
     if ((ret = wolfSSL_CTX_load_verify_locations(ctx, CA_FILE, NULL))

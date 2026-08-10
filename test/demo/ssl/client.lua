@@ -16,9 +16,9 @@ local params = {
 --curveslist="P-521:P-384:P-256",
 --curveslist="secp224r1:prime239v1:prime256v1:secp384r1:secp521r1",
 
-   key = "./clientAkey.pem",
-   certificate = "./clientA.pem",
-   cafile = "./rootA.pem",
+--   key = "./clientAkey.pem",
+--   certificate = "./clientA.pem",
+--   cafile = "./rootA.pem",
 --[[
    verify = {"peer", "fail_if_no_peer_cert"},
 ]]

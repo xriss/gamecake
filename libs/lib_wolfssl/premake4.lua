@@ -62,6 +62,8 @@ if true then
 
 	links { "lib_wolfssl" }
 
+	links { "c", "m", }
+
 	KIND{kind="ConsoleApp",name="wolfssl-test."..CPU}
 	
 end
