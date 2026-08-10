@@ -16,6 +16,10 @@ extern "C" {
 #define HAVE_ALPN
 #define SESSION_CERTS
 
+/* ------------------------------------------------- */
+/* NEEDED FOR HTTPS TLS1_2 ? */
+/* ------------------------------------------------- */
+#define WOLFSSL_ALT_CERT_CHAINS
 
 /* ------------------------------------------------- */
 /* Platform */

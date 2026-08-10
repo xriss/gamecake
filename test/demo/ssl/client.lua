@@ -18,7 +18,7 @@ local params = {
 
 --   key = "./clientAkey.pem",
 --   certificate = "./clientA.pem",
---   cafile = "./rootA.pem",
+   cafile = "/etc/ssl/certs/ca-certificates.crt",
 --[[
    verify = {"peer", "fail_if_no_peer_cert"},
 ]]

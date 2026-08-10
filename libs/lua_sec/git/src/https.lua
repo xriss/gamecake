@@ -30,6 +30,7 @@ local cfg = {
   protocol = "any",
   options  = {"all", "no_sslv2", "no_sslv3", "no_tlsv1"},
   verify   = "none",
+  cafile = ssl.get_system_ca(), -- must provide for wolfssl ?
 }
 
 --------------------------------------------------------------------
