@@ -1,12 +1,12 @@
 /* sctp-client-dtls.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -19,6 +19,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
+#ifdef HAVE_CONFIG_H
+    #include <config.h>
+#endif
 
 /* wolfssl */
 #ifndef WOLFSSL_USER_SETTINGS
@@ -27,7 +30,7 @@
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/ssl.h>
 
-#if defined(WOLFSSL_SCTP) && defined(WOLFSSL_DTLS)
+#if defined(WOLFSSL_SCTP) && defined(WOLFSSL_DTLS) && !defined(WOLFSSL_NO_TLS12)
 /* sctp */
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -47,11 +50,13 @@ static int err_sys(const char* msg)
     perror(msg);
     exit(EXIT_FAILURE);
 }
-#endif /* WOLFSSL_SCTP && WOLFSSL_DTLS */
+#endif /* WOLFSSL_SCTP && WOLFSSL_DTLS && !WOLFSSL_NO_TLS12 */
 
-int main()
+int main(int argc, char **argv)
 {
-#if defined(WOLFSSL_SCTP) && defined(WOLFSSL_DTLS)
+    (void)argc;
+    (void)argv;
+#if defined(WOLFSSL_SCTP) && defined(WOLFSSL_DTLS) && !defined(WOLFSSL_NO_TLS12)
     int sd = socket(PF_INET, SOCK_STREAM, IPPROTO_SCTP);
 
     if (sd < 0)
@@ -97,7 +102,7 @@ int main()
            wolfSSL_CIPHER_get_name(wolfSSL_get_current_cipher(ssl)));
 
     wolfSSL_write(ssl, response, (int)strlen(response));
-    int got = wolfSSL_read(ssl, buffer, sizeof(buffer));
+    int got = wolfSSL_read(ssl, buffer, sizeof(buffer) - 1);
     if (got > 0) {
         buffer[got] = 0;
         printf("server said: %s\n", buffer);
@@ -114,7 +119,7 @@ int main()
     wolfSSL_read(ssl, bigBuf, sizeof(bigBuf));
     for (i = 0; i < sizeof(bigBuf); i++) {
         if (bigBuf[i] != (unsigned char)(i & 0xFF)) {
-            printf("big message check fail\n");
+            fprintf(stderr, "big message check fail\n");
             break;
         }
     }
@@ -124,7 +129,7 @@ int main()
     wolfSSL_CTX_free(ctx);
 
     close(sd);
-#endif /* WOLFSSL_SCTP && WOLFSSL_DTLS */
+#endif /* WOLFSSL_SCTP && WOLFSSL_DTLS && !WOLFSSL_NO_TLS12 */
 
     return 0;
 }

@@ -1,12 +1,12 @@
 /* silabs_aes.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -43,18 +43,20 @@ int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen,
     int ret = 0;
     (void)dir;
 
-    ret = sl_se_init();
-    if (ret != SL_STATUS_OK) {
-        return BUFFER_E;
-    }
-
-    XMEMSET(aes, 0, sizeof(aes));
-
-    if (keylen > sizeof(aes->key)) {
+    if (aes == NULL || userKey == NULL || keylen > sizeof(aes->key)) {
         return BAD_FUNC_ARG;
     }
 
+    ret = sl_se_init();
+    if (ret != SL_STATUS_OK) {
+        return WC_HW_E;
+    }
+
+    XMEMSET(aes, 0, sizeof(*aes));
+
     ret = wc_AesSetIV(aes, iv);
+    if (ret != 0)
+        return ret;
     aes->rounds = keylen/4 + 6;
     aes->ctx.cmd_ctx = cc;
 
@@ -80,18 +82,102 @@ int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen,
         break;
     }
 
-
-    XMEMCPY(aes->key, userKey, keylen);
-    aes->ctx.key.storage.location.buffer.pointer = (void*)aes->key;
-    aes->ctx.key.storage.location.buffer.size = keylen;
-    aes->ctx.key.size = keylen;
+    if (ret == 0) {
+        XMEMCPY(aes->key, userKey, keylen);
+        aes->ctx.key.storage.location.buffer.pointer = (void*)aes->key;
+        aes->ctx.key.storage.location.buffer.size = keylen;
+        aes->ctx.key.size = keylen;
+    }
 
     return ret;
 }
 
+#ifdef HAVE_AES_ECB
+int wc_AesEcbEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
+{
+    sl_status_t status;
+    if ((in == NULL) || (out == NULL) || (aes == NULL)) {
+        return BAD_FUNC_ARG;
+    }
+    if ((sz % WC_AES_BLOCK_SIZE) != 0) {
+        return BAD_LENGTH_E;
+    }
+
+    status = sl_se_aes_crypt_ecb(
+        &(aes->ctx.cmd_ctx),
+        &(aes->ctx.key),
+        SL_SE_ENCRYPT,
+        sz,
+        in,
+        out);
+    return (status != SL_STATUS_OK) ? WC_HW_E : 0;
+}
+
+int wc_AesEcbDecrypt(Aes* aes, byte* out, const byte* in, word32 sz)
+{
+    sl_status_t status;
+    if ((in == NULL) || (out == NULL) || (aes == NULL)) {
+        return BAD_FUNC_ARG;
+    }
+    if ((sz % WC_AES_BLOCK_SIZE) != 0) {
+        return BAD_LENGTH_E;
+    }
+
+    status = sl_se_aes_crypt_ecb(
+        &(aes->ctx.cmd_ctx),
+        &(aes->ctx.key),
+        SL_SE_DECRYPT,
+        sz,
+        in,
+        out);
+    return (status != SL_STATUS_OK) ? WC_HW_E : 0;
+}
+#endif /* HAVE_AES_ECB */
+
+#ifdef WOLFSSL_AES_DIRECT
+int wc_AesEncrypt(Aes* aes, const byte* inBlock, byte* outBlock)
+{
+    sl_status_t status;
+    if ((inBlock == NULL) || (outBlock == NULL) || (aes == NULL)) {
+        return BAD_FUNC_ARG;
+    }
+
+    status = sl_se_aes_crypt_ecb(
+        &(aes->ctx.cmd_ctx),
+        &(aes->ctx.key),
+        SL_SE_ENCRYPT,
+        WC_AES_BLOCK_SIZE,
+        inBlock,
+        outBlock);
+    return (status != SL_STATUS_OK) ? WC_HW_E : 0;
+}
+
+int wc_AesDecrypt(Aes* aes, const byte* inBlock, byte* outBlock)
+{
+    sl_status_t status;
+    if ((inBlock == NULL) || (outBlock == NULL) || (aes == NULL)) {
+        return BAD_FUNC_ARG;
+    }
+
+    status = sl_se_aes_crypt_ecb(
+        &(aes->ctx.cmd_ctx),
+        &(aes->ctx.key),
+        SL_SE_DECRYPT,
+        WC_AES_BLOCK_SIZE,
+        inBlock,
+        outBlock);
+    return (status != SL_STATUS_OK) ? WC_HW_E : 0;
+}
+#endif /* WOLFSSL_AES_DIRECT */
+
 int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
 {
-    sl_status_t status = sl_se_aes_crypt_cbc(
+    sl_status_t status;
+    if ((in == NULL) || (out == NULL) || (aes == NULL)) {
+        return BAD_FUNC_ARG;
+    }
+
+    status = sl_se_aes_crypt_cbc(
         &(aes->ctx.cmd_ctx),
         &(aes->ctx.key),
         SL_SE_ENCRYPT,
@@ -104,7 +190,12 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
 
 int wc_AesCbcDecrypt(Aes* aes, byte* out, const byte* in, word32 sz)
 {
-    sl_status_t status = sl_se_aes_crypt_cbc(
+    sl_status_t status;
+    if ((in == NULL) || (out == NULL) || (aes == NULL)) {
+        return BAD_FUNC_ARG;
+    }
+
+    status = sl_se_aes_crypt_cbc(
         &(aes->ctx.cmd_ctx),
         &(aes->ctx.key),
         SL_SE_DECRYPT,
@@ -121,7 +212,13 @@ int wc_AesGcmEncrypt_silabs (Aes* aes, byte* out, const byte* in, word32 sz,
                             byte* authTag, word32 authTagSz,
                             const byte* authIn, word32 authInSz)
 {
-    sl_status_t status = sl_se_gcm_crypt_and_tag(
+    sl_status_t status;
+    if ((in == NULL) || (out == NULL) || (iv == NULL) || (authTag == NULL) ||
+            (authIn == NULL && authInSz != 0) || (aes == NULL)) {
+        return BAD_FUNC_ARG;
+    }
+
+    status = sl_se_gcm_crypt_and_tag(
         &(aes->ctx.cmd_ctx),
         &(aes->ctx.key),
         SL_SE_ENCRYPT,
@@ -143,7 +240,13 @@ int wc_AesGcmDecrypt_silabs (Aes* aes, byte* out, const byte* in, word32 sz,
                             const byte* authTag, word32 authTagSz,
                             const byte* authIn, word32 authInSz)
 {
-    sl_status_t status = sl_se_gcm_auth_decrypt(
+    sl_status_t status;
+    if ((in == NULL) || (out == NULL) || (iv == NULL) || (authTag == NULL) ||
+            (authIn == NULL && authInSz != 0) || (aes == NULL)) {
+        return BAD_FUNC_ARG;
+    }
+
+    status = sl_se_gcm_auth_decrypt(
         &(aes->ctx.cmd_ctx),
         &(aes->ctx.key),
         sz,
@@ -168,7 +271,26 @@ int wc_AesCcmEncrypt_silabs (Aes* aes, byte* out, const byte* in, word32 sz,
                              byte* authTag, word32 authTagSz,
                              const byte* authIn, word32 authInSz)
 {
-    sl_status_t status = sl_se_ccm_encrypt_and_tag(
+    sl_status_t status;
+    if ((in == NULL) || (out == NULL) || (iv == NULL) || (authTag == NULL) ||
+            (ivSz < CCM_NONCE_MIN_SZ) || (ivSz > CCM_NONCE_MAX_SZ) ||
+            (authIn == NULL && authInSz != 0) || (aes == NULL)) {
+        return BAD_FUNC_ARG;
+    }
+
+    {
+        word32 lenSz = (word32)WC_AES_BLOCK_SIZE - 1U - ivSz;
+        /* With a large nonce, B[] runs out of room to represent inSz, and beyond
+         * that, the counter itself can wrap.
+         */
+        if ((lenSz < sizeof(sz)) &&
+            (sz >= ((word32)1 << (lenSz * 8))))
+        {
+            return AES_CCM_OVERFLOW_E;
+        }
+    }
+
+    status = sl_se_ccm_encrypt_and_tag(
         &(aes->ctx.cmd_ctx),
         &(aes->ctx.key),
         sz,
@@ -190,7 +312,26 @@ int wc_AesCcmDecrypt_silabs (Aes* aes, byte* out, const byte* in, word32 sz,
                             const byte* authTag, word32 authTagSz,
                             const byte* authIn, word32 authInSz)
 {
-    sl_status_t status = sl_se_ccm_auth_decrypt(
+    sl_status_t status;
+    if ((in == NULL) || (out == NULL) || (iv == NULL) || (authTag == NULL) ||
+            (ivSz < CCM_NONCE_MIN_SZ) || (ivSz > CCM_NONCE_MAX_SZ) ||
+            (authIn == NULL && authInSz != 0) || (aes == NULL)) {
+        return BAD_FUNC_ARG;
+    }
+
+    {
+        word32 lenSz = (word32)WC_AES_BLOCK_SIZE - 1U - ivSz;
+        /* With a large nonce, B[] runs out of room to represent inSz, and beyond
+         * that, the counter itself can wrap.
+         */
+        if ((lenSz < sizeof(sz)) &&
+            (sz >= ((word32)1 << (lenSz * 8))))
+        {
+            return AES_CCM_OVERFLOW_E;
+        }
+    }
+
+    status = sl_se_ccm_auth_decrypt(
         &(aes->ctx.cmd_ctx),
         &(aes->ctx.key),
         sz,
@@ -206,6 +347,6 @@ int wc_AesCcmDecrypt_silabs (Aes* aes, byte* out, const byte* in, word32 sz,
     return (status != SL_STATUS_OK) ? AES_GCM_AUTH_E : 0;
 }
 
-#endif /* HAVE_AESGCM */
+#endif /* HAVE_AESCCM */
 
 #endif /* WOLFSSL_SILABS_SE_ACCEL */

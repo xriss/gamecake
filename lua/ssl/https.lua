@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------
--- LuaSec 1.0.2
--- Copyright (C) 2009-2021 PUC-Rio
+-- LuaSec 1.3.2
+--
+-- Copyright (C) 2009-2023 PUC-Rio
 --
 -- Author: Pablo Musa
 -- Author: Tomas Guisasola
@@ -18,8 +19,8 @@ local try    = socket.try
 -- Module
 --
 local _M = {
-  _VERSION   = "1.0.2",
-  _COPYRIGHT = "LuaSec 1.0.2 - Copyright (C) 2009-2021 PUC-Rio",
+  _VERSION   = "1.3.2",
+  _COPYRIGHT = "LuaSec 1.3.2 - Copyright (C) 2009-2023 PUC-Rio",
   PORT       = 443,
   TIMEOUT    = 60
 }
@@ -29,7 +30,7 @@ local cfg = {
   protocol = "any",
   options  = {"all", "no_sslv2", "no_sslv3", "no_tlsv1"},
   verify   = "none",
-  verifyext = "lsec_continue" ,
+  cafile = ssl.get_system_ca(), -- must provide for wolfssl ?
 }
 
 --------------------------------------------------------------------
@@ -94,7 +95,7 @@ local function tcp(params)
          self.sock:sni(host)
          self.sock:settimeout(_M.TIMEOUT)
          try(self.sock:dohandshake())
-         reg(self, getmetatable(self.sock))
+         reg(self)
          return 1
       end
       return conn

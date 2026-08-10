@@ -1,12 +1,12 @@
 /* dsa.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -26,6 +26,7 @@
 #define WOLFSSL_DSA_H_
 
 #include <wolfssl/openssl/bn.h>
+#include <wolfssl/openssl/compat_types.h>
 
 #ifdef __cplusplus
     extern "C" {
@@ -41,8 +42,6 @@ typedef struct WOLFSSL_DSA            WOLFSSL_DSA;
 #define WOLFSSL_DSA_TYPE_DEFINED
 #endif
 
-typedef WOLFSSL_DSA                   DSA;
-
 struct WOLFSSL_DSA {
     WOLFSSL_BIGNUM* p;
     WOLFSSL_BIGNUM* q;
@@ -56,18 +55,18 @@ struct WOLFSSL_DSA {
 
 
 WOLFSSL_API WOLFSSL_DSA* wolfSSL_DSA_new(void);
-WOLFSSL_API void wolfSSL_DSA_free(WOLFSSL_DSA*);
+WOLFSSL_API void wolfSSL_DSA_free(WOLFSSL_DSA* dsa);
 #if !defined(NO_FILESYSTEM) && !defined(NO_STDIO_FILESYSTEM)
-WOLFSSL_API int wolfSSL_DSA_print_fp(XFILE, WOLFSSL_DSA*, int);
+WOLFSSL_API int wolfSSL_DSA_print_fp(XFILE fp, WOLFSSL_DSA* dsa, int indent);
 #endif /* !NO_FILESYSTEM && NO_STDIO_FILESYSTEM */
 
-WOLFSSL_API int wolfSSL_DSA_generate_key(WOLFSSL_DSA*);
+WOLFSSL_API int wolfSSL_DSA_generate_key(WOLFSSL_DSA* dsa);
 
 typedef void (*WOLFSSL_BN_CB)(int i, int j, void* exArg);
 WOLFSSL_API WOLFSSL_DSA* wolfSSL_DSA_generate_parameters(int bits,
                    unsigned char* seed, int seedLen, int* counterRet,
                    unsigned long* hRet, WOLFSSL_BN_CB cb, void* CBArg);
-WOLFSSL_API int wolfSSL_DSA_generate_parameters_ex(WOLFSSL_DSA*, int bits,
+WOLFSSL_API int wolfSSL_DSA_generate_parameters_ex(WOLFSSL_DSA* dsa, int bits,
                    unsigned char* seed, int seedLen, int* counterRet,
                    unsigned long* hRet, void* cb);
 
@@ -82,17 +81,17 @@ WOLFSSL_API int wolfSSL_DSA_set0_key(WOLFSSL_DSA *d, WOLFSSL_BIGNUM *pub_key,
         WOLFSSL_BIGNUM *priv_key);
 
 
-WOLFSSL_API int wolfSSL_DSA_LoadDer(WOLFSSL_DSA*, const unsigned char*, int sz);
+WOLFSSL_API int wolfSSL_DSA_LoadDer(
+    WOLFSSL_DSA* dsa, const unsigned char* derBuf, int derSz);
 
-WOLFSSL_API int wolfSSL_DSA_LoadDer_ex(WOLFSSL_DSA*, const unsigned char*,
-                                       int sz, int opt);
+WOLFSSL_API int wolfSSL_DSA_LoadDer_ex(
+    WOLFSSL_DSA* dsa, const unsigned char* derBuf, int derSz, int opt);
 
-WOLFSSL_API int wolfSSL_DSA_do_sign(const unsigned char* d,
-                                    unsigned char* sigRet, WOLFSSL_DSA* dsa);
+WOLFSSL_API int wolfSSL_DSA_do_sign(
+    const unsigned char* d, unsigned char* sigRet, WOLFSSL_DSA* dsa);
 
-WOLFSSL_API int wolfSSL_DSA_do_verify(const unsigned char* d,
-                                      unsigned char* sig,
-                                      WOLFSSL_DSA* dsa, int *dsacheck);
+WOLFSSL_API int wolfSSL_DSA_do_verify(
+    const unsigned char* d, unsigned char* sig, WOLFSSL_DSA* dsa, int *dsacheck);
 
 WOLFSSL_API int wolfSSL_DSA_bits(const WOLFSSL_DSA *d);
 
@@ -112,12 +111,21 @@ WOLFSSL_API WOLFSSL_DSA_SIG* wolfSSL_DSA_do_sign_ex(const unsigned char* digest,
 WOLFSSL_API int wolfSSL_DSA_do_verify_ex(const unsigned char* digest, int digest_len,
                                          WOLFSSL_DSA_SIG* sig, WOLFSSL_DSA* dsa);
 
-WOLFSSL_API int wolfSSL_i2d_DSAparams(const WOLFSSL_DSA*, unsigned char**);
-WOLFSSL_API WOLFSSL_DSA* wolfSSL_d2i_DSAparams(WOLFSSL_DSA**,
-                                               const unsigned char **, long);
+WOLFSSL_API int wolfSSL_i2d_DSAparams(
+    const WOLFSSL_DSA* dsa, unsigned char** out);
+WOLFSSL_API WOLFSSL_DSA* wolfSSL_d2i_DSAparams(
+    WOLFSSL_DSA** dsa, const unsigned char** der, long derLen);
+
+#if defined(OPENSSL_EXTRA) || defined(OPENSSL_EXTRA_X509_SMALL)
 
 #define WOLFSSL_DSA_LOAD_PRIVATE 1
 #define WOLFSSL_DSA_LOAD_PUBLIC  2
+
+#ifndef OPENSSL_COEXIST
+
+typedef WOLFSSL_DSA                   DSA;
+
+#define OPENSSL_DSA_MAX_MODULUS_BITS 3072
 
 #define DSA_new wolfSSL_DSA_new
 #define DSA_free wolfSSL_DSA_free
@@ -144,6 +152,10 @@ WOLFSSL_API WOLFSSL_DSA* wolfSSL_d2i_DSAparams(WOLFSSL_DSA**,
 #define d2i_DSAparams              wolfSSL_d2i_DSAparams
 
 #define DSA_SIG                    WOLFSSL_DSA_SIG
+
+#endif /* !OPENSSL_COEXIST */
+
+#endif /* OPENSSL_EXTRA || OPENSSL_EXTRA_X509_SMALL */
 
 #ifdef __cplusplus
     }  /* extern "C" */

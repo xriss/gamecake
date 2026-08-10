@@ -72,12 +72,17 @@
 		<link>
 			<name>wolfcrypt/port/renesas_common.c</name>
 			<type>1</type>
-			<location>F:/Work/1_Renesas/tsip113_integrate/wolfssl/wolfcrypt/src/port/Renesas/renesas_common.c</location>
+			<locationURI>PARENT-6-PROJECT_LOC/wolfcrypt/src/port/Renesas/renesas_common.c</locationURI>
 		</link>
 		<link>
 			<name>wolfcrypt/port/renesas_tsip_aes.c</name>
 			<type>1</type>
 			<locationURI>PARENT-6-PROJECT_LOC/wolfcrypt/src/port/Renesas/renesas_tsip_aes.c</locationURI>
+		</link>
+		<link>
+			<name>wolfcrypt/port/renesas_tsip_rsa.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/wolfcrypt/src/port/Renesas/renesas_tsip_rsa.c</locationURI>
 		</link>
 		<link>
 			<name>wolfcrypt/port/renesas_tsip_sha.c</name>
@@ -225,11 +230,6 @@
 			<locationURI>PARENT-6-PROJECT_LOC/wolfcrypt/src/hmac.c</locationURI>
 		</link>
 		<link>
-			<name>wolfcrypt/src/idea.c</name>
-			<type>1</type>
-			<locationURI>PARENT-6-PROJECT_LOC/wolfcrypt/src/idea.c</locationURI>
-		</link>
-		<link>
 			<name>wolfcrypt/src/include.am</name>
 			<type>1</type>
 			<locationURI>PARENT-6-PROJECT_LOC/wolfcrypt/src/include.am</locationURI>
@@ -288,11 +288,6 @@
 			<name>wolfcrypt/src/pwdbased.c</name>
 			<type>1</type>
 			<locationURI>PARENT-6-PROJECT_LOC/wolfcrypt/src/pwdbased.c</locationURI>
-		</link>
-		<link>
-			<name>wolfcrypt/src/rabbit.c</name>
-			<type>1</type>
-			<locationURI>PARENT-6-PROJECT_LOC/wolfcrypt/src/rabbit.c</locationURI>
 		</link>
 		<link>
 			<name>wolfcrypt/src/random.c</name>

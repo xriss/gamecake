@@ -1,10 +1,15 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # psk.test
 # copyright wolfSSL 2016
 
 # if we can, isolate the network namespace to eliminate port collisions.
-if [ "${AM_BWRAPPED-}" != "yes" ]; then
+if [[ -n "$NETWORK_UNSHARE_HELPER" ]]; then
+     if [[ -z "$NETWORK_UNSHARE_HELPER_CALLED" ]]; then
+         export NETWORK_UNSHARE_HELPER_CALLED=yes
+         exec "$NETWORK_UNSHARE_HELPER" "$0" "$@" || exit $?
+     fi
+elif [ "${AM_BWRAPPED-}" != "yes" ]; then
     bwrap_path="$(command -v bwrap)"
     if [ -n "$bwrap_path" ]; then
         export AM_BWRAPPED=yes
@@ -28,6 +33,7 @@ ready_file=`pwd`/wolfssl_psk_ready$$
 echo "ready file \"$ready_file\""
 
 create_port() {
+    counter=0
     while [ ! -s "$ready_file" -a "$counter" -lt 20 ]; do
         echo -e "waiting for ready file..."
         sleep 0.1
@@ -58,8 +64,10 @@ remove_ready_file() {
 do_cleanup() {
     echo "in cleanup"
 
-    if  [ $server_pid != $no_pid ]
+    if [ $server_pid != $no_pid ] && kill -0 $server_pid 2>&-
     then
+        # sleep to give sanitizers time to dump backtraces.
+        sleep 1
         echo "killing server"
         kill -9 $server_pid
     fi
@@ -69,7 +77,7 @@ do_cleanup() {
 do_trap() {
     echo "got trap"
     do_cleanup
-    exit -1
+    exit 1
 }
 
 trap do_trap INT TERM
@@ -82,6 +90,10 @@ fi
 ./examples/server/server '-?' 2>&1 | grep -- 'Server not compiled in!'
 if [ $? -eq 0 ]; then
     exit 0
+fi
+./examples/client/client '-?' 2>&1 | grep -- 'Disable client cert/key loading'
+if [ $? -eq 0 ]; then
+    CLIENT_AUTH_ENABLED=1
 fi
 
 # Usual psk server / psk client. This use case is tested in
@@ -139,19 +151,21 @@ if [ $? -ne 0 ]; then
     fi
     echo ""
 
-    # check fail if no auth, psk server with non psk client
-    echo "Checking fail when not sending peer cert"
-    port=0
-    ./examples/server/server -j -R "$ready_file" -p $port &
-    server_pid=$!
-    create_port
-    ./examples/client/client -x -p $port
-    RESULT=$?
-    remove_ready_file
-    if [ $RESULT -eq 0 ]; then
-        echo -e "\n\nClient connected when supposed to fail"
-        do_cleanup
-        exit 1
+    if [ "$CLIENT_AUTH_ENABLED" != "" ]; then
+        # check fail if no auth, psk server with non psk client
+        echo "Checking fail when not sending peer cert"
+        port=0
+        ./examples/server/server -j -R "$ready_file" -p $port &
+        server_pid=$!
+        create_port
+        ./examples/client/client -x -p $port
+        RESULT=$?
+        remove_ready_file
+        if [ $RESULT -eq 0 ]; then
+            echo -e "\n\nClient connected when supposed to fail"
+            do_cleanup
+            exit 1
+        fi
     fi
 fi
 

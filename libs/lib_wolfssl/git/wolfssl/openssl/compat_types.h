@@ -1,12 +1,12 @@
 /* compat_types.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -30,22 +30,29 @@
 #include <wolfssl/wolfcrypt/types.h>
 #include <wolfssl/wolfcrypt/hmac.h>
 
+#ifndef NO_HMAC
 typedef struct WOLFSSL_HMAC_CTX {
     Hmac hmac;
     int  type;
     word32  save_ipad[WC_HMAC_BLOCK_SIZE  / sizeof(word32)];  /* same block size all*/
     word32  save_opad[WC_HMAC_BLOCK_SIZE  / sizeof(word32)];
 } WOLFSSL_HMAC_CTX;
+#endif
 
 typedef char   WOLFSSL_EVP_MD;
-typedef struct WOLFSSL_EVP_PKEY     WOLFSSL_EVP_PKEY;
-typedef struct WOLFSSL_EVP_MD_CTX   WOLFSSL_EVP_MD_CTX;
-typedef struct WOLFSSL_EVP_PKEY WOLFSSL_PKCS8_PRIV_KEY_INFO;
-typedef char WOLFSSL_EVP_CIPHER;
-typedef struct WOLFSSL_EVP_PKEY_CTX WOLFSSL_EVP_PKEY_CTX;
-typedef struct WOLFSSL_EVP_CIPHER_CTX WOLFSSL_EVP_CIPHER_CTX;
-typedef struct WOLFSSL_ASN1_PCTX WOLFSSL_ASN1_PCTX;
+typedef char   WOLFSSL_EVP_CIPHER;
+typedef int    WOLFSSL_ENGINE;
 
+typedef struct WOLFSSL_EVP_PKEY       WOLFSSL_EVP_PKEY;
+typedef struct WOLFSSL_EVP_MD_CTX     WOLFSSL_EVP_MD_CTX;
+typedef struct WOLFSSL_EVP_PKEY       WOLFSSL_PKCS8_PRIV_KEY_INFO;
+typedef struct WOLFSSL_EVP_PKEY_CTX   WOLFSSL_EVP_PKEY_CTX;
+typedef struct WOLFSSL_EVP_CIPHER_CTX WOLFSSL_EVP_CIPHER_CTX;
+typedef struct WOLFSSL_ASN1_PCTX      WOLFSSL_ASN1_PCTX;
+
+typedef struct WOLFSSL_BIO            WOLFSSL_BIO;
+
+#if !defined(OPENSSL_COEXIST) && (defined(OPENSSL_EXTRA) || defined(OPENSSL_EXTRA_X509_SMALL))
 typedef WOLFSSL_EVP_MD         EVP_MD;
 typedef WOLFSSL_EVP_MD_CTX     EVP_MD_CTX;
 typedef WOLFSSL_EVP_CIPHER     EVP_CIPHER;
@@ -54,8 +61,10 @@ typedef WOLFSSL_ASN1_PCTX      ASN1_PCTX;
 typedef WOLFSSL_EVP_PKEY       EVP_PKEY;
 typedef WOLFSSL_EVP_PKEY       PKCS8_PRIV_KEY_INFO;
 
-typedef int WOLFSSL_ENGINE;
-typedef WOLFSSL_ENGINE ENGINE;
-typedef WOLFSSL_EVP_PKEY_CTX EVP_PKEY_CTX;
+typedef WOLFSSL_ENGINE         ENGINE;
+typedef WOLFSSL_EVP_PKEY_CTX   EVP_PKEY_CTX;
+#endif /* !OPENSSL_COEXIST && (OPENSSL_EXTRA || OPENSSL_EXTRA_X509_SMALL) */
 
-#endif /* WOLFSSL_OPENSSL_COMPAT_TYPES_H_ */
+typedef unsigned long (*wolf_sk_hash_cb) (const void *v);
+
+#endif /* !WOLFSSL_OPENSSL_COMPAT_TYPES_H_ */

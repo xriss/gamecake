@@ -18,6 +18,9 @@ extern "C" {
 #undef  SINGLE_THREADED
 #define SINGLE_THREADED
 
+#undef WOLFSSL_NO_SOCK
+#define WOLFSSL_NO_SOCK
+
 #undef  WOLFSSL_SMALL_STACK
 //#define WOLFSSL_SMALL_STACK
 
@@ -53,7 +56,6 @@ extern "C" {
     #define WOLFSSL_HAVE_SP_RSA
     #define WOLFSSL_HAVE_SP_DH
     #define WOLFSSL_HAVE_SP_ECC
-    //#define WOLFSSL_SP_CACHE_RESISTANT
     #define WOLFSSL_SP_MATH     /* only SP math - eliminates fast math code */
 
     /* SP Assembly Speedups */
@@ -406,9 +408,6 @@ extern unsigned int custom_rand_generate(void);
 
 #undef  NO_OLD_TLS
 #define NO_OLD_TLS
-
-#undef  NO_RABBIT
-#define NO_RABBIT
 
 #undef  NO_PSK
 #define NO_PSK

@@ -1,12 +1,12 @@
 /* chacha.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -27,17 +27,11 @@ or Authenticated Encryption with Additional Data (AEAD) algorithm.
 
 */
 
-#ifdef HAVE_CONFIG_H
-    #include <config.h>
-#endif
-
-#include <wolfssl/wolfcrypt/settings.h>
+#include <wolfssl/wolfcrypt/libwolfssl_sources.h>
 
 #if defined(HAVE_CHACHA) && defined(HAVE_POLY1305)
 
 #include <wolfssl/wolfcrypt/chacha20_poly1305.h>
-#include <wolfssl/wolfcrypt/error-crypt.h>
-#include <wolfssl/wolfcrypt/logging.h>
 
 #ifdef NO_INLINE
 #include <wolfssl/wolfcrypt/misc.h>
@@ -47,6 +41,7 @@ or Authenticated Encryption with Additional Data (AEAD) algorithm.
 #endif
 
 #define CHACHA20_POLY1305_AEAD_INITIAL_COUNTER  0
+WOLFSSL_ABI
 int wc_ChaCha20Poly1305_Encrypt(
                 const byte inKey[CHACHA20_POLY1305_AEAD_KEYSIZE],
                 const byte inIV[CHACHA20_POLY1305_AEAD_IV_SIZE],
@@ -56,29 +51,39 @@ int wc_ChaCha20Poly1305_Encrypt(
                 byte outAuthTag[CHACHA20_POLY1305_AEAD_AUTHTAG_SIZE])
 {
     int ret;
-    ChaChaPoly_Aead aead;
+    WC_DECLARE_VAR(aead, ChaChaPoly_Aead, 1, 0);
 
     /* Validate function arguments */
     if (!inKey || !inIV ||
-        !inPlaintext || !inPlaintextLen ||
+        (inPlaintextLen > 0 && inPlaintext == NULL) ||
         !outCiphertext ||
         !outAuthTag)
     {
         return BAD_FUNC_ARG;
     }
 
-    ret = wc_ChaCha20Poly1305_Init(&aead, inKey, inIV,
+    WC_ALLOC_VAR_EX(aead, ChaChaPoly_Aead, 1, NULL, DYNAMIC_TYPE_TMP_BUFFER,
+        return MEMORY_E);
+
+    ret = wc_ChaCha20Poly1305_Init(aead, inKey, inIV,
         CHACHA20_POLY1305_AEAD_ENCRYPT);
     if (ret == 0)
-        ret = wc_ChaCha20Poly1305_UpdateAad(&aead, inAAD, inAADLen);
+        ret = wc_ChaCha20Poly1305_UpdateAad(aead, inAAD, inAADLen);
     if (ret == 0)
-        ret = wc_ChaCha20Poly1305_UpdateData(&aead, inPlaintext, outCiphertext,
+        ret = wc_ChaCha20Poly1305_UpdateData(aead, inPlaintext, outCiphertext,
             inPlaintextLen);
     if (ret == 0)
-        ret = wc_ChaCha20Poly1305_Final(&aead, outAuthTag);
+        ret = wc_ChaCha20Poly1305_Final(aead, outAuthTag);
+    #ifdef WOLFSSL_SMALL_STACK
+    if (aead != NULL)
+    #endif
+        ForceZero(aead, sizeof(ChaChaPoly_Aead));
+    WC_FREE_VAR_EX(aead, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+
     return ret;
 }
 
+WOLFSSL_ABI
 int wc_ChaCha20Poly1305_Decrypt(
                 const byte inKey[CHACHA20_POLY1305_AEAD_KEYSIZE],
                 const byte inIV[CHACHA20_POLY1305_AEAD_IV_SIZE],
@@ -88,31 +93,45 @@ int wc_ChaCha20Poly1305_Decrypt(
                 byte* outPlaintext)
 {
     int ret;
-    ChaChaPoly_Aead aead;
+    WC_DECLARE_VAR(aead, ChaChaPoly_Aead, 1, 0);
     byte calculatedAuthTag[CHACHA20_POLY1305_AEAD_AUTHTAG_SIZE];
 
     /* Validate function arguments */
     if (!inKey || !inIV ||
-        !inCiphertext || !inCiphertextLen ||
+        (inCiphertextLen > 0 && inCiphertext == NULL) ||
         !inAuthTag ||
         !outPlaintext)
     {
         return BAD_FUNC_ARG;
     }
 
+    WC_ALLOC_VAR_EX(aead, ChaChaPoly_Aead, 1, NULL, DYNAMIC_TYPE_TMP_BUFFER,
+        return MEMORY_E);
+
     XMEMSET(calculatedAuthTag, 0, sizeof(calculatedAuthTag));
 
-    ret = wc_ChaCha20Poly1305_Init(&aead, inKey, inIV,
+    ret = wc_ChaCha20Poly1305_Init(aead, inKey, inIV,
         CHACHA20_POLY1305_AEAD_DECRYPT);
     if (ret == 0)
-        ret = wc_ChaCha20Poly1305_UpdateAad(&aead, inAAD, inAADLen);
+        ret = wc_ChaCha20Poly1305_UpdateAad(aead, inAAD, inAADLen);
     if (ret == 0)
-        ret = wc_ChaCha20Poly1305_UpdateData(&aead, inCiphertext, outPlaintext,
+        ret = wc_ChaCha20Poly1305_UpdateData(aead, inCiphertext, outPlaintext,
             inCiphertextLen);
     if (ret == 0)
-        ret = wc_ChaCha20Poly1305_Final(&aead, calculatedAuthTag);
+        ret = wc_ChaCha20Poly1305_Final(aead, calculatedAuthTag);
     if (ret == 0)
         ret = wc_ChaCha20Poly1305_CheckTag(inAuthTag, calculatedAuthTag);
+
+    if (ret != 0) {
+        /* zero plaintext on error */
+        ForceZero(outPlaintext, inCiphertextLen);
+    }
+    #ifdef WOLFSSL_SMALL_STACK
+    if (aead != NULL)
+    #endif
+        ForceZero(aead, sizeof(ChaChaPoly_Aead));
+    WC_FREE_VAR_EX(aead, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+
     return ret;
 }
 
@@ -139,15 +158,27 @@ int wc_ChaCha20Poly1305_Init(ChaChaPoly_Aead* aead,
     int ret;
     byte authKey[CHACHA20_POLY1305_AEAD_KEYSIZE];
 
+    /* authKey will hold the derived Poly1305 key. Register from the top with a
+     * zero baseline so every exit (including the arg-check return, where it is
+     * still zero) is covered. */
+#ifdef WOLFSSL_CHECK_MEM_ZERO
+    XMEMSET(authKey, 0, sizeof(authKey));
+    wc_MemZero_Add("wc_ChaCha20Poly1305_Init authKey", authKey,
+        sizeof(authKey));
+#endif
+
     /* check arguments */
     if (aead == NULL || inKey == NULL || inIV == NULL) {
+    #ifdef WOLFSSL_CHECK_MEM_ZERO
+        wc_MemZero_Check(authKey, sizeof(authKey));
+    #endif
         return BAD_FUNC_ARG;
     }
 
     /* setup aead context */
     XMEMSET(aead, 0, sizeof(ChaChaPoly_Aead));
     XMEMSET(authKey, 0, sizeof(authKey));
-    aead->isEncrypt = (byte)isEncrypt;
+    aead->isEncrypt = isEncrypt ? 1 : 0;
 
     /* Initialize the ChaCha20 context (key and iv) */
     ret = wc_Chacha_SetKey(&aead->chacha, inKey,
@@ -178,6 +209,11 @@ int wc_ChaCha20Poly1305_Init(ChaChaPoly_Aead* aead,
     if (ret == 0) {
         aead->state = CHACHA20_POLY1305_STATE_READY;
     }
+
+    ForceZero(authKey, sizeof(authKey));
+#ifdef WOLFSSL_CHECK_MEM_ZERO
+    wc_MemZero_Check(authKey, sizeof(authKey));
+#endif
 
     return ret;
 }
@@ -305,43 +341,72 @@ int wc_XChaCha20Poly1305_Init(
     byte authKey[CHACHA20_POLY1305_AEAD_KEYSIZE];
     int ret;
 
-    if ((ad == NULL) || (nonce == NULL) || (key == NULL))
+    /* authKey will hold the derived Poly1305 key. Register from the top with a
+     * zero baseline so every exit (including the arg/setup error returns below,
+     * where it is still zero) is covered. */
+#ifdef WOLFSSL_CHECK_MEM_ZERO
+    XMEMSET(authKey, 0, sizeof authKey);
+    wc_MemZero_Add("xchacha20poly1305 authKey", authKey, sizeof authKey);
+#endif
+
+    if ((aead == NULL) || (ad == NULL && ad_len > 0) || (nonce == NULL) ||
+        (key == NULL)) {
+    #ifdef WOLFSSL_CHECK_MEM_ZERO
+        wc_MemZero_Check(authKey, sizeof authKey);
+    #endif
         return BAD_FUNC_ARG;
+    }
 
     if ((key_len != CHACHA20_POLY1305_AEAD_KEYSIZE) ||
-        (nonce_len != XCHACHA20_POLY1305_AEAD_NONCE_SIZE))
+        (nonce_len != XCHACHA20_POLY1305_AEAD_NONCE_SIZE)) {
+    #ifdef WOLFSSL_CHECK_MEM_ZERO
+        wc_MemZero_Check(authKey, sizeof authKey);
+    #endif
         return BAD_FUNC_ARG;
+    }
 
     if ((ret = wc_XChacha_SetKey(&aead->chacha,
                                  key, key_len,
                                  nonce, nonce_len,
-                                 0 /* counter */)) < 0)
+                                 0 /* counter */)) < 0) {
+    #ifdef WOLFSSL_CHECK_MEM_ZERO
+        wc_MemZero_Check(authKey, sizeof authKey);
+    #endif
         return ret;
+    }
 
     XMEMSET(authKey, 0, sizeof authKey);
 
     /* Create the Poly1305 key */
     if ((ret = wc_Chacha_Process(&aead->chacha, authKey, authKey,
                                  (word32)sizeof authKey)) < 0)
-        return ret;
+        goto out;
     /* advance to start of the next ChaCha block. */
     wc_Chacha_purge_current_block(&aead->chacha);
 
     /* Initialize Poly1305 context */
     if ((ret = wc_Poly1305SetKey(&aead->poly, authKey,
                                  (word32)sizeof authKey)) < 0)
-        return ret;
+        goto out;
 
     if ((ret = wc_Poly1305Update(&aead->poly, ad, (word32)ad_len)) < 0)
-        return ret;
+        goto out;
 
     if ((ret = wc_Poly1305_Pad(&aead->poly, (word32)ad_len)) < 0)
-        return ret;
+        goto out;
 
-    aead->isEncrypt = (byte)isEncrypt;
+    aead->isEncrypt = isEncrypt ? 1 : 0;
     aead->state = CHACHA20_POLY1305_STATE_AAD;
 
-    return 0;
+    ret = 0;
+
+out:
+    ForceZero(authKey, sizeof(authKey));
+#ifdef WOLFSSL_CHECK_MEM_ZERO
+    wc_MemZero_Check(authKey, sizeof(authKey));
+#endif
+
+    return ret;
 }
 
 static WC_INLINE int wc_XChaCha20Poly1305_crypt_oneshot(
@@ -353,9 +418,7 @@ static WC_INLINE int wc_XChaCha20Poly1305_crypt_oneshot(
     int isEncrypt)
 {
     int ret;
-    ssize_t dst_len = isEncrypt ?
-        (ssize_t)src_len + POLY1305_DIGEST_SIZE :
-        (ssize_t)src_len - POLY1305_DIGEST_SIZE;
+    size_t dst_len;
     const byte *src_i;
     byte *dst_i;
     size_t src_len_rem;
@@ -368,13 +431,36 @@ static WC_INLINE int wc_XChaCha20Poly1305_crypt_oneshot(
     ChaChaPoly_Aead aead_buf, *aead = &aead_buf;
 #endif
 
+    if (isEncrypt) {
+        if (src_len > (size_t)(CHACHA20_POLY1305_MAX - POLY1305_DIGEST_SIZE)) {
+            ret = BAD_FUNC_ARG;
+            goto out;
+        }
+        dst_len = src_len + (size_t)POLY1305_DIGEST_SIZE;
+    }
+    else {
+        if (src_len < POLY1305_DIGEST_SIZE) {
+            ret = BAD_FUNC_ARG;
+            goto out;
+        }
+        dst_len = src_len - (size_t)POLY1305_DIGEST_SIZE;
+    }
+
     if ((dst == NULL) || (src == NULL)) {
         ret = BAD_FUNC_ARG;
         goto out;
     }
 
-    if ((ssize_t)dst_space < dst_len) {
+    if (dst_space < dst_len) {
         ret = BUFFER_E;
+        goto out;
+    }
+
+    /* Sanity check lengths to prevent truncation when cast to word32. */
+    if ((ad_len > WOLFSSL_MAX_32BIT) ||
+        (nonce_len > WOLFSSL_MAX_32BIT) ||
+        (key_len > WOLFSSL_MAX_32BIT)) {
+        ret = BAD_FUNC_ARG;
         goto out;
     }
 
@@ -383,11 +469,16 @@ static WC_INLINE int wc_XChaCha20Poly1305_crypt_oneshot(
                                          key, (word32)key_len, 1)) < 0)
         goto out;
 
+#ifdef WOLFSSL_CHECK_MEM_ZERO
+    wc_MemZero_Add("wc_XChaCha20Poly1305_crypt_oneshot aead", aead,
+        sizeof(ChaChaPoly_Aead));
+#endif
+
     /* process the input in 16k pieces to accommodate src_lens that don't fit in a word32,
      * and to exploit hot cache for the input data.
      */
     src_i = src;
-    src_len_rem = isEncrypt ? src_len : (size_t)dst_len;
+    src_len_rem = isEncrypt ? src_len : dst_len;
     dst_i = dst;
     while (src_len_rem > 0) {
         word32 this_src_len =
@@ -408,13 +499,13 @@ static WC_INLINE int wc_XChaCha20Poly1305_crypt_oneshot(
 
     if (aead->poly.leftover) {
         if ((ret = wc_Poly1305_Pad(&aead->poly, (word32)aead->poly.leftover)) < 0)
-            return ret;
+            goto out;
     }
 
 #ifdef WORD64_AVAILABLE
-    ret = wc_Poly1305_EncodeSizes64(&aead->poly, ad_len, isEncrypt ? src_len : (size_t)dst_len);
+    ret = wc_Poly1305_EncodeSizes64(&aead->poly, ad_len, isEncrypt ? src_len : dst_len);
 #else
-    ret = wc_Poly1305_EncodeSizes(&aead->poly, ad_len, isEncrypt ? src_len : (size_t)dst_len);
+    ret = wc_Poly1305_EncodeSizes(&aead->poly, ad_len, isEncrypt ? src_len : dst_len);
 #endif
     if (ret < 0)
         goto out;
@@ -427,7 +518,9 @@ static WC_INLINE int wc_XChaCha20Poly1305_crypt_oneshot(
         if ((ret = wc_Poly1305Final(&aead->poly, outAuthTag)) < 0)
             goto out;
 
-        if (ConstantCompare(outAuthTag, src + dst_len, POLY1305_DIGEST_SIZE) != 0) {
+        if (ConstantCompare(outAuthTag, src + dst_len, POLY1305_DIGEST_SIZE)
+            != 0) {
+            ForceZero(dst, dst_space);
             ret = MAC_CMP_FAILED_E;
             goto out;
         }
@@ -439,6 +532,8 @@ static WC_INLINE int wc_XChaCha20Poly1305_crypt_oneshot(
 
 #if defined(WOLFSSL_SMALL_STACK) && !defined(WOLFSSL_NO_MALLOC)
     XFREE(aead, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+#elif defined(WOLFSSL_CHECK_MEM_ZERO)
+    wc_MemZero_Check(aead, sizeof(ChaChaPoly_Aead));
 #endif
 
     return ret;

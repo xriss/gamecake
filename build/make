@@ -68,8 +68,6 @@ declare -A flags
 mode="names"
 for arg in "$@" ; do
 
-echo $arg
-
 	case $mode in
 
 		"set")
@@ -158,7 +156,6 @@ Available options are :
 
 ./make --openal=sys  # use system provided openal
 
-
 EOF
 
 exit 0
@@ -178,7 +175,7 @@ fi
 buildhere=build-gmake-$( arg_get gcc )-$( arg_get cpu )
 
 echo BUILDING INTO $buildhere
-
+env | grep "BUILD_"
 
 
 export GAMECAKE_WIN_TYPE=$( arg_get win )
@@ -189,7 +186,7 @@ export GAMECAKE_WIN_TYPE=$( arg_get win )
 
 if [[ -n "$( arg_get clean )" ]] ; then
 
-echo cleaning ${buildhere}
+echo hard cleaning ${buildhere}
 
 rm -rf ${buildhere}
 
@@ -210,11 +207,14 @@ makeopts="config=debug"
 
 fi
 
-# need to include cpu in android builds
-#if [[ "$( arg_get gcc )" = "android" ]] ; then
-#makeopts="$makeopts-$( arg_get cpu )"
-#fi
+if [[ -n "$( arg_get debug )" ]] ; then
 
+makeopts="config=debug"
+
+fi
+
+# include nonflag arguments from commandline to control make
+makeopts="$makeopts ${args[@]}"
 
 
 # this will make a directory to build into
@@ -239,21 +239,26 @@ $PUREMAKE_LUA build/puremake --openal=$( arg_get openal ) gmake $( arg_get gcc )
 # enter that directory
 cd ${buildhere}
 
-# what is about to happen
-echo ${buildhere} / make $makeopts
+# where is my build
+echo
+echo " ${buildhere} "
 
+# a pre clean
 if [[ -n "$( arg_get clean )" ]] ; then
 
-echo " make -j$( arg_get jobs ) $makeopts "
+echo
+echo " make -j$( arg_get jobs ) $makeopts clean "
 
 make -j$( arg_get jobs ) $makeopts clean
-make -j$( arg_get jobs ) $makeopts
-
-else
-
-echo " make -j$( arg_get jobs ) $makeopts "
-make -j$( arg_get jobs ) $makeopts
 
 fi
+
+# the real build
+
+echo
+echo " make -j$( arg_get jobs ) $makeopts "
+echo
+
+make -j$( arg_get jobs ) $makeopts
 
 

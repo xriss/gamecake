@@ -1,12 +1,12 @@
 /* user_settings.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -205,7 +205,7 @@ extern "C" {
         #else
             #undef  ALT_ECC_SIZE
             #define ALT_ECC_SIZE
-            /* wolfSSL will compute the FP_MAX_BITS_ECC, but it can be overriden */
+            /* wolfSSL will compute the FP_MAX_BITS_ECC, but it can be overridden */
             //#undef  FP_MAX_BITS_ECC
             //#define FP_MAX_BITS_ECC (256 * 2)
         #endif
@@ -419,6 +419,7 @@ extern "C" {
 
     /* prototypes for user heap override functions */
     /* Note: Realloc only required for normal math */
+    /* Note2: XFREE(NULL) must be properly handled */
     #include <stddef.h>  /* for size_t */
     extern void *myMalloc(size_t n, void* heap, int type);
     extern void myFree(void *p, void* heap, int type);
@@ -523,7 +524,7 @@ extern "C" {
     #define USE_WOLF_STRTOK
     #define XSTRTOK(s1,d,ptr) wc_strtok((s1),(d),(ptr))
 
-    #define XSTRNSTR(s1,s2,n) mystrnstr((s1),(s2),(n))
+    #define XSTRNSTR(s1,s2,n) wolfSSL_strnstr((s1),(s2),(n))
 
     #define XMEMCPY(d,s,l)    memcpy((d),(s),(l))
     #define XMEMSET(b,c,l)    memset((b),(c),(l))
@@ -649,9 +650,6 @@ extern "C" {
 
 #undef  NO_OLD_TLS
 #define NO_OLD_TLS
-
-#undef  NO_RABBIT
-#define NO_RABBIT
 
 #undef  NO_PSK
 #define NO_PSK

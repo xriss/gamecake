@@ -1,0 +1,90 @@
+name: Multiple architectures
+
+# START OF COMMON SECTION
+on:
+  push:
+    branches: [ 'release/**' ]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [ '*' ]
+  # Weekday-morning cron (10:00 UTC) seeds the master-scoped ccache that PR runs
+  # restore: re-runs --build-only (compile only, no tests) on the
+  # default branch. PR runs are read-only (see ccache-setup).
+  schedule:
+    - cron: '20 10 * * 1-5'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+# END OF COMMON SECTION
+
+jobs:
+  # All former runner-per-config matrix entries build on one runner via
+  # .github/scripts/parallel-make-check.py (see os-check.yml for the full
+  # pattern): each config builds in its own out-of-tree ("VPATH") build
+  # directory off one checkout/autogen, on a pool of one-per-CPU worker
+  # threads, longest first.
+  my_matrix:
+    name: Multi-arch test
+    if: ${{ (github.repository_owner == 'wolfssl') && (github.event_name != 'pull_request' || github.event.pull_request.draft == false) }}
+    runs-on: ubuntu-22.04
+    # Generous for a cold ccache; warm reruns finish in a fraction.
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+        name: Checkout wolfSSL
+
+      - name: Install dependencies
+        uses: ./.github/actions/install-apt-deps
+        with:
+          packages: autoconf automake libtool build-essential crossbuild-essential-arm64 crossbuild-essential-armhf crossbuild-essential-riscv64 crossbuild-essential-armel qemu-user
+          ghcr-debs-tag: ubuntu-22.04-minimal
+
+      # ccache via the cross-platform composite; the script passes the
+      # compiler to configure as CC="ccache gcc" (or a per-config "cc").
+      - name: Set up ccache
+        uses: ./.github/actions/ccache-setup
+        with:
+          workflow-id: multi-arch
+          read-only: ${{ github.event_name == 'pull_request' }}
+          max-size: 500M
+
+      # NOTE: the old runner-per-config matrix combined an "include" list
+      # of four architectures with an "opts" axis; GitHub's include-merge
+      # rules made each arch entry overwrite the previous one, so only the
+      # last (armel) combinations actually ran. .github/configs/multi-arch.json
+      # restores the evidently intended aarch64/armhf/riscv64 x opts coverage
+      # alongside armel, except riscv64 x sp-math: configure rejects
+      # --enable-sp-math without SP, and riscv64's --enable-riscv-asm (unlike
+      # the other arches' --enable-sp-asm) does not bring it in. Cross builds
+      # run testwolfcrypt transparently under qemu-user (binfmt) with the
+      # matching QEMU_LD_PREFIX.
+      #
+      # The list is kept out of this file on purpose: GitHub caps a single
+      # `run:` step at 21000 characters, and an inlined heredoc is what
+      # silently pushed os-check.yml past that cap - the whole file then
+      # failed to load and every run reported zero jobs.
+      - name: Build all configs (parallel, out-of-tree)
+        run: |
+          .github/scripts/parallel-make-check.py \
+            ${{ github.event_name == 'schedule' && '--build-only' || '' }} \
+            .github/configs/multi-arch.json
+
+      - name: ccache stats
+        if: always()
+        run: ccache -s || true
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          retention-days: 7
+          name: multi-arch-logs
+          path: |
+            build-*/make-check.log
+            build-*/test-suite.log
+            build-*/config.log
+          if-no-files-found: ignore

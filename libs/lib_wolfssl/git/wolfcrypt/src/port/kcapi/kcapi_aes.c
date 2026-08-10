@@ -1,12 +1,12 @@
 /* kcapi_aes.c
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -19,18 +19,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
-
-
-#ifdef HAVE_CONFIG_H
-    #include <config.h>
-#endif
-
-#include <errno.h>
-
-#include <wolfssl/wolfcrypt/settings.h>
-#include <wolfssl/wolfcrypt/error-crypt.h>
+#include <wolfssl/wolfcrypt/libwolfssl_sources.h>
 
 #if !defined(NO_AES) && defined(WOLFSSL_KCAPI_AES)
+
+#include <errno.h>
 
 #if defined(HAVE_FIPS) && \
     defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2)
@@ -39,13 +32,12 @@
     #define FIPS_NO_WRAPPERS
 
     #ifdef USE_WINDOWS_API
-        #pragma code_seg(".fipsA$g")
-        #pragma const_seg(".fipsB$g")
+        #pragma code_seg(".fipsA$ba")
+        #pragma const_seg(".fipsB$ba")
     #endif
 #endif
 
 #include <wolfssl/wolfcrypt/aes.h>
-#include <wolfssl/wolfcrypt/logging.h>
 #include <wolfssl/wolfcrypt/port/kcapi/wc_kcapi.h>
 
 #ifdef NO_INLINE
@@ -65,7 +57,8 @@
         int          ret = 0;
         struct iovec iov;
 
-        if (aes == NULL || out == NULL || in == NULL) {
+        if (aes == NULL || out == NULL || in == NULL ||
+                                                    sz % WC_AES_BLOCK_SIZE != 0) {
             ret = BAD_FUNC_ARG;
         }
 
@@ -84,8 +77,8 @@
             }
         }
         if (ret == 0 && aes->init == 0) {
-            ret = kcapi_cipher_stream_init_enc(aes->handle, (byte*)aes->reg,
-                                               NULL, 0);
+            ret = (int)kcapi_cipher_stream_init_enc(aes->handle, (byte*)aes->reg,
+                                                    NULL, 0);
             if (ret != 0) {
                 WOLFSSL_MSG("Error initializing IV through KCAPI");
             }
@@ -95,15 +88,15 @@
             aes->init = 1;
             iov.iov_base = (byte*)in;
             iov.iov_len = sz;
-            ret = kcapi_cipher_stream_update(aes->handle, &iov, 1);
+            ret = (int)kcapi_cipher_stream_update(aes->handle, &iov, 1);
             if (ret < 0) {
-                WOLFSSL_MSG("CbcEncrypt error updateing through KCAPI");
+                WOLFSSL_MSG("CbcEncrypt error updating through KCAPI");
             }
         }
         if (ret >= 0) {
             iov.iov_base = out;
             iov.iov_len = sz;
-            ret = kcapi_cipher_stream_op(aes->handle, &iov, 1);
+            ret = (int)kcapi_cipher_stream_op(aes->handle, &iov, 1);
             if (ret < 0) {
                 WOLFSSL_MSG("CbcEncrypt error with op in KCAPI");
             }
@@ -123,7 +116,7 @@
         struct iovec iov;
 
         if (aes == NULL || out == NULL || in == NULL || \
-                                                     sz % AES_BLOCK_SIZE != 0) {
+                                                     sz % WC_AES_BLOCK_SIZE != 0) {
             ret = BAD_FUNC_ARG;
         }
 
@@ -142,8 +135,8 @@
             }
         }
         if (ret == 0 && aes->init == 0) {
-            ret = kcapi_cipher_stream_init_dec(aes->handle, (byte*)aes->reg,
-                                               NULL, 0);
+            ret = (int)kcapi_cipher_stream_init_dec(aes->handle, (byte*)aes->reg,
+                                                    NULL, 0);
             if (ret != 0) {
                 WOLFSSL_MSG("Error initializing IV through KCAPI");
             }
@@ -153,15 +146,15 @@
             aes->init = 1;
             iov.iov_base = (byte*)in;
             iov.iov_len = sz;
-            ret = kcapi_cipher_stream_update(aes->handle, &iov, 1);
+            ret = (int)kcapi_cipher_stream_update(aes->handle, &iov, 1);
             if (ret < 0) {
-                WOLFSSL_MSG("CbcDecrypt error updateing through KCAPI");
+                WOLFSSL_MSG("CbcDecrypt error updating through KCAPI");
             }
         }
         if (ret >= 0) {
             iov.iov_base = out;
             iov.iov_len = sz;
-            ret = kcapi_cipher_stream_op(aes->handle, &iov, 1);
+            ret = (int)kcapi_cipher_stream_op(aes->handle, &iov, 1);
             if (ret < 0) {
                 WOLFSSL_MSG("CbcDecrypt error with op in KCAPI");
             }
@@ -234,31 +227,34 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 {
     int     ret = 0;
     byte*   data = NULL;
-    word32  dataSz = authInSz + sz + authTagSz;
-    ssize_t rc;
+    word32  dataSz;
+    int     inbuflen = 0, outbuflen = 0;
+#ifndef KCAPI_USE_XMALLOC
+    size_t  pageSz = (size_t)sysconf(_SC_PAGESIZE);
+#endif
 
     /* argument checks */
-    if (aes == NULL || authTagSz > AES_BLOCK_SIZE) {
+    if ((aes == NULL) || ((sz != 0 && (in == NULL || out == NULL))) ||
+        (iv == NULL) || ((authTag == NULL) && (authTagSz > 0)) ||
+        (authTagSz > WC_AES_BLOCK_SIZE) || ((authIn == NULL) && (authInSz > 0))) {
         ret = BAD_FUNC_ARG;
     }
 
-    if ((ret == 0) && ((ivSz != WC_SYSTEM_AESGCM_IV) ||
-                                       (authTagSz > WOLFSSL_MAX_AUTH_TAG_SZ))) {
+    if ((ret == 0) && ((ivSz != WC_SYSTEM_AESGCM_IV)
+#if defined(HAVE_FIPS) && FIPS_VERSION3_LT(7,0,0)
+                       || (authTagSz < WOLFSSL_MIN_AUTH_TAG_SZ)
+                       || (authTagSz > WOLFSSL_MAX_AUTH_TAG_SZ)
+#endif
+            ))
+    {
         WOLFSSL_MSG("IV/AAD size not supported on system");
         ret = BAD_FUNC_ARG;
     }
 
-    if ((ret == 0) && (authTagSz < WOLFSSL_MIN_AUTH_TAG_SZ)) {
-        WOLFSSL_MSG("GcmEncrypt authTagSz too small error");
-        ret = BAD_FUNC_ARG;
-    }
-
-    if (ret == 0) {
-        data = (byte*)XMALLOC(dataSz, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
-        if (data == NULL) {
-            ret = MEMORY_E;
-        }
-    }
+#if !defined(HAVE_FIPS) || FIPS_VERSION3_GE(7,0,0)
+    if (ret == 0)
+        ret = wc_local_AesGcmCheckTagSz(authTagSz);
+#endif
 
     if (ret == 0) {
         ret = kcapi_aead_init(&aes->handle, WC_NAME_AESGCM, 0);
@@ -267,7 +263,26 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         }
     }
 
-    if (ret >= 0) {
+    if (ret == 0) {
+        inbuflen  = (int)kcapi_aead_inbuflen_enc( aes->handle, sz, authInSz,
+            authTagSz);
+        outbuflen = (int)kcapi_aead_outbuflen_enc(aes->handle, sz, authInSz,
+            authTagSz);
+        dataSz = (inbuflen > outbuflen) ? inbuflen : outbuflen;
+    #ifdef KCAPI_USE_XMALLOC
+        data = (byte *)XMALLOC(dataSz, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
+        if (data == NULL) {
+            ret = MEMORY_E;
+        }
+    #else
+        ret = posix_memalign((void*)&data, pageSz, dataSz);
+        if (ret != 0) {
+            ret = MEMORY_E;
+        }
+    #endif
+    }
+
+    if (ret == 0) {
         ret = kcapi_aead_setkey(aes->handle, (byte*)aes->devKey, aes->keylen);
         if (ret != 0) {
             WOLFSSL_MSG("GcmEncrypt set key failed");
@@ -283,18 +298,22 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 
     if (ret == 0) {
         kcapi_aead_setassoclen(aes->handle, authInSz);
-        XMEMCPY(data, authIn, authInSz);
-        XMEMCPY(data + authInSz, in, sz);
+        if (authInSz > 0)
+            XMEMCPY(data, authIn, authInSz);
+        if (sz > 0)
+            XMEMCPY(data + authInSz, in, sz);
 
-        rc = kcapi_aead_encrypt(aes->handle, data, dataSz, iv, data, dataSz,
-                                                        KCAPI_ACCESS_HEURISTIC);
-        if (rc < 0) {
+        ret = (int)kcapi_aead_encrypt(aes->handle, data, inbuflen, iv, data,
+            outbuflen, KCAPI_ACCESS_HEURISTIC);
+        if (ret < 0) {
             WOLFSSL_MSG("GcmEncrypt failed");
-            ret = (int)rc;
         }
-        else if ((word32)rc != dataSz) {
+        else if (ret != outbuflen) {
             WOLFSSL_MSG("GcmEncrypt produced wrong output length");
             ret = BAD_FUNC_ARG;
+        }
+        else {
+            ret = 0; /* success */
         }
     }
 
@@ -304,7 +323,11 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     }
 
     if (data != NULL) {
+    #ifdef KCAPI_USE_XMALLOC
         XFREE(data, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
+    #else
+        free(data);
+    #endif
     }
     if (aes != NULL && aes->handle != NULL) {
         kcapi_aead_destroy(aes->handle);
@@ -324,33 +347,34 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 {
     int     ret = 0;
     byte*   data = NULL;
-    word32  dataSz = authInSz + sz + authTagSz;
-    word32  outSz = authInSz + sz;
-    ssize_t rc;
+    word32  dataSz;
+    int     inbuflen = 0, outbuflen = 0;
+#ifndef KCAPI_USE_XMALLOC
+    size_t  pageSz = (size_t)sysconf(_SC_PAGESIZE);
+#endif
 
     /* argument checks */
-    if (aes == NULL || (sz != 0 && (in == NULL || out == NULL)) ||
-                                                   authTagSz > AES_BLOCK_SIZE) {
+    if ((aes == NULL) || ((sz != 0 && (in == NULL || out == NULL))) ||
+        (iv == NULL) || ((authTag == NULL) && (authTagSz > 0)) ||
+        (authTagSz > WC_AES_BLOCK_SIZE) || ((authIn == NULL) && (authInSz > 0))) {
         ret = BAD_FUNC_ARG;
     }
 
-    if ((ret == 0) && ((ivSz != WC_SYSTEM_AESGCM_IV) ||
-                                       (authTagSz > WOLFSSL_MAX_AUTH_TAG_SZ))) {
+    if ((ret == 0) && ((ivSz != WC_SYSTEM_AESGCM_IV)
+#if defined(HAVE_FIPS) && FIPS_VERSION3_LT(7,0,0)
+                       || (authTagSz < WOLFSSL_MIN_AUTH_TAG_SZ)
+                       || (authTagSz > WOLFSSL_MAX_AUTH_TAG_SZ)
+#endif
+            ))
+    {
         WOLFSSL_MSG("IV/AAD size not supported on system");
         ret = BAD_FUNC_ARG;
     }
 
-    if ((ret == 0) && (authTagSz < WOLFSSL_MIN_AUTH_TAG_SZ)) {
-        WOLFSSL_MSG("GcmDecrypt authTagSz too small error");
-        ret = BAD_FUNC_ARG;
-    }
-
-    if (ret == 0) {
-        data = (byte*)XMALLOC(dataSz, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
-        if (data == NULL) {
-            ret = MEMORY_E;
-        }
-    }
+#if !defined(HAVE_FIPS) || FIPS_VERSION3_GE(7,0,0)
+    if (ret == 0)
+        ret = wc_local_AesGcmCheckTagSz(authTagSz);
+#endif
 
     if (ret == 0) {
         ret = kcapi_aead_init(&aes->handle, WC_NAME_AESGCM, 0);
@@ -359,7 +383,26 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         }
     }
 
-    if (ret >= 0) {
+    if (ret == 0) {
+        inbuflen  = (int)kcapi_aead_inbuflen_dec( aes->handle, sz, authInSz,
+            authTagSz);
+        outbuflen = (int)kcapi_aead_outbuflen_dec(aes->handle, sz, authInSz,
+            authTagSz);
+        dataSz = (inbuflen > outbuflen) ? inbuflen : outbuflen;
+    #ifdef KCAPI_USE_XMALLOC
+        data = (byte*)XMALLOC(dataSz, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
+        if (data == NULL) {
+            ret = MEMORY_E;
+        }
+    #else
+        ret = posix_memalign((void*)&data, pageSz, dataSz);
+        if (ret != 0) {
+            ret = MEMORY_E;
+        }
+    #endif
+    }
+
+    if (ret == 0) {
         ret = kcapi_aead_setkey(aes->handle, (byte*)aes->devKey, aes->keylen);
         if (ret != 0) {
             WOLFSSL_MSG("GcmDecrypt set key failed");
@@ -372,22 +415,25 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 
     if (ret == 0) {
         kcapi_aead_setassoclen(aes->handle, authInSz);
-        XMEMCPY(data, authIn, authInSz);
-        XMEMCPY(data + authInSz, in, sz);
+        if (authInSz > 0)
+            XMEMCPY(data, authIn, authInSz);
+        if (sz > 0)
+            XMEMCPY(data + authInSz, in, sz);
         XMEMCPY(data + authInSz + sz, authTag, authTagSz);
 
-        rc = kcapi_aead_decrypt(aes->handle, data, dataSz, iv, data, outSz,
-                                                        KCAPI_ACCESS_HEURISTIC);
-        if (rc < 0) {
+        ret = (int)kcapi_aead_decrypt(aes->handle, data, inbuflen, iv, data,
+            outbuflen, KCAPI_ACCESS_HEURISTIC);
+        if (ret < 0) {
             WOLFSSL_MSG("GcmDecrypt failed");
-            if (rc == -EBADMSG)
+            if (ret == -EBADMSG)
                 ret = AES_GCM_AUTH_E;
-            else
-                ret = (int)rc;
         }
-        else if ((word32)rc != outSz) {
+        else if ((word32)ret != sz + authInSz) {
             WOLFSSL_MSG("GcmDecrypt produced wrong output length");
             ret = BAD_FUNC_ARG;
+        }
+        else {
+            ret = 0; /* success */
         }
     }
 
@@ -396,7 +442,11 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     }
 
     if (data != NULL) {
+    #ifdef KCAPI_USE_XMALLOC
         XFREE(data, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
+    #else
+        free(data);
+    #endif
     }
     if (aes != NULL && aes->handle != NULL) {
         kcapi_aead_destroy(aes->handle);

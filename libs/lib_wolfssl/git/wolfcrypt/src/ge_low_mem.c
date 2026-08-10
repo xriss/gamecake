@@ -1,12 +1,12 @@
 /* ge_low_mem.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -19,20 +19,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
+#include <wolfssl/wolfcrypt/libwolfssl_sources.h>
 
  /* Based from Daniel Beer's public domain work. */
 
-#ifdef HAVE_CONFIG_H
-    #include <config.h>
-#endif
-
-#include <wolfssl/wolfcrypt/settings.h>
-
-#ifdef HAVE_ED25519
+/* under WOLF_CRYPTO_CB_ONLY_ED25519 the callback device does all Ed25519
+ * group math, so this file compiles out */
+#if defined(HAVE_ED25519) && !defined(WOLF_CRYPTO_CB_ONLY_ED25519)
 #ifdef ED25519_SMALL /* use slower code that takes less memory */
 
 #include <wolfssl/wolfcrypt/ge_operations.h>
-#include <wolfssl/wolfcrypt/error-crypt.h>
 #ifdef NO_INLINE
     #include <wolfssl/wolfcrypt/misc.h>
 #else
@@ -133,7 +129,6 @@ static void barrett_reduce(word32* r, word32 x[64])
   word32 r2[33];
   word32 carry;
   word32 pb = 0;
-  word32 b;
 
   for (i = 0;i < 66;++i) q2[i] = 0;
   for (i = 0;i < 33;++i) r2[i] = 0;
@@ -160,6 +155,7 @@ static void barrett_reduce(word32* r, word32 x[64])
 
   for(i=0;i<32;i++)
   {
+    word32 b;
     pb += r2[i];
     b = lt(r1[i],pb);
     r[i] = r1[i]-pb+(b<<8);
@@ -176,7 +172,7 @@ static void barrett_reduce(word32* r, word32 x[64])
 }
 
 
-void sc_reduce(unsigned char x[64])
+void sc_reduce(unsigned char *x)
 {
   int i;
   word32 t[64];
@@ -442,28 +438,6 @@ void ge_scalarmult_base(ge_p3 *R,const unsigned char *nonce)
 
 
 /* pack the point h into array s */
-void ge_p3_tobytes(unsigned char *s,const ge_p3 *h)
-{
-    byte x[F25519_SIZE];
-    byte y[F25519_SIZE];
-    byte z1[F25519_SIZE];
-    byte parity;
-
-    fe_inv__distinct(z1, h->Z);
-    fe_mul__distinct(x, h->X, z1);
-    fe_mul__distinct(y, h->Y, z1);
-
-    fe_normalize(x);
-    fe_normalize(y);
-
-    parity = (x[0] & 1) << 7;
-    lm_copy(s, y);
-    fe_normalize(s);
-    s[31] |= parity;
-}
-
-
-/* pack the point h into array s */
 void ge_tobytes(unsigned char *s,const ge_p2 *h)
 {
     byte x[F25519_SIZE];
@@ -534,6 +508,33 @@ int ge_frombytes_negate_vartime(ge_p3 *p,const unsigned char *s)
     return ret;
 }
 
+#ifdef WOLFSSL_CHECK_VER_FAULTS
+/* return 0 if equal and -1 if not equal */
+static int ge_equal(ge a, ge b)
+{
+    if (XMEMCMP(a, b, sizeof(ge)) == 0) {
+        return 0;
+    }
+    else {
+        return -1;
+    }
+}
+
+/* returns 0 if a == b */
+static int ge_p3_equal(ge_p3* a, ge_p3* b)
+{
+    int ret = 0;
+
+    ret |= ge_equal(a->X, b->X);
+    ret |= ge_equal(a->Y, b->Y);
+    ret |= ge_equal(a->Z, b->Z);
+    ret |= ge_equal(a->T, b->T);
+
+    return ret;
+}
+#endif
+
+
 
 int ge_double_scalarmult_vartime(ge_p2* R, const unsigned char *h,
                                  const ge_p3 *inA,const unsigned char *sig)
@@ -548,9 +549,19 @@ int ge_double_scalarmult_vartime(ge_p2* R, const unsigned char *h,
 
     /* find H(R,A,M) * -A */
     ed25519_smult(&A, &A, h);
+#ifdef WOLFSSL_CHECK_VER_FAULTS
+    if (ge_p3_equal(&A, (ge_p3*)inA) == 0) {
+        ret = BAD_STATE_E;
+    }
+#endif
 
     /* SB + -H(R,A,M)A */
     ed25519_add(&A, &p, &A);
+#ifdef WOLFSSL_CHECK_VER_FAULTS
+    if (ge_p3_equal(&A, &p) == 0) {
+        ret = BAD_STATE_E;
+    }
+#endif
 
     lm_copy(R->X, A.X);
     lm_copy(R->Y, A.Y);

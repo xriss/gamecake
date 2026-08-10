@@ -1,12 +1,12 @@
 /* srp.c SRP unit tests
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -19,14 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
-
-#ifdef HAVE_CONFIG_H
-    #include <config.h>
-#endif
-
-#include <wolfssl/wolfcrypt/settings.h>
-
 #include <tests/unit.h>
+
 #include <wolfssl/wolfcrypt/sha512.h>
 #include <wolfssl/wolfcrypt/srp.h>
 
@@ -34,9 +28,6 @@
 
 static byte username[] = "user";
 static word32 usernameSz = 4;
-
-static byte password[] = "password";
-static word32 passwordSz = 8;
 
 static byte srp_N[] = {
     0xD4, 0xC7, 0xF8, 0xA2, 0xB3, 0x2C, 0x11, 0xB8, 0xFB, 0xA9, 0x58, 0x1E,
@@ -54,6 +45,17 @@ static byte srp_g[] = {
 static byte srp_salt[] = {
     0x80, 0x66, 0x61, 0x5B, 0x7D, 0x33, 0xA2, 0x2E, 0x79, 0x18
 };
+
+#ifdef NO_SHA
+
+#define SRP_TYPE_TEST_DEFAULT SRP_TYPE_SHA256
+
+#else /* SHA-1 */
+
+#define SRP_TYPE_TEST_DEFAULT SRP_TYPE_SHA
+
+static byte password[] = "password";
+static word32 passwordSz = 8;
 
 static byte srp_verifier[] = {
     0x24, 0x5F, 0xA5, 0x1B, 0x2A, 0x28, 0xF8, 0xFF, 0xE2, 0xA0, 0xF8, 0x61,
@@ -111,17 +113,23 @@ static byte srp_server_proof[] = {
     0xD0, 0xAF, 0xC5, 0xBC, 0xAE, 0x12, 0xFC, 0x75
 };
 
+#endif /* SHA-1 */
+
 static void test_SrpInit(void)
 {
     Srp srp;
 
     /* invalid params */
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpInit(NULL, SRP_TYPE_SHA, SRP_CLIENT_SIDE));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpInit(&srp, (SrpType)255, SRP_CLIENT_SIDE));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpInit(&srp, SRP_TYPE_SHA, (SrpSide)255));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpInit(NULL, SRP_TYPE_TEST_DEFAULT,
+                                         SRP_CLIENT_SIDE));
+    /* // NOLINTBEGIN(clang-analyzer-optin.core.EnumCastOutOfRange) */
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpInit(&srp, (SrpType)255, SRP_CLIENT_SIDE));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpInit(&srp, SRP_TYPE_TEST_DEFAULT,
+                                         (SrpSide)255));
+    /* // NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange) */
 
     /* success */
-    AssertIntEQ(0, wc_SrpInit(&srp, SRP_TYPE_SHA, SRP_CLIENT_SIDE));
+    AssertIntEQ(0, wc_SrpInit(&srp, SRP_TYPE_TEST_DEFAULT, SRP_CLIENT_SIDE));
 
     wc_SrpTerm(&srp);
 }
@@ -130,11 +138,11 @@ static void test_SrpSetUsername(void)
 {
     Srp srp;
 
-    AssertIntEQ(0, wc_SrpInit(&srp, SRP_TYPE_SHA, SRP_CLIENT_SIDE));
+    AssertIntEQ(0, wc_SrpInit(&srp, SRP_TYPE_TEST_DEFAULT, SRP_CLIENT_SIDE));
 
     /* invalid params */
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpSetUsername(NULL, username, usernameSz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpSetUsername(&srp, NULL, usernameSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpSetUsername(NULL, username, usernameSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpSetUsername(&srp, NULL, usernameSz));
 
     /* success */
     AssertIntEQ(0, wc_SrpSetUsername(&srp, username, usernameSz));
@@ -148,10 +156,10 @@ static void test_SrpSetParams(void)
 {
     Srp srp;
 
-    AssertIntEQ(0, wc_SrpInit(&srp, SRP_TYPE_SHA, SRP_CLIENT_SIDE));
+    AssertIntEQ(0, wc_SrpInit(&srp, SRP_TYPE_TEST_DEFAULT, SRP_CLIENT_SIDE));
 
     /* invalid call order */
-    AssertIntEQ(SRP_CALL_ORDER_E, wc_SrpSetParams(&srp,
+    AssertIntEQ(WC_NO_ERR_TRACE(SRP_CALL_ORDER_E), wc_SrpSetParams(&srp,
                                                   srp_N,    sizeof(srp_N),
                                                   srp_g,    sizeof(srp_g),
                                                   srp_salt, sizeof(srp_salt)));
@@ -160,19 +168,19 @@ static void test_SrpSetParams(void)
     AssertIntEQ(0, wc_SrpSetUsername(&srp, username, usernameSz));
 
     /* invalid params */
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpSetParams(NULL,
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpSetParams(NULL,
                                               srp_N,    sizeof(srp_N),
                                               srp_g,    sizeof(srp_g),
                                               srp_salt, sizeof(srp_salt)));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpSetParams(&srp,
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpSetParams(&srp,
                                               NULL,     sizeof(srp_N),
                                               srp_g,    sizeof(srp_g),
                                               srp_salt, sizeof(srp_salt)));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpSetParams(&srp,
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpSetParams(&srp,
                                               srp_N,    sizeof(srp_N),
                                               NULL,      sizeof(srp_g),
                                               srp_salt, sizeof(srp_salt)));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpSetParams(&srp,
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpSetParams(&srp,
                                               srp_N,    sizeof(srp_N),
                                               srp_g,    sizeof(srp_g),
                                               NULL,     sizeof(srp_salt)));
@@ -188,19 +196,22 @@ static void test_SrpSetParams(void)
     wc_SrpTerm(&srp);
 }
 
+#ifndef NO_SHA
+
 static void test_SrpSetPassword(void)
 {
     Srp srp;
     byte v[64];
     word32 vSz = 0;
 
+    XMEMSET(v, 0, sizeof(v));
     AssertIntEQ(0, wc_SrpInit(&srp, SRP_TYPE_SHA, SRP_CLIENT_SIDE));
     AssertIntEQ(0, wc_SrpSetUsername(&srp, username, usernameSz));
 
     /* invalid call order */
-    AssertIntEQ(SRP_CALL_ORDER_E,
+    AssertIntEQ(WC_NO_ERR_TRACE(SRP_CALL_ORDER_E),
                 wc_SrpSetPassword(&srp, password, passwordSz));
-    AssertIntEQ(SRP_CALL_ORDER_E,
+    AssertIntEQ(WC_NO_ERR_TRACE(SRP_CALL_ORDER_E),
                 wc_SrpGetVerifier(&srp, v, &vSz));
 
     /* fix call order */
@@ -209,16 +220,16 @@ static void test_SrpSetPassword(void)
                                          srp_salt, sizeof(srp_salt)));
 
     /* invalid params */
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpSetPassword(NULL, password, passwordSz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpSetPassword(&srp, NULL,     passwordSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpSetPassword(NULL, password, passwordSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpSetPassword(&srp, NULL,     passwordSz));
 
     /* success */
     AssertIntEQ(0, wc_SrpSetPassword(&srp, password, passwordSz));
 
     /* invalid params */
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpGetVerifier(NULL, v,    &vSz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpGetVerifier(&srp, NULL, &vSz));
-    AssertIntEQ(BUFFER_E,     wc_SrpGetVerifier(&srp, v,    &vSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpGetVerifier(NULL, v,    &vSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpGetVerifier(&srp, NULL, &vSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BUFFER_E),     wc_SrpGetVerifier(&srp, v,    &vSz));
 
     /* success */
     vSz = sizeof(v);
@@ -227,14 +238,14 @@ static void test_SrpSetPassword(void)
     AssertIntEQ(0, XMEMCMP(srp_verifier, v, vSz));
 
     /* invalid params - client side srp */
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpSetVerifier(&srp, v, vSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpSetVerifier(&srp, v, vSz));
 
     wc_SrpTerm(&srp);
     AssertIntEQ(0, wc_SrpInit(&srp, SRP_TYPE_SHA, SRP_SERVER_SIDE));
 
     /* invalid params */
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpSetVerifier(NULL, v,    vSz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpSetVerifier(&srp, NULL, vSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpSetVerifier(NULL, v,    vSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpSetVerifier(&srp, NULL, vSz));
 
     /* success */
     AssertIntEQ(0, wc_SrpSetVerifier(&srp, v, vSz));
@@ -248,6 +259,7 @@ static void test_SrpGetPublic(void)
     byte pub[64];
     word32 pubSz = 0;
 
+    XMEMSET(pub, 0, sizeof(pub));
     AssertIntEQ(0, wc_SrpInit(&srp, SRP_TYPE_SHA, SRP_CLIENT_SIDE));
     AssertIntEQ(0, wc_SrpSetUsername(&srp, username, usernameSz));
     AssertIntEQ(0, wc_SrpSetParams(&srp, srp_N,    sizeof(srp_N),
@@ -255,16 +267,16 @@ static void test_SrpGetPublic(void)
                                          srp_salt, sizeof(srp_salt)));
 
     /* invalid call order */
-    AssertIntEQ(SRP_CALL_ORDER_E, wc_SrpGetPublic(&srp, pub, &pubSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(SRP_CALL_ORDER_E), wc_SrpGetPublic(&srp, pub, &pubSz));
 
     /* fix call order */
     AssertIntEQ(0, wc_SrpSetPassword(&srp, password, passwordSz));
 
     /* invalid params */
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpGetPublic(NULL, pub, &pubSz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpGetPublic(&srp, NULL,   &pubSz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpGetPublic(&srp, pub, NULL));
-    AssertIntEQ(BUFFER_E,     wc_SrpGetPublic(&srp, pub, &pubSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpGetPublic(NULL, pub, &pubSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpGetPublic(&srp, NULL,   &pubSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpGetPublic(&srp, pub, NULL));
+    AssertIntEQ(WC_NO_ERR_TRACE(BUFFER_E),     wc_SrpGetPublic(&srp, pub, &pubSz));
 
     /* success */
     pubSz = sizeof(pub);
@@ -282,7 +294,7 @@ static void test_SrpGetPublic(void)
                                          srp_salt, sizeof(srp_salt)));
 
     /* invalid call order */
-    AssertIntEQ(SRP_CALL_ORDER_E, wc_SrpGetPublic(&srp, pub, &pubSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(SRP_CALL_ORDER_E), wc_SrpGetPublic(&srp, pub, &pubSz));
 
     /* fix call order */
     AssertIntEQ(0, wc_SrpSetVerifier(&srp, srp_verifier, sizeof(srp_verifier)));
@@ -304,11 +316,13 @@ static void test_SrpComputeKey(void)
     word32 clientPubKeySz = 64;
     word32 serverPubKeySz = 64;
 
+    XMEMSET(clientPubKey, 0, sizeof(clientPubKey));
+    XMEMSET(serverPubKey, 0, sizeof(serverPubKey));
     AssertIntEQ(0, wc_SrpInit(&cli, SRP_TYPE_SHA, SRP_CLIENT_SIDE));
     AssertIntEQ(0, wc_SrpInit(&srv, SRP_TYPE_SHA, SRP_SERVER_SIDE));
 
     /* invalid call order */
-    AssertIntEQ(SRP_CALL_ORDER_E, wc_SrpComputeKey(&cli,
+    AssertIntEQ(WC_NO_ERR_TRACE(SRP_CALL_ORDER_E), wc_SrpComputeKey(&cli,
                                                    clientPubKey, clientPubKeySz,
                                                    serverPubKey, serverPubKeySz));
 
@@ -334,19 +348,19 @@ static void test_SrpComputeKey(void)
     AssertIntEQ(0, XMEMCMP(serverPubKey, srp_B, serverPubKeySz));
 
     /* invalid params */
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpComputeKey(NULL,
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpComputeKey(NULL,
                                                clientPubKey, clientPubKeySz,
                                                serverPubKey, serverPubKeySz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpComputeKey(&cli,
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpComputeKey(&cli,
                                                NULL,         clientPubKeySz,
                                                serverPubKey, serverPubKeySz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpComputeKey(&cli,
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpComputeKey(&cli,
                                                clientPubKey, 0,
                                                serverPubKey, serverPubKeySz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpComputeKey(&cli,
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpComputeKey(&cli,
                                                clientPubKey, clientPubKeySz,
                                                NULL,         serverPubKeySz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpComputeKey(&cli,
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpComputeKey(&cli,
                                                clientPubKey, clientPubKeySz,
                                                serverPubKey, 0));
 
@@ -374,6 +388,10 @@ static void test_SrpGetProofAndVerify(void)
     word32 clientProofSz = SRP_MAX_DIGEST_SIZE;
     word32 serverProofSz = SRP_MAX_DIGEST_SIZE;
 
+    XMEMSET(clientPubKey, 0, sizeof(clientPubKey));
+    XMEMSET(serverPubKey, 0, sizeof(serverPubKey));
+    XMEMSET(clientProof, 0, sizeof(clientProof));
+    XMEMSET(serverProof, 0, sizeof(serverProof));
     AssertIntEQ(0, wc_SrpInit(&cli, SRP_TYPE_SHA, SRP_CLIENT_SIDE));
     AssertIntEQ(0, wc_SrpInit(&srv, SRP_TYPE_SHA, SRP_SERVER_SIDE));
 
@@ -408,16 +426,16 @@ static void test_SrpGetProofAndVerify(void)
 
     /* invalid params */
     serverProofSz = 0;
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpGetProof(NULL, clientProof,&clientProofSz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpGetProof(&cli, NULL,       &clientProofSz));
-    AssertIntEQ(BAD_FUNC_ARG, wc_SrpGetProof(&cli, clientProof,NULL));
-    AssertIntEQ(BUFFER_E,     wc_SrpGetProof(&srv, serverProof,&serverProofSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpGetProof(NULL, clientProof,&clientProofSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpGetProof(&cli, NULL,       &clientProofSz));
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG), wc_SrpGetProof(&cli, clientProof,NULL));
+    AssertIntEQ(WC_NO_ERR_TRACE(BUFFER_E),     wc_SrpGetProof(&srv, serverProof,&serverProofSz));
 
-    AssertIntEQ(BAD_FUNC_ARG,
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG),
                 wc_SrpVerifyPeersProof(NULL, clientProof, clientProofSz));
-    AssertIntEQ(BAD_FUNC_ARG,
+    AssertIntEQ(WC_NO_ERR_TRACE(BAD_FUNC_ARG),
                 wc_SrpVerifyPeersProof(&cli, NULL,        clientProofSz));
-    AssertIntEQ(BUFFER_E,
+    AssertIntEQ(WC_NO_ERR_TRACE(BUFFER_E),
                 wc_SrpVerifyPeersProof(&srv, serverProof, serverProofSz));
     serverProofSz = SRP_MAX_DIGEST_SIZE;
 
@@ -434,6 +452,8 @@ static void test_SrpGetProofAndVerify(void)
     wc_SrpTerm(&cli);
     wc_SrpTerm(&srv);
 }
+
+#endif /* !NO_SHA */
 
 static int sha512_key_gen(Srp* srp, byte* secret, word32 size)
 {
@@ -776,6 +796,10 @@ static void test_SrpKeyGenFunc_cb(void)
     };
 #endif
 
+    XMEMSET(clientPubKey, 0, sizeof(clientPubKey));
+    XMEMSET(serverPubKey, 0, sizeof(serverPubKey));
+    XMEMSET(clientProof, 0, sizeof(clientProof));
+    XMEMSET(serverProof, 0, sizeof(serverProof));
     AssertIntEQ(0, wc_SrpInit(&cli, SRP_TYPE_SHA512, SRP_CLIENT_SIDE));
     AssertIntEQ(0, wc_SrpInit(&srv, SRP_TYPE_SHA512, SRP_SERVER_SIDE));
 
@@ -829,10 +853,12 @@ void SrpTest(void)
     test_SrpInit();
     test_SrpSetUsername();
     test_SrpSetParams();
+#ifndef NO_SHA
     test_SrpSetPassword();
     test_SrpGetPublic();
     test_SrpComputeKey();
     test_SrpGetProofAndVerify();
+#endif /* !NO_SHA */
     test_SrpKeyGenFunc_cb();
     wolfCrypt_Cleanup();
 #endif

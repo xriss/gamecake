@@ -1,12 +1,12 @@
 /* user_settings.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -50,7 +50,6 @@
 #define HAVE_CHACHA
 #define HAVE_POLY1305
 #define HAVE_ECC
-#define HAVE_RSA
 #define HAVE_SHA256
 #define HAVE_SUPPORTED_CURVES
 #define HAVE_TLS_EXTENSIONS
@@ -75,7 +74,6 @@
 #define NO_PWDBASED
 #define NO_DSA
 #define NO_DES3
-#define NO_RABBIT
 #define NO_RC4
 #define NO_MD4
 

@@ -1,12 +1,12 @@
 /* retarget.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -81,6 +81,15 @@ int custom_rand_generate_block(unsigned char* output, unsigned int sz)
 int __putchar(int c, __printf_tag_ptr ctx)
 {
     hw_uart_printchar(c);
+}
+
+/* C library support function to write buffer (always to UART) */
+int __write(int __fildes, const unsigned char *__buf, unsigned __len)
+{
+    (void)__fildes;
+    for (unsigned i = 0; i < __len; i++) {
+        hw_uart_printchar((int)__buf[i]);
+    }
 }
 
 extern unsigned char __stack_process_start__[];

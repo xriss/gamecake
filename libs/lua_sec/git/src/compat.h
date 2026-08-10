@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------------
- * LuaSec 1.0.2
+ * LuaSec 1.3.2
  *
- * Copyright (C) 2006-2021 Bruno Silvestre
+ * Copyright (C) 2006-2023 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -48,10 +48,21 @@
 
 //------------------------------------------------------------------------------
 
-#if !defined(LIBRESSL_VERSION_NUMBER) && ((OPENSSL_VERSION_NUMBER & 0xFFFFF000L) == 0x10101000L)
-#define LSEC_OPENSSL_1_1_1
+#if !defined(LIBRESSL_VERSION_NUMBER) && ((OPENSSL_VERSION_NUMBER & 0xFFFFF000L) == 0x10101000L || (OPENSSL_VERSION_NUMBER & 0xFFFFF000L) == 0x30000000L)
+#define LSEC_OPENSSL_ERRNO_BUG
 #endif
 
 //------------------------------------------------------------------------------
+
+#if !defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_NO_PSK)
+#define LSEC_ENABLE_PSK
+#endif
+
+//------------------------------------------------------------------------------
+
+#define SSL_up_ref(a) ( printf("\nERROR WOLFSSL SSL_up_ref missing.\n\n") & 0  )
+#define SSL_X509_LOOKUP 0
+#define X509_VERIFY_PARAM_set_purpose(a,b) ( printf("\nERROR WOLFSSL X509_VERIFY_PARAM_set_purpose missing.\n\n") & 0  )
+#define X509_VERIFY_PARAM_set_trust(a,b) ( printf("\nERROR WOLFSSL X509_VERIFY_PARAM_set_trust missing.\n\n") & 0  )
 
 #endif

@@ -1,12 +1,12 @@
 /* crl.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -34,13 +34,26 @@
     extern "C" {
 #endif
 
-WOLFSSL_LOCAL int  InitCRL(WOLFSSL_CRL*, WOLFSSL_CERT_MANAGER*);
-WOLFSSL_LOCAL void FreeCRL(WOLFSSL_CRL*, int dynamic);
+WOLFSSL_LOCAL int  InitCRL(WOLFSSL_CRL* crl, WOLFSSL_CERT_MANAGER* cm);
+WOLFSSL_LOCAL void FreeCRL(WOLFSSL_CRL* crl, int dynamic);
 
-WOLFSSL_LOCAL int  LoadCRL(WOLFSSL_CRL* crl, const char* path, int type, int mon);
-WOLFSSL_LOCAL int  BufferLoadCRL(WOLFSSL_CRL*, const byte*, long, int, int);
-WOLFSSL_LOCAL int  CheckCertCRL(WOLFSSL_CRL*, DecodedCert*);
-
+WOLFSSL_LOCAL int  LoadCRL(WOLFSSL_CRL* crl, const char* path, int type,
+                           int monitor);
+WOLFSSL_LOCAL int  StoreCRL(WOLFSSL_CRL* crl, const char* file, int type);
+WOLFSSL_LOCAL int  BufferLoadCRL(WOLFSSL_CRL* crl, const byte* buff, long sz,
+                                 int type, int verify);
+WOLFSSL_LOCAL int  BufferStoreCRL(WOLFSSL_CRL* crl, byte* buff, long* inOutSz,
+                                  int type);
+WOLFSSL_LOCAL int  CheckCertCRL(WOLFSSL_CRL* crl, DecodedCert* cert);
+WOLFSSL_LOCAL int  CheckCertCRL_ex(WOLFSSL_CRL* crl, byte* issuerHash,
+        byte* serial, int serialSz, byte* serialHash, const byte* extCrlInfo,
+        int extCrlInfoSz, void* issuerName);
+WOLFSSL_LOCAL int  CheckCertCRLFromCm(WOLFSSL_CERT_MANAGER* cm,
+        WOLFSSL_CRL* crl, DecodedCert* cert);
+#ifdef HAVE_CRL_UPDATE_CB
+WOLFSSL_LOCAL int  GetCRLInfo(WOLFSSL_CRL* crl, CrlInfo* info, const byte* buff,
+        long sz, int type);
+#endif
 
 #ifdef __cplusplus
     }  /* extern "C" */

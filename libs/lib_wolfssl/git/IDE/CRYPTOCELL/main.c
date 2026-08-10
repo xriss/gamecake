@@ -1,12 +1,12 @@
 /* main.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -19,6 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
+
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfcrypt/test/test.h>
 #include <wolfcrypt/benchmark/benchmark.h>
@@ -26,7 +27,7 @@
 /* wolfCrypt_Init/wolfCrypt_Cleanup to turn CryptoCell hardware on/off */
 #include <wolfssl/wolfcrypt/wc_port.h>
 
-/* SEGGER_RTT_Init, you can potential replace it with other serial terminal */
+/* SEGGER_RTT_Init, you can potentially replace it with other serial terminal */
 #include "SEGGER_RTT.h"
 
 int main(void)
@@ -62,4 +63,3 @@ int main(void)
 
     return 0;
 }
-

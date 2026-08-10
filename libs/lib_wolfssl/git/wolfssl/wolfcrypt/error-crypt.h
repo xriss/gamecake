@@ -1,12 +1,12 @@
 /* error-crypt.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -24,28 +24,48 @@
 */
 /*
 DESCRIPTION
-This library defines error codes and contians routines for setting and examining
+This library defines error codes and contains routines for setting and examining
 the error status.
 */
 
 #ifndef WOLF_CRYPT_ERROR_H
 #define WOLF_CRYPT_ERROR_H
 
-#include <wolfssl/wolfcrypt/types.h>
-
-#if defined(HAVE_FIPS) && \
-    (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-    #include <cyassl/ctaocrypt/error-crypt.h>
-#endif /* HAVE_FIPS V1 */
+/* Avoid wolfcrypt/types.h here, to mitigate circular dependencies via
+ * wc_compat.h.
+ */
+#include <wolfssl/wolfcrypt/wc_port.h>
 
 #ifdef __cplusplus
     extern "C" {
 #endif
 
+#ifdef WOLFSSL_DEBUG_TRACE_ERROR_CODES_H
+#include <wolfssl/debug-untrace-error-codes.h>
+#endif
 
 /* error codes, add string for new errors !!! */
-enum {
-    MAX_CODE_E         = -100,  /* errors -101 - -299 */
+enum wolfCrypt_ErrorCodes {
+    /* note that WOLFSSL_FATAL_ERROR is defined as -1 in error-ssl.h, for
+     * reasons of backward compatibility.
+     */
+    WC_SUCCESS         =    0,
+    WC_FAILURE         =   -1,  /* Generic but traceable back compat errcode.
+                                 * Note, not reflected in MAX_CODE_E or
+                                 * WC_FIRST_E.
+                                 */
+
+    MAX_CODE_E         =  -96,  /* WC_FIRST_E + 1, for backward compat. */
+    WC_FIRST_E         =  -97,  /* First code used for wolfCrypt */
+
+    WC_SPAN1_FIRST_E   =  -97,  /* errors -97 - -300 */
+
+    MP_MEM             =  -97,  /* MP dynamic memory allocation failed. */
+    MP_VAL             =  -98,  /* MP value passed is not able to be used. */
+    MP_WOULDBLOCK      =  -99,  /* MP non-blocking operation is returning after
+                                 * partial completion. */
+    MP_NOT_INF         = -100,  /* MP point not at infinity */
+
     OPEN_RAN_E         = -101,  /* opening random device error */
     READ_RAN_E         = -102,  /* reading random device error */
     WINCRYPT_E         = -103,  /* windows crypt init error */
@@ -54,7 +74,7 @@ enum {
     BAD_MUTEX_E        = -106,  /* Bad mutex operation */
     WC_TIMEOUT_E       = -107,  /* timeout error */
     WC_PENDING_E       = -108,  /* wolfCrypt operation pending (would block) */
-    WC_NOT_PENDING_E   = -109,  /* wolfCrypt operation not pending */
+    WC_NO_PENDING_E    = -109,  /* no asynchronous operation pending */
 
     MP_INIT_E          = -110,  /* mp_init error state */
     MP_READ_E          = -111,  /* mp_read error state */
@@ -69,8 +89,17 @@ enum {
     MP_CMP_E           = -120,  /* mp_cmp error state */
     MP_ZERO_E          = -121,  /* got a mp zero result, not expected */
 
+    AES_EAX_AUTH_E     = -122, /* AES-EAX Authentication check failure */
+    KEY_EXHAUSTED_E    = -123, /* No longer usable for operation. */
+
+    ML_KEM_KAT_FIPS_E  = -124,  /* ML-KEM KAT failure */
+
     MEMORY_E           = -125,  /* out of memory error */
     VAR_STATE_CHANGE_E = -126,  /* var state modified by different thread */
+    FIPS_DEGRADED_E    = -127,  /* FIPS Module in degraded mode */
+
+    FIPS_CODE_SZ_E     = -128,  /* Module CODE too big */
+    FIPS_DATA_SZ_E     = -129,  /* Module DATA too big */
 
     RSA_WRONG_TYPE_E   = -130,  /* RSA wrong block type for RSA function */
     RSA_BUFFER_E       = -131,  /* RSA buffer error, output too small or
@@ -103,9 +132,17 @@ enum {
     ASN_SIG_HASH_E     = -156,  /* ASN sig error, unsupported hash type */
     ASN_SIG_KEY_E      = -157,  /* ASN sig error, unsupported key type */
     ASN_DH_KEY_E       = -158,  /* ASN key init error, invalid input */
+    KDF_SRTP_KAT_FIPS_E = -159, /* SRTP-KDF Known Answer Test Failure */
     ASN_CRIT_EXT_E     = -160,  /* ASN unsupported critical extension */
     ASN_ALT_NAME_E     = -161,  /* ASN alternate name error */
     ASN_NO_PEM_HEADER  = -162,  /* ASN no PEM header found */
+    ED25519_KAT_FIPS_E = -163,  /* Ed25519 Known answer test failure */
+    ED448_KAT_FIPS_E   = -164,  /* Ed448 Known answer test failure */
+    PBKDF2_KAT_FIPS_E  = -165,  /* PBKDF2 Known answer test failure */
+    WC_KEY_MISMATCH_E  = -166,  /* Error for private/public key mismatch */
+    ML_DSA_KAT_FIPS_E  = -167,  /* ML-DSA KAT failure */
+    LMS_KAT_FIPS_E     = -168,  /* LMS KAT failure */
+    XMSS_KAT_FIPS_E    = -169,  /* XMSS KAT failure */
 
     ECC_BAD_ARG_E      = -170,  /* ECC input argument of wrong type */
     ASN_ECC_KEY_E      = -171,  /* ASN ECC bad input */
@@ -181,8 +218,11 @@ enum {
     WC_INIT_E           = -228,  /* wolfcrypt failed to initialize */
     SIG_VERIFY_E        = -229,  /* wolfcrypt signature verify error */
     BAD_COND_E          = -230,  /* Bad condition variable operation */
-    SIG_TYPE_E          = -231,  /* Signature Type not enabled/available */
+    SIG_TYPE_E          = -231,  /* Signature Type not enabled/available
+                                  * NOTE: 1024-bit sign disabled in FIPS mode */
     HASH_TYPE_E         = -232,  /* Hash Type not enabled/available */
+
+    FIPS_INVALID_VER_E  = -233,  /* Invalid FIPS Version defined */
 
     WC_KEY_SIZE_E       = -234,  /* Key size error, either too small or large */
     ASN_COUNTRY_SIZE_E  = -235,  /* ASN Cert Gen, invalid country code size */
@@ -214,8 +254,8 @@ enum {
     AESCCM_KAT_FIPS_E   = -257,  /* AESCCM KAT failure */
     SHA3_KAT_FIPS_E     = -258,  /* SHA-3 KAT failure */
     ECDHE_KAT_FIPS_E    = -259,  /* ECDHE KAT failure */
-    AES_GCM_OVERFLOW_E  = -260,  /* AES-GCM invocation counter overflow. */
-    AES_CCM_OVERFLOW_E  = -261,  /* AES-CCM invocation counter overflow. */
+    AES_GCM_OVERFLOW_E  = -260,  /* AES-GCM internal overflow averted */
+    AES_CCM_OVERFLOW_E  = -261,  /* AES-CCM internal overflow averted */
     RSA_KEY_PAIR_E      = -262,  /* RSA Key Pair-Wise Consistency check fail. */
     DH_CHECK_PRIV_E     = -263,  /* DH Check Priv Key error */
 
@@ -240,32 +280,144 @@ enum {
     BAD_LENGTH_E        = -279,  /* Value of length parameter is invalid. */
     ECDSA_KAT_FIPS_E    = -280,  /* ECDSA KAT failure */
     RSA_PAT_FIPS_E      = -281,  /* RSA Pairwise failure */
-    KDF_TLS12_KAT_FIPS_E = -282,  /* TLS12 KDF KAT failure */
-    KDF_TLS13_KAT_FIPS_E = -283,  /* TLS13 KDF KAT failure */
+    KDF_TLS12_KAT_FIPS_E = -282, /* TLS12 KDF KAT failure */
+    KDF_TLS13_KAT_FIPS_E = -283, /* TLS13 KDF KAT failure */
     KDF_SSH_KAT_FIPS_E  = -284,  /* SSH KDF KAT failure */
     DHE_PCT_E           = -285,  /* DHE Pairwise Consistency Test failure */
     ECC_PCT_E           = -286,  /* ECDHE Pairwise Consistency Test failure */
     FIPS_PRIVATE_KEY_LOCKED_E = -287, /* Cannot export private key. */
     PROTOCOLCB_UNAVAILABLE  = -288, /* Protocol callback unavailable */
-    AES_SIV_AUTH_E = -289, /* AES-SIV authentication failed */
+    AES_SIV_AUTH_E      = -289,  /* AES-SIV authentication failed */
+    NO_VALID_DEVID      = -290,  /* no valid device ID */
 
-    WC_LAST_E           = -289,  /* Update this to indicate last error */
-    MIN_CODE_E          = -300   /* errors -101 - -299 */
+    IO_FAILED_E         = -291,  /* Input/output failure */
+    SYSLIB_FAILED_E     = -292,  /* System/library call failed */
+    USE_HW_PSK          = -293,  /* Callback return to indicate HW has PSK */
+
+    ENTROPY_RT_E        = -294,  /* Entropy Repetition Test failed */
+    ENTROPY_APT_E       = -295,  /* Entropy Adaptive Proportion Test failed */
+
+    ASN_DEPTH_E         = -296,  /* Invalid ASN.1 - depth check */
+    ASN_LEN_E           = -297,  /* ASN.1 length invalid */
+
+    SM4_GCM_AUTH_E      = -298,  /* SM4-GCM Authentication check failure */
+    SM4_CCM_AUTH_E      = -299,  /* SM4-CCM Authentication check failure */
+
+    WC_SPAN1_LAST_E     = -299,  /* Last used code in span 1 */
+    WC_SPAN1_MIN_CODE_E = -300,  /* Last usable code in span 1 */
+
+    WC_SPAN2_FIRST_E    = -1000,
+
+    DEADLOCK_AVERTED_E  = -1000, /* Deadlock averted -- retry the call */
+    ASCON_AUTH_E        = -1001, /* ASCON Authentication check failure */
+    WC_ACCEL_INHIBIT_E  = -1002, /* Crypto acceleration is currently inhibited */
+    BAD_INDEX_E         = -1003, /* Bad index */
+    INTERRUPTED_E       = -1004, /* Process interrupted */
+    MLKEM_PUB_HASH_E    = -1005, /* Encoded public key in decapsulation key does
+                                  * not match stored hash*/
+    BUSY_E              = -1006, /* Object is busy */
+    ALREADY_E           = -1007, /* Operation was redundant or preempted */
+    SEQ_OVERFLOW_E      = -1008, /* Sequence counter would overflow */
+
+    PUF_INIT_E          = -1009, /* PUF initialization failed (reserved) */
+    PUF_READ_E          = -1010, /* PUF SRAM read failed */
+    PUF_ENROLL_E        = -1011, /* PUF enrollment failed */
+    PUF_RECONSTRUCT_E   = -1012, /* PUF reconstruction failed */
+    PUF_DERIVE_KEY_E    = -1013, /* PUF key derivation failed */
+    PUF_IDENTITY_E      = -1014, /* PUF identity retrieval failed */
+
+    ML_KEM_PCT_E        = -1015, /* ML-KEM Pairwise Consistency Test failure */
+    ML_DSA_PCT_E        = -1016, /* ML-DSA Pairwise Consistency Test failure */
+    DRBG_SHA512_KAT_FIPS_E = -1017, /* SHA-512 DRBG KAT failure */
+    SLH_DSA_KAT_FIPS_E  = -1018, /* SLH-DSA CAST KAT failure */
+
+    TSP_VERIFY_E        = -1019, /* TSP token invalid or response doesn't
+                                  * match request */
+
+    SLH_DSA_PCT_E       = -1020, /* SLH-DSA Pairwise Consistency Test failure */
+    CMAC_KAT_FIPS_E     = -1021, /* AES-CMAC KAT failure */
+    SHAKE_KAT_FIPS_E    = -1022, /* SHAKE KAT failure */
+    DH_PCT_E            = -1023, /* DH Pairwise Consistency Test failure.
+                                  * Retired in FIPS v7+ (classic DH left the
+                                  * module boundary); the code stays allocated
+                                  * so fips.c can report it as retired rather
+                                  * than unknown. */
+    AES_KW_KAT_FIPS_E   = -1024, /* AES Key Wrap KAT failure */
+    FIPS_WRONG_API_E    = -1025, /* Requested API is not allowed in FIPS mode */
+    KMAC_MIN_KEYLEN_E   = -1026, /* FIPS Mode KMAC Minimum Key Length error */
+    FIPS_BAD_VALUE_E    = -1027, /* Supplied value was rejected by FIPS policy */
+    FIPS_UNAPPROVED_E   = -1028, /* Requested operation succeeded, but supplied */
+                                 /* parameters are unapproved for FIPS */
+
+    WC_SPAN2_LAST_E     = -1028, /* Update to indicate last used error code */
+    WC_LAST_E           = -1028, /* the last code used either here or in
+                                  * error-ssl.h */
+
+    WC_SPAN2_MIN_CODE_E = -1999, /* Last usable code in span 2 */
+    MIN_CODE_E          = -1999  /* the last code allocated either here or in
+                                  * error-ssl.h
+                                  */
 
     /* add new companion error id strings for any new error codes
        wolfcrypt/src/error.c !!! */
 };
 
-
 #ifdef NO_ERROR_STRINGS
     #define wc_GetErrorString(error) "no support for error strings built in"
     #define wc_ErrorString(err, buf) \
-        (void)err; XSTRNCPY((buf), wc_GetErrorString((err)), \
+        (void)(err); XSTRNCPY((buf), wc_GetErrorString(err), \
         WOLFSSL_MAX_ERROR_SZ);
 
 #else
 WOLFSSL_API void wc_ErrorString(int err, char* buff);
-WOLFSSL_API const char* wc_GetErrorString(int error);
+WOLFSSL_ABI WOLFSSL_API const char* wc_GetErrorString(int error);
+#endif
+
+#ifdef WOLFSSL_DEBUG_BACKTRACE_ERROR_CODES
+    WOLFSSL_API extern int wc_backtrace_render(void);
+#endif
+
+#if defined(WOLFSSL_DEBUG_TRACE_ERROR_CODES) && \
+        (defined(BUILDING_WOLFSSL) || \
+         defined(WOLFSSL_DEBUG_TRACE_ERROR_CODES_ALWAYS))
+    #define WC_NO_ERR_TRACE(label) (CONST_NUM_ERR_ ## label)
+    #ifndef WOLFSSL_DEBUG_BACKTRACE_RENDER_CLAUSE
+        #ifdef WOLFSSL_DEBUG_BACKTRACE_ERROR_CODES
+            #define WOLFSSL_DEBUG_BACKTRACE_RENDER_CLAUSE wc_backtrace_render()
+        #else
+            #define WOLFSSL_DEBUG_BACKTRACE_RENDER_CLAUSE 0
+        #endif
+    #endif
+    #ifndef WC_ERR_TRACE
+        #if defined(__GNUC__) && !defined(__STRICT_ANSI__)
+            #define WC_ERR_TRACE(label) __extension__                     \
+                ({ if (wc_debug_trace_error_codes_enabled()) {            \
+                    (void)WOLFSSL_DEBUG_PRINTF_FN(                        \
+                                          WOLFSSL_DEBUG_PRINTF_FIRST_ARGS \
+                                          "ERR TRACE: %s L %d %s (%d)\n", \
+                                      __FILE__, __LINE__, #label, label); \
+                    (void)WOLFSSL_DEBUG_BACKTRACE_RENDER_CLAUSE; }        \
+                  (label);                                                \
+                })
+        #else /* ! __GNUC__ || __STRICT_ANSI__ */
+            #define WC_ERR_TRACE(label)                                   \
+                ((void)(wc_debug_trace_error_codes_enabled() &&           \
+                          WOLFSSL_DEBUG_PRINTF_FN(                        \
+                                          WOLFSSL_DEBUG_PRINTF_FIRST_ARGS \
+                                          "ERR TRACE: %s L %d %s (%d)\n", \
+                                     __FILE__, __LINE__, #label, label)), \
+                 (void)(wc_debug_trace_error_codes_enabled() &&           \
+                          WOLFSSL_DEBUG_BACKTRACE_RENDER_CLAUSE),         \
+                  (label)                                                 \
+                )
+        #endif /* ! __GNUC__ || __STRICT_ANSI__ */
+    #endif
+    #include <wolfssl/debug-trace-error-codes.h>
+#else
+    #define WC_NO_ERR_TRACE(label) (label)
+    #ifndef WC_ERR_TRACE
+        #define WC_ERR_TRACE(label) (label)
+    #endif
 #endif
 
 #ifdef __cplusplus

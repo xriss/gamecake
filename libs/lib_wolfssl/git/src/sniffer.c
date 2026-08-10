@@ -1,12 +1,12 @@
 /* sniffer.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -19,14 +19,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
+#include <wolfssl/wolfcrypt/libwolfssl_sources.h>
 
-#ifdef HAVE_CONFIG_H
-    #include <config.h>
+#ifdef WOLFSSL_ASYNC_CRYPT
+    #include <wolfssl/wolfcrypt/async.h>
 #endif
 
-#include <wolfssl/wolfcrypt/settings.h>
-#include <wolfssl/wolfcrypt/types.h>
-#include <wolfssl/wolfcrypt/wc_port.h>
+/* Build Options:
+ * WOLFSSL_SNIFFER_NO_RECOVERY: Do not track missed data count.
+ * SNIFFER_SINGLE_SESSION_CACHE: Do not cache more than one session.
+ */
+
 
 /* xctime */
 #ifndef XCTIME
@@ -53,14 +56,22 @@
     /* default */
     #define XINET_NTOA inet_ntoa
     #define XINET_ATON inet_aton
+#ifdef FREESCALE_MQX
+    #define XINET_PTON(a,b,c,d) inet_pton((a),(b),(c),(d))
+#else
     #define XINET_PTON(a,b,c) inet_pton((a),(b),(c))
+#endif
     #define XINET_NTOP inet_ntop
     #define XINET_ADDR inet_addr
     #define XHTONS htons
     #define XNTOHS ntohs
     #define XHTONL htonl
     #define XNTOHL ntohl
+#ifdef FREESCALE_MQX
+    #define XINADDR_NONE INADDR_BROADCAST
+#else
     #define XINADDR_NONE INADDR_NONE
+#endif
 #endif
 
 #if !defined(WOLFCRYPT_ONLY) && !defined(NO_FILESYSTEM)
@@ -73,7 +84,7 @@
     #ifdef TCP_PROTOCOL
         #undef TCP_PROTOCOL
     #endif
-#else
+#elif !defined(FREESCALE_MQX)
     #ifndef _WIN32
         #include <arpa/inet.h>
     #else
@@ -98,7 +109,7 @@
 #ifndef NO_DH
     #include <wolfssl/wolfcrypt/dh.h>
 #endif
-#ifdef HAVE_ECC
+#if defined(HAVE_ECC) || defined(HAVE_CURVE25519)
     #include <wolfssl/wolfcrypt/ecc.h>
 #endif
 #ifdef HAVE_CURVE25519
@@ -122,6 +133,7 @@
     #endif
 #endif
 
+#define ERROR_OUT(err, eLabel) { ret = (err); goto eLabel; }
 
 #ifndef WOLFSSL_SNIFFER_TIMEOUT
     #define WOLFSSL_SNIFFER_TIMEOUT 900
@@ -146,6 +158,7 @@ enum {
     TRACE_MSG_SZ       = 80,  /* Trace Message buffer size */
     HASH_SIZE          = 499, /* Session Hash Table Rows */
     PSEUDO_HDR_SZ      = 12,  /* TCP Pseudo Header size in bytes */
+    STREAM_INFO_SZ     = 44,  /* SnifferStreamInfo size in bytes */
     FATAL_ERROR_STATE  = 1,   /* SnifferSession fatal error state */
     TICKET_HINT_LEN    = 4,   /* Session Ticket Hint length */
     TICKET_HINT_AGE_LEN= 4,   /* Session Ticket Age add length */
@@ -216,8 +229,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 #endif /* _WIN32 */
 
 
-static WOLFSSL_GLOBAL int TraceOn = 0;         /* Trace is off by default */
-static WOLFSSL_GLOBAL XFILE TraceFile = 0;
+static WC_THREADSHARED int TraceOn = 0;         /* Trace is off by default */
+static WC_THREADSHARED XFILE TraceFile = 0;
 
 
 /* windows uses .rc table for this */
@@ -357,6 +370,14 @@ static const char* const msgTable[] =
     "Loading chain input",
     "Got encrypted extension",
     "Got Hello Retry Request",
+
+    /* 96 */
+    "Setting up keys",
+    "Unsupported TLS Version",
+    "Server Client Key Mismatch",
+
+    /* 99 */
+    "Invalid or missing keylog file",
 };
 
 
@@ -410,16 +431,6 @@ typedef struct NamedKey {
 
 #endif
 
-
-typedef struct IpAddrInfo {
-    int version;
-    union {
-        word32 ip4;
-        byte   ip6[16];
-    };
-} IpAddrInfo;
-
-
 /* Sniffer Server holds info for each server/port monitored */
 typedef struct SnifferServer {
     WOLFSSL_CTX*   ctx;                          /* SSL context */
@@ -430,9 +441,13 @@ typedef struct SnifferServer {
     NamedKey*      namedKeys;                    /* mapping of names and keys */
     wolfSSL_Mutex  namedKeysMutex;               /* mutex for namedKey list */
 #endif
+#if defined(WOLFSSL_SNIFFER_KEYLOGFILE)
+    byte           useKeyLogFile; /* True if session secrets are coming from a
+                                     keylog file */
+#endif /* WOLFSSL_SNIFFER_KEYLOGFILE */
+
     struct SnifferServer* next;                  /* for list */
 } SnifferServer;
-
 
 /* Session Flags */
 typedef struct Flags {
@@ -440,7 +455,6 @@ typedef struct Flags {
     byte           serverCipherOn;  /* indicates whether cipher is active */
     byte           clientCipherOn;  /* indicates whether cipher is active */
     byte           resuming;        /* did this session come from resumption */
-    byte           cached;          /* have we cached this session yet */
     byte           clientHello;     /* processed client hello yet, for SSLv2 */
     byte           finCount;        /* get both FINs before removing */
     byte           fatalError;      /* fatal error state */
@@ -453,6 +467,12 @@ typedef struct Flags {
 #endif
     byte           gotFinished;     /* processed finished */
     byte           secRenegEn;      /* secure renegotiation enabled */
+#ifdef WOLFSSL_ASYNC_CRYPT
+    byte           wasPolled;
+#endif
+#ifdef SNIFFER_SINGLE_SESSION_CACHE
+    byte           cached;          /* have we cached this session yet */
+#endif
 } Flags;
 
 
@@ -492,11 +512,6 @@ typedef struct KeyShareInfo {
     int         curve_id;
 } KeyShareInfo;
 
-/* maximum previous acks to capture */
-#ifndef WC_SNIFFER_HS_ACK_HIST_MAX
-#define WC_SNIFFER_HS_ACK_HIST_MAX 10
-#endif
-
 /* Sniffer Session holds info for each client/server SSL/TLS session */
 typedef struct SnifferSession {
     SnifferServer* context;         /* server context */
@@ -508,10 +523,10 @@ typedef struct SnifferSession {
     word16         cliPort;         /* client port */
     word32         cliSeqStart;     /* client start sequence */
     word32         srvSeqStart;     /* server start sequence */
+    word32         cliSeqLast;      /* client last sequence */
+    word32         srvSeqLast;      /* server last sequence */
     word32         cliExpected;     /* client expected sequence (relative) */
     word32         srvExpected;     /* server expected sequence (relative) */
-    word32         cliAcks[WC_SNIFFER_HS_ACK_HIST_MAX]; /* history of acks during handshake */
-    word32         srvAcks[WC_SNIFFER_HS_ACK_HIST_MAX]; /* history of acks during handshake */
     FinCapture     finCapture;      /* retain out of order FIN s */
     Flags          flags;           /* session flags */
     time_t         lastUsed;        /* last used ticks */
@@ -539,105 +554,227 @@ typedef struct SnifferSession {
     KeyShareInfo   srvKs;
     KeyShareInfo   cliKs;
 #endif
+#ifdef WOLFSSL_ASYNC_CRYPT
+    void*          userCtx;
+    word32         pendSeq; /* when WC_PENDING_E is returned capture sequence */
+#endif
+    int            error;   /* store the last set error number */
+    byte           verboseErr; /* Last set error is helpful and should
+                                *  not be overwritten by FATAL_ERROR_STATE */
 } SnifferSession;
 
 
+/* The session, server, and keylog secret tables below are qualified
+ * THREAD_LS_T. When thread-local storage is genuinely available each thread
+ * owns a private copy of these tables, so their lookups and list mutations
+ * need no mutex. THREAD_LS_T is only a real thread-local qualifier when
+ * HAVE_THREAD_LS is defined and NO_THREAD_LS is not; otherwise the tables are
+ * process-shared globals that must be locked. HAVE_C___ATOMIC by itself does
+ * not make the tables thread-local, so the lock elision is gated on both. */
+#if defined(HAVE_C___ATOMIC) && defined(HAVE_THREAD_LS) && \
+    !defined(NO_THREAD_LS)
+    #define SNIFFER_LOCKLESS_TABLES
+#endif
+
 /* Sniffer Server List and mutex */
-static WOLFSSL_GLOBAL SnifferServer* ServerList = NULL;
-static WOLFSSL_GLOBAL wolfSSL_Mutex ServerListMutex;
+static THREAD_LS_T SnifferServer* ServerList = NULL;
+#ifndef SNIFFER_LOCKLESS_TABLES
+static WC_THREADSHARED wolfSSL_Mutex ServerListMutex WOLFSSL_MUTEX_INITIALIZER_CLAUSE(ServerListMutex);
+#endif
 
 /* Session Hash Table, mutex, and count */
-static WOLFSSL_GLOBAL SnifferSession* SessionTable[HASH_SIZE];
-static WOLFSSL_GLOBAL wolfSSL_Mutex SessionMutex;
-static WOLFSSL_GLOBAL int SessionCount = 0;
+static THREAD_LS_T SnifferSession* SessionTable[HASH_SIZE];
+#ifndef SNIFFER_LOCKLESS_TABLES
+static WC_THREADSHARED wolfSSL_Mutex SessionMutex WOLFSSL_MUTEX_INITIALIZER_CLAUSE(SessionMutex);
+#endif
+static THREAD_LS_T int SessionCount = 0;
 
-/* Recovery of missed data switches and stats */
-static WOLFSSL_GLOBAL wolfSSL_Mutex RecoveryMutex; /* for stats */
-static WOLFSSL_GLOBAL int RecoveryEnabled    = 0;  /* global switch */
-static WOLFSSL_GLOBAL int MaxRecoveryMemory  = -1;
+static WC_THREADSHARED int RecoveryEnabled    = 0;  /* global switch */
+static WC_THREADSHARED int MaxRecoveryMemory  = -1;
                                            /* per session max recovery memory */
-static WOLFSSL_GLOBAL word32 MissedDataSessions = 0;
-                                            /* # of sessions with missed data */
+#ifndef WOLFSSL_SNIFFER_NO_RECOVERY
+/* Recovery of missed data switches and stats */
+static WC_THREADSHARED wolfSSL_Mutex RecoveryMutex WOLFSSL_MUTEX_INITIALIZER_CLAUSE(RecoveryMutex); /* for stats */
+/* # of sessions with missed data */
+static WC_THREADSHARED word32 MissedDataSessions = 0;
+#endif
 
 /* Connection Info Callback */
-static WOLFSSL_GLOBAL SSLConnCb ConnectionCb;
-static WOLFSSL_GLOBAL void*     ConnectionCbCtx = NULL;
+static WC_THREADSHARED SSLConnCb ConnectionCb;
+static WC_THREADSHARED void*     ConnectionCbCtx = NULL;
 
 #ifdef WOLFSSL_SNIFFER_STATS
 /* Sessions Statistics */
-static WOLFSSL_GLOBAL SSLStats SnifferStats;
-static WOLFSSL_GLOBAL wolfSSL_Mutex StatsMutex;
+static WC_THREADSHARED SSLStats SnifferStats;
+static WC_THREADSHARED wolfSSL_Mutex StatsMutex WOLFSSL_MUTEX_INITIALIZER_CLAUSE(StatsMutex);
 #endif
 
 #ifdef WOLFSSL_SNIFFER_KEY_CALLBACK
-static WOLFSSL_GLOBAL SSLKeyCb KeyCb;
-static WOLFSSL_GLOBAL void*    KeyCbCtx = NULL;
+static WC_THREADSHARED SSLKeyCb KeyCb;
+static WC_THREADSHARED void*    KeyCbCtx = NULL;
 #endif
 
 #ifdef WOLFSSL_SNIFFER_WATCH
 /* Watch Key Callback */
-static WOLFSSL_GLOBAL SSLWatchCb WatchCb;
-static WOLFSSL_GLOBAL void*      WatchCbCtx = NULL;
+static WC_THREADSHARED SSLWatchCb WatchCb;
+static WC_THREADSHARED void*      WatchCbCtx = NULL;
 #endif
 
 #ifdef WOLFSSL_SNIFFER_STORE_DATA_CB
 /* Store Data Callback */
-static WOLFSSL_GLOBAL SSLStoreDataCb StoreDataCb;
+static WC_THREADSHARED SSLStoreDataCb StoreDataCb;
 #endif
 
 
+#ifndef WOLFSSL_SNIFFER_NO_RECOVERY
 static void UpdateMissedDataSessions(void)
 {
     wc_LockMutex(&RecoveryMutex);
     MissedDataSessions += 1;
     wc_UnLockMutex(&RecoveryMutex);
 }
-
+#endif
 
 #ifdef WOLFSSL_SNIFFER_STATS
-#define LOCK_STAT() do { wc_LockMutex(&StatsMutex); } while (0)
-#define UNLOCK_STAT() do { wc_UnLockMutex(&StatsMutex); } while (0)
-#define NOLOCK_ADD_TO_STAT(x,y) do { TraceStat(#x, y); x += y; } while (0)
-#define NOLOCK_INC_STAT(x) NOLOCK_ADD_TO_STAT(x,1)
-#define ADD_TO_STAT(x,y) do { LOCK_STAT(); \
-    NOLOCK_ADD_TO_STAT(x,y); UNLOCK_STAT(); } while (0)
-#define INC_STAT(x) do { LOCK_STAT(); \
-    NOLOCK_INC_STAT(x); UNLOCK_STAT(); } while (0)
+    #ifdef HAVE_C___ATOMIC
+        #define LOCK_STAT() WC_DO_NOTHING
+        #define UNLOCK_STAT() WC_DO_NOTHING
+        #define NOLOCK_ADD_TO_STAT(x,y) ({ TraceStat(#x, y); \
+            __atomic_fetch_add(&x, y, __ATOMIC_RELAXED); })
+    #else
+        #define LOCK_STAT() wc_LockMutex(&StatsMutex)
+        #define UNLOCK_STAT() wc_UnLockMutex(&StatsMutex)
+        #define NOLOCK_ADD_TO_STAT(x,y) ({ TraceStat(#x, y); x += y; })
+    #endif
+    #define NOLOCK_INC_STAT(x) NOLOCK_ADD_TO_STAT(x,1)
+    #define ADD_TO_STAT(x,y) do { LOCK_STAT(); \
+        NOLOCK_ADD_TO_STAT(x,y); UNLOCK_STAT(); } while (0)
+    #define INC_STAT(x) do { LOCK_STAT(); \
+        NOLOCK_INC_STAT(x); UNLOCK_STAT(); } while (0)
+#endif /* WOLFSSL_SNIFFER_STATS */
+
+#ifdef SNIFFER_LOCKLESS_TABLES
+    #define LOCK_SESSION() WC_DO_NOTHING
+    #define UNLOCK_SESSION() WC_DO_NOTHING
+    #define LOCK_SERVER_LIST() WC_DO_NOTHING
+    #define UNLOCK_SERVER_LIST() WC_DO_NOTHING
+#else
+    #define LOCK_SESSION() wc_LockMutex(&SessionMutex)
+    #define UNLOCK_SESSION() wc_UnLockMutex(&SessionMutex)
+    #define LOCK_SERVER_LIST() wc_LockMutex(&ServerListMutex)
+    #define UNLOCK_SERVER_LIST() wc_UnLockMutex(&ServerListMutex)
 #endif
 
 
-#ifdef WOLF_CRYPTO_CB
-    static WOLFSSL_GLOBAL int CryptoDeviceId = INVALID_DEVID;
+#if defined(WOLF_CRYPTO_CB) || defined(WOLFSSL_ASYNC_CRYPT)
+    static WC_THREADSHARED int CryptoDeviceId = INVALID_DEVID;
 #endif
+
+#if defined(WOLFSSL_SNIFFER_KEYLOGFILE)
+static int addSecretNode(unsigned char* clientRandom,
+                         int type,
+                         unsigned char* masterSecret,
+                         char* error);
+static void hexToBin(const char* hex, unsigned char* bin, int binLength);
+static int parseKeyLogFile(const char* fileName, char* error);
+static unsigned char* findSecret(unsigned char* clientRandom, int type);
+static void freeSecretList(void);
+static int snifferSecretCb(unsigned char* client_random,
+                           int type,
+                           unsigned char* output_secret);
+static void setSnifferSecretCb(SnifferSession* session);
+static int addKeyLogSnifferServerHelper(const char* address,
+                                        int port,
+                                        char* error);
+#endif /* WOLFSSL_SNIFFER_KEYLOGFILE */
 
 
 /* Initialize overall Sniffer */
-void ssl_InitSniffer(void)
+void ssl_InitSniffer_ex(int devId)
 {
     wolfSSL_Init();
+#ifndef WOLFSSL_MUTEX_INITIALIZER
+#ifndef SNIFFER_LOCKLESS_TABLES
     wc_InitMutex(&ServerListMutex);
     wc_InitMutex(&SessionMutex);
+#endif
+#ifndef WOLFSSL_SNIFFER_NO_RECOVERY
     wc_InitMutex(&RecoveryMutex);
+#endif
 #ifdef WOLFSSL_SNIFFER_STATS
     XMEMSET(&SnifferStats, 0, sizeof(SSLStats));
     wc_InitMutex(&StatsMutex);
 #endif
+#endif /* !WOLFSSL_MUTEX_INITIALIZER */
+
+#ifdef WOLFSSL_SNIFFER_STATS
+    XMEMSET(&SnifferStats, 0, sizeof(SSLStats));
+#endif
+#if defined(WOLF_CRYPTO_CB) || defined(WOLFSSL_ASYNC_CRYPT)
+    CryptoDeviceId = devId;
+#endif
+    (void)devId;
+}
+
+static int GetDevId(void)
+{
+    int devId = INVALID_DEVID;
+
 #ifdef WOLF_CRYPTO_CB
     #ifdef HAVE_INTEL_QA_SYNC
-    CryptoDeviceId = wc_CryptoCb_InitIntelQa();
-    if (INVALID_DEVID == CryptoDeviceId) {
-        printf("Couldn't init the Intel QA\n");
+    devId = wc_CryptoCb_InitIntelQa();
+    if (devId == INVALID_DEVID) {
+        fprintf(stderr, "Couldn't init the Intel QA\n");
     }
     #endif
     #ifdef HAVE_CAVIUM_OCTEON_SYNC
-    CryptoDeviceId = wc_CryptoCb_InitOcteon();
-    if (INVALID_DEVID == CryptoDeviceId) {
-        printf("Couldn't init the Intel QA\n");
+    devId = wc_CryptoCb_InitOcteon();
+    if (devId == INVALID_DEVID) {
+        fprintf(stderr, "Couldn't init the Octeon\n");
     }
     #endif
 #endif
+
+    return devId;
 }
 
+void ssl_InitSniffer(void)
+{
+    int devId = GetDevId();
+
+#ifdef WOLFSSL_ASYNC_CRYPT
+    if (wolfAsync_DevOpen(&devId) < 0) {
+        fprintf(stderr, "Async device open failed\nRunning without async\n");
+        devId = INVALID_DEVID;
+    }
+#endif /* WOLFSSL_ASYNC_CRYPT */
+
+    (void)devId;
+
+    ssl_InitSniffer_ex(devId);
+}
+
+void ssl_InitSniffer_ex2(int threadNum)
+{
+    int devId = GetDevId();
+
+#ifdef WOLFSSL_ASYNC_CRYPT
+#ifndef WC_NO_ASYNC_THREADING
+    if (wolfAsync_DevOpenThread(&devId, &threadNum) < 0)
+#else
+    if (wolfAsync_DevOpen(&devId) < 0)
+#endif
+    {
+        fprintf(stderr, "Async device open failed\nRunning without async\n");
+        devId = INVALID_DEVID;
+    }
+#endif /* WOLFSSL_ASYNC_CRYPT */
+
+    (void)devId;
+    (void)threadNum;
+
+    ssl_InitSniffer_ex(devId);
+}
 
 #ifdef HAVE_SNI
 
@@ -725,14 +862,11 @@ static void FreeSnifferSession(SnifferSession* session)
         XFREE(session->hash, NULL, DYNAMIC_TYPE_HASHES);
 #endif
 #ifdef WOLFSSL_TLS13
-        if (session->cliKeyShare)
-            XFREE(session->cliKeyShare, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+        XFREE(session->cliKeyShare, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
 #ifdef HAVE_MAX_FRAGMENT
-        if (session->tlsFragBuf) {
-            XFREE(session->tlsFragBuf, NULL, DYNAMIC_TYPE_TMP_BUFFER);
-            session->tlsFragBuf = NULL;
-        }
+        XFREE(session->tlsFragBuf, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+        session->tlsFragBuf = NULL;
 #endif
     }
     XFREE(session, NULL, DYNAMIC_TYPE_SNIFFER_SESSION);
@@ -748,8 +882,8 @@ void ssl_FreeSniffer(void)
     SnifferSession* removeSession;
     int i;
 
-    wc_LockMutex(&ServerListMutex);
-    wc_LockMutex(&SessionMutex);
+    LOCK_SERVER_LIST();
+    LOCK_SESSION();
 
     /* Free sessions (wolfSSL objects) first */
     for (i = 0; i < HASH_SIZE; i++) {
@@ -760,6 +894,7 @@ void ssl_FreeSniffer(void)
             FreeSnifferSession(removeSession);
         }
     }
+    XMEMSET(SessionTable, 0, sizeof(SessionTable));
     SessionCount = 0;
 
     /* Then server (wolfSSL_CTX) */
@@ -771,20 +906,36 @@ void ssl_FreeSniffer(void)
     }
     ServerList = NULL;
 
-    wc_UnLockMutex(&SessionMutex);
-    wc_UnLockMutex(&ServerListMutex);
 
+
+    UNLOCK_SESSION();
+    UNLOCK_SERVER_LIST();
+
+#if defined(WOLFSSL_SNIFFER_KEYLOGFILE)
+    freeSecretList();
+#endif /* WOLFSSL_SNIFFER_KEYLOGFILE */
+
+
+#ifndef WOLFSSL_MUTEX_INITIALIZER
+#ifndef WOLFSSL_SNIFFER_NO_RECOVERY
     wc_FreeMutex(&RecoveryMutex);
+#endif
+#ifndef SNIFFER_LOCKLESS_TABLES
     wc_FreeMutex(&SessionMutex);
     wc_FreeMutex(&ServerListMutex);
+#endif
+#endif /* !WOLFSSL_MUTEX_INITIALIZER */
 
 #ifdef WOLF_CRYPTO_CB
-#ifdef HAVE_INTEL_QA_SYNC
+    #ifdef HAVE_INTEL_QA_SYNC
     wc_CryptoCb_CleanupIntelQa(&CryptoDeviceId);
-#endif
-#ifdef HAVE_CAVIUM_OCTEON_SYNC
+    #endif
+    #ifdef HAVE_CAVIUM_OCTEON_SYNC
     wc_CryptoCb_CleanupOcteon(&CryptoDeviceId);
+    #endif
 #endif
+#ifdef WOLFSSL_ASYNC_CRYPT
+    wolfAsync_DevClose(&CryptoDeviceId);
 #endif
 
     if (TraceFile) {
@@ -921,7 +1072,7 @@ typedef struct IpInfo {
 /* TCP Info from TCP Header */
 typedef struct TcpInfo {
     int    srcPort;       /* source port */
-    int    dstPort;       /* source port */
+    int    dstPort;       /* destination port */
     int    length;        /* length of this header */
     word32 sequence;      /* sequence number */
     word32 ackNumber;     /* ack number */
@@ -943,6 +1094,7 @@ typedef struct TcpPseudoHdr {
 } TcpPseudoHdr;
 
 
+#ifdef WOLFSSL_ENCRYPTED_KEYS
 /* Password Setting Callback */
 static int SetPassword(char* passwd, int sz, int rw, void* userdata)
 {
@@ -950,7 +1102,7 @@ static int SetPassword(char* passwd, int sz, int rw, void* userdata)
     XSTRNCPY(passwd, (const char*)userdata, sz);
     return (int)XSTRLEN((const char*)userdata);
 }
-
+#endif
 
 /* Ethernet Header */
 typedef struct EthernetHdr {
@@ -1059,8 +1211,14 @@ static void TraceSetServer(const char* srv, int port, const char* keyFile)
 {
     if (TraceOn) {
         XFPRINTF(TraceFile, "\tTrying to install a new Sniffer Server with\n");
-        XFPRINTF(TraceFile, "\tserver: %s, port: %d, keyFile: %s\n", srv, port,
-                                                                    keyFile);
+        if (keyFile != NULL) {
+            XFPRINTF(TraceFile, "\tserver: %s, port: %d, keyFile: %s\n",
+                     srv, port, keyFile);
+        }
+        else {
+            XFPRINTF(TraceFile, "\tserver: %s, port: %d\n",
+                     srv, port);
+        }
     }
 }
 
@@ -1148,10 +1306,11 @@ static void TraceSequence(word32 seq, int len)
 
 
 /* Show sequence and payload length for Trace */
-static void TraceAck(word32 ack, word32 expected)
+static void TraceAck(word32 acknowledgement, word32 expected)
 {
     if (TraceOn) {
-        XFPRINTF(TraceFile, "\tAck:%u Expected:%u\n", ack, expected);
+        XFPRINTF(TraceFile, "\tAck:%u Expected:%u\n", acknowledgement,
+                 expected);
     }
 }
 
@@ -1294,6 +1453,8 @@ static void SetError(int idx, char* error, SnifferSession* session, int fatal)
 {
     GetError(idx, error);
     TraceError(idx, error);
+    if (session)
+        session->error = idx;
     if (session && fatal == FATAL_ERROR_STATE)
         session->flags.fatalError = 1;
 }
@@ -1321,7 +1482,7 @@ static int IsServerRegistered(word32 addr)
     int ret = 0;     /* false */
     SnifferServer* sniffer;
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
 
     sniffer = ServerList;
     while (sniffer) {
@@ -1332,7 +1493,7 @@ static int IsServerRegistered(word32 addr)
         sniffer = sniffer->next;
     }
 
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     return ret;
 }
@@ -1346,7 +1507,7 @@ static int IsServerRegistered6(byte* addr)
     int ret = 0;     /* false */
     SnifferServer* sniffer;
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
 
     sniffer = ServerList;
     while (sniffer) {
@@ -1358,7 +1519,7 @@ static int IsServerRegistered6(byte* addr)
         sniffer = sniffer->next;
     }
 
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     return ret;
 }
@@ -1371,7 +1532,7 @@ static int IsPortRegistered(word32 port)
     int ret = 0;    /* false */
     SnifferServer* sniffer;
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
 
     sniffer = ServerList;
     while (sniffer) {
@@ -1382,7 +1543,7 @@ static int IsPortRegistered(word32 port)
         sniffer = sniffer->next;
     }
 
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     return ret;
 }
@@ -1395,7 +1556,7 @@ static SnifferServer* GetSnifferServer(IpInfo* ipInfo, TcpInfo* tcpInfo)
 {
     SnifferServer* sniffer;
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
 
     sniffer = ServerList;
 
@@ -1408,14 +1569,17 @@ static SnifferServer* GetSnifferServer(IpInfo* ipInfo, TcpInfo* tcpInfo)
                 MatchAddr(sniffer->server, ipInfo->dst))
             break;
 
-        sniffer = sniffer->next;
+        if (sniffer->next)
+            sniffer = sniffer->next;
+        else
+           break;
     }
 #else
     (void)ipInfo;
     (void)tcpInfo;
 #endif
 
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     return sniffer;
 }
@@ -1452,8 +1616,7 @@ static SnifferSession* GetSnifferSession(IpInfo* ipInfo, TcpInfo* tcpInfo)
     time_t          currTime = wc_Time(NULL);
     word32          row = SessionHash(ipInfo, tcpInfo);
 
-    wc_LockMutex(&SessionMutex);
-
+    LOCK_SESSION();
     session = SessionTable[row];
     while (session) {
         if (MatchAddr(session->server, ipInfo->src) &&
@@ -1474,7 +1637,7 @@ static SnifferSession* GetSnifferSession(IpInfo* ipInfo, TcpInfo* tcpInfo)
     if (session)
         session->lastUsed= currTime; /* keep session alive, remove stale will */
                                      /* leave alone */
-    wc_UnLockMutex(&SessionMutex);
+    UNLOCK_SESSION();
 
     /* determine side */
     if (session) {
@@ -1504,28 +1667,31 @@ static int LoadKeyFile(byte** keyBuf, word32* keyBufSz,
     int ret = -1;
 
     if (keyBuf == NULL || keyBufSz == NULL || keyFile == NULL) {
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     if (keySz == 0) {
         /* load from file */
         file = XFOPEN(keyFile, "rb");
-        if (file == XBADFILE) return -1;
+        if (file == XBADFILE) return WOLFSSL_FATAL_ERROR;
         if(XFSEEK(file, 0, XSEEK_END) != 0) {
             XFCLOSE(file);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         fileSz = XFTELL(file);
         if (fileSz > MAX_WOLFSSL_FILE_SIZE || fileSz < 0) {
             XFCLOSE(file);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
-        XREWIND(file);
+        if(XFSEEK(file, 0, XSEEK_SET) != 0) {
+            XFCLOSE(file);
+            return WOLFSSL_FATAL_ERROR;
+        }
 
         loadBuf = (byte*)XMALLOC(fileSz, NULL, DYNAMIC_TYPE_FILE);
         if (loadBuf == NULL) {
             XFCLOSE(file);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
 
         ret = (int)XFREAD(loadBuf, 1, fileSz, file);
@@ -1533,14 +1699,14 @@ static int LoadKeyFile(byte** keyBuf, word32* keyBufSz,
 
         if (ret != fileSz) {
             XFREE(loadBuf, NULL, DYNAMIC_TYPE_FILE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
     }
     else {
         /* use buffer directly */
         loadBuf = (byte*)XMALLOC(keySz, NULL, DYNAMIC_TYPE_FILE);
         if (loadBuf == NULL) {
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         fileSz = keySz;
         XMEMCPY(loadBuf, keyFile, fileSz);
@@ -1577,7 +1743,7 @@ static int LoadKeyFile(byte** keyBuf, word32* keyBufSz,
     }
 
     if (ret < 0) {
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     return ret;
@@ -1596,30 +1762,31 @@ static int CreateWatchSnifferServer(char* error)
             DYNAMIC_TYPE_SNIFFER_SERVER);
     if (sniffer == NULL) {
         SetError(MEMORY_STR, error, NULL, 0);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
     InitSnifferServer(sniffer);
     sniffer->ctx = wolfSSL_CTX_new(wolfSSLv23_client_method());
     if (!sniffer->ctx) {
         SetError(MEMORY_STR, error, NULL, 0);
         FreeSnifferServer(sniffer);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
-#ifdef WOLF_CRYPTO_CB
+#if defined(WOLF_CRYPTO_CB) || defined(WOLFSSL_ASYNC_CRYPT)
     if (CryptoDeviceId != INVALID_DEVID)
         wolfSSL_CTX_SetDevId(sniffer->ctx, CryptoDeviceId);
 #endif
 
     /* add to server list */
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
     sniffer->next = ServerList;
     ServerList = sniffer;
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     return 0;
 }
 
 #endif
+
 
 /* Caller locks ServerListMutex */
 static int SetNamedPrivateKey(const char* name, const char* address, int port,
@@ -1644,7 +1811,7 @@ static int SetNamedPrivateKey(const char* name, const char* address, int port,
                 NULL, DYNAMIC_TYPE_SNIFFER_NAMED_KEY);
         if (namedKey == NULL) {
             SetError(MEMORY_STR, error, NULL, 0);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         XMEMSET(namedKey, 0, sizeof(NamedKey));
 
@@ -1659,7 +1826,7 @@ static int SetNamedPrivateKey(const char* name, const char* address, int port,
         if (ret < 0) {
             SetError(KEY_FILE_STR, error, NULL, 0);
             FreeNamedKey(namedKey);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
     }
 #endif
@@ -1669,10 +1836,14 @@ static int SetNamedPrivateKey(const char* name, const char* address, int port,
     if (serverIp.ip4 == XINADDR_NONE) {
     #ifdef FUSION_RTOS
         if (XINET_PTON(AF_INET6, address, serverIp.ip6,
-                       sizeof(serverIp.ip4)) == 1) {
+                       sizeof(serverIp.ip6)) == 1)
+    #elif defined(FREESCALE_MQX)
+        if (XINET_PTON(AF_INET6, address, serverIp.ip6,
+                       sizeof(serverIp.ip6)) == RTCS_OK)
     #else
-        if (XINET_PTON(AF_INET6, address, serverIp.ip6) == 1) {
+        if (XINET_PTON(AF_INET6, address, serverIp.ip6) == 1)
     #endif
+        {
             serverIp.version = IPV6;
         }
     }
@@ -1692,7 +1863,7 @@ static int SetNamedPrivateKey(const char* name, const char* address, int port,
 #ifdef HAVE_SNI
             FreeNamedKey(namedKey);
 #endif
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         InitSnifferServer(sniffer);
 
@@ -1708,8 +1879,12 @@ static int SetNamedPrivateKey(const char* name, const char* address, int port,
             FreeNamedKey(namedKey);
 #endif
             FreeSnifferServer(sniffer);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
+    #if defined(WOLF_CRYPTO_CB) || defined(WOLFSSL_ASYNC_CRYPT)
+        if (CryptoDeviceId != INVALID_DEVID)
+            wolfSSL_CTX_SetDevId(sniffer->ctx, CryptoDeviceId);
+    #endif
     }
 
     if (name == NULL) {
@@ -1745,7 +1920,7 @@ static int SetNamedPrivateKey(const char* name, const char* address, int port,
             SetError(KEY_FILE_STR, error, NULL, 0);
             if (isNew)
                 FreeSnifferServer(sniffer);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
     #ifdef WOLF_CRYPTO_CB
         wolfSSL_CTX_SetDevId(sniffer->ctx, CryptoDeviceId);
@@ -1765,6 +1940,10 @@ static int SetNamedPrivateKey(const char* name, const char* address, int port,
         ServerList = sniffer;
     }
 
+#ifndef WOLFSSL_STATIC_EPHEMERAL
+    (void)isEphemeralKey;
+#endif
+
     return 0;
 }
 
@@ -1782,10 +1961,10 @@ int ssl_SetNamedPrivateKey(const char* name,
     TraceHeader();
     TraceSetNamedServer(name, address, port, keyFile);
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
     ret = SetNamedPrivateKey(name, address, port, keyFile, 0,
                              typeKey, password, error, 0);
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     if (ret == 0)
         Trace(NEW_SERVER_STR);
@@ -1803,10 +1982,10 @@ int ssl_SetNamedPrivateKeyBuffer(const char* name,
     TraceHeader();
     TraceSetNamedServer(name, address, port, NULL);
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
     ret = SetNamedPrivateKey(name, address, port, keyBuf, keySz,
                              typeKey, password, error, 0);
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     if (ret == 0)
         Trace(NEW_SERVER_STR);
@@ -1826,10 +2005,10 @@ int ssl_SetPrivateKey(const char* address, int port,
     TraceHeader();
     TraceSetServer(address, port, keyFile);
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
     ret = SetNamedPrivateKey(NULL, address, port, keyFile, 0,
                              typeKey, password, error, 0);
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     if (ret == 0)
         Trace(NEW_SERVER_STR);
@@ -1846,10 +2025,10 @@ int ssl_SetPrivateKeyBuffer(const char* address, int port,
     TraceHeader();
     TraceSetServer(address, port, "from buffer");
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
     ret = SetNamedPrivateKey(NULL, address, port, keyBuf, keySz,
                              typeKey, password, error, 0);
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     if (ret == 0)
         Trace(NEW_SERVER_STR);
@@ -1871,10 +2050,10 @@ int ssl_SetNamedEphemeralKey(const char* name,
     TraceHeader();
     TraceSetNamedServer(name, address, port, keyFile);
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
     ret = SetNamedPrivateKey(name, address, port, keyFile, 0,
                              typeKey, password, error, 1);
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     if (ret == 0)
         Trace(NEW_SERVER_STR);
@@ -1892,10 +2071,10 @@ int ssl_SetNamedEphemeralKeyBuffer(const char* name,
     TraceHeader();
     TraceSetNamedServer(name, address, port, NULL);
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
     ret = SetNamedPrivateKey(name, address, port, keyBuf, keySz,
                              typeKey, password, error, 1);
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     if (ret == 0)
         Trace(NEW_SERVER_STR);
@@ -1915,10 +2094,10 @@ int ssl_SetEphemeralKey(const char* address, int port,
     TraceHeader();
     TraceSetServer(address, port, keyFile);
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
     ret = SetNamedPrivateKey(NULL, address, port, keyFile, 0,
                              typeKey, password, error, 1);
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     if (ret == 0)
         Trace(NEW_SERVER_STR);
@@ -1935,10 +2114,10 @@ int ssl_SetEphemeralKeyBuffer(const char* address, int port,
     TraceHeader();
     TraceSetServer(address, port, "from buffer");
 
-    wc_LockMutex(&ServerListMutex);
+    LOCK_SERVER_LIST();
     ret = SetNamedPrivateKey(NULL, address, port, keyBuf, keySz,
                              typeKey, password, error, 1);
-    wc_UnLockMutex(&ServerListMutex);
+    UNLOCK_SERVER_LIST();
 
     if (ret == 0)
         Trace(NEW_SERVER_STR);
@@ -1954,34 +2133,50 @@ static int CheckIp6Hdr(Ip6Hdr* iphdr, IpInfo* info, int length, char* error)
     int        version = IP_V(iphdr);
     int        exthdrsz = IP6_HDR_SZ;
 
+    if (length < IP6_HDR_SZ) {
+        SetError(BAD_IPVER_STR, error, NULL, 0);
+        return WOLFSSL_FATAL_ERROR;
+    }
+
     TraceIP6(iphdr);
     Trace(IP_CHECK_STR);
 
     if (version != IPV6) {
         SetError(BAD_IPVER_STR, error, NULL, 0);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     /* Here, we need to move onto next header if not TCP. */
     if (iphdr->next_header != TCP_PROTOCOL) {
         Ip6ExtHdr* exthdr = (Ip6ExtHdr*)((byte*)iphdr + IP6_HDR_SZ);
         do {
-            int hdrsz = (exthdr->length + 1) * 8;
+            int hdrsz;
+            /* make sure the extension header is fully present before reading */
+            if (length - exthdrsz < (int)sizeof(Ip6ExtHdr)) {
+                SetError(PACKET_HDR_SHORT_STR, error, NULL, 0);
+                return WOLFSSL_FATAL_ERROR;
+            }
+            hdrsz = (exthdr->length + 1) * 8;
             if (hdrsz > length - exthdrsz) {
                 SetError(PACKET_HDR_SHORT_STR, error, NULL, 0);
-                return -1;
+                return WOLFSSL_FATAL_ERROR;
             }
             exthdrsz += hdrsz;
             exthdr = (Ip6ExtHdr*)((byte*)exthdr + hdrsz);
         }
-        while (exthdr->next_header != TCP_PROTOCOL &&
+        while (exthdrsz < length &&
+                exthdr->next_header != TCP_PROTOCOL &&
                 exthdr->next_header != NO_NEXT_HEADER);
+        if (exthdrsz >= length) {
+            SetError(PACKET_HDR_SHORT_STR, error, NULL, 0);
+            return WOLFSSL_FATAL_ERROR;
+        }
     }
 
 #ifndef WOLFSSL_SNIFFER_WATCH
     if (!IsServerRegistered6(iphdr->src) && !IsServerRegistered6(iphdr->dst)) {
         SetError(SERVER_NOT_REG_STR, error, NULL, 0);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 #endif
 
@@ -2000,32 +2195,33 @@ static int CheckIp6Hdr(Ip6Hdr* iphdr, IpInfo* info, int length, char* error)
 /* Check IP Header for IPV4, TCP, and a registered server address */
 /* If header IPv6, pass to CheckIp6Hdr(). */
 /* returns 0 on success, -1 on error */
-static int CheckIpHdr(IpHdr* iphdr, IpInfo* info, int length, char* error)
+static int CheckIpHdr(IpHdr* iphdr, IpInfo* info, int length, char* error,
+                      int trace)
 {
     int version = IP_V(iphdr);
 
     if (version == IPV6)
         return CheckIp6Hdr((Ip6Hdr*)iphdr, info, length, error);
 
-    TraceIP(iphdr);
-    Trace(IP_CHECK_STR);
+    if (length < IP_HDR_SZ) {
+        SetError(PACKET_HDR_SHORT_STR, error, NULL, 0);
+        return WOLFSSL_FATAL_ERROR;
+    }
+
+    if (trace) {
+        TraceIP(iphdr);
+        Trace(IP_CHECK_STR);
+    }
 
     if (version != IPV4) {
         SetError(BAD_IPVER_STR, error, NULL, 0);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     if (iphdr->protocol != TCP_PROTOCOL) {
         SetError(BAD_PROTO_STR, error, NULL, 0);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
-
-#ifndef WOLFSSL_SNIFFER_WATCH
-    if (!IsServerRegistered(iphdr->src) && !IsServerRegistered(iphdr->dst)) {
-        SetError(SERVER_NOT_REG_STR, error, NULL, 0);
-        return -1;
-    }
-#endif
 
     info->length  = IP_HL(iphdr);
     info->total   = XNTOHS(iphdr->length);
@@ -2043,10 +2239,13 @@ static int CheckIpHdr(IpHdr* iphdr, IpInfo* info, int length, char* error)
 
 /* Check TCP Header for a registered port */
 /* returns 0 on success, -1 on error */
-static int CheckTcpHdr(TcpHdr* tcphdr, TcpInfo* info, char* error)
+static int CheckTcpHdr(TcpHdr* tcphdr, TcpInfo* info, char* error, int trace)
 {
-    TraceTcp(tcphdr);
-    Trace(TCP_CHECK_STR);
+    if (trace) {
+        TraceTcp(tcphdr);
+        Trace(TCP_CHECK_STR);
+    }
+
     info->srcPort   = XNTOHS(tcphdr->srcPort);
     info->dstPort   = XNTOHS(tcphdr->dstPort);
     info->length    = TCP_LEN(tcphdr);
@@ -2058,14 +2257,7 @@ static int CheckTcpHdr(TcpHdr* tcphdr, TcpInfo* info, char* error)
     if (info->ack)
         info->ackNumber = XNTOHL(tcphdr->ack);
 
-#ifndef WOLFSSL_SNIFFER_WATCH
-    if (!IsPortRegistered(info->srcPort) && !IsPortRegistered(info->dstPort)) {
-        SetError(SERVER_PORT_NOT_REG_STR, error, NULL, 0);
-        return -1;
-    }
-#else
     (void)error;
-#endif
 
     return 0;
 }
@@ -2077,8 +2269,23 @@ static int GetRecordHeader(const byte* input, RecordLayerHeader* rh, int* size)
     XMEMCPY(rh, input, RECORD_HEADER_SZ);
     *size = (rh->length[0] << 8) | rh->length[1];
 
+    /* make sure length is valid */
     if (*size > (MAX_RECORD_SIZE + COMP_EXTRA + MAX_MSG_EXTRA))
         return LENGTH_ERROR;
+    /* make sure the record type is valid */
+    if (rh->type < change_cipher_spec ||
+    #ifdef WOLFSSL_DTLS13
+        rh->type > ack
+    #else
+        rh->type > dtls12_cid
+    #endif
+        ) {
+        return UNKNOWN_RECORD_TYPE;
+    }
+    /* make sure version is valid */
+    if (rh->pvMajor > SSLv3_MAJOR || rh->pvMinor > TLSv1_3_MINOR) {
+        return VERSION_ERROR;
+    }
 
     return 0;
 }
@@ -2106,7 +2313,7 @@ static void CopySessionInfo(SnifferSession* session, SSLInfo* sslInfo)
             pCipher = wolfSSL_get_cipher(session->sslServer);
             if (NULL != pCipher) {
                 XSTRNCPY((char*)sslInfo->serverCipherSuiteName, pCipher,
-                         sizeof(sslInfo->serverCipherSuiteName));
+                         sizeof(sslInfo->serverCipherSuiteName) - 1);
                 sslInfo->serverCipherSuiteName
                          [sizeof(sslInfo->serverCipherSuiteName) - 1] = '\0';
             }
@@ -2114,7 +2321,7 @@ static void CopySessionInfo(SnifferSession* session, SSLInfo* sslInfo)
         #ifdef HAVE_SNI
             if (NULL != session->sni) {
                 XSTRNCPY((char*)sslInfo->serverNameIndication,
-                         session->sni, sizeof(sslInfo->serverNameIndication));
+                    session->sni, sizeof(sslInfo->serverNameIndication) - 1);
                 sslInfo->serverNameIndication
                          [sizeof(sslInfo->serverNameIndication) - 1] = '\0';
             }
@@ -2155,701 +2362,960 @@ static void ShowTlsSecrets(SnifferSession* session)
 }
 #endif /* SHOW_SECRETS */
 
+typedef struct {
+    int type;
+    union {
+    #ifndef NO_RSA
+        RsaKey rsa;
+    #endif
+    #if !defined(NO_DH) && defined(WOLFSSL_DH_EXTRA)
+        struct {
+            word32 pLen; /* modulus length */
+            word32 privKeySz;
+            byte   privKey[WC_DH_PRIV_MAX_SZ]; /* max for TLS */
+            DhKey  key;
+        } dh;
+    #endif
+    #ifdef HAVE_ECC
+        ecc_key ecc;
+    #endif
+    #ifdef HAVE_CURVE25519
+        curve25519_key x25519;
+    #endif
+    #ifdef HAVE_CURVE448
+        curve448_key x448;
+    #endif
+    } priv;
+
+#if defined(HAVE_ECC) || defined(HAVE_CURVE25519) || defined(HAVE_CURVE448)
+    union {
+        /* RSA is for static RSA only */
+        /* DH does not use public DhKey for Agree */
+    #ifdef HAVE_ECC
+        ecc_key ecc;
+    #endif
+    #ifdef HAVE_CURVE25519
+        curve25519_key x25519;
+    #endif
+    #ifdef HAVE_CURVE448
+        curve448_key x448;
+    #endif
+    } pub;
+#endif
+    byte initPriv:1;
+    byte initPub:1;
+} SnifferKey;
+
+typedef struct SetupKeysArgs {
+#ifdef WOLFSSL_ASYNC_CRYPT
+    SnifferKey* key;
+#else
+    SnifferKey  key[1];
+#endif
+    DerBuffer*  keyBuf;
+    int         length;
+    byte        keyBufFree:1;
+    byte        keyLocked:1;
+} SetupKeysArgs;
+
+static void FreeSetupKeysArgs(WOLFSSL* ssl, void* pArgs)
+{
+    SetupKeysArgs* args = (SetupKeysArgs*)pArgs;
+
+    if (args == NULL) {
+        return;
+    }
+    (void)ssl;
+#ifdef WOLFSSL_ASYNC_CRYPT
+    if (args->key != NULL)
+#endif
+    {
+    #ifndef NO_RSA
+        if (args->key->type == WC_PK_TYPE_RSA) {
+            if (args->key->initPriv) {
+                wc_FreeRsaKey(&args->key->priv.rsa);
+            }
+        }
+    #endif
+    #if !defined(NO_DH) && defined(WOLFSSL_DH_EXTRA)
+        if (args->key->type == WC_PK_TYPE_DH) {
+            if (args->key->initPriv) {
+                wc_FreeDhKey(&args->key->priv.dh.key);
+            }
+        }
+    #endif
+    #ifdef HAVE_ECC
+        if (args->key->type == WC_PK_TYPE_ECDH) {
+            if (args->key->initPriv) {
+                wc_ecc_free(&args->key->priv.ecc);
+            }
+            if (args->key->initPub) {
+                wc_ecc_free(&args->key->pub.ecc);
+            }
+        }
+    #endif
+    #ifdef HAVE_CURVE25519
+        if (args->key->type == WC_PK_TYPE_CURVE25519) {
+            if (args->key->initPriv) {
+                wc_curve25519_free(&args->key->priv.x25519);
+            }
+            if (args->key->initPub) {
+                wc_curve25519_free(&args->key->pub.x25519);
+            }
+        }
+    #endif
+    #ifdef HAVE_CURVE448
+        if (args->key->type == WC_PK_TYPE_CURVE448) {
+            if (args->key->initPriv) {
+                wc_curve448_free(&args->key->priv.x448);
+            }
+            if (args->key->initPub) {
+                wc_curve448_free(&args->key->pub.x448);
+            }
+        }
+    #endif
+        args->key->type = WC_PK_TYPE_NONE;
+        args->key->initPriv = 0; args->key->initPub = 0;
+
+        /* Scrub the raw DH private exponent (and any other key material
+         * embedded in the union) before release. wc_FreeDhKey above only
+         * clears the mp_int DhKey, not the separate privKey byte array.
+         * Use ForceZero (rather than XMEMSET) so the wipe cannot be
+         * elided by the optimizer. */
+        ForceZero(args->key, sizeof(*args->key));
+#ifdef WOLFSSL_ASYNC_CRYPT
+        XFREE(args->key, NULL, DYNAMIC_TYPE_SNIFFER_KEY);
+        args->key = NULL;
+#endif
+    }
+
+    if (args->keyBuf != NULL && args->keyBufFree) {
+        FreeDer(&args->keyBuf);
+        args->keyBufFree = 0;
+    }
+}
 
 /* Process Keys */
-
 static int SetupKeys(const byte* input, int* sslBytes, SnifferSession* session,
     char* error, KeyShareInfo* ksInfo)
 {
-    word32 idx = 0;
+    word32 idx;
     int ret;
-    DerBuffer* keyBuf = NULL;
-    int keyBufFree = 0;
-#if defined(HAVE_ECC) || defined(HAVE_CURVE25519)
-    int useCurveId = 0;
-#endif
     int devId = INVALID_DEVID;
     WOLFSSL_CTX* ctx = session->context->ctx;
     WOLFSSL* ssl = session->sslServer;
 
-#if defined(HAVE_ECC) || defined(HAVE_CURVE25519)
-    if (ksInfo && ksInfo->curve_id != 0)
-        useCurveId = ksInfo->curve_id;
-#endif
-#ifdef WOLF_CRYPTO_CB
-    devId = CryptoDeviceId;
+#ifdef WOLFSSL_ASYNC_CRYPT
+    SetupKeysArgs* args = NULL;
+    WOLFSSL_ASSERT_SIZEOF_GE(ssl->async->args, *args);
+#else
+    SetupKeysArgs  args[1];
 #endif
 
-    if (session->sslServer->arrays == NULL || session->sslClient->arrays == NULL) {
-        /* secret's have already been established and released */
-        /* this can happen with secure renegotiation */
+    Trace(SNIFFER_KEY_SETUP_STR);
+
+    if (session->sslServer->arrays == NULL ||
+        session->sslClient->arrays == NULL) {
+        /* Secret's have already been established and released.
+         * This can happen with secure renegotiation. */
         return 0;
     }
 
-#ifndef NO_RSA
-    /* Static RSA */
-    if (ksInfo == NULL && ssl->buffers.key) {
-        RsaKey key;
-        int length;
-        int keyInit = 0;
-
-        ret = wc_InitRsaKey_ex(&key, NULL, devId);
-        if (ret == 0) {
-            keyInit = 1;
-            keyBuf = ssl->buffers.key;
-
-            ret = wc_RsaPrivateKeyDecode(keyBuf->buffer, &idx, &key,
-                keyBuf->length);
-            if (ret != 0) {
-            #ifndef HAVE_ECC
-                #ifdef WOLFSSL_SNIFFER_STATS
-                INC_STAT(SnifferStats.sslKeyFails);
-                #endif
-                SetError(RSA_DECODE_STR, error, session, FATAL_ERROR_STATE);
-            #else
-                /* If we can do ECC, this isn't fatal. Not loading a key later
-                 * will be fatal, though. */
-                SetError(RSA_DECODE_STR, error, session, 0);
-                keyBuf = NULL;
-            #endif
-            }
-        }
-
-        if (ret == 0) {
-            length = wc_RsaEncryptSize(&key);
-            if (IsTLS(session->sslServer)) {
-                input += 2;     /* tls pre length */
-            }
-
-            if (length > *sslBytes) {
-                SetError(PARTIAL_INPUT_STR, error, session, FATAL_ERROR_STATE);
-                ret = -1;
-            }
-        }
-
-    #ifdef WC_RSA_BLINDING
-        if (ret == 0) {
-            ret = wc_RsaSetRNG(&key, session->sslServer->rng);
-            if (ret != 0) {
-                SetError(RSA_DECRYPT_STR, error, session, FATAL_ERROR_STATE);
-            }
-        }
-    #endif
-
-        if (ret == 0) {
-            session->keySz = length * WOLFSSL_BIT_SIZE;
-            /* length is the key size in bytes */
-            session->sslServer->arrays->preMasterSz = SECRET_LEN;
-
-            do {
-            #ifdef WOLFSSL_ASYNC_CRYPT
-                ret = wc_AsyncWait(ret, &key.asyncDev,
-                        WC_ASYNC_FLAG_CALL_AGAIN);
-            #endif
-                if (ret >= 0) {
-                    ret = wc_RsaPrivateDecrypt(input, length,
-                        session->sslServer->arrays->preMasterSecret,
-                        session->sslServer->arrays->preMasterSz, &key);
-                }
-            } while (ret == WC_PENDING_E);
-
-            if (ret != SECRET_LEN) {
-                SetError(RSA_DECRYPT_STR, error, session, FATAL_ERROR_STATE);
-            }
-        }
-
-        if (keyInit) {
-            wc_FreeRsaKey(&key);
-        }
+#ifdef WOLFSSL_ASYNC_CRYPT
+    if (ssl->async == NULL) {
+        ssl->async = (struct WOLFSSL_ASYNC*)
+                XMALLOC(sizeof(struct WOLFSSL_ASYNC), ssl->heap,
+                        DYNAMIC_TYPE_ASYNC);
+        if (ssl->async == NULL)
+            ERROR_OUT(MEMORY_E, exit_sk);
     }
-#endif /* !NO_RSA */
+    args = (SetupKeysArgs*)ssl->async->args;
 
-#if !defined(NO_DH) && defined(WOLFSSL_DH_EXTRA)
-    /* Static DH Key */
-    if (ksInfo && ksInfo->dh_key_bits != 0 && keyBuf == NULL) {
-        DhKey dhKey;
-    #ifdef HAVE_PUBLIC_FFDHE
-        const DhParams* params;
-    #endif
-        word32 privKeySz = 0, p_len = 0;
-        byte privKey[52]; /* max for TLS */
-        int keyInit = 0;
-
-        /* try and load static ephemeral */
-    #ifdef WOLFSSL_STATIC_EPHEMERAL
-        #ifndef SINGLE_THREADED
-        int keyLocked = 0;
-        if (ctx->staticKELockInit &&
-            wc_LockMutex(&ctx->staticKELock) == 0)
-        #endif
-        {
-        #ifndef SINGLE_THREADED
-            keyLocked = 1;
-        #endif
-            keyBuf = ssl->staticKE.dhKey;
-            if (keyBuf == NULL)
-                keyBuf = ctx->staticKE.dhKey;
-        }
-    #endif
-
-        ret = 0;
-    #ifdef WOLFSSL_SNIFFER_KEY_CALLBACK
-        if (KeyCb != NULL) {
-            if (keyBuf == NULL) {
-                ret = AllocDer(&keyBuf, FILE_BUFFER_SIZE, PRIVATEKEY_TYPE, NULL);
-                if (ret == 0)
-                    keyBufFree = 1;
-            }
-            ret = KeyCb(session, ksInfo->named_group,
-                session->srvKs.key, session->srvKs.key_len,
-                session->cliKs.key, session->cliKs.key_len,
-                keyBuf, KeyCbCtx, error);
-            if (ret != 0) {
-                SetError(-1, error, session, FATAL_ERROR_STATE);
-            }
-        }
-    #endif
-        if (ret == 0 && keyBuf == NULL) {
-            ret = BUFFER_E;
-        }
-
-    #ifdef HAVE_PUBLIC_FFDHE
-        if (ret == 0) {
-            /* get DH params */
-            switch (ksInfo->named_group) {
-            #ifdef HAVE_FFDHE_2048
-                case WOLFSSL_FFDHE_2048:
-                    params = wc_Dh_ffdhe2048_Get();
-                    privKeySz = 29;
-                    break;
-            #endif
-            #ifdef HAVE_FFDHE_3072
-                case WOLFSSL_FFDHE_3072:
-                    params = wc_Dh_ffdhe3072_Get();
-                    privKeySz = 34;
-                    break;
-            #endif
-            #ifdef HAVE_FFDHE_4096
-                case WOLFSSL_FFDHE_4096:
-                    params = wc_Dh_ffdhe4096_Get();
-                    privKeySz = 39;
-                    break;
-            #endif
-            #ifdef HAVE_FFDHE_6144
-                case WOLFSSL_FFDHE_6144:
-                    params = wc_Dh_ffdhe6144_Get();
-                    privKeySz = 46;
-                    break;
-            #endif
-            #ifdef HAVE_FFDHE_8192
-                case WOLFSSL_FFDHE_8192:
-                    params = wc_Dh_ffdhe8192_Get();
-                    privKeySz = 52;
-                    break;
-            #endif
-                default:
-                    ret = BAD_FUNC_ARG;
-            }
-        }
-    #endif
-
-        if (ret == 0) {
-            ret = wc_InitDhKey_ex(&dhKey, NULL, devId);
-            if (ret == 0)
-                keyInit = 1;
-        }
-        if (ret == 0) {
-    #ifdef HAVE_PUBLIC_FFDHE
-            ret = wc_DhSetKey(&dhKey,
-                (byte*)params->p, params->p_len,
-                (byte*)params->g, params->g_len);
-            p_len = params->p_len;
-    #else
-            ret = wc_DhSetNamedKey(&dhKey, ksInfo->named_group);
-            if (ret == 0) {
-                privKeySz = wc_DhGetNamedKeyMinSize(ksInfo->named_group);
-                ret = wc_DhGetNamedKeyParamSize(ksInfo->named_group,
-                        &p_len, NULL, NULL);
-            }
-    #endif
-        }
-        if (ret == 0) {
-            ret = wc_DhKeyDecode(keyBuf->buffer, &idx, &dhKey,
-                keyBuf->length);
-        }
-        if (ret == 0) {
-            ret = wc_DhExportKeyPair(&dhKey, privKey, &privKeySz, NULL,
-                NULL);
-        }
-
-    #if defined(WOLFSSL_STATIC_EPHEMERAL) && !defined(SINGLE_THREADED)
-        if (keyLocked) {
-            wc_UnLockMutex(&ctx->staticKELock);
-        }
-    #endif
-
-        if (ret == 0) {
-            /* Derive secret from private key and peer's public key */
-            do {
-            #ifdef WOLFSSL_ASYNC_CRYPT
-                ret = wc_AsyncWait(ret, &dhKey.asyncDev,
-                        WC_ASYNC_FLAG_CALL_AGAIN);
-            #endif
-                if (ret >= 0) {
-                    PRIVATE_KEY_UNLOCK();
-                    ret = wc_DhAgree(&dhKey,
-                        session->sslServer->arrays->preMasterSecret,
-                        &session->sslServer->arrays->preMasterSz,
-                        privKey, privKeySz,
-                        input, *sslBytes);
-                    PRIVATE_KEY_LOCK();
-                }
-            } while (ret == WC_PENDING_E);
-        }
-
-        if (keyInit)
-            wc_FreeDhKey(&dhKey);
-
-    #ifdef WOLFSSL_SNIFFER_STATS
-        if (ret != 0)
-            INC_STAT(SnifferStats.sslKeyFails);
-    #endif
-
-        /* left-padded with zeros up to the size of the prime */
-        if (ret == 0 && p_len > session->sslServer->arrays->preMasterSz) {
-            word32 diff = p_len - session->sslServer->arrays->preMasterSz;
-            XMEMMOVE(session->sslServer->arrays->preMasterSecret + diff,
-                    session->sslServer->arrays->preMasterSecret,
-                    session->sslServer->arrays->preMasterSz);
-            XMEMSET(session->sslServer->arrays->preMasterSecret, 0, diff);
-            session->sslServer->arrays->preMasterSz = p_len;
-        }
-    }
-#endif /* !NO_DH && WOLFSSL_DH_EXTRA */
-
-#ifdef HAVE_ECC
-    /* Static ECC Key */
-    if (useCurveId >= 0 && keyBuf == NULL
-    #ifdef HAVE_CURVE25519
-        && useCurveId != ECC_X25519
-    #endif
-    #ifdef HAVE_CURVE448
-        && useCurveId != ECC_X448
-    #endif
-    ) {
-        ecc_key key, pubKey;
-        int length, keyInit = 0, pubKeyInit = 0;
-
-        /* try and load static ephemeral */
-    #ifdef WOLFSSL_STATIC_EPHEMERAL
-        #ifndef SINGLE_THREADED
-        int keyLocked = 0;
-        if (ctx->staticKELockInit &&
-            wc_LockMutex(&ctx->staticKELock) == 0)
-        #endif
-        {
-        #ifndef SINGLE_THREADED
-            keyLocked = 1;
-        #endif
-            keyBuf = ssl->staticKE.ecKey;
-            if (keyBuf == NULL)
-                keyBuf = ctx->staticKE.ecKey;
-        }
-    #endif
-
-        /* try static ECC */
-        if (keyBuf == NULL) {
-            keyBuf = session->sslServer->buffers.key;
-        }
-
-        ret = 0;
-    #ifdef WOLFSSL_SNIFFER_KEY_CALLBACK
-        if (KeyCb != NULL && ksInfo) {
-            if (keyBuf == NULL) {
-                ret = AllocDer(&keyBuf, FILE_BUFFER_SIZE, PRIVATEKEY_TYPE, NULL);
-                if (ret == 0)
-                    keyBufFree = 1;
-            }
-            ret = KeyCb(session, ksInfo->named_group,
-                session->srvKs.key, session->srvKs.key_len,
-                session->cliKs.key, session->cliKs.key_len,
-                keyBuf, KeyCbCtx, error);
-            if (ret != 0) {
-                SetError(-1, error, session, FATAL_ERROR_STATE);
-            }
-        }
-    #endif
-
-        if (ret == 0 && keyBuf == NULL) {
-            ret = BUFFER_E;
-        }
-        if (ret == 0) {
-            ret = wc_ecc_init_ex(&key, NULL, devId);
-            if (ret == 0)
-                keyInit = 1;
-        }
-    #if defined(ECC_TIMING_RESISTANT) && (!defined(HAVE_FIPS) || \
-        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION != 2))) && \
-        !defined(HAVE_SELFTEST)
-        if (ret == 0) {
-            ret = wc_ecc_set_rng(&key, session->sslServer->rng);
-        }
-    #endif
-        if (ret == 0) {
-            idx = 0;
-            ret = wc_EccPrivateKeyDecode(keyBuf->buffer, &idx, &key, keyBuf->length);
-            if (ret != 0) {
-                SetError(ECC_DECODE_STR, error, session, FATAL_ERROR_STATE);
-            }
-        }
-
-    #if defined(WOLFSSL_STATIC_EPHEMERAL) && !defined(SINGLE_THREADED)
-        if (keyLocked) {
-            wc_UnLockMutex(&ctx->staticKELock);
-        }
-    #endif
-
-        if (ret == 0) {
-            length = wc_ecc_size(&key) * 2 + 1;
-            /* The length should be 2 times the key size (x and y), plus 1
-             * for the type byte. */
-            if (!IsAtLeastTLSv1_3(session->sslServer->version)) {
-                input += 1; /* Don't include the TLS length for the key. */
-            }
-
-            if (length > *sslBytes) {
-                SetError(PARTIAL_INPUT_STR, error, session, FATAL_ERROR_STATE);
-                ret = -1;
-            }
-
-            /* if curve not provided in key share data, then use private key curve */
-            if (useCurveId == 0 && key.dp) {
-                useCurveId = key.dp->id;
-            }
-        }
-        if (ret == 0) {
-            ret = wc_ecc_init(&pubKey);
-            if (ret == 0)
-                pubKeyInit = 1;
-        }
-        if (ret == 0) {
-            ret = wc_ecc_import_x963_ex(input, length, &pubKey, useCurveId);
-            if (ret != 0) {
-                SetError(ECC_PUB_DECODE_STR, error, session, FATAL_ERROR_STATE);
-            }
-        }
-        if (ret == 0) {
-            session->keySz = ((length - 1) / 2) * WOLFSSL_BIT_SIZE;
-            /* Length is in bytes. Subtract 1 for the ECC key type. Divide
-             * by two as the key is in (x,y) coordinates, where x and y are
-             * the same size, the key size. Convert from bytes to bits. */
-            session->sslServer->arrays->preMasterSz = ENCRYPT_LEN;
-
-            do {
-            #ifdef WOLFSSL_ASYNC_CRYPT
-                ret = wc_AsyncWait(ret, &key.asyncDev,
-                        WC_ASYNC_FLAG_CALL_AGAIN);
-            #endif
-                if (ret >= 0) {
-                    PRIVATE_KEY_UNLOCK();
-                    ret = wc_ecc_shared_secret(&key, &pubKey,
-                          session->sslServer->arrays->preMasterSecret,
-                          &session->sslServer->arrays->preMasterSz);
-                    PRIVATE_KEY_LOCK();
-                }
-            } while (ret == WC_PENDING_E);
-        }
-
-    #ifdef WOLFSSL_SNIFFER_STATS
-        if (ret != 0)
-            INC_STAT(SnifferStats.sslKeyFails);
-    #endif
-
-        if (keyInit)
-            wc_ecc_free(&key);
-        if (pubKeyInit)
-            wc_ecc_free(&pubKey);
-    }
-#endif /* HAVE_ECC */
-
-#ifdef HAVE_CURVE25519
-    /* Static Curve25519 Key */
-    if (useCurveId == ECC_X25519) {
-        curve25519_key key, pubKey;
-        int length, keyInit = 0, pubKeyInit = 0;
-
-        /* try and load static ephemeral */
-#ifdef WOLFSSL_STATIC_EPHEMERAL
-    #ifndef SINGLE_THREADED
-        int keyLocked = 0;
-        if (ctx->staticKELockInit &&
-            wc_LockMutex(&ctx->staticKELock) == 0)
-    #endif
-        {
-        #ifndef SINGLE_THREADED
-            keyLocked = 1;
-        #endif
-            keyBuf = ssl->staticKE.x25519Key;
-            if (keyBuf == NULL)
-                keyBuf = ctx->staticKE.x25519Key;
-        }
-#endif
-
-        ret = 0;
-#ifdef WOLFSSL_SNIFFER_KEY_CALLBACK
-        if (KeyCb != NULL && ksInfo) {
-            if (keyBuf == NULL) {
-                ret = AllocDer(&keyBuf, FILE_BUFFER_SIZE, PRIVATEKEY_TYPE, NULL);
-                if (ret == 0)
-                    keyBufFree = 1;
-            }
-            ret = KeyCb(session, ksInfo->named_group,
-                session->srvKs.key, session->srvKs.key_len,
-                session->cliKs.key, session->cliKs.key_len,
-                keyBuf, KeyCbCtx, error);
-            if (ret != 0) {
-                SetError(-1, error, session, FATAL_ERROR_STATE);
-                return ret;
-            }
-        }
-#endif
-
-        if (ret == 0 && keyBuf == NULL) {
-            ret = BUFFER_E;
-        }
-        if (ret == 0) {
-            ret = wc_curve25519_init_ex(&key, NULL, devId);
-            if (ret == 0)
-                keyInit = 1;
-        }
-        if (ret == 0) {
-            idx = 0;
-            ret = wc_Curve25519PrivateKeyDecode(keyBuf->buffer, &idx, &key,
-                keyBuf->length);
-            if (ret != 0) {
-                SetError(ECC_DECODE_STR, error, session, FATAL_ERROR_STATE);
-            }
-        }
-
-#if defined(WOLFSSL_STATIC_EPHEMERAL) && !defined(SINGLE_THREADED)
-        if (keyLocked) {
-            wc_UnLockMutex(&ctx->staticKELock);
-        }
-#endif
-
-        if (ret == 0) {
-            length = CURVE25519_KEYSIZE;
-            if (length > *sslBytes) {
-                SetError(PARTIAL_INPUT_STR, error, session, FATAL_ERROR_STATE);
-                ret = -1;
-            }
-        }
-        if (ret == 0) {
-            ret = wc_curve25519_init(&pubKey);
-            if (ret == 0)
-                pubKeyInit = 1;
-        }
-        if (ret == 0) {
-            ret = wc_curve25519_import_public_ex(input, length, &pubKey,
-                EC25519_LITTLE_ENDIAN);
-            if (ret != 0) {
-                SetError(ECC_PUB_DECODE_STR, error, session, FATAL_ERROR_STATE);
-            }
-        }
-
-        if (ret == 0) {
-            /* For Curve25519 length is always 32 */
-            session->keySz = CURVE25519_KEYSIZE;
-            session->sslServer->arrays->preMasterSz = ENCRYPT_LEN;
-
-            ret = wc_curve25519_shared_secret_ex(&key, &pubKey,
-                session->sslServer->arrays->preMasterSecret,
-                &session->sslServer->arrays->preMasterSz, EC25519_LITTLE_ENDIAN);
-        }
-
-#ifdef WOLFSSL_SNIFFER_STATS
-        if (ret != 0)
-            INC_STAT(SnifferStats.sslKeyFails);
-#endif
-
-        if (keyInit)
-            wc_curve25519_free(&key);
-        if (pubKeyInit)
-            wc_curve25519_free(&pubKey);
-    }
-#endif /* HAVE_CURVE25519 */
-
-#ifdef HAVE_CURVE448
-    /* Static Curve448 Key */
-    if (useCurveId == ECC_X448) {
-        curve448_key key, pubKey;
-        int length, keyInit = 0, pubKeyInit = 0;
-
-        /* try and load static ephemeral */
-#ifdef WOLFSSL_STATIC_EPHEMERAL
-    #ifndef SINGLE_THREADED
-        int keyLocked = 0;
-        if (ctx->staticKELockInit &&
-            wc_LockMutex(&ctx->staticKELock) == 0)
-    #endif
-        {
-        #ifndef SINGLE_THREADED
-            keyLocked = 1;
-        #endif
-            keyBuf = ssl->staticKE.x448Key;
-            if (keyBuf == NULL)
-                keyBuf = ctx->staticKE.x448Key;
-        }
-#endif
-
-        ret = 0;
-#ifdef WOLFSSL_SNIFFER_KEY_CALLBACK
-        if (KeyCb != NULL && ksInfo) {
-            if (keyBuf == NULL) {
-                ret = AllocDer(&keyBuf, FILE_BUFFER_SIZE, PRIVATEKEY_TYPE, NULL);
-                if (ret == 0)
-                    keyBufFree = 1;
-            }
-            ret = KeyCb(session, ksInfo->named_group,
-                session->srvKs.key, session->srvKs.key_len,
-                session->cliKs.key, session->cliKs.key_len,
-                keyBuf, KeyCbCtx, error);
-            if (ret != 0) {
-                SetError(-1, error, session, FATAL_ERROR_STATE);
-                return ret;
-            }
-        }
-#endif
-
-        if (ret == 0 && keyBuf == NULL) {
-            ret = BUFFER_E;
-        }
-        if (ret == 0) {
-            ret = wc_curve448_init(&key);
-            if (ret == 0)
-                keyInit = 1;
-        }
-        if (ret == 0) {
-            idx = 0;
-            ret = wc_Curve448PrivateKeyDecode(keyBuf->buffer, &idx, &key,
-                keyBuf->length);
-            if (ret != 0) {
-                SetError(ECC_DECODE_STR, error, session, FATAL_ERROR_STATE);
-            }
-        }
-
-#if defined(WOLFSSL_STATIC_EPHEMERAL) && !defined(SINGLE_THREADED)
-        if (keyLocked) {
-            wc_UnLockMutex(&ctx->staticKELock);
-        }
-#endif
-
-        if (ret == 0) {
-            length = CURVE448_KEY_SIZE;
-            if (length > *sslBytes) {
-                SetError(PARTIAL_INPUT_STR, error, session, FATAL_ERROR_STATE);
-                ret = -1;
-            }
-        }
-        if (ret == 0) {
-            ret = wc_curve448_init(&pubKey);
-            if (ret == 0)
-                pubKeyInit = 1;
-        }
-        if (ret == 0) {
-            ret = wc_curve448_import_public_ex(input, length, &pubKey,
-                EC448_LITTLE_ENDIAN);
-            if (ret != 0) {
-                SetError(ECC_PUB_DECODE_STR, error, session, FATAL_ERROR_STATE);
-            }
-        }
-
-        if (ret == 0) {
-            session->keySz = CURVE448_KEY_SIZE;
-            session->sslServer->arrays->preMasterSz = ENCRYPT_LEN;
-
-            ret = wc_curve448_shared_secret_ex(&key, &pubKey,
-                session->sslServer->arrays->preMasterSecret,
-                &session->sslServer->arrays->preMasterSz, EC448_LITTLE_ENDIAN);
-        }
-
-#ifdef WOLFSSL_SNIFFER_STATS
-        if (ret != 0)
-            INC_STAT(SnifferStats.sslKeyFails);
-#endif
-
-        if (keyInit)
-            wc_curve448_free(&key);
-        if (pubKeyInit)
-            wc_curve448_free(&pubKey);
-    }
-#endif /* HAVE_CURVE448 */
-
-    if (keyBufFree && keyBuf != NULL) {
-        FreeDer(&keyBuf);
-    }
-
-    /* store for client side as well */
-    XMEMCPY(session->sslClient->arrays->preMasterSecret,
-           session->sslServer->arrays->preMasterSecret,
-           session->sslServer->arrays->preMasterSz);
-    session->sslClient->arrays->preMasterSz =
-        session->sslServer->arrays->preMasterSz;
-
-#ifdef SHOW_SECRETS
-    PrintSecret("pre master secret",
-                session->sslServer->arrays->preMasterSecret,
-                session->sslServer->arrays->preMasterSz);
-#endif
-
-    if (SetCipherSpecs(session->sslServer) != 0) {
-        SetError(BAD_CIPHER_SPEC_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
-    }
-
-    if (SetCipherSpecs(session->sslClient) != 0) {
-        SetError(BAD_CIPHER_SPEC_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
-    }
-
-#ifdef WOLFSSL_TLS13
-    /* TLS v1.3 derive handshake key */
-    if (IsAtLeastTLSv1_3(session->sslServer->version)) {
-        ret  = DeriveEarlySecret(session->sslServer);
-        ret += DeriveEarlySecret(session->sslClient);
-        ret += DeriveHandshakeSecret(session->sslServer);
-        ret += DeriveHandshakeSecret(session->sslClient);
-        ret += DeriveTls13Keys(session->sslServer, handshake_key, ENCRYPT_AND_DECRYPT_SIDE, 1);
-        ret += DeriveTls13Keys(session->sslClient, handshake_key, ENCRYPT_AND_DECRYPT_SIDE, 1);
-    #ifdef WOLFSSL_EARLY_DATA
-        ret += SetKeysSide(session->sslServer, DECRYPT_SIDE_ONLY);
-        ret += SetKeysSide(session->sslClient, DECRYPT_SIDE_ONLY);
-    #else
-        ret += SetKeysSide(session->sslServer, ENCRYPT_AND_DECRYPT_SIDE);
-        ret += SetKeysSide(session->sslClient, ENCRYPT_AND_DECRYPT_SIDE);
-    #endif
+    ret = wolfSSL_AsyncPop(ssl, &ssl->options.asyncState);
+    if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E)) {
+        /* Check for error */
+        if (ret < 0)
+            goto exit_sk;
     }
     else
 #endif
     {
-        ret  = MakeMasterSecret(session->sslServer);
-        ret += MakeMasterSecret(session->sslClient);
-        ret += SetKeysSide(session->sslServer, ENCRYPT_AND_DECRYPT_SIDE);
-        ret += SetKeysSide(session->sslClient, ENCRYPT_AND_DECRYPT_SIDE);
-    }
-    if (ret != 0) {
-        SetError(BAD_DERIVE_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        /* Reset state */
+        ret = 0;
+        ssl->options.asyncState = TLS_ASYNC_BEGIN;
+        XMEMSET(args, 0, sizeof(SetupKeysArgs));
+    #ifdef WOLFSSL_ASYNC_CRYPT
+        ssl->async->freeArgs = FreeSetupKeysArgs;
+    #endif
+    #ifdef WOLFSSL_ASYNC_CRYPT
+        args->key = (SnifferKey*)XMALLOC(sizeof(SnifferKey), NULL,
+            DYNAMIC_TYPE_SNIFFER_KEY);
+    #endif
     }
 
-#ifdef SHOW_SECRETS
-    #ifdef WOLFSSL_TLS13
-    if (!IsAtLeastTLSv1_3(session->sslServer->version))
-    #endif
-        ShowTlsSecrets(session);
+#if defined(WOLF_CRYPTO_CB) || defined(WOLFSSL_ASYNC_CRYPT)
+    devId = CryptoDeviceId;
 #endif
 
-    CallConnectionCb(session);
+#ifdef WOLFSSL_ASYNC_CRYPT
+    if (args->key == NULL) {
+        ERROR_OUT(MEMORY_E, exit_sk);
+    }
+#endif
+
+    #if defined(WOLFSSL_SNIFFER_KEYLOGFILE)
+    if (session->context->useKeyLogFile) {
+        ret = 0;
+        XMEMSET(args, 0, sizeof(SetupKeysArgs));
+
+        /* We want to skip all the key setup and go right to master secret generation, which is
+         * where we inject the master secret obtained from the keylog file */
+        ssl->options.asyncState = TLS_ASYNC_FINALIZE;
+    }
+    #endif
+
+    switch (ssl->options.asyncState) {
+    case TLS_ASYNC_BEGIN:
+    {
+    #if defined(HAVE_ECC) || defined(HAVE_CURVE25519) || defined(HAVE_CURVE448)
+        int useCurveId = 0;
+        if (ksInfo && ksInfo->curve_id != 0) {
+            useCurveId = ksInfo->curve_id;
+        }
+    #endif
+
+    #if defined(WOLFSSL_STATIC_EPHEMERAL) && !defined(SINGLE_THREADED)
+        if (ctx->staticKELockInit &&
+            wc_LockMutex(&ctx->staticKELock) == 0) {
+            args->keyLocked = 1;
+        }
+    #endif
+
+    #ifndef NO_RSA
+        /* Static RSA */
+        if (ksInfo == NULL && ssl->buffers.key) {
+            ret = wc_InitRsaKey_ex(&args->key->priv.rsa, NULL, devId);
+            if (ret == 0) {
+                args->key->type = WC_PK_TYPE_RSA;
+                args->key->initPriv = 1;
+                args->keyBuf = ssl->buffers.key;
+            #ifdef WOLFSSL_ASYNC_CRYPT
+                ret = wolfSSL_AsyncInit(ssl, &args->key->priv.rsa.asyncDev,
+                    WC_ASYNC_FLAG_CALL_AGAIN);
+            #endif
+            }
+            if (ret == 0) {
+                idx = 0;
+                ret = wc_RsaPrivateKeyDecode(args->keyBuf->buffer, &idx,
+                    &args->key->priv.rsa, args->keyBuf->length);
+                if (ret != 0) {
+                #ifndef HAVE_ECC
+                    SetError(RSA_DECODE_STR, error, session,
+                        FATAL_ERROR_STATE);
+                    break;
+                #else
+                    /* If we can do ECC, this isn't fatal. Not loading a key
+                     * later will be fatal, though. */
+                    SetError(RSA_DECODE_STR, error, session, 0);
+                    args->keyBuf = NULL;
+                #endif
+                }
+            }
+
+            if (ret == 0) {
+                args->length = wc_RsaEncryptSize(&args->key->priv.rsa);
+                if (IsTLS(session->sslServer)) {
+                    input += 2;     /* tls pre length */
+                }
+
+                if (args->length > *sslBytes) {
+                    SetError(PARTIAL_INPUT_STR, error, session,
+                        FATAL_ERROR_STATE);
+                    ret = WOLFSSL_FATAL_ERROR;
+                }
+            }
+
+        #ifdef WC_RSA_BLINDING
+            if (ret == 0) {
+                ret = wc_RsaSetRNG(&args->key->priv.rsa,
+                    session->sslServer->rng);
+                if (ret != 0) {
+                    SetError(RSA_DECRYPT_STR, error, session,
+                        FATAL_ERROR_STATE);
+                }
+            }
+        #endif
+
+            if (ret == 0) {
+                session->keySz = args->length * WOLFSSL_BIT_SIZE;
+                /* length is the key size in bytes */
+                session->sslServer->arrays->preMasterSz = SECRET_LEN;
+            }
+        }
+    #endif /* !NO_RSA */
+
+    #if !defined(NO_DH) && defined(WOLFSSL_DH_EXTRA)
+        /* Static DH Key */
+        if (ksInfo && ksInfo->dh_key_bits != 0 && args->keyBuf == NULL) {
+        #ifdef HAVE_PUBLIC_FFDHE
+            const DhParams* params;
+        #endif
+
+            /* try and load static ephemeral */
+        #ifdef WOLFSSL_STATIC_EPHEMERAL
+            args->keyBuf = ssl->staticKE.dhKey;
+            if (args->keyBuf == NULL)
+                args->keyBuf = ctx->staticKE.dhKey;
+        #endif
+
+            ret = 0;
+        #ifdef WOLFSSL_SNIFFER_KEY_CALLBACK
+            if (KeyCb != NULL) {
+                if (args->keyBuf == NULL) {
+                    ret = AllocDer(&args->keyBuf, FILE_BUFFER_SIZE,
+                        PRIVATEKEY_TYPE, NULL);
+                    if (ret == 0)
+                        args->keyBufFree = 1;
+                }
+                ret = KeyCb(session, ksInfo->named_group,
+                    session->srvKs.key, session->srvKs.key_len,
+                    session->cliKs.key, session->cliKs.key_len,
+                    args->keyBuf, KeyCbCtx, error);
+                if (ret != 0) {
+                    SetError(-1, error, session, FATAL_ERROR_STATE);
+                }
+            }
+        #endif
+            if (ret == 0 && args->keyBuf == NULL) {
+                ret = BUFFER_E;
+            }
+
+        #ifdef HAVE_PUBLIC_FFDHE
+            if (ret == 0) {
+                /* get DH params */
+                switch (ksInfo->named_group) {
+                #ifdef HAVE_FFDHE_2048
+                    case WOLFSSL_FFDHE_2048:
+                        params = wc_Dh_ffdhe2048_Get();
+                        args->key->priv.dh.privKeySz = 29;
+                        break;
+                #endif
+                #ifdef HAVE_FFDHE_3072
+                    case WOLFSSL_FFDHE_3072:
+                        params = wc_Dh_ffdhe3072_Get();
+                        args->key->priv.dh.privKeySz = 34;
+                        break;
+                #endif
+                #ifdef HAVE_FFDHE_4096
+                    case WOLFSSL_FFDHE_4096:
+                        params = wc_Dh_ffdhe4096_Get();
+                        args->key->priv.dh.privKeySz = 39;
+                        break;
+                #endif
+                #ifdef HAVE_FFDHE_6144
+                    case WOLFSSL_FFDHE_6144:
+                        params = wc_Dh_ffdhe6144_Get();
+                        args->key->priv.dh.privKeySz = 46;
+                        break;
+                #endif
+                #ifdef HAVE_FFDHE_8192
+                    case WOLFSSL_FFDHE_8192:
+                        params = wc_Dh_ffdhe8192_Get();
+                        args->key->priv.dh.privKeySz = 52;
+                        break;
+                #endif
+                    default:
+                        ret = BAD_FUNC_ARG;
+                }
+            }
+        #endif
+
+            if (ret == 0) {
+                ret = wc_InitDhKey_ex(&args->key->priv.dh.key, NULL, devId);
+                if (ret == 0) {
+                    args->key->type = WC_PK_TYPE_DH;
+                    args->key->initPriv = 1;
+                #ifdef WOLFSSL_ASYNC_CRYPT
+                    ret = wolfSSL_AsyncInit(ssl,
+                        &args->key->priv.dh.key.asyncDev, WC_ASYNC_FLAG_NONE);
+                #endif
+                }
+            }
+            if (ret == 0) {
+        #ifdef HAVE_PUBLIC_FFDHE
+                ret = wc_DhSetKey(&args->key->priv.dh.key,
+                    (byte*)params->p, params->p_len,
+                    (byte*)params->g, params->g_len);
+                args->key->priv.dh.pLen = params->p_len;
+        #else
+                ret = wc_DhSetNamedKey(&args->key->priv.dh.key,
+                    ksInfo->named_group);
+                if (ret == 0) {
+                    args->key->priv.dh.privKeySz =
+                        wc_DhGetNamedKeyMinSize(ksInfo->named_group);
+                    ret = wc_DhGetNamedKeyParamSize(ksInfo->named_group,
+                            &args->key->priv.dh.pLen, NULL, NULL);
+                }
+        #endif
+            }
+            if (ret == 0) {
+                idx = 0;
+                ret = wc_DhKeyDecode(args->keyBuf->buffer, &idx,
+                    &args->key->priv.dh.key, args->keyBuf->length);
+            }
+            if (ret == 0) {
+                ret = wc_DhExportKeyPair(&args->key->priv.dh.key,
+                    args->key->priv.dh.privKey, &args->key->priv.dh.privKeySz,
+                    NULL, NULL);
+            }
+        }
+    #endif /* !NO_DH && WOLFSSL_DH_EXTRA */
+
+    #ifdef HAVE_ECC
+        /* Static ECC Key */
+        if (useCurveId >= 0 && args->keyBuf == NULL
+        #ifdef HAVE_CURVE25519
+            && useCurveId != ECC_X25519
+        #endif
+        #ifdef HAVE_CURVE448
+            && useCurveId != ECC_X448
+        #endif
+        ) {
+            /* try and load static ephemeral */
+        #ifdef WOLFSSL_STATIC_EPHEMERAL
+            args->keyBuf = ssl->staticKE.ecKey;
+            if (args->keyBuf == NULL)
+                args->keyBuf = ctx->staticKE.ecKey;
+        #endif
+
+            /* try static ECC */
+            if (args->keyBuf == NULL) {
+                args->keyBuf = session->sslServer->buffers.key;
+            }
+
+            ret = 0;
+        #ifdef WOLFSSL_SNIFFER_KEY_CALLBACK
+            if (KeyCb != NULL && ksInfo) {
+                if (args->keyBuf == NULL) {
+                    ret = AllocDer(&args->keyBuf, FILE_BUFFER_SIZE,
+                        PRIVATEKEY_TYPE, NULL);
+                    if (ret == 0)
+                        args->keyBufFree = 1;
+                }
+                ret = KeyCb(session, ksInfo->named_group,
+                    session->srvKs.key, session->srvKs.key_len,
+                    session->cliKs.key, session->cliKs.key_len,
+                    args->keyBuf, KeyCbCtx, error);
+                if (ret != 0) {
+                    SetError(-1, error, session, FATAL_ERROR_STATE);
+                }
+            }
+        #endif
+
+            if (ret == 0 && args->keyBuf == NULL) {
+                ret = BUFFER_E;
+            }
+            if (ret == 0) {
+                ret = wc_ecc_init_ex(&args->key->priv.ecc, NULL, devId);
+                if (ret == 0) {
+                    args->key->type = WC_PK_TYPE_ECDH;
+                    args->key->initPriv = 1;
+                #ifdef WOLFSSL_ASYNC_CRYPT
+                    ret = wolfSSL_AsyncInit(ssl, &args->key->priv.ecc.asyncDev,
+                        WC_ASYNC_FLAG_CALL_AGAIN);
+                #endif
+                }
+        }
+        #if defined(ECC_TIMING_RESISTANT) && (!defined(HAVE_FIPS) || \
+            (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION != 2))) && \
+            !defined(HAVE_SELFTEST)
+            if (ret == 0) {
+                ret = wc_ecc_set_rng(&args->key->priv.ecc,
+                    session->sslServer->rng);
+            }
+        #endif
+            if (ret == 0) {
+                idx = 0;
+                ret = wc_EccPrivateKeyDecode(args->keyBuf->buffer, &idx,
+                    &args->key->priv.ecc, args->keyBuf->length);
+                if (ret != 0) {
+                    SetError(ECC_DECODE_STR, error, session, FATAL_ERROR_STATE);
+                }
+            }
+
+            if (ret == 0) {
+                args->length = wc_ecc_size(&args->key->priv.ecc) * 2 + 1;
+                /* The length should be 2 times the key size (x and y), plus 1
+                * for the type byte. */
+                if (!IsAtLeastTLSv1_3(session->sslServer->version)) {
+                    input += 1; /* Don't include the TLS length for the key. */
+                }
+
+                if (args->length > *sslBytes) {
+                    SetError(PARTIAL_INPUT_STR, error, session,
+                        FATAL_ERROR_STATE);
+                    ret = WOLFSSL_FATAL_ERROR;
+                }
+
+                /* if curve not provided in key share data, then use private
+                 * key curve */
+                if (useCurveId == 0 && args->key->priv.ecc.dp) {
+                    /* this is for the static ECC case */
+                    useCurveId = args->key->priv.ecc.dp->id;
+                }
+            }
+            if (ret == 0) {
+                ret = wc_ecc_init(&args->key->pub.ecc);
+                if (ret == 0)
+                    args->key->initPub = 1;
+            }
+            if (ret == 0) {
+                ret = wc_ecc_import_x963_ex(input, args->length,
+                    &args->key->pub.ecc, useCurveId);
+                if (ret != 0) {
+                    SetError(ECC_PUB_DECODE_STR, error, session,
+                        FATAL_ERROR_STATE);
+                }
+            }
+            if (ret == 0) {
+                session->keySz = ((args->length - 1) / 2) * WOLFSSL_BIT_SIZE;
+                /* Length is in bytes. Subtract 1 for the ECC key type. Divide
+                * by two as the key is in (x,y) coordinates, where x and y are
+                * the same size, the key size. Convert from bytes to bits. */
+                session->sslServer->arrays->preMasterSz = ENCRYPT_LEN;
+            }
+        }
+    #endif /* HAVE_ECC */
+
+    #ifdef HAVE_CURVE25519
+        /* Static Curve25519 Key */
+        if (useCurveId == ECC_X25519) {
+            /* try and load static ephemeral */
+        #ifdef WOLFSSL_STATIC_EPHEMERAL
+            args->keyBuf = ssl->staticKE.x25519Key;
+            if (args->keyBuf == NULL)
+                args->keyBuf = ctx->staticKE.x25519Key;
+        #endif
+
+            ret = 0;
+        #ifdef WOLFSSL_SNIFFER_KEY_CALLBACK
+            if (KeyCb != NULL && ksInfo) {
+                if (args->keyBuf == NULL) {
+                    ret = AllocDer(&args->keyBuf, FILE_BUFFER_SIZE,
+                        PRIVATEKEY_TYPE, NULL);
+                    if (ret == 0)
+                        args->keyBufFree = 1;
+                }
+                ret = KeyCb(session, ksInfo->named_group,
+                    session->srvKs.key, session->srvKs.key_len,
+                    session->cliKs.key, session->cliKs.key_len,
+                    args->keyBuf, KeyCbCtx, error);
+                if (ret != 0) {
+                    SetError(-1, error, session, FATAL_ERROR_STATE);
+                    break;
+                }
+            }
+        #endif
+
+            if (ret == 0 && args->keyBuf == NULL) {
+                ret = BUFFER_E;
+            }
+            if (ret == 0) {
+                ret = wc_curve25519_init_ex(&args->key->priv.x25519, NULL,
+                    devId);
+                if (ret == 0) {
+                    args->key->type = WC_PK_TYPE_CURVE25519;
+                    args->key->initPriv = 1;
+                #ifdef WOLFSSL_ASYNC_CRYPT
+                    ret = wolfSSL_AsyncInit(ssl,
+                        &args->key->priv.x25519.asyncDev,
+                        WC_ASYNC_FLAG_CALL_AGAIN);
+                #endif
+                }
+            }
+            if (ret == 0) {
+                idx = 0;
+                ret = wc_Curve25519PrivateKeyDecode(args->keyBuf->buffer, &idx,
+                    &args->key->priv.x25519, args->keyBuf->length);
+                if (ret != 0) {
+                    SetError(ECC_DECODE_STR, error, session, FATAL_ERROR_STATE);
+                }
+            }
+
+            if (ret == 0) {
+                args->length = CURVE25519_KEYSIZE;
+                if (args->length > *sslBytes) {
+                    SetError(PARTIAL_INPUT_STR, error, session,
+                        FATAL_ERROR_STATE);
+                    ret = WOLFSSL_FATAL_ERROR;
+                }
+            }
+            if (ret == 0) {
+                ret = wc_curve25519_init(&args->key->pub.x25519);
+                if (ret == 0)
+                    args->key->initPub = 1;
+            }
+            if (ret == 0) {
+                ret = wc_curve25519_import_public_ex(input, args->length,
+                    &args->key->pub.x25519, EC25519_LITTLE_ENDIAN);
+                if (ret != 0) {
+                    SetError(ECC_PUB_DECODE_STR, error, session,
+                        FATAL_ERROR_STATE);
+                }
+            }
+
+            if (ret == 0) {
+                /* For Curve25519 length is always 32 */
+                session->keySz = CURVE25519_KEYSIZE;
+                session->sslServer->arrays->preMasterSz = ENCRYPT_LEN;
+            }
+        }
+    #endif /* HAVE_CURVE25519 */
+
+    #ifdef HAVE_CURVE448
+        /* Static Curve448 Key */
+        if (useCurveId == ECC_X448) {
+            /* try and load static ephemeral */
+        #ifdef WOLFSSL_STATIC_EPHEMERAL
+            args->keyBuf = ssl->staticKE.x448Key;
+            if (args->keyBuf == NULL)
+                args->keyBuf = ctx->staticKE.x448Key;
+        #endif
+
+            ret = 0;
+        #ifdef WOLFSSL_SNIFFER_KEY_CALLBACK
+            if (KeyCb != NULL && ksInfo) {
+                if (args->keyBuf == NULL) {
+                    ret = AllocDer(&args->keyBuf, FILE_BUFFER_SIZE,
+                        PRIVATEKEY_TYPE, NULL);
+                    if (ret == 0)
+                        args->keyBufFree = 1;
+                }
+                ret = KeyCb(session, ksInfo->named_group,
+                    session->srvKs.key, session->srvKs.key_len,
+                    session->cliKs.key, session->cliKs.key_len,
+                    args->keyBuf, KeyCbCtx, error);
+                if (ret != 0) {
+                    SetError(-1, error, session, FATAL_ERROR_STATE);
+                    break;
+                }
+            }
+        #endif
+
+            if (ret == 0 && args->keyBuf == NULL) {
+                ret = BUFFER_E;
+            }
+            if (ret == 0) {
+                ret = wc_curve448_init(&args->key->priv.x448);
+                if (ret == 0) {
+                    args->key->type = WC_PK_TYPE_CURVE448;
+                    args->key->initPriv = 1;
+                #ifdef WOLFSSL_ASYNC_CRYPT
+                    ret = wolfSSL_AsyncInit(ssl, &args->key->priv.x448.asyncDev,
+                        WC_ASYNC_FLAG_CALL_AGAIN);
+                #endif
+                }
+            }
+            if (ret == 0) {
+                idx = 0;
+                ret = wc_Curve448PrivateKeyDecode(args->keyBuf->buffer, &idx,
+                    &args->key->priv.x448, args->keyBuf->length);
+                if (ret != 0) {
+                    SetError(ECC_DECODE_STR, error, session, FATAL_ERROR_STATE);
+                }
+            }
+
+            if (ret == 0) {
+                args->length = CURVE448_KEY_SIZE;
+                if (args->length > *sslBytes) {
+                    SetError(PARTIAL_INPUT_STR, error, session,
+                        FATAL_ERROR_STATE);
+                    ret = WOLFSSL_FATAL_ERROR;
+                }
+            }
+            if (ret == 0) {
+                ret = wc_curve448_init(&args->key->pub.x448);
+                if (ret == 0)
+                    args->key->initPub = 1;
+            }
+            if (ret == 0) {
+                ret = wc_curve448_import_public_ex(input, args->length,
+                    &args->key->pub.x448, EC448_LITTLE_ENDIAN);
+                if (ret != 0) {
+                    SetError(ECC_PUB_DECODE_STR, error, session,
+                        FATAL_ERROR_STATE);
+                }
+            }
+
+            if (ret == 0) {
+                session->keySz = CURVE448_KEY_SIZE;
+                session->sslServer->arrays->preMasterSz = ENCRYPT_LEN;
+            }
+        }
+    #endif /* HAVE_CURVE448 */
+
+    #if defined(WOLFSSL_STATIC_EPHEMERAL) && !defined(SINGLE_THREADED)
+        /* release early so the lock is not held during key agreement,
+         * the exit path below covers the error cases */
+        if (args->keyLocked) {
+            wc_UnLockMutex(&ctx->staticKELock);
+            args->keyLocked = 0;
+        }
+    #endif
+
+        /* make sure a key type was found */
+        if (args->key->type == WC_PK_TYPE_NONE) {
+            ret = NOT_COMPILED_IN;
+        }
+
+        /* check for errors before moving to next state */
+        if (ret < 0) {
+            break;
+        }
+
+        /* Advance state and proceed */
+        ssl->options.asyncState = TLS_ASYNC_DO;
+    } /* case TLS_ASYNC_BEGIN */
+    FALL_THROUGH;
+
+    case TLS_ASYNC_DO:
+    {
+    #ifdef WOLFSSL_ASYNC_CRYPT
+        WC_ASYNC_DEV* asyncDev = NULL;
+    #endif
+    #ifndef NO_RSA
+        if (args->key->type == WC_PK_TYPE_RSA) {
+            ret = wc_RsaPrivateDecrypt(input, args->length,
+                    session->sslServer->arrays->preMasterSecret,
+                    session->sslServer->arrays->preMasterSz,
+                    &args->key->priv.rsa);
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            asyncDev = &args->key->priv.rsa.asyncDev;
+        #endif
+        }
+    #endif /* !NO_RSA */
+    #if !defined(NO_DH) && defined(WOLFSSL_DH_EXTRA)
+        if (args->key->type == WC_PK_TYPE_DH) {
+            /* Derive secret from private key and peer's public key */
+            ret = wc_DhAgree(&args->key->priv.dh.key,
+                session->sslServer->arrays->preMasterSecret,
+                &session->sslServer->arrays->preMasterSz,
+                args->key->priv.dh.privKey, args->key->priv.dh.privKeySz,
+                input, *sslBytes);
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            asyncDev = &args->key->priv.dh.key.asyncDev;
+        #endif
+        }
+    #endif /* !NO_DH && WOLFSSL_DH_EXTRA */
+    #ifdef HAVE_ECC
+        if (args->key->type == WC_PK_TYPE_ECDH) {
+            ret = wc_ecc_shared_secret(&args->key->priv.ecc,
+                &args->key->pub.ecc,
+                session->sslServer->arrays->preMasterSecret,
+                &session->sslServer->arrays->preMasterSz);
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            asyncDev = &args->key->priv.ecc.asyncDev;
+        #endif
+        }
+    #endif /* HAVE_ECC */
+    #ifdef HAVE_CURVE25519
+        if (args->key->type == WC_PK_TYPE_CURVE25519) {
+            ret = wc_curve25519_shared_secret_ex(&args->key->priv.x25519,
+                &args->key->pub.x25519,
+                session->sslServer->arrays->preMasterSecret,
+                &session->sslServer->arrays->preMasterSz,
+                EC25519_LITTLE_ENDIAN);
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            asyncDev = &args->key->priv.x25519.asyncDev;
+        #endif
+        }
+    #endif /* HAVE_CURVE25519 */
+    #ifdef HAVE_CURVE448
+        if (args->key->type == WC_PK_TYPE_CURVE448) {
+            ret = wc_curve448_shared_secret_ex(&args->key->priv.x448,
+                &args->key->pub.x448,
+                session->sslServer->arrays->preMasterSecret,
+                &session->sslServer->arrays->preMasterSz, EC448_LITTLE_ENDIAN);
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            asyncDev = &args->key->priv.x448.asyncDev;
+        #endif
+        }
+    #endif /* HAVE_CURVE448 */
+
+    #ifdef WOLFSSL_ASYNC_CRYPT
+        if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
+            /* Handle async pending response */
+            ret = wolfSSL_AsyncPush(ssl, asyncDev);
+            break;
+        }
+    #endif /* WOLFSSL_ASYNC_CRYPT */
+
+        /* check for errors before moving to next state */
+        if (ret < 0) {
+            break;
+        }
+
+        /* Advance state and proceed */
+        ssl->options.asyncState = TLS_ASYNC_VERIFY;
+    } /* case TLS_ASYNC_DO */
+    FALL_THROUGH;
+
+    case TLS_ASYNC_VERIFY:
+    {
+    #ifndef NO_RSA
+        if (args->key->type == WC_PK_TYPE_RSA) {
+            if (ret != SECRET_LEN) {
+                SetError(RSA_DECRYPT_STR, error, session, FATAL_ERROR_STATE);
+                ret = RSA_BUFFER_E;
+            }
+        }
+    #endif /* !NO_RSA */
+    #if !defined(NO_DH) && defined(WOLFSSL_DH_EXTRA)
+        if (args->key->type == WC_PK_TYPE_DH) {
+            /* left-padded with zeros up to the size of the prime */
+            if (args->key->priv.dh.pLen >
+                                      session->sslServer->arrays->preMasterSz) {
+                word32 diff = args->key->priv.dh.pLen -
+                              session->sslServer->arrays->preMasterSz;
+                XMEMMOVE(session->sslServer->arrays->preMasterSecret + diff,
+                        session->sslServer->arrays->preMasterSecret,
+                        session->sslServer->arrays->preMasterSz);
+                XMEMSET(session->sslServer->arrays->preMasterSecret, 0, diff);
+                session->sslServer->arrays->preMasterSz=args->key->priv.dh.pLen;
+            }
+        }
+    #endif /* !NO_DH && WOLFSSL_DH_EXTRA */
+
+        /* check for errors before moving to next state */
+        if (ret < 0) {
+            break;
+        }
+
+        /* Advance state and proceed */
+        ssl->options.asyncState = TLS_ASYNC_FINALIZE;
+    } /* case TLS_ASYNC_VERIFY */
+    FALL_THROUGH;
+
+    case TLS_ASYNC_FINALIZE:
+    {
+    #if defined(WOLFSSL_SNIFFER_KEYLOGFILE)
+        if (!session->context->useKeyLogFile)
+    #endif /* !WOLFSSL_SNIFFER_KEYLOGFILE */
+        {
+            /* store for client side as well */
+            XMEMCPY(session->sslClient->arrays->preMasterSecret,
+                    session->sslServer->arrays->preMasterSecret,
+                    session->sslServer->arrays->preMasterSz);
+            session->sslClient->arrays->preMasterSz =
+                session->sslServer->arrays->preMasterSz;
+        }
+
+    #ifdef SHOW_SECRETS
+        PrintSecret("pre master secret",
+                    session->sslServer->arrays->preMasterSecret,
+                    session->sslServer->arrays->preMasterSz);
+    #endif
+
+        if (SetCipherSpecs(session->sslServer) != 0) {
+            SetError(BAD_CIPHER_SPEC_STR, error, session, FATAL_ERROR_STATE);
+            session->verboseErr = 1;
+            ret = WOLFSSL_FATAL_ERROR; break;
+        }
+
+        if (SetCipherSpecs(session->sslClient) != 0) {
+            SetError(BAD_CIPHER_SPEC_STR, error, session, FATAL_ERROR_STATE);
+            session->verboseErr = 1;
+            ret = WOLFSSL_FATAL_ERROR; break;
+        }
+
+    #ifdef WOLFSSL_TLS13
+        /* TLS v1.3 derive handshake key */
+        if (IsAtLeastTLSv1_3(session->sslServer->version)) {
+            ret  = DeriveEarlySecret(session->sslServer);
+            ret += DeriveEarlySecret(session->sslClient);
+            ret += DeriveHandshakeSecret(session->sslServer);
+            ret += DeriveHandshakeSecret(session->sslClient);
+            ret += DeriveTls13Keys(session->sslServer, handshake_key,
+                ENCRYPT_AND_DECRYPT_SIDE, 1);
+            ret += DeriveTls13Keys(session->sslClient, handshake_key,
+                ENCRYPT_AND_DECRYPT_SIDE, 1);
+        #ifdef WOLFSSL_EARLY_DATA
+            ret += SetKeysSide(session->sslServer, DECRYPT_SIDE_ONLY);
+            ret += SetKeysSide(session->sslClient, DECRYPT_SIDE_ONLY);
+        #else
+            ret += SetKeysSide(session->sslServer, ENCRYPT_AND_DECRYPT_SIDE);
+            ret += SetKeysSide(session->sslClient, ENCRYPT_AND_DECRYPT_SIDE);
+        #endif
+        }
+        else
+    #endif /* WOLFSSL_TLS13 */
+        {
+            ret  = MakeMasterSecret(session->sslServer);
+            ret += MakeMasterSecret(session->sslClient);
+            ret += SetKeysSide(session->sslServer, ENCRYPT_AND_DECRYPT_SIDE);
+            ret += SetKeysSide(session->sslClient, ENCRYPT_AND_DECRYPT_SIDE);
+        }
+        if (ret != 0) {
+            SetError(BAD_DERIVE_STR, error, session, FATAL_ERROR_STATE);
+            ret = WOLFSSL_FATAL_ERROR; break;
+        }
+
+    #ifdef SHOW_SECRETS
+        #ifdef WOLFSSL_TLS13
+        if (!IsAtLeastTLSv1_3(session->sslServer->version))
+        #endif
+        {
+            ShowTlsSecrets(session);
+        }
+    #endif
+
+        CallConnectionCb(session);
+
+        break;
+    } /* case TLS_ASYNC_FINALIZE */
+
+    default:
+        ret = INPUT_CASE_ERROR;
+    } /* switch(ssl->options.asyncState) */
+
+#ifdef WOLFSSL_ASYNC_CRYPT
+exit_sk:
+#endif
+
+#if defined(WOLFSSL_STATIC_EPHEMERAL) && !defined(SINGLE_THREADED)
+    /* release the lock if an error path left the key state locked */
+#ifdef WOLFSSL_ASYNC_CRYPT
+    if ((args != NULL) && (args->keyLocked))
+#else
+    if (args->keyLocked)
+#endif
+    {
+        wc_UnLockMutex(&ctx->staticKELock);
+        args->keyLocked = 0;
+    }
+#endif
+
+#ifdef WOLFSSL_ASYNC_CRYPT
+    /* Handle async pending response */
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
+        return ret;
+    }
+#endif /* WOLFSSL_ASYNC_CRYPT */
+
+#ifdef WOLFSSL_SNIFFER_STATS
+    if (ret < 0)
+        INC_STAT(SnifferStats.sslKeyFails);
+#endif
+
+    /* Final cleanup */
+#ifdef WOLFSSL_ASYNC_CRYPT
+    FreeAsyncCtx(ssl, 1);
+#else
+    FreeSetupKeysArgs(ssl, args);
+#endif
+#ifndef WOLFSSL_STATIC_EPHEMERAL
+    (void)ctx;
+#endif
 
     return ret;
 }
@@ -2866,7 +3332,7 @@ static int ProcessClientKeyExchange(const byte* input, int* sslBytes,
         session->sslServer->buffers.key->length == 0) {
 
         SetError(RSA_KEY_MISSING_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 #endif
 
@@ -2879,25 +3345,28 @@ static int ProcessClientKeyExchange(const byte* input, int* sslBytes,
 static int ProcessKeyShare(KeyShareInfo* info, const byte* input, int len,
     word16 filter_group)
 {
-    int index = 0;
-    while (index < len) {
+    int idx = 0;
+    while (idx < len) {
         /* clear info (reset dh_key_bits and curve_id) */
         XMEMSET(info, 0, sizeof(KeyShareInfo));
 
         /* Named group and public key */
-        info->named_group = (word16)((input[index] << 8) | input[index+1]);
-        index += OPAQUE16_LEN;
+        if (idx + OPAQUE16_LEN > len) {
+            return WOLFSSL_FATAL_ERROR;
+        }
+        info->named_group = (word16)((input[idx] << 8) | input[idx+1]);
+        idx += OPAQUE16_LEN;
         info->key_len = 0;
         info->key = NULL;
         /* If key was provided... (a hello_retry_request will not send a key) */
-        if (index + 2 <= len) {
-            info->key_len = (word16)((input[index] << 8) | input[index+1]);
-            index += OPAQUE16_LEN;
-            if (info->key_len == 0 || info->key_len > len - index) {
-                return -1;
+        if (idx + 2 <= len) {
+            info->key_len = (word16)((input[idx] << 8) | input[idx+1]);
+            idx += OPAQUE16_LEN;
+            if (info->key_len == 0 || info->key_len > len - idx) {
+                return WOLFSSL_FATAL_ERROR;
             }
-            info->key = &input[index];
-            index += info->key_len;
+            info->key = &input[idx];
+            idx += info->key_len;
         }
 
         switch (info->named_group) {
@@ -2935,6 +3404,16 @@ static int ProcessKeyShare(KeyShareInfo* info, const byte* input, int len,
                 info->curve_id = ECC_SECP256R1;
                 break;
             #endif /* !NO_ECC_SECP */
+            #ifdef WOLFSSL_SM2
+            case WOLFSSL_ECC_SM2P256V1:
+                info->curve_id = ECC_SM2P256V1;
+                break;
+            #endif /* WOLFSSL_SM2 */
+            #ifdef HAVE_ECC_BRAINPOOL
+            case WOLFSSL_ECC_BRAINPOOLP256R1TLS13:
+                info->curve_id = ECC_BRAINPOOLP256R1;
+                break;
+            #endif /* HAVE_ECC_BRAINPOOL */
         #endif
         #if defined(HAVE_ECC384) || defined(HAVE_ALL_CURVES)
             #ifndef NO_ECC_SECP
@@ -2942,6 +3421,18 @@ static int ProcessKeyShare(KeyShareInfo* info, const byte* input, int len,
                 info->curve_id = ECC_SECP384R1;
                 break;
             #endif /* !NO_ECC_SECP */
+            #ifdef HAVE_ECC_BRAINPOOL
+            case WOLFSSL_ECC_BRAINPOOLP384R1TLS13:
+                info->curve_id = ECC_BRAINPOOLP384R1;
+                break;
+            #endif /* HAVE_ECC_BRAINPOOL */
+        #endif
+        #if defined(HAVE_ECC512) || defined(HAVE_ALL_CURVES)
+            #ifdef HAVE_ECC_BRAINPOOL
+            case WOLFSSL_ECC_BRAINPOOLP512R1TLS13:
+                info->curve_id = ECC_BRAINPOOLP512R1;
+                break;
+            #endif /* HAVE_ECC_BRAINPOOL */
         #endif
         #if defined(HAVE_ECC521) || defined(HAVE_ALL_CURVES)
             #ifndef NO_ECC_SECP
@@ -2993,7 +3484,7 @@ static int ProcessServerKeyShare(SnifferSession* session, const byte* input, int
     }
     if (ret != 0) {
         SetError(SERVER_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     return ret;
@@ -3018,7 +3509,7 @@ static int ProcessSessionTicket(const byte* input, int* sslBytes,
     /* make sure can read through hint len */
     if (TICKET_HINT_LEN > *sslBytes) {
         SetError(BAD_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
     input     += TICKET_HINT_LEN; /* skip over hint len */
     *sslBytes -= TICKET_HINT_LEN;
@@ -3027,26 +3518,26 @@ static int ProcessSessionTicket(const byte* input, int* sslBytes,
     /* TLS v1.3 has hint age and nonce */
     if (IsAtLeastTLSv1_3(ssl->version)) {
         /* make sure can read through hint age and nonce len */
-        if (TICKET_HINT_AGE_LEN + 1 > *sslBytes) {
+        if (TICKET_HINT_AGE_LEN + OPAQUE8_LEN > *sslBytes) {
             SetError(BAD_INPUT_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         input     += TICKET_HINT_AGE_LEN; /* skip over hint age */
         *sslBytes -= TICKET_HINT_AGE_LEN;
 
         /* ticket nonce */
         len = input[0];
-        if (len > MAX_TICKET_NONCE_SZ) {
+        if (len > MAX_TICKET_NONCE_STATIC_SZ || len + OPAQUE8_LEN > *sslBytes) {
             SetError(BAD_INPUT_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         input += OPAQUE8_LEN;
         *sslBytes -= OPAQUE8_LEN;
     #ifdef HAVE_SESSION_TICKET
         /* store nonce in server for DeriveResumptionPSK */
-        session->sslServer->session.ticketNonce.len = len;
+        session->sslServer->session->ticketNonce.len = len;
         if (len > 0)
-            XMEMCPY(&session->sslServer->session.ticketNonce.data, input, len);
+            XMEMCPY(session->sslServer->session->ticketNonce.data, input, len);
     #endif
         input += len;
         *sslBytes -= len;
@@ -3056,7 +3547,7 @@ static int ProcessSessionTicket(const byte* input, int* sslBytes,
     /* make sure can read through len */
     if (OPAQUE16_LEN > *sslBytes) {
         SetError(BAD_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     len = (word16)((input[0] << 8) | input[1]);
@@ -3066,7 +3557,7 @@ static int ProcessSessionTicket(const byte* input, int* sslBytes,
     /* make sure can read through ticket */
     if (len > *sslBytes) {
         SetError(BAD_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
 #ifdef WOLFSSL_TLS13
@@ -3074,26 +3565,31 @@ static int ProcessSessionTicket(const byte* input, int* sslBytes,
     if (IsAtLeastTLSv1_3(ssl->version)) {
         /* Note: Must use server session for sessions */
     #ifdef HAVE_SESSION_TICKET
+        WOLFSSL_SESSION* sess;
         if (SetTicket(session->sslServer, input, len) != 0) {
             SetError(BAD_INPUT_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
 
         /* set haveSessionId to use the wolfSession cache */
         session->sslServer->options.haveSessionId = 1;
 
+    #ifdef SNIFFER_SINGLE_SESSION_CACHE
         /* Use the wolf Session cache to retain resumption secret */
         if (session->flags.cached == 0) {
-            WOLFSSL_SESSION* sess = wolfSSL_GetSession(session->sslServer,
-                NULL, 0);
+    #endif /* SNIFFER_SINGLE_SESSION_CACHE */
+            sess = wolfSSL_GetSession(session->sslServer, NULL, 0);
             if (sess == NULL) {
+                SetupSession(session->sslServer);
                 AddSession(session->sslServer); /* don't re add */
             #ifdef WOLFSSL_SNIFFER_STATS
                 INC_STAT(SnifferStats.sslResumptionInserts);
             #endif
             }
+    #ifdef SNIFFER_SINGLE_SESSION_CACHE
             session->flags.cached = 1;
         }
+    #endif /* SNIFFER_SINGLE_SESSION_CACHE */
     #endif /* HAVE_SESSION_TICKET */
     }
     else
@@ -3102,13 +3598,14 @@ static int ProcessSessionTicket(const byte* input, int* sslBytes,
         /* capture last part of sessionID as macID (32 bytes) */
         if (len < ID_LEN) {
             SetError(BAD_INPUT_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         /* store session with macID as sessionID */
         session->sslServer->options.haveSessionId = 1;
         if (session->sslServer->arrays) {
             XMEMCPY(session->sslServer->arrays->sessionID,
                 input + len - ID_LEN, ID_LEN);
+            session->sslServer->arrays->sessionIDSz = ID_LEN;
         }
     }
 
@@ -3123,7 +3620,7 @@ static int DoResume(SnifferSession* session, char* error)
 #ifdef WOLFSSL_TLS13
     if (IsAtLeastTLSv1_3(session->sslServer->version)) {
         resume = wolfSSL_GetSession(session->sslServer,
-                                    session->sslServer->session.masterSecret, 0);
+                                    session->sslServer->session->masterSecret, 0);
         if (resume == NULL) {
             /* TLS v1.3 with hello_retry uses session_id even for new session,
                 so ignore error here */
@@ -3133,6 +3630,11 @@ static int DoResume(SnifferSession* session, char* error)
     else
 #endif
     {
+    #ifdef HAVE_SESSION_TICKET
+        /* make sure "useTicket" is not set, otherwise the session will not be
+         * properly retrieved */
+        session->sslServer->options.useTicket = 0;
+    #endif
         resume = wolfSSL_GetSession(session->sslServer,
                                     session->sslServer->arrays->masterSecret, 0);
         if (resume == NULL) {
@@ -3140,15 +3642,15 @@ static int DoResume(SnifferSession* session, char* error)
             INC_STAT(SnifferStats.sslResumeMisses);
         #endif
             SetError(BAD_SESSION_RESUME_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
     }
 
     /* make sure client has master secret too */
 #ifdef WOLFSSL_TLS13
     if (IsAtLeastTLSv1_3(session->sslServer->version)) {
-        XMEMCPY(session->sslClient->session.masterSecret,
-                session->sslServer->session.masterSecret, SECRET_LEN);
+        XMEMCPY(session->sslClient->session->masterSecret,
+                session->sslServer->session->masterSecret, SECRET_LEN);
     }
     else
 #endif
@@ -3164,12 +3666,14 @@ static int DoResume(SnifferSession* session, char* error)
 #endif
     if (SetCipherSpecs(session->sslServer) != 0) {
         SetError(BAD_CIPHER_SPEC_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        session->verboseErr = 1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     if (SetCipherSpecs(session->sslClient) != 0) {
         SetError(BAD_CIPHER_SPEC_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        session->verboseErr = 1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
 #ifdef WOLFSSL_TLS13
@@ -3179,8 +3683,8 @@ static int DoResume(SnifferSession* session, char* error)
         session->sslServer->arrays->psk_keySz = session->sslServer->specs.hash_size;
         session->sslClient->arrays->psk_keySz = session->sslClient->specs.hash_size;
         ret  = DeriveResumptionPSK(session->sslServer,
-            session->sslServer->session.ticketNonce.data,
-            session->sslServer->session.ticketNonce.len,
+            session->sslServer->session->ticketNonce.data,
+            session->sslServer->session->ticketNonce.len,
             session->sslServer->arrays->psk_key);
         /* Copy resumption PSK to client */
         XMEMCPY(session->sslClient->arrays->psk_key,
@@ -3208,7 +3712,7 @@ static int DoResume(SnifferSession* session, char* error)
 
     if (ret != 0) {
         SetError(BAD_DERIVE_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     return ret;
@@ -3237,7 +3741,7 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
     /* make sure can read through session len */
     if (toRead > *sslBytes) {
         SetError(SERVER_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     XMEMCPY(&pv, input, VERSION_SZ);
@@ -3262,13 +3766,19 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
     /* make sure can read through compression */
     if ( (b + SUITE_LEN + ENUM_LEN) > *sslBytes) {
         SetError(SERVER_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
     if (b) {
+        if (ID_LEN > *sslBytes) {
+            SetError(SERVER_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
+            return WOLFSSL_FATAL_ERROR;
+        }
     #ifdef WOLFSSL_TLS13
-        XMEMCPY(session->sslServer->session.sessionID, input, ID_LEN);
+        XMEMCPY(session->sslServer->session->sessionID, input, ID_LEN);
+        session->sslServer->session->sessionIDSz = ID_LEN;
     #endif
         XMEMCPY(session->sslServer->arrays->sessionID, input, ID_LEN);
+        session->sslServer->arrays->sessionIDSz = ID_LEN;
         session->sslServer->options.haveSessionId = 1;
     }
     input     += b;
@@ -3308,7 +3818,7 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
 
     if (b) {
         SetError(BAD_COMPRESSION_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     /* extensions */
@@ -3319,7 +3829,7 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
         /* make sure can read len */
         if (SUITE_LEN > *sslBytes) {
             SetError(SERVER_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         len = (word16)((input[0] << 8) | input[1]);
         input     += SUITE_LEN;
@@ -3327,12 +3837,19 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
         /* make sure can read through all extensions */
         if (len > *sslBytes) {
             SetError(SERVER_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
 
         while (len >= EXT_TYPE_SZ + LENGTH_SZ) {
             word16 extType;
             word16 extLen;
+
+            /* make sure can read extension type and length */
+            if (*sslBytes < EXT_TYPE_SZ + LENGTH_SZ) {
+                SetError(SERVER_HELLO_INPUT_STR, error, session,
+                         FATAL_ERROR_STATE);
+                return WOLFSSL_FATAL_ERROR;
+            }
 
             extType    = (word16)((input[0] << 8) | input[1]);
             input     += EXT_TYPE_SZ;
@@ -3346,7 +3863,7 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
             if (extLen > *sslBytes) {
                 SetError(SERVER_HELLO_INPUT_STR, error, session,
                          FATAL_ERROR_STATE);
-                return -1;
+                return WOLFSSL_FATAL_ERROR;
             }
         #ifdef DEBUG_SNIFFER
             printf("\tserver_hello ext: 0x%02x (len %d)\n", extType, extLen);
@@ -3359,7 +3876,7 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
                 if (ret != 0) {
                     SetError(SERVER_HELLO_INPUT_STR, error, session,
                         FATAL_ERROR_STATE);
-                    return -1;
+                    return WOLFSSL_FATAL_ERROR;
                 }
                 break;
         #endif
@@ -3370,10 +3887,10 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
                 session->sslClient->options.resuming = 1;
             #ifdef WOLFSSL_TLS13
                 /* default nonce to len = 1, data = 0 */
-                session->sslServer->session.ticketNonce.len = 1;
-                session->sslServer->session.ticketNonce.data[0] = 0;
-                session->sslClient->session.ticketNonce.len = 1;
-                session->sslClient->session.ticketNonce.data[0] = 0;
+                session->sslServer->session->ticketNonce.len = 1;
+                session->sslServer->session->ticketNonce.data[0] = 0;
+                session->sslClient->session->ticketNonce.len = 1;
+                session->sslClient->session->ticketNonce.data[0] = 0;
             #endif
                 break;
         #endif
@@ -3381,6 +3898,11 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
             case EXT_MAX_FRAGMENT_LENGTH:
             {
                 word16 max_fragment = MAX_RECORD_SIZE;
+                if (extLen != 1) {
+                    SetError(SERVER_HELLO_INPUT_STR, error, session,
+                             FATAL_ERROR_STATE);
+                    return WOLFSSL_FATAL_ERROR;
+                }
                 switch (input[0]) {
                     case WOLFSSL_MFL_2_8 : max_fragment =  256; break;
                     case WOLFSSL_MFL_2_9 : max_fragment =  512; break;
@@ -3396,6 +3918,11 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
             }
         #endif
             case EXT_SUPPORTED_VERSIONS:
+                if (extLen != 2) {
+                    SetError(SERVER_HELLO_INPUT_STR, error, session,
+                             FATAL_ERROR_STATE);
+                    return WOLFSSL_FATAL_ERROR;
+                }
                 session->sslServer->version.major = input[0];
                 session->sslServer->version.minor = input[1];
                 session->sslClient->version.major = input[0];
@@ -3415,10 +3942,32 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
                 break;
             } /* switch (extType) */
 
+            /* make sure the extension fits in the remaining declared length */
+            if ((word32)extLen + EXT_TYPE_SZ + LENGTH_SZ > len) {
+                SetError(SERVER_HELLO_INPUT_STR, error, session,
+                         FATAL_ERROR_STATE);
+                return WOLFSSL_FATAL_ERROR;
+            }
+
             input     += extLen;
             *sslBytes -= extLen;
             len       -= extLen + EXT_TYPE_SZ + LENGTH_SZ;
         }
+    }
+
+    if (IsAtLeastTLSv1_3(session->sslServer->version)) {
+#ifndef WOLFSSL_TLS13
+        SetError(UNSUPPORTED_TLS_VER_STR, error, session, FATAL_ERROR_STATE);
+        session->verboseErr = 1;
+        return WOLFSSL_FATAL_ERROR;
+#endif
+    }
+    else {
+#ifdef WOLFSSL_NO_TLS12
+        SetError(UNSUPPORTED_TLS_VER_STR, error, session, FATAL_ERROR_STATE);
+        session->verboseErr = 1;
+        return WOLFSSL_FATAL_ERROR;
+#endif
     }
 
 #ifdef HAVE_EXTENDED_MASTER
@@ -3429,8 +3978,10 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
 #endif
 
     if (session->sslServer->options.haveSessionId) {
-        if (XMEMCMP(session->sslServer->arrays->sessionID,
-                session->sslClient->arrays->sessionID, ID_LEN) == 0) {
+        if (session->sslServer->arrays->sessionIDSz == ID_LEN &&
+                session->sslClient->arrays->sessionIDSz == ID_LEN &&
+                XMEMCMP(session->sslServer->arrays->sessionID,
+                        session->sslClient->arrays->sessionID, ID_LEN) == 0) {
             doResume = 1;
         }
     }
@@ -3443,6 +3994,7 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
     if (session->ticketID && doResume) {
         /* use ticketID to retrieve from session, prefer over sessionID */
         XMEMCPY(session->sslServer->arrays->sessionID,session->ticketID,ID_LEN);
+        session->sslServer->arrays->sessionIDSz = ID_LEN;
         session->sslServer->options.haveSessionId = 1;  /* may not have
                                                            actual sessionID */
     }
@@ -3467,11 +4019,17 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
     }
 #endif
 
-    /* hash server_hello */
-    HashRaw(session->sslServer, inputHello - HANDSHAKE_HEADER_SZ,
-        initialBytes + HANDSHAKE_HEADER_SZ);
-    HashRaw(session->sslClient, inputHello - HANDSHAKE_HEADER_SZ,
-        initialBytes + HANDSHAKE_HEADER_SZ);
+#ifdef WOLFSSL_ASYNC_CRYPT
+    if (session->sslServer->error != WC_NO_ERR_TRACE(WC_PENDING_E) &&
+        session->pendSeq == 0)
+#endif
+    {
+        /* hash server_hello */
+        HashRaw(session->sslServer, inputHello - HANDSHAKE_HEADER_SZ,
+            initialBytes + HANDSHAKE_HEADER_SZ);
+        HashRaw(session->sslClient, inputHello - HANDSHAKE_HEADER_SZ,
+            initialBytes + HANDSHAKE_HEADER_SZ);
+    }
 
     if (doResume) {
         ret = DoResume(session, error);
@@ -3496,7 +4054,13 @@ static int ProcessServerHello(int msgSz, const byte* input, int* sslBytes,
         ret = SetupKeys(session->cliKs.key, &session->cliKs.key_len,
             session, error, &session->cliKs);
         if (ret != 0) {
-            SetError(SERVER_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
+                return ret;
+            }
+        #endif
+            SetError(KEY_MISMATCH_STR, error, session, FATAL_ERROR_STATE);
+            session->verboseErr = 1;
             return ret;
         }
 
@@ -3569,7 +4133,7 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
     /* make sure can read up to session len */
     if (toRead > *sslBytes) {
         SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     /* skip, get negotiated one from server hello */
@@ -3591,14 +4155,17 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
     if (bLen) {
         if (ID_LEN > *sslBytes) {
             SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         Trace(CLIENT_RESUME_TRY_STR);
 #ifdef WOLFSSL_TLS13
-        XMEMCPY(session->sslClient->session.sessionID, input, ID_LEN);
+        XMEMCPY(session->sslClient->session->sessionID, input, ID_LEN);
+        session->sslClient->session->sessionIDSz = ID_LEN;
 #endif
-        if (session->sslClient->arrays)
+        if (session->sslClient->arrays) {
             XMEMCPY(session->sslClient->arrays->sessionID, input, ID_LEN);
+            session->sslClient->arrays->sessionIDSz = ID_LEN;
+        }
         session->sslClient->options.haveSessionId = 1;
     }
 
@@ -3614,7 +4181,7 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
     /* make sure can read len */
     if (SUITE_LEN > *sslBytes) {
         SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
     len = (word16)((input[0] << 8) | input[1]);
     input     += SUITE_LEN;
@@ -3622,7 +4189,7 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
     /* make sure can read suites + comp len */
     if (len + ENUM_LEN > *sslBytes) {
         SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
     input     += len;
     *sslBytes -= len;
@@ -3633,7 +4200,7 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
     /* make sure can read len */
     if (bLen > *sslBytes) {
         SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
     input     += bLen;
     *sslBytes -= bLen;
@@ -3647,7 +4214,7 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
     /* make sure can read len */
     if (SUITE_LEN > *sslBytes) {
         SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
     len = (word16)((input[0] << 8) | input[1]);
     input     += SUITE_LEN;
@@ -3655,12 +4222,18 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
     /* make sure can read through all extensions */
     if (len > *sslBytes) {
         SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     while (len >= EXT_TYPE_SZ + LENGTH_SZ) {
         word16 extType;
         word16 extLen;
+
+        /* make sure can read extension type and length */
+        if (*sslBytes < EXT_TYPE_SZ + LENGTH_SZ) {
+            SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
+            return WOLFSSL_FATAL_ERROR;
+        }
 
         extType    = (word16)((input[0] << 8) | input[1]);
         input     += EXT_TYPE_SZ;
@@ -3673,7 +4246,7 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
         /* make sure can read through individual extension */
         if (extLen > *sslBytes) {
             SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
 
     #ifdef DEBUG_SNIFFER
@@ -3685,6 +4258,9 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
         case EXT_SERVER_NAME:
         {
             word16 listLen = 0, offset = 0;
+
+            if (extLen < OPAQUE16_LEN)
+                return BUFFER_ERROR;
 
             ato16(input + offset, &listLen);
             offset += OPAQUE16_LEN;
@@ -3719,19 +4295,27 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
     #ifdef WOLFSSL_TLS13
         case EXT_KEY_SHARE:
         {
-            word16 ksLen = (word16)((input[0] << 8) | input[1]);
+            word16 ksLen = 0;
+            if (extLen < OPAQUE16_LEN) {
+                SetError(BUFFER_ERROR_STR, error, session, FATAL_ERROR_STATE);
+                return BUFFER_ERROR;
+            }
+
+            ksLen = (word16)((input[0] << 8) | input[1]);
             if (ksLen + OPAQUE16_LEN > extLen) {
                 SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-                return -1;
+                return WOLFSSL_FATAL_ERROR;
             }
             /* cache key share data till server_hello */
             session->cliKeyShareSz = ksLen;
-            session->cliKeyShare = (byte*)XMALLOC(ksLen, NULL, DYNAMIC_TYPE_TMP_BUFFER);
-            if (session->cliKeyShare == NULL) {
-                SetError(MEMORY_STR, error, session, FATAL_ERROR_STATE);
-                break;
+            if (ksLen > 0) {
+                session->cliKeyShare = (byte*)XMALLOC(ksLen, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+                if (session->cliKeyShare == NULL) {
+                    SetError(MEMORY_STR, error, session, FATAL_ERROR_STATE);
+                    break;
+                }
+                XMEMCPY(session->cliKeyShare, &input[2], ksLen);
             }
-            XMEMCPY(session->cliKeyShare, &input[2], ksLen);
             break;
         }
         #ifdef HAVE_SESSION_TICKET
@@ -3741,34 +4325,47 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
             word32 ticketAge;
             const byte *identity, *binders;
 
+            if (extLen < OPAQUE16_LEN) {
+                SetError(BUFFER_ERROR_STR, error, session, FATAL_ERROR_STATE);
+                return BUFFER_ERROR;
+            }
+
             idsLen = (word16)((input[idx] << 8) | input[idx+1]);
-            if (idsLen + OPAQUE16_LEN + idx > extLen) {
+            if ((word32)idsLen + OPAQUE16_LEN + idx > (word32)extLen) {
                 SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-                return -1;
+                return WOLFSSL_FATAL_ERROR;
             }
             idx += OPAQUE16_LEN;
 
             /* PSK identity */
             idLen = (word16)((input[idx] << 8) | input[idx+1]);
-            if (idLen + OPAQUE16_LEN + idx > extLen) {
+            if ((word32)idLen + OPAQUE16_LEN + idx > (word32)extLen) {
                 SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-                return -1;
+                return WOLFSSL_FATAL_ERROR;
             }
             idx += OPAQUE16_LEN;
             identity = &input[idx];
             idx += idLen;
 
             /* Obfuscated Ticket Age 32-bits */
+            if ((word32)idx + OPAQUE32_LEN > (word32)extLen) {
+                SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
+                return WOLFSSL_FATAL_ERROR;
+            }
             ticketAge = (word32)((input[idx] << 24) | (input[idx+1] << 16) |
                                  (input[idx+2] << 8) | input[idx+3]);
             (void)ticketAge; /* not used */
             idx += OPAQUE32_LEN;
 
             /* binders - all binders */
-            bindersLen = (word16)((input[idx] << 8) | input[idx+1]);
-            if (bindersLen + OPAQUE16_LEN + idx > extLen) {
+            if ((word32)idx + OPAQUE16_LEN > (word32)extLen) {
                 SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
-                return -1;
+                return WOLFSSL_FATAL_ERROR;
+            }
+            bindersLen = (word16)((input[idx] << 8) | input[idx+1]);
+            if ((word32)bindersLen + OPAQUE16_LEN + idx > (word32)extLen) {
+                SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
+                return WOLFSSL_FATAL_ERROR;
             }
             idx += OPAQUE16_LEN;
             binders = &input[idx];
@@ -3803,7 +4400,7 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
             if (extLen && extLen < ID_LEN) {
                 SetError(CLIENT_HELLO_INPUT_STR, error, session,
                          FATAL_ERROR_STATE);
-                return -1;
+                return WOLFSSL_FATAL_ERROR;
             }
             if (extLen) {
                 if (session->ticketID == NULL) {
@@ -3812,15 +4409,23 @@ static int ProcessClientHello(const byte* input, int* sslBytes,
                     if (session->ticketID == 0) {
                         SetError(MEMORY_STR, error, session,
                                  FATAL_ERROR_STATE);
-                        return -1;
+                        return WOLFSSL_FATAL_ERROR;
                     }
                 }
+
             #ifdef HAVE_SESSION_TICKET
-                ssl->options.useTicket = 1;
+                /* do not set "ssl->options.useTicket", since the sniffer uses
+                 * the cache differently for retaining the master secret only */
             #endif
                 XMEMCPY(session->ticketID, input + extLen - ID_LEN, ID_LEN);
             }
             break;
+        }
+
+        /* make sure the extension fits in the remaining declared length */
+        if ((word32)extLen + EXT_TYPE_SZ + LENGTH_SZ > len) {
+            SetError(CLIENT_HELLO_INPUT_STR, error, session, FATAL_ERROR_STATE);
+            return WOLFSSL_FATAL_ERROR;
         }
 
         input     += extLen;
@@ -3847,12 +4452,12 @@ static int KeyWatchCall(SnifferSession* session, const byte* data, int dataSz,
     char* error)
 {
     int ret;
-    Sha256 sha;
-    byte digest[SHA256_DIGEST_SIZE];
+    wc_Sha256 sha;
+    byte digest[WC_SHA256_DIGEST_SIZE];
 
     if (WatchCb == NULL) {
         SetError(WATCH_CB_MISSING_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     ret = wc_InitSha256(&sha);
@@ -3862,7 +4467,7 @@ static int KeyWatchCall(SnifferSession* session, const byte* data, int dataSz,
         ret = wc_Sha256Final(&sha, digest);
     if (ret != 0) {
         SetError(WATCH_HASH_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     ret = WatchCb((void*)session, digest, sizeof(digest),
@@ -3872,7 +4477,7 @@ static int KeyWatchCall(SnifferSession* session, const byte* data, int dataSz,
         INC_STAT(SnifferStats.sslKeysUnmatched);
 #endif
         SetError(WATCH_FAIL_STR, error, session, FATAL_ERROR_STATE);
-        ret = -1;
+        ret = WOLFSSL_FATAL_ERROR;
     }
     else {
 #ifdef WOLFSSL_SNIFFER_STATS
@@ -3896,7 +4501,7 @@ static int ProcessCertificate(const byte* input, int* sslBytes,
 
     if (*sslBytes < CERT_HEADER_SZ) {
         SetError(BAD_CERT_MSG_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
 #ifdef WOLFSSL_TLS13
@@ -3913,14 +4518,14 @@ static int ProcessCertificate(const byte* input, int* sslBytes,
 
     if (*sslBytes < (int)certChainSz) {
         SetError(BAD_CERT_MSG_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     ato24(input, &certSz);
     input += OPAQUE24_LEN;
     if (*sslBytes < (int)certSz) {
         SetError(BAD_CERT_MSG_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     *sslBytes -= certChainSz;
@@ -3965,17 +4570,24 @@ static int ProcessFinished(const byte* input, int size, int* sslBytes,
         return ret;
     }
 
-    if (ret == 0 && session->flags.cached == 0) {
+    if (ret == 0
+    #ifdef SNIFFER_SINGLE_SESSION_CACHE
+            && session->flags.cached == 0
+    #endif
+            ) {
         if (session->sslServer->options.haveSessionId) {
         #ifndef NO_SESSION_CACHE
             WOLFSSL_SESSION* sess = wolfSSL_GetSession(session->sslServer, NULL, 0);
             if (sess == NULL) {
+                SetupSession(session->sslServer);
                 AddSession(session->sslServer); /* don't re add */
             #ifdef WOLFSSL_SNIFFER_STATS
                 INC_STAT(SnifferStats.sslResumptionInserts);
             #endif
             }
-            session->flags.cached = 1;
+            #ifdef SNIFFER_SINGLE_SESSION_CACHE
+                session->flags.cached = 1;
+            #endif
         #endif
          }
     }
@@ -3997,7 +4609,7 @@ static int ProcessFinished(const byte* input, int size, int* sslBytes,
 
             if (ret != 0) {
                 SetError(BAD_FINISHED_MSG, error, session, FATAL_ERROR_STATE);
-                return -1;
+                return WOLFSSL_FATAL_ERROR;
             }
 
             session->flags.gotFinished = 1;
@@ -4014,14 +4626,14 @@ static int ProcessFinished(const byte* input, int size, int* sslBytes,
         #ifdef HAVE_SESSION_TICKET
             /* derive resumption secret for next session - on finished (from client) */
             ret += DeriveResumptionSecret(session->sslClient,
-                session->sslClient->session.masterSecret);
+                session->sslClient->session->masterSecret);
 
             /* copy resumption secret to server */
-            XMEMCPY(session->sslServer->session.masterSecret,
-                    session->sslClient->session.masterSecret, SECRET_LEN);
+            XMEMCPY(session->sslServer->session->masterSecret,
+                    session->sslClient->session->masterSecret, SECRET_LEN);
             #ifdef SHOW_SECRETS
             PrintSecret("resumption secret",
-                session->sslClient->session.masterSecret, SECRET_LEN);
+                session->sslClient->session->masterSecret, SECRET_LEN);
             #endif
         #endif
         }
@@ -4033,7 +4645,7 @@ static int ProcessFinished(const byte* input, int size, int* sslBytes,
 
         if (ret != 0) {
             SetError(BAD_FINISHED_MSG, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
     }
 #endif
@@ -4066,6 +4678,10 @@ static int DoHandShake(const byte* input, int* sslBytes,
 
 #ifdef HAVE_MAX_FRAGMENT
     if (session->tlsFragBuf) {
+        if (session->tlsFragOffset + rhSize > session->tlsFragSize) {
+            SetError(HANDSHAKE_INPUT_STR, error, session, FATAL_ERROR_STATE);
+            return WOLFSSL_FATAL_ERROR;
+        }
         XMEMCPY(session->tlsFragBuf + session->tlsFragOffset, input, rhSize);
         session->tlsFragOffset += rhSize;
         *sslBytes -= rhSize;
@@ -4083,7 +4699,7 @@ static int DoHandShake(const byte* input, int* sslBytes,
 
     if (*sslBytes < HANDSHAKE_HEADER_SZ) {
         SetError(HANDSHAKE_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
     type = input[0];
     size = (input[1] << 16) | (input[2] << 8) | input[3];
@@ -4120,6 +4736,10 @@ static int DoHandShake(const byte* input, int* sslBytes,
             *sslBytes += HANDSHAKE_HEADER_SZ;
         }
 
+        if (session->tlsFragOffset + rhSize > session->tlsFragSize) {
+            SetError(HANDSHAKE_INPUT_STR, error, session, FATAL_ERROR_STATE);
+            return WOLFSSL_FATAL_ERROR;
+        }
         XMEMCPY(session->tlsFragBuf + session->tlsFragOffset, input, rhSize);
         session->tlsFragOffset += rhSize;
         *sslBytes -= rhSize;
@@ -4128,7 +4748,12 @@ static int DoHandShake(const byte* input, int* sslBytes,
 #endif
 
 #ifdef WOLFSSL_TLS13
-    if (type != client_hello && type != server_hello) {
+    if (type != client_hello && type != server_hello
+    #ifdef WOLFSSL_ASYNC_CRYPT
+        && session->sslServer->error != WC_NO_ERR_TRACE(WC_PENDING_E)
+        && session->pendSeq == 0
+    #endif
+    ) {
         /* For resumption the hash is before / after client_hello PSK binder */
         /* hash the packet including header */
         /* TLS v1.3 requires the hash for the handshake and transfer key derivation */
@@ -4144,7 +4769,7 @@ static int DoHandShake(const byte* input, int* sslBytes,
         if (HashUpdate(session->hash, input, size) != 0) {
             SetError(EXTENDED_MASTER_HASH_STR, error,
                      session, FATAL_ERROR_STATE);
-            ret = -1;
+            ret = WOLFSSL_FATAL_ERROR;
             goto exit;
         }
     }
@@ -4169,13 +4794,21 @@ static int DoHandShake(const byte* input, int* sslBytes,
             Trace(GOT_CERT_REQ_STR);
             break;
         case server_key_exchange:
-#ifdef WOLFSSL_SNIFFER_STATS
-            INC_STAT(SnifferStats.sslEphemeralMisses);
-#endif
             Trace(GOT_SERVER_KEY_EX_STR);
-            /* can't know temp key passively */
-            SetError(BAD_CIPHER_SPEC_STR, error, session, FATAL_ERROR_STATE);
-            ret = -1;
+
+#if defined(WOLFSSL_SNIFFER_KEYLOGFILE)
+            if (!session->context->useKeyLogFile)
+#endif /* WOLFSSL_SNIFFER_KEYLOGFILE */
+            {
+                /* can't know temp key passively */
+                SetError(BAD_CIPHER_SPEC_STR, error, session, FATAL_ERROR_STATE);
+                session->verboseErr = 1;
+                ret = WOLFSSL_FATAL_ERROR;
+
+#if defined(WOLFSSL_SNIFFER_STATS)
+                INC_STAT(SnifferStats.sslEphemeralMisses);
+#endif /* WOLFSSL_SNIFFER_STATS */
+            }
             break;
         case encrypted_extensions:
             Trace(GOT_ENC_EXT_STR);
@@ -4206,23 +4839,27 @@ static int DoHandShake(const byte* input, int* sslBytes,
         case client_key_exchange:
             Trace(GOT_CLIENT_KEY_EX_STR);
 #ifdef HAVE_EXTENDED_MASTER
-            if (session->flags.expectEms && session->hash != NULL) {
-                if (HashCopy(session->sslServer->hsHashes,
-                             session->hash) == 0 &&
-                    HashCopy(session->sslClient->hsHashes,
-                             session->hash) == 0) {
+            if (session->flags.expectEms) {
+                /* on async reentry the session->hash is already copied
+                 * and free'd */
+                if (session->hash != NULL) {
+                    if (HashCopy(session->sslServer->hsHashes,
+                                session->hash) == 0 &&
+                        HashCopy(session->sslClient->hsHashes,
+                                session->hash) == 0) {
 
-                    session->sslServer->options.haveEMS = 1;
-                    session->sslClient->options.haveEMS = 1;
+                        session->sslServer->options.haveEMS = 1;
+                        session->sslClient->options.haveEMS = 1;
+                    }
+                    else {
+                        SetError(EXTENDED_MASTER_HASH_STR, error,
+                                session, FATAL_ERROR_STATE);
+                        ret = WOLFSSL_FATAL_ERROR;
+                    }
+                    XMEMSET(session->hash, 0, sizeof(HsHashes));
+                    XFREE(session->hash, NULL, DYNAMIC_TYPE_HASHES);
+                    session->hash = NULL;
                 }
-                else {
-                    SetError(EXTENDED_MASTER_HASH_STR, error,
-                             session, FATAL_ERROR_STATE);
-                    ret = -1;
-                }
-                XMEMSET(session->hash, 0, sizeof(HsHashes));
-                XFREE(session->hash, NULL, DYNAMIC_TYPE_HASHES);
-                session->hash = NULL;
             }
             else {
                 session->sslServer->options.haveEMS = 0;
@@ -4231,8 +4868,14 @@ static int DoHandShake(const byte* input, int* sslBytes,
 #endif
             if (ret == 0) {
                 ret = ProcessClientKeyExchange(input, sslBytes, session, error);
-                if (ret != 0)
-                    SetError(GOT_CLIENT_KEY_EX_STR, error, session, FATAL_ERROR_STATE);
+            #ifdef WOLFSSL_ASYNC_CRYPT
+                if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
+                    return ret;
+            #endif
+                if (ret != 0) {
+                    SetError(KEY_MISMATCH_STR, error, session, FATAL_ERROR_STATE);
+                    session->verboseErr = 1;
+                }
             }
             break;
         case certificate_verify:
@@ -4243,7 +4886,7 @@ static int DoHandShake(const byte* input, int* sslBytes,
             break;
         default:
             SetError(GOT_UNKNOWN_HANDSHAKE_STR, error, session, 0);
-            ret = -1;
+            ret = WOLFSSL_FATAL_ERROR;
             break;
     }
 
@@ -4251,10 +4894,8 @@ static int DoHandShake(const byte* input, int* sslBytes,
 exit:
 #endif
 #ifdef HAVE_MAX_FRAGMENT
-    if (session->tlsFragBuf) {
-        XFREE(session->tlsFragBuf, NULL, DYNAMIC_TYPE_TMP_BUFFER);
-        session->tlsFragBuf = NULL;
-    }
+    XFREE(session->tlsFragBuf, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+    session->tlsFragBuf = NULL;
 #endif
 
     *sslBytes = startBytes - size;  /* actual bytes of full process */
@@ -4262,103 +4903,257 @@ exit:
     return ret;
 }
 
-
-/* Decrypt input into plain output, 0 on success */
-static int Decrypt(WOLFSSL* ssl, byte* output, const byte* input, word32 sz)
+/* For ciphers that use AEAD use the encrypt routine to
+ * bypass the auth tag checking */
+static int DecryptDo(WOLFSSL* ssl, byte* plain, const byte* input,
+                           word16 sz)
 {
     int ret = 0;
 
-    (void)output;
+    (void)plain;
     (void)input;
     (void)sz;
 
-    switch (ssl->specs.bulk_cipher_algorithm) {
-        #ifdef BUILD_ARC4
+    switch (ssl->specs.bulk_cipher_algorithm)
+    {
+    #ifndef NO_RC4
         case wolfssl_rc4:
-            wc_Arc4Process(ssl->decrypt.arc4, output, input, sz);
+            wc_Arc4Process(ssl->decrypt.arc4, plain, input, sz);
             break;
-        #endif
+    #endif
 
-        #ifdef BUILD_DES3
+    #ifndef NO_DES3
         case wolfssl_triple_des:
-            ret = wc_Des3_CbcDecrypt(ssl->decrypt.des3, output, input, sz);
-            break;
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            /* initialize event */
+            ret = wolfSSL_AsyncInit(ssl, &ssl->decrypt.des3->asyncDev,
+                WC_ASYNC_FLAG_CALL_AGAIN);
+            if (ret != 0)
+                break;
         #endif
 
-        #ifdef BUILD_AES
+            ret = wc_Des3_CbcDecrypt(ssl->decrypt.des3, plain, input, sz);
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
+                ret = wolfSSL_AsyncPush(ssl, &ssl->decrypt.des3->asyncDev);
+            }
+        #endif
+            break;
+    #endif
+
+    #if !defined(NO_AES) && defined(HAVE_AES_CBC)
         case wolfssl_aes:
-            ret = wc_AesCbcDecrypt(ssl->decrypt.aes, output, input, sz);
-            break;
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            /* initialize event */
+            ret = wolfSSL_AsyncInit(ssl, &ssl->decrypt.aes->asyncDev,
+                WC_ASYNC_FLAG_CALL_AGAIN);
+            if (ret != 0)
+                break;
         #endif
-
-        #ifdef BUILD_RABBIT
-        case wolfssl_rabbit:
-            wc_RabbitProcess(ssl->decrypt.rabbit, output, input, sz);
-            break;
+            ret = wc_AesCbcDecrypt(ssl->decrypt.aes, plain, input, sz);
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
+                ret = wolfSSL_AsyncPush(ssl, &ssl->decrypt.aes->asyncDev);
+            }
         #endif
-
-        #ifdef HAVE_CAMELLIA
-        case wolfssl_camellia:
-            wc_CamelliaCbcDecrypt(ssl->decrypt.cam, output, input, sz);
             break;
-        #endif
+    #endif
 
-        #ifdef HAVE_IDEA
-        case wolfssl_idea:
-            wc_IdeaCbcDecrypt(ssl->decrypt.idea, output, input, sz);
-            break;
-        #endif
-
-        #if defined(HAVE_AESGCM) || defined(HAVE_AESCCM)
+    #if defined(HAVE_AESGCM) || defined(HAVE_AESCCM)
         case wolfssl_aes_gcm:
         case wolfssl_aes_ccm: /* GCM AEAD macros use same size as CCM */
-            if (sz >= (word32)(AESGCM_EXP_IV_SZ + ssl->specs.aead_mac_size)) {
-                /* scratch buffer, sniffer ignores auth tag */
-                wc_AesAuthEncryptFunc aes_auth_fn;
-                byte authTag[WOLFSSL_MIN_AUTH_TAG_SZ];
-                byte nonce[AESGCM_NONCE_SZ];
-                XMEMCPY(nonce, ssl->keys.aead_dec_imp_IV, AESGCM_IMP_IV_SZ);
-                XMEMCPY(nonce + AESGCM_IMP_IV_SZ, input, AESGCM_EXP_IV_SZ);
+        {
+            /* For ciphers that use AEAD use the encrypt routine to
+             * bypass the auth tag checking */
+            wc_AesAuthEncryptFunc aes_auth_fn;
 
-                /* use encrypt because we don't care about authtag */
-            #if defined(BUILD_AESGCM) && defined(HAVE_AESCCM)
-                aes_auth_fn = (ssl->specs.bulk_cipher_algorithm == wolfssl_aes_gcm)
-                                ? wc_AesGcmEncrypt : wc_AesCcmEncrypt;
-            #elif defined(BUILD_AESGCM)
-                aes_auth_fn = wc_AesGcmEncrypt;
-            #else
-                aes_auth_fn = wc_AesCcmEncrypt;
-            #endif
-                if (aes_auth_fn(ssl->decrypt.aes,
-                            output,
-                            input + AESGCM_EXP_IV_SZ,
-                            sz - AESGCM_EXP_IV_SZ - ssl->specs.aead_mac_size,
-                            nonce, AESGCM_NONCE_SZ,
-                            authTag, sizeof(authTag),
-                            NULL, 0) < 0) {
-                    Trace(BAD_DECRYPT);
-                    ret = -1;
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            /* initialize event */
+            ret = wolfSSL_AsyncInit(ssl, &ssl->decrypt.aes->asyncDev,
+                WC_ASYNC_FLAG_CALL_AGAIN);
+            if (ret != 0)
+                break;
+        #endif
+
+        #if defined(HAVE_AESGCM) && defined(HAVE_AESCCM)
+            aes_auth_fn = (ssl->specs.bulk_cipher_algorithm == wolfssl_aes_gcm)
+                            ? wc_AesGcmEncrypt : wc_AesCcmEncrypt;
+        #elif defined(HAVE_AESGCM)
+            aes_auth_fn = wc_AesGcmEncrypt;
+        #else
+            aes_auth_fn = wc_AesCcmEncrypt;
+        #endif
+
+            XMEMSET(ssl->decrypt.additional, 0, AEAD_AUTH_DATA_SZ);
+
+            XMEMCPY(ssl->decrypt.nonce, ssl->keys.aead_dec_imp_IV, AESGCM_IMP_IV_SZ);
+            XMEMCPY(ssl->decrypt.nonce + AESGCM_IMP_IV_SZ, input, AESGCM_EXP_IV_SZ);
+
+            if (sz < AESGCM_EXP_IV_SZ + ssl->specs.aead_mac_size) {
+                ret = BUFFER_ERROR;
+            }
+
+            if (ret == 0) {
+                ret = aes_auth_fn(ssl->decrypt.aes,
+                       plain,
+                       input + AESGCM_EXP_IV_SZ,
+                       sz - AESGCM_EXP_IV_SZ - ssl->specs.aead_mac_size,
+                       ssl->decrypt.nonce, AESGCM_NONCE_SZ,
+                       ssl->decrypt.additional, AEAD_AUTH_DATA_SZ,
+                       NULL, 0);
+                if (ret < 0) {
+                #ifdef WOLFSSL_ASYNC_CRYPT
+                    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
+                        ret = wolfSSL_AsyncPush(ssl, &ssl->decrypt.aes->asyncDev);
+                    }
+                #endif
                 }
-                ForceZero(nonce, AESGCM_NONCE_SZ);
             }
-            else {
-                Trace(BAD_DECRYPT_SIZE);
-                ret = -1;
-            }
-            break;
-        #endif
+        }
+        break;
+    #endif /* HAVE_AESGCM || HAVE_AESCCM */
 
-        #ifdef HAVE_NULL_CIPHER
-        case wolfssl_cipher_null:
-            XMEMCPY(output, input, sz);
+    #ifdef HAVE_ARIA
+        case wolfssl_aria_gcm:
+            if (sz < AESGCM_EXP_IV_SZ + ssl->specs.aead_mac_size) {
+                ret = BUFFER_ERROR;
+            }
+
+            if (ret == 0) {
+                ret = wc_AriaDecrypt(ssl->decrypt.aria,
+                            plain,
+                            (byte *)input + AESGCM_EXP_IV_SZ,
+                            sz - AESGCM_EXP_IV_SZ - ssl->specs.aead_mac_size,
+                            ssl->decrypt.nonce, AESGCM_NONCE_SZ,
+                            ssl->decrypt.additional, ssl->specs.aead_mac_size,
+                            NULL, 0);
+            }
             break;
-        #endif
+    #endif
+
+    #ifdef HAVE_CAMELLIA
+        case wolfssl_camellia:
+            ret = wc_CamelliaCbcDecrypt(ssl->decrypt.cam, plain, input, sz);
+            break;
+    #endif
+
+    #if defined(HAVE_CHACHA) && defined(HAVE_POLY1305) && \
+        !defined(NO_CHAPOL_AEAD)
+        case wolfssl_chacha:
+            ret = ChachaAEADDecrypt(ssl, plain, input, sz);
+            break;
+    #endif
+
+    #ifdef HAVE_NULL_CIPHER
+        case wolfssl_cipher_null:
+            if (input != plain) {
+                XMEMMOVE(plain, input, sz);
+            }
+            break;
+    #endif
 
         default:
-            Trace(BAD_DECRYPT_TYPE);
-            ret = -1;
+            WOLFSSL_MSG("wolfSSL Decrypt programming error");
+            ret = DECRYPT_ERROR;
+    }
+
+    return ret;
+}
+
+static int DecryptTls(WOLFSSL* ssl, byte* plain, const byte* input,
+                           word16 sz)
+{
+    int ret = 0;
+
+#ifdef WOLFSSL_ASYNC_CRYPT
+    if (ssl->decrypt.state != CIPHER_STATE_BEGIN) {
+        ret = wolfSSL_AsyncPop(ssl, &ssl->decrypt.state);
+        if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E)) {
+            /* check for still pending */
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
+                return ret;
+
+            ssl->error = 0; /* clear async */
+
+            /* let failures through so CIPHER_STATE_END logic is run */
+        }
+    }
+    else
+#endif
+    {
+        /* Reset state */
+        ret = 0;
+        ssl->decrypt.state = CIPHER_STATE_BEGIN;
+    }
+
+    switch (ssl->decrypt.state) {
+        case CIPHER_STATE_BEGIN:
+        {
+            if (ssl->decrypt.setup == 0) {
+                WOLFSSL_MSG("Decrypt ciphers not setup");
+                return DECRYPT_ERROR;
+            }
+
+        #if defined(HAVE_AESGCM) || defined(HAVE_AESCCM)
+            /* make sure AES GCM/CCM memory is allocated */
+            /* free for these happens in FreeCiphers */
+            if (ssl->specs.bulk_cipher_algorithm == wolfssl_aes_ccm ||
+                ssl->specs.bulk_cipher_algorithm == wolfssl_aes_gcm) {
+                /* make sure auth iv and auth are allocated */
+                if (ssl->decrypt.additional == NULL)
+                    ssl->decrypt.additional = (byte*)XMALLOC(AEAD_AUTH_DATA_SZ,
+                                            ssl->heap, DYNAMIC_TYPE_AES_BUFFER);
+                if (ssl->decrypt.nonce == NULL)
+                    ssl->decrypt.nonce = (byte*)XMALLOC(AESGCM_NONCE_SZ,
+                                            ssl->heap, DYNAMIC_TYPE_AES_BUFFER);
+                if (ssl->decrypt.additional == NULL ||
+                         ssl->decrypt.nonce == NULL) {
+                    return MEMORY_E;
+                }
+            }
+        #endif /* HAVE_AESGCM || HAVE_AESCCM */
+
+            /* Advance state and proceed */
+            ssl->decrypt.state = CIPHER_STATE_DO;
+        }
+        FALL_THROUGH;
+        case CIPHER_STATE_DO:
+        {
+            ret = DecryptDo(ssl, plain, input, sz);
+
+            /* Advance state */
+            ssl->decrypt.state = CIPHER_STATE_END;
+
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            /* If pending, return now */
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
+                return ret;
+            }
+        #endif
+        }
+        FALL_THROUGH;
+        case CIPHER_STATE_END:
+        {
+        #if defined(HAVE_AESGCM) || defined(HAVE_AESCCM)
+            /* make sure AES GCM/CCM nonce is cleared */
+            if (ssl->specs.bulk_cipher_algorithm == wolfssl_aes_ccm ||
+                ssl->specs.bulk_cipher_algorithm == wolfssl_aes_gcm) {
+                if (ssl->decrypt.nonce)
+                    ForceZero(ssl->decrypt.nonce, AESGCM_NONCE_SZ);
+
+                if (ret < 0)
+                    ret = VERIFY_MAC_ERROR;
+            }
+        #endif /* HAVE_AESGCM || HAVE_AESCCM */
+            break;
+        }
+
+        default:
             break;
     }
+
+    /* Reset state */
+    ssl->decrypt.state = CIPHER_STATE_BEGIN;
 
     return ret;
 }
@@ -4373,18 +5168,36 @@ static const byte* DecryptMessage(WOLFSSL* ssl, const byte* input, word32 sz,
 
 #ifdef WOLFSSL_TLS13
     if (IsAtLeastTLSv1_3(ssl->version)) {
+        if (sz <= ssl->specs.aead_mac_size) {
+            *error = BUFFER_ERROR;
+            return NULL;
+        }
         ret = DecryptTls13(ssl, output, input, sz, (byte*)rh, RECORD_HEADER_SZ);
     }
     else
 #endif
     {
-        ret = Decrypt(ssl, output, input, sz);
+        XMEMCPY(&ssl->curRL, rh, RECORD_HEADER_SZ);
+        ret = DecryptTls(ssl, output, input, sz);
     }
+#ifdef WOLFSSL_ASYNC_CRYPT
+    /* for async the symmetric operations are blocking */
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
+        do {
+            ret = wolfSSL_AsyncPoll(ssl, WOLF_POLL_FLAG_CHECK_HW);
+        } while (ret == 0);
+        if (ret >= 0) {
+            /* remove from event queue list */
+            ret = wolfSSL_AsyncPop(ssl, NULL);
+        }
+    }
+#endif
     if (ret != 0) {
         *error = ret;
         return NULL;
     }
 
+    ssl->curSize = sz;
     ssl->keys.encryptSz = sz;
     if (ssl->options.tls1_1 && ssl->specs.cipher_type == block) {
         output += ssl->specs.block_size; /* go past TLSv1.1 IV */
@@ -4412,6 +5225,10 @@ static const byte* DecryptMessage(WOLFSSL* ssl, const byte* input, word32 sz,
 #ifdef WOLFSSL_TLS13
     if (IsAtLeastTLSv1_3(ssl->version)) {
         word16 i = (word16)(sz - ssl->keys.padSz);
+        if (i == 0) {
+            *error = BUFFER_ERROR;
+            return NULL;
+        }
         /* Remove padding from end of plain text. */
         for (--i; i > 0; i--) {
             if (output[i] != 0)
@@ -4435,20 +5252,26 @@ static void RemoveSession(SnifferSession* session, IpInfo* ipInfo,
     SnifferSession* previous = 0;
     SnifferSession* current;
     word32          row = rowHint;
+#ifndef SNIFFER_LOCKLESS_TABLES
     int             haveLock = 0;
-
+#endif
     Trace(REMOVE_SESSION_STR);
 
     if (ipInfo && tcpInfo)
         row = SessionHash(ipInfo, tcpInfo);
+#ifndef SNIFFER_LOCKLESS_TABLES
     else
         haveLock = 1;
+#endif
 
     if (row >= HASH_SIZE)
         return;
 
-    if (!haveLock)
-        wc_LockMutex(&SessionMutex);
+#ifndef SNIFFER_LOCKLESS_TABLES
+    if (!haveLock) {
+        LOCK_SESSION();
+    }
+#endif
 
     current = SessionTable[row];
 
@@ -4466,8 +5289,11 @@ static void RemoveSession(SnifferSession* session, IpInfo* ipInfo,
         current  = current->next;
     }
 
-    if (!haveLock)
-        wc_UnLockMutex(&SessionMutex);
+#ifndef SNIFFER_LOCKLESS_TABLES
+    if (!haveLock) {
+        UNLOCK_SESSION();
+    }
+#endif
 }
 
 
@@ -4490,6 +5316,12 @@ static void RemoveStaleSessions(void)
     }
 }
 
+void ssl_RemoveStaleSessions(void)
+{
+    LOCK_SESSION();
+    RemoveStaleSessions();
+    UNLOCK_SESSION();
+}
 
 /* Create a new Sniffer Session */
 static SnifferSession* CreateSession(IpInfo* ipInfo, TcpInfo* tcpInfo,
@@ -4504,7 +5336,7 @@ static SnifferSession* CreateSession(IpInfo* ipInfo, TcpInfo* tcpInfo,
             NULL, DYNAMIC_TYPE_SNIFFER_SESSION);
     if (session == NULL) {
         SetError(MEMORY_STR, error, NULL, 0);
-        return 0;
+        return NULL;
     }
     InitSession(session);
 #ifdef HAVE_EXTENDED_MASTER
@@ -4514,12 +5346,13 @@ static SnifferSession* CreateSession(IpInfo* ipInfo, TcpInfo* tcpInfo,
         if (newHash == NULL) {
             SetError(MEMORY_STR, error, NULL, 0);
             XFREE(session, NULL, DYNAMIC_TYPE_SNIFFER_SESSION);
-            return 0;
+            return NULL;
         }
         if (HashInit(newHash) != 0) {
             SetError(EXTENDED_MASTER_HASH_STR, error, NULL, 0);
+            XFREE(newHash, NULL, DYNAMIC_TYPE_HASHES);
             XFREE(session, NULL, DYNAMIC_TYPE_SNIFFER_SESSION);
-            return 0;
+            return NULL;
         }
         session->hash = newHash;
     }
@@ -4532,6 +5365,8 @@ static SnifferSession* CreateSession(IpInfo* ipInfo, TcpInfo* tcpInfo,
     session->cliExpected = 1;  /* relative */
     session->lastUsed= wc_Time(NULL);
     session->keySz = 0;
+    session->error = 0;
+    session->verboseErr = 0;
 #ifdef HAVE_SNI
     session->sni = NULL;
 #endif
@@ -4540,14 +5375,14 @@ static SnifferSession* CreateSession(IpInfo* ipInfo, TcpInfo* tcpInfo,
     if (session->context == NULL) {
         SetError(SERVER_NOT_REG_STR, error, NULL, 0);
         XFREE(session, NULL, DYNAMIC_TYPE_SNIFFER_SESSION);
-        return 0;
+        return NULL;
     }
 
     session->sslServer = wolfSSL_new(session->context->ctx);
     if (session->sslServer == NULL) {
         SetError(BAD_NEW_SSL_STR, error, session, FATAL_ERROR_STATE);
         XFREE(session, NULL, DYNAMIC_TYPE_SNIFFER_SESSION);
-        return 0;
+        return NULL;
     }
     session->sslClient = wolfSSL_new(session->context->ctx);
     if (session->sslClient == NULL) {
@@ -4556,15 +5391,22 @@ static SnifferSession* CreateSession(IpInfo* ipInfo, TcpInfo* tcpInfo,
 
         SetError(BAD_NEW_SSL_STR, error, session, FATAL_ERROR_STATE);
         XFREE(session, NULL, DYNAMIC_TYPE_SNIFFER_SESSION);
-        return 0;
+        return NULL;
     }
     /* put server back into server mode */
     session->sslServer->options.side = WOLFSSL_SERVER_END;
 
+#if defined(WOLFSSL_SNIFFER_KEYLOGFILE)
+    if (session->context->useKeyLogFile) {
+        setSnifferSecretCb(session);
+    }
+#endif /* WOLFSSL_SNIFFER_KEYLOGFILE */
+
+
     row = SessionHash(ipInfo, tcpInfo);
 
     /* add it to the session table */
-    wc_LockMutex(&SessionMutex);
+    LOCK_SESSION();
 
     session->next = SessionTable[row];
     SessionTable[row] = session;
@@ -4576,7 +5418,7 @@ static SnifferSession* CreateSession(IpInfo* ipInfo, TcpInfo* tcpInfo,
         RemoveStaleSessions();
     }
 
-    wc_UnLockMutex(&SessionMutex);
+    UNLOCK_SESSION();
 
     /* CreateSession is called in response to a SYN packet, we know this
      * is headed to the server. Also we know the server is one we care
@@ -4607,14 +5449,14 @@ static int DoOldHello(SnifferSession* session, const byte* sslFrame,
 
     if (*rhSize > *sslBytes) {
         SetError(OLD_CLIENT_INPUT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     ret = ProcessOldClientHello(session->sslServer, input, &idx, *sslBytes,
                                 (word16)*rhSize);
-    if (ret < 0 && ret != MATCH_SUITE_ERROR) {
+    if (ret < 0 && ret != WC_NO_ERR_TRACE(MATCH_SUITE_ERROR)) {
         SetError(BAD_OLD_CLIENT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     Trace(OLD_CLIENT_OK_STR);
@@ -4635,7 +5477,7 @@ static int DoOldHello(SnifferSession* session, const byte* sslFrame,
    TcpChecksum(&ipInfo, &tcpInfo, sslBytes, packet + ipInfo.length);
    could also add a 64bit version if type available and using this
 */
-int TcpChecksum(IpInfo* ipInfo, TcpInfo* tcpInfo, int dataLen,
+static int TcpChecksum(IpInfo* ipInfo, TcpInfo* tcpInfo, int dataLen,
                 const byte* packet)
 {
     TcpPseudoHdr  pseudo;
@@ -4644,8 +5486,8 @@ int TcpChecksum(IpInfo* ipInfo, TcpInfo* tcpInfo, int dataLen,
     word32        sum = 0;
     word16        checksum;
 
-    pseudo.src = ipInfo->src;
-    pseudo.dst = ipInfo->dst;
+    pseudo.src = ipInfo->src.ip4;
+    pseudo.dst = ipInfo->dst.ip4;
     pseudo.rsv = 0;
     pseudo.protocol = TCP_PROTO;
     pseudo.length = htons(tcpInfo->length + dataLen);
@@ -4680,7 +5522,7 @@ int TcpChecksum(IpInfo* ipInfo, TcpInfo* tcpInfo, int dataLen,
     /* field, but tcp checksum offloading could negate calculation */
     if (checksum == 0)
         return 0;
-    return -1;
+    return WOLFSSL_FATAL_ERROR;
 }
 #endif
 
@@ -4688,18 +5530,22 @@ int TcpChecksum(IpInfo* ipInfo, TcpInfo* tcpInfo, int dataLen,
 /* Check IP and TCP headers, set payload */
 /* returns 0 on success, -1 on error */
 static int CheckHeaders(IpInfo* ipInfo, TcpInfo* tcpInfo, const byte* packet,
-                  int length, const byte** sslFrame, int* sslBytes, char* error)
+    int length, const byte** sslFrame, int* sslBytes, char* error,
+    int checkReg, int trace)
 {
     IpHdr* iphdr = (IpHdr*)packet;
+    TcpHdr* tcphdr;
     int version;
 
-    TraceHeader();
-    TracePacket();
+    if (trace) {
+        TraceHeader();
+        TracePacket();
+    }
 
     /* ip header */
     if (length < IP_HDR_SZ) {
         SetError(PACKET_HDR_SHORT_STR, error, NULL, 0);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     version = IP_V(iphdr);
@@ -4709,30 +5555,62 @@ static int CheckHeaders(IpInfo* ipInfo, TcpInfo* tcpInfo, const byte* packet,
             /* trim VLAN header and try again */
             packet += 8;
             length -= 8;
+            if (length < IP_HDR_SZ) {
+                SetError(PACKET_HDR_SHORT_STR, error, NULL, 0);
+                return WOLFSSL_FATAL_ERROR;
+            }
+            iphdr = (IpHdr*)packet;
+            version = IP_V(iphdr);
         }
     }
 
-    if (CheckIpHdr((IpHdr*)packet, ipInfo, length, error) != 0)
-        return -1;
+    if (CheckIpHdr(iphdr, ipInfo, length, error, trace) != 0)
+        return WOLFSSL_FATAL_ERROR;
+
+#ifndef WOLFSSL_SNIFFER_WATCH
+    if (checkReg &&
+           !IsServerRegistered(iphdr->src) && !IsServerRegistered(iphdr->dst)) {
+        SetError(SERVER_NOT_REG_STR, error, NULL, 0);
+        return WOLFSSL_FATAL_ERROR;
+    }
+#endif
 
     /* tcp header */
     if (length < (ipInfo->length + TCP_HDR_SZ)) {
         SetError(PACKET_HDR_SHORT_STR, error, NULL, 0);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
-    if (CheckTcpHdr((TcpHdr*)(packet + ipInfo->length), tcpInfo, error) != 0)
-        return -1;
+    tcphdr = (TcpHdr*)(packet + ipInfo->length);
+    if (CheckTcpHdr(tcphdr, tcpInfo, error, trace) != 0)
+        return WOLFSSL_FATAL_ERROR;
+
+#ifndef WOLFSSL_SNIFFER_WATCH
+    if (checkReg &&
+         !IsPortRegistered(tcpInfo->srcPort) &&
+            !IsPortRegistered(tcpInfo->dstPort)) {
+        SetError(SERVER_PORT_NOT_REG_STR, error, NULL, 0);
+        return WOLFSSL_FATAL_ERROR;
+    }
+#endif
 
     /* setup */
     *sslFrame = packet + ipInfo->length + tcpInfo->length;
     if (*sslFrame > packet + length) {
         SetError(PACKET_HDR_SHORT_STR, error, NULL, 0);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     /* We only care about the data in the TCP/IP record. There may be extra
      * data after the IP record for the FCS for Ethernet. */
     *sslBytes = (int)(packet + ipInfo->total - *sslFrame);
+
+    /* Ensure sslBytes does not exceed the actual size. */
+    if (*sslBytes > (int)(length - (ipInfo->length + tcpInfo->length))) {
+        SetError(PACKET_HDR_SHORT_STR, error, NULL, 0);
+        return WOLFSSL_FATAL_ERROR;
+    }
+
+    (void)checkReg;
 
     return 0;
 }
@@ -4745,6 +5623,16 @@ static int CheckSession(IpInfo* ipInfo, TcpInfo* tcpInfo, int sslBytes,
 {
     /* create a new SnifferSession on client SYN */
     if (tcpInfo->syn && !tcpInfo->ack) {
+    #ifdef WOLFSSL_ASYNC_CRYPT
+        /* if session already exists and is pending do not create another */
+        *session = GetSnifferSession(ipInfo, tcpInfo);
+        if (*session != NULL) {
+            if ((*session)->pendSeq != 0) {
+                return WC_PENDING_E;
+            }
+        }
+    #endif
+
         TraceClientSyn(tcpInfo->sequence);
 #ifdef WOLFSSL_SNIFFER_STATS
         INC_STAT(SnifferStats.sslEncryptedConns);
@@ -4757,7 +5645,7 @@ static int CheckSession(IpInfo* ipInfo, TcpInfo* tcpInfo, int sslBytes,
                 return 1;
 
             SetError(MEMORY_STR, error, NULL, 0);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         return 1;
     }
@@ -4780,7 +5668,7 @@ static int CheckSession(IpInfo* ipInfo, TcpInfo* tcpInfo, int sslBytes,
 #endif
 
             SetError(BAD_SESSION_STR, error, NULL, 0);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
     }
     return 0;
@@ -4819,7 +5707,6 @@ static PacketBuffer* CreateBuffer(word32* begin, word32 end, const byte* data,
     return pb;
 }
 
-
 /* Add sslFrame to Reassembly List */
 /* returns 1 (end) on success, -1, on error */
 static int AddToReassembly(byte from, word32 seq, const byte* sslFrame,
@@ -4842,12 +5729,12 @@ static int AddToReassembly(byte from, word32 seq, const byte* sslFrame,
         if (MaxRecoveryMemory != -1 &&
                       (int)(*reassemblyMemory + sslBytes) > MaxRecoveryMemory) {
             SetError(REASSEMBLY_MAX_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         add = CreateBuffer(&seq, seq + sslBytes - 1, sslFrame, &bytesLeft);
         if (add == NULL) {
             SetError(MEMORY_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         *front = add;
         *reassemblyMemory += sslBytes;
@@ -4861,15 +5748,15 @@ static int AddToReassembly(byte from, word32 seq, const byte* sslFrame,
         if (end >= curr->begin)
             end = curr->begin - 1;
 
-        if (MaxRecoveryMemory -1 &&
+        if (MaxRecoveryMemory != -1 &&
                       (int)(*reassemblyMemory + sslBytes) > MaxRecoveryMemory) {
             SetError(REASSEMBLY_MAX_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         add = CreateBuffer(&seq, end, sslFrame, &bytesLeft);
         if (add == NULL) {
             SetError(MEMORY_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         add->next = curr;
         *front = add;
@@ -4906,13 +5793,13 @@ static int AddToReassembly(byte from, word32 seq, const byte* sslFrame,
         if (MaxRecoveryMemory != -1 &&
                          (int)(*reassemblyMemory + added) > MaxRecoveryMemory) {
             SetError(REASSEMBLY_MAX_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         add = CreateBuffer(&seq, seq + added - 1, &sslFrame[seq - startSeq],
                            &bytesLeft);
         if (add == NULL) {
             SetError(MEMORY_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         add->next  = prev->next;
         prev->next = add;
@@ -4920,7 +5807,6 @@ static int AddToReassembly(byte from, word32 seq, const byte* sslFrame,
     }
     return 1;
 }
-
 
 /* Add out of order FIN capture */
 /* returns 1 for success (end) */
@@ -4937,47 +5823,6 @@ static int AddFinCapture(SnifferSession* session, word32 sequence)
     return 1;
 }
 
-static int FindPrevAck(SnifferSession* session, word32 realAck)
-{
-    int i;
-    word32* acks = (session->flags.side == WOLFSSL_SERVER_END) ?
-        session->cliAcks : session->srvAcks;
-    /* if previous ack found return 1, otherwise 0 */
-    for (i=0; i<WC_SNIFFER_HS_ACK_HIST_MAX; i++) {
-        if (acks[i] == realAck) {
-            return 1;
-        }
-
-    }
-    return 0;
-}
-static void AddAck(SnifferSession* session, word32 realAck)
-{
-    int i;
-    word32* acks = (session->flags.side == WOLFSSL_SERVER_END) ?
-        session->cliAcks : session->srvAcks;
-    /* find first empty ack slot */
-    for (i=0; i<WC_SNIFFER_HS_ACK_HIST_MAX; i++) {
-        if (acks[i] == 0) {
-            break;
-        }
-    }
-    /* if out of slots, find oldest */
-    if (i == WC_SNIFFER_HS_ACK_HIST_MAX) {
-        int idx = 0;
-        word32 lastAck = realAck;
-        for (i=0; i<WC_SNIFFER_HS_ACK_HIST_MAX; i++) {
-            if (acks[i] < lastAck) {
-                idx = i;
-                lastAck = acks[i];
-            }
-        }
-        i  = idx;
-    }
-
-    acks[i] = realAck;
-}
-
 /* Adjust incoming sequence based on side */
 /* returns 0 on success (continue), -1 on error, 1 on success (end) */
 static int AdjustSequence(TcpInfo* tcpInfo, SnifferSession* session,
@@ -4985,7 +5830,9 @@ static int AdjustSequence(TcpInfo* tcpInfo, SnifferSession* session,
 {
     int ret = 0;
     word32  seqStart = (session->flags.side == WOLFSSL_SERVER_END) ?
-                                     session->cliSeqStart :session->srvSeqStart;
+                                    session->cliSeqStart : session->srvSeqStart;
+    word32* seqLast = (session->flags.side == WOLFSSL_SERVER_END) ?
+                                    &session->cliSeqLast : &session->srvSeqLast;
     word32  real     = tcpInfo->sequence - seqStart;
     word32* expected = (session->flags.side == WOLFSSL_SERVER_END) ?
                                   &session->cliExpected : &session->srvExpected;
@@ -5002,15 +5849,21 @@ static int AdjustSequence(TcpInfo* tcpInfo, SnifferSession* session,
     TraceRelativeSequence(*expected, real);
 
     if (real < *expected) {
+        int overlap = *expected - real;
 
         if (real + *sslBytes > *expected) {
-            Trace(OVERLAP_DUPLICATE_STR);
+        #ifdef WOLFSSL_ASYNC_CRYPT
+            if (session->sslServer->error != WC_NO_ERR_TRACE(WC_PENDING_E) &&
+                session->pendSeq != tcpInfo->sequence)
+        #endif
+            {
+                Trace(OVERLAP_DUPLICATE_STR);
+            }
 
             /* The following conditional block is duplicated below. It is the
              * same action but for a different setup case. If changing this
              * block be sure to also update the block below. */
             if (reassemblyList) {
-                int overlap = *expected - real;
                 word32 newEnd;
 
                 /* adjust to expected, remove duplicate */
@@ -5039,11 +5892,23 @@ static int AdjustSequence(TcpInfo* tcpInfo, SnifferSession* session,
                                  newEnd - reassemblyList->end, session, error);
                 }
             }
-            else {
-                /* DUP overlap, allow */
-                if (*sslBytes > 0) {
-                    skipPartial = 0; /* do not reset sslBytes */
+            else if (*sslBytes > 0) {
+                if (real + *sslBytes - 1 > *seqLast) {
+                    /* fix segment overlap */
+                #ifdef DEBUG_SNIFFER
+                    WOLFSSL* ssl = (session->flags.side == WOLFSSL_SERVER_END) ?
+                                    session->sslServer : session->sslClient;
+                    printf("\tSegment %d overlap (%d -> %d)\n",
+                        *sslBytes,
+                        ssl->buffers.inputBuffer.length - overlap,
+                        ssl->buffers.inputBuffer.length + *sslBytes - overlap - 1);
+                #endif
+                    *sslBytes -= overlap;
+                    *sslFrame += overlap;
                 }
+
+                /* DUP overlap, allow */
+                skipPartial = 0; /* do not reset sslBytes */
             }
             ret = 0;
         }
@@ -5052,8 +5917,13 @@ static int AdjustSequence(TcpInfo* tcpInfo, SnifferSession* session,
              * possible spurious retransmission. */
             if (*sslBytes > 0) {
                 /* If packet has data attempt to process packet, if hasn't
-                 * already been ack'd during handshake */
-                if (FindPrevAck(session, real)) {
+                 * already been received */
+                if (
+                #ifdef WOLFSSL_ASYNC_CRYPT
+                    session->sslServer->error != WC_NO_ERR_TRACE(WC_PENDING_E) &&
+                    session->pendSeq != tcpInfo->sequence &&
+                #endif
+                    real + *sslBytes -1 <= *seqLast) {
                     Trace(DUPLICATE_STR);
                     ret = 1;
                 }
@@ -5125,7 +5995,7 @@ static int AdjustSequence(TcpInfo* tcpInfo, SnifferSession* session,
             *expected += 1;
     }
     if (*sslBytes > 0) {
-        AddAck(session, real);
+        *seqLast = real + *sslBytes - 1;
     }
     if (*sslBytes > 0 && skipPartial) {
         *sslBytes = 0;
@@ -5172,7 +6042,7 @@ static int FindNextRecordInAssembly(SnifferSession* session,
             if ( *sslBytes > (int)ssl->buffers.inputBuffer.bufferSize) {
                 if (GrowInputBuffer(ssl, *sslBytes, 0) < 0) {
                     SetError(MEMORY_STR, error, session, FATAL_ERROR_STATE);
-                    return -1;
+                    return WOLFSSL_FATAL_ERROR;
                 }
             }
 
@@ -5193,13 +6063,13 @@ static int FindNextRecordInAssembly(SnifferSession* session,
             int ivPos = (int)(curr->end - curr->begin -
                                                      ssl->specs.block_size + 1);
             if (ssl->specs.bulk_cipher_algorithm == wolfssl_aes) {
-#ifdef BUILD_AES
+#ifndef NO_AES
                 if (ivPos >= 0)
                     wc_AesSetIV(ssl->decrypt.aes, curr->data + ivPos);
 #endif
             }
             else if (ssl->specs.bulk_cipher_algorithm == wolfssl_triple_des) {
-#ifdef BUILD_DES3
+#ifndef NO_DES3
                 if (ivPos >= 0)
                     wc_Des3_SetIV(ssl->decrypt.des3, curr->data + ivPos);
 #endif
@@ -5264,7 +6134,7 @@ static int CheckAck(TcpInfo* tcpInfo, SnifferSession* session)
         TraceAck(real, expected);
 
         if (real > expected)
-            return -1;  /* we missed a packet, ACKing data we never saw */
+            return WOLFSSL_FATAL_ERROR;  /* we missed a packet, ACKing data we never saw */
     }
     return 0;
 }
@@ -5280,6 +6150,17 @@ static int CheckSequence(IpInfo* ipInfo, TcpInfo* tcpInfo,
     byte* ackFault = (session->flags.side == WOLFSSL_SERVER_END) ?
                         &session->flags.cliAckFault :
                         &session->flags.srvAckFault;
+
+#ifdef WOLFSSL_ASYNC_CRYPT
+    if (session->sslServer->error == 0 && session->pendSeq != 0 &&
+        session->pendSeq == tcpInfo->sequence) {
+        return 0; /* ready to process, but skip sequence checking below (already done) */
+    }
+    /* check if this session is pending */
+    else if (session->pendSeq != 0 && session->pendSeq != tcpInfo->sequence) {
+        return WC_PENDING_E;
+    }
+#endif
 
     /* init SEQ from server to client - if not ack fault */
     if (tcpInfo->syn && tcpInfo->ack && !*ackFault) {
@@ -5298,15 +6179,19 @@ static int CheckSequence(IpInfo* ipInfo, TcpInfo* tcpInfo,
     TraceSequence(tcpInfo->sequence, *sslBytes);
     if (CheckAck(tcpInfo, session) < 0) {
         if (!RecoveryEnabled) {
+        #ifndef WOLFSSL_SNIFFER_NO_RECOVERY
             UpdateMissedDataSessions();
+        #endif
             SetError(ACK_MISSED_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         else {
             SetError(ACK_MISSED_STR, error, session, 0);
             if (*ackFault == 0) {
                 *ackFault = 1;
+            #ifndef WOLFSSL_SNIFFER_NO_RECOVERY
                 UpdateMissedDataSessions();
+            #endif
             }
             return FixSequence(tcpInfo, session);
         }
@@ -5324,40 +6209,57 @@ static int CheckSequence(IpInfo* ipInfo, TcpInfo* tcpInfo,
 /* Check Status before record processing */
 /* returns 0 on success (continue), -1 on error, 1 on success (end) */
 static int CheckPreRecord(IpInfo* ipInfo, TcpInfo* tcpInfo,
-                          const byte** sslFrame, SnifferSession** session,
-                          int* sslBytes, const byte** end,
-                          void* vChain, word32 chainSz, char* error)
+                          const byte** sslFrame, SnifferSession** pSession,
+                          int* sslBytes, const byte** end, char* error)
 {
     word32 length;
-    WOLFSSL* ssl = ((*session)->flags.side == WOLFSSL_SERVER_END) ?
-                                  (*session)->sslServer : (*session)->sslClient;
-    byte skipPartial = ((*session)->flags.side == WOLFSSL_SERVER_END) ?
-                        (*session)->flags.srvSkipPartial :
-                        (*session)->flags.cliSkipPartial;
+    SnifferSession* session = *pSession;
+    WOLFSSL* ssl = (session->flags.side == WOLFSSL_SERVER_END) ?
+                                  session->sslServer : session->sslClient;
+    byte skipPartial = (session->flags.side == WOLFSSL_SERVER_END) ?
+                        session->flags.srvSkipPartial :
+                        session->flags.cliSkipPartial;
+
+#ifdef WOLFSSL_ASYNC_CRYPT
+    /* if this is a pending async packet do not "grow" on partial (we already did) */
+    if (session->pendSeq == tcpInfo->sequence) {
+        if (session->sslServer->error == WC_NO_ERR_TRACE(WC_PENDING_E)) {
+            return 0; /* don't check pre-record again */
+        }
+        /* if record check already done then restore, otherwise process normal */
+        if (ssl->buffers.inputBuffer.length > 0) {
+            *sslBytes = ssl->buffers.inputBuffer.length;
+            *sslFrame = ssl->buffers.inputBuffer.buffer;
+            *end = *sslFrame + *sslBytes;
+            return 0;
+        }
+    }
+#endif
+
     /* remove SnifferSession on 2nd FIN or RST */
     if (tcpInfo->fin || tcpInfo->rst) {
         /* flag FIN and RST */
         if (tcpInfo->fin)
-            (*session)->flags.finCount += 1;
+            session->flags.finCount += 1;
         else if (tcpInfo->rst)
-            (*session)->flags.finCount += 2;
+            session->flags.finCount += 2;
 
-        if ((*session)->flags.finCount >= 2) {
-            RemoveSession(*session, ipInfo, tcpInfo, 0);
-            *session = NULL;
+        if (session->flags.finCount >= 2) {
+            RemoveSession(session, ipInfo, tcpInfo, 0);
+            *pSession = NULL;
             return 1;
         }
     }
 
-    if ((*session)->flags.fatalError == FATAL_ERROR_STATE) {
+    if (session->flags.fatalError == FATAL_ERROR_STATE) {
         SetError(FATAL_ERROR_STR, error, NULL, 0);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     if (skipPartial) {
-        if (FindNextRecordInAssembly(*session,
+        if (FindNextRecordInAssembly(session,
                                      sslFrame, sslBytes, end, error) < 0) {
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
     }
 
@@ -5374,70 +6276,28 @@ static int CheckPreRecord(IpInfo* ipInfo, TcpInfo* tcpInfo,
 
         if ( (*sslBytes + length) > ssl->buffers.inputBuffer.bufferSize) {
             if (GrowInputBuffer(ssl, *sslBytes, length) < 0) {
-                SetError(MEMORY_STR, error, *session, FATAL_ERROR_STATE);
-                return -1;
+                SetError(MEMORY_STR, error, session, FATAL_ERROR_STATE);
+                return WOLFSSL_FATAL_ERROR;
             }
         }
-        if (vChain == NULL) {
-            XMEMCPY(&ssl->buffers.inputBuffer.buffer[length],
-                    *sslFrame, *sslBytes);
-            *sslBytes += length;
-            ssl->buffers.inputBuffer.length = *sslBytes;
-            *sslFrame = ssl->buffers.inputBuffer.buffer;
-            *end = *sslFrame + *sslBytes;
-        }
-
-        if (vChain != NULL) {
-    #ifdef WOLFSSL_SNIFFER_CHAIN_INPUT
-            struct iovec* chain = (struct iovec*)vChain;
-            word32 i, offset, headerSz, qty, remainder;
-
-            Trace(CHAIN_INPUT_STR);
-            headerSz = (word32)((const byte*)*sslFrame - (const byte*)chain[0].iov_base);
-            remainder = *sslBytes;
-
-            if ( (*sslBytes + length) > ssl->buffers.inputBuffer.bufferSize) {
-                if (GrowInputBuffer(ssl, *sslBytes, length) < 0) {
-                    SetError(MEMORY_STR, error, *session, FATAL_ERROR_STATE);
-                    return -1;
-                }
-            }
-
-            qty = min(*sslBytes, (word32)chain[0].iov_len - headerSz);
-            XMEMCPY(&ssl->buffers.inputBuffer.buffer[length],
-                (byte*)chain[0].iov_base + headerSz, qty);
-            offset = length;
-            for (i = 1; i < chainSz; i++) {
-                offset += qty;
-                remainder -= qty;
-
-                if (chain[i].iov_len > remainder)
-                    qty = remainder;
-                else
-                    qty = (word32)chain[i].iov_len;
-                XMEMCPY(ssl->buffers.inputBuffer.buffer + offset,
-                        chain[i].iov_base, qty);
-            }
-
-            *sslBytes += length;
-            ssl->buffers.inputBuffer.length = *sslBytes;
-            *sslFrame = ssl->buffers.inputBuffer.buffer;
-            *end = *sslFrame + *sslBytes;
-    #endif
-            (void)chainSz;
-        }
+        XMEMCPY(&ssl->buffers.inputBuffer.buffer[length],
+                *sslFrame, *sslBytes);
+        *sslBytes += length;
+        ssl->buffers.inputBuffer.length = *sslBytes;
+        *sslFrame = ssl->buffers.inputBuffer.buffer;
+        *end = *sslFrame + *sslBytes;
     }
 
-    if ((*session)->flags.clientHello == 0 && **sslFrame != handshake) {
+    if (session->flags.clientHello == 0 && **sslFrame != handshake) {
         /* Sanity check the packet for an old style client hello. */
         int rhSize = (((*sslFrame)[0] & 0x7f) << 8) | ((*sslFrame)[1]);
 
         if ((rhSize <= (*sslBytes - 2)) &&
             (*sslFrame)[2] == OLD_HELLO_ID && (*sslFrame)[3] == SSLv3_MAJOR) {
 #ifdef OLD_HELLO_ALLOWED
-        int ret = DoOldHello(*session, *sslFrame, &rhSize, sslBytes, error);
+        int ret = DoOldHello(session, *sslFrame, &rhSize, sslBytes, error);
         if (ret < 0)
-            return -1;  /* error already set */
+            return WOLFSSL_FATAL_ERROR;  /* error already set */
         if (*sslBytes <= 0)
             return 1;
 #endif
@@ -5534,7 +6394,7 @@ static int ProcessMessage(const byte* sslFrame, SnifferSession* session,
     const byte*       recordEnd;   /* end of record indicator */
     const byte*       inRecordEnd; /* indicator from input stream not decrypt */
     RecordLayerHeader rh;
-    int               rhSize = 0;
+    int               rhSize;
     int               ret;
     int               errCode = 0;
     int               decoded = 0;      /* bytes stored for user in data */
@@ -5543,10 +6403,12 @@ static int ProcessMessage(const byte* sslFrame, SnifferSession* session,
     WOLFSSL*          ssl = (session->flags.side == WOLFSSL_SERVER_END) ?
                             session->sslServer : session->sslClient;
 doMessage:
+
     notEnough = 0;
+    rhSize = 0;
     if (sslBytes < 0) {
         SetError(PACKET_HDR_SHORT_STR, error, session, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
     if (sslBytes >= RECORD_HEADER_SZ) {
         if (GetRecordHeader(sslFrame, &rh, &rhSize) != 0) {
@@ -5555,8 +6417,9 @@ doMessage:
             return 0;
         }
     }
-    else
+    else {
         notEnough = 1;
+    }
 
     if (notEnough || rhSize > (sslBytes - RECORD_HEADER_SZ)) {
         /* don't have enough input yet to process full SSL record */
@@ -5567,7 +6430,7 @@ doMessage:
             if (sslBytes > (int)ssl->buffers.inputBuffer.bufferSize) {
                 if (GrowInputBuffer(ssl, sslBytes, 0) < 0) {
                     SetError(MEMORY_STR, error, session, FATAL_ERROR_STATE);
-                    return -1;
+                    return WOLFSSL_FATAL_ERROR;
                 }
             }
             XMEMMOVE(ssl->buffers.inputBuffer.buffer, sslFrame, sslBytes);
@@ -5583,7 +6446,7 @@ doMessage:
     inRecordEnd = recordEnd;
 
     /* Make sure cipher is on for client, if we get an application data packet
-     * and handhsake is done for server. This workaround is required if client
+     * and handshake is done for server. This workaround is required if client
      * handshake packets were missed, retransmitted or sent out of order. */
     if ((enum ContentType)rh.type == application_data &&
                   ssl->options.handShakeDone && session->flags.serverCipherOn) {
@@ -5605,11 +6468,11 @@ doMessage:
         }
         if (ssl->decrypt.setup != 1) {
             SetError(DECRYPT_KEYS_NOT_SETUP, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
         if (CheckAvailableSize(ssl, rhSize) < 0) {
             SetError(MEMORY_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
         }
 
         sslFrame = DecryptMessage(ssl, sslFrame, rhSize,
@@ -5633,7 +6496,7 @@ doMessage:
         if (errCode != 0) {
             if ((enum ContentType)rh.type == application_data) {
                 SetError(BAD_DECRYPT, error, session, FATAL_ERROR_STATE);
-                return -1;
+                return WOLFSSL_FATAL_ERROR;
             }
             /* do not end session for failures on handshake packets */
             return 0;
@@ -5650,11 +6513,15 @@ doPart:
 
                 Trace(GOT_HANDSHAKE_STR);
                 ret = DoHandShake(sslFrame, &sslBytes, session, error, rhSize);
+            #ifdef WOLFSSL_ASYNC_CRYPT
+                if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
+                    return ret;
+            #endif
                 if (ret != 0 || sslBytes > startIdx) {
                     if (session->flags.fatalError == 0)
                         SetError(BAD_HANDSHAKE_STR, error, session,
                                  FATAL_ERROR_STATE);
-                    return -1;
+                    return WOLFSSL_FATAL_ERROR;
                 }
 
                 /* DoHandShake now fully decrements sslBytes to remaining */
@@ -5690,12 +6557,33 @@ doPart:
             Trace(GOT_APP_DATA_STR);
             {
                 word32 inOutIdx = 0;
+                int    ivExtra  = 0;
 
                 ret = DoApplicationData(ssl, (byte*)sslFrame, &inOutIdx, SNIFF);
                 if (ret == 0) {
                     ret = ssl->buffers.clearOutputBuffer.length;
+                #ifndef WOLFSSL_AEAD_ONLY
+                    if (ssl->specs.cipher_type == block) {
+                        if (ssl->options.tls1_1)
+                            ivExtra = ssl->specs.block_size;
+                    }
+                    else
+                #endif
+                    if (ssl->specs.cipher_type == aead) {
+                        if (!ssl->options.tls1_3 &&
+                            ssl->specs.bulk_cipher_algorithm != wolfssl_chacha)
+                            ivExtra = AESGCM_EXP_IV_SZ;
+                    }
+
+                    ret -= ivExtra;
+
+                #if defined(HAVE_ENCRYPT_THEN_MAC) && \
+                    !defined(WOLFSSL_AEAD_ONLY)
+                    if (ssl->options.startedETMRead)
+                        ret -= MacSize(ssl);
+                #endif
                     TraceGotData(ret);
-                    if (ret) {  /* may be blank message */
+                    if (ret > 0) {  /* may be blank message */
                         if (data != NULL) {
                             byte* tmpData;  /* don't leak on realloc free */
                             /* add an extra byte at end of allocation in case
@@ -5708,7 +6596,7 @@ doPart:
                                 *data = NULL;
                                 SetError(MEMORY_STR, error, session,
                                          FATAL_ERROR_STATE);
-                                return -1;
+                                return WOLFSSL_FATAL_ERROR;
                             }
                             *data = tmpData;
                             XMEMCPY(*data + decoded,
@@ -5728,7 +6616,7 @@ doPart:
                                     stored = StoreDataCb(buf, bufSz, offset,
                                             ctx);
                                     if (stored <= 0) {
-                                        return -1;
+                                        return WOLFSSL_FATAL_ERROR;
                                     }
                                     offset += stored;
                                 } while (offset < bufSz);
@@ -5736,24 +6624,34 @@ doPart:
                             else {
                                 SetError(STORE_DATA_CB_MISSING_STR, error,
                                         session, FATAL_ERROR_STATE);
-                                return -1;
+                                return WOLFSSL_FATAL_ERROR;
                             }
 #else
                             (void)ctx;
                             SetError(NO_DATA_DEST_STR, error, session,
                                     FATAL_ERROR_STATE);
-                            return -1;
+                            return WOLFSSL_FATAL_ERROR;
 #endif
                         }
                         TraceAddedData(ret, decoded);
                         decoded += ret;
                         ssl->buffers.clearOutputBuffer.length = 0;
                     }
+                    else if (ret < 0){
+                    #ifdef DEBUG_SNIFFER
+                        printf("Invalid data offset calculation! "
+                            "ret %d, inOutIdx %d, ivExtra %d\n",
+                            ret, inOutIdx, ivExtra);
+                    #endif
+                        /* set error, but do not treat fatal */
+                        SetError(BAD_APP_DATA_STR, error, session, 0);
+                        return WOLFSSL_FATAL_ERROR;
+                    }
                 }
                 else {
                     /* set error, but do not treat fatal */
-                    SetError(BAD_APP_DATA_STR, error,session, 0);
-                    return -1;
+                    SetError(BAD_APP_DATA_STR, error, session, 0);
+                    return WOLFSSL_FATAL_ERROR;
                 }
                 if (ssl->buffers.outputBuffer.dynamicFlag)
                     ShrinkOutputBuffer(ssl);
@@ -5770,14 +6668,20 @@ doPart:
             sslFrame += rhSize;
             sslBytes -= rhSize;
             break;
+#ifdef WOLFSSL_DTLS13
+        case ack:
+            /* TODO */
+#endif /* WOLFSSL_DTLS13 */
+        case dtls12_cid:
         case no_type:
         default:
             SetError(GOT_UNKNOWN_RECORD_STR, error, session, FATAL_ERROR_STATE);
-            return -1;
+            return WOLFSSL_FATAL_ERROR;
     }
 
-    /* do we have another msg in record ? */
-    if (sslFrame < recordEnd) {
+    /* do we have another msg in record (if app data did we decode bytes?) */
+    if (sslFrame < recordEnd && ((enum ContentType)rh.type != application_data ||
+        ((enum ContentType)rh.type == application_data && decoded))) {
         Trace(ANOTHER_MSG_STR);
         goto doPart;
     }
@@ -5845,54 +6749,115 @@ static int RemoveFatalSession(IpInfo* ipInfo, TcpInfo* tcpInfo,
                               SnifferSession* session, char* error)
 {
     if (session && session->flags.fatalError == FATAL_ERROR_STATE) {
+        if (!session->verboseErr) {
+            SetError(FATAL_ERROR_STR, error, NULL, 0);
+        }
         RemoveSession(session, ipInfo, tcpInfo, 0);
-        SetError(FATAL_ERROR_STR, error, NULL, 0);
         return 1;
     }
     return 0;
 }
 
+int ssl_DecodePacket_GetStream(SnifferStreamInfo* info, const byte* packet,
+        int length, char* error )
+{
+    TcpInfo           tcpInfo;
+    IpInfo            ipInfo;
+    const byte*       sslFrame = NULL;
+    int               sslBytes = 0;
+
+    XMEMSET(&tcpInfo, 0, sizeof(tcpInfo));
+    XMEMSET(&ipInfo, 0, sizeof(ipInfo));
+
+    if (CheckHeaders(&ipInfo, &tcpInfo, packet, length, &sslFrame, &sslBytes,
+            error, 0, 0) != 0) {
+        return WOLFSSL_SNIFFER_ERROR;
+    }
+
+    info->src     = ipInfo.src;
+    info->dst     = ipInfo.dst;
+    info->srcPort = tcpInfo.srcPort;
+    info->dstPort = tcpInfo.dstPort;
+
+    return 0;
+}
 
 /* Passes in an IP/TCP packet for decoding (ethernet/localhost frame) removed */
 /* returns Number of bytes on success, 0 for no data yet, and
  * WOLFSSL_SNIFFER_ERROR on error and WOLFSSL_SNIFFER_FATAL_ERROR on fatal state
  * error
  */
-static int ssl_DecodePacketInternal(const byte* packet, int length,
-                                    void* vChain, word32 chainSz,
+static int ssl_DecodePacketInternal(const byte* packet, int length, int isChain,
                                     byte** data, SSLInfo* sslInfo,
-                                    void* ctx, char* error)
+                                    void* ctx, char* error, int asyncOkay)
 {
     TcpInfo           tcpInfo;
     IpInfo            ipInfo;
+    byte*             tmpPacket = NULL;        /* Assemble the chain */
     const byte*       sslFrame;
     const byte*       end;
     int               sslBytes;                /* ssl bytes unconsumed */
     int               ret;
-    SnifferSession*   session = 0;
+    SnifferSession*   session = NULL;
 
+    if (isChain) {
 #ifdef WOLFSSL_SNIFFER_CHAIN_INPUT
-    if (packet == NULL && vChain != NULL) {
-        struct iovec* chain = (struct iovec*)vChain;
+        struct iovec* chain;
         word32 i;
+        size_t totalLength;
+
+        word32 chainSz = (word32)length;
+
+        chain = (struct iovec*)packet;
+        totalLength = 0;
+        for (i = 0; i < chainSz; i++) {
+            size_t prev = totalLength;
+            totalLength += chain[i].iov_len;
+            if (totalLength < prev || totalLength > (size_t)INT_MAX) {
+                SetError(BAD_INPUT_STR, error, session, FATAL_ERROR_STATE);
+                return WOLFSSL_SNIFFER_ERROR;
+            }
+        }
+        length = (int)totalLength;
+
+        tmpPacket = (byte*)XMALLOC(length, NULL, DYNAMIC_TYPE_SNIFFER_CHAIN_BUFFER);
+        if (tmpPacket == NULL) return MEMORY_E;
 
         length = 0;
-        for (i = 0; i < chainSz; i++)
-            length += chain[i].iov_len;
-        packet = (const byte*)chain[0].iov_base;
-    }
+        for (i = 0; i < chainSz; i++) {
+            XMEMCPY(tmpPacket+length,chain[i].iov_base,chain[i].iov_len);
+            length += (int)chain[i].iov_len;
+        }
+        packet = (const byte*)tmpPacket;
+#else
+        SetError(BAD_INPUT_STR, error, session, FATAL_ERROR_STATE);
+        return WOLFSSL_SNIFFER_ERROR;
 #endif
+    }
 
     if (CheckHeaders(&ipInfo, &tcpInfo, packet, length, &sslFrame, &sslBytes,
-                     error) != 0)
-        return WOLFSSL_SNIFFER_ERROR;
+                     error, 1, 1) != 0) {
+        ret = WOLFSSL_SNIFFER_ERROR;
+        goto exit_decode;
+    }
 
     end = sslFrame + sslBytes;
 
     ret = CheckSession(&ipInfo, &tcpInfo, sslBytes, &session, error);
-    if (RemoveFatalSession(&ipInfo, &tcpInfo, session, error))
-        return WOLFSSL_SNIFFER_FATAL_ERROR;
-    else if (ret == -1) return WOLFSSL_SNIFFER_ERROR;
+    if (RemoveFatalSession(&ipInfo, &tcpInfo, session, error)) {
+        ret = WOLFSSL_SNIFFER_FATAL_ERROR;
+        goto exit_decode;
+    }
+#ifdef WOLFSSL_ASYNC_CRYPT
+    else if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
+        ret = WC_PENDING_E;
+        goto exit_decode;
+    }
+#endif
+    else if (ret == -1) {
+        ret = WOLFSSL_SNIFFER_ERROR;
+        goto exit_decode;
+    }
     else if (ret ==  1) {
 #ifdef WOLFSSL_SNIFFER_STATS
         if (sslBytes > 0) {
@@ -5901,53 +6866,122 @@ static int ssl_DecodePacketInternal(const byte* packet, int length,
             NOLOCK_ADD_TO_STAT(SnifferStats.sslEncryptedBytes, sslBytes);
             UNLOCK_STAT();
         }
-        else
+        else {
             INC_STAT(SnifferStats.sslDecryptedPackets);
+        }
 #endif
-         return  0;   /* done for now */
+        ret = 0;
+        goto exit_decode; /* done for now */
     }
 
+#ifdef WOLFSSL_ASYNC_CRYPT
+    session->userCtx = ctx;
+#endif
+
     ret = CheckSequence(&ipInfo, &tcpInfo, session, &sslBytes, &sslFrame,error);
-    if (RemoveFatalSession(&ipInfo, &tcpInfo, session, error))
-        return WOLFSSL_SNIFFER_FATAL_ERROR;
-    else if (ret == -1) return WOLFSSL_SNIFFER_ERROR;
+    if (RemoveFatalSession(&ipInfo, &tcpInfo, session, error)) {
+        ret = WOLFSSL_SNIFFER_FATAL_ERROR;
+        goto exit_decode;
+    }
+    else if (ret == -1) {
+        ret = WOLFSSL_SNIFFER_ERROR;
+        goto exit_decode;
+    }
     else if (ret ==  1) {
 #ifdef WOLFSSL_SNIFFER_STATS
         INC_STAT(SnifferStats.sslDecryptedPackets);
 #endif
-        return  0;   /* done for now */
+        ret = 0;
+        goto exit_decode; /* done for now */
+    }
+    else if (ret != 0) {
+        goto exit_decode; /* return specific error case */
     }
 
     ret = CheckPreRecord(&ipInfo, &tcpInfo, &sslFrame, &session, &sslBytes,
-                         &end, vChain, chainSz, error);
-    if (RemoveFatalSession(&ipInfo, &tcpInfo, session, error))
-        return WOLFSSL_SNIFFER_FATAL_ERROR;
-    else if (ret == -1) return WOLFSSL_SNIFFER_ERROR;
+                         &end, error);
+    if (RemoveFatalSession(&ipInfo, &tcpInfo, session, error)) {
+        ret = WOLFSSL_SNIFFER_FATAL_ERROR;
+        goto exit_decode;
+    }
+    else if (ret == -1) {
+        ret = WOLFSSL_SNIFFER_ERROR;
+        goto exit_decode;
+    }
     else if (ret ==  1) {
 #ifdef WOLFSSL_SNIFFER_STATS
         INC_STAT(SnifferStats.sslDecryptedPackets);
 #endif
-        return  0;   /* done for now */
+        ret = 0;
+        goto exit_decode; /* done for now */
     }
 
-#ifdef WOLFSSL_SNIFFER_STATS
-    if (sslBytes > 0) {
-        LOCK_STAT();
-        NOLOCK_INC_STAT(SnifferStats.sslEncryptedPackets);
-        NOLOCK_ADD_TO_STAT(SnifferStats.sslEncryptedBytes, sslBytes);
-        UNLOCK_STAT();
+#ifdef WOLFSSL_ASYNC_CRYPT
+    /* make sure this server was polled */
+    if (asyncOkay &&
+        session->sslServer->error == WC_NO_ERR_TRACE(WC_PENDING_E) &&
+        !session->flags.wasPolled) {
+        ret = WC_PENDING_E;
+        goto exit_decode;
     }
-    else
-        INC_STAT(SnifferStats.sslDecryptedPackets);
 #endif
 
-    ret = ProcessMessage(sslFrame, session, sslBytes, data, end, ctx, error);
-    if (RemoveFatalSession(&ipInfo, &tcpInfo, session, error))
-        return WOLFSSL_SNIFFER_FATAL_ERROR;
+#ifdef WOLFSSL_SNIFFER_STATS
+    #ifdef WOLFSSL_ASYNC_CRYPT
+    if (session->sslServer->error != WC_NO_ERR_TRACE(WC_PENDING_E))
+    #endif
+    {
+        if (sslBytes > 0) {
+            LOCK_STAT();
+            NOLOCK_INC_STAT(SnifferStats.sslEncryptedPackets);
+            NOLOCK_ADD_TO_STAT(SnifferStats.sslEncryptedBytes, sslBytes);
+            UNLOCK_STAT();
+        }
+        else {
+            INC_STAT(SnifferStats.sslDecryptedPackets);
+        }
+    }
+#endif
+
+#ifdef WOLFSSL_ASYNC_CRYPT
+    do {
+#endif
+        ret = ProcessMessage(sslFrame, session, sslBytes, data, end, ctx, error);
+        session->sslServer->error = ret;
+#ifdef WOLFSSL_ASYNC_CRYPT
+        /* capture the seq pending for this session */
+        if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
+            session->flags.wasPolled = 0;
+            session->pendSeq = tcpInfo.sequence;
+            if (!asyncOkay || CryptoDeviceId == INVALID_DEVID) {
+                /* If devId has not been set then we need to block here by
+                 * polling and looping */
+                wolfSSL_AsyncPoll(session->sslServer, WOLF_POLL_FLAG_CHECK_HW);
+            }
+            else {
+                goto exit_decode; /* return to caller */
+            }
+        }
+        else {
+            session->pendSeq = 0;
+        }
+    } while (ret == WC_NO_ERR_TRACE(WC_PENDING_E));
+#else
+    (void)asyncOkay;
+#endif
+
+    if (RemoveFatalSession(&ipInfo, &tcpInfo, session, error)) {
+        ret = WOLFSSL_SNIFFER_FATAL_ERROR;
+        goto exit_decode;
+    }
     if (CheckFinCapture(&ipInfo, &tcpInfo, session) == 0) {
         CopySessionInfo(session, sslInfo);
     }
 
+exit_decode:
+    if (isChain) {
+        XFREE(tmpPacket, NULL, DYNAMIC_TYPE_SNIFFER_CHAIN_BUFFER);
+    }
     return ret;
 }
 
@@ -5959,8 +6993,8 @@ static int ssl_DecodePacketInternal(const byte* packet, int length,
 int ssl_DecodePacketWithSessionInfo(const unsigned char* packet, int length,
     unsigned char** data, SSLInfo* sslInfo, char* error)
 {
-    return ssl_DecodePacketInternal(packet, length, NULL, 0, data, sslInfo,
-            NULL, error);
+    return ssl_DecodePacketInternal(packet, length, 0, data, sslInfo,
+            NULL, error, 0);
 }
 
 
@@ -5969,8 +7003,8 @@ int ssl_DecodePacketWithSessionInfo(const unsigned char* packet, int length,
  * on error and WOLFSSL_SNIFFER_FATAL_ERROR on fatal state error */
 int ssl_DecodePacket(const byte* packet, int length, byte** data, char* error)
 {
-    return ssl_DecodePacketInternal(packet, length, NULL, 0, data, NULL, NULL,
-            error);
+    return ssl_DecodePacketInternal(packet, length, 0, data, NULL, NULL,
+            error, 0);
 }
 
 
@@ -5981,8 +7015,8 @@ int ssl_DecodePacket(const byte* packet, int length, byte** data, char* error)
 int ssl_DecodePacketWithSessionInfoStoreData(const unsigned char* packet,
         int length, void* ctx, SSLInfo* sslInfo, char* error)
 {
-    return ssl_DecodePacketInternal(packet, length, NULL, 0, NULL, sslInfo,
-            ctx, error);
+    return ssl_DecodePacketInternal(packet, length, 0, NULL, sslInfo,
+            ctx, error, 0);
 }
 
 #endif
@@ -5995,8 +7029,8 @@ int ssl_DecodePacketWithSessionInfoStoreData(const unsigned char* packet,
 int ssl_DecodePacketWithChain(void* vChain, word32 chainSz, byte** data,
         char* error)
 {
-    return ssl_DecodePacketInternal(NULL, 0, vChain, chainSz, data, NULL, NULL,
-            error);
+    return ssl_DecodePacketInternal((const byte*)vChain, chainSz, 1, data,
+        NULL, NULL, error, 0);
 }
 
 #endif
@@ -6012,8 +7046,8 @@ int ssl_DecodePacketWithChain(void* vChain, word32 chainSz, byte** data,
 int ssl_DecodePacketWithChainSessionInfoStoreData(void* vChain, word32 chainSz,
         void* ctx, SSLInfo* sslInfo, char* error)
 {
-    return ssl_DecodePacketInternal(NULL, 0, vChain, chainSz, NULL, sslInfo,
-            ctx, error);
+    return ssl_DecodePacketInternal(vChain, chainSz, 1, NULL, sslInfo,
+            ctx, error, 0);
 }
 
 #endif
@@ -6034,7 +7068,7 @@ int ssl_FreeZeroDecodeBuffer(byte** data, int sz, char* error)
     (void)error;
 
     if (sz < 0) {
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     if (data != NULL) {
@@ -6054,11 +7088,15 @@ int ssl_Trace(const char* traceFile, char* error)
     if (traceFile) {
         /* Don't try to reopen the file */
         if (TraceFile == NULL) {
-            TraceFile = XFOPEN(traceFile, "a");
-            if (!TraceFile) {
-                SetError(BAD_TRACE_FILE_STR, error, NULL, 0);
-                return -1;
-             }
+            if (XSTRCMP(traceFile, "-") == 0) {
+                TraceFile = stdout;
+            } else {
+                TraceFile = XFOPEN(traceFile, "a");
+                if (!TraceFile) {
+                    SetError(BAD_TRACE_FILE_STR, error, NULL, 0);
+                    return WOLFSSL_FATAL_ERROR;
+                }
+            }
             TraceOn = 1;
         }
     }
@@ -6096,9 +7134,11 @@ int ssl_GetSessionStats(unsigned int* active,     unsigned int* total,
     int ret;
 
     if (missedData) {
+    #ifndef WOLFSSL_SNIFFER_NO_RECOVERY
         wc_LockMutex(&RecoveryMutex);
         *missedData = MissedDataSessions;
         wc_UnLockMutex(&RecoveryMutex);
+    #endif
     }
 
     if (reassemblyMem) {
@@ -6106,7 +7146,8 @@ int ssl_GetSessionStats(unsigned int* active,     unsigned int* total,
         int i;
 
         *reassemblyMem = 0;
-        wc_LockMutex(&SessionMutex);
+        LOCK_SESSION();
+
         for (i = 0; i < HASH_SIZE; i++) {
             session = SessionTable[i];
             while (session) {
@@ -6115,7 +7156,7 @@ int ssl_GetSessionStats(unsigned int* active,     unsigned int* total,
                 session = session->next;
             }
         }
-        wc_UnLockMutex(&SessionMutex);
+        UNLOCK_SESSION();
     }
 
     ret = wolfSSL_get_session_stats(active, total, peak, maxSessions);
@@ -6124,7 +7165,7 @@ int ssl_GetSessionStats(unsigned int* active,     unsigned int* total,
         return 0;
     else {
         SetError(BAD_SESSION_STATS, error, NULL, 0);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 }
 
@@ -6165,7 +7206,7 @@ int ssl_ResetStatistics(void)
 int ssl_ReadStatistics(SSLStats* stats)
 {
     if (stats == NULL)
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
 
     LOCK_STAT();
     XMEMCPY(stats, &SnifferStats, sizeof(SSLStats));
@@ -6179,7 +7220,7 @@ int ssl_ReadStatistics(SSLStats* stats)
 int ssl_ReadResetStatistics(SSLStats* stats)
 {
     if (stats == NULL)
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
 
     LOCK_STAT();
     XMEMCPY(stats, &SnifferStats, sizeof(SSLStats));
@@ -6225,10 +7266,10 @@ int ssl_SetWatchKey_buffer(void* vSniffer, const byte* key, word32 keySz,
     int ret;
 
     if (vSniffer == NULL) {
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
     if (key == NULL || keySz == 0) {
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     sniffer = (SnifferSession*)vSniffer;
@@ -6246,7 +7287,7 @@ int ssl_SetWatchKey_buffer(void* vSniffer, const byte* key, word32 keySz,
     if (ret != 0) {
     #ifdef DEBUG_SNIFFER
         /* print warnings */
-        printf("key watch set ephemeral failed %d\n", ret);
+        fprintf(stderr, "key watch set ephemeral failed %d\n", ret);
     #endif
     }
 #endif
@@ -6257,7 +7298,7 @@ int ssl_SetWatchKey_buffer(void* vSniffer, const byte* key, word32 keySz,
 
     if (ret != WOLFSSL_SUCCESS) {
         SetError(KEY_FILE_STR, error, sniffer, FATAL_ERROR_STATE);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     return 0;
@@ -6271,10 +7312,10 @@ int ssl_SetWatchKey_file(void* vSniffer, const char* keyFile, int keyType,
     int ret;
 
     if (vSniffer == NULL) {
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
     if (keyFile == NULL) {
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     /* Remap the keyType from what the user can use to
@@ -6285,12 +7326,16 @@ int ssl_SetWatchKey_file(void* vSniffer, const char* keyFile, int keyType,
     ret = LoadKeyFile(&keyBuf, &keyBufSz, keyFile, 0, keyType, password);
     if (ret < 0) {
         SetError(KEY_FILE_STR, error, NULL, 0);
+        if (keyBuf != NULL) {
+            ForceZero(keyBuf, keyBufSz);
+        }
         XFREE(keyBuf, NULL, DYNAMIC_TYPE_X509);
-        return -1;
+        return WOLFSSL_FATAL_ERROR;
     }
 
     ret = ssl_SetWatchKey_buffer(vSniffer, keyBuf, keyBufSz, FILETYPE_DER,
             error);
+    ForceZero(keyBuf, keyBufSz);
     XFREE(keyBuf, NULL, DYNAMIC_TYPE_X509);
 
     return ret;
@@ -6318,5 +7363,658 @@ int ssl_SetKeyCallback(SSLKeyCb cb, void* cbCtx)
 }
 #endif
 
+#ifdef WOLFSSL_ASYNC_CRYPT
+
+int ssl_DecodePacketAsync(void* packet, unsigned int packetSz,
+    int isChain, unsigned char** data, char* error, SSLInfo* sslInfo,
+    void* userCtx)
+{
+    return ssl_DecodePacketInternal(packet, packetSz, isChain, data, sslInfo,
+        userCtx, error, 1);
+}
+
+static SnifferSession* FindSession(WOLFSSL* ssl)
+{
+    int i;
+    SnifferSession* session;
+    for (i = 0; i < HASH_SIZE; i++) {
+        session = SessionTable[i];
+        while (session) {
+            if (session->sslServer == ssl) {
+                return session;
+            }
+            session = session->next;
+        }
+    }
+    return NULL;
+}
+
+int ssl_PollSniffer(WOLF_EVENT** events, int maxEvents, WOLF_EVENT_FLAG flags,
+    int* pEventCount)
+{
+    int ret = 0;
+    int eventCount = 0;
+    int i;
+    SnifferServer* srv;
+
+    LOCK_SERVER_LIST();
+
+    /* Iterate the open sniffer sessions calling wolfSSL_CTX_AsyncPoll */
+    srv = ServerList;
+    while (srv) {
+        int nMax = maxEvents - eventCount, nReady = 0;
+        if (nMax <= 0) {
+            break; /* out of room in events list */
+        }
+        ret = wolfSSL_CTX_AsyncPoll(srv->ctx, events + nReady, nMax, flags,
+                                    &nReady);
+        if (ret == 0) {
+            eventCount += nReady;
+        }
+        else {
+        #ifdef DEBUG_SNIFFER
+            fprintf(stderr, "Sniffer Server %p: Poll error: %d\n", srv, ret);
+        #endif
+            break;
+        }
+        srv = srv->next;
+    }
+
+    UNLOCK_SERVER_LIST();
+
+
+    /* iterate list and mark polled */
+    LOCK_SESSION();
+    for (i=0; i<eventCount; i++) {
+        WOLFSSL* ssl = (WOLFSSL*)events[i]->context;
+        SnifferSession* session = FindSession(ssl);
+        if (session) {
+            session->flags.wasPolled = 1;
+            session->sslServer->error = events[i]->ret;
+        }
+    }
+    UNLOCK_SESSION();
+
+    *pEventCount = eventCount;
+
+    return ret;
+}
+#endif
+
+
+#if defined(WOLFSSL_SNIFFER_KEYLOGFILE)
+
+/* Maximum length of the NSS Keylog prefix string */
+#define MAX_PREFIX_LENGTH (31)
+/* Maximum length (in bytes) required to store the binary representation of
+ * the "client random" value parsed from keylog file */
+#define CLIENT_RANDOM_LENGTH (32)
+/* Maximum length (in bytes) required to store the binary representation of the
+ * "secret" value parsed from keylog file */
+#define SECRET_LENGTH (48)
+
+typedef struct SecretNode {
+    unsigned char clientRandom[CLIENT_RANDOM_LENGTH];
+    unsigned char secrets[SNIFFER_SECRET_NUM_SECRET_TYPES][SECRET_LENGTH];
+    struct SecretNode* next;
+} SecretNode;
+
+
+/* Default to the same size hash table as the session table,
+ * but allow user to override */
+#ifndef WOLFSSL_SNIFFER_KEYLOGFILE_HASH_TABLE_SIZE
+#define WOLFSSL_SNIFFER_KEYLOGFILE_HASH_TABLE_SIZE HASH_SIZE
+#endif
+
+static THREAD_LS_T
+SecretNode*
+secretHashTable[WOLFSSL_SNIFFER_KEYLOGFILE_HASH_TABLE_SIZE] = {NULL};
+#ifndef SNIFFER_LOCKLESS_TABLES
+static WC_THREADSHARED wolfSSL_Mutex secretListMutex WOLFSSL_MUTEX_INITIALIZER_CLAUSE(secretListMutex);
+#endif
+
+static unsigned int secretHashFunction(unsigned char* clientRandom);
+
+#ifdef SNIFFER_LOCKLESS_TABLES
+    #define LOCK_SECRET_LIST() WC_DO_NOTHING
+    #define UNLOCK_SECRET_LIST() WC_DO_NOTHING
+#else
+    #define LOCK_SECRET_LIST() wc_LockMutex(&secretListMutex)
+    #define UNLOCK_SECRET_LIST() wc_UnLockMutex(&secretListMutex)
+#endif
+
+
+/*
+ * Basic polynomial hash function that maps a 32-byte client random value to an
+ * array index
+ */
+static unsigned int secretHashFunction(unsigned char* clientRandom)
+{
+    int i = 0;
+    unsigned int hash = 0;
+    const int CLIENT_RANDOM_NUM_BITS = CLIENT_RANDOM_LENGTH * 8;
+
+    for (i = 0; i < CLIENT_RANDOM_LENGTH; i++) {
+        hash = (hash * CLIENT_RANDOM_NUM_BITS + clientRandom[i])
+            % WOLFSSL_SNIFFER_KEYLOGFILE_HASH_TABLE_SIZE;
+    }
+
+    return hash;
+}
+
+
+/*
+ * Adds a new secret to the secret table, creating a new node based on the
+ * client random if necessary. If the client random is already present in the
+ * list, the requested secret will be updated.
+ */
+static int addSecretNode(unsigned char* clientRandom,
+                         int type,
+                         unsigned char* secret,
+                         char* error)
+{
+    int idx = 0;
+    int ret = 0;
+    SecretNode* node = NULL;
+
+    if (type >= SNIFFER_SECRET_NUM_SECRET_TYPES) {
+        return WOLFSSL_SNIFFER_ERROR;
+    }
+
+    LOCK_SECRET_LIST();
+
+    idx = secretHashFunction(clientRandom);
+    node = secretHashTable[idx];
+
+    while(node) {
+        /* Node already exists, so just add the requested secret */
+        if (XMEMCMP(node->clientRandom, clientRandom, CLIENT_RANDOM_LENGTH)
+            == 0)
+        {
+            XMEMCPY(node->secrets[type], secret, SECRET_LENGTH);
+            ret = 0;
+            goto unlockReturn;
+        }
+        node = node ->next;
+    }
+
+    node = (SecretNode*)XMALLOC(sizeof(SecretNode),
+                                NULL,
+                                DYNAMIC_TYPE_SNIFFER_KEYLOG_NODE);
+    if (node == NULL) {
+        SetError(MEMORY_STR, error, NULL, 0);
+        ret = WOLFSSL_SNIFFER_ERROR;
+        goto unlockReturn;
+    }
+
+    XMEMCPY(node->clientRandom, clientRandom, CLIENT_RANDOM_LENGTH);
+    XMEMCPY(node->secrets[type], secret, SECRET_LENGTH);
+    node->next = secretHashTable[idx];
+    secretHashTable[idx] = node;
+
+unlockReturn:
+
+    UNLOCK_SECRET_LIST();
+
+    return ret;
+}
+
+
+/*
+ * Looks up a master secret for a given client random from the keylog file
+ */
+static unsigned char* findSecret(unsigned char* clientRandom, int type)
+{
+    unsigned char* secret = NULL;
+    SecretNode* node = NULL;
+    unsigned int idx = 0;
+
+    LOCK_SECRET_LIST();
+
+    idx = secretHashFunction(clientRandom);
+    node  = secretHashTable[idx];
+
+    while (node != NULL) {
+        if (XMEMCMP(node->clientRandom,
+                    clientRandom, CLIENT_RANDOM_LENGTH) == 0) {
+            secret = node->secrets[type];
+            break;
+        }
+        node = node->next;
+    }
+
+    UNLOCK_SECRET_LIST();
+
+    return secret;
+}
+
+
+static void hexToBin(const char* hex, unsigned char* bin, int binLength)
+{
+    int i = 0;
+    for (i = 0; i < binLength; i++) {
+        sscanf(hex + 2*i, "%02hhx", &bin[i]);
+    }
+}
+
+/*
+ * Helper function to parse secrets from the keylog file into the secret table
+ */
+static int parseKeyLogFile(const char* fileName, char* error)
+{
+    unsigned char clientRandom[CLIENT_RANDOM_LENGTH];
+    unsigned char secret[SECRET_LENGTH];
+    FILE* file = NULL;
+    int ret = 0;
+    int  type = 0;
+    /* +1 for null terminator */
+    char prefix[MAX_PREFIX_LENGTH + 1] = {0};
+    /* 2 chars for Hexadecimal representation, plus null terminator */
+    char clientRandomHex[2 * CLIENT_RANDOM_LENGTH + 1] = {0};
+    char secretHex[2 * SECRET_LENGTH + 1] = {0};
+    /* One keylog record. RFC 9850 requires line based parsing so that comment
+     * and malformed lines cannot desynchronize the fields. Sized to hold the
+     * longest valid line plus separators and terminator. */
+    char line[256];
+
+    file = fopen(fileName, "r");
+    if (file == NULL) {
+        fprintf(stderr, "Could not open keylog file: %s\n", fileName);
+        SetError(KEYLOG_FILE_INVALID, error, NULL, 0);
+        return WOLFSSL_SNIFFER_ERROR;
+    }
+
+#ifdef WOLFSSL_CHECK_MEM_ZERO
+    /* Register the secret-bearing stack buffers as high as possible (right
+     * after the last early return that bypasses the ForceZeros, i.e. the
+     * fopen failure above) so any future path that fails to clear them before
+     * scope exit is caught. Every exit path below (the in-loop error return
+     * and the normal post-loop return) ForceZeros and Checks each of them, so
+     * exactly one Add is balanced by one Check. Baseline the not-yet-written
+     * buffers so they are defined at registration time (secretHex is already
+     * zero-initialized at declaration). */
+    XMEMSET(secret, 0, sizeof(secret));
+    XMEMSET(line, 0, sizeof(line));
+    wc_MemZero_Add("parseKeyLogFile secret", secret, sizeof(secret));
+    wc_MemZero_Add("parseKeyLogFile secretHex", secretHex, sizeof(secretHex));
+    wc_MemZero_Add("parseKeyLogFile line", line, sizeof(line));
+#endif
+
+    while (fgets(line, (int)sizeof(line), file) != NULL) {
+        /* RFC 9850 Section 1: ignore empty lines and lines whose first
+         * character is the octothorpe ('#') comment marker. */
+        if (line[0] == '#' || line[0] == '\n' || line[0] == '\r' ||
+                line[0] == '\0') {
+            continue;
+        }
+
+        /* Clear the field buffers so that a short field on one line cannot
+         * pick up stale bytes left by a previous line. */
+        XMEMSET(prefix, 0, sizeof(prefix));
+        XMEMSET(clientRandomHex, 0, sizeof(clientRandomHex));
+        XMEMSET(secretHex, 0, sizeof(secretHex));
+
+        /* RFC 9850 Section 2: silently ignore lines that do not conform to the
+         * "label SP random SP secret" format so that secrets can still be
+         * recovered from a corrupted file. */
+        if (sscanf(line, "%31s %64s %96s", prefix, clientRandomHex, secretHex)
+                != 3) {
+            continue;
+        }
+
+        if (XSTRCMP(prefix, "CLIENT_RANDOM") == 0) {
+            type = SNIFFER_SECRET_TLS12_MASTER_SECRET;
+        }
+#if defined(WOLFSSL_TLS13)
+        else if (XSTRCMP(prefix, "CLIENT_EARLY_TRAFFIC_SECRET") == 0) {
+            type = SNIFFER_SECRET_CLIENT_EARLY_TRAFFIC_SECRET;
+        }
+        else if (XSTRCMP(prefix, "CLIENT_HANDSHAKE_TRAFFIC_SECRET") == 0) {
+            type = SNIFFER_SECRET_CLIENT_HANDSHAKE_TRAFFIC_SECRET;
+        }
+        else if (XSTRCMP(prefix, "SERVER_HANDSHAKE_TRAFFIC_SECRET") == 0) {
+            type = SNIFFER_SECRET_SERVER_HANDSHAKE_TRAFFIC_SECRET;
+        }
+        else if (XSTRCMP(prefix, "CLIENT_TRAFFIC_SECRET_0") == 0) {
+            type = SNIFFER_SECRET_CLIENT_TRAFFIC_SECRET;
+        }
+        else if (XSTRCMP(prefix, "SERVER_TRAFFIC_SECRET_0") == 0) {
+            type = SNIFFER_SECRET_SERVER_TRAFFIC_SECRET;
+        }
+#endif /* WOLFSSL_TLS13 */
+        else {
+            fprintf(stderr, "unrecognized prefix: %s\n", prefix);
+            continue;
+        }
+
+        /* The client random is always CLIENT_RANDOM_LENGTH bytes. Reject a
+         * line whose random field is not the exact expected length. The secret
+         * length is left variable because it depends on the negotiated hash. */
+        if (XSTRLEN(clientRandomHex) != (size_t)(2 * CLIENT_RANDOM_LENGTH)) {
+            fprintf(stderr, "malformed client random for prefix: %s\n", prefix);
+            continue;
+        }
+
+        hexToBin(clientRandomHex, clientRandom, CLIENT_RANDOM_LENGTH);
+        hexToBin(secretHex, secret, SECRET_LENGTH);
+        ret = addSecretNode(clientRandom, type, secret, error);
+
+        if (ret != 0) {
+            fclose(file);
+            ForceZero(secret, SECRET_LENGTH);
+            ForceZero(secretHex, sizeof(secretHex));
+            ForceZero(line, sizeof(line));
+        #ifdef WOLFSSL_CHECK_MEM_ZERO
+            wc_MemZero_Check(secret, sizeof(secret));
+            wc_MemZero_Check(secretHex, sizeof(secretHex));
+            wc_MemZero_Check(line, sizeof(line));
+        #endif
+            return ret;
+        }
+    }
+    fclose(file);
+
+    ForceZero(secret, SECRET_LENGTH);
+    ForceZero(secretHex, sizeof(secretHex));
+    ForceZero(line, sizeof(line));
+#ifdef WOLFSSL_CHECK_MEM_ZERO
+    wc_MemZero_Check(secret, sizeof(secret));
+    wc_MemZero_Check(secretHex, sizeof(secretHex));
+    wc_MemZero_Check(line, sizeof(line));
+#endif
+    return 0;
+}
+
+
+static void freeSecretList(void)
+{
+    int i = 0;
+
+    LOCK_SECRET_LIST();
+
+    for (i=0; i<WOLFSSL_SNIFFER_KEYLOGFILE_HASH_TABLE_SIZE; i++)
+    {
+        SecretNode* current = secretHashTable[i];
+        SecretNode * next = NULL;
+
+        while (current != NULL) {
+            next = current->next;
+            ForceZero(current, sizeof(SecretNode));
+            XFREE(current, NULL, DYNAMIC_TYPE_SNIFFER_KEYLOG_NODE);
+            current = next;
+        }
+    }
+
+    UNLOCK_SECRET_LIST();
+}
+
+
+/*
+ * Looks up secret based on client random and copies it to output_secret
+ */
+static int snifferSecretCb(unsigned char* client_random,
+                           int type,
+                           unsigned char* output_secret)
+{
+    unsigned char* secret = NULL;
+
+    if (client_random == NULL || output_secret == NULL) {
+        return WOLFSSL_SNIFFER_FATAL_ERROR;
+    }
+
+    if (type >= SNIFFER_SECRET_NUM_SECRET_TYPES) {
+        return WOLFSSL_SNIFFER_FATAL_ERROR;
+    }
+
+    /* get secret from secret table based on client random */
+    secret = findSecret(client_random, type);
+    if (secret != NULL) {
+        XMEMCPY(output_secret, secret, SECRET_LENGTH);
+        return 0;
+    }
+
+    /* didn't find the secret */
+    return WOLFSSL_SNIFFER_ERROR;
+}
+
+
+static void setSnifferSecretCb(SnifferSession* session)
+{
+    session->context->useKeyLogFile = 1;
+    session->sslServer->snifferSecretCb = snifferSecretCb;
+    session->sslClient->snifferSecretCb = snifferSecretCb;
+}
+
+
+/*
+ * Helper function that creates a sniffer server object that can decrypt using
+ * a keylog file, and adds it to the server list
+ *
+ * NOTE: the caller is responsible for locking and unlocking the server list
+ */
+static int addKeyLogSnifferServerHelper(const char* address,
+                                        int port,
+                                        char* error)
+{
+    IpAddrInfo     serverIp = {0};
+    SnifferServer *sniffer = NULL;
+
+    TraceHeader();
+    TraceSetServer(address, port, NULL);
+
+    serverIp.version = IPV4;
+    serverIp.ip4 = XINET_ADDR(address);
+    if (serverIp.ip4 == XINADDR_NONE) {
+    #ifdef FUSION_RTOS
+        if (XINET_PTON(AF_INET6, address, serverIp.ip6,
+                       sizeof(serverIp.ip6)) == 1)
+    #elif defined(FREESCALE_MQX)
+        if (XINET_PTON(AF_INET6, address, serverIp.ip6,
+                       sizeof(serverIp.ip6)) == RTCS_OK)
+    #else
+        if (XINET_PTON(AF_INET6, address, serverIp.ip6) == 1)
+    #endif
+        {
+            serverIp.version = IPV6;
+        }
+    }
+
+    sniffer = ServerList;
+    while (sniffer != NULL &&
+            (!MatchAddr(sniffer->server, serverIp) || sniffer->port != port)) {
+        sniffer = sniffer->next;
+    }
+
+    if (sniffer == NULL) {
+        sniffer = (SnifferServer*)XMALLOC(sizeof(SnifferServer),
+                NULL, DYNAMIC_TYPE_SNIFFER_SERVER);
+        if (sniffer == NULL) {
+            SetError(MEMORY_STR, error, NULL, 0);
+            return WOLFSSL_SNIFFER_ERROR;
+        }
+        InitSnifferServer(sniffer);
+
+        XSTRNCPY(sniffer->address, address, MAX_SERVER_ADDRESS-1);
+        sniffer->address[MAX_SERVER_ADDRESS-1] = '\0';
+        sniffer->server = serverIp;
+        sniffer->port = port;
+
+        sniffer->ctx = wolfSSL_CTX_new(wolfSSLv23_client_method());
+        if (!sniffer->ctx) {
+            SetError(MEMORY_STR, error, NULL, 0);
+            FreeSnifferServer(sniffer);
+            return WOLFSSL_SNIFFER_ERROR;
+        }
+    #if defined(WOLF_CRYPTO_CB) || defined(WOLFSSL_ASYNC_CRYPT)
+        if (CryptoDeviceId != INVALID_DEVID)
+            wolfSSL_CTX_SetDevId(sniffer->ctx, CryptoDeviceId);
+    #endif
+
+        sniffer->next = ServerList;
+        ServerList = sniffer;
+    }
+    else {
+        printf("SESSION ALREADY EXISTS\n");
+    }
+
+    /* Tag the new or existing server as requiring keylog support to
+     * decrypt, otherwise it won't be usable */
+    sniffer->useKeyLogFile = 1;
+
+    return 0;
+}
+
+/*
+ * Creates a sniffer server that is able to decrypt using secrets from a
+ * keylog file, and adds it to the server list
+ *
+ * If a server at the address and port already exists, it will be marked
+ * for keylog file decryption
+ */
+int ssl_CreateKeyLogSnifferServer(const char* address, int port, char* error)
+{
+    int ret = 0;
+
+    if (address == NULL) {
+        SetError(KEYLOG_FILE_INVALID, error, NULL, 0);
+        return WOLFSSL_SNIFFER_ERROR;
+    }
+
+    LOCK_SERVER_LIST();
+
+    ret = addKeyLogSnifferServerHelper(address, port, error);
+
+    UNLOCK_SERVER_LIST();
+
+    return ret;
+}
+
+
+/*
+ * Loads secrets to decrypt TLS traffic from a keylog file. Only sniffer
+ * servers registered with ssl_createKeyLogSnifferServer() will be able to
+ * decrypt using these secrets
+ */
+int ssl_LoadSecretsFromKeyLogFile(const char* keylogfile, char* error)
+{
+    if (keylogfile == NULL) {
+        SetError(KEYLOG_FILE_INVALID, error, NULL, 0);
+        return WOLFSSL_SNIFFER_ERROR;
+    }
+
+    return parseKeyLogFile(keylogfile, error);
+}
+
+#endif /* WOLFSSL_SNIFFER_KEYLOGFILE */
+
+
+/*
+ * Removes a session from the SessionTable based on client/server IP & ports
+ * Returns 0 if a session was found and freed, -1 otherwise
+ */
+int ssl_RemoveSession(const char* clientIp, int clientPort,
+                      const char* serverIp, int serverPort,
+                      char* error)
+{
+    IpAddrInfo clientAddr;
+    IpAddrInfo serverAddr;
+    IpInfo ipInfo;
+    TcpInfo tcpInfo;
+    SnifferSession* session;
+    int ret = -1;  /* Default to not found */
+    word32 row;
+
+    if (clientIp == NULL || serverIp == NULL) {
+        SetError(BAD_IPVER_STR, error, NULL, 0);
+        return ret;
+    }
+
+    /* Set up client IP address */
+    clientAddr.version = IPV4;
+    clientAddr.ip4 = XINET_ADDR(clientIp);
+    if (clientAddr.ip4 == XINADDR_NONE) {
+    #ifdef FUSION_RTOS
+        if (XINET_PTON(AF_INET6, clientIp, clientAddr.ip6,
+                       sizeof(clientAddr.ip6)) == 1)
+    #elif defined(FREESCALE_MQX)
+        if (XINET_PTON(AF_INET6, clientIp, clientAddr.ip6,
+                       sizeof(clientAddr.ip6)) == RTCS_OK)
+    #else
+        if (XINET_PTON(AF_INET6, clientIp, clientAddr.ip6) == 1)
+    #endif
+        {
+            clientAddr.version = IPV6;
+        }
+        else {
+            SetError(BAD_IPVER_STR, error, NULL, 0);
+            return ret;
+        }
+    }
+
+    /* Set up server IP address */
+    serverAddr.version = IPV4;
+    serverAddr.ip4 = XINET_ADDR(serverIp);
+    if (serverAddr.ip4 == XINADDR_NONE) {
+    #ifdef FUSION_RTOS
+        if (XINET_PTON(AF_INET6, serverIp, serverAddr.ip6,
+                       sizeof(serverAddr.ip6)) == 1)
+    #elif defined(FREESCALE_MQX)
+        if (XINET_PTON(AF_INET6, serverIp, serverAddr.ip6,
+                       sizeof(serverAddr.ip6)) == RTCS_OK)
+    #else
+        if (XINET_PTON(AF_INET6, serverIp, serverAddr.ip6) == 1)
+    #endif
+        {
+            serverAddr.version = IPV6;
+        }
+        else {
+            SetError(BAD_IPVER_STR, error, NULL, 0);
+            return ret;
+        }
+    }
+
+    XMEMSET(&ipInfo, 0, sizeof(ipInfo));
+    XMEMSET(&tcpInfo, 0, sizeof(tcpInfo));
+
+    /* Set up client->server direction */
+    ipInfo.src = clientAddr;
+    ipInfo.dst = serverAddr;
+    tcpInfo.srcPort = clientPort;
+    tcpInfo.dstPort = serverPort;
+
+    /* Calculate the hash row for this session */
+    row = SessionHash(&ipInfo, &tcpInfo);
+
+    LOCK_SESSION();
+
+    /* Search only the specific row in the session table */
+    session = SessionTable[row];
+
+    while (session) {
+        SnifferSession* next = session->next;
+
+        /* Check if this session matches the specified client/server IP/port */
+        if (MatchAddr(session->client, clientAddr) &&
+            MatchAddr(session->server, serverAddr) &&
+            session->cliPort == clientPort &&
+            session->srvPort == serverPort) {
+
+            /* Use RemoveSession to remove and free the session */
+            RemoveSession(session, NULL, NULL, row);
+            ret = 0;  /* Session found and freed */
+            break;
+        }
+
+        session = next;
+    }
+
+    UNLOCK_SESSION();
+
+    return ret;
+}
+
+
+#undef ERROR_OUT
+
 #endif /* WOLFSSL_SNIFFER */
-#endif /* WOLFCRYPT_ONLY */
+#endif /* !WOLFCRYPT_ONLY && !NO_FILESYSTEM */

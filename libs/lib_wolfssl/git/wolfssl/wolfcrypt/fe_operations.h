@@ -1,12 +1,12 @@
 /* fe_operations.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -29,24 +29,10 @@
 
 #include <wolfssl/wolfcrypt/types.h>
 
-#if defined(USE_INTEL_SPEEDUP) && !defined(NO_CURVED25519_X64)
-    #define CURVED25519_X64
-#elif defined(HAVE___UINT128_T) && !defined(NO_CURVED25519_128BIT)
-    #define CURVED25519_128BIT
-#endif
-
-#if defined(CURVED25519_X64)
-    #define CURVED25519_ASM_64BIT
-    #define CURVED25519_ASM
-#endif
-#if defined(WOLFSSL_ARMASM)
-    #ifdef __aarch64__
-        #define CURVED25519_ASM_64BIT
-    #else
-        #define CURVED25519_ASM_32BIT
-    #endif
-    #define CURVED25519_ASM
-#endif
+/* CURVED25519_X64, CURVED25519_128BIT, CURVED25519_ASM[_32BIT|_64BIT] and
+ * WOLFSSL_CURVE25519_USE_ED25519 are derived in settings.h, so that the
+ * generated assembly - which only ever sees settings.h - is guarded by the
+ * same macros as the C sources. */
 
 /*
 fe means field element.
@@ -61,21 +47,60 @@ Bounds on each t[i] vary depending on context.
 #endif
 
 #if defined(CURVE25519_SMALL) || defined(ED25519_SMALL)
-    #define F25519_SIZE 32
 
-    WOLFSSL_LOCAL void lm_copy(byte*, const byte*);
-    WOLFSSL_LOCAL void lm_add(byte*, const byte*, const byte*);
-    WOLFSSL_LOCAL void lm_sub(byte*, const byte*, const byte*);
-    WOLFSSL_LOCAL void lm_neg(byte*,const byte*);
-    WOLFSSL_LOCAL void lm_invert(byte*, const byte*);
-    WOLFSSL_LOCAL void lm_mul(byte*,const byte*,const byte*);
+#define F25519_SIZE 32
+
+#include <wolfssl/wolfcrypt/curve25519.h>
+
+WOLFSSL_LOCAL void lm_copy(byte*, const byte*);
+WOLFSSL_LOCAL void lm_add(byte*, const byte*, const byte*);
+WOLFSSL_LOCAL void lm_sub(byte*, const byte*, const byte*);
+WOLFSSL_LOCAL void lm_neg(byte*,const byte*);
+WOLFSSL_LOCAL void lm_invert(byte*, const byte*);
+WOLFSSL_LOCAL void lm_mul(byte*,const byte*,const byte*);
+
+#ifdef WC_X25519_NONBLOCK
+
+/* Use standard wolfSSL non-blocking error code */
+#ifndef FP_WOULDBLOCK
+#include <wolfssl/wolfcrypt/error-crypt.h>
+#define FP_WOULDBLOCK   MP_WOULDBLOCK
 #endif
+
+struct fe_inv__distinct_nb_ctx_t;
+struct x25519_nb_ctx_t;
+
+WOLFSSL_LOCAL int fe_inv__distinct_nb(byte *r, const byte *x,
+    struct fe_inv__distinct_nb_ctx_t* ctx);
+
+WOLFSSL_LOCAL int curve25519_nb(byte * q, const byte * n, const byte * p,
+    struct x25519_nb_ctx_t* ctx);
+
+#endif /* WC_X25519_NONBLOCK */
+
+#else
+    #ifdef WC_X25519_NONBLOCK
+        #error The X25519 non-blocking requires CURVE25519_SMALL \
+               (--enable-curve25519=small)
+    #endif
+#endif /* CURVE25519_SMALL || ED25519_SMALL */
 
 
 #if !defined(FREESCALE_LTC_ECC)
 WOLFSSL_LOCAL void fe_init(void);
 
-WOLFSSL_LOCAL int  curve25519(byte * q, const byte * n, const byte * p);
+WOLFSSL_LOCAL int curve25519(byte * q, const byte * n, const byte * p);
+#if defined(CURVED25519_X64) || (defined(WOLFSSL_ARMASM) && defined(__aarch64__))
+/* Fixed-base scalar multiply provided by the x64/aarch64 assembly
+ * (fe_x25519_asm.S, armv8-curve25519); declared here as no other header
+ * prototypes it, which otherwise breaks a strict C (implicit-declaration)
+ * build of curve25519.c. */
+WOLFSSL_LOCAL int curve25519_base(byte * q, const byte * n);
+#endif
+#ifdef WOLFSSL_CURVE25519_BLINDING
+WOLFSSL_LOCAL int curve25519_blind(byte* q, const byte* n, const byte* mask,
+    const byte* p, const byte* rz);
+#endif
 #endif
 
 /* default to be faster but take more memory */
@@ -91,58 +116,39 @@ WOLFSSL_LOCAL int  curve25519(byte * q, const byte * n, const byte * p);
     typedef sword32  fe[10];
 #endif
 
-WOLFSSL_LOCAL void fe_copy(fe, const fe);
-WOLFSSL_LOCAL void fe_add(fe, const fe, const fe);
-WOLFSSL_LOCAL void fe_neg(fe,const fe);
-WOLFSSL_LOCAL void fe_sub(fe, const fe, const fe);
-WOLFSSL_LOCAL void fe_invert(fe, const fe);
-WOLFSSL_LOCAL void fe_mul(fe,const fe,const fe);
+WOLFSSL_LOCAL void fe_copy(fe h,const fe f);
+WOLFSSL_LOCAL void fe_add(fe h,const fe f,const fe g);
+WOLFSSL_LOCAL void fe_neg(fe h,const fe f);
+WOLFSSL_LOCAL void fe_sub(fe h,const fe f,const fe g);
+WOLFSSL_LOCAL void fe_invert(fe out,const fe z);
+WOLFSSL_LOCAL void fe_mul(fe h,const fe f,const fe g);
 
 
 /* Based On Daniel J Bernstein's curve25519 and ed25519 Public Domain ref10
    work. */
 
-WOLFSSL_LOCAL void fe_0(fe);
-WOLFSSL_LOCAL void fe_1(fe);
-WOLFSSL_LOCAL int  fe_isnonzero(const fe);
-WOLFSSL_LOCAL int  fe_isnegative(const fe);
-WOLFSSL_LOCAL void fe_tobytes(unsigned char *, const fe);
-WOLFSSL_LOCAL void fe_sq(fe, const fe);
-WOLFSSL_LOCAL void fe_sq2(fe,const fe);
-WOLFSSL_LOCAL void fe_frombytes(fe,const unsigned char *);
-WOLFSSL_LOCAL void fe_cswap(fe, fe, int);
-WOLFSSL_LOCAL void fe_mul121666(fe,fe);
-WOLFSSL_LOCAL void fe_cmov(fe,const fe, int);
-WOLFSSL_LOCAL void fe_pow22523(fe,const fe);
+WOLFSSL_LOCAL void fe_0(fe h);
+WOLFSSL_LOCAL void fe_1(fe h);
+WOLFSSL_LOCAL int  fe_isnonzero(const fe f);
+WOLFSSL_LOCAL int  fe_isnegative(const fe f);
+WOLFSSL_LOCAL void fe_tobytes(unsigned char *s,const fe h);
+WOLFSSL_LOCAL void fe_sq(fe h,const fe f);
+WOLFSSL_LOCAL void fe_sq2(fe h,const fe f);
+WOLFSSL_LOCAL void fe_frombytes(fe h,const unsigned char *s);
+WOLFSSL_LOCAL void fe_cswap(fe f, fe g, int b);
+WOLFSSL_LOCAL void fe_mul121666(fe h,fe f);
+WOLFSSL_LOCAL void fe_cmov(fe f, const fe g, int b);
+WOLFSSL_LOCAL void fe_pow22523(fe out,const fe z);
 
-/* 64 type needed for SHA512 */
-WOLFSSL_LOCAL word64 load_3(const unsigned char *in);
-WOLFSSL_LOCAL word64 load_4(const unsigned char *in);
+#if !defined(CURVE25519_SMALL) && !defined(ED25519_SMALL)
+    WOLFSSL_LOCAL sword64 load_3(const unsigned char *in);
+    WOLFSSL_LOCAL sword64 load_4(const unsigned char *in);
+#endif
 
 #ifdef CURVED25519_ASM
-WOLFSSL_LOCAL void fe_ge_to_p2(fe rx, fe ry, fe rz, const fe px, const fe py,
-                               const fe pz, const fe pt);
-WOLFSSL_LOCAL void fe_ge_to_p3(fe rx, fe ry, fe rz, fe rt, const fe px,
-                               const fe py, const fe pz, const fe pt);
-WOLFSSL_LOCAL void fe_ge_dbl(fe rx, fe ry, fe rz, fe rt, const fe px,
-                             const fe py, const fe pz);
-WOLFSSL_LOCAL void fe_ge_madd(fe rx, fe ry, fe rz, fe rt, const fe px,
-                              const fe py, const fe pz, const fe pt,
-                              const fe qxy2d, const fe qyplusx,
-                              const fe qyminusx);
-WOLFSSL_LOCAL void fe_ge_msub(fe rx, fe ry, fe rz, fe rt, const fe px,
-                              const fe py, const fe pz, const fe pt,
-                              const fe qxy2d, const fe qyplusx,
-                              const fe qyminusx);
-WOLFSSL_LOCAL void fe_ge_add(fe rx, fe ry, fe rz, fe rt, const fe px,
-                             const fe py, const fe pz, const fe pt, const fe qz,
-                             const fe qt2d, const fe qyplusx,
-                             const fe qyminusx);
-WOLFSSL_LOCAL void fe_ge_sub(fe rx, fe ry, fe rz, fe rt, const fe px,
-                             const fe py, const fe pz, const fe pt, const fe qz,
-                             const fe qt2d, const fe qyplusx,
-                             const fe qyminusx);
-WOLFSSL_LOCAL void fe_cmov_table(fe* r, fe* base, signed char b);
+WOLFSSL_LOCAL void fe_cmov_table(fe* r, const fe* base, signed char b);
+
+WOLFSSL_LOCAL void fe_invert_nct(fe r, const fe a);
 #endif /* CURVED25519_ASM */
 #endif /* !CURVE25519_SMALL || !ED25519_SMALL */
 

@@ -1,12 +1,12 @@
 /* stack.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -24,14 +24,17 @@
 #ifndef WOLFSSL_STACK_H_
 #define WOLFSSL_STACK_H_
 
+#include <wolfssl/openssl/compat_types.h>
+#include <wolfssl/openssl/ssl.h>
+
 #ifdef __cplusplus
     extern "C" {
 #endif
 
 typedef void (*wolfSSL_sk_freefunc)(void *);
 
-WOLFSSL_API void wolfSSL_sk_GENERIC_pop_free(WOLFSSL_STACK* sk, wolfSSL_sk_freefunc);
-WOLFSSL_API void wolfSSL_sk_GENERIC_free(WOLFSSL_STACK *);
+WOLFSSL_API void wolfSSL_sk_GENERIC_pop_free(WOLFSSL_STACK* sk, wolfSSL_sk_freefunc f);
+WOLFSSL_API void wolfSSL_sk_GENERIC_free(WOLFSSL_STACK *sk);
 WOLFSSL_API int wolfSSL_sk_GENERIC_push(WOLFSSL_STACK *sk, void *data);
 WOLFSSL_API void wolfSSL_sk_pop_free(WOLFSSL_STACK *st, void (*func) (void *));
 WOLFSSL_API WOLFSSL_STACK *wolfSSL_sk_new_null(void);

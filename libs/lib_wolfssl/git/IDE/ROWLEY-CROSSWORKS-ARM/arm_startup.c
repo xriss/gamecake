@@ -1,12 +1,12 @@
 /* arm_startup.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -51,7 +51,7 @@ void memcpy32(uint32_t* src, uint32_t* dst_beg, uint32_t* dst_end)
 void meminit32(uint32_t* start, uint32_t* end)
 {
     while (start < end) {
-	    *start++ = 0;
+        *start++ = 0;
     }
 }
 

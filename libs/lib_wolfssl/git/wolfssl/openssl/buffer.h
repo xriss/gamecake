@@ -1,12 +1,12 @@
 /* buffer.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -33,18 +33,22 @@
 
 WOLFSSL_API WOLFSSL_BUF_MEM* wolfSSL_BUF_MEM_new(void);
 WOLFSSL_API int wolfSSL_BUF_MEM_grow(WOLFSSL_BUF_MEM* buf, size_t len);
+WOLFSSL_API int wolfSSL_BUF_MEM_grow_ex(WOLFSSL_BUF_MEM* buf, size_t len,
+        char zeroFill);
+WOLFSSL_API int wolfSSL_BUF_MEM_resize(WOLFSSL_BUF_MEM* buf, size_t len);
 WOLFSSL_API void wolfSSL_BUF_MEM_free(WOLFSSL_BUF_MEM* buf);
-WOLFSSL_API size_t wolfSSL_strlcpy(char *dst, const char *src, size_t dstSize);
-WOLFSSL_API size_t wolfSSL_strlcat(char *dst, const char *src, size_t dstSize);
 
+#ifndef OPENSSL_COEXIST
 
 #define BUF_MEM_new  wolfSSL_BUF_MEM_new
 #define BUF_MEM_grow wolfSSL_BUF_MEM_grow
 #define BUF_MEM_free wolfSSL_BUF_MEM_free
 
 #define BUF_strdup strdup
-#define BUF_strlcpy wolfSSL_strlcpy
-#define BUF_strlcat wolfSSL_strlcat
+#define BUF_strlcpy wc_strlcpy
+#define BUF_strlcat wc_strlcat
+
+#endif /* !OPENSSL_COEXIST */
 
 #ifdef __cplusplus
     }  /* extern "C" */

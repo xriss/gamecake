@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
--- LuaSec 1.0.2
+-- LuaSec 1.3.2
 --
--- Copyright (C) 2006-2021 Bruno Silvestre
+-- Copyright (C) 2006-2023 Bruno Silvestre
 --
 ------------------------------------------------------------------------------
 
@@ -61,6 +61,76 @@ local function wireformat2array(str)
       i = i + len + 1
    end
    return array
+end
+
+--------------------------------------------------------------------------------
+-- System CA auto-detection
+--
+
+-- Module-level cache; nil means "not (yet) populated", false means don't auto detect (always return nil)
+local system_ca
+
+--
+-- Probes for a usable system CA value. Does not touch the cache.
+--
+local find_system_ca do
+
+   -- Known CA bundle locations to probe, in order.
+   local ca_bundle_paths = {
+      "/etc/ssl/certs/ca-certificates.crt",                 -- Debian / Ubuntu / Gentoo
+      "/etc/pki/tls/certs/ca-bundle.crt",                   -- Fedora / RHEL 6
+      "/etc/ssl/ca-bundle.pem",                             -- OpenSUSE
+      "/etc/pki/tls/cacert.pem",                            -- OpenELEC
+      "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",  -- CentOS / RHEL 7
+      "/etc/ssl/cert.pem",                                  -- OpenBSD / Alpine / macOS
+   }
+
+   local is_windows = package.config:sub(1, 1) == "\\"
+
+   function find_system_ca()
+      if is_windows then
+         return "system"
+      end
+      for _, path in ipairs(ca_bundle_paths) do
+         local fh = io.open(path, "r")
+         if fh then
+            fh:close()
+            return path
+         end
+      end
+      return nil, "no system CA bundle found:\n\tno file '" .. table.concat(ca_bundle_paths, "'\n\tno file '") .. "'"
+   end
+end
+
+
+--
+-- Explicitly sets the cached system CA value.
+--   * a string caches that value
+--   * nil clears the cache, so the next get_system_ca() call re-probes the file list
+--   * false disables discovery, so get_system_ca() always returns nil + error
+--
+local function set_system_ca(ca)
+   assert(ca == nil or ca == false or type(ca) == "string", "invalid system CA value; nil, false, filename")
+   system_ca = ca
+   return true
+end
+
+--
+-- Returns the cached system CA value, auto-populating the cache on first call, or nil+error
+-- if discovery fails or is disabled.
+--
+local function get_system_ca()
+   if system_ca == false then
+      return nil, "system CA discovery disabled"
+   end
+   if system_ca == nil then
+      local cafile, err = find_system_ca()
+      if not cafile then
+         return nil, err
+      end
+      set_system_ca(cafile)
+   end
+   return system_ca
 end
 
 --
@@ -201,6 +271,33 @@ local function newcontext(cfg)
       if not succ then return nil, msg end
    end
 
+   -- PSK
+   if config.capabilities.psk and cfg.psk then
+      if cfg.mode == "client" then
+         if type(cfg.psk) ~= "function" then
+            return nil, "invalid PSK configuration"
+         end
+         succ = context.setclientpskcb(ctx, cfg.psk)
+         if not succ then return nil, msg end
+      elseif cfg.mode == "server" then
+         if type(cfg.psk) == "function" then
+            succ, msg = context.setserverpskcb(ctx, cfg.psk)
+            if not succ then return nil, msg end
+         elseif type(cfg.psk) == "table" then
+            if type(cfg.psk.hint) == "string" and type(cfg.psk.callback) == "function" then
+               succ, msg = context.setpskhint(ctx, cfg.psk.hint)
+               if not succ then return succ, msg end
+               succ = context.setserverpskcb(ctx, cfg.psk.callback)
+               if not succ then return succ, msg end
+            else
+               return nil, "invalid PSK configuration"
+            end
+         else
+            return nil, "invalid PSK configuration"
+         end
+      end
+   end
+
    if config.capabilities.dane and cfg.dane then
       if type(cfg.dane) == "table" then
          context.setdane(ctx, unpack(cfg.dane))
@@ -275,12 +372,18 @@ core.setmethod("info", info)
 --
 
 local _M = {
-  _VERSION        = "1.0.2",
+  _VERSION        = "1.3.2",
   _COPYRIGHT      = core.copyright(),
   config          = config,
   loadcertificate = x509.load,
   newcontext      = newcontext,
   wrap            = wrap,
+  find_system_ca  = find_system_ca,
+  set_system_ca   = set_system_ca,
+  get_system_ca   = get_system_ca,
 }
+
+-- Warm the system CA cache at load time, rather than on first connection.
+get_system_ca()
 
 return _M

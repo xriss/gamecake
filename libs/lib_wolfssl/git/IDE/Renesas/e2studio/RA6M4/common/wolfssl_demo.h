@@ -1,12 +1,12 @@
 /* wolfssl_demo.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -35,22 +35,27 @@
 #define DIRECT_KEY_ADDRESS_256      FLASH_HP_DF_BLOCK_1
 #define DIRECT_KEY_ADDRESS_128      FLASH_HP_DF_BLOCK_2
 
+/* Client connects to the server with these details. */
+#define SERVER_IP    "192.168.11.4"
+#define DEFAULT_PORT 11111
+
 /* Enable wolfcrypt test */
 /* can be enabled with benchmark test */
 /*#define CRYPT_TEST*/
 
 /* Enable benchmark               */
 /* can be enabled with cyrpt test */
-/*#define BENCHMARK*/
+/* #define BENCHMARK */
 
 /* Enable TLS client     */
 /* cannot enable with CRYPT_TEST or BENCHMARK */
 #define TLS_CLIENT
-/* Specify cipher suites that are supported by SCE 
- * ClientHello specifies the cipher suite to communicate peer Server 
- * so that TLS handshake uses SCE protect mode 
- */
-#define TEST_CIPHER_SPECIFIED
+
+/* use multi-thread example */
+/*#define TLS_MULTITHREAD_TEST*/
+#if defined(TLS_MULTITHREAD_TEST)
+ #define THREAD_STACK_SIZE (5 * 1024)
+#endif
 
 /* Use RSA certificates */
 #define USE_CERT_BUFFERS_2048
@@ -61,8 +66,29 @@
     #error please set either macro USE_CERT_BUFFERS_2048 or USE_CERT_BUFFERS_256
 #endif
 
+typedef struct tagTestInfo
+{
+     int  id;
+     int  port;
+     char name[32];
+     const char* cipher;
+     WOLFSSL_CTX* ctx;
+     wolfSSL_Logging_cb log_f;
+#if defined(TLS_MULTITHREAD_TEST)
+     SemaphoreHandle_t xBinarySemaphore;
+#endif
+} TestInfo;
+
+void sce_test();
+void TCPInit();
 void wolfSSL_TLS_client_init();
-void wolfSSL_TLS_client();
+int wolfSSL_TLS_client_do(void *pvParam);
+void wolfSSL_TLS_cleanup();
+extern WOLFSSL_CTX *client_ctx;
+
+#ifdef TLS_MULTITHREAD_TEST
+extern xSemaphoreHandle exit_semaph;
+#endif
 
 static void util_Cleanup(xSocket_t xSock, WOLFSSL_CTX *ctx, WOLFSSL *ssl) {
     printf("Cleaning up socket and wolfSSL objects.\n");

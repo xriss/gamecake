@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/sh
+# This script depends on g++, cmake, git, and make to be installed
 
 POSIXLY_CORRECT=1
 
@@ -8,33 +9,9 @@ GEN_PDF=false
 GEN_ALL=false
 INSTALL_DOX=false
 
-command -v g++
-if [ $? -ne "0" ]; then
-echo "Please install g++"
-exit 1
-fi
-
-command -v cmake
-if [ $? -ne "0" ]; then
-echo "Please install cmake"
-exit 1
-fi
-
-command -v git
-if [ $? -ne "0" ]; then
-echo "Please install git"
-exit 1
-fi
-
-command -v make
-if [ $? -ne "0" ]; then
-echo "Please install make"
-exit 1
-fi
-
 # Checking arguments and setting appropriate option variables
 
-for var in $@
+for var in "$@"
 do
     case $var in
     -install)

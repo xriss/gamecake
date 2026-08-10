@@ -1,12 +1,12 @@
 /* caam_qnx.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -25,15 +25,12 @@
 #ifndef CAAM_QNX_H
 #define CAAM_QNX_H
 
-#ifdef WOLFSSL_CAAM_PRINT
-#include <stdio.h>
-#define WOLFSSL_MSG(in) printf("%s\n", (in))
-#else
-#define WOLFSSL_MSG(in)
-#endif
-
 #include <sys/mman.h>
-#include <hw/inout.h>
+#ifdef __aarch64__
+    #include <aarch64/inout.h>
+#else
+    #include <hw/inout.h>
+#endif
 #include <sys/iofunc.h>
 #include <sys/neutrino.h>
 #include <pthread.h>
@@ -47,14 +44,15 @@
 #define Error int
 #define Value int
 #define Boolean int
-#define CAAM_ADDRESS unsigned int
+#define CAAM_ADDRESS uintptr_t
 #define Success 1
 #define Failure 0
-#define INTERRUPT_Panic()
+#define INTERRUPT_Panic() do {} while (0)
 #define MemoryMapMayNotBeEmpty -1
 #define CAAM_WAITING -2
 #define NoActivityReady -1
 #define MemoryOperationNotPerformed -1
+#define CAAM_ARGS_E -3
 
 #ifndef WOLFSSL_CAAM_BUFFER
 #define WOLFSSL_CAAM_BUFFER
@@ -67,9 +65,4 @@
 
 /* check kernel and yield to same priority threads waiting */
 #define CAAM_CPU_CHILL() sched_yield()
-
-/* IMX6UL */
-#define CAAM_BASE 0x02140000
-#define CAAM_PAGE 0x00100000
-
 #endif /* CAAM_QNX_H */

@@ -1,34 +1,96 @@
 # ESP32 Port
 
-Support for the ESP32-WROOM-32 on-board crypto hardware acceleration for symmetric AES, SHA1/SHA256/SHA384/SHA512 and RSA primitive including mul, mulmod and exptmod.
+Support for the ESP32 on-board cryptographic hardware acceleration for symmetric AES, SHA1/SHA256/SHA384/SHA512 and RSA primitive including mul, mulmod and exptmod.
+
+* ESP32 - Supported
+* ESP32S2 - Supported
+* ESP32S3 - Supported
+* ESP32C2 - Software only (contact support to request hardware acceleration)
+* ESP32C3 - Supported
+* ESP32C6 - Supported
+* ESP32H2 - Software only (contact support to request hardware acceleration)
 
 ## ESP32 Acceleration
 
-For detail about ESP32 HW Acceleration, you can find in [Technical Reference Manual](https://espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf)
+More details about ESP32 HW Acceleration can be found in:
+
+* `esp32_technical_reference_manual_en.pdf`
+* `esp32-s2_technical_reference_manual_en.pdf`
+* `esp32-s3_technical_reference_manual_en.pdf`
+* `esp8684_technical_reference_manual_en.pdf`
+* `esp32-c3_technical_reference_manual_en.pdf`
+* `esp32-c6_technical_reference_manual_en.pdf`
+* `esp32-h2_technical_reference_manual_en.pdf`
 
 ### Building
 
-To enable hw acceleration :
+Simply run `ESP-IDF.py` in any of the [Espressif/ESP-IDF/Examples](https://github.com/wolfSSL/wolfssl/tree/master/IDE/Espressif/ESP-IDF/examples).
+See the respective project README files. Examples are also available using wolfssl as a [Managed Component](https://www.wolfssl.com/wolfssl-now-available-in-espressif-component-registry/).
 
-* Uncomment out `#define WOLFSSL_ESPIDF` in `/path/to/wolfssl/wolfssl/wolfcrypt/settings.h`
-* Uncomment out `#define WOLFSSL_ESPWROOM32` in `/path/to/wolfssl/wolfssl/wolfcrypt/settings.h`
+Hardware acceleration is enabled by default. All settings should be adjusted in the respective project component
+`user_settings.h` file. See the example in [template example](https://github.com/wolfSSL/wolfssl/blob/master/IDE/Espressif/ESP-IDF/examples/template/components/wolfssl/include/user_settings.h).
+In particular, comment out the `NO_[feature_name]` macros to enable hardware encryption:
 
-To disable portions of the hardware acceleration you can optionally define:
+    /* #define NO_ESP32_CRYPT                 */
+    /* #define NO_WOLFSSL_ESP32_CRYPT_HASH    */
+    /* #define NO_WOLFSSL_ESP32_CRYPT_AES     */
+    /* #define NO_WOLFSSL_ESP32_CRYPT_RSA_PRI */
+
+To disable specific portions of the hardware acceleration you can optionally define:
 
 ```c
-/* Disabled SHA, AES and RSA acceleration */
-#define NO_ESP32WROOM32_CRYPT
-/* Disabled AES acceleration */
-#define NO_WOLFSSL_ESP32WROOM32_CRYPT_AES
-/* Disabled SHA acceleration */
-#define NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH
-/* Disabled RSA Primitive acceleration */
-#define NO_WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI
+/* Disable all SHA, AES and RSA acceleration */
+#define NO_ESP32_CRYPT
+
+/* Disable only AES acceleration */
+#define NO_WOLFSSL_ESP32_CRYPT_AES
+
+/* Disabled only SHA acceleration */
+#define NO_WOLFSSL_ESP32_CRYPT_HASH
+
+/* Disabled only RSA Primitive acceleration */
+#define NO_WOLFSSL_ESP32_CRYPT_RSA_PRI
 ```
+
+See the [wolfcrypt/port/Espressif/esp32-crypt.h](https://github.com/wolfSSL/wolfssl/blob/master/wolfssl/wolfcrypt/port/Espressif/esp32-crypt.h)
+for more details on fine tuning and debugging options.
 
 ### Coding
 
-In your application you must include `<wolfssl/wolfcrypt/settings.h>` before any other wolfSSL headers. If building the sources directly we recommend defining `WOLFSSL_USER_SETTINGS` and adding your own `user_settings.h` file. You can find a good reference for this in `IDE/GCC-ARM/Header/user_settings.h`.
+In your application you must include `<wolfssl/wolfcrypt/settings.h>` before any other wolfSSL headers.
+If building the sources directly we recommend defining `WOLFSSL_USER_SETTINGS` (typically defined in the `CMakeLists.txt`)
+and adding your own `user_settings.h` file. You can find a good reference in the [Espressif examples](https://github.com/wolfSSL/wolfssl/tree/master/IDE/Espressif/ESP-IDF/examples)
+as well as other examples such as [IDE/GCC-ARM/Header/user_settings.h](https://github.com/wolfSSL/wolfssl/blob/master/IDE/GCC-ARM/Header/user_settings.h).
+
+To view disassembly, add `__attribute__((section(".iram1")))` decorator. Foe example:
+
+To view disassembly, add `__attribute__((section(".iram1")))` decorator. Foe example:
+
+```
+static int __attribute__((section(".iram1"))) memblock_peek(volatile u_int32_t mem_address)
+```
+
+### VisualGDB
+
+Each project example has a `VisuaGDB` directory with sample project files for [Sysprogs VisualGDB](https://visualgdb.com).
+
+For installing multiple toolchains, see the [documentation](https://visualgdb.com/documentation/espidf/).
+
+The library naming format used at wolfSSL:
+
+```
+HKEY_CURRENT_USER\Software\Sysprogs\GNUToolchains
+```
+
+| Registry String Value Name       | Value Data             |
+| -------------------------------- |----------------------- |
+| `SysGCC-xtensa-lx106-elf-8.4.0`  | `C:\SysGCC\esp8266`    |
+| `SysGCC-xtensa-esp32-elf-8.4.0`  | `C:\SysGCC\esp32-8.4`  |
+| `SysGCC-xtensa-esp32-elf-13.2.0` | `C:\SysGCC\esp32`      |
+| `SysGCC-xtensa-esp32-elf-12.4.0` | `C:\SysGCC\esp32-12.4` |
+| `SysGCC-xtensa-esp32-elf-11.2.0` | `C:\SysGCC\esp32-11.2` |
+
+Note the latest toolchain value is the default install name of `C:\SysGCC\esp32`.
 
 
 ### Benchmarks
@@ -98,10 +160,10 @@ ECDSA    256 sign            4 ops took 1.101 sec, avg 275.250 ms, 3.633 ops/sec
 ECDSA    256 verify          2 ops took 1.092 sec, avg 546.000 ms, 1.832 ops/sec
 ```
 
-Condition  :  
-- Model    : ESP32-WROOM-32  
-- CPU Speed: 240Mhz  
-- ESP-IDF  : v3.3-beta1-39-g6cb37ecc5(commit hash : 6cb37ecc5)  
+Condition  :
+- Model    : ESP32-WROOM-32
+- CPU Speed: 240Mhz
+- ESP-IDF  : v3.3-beta1-39-g6cb37ecc5(commit hash : 6cb37ecc5)
 - OS       : Ubuntu 18.04.1 LTS (Bionic Beaver)
 
 ## Support

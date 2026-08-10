@@ -1,12 +1,12 @@
 /* rsa.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -44,13 +44,35 @@ RSA keys can be used to encrypt, decrypt, sign and verify data.
 #endif
 
 #if defined(WC_RSA_NONBLOCK)
-    /* enable support for fast math based non-blocking exptmod */
-    /* this splits the RSA function into many smaller operations */
-    #ifndef USE_FAST_MATH
-        #error RSA non-blocking mode only supported using fast math
+    /* Non-blocking RSA splits the operation into many smaller chunks so a
+     * bare-metal system loop stays responsive. Two backends are supported:
+     *   - TFM fastmath (fp_exptmod_nb), the original implementation.
+     *   - SP small (sp_RsaPublic_<n>_nb / sp_RsaPrivate_<n>_nb) when SP
+     *     non-blocking is enabled. SP requires RSA_LOW_MEM (CRT not
+     *     supported in non-block mode) and the small / no-malloc /
+     *     non-blocking trio that drives the chunked state machine. */
+    #if !defined(USE_FAST_MATH) && \
+        !(defined(WOLFSSL_HAVE_SP_RSA) && defined(WOLFSSL_SP_NONBLOCK) && \
+          defined(WOLFSSL_SP_SMALL) && !defined(WOLFSSL_SP_FAST_MODEXP))
+        #error RSA non-blocking mode requires fast math or SP non-blocking
     #endif
-    #ifndef TFM_TIMING_RESISTANT
+    #if defined(USE_FAST_MATH) && !defined(TFM_TIMING_RESISTANT)
       #error RSA non-blocking mode only supported with timing resistance enabled
+    #endif
+    #if defined(WOLFSSL_HAVE_SP_RSA) && defined(WOLFSSL_SP_NONBLOCK)
+        #if !defined(WOLFSSL_SP_SMALL)
+            #error SP non-blocking RSA requires WOLFSSL_SP_SMALL
+        #endif
+        #if !defined(WOLFSSL_SP_NO_MALLOC)
+            #error SP non-blocking RSA requires WOLFSSL_SP_NO_MALLOC
+        #endif
+        #if defined(WOLFSSL_SP_FAST_MODEXP)
+            #error SP non-blocking RSA is incompatible with WOLFSSL_SP_FAST_MODEXP
+        #endif
+        #if !defined(WOLFSSL_RSA_PUBLIC_ONLY) && \
+            !defined(SP_RSA_PRIVATE_EXP_D) && !defined(RSA_LOW_MEM)
+            #error SP non-blocking RSA requires RSA_LOW_MEM (CRT path is unsupported)
+        #endif
     #endif
 
     /* RSA bounds check is not supported with RSA non-blocking mode */
@@ -58,22 +80,9 @@ RSA keys can be used to encrypt, decrypt, sign and verify data.
     #define NO_RSA_BOUNDS_CHECK
 #endif
 
-/* allow for user to plug in own crypto */
-#if !defined(HAVE_FIPS) && (defined(HAVE_USER_RSA) || defined(HAVE_FAST_RSA))
-    #include "user_rsa.h"
-#else
+#include <wolfssl/wolfcrypt/wolfmath.h>
+#include <wolfssl/wolfcrypt/random.h>
 
-#if defined(HAVE_FIPS) && \
-        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-/* for fips @wc_fips */
-#include <cyassl/ctaocrypt/rsa.h>
-#if defined(CYASSL_KEY_GEN) && !defined(WOLFSSL_KEY_GEN)
-    #define WOLFSSL_KEY_GEN
-#endif
-#else
-    #include <wolfssl/wolfcrypt/integer.h>
-    #include <wolfssl/wolfcrypt/random.h>
-#endif /* HAVE_FIPS && HAVE_FIPS_VERION 1 */
 #if defined(HAVE_FIPS) && \
         defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2)
 #include <wolfssl/wolfcrypt/fips.h>
@@ -83,7 +92,11 @@ RSA keys can be used to encrypt, decrypt, sign and verify data.
 #include <wolfssl/wolfcrypt/hash.h>
 
 #ifdef WOLFSSL_XILINX_CRYPT
-#include "xsecure_rsa.h"
+#ifdef WOLFSSL_XILINX_CRYPT_VERSAL
+#include <wolfssl/wolfcrypt/port/xilinx/xil-versal-glue.h>
+#else
+#include <xsecure_rsa.h>
+#endif
 #endif
 
 #if defined(WOLFSSL_CRYPTOCELL)
@@ -94,16 +107,53 @@ RSA keys can be used to encrypt, decrypt, sign and verify data.
     #include <wolfssl/wolfcrypt/port/kcapi/kcapi_rsa.h>
 #endif
 
+#if defined(WOLFSSL_DEVCRYPTO_RSA)
+    #include <wolfssl/wolfcrypt/port/devcrypto/wc_devcrypto.h>
+#endif
+
+#if defined(WOLFSSL_RENESAS_FSPSM)
+    #include <wolfssl/wolfcrypt/port/renesas/renesas_fspsm_internal.h>
+#endif
+
 #ifdef __cplusplus
     extern "C" {
 #endif
 
+#if FIPS_VERSION3_GE(6,0,0)
+    extern const unsigned int wolfCrypt_FIPS_rsa_ro_sanity[2];
+    WOLFSSL_LOCAL int wolfCrypt_FIPS_RSA_sanity(void);
+#endif
+
 #ifndef RSA_MIN_SIZE
-#define RSA_MIN_SIZE 512
+    #if defined(HAVE_WOLFENGINE) || defined(HAVE_WOLFPROVIDER)
+        #define RSA_MIN_SIZE 1024
+    #else
+        #define RSA_MIN_SIZE 2048
+    #endif
 #endif
 
 #ifndef RSA_MAX_SIZE
-#define RSA_MAX_SIZE 4096
+    #ifdef USE_FAST_MATH
+        /* FP implementation support numbers up to FP_MAX_BITS / 2 bits. */
+        #define RSA_MAX_SIZE    (FP_MAX_BITS / 2)
+        #if defined(WOLFSSL_MYSQL_COMPATIBLE) && RSA_MAX_SIZE < 8192
+            #error "MySQL needs FP_MAX_BITS at least at 16384"
+        #endif
+    #elif defined(WOLFSSL_SP_MATH_ALL) || defined(WOLFSSL_SP_MATH)
+        /* SP implementation supports numbers of SP_INT_BITS bits. */
+        #define RSA_MAX_SIZE    WC_BITS_FULL_BYTES(SP_INT_BITS)
+        #if defined(WOLFSSL_MYSQL_COMPATIBLE) && RSA_MAX_SIZE < 8192
+            #error "MySQL needs SP_INT_BITS at least at 8192"
+        #endif
+    #else
+        #ifdef WOLFSSL_MYSQL_COMPATIBLE
+            /* Integer maths is dynamic but we only go up to 8192 bits. */
+            #define RSA_MAX_SIZE 8192
+        #else
+            /* Integer maths is dynamic but we only go up to 4096 bits. */
+            #define RSA_MAX_SIZE 4096
+        #endif
+    #endif
 #endif
 
 /* avoid redefinition of structs */
@@ -112,9 +162,14 @@ RSA keys can be used to encrypt, decrypt, sign and verify data.
 
 #ifdef WOLFSSL_ASYNC_CRYPT
     #include <wolfssl/wolfcrypt/async.h>
-    #ifdef WOLFSSL_CERT_GEN
-        #include <wolfssl/wolfcrypt/asn.h>
-    #endif
+#endif
+#if defined(WOLFSSL_MICROCHIP_TA100)
+    #include <wolfssl/wolfcrypt/port/atmel/atmel.h>
+#endif /* WOLFSSL_MICROCHIP_TA100 */
+
+#if FIPS_VERSION3_GE(6,0,0)
+    #define WC_RSA_FIPS_GEN_MIN 2048
+    #define WC_RSA_FIPS_SIG_MIN (WC_RSA_FIPS_GEN_MIN/8)
 #endif
 
 enum {
@@ -136,8 +191,12 @@ enum {
     RSA_PSS_SALT_MAX_SZ = 62,
 
 #ifdef OPENSSL_EXTRA
-    RSA_PKCS1_PADDING_SIZE = 11,
-    RSA_PKCS1_OAEP_PADDING_SIZE = 42, /* (2 * hashlen(SHA-1)) + 2 */
+    WC_RSA_PKCS1_PADDING_SIZE = 11,
+    WC_RSA_PKCS1_OAEP_PADDING_SIZE = 42, /* (2 * hashlen(SHA-1)) + 2 */
+    #ifndef OPENSSL_COEXIST
+        #define RSA_PKCS1_PADDING_SIZE WC_RSA_PKCS1_PADDING_SIZE
+        #define RSA_PKCS1_OAEP_PADDING_SIZE WC_RSA_PKCS1_OAEP_PADDING_SIZE
+    #endif
 #endif
 #ifdef WC_RSA_PSS
     RSA_PSS_PAD_TERM = 0xBC,
@@ -148,16 +207,24 @@ enum {
     RSA_PSS_SALT_LEN_DISCOVER = -2,
 #endif
 
-#ifdef WOLF_CRYPTO_CB
+#ifdef WOLF_PRIVATE_KEY_ID
     RSA_MAX_ID_LEN      = 32,
     RSA_MAX_LABEL_LEN   = 32,
 #endif
+
+    WOLF_ENUM_DUMMY_LAST_ELEMENT(RSA)
 };
 
 #ifdef WC_RSA_NONBLOCK
 typedef struct RsaNb {
-    exptModNb_t exptmod; /* non-block expt_mod */
+#ifdef USE_FAST_MATH
+    exptModNb_t exptmod; /* TFM non-block expt_mod state */
     mp_int tmp;
+#endif
+#if defined(WOLFSSL_HAVE_SP_RSA) && defined(WOLFSSL_SP_NONBLOCK) && \
+    defined(WOLFSSL_SP_SMALL) && !defined(WOLFSSL_SP_FAST_MODEXP)
+    sp_rsa_ctx_t sp_ctx; /* SP non-block wrapper state */
+#endif
 } RsaNb;
 #endif
 
@@ -175,10 +242,22 @@ struct RsaKey {
     int   type;                               /* public or private */
     int   state;
     word32 dataLen;
-#ifdef WC_RSA_BLINDING
-    WC_RNG* rng;                              /* for PrivateDecrypt blinding */
+#ifndef WC_NO_RNG
+    WC_RNG* rng;                              /* for PrivateDecrypt blinding and
+                                               * _ifc_pairwise_consistency_test()
+                                               */
+#endif
+#ifdef WOLFSSL_SE050
+    word32 keyId;
+    byte   keyIdSet;
+#endif
+#if defined(WOLFSSL_MICROCHIP_TA100)
+    uint16_t  rKeyH;        /* private key handle */
+    uint16_t  uKeyH;        /* public key handle */
+    byte uKey[WOLFSSL_TA_KEY_TYPE_RSA_SIZE]; /* public key */
 #endif
 #ifdef WOLF_CRYPTO_CB
+    void* devCtx;
     int   devId;
 #endif
 #ifdef WOLFSSL_ASYNC_CRYPT
@@ -190,18 +269,24 @@ struct RsaKey {
 #ifdef WOLFSSL_XILINX_CRYPT
     word32 pubExp; /* to keep values in scope they are here in struct */
     byte*  mod;
+#if defined(WOLFSSL_XILINX_CRYPT_VERSAL)
+    int mSz;
+    wc_Xsecure xSec;
+#else
     XSecure_Rsa xRsa;
+#endif
 #endif
 #if defined(WOLFSSL_KCAPI_RSA)
     struct kcapi_handle* handle;
 #endif
-#ifdef WOLF_CRYPTO_CB
+#ifdef WOLF_PRIVATE_KEY_ID
     byte id[RSA_MAX_ID_LEN];
     int  idLen;
     char label[RSA_MAX_LABEL_LEN];
     int  labelLen;
 #endif
-#if defined(WOLFSSL_ASYNC_CRYPT) || !defined(WOLFSSL_RSA_VERIFY_INLINE)
+#if !defined(WOLFSSL_NO_MALLOC) && (defined(WOLFSSL_ASYNC_CRYPT) || \
+    (!defined(WOLFSSL_RSA_VERIFY_ONLY) && !defined(WOLFSSL_RSA_VERIFY_INLINE)))
     byte   dataIsAlloc;
 #endif
 #ifdef WC_RSA_NONBLOCK
@@ -214,6 +299,15 @@ struct RsaKey {
 #if defined(WOLFSSL_CRYPTOCELL)
     rsa_context_t ctx;
 #endif
+#if defined(WOLFSSL_CAAM)
+    word32 blackKey;
+#endif
+#if defined(WOLFSSL_DEVCRYPTO_RSA)
+    WC_CRYPTODEV ctx;
+#endif
+#if defined(WOLFSSL_RENESAS_FSPSM)
+    FSPSM_RSA_CTX ctx;
+#endif
 };
 
 #ifndef WC_RSAKEY_TYPE_DEFINED
@@ -223,10 +317,36 @@ struct RsaKey {
 
 #endif /* HAVE_FIPS */
 
+#if defined(WOLF_CRYPTO_CB) && defined(WOLF_CRYPTO_CB_RSA_PAD)
+struct RsaPadding {
+    byte pad_value;
+    int pad_type;
+    enum wc_HashType hash;
+    int mgf;
+    byte* label;
+    word32 labelSz;
+    int saltLen;
+    int unpadded;
+};
+typedef struct RsaPadding RsaPadding;
+#endif
+
 WOLFSSL_API int  wc_InitRsaKey(RsaKey* key, void* heap);
 WOLFSSL_API int  wc_InitRsaKey_ex(RsaKey* key, void* heap, int devId);
 WOLFSSL_API int  wc_FreeRsaKey(RsaKey* key);
-#ifdef WOLF_CRYPTO_CB
+#ifndef WC_NO_CONSTRUCTORS
+#define WC_RSA_NEW_API_AVAILABLE
+WOLFSSL_API RsaKey* wc_NewRsaKey(void* heap, int devId, int *result_code);
+#ifdef WOLF_PRIVATE_KEY_ID
+WOLFSSL_API RsaKey* wc_NewRsaKey_Id(unsigned char* id, int len, void* heap,
+        int devId, int *result_code);
+WOLFSSL_API RsaKey* wc_NewRsaKey_Label(const char* label, void* heap,
+        int devId, int *result_code);
+#endif
+WOLFSSL_API int  wc_DeleteRsaKey(RsaKey* key, RsaKey** key_p);
+#endif
+
+#ifdef WOLF_PRIVATE_KEY_ID
 WOLFSSL_API int wc_InitRsaKey_Id(RsaKey* key, unsigned char* id, int len,
                                  void* heap, int devId);
 WOLFSSL_API int wc_InitRsaKey_Label(RsaKey* key, const char* label, void* heap,
@@ -236,6 +356,10 @@ WOLFSSL_API int  wc_CheckRsaKey(RsaKey* key);
 #ifdef WOLFSSL_XILINX_CRYPT
 WOLFSSL_LOCAL int wc_InitRsaHw(RsaKey* key);
 #endif /* WOLFSSL_XILINX_CRYPT */
+#ifdef WOLFSSL_SE050
+WOLFSSL_API int wc_RsaUseKeyId(RsaKey* key, word32 keyId, word32 flags);
+WOLFSSL_API int wc_RsaGetKeyId(RsaKey* key, word32* keyId);
+#endif /* WOLFSSL_SE050 */
 
 WOLFSSL_API int  wc_RsaFunction(const byte* in, word32 inLen, byte* out,
                            word32* outLen, int type, RsaKey* key, WC_RNG* rng);
@@ -248,6 +372,7 @@ WOLFSSL_API int  wc_RsaPrivateDecrypt(const byte* in, word32 inLen, byte* out,
                                   word32 outLen, RsaKey* key);
 WOLFSSL_API int  wc_RsaSSL_Sign(const byte* in, word32 inLen, byte* out,
                             word32 outLen, RsaKey* key, WC_RNG* rng);
+#ifdef WC_RSA_PSS
 WOLFSSL_API int  wc_RsaPSS_Sign(const byte* in, word32 inLen, byte* out,
                                 word32 outLen, enum wc_HashType hash, int mgf,
                                 RsaKey* key, WC_RNG* rng);
@@ -255,6 +380,7 @@ WOLFSSL_API int  wc_RsaPSS_Sign_ex(const byte* in, word32 inLen, byte* out,
                                    word32 outLen, enum wc_HashType hash,
                                    int mgf, int saltLen, RsaKey* key,
                                    WC_RNG* rng);
+#endif
 WOLFSSL_API int  wc_RsaSSL_VerifyInline(byte* in, word32 inLen, byte** out,
                                     RsaKey* key);
 WOLFSSL_API int  wc_RsaSSL_Verify(const byte* in, word32 inLen, byte* out,
@@ -264,38 +390,40 @@ WOLFSSL_API int  wc_RsaSSL_Verify_ex(const byte* in, word32 inLen, byte* out,
 WOLFSSL_API int  wc_RsaSSL_Verify_ex2(const byte* in, word32 inLen, byte* out,
                               word32 outLen, RsaKey* key, int pad_type,
                               enum wc_HashType hash);
+#ifdef WC_RSA_PSS
 WOLFSSL_API int  wc_RsaPSS_VerifyInline(byte* in, word32 inLen, byte** out,
                                         enum wc_HashType hash, int mgf,
                                         RsaKey* key);
 WOLFSSL_API int  wc_RsaPSS_VerifyInline_ex(byte* in, word32 inLen, byte** out,
                                            enum wc_HashType hash, int mgf,
                                            int saltLen, RsaKey* key);
-WOLFSSL_API int  wc_RsaPSS_Verify(byte* in, word32 inLen, byte* out,
+WOLFSSL_API int  wc_RsaPSS_Verify(const byte* in, word32 inLen, byte* out,
                                   word32 outLen, enum wc_HashType hash, int mgf,
                                   RsaKey* key);
-WOLFSSL_API int  wc_RsaPSS_Verify_ex(byte* in, word32 inLen, byte* out,
+WOLFSSL_API int  wc_RsaPSS_Verify_ex(const byte* in, word32 inLen, byte* out,
                                      word32 outLen, enum wc_HashType hash,
                                      int mgf, int saltLen, RsaKey* key);
-WOLFSSL_API int  wc_RsaPSS_CheckPadding(const byte* in, word32 inLen, byte* sig,
-                                        word32 sigSz,
+WOLFSSL_API int  wc_RsaPSS_CheckPadding(const byte* in, word32 inLen,
+                                        const byte* sig, word32 sigSz,
                                         enum wc_HashType hashType);
 WOLFSSL_API int  wc_RsaPSS_CheckPadding_ex(const byte* in, word32 inLen,
-                                           byte* sig, word32 sigSz,
+                                           const byte* sig, word32 sigSz,
                                            enum wc_HashType hashType,
                                            int saltLen, int bits);
 WOLFSSL_API int  wc_RsaPSS_CheckPadding_ex2(const byte* in, word32 inLen,
-                                           byte* sig, word32 sigSz,
+                                           const byte* sig, word32 sigSz,
                                            enum wc_HashType hashType,
                                            int saltLen, int bits, void* heap);
 WOLFSSL_API int  wc_RsaPSS_VerifyCheckInline(byte* in, word32 inLen, byte** out,
                                const byte* digest, word32 digentLen,
                                enum wc_HashType hash, int mgf,
                                RsaKey* key);
-WOLFSSL_API int  wc_RsaPSS_VerifyCheck(byte* in, word32 inLen,
+WOLFSSL_API int  wc_RsaPSS_VerifyCheck(const byte* in, word32 inLen,
                                byte* out, word32 outLen,
                                const byte* digest, word32 digestLen,
                                enum wc_HashType hash, int mgf,
                                RsaKey* key);
+#endif
 
 WOLFSSL_API int  wc_RsaEncryptSize(const RsaKey* key);
 
@@ -303,22 +431,29 @@ WOLFSSL_API int  wc_RsaEncryptSize(const RsaKey* key);
         (defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2))
 /* to avoid asn duplicate symbols @wc_fips */
 WOLFSSL_API int  wc_RsaPrivateKeyDecode(const byte* input, word32* inOutIdx,
-                                                               RsaKey*, word32);
+                                        RsaKey* key, word32 inSz);
+#if !defined(HAVE_FIPS) || \
+        (defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION > 2))
+WOLFSSL_API int  wc_RsaPrivateKeyValidate(const byte* input, word32* inOutIdx,
+                                          int* keySz, word32 inSz);
+#endif
 WOLFSSL_API int  wc_RsaPublicKeyDecode(const byte* input, word32* inOutIdx,
-                                                               RsaKey*, word32);
+                                       RsaKey* key, word32 inSz);
 WOLFSSL_API int  wc_RsaPublicKeyDecodeRaw(const byte* n, word32 nSz,
                                         const byte* e, word32 eSz, RsaKey* key);
-#if defined(WOLFSSL_KEY_GEN) || defined(OPENSSL_EXTRA) || \
-        defined(WOLFSSL_KCAPI_RSA)
-    WOLFSSL_API int wc_RsaKeyToDer(RsaKey*, byte* output, word32 inLen);
+#ifdef WOLFSSL_KEY_TO_DER
+    WOLFSSL_API int wc_RsaKeyToDer(RsaKey* key, byte* output, word32 outLen);
 #endif
 
-#ifdef WC_RSA_BLINDING
+#ifndef WC_NO_RNG
     WOLFSSL_API int wc_RsaSetRNG(RsaKey* key, WC_RNG* rng);
 #endif
 #ifdef WC_RSA_NONBLOCK
     WOLFSSL_API int wc_RsaSetNonBlock(RsaKey* key, RsaNb* nb);
-    #ifdef WC_RSA_NONBLOCK_TIME
+    /* maxBlockInst budget lives on the TFM exptModNb_t; only available
+     * with USE_FAST_MATH. SP-only WC_RSA_NONBLOCK builds do not expose
+     * this entry point. */
+    #if defined(WC_RSA_NONBLOCK_TIME) && defined(USE_FAST_MATH)
     WOLFSSL_API int wc_RsaSetNonBlockTime(RsaKey* key, word32 maxBlockUs,
                                           word32 cpuMHz);
     #endif
@@ -329,12 +464,22 @@ WOLFSSL_API int  wc_RsaPublicKeyDecodeRaw(const byte* n, word32 nSz,
  */
 
 /* Mask Generation Function Identifiers */
-#define WC_MGF1NONE   0
-#define WC_MGF1SHA1   26
-#define WC_MGF1SHA224 4
-#define WC_MGF1SHA256 1
-#define WC_MGF1SHA384 2
-#define WC_MGF1SHA512 3
+#define WC_MGF1NONE       0
+#define WC_MGF1SHA1       26
+#define WC_MGF1SHA224     4
+#define WC_MGF1SHA256     1
+#define WC_MGF1SHA384     2
+#define WC_MGF1SHA512     3
+#define WC_MGF1SHA512_224 5
+#define WC_MGF1SHA512_256 6
+#define WC_MGF1SHA3_224   7
+#define WC_MGF1SHA3_256   8
+#define WC_MGF1SHA3_384   9
+#define WC_MGF1SHA3_512   10
+#define WC_MGF1SHAKE128   11
+#define WC_MGF1SHAKE256   12
+#define WC_MGFSHAKE128    13
+#define WC_MGFSHAKE256    14
 
 /* Padding types */
 #define WC_RSA_PKCSV15_PAD 0
@@ -351,16 +496,16 @@ WOLFSSL_API int  wc_RsaPrivateDecrypt_ex(const byte* in, word32 inLen,
 WOLFSSL_API int  wc_RsaPrivateDecryptInline_ex(byte* in, word32 inLen,
                       byte** out, RsaKey* key, int type, enum wc_HashType hash,
                       int mgf, byte* label, word32 labelSz);
-#if defined(WC_RSA_DIRECT) || defined(WC_RSA_NO_PADDING)
-WOLFSSL_API int wc_RsaDirect(byte* in, word32 inLen, byte* out, word32* outSz,
+#if defined(WC_RSA_DIRECT) || defined(WC_RSA_NO_PADDING) || defined(OPENSSL_EXTRA) || defined(OPENSSL_EXTRA_X509_SMALL)
+WOLFSSL_API int wc_RsaDirect(const byte* in, word32 inLen, byte* out, word32* outSz,
                    RsaKey* key, int type, WC_RNG* rng);
 #endif
 
 #endif /* HAVE_FIPS */
 
-WOLFSSL_API int  wc_RsaFlattenPublicKey(RsaKey*, byte*, word32*, byte*,
-                                                                       word32*);
-WOLFSSL_API int wc_RsaExportKey(RsaKey* key,
+WOLFSSL_API int  wc_RsaFlattenPublicKey(const RsaKey* key, byte* e, word32* eSz,
+                                        byte* n, word32* nSz);
+WOLFSSL_API int wc_RsaExportKey(const RsaKey* key,
                                 byte* e, word32* eSz,
                                 byte* n, word32* nSz,
                                 byte* d, word32* dSz,
@@ -379,18 +524,23 @@ WOLFSSL_API int wc_RsaExportKey(RsaKey* key,
                                           int nlen, int* isPrime);
 #endif
 
-WOLFSSL_LOCAL int wc_RsaPad_ex(const byte* input, word32 inputLen, byte* pkcsBlock,
-        word32 pkcsBlockLen, byte padValue, WC_RNG* rng, int padType,
-        enum wc_HashType hType, int mgf, byte* optLabel, word32 labelLen,
-        int saltLen, int bits, void* heap);
-WOLFSSL_LOCAL int wc_RsaUnPad_ex(byte* pkcsBlock, word32 pkcsBlockLen, byte** out,
-                                   byte padValue, int padType, enum wc_HashType hType,
-                                   int mgf, byte* optLabel, word32 labelLen, int saltLen,
-                                   int bits, void* heap);
+WOLFSSL_API int wc_RsaPad_ex(const byte* input, word32 inputLen,
+    byte* pkcsBlock, word32 pkcsBlockLen, byte padValue,
+    WC_RNG* rng, int padType, enum wc_HashType hType, int mgf,
+    byte* optLabel, word32 labelLen, int saltLen, int bits, void* heap);
+WOLFSSL_API int wc_RsaUnPad_ex(byte* pkcsBlock, word32 pkcsBlockLen,
+    byte** out, byte padValue, int padType, enum wc_HashType hType, int mgf,
+    byte* optLabel, word32 labelLen, int saltLen, int bits, void* heap);
 
 WOLFSSL_LOCAL int wc_hash2mgf(enum wc_HashType hType);
+WOLFSSL_LOCAL int RsaFunctionCheckIn(const byte* in, word32 inLen, RsaKey* key,
+    int checkSmallCt);
 
-#endif /* HAVE_USER_RSA */
+WOLFSSL_API int wc_RsaPrivateKeyDecodeRaw(const byte* n, word32 nSz,
+        const byte* e, word32 eSz, const byte* d, word32 dSz,
+        const byte* u, word32 uSz, const byte* p, word32 pSz,
+        const byte* q, word32 qSz, const byte* dP, word32 dPSz,
+        const byte* dQ, word32 dQSz, RsaKey* key);
 
 #ifdef __cplusplus
     } /* extern "C" */
@@ -398,4 +548,3 @@ WOLFSSL_LOCAL int wc_hash2mgf(enum wc_HashType hType);
 
 #endif /* NO_RSA */
 #endif /* WOLF_CRYPT_RSA_H */
-

@@ -1,12 +1,12 @@
 /* integer.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -29,24 +29,25 @@
 #ifndef WOLF_CRYPT_INTEGER_H
 #define WOLF_CRYPT_INTEGER_H
 
-/* may optionally use fast math instead, not yet supported on all platforms and
-   may not be faster on all
-*/
-#include <wolfssl/wolfcrypt/types.h>       /* will set MP_xxBIT if not default */
-#if defined(WOLFSSL_SP_MATH) || defined(WOLFSSL_SP_MATH_ALL)
-    #include <wolfssl/wolfcrypt/sp_int.h>
-#elif defined(USE_FAST_MATH)
-    #include <wolfssl/wolfcrypt/tfm.h>
+/* may optionally use SP math all or fast math instead. The heap math requires
+ * realloc and is not timing resistant. The SP math all is recommended for new
+ * designs.
+ */
+
+#ifndef USE_INTEGER_HEAP_MATH
+
+    /* Some platforms (like FIPS) may only include integer.h for math. */
+    /* Handle variations of fast math, integer and sp math */
+    #include <wolfssl/wolfcrypt/wolfmath.h>
+
 #else
 
+#include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/error-crypt.h>
 #include <wolfssl/wolfcrypt/random.h>
 
-#ifndef CHAR_BIT
-    #if defined(WOLFSSL_LINUXKM)
-        #include <linux/limits.h>
-    #else
-        #include <limits.h>
-    #endif
+#if !defined(CHAR_BIT) && !defined(NO_LIMITS_H)
+    #include <limits.h>
 #endif
 
 #include <wolfssl/wolfcrypt/mpi_class.h>
@@ -66,7 +67,7 @@ extern "C" {
 #else
 
 /* C on the other hand doesn't care */
-#define  OPT_CAST(x)
+#define  OPT_CAST(x) /* null expansion */
 
 #endif /* __cplusplus */
 
@@ -151,7 +152,7 @@ extern "C" {
 #define MP_DIGIT_MAX     MP_MASK
 
 /* equalities */
-#define MP_LT        -1   /* less than */
+#define MP_LT       (-1)  /* less than */
 #define MP_EQ         0   /* equal to */
 #define MP_GT         1   /* greater than */
 
@@ -159,9 +160,6 @@ extern "C" {
 #define MP_NEG        1   /* negative */
 
 #define MP_OKAY       0   /* ok result */
-#define MP_MEM        -2  /* out of mem */
-#define MP_VAL        -3  /* invalid input */
-#define MP_NOT_INF    -4  /* point not at infinity */
 #define MP_RANGE      MP_NOT_INF
 
 #define MP_YES        1   /* yes response */
@@ -190,6 +188,35 @@ typedef int           mp_err;
    BITS_PER_DIGIT*2) */
 #define MP_WARRAY  ((mp_word)1 << (sizeof(mp_word) * CHAR_BIT - 2 * DIGIT_BIT + 1))
 
+/* No point in dynamically allocating mp_int when it is very small.
+ * The dp field will grow and shrink dynamically.
+ */
+/* Declare a statically allocated mp_int. */
+#define DECL_MP_INT_SIZE(name, bits)    \
+    mp_int name[1]
+/* Declare statically allocated mp_int. */
+#define DECL_MP_INT_SIZE_DYN(name, bits, max) \
+    mp_int name[1]
+/* Zero out mp_int of minimal size. */
+#define NEW_MP_INT_SIZE(name, bits, heap, type) \
+    XMEMSET(name, 0, sizeof(mp_int))
+/* Dispose of static mp_int. */
+#define FREE_MP_INT_SIZE(name, heap, type) \
+    do {                                   \
+        if ((name) != NULL) {              \
+            mp_free(name);                 \
+        }                                  \
+    } while (0)
+/* Initialize an mp_int. */
+#define INIT_MP_INT_SIZE(name, bits) \
+    mp_init(name)
+/* Type to cast to when using size marcos. */
+#define MP_INT_SIZE     mp_int
+
+/* integer.h allocates full-sized mp_int buffers, so DECL_MP_INT_SIZE_DYN
+ * cannot be undersized for any 'bits' value -- no check is needed. */
+#define MP_BITS_OVER_MAX(bits, max) 0
+
 #ifdef HAVE_WOLF_BIGINT
     /* raw big integer */
     typedef struct WC_BIGINT {
@@ -199,6 +226,9 @@ typedef int           mp_err;
     } WC_BIGINT;
     #define WOLF_BIGINT_DEFINED
 #endif
+
+#define wc_mp_size_t int
+#define wc_mp_sign_t int
 
 /* the mp_int structure */
 typedef struct mp_int {
@@ -234,9 +264,12 @@ typedef int ltm_prime_callback(unsigned char *dst, int len, void *dat);
 #define mp_isodd(a) \
     (((a)->used > 0 && (((a)->dp[0] & 1u) == 1u)) ? MP_YES : MP_NO)
 #define mp_isneg(a)  (((a)->sign != MP_ZPOS) ? MP_YES : MP_NO)
+#define mp_setneg(a) ((a)->sign = MP_NEG)
 #define mp_isword(a, w) \
-    ((((a)->used == 1) && ((a)->dp[0] == w)) || ((w == 0) && ((a)->used == 0)) \
+    ((((a)->used == 1) && ((a)->dp[0] == (w))) || (((w) == 0) && ((a)->used == 0)) \
                                                                ? MP_YES : MP_NO)
+/* Number of bits used based on used field only. */
+#define mp_bitsused(a)   ((a)->used * DIGIT_BIT)
 
 /* number of primes */
 #ifdef MP_8BIT
@@ -254,7 +287,7 @@ typedef int ltm_prime_callback(unsigned char *dst, int len, void *dat);
 #endif
 
 #define mp_prime_random(a, t, size, bbs, cb, dat) \
-   mp_prime_random_ex(a, t, ((size) * 8) + 1, (bbs==1)?LTM_PRIME_BBS:0, cb, dat)
+   mp_prime_random_ex(a, t, ((size) * 8) + 1, ((bbs)==1)?LTM_PRIME_BBS:0, cb, dat)
 
 #define mp_read_mag(mp, str, len) mp_read_unsigned_bin((mp), (str), (len))
 #define mp_mag_size(mp)           mp_unsigned_bin_size(mp)
@@ -278,7 +311,7 @@ typedef int ltm_prime_callback(unsigned char *dst, int len, void *dat);
 extern const char *mp_s_rmap;
 #endif
 
-/* 6 functions needed by Rsa */
+/* functions needed by Rsa */
 MP_API int  mp_init (mp_int * a);
 MP_API void mp_clear (mp_int * a);
 MP_API void mp_free (mp_int * a);
@@ -286,7 +319,8 @@ MP_API void mp_forcezero(mp_int * a);
 MP_API int  mp_unsigned_bin_size(const mp_int * a);
 MP_API int  mp_read_unsigned_bin (mp_int * a, const unsigned char *b, int c);
 MP_API int  mp_to_unsigned_bin_at_pos(int x, mp_int *t, unsigned char *b);
-MP_API int  mp_to_unsigned_bin (mp_int * a, unsigned char *b);
+MP_API int  mp_to_unsigned_bin(const mp_int * a, unsigned char *b);
+#define mp_to_unsigned_bin_len_ct mp_to_unsigned_bin_len
 MP_API int  mp_to_unsigned_bin_len(mp_int * a, unsigned char *b, int c);
 MP_API int  mp_exptmod (mp_int * G, mp_int * X, mp_int * P, mp_int * Y);
 MP_API int  mp_exptmod_ex (mp_int * G, mp_int * X, int digits, mp_int * P,
@@ -296,13 +330,15 @@ MP_API int  mp_exptmod_ex (mp_int * G, mp_int * X, int digits, mp_int * P,
 /* functions added to support above needed, removed TOOM and KARATSUBA */
 MP_API int  mp_count_bits (const mp_int * a);
 MP_API int  mp_leading_bit (mp_int * a);
-MP_API int  mp_init_copy (mp_int * a, mp_int * b);
+MP_API int  mp_init_copy (mp_int * a, const mp_int * b);
 MP_API int  mp_copy (const mp_int * a, mp_int * b);
 MP_API int  mp_grow (mp_int * a, int size);
 MP_API int  mp_div_2d (mp_int * a, int b, mp_int * c, mp_int * d);
 MP_API void mp_zero (mp_int * a);
 MP_API void mp_clamp (mp_int * a);
 MP_API int  mp_exch (mp_int * a, mp_int * b);
+MP_API int  mp_cond_swap_ct_ex (mp_int * a, mp_int * b, int c, int m,
+                                mp_int * t);
 MP_API int  mp_cond_swap_ct (mp_int * a, mp_int * b, int c, int m);
 MP_API void mp_rshd (mp_int * a, int b);
 MP_API void mp_rshb (mp_int * a, int b);
@@ -313,8 +349,9 @@ MP_API int  mp_abs (mp_int * a, mp_int * b);
 MP_API int  mp_invmod (mp_int * a, mp_int * b, mp_int * c);
 int  fast_mp_invmod (mp_int * a, mp_int * b, mp_int * c);
 MP_API int  mp_invmod_slow (mp_int * a, mp_int * b, mp_int * c);
-MP_API int  mp_cmp_mag (mp_int * a, mp_int * b);
-MP_API int  mp_cmp (mp_int * a, mp_int * b);
+MP_API int  mp_cmp_mag (const mp_int * a, const mp_int * b);
+MP_API int  mp_cmp (const mp_int * a, const mp_int * b);
+#define mp_cmp_ct(a, b, n) mp_cmp(a, b)
 MP_API int  mp_cmp_d(mp_int * a, mp_digit b);
 MP_API int  mp_set (mp_int * a, mp_digit b);
 MP_API int  mp_is_bit_set (mp_int * a, mp_digit b);
@@ -330,13 +367,14 @@ MP_API int  mp_reduce_is_2k_l(mp_int *a);
 MP_API int  mp_reduce_is_2k(mp_int *a);
 MP_API int  mp_dr_is_modulus(mp_int *a);
 MP_API int  mp_exptmod_fast (mp_int * G, mp_int * X, mp_int * P, mp_int * Y,
-                             int);
+                             int redmode);
 MP_API int  mp_exptmod_base_2 (mp_int * X, mp_int * P, mp_int * Y);
 #define mp_exptmod_nct(G,X,P,Y)    mp_exptmod_fast(G,X,P,Y,0)
 MP_API int  mp_montgomery_setup (mp_int * n, mp_digit * rho);
 int  fast_mp_montgomery_reduce (mp_int * x, mp_int * n, mp_digit rho);
 MP_API int  mp_montgomery_reduce (mp_int * x, mp_int * n, mp_digit rho);
 #define mp_montgomery_reduce_ex(x, n, rho, ct) mp_montgomery_reduce (x, n, rho)
+#define mp_montgomery_reduce_ct(x, n, rho)     mp_montgomery_reduce (x, n, rho)
 MP_API void mp_dr_setup(mp_int *a, mp_digit *d);
 MP_API int  mp_dr_reduce (mp_int * x, mp_int * n, mp_digit k);
 MP_API int  mp_reduce_2k(mp_int *a, mp_int *n, mp_digit d);
@@ -380,25 +418,25 @@ MP_API int mp_radix_size (mp_int * a, int radix, int *size);
 #ifdef WOLFSSL_DEBUG_MATH
     MP_API void mp_dump(const char* desc, mp_int* a, byte verbose);
 #else
-    #define mp_dump(desc, a, verbose)
+    #define mp_dump(desc, a, verbose) WC_DO_NOTHING
 #endif
 
 #if defined(HAVE_ECC) || defined(WOLFSSL_KEY_GEN) || !defined(NO_RSA) || \
     !defined(NO_DSA) || !defined(NO_DH)
     MP_API int mp_sqrmod(mp_int* a, mp_int* b, mp_int* c);
 #endif
-#if !defined(NO_DSA) || defined(HAVE_ECC)
+#if !defined(NO_DSA) || defined(HAVE_ECC) || defined(OPENSSL_EXTRA)
     MP_API int mp_read_radix(mp_int* a, const char* str, int radix);
 #endif
 
 #if defined(WOLFSSL_KEY_GEN) || !defined(NO_RSA) || !defined(NO_DSA) || !defined(NO_DH)
     MP_API int mp_prime_is_prime (mp_int * a, int t, int *result);
-    MP_API int mp_prime_is_prime_ex (mp_int * a, int t, int *result, WC_RNG*);
+    MP_API int mp_prime_is_prime_ex (mp_int * a, int t, int *result, WC_RNG* rng);
 #endif /* WOLFSSL_KEY_GEN NO_RSA NO_DSA NO_DH */
 #ifdef WOLFSSL_KEY_GEN
     MP_API int mp_gcd (mp_int * a, mp_int * b, mp_int * c);
     MP_API int mp_lcm (mp_int * a, mp_int * b, mp_int * c);
-    MP_API int mp_rand_prime(mp_int* N, int len, WC_RNG* rng, void* heap);
+    MP_API int mp_rand_prime(mp_int* a, int len, WC_RNG* rng, void* heap);
 #endif
 
 MP_API int mp_cnt_lsb(mp_int *a);
@@ -410,7 +448,6 @@ MP_API int mp_mod_d(mp_int* a, mp_digit b, mp_digit* c);
 #endif
 
 
-#endif /* USE_FAST_MATH */
+#endif /* USE_INTEGER_HEAP_MATH */
 
 #endif  /* WOLF_CRYPT_INTEGER_H */
-

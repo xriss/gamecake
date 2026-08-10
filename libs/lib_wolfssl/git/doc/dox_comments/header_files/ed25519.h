@@ -1,21 +1,21 @@
 /*!
     \ingroup ED25519
 
-    \brief This function generates the Ed25519 public key from the private key.
-    It stores the public key in the buffer pubKey, and sets the bytes
-    written to this buffer in pubKeySz.
+    \brief This function generates the Ed25519 public key from the private key,
+    stored in the ed25519_key object. It stores the public key in the buffer
+    pubKey.
 
     \return 0 Returned upon successfully making the public key.
-    \return BAD_FUNC_ARG Returned ifi key or pubKey evaluate to NULL, or if the
+    \return BAD_FUNC_ARG Returned if key or pubKey evaluate to NULL, or if the
     specified key size is not 32 bytes (Ed25519 has 32 byte keys).
+    \return ECC_PRIV_KEY_E returned if the ed25519_key object does not have
+    the private key in it.
     \return MEMORY_E Returned if there is an error allocating memory
     during function execution.
 
     \param [in] key Pointer to the ed25519_key for which to generate a key.
-    \param [out] out Pointer to the buffer in which to store the public key.
-    \param [in,out] outLen Pointer to a word32 object with the size available
-    in out. Set with the number of bytes written to out after successfully
-    exporting the public key.
+    \param [out] pubKey Pointer to the buffer in which to store the public key.
+    \param [in] pubKeySz Size of the public key. Should be ED25519_PUB_KEY_SIZE.
 
     _Example_
     \code
@@ -38,7 +38,7 @@
     \sa wc_ed25519_import_private_only
     \sa wc_ed25519_make_key
 */
-WOLFSSL_API
+
 int wc_ed25519_make_public(ed25519_key* key, unsigned char* pubKey,
                            word32 pubKeySz);
 
@@ -76,7 +76,7 @@ int wc_ed25519_make_public(ed25519_key* key, unsigned char* pubKey,
 
     \sa wc_ed25519_init
 */
-WOLFSSL_API
+
 int wc_ed25519_make_key(WC_RNG* rng, int keysize, ed25519_key* key);
 
 /*!
@@ -124,7 +124,7 @@ int wc_ed25519_make_key(WC_RNG* rng, int keysize, ed25519_key* key);
     \sa wc_ed25519ph_sign_msg
     \sa wc_ed25519_verify_msg
 */
-WOLFSSL_API
+
 int wc_ed25519_sign_msg(const byte* in, word32 inlen, byte* out,
                         word32 *outlen, ed25519_key* key);
 
@@ -178,7 +178,7 @@ int wc_ed25519_sign_msg(const byte* in, word32 inlen, byte* out,
     \sa wc_ed25519ph_sign_msg
     \sa wc_ed25519_verify_msg
 */
-WOLFSSL_API
+
 int wc_ed25519ctx_sign_msg(const byte* in, word32 inlen, byte* out,
                         word32 *outlen, ed25519_key* key,
                         const byte* context, byte contextLen);
@@ -188,8 +188,7 @@ int wc_ed25519ctx_sign_msg(const byte* in, word32 inlen, byte* out,
 
     \brief This function signs a message digest using an ed25519_key object
     to guarantee authenticity. The context is included as part of the data
-    signed. The message is pre-hashed before signature calculation. The hash
-    algorithm used to create message digest must be SHAKE-256.
+    signed. The message is pre-hashed before signature calculation.
 
     \return 0 Returned upon successfully generating a signature for the
     message digest.
@@ -202,7 +201,7 @@ int wc_ed25519ctx_sign_msg(const byte* in, word32 inlen, byte* out,
     to sign.
     \param [in] hashLen Length of the hash of the message to sign.
     \param [out] out Buffer in which to store the generated signature.
-    \param [in,out] outlen Maximum length of the output buffer. Will store the
+    \param [in,out] outLen Maximum length of the output buffer. Will store the
     bytes written to out upon successfully generating a message signature.
     \param [in] key Pointer to a private ed25519_key with which to generate the
     signature.
@@ -236,7 +235,7 @@ int wc_ed25519ctx_sign_msg(const byte* in, word32 inlen, byte* out,
     \sa wc_ed25519ph_sign_msg
     \sa wc_ed25519_verify_msg
 */
-WOLFSSL_API
+
 int wc_ed25519ph_sign_hash(const byte* hash, word32 hashLen, byte* out,
                            word32 *outLen, ed25519_key* key,
                            const byte* context, byte contextLen);
@@ -292,7 +291,7 @@ int wc_ed25519ph_sign_hash(const byte* hash, word32 hashLen, byte* out,
     \sa wc_ed25519ph_sign_hash
     \sa wc_ed25519_verify_msg
 */
-WOLFSSL_API
+
 int wc_ed25519ph_sign_msg(const byte* in, word32 inlen, byte* out,
                         word32 *outlen, ed25519_key* key,
                         const byte* context, byte contextLen);
@@ -301,7 +300,7 @@ int wc_ed25519ph_sign_msg(const byte* in, word32 inlen, byte* out,
     \ingroup ED25519
 
     \brief This function verifies the Ed25519 signature of a message to ensure
-    authenticity. It returns the answer through res, with 1 corresponding to
+    authenticity. It returns the answer through ret, with 1 corresponding to
     a valid signature, and 0 corresponding to an invalid signature.
 
     \return 0 Returned upon successfully performing the signature
@@ -315,7 +314,7 @@ int wc_ed25519ph_sign_msg(const byte* in, word32 inlen, byte* out,
     \param [in] siglen Length of the signature to verify.
     \param [in] msg Pointer to the buffer containing the message to verify.
     \param [in] msgLen Length of the message to verify.
-    \param [out] res Pointer to the result of the verification. 1 indicates the
+    \param [out] ret Pointer to the result of the verification. 1 indicates the
     message was successfully verified.
     \param [in] key Pointer to a public Ed25519 key with which to verify the
     signature.
@@ -342,7 +341,7 @@ int wc_ed25519ph_sign_msg(const byte* in, word32 inlen, byte* out,
     \sa wc_ed25519ph_verify_msg
     \sa wc_ed25519_sign_msg
 */
-WOLFSSL_API
+
 int wc_ed25519_verify_msg(const byte* sig, word32 siglen, const byte* msg,
                           word32 msgLen, int* ret, ed25519_key* key);
 
@@ -351,7 +350,7 @@ int wc_ed25519_verify_msg(const byte* sig, word32 siglen, const byte* msg,
 
     \brief This function verifies the Ed25519 signature of a message to ensure
     authenticity. The context is included as part of the data
-    verified. It returns the answer through res, with 1 corresponding to
+    verified. It returns the answer through ret, with 1 corresponding to
     a valid signature, and 0 corresponding to an invalid signature.
 
     \return 0 Returned upon successfully performing the signature
@@ -365,7 +364,7 @@ int wc_ed25519_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     \param [in] siglen Length of the signature to verify.
     \param [in] msg Pointer to the buffer containing the message to verify.
     \param [in] msgLen Length of the message to verify.
-    \param [out] res Pointer to the result of the verification. 1 indicates the
+    \param [out] ret Pointer to the result of the verification. 1 indicates the
     message was successfully verified.
     \param [in] key Pointer to a public Ed25519 key with which to verify the
     signature.
@@ -396,7 +395,7 @@ int wc_ed25519_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     \sa wc_ed25519ph_verify_msg
     \sa wc_ed25519_sign_msg
 */
-WOLFSSL_API
+
 int wc_ed25519ctx_verify_msg(const byte* sig, word32 siglen, const byte* msg,
                              word32 msgLen, int* ret, ed25519_key* key,
                              const byte* context, byte contextLen);
@@ -408,7 +407,7 @@ int wc_ed25519ctx_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     message to ensure authenticity. The context is included as part of the data
     verified. The hash is the pre-hashed message before signature calculation.
     The hash algorithm used to create message digest must be SHA-512.
-    The answer is returned through res, with 1 corresponding to a valid
+    The answer is returned through ret, with 1 corresponding to a valid
     signature, and 0 corresponding to an invalid signature.
 
 
@@ -424,7 +423,7 @@ int wc_ed25519ctx_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     \param [in] hash Pointer to the buffer containing the hash of the message
     to verify.
     \param [in] hashLen Length of the hash to verify.
-    \param [out] res Pointer to the result of the verification. 1 indicates the
+    \param [out] ret Pointer to the result of the verification. 1 indicates the
     message was successfully verified.
     \param [in] key Pointer to a public Ed25519 key with which to verify the
     signature.
@@ -441,8 +440,8 @@ int wc_ed25519ctx_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     byte hash[] = { initialize with SHA-512 hash of message };
     byte context[] = { initialize with context of signature };
     // initialize key with received public key
-    ret = wc_ed25519ph_verify_hash(sig, sizeof(sig), msg, sizeof(msg),
-            &verified, &key, );
+    ret = wc_ed25519ph_verify_hash(sig, sizeof(sig), hash, sizeof(hash),
+            &verified, &key, context, sizeof(context));
     if (ret < 0) {
         // error performing verification
     } else if (verified == 0)
@@ -455,7 +454,7 @@ int wc_ed25519ctx_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     \sa wc_ed25519ph_verify_msg
     \sa wc_ed25519_sign_msg
 */
-WOLFSSL_API
+
 int wc_ed25519ph_verify_hash(const byte* sig, word32 siglen, const byte* hash,
                              word32 hashLen, int* ret, ed25519_key* key,
                              const byte* context, byte contextLen);
@@ -466,7 +465,7 @@ int wc_ed25519ph_verify_hash(const byte* sig, word32 siglen, const byte* hash,
     \brief This function verifies the Ed25519 signature of a message to ensure
     authenticity. The context is included as part of the data
     verified. The message is pre-hashed before verification. It returns the
-    answer through res, with 1 corresponding to a valid signature, and 0
+    answer through ret, with 1 corresponding to a valid signature, and 0
     corresponding to an invalid signature.
 
     \return 0 Returned upon successfully performing the signature
@@ -480,7 +479,7 @@ int wc_ed25519ph_verify_hash(const byte* sig, word32 siglen, const byte* hash,
     \param [in] siglen Length of the signature to verify.
     \param [in] msg Pointer to the buffer containing the message to verify.
     \param [in] msgLen Length of the message to verify.
-    \param [out] res Pointer to the result of the verification. 1 indicates the
+    \param [out] ret Pointer to the result of the verification. 1 indicates the
     message was successfully verified.
     \param [in] key Pointer to a public Ed25519 key with which to verify the
     signature.
@@ -497,8 +496,8 @@ int wc_ed25519ph_verify_hash(const byte* sig, word32 siglen, const byte* hash,
     byte msg[] = { initialize with message };
     byte context[] = { initialize with context of signature };
     // initialize key with received public key
-    ret = wc_ed25519ctx_verify_msg(sig, sizeof(sig), msg, sizeof(msg),
-            &verified, &key, );
+    ret = wc_ed25519ph_verify_msg(sig, sizeof(sig), msg, sizeof(msg),
+            &verified, &key, context, sizeof(context));
     if (ret < 0) {
         // error performing verification
     } else if (verified == 0)
@@ -507,11 +506,11 @@ int wc_ed25519ph_verify_hash(const byte* sig, word32 siglen, const byte* hash,
     \endcode
 
     \sa wc_ed25519_verify_msg
+    \sa wc_ed25519ctx_verify_msg
     \sa wc_ed25519ph_verify_hash
-    \sa wc_ed25519ph_verify_msg
     \sa wc_ed25519_sign_msg
 */
-WOLFSSL_API
+
 int wc_ed25519ph_verify_msg(const byte* sig, word32 siglen, const byte* msg,
                             word32 msgLen, int* ret, ed25519_key* key,
                             const byte* context, byte contextLen);
@@ -536,7 +535,7 @@ int wc_ed25519ph_verify_msg(const byte* sig, word32 siglen, const byte* msg,
     \sa wc_ed25519_make_key
     \sa wc_ed25519_free
 */
-WOLFSSL_API
+
 int wc_ed25519_init(ed25519_key* key);
 
 /*!
@@ -556,15 +555,16 @@ int wc_ed25519_init(ed25519_key* key);
 
     \sa wc_ed25519_init
 */
-WOLFSSL_API
+
 void wc_ed25519_free(ed25519_key* key);
 
 /*!
     \ingroup ED25519
 
-    \brief This function imports a public ed25519_key pair from a buffer
+    \brief This function imports a public ed25519_key from a buffer
     containing the public key. This function will handle both compressed and
-    uncompressed keys.
+    uncompressed keys. The public key is checked that it matches the private
+    key when one is present.
 
     \return 0 Returned on successfully importing the ed25519_key.
     \return BAD_FUNC_ARG Returned if in or key evaluate to NULL, or inLen is
@@ -588,11 +588,53 @@ void wc_ed25519_free(ed25519_key* key);
     }
     \endcode
 
+    \sa wc_ed25519_import_public_ex
     \sa wc_ed25519_import_private_key
+    \sa wc_ed25519_import_private_key_ex
     \sa wc_ed25519_export_public
 */
-WOLFSSL_API
+
 int wc_ed25519_import_public(const byte* in, word32 inLen, ed25519_key* key);
+
+/*!
+    \ingroup ED25519
+
+    \brief This function imports a public ed25519_key from a buffer
+    containing the public key. This function will handle both compressed and
+    uncompressed keys. Check public key matches private key, when present,
+    when not trusted.
+
+    \return 0 Returned on successfully importing the ed25519_key.
+    \return BAD_FUNC_ARG Returned if in or key evaluate to NULL, or inLen is
+    less than the size of an Ed25519 key.
+
+    \param [in] in Pointer to the buffer containing the public key.
+    \param [in] inLen Length of the buffer containing the public key.
+    \param [in,out] key Pointer to the ed25519_key object in which to store the
+    public key.
+    \param [in] trusted Public key data is trusted or not.
+
+    _Example_
+    \code
+    int ret;
+    byte pub[] = { initialize Ed25519 public key };
+
+    ed_25519 key;
+    wc_ed25519_init_key(&key);
+    ret = wc_ed25519_import_public_ex(pub, sizeof(pub), &key, 1);
+    if (ret != 0) {
+        // error importing key
+    }
+    \endcode
+
+    \sa wc_ed25519_import_public
+    \sa wc_ed25519_import_private_key
+    \sa wc_ed25519_import_private_key_ex
+    \sa wc_ed25519_export_public
+*/
+
+int wc_ed25519_import_public_ex(const byte* in, word32 inLen, ed25519_key* key,
+    int trusted);
 
 /*!
     \ingroup ED25519
@@ -601,13 +643,11 @@ int wc_ed25519_import_public(const byte* in, word32 inLen, ed25519_key* key);
     buffer.
 
     \return 0 Returned on successfully importing the Ed25519 key.
-    \return BAD_FUNC_ARG Returned if in or key evaluate to NULL, or if
-    privSz is less than ED25519_KEY_SIZE.
+    \return BAD_FUNC_ARG Returned if priv or key evaluate to NULL, or if
+    privSz is not equal to ED25519_KEY_SIZE.
 
     \param [in] priv Pointer to the buffer containing the private key.
     \param [in] privSz Length of the private key.
-    \param [in] pub Pointer to the buffer containing the public key.
-    \param [in] pubSz Length of the public key.
     \param [in,out] key Pointer to the ed25519_key object in which to store the
     imported private key.
 
@@ -618,17 +658,19 @@ int wc_ed25519_import_public(const byte* in, word32 inLen, ed25519_key* key);
 
     ed25519_key key;
     wc_ed25519_init_key(&key);
-    ret = wc_ed25519_import_private_key(priv, sizeof(priv), &key);
+    ret = wc_ed25519_import_private_only(priv, sizeof(priv), &key);
     if (ret != 0) {
         // error importing private key
     }
     \endcode
 
     \sa wc_ed25519_import_public
+    \sa wc_ed25519_import_public_ex
     \sa wc_ed25519_import_private_key
+    \sa wc_ed25519_import_private_key_ex
     \sa wc_ed25519_export_private_only
 */
-WOLFSSL_API
+
 int wc_ed25519_import_private_only(const byte* priv, word32 privSz,
                                    ed25519_key* key);
 
@@ -637,12 +679,13 @@ int wc_ed25519_import_private_only(const byte* priv, word32 privSz,
 
     \brief This function imports a public/private Ed25519 key pair from a
     pair of buffers. This function will handle both compressed and
-    uncompressed keys.
+    uncompressed keys. The public key is assumed to be untrusted and is
+    checked against the private key.
 
     \return 0 Returned on successfully importing the ed25519_key.
-    \return BAD_FUNC_ARG Returned if in or key evaluate to NULL, or if
-    either privSz is less than ED25519_KEY_SIZE or pubSz is less than
-    ED25519_PUB_KEY_SIZE.
+    \return BAD_FUNC_ARG Returned if priv or key evaluate to NULL; or if
+    either privSz is not equal to ED25519_KEY_SIZE nor ED25519_PRV_KEY_SIZE, or
+    pubSz is less than ED25519_PUB_KEY_SIZE.
 
     \param [in] priv Pointer to the buffer containing the private key.
     \param [in] privSz Length of the private key.
@@ -667,24 +710,71 @@ int wc_ed25519_import_private_only(const byte* priv, word32 privSz,
     \endcode
 
     \sa wc_ed25519_import_public
+    \sa wc_ed25519_import_public_ex
     \sa wc_ed25519_import_private_only
+    \sa wc_ed25519_import_private_key_ex
     \sa wc_ed25519_export_private
 */
-WOLFSSL_API
+
 int wc_ed25519_import_private_key(const byte* priv, word32 privSz,
                                const byte* pub, word32 pubSz, ed25519_key* key);
 
 /*!
     \ingroup ED25519
 
-    \brief This function exports the private key from an ed25519_key
+    \brief This function imports a public/private Ed25519 key pair from a
+    pair of buffers. This function will handle both compressed and
+    uncompressed keys. The public is checked against private key if not trusted.
+
+    \return 0 Returned on successfully importing the ed25519_key.
+    \return BAD_FUNC_ARG Returned if priv or key evaluate to NULL; or if
+    either privSz is not equal to ED25519_KEY_SIZE nor ED25519_PRV_KEY_SIZE, or
+    pubSz is less than ED25519_PUB_KEY_SIZE.
+
+    \param [in] priv Pointer to the buffer containing the private key.
+    \param [in] privSz Length of the private key.
+    \param [in] pub Pointer to the buffer containing the public key.
+    \param [in] pubSz Length of the public key.
+    \param [in,out] key Pointer to the ed25519_key object in which to store the
+    imported private/public key pair.
+    \param [in] trusted Public key data is trusted or not.
+
+    _Example_
+    \code
+    int ret;
+    byte priv[] = { initialize with 32 byte private key };
+    byte pub[]  = { initialize with the corresponding public key };
+
+    ed25519_key key;
+    wc_ed25519_init_key(&key);
+    ret = wc_ed25519_import_private_key_ex(priv, sizeof(priv), pub, sizeof(pub),
+            &key, 1);
+    if (ret != 0) {
+        // error importing key
+    }
+    \endcode
+
+    \sa wc_ed25519_import_public
+    \sa wc_ed25519_import_public_ex
+    \sa wc_ed25519_import_private_only
+    \sa wc_ed25519_import_private_key
+    \sa wc_ed25519_export_private
+*/
+
+int wc_ed25519_import_private_key_ex(const byte* priv, word32 privSz,
+    const byte* pub, word32 pubSz, ed25519_key* key, int trusted);
+
+/*!
+    \ingroup ED25519
+
+    \brief This function exports the public key from an ed25519_key
     structure. It stores the public key in the buffer out, and sets the bytes
     written to this buffer in outLen.
 
     \return 0 Returned upon successfully exporting the public key.
     \return BAD_FUNC_ARG Returned if any of the input values evaluate to NULL.
     \return BUFFER_E Returned if the buffer provided is not large enough to
-    store the private key. Upon returning this error, the function sets the
+    store the public key. Upon returning this error, the function sets the
     size required in outLen.
 
     \param [in] key Pointer to an ed25519_key structure from which to export the
@@ -710,10 +800,12 @@ int wc_ed25519_import_private_key(const byte* priv, word32 privSz,
     \endcode
 
     \sa wc_ed25519_import_public
+    \sa wc_ed25519_import_public_ex
+    \sa wc_ed25519_export_private
     \sa wc_ed25519_export_private_only
 */
-WOLFSSL_API
-int wc_ed25519_export_public(ed25519_key*, byte* out, word32* outLen);
+
+int wc_ed25519_export_public(const ed25519_key* key, byte* out, word32* outLen);
 
 /*!
     \ingroup ED25519
@@ -723,7 +815,7 @@ int wc_ed25519_export_public(ed25519_key*, byte* out, word32* outLen);
     the bytes written to this buffer in outLen.
 
     \return 0 Returned upon successfully exporting the private key.
-    \return ECC_BAD_ARG_E Returned if any of the input values evaluate to NULL.
+    \return BAD_FUNC_ARG Returned if any of the input values evaluate to NULL.
     \return BUFFER_E Returned if the buffer provided is not large enough
     to store the private key.
 
@@ -749,10 +841,12 @@ int wc_ed25519_export_public(ed25519_key*, byte* out, word32* outLen);
     \endcode
 
     \sa wc_ed25519_export_public
+    \sa wc_ed25519_export_private
     \sa wc_ed25519_import_private_key
+    \sa wc_ed25519_import_private_key_ex
 */
-WOLFSSL_API
-int wc_ed25519_export_private_only(ed25519_key* key, byte* out, word32* outLen);
+
+int wc_ed25519_export_private_only(const ed25519_key* key, byte* out, word32* outLen);
 
 /*!
     \ingroup ED25519
@@ -762,7 +856,7 @@ int wc_ed25519_export_private_only(ed25519_key* key, byte* out, word32* outLen);
     the bytes written to this buffer in outLen.
 
     \return 0 Returned upon successfully exporting the key pair.
-    \return ECC_BAD_ARG_E Returned if any of the input values evaluate to NULL.
+    \return BAD_FUNC_ARG Returned if any of the input values evaluate to NULL.
     \return BUFFER_E Returned if the buffer provided is not large enough
     to store the key pair.
 
@@ -792,10 +886,11 @@ int wc_ed25519_export_private_only(ed25519_key* key, byte* out, word32* outLen);
     \endcode
 
     \sa wc_ed25519_import_private_key
+    \sa wc_ed25519_import_private_key_ex
     \sa wc_ed25519_export_private_only
 */
-WOLFSSL_API
-int wc_ed25519_export_private(ed25519_key* key, byte* out, word32* outLen);
+
+int wc_ed25519_export_private(const ed25519_key* key, byte* out, word32* outLen);
 
 /*!
     \ingroup ED25519
@@ -806,9 +901,10 @@ int wc_ed25519_export_private(ed25519_key* key, byte* out, word32* outLen);
     in the buffer pub, and sets the bytes written to this buffer in pubSz.
 
     \return 0 Returned upon successfully exporting the key pair.
-    \return ECC_BAD_ARG_E Returned if any of the input values evaluate to NULL.
+    \return BAD_FUNC_ARG Returned if any of the input values evaluate to NULL.
     \return BUFFER_E Returned if the buffer provided is not large enough
     to store the key pair.
+    \return PUBLIC_KEY_E the given key only has a private key present.
 
     \param [in] key Pointer to an ed25519_key structure from which to export
     the key pair.
@@ -841,8 +937,8 @@ int wc_ed25519_export_private(ed25519_key* key, byte* out, word32* outLen);
     \sa wc_ed25519_export_private
     \sa wc_ed25519_export_public
 */
-WOLFSSL_API
-int wc_ed25519_export_key(ed25519_key* key,
+
+int wc_ed25519_export_key(const ed25519_key* key,
                           byte* priv, word32 *privSz,
                           byte* pub, word32 *pubSz);
 
@@ -853,7 +949,8 @@ int wc_ed25519_export_key(ed25519_key* key,
     the private key.
 
     \return 0 Returned if the private and public key matched.
-    \return BAD_FUNC_ARGS Returned if the given key is NULL.
+    \return BAD_FUNC_ARG Returned if the given key is NULL.
+    \return PUBLIC_KEY_E Returned if the no public key available or is invalid.
 
     \param [in] key Pointer to an ed25519_key structure holding a private and
     public key.
@@ -866,7 +963,8 @@ int wc_ed25519_export_key(ed25519_key* key,
 
     ed25519_key key;
     wc_ed25519_init_key(&key);
-    wc_ed25519_import_private_key(priv, sizeof(priv), pub, sizeof(pub), &key);
+    wc_ed25519_import_private_key_ex(priv, sizeof(priv), pub, sizeof(pub), &key,
+        1);
     ret = wc_ed25519_check_key(&key);
     if (ret != 0) {
         // error checking key
@@ -874,8 +972,9 @@ int wc_ed25519_export_key(ed25519_key* key,
     \endcode
 
     \sa wc_ed25519_import_private_key
+    \sa wc_ed25519_import_private_key_ex
 */
-WOLFSSL_API
+
 int wc_ed25519_check_key(ed25519_key* key);
 
 /*!
@@ -884,7 +983,7 @@ int wc_ed25519_check_key(ed25519_key* key);
     \brief This function returns the size of an Ed25519 - 32 bytes.
 
     \return ED25519_KEY_SIZE The size of a valid private key (32 bytes).
-    \return BAD_FUNC_ARGS Returned if the given key is NULL.
+    \return BAD_FUNC_ARG Returned if the given key is NULL.
 
     \param [in] key Pointer to an ed25519_key structure for which to get the
     key size.
@@ -902,8 +1001,8 @@ int wc_ed25519_check_key(ed25519_key* key);
 
     \sa wc_ed25519_make_key
 */
-WOLFSSL_API
-int wc_ed25519_size(ed25519_key* key);
+
+int wc_ed25519_size(const ed25519_key* key);
 
 /*!
     \ingroup ED25519
@@ -931,8 +1030,8 @@ int wc_ed25519_size(ed25519_key* key);
 
     \sa wc_ed25519_pub_size
 */
-WOLFSSL_API
-int wc_ed25519_priv_size(ed25519_key* key);
+
+int wc_ed25519_priv_size(const ed25519_key* key);
 
 /*!
     \ingroup ED25519
@@ -959,8 +1058,8 @@ int wc_ed25519_priv_size(ed25519_key* key);
 
     \sa wc_ed25519_priv_size
 */
-WOLFSSL_API
-int wc_ed25519_pub_size(ed25519_key* key);
+
+int wc_ed25519_pub_size(const ed25519_key* key);
 
 /*!
     \ingroup ED25519
@@ -987,5 +1086,220 @@ int wc_ed25519_pub_size(ed25519_key* key);
 
     \sa wc_ed25519_sign_msg
 */
-WOLFSSL_API
-int wc_ed25519_sig_size(ed25519_key* key);
+
+int wc_ed25519_sig_size(const ed25519_key* key);
+/*!
+    \ingroup ED25519
+    \brief Signs message with extended parameters.
+
+    \return 0 on success
+    \return negative on failure
+
+    \param in Input message
+    \param inLen Input message length
+    \param out Output signature buffer
+    \param outLen Output signature length pointer
+    \param key Ed25519 key
+    \param type Signature type
+    \param context Context buffer
+    \param contextLen Context length
+
+    _Example_
+    \code
+    byte msg[] = "message";
+    byte sig[ED25519_SIG_SIZE];
+    word32 sigLen = sizeof(sig);
+    int ret = wc_ed25519_sign_msg_ex(msg, sizeof(msg), sig, &sigLen,
+                                     &key, Ed25519, NULL, 0);
+    \endcode
+
+    \sa wc_ed25519_sign_msg
+*/
+int wc_ed25519_sign_msg_ex(const byte* in, word32 inLen, byte* out,
+    word32 *outLen, ed25519_key* key, byte type, const byte* context,
+    byte contextLen);
+
+/*!
+    \ingroup ED25519
+    \brief Verifies signature with extended parameters.
+
+    \return 0 on success
+    \return negative on failure
+
+    \param sig Signature buffer
+    \param sigLen Signature length
+    \param msg Message buffer
+    \param msgLen Message length
+    \param res Verification result pointer
+    \param key Ed25519 key
+    \param type Signature type
+    \param context Context buffer
+    \param contextLen Context length
+
+    _Example_
+    \code
+    byte msg[] = "message";
+    byte sig[ED25519_SIG_SIZE];
+    int res;
+    int ret = wc_ed25519_verify_msg_ex(sig, sizeof(sig), msg,
+                                       sizeof(msg), &res, &key,
+                                       Ed25519, NULL, 0);
+    \endcode
+
+    \sa wc_ed25519_verify_msg
+*/
+int wc_ed25519_verify_msg_ex(const byte* sig, word32 sigLen,
+    const byte* msg, word32 msgLen, int* res, ed25519_key* key,
+    byte type, const byte* context, byte contextLen);
+
+/*!
+    \ingroup ED25519
+    \brief Initializes streaming verification.
+
+    \return 0 on success
+    \return negative on failure
+
+    \param sig Signature buffer
+    \param sigLen Signature length
+    \param key Ed25519 key
+    \param type Signature type
+    \param context Context buffer
+    \param contextLen Context length
+
+    _Example_
+    \code
+    byte sig[ED25519_SIG_SIZE];
+    int ret = wc_ed25519_verify_msg_init(sig, sizeof(sig), &key,
+                                         Ed25519, NULL, 0);
+    \endcode
+
+    \sa wc_ed25519_verify_msg_update
+    \sa wc_ed25519_verify_msg_final
+*/
+int wc_ed25519_verify_msg_init(const byte* sig, word32 sigLen,
+    ed25519_key* key, byte type, const byte* context,
+    byte contextLen);
+
+/*!
+    \ingroup ED25519
+    \brief Updates streaming verification with message segment.
+
+    \return 0 on success
+    \return negative on failure
+
+    \param msgSegment Message segment buffer
+    \param msgSegmentLen Message segment length
+    \param key Ed25519 key
+
+    _Example_
+    \code
+    byte msgPart[] = "part";
+    int ret = wc_ed25519_verify_msg_update(msgPart, sizeof(msgPart),
+                                           &key);
+    \endcode
+
+    \sa wc_ed25519_verify_msg_init
+    \sa wc_ed25519_verify_msg_final
+*/
+int wc_ed25519_verify_msg_update(const byte* msgSegment,
+    word32 msgSegmentLen, ed25519_key* key);
+
+/*!
+    \ingroup ED25519
+    \brief Finalizes streaming verification.
+
+    \return 0 on success
+    \return negative on failure
+
+    \param sig Signature buffer
+    \param sigLen Signature length
+    \param res Verification result pointer
+    \param key Ed25519 key
+
+    _Example_
+    \code
+    byte sig[ED25519_SIG_SIZE];
+    int res;
+    int ret = wc_ed25519_verify_msg_final(sig, sizeof(sig), &res,
+                                          &key);
+    \endcode
+
+    \sa wc_ed25519_verify_msg_init
+    \sa wc_ed25519_verify_msg_update
+*/
+int wc_ed25519_verify_msg_final(const byte* sig, word32 sigLen,
+    int* res, ed25519_key* key);
+
+/*!
+    \ingroup ED25519
+    \brief Initializes Ed25519 key with extended parameters.
+
+    \return 0 on success
+    \return negative on failure
+
+    \param key Ed25519 key structure
+    \param heap Heap hint for memory allocation
+    \param devId Device ID for hardware acceleration
+
+    _Example_
+    \code
+    ed25519_key key;
+    int ret = wc_ed25519_init_ex(&key, NULL, INVALID_DEVID);
+    \endcode
+
+    \sa wc_ed25519_init
+*/
+int wc_ed25519_init_ex(ed25519_key* key, void* heap, int devId);
+
+/*!
+    \ingroup ED25519
+    \brief Allocates and initializes new Ed25519 key. These New/Delete
+    functions are exposed to support allocation of the structure using
+    dynamic memory to provide better ABI compatibility.
+
+    \note This API is only available when WC_NO_CONSTRUCTORS is not defined.
+    WC_NO_CONSTRUCTORS is automatically defined when WOLFSSL_NO_MALLOC is
+    defined.
+
+    \return ed25519_key pointer on success
+    \return NULL on failure
+
+    \param heap Heap hint for memory allocation
+    \param devId Device ID for hardware acceleration
+    \param result_code Result code pointer
+
+    _Example_
+    \code
+    int result;
+    ed25519_key* key = wc_ed25519_new(NULL, INVALID_DEVID, &result);
+    \endcode
+
+    \sa wc_ed25519_delete
+*/
+ed25519_key* wc_ed25519_new(void* heap, int devId, int *result_code);
+
+/*!
+    \ingroup ED25519
+    \brief Frees and deletes Ed25519 key. These New/Delete functions are
+    exposed to support allocation of the structure using dynamic memory
+    to provide better ABI compatibility.
+
+    \note This API is only available when WC_NO_CONSTRUCTORS is not defined.
+    WC_NO_CONSTRUCTORS is automatically defined when WOLFSSL_NO_MALLOC is
+    defined.
+
+    \return 0 on success
+    \return negative on failure
+
+    \param key Ed25519 key to delete
+    \param key_p Pointer to key pointer (set to NULL after delete)
+
+    _Example_
+    \code
+    ed25519_key* key = wc_ed25519_new(NULL, INVALID_DEVID, NULL);
+    int ret = wc_ed25519_delete(key, &key);
+    \endcode
+
+    \sa wc_ed25519_new
+*/
+int wc_ed25519_delete(ed25519_key* key, ed25519_key** key_p);

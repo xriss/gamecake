@@ -284,6 +284,9 @@ extern "C" {
 #undef  OPENSSL_EXTRA
 #define OPENSSL_EXTRA
 
+#undef  OPENSSL_ALL
+#define OPENSSL_ALL
+
 #undef  WOLFSSL_BASE64_ENCODE
 #define WOLFSSL_BASE64_ENCODE
 
@@ -417,9 +420,6 @@ extern "C" {
 
 #undef  NO_RC4
 #define NO_RC4
-
-#undef  NO_RABBIT
-#define NO_RABBIT
 
 #undef  NO_MD4
 #define NO_MD4

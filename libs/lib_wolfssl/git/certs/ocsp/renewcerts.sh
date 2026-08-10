@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# bwrap execution environment to avoid port conflicts
+if [ "${AM_BWRAPPED-}" != "yes" ]; then
+    bwrap_path="$(command -v bwrap)"
+    if [ -n "$bwrap_path" ]; then
+        export AM_BWRAPPED=yes
+        exec "$bwrap_path" --cap-add ALL --unshare-net --dev-bind / / "$0" "$@"
+    fi
+fi
+
 check_result(){
     if [ $1 -ne 0 ]; then
         if [ -n "$2" ]; then
@@ -19,7 +28,7 @@ openssl req                \
     -key  root-ca-key.pem  \
     -out  root-ca-cert.csr \
     -config ../renewcerts/wolfssl.cnf \
-    -subj "/C=US/ST=Washington/L=Seattle/O=wolfSSL/OU=Engineering/CN=wolfSSL root CA/emailAddress=info@wolfssl.com"
+    -subj "/C=US/ST=Washington/L=Seattle/O=wolfSSL/OU=Engineering/CN=wolfSSL root CA/emailAddress=facts@wolfssl.com"
 check_result $? ""
 
 echo "OCSP renew certs Step 2"
@@ -39,6 +48,49 @@ openssl x509 -in root-ca-cert.pem -text > tmp.pem
 check_result $? ""
 mv tmp.pem root-ca-cert.pem
 
+echo "OCSP renew certs Step 4"
+openssl x509 -in root-ca-cert.pem -outform DER -out root-ca-cert.der
+check_result $? ""
+openssl rsa -in root-ca-key.pem -outform DER -out root-ca-key.der
+check_result $? ""
+
+# imposter-root-ca: self-signed cert sharing the legitimate root-ca DN but with
+# a different key. Used to test that OCSP responder authorization is bound to
+# the CertID issuerKeyHash, not just the issuer name.
+echo "OCSP renew certs imposter root step 1"
+openssl req                       \
+    -new                          \
+    -key  imposter-root-ca-key.pem \
+    -out  imposter-root-ca-cert.csr \
+    -config ../renewcerts/wolfssl.cnf \
+    -subj "/C=US/ST=Washington/L=Seattle/O=wolfSSL/OU=Engineering/CN=wolfSSL root CA/emailAddress=facts@wolfssl.com"
+check_result $? ""
+
+echo "OCSP renew certs imposter root step 2"
+openssl x509                            \
+    -req -in imposter-root-ca-cert.csr  \
+    -extfile openssl.cnf                \
+    -extensions v3_ca                   \
+    -days 1000                          \
+    -signkey imposter-root-ca-key.pem   \
+    -set_serial 199                     \
+    -out imposter-root-ca-cert.pem
+check_result $? ""
+
+rm imposter-root-ca-cert.csr
+echo "OCSP renew certs imposter root step 3"
+openssl x509 -in imposter-root-ca-cert.pem -text > tmp.pem
+check_result $? ""
+mv tmp.pem imposter-root-ca-cert.pem
+
+echo "OCSP renew certs imposter root step 4"
+openssl x509 -in imposter-root-ca-cert.pem -outform DER \
+    -out imposter-root-ca-cert.der
+check_result $? ""
+openssl rsa -in imposter-root-ca-key.pem -outform DER \
+    -out imposter-root-ca-key.der
+check_result $? ""
+
 # $1 cert, $2 name, $3 ca, $4 extensions, $5 serial
 update_cert() {
     echo "Updating certificate \"$1-cert.pem\""
@@ -47,7 +99,7 @@ update_cert() {
         -key  "$1"-key.pem  \
         -out  "$1"-cert.csr \
         -config ../renewcerts/wolfssl.cnf \
-        -subj "/C=US/ST=Washington/L=Seattle/O=wolfSSL/OU=Engineering/CN=$2/emailAddress=info@wolfssl.com"
+        -subj "/C=US/ST=Washington/L=Seattle/O=wolfSSL/OU=Engineering/CN=$2/emailAddress=facts@wolfssl.com"
     check_result $? "Step 1"
 
     openssl x509               \
@@ -66,6 +118,11 @@ update_cert() {
     check_result $? "Step 3"
     mv "$1"_tmp.pem "$1"-cert.pem
     cat "$3"-cert.pem >> "$1"-cert.pem
+
+    openssl x509 -in "$1"-cert.pem -outform DER -out "$1"-cert.der
+    check_result $? "Step 4"
+    openssl rsa -in "$1"-key.pem -outform DER -out "$1"-key.der
+    check_result $? "Step 5"
 }
 
 update_cert intermediate1-ca "wolfSSL intermediate CA 1"       root-ca          v3_ca   01
@@ -74,8 +131,58 @@ update_cert intermediate3-ca "wolfSSL REVOKED intermediate CA" root-ca          
 
 update_cert ocsp-responder   "wolfSSL OCSP Responder"          root-ca          v3_ocsp 04
 
+# Delegated OCSP responder issued directly by intermediate1-ca. RFC 6960
+# 4.2.2.2 authorizes a delegated responder only for the CA that issued it.
+# We keep one (int1) to exercise the delegated-responder path in the live
+# tests; the intermediate2/3 responders sign their OCSP responses directly
+# with the CA key (the CA-direct path), so no extra responder certs are needed.
+update_cert ocsp-responder-int1 "wolfSSL OCSP Responder Int1"  intermediate1-ca v3_ocsp 10
+
 update_cert server1          "www1.wolfssl.com"                intermediate1-ca v3_req1 05
 update_cert server2          "www2.wolfssl.com"                intermediate1-ca v3_req1 06 # REVOKED
 update_cert server3          "www3.wolfssl.com"                intermediate2-ca v3_req2 07
 update_cert server4          "www4.wolfssl.com"                intermediate2-ca v3_req2 08 # REVOKED
 update_cert server5          "www5.wolfssl.com"                intermediate3-ca v3_req3 09
+
+# server1-chain-noroot.pem: server1 + intermediate1 without root-ca
+# (used by tests that need a chain where the root is not sent by the server)
+head -n "$(grep -n 'END CERTIFICATE' server1-cert.pem | head -2 | tail -1 | cut -d: -f1)" server1-cert.pem > server1-chain-noroot.pem
+check_result $? ""
+
+# Create response DER buffer for test
+openssl ocsp -port 22221 -ndays 1000 -index index-ca-and-intermediate-cas.txt -rsigner ocsp-responder-cert.pem -rkey ocsp-responder-key.pem -CA root-ca-cert.pem -partial_chain &
+PID=$!
+sleep 1 # Make sure server is ready
+
+openssl ocsp -issuer ./root-ca-cert.pem -cert ./intermediate1-ca-cert.pem -url http://localhost:22221/ -respout test-response.der -noverify
+openssl ocsp -issuer ./root-ca-cert.pem -cert ./intermediate1-ca-cert.pem -url http://localhost:22221/ -respout test-response-nointern.der -no_intern -noverify
+openssl ocsp -issuer ./root-ca-cert.pem -cert ./intermediate1-ca-cert.pem -cert ./intermediate2-ca-cert.pem -url http://localhost:22221/ -respout test-multi-response.der -noverify
+kill $PID
+wait $PID
+
+# Create a response DER buffer for testing leaf certificate. Signed by the
+# intermediate1-issued responder (RFC 6960 4.2.2.2 requires the delegated
+# responder to be directly issued by the CA named in the CertID).
+openssl ocsp -port 22221 -ndays 1000 -index \
+./index-intermediate1-ca-issued-certs.txt -rsigner ocsp-responder-int1-cert.pem \
+-rkey ocsp-responder-int1-key.pem -CA intermediate1-ca-cert.pem -partial_chain &
+PID=$!
+sleep 1 # Make sure server is ready
+
+openssl ocsp -issuer ./intermediate1-ca-cert.pem -cert ./server1-cert.pem -url http://localhost:22221/ -respout test-leaf-response.der -noverify
+kill $PID
+wait $PID
+
+# now start up a responder that signs using rsa-pss
+openssl ocsp -port 22221 -ndays 1000 -index index-ca-and-intermediate-cas.txt -rsigner ocsp-responder-cert.pem -rkey ocsp-responder-key.pem -CA root-ca-cert.pem -rsigopt rsa_padding_mode:pss &
+PID=$!
+sleep 1 # Make sure server is ready
+
+openssl ocsp -issuer ./root-ca-cert.pem -cert ./intermediate1-ca-cert.pem -url http://localhost:22221/ -respout test-response-rsapss.der -noverify
+# can verify with the following command
+# openssl ocsp -respin test-response-nointern.der -CAfile root-ca-cert.pem -issuer intermediate1-ca-cert.pem
+
+kill $PID
+wait $PID
+
+exit 0

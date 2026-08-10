@@ -1,12 +1,12 @@
 ﻿/* wolfSSL-Example-IOCallbacks.cs
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -18,6 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
+
 
 
 
@@ -121,12 +122,12 @@ class wolfSSL_Example_IOCallbacks
     /// <returns>size of key set</returns>
     public static uint my_psk_server_cb(IntPtr ssl, string identity, IntPtr key, uint max_key)
     {
-        /* perform a check on the identity sent across 
+        /* perform a check on the identity sent across
          * log function must be set for print out of logging information
          */
         wolfssl.log(wolfssl.INFO_LOG, "PSK Client Identity = " + identity);
 
-        /* Use desired key, note must be a key smaller than max key size parameter 
+        /* Use desired key, note must be a key smaller than max key size parameter
             Replace this with desired key. Is trivial one for testing */
         if (max_key < 4)
             return 0;
@@ -213,12 +214,17 @@ class wolfSSL_Example_IOCallbacks
         IntPtr ssl;
         Socket fd;
 
-        wolfssl.psk_delegate psk_cb = new wolfssl.psk_delegate(my_psk_server_cb);
         wolfssl.CallbackVerify_delegate verify_cb = new wolfssl.CallbackVerify_delegate(my_verify_cb);
 
         /* These paths should be changed according to use */
-        string fileCert = @"server-cert.pem";
-        string fileKey = @"server-key.pem";
+        string fileCert = wolfssl.setPath("server-cert.pem");
+        string fileKey = wolfssl.setPath("server-key.pem");
+        StringBuilder dhparam = new StringBuilder(wolfssl.setPath("dh2048.pem"));
+
+        if (fileCert == "" || fileKey == "" || dhparam.Length == 0) {
+            Console.WriteLine("Platform not supported");
+            return;
+        }
 
         StringBuilder buff = new StringBuilder(1024);
         StringBuilder reply = new StringBuilder("Hello, this is the wolfSSL C# wrapper");
@@ -237,6 +243,12 @@ class wolfSSL_Example_IOCallbacks
         if (!File.Exists(fileCert) || !File.Exists(fileKey))
         {
             Console.WriteLine("Could not find cert or key file");
+            wolfssl.CTX_free(ctx);
+            return;
+        }
+
+        if (!File.Exists(dhparam.ToString())) {
+            Console.WriteLine("Could not find dh file");
             wolfssl.CTX_free(ctx);
             return;
         }

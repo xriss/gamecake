@@ -1,12 +1,12 @@
 /* afalg_aes.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -19,20 +19,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
-
-
-#ifdef HAVE_CONFIG_H
-    #include <config.h>
-#endif
-
-#include <wolfssl/wolfcrypt/settings.h>
-#include <wolfssl/wolfcrypt/error-crypt.h>
+#include <wolfssl/wolfcrypt/libwolfssl_sources.h>
 
 #if !defined(NO_AES) && (defined(WOLFSSL_AFALG) || \
                          defined(WOLFSSL_AFALG_XILINX_AES))
 
 #include <wolfssl/wolfcrypt/aes.h>
-#include <wolfssl/wolfcrypt/logging.h>
 #include <wolfssl/wolfcrypt/port/af_alg/wc_afalg.h>
 
 #include <sys/uio.h> /* for readv */
@@ -50,6 +42,16 @@
 
 static const char WC_TYPE_SYMKEY[] = "skcipher";
 
+#ifdef HAVE_AESGCM
+#ifdef WOLFSSL_AFALG_XILINX_AES
+    static const char WC_NAME_AESGCM[] = "xilinx-zynqmp-aes";
+    static const char* WC_TYPE_AEAD    = WC_TYPE_SYMKEY;
+#else
+    static const char WC_NAME_AESGCM[] = "gcm(aes)";
+    static const char WC_TYPE_AEAD[]   = "aead";
+#endif
+#endif
+
 static int wc_AesSetup(Aes* aes, const char* type, const char* name, int ivSz, int aadSz)
 {
 #ifdef WOLFSSL_AFALG_XILINX_AES
@@ -58,19 +60,32 @@ static int wc_AesSetup(Aes* aes, const char* type, const char* name, int ivSz, i
     byte* key = (byte*)aes->key;
 #endif
 
+    if (aes->alFd == WC_SOCK_NOTSET) {
+        aes->alFd = wc_Afalg_Socket();
+        if (aes->alFd < 0) {
+            WOLFSSL_MSG("Unable to open an AF_ALG socket");
+            return WC_AFALG_SOCK_E;
+        }
+    }
+
     aes->rdFd = wc_Afalg_CreateRead(aes->alFd, type, name);
     if (aes->rdFd < 0) {
         WOLFSSL_MSG("Unable to accept and get AF_ALG read socket");
         aes->rdFd = WC_SOCK_NOTSET;
-        return aes->rdFd;
+        return WC_AFALG_SOCK_E;
     }
 
     if (setsockopt(aes->alFd, SOL_ALG, ALG_SET_KEY, key, aes->keylen) != 0) {
         WOLFSSL_MSG("Unable to set AF_ALG key");
+        (void)close(aes->rdFd);
         aes->rdFd = WC_SOCK_NOTSET;
         return WC_AFALG_SOCK_E;
     }
+#ifdef WOLFSSL_AFALG_XILINX_AES
+    ForceZero(key, sizeof(aes->msgBuf));
+#else
     ForceZero(key, sizeof(aes->key));
+#endif
 
     /* set up CMSG headers */
     XMEMSET((byte*)&(aes->msg), 0, sizeof(struct msghdr));
@@ -83,18 +98,27 @@ static int wc_AesSetup(Aes* aes, const char* type, const char* name, int ivSz, i
     (void)aadSz;
 #else
     aes->msg.msg_controllen = CMSG_SPACE(4);
-    if (aadSz > 0) {
-        aes->msg.msg_controllen += CMSG_SPACE(4);
-    }
     if (ivSz > 0) {
         aes->msg.msg_controllen += CMSG_SPACE((sizeof(struct af_alg_iv) + ivSz));
     }
+    /* Always reserve ASSOCLEN slot for AEAD (gcm(aes)). Value may be 0 on any
+     * given call.  skcipher paths (CBC etc.) simply won't use the 3rd cmsg. */
+    if ((aadSz > 0)
+#ifdef HAVE_AESGCM
+        || (strcmp(type, WC_TYPE_AEAD) == 0)
+#endif
+        )
+    {
+        aes->msg.msg_controllen += CMSG_SPACE(4);
+    }
+
 #endif
 
     if (wc_Afalg_SetOp(CMSG_FIRSTHDR(&(aes->msg)), aes->dir) < 0) {
         WOLFSSL_MSG("Error with setting AF_ALG operation");
+        (void)close(aes->rdFd);
         aes->rdFd = WC_SOCK_NOTSET;
-        return -1;
+        return WC_AFALG_SOCK_E;
     }
 
     return 0;
@@ -127,8 +151,14 @@ int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen,
     aes->left = 0;
 #endif
 
+    if (aes->rdFd > WC_SOCK_NOTSET) {
+        (void)close(aes->rdFd);
+    }
     aes->rdFd = WC_SOCK_NOTSET;
-    aes->alFd = wc_Afalg_Socket();
+    if (aes->alFd == WC_SOCK_NOTSET) {
+        aes->alFd = wc_Afalg_Socket();
+    }
+
     if (aes->alFd < 0) {
          WOLFSSL_MSG("Unable to open an AF_ALG socket");
          return WC_AFALG_SOCK_E;
@@ -156,18 +186,32 @@ int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen,
             return BAD_FUNC_ARG;
         }
 
+#ifdef WOLFSSL_AES_CBC_LENGTH_CHECKS
+        if (sz % WC_AES_BLOCK_SIZE) {
+            return BAD_LENGTH_E;
+        }
+#endif
+
+        if (aes->dir != AES_ENCRYPTION) {
+            return KEYUSAGE_E;
+        }
+
         if (aes->rdFd == WC_SOCK_NOTSET) {
-                if ((ret = wc_AesSetup(aes, WC_TYPE_SYMKEY, WC_NAME_AESCBC,
+            if ((ret = wc_AesSetup(aes, WC_TYPE_SYMKEY, WC_NAME_AESCBC,
                                 AES_IV_SIZE, 0)) != 0) {
                 WOLFSSL_MSG("Error with first time setup of AF_ALG socket");
                 return ret;
             }
         }
 
-        sz = sz - (sz % AES_BLOCK_SIZE);
-        if ((sz / AES_BLOCK_SIZE) > 0) {
+        sz = sz - (sz % WC_AES_BLOCK_SIZE);
+        if ((sz / WC_AES_BLOCK_SIZE) > 0) {
             /* update IV */
             cmsg = CMSG_FIRSTHDR(&(aes->msg));
+            if (cmsg == NULL) {
+                WOLFSSL_MSG("CMSG_FIRSTHDR() in wc_AesCbcEncrypt() returned NULL unexpectedly.");
+                return SYSLIB_FAILED_E;
+            }
             ret = wc_Afalg_SetIv(CMSG_NXTHDR(&(aes->msg), cmsg),
                     (byte*)(aes->reg), AES_IV_SIZE);
             if (ret < 0) {
@@ -184,15 +228,15 @@ int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen,
 
             ret = (int)sendmsg(aes->rdFd, &(aes->msg), 0);
             if (ret < 0) {
-                return ret;
+                return WC_AFALG_SOCK_E;
             }
             ret = (int)read(aes->rdFd, out, sz);
             if (ret < 0) {
-                return ret;
+                return WC_AFALG_SOCK_E;
             }
 
             /* set IV for next CBC call */
-            XMEMCPY(aes->reg, out + sz - AES_BLOCK_SIZE, AES_BLOCK_SIZE);
+            XMEMCPY(aes->reg, out + sz - WC_AES_BLOCK_SIZE, WC_AES_BLOCK_SIZE);
         }
 
         return 0;
@@ -205,9 +249,20 @@ int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen,
         struct iovec    iov;
         int ret;
 
-        if (aes == NULL || out == NULL || in == NULL
-                                       || sz % AES_BLOCK_SIZE != 0) {
+        if (aes == NULL || out == NULL || in == NULL) {
             return BAD_FUNC_ARG;
+        }
+
+        if (sz % WC_AES_BLOCK_SIZE) {
+#ifdef WOLFSSL_AES_CBC_LENGTH_CHECKS
+            return BAD_LENGTH_E;
+#else
+            return BAD_FUNC_ARG;
+#endif
+        }
+
+        if (aes->dir != AES_DECRYPTION) {
+            return KEYUSAGE_E;
         }
 
         if (aes->rdFd == WC_SOCK_NOTSET) {
@@ -217,9 +272,13 @@ int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen,
             }
         }
 
-        if ((sz / AES_BLOCK_SIZE) > 0) {
+        if ((sz / WC_AES_BLOCK_SIZE) > 0) {
             /* update IV */
             cmsg = CMSG_FIRSTHDR(&(aes->msg));
+            if (cmsg == NULL) {
+                WOLFSSL_MSG("CMSG_FIRSTHDR() in wc_AesCbcDecrypt() returned NULL unexpectedly.");
+                return SYSLIB_FAILED_E;
+            }
             ret = wc_Afalg_SetIv(CMSG_NXTHDR(&(aes->msg), cmsg),
                     (byte*)(aes->reg), AES_IV_SIZE);
             if (ret != 0) {
@@ -234,15 +293,15 @@ int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen,
             aes->msg.msg_iovlen = 1; /* # of iov structures */
 
             /* set IV for next CBC call */
-            XMEMCPY(aes->reg, in + sz - AES_BLOCK_SIZE, AES_BLOCK_SIZE);
+            XMEMCPY(aes->reg, in + sz - WC_AES_BLOCK_SIZE, WC_AES_BLOCK_SIZE);
 
             ret = (int)sendmsg(aes->rdFd, &(aes->msg), 0);
             if (ret < 0) {
-                return ret;
+                return WC_AFALG_SOCK_E;
             }
             ret = (int)read(aes->rdFd, out, sz);
             if (ret < 0) {
-                return ret;
+                return WC_AFALG_SOCK_E;
             }
 
         }
@@ -288,11 +347,11 @@ static int wc_Afalg_AesDirect(Aes* aes, byte* out, const byte* in, word32 sz)
 
             ret = (int)sendmsg(aes->rdFd, &(aes->msg), 0);
             if (ret < 0) {
-                return ret;
+                return WC_AFALG_SOCK_E;
             }
             ret = (int)read(aes->rdFd, out, sz);
             if (ret < 0) {
-                return ret;
+                return WC_AFALG_SOCK_E;
             }
 
         return 0;
@@ -303,13 +362,21 @@ static int wc_Afalg_AesDirect(Aes* aes, byte* out, const byte* in, word32 sz)
 #if defined(WOLFSSL_AES_DIRECT) && defined(WOLFSSL_AFALG)
 int wc_AesEncryptDirect(Aes* aes, byte* out, const byte* in)
 {
-    return wc_Afalg_AesDirect(aes, out, in, AES_BLOCK_SIZE);
+    if (aes && (aes->dir != AES_ENCRYPTION)) {
+        return KEYUSAGE_E;
+    }
+
+    return wc_Afalg_AesDirect(aes, out, in, WC_AES_BLOCK_SIZE);
 }
 
 
 int wc_AesDecryptDirect(Aes* aes, byte* out, const byte* in)
 {
-    return wc_Afalg_AesDirect(aes, out, in, AES_BLOCK_SIZE);
+    if (aes && (aes->dir != AES_DECRYPTION)) {
+        return KEYUSAGE_E;
+    }
+
+    return wc_Afalg_AesDirect(aes, out, in, WC_AES_BLOCK_SIZE);
 }
 
 
@@ -330,7 +397,7 @@ int wc_AesSetKeyDirect(Aes* aes, const byte* userKey, word32 keylen,
         {
             /* in network byte order so start at end and work back */
             int i;
-            for (i = AES_BLOCK_SIZE - 1; i >= 0; i--) {
+            for (i = WC_AES_BLOCK_SIZE - 1; i >= 0; i--) {
                 if (++inOutCtr[i])  /* we're done unless we overflow */
                     return;
             }
@@ -347,8 +414,12 @@ int wc_AesSetKeyDirect(Aes* aes, const byte* userKey, word32 keylen,
                 return BAD_FUNC_ARG;
             }
 
+            if (aes->dir != AES_ENCRYPTION) {
+                return KEYUSAGE_E;
+            }
+
             /* consume any unused bytes left in aes->tmp */
-            tmp = (byte*)aes->tmp + AES_BLOCK_SIZE - aes->left;
+            tmp = (byte*)aes->tmp + WC_AES_BLOCK_SIZE - aes->left;
             while (aes->left && sz) {
                *(out++) = *(in++) ^ *(tmp++);
                aes->left--;
@@ -364,14 +435,18 @@ int wc_AesSetKeyDirect(Aes* aes, const byte* userKey, word32 keylen,
             }
 
             if (sz > 0) {
-                aes->left = sz % AES_BLOCK_SIZE;
+                aes->left = sz % WC_AES_BLOCK_SIZE;
 
                 /* clear previously leftover data */
                 tmp = (byte*)aes->tmp;
-                XMEMSET(tmp, 0, AES_BLOCK_SIZE);
+                XMEMSET(tmp, 0, WC_AES_BLOCK_SIZE);
 
                 /* update IV */
                 cmsg = CMSG_FIRSTHDR(&(aes->msg));
+                if (cmsg == NULL) {
+                    WOLFSSL_MSG("CMSG_FIRSTHDR() in wc_AesCtrEncrypt() returned NULL unexpectedly.");
+                    return SYSLIB_FAILED_E;
+                }
                 ret = wc_Afalg_SetIv(CMSG_NXTHDR(&(aes->msg), cmsg),
                         (byte*)(aes->reg), AES_IV_SIZE);
                 if (ret < 0) {
@@ -386,7 +461,7 @@ int wc_AesSetKeyDirect(Aes* aes, const byte* userKey, word32 keylen,
                 iov[1].iov_base = tmp;
                 if (aes->left > 0) {
                     XMEMCPY(tmp, in + sz - aes->left, aes->left);
-                    iov[1].iov_len  = AES_BLOCK_SIZE;
+                    iov[1].iov_len  = WC_AES_BLOCK_SIZE;
                 }
                 else {
                     iov[1].iov_len  = 0;
@@ -397,7 +472,7 @@ int wc_AesSetKeyDirect(Aes* aes, const byte* userKey, word32 keylen,
 
                 ret = (int)sendmsg(aes->rdFd, &(aes->msg), 0);
                 if (ret < 0) {
-                    return ret;
+                    return WC_AFALG_SOCK_E;
                 }
 
 
@@ -407,7 +482,7 @@ int wc_AesSetKeyDirect(Aes* aes, const byte* userKey, word32 keylen,
 
                 iov[1].iov_base = tmp;
                 if (aes->left > 0) {
-                    iov[1].iov_len  = AES_BLOCK_SIZE;
+                    iov[1].iov_len  = WC_AES_BLOCK_SIZE;
                 }
                 else {
                     iov[1].iov_len  = 0;
@@ -415,19 +490,19 @@ int wc_AesSetKeyDirect(Aes* aes, const byte* userKey, word32 keylen,
 
                 ret = (int)readv(aes->rdFd, iov, 2);
                 if (ret < 0) {
-                    return ret;
+                    return WC_AFALG_SOCK_E;
                 }
 
                 if (aes->left > 0) {
                     XMEMCPY(out + sz - aes->left, tmp, aes->left);
-                    aes->left = AES_BLOCK_SIZE - aes->left;
+                    aes->left = WC_AES_BLOCK_SIZE - aes->left;
                 }
             }
 
             /* adjust counter after call to hardware */
-            while (sz >= AES_BLOCK_SIZE) {
+            while (sz >= WC_AES_BLOCK_SIZE) {
                 IncrementAesCounter((byte*)aes->reg);
-                sz  -= AES_BLOCK_SIZE;
+                sz  -= WC_AES_BLOCK_SIZE;
             }
 
             if (aes->left > 0) {
@@ -440,15 +515,6 @@ int wc_AesSetKeyDirect(Aes* aes, const byte* userKey, word32 keylen,
 
 
 #ifdef HAVE_AESGCM
-
-
-#ifdef WOLFSSL_AFALG_XILINX_AES
-    static const char WC_NAME_AESGCM[] = "xilinx-zynqmp-aes";
-    static const char* WC_TYPE_AEAD    = WC_TYPE_SYMKEY;
-#else
-    static const char WC_NAME_AESGCM[] = "gcm(aes)";
-    static const char WC_TYPE_AEAD[]   = "aead";
-#endif
 
 #ifndef WC_SYSTEM_AESGCM_IV
 /* size of IV allowed on system for AES-GCM */
@@ -476,7 +542,7 @@ int wc_AesGcmSetKey(Aes* aes, const byte* key, word32 len)
     const word32 max_key_len = (AES_MAX_KEY_SIZE / 8);
 #endif
 
-    if (aes == NULL ||
+    if (aes == NULL || key == NULL ||
             !((len == 16) || (len == 24) || (len == 32))) {
         return BAD_FUNC_ARG;
     }
@@ -489,9 +555,16 @@ int wc_AesGcmSetKey(Aes* aes, const byte* key, word32 len)
 #endif
     aes->keylen = len;
     aes->rounds = len/4 + 6;
+    aes->dir = AES_ENCRYPTION;
 
+    if (aes->rdFd > WC_SOCK_NOTSET) {
+        (void)close(aes->rdFd);
+    }
     aes->rdFd = WC_SOCK_NOTSET;
-    aes->alFd = wc_Afalg_Socket();
+    if (aes->alFd == WC_SOCK_NOTSET) {
+        aes->alFd = wc_Afalg_Socket();
+    }
+
     if (aes->alFd < 0) {
          WOLFSSL_MSG("Unable to open an AF_ALG socket");
          return WC_AFALG_SOCK_E;
@@ -527,24 +600,30 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     struct iovec    iov[3];
     int ret;
     struct msghdr* msg;
-    byte scratch[AES_BLOCK_SIZE];
+    byte scratch[WC_AES_BLOCK_SIZE];
 
     /* argument checks */
-    if (aes == NULL || authTagSz > AES_BLOCK_SIZE) {
+    if (aes == NULL || authTagSz > WC_AES_BLOCK_SIZE ||
+        (sz > 0 && (in == NULL || out == NULL)) ||
+        authTag == NULL || (authInSz > 0 && authIn == NULL))
+    {
         return BAD_FUNC_ARG;
     }
+
+    if (ivSz > WC_SYSTEM_AESGCM_IV)
+        ivSz = WC_SYSTEM_AESGCM_IV;
 
     if (ivSz != WC_SYSTEM_AESGCM_IV) {
         WOLFSSL_MSG("IV size not supported on system");
         return BAD_FUNC_ARG;
     }
-    if (authTagSz > WOLFSSL_MAX_AUTH_TAG_SZ) {
-        WOLFSSL_MSG("Authentication tag size not supported on system");
-        return BAD_FUNC_ARG;
-    }
 
-    if (authTagSz < WOLFSSL_MIN_AUTH_TAG_SZ) {
-        WOLFSSL_MSG("GcmEncrypt authTagSz too small error");
+    ret = wc_local_AesGcmCheckTagSz(authTagSz);
+    if (ret != 0)
+        return ret;
+
+    if (aes->alFd == WC_SOCK_NOTSET) {
+        WOLFSSL_MSG("AF_ALG GcmEncrypt called with alFd unset");
         return BAD_FUNC_ARG;
     }
 
@@ -574,7 +653,15 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 
     msg = &(aes->msg);
     cmsg = CMSG_FIRSTHDR(msg);
+    if (cmsg == NULL) {
+        WOLFSSL_MSG("CMSG_FIRSTHDR() in wc_AesGcmEncrypt() returned NULL unexpectedly.");
+        return SYSLIB_FAILED_E;
+    }
     cmsg = CMSG_NXTHDR(msg, cmsg);
+    if (cmsg == NULL) {
+        WOLFSSL_MSG("CMSG_NEXTHDR() in wc_AesGcmEncrypt() returned NULL unexpectedly.");
+        return SYSLIB_FAILED_E;
+    }
 
     /* set IV and AAD size */
     ret = wc_Afalg_SetIv(cmsg, (byte*)iv, ivSz);
@@ -592,7 +679,7 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         #ifndef NO_WOLFSSL_ALLOC_ALIGN
             byte* tmp_align;
             tmp = (byte*)XMALLOC(sz + WOLFSSL_XILINX_ALIGN +
-                    AES_BLOCK_SIZE, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
+                    WC_AES_BLOCK_SIZE, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
             if (tmp == NULL) {
                 return MEMORY_E;
             }
@@ -608,7 +695,7 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         else {
             iov[0].iov_base = (byte*)in;
         }
-        iov[0].iov_len  = sz + AES_BLOCK_SIZE;
+        iov[0].iov_len  = sz + WC_AES_BLOCK_SIZE;
 
         msg->msg_iov    = iov;
         msg->msg_iovlen = 1; /* # of iov structures */
@@ -618,36 +705,38 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         XFREE(tmp, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
     #endif
         if (ret < 0) {
-            return ret;
+            return WC_AFALG_SOCK_E;
         }
 
-        ret = read(aes->rdFd, out, sz + AES_BLOCK_SIZE);
+        ret = read(aes->rdFd, out, sz + WC_AES_BLOCK_SIZE);
         if (ret < 0) {
-            return ret;
+            return WC_AFALG_SOCK_E;
         }
         XMEMCPY(authTag, out + sz, authTagSz);
     }
 
     /* handle completing tag with using software if additional data added */
     if (authIn != NULL && authInSz > 0) {
-        byte initalCounter[AES_BLOCK_SIZE];
-        XMEMSET(initalCounter, 0, AES_BLOCK_SIZE);
+        byte initalCounter[WC_AES_BLOCK_SIZE];
+        XMEMSET(initalCounter, 0, WC_AES_BLOCK_SIZE);
         XMEMCPY(initalCounter, iv, ivSz);
-        initalCounter[AES_BLOCK_SIZE - 1] = 1;
-        GHASH(aes, authIn, authInSz, out, sz, authTag, authTagSz);
+        initalCounter[WC_AES_BLOCK_SIZE - 1] = 1;
+        GHASH(&aes->gcm, authIn, authInSz, out, sz, authTag, authTagSz);
         ret = wc_AesEncryptDirect(aes, scratch, initalCounter);
-        if (ret < 0)
+        if (ret < 0) {
             return ret;
+        }
         xorbuf(authTag, scratch, authTagSz);
     }
 #else
-    if (authInSz > 0) {
-        cmsg = CMSG_NXTHDR(msg, cmsg);
-        ret = wc_Afalg_SetAad(cmsg, authInSz);
-        if (ret < 0) {
-            WOLFSSL_MSG("Unable to set AAD size");
-            return ret;
-        }
+    /* Always set AAD length (even 0). This is required by the AF_ALG AEAD interface
+     * and prevents kernel state mismatch when switching between AAD and no-AAD
+     * operations on the same rdFd. */
+    cmsg = CMSG_NXTHDR(msg, cmsg);
+    ret = wc_Afalg_SetAad(cmsg, authInSz);
+    if (ret < 0) {
+        WOLFSSL_MSG("Unable to set AAD size");
+        return ret;
     }
 
     /* set data to be encrypted*/
@@ -662,18 +751,22 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 
     ret = (int)sendmsg(aes->rdFd, msg, 0);
     if (ret < 0) {
-        return ret;
+        return WC_AFALG_SOCK_E;
     }
 
     {
-        byte* tmp = (byte*)XMALLOC(authInSz, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
-        if (tmp == NULL) {
-            return MEMORY_E;
+        byte* tmp = NULL;
+
+        if (authInSz > 0) {
+            tmp = (byte*)XMALLOC(authInSz, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
+            if (tmp == NULL) {
+                return MEMORY_E;
+            }
+            /* first 16 bytes was all 0's */
+            iov[0].iov_base = tmp;
+            (void)scratch;
+            iov[0].iov_len  = authInSz;
         }
-        /* first 16 bytes was all 0's */
-        iov[0].iov_base = tmp;
-        (void)scratch;
-        iov[0].iov_len  = authInSz;
 
         iov[1].iov_base = out;
         iov[1].iov_len  = sz;
@@ -683,9 +776,9 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 
         ret = (int)readv(aes->rdFd, iov, 3);
         XFREE(tmp, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
-    }
-    if (ret < 0) {
-        return ret;
+        if (ret < 0) {
+            return WC_AFALG_SOCK_E;
+        }
     }
 #endif
 
@@ -698,7 +791,8 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
  *
  * Warning: If using Xilinx hardware acceleration it is assumed that the in
  *          buffer is large enough to hold both cipher text and tag. That is
- *          sz | 16 bytes
+ *          sz | 16 bytes. The in buffer has tag appended even though it is
+ *          const for this wolfSSL API.
  */
 int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
                      const byte* iv, word32 ivSz,
@@ -708,35 +802,33 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     struct cmsghdr* cmsg;
     struct msghdr* msg;
     struct iovec    iov[3];
-    byte scratch[AES_BLOCK_SIZE];
+    byte scratch[WC_AES_BLOCK_SIZE];
     int ret;
 #ifdef WOLFSSL_AFALG_XILINX_AES
     byte* tag = (byte*)authTag;
-    byte buf[AES_BLOCK_SIZE];
-    byte initalCounter[AES_BLOCK_SIZE];
+    byte buf[WC_AES_BLOCK_SIZE];
+    byte initalCounter[WC_AES_BLOCK_SIZE];
 #ifndef NO_WOLFSSL_ALLOC_ALIGN
     byte* tmp = NULL;
 #endif
 #endif
 
     /* argument checks */
-    if (aes == NULL || authTagSz > AES_BLOCK_SIZE) {
+    if (aes == NULL || authTagSz > WC_AES_BLOCK_SIZE) {
         return BAD_FUNC_ARG;
     }
+
+    if (ivSz > WC_SYSTEM_AESGCM_IV)
+        ivSz = WC_SYSTEM_AESGCM_IV;
 
     if (ivSz != WC_SYSTEM_AESGCM_IV) {
         WOLFSSL_MSG("IV size not supported on system");
         return BAD_FUNC_ARG;
     }
-    if (authTagSz > WOLFSSL_MAX_AUTH_TAG_SZ) {
-        WOLFSSL_MSG("Authentication tag size not supported on system");
-        return BAD_FUNC_ARG;
-    }
 
-    if (authTagSz < WOLFSSL_MIN_AUTH_TAG_SZ) {
-        WOLFSSL_MSG("GcmEncrypt authTagSz too small error");
-        return BAD_FUNC_ARG;
-    }
+    ret = wc_local_AesGcmCheckTagSz(authTagSz);
+    if (ret != 0)
+        return ret;
 
     if (aes->rdFd == WC_SOCK_NOTSET) {
         aes->dir = AES_DECRYPTION;
@@ -779,33 +871,30 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     /* check for and handle additional data */
     if (authIn != NULL && authInSz > 0) {
 
-        XMEMSET(initalCounter, 0, AES_BLOCK_SIZE);
+        XMEMSET(initalCounter, 0, WC_AES_BLOCK_SIZE);
         XMEMCPY(initalCounter, iv, ivSz);
-        initalCounter[AES_BLOCK_SIZE - 1] = 1;
+        initalCounter[WC_AES_BLOCK_SIZE - 1] = 1;
         tag = buf;
-        GHASH(aes, NULL, 0, in, sz, tag, AES_BLOCK_SIZE);
+        GHASH(&aes->gcm, NULL, 0, in, sz, tag, WC_AES_BLOCK_SIZE);
         ret = wc_AesEncryptDirect(aes, scratch, initalCounter);
         if (ret < 0)
             return ret;
-        xorbuf(tag, scratch, AES_BLOCK_SIZE);
-        if (ret != 0) {
-            return AES_GCM_AUTH_E;
-        }
+        xorbuf(tag, scratch, WC_AES_BLOCK_SIZE);
     }
 
     /* it is assumed that in buffer size is large enough to hold TAG */
-    XMEMCPY((byte*)in + sz, tag, AES_BLOCK_SIZE);
+    XMEMCPY((byte*)in + sz, tag, WC_AES_BLOCK_SIZE);
     if ((wc_ptr_t)in % WOLFSSL_XILINX_ALIGN) {
     #ifndef NO_WOLFSSL_ALLOC_ALIGN
         byte* tmp_align;
         tmp = (byte*)XMALLOC(sz + WOLFSSL_XILINX_ALIGN +
-                AES_BLOCK_SIZE, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
+                WC_AES_BLOCK_SIZE, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
         if (tmp == NULL) {
             return MEMORY_E;
         }
         tmp_align = tmp + (WOLFSSL_XILINX_ALIGN -
                 ((size_t)tmp % WOLFSSL_XILINX_ALIGN));
-        XMEMCPY(tmp_align, in, sz + AES_BLOCK_SIZE);
+        XMEMCPY(tmp_align, in, sz + WC_AES_BLOCK_SIZE);
         iov[0].iov_base = tmp_align;
     #else
         WOLFSSL_MSG("Buffer expected to be word aligned");
@@ -815,7 +904,7 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     else {
         iov[0].iov_base = (byte*)in;
     }
-    iov[0].iov_len = sz + AES_BLOCK_SIZE;
+    iov[0].iov_len = sz + WC_AES_BLOCK_SIZE;
 
     msg->msg_iov = iov;
     msg->msg_iovlen = 1;
@@ -825,33 +914,35 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     XFREE(tmp, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
     if (ret < 0) {
-        return ret;
+        return WC_AFALG_SOCK_E;
     }
 
-    ret = read(aes->rdFd, out, sz + AES_BLOCK_SIZE);
+    ret = read(aes->rdFd, out, sz + WC_AES_BLOCK_SIZE);
     if (ret < 0) {
         return AES_GCM_AUTH_E;
     }
 
     /* check on tag */
     if (authIn != NULL && authInSz > 0) {
-        GHASH(aes, authIn, authInSz, in, sz, tag, AES_BLOCK_SIZE);
+        GHASH(&aes->gcm, authIn, authInSz, in, sz, tag, WC_AES_BLOCK_SIZE);
         ret = wc_AesEncryptDirect(aes, scratch, initalCounter);
         if (ret < 0)
             return ret;
-        xorbuf(tag, scratch, AES_BLOCK_SIZE);
+        xorbuf(tag, scratch, WC_AES_BLOCK_SIZE);
         if (ConstantCompare(tag, authTag, authTagSz) != 0) {
             return AES_GCM_AUTH_E;
         }
     }
 
 #else
-    if (authInSz > 0) {
-        cmsg = CMSG_NXTHDR(msg, cmsg);
-        ret = wc_Afalg_SetAad(cmsg, authInSz);
-        if (ret < 0) {
-            return ret;
-        }
+    /* Always set AAD length (even 0). This is required by the AF_ALG AEAD interface
+     * and prevents kernel state mismatch when switching between AAD and no-AAD
+     * operations on the same rdFd. */
+
+    cmsg = CMSG_NXTHDR(msg, cmsg);
+    ret = wc_Afalg_SetAad(cmsg, authInSz);
+    if (ret < 0) {
+        return ret;
     }
 
     /* set data to be decrypted*/
@@ -866,16 +957,20 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     msg->msg_iovlen = 3; /* # of iov structures */
     ret = (int)sendmsg(aes->rdFd, &(aes->msg), 0);
     if (ret < 0) {
-        return ret;
+        return WC_AFALG_SOCK_E;
     }
 
     {
-        byte* tmp = (byte*)XMALLOC(authInSz, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
-        if (tmp == NULL) {
-            return MEMORY_E;
+        byte* tmp = NULL;
+
+        if (authInSz > 0) {
+            tmp = (byte*)XMALLOC(authInSz, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
+            if (tmp == NULL) {
+                return MEMORY_E;
+            }
+            iov[0].iov_base = tmp;
+            iov[0].iov_len  = authInSz;
         }
-        iov[0].iov_base = tmp;
-        iov[0].iov_len  = authInSz;
         iov[1].iov_base = out;
         iov[1].iov_len  = sz;
         ret = (int)readv(aes->rdFd, iov, 2);
@@ -896,12 +991,20 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 #ifdef HAVE_AES_ECB
 int wc_AesEcbEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
 {
+    if (aes && (aes->dir != AES_ENCRYPTION)) {
+        return KEYUSAGE_E;
+    }
+
     return wc_Afalg_AesDirect(aes, out, in, sz);
 }
 
 
 int wc_AesEcbDecrypt(Aes* aes, byte* out, const byte* in, word32 sz)
 {
+    if (aes && (aes->dir != AES_DECRYPTION)) {
+        return KEYUSAGE_E;
+    }
+
     return wc_Afalg_AesDirect(aes, out, in, sz);
 }
 #endif /* HAVE_AES_ECB */

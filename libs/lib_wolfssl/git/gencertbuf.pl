@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # gencertbuf.pl
 # version 1.1
@@ -13,24 +13,28 @@ use warnings;
 # ---- SCRIPT SETTINGS -------------------------------------------------------
 
 # output C header file to write cert/key buffers to
-my $outputFile = "./wolfssl/certs_test.h";
+my $outputFile   = "./wolfssl/certs_test.h";
+my $outputFileSM = "./wolfssl/certs_test_sm.h";
 
 # ecc keys and certs to be converted
 # Used with HAVE_ECC && USE_CERT_BUFFERS_256
 
 my @fileList_ecc = (
-        [ "./certs/ecc-client-key.der",    "ecc_clikey_der_256" ],
-        [ "./certs/ecc-client-keyPub.der", "ecc_clikeypub_der_256" ],
-        [ "./certs/client-ecc-cert.der",   "cliecc_cert_der_256" ],
-        [ "./certs/ecc-key.der",           "ecc_key_der_256" ],
-        [ "./certs/ecc-keyPub.der",        "ecc_key_pub_der_256" ],
-        [ "./certs/server-ecc-comp.der",   "serv_ecc_comp_der_256" ],
-        [ "./certs/server-ecc-rsa.der",    "serv_ecc_rsa_der_256" ],
-        [ "./certs/server-ecc.der",        "serv_ecc_der_256" ],
-        [ "./certs/ca-ecc-key.der",        "ca_ecc_key_der_256" ],
-        [ "./certs/ca-ecc-cert.der",       "ca_ecc_cert_der_256" ],
-        [ "./certs/ca-ecc384-key.der",     "ca_ecc_key_der_384" ],
-        [ "./certs/ca-ecc384-cert.der",    "ca_ecc_cert_der_384" ]
+        [ "./certs/ecc-client-key.der",              "ecc_clikey_der_256" ],
+        [ "./certs/ecc-client-keyPub.der",           "ecc_clikeypub_der_256" ],
+        [ "./certs/client-ecc-cert.der",             "cliecc_cert_der_256" ],
+        [ "./certs/ecc-key.der",                     "ecc_key_der_256" ],
+        [ "./certs/ecc-keyPub.der",                  "ecc_key_pub_der_256" ],
+        [ "./certs/statickeys/ecc-secp256r1.der",    "ecc_secp_r1_statickey_der_256" ],
+        [ "./certs/server-ecc-comp.der",             "serv_ecc_comp_der_256" ],
+        [ "./certs/server-ecc-rsa.der",              "serv_ecc_rsa_der_256" ],
+        [ "./certs/server-ecc.der",                  "serv_ecc_der_256" ],
+        [ "./certs/tsa-ecc-key.der",                 "tsa_ecc_key_der_256" ],
+        [ "./certs/tsa-ecc-cert.der",                "tsa_ecc_cert_der_256" ],
+        [ "./certs/ca-ecc-key.der",                  "ca_ecc_key_der_256" ],
+        [ "./certs/ca-ecc-cert.der",                 "ca_ecc_cert_der_256" ],
+        [ "./certs/ca-ecc384-key.der",               "ca_ecc_key_der_384" ],
+        [ "./certs/ca-ecc384-cert.der",              "ca_ecc_cert_der_384" ]
         );
 
 
@@ -38,11 +42,19 @@ my @fileList_ecc = (
 # Used with HAVE_ED25519 define.
 my @fileList_ed = (
         [ "./certs/ed25519/server-ed25519.der",     "server_ed25519_cert" ],
-        [ "./certs/ed25519/server-ed25519-key.der", "server_ed25519_key" ],
+        [ "./certs/ed25519/server-ed25519-priv.der", "server_ed25519_key" ],
         [ "./certs/ed25519/ca-ed25519.der",         "ca_ed25519_cert" ],
         [ "./certs/ed25519/client-ed25519.der",     "client_ed25519_cert" ],
-        [ "./certs/ed25519/client-ed25519-key.der", "client_ed25519_key" ]
+        [ "./certs/ed25519/client-ed25519-priv.der", "client_ed25519_key" ]
         );
+
+# x25519 keys and certs
+# Used with USE_CERT_BUFFERS_25519 define.
+my @fileList_x = (
+        [ "./certs/statickeys/x25519.der",      "x25519_statickey_der" ],
+        [ "./certs/statickeys/x25519-pub.der",  "x25519_pub_statickey_der" ]
+        );
+
 
 # 1024-bit certs/keys to be converted
 # Used with USE_CERT_BUFFERS_1024 define.
@@ -68,6 +80,8 @@ my @fileList_2048 = (
         [ "./certs/client-cert.der", "client_cert_der_2048" ],
         [ "./certs/dh2048.der", "dh_key_der_2048" ],
         [ "./certs/dh-pubkey-2048.der", "dh_pub_key_der_2048" ],
+        [ "./certs/statickeys/dh-ffdhe2048.der", "dh_ffdhe_statickey_der_2048" ],
+        [ "./certs/statickeys/dh-ffdhe2048-pub.der", "dh_ffdhe_pub_statickey_der_2048" ],
         [ "./certs/dsa-pubkey-2048.der", "dsa_pub_key_der_2048" ],
         [ "./certs/dsa2048.der", "dsa_key_der_2048" ],
         [ "./certs/rsa2048.der", "rsa_key_der_2048" ],
@@ -75,7 +89,14 @@ my @fileList_2048 = (
         [ "./certs/ca-cert.der", "ca_cert_der_2048" ],
         [ "./certs/ca-cert-chain.der", "ca_cert_chain_der" ],
         [ "./certs/server-key.der", "server_key_der_2048" ],
-        [ "./certs/server-cert.der", "server_cert_der_2048" ]
+        [ "./certs/server-cert.der", "server_cert_der_2048" ],
+        [ "./certs/tsa-key.der", "tsa_key_der_2048" ],
+        [ "./certs/tsa-cert.der", "tsa_cert_der_2048" ],
+        [ "./certs/tsa-bad-ku-cert.der", "tsa_bad_ku_cert_der_2048" ],
+        [ "./certs/tsa-extra-eku-cert.der", "tsa_extra_eku_cert_der_2048" ],
+        [ "./certs/intermediate/ca-int-cert.der", "ca_int_cert_der_2048" ],
+        [ "./certs/tsa-chain-key.der", "tsa_chain_key_der_2048" ],
+        [ "./certs/tsa-chain-cert.der", "tsa_chain_cert_der_2048" ]
         );
 
 # 3072-bit certs/keys to be converted
@@ -98,27 +119,76 @@ my @fileList_4096 = (
         [ "./certs/dh4096.der", "dh_key_der_4096" ],
         );
 
+# SM ciphers PRM format in certs/sm2
+my @fileList_sm2 = (
+        [ "./certs/sm2/ca-sm2.pem",          "ca_sm2"          ],
+        [ "./certs/sm2/ca-sm2-key.pem",      "ca_sm2_key"      ],
+        [ "./certs/sm2/ca-sm2-priv.pem",     "ca_sm2_priv"     ],
+        [ "./certs/sm2/client-sm2.pem",      "client_sm2"      ],
+        [ "./certs/sm2/client-sm2-key.pem",  "client_sm2_key"  ],
+        [ "./certs/sm2/client-sm2-priv.pem", "client_sm2_priv" ],
+        [ "./certs/sm2/root-sm2.pem",        "root_sm2"        ],
+        [ "./certs/sm2/root-sm2-key.pem",    "root_sm2_key"    ],
+        [ "./certs/sm2/root-sm2-priv.pem",   "root_sm2_priv"   ],
+        [ "./certs/sm2/self-sm2-cert.pem",   "self_sm2_cert"   ],
+        [ "./certs/sm2/self-sm2-key.pem",    "self_sm2_key"    ],
+        [ "./certs/sm2/self-sm2-priv.pem",   "self_sm2_priv"   ],
+        [ "./certs/sm2/server-sm2.pem",      "server_sm2"      ],
+        [ "./certs/sm2/server-sm2-cert.pem", "server_sm2_cert" ],
+        [ "./certs/sm2/server-sm2-key.pem",  "server_sm2_key"  ],
+        [ "./certs/sm2/server-sm2-priv.pem", "server_sm2_priv" ],
+        );
+
+my @fileList_sm2_der = (
+        [ "./certs/sm2/ca-sm2.der",          "ca_sm2_der"          ],
+        [ "./certs/sm2/ca-sm2-key.der",      "ca_sm2_key_der"      ],
+        [ "./certs/sm2/ca-sm2-priv.der",     "ca_sm2_priv_der"     ],
+        [ "./certs/sm2/client-sm2.der",      "client_sm2_der"      ],
+        [ "./certs/sm2/client-sm2-key.der",  "client_sm2_key_der"  ],
+        [ "./certs/sm2/client-sm2-priv.der", "client_sm2_priv_der" ],
+        [ "./certs/sm2/root-sm2.der",        "root_sm2_der"        ],
+        [ "./certs/sm2/root-sm2-key.der",    "root_sm2_key_der"    ],
+        [ "./certs/sm2/root-sm2-priv.der",   "root_sm2_priv_der"   ],
+        [ "./certs/sm2/server-sm2.der",      "server_sm2_der"      ],
+        [ "./certs/sm2/server-sm2-cert.der", "server_sm2_cert_der" ],
+        [ "./certs/sm2/server-sm2-key.der",  "server_sm2_key_der"  ],
+        [ "./certs/sm2/server-sm2-priv.der", "server_sm2_priv_der" ],
+        );
+
 #Falcon Post-Quantum Keys
-#Used with HAVE_PQC
+#Used with HAVE_FALCON
 my @fileList_falcon = (
         ["certs/falcon/bench_falcon_level1_key.der", "bench_falcon_level1_key" ],
         ["certs/falcon/bench_falcon_level5_key.der", "bench_falcon_level5_key" ],
         );
 
+# CN-IP test certs (no SAN, CN contains IP literal or wildcard)
+# Used with OPENSSL_EXTRA && !NO_RSA
+my @fileList_cn_ip = (
+        [ "./certs/test/cn-ip-literal.der",  "cn_ip_literal_der" ],
+        [ "./certs/test/cn-ip-wildcard.der",  "cn_ip_wildcard_der" ],
+        );
+
+
 # ----------------------------------------------------------------------------
 
-my $num_ecc = @fileList_ecc;
-my $num_ed = @fileList_ed;
-my $num_1024 = @fileList_1024;
-my $num_2048 = @fileList_2048;
-my $num_3072 = @fileList_3072;
-my $num_4096 = @fileList_4096;
-my $num_falcon = @fileList_falcon;
+my $num_ecc      = @fileList_ecc;
+my $num_ed       = @fileList_ed;
+my $num_x        = @fileList_x;
+my $num_1024     = @fileList_1024;
+my $num_2048     = @fileList_2048;
+my $num_3072     = @fileList_3072;
+my $num_4096     = @fileList_4096;
+my $num_sm2      = @fileList_sm2;
+my $num_sm2_der  = @fileList_sm2_der;
+my $num_falcon   = @fileList_falcon;
+my $num_cn_ip    = @fileList_cn_ip;
 
 # open our output file, "+>" creates and/or truncates
 open OUT_FILE, "+>", $outputFile  or die $!;
 
-print OUT_FILE "/* certs_test.h */\n\n";
+print OUT_FILE "/* certs_test.h */\n";
+print OUT_FILE "/* This file was generated using: ./gencertbuf.pl */\n\n";
 print OUT_FILE "#ifndef WOLFSSL_CERTS_TEST_H\n";
 print OUT_FILE "#define WOLFSSL_CERTS_TEST_H\n\n";
 
@@ -134,7 +204,11 @@ for (my $i = 0; $i < $num_1024; $i++) {
     print OUT_FILE "{\n";
     file_to_hex($fname);
     print OUT_FILE "};\n";
-    print OUT_FILE "static const int sizeof_$sname = sizeof($sname);\n\n";
+
+    # In C89/C90 (which Watcom generally defaults to), sizeof must be a
+    # compile-time constant expression when used in a static initializer.
+    # So don't use `static const int sizeof_` here:
+    print OUT_FILE "#define sizeof_$sname (sizeof($sname))\n\n"
 }
 print OUT_FILE "#endif /* USE_CERT_BUFFERS_1024 */\n\n";
 
@@ -151,7 +225,10 @@ for (my $i = 0; $i < $num_2048; $i++) {
     print OUT_FILE "{\n";
     file_to_hex($fname);
     print OUT_FILE "};\n";
-    print OUT_FILE "static const int sizeof_$sname = sizeof($sname);\n\n";
+    # In C89/C90 (which Watcom generally defaults to), sizeof must be a
+    # compile-time constant expression when used in a static initializer.
+    # So don't use `static const int sizeof_` here:
+    print OUT_FILE "#define sizeof_$sname (sizeof($sname))\n\n"
 }
 
 
@@ -170,7 +247,10 @@ for (my $i = 0; $i < $num_3072; $i++) {
     print OUT_FILE "{\n";
     file_to_hex($fname);
     print OUT_FILE "};\n";
-    print OUT_FILE "static const int sizeof_$sname = sizeof($sname);\n\n";
+    # In C89/C90 (which Watcom generally defaults to), sizeof must be a
+    # compile-time constant expression when used in a static initializer.
+    # So don't use `static const int sizeof_` here:
+    print OUT_FILE "#define sizeof_$sname (sizeof($sname))\n\n"
 }
 
 print OUT_FILE "#endif /* USE_CERT_BUFFERS_3072 */\n\n";
@@ -188,13 +268,16 @@ for (my $i = 0; $i < $num_4096; $i++) {
     print OUT_FILE "{\n";
     file_to_hex($fname);
     print OUT_FILE "};\n";
-    print OUT_FILE "static const int sizeof_$sname = sizeof($sname);\n\n";
+    # In C89/C90 (which Watcom generally defaults to), sizeof must be a
+    # compile-time constant expression when used in a static initializer.
+    # So don't use `static const int sizeof_` here:
+    print OUT_FILE "#define sizeof_$sname (sizeof($sname))\n\n"
 }
 
 print OUT_FILE "#endif /* USE_CERT_BUFFERS_4096 */\n\n";
 
 # convert and print falcon keys
-print OUT_FILE "#ifdef HAVE_PQC\n\n";
+print OUT_FILE "#if defined(HAVE_FALCON)\n\n";
 for (my $i = 0; $i < $num_falcon; $i++) {
 
     my $fname = $fileList_falcon[$i][0];
@@ -205,10 +288,93 @@ for (my $i = 0; $i < $num_falcon; $i++) {
     print OUT_FILE "{\n";
     file_to_hex($fname);
     print OUT_FILE "};\n";
-    print OUT_FILE "static const int sizeof_$sname = sizeof($sname);\n\n";
+    # In C89/C90 (which Watcom generally defaults to), sizeof must be a
+    # compile-time constant expression when used in a static initializer.
+    # So don't use `static const int sizeof_` here:
+    print OUT_FILE "#define sizeof_$sname (sizeof($sname))\n\n"
 }
 
-print OUT_FILE "#endif /* HAVE_PQC */\n\n";
+print OUT_FILE "#endif /* HAVE_FALCON */\n\n";
+
+# print ML-DSA raw keys (used by the wolfcrypt benchmark)
+my @mldsa_keys = (
+        [ 44, "./certs/mldsa/bench_mldsa_44_key.der",
+              "./certs/mldsa/bench_mldsa_44_pubkey.der" ],
+        [ 65, "./certs/mldsa/bench_mldsa_65_key.der",
+              "./certs/mldsa/bench_mldsa_65_pubkey.der" ],
+        [ 87, "./certs/mldsa/bench_mldsa_87_key.der",
+              "./certs/mldsa/bench_mldsa_87_pubkey.der" ],
+        );
+
+print OUT_FILE "#if defined(WOLFSSL_HAVE_MLDSA)\n\n";
+
+for my $entry (@mldsa_keys) {
+    my ($n, $priv, $pub) = @$entry;
+
+    print OUT_FILE "#ifndef WOLFSSL_MLDSA_NO_SIGN\n";
+    print OUT_FILE "/* $priv */\n";
+    print OUT_FILE "static const unsigned char bench_mldsa_${n}_key[] =\n{\n";
+    file_to_hex($priv);
+    print OUT_FILE "};\n";
+    print OUT_FILE "#define sizeof_bench_mldsa_${n}_key (sizeof(bench_mldsa_${n}_key))\n";
+    print OUT_FILE "#endif /* !WOLFSSL_MLDSA_NO_SIGN */\n\n";
+
+    print OUT_FILE "#ifndef WOLFSSL_MLDSA_NO_VERIFY\n";
+    print OUT_FILE "/* $pub */\n";
+    print OUT_FILE "static const unsigned char bench_mldsa_${n}_pubkey[] =\n{\n";
+    file_to_hex($pub);
+    print OUT_FILE "};\n";
+    print OUT_FILE "#define sizeof_bench_mldsa_${n}_pubkey (sizeof(bench_mldsa_${n}_pubkey))\n";
+    print OUT_FILE "#endif /* !WOLFSSL_MLDSA_NO_VERIFY */\n\n";
+}
+
+print OUT_FILE "#endif /* WOLFSSL_HAVE_MLDSA */\n\n";
+
+
+# ML-DSA test key material encoded per the IETF LAMPS WG profile:
+# SubjectPublicKeyInfo for public keys, PKCS#8 PrivateKeyInfo for
+# private keys, using the NIST id-ml-dsa-N OIDs.
+print OUT_FILE "#if defined(WOLFSSL_HAVE_MLDSA)\n\n";
+
+for my $L ( [44,"WOLFSSL_NO_ML_DSA_44"],
+            [65,"WOLFSSL_NO_ML_DSA_65"],
+            [87,"WOLFSSL_NO_ML_DSA_87"] ) {
+    my ($n, $noLevel) = @$L;
+
+    print OUT_FILE "#if !defined($noLevel)\n\n";
+
+    print OUT_FILE "#ifndef WOLFSSL_MLDSA_NO_VERIFY\n";
+    print OUT_FILE "/* ./certs/mldsa/mldsa${n}_pub-spki.der */\n";
+    print OUT_FILE "static const unsigned char mldsa${n}_pub_spki[] =\n{\n";
+    file_to_hex("./certs/mldsa/mldsa${n}_pub-spki.der");
+    print OUT_FILE "};\n";
+    print OUT_FILE "#define sizeof_mldsa${n}_pub_spki (sizeof(mldsa${n}_pub_spki))\n";
+    print OUT_FILE "#endif /* !WOLFSSL_MLDSA_NO_VERIFY */\n\n";
+
+    print OUT_FILE "#ifndef WOLFSSL_MLDSA_NO_SIGN\n";
+    print OUT_FILE "/* ./certs/mldsa/mldsa${n}_priv-only.der */\n";
+    print OUT_FILE "static const unsigned char mldsa${n}_priv_only[] =\n{\n";
+    file_to_hex("./certs/mldsa/mldsa${n}_priv-only.der");
+    print OUT_FILE "};\n";
+    print OUT_FILE "#define sizeof_mldsa${n}_priv_only (sizeof(mldsa${n}_priv_only))\n";
+
+    print OUT_FILE "/* ./certs/mldsa/mldsa${n}_seed-priv.der */\n";
+    print OUT_FILE "static const unsigned char mldsa${n}_seed_priv[] =\n{\n";
+    file_to_hex("./certs/mldsa/mldsa${n}_seed-priv.der");
+    print OUT_FILE "};\n";
+    print OUT_FILE "#define sizeof_mldsa${n}_seed_priv (sizeof(mldsa${n}_seed_priv))\n";
+
+    print OUT_FILE "/* ./certs/mldsa/mldsa${n}_seed-only.der */\n";
+    print OUT_FILE "static const unsigned char mldsa${n}_seed_only[] =\n{\n";
+    file_to_hex("./certs/mldsa/mldsa${n}_seed-only.der");
+    print OUT_FILE "};\n";
+    print OUT_FILE "#define sizeof_mldsa${n}_seed_only (sizeof(mldsa${n}_seed_only))\n";
+    print OUT_FILE "#endif /* !WOLFSSL_MLDSA_NO_SIGN */\n\n";
+
+    print OUT_FILE "#endif /* !$noLevel */\n\n";
+}
+
+print OUT_FILE "#endif /* WOLFSSL_HAVE_MLDSA */\n\n";
 
 # convert and print 256-bit cert/keys
 print OUT_FILE "#if defined(HAVE_ECC) && defined(USE_CERT_BUFFERS_256)\n\n";
@@ -222,7 +388,10 @@ for (my $i = 0; $i < $num_ecc; $i++) {
     print OUT_FILE "{\n";
     file_to_hex($fname);
     print OUT_FILE "};\n";
-    print OUT_FILE "static const int sizeof_$sname = sizeof($sname);\n\n";
+    # In C89/C90 (which Watcom generally defaults to), sizeof must be a
+    # compile-time constant expression when used in a static initializer.
+    # So don't use `static const int sizeof_` here:
+    print OUT_FILE "#define sizeof_$sname (sizeof($sname))\n\n"
 }
 print OUT_FILE "#endif /* HAVE_ECC && USE_CERT_BUFFERS_256 */\n\n";
 
@@ -249,6 +418,42 @@ static const unsigned char dh_g[] =
   0x02,
 };\n\n";
 
+print OUT_FILE "#if defined(NO_ASN) && defined(WOLFSSL_SP_MATH)\n";
+print OUT_FILE "/* dh2048 p */
+static const unsigned char dh2048_p[] =
+{
+    0xb0, 0xa1, 0x08, 0x06, 0x9c, 0x08, 0x13, 0xba, 0x59, 0x06, 0x3c, 0xbc,
+    0x30, 0xd5, 0xf5, 0x00, 0xc1, 0x4f, 0x44, 0xa7, 0xd6, 0xef, 0x4a, 0xc6,
+    0x25, 0x27, 0x1c, 0xe8, 0xd2, 0x96, 0x53, 0x0a, 0x5c, 0x91, 0xdd, 0xa2,
+    0xc2, 0x94, 0x84, 0xbf, 0x7d, 0xb2, 0x44, 0x9f, 0x9b, 0xd2, 0xc1, 0x8a,
+    0xc5, 0xbe, 0x72, 0x5c, 0xa7, 0xe7, 0x91, 0xe6, 0xd4, 0x9f, 0x73, 0x07,
+    0x85, 0x5b, 0x66, 0x48, 0xc7, 0x70, 0xfa, 0xb4, 0xee, 0x02, 0xc9, 0x3d,
+    0x9a, 0x4a, 0xda, 0x3d, 0xc1, 0x46, 0x3e, 0x19, 0x69, 0xd1, 0x17, 0x46,
+    0x07, 0xa3, 0x4d, 0x9f, 0x2b, 0x96, 0x17, 0x39, 0x6d, 0x30, 0x8d, 0x2a,
+    0xf3, 0x94, 0xd3, 0x75, 0xcf, 0xa0, 0x75, 0xe6, 0xf2, 0x92, 0x1f, 0x1a,
+    0x70, 0x05, 0xaa, 0x04, 0x83, 0x57, 0x30, 0xfb, 0xda, 0x76, 0x93, 0x38,
+    0x50, 0xe8, 0x27, 0xfd, 0x63, 0xee, 0x3c, 0xe5, 0xb7, 0xc8, 0x09, 0xae,
+    0x6f, 0x50, 0x35, 0x8e, 0x84, 0xce, 0x4a, 0x00, 0xe9, 0x12, 0x7e, 0x5a,
+    0x31, 0xd7, 0x33, 0xfc, 0x21, 0x13, 0x76, 0xcc, 0x16, 0x30, 0xdb, 0x0c,
+    0xfc, 0xc5, 0x62, 0xa7, 0x35, 0xb8, 0xef, 0xb7, 0xb0, 0xac, 0xc0, 0x36,
+    0xf6, 0xd9, 0xc9, 0x46, 0x48, 0xf9, 0x40, 0x90, 0x00, 0x2b, 0x1b, 0xaa,
+    0x6c, 0xe3, 0x1a, 0xc3, 0x0b, 0x03, 0x9e, 0x1b, 0xc2, 0x46, 0xe4, 0x48,
+    0x4e, 0x22, 0x73, 0x6f, 0xc3, 0x5f, 0xd4, 0x9a, 0xd6, 0x30, 0x07, 0x48,
+    0xd6, 0x8c, 0x90, 0xab, 0xd4, 0xf6, 0xf1, 0xe3, 0x48, 0xd3, 0x58, 0x4b,
+    0xa6, 0xb9, 0xcd, 0x29, 0xbf, 0x68, 0x1f, 0x08, 0x4b, 0x63, 0x86, 0x2f,
+    0x5c, 0x6b, 0xd6, 0xb6, 0x06, 0x65, 0xf7, 0xa6, 0xdc, 0x00, 0x67, 0x6b,
+    0xbb, 0xc3, 0xa9, 0x41, 0x83, 0xfb, 0xc7, 0xfa, 0xc8, 0xe2, 0x1e, 0x7e,
+    0xaf, 0x00, 0x3f, 0x93
+};
+
+/* dh2048 g */
+static const unsigned char dh2048_g[] =
+{
+  0x02,
+};\n";
+print OUT_FILE "#endif\n\n";
+
+
 # convert and print ed25519 cert/keys
 print OUT_FILE "#if defined(HAVE_ED25519)\n\n";
 for (my $i = 0; $i < $num_ed; $i++) {
@@ -261,18 +466,118 @@ for (my $i = 0; $i < $num_ed; $i++) {
     print OUT_FILE "{\n";
     file_to_hex($fname);
     print OUT_FILE "};\n";
-    print OUT_FILE "static const int sizeof_$sname = sizeof($sname);\n\n";
+    # In C89/C90 (which Watcom generally defaults to), sizeof must be a
+    # compile-time constant expression when used in a static initializer.
+    # So don't use `static const int sizeof_` here:
+    print OUT_FILE "#define sizeof_$sname (sizeof($sname))\n\n"
 }
 print OUT_FILE "#endif /* HAVE_ED25519 */\n\n";
+
+
+# convert and print CURVE25519 cert/keys
+print OUT_FILE "#if defined(USE_CERT_BUFFERS_25519)\n\n";
+for (my $i = 0; $i < $num_x; $i++) {
+
+    my $fname = $fileList_x[$i][0];
+    my $sname = $fileList_x[$i][1];
+
+    print OUT_FILE "/* $fname, CURVE25519 */\n";
+    print OUT_FILE "static const unsigned char $sname\[] =\n";
+    print OUT_FILE "{\n";
+    file_to_hex($fname);
+    print OUT_FILE "};\n";
+    # In C89/C90 (which Watcom generally defaults to), sizeof must be a
+    # compile-time constant expression when used in a static initializer.
+    # So don't use `static const int sizeof_` here:
+    print OUT_FILE "#define sizeof_$sname (sizeof($sname))\n\n"
+}
+print OUT_FILE "#endif /* USE_CERT_BUFFERS_25519 */\n\n";
+
+
+# convert and print CN-IP test certs
+print OUT_FILE "#if defined(OPENSSL_EXTRA) && !defined(NO_RSA)\n\n";
+for (my $i = 0; $i < $num_cn_ip; $i++) {
+
+    my $fname = $fileList_cn_ip[$i][0];
+    my $sname = $fileList_cn_ip[$i][1];
+
+    print OUT_FILE "/* $fname */\n";
+    print OUT_FILE "static const unsigned char $sname\[] =\n";
+    print OUT_FILE "{\n";
+    file_to_hex($fname);
+    print OUT_FILE "};\n";
+    print OUT_FILE "#define sizeof_$sname (sizeof($sname))\n\n"
+}
+print OUT_FILE "#endif /* OPENSSL_EXTRA && !NO_RSA */\n\n";
+
 
 print OUT_FILE "#endif /* WOLFSSL_CERTS_TEST_H */\n\n";
 
 # close certs_test.h file
 close OUT_FILE or die $!;
 
+#---------------------------------------------------------------------------
+# open our output file, "+>" creates and/or truncates
+open OUT_FILE_SM, "+>", $outputFileSM  or die $!;
+
+print OUT_FILE_SM "/* certs_test_sm.h */\n";
+print OUT_FILE_SM "/* This file was generated using: ./gencertbuf.pl */\n\n";
+print OUT_FILE_SM "#ifndef WOLFSSL_CERTS_TEST_SM_H\n";
+print OUT_FILE_SM "#define WOLFSSL_CERTS_TEST_SM_H\n\n";
+print OUT_FILE_SM "#if defined(WOLFSSL_SM2) || defined(WOLFSSL_SM3) || defined(WOLFSSL_SM4)\n\n";
+print OUT_FILE_SM "    /* DER Certs Begin */\n\n";
+
+# convert and print SM2 DER format certs/keys
+for (my $i = 0; $i < $num_sm2_der; $i++) {
+
+    my $fname = $fileList_sm2_der[$i][0];
+    my $sname = $fileList_sm2_der[$i][1];
+
+    print OUT_FILE_SM "/* $fname */\n";
+    print OUT_FILE_SM "static const unsigned char $sname\[] =\n";
+    print OUT_FILE_SM "{\n";
+    file_to_hex($fname, \*OUT_FILE_SM);
+    print OUT_FILE_SM "};\n";
+    # In C89/C90 (which Watcom generally defaults to), sizeof must be a
+    # compile-time constant expression when used in a static initializer.
+    # So don't use `static const int sizeof_` here:
+    print OUT_FILE_SM "#define sizeof_$sname (sizeof($sname))\n\n";
+}
+print OUT_FILE_SM "    /* DER Certs End */\n\n";
+
+
+# convert and print SM2 PEM format certs/keys
+print OUT_FILE_SM "#ifdef WOLFSSL_NO_PEM\n\n";
+print OUT_FILE_SM "    /* SM PEM Certs disabled */\n\n";
+print OUT_FILE_SM "#else\n\n";
+
+for (my $i = 0; $i < $num_sm2; $i++) {
+
+    my $fname = $fileList_sm2[$i][0];
+    my $sname = $fileList_sm2[$i][1];
+
+    print OUT_FILE_SM "/* $fname */\n";
+    print OUT_FILE_SM "static const unsigned char $sname\[] =\n";
+    print OUT_FILE_SM "{\n";
+    file_to_hex($fname, \*OUT_FILE_SM);
+    print OUT_FILE_SM "};\n";
+    # In C89/C90 (which Watcom generally defaults to), sizeof must be a
+    # compile-time constant expression when used in a static initializer.
+    # So don't use `static const int sizeof_` here:
+    print OUT_FILE_SM "#define sizeof_$sname (sizeof($sname))\n\n";
+}
+
+print OUT_FILE_SM "#endif /* WOLFSSL_NO_PEM */\n\n";
+print OUT_FILE_SM "#endif /* WOLFSSL_SM2 || WOLFSSL_SM3 || WOLFSSL_SM4 */\n";
+print OUT_FILE_SM "#endif /* WOLFSSL_CERTS_TEST_SM_H */\n";
+
+# close certs_test_sm.h file
+close OUT_FILE_SM or die $!;
+
 # print file as hex, comma-separated, as needed by C buffer
 sub file_to_hex {
-    my $fileName = $_[0];
+    my ($fileName, $out_fh) = @_;
+    $out_fh //= \*OUT_FILE;   # default handle
 
     open my $fp, "<", $fileName or die $!;
     binmode($fp);
@@ -283,26 +588,27 @@ sub file_to_hex {
     for (my $i = 0, my $j = 1; $i < $fileLen; $i++, $j++)
     {
         if ($j == 1) {
-            print OUT_FILE "        ";
+            print {$out_fh} "        ";
         }
         if ($j != 1) {
-            print OUT_FILE " ";
+            print {$out_fh} " ";
         }
         read($fp, $byte, 1) or die "Error reading $fileName";
         my $output = sprintf("0x%02X", ord($byte));
-        print OUT_FILE $output;
+        print {$out_fh} $output;
 
         if ($i != ($fileLen - 1)) {
-            print OUT_FILE ",";
+            print {$out_fh} ",";
         }
 
         if ($j == 10) {
             $j = 0;
-            print OUT_FILE "\n";
+            print {$out_fh} "\n";
         }
     }
 
-    print OUT_FILE "\n";
+    print {$out_fh} "\n";
 
     close($fp);
 }
+

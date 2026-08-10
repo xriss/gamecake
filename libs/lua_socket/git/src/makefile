@@ -1,6 +1,6 @@
 # luasocket src/makefile
 #
-# Definitions in this section can be overriden on the command line or in the
+# Definitions in this section can be overridden on the command line or in the
 # environment.
 #
 # These are equivalent:
@@ -16,7 +16,7 @@
 # platform to build for
 PLAT?=linux
 
-# LUAV: 5.1 5.2
+# LUAV: 5.1 5.2 5.3 5.4
 # lua version to build against
 LUAV?=5.1
 
@@ -74,6 +74,13 @@ LUAPREFIX_mingw?=/usr
 CDIR_mingw?=lua/$(LUAV)
 LDIR_mingw?=lua/$(LUAV)/lua
 
+# where lua headers are found for ucrt64 builds
+# LUAINC_ucrt64:
+LUAINC_ucrt64?=/ucrt64/include
+LUALIB_ucrt64?=/ucrt64/bin/lua$(subst .,,$(LUAV)).dll
+LUAPREFIX_ucrt64?=/ucrt64
+CDIR_ucrt64?=lib/lua/$(LUAV)
+LDIR_ucrt64?=share/lua/$(LUAV)
 
 # LUAINC_win32:
 # LUALIB_win32:
@@ -153,7 +160,7 @@ print:
 #------
 # Supported platforms
 #
-PLATS= macosx linux win32 win64 mingw solaris
+PLATS= macosx linux win32 win64 mingw solaris ucrt64
 
 #------
 # Compiler and linker settings
@@ -163,7 +170,7 @@ O_macosx=o
 CC_macosx=gcc
 DEF_macosx= -DLUASOCKET_$(DEBUG) -DUNIX_HAS_SUN_LEN
 CFLAGS_macosx=$(LUAINC:%=-I%) $(DEF) -Wall -O2 -fno-common
-LDFLAGS_macosx= -bundle -undefined dynamic_lookup -o 
+LDFLAGS_macosx= -bundle -undefined dynamic_lookup -o
 LD_macosx=gcc
 SOCKET_macosx=usocket.o
 
@@ -176,7 +183,7 @@ CC_linux=gcc
 DEF_linux=-DLUASOCKET_$(DEBUG)
 CFLAGS_linux=$(LUAINC:%=-I%) $(DEF) -Wall -Wshadow -Wextra \
 	-Wimplicit -O2 -ggdb3 -fpic
-LDFLAGS_linux=-O -shared -fpic -o 
+LDFLAGS_linux=-O -shared -fpic -o
 LD_linux=gcc
 SOCKET_linux=usocket.o
 
@@ -189,7 +196,7 @@ CC_freebsd=gcc
 DEF_freebsd=-DLUASOCKET_$(DEBUG) -DUNIX_HAS_SUN_LEN
 CFLAGS_freebsd=$(LUAINC:%=-I%) $(DEF) -Wall -Wshadow -Wextra \
 	-Wimplicit -O2 -ggdb3 -fpic
-LDFLAGS_freebsd=-O -shared -fpic -o 
+LDFLAGS_freebsd=-O -shared -fpic -o
 LD_freebsd=gcc
 SOCKET_freebsd=usocket.o
 
@@ -202,7 +209,7 @@ CC_solaris=gcc
 DEF_solaris=-DLUASOCKET_$(DEBUG)
 CFLAGS_solaris=$(LUAINC:%=-I%) $(DEF) -Wall -Wshadow -Wextra \
 	-Wimplicit -O2 -ggdb3 -fpic
-LDFLAGS_solaris=-lnsl -lsocket -lresolv -O -shared -fpic -o 
+LDFLAGS_solaris=-lnsl -lsocket -lresolv -O -shared -fpic -o
 LD_solaris=gcc
 SOCKET_solaris=usocket.o
 
@@ -215,9 +222,24 @@ CC_mingw=gcc
 DEF_mingw= -DLUASOCKET_$(DEBUG) \
 	-DWINVER=0x0501
 CFLAGS_mingw=$(LUAINC:%=-I%) $(DEF) -Wall -O2 -fno-common
-LDFLAGS_mingw= $(LUALIB) -shared -Wl,-s -lws2_32 -o 
+LDFLAGS_mingw= $(LUALIB) -shared -Wl,-s -lws2_32 -o
 LD_mingw=gcc
 SOCKET_mingw=wsocket.o
+
+#------
+# Compiler and linker settings
+# for ucrt64
+SO_ucrt64=dll
+O_ucrt64=o
+CC_ucrt64=gcc
+DEF_ucrt64= -DLUASOCKET_$(DEBUG) \
+	-DWINVER=0x0501
+CFLAGS_ucrt64= -I$(LUAINC) $(DEF) -Wall -O2 -fno-common 
+# \
+	-fvisibility=hidden
+LDFLAGS_ucrt64= $(LUALIB) -shared -Wl,-s -lws2_32 -o
+LD_ucrt64=gcc
+SOCKET_ucrt64=wsocket.o
 
 
 #------
@@ -272,7 +294,7 @@ SOCKET_win64=wsocket.obj
 #
 SO=$(SO_$(PLAT))
 O=$(O_$(PLAT))
-SOCKET_V=3.0-rc1
+SOCKET_V=3.1.0
 MIME_V=1.0.3
 SOCKET_SO=socket-$(SOCKET_V).$(SO)
 MIME_SO=mime-$(MIME_V).$(SO)
@@ -383,6 +405,9 @@ linux:
 
 mingw:
 	$(MAKE) all PLAT=mingw
+
+ucrt64:
+	$(MAKE) all PLAT=ucrt64
 
 solaris:
 	$(MAKE) all-unix PLAT=solaris

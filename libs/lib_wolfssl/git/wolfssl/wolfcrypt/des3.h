@@ -1,12 +1,12 @@
 /* des3.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -35,12 +35,6 @@
     #include <wolfssl/wolfcrypt/fips.h>
 #endif /* HAVE_FIPS_VERSION >= 2 */
 
-#if defined(HAVE_FIPS) && \
-        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-    /* included for fips @wc_fips */
-    #include <cyassl/ctaocrypt/des3.h>
-#endif
-
 #ifdef __cplusplus
     extern "C" {
 #endif
@@ -49,16 +43,21 @@
 enum {
     DES_KEY_SIZE        =  8,  /* des                     */
     DES3_KEY_SIZE       = 24,  /* 3 des ede               */
-    DES_IV_SIZE         =  8,  /* should be the same as DES_BLOCK_SIZE */
+    DES_IV_SIZE         =  8   /* should be the same as DES_BLOCK_SIZE */
 };
 
 
 /* avoid redefinition of structs */
 #if !defined(HAVE_FIPS) || (defined(HAVE_FIPS_VERSION) && \
-        (HAVE_FIPS_VERSION == 2 || HAVE_FIPS_VERSION == 3))
+    HAVE_FIPS_VERSION >= 2)
 
 #ifdef WOLFSSL_ASYNC_CRYPT
     #include <wolfssl/wolfcrypt/async.h>
+#endif
+
+#ifdef WOLFSSL_SE050
+    /* SE050 SDK also defines DES_BLOCK_SIZE */
+    #undef DES_BLOCK_SIZE
 #endif
 
 enum {
@@ -79,6 +78,9 @@ enum {
 
 
 #if defined(STM32_CRYPTO)
+
+#include <wolfssl/wolfcrypt/port/st/stm32.h>
+
 enum {
     DES_CBC = 0,
     DES_ECB = 1
@@ -111,6 +113,7 @@ struct Des3 {
     void*  devCtx;
 #endif
     void* heap;
+    WC_BITFIELD keySet:1;    /* set to 1 once a key has been configured */
 };
 
 #ifndef WC_DES3_TYPE_DEFINED
@@ -132,9 +135,16 @@ WOLFSSL_API int  wc_Des_EcbEncrypt(Des* des, byte* out,
 WOLFSSL_API int wc_Des3_EcbEncrypt(Des3* des, byte* out,
                                    const byte* in, word32 sz);
 
+#ifdef FREESCALE_MMCAU /* Has separate encrypt/decrypt functions */
+WOLFSSL_API int wc_Des_EcbDecrypt(Des* des, byte* out,
+                                   const byte* in, word32 sz);
+WOLFSSL_API int wc_Des3_EcbDecrypt(Des3* des, byte* out,
+                                   const byte* in, word32 sz);
+#else
 /* ECB decrypt same process as encrypt but with decrypt key */
 #define wc_Des_EcbDecrypt  wc_Des_EcbEncrypt
 #define wc_Des3_EcbDecrypt wc_Des3_EcbEncrypt
+#endif
 
 WOLFSSL_API int  wc_Des3_SetKey(Des3* des, const byte* key,
                                 const byte* iv,int dir);
@@ -146,8 +156,8 @@ WOLFSSL_API int  wc_Des3_CbcDecrypt(Des3* des, byte* out,
 
 /* These are only required when using either:
   static memory (WOLFSSL_STATIC_MEMORY) or asynchronous (WOLFSSL_ASYNC_CRYPT) */
-WOLFSSL_API int  wc_Des3Init(Des3*, void*, int);
-WOLFSSL_API void wc_Des3Free(Des3*);
+WOLFSSL_API int  wc_Des3Init(Des3* des3, void* heap, int devId);
+WOLFSSL_API void wc_Des3Free(Des3* des3);
 
 #ifdef __cplusplus
     } /* extern "C" */

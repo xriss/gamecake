@@ -1,12 +1,12 @@
 /* srp.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -32,7 +32,7 @@
 #include <wolfssl/wolfcrypt/sha.h>
 #include <wolfssl/wolfcrypt/sha256.h>
 #include <wolfssl/wolfcrypt/sha512.h>
-#include <wolfssl/wolfcrypt/integer.h>
+#include <wolfssl/wolfcrypt/wolfmath.h>
 
 #ifdef __cplusplus
     extern "C" {
@@ -65,7 +65,7 @@
  */
 typedef enum {
     SRP_CLIENT_SIDE  = 0,
-    SRP_SERVER_SIDE  = 1,
+    SRP_SERVER_SIDE  = 1
 } SrpSide;
 
 /**
@@ -75,7 +75,7 @@ typedef enum {
         SRP_TYPE_SHA    = 1,
         SRP_TYPE_SHA256 = 2,
         SRP_TYPE_SHA384 = 3,
-        SRP_TYPE_SHA512 = 4,
+        SRP_TYPE_SHA512 = 4
 } SrpType;
 
 

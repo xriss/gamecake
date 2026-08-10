@@ -1,140 +1,200 @@
 
-#ifndef _WIN32
+#ifndef WOLFSSL_USER_SETTINGS_H
+#define WOLFSSL_USER_SETTINGS_H
 
-
-#undef  _POSIX_THREADS
-#define _POSIX_THREADS
-
-#undef  HAVE_THREAD_LS
-#define HAVE_THREAD_LS
-
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 
-#undef  TFM_TIMING_RESISTANT
-#define TFM_TIMING_RESISTANT
+/* ------------------------------------------------- */
+/* NEEDED FOR LUASEC BUILD */
+/* ------------------------------------------------- */
+#define OPENSSL_EXTRA
+#define OPENSSL_ALL
+#define HAVE_KEYING_MATERIAL
+#define HAVE_ALPN
+#define SESSION_CERTS
 
-#undef  ECC_TIMING_RESISTANT
-#define ECC_TIMING_RESISTANT
+/* ------------------------------------------------- */
+/* NEEDED FOR HTTPS TLS1_2 ? */
+/* ------------------------------------------------- */
+#define WOLFSSL_ALT_CERT_CHAINS
 
-#undef  WC_RSA_BLINDING
-#define WC_RSA_BLINDING
+/* ------------------------------------------------- */
+/* Platform */
+/* ------------------------------------------------- */
+#if 0 /* Single threaded */
+    #define SINGLE_THREADED
+#endif
+#if 0 /* Disable filesystem */
+    #define NO_FILESYSTEM
+#endif
+#define WOLFSSL_IGNORE_FILE_WARN
 
-#undef  WOLFSSL_USE_ALIGN
-#define WOLFSSL_USE_ALIGN
+/* ------------------------------------------------- */
+/* Math */
+/* ------------------------------------------------- */
+#define WOLFSSL_SP_MATH_ALL
+#if 0 /* Small code size */
+    #define WOLFSSL_SP_SMALL
+#endif
 
-#undef  WOLFSSL_SHA224
-#define WOLFSSL_SHA224
-
-#undef  WOLFSSL_SHA512
-#define WOLFSSL_SHA512
-
-#undef  WOLFSSL_SHA384
-#define WOLFSSL_SHA384
-
-#undef  HAVE_HKDF
+/* ------------------------------------------------- */
+/* TLS 1.3 */
+/* ------------------------------------------------- */
+#define WOLFSSL_TLS13
+#define HAVE_TLS_EXTENSIONS
+#define HAVE_SUPPORTED_CURVES
 #define HAVE_HKDF
-
-#undef  NO_DSA
-#define NO_DSA
-
-#undef  HAVE_ECC
-#define HAVE_ECC
-
-#undef  TFM_ECC256
-#define TFM_ECC256
-
-#undef  ECC_SHAMIR
-#define ECC_SHAMIR
-
-#undef  WC_RSA_PSS
 #define WC_RSA_PSS
 
-#undef  WOLFSSL_BASE64_ENCODE
-#define WOLFSSL_BASE64_ENCODE
+/* Disable older TLS versions */
+//#define WOLFSSL_NO_TLS12
+#define NO_OLD_TLS
 
-#undef  NO_RABBIT
-#define NO_RABBIT
+/* TLS 1.3 Extensions */
+#if 1 /* Session tickets */
+    #define HAVE_SESSION_TICKET
+#endif
+#if 0 /* Early data (0-RTT) */
+    #define WOLFSSL_EARLY_DATA
+#endif
+#if 0 /* Post-handshake authentication */
+    #define WOLFSSL_POST_HANDSHAKE_AUTH
+#endif
+#if 1 /* Server Name Indication */
+    #define HAVE_SNI
+#endif
 
-#undef  WOLFSSL_SHA3
-#define WOLFSSL_SHA3
+/* Client/Server */
+#if 0 /* Client only */
+    #define NO_WOLFSSL_SERVER
+#endif
+#if 0 /* Server only */
+    #define NO_WOLFSSL_CLIENT
+#endif
 
-#undef  HAVE_POLY1305
-#define HAVE_POLY1305
+/* ------------------------------------------------- */
+/* Timing Resistance */
+/* ------------------------------------------------- */
+#define TFM_TIMING_RESISTANT
+#define ECC_TIMING_RESISTANT
+#define WC_RSA_BLINDING
 
-#undef  HAVE_ONE_TIME_AUTH
-#define HAVE_ONE_TIME_AUTH
+/* ------------------------------------------------- */
+/* ECC */
+/* ------------------------------------------------- */
+#if 1 /* ECC support */
+    #define HAVE_ECC
+    #define ECC_USER_CURVES
+    #undef  NO_ECC256
+    #if 1 /* P-384 */
+        #define HAVE_ECC384
+    #endif
+    #if 0 /* P-521 */
+        #define HAVE_ECC521
+    #endif
+    #define ECC_SHAMIR
+#endif
 
-#undef  HAVE_CHACHA
-#define HAVE_CHACHA
+/* ------------------------------------------------- */
+/* Curve25519 / Ed25519 */
+/* ------------------------------------------------- */
+#if 1 /* X25519 key exchange */
+    #define HAVE_CURVE25519
+#endif
+#if 0 /* Ed25519 signatures */
+    #define HAVE_ED25519
+#endif
 
-#undef  HAVE_HASHDRBG
-#define HAVE_HASHDRBG
+/* ------------------------------------------------- */
+/* RSA */
+/* ------------------------------------------------- */
+#if 1 /* RSA support */
+    #undef NO_RSA
+    #define WOLFSSL_KEY_GEN
+#else
+    #define NO_RSA
+#endif
 
-#undef  HAVE_TLS_EXTENSIONS
-#define HAVE_TLS_EXTENSIONS
+/* ------------------------------------------------- */
+/* DH */
+/* ------------------------------------------------- */
+#if 1 /* DH key exchange (FFDHE) */
+    #undef NO_DH
+    #define HAVE_FFDHE_2048
+    #define HAVE_FFDHE_3072
+    #define HAVE_DH_DEFAULT_PARAMS
+#else
+    #define NO_DH
+#endif
 
-#undef  HAVE_SUPPORTED_CURVES
-#define HAVE_SUPPORTED_CURVES
-
-#undef  HAVE_FFDHE_2048
-#define HAVE_FFDHE_2048
-
-#undef  HAVE_SUPPORTED_CURVES
-#define HAVE_SUPPORTED_CURVES
-
-#undef  WOLFSSL_TLS13
-#define WOLFSSL_TLS13
-
-#undef  HAVE_TLS_EXTENSIONS
-#define HAVE_TLS_EXTENSIONS
-
-#undef  HAVE_EXTENDED_MASTER
-#define HAVE_EXTENDED_MASTER
-
-#undef  NO_RC4
-#define NO_RC4
-
-#undef  HAVE_ENCRYPT_THEN_MAC
-#define HAVE_ENCRYPT_THEN_MAC
-
-#undef  NO_PSK
-#define NO_PSK
-
-#undef  NO_MD4
-#define NO_MD4
-
-//#undef  USE_FAST_MATH
-//#define USE_FAST_MATH
-
-//#undef  WOLFSSL_X86_64_BUILD
-//#define WOLFSSL_X86_64_BUILD
-
-#undef  WC_NO_ASYNC_THREADING
-#define WC_NO_ASYNC_THREADING
-
-#undef  HAVE_DH_DEFAULT_PARAMS
-#define HAVE_DH_DEFAULT_PARAMS
-
-#undef  NO_DES3
-#define NO_DES3
-
-#undef  GCM_TABLE_4BIT
+/* ------------------------------------------------- */
+/* Symmetric Ciphers */
+/* ------------------------------------------------- */
+/* AES-GCM (required for TLS 1.3) */
+#define HAVE_AESGCM
 #define GCM_TABLE_4BIT
 
-#undef  HAVE_AESGCM
-#define HAVE_AESGCM
+#if 1 /* ChaCha20-Poly1305 */
+    #define HAVE_CHACHA
+    #define HAVE_POLY1305
+    #define HAVE_ONE_TIME_AUTH
+#endif
 
-#undef  HAVE_TLS_EXTENSIONS
-#define HAVE_TLS_EXTENSIONS
+#if 0 /* AES-CCM */
+    #define HAVE_AESCCM
+#endif
 
-#undef  HAVE_SERVER_RENEGOTIATION_INFO
-#define HAVE_SERVER_RENEGOTIATION_INFO
+/* ------------------------------------------------- */
+/* Hashing */
+/* ------------------------------------------------- */
+/* SHA-256 required */
+#define WOLFSSL_SHA384
+#define WOLFSSL_SHA512
 
-//#undef  HAVE___UINT128_T
-//#define HAVE___UINT128_T 1
+/* ------------------------------------------------- */
+/* RNG */
+/* ------------------------------------------------- */
+#define HAVE_HASHDRBG
 
-#undef  HAVE_WC_INTROSPECTION
-#define HAVE_WC_INTROSPECTION
+/* ------------------------------------------------- */
+/* ASN / Certificates */
+/* ------------------------------------------------- */
+#define WOLFSSL_ASN_TEMPLATE
 
+#if 1 /* Certificate generation */
+    #define WOLFSSL_CERT_GEN
+    #define WOLFSSL_CERT_REQ
+    #define WOLFSSL_CERT_EXT
+#endif
+
+/* ------------------------------------------------- */
+/* Disabled Algorithms */
+/* ------------------------------------------------- */
+#define NO_DSA
+#define NO_RC4
+#define NO_MD4
+#define NO_MD5
+#define NO_DES3
+#define NO_DES3_TLS_SUITES
+//#define NO_PSK
+//#define NO_PWDBASED
+
+/* ------------------------------------------------- */
+/* Debugging */
+/* ------------------------------------------------- */
+#if 0 /* Enable debug logging */
+    #define DEBUG_WOLFSSL
+#endif
+#if 0 /* Disable error strings to save flash */
+    #define NO_ERROR_STRINGS
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* WOLFSSL_USER_SETTINGS_H */
 

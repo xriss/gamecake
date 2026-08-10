@@ -1,12 +1,12 @@
 /* sniffer.h
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -27,6 +27,11 @@
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/asn_public.h>
 
+#ifdef HAVE_WOLF_EVENT
+    #include <wolfssl/wolfcrypt/wolfevent.h>
+#endif
+
+
 #ifdef _WIN32
     #ifdef SSL_SNIFFER_EXPORTS
         #define SSL_SNIFFER_API __declspec(dllexport)
@@ -41,6 +46,22 @@
 #ifdef __cplusplus
     extern "C" {
 #endif
+
+
+typedef struct IpAddrInfo {
+    int version;
+    union {
+        word32 ip4;
+        byte   ip6[16];
+    };
+} IpAddrInfo;
+
+typedef struct SnifferStreamInfo {
+    IpAddrInfo src;          /* server address in network byte order */
+    IpAddrInfo dst;          /* client address in network byte order */
+    word16            dstPort;         /* server port */
+    word16            srcPort;         /* client port */
+} SnifferStreamInfo;
 
 /* @param typeK: (formerly keyType) was shadowing a global declaration in
  *                wolfssl/wolfcrypt/asn.h line 175
@@ -119,10 +140,18 @@ SSL_SNIFFER_API int ssl_GetSessionStats(unsigned int* active,
                                         unsigned int* reassemblyMemory,
                                         char* error);
 
-WOLFSSL_API void ssl_InitSniffer(void);
+WOLFSSL_API
+SSL_SNIFFER_API void ssl_InitSniffer(void);
+WOLFSSL_API
+SSL_SNIFFER_API void ssl_InitSniffer_ex(int devId);
+WOLFSSL_API
+SSL_SNIFFER_API void ssl_InitSniffer_ex2(int threadNum);
 
-WOLFSSL_API void ssl_FreeSniffer(void);
+WOLFSSL_API
+SSL_SNIFFER_API void ssl_FreeSniffer(void);
 
+WOLFSSL_API
+SSL_SNIFFER_API void ssl_RemoveStaleSessions(void);
 
 /* ssl_SetPrivateKey typeKs */
 enum {
@@ -268,6 +297,58 @@ SSL_SNIFFER_API int ssl_DecodePacketWithChainSessionInfoStoreData(
         void* vChain, unsigned int chainSz, void* ctx, SSLInfo* sslInfo,
         char* error);
 #endif
+
+WOLFSSL_API
+SSL_SNIFFER_API int ssl_DecodePacket_GetStream(SnifferStreamInfo* info,
+        const byte* packet, int length, char* error);
+
+#ifdef WOLFSSL_ASYNC_CRYPT
+
+WOLFSSL_API
+SSL_SNIFFER_API int ssl_DecodePacketAsync(void* packet, unsigned int packetSz,
+    int isChain, unsigned char** data, char* error, SSLInfo* sslInfo,
+    void* userCtx);
+
+WOLFSSL_API
+SSL_SNIFFER_API int ssl_PollSniffer(WOLF_EVENT** events, int maxEvents,
+    WOLF_EVENT_FLAG flags, int* eventCount);
+
+#endif /* WOLFSSL_ASYNC_CRYPT */
+
+#ifdef WOLFSSL_SNIFFER_KEYLOGFILE
+
+typedef enum {
+    SNIFFER_SECRET_TLS12_MASTER_SECRET,
+#if defined(WOLFSSL_TLS13)
+    SNIFFER_SECRET_CLIENT_EARLY_TRAFFIC_SECRET,
+    SNIFFER_SECRET_CLIENT_HANDSHAKE_TRAFFIC_SECRET,
+    SNIFFER_SECRET_SERVER_HANDSHAKE_TRAFFIC_SECRET,
+    SNIFFER_SECRET_CLIENT_TRAFFIC_SECRET,
+    SNIFFER_SECRET_SERVER_TRAFFIC_SECRET,
+#endif /* WOLFSSL_TLS13 */
+    SNIFFER_SECRET_NUM_SECRET_TYPES
+} SnifferSecretType;
+
+
+WOLFSSL_API
+SSL_SNIFFER_API int ssl_CreateKeyLogSnifferServer(const char* address,
+                                                  int port,
+                                                  char* error);
+
+WOLFSSL_API
+SSL_SNIFFER_API int ssl_LoadSecretsFromKeyLogFile(const char* keylogfile,
+                                                  char* error);
+
+typedef int (*SSLSnifferSecretCb)(unsigned char* client_random,
+                                  int type,
+                                  unsigned char* output_secret);
+
+#endif /* WOLFSSL_SNIFFER_KEYLOGFILE */
+
+WOLFSSL_API
+SSL_SNIFFER_API int ssl_RemoveSession(const char* clientIp, int clientPort,
+                                      const char* serverIp, int serverPort,
+                                      char* error);
 
 
 #ifdef __cplusplus

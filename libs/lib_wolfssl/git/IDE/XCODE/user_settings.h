@@ -7,7 +7,6 @@
 
 #ifdef HAVE_FIPS
     #define NO_MD4
-    #define NO_RABBIT
     #define NO_DSA
     #define NO_PWDBASED
 #else
@@ -18,8 +17,8 @@
     /* 128-bit type */
     #define HAVE___UINT128_T
 
-    /* fast math */
-    #define USE_FAST_MATH
+    /* SP Math */
+    #define WOLFSSL_SP_MATH
     #define HAVE_ECC
 
     /* ECC speedups */
@@ -68,7 +67,6 @@
     /* off by default */
     #define NO_RC4
     #define NO_MD4
-    #define NO_RABBIT
     #define NO_DSA
     #define NO_PSK
     #define NO_PWDBASED

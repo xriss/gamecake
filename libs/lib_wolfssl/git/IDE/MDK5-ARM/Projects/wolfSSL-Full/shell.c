@@ -1,12 +1,12 @@
 /*shell.c
  *
- * Copyright (C) 2006-2021 wolfSSL Inc.
+ * Copyright (C) 2006-2026 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -152,10 +152,6 @@ extern void hmac_sha384_test(void *arg) ;
 extern void arc4_test(void *arg) ;
 #endif
 
-#ifndef NO_RABBIT
-extern void rabbit_test(void *arg) ;
-#endif
-
 #ifndef NO_DES3
 extern void des_test(void *arg) ;
 extern void des3_test(void *arg) ;
@@ -270,9 +266,6 @@ static struct {
 #ifndef NO_RC4
     "arc4",  arc4_test,
 #endif
-#ifndef NO_RABBIT
-  "rabbit",  rabbit_test,
-#endif
 #ifndef NO_DES3
   "des",  des_test,
   "des3",  des3_test,
@@ -315,7 +308,7 @@ static struct {
     "",  NULL
 } ;
 
-enum jobtype { FORGROUND, BACKGROUND }  ;
+enum jobtype { FOREGROUND, BACKGROUND }  ;
 
 #define IF_DELIMITER(ch) ((ch) == ' ' || (ch) == '\n')
 
@@ -375,7 +368,7 @@ static int getline(char * line, int sz, func_args *args, int*bf_flg)
         (*bf_flg) = BACKGROUND ;
         line[strlen(line)-2] = '\n' ;
     } else {
-        (*bf_flg) = FORGROUND ;
+        (*bf_flg) = FOREGROUND ;
     }
     args->argc = 0 ;
     for(i=0; i<sz; i++) {
@@ -538,7 +531,7 @@ static   wolfSSL_Mutex command_mutex ;
 #endif
 
 void exit_command(void) {
-	  printf("Command Aborted\n") ;
+    printf("Command Aborted\n") ;
     #ifdef WOLFSSL_CMSIS_RTOS
         osThreadTerminate(osThreadGetId()) ;
     #else
@@ -624,7 +617,7 @@ void shell_main(void *arg) {
     func_args args ;
     int bf_flg ;
 #if defined(WOLFSSL_CMSIS_RTOS)
-    osThreadId 	 cmd ;
+    osThreadId cmd ;
 #endif
     i = BackGround ;
         /* Dummy for avoiding warning: BackGround is defined but not used. */
@@ -640,7 +633,7 @@ void shell_main(void *arg) {
         for(i=0; commandTable[i].func != NULL; i++) {
             if(strcmp(commandTable[i].command, args.argv[0]) == 0) {
             args.argv[0] = (char *) commandTable[i].func ;
-                if(bf_flg == FORGROUND) {
+                if(bf_flg == FOREGROUND) {
                     #if defined(HAVE_KEIL_RTX) && !defined(WOLFSSL_CMSIS_RTOS)
                         wc_UnLockMutex((wolfSSL_Mutex *)&command_mutex) ;
                         os_tsk_create_user_ex( (void(*)(void *))&command_invoke, 7,
@@ -648,14 +641,14 @@ void shell_main(void *arg) {
                         os_tsk_pass ();
                     #else
                         #if defined(WOLFSSL_CMSIS_RTOS)
-                             wc_UnLockMutex((wolfSSL_Mutex *)&command_mutex) ;
-                             cmd = osThreadCreate (osThread (command_invoke) , &args);
-                             if(cmd == NULL) {
-															     printf("Cannon create command thread\n") ;
-														 }
-												     osThreadYield ();
+                            wc_UnLockMutex((wolfSSL_Mutex *)&command_mutex) ;
+                            cmd = osThreadCreate (osThread (command_invoke) , &args);
+                            if(cmd == NULL) {
+                                printf("Cannon create command thread\n") ;
+                            }
+                            osThreadYield ();
                         #else
-                              command_invoke(&args) ;
+                            command_invoke(&args) ;
                         #endif
                     #endif
                     #ifdef  HAVE_KEIL_RTX

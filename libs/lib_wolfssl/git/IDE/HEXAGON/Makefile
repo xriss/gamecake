@@ -1,12 +1,12 @@
 # Makefile
 #
-# Copyright (C) 2006-2021 wolfSSL Inc.
+# Copyright (C) 2006-2026 wolfSSL Inc.
 #
 # This file is part of wolfSSL.
 #
 # wolfSSL is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # wolfSSL is distributed in the hope that it will be useful,
@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
-#/
 
 ENVI=UbuntuARM
 
@@ -82,7 +81,6 @@ libwolfssl_C_SRCS += \
 	../../wolfcrypt/src/chacha20_poly1305 \
 	../../wolfcrypt/src/pwdbased \
 	../../wolfcrypt/src/chacha \
-	../../wolfcrypt/src/rabbit \
 	../../wolfcrypt/src/cmac \
 	../../wolfcrypt/src/random \
 	../../wolfcrypt/src/coding \
@@ -121,7 +119,6 @@ libwolfssl_C_SRCS += \
 	../../wolfcrypt/src/wc_port \
 	../../wolfcrypt/src/hmac \
 	../../wolfcrypt/src/wolfcrypt_first \
-	../../wolfcrypt/src/idea \
 	../../wolfcrypt/src/wolfcrypt_last \
 	../../wolfcrypt/src/wolfevent \
 	../../wolfcrypt/src/logging \

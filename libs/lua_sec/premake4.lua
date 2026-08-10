@@ -1,4 +1,25 @@
 
+--[[
+
+compat hacks
+
+#define SSL_up_ref(a) ( printf("\nERROR WOLFSSL SSL_up_ref missing.\n\n") & 0  )
+#define SSL_X509_LOOKUP 0
+#define X509_VERIFY_PARAM_set_purpose(a,b) ( printf("\nERROR WOLFSSL X509_VERIFY_PARAM_set_purpose missing.\n\n") & 0  )
+#define X509_VERIFY_PARAM_set_trust(a,b) ( printf("\nERROR WOLFSSL X509_VERIFY_PARAM_set_trust missing.\n\n") & 0  )
+
+
+
+
+#define SSL_is_server(a) ( printf("\nERROR WOLFSSL SSL_is_server missing.\n\n") & 0  )
+#define X509_up_ref(a) ( printf("\nERROR WOLFSSL X509_up_ref missing.\n\n") & 0  )
+
+#define SSL_get_current_compression(a) ((void*)( printf("\nERROR WOLFSSL SSL_get_current_compression missing.\n\n") & 0  ))
+#define X509_STORE_CTX_get0_param(a) ((void*)( printf("\nERROR WOLFSSL X509_STORE_CTX_get0_param missing.\n\n") & 0  ))
+
+]]
+
+
 local lua_sec_all=function()
 
 includedirs{
@@ -8,19 +29,17 @@ includedirs{
 	"../lib_wolfssl/git/wolfssl",
 }
 
+-- wolfssl
 defines{
-	"HAVE_EX_DATA",
-	"SESSION_CERTS",
-	"HAVE_ALPN",
-	"WOLFSSL_ALLOW_TLSV10",
-	"WOLFSSL_CERT_GEN",
+-- put it all in user_settings.h
 	"WOLFSSL_USER_SETTINGS",
-	"OPENSSL_EXTRA",
-	"OPENSSL_ALL",
-	"WOLFSSL_ALT_CERT_CHAINS",
---	"DEBUG_WOLFSSL",
 }
 
+defines{
+	"LSEC_API_OPENSSL_1_1_0",
+--	"OPENSSL_NO_EC",
+--	"TLS1_3_VERSION",
+}
 
 if WINDOWS then
 
