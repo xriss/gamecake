@@ -88,9 +88,10 @@ local find_system_ca do
    local is_windows = package.config:sub(1, 1) == "\\"
 
    function find_system_ca()
-      if is_windows then
-         return "system"
-      end
+-- mingwin lets linux paths work...
+--      if is_windows then
+--         return "system"
+--      end
       for _, path in ipairs(ca_bundle_paths) do
          local fh = io.open(path, "r")
          if fh then

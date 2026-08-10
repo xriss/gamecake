@@ -332,7 +332,7 @@ elseif ANDROID then
 
 elseif WINDOWS then
 
-	defines "_WIN32_WINNT=0x0501"
+--	defines "_WIN32_WINNT=0x0600"
 	defines "WIN32"
 	defines "_CRT_SECURE_NO_WARNINGS"
 --	defines	"LUA_BUILD_AS_DLL"

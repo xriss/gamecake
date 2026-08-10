@@ -13,7 +13,9 @@ defines "LUASOCKET_EXPORTS"
 
 if WINDOWS then
 
-	defines "LUASOCKET_INET_PTON"
+--	defines "LUASOCKET_INET_PTON"
+--	defines "LUASEC_INET_NTOP"
+	defines "_WIN32_WINNT=0x0600"
 
 	excludes("git/src/usocket.*")
 	excludes("git/src/serial.*")

@@ -51,7 +51,7 @@ configuration {}
 KIND{}
 
 
-if true then
+if false then
 
 	project "wolfssl-test"
 	language "C"

@@ -43,7 +43,8 @@ defines{
 
 if WINDOWS then
 
-	defines "LUASEC_INET_NTOP"
+--	defines "LUASEC_INET_NTOP"
+	defines "_WIN32_WINNT=0x0600"
 
 end
 

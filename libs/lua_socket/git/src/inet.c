@@ -513,7 +513,8 @@ int inet_aton(const char *cp, struct in_addr *inp)
 #endif
 
 #ifdef LUASOCKET_INET_PTON
-int inet_pton(int af, const char *src, void *dst)
+
+ddd int inet_pton(int af, const char *src, void *dst)
 {
     struct addrinfo hints, *res;
     int ret = 1;
