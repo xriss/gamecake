@@ -37,6 +37,7 @@ defines{
 
 defines{
 	"LSEC_API_OPENSSL_1_1_0",
+--	"OPENSSL_NO_EC",
 --	"TLS1_3_VERSION",
 }
 

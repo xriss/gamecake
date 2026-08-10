@@ -50,3 +50,21 @@ configuration {}
 
 KIND{}
 
+
+if true then
+
+	project "wolfssl-test"
+	language "C"
+
+	includedirs { ".", "git", }
+
+	files { "./test/client-tts.c" }
+
+	links { "lib_wolfssl" }
+
+	KIND{kind="ConsoleApp",name="wolfssl-test."..CPU}
+	
+end
+
+
+

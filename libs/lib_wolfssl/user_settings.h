@@ -1,13 +1,36 @@
-/* Custom build settings for Android */
+/* ADAPTED FROM Custom build settings for Android */
 
 #ifndef _WOLF_USER_SETTINGS_H_
 #define _WOLF_USER_SETTINGS_H_
 
 
+//#define WOLFSSL_DTLS
+//#define WOLFSSL_DTLS13
+//#define WOLFSSL_SEND_HRR_COOKIE
+
+//#define WOLFSSL_NO_SIGALG
+
+//#define WOLFSSL_ASYNC_CRYPT
+//#define WC_NO_ASYNC_THREADING
+//#define _POSIX_THREADS
+//#define HAVE_THREAD_LS
+//#define SINGLE_THREADED
+
+#ifndef _WIN32
+#endif
+
+
 #define WOLFSSL_MAX_ERROR_SZ 160
 
-#define OPENSSL_EXTRA
+/* OpenSSL-compatible names and behavior */
+//#define OPENSSL_EXTRA
 #define OPENSSL_ALL
+#define WOLFSSL_VERBOSE_ERRORS
+#define WOLFSSL_DEBUG_CERTS
+#define ERROR_QUEUE_PER_THREAD
+#define WOLFSSL_ERROR_CODE_OPENSSL
+#define HAVE_WOLFSSL_SSL_H
+#define OPENSSL_COMPATIBLE_DEFAULTS
 
 #define SESSION_CERTS
 #define WOLFSSL_CERT_GEN
@@ -18,10 +41,6 @@
 #define WOLFSSL_ALLOW_TLSV10
 #define WOLFSSL_ALT_CERT_CHAINS
 
-
-//#define WOLFSSL_DTLS
-//#define WOLFSSL_DTLS13
-//#define WOLFSSL_SEND_HRR_COOKIE
 
 
 
@@ -148,6 +167,7 @@
 #define NO_OLD_SHA_NAMES
 #define NO_OLD_SHA256_NAMES
 #define NO_OLD_WC_NAMES
+
 
 #if 0
     #define DEBUG_WOLFSSL
