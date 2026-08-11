@@ -10,6 +10,7 @@ includedirs {
 	"../lua_sdl2/luasdl2/src",
 	"../lua_sdl2/luasdl2/extern/queue",
 }
+includedirs { "../lib_hacks/code" }
 
 
 KIND{lua="wetgenes.win.core"}

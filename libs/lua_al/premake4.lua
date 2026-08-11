@@ -6,6 +6,7 @@ files { "code/*.c" }
 
 links { "lib_lua" , "lua_pack" }
 
+includedirs { "../lib_hacks/code" }
 
 KIND{lua="al.core"}
 
@@ -17,5 +18,6 @@ files { "code/lua_alc.c" }
 
 links { "lib_lua" , "lua_pack" }
 
+includedirs { "../lib_hacks/code" }
 
 KIND{lua="alc.core"}

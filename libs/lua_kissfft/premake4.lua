@@ -11,6 +11,7 @@ files { "code/lua_kissfft.c" }
 
 includedirs { "code" }
 includedirs { "../lib_luajit/src" }
+includedirs { "../lib_hacks/code" }
 
 links { "lib_lua" , "lua_pack" }
 

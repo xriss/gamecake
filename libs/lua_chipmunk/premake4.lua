@@ -9,6 +9,7 @@ excludes {
 links { "lib_lua" }
 
 includedirs { "." , "master/include" }
+includedirs { "../lib_hacks/code" }
 
 buildoptions{ "-std=c99" } -- newfangled flag
 

@@ -742,12 +742,11 @@ else
 end
 
 
-includedirs { "libs/lib_hacks/code" }
-includedirs { "libs/lua_freetype/code" }
-includedirs { "libs/lua_grd/code" }
-
-
 all_includes=all_includes or {
+
+-- luajit and sdl are too complex to build here so must be prebuilt in
+-- the build directory by their own makefiles or provided by the OS.
+-- eg: Emscripten provides a version of SDL for the browser.
 
 -- lua bindings that should always be available no matter the OS host.
 	{LUA_BIT,		    WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
@@ -782,7 +781,7 @@ all_includes=all_includes or {
 
 --	{"lua_bullet",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_chipmunk",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
--- boxxd will replace bullet and chipmunk
+-- boxxd will replace bullet and chipmunk but gonna keep chipmunk as its only tiny
 	{"lua_boxxd",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 
@@ -793,26 +792,40 @@ all_includes=all_includes or {
 --	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
 
 
--- These are mostly linux only bindings for linux only gamecake projects...
+
+
+--
+-- This middle group is mostly linux only bindings for linux projects.
+-- not to be relied upon in any windows or web project
+--
+-- when a lib and lua binding are dependent they are grouped together as
+-- the lib must be linked after the lua
+--
 
 	{"lua_moonusb",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lib_usb",			nil			or		NIX		or		nil			or		nil			or	nil		},
 
---	{"lua_linenoise",	WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_posix",		nil			or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_periphery",	nil			or		NIX		or		nil			or		nil			or	nil		},
-	{"lua_v4l2",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_rex",			nil			or		NIX		or		nil			or		nil			or	nil		},
-	{"lua_sys",			WINDOWS		or		NIX		or		nil			or		nil			or	OSX		},
-	{"lua_glslang",		nil			or		NIX		or		nil			or		nil			or	nil		},
-	{"lua_midi",		nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	nil		},
 
 	{"lua_pgsql",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil			or		nil			or	nil		},
 
+--	{"lua_linenoise",	nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_posix",		nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_periphery",	nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_v4l2",		nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_sys",			WINDOWS		or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_glslang",		nil			or		NIX		or		nil			or		nil			or	nil		},
+	{"lua_midi",		nil			or		NIX		or		nil			or		nil			or	nil		},
+
+
 -- hid is now in SDL
 --	{"lua_hid",			nil			or		NIX		or		nil			or		nil			or	nil		},
 --	{"lib_hidapi",		nil			or		NIX		or		nil			or		nil			or	nil		},
+
+
+
 
 -- this is probably luajit but may be lua 5.1
 	{LIB_LUA,			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
@@ -832,12 +845,11 @@ all_includes=all_includes or {
 	{"lib_ogg",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lib_pcre",		nil			or		NIX		or		nil			or		nil			or	OSX		},
 	{"lib_box2d",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_box3d",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_c11threads",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
--- some OS will provide openal so do not need this.
+-- OSX will provide openal.
 	{LIB_OPENAL,		WINDOWS		or		NIX		or		EMCC 		or		ANDROID		or	nil		},
 
 -- the output executables

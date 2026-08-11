@@ -10,6 +10,7 @@ defines { "JPEGSTATIC" }
 
 includedirs { "." , "../lib_z" , "../lib_png/fixed" , "../lib_jpeg/jpeg" , "../lib_gif/giflib/" }
 
+includedirs { "../lib_hacks/code" }
 
 
 KIND{kind="lua",dir="wetgenes/grd",name="core",luaname="wetgenes.grd.core",luaopen="wetgenes_grd_core"}

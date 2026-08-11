@@ -10,6 +10,7 @@ if GCC then
 end
 
 includedirs { "." }
+includedirs { "../lib_hacks/code" }
 
 KIND{lua="wetgenes.pack.core"}
 
