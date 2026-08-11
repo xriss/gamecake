@@ -2,7 +2,7 @@
 project "lua_freetype"
 language "C"
 
-includedirs { "../lib_freetype/freetype/include/" , "." }
+includedirs { "../lib_freetype/git/include/" , "." }
 
 files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 
