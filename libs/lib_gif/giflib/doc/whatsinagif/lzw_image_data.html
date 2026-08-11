@@ -23,10 +23,8 @@
 .alg_steps th, .alg_steps td {border: 1px solid black}
 .alg_steps .index {padding: 0 .3em}
 .alg_steps .processed {color: #CCC}
-.alg_steps .buffer {background: #C8DBD9 url(highlight_green.gif) repeat-x center left;
-	border-top: 1px solid #AAA2A2; border-bottom: 1px solid #AAA2A2;}
-.alg_steps .current {background: #D0C4C4 url(highlight_purple.gif) repeat-x center left;
-	border-top: 1px solid #98A5A4; border-bottom: 1px solid #98A5A4;}
+.alg_steps .buffer {background-color: #c0efc0; border-top: 1px solid #c0efc0; border-bottom: 1px solid #c0efc0;}
+.alg_steps .current {background-color: #e0d0e0; border-top: 1px solid #e0d0e0; border-bottom: 1px solid #e0d0e0;}
 </style>
 </head>
 <body>
@@ -133,14 +131,14 @@ this code, this means you've reached the end of the image. Here I've placed
 the special codes right after the color codes, but actually the value of
 the special codes depends on the value of the LZW minimum code size
 from the image data block. If the LZW minimum code size is the same as
-the color table size, then special codes immediatly follow the colors; however
-it is possible to specify a larger LWZ minimum code size which may leave
+the color table size, then special codes immediately follow the colors; however
+it is possible to specify a larger LZW minimum code size which may leave
 a gap in the codes where no colors are assigned. This can be
-summarizaed in the <a name="color_table_size">following table</a>.</p>
+summarized in the <a name="color_table_size">following table</a>.</p>
 
 <div style="text-align:center">
 <table id="global_color_size">
-<tr><th>LWZ Min Code<br/>Size</th><th>Color<br/>Codes</th><th>Clear<br/>Code</th><th>EOI<br/>Code</th></tr>
+<tr><th>LZW Min Code<br/>Size</th><th>Color<br/>Codes</th><th>Clear<br/>Code</th><th>EOI<br/>Code</th></tr>
 <tr><td>2</td><td>#0-#3</td><td>#4</td><td>#5</td></tr>
 <tr><td>3</td><td>#0-#7</td><td>#8</td><td>#9</td></tr>
 <tr><td>4</td><td>#0-#15</td><td>#16</td><td>#17</td></tr>
@@ -226,14 +224,16 @@ buffer (#6 = 1,1) to the code stream and set the index buffer to be
 K. [Step 6].</p>
 
 <table class="alg_steps" cellspacing="0">
-<tbody>
+<thead>
 <tr>
 	<th>Step</th>
 	<th>Action</th>
 	<th>Index Stream</th>
 	<th>New Code Table Row</th>
 	<th>Code Stream</th>
-</tr>	
+</tr>
+</thead>
+<tbody>
 <tr>
 	<td>0</td>
 	<td>Init</td>
@@ -841,8 +841,8 @@ and the size of the color table that was used. That's it. You remember that
 big code table we built during compression? We actually have enough information
 in the code stream itself to be able to rebuild it.</p>
 
-<p>Again, i'll list the algorithm and then we will walk though an example. Let
-me define a few terms i will be using. CODE will be current code we're working 
+<p>Again, I'll list the algorithm and then we will walk though an example. Let
+me define a few terms I will be using. CODE will be current code we're working 
 with. CODE-1 will be the code just before CODE in the code stream. {CODE} 
 will be the value for CODE in the code table. For example, using the code
 table we created during compression, if CODE=#7 then {CODE}=1,1,1. 
@@ -989,7 +989,7 @@ converted to their binary values to come up with the bits. To specify
 the code for #4, you would look at this binary equivalent, which is 100, 
 and see that you would need three bits to store this value. The largest code
 value in our sample code stream is #36 (binary: 100100) which would 
-take 6 bits to encode. Note that the number of bits i've just given is 
+take 6 bits to encode. Note that the number of bits I've just given is 
 the minimum number. You can make the number take up more bits by adding
 zeros to the front.</p>
 
@@ -1038,7 +1038,7 @@ If you see at Step 6 of the encoding, we added a code of #7 to our code
 table. This is our clue to increase our code size because 7 is equal to
 2^3-1 (where 3 is our current code size). Thus, the next code we 
 write out, #2, will use the new code size of 4 and therefore look
-like 0010. In the decoding process, we again would increase our code
+like 0100. In the decoding process, we again would increase our code
 size when we read the code for #7 and would read the next 4, rather than
 the next 3 bits, to get the next code. In the sample table above this
 occurs in Step 2.</p>
@@ -1055,7 +1055,7 @@ HEIGHT="220"></p>
 
 <p>You can see in the first byte that was returned (<span
 class="byte">8C</span>) that the lowest three bits (because that was
-our first code size) contain 110 which is the binary value of 4 so
+our first code size) contain 010 which is the binary value of 4 so
 that would be the clear code we started with, #4. In the three bits to
 the left, you see 001 which out or first data code of #1. You can also
 see when we switched into code sizes of 4 bits in the second byte
@@ -1068,7 +1068,7 @@ href="bits_and_bytes.html#image_data_block">data sub-blocks</a>.  Each
 of the data sub-blocks begins with a byte that specifies how many
 bytes of data. The value will be between 1 and 255. After you read
 those bytes, the next byte indicates again how many bytes of data
-follow. You stop when you encounter a subblock that has a lenght of
+follow. You stop when you encounter a subblock that has a length of
 zero. That tells you when you've reached the end of the image data. In
 our sample the image the byte just after the LZW code size is <span
 class="byte">16</span> which indicates that 22 bytes of data
@@ -1084,7 +1084,7 @@ you would extract codes if the first code size were 5 bits.</p>
 <h2>Next: Animation and Transparency</h2>
 
 <p>That is pretty much everything you need to know to read or generate 
-a basic image file. One of the reasons the GIF becames such a popular
+a basic image file. One of the reasons the GIF became such a popular
 format was because it also allowed for &quot;fancier&quot; features. These
 features include animation and transparency. Next we'll look 
 at how those work.</p>

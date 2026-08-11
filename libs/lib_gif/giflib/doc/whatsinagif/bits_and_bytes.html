@@ -45,7 +45,7 @@ type, followed by a payload length byte, followed by payload.</p>
 <p>The following railroad diagram shows all of the different types of
 blocks and where they can be in the file. Every path following the
 arrows corresponds to a valid block sequence. The large middle 
-secction, in particular, can be repeated any number of times.</p>
+section, in particular, can be repeated any number of times.</p>
 
 <p style="text-align:center"><img src="gif_file_stream.gif" alt="GIF file stream diagram" style="border: 1px solid black" / WIDTH="700" HEIGHT="220"></p>
 
@@ -221,7 +221,7 @@ case).<p>
 
 <p>The next three bits are the <strong>color resolution</strong>. They
 are only meaningful if there is a global color table, and allow you to
-compute its size.  If the value of this filed is N, the number of
+compute its size.  If the value of this field is N, the number of
 entries in the global color table will be 2 ^ (N+1) - that is, two
 raised to the power (N+1). Thus, the <span class="byte">001</span> in
 the sample image represents 2 bits/pixel; <span
@@ -254,7 +254,7 @@ flag is 1, and if there is no global color table, this byte should be
 0.. To understand it you have to remember the original "picture wall"
 rendering model for GIFs in which sub-images are composited onto a
 larger canvas.  It represents which index in the global color table
-should be used for pixels on the virtual canvas that aren't overlayed
+should be used for pixels on the virtual canvas that aren't overlaid
 by an image. GIFLIB supports reading and setting this byte, but modern
 viewers and browsers generally have no use for it.</p>
 
@@ -419,7 +419,7 @@ color table follows.)</p>
 changes the way images are rendered onto the screen in a way that may
 reduce annoying visual flicker. The effect of interlacing on a display
 is that the first pass of appears immediately, displaying the graphic
-as a first as a blur and then sharpenining it up as later passes fill
+as a first as a blur and then sharpening it up as later passes fill
 in lines. That allows the human viewer to at least get an idea of
 what's coming up rather than waiting for the entire image to be
 painted, line by line. <a
@@ -489,7 +489,7 @@ compression</a> to see how this works.)  The rest of the bytes
 represent <em>data sub-blocks</em>. Data sub-blocks are are groups of
 1 - 256 bytes. The first byte in the sub-block tells you how many
 bytes of actual data follow. This can be a value from 0 (<span
-class="byte">00</span>) it 255 (<span class="byte">FF</span>). After
+class="byte">00</span>) to 255 (<span class="byte">FF</span>). After
 you've read those bytes, the next byte you read will tell you now many
 more bytes of data follow that one. You continue to read until you
 reach a sub-block that says that zero bytes follow.
@@ -536,7 +536,7 @@ read all the data in this block.</p>
 <span class="byte gif_ext"> 00 </span></p>
 
 <p>The GIF89 specification allows you to specify text captions to be
-overlayed on the following image.  This feature never took off; 
+overlaid on the following image.  This feature never took off; 
 browsers and image-processing applications such as Photoshop ignore
 it, and GIFLIB doesn't try to interpret it.</p>
 
@@ -657,7 +657,7 @@ for your comment. As you can see from the example we have one data
 sub-block that is 9 bytes long. If you translate the character codes
 you see that the comment is &quot;blueberry.&quot; The final byte,
 <span class="byte">00</span>, indicates a sub-block with zero bytes
-that follow which let's us know we have reached the end of the block.</p>
+that follow which lets us know we have reached the end of the block.</p>
 
 <p style="text-align:center"><img src="comment_ext.gif" alt="GIF comment extension block layout" style="border: 1px solid black" /></p>
 

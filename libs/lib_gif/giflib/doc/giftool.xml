@@ -149,7 +149,9 @@ descriptor block.</para>
 <para>The -d option takes a decimal integer argument and uses it to set a delay
 time, in hundredths of a second, on selected images.</para>
 
-<para>The -i option sets or clears interlaccing in selected images. Acceptable arguments are "1", "0", "yes", "no", "on", "off", "t", "f"</para>
+<para>The -i option sets or clears interlacing in selected
+images. Acceptable arguments are "1", "0", "yes", "no", "on", "off",
+"t", "f"</para>
 
 <para>The -p option takes a (0-origin) x,y coordinate-pair and sets it
 as the preferred upper-left-corner coordinates of selected

@@ -21,7 +21,7 @@
   <command>gifbg</command>
       <arg choice='opt'>-v</arg>
       <arg choice='opt'>-d <replaceable>dir</replaceable></arg>
-      <arg choice='opt'>-l <replaceable>lvls</replaceable></arg>
+      <arg choice='opt'>-l <replaceable>levels</replaceable></arg>
       <arg choice='opt'>-c 
       		<replaceable>R</replaceable>
       		<replaceable>G</replaceable>
@@ -92,9 +92,9 @@ for example "NE" is equal to "TR".</para>
 </listitem>
 </varlistentry>
 <varlistentry>
-<term> -l lvls</term>
+<term> -l levels</term>
 <listitem>
-<para> Numeric, nmber of levels the color will be scaled to. Default is 16.</para>
+<para> Numeric, number of levels the color will be scaled to. Default is 16.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -133,7 +133,7 @@ dir.  See below (-m &amp; -M) for min &amp; max. Default is Blue (0,
 </varlistentry>
 </variablelist>
 
-<para>If min == max = 100 (%) and lvls == 2 then boolean mask image
+<para>If min == max = 100 (%) and levels == 2 then boolean mask image
 of specified size will be created - all foreground.</para>
 
 </refsect1>

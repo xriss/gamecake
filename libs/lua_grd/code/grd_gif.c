@@ -520,8 +520,8 @@ unsigned char *p;
 
 void grd_gif_save_stream_close(struct grd_io_gif *sgif)
 {
-
-	if (EGifSpew(sgif->gif) == GIF_ERROR)
+	int error;
+	if (EGifSpew(sgif->gif,&error) == GIF_ERROR)
 	{
 		sgif->err="write fail";
 		goto bogus;

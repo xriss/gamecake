@@ -10,7 +10,7 @@ GIF89 application block (Ext Code = 255 [ ]):
 
 GIF89 comment (Ext Code = 254 [ ]):
 
-00000:  2                                                                  
+00000:  20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20                    
 GIF89 graphics control (Ext Code = 249 [ ]):
 	Disposal Mode: 1
 	User Input Flag: 0
@@ -442,7 +442,7 @@ Image #33:
 
 GIF89 comment (Ext Code = 254 [ ]):
 
-00000:  4                                                 Don't flame me!  
-00010:  7                                                 polder@xs4all.nl 
-00020:  0                                                  (c) 1996 Demon  
+00000:  44 6f 6e 27 74 20 66 6c 61 6d 65 20 6d 65 21 20   Don't flame me!  
+00010:  70 6f 6c 64 65 72 40 78 73 34 61 6c 6c 2e 6e 6c   polder@xs4all.nl 
+00020:  0a 28 63 29 20 31 39 39 36 20 44 65 6d 6f 6e 20    (c) 1996 Demon  
 GIF file terminated normally.

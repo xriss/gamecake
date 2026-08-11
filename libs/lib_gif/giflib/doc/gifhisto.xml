@@ -12,7 +12,7 @@
 </refmeta>
 <refnamediv id='name'>
 <refname>gifhisto</refname>
-<refpurpose>make a color histogram from GIF colr frequencies</refpurpose>
+<refpurpose>make a color histogram from GIF color frequencies</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv id='synopsis'>
@@ -61,7 +61,7 @@ generate histogram for, as defined in GIF format.</para>
 <varlistentry>
 <term>-s width height</term>
 <listitem>
-<para>Size of GIF histogram file.  The height of the histogram should be power of 2 dividable by number of colors in colormap.</para>
+<para>Size of GIF histogram file.  The height of the histogram should be power of 2 divisible by number of colors in colormap.</para>
 <para>Width sets the resolution (accuracy if you like) of the histogram as
 the maximum histogram bar is scaled to fit it.</para>
 </listitem>

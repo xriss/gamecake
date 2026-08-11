@@ -58,7 +58,7 @@ not sure how long 8 bits per pixel will be enough."</para>
 
 <para>During his first spell of maintainership between 1989 and 1994, Eric
 S. Raymond (aka "ESR") ported the code to Unix, wrote the high-level
-DGIfSlurp()/EGifSpew() interface, rationalized the internal data
+DGifSlurp()/EGifSpew() interface, rationalized the internal data
 structures, and did a lot of general cleanup and refactoring to
 improve the code quality.</para>
 
@@ -199,7 +199,7 @@ GIF_OK on success, GIF_ERROR on failure; on failure, the Error member
 will be set.</para>
 
 <para>Once you have done this, all image, raster, and extension-block
-data in the GIF is accessable in the SavedImages member (see the
+data in the GIF is accessible in the SavedImages member (see the
 structures in gif_lib.h).  When you have modified the image to taste,
 write it out with EGifSpew().</para>
 
@@ -226,13 +226,16 @@ described in a later section.</para>
 <para>The high-level function</para>
 
 <programlisting id="EGifSpew">
-int EGifSpew(GifFileType *GifFile)
+int EGifSpew(GifFileType *GifFile, int *ErrorCode)
 </programlisting>
 
 <para>writes a complete (possibly multi-image) GIF file to the indicated file
 handle from in-core allocated structures created by a previous DGifSlurp()
 or equivalent operations.  Its argument is a GIF file descriptor, which
-imnplicitly points to storage previously allocated by DGifSlurp().</para>
+implicitly points to storage previously allocated by DGifSlurp().</para>
+
+<para>If ErrorCode is non-NULL, it returns a GIFLIB error code on failure;
+otherwise it may be NULL.  The function returns GIF_OK or GIF_ERROR.</para>
 
 <para>The file is written with a GIF87 stamp unless it contains one of the four
 special extension blocks defined in GIF89, in which case it is written
@@ -277,11 +280,12 @@ ColorMapObject *GifUnionColorMap(
         GifPixelType ColorTransIn2[])
 </programlisting>
 
-<para>Create the union of two given color maps and return it.  If the result
-won't fit into 256 colors, NULL is returned, the allocated union
-otherwise.  ColorIn1 is copied as it to ColorUnion, while colors from
-ColorIn2 are copied iff they didn't exist before.  ColorTransIn2 maps
-the old ColorIn2 into ColorUnion color map table.</para>
+<para>Create the union of two given color maps and return it.  If the
+result won't fit into 256 colors, NULL is returned, the allocated
+union otherwise.  ColorIn1 is copied as it to ColorUnion, while colors
+from ColorIn2 are copied if and only if they didn't exist before.
+ColorTransIn2 maps the old ColorIn2 into ColorUnion color map
+table.</para>
 
 <programlisting id="GifAttachImage">
 SavedImage *GifAttachImage(GifFileType *GifFile)
@@ -331,18 +335,19 @@ will create a new leading extension block.</para>
 <sect1><title>Error Handling (gif_err.c)</title>
 
 <programlisting>
-int GifErrorString(int ErrCode)
+int GifErrorString(int ErrorCode)
 </programlisting>
 
-<para>Returns a sting describing the specified GIFLIB error code.
+<para>Returns a string describing the specified GIFLIB error code.
 Return NULL if the argument is not a valid error code.</para>
 
 </sect1>
 <sect1><title>The GIF Utility Font</title>
 
-<para>The 8x8 utility font used in gifecho and gifcolor lives in the library
-module gif_font.c, in a table called GifAsciiTable.  The library header file
-includes suitable externs and defines.</para>
+<para>The 8x8 utility font used in the (obsolete, no longer installed)
+gifecho and gifcolor lives in the library module gif_font.c, in a
+table called GifAsciiTable.  The library header file includes suitable
+externs and defines.</para>
 
 <para>The GIF utility font support includes entry points for drawing legends
 on in-core images, drawing boxes and rectangles, and boxing text.
@@ -470,7 +475,7 @@ briefly.</para>
 <term><errorname>E_GIF_ERR_NOT_ENOUGH_MEM</errorname></term>
 <listitem>
    <para>Message printed using PrintGifError: "Fail to allocate
-   required memory" Once an attemp is made to open GIF file, special
+   required memory" Once an attempt is made to open GIF file, special
    structures are allocated to hold internal data for it. If
    allocation fails this error is returned.</para>
 </listitem>
@@ -663,7 +668,7 @@ beginning of getarg.c for exact usage.</para>
 void GAPrintErrMsg(int Error)
 </programlisting>
 
-<para>If an error occurred in GAGetARgs, this routine may be used to print
+<para>If an error occurred in GAGetArgs, this routine may be used to print
 one line diagnostic to stderr.</para>
 
 <programlisting id="GAPrintHowTo">
@@ -770,18 +775,6 @@ not recommended.</para>
 
 <para>Returns GIF_ERROR if something went wrong, GIF_OK otherwise.</para>
 
-<programlisting id="DGifGetComment">
-int DGifGetComment(GifFileType *GifFile, char *GifComment)
-</programlisting>
-
-<para>Load a comment from the GIF file.  Because DGifGetRecordType will
-only tell if the record is of type extension, this routine should be
-called iff it is known %100 that is must be a comment.</para>
-
-<para>For the definition of a comment, see <link
-linkend="EGifPutComment">EGifPutComment()</link>.  Returns GIF_ERROR
-if something went wrong, GIF_OK otherwise.</para>
-
 <programlisting>
 int DGifGetExtension(
         GifFileType *GifFile,
@@ -853,6 +846,16 @@ diagnostic error code will remain accessible in GifFile->Error.
 This behavior was changed because it caused problems for the
 implementation of library wrappers in dynamic languages.)</para>
 
+<programlisting id="DGetGifVersion">
+const char * DGifGetGifVersion(GifFileType *GifFile)
+</programlisting>
+
+<para>Get the GIF version collected during sequential read. This is
+handy for sequential API users who want to set an encoder's version
+from a decoder (e.g. for gif resizing). For the all-at-once users this
+isn't necessary because gif encoder inspects all the extension blocks,
+but sequential users do not have that luxury.</para>
+
 </sect2>
 <sect2><title>Sequential writing</title>
 
@@ -892,7 +895,7 @@ void EGifSetGifVersion(GifFileType *GifFile, bool gif89)
 
 <para>Set the GIF type, to GIF89 if the argument is true and GIF87 if
 it is false.  The default type is GIF87. This function may be called
-aftert the GifFile record is allocated but before
+after the GifFile record is allocated but before
 EGifPutScreenDesc().</para>
 
 <programlisting>
@@ -1037,7 +1040,7 @@ faster.</para>
 
 <para>This routine does exactly that (with EGifPutCodeNext), and can be
 used instead of EGifPutLine.  You'll usually use this with the
-DGifGetCode/DgifGetCodeNext routines, which reads the compressed
+DGifGetCode/DGifGetCodeNext routines, which reads the compressed
 code, while EGifPutCode/EGifPutCodeNext write it out.  See gifpos.c
 for example.</para>
 
@@ -1099,6 +1102,8 @@ NEWS file in the GIFLIB distribution to track API changes.</para>
 <listitem><para>New functions DGifSavedExtensionToGCB() and
 EGifGCBToSavedExtension() make it easy to read and edit GIF89 graphics
 control blocks in saved images.</para></listitem>
+<listitem><para>The new function DGifGetGifVersion() is convenient
+for people doing sequential reads.</para></listitem>
 </itemizedlist>
 
 <para>A few changes in behavior were introduced in 5.0:</para>
@@ -1209,7 +1214,7 @@ a picture wall.  The 'logical screen descriptor block' (LSDB), 6 bytes right
 after the 6-byte GIF stamp and version header at the beginning of a
 GIF file, includes both two-byte canvas width and canvas height
 fields and a canvas background color.  Each image, besides height and
-width, also has 'left' and 'top' cordinates specifying where it is to
+width, also has 'left' and 'top' coordinates specifying where it is to
 be placed on the canvas.</para>
 
 <para>GIFLIB can read and set these fields; the gifpos and giftool

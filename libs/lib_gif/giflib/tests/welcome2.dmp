@@ -88,23 +88,23 @@ Image #6:
 
 GIF89 comment (Ext Code = 254 [ ]):
 
-00000:  5                                                 This animated GI 
-00010:  4                                                 F is created by  
-00020:  4                                                 Fairy Suryana  h 
-00030:  7                                                 ttp://members.ao 
-00040:  6                                                 l.com/BeatFacto/ 
-00050:  0                                                   http://www.dew 
-00060:  6                                                 a.com/    Fairy  
-00070:  5                                                 Suryana DJ palin 
-00080:  6                                                 g jago se dunia! 
+00000:  54 68 69 73 20 61 6e 69 6d 61 74 65 64 20 47 49   This animated GI 
+00010:  46 20 69 73 20 63 72 65 61 74 65 64 20 62 79 20   F is created by  
+00020:  46 61 69 72 79 20 53 75 72 79 61 6e 61 0d 0a 68   Fairy Suryana  h 
+00030:  74 74 70 3a 2f 2f 6d 65 6d 62 65 72 73 2e 61 6f   ttp://members.ao 
+00040:  6c 2e 63 6f 6d 2f 42 65 61 74 46 61 63 74 6f 2f   l.com/BeatFacto/ 
+00050:  0d 0a 68 74 74 70 3a 2f 2f 77 77 77 2e 64 65 77     http://www.dew 
+00060:  61 2e 63 6f 6d 2f 0d 0a 0d 0a 46 61 69 72 79 20   a.com/    Fairy  
+00070:  53 75 72 79 61 6e 61 20 44 4a 20 70 61 6c 69 6e   Suryana DJ palin 
+00080:  67 20 6a 61 67 6f 20 73 65 20 64 75 6e 69 61 21   g jago se dunia! 
 GIF89 application block (Ext Code = 255 [ ]):
 
-00000:  4                                                 GIFCONnb1.0      
-00010:  0                                                            new-6 
-00020:  2                                                 .gif             
-00030:  0                                                    New-5.gif     
-00040:  0                                                            new-6 
-00050:  2                                                 .gif             
-00060:  0                                                    New-5.gif     
-00070:  0                                                            new-6 
+00000:  47 49 46 43 4f 4e 6e 62 31 2e 30 05 00 0a 00 02   GIFCONnb1.0      
+00010:  00 05 00 00 00 00 00 00 00 00 00 6e 65 77 2d 36              new-6 
+00020:  2e 67 69 66 00 0a 00 02 00 07 00 00 00 00 00 00   .gif             
+00030:  00 00 00 4e 65 77 2d 35 2e 67 69 66 00 0a 00 02      New-5.gif     
+00040:  00 09 00 00 00 00 00 00 00 00 00 6e 65 77 2d 36              new-6 
+00050:  2e 67 69 66 00 0a 00 02 00 0b 00 00 00 00 00 00   .gif             
+00060:  00 00 00 4e 65 77 2d 35 2e 67 69 66 00 0a 00 02      New-5.gif     
+00070:  00 0d 00 00 00 00 00 00 00 00 00 6e 65 77 2d 36              new-6 
 GIF file terminated normally.

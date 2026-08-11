@@ -20,7 +20,7 @@
 <cmdsynopsis>
   <command>gifwedge</command>
       <arg choice='opt'>-v</arg>
-      <arg choice='opt'>-l <replaceable>lvls</replaceable></arg>
+      <arg choice='opt'>-l <replaceable>levels</replaceable></arg>
       <arg choice='opt'>-s 
       		<replaceable>sizex</replaceable>
       		<replaceable>sizey</replaceable></arg>
@@ -47,7 +47,7 @@ Enables printout of running scan lines. </para>
 </varlistentry>
 
 <varlistentry>
-<term>-l lvls</term>
+<term>-l levels</term>
 <listitem>
 <para>Set number of intensity levels per color.  This number must be
 power of two up to 32, as Gif format can only have 256 color

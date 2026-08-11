@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: gifbg
 .\"    Author: [see the "Author" section]
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
 .\"      Date: 2 May 2012
 .\"    Manual: GIFLIB Documentation
 .\"    Source: GIFLIB
@@ -31,7 +31,7 @@
 gifbg \- generate a test\-pattern GIF
 .SH "SYNOPSIS"
 .HP \w'\fBgifbg\fR\ 'u
-\fBgifbg\fR [\-v] [\-d\ \fIdir\fR] [\-l\ \fIlvls\fR] [\-c\ \fIR\fR\ \fIG\fR\ \fIB\fR] [\-m\ \fImin\fR] [\-o\ \fImax\fR] [\-s\ \fIw\fR\ \fIh\fR] [\-h]
+\fBgifbg\fR [\-v] [\-d\ \fIdir\fR] [\-l\ \fIlevels\fR] [\-c\ \fIR\fR\ \fIG\fR\ \fIB\fR] [\-m\ \fImin\fR] [\-o\ \fImax\fR] [\-s\ \fIw\fR\ \fIh\fR] [\-h]
 .SH "DESCRIPTION"
 .PP
 A program to generate a single\-color test pattern GIF with gradually changing intensity in any of the basic 8 directions\&.
@@ -93,9 +93,9 @@ The compass directions may be use as synonyms for the above directions, so for e
 Direction is case insensitive\&. The default direction is Top (North)\&.
 .RE
 .PP
-\-l lvls
+\-l levels
 .RS 4
-Numeric, nmber of levels the color will be scaled to\&. Default is 16\&.
+Numeric, number of levels the color will be scaled to\&. Default is 16\&.
 .RE
 .PP
 \-c R G B
@@ -123,7 +123,7 @@ Size of image to create\&. Default 640 by 350\&.
 Print one line of command line help, similar to Usage above\&.
 .RE
 .PP
-If min == max = 100 (%) and lvls == 2 then boolean mask image of specified size will be created \- all foreground\&.
+If min == max = 100 (%) and levels == 2 then boolean mask image of specified size will be created \- all foreground\&.
 .SH "AUTHOR"
 .PP
 Gershon Elber\&.

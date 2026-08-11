@@ -4,11 +4,11 @@
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 <!ENTITY project   "http://sourceforge.net/projects/giflib/?source=directory">
 ]>
-<refentry id='giflib.1'>
+<refentry id='giflib.7'>
 <refentryinfo><date>3 June 2012</date></refentryinfo>
 <refmeta>
 <refentrytitle>giflib</refentrytitle>
-<manvolnum>1</manvolnum>
+<manvolnum>7</manvolnum>
 <refmiscinfo class="source">GIFLIB</refmiscinfo>
 <refmiscinfo class="manual">GIFLIB Documentation</refmiscinfo>
 </refmeta>
@@ -37,13 +37,8 @@ a browser at the project website: &project;.</para>
 <refsect1><title>See Also</title>
 
 <para>
-<citerefentry><refentrytitle>gif2raw</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gif2rgb</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gifbuild</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gifecho</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>giffix</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gifinter</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gifinto</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>giftext</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>giftool</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gifclrmap</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
@@ -56,4 +51,3 @@ a browser at the project website: &project;.</para>
 
 </refsect1>
 </refentry>
-

@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: gif2rgb
 .\"    Author: [see the "Author" section]
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
 .\"      Date: 2 May 2012
 .\"    Manual: GIFLIB Documentation
 .\"    Source: GIFLIB
@@ -67,6 +67,9 @@ Print one line of command line help, similar to Usage above\&.
 By default, convert a GIF input file to RGB triplets\&. If \-s is specified, convert RGB input to a GIF\&.
 .PP
 If no input file is given, gif2rgb will try to read data from stdin\&.
+.SH "BUGS"
+.PP
+Feeding this utility a GIF with an invalid colormap, or other kinds of malformations, index will produce invalid output and may core\-dump the tool\&. Don\*(Aqt do that\&.
 .SH "AUTHOR"
 .PP
 Gershon Elber\&.

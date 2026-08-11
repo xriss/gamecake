@@ -76,42 +76,6 @@ list of references. It's meant to be seen through man(1) only as part
 of a local installation of the tools.
 -->
 
-<sect2><title>Conversion Utilities</title>
-
-<variablelist>
-<varlistentry>
-<term><ulink url="gif2rgb.html">gif2rgb</ulink></term>
-<listitem>
-<para>convert images saved as GIF to 24-bit RGB image(s) or vice-versa</para>
-</listitem>
-</varlistentry>
-</variablelist>
-
-</sect2>
-<sect2><title>Test Pattern Generators</title>
-
-<variablelist>
-<varlistentry>
-<term><ulink url="gifbg.html">gifbg</ulink></term>
-<listitem>
-<para>generate a single-color test pattern GIF</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term><ulink url="gifcolor.html">gifcolor</ulink></term>
-<listitem>
-<para>generate color test patterns</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term><ulink url="gifwedge.html">gifwedge</ulink></term>
-<listitem>
-<para>create a test GIF image resembling a color monitor test pattern</para>
-</listitem>
-</varlistentry>
-</variablelist>
-
-</sect2>
 <sect2><title>Image Manipulation Components</title>
 
 <variablelist>
@@ -139,12 +103,6 @@ of a local installation of the tools.
 <para>print (text only) general information about a GIF</para>
 </listitem>
 </varlistentry>
-<varlistentry>
-<term><ulink url="gifhisto.html">gifhisto</ulink></term>
-<listitem>
-<para>generate color-frequency histogram from a GIF</para>
-</listitem>
-</varlistentry>
 </variablelist>
 
 </sect2>
@@ -155,6 +113,51 @@ of a local installation of the tools.
 <term><ulink url="gifbuild.html">gifbuild</ulink></term>
 <listitem>
 <para>converter/deconverter to/from an editable text format</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><ulink url="giftool.html">giftool</ulink></term>
+<listitem>
+<para>GIF transformation tool</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+</sect2>
+<sect2><title>Obsolete utilities</title>
+
+<para>These are used for testing by the GFLIB developers and no longer
+installed by a normal build.</para>
+
+<variablelist>
+<varlistentry>
+<term><ulink url="gif2rgb.html">gif2rgb</ulink></term>
+<listitem>
+<para>convert images saved as GIF to 24-bit RGB image(s) or vice-versa</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><ulink url="gifbg.html">gifbg</ulink></term>
+<listitem>
+<para>generate a single-color test pattern GIF</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><ulink url="gifcolor.html">gifcolor</ulink></term>
+<listitem>
+<para>generate color test patterns</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><ulink url="gifwedge.html">gifwedge</ulink></term>
+<listitem>
+<para>create a test GIF image resembling a color monitor test pattern</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><ulink url="gifhisto.html">gifhisto</ulink></term>
+<listitem>
+<para>generate color-frequency histogram from a GIF</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -169,13 +172,8 @@ of a local installation of the tools.
 <para>end-of-pipe fitting for GIF-processing pipelines</para>
 </listitem>
 </varlistentry>
-<varlistentry>
-<term><ulink url="giftool.html">giftool</ulink></term>
-<listitem>
-<para>GIF transformation tool</para>
-</listitem>
-</varlistentry>
 </variablelist>
+
 
 </sect2>
 </sect1>
@@ -195,11 +193,14 @@ url="gif_lib.html">gif_lib.html</ulink>.</para>
 </sect1>
 <sect1><title>The GIF Standard</title>
 
-<para>The doc subdirectory includes flat-ASCII descriptions of <ulink
-url="gif89.txt">GIF89 format</ulink> and <ulink
-url="lzgif.txt">Lempel-Ziv Compression</ulink>. For historical
+<para>The doc subdirectory includes an <ulink
+url="gifstandard/GIF89a.html">HTML presentation of the GIF
+standard</ulink>; an <ulink url="gifstandard/
+LZW-and-GIF-explained.html">explanation of Lempel-Ziv
+compression</ulink>, and the original flat-ASCII description of <ulink
+url="gifstandard/gif89.txt">GIF89 format</ulink> . For historical
 completeness, we also include a copy of the <ulink
-url="gif87.txt">GIF87 standard.</ulink></para>
+url="gifstandard/gif87.txt">GIF87 standard.</ulink></para>
 
 <para>You can also read a <ulink url="whatsinagif/index.html">
 detailed narrative description</ulink> of how GIFs are laid out.  It
