@@ -7,24 +7,25 @@ language "C"
 defines { "USE_ALLOCA" , "OPUS_BUILD" , "HAVE_LRINTF" }
 
 includedirs {
-	'opus/src/',
-	'opus/celt/',
-	'opus/silk/',
-	'opus/silk/float/',
-	'opus/include/',
+	'git/src/',
+	'git/celt/',
+	'git/silk/',
+	'git/silk/float/',
+	'git/include/',
 }
 
 files {
-	'opus/src/analysis.c',
-	'opus/src/mlp.c',
-	'opus/src/mlp_data.c',
-	'opus/src/opus.c',
-	'opus/src/opus_decoder.c',
-	'opus/src/opus_encoder.c',
-	'opus/src/repacketizer.c',
-	'opus/celt/*.c',
-	'opus/silk/*.c',
-	'opus/silk/float/*.c',
+	'git/src/analysis.c',
+	'git/src/mlp.c',
+	'git/src/mlp_data.c',
+	'git/src/opus.c',
+	'git/src/opus_decoder.c',
+	'git/src/opus_encoder.c',
+	'git/src/repacketizer.c',
+	'git/src/extensions.c',
+	'git/celt/*.c',
+	'git/silk/*.c',
+	'git/silk/float/*.c',
 }
 
 

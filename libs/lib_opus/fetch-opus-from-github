@@ -1,5 +1,5 @@
 cd `dirname $0`
 
-rm -rf opus
-git clone --depth 1 https://github.com/xiph/opus.git 
-rm -rf opus/.git
+rm -rf git
+git clone --depth 1 https://github.com/xiph/opus.git git
+rm -rf git/.git
