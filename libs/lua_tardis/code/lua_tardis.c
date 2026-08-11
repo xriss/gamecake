@@ -32,7 +32,7 @@ extern int lua_tardis_count (lua_State *l, int idx)
 int len=0;
 char *ts=0;
 
-	ts=lua_typename(l,lua_type(l,idx));
+	ts=(char *)lua_typename(l,lua_type(l,idx));
 	if(ts && ts[0]=='c' && ts[1]=='d' && ts[2]=='a' && ts[3]=='t' && ts[4]=='a' ) // cdata hax
 	{
 		lua_getfield(l,idx,"__len"); // get length using metatable
@@ -50,7 +50,7 @@ extern double * lua_tardis_cdata (lua_State *l, int idx)
 double *p=0;
 char *ts=0;
 
-	ts=lua_typename(l,lua_type(l,idx));
+	ts=(char *)lua_typename(l,lua_type(l,idx));
 	if(ts && ts[0]=='c' && ts[1]=='d' && ts[2]=='a' && ts[3]=='t' && ts[4]=='a' ) // cdata hax
 	{
 		p=(double *)lua_topointer(l,idx); // hax but seems to work

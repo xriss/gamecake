@@ -2,7 +2,7 @@
 project "lib_zzip"
 kind "StaticLib"
 language "C"
-files { "zziplib/zzip/**.c" , "zziplib/zzip/**.h" }
+files { "git/zzip/**.c" , "git/zzip/**.h" }
 
 if WINDOWS then
 
@@ -22,8 +22,8 @@ else -- nix
 end
 
 
-includedirs { "zziplib" , "../lib_z" }
+includedirs { "git" , "../lib_z/git" }
 
-
+buildoptions { "-Wno-discarded-qualifiers" }
 
 KIND{}

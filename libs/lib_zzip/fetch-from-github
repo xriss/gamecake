@@ -1,7 +1,7 @@
 cd `dirname $0`
 
-rm -rf zziplib
-git clone --depth 1 https://github.com/gdraheim/zziplib.git 
-rm -rf zziplib/.git
-git checkout zziplib/zzip/_config.h
+rm -rf git
+git clone --depth 1 https://github.com/gdraheim/zziplib.git git
+rm -rf git/.git
+cp ./_config.h git/zzip/_config.h
 
