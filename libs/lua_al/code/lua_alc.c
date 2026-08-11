@@ -293,7 +293,7 @@ const u8 *tmp=0;
 	if(tmp) // return data string
 	{
 		lua_pushlstring(l,(char*)tmp,len*2);
-		free(tmp);
+		free((void*)tmp);
 	}
 	else // return userdata passed in
 	{
