@@ -780,7 +780,7 @@ all_includes=all_includes or {
 	{"lua_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_wire",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
-	{"lua_bullet",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+--	{"lua_bullet",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_chipmunk",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 -- boxxd will replace bullet and chipmunk
 	{"lua_boxxd",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},

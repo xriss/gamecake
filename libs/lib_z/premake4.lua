@@ -2,11 +2,12 @@
 project "lib_z"
 kind "StaticLib"
 language "C"
-files { "./*.cpp" , "./*.c" , "./*.h" }
+files { "git/*.cpp" , "git/*.c" , "git/*.h" }
 
 
-includedirs { "." }
+includedirs { "git" }
 
+defines { "HAVE_UNISTD_H" }
 
 KIND{}
 
