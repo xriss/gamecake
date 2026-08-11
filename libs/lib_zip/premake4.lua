@@ -5,7 +5,7 @@ language "C"
 files { "./lib/**.c" }
 
 
-includedirs { "." , "./lib" , "../lib_z" }
+includedirs { "." , "./lib" , "../lib_z/git" }
 
 
 KIND{}

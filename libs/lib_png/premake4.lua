@@ -14,7 +14,7 @@ defines { "PNG_STATIC" , "PNG_NO_CONSOLE_IO" , "PNG_ARM_NEON_OPT=0" }
 
 
 
-includedirs { "." , "../lib_z" }
+includedirs { "." , "../lib_z/git" }
 
 
 KIND{}

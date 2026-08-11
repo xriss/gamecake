@@ -7,7 +7,7 @@ links { "lib_lua" , "lib_zzip" }
 
 
 
-includedirs { "." , "../lib_zzip/zziplib" }
+includedirs { "." , "../lib_zzip/git" }
 
 
 KIND{kind="lua",name="zip"}
