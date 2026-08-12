@@ -3294,7 +3294,7 @@
    "body": "<pre><code>secs = wire.time()\n</code></pre>\n<p>Get the current TIME_UTC via a timespec_get and converted into a \ndouble.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 167,
+   "line": 163,
    "name": "lua.wire.time",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

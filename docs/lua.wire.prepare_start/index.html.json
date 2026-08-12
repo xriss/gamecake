@@ -3294,7 +3294,7 @@
    "body": "<pre><code>start = wire.prepare_start( { start=&quot;...&quot; , globals={} } )\n\nopts.start=nil\nopts.globals={}\nopts.header=&quot;...&quot;\nopts.footer=&quot;...&quot;\n</code></pre>\n<p>See wire.thread for documentation on these opts, we just pass the opts \ntable down into this function to prepare the start string.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 1064,
+   "line": 1060,
    "name": "lua.wire.prepare_start",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

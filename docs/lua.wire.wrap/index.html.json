@@ -3294,7 +3294,7 @@
    "body": "<pre><code>it = wire.wrap(name,handle)\n</code></pre>\n<p>We <em>know</em> that this handle exists. So either return a previously cached \nfifo/thread or create a new one with the given name and return that.</p>\n<p>The returned value may be a fifo or a thread, it.is will be &quot;thread&quot; or \n&quot;fifo&quot; for the different results.</p>\n<p>Always returns a valid table.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 222,
+   "line": 218,
    "name": "lua.wire.wrap",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }

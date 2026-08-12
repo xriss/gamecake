@@ -3294,7 +3294,7 @@
    "body": "<pre><code>it = wire.reference(name)\nit = wire.reference(handle)\n</code></pre>\n<p>Return a fifo or thread if it exists, this is a way of wrapping a \nhandle/name that you hope already exists but you are not 100% sure.</p>\n<p>Will return nil if the name or handle does not exist.</p>\n<p>We may talk to the house thread to check for the existence of name or \nhandle, so this can block for a while before returning.</p>\n<p>The returned value may be a fifo or a thread, it.is will be &quot;thread&quot; or \n&quot;fifo&quot; for the different results.</p>\n",
    "count": 1,
    "file": "../lua/wire.lua",
-   "line": 275,
+   "line": 271,
    "name": "lua.wire.reference",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wire.lua"
   }
