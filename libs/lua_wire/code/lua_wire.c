@@ -998,6 +998,90 @@ static int lua_wire_thread_handle (lua_State *l)
 	return 0;
 }
 
+
+/*+---------------------------------------------------------------------
+
+unpack a string or userdata+length into a lua table
+
+*/
+static int lua_wire_unpack(lua_State *L)
+{
+	size_t len=0;
+	const char *s=0;
+    mp_cur c;
+
+	s = luaL_checklstring(L,1,&len);
+
+	mp_cur_init(&c,(const unsigned char *)s,len);
+	mp_decode_to_lua_type(L,&c);
+
+	if (c.err == MP_CUR_ERROR_EOF)
+	{
+		return luaL_error(L,"Missing bytes in input.");
+	}
+	else
+	if (c.err == MP_CUR_ERROR_BADFMT)
+	{
+		return luaL_error(L,"Bad data format in input.");
+	}
+
+	return 1;
+}
+
+/*+---------------------------------------------------------------------
+
+pack a lua table into a string or userdata,length
+
+*/
+static int lua_wire_pack(lua_State *L)
+{
+	mp_buf *buf=0;
+	int data=0;
+
+	// id second arg is true then return userdata
+	if( lua_isboolean(L,2) ) { data=lua_toboolean(L,2); }
+
+	buf = mp_buf_new(L);
+
+	lua_pushvalue(L, 1);
+	mp_encode_lua_type(L,buf,0);
+
+	if(data)
+	{
+		lua_pushlightuserdata(L,(void*)buf->b);
+		lua_pushnumber(L,buf->len);
+		// note we do not free the string
+		// must free later with
+		// mp_realloc(buf->L, buf->b, buf->len, 0);
+		// using the two values we returned
+		mp_buf_dont_free(buf);
+		return 2;
+	}
+	else
+	{
+		// return string
+		lua_pushlstring(L,(char*)buf->b,buf->len);
+		mp_buf_free(buf);
+		return 1;
+	}
+}
+
+/*+---------------------------------------------------------------------
+
+free a userdata,length
+
+*/
+static int lua_wire_freepack(lua_State *L)
+{
+	void *ptr;
+	int len;
+	ptr=lua_touserdata(L,1);
+	len=lua_tonumber(L,2);
+
+	mp_realloc(L, ptr, len, 0);
+	return 0;
+}
+
 /*+---------------------------------------------------------------------
 
 open library.
@@ -1007,6 +1091,11 @@ LUALIB_API int luaopen_wire_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{
+		// hacked messagepack functions
+		{"unpack",						lua_wire_unpack},
+		{"pack",						lua_wire_pack},
+		{"freepack",					lua_wire_freepack},
+		
 		// internal helper functions
 		{"time",						lua_wire_time},
 		{"pointer",						lua_wire_pointer},

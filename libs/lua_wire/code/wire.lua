@@ -4,10 +4,6 @@
 -- http://en.wikipedia.org/wiki/MIT_License
 --
 
--- gonna need a new cmsgpack that can pack/unpacks to memory
--- so we can skip the pointless copy into lua string when sending data
-local cmsgpack = require("cmsgpack")
-
 --[[#lua.wire
 
 	local wire=require("wire")
@@ -124,7 +120,7 @@ This is a local function for local people. It should not be used by
 you.
 
 ]]
-wire.table_to_data = cmsgpack.pack
+wire.table_to_data = core.pack
 
 
 --[[#lua.wire.data_to_table
@@ -141,7 +137,7 @@ This is a local function for local people. It should not be used by
 you.
 
 ]]
-wire.data_to_table = cmsgpack.unpack
+wire.data_to_table = core.unpack
 
 
 --[[#lua.wire.sleep

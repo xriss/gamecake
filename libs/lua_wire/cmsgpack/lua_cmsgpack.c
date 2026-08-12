@@ -49,6 +49,18 @@
  *
  * See Copyright Notice at the end of this file.
  *
+
+some hacks
+
+static everything as we might have the original version of this library 
+as well.
+
+much dumber table array check
+
+do not use lua_getallocf just use realloc as we may be sharing packed 
+data between states. alloc in one, free in another...
+
+
  * CHANGELOG:
  * 19-Feb-2012 (ver 0.1.0): Initial release.
  * 20-Feb-2012 (ver 0.2.0): Tables encoding improved.
@@ -97,6 +109,10 @@ typedef struct mp_buf {
     size_t len, free;
 } mp_buf;
 
+
+// we do not want a per lua state allocator
+// as we might free in another state
+#if 0
 static void *mp_realloc(lua_State *L, void *target, size_t osize,size_t nsize) {
     void *(*local_realloc) (void *, void *, size_t osize, size_t nsize) = NULL;
     void *ud;
@@ -104,6 +120,11 @@ static void *mp_realloc(lua_State *L, void *target, size_t osize,size_t nsize) {
     local_realloc = lua_getallocf(L, &ud);
 
     return local_realloc(ud, target, osize, nsize);
+}
+#endif
+
+static void *mp_realloc(lua_State *L, void *target, size_t osize,size_t nsize) {
+	return realloc(target,nsize);
 }
 
 static mp_buf *mp_buf_new(lua_State *L) {
@@ -132,6 +153,10 @@ static void mp_buf_append(mp_buf *buf, const unsigned char *s, size_t len) {
 
 static void mp_buf_free(mp_buf *buf) {
     mp_realloc(buf->L, buf->b, buf->len, 0); /* realloc to 0 = free */
+    mp_realloc(buf->L, buf, sizeof(*buf), 0);
+}
+
+static void mp_buf_dont_free(mp_buf *buf) {
     mp_realloc(buf->L, buf, sizeof(*buf), 0);
 }
 
@@ -420,6 +445,7 @@ static void mp_encode_lua_table_as_map(lua_State *L, mp_buf *buf, int level) {
     }
 }
 
+#if 0
 /* Returns true if the Lua table on top of the stack is exclusively composed
  * of keys from numerical keys from 1 up to N, with N being the total number
  * of elements, without any hole in the middle. */
@@ -462,6 +488,29 @@ static int table_is_an_array(lua_State *L) {
     lua_settop(L, stacktop);
     return max == count;
 }
+#endif
+
+// dumber table check, if you mix numbers and keys in the same table
+// then that is a you, problem.
+static int table_is_an_array(lua_State *l)
+{
+	int isarray=1; // assume array if empty
+	lua_pushnil(l);
+	if( lua_next(l,-2) != 0 ) // check first key only
+	{
+		isarray=0; // assume object unless
+		if( lua_type(l, -2) == LUA_TNUMBER ) // first key is a number
+		{
+			if( lua_tonumber(l, -2) == 1.0 ) // and that number is 1
+			{
+				isarray=1;
+			}
+		}
+		lua_pop(l,2);
+	}
+	return isarray;
+}
+
 
 /* If the length operator returns non-zero, that is, there is at least
  * an object at key '1', we serialize to message pack list. Otherwise

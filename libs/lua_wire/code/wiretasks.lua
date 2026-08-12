@@ -331,7 +331,6 @@ wiretasks.sqlite_code=function()
 		
 		if tables then
 			if not wgetsql then error("wetgenes.getsql module not available") end
-
 			for tabname,tab in pairs(tables) do
 				local sql=wgetsql.sqlite.create_table(tab.name,tab)
 				db:exec(sql)

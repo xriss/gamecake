@@ -23,9 +23,13 @@ getsql.prepare_tables=function(tables)
 	for tabname,tab in pairs(tables) do
 		tab.name=tabname
 		tab.columns={} -- keyed by column name
+		tab.list={}
 		for idx,col in ipairs(tab) do
+			tab[idx]=nil -- remove array
+			tab.list[idx]=col
 			col.index=idx
 			for i,val in ipairs(col) do
+				col[i]=nil -- remove array
 				if i==1 then -- first is name
 					col.name=val
 					tab.columns[col.name]=col
@@ -60,7 +64,7 @@ getsql.sqlite.create_table=function(name,columns)
 	push("CREATE TABLE IF NOT EXISTS "..name.." (\n")
 	
 	local column_count=0
-	for _,column in ipairs(columns) do
+	for _,column in ipairs(columns.list) do
 
 		if column.name then
 
