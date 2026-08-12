@@ -1,12 +1,19 @@
 
 project "lua_wire"
 language "C"
-files { "code/lua_wire.c" }
-links { "lib_lua" }
-links { "lib_c11threads" }
 
 includedirs { "." , "./code" }
-includedirs { "../lib_c11threads/git" }
+includedirs { "c11threads/git" }
+
+files { "code/lua_wire.c" }
+
+
+-- need windows thread hax
+if WINDOWS then
+files { "c11threads/git/c11threads_win32.c" }
+end
+
+links { "lib_lua" }
 
 KIND{lua="wire.core"}
 

@@ -883,7 +883,7 @@ static int mp_safe(lua_State *L) {
 }
 
 
-#if 1
+#if 0
 /* -------------------------------------------------------------------------- */
 const struct luaL_Reg cmds[] = {
     {"pack", mp_pack},

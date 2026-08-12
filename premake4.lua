@@ -847,7 +847,7 @@ all_includes=all_includes or {
 	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_box2d",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_box3d",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lib_c11threads",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+--	{"lib_c11threads",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- OSX will provide openal.
 	{LIB_OPENAL,		WINDOWS		or		NIX		or		EMCC 		or		ANDROID		or	nil		},

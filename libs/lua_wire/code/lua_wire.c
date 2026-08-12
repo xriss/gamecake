@@ -32,6 +32,10 @@ found them etc etc. But for all I know this may actually make it worse.
 #include "lauxlib.h"
 
 
+// lightly hacked and we expose some of its functions directly in wire
+#include "cmsgpack/lua_cmsgpack.c"
+
+
 // allocate this many empty threads/fifos in a single chunk
 #define WIRE_SLOTS_CHUNK_SIZE 16
 
