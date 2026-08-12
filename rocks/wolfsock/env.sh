@@ -1,0 +1,9 @@
+
+export ROCK_DIR=`pwd`
+
+export ROCK_BASENAME=wolfsock
+export ROCK_VERSION=26
+export ROCK_REVISION=260721
+
+export ROCK_ROCKSPEC=${ROCK_BASENAME}-${ROCK_VERSION}-${ROCK_REVISION}.rockspec
+
