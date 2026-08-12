@@ -1,7 +1,7 @@
 cd `dirname $0`
 
 # $1 must be dir
-./setenv.sh $1 || exit 0
+source ./rock-env.sh $1 || exit 0
 
 
 if [ -z "$2" ]; then
@@ -21,17 +21,18 @@ spec
 EOF
 
 exit 0
+
 fi
 
 
 case $2 in
 
 	"bump")
-		echo "bumping"
+		./rock-bump.sh || exit 20
 	;;
 
 	"spec")
-		echo "specing"
+		./rock-spec.sh || exit 20
 	;;
 
 	*)

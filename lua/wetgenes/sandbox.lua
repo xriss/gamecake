@@ -7,6 +7,9 @@
 -- Simple sandboxing of lua functions
 --
 
+local M={ modname=(...) } ; package.loaded[M.modname]=M
+local sandbox=M
+
 
 -- make a table to be used as a reasonably "safe" environment
 -- code can still lock up in loops or allocate too much memory
@@ -112,15 +115,11 @@ local env={
 end
 
 
-
-local M={ modname=(...) } ; package.loaded[M.modname]=M
---module(...)
-
 --
 -- get a functional environment full of useful but "safe" functions
 -- probably not safe
 --
-M.make_env=function (opts)
+sandbox.make_env=function (opts)
 
 	local env=local_make_env_safe()
 
@@ -131,7 +130,7 @@ end
 -- a duplicate env including unsafe function
 -- definitely not safe
 --
-M.make_unsafe_env=function (opts)
+sandbox.make_unsafe_env=function (opts)
 
 	local env=local_make_env_safe()
 
@@ -178,12 +177,13 @@ M.make_unsafe_env=function (opts)
 end
 
 --
+-- this performs the opposite of a sandbox.save_ini
 -- turns a string containing lua code into a table containing the globals it sets
 -- IE read an ini file, run it through this
 --
-M.ini=function (s,import)
+sandbox.ini=function (s,import)
 
-	local env=M.make_env()
+	local env=sandbox.make_env()
 	for n,v in pairs(import or {}) do env[n]=v end
 	local tab={}
 	local meta={__index=env}
@@ -196,11 +196,12 @@ M.ini=function (s,import)
 
 	return tab
 end
+sandbox.load_ini=sandbox.ini
 
--- this performs the opposite of a string.serialize
-M.lson=function (s,import)
+-- this performs the opposite of a sandbox.save_lson
+sandbox.lson=function (s,import)
 
-	local env=M.make_env()
+	local env=sandbox.make_env()
 	for n,v in pairs(import or {}) do env[n]=v end
 	local tab={}
 	local meta={__index=env}
@@ -211,4 +212,117 @@ M.lson=function (s,import)
 	setfenv(f,tab)
 	local _,ret=assert(pcall(f))
 	return ret
+end
+sandbox.load_lson=sandbox.lson
+
+local sortedpairs = function( tab )
+	local order={}
+	for n,v in pairs(tab) do order[#order+1]=n end
+	table.sort(order)
+	local idx=0
+	return function()
+		idx=idx+1
+		return order[idx] , tab[ order[idx] ]
+	end
+end
+
+-- create lson formated text ( lua code )
+sandbox.save_lson = function(o,opts)
+	opts=opts or {}
+
+	-- set defaults
+	local opts_indent=opts.indent or " "
+	local newline=opts.newline or "\n"
+	local errors=opts.errors
+
+	local dedupe={}
+	local ret={}
+	local fout=function(...)
+		for i,v in ipairs({...}) do ret[#ret+1]=tostring(v) end
+	end
+
+	-- recursive
+	local serialize ; serialize=function(o,indent)
+		local t=type(o)
+		if t == "number" then
+		
+			return fout(o)
+			
+		elseif t == "boolean" then
+		
+			if o then return fout("true") else return fout("false") end
+			
+		elseif t == "string" then
+		
+			return fout(string.format("%q", o))
+			
+		elseif t == "table" then
+		
+			local indent2=indent..opts_indent -- next indent level
+			
+			if dedupe[o] then
+				if errors then
+					error("recursive table "..tostring(o))
+				else
+					fout("{ --[[ ",tostring(o)," ]] }")
+					return
+				end
+			else
+				dedupe[o]=true
+			
+				fout("{",newline)
+							
+				local maxi=0
+				
+				for k,v in ipairs(o) do -- dump number keys in order
+					fout(indent2)
+					serialize(v,indent2)
+					fout(",",newline)
+					maxi=k -- remember top
+				end
+				
+				for k,v in sortedpairs(o) do
+					 -- skip what we already dumped
+					if (type(k)~="number") or (k<1) or (k>maxi) or (math.floor(k)~=k) then
+						fout(indent2,"[")
+						serialize(k,indent2)
+						fout("]=")
+						serialize(v,indent2)
+						fout(",",newline)
+					end
+				end
+				fout(indent,"}")
+				dedupe[o]=false
+				return
+			end
+		elseif t == "nil" then	
+			return fout("nil")
+		else
+			if errors then
+				error("cannot serialize a " .. type(o))
+			else
+				return fout("nil --[[",tostring(o),"]]")
+			end
+		end
+	end
+
+	serialize(o,"")
+	fout(newline)
+	return table.concat(ret)
+end
+
+-- create ini formated text ( lua code that writes to the environment )
+-- similar to lson but the top level must be string keys with no funny characters
+-- and these are written as globals
+sandbox.save_ini = function(tab)
+	local ret={}
+	local fout=function(...)
+		for i,v in ipairs({...}) do ret[#ret+1]=tostring(v) end
+	end
+
+	for n,v in sortedpairs(tab) do
+		fout( n.."="..sandbox.save_lson(v))
+	end
+
+	return table.concat(ret)
 end

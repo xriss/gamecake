@@ -1,7 +1,7 @@
 
 export ROCK_DIR=`pwd`
 
-export ROCK_NAME=wolfsock
+export ROCK_NAME=wire
 export ROCK_VERSION=26
 export ROCK_REVISION=260812
 
