@@ -21,6 +21,9 @@ spec
 pack
 	zip up the src and pack it into the src rock
 
+make
+	make and install locally ( home directory )
+
 EOF
 
 exit 0
@@ -40,6 +43,10 @@ case $2 in
 
 	"pack")
 		./rock-pack.sh || exit 20
+	;;
+
+	"make")
+		./rock-make.sh || exit 20
 	;;
 
 	*)
