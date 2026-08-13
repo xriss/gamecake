@@ -17,16 +17,16 @@
 
 typedef struct
 {
-	s32	fmt;			// format of data
+	int32_t	fmt;			// format of data
 	
-	s32	sample_size;	// size of each sample in bytes, probably 2 (16bits)
-	s32	samples;		// size of data in samples
-	s32 chanels;		// number of chanels, probably 1 or maybe 2
+	int32_t	sample_size;	// size of each sample in bytes, probably 2 (16bits)
+	int32_t	samples;		// size of data in samples
+	int32_t chanels;		// number of chanels, probably 1 or maybe 2
 	
-	u8 *data;			// pointer to sample data
-	s32 data_sizeof;	// size of data in bytes probably ( sample_size * samples * chanels )
+	uint8_t *data;			// pointer to sample data
+	int32_t data_sizeof;	// size of data in bytes probably ( sample_size * samples * chanels )
 	
-	s32 freq;			// sugested default frequency this sample should be played back at
+	int32_t freq;			// sugested default frequency this sample should be played back at
 		
 	const char *err;	// can be used to pass error strings back to other code
 
@@ -34,12 +34,12 @@ typedef struct
 
 
 sod * sod_alloc();
-sod * sod_alloc_data(sod *sd,s32 fmt,s32 samples);
+sod * sod_alloc_data(sod *sd,int32_t fmt,int32_t samples);
 
 void sod_free(sod *sd);
 void sod_free_data(sod *sd);;
 
-void sod_set_fmt( sod * sd, s32 fmt );
+void sod_set_fmt( sod * sd, int32_t fmt );
 
 sod * sod_load_file( sod * sd, const char *filename , const char *opts );
 

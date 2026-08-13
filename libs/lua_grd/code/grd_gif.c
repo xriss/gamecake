@@ -179,7 +179,7 @@ bogus:
 // read a gif into a grd from a file
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_gif_load_file(struct grd * g, const char* file_name, u32 *tags)
+void grd_gif_load_file(struct grd * g, const char* file_name, uint32_t *tags)
 {
 	struct grd_io_info inf[1]={0};
 	
@@ -197,12 +197,12 @@ void grd_gif_load_file(struct grd * g, const char* file_name, u32 *tags)
 // read a gif into a grd from data
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_gif_load_data(struct grd *g, const unsigned char* data, int data_len, u32 *tags)
+void grd_gif_load_data(struct grd *g, const unsigned char* data, int data_len, uint32_t *tags)
 {
 	struct grd_io_info inf[1]={0};
 	
 	inf->file_name=0;
-	inf->data=(u8*)data;
+	inf->data=(uint8_t*)data;
 	inf->pos=0;
 	inf->data_len=data_len;
 	inf->tags=tags;
@@ -217,7 +217,7 @@ void grd_gif_load_data(struct grd *g, const unsigned char* data, int data_len, u
 // save a gif into a file (Z layers are animation frames)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_gif_save_file(struct grd * g, const char* file_name, u32 *tags)
+void grd_gif_save_file(struct grd * g, const char* file_name, uint32_t *tags)
 {
 	struct grd_io_info inf[1]={0};
 	inf->file_name=file_name;
@@ -265,9 +265,9 @@ ExtensionBlock ext[4];
 unsigned char control[4];
 unsigned char wank[3];
 
-	u32 *tag_SPED=grd_tags_find(inf->tags,GRD_TAG_DEF('S','P','E','D'));
-	u32 speed=80;
-	if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
+	uint32_t *tag_SPED=grd_tags_find(inf->tags,GRD_TAG_DEF('S','P','E','D'));
+	uint32_t speed=80;
+	if(tag_SPED) { speed=*((uint32_t*)(tag_SPED+2)); } // get speed in 1/1000 seconds
 
 
 	ext[0].ByteCount=11;
@@ -395,9 +395,9 @@ int ErrorCode;
 int i;
 unsigned char *p;
 
-u32 *tag_SPED=grd_tags_find(sgif->inf->tags,GRD_TAG_DEF('S','P','E','D'));
-u32 speed=80;
-if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
+uint32_t *tag_SPED=grd_tags_find(sgif->inf->tags,GRD_TAG_DEF('S','P','E','D'));
+uint32_t speed=80;
+if(tag_SPED) { speed=*((uint32_t*)(tag_SPED+2)); } // get speed in 1/1000 seconds
 	
 	sgif->ext[0].ByteCount=11;
 	sgif->ext[0].Bytes=(GifByteType *)"NETSCAPE2.0";

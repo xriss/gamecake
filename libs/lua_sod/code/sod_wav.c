@@ -19,53 +19,53 @@
 
 typedef struct PACKBYTES /* WAV File-header */
 {
-  u8   Id[4];
-  s32  Size;
-  u8   Type[4];
+  uint8_t   Id[4];
+  int32_t  Size;
+  uint8_t   Type[4];
 } WAVFileHdr_Struct;
 
 typedef struct PACKBYTES /* WAV Fmt-header */
 {
-	u16	Format;
-	u16	Channels;
-	u32	SamplesPerSec;
-	u32	BytesPerSec;
-	u16	BlockAlign;
-	u16	BitsPerSample;
+	uint16_t	Format;
+	uint16_t	Channels;
+	uint32_t	SamplesPerSec;
+	uint32_t	BytesPerSec;
+	uint16_t	BlockAlign;
+	uint16_t	BitsPerSample;
 } WAVFmtHdr_Struct;
 
 typedef struct PACKBYTES /* WAV FmtEx-header */
 {
-	u16 Size;
-	u16 SamplesPerBlock;
+	uint16_t Size;
+	uint16_t SamplesPerBlock;
 } WAVFmtExHdr_Struct;
 
 typedef struct PACKBYTES /* WAV Smpl-header */
 {
-	u32	Manufacturer;
-	u32	Product;
-	u32	SamplePeriod;
-	u32	Note;
-	u32	FineTune;
-	u32	SMPTEFormat;
-	u32	SMPTEOffest;
-	u32	Loops;
-	u32	SamplerData;
+	uint32_t	Manufacturer;
+	uint32_t	Product;
+	uint32_t	SamplePeriod;
+	uint32_t	Note;
+	uint32_t	FineTune;
+	uint32_t	SMPTEFormat;
+	uint32_t	SMPTEOffest;
+	uint32_t	Loops;
+	uint32_t	SamplerData;
 	struct PACKBYTES
 	{
-		u32	Identifier;
-		u32	Type;
-		u32	Start;
-		u32	End;
-		u32	Fraction;
-		u32	Count;
+		uint32_t	Identifier;
+		uint32_t	Type;
+		uint32_t	Start;
+		uint32_t	End;
+		uint32_t	Fraction;
+		uint32_t	Count;
 	}	Loop[1];
 } WAVSmplHdr_Struct;
 
 typedef struct PACKBYTES /* WAV Chunk-header */
 {
-	u8	Id[4];
-	u32	Size;
+	uint8_t	Id[4];
+	uint32_t	Size;
 } WAVChunkHdr_Struct;
 
 

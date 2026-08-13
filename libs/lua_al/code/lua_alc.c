@@ -51,9 +51,9 @@ alcGetProcAddress
 // if lua or luajit change then this will break
 // it is however still better than not having any bounds checking
 
-#include "wet_types.h"
+#include <stdint.h>’
 
-extern u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
+extern uint8_t * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
 
 
@@ -263,11 +263,11 @@ static int lua_alc_CaptureSamples (lua_State *l)
 {	
 ALCdevice *device;
 
-const u8 *ptr=0;
+const uint8_t *ptr=0;
 size_t len=0;
 size_t lenmax=0;
 
-const u8 *tmp=0;
+const uint8_t *tmp=0;
 
 	device = lua_alc_check_capture_device(l, 1 );
 	

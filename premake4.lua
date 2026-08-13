@@ -844,7 +844,7 @@ all_includes=all_includes or {
 	{"lib_vorbis",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+--	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_box2d",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_box3d",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 --	{"lib_c11threads",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},

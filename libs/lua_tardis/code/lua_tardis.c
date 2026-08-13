@@ -15,7 +15,6 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "wet_types.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"

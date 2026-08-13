@@ -21,7 +21,7 @@
 // or with + to force big endian
 
 
-#include "wet_types.h"
+#include <stdint.h>
 
 extern unsigned char * lua_toluserdata (lua_State *l, int idx, size_t *len);
 
@@ -123,20 +123,20 @@ const unsigned char *p;
 // This number can then be compared against multichar numbers.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static u32 string_to_id(const char *s)
+static uint32_t string_to_id(const char *s)
 {
-	const u32 test4='abcd'; // lets play find the ace
-	const u32 test1='a';	
+	const uint32_t test4='abcd'; // lets play find the ace
+	const uint32_t test1='a';	
 	int inyourendo= ( (test4&0xff) == test1 ); // true if first char is at bottom, littleendian
 	int len;
-	const u8 *p;
+	const uint8_t *p;
 
 	if(!s) { return 0; }
 	
 	len=strlen(s);
 	if(len>4) { len=4; } // only first 4 chars of longer strings
 	
-	p=(const u8 *)s; // unsigned please
+	p=(const uint8_t *)s; // unsigned please
 	if(inyourendo)
 	{
 		switch(len)
@@ -165,23 +165,23 @@ static u32 string_to_id(const char *s)
 // read/write a u64 or s64 or f64
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static u64 lua_pack_read_u64 (const u8 *p, int inyourendo)
+static uint64_t lua_pack_read_u64 (const uint8_t *p, int inyourendo)
 {
 	if(inyourendo) { 
-	return ((u64)p[0]) | ((u64)p[1]<<8) | ((u64)p[2]<<16) | ((u64)p[3]<<24) | ((u64)p[4]<<32) | ((u64)p[5]<<40) | ((u64)p[6]<<48) | ((u64)p[7]<<56); }
-	return ((u64)p[7]) | ((u64)p[6]<<8) | ((u64)p[5]<<16) | ((u64)p[4]<<24) | ((u64)p[3]<<32) | ((u64)p[2]<<40) | ((u64)p[1]<<48) | ((u64)p[0]<<56);
+	return ((uint64_t)p[0]) | ((uint64_t)p[1]<<8) | ((uint64_t)p[2]<<16) | ((uint64_t)p[3]<<24) | ((uint64_t)p[4]<<32) | ((uint64_t)p[5]<<40) | ((uint64_t)p[6]<<48) | ((uint64_t)p[7]<<56); }
+	return ((uint64_t)p[7]) | ((uint64_t)p[6]<<8) | ((uint64_t)p[5]<<16) | ((uint64_t)p[4]<<24) | ((uint64_t)p[3]<<32) | ((uint64_t)p[2]<<40) | ((uint64_t)p[1]<<48) | ((uint64_t)p[0]<<56);
 }
-static s64 lua_pack_read_s64 (const u8 *p, int inyourendo)
+static int64_t lua_pack_read_s64 (const uint8_t *p, int inyourendo)
 {
-	u64 r=lua_pack_read_u64 ( p , inyourendo );
-	return *((s64*)(&r));
+	uint64_t r=lua_pack_read_u64 ( p , inyourendo );
+	return *((int64_t*)(&r));
 }
-static f64 lua_pack_read_f64 (const u8 *p, int inyourendo)
+static double lua_pack_read_f64 (const uint8_t *p, int inyourendo)
 {
-	u64 r=lua_pack_read_u64 ( p , inyourendo );
-	return *((f64*)(&r));
+	uint64_t r=lua_pack_read_u64 ( p , inyourendo );
+	return *((double*)(&r));
 }
-static void lua_pack_write_u64 (u64 d,u8 *p, int inyourendo )
+static void lua_pack_write_u64 (uint64_t d,uint8_t *p, int inyourendo )
 {
 	if(inyourendo)
 	{
@@ -206,13 +206,13 @@ static void lua_pack_write_u64 (u64 d,u8 *p, int inyourendo )
 		p[0]=((d>>56)&0xff);
 	}
 }
-static void lua_pack_write_s64 (s64 d,u8 *p, int inyourendo )
+static void lua_pack_write_s64 (int64_t d,uint8_t *p, int inyourendo )
 {
-	lua_pack_write_u64 ( *((u64*)(&d)) ,p,inyourendo );
+	lua_pack_write_u64 ( *((uint64_t*)(&d)) ,p,inyourendo );
 }
-static void lua_pack_write_f64 (f64 d,u8 *p, int inyourendo )
+static void lua_pack_write_f64 (double d,uint8_t *p, int inyourendo )
 {
-	lua_pack_write_u64 ( *((u64*)(&d)) ,p,inyourendo );
+	lua_pack_write_u64 ( *((uint64_t*)(&d)) ,p,inyourendo );
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -220,22 +220,22 @@ static void lua_pack_write_f64 (f64 d,u8 *p, int inyourendo )
 // read/write a u32 or s32 or f32
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static u32 lua_pack_read_u32 (const u8 *p, int inyourendo)
+static uint32_t lua_pack_read_u32 (const uint8_t *p, int inyourendo)
 {
 	if(inyourendo) { return (p[0]) | (p[1]<<8) | (p[2]<<16) | (p[3]<<24) ; }
 	return (p[3]) | (p[2]<<8) | (p[1]<<16) | (p[0]<<24) ;
 }
-static s32 lua_pack_read_s32 (const u8 *p, int inyourendo)
+static int32_t lua_pack_read_s32 (const uint8_t *p, int inyourendo)
 {
-	u32 r=lua_pack_read_u32 ( p , inyourendo );
-	return *((s32*)(&r));
+	uint32_t r=lua_pack_read_u32 ( p , inyourendo );
+	return *((int32_t*)(&r));
 }
-static f32 lua_pack_read_f32 (const u8 *p, int inyourendo)
+static float lua_pack_read_f32 (const uint8_t *p, int inyourendo)
 {
-	u32 r=lua_pack_read_u32 ( p , inyourendo );
-	return *((f32*)(&r));
+	uint32_t r=lua_pack_read_u32 ( p , inyourendo );
+	return *((float*)(&r));
 }
-static void lua_pack_write_u32 (u32 d,u8 *p, int inyourendo )
+static void lua_pack_write_u32 (uint32_t d,uint8_t *p, int inyourendo )
 {
 	if(inyourendo)
 	{
@@ -252,13 +252,13 @@ static void lua_pack_write_u32 (u32 d,u8 *p, int inyourendo )
 		p[0]=((d>>24)&0xff);
 	}
 }
-static void lua_pack_write_s32 (s32 d,u8 *p, int inyourendo )
+static void lua_pack_write_s32 (int32_t d,uint8_t *p, int inyourendo )
 {
-	lua_pack_write_u32 ( *((u32*)(&d)) ,p,inyourendo );
+	lua_pack_write_u32 ( *((uint32_t*)(&d)) ,p,inyourendo );
 }
-static void lua_pack_write_f32 (f32 d,u8 *p, int inyourendo )
+static void lua_pack_write_f32 (float d,uint8_t *p, int inyourendo )
 {
-	lua_pack_write_u32 ( *((u32*)(&d)) ,p,inyourendo );
+	lua_pack_write_u32 ( *((uint32_t*)(&d)) ,p,inyourendo );
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -266,17 +266,17 @@ static void lua_pack_write_f32 (f32 d,u8 *p, int inyourendo )
 // read/write a u16 or s16
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static u16 lua_pack_read_u16 (const u8 *p, int inyourendo )
+static uint16_t lua_pack_read_u16 (const uint8_t *p, int inyourendo )
 {
 	if(inyourendo) { return (p[0]) | (p[1]<<8) ; }
 	return (p[1]) | (p[0]<<8) ;
 }
-static s16 lua_pack_read_s16 (const u8 *p, int inyourendo )
+static int16_t lua_pack_read_s16 (const uint8_t *p, int inyourendo )
 {
-	u16 r=lua_pack_read_u16 ( p , inyourendo );
-	return *((s16*)(&r));
+	uint16_t r=lua_pack_read_u16 ( p , inyourendo );
+	return *((int16_t*)(&r));
 }
-static void lua_pack_write_u16 (u16 d,u8 *p, int inyourendo )
+static void lua_pack_write_u16 (uint16_t d,uint8_t *p, int inyourendo )
 {
 	if(inyourendo)
 	{
@@ -289,9 +289,9 @@ static void lua_pack_write_u16 (u16 d,u8 *p, int inyourendo )
 		p[0]=((d>>8)&0xff);
 	}
 }
-static void lua_pack_write_s16 (s16 d,u8 *p, int inyourendo )
+static void lua_pack_write_s16 (int16_t d,uint8_t *p, int inyourendo )
 {
-	lua_pack_write_u16 ( *((u16*)(&d)) ,p,inyourendo );
+	lua_pack_write_u16 ( *((uint16_t*)(&d)) ,p,inyourendo );
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -299,22 +299,22 @@ static void lua_pack_write_s16 (s16 d,u8 *p, int inyourendo )
 // read/write a u8 or s8
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static u8 lua_pack_read_u8 (const u8 *p, int inyourendo )
+static uint8_t lua_pack_read_u8 (const uint8_t *p, int inyourendo )
 {
 	return *p ;
 }
-static s8 lua_pack_read_s8 (const u8 *p, int inyourendo )
+static int8_t lua_pack_read_s8 (const uint8_t *p, int inyourendo )
 {
-	u8 r=lua_pack_read_u8 ( p , inyourendo );
-	return *((s8*)(&r));
+	uint8_t r=lua_pack_read_u8 ( p , inyourendo );
+	return *((int8_t*)(&r));
 }
-static void lua_pack_write_u8 (u8 d,u8 *p, int inyourendo )
+static void lua_pack_write_u8 (uint8_t d,uint8_t *p, int inyourendo )
 {
 	p[0]=d;
 }
-static void lua_pack_write_s8 (s8 d,u8 *p, int inyourendo )
+static void lua_pack_write_s8 (int8_t d,uint8_t *p, int inyourendo )
 {
-	lua_pack_write_u8 ( *((u8*)(&d)) ,p,inyourendo );
+	lua_pack_write_u8 ( *((uint8_t*)(&d)) ,p,inyourendo );
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
@@ -322,7 +322,7 @@ static void lua_pack_write_s8 (s8 d,u8 *p, int inyourendo )
 // what size is this field, so we can allocate a string in advance
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static int lua_pack_field_size (u32 def)
+static int lua_pack_field_size (uint32_t def)
 {
 	switch(def)
 	{
@@ -373,7 +373,7 @@ static int lua_pack_field_size (u32 def)
 // read this field into a double (s32 and u32 will fit with no bitloss)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static double lua_pack_get_field (u32 def,const u8*p)
+static double lua_pack_get_field (uint32_t def,const uint8_t*p)
 {
 	switch(def)
 	{
@@ -426,49 +426,49 @@ static double lua_pack_get_field (u32 def,const u8*p)
 // write this field into some data
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-static void lua_pack_set_field (double d,u32 def,u8*p)
+static void lua_pack_set_field (double d,uint32_t def,uint8_t*p)
 {
 	switch(def)
 	{
 		case 's8' :
-		case '-s8' : lua_pack_write_s8 ( (s8)d,p, 1 ); break;
-		case '+s8' : lua_pack_write_s8 ( (s8)d,p, 0 ); break;
+		case '-s8' : lua_pack_write_s8 ( (int8_t)d,p, 1 ); break;
+		case '+s8' : lua_pack_write_s8 ( (int8_t)d,p, 0 ); break;
 
 		case 'u8' :
-		case '-u8' : lua_pack_write_u8 ( (u8)d,p, 1 ); break;
-		case '+u8' : lua_pack_write_u8 ( (u8)d,p, 0 ); break;
+		case '-u8' : lua_pack_write_u8 ( (uint8_t)d,p, 1 ); break;
+		case '+u8' : lua_pack_write_u8 ( (uint8_t)d,p, 0 ); break;
 			
 		case 's16' :
-		case '-s16' : lua_pack_write_s16 ( (s16)d,p, 1 ); break;
-		case '+s16' : lua_pack_write_s16 ( (s16)d,p, 0 ); break;
+		case '-s16' : lua_pack_write_s16 ( (int16_t)d,p, 1 ); break;
+		case '+s16' : lua_pack_write_s16 ( (int16_t)d,p, 0 ); break;
 
 		case 'u16' :
-		case '-u16' : lua_pack_write_u16 ( (u16)d,p, 1 ); break;
-		case '+u16' : lua_pack_write_u16 ( (u16)d,p, 0 ); break;
+		case '-u16' : lua_pack_write_u16 ( (uint16_t)d,p, 1 ); break;
+		case '+u16' : lua_pack_write_u16 ( (uint16_t)d,p, 0 ); break;
 			
 		case 'f32' :
-		case '-f32' : lua_pack_write_f32 ( (f32)d,p, 1 ); break;
-		case '+f32' : lua_pack_write_f32 ( (f32)d,p, 0 ); break;
+		case '-f32' : lua_pack_write_f32 ( (float)d,p, 1 ); break;
+		case '+f32' : lua_pack_write_f32 ( (float)d,p, 0 ); break;
 
 		case 's32' :
-		case '-s32' : lua_pack_write_s32 ( (s32)d,p, 1 ); break;
-		case '+s32' : lua_pack_write_s32 ( (s32)d,p, 0 ); break;
+		case '-s32' : lua_pack_write_s32 ( (int32_t)d,p, 1 ); break;
+		case '+s32' : lua_pack_write_s32 ( (int32_t)d,p, 0 ); break;
 
 		case 'u32' :
-		case '-u32' : lua_pack_write_u32 ( (u32)d,p, 1 ); break;
-		case '+u32' : lua_pack_write_u32 ( (u32)d,p, 0 ); break;
+		case '-u32' : lua_pack_write_u32 ( (uint32_t)d,p, 1 ); break;
+		case '+u32' : lua_pack_write_u32 ( (uint32_t)d,p, 0 ); break;
 
 		case 'f64' :
-		case '-f64' : lua_pack_write_f64 ( (f64)d,p, 1 ); break;
-		case '+f64' : lua_pack_write_f64 ( (f64)d,p, 0 ); break;
+		case '-f64' : lua_pack_write_f64 ( (double)d,p, 1 ); break;
+		case '+f64' : lua_pack_write_f64 ( (double)d,p, 0 ); break;
 
 		case 's64' :
-		case '-s64' : lua_pack_write_s64 ( (s64)d,p, 1 ); break; // note that a double does not have enough precision for s64
-		case '+s64' : lua_pack_write_s64 ( (s64)d,p, 0 ); break;
+		case '-s64' : lua_pack_write_s64 ( (int64_t)d,p, 1 ); break; // note that a double does not have enough precision for s64
+		case '+s64' : lua_pack_write_s64 ( (int64_t)d,p, 0 ); break;
 
 		case 'u64' :
-		case '-u64' : lua_pack_write_u64 ( (u64)d,p, 1 ); break; // note that a double does not have enough precision for u64
-		case '+u64' : lua_pack_write_u64 ( (u64)d,p, 0 ); break;
+		case '-u64' : lua_pack_write_u64 ( (uint64_t)d,p, 1 ); break; // note that a double does not have enough precision for u64
+		case '+u64' : lua_pack_write_u64 ( (uint64_t)d,p, 0 ); break;
 	}
 	
 }
@@ -481,14 +481,14 @@ static void lua_pack_set_field (double d,u32 def,u8*p)
 static int lua_pack_load (lua_State *l)
 {
 double d;
-const u8 *ptr=0;
+const uint8_t *ptr=0;
 size_t len;
 int off=0;
 int n;
 
-u32 arr=0;
+uint32_t arr=0;
 
-u32 def;
+uint32_t def;
 int def_len;
 
 int data_len=0;
@@ -514,7 +514,7 @@ int count;
 	
 	if(lua_isnumber(l,3)) // optional start point
 	{
-		off=(u32)lua_tonumber(l,3);
+		off=(uint32_t)lua_tonumber(l,3);
 	}
 
 	if(lua_isnumber(l,4)) // optional forced length
@@ -634,14 +634,14 @@ int datidx=1;
 int datadd=0;
 int datmul=1;
 
-u32 arr=0;
+uint32_t arr=0;
 
-u32 def;
+uint32_t def;
 int def_len;
 
 int data_len=0;
-u8 *data=0;
-u8 *ptr=0;
+uint8_t *data=0;
+uint8_t *ptr=0;
 int count;
 
 const char *s;
@@ -670,7 +670,7 @@ size_t sl;
 	
 	if(lua_isnumber(l,3)) // optional start point
 	{
-		off=(u32)lua_tonumber(l,3);
+		off=(uint32_t)lua_tonumber(l,3);
 	}
 
 	ptr=lua_pack_to_buffer(l,4,&len); // optional buffer to write too
@@ -798,7 +798,7 @@ size_t sl;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_pack_alloc (lua_State *l)
 {
-s32 size=(s32)lua_tonumber(l,1);
+int32_t size=(int32_t)lua_tonumber(l,1);
 
 	if(size<=0)
 	{
@@ -825,9 +825,9 @@ s32 size=(s32)lua_tonumber(l,1);
 static int lua_pack_grow (lua_State *l)
 {
 size_t len=0;
-const u8 *ptr=0;
-u8 *newptr=0;
-s32 size=(s32)lua_tonumber(l,2);
+const uint8_t *ptr=0;
+uint8_t *newptr=0;
+int32_t size=(int32_t)lua_tonumber(l,2);
 
 	ptr=lua_pack_to_const_buffer(l,1,&len); // also allow input strings
 	if(!ptr)
@@ -858,7 +858,7 @@ s32 size=(s32)lua_tonumber(l,2);
 static int lua_pack_sizeof (lua_State *l)
 {
 size_t len=0;
-const u8 *ptr=0;
+const uint8_t *ptr=0;
 	
 	ptr=lua_pack_to_const_buffer(l,1,&len);
 	if(!ptr) { return 0; }
@@ -874,7 +874,7 @@ const u8 *ptr=0;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_pack_typesize (lua_State *l)
 {
-u32 def;
+uint32_t def;
 int def_len;
 
 	def=string_to_id( lua_tostring(l,1) );
@@ -892,7 +892,7 @@ int def_len;
 static int lua_pack_tostring (lua_State *l)
 {
 size_t len=0;
-const u8 *ptr=0;
+const uint8_t *ptr=0;
 	
 	ptr=lua_pack_to_const_buffer(l,1,&len);
 	if(!ptr) { return 0; }
@@ -917,7 +917,7 @@ static int lua_pack_tolightuserdata (lua_State *l)
 {
 size_t len;
 size_t offset;
-const u8 *ptr=0;
+const uint8_t *ptr=0;
 
 	ptr=lua_pack_to_const_buffer(l,1,&len);
 	if(!ptr) { return 0; }
@@ -944,10 +944,10 @@ const u8 *ptr=0;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_pack_copy (lua_State *l)
 {
-const u8 *ptr=0;
+const uint8_t *ptr=0;
 size_t len;
 size_t newlen;
-u8 *newptr=0;
+uint8_t *newptr=0;
 
 	ptr=lua_pack_to_const_buffer(l,1,&len);
 

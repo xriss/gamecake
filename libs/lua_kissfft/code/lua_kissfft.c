@@ -5,6 +5,7 @@
 -- Please ping me if you use it for anything cool...
 */
 
+#include <stdint.h>’
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
@@ -15,12 +16,11 @@
 
 #include "lua_kissfft.h"
 
-#include "wet_types.h"
 
-extern u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
+extern uint8_t * lua_toluserdata (lua_State *L, int idx, size_t *len);
 
-static u8 * lua_toptr (lua_State *L, int idx, size_t *len) {
-	u8 *p=(u8*)lua_tolstring(L,idx,len);
+static uint8_t * lua_toptr (lua_State *L, int idx, size_t *len) {
+	uint8_t *p=(uint8_t*)lua_tolstring(L,idx,len);
 	if(!p)
 	{
 		if(lua_islightuserdata(L,idx))
@@ -166,7 +166,7 @@ kissfftdat **ptr;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_kissfft_push (lua_State *l)
 {
-const u8 *ptr=0;
+const uint8_t *ptr=0;
 size_t len;
 
 kissfftdat *dat = lua_kissfft_check_dat (l, 1);
@@ -187,7 +187,7 @@ int i,j;
 		float ss=1.0f/32768.0f;
 		for(i=0;i<dat->len;i++)
 		{
-			dat->din[i]=(float)(((const s16*)ptr)[i])*ss;
+			dat->din[i]=(float)(((const int16_t*)ptr)[i])*ss;
 		}
 
 		kiss_fftr(dat->cfg,dat->din,dat->tmp);
@@ -249,10 +249,10 @@ int i;
 int len;
 int lenf;
 
-u8 *ptr_io=0;
+uint8_t *ptr_io=0;
 size_t len_io;
 
-const u8 *ptr_f=0;
+const uint8_t *ptr_f=0;
 size_t len_f;
 
 kissfftdat *dat;
@@ -308,7 +308,7 @@ float f;
 	{
 		for(i=0;i<dat->len;i++) // input
 		{
-			dat->din[i]=(float)(((const s16*)ptr_io)[i])*(1.0f/32767.0f);
+			dat->din[i]=(float)(((const int16_t*)ptr_io)[i])*(1.0f/32767.0f);
 		}
 	}
 	else
@@ -342,7 +342,7 @@ float f;
 			float f=dat->din[i]*(32767.0f);
 			if(f> 32767.0f) { f= 32767.0f; }
 			if(f<-32767.0f) { f=-32767.0f; }
-			((s16*)ptr_io)[i]=(s16)f;
+			((int16_t*)ptr_io)[i]=(int16_t)f;
 		}
 	}
 	else

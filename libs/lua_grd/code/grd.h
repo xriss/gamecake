@@ -121,7 +121,7 @@
 
 
 // little endian
-#define	GRD_TAG_DEF(a,b,c,d) (((((u32)d)<<24)+(((u32)c)<<16)+(((u32)b)<<8)+((u32)a)))
+#define	GRD_TAG_DEF(a,b,c,d) (((((uint32_t)d)<<24)+(((uint32_t)c)<<16)+(((uint32_t)b)<<8)+((uint32_t)a)))
 
 
 // information about a bitmap held in memory (or even a palette)
@@ -130,22 +130,22 @@
 
 struct grd_info
 {
-	s16	fmt;			// format of data
-	s16	flags;			// flags of data
+	int16_t	fmt;			// format of data
+	int16_t	flags;			// flags of data
 	
-	s32	w,h,d;			// width and height and depth of image
+	int32_t	w,h,d;			// width and height and depth of image
 
-	s32	xscan;			// add this to data to move across the image probably (sizeof(pixel))
-	s32	yscan;			// add this to data to move down the image probably (w*sizeof(pixel))
-	s32	zscan;			// add this to data to move into the image probably (w*sizeof(pixel)*h)
+	int32_t	xscan;			// add this to data to move across the image probably (sizeof(pixel))
+	int32_t	yscan;			// add this to data to move down the image probably (w*sizeof(pixel))
+	int32_t	zscan;			// add this to data to move into the image probably (w*sizeof(pixel)*h)
 
-	u8 *data;			// pointer to image data
+	uint8_t *data;			// pointer to image data
 
 };
 
 void grdinfo_reset(struct grd_info *gi);
 void grdinfo_set(  struct grd_info *gi , struct grd_info *ga );
-u8 * grdinfo_get_data( struct grd_info *gi , s32 x, s32 y, s32 z);
+uint8_t * grdinfo_get_data( struct grd_info *gi , int32_t x, int32_t y, int32_t z);
 
 
 //
@@ -165,7 +165,7 @@ struct grd
 // extra allocated memory associated with this grd,
 	
 	void *data;
-	s32   data_sizeof;
+	int32_t   data_sizeof;
 	
 };
 
@@ -173,50 +173,50 @@ struct grd
 struct grd_io_info
 {
 	const char * file_name; // 0 if not a file load/save
-	u8 * data;
+	uint8_t * data;
 	int data_len;
 	int data_len_max; // data may be stored into a bigger buffer (to reduce realocs while writing)
 	int pos;
 	int fmt;
-	u32 *tags;
+	uint32_t *tags;
 };
 
 
 // just a simple  area
 struct grd_area
 {
-	s32	x,y,z;			// the top left corner and its
-	s32	w,h,d;			// width and height and depth
+	int32_t	x,y,z;			// the top left corner and its
+	int32_t	w,h,d;			// width and height and depth
 };
 
 
-void * grd_info_alloc(struct grd_info *gi,  s32 fmt , s32 w, s32 h, s32 d );
+void * grd_info_alloc(struct grd_info *gi,  int32_t fmt , int32_t w, int32_t h, int32_t d );
 void grd_info_free(struct grd_info *gi);
 
 void grd_copy_data(struct grd *ga, struct grd *gb );
 void grd_copy_data_layer(struct grd *ga, struct grd *gb , int za , int zb );
 
-struct grd * grd_realloc( struct grd *g, s32 fmt , s32 w, s32 h, s32 d );
+struct grd * grd_realloc( struct grd *g, int32_t fmt , int32_t w, int32_t h, int32_t d );
 
-struct grd * grd_create( s32 fmt , s32 w, s32 h, s32 d );
+struct grd * grd_create( int32_t fmt , int32_t w, int32_t h, int32_t d );
 
 void grd_free( struct grd *g );
 
-struct grd * grd_load_file( const char *filename , int fmt , u32 *tags );
-struct grd * grd_load_data( const unsigned char *data , int len , int fmt , u32 *tags );
+struct grd * grd_load_file( const char *filename , int fmt , uint32_t *tags );
+struct grd * grd_load_data( const unsigned char *data , int len , int fmt , uint32_t *tags );
 
-struct grd * grd_save_file( struct grd *g, const char *filename , int fmt , u32 *tags );
+struct grd * grd_save_file( struct grd *g, const char *filename , int fmt , uint32_t *tags );
 struct grd * grd_save_data( struct grd *g, struct grd_io_info *filedata , int fmt );
 
 
 struct grd * grd_duplicate( struct grd *g );
-struct grd * grd_duplicate_convert( struct grd *g , s32 fmt );
-struct grd * grd_duplicate_quant(struct grd *g , s32 num_colors , s32 dither );
+struct grd * grd_duplicate_convert( struct grd *g , int32_t fmt );
+struct grd * grd_duplicate_quant(struct grd *g , int32_t num_colors , int32_t dither );
 struct grd * grd_duplicate_sobelnormal(struct grd *g );
 
 int grd_sobelnormal( struct grd *g );
-int grd_convert( struct grd *g , s32 fmt );
-int grd_quant(struct grd *g , s32 num_colors , s32 dither );
+int grd_convert( struct grd *g , int32_t fmt );
+int grd_quant(struct grd *g , int32_t num_colors , int32_t dither );
 int grd_attr_redux(struct grd *g, int cw, int ch, int num, int sub, int bak);
 
 int grd_slide( struct grd *ga , int dx , int dy , int dz );
@@ -224,31 +224,31 @@ int grd_slide( struct grd *ga , int dx , int dy , int dz );
 void grd_flipx( struct grd *g );
 void grd_flipy( struct grd *g );
 
-//int grd_conscale( struct grd *g , f32 base, f32 scale);
+//int grd_conscale( struct grd *g , float base, float scale);
 
-int grd_resize( struct grd *g , s32 w, s32 h, s32 d);
-int grd_scale( struct grd *g , s32 w, s32 h, s32 d);
+int grd_resize( struct grd *g , int32_t w, int32_t h, int32_t d);
+int grd_scale( struct grd *g , int32_t w, int32_t h, int32_t d);
 
 
-int grd_layer( struct grd *ga , struct grd *gb , s32 z);
+int grd_layer( struct grd *ga , struct grd *gb , int32_t z);
 
-int grd_clip( struct grd *ga , struct grd *gb ,  s32 x, s32 y, s32 z, s32 w, s32 h, s32 d);
+int grd_clip( struct grd *ga , struct grd *gb ,  int32_t x, int32_t y, int32_t z, int32_t w, int32_t h, int32_t d);
 
-int grd_blit( struct grd *ga , struct grd *gb , s32 x, s32 y);
-int grd_paint( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 mode, u32 trans, u32 color);
+int grd_blit( struct grd *ga , struct grd *gb , int32_t x, int32_t y);
+int grd_paint( struct grd *ga , struct grd *gb , int32_t x, int32_t y, int32_t mode, uint32_t trans, uint32_t color);
 
 int grd_xor(struct grd *gd,struct grd *ga);
 int grd_shrink(struct grd *ga,struct grd_area *gc );
 
-void grd_clear( struct grd *g , u32 val);
+void grd_clear( struct grd *g , uint32_t val);
 
-u32* grd_tags_find(u32 *tags,u32 id);
+uint32_t* grd_tags_find(uint32_t *tags,uint32_t id);
 
 int grd_remap(struct grd *ga, struct grd *gb, int colors, int dither);
 
-int grd_adjust_hsv( struct grd *g , f32 fh, f32 fs, f32 fv);
-int grd_adjust_rgb( struct grd *g , f32 fr, f32 fg, f32 fb);
-int grd_adjust_contrast( struct grd *g , int sub, f32 con);
+int grd_adjust_hsv( struct grd *g , float fh, float fs, float fv);
+int grd_adjust_rgb( struct grd *g , float fr, float fg, float fb);
+int grd_adjust_contrast( struct grd *g , int sub, float con);
 
 
 int grd_sort_cmap( struct grd *g );

@@ -23,14 +23,14 @@ sod * sod_alloc()
 {
 	return (sod *) calloc( sizeof(sod) , 1 );
 }
-sod * sod_alloc_data(sod *sd,s32 fmt,s32 samples)
+sod * sod_alloc_data(sod *sd,int32_t fmt,int32_t samples)
 {
 	sod_free_data(sd); // free old data if we have any
 	
 	sod_set_fmt(sd,fmt); // this fills in fmt, sample_size and chanels
 	sd->samples=samples;
 	sd->data_sizeof=( sd->sample_size * sd->samples * sd->chanels );
-	sd->data=(u8*)calloc(sd->data_sizeof,1);
+	sd->data=(uint8_t*)calloc(sd->data_sizeof,1);
 	if(!sd->data) { return 0; } //fail
 	return sd; //success
 }
@@ -62,7 +62,7 @@ void sod_free_data(sod *sd)
 // set fmt and chanels and sample_size
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void sod_set_fmt( sod * sd, s32 fmt )
+void sod_set_fmt( sod * sd, int32_t fmt )
 {
 	sd->fmt=fmt;
 	
@@ -579,7 +579,7 @@ bool check;
 bool sfx::setup(void)
 {
 bool check;
-s32 i;
+int32_t i;
 
 	DMEM_ZERO(this);
 
@@ -782,11 +782,11 @@ bool check;
 // load a sound file into a previously allocated buffer, some basic noises are preallocated
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool sfx::Load(s32 buffer,const char *path)
+bool sfx::Load(int32_t buffer,const char *path)
 {
 bool check;
-s32 len;
-u8 *buff;
+int32_t len;
+uint8_t *buff;
 FILE *f;
 
 	if(!available) return true; // sound disabled/not setup
@@ -832,11 +832,11 @@ bogus:
 // allocate a sound buffer
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-s32 sfx::Alloc(void)
+int32_t sfx::Alloc(void)
 {
-s32 ret;
+int32_t ret;
 bool check;
-static s32 random=1;
+static int32_t random=1;
 
 	if(!available) return random++; // sound disabled/not setup
 
@@ -858,10 +858,10 @@ bogus:
 // free a sound buffer
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void sfx::Free(s32 buffer)
+void sfx::Free(int32_t buffer)
 {
 //bool check;
-s32 error;
+int32_t error;
 
 	if(!available) return; // sound disabled/not setup
 
@@ -880,7 +880,7 @@ s32 error;
 // Play a sound
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void sfx::Play(s32 buffer,f32 gain,f32 pitch, v3 *pos, v3 *dir)
+void sfx::Play(int32_t buffer,f32 gain,f32 pitch, v3 *pos, v3 *dir)
 {
 bool check;
 
@@ -940,8 +940,8 @@ bool check;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void sfx::StopAll(void)
 {
-s32 i;
-s32 error;
+int32_t i;
+int32_t error;
 
 	for(i=0;i<numof_Sources;i++)
 	{
@@ -957,9 +957,9 @@ s32 error;
 // report d3d errors
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-bool oalcheck(const char *name,const char *f,s32 l, const char *t)
+bool oalcheck(const char *name,const char *f,int32_t l, const char *t)
 {
-s32 error;
+int32_t error;
 
 	if ((error = alGetError()) != AL_NO_ERROR)
 	{

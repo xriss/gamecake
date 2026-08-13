@@ -108,15 +108,15 @@ void grdinfo_set(  struct grd_info *gi , struct grd_info *ga )
 	gi->data=ga->data;
 }
 	
-u8 * grdinfo_get_data( struct grd_info *gi , s32 x, s32 y, s32 z)
+uint8_t * grdinfo_get_data( struct grd_info *gi , int32_t x, int32_t y, int32_t z)
 {
 	return gi->data+(z*gi->zscan)+(y*gi->yscan)+(x*gi->xscan);
 }
 
 /*
-u8 * grdinfo_get_data( struct grd_info *ga  , f32 x, f32 y, f32 z)
+uint8_t * grdinfo_get_data( struct grd_info *ga  , float x, float y, float z)
 {
-	return gi->data+(((s32)(gi->z))*gi->zscan)+(((s32)(gi->y))*gi->yscan)+(((s32)(gi->x))*gi->xscan);
+	return gi->data+(((int32_t)(gi->z))*gi->zscan)+(((int32_t)(gi->y))*gi->yscan)+(((int32_t)(gi->x))*gi->xscan);
 }
 */
 
@@ -162,7 +162,7 @@ int grd_sizeof_pixel(int id)
 // allocate some data in a grd_info
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void * grd_info_alloc(struct grd_info *gi,  s32 fmt , s32 w, s32 h, s32 d )
+void * grd_info_alloc(struct grd_info *gi,  int32_t fmt , int32_t w, int32_t h, int32_t d )
 {
 int ps=grd_sizeof_pixel(fmt);
 
@@ -174,7 +174,7 @@ int ps=grd_sizeof_pixel(fmt);
 	
 	if(w*h*d>0) // must all be 1 or more
 	{
-		gi->data=(u8*)calloc( w*h*d , ps );
+		gi->data=(uint8_t*)calloc( w*h*d , ps );
 		
 		if(gi->data)
 		{
@@ -217,9 +217,9 @@ void grd_info_free(struct grd_info *gi)
 // returns 0 on error but does not free the grd you passed in
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-struct grd * grd_realloc( struct grd *g, s32 fmt , s32 w, s32 h, s32 d )
+struct grd * grd_realloc( struct grd *g, int32_t fmt , int32_t w, int32_t h, int32_t d )
 {
-u8 *bp;
+uint8_t *bp;
 int i;
 	if(g)
 	{
@@ -260,7 +260,7 @@ bogus:
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-struct grd * grd_create( s32 fmt , s32 w, s32 h, s32 d )
+struct grd * grd_create( int32_t fmt , int32_t w, int32_t h, int32_t d )
 {
 struct grd *g=0;
 
@@ -333,7 +333,7 @@ static int grd_fileheader_to_format( const unsigned char data[16] )
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-struct grd * grd_load_file( const char *filename , int fmt , u32 *tags)
+struct grd * grd_load_file( const char *filename , int fmt , uint32_t *tags)
 {
 FILE *fp;
 unsigned char data[16];
@@ -365,7 +365,7 @@ struct grd *g=0;
 
 	return g;
 }
-struct grd * grd_load_data( const unsigned char *data , int len,  int fmt , u32 *tags)
+struct grd * grd_load_data( const unsigned char *data , int len,  int fmt , uint32_t *tags)
 {
 struct grd *g=0;
 
@@ -399,7 +399,7 @@ struct grd *g=0;
 // returns 0 on error
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-struct grd * grd_save_file( struct grd *g , const char *filename , int fmt , u32 *tags)
+struct grd * grd_save_file( struct grd *g , const char *filename , int fmt , uint32_t *tags)
 {
 	if(g)
 	{
@@ -498,7 +498,7 @@ struct grd * grd_insert( struct grd *ga ,  struct grd *gb )
 // convert to given format
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_convert( struct grd *g , s32 fmt )
+int grd_convert( struct grd *g , int32_t fmt )
 {
 	struct grd *gb=grd_duplicate_convert( g , fmt );
 	if( gb == 0 )
@@ -516,7 +516,7 @@ int grd_convert( struct grd *g , s32 fmt )
 // many many bit twiddles follow
 void grd_convert_8888_rotate_left( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
@@ -529,7 +529,7 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_8888_rotate_right( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
@@ -542,65 +542,65 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_8888_multiply_a0( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 a=pa[0];
-		pb[0]=(u8)a;
-		pb[1]=(u8)((pa[1]*a)/255);
-		pb[2]=(u8)((pa[2]*a)/255);
-		pb[3]=(u8)((pa[3]*a)/255);
+		uint32_t a=pa[0];
+		pb[0]=(uint8_t)a;
+		pb[1]=(uint8_t)((pa[1]*a)/255);
+		pb[2]=(uint8_t)((pa[2]*a)/255);
+		pb[3]=(uint8_t)((pa[3]*a)/255);
 		pa+=4; pb+=4;
 	}}}
 }
 void grd_convert_8888_multiply_a3( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 a=pa[3];
-		pb[3]=(u8)a;
-		pb[2]=(u8)((pa[2]*a)/255);
-		pb[1]=(u8)((pa[1]*a)/255);
-		pb[0]=(u8)((pa[0]*a)/255);
+		uint32_t a=pa[3];
+		pb[3]=(uint8_t)a;
+		pb[2]=(uint8_t)((pa[2]*a)/255);
+		pb[1]=(uint8_t)((pa[1]*a)/255);
+		pb[0]=(uint8_t)((pa[0]*a)/255);
 		pa+=4; pb+=4;
 	}}}
 }
 void grd_convert_8888_divide_a0( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 c;
-		u32 a=pa[0]; if(a>0) { a=(255<<16)/a; }
-		c=((pa[1]*a))>>16; pb[1]=(u8)(c>255?255:c);
-		c=((pa[2]*a))>>16; pb[2]=(u8)(c>255?255:c);
-		c=((pa[3]*a))>>16; pb[3]=(u8)(c>255?255:c);
+		uint32_t c;
+		uint32_t a=pa[0]; if(a>0) { a=(255<<16)/a; }
+		c=((pa[1]*a))>>16; pb[1]=(uint8_t)(c>255?255:c);
+		c=((pa[2]*a))>>16; pb[2]=(uint8_t)(c>255?255:c);
+		c=((pa[3]*a))>>16; pb[3]=(uint8_t)(c>255?255:c);
 		pb[0]=pa[0];
 		pa+=4; pb+=4;
 	}}}
 }
 void grd_convert_8888_divide_a3( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 c;
-		u32 a=pa[3]; if(a>0) { a=(255<<16)/a; }
-		c=((pa[0]*a))>>16; pb[0]=(u8)(c>255?255:c);
-		c=((pa[1]*a))>>16; pb[1]=(u8)(c>255?255:c);
-		c=((pa[2]*a))>>16; pb[2]=(u8)(c>255?255:c);
+		uint32_t c;
+		uint32_t a=pa[3]; if(a>0) { a=(255<<16)/a; }
+		c=((pa[0]*a))>>16; pb[0]=(uint8_t)(c>255?255:c);
+		c=((pa[1]*a))>>16; pb[1]=(uint8_t)(c>255?255:c);
+		c=((pa[2]*a))>>16; pb[2]=(uint8_t)(c>255?255:c);
 		pb[3]=pa[3];
 		pa+=4; pb+=4;
 	}}}
 }
 void grd_convert_8888_8880( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
@@ -612,7 +612,7 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_8888_0888( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
@@ -624,7 +624,7 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_8880_8888( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
@@ -637,7 +637,7 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_0888_8888( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
@@ -650,12 +650,12 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_8888_5650( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 c=*((u32*)(pa));
-		*((u16*)(pb))=(u16)(
+		uint32_t c=*((uint32_t*)(pa));
+		*((uint16_t*)(pb))=(uint16_t)(
 				((c>>16)&0xf800) |
 				((c>>13)&0x07e0) |
 				((c>>11)&0x001f)
@@ -665,12 +665,12 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_8888_0565( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 c=*((u32*)(pa));
-		*((u16*)(pb))=(u16)(
+		uint32_t c=*((uint32_t*)(pa));
+		*((uint16_t*)(pb))=(uint16_t)(
 				((c>>8)&0xf800) |
 				((c>>5)&0x07e0) |
 				((c>>3)&0x001f)
@@ -680,12 +680,12 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_0565_8888( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 c=(u32)*((u16*)(pa));
-		*((u32*)(pb))=(u32)( 0xff000000 |
+		uint32_t c=(uint32_t)*((uint16_t*)(pa));
+		*((uint32_t*)(pb))=(uint32_t)( 0xff000000 |
 				((c<<8)&0x00f80000) | ((c<<3)&0x00070000) |
 				((c<<5)&0x0000fc00) | ((c>>1)&0x00000300) |
 				((c<<3)&0x000000f8) | ((c>>2)&0x00000007)
@@ -695,12 +695,12 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_5650_8888( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 c=(u32)*((u16*)(pa));
-		*((u32*)(pb))=(u32)( 0x000000ff |
+		uint32_t c=(uint32_t)*((uint16_t*)(pa));
+		*((uint32_t*)(pb))=(uint32_t)( 0x000000ff |
 				((c<<16)&0xf8000000) | ((c<<11)&0x07000000) |
 				((c<<13)&0x00fc0000) | ((c<< 6)&0x00030000) |
 				((c<<11)&0x0000f800) | ((c<< 5)&0x00000700)
@@ -710,12 +710,12 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_8888_5551( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 c=*((u32*)(pa));
-		*((u16*)(pb))=(u16)(
+		uint32_t c=*((uint32_t*)(pa));
+		*((uint16_t*)(pb))=(uint16_t)(
 				((c<< 8)&0xf800) |
 				((c>> 5)&0x07c0) |
 				((c>>18)&0x003e) |
@@ -726,12 +726,12 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_5551_8888( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 c=(u32)*((u16*)(pa));
-		*((u32*)(pb))=(u32)( ( (c&0x0001) ? 0xff000000 : 0 ) |
+		uint32_t c=(uint32_t)*((uint16_t*)(pa));
+		*((uint32_t*)(pb))=(uint32_t)( ( (c&0x0001) ? 0xff000000 : 0 ) |
 				((c>> 8)&0x000000f8) | ((c>>13)&0x00000007) |
 				((c<< 5)&0x0000f800) | ((c    )&0x00000700) |
 				((c<<18)&0x00f80000) | ((c<<13)&0x00070000)
@@ -741,12 +741,12 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_8888_4444( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 c=*((u32*)(pa));
-		*((u16*)(pb))=(u16)(
+		uint32_t c=*((uint32_t*)(pa));
+		*((uint16_t*)(pb))=(uint16_t)(
 				((c>>16)&0xf000) |
 				((c>>12)&0x0f00) |
 				((c>> 8)&0x00f0) |
@@ -757,12 +757,12 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_4444_8888( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 c=(u32)*((u16*)(pa));
-		*((u32*)(pb))=(u32)(
+		uint32_t c=(uint32_t)*((uint16_t*)(pa));
+		*((uint32_t*)(pb))=(uint32_t)(
 				((c<<16)&0xf0000000) | ((c<<12)&0x0f000000) |
 				((c<<12)&0x00f00000) | ((c<< 8)&0x000f0000) |
 				((c<< 8)&0x0000f000) | ((c<< 4)&0x00000f00) |
@@ -773,93 +773,93 @@ int x,y,z; u8 *pa,*pb;
 }
 void grd_convert_indexed_8888( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		*((u32*)pb)=*((u32*)grdinfo_get_data(ga->cmap,*pa,0,0));
+		*((uint32_t*)pb)=*((uint32_t*)grdinfo_get_data(ga->cmap,*pa,0,0));
 		pa+=1; pb+=4;
 	}}}
 }
 
 void grd_convert_grey_8888( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 b=(u32)*pa;
-		*((u32*)pb)=0xff000000 | (b<<16) | (b<<8) | (b) ;
+		uint32_t b=(uint32_t)*pa;
+		*((uint32_t*)pb)=0xff000000 | (b<<16) | (b<<8) | (b) ;
 		pa+=1; pb+=4;
 	}}}
 }
 void grd_convert_8888_grey( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 b=*((u32*)pa);
-		*pb=(u8)( ( (((b)&0xff)*54) + (((b>>8)&0xff)*182) + (((b>>16)&0xff)*20) )>>8 );
+		uint32_t b=*((uint32_t*)pa);
+		*pb=(uint8_t)( ( (((b)&0xff)*54) + (((b>>8)&0xff)*182) + (((b>>16)&0xff)*20) )>>8 );
 		pa+=4; pb+=1;
 	}}}
 }
 
 void grd_convert_0008_8888( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 b=(u32)*pa;
-		*((u32*)pb)=0x00ffffff | (b<<24) ;
+		uint32_t b=(uint32_t)*pa;
+		*((uint32_t*)pb)=0x00ffffff | (b<<24) ;
 		pa+=1; pb+=4;
 	}}}
 }
 void grd_convert_8888_0008( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 b=*((u32*)pa);
-		*pb=(u8)( ((b>>24)&0xff) );
+		uint32_t b=*((uint32_t*)pa);
+		*pb=(uint8_t)( ((b>>24)&0xff) );
 		pa+=4; pb+=1;
 	}}}
 }
 
 void grd_convert_8008_8888( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 b=(u32)pa[0];
-		u32 a=(u32)pa[1];
-		*((u32*)pb)=(a<<24) | (b<<16) | (b<<8) | (b) ;
+		uint32_t b=(uint32_t)pa[0];
+		uint32_t a=(uint32_t)pa[1];
+		*((uint32_t*)pb)=(a<<24) | (b<<16) | (b<<8) | (b) ;
 		pa+=2; pb+=4;
 	}}}
 }
 void grd_convert_8888_8008( struct grd *ga , struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z); pb=grdinfo_get_data(gb->bmap,0,y,z);
 	for(x=0;x<ga->bmap->w;x++) {
-		u32 b=*((u32*)pa);
-		pb[0]=(u8)( ( (((b)&0xff)*54) + (((b>>8)&0xff)*182) + (((b>>16)&0xff)*20) )>>8 );
-		pb[1]=(u8)( ((b>>24)&0xff) );
+		uint32_t b=*((uint32_t*)pa);
+		pb[0]=(uint8_t)( ( (((b)&0xff)*54) + (((b>>8)&0xff)*182) + (((b>>16)&0xff)*20) )>>8 );
+		pb[1]=(uint8_t)( ((b>>24)&0xff) );
 		pa+=4; pb+=2;
 	}}}
 }
 
-struct grd * grd_duplicate_convert( struct grd *ga , s32 fmt )
+struct grd * grd_duplicate_convert( struct grd *ga , int32_t fmt )
 {
 struct grd *gb=0;
 int x,y,z;
-u8 *pa;
-u8 *pb;
-u8 *pc;
+uint8_t *pa;
+uint8_t *pb;
+uint8_t *pc;
 
 	ga->err=0;
 
@@ -1165,7 +1165,7 @@ u8 *pc;
 // result will be an indexed image with a funky palette
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_quant(struct grd *g , s32 num_colors , s32 dither )
+int grd_quant(struct grd *g , int32_t num_colors , int32_t dither )
 {
 	struct grd *gb=grd_duplicate_quant(g , num_colors , dither );
 	
@@ -1177,14 +1177,14 @@ int grd_quant(struct grd *g , s32 num_colors , s32 dither )
 	}
 	return 1;
 }
-struct grd * grd_duplicate_quant(struct grd *g , s32 num_colors , s32 dither )
+struct grd * grd_duplicate_quant(struct grd *g , int32_t num_colors , int32_t dither )
 {
 struct grd *gb;
 struct grd *gc;
 int i;
-u8 *optr;
-u32 *ptr;
-u32 c;
+uint8_t *optr;
+uint32_t *ptr;
+uint32_t c;
 int siz=g->bmap->w*g->bmap->h*g->bmap->d;
 int w,h;
 
@@ -1244,9 +1244,9 @@ int w,h;
 // v is -1 to +1
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_adjust_hsv( struct grd *g , f32 fh, f32 fs, f32 fv)
+int grd_adjust_hsv( struct grd *g , float fh, float fs, float fv)
 {
-int x,y,z; u8 *p;
+int x,y,z; uint8_t *p;
 
 unsigned char bh,bs,bv;
 int ah,as,av;
@@ -1285,9 +1285,9 @@ int h,s,v;
 // b is -1 to +1
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_adjust_rgb( struct grd *g , f32 fr, f32 fg, f32 fb)
+int grd_adjust_rgb( struct grd *g , float fr, float fg, float fb)
 {
-int x,y,z; u8 *p;
+int x,y,z; uint8_t *p;
 
 int ar,ag,ab;
 
@@ -1326,9 +1326,9 @@ con is a contrast scale where 0 is no change and +1
 gives full contrast while -1 removes all contrast.
 
 */
-int grd_adjust_contrast( struct grd *g , int sub, f32 con)
+int grd_adjust_contrast( struct grd *g , int sub, float con)
 {
-int x,y,z; u8 *p;
+int x,y,z; uint8_t *p;
 int i;
 int pos;
 int c;
@@ -1353,7 +1353,7 @@ int s;
 			c=sub + (((c-sub)*s)>>10) ;
 			if     ( c<  0 ) { p[i]=0;     } // write out with clamp
 			else if( c>255 ) { p[i]=255;   }
-			else             { p[i]=(u8)c; }
+			else             { p[i]=(uint8_t)c; }
 		}
 	}}}
 	
@@ -1368,21 +1368,21 @@ int s;
 // this gives us a simple but slow way to scale images
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-u32 grd_sample( struct grd *ga , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d)
+uint32_t grd_sample( struct grd *ga , int32_t x, int32_t y, int32_t z , int32_t w, int32_t h, int32_t d)
 {
 struct grd_info *gi=ga->bmap;
-s32 r=0;
-s32 g=0;
-s32 b=0;
-s32 a=0;
-s32 c=0;
+int32_t r=0;
+int32_t g=0;
+int32_t b=0;
+int32_t a=0;
+int32_t c=0;
 
-s32 xx,yy,zz;
+int32_t xx,yy,zz;
 
-u32 *ptr;
-u32 abgr;
+uint32_t *ptr;
+uint32_t abgr;
 
-u8 *p8;
+uint8_t *p8;
 
 // clamp the input values
 	if(x<0) {x=0;}	if(x>=gi->w) {x=gi->w-1;}
@@ -1404,7 +1404,7 @@ u8 *p8;
 		{
 			for(yy=y;yy<y+h;yy++)
 			{
-				ptr=(u32*)grdinfo_get_data(gi,x,yy,zz);
+				ptr=(uint32_t*)grdinfo_get_data(gi,x,yy,zz);
 				for(xx=x;xx<x+w;xx++)
 				{
 					abgr=*ptr++;
@@ -1439,7 +1439,7 @@ u8 *p8;
 		{
 			for(yy=y;yy<y+h;yy++)
 			{
-				p8=(u8*)grdinfo_get_data(gi,x,yy,zz);
+				p8=(uint8_t*)grdinfo_get_data(gi,x,yy,zz);
 				for(xx=x;xx<x+w;xx++)
 				{
 					a+=*p8++;
@@ -1466,8 +1466,8 @@ u8 *p8;
 			( gi->fmt==GRD_FMT_U8_INDEXED_PREMULT )
 		)
 	{
-		p8=(u8*)grdinfo_get_data(gi,x,y,z);
-		return (u32)*p8;
+		p8=(uint8_t*)grdinfo_get_data(gi,x,y,z);
+		return (uint32_t)*p8;
 	}
 	
 	return 0;
@@ -1491,12 +1491,12 @@ struct grd * grd_duplicate_sobelnormal(struct grd *g )
 {
 struct grd *r;
 int i;
-u8 *optr;
-u32 *ptr;
-u32 c;
-s32 w,h,d;
-s32 x,y,z;
-f32 nx,ny,nz,nd;
+uint8_t *optr;
+uint32_t *ptr;
+uint32_t c;
+int32_t w,h,d;
+int32_t x,y,z;
+float nx,ny,nz,nd;
 
 	if( g->bmap->fmt!=GRD_FMT_U8_LUMINANCE) { return 0; }
 	if( g->bmap->w<1 || g->bmap->h<1 || g->bmap->d<1 ) { return 0; }
@@ -1512,7 +1512,7 @@ f32 nx,ny,nz,nd;
 	{
 		for(y=0;y<h;y++)
 		{
-			optr=(u8*)grdinfo_get_data(r->bmap,0,y,z);
+			optr=(uint8_t*)grdinfo_get_data(r->bmap,0,y,z);
 			for(x=0;x<w;x++)
 			{
 				// sample gradient
@@ -1549,9 +1549,9 @@ f32 nx,ny,nz,nd;
 				nz/=nd;
 				
 				// output rgb (should be safe to skip the clamping)
-				*optr++=(u8)(((nx+1.0f)*0.5f)*255.0f); // r
-				*optr++=(u8)(((ny+1.0f)*0.5f)*255.0f); // g
-				*optr++=(u8)(((nz+1.0f)*0.5f)*255.0f); // b
+				*optr++=(uint8_t)(((nx+1.0f)*0.5f)*255.0f); // r
+				*optr++=(uint8_t)(((ny+1.0f)*0.5f)*255.0f); // g
+				*optr++=(uint8_t)(((nz+1.0f)*0.5f)*255.0f); // b
 
 			}
 		}
@@ -1566,16 +1566,16 @@ f32 nx,ny,nz,nd;
 // change the size of the image but keep the image data the same, rest of image is filled in with black
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_resize( struct grd *g , s32 w, s32 h, s32 d)
+int grd_resize( struct grd *g , int32_t w, int32_t h, int32_t d)
 {
 struct grd_info *gi=g->bmap;
 struct grd *gb;
 
-s32 s;
-s32 ww,hh,dd;
-s32 x,y,z;
-u8 *ptr;
-u8 *pts;
+int32_t s;
+int32_t ww,hh,dd;
+int32_t x,y,z;
+uint8_t *ptr;
+uint8_t *pts;
 
 /*
  * 	if( // any U8 32bit format should be fine
@@ -1601,16 +1601,16 @@ u8 *pts;
 	{
 		for(y=0;y<h;y++)
 		{
-			ptr=(u8*)grdinfo_get_data(gb->bmap,0,y,z);
+			ptr=(uint8_t*)grdinfo_get_data(gb->bmap,0,y,z);
 			if(y<hh && z<dd && y<h && z<d) // scan line must exist both sides
 			{
-				pts=(u8*)grdinfo_get_data(gi,0,y,z);
+				pts=(uint8_t*)grdinfo_get_data(gi,0,y,z);
 				if(ww<w) { s=ww*grd_sizeof_pixel(gb->bmap->fmt); } else { s=w*grd_sizeof_pixel(gb->bmap->fmt); }
 				memcpy(ptr,pts,s);
 			}
 //			else
 //			{
-//				pts=(u8*)0;
+//				pts=(uint8_t*)0;
 //			}
 //			if(pts)
 //			{
@@ -1640,23 +1640,23 @@ u8 *pts;
 // scale image
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_scale( struct grd *g , s32 w, s32 h, s32 d)
+int grd_scale( struct grd *g , int32_t w, int32_t h, int32_t d)
 {
 struct grd_info *gi=g->bmap;
 struct grd *gb;
 
-f32 fw=0;
-f32 fh=0;
-f32 fd=0;
+float fw=0;
+float fh=0;
+float fd=0;
 
-s32 sw=0;
-s32 sh=0;
-s32 sd=0;
+int32_t sw=0;
+int32_t sh=0;
+int32_t sd=0;
 
-f32 fx,fy,fz;
-s32 x,y,z;
-u32 *ptr;
-u8 *p8;
+float fx,fy,fz;
+int32_t x,y,z;
+uint32_t *ptr;
+uint8_t *p8;
 int suc;
 
 	if( // any U8 32bit format should be fine
@@ -1684,23 +1684,23 @@ int suc;
 	{
 		memcpy(gb->cmap->data,g->cmap->data, 4 * 256 ); // copy palette colors
 
-		fw=( (f32)gi->w / (f32)w );
-		sw=(s32)ceilf(fw);
+		fw=( (float)gi->w / (float)w );
+		sw=(int32_t)ceilf(fw);
 
-		fh=( (f32)gi->h / (f32)h );
-		sh=(s32)ceilf(fh);
+		fh=( (float)gi->h / (float)h );
+		sh=(int32_t)ceilf(fh);
 
-		fd=( (f32)gi->d / (f32)d );
-		sd=(s32)ceilf(fd);
+		fd=( (float)gi->d / (float)d );
+		sd=(int32_t)ceilf(fd);
 		
 		for(z=0,fz=0.0f;z<d;z++,fz+=fd)
 		{
 			for(y=0,fy=0.0f;y<h;y++,fy+=fh)
 			{
-				p8=(u8*)grdinfo_get_data(gb->bmap,0,y,z);
+				p8=(uint8_t*)grdinfo_get_data(gb->bmap,0,y,z);
 				for(x=0,fx=0.0f;x<w;x++,fx+=fw)
 				{
-					*p8++=(u8)grd_sample(g, fx,fy,fz, sw,sh,sd );
+					*p8++=(uint8_t)grd_sample(g, fx,fy,fz, sw,sh,sd );
 				}
 			}
 		}
@@ -1708,13 +1708,13 @@ int suc;
 	}
 	else // use stb_image_resize code
 	{
-		fd=( (f32)gi->d / (f32)d );
-		sd=(s32)ceilf(fd);
+		fd=( (float)gi->d / (float)d );
+		sd=(int32_t)ceilf(fd);
 		
 		for(z=0,fz=0.0f;z<d;z++,fz+=fd) // simple z scale, just pick the closest z
 		{
 			if(!
-				stbir_resize_uint8(	grdinfo_get_data(gi,0,0,(s32)fz),	gi->w,			gi->h,			gi->yscan,
+				stbir_resize_uint8(	grdinfo_get_data(gi,0,0,(int32_t)fz),	gi->w,			gi->h,			gi->yscan,
 									grdinfo_get_data(gb->bmap,0,0,z),	gb->bmap->w,	gb->bmap->h,	gb->bmap->yscan,
 									grd_sizeof_pixel(gi->fmt) )
 			) { return 0; } // TODO:  should pass in the premult alpha flags
@@ -1736,11 +1736,11 @@ int suc;
 void grd_rotate_clockwise( struct grd *g )
 {
 struct grd_info *gi=g->bmap;
-s32 x,y,z,i;
-s32 pw;
-u8 *p1;
-u8 *p2;
-u8 b;
+int32_t x,y,z,i;
+int32_t pw;
+uint8_t *p1;
+uint8_t *p2;
+uint8_t b;
 	pw=grd_sizeof_pixel(gi->fmt);
 	for(z=0;z<gi->d;z++)
 	{
@@ -1748,8 +1748,8 @@ u8 b;
 		{
 			for(x=y;x<gi->w-y);x++)
 			{
-				p1=(u8*)grdinfo_get_data(gi,x,y,z);
-				p2=(u8*)grdinfo_get_data(gi,y,x,z);
+				p1=(uint8_t*)grdinfo_get_data(gi,x,y,z);
+				p2=(uint8_t*)grdinfo_get_data(gi,y,x,z);
 				for(i=0;i<pw;i++) { b=p1[i]; p1[i]=p2[i]; p2[i]=b; }
 				p1+=pw;
 				p2-=pw;
@@ -1767,18 +1767,18 @@ u8 b;
 void grd_flipx( struct grd *g )
 {
 struct grd_info *gi=g->bmap;
-s32 x,y,z,i;
-s32 pw;
-u8 *p1;
-u8 *p2;
-u8 b;
+int32_t x,y,z,i;
+int32_t pw;
+uint8_t *p1;
+uint8_t *p2;
+uint8_t b;
 	pw=grd_sizeof_pixel(gi->fmt);
 	for(z=0;z<gi->d;z++)
 	{
 		for(y=0;y<(gi->h);y++)
 		{
-			p1=(u8*)grdinfo_get_data(gi,0,y,z);
-			p2=(u8*)grdinfo_get_data(gi,gi->w-1,y,z);
+			p1=(uint8_t*)grdinfo_get_data(gi,0,y,z);
+			p2=(uint8_t*)grdinfo_get_data(gi,gi->w-1,y,z);
 			for(x=0;x<(gi->w/2);x++)
 			{
 				for(i=0;i<pw;i++) { b=p1[i]; p1[i]=p2[i]; p2[i]=b; }
@@ -1798,16 +1798,16 @@ u8 b;
 void grd_flipy( struct grd *g )
 {
 struct grd_info *gi=g->bmap;
-s32 x,y,z;
-u8 *p1;
-u8 *p2;
-u8 b;
+int32_t x,y,z;
+uint8_t *p1;
+uint8_t *p2;
+uint8_t b;
 	for(z=0;z<gi->d;z++)
 	{
 		for(y=0;y<(gi->h/2);y++) // only need half to flip
 		{
-			p1=(u8*)grdinfo_get_data(gi,0,y,z);
-			p2=(u8*)grdinfo_get_data(gi,0,(gi->h-1)-y,z);
+			p1=(uint8_t*)grdinfo_get_data(gi,0,y,z);
+			p2=(uint8_t*)grdinfo_get_data(gi,0,(gi->h-1)-y,z);
 			for(x=0;x<gi->yscan;x++) // yscan is a full line (use abs?) this may break, fixit
 			{
 				b=*p1;
@@ -1833,7 +1833,7 @@ u8 b;
 // if gb==ga then it is not copied just adjusted
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_layer( struct grd *ga , struct grd *gb , s32 z)
+int grd_layer( struct grd *ga , struct grd *gb , int32_t z)
 {
 	gb->err=0;
 	
@@ -1872,7 +1872,7 @@ int grd_layer( struct grd *ga , struct grd *gb , s32 z)
 // if gb==ga then it is not copied just adjusted
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 z, s32 w, s32 h, s32 d)
+int grd_clip( struct grd *ga , struct grd *gb , int32_t x, int32_t y, int32_t z, int32_t w, int32_t h, int32_t d)
 {
 	gb->err=0;
 	
@@ -1907,18 +1907,18 @@ int grd_clip( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 z, s32 w, s32 
 // you can use a fake gb to choose a portion of a larger image built using grd_clip and grd_layer
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_blit( struct grd *ga , struct grd *gb , s32 x, s32 y)
+int grd_blit( struct grd *ga , struct grd *gb , int32_t x, int32_t y)
 {
 struct grd_info *ba=ga->bmap;
 struct grd_info *bb=gb->bmap;
 
-u32 *pa,*pb;
-u16 *p16a,*p16b;
-u32 a,b;
+uint32_t *pa,*pb;
+uint16_t *p16a,*p16b;
+uint32_t a,b;
 
-s32 i,j;
-s32 w=bb->w;
-s32 h=bb->h;
+int32_t i,j;
+int32_t w=bb->w;
+int32_t h=bb->h;
 
 	ga->err=0;
 
@@ -1932,12 +1932,12 @@ s32 h=bb->h;
 
 	if( (ba->fmt==GRD_FMT_U8_RGBA) && (bb->fmt==GRD_FMT_U8_RGBA_PREMULT) )
 	{
-		u32 ialpha;
-		u32 ban;
+		uint32_t ialpha;
+		uint32_t ban;
 		for(i=0;i<h;i++)
 		{
-			pa=(u32*)grdinfo_get_data(ba,x,y+i,0);
-			pb=(u32*)grdinfo_get_data(bb,0,i,0);
+			pa=(uint32_t*)grdinfo_get_data(ba,x,y+i,0);
+			pb=(uint32_t*)grdinfo_get_data(bb,0,i,0);
 			for(j=0;j<w;j++)
 			{
 				b=*(pb++);
@@ -1967,11 +1967,11 @@ s32 h=bb->h;
 	else
 	if( (ba->fmt==GRD_FMT_U16_RGBA_5650) && (bb->fmt==GRD_FMT_U16_RGBA_4444_PREMULT) )
 	{
-		u32 ialpha;
+		uint32_t ialpha;
 		for(i=0;i<h;i++)
 		{
-			p16a=(u16*)grdinfo_get_data(ba,x,y+i,0);
-			p16b=(u16*)grdinfo_get_data(bb,0,i,0);
+			p16a=(uint16_t*)grdinfo_get_data(ba,x,y+i,0);
+			p16b=(uint16_t*)grdinfo_get_data(bb,0,i,0);
 			for(j=0;j<w;j++)
 			{
 				b=*(p16b++);
@@ -2012,18 +2012,18 @@ s32 h=bb->h;
 // you can use a fake gb to choose a portion of a larger image built using grd_clip and grd_layer
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grd_paint( struct grd *ga , struct grd *gb , s32 x, s32 y, s32 mode, u32 trans, u32 color)
+int grd_paint( struct grd *ga , struct grd *gb , int32_t x, int32_t y, int32_t mode, uint32_t trans, uint32_t color)
 {
 struct grd_info *ba=ga->bmap;
 struct grd_info *bb=gb->bmap;
 struct grd_info *cb=gb->cmap;
 
-u8 *pa,*pb;
-u32 a,b;
+uint8_t *pa,*pb;
+uint32_t a,b;
 
-s32 i,j;
-s32 w=bb->w;
-s32 h=bb->h;
+int32_t i,j;
+int32_t w=bb->w;
+int32_t h=bb->h;
 
 //printf("%d,%d\n",w,h);
 
@@ -2046,8 +2046,8 @@ s32 h=bb->h;
 
 	for(i=0;i<h;i++)
 	{
-		pa=(u8*)grdinfo_get_data(ba,x,y+i,0);
-		pb=(u8*)grdinfo_get_data(bb,0,i,0);
+		pa=(uint8_t*)grdinfo_get_data(ba,x,y+i,0);
+		pb=(uint8_t*)grdinfo_get_data(bb,0,i,0);
 		switch(mode)
 		{
 			case GRD_PAINT_MODE_ALPHA:
@@ -2145,11 +2145,11 @@ int grd_xor(struct grd *gd,struct grd *ga)
 		return 0;
 	}
 
-s32 x,y,z;
-s32 w,h,d;
-u8  *p1d,*p1a;
-u16 *p2d,*p2a;
-u32 *p4d,*p4a;
+int32_t x,y,z;
+int32_t w,h,d;
+uint8_t  *p1d,*p1a;
+uint16_t *p2d,*p2a;
+uint32_t *p4d,*p4a;
 
 	w=gd->bmap->w;
 	h=gd->bmap->h;
@@ -2161,8 +2161,8 @@ u32 *p4d,*p4a;
 		{
 			for( y=0 ; y<h ; y++ )
 			{
-				p4d=(u32*)grdinfo_get_data( gd->bmap, 0 , y , z );
-				p4a=(u32*)grdinfo_get_data( ga->bmap, 0 , y , z );
+				p4d=(uint32_t*)grdinfo_get_data( gd->bmap, 0 , y , z );
+				p4a=(uint32_t*)grdinfo_get_data( ga->bmap, 0 , y , z );
 				for( x=0 ; x<w ; x++ )
 				{
 					(*p4d++) ^= (*p4a++);
@@ -2195,8 +2195,8 @@ u32 *p4d,*p4a;
 		{
 			for( y=0 ; y<h ; y++ )
 			{
-				p2d=(u16*)grdinfo_get_data( gd->bmap, 0 , y , z );
-				p2a=(u16*)grdinfo_get_data( ga->bmap, 0 , y , z );
+				p2d=(uint16_t*)grdinfo_get_data( gd->bmap, 0 , y , z );
+				p2a=(uint16_t*)grdinfo_get_data( ga->bmap, 0 , y , z );
 				for( x=0 ; x<w ; x++ )
 				{
 					(*p2d++) ^= (*p2a++);
@@ -2222,8 +2222,8 @@ u32 *p4d,*p4a;
 	}
 	if(gd->cmap->data && gd->cmap->w) // and xor palette data?
 	{
-		p4d=(u32*)grdinfo_get_data( gd->cmap, 0 , 0 , 0 );
-		p4a=(u32*)grdinfo_get_data( ga->cmap, 0 , 0 , 0 );
+		p4d=(uint32_t*)grdinfo_get_data( gd->cmap, 0 , 0 , 0 );
+		p4a=(uint32_t*)grdinfo_get_data( ga->cmap, 0 , 0 , 0 );
 		for( x=0 ; x<gd->cmap->w ; x++ )
 		{
 			(*p4d++) ^= (*p4a++);
@@ -2243,10 +2243,10 @@ u32 *p4d,*p4a;
 int grd_shrink(struct grd *g,struct grd_area *gc )
 {
 struct grd_info *gi=g->bmap;
-s32 x,y,z;
-s32 w,h,d;
-u8 *p;
-u8 a;
+int32_t x,y,z;
+int32_t w,h,d;
+uint8_t *p;
+uint8_t a;
 int mode=grd_sizeof_pixel(gi->fmt);
 int i;
 
@@ -2450,35 +2450,35 @@ int i;
 // set the bmap data to the given value (u32) (u16) or (u8)
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_clear(struct grd *ga, u32 val )
+void grd_clear(struct grd *ga, uint32_t val )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 	pa=grdinfo_get_data(ga->bmap,0,y,z);
 		switch(grd_sizeof_pixel(ga->bmap->fmt))
 		{
 			case 1:
 				for(x=0;x<ga->bmap->w;x++) {
-					*((u8*)pa)=(u8)val;
+					*((uint8_t*)pa)=(uint8_t)val;
 					pa+=1;
 				}
 			break;
 			case 2:
 				for(x=0;x<ga->bmap->w;x++) {
-					*((u16*)pa)=(u16)val;
+					*((uint16_t*)pa)=(uint16_t)val;
 					pa+=2;
 				}
 			break;
 			case 3:
 				for(x=0;x<ga->bmap->w;x++) {
-					*((u8*)pa++)=(u8)((val    )&0xff); // assume little endian
-					*((u8*)pa++)=(u8)((val>>8 )&0xff);
-					*((u8*)pa++)=(u8)((val>>16)&0xff);
+					*((uint8_t*)pa++)=(uint8_t)((val    )&0xff); // assume little endian
+					*((uint8_t*)pa++)=(uint8_t)((val>>8 )&0xff);
+					*((uint8_t*)pa++)=(uint8_t)((val>>16)&0xff);
 				}
 			break;
 			case 4:
 				for(x=0;x<ga->bmap->w;x++) {
-					*((u32*)pa)=(u32)val;
+					*((uint32_t*)pa)=(uint32_t)val;
 					pa+=4;
 				}
 			break;
@@ -2495,7 +2495,7 @@ int x,y,z; u8 *pa,*pb;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_copy_data(struct grd *ga, struct grd *gb )
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 int s;
 	for(z=0;z<ga->bmap->d;z++) { for(y=0;y<ga->bmap->h;y++) {
 		pa=grdinfo_get_data(ga->bmap,0,y,z);
@@ -2518,7 +2518,7 @@ int s;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 void grd_copy_data_layer(struct grd *ga, struct grd *gb , int za , int zb)
 {
-int x,y,z; u8 *pa,*pb;
+int x,y,z; uint8_t *pa,*pb;
 int s;
 	for(y=0;y<ga->bmap->h;y++) {
 		pa=grdinfo_get_data(ga->bmap,0,y,za);
@@ -2549,14 +2549,14 @@ int s;
 int grd_attr_redux(struct grd *g, int cw, int ch, int num, int sub,int bak)
 {
 int x,y,z,cx,cy;
-u8 *p;
+uint8_t *p;
 int i,j,t,tsub;
 int look[3][256]; // [0] counts [1] order [2] remap
 
 int d,dd;
 int best_i=0;
 int best_d=0;
-u32 c1,c2;
+uint32_t c1,c2;
 
 	if(cw==0) { cw=g->bmap->w; }
 	if(ch==0) { ch=g->bmap->h; }
@@ -2645,12 +2645,12 @@ u32 c1,c2;
 					}
 					else
 					{
-						c1=*((u32*)grdinfo_get_data(g->cmap,look[1][i],0,0));
+						c1=*((uint32_t*)grdinfo_get_data(g->cmap,look[1][i],0,0));
 						best_i=look[1][0];
 						best_d=0x7fffffff;
 						if(bak>=0) // start by selecting bak
 						{
-							c2=*((u32*)grdinfo_get_data(g->cmap,bak,0,0));
+							c2=*((uint32_t*)grdinfo_get_data(g->cmap,bak,0,0));
 							dd=0;
 							d=((int) (c1&0x000000ff)     )-((int) (c2&0x000000ff)     ); if(d<0){d=-d;} dd+=d;
 							d=((int)((c1&0x0000ff00)>>8) )-((int)((c2&0x0000ff00)>>8) ); if(d<0){d=-d;} dd+=d;
@@ -2661,7 +2661,7 @@ u32 c1,c2;
 						}
 						for(j=0;j<num;j++)
 						{
-							c2=*((u32*)grdinfo_get_data(g->cmap,look[1][j],0,0));
+							c2=*((uint32_t*)grdinfo_get_data(g->cmap,look[1][j],0,0));
 							dd=0;
 							d=((int) (c1&0x000000ff)     )-((int) (c2&0x000000ff)     ); if(d<0){d=-d;} dd+=d;
 							d=((int)((c1&0x0000ff00)>>8) )-((int)((c2&0x0000ff00)>>8) ); if(d<0){d=-d;} dd+=d;
@@ -2712,7 +2712,7 @@ static inline int grd_remap_color_distance(int ar,int ag,int ab,int aa,int br,in
 int grd_remap(struct grd *ga, struct grd *gb, int colors, int dither)
 {
 int x,y,z;
-u8 *pa,*pb;
+uint8_t *pa,*pb;
 
 unsigned char *palette;
 unsigned char *pp;	// pointer to input palette
@@ -2869,11 +2869,11 @@ const int pattern[64]={
 // find the first tag of the given ID and return a pointer to it
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-u32* grd_tags_find(u32 *tags,u32 id)
+uint32_t* grd_tags_find(uint32_t *tags,uint32_t id)
 {
 	if(!tags){ return 0;}
 	
-	u32 *td=tags;
+	uint32_t *td=tags;
 	while( td[0] != 0 ) // null terminated
 	{
 		if(td[1]==id)
@@ -2894,15 +2894,15 @@ work and we will then remap any image data associated with it.
 */
 int grd_sort_cmap( struct grd *ga )
 {
-int x,y,z; u8 *p;
+int x,y,z; uint8_t *p;
 
 int i,b,bi,d;
 
-u8 avail[256]; // available indexes
-u8 order[256]; // the new palette order
-u8 remap[256]; // remap table
+uint8_t avail[256]; // available indexes
+uint8_t order[256]; // the new palette order
+uint8_t remap[256]; // remap table
 
-u8 cc[256*4]; // temp cmap store
+uint8_t cc[256*4]; // temp cmap store
 
 int avail_max;
 int order_max;
@@ -2912,7 +2912,7 @@ int best_idx,best_dist,last_idx;
 
 int colors;
 
-u8 *cmap;
+uint8_t *cmap;
 
 int thinking;
 
@@ -3019,7 +3019,7 @@ Slide image along x,y,z , wrapping at the edges so the bitmap never loses any de
 int grd_slide( struct grd *ga , int dx , int dy , int dz )
 {
 int x,y,z,lx,ly,lz;
-u8 *tp,*bp;
+uint8_t *tp,*bp;
 struct grd *gt;
 int ps=grd_sizeof_pixel(ga->bmap->fmt); // size of pixel
 	
@@ -3065,8 +3065,8 @@ int ps=grd_sizeof_pixel(ga->bmap->fmt); // size of pixel
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int grd_fillmask(struct grd *ga, struct grd *gb, int seedx, int seedy, int threshold)
 {
-	u8 *pa;
-	u8 *pb;
+	uint8_t *pa;
+	uint8_t *pb;
 	int x,y;
 	int xh,yh;
 	int ya,yb;

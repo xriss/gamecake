@@ -79,7 +79,7 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	int num_palette;
 	png_color *palptr;
 	int num_trans;
-	u8 *trans;
+	uint8_t *trans;
 	png_color_16 *trans_values;
 	
 	png_unknown_chunkp unknowns;
@@ -91,7 +91,7 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	int chunk_json_size=0;
 	char *chunk_undo=0;
 	int chunk_undo_size=0;
-	u32 *chunksptr;
+	uint32_t *chunksptr;
 
     png_uint_32 next_frame_width;
     png_uint_32 next_frame_height;
@@ -256,16 +256,16 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	
     for(x=0;x<num_palette;x++)
     {
-	u32 c;
+	uint32_t c;
 		c=0xff000000|
 		    ((palptr[x].red  &0xff)    )|
 		    ((palptr[x].green&0xff)<< 8)|
 		    ((palptr[x].blue &0xff)<<16);
-		((u32*)g->cmap->data)[x]=c;
+		((uint32_t*)g->cmap->data)[x]=c;
 	}
     for(x=0;x<num_trans;x++)
     {
-		((u8*)g->cmap->data)[(4*x)+3]=trans[x];
+		((uint8_t*)g->cmap->data)[(4*x)+3]=trans[x];
 	}
 
 
@@ -301,7 +301,7 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 		g->data_sizeof+=8+4; // head and tail
 		g->data=calloc(g->data_sizeof,1);
 		if(!g->data) { abort_("png chunks alloc fail"); }
-		chunksptr=(u32*)g->data;
+		chunksptr=(uint32_t*)g->data;
 		chunksptr[0]=8;
 		chunksptr[1]=GRD_TAG_DEF('T','A','G','S');
 		chunksptr+=2;
@@ -346,7 +346,7 @@ bogus:
 // read a jpg into a grd from a file
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_png_load_file(struct grd * g, const char* file_name, u32 *tags)
+void grd_png_load_file(struct grd * g, const char* file_name, uint32_t *tags)
 {
 	struct grd_io_info inf[1]={0};
 	
@@ -361,12 +361,12 @@ void grd_png_load_file(struct grd * g, const char* file_name, u32 *tags)
 // read a jpg into a grd from data
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-void grd_png_load_data(struct grd *g, const unsigned char* data, int data_len, u32 *tags)
+void grd_png_load_data(struct grd *g, const unsigned char* data, int data_len, uint32_t *tags)
 {
 	struct grd_io_info inf[1]={0};
 	
 	inf->file_name=0;
-	inf->data=(u8*)data;
+	inf->data=(uint8_t*)data;
 	inf->pos=0;
 	inf->data_len=data_len;
 	inf->tags=tags;
@@ -399,11 +399,11 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 
 	png_text  text[1];
 
-	u32 *tag_UNDO=grd_tags_find(inf->tags,GRD_TAG_DEF('U','N','D','O')); // undo chunk data
-	u32 *tag_JSON=grd_tags_find(inf->tags,GRD_TAG_DEF('J','S','O','N'));
-	u32 *tag_SPED=grd_tags_find(inf->tags,GRD_TAG_DEF('S','P','E','D'));
-	u32 speed=80;
-	if(tag_SPED) { speed=*((u32*)(tag_SPED+2)); } // get speed in 1/1000 seconds
+	uint32_t *tag_UNDO=grd_tags_find(inf->tags,GRD_TAG_DEF('U','N','D','O')); // undo chunk data
+	uint32_t *tag_JSON=grd_tags_find(inf->tags,GRD_TAG_DEF('J','S','O','N'));
+	uint32_t *tag_SPED=grd_tags_find(inf->tags,GRD_TAG_DEF('S','P','E','D'));
+	uint32_t speed=80;
+	if(tag_SPED) { speed=*((uint32_t*)(tag_SPED+2)); } // get speed in 1/1000 seconds
 	
 
 	/* need to create file ? */
@@ -431,7 +431,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 	if( (g->bmap->fmt==GRD_FMT_U8_INDEXED) || (g->bmap->fmt==GRD_FMT_U8_INDEXED_PREMULT) )
 	{
    	png_color palptr[256];
-   	u8 tptr[256];
+   	uint8_t tptr[256];
    	int max_trans=-1;
    	
 		color_type = PNG_COLOR_TYPE_PALETTE;
@@ -439,7 +439,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 
 		for(x=0;x<g->cmap->w;x++)
 		{
-		u32 c=((u32*)g->cmap->data)[x];
+		uint32_t c=((uint32_t*)g->cmap->data)[x];
 		
 			palptr[x].blue =(c>>16)&0xff;
 			palptr[x].green=(c>> 8)&0xff;
@@ -589,7 +589,7 @@ bogus:
 	if(err) {g->err=err;} else {g->err=0; }
 }
 
-void grd_png_save_file(struct grd *g , const char* file_name , u32 *tags)
+void grd_png_save_file(struct grd *g , const char* file_name , uint32_t *tags)
 {
 	struct grd_io_info inf[1]={0};
 	

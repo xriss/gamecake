@@ -53,7 +53,7 @@ extern "C" {
 
 #include <vorbis/codec.h>
 
-#include "wet_types.h"
+#include <stdint.h>
 
 #include "code/lua_ogg.h"
 

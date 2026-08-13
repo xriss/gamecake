@@ -11,7 +11,6 @@
 
 #include INCLUDE_GLES_GL
 
-#include "wet_types.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"

@@ -19,7 +19,7 @@ typedef struct grd * part_ptr ;
 
 // pull in a hack
 //extern "C" 
-extern u8 * lua_toluserdata (lua_State *L, int idx, size_t *len);
+extern uint8_t * lua_toluserdata (lua_State *L, int idx, size_t *len);
 extern void * luaL_wetestudata(lua_State *L, int index, const char *tname);
 
 
@@ -117,12 +117,12 @@ const char *opts=0;
 
 	if(lua_isnumber(l,2))	// create an image of a given format and size
 	{
-	s32 fmt,w,h,d;
+	int32_t fmt,w,h,d;
 
-		fmt=(s32)lua_tonumber(l,1);
-		w=(s32)lua_tonumber(l,2);
-		h=(s32)lua_tonumber(l,3);
-		d=(s32)lua_tonumber(l,4);
+		fmt=(int32_t)lua_tonumber(l,1);
+		w=(int32_t)lua_tonumber(l,2);
+		h=(int32_t)lua_tonumber(l,3);
+		d=(int32_t)lua_tonumber(l,4);
 
 		(*p)=grd_create(fmt,w,h,d);
 	}
@@ -185,12 +185,12 @@ part_ptr new_p;
 	}
 	else	// change dimensions
 	{
-	s32 fmt,w,h,d;
+	int32_t fmt,w,h,d;
 
-		fmt=(s32)lua_tonumber(l,2);
-		w=(s32)lua_tonumber(l,3);
-		h=(s32)lua_tonumber(l,4);
-		d=(s32)lua_tonumber(l,5);
+		fmt=(int32_t)lua_tonumber(l,2);
+		w=(int32_t)lua_tonumber(l,3);
+		h=(int32_t)lua_tonumber(l,4);
+		d=(int32_t)lua_tonumber(l,5);
 
 		new_p=grd_create(fmt,w,h,d);
 	}
@@ -222,9 +222,9 @@ const char *opts=0;
 part_ptr *p;
 part_ptr new_p;
 const char *filename=0;
-const u8 *data=0;
+const uint8_t *data=0;
 size_t data_len=0;
-s32 fmt=0;
+int32_t fmt=0;
 
 	new_p=0;
 
@@ -247,7 +247,7 @@ s32 fmt=0;
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"data");
-	if(lua_isstring(l,-1))   { data=(const u8*)lua_tolstring(l,-1,&data_len); }
+	if(lua_isstring(l,-1))   { data=(const uint8_t*)lua_tolstring(l,-1,&data_len); }
 	if(lua_isuserdata(l,-1)) { data=lua_toluserdata(l,-1,&data_len); }
 	lua_pop(l,1);
 
@@ -283,7 +283,7 @@ s32 fmt=0;
 		if(new_p->data) // also loaded some special json+undo chunks so return that too?
 		{
 			lua_newtable(l);
-			u32 *td=(u32*)(new_p->data);
+			uint32_t *td=(uint32_t*)(new_p->data);
 			while( td[0] != 0 ) // null terminated
 			{
 				lua_pushlstring(l,(char*)(td+1),4);
@@ -318,11 +318,11 @@ int lua_grd_save (lua_State *l)
 {
 part_ptr p;
 const char *s=0;
-s32 n=0;
+int32_t n=0;
 
 size_t len;
 
-u32 tags[16];
+uint32_t tags[16];
 
 	tags[0]=3<<2;
 	tags[1]=GRD_TAG_DEF('Q','U','A','L');
@@ -359,15 +359,15 @@ u32 tags[16];
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"fmt");
-	if(lua_isnumber(l,-1)) { n=(u32)lua_tonumber(l,-1); }
+	if(lua_isnumber(l,-1)) { n=(uint32_t)lua_tonumber(l,-1); }
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"quality");
-	if(lua_isnumber(l,-1)) { tags[2]=(u32)lua_tonumber(l,-1); }
+	if(lua_isnumber(l,-1)) { tags[2]=(uint32_t)lua_tonumber(l,-1); }
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"speed");
-	if(lua_isnumber(l,-1)) { tags[5]=(u32)lua_tonumber(l,-1); }
+	if(lua_isnumber(l,-1)) { tags[5]=(uint32_t)lua_tonumber(l,-1); }
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"json");
@@ -535,13 +535,13 @@ part_ptr pb;
 int lua_grd_quant (lua_State *l)
 {
 part_ptr p;
-s32 num;
-s32 dither;
+int32_t num;
+int32_t dither;
 
 	p=lua_grd_check_ptr(l,1);
 
-	num=(s32)lua_tonumber(l,2);
-	dither=(s32)lua_tonumber(l,3);
+	num=(int32_t)lua_tonumber(l,2);
+	dither=(int32_t)lua_tonumber(l,3);
 	
 	if(num<2) { num=2; }
 	if(num>256) { num=256; }
@@ -559,15 +559,15 @@ s32 dither;
 int lua_grd_attr_redux (lua_State *l)
 {
 part_ptr p;
-s32 bak,num,cw,ch,sub;
+int32_t bak,num,cw,ch,sub;
 
 	p=lua_grd_check_ptr(l,1);
 
-	cw=(s32)lua_tonumber(l,2);
-	ch=(s32)lua_tonumber(l,3);
-	num=(s32)lua_tonumber(l,4);
-	sub=(s32)lua_tonumber(l,5);
-	bak=(s32)lua_tonumber(l,6);
+	cw=(int32_t)lua_tonumber(l,2);
+	ch=(int32_t)lua_tonumber(l,3);
+	num=(int32_t)lua_tonumber(l,4);
+	sub=(int32_t)lua_tonumber(l,5);
+	bak=(int32_t)lua_tonumber(l,6);
 	
 	if(num<2) { num=2; }
 	if(num>256) { num=256; }
@@ -750,11 +750,11 @@ float sub,con;
 int lua_grd_convert (lua_State *l)
 {
 part_ptr p;
-s32 fmt;
+int32_t fmt;
 
 	p=lua_grd_check_ptr(l,1);
 
-	fmt=(s32)lua_tonumber(l,2);
+	fmt=(int32_t)lua_tonumber(l,2);
 
 	if(! grd_convert(p,fmt) )
 	{
@@ -774,11 +774,11 @@ int lua_grd_create_convert (lua_State *l)
 part_ptr p;
 part_ptr *pp;
 part_ptr p2;
-s32 fmt;
+int32_t fmt;
 
 	p=lua_grd_check_ptr(l,1);
 
-	fmt=(s32)lua_tonumber(l,2);
+	fmt=(int32_t)lua_tonumber(l,2);
 
 	p2=grd_duplicate_convert(p,fmt);
 
@@ -802,7 +802,7 @@ s32 fmt;
 int lua_grd_normal (lua_State *l)
 {
 part_ptr p;
-s32 fmt;
+int32_t fmt;
 
 	p=lua_grd_check_ptr(l,1);
 
@@ -824,7 +824,7 @@ int lua_grd_create_normal (lua_State *l)
 part_ptr p;
 part_ptr *pp;
 part_ptr p2;
-s32 fmt;
+int32_t fmt;
 
 	p=lua_grd_check_ptr(l,1);
 
@@ -851,20 +851,20 @@ int lua_grd_clip (lua_State *l)
 {
 part_ptr *g;
 part_ptr p;
-s32 cx;
-s32 cy;
-s32 cz;
-s32 cw;
-s32 ch;
-s32 cd;
+int32_t cx;
+int32_t cy;
+int32_t cz;
+int32_t cw;
+int32_t ch;
+int32_t cd;
 
 	p=lua_grd_check_ptr(l,1);
-	cx=(s32)lua_tonumber(l,2);
-	cy=(s32)lua_tonumber(l,3);
-	cz=(s32)lua_tonumber(l,4);
-	cw=(s32)lua_tonumber(l,5);
-	ch=(s32)lua_tonumber(l,6);
-	cd=(s32)lua_tonumber(l,7);
+	cx=(int32_t)lua_tonumber(l,2);
+	cy=(int32_t)lua_tonumber(l,3);
+	cz=(int32_t)lua_tonumber(l,4);
+	cw=(int32_t)lua_tonumber(l,5);
+	ch=(int32_t)lua_tonumber(l,6);
+	cd=(int32_t)lua_tonumber(l,7);
 
 	g=lua_grd_create_ptr(l);
 	(*g)=grd_create(GRD_FMT_U8_RGBA,0,0,0);
@@ -889,25 +889,25 @@ part_ptr pa;
 part_ptr pb;
 struct grd g[1];
 
-s32 x;
-s32 y;
+int32_t x;
+int32_t y;
 
-s32 cx;
-s32 cy;
-s32 cw;
-s32 ch;
+int32_t cx;
+int32_t cy;
+int32_t cw;
+int32_t ch;
 
 	pa=lua_grd_check_ptr(l,1);
 	pb=lua_grd_check_ptr(l,2);
-	x=(s32)lua_tonumber(l,3);
-	y=(s32)lua_tonumber(l,4);
+	x=(int32_t)lua_tonumber(l,3);
+	y=(int32_t)lua_tonumber(l,4);
 
 	if( lua_isnumber(l,5) ) // clip the from grd,  pass a false if no need to clip from
 	{
-		cx=(s32)lua_tonumber(l,5);
-		cy=(s32)lua_tonumber(l,6);
-		cw=(s32)lua_tonumber(l,7);
-		ch=(s32)lua_tonumber(l,8);
+		cx=(int32_t)lua_tonumber(l,5);
+		cy=(int32_t)lua_tonumber(l,6);
+		cw=(int32_t)lua_tonumber(l,7);
+		ch=(int32_t)lua_tonumber(l,8);
 		if(!grd_clip(g,pb,cx,cy,0,cw,ch,1))
 		{
 			lua_pushboolean(l,0);
@@ -946,29 +946,29 @@ part_ptr pa;
 part_ptr pb;
 struct grd g[1];
 
-s32 x;
-s32 y;
+int32_t x;
+int32_t y;
 
-s32 cx;
-s32 cy;
-s32 cw;
-s32 ch;
+int32_t cx;
+int32_t cy;
+int32_t cw;
+int32_t ch;
 
-s32 mode;
-u32 trans;
-u32 color;
+int32_t mode;
+uint32_t trans;
+uint32_t color;
 
 	pa=lua_grd_check_ptr(l,1);
 	pb=lua_grd_check_ptr(l,2);
-	x=(s32)lua_tonumber(l,3);
-	y=(s32)lua_tonumber(l,4);
+	x=(int32_t)lua_tonumber(l,3);
+	y=(int32_t)lua_tonumber(l,4);
 
 	if( lua_isnumber(l,5) ) // clip the from grd, pass a false if no need to clip from
 	{
-		cx=(s32)lua_tonumber(l,5);
-		cy=(s32)lua_tonumber(l,6);
-		cw=(s32)lua_tonumber(l,7);
-		ch=(s32)lua_tonumber(l,8);
+		cx=(int32_t)lua_tonumber(l,5);
+		cy=(int32_t)lua_tonumber(l,6);
+		cw=(int32_t)lua_tonumber(l,7);
+		ch=(int32_t)lua_tonumber(l,8);
 		if(!grd_clip(g,pb,cx,cy,0,cw,ch,1))
 		{
 			lua_pushboolean(l,0);
@@ -976,9 +976,9 @@ u32 color;
 			return 2;
 		}
 		
-		mode=(s32)lua_tonumber(l,9);
-		trans=(u32)lua_tonumber(l,10);
-		color=(u32)lua_tonumber(l,11);
+		mode=(int32_t)lua_tonumber(l,9);
+		trans=(uint32_t)lua_tonumber(l,10);
+		color=(uint32_t)lua_tonumber(l,11);
 		if(!grd_paint(pa,g,x,y,mode,trans,color))
 		{
 			lua_pushboolean(l,0);
@@ -988,9 +988,9 @@ u32 color;
 	}
 	else // simnple mode without clipping
 	{
-		mode=(s32)lua_tonumber(l,6);
-		trans=(u32)lua_tonumber(l,7);
-		color=(u32)lua_tonumber(l,8);
+		mode=(int32_t)lua_tonumber(l,6);
+		trans=(uint32_t)lua_tonumber(l,7);
+		color=(uint32_t)lua_tonumber(l,8);
 		if(!grd_paint(pa,pb,x,y,mode,trans,color))
 		{
 			lua_pushboolean(l,0);
@@ -1033,13 +1033,13 @@ f32 scale;
 int lua_grd_resize (lua_State *l)
 {
 part_ptr p;
-s32 w,h,d;
+int32_t w,h,d;
 
 	p=lua_grd_check_ptr(l,1);
 
-	w=(s32)lua_tonumber(l,2);
-	h=(s32)lua_tonumber(l,3);
-	d=(s32)lua_tonumber(l,4);
+	w=(int32_t)lua_tonumber(l,2);
+	h=(int32_t)lua_tonumber(l,3);
+	d=(int32_t)lua_tonumber(l,4);
 
 	grd_resize(p,w,h,d);
 
@@ -1055,13 +1055,13 @@ s32 w,h,d;
 int lua_grd_scale (lua_State *l)
 {
 part_ptr p;
-s32 w,h,d;
+int32_t w,h,d;
 
 	p=lua_grd_check_ptr(l,1);
 
-	w=(s32)lua_tonumber(l,2);
-	h=(s32)lua_tonumber(l,3);
-	d=(s32)lua_tonumber(l,4);
+	w=(int32_t)lua_tonumber(l,2);
+	h=(int32_t)lua_tonumber(l,3);
+	d=(int32_t)lua_tonumber(l,4);
 
 	grd_scale(p,w,h,d);
 
@@ -1105,12 +1105,12 @@ struct grd_area gc[1];
 
 	p=lua_grd_check_ptr(l,1);
 
-	lua_getfield(l,2,"x");	gc->x=(s32)lua_tonumber(l,-1);	lua_pop(l,1);
-	lua_getfield(l,2,"y");	gc->y=(s32)lua_tonumber(l,-1);	lua_pop(l,1);	
-	lua_getfield(l,2,"z");	gc->z=(s32)lua_tonumber(l,-1);	lua_pop(l,1);
-	lua_getfield(l,2,"w");	gc->w=(s32)lua_tonumber(l,-1);	lua_pop(l,1);
-	lua_getfield(l,2,"h");	gc->h=(s32)lua_tonumber(l,-1);	lua_pop(l,1);	
-	lua_getfield(l,2,"d");	gc->d=(s32)lua_tonumber(l,-1);	lua_pop(l,1);
+	lua_getfield(l,2,"x");	gc->x=(int32_t)lua_tonumber(l,-1);	lua_pop(l,1);
+	lua_getfield(l,2,"y");	gc->y=(int32_t)lua_tonumber(l,-1);	lua_pop(l,1);	
+	lua_getfield(l,2,"z");	gc->z=(int32_t)lua_tonumber(l,-1);	lua_pop(l,1);
+	lua_getfield(l,2,"w");	gc->w=(int32_t)lua_tonumber(l,-1);	lua_pop(l,1);
+	lua_getfield(l,2,"h");	gc->h=(int32_t)lua_tonumber(l,-1);	lua_pop(l,1);	
+	lua_getfield(l,2,"d");	gc->d=(int32_t)lua_tonumber(l,-1);	lua_pop(l,1);
 	
 	if( !grd_shrink(p,gc) )
 	{
@@ -1179,13 +1179,13 @@ part_ptr p;
 // works with palettes of bitmaps
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_grd_pix(lua_State *l , s32 tab_idx , struct grd_info *dst , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
+int lua_grd_pix(lua_State *l , int32_t tab_idx , struct grd_info *dst , int32_t x, int32_t y, int32_t z , int32_t w, int32_t h, int32_t d )
 {
-s32 xi,yi,zi;
+int32_t xi,yi,zi;
 
-u8* datu8;
+uint8_t* datu8;
 
-s32 idx;
+int32_t idx;
 
 int read_tab;
 
@@ -1239,28 +1239,28 @@ int read_tab;
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
-						datu8[0]=(u8)t;
+						datu8[0]=(uint8_t)t;
 						lua_pop(l,1);
 
 						lua_pushnumber(l,idx+1);
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
-						datu8[1]=(u8)t;
+						datu8[1]=(uint8_t)t;
 						lua_pop(l,1);
 
 						lua_pushnumber(l,idx+2);
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
-						datu8[2]=(u8)t;
+						datu8[2]=(uint8_t)t;
 						lua_pop(l,1);
 
 						lua_pushnumber(l,idx+3);
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
-						datu8[3]=(u8)t;
+						datu8[3]=(uint8_t)t;
 						lua_pop(l,1);
 
 					}
@@ -1309,21 +1309,21 @@ int read_tab;
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
-						datu8[0]=(u8)t;
+						datu8[0]=(uint8_t)t;
 						lua_pop(l,1);
 
 						lua_pushnumber(l,idx+1);
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
-						datu8[1]=(u8)t;
+						datu8[1]=(uint8_t)t;
 						lua_pop(l,1);
 
 						lua_pushnumber(l,idx+2);
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
-						datu8[2]=(u8)t;
+						datu8[2]=(uint8_t)t;
 						lua_pop(l,1);
 					}
 					else
@@ -1366,7 +1366,7 @@ int read_tab;
 						lua_rawget(l,tab_idx);
 						t=(float)lua_tonumber(l,-1);
 						if(t>255) { t=255; }	if(t<0)   { t=0; }
-						datu8[0]=(u8)t;
+						datu8[0]=(uint8_t)t;
 						lua_pop(l,1);
 					}
 					else
@@ -1393,16 +1393,16 @@ int read_tab;
 // a string version of lua_grd_pix for when you dont want to bit fiddle
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_grd_pix_str(lua_State *l , s32 str_idx , struct grd_info *dst , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
+int lua_grd_pix_str(lua_State *l , int32_t str_idx , struct grd_info *dst , int32_t x, int32_t y, int32_t z , int32_t w, int32_t h, int32_t d )
 {
 int i;
 
-s32 xi,yi,zi;
+int32_t xi,yi,zi;
 
-u8* datu8;
-u8* bufu8;
+uint8_t* datu8;
+uint8_t* bufu8;
 
-s32 idx;
+int32_t idx;
 
 int read_tab;
 
@@ -1450,7 +1450,7 @@ struct grd_info gb[1];
 	
 	if(read_tab)
 	{
-		bufu8=(u8*)s; // read from this string
+		bufu8=(uint8_t*)s; // read from this string
 		if(sl<(dst->xscan*w*h*d))
 		{
 			luaL_error(l, "data string too short" );
@@ -1507,11 +1507,11 @@ struct grd_info gb[1];
 // use clip to limit the source grd if you dont want all of it
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int lua_grd_pix_grd(lua_State *l , struct grd_info *src , struct grd_info *dst , s32 x, s32 y, s32 z , s32 w, s32 h, s32 d )
+int lua_grd_pix_grd(lua_State *l , struct grd_info *src , struct grd_info *dst , int32_t x, int32_t y, int32_t z , int32_t w, int32_t h, int32_t d )
 {
 
-s32 xi,yi,zi;
-s32 xscan;
+int32_t xi,yi,zi;
+int32_t xscan;
 
 // sanity clipping, so we don't trash random memory super easily.
 
@@ -1565,8 +1565,8 @@ part_ptr p;
 
 struct grd_info *grd;
 
-s32 x;
-s32 w;
+int32_t x;
+int32_t w;
 
 	p=lua_grd_check_ptr(l,1);
 	grd=p->cmap;
@@ -1582,14 +1582,14 @@ s32 w;
 
 	if(lua_isnil(l,3)) // set palette size
 	{
-		w=(s32)lua_tonumber(l,2);
+		w=(int32_t)lua_tonumber(l,2);
 		p->cmap->w=w;
 		lua_pushnumber(l,p->cmap->w);
 		return 1;
 	}
 
-	x=(s32)lua_tonumber(l,2);
-	w=(s32)lua_tonumber(l,3);
+	x=(int32_t)lua_tonumber(l,2);
+	w=(int32_t)lua_tonumber(l,3);
 
 	if(lua_istable(l,4))
 	{
@@ -1633,9 +1633,9 @@ part_ptr p;
 struct grd_info *grd;
 
 
-s32 x,y,z;
-s32 w,h,d;
-s32 tab_idx;
+int32_t x,y,z;
+int32_t w,h,d;
+int32_t tab_idx;
 
 	p=lua_grd_check_ptr(l,1);
 	grd=p->bmap;
@@ -1645,31 +1645,31 @@ s32 tab_idx;
 
 	if( lua_isnumber(l,7) )
 	{
-		x=(s32)lua_tonumber(l,2);
-		y=(s32)lua_tonumber(l,3);
-		z=(s32)lua_tonumber(l,4);
+		x=(int32_t)lua_tonumber(l,2);
+		y=(int32_t)lua_tonumber(l,3);
+		z=(int32_t)lua_tonumber(l,4);
 
-		w=(s32)lua_tonumber(l,5);
-		h=(s32)lua_tonumber(l,6);
-		d=(s32)lua_tonumber(l,7);
+		w=(int32_t)lua_tonumber(l,5);
+		h=(int32_t)lua_tonumber(l,6);
+		d=(int32_t)lua_tonumber(l,7);
 		if( lua_istable(l,8) || lua_isstring(l,8) || lua_grd_get_ptr(l,8) ) { tab_idx=8; }
 	}
 	else
 	if( lua_isnumber(l,5) )
 	{
-		x=(s32)lua_tonumber(l,2);
-		y=(s32)lua_tonumber(l,3);
+		x=(int32_t)lua_tonumber(l,2);
+		y=(int32_t)lua_tonumber(l,3);
 		z=0;
 
-		w=(s32)lua_tonumber(l,4);
-		h=(s32)lua_tonumber(l,5);
+		w=(int32_t)lua_tonumber(l,4);
+		h=(int32_t)lua_tonumber(l,5);
 		d=1;
 		if( lua_istable(l,6) || lua_isstring(l,6) || lua_grd_get_ptr(l,6) ) { tab_idx=6; }
 	}
 	else
 	{
-		x=(s32)lua_tonumber(l,2);
-		y=(s32)lua_tonumber(l,3);
+		x=(int32_t)lua_tonumber(l,2);
+		y=(int32_t)lua_tonumber(l,3);
 		z=0;
 
 		w=1;
@@ -1704,11 +1704,11 @@ s32 tab_idx;
 int lua_grd_clear (lua_State *l)
 {
 part_ptr p;
-u32 v;
+uint32_t v;
 
 	p=lua_grd_check_ptr(l,1);
 
-	v=(u32)lua_tonumber(l,2);
+	v=(uint32_t)lua_tonumber(l,2);
 
 	grd_clear(p,v);
 
@@ -1741,9 +1741,9 @@ int lua_grd_stream_open (lua_State *l)
 {
 part_ptr p;
 const char *s=0;
-s32 n=0;
+int32_t n=0;
 
-u32 tags[16];
+uint32_t tags[16];
 
 	tags[0]=3<<2;
 	tags[1]=GRD_TAG_DEF('Q','U','A','L');
@@ -1774,15 +1774,15 @@ u32 tags[16];
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"fmt");
-	if(lua_isnumber(l,-1)) { n=(u32)lua_tonumber(l,-1); }
+	if(lua_isnumber(l,-1)) { n=(uint32_t)lua_tonumber(l,-1); }
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"quality");
-	if(lua_isnumber(l,-1)) { tags[2]=(u32)lua_tonumber(l,-1); }
+	if(lua_isnumber(l,-1)) { tags[2]=(uint32_t)lua_tonumber(l,-1); }
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"speed");
-	if(lua_isnumber(l,-1)) { tags[5]=(u32)lua_tonumber(l,-1); }
+	if(lua_isnumber(l,-1)) { tags[5]=(uint32_t)lua_tonumber(l,-1); }
 	lua_pop(l,1);
 
 	lua_getfield(l,2,"json");

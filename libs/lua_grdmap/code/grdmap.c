@@ -37,8 +37,8 @@ void grdmap_free(struct grdmap *gm)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int grdmap_setup(struct grdmap *gm,struct grd *g)
 {
-s32 x;
-s32 y;
+int32_t x;
+int32_t y;
 
 	if(!gm) { goto bogus; } // need these parts
 	
@@ -80,11 +80,11 @@ bogus:
 // break an image into chars of the given size, this may fail
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grdmap_cutup(struct grdmap *gm,s32 pw,s32 ph)
+int grdmap_cutup(struct grdmap *gm,int32_t pw,int32_t ph)
 {
-s32 x;
-s32 y;
-s32 id;
+int32_t x;
+int32_t y;
+int32_t id;
 const char *err;
 
 	if(!gm) { goto bogus; } // need these parts
@@ -237,24 +237,24 @@ bogus:
 // layout the contents of one grdmap onto another, skip tiles that have a zero size
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-int grdmap_layout( struct grdmap *a , struct grdmap *b , s32 border)
+int grdmap_layout( struct grdmap *a , struct grdmap *b , int32_t border)
 {
 #if 0
 bool ret;
 struct grdmap_tile *pa;
 struct grdmap_tile *pb;
 
-s32 count;
+int32_t count;
 
 // used to layout the tiles
-s32 max_width;
-s32 max_height;
+int32_t max_width;
+int32_t max_height;
 
-s32 biggest_y;
+int32_t biggest_y;
 
-s32 x,y;
+int32_t x,y;
 
-s32 height_loop;
+int32_t height_loop;
 
 	ret=false;
 
@@ -387,13 +387,13 @@ struct grdmap_tile *tile;
 struct grdmap_tile *tile2;
 
 
-s32 chunk_info			;
-s32 chunk_area			;
-s32 chunk_map			;
-s32 chunk_kern			;
+int32_t chunk_info			;
+int32_t chunk_area			;
+int32_t chunk_map			;
+int32_t chunk_kern			;
 
-s32 chunk_pos;
-u16 id;
+int32_t chunk_pos;
+uint16_t id;
 
 	ret=false;
 
@@ -450,14 +450,14 @@ u16 id;
 //
 	for( tile=grdmap_layout->tiles ; tile<grdmap_layout->tiles+grdmap_layout->numof_tiles ; tile++ )
 	{
-		xtxarea->x=((s16)(tile->x));///((f32)(grdmap_layout->w));
-		xtxarea->y=((s16)(tile->y));///((f32)(grdmap_layout->h));
+		xtxarea->x=((int16_t)(tile->x));///((f32)(grdmap_layout->w));
+		xtxarea->y=((uint8_t)(tile->y));///((f32)(grdmap_layout->h));
 
-		xtxarea->w=((s16)(tile->w));///((f32)(grdmap_layout->w));
-		xtxarea->h=((s16)(tile->h));///((f32)(grdmap_layout->h));
+		xtxarea->w=((uint8_t)(tile->w));///((f32)(grdmap_layout->w));
+		xtxarea->h=((uint8_t)(tile->h));///((f32)(grdmap_layout->h));
 
-		xtxarea->hx=((s16)(tile->hx));
-		xtxarea->hy=((s16)(tile->hy));
+		xtxarea->hx=((uint8_t)(tile->hx));
+		xtxarea->hy=((uint8_t)(tile->hy));
 
 		xtxarea->twiddle();
 		if(1!=fwrite((void*)xtxarea,sizeof(xtxarea),1,fp))

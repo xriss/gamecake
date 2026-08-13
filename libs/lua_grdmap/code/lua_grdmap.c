@@ -220,16 +220,16 @@ struct grd *g=lua_grd_check_ptr(l,2);
 int lua_grdmap_cutup (lua_State *l)
 {
 part_ptr p=lua_grdmap_get(l,1);
-s32 px;
-s32 py;
+int32_t px;
+int32_t py;
 
 	if(!p->g)
 	{
 		luaL_error(l, "missing grd in grdmap" );
 	}
 		
-	px=(s32)lua_tonumber(l,2);
-	py=(s32)lua_tonumber(l,3);
+	px=(int32_t)lua_tonumber(l,2);
+	py=(int32_t)lua_tonumber(l,3);
 
 	grdmap_cutup(p,px,py);
 	
@@ -253,21 +253,21 @@ int lua_grdmap_tile (lua_State *l)
 {
 part_ptr p=lua_grdmap_get(l,1);
 
-s32 id;
-s32 x;
-s32 y;
+int32_t id;
+int32_t x;
+int32_t y;
 struct grdmap_tile *t;
 
 	if( lua_isnumber(l,3) ) // x,y ?
 	{
-		x=(s32)lua_tonumber(l,2);
-		y=(s32)lua_tonumber(l,3);
+		x=(int32_t)lua_tonumber(l,2);
+		y=(int32_t)lua_tonumber(l,3);
 		
 		id=x+y*p->tw;
 	}
 	else
 	{
-		id=(s32)lua_tonumber(l,2); // or just id
+		id=(int32_t)lua_tonumber(l,2); // or just id
 	}
 	
 	if( (id<0) || (id>=p->numof_tiles) ) { luaL_error(l, "tile out of range" ); }
@@ -531,12 +531,12 @@ static int lua_mmap_cutup (lua_State *l)
 #if 0
 metamap *p;
 
-s32 h,w;
+int32_t h,w;
 
 	p=lua_mmap_to_mmap_from_table(l,1);
 
-	w=(s32)lua_tonumber(l,2);
-	h=(s32)lua_tonumber(l,3);
+	w=(int32_t)lua_tonumber(l,2);
+	h=(int32_t)lua_tonumber(l,3);
 
 	mmap_cutup(p,w,h);
 
@@ -615,11 +615,11 @@ static int lua_mmap_layout (lua_State *l)
 #if 0
 metamap *pa;
 metamap *pb;
-s32 border;
+int32_t border;
 
 	pa=lua_mmap_to_mmap_from_table(l,1);
 	pb=lua_mmap_to_mmap_from_table(l,2);
-	border=(s32)luaL_checknumber(l,3);
+	border=(int32_t)luaL_checknumber(l,3);
 
 	mmap_layout(pa,pb,border);
 
@@ -642,7 +642,7 @@ static int lua_mmap_get_tile (lua_State *l)
 mmap_tile *m;
 mmap_tile *t;
 metamap *p;
-s32 x,y,idx;
+int32_t x,y,idx;
 
 	lua_pushliteral(l,MMAPHANDLE); // get our data within the table
 	lua_gettable(l, 1);
@@ -651,12 +651,12 @@ s32 x,y,idx;
 
 // 2 is a table we wish to fill in from tile
 
-	x=(s32)lua_tonumber(l,3);
+	x=(int32_t)lua_tonumber(l,3);
 
 	y=0;
 	if(lua_isnumber(l,4))
 	{
-		y=(s32)lua_tonumber(l,4);
+		y=(int32_t)lua_tonumber(l,4);
 	}
 
 	idx=x+y*p->tw;
@@ -717,7 +717,7 @@ static int lua_mmap_get_master_tile (lua_State *l)
 mmap_tile *t;
 mmap_tile *m;
 metamap *p;
-s32 x,y,idx;
+int32_t x,y,idx;
 
 	lua_pushliteral(l,MMAPHANDLE); // get our data within the table
 	lua_gettable(l, 1);
@@ -726,12 +726,12 @@ s32 x,y,idx;
 
 // 2 is a table we wish to fill in from tile
 
-	x=(s32)lua_tonumber(l,3);
+	x=(int32_t)lua_tonumber(l,3);
 
 	y=0;
 	if(lua_isnumber(l,4))
 	{
-		y=(s32)lua_tonumber(l,4);
+		y=(int32_t)lua_tonumber(l,4);
 	}
 
 	idx=x+y*p->tw;
@@ -790,7 +790,7 @@ static int lua_mmap_set_tile (lua_State *l)
 #if 0
 mmap_tile *t;
 metamap *p;
-s32 x,y,idx;
+int32_t x,y,idx;
 
 	lua_pushliteral(l,MMAPHANDLE); // get our data within the table
 	lua_gettable(l, 1);
@@ -799,12 +799,12 @@ s32 x,y,idx;
 
 // 2 is a table containing data we want to set into the tile
 
-	x=(s32)lua_tonumber(l,3);
+	x=(int32_t)lua_tonumber(l,3);
 
 	y=0;
 	if(lua_isnumber(l,4))
 	{
-		y=(s32)lua_tonumber(l,4);
+		y=(int32_t)lua_tonumber(l,4);
 	}
 
 	idx=x+y*p->tw;
@@ -817,32 +817,32 @@ s32 x,y,idx;
 
 	lua_pushliteral(l,"x");
 	lua_gettable(l,2);
-	t->x=(s32)lua_tonumber(l,-1);
+	t->x=(int32_t)lua_tonumber(l,-1);
 	lua_pop(l,1);
 
 	lua_pushliteral(l,"y");
 	lua_gettable(l,2);
-	t->y=(s32)lua_tonumber(l,-1);
+	t->y=(int32_t)lua_tonumber(l,-1);
 	lua_pop(l,1);
 	
 	lua_pushliteral(l,"w");
 	lua_gettable(l,2);
-	t->w=(s32)lua_tonumber(l,-1);
+	t->w=(int32_t)lua_tonumber(l,-1);
 	lua_pop(l,1);
 	
 	lua_pushliteral(l,"h");
 	lua_gettable(l,2);
-	t->h=(s32)lua_tonumber(l,-1);
+	t->h=(int32_t)lua_tonumber(l,-1);
 	lua_pop(l,1);
 
 	lua_pushliteral(l,"hx");
 	lua_gettable(l,2);
-	t->hx=(s32)lua_tonumber(l,-1);
+	t->hx=(int32_t)lua_tonumber(l,-1);
 	lua_pop(l,1);
 
 	lua_pushliteral(l,"hy");
 	lua_gettable(l,2);
-	t->hy=(s32)lua_tonumber(l,-1);
+	t->hy=(int32_t)lua_tonumber(l,-1);
 	lua_pop(l,1);
 	
 

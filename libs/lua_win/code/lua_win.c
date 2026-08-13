@@ -1,6 +1,6 @@
 
 
-#include "wet_types.h"
+//#include "wet_types.h"
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -21,7 +21,7 @@
 #endif
 
 
-static const u8 font_bits[16*48]={
+static const uint8_t font_bits[16*48]={
 
 0x00,0x18,0x66,0x6c,0x18,0x00,0x70,0x18,0x0c,0x30,0x00,0x00,0x00,0x00,0x00,0x06,
 0x00,0x18,0x66,0x6c,0x3e,0x66,0xd8,0x18,0x18,0x18,0xcc,0x30,0x00,0x00,0x00,0x0c,
@@ -90,17 +90,17 @@ static const u8 font_bits[16*48]={
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int lua_wetwin_glyph_8x8(lua_State *l)
 {
-const u8 *f=font_bits;
-s32 x,y,xx,yy;
-u8 m;
-u8 b;
-u32 c;
+const uint8_t *f=font_bits;
+int32_t x,y,xx,yy;
+uint8_t m;
+uint8_t b;
+uint32_t c;
 
-u32 bmap[8*8];
+uint32_t bmap[8*8];
 
-s32 id=0;
+int32_t id=0;
 
-	id=(s32)(lua_tonumber(l,1));
+	id=(int32_t)(lua_tonumber(l,1));
 	if( id<32 )  { id=32; }
 	if( id>255 ) { id=255; }
 	

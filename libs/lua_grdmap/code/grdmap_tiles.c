@@ -18,16 +18,16 @@
 void grdmap_tile_shrink(struct grdmap_tile *a )
 {
 
-s32 sa,sp; // spans for tile a and a pixel
+int32_t sa,sp; // spans for tile a and a pixel
 
-u8 *pa; // data pointers
-s32 x,y,p;	// x,y pointers
+uint8_t *pa; // data pointers
+int32_t x,y,p;	// x,y pointers
 
-u32 pix;
+uint32_t pix;
 
 int clear;
 
-s32 delta;
+int32_t delta;
 
 	sa=a->base->g->bmap->yscan;
 	sp=a->base->g->bmap->xscan;
@@ -138,11 +138,11 @@ s32 delta;
 int grdmap_tile_compare(struct grdmap_tile *a , struct grdmap_tile *b)
 {
 
-s32 w,h; //in bytes for both tiles (if tiles are diferent size then they aint equal)
-s32 sp; // spans for tiles a and b and a pixel
+int32_t w,h; //in bytes for both tiles (if tiles are diferent size then they aint equal)
+int32_t sp; // spans for tiles a and b and a pixel
 
-u8 *pa,*pb; // data pointers
-s32 x,y;	// x,y pointers
+uint8_t *pa,*pb; // data pointers
+int32_t x,y;	// x,y pointers
 
 
 	if(a==b) return 1; // pass in the same pointer twice?
