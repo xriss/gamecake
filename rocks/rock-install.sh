@@ -5,4 +5,4 @@ if [ -z "$ROCK_DIR" ]; then
 fi
 cd $ROCK_DIR
 
-luarocks make --local $ROCK_FILENAME
+luarocks install --local --force $ROCK_DIR/$ROCK_BASENAME.src.rock

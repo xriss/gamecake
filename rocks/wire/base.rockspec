@@ -1,26 +1,33 @@
 build={
- ["modules"]={
+ modules={
+  wire="lua_wire/code/wire.lua",
   ["wire.core"]={
-   ["incdirs"]={
+   incdirs={
     "lua_wire",
+    "lua_wire/c11threads/git",
    },
-   ["sources"]={
+   sources={
     "lua_wire/code/lua_wire.c",
    },
   },
-  ["wetgenes.string"]="lua_wire/code/wire.lua",
+  wiretasks="lua_wire/code/wiretasks.lua",
  },
- ["type"]="builtin",
+ platform={
+  windows={
+   ["wire.core"]={
+    sources={
+     "lua_wire/code/lua_wire.c",
+     "lua_wire/code/c11threads/git/c11threads_win32.c",
+    },
+   },
+  },
+ },
+ type="builtin",
 }
 dependencies={
- "bit32",
+ "lua >= 5.1 <= 5.2",
 }
 description={
- ["homepage"]="https://xriss.github.io/gamecake/docs/lua.wire/",
- ["license"]="MIT",
+ homepage="https://xriss.github.io/gamecake/docs/lua.wire/",
+ license="MIT",
 }
-package="wolfsock"
-source={
- ["url"]="/home/kriss/devcake/gamecake/rocks/wolfsock/src.zip",
-}
-version="26-260812"

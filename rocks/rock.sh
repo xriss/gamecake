@@ -19,10 +19,13 @@ spec
 	generate spec file for latest verison/revision
 
 pack
-	zip up the src and pack it into the src rock
+	zip up the src and pack it into the src.rock
+
+install
+	make and install locally ( home directory ) from src.rock
 
 make
-	make and install locally ( home directory )
+	runs all the spec and pack and install steps
 
 EOF
 
@@ -37,6 +40,12 @@ case $2 in
 		./rock-bump.sh || exit 20
 	;;
 
+	"make")
+		./rock-spec.sh || exit 20
+		./rock-pack.sh || exit 20
+		./rock-install.sh || exit 20
+	;;
+
 	"spec")
 		./rock-spec.sh || exit 20
 	;;
@@ -45,8 +54,8 @@ case $2 in
 		./rock-pack.sh || exit 20
 	;;
 
-	"make")
-		./rock-make.sh || exit 20
+	"install")
+		./rock-install.sh || exit 20
 	;;
 
 	*)
