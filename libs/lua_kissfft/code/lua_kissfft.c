@@ -17,7 +17,8 @@
 #include "lua_kissfft.h"
 
 
-extern uint8_t * lua_toluserdata (lua_State *L, int idx, size_t *len);
+// hax
+#include "lua_toluserdata.c"
 
 static uint8_t * lua_toptr (lua_State *L, int idx, size_t *len) {
 	uint8_t *p=(uint8_t*)lua_tolstring(L,idx,len);

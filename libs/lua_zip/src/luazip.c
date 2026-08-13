@@ -9,6 +9,7 @@
 */
 
 #include <string.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include "zzip/zzip.h"
 #include "luazip.h"
@@ -229,8 +230,8 @@ static struct zzip_plugin_mem_io xio_mem={
 	zzip_plugin_mem_io_write
 };
 
-// need hacks to get length of userdata
-extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
+// hax
+#include "lua_toluserdata.c"
 
 static int zip_open_mem (lua_State *L) {
   ZZIP_FILE** inf;

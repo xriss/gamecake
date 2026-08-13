@@ -18,8 +18,8 @@
 #include "code/lua_gamecake.h"
 
 
-// link with lua/hacks.c plz
-extern unsigned char * lua_toluserdata (lua_State *L, int idx, size_t *len);
+// hax
+#include "lua_toluserdata.c"
 
 #define SIZEOF_VB (6*5*4*256)
 

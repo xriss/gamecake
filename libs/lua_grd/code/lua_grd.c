@@ -17,10 +17,27 @@ const char *lua_grd_ptr_name="grd*ptr";
 
 typedef struct grd * part_ptr ;
 
-// pull in a hack
-//extern "C" 
-extern uint8_t * lua_toluserdata (lua_State *L, int idx, size_t *len);
-extern void * luaL_wetestudata(lua_State *L, int index, const char *tname);
+// hax
+#include "lua_toluserdata.c"
+static void * luaL_wetestudata(lua_State *L, int index, const char *tname)
+{
+	void *p = lua_touserdata(L, index);
+
+	if (p != NULL) {
+		if (lua_getmetatable(L, index)) {
+			luaL_getmetatable(L, tname);
+
+			if (!lua_rawequal(L, -1, -2))
+				p = NULL;
+
+			lua_pop(L, 2);
+
+			return p;
+		}
+	}
+
+	return NULL;
+}
 
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/

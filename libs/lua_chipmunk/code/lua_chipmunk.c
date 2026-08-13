@@ -152,7 +152,25 @@ cpBody **pp;
 	return pp;
 }
 
-extern void * luaL_wetestudata(lua_State *L, int index, const char *tname);
+static void * luaL_wetestudata(lua_State *L, int index, const char *tname)
+{
+	void *p = lua_touserdata(L, index);
+
+	if (p != NULL) {
+		if (lua_getmetatable(L, index)) {
+			luaL_getmetatable(L, tname);
+
+			if (!lua_rawequal(L, -1, -2))
+				p = NULL;
+
+			lua_pop(L, 2);
+
+			return p;
+		}
+	}
+
+	return NULL;
+}
 
 cpBody *  lua_chipmunk_body_ptr (lua_State *l,int idx)
 {

@@ -6,6 +6,7 @@ files { "code/lua_gles.c" , "code/**.h" }
 
 
 includedirs { "include" }
+includedirs { "../lib_hacks/code" }
 
 
 if WINDOWS then

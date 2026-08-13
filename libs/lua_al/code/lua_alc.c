@@ -52,8 +52,7 @@ alcGetProcAddress
 // it is however still better than not having any bounds checking
 
 #include <stdint.h>’
-
-extern uint8_t * lua_toluserdata (lua_State *L, int idx, size_t *len);
+#include "lua_toluserdata.c"
 
 
 

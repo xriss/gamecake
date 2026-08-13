@@ -23,7 +23,8 @@
 
 #include <stdint.h>
 
-extern unsigned char * lua_toluserdata (lua_State *l, int idx, size_t *len);
+// hax
+#include "lua_toluserdata.c"
 
 extern unsigned char * lua_pack_to_buffer (lua_State *l, int idx, size_t *len)
 {
