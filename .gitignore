@@ -73,7 +73,5 @@ stage/
 /docs
 node_modules
 
-rocks/src.zip
-rocks/*.src.rock
-
-
+rocks/*/*.zip
+rocks/*/*.rock
