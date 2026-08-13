@@ -5,12 +5,10 @@ if [ -z "$ROCK_DIR" ]; then
 fi
 cd $ROCK_DIR
 
-#rm -f $ROCK_BASENAME.src.rock
-#zip -r $ROCK_BASENAME.src.rock src $ROCK_BASENAME.rockspec
-
 rm -f src.zip
 zip -r src.zip src
 
 luarocks pack $ROCK_BASENAME.rockspec
+rm -f $ROCK_BASENAME.rockspec
 
 rm -f src.zip
