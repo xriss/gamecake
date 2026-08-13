@@ -16,7 +16,7 @@ dependencies={
  "bit32",
 }
 description={
- ["homepage"]="https://github.com/xriss/gamecake",
+ ["homepage"]="https://xriss.github.io/gamecake/docs/lua.wire/",
  ["license"]="MIT",
 }
 package="wolfsock"

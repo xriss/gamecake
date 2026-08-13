@@ -18,6 +18,9 @@ bump
 spec
 	generate spec file for latest verison/revision
 
+pack
+	zip up the src and pack it into the src rock
+
 EOF
 
 exit 0
@@ -33,6 +36,10 @@ case $2 in
 
 	"spec")
 		./rock-spec.sh || exit 20
+	;;
+
+	"pack")
+		./rock-pack.sh || exit 20
 	;;
 
 	*)

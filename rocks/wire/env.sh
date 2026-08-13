@@ -2,8 +2,8 @@
 export ROCK_DIR=`pwd`
 
 export ROCK_NAME=wire
-export ROCK_VERSION=26
-export ROCK_REVISION=260812
+export ROCK_VERSION=1.0
+export ROCK_REVISION=260813
 
 export ROCK_FILENAME=${ROCK_NAME}-${ROCK_VERSION}-${ROCK_REVISION}.rockspec
 
