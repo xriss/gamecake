@@ -29,6 +29,7 @@ dependencies={
  "lua >= 5.1 <= 5.2",
  "gamecake-grd",
  "gamecake-wire",
+ "gamecake-pack",
 }
 description={
  homepage="https://xriss.github.io/gamecake/docs/lua/",
