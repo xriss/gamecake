@@ -42,7 +42,7 @@ Provides a way of launching lua states in separate threads and a means
 of communicating with these threads via messages only.
 
 Includes simple tasks for running a non blocking HTTP fetch or SQLITE 
-query in another thread, hence the luasocket etc dependencies.
+query in another thread, hence the optional luasocket etc dependencies.
 
 See https://github.com/xriss/gamecake/tree/master/libs/lua_wire and 
 https://xriss.github.io/gamecake/docs/lua.wire/ for more docs.
