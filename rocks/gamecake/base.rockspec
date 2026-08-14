@@ -187,6 +187,7 @@ dependencies={
  "gamecake-wire",
  "gamecake-pack",
  "gamecake-fats",
+ "gamecake-box2d",
 }
 description={
  homepage="https://xriss.github.io/gamecake/docs/lua/",
