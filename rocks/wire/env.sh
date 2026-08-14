@@ -1,7 +1,7 @@
 
 export ROCK_DIR=`pwd`
 
-export ROCK_NAME=wire
+export ROCK_NAME=wetgenes-wire
 export ROCK_VERSION=1.0
 export ROCK_REVISION=260813
 
