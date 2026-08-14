@@ -4,7 +4,6 @@ build={
       ["wetgenes.pack.core"]={
          sources={
             "lua_pack/code/lua_pack.c",
-            "lib_hacks/code/hacks.c",
          },
          incdirs={
             "lua_pack",

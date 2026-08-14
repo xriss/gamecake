@@ -28,9 +28,6 @@ build={
 dependencies={
  "lua >= 5.1 <= 5.2",
  "djon",
- "luasocket",
- "luasec",
- "lsqlite3",
 }
 description={
  homepage="https://xriss.github.io/gamecake/docs/lua.wire/",
