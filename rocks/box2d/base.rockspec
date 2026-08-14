@@ -63,7 +63,7 @@ description={
  summary="box2d V3",
  detailed=[[
 
-A lua binding to Box2d V3.
+A lua binding to Box2d V3, includes box2d source build.
 
  ]],
 }
