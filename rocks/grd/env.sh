@@ -1,7 +1,7 @@
 
 export ROCK_DIR=`pwd`
 
-export ROCK_NAME=gamecake-wire
+export ROCK_NAME=gamecake-grd
 export ROCK_VERSION=1.0
 export ROCK_REVISION=260813
 

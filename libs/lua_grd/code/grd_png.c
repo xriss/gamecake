@@ -148,7 +148,7 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 
 	depth=1;
 
-#if defined(PNG_INFO_acTL)
+#if defined(PNG_APNG_SUPPORTED)
 	if(png_get_valid(png_ptr, info_ptr, PNG_INFO_acTL))
 	{
 		depth=png_get_num_frames(png_ptr, info_ptr);
@@ -212,7 +212,7 @@ void grd_png_load(struct grd * g, struct grd_io_info * inf )
 	if (setjmp(png_jmpbuf(png_ptr)))
 		abort_("png read fail");
 		
-#if defined(PNG_INFO_acTL)
+#if defined(PNG_APNG_SUPPORTED)
 	if(png_get_valid(png_ptr, info_ptr, PNG_INFO_acTL))
 	{
 		for(z=0;z<depth;z++)
@@ -511,7 +511,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 	}
 	
 
-#if defined(PNG_INFO_acTL)
+#if defined(PNG_APNG_SUPPORTED)
 	if(frames>0)
 	{
 		png_set_acTL(png_ptr, info_ptr, frames, 0);
@@ -541,7 +541,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 			row_pointers[y] = grdinfo_get_data(g->bmap,0,y,z);
 		}
 
-#if defined(PNG_INFO_acTL)
+#if defined(PNG_APNG_SUPPORTED)
 		if(frames>0)
 		{
 			png_write_frame_head(png_ptr, info_ptr, row_pointers, 
@@ -557,7 +557,7 @@ void grd_png_save(struct grd *g , struct grd_io_info *inf )
 #endif		
 		png_write_image(png_ptr, row_pointers);
 
-#if defined(PNG_INFO_acTL)
+#if defined(PNG_APNG_SUPPORTED)
 		if(frames>0)
 		{
 			png_write_frame_tail(png_ptr, info_ptr);

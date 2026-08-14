@@ -32,8 +32,15 @@ ln -f lua/lanes.lua    libs/lua_lanes/lanes/src/lanes.lua
      
 ln -f lua/wetgenes/midi.lua   libs/lua_midi/code/midi.lua                  
 ln -f lua/wetgenes/tardis.lua libs/lua_tardis/code/tardis.lua              
+
 ln -f lua/wetgenes/grd.lua    libs/lua_grd/code/grd.lua                    
-ln -f lua/wetgenes/grdmap.lua libs/lua_grd/code/grdmap.lua                 
+ln -f lua/wetgenes/grd.lua    libs/lua_grd/code/grdcanvas.lua                    
+ln -f lua/wetgenes/grd.lua    libs/lua_grd/code/grdhistory.lua                    
+ln -f lua/wetgenes/grd.lua    libs/lua_grd/code/grdlayers.lua                    
+ln -f lua/wetgenes/grd.lua    libs/lua_grd/code/grdpaint.lua                    
+ln -f lua/wetgenes/grd.lua    libs/lua_grd/code/grdsvg.lua                    
+
+ln -f lua/wetgenes/grdmap.lua libs/lua_grdmap/code/grdmap.lua                 
      
 ln -f lua/wetgenes/win.lua      libs/lua_win/code/win.lua                    
      
