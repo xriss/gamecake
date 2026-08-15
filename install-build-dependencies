@@ -13,6 +13,7 @@ fi
 
 require.sh clang
 require.sh gcc
+require.sh g++
 require.sh make
 require.sh luajit
 require.sh patchelf
