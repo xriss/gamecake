@@ -2,7 +2,7 @@ build={
  modules={
   gles="lua_gles/code/gles.lua",
   glescode="lua_gles/code/glescode.lua",
-  ["wire.core"]={
+  ["gles.core"]={
    incdirs={
     "lua_gles",
     "lua_gles/include",
@@ -19,7 +19,7 @@ build={
  },
  platform={
   windows={
-   ["wire.core"]={
+   ["gles.core"]={
     defines={
      "HAVE_FCNTL_H=1",
     },
@@ -30,7 +30,6 @@ build={
 }
 dependencies={
  "lua >= 5.1 <= 5.2",
- "djon",
 }
 description={
  homepage="https://xriss.github.io/gamecake/docs/lua.gles/",
