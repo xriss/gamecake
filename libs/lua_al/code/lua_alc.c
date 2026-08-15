@@ -51,7 +51,7 @@ alcGetProcAddress
 // if lua or luajit change then this will break
 // it is however still better than not having any bounds checking
 
-#include <stdint.h>’
+#include <stdint.h>
 #include "lua_toluserdata.c"
 
 

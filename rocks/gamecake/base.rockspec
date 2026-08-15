@@ -180,9 +180,17 @@ external_dependencies = {
 }
 dependencies={
  "lua >= 5.1 <= 5.2",
+ "luautf8",
+ "luafilesystem",
+ "luaposix",
+ "luazip",
+ "lua-zlib",
  "luasocket",
  "luasec",
  "lsqlite3",
+ "luapgsql",
+ "lua-cmsgpack",
+ "djon",
  "gamecake-grd",
  "gamecake-wire",
  "gamecake-pack",
