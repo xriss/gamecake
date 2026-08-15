@@ -775,7 +775,7 @@ all_includes=all_includes or {
 	{"lua_sdl2",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_utf8",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_cmsgpack",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lua_brimworkszip",WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
+--	{"lua_brimworkszip",WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_wire",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 

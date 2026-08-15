@@ -30,6 +30,7 @@ build={
    },
    sources={
     "lua_al/code/lua_alc.c",
+    "lib_openal/mojoal/mojoal.c",
    },
    defines={
    },

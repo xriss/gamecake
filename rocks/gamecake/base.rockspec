@@ -1,7 +1,8 @@
 build={
  modules={
 
-      ["global"]            = "lua_src/global.lua",
+      ["global"]              = "lua_src/global.lua",
+      ["gamecake"]            = "lua_src/gamecake.lua",
 
       ["wetgenes"]            = "lua_src/wetgenes/init.lua",
       ["wetgenes.csv"]        = "lua_src/wetgenes/csv.lua",
@@ -9,6 +10,7 @@ build={
       ["wetgenes.getsql"]     = "lua_src/wetgenes/getsql.lua",
       ["wetgenes.gists"]      = "lua_src/wetgenes/gists.lua",
       ["wetgenes.html"]       = "lua_src/wetgenes/html.lua",
+      ["wetgenes.json"]       = "lua_src/wetgenes/json.lua",
       ["wetgenes.json_diff"]  = "lua_src/wetgenes/json_diff.lua",
       ["wetgenes.msgp"]       = "lua_src/wetgenes/msgp.lua",
       ["wetgenes.logs"]       = "lua_src/wetgenes/logs.lua",
@@ -193,7 +195,9 @@ dependencies={
  "lsqlite3",
 -- "luapgsql",
  "lua-cmsgpack",
+ "Lrexlib-PCRE",
  "djon",
+ "Lua-SDL2",
  "gamecake-grd",
  "gamecake-wire",
  "gamecake-pack",

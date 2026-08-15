@@ -1,11 +1,11 @@
 build={
  modules={
 
-      ["wetgenes.grd"]="lua_grd/code/grdcanvas.lua",
-      ["wetgenes.grd"]="lua_grd/code/grdhistory.lua",
-      ["wetgenes.grd"]="lua_grd/code/grdlayers.lua",
-      ["wetgenes.grd"]="lua_grd/code/grdpaint.lua",
-      ["wetgenes.grd"]="lua_grd/code/grdsvg.lua",
+      ["wetgenes.grdcanvas"] ="lua_grd/code/grdcanvas.lua",
+      ["wetgenes.grdhistory"]="lua_grd/code/grdhistory.lua",
+      ["wetgenes.grdlayers"] ="lua_grd/code/grdlayers.lua",
+      ["wetgenes.grdpaint"]  ="lua_grd/code/grdpaint.lua",
+      ["wetgenes.grdsvg"]    ="lua_grd/code/grdsvg.lua",
 
       ["wetgenes.grd"]="lua_grd/code/grd.lua",
       ["wetgenes.grd.core"]={

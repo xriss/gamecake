@@ -380,7 +380,7 @@ int has_fun=0;
   lua_pop(L,narg);
 
 // replace this file with lua code
-  dolibrary(L,"lua"); // always run lua/lua.lua (encoded in res)
+  dolibrary(L,"gamecake"); // always run lua/gamecake.lua (encoded in res)
   
 
 /*
