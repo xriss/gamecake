@@ -1,5 +1,8 @@
 build={
  modules={
+
+      ["global"]            = "lua_src/global.lua",
+
       ["wetgenes"]            = "lua_src/wetgenes/init.lua",
       ["wetgenes.csv"]        = "lua_src/wetgenes/csv.lua",
       ["wetgenes.diff"]       = "lua_src/wetgenes/diff.lua",
@@ -188,7 +191,7 @@ dependencies={
  "luasocket",
  "luasec",
  "lsqlite3",
- "luapgsql",
+-- "luapgsql",
  "lua-cmsgpack",
  "djon",
  "gamecake-grd",
