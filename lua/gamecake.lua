@@ -55,8 +55,137 @@ local progname = LUA_PROGNAME
 
 
 -- attempt to find lua code relative to executable
-local apps=require("apps")
-apps.default_paths()
+do
+	--
+	-- get/set current dir
+	--
+	local get_cd=function()
+
+		local lfs ; pcall( function() lfs=require("lfs") end )
+
+		if lfs then	return string.gsub(lfs.currentdir(),'\\','/') end
+		
+		return "." -- lfs is not available
+
+	end
+
+	local set_cd=function(str)
+		local lfs=require("lfs")
+
+		lfs.chdir(str)
+
+	end
+
+	local file_exists=function(str)
+		local fp=io.open(str,"r")
+		if fp then fp:close() return true end
+		return false
+	end
+
+		
+	local setpaths = function(dll,dirs)
+
+		if dll then
+			local cpath={}
+			for i,v in ipairs(dirs) do
+				cpath[#cpath+1]=v .. "?." .. dll
+				cpath[#cpath+1]=v .. "?/init." .. dll
+			end
+			local newpath=table.concat(cpath,";")
+			if not string.find(package.cpath,newpath,1,true) then -- only add once
+				package.cpath=newpath..";"..package.cpath
+			end
+		end
+		
+		local path={}
+		for i,v in ipairs(dirs) do
+			path[#path+1]=v .. "?.lua"
+			path[#path+1]=v .. "?/init.lua"
+			path[#path+1]=v .. "lua/?.lua"
+			path[#path+1]=v .. "lua/?/init.lua"
+		end
+		local newpath=table.concat(path,";")
+		if not string.find(package.path,newpath,1,true) then -- only add once
+			package.path=newpath..";"..package.path
+		end
+
+	end
+
+	--
+	-- find where our exe lives
+	--
+	local find_bin = function ()
+
+		local dir=get_cd()
+		local exe="."
+		local exe_path
+		pcall(function() exe_path=require("wetgenes.win.core").get_exe_path() end)
+		if exe_path then -- remove filename
+			local dir,name,ext=string.match(exe_path,"(.-)([^\\/]-%.?([^%.\\/]*))$")
+			exe=dir:sub(1,-2) -- remove trailing / or \
+		end
+
+	-- print(dir,exe)
+
+		local tdirs={ -- look in these dirs
+			dir,
+			dir.."/..",
+			dir.."/../..",
+			exe,
+			exe.."/..",
+			exe.."/../..",
+		}
+		local bin_dir=dir.."/"
+		for i=1,#tdirs do local v=tdirs[i]
+			if file_exists(v.."/lua/apps.lua") then bin_dir=v.."/" break end -- found a bin dir?
+		end
+
+		return bin_dir
+	end
+
+	--
+	-- find our bin dir and set search for all lua files under there, makes debuging a bit easier
+	-- than using the builtin strings. Also lets us pick up any dlls in there.
+	--
+	local default_paths = function (appdir)
+	-- we are looking for a dir/lua/name.lua and dir will be our base dir so look in various places
+
+		if not pcall( function() return require("lfs") end ) then return end -- not possible without lfs
+
+		local osflavour="win"
+		local os_shell=os.getenv("SHELL")
+		if os_shell and string.sub(os_shell,1,5)== "/bin/" then -- if your shell is not here then we assume windows...
+			osflavour="nix"
+		end
+
+		local dll="dll"
+		if osflavour=="nix" then dll="so" end
+
+		local luadir=find_bin()
+		
+		if appdir and appdir~="" then -- use this as app dir
+
+			appdir=appdir:gsub("\\","/").."../"
+			setpaths(dll,{luadir,appdir,"./"})
+
+		else
+		
+			appdir=get_cd().."/" -- use cd as app dir	
+			setpaths(dll,{luadir,"./"})
+			
+		end
+		
+		local wzips=require("wetgenes.zips") -- and search for data+lua here
+		wzips.paths[#wzips.paths+1]=appdir
+
+		return luadir,appdir
+		
+	end
+	
+default_paths()
+
+end
+
 
 -- need to be able to auto mount some zip files for reading from
 local wzips=require("wetgenes.zips")

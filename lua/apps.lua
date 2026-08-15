@@ -6,17 +6,19 @@
 -- yup this module is assumed to be preloaded, afterwhich all other modules can be found
 -- and loaded.
 
-local package=package
-local require=require
-local string=string
-local table=table
-local ipairs=ipairs
-local print=print
-local os=os
-local io=io
-local pcall=pcall
+--local package=package
+--local require=require
+--local string=string
+--local table=table
+--local ipairs=ipairs
+--local print=print
+--local os=os
+--local io=io
+--local pcall=pcall
 
-module("apps")
+local M={ modname=(...) }
+package.loaded[M.modname]=M
+local apps=M
 
 --
 -- get/set current dir
@@ -45,7 +47,7 @@ local file_exists=function(str)
 end
 
 	
-function setpaths(dll,dirs)
+local setpaths = function(dll,dirs)
 
 	if dll then
 		local cpath={}
@@ -76,7 +78,7 @@ end
 --
 -- find where our exe lives
 --
-function find_bin()
+local find_bin = function ()
 
 	local dir=get_cd()
 	local exe="."
@@ -109,7 +111,7 @@ end
 -- find our bin dir and set search for all lua files under there, makes debuging a bit easier
 -- than using the builtin strings. Also lets us pick up any dlls in there.
 --
-function default_paths(appdir)
+apps.default_paths = function (appdir)
 -- we are looking for a dir/lua/name.lua and dir will be our base dir so look in various places
 
 	if not pcall( function() return require("lfs") end ) then return end -- not possible without lfs
@@ -154,7 +156,7 @@ end
 --
 -- this needs to get more searchy so it can find where the lua app is without any explicit values
 --
-function find(name)
+apps.find = function (name)
 
 	local lfs=require("lfs")
 
@@ -214,7 +216,7 @@ end
 
 -- only call this once
 -- probably on the commandline
-function start(_name,...)
+apps.start = function (_name,...)
 
 	path_orig=package.path
 	cpath_orig=package.cpath
