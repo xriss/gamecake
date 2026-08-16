@@ -6,7 +6,7 @@
 
 local zip=require("zip")
 local wsandbox=require("wetgenes.sandbox")
-local apps ; pcall( function() apps=require("apps") end )
+--local apps ; pcall( function() apps=require("apps") end )
 local core ; pcall( function() core=require("wetgenes.gamecake.core") end )
 
 
@@ -21,7 +21,7 @@ M.files={} -- zip files for loader to search
 --dirs={} -- dirs to check in file system
 
 -- prefix to use when io.opening 
-M.paths={"",apps and apps.find_bin()}
+M.paths={""} -- ,apps and apps.find_bin()}
 
 
 -- uses assets/ dir now so no need to mangle

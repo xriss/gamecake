@@ -62,7 +62,7 @@ extern "C" {
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include <stdint.h>’
+#include <stdint.h>
 
 
 #include "lua_freetype.h"

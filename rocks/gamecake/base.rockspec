@@ -1,10 +1,14 @@
 build={
  modules={
 
+-- put minimal junk in the lua root
+
       ["global"]              = "lua_src/global.lua",
       ["gamecake"]            = "lua_src/gamecake.lua",
-
       ["wetgenes"]            = "lua_src/wetgenes/init.lua",
+
+-- although other gamecake-... sub rocks do provide more rooted modules
+
       ["wetgenes.csv"]        = "lua_src/wetgenes/csv.lua",
       ["wetgenes.diff"]       = "lua_src/wetgenes/diff.lua",
       ["wetgenes.getsql"]     = "lua_src/wetgenes/getsql.lua",

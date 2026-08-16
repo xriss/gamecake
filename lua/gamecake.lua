@@ -137,7 +137,7 @@ do
 		}
 		local bin_dir=dir.."/"
 		for i=1,#tdirs do local v=tdirs[i]
-			if file_exists(v.."/lua/apps.lua") then bin_dir=v.."/" break end -- found a bin dir?
+			if file_exists(v.."/lua/gamecake.lua") then bin_dir=v.."/" break end -- found a bin dir?
 		end
 
 		return bin_dir

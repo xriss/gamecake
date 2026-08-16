@@ -43,6 +43,24 @@ build={
             "lua_grd",
          },
       },
+      ["wetgenes.freetype"]="lua_freetype/code/freetype.lua",
+      ["wetgenes.freetype.core"]={
+         sources={
+            "lua_freetype/code/lua_freetype.c",
+         },
+         incdirs={
+            "lua_freetype",
+            "lua_freetype/code",
+            "lib_hacks/code",
+            "$(FREETYPE_LIB_INCDIR)/freetype2/",
+            "$(FREETYPE_LIB_INCDIR)/freetype2/freetype/",
+            "lua_grd/code",
+         },
+         libdirs={
+            "$(FREETYPE_LIB_LIBDIR)",
+         },
+         libraries = {"freetype"},
+      },
  },
  platform={
   windows={
@@ -66,6 +84,9 @@ external_dependencies = {
    ZZIP_LIB = {
       header = "zzip.h",
       library = "libzzip.a",
+   },
+   FREETYPE_LIB = {
+      header = "freetype2/freetype/freetype.h",
    },
 }
 dependencies={

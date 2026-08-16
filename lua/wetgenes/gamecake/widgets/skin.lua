@@ -13,7 +13,7 @@ local wzips=require("wetgenes.zips")
 local wstr=require("wetgenes.string")
 
 
-local apps=apps
+--local apps=apps
 
 local function explode_color(c)
 
