@@ -42,7 +42,7 @@ is that we provide.
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
-local wire=require("wire")
+local wire=require("wetgenes.wire")
 
 local wstr=require("wetgenes.string")
 

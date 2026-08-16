@@ -582,7 +582,7 @@ lanes task function for handling bitsynth rendering.
 ]]
 bitsynth.task_code=function()
 	
-	local wire=require("wire")
+	local wire=require("wetgenes.wire")
 	local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
 	local fats=require("wetgenes.fats")
 

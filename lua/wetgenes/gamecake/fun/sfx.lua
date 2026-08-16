@@ -5,7 +5,7 @@
 
 -- A copper like background, uses a glsl fragment program to fill the screen,
 
-local wire=require("wire")
+local wire=require("wetgenes.wire")
 
 local wzips=require("wetgenes.zips")
 

@@ -1,5 +1,5 @@
 
-local wire=require("wire")
+local wire=require("wetgenes.wire")
 
 print(  )
 print( "wire starting" )
@@ -10,7 +10,7 @@ wire.tasks("http",4,"require('wiretasks').http_code()")
 wire.thread({
 	start=[[
 	
-local wire=require("wire")
+local wire=require("wetgenes.wire")
 
 print(  )
 print( "thread starting" , wire.threads.us.name , wire.threads.us.handle )

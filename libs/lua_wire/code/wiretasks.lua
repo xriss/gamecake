@@ -20,7 +20,7 @@ require certain tasks to already be running.
 
 ]]
 
-local wire=require("wire")
+local wire=require("wetgenes.wire")
 local djon=require("djon")
 
 --module

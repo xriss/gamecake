@@ -1087,7 +1087,7 @@ wire.prepare_start=function( opts )
 
 	fout(opts.header or [[
 
-require("wire").do_start(function()
+require("wetgenes.wire").do_start(function()
 
 ]])
 	fout(opts.start) -- your actual start code
@@ -1369,7 +1369,7 @@ do
 		wire.wrap( "house" , -2 ) -- Wrap the house thread
 	else -- Create the house thread ( we are the main thread and no other threads exist yet )
 		assert( wire.thread_handle == -1 ) -- main thread check
-		wire.thread( { handle=-2 , name="house" , start="require('wire').house_code()" , globals={house="yes"} , } )
+		wire.thread( { handle=-2 , name="house" , start="require('wetgenes.wire').house_code()" , globals={house="yes"} , } )
 	end
 	if wire.thread_handle == -2 then
 		wire.threads.us = wire.threads.house -- we are the house thread

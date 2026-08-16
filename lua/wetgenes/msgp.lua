@@ -2,7 +2,7 @@
 -- (C) 2024 Kriss@XIXs.com
 --
 
-local wire=require("wire")
+local wire=require("wetgenes.wire")
 
 -- module
 local M={ modname = (...) } package.loaded[M.modname] = M

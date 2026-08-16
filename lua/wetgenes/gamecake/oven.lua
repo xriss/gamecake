@@ -12,7 +12,7 @@ local toaster=require("wetgenes.gamecake.toaster")
 toaster.jit_prealloc()
 local profile ; pcall(function() profile = require("jit.profile") end)
 
-local wire=require("wire") -- manage tasks
+local wire=require("wetgenes.wire") -- manage tasks
 
 
 --[[#lua.wetgenes.gamecake.oven

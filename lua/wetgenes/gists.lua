@@ -19,7 +19,7 @@ situation.
 
 ]]
 
-local wire=require("wire")
+local wire=require("wetgenes.wire")
 local djon=require("djon")
 
 --module

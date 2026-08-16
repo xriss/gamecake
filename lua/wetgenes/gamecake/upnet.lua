@@ -17,7 +17,7 @@ local Ox=function(n) return string.format("%012x",n or 0) end
 
 local log,dump,dlog=require("wetgenes.logs"):export("log","dump","dlog")
 
-local wire=require("wire")
+local wire=require("wetgenes.wire")
 
 local wwin=require("wetgenes.win")
 local wgups=require("wetgenes.gamecake.ups")

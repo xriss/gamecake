@@ -10,7 +10,7 @@ local M={ modname = (...) } package.loaded[M.modname] = M
 
 
 local bit=require("bit")
-local wire=require("wire")
+local wire=require("wetgenes.wire")
 
 
 M.functions={}
