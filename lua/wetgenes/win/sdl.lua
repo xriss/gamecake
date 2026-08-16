@@ -343,7 +343,7 @@ print("SDL detected EMCC : "..SDL.getPlatform())
 	SDL.glMakeCurrent(it.win, it.ctx)
 	SDL.glSetSwapInterval(it.vsync) -- probably enable vsync by default
 
-	local gles=require("gles")
+	local gles=require("wetgenes.gles")
 	log( "oven","vendor",(gles.Get(gles.VENDOR) or ""))
 	log( "oven","render",(gles.Get(gles.RENDERER) or ""))
 	log( "oven","version",(gles.Get(gles.VERSION) or ""))

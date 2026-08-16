@@ -1,8 +1,8 @@
 
 local wstr=require("wetgenes.string")
 
-local al=require("al")
-local alc=require("alc")
+local al=require("wetgenes.al")
+local alc=require("wetgenes.alc")
 
 
 function alc_CheckError(device)

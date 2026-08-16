@@ -24,11 +24,12 @@ ln -f lua/ssl/https.lua      libs/lua_sec/git/src/https.lua
 ln -f lua/ssl.lua            libs/lua_sec/git/src/ssl.lua
 
 
-ln -f lua/glslang.lua  libs/lua_glslang/code/glslang.lua
-ln -f lua/gles.lua     libs/lua_gles/code/gles.lua
-ln -f lua/glescode.lua libs/lua_gles/code/glescode.lua
-ln -f lua/al.lua       libs/lua_al/code/al.lua
-ln -f lua/alc.lua      libs/lua_al/code/alc.lua
+ln -f lua/wetgenes/glslang.lua  libs/lua_glslang/code/glslang.lua
+ln -f lua/wetgenes/gles.lua     libs/lua_gles/code/gles.lua
+ln -f lua/wetgenes/glescode.lua libs/lua_gles/code/glescode.lua
+ln -f lua/wetgenes/al.lua       libs/lua_al/code/al.lua
+ln -f lua/wetgenes/alc.lua      libs/lua_al/code/alc.lua
+
 ln -f lua/lanes.lua    libs/lua_lanes/lanes/src/lanes.lua
 
 ln -f lua/wetgenes/sod.lua      libs/lua_sod/code/sod.lua

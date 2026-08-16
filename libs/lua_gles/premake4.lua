@@ -22,5 +22,5 @@ end
 
 links { "lib_lua" }
 
-KIND{lua="gles.core"}
+KIND{lua="wetgenes.gles.core"}
 

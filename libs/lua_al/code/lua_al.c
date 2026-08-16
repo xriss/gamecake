@@ -593,7 +593,7 @@ static int lua_al_SetBuffer (lua_State *l)
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-LUALIB_API int luaopen_al_core(lua_State *l)
+LUALIB_API int luaopen_wetgenes_al_core(lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{

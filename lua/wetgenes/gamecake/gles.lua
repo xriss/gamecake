@@ -15,7 +15,7 @@ function M.bake(oven,gles)
 
 	if not oven.gl then -- need a gles2 wrapped in glescode
 	
-		oven.gl=require("glescode").create( require("gles") , gles )
+		oven.gl=require("wetgenes.glescode").create( require("wetgenes.gles") , gles )
 		
 		oven.gl.GetExtensions()
 		oven.gl.probe_all()

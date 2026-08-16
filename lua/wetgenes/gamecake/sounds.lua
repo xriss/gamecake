@@ -48,8 +48,8 @@ function M.bake(oven,sounds)
 
 sounds.setup=function()
 
-	sounds.al=sounds.al or require("al")
-	sounds.alc=sounds.alc or require("alc")
+	sounds.al=sounds.al or require("wetgenes.al")
+	sounds.alc=sounds.alc or require("wetgenes.alc")
 
 -- copy into locals
 	al=sounds.al

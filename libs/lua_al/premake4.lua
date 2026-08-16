@@ -8,7 +8,7 @@ links { "lib_lua" , "lua_pack" }
 
 includedirs { "../lib_hacks/code" }
 
-KIND{lua="al.core"}
+KIND{lua="wetgenes.al.core"}
 
 
 project "lua_alc"
@@ -20,4 +20,4 @@ links { "lib_lua" , "lua_pack" }
 
 includedirs { "../lib_hacks/code" }
 
-KIND{lua="alc.core"}
+KIND{lua="wetgenes.alc.core"}

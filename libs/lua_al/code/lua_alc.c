@@ -483,7 +483,7 @@ const char *cp=0;
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-LUALIB_API int luaopen_alc_core(lua_State *l)
+LUALIB_API int luaopen_wetgenes_alc_core(lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{

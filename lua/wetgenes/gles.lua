@@ -3,7 +3,7 @@
 
 local gles={}
 
-local core=require("gles.core")
+local core=require("wetgenes.gles.core")
 gles.core=core -- expose the core
 
 --local base={}

@@ -15,7 +15,7 @@ local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 local glslang=require("wetgenes.glslang")
 
 
-local core=require("gles.core")
+local core=require("wetgenes.gles.core")
 
 
 local glescode={}

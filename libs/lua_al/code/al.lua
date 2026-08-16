@@ -3,7 +3,7 @@
 
 local al={}
 
-local core=require("al.core")
+local core=require("wetgenes.al.core")
 
 local base={}
 local meta={}
