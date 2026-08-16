@@ -307,9 +307,9 @@ end
 
 -- setup tasks early so we can use recipes.sqlite for data management and run loading tasks on another thread
 
-wire.tasks("http",4,[[ require("wiretasks").http_code(); ]])
+wire.tasks("http",4,[[ require("wetgenes.wiretasks").http_code(); ]])
 
-wire.tasks("recipes",1,[[ require("wiretasks").sqlite_code(); ]],{
+wire.tasks("recipes",1,[[ require("wetgenes.wiretasks").sqlite_code(); ]],{
 			sqlite_filename=wwin.files_prefix.."recipes.sqlite",
 			sqlite_pragmas=[[ PRAGMA synchronous=0; ]],		
 	})

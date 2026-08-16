@@ -4,9 +4,9 @@
 -- http://en.wikipedia.org/wiki/MIT_License
 --
 
---[[#lua.box2d
+--[[#lua.wetgenes.box2d
 
-	local box2d=require("box2d")
+	local box2d=require("wetgenes.box2d")
 
 We use box2d as the local name of this library.
 
@@ -20,7 +20,7 @@ local M={ modname=(...) }
 package.loaded[M.modname]=M
 local box2d=M
 
-local core=require("box2d.core")
+local core=require("wetgenes.box2d.core")
 
 -- meta methods bound to the various objects
 
@@ -37,7 +37,7 @@ box2d.joint_functions={is="joint"}
 box2d.joint_metatable={__index=box2d.joint_functions}
 
 
---[[#lua.box2d.info
+--[[#lua.wetgenes.box2d.info
 
 	info = box2d.info()
 
@@ -65,7 +65,7 @@ box2d.info=function()
 	return info
 end
 
---[[#lua.box2d.get
+--[[#lua.wetgenes.box2d.get
 
 	vars = box2d.get()
 
@@ -81,7 +81,7 @@ box2d.get=function()
 	return core.get()
 end
 
---[[#lua.box2d.set
+--[[#lua.wetgenes.box2d.set
 
 	box2d.set(vars)
 
@@ -110,7 +110,7 @@ box2d.set=function(vars)
 	core.set(vars)
 end
 
---[[#lua.box2d.world
+--[[#lua.wetgenes.box2d.world
 
 	world=box2d.world(def)
 
@@ -156,7 +156,7 @@ box2d.world=function(def)
 	return world
 end
 
---[[#lua.box2d.world.destroy
+--[[#lua.wetgenes.box2d.world.destroy
 
 	world:destroy()
 
@@ -175,7 +175,7 @@ box2d.world_functions.destroy=function(world)
 end
 
 
---[[#lua.box2d.world.info
+--[[#lua.wetgenes.box2d.world.info
 
 	info = world:info()
 
@@ -205,7 +205,7 @@ box2d.world_functions.info=function(world)
 	return info
 end
 
---[[#lua.box2d.world.get
+--[[#lua.wetgenes.box2d.world.get
 
 	vars = world:get()
 
@@ -216,7 +216,7 @@ box2d.world_functions.get=function(world)
 	return core.world_get(world[0])
 end
 
---[[#lua.box2d.world.set
+--[[#lua.wetgenes.box2d.world.set
 
 	world:set(vars)
 
@@ -227,7 +227,7 @@ box2d.world_functions.set=function(world,vars)
 	return core.world_set(world[0],vars)
 end
 
---[[#lua.box2d.world.step
+--[[#lua.wetgenes.box2d.world.step
 
 	world:step(seconds,steps)
 
@@ -244,7 +244,7 @@ box2d.world_functions.step=function(world,seconds,steps)
 
 end
 
---[[#lua.box2d.world.prepare_events
+--[[#lua.wetgenes.box2d.world.prepare_events
 
 	events = world:prepare_events()
 	events = world:prepare_events(events)
@@ -335,7 +335,7 @@ box2d.world_functions.prepare_events=function(world,events)
 	end
 	return events
 end
---[[#lua.box2d.world.body_events
+--[[#lua.wetgenes.box2d.world.body_events
 
 	events = world:body_events()
 	events = world:body_events(events)
@@ -366,7 +366,7 @@ box2d.world_functions.body_events=function(world,events)
 	return events
 end
 
---[[#lua.box2d.world.sensor_events
+--[[#lua.wetgenes.box2d.world.sensor_events
 
 	events = world:sensor_events()
 	events = world:sensor_events(events)
@@ -412,7 +412,7 @@ box2d.world_functions.sensor_events=function(world,events)
 	return events
 end
 
---[[#lua.box2d.world.contact_events
+--[[#lua.wetgenes.box2d.world.contact_events
 
 	events = world:contact_events()
 	events = world:contact_events(events)
@@ -478,7 +478,7 @@ box2d.world_functions.contact_events=function(world,events)
 	return events
 end
 
---[[#lua.box2d.world.cast
+--[[#lua.wetgenes.box2d.world.cast
 
 	hits = world:cast(ray)
 
@@ -586,7 +586,7 @@ box2d.world_functions.cast=function(world,ray)
 end
 
 
---[[#lua.box2d.world.overlap
+--[[#lua.wetgenes.box2d.world.overlap
 
 	overlaps = world:overlap(shape)
 
@@ -665,7 +665,7 @@ box2d.world_functions.overlap=function(world,shape)
 end
 
 
---[[#lua.box2d.world.fill
+--[[#lua.wetgenes.box2d.world.fill
 
 	def=world:fill(def,name)
 
@@ -706,7 +706,7 @@ box2d.world_functions.fill=function(world,def,name)
 	return def
 end
 
---[[#lua.box2d.world.fills
+--[[#lua.wetgenes.box2d.world.fills
 
 	def=world:fills(def,...)
 
@@ -728,7 +728,7 @@ box2d.world_functions.fills=function(world,def,...)
 	return def
 end
 
---[[#lua.box2d.world.defaults
+--[[#lua.wetgenes.box2d.world.defaults
 
 	cache=world:defaults(name)
 	cache=world:defaults(name,def)
@@ -775,7 +775,7 @@ box2d.world_functions.defaults=function(world,name,def)
 	return cache
 end
 
---[[#lua.box2d.world.bits
+--[[#lua.wetgenes.box2d.world.bits
 
 	bits=world:bits(name)
 	bits=world:bits(name,{mask=0xfffffffffffff,bits=0x0000000000001,group=0})
@@ -827,7 +827,7 @@ box2d.world_functions.bits=function(world,name,bits)
 	return bits
 end
 
---[[#lua.box2d.world.body
+--[[#lua.wetgenes.box2d.world.body
 
 	body=world:body(def)
 
@@ -892,7 +892,7 @@ box2d.world_functions.body=function(world,def)
 	return body
 end
 
---[[#lua.box2d.body.destroy
+--[[#lua.wetgenes.box2d.body.destroy
 
 	body:destroy()
 
@@ -908,7 +908,7 @@ box2d.body_functions.destroy=function(body)
 	body.world.bodys[body.boxid]=nil
 end
 
---[[#lua.box2d.body.info
+--[[#lua.wetgenes.box2d.body.info
 
 	info = body:info()
 
@@ -943,7 +943,7 @@ box2d.body_functions.info=function(body)
 	return info
 end
 
---[[#lua.box2d.body.get
+--[[#lua.wetgenes.box2d.body.get
 
 	vars = body:get()
 
@@ -954,7 +954,7 @@ box2d.body_functions.get=function(body)
 	return core.body_get(body[0])
 end
 
---[[#lua.box2d.body.set
+--[[#lua.wetgenes.box2d.body.set
 
 	body:set(vars)
 
@@ -965,7 +965,7 @@ box2d.body_functions.set=function(body,vars)
 	return core.body_set(body[0],vars)
 end
 
---[[#lua.box2d.body.type
+--[[#lua.wetgenes.box2d.body.type
 
 	btype = body:type()
 	btype = body:type(btype)
@@ -981,7 +981,7 @@ box2d.body_functions.type=function(body,btype)
 	return core.body_type(body[0],btype)
 end
 
---[[#lua.box2d.body.awake
+--[[#lua.wetgenes.box2d.body.awake
 
 	b = body:awake()
 	b = body:awake(b)
@@ -993,7 +993,7 @@ box2d.body_functions.awake=function(body,b)
 	return core.body_awake(body[0],b)
 end
 
---[[#lua.box2d.body.transform
+--[[#lua.wetgenes.box2d.body.transform
 
 	x,y,r = body:transform()
 	x,y,r = body:transform(x,y,r)
@@ -1005,7 +1005,7 @@ box2d.body_functions.transform=function(body,x,y,r)
 	return core.body_transform(body[0],x,y,r)
 end
 
---[[#lua.box2d.body.velocity
+--[[#lua.wetgenes.box2d.body.velocity
 
 	x,y,r = body:velocity()
 	x,y,r = body:velocity(x,y,r)
@@ -1017,7 +1017,7 @@ box2d.body_functions.velocity=function(body,x,y,r)
 	return core.body_velocity(body[0],x,y,r)
 end
 
---[[#lua.box2d.body.force
+--[[#lua.wetgenes.box2d.body.force
 
 	body:force()
 	body:force(x,y)
@@ -1039,7 +1039,7 @@ box2d.body_functions.force=function(body,x,y,r)
 	return core.body_force(body[0],x,y,r)
 end
 
---[[#lua.box2d.body.acceleration
+--[[#lua.wetgenes.box2d.body.acceleration
 
 	body:acceleration()
 	body:acceleration(x,y)
@@ -1065,7 +1065,7 @@ box2d.body_functions.acceleration=function(body,x,y,r)
 end
 
 
---[[#lua.box2d.body.mass
+--[[#lua.wetgenes.box2d.body.mass
 
 	mass , rotationalInertia , x,y = body:mass( mass , rotationalInertia , x,y )
 	mass = ( body:mass(mass) )
@@ -1090,7 +1090,7 @@ box2d.body_functions.mass=function(body,mass,ri,x,y)
 end
 
 
---[[#lua.box2d.body.convert
+--[[#lua.wetgenes.box2d.body.convert
 
 	x,y = body:convert(x,y,conversion)
 
@@ -1123,7 +1123,7 @@ do
 	end
 end
 
---[[#lua.box2d.body.aabb
+--[[#lua.wetgenes.box2d.body.aabb
 
 	xa,ya,xb,yb = body:aabb()
 
@@ -1137,7 +1137,7 @@ box2d.body_functions.aabb=function(body)
 end
 
 
---[[#lua.box2d.world.body.shape
+--[[#lua.wetgenes.box2d.world.body.shape
 
 	shape=body:shape(def)
 
@@ -1229,7 +1229,7 @@ box2d.body_functions.shape=function(body,def)
 	return shape
 end
 
---[[#lua.box2d.shape.destroy
+--[[#lua.wetgenes.box2d.shape.destroy
 
 	shape:destroy()
 
@@ -1243,7 +1243,7 @@ box2d.shape_functions.destroy=function(shape)
 	shape.body.world.shapes[shape.boxid]=nil
 end
 
---[[#lua.box2d.shape.info
+--[[#lua.wetgenes.box2d.shape.info
 
 	info = shape:info()
 
@@ -1273,7 +1273,7 @@ box2d.shape_functions.info=function(shape)
 	return info
 end
 
---[[#lua.box2d.shape.get
+--[[#lua.wetgenes.box2d.shape.get
 
 	vars = shape:get()
 
@@ -1284,7 +1284,7 @@ box2d.shape_functions.get=function(shape)
 	return core.shape_get(shape[0])
 end
 
---[[#lua.box2d.shape.set
+--[[#lua.wetgenes.box2d.shape.set
 
 	shape:set(vars)
 
@@ -1295,7 +1295,7 @@ box2d.shape_functions.set=function(shape,vars)
 	return core.shape_set(shape[0],vars)
 end
 
---[[#lua.box2d.shape.convert
+--[[#lua.wetgenes.box2d.shape.convert
 
 	x,y = shape:convert(x,y,conversion)
 
@@ -1312,7 +1312,7 @@ box2d.shape_functions.convert=function(shape,x,y,conversion)
 	return core.shape_convert( shape[0], x,y )
 end
 
---[[#lua.box2d.shape.aabb
+--[[#lua.wetgenes.box2d.shape.aabb
 
 	xa,ya,xb,yb = shape:aabb()
 
@@ -1324,7 +1324,7 @@ box2d.shape_functions.aabb=function(shape)
 end
 
 
---[[#lua.box2d.world.joint
+--[[#lua.wetgenes.box2d.world.joint
 
 	joint=world:joint(def)
 
@@ -1462,7 +1462,7 @@ box2d.world_functions.joint=function(world,def)
 	return joint
 end
 
---[[#lua.box2d.joint.destroy
+--[[#lua.wetgenes.box2d.joint.destroy
 
 	joint:destroy()
 
@@ -1475,7 +1475,7 @@ box2d.joint_functions.destroy=function(joint)
 	joint.world.joint[joint.boxid]=nil
 end
 
---[[#lua.box2d.joint.info
+--[[#lua.wetgenes.box2d.joint.info
 
 	info = joint:info()
 
@@ -1509,7 +1509,7 @@ box2d.joint_functions.info=function(joint)
 	return info
 end
 
---[[#lua.box2d.joint.get
+--[[#lua.wetgenes.box2d.joint.get
 
 	vars = joint:get()
 
@@ -1520,7 +1520,7 @@ box2d.joint_functions.get=function(joint)
 	return core.joint_get(joint[0])
 end
 
---[[#lua.box2d.joint.set
+--[[#lua.wetgenes.box2d.joint.set
 
 	joint:set(vars)
 

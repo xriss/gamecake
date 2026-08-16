@@ -50,7 +50,7 @@ kinetics.item.setup=function(kinetic)
 
 	kinetic:get_values()
 
-	local box2d=require("box2d")
+	local box2d=require("wetgenes.box2d")
 	box2d.set({
 		LengthUnitsPerMeter=kinetic.LengthUnitsPerMeter,
 	})

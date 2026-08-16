@@ -4,9 +4,9 @@
 -- http://en.wikipedia.org/wiki/MIT_License
 --
 
---[[#lua.wire
+--[[#lua.wetgenes.wire
 
-	local wire=require("wire")
+	local wire=require("wetgenes.wire")
 
 We use wire as the local name of this library. So we can, uhh, wire 
 things together?
@@ -68,7 +68,7 @@ local wire=M
 -- auto preloadlibs on new threads if gamecake is available
 pcall( function() wire.preloadlibs=require("wetgenes.gamecake.core").preloadlibs end )
 
-local core=require("wire.core")
+local core=require("wetgenes.wire.core")
 
 -- meta methods bound to the various objects
 
@@ -106,7 +106,7 @@ wire.memos={
 	got={},
 }
 
---[[#lua.wire.table_to_data
+--[[#lua.wetgenes.wire.table_to_data
 
 	data = wire.table_to_data( table )
 
@@ -123,7 +123,7 @@ you.
 wire.table_to_data = core.pack
 
 
---[[#lua.wire.data_to_table
+--[[#lua.wetgenes.wire.data_to_table
 
 	table = wire.data_to_table( data )
 
@@ -140,7 +140,7 @@ you.
 wire.data_to_table = core.unpack
 
 
---[[#lua.wire.sleep
+--[[#lua.wetgenes.wire.sleep
 
 	wire.sleep(secs)
 
@@ -150,7 +150,7 @@ bit longer.
 ]]
 wire.sleep=core.sleep -- copy the core cfunction
 
---[[#lua.wire.wait
+--[[#lua.wetgenes.wire.wait
 
 	wire.wait(secs)
 
@@ -160,7 +160,7 @@ whenever a new msg is sent to any fifo or when this time has passed.
 ]]
 wire.wait=core.wait -- copy the core cfunction
 
---[[#lua.wire.time
+--[[#lua.wetgenes.wire.time
 
 	secs = wire.time()
 
@@ -170,7 +170,7 @@ double.
 ]]
 wire.time=core.time -- copy the core cfunction
 
---[[#lua.wire.timeres
+--[[#lua.wetgenes.wire.timeres
 
 	secs = wire.timeres()
 
@@ -182,7 +182,7 @@ double.
 ]]
 wire.timeres=core.timeres -- copy the core cfunction
 
---[[#lua.wire.active
+--[[#lua.wetgenes.wire.active
 
 	active = wire.active(handle)
 	active = wire.active(thread)
@@ -215,7 +215,7 @@ wire.active=function(handle)
 	return false -- thread is halting or halted
 end
 
---[[#lua.wire.wrap
+--[[#lua.wetgenes.wire.wrap
 
 	it = wire.wrap(name,handle)
 
@@ -268,7 +268,7 @@ wire.wrap=function(name,handle)
 
 end
 
---[[#lua.wire.reference
+--[[#lua.wetgenes.wire.reference
 
 	it = wire.reference(name)
 	it = wire.reference(handle)
@@ -329,7 +329,7 @@ wire.reference=function(name)
 
 end
 
---[[#lua.wire.thread
+--[[#lua.wetgenes.wire.thread
 
 	thread = wire.thread(handle)
 	thread = wire.thread(name)
@@ -459,7 +459,7 @@ wire.thread_start=function(opts)
 end
 
 
---[[#lua.wire.fifo
+--[[#lua.wetgenes.wire.fifo
 
 	fifo = wire.fifo(name)
 
@@ -572,7 +572,7 @@ wire.fifo=function(opts)
 end
 
 
---[[#lua.wire.update
+--[[#lua.wetgenes.wire.update
 
 	wire.update()
 
@@ -611,7 +611,7 @@ wire.update=function()
 
 end
 
---[[#lua.wire.memo
+--[[#lua.wetgenes.wire.memo
 
 	memo = wire.memo()
 	memo = wire.memo( { fifo=handle , data={} , on_result=callback } )
@@ -686,7 +686,7 @@ wire.memo=function(memo)
 	return memo
 end
 
---[[#lua.wire.memo.remove
+--[[#lua.wetgenes.wire.memo.remove
 
 	memo:remove()
 
@@ -711,7 +711,7 @@ wire.memo_functions.remove=function( memo )
 	return memo
 end
 
---[[#lua.wire.memo.status
+--[[#lua.wetgenes.wire.memo.status
 
 	memo:status(state)
 
@@ -733,7 +733,7 @@ wire.memo_functions.status=function( memo , state )
 	return memo
 end
 
---[[#lua.wire.memo.send
+--[[#lua.wetgenes.wire.memo.send
 
 	memo:send()
 
@@ -757,7 +757,7 @@ wire.memo_functions.send=function( memo )
 	return memo -- chainable
 end
 
---[[#lua.wire.memo.send
+--[[#lua.wetgenes.wire.memo.send
 
 	memo:reply()
 
@@ -777,7 +777,7 @@ wire.memo_functions.reply=function( memo )
 end
 
 
---[[#lua.wire.memo.resolve
+--[[#lua.wetgenes.wire.memo.resolve
 
 	result = memo:resolve()
 	result = wire.memo(...):resolve()
@@ -836,7 +836,7 @@ wire.memo_functions.resolve=function( memo )
 end
 
 
---[[#lua.wire.fifo.peek
+--[[#lua.wetgenes.wire.fifo.peek
 
 	bool = fifo:peek()
 	bool = thread:peek()
@@ -861,7 +861,7 @@ end
 wire.thread_functions.peek=wire.fifo_functions.peek
 
 
---[[#lua.wire.fifo.pull
+--[[#lua.wetgenes.wire.fifo.pull
 
 	memo = fifo:pull()
 	memo = thread:pull()
@@ -912,7 +912,7 @@ end
 wire.thread_functions.pull=wire.fifo_functions.pull
 
 
---[[#lua.wire.fifo.push
+--[[#lua.wetgenes.wire.fifo.push
 
 	fifo:push(memo)
 	thread:push(memo)
@@ -929,7 +929,7 @@ wire.fifo_functions.push=function( fifo , memo )
 end
 wire.thread_functions.push=wire.fifo_functions.push
 
---[[#lua.wire.fifo.wait
+--[[#lua.wetgenes.wire.fifo.wait
 
 	fifo:wait(secs)
 	thread:wait(secs)
@@ -946,7 +946,7 @@ end
 wire.thread_functions.wait=wire.fifo_functions.wait
 
 
---[[#lua.wire.serialize
+--[[#lua.wetgenes.wire.serialize
 
 	luastr = wire.serialize(tab)
 	luastr = wire.serialize(tab,{ indent="\t" , newline="\n" , errors=true  })
@@ -1057,7 +1057,7 @@ wire.serialize = function(o,opts)
 end
 
 
---[[#lua.wire.prepare_start
+--[[#lua.wetgenes.wire.prepare_start
 
 	start = wire.prepare_start( { start="..." , globals={} } )
 
@@ -1101,7 +1101,7 @@ end )
 	return table.concat(ret)
 end
 
---[[#lua.wire.do_start
+--[[#lua.wetgenes.wire.do_start
 
 Wrapper code used in a new thread to set things up and handle errors 
 etc.
@@ -1141,7 +1141,7 @@ wire.do_start=function( func )
 
 end
 
---[[#lua.wire.tasks
+--[[#lua.wetgenes.wire.tasks
 
 	wire.tasks(name,count,code)
 	wire.tasks(name,0)
@@ -1158,7 +1158,7 @@ count is the number of tasks we want, call with 0 and we will halt all
 named tasks.
 
 code is the string of lua code to run in each task, eg for http tasks 
-it would be "require('wiretasks').http_code()" to run the wire.http_code 
+it would be "require('wetgenes.wiretasks').http_code()" to run the wire.http_code 
 function in each task. If count zero, this may be skipped.
 
 We will try and reuse old tasks, if stopping and starting, but really 
@@ -1246,7 +1246,7 @@ wire.tasks=function(name,count,code,globals)
 	return result
 end
 
---[[#lua.wire.house_code
+--[[#lua.wetgenes.wire.house_code
 
 The message loop code we run in the house thread (-2) to synchronize 
 process wide task names and handles.

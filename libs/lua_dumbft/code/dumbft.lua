@@ -1,7 +1,7 @@
 
 local fats=require("wetgenes.fats")
 
-local core=require("dumbft.core")
+local core=require("wetgenes.dumbft.core")
 
 --module
 local M={ modname=(...) }

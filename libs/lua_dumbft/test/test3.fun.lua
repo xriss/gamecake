@@ -1,5 +1,5 @@
 
-local dumbft=require("dumbft")
+local dumbft=require("wetgenes.dumbft")
 
 -- expect this many s16 audio samples per second
 local sample_rate=48000

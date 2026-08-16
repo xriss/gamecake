@@ -1087,7 +1087,7 @@ static int lua_wire_freepack(lua_State *L)
 open library.
 
 */
-LUALIB_API int luaopen_wire_core (lua_State *l)
+LUALIB_API int luaopen_wetgenes_wire_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{

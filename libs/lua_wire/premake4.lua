@@ -15,5 +15,5 @@ end
 
 links { "lib_lua" }
 
-KIND{lua="wire.core"}
+KIND{lua="wetgenes.wire.core"}
 

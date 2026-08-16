@@ -20,7 +20,7 @@ local M={ modname=(...) }
 package.loaded[M.modname]=M
 local box3d=M
 
-local core=require("box3d.core")
+local core=require("wetgenes.box3d.core")
 
 -- meta methods bound to the various objects
 

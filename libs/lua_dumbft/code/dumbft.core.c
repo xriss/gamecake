@@ -175,7 +175,7 @@ int len;
 	return 1;
 }
 
-LUALIB_API int luaopen_dumbft_core (lua_State *l)
+LUALIB_API int luaopen_wetgenes_dumbft_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{

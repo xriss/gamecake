@@ -2609,7 +2609,7 @@ static int lua_b3_assert (const char *condition, const char *fileName, int lineN
 open library.
 
 */
-LUALIB_API int luaopen_box3d_core (lua_State *l)
+LUALIB_API int luaopen_wetgenes_box3d_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{

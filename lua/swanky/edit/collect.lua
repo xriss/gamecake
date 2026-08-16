@@ -336,7 +336,7 @@ M.bake=function(oven,collect)
 			rows[#rows+1]={ key=k , values=v }
 		end
 
-wire.tasks("collect",1,[[ require("wiretasks").sqlite_code(); ]],{
+wire.tasks("collect",1,[[ require("wetgenes.wiretasks").sqlite_code(); ]],{
 			sqlite_filename=sqlite_filename,
 			sqlite_pragmas=[[ PRAGMA synchronous=0; ]],	
 			sqlite_tables=M.tables,

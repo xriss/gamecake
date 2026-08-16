@@ -4,15 +4,16 @@
 -- http://en.wikipedia.org/wiki/MIT_License
 --
 
---[[#lua.wiretasks
+--[[#lua.wetgenes.wiretasks
 
-	local wiretasks=require("wiretasks")
+	local wiretasks=require("wetgenes.wiretasks")
 
 This is a small collection of useful tasks for running via wire. Each 
 task has its own specific module dependencies, eg lua socket is needed 
 for http fetching. This module is usually used in a task start code 
-string passed to wire.tasks. So "require('wiretasks').http_code()" 
-would be used to start the http task.
+string passed to wire.tasks. So 
+"require('wetgenes.wiretasks').http_code()" would be used to start the 
+http task.
 
 We also include some wrapper functions that make use of memos and 
 require certain tasks to already be running.
@@ -27,9 +28,9 @@ local M={ modname=(...) }
 package.loaded[M.modname]=M
 local wiretasks=M
 
---[[#lua.wiretasks.http_code
+--[[#lua.wetgenes.wiretasks.http_code
 
-	wire.tasks("http",4,"require('wiretasks').http_code()")
+	wire.tasks("http",4,"require('wetgenes.wiretasks').http_code()")
 
 	result = wire.memo({
 		fifo=wire.fifo("http"),
@@ -242,7 +243,7 @@ end
 
 --[[#lua.wetgenes.wiretasks.sqlite_code
 
-	wire.tasks("sqlite",1,"require('wiretasks').sqlite_code()",{
+	wire.tasks("sqlite",1,"require('wetgenes.wiretasks').sqlite_code()",{
 			sqlite_filename = "./test.sql" ,
 			sqlite_pragmas = "" ,
 		})
