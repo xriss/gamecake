@@ -3293,10 +3293,10 @@
   {
    "body": "<pre><code>local wgrdpaint=require(&quot;wetgenes.grdpaint&quot;)\n</code></pre>\n<p>We use wgrdpaint as the local name of this library.</p>\n<p>Add extra functionality to wetgenes.grd primarily these are functions that \nare used by swanky paint to manage its internal data.</p>\n<p>Primarily we add a concept of &quot;layers&quot; and &quot;history&quot; these interfaces \nare added to a grd via a new object that lives inside the grd table and \nbinds them together.</p>\n<p>EG grd.history contains history data and functions.</p>\n<p>As these are written first for swankypaint they may only work with \nindexed images and are currently in state of flux so may take a while \nto settle down.</p>\n",
    "count": 1,
-   "file": "../lua/wetgenes/grdpaint.lua",
+   "file": "../libs/lua_grd/code/grdpaint.lua",
    "line": 6,
    "name": "lua.wetgenes.grdpaint",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grdpaint.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grdpaint.lua"
   }
  ],
  "_output_chunkname": "html",

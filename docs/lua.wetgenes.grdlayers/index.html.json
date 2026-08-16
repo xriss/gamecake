@@ -3293,10 +3293,10 @@
   {
    "body": "<pre><code>local wgrdlayers=require(&quot;wetgenes.grdlayers&quot;)\n</code></pre>\n<p>We use wgrdlayers as the local name of this library.</p>\n<p>Add extra functionality to wetgenes.grd primarily these are functions that \nare used by swanky paint to manage its internal data.</p>\n",
    "count": 1,
-   "file": "../lua/wetgenes/grdlayers.lua",
+   "file": "../libs/lua_grd/code/grdlayers.lua",
    "line": 6,
    "name": "lua.wetgenes.grdlayers",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grdlayers.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grdlayers.lua"
   }
  ],
  "_output_chunkname": "html",

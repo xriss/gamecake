@@ -3293,10 +3293,10 @@
   {
    "body": "<pre><code>local history=grdhistory.history(grd)\n</code></pre>\n<p>Create and bind a history object to the given grd object. The history \nlives inside the grd and can be accesd as grd.history just as the grd can \nbe accessed through the history as history.grd</p>\n",
    "count": 1,
-   "file": "../lua/wetgenes/grdhistory.lua",
+   "file": "../libs/lua_grd/code/grdhistory.lua",
    "line": 102,
    "name": "lua.wetgenes.grdhistory.history",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grdhistory.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grdhistory.lua"
   }
  ],
  "_output_chunkname": "html",

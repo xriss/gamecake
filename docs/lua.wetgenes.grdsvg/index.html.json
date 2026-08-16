@@ -3293,18 +3293,18 @@
   {
    "body": "<pre><code>wgrdsvg=require(&quot;wetgenes.grdsvg&quot;)\n</code></pre>\n<p>Build svg files from grd data (bitmaps)</p>\n",
    "count": 2,
-   "file": "../lua/wetgenes/grdsvg.lua",
+   "file": "../libs/lua_grd/code/grdsvg.lua",
    "line": 8,
    "name": "lua.wetgenes.grdsvg",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grdsvg.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grdsvg.lua"
   },
   {
    "body": "<pre><code>local svgstring=wgrdsvg.string(grd,opts)\n</code></pre>\n<p>Return an svg formated string that represents the input grd which must \nbe an indexed (8bit) format. Each pixel will be converted into a filled \nsvg rectangle element. Opts can contain the following options to \ncontrol the generation of the svg file.</p>\n<pre><code>opts.skip_transparent_pixels=true\n</code></pre>\n<p>Do not export a rectangle for fully transparent pixels.</p>\n<pre><code>opts.scalex=1\n</code></pre>\n<p>Width of each exported pixel.</p>\n<pre><code>opts.scaley=1\n</code></pre>\n<p>Height of each exported pixel.</p>\n",
    "count": 1,
-   "file": "../lua/wetgenes/grdsvg.lua",
+   "file": "../libs/lua_grd/code/grdsvg.lua",
    "line": 21,
    "name": "lua.wetgenes.grdsvg.string",
-   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/grdsvg.lua"
+   "url": "https://github.com/xriss/gamecake/blob/master/libs/lua_grd/code/grdsvg.lua"
   }
  ],
  "_output_chunkname": "html",
