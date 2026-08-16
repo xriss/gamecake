@@ -2,8 +2,9 @@
 
 module(...,package.seeall)
 
-local glslang=require("glslang")
-
+--optional
+local glslang ; pcall(function() glslang=require("glslang") end)
+if glslang then
 
 function test_pp()
 
@@ -34,5 +35,7 @@ print( test );
 ]]) )
 
 
+
+end
 
 end

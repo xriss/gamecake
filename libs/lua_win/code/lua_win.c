@@ -14,7 +14,7 @@
 
 #include "SDL.h"
 
-#include "../../lua_sdl2/luasdl2/src/window.h"
+//#include "../../lua_sdl2/luasdl2/src/window.h"
 
 #if (defined __EMSCRIPTEN__)
 #include "emscripten.h"
@@ -240,10 +240,17 @@ static SDL_HitTestResult SDLCALL
 }
 
 
+typedef struct {
+	int		mustdelete;		/*! tells if we should delete it */
+	void		*data;			/*! the data itself */
+} CommonUserdata;
 
 int lua_wetwin_sdl_attach_resize_hax(lua_State *l)
 {
-	SDL_Window *win = commonGetAs(l, 1, WindowName, SDL_Window *);
+//	SDL_Window *win = commonGetAs(l, 1, WindowName, SDL_Window *);
+
+// danger danger
+	SDL_Window *win = (SDL_Window *)(((CommonUserdata*)lua_touserdata(l,1))->data);
 	
 	SDL_SetWindowHitTest(win, hitTest, NULL);
 

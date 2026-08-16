@@ -206,6 +206,7 @@ dependencies={
  "gamecake-wire",
  "gamecake-pack",
  "gamecake-fats",
+ "gamecake-chipmunk",
  "gamecake-box2d",
  "gamecake-gles",
  "gamecake-al",

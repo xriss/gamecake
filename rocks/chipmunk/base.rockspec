@@ -40,6 +40,9 @@ build={
             "lua_chipmunk",
             "lua_chipmunk/master/include",
          },
+         defines={
+			"NDEBUG=1",
+         },
       },
  },
  platform={
