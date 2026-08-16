@@ -12,7 +12,7 @@ local wstr=require("wetgenes.string")
 local tardis=require("wetgenes.tardis")
 local V2,V3,V4,M2,M3,M4,Q4=tardis:export("V2","V3","V4","M2","M3","M4","Q4")
 
-local glslang=require("glslang")
+local glslang=require("wetgenes.glslang")
 
 
 local core=require("gles.core")

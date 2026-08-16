@@ -1,7 +1,7 @@
 -- copy all globals into locals, some locals are prefixed with a G to reduce name clashes
 --local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
---[[#lua.glslang
+--[[#lua.wetgenes.glslang
 
 Manage string embedding and the glsl compiler and language options.
 
@@ -21,7 +21,7 @@ local core ; pcall(function() core=require("wetgenes.glslang.core") end)
 local glslang={}
 
 
---[[#lua.glslang.yank_shader_versions
+--[[#lua.wetgenes.glslang.yank_shader_versions
 
 parse a shader source and yank any #version out of the source and into a table
 this allows multiple attempts at compiling the same source using different #versions
@@ -59,7 +59,7 @@ function glslang.yank_shader_versions(src,default_version)
 end
 
 
---[[#lua.glslang.pp
+--[[#lua.wetgenes.glslang.pp
 
 	code,err = glslang.pp(code,err)
 
@@ -76,7 +76,7 @@ glslang.pp=function(code,cbinc)
 end
 
 
---[[#lua.glslang.lint_gles2
+--[[#lua.wetgenes.glslang.lint_gles2
 
 	verr,ferr = glslang.lint_gles2(vcode,fcode)
 
@@ -102,7 +102,7 @@ end
 
 
 
---[[#lua.glslang.parse_chunks
+--[[#lua.wetgenes.glslang.parse_chunks
 
 	shaders=glslang.shader_chunks(text,filename,headers,flags)
 
@@ -187,7 +187,7 @@ glslang.parse_chunks=function(text,filename,headers,flags)
 	return headers,map -- map is just the headers we added
 end
 
---[[#lua.glslang.replace_include
+--[[#lua.wetgenes.glslang.replace_include
 
 process #include statements in src with strings found in the headers table
 
