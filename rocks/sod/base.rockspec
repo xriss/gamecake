@@ -1,16 +1,16 @@
 build={
  modules={
-      ["wetgenes.ogg"]="lua_ogg/code/ogg.lua",
-      ["wetgenes.ogg.core"]={
+      ["wetgenes.sod"]="lua_sod/code/sod.lua",
+      ["wetgenes.sod.core"]={
          sources={
-            "lua_ogg/code/lua_ogg.c",
+            "lua_sod/code/lua_sod.c",
+            "lua_sod/code/sod.c",
+            "lua_sod/code/sod_wav.c",
          },
          incdirs={
-            "lua_ogg",
+            "lua_sod",
             "lib_hacks/code",
-            "$(VORBIS_LIB_INCDIR)",
          },
-         libraries = {"vorbis","ogg"},
       },
  },
  platform={
@@ -19,21 +19,13 @@ build={
  },
  type="builtin",
 }
-
-external_dependencies = {
-   VORBIS_LIB = {
-      header = "vorbis/codec.h",
-   },
-}
-
-
 dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
  homepage="https://xriss.github.io/gamecake/docs/lua.wetgenes/",
  license="MIT",
- summary="read ogg vorbis audio files",
+ summary="Read wav audio files",
  detailed=[[
 
 https://github.com/xriss/gamecake

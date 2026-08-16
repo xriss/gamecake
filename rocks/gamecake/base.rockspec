@@ -199,6 +199,9 @@ external_dependencies = {
 }
 dependencies={
  "lua >= 5.1 <= 5.2",
+
+-- generic modules
+
  "luautf8",
  "luafilesystem",
  "luaposix",
@@ -212,14 +215,22 @@ dependencies={
  "Lrexlib-PCRE",
  "djon",
  "Lua-SDL2",
- "gamecake-grd",
- "gamecake-wire",
- "gamecake-pack",
- "gamecake-fats",
- "gamecake-chipmunk",
- "gamecake-box2d",
- "gamecake-gles",
+
+-- custom gamecake modules
+
  "gamecake-al",
+ "gamecake-box2d",
+ "gamecake-chipmunk",
+ "gamecake-fats",
+ "gamecake-gles",
+ "gamecake-grd",
+ "gamecake-ogg",
+ "gamecake-opus",
+ "gamecake-pack",
+ "gamecake-sod",
+ "gamecake-win",
+ "gamecake-wire",
+ 
 }
 description={
  homepage="https://xriss.github.io/gamecake/docs/lua/",

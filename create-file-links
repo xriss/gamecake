@@ -31,6 +31,7 @@ ln -f lua/al.lua       libs/lua_al/code/al.lua
 ln -f lua/alc.lua      libs/lua_al/code/alc.lua
 ln -f lua/lanes.lua    libs/lua_lanes/lanes/src/lanes.lua
 
+ln -f lua/wetgenes/sod.lua      libs/lua_sod/code/sod.lua
 ln -f lua/wetgenes/midi.lua     libs/lua_midi/code/midi.lua
 ln -f lua/wetgenes/tardis.lua   libs/lua_tardis/code/tardis.lua
 ln -f lua/wetgenes/freetype.lua libs/lua_freetype/code/freetype.lua
