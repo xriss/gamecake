@@ -54,13 +54,14 @@ ln -f lua/wetgenes/pack.lua     libs/lua_pack/code/pack.lua
 ln -f lua/wetgenes/fats.lua     libs/lua_fats/code/fats.lua
 ln -f lua/wetgenes/ogg.lua      libs/lua_ogg/code/ogg.lua
 ln -f lua/djon.lua              libs/lua_djon/git/lua/djon.lua
-ln -f lua/dumbft.lua            libs/lua_dumbft/code/dumbft.lua
 
-ln -f lua/box2d.lua            libs/lua_boxxd/code/box2d.lua
-ln -f lua/box3d.lua            libs/lua_boxxd/code/box3d.lua
+ln -f lua/wetgenes/dumbft.lua            libs/lua_dumbft/code/dumbft.lua
 
-ln -f lua/wire.lua            libs/lua_wire/code/wire.lua
-ln -f lua/wiretasks.lua       libs/lua_wire/code/wiretasks.lua
+ln -f lua/wetgenes/box2d.lua            libs/lua_boxxd/code/box2d.lua
+ln -f lua/wetgenes/box3d.lua            libs/lua_boxxd/code/box3d.lua
+
+ln -f lua/wetgenes/wire.lua            libs/lua_wire/code/wire.lua
+ln -f lua/wetgenes/wiretasks.lua       libs/lua_wire/code/wiretasks.lua
 
 
 echo "listing all linked files"
