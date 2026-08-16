@@ -1,6 +1,17 @@
 build={
  modules={
 
+      ["wetgenes.tardis"]     = "lua_tardis/code/tardis.lua",
+      ["wetgenes.tardis.core"]={
+         sources={
+            "lua_tardis/code/lua_tardis.c",
+         },
+         incdirs={
+            "lua_tardis",
+            "lib_hacks/code",
+         },
+      },
+
 -- put minimal junk in the lua root
 
       ["global"]              = "lua_src/global.lua",
@@ -28,7 +39,6 @@ build={
       ["wetgenes.spew"]       = "lua_src/wetgenes/spew.lua",
       ["wetgenes.string"]     = "lua_src/wetgenes/string.lua",
       ["wetgenes.syncs"]      = "lua_src/wetgenes/syncs.lua",
-      ["wetgenes.tardis"]     = "lua_src/wetgenes/tardis.lua",
       ["wetgenes.tongues"]    = "lua_src/wetgenes/tongues.lua",
       ["wetgenes.tsv"]        = "lua_src/wetgenes/tsv.lua",
       ["wetgenes.zipsloader"] = "lua_src/wetgenes/zipsloader.lua",

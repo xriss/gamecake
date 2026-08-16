@@ -108,10 +108,6 @@ void grdinfo_set(  struct grd_info *gi , struct grd_info *ga )
 	gi->data=ga->data;
 }
 	
-uint8_t * grdinfo_get_data( struct grd_info *gi , int32_t x, int32_t y, int32_t z)
-{
-	return gi->data+(z*gi->zscan)+(y*gi->yscan)+(x*gi->xscan);
-}
 
 /*
 uint8_t * grdinfo_get_data( struct grd_info *ga  , float x, float y, float z)

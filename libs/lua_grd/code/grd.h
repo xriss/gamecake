@@ -145,7 +145,13 @@ struct grd_info
 
 void grdinfo_reset(struct grd_info *gi);
 void grdinfo_set(  struct grd_info *gi , struct grd_info *ga );
-uint8_t * grdinfo_get_data( struct grd_info *gi , int32_t x, int32_t y, int32_t z);
+
+//uint8_t * grdinfo_get_data( struct grd_info *gi , int32_t x, int32_t y, int32_t z);
+
+static uint8_t * grdinfo_get_data( struct grd_info *gi , int32_t x, int32_t y, int32_t z)
+{
+	return gi->data+(z*gi->zscan)+(y*gi->yscan)+(x*gi->xscan);
+}
 
 
 //
