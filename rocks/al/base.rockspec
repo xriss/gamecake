@@ -18,6 +18,7 @@ build={
    libdirs={
     "$(SDL_LIB_LIBDIR)",
    },
+   libraries = {"SDL2"},
   },
   alc="lua_al/code/alc.lua",
   ["alc.core"]={
@@ -37,6 +38,7 @@ build={
    libdirs={
     "$(SDL_LIB_LIBDIR)",
    },
+   libraries = {"SDL2"},
   },
  },
  platform={
