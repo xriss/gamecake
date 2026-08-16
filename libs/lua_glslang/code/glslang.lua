@@ -15,7 +15,7 @@ local wstr=require("wetgenes.string")
 
 
 -- the core is optional
-local core ; pcall(function() core=require("glslang.core") end)
+local core ; pcall(function() core=require("wetgenes.glslang.core") end)
 
 
 local glslang={}

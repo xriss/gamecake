@@ -17,5 +17,5 @@ LUALIB_API int luaopen_glslang_core (lua_State *l);
 
 
 
-#define LUA_glslang_LIB_NAME "glslang.core"
+#define LUA_glslang_LIB_NAME "wetgenes.glslang.core"
 

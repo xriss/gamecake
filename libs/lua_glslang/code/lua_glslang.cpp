@@ -332,7 +332,7 @@ static int lua_glslang_pp(lua_State *l)
 Open the lua library.
 
 */
-extern "C" int luaopen_glslang_core (lua_State *l)
+extern "C" int luaopen_wetgenes_glslang_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{

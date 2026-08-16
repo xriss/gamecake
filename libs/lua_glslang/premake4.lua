@@ -28,4 +28,4 @@ buildoptions{"-std=c++11"}
 
 links { "lib_lua" }
 
-KIND{kind="lua",name="glslang_core",lua="glslang.core"}
+KIND{kind="lua",name="wetgenes_glslang_core",lua="wetgenes.glslang.core"}
