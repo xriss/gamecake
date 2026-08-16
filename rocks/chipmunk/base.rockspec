@@ -1,0 +1,63 @@
+build={
+ modules={
+      ["wetgenes.chipmunk"]="lua_chipmunk/code/chipmunk.lua",
+      ["wetgenes.chipmunk.core"]={
+         sources={
+			"lua_chipmunk/code/lua_chipmunk.c",
+			"lua_chipmunk/master/src/chipmunk.c",
+			"lua_chipmunk/master/src/cpArbiter.c",
+			"lua_chipmunk/master/src/cpArray.c",
+			"lua_chipmunk/master/src/cpBBTree.c",
+			"lua_chipmunk/master/src/cpBody.c",
+			"lua_chipmunk/master/src/cpCollision.c",
+			"lua_chipmunk/master/src/cpConstraint.c",
+			"lua_chipmunk/master/src/cpDampedRotarySpring.c",
+			"lua_chipmunk/master/src/cpDampedSpring.c",
+			"lua_chipmunk/master/src/cpGearJoint.c",
+			"lua_chipmunk/master/src/cpGrooveJoint.c",
+			"lua_chipmunk/master/src/cpHashSet.c",
+			"lua_chipmunk/master/src/cpMarch.c",
+			"lua_chipmunk/master/src/cpPinJoint.c",
+			"lua_chipmunk/master/src/cpPivotJoint.c",
+			"lua_chipmunk/master/src/cpPolyline.c",
+			"lua_chipmunk/master/src/cpPolyShape.c",
+			"lua_chipmunk/master/src/cpRatchetJoint.c",
+			"lua_chipmunk/master/src/cpRobust.c",
+			"lua_chipmunk/master/src/cpRotaryLimitJoint.c",
+			"lua_chipmunk/master/src/cpShape.c",
+			"lua_chipmunk/master/src/cpSimpleMotor.c",
+			"lua_chipmunk/master/src/cpSlideJoint.c",
+			"lua_chipmunk/master/src/cpSpace.c",
+			"lua_chipmunk/master/src/cpSpaceComponent.c",
+			"lua_chipmunk/master/src/cpSpaceDebug.c",
+			"lua_chipmunk/master/src/cpSpaceHash.c",
+			"lua_chipmunk/master/src/cpSpaceQuery.c",
+			"lua_chipmunk/master/src/cpSpaceStep.c",
+			"lua_chipmunk/master/src/cpSpatialIndex.c",
+			"lua_chipmunk/master/src/cpSweep1D.c",
+         },
+         incdirs={
+            "lua_chipmunk",
+            "lua_chipmunk/master/include",
+         },
+      },
+ },
+ platform={
+  windows={
+  },
+ },
+ type="builtin",
+}
+dependencies={
+ "lua >= 5.1 <= 5.2",
+}
+description={
+ homepage="https://xriss.github.io/gamecake/docs/lua.chipmunk/",
+ license="MIT",
+ summary="chipmunk",
+ detailed=[[
+
+A lua binding to chipmunk, includes chipmunk source build.
+
+ ]],
+}

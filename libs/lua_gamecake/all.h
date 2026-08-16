@@ -45,7 +45,7 @@
 #endif
 
 
-#include <stdint.h>’
+#include <stdint.h>
 
 
 #ifdef __cplusplus

@@ -45,7 +45,7 @@
 #endif
 
 
-#include <stdint.h>’
+#include <stdint.h>
 
 //#include "../lib_wet/util/f32_math.h"
 
