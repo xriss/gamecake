@@ -12,7 +12,7 @@
 
 
 // hax
-#include "lua_toluserdata.c"
+#include "hax_toluserdata.c"
 
 // 512 vec4 is 128 mat4
 #define MAX_UNIFORM_V4_LEN 512
@@ -73,7 +73,7 @@ size_t len=0x7fffffff; // fake max length if we have no idea what it is (light u
 	else
 	if(lua_isuserdata(l,idx)) // real user data only because we first checked for light
 	{
-		ptr=(const unsigned char*)lua_toluserdata(l,idx,&len);
+		ptr=(const unsigned char*)hax_toluserdata(l,idx,&len);
 	}
 	
 	if(plen) { *plen=len; } //write out len if it was asked for

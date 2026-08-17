@@ -18,7 +18,7 @@
 
 
 // hax
-#include "lua_toluserdata.c"
+#include "hax_toluserdata.c"
 
 static uint8_t * lua_toptr (lua_State *L, int idx, size_t *len) {
 	uint8_t *p=(uint8_t*)lua_tolstring(L,idx,len);
@@ -26,7 +26,7 @@ static uint8_t * lua_toptr (lua_State *L, int idx, size_t *len) {
 	{
 		if(lua_islightuserdata(L,idx))
 		{
-			p=lua_toluserdata(L,idx,len);
+			p=hax_toluserdata(L,idx,len);
 			if(len)
 			{
 				if(lua_isnumber(L,idx+1))
@@ -37,7 +37,7 @@ static uint8_t * lua_toptr (lua_State *L, int idx, size_t *len) {
 		}
 		else
 		{
-			p=lua_toluserdata(L,idx,len);
+			p=hax_toluserdata(L,idx,len);
 		}
 	}
 	return p;

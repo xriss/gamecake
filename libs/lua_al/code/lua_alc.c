@@ -47,12 +47,12 @@ alcGetProcAddress
 */
 
 
-// hax to be honest, all this to create a lua_toluserdata function
+// hax to be honest, all this to create a hax_toluserdata function
 // if lua or luajit change then this will break
 // it is however still better than not having any bounds checking
 
 #include <stdint.h>
-#include "lua_toluserdata.c"
+#include "hax_toluserdata.c"
 
 
 
@@ -272,7 +272,7 @@ const uint8_t *tmp=0;
 	
 	if(lua_isuserdata(l,2)) // must check for light first...
 	{
-		ptr=lua_toluserdata(l,2,&lenmax);
+		ptr=hax_toluserdata(l,2,&lenmax);
 		len=lua_tonumber(l,3);
 		if(len>lenmax) { len=lenmax; }
 	}

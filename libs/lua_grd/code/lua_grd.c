@@ -18,7 +18,7 @@ const char *lua_grd_ptr_name="grd*ptr";
 typedef struct grd * part_ptr ;
 
 // hax
-#include "lua_toluserdata.c"
+#include "hax_toluserdata.c"
 static void * luaL_wetestudata(lua_State *L, int index, const char *tname)
 {
 	void *p = lua_touserdata(L, index);
@@ -265,7 +265,7 @@ int32_t fmt=0;
 
 	lua_getfield(l,2,"data");
 	if(lua_isstring(l,-1))   { data=(const uint8_t*)lua_tolstring(l,-1,&data_len); }
-	if(lua_isuserdata(l,-1)) { data=lua_toluserdata(l,-1,&data_len); }
+	if(lua_isuserdata(l,-1)) { data=hax_toluserdata(l,-1,&data_len); }
 	lua_pop(l,1);
 
 	if(filename)

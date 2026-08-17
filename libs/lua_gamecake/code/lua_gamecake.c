@@ -19,7 +19,7 @@
 
 
 // hax
-#include "lua_toluserdata.c"
+#include "hax_toluserdata.c"
 
 #define SIZEOF_VB (6*5*4*256)
 
@@ -65,7 +65,7 @@ int i;
 int image=0;
 
 	lua_rawgeti(l,1,0); // get our userdata if it already exists
-	ud=(struct gamecake_fontdata *)lua_toluserdata(l,-1,&dlen);
+	ud=(struct gamecake_fontdata *)hax_toluserdata(l,-1,&dlen);
 	lua_pop(l,1);
 	if(!ud) // need to allocate
 	{
@@ -128,7 +128,7 @@ size_t dlen=0;
 int i;
 
 	lua_rawgeti(l,1,0); // get our userdata if it already exists
-	ud=(struct gamecake_canvas_font *)lua_toluserdata(l,-1,&dlen);
+	ud=(struct gamecake_canvas_font *)hax_toluserdata(l,-1,&dlen);
 	lua_pop(l,1);
 	if(!ud) // need to allocate
 	{
@@ -140,7 +140,7 @@ int i;
 	
 	lua_getfield(l,1,"dat"); // fontdata
 	lua_rawgeti(l,-1,0);
-	ud->fontdata=(struct gamecake_fontdata *)lua_toluserdata(l,-1,0);
+	ud->fontdata=(struct gamecake_fontdata *)hax_toluserdata(l,-1,0);
 	lua_pop(l,2);
 		
 	lua_getfield(l,1,"x"   ); ud->x   =(float)lua_tonumber(l,-1); lua_pop(l,1);
@@ -185,7 +185,7 @@ int vid,tid;
 //	tid=(int)luaL_checknumber(l,4);
 
 	lua_rawgeti(l,1,0); // get our userdata if it already exists
-	ud=(struct gamecake_canvas_font *)lua_toluserdata(l,-1,0);
+	ud=(struct gamecake_canvas_font *)hax_toluserdata(l,-1,0);
 	lua_pop(l,1);
 	
 	text=(unsigned char *)luaL_checkstring(l,2);

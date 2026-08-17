@@ -24,7 +24,7 @@
 #include <stdint.h>
 
 // hax
-#include "lua_toluserdata.c"
+#include "hax_toluserdata.c"
 
 extern unsigned char * lua_pack_to_buffer (lua_State *l, int idx, size_t *len)
 {
@@ -64,7 +64,7 @@ extern unsigned char * lua_pack_to_buffer (lua_State *l, int idx, size_t *len)
 		return p;
 	}
 	
-	return lua_toluserdata(l,idx,len);
+	return hax_toluserdata(l,idx,len);
 }
 
 // same as lua_pack_to_buffer but also allows strings
@@ -115,7 +115,7 @@ const unsigned char *p;
 			return (const unsigned char *) lua_tostring(l,idx);
 		}
 	}
-	return (const unsigned char *) lua_toluserdata(l,idx,len);
+	return (const unsigned char *) hax_toluserdata(l,idx,len);
 }
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/

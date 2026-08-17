@@ -231,7 +231,7 @@ static struct zzip_plugin_mem_io xio_mem={
 };
 
 // hax
-#include "lua_toluserdata.c"
+#include "hax_toluserdata.c"
 
 static int zip_open_mem (lua_State *L) {
   ZZIP_FILE** inf;
@@ -256,7 +256,7 @@ static int zip_open_mem (lua_State *L) {
 	if(lua_isuserdata(L,1))
 	{
 		size_t t;
-		f->data = lua_toluserdata(L,1, &t);
+		f->data = hax_toluserdata(L,1, &t);
 		f->size=t;
 		
 //		f->data = lua_touserdata(L, 1);

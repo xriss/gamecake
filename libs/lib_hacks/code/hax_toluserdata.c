@@ -6,13 +6,13 @@
 // even more evil hack
 // we create some userdata of various sizes and find where lua or luajit is keeping the size value.
 // then we remember that location
-static int userdata_size_offset=0;
-static int get_userdata_size_offset( lua_State *l )
+static int hax_userdata_size_offset=0;
+static int hax_get_userdata_size_offset( lua_State *l )
 {
 	int i;
 	uint32_t *p;
 	uint32_t t;
-	if(userdata_size_offset==0) // go fish
+	if(hax_userdata_size_offset==0) // go fish
 	{
 		for(i=-1;i>-16;i--)
 		{
@@ -31,21 +31,21 @@ static int get_userdata_size_offset( lua_State *l )
 					lua_pop(l,1);
 					if( t == 19 )
 					{
-						userdata_size_offset=i;
+						hax_userdata_size_offset=i;
 						break;
 					}
 				}
 			}
 		}
 	}
-	return userdata_size_offset;
+	return hax_userdata_size_offset;
 }
 
 
 
-static unsigned char * lua_toluserdata (lua_State *l, int idx, size_t *len)
+static unsigned char * hax_toluserdata (lua_State *l, int idx, size_t *len)
 {
-	int hax=get_userdata_size_offset(l);
+	int hax=hax_get_userdata_size_offset(l);
 	uint32_t *t=(uint32_t*)lua_touserdata(l,idx);
 	if(!t) { return 0; }
 	if(len)
