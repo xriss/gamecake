@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 773,
+   "count": 735,
    "name": "lua"
   },
   {
@@ -330,7 +330,7 @@
    "name": "lua.box3d.world.step"
   },
   {
-   "count": 718,
+   "count": 680,
    "name": "lua.wetgenes"
   },
   {
@@ -528,158 +528,6 @@
   {
    "count": 1,
    "name": "lua.wetgenes.box2d.world.step"
-  },
-  {
-   "count": 38,
-   "name": "lua.wetgenes.bullet"
-  },
-  {
-   "count": 9,
-   "name": "lua.wetgenes.bullet.body"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.body.cgroup"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.body.change_shape"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.body.cmask"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.body.force"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.body.gravity"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.body.impulse"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.body.overlaps"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.body.support"
-  },
-  {
-   "count": 28,
-   "name": "lua.wetgenes.bullet.world"
-  },
-  {
-   "count": 14,
-   "name": "lua.wetgenes.bullet.world.body"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.active"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.angular_factor"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.angular_velocity"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.ccd"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.custom_material_callback"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.damping"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.destroy"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.factor"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.friction"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.restitution"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.sleep"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.transform"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.body.velocity"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.contacts"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.destroy"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.get"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.gravity"
-  },
-  {
-   "count": 2,
-   "name": "lua.wetgenes.bullet.world.mesh"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.mesh.destroy"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.ray_test"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.set"
-  },
-  {
-   "count": 3,
-   "name": "lua.wetgenes.bullet.world.shape"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.shape.destroy"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.shape.margin"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.status"
-  },
-  {
-   "count": 1,
-   "name": "lua.wetgenes.bullet.world.step"
   },
   {
    "count": 65,
