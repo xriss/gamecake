@@ -775,23 +775,12 @@ all_includes=all_includes or {
 	{"lua_sdl2",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_utf8",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_cmsgpack",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
---	{"lua_brimworkszip",WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_opus",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_wire",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
---	{"lua_bullet",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_chipmunk",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 -- boxxd will replace bullet and chipmunk but gonna keep chipmunk as its only tiny
 	{"lua_boxxd",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-
-
--- lanes has been replaced with wire
---	{"lua_lanes",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-
--- emcc needs a little bit of special sauce
---	{"lua_win_emcc",	nil			or		nil		or		EMCC		or		nil			or	nil		},
-
-
 
 
 --
@@ -811,20 +800,12 @@ all_includes=all_includes or {
 	{"lua_pgsql",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lib_pq",			nil			or		NIX		or		nil			or		nil			or	nil		},
 
---	{"lua_linenoise",	nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_posix",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_periphery",	nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_v4l2",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_sys",			WINDOWS		or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_glslang",		nil			or		NIX		or		nil			or		nil			or	nil		},
 	{"lua_midi",		nil			or		NIX		or		nil			or		nil			or	nil		},
-
-
--- hid is now in SDL
---	{"lua_hid",			nil			or		NIX		or		nil			or		nil			or	nil		},
---	{"lib_hidapi",		nil			or		NIX		or		nil			or		nil			or	nil		},
-
-
 
 
 -- this is probably luajit but may be lua 5.1
@@ -844,10 +825,8 @@ all_includes=all_includes or {
 	{"lib_vorbis",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_ogg",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_sqlite",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
---	{"lib_hacks",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_box2d",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lib_box3d",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
---	{"lib_c11threads",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- OSX will provide openal.
 	{LIB_OPENAL,		WINDOWS		or		NIX		or		EMCC 		or		ANDROID		or	nil		},

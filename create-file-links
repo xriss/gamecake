@@ -50,7 +50,6 @@ ln -f lua/wetgenes/win.lua      libs/lua_win/code/win.lua
 
 ln -f lua/wetgenes/v4l2.lua     libs/lua_v4l2/code/v4l2.lua
 ln -f lua/wetgenes/chipmunk.lua libs/lua_chipmunk/code/chipmunk.lua
-ln -f lua/wetgenes/bullet.lua   libs/lua_bullet/code/bullet.lua
 ln -f lua/wetgenes/pack.lua     libs/lua_pack/code/pack.lua
 ln -f lua/wetgenes/fats.lua     libs/lua_fats/code/fats.lua
 ln -f lua/wetgenes/ogg.lua      libs/lua_ogg/code/ogg.lua
