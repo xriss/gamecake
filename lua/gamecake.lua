@@ -13,8 +13,6 @@
 
 -- remorked the argument handling to be more lua less c but mostly the same results, probably
 
-
-
 -- Variables analogous to those in luaconf.h
 local LUA_INIT = "LUA_INIT"
 local LUA_PROGNAME = "lua"
@@ -25,30 +23,6 @@ local function LUA_QL(x) return "'" .. x .. "'" end
 -- Variables analogous to those in lua.h
 local LUA_RELEASE   = "Lua x.x.x"
 local LUA_COPYRIGHT = "Copyright (C) 1994-2008 Lua.org, PUC-Rio"
-
-
--- Note: don't allow user scripts to change implementation.
--- Check for globals with "cat lua.lua | luac -p -l - | grep ETGLOBAL"
-local _G = _G
-local assert = assert
-local collectgarbage = collectgarbage
-local loadfile = loadfile
-local loadstring = loadstring
-local pcall = pcall
-local rawget = rawget
-local select = select
-local tostring = tostring
-local type = type
-local unpack = unpack
-local xpcall = xpcall
-local io_stderr = io.stderr
-local io_stdout = io.stdout
-local io_stdin = io.stdin
-local string_format = string.format
-local string_sub = string.sub
-local os_getenv = os.getenv
-local os_exit = os.exit
-
 
 local progname = LUA_PROGNAME
 
@@ -194,7 +168,7 @@ local wzips=require("wetgenes.zips")
 
 local function print_usage()
 -- need to use print so we can overload it on android
-  print(string_format([=[
+  print(string.format([=[
 %s [options] [mountfile.zip|.cake|.apk] [script -- [script_args]]
 Script filenames that end in .fun.lua will auto run inside a fun oven.
 Mounting a zip will allow you to require lua code from within its lua directory.
@@ -211,7 +185,7 @@ end
 
 local function l_message (pname, msg)
 -- might need to replace global print, so do not cache (eg -landroid will mess with globals)
-	print( string.format("%s%s",pname and string_format("%s: ", pname) or "",msg) )
+	print( string.format("%s%s",pname and string.format("%s: ", pname) or "",msg) )
 end
 
 --------------------------------------------------------------------------
@@ -308,7 +282,7 @@ end
 local function incomplete (msg)
   if msg then
     local ender = LUA_QL("<eof>")
-    if string_sub(msg, -#ender) == ender then
+    if string.sub(msg, -#ender) == ender then
       return true
     end
   end
@@ -318,12 +292,12 @@ end
 
 local function pushline (firstline)
   local prmt = get_prompt(firstline)
-  io_stdout:write(prmt)
-  io_stdout:flush()
-  local b = io_stdin:read'*l'
+  io.stdout:write(prmt)
+  io.stdout:flush()
+  local b = io.stdin:read'*l'
   if not b then return end -- no input
-  if firstline and string_sub(b, 1, 1) == '=' then
-    return "return " .. string_sub(b, 2)  -- change '=' to `return'
+  if firstline and string.sub(b, 1, 1) == '=' then
+    return "return " .. string.sub(b, 2)  -- change '=' to `return'
   else
     return b
   end
@@ -365,14 +339,14 @@ local function dotty ()
     if status and result.n > 1 then  -- any result to print?
       status, msg = pcall(_G.print, unpack(result, 2, result.n))
       if not status then
-        l_message(progname, string_format(
+        l_message(progname, string.format(
             "error calling %s (%s)",
             LUA_QL("print"), msg))
       end
     end
   end
-  io_stdout:write"\n"
-  io_stdout:flush()
+  io.stdout:write"\n"
+  io.stdout:flush()
   progname = oldprogname
 end
 
@@ -380,11 +354,11 @@ end
 
 
 local function handle_luainit()
-  local init = os_getenv(LUA_INIT)
+  local init = os.getenv(LUA_INIT)
   if init == nil then
     return  -- status OK
-  elseif string_sub(init, 1, 1) == '@' then
-    dofile(string_sub(init, 2))
+  elseif string.sub(init, 1, 1) == '@' then
+    dofile(string.sub(init, 2))
   else
     dostring(init, "=" .. LUA_INIT)
   end
@@ -507,8 +481,16 @@ for idx=1,#args do
 				chunk=assert(args[idx+1])
 				skip=skip+1
 			end
+			for i=idx+1,#args do
+				if args[i]~="--" then
+					script_args[#script_args+1]=args[i]
+				end
+			end
+			script_args[-1]=progname
+			script_args[0]="=(command line)"
+			_G.arg=script_args
 			if not dostring(chunk, "=(command line)") then
-				os_exit(1)
+				os.exit(1)
 			end
 
 		elseif arg:sub(1,2)=="-l" then
@@ -519,7 +501,7 @@ for idx=1,#args do
 				skip=skip+1
 			end
 			if not dolibrary(fname) then
-				os_exit(1)
+				os.exit(1)
 			end
 
 		elseif arg=="-i" then
@@ -529,12 +511,12 @@ for idx=1,#args do
 		elseif arg=="-h" then
 
 			print_usage()
-			os_exit(0)
+			os.exit(0)
 
 		elseif arg=="-v" then
 
 			print_version()
-			os_exit(0)
+			os.exit(0)
 
 		else
 
@@ -565,6 +547,9 @@ if not script and script_auto then
 	end
 end
 if script then
+	script_args[-1]=progname
+	script_args[0]=script
+	_G.arg=script_args
 	none=false
 	if script:sub(-8)==".fun.lua" then
 		do_fun(script,script_args)
@@ -580,5 +565,5 @@ elseif pipe then
 	dofile(nil)  -- executes stdin as a file
 elseif none then
 	print_usage()
-	os_exit(0)
+	os.exit(0)
 end

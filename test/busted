@@ -1,0 +1,18 @@
+
+#ROOT=`pwd`
+#echo "LUA_PATH  = $( lua -e'print( package.path )' )"
+#echo "LUA_CPATH = $( lua -e'print( package.cpath )' )"
+#echo "LUA_PATH  = $LUA_PATH"
+#echo "LUA_CPATH = $LUA_CPATH"
+
+# use luarocks for busted install, we should pick it all up from LUA_PATH
+
+luarocks config lua_version 5.1
+source <(luarocks path)
+luarocks install --local busted
+
+gamecake -e"require('busted.runner')({ standalone = false })" -- -p='.*.lua' bust/ "$@"
+
+#gamecake "$@"
+
+#busted -p'.*.lua' bust/
