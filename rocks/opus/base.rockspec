@@ -4,6 +4,7 @@ build={
       ["wetgenes.opus.core"]={
          sources={
             "lua_opus/code/lua_opus.c",
+            "lua_pack/code/lua_pack.c",
          },
          incdirs={
             "lua_opus",

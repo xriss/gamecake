@@ -10,6 +10,7 @@ build={
             "lib_hacks/code",
 			"$(SDL_LIB_INCDIR)/SDL2",
          },
+		 libraries = {"SDL2"},
       },
  },
  platform={

@@ -48,6 +48,7 @@ build={
       ["wetgenes.txt.diff"]        = "lua_src/wetgenes/txt/diff.lua",
       ["wetgenes.txt.edit"]        = "lua_src/wetgenes/txt/edit.lua",
       ["wetgenes.txt.ipa_symbols"] = "lua_src/wetgenes/txt/ipa_symbols.lua",
+      ["wetgenes.txt.lex"]         = "lua_src/wetgenes/txt/lex.lua",
       ["wetgenes.txt.lex_glsl"]    = "lua_src/wetgenes/txt/lex_glsl.lua",
       ["wetgenes.txt.lex_js"]      = "lua_src/wetgenes/txt/lex_js.lua",
       ["wetgenes.txt.lex_lua"]     = "lua_src/wetgenes/txt/lex_lua.lua",

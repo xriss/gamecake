@@ -10,6 +10,7 @@ defines { "JPEGSTATIC" }
 
 includedirs { "." , "../lib_z" , "../lib_png/fixed" , "../lib_jpeg/jpeg" , "../lib_gif/giflib/" }
 
+includedirs { "./code" }
 includedirs { "../lib_hacks/code" }
 
 

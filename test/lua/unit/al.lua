@@ -6,8 +6,8 @@ local wstr=require("wetgenes.string")
 
 local function test_al()
 
-local al=require("al")
-local alc=require("alc")
+local al=require("wetgenes.al")
+local alc=require("wetgenes.alc")
 
 	
 	local dc=alc.setup()

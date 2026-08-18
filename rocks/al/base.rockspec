@@ -1,7 +1,7 @@
 build={
  modules={
-  al="lua_al/code/al.lua",
-  ["al.core"]={
+  ["wetgenes.al"]="lua_al/code/al.lua",
+  ["wetgenes.al.core"]={
    incdirs={
     "lib_openal/mojoal",
     "lib_openal/mojoal/AL",
@@ -20,8 +20,8 @@ build={
    },
    libraries = {"SDL2"},
   },
-  alc="lua_al/code/alc.lua",
-  ["alc.core"]={
+  ["wetgenes.alc"]="lua_al/code/alc.lua",
+  ["wetgenes.alc.core"]={
    incdirs={
     "lib_openal/mojoal",
     "lib_openal/mojoal/AL",

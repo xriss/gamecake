@@ -36,17 +36,28 @@ build={
             "lua_grdmap/code/lua_grdmap.c",
             "lua_grdmap/code/grdmap.c",
             "lua_grdmap/code/grdmap_tiles.c",
+            "lua_grd/code/lua_grd.c",
+            "lua_grd/code/grd.c",
+            "lua_grd/code/grd_gif.c",
+            "lua_grd/code/grd_jpg.c",
+            "lua_grd/code/grd_png.c",
          },
          incdirs={
             "lua_grdmap",
             "lib_hacks/code",
             "lua_grd",
          },
+         libraries = {"gif","png","jpeg"},
       },
       ["wetgenes.freetype"]="lua_freetype/code/freetype.lua",
       ["wetgenes.freetype.core"]={
          sources={
             "lua_freetype/code/lua_freetype.c",
+            "lua_grd/code/lua_grd.c",
+            "lua_grd/code/grd.c",
+            "lua_grd/code/grd_gif.c",
+            "lua_grd/code/grd_jpg.c",
+            "lua_grd/code/grd_png.c",
          },
          incdirs={
             "lua_freetype",
@@ -59,7 +70,7 @@ build={
          libdirs={
             "$(FREETYPE_LIB_LIBDIR)",
          },
-         libraries = {"freetype"},
+         libraries = {"freetype","gif","png","jpeg"},
       },
  },
  platform={

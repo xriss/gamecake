@@ -3,7 +3,7 @@
 module(...,package.seeall)
 
 local wstr=require("wetgenes.string")
-local gl=require("gles")
+local gl=require("wetgenes.gles")
 
 
 -- disable

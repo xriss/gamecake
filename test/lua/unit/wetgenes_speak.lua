@@ -4,8 +4,8 @@ module(...,package.seeall)
 
 local wstr=require("wetgenes.string")
 local sod=require("wetgenes.sod")
-local al=require("al")
-local alc=require("alc")
+local al=require("wetgenes.al")
+local alc=require("wetgenes.alc")
 
 
 

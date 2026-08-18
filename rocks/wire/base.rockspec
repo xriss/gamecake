@@ -1,7 +1,7 @@
 build={
  modules={
-  wire="lua_wire/code/wire.lua",
-  ["wire.core"]={
+  ["wetgenes.wire"]="lua_wire/code/wire.lua",
+  ["wetgenes.wire.core"]={
    incdirs={
     "lua_wire",
     "lua_wire/c11threads/git",
@@ -10,7 +10,7 @@ build={
     "lua_wire/code/lua_wire.c",
    },
   },
-  wiretasks="lua_wire/code/wiretasks.lua",
+  ["wetgenes.wiretasks"]="lua_wire/code/wiretasks.lua",
   ["wetgenes.getsql"]="getsql.lua",
  },
  platform={

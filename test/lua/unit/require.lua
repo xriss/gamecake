@@ -9,9 +9,17 @@ local n={
 	"wetgenes.grdmap.core","wetgenes.sod.core","socket.core",
 	"mime.core","wetgenes.gamecake.core","wetgenes.win.core","lfs",
 	"lsqlite3","posix_c","lash","SDL","cmsgpack","periphery",
-	"wetgenes.v4l2.core","rex_pcre"--[[,"linenoise","brimworks_zip"]],
-	"sys","sys.sock","pgsql","wetgenes.opus.core"}
+	"rex_pcre",
+	"wetgenes.opus.core"}
 
+--[[
+
+"wetgenes.v4l2.core",
+"sys","sys.sock","pgsql",
+,"linenoise","brimworks_zip"
+
+
+]]
 
 for i,v in ipairs(n) do
 

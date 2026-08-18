@@ -64,12 +64,12 @@ extern "C" {
 
 #include "png.h"
 
-#include "code/grd.h"
-#include "code/grd_png.h"
-#include "code/grd_jpg.h"
-#include "code/grd_gif.h"
-#include "code/lua_grd.h"
-#include "code/neuquant32.h"
+#include "grd.h"
+#include "grd_png.h"
+#include "grd_jpg.h"
+#include "grd_gif.h"
+#include "lua_grd.h"
+#include "neuquant32.h"
 
 
 

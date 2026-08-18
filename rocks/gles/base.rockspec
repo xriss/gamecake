@@ -1,8 +1,8 @@
 build={
  modules={
-  gles="lua_gles/code/gles.lua",
-  glescode="lua_gles/code/glescode.lua",
-  ["gles.core"]={
+  ["wetgenes.gles"]="lua_gles/code/gles.lua",
+  ["wetgenes.glescode"]="lua_gles/code/glescode.lua",
+  ["wetgenes.gles.core"]={
    incdirs={
     "lua_gles",
     "lua_gles/include",
@@ -11,6 +11,7 @@ build={
    sources={
     "lua_gles/code/lua_gles.c",
     "lua_gles/src/gl3w.c",
+    "lua_tardis/code/lua_tardis.c",
    },
    defines={
     "INCLUDE_GLES_GL=\"GL/gl3w.h\"",
