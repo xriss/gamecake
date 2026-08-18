@@ -15,5 +15,5 @@ includedirs { "../lib_hacks/code" }
 
 links { "lib_lua" , "lua_pack" }
 
-KIND{lua="kissfft.core"}
+KIND{lua="wetgenes.kissfft.core"}
 

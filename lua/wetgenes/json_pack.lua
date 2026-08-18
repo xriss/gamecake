@@ -34,8 +34,11 @@ better way is found.
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local json_pack=M
 
-local cmsgpack=require("cmsgpack")
-local zlib=require("zlib")
+	if __newindex_unlock then __newindex_unlock() end
+	local cmsgpack=require("cmsgpack")
+	local zlib=require("zlib")
+	if __newindex_lock then __newindex_lock() end
+
 local zip_inflate=function(d) return ((zlib.inflate())(d)) end
 local zip_deflate=function(d) return ((zlib.deflate())(d,"finish")) end
 local   compress=function(it) return zip_deflate(cmsgpack.pack(it))   end

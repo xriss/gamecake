@@ -48,6 +48,8 @@ dependencies={
 
 -- generic modules
 
+ "bit32",
+ "LuaBitOp",
  "luautf8",
  "luafilesystem",
  "luaposix",

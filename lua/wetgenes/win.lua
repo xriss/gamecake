@@ -10,7 +10,7 @@ local wpath=require("wetgenes.path")
 local wsbox=require("wetgenes.sandbox")
 local wstr=require("wetgenes.string")
 local pack=require("wetgenes.pack")
-local bit=require("bit")
+--local bit=require("bit")
 
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local win = M

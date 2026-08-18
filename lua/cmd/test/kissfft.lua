@@ -5,7 +5,7 @@ local sod=require("wetgenes.sod")
 local pack=require("wetgenes.pack")
 
 
-local kissfft=require("kissfft.core")
+local kissfft=require("wetgenes.kissfft.core")
 
 function test_sod()
 

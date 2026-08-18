@@ -5,7 +5,7 @@
 -- this also contains matrix manipulation functions in the style of normal gl
 -- and a simple Color replacement that just caches the color here for later use
 
-local bit=require("bit")
+--local bit=require("bit")
 
 local wstr=require("wetgenes.string")
 

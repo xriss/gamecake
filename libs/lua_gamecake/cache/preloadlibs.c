@@ -3,7 +3,7 @@
 extern void wetgenes_cache_preloader(lua_State *L);
 extern int luaopen_wetgenes_dumbft_core(lua_State *L);
 extern int luaopen_djon_core(lua_State *L);
-extern int luaopen_kissfft_core(lua_State *L);
+extern int luaopen_wetgenes_kissfft_core(lua_State *L);
 extern int luaopen_wetgenes_pack_core(lua_State *L);
 extern int luaopen_wetgenes_fats_core(lua_State *L);
 extern int luaopen_wetgenes_zip(lua_State *L);
@@ -57,8 +57,8 @@ extern void lua_preloadlibs(lua_State *L)
     lua_pushliteral(L, "djon.core");
     lua_pushcfunction(L, luaopen_djon_core);
     lua_settable(L, -3);
-    lua_pushliteral(L, "kissfft.core");
-    lua_pushcfunction(L, luaopen_kissfft_core);
+    lua_pushliteral(L, "wetgenes.kissfft.core");
+    lua_pushcfunction(L, luaopen_wetgenes_kissfft_core);
     lua_settable(L, -3);
     lua_pushliteral(L, "wetgenes.pack.core");
     lua_pushcfunction(L, luaopen_wetgenes_pack_core);

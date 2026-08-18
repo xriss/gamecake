@@ -369,7 +369,7 @@ float f;
 // open library.
 //
 /*+-----------------------------------------------------------------------------------------------------------------+*/
-LUALIB_API int luaopen_kissfft_core (lua_State *l)
+LUALIB_API int luaopen_wetgenes_kissfft_core (lua_State *l)
 {
 	const luaL_Reg lib[] =
 	{

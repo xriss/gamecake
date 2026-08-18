@@ -7,6 +7,7 @@ build={
 			"lib_box2d/git/src/aabb.c",
 			"lib_box2d/git/src/arena_allocator.c",
 			"lib_box2d/git/src/bitset.c",
+			"lib_box2d/git/src/body.c",
 			"lib_box2d/git/src/broad_phase.c",
 			"lib_box2d/git/src/constraint_graph.c",
 			"lib_box2d/git/src/contact.c",

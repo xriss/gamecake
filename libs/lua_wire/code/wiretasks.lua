@@ -308,7 +308,10 @@ for sending binary data.
 ]]
 wiretasks.sqlite_code=function()
 
+--	local global = require("global")
+	if __newindex_unlock then __newindex_unlock() end
 	local sqlite3 = require("lsqlite3")
+	if __newindex_lock then __newindex_lock() end
 
 	-- only if available , will error if you try and use when nil
 	local wgetsql ; pcall( function() wgetsql=require("wetgenes.getsql") end )

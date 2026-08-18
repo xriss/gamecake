@@ -1,0 +1,22 @@
+
+luarocks config lua_version 5.1
+
+source <(luarocks path)
+
+./rock al "$@"
+./rock box2d "$@"
+./rock chipmunk "$@"
+./rock dumbft "$@"
+./rock fats "$@"
+./rock gles "$@"
+./rock grd "$@"
+./rock kissfft "$@"
+./rock ogg "$@"
+./rock opus "$@"
+./rock pack "$@"
+./rock sod "$@"
+./rock win "$@"
+./rock wire "$@"
+./rock zip "$@"
+./rock gamecake "$@"
+

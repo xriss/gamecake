@@ -1,2 +1,4 @@
 
+source <(luarocks path)
+
 ~/.luarocks/bin/gamecakerock "$@"

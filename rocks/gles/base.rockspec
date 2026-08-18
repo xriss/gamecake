@@ -15,6 +15,7 @@ build={
    },
    defines={
     "INCLUDE_GLES_GL=\"GL/gl3w.h\"",
+    "LUA_GLES_GL",
    },
   },
  },

@@ -7,7 +7,7 @@
 local sin=math.sin
 local pi=math.pi
 
-local kissfft=require("kissfft.core")
+local kissfft=require("wetgenes.kissfft.core")
 local wpack=require("wetgenes.pack")
 
 --module
