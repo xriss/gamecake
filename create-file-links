@@ -32,6 +32,8 @@ ln -f lua/wetgenes/alc.lua      libs/lua_al/code/alc.lua
 
 ln -f lua/lanes.lua    libs/lua_lanes/lanes/src/lanes.lua
 
+ln -f lua/gamecake.lua      libs/lua_gamecake/code/gamecake.lua
+
 ln -f lua/wetgenes/sod.lua      libs/lua_sod/code/sod.lua
 ln -f lua/wetgenes/midi.lua     libs/lua_midi/code/midi.lua
 ln -f lua/wetgenes/tardis.lua   libs/lua_tardis/code/tardis.lua

@@ -71,6 +71,7 @@ extern void wetgenes_cache_preloader(lua_State *L)
 	const char *name="wetgenes.zipsloader";
 	const char *data=wetgenes_cache_find_mod(name);
 
+	int doneLoaders=0;
 	int numLoaders = 0;
 
 	lua_getglobal(L,"package");	// push "package"
@@ -83,29 +84,40 @@ extern void wetgenes_cache_preloader(lua_State *L)
 	lua_pushnil(L);
 	while (lua_next(L, -2) != 0) 
 	{
+		if( lua_iscfunction(L,-1) )
+		{
+			lua_CFunction f=lua_tocfunction(L,-1);
+			if( f == wetgenes_cache_loader) // we have already set us up
+			{
+				doneLoaders=1; // flag already setup
+			}
+		}
 		lua_pop(L, 1);
 		numLoaders++;
 	}
-
-	if(data) // this is the zipsloader
+	if( !doneLoaders ) // we are already setup
 	{
-		lua_pushinteger(L, numLoaders + 1);
 
-		if( luaL_loadbuffer(L, data,strlen(data),name) != 0 )
+		if(data) // this is the zipsloader
 		{
-			luaL_error(L, "error loading module %s from file %s:\n\t%s",
-				name, "internal", lua_tostring(L, -1));
+			lua_pushinteger(L, numLoaders + 1);
+
+			if( luaL_loadbuffer(L, data,strlen(data),name) != 0 )
+			{
+				luaL_error(L, "error loading module %s from file %s:\n\t%s",
+					name, "internal", lua_tostring(L, -1));
+			}
+
+			lua_rawset(L, -3);
+			numLoaders++;
 		}
 
+	// setup the string loader
+		lua_pushinteger(L, numLoaders + 1);
+		lua_pushcfunction(L, wetgenes_cache_loader);
 		lua_rawset(L, -3);
-		numLoaders++;
 	}
-
-// setup the string loader
-	lua_pushinteger(L, numLoaders + 1);
-	lua_pushcfunction(L, wetgenes_cache_loader);
-	lua_rawset(L, -3);
-
+	
 	// Table is still on the stack.  Get rid of it now.
 	lua_pop(L, 1);
 

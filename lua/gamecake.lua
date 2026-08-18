@@ -13,6 +13,13 @@
 
 -- remorked the argument handling to be more lua less c but mostly the same results, probably
 
+-- make sure our cached lua is preloaded, safe to call multiple times
+require("wetgenes.gamecake.core").preloadcache()
+
+--print(arg)
+--for n,v in pairs(arg) do print("arg",n,v) end
+if arg[1] == "--" then table.remove(arg,1) end -- remove escaped call
+
 -- Variables analogous to those in luaconf.h
 local LUA_INIT = "LUA_INIT"
 local LUA_PROGNAME = "lua"

@@ -10,7 +10,9 @@ local n={
 	"mime.core","wetgenes.gamecake.core","wetgenes.win.core","lfs",
 	"lsqlite3","SDL","cmsgpack",
 	"rex_pcre",
-	"wetgenes.opus.core"}
+	"wetgenes.opus.core",
+	"wetgenes.wire.core",
+	}
 
 --[[
 "kissfft.core",

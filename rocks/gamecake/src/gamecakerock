@@ -1,0 +1,13 @@
+
+DIR="$(dirname "$0")"
+
+# dumb rock install fucks with my files
+echo 'require("gamecake")' >${DIR}/gamecakerock.lua
+
+source <(luarocks path)
+
+# need to use a loader.lua file that just does a require("gamecake")
+# this is needed to get all the command line args parsed and into _G.arg
+# this hack works on luajit and lua
+# gamecake module can now pretend it is a lua command
+luajit ${DIR}/gamecakerock.lua -- "$@"
