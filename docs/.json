@@ -6659,7 +6659,7 @@
    "body": "<pre><code>j=json_pack.from_data(d)\n</code></pre>\n<p>Where j is some json data and d is a binary string of the same data.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/json_pack.lua",
-   "line": 57,
+   "line": 60,
    "name": "lua.wetgenes.json_pack.from_data",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_pack.lua"
   },
@@ -6667,7 +6667,7 @@
    "body": "<pre><code>d=json_pack.into_data(j)\n</code></pre>\n<p>Where j is some json data and d is a binary string of the same data.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/json_pack.lua",
-   "line": 45,
+   "line": 48,
    "name": "lua.wetgenes.json_pack.into_data",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/json_pack.lua"
   },
