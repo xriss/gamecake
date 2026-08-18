@@ -17,7 +17,7 @@ build={
             "$(OPUS_LIB_LIBDIR)",
             "$(SPEEX_LIB_LIBDIR)",
          },
-         libraries = {"opus","speex"},
+         libraries = {"opus","speexdsp"},
       },
  },
  platform={

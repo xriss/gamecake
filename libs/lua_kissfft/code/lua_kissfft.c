@@ -5,7 +5,7 @@
 -- Please ping me if you use it for anything cool...
 */
 
-#include <stdint.h>’
+#include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>

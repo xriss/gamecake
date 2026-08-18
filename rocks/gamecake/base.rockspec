@@ -245,6 +245,8 @@ dependencies={
  "gamecake-win",
  "gamecake-wire",
  "gamecake-zip",
+ "gamecake-kissfft",
+ "gamecake-dumbft",
  
 }
 description={
