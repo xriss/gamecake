@@ -13,7 +13,7 @@ build={
          },
       },
 
-      ["gamecake"]            = "lua_gamecake/code/gamecake.lua",
+--      ["gamecake"]            = "lua_gamecake/code/gamecake.lua",
       ["wetgenes.gamecake.core"]={
          sources={
             "lua_gamecake/code/lua_gamecake.c",
@@ -33,7 +33,7 @@ build={
  },
  install = {
   bin = {
-   ['gamecakerock'] = 'gamecakerock',
+   ['gamecakerock'] = 'lua_gamecake/code/gamecake.lua',
   },
  },
  platform={
