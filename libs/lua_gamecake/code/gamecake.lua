@@ -9,7 +9,7 @@
 -- Based on lua.c from Lua 5.1.3.
 -- Improvements by Shmuel Zeigerman.
 
--- HAXTBH
+-- HAXTBH trying to do everything in lua so the c side just calls this
 
 -- remorked the argument handling to be more lua less c but mostly the same results, probably
 

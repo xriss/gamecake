@@ -5,8 +5,8 @@
 local luapath,apppath=require("apps").default_paths(debug.getinfo(1,"S").source:match("^@(.*[/\\])")) -- default search paths so things can easily be found
 ]]
 -- we should be good to work with *only* internal files so disable *all* module path loading
-package.path=""
-package.cpath=""
+--package.path=""
+--package.cpath=""
 -- this is so this installed swed will continue to work using only its internal installed code
 
 local global=require("global") -- prevent accidental global use

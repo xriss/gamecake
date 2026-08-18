@@ -310,7 +310,8 @@ extern void lua_preloadlibs(lua_State *);
 static int lua_gamecake_preloadlibs(lua_State *l)
 {
 #ifdef GAMECAKE_NOLIBS
-// no libs to include
+// no libs to include but do do the cache
+	wetgenes_cache_preloader(l);
 	return 0;
 #else
 	lua_preloadlibs(l);
