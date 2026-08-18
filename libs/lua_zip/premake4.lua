@@ -11,5 +11,5 @@ includedirs { "." , "../lib_zzip/git" }
 includedirs { "../lib_hacks/code" }
 
 
-KIND{kind="lua",name="zip"}
+KIND{lua="wetgenes.zip"}
 

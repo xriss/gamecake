@@ -3,7 +3,7 @@
 module(...,package.seeall)
 
 local wstr=require("wetgenes.string")
-local zip=require("zip")
+local zip=require("wetgenes.zip")
 
 function do_file_read(f)
 	local fp=assert(io.open(f,"rb"))

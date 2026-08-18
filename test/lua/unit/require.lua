@@ -3,7 +3,7 @@
 local test={ modname=(...) } package.loaded[test.modname]=test
 
 local n={
-	"kissfft.core","wetgenes.pack.core","zip","zlib",
+	"kissfft.core","wetgenes.pack.core","wetgenes.zip","zlib",
 	"wetgenes.freetype.core","wetgenes.ogg.core","wetgenes.al.core",
 	"wetgenes.alc.core","wetgenes.tardis.core","wetgenes.gles.core","wetgenes.grd.core",
 	"wetgenes.grdmap.core","wetgenes.sod.core","socket.core",

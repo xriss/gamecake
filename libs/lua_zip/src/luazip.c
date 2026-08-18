@@ -716,7 +716,7 @@ static void createmeta (lua_State *L) {
   luaL_openlib(L, NULL, fflib, 0);
 }
 
-LUAZIP_API int luaopen_zip (lua_State *L) {
+LUAZIP_API int luaopen_wetgenes_zip (lua_State *L) {
   lua_newtable(L);
   createmeta(L);
   luaL_openlib(L, NULL, ziplib, 2);

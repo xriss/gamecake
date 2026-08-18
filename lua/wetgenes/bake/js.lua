@@ -111,7 +111,7 @@ print('cd','=',bake.cd)
 
 
 bake.cmd.java="java" -- needed for minifier
-bake.cmd.zip="zip" -- needed to zip stuffs
+bake.cmd.zip="wetgenes.zip" -- needed to zip stuffs
 
 bake.cmd.lua		=	bake.path_clean_exe( bake.cd , '/exe/lua' )
 

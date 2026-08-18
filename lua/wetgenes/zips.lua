@@ -4,7 +4,7 @@
 
 -- handle zip files containing lua code and data
 
-local zip=require("zip")
+local zip=require("wetgenes.zip")
 local wsandbox=require("wetgenes.sandbox")
 --local apps ; pcall( function() apps=require("apps") end )
 local core ; pcall( function() core=require("wetgenes.gamecake.core") end )
