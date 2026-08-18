@@ -12,6 +12,20 @@ build={
          },
       },
 
+      ["wetgenes.gamecake.core"]={
+         sources={
+            "lua_gamecake/code/lua_gamecake.c",
+         },
+         incdirs={
+            "lua_gamecake/code",
+            "lua_gles/include",
+            "lib_hacks/code",
+         },
+		defines={
+			"INCLUDE_GLES_GL=\"GL/gl3w.h\"",
+		},
+      },
+
 -- put minimal junk in the lua root
 
       ["global"]              = "lua_src/global.lua",
@@ -206,7 +220,6 @@ dependencies={
  "luautf8",
  "luafilesystem",
  "luaposix",
- "luazip",
  "lua-zlib",
  "luasocket",
  "luasec",
@@ -231,6 +244,7 @@ dependencies={
  "gamecake-sod",
  "gamecake-win",
  "gamecake-wire",
+ "gamecake-zip",
  
 }
 description={

@@ -13,7 +13,11 @@ build={
             "$(OPUS_LIB_INCDIR)/opus",
             "$(SPEEX_LIB_INCDIR)/speex",
          },
-         libraries = {"opus"},
+         libdirs={
+            "$(OPUS_LIB_LIBDIR)",
+            "$(SPEEX_LIB_LIBDIR)",
+         },
+         libraries = {"opus","speex"},
       },
  },
  platform={

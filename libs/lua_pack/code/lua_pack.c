@@ -14,7 +14,7 @@
 #include "lualib.h"
 
 
-#include "code/lua_pack.h"
+#include "lua_pack.h"
 
 // inyourendo is a flag set to 1 for little endian (the default) or 0 for bigendian
 // dataformats can be preceeded by - to force little endian although they are little endian by default

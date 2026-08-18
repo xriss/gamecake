@@ -9,7 +9,7 @@ if GCC then
 	buildoptions{ "-Wno-multichar" } -- we are using mulibyte char constants so please don't whine
 end
 
-includedirs { "." }
+includedirs { "." , "./code" }
 includedirs { "../lib_hacks/code" }
 
 KIND{lua="wetgenes.pack.core"}

@@ -5,8 +5,10 @@ files { "code/**.cpp" , "code/**.c" , "code/**.h" , "all.h" }
 
 links { "lib_lua" }
 
-includedirs { "." }
+includedirs { "." , "./code" }
 includedirs { "../lib_hacks/code" }
+
+defines { "WETGENES_CACHE" }
 
 if RASPI or GAMECAKE_WIN_TYPE=="raspi" then
 
