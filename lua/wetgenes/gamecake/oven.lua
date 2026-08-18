@@ -7,6 +7,11 @@
 local logs=require("wetgenes.logs")
 local global=require("global")
 
+-- make sure possible global hitting modules are already loaded
+	if __newindex_unlock then __newindex_unlock() end
+	local bit=require("bit")
+	if __newindex_lock then __newindex_lock() end
+
 local toaster=require("wetgenes.gamecake.toaster")
 -- help luajit work on android/arm
 toaster.jit_prealloc()
