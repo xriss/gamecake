@@ -27,8 +27,6 @@
 static unsigned char vb[SIZEOF_VB] __attribute__((aligned (16)));
 
 
-#ifdef WETGENES_CACHE
-
 extern const char* wetgenes_cache_lua_files[];
 
 static const char *wetgenes_cache_find_file(const char *name)
@@ -46,7 +44,6 @@ static const char *wetgenes_cache_find_file(const char *name)
 	return data;
 }
 
-#endif
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -256,7 +253,6 @@ int vid,tid;
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_gamecake_get_cache_string(lua_State *l)
 {
-#ifdef WETGENES_CACHE
 	const char *name = (const char *)luaL_checkstring(l, 1);
 
 	const char *data = wetgenes_cache_find_file(name);
@@ -266,7 +262,6 @@ static int lua_gamecake_get_cache_string(lua_State *l)
 		lua_pushstring(l,data);
 		return 1;
 	}
-#endif
 
 	return 0;
 }
@@ -279,7 +274,6 @@ static int lua_gamecake_get_cache_string(lua_State *l)
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 static int lua_gamecake_list_cache_strings(lua_State *l)
 {
-#ifdef WETGENES_CACHE
 	int i;
 	lua_newtable(l);
 	for(i=0;wetgenes_cache_lua_files[i];i+=2)
@@ -288,8 +282,6 @@ static int lua_gamecake_list_cache_strings(lua_State *l)
 		lua_rawseti(l,-2,1+(i/2));
 	}
 	return 1;
-#endif
-	return 0;
 }
 
 
@@ -302,9 +294,7 @@ extern void lua_preloadlibs(lua_State *);
 
 static int lua_gamecake_preloadlibs(lua_State *l)
 {
-#ifdef WETGENES_CACHE
 	lua_preloadlibs(l);
-#endif
 	return 0;
 }
 
@@ -319,11 +309,7 @@ extern const char *wetgenes_wetmods_version();
 static int lua_gamecake_get_version(lua_State *l)
 {
 //  l_message(NULL, LUA_RELEASE "  " LUA_COPYRIGHT );
-#ifdef WETGENES_CACHE
 	lua_pushstring(l, wetgenes_wetmods_version() );
-#else
-	lua_pushstring(l, LUA_RELEASE "  " LUA_COPYRIGHT );
-#endif
 	return 1;
 }
 

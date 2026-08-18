@@ -4,11 +4,8 @@ language "C++"
 
 dofile("version.lua")
 
-dofile("cache.lua")
-dofile("preloadlibs.lua")
-
-links(static_lib_names)
-links(static_lib_names) -- so good, so good, we linked it twice...
+links("lua_gamecake") -- must be first
+links(static_lib_names) -- as it requires these
 
 -- link in luajit that was compiled externally
 if LUA_LIBDIRS then	libdirs(LUA_LIBDIRS) end

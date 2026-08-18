@@ -767,7 +767,6 @@ all_includes=all_includes or {
 	{"lua_sod",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_socket",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_sec",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
-	{"lua_gamecake",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_win",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_lfs",			WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 	{"lua_sqlite",		WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
@@ -830,6 +829,9 @@ all_includes=all_includes or {
 
 -- OSX will provide openal.
 	{LIB_OPENAL,		WINDOWS		or		NIX		or		EMCC 		or		ANDROID		or	nil		},
+
+-- must be last as it embeds all static libs above
+	{"lua_gamecake",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
 
 -- the output executables
 	{"exe_gamecake",	WINDOWS		or		NIX		or		EMCC		or		ANDROID		or	OSX		},
