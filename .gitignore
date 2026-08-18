@@ -24,8 +24,9 @@ android/gamecake/build.gradle
 android/.gradle/
 android/*.hprof
 
-libs/exe_gamecake/preloadlibs.c
-libs/exe_gamecake/cache.c
+libs/lua_gamecake/cache/preloadlibs.c
+libs/lua_gamecake/cache/cache.c
+
 */log.txt
 build/*.nix
 libs/lib_luajit/*/native/*
