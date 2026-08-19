@@ -309,8 +309,8 @@ int def;
 char v='i';
 int num=1;
 
-int iv[16];
-float fv[16];
+int iv[16]={0};
+float fv[16]={0};
 
 int i;
 
@@ -376,8 +376,8 @@ int def;
 char v='i';
 int num=1;
 
-int iv[16];
-float fv[16];
+int iv[16]={0};
+float fv[16]={0};
 
 int i;
 
@@ -444,8 +444,8 @@ int def;
 char v='i';
 int num=1;
 
-int iv[16];
-float fv[16];
+int iv[16]={0};
+float fv[16]={0};
 
 int i;
 
@@ -522,8 +522,8 @@ int def;
 char v='i';
 int num=1;
 
-int iv[16];
-float fv[16];
+int iv[16]={0};
+float fv[16]={0};
 
 int i;
 

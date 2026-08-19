@@ -19,5 +19,8 @@ source <(luarocks path)
 ./rock win "$@"
 ./rock wire "$@"
 ./rock zip "$@"
+
+# must do gamecake last as it depends on all the others
+
 ./rock gamecake "$@"
 

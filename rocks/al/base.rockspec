@@ -3,57 +3,47 @@ build={
   ["wetgenes.al"]="lua_al/code/al.lua",
   ["wetgenes.al.core"]={
    incdirs={
-    "lib_openal/mojoal",
-    "lib_openal/mojoal/AL",
     "lua_al",
     "lib_hacks/code",
-    "$(SDL_LIB_INCDIR)/SDL2",
+    "$(AL_LIB_INCDIR)",
    },
    sources={
     "lua_al/code/lua_al.c",
-    "lib_openal/mojoal/mojoal.c",
    },
    defines={
    },
    libdirs={
-    "$(SDL_LIB_LIBDIR)",
+    "$(AL_LIB_LIBDIR)",
    },
-   libraries = {"SDL2"},
+   libraries = {"openal"},
   },
   ["wetgenes.alc"]="lua_al/code/alc.lua",
   ["wetgenes.alc.core"]={
    incdirs={
-    "lib_openal/mojoal",
-    "lib_openal/mojoal/AL",
     "lua_al",
     "lib_hacks/code",
-    "$(SDL_LIB_INCDIR)/SDL2",
+    "$(AL_LIB_INCDIR)",
    },
    sources={
     "lua_al/code/lua_alc.c",
-    "lib_openal/mojoal/mojoal.c",
    },
    defines={
    },
    libdirs={
-    "$(SDL_LIB_LIBDIR)",
+    "$(AL_LIB_LIBDIR)",
    },
-   libraries = {"SDL2"},
+   libraries = {"openal"},
   },
  },
  platform={
   windows={
-   ["wire.core"]={
-    defines={
-    },
-   },
   },
  },
  type="builtin",
 }
 external_dependencies = {
-   SDL_LIB = {
-      header = "SDL2/SDL_scancode.h"
+   AL_LIB = {
+      header = "AL/al.h"
    },
 }
 dependencies={
@@ -67,11 +57,6 @@ description={
 
 OpenAL binding, provides al and alc modules.
 
-OpenAL is via mojoal which uses SDL for the actual audio interface.
-
-https://github.com/icculus/mojoAL/
-
-This works anywhere SDL works, so phones/web/pc etc.
 
  ]],
 }

@@ -634,24 +634,19 @@ local qq=sounds.queues[str.idx]
 
 -- remove finished buffers
 	local processed=al.GetSource(str.source,al.BUFFERS_PROCESSED)
-	if processed>1024 then -- i think we get a huge error number sometimes
---print(str,processed)
-	end
-	if processed<1024 then -- sane ity ( i think we get a huge error number sometimes
-		for i=1,processed do
-	--	if processed>0 then
-			local b=al.SourceUnqueueBuffer(str.source,0)
-			local idx
-			for i,v in ipairs(str.full) do -- find and remove, it should be the first one.
-				if v==b then idx=i break end
-			end
-	--print("unque ",str.source,b,idx)
-	--al.CheckError()
-	--		assert(idx)
-			if idx then
-				table.remove(str.full,idx)
-				table.insert(str.empty,b)
-			end
+	for i=1,processed do
+--	if processed>0 then
+		local b=al.SourceUnqueueBuffer(str.source,0)
+		local idx
+		for i,v in ipairs(str.full) do -- find and remove, it should be the first one.
+			if v==b then idx=i break end
+		end
+--print("unque ",str.source,b,idx)
+--al.CheckError()
+		assert(idx)
+		if idx then
+			table.remove(str.full,idx)
+			table.insert(str.empty,b)
 		end
 	end
 	
