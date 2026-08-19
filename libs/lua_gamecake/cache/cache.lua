@@ -1,5 +1,5 @@
-	files { "cache.c" , "cache_funcs.c" }
 
+dofile("../version.lua")
 
 -- this is a premake file
 -- it sticks all of the current lua sources into a .c file for internal packing
@@ -22,13 +22,34 @@ function dorawfilename(i,v)
 	m="lua/"..m
 	mod_files[m]=v
 end
+
+if os.matchfiles then -- premake
+
 for i,v in ipairs( os.matchfiles("../../../lua/**") or {} ) do dorawfilename(i,v) end
 
+else -- standalone rock run
 
-for i,v in ipairs( LUA_CACHE_FILES or {} ) do
-	for i,v in ipairs( os.matchfiles(v) or {} ) do dofilename(i,v) end
+	local lfs=require("lfs")
+
+	local dodir ; dodir=function(d)
+		if lfs.attributes(d) then -- only if dir exists
+			for v in lfs.dir(d) do
+				local n=d.."/"..v
+				local a=lfs.attributes(n)
+				if a and a.mode=="file" then
+					dorawfilename(0,n)
+				end
+				if a and a.mode=="directory" then
+					if v:sub(1,1)~="." then
+						dodir(n)
+					end
+				end
+			end
+		end
+	end
+	dodir("../../../lua")
+
 end
-
 
 local readfile=function(name)
 	local fp=assert(io.open(name,"r"))
@@ -37,28 +58,7 @@ local readfile=function(name)
 	return d
 end
 
-function version_from_time(t,vplus)
-
-	vplus=vplus or 0 -- slight tweak if we need it
-
-	t=t or os.time()
-
-	local d=os.date("*t",t)
-
--- how far through the year are we
-	local total=os.time{year=d.year+1,day=1,month=1} - os.time{year=d.year,day=1,month=1}
-	local part=t - os.time{year=d.year,day=1,month=1}
-
--- build major and minor version numbers
-	local maj=math.floor(d.year-2000)
-	local min=math.floor((part/total)*1000)+vplus
-
-	if min>=1000 then min=min-1000 maj=maj+1 end -- paranoia fix
-
-	return string.format("%02d.%03d",maj,min)
-end
-
-	local version=GAMECAKE_VERSION or version_from_time()
+	local version=GAMECAKE_VERSION
 	local buildtime=os.date(" %Y-%m-%d %H:%M:%S")
 
 
@@ -70,7 +70,7 @@ end
 	
 	local libnames={}
 	
-	for i,v in ipairs(lua_lib_loads) do
+	for i,v in ipairs(lua_lib_loads or {}) do
 		libnames[#libnames+1]=v[1]
 	end
 	
@@ -84,6 +84,7 @@ end
 	
 	srcnames=table.concat(srcnames," ")
 	
+	if lua_lib_loads then --premake will have set this list
 	put([[
 
 	const char *wetgenes_wetmods_version()
@@ -92,7 +93,17 @@ end
 	}
 
 ]])
+	else
+	put([[
 
+	const char *wetgenes_wetmods_version()
+	{
+		return "Gamecake V]]..version..buildtime..[[ https://github.com/xriss/gamecake rock";
+	}
+
+]])
+	end
+	
 	put([[
 
 const char* wetgenes_cache_lua_modnames[]={

@@ -1,8 +1,2 @@
 
-ROCK_ROOT="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-
-source <(luarocks path)
-
-# ~/.luarocks/bin/gamecakerock "$@"
-
-luajit "$ROCK_ROOT/gamecake/src/lua_gamecake/code/gamecake.lua" -- "$@"
+~/.luarocks/bin/gamecakejit "$@"

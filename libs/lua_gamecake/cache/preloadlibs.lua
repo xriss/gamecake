@@ -1,5 +1,3 @@
-
-	files { "preloadlibs.c" }
 	
 	local fp=io.open("preloadlibs.c","w")
 	local t={}

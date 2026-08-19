@@ -1,0 +1,19 @@
+
+# this will be the binary install dir
+DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+source <(luarocks path)
+
+# prefer luajit
+
+if command -v luajit &> /dev/null; then
+
+	# luajit gets a bit confused so needs two sets of --
+	luajit -e"require'gamecake'" -- -- "$@"
+
+else
+
+	# this is our sister command which will probably run lua
+	$DIR/gamecakerock "$@"
+
+fi

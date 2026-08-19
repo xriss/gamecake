@@ -2,8 +2,6 @@
 project "gamecake"
 language "C++"
 
-dofile("version.lua")
-
 links("lua_gamecake") -- must be first
 links(static_lib_names) -- as it requires these
 
