@@ -2,17 +2,6 @@ build={
  type="builtin",
  modules={
 
-      ["wetgenes.tardis"]     = "lua_tardis/code/tardis.lua",
-      ["wetgenes.tardis.core"]={
-         sources={
-            "lua_tardis/code/lua_tardis.c",
-         },
-         incdirs={
-            "lua_tardis",
-            "lib_hacks/code",
-         },
-      },
-
       ["gamecake"]            = "lua_gamecake/code/gamecake.lua",
       ["wetgenes.gamecake.core"]={
          sources={
@@ -57,14 +46,17 @@ dependencies={
  "luasocket",
  "luasec",
  "lsqlite3",
--- "luapgsql",
  "lua-cmsgpack",
  "Lrexlib-PCRE",
- "djon",
  "Lua-SDL2",
+
+-- "luapgsql",
 
 -- custom gamecake modules
 
+ "djon",
+
+ "gamecake-tardis",
  "gamecake-al",
  "gamecake-box2d",
  "gamecake-chipmunk",

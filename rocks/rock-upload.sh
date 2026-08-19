@@ -5,8 +5,4 @@ if [ -z "$ROCK_DIR" ]; then
 fi
 cd $ROCK_DIR
 
-
-gamecake ../rock-spec.lua
-
-luarocks lint ${ROCK_BASENAME}.rockspec
-
+luarocks upload --api-key=$ROCK_API_KEY $ROCK_BASENAME.src.rock

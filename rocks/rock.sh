@@ -27,6 +27,9 @@ install
 make
 	runs all the spec and pack and install steps
 
+upload
+	upload src.rock needs "export ROCK_API_KEY=..." in secret-env.sh
+
 EOF
 
 exit 0
@@ -56,6 +59,10 @@ case $2 in
 
 	"install")
 		./rock-install.sh || exit 20
+	;;
+
+	"upload")
+		./rock-upload.sh || exit 20
 	;;
 
 	*)

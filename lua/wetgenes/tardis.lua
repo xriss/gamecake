@@ -35,7 +35,7 @@ a library of matrix based math functions.
 This tardis is a lua library for manipulating time and space with 
 numbers. Designed to work as pure lua so expect lots of small tables 
 full of numbers. In the future we may attempt clever optimisations and 
-change from tables to somthing else but so far all attempts have 
+change from tables to something else but so far all attempts have 
 failed.
 
 Recoil in terror as we use two glyph names for classes whilst typing in
@@ -45,6 +45,8 @@ tyops.
 	v# vector [#]
 	m# matrix [#][#]
 	q4 quaternion
+
+Quaternions are {x,y,z,w} as eris intended.
 
 Each class is a table of # values [1] to [#] the 2d number streams are
 formatted the same as opengl (row-major) and metatables are used to
