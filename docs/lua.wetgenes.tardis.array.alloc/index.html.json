@@ -3138,7 +3138,7 @@
    "body": "<pre><code>a = tardis.array.alloc()\n</code></pre>\n<p>Create an empty object with applied metatable.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 260,
+   "line": 262,
    "name": "lua.wetgenes.tardis.array.alloc",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

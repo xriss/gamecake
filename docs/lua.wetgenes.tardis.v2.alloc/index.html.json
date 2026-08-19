@@ -3138,7 +3138,7 @@
    "body": "<pre><code>v2 = tardis.v2.alloc()\n</code></pre>\n<p>Allocate an empty v2 object with metatable.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 2262,
+   "line": 2264,
    "name": "lua.wetgenes.tardis.v2.alloc",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

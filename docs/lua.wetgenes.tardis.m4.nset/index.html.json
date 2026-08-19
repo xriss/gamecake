@@ -3138,7 +3138,7 @@
    "body": "<pre><code>m4 = m4:nset(1,2,3,4,5,6,7,8,9)\n</code></pre>\n<p>Set exactly 16 numbers into the array.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 1327,
+   "line": 1329,
    "name": "lua.wetgenes.tardis.m4.nset",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }

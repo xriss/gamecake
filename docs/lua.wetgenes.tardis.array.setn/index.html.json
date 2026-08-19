@@ -3138,7 +3138,7 @@
    "body": "<pre><code>a=a:setn(1)\n</code></pre>\n<p>Dumber version of set that must be a single number and repeats to all slots.</p>\n",
    "count": 1,
    "file": "../lua/wetgenes/tardis.lua",
-   "line": 281,
+   "line": 283,
    "name": "lua.wetgenes.tardis.array.setn",
    "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/tardis.lua"
   }
