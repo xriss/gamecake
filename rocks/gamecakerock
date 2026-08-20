@@ -1,2 +1,2 @@
 
-~/.luarocks/bin/gamecakejit "$@"
+~/.luarocks/bin/gamecakerock "$@"

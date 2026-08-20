@@ -8,12 +8,12 @@ source <(luarocks path)
 
 if command -v luajit &> /dev/null; then
 
-	# luajit gets a bit confused so needs two sets of --
+	# luajit -e gets args a bit confused so needs two sets of --
 	luajit -e"require'gamecake'" -- -- "$@"
 
 else
 
 	# this is our sister command which will probably run lua
-	$DIR/gamecakerock "$@"
+	$DIR/gamecakerocklua "$@"
 
 fi

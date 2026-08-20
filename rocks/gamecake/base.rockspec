@@ -22,8 +22,8 @@ build={
  },
  install = {
   bin = {
-   ['gamecakerock'] = 'lua_gamecake/code/gamecake.lua',
-   ['gamecakejit'] = 'gamecakejit',
+   ['gamecakerocklua'] = 'lua_gamecake/code/gamecake.lua',
+   ['gamecakerock'] = 'gamecakerock',
   },
  },
  platform={

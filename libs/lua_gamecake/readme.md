@@ -17,30 +17,28 @@ to packages.loaders
 
 Two binfiles are provided
 
-	gamecakerock
+	gamecakerocklua
 
 Which runs gamecake.lua in the standard luarocks lua
 
-	gamecakejit
+	gamecakerock
 
-Which trys to run gamecake.lua using luajit if available, with fall 
-back to standard luarocks lua.
-
-Jit version is recommended.
+Which tries to run gamecake.lua using luajit if available, with fall 
+back to standard luarocks lua. This Jit version is recommended.
 
 These commands mostly mimic the standard lua command line interface but 
 with extras. eg:
 
-	gamecakejit -lcmd
+	gamecakerock -lcmd
 
 For builtin commands, such as the swed editor
 
-	gamecakejit -lcmd swed
+	gamecakerock -lcmd swed
 
 We automatically run .fun.lua files (all in one game text files) inside a fun 
 harness and even have a few examples builtin.
 
-	gamecakejit lua/fun/poopeepanda.fun.lua
+	gamecakerock lua/fun/poopeepanda.fun.lua
 
 We automatically run .cake files (zip with lua and assets) by mounting 
 the zip and running lua/init.lua to start it. gamecake .apk files are 

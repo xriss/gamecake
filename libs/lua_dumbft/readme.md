@@ -12,8 +12,10 @@ Probing sound buffers, eg mic input, primarily for visual effects.
 Development in progress with tests/examples in
 https://github.com/xriss/gamecake/tree/master/libs/lua_dumbft/test
 
-test4.fun.lua should work and produces a real time image intended to be 
-similar to the iconic album cover for Joy Division's - Unknown 
-Pleasures. It also tries to print it in a never ending strip to a 
-thermal receipt printer but that will only work with my printer ( NELKO 
-PM220 ) and with moonusb available.
+	gamecakerock lua/fun/unknownjoy.fun.lua
+
+Produces a real time image from your mic, intended to be similar to the 
+iconic album cover for Joy Division's - Unknown Pleasures. It also 
+tries to print it in a never ending strip to a thermal receipt printer 
+but that will only work with my printer ( NELKO PM220 ) and with 
+moonusb available.
