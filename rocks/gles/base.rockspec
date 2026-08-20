@@ -34,14 +34,16 @@ dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.gles/",
+ homepage="https://github.com/xriss/gamecake",
  license="MIT",
  summary="GLES",
  detailed=[[
 
-GLES, so good for phone/web/desktop opengl lua binding.
+A GLES opengl lua binding. Uses gl3w for maximum compatibility.
 
-Uses gl3w for maximum compatibility.
+See libs/lua_gles/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_gles/
+
 
  ]],
 }

@@ -104,13 +104,19 @@ dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.grd/",
+ homepage="https://github.com/xriss/gamecake",
  license="MIT",
- summary="read/write/edit png/gif/jpg",
+ summary="read/write/edit of png/gif/jpg",
  detailed=[[
 
-APNG is suported but you must have libpng configured for it ( which you 
+Needs libpng libgif libjpeg libzzip and libfreetype pre installed.
+
+APNG is sported but you must have libpng configured for it ( which you 
 probably do not )
+
+See libs/lua_grd/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_grd/
+
 
  ]],
 }

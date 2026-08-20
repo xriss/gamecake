@@ -55,12 +55,15 @@ dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.chipmunk/",
+ homepage="https://github.com/xriss/gamecake",
  license="MIT",
  summary="chipmunk",
  detailed=[[
 
-A lua binding to chipmunk, includes chipmunk source build.
+A lua binding to chipmunk physics library.
+
+See libs/lua_chipmunk/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_chipmunk/
 
  ]],
 }

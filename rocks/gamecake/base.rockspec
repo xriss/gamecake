@@ -76,7 +76,7 @@ dependencies={
  
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua/",
+ homepage="https://github.com/xriss/gamecake",
  license="MIT",
  summary="A collection of modules from the gamecake project",
  detailed=[[
@@ -84,9 +84,7 @@ description={
 This pulls in as many dependencies as it can to try and mimic the 
 modules that gamecake provides in a luarocks environment.
 
-See libs/lua_gamecake/readme.md in the game cake repo
-https://github.com/xriss/gamecake
-
+See libs/lua_gamecake/readme.md in the gamecake repo 
 https://github.com/xriss/gamecake/blob/master/libs/lua_gamecake/
 
  ]],

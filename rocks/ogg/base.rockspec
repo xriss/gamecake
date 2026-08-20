@@ -31,12 +31,15 @@ dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.wetgenes/",
- license="MIT",
+ homepage="https://github.com/xriss/gamecake",
+ license="MIT,
  summary="read ogg vorbis audio files",
  detailed=[[
 
-https://github.com/xriss/gamecake
+Needs libvorbis and libogg pre installed.
+
+See libs/lua_ogg/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_ogg/
 
  ]],
 }

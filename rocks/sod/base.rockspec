@@ -23,12 +23,15 @@ dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.wetgenes/",
+ homepage="https://github.com/xriss/gamecake",
  license="MIT",
  summary="Read wav audio files",
  detailed=[[
 
 https://github.com/xriss/gamecake
+
+See libs/lua_sod/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_sod/
 
  ]],
 }

@@ -21,7 +21,7 @@ dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.fats/",
+ homepage="https://github.com/xriss/gamecake",
  license="MIT",
  summary="fat(int16_t,float,etc) binary strings",
  detailed=[[
@@ -29,6 +29,9 @@ description={
 Lua arrays of numbers, to and from strings made out of streams of ints 
 or floats. Useful for building buffers for opengl (float) and audio 
 (int16_t).
+
+See libs/lua_fats/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_fats/
 
  ]],
 }

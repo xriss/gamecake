@@ -59,12 +59,15 @@ dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.box2d/",
+ homepage="https://github.com/xriss/gamecake",
  license="MIT",
  summary="box2d V3",
  detailed=[[
 
-A lua binding to Box2d V3, includes box2d source build.
+A lua binding to Box2d V3 physics library.
+
+See libs/lua_boxxd/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_boxxd/
 
  ]],
 }

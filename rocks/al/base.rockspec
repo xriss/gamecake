@@ -50,12 +50,15 @@ dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.al/",
+ homepage="https://github.com/xriss/gamecake",
  license="MIT",
  summary="OpenAL",
  detailed=[[
 
 OpenAL binding, provides al and alc modules.
+
+See libs/lua_al/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_al/
 
 
  ]],

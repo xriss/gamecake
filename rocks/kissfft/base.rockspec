@@ -29,12 +29,15 @@ dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.wetgenes/",
- license="MIT",
+ homepage="https://github.com/xriss/gamecake",
+ license="MIT / BSD-3-Clause",
  summary="kissfft sound processing",
  detailed=[[
 
-https://github.com/xriss/gamecake
+A lua binding to kissfft https://github.com/mborgerding/kissfft
+
+See libs/lua_kissfft/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_kissfft/
 
  ]],
 }

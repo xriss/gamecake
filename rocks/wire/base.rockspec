@@ -30,7 +30,7 @@ dependencies={
  "djon",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.wire/",
+ homepage="https://github.com/xriss/gamecake",
  license="MIT / Two-clause BSD",
  summary="C11 threads and FIFOs across lua states",
  detailed=[[
@@ -41,23 +41,8 @@ of communicating with these threads via messages only.
 Includes simple tasks for running a non blocking HTTP fetch or SQLITE 
 query in another thread, hence the optional luasocket etc dependencies.
 
-See https://github.com/xriss/gamecake/tree/master/libs/lua_wire and 
-https://xriss.github.io/gamecake/docs/lua.wire/ for more docs.
-
-Contains a builtin static slightly modified version of cmsgpack ( used 
-for squirting lua data between threads and will not conflict with a 
-real install of cmsgpack ) from 
-
-https://github.com/antirez/lua-cmsgpack
-
-it is just safer to have an internal version that we can explicitly 
-control and hack, also it might get replaced.
-
-Also contains windows thread hacks from
-
-https://github.com/jtsiomb/c11threads
-
-to help with mingwin C11 builds
+See libs/lua_wire/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_wire/
 
  ]],
 }

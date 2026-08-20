@@ -27,12 +27,15 @@ dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.wetgenes/",
+ homepage="https://github.com/xriss/gamecake",
  license="MIT",
  summary="dumbft sound processing",
  detailed=[[
 
-https://github.com/xriss/gamecake
+Like FFT but dumber.
+
+See libs/lua_dumbft/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_dumbft/
 
  ]],
 }

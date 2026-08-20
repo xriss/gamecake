@@ -1,6 +1,18 @@
 
-not sure why but have disable force resets on update in cpBody.c as that seems like, uhm, bad?
+# gamecake-chipmunk
 
+- v0.9
+	- initial rocks release.
+
+Lua code documentation auto built from source comments can be found at 
+https://xriss.github.io/gamecake/docs/
+
+This has been replaced by box2d but currently kept around for 
+compatibility with old fun code.
+
+
+also not sure why but have had to disable force resets on update in 
+cpBody.c so we can easily run multiple steps
 
 	https://chipmunk-physics.net/forum/viewtopic.php?t=484
 	Re: Force vs Impulse?

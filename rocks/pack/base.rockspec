@@ -21,12 +21,17 @@ dependencies={
  "lua >= 5.1 <= 5.2",
 }
 description={
- homepage="https://xriss.github.io/gamecake/docs/lua.pack/",
+ homepage="https://github.com/xriss/gamecake",
  license="MIT",
- summary="binary string packing",
+ summary="binary string userdata packing",
  detailed=[[
 
-ignore me
+Lua library to help with read/write cdata style structs etc. This 
+exists as we can not rely on luajits ffi structs always being available 
+so needed a workaround for vanilla lua.
+
+See libs/lua_pack/readme.md in the gamecake repo 
+https://github.com/xriss/gamecake/blob/master/libs/lua_pack/
 
  ]],
 }

@@ -1,5 +1,5 @@
 
-local usb = require("moonusb")
+local usb ; pcall(function() usb=require("moonusb") end)
 local dumbft=require("wetgenes.dumbft")
 
 -- expect this many s16 audio samples per second
@@ -82,11 +82,13 @@ setup=function()
 	dft=dumbft.create(buckets)
 
 --	usb.trace_objects(true) -- trace creation/deletion of objects
+if usb then
 	local ctx = usb.init()
 	local vendor_id, product_id = 0x0483,  0x2023
 	local device, devhandle = ctx:open_device(vendor_id, product_id)
 	printhandle=devhandle
 	print("PRINTER",printhandle)
+end
 
 end
 
