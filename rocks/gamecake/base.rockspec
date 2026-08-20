@@ -81,14 +81,13 @@ description={
  summary="A collection of modules from the gamecake project",
  detailed=[[
 
-See https://github.com/xriss/gamecake for the source.
-
 This pulls in as many dependencies as it can to try and mimic the 
 modules that gamecake provides in a luarocks environment.
 
-This is not a perfect copy but is reasonably close and is primarily 
-used to share gamecake code with openresty.
+See libs/lua_gamecake/readme.md in the game cake repo
+https://github.com/xriss/gamecake
 
+https://github.com/xriss/gamecake/blob/master/libs/lua_gamecake/
 
  ]],
 }
