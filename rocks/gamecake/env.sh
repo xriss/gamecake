@@ -4,6 +4,7 @@ export ROCK_DIR=`pwd`
 export ROCK_NAME=gamecake
 export ROCK_VERSION=26.260812
 export ROCK_REVISION=260813
+export ROCK_README=src/lua_gamecake/readme.md
 
 export ROCK_BASENAME=${ROCK_NAME}-${ROCK_VERSION}-${ROCK_REVISION}
 

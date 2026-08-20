@@ -4,6 +4,7 @@ export ROCK_DIR=`pwd`
 export ROCK_NAME=gamecake-box2d
 export ROCK_VERSION=0.9
 export ROCK_REVISION=260813
+export ROCK_README=src/lua_boxxd/readme.md
 
 export ROCK_BASENAME=${ROCK_NAME}-${ROCK_VERSION}-${ROCK_REVISION}
 
