@@ -39,7 +39,7 @@ dependencies={
 -- generic modules
 
  "bit32",
- "LuaBitOp",
+ "luabitop",
  "luautf8",
  "luafilesystem",
  "luaposix",
@@ -48,8 +48,8 @@ dependencies={
  "luasec",
  "lsqlite3",
  "lua-cmsgpack",
- "Lrexlib-PCRE",
- "Lua-SDL2",
+ "lrexlib-pcre",
+ "lua-sdl2",
 
 -- "luapgsql",
 
