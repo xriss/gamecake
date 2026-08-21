@@ -31,3 +31,11 @@ make and install it.
 
 	./rock.sh wire make
 
+
+To test that everything makes OK, nuke the ~/.luarocks dir and 
+reinstall everything.
+
+	rm -rf ~/.luarocks
+	luarocks config lua_version 5.1
+	./allrocks make
+
