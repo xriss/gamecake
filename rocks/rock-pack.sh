@@ -18,6 +18,6 @@ rm -f src.zip
 zip -r src.zip src
 
 luarocks pack $ROCK_BASENAME.rockspec
-rm -f $ROCK_BASENAME.rockspec
+#rm -f $ROCK_BASENAME.rockspec
 
 rm -f src.zip

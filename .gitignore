@@ -80,3 +80,5 @@ node_modules
 
 rocks/*/*.zip
 rocks/*/*.rock
+rocks/*/*.rockspec
+

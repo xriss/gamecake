@@ -12,7 +12,7 @@ ROCK_README   = assert(os.getenv("ROCK_README"))
 print( "updating" , ROCK_BASENAME..".rockspec" )
 
 -- load base file
-local fp=assert(io.open("./base.rockspec","rb"))
+local fp=assert(io.open("./base.lua","rb"))
 local text=assert(fp:read("*all"))
 fp:close()
 

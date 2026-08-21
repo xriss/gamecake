@@ -5,4 +5,4 @@ if [ -z "$ROCK_DIR" ]; then
 fi
 cd $ROCK_DIR
 
-luarocks upload --api-key=$ROCK_API_KEY $ROCK_BASENAME.src.rock
+luarocks upload --api-key=$ROCK_API_KEY $ROCK_BASENAME.rockspec $ROCK_BASENAME.src.rock
