@@ -9,7 +9,12 @@ build={
             "lua_ogg",
             "lib_hacks/code",
             "$(VORBIS_LIB_INCDIR)",
+            "$(OGG_LIB_INCDIR)",
          },
+		libdirs={
+			"$(VORBIS_LIB_LIBDIR)",
+			"$(OGG_LIB_LIBDIR)",
+		},
          libraries = {"vorbis","ogg"},
       },
  },
@@ -24,6 +29,9 @@ external_dependencies = {
    VORBIS_LIB = {
       header = "vorbis/codec.h",
    },
+   OGG_LIB = {
+      header = "ogg/ogg.h",
+   },
 }
 
 
@@ -32,7 +40,7 @@ dependencies={
 }
 description={
  homepage="https://github.com/xriss/gamecake",
- license="MIT,
+ license="MIT",
  summary="read ogg vorbis audio files",
  detailed=[[
 
