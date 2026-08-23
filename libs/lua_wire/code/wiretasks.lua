@@ -21,7 +21,6 @@ require certain tasks to already be running.
 ]]
 
 local wire=require("wetgenes.wire")
-local djon=require("djon")
 
 --module
 local M={ modname=(...) }
