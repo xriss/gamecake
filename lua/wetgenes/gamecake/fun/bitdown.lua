@@ -343,8 +343,15 @@ M.pix_grd_idx=function(str,map,gout,px,py,hx,hy)
 			t[l+1]=c.idx
 		end
 	end
+
+	if not gout then -- auto create grd
+		gout=wgrd.create("U8_INDEXED",hx,hy,1)
+		gout:palette(0,256,map.data) -- with palette
+	end 
+
 	gout:pixels(px,py,hx,hy,t)
 
+	return gout
 end
 
 -- write a grd into some ascii art from an x,y grd location
