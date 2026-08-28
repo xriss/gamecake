@@ -96,6 +96,65 @@ for idx,part in ipairs(parts) do
 	end
 end
 
+do
+	local totx=0
+	local toty=0
+	local maxx=0
+	local maxy=0
+	local hx,hy=0,0
+	local area=0
+	
+	for idx,part in ipairs(parts) do
+		if type(part)=="table" then
+			part.grd=bitdown.pix_grd_idx(part.body)
+			part.hx=math.ceil(part.grd.width/8)*8
+			part.hy=math.ceil(part.grd.height/8)*8
+			totx=totx+part.hx+16
+			toty=toty+part.hy+16
+			if part.hx+16 > maxx then maxx=part.hx+16 end -- max
+			if part.hy+16 > maxy then maxy=part.hy+16 end -- max
+			area=area+(part.hx+16)*(part.hy+16)
+		end
+	end
+	hx=math.ceil(math.sqrt(area)/8)*8
+	if hx<maxx then hx=maxx end
+	print( "total x" , totx )
+	print( "img x" , hx )
+	
+	-- layout and workout height
+	local px,py=0,0
+	local line=0
+	for idx,part in ipairs(parts) do
+		if type(part)=="table" then
+			if px+part.hx+16<=hx then -- fit
+				part.px=px+8
+				part.py=py+8
+				px=px+part.hx+16
+				if line<part.hy then line=part.hy end
+			else -- next line
+				py=py+line+16
+				px=0
+				line=0
+				part.px=px+8
+				part.py=py+8
+				px=px+part.hx+16
+				if line<part.hy then line=part.hy end
+			end
+		end
+	end
+	hy=py+line+16
 
+	local g=wgrd.create("U8_INDEXED",hx,hy,1)
+	g:palette(0,256,bitdown.cmap_swanky32.data) -- with palette
+
+	for idx,part in ipairs(parts) do
+		if type(part)=="table" then
+			g:pixels( part.px, part.py, part.grd.width, part.grd.height, part.grd )
+		end
+	end
+	
+	g:save({fmt="png",filename="test.png"})
+
+end
 
 

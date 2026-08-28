@@ -323,6 +323,7 @@ M.bake=function(oven,docs)
 		end
 		gui.master.ids.infobar:set_dirty()
 
+		gui.master.ids.texteditor:layout_size()
 		gui.master.ids.texteditor:scroll_to_line() -- force top
 
 		return it

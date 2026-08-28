@@ -1398,10 +1398,18 @@ wtexteditor.double_click=function(texteditor,dy,dx,act)
 end
 
 
-function wtexteditor.layout(widget)
+-- maybe we just need to sync size
+function wtexteditor.layout_size(widget)
 
 	widget.scroll_widget.hx=math.floor(widget.hx)
 	widget.scroll_widget.hy=math.floor(widget.hy)
+
+	return widget
+end
+
+function wtexteditor.layout(widget)
+
+	wtexteditor.layout_size(widget)
 
 	return widget.meta.layout(widget)
 end
@@ -1423,6 +1431,7 @@ function wtexteditor.setup(widget,def)
 
 	widget.update=wtexteditor.update
 	widget.layout=wtexteditor.layout
+	widget.layout_size=wtexteditor.layout_size
 	widget.draw=wtexteditor.draw
 	widget.refresh=wtexteditor.refresh
 
