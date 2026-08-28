@@ -784,6 +784,7 @@ local lay=
         },
         {
          id="console",hidden=true,
+         lock_max_y=true,
          class="texteditor",size="full",style="flat",color=0,
          opts={console=true,gutter_disable=true,word_wrap=false},
          --fbo=true, --  scale using fbo so it is smoothed
@@ -1123,8 +1124,8 @@ inherit=true,
 		local console=gui.master.ids.console
 		if console then
 			console.txt.append_text(s)
-			console:resize_and_layout()
-			console:scroll_to_bottom()
+			console:resize_and_layout() -- new size so must calc
+			console:scroll_to_bottom() -- before we can scroll
 			console.txt_dirty=true
 		end
 	end

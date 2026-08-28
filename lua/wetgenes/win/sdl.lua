@@ -763,7 +763,6 @@ local _cursor=function(s,dat,px,py)
 		if v:lower()==s then S=v break end
 	end
 
-print(s)
 	v=assert( SDL.createSystemCursor( SDL.systemCursor[S] ) )
 
 	_cursors[s]=v

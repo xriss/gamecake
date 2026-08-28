@@ -79,7 +79,7 @@ function wscroll.layout(widget)
 
 --	widget.datx.step= widget:bubble("text_size") or 16
 	local maxnum=false
-	if widget.lock_max_x and widget.datx.num>0 and widget.datx.max<=widget.datx.num then maxnum=true end -- keep number locked at max
+--	if widget.lock_max_x and widget.datx.num>0 and widget.datx.max<=widget.datx.num then maxnum=true end -- keep number locked at max
 	widget.datx.max=math.ceil((widget.pan.hx_max-widget.pan.hx)/widget.datx.step)*widget.datx.step
 	if widget.datx.max<0 then widget.datx.max=0  end
 	widget.datx.size=widget.pan.hx/widget.pan.hx_max
@@ -87,7 +87,7 @@ function wscroll.layout(widget)
 
 --	widget.daty.step= widget:bubble("text_size") or 16
 	local maxnum=false
-	if widget.lock_max_y and widget.daty.num>0 and  widget.daty.max<=widget.daty.num then maxnum=true end -- keep number locked at max
+--	if widget.lock_max_y and widget.daty.num>0 and  widget.daty.max<=widget.daty.num then maxnum=true end -- keep number locked at max
 	widget.daty.max=math.ceil((widget.pan.hy_max-widget.pan.hy)/widget.daty.step)*widget.daty.step
 	if widget.daty.max<0 then widget.daty.max=0 end
 	widget.daty.size=widget.pan.hy/widget.pan.hy_max
@@ -111,8 +111,8 @@ function wscroll.setup(widget,def)
 	-- if true then when the content expands we stick to the bottom/right
 	-- if we have already been scrolled all the way there
 	-- unsure if this should be default logic so testing
-	widget.lock_max_x=false
-	widget.lock_max_y=false
+--	widget.lock_max_x=def.lock_max_x or false
+--	widget.lock_max_y=def.lock_max_y or false
 
 -- auto add the draging button as a child
 	local ss=16
