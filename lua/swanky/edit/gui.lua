@@ -1123,7 +1123,7 @@ inherit=true,
 		local console=gui.master.ids.console
 		if console then
 			console.txt.append_text(s)
---				console:layout()
+			console:resize_and_layout()
 			console:scroll_to_bottom()
 			console.txt_dirty=true
 		end
