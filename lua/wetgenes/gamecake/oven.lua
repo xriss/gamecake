@@ -121,79 +121,6 @@ not be able to run at an fps faster than your screens refresh rate.
 
 }
 
-
-M.help_text=[[
-gamecake -lcake  # Run a cake in cake mode
-gamecake -lfun   # Run a fun in fun mode
-gamecake -lcmd   # Run a cmd in cmd mode
-
-Mostly we will behave the same as the lua or luajit command, but some
-filenames will be treated as special. So filename.fun.lua will auto
-run in fun mode and filename.cake will auto run in cake mode. When
-running a cake or fun script then the following args can control it.
-
-  --help
-    Print help text and exit
-		gamecake -lcake --help
-		gamecake -lcmd --help
-
-  --logs
-    Enable all log output. ( essentially a verbose mode )
-
-  --logs=MODE
-	Enables MODE log output only, eg --logs=oven for oven logs only.
-	Prefixing mode with a - will remove that mode from the logs and a +
-	will add it and we assume + if neither is present, eg --logs=-oven
-	will show everything except oven logs.
-
-  --win-hx=640
-  --win-hy=480
-  --win-px=0
-  --win-py=0
-	Set the window size and position, without these values we will
-	place and position the window automatically.
-
-  --win-vsync=1
-	Set vsync to 0 for immediate updates, 1 for updates synchronized 
-	with the vertical retrace, -1 for adaptive vsync. We default to 
-	1 so will not be able to run at an fps faster than your screens 
-	refresh rate.
-
-  --win-borderless
-    Ask for a borderless window.
-
-  --win-hidden
-    Ask for window to start off hidden.
-
-  --win-title="hello world"
-    Set window title.
-
-  --show=win
-	Show window as a normal draggable and resizable window. This is the
-	default.
-
-  --show=max
-	Show window as a maximised window. Desktop resolution possibly
-	with a visible title bar and desktop panel still visible.
-
-  --show=full
-	Show window as a borderless full screen window. Desktop resolution
-	no title bar.
-
-  --screen=1280x720
-  --screen=1280x720.RGB888
-  --screen=1280x720.RGB888/60
-	When going full screen request this resolution, optional SDL pixel
-	format and optional framerate.
-
-  --pixel
-    Disable screen space pixel processing, eg fun scanlines filter.
-
-  --pixel=NUMBER
-	Disable screen space pixel processing and set default window size
-	to NUMBER view pixels per game pixel.
-]]
-
 -- probably not generic? maybe
 
 --[[
@@ -256,46 +183,10 @@ function M.bake(opts)
 	opts.args = require("cmd.args").bake({inputs=M.base_args})
 	opts.args:parse(opts)
 
---[[
-
--- handle commandline options, copy --flags into opts.args and put other args into number keys
-	opts.args=opts.args or {}
-	for i=0,#opts do local v=opts[i]
-		if type(v)=="string" then
-			if v:sub(1,2)=="--" then -- strip --from-start-of-flags
-				local n=v:sub(3)
-				local d=true
-				local s,e = v:find("=")
-				if s then -- its a setting so set it
-					n=(v:sub(3,s-1))
-					d=v:sub(e+1)
-				end
-				n=n:lower():gsub("[^%w]", "_")
-				opts.args[ n ]=d -- simple setting, strings only
-			else
-				opts.args[#opts.args+1]=v -- normal arg
-			end
-		end
-	end
---RINT(opts)
-
-	if opts.args.help then
-
-		print(opts.help_text or M.help_text)
-
-		os.exit(0)
-	end
-
 	opts.width=opts.width or 0
 	opts.height=opts.height or 0
 
-	if opts.sanitize then -- sanitize args
-		opts:sanitize()
-	end
-]]
-
-
-	require("wetgenes.logs").setup(opts.args)
+	require("wetgenes.logs").setup(opts.args.data)
 
 if jit then -- now logs are setup, dump basic jit info
 	local t={jit.version,jit.status()}
@@ -485,7 +376,7 @@ os.exit()
 			end
 
 			local inf={width=opts.width,height=opts.height,title=opts.title,overscale=opts.overscale,
-				console=opts.args.console,		-- use --console on commandline to keep console open
+				console=opts.args.data.console,		-- use --console on commandline to keep console open
 				borderless=opts.borderless,
 				hidden=opts.hidden,
 				}
@@ -493,8 +384,8 @@ os.exit()
 
 			local set_inf_arg=function(inf_name,arg_name,arg_cast)
 				arg_cast=arg_cast or function(v) return v end
-				if opts.args[arg_name] then
-					inf[inf_name]=arg_cast( opts.args[arg_name] )
+				if opts.args.data[arg_name] then
+					inf[inf_name]=arg_cast( opts.args.data[arg_name] )
 				end
 			end
 
@@ -526,7 +417,7 @@ os.exit()
 			set_inf_arg("x","win-px",tonumber)
 			set_inf_arg("y","win-py",tonumber)
 
-			inf.screen_mode=opts.args.screen or opts.screen_mode
+			inf.screen_mode=opts.args.data.screen or opts.screen_mode
 
 			oven.win=wwin.create(inf)
 			oven.win:context({})
@@ -534,7 +425,7 @@ os.exit()
 --wwin.hardcore.peek(oven.win[0])
 
 			if not inf.hidden then
-				local doshow=opts.args.show or opts.show or "win" -- default window display
+				local doshow=opts.args.data.show or opts.show or "win" -- default window display
 				if doshow then oven.win:show(doshow) end
 			end
 
