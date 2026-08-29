@@ -55,7 +55,7 @@ Load file.txt for editing.
 
 			]], },
 
-		}}):parse(arg):sanity()
+		}}):parse(arg)
 			
 		if args.data.help then
 			print(table.concat(args:help(),"\n"))
