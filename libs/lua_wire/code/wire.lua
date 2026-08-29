@@ -1125,7 +1125,7 @@ wire.do_start=function( func )
 	global.PRINT=print
 	global.DUMP=print
 	global.LOG=print
-	global.TRACEBACK=function(err) LOG( "TASK" , debug.traceback( err ) ) return err end
+	global.TRACEBACK=function(err) LOG( "TASK" , debug.traceback( err or "" ) ) return err end
 
 -- try and setup wetgenes.logs
 	pcall( function()

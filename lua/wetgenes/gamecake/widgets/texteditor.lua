@@ -818,7 +818,7 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		local x,y=pan:mousexy(_x,_y)
 		local top=widgets_menuitem.menu_add(pan,{menu_data=menu_data,px=x,py=y})
 		top.also_over={top} -- pan does not count as over
-		top.master.activate(top)
+--		top.master.activate(top)
 
 		end)
 		return

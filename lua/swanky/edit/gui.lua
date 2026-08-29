@@ -583,7 +583,15 @@ function gui.hooks(act,w,dat)
 
 --print("CLICK",w.id)
 
-		if w.id=="font_size" then
+		if w.id=="menu_app" then
+
+			if oven.modname=="swanky.edit" then
+				oven.modname="swanky.paint"
+			else
+				oven.modname="swanky.edit"
+			end
+
+		elseif w.id=="font_size" then
 		
 			gui.font_size=w.user
 
@@ -721,8 +729,14 @@ local lay=
     hx_min_double=gsiz*48,
     hy_max_double=gsiz*1,
 
-   {
-     hx=gsiz*24,hy=gsiz*1,class="three",
+    {
+     hx=gsiz*1,hy=gsiz*1,
+     id="menu_app",hooks=gui.hooks,
+     class="button",color=1,
+     text="*",
+    },
+    {
+     hx=gsiz*23,hy=gsiz*1,class="three",
      {
       hx=gsiz*4,hy=gsiz*1,class="menubar",id="menubar",always_draw=true,
      },

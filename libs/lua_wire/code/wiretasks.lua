@@ -361,7 +361,7 @@ wiretasks.sqlite_code=function()
 						local names={}
 						for n,v in pairs(row) do names[#names+1]=":"..n end
 						names=table.concat(names," , ")
-						local stmt = db:prepare[[ INSERT INTO ]]..tabname..[[ VALUES (]]..names..[[) ]]
+						local stmt = db:prepare([[ INSERT INTO ]]..tabname..[[ VALUES (]]..names..[[) ]])
 						stmt:bind_names(row)
 						stmt:step()
 						stmt:finalize()

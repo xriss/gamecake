@@ -54,22 +54,22 @@ sysopts={
 		},
 	},
 	icon=[[
-. . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . 
-. . . . . Y Y O O Y Y O O o o . . . . 
-. . . . . Y Y O O Y Y O O o o . . . . 
-. . . Y Y O O o o O O o o r r r r . . 
-. . . Y Y O O o o O O o o r r r r . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
-. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . o o o o O O O O O O r r r r . . 
-. . . o o o o O O O O O O r r r r . . 
-. . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . Y Y O O Y Y O O o o . . . 
+. . . Y Y O O Y Y O O o o . . . 
+. Y Y O O o o O O o o r r r r . 
+. Y Y O O o o O O o o r r r r . 
+. s s s s F F F F F F f f f f . 
+. s s s s F F F F F F f f f f . 
+. Y Y Y Y Y Y Y Y Y Y o o o o . 
+. Y Y Y Y Y Y Y Y Y Y o o o o . 
+. s s s s F F F F F F f f f f . 
+. s s s s F F F F F F f f f f . 
+. o o o o O O O O O O r r r r . 
+. o o o o O O O O O O r r r r . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
 ]],
 }
 
