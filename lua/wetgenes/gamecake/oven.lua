@@ -59,6 +59,69 @@ end
 
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
+-- { name , default , help }
+M.base_args={
+	{ "help" , false , "Print help text and exit.", },
+
+	{ 1 , nil , nil , [[
+
+gamecake 
+	Mostly we will behave the same as the lua or luajit command, but some
+	filenames will be treated as special. So filename.fun.lua will auto
+	run in fun mode and filename.cake will auto run in cake mode. When
+	running a cake or fun script then the following args can control it.
+
+]]},
+	{ "console" , false , "Keep console open." },
+	{ "logs" , nil , "Enable log output." , [[
+
+--logs=MODE
+	Enables MODE log output only, eg --logs=oven for oven logs only. 
+	Prefixing mode with a - will remove that mode from the logs and a + 
+	will add it and we assume + if neither is present, eg --logs=-oven 
+	will show everything except oven logs.
+
+]]},
+	{ "win-hx" , nil , "Set the window width." },
+	{ "win-hy" , nil , "Set the window height." },
+	{ "win-px" , nil , "Set the window X position." },
+	{ "win-py" , nil , "Set the window Y position." },
+	{ "win-vsync" , 1 , nil , [[
+
+Set vsync to 0 for immediate updates, 1 for updates synchronized with 
+the vertical retrace, -1 for adaptive vsync. We default to 1 so will 
+not be able to run at an fps faster than your screens refresh rate.
+
+]]},
+	{ "win-borderless" , false , "Ask for a borderless window." },
+	{ "win-hidden" , false , "Ask for window to start off hidden." },
+	{ "win-title" , nil , "Force a window title." },
+	{ "show" , {"win","max","full"} , nil , [[
+
+--show=win
+	Show window as a normal draggable and resizable window. This is the 
+	default.
+--show=max
+	Show window as a maximised window. Desktop resolution possibly
+	with a visible title bar and desktop panel still visible.
+--show=full
+	Show window as a borderless full screen window. Desktop resolution 
+	no title bar.
+
+]]},
+	{ "screen" , nil , nil , [[
+
+--screen=1280x720
+--screen=1280x720.RGB888
+--screen=1280x720.RGB888/60
+	When going full screen request this resolution, optional SDL pixel 
+	format and optional framerate.
+
+]]},
+
+}
+
+
 M.help_text=[[
 gamecake -lcake  # Run a cake in cake mode
 gamecake -lfun   # Run a fun in fun mode
@@ -190,6 +253,11 @@ function M.bake(opts)
 		end
 	end
 
+	opts.args = require("cmd.args").bake({inputs=M.base_args})
+	opts.args:parse(opts)
+
+--[[
+
 -- handle commandline options, copy --flags into opts.args and put other args into number keys
 	opts.args=opts.args or {}
 	for i=0,#opts do local v=opts[i]
@@ -224,6 +292,8 @@ function M.bake(opts)
 	if opts.sanitize then -- sanitize args
 		opts:sanitize()
 	end
+]]
+
 
 	require("wetgenes.logs").setup(opts.args)
 

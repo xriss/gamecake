@@ -31,12 +31,23 @@ M.bake=function(oven,cmd)
 --		gui.texteditor.txt.set_text("Hello")
 
 
-		local args=require("cmd.args").bake({inputs={
-
+		local inputs={
 			{	"swanky-edit",	false,	"force swanky.edit app. When running a combined swanky app this forces edit mode.", },
+			{	"run",			false,	"Run the file full screen rather than edit it.", },
+			{	1,			"",	"", [[
+
+swed file.txt
+	Load file.txt for editing.
+
+			]], },
+
+		}
+
+--[=[
 			{	"help",			false,	"Print help and exit.", },
-			{	"console",		false,	"Keep console open.", },
-			{	"run",			false,	"Run the file full screen.", },
+			{	"show",			"win",	[[
+Choose window mode. win|max|full for normal maximized or fullscreen.
+]], },
 			{	"logs",			false,	[[
 
 Choose log verbosity. Set to true to enable all logs or use a string of 
@@ -44,26 +55,18 @@ Choose log verbosity. Set to true to enable all logs or use a string of
 prefixes.
 
 ]], },
-			{	"show",			"win",	[[
+]=]
 
-Choose window mode. win|max|full for normal maximized or fullscreen.
-
-]], },
-			{	1,			"swed file.txt",	[[
-
-Load file.txt for editing.
-
-			]], },
-
-		}}):parse(arg)
+		opts.args:new_inputs(inputs)
+		opts.args:parse(opts)
 			
-		if args.data.help then
-			print(table.concat(args:help(),"\n"))
+		if opts.args.data.help then
+			print(table.concat(opts.args:help(),"\n"))
 			oven.next=true
 			return
 		end
 		
-		cmd.args=args
+		cmd.args=opts.args
 	end
 	
 	return cmd
