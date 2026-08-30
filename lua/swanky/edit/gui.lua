@@ -248,17 +248,22 @@ function gui.refresh_tree()
 	gui.master.ids.treefiles:refresh()
 end
 
-function gui.action(m)
+do
+-- can create "global" locals here for actions within this scope
 
-	if m.id=="file_quit" then
-	
+gui.actions={}
+
+gui.actions[ "file_quit" ]=function(why)
+
 		oven.next=true
 
-	elseif m.id=="file_new" then
+end
+gui.actions[ "file_new" ]=function(why)
 
 		docs.manifest():show()
 
-	elseif m.id=="file_open" then
+end
+gui.actions[ "file_open" ]=function(why)
 
 		gui.screen.dialogs:show({
 			lines={"Load..."
@@ -280,23 +285,28 @@ function gui.action(m)
 			end
 		})
 
-	elseif m.id=="file_close" then
+end
+gui.actions[ "file_close" ]=function(why)
 		if docs.doc then
 			docs.doc:close()
 		end
-	elseif m.id=="file_reload" then
+end
+gui.actions[ "file_reload" ]=function(why)
 		if docs.doc then
 			docs.doc:reload()
 		end
-	elseif m.id=="file_save" then
+end
+gui.actions[ "file_save" ]=function(why)
 		if docs.doc then
 			docs.doc:save()
 		end
-	elseif m.id=="file_saveall" then
+end
+gui.actions[ "file_saveall" ]=function(why)
 
 		docs.save_all()
 
-	elseif m.id=="file_saveas" then
+end
+gui.actions[ "file_saveas" ]=function(why)
 
 		gui.screen.dialogs:show({
 			lines={"Save..."
@@ -313,29 +323,8 @@ function gui.action(m)
 			cancel=function()end,
 		})
 
-	elseif m.id:sub(1,6)=="theme_" then -- all themes
-		local a=gui.master.actions[m.id]
-		if a then
-			gui.theme(a.json)
-			ssettings.set("gui_theme",m.id)
-		end
-
-	elseif m.id=="search_find" then
-
--- hacky print hook on ctrl+g
---[[
-do
-print("next")
-
-local w=gui.master.ids.top
-
-	w:call_and_walk(function(w,d)
-		print(w.id or "",w.hx)
-		return true
-	end)
-
 end
-]]
+gui.actions[ "search_find" ]=function(why)
 
 		local texteditor=gui.master.ids.texteditor
 		local txt=texteditor.txt
@@ -345,24 +334,8 @@ end
 
 			local dir=wpath.dir(txt.doc.filename)
 			dir=wpath.unslash(dir)
---			gui.datas.set_string("find_files",dir)
-
---print("search_find",word,dir)
-
---[[
-			local find=finds.get(dir,word)
-			if not find then
-				find=finds.create({dir=dir,word=word})
-				find:add_item()
-				find:scan()
-			end
-]]
-
---			gui.refresh_tree()
---			gui.master.request_redraw=true
 
 		end
-
 
 		-- show search
 		gui.datas.set_string("list_mode","search")
@@ -370,7 +343,8 @@ end
 		gui.master.set_focus( gui.master.ids.find_search_text )
 		gui.master.ids.find_search_text:select_all()
 
-	elseif m.id=="find_goto" then
+end
+gui.actions[ "find_goto" ]=function(why)
 
 		local texteditor=gui.master.ids.texteditor
 		local txt=texteditor.txt
@@ -378,7 +352,8 @@ end
 		txt.find_next()
 		texteditor:cursor_sync()
 
-	elseif m.id=="find_replace" then
+end
+gui.actions[ "find_replace" ]=function(why)
 
 		local texteditor=gui.master.ids.texteditor
 		local txt=texteditor.txt
@@ -398,7 +373,8 @@ end
 			texteditor:cursor_sync()
 		end
 
-	elseif m.id=="find_replace_all" then
+end
+gui.actions[ "find_replace_all" ]=function(why)
 
 		local texteditor=gui.master.ids.texteditor
 		local txt=texteditor.txt
@@ -421,7 +397,8 @@ end
 			texteditor:cursor_sync()
 		end
 
-	elseif m.id=="find_replace_selection" then
+end
+gui.actions[ "find_replace_selection" ]=function(why)
 
 		local texteditor=gui.master.ids.texteditor
 		local txt=texteditor.txt
@@ -442,7 +419,8 @@ end
 			texteditor:cursor_sync()
 		end
 
-	elseif m.id=="find_set_dir" then
+end
+gui.actions[ "find_set_dir" ]=function(why)
 		
 		local doc=docs.doc
 		if doc then -- must have file
@@ -450,7 +428,8 @@ end
 			gui.datas.set_string("find_dir",dir)
 		end
 
-	elseif m.id=="find_in_files" then
+end
+gui.actions[ "find_in_files" ]=function(why)
 
 		local s=gui.datas.get_string("find_search")
 		local f=gui.datas.get_string("find_files")
@@ -473,20 +452,51 @@ end
 			
 		end
 
-	elseif m.id=="find_in_files_cancel" then
+end
+gui.actions[ "find_in_files_cancel" ]=function(why)
 
 		finds.cancel_all() -- only 1 find at a time?
 
-	elseif m.id=="docs_prev" then
+end
+gui.actions[ "docs_prev" ]=function(why)
 
 		docs.show_prev()
 
-	elseif m.id=="docs_close_other" then
+end
+gui.actions[ "docs_close_other" ]=function(why)
 
 		docs.close_other()
 
-	end
+end
 
+for _,name in ipairs{
+		"theme_dark_tiny",
+		"theme_dark_small",
+		"theme_dark_medium",
+		"theme_dark_large",
+		"theme_dark_huge",
+		"theme_bright_tiny",
+		"theme_bright_small",
+		"theme_bright_medium",
+		"theme_bright_large",
+		"theme_bright_huge",
+		} do
+	gui.actions[name]=function(why)
+		local action=gui.master.actions[why.id]
+		if action then
+			gui.theme(action.json)
+			ssettings.set("gui_theme",why.id)
+		end
+	end
+end
+
+end
+
+function gui.action(why)
+	local action=gui.actions[ assert(why.id) ]
+	if action then
+		return action(why)
+	end
 end
 
 function gui.theme(def)
