@@ -164,6 +164,10 @@ function M.bake(opts)
 	oven.newticks=toaster.newticks
 	oven.is={}
 	
+	oven.share={}
+	oven.share.files={} -- dumb interface to share files by full paths
+	-- contains generic objects like [ path={ mine={} } ]
+	-- where mine is an unique name for the type of data we have
 
 	if opts.hints then -- pass hints from opts to sdl
 		wwin.hints(opts.hints)

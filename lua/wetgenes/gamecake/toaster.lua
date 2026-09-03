@@ -163,7 +163,7 @@ function M.bake(opts)
 	
 	oven.baked={}
 
-	oven.tasks=require("wetgenes.tasks").create({linda=opts.linda})
+--	oven.tasks=require("wetgenes.tasks").create({linda=opts.linda})
 
 --
 -- preheat a normal oven

@@ -253,266 +253,361 @@ do
 
 gui.actions={}
 
+gui.actions[ "find_search_text" ]=function(why)
+
+	-- on enter/tab in search box
+	if why.action=="unfocus" then
+		local texteditor=gui.master.ids.texteditor
+		local txt=texteditor.txt
+		if (txt.copy() or "") == "" then -- only if not selected
+			gui.do_actions[#gui.do_actions+1]={id="find_goto"}
+		end
+	end
+
+end
+
+gui.actions[ "find_search_text" ]=function(why)
+
+	-- on enter/tab in search box
+	if why.action=="unfocus" then
+		gui.refresh_tree()
+	end
+	
+end
+
+gui.actions[ "run_state" ]=function(why)
+
+	gui.master.dirty_by_data("run_state")
+
+end
+
+gui.actions[ "list_top" ]=function(why)
+
+	if why.data then -- data change
+		gui.master.ids.console.hidden=true
+		gui.master.ids.treefiles.hidden=true
+
+		if why.data.str=="tree" then
+			gui.master.ids.treefiles.hidden=false
+		elseif why.data.str=="console" then
+			gui.master.ids.console.hidden=false
+		end
+	end
+
+end
+
+gui.actions[ "list_mode" ]=function(why)
+
+	if why.data then -- data change
+
+		gui.master.ids.bar2:set_dirty()
+
+--			gui.master.ids.console.hidden=true
+		gui.master.ids.search.hidden=true
+		gui.master.ids.play.hidden=true
+
+		gui.master.ids.run_play_autoplay.hidden=true
+		gui.master.ids.run_play_start.hidden=true
+		gui.master.ids.run_play_stop.hidden=true
+		gui.master.ids.run_play_pause.hidden=true
+		gui.master.ids.run_play_restart.hidden=true
+
+		if why.data.str=="search" then
+
+			gui.master.ids.search.hidden=false
+
+		elseif why.data.str=="play" then
+
+			gui.master.ids.play.hidden=false
+
+			gui.master.ids.run_play_autoplay.hidden=false
+			gui.master.ids.run_play_start.hidden=false
+			gui.master.ids.run_play_stop.hidden=false
+			gui.master.ids.run_play_pause.hidden=false
+			gui.master.ids.run_play_restart.hidden=false
+
+		end
+
+	end
+end
+
+gui.actions[ "font_size" ]=function(why)
+
+	gui.font_size=why.widget.user
+
+end
+
+gui.actions[ "run_play_restart" ]=function(why)
+
+	gui.datas.set_string("run_state","play")
+	show.start_doc(0)
+
+end
+
+gui.actions[ "run_play_start" ]=function(why)
+
+	gui.datas.set_string("run_state","play")
+	show.start_doc()
+
+end
+
+gui.actions[ "run_play_pause" ]=function(why)
+
+	local run_state=gui.datas.get_string("run_state")
+	
+	if run_state=="pause" then
+		gui.datas.set_string("run_state","play")
+	else
+		gui.datas.set_string("run_state","pause")
+	end
+	
+end
+
+gui.actions[ "run_play_stop" ]=function(why)
+
+	gui.datas.set_string("run_state","stop")
+
+end
+
+
+gui.actions[ "menu_app" ]=function(why)
+
+	if oven.modname=="swanky.edit" then
+		oven.modname="swanky.paint"
+	else
+		oven.modname="swanky.edit"
+	end
+
+end
+
 gui.actions[ "file_quit" ]=function(why)
 
-		oven.next=true
+	oven.next=true
 
 end
 gui.actions[ "file_new" ]=function(why)
 
-		docs.manifest():show()
+	docs.manifest():show()
 
 end
 gui.actions[ "file_open" ]=function(why)
 
-		gui.screen.dialogs:show({
-			lines={"Load..."
-			},
-			file={},
-			cancel=function()end,
-			hooks=function(act,it)
-				local window=it ; while not window.close_request and window.parent~=window do window=window.parent end
-				if act=="file_name_click" then
-					local path=window.file:path()
-					gui.master.later_append(function()
-						docs.manifest(path):show()
-					end)
-					window:close_request()
-				end
-				if act=="click" then
-					window.close_request(it.id)
-				end
+	gui.screen.dialogs:show({
+		lines={"Load..."
+		},
+		file={},
+		cancel=function()end,
+		hooks=function(act,it)
+			local window=it ; while not window.close_request and window.parent~=window do window=window.parent end
+			if act=="file_name_click" then
+				local path=window.file:path()
+				gui.master.later_append(function()
+					docs.manifest(path):show()
+				end)
+				window:close_request()
 			end
-		})
+			if act=="click" then
+				window.close_request(it.id)
+			end
+		end
+	})
 
 end
 gui.actions[ "file_close" ]=function(why)
-		if docs.doc then
-			docs.doc:close()
-		end
+
+	if docs.doc then
+		docs.doc:close()
+	end
+
 end
 gui.actions[ "file_reload" ]=function(why)
-		if docs.doc then
-			docs.doc:reload()
-		end
+
+	if docs.doc then
+		docs.doc:reload()
+	end
+
 end
 gui.actions[ "file_save" ]=function(why)
-		if docs.doc then
-			docs.doc:save()
-		end
+
+	if docs.doc then
+		docs.doc:save()
+	end
+
 end
 gui.actions[ "file_saveall" ]=function(why)
 
-		docs.save_all()
+	docs.save_all()
 
 end
 gui.actions[ "file_saveas" ]=function(why)
 
-		gui.screen.dialogs:show({
-			lines={"Save..."
-			},
-			file={},
-			ok=function(window)
-				local path=window.file:path()
-				window.master.later_append(function()
-					if docs.doc then
-						docs.doc:save(path)
-					end
-				end)
-			end,
-			cancel=function()end,
-		})
+	gui.screen.dialogs:show({
+		lines={"Save..."
+		},
+		file={},
+		ok=function(window)
+			local path=window.file:path()
+			window.master.later_append(function()
+				if docs.doc then
+					docs.doc:save(path)
+				end
+			end)
+		end,
+		cancel=function()end,
+	})
 
 end
 gui.actions[ "search_find" ]=function(why)
 
-		local texteditor=gui.master.ids.texteditor
-		local txt=texteditor.txt
+	local texteditor=gui.master.ids.texteditor
+	local txt=texteditor.txt
 
-		local word=txt.copy() or ""
-		if word~="" and #word<256 then -- search for selected unless it is huge
+	local word=txt.copy() or ""
+	if word~="" and #word<256 then -- search for selected unless it is huge
 
-			local dir=wpath.dir(txt.doc.filename)
-			dir=wpath.unslash(dir)
+		local dir=wpath.dir(txt.doc.filename)
+		dir=wpath.unslash(dir)
 
-		end
+	end
 
-		-- show search
-		gui.datas.set_string("list_mode","search")
-		
-		gui.master.set_focus( gui.master.ids.find_search_text )
-		gui.master.ids.find_search_text:select_all()
+	-- show search
+	gui.datas.set_string("list_mode","search")
+	
+	gui.master.set_focus( gui.master.ids.find_search_text )
+	gui.master.ids.find_search_text:select_all()
 
 end
 gui.actions[ "find_goto" ]=function(why)
 
-		local texteditor=gui.master.ids.texteditor
-		local txt=texteditor.txt
+	local texteditor=gui.master.ids.texteditor
+	local txt=texteditor.txt
 
-		txt.find_next()
-		texteditor:cursor_sync()
+	txt.find_next()
+	texteditor:cursor_sync()
 
 end
 gui.actions[ "find_replace" ]=function(why)
 
-		local texteditor=gui.master.ids.texteditor
-		local txt=texteditor.txt
+	local texteditor=gui.master.ids.texteditor
+	local txt=texteditor.txt
 
-		if texteditor:allow_changes() then
+	if texteditor:allow_changes() then
 
 
-			local s=gui.datas.get_string("find_search")
-			local r=gui.datas.get_string("find_replace")
-			local old=txt.copy() or ""
+		local s=gui.datas.get_string("find_search")
+		local r=gui.datas.get_string("find_replace")
+		local old=txt.copy() or ""
 
-			if old~=s then -- just searched, so replace that 
-				txt.find_next()
-			end
-			txt.undo.replace_and_select(r)
-
-			texteditor:cursor_sync()
+		if old~=s then -- just searched, so replace that 
+			txt.find_next()
 		end
+		txt.undo.replace_and_select(r)
+
+		texteditor:cursor_sync()
+	end
 
 end
 gui.actions[ "find_replace_all" ]=function(why)
 
-		local texteditor=gui.master.ids.texteditor
-		local txt=texteditor.txt
+	local texteditor=gui.master.ids.texteditor
+	local txt=texteditor.txt
 
-		if texteditor:allow_changes() then
+	if texteditor:allow_changes() then
 
-			local s=gui.datas.get_string("find_search")
-			local r=gui.datas.get_string("find_replace")
+		local s=gui.datas.get_string("find_search")
+		local r=gui.datas.get_string("find_replace")
 
-			local t = txt.get_text() -- get all the text
+		local t = txt.get_text() -- get all the text
 
-			s=s:gsub("%p","%%%0") -- escape any paterns
-			r=r:gsub("%%","%%%%")
+		s=s:gsub("%p","%%%0") -- escape any paterns
+		r=r:gsub("%%","%%%%")
 
-			t=t:gsub( s , r ) -- simple replace
+		t=t:gsub( s , r ) -- simple replace
 
-			txt.mark(0,0,txt.hy+1,0) -- update text with a full file undo
-			txt.undo.replace(t)
+		txt.mark(0,0,txt.hy+1,0) -- update text with a full file undo
+		txt.undo.replace(t)
 
-			texteditor:cursor_sync()
-		end
+		texteditor:cursor_sync()
+	end
 
 end
 gui.actions[ "find_replace_selection" ]=function(why)
 
-		local texteditor=gui.master.ids.texteditor
-		local txt=texteditor.txt
+	local texteditor=gui.master.ids.texteditor
+	local txt=texteditor.txt
 
-		if texteditor:allow_changes() then
+	if texteditor:allow_changes() then
 
-			local s=gui.datas.get_string("find_search")
-			local r=gui.datas.get_string("find_replace")
+		local s=gui.datas.get_string("find_search")
+		local r=gui.datas.get_string("find_replace")
 
-			local t = txt.copy() or "" -- get selected text
+		local t = txt.copy() or "" -- get selected text
 
-			s=s:gsub("%p","%%%0") -- escape any paterns
-			r=r:gsub("%%","%%%%")
+		s=s:gsub("%p","%%%0") -- escape any paterns
+		r=r:gsub("%%","%%%%")
 
-			t=t:gsub( s , r ) -- simple replace
+		t=t:gsub( s , r ) -- simple replace
 
-			txt.undo.replace(t)
-			texteditor:cursor_sync()
-		end
+		txt.undo.replace(t)
+		texteditor:cursor_sync()
+	end
 
 end
 gui.actions[ "find_set_dir" ]=function(why)
-		
-		local doc=docs.doc
-		if doc then -- must have file
-			local dir=wpath.relative_cd( wpath.dir( doc.filename ) ) 
-			gui.datas.set_string("find_dir",dir)
-		end
+
+	local doc=docs.doc
+	if doc then -- must have file
+		local dir=wpath.relative_cd( wpath.dir( doc.filename ) ) 
+		gui.datas.set_string("find_dir",dir)
+	end
 
 end
 gui.actions[ "find_in_files" ]=function(why)
 
-		local s=gui.datas.get_string("find_search")
-		local f=gui.datas.get_string("find_files")
-		local d=gui.datas.get_string("find_dir")
-		
-		local t=gui.datas.get_string("find_infiles")
-		
-		if s~="" then -- must search for something
+	local s=gui.datas.get_string("find_search")
+	local f=gui.datas.get_string("find_files")
+	local d=gui.datas.get_string("find_dir")
+	
+	local t=gui.datas.get_string("find_infiles")
+	
+	if s~="" then -- must search for something
 
-			if t~="Search in files" then -- cancel
-				finds.cancel_all() -- only 1 find at a time?
-			else
-				finds.cancel_all() -- only 1 find at a time?
-				local find=finds.create({pattern=f,word=s,dir=d})
-				find:scan() -- start search
-			end
-
-			-- show console which will contain results
-			gui.datas.set_string("list_top","console")
-			
+		if t~="Search in files" then -- cancel
+			finds.cancel_all() -- only 1 find at a time?
+		else
+			finds.cancel_all() -- only 1 find at a time?
+			local find=finds.create({pattern=f,word=s,dir=d})
+			find:scan() -- start search
 		end
+
+		-- show console which will contain results
+		gui.datas.set_string("list_top","console")
+		
+	end
 
 end
 gui.actions[ "find_in_files_cancel" ]=function(why)
 
-		finds.cancel_all() -- only 1 find at a time?
+	finds.cancel_all() -- only 1 find at a time?
 
 end
 gui.actions[ "docs_prev" ]=function(why)
 
-		docs.show_prev()
+	docs.show_prev()
 
 end
 gui.actions[ "docs_close_other" ]=function(why)
 
-		docs.close_other()
+	docs.close_other()
 
 end
 
-for _,name in ipairs{
-		"theme_dark_tiny",
-		"theme_dark_small",
-		"theme_dark_medium",
-		"theme_dark_large",
-		"theme_dark_huge",
-		"theme_bright_tiny",
-		"theme_bright_small",
-		"theme_bright_medium",
-		"theme_bright_large",
-		"theme_bright_huge",
-		} do
-	gui.actions[name]=function(why)
-		local action=gui.master.actions[why.id]
-		if action then
-			gui.theme(action.json)
-			ssettings.set("gui_theme",why.id)
-		end
-	end
-end
+gui.actions[ "line_click" ]=function(why)
 
-end
-
-function gui.action(why)
-	local action=gui.actions[ assert(why.id) ]
-	if action then
-		return action(why)
-	end
-end
-
-function gui.theme(def)
-		gui.master:clean_all()
-		gui.master:set_theme(def)
-		gui.plan_windows(gui.master)
-end
-
-function gui.hooks(act,w,dat)
-
-	if act=="line_click" and dat and dat.read_file then
+	if why.data and why.data.read_file then
 	
---	print( dat.is )
-
---print(act,dat.path)
-	
+		local dat=why.data
+		
 		if dat.path and dat.path:sub(-1)~="/" then -- a file click
 
 			if dat.dir then
@@ -558,158 +653,83 @@ function gui.hooks(act,w,dat)
 				end
 			end)
 		end
-
---[[
-		if dat.mode=="file_find" then
-
-			local path=dat.path
-			w.master.later_append(function()
-			
-				local doc=docs.manifest(path)
-				local txt=doc.txt
-				doc:show()
-				local texteditor=gui.master.ids.texteditor
-
-				local hy=dat.bpos[1]
-				local hxa=dat.bpos[2]
-				local hxb=dat.bpos[3]
-
-				txt.mark(hy,hxa,hy,hxb)
-				texteditor:cursor_sync()
-				texteditor:scroll_to_view()
-				texteditor.txt_dirty=true
-
-				gui.refresh_tree()
-
-			end)			
-		end
-]]
-
-	elseif act=="click" then
-
-		if w.action then -- auto trigger action
-			gui.master.push_action_msg(w.id,w.user)
-		end
-
---print("CLICK",w.id)
-
-		if w.id=="menu_app" then
-
-			if oven.modname=="swanky.edit" then
-				oven.modname="swanky.paint"
-			else
-				oven.modname="swanky.edit"
-			end
-
-		elseif w.id=="font_size" then
-		
-			gui.font_size=w.user
-
-		elseif w.id=="run_play_restart" then
-
-			gui.datas.set_string("run_state","play")
-			show.start_doc(0)
-
-		elseif w.id=="run_play_start" then
-
-			gui.datas.set_string("run_state","play")
-			show.start_doc()
-
-		elseif w.id=="run_play_pause" then
-
-			local run_state=gui.datas.get_string("run_state")
-			
-			if run_state=="pause" then
-				gui.datas.set_string("run_state","play")
-			else
-				gui.datas.set_string("run_state","pause")
-			end
---			gui.master.dirty_by_data(gui.datas.get("run_state"))
-
-		elseif w.id=="run_play_stop" then
-			
-			gui.datas.set_string("run_state","stop")
-			
---			gui.master.dirty_by_data(gui.datas.get("run_state"))
-
-		else -- upgrade to action
-		
-			gui.do_actions[#gui.do_actions+1]={id=w.id}
-
-		end
-
-
 	end
+end
 
-
-	if act=="value" then
-
-		if w.id=="run_state" then -- change
-
-			gui.master.dirty_by_data("run_state")
-
-		elseif w.id=="list_top" then -- change
-
-			gui.master.ids.console.hidden=true
-			gui.master.ids.treefiles.hidden=true
-
-			if w.str=="tree" then
-				gui.master.ids.treefiles.hidden=false
-			elseif w.str=="console" then
-				gui.master.ids.console.hidden=false
-			end
-			
-		elseif w.id=="list_mode" then -- change
-
-			gui.master.ids.bar2:set_dirty()
-
---			gui.master.ids.console.hidden=true
-			gui.master.ids.search.hidden=true
-			gui.master.ids.play.hidden=true
-
-			gui.master.ids.run_play_autoplay.hidden=true
-			gui.master.ids.run_play_start.hidden=true
-			gui.master.ids.run_play_stop.hidden=true
-			gui.master.ids.run_play_pause.hidden=true
-			gui.master.ids.run_play_restart.hidden=true
-
---			if w.str=="console" then
---				gui.master.ids.console.hidden=false
---			else
-
-			if w.str=="search" then
-
-				gui.master.ids.search.hidden=false
-
-			elseif w.str=="play" then
-
-				gui.master.ids.play.hidden=false
-
-				gui.master.ids.run_play_autoplay.hidden=false
-				gui.master.ids.run_play_start.hidden=false
-				gui.master.ids.run_play_stop.hidden=false
-				gui.master.ids.run_play_pause.hidden=false
-				gui.master.ids.run_play_restart.hidden=false
-
-			end
-
+for _,name in ipairs{
+		"theme_dark_tiny",
+		"theme_dark_small",
+		"theme_dark_medium",
+		"theme_dark_large",
+		"theme_dark_huge",
+		"theme_bright_tiny",
+		"theme_bright_small",
+		"theme_bright_medium",
+		"theme_bright_large",
+		"theme_bright_huge",
+		} do
+	gui.actions[name]=function(why)
+		local action=gui.master.actions[why.id]
+		if action then
+			gui.theme(action.json)
+			ssettings.set("gui_theme",why.id)
 		end
-
---print("VALUE",w.id)
-
 	end
+end
 
-	if act=="unfocus" then
-	
-		if w.id=="find_search_text" then -- on enter/tab in search box
-			local texteditor=gui.master.ids.texteditor
-			local txt=texteditor.txt
-			if (txt.copy() or "") == "" then -- only if not selected
-				gui.do_actions[#gui.do_actions+1]={id="find_goto"}
-			end
-		elseif w.id=="tree_filter_text" then -- on enter/tab in search box
-			gui.refresh_tree()
-		end
+end
+
+function gui.action(why)
+	local action=gui.actions[ assert(why.id) ]
+	if action then
+		return action(why)
+	end
+end
+
+function gui.theme(def)
+		gui.master:clean_all()
+		gui.master:set_theme(def)
+		gui.plan_windows(gui.master)
+end
+
+function gui.hooks(act,w,data)
+
+-- convert hook to action
+
+	if act=="line_click" then
+
+		local why={}
+		why.widget=w
+		why.id=w.id
+		why.data=data
+		why.action="line_click"
+		gui.do_actions[#gui.do_actions+1]=why
+
+	elseif act=="click" then -- convert to action
+
+		local why={}
+		why.widget=w
+		why.id=w.id
+		why.action="click"
+		gui.do_actions[#gui.do_actions+1]=why
+
+	elseif act=="value" then
+
+--print("value",w.id,w,data)
+		local why={}
+		why.data=w -- this is a data
+		why.id=w.id
+		why.action="value"
+		gui.do_actions[#gui.do_actions+1]=why
+
+	elseif act=="unfocus" then -- convert to action
+
+--print("unfocus",w.id,w,data)
+		local why={}
+		why.widget=w
+		why.id=w.id
+		why.action="unfocus"
+		gui.do_actions[#gui.do_actions+1]=why
 
 	end
 	
