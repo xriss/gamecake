@@ -8,6 +8,8 @@ local bit=require("bit")
 local wstr=require("wetgenes.string")
 local wpath=require("wetgenes.path")
 
+local bitdown_parse=require("wetgenes.gamecake.fun.bitdown_parse")
+
 local function dprint(a) print(wstr.dump(a)) end
 
 --module
@@ -429,6 +431,42 @@ M.bake=function(oven,docs)
 			docs.show( docs.list[1] ) -- show another doc or no doc if list is empty
 		end
 
+	end
+
+
+-- prepare shared files for swankypaint
+	docs.prepare_share=function()
+
+print("prepare_share")
+
+
+	-- flag that swed data has been prepared and paint should load it
+	oven.share.flag="swed"
+	local files=oven.share.files
+	
+		for idx,doc in ipairs(docs.list) do
+			if doc.filename:sub(-8)==".fun.lua" then -- can create grd
+				local text=doc.txt.get_text()
+				local parts=bitdown_parse.scan_parts(text)
+				if parts then -- we got some graphics
+				print("filename",doc.filename)
+				
+					local fileshare=files[ doc.filename ]
+					if not fileshare then
+						fileshare={}
+						files[ doc.filename ]=fileshare
+					end
+					local swedshare={}
+					fileshare.swed=swedshare
+					
+					swedshare.parts=parts
+					swedshare.get_grd=function(swedshare)
+						return bitdown_parse.render_parts(swedshare.parts)
+					end
+				
+				end
+			end
+		end
 	end
 	
 	return docs

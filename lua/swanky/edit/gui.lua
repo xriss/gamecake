@@ -87,7 +87,7 @@ gui.msg=function(m)
 --	oven.console.linehook_safety=true
 
 	if m.class=="action" and m.action==1 then -- deal with actions
-		gui.action(m)
+		gui.queue_action(m)
 	end
 		
 	if m.class=="key" and m.action==-1 and
@@ -96,13 +96,16 @@ gui.msg=function(m)
 		docs.doc_to_front() -- catch ctrl-tab release ( bump final selection to front )
 	end
 
+	if m.class=="close" then -- close when in paint...
+		oven.next=true
+	end
+
 	gui.master:msg(m)
 
 --	oven.console.linehook_safety=false
 end
 
 
-gui.do_actions={}
 gui.cursor=nil
 gui.update=function()
 --	oven.console.linehook_safety=true
@@ -118,11 +121,7 @@ gui.update=function()
 		wwin.cursor( gui.cursor or "arrow" )
 	end
 
-
-	for _,a in ipairs(gui.do_actions) do
-		gui.action(a)
-	end
-	gui.do_actions={}
+	gui.update_actions()
 
 	if not gui.data_save_time then gui.data_save_time=wwin.time() end
 	if gui.data_save_time+1 < wwin.time() then -- save but not too often
@@ -251,7 +250,45 @@ end
 do
 -- can create "global" locals here for actions within this scope
 
+gui.do_actions={}
 gui.actions={}
+
+gui.queue_action=function(why)
+
+	-- why needs to be simple non nested data
+	-- currently it may link to the entire gui via widgets/data linking to parents/etc
+	-- when these should just be ids of widgets or data
+	
+	if why.id then -- slight sanity, need id to do anything
+		gui.do_actions[#gui.do_actions+1]=why
+	end
+
+end
+
+gui.update_actions=function()
+	for _,a in ipairs(gui.do_actions) do
+		gui.action(a)
+	end
+	gui.do_actions={}
+end
+
+gui.action=function(why)
+	if not why then return end
+	local action=gui.actions[ assert(why.id) ]
+	if action then
+		return action(why)
+	else
+		return why
+	end
+end
+
+gui.actions[ "tree_filter" ]=function(why)
+
+--PRINT(why.id,why.action,why.data)
+
+	gui.refresh_tree()
+
+end
 
 gui.actions[ "find_search_text" ]=function(why)
 
@@ -373,6 +410,7 @@ end
 gui.actions[ "menu_app" ]=function(why)
 
 	if oven.modname=="swanky.edit" then
+		docs.prepare_share()
 		oven.modname="swanky.paint"
 	else
 		oven.modname="swanky.edit"
@@ -677,13 +715,6 @@ for _,name in ipairs{
 	end
 end
 
-end
-
-function gui.action(why)
-	local action=gui.actions[ assert(why.id) ]
-	if action then
-		return action(why)
-	end
 end
 
 function gui.theme(def)
