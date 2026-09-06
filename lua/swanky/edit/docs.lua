@@ -457,6 +457,9 @@ M.bake=function(oven,docs)
 					doc.txt.mark(line,0,line+oc,0) -- area to replace
 					local t=doc.txt.copy()
 					if o~=t then -- something went wrong
+print("OLD",o)
+print("CHK",t)
+print("NEW",n)
 						return false
 					end
 					if o~=n then -- replace with new
