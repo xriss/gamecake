@@ -162,6 +162,12 @@ M.bake=function(oven,docs)
 	end
 
 	docs.update=function()
+	
+		-- data passed back from paint
+		if 	oven.share.flag=="paint" then
+			oven.share.flag=nil
+			docs.update_paint()
+		end
 
 		local doc=docs.doc
 		if not doc then return end
@@ -434,20 +440,66 @@ M.bake=function(oven,docs)
 	end
 
 
+	docs.update_paint=function()
+
+		local files=oven.share.files
+		for filename,fileshare in pairs(oven.share.files) do
+			if fileshare.paint then
+				local paintshare=fileshare.paint
+				local doc=docs.manifest(filename)
+
+				local line=1
+				local checknchange=function(o,n)
+					local oc=0
+					for _ in o:gmatch("\n") do oc=oc+1 end
+					local nc=0
+					for _ in n:gmatch("\n") do nc=nc+1 end
+					doc.txt.mark(line,0,line+oc,0) -- area to replace
+					local t=doc.txt.copy()
+					if o~=t then -- something went wrong
+						return false
+					end
+					if o~=n then -- replace with new
+						doc.txt.undo.replace_and_select( n )
+					end
+					line=line+nc
+					return true
+				end
+
+				local parts=paintshare.parts
+				local ok=true
+				for idx,part in ipairs(parts) do
+					if type(part)=="string" then 
+						ok=ok and checknchange(part,part)
+					else
+						ok=ok and checknchange(part.head,part.head)
+						ok=ok and checknchange(part.body,part.body_new or part.body)
+						ok=ok and checknchange(part.foot,part.foot)
+					end
+					if not ok then
+						print("files out of sync giving up")
+						break
+					end
+				end
+			end
+		end
+
+	end
+
 -- prepare shared files for swankypaint
 	docs.prepare_share=function()
-
-print("prepare_share")
-
 
 	-- flag that swed data has been prepared and paint should load it
 	oven.share.flag="swed"
 	local files=oven.share.files
+	for filename,fileshare in pairs(files) do
+		fileshare.swed=nil -- clear old data
+	end
 	
 		for idx,doc in ipairs(docs.list) do
 			if doc.filename:sub(-8)==".fun.lua" then -- can create grd
 				local text=doc.txt.get_text()
-				local parts=bitdown_parse.scan_parts(text)
+				local parts=bitdown_parse.scan_parts_from_text(text)
 				if parts then -- we got some graphics
 				print("filename",doc.filename)
 				
@@ -461,7 +513,7 @@ print("prepare_share")
 					
 					swedshare.parts=parts
 					swedshare.get_grd=function(swedshare)
-						return bitdown_parse.render_parts(swedshare.parts)
+						return bitdown_parse.render_grd_from_parts(swedshare.parts)
 					end
 				
 				end

@@ -25,7 +25,7 @@ end
 codes="["..codes.."]+" -- all valid bitdown chars patterns
 
 
-M.scan_parts=function(funtext)
+M.scan_parts_from_text=function(funtext)
 
 --	print("input size:",#funtext)
 
@@ -109,7 +109,7 @@ M.scan_parts=function(funtext)
 end
 
 
-M.render_parts=function(parts)
+M.render_grd_from_parts=function(parts)
 
 	local totx=0
 	local toty=0
@@ -164,11 +164,26 @@ M.render_parts=function(parts)
 	for idx,part in ipairs(parts) do
 		if type(part)=="table" then
 			g:pixels( part.px, part.py, part.grd.width, part.grd.height, part.grd )
-			part.grd=nil -- forget sprite, just remember px,py,hx,hy
+			part.grd=nil -- forget bitmap, just remember px,py,hx,hy
 		end
 	end
 	
 --	g:save({fmt="png",filename="test.png"})
 
+	g.json={}
+	g.json.fun64={}
+	g.json.fun64.parts=parts -- remember code and part layout
+
 	return g
+end
+
+
+M.update_parts_from_grd=function(parts,grd)
+
+	for idx,part in ipairs(parts) do
+		if type(part)=="table" then
+			part.body_new=bitdown.grd_pix_idx( grd, nil, part.px, part.py, part.hx, part.hy )
+		end
+	end
+
 end
