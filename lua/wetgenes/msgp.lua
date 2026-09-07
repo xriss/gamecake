@@ -788,7 +788,7 @@ M.functions.code=function()
 					end
 				end
 			end
-			if not hostport then ret.error="could not bind to port" end
+			if not hostport then result.error="could not bind to port" end
 
 			result.port=hostport
 			result.name=hostname
