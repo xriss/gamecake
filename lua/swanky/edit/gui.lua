@@ -640,9 +640,9 @@ gui.actions[ "docs_close_other" ]=function(why)
 
 end
 
-gui.actions[ "line_click" ]=function(why)
+gui.actions[ "treefiles" ]=function(why)
 
-	if why.data and why.data.read_file then
+	if why.action=="line_click" and why.data and why.data.read_file then
 	
 		local dat=why.data
 		
@@ -655,7 +655,7 @@ gui.actions[ "line_click" ]=function(why)
 			end
 
 			local path=dat.path
-			w.master.later_append(function()
+			gui.master.later_append(function()
 			
 				local doc=docs.manifest(path)
 				doc:auto_age_reload() -- auto reload on change
