@@ -430,7 +430,56 @@ UPDATE config SET value=$VALUE WHERE key=$KEY ;
 
 	end
 
+-- delete all cached data for this path
+	collect.purge=function(path)
 
+		local meta=load_meta(path)
+		if not meta then return end -- nothing found
+
+		-- purge all file data 
+		local result=M.memo({
+			data={
+				binds={
+					ID=meta.id,
+				},
+				sql=[[
+
+	DELETE FROM file_undo WHERE id=$ID ;
++
+				]],
+			},
+		}):resolve()
+		
+		local result=M.memo({
+			data={
+				binds={
+					ID=meta.id,
+				},
+				sql=[[
+
+	DELETE FROM file_data WHERE id=$ID ;
+
+				]],
+			},
+		}):resolve()
+		
+		local result=M.memo({
+			data={
+				binds={
+					ID=meta.id,
+				},
+				sql=[[
+
+	DELETE FROM file      WHERE id=$ID ;
+
+				]],
+			},
+		}):resolve()
+
+
+	end
+	
+	
 -- load the file from database first then disk and also cache this file in database
 	collect.load=function(it,path)
 

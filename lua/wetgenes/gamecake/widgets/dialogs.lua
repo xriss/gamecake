@@ -139,6 +139,7 @@ wdialogs.show=function(dialogs,opts)
 -- layout twice still neded? not sure why but will look into it, untill then...
 	master:layout() -- need to layout at least once to get everything in the right place
 
+	return window
 end
 
 

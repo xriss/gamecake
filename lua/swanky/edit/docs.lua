@@ -385,12 +385,9 @@ M.bake=function(oven,docs)
 		end
 	end
 
-	doc.reload=function(it)
-		local text_file=collect.mounts:read_file(it.filename) or ""
-		local text_age=collect.mounts:age_file(it.filename)
-		local text_doc=it.txt.get_text()
-		it.fileage=text_age
-		
+	doc.change_text=function(it,newtext)
+		local oldtext=it.txt.get_text()
+
 		-- return length of matching prefix and postfix
 		local get_pre_post=function(a,b)
 			if a==b then return #a,0 end -- equal of sanity
@@ -410,16 +407,23 @@ M.bake=function(oven,docs)
 			return pre,post
 		end
 		
-		if text_file~=text_doc then -- text in file is not the same as text in memory
-			local pre,post=get_pre_post(text_file,text_doc) -- get size of matching prefix and postfix
+		if newtext~=oldtext then -- new text is not the same as old text
+			local pre,post=get_pre_post(newtext,oldtext) -- get size of matching prefix and postfix
 			local fy,fx=it.txt.ptr_to_location(pre)
-			local ty,tx=it.txt.ptr_to_location(#text_doc-post)
+			local ty,tx=it.txt.ptr_to_location(#oldtext-post)
 			it.txt.mark(fy,fx,ty,tx) -- area to replace
-			it.txt.undo.replace_and_select( text_file:sub(pre+1,-(post+1)) )
-			-- select new area so you have a clue that something just happened
+			it.txt.undo.replace_and_select( newtext:sub(pre+1,-(post+1)) )
+			-- show new area so you have a clue that something just happened
 			gui.master.ids.texteditor:scroll_to_line()
-			-- if it was bad you can undo it, but auto syncing like this is probably the right thing to do.
 		end
+
+	end
+
+	doc.reload=function(it)
+		local text_file=collect.mounts:read_file(it.filename) or ""
+		it.fileage=collect.mounts:age_file(it.filename)
+		it:change_text(text_file)
+		-- if it was bad you can undo it, but auto syncing like this is probably the right thing to do.
 	end
 
 	doc.close=function(it)

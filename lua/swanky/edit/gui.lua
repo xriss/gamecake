@@ -282,6 +282,20 @@ gui.action=function(why)
 	end
 end
 
+gui.actions[ "collection_purge_file" ]=function(why)
+
+	if docs.doc then
+		local doc=docs.doc
+		collect.purge(doc.filename)
+		doc:close()
+	end
+
+end
+
+gui.actions[ "collection_purge_all" ]=function(why)
+print("collection_purge_all",why)
+end
+
 gui.actions[ "tree_filter" ]=function(why)
 
 --PRINT(why.id,why.action,why.data)
@@ -487,7 +501,10 @@ gui.actions[ "file_saveas" ]=function(why)
 			local path=window.file:path()
 			window.master.later_append(function()
 				if docs.doc then
-					docs.doc:save(path)
+					local otxt=docs.doc.txt.get_text() -- current text
+					local ndoc=docs.manifest(path) -- open/create new file
+					ndoc:change_text(otxt) -- write current text into new doc
+					ndoc:save() -- save it
 				end
 			end)
 		end,
@@ -1068,9 +1085,9 @@ inherit=true,
     }},
     {id="menu_collection",menu_data={
 --     {id="collection_name"},
-     {id="collection_switch"},
+--     {id="collection_switch"},
      {id="collection_purge_file"},
-     {id="collection_purge_all"},
+--     {id="collection_purge_all"},
     }},
     {id="menu_theme",text="Theme",menu_data={
      {id="theme_dark_tiny"},
