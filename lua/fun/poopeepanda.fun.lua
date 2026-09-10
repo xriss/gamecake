@@ -311,7 +311,7 @@ draws.sprite=function(it) -- note that we will modify this table
 		it.py=it.p[2]
 		it.pz=it.p[3]
 	end
-	if not it.pz then it.pz=px+py end	-- auto pz
+	if not it.pz then it.pz=it.px+it.py end	-- auto pz
 	local map=system.components.map
 	it.px=it.px+map.window_px-map.px	-- auto map position
 	it.py=it.py+map.window_py-map.py

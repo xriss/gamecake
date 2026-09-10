@@ -103,13 +103,24 @@ draws.sprite=function(it) -- note that we will modify this table
 
 end
 
+draws.char4=function(s,x,y)
+	local sx,sy=system.components.text.text_tile4x8(s)
+	system.components.sprites.list_add({
+		t=sy*256+(sx/2) ,
+		hx=4 , hy=8 ,
+		ox=0 , oy=0 ,
+		px=x , py=y , pz=-1 ,
+		color=0xffffffff,
+	})
+end
 
 --------------------------------------------------------------------------------
 --#all
 -- simple scene setup
 
 all={}
-all.meta={__index=all,is="all"}
+all.meta={__index=all}
+all.is="all"
 
 all.sys={}
 
@@ -119,17 +130,41 @@ end
 
 all.list_add=function(all,it)
 	all.list[#all.list+1]=it
+	all.names[it.is]=it
+	it.all=all -- link back
 end
 
 all.setup=function(all)
     all.setup_done=true
 
-	all.list={} -- simple list of objects
-
-	text.create() -- add an object
-	panda.create() -- add an object
+	all.list={} -- all objects
+	all.names={} -- singleton objects
 	
-	for idx,it in ipairs(all.list) do it:setup() end
+	local panda={}
+	panda.text=([[
+	
+	The name Poopee Pandaa has been generating unwanted attention from a
+	certain group of perverts.
+	
+	To de-escalate this situation you may also refer to me by my old school
+	nickname.
+	
+	Doberman Uncut
+	
+	So called because of my very large floppy ears and loveable nature.
+	
+]]):match("^%s*(.-)%s*$")
+
+	panda.text_idx=1
+	panda.text_wait=0
+
+	all.sys.text.create():setup() -- add an object
+	all.sys.panda.create(panda):setup() -- add an object
+	all.sys.text.create():setup() -- add an object
+	
+	for idx=#all.list,1,-1 do -- backwards so safe to remove or add
+		all.list[idx]:setup()
+	end
 
 	for _,sys in pairs(all.sys) do
 		if sys.graphics then
@@ -142,24 +177,16 @@ end
 all.update=function(all)
 	if not all.setup_done then all:setup() end
 
-	local delete_me
-	for idx,it in ipairs(all.list) do
-		it:update()
-		if it.delete_me then delete_me=true end
-	end
-
-	if delete_me then
-		for idx=#all.list,1,-1 do
-			if all.list[idx].delete_me then
-				table.remove(all.list,idx):delete_me()
-			end
-		end
+	for idx=#all.list,1,-1 do -- backwards so safe to remove or add
+		all.list[idx]:update()
 	end
 end
 
 all.draw=function(all)
 
-	for idx,it in ipairs(all.list) do it:draw() end
+	for idx=#all.list,1,-1 do -- backwards so safe to remove or add
+		all.list[idx]:draw()
+	end
 end
 
 
@@ -168,7 +195,8 @@ end
 -- manage panda
 
 panda={}
-panda.meta={__index=panda,is="panda"}
+panda.meta={__index=panda}
+panda.is="panda"
 
 all.sys.panda=panda
 
@@ -181,9 +209,10 @@ end
 panda.setup=function(panda)
 
 	panda.dir=1
-	panda.pos=V3(32,164,0)
+	panda.pos=V3(28,164,0)
 	panda.frame=0
 	panda.walk_frame=1
+	panda.text_pos=V3(12,16)
 
 end
 
@@ -195,13 +224,51 @@ panda.update=function(panda)
 		panda.walk_frame=panda.walk_frame+1
 		if panda.walk_frame>4 then panda.walk_frame=1 end
 		panda.pos[1]=panda.pos[1]+panda.dir
-		if panda.pos[1]>108 then
+		if panda.pos[1]>100 then
 			panda.dir=-1
 		end
-		if panda.pos[1]<20 then
+		if panda.pos[1]<28 then
 			panda.dir=1
 		end
 	end
+
+	local create_word=panda.all.sys.talk.create_word
+
+	panda.text_wait=panda.text_wait-1
+	if panda.text_wait<=0 then
+		panda.text_wait=60
+		local idx=panda.text_idx
+		if panda.text:match("^%s",idx) then -- whitespace
+			local word=panda.text:match("^%s*",idx)
+			panda.text_idx=idx+#word
+			panda.text_wait=4
+			panda.text_pos[1]=panda.text_pos[1]+4
+			if word:match("\n%s*\n") then
+				panda.text_pos[1]=12
+				panda.text_pos[2]=panda.text_pos[2]+16
+				panda.text_wait=60
+			end
+		else
+			local word=panda.text:match("^%S*",idx)
+			panda.text_idx=idx+#word
+			panda.text_wait=2*#word
+
+			if panda.text_pos[1]+#word*4 > 128-12 then -- wrap
+				panda.text_pos[1]=12
+				panda.text_pos[2]=panda.text_pos[2]+8
+			end
+
+			create_word({
+				text=word,
+				pos_from=panda.pos+V3(0,-8),
+				pos_goal=V3(panda.text_pos),
+				age_max=20,
+			})
+			
+			panda.text_pos[1]=panda.text_pos[1]+#word*4
+		end
+	end
+
 
 end
 
@@ -246,8 +313,73 @@ panda.graphics={
 --#text
 -- manage text
 
+talk={}
+talk.meta={__index=talk}
+talk.is="talk"
+
+all.sys.talk=talk
+
+talk.create=function(it)
+	it=setmetatable( it or {} , talk.meta )
+	main_all:list_add(it)
+	return it
+end
+
+talk.setup=function(talk)
+
+end
+
+talk.update=function(talk)
+
+	talk.age=talk.age+1
+
+	local t=0
+	if talk.age>=talk.age_max then
+		t=1
+	elseif talk.age>=0 then
+		t=talk.age/talk.age_max
+	end
+	t=t*t
+	
+	talk.pos=talk.pos_from+(t*(talk.pos_goal-talk.pos_from))
+
+end
+
+talk.draw=function(talk)
+
+	draws.char4( talk.letter , talk.pos[1] , talk.pos[2] )
+
+end
+
+talk.create_word=function(word)
+
+	for idx=1,#word.text do
+	
+		local talk={}
+		
+		talk.word=word
+		talk.letter=word.text:sub(idx,idx)
+		talk.age=0
+		talk.age_max=word.age_max
+		talk.pos_from=V3(word.pos_from)
+		talk.pos_goal=V3(word.pos_goal)
+		talk.pos_goal[1]=talk.pos_goal[1]+((idx-1)*4)
+
+		talk.pos=V3(talk.pos_from)
+
+		all.sys.talk.create(talk):setup()
+
+	end
+
+end
+
+--------------------------------------------------------------------------------
+--#text
+-- manage text
+
 text={}
-text.meta={__index=text,is="text"}
+text.meta={__index=text}
+text.is="text"
 
 all.sys.text=text
 
