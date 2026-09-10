@@ -117,6 +117,8 @@ M.bake=function(oven,main)
 		
 		if cmd.args and cmd.args.data.run then
 			main.fullshow_start(true)
+		else
+			gui.datas.set_string("run_state","stop")
 		end
 
 		oven.upnet.setup()
