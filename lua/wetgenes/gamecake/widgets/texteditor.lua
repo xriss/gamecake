@@ -156,7 +156,33 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 			pan.hx_max=(widget.txt.hx+widget.gutter+2)*8
 			pan.hy_max=widget.txt.hy*16
 
-			if widget.opts.word_wrap then pan.hx_max=0 end -- no x scroll when word wrapping
+			if widget.opts.word_wrap then
+				pan.hx_max=0 -- no x scroll when word wrapping
+				local h=math.ceil(pan.hy/16) -- need to adjust max for wraps
+				local txt=widget.txt
+				local cy=txt.hy
+				local h=pan.hy
+				local maxmax=pan.hy+cy*16-16
+				local maxwrap=math.ceil(pan.hy/16)
+				local cc=txt.get_cache( cy )
+--io.write("wrap1 "..(pan.hy_max).." : "..pan.hx.."\n")
+				while h>=0 and cy>=1 and cc do
+					local cl=math.ceil(cc.cx[#cc.cx]*8/pan.hx)
+					 -- adjust by extra wrap lines
+					if cl > maxwrap then -- max wrap is pan size
+						cl=maxwrap
+					end
+					if cl>1 then
+						pan.hy_max=pan.hy_max+((cl-1)*16)
+					end
+					h=h-(cl*16)
+					cy=cy-1
+					cc=txt.get_cache( cy )
+				end
+--io.write("wrap2 "..(pan.hy_max).."\n")
+				if pan.hy_max>maxmax then pan.hy_max=maxmax end
+--io.write("wrap3 "..(pan.hy_max).."\n")
+			end
 
 		end
 

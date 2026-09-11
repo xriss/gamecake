@@ -878,7 +878,7 @@ local lay=
          id="console",hidden=true,
          lock_max_y=true,
          class="texteditor",size="full",style="flat",color=0,
-         opts={console=true,gutter_disable=true,word_wrap=false},
+         opts={console=true,gutter_disable=true,word_wrap=true},
          --fbo=true, --  scale using fbo so it is smoothed
          console_command=gui.console_command,
         },
@@ -1248,7 +1248,7 @@ inherit=true,
 		if fname then -- set current doc to filename
 -- in lua the chunk of the current editor text will be named .
 -- so we can search for -> [string "."]:00000: <- where the number inside :: is the line
-			if string.find(fname,"^%[string ") then --if string assume current file
+			if string.find(fname,"%[string ") then --if string assume current file
 				-- use current file
 			else -- switch to this file
 				docs.show( docs.manifest(fname) )

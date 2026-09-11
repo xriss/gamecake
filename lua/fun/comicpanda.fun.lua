@@ -180,6 +180,7 @@ all.update=function(all)
 	for idx=#all.list,1,-1 do -- backwards so safe to remove or add
 		all.list[idx]:update()
 	end
+
 end
 
 all.draw=function(all)
@@ -246,7 +247,7 @@ panda.update=function(panda)
 			if word:match("\n%s*\n") then
 				panda.text_pos[1]=12
 				panda.text_pos[2]=panda.text_pos[2]+16
-				panda.text_wait=60
+				panda.text_wait=90
 			end
 		else
 			local word=panda.text:match("^%S*",idx)
@@ -262,7 +263,7 @@ panda.update=function(panda)
 				text=word,
 				pos_from=panda.pos+V3(0,-8),
 				pos_goal=V3(panda.text_pos),
-				age_max=20,
+				age_max=60,
 			})
 			
 			panda.text_pos[1]=panda.text_pos[1]+#word*4
@@ -331,7 +332,6 @@ end
 
 talk.update=function(talk)
 
-	talk.age=talk.age+1
 
 	local t=0
 	if talk.age>=talk.age_max then
@@ -339,10 +339,11 @@ talk.update=function(talk)
 	elseif talk.age>=0 then
 		t=talk.age/talk.age_max
 	end
-	t=t*t
+	t=t^0.7
 	
 	talk.pos=talk.pos_from+(t*(talk.pos_goal-talk.pos_from))
 
+	talk.age=talk.age+1
 end
 
 talk.draw=function(talk)
