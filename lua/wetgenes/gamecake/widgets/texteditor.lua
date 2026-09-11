@@ -162,25 +162,30 @@ wtexteditor.texteditor_hooks=function(widget,act,w)
 				local txt=widget.txt
 				local cy=txt.hy
 				local h=pan.hy
-				local maxmax=pan.hy+cy*16-16
+--				local maxmax=pan.hy+cy*16-16
 				local maxwrap=math.ceil(pan.hy/16)
 				local cc=txt.get_cache( cy )
 --io.write("wrap1 "..(pan.hy_max).." : "..pan.hx.."\n")
-				while h>=0 and cy>=1 and cc do
+				local overscroll=0
+				while h>0 and cy>=1 and cc do
 					local cl=math.ceil(cc.cx[#cc.cx]*8/pan.hx)
 					 -- adjust by extra wrap lines
-					if cl > maxwrap then -- max wrap is pan size
+					if cl > maxwrap then -- max wrap is pan size in lines
 						cl=maxwrap
 					end
+					if h<=(cl*16) then cl=math.ceil(h/16) end -- clamp
 					if cl>1 then
-						pan.hy_max=pan.hy_max+((cl-1)*16)
+						overscroll=overscroll+cl-1
 					end
 					h=h-(cl*16)
 					cy=cy-1
 					cc=txt.get_cache( cy )
 				end
+				if overscroll>maxwrap then overscroll=maxwrap end
+				pan.hy_max=(widget.txt.hy+overscroll)*16
+
 --io.write("wrap2 "..(pan.hy_max).."\n")
-				if pan.hy_max>maxmax then pan.hy_max=maxmax end
+--				if pan.hy_max>maxmax then pan.hy_max=maxmax end
 --io.write("wrap3 "..(pan.hy_max).."\n")
 			end
 

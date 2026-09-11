@@ -236,7 +236,7 @@ panda.update=function(panda)
 	local create_word=panda.all.sys.talk.create_word
 
 	panda.text_wait=panda.text_wait-1
-	if panda.text_wait<=0 then
+	if (panda.text_wait<=0) and (#panda.text>panda.text_idx) then
 		panda.text_wait=60
 		local idx=panda.text_idx
 		if panda.text:match("^%s",idx) then -- whitespace
@@ -353,6 +353,8 @@ talk.draw=function(talk)
 end
 
 talk.create_word=function(word)
+
+print(word.text)
 
 	for idx=1,#word.text do
 	
