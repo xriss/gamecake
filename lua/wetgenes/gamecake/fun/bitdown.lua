@@ -76,6 +76,18 @@ M.cmap_swanky16={
 	[15]={bgra=0xffffffff,code="7 ",name="white"},
 }
 
+-- default colorless palette for easy hexmaps only data
+M.cmap_grey256={
+	name="Grey256",
+}
+for i=0,255 do
+	local name=string.format("%02X",i)
+	local bgra=tonumber( "FF"..name..name..name , 16 )
+	M.cmap_grey256[i]={
+		bgra=bgra,
+	}
+end
+
 M.cmap_build=function(cmap_data)
 	local cmap={}
 	cmap.name=cmap_data.name
@@ -129,6 +141,7 @@ end
 
 M.cmap_swanky32=M.cmap_build(M.cmap_swanky32) -- process
 M.cmap_swanky16=M.cmap_build(M.cmap_swanky16) -- process
+M.cmap_grey256=M.cmap_build(M.cmap_grey256) -- process
 
 M.cmap=M.cmap_swanky32 -- set the default palette to swanky32
 -- this is the global default but you can pass in a different cmap to functions
@@ -357,7 +370,7 @@ end
 -- write a grd into some ascii art from an x,y grd location
 M.grd_pix_idx=function(g,map,px,py,hx,hy)
 
-	map=map or M.cmap
+	map=map
 
 	px=px or 0
 	py=py or 0
@@ -366,17 +379,24 @@ M.grd_pix_idx=function(g,map,px,py,hx,hy)
 
 	local ss=""
 	
-	local swanky32=true -- use the swanky32 palette nicer looking ascii codes
+	
+	if not map then -- check for auto swanky
 
-	local t=g:palette(0,256)
-	if t then
-		for i=0,255 do
-			local r=t[1+i*4]
-			local g=t[2+i*4]
-			local b=t[3+i*4]
-			local a=t[4+i*4]
-			local bgra=a*0x01000000 + r*0x00010000 + g*0x00000100 + b -- 32bit little endian
-			if bgra ~= map[i].bgra then swanky32=false break end
+		local swanky32=true -- use the swanky32 palette nicer looking ascii codes
+		local t=g:palette(0,256)
+		if t then
+			for i=0,255 do
+				local r=t[1+i*4]
+				local g=t[2+i*4]
+				local b=t[3+i*4]
+				local a=t[4+i*4]
+				local bgra=a*0x01000000 + r*0x00010000 + g*0x00000100 + b -- 32bit little endian
+				if bgra ~= M.cmap_swanky32[i].bgra then swanky32=false break end
+			end
+		end
+		
+		if swanky32 then
+			map=M.cmap_swanky32
 		end
 	end
 
@@ -386,7 +406,7 @@ M.grd_pix_idx=function(g,map,px,py,hx,hy)
 
 		local s={}
 		for i,v in ipairs(t) do
-			s[#s+1]=swanky32 and bitdown.cmap[v].code or string.format("%02X",v)
+			s[#s+1]=map and map[v].code or string.format("%02X",v)
 		end
 
 		ss=ss..table.concat(s,"").."\n"

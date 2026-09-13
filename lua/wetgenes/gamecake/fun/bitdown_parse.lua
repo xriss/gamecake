@@ -1,7 +1,6 @@
 --
--- (C) 2016 Kriss@XIXs.com
+-- (C) 2026 Kriss@XIXs.com
 --
---local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 
 local wgrd=require("wetgenes.grd")
@@ -13,17 +12,18 @@ local bitdown=require("wetgenes.gamecake.fun.bitdown")
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 
 
-local codes="%s" -- any white space
+local codes_swanky="%s" -- any white space
 for i=0,31 do
 	local v=bitdown.cmap_swanky32[i]
 	local c=v.code:sub(1,1)
 	if c == c:match("%p+") then -- is char punctuation
 		c="%"..c -- escape punctuation
 	end
-	codes=codes..c
+	codes_swanky=codes_swanky..c
 end
-codes="["..codes.."]+" -- all valid bitdown chars patterns
+codes_swanky="["..codes_swanky.."]+" -- all valid bitdown chars patterns
 
+local codes_hex="[0-9a-fA-F]+" -- any hex
 
 M.scan_parts_from_text=function(funtext)
 
@@ -52,26 +52,63 @@ M.scan_parts_from_text=function(funtext)
 			if line:sub(1,2)=="]]" then -- last line
 				chunk.foot=line
 				-- check bitmap
-				local g=bitdown.pix_grd_idx(chunk.body)  -- convert from bitdown
-				local s=bitdown.grd_pix_idx(g)           -- convert into bitdown
-				if s==chunk.body then -- must match so we can recreate exactly
-					parts[#parts+1]=chunk
-					part=""
-					chunk=nil
-				else -- bad image
+				if chunk.is=="bmap" then
+					if chunk.body_type=="swanky" then
+						local g=bitdown.pix_grd_idx(chunk.body)  -- convert from bitdown
+						local s=bitdown.grd_pix_idx(g)           -- convert into bitdown
+						if s==chunk.body then -- must match so we can recreate exactly
+							parts[#parts+1]=chunk
+							part=""
+							chunk=nil
+						else -- bad image
+							chunk=nil
+						end
+					else -- hex
+						local g=bitdown.pix_grd_idx(chunk.body,bitdown.cmap_grey256)  -- convert from bitdown hex only
+						local s=bitdown.grd_pix_idx(g,bitdown.cmap_grey256)           -- convert into bitdown hex only
+						if s==chunk.body then -- must match so we can recreate exactly
+							parts[#parts+1]=chunk
+							part=""
+							chunk=nil
+						else -- bad image
+							chunk=nil
+						end
+					end
+				else
 					chunk=nil
 				end
 			else -- continue body
-				if line == line:match(codes) then -- possible image data
+				local nosline=line:match("^%s*(.-)%s*$") -- trim whitespace
+
+				-- is hex or swanky
+				if not chunk.body_type and nosline~="" then
+					if nosline == nosline:match(codes_hex) then
+						chunk.body_type="hex"
+					elseif nosline == nosline:match(codes_swanky) then
+						chunk.body_type="swanky"
+					end
+				end
+
+				if chunk.body_type=="hex" -- possible hex image data
+				and nosline == nosline:match(codes_hex) -- must match
+				then
 					chunk.body=chunk.body..line
+
+				elseif chunk.body_type=="swanky" -- possible swanky image data
+				and nosline == nosline:match(codes_swanky) -- must match
+				then
+					chunk.body=chunk.body..line
+
 				else
 					chunk=nil -- failed to find
+
 				end
 			end
 		
 		else
 			if line:sub(-3,-1)=="[[\n" then -- check for head line
 				chunk={} -- start thinking
+				chunk.is="bmap"
 				chunk.head=line
 				chunk.body=""
 				append_part_string(part)
@@ -84,20 +121,15 @@ M.scan_parts_from_text=function(funtext)
 		char_idx=char_idx+(#line)
 	end
 	append_part_string(part) -- final part
-
---[[
+	
+	-- scan the parts looking for chunks we can merge into a tilemap
+	local tilemap
 	for idx,part in ipairs(parts) do
-		if type(part)=="string" then
-			print("STRING",idx,part)
-		else
-			print("BITMAP",idx)
-			print("HEAD" , part.head )
-			print("BODY" , part.body )
-			print("FOOT" , part.foot )
+		if type(part)=="table" then
+			if part.is == "bmap" then
+			end
 		end
 	end
-]]
-
 	-- only return parts if we found some bitdown to convert
 	for idx,part in ipairs(parts) do
 		if type(part)=="table" then
@@ -185,5 +217,63 @@ M.update_parts_from_grd=function(parts,grd)
 			part.body_new=bitdown.grd_pix_idx( grd, nil, part.px, part.py, part.hx, part.hy )
 		end
 	end
+
+end
+
+M.render_text_from_parts=function(parts)
+
+	local tt={}
+	local push=function(s) tt[#tt+1]=s end
+
+	for idx,part in ipairs(parts) do
+		if type(part)=="table" then
+
+			if part.is == "bmap" then
+				push(part.head_new or part.head)
+				push(part.body_new or part.body)
+				push(part.tail_new or part.tail_new)
+			else
+				error( "unknown part "..part.is )
+			end
+		else
+			push(part)
+		end
+	end
+
+	return table.concat(tt)
+
+end
+
+
+M.debug_parts_string=function(parts)
+
+	local tt={}
+	local push=function(s) tt[#tt+1]=s end
+	local prints=function(...)
+		local tt={...}
+		if tt[1] then
+			for i=1,#tt do tt[i]=tostring(tt[i]) end
+			push( table.concat(tt,"\t") )
+		end
+		push("\n")
+	end
+
+	for idx,part in ipairs(parts) do
+		if type(part)=="table" then
+			if part.is == "bmap" then
+				local g=bitdown.pix_grd_idx(part.body)  -- convert from bitdown
+				prints("bmap",g.width,g.height, (part.head_new or part.head) )
+			else
+				error( "unknown part "..part.is )
+			end
+		else
+			prints("string",#part)
+		end
+	end
+	
+	local g=M.render_grd_from_parts(parts)
+			prints("renders-into",g.width,g.height)
+
+	return table.concat(tt)
 
 end

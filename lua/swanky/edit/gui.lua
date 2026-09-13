@@ -541,7 +541,7 @@ gui.actions[ "find_goto" ]=function(why)
 	texteditor:cursor_sync()
 
 end
-gui.actions[ "find_replace" ]=function(why)
+gui.actions[ "find_replace_once" ]=function(why)
 
 	local texteditor=gui.master.ids.texteditor
 	local txt=texteditor.txt
@@ -941,7 +941,7 @@ local lay=
          {
             hx=gsiz*17/3,hy=gsiz,
           {
-           id="find_replace",hooks=gui.hooks,
+           id="find_replace_once",hooks=gui.hooks,
            class="button",hx=gsiz*14/3,hy=gsiz*1,color=1,
            text="Replace with",
           },

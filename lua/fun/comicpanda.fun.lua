@@ -103,15 +103,66 @@ draws.sprite=function(it) -- note that we will modify this table
 
 end
 
-draws.char4=function(s,x,y)
-	local sx,sy=system.components.text.text_tile4x8(s)
+draws.char4=function(c,x,y,z)
+	if not z then z=1 end
+	local cx,cy=system.components.text.text_tile4x8(c)
 	system.components.sprites.list_add({
-		t=sy*256+(sx/2) ,
+		t=cy*256+(cx/2) ,
 		hx=4 , hy=8 ,
 		ox=0 , oy=0 ,
 		px=x , py=y , pz=-1 ,
+		sx=z,sy=z,
 		color=0xffffffff,
 	})
+end
+
+draws.string4=function(s,x,y,z)
+	if not z then z=1 end
+	x=x-#s*2*z
+	for i=1,#s do
+		local c=s:sub(i,i)
+		draws.char4(c,x+(i-1)*4*z,y,z)
+	end
+end
+
+draws.char16=function(c,x,y,z)
+	if not z then z=1 end
+	local cx,cy=system.components.text.text_tile8x16(c)
+	system.components.sprites.list_add({
+		t=cy*256+cx ,
+		hx=8 , hy=16 ,
+		ox=0 , oy=0 ,
+		px=x , py=y , pz=-1 ,
+		sx=z,sy=z,
+		color=0xffffffff,
+	})
+end
+
+draws.string16=function(s,x,y,z)
+	if not z then z=1 end
+	x=x-#s*4*z
+	for i=1,#s do
+		local c=s:sub(i,i)
+		draws.char16(c,x+(i-1)*8*z,y,z)
+	end
+end
+
+draws.charS=function(c,x,y,z)
+	if not z then z=4 end
+	if z>6 then
+		draws.char16(c,x,y,z/8)
+	else
+		draws.char4(c,x,y,z/4)
+	end
+end
+
+draws.stringS=function(s,x,y,z)
+	if not z then z=4 end
+	if z>6 then
+		draws.string16(s,x,y,z/8)
+	else
+		draws.string4(s,x,y,z/4)
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -149,7 +200,7 @@ all.setup=function(all)
 	To de-escalate this situation you may also refer to me by my old school
 	nickname.
 	
-	Doberman Uncut
+	DOBERMAN UNCUT
 	
 	So called because of my very large floppy ears and loveable nature.
 	
@@ -213,7 +264,7 @@ panda.setup=function(panda)
 	panda.pos=V3(28,164,0)
 	panda.frame=0
 	panda.walk_frame=1
-	panda.text_pos=V3(12,16)
+	panda.text_pos=V3(12,12)
 
 end
 
@@ -259,12 +310,16 @@ panda.update=function(panda)
 				panda.text_pos[2]=panda.text_pos[2]+8
 			end
 
-			create_word({
+			local ww={
 				text=word,
-				pos_from=panda.pos+V3(0,-8),
+				pos_from=panda.pos+V3(0,-16),
 				pos_goal=V3(panda.text_pos),
-				age_max=60,
-			})
+				age_max=0,
+			}
+			ww.age_max=30+math.ceil(math.abs(ww.pos_from[2]-ww.pos_goal[2])/1)
+--			ww.pos_from[1]=ww.pos_from[1]-#word*2
+			ww.pos_goal[1]=ww.pos_goal[1]+#word*2
+			create_word(ww)
 			
 			panda.text_pos[1]=panda.text_pos[1]+#word*4
 		end
@@ -328,6 +383,10 @@ end
 
 talk.setup=function(talk)
 
+	talk.siz=1
+	
+	talk:update()
+
 end
 
 talk.update=function(talk)
@@ -339,40 +398,46 @@ talk.update=function(talk)
 	elseif talk.age>=0 then
 		t=talk.age/talk.age_max
 	end
-	t=t^0.7
+	local h=1-(math.abs(t-0.5)*2)
+	local t2=t^0.8
+	local t3=t^0.4
+	local h2=h^0.5
+	talk.siz=1+h2*2
 	
-	talk.pos=talk.pos_from+(t*(talk.pos_goal-talk.pos_from))
+	talk.pos[1]=talk.pos_from[1]*(1-t2)+(talk.pos_goal[1]*t2)
+	talk.pos[2]=talk.pos_from[2]*(1-t2)+(talk.pos_goal[2]*t2)
 
 	talk.age=talk.age+1
 end
 
 talk.draw=function(talk)
 
-	draws.char4( talk.letter , talk.pos[1] , talk.pos[2] )
+	draws.stringS( talk.word.text , talk.pos[1] , talk.pos[2] , 4*talk.siz )
 
 end
 
 talk.create_word=function(word)
 
-print(word.text)
+--print(word.text)
 
-	for idx=1,#word.text do
+--	for idx=1,#word.text do
 	
 		local talk={}
 		
 		talk.word=word
-		talk.letter=word.text:sub(idx,idx)
+--		talk.letter=word.text:sub(idx,idx)
 		talk.age=0
 		talk.age_max=word.age_max
 		talk.pos_from=V3(word.pos_from)
 		talk.pos_goal=V3(word.pos_goal)
-		talk.pos_goal[1]=talk.pos_goal[1]+((idx-1)*4)
+--		talk.pos_goal[1]=talk.pos_goal[1]+((idx-1)*4)
+--		talk.pos_from[1]=talk.pos_from[1]+((idx-1)*8)
 
 		talk.pos=V3(talk.pos_from)
 
 		all.sys.talk.create(talk):setup()
 
-	end
+--	end
 
 end
 
@@ -421,6 +486,78 @@ text.draw=function(text)
 	ctext.text_print("                       4lfa.com ",0,23,26,24)
 
 end
+
+--------------------------------------------------------------------------------
+--#back
+-- manage back
+
+back={}
+back.meta={__index=back}
+back.is="back"
+
+all.sys.back=back
+
+back.create=function(it)
+	it=setmetatable( it or {} , back.meta )
+	main_all:list_add(it)
+	return it
+end
+
+back.setup=function(back)
+
+end
+
+back.update=function(back)
+
+end
+
+back.draw=function(back)
+
+end
+
+back.graphics_maps={
+
+bmaps={
+
+	{ bmap=[[
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+]], },
+
+	{ bmap=[[
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+]], },
+
+},
+
+tmaps={
+	{ tmap=[[
+0000000000000000
+0000000000000000
+0000000000000000
+0101010101010101
+0000000000000000
+0000000000000000
+0000000000000000
+0000000000000000
+]],	},
+
+},
+
+}
 
 --------------------------------------------------------------------------------
 --#start
