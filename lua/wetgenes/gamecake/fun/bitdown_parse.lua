@@ -52,7 +52,7 @@ M.scan_parts_from_text=function(funtext)
 			if line:sub(1,2)=="]]" then -- last line
 				chunk.foot=line
 				-- check bitmap
-				if chunk.is=="bmap" then
+				if chunk.is=="bitmap" then
 					if chunk.body_type=="swanky" then
 						local g=bitdown.pix_grd_idx(chunk.body)  -- convert from bitdown
 						local s=bitdown.grd_pix_idx(g)           -- convert into bitdown
@@ -108,7 +108,7 @@ M.scan_parts_from_text=function(funtext)
 		else
 			if line:sub(-3,-1)=="[[\n" then -- check for head line
 				chunk={} -- start thinking
-				chunk.is="bmap"
+				chunk.is="bitmap"
 				chunk.head=line
 				chunk.body=""
 				append_part_string(part)
@@ -123,13 +123,131 @@ M.scan_parts_from_text=function(funtext)
 	append_part_string(part) -- final part
 	
 	-- scan the parts looking for chunks we can merge into a tilemap
+	local tilemaps={}
 	local tilemap
 	for idx,part in ipairs(parts) do
 		if type(part)=="table" then
-			if part.is == "bmap" then
+			if part.is == "bitmap" then
+				local g=bitdown.pix_grd_idx(part.body)  -- convert from bitdown
+				local check_start=function()
+					if part.body_type=="swanky" and g.width==8 and g.height==8 then -- start tiles
+						tilemap={}
+						tilemap.tile_head=idx
+						tilemap.tile_foot=idx
+					end
+				end
+				if not tilemap then
+					check_start()
+				else -- continue
+					if tilemap.map_head then -- continue maps
+						if part.body_type=="hex" then -- continue maps
+							tilemap.map_foot=idx
+						else
+							tilemaps[#tilemaps+1]=tilemap -- finish tilemap
+							tilemap=nil
+							check_start()
+						end
+					else -- continue tiles or start maps
+						if part.body_type=="swanky" and g.width==8 and g.height==8 then
+							tilemap.tile_foot=idx
+						elseif part.body_type=="hex" then -- start maps
+							tilemap.map_head=idx
+							tilemap.map_foot=idx
+						else
+							tilemap=nil
+						end
+					end
+				end
 			end
 		end
 	end
+	if tilemap and tilemap.map_foot then -- finish
+		tilemaps[#tilemaps+1]=tilemap -- finish tilemap
+		tilemap=nil
+	end
+	if tilemaps[1] then -- rejiggle for found tilemaps
+		for ti,tilemap in ipairs(tilemaps) do
+			tilemap.is="tilemap"
+			tilemap.tiles={}
+			tilemap.maps={}
+			local tile
+			local newtile=function(part)
+				local tile={}
+				tilemap.tiles[#tilemap.tiles+1]=tile
+				tile.is="tile"
+				tile.head=part.head
+				tile.body=part.body
+				tile.foot=part.foot
+				tile.tail=""
+				return tile
+			end
+			for i=tilemap.tile_head,tilemap.map_head-1 do
+				local part=parts[i]
+				if type(part)=="string" then -- append between strings
+					tile.tail=tile.tail..part
+				else
+					tile=newtile(part)
+				end
+			end
+			local map
+			local newmap=function(part)
+				local map={}
+				tilemap.maps[#tilemap.maps+1]=map
+				map.is="map"
+				map.head=part.head
+				map.body=part.body
+				map.foot=part.foot
+				map.tail=""
+				return map
+			end
+			for i=tilemap.map_head,tilemap.map_foot do
+				local part=parts[i]
+				if type(part)=="string" then -- append between strings
+					map.tail=map.tail..part
+				else
+					map=newmap(part)
+				end
+			end
+			tilemap.head=""
+			tilemap.tail=""
+			local bb={}
+			for _,tile in ipairs(tilemap.tiles) do
+				bb[#bb+1]=tile.head
+				bb[#bb+1]=tile.body
+				bb[#bb+1]=tile.foot
+				bb[#bb+1]=tile.tail
+			end
+			for _,map in ipairs(tilemap.maps) do
+				bb[#bb+1]=map.head
+				bb[#bb+1]=map.body
+				bb[#bb+1]=map.foot
+				bb[#bb+1]=map.tail
+			end
+			tilemap.body=table.concat(bb) -- shove everything in body
+		end
+		-- put tilemaps into parts
+		local oldparts=parts
+		local idx=0
+		parts={}
+		for ti,tilemap in ipairs(tilemaps) do
+			while idx<tilemap.tile_head-1 do
+				idx=idx+1
+				parts[#parts+1]=oldparts[idx]
+			end
+			parts[#parts+1]=tilemap
+			idx=tilemap.map_foot
+			-- remove old part indexes
+			tilemap.tile_head=nil
+			tilemap.tile_foot=nil
+			tilemap.map_head=nil
+			tilemap.map_foot=nil
+		end
+		while idx<#oldparts do
+			idx=idx+1
+			parts[#parts+1]=oldparts[idx]
+		end
+	end
+	
 	-- only return parts if we found some bitdown to convert
 	for idx,part in ipairs(parts) do
 		if type(part)=="table" then
@@ -143,8 +261,6 @@ end
 
 M.render_grd_from_parts=function(parts)
 
-	local totx=0
-	local toty=0
 	local maxx=0
 	local maxy=0
 	local hx,hy=0,0
@@ -152,14 +268,32 @@ M.render_grd_from_parts=function(parts)
 	
 	for idx,part in ipairs(parts) do
 		if type(part)=="table" then
-			part.grd=bitdown.pix_grd_idx(part.body)
-			part.hx=math.ceil(part.grd.width/8)*8
-			part.hy=math.ceil(part.grd.height/8)*8
-			totx=totx+part.hx+16
-			toty=toty+part.hy+16
-			if part.hx+16 > maxx then maxx=part.hx+16 end -- max
-			if part.hy+16 > maxy then maxy=part.hy+16 end -- max
-			area=area+(part.hx+16)*(part.hy+16)
+			if part.is=="bitmap" then
+				part.grd=bitdown.pix_grd_idx(part.body)
+				part.hx=math.ceil(part.grd.width/8)*8
+				part.hy=math.ceil(part.grd.height/8)*8
+				if part.hx+16 > maxx then maxx=part.hx+16 end -- max
+				if part.hy+16 > maxy then maxy=part.hy+16 end -- max
+				area=area+(part.hx+16)*(part.hy+16)
+			elseif part.is=="tilemap" then
+				local tc=#part.tiles
+				if 16*8+16 > maxx then maxx=16*8+16 end -- max
+				if    8+16 > maxy then maxy=8+16 end -- max
+				area=area+(tc*8+16)*(8+16)
+				for _,tile in ipairs(part.tiles) do
+					tile.grd=bitdown.pix_grd_idx(tile.body)
+					tile.hx=8
+					tile.hy=8
+				end
+				for _,map in ipairs(part.maps) do
+					map.grd=bitdown.pix_grd_idx(map.body)
+					map.hx=map.grd.width*8
+					map.hy=map.grd.height*8
+					if map.hx+16 > maxx then maxx=map.hx+16 end -- max
+					if map.hy+16 > maxy then maxy=map.hy+16 end -- max
+					area=area+(map.hx+16)*(map.hy+16)
+				end
+			end
 		end
 	end
 	hx=math.ceil(math.sqrt(area)/8)*8
@@ -172,19 +306,51 @@ M.render_grd_from_parts=function(parts)
 	local line=0
 	for idx,part in ipairs(parts) do
 		if type(part)=="table" then
-			if px+part.hx+16<=hx then -- fit
-				part.px=px+8
-				part.py=py+8
-				px=px+part.hx+16
-				if line<part.hy then line=part.hy end
-			else -- next line
-				py=py+line+16
+			if part.is=="bitmap" then
+				if px+part.hx+16<=hx then -- fit
+					part.px=px+8
+					part.py=py+8
+					px=px+part.hx+16
+					if line<part.hy then line=part.hy end
+				else -- next line
+					py=py+line+16
+					px=0
+					line=0
+					part.px=px+8
+					part.py=py+8
+					px=px+part.hx+16
+					if line<part.hy then line=part.hy end
+				end
+			elseif part.is=="tilemap" then
+				-- always take full width
+				local tc=#part.tiles
+				if line>0 then py=py+line+16 end
 				px=0
-				line=0
+				line=8
 				part.px=px+8
 				part.py=py+8
-				px=px+part.hx+16
-				if line<part.hy then line=part.hy end
+				part.hx=hx-16
+				local tx,ty=0,0
+				for _,tile in ipairs(part.tiles) do
+					if 8+tx+8+8>hx then -- next line
+						tx=0
+						ty=ty+8
+						line=line+8
+					end
+					tile.px=px+8+tx
+					tile.py=py+8+ty
+					px=px+8
+				end
+				tx=0
+				ty=ty+8+8+8
+				line=line+8+8+8
+				for _,map in ipairs(part.maps) do -- each map on its own line
+					map.px=px+8+tx
+					map.py=py+8+ty
+					ty=ty+16+map.hy
+					line=line+16+map.hy
+				end
+				part.hy=line
 			end
 		end
 	end
@@ -195,8 +361,33 @@ M.render_grd_from_parts=function(parts)
 
 	for idx,part in ipairs(parts) do
 		if type(part)=="table" then
-			g:pixels( part.px, part.py, part.grd.width, part.grd.height, part.grd )
-			part.grd=nil -- forget bitmap, just remember px,py,hx,hy
+			if part.is=="bitmap" then
+				g:pixels( part.px, part.py, part.hx, part.hy, part.grd )
+				part.grd=nil -- forget bitmap, just remember px,py,hx,hy
+			elseif part.is=="tilemap" then
+				for _,tile in ipairs(part.tiles) do
+					g:pixels( tile.px, tile.py, tile.hx, tile.hy, tile.grd )
+					tile.grd=nil -- forget bitmap, just remember px,py,hx,hy
+				end
+				for _,map in ipairs(part.maps) do
+					local pw=map.grd.width
+					local ph=map.grd.height
+					local pp=map.grd:pixels(0,0,pw,ph) -- get tile indexes ( max 256 tiles )
+					for x=0,pw-1 do
+						for y=0,ph-1 do
+							local ti=pp[y*pw+x+1]
+							local tile=part.tiles[ti+1]
+							g:pixels( map.px + x*8, map.py + y*8, tile.hx, tile.hy, tile.grd )
+						end
+					end
+				end
+				for _,tile in ipairs(part.tiles) do
+					tile.grd=nil -- forget bitmap, just remember px,py,hx,hy
+				end
+				for _,map in ipairs(part.maps) do
+					map.grd=nil -- forget bitmap, just remember px,py,hx,hy
+				end
+			end
 		end
 	end
 	
@@ -214,7 +405,13 @@ M.update_parts_from_grd=function(parts,grd)
 
 	for idx,part in ipairs(parts) do
 		if type(part)=="table" then
-			part.body_new=bitdown.grd_pix_idx( grd, nil, part.px, part.py, part.hx, part.hy )
+			if part.is=="bitmap" then
+				part.body_new=bitdown.grd_pix_idx( grd, nil, part.px, part.py, part.hx, part.hy )
+			elseif part.is=="tilemap" then
+			
+			else
+				-- unknown
+			end
 		end
 	end
 
@@ -228,10 +425,14 @@ M.render_text_from_parts=function(parts)
 	for idx,part in ipairs(parts) do
 		if type(part)=="table" then
 
-			if part.is == "bmap" then
+			if part.is == "bitmap" then
 				push(part.head_new or part.head)
 				push(part.body_new or part.body)
-				push(part.tail_new or part.tail_new)
+				push(part.tail_new or part.tail)
+			elseif part.is == "tilemap" then
+				push(part.head_new or part.head)
+				push(part.body_new or part.body)
+				push(part.tail_new or part.tail)
 			else
 				error( "unknown part "..part.is )
 			end
@@ -260,9 +461,11 @@ M.debug_parts_string=function(parts)
 
 	for idx,part in ipairs(parts) do
 		if type(part)=="table" then
-			if part.is == "bmap" then
+			if part.is == "bitmap" then
 				local g=bitdown.pix_grd_idx(part.body)  -- convert from bitdown
-				prints("bmap",g.width,g.height, (part.head_new or part.head) )
+				prints("bitmap",g.width,g.height, (part.head_new or part.head) )
+			elseif part.is == "tilemap" then
+				prints("tilemap","tiles:"..#part.tiles,"maps:"..#part.maps )
 			else
 				error( "unknown part "..part.is )
 			end
@@ -272,7 +475,7 @@ M.debug_parts_string=function(parts)
 	end
 	
 	local g=M.render_grd_from_parts(parts)
-			prints("renders-into",g.width,g.height)
+	prints("renders-into",g.width,g.height)
 
 	return table.concat(tt)
 

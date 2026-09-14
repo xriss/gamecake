@@ -23,3 +23,6 @@ if not parts then
 end
 
 print( bitdown_parse.debug_parts_string(parts) )
+
+local g=bitdown_parse.render_grd_from_parts(parts)
+g:save({fmt="png",filename="test.png"})
