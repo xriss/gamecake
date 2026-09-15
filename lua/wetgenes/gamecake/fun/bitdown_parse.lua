@@ -189,6 +189,9 @@ M.scan_parts_from_text=function(funtext)
 					tile=newtile(part)
 				end
 			end
+			local last_tile=tilemap.tiles[#tilemap.tiles]
+			tilemap.tiles_tale=last_tile.tail
+			last_tile.tail=""
 			local map
 			local newmap=function(part)
 				local map={}
@@ -208,8 +211,6 @@ M.scan_parts_from_text=function(funtext)
 					map=newmap(part)
 				end
 			end
-			tilemap.head=""
-			tilemap.tail=""
 			local bb={}
 			for _,tile in ipairs(tilemap.tiles) do
 				bb[#bb+1]=tile.head
@@ -217,13 +218,16 @@ M.scan_parts_from_text=function(funtext)
 				bb[#bb+1]=tile.foot
 				bb[#bb+1]=tile.tail
 			end
+			bb[#bb+1]=tilemap.tiles_tale
 			for _,map in ipairs(tilemap.maps) do
 				bb[#bb+1]=map.head
 				bb[#bb+1]=map.body
 				bb[#bb+1]=map.foot
 				bb[#bb+1]=map.tail
 			end
+			tilemap.head=""
 			tilemap.body=table.concat(bb) -- shove everything in body
+			tilemap.foot=""
 		end
 		-- put tilemaps into parts
 		local oldparts=parts
@@ -278,7 +282,7 @@ M.render_grd_from_parts=function(parts)
 			elseif part.is=="tilemap" then
 				local tc=#part.tiles
 				if 16*8+16 > maxx then maxx=16*8+16 end -- max
-				if    8+16 > maxy then maxy=8+16 end -- max
+				if    8+16 > maxy then maxy=   8+16 end -- max
 				area=area+(tc*8+16)*(8+16)
 				for _,tile in ipairs(part.tiles) do
 					tile.grd=bitdown.pix_grd_idx(tile.body)
@@ -304,6 +308,15 @@ M.render_grd_from_parts=function(parts)
 	-- layout and workout height
 	local px,py=0,0
 	local line=0
+	hy=0
+	local next_line=function()
+		if line>0 then
+			py=py+line+16
+			if py>hy then hy=py end
+		end
+		line=0
+		px=0
+	end
 	for idx,part in ipairs(parts) do
 		if type(part)=="table" then
 			if part.is=="bitmap" then
@@ -313,9 +326,7 @@ M.render_grd_from_parts=function(parts)
 					px=px+part.hx+16
 					if line<part.hy then line=part.hy end
 				else -- next line
-					py=py+line+16
-					px=0
-					line=0
+					next_line()
 					part.px=px+8
 					part.py=py+8
 					px=px+part.hx+16
@@ -323,38 +334,36 @@ M.render_grd_from_parts=function(parts)
 				end
 			elseif part.is=="tilemap" then
 				-- always take full width
+				next_line()
 				local tc=#part.tiles
-				if line>0 then py=py+line+16 end
-				px=0
 				line=8
 				part.px=px+8
 				part.py=py+8
-				part.hx=hx-16
+				part.hx=16*8 -- force 16 tiles across
+				line=8 -- start height
 				local tx,ty=0,0
 				for _,tile in ipairs(part.tiles) do
-					if 8+tx+8+8>hx then -- next line
+					if 8+tx+8+8>hx then -- wrap
 						tx=0
 						ty=ty+8
 						line=line+8
 					end
 					tile.px=px+8+tx
 					tile.py=py+8+ty
-					px=px+8
-				end
-				tx=0
-				ty=ty+8+8+8
-				line=line+8+8+8
-				for _,map in ipairs(part.maps) do -- each map on its own line
-					map.px=px+8+tx
-					map.py=py+8+ty
-					ty=ty+16+map.hy
-					line=line+16+map.hy
+					tx=tx+8
 				end
 				part.hy=line
+				next_line()
+				for _,map in ipairs(part.maps) do -- each map on its own line
+					map.px=px+8
+					map.py=py+8
+					line=map.hy
+					next_line()
+				end
 			end
 		end
 	end
-	hy=py+line+16
+	next_line() -- in case we need a final one
 
 	local g=wgrd.create("U8_INDEXED",hx,hy,1)
 	g:palette(0,256,bitdown.cmap_swanky32.data) -- with palette
@@ -367,17 +376,18 @@ M.render_grd_from_parts=function(parts)
 			elseif part.is=="tilemap" then
 				for _,tile in ipairs(part.tiles) do
 					g:pixels( tile.px, tile.py, tile.hx, tile.hy, tile.grd )
-					tile.grd=nil -- forget bitmap, just remember px,py,hx,hy
 				end
 				for _,map in ipairs(part.maps) do
-					local pw=map.grd.width
-					local ph=map.grd.height
-					local pp=map.grd:pixels(0,0,pw,ph) -- get tile indexes ( max 256 tiles )
-					for x=0,pw-1 do
-						for y=0,ph-1 do
-							local ti=pp[y*pw+x+1]
+					local mx=map.grd.width
+					local my=map.grd.height
+					local pp=map.grd:pixels(0,0,mx,my) -- get tile indexes ( max 256 tiles )
+					for y=0,my-1 do
+						for x=0,mx-1 do
+							local ti=pp[y*mx+x+1]
 							local tile=part.tiles[ti+1]
-							g:pixels( map.px + x*8, map.py + y*8, tile.hx, tile.hy, tile.grd )
+							if tile then
+								g:pixels( map.px + x*8, map.py + y*8, 8, 8, tile.grd )
+							end
 						end
 					end
 				end
@@ -408,7 +418,72 @@ M.update_parts_from_grd=function(parts,grd)
 			if part.is=="bitmap" then
 				part.body_new=bitdown.grd_pix_idx( grd, nil, part.px, part.py, part.hx, part.hy )
 			elseif part.is=="tilemap" then
-			
+				local gt=wgrd.create("U8_INDEXED",8,8,1)
+				gt:palette(0,256,bitdown.cmap_swanky32.data) -- with palette
+				local bitcache={}
+				for idx,tile in ipairs(part.tiles) do
+					tile.body_new=bitdown.grd_pix_idx( grd, nil, tile.px, tile.py, tile.hx, tile.hy )
+					tile.bitstr=grd:pixels(tile.px, tile.py,8,8,"")
+					tile.idx=idx
+					bitcache[tile.bitstr]=tile
+				end
+				local last_tile=part.tiles[#part.tiles]
+				local manifest_tile=function(bitstr)
+					local tile=bitcache[bitstr]
+					if not tile then -- add new one
+						tile={}
+						tile.is="temp"
+						tile.bitstr=bitstr
+						tile.idx=#part.tiles+1
+						part.tiles[tile.idx]=tile
+						bitcache[tile.bitstr]=tile
+						gt:pixels( 0, 0, 8, 8, bitstr )
+						tile.head_new=last_tile.head
+						tile.body_new=bitdown.grd_pix_idx( gt, nil, 0, 0, 8, 8 )
+						tile.foot_new=last_tile.foot
+					end
+					return tile
+				end
+				for _,map in ipairs(part.maps) do
+					local mapdata={}
+					for y=map.py,map.py+map.hy-1,8 do
+						for x=map.px,map.px+map.hx-1,8 do
+							local bitstr=grd:pixels(x,y,8,8,"")
+							local tile=manifest_tile(bitstr)
+							mapdata[#mapdata+1]=tile and tile.idx-1 or 0
+						end
+					end
+					gt:pixels( 0, 0, map.hx/8, map.hy/8, mapdata )
+					map.body_new=bitdown.grd_pix_idx( gt, bitdown.cmap_grey256, 0, 0, map.hx/8, map.hy/8 )
+				end
+				local bb={}
+				for _,tile in ipairs(part.tiles) do
+					bb[#bb+1]=tile.head_new or tile.head or ""
+					bb[#bb+1]=tile.body_new or tile.body or ""
+					bb[#bb+1]=tile.foot_new or tile.foot or ""
+					bb[#bb+1]=tile.tail_new or tile.tail or ""
+				end
+				bb[#bb+1]=part.tiles_tale
+				for _,map in ipairs(part.maps) do
+					bb[#bb+1]=map.head_new or map.head or ""
+					bb[#bb+1]=map.body_new or map.body or ""
+					bb[#bb+1]=map.foot_new or map.foot or ""
+					bb[#bb+1]=map.tail_new or map.tail or ""
+				end
+				part.body_new=table.concat(bb) -- shove everything in body
+				-- remove the extra data and temp tiles we added
+				for idx=#part.tiles,1,-1 do
+					local tile=part.tiles[idx]
+					if tile.is=="temp" then
+						table.remove(part.tiles,idx)
+					else
+						tile.bitstr=nil
+						tile.idx=nil
+					end
+				end
+				for _,map in ipairs(part.maps) do
+					map.bitstr=nil
+				end
 			else
 				-- unknown
 			end
@@ -417,7 +492,7 @@ M.update_parts_from_grd=function(parts,grd)
 
 end
 
-M.render_text_from_parts=function(parts)
+M.render_string_from_parts=function(parts)
 
 	local tt={}
 	local push=function(s) tt[#tt+1]=s end
@@ -428,11 +503,11 @@ M.render_text_from_parts=function(parts)
 			if part.is == "bitmap" then
 				push(part.head_new or part.head)
 				push(part.body_new or part.body)
-				push(part.tail_new or part.tail)
+				push(part.foot_new or part.foot)
 			elseif part.is == "tilemap" then
 				push(part.head_new or part.head)
 				push(part.body_new or part.body)
-				push(part.tail_new or part.tail)
+				push(part.foot_new or part.foot)
 			else
 				error( "unknown part "..part.is )
 			end

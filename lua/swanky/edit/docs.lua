@@ -459,11 +459,11 @@ M.bake=function(oven,docs)
 					local nc=0
 					for _ in n:gmatch("\n") do nc=nc+1 end
 					doc.txt.mark(line,0,line+oc,0) -- area to replace
-					local t=doc.txt.copy()
+					local t=doc.txt.copy() or ""
 					if o~=t then -- something went wrong
-print("OLD",o)
-print("CHK",t)
-print("NEW",n)
+--rint("OLD",o)
+--rint("CHK",t)
+--rint("NEW",n)
 						return false
 					end
 					if o~=n then -- replace with new
@@ -479,9 +479,9 @@ print("NEW",n)
 					if type(part)=="string" then 
 						ok=ok and checknchange(part,part)
 					else
-						ok=ok and checknchange(part.head,part.head)
+						ok=ok and checknchange(part.head,part.head_new or part.head)
 						ok=ok and checknchange(part.body,part.body_new or part.body)
-						ok=ok and checknchange(part.foot,part.foot)
+						ok=ok and checknchange(part.foot,part.foot_new or part.foot)
 					end
 					if not ok then
 						print("files out of sync giving up")

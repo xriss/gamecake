@@ -22,6 +22,8 @@ if not parts then
 	print("no bitdown found")
 end
 
+print( bitdown_parse.render_string_from_parts(parts) )
+
 print( bitdown_parse.debug_parts_string(parts) )
 
 local g=bitdown_parse.render_grd_from_parts(parts)
