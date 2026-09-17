@@ -477,7 +477,7 @@ function wwindow.setup(window,def)
 --	window.outline_size=-ss/16
 --	window.outline_color=0xcc000000
 
-	window.win_scale=def.win_scale or 0
+--	window.win_scale=def.win_scale or 0
 
 -- add all the trimmings
 	window.win_fbo=window:add({
@@ -751,8 +751,8 @@ function wwindow.setup(window,def)
 		window:resize()
 		window:layout()
 		window:resize()
---		window.reset_layout.hx=window.win_fbo.hx
---		window.reset_layout.hy=window.win_fbo.hy
+		window.reset_layout.hx=window.win_fbo.hx
+		window.reset_layout.hy=window.win_fbo.hy
 	end
 
 --local widget=window
