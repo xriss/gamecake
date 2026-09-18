@@ -333,7 +333,7 @@ M.bake=function(oven,collect)
 		
 		local rows={}
 		for k,v in pairs( M.default_configs ) do
-			rows[#rows+1]={ key=k , values=v }
+			rows[#rows+1]={ key=k , value=v }
 		end
 
 wire.tasks("collect",1,[[ require("wetgenes.wiretasks").sqlite_code(); ]],{

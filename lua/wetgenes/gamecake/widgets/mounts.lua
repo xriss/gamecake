@@ -339,7 +339,7 @@ M.meta.hooks=function(hook,widget,dat)
 		local tree=widget ; while tree and tree.parent~=tree and tree.class~="tree" do tree=tree.parent end
 		assert( tree.class=="tree" )
 
-PRINT("click",it.path)
+--PRINT("click",it.path)
 
 		if it.dir then
 			it:toggle_dir()
@@ -699,6 +699,8 @@ end
 
 M.config.fetch_dir=function(config,path)
 --	path="/"..wpath.resolve(path) -- force the // prefix
+PRINT("dir_config",path)
+
 	local dir={}
 
 	if path=="/../config/" then
@@ -713,6 +715,7 @@ M.config.fetch_dir=function(config,path)
 			},
 		}):resolve().rows
 		for i,v in ipairs(rows) do
+DUMP(rows)
 			dir[#dir+1]=config:new_item(v.key..".djon")
 		end
 

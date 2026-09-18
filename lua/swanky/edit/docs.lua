@@ -379,7 +379,7 @@ M.bake=function(oven,docs)
 	doc.auto_age_reload=function(it)
 		if it.fileage then
 			local text_age=collect.mounts:age_file(it.filename)
-			if text_age > it.fileage then  -- file is newer
+			if text_age and ( text_age > it.fileage ) then  -- file is newer
 				doc.reload(it)
 			end
 		end

@@ -359,9 +359,15 @@ wiretasks.sqlite_code=function()
 					local key=row[ tab.keyname ]
 					if not keys[key] then
 						local names={}
-						for n,v in pairs(row) do names[#names+1]=":"..n end
+						local values={}
+						for n,v in pairs(row) do
+							names[#names+1]=n
+							values[#values+1]=":"..n
+						end
 						names=table.concat(names," , ")
-						local stmt = db:prepare([[ INSERT INTO ]]..tabname..[[ VALUES (]]..names..[[) ]])
+						values=table.concat(values," , ")
+						local stxt=[[ INSERT INTO ]]..tabname..[[ ( ]]..names..[[ ) VALUES ( ]]..values..[[ ) ]]
+						local stmt = assert( db:prepare(stxt) )
 						stmt:bind_names(row)
 						stmt:step()
 						stmt:finalize()
