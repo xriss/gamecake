@@ -22,7 +22,6 @@
  }
 
  datas = {
-  find_infiles = *.lua
  }
 
 }

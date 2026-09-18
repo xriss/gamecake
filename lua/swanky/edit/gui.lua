@@ -663,11 +663,7 @@ gui.actions[ "treefiles" ]=function(why)
 	
 		local dat=why.data
 
-print("line_click",dat.path)
-
 		if dat.path and dat.path:sub(-1)~="/" then -- a file click
-
-print("line_click","file clieck")
 
 			if dat.dir then
 				dat.dir=nil
