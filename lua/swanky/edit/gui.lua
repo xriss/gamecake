@@ -1199,6 +1199,8 @@ inherit=true,
 --		docs.refresh()
 
 		gui.screen:windows_reset()
+		
+		docs.show( docs.list[1] )
 
 	end
 

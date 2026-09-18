@@ -134,6 +134,8 @@ function wmenudrop.setup(widget,def)
 	widget.class_hooks={wmenudrop.class_hooks}
 	
 	widget.fbo=widget.fbo or framebuffers.create(0,0,0)
+	
+	widget:update()
 
 	return widget
 end
