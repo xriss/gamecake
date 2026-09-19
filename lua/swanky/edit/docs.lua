@@ -72,7 +72,7 @@ M.bake=function(oven,docs)
 
 		local s=gui.datas.get_string("tree_filter")
 		local walk;walk=function(it)
-			if it.path:find(s,0,true) then -- path contains filter
+			if it.path:find(s,0,false) then -- path contains filter
 				addpath(it.path)
 			end
 			if it.dir then

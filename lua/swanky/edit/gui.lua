@@ -184,7 +184,7 @@ gui.data_setup=function()
 
 		datas.new({id="run_auto"  ,class="number",  hooks=gui.hooks,num=1})
 
-		datas.new({id="tree_filter"  ,class="string",  hooks=gui.hooks,str=""})
+		datas.new({id="tree_filter"  ,class="string",  hooks=gui.hooks,str=".*"})
 
 		datas.new({id="find_search"  ,class="string",  hooks=gui.hooks,str=""})
 		datas.new({id="find_replace"  ,class="string",  hooks=gui.hooks,str=""})

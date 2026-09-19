@@ -20,7 +20,6 @@ local opts={
 	version=require("swanky.edit.version").version,
 	fps="auto",
 	title="Swanky Edit",
-	name="swanky.edit",
 	start="swanky.edit.main",
 	disable_sounds=false, -- we need sounds
 	icon=[[
