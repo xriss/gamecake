@@ -134,6 +134,13 @@ M.construct=function(undo,txt)
 			local s=( txt.copy() or "" ) -- old string
 			if it[2] ~= s then -- sanity test
 				print("REDO ERROR '"..it[2].."' == '"..s.."'")
+				print(fy,fx,ty,tx)
+				for i=-1,1,1 do
+					local it=undo.list_get(index+i)
+					if it then
+						print(index+i,unpack(it))
+					end
+				end
 				return false
 			end
 			txt.cut()
@@ -147,7 +154,14 @@ M.construct=function(undo,txt)
 			txt.mark(fy,fx,ty,tx)
 			local s=( txt.copy() or "" ) -- old string
 			if it[3] ~= s then -- sanity test
-				print("UNDO ERROR '"..it[3].."' == '"..s.."'")
+				print("UNDO ERROR old '"..it[3].."' ~= new '"..s.."'")
+				print(fy,fx,ty,tx)
+				for i=-1,1,1 do
+					local it=undo.list_get(index+i)
+					if it then
+						print(index+i,unpack(it))
+					end
+				end
 				return false
 			end
 			txt.cut()

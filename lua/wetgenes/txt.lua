@@ -738,7 +738,10 @@ get fy,fx,ty,tx range given a start and a glyph offset ( probably +1 or -1 )
 					length=length-( #cache.codes + 1 - tx ) -- include line end
 					ty=ty+1
 					cache=txt.get_cache(ty)
-					if not cache then return fy,fx,ty-1,tx end -- end of file
+					if not cache then -- end of file
+						cache=txt.get_cache(ty-1) -- previous line
+						return fy,fx,ty,#cache.codes -- full line
+					end
 					tx=1 -- start of line
 				
 				else -- partial line
@@ -746,7 +749,6 @@ get fy,fx,ty,tx range given a start and a glyph offset ( probably +1 or -1 )
 					tx=tx+length
 					length=0
 				end
-				
 			end
 
 		end
