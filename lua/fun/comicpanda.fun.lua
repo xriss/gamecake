@@ -12,7 +12,7 @@ local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
 local wstr=require("wetgenes.string")
 
-oven.opts.fun="" -- back to menu on reset				
+oven.opts.fun="" -- back to menu on reset
 
 sysopts={
 	-- these do not read the global main_all until called so it can be set later.
@@ -52,8 +52,8 @@ sysopts={
 	icon=[[
 . 0 0 0 . . . . . . . . 0 0 0 . 
 0 0 2 0 0 . 6 6 6 6 6 0 0 2 0 0 
-0 3 2 0 6 6 6 6 6 6 6 6 0 2 1 0 
-0 3 0 6 6 6 6 6 6 6 6 6 6 0 1 0 
+0 3 2 0 6 6 6 6 6 6 6 6 0 2 3 0 
+0 3 0 6 6 6 6 6 6 6 6 6 6 0 3 0 
 0 0 6 6 0 0 0 6 6 6 0 0 0 6 0 0 
 0 0 6 0 0 6 0 0 6 0 0 6 0 0 6 0 
 . 6 6 0 0 0 0 6 6 6 0 0 0 0 6 . 
@@ -169,14 +169,19 @@ end
 --#all
 -- simple scene setup
 
-all={}
-all.meta={__index=all}
-all.is="all"
+meta={}
+meta.new=function(meta,name,...)
+	if meta[name] then return meta[name] end
+	meta[name]={}
+	meta[name].__index=meta[name]
+	meta[name].is=name
+	return 	meta[name]
+end
 
-all.sys={}
+local all=meta:new("all")
 
 all.create=function(it)
-	return setmetatable( it or {} , all.meta )
+	return setmetatable( it or {} , all )
 end
 
 all.list_add=function(all,it)
@@ -209,17 +214,19 @@ all.setup=function(all)
 	panda.text_idx=1
 	panda.text_wait=0
 
-	all.sys.text.create():setup() -- add an object
-	all.sys.panda.create(panda):setup() -- add an object
-	all.sys.text.create():setup() -- add an object
+	meta.text.create():setup() -- add an object
+	meta.panda.create(panda):setup() -- add an object
+	meta.text.create():setup() -- add an object
 	
 	for idx=#all.list,1,-1 do -- backwards so safe to remove or add
 		all.list[idx]:setup()
 	end
 
-	for _,sys in pairs(all.sys) do
-		if sys.graphics then
-			system.components.tiles.upload_tiles( sys.graphics )
+	for _,it in pairs(meta) do
+		if type(it)=="table" then
+			if it.graphics then
+				system.components.tiles.upload_tiles( it.graphics )
+			end
 		end
 	end
 
@@ -246,14 +253,10 @@ end
 --#panda
 -- manage panda
 
-panda={}
-panda.meta={__index=panda}
-panda.is="panda"
-
-all.sys.panda=panda
+local panda=meta:new("panda")
 
 panda.create=function(it)
-	it=setmetatable( it or {} , panda.meta )
+	it=setmetatable( it or {} , panda )
 	main_all:list_add(it)
 	return it
 end
@@ -284,7 +287,7 @@ panda.update=function(panda)
 		end
 	end
 
-	local create_word=panda.all.sys.talk.create_word
+	local create_word=meta.talk.create_word
 
 	panda.text_wait=panda.text_wait-1
 	if (panda.text_wait<=0) and (#panda.text>panda.text_idx) then
@@ -369,14 +372,10 @@ panda.graphics={
 --#text
 -- manage text
 
-talk={}
-talk.meta={__index=talk}
-talk.is="talk"
-
-all.sys.talk=talk
+local talk=meta:new("talk")
 
 talk.create=function(it)
-	it=setmetatable( it or {} , talk.meta )
+	it=setmetatable( it or {} , talk )
 	main_all:list_add(it)
 	return it
 end
@@ -435,7 +434,7 @@ talk.create_word=function(word)
 
 		talk.pos=V3(talk.pos_from)
 
-		all.sys.talk.create(talk):setup()
+		meta.talk.create(talk):setup()
 
 --	end
 
@@ -445,14 +444,10 @@ end
 --#text
 -- manage text
 
-text={}
-text.meta={__index=text}
-text.is="text"
-
-all.sys.text=text
+local text=meta:new("text")
 
 text.create=function(it)
-	it=setmetatable( it or {} , text.meta )
+	it=setmetatable( it or {} , text )
 	main_all:list_add(it)
 	return it
 end
@@ -491,14 +486,10 @@ end
 --#back
 -- manage back
 
-back={}
-back.meta={__index=back}
-back.is="back"
-
-all.sys.back=back
+local back=meta:new("back")
 
 back.create=function(it)
-	it=setmetatable( it or {} , back.meta )
+	it=setmetatable( it or {} , back )
 	main_all:list_add(it)
 	return it
 end
@@ -529,7 +520,6 @@ bmaps={
 . . . . . . . . 
 . . . . . . . . 
 ]], },
-
 	{ bmap=[[
 1 1 1 1 1 1 1 1 
 1 1 1 1 1 1 1 1 
@@ -540,7 +530,6 @@ bmaps={
 1 1 1 1 1 1 1 1 
 1 1 1 1 1 1 1 1 
 ]], },
-
 	{ bmap=[[
 2 2 2 2 2 2 2 2 
 2 2 2 2 2 2 2 2 
@@ -551,7 +540,6 @@ bmaps={
 2 2 2 2 2 2 2 2 
 2 2 2 2 2 2 2 2 
 ]], },
-
 	{ bmap=[[
 3 3 7 7 7 3 3 3 
 3 3 7 3 7 7 3 3 
