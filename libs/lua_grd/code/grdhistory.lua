@@ -400,7 +400,7 @@ grdhistory.history=function(grd)
 
 		if width<wa or height<ha then -- if shrinking we need to clear the areas we will lose first
 			for z=0,history.grd.depth-1 do -- across all frames
-				history.draw_begin(0,0,z,history.grd.width,history.grd.height,1)
+				history:draw_begin(0,0,z,history.grd.width,history.grd.height,1)
 				local ga=history:draw_get()
 				if width<wa then
 					if xa>0 then
