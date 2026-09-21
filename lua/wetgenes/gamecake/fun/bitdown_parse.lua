@@ -453,8 +453,10 @@ M.update_parts_from_grd=function(parts,grd)
 							mapdata[#mapdata+1]=tile and tile.idx-1 or 0
 						end
 					end
-					gt:pixels( 0, 0, map.hx/8, map.hy/8, mapdata )
-					map.body_new=bitdown.grd_pix_idx( gt, bitdown.cmap_grey256, 0, 0, map.hx/8, map.hy/8 )
+					local gm=wgrd.create("U8_INDEXED",map.hx/8, map.hy/8,1)
+					gm:palette(0,256,bitdown.cmap_grey256.data) -- with palette
+					gm:pixels( 0, 0, map.hx/8, map.hy/8, mapdata )
+					map.body_new=bitdown.grd_pix_idx( gm, bitdown.cmap_grey256, 0, 0, map.hx/8, map.hy/8 )
 				end
 				local bb={}
 				for _,tile in ipairs(part.tiles) do
