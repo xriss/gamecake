@@ -421,11 +421,17 @@ M.update_parts_from_grd=function(parts,grd)
 				local gt=wgrd.create("U8_INDEXED",8,8,1)
 				gt:palette(0,256,bitdown.cmap_swanky32.data) -- with palette
 				local bitcache={}
+				local tile_idx=0
 				for idx,tile in ipairs(part.tiles) do
 					tile.body_new=bitdown.grd_pix_idx( grd, nil, tile.px, tile.py, tile.hx, tile.hy )
 					tile.bitstr=grd:pixels(tile.px, tile.py,8,8,"")
-					tile.idx=idx
-					bitcache[tile.bitstr]=tile
+					if bitcache[tile.bitstr] then -- dupe so remove this tile
+						tile.idx=nil
+					else
+						tile.idx=tile_idx
+						tile_idx=tile_idx+1
+						bitcache[tile.bitstr]=tile
+					end
 				end
 				local last_tile=part.tiles[#part.tiles]
 				local manifest_tile=function(bitstr)
@@ -434,8 +440,9 @@ M.update_parts_from_grd=function(parts,grd)
 						tile={}
 						tile.is="temp"
 						tile.bitstr=bitstr
-						tile.idx=#part.tiles+1
-						part.tiles[tile.idx]=tile
+						tile.idx=tile_idx
+						tile_idx=tile_idx+1
+						part.tiles[#part.tiles+1]=tile
 						bitcache[tile.bitstr]=tile
 						gt:pixels( 0, 0, 8, 8, bitstr )
 						tile.head_new=last_tile.head
@@ -450,7 +457,7 @@ M.update_parts_from_grd=function(parts,grd)
 						for x=map.px,map.px+map.hx-1,8 do
 							local bitstr=grd:pixels(x,y,8,8,"")
 							local tile=manifest_tile(bitstr)
-							mapdata[#mapdata+1]=tile and tile.idx-1 or 0
+							mapdata[#mapdata+1]=tile and tile.idx or 0
 						end
 					end
 					local gm=wgrd.create("U8_INDEXED",map.hx/8, map.hy/8,1)
@@ -460,10 +467,12 @@ M.update_parts_from_grd=function(parts,grd)
 				end
 				local bb={}
 				for _,tile in ipairs(part.tiles) do
-					bb[#bb+1]=tile.head_new or tile.head or ""
-					bb[#bb+1]=tile.body_new or tile.body or ""
-					bb[#bb+1]=tile.foot_new or tile.foot or ""
-					bb[#bb+1]=tile.tail_new or tile.tail or ""
+					if tile.idx then -- only if not deleted
+						bb[#bb+1]=tile.head_new or tile.head or ""
+						bb[#bb+1]=tile.body_new or tile.body or ""
+						bb[#bb+1]=tile.foot_new or tile.foot or ""
+						bb[#bb+1]=tile.tail_new or tile.tail or ""
+					end
 				end
 				bb[#bb+1]=part.tiles_tale
 				for _,map in ipairs(part.maps) do
