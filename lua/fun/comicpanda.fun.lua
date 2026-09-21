@@ -211,6 +211,19 @@ all.setup=function(all)
 	
 ]]):match("^%s*(.-)%s*$")
 
+	panda.text=([[
+	
+	You call yourself a traditionalist and yet you refuse to crawl into the
+	giant wicker man of your own free will.
+	
+	Not only would your sacrifice guarantee the harvest but it's also a great
+	day out for the kids.
+	
+	I am beginning to suspect that you might be picking and choosing
+	"acceptable" traditions.
+	
+]]):match("^%s*(.-)%s*$")
+
 	panda.text_idx=1
 	panda.text_wait=0
 
