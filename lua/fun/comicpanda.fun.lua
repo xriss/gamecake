@@ -188,13 +188,14 @@ all.list_add=function(all,it)
 	all.list[#all.list+1]=it
 	all.names[it.is]=it
 	it.all=all -- link back
+	it.base=all.bases[it.is] -- link base
 end
 
 all.setup=function(all)
     all.setup_done=true
 
-    system.components.screen.bloom=0
-    system.components.screen.filter=nil
+--    system.components.screen.bloom=0
+--    system.components.screen.filter=nil
     
 	all.list={} -- all objects
 	all.names={} -- singleton objects ( last allocated object of name )
@@ -240,6 +241,8 @@ all.setup=function(all)
 	end
 
 	local panda={}
+
+
 	panda.text=([[
 	
 	The name Poopee Pandaa has been generating unwanted attention from a
@@ -253,6 +256,9 @@ all.setup=function(all)
 	So called because of my very large floppy ears and loveable nature.
 	
 ]]):match("^%s*(.-)%s*$")
+	panda.title="Hello Pandaa"
+
+
 
 	panda.text=([[
 	
@@ -266,6 +272,25 @@ all.setup=function(all)
 	"acceptable" traditions.
 	
 ]]):match("^%s*(.-)%s*$")
+	panda.title="Of Your Own Free Will"
+
+
+
+	panda.text=([[
+	
+	When are flat earthers going to grow up and realise the TRUTH?
+	
+	We have to live on the outside of a sphere!
+	
+	It drastically reduces the draw distance, lowering the rendering cost and
+	enabling you to exist.
+	
+	Would you rather be an NPC?
+	
+]]):match("^%s*(.-)%s*$")
+	panda.title="Simple Common Sense"
+
+
 
 	panda.text_idx=1
 	panda.text_wait=0
@@ -274,10 +299,6 @@ all.setup=function(all)
 	meta.text.create():setup() -- add an object
 	meta.panda.create(panda):setup() -- add an object
 	
---	for idx=#all.list,1,-1 do -- backwards so safe to remove or add
---		all.list[idx]:setup()
---	end
-
 end
 
 all.update=function(all)
@@ -511,7 +532,9 @@ end
 text.draw=function(text)
 
     local ctext=system.components.text
-	ctext.text_print(" Your own free will.            ",0,0,26,24)
+	ctext.text_print("                                ",0,0,26,24)
+	local title=text.all.names.panda.title
+	ctext.text_print( title ,1,0,26,24)
     for y=1,22 do
 		ctext.text_print("  ",0,y,26,24)
 		ctext.text_print("  ",30,y,26,24)
@@ -1157,33 +1180,243 @@ F F F F F F F F
 3 3 3 3 3 3 3 3 
 3 4 4 4 4 4 4 3 
 ]], },
+	{ bmap=[[
+3 3 3 3 3 3 3 3 
+2 1 1 1 1 2 2 2 
+1 1 1 1 2 2 2 2 
+1 1 1 2 2 2 2 3 
+1 1 2 2 2 2 3 3 
+1 2 2 2 2 3 3 3 
+2 2 2 2 3 3 3 3 
+2 2 2 3 3 3 3 2 
+]], },
+	{ bmap=[[
+3 3 3 3 3 3 3 3 
+0 3 3 3 3 2 2 2 
+0 3 3 3 2 2 2 2 
+0 3 3 2 2 2 2 1 
+0 3 2 2 2 2 1 1 
+0 2 2 2 2 1 1 1 
+0 2 2 2 1 1 1 1 
+0 2 2 1 1 1 1 2 
+]], },
+	{ bmap=[[
+3 3 3 3 3 3 3 3 
+2 3 3 3 3 2 2 2 
+3 3 3 3 2 2 2 2 
+3 3 3 2 2 2 2 1 
+3 3 2 2 2 2 1 1 
+3 2 2 2 2 1 1 1 
+2 2 2 2 1 1 1 1 
+2 2 2 1 1 1 1 2 
+]], },
+	{ bmap=[[
+2 2 3 3 3 3 2 2 
+2 3 3 3 3 2 2 2 
+3 3 3 3 2 2 2 2 
+3 3 3 2 2 2 2 1 
+y y G G G G g g 
+y G G G G g g g 
+G G G G g g g g 
+G G G g g g g G 
+]], },
+	{ bmap=[[
+0 2 1 1 1 1 2 2 
+0 1 1 1 1 2 2 2 
+0 1 1 1 2 2 2 2 
+0 1 1 2 2 2 2 3 
+0 1 1 1 1 1 1 1 
+0 1 1 1 1 1 1 1 
+0 1 1 1 1 1 1 1 
+0 1 1 1 1 1 1 1 
+]], },
+	{ bmap=[[
+2 2 3 3 3 3 2 2 
+2 3 3 3 3 2 2 2 
+3 3 3 3 2 2 2 2 
+3 3 3 2 2 2 2 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+]], },
+	{ bmap=[[
+2 2 1 1 1 1 2 2 
+2 1 1 1 1 2 2 2 
+1 1 1 1 2 2 2 2 
+1 1 1 2 2 2 2 3 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+]], },
+	{ bmap=[[
+2 2 3 3 3 3 2 2 
+2 3 3 3 3 2 2 2 
+3 3 3 3 2 2 2 2 
+3 3 3 2 2 2 2 2 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+]], },
+	{ bmap=[[
+2 2 1 1 1 1 2 2 
+2 1 1 1 1 2 2 2 
+1 1 1 1 2 2 2 2 
+1 1 1 2 2 2 2 3 
+4 7 7 7 7 7 7 7 
+7 5 5 5 5 5 5 5 
+7 5 3 2 2 3 5 5 
+7 3 0 3 3 0 3 5 
+]], },
+	{ bmap=[[
+2 2 3 3 3 3 2 2 
+2 3 3 3 3 2 2 2 
+3 3 3 3 2 2 2 2 
+3 3 3 2 2 2 2 1 
+7 7 7 7 7 7 7 4 
+5 5 5 5 5 5 5 7 
+5 5 3 2 2 3 5 7 
+5 3 0 3 3 0 3 7 
+]], },
+	{ bmap=[[
+2 2 1 1 1 1 2 2 
+2 1 1 1 1 2 2 2 
+1 1 1 1 2 2 2 2 
+1 1 1 2 2 2 2 3 
+g g G G G G y y 
+0 G G G G y y y 
+0 G G G y y y y 
+0 G G y y y y G 
+]], },
+	{ bmap=[[
+0 2 1 1 1 1 2 2 
+0 1 1 1 1 2 2 2 
+0 1 1 1 2 2 2 2 
+0 1 1 2 2 2 2 3 
+0 G G G G G y y 
+0 G G G G y y y 
+0 G G G y y y y 
+0 G G y y y y G 
+]], },
+	{ bmap=[[
+0 1 1 1 1 1 1 1 
+0 1 1 1 1 1 1 1 
+0 1 1 1 1 1 1 1 
+0 1 1 1 1 1 1 1 
+0 1 1 1 1 1 1 1 
+0 1 1 1 1 1 1 1 
+0 1 1 1 1 1 1 1 
+2 2 2 2 2 2 2 2 
+]], },
+	{ bmap=[[
+0 G y y y y G G 
+0 y y y y G G G 
+0 y y y G G G G 
+0 y y G G G G g 
+0 y G G G G g g 
+0 G G G G g g g 
+0 G G G g g g g 
+0 G G g g g g G 
+]], },
+	{ bmap=[[
+0 0 0 0 0 0 0 0 
+0 1 1 1 1 1 1 0 
+0 1 0 0 0 0 1 0 
+0 1 0 0 0 0 1 0 
+0 1 1 1 1 1 1 0 
+0 0 0 0 0 0 0 0 
+0 3 3 3 3 3 3 3 
+0 4 4 4 4 4 4 3 
+]], },
+	{ bmap=[[
+0 4 3 3 3 3 4 3 
+0 4 3 3 3 3 4 3 
+0 4 4 4 4 4 4 3 
+0 3 3 3 3 3 3 3 
+0 0 0 0 0 0 0 0 
+0 1 1 1 1 1 1 0 
+0 1 0 0 0 0 1 0 
+0 1 0 0 0 0 1 0 
+]], },
+	{ bmap=[[
+G G y y y y G G 
+G y y y y G G G 
+y y y y G G G G 
+y y y G G G G b 
+y y G G G G b b 
+y G G G G b b b 
+G G G G b b b b 
+G G G b b b b G 
+]], },
+	{ bmap=[[
+G G b b b b G G 
+G b b b b G G G 
+b b b b G G G G 
+b b b G G G G y 
+b b G G G G y y 
+b G G G G y y y 
+G G G G y y y y 
+G G G y y y y G 
+]], },
+	{ bmap=[[
+2 2 3 3 3 3 2 2 
+2 3 3 3 3 2 2 2 
+3 3 3 3 2 2 2 2 
+3 3 3 2 2 2 2 1 
+y y G G G G b b 
+y G G G G b b b 
+G G G G b b b b 
+G G G b b b b G 
+]], },
+	{ bmap=[[
+2 2 1 1 1 1 2 2 
+2 1 1 1 1 2 2 2 
+1 1 1 1 2 2 2 2 
+1 1 1 2 2 2 2 3 
+b b G G G G y y 
+0 G G G G y y y 
+0 G G G y y y y 
+0 G G y y y y G 
+]], },
+	{ bmap=[[
+0 G y y y y G G 
+0 y y y y G G G 
+0 y y y G G G G 
+0 y y G G G G b 
+0 y G G G G b b 
+0 G G G G b b b 
+0 G G G b b b b 
+0 G G b b b b G 
+]], },
 
 },
 
 tmaps={
 	{ tmap=[[
-01020102010201020102010201020102
-02010201020102010201020102010201
-01020102010201020102010201020102
-02010201020102010201020102010201
-01020102010201020102010201020102
-02010201020102010201020102010201
-01020102010201020102010201020102
-02010201020102010201020102010201
-01020102010201020102010201020102
-02010201020102010201020102010201
-01020102010201020102010201020102
-02010201020102010201020102010201
-01020102010201020102010201020102
-02010201020102010201020102010201
-01020102010201020102010201020102
-02010201020102010201020102010201
-01020102010201020102010201020102
-03040505060703030303030303080807
-090A0B0C0D0E0F0F0F10111209131415
-02161718191A1A1A1A1B1C1D021E1F20
-2122232425262728292A2B2C212D2E2C
-2F30313031323332333435362F323336
+4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D
+4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C
+4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D
+4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C
+4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D
+4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C
+4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D
+4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C
+4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D
+4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C
+4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D
+4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C
+4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D
+4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C
+4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D
+4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C
+4C4D4C4D4C4D4C4D4C4D4C4D4C4D4C4D
+3C040505063D3C3E3C3E3C3E3C08083D
+4E0A0B0C0D4041424344454F4E131447
+4D16171819481A1A1A1B1C504D1E1F50
+2122232425262728292A2B4A212D2E4A
+2F303130313233323334354B2F32334B
 37383738373837383738373837383738
 393A393A393A393A393A393A393A213B
 ]],	},
