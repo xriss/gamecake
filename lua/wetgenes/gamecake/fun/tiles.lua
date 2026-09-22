@@ -150,108 +150,119 @@ tiles.create=function(it,opts)
 	end
 
 -- upload all the given tiles t[1]=idx t[2]=name t[3]=ascii
+	it.upload_tile=function(t)
+
+		if type(t.ascii)=="number" then -- just mark as allocated
+
+			local n=t.ascii
+			t.ascii=nil
+
+			t.hxt=math.floor(n%256)
+			t.hyt=math.floor((n)/256)
+			
+			t.hx=t.hxt*it.tile_hx
+			t.hy=t.hyt*it.tile_hy
+		
+		else
+
+			t.hx,t.hy=bitdown.pix_size(t.ascii,it.tile_hx,it.tile_hy)
+			
+			t.hxt=math.floor(t.hx/it.tile_hx)
+			t.hyt=math.floor(t.hy/it.tile_hy)
+		
+		end
+		
+		if t.idx then
+
+			t.pxt=math.floor(t.idx%256)
+			t.pyt=math.floor((t.idx)/256)
+
+			t.px=t.pxt*it.tile_hx
+			t.py=t.pyt*it.tile_hy
+			
+		else -- find a free spot
+		
+			local tilecheck=function(px,py,hx,hy)
+				for y=py,py+hy-1 do
+					for x=px,px+hx-1 do
+						if x<1 or y<1 or x>it.bitmap_hx or y>it.bitmap_hy then return false end -- out of bounds
+						if it.idxnames[ x + ((y-1)*256) ] then return false end -- already used
+					end
+				end
+				return true
+			end
+		
+			local hx,hy=t.hx/it.tile_hx,t.hy/it.tile_hy
+--				print(t.name,hx,hy)
+			for y=1,it.bitmap_hy do
+				for x=1,it.bitmap_hx do
+					if tilecheck(x,y,hx,hy) then
+						t.pxt=(x-1)
+						t.pyt=(y-1)
+						t.px=t.pxt*it.tile_hx
+						t.py=t.pyt*it.tile_hy
+						t.idx=(y-1)*256+(x-1)
+						break
+					end
+				end
+				if t.idx then break end
+			end
+--				print(string.format("%04x",t.idx),hx,hy,t.name)
+		
+		end
+		
+		assert(t.idx) -- make sure we found a place to live
+		
+		if t.ascii then
+			bitdown.pix_grd(t.ascii,map,it.bitmap_grd,t.px,t.py,t.hx,t.hy)
+		end
+		
+		-- keep lookups
+		if t.name then
+			it.names[t.name]=t -- by name
+		end
+		it.names[t.idx]=t -- by number
+
+		-- remember allocated zones
+
+		for y=t.pyt,t.pyt+t.hyt-1 do
+			for x=t.pxt,t.pxt+t.hxt-1 do
+				it.idxnames[ 1 + x + y*256 ]=t.name or tostring(t)
+			end
+		end
+		
+		-- cut horizontal slices into sub sprites
+		if t.cuts then
+			local cuts={}
+			for i=1,t.cuts do
+				local c={}
+				cuts[i]=c
+				for n,v in pairs(t) do c[n]=v end -- dupe
+				c.cuts=nil
+				c.ascii=nil
+				c.hx=math.floor(t.hx/t.cuts)
+				c.hxt=math.floor(t.hxt/t.cuts)
+				c.pxt=c.pxt+((i-1)*c.hxt)
+				c.px=c.pxt*it.tile_hx
+				c.idx=c.idx+((i-1)*c.hxt)
+			end
+			t.cuts=cuts
+		end
+		
+		return t
+	end
+
 	it.upload_tiles=function(graphics)
 		for n,v in ipairs(graphics) do
+
 			local t={}
 			t.idx=v[1]
 			t.name=v[2]
+			t.ascii=v[3]
 			t.cuts=v[4]
 
-			if type(v[3])=="number" then -- just mark as allocated
-			
-				t.ascii=nil
+			it.upload_tile(t)
 
-				t.hxt=math.floor(v[3]%256)
-				t.hyt=math.floor((v[3])/256)
-				
-				t.hx=t.hxt*it.tile_hx
-				t.hy=t.hyt*it.tile_hy
-			
-			else
-
-				t.ascii=v[3]
-
-				t.hx,t.hy=bitdown.pix_size(t.ascii,it.tile_hx,it.tile_hy)
-				
-				t.hxt=math.floor(t.hx/it.tile_hx)
-				t.hyt=math.floor(t.hy/it.tile_hy)
-			
-			end
-			
-			if t.idx then
-
-				t.pxt=math.floor(t.idx%256)
-				t.pyt=math.floor((t.idx)/256)
-
-				t.px=t.pxt*it.tile_hx
-				t.py=t.pyt*it.tile_hy
-				
-			else -- find a free spot
-			
-				local tilecheck=function(px,py,hx,hy)
-					for y=py,py+hy-1 do
-						for x=px,px+hx-1 do
-							if x<1 or y<1 or x>it.bitmap_hx or y>it.bitmap_hy then return false end -- out of bounds
-							if it.idxnames[ x + ((y-1)*256) ] then return false end -- already used
-						end
-					end
-					return true
-				end
-			
-				local hx,hy=t.hx/it.tile_hx,t.hy/it.tile_hy
---				print(t.name,hx,hy)
-				for y=1,it.bitmap_hy do
-					for x=1,it.bitmap_hx do
-						if tilecheck(x,y,hx,hy) then
-							t.pxt=(x-1)
-							t.pyt=(y-1)
-							t.px=t.pxt*it.tile_hx
-							t.py=t.pyt*it.tile_hy
-							t.idx=(y-1)*256+(x-1)
-							break
-						end
-					end
-					if t.idx then break end
-				end
---				print(string.format("%04x",t.idx),hx,hy,t.name)
-			
-			end
-			
-			assert(t.idx) -- make sure we found a place to live
-			
-			if t.ascii then
-				bitdown.pix_grd(t.ascii,map,it.bitmap_grd,t.px,t.py,t.hx,t.hy)
-			end
-			
-			-- keep lookups
-			it.names[t.name]=t -- by name
-			it.names[t.idx]=t -- by number
-
-			-- remember allocated zones
-
-			for y=t.pyt,t.pyt+t.hyt-1 do
-				for x=t.pxt,t.pxt+t.hxt-1 do
-					it.idxnames[ 1 + x + y*256 ]=t.name
-				end
-			end
-			
-			-- cut horizontal slices into sub sprites
-			if t.cuts then
-				local cuts={}
-				for i=1,t.cuts do
-					local c={}
-					cuts[i]=c
-					for n,v in pairs(t) do c[n]=v end -- dupe
-					c.cuts=nil
-					c.ascii=nil
-					c.hx=math.floor(t.hx/t.cuts)
-					c.hxt=math.floor(t.hxt/t.cuts)
-					c.pxt=c.pxt+((i-1)*c.hxt)
-					c.px=c.pxt*it.tile_hx
-					c.idx=c.idx+((i-1)*c.hxt)
-				end
-				t.cuts=cuts
-			end
 		end
 		
 --[[

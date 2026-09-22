@@ -194,8 +194,48 @@ all.setup=function(all)
     all.setup_done=true
 
 	all.list={} -- all objects
-	all.names={} -- singleton objects
-	
+	all.names={} -- singleton objects ( last allocated object of name )
+	all.bases={} -- prototype objects ( shared data per type )
+		
+	-- reset tiles
+    local ctiles=system.components.tiles
+	ctiles.reset_tiles()
+
+ 	-- and upload all the tiles we are going to use, first all the fonts
+ 	ctiles.upload_default_font_4x8()
+	ctiles.upload_default_font_8x8()
+	ctiles.upload_default_font_8x16()
+
+	for _,it in pairs(meta) do
+		if type(it)=="table" and it.is then
+
+			-- create base, just using normal item meta
+			-- so its full of item functions you probably should not call
+			local base=setmetatable( {} , it )
+			all.bases[base.is]=base
+
+			if base.graphics then
+				base.tiles_sprites={}
+				for idx,v in ipairs( base.graphics ) do
+					local t={}
+					t.idx=v[1]
+					t.name=v[2]
+					t.ascii=v[3]
+					t.cuts=v[4]
+					base.tiles_sprites[idx]=ctiles.upload_tile( t )
+				end
+			end
+			if base.graphics_maps then
+				base.tiles_maps={}
+				for idx,v in ipairs( base.graphics_maps.bmaps ) do
+					local t={}
+					t.ascii=v.bmap
+					base.tiles_maps[idx]=ctiles.upload_tile( t )
+				end
+			end
+		end
+	end
+
 	local panda={}
 	panda.text=([[
 	
@@ -214,8 +254,8 @@ all.setup=function(all)
 	panda.text=([[
 	
 	You call yourself a traditionalist and yet you refuse to crawl into the
-	giant wicker man of your own free will.
-	
+	giant wicker man?
+		
 	Not only would your sacrifice guarantee the harvest but it's also a great
 	day out for the kids.
 	
@@ -227,21 +267,13 @@ all.setup=function(all)
 	panda.text_idx=1
 	panda.text_wait=0
 
+	meta.back.create():setup() -- add an object
 	meta.text.create():setup() -- add an object
 	meta.panda.create(panda):setup() -- add an object
-	meta.text.create():setup() -- add an object
 	
-	for idx=#all.list,1,-1 do -- backwards so safe to remove or add
-		all.list[idx]:setup()
-	end
-
-	for _,it in pairs(meta) do
-		if type(it)=="table" then
-			if it.graphics then
-				system.components.tiles.upload_tiles( it.graphics )
-			end
-		end
-	end
+--	for idx=#all.list,1,-1 do -- backwards so safe to remove or add
+--		all.list[idx]:setup()
+--	end
 
 end
 
@@ -277,7 +309,7 @@ end
 panda.setup=function(panda)
 
 	panda.dir=1
-	panda.pos=V3(28,164,0)
+	panda.pos=V3(28,162,0)
 	panda.frame=0
 	panda.walk_frame=1
 	panda.text_pos=V3(13,12)
@@ -467,16 +499,6 @@ end
 
 text.setup=function(text)
 
-    local cmap=system.components.map    
-    cmap.text_clear(0x09000000) -- clear text forcing a background color
-
-	-- reset tiles
-    local ctiles=system.components.tiles
-	ctiles.reset_tiles()
-	ctiles.upload_default_font_4x8()
-	ctiles.upload_default_font_8x8()
-	ctiles.upload_default_font_8x16()
-
 end
 
 text.update=function(text)
@@ -486,7 +508,7 @@ end
 text.draw=function(text)
 
     local ctext=system.components.text
-	ctext.text_print(" PanDaa Says What               ",0,0,26,24)
+	ctext.text_print(" Your own free will.            ",0,0,26,24)
     for y=1,22 do
 		ctext.text_print("  ",0,y,26,24)
 		ctext.text_print("  ",30,y,26,24)
@@ -508,6 +530,15 @@ back.create=function(it)
 end
 
 back.setup=function(back)
+
+	local base=back.all.bases.back
+
+	local cmap=system.components.map
+	cmap.text_clear(0x08000000) -- clear forcing a background color
+	
+	local tmap=back.graphics_maps.tmaps[1].tmap
+	bitdown.tile_grd( tmap, base.tiles_maps, system.components.map.tilemap_grd  ) -- draw into the screen (tiles)
+	system.components.map.dirty(true)
 
 end
 
@@ -534,94 +565,584 @@ bmaps={
 . . . . . . . . 
 ]], },
 	{ bmap=[[
-j j 1 j 1 1 j j 
-j j j 1 1 j j i 
-i i j j 1 j i j 
-j i i 1 j i i i 
-j i j j 1 j i j 
-i i j 1 j j i i 
-j j j 1 1 j j j 
-i j 1 1 j 1 j i 
+i i i i i i i i 
+i i i i i i i i 
+i i i i i i i i 
+j j j j j j j j 
+j j j j j j j j 
+i i i i i i i i 
+i j j j i i i i 
+i j i j i i i i 
 ]], },
 	{ bmap=[[
-j i j j 1 j i j 
-i i j 1 j j i i 
-j j j 1 1 j j j 
-i j 1 1 j 1 j i 
-j j 1 j 1 1 j j 
-j j j 1 1 j j i 
-i i j j 1 j i j 
-j i i 1 j i i i 
+i i i i i j j i 
+i i i i i j j i 
+i i i i i j j i 
+j j j j j j j j 
+j j j j j j j j 
+i i i i i j j i 
+i i i i i j j i 
+i i i i i j j i 
 ]], },
 	{ bmap=[[
-3 4 4 3 0 1 1 0 
-3 3 3 3 0 0 0 0 
-0 0 0 0 3 3 3 3 
-0 1 1 0 3 4 4 3 
-0 0 0 0 3 3 3 3 
-3 3 3 3 0 0 0 0 
-3 4 4 3 0 1 1 0 
-3 3 3 3 0 0 0 0 
+i i i i i i i i 
+i i i i i i i i 
+i i i i i i i i 
+j j j j j j j j 
+j j j j j j j j 
+i i i i i i i i 
+i i i i i i i i 
+i i i i i i i i 
 ]], },
 	{ bmap=[[
-0 0 0 0 3 3 3 3 
-0 1 1 0 3 4 4 3 
-0 0 0 0 3 3 3 3 
-3 3 3 3 0 0 0 0 
-3 4 4 3 0 1 1 0 
-3 3 3 3 0 0 0 0 
-0 0 0 0 3 3 3 3 
-0 1 1 0 3 4 4 3 
+i j i j i j j j 
+i j i j i j j j 
+i j i j i j j i 
+i j i j i j j i 
+i j i j i j j i 
+i j i j i j j i 
+i j j j i j j i 
+i i i i i j j i 
 ]], },
 	{ bmap=[[
-0 0 0 0 3 3 3 3 
-3 3 3 3 0 0 0 0 
-3 4 4 3 0 1 1 0 
-3 3 3 3 0 0 0 0 
-0 0 0 0 3 3 3 3 
-0 1 1 0 3 4 4 3 
-0 0 0 0 3 3 3 3 
-3 3 3 3 0 0 0 0 
+j j j j j j j j 
+j j j j j j j j 
+i i i i i j j i 
+i i i i i j j i 
+i i i i i j j i 
+i j j j j j j j 
+i j j j j j j j 
+i j j i i j j i 
 ]], },
 	{ bmap=[[
-f f f f f f f f 
-3 3 3 3 0 0 0 0 
-3 4 4 3 0 1 1 0 
-3 3 3 3 0 0 0 0 
-0 0 0 0 3 3 3 3 
-0 1 1 0 3 4 4 3 
-0 0 0 0 3 3 3 3 
-3 3 3 3 0 0 0 0 
+j j j j j j j i 
+j j j j j j j i 
+i i i i i j j i 
+i i i i i j j i 
+i i i i i j j i 
+j j j i i j j i 
+j j j i i j j i 
+i j j i i j j i 
+]], },
+	{ bmap=[[
+i i i i i j j i 
+j j j j j j j i 
+j j j j j j j i 
+i i i i i i i i 
+i i i i i i i i 
+j j j j j j j j 
+j j j j j j j j 
+i i i i i i i i 
+]], },
+	{ bmap=[[
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j i 
+j j j i i j j i 
+j j j i i j j i 
+i i i i i j j i 
+]], },
+	{ bmap=[[
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j j 
+i j j i i j j j 
+i j j i i i i i 
+i j j j j j j j 
+i j j j j j j j 
+i i i i i i i i 
+]], },
+	{ bmap=[[
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j i 
+5 5 5 5 5 5 5 5 
+5 5 5 5 5 5 5 5 
+5 5 5 4 4 4 4 4 
+5 5 5 4 4 4 4 4 
+]], },
+	{ bmap=[[
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j j 
+i j j i i j j j 
+5 5 5 5 5 5 5 5 
+5 5 5 5 5 5 5 5 
+4 4 4 4 4 4 4 4 
+4 4 4 4 4 4 4 4 
+]], },
+	{ bmap=[[
+i i i i i j j i 
+j j j j j j j i 
+j j j j j j j i 
+i i i i i i i i 
+5 5 5 5 5 5 5 5 
+5 5 5 5 5 5 5 5 
+4 4 4 4 4 4 4 4 
+4 4 4 4 4 4 4 4 
+]], },
+	{ bmap=[[
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j i 
+5 5 5 5 5 5 5 5 
+5 5 5 5 5 5 5 5 
+4 4 4 4 4 5 5 5 
+4 4 4 4 4 5 5 5 
+]], },
+	{ bmap=[[
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j i 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+]], },
+	{ bmap=[[
+i j j i i j j i 
+i j j i i j j i 
+i j j i i j j j 
+i j j i i j j j 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+]], },
+	{ bmap=[[
+5 5 5 4 4 4 4 4 
+5 5 5 4 4 4 4 4 
+5 5 5 4 4 4 4 4 
+5 5 5 4 4 4 4 4 
+5 5 5 4 4 4 4 4 
+5 5 5 4 4 4 4 4 
+5 5 5 5 5 5 5 5 
+5 5 5 5 5 5 5 5 
+]], },
+	{ bmap=[[
+4 4 4 4 4 4 4 4 
+4 4 4 4 4 4 4 4 
+4 4 4 4 4 4 4 4 
+4 4 4 4 4 4 4 4 
+4 4 4 4 4 4 4 4 
+4 4 4 4 4 4 4 4 
+5 5 5 5 5 5 5 5 
+5 5 5 5 5 5 5 5 
+]], },
+	{ bmap=[[
+4 4 4 4 4 5 5 5 
+4 4 4 4 4 5 5 5 
+4 4 4 4 4 5 5 5 
+4 4 4 4 4 5 5 5 
+4 4 4 4 4 5 5 5 
+4 4 4 4 4 5 5 5 
+5 5 5 5 5 5 5 5 
+5 5 5 5 5 5 5 5 
+]], },
+	{ bmap=[[
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+]], },
+	{ bmap=[[
+7 7 7 7 7 7 7 7 
+5 5 5 5 5 5 5 5 
+5 5 5 5 5 5 5 5 
+5 5 5 5 5 5 5 4 
+5 5 5 5 5 5 4 4 
+5 5 5 5 5 4 4 4 
+5 5 5 5 4 4 4 5 
+5 5 5 4 4 4 5 4 
+]], },
+	{ bmap=[[
+7 7 7 7 7 7 7 4 
+5 4 4 4 5 4 4 3 
+4 4 4 5 4 4 4 3 
+4 4 5 4 4 4 4 3 
+4 5 4 4 4 4 4 3 
+5 4 4 4 4 4 5 3 
+4 4 4 4 4 5 4 3 
+4 4 4 4 5 4 4 3 
+]], },
+	{ bmap=[[
+j j j j j j j i 
+j j j j j j j i 
+i i i i i j j i 
+i i i i i j j i 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+]], },
+	{ bmap=[[
+i j i j i j j j 
+i j i j i j j j 
+i j i j i j j i 
+i j i j i j j i 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+]], },
+	{ bmap=[[
+j j j j j j j j 
+j j j j j j j j 
+i i i i i j j i 
+i i i i i j j i 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 
+]], },
+	{ bmap=[[
+i j i j i j j j 
+i j i j i j j j 
+i j i j i j j i 
+i j i j i j j i 
+4 7 7 7 7 7 7 7 
+7 5 5 5 5 5 5 5 
+7 5 3 2 2 3 5 5 
+7 3 0 3 3 0 3 5 
+]], },
+	{ bmap=[[
+j j j j j j j j 
+j j j j j j j j 
+i i i i i j j i 
+i i i i i j j i 
+7 7 7 7 7 7 7 4 
+5 5 5 5 5 5 5 7 
+5 5 3 2 2 3 5 7 
+5 3 0 3 3 0 3 7 
+]], },
+	{ bmap=[[
+2 2 2 2 2 2 2 2 
+F F F F F F F F 
+F F F F F F F F 
+F F f f f f f f 
+F F f f f f f f 
+F F f f F F F F 
+F F f f F F F F 
+F F f f F F F F 
+]], },
+	{ bmap=[[
+2 2 2 2 2 2 2 2 
+F F F F F F F F 
+F F F F F F F F 
+f f f f f f F F 
+f f f f f f F F 
+F F F F f f F F 
+F F F F f f F F 
+F F F F f f F F 
+]], },
+	{ bmap=[[
+5 5 4 4 4 5 4 4 
+5 4 4 4 5 4 4 4 
+5 4 4 5 4 4 4 4 
+5 4 5 4 4 4 4 4 
+5 5 4 4 4 4 4 5 
+5 4 4 4 4 4 5 4 
+5 4 4 4 4 5 4 4 
+5 4 4 4 5 4 4 4 
+]], },
+	{ bmap=[[
+4 4 4 5 4 4 4 3 
+4 4 5 4 2 2 4 3 
+4 5 4 4 1 1 4 3 
+5 4 4 4 1 2 4 3 
+4 4 4 4 1 2 4 3 
+4 4 4 4 1 2 4 3 
+4 4 4 4 1 2 4 3 
+4 4 4 4 1 2 4 3 
+]], },
+	{ bmap=[[
+5 5 4 4 4 5 4 4 
+5 4 2 2 5 4 4 4 
+5 4 1 1 4 4 4 4 
+5 4 2 1 4 4 4 4 
+5 5 2 1 4 4 4 5 
+5 4 2 1 4 4 5 4 
+5 4 2 1 4 5 4 4 
+5 4 2 1 5 4 4 4 
+]], },
+	{ bmap=[[
+4 4 4 5 4 4 4 3 
+4 4 5 4 4 4 4 3 
+4 5 4 4 4 4 4 3 
+5 4 4 4 4 4 4 3 
+4 4 4 4 4 4 4 3 
+4 4 4 4 4 4 5 3 
+4 4 4 4 4 5 4 3 
+4 4 4 4 5 4 4 3 
+]], },
+	{ bmap=[[
+7 3 0 3 3 0 3 5 
+7 5 3 2 2 3 5 5 
+7 5 5 5 5 5 5 7 
+7 5 3 2 2 3 5 5 
+7 3 0 3 3 0 3 5 
+7 3 0 3 3 0 3 5 
+7 5 3 2 2 3 5 5 
+7 5 5 5 5 5 5 4 
+]], },
+	{ bmap=[[
+5 3 0 3 3 0 3 7 
+5 5 3 2 2 3 5 7 
+7 5 5 5 5 5 5 7 
+5 5 3 2 2 3 5 7 
+5 3 0 3 3 0 3 7 
+5 3 0 3 3 0 3 7 
+5 5 3 2 2 3 5 7 
+5 4 5 4 5 4 5 7 
+]], },
+	{ bmap=[[
+F F f f F F F F 
+F F f f F F F F 
+F F f f F F F F 
+F F f f F F F F 
+F F f f F F F F 
+F F f f F F F F 
+F F f f F F F F 
+F F f f F F F F 
+]], },
+	{ bmap=[[
+F F F F f f F F 
+F F F F f f F F 
+F F F F f f F F 
+F F F F f f F F 
+F F F F f f F F 
+F F F F j j F F 
+F F F F f j F F 
+F F F F f j F F 
+]], },
+	{ bmap=[[
+3 3 3 3 3 3 3 3 
+3 4 4 4 4 4 4 3 
+3 4 3 3 3 3 4 3 
+3 4 3 3 3 3 4 3 
+3 4 4 4 4 4 4 3 
+3 3 3 3 3 3 3 3 
+0 0 0 0 0 0 0 0 
+0 1 1 1 1 1 1 0 
+]], },
+	{ bmap=[[
+5 4 4 5 4 4 4 4 
+5 4 5 4 4 4 4 4 
+5 5 4 4 4 4 4 4 
+5 4 4 4 4 4 4 4 
+5 4 4 4 4 4 4 5 
+5 4 4 4 4 4 5 4 
+5 4 4 4 4 5 4 4 
+5 4 4 4 5 4 4 4 
+]], },
+	{ bmap=[[
+4 4 4 5 1 2 4 3 
+4 4 5 4 1 1 4 3 
+4 5 4 4 2 2 4 3 
+5 4 4 4 4 4 4 3 
+4 4 4 4 4 4 4 3 
+4 4 4 4 4 4 4 3 
+4 4 4 4 4 4 4 3 
+4 4 4 4 4 4 4 3 
+]], },
+	{ bmap=[[
+5 4 2 1 4 4 4 4 
+5 4 1 1 4 4 4 4 
+5 4 2 2 4 4 4 4 
+5 4 4 4 4 4 4 4 
+5 4 4 4 4 4 4 5 
+5 4 4 4 4 4 5 4 
+5 4 4 4 4 5 4 4 
+5 4 4 4 5 4 4 4 
+]], },
+	{ bmap=[[
+4 4 4 5 4 4 4 3 
+4 4 5 4 4 4 4 3 
+4 5 4 4 4 4 4 3 
+5 4 4 4 4 4 4 3 
+4 4 4 4 4 4 4 3 
+4 4 4 4 4 4 4 3 
+4 4 4 4 4 4 4 3 
+4 4 4 4 4 4 4 3 
+]], },
+	{ bmap=[[
+4 7 7 7 7 7 7 0 
+7 7 7 5 7 5 5 7 
+7 7 1 1 1 1 1 1 
+7 5 1 5 5 7 5 5 
+7 7 1 5 7 5 5 5 
+7 5 1 7 5 5 5 5 
+7 5 1 5 5 5 5 4 
+7 7 1 5 5 5 4 5 
+]], },
+	{ bmap=[[
+7 0 7 0 7 0 7 4 
+5 5 5 5 4 5 5 4 
+1 1 1 1 1 1 4 4 
+5 5 4 5 5 1 4 5 
+5 4 5 5 4 1 5 5 
+4 5 5 4 4 1 5 5 
+5 5 4 4 5 1 5 4 
+5 4 4 5 5 1 4 4 
+]], },
+	{ bmap=[[
+0 0 0 0 0 0 0 0 
+0 1 1 1 1 1 1 0 
+0 1 0 0 0 0 1 0 
+0 1 0 0 0 0 1 0 
+0 1 1 1 1 1 1 0 
+0 0 0 0 0 0 0 0 
+3 3 3 3 3 3 3 3 
+3 4 4 4 4 4 4 3 
+]], },
+	{ bmap=[[
+F F F F j j F F 
+F F F F f f F F 
+F F F F f f F F 
+F F F F f f F F 
+F F F F f f F F 
+F F F F f f F F 
+F F F F f f F F 
+F F F F f f F F 
+]], },
+	{ bmap=[[
+0 1 0 0 0 0 1 0 
+0 1 0 0 0 0 1 0 
+0 1 1 1 1 1 1 0 
+0 0 0 0 0 0 0 0 
+3 3 3 3 3 3 3 3 
+3 4 4 4 4 4 4 3 
+3 4 3 3 3 3 4 3 
+3 4 3 3 3 3 4 3 
+]], },
+	{ bmap=[[
+5 4 4 5 4 4 4 4 
+5 4 5 4 4 4 4 4 
+5 5 4 4 4 4 4 4 
+4 3 3 3 3 3 3 3 
+0 0 0 0 0 0 0 0 
+0 1 1 1 1 1 1 0 
+0 1 0 0 0 0 1 0 
+0 1 0 0 0 0 1 0 
+]], },
+	{ bmap=[[
+4 4 4 4 4 4 4 3 
+4 4 4 4 4 4 4 3 
+4 4 4 4 4 4 4 3 
+3 3 3 3 3 3 3 3 
+3 3 3 3 3 3 3 3 
+3 4 4 4 4 4 4 3 
+3 4 3 3 3 3 4 3 
+3 4 3 3 3 3 4 3 
+]], },
+	{ bmap=[[
+F F f f f f f f 
+F F f f f f f f 
+F F F F F F F F 
+F F F F F F F F 
+0 0 0 0 0 0 0 0 
+0 1 1 1 1 1 1 0 
+0 1 0 0 0 0 1 0 
+0 1 0 0 0 0 1 0 
+]], },
+	{ bmap=[[
+f f f f f f F F 
+f f f f f f F F 
+F F F F F F F F 
+F F F F F F F F 
+3 3 3 3 3 3 3 3 
+3 4 4 4 4 4 4 3 
+3 4 3 3 3 3 4 3 
+3 4 3 3 3 3 4 3 
+]], },
+	{ bmap=[[
+7 5 1 5 5 4 4 4 
+7 5 1 1 1 1 1 1 
+5 4 4 4 4 4 4 4 
+3 3 3 3 3 3 3 3 
+0 0 0 0 0 0 0 0 
+0 1 1 1 1 1 1 0 
+0 1 0 0 0 0 1 0 
+0 1 0 0 0 0 1 0 
+]], },
+	{ bmap=[[
+4 4 4 4 4 1 4 4 
+1 1 1 1 1 1 4 4 
+4 4 4 4 4 4 4 4 
+3 3 3 3 3 3 3 3 
+3 3 3 3 3 3 3 3 
+3 4 4 4 4 4 4 3 
+3 4 3 3 3 3 4 3 
+3 4 3 3 3 3 4 3 
+]], },
+	{ bmap=[[
+3 4 3 3 3 3 4 3 
+3 4 3 3 3 3 4 3 
+3 4 4 4 4 4 4 3 
+3 3 3 3 3 3 3 3 
+0 0 0 0 0 0 0 0 
+0 1 1 1 1 1 1 0 
+0 1 0 0 0 0 1 0 
+0 1 0 0 0 0 1 0 
+]], },
+	{ bmap=[[
+3 4 4 4 4 4 4 3 
+3 3 3 3 3 3 3 3 
+0 0 0 0 0 0 0 0 
+0 1 1 1 1 1 1 0 
+0 1 0 0 0 0 1 0 
+0 1 0 0 0 0 1 0 
+0 1 1 1 1 1 1 0 
+0 0 0 0 0 0 0 0 
+]], },
+	{ bmap=[[
+0 1 1 1 1 1 1 0 
+0 0 0 0 0 0 0 0 
+3 3 3 3 3 3 3 3 
+3 4 4 4 4 4 4 3 
+3 4 3 3 3 3 4 3 
+3 4 3 3 3 3 4 3 
+3 4 4 4 4 4 4 3 
+3 3 3 3 3 3 3 3 
 ]], },
 
 },
 
 tmaps={
 	{ tmap=[[
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-01020102010201020102010201020102
-06060606060606060606060606060606
-03030303030303030303030303030303
-04040404040404040404040404040404
-05050505050505050505050505050505
-03030303030303030303030303030303
+01020301020301020301020301020301
+04050604050604050604050604050604
+07080907080907080907080907080907
+01020301020301020301020301020301
+04050604050604050604050604050604
+07080907080907080907080907080907
+01020301020301020301020301020301
+07080907080907080907080907080907
+01020301020301020301020301020301
+04050604050604050604050604050604
+07080907080907080907080907080907
+01020301020301020301020301020301
+04050604050604050604050604050604
+07080907080907080907080907080907
+01020301020301020301020301020301
+04050604050604050604050604050604
+070A0B0C0D09070809070809070E0F07
+01101111120301020301020301131301
+041415141516171816191A06041B1C04
+071D1E1F201313131321220907232407
+25262728291B1C1B1C2A2B2C25232D2C
+2E2F302F30313231323334352E313235
+36373637363736373637363736373637
+252C252C252C252C252C252C252C252C
 ]],	},
 
 },

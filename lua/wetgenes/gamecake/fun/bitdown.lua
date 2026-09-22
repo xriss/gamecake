@@ -256,10 +256,16 @@ M.tile_grd=function(str,map,gout,px,py,hx,hy,tocolor)
 	end
 
 	local gettile=function(s)
-		return map[s] or map[s:sub(1,1)] or map[0]
+		local t=map[s] or map[s:sub(1,1)]
+		if not t then -- try hex into normal lua table
+			local n=tonumber(s,16)
+			if n then
+				t=map[n+1]
+			end
+		end
+		return t or map[0] or map[1]
 	end
 
-	
 	local t={}
 	for y=0,hy-1 do
 		for x=0,hx-1 do
