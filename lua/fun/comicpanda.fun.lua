@@ -169,38 +169,118 @@ end
 --#all
 -- simple scene setup
 
-meta={}
-meta.new=function(meta,name,...)
-	if meta[name] then return meta[name] end
-	meta[name]={}
-	meta[name].__index=meta[name]
-	meta[name].is=name
-	return 	meta[name]
+-- all is everything
+local all={}
+all.is="all"
+all.__index=all
+
+all.class_meta={}
+all.class=function(all,name,...)
+	if all.class_meta[name] then return all.class_meta[name] end
+	local it={}
+	all.class_meta[name]=it
+--	it.__index=it
+	it.is=name
+	it.is_also={...}
+	return it
 end
 
-local all=meta:new("all")
 
-all.create=function(it)
+all.create=function(all,it)
 	return setmetatable( it or {} , all )
 end
 
-all.list_add=function(all,it)
-	all.list[#all.list+1]=it
-	all.names[it.is]=it
-	it.all=all -- link back
-	it.base=all.bases[it.is] -- link base
+all.order_sort=function(all,orderby)
+	if orderby then -- optionally change order
+		for n,v in pairs(orderby) do
+			all.orderby[n]=v
+		end
+	end
+
+	all.order={} -- reset
+	for n,v in pairs(all.class_meta) do -- fill with names
+		all.order[#all.order+1]=n
+	end
+
+	table.sort(all.order,function(a,b)
+		local aw=all.orderby[a] or 0
+		local bw=all.orderby[b] or 0
+		if aw<bw then -- sort by weight
+			return true
+		elseif aw>bw then
+			return false
+		else -- then sort by name
+			if a<b then
+				return true
+			else
+				return false
+			end
+		end
+	end)
+end
+
+all.lists_pairs=function(all)
+	local idx=0
+	return function()
+		idx=idx+1
+		local name=all.order[idx]
+		return name,all.lists[ name ]
+	end
+end
+
+all.class_manifest=function(all,name)
+	if all.classes[name] then return all.classes[name] end
+
+	local it={}
+	local its={}
+	all.lists[name]=its
+	all.classes[name]=it -- meta prototype
+
+	-- perform inheritance
+	local fill_it=function(from)
+		for n,v in pairs( from ) do
+			if type(it[n])=="nil" then
+				it[n]=v
+			end
+		end
+	end
+	fill_it( assert(all.class_meta[name]) ) -- must exist
+	for i,n in ipairs(it.is_also) do
+		fill_it( all:class_manifest(n) ) -- fix call order with recursion
+	end
+	
+	-- bind live values for quick access
+	it.__index=it
+	it.all=all
+	it.class=it
+	
+	return it
+end
+
+all.singleton=function(all,name)
+	local list=all.lists[name]
+	return list[#list]
 end
 
 all.setup=function(all)
+	if all.setup_done then return end
     all.setup_done=true
+    PRINT("SETUP")
 
 --    system.components.screen.bloom=0
 --    system.components.screen.filter=nil
+
+	all.order={} -- order list of names
+	all.orderby={} -- order weights map or default to 0
+	all.lists={} -- map of name to items list
+	all.classes={} -- meta proto table for each class
+
+
+	for name,it in pairs(all.class_meta) do
+		all:class_manifest(it.is)
+	end
+	all:order_sort() -- this creates all.order
     
-	all.list={} -- all objects
-	all.names={} -- singleton objects ( last allocated object of name )
-	all.bases={} -- prototype objects ( shared data per type )
-		
 	-- reset tiles
     local ctiles=system.components.tiles
 	ctiles.reset_tiles()
@@ -210,32 +290,24 @@ all.setup=function(all)
 	ctiles.upload_default_font_8x8()
 	ctiles.upload_default_font_8x16()
 
-	for _,it in pairs(meta) do
-		if type(it)=="table" and it.is then
-
-			-- create base, just using normal item meta
-			-- so its full of item functions you probably should not call
-			local base=setmetatable( {} , it )
-			all.bases[base.is]=base
-
-			if base.graphics then
-				base.tiles_sprites={}
-				for idx,v in ipairs( base.graphics ) do
-					local t={}
-					t.idx=v[1]
-					t.name=v[2]
-					t.ascii=v[3]
-					t.cuts=v[4]
-					base.tiles_sprites[idx]=ctiles.upload_tile( t )
-				end
+	for _,class in pairs(all.classes) do
+		if class.graphics then
+			class.tiles_sprites={}
+			for idx,v in ipairs( class.graphics ) do
+				local t={}
+				t.idx=v[1]
+				t.name=v[2]
+				t.ascii=v[3]
+				t.cuts=v[4]
+				class.tiles_sprites[idx]=ctiles.upload_tile( t )
 			end
-			if base.graphics_maps then
-				base.tiles_maps={}
-				for idx,v in ipairs( base.graphics_maps.bmaps ) do
-					local t={}
-					t.ascii=v.bmap
-					base.tiles_maps[idx]=ctiles.upload_tile( t )
-				end
+		end
+		if class.graphics_maps then
+			class.tiles_maps={}
+			for idx,v in ipairs( class.graphics_maps.bmaps ) do
+				local t={}
+				t.ascii=v.bmap
+				class.tiles_maps[idx]=ctiles.upload_tile( t )
 			end
 		end
 	end
@@ -295,40 +367,57 @@ all.setup=function(all)
 	panda.text_idx=1
 	panda.text_wait=0
 
-	meta.back.create():setup() -- add an object
-	meta.text.create():setup() -- add an object
-	meta.panda.create(panda):setup() -- add an object
+	all.classes.back:create():setup() -- add an object
+	all.classes.text:create():setup() -- add an object
+	all.classes.panda:create(panda):setup() -- add an object
 	
 end
 
 all.update=function(all)
 	if not all.setup_done then all:setup() end
 
-	for idx=#all.list,1,-1 do -- backwards so safe to remove or add
-		all.list[idx]:update()
+	for _,list in all:lists_pairs() do
+		for idx=#list,1,-1 do -- backwards so safe to remove or add
+			list[idx]:update()
+		end
 	end
-
 end
 
 all.draw=function(all)
 
-	for idx=#all.list,1,-1 do -- backwards so safe to remove or add
-		all.list[idx]:draw()
+	for _,list in all:lists_pairs() do
+		for idx=#list,1,-1 do -- backwards so safe to remove or add
+			list[idx]:draw()
+		end
 	end
 end
+
+
+--------------------------------------------------------------------------------
+--#item
+-- manage item
+
+local item=all:class("item")
+
+item.create=function(item,it)
+	local all=item.all
+
+	it=setmetatable( it or {} , all.classes[ item.is ] )
+
+	local list=all.lists[item.is]
+	list[#list+1]=it
+
+	return it
+end
+
+
 
 
 --------------------------------------------------------------------------------
 --#panda
 -- manage panda
 
-local panda=meta:new("panda")
-
-panda.create=function(it)
-	it=setmetatable( it or {} , panda )
-	main_all:list_add(it)
-	return it
-end
+local panda=all:class("panda","item")
 
 panda.setup=function(panda)
 
@@ -357,7 +446,7 @@ panda.update=function(panda)
 		end
 	end
 
-	local create_word=meta.talk.create_word
+	local talk=panda.all.classes.talk
 
 	panda.text_wait=panda.text_wait-1
 	if (panda.text_wait<=0) and (#panda.text>panda.text_idx) then
@@ -392,7 +481,7 @@ panda.update=function(panda)
 			ww.age_max=30+math.ceil(math.abs(ww.pos_from[2]-ww.pos_goal[2])/1)
 --			ww.pos_from[1]=ww.pos_from[1]-#word*2
 			ww.pos_goal[1]=ww.pos_goal[1]+#word*2
-			create_word(ww)
+			talk:create_word(ww)
 			
 			panda.mouth=panda.mouth+1
 			
@@ -460,13 +549,7 @@ panda.graphics={
 --#text
 -- manage text
 
-local talk=meta:new("talk")
-
-talk.create=function(it)
-	it=setmetatable( it or {} , talk )
-	main_all:list_add(it)
-	return it
-end
+local talk=all:class("talk","item")
 
 talk.setup=function(talk)
 
@@ -503,26 +586,26 @@ talk.draw=function(talk)
 
 end
 
-talk.create_word=function(word)
+talk.create_word=function(talk,word)
 
 --print(word.text)
 
 --	for idx=1,#word.text do
 	
-		local talk={}
+		local it={}
 		
-		talk.word=word
---		talk.letter=word.text:sub(idx,idx)
-		talk.age=0
-		talk.age_max=word.age_max
-		talk.pos_from=V3(word.pos_from)
-		talk.pos_goal=V3(word.pos_goal)
---		talk.pos_goal[1]=talk.pos_goal[1]+((idx-1)*4)
---		talk.pos_from[1]=talk.pos_from[1]+((idx-1)*8)
+		it.word=word
+--		it.letter=word.text:sub(idx,idx)
+		it.age=0
+		it.age_max=word.age_max
+		it.pos_from=V3(word.pos_from)
+		it.pos_goal=V3(word.pos_goal)
+--		it.pos_goal[1]=talk.pos_goal[1]+((idx-1)*4)
+--		it.pos_from[1]=talk.pos_from[1]+((idx-1)*8)
 
-		talk.pos=V3(talk.pos_from)
+		it.pos=V3(it.pos_from)
 
-		meta.talk.create(talk):setup()
+		talk.all.classes.talk:create(it):setup()
 
 --	end
 
@@ -532,13 +615,7 @@ end
 --#text
 -- manage text
 
-local text=meta:new("text")
-
-text.create=function(it)
-	it=setmetatable( it or {} , text )
-	main_all:list_add(it)
-	return it
-end
+local text=all:class("text","item")
 
 text.setup=function(text)
 
@@ -552,7 +629,7 @@ text.draw=function(text)
 
     local ctext=system.components.text
 	ctext.text_print("                                ",0,0,26,24)
-	local title=text.all.names.panda.title
+	local title=text.all:singleton("panda").title
 	ctext.text_print( title ,1,0,26,24)
     for y=1,22 do
 		ctext.text_print("  ",0,y,26,24)
@@ -566,23 +643,15 @@ end
 --#back
 -- manage back
 
-local back=meta:new("back")
-
-back.create=function(it)
-	it=setmetatable( it or {} , back )
-	main_all:list_add(it)
-	return it
-end
+local back=all:class("back","item")
 
 back.setup=function(back)
-
-	local base=back.all.bases.back
 
 	local cmap=system.components.map
 	cmap.text_clear(0x08000000) -- clear forcing a background color
 	
 	local tmap=back.graphics_maps.tmaps[1].tmap
-	bitdown.tile_grd( tmap, base.tiles_maps, system.components.map.tilemap_grd  ) -- draw into the screen (tiles)
+	bitdown.tile_grd( tmap, back.tiles_maps, system.components.map.tilemap_grd  ) -- draw into the screen (tiles)
 	system.components.map.dirty(true)
 
 end
@@ -1608,7 +1677,7 @@ tmaps={
 --#start
 
 hardware,main=system.configurator(sysopts)
-main_all=all.create()
+main_all=all:create()
 
 -- we are in a sandbox and global has probably already been required
 -- so we need to force lock globals like so
