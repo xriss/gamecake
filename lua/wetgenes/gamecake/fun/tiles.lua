@@ -256,10 +256,10 @@ tiles.create=function(it,opts)
 		for n,v in ipairs(graphics) do
 
 			local t={}
-			t.idx=v[1]
-			t.name=v[2]
-			t.ascii=v[3]
-			t.cuts=v[4]
+			t.idx   = v.idx   or v[1]
+			t.name  = v.name  or v[2]
+			t.ascii = v.ascii or v[3]
+			t.cuts  = v.cuts  or v[4]
 
 			it.upload_tile(t)
 
