@@ -175,8 +175,9 @@ all.is="all"
 all.__index=all
 
 all.class_meta={}
-all.class=function(all,name,...)
+all.class_define=function(all,name,...)
 	if all.class_meta[name] then return all.class_meta[name] end
+	
 	local it={}
 	all.class_meta[name]=it
 --	it.__index=it
@@ -228,7 +229,16 @@ all.lists_pairs=function(all)
 	end
 end
 
-all.class_manifest=function(all,name)
+all.classes_pairs=function(all)
+	local idx=0
+	return function()
+		idx=idx+1
+		local name=all.order[idx]
+		return name,all.classes[ name ]
+	end
+end
+
+all.class=function(all,name)
 	if all.classes[name] then return all.classes[name] end
 
 	local it={}
@@ -246,7 +256,7 @@ all.class_manifest=function(all,name)
 	end
 	fill_it( assert(all.class_meta[name]) ) -- must exist
 	for i,n in ipairs(it.is_also) do
-		fill_it( all:class_manifest(n) ) -- fix call order with recursion
+		fill_it( all:class(n) ) -- fix call order with recursion
 	end
 	
 	-- bind live values for quick access
@@ -259,7 +269,7 @@ end
 
 all.singleton=function(all,name)
 	local list=all.lists[name]
-	return list[#list]
+	return assert(list[1])
 end
 
 all.setup=function(all)
@@ -276,8 +286,9 @@ all.setup=function(all)
 	all.classes={} -- meta proto table for each class
 
 
+	-- fill all.classes with bound meta
 	for name,it in pairs(all.class_meta) do
-		all:class_manifest(it.is)
+		all:class(it.is)
 	end
 	all:order_sort() -- this creates all.order
     
@@ -397,7 +408,7 @@ end
 --#item
 -- manage item
 
-local item=all:class("item")
+local item=all:class_define("item")
 
 item.create=function(item,it)
 	local all=item.all
@@ -417,7 +428,7 @@ end
 --#panda
 -- manage panda
 
-local panda=all:class("panda","item")
+local panda=all:class_define("panda","item")
 
 panda.setup=function(panda)
 
@@ -549,7 +560,7 @@ panda.graphics={
 --#text
 -- manage text
 
-local talk=all:class("talk","item")
+local talk=all:class_define("talk","item")
 
 talk.setup=function(talk)
 
@@ -615,7 +626,7 @@ end
 --#text
 -- manage text
 
-local text=all:class("text","item")
+local text=all:class_define("text","item")
 
 text.setup=function(text)
 
@@ -643,7 +654,7 @@ end
 --#back
 -- manage back
 
-local back=all:class("back","item")
+local back=all:class_define("back","item")
 
 back.setup=function(back)
 
