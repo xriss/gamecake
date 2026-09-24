@@ -15,9 +15,9 @@ local wstr=require("wetgenes.string")
 oven.opts.fun="" -- back to menu on reset
 
 sysopts={
-	-- these do not read the global main_all until called so it can be set later.
-	update=function() main_all:update() end, -- call global update
-	draw=function() main_all:draw() end, -- call global draw
+	-- these do not read the global scene until called so it can be set later.
+	update=function() scene:update() end, -- call global update
+	draw=function() scene:draw() end, -- call global draw
 
 	mode="swordstone", -- select basic text setup using the swanky32 palette.
 	hx=128,hy=192, -- fixed size
@@ -167,9 +167,9 @@ end
 
 --------------------------------------------------------------------------------
 --#all
--- simple scene setup
+-- all is everything static
+-- scene is everything bound
 
--- all is everything
 local all={}
 all.is="all"
 all.is_also={}
@@ -181,32 +181,32 @@ all.class_define=function(all,name,...)
 	
 	local it={}
 	all.class_meta[name]=it
---	it.__index=it
+	it.__index=it
 	it.is=name
 	it.is_also={...}
 	return it
 end
 
 
-all.create=function(all,it)
+all.scene=function(all,it)
 	return setmetatable( it or {} , all )
 end
 
-all.order_sort=function(all,orderby)
+all.order_sort=function(scene,orderby)
 	if orderby then -- optionally change order
 		for n,v in pairs(orderby) do
-			all.orderby[n]=v
+			scene.orderby[n]=v
 		end
 	end
 
-	all.order={} -- reset
-	for n,v in pairs(all.class_meta) do -- fill with names
-		all.order[#all.order+1]=n
+	scene.order={} -- reset
+	for n,v in pairs(scene.class_meta) do -- fill with names
+		scene.order[#scene.order+1]=n
 	end
 
-	table.sort(all.order,function(a,b)
-		local aw=all.orderby[a] or 0
-		local bw=all.orderby[b] or 0
+	table.sort(scene.order,function(a,b)
+		local aw=scene.orderby[a] or 0
+		local bw=scene.orderby[b] or 0
 		if aw<bw then -- sort by weight
 			return true
 		elseif aw>bw then
@@ -221,31 +221,31 @@ all.order_sort=function(all,orderby)
 	end)
 end
 
-all.lists_pairs=function(all)
+all.lists_pairs=function(scene)
 	local idx=0
 	return function()
 		idx=idx+1
-		local name=all.order[idx]
-		return name,all.lists[ name ]
+		local name=scene.order[idx]
+		return name,scene.lists[ name ]
 	end
 end
 
-all.classes_pairs=function(all)
+all.classes_pairs=function(scene)
 	local idx=0
 	return function()
 		idx=idx+1
-		local name=all.order[idx]
-		return name,all.classes[ name ]
+		local name=scene.order[idx]
+		return name,scene.classes[ name ]
 	end
 end
 
-all.class=function(all,name)
-	if all.classes[name] then return all.classes[name] end
+all.class=function(scene,name)
+	if scene.classes[name] then return scene.classes[name] end
 
 	local it={}
 	local its={}
-	all.lists[name]=its
-	all.classes[name]=it -- meta prototype
+	scene.lists[name]=its
+	scene.classes[name]=it -- meta prototype
 
 	-- perform inheritance
 	local fill_it=function(from)
@@ -255,43 +255,43 @@ all.class=function(all,name)
 			end
 		end
 	end
-	fill_it( assert(all.class_meta[name]) ) -- must exist
+	fill_it( assert(scene.class_meta[name]) ) -- must exist
 	for i,n in ipairs(it.is_also) do
-		fill_it( all:class(n) ) -- fix call order with recursion
+		fill_it( scene:class(n) ) -- fix call order with recursion
 	end
 	
 	-- bind live values for quick access
 	it.__index=it
-	it.all=all
+	it.scene=scene
 	it.class=it
 	
 	return it
 end
 
-all.singleton=function(all,name)
-	local list=all.lists[name]
+all.singleton=function(scene,name)
+	local list=scene.lists[name]
 	return assert(list[1])
 end
 
-all.setup=function(all)
-	if all.setup_done then return end
-    all.setup_done=true
+all.setup=function(scene)
+	if scene.setup_done then return end
+    scene.setup_done=true
     PRINT("SETUP")
 
 --    system.components.screen.bloom=0
 --    system.components.screen.filter=nil
 
-	all.order={} -- order list of names
-	all.orderby={} -- order weights map or default to 0
-	all.lists={} -- map of name to items list
-	all.classes={} -- meta proto table for each class
+	scene.order={} -- order list of names
+	scene.orderby={} -- order weights map or default to 0
+	scene.lists={} -- map of name to items list
+	scene.classes={} -- meta proto table for each class
 
 
-	-- fill all.classes with bound meta
-	for name,it in pairs(all.class_meta) do
-		all:class(it.is)
+	-- fill scene.classes with bound meta
+	for name,it in pairs(scene.class_meta) do
+		scene:class(it.is)
 	end
-	all:order_sort() -- this creates all.order
+	scene:order_sort() -- this creates scene.order
     
 	-- reset tiles
     local ctiles=system.components.tiles
@@ -302,7 +302,7 @@ all.setup=function(all)
 	ctiles.upload_default_font_8x8()
 	ctiles.upload_default_font_8x16()
 
-	for _,class in pairs(all.classes) do
+	for _,class in pairs(scene.classes) do
 		if class.graphics then
 			class.tiles_sprites={}
 			for idx,v in ipairs( class.graphics ) do
@@ -379,25 +379,25 @@ all.setup=function(all)
 	panda.text_idx=1
 	panda.text_wait=0
 
-	all.classes.back:create():setup() -- add an object
-	all.classes.text:create():setup() -- add an object
-	all.classes.panda:create(panda):setup() -- add an object
+	scene.classes.back:create():setup() -- add an object
+	scene.classes.text:create():setup() -- add an object
+	scene.classes.panda:create(panda):setup() -- add an object
 	
 end
 
-all.update=function(all)
-	if not all.setup_done then all:setup() end
+all.update=function(scene)
+	if not scene.setup_done then scene:setup() end
 
-	for _,list in all:lists_pairs() do
+	for _,list in scene:lists_pairs() do
 		for idx=#list,1,-1 do -- backwards so safe to remove or add
 			list[idx]:update()
 		end
 	end
 end
 
-all.draw=function(all)
+all.draw=function(scene)
 
-	for _,list in all:lists_pairs() do
+	for _,list in scene:lists_pairs() do
 		for idx=#list,1,-1 do -- backwards so safe to remove or add
 			list[idx]:draw()
 		end
@@ -412,11 +412,11 @@ end
 local item=all:class_define("item")
 
 item.create=function(item,it)
-	local all=item.all
+	local scene=item.scene
 
-	it=setmetatable( it or {} , all.classes[ item.is ] )
+	it=setmetatable( it or {} , scene.classes[ item.is ] )
 
-	local list=all.lists[item.is]
+	local list=scene.lists[item.is]
 	list[#list+1]=it
 
 	return it
@@ -458,7 +458,7 @@ panda.update=function(panda)
 		end
 	end
 
-	local talk=panda.all.classes.talk
+	local talk=panda.scene.classes.talk
 
 	panda.text_wait=panda.text_wait-1
 	if (panda.text_wait<=0) and (#panda.text>panda.text_idx) then
@@ -617,7 +617,7 @@ talk.create_word=function(talk,word)
 
 		it.pos=V3(it.pos_from)
 
-		talk.all.classes.talk:create(it):setup()
+		talk.scene.classes.talk:create(it):setup()
 
 --	end
 
@@ -641,7 +641,7 @@ text.draw=function(text)
 
     local ctext=system.components.text
 	ctext.text_print("                                ",0,0,26,24)
-	local title=text.all:singleton("panda").title
+	local title=text.scene:singleton("panda").title
 	ctext.text_print( title ,1,0,26,24)
     for y=1,22 do
 		ctext.text_print("  ",0,y,26,24)
@@ -1689,7 +1689,7 @@ tmaps={
 --#start
 
 hardware,main=system.configurator(sysopts)
-hardware.all=all:create()
+scene=all:scene()
 
 -- we are in a sandbox and global has probably already been required
 -- so we need to force lock globals like so
