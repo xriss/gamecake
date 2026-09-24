@@ -1138,7 +1138,7 @@ function wtexteditor.msg(pan,m)
 				txt.set_lexer("glsl")
 				texteditor.texteditor_hooks("txt_changed")
 
-			elseif m.id=="search_next" then -- or m.id=="search_find" then
+			elseif m.id=="search_find" then
 
 				local word=txt.copy() or ""
 				if word~="" and ((#word)<MAX_AUTO_SEARCH) then -- search for selected?
@@ -1148,12 +1148,12 @@ function wtexteditor.msg(pan,m)
 				txt.find_next()
 				texteditor:cursor_sync()
 
-			elseif m.id=="search_prev" then
+			elseif m.id=="search_next" then
 
-				local word=txt.copy() or ""
-				if word~="" and ((#word)<MAX_AUTO_SEARCH) then -- search for selected?
-					txt.search:value(word)
-				end
+				txt.find_next()
+				texteditor:cursor_sync()
+
+			elseif m.id=="search_prev" then
 
 				txt.find_prev()
 				texteditor:cursor_sync()

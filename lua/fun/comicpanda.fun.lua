@@ -172,6 +172,7 @@ end
 -- all is everything
 local all={}
 all.is="all"
+all.is_also={}
 all.__index=all
 
 all.class_meta={}
@@ -1688,7 +1689,7 @@ tmaps={
 --#start
 
 hardware,main=system.configurator(sysopts)
-main_all=all:create()
+hardware.all=all:create()
 
 -- we are in a sandbox and global has probably already been required
 -- so we need to force lock globals like so
