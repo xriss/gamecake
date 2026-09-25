@@ -273,6 +273,7 @@ gui.update_actions=function()
 end
 
 gui.action=function(why)
+
 	if not why then return end
 	local action=gui.actions[ assert(why.id) ]
 	if action then
@@ -518,18 +519,20 @@ gui.actions[ "search_find" ]=function(why)
 	local txt=texteditor.txt
 
 	local word=txt.copy() or ""
-	if word~="" and #word<256 then -- search for selected unless it is huge
+	if word~="" and #word<256 then -- set search to selected unless it is huge
 
-		local dir=wpath.dir(txt.doc.filename)
-		dir=wpath.unslash(dir)
+		-- use currently selected
+		txt.search:value(word)
 
+
+	else
+		-- show search
+		gui.datas.set_string("list_mode","search")
+		
+		gui.master.set_focus( gui.master.ids.find_search_text )
+		gui.master.ids.find_search_text:select_all()
 	end
 
-	-- show search
-	gui.datas.set_string("list_mode","search")
-	
-	gui.master.set_focus( gui.master.ids.find_search_text )
-	gui.master.ids.find_search_text:select_all()
 
 end
 gui.actions[ "find_goto" ]=function(why)
@@ -836,6 +839,8 @@ local lay=
     {
      id="texteditor",
      class="texteditor",color=0,hooks=gui.hooks,
+     -- we will handle these actions
+     disable_actions={search_find=true},
      --fbo=true, --  scale using fbo so it is smoothed
     }
    },

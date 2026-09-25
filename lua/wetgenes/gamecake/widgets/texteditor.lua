@@ -1043,6 +1043,14 @@ function wtexteditor.msg(pan,m)
 		local master=pan.master
 		local texteditor=pan.texteditor
 		local txt=texteditor.txt
+
+		-- disable these actions
+		if texteditor.disable_actions and m.id then
+			if texteditor.disable_actions[m.id] then
+				return
+			end
+		end
+
 		if m.action==1 or m.action==0 then -- allow repeats
 			if m.action==1 and AUTO_TRANSFORM_SELECTED[ m.id ] then
 
@@ -1477,7 +1485,6 @@ function wtexteditor.setup(widget,def)
 
 	-- so we can overload double clicking
 	widget.double_click=wtexteditor.double_click
-
 
 	widget.scroll_widget=widget:add({hx=widget.hx,hy=widget.hy,class="scroll",scroll_pan="tiles",color=widget.color})
 
