@@ -76,6 +76,7 @@ local protos={}
 --#draws
 
 local proto={is={"draw"},}
+proto.__index=proto
 protos[ proto.is[1] ]=proto
 local draws=proto
 
@@ -175,10 +176,9 @@ end
 -- scene is everything bound
 
 local proto={is={"scene"},}
+proto.__index=proto
 protos[ proto.is[1] ]=proto
 local scenes=proto
-
-scenes.__index=scenes
 
 scenes.create=function(scenes,it)
 	return setmetatable( it or {} , scenes )
@@ -405,6 +405,7 @@ end
 -- manage item
 
 local proto={is={"item"},}
+proto.__index=proto
 protos[ proto.is[1] ]=proto
 local items=proto
 
@@ -561,6 +562,7 @@ pandas.graphics={
 -- manage text
 
 local proto={is={"talk","item"},}
+proto.__index=proto
 protos[ proto.is[1] ]=proto
 local talks=proto
 
@@ -629,6 +631,7 @@ end
 -- manage text
 
 local proto={is={"text","item"},}
+proto.__index=proto
 protos[ proto.is[1] ]=proto
 local texts=proto
 
@@ -659,6 +662,7 @@ end
 -- manage back
 
 local proto={is={"back","item"},}
+proto.__index=proto
 protos[ proto.is[1] ]=proto
 local backs=proto
 
