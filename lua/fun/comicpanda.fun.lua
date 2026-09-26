@@ -69,12 +69,16 @@ sysopts={
 ]],
 }
 
+local protos={}
 
 --------------------------------------------------------------------------------
 --
 --#draws
 
-draws={}
+local proto={is={"draw"},}
+protos[ proto.is[1] ]=proto
+local draws=proto
+
 draws.sprite=function(it) -- note that we will modify this table
 	local spr=system.components.tiles.names[it.n] -- sprite by name
 	if it.i then spr=spr.cuts[it.i] end -- and cuts idx
@@ -170,30 +174,18 @@ end
 -- scenes is everything static
 -- scene is everything bound
 
-local scenes={}
-scenes.is="scene"
-scenes.is_also={}
+local proto={is={"scene"},}
+protos[ proto.is[1] ]=proto
+local scenes=proto
+
 scenes.__index=scenes
-
-scenes.proto_meta={}
-scenes.proto_define=function(scenes,name,...)
-	if scenes.proto_meta[name] then return scenes.proto_meta[name] end
-	
-	local it={}
-	scenes.proto_meta[name]=it
-	it.__index=it
-	it.is=name
-	it.is_also={...}
-	return it
-end
-
 
 scenes.create=function(scenes,it)
 	return setmetatable( it or {} , scenes )
 end
 
 scenes.order_sort=function(scene,orderby)
-	if orderby then -- optionscenesy change order
+	if orderby then -- optionally change order
 		for n,v in pairs(orderby) do
 			scene.orderby[n]=v
 		end
@@ -238,8 +230,7 @@ scenes.proto=function(scene,name)
 	if scene.protos[name] then return scene.protos[name] end
 
 	local it={}
-	local its={}
-	scene.lists[name]=its
+	scene.lists[name]={}
 	scene.protos[name]=it -- meta prototype
 
 	-- perform inheritance
@@ -250,9 +241,9 @@ scenes.proto=function(scene,name)
 			end
 		end
 	end
-	fill_it( assert(scene.proto_meta[name]) ) -- must exist
-	for i,n in ipairs(it.is_also) do
-		fill_it( scene:proto(n) ) -- fix cscenes order with recursion
+	fill_it( assert(protos[name]) ) -- global proto must exist
+	for idx=2,#it.is do
+		fill_it( scene:proto( it.is[idx] ) ) -- inherit recursion
 	end
 	
 	-- bind live values for quick access
@@ -273,23 +264,29 @@ scenes.setup=function(scene)
     scene.setup_done=true
     PRINT("SETUP")
 
---    system.components.screen.bloom=0
---    system.components.screen.filter=nil
+    system.components.screen.bloom=0
+    system.components.screen.filter=nil
 
-	scene.order={} -- order list of names
-	scene.orderby={} -- order weights map or default to 0
 	scene.lists={} -- map of name to items list
 	scene.protos={} -- meta proto table for each prototype class
 
+	-- order weights map or default to 0
+	scene.orderby=scene.orderby or {}
 
-	-- fill scene.protos with bound meta for active protos
-	scene.order={} -- reset
-	for name,it in pairs(scene.proto_need or scene.proto_meta) do
-		scene:proto(it.is)
-		scene.order[#scene.order+1]=it.is
+	-- list of names of protos
+	scene.order=scene.order or {
+		"panda",
+		"talk",
+		"text",
+		"back",
+	}
+	scene:order_sort() -- sort using orderby
+
+	-- fill scene.protos with bound meta handling inheritance
+	for _,name in ipairs(scene.order) do
+		scene:proto(name)
 	end
-	scene:order_sort() -- this creates scene.order
-    
+	 
 	-- reset tiles
     local ctiles=system.components.tiles
 	ctiles.reset_tiles()
@@ -299,7 +296,7 @@ scenes.setup=function(scene)
 	ctiles.upload_default_font_8x8()
 	ctiles.upload_default_font_8x16()
 
-	for _,proto in pairs(scene.protos) do
+	for name,proto in scene:protos_pairs() do
 		if proto.graphics then
 			proto.tiles_sprites={}
 			for idx,v in ipairs( proto.graphics ) do
@@ -326,7 +323,7 @@ scenes.setup=function(scene)
 
 	panda.text=([[
 	
-	The name Poopee Pandaa has been generating unwanted attention from a
+	The name Poopee Pandah has been generating unwanted attention from a
 	certain group of perverts.
 	
 	To de-escalate this situation you may also refer to me by my old school
@@ -334,16 +331,16 @@ scenes.setup=function(scene)
 	
 	DOBERMAN UNCUT
 	
-	So cscenesed because of my very large floppy ears and loveable nature.
+	So called because of my very large floppy ears and loveable nature.
 	
 ]]):match("^%s*(.-)%s*$")
-	panda.title="Hello Pandaa"
+	panda.title="Hello Pandah"
 
 
 
 	panda.text=([[
 	
-	You cscenes yourself a traditionalist and yet you refuse to crawl into the
+	You calls yourself a traditionalist and yet you refuse to crawl into the
 	giant wicker man?
 		
 	Not only would your sacrifice guarantee the harvest but it's also a great
@@ -363,7 +360,7 @@ scenes.setup=function(scene)
 	
 	We have to live on the outside of a sphere!
 	
-	It drasticscenesy reduces the draw distance, lowering the rendering cost and
+	It drastically reduces the draw distance, lowering the rendering cost and
 	enabling you to exist.
 	
 	Would you rather be an NPC?
@@ -376,9 +373,10 @@ scenes.setup=function(scene)
 	panda.text_idx=1
 	panda.text_wait=0
 
-	scene.protos.back:create():setup() -- add an object
-	scene.protos.text:create():setup() -- add an object
-	scene.protos.panda:create(panda):setup() -- add an object
+	-- add some objects
+	scene.protos.back:create():setup()
+	scene.protos.text:create():setup()
+	scene.protos.panda:create(panda):setup()
 	
 end
 
@@ -406,14 +404,16 @@ end
 --#item
 -- manage item
 
-local item=scenes:proto_define("item")
+local proto={is={"item"},}
+protos[ proto.is[1] ]=proto
+local items=proto
 
-item.create=function(item,it)
+items.create=function(item,it)
 	local scene=item.scene
 
-	it=setmetatable( it or {} , scene.protos[ item.is ] )
+	it=setmetatable( it or {} , scene.protos[ item.is[1] ] )
 
-	local list=scene.lists[item.is]
+	local list=scene.lists[ item.is[1] ]
 	list[#list+1]=it
 
 	return it
@@ -426,7 +426,9 @@ end
 --#panda
 -- manage panda
 
-local pandas=scenes:proto_define("panda","item")
+local proto={is={"panda","item"},}
+protos[ proto.is[1] ]=proto
+local pandas=proto
 
 pandas.setup=function(panda)
 
@@ -558,7 +560,9 @@ pandas.graphics={
 --#text
 -- manage text
 
-local talks=scenes:proto_define("talk","item")
+local proto={is={"talk","item"},}
+protos[ proto.is[1] ]=proto
+local talks=proto
 
 talks.setup=function(talk)
 
@@ -624,7 +628,9 @@ end
 --#text
 -- manage text
 
-local texts=scenes:proto_define("text","item")
+local proto={is={"text","item"},}
+protos[ proto.is[1] ]=proto
+local texts=proto
 
 texts.setup=function(text)
 
@@ -652,7 +658,9 @@ end
 --#back
 -- manage back
 
-local backs=scenes:proto_define("back","item")
+local proto={is={"back","item"},}
+protos[ proto.is[1] ]=proto
+local backs=proto
 
 backs.setup=function(back)
 
