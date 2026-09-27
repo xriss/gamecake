@@ -708,6 +708,13 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 --		return
 --	end
 
+	local hidemenu=function()
+		if pan.menu then
+			pan.menu:remove()
+			pan.menu=nil
+		end
+	end
+
 	if pan.master.old_over==pan and pan.parent.daty and pan.parent.daty.class=="number" then
 		if keyname=="wheel_add" and act==-1 then
 			pan.parent.daty:dec(16*4)
@@ -771,29 +778,40 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 	end
 
 	if keyname=="right" and act==1 then
+
+		-- click again to hide
+		if pan.menu then
+			hidemenu()
+			return
+		end
+
+		pan.drag=nil -- remove fake drag
+
 --		log("texteditor","righty clicky")
 		pan.master.later_append(function()
 --			log("texteditor","righty clicky later")
 
 		local word=txt.copy()
+--[[
 		if not word or word=="" then -- automark
 			txt.markauto(dy,dx,2) -- auto select word under cursor
 			texteditor.mark_area={txt.markget()}
 			texteditor.click_area={unpack(texteditor.mark_area)}
 			word=txt.copy()
-			txt.cursor()
 			texteditor:cursor_sync()
 		end
+]]
 		word=word or ""
 		if #word>64 then word="" end -- too long
 
 		local hooks=function(act,w)
-			if act=="click" then
+			if act=="click" or act=="release" then
 				if w.id=="edit_spell" then
 					txt.undo.replace(w.text)
 				elseif w and w.action then -- auto trigger action
 					pan.master.push_action_msg(w.id,w.user)
 				end
+				hidemenu()
 			end
 		end
 
@@ -854,9 +872,9 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 		}
 
 		local x,y=pan:mousexy(_x,_y)
-		local top=widgets_menuitem.menu_add(pan,{menu_data=menu_data,px=x,py=y})
-		top.also_over={top} -- pan does not count as over
---		top.master.activate(top)
+		local top=widgets_menuitem.menu_add(pan,{menu_data=menu_data,px=x+4,py=y+4})
+
+--		top.master.active=nil
 
 		end)
 		return
@@ -864,6 +882,9 @@ function wtexteditor.mouse(pan,act,_x,_y,keyname)
 
 	if act==1 and texteditor.master.over==pan and keyname=="left" then -- click to activate
 
+		pan.drag=function()end -- fake drag so we are treated as drag able
+
+		hidemenu()
 
 		texteditor.float_cx=nil
 
@@ -1537,9 +1558,6 @@ function wtexteditor.setup(widget,def)
 	widget.scroll_widget.pan.msg=wtexteditor.msg
 	widget.scroll_widget.pan.key=wtexteditor.key
 	widget.scroll_widget.pan.mouse=wtexteditor.mouse
-
-
-	widget.scroll_widget.pan.drag=function()end -- fake drag so we are treated as drag able
 
 --	if not widget.gutter_disable then
 --		widget.gutter=#(" 01   ")

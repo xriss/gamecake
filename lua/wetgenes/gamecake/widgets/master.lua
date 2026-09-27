@@ -164,6 +164,8 @@ function wmaster.setup(widget,def)
 
 			if
 				master.keyset["mouse_left"] or
+				master.keyset["mouse_right"] or
+				master.keyset["mouse_middle"] or
 				(
 					( not master.focus ) and
 					(
@@ -211,6 +213,8 @@ function wmaster.setup(widget,def)
 
 			if
 				master.keyclr["mouse_left"] or
+				master.keyclr["mouse_right"] or
+				master.keyclr["mouse_middle"] or
 				(
 					( not master.focus ) and
 					(
