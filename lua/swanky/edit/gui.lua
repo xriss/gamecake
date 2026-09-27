@@ -524,6 +524,8 @@ gui.actions[ "search_find" ]=function(why)
 		-- use currently selected
 		txt.search:value(word)
 
+		txt.find_next()
+		texteditor:cursor_sync()
 
 	else
 		-- show search
