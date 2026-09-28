@@ -495,12 +495,12 @@ pandas.update=function(panda)
 			ww.pos_goal[1]=ww.pos_goal[1]+#word*2
 			talk:create_word(ww)
 			
-			panda.mouth=panda.mouth+1
+			panda.mouth=panda.mouth+1.5
 			
 			panda.text_pos[1]=panda.text_pos[1]+#word*4
 		end
 	end
-	panda.mouth=math.min(math.max( panda.mouth-(1/8) ,1),4)
+	panda.mouth=math.min(math.max( panda.mouth*(15/16) ,1),4)
 
 
 end
@@ -510,6 +510,7 @@ pandas.draw=function(panda)
 	local b=({0,-1,0,1})[panda.walk_frame]
 	local bob=V3(0,b,0)
 	local mouth=math.ceil(math.min( panda.mouth ,3))
+
 	draws.sprite({p=panda.pos+bob,n="panda_head",i=mouth,sx=panda.dir})
 	draws.sprite({p=panda.pos+V3(0,8,0),n="panda_walk",i=panda.walk_frame,sx=panda.dir})
 
