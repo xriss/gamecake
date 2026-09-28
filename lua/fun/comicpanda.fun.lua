@@ -434,7 +434,7 @@ local pandas=proto
 pandas.setup=function(panda)
 
 	panda.dir=1
-	panda.pos=V3(28,162,0)
+	panda.pos=V3(28,162-4,0)
 	panda.frame=0
 	panda.walk_frame=1
 	panda.text_pos=V3(13,12)
@@ -512,7 +512,7 @@ pandas.draw=function(panda)
 	local mouth=math.ceil(math.min( panda.mouth ,3))
 
 	draws.sprite({p=panda.pos+bob,n="panda_head",i=mouth,sx=panda.dir})
-	draws.sprite({p=panda.pos+V3(0,8,0),n="panda_walk",i=panda.walk_frame,sx=panda.dir})
+	draws.sprite({p=panda.pos+V3(0,9,0),n="panda_walk",i=panda.walk_frame,sx=panda.dir})
 
 end
 
