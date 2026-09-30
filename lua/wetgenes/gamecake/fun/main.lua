@@ -96,7 +96,7 @@ end
 
 main.setup=function()
 
-	local args=oven.opts.args
+	local args=oven.opts.args.data
 
 	if args.fun_info then -- dump info from this fun file
 	
@@ -247,7 +247,8 @@ main.draw=function()
 			font.set(cake.fonts.get(1)) -- default font
 			font.set_size(32,0) -- 32 pixels high
 
-			gl.Translate( 0 , 0 ,1)
+--			gl.Translate( 0 , 0 ,1)
+			gl.Translate( view_debug.vx/2 , view_debug.vy/2 ,1)
 			main.system.draw_debug()
 			
 			gl.PopMatrix()

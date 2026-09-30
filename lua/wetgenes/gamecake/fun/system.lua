@@ -312,12 +312,17 @@ system.draw_debug=function()
 	local colors=system.components.colors
 	
 	if screen and tiles and colors then -- draw raw tiles
+	
+		local x0=-tiles.hx*0.25
+		local x1= tiles.hx*0.25
+		local y0=-tiles.hy*0.25
+		local y1= tiles.hy*0.25
 
 		local t={
-			0,			tiles.hy,	0, 0,1,
-			0,			0,			0, 0,0,
-			tiles.hx,	tiles.hy,	0, 1,1,
-			tiles.hx,	0,			0, 1,0,
+			x0,	y1,	0, 0,1,
+			x0,	y0,	0, 0,0,
+			x1,	y1,	0, 1,1,
+			x1,	y0,	0, 1,0,
 		}
 
 		flat.tristrip("rawuv",t,"fun_draw_tiles_debug",function(p)
