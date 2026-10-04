@@ -138,7 +138,7 @@ log("snap","to create this "..wwin.files_prefix.."snaps/"..snaps.auto..".mp4")
 				if f then
 					f:write([[
 cd `dirname $0`
-ffmpeg -framerate 30 -i "]]..snaps.auto..[[/%04d.pam" -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" -pix_fmt yuv420p -y ]]..snaps.auto..[[.mp4
+ffmpeg -framerate 60 -i "]]..snaps.auto..[[/%04d.pam" -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" "$@" -pix_fmt yuv420p -y ]]..snaps.auto..[[.mp4
 ]])
 					f:close()
 				end
@@ -161,7 +161,7 @@ ffmpeg -framerate 30 -i "]]..snaps.auto..[[/%04d.pam" -vf "pad=ceil(iw/2)*2:ceil
 	snaps.idx=0
 	snaps.frame=0
 	snaps.frame_max=60*20  -- x seconds, at 60fps
-	snaps.frame_skip=2     -- only record every other frame, so 30 fps output.
+	snaps.frame_skip=1     -- maybe only record every other frame?
 	function snaps.msg(m)
 		if not lfs then return m end
 

@@ -296,10 +296,10 @@ system.draw=function()
 --hax
 	if not system.done_save_fun_png then
 		system.done_save_fun_png=true
-		if oven.opts.args.savepng then -- pass --savepng on commandline to dump grafix memory after setup
+		if oven.opts.args.data.savepng then -- pass --savepng on commandline to dump grafix memory after setup
 			system.save_fun_png()
-		elseif oven.opts.args["savegif"] then -- pass --savegif=1200 to record first 20 seconds
-			oven.snaps.begin_record( tonumber(oven.opts.args["savegif"]) or 1 )
+		elseif oven.opts.args.data["savegif"] then -- pass --savegif=1200 to record first 20 seconds
+			oven.snaps.begin_record( tonumber(oven.opts.args.data["savegif"]) or 1 )
 		end
 	end
 
