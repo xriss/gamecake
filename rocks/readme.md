@@ -39,3 +39,19 @@ reinstall everything.
 	luarocks config lua_version 5.1
 	./allrocks make
 
+
+to update published rocks
+
+	./allrocks bump
+	./allrocks make
+
+At this point we can test the build using
+
+	./test.sh
+
+But it will probably complain about the pngs/etc being slightly 
+different due to the libs we built with, so can only do a visual check.
+
+finally we can upload all the rocks.
+
+	./allrocks upload
