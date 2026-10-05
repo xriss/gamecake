@@ -1,14 +1,14 @@
-Resolving SDK alias 'latest' to '6.0.3'
-Resolving SDK version '6.0.3' to 'sdk-releases-9074aa513b501925adb1361e208932ad32a29a5f-64bit'
+Resolving SDK alias 'latest' to '6.0.11'
+Resolving SDK version '6.0.11' to 'sdk-releases-f6264d4a4dd9ba24a9f0a5702835a44d1463de13-64bit'
 Setting the following tools as active:
-   node-22.16.0-64bit
-   releases-9074aa513b501925adb1361e208932ad32a29a5f-64bit
+   node-24.19.0-64bit
+   releases-f6264d4a4dd9ba24a9f0a5702835a44d1463de13-64bit
 
 Next steps:
 - To conveniently access emsdk tools from the command line,
   consider adding the following directories to your PATH:
     /home/vagrant/emsdk
-    /home/vagrant/emsdk/node/22.16.0_64bit/bin
+    /home/vagrant/emsdk/node/24.19.0_64bit/bin
     /home/vagrant/emsdk/upstream/emscripten
 - This can be done for the current shell by running:
     source "/home/vagrant/emsdk/emsdk_env.sh"
