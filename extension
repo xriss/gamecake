@@ -1,0 +1,19 @@
+if [ "`uname`" = "Darwin" ] ; then
+	echo osx
+
+elif [ "`uname -o`" = "Msys" ] ; then
+	echo exe
+
+elif [ "`uname -m`" = "aarch64" ] ; then
+	echo a64
+
+elif [ "`uname -m`" = "armv7l" ] ; then
+	echo rpi
+
+elif [ "`uname -m`" = "x86_64" ] ; then
+	echo x64
+
+else
+	echo js
+
+fi

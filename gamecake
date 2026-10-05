@@ -1,0 +1,10 @@
+if [ -e "`dirname $0`/gamecake.nix" ] ; then
+
+	`dirname $0`/gamecake.nix "$@"
+
+else
+DIR=`dirname $0`
+EXT=`$DIR/extension`
+	`dirname $0`/gamecake.$EXT "$@"
+
+fi
