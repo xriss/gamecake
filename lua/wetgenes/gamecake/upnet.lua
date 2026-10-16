@@ -67,7 +67,6 @@ M.bake=function(oven,upnet)
 	end
 	
 	upnet.setup=function()
-	local upnet=wire.fifo("upnet")
 		wire.memo({
 			fifo=wire.fifo("upnet"),
 			data={
