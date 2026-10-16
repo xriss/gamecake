@@ -827,7 +827,7 @@ wire.memo_functions.resolve=function( memo )
 		end
 
 		if not m then -- we pulled nothing
-			wire.threads.us:wait(1/1024) -- wait for new memos
+			wire.threads.us:wait(1/16384) -- wait for new memos
 		end
 	end
 	
@@ -1327,7 +1327,7 @@ wire.house_code=function()
 
 		else -- no memo, sleep a bit
 
-			wire.threads.us:wait( 1/16 )
+			wire.threads.us:wait( 1/16384 )
 
 		end
 	end

@@ -285,6 +285,9 @@ returns 0 on error
 */
 static wire_slots * wire_slots_init( wire_slots * slots )
 {
+	if( thrd_success != cnd_init( &(slots->msg) ) )
+	{ return 0; }
+
 	if( thrd_success != mtx_init( &(slots->mutex) , mtx_plain ) )
 	{ return 0; }
 	
@@ -878,9 +881,9 @@ static int lua_wire_fifo_push (lua_State *l)
 //	}
 // so only use the one in wire_fifos
 
-	cnd_broadcast( &(wire_fifos.msg) ); // waiting for a msg to any fifo
-
 	lua_wire_fifo_lock(l,0,fifo);
+
+	cnd_broadcast( &(wire_fifos.msg) ); // waiting for a msg to any fifo
 
 	return 0;
 }
