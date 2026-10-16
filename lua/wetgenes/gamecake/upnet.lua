@@ -44,17 +44,6 @@ M.bake=function(oven,upnet)
 		if wwin.sdl_platform~="Emscripten" then -- disable msgp on wasm
 
 			wire.tasks("msgp",1,[[ require("wetgenes.msgp").code(); ]])
-
---[[
-			oven.tasks:add_global_thread({
-				count=1,
-				id="msgp",
-				code=msgp.msgp_code,
-				globals={
-					TASK_NAME="#MSGP"
-				}
-			})
-]]
 			
 		end
 
@@ -78,6 +67,7 @@ M.bake=function(oven,upnet)
 	end
 	
 	upnet.setup=function()
+	local upnet=wire.fifo("upnet")
 		wire.memo({
 			fifo=wire.fifo("upnet"),
 			data={
@@ -309,12 +299,14 @@ M.create=function(upnet)
 
 	upnet.client.send=function(client,msg,cmd)
 
-		upnet.tasks:send({
-			task="msgp",
-			cmd=cmd or "send",
-			addr=client.addr,
-			data=json_pack.into_data(msg),
-		})
+		if wwin.sdl_platform~="Emscripten" then -- disable msgp on wasm
+			upnet.tasks:send({
+				task="msgp",
+				cmd=cmd or "send",
+				addr=client.addr,
+				data=json_pack.into_data(msg),
+			})
+		end
 
 	end
 
@@ -489,22 +481,18 @@ print("WELCOME",client.idx)
 		if tonumber( args.host ) then baseport=tonumber( args.host ) end
 
 		-- and tell it to start listening
-		local host_ret=wire.memo({
-			fifo=wire.fifo("msgp"),
-			data={
-				action="host",
-				baseport=baseport,
-				basepack=basepack,
-			},
-		}):resolve()
---[[
-		upnet.do_memo({
-			task="msgp",
-			cmd="host",
-			baseport=baseport,
-			basepack=basepack,
-		})
-]]
+
+		if wwin.sdl_platform~="Emscripten" then -- disable msgp on wasm
+			local host_ret=wire.memo({
+				fifo=wire.fifo("msgp"),
+				data={
+					action="host",
+					baseport=baseport,
+					basepack=basepack,
+				},
+			}):resolve()
+		end
+
 		-- the client of this host
 		local client=upnet.manifest_client(host_ret)
 		client.us=true -- remember that this is us
@@ -538,21 +526,15 @@ print("WELCOME",client.idx)
 		upnet.ticks.pause="join"
 
 print("joining",addr)
-		local ret=wire.memo({
-			fifo=wire.fifo("msgp"),
-			data={
-				action="join",
-				addr=addr,
-			},
-		}):resolve()
-
---[[
-		local ret=upnet.do_memo({
-			task="msgp",
-			cmd="join",
-			addr=addr,
-		})
-]]
+		if wwin.sdl_platform~="Emscripten" then -- disable msgp on wasm
+			local ret=wire.memo({
+				fifo=wire.fifo("msgp"),
+				data={
+					action="join",
+					addr=addr,
+				},
+			}):resolve()
+		end
 
 	end
 
