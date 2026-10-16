@@ -39,7 +39,7 @@ html {
 			no_load_gamecakejs:true,
 	});
 
-	gamecake.loading_hook=function(){
+	gamecake.loaded_hook=function(){
 		gamecake.FS.writeFile("/poopeepanda.fun.lua", code,  { encoding: "utf8" } );
 	}
 

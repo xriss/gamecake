@@ -1702,6 +1702,9 @@ uint8_t *pts;
 //
 // scale image
 //
+// TODO switch to https://github.com/nothings/stb/blob/master/stb_image_resize2.h
+// and add filter
+//
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 int grd_scale( struct grd *g , int32_t w, int32_t h, int32_t d)
 {

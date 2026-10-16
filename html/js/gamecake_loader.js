@@ -244,10 +244,6 @@ console.log(tr)
 				}
 			}
 		}
-		if( gamecake.loading_hook )
-		{
-			gamecake.loading_hook();
-		}
 
 		gamecake.status="start"
 		if( gamecake.loaded_hook )

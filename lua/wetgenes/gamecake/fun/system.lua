@@ -567,6 +567,9 @@ system.configurator=function(opts)
 
 	if opts.icon then -- change icon
 		local g=bitdown.pix_grd(opts.icon)
+		g:convert(wgrd.FMT_U8_RGBA)
+		assert(g:quant(256,0)) -- indexed so the scale is pixely
+		assert(g:scale(g.width*8,g.height*8,1))
 		wwin.hardcore.icon(oven.win[0],g)
 	end
 

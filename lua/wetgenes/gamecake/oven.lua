@@ -472,8 +472,11 @@ os.exit()
 					assert(g:load_data(d,"png")) -- last 3 letters pleaze
 					wwin.hardcore.icon(oven.win[0],g)
 				elseif opts.icon then -- load ascii pixels
+					local wgrd=require("wetgenes.grd")
 					local bd=require("wetgenes.gamecake.fun.bitdown")
 					local g=bd.pix_grd(opts.icon)
+					assert(g:quant(256,0)) -- indexed so the scale is pixely
+					assert(g:scale(g.width*8,g.height*8,1))
 					wwin.hardcore.icon(oven.win[0],g)
 				end
 			end

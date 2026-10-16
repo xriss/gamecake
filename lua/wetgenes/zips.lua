@@ -165,6 +165,9 @@ M.exists = function (fname)
 		f:close()
 		return true
 	end
+	if core then -- final attempt at getting a cached string
+		return core.get_cache_string(fname) and true or false
+	end
 	return false
 end
 
