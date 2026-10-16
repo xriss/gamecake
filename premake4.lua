@@ -262,7 +262,11 @@ if EMCC then
 		"-s PTHREAD_POOL_SIZE=16", -- safer to have these available.
 		"-s ALLOW_MEMORY_GROWTH=1", -- we are big and ineffable so this is rather necessary
 		"-s INITIAL_MEMORY=536870912", -- start bigger, 1/2gb
---		"-s GROWABLE_ARRAYBUFFERS=2 ", -- this makes growth better but breaks gl ?
+
+-- might be possible to hack around this with buffer copies on texture uploads/etc ?
+-- unsure if worth it
+--		"-s GROWABLE_ARRAYBUFFERS=2 ", -- this makes growth better maybe? but breaks any gl buffer use
+
 
 		"-s EXPORTED_FUNCTIONS=\"['"..table.concat({
 			"_main",
@@ -275,10 +279,10 @@ if EMCC then
 			"cwrap",
 		},"','").."']\"",
 		
---		"-s PROXY_TO_PTHREAD=0", -- PROXY_TO_PTHREAD is borked so must be disabled
+--		"-s PROXY_TO_PTHREAD", -- PROXY_TO_PTHREAD is borked with GL code
 --		"-s OFFSCREEN_FRAMEBUFFER",
 
---		"-s ASYNCIFY",
+		"-s ASYNCIFY",
 --		"-s ASYNCIFY_ADVISE",
 --		"-s ASYNCIFY_IMPORTS=['_emscripten_receive_on_main_thread_js']",
 		
@@ -296,7 +300,7 @@ if EMCC then
 	configuration {"Debug"}
 		linkoptions{
 			"-s ASSERTIONS=1",
-			"-gsource-map", 
+--			"-gsource-map", 
 --			"-gsource-map=inline", -- this breaks...?
 			"--emrun", -- expect the debug emscripten to do the emrun stuff
 --			"-s SAFE_HEAP=1",
