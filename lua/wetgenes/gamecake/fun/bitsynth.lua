@@ -624,7 +624,7 @@ bitsynth.task_code=function()
 
 		else -- no memo, sleep a bit
 		
-			fifo:wait(1/16)
+			fifo:wait(1/16) -- slow response
 
 		end
 

@@ -868,8 +868,6 @@ static int lua_wire_fifo_push (lua_State *l)
 			while(last->next) { last=last->next; } // loop to last
 			last->next=msg; // append to last
 		}
-
-	lua_wire_fifo_lock(l,0,fifo);
 	
 	cnd_signal( &(fifo->msg) ); // waiting for a msg to this fifo
 
@@ -881,6 +879,8 @@ static int lua_wire_fifo_push (lua_State *l)
 // so only use the one in wire_fifos
 
 	cnd_broadcast( &(wire_fifos.msg) ); // waiting for a msg to any fifo
+
+	lua_wire_fifo_lock(l,0,fifo);
 
 	return 0;
 }

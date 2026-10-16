@@ -768,6 +768,7 @@ M.bake=function(oven,ups)
 
 	-- manual advance
 	ups.advance=function()
+
 		ups.upish=wire.memo({
 			fifo=wire.fifo("ups"),
 			data={
@@ -916,7 +917,7 @@ M.task_code=function()
 		else -- no memo, sleep a bit
 		
 			wire.update()
-			fifo:wait(1/16)
+			fifo:wait(1/16384) -- fast response
 
 		end
 

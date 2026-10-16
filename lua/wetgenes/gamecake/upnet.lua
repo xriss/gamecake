@@ -972,7 +972,7 @@ M.upnet_code=function()
 			upnet.update() -- probably getting called every 1ms ish
 			wire.update()
 			toaster.garbage_collect_step() -- try and avoid gc glitching
-			fifo:wait(1/1024)
+			fifo:wait(1/16384) -- fast response
 
 		end
 
