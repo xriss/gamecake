@@ -260,8 +260,16 @@ if EMCC then
 	linkoptions{
 		"-v",
 		"-s PTHREAD_POOL_SIZE=16", -- safer to have these available.
-		"-s ALLOW_MEMORY_GROWTH=1", -- we are big and ineffable so this is rather necessary
-		"-s INITIAL_MEMORY=536870912", -- start bigger, 1/2gb
+		"-s PTHREAD_POOL_SIZE_STRICT=2", -- and error if we run out
+
+-- not entirely sure where we are hitting locks, debug is hard
+--		"-s ALLOW_BLOCKING_ON_MAIN_THREAD=0", -- catch locks
+
+--		"-s ALLOW_MEMORY_GROWTH=1", -- we are big and ineffable so this is rather necessary
+-- fixed huge size might be better?
+-- 2GB is the maximum size for webgl so I mean, it is already a limit...
+-- and we are talking browsers so I mean, yeah lets limit this
+		"-s INITIAL_MEMORY=2048MB",
 
 -- might be possible to hack around this with buffer copies on texture uploads/etc ?
 -- unsure if worth it
@@ -282,7 +290,8 @@ if EMCC then
 --		"-s PROXY_TO_PTHREAD", -- PROXY_TO_PTHREAD is borked with GL code
 --		"-s OFFSCREEN_FRAMEBUFFER",
 
-		"-s ASYNCIFY",
+-- asyncing doesnt seem to help, might be doing it wrong?
+--		"-s ASYNCIFY",
 --		"-s ASYNCIFY_ADVISE",
 --		"-s ASYNCIFY_IMPORTS=['_emscripten_receive_on_main_thread_js']",
 		
@@ -290,7 +299,6 @@ if EMCC then
 		"-s WASMFS",
 		"-s FORCE_FILESYSTEM",
 		
---		"-s SOURCE_MAP_PREFIXES=/home/kriss/devcake/gamecake=/gamecake"
 
 	}
 
@@ -300,8 +308,7 @@ if EMCC then
 	configuration {"Debug"}
 		linkoptions{
 			"-s ASSERTIONS=1",
---			"-gsource-map", 
---			"-gsource-map=inline", -- this breaks...?
+			"-gsource-map", 
 			"--emrun", -- expect the debug emscripten to do the emrun stuff
 --			"-s SAFE_HEAP=1",
 		}

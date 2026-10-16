@@ -5,5 +5,5 @@ cd `dirname $0`
 #( cd ../test && zip -r ../html/test.zip . )
 
 
-emrun --browser-args=--devtools --kill-start --kill-exit --browser=firefox dbg/gamecake.html -- -lcmd swed --logs
+emrun --serve-root=. --browser-args=--devtools --kill-start --kill-exit --browser=firefox dbg/gamecake.html -- -lcmd swed --logs
 
