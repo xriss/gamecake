@@ -1125,7 +1125,20 @@ wire.do_start=function( func )
 	global.PRINT=print
 	global.DUMP=print
 	global.LOG=print
-	global.TRACEBACK=function(err) LOG( "TASK" , debug.traceback( err or "" ) ) return err end
+	global.TRACEBACK=function(err) LOG( "TASK" , debug.traceback( tostring(err or "") ) ) return err end
+	-- behave like pcall but with auto error printing
+	global.PCALL=function(f,...)
+		local aa={...}
+		local ff=function() return f(unpack(aa)) end
+		local ee=function(err)
+			return debug.traceback( tostring(err or "") , 2)
+		end
+		local rr={xpcall(ff,ee)}
+		if not rr[1] then -- print error
+			print("PCALL",unpack(rr))
+		end
+		return unpack(rr)
+	end
 
 -- try and setup wetgenes.logs
 	pcall( function()
@@ -1134,6 +1147,19 @@ wire.do_start=function( func )
 		global.PRINT=logs.print
 		global.DUMP=logs.dump
 		global.LOG=logs.log
+		-- behave like pcall but with auto error logging
+		global.PCALL=function(f,...)
+			local aa={...}
+			local ff=function() return f(unpack(aa)) end
+			local ee=function(err)
+				return debug.traceback( tostring(err or "") , 2 )
+			end
+			local rr={xpcall(ff,ee)}
+			if not rr[1] then -- print error
+				LOG("PCALL",unpack(rr))
+			end
+			return unpack(rr)
+		end
 	end )
 
 	-- maybe we just wanted to set some globals so function is optional

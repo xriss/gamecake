@@ -534,11 +534,13 @@ M.gist.fetch_dir=function(gist,path)
 		opts.tasks=gist.collect.oven.tasks
 		opts.gid=gid
 
-		local result=wgists.get(opts)
-		for n,v in pairs(result.files or {}) do
-			dir[#dir+1]=gist:new_item(n)
+		local ok,result=PCALL( wgists.get , opts )
+		if ok then
+			for n,v in pairs(result.files or {}) do
+				dir[#dir+1]=gist:new_item(n)
+			end
+			dir[#dir+1]=gist:new_item(".meta")
 		end
-		dir[#dir+1]=gist:new_item(".meta")
 
 	end
 	
@@ -563,8 +565,12 @@ M.gist.age_file=function(gist,path)
 		opts.tasks=gist.collect.oven.tasks
 		opts.gid=gid
 
-		local result=wgists.get(opts)
-		return wgists.parse_iso8601( result.updated_at ) -- into os.time() comparable value
+		local ok,result=PCALL( wgists.get , opts )
+		if not ok then
+			return -1
+		else
+			return wgists.parse_iso8601( result.updated_at ) -- into os.time() comparable value
+		end
 	end
 
 end
@@ -588,18 +594,22 @@ PRINT("read_gist",path)
 		opts.tasks=gist.collect.oven.tasks
 		opts.gid=gid
 
-		local result=wgists.get(opts)
-		if gfname==".meta" then
-			return djon.save({
-				description=result.description,
-				owner=result.owner and result.owner.login,
-				created_at=result.created_at,
-				updated_at=result.updated_at,
-				public=result.public,
-				html_url=result.html_url,
-			},"djon")
+		local ok,result=PCALL( wgists.get , opts )
+		if not ok then
+			return nil
 		else
-			return result.files and result.files[gfname] and result.files[gfname].content
+			if gfname==".meta" then
+				return djon.save({
+					description=result.description,
+					owner=result.owner and result.owner.login,
+					created_at=result.created_at,
+					updated_at=result.updated_at,
+					public=result.public,
+					html_url=result.html_url,
+				},"djon")
+			else
+				return result.files and result.files[gfname] and result.files[gfname].content
+			end
 		end
 	end
 
@@ -635,9 +645,13 @@ PRINT("write_gist",path)
 		else
 			opts.body={files={}}
 			opts.body.files[gfname]={content=data}
-			local result=wgists.set(opts)
+			local ok,result=PCALL( wgists.set , opts )
 -- we get result?
-			return result.files and result.files[gfname] and result.files[gfname].content
+			if not ok then
+				return nil
+			else
+				return result.files and result.files[gfname] and result.files[gfname].content
+			end
 		end
 
 	end

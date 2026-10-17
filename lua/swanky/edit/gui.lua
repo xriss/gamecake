@@ -267,7 +267,7 @@ end
 
 gui.update_actions=function()
 	for _,a in ipairs(gui.do_actions) do
-		gui.action(a)
+		PCALL( gui.action , a ) -- print errors but keep going
 	end
 	gui.do_actions={}
 end

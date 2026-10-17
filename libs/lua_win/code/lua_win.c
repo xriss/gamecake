@@ -346,13 +346,15 @@ const char *result=0;
 
 EM_JS(const char *, lua_emcc_js_http_js, ( const char* strptr ), {
 
+let retptr;
+
+try{
+
 	let str = UTF8ToString(strptr);
 	let opts=JSON.parse(str);
 
 	let request = new XMLHttpRequest();
-console.log("pre open",opts.method,opts.url);
 	request.open( opts.method , opts.url  , false );
-console.log("pst open");
 	for(const key in opts.headers)
 	{
 		request.setRequestHeader( key , opts.headers[key] );
@@ -367,9 +369,11 @@ console.log("pst open");
 
 	let retval = JSON.stringify(ret);
 	let retlen = lengthBytesUTF8(retval)+1;
-	let retptr = _malloc(retlen);
+	retptr = _malloc(retlen);
 	stringToUTF8(retval, retptr, retlen);
-console.log("req done");
+
+}catch(e){console.log(e)}
+
 	return retptr;
 });
 
