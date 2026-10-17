@@ -8,7 +8,6 @@ local V0,V1,V2,V3,V4,M2,M3,M4,Q4=tardis:export("V0","V1","V2","V3","V4","M2","M3
 -- gonna render some sounds
 local djon=require("djon")
 local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
-local bitsynth_task=require("wetgenes.gamecake.fun.bitsynth_task")
 
 local bitdown=require("wetgenes.gamecake.fun.bitdown")
 local wstr=require("wetgenes.string")
@@ -55,25 +54,24 @@ sysopts={
 		},
 	},
 	icon=[[
-. . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . 
-. . . . . Y Y O O Y Y O O o o . . . . 
-. . . . . Y Y O O Y Y O O o o . . . . 
-. . . Y Y O O o o O O o o r r r r . . 
-. . . Y Y O O o o O O o o r r r r . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
-. . . Y Y Y Y Y Y Y Y Y Y o o o o . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . s s s s F F F F F F f f f f . . 
-. . . o o o o O O O O O O r r r r . . 
-. . . o o o o O O O O O O r r r r . . 
-. . . . . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . Y Y O O Y Y O O o o . . . 
+. . . Y Y O O Y Y O O o o . . . 
+. Y Y O O o o O O o o r r r r . 
+. Y Y O O o o O O o o r r r r . 
+. s s s s F F F F F F f f f f . 
+. s s s s F F F F F F f f f f . 
+. Y Y Y Y Y Y Y Y Y Y o o o o . 
+. Y Y Y Y Y Y Y Y Y Y o o o o . 
+. s s s s F F F F F F f f f f . 
+. s s s s F F F F F F f f f f . 
+. o o o o O O O O O O r r r r . 
+. o o o o O O O O O O r r r r . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
 ]],
 }
-hardware,main=system.configurator(sysopts)
 
 --------------------------------------------------------------------------------
 --
@@ -98,6 +96,9 @@ sound_data=djon.load([[
 }
 
 ]])
+
+
+hardware,main=system.configurator(sysopts)
 
 systems={}
 
@@ -310,7 +311,7 @@ draws.sprite=function(it) -- note that we will modify this table
 		it.py=it.p[2]
 		it.pz=it.p[3]
 	end
-	if not it.pz then it.pz=px+py end	-- auto pz
+	if not it.pz then it.pz=it.px+it.py end	-- auto pz
 	local map=system.components.map
 	it.px=it.px+map.window_px-map.px	-- auto map position
 	it.py=it.py+map.window_py-map.py
@@ -3937,6 +3938,7 @@ huds.item.draw=function(hud)
 	local tm=math.floor(level.time/60)
 	local s=tm..":"..("0"..ts):sub(-2)
 	draws.string16(s,128-(#s*4),0)
+
 
 	local players=scene:caste("player")
 	for i,p in ipairs(players) do
