@@ -85,6 +85,16 @@ local find_system_ca do
       "/etc/ssl/cert.pem",                                  -- OpenBSD / Alpine / macOS
    }
 
+-- also try bundled .cacert file next to exe
+	pcall( function()
+		local win=require("wetgenes.win") -- if available
+		local exe=win.get_exe_path()
+		local exe= exe:match("^(.*)%.[^%./\\]+$") or exe -- strip any extension
+		local path=exe..".cacert" -- probably gamecake.cacert
+		ca_bundle_paths[#ca_bundle_paths+1]=path
+	end)
+
+
 	function find_system_ca()
 
 		for _, path in ipairs(ca_bundle_paths) do
@@ -94,20 +104,6 @@ local find_system_ca do
 				return path
 			end
 		end
-
--- try and find bundled ca file next to exe
-		local ok,path=pcall( function()
-			local win=require("wetgenes.win")
-			local exe=win.get_exe_path()
-			local exe= exe:match("^(.*)%.[^%./\\]+$") or exe -- strip any extension
-			local path=exe..".cacert" -- try our gamecake.cacert
-			local fh = io.open(path, "r")
-			if fh then
-				fh:close()
-				return path
-			end
-		end)
-		if ok then return path end
 
       return nil, "no system CA bundle found:\n\tno file '" .. table.concat(ca_bundle_paths, "'\n\tno file '") .. "'"
    end

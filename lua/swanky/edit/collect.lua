@@ -169,7 +169,7 @@ M.bake=function(oven,collect)
 		dir={},
 		keep=true,
 	})
-	collect.mounts_file=wgw_mounts.file.setup({
+	collect.mounts_root=wgw_mounts.file.setup({
 		collect=collect, -- back link to this state data
 		name="/",
 		path="/",
@@ -177,11 +177,26 @@ M.bake=function(oven,collect)
 		dir={},
 		keep=true,
 	})
+	local roots={ collect.mounts_root }
+	local dmap=wwin.get_win_mounts() -- bitmap of mounted windows letters
+	for d=1,26 do
+		if bit.band( dmap , 2^(d-1) ) ~= 0 then
+			local letter=string.char(0x40+d)
+			--RINT( "MOUNT" , letter..":/" )
+			roots[#roots+1]=wgw_mounts.file.setup({
+				collect=collect, -- back link to this state data
+				name=letter..":/",
+				path=letter..":/",
+				dir={},
+				keep=true,
+			})
+		end
+	end
 	collect.mounts=wgw_mounts.meta.setup({
 		collect=collect, -- back link to this state data
 		name="",
 		path="",
-		mounts={  collect.mounts_file },
+		mounts=roots,
 		dir={},
 		keep=true,
 	})

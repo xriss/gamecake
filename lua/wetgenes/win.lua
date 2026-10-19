@@ -478,6 +478,10 @@ function base.get_mod_path()
 end
 win.get_mod_path=base.get_mod_path
 
+function base.get_win_mounts()
+	return softcore.get_win_mounts()
+end
+win.get_win_mounts=base.get_win_mounts
 
 function base.posix_open_events(w)
 	if not posix then return end

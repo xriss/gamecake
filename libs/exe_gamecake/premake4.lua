@@ -55,6 +55,8 @@ elseif WINDOWS then
 	links { "winmm" }
 
 	links { "psapi" }
+	
+	links { "kernel32" }
 
 	linkoptions{ "-mconsole" }
 

@@ -16,10 +16,15 @@
 
 //#include "../../lua_sdl2/luasdl2/src/window.h"
 
-#if (defined __EMSCRIPTEN__)
+#if defined( __EMSCRIPTEN__ )
 #include "emscripten.h"
 #endif
 
+#if defined( _WIN32 )
+
+#include "fileapi.h"
+
+#endif
 
 static const uint8_t font_bits[16*48]={
 
@@ -207,6 +212,24 @@ char *path=0;
 	return 0;
 }
 
+
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+//
+// bitmap of mounted letters ( windows only )
+//
+/*+-----------------------------------------------------------------------------------------------------------------+*/
+int lua_wetwin_get_win_mounts(lua_State *l)
+{
+	double ret=0.0;
+	
+#if defined( _WIN32 )
+	ret=(double)GetLogicalDrives();
+#endif
+
+	lua_pushnumber(l,ret);
+
+	return 1;
+}
 
 /*+-----------------------------------------------------------------------------------------------------------------+*/
 //
@@ -428,6 +451,10 @@ LUALIB_API int luaopen_wetgenes_win_core(lua_State *l)
 
 		{"get_exe_path",		lua_wetwin_get_exe_path},
 		{"get_mod_path",		lua_wetwin_get_mod_path},
+
+// windows drives
+
+		{"get_win_mounts",		lua_wetwin_get_win_mounts},
 
 // sdl hax
 
