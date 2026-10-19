@@ -1,0 +1,25 @@
+SRCDIR=`dirname $0`
+
+if [ -e "`dirname $0`/gamecake.nix" ] ; then
+SRCEXT=nix
+
+else
+SRCEXT=`$SRCDIR/extension`
+
+fi
+
+if [ -z "$DESTDIR" ] ; then
+	DESTDIR="/usr/local"
+fi
+
+mkdir -p ${DESTDIR}/bin/
+
+echo
+echo " Installing ${SRCDIR}/gamecake.${SRCEXT} to ${DESTDIR}/bin/gamecake "
+cp ${SRCDIR}/gamecake.${SRCEXT} ${DESTDIR}/bin/gamecake
+cp ${SRCDIR}/gamecake.grd ${DESTDIR}/bin/gamecake.grd
+cp ${SRCDIR}/gamecake.midi ${DESTDIR}/bin/gamecake.midi
+cp ${SRCDIR}/gamecake.http ${DESTDIR}/bin/gamecake.http
+
+cp ${SRCDIR}/gamecake.swed ${DESTDIR}/bin/swed
+echo
