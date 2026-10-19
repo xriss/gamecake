@@ -85,20 +85,30 @@ local find_system_ca do
       "/etc/ssl/cert.pem",                                  -- OpenBSD / Alpine / macOS
    }
 
-   local is_windows = package.config:sub(1, 1) == "\\"
+	function find_system_ca()
 
-   function find_system_ca()
--- mingwin lets linux paths work...
---      if is_windows then
---         return "system"
---      end
-      for _, path in ipairs(ca_bundle_paths) do
-         local fh = io.open(path, "r")
-         if fh then
-            fh:close()
-            return path
-         end
-      end
+		for _, path in ipairs(ca_bundle_paths) do
+			local fh = io.open(path, "r")
+			if fh then
+				fh:close()
+				return path
+			end
+		end
+
+-- try and find bundled ca file next to exe
+		local ok,path=pcall( function()
+			local win=require("wetgenes.win")
+			local exe=win.get_exe_path()
+			local exe= exe:match("^(.*)%.[^%./\\]+$") or exe -- strip any extension
+			local path=exe..".cacert" -- try our gamecake.cacert
+			local fh = io.open(path, "r")
+			if fh then
+				fh:close()
+				return path
+			end
+		end)
+		if ok then return path end
+
       return nil, "no system CA bundle found:\n\tno file '" .. table.concat(ca_bundle_paths, "'\n\tno file '") .. "'"
    end
 end
