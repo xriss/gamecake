@@ -104,7 +104,8 @@ sprites.create=function(it,opts)
 		local batch={}
 		for idx,v in pairs(it.list) do
 		
-			local bleed=v.bleed or 0 -- optional pixel bleed, set to 1 if you plan on rotating without glitch
+			-- default to a small bleed, which helps on some gfx drivers
+			local bleed=v.bleed or 1/1024 -- optional pixel bleed, set to 1 ( maybe 0.5 ) if you plan on rotating/scaling without edge wrap glitch
 
 			local ixw=(v.tx*it.tile_hx+v.hx-bleed)/(it.tiles.hx)
 			local iyh=(v.ty*it.tile_hy+v.hy-bleed)/(it.tiles.hy)

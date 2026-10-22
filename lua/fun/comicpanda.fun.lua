@@ -380,14 +380,21 @@ scenes.setup=function(scene)
 	
 end
 
+local time=0
 scenes.update=function(scene)
 	if not scene.setup_done then scene:setup() end
 
+	time=time+1
+
+-- frame 138 sprite glitches
+--if time<138 then
 	for _,list in scene:lists_pairs() do
 		for idx=#list,1,-1 do -- backwards so safe to remove or add
 			list[idx]:update()
 		end
 	end
+--end
+
 end
 
 scenes.draw=function(scene)
