@@ -19,69 +19,74 @@ bitsynth.frequency=48000
 bitsynth.oversample=1
 bitsynth.samplerate=bitsynth.frequency*bitsynth.oversample-- number of samples per second we will deal with
 
---                     01   02   03   04   05   06   07   08   09   10   11   12
-bitsynth.note_names={ "C", "C#","D", "D#","E", "F", "F#","G", "G#","A", "A#","B"}
-for i=0,12 do
-	local s=bitsynth.note_names[i]
-	local c=s:sub(1,1)
-	if #s==2 then -- is sharp
-		bitsynth.note_names[ c:lower() ]=i -- lowercase
-		bitsynth.note_names[ c.."#"    ]=i
-		bitsynth.note_names[ c.."s"    ]=i
-	else
-		bitsynth.note_names[ c      ]=i -- uppercase
-		bitsynth.note_names[ c.."-" ]=i
-		bitsynth.note_names[ c.."_" ]=i
+bitsynth.note_names={ "C","C#","D","D#","E","F","F#","G","G#","A","A#","B"}
+bitsynth.note_freq={
+{ [4]=261.63 },
+{ [4]=277.18 },
+{ [4]=293.66 },
+{ [4]=311.13 },
+{ [4]=329.63 },
+{ [4]=349.23 },
+{ [4]=369.99 },
+{ [4]=392.00 },
+{ [4]=415.30 },
+{ [4]=440.00 },
+{ [4]=466.16 },
+{ [4]=493.88 },
+}
+for i,v in ipairs(bitsynth.note_freq) do -- build other octaves
+	v[1]=v[4]/8	v[2]=v[4]/4	v[3]=v[4]/2	v[5]=v[4]*2	v[6]=v[4]*4	v[7]=v[4]*8	v[8]=v[4]*16
+end
+bitsynth.note_freq_add={}
+for i=1,11 do
+	bitsynth.note_freq_add[i]={}
+	for j=1,8 do
+		bitsynth.note_freq_add[i][j]=bitsynth.note_freq[i+1][j] - bitsynth.note_freq[i][j]
 	end
 end
--- cache log of 2 as a constant
-local log_of_2=math.log(2)
-
--- midi notes to freq, based on 69 is A4 is 440 ( C4 is 60 )
-bitsynth.midi2freq=function(m)
-	return (2^((m−69)/12))*440
+bitsynth.note_freq_add[12]={}
+for j=1,7 do
+	bitsynth.note_freq_add[12][j]=bitsynth.note_freq[1][j+1] - bitsynth.note_freq[12][j]
 end
+bitsynth.note_freq_add[12][8]=0
 
--- convert a freq to a midi note
-bitsynth.freq2midi=function(f)
-	return 69+( 12 * ( math.log(f/440) / log_of_2 ) )
-end
-
--- convert a note string, eg C4 into a midi note
-bitsynth.note2midi=function(s,o)
-
-	if type(s)~="string" then -- we only convert strings
-		return s -- otherwise return number we are given
-	end 
-
-	if not o then -- look for octave
-		o=tonumber(s:sub(-1))
-		if o then
-			s=s:sub(1,-2)
-		else
-			o=tonumber(s:sub(1,1))
-			if o then
-				s=s:sub(2)
+-- use the above tables to turn a frequency into the closest note name
+bitsynth.freq2note=function(freq)
+	for i=1,8 do
+		if freq<=bitsynth.note_freq[12][i] + (bitsynth.note_freq_add[12][i]/2) then
+			for j=12,2,-1 do
+				if freq>bitsynth.note_freq[j-1][i] + (bitsynth.note_freq_add[j-1][i]/2) then
+					return bitsynth.note_names[j]..i
+				end
 			end
+			return bitsynth.note_names[1]..i
 		end
 	end
-	if not o then 0=4 end -- default octave
-	assert(type(o)=="number") -- unknown octave name
-
-	local n=bitsynth.note_names[ s ]
-	assert(type(n)=="number") -- unknown note name
-
-	return (n-1)+((o+1)*12) -- return midi note
 end
 
-bitsynth.note2freq=function(s,o)
-	local m=bitsynth.note2midi(s,o)
-	return bitsynth.midi2freq(m)
+-- use the above tables to turn a frequency into the closest note name
+bitsynth.note2freq=function(s,n)
+	if type(s)~="string" then return s end -- we only convert strings, otherwise return what we are given
+	
+	if not n then n=tonumber(s:sub(-1)) s=s:sub(1,-2) end -- allows "C",1 or "C1",nil
+
+	s=s:upper() -- note names are uppercase
+	for i=1,#bitsynth.note_names do
+		if s==bitsynth.note_names[i] then s=i break end
+	end
+	assert(type(s)=="number") -- unknown note name
+	return assert(bitsynth.note_freq[s][n]) -- check the range is ok as we return
+end
+
+-- get ratio of two notes, second note defaults to C4
+bitsynth.note2ratio=function(s1,s2)
+	local v1=bitsynth.note2freq(s1)
+	local v2=bitsynth.note2freq(s2 or bitsynth.C4)
+	return v1/v2
 end
 
 -- also add quick lookups of notes to bitsynth globals
 
---[[
 bitsynth.fillnotes=function(t)
 	for n=1,12 do
 		for o=1,8 do
@@ -99,28 +104,21 @@ bitsynth.fillnotes=function(t)
 end
 
 bitsynth.fillnotes(bitsynth) -- we can now use bitsynth.C4 or bitsynth.Cs4 or bitsynth.c4 which is easier than bitsynth["C#4"]
-]]
 
 -- create a rnd function
-bitsynth.randomise=function(seed)
+local randomise=function(seed)
 	local n=seed -- set the seed
 	return function() -- get the next number as a value between 0 and 1
 		n=(n*75)%65537
 		return (n-1)/65536
 	end
 end
-
-bitsynth.rnds={}
-bitsynth.rnd=bitsynth.randomise(437) -- a global random sequence
-for i=1,65536 do -- cache 64k set sequence
-	bitsynth.rnds=bitsynth.rnd()
-end
+bitsynth.rnd=randomise(437) -- a global random sequence
 
 -- repeating wave functions
 -- put in a value 0-1 and get out a single wave cycle that goes 0 1 0 -1 0 ish depending on wave
 bitsynth.fwav={}
 
--- wave functions that begin with f, return a wave function built with args
 bitsynth.fwav.f=function(f) -- auto lookup f if it is not already a function
 	if type(f)=="string" then f=bitsynth.fwav[f] end -- lookup function
 	if type(f)=="table" then f=bitsynth.fwav[f[1]](select(2,unpack(f))) end -- call wrapper
@@ -272,54 +270,55 @@ end
 			* *
 ]]
 bitsynth.fwav.fwhitenoise=function(steps,seed) -- steps is the number of values in a white noise wave cycle
+	local seeds={[0]=(seed or 437)} -- remember seed for *each* cycle
+	local getseed=function(t)
+		if not seeds[t] then -- need to work it out
+			local fillfrom=0
+			if seeds[t-1] then
+				fillfrom=t-1 -- have previous seed
+			else
+				for j=t,0,-1 do -- find closest seed we have
+					if seeds[j] then fillfrom=j break end
+				end
+			end
+			for i=fillfrom,t do -- fill in missing seeds
+				if not seeds[i] then
+					local n=seeds[i-1]
+					for j=1,steps do n=(n*75)%65537 end
+					seeds[i]=n
+				end
+			end
+		end
+		return seeds[t]
+	end
 	return function(t)
-		local idx=1+(math.floor((t*steps)+seed)%65536)
-		return bitsynth.rnds[idx]
+		local n=getseed(math.floor(t))
+		for j=0,math.floor((t%1)*steps) do n=(n*75)%65537 end
+		return ((n-1)/32768)-1
 	end
 end
 bitsynth.fwav.whitenoise=bitsynth.fwav.fwhitenoise(16,437) -- default whitenoise
 
--- create a wave duty function, this squishes a waves time
--- numbers are mid point and can be dragged left to 0 or right to 1
--- first number is middle of wave ( main duty )
--- second (optional) number is middle of left part of wave
--- second (optional) number is middle of right part of wave
-bitsynth.fwav.fduty=function(b,a,c)
-	-- defaults to middle of each section, half on half off
-	if not b then b=0.5 end
-	if not a then a=0.5 end
-	if not c then c=0.5 end
-	-- convert into wave time
-	local ta=b*a
-	local tb=b
-	local tc=1-((1-b)*c)
-	-- clamp
-	if ta<0 then ta=0 end ; if ta>1 then ta=1 end
-	if tb<0 then tb=0 end ; if tb>1 then tb=1 end
-	if tc<0 then tc=0 end ; if tc>1 then tc=1 end
 
-	local f=function(t)
-		t=t%1
-		if t==0 then return 0 end -- catch 0 and 1 prevents possible divide by 0
-		if     t<=ta then -- ta cant be 0
-			return (((t)/(ta))*0.25)
-		elseif t<=tb then -- tb cant be ta
-			return (((t-ta)/(tb-ta))*0.25)+0.25
-		elseif t<=tc then -- tc cant be tb
-			return (((t-tb)/(tc-tb))*0.25)+0.5
-		elseif t<1  then -- tc cant be 1
-			return (((t-tc)/(1 -tc))*0.25)+0.75
-		end
-		return 1 -- catch 1
+
+-- attempt at pink noise... a tad expensive and not as versatile as white
+--[[
+bitsynth.fwav.fpinknoise=function(steps,layers,seed) -- layers is the number of white noise samples we merge
+	local f=bitsynth.fwav.fwhitenoise(steps,seed)
+	return function(t)
+		local n=0
+		for i=1,layers do n=n+f(t*math.pow(2,i-1)) end
+		return n/layers
 	end
-	return f
 end
+bitsynth.fwav.pinknoise=bitsynth.fwav.fpinknoise(16,8,437)
+]]
 
 -- create an envelope function, could be used for waves as well if you wish but is rather slow with lots of points
 -- pass in a {t1,v1,t2,v2,t3,v3,...} table of points and we will linear interpolate between the values
 -- must be at least one point of data and each time value must be higher than the previous
 -- returns function of the following type -> value=function(time)
-bitsynth.fwav.flinear=function(...)
+bitsynth.flinear=function(...)
 	local tt={...}
 	local idx_max=#tt -- remember length
 	local tmin,vmin=tt[1],tt[2]
@@ -333,17 +332,16 @@ bitsynth.fwav.flinear=function(...)
 			if t1<=t and t2>=t then -- found it
 				local v2=tt[i+1]
 				local v1=tt[i-1]
-				if t1==t2 then return v1 end -- avoid /0
 				local s=(t-t1)/(t2-t1) -- 0==v1 1==v2
 				local v=v1+((v2-v1)*s) -- linear blend
 				return v
 			end
 		end
-		return 0
 	end
 	
 	return f
 end
+bitsynth.fwav.flinear=bitsynth.flinear -- expose to wave generator
 
 
 -- sv (value)   is sustain value ( 0 to 1 )
@@ -367,10 +365,22 @@ bitsynth.fadsr=function(sv,at,dt,st,rt)
 
 	return bitsynth.flinear( unpack(t) ),at+dt+st+rt
 end
-bitsynth.fwav.fadsr=bitsynth.fadsr -- expose to wave generator
-
 
 bitsynth.funcs={} -- reference by string and args
+
+-- turn a -1 +1 signal into a frequency signal -1==f1 0==f2 +1==f3 + t*t1
+bitsynth.funcs.freq_range=function(f1,f2,f3,t1)
+	if type(f1)=="table" then f1,f2,f3,t1=unpack(f1) end -- maybe unpack inputs from table
+	f1=bitsynth.note2freq(f1)
+	f2=bitsynth.note2freq(f2)
+	f3=bitsynth.note2freq(f3)
+	t1=t1 or 0
+	local f=function(m,t)
+		if m<0 then return f2+((f1-f2)*-m)+t*t1 end
+		return f2+((f3-f2)*m)+t*t1
+	end
+	return f
+end
 
 
 -- a wave generator, wraps a wave functions and handles wavelengths and phase sync with dynamic frequency change.
@@ -380,40 +390,36 @@ bitsynth.gwav=function(ot)
 	
 	it.fwav=bitsynth.fwav.f(ot.fwav or "sine") -- auto lookup function from string
 	
-	it.reset=function()
-		it.sample=0 -- last sample index ( it.sample/bitsynth.samplerate == time in seconds ), this is expected to only ever increase
-		it.frequency=0
-		it.wavelength=1
-		it.phase=0
-	end
-	it.reset()
+	it.sample=0 -- last sample index ( it.sample/bitsynth.samplerate == time in seconds ), this is expected to only ever increase
+	it.duty=ot.duty or 0.5
 
-	if ot.duty then -- duty adjust
-		if type(ot.duty)=="table" then
-			it.duty=bitsynth.duty(unpack(ot.duty))
+-- adjust the frequency but keep the wave at a stable point.
+	it.set_frequency=function(f)
+		if f<0 then f=-f end
+		if f==0 then
+			it.frequency=0
+			it.wavelength=1
+			it.phase=0
 		else
-			it.duty=bitsynth.duty(ot.duty)
+			local old_phase=((it.sample/it.wavelength)+it.phase)%1 -- this is the current phase position, we want to keep it here when we change frequency
+			it.frequency=f
+			it.wavelength=bitsynth.samplerate/it.frequency 
+			local new_phase=(it.sample/it.wavelength)%1 -- this is the unadjusted new base phase for the current sample point in time
+			it.phase=(old_phase-new_phase)%1 -- this adjusts it to what it was before
+			while it.phase<0 do it.phase=it.phase+1 end -- make sure phase is not a negative value
 		end
 	end
-
--- adjust the note frequency but keep the wave at a stable point in its cycle.
-	it.set_note=function(note)
-		local old_phase=((it.sample/it.wavelength)+it.phase)%1 -- this is the current phase position, we want to keep it here when we change frequency
-		it.note=note -- midi number, probably an int but may not be
-		it.frequency=bitsynth.midi2freq(note)
-		it.wavelength=bitsynth.samplerate/it.frequency
-		local new_phase=(it.sample/it.wavelength)%1 -- this is the unadjusted new base phase for the current sample point in time
-		it.phase=(old_phase-new_phase)%1 -- this adjusts it to what it was before
-		while it.phase<0 do it.phase=it.phase+1 end -- make sure phase is not a negative value
-	end
-	it.basenote=ot.note or 60
-	it.set_note( it.basenote ) -- start at this midi note
-
+	it.set_frequency(0) -- reset
+	it.set_frequency( bitsynth.note2freq(ot.frequency) or bitsynth.C4 ) -- start at this frequency
 -- read a sample, and advance the sample counter by one.
 	it.read=function()
 		local t=(it.sample/it.wavelength)+it.phase
-		if it.duty then
-			t=math.floor(t)+it.duty(t) -- adjust t by duty
+		if it.duty~=0.5 then -- only if not default duty
+			local ta=math.floor(t)
+			local tb=(t-ta)
+			if tb<it.duty then 		tb=      tb *(0.5/   it.duty)	-- i think we are /0 safe here...
+			else					tb=1-((1-tb)*(0.5/(1-it.duty)))	end
+			t=ta+tb
 		end
 		local v=it.fwav(t)
 		it.sample=it.sample+1
@@ -425,7 +431,7 @@ end
 
 
 -- prepare a generator to render from the options table (ot)
--- most basic sound, nothing clever just a waveform and a volume envelope with optional modulation
+-- most basic sound, nothing clever just a waveform and a volume envelope with optional FM
 bitsynth.prepare=function(ot)
 	local it={ot=ot}
 	
@@ -446,6 +452,9 @@ bitsynth.prepare=function(ot)
 
 	it.volume=ot.volume or 1 -- render volume
 	
+	-- we call a function to return a bound function or use a default empty one
+	it.fread=fbind(ot.fread) or function(t) end
+
 	it.gwav=bitsynth.gwav(ot) -- base wave
 
 	if ot.fadsr then
@@ -454,19 +463,30 @@ bitsynth.prepare=function(ot)
 		it.fadsr,it.time=bitsynth.fadsr(ot.adsr) -- or data table
 	end
 	
+	if ot.fm then -- fm table flags fm actions
+
+		it.fm_gwav=bitsynth.gwav(ot.fm) -- run another wave as fm input
+
+		-- we call a function to return a bound function or use a default empty one
+		it.fm_ffreq=fbind(ot.fm.ffreq) or function(v,s) return it.gwav.frequency end
+		
+	end
+
+
 	it.samples=it.time*bitsynth.samplerate
 	it.sample=0
 	it.read=function()
+		local t=it.sample/bitsynth.samplerate
+		
+		it.fread(t) -- main callback can change other settings by time
 
 		-- using frequency modulation?
-		for i,v in ipairs(it) do -- update sub waves and ourselves
-			if v.update then v.update(v) end
-		end
-		if it.update then
-			it.update(it) -- main callback
+		if it.fm_gwav then
+			local m=it.fm_gwav.read() -- get the modulation value
+			it.gwav.set_frequency( it.fm_ffreq(m,t) ) -- function decides how it changes the frequency
 		end
 
-		local e=it.fadsr( it.sample/bitsynth.samplerate ) -- envelope
+		local e=it.fadsr(t) -- envelope
 		local w=it.gwav.read() -- waveform
 
 		it.sample=it.sample+1
@@ -474,12 +494,6 @@ bitsynth.prepare=function(ot)
 	end
 
 	it.rewind=function() it.sample=0 end
-
-	for i,v in ipairs(ot) do -- init sub waves
-		it[i]=bitsynth.gwav(ot[i])
-		it[i].idx=i
-		it[i].parent=it
-	end
 
 	return it
 end
