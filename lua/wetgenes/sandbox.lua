@@ -334,3 +334,85 @@ sandbox.save_ini = function(tab)
 
 	return table.concat(ret)
 end
+
+
+-- exposed math for expression (safeish) to include in your env if you wish
+sandbox.expression_math={
+	abs=math and math.abs,
+	acos=math and math.acos,
+	asin=math and math.asin,
+	atan=math and math.atan,
+	atan2=math and math.atan2,
+	ceil=math and math.ceil,
+	cos=math and math.cos,
+	cosh=math and math.cosh,
+	deg=math and math.deg,
+	exp=math and math.exp,
+	floor=math and math.floor,
+	fmod=math and math.fmod,
+	frexp=math and math.frexp,
+	huge=math and math.huge,
+	ldexp=math and math.ldexp,
+	log=math and math.log,
+	log10=math and math.log10,
+	max=math and math.max,
+	min=math and math.min,
+	modf=math and math.modf,
+	pi=math and math.pi,
+	pow=math and math.pow,
+	rad=math and math.rad,
+--	random=math and math.random, -- should replace with sandboxed versions
+--	randomseed=math and math.randomseed, -- should replace with sandboxed versions
+	sin=math and math.sin,
+	sinh=math and math.sinh,
+	sqrt=math and math.sqrt,
+	tan=math and math.tan,
+	tanh=math and math.tanh,
+}
+
+-- run a lua expression string with the given environment
+-- env is optional and we will put a math table in it for sin etc
+-- expression is not 100% safe, env may be altered ? not sure
+-- we expose a math table and strings have an auto meta table 
+-- so can easily force a oom crash with ("a"):rep(bignumber)
+-- i don't think you can force a stuck loop, but maybe you can
+-- returns nil on string error , unless err is set
+-- then we will try and assert on string errors
+sandbox.expression = function(s,env,lib,err)
+	local f,err=loadstring("return "..s)
+	if f then
+		if env then
+			if lib then -- force math lib
+				env.math=sandbox.expression_math
+			end
+			setfenv(f,env)
+		end
+		local results={ pcall(f) }
+		if results[1] then
+			return unpack(results,2)
+		end
+		if err then assert( unpack(results) ) end -- we want call errors
+	else
+		if err then assert( f,err ) end -- we want load errors
+	end
+end
+
+-- load and run the string using the given env
+-- exposing basic lua functions ( safe ish )
+sandbox.load_and_run = function(str,env)
+
+	if not env then
+		env=local_make_env_safe() -- fresh env
+	else
+		for n,v in pairs( local_make_env_safe() ) -- fill env
+			env[n]=env[n] or v
+		end
+	end
+
+	local f=assert(loadstring(str))
+	setfenv(f,env)
+
+	assert(pcall(f))
+	
+	return env
+end
