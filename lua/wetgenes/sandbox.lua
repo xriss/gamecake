@@ -404,7 +404,7 @@ sandbox.load_and_run = function(str,env)
 	if not env then
 		env=local_make_env_safe() -- fresh env
 	else
-		for n,v in pairs( local_make_env_safe() ) -- fill env
+		for n,v in pairs( local_make_env_safe() ) do -- fill env
 			env[n]=env[n] or v
 		end
 	end

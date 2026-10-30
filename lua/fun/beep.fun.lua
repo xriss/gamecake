@@ -7,6 +7,9 @@
 --local note2freq = require("wetgenes.gamecake.fun.bitsynth").note2freq
 --local fwav = require("wetgenes.gamecake.fun.bitsynth").fwav
 
+
+--[=[
+
 local midinote_to_freq=function(m)
 	return (2^((m-69)/12))*440
 end
@@ -400,6 +403,39 @@ fm={
 }
 
 
+]=]
+
+
+beeps={}
+
+beeps["1"]={
+
+	lua=[=[
+
+genes = {
+	function() return wave_sine end,
+	function() return wave_sine end,
+	function() return wave_sine end,
+}
+
+note = 48
+
+notes = {
+	function() return 0 end,
+	function() return note end,
+	function() return note+(results[1]*0.1) end,
+}
+
+adsr , length = gene_ladsr( 0.9 ,   0.1 , 0.21 ,   2 , 0.1 )
+
+result = function()
+	return ((results[3]+results[3])/2)*adsr(time)
+end
+
+	]=],
+}
+
+
 oven.opts.fun="" -- back to menu on reset
 hardware,main=system.configurator({
 	mode="fun64", -- select the standard 320x240 screen using the swanky32 palette.
@@ -416,15 +452,12 @@ setup=function()
 --    system.components.screen.bloom=0
 --    system.components.screen.filter=nil
 --    system.components.screen.shadow=nil
-    
-    
-    local scsfx=system.components.sfx
-    local bitsynth=scsfx.bitsynth
 
+    local csfx=system.components.sfx
 
     for n,v in pairs(beeps) do 
 		v.name=n
-		scsfx.render(v)
+		csfx.render(v)
     end
 
     print("Setup complete!")
@@ -440,7 +473,8 @@ msg=function(m)
 	    local csfx=system.components.sfx
 	    local s=beeps[m.keyname]
 	    if s then
-		csfx.play(s.name,1,1.0)
+PRINT(s.name)
+			csfx.play(s.name,1,1.0)
 	    end
 	end
     end

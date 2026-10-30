@@ -40,7 +40,7 @@ local log_of_2=math.log(2)
 
 -- midi notes to freq, based on 69 is A4 is 440 ( C4 is 60 )
 bitsynth.note_to_freq=function(m,standard)
-	return (2^((m−69)/12))*(standard or 440)
+	return (2^((m-69)/12))*(standard or 440)
 end
 
 -- convert a freq to a midi note
@@ -151,7 +151,7 @@ bitsynth.render_prepare=function(env)
 	env.time = 0
 
 	-- length of output in samples (how much will be statically rendered)
-	env.length = env.length or 48000
+	env.length = env.length or 1
 
 	-- base note
 	env.note   = env.note   or 60
@@ -173,11 +173,12 @@ bitsynth.render_prepare=function(env)
 		sbox.load_and_run( env.lua , env )
 	end
 	
-	env.cycles={}
-	env.results={}
-	env.notes={}
+	-- these may be preset in env or lua
+	env.results=env.results or {}
+	env.notes=env.notes or {}
 	
-	-- start new cycles
+	env.cycles={} -- must reset cycles
+	-- and start new cycles
 	if env.genes then
 		for i=1,#env.genes do
 			env.cycles[i]=bitsynth.cycle(env,env.genes[i])
@@ -194,7 +195,7 @@ bitsynth.render_next=function(env)
 		-- possibly change wavelength using midi notes
 		local note=env.notes[i]
 		if note then
-			while type(note)=="string" do note=env[note] end -- auto string
+			while type(note)=="string" do note=env[note] end -- auto string lookup
 			if type(note)=="function" then note=note() end -- auto call
 			if type(note)=="number" then
 				env.cycles[i].stretch(
@@ -207,19 +208,19 @@ bitsynth.render_next=function(env)
 
 	-- get result
 	local result="result"
-	while type(result)=="string" do result=env[resuly] end -- auto string
+	while type(result)=="string" do result=env[result] end -- auto string lookup
 	if type(result)=="function" then result=result() end -- auto call
 	if type(result)=="number" then
 		return result
 	end
-	return 0
+--	return 0
 end
 
 bitsynth.render=function(env)
 	-- render to array of numbers
 	env.time=0
 	local dat={}
-	for i=1,env.length do
+	for i=1,math.ceil(env.length*bitsynth.samplerate) do
 		env.time=i/bitsynth.samplerate -- time in seconds
 		dat[i]=bitsynth.render_next(env)
 	end
@@ -274,9 +275,8 @@ bitsynth.task_code=function()
 			
 			local env=bitsynth.render_prepare(data.env)
 			local floats=bitsynth.render(env)
-			local ints=bitsynth.float_to_16bit(tt)
+			local ints=bitsynth.float_to_16bit(floats)
 			local words=fats.table_to_int16s(ints)
-
 			result.dat=words -- return 16bit data string from bitsynth
 		end
 	

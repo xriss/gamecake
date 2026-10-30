@@ -59,11 +59,13 @@ end
 genes.gene_attack=function(sv,at,dt)
 	return function(t)
 		if t<=0 then return 0 end
-		if t<=av then return (t/at) end
-		if t<=av+dt then return sv+(((t-at)/dt)*(1-sv)) end
+		if t<=at then return (t/at) end
+		if t<=at+dt then return sv+(((t-at)/dt)*(1-sv)) end
 		return sv
 	end
 end
+
+
 -- st (sustain) is time to stay at 1
 -- rt (release) is time to reach 0
 -- times are lengths not absolutes
@@ -76,18 +78,18 @@ genes.gene_release=function(st,rt)
 end
 
 -- combine attack and release together to get a full adsr signal
-genes.gene_adsr=function(sv,at,dt,st,rt)
+genes.gene_ladsr=function(sv,at,dt,st,rt)
 	local a=genes.gene_attack(sv,at,dt)
-	local r=genes.gene_release(st,rt)
-	return function(t) return a(t)*b(t) end
+	local b=genes.gene_release(st,rt)
+	return function(t) return a(t)*b(t) end , st+rt
 end
 
 -- create a simple rnd function, no input just next in sequence out
 genes.gene_randomise=function(seed)
 	local n=seed -- set the seed
-	return function() -- get the next number as a value between 0 and 1
+	return function() -- get the next number as a value between 0 and 1 inclusive
 		n=(n*75)%65537
-		return (n-1)/65536
+		return (n-1)/65535
 	end
 end
 
@@ -100,7 +102,7 @@ end
 
 genes.rnds={} -- cache
 do
-	local rnd=genes.randomise(437)
+	local rnd=genes.gene_randomise(437)
 	for i=1,65536 do -- cache 64k set sequence
 		genes.rnds[i]=rnd()
 	end
@@ -109,9 +111,11 @@ end
 -- cache a bit chunk of random and index it
 
 genes.gene_whitenoise=function(steps,seed) -- steps is the number of values in a white noise wave cycle
+	steps=steps or 2 -- two gives a square wave cycle for the given frequency
+	seed=seed or 0
 	return function(t)
 		local idx=1+(math.floor((t*steps)+seed)%65536)
-		return genes.rnds[idx]
+		return (genes.rnds[idx]*2)-1
 	end
 end
 

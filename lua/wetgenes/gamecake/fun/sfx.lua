@@ -38,21 +38,24 @@ sfx.create=function(it,opts)
 
 	it.bitsynth=bitsynth
 
-	it.render=function(ot) -- render a bitsynth sound
+	it.render=function(env) -- render a bitsynth sound
 		local memo = wire.memo({
 			fifo=wire.fifo("bitsynth"),
 			data={
 				action="bitsynth",
-				ot=ot, -- bitsynth options table
+				env=env, -- bitsynth options table
 			},
 		}):send()
 		local result=function()
-			if memo.result.fail then
-				error(memo.result.fail)
+PRINT("memo",memo.result)
+			if memo.result then
+				if memo.result.fail then
+					error(memo.result.fail)
+				end
+				return memo.result.dat
 			end
-			return memo.result.dat
 		end
-		return sounds.lazyload_wavtab( result, ot.name , bitsynth.frequency )
+		return sounds.lazyload_wavtab( result, env.name , bitsynth.frequency )
 	end
 
 	it.get=function(name)
