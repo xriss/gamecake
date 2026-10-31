@@ -13,12 +13,11 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 local bitsynth=M
 M.old=require("wetgenes.gamecake.fun.bitsynth_old") -- the bad old ways
 
+bitsynth.samplerate=48000
+
 bitsynth.genes=require("wetgenes.gamecake.fun.bitsynth_genes")
 local genes=bitsynth.genes
 
-bitsynth.frequency=48000
-bitsynth.oversample=1
-bitsynth.samplerate=bitsynth.frequency*bitsynth.oversample-- number of samples per second we will deal with
 
 --                     01   02   03   04   05   06   07   08   09   10   11   12
 bitsynth.note_names={ "C", "C#","D", "D#","E", "F", "F#","G", "G#","A", "A#","B"}
@@ -140,6 +139,14 @@ bitsynth.render_prepare=function(env)
 			env[n]=env[n] or v
 		end
 	end
+			
+	-- env.lua is a string to init code with inside env
+	-- when called this should reset the sound
+	if env.lua then
+		-- code is mildly sandboxed, may crash if it wants too
+		-- but probably cant escape significantly
+		sbox.load_and_run( env.lua , env )
+	end
 	
 	-- current time in seconds
 	env.time = 0
@@ -150,18 +157,7 @@ bitsynth.render_prepare=function(env)
 
 	-- base note
 	env.note   = env.note   or 60
-	
-	-- cache sample rate for easy access
-	env.samplerate = bitsynth.samplerate
-	
-	-- env.lua is a string to init code with inside env
-	-- when called this should reset the sound
-	if env.lua then
-		-- code is mildly sandboxed, may crash if it wants too
-		-- but probably cant escape significantly
-		sbox.load_and_run( env.lua , env )
-	end
-	
+
 	-- these may be preset in env or lua but we force table existence
 	env.notes=env.notes or {}
 	

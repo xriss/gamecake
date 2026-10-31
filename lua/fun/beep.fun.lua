@@ -417,28 +417,45 @@ time = 0
 
 note = note or 48
 
+sine=gene_sine()
+square=gene_square()
+
 wave_vib  = function() return sine(cycles[1])*0.5 end
+--wave_base = function() return (sine(cycles[2])+square(cycles[2]))/2 end
 wave_base = function() return sine(cycles[2]) end
 
-release=gene_release(1,1)
+release=gene_release(0,1)
 
 note_decay= function( a , b )
 	return b + ( (a-b) * release(time) )
 end
 
 notes = {
-	function() return note_decay(12,-48) end,
-	function() return note+wave_vib() end,
+	function() return note_decay(-60,-90) end,
+	function() return note end,
 }
+
+delay_time=0.01
+delay_echo=gene_delay( delay_time , function(get)
+	return
+		( get( 0                ) * 1.0 ) +
+		( get( 0.2 * delay_time ) * 0.8 ) +
+		( get( 0.4 * delay_time ) * 0.6 ) +
+		( get( 0.6 * delay_time ) * 0.4 ) +
+		( get( 0.8 * delay_time ) * 0.2 )
+end)
+length=length+delay_time
 
 result = function()
 
-	return smooth_clip(
-		adsr(time) *
+	local ret = 0.75 * adsr(time) *
 		(
 			( wave_base() * 1.0 )
 		)
-	)
+	
+--	return smooth_clip( delay_echo(ret) , 1.0 )
+--	return delay_echo(ret)
+	return ret
 
 end
 

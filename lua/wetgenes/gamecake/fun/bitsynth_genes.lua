@@ -8,6 +8,7 @@ local tau=math.pi*2
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local genes=M
 
+genes.samplerate=48000
 
 -- smooth clip a float of any value to between -1 and +1
 -- waves will be deformed progressively and never reach +1-1
@@ -24,6 +25,33 @@ genes.smooth_clip=function(n,c)
 	end
 end
 
+-- create a delay filter, tlen is size of delay buffer
+-- fout is function that samples the buffer and produces an output
+-- read is function that samples the buffer at given time
+genes.gene_delay=function(tlen,fout)
+	local buf={}
+	local len=math.ceil(tlen*genes.samplerate)
+	for i=1,len do buf[i]=0 end -- empty
+	local base=0
+	local get=function(t) -- t is time from now into the past
+		local f=t*genes.samplerate
+		local i=math.floor(f)
+		f=f-i
+		if i<0 then i=0 end
+		if i>(len-1) then i=(len-1) end
+--		return buf[ 1+((base+i)%len) ]
+		local j=i+1
+		if j>(len-1) then j=(len-1) end
+		local a=buf[ 1+((base+i)%len) ]
+		local b=buf[ 1+((base+j)%len) ]
+		return b*f + a*(1-f)
+	end
+	return function(v)
+		base=(base+len-1)%len
+		buf[1+base]=v
+		return fout(get) -- get output
+	end
+end
 
 -- utility and wave/gene functions
 -- gene functions create and return a wave function
