@@ -93,31 +93,15 @@ end
 bitsynth.dupe=dupe
 
 
--- wrap a gene into a cycle , pulling out 1 sample at a time
--- provides a way to smoothly stretch a waves length over time
--- wave has its cycle passed in second param
--- so the wave functions can auto regen if it is dynamic
-bitsynth.cycle=function(env,gene)
+-- provides a 0-1 cycle of the given sample length
+-- sample length can be changed dynamically changed
+bitsynth.cycle=function(length)
 	local it={}
 	
-	it.idx=0 -- cycle array index
-	
+	it.value=0 -- current value	
 	it.sample=0 -- current sample we are rendering
-	it.length=1024 -- length in samples , does not have to be an integer
-	it.phase=0
-
-	it.env=env -- shared env between waves
-	it.gene=gene -- wave generator function or string to lookup in env
-
--- calling regenerate dynamically can change its own wave
-	it.regenerate=function(t)
-		local f=it.gene
-		while type(f)=="string" do f=it.env[f] end -- auto string
-		assert( type(f)=="function" ) -- wave must be function
-		it.wave=f(t) or it.wave -- generate wave function, use old wave on nil
-		assert( type(it.wave)=="function" ) -- wave must be function
-	end
-	it.regenerate(0) -- first gene is 0
+	it.length=length -- length in samples , does not have to be an integer
+	it.phase=0 -- adjustment
 
 -- stretch the waves length but stay at the same point in its cycle, using phase.
 	it.stretch=function(length)
@@ -132,7 +116,9 @@ bitsynth.cycle=function(env,gene)
 -- returns the next sample and advances sample by 1
 	it.next=function()
 		it.sample=it.sample+1
-		return it.wave( (it.sample/it.length)+it.phase , it )
+		if it.sample>it.length then it.sample=it.sample-it.length end
+		it.value = ((it.sample/it.length)+it.phase)%1
+		return it.value
 	end
 
 	return it
@@ -145,66 +131,72 @@ end
 -- must pass in env.result for output
 bitsynth.render_prepare=function(env)
 
+	-- a clean new env
 	env=dupe(env)
+
+	-- auto load base gene functions into env
+	for n,v in pairs(genes) do
+		if type(v)~="table" then -- do not copy tables
+			env[n]=env[n] or v
+		end
+	end
 	
 	-- current time in seconds
 	env.time = 0
 
-	-- length of output in samples (how much will be statically rendered)
+	-- length of output in seconds
 	env.length = env.length or 1
+	-- rendering auto ends after this much time
 
 	-- base note
 	env.note   = env.note   or 60
 	
 	-- cache sample rate for easy access
 	env.samplerate = bitsynth.samplerate
-
-	-- load base gene functions into env
-	for n,v in pairs(genes) do
-		if type(v)=="function" then
-			env[n]=env[n] or v
-		end
-	end
 	
 	-- env.lua is a string to init code with inside env
-	-- code mis mildly sandboxed, may crash if it wants too
-	-- but probably cant escape significantly
+	-- when called this should reset the sound
 	if env.lua then
+		-- code is mildly sandboxed, may crash if it wants too
+		-- but probably cant escape significantly
 		sbox.load_and_run( env.lua , env )
 	end
 	
-	-- these may be preset in env or lua
-	env.results=env.results or {}
+	-- these may be preset in env or lua but we force table existence
 	env.notes=env.notes or {}
 	
-	env.cycles={} -- must reset cycles
+	env._cycles={} -- reset cycles (internal objects)
+	env.cycles={} -- current cycle values
 	-- and start new cycles
-	if env.genes then
-		for i=1,#env.genes do
-			env.cycles[i]=bitsynth.cycle(env,env.genes[i])
-			env.cycles[i].idx=i
-			env.results[i]=0 -- init results to 0
-		end
-	end
+	bitsynth.render_cycles(env)
 	
 	return env
 end
 
-bitsynth.render_next=function(env)
-	for i=1,#env.cycles do		
-		-- possibly change wavelength using midi notes
+bitsynth.render_cycles=function(env)
+	for i=1,#env.notes do		
+		-- create/change cycle wavelength using midi notes
 		local note=env.notes[i]
 		if note then
+			if not env._cycles[i] then -- create new cycle
+				env._cycles[i]=bitsynth.cycle(1024)
+			end
 			while type(note)=="string" do note=env[note] end -- auto string lookup
 			if type(note)=="function" then note=note() end -- auto call
 			if type(note)=="number" then
-				env.cycles[i].stretch(
+				env._cycles[i].stretch(
 					bitsynth.samplerate/bitsynth.note_to_freq(note)
 				)
 			end
 		end
-		env.results[i]=env.cycles[i].next() -- remember result
+		env.cycles[i]=env._cycles[i].next() -- remember result
 	end
+end
+
+bitsynth.render_next=function(env)
+
+	-- advance cycles
+	bitsynth.render_cycles(env)
 
 	-- get result
 	local result="result"
@@ -213,7 +205,9 @@ bitsynth.render_next=function(env)
 	if type(result)=="number" then
 		return result
 	end
---	return 0
+
+	-- default
+	return 0
 end
 
 bitsynth.render=function(env)
@@ -221,7 +215,7 @@ bitsynth.render=function(env)
 	env.time=0
 	local dat={}
 	for i=1,math.ceil(env.length*bitsynth.samplerate) do
-		env.time=i/bitsynth.samplerate -- time in seconds
+		env.time=i/bitsynth.samplerate -- render time in seconds
 		dat[i]=bitsynth.render_next(env)
 	end
 	return dat

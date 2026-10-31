@@ -412,24 +412,34 @@ beeps["1"]={
 
 	lua=[=[
 
-genes = {
-	function() return wave_sine end,
-	function() return wave_sine end,
-	function() return wave_sine end,
-}
+adsr , length = gene_ladsr( 0.5 ,   0.2 , 0.4 ,   2 , 0.1 )
+time = 0
 
-note = 48
+note = note or 48
+
+wave_vib  = function() return sine(cycles[1])*0.5 end
+wave_base = function() return sine(cycles[2]) end
+
+release=gene_release(1,1)
+
+note_decay= function( a , b )
+	return b + ( (a-b) * release(time) )
+end
 
 notes = {
-	function() return 0 end,
-	function() return note end,
-	function() return note+(results[1]*0.1) end,
+	function() return note_decay(12,-48) end,
+	function() return note+wave_vib() end,
 }
 
-adsr , length = gene_ladsr( 0.9 ,   0.1 , 0.21 ,   2 , 0.1 )
-
 result = function()
-	return ((results[3]+results[3])/2)*adsr(time)
+
+	return smooth_clip(
+		adsr(time) *
+		(
+			( wave_base() * 1.0 )
+		)
+	)
+
 end
 
 	]=],

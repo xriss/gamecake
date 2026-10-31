@@ -8,6 +8,23 @@ local tau=math.pi*2
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local genes=M
 
+
+-- smooth clip a float of any value to between -1 and +1
+-- waves will be deformed progressively and never reach +1-1
+-- uses a simple n=n/(n+c) deform, c being a small constant
+-- sign fixed and with any amplification removed
+genes.smooth_clip=function(n,c)
+	c=c or 1
+	if n<0 then
+		if (n-c)>-1 then return n end -- do not amplify
+		return -n/(n-c)
+	else
+		if (n+c)< 1 then return n end -- do not amplify
+		return  n/(n+c)
+	end
+end
+
+
 -- utility and wave/gene functions
 -- gene functions create and return a wave function
 -- wave functions take (time) and return a wave (probably)
@@ -60,7 +77,7 @@ genes.gene_attack=function(sv,at,dt)
 	return function(t)
 		if t<=0 then return 0 end
 		if t<=at then return (t/at) end
-		if t<=at+dt then return sv+(((t-at)/dt)*(1-sv)) end
+		if t<=at+dt then return 1-(((t-at)/dt)*(1-sv)) end
 		return sv
 	end
 end
@@ -131,8 +148,12 @@ end
 			   ***
 
 ]]
-genes.wave_sine=function(t)
-	return math.sin( (t%1) * tau  )
+genes.gene_sine=function(s)
+	s=s or 1
+	return function(t)
+		t=t*s
+		return math.sin( (t%1) * tau  )
+	end
 end
 
 --[[
@@ -146,12 +167,16 @@ end
 			   * *
 	            *
 ]]
-genes.wave_triangle=function(t)
-	t=t%1
-	if     t<0.25 then return t*4
-	elseif t<0.50 then return 1-((t-0.25)*4)
-	elseif t<0.75 then return (t-0.5)*-4
-	else               return ((t-0.75)*4)-1
+genes.gene_triangle=function(s)
+	s=s or 1
+	return function(t)
+		t=t*s
+		t=t%1
+		if     t<0.25 then return t*4
+		elseif t<0.50 then return 1-((t-0.25)*4)
+		elseif t<0.75 then return (t-0.5)*-4
+		else               return ((t-0.75)*4)-1
+		end
 	end
 end
 
@@ -166,8 +191,12 @@ end
 			***
 
 ]]
-genes.wave_sawtooth=function(t)
-	return (((t+0.5)%1)*2)-1
+genes.gene_sawtooth=function(s)
+	s=s or 1
+	return function(t)
+		t=t*s
+		return (((t+0.5)%1)*2)-1
+	end
 end
 
 --[[
@@ -181,8 +210,12 @@ end
 				  ***
 
 ]]
-genes.wave_toothsaw=function(t)
-	return ((t%1)*-2)+1
+genes.gene_toothsaw=function(s)
+	s=s or 1
+	return function(t)
+		t=t*s
+		return ((t%1)*-2)+1
+	end
 end
 
 --[[
@@ -196,9 +229,13 @@ end
 			*********
 
 ]]
-genes.wave_square=function(t)
-	if (t%1)>=0.5 then return -1 end 
-	return 1
+genes.gene_square=function(s)
+	s=s or 1
+	return function(t)
+		t=t*s
+		if (t%1)>=0.5 then return -1 end 
+		return 1
+	end
 end
 
 
