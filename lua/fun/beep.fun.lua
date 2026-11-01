@@ -412,50 +412,55 @@ beeps["1"]={
 
 	lua=[=[
 
-adsr , length = gene_ladsr( 0.5 ,   0.2 , 0.4 ,   2 , 0.1 )
+sustain_length=2
+release_length=0.1
+delay_length=0.25
+
+delay=gene_delay( delay_length , function(get)
+	return	( get( 0                    ) * 1.0  ) +
+			( get( 0.5   * delay_length ) * 0.5  ) +
+			( get( 1.0   * delay_length ) * 0.25 )
+end)
+
+release=function(t)
+	if t<=sustain_length then return 1 end
+	if t<=sustain_length+release_length then return 1-((t-sustain_length)/release_length) end
+	return 0
+end
+attack=gene_attack( 0.5 , 0.2 , 0.4 )
+
 time = 0
 
 note = note or 48
 
 sine=gene_sine()
 square=gene_square()
+triangle=gene_triangle()
+sawtooth=gene_sawtooth()
+toothsaw=gene_toothsaw()
+whitenoise=gene_whitenoise(256)
 
-wave_vib  = function() return sine(cycles[1])*0.5 end
---wave_base = function() return (sine(cycles[2])+square(cycles[2]))/2 end
-wave_base = function() return sine(cycles[2]) end
+wave_vib  = function() return sine(cycles[1])*3 end
+wave_base = function() return (sine(cycles[2])+square(cycles[2]))/2 end
+wave_base = function() return whitenoise(cycles[2]) end
 
-release=gene_release(0,1)
-
-note_decay= function( a , b )
-	return b + ( (a-b) * release(time) )
+vib_note_sweep= function( a , b , len )
+	return b + ( (a-b) * (gene_release( 0 , len ))(time) )
 end
 
 notes = {
-	function() return note_decay(-60,-90) end,
-	function() return note end,
+	function() return vib_note_sweep(12,-36,1) end,
+	function() return note+wave_vib() end,
 }
-
-delay_time=0.01
-delay_echo=gene_delay( delay_time , function(get)
-	return
-		( get( 0                ) * 1.0 ) +
-		( get( 0.2 * delay_time ) * 0.8 ) +
-		( get( 0.4 * delay_time ) * 0.6 ) +
-		( get( 0.6 * delay_time ) * 0.4 ) +
-		( get( 0.8 * delay_time ) * 0.2 )
-end)
-length=length+delay_time
 
 result = function()
 
-	local ret = 0.75 * adsr(time) *
+	local ret = 0.5 * attack(time) * release(time) *
 		(
 			( wave_base() * 1.0 )
 		)
 	
---	return smooth_clip( delay_echo(ret) , 1.0 )
---	return delay_echo(ret)
-	return ret
+	return delay(ret)
 
 end
 

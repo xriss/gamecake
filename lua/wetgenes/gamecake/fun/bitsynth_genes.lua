@@ -12,17 +12,34 @@ genes.samplerate=48000
 
 -- smooth clip a float of any value to between -1 and +1
 -- waves will be deformed progressively and never reach +1-1
--- uses a simple n=n/(n+c) deform, c being a small constant
--- sign fixed and with any amplification removed
-genes.smooth_clip=function(n,c)
-	c=c or 1
+-- uses n=n^2/(n^2+0.25) to squish
+-- signal is untouched until 0.5 then gets squished
+-- this will square off louder waves but is not as instantly harsh as clipping
+genes.smooth_clip=function(n)
 	if n<0 then
-		if (n-c)>-1 then return n end -- do not amplify
-		return -n/(n-c)
+		if n>-0.5 then return n end -- linear
+		return -n*n/(n*n+0.25) -- squish
 	else
-		if (n+c)< 1 then return n end -- do not amplify
-		return  n/(n+c)
+		if n<0.5 then return n end -- linear
+		return  n*n/(n*n+0.25) -- squish
 	end
+end
+
+-- blend between a and b by w clamped.
+-- w is a wave so -1 is a and +1 is b
+genes.blend=function(a,b,w)
+	local f=(w*0.5)+0.5
+	if f<0 then f=0 end
+	if f>1 then f=1 end
+	return a*(1-f) + b*f
+end
+
+-- mix between a and b by f clamped.
+-- f is a fraction so 0 is a and 1 is b
+genes.mix=function(a,b,f)
+	if f<0 then f=0 end
+	if f>1 then f=1 end
+	return a*(1-f) + b*f
 end
 
 -- create a delay filter, tlen is size of delay buffer
@@ -31,6 +48,7 @@ end
 genes.gene_delay=function(tlen,fout)
 	local buf={}
 	local len=math.ceil(tlen*genes.samplerate)
+	if len<1 then len=1 end
 	for i=1,len do buf[i]=0 end -- empty
 	local base=0
 	local get=function(t) -- t is time from now into the past

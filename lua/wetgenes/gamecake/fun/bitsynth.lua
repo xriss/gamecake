@@ -152,10 +152,13 @@ bitsynth.render_prepare=function(env)
 	env.time = 0
 
 	-- length of output in seconds
-	env.length = env.length or 1
-	-- rendering auto ends after this much time
+	env.sustain_length = env.sustain_length or 1	-- may be dynamic 
+	env.release_length = env.release_length or 0	-- note off release time
+	env.delay_length   = env.delay_length   or 0	-- optional delay filter
+	-- if a note is dynamically held then sustain_length will 
+	-- be set to current time before each render call
 
-	-- base note
+	-- base note, dynamic input
 	env.note   = env.note   or 60
 
 	-- these may be preset in env or lua but we force table existence
@@ -207,12 +210,14 @@ bitsynth.render_next=function(env)
 end
 
 bitsynth.render=function(env)
-	-- render to array of numbers
+	-- render to array of numbers with smooth_clip applied
+	-- keep wave under 0.5 to prevent distortion
 	env.time=0
+	local length=env.sustain_length + env.release_length + env.delay_length
 	local dat={}
-	for i=1,math.ceil(env.length*bitsynth.samplerate) do
+	for i=1,math.ceil(length*bitsynth.samplerate) do
 		env.time=i/bitsynth.samplerate -- render time in seconds
-		dat[i]=bitsynth.render_next(env)
+		dat[i]=genes.smooth_clip( bitsynth.render_next(env) )
 	end
 	return dat
 end
@@ -268,6 +273,7 @@ bitsynth.task_code=function()
 			local ints=bitsynth.float_to_16bit(floats)
 			local words=fats.table_to_int16s(ints)
 			result.dat=words -- return 16bit data string from bitsynth
+
 		end
 	
 		return result

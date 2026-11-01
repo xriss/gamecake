@@ -47,10 +47,11 @@ sfx.create=function(it,opts)
 			},
 		}):send()
 		local result=function()
-PRINT("memo",memo.result)
+--PRINT("memo",memo.result)
 			if memo.result then
 				if memo.result.fail then
-					error(memo.result.fail)
+					PRINT(memo.result.fail)
+					return "" --fail
 				end
 				return memo.result.dat
 			end
