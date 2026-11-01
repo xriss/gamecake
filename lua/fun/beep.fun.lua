@@ -414,22 +414,18 @@ beeps["1"]={
 
 sustain_length=2
 release_length=0.1
-delay_length=0.25
+release=env_release(env)
 
+delay_length=0.25
 delay=gene_delay( delay_length , function(get)
 	return	( get( 0                    ) * 1.0  ) +
 			( get( 0.5   * delay_length ) * 0.5  ) +
 			( get( 1.0   * delay_length ) * 0.25 )
 end)
 
-release=function(t)
-	if t<=sustain_length then return 1 end
-	if t<=sustain_length+release_length then return 1-((t-sustain_length)/release_length) end
-	return 0
-end
 attack=gene_attack( 0.5 , 0.2 , 0.4 )
 
-time = 0
+time = time or 0
 
 note = note or 48
 
@@ -453,7 +449,7 @@ notes = {
 	function() return note+wave_vib() end,
 }
 
-result = function()
+render_next = function()
 
 	local ret = 0.5 * attack(time) * release(time) *
 		(

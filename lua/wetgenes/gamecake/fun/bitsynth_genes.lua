@@ -8,7 +8,7 @@ local tau=math.pi*2
 local M={ modname=(...) } ; package.loaded[M.modname]=M
 local genes=M
 
-genes.samplerate=48000
+local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
 
 -- smooth clip a float of any value to between -1 and +1
 -- waves will be deformed progressively and never reach +1-1
@@ -47,12 +47,12 @@ end
 -- read is function that samples the buffer at given time
 genes.gene_delay=function(tlen,fout)
 	local buf={}
-	local len=math.ceil(tlen*genes.samplerate)
+	local len=math.ceil(tlen*bitsynth.samplerate)
 	if len<1 then len=1 end
 	for i=1,len do buf[i]=0 end -- empty
 	local base=0
 	local get=function(t) -- t is time from now into the past
-		local f=t*genes.samplerate
+		local f=t*bitsynth.samplerate
 		local i=math.floor(f)
 		f=f-i
 		if i<0 then i=0 end
@@ -137,6 +137,15 @@ genes.gene_release=function(st,rt)
 		if t<=st then return 1 end
 		if t<=st+rt then return 1-((t-st)/rt) end
 		return 0
+	end
+end
+
+-- use dynamic env value for release, as sustain must be changed by streaming
+genes.env_release=function(env,sn,rn)
+	sn=sn or "sustain_length"
+	rn=rn or "release_length"
+	return function(t)
+		return (genes.gene_release(	env[sn] , env[rn] ))(t)
 	end
 end
 

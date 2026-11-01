@@ -93,7 +93,8 @@ bitsynth.dupe=dupe
 
 
 -- provides a 0-1 cycle of the given sample length
--- sample length can be changed dynamically changed
+-- sample length can be dynamically changed without losing phase
+-- return value is an ever increasing time value that you should %1
 bitsynth.cycle=function(length)
 	local it={}
 	
@@ -102,8 +103,8 @@ bitsynth.cycle=function(length)
 	it.length=length -- length in samples , does not have to be an integer
 	it.phase=0 -- adjustment
 
--- stretch the waves length but stay at the same point in its cycle, using phase.
-	it.stretch=function(length)
+-- change the waves length but stay at the same point in its cycle, using phase.
+	it.relength=function(length)
 		if length==it.length then return end -- no change
 		local old_phase=((it.sample/it.length)+it.phase)%1 -- this is the current phase position, we want to keep it here when we change frequency
 		it.length=length
@@ -116,7 +117,7 @@ bitsynth.cycle=function(length)
 	it.next=function()
 		it.sample=it.sample+1
 		if it.sample>it.length then it.sample=it.sample-it.length end
-		it.value = ((it.sample/it.length)+it.phase)%1
+		it.value = ((it.sample/it.length)+it.phase)
 		return it.value
 	end
 
@@ -132,6 +133,10 @@ bitsynth.render_prepare=function(env)
 
 	-- a clean new env
 	env=dupe(env)
+	env.env=env -- for easy access from out of scope functions
+	
+	env.stream_packet={} -- when streaming, this is the packet of samples
+	env.streams={}       -- when mixing these are the streams to mix
 
 	-- auto load base gene functions into env
 	for n,v in pairs(genes) do
@@ -139,24 +144,28 @@ bitsynth.render_prepare=function(env)
 			env[n]=env[n] or v
 		end
 	end
-			
+	-- and copy some bitsynth basics 
+	env.samplerate   = bitsynth.samplerate
+	env.note_to_freq = bitsynth.note_to_freq
+	env.freq_to_note = bitsynth.freq_to_note
+
+	-- current time in seconds
+	env.time = 0
+
 	-- env.lua is a string to init code with inside env
-	-- when called this should reset the sound
+	-- when called this must reset the sound so the env can be reused
 	if env.lua then
 		-- code is mildly sandboxed, may crash if it wants too
 		-- but probably cant escape significantly
 		sbox.load_and_run( env.lua , env )
 	end
-	
-	-- current time in seconds
-	env.time = 0
 
 	-- length of output in seconds
 	env.sustain_length = env.sustain_length or 1	-- may be dynamic 
 	env.release_length = env.release_length or 0	-- note off release time
 	env.delay_length   = env.delay_length   or 0	-- optional delay filter
-	-- if a note is dynamically held then sustain_length will 
-	-- be set to current time before each render call
+	-- if a note is dynamically held then sustain_length will start as math.huge
+	-- and change to the current time when released
 
 	-- base note, dynamic input
 	env.note   = env.note   or 60
@@ -183,7 +192,7 @@ bitsynth.render_cycles=function(env)
 			while type(note)=="string" do note=env[note] end -- auto string lookup
 			if type(note)=="function" then note=note() end -- auto call
 			if type(note)=="number" then
-				env._cycles[i].stretch(
+				env._cycles[i].relength(
 					bitsynth.samplerate/bitsynth.note_to_freq(note)
 				)
 			end
@@ -198,7 +207,7 @@ bitsynth.render_next=function(env)
 	bitsynth.render_cycles(env)
 
 	-- get result
-	local result="result"
+	local result="render_next"
 	while type(result)=="string" do result=env[result] end -- auto string lookup
 	if type(result)=="function" then result=result() end -- auto call
 	if type(result)=="number" then
