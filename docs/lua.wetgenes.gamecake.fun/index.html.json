@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 735,
+   "count": 736,
    "name": "lua"
   },
   {
@@ -330,7 +330,7 @@
    "name": "lua.box3d.world.step"
   },
   {
-   "count": 680,
+   "count": 681,
    "name": "lua.wetgenes"
   },
   {
@@ -838,7 +838,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 174,
+   "count": 175,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -946,12 +946,16 @@
    "name": "lua.wetgenes.gamecake.framebuffers.stop"
   },
   {
-   "count": 45,
+   "count": 46,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
-   "count": 2,
+   "count": 3,
    "name": "lua.wetgenes.gamecake.fun.bitsynth"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth.stream_code"
   },
   {
    "count": 1,
@@ -3136,13 +3140,21 @@
  "_list": [
   {
    "body": "",
-   "count": 45,
+   "count": 46,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
    "body": "",
-   "count": 2,
+   "count": 3,
    "name": "lua.wetgenes.gamecake.fun.bitsynth"
+  },
+  {
+   "body": "<p>stream function for handling bitsynth streaming.</p>\n",
+   "count": 1,
+   "file": "../lua/wetgenes/gamecake/fun/bitsynth.lua",
+   "line": 340,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth.stream_code",
+   "url": "https://github.com/xriss/gamecake/blob/master/lua/wetgenes/gamecake/fun/bitsynth.lua"
   },
   {
    "body": "<p>lanes task function for handling bitsynth rendering.</p>\n",

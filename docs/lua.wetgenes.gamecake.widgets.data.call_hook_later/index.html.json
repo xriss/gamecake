@@ -130,7 +130,7 @@
    "name": "levels"
   },
   {
-   "count": 735,
+   "count": 736,
    "name": "lua"
   },
   {
@@ -330,7 +330,7 @@
    "name": "lua.box3d.world.step"
   },
   {
-   "count": 680,
+   "count": 681,
    "name": "lua.wetgenes"
   },
   {
@@ -838,7 +838,7 @@
    "name": "lua.wetgenes.export"
   },
   {
-   "count": 174,
+   "count": 175,
    "name": "lua.wetgenes.gamecake"
   },
   {
@@ -946,12 +946,16 @@
    "name": "lua.wetgenes.gamecake.framebuffers.stop"
   },
   {
-   "count": 45,
+   "count": 46,
    "name": "lua.wetgenes.gamecake.fun"
   },
   {
-   "count": 2,
+   "count": 3,
    "name": "lua.wetgenes.gamecake.fun.bitsynth"
+  },
+  {
+   "count": 1,
+   "name": "lua.wetgenes.gamecake.fun.bitsynth.stream_code"
   },
   {
    "count": 1,
