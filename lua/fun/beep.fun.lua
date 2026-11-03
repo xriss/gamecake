@@ -403,6 +403,8 @@ fm={
 }
 
 
+40 45 50 55 59 64
+
 ]=]
 
 
@@ -417,13 +419,14 @@ release_length=0.1
 release=env_release(env)
 
 delay_length=0.25
-delay=gene_delay( delay_length , function(get)
+delay=gene_delay( delay_length , function(get,box)
 	return	( get( 0                    ) * 1.0  ) +
 			( get( 0.5   * delay_length ) * 0.5  ) +
 			( get( 1.0   * delay_length ) * 0.25 )
 end)
 
-attack=gene_attack( 0.5 , 0.2 , 0.4 )
+attack=gene_attack( 0.5 )
+decay=gene_decay( 10 )
 
 time = time or 0
 
@@ -451,7 +454,7 @@ notes = {
 
 render_next = function()
 
-	local ret = 0.5 * attack(time) * release(time) *
+	local ret = 0.5 * attack(time) * decay(time) * release(time) *
 		(
 			( wave_base() * 1.0 )
 		)
@@ -463,6 +466,65 @@ end
 	]=],
 }
 
+beeps["2"]={
+
+	lua=[=[
+
+sustain_length=2
+release_length=0.1
+release=env_release(env)
+
+delay_length=0.001
+delay=gene_delay( delay_length , function(get,box)
+	return	(box(delay_length)+get(0))/2
+end)
+
+attack=gene_attack( 0.5 )
+decay=gene_decay( 10 )
+
+time = time or 0
+
+note = note or 72
+
+sine=gene_sine()
+square=gene_square()
+triangle=gene_triangle()
+sawtooth=gene_sawtooth()
+toothsaw=gene_toothsaw()
+whitenoise=gene_whitenoise(256)
+
+wave_decay=gene_decay(1)
+wave_base = function(s)
+	return wave_decay( time*s ) *
+	(
+		(
+			sine( cycles[1]*s )
+		) * 1
+	) 
+end
+
+notes = {
+	function() return note+gene_decay(0.125)(time)*2 end,
+}
+
+
+render_next = function()
+
+	local ret = 0.5 * attack(time) * decay(time) * release(time) *
+		(
+			wave_base(1) +
+			wave_base(2) +
+			wave_base(3) +
+			wave_base(4) +
+			wave_base(5)
+		)
+	
+	return delay(ret)
+
+end
+
+	]=],
+}
 
 oven.opts.fun="" -- back to menu on reset
 hardware,main=system.configurator({

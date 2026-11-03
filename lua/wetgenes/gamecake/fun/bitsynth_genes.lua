@@ -51,6 +51,7 @@ genes.gene_delay=function(tlen,fout)
 	if len<1 then len=1 end
 	for i=1,len do buf[i]=0 end -- empty
 	local base=0
+	-- single sample with tween
 	local get=function(t) -- t is time from now into the past
 		local f=t*bitsynth.samplerate
 		local i=math.floor(f)
@@ -64,10 +65,27 @@ genes.gene_delay=function(tlen,fout)
 		local b=buf[ 1+((base+j)%len) ]
 		return b*f + a*(1-f)
 	end
+	-- box sample
+	local box=function(l,s) -- s box start, l length of box
+		if not s then s=0 end
+		local s=math.floor(s*bitsynth.samplerate)
+		local l=math.ceil(l*bitsynth.samplerate)
+		if s<0 then l=l+s s=0 end
+		if s>(len-1) then s=(len-1) end
+		if l<1 then l=1 end
+		if l>(len-s) then l=len-s end
+		local a=0
+		for i=s,s+l-1 do
+			a=a+buf[ 1+((base+i)%len) ]
+		end
+		return a/l
+	end
 	return function(v)
-		base=(base+len-1)%len
-		buf[1+base]=v
-		return fout(get) -- get output
+		if v then -- optional push into front of buffer
+			base=(base+len-1)%len
+			buf[1+base]=v
+		end
+		return fout(get,box) -- get output
 	end
 end
 
@@ -115,16 +133,13 @@ genes.gene_duty=function(b,a,c)
 	return f
 end
 
--- sv (value)   is sustain value ( 0 to 1 )
 -- at (attack)  is time to reach 1
--- dt (decay)   is time to reach sv
--- times are lengths not absolutes
-genes.gene_attack=function(sv,at,dt)
+genes.gene_attack=function(at)
+	if at<=0 then return function() return 1 end end
 	return function(t)
 		if t<=0 then return 0 end
 		if t<=at then return (t/at) end
-		if t<=at+dt then return 1-(((t-at)/dt)*(1-sv)) end
-		return sv
+		return 1
 	end
 end
 
@@ -146,6 +161,15 @@ genes.env_release=function(env,sn,rn)
 	rn=rn or "release_length"
 	return function(t)
 		return (genes.gene_release(	env[sn] , env[rn] ))(t)
+	end
+end
+
+-- dt is decay time to half amplitude, call with time to get a decay 
+-- 0 or less removes decay
+genes.gene_decay=function(dt)
+	if dt<=0 then return function() return 1 end end
+	return function(t)
+		return 1 / (2^(t/(dt)))
 	end
 end
 
