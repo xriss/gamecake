@@ -28,6 +28,37 @@ sfx.setup=function()
 
 	sfx.load()
 
+	local env={ -- bitsynth stream options table
+		fifo_name="fun_bitsynth",
+		lua=[=[
+
+time=0
+stream_next = function()
+
+	local a=0
+
+	for n,sound in pairs(sounds or {}) do
+		a=a+sound.sound_sample
+	end
+
+	return a
+
+end
+
+]=],
+	}
+
+	local qq=cake.sounds.queues[1]
+	qq:stream_bitsynth(env)
+
+	local memo = wire.memo({
+		fifo=wire.fifo("bitstream"),
+		data={
+			action="stream",
+			env=env,
+		},
+	}):send()
+
 	return sfx
 end
 
@@ -40,7 +71,7 @@ sfx.create=function(it,opts)
 
 	it.render=function(env) -- render a bitsynth sound
 		local memo = wire.memo({
-			fifo=wire.fifo("bitsynth"),
+			fifo=wire.fifo("bitrender"),
 			data={
 				action="render",
 				env=env, -- bitsynth options table
@@ -53,7 +84,7 @@ sfx.create=function(it,opts)
 					PRINT(memo.result.fail)
 					return "" --fail
 				end
-				return memo.result.dat
+				return memo.result.buf
 			end
 		end
 		return sounds.lazyload_wavtab( result, env.name , bitsynth.frequency )
@@ -69,6 +100,16 @@ sfx.create=function(it,opts)
 		d.pitch,d.gain=pitch or 1,gain or 1
 		sounds.beep( d )
 		d.pitch,d.gain=op,og
+	end
+	
+	it.stream_sound=function(env)
+		local memo = wire.memo({
+			fifo=wire.fifo("bitstream"),
+			data={
+				action="sound",
+				env=env,
+			},
+		}):send()
 	end
 	
 	it.update=function() -- nothing to do, maybe add a tracker later?

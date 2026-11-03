@@ -10,6 +10,8 @@ local zips=require("wetgenes.zips")
 local grd=require("wetgenes.grd")
 local sod=require("wetgenes.sod")
 
+local wire=require("wetgenes.wire") -- manage tasks
+
 
 --module
 local M={ modname=(...) } ; package.loaded[M.modname]=M
@@ -441,6 +443,11 @@ sounds.start = function()
 				end
 				r:clear()
 
+				r.stream_bitsynth=function(qq,d)
+					qq.bitsynth=d
+					qq.state="play_queue"
+				end
+
 				r.stream_ogg=function(qq,d)
 					local str=sounds.strs[qq.idx]
 					
@@ -528,11 +535,34 @@ end
 
 local dbgfp
 
-function str_func.fill(str,b)
+function str_func.fill(str,b,catchup)
 
 local qq=sounds.queues[str.idx]
 
-	if qq.talks and qq.talks[1] then
+	if qq.bitsynth then -- name of wire fifo to get data from
+	
+		local fifo = wire.fifo(qq.bitsynth.fifo_name)
+		
+		repeat -- pull all memos
+			local memo = fifo:pull()
+			if memo and memo.data.action=="stream" then -- got next buffer
+				qq.last_buf=memo.data.buf
+				al.BufferData(b,al.FORMAT_MONO16,qq.last_buf,#qq.last_buf,48000 )
+				return true
+			end
+		until not memo
+
+		if catchup then
+			if qq.last_buf then
+				al.BufferData(b,al.FORMAT_MONO16,qq.last_buf,#qq.last_buf,48000 )
+				return true
+			end
+		end
+
+		
+		return
+
+	elseif qq.talks and qq.talks[1] then
 	
 --	al.Source(str.source, al.GAIN, 1)
 	
@@ -658,7 +688,7 @@ local qq=sounds.queues[str.idx]
 
 	while str.empty[1] do -- fill the empty queue
 		local b=str.empty[1]
-		if str:fill(b) then
+		if str:fill(b, str.empty[2] and true) then
 --al.CheckError()
 			al.SourceQueueBuffer(str.source,b)
 --print("queue ",str.source,b)

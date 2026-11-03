@@ -92,6 +92,17 @@ end
 bitsynth.dupe=dupe
 
 
+bitsynth.base_id=0
+bitsynth.next_id=function()
+	
+	-- wrap ids, lets pretend it might happen
+	if bitsynth.base_id >= 0xffffffffffff then bitsynth.base_id=0 end
+	
+	bitsynth.base_id=bitsynth.base_id+1
+
+	return bitsynth.base_id
+end
+
 -- provides a 0-1 cycle of the given sample length
 -- sample length can be dynamically changed without losing phase
 -- return value is an ever increasing time value that you should %1
@@ -126,6 +137,9 @@ end
 
 -- run cycles in an env
 bitsynth.env_cycles=function(env)
+
+	env.time=env.time + (1/bitsynth.samplerate)
+
 	for i=1,#env.notes do		
 		-- create/change cycle wavelength using midi notes
 		local note=env.notes[i]
@@ -145,19 +159,14 @@ bitsynth.env_cycles=function(env)
 	end
 end
 
--- dupe static env input and fill with junk 
--- render a bunch of cycles, defined in env
--- possibly feeding results between each
--- should pass in env.genes[1] env.genes[2] etc to init cycles
--- must pass in env.result for output
-bitsynth.sound_init=function(env)
+bitsynth.env_init=function(env)
 
-	-- a clean new env
+	-- a clean new env, copied from input
 	env=dupe(env)
-	env.env=env -- for easy access from out of scope functions
+	env.env=env -- self access from out of scope functions
 	
-	env.stream_packet={} -- when streaming, this is the packet of samples
-	env.streams={}       -- when mixing these are the streams to mix
+	-- asign an ID
+	env.ID=bitsynth.next_id()
 
 	-- auto load base gene functions into env
 	for n,v in pairs(genes) do
@@ -180,24 +189,36 @@ bitsynth.sound_init=function(env)
 		-- but probably cant escape significantly
 		sbox.load_and_run( env.lua , env )
 	end
+	
+	-- these may be preset in env or lua but we force table existence
+	env.notes=env.notes or {}
+	env._cycles={} -- reset cycles (internal objects)
+	env.cycles={} -- current cycle values
+	-- and start new cycles
+	bitsynth.env_cycles(env)
+
+	return env
+end
+
+
+-- dupe static env input and fill with junk 
+-- render a bunch of cycles, defined in env
+-- possibly feeding results between each
+-- should pass in env.genes[1] env.genes[2] etc to init cycles
+-- must pass in env.result for output
+bitsynth.sound_init=function(env)
+
+	env=bitsynth.env_init(env) -- dupe and basic init
 
 	-- length of output in seconds
 	env.sustain_length = env.sustain_length or 1	-- may be dynamic 
 	env.release_length = env.release_length or 0	-- note off release time
 	env.delay_length   = env.delay_length   or 0	-- optional delay filter
-	-- if a note is dynamically held then sustain_length will start as math.huge
+	-- if a sound is dynamically held then sustain_length will start as math.huge
 	-- and change to the current time when released
 
-	-- base note, dynamic input
+	-- base note, dynamic input, for this sound
 	env.note   = env.note   or 60
-
-	-- these may be preset in env or lua but we force table existence
-	env.notes=env.notes or {}
-	
-	env._cycles={} -- reset cycles (internal objects)
-	env.cycles={} -- current cycle values
-	-- and start new cycles
-	bitsynth.env_cycles(env)
 	
 	return env
 end
@@ -208,12 +229,13 @@ bitsynth.sound_next=function(env)
 	-- advance cycles
 	bitsynth.env_cycles(env)
 
-	-- get result
-	local result="sound_next"
-	while type(result)=="string" do result=env[result] end -- auto string lookup
-	if type(result)=="function" then result=result() end -- auto call
-	if type(result)=="number" then
-		return result
+	-- get next sample
+	local sample="sound_next"
+	while type(sample)=="string" do sample=env[sample] end -- auto string lookup
+	if type(sample)=="function" then sample=sample() end -- auto call
+	if type(sample)=="number" then
+		env.sound_sample=sample -- remember last sample
+		return sample
 	end
 
 	-- default
@@ -227,27 +249,74 @@ bitsynth.sound_render=function(env)
 	local length=env.sustain_length + env.release_length + env.delay_length
 	local dat={}
 	for i=1,math.ceil(length*bitsynth.samplerate) do
-		env.time=i/bitsynth.samplerate -- render time in seconds
-		dat[i]=genes.smooth_clip( bitsynth.sound_next(env) )
+		-- get next sample and
+		-- auto apply smooth_clip ( env may alter smooth_clip )
+		dat[i]=env.smooth_clip( bitsynth.sound_next(env) )
 	end
 	return dat
 end
 
 bitsynth.line_init=function(env)
 
+	env=bitsynth.env_init(env) -- dupe and basic init
+
+	return env
 end
 
 bitsynth.line_next=function(env)
 
+	return 0
 end
 
 bitsynth.stream_init=function(env)
 
+	env=bitsynth.env_init(env) -- dupe and basic init
+	
+	-- stream buffer packet size
+	env.packet_length=env.packet_length or 1024
+
+	-- lists of active sounds etc keyed by ID
+	env.sounds=env.sounds or {}
+	env.lines=env.lines or {}
+
+	return env
 end
 
 bitsynth.stream_next=function(env)
 
+	-- advance cycles
+	bitsynth.env_cycles(env)
+	
+	for n,sound in pairs(env.sounds or {}) do
+		bitsynth.sound_next(sound)
+		local length=sound.sustain_length + sound.release_length + sound.delay_length
+		if sound.time > length then
+			env.sounds[n]=nil -- finished
+		end
+	end
+
+	-- get next sample
+	local sample="stream_next"
+	while type(sample)=="string" do sample=env[sample] end -- auto string lookup
+	if type(sample)=="function" then sample=sample() end -- auto call
+	if type(sample)=="number" then
+		env.stream_sample=sample -- remember last sample
+		return sample
+	end
+	return 0
 end
+
+bitsynth.tracker_init=function(env)
+
+	env=bitsynth.env_init(env) -- dupe and basic init
+
+	return env
+end
+
+bitsynth.tracker_next=function(env)
+
+end
+
 
 -- turn a stream of float values into s16 values, changes input data and returns it
 -- scale defaults to 0x7fff but you could use a slightly lower value to reduce clipping
@@ -283,7 +352,7 @@ end
 task function for handling bitsynth rendering.
 
 ]]
-bitsynth.task_code=function()
+bitsynth.render_code=function()
 	
 	local wire=require("wetgenes.wire")
 	local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
@@ -298,7 +367,7 @@ bitsynth.task_code=function()
 			local floats=bitsynth.sound_render(env)
 			local ints=bitsynth.float_to_16bit(floats)
 			local words=fats.table_to_int16s(ints)
-			result.dat=words -- return 16bit data string from bitsynth
+			result.buf=words -- return 16bit data string from bitsynth
 
 		end
 	
@@ -347,20 +416,64 @@ bitsynth.stream_code=function()
 	local wire=require("wetgenes.wire")
 	local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
 	local fats=require("wetgenes.fats")
+	
+	local stream -- main stream data
 
 	local consume=function(data)
 		local result={}
 		
-		if data.action=="stream" then -- control streaming
-		end
+		if     data.action=="tracker" then -- control tracker
 
-		if data.action=="line" then -- control line (filters)
-		end
+		elseif data.action=="stream"  then -- control stream
 
-		if data.action=="sound" then -- control sounds
+			if data.env then
+PRINT("START STREAM")
+				stream=bitsynth.stream_init(data.env)
+				stream.packet_time=wire.time()
+			end
+
+		elseif data.action=="line"    then -- control lines
+
+		elseif data.action=="sound"   then -- control sounds
+
+			if not stream then return result end
+
+			local sound
+			if data.env then -- new sound
+				sound=bitsynth.sound_init(data.env)
+			end
+			if sound then
+				stream.sounds[sound.ID]=sound
+				result.sound_id=sound.ID
+			end
+
 		end
 	
 		return result
+	end
+	
+	-- advance the current stream and send data if it is time
+	local update_stream=function()
+	
+		if stream.packet_time <= wire.time() then -- send new packet
+
+			local floats={}
+			for i=1,stream.packet_length do
+				floats[i]=bitsynth.stream_next(stream)
+			end
+			stream.packet_time=stream.packet_time+(stream.packet_length/bitsynth.samplerate)
+			
+			local ints=bitsynth.float_to_16bit(floats)
+			local words=fats.table_to_int16s(ints)
+			local memo = wire.memo({
+				fifo=wire.fifo( stream.fifo_name ),
+				data={
+					action="stream",
+					buf=words,
+				},
+			}):send()
+			
+		end
 	end
 
 	 -- this named fifo will have been created before this thread
@@ -387,6 +500,10 @@ bitsynth.stream_code=function()
 		
 			fifo:wait(1/1024) -- fast response
 
+		end
+		
+		if stream then
+			xpcall( update_stream , TRACEBACK )
 		end
 
 	end

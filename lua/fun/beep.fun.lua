@@ -428,8 +428,6 @@ end)
 attack=gene_attack( 0.5 )
 decay=gene_decay( 10 )
 
-time = time or 0
-
 note = note or 48
 
 sine=gene_sine()
@@ -452,6 +450,7 @@ notes = {
 	function() return note+wave_vib() end,
 }
 
+time=0
 sound_next = function()
 
 	local ret = 0.5 * attack(time) * decay(time) * release(time) *
@@ -482,8 +481,6 @@ end)
 attack=gene_attack( 0.5 )
 decay=gene_decay( 10 )
 
-time = time or 0
-
 note = note or 72
 
 sine=gene_sine()
@@ -508,6 +505,7 @@ notes = {
 }
 
 
+time=0
 sound_next = function()
 
 	local ret = 0.5 * attack(time) * decay(time) * release(time) *
@@ -547,7 +545,7 @@ setup=function()
 
     for n,v in pairs(beeps) do 
 		v.name=n
-		csfx.render(v)
+--		csfx.render(v)
     end
 
     print("Setup complete!")
@@ -564,7 +562,7 @@ msg=function(m)
 	    local s=beeps[m.keyname]
 	    if s then
 PRINT(s.name)
-			csfx.play(s.name,1,1.0)
+			csfx.stream_sound(s)
 	    end
 	end
     end

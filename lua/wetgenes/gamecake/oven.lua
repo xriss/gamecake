@@ -284,7 +284,8 @@ wire.tasks("recipes",1,[[ require("wetgenes.wiretasks").sqlite_code(); ]],{
 			sqlite_pragmas=[[ PRAGMA synchronous=0; ]],		
 	})
 
-wire.tasks("bitsynth",2,[[ require("wetgenes.gamecake.fun.bitsynth").task_code(); ]])
+wire.tasks("bitrender",1,[[ require("wetgenes.gamecake.fun.bitsynth").render_code(); ]])
+wire.tasks("bitstream",1,[[ require("wetgenes.gamecake.fun.bitsynth").stream_code(); ]])
 
 -- so we can run off thread code and coroutines
 
