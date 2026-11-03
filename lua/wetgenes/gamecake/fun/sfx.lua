@@ -42,7 +42,7 @@ sfx.create=function(it,opts)
 		local memo = wire.memo({
 			fifo=wire.fifo("bitsynth"),
 			data={
-				action="bitsynth",
+				action="render",
 				env=env, -- bitsynth options table
 			},
 		}):send()

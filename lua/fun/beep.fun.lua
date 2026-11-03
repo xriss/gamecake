@@ -452,7 +452,7 @@ notes = {
 	function() return note+wave_vib() end,
 }
 
-render_next = function()
+sound_next = function()
 
 	local ret = 0.5 * attack(time) * decay(time) * release(time) *
 		(
@@ -508,7 +508,7 @@ notes = {
 }
 
 
-render_next = function()
+sound_next = function()
 
 	local ret = 0.5 * attack(time) * decay(time) * release(time) *
 		(

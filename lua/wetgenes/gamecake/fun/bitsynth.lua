@@ -124,12 +124,33 @@ bitsynth.cycle=function(length)
 	return it
 end
 
+-- run cycles in an env
+bitsynth.env_cycles=function(env)
+	for i=1,#env.notes do		
+		-- create/change cycle wavelength using midi notes
+		local note=env.notes[i]
+		if note then
+			if not env._cycles[i] then -- create new cycle
+				env._cycles[i]=bitsynth.cycle(1024)
+			end
+			while type(note)=="string" do note=env[note] end -- auto string lookup
+			if type(note)=="function" then note=note() end -- auto call
+			if type(note)=="number" then
+				env._cycles[i].relength(
+					bitsynth.samplerate/bitsynth.note_to_freq(note)
+				)
+			end
+		end
+		env.cycles[i]=env._cycles[i].next() -- remember result
+	end
+end
+
 -- dupe static env input and fill with junk 
 -- render a bunch of cycles, defined in env
 -- possibly feeding results between each
 -- should pass in env.genes[1] env.genes[2] etc to init cycles
 -- must pass in env.result for output
-bitsynth.render_prepare=function(env)
+bitsynth.sound_init=function(env)
 
 	-- a clean new env
 	env=dupe(env)
@@ -176,38 +197,19 @@ bitsynth.render_prepare=function(env)
 	env._cycles={} -- reset cycles (internal objects)
 	env.cycles={} -- current cycle values
 	-- and start new cycles
-	bitsynth.render_cycles(env)
+	bitsynth.env_cycles(env)
 	
 	return env
 end
 
-bitsynth.render_cycles=function(env)
-	for i=1,#env.notes do		
-		-- create/change cycle wavelength using midi notes
-		local note=env.notes[i]
-		if note then
-			if not env._cycles[i] then -- create new cycle
-				env._cycles[i]=bitsynth.cycle(1024)
-			end
-			while type(note)=="string" do note=env[note] end -- auto string lookup
-			if type(note)=="function" then note=note() end -- auto call
-			if type(note)=="number" then
-				env._cycles[i].relength(
-					bitsynth.samplerate/bitsynth.note_to_freq(note)
-				)
-			end
-		end
-		env.cycles[i]=env._cycles[i].next() -- remember result
-	end
-end
 
-bitsynth.render_next=function(env)
+bitsynth.sound_next=function(env)
 
 	-- advance cycles
-	bitsynth.render_cycles(env)
+	bitsynth.env_cycles(env)
 
 	-- get result
-	local result="render_next"
+	local result="sound_next"
 	while type(result)=="string" do result=env[result] end -- auto string lookup
 	if type(result)=="function" then result=result() end -- auto call
 	if type(result)=="number" then
@@ -218,7 +220,7 @@ bitsynth.render_next=function(env)
 	return 0
 end
 
-bitsynth.render=function(env)
+bitsynth.sound_render=function(env)
 	-- render to array of numbers with smooth_clip applied
 	-- keep wave under 0.5 to prevent distortion
 	env.time=0
@@ -226,11 +228,26 @@ bitsynth.render=function(env)
 	local dat={}
 	for i=1,math.ceil(length*bitsynth.samplerate) do
 		env.time=i/bitsynth.samplerate -- render time in seconds
-		dat[i]=genes.smooth_clip( bitsynth.render_next(env) )
+		dat[i]=genes.smooth_clip( bitsynth.sound_next(env) )
 	end
 	return dat
 end
 
+bitsynth.line_init=function(env)
+
+end
+
+bitsynth.line_next=function(env)
+
+end
+
+bitsynth.stream_init=function(env)
+
+end
+
+bitsynth.stream_next=function(env)
+
+end
 
 -- turn a stream of float values into s16 values, changes input data and returns it
 -- scale defaults to 0x7fff but you could use a slightly lower value to reduce clipping
@@ -275,10 +292,10 @@ bitsynth.task_code=function()
 	local consume=function(data)
 		local result={}
 		
-		if data.action=="bitsynth" then
+		if data.action=="render" then
 			
-			local env=bitsynth.render_prepare(data.env)
-			local floats=bitsynth.render(env)
+			local env=bitsynth.sound_init(data.env)
+			local floats=bitsynth.sound_render(env)
 			local ints=bitsynth.float_to_16bit(floats)
 			local words=fats.table_to_int16s(ints)
 			result.dat=words -- return 16bit data string from bitsynth
@@ -311,6 +328,64 @@ bitsynth.task_code=function()
 		else -- no memo, sleep a bit
 		
 			fifo:wait(1/16) -- slow response
+
+		end
+
+	end
+	-- we have gracefully halted so cleanup and return
+
+end
+
+
+--[[#lua.wetgenes.gamecake.fun.bitsynth.stream_code
+
+stream function for handling bitsynth streaming.
+
+]]
+bitsynth.stream_code=function()
+	
+	local wire=require("wetgenes.wire")
+	local bitsynth=require("wetgenes.gamecake.fun.bitsynth")
+	local fats=require("wetgenes.fats")
+
+	local consume=function(data)
+		local result={}
+		
+		if data.action=="stream" then -- control streaming
+		end
+
+		if data.action=="line" then -- control line (filters)
+		end
+
+		if data.action=="sound" then -- control sounds
+		end
+	
+		return result
+	end
+
+	 -- this named fifo will have been created before this thread
+	local fifo = wire.fifo(wire_tasks_name)
+
+	-- loop until our thread is asked to halt
+	while wire.active( wire.thread_handle ) do
+		local memo = fifo:pull()
+		
+		if memo then
+
+			-- this will print a TRACEBACK on error but keep going
+			local ok,result = xpcall( function() return consume( memo.data ) end , TRACEBACK )
+
+			if ok then
+				memo.result=result -- consume gave us a result to reply with
+			else
+				memo.result={ fail=(result or "fail") } -- reply with fail reason
+			end
+			memo:reply()
+			memo:remove()
+
+		else -- no memo, sleep a bit
+		
+			fifo:wait(1/1024) -- fast response
 
 		end
 

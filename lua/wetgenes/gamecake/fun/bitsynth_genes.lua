@@ -92,9 +92,10 @@ end
 -- utility and wave/gene functions
 -- gene functions create and return a wave function
 -- wave functions take (time) and return a wave (probably)
--- time must not be negative.
--- the wavelength is normally 1
+-- time must not be negative. it starts at 0 and advances.
+-- the wavelength is nominally 1
 -- time may be scaled to get the wave length we want out
+-- and then we scale by integers to produce wave harmonics
 
 
 -- create a wave duty function, this squishes a waves time
