@@ -488,7 +488,7 @@ wave_base = function(n,s)
 	return wave_decay( time*s ) *
 	(
 		(
-			sine( time , n+note+gene_decay(0.125)(time)*2 )
+			sine( time , n+note+gene_decay(0.125)(time)*4 )
 		) * 1
 	) 
 end
@@ -498,11 +498,14 @@ get_sample = function()
 
 	local ret = 0.5 * attack(time) * decay(time) * release(time) *
 		(
-			wave_base(  0 , 1 ) +
-			wave_base( 12 , 2 ) +
-			wave_base( 19 , 3 ) +
-			wave_base( 24 , 4 ) +
-			wave_base( 28 , 5 )
+			  wave_base(  0 , 1 )
+--			+ wave_base( 12 , 2 )
+--			+ wave_base( 19 , 3 )
+--			+ wave_base( 24 , 4 )
+--			+ wave_base( 28 , 5 )
+--			+ wave_base( 31 , 6 )
+--			+ wave_base( 34 , 7 )
+--			+ wave_base( 36 , 8 )
 		)
 	
 	return delay(ret)
@@ -517,18 +520,21 @@ beeps["3"]={
 	lua=[=[
 
 sustain_length=2
-release_length=0.1
-release=env_release(env)
+release_length=0.2
 
-delay_length=0.001
+release=env_release(env)
+attack=gene_attack( 0.2 )
+decay=gene_decay( 10 )
+adsr=function(t) return attack(t) * decay(t) * release(t) end
+
+delay_length=0.25
 delay=gene_delay( delay_length , function(get,box)
-	return	(box(delay_length)+get(0))/2
+	return	( get( 0                    ) * 1.0  ) +
+			( get( 0.5   * delay_length ) * 0.5  ) +
+			( get( 1.0   * delay_length ) * 0.25 )
 end)
 
-attack=gene_attack( 0.5 )
-decay=gene_decay( 10 )
-
-note = note or 72
+note = note or 48
 
 sine=gene_sine(note)
 square=gene_square(note)
@@ -537,27 +543,24 @@ sawtooth=gene_sawtooth(note)
 toothsaw=gene_toothsaw(note)
 whitenoise=gene_whitenoise(note,256)
 
-wave_decay=gene_decay(1)
-wave_base = function(s)
-	return wave_decay( time*(2^(s/12)) ) *
-	(
-		(
-			sine( time , s+note+gene_decay(0.125)(time)*2 )
-		) * 1
-	) 
+wave_decay=gene_decay(0.5)
+wave_base = function()
+	return
+	  wave_decay( time*1 ) * sine( time*1 , note )
+	+ wave_decay( time*2 ) * sine( time*2 , note )
+	+ wave_decay( time*3 ) * sine( time*3 , note )
+	+ wave_decay( time*4 ) * sine( time*4 , note )
+	+ wave_decay( time*5 ) * sine( time*5 , note )
+	+ wave_decay( time*6 ) * sine( time*6 , note )
+	+ wave_decay( time*7 ) * sine( time*7 , note )
+	+ wave_decay( time*8 ) * sine( time*8 , note )
+	+ wave_decay( time*16 ) * square( time*16 , 64 )
 end
 
 
 time=0
 get_sample = function()
-
-	local ret = 0.5 * attack(time) * decay(time) * release(time) *
-		(
-			wave_base(0)
-		)
-	
-	return ret
-
+	return delay( 0.5 * adsr(time) * wave_base() )
 end
 
 	]=],
