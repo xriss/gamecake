@@ -547,12 +547,14 @@ local qq=sounds.queues[str.idx]
 			local memo = fifo:pull()
 			if memo and memo.data.action=="stream" then -- got next buffer
 				qq.last_buf=memo.data.buf
-				al.BufferData(b,al.FORMAT_MONO16,qq.last_buf,#qq.last_buf,48000 )
-				return true
+				if b then
+					al.BufferData(b,al.FORMAT_MONO16,qq.last_buf,#qq.last_buf,48000 )
+					return true
+				end
 			end
 		until not memo
 
-		if catchup then
+		if catchup and b then
 			if qq.last_buf then
 				al.BufferData(b,al.FORMAT_MONO16,qq.last_buf,#qq.last_buf,48000 )
 				return true
@@ -563,6 +565,7 @@ local qq=sounds.queues[str.idx]
 		return
 
 	elseif qq.talks and qq.talks[1] then
+		if not b then return end
 	
 --	al.Source(str.source, al.GAIN, 1)
 	
@@ -577,6 +580,7 @@ local qq=sounds.queues[str.idx]
 		return true
 		
 	elseif qq.oggs then
+		if not b then return end
 --do return false end	
 		
 		if not qq.og and qq.oggs[1] then
@@ -700,6 +704,7 @@ local qq=sounds.queues[str.idx]
 			break
 		end
 	end
+	while str:fill(nil,nil) do end -- purge waiting packets
 	
 	if qq.state=="play_queue" and str.full[1] then -- start to play whenever we have a buffer filled
 		local astate=al.GetSource(str.source, al.SOURCE_STATE)

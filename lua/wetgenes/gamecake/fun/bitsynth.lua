@@ -47,6 +47,8 @@ bitsynth.freq_to_note=function(f,standard)
 	return 69+( 12 * ( math.log(f/(standard or 440)) / log_of_2 ) )
 end
 
+bitsynth.note_1hz=bitsynth.freq_to_note(1)
+
 -- convert a string, eg "C4" into a note
 bitsynth.to_note=function(s,o)
 
@@ -103,62 +105,6 @@ bitsynth.next_id=function()
 	return bitsynth.base_id
 end
 
--- provides a 0-1 cycle of the given sample length
--- sample length can be dynamically changed without losing phase
--- return value is an ever increasing time value that you should %1
-bitsynth.cycle=function(length)
-	local it={}
-	
-	it.value=0 -- current value	
-	it.sample=0 -- current sample we are rendering
-	it.length=length -- length in samples , does not have to be an integer
-	it.phase=0 -- adjustment
-
--- change the waves length but stay at the same point in its cycle, using phase.
-	it.relength=function(length)
-		if length==it.length then return end -- no change
-		local old_phase=((it.sample/it.length)+it.phase)%1 -- this is the current phase position, we want to keep it here when we change frequency
-		it.length=length
-		local new_phase=(it.sample/it.length)%1 -- this is the unadjusted new base phase for the current sample point in time
-		it.phase=(old_phase-new_phase)%1 -- this adjusts phase to what it was before we changed length
-		while it.phase<0 do it.phase=it.phase+1 end -- make sure phase is not a negative value
-	end
-
--- returns the next sample and advances sample by 1
-	it.next=function()
-		it.sample=it.sample+1
-		if it.sample>it.length then it.sample=it.sample-it.length end
-		it.value = ((it.sample/it.length)+it.phase)
-		return it.value
-	end
-
-	return it
-end
-
--- run cycles in an env
-bitsynth.env_cycles=function(env)
-
-	env.time=env.time + (1/bitsynth.samplerate)
-
-	for i=1,#env.notes do		
-		-- create/change cycle wavelength using midi notes
-		local note=env.notes[i]
-		if note then
-			if not env._cycles[i] then -- create new cycle
-				env._cycles[i]=bitsynth.cycle(1024)
-			end
-			while type(note)=="string" do note=env[note] end -- auto string lookup
-			if type(note)=="function" then note=note() end -- auto call
-			if type(note)=="number" then
-				env._cycles[i].relength(
-					bitsynth.samplerate/bitsynth.note_to_freq(note)
-				)
-			end
-		end
-		env.cycles[i]=env._cycles[i].next() -- remember result
-	end
-end
-
 bitsynth.env_init=function(env)
 
 	-- a clean new env, copied from input
@@ -176,6 +122,7 @@ bitsynth.env_init=function(env)
 	end
 	-- and copy some bitsynth basics 
 	env.samplerate   = bitsynth.samplerate
+	env.note_1hz     = bitsynth.note_1hz
 	env.note_to_freq = bitsynth.note_to_freq
 	env.freq_to_note = bitsynth.freq_to_note
 
@@ -190,22 +137,11 @@ bitsynth.env_init=function(env)
 		sbox.load_and_run( env.lua , env )
 	end
 	
-	-- these may be preset in env or lua but we force table existence
-	env.notes=env.notes or {}
-	env._cycles={} -- reset cycles (internal objects)
-	env.cycles={} -- current cycle values
-	-- and start new cycles
-	bitsynth.env_cycles(env)
-
 	return env
 end
 
 
 -- dupe static env input and fill with junk 
--- render a bunch of cycles, defined in env
--- possibly feeding results between each
--- should pass in env.genes[1] env.genes[2] etc to init cycles
--- must pass in env.result for output
 bitsynth.sound_init=function(env)
 
 	env=bitsynth.env_init(env) -- dupe and basic init
@@ -226,20 +162,10 @@ end
 
 bitsynth.sound_next=function(env)
 
-	-- advance cycles
-	bitsynth.env_cycles(env)
-
 	-- get next sample
-	local sample="sound_next"
-	while type(sample)=="string" do sample=env[sample] end -- auto string lookup
-	if type(sample)=="function" then sample=sample() end -- auto call
-	if type(sample)=="number" then
-		env.sound_sample=sample -- remember last sample
-		return sample
-	end
-
-	-- default
-	return 0
+	env.time=env.time+(1/bitsynth.samplerate)
+	env.sample=env.get_sample()
+	return env.sample
 end
 
 bitsynth.sound_render=function(env)
@@ -273,7 +199,7 @@ bitsynth.stream_init=function(env)
 	env=bitsynth.env_init(env) -- dupe and basic init
 	
 	-- stream buffer packet size
-	env.packet_length=env.packet_length or 1024
+	env.packet_length=env.packet_length or 2048
 
 	-- lists of active sounds etc keyed by ID
 	env.sounds=env.sounds or {}
@@ -284,9 +210,7 @@ end
 
 bitsynth.stream_next=function(env)
 
-	-- advance cycles
-	bitsynth.env_cycles(env)
-	
+	-- advance playing sounds
 	for n,sound in pairs(env.sounds or {}) do
 		bitsynth.sound_next(sound)
 		local length=sound.sustain_length + sound.release_length + sound.delay_length
@@ -296,14 +220,9 @@ bitsynth.stream_next=function(env)
 	end
 
 	-- get next sample
-	local sample="stream_next"
-	while type(sample)=="string" do sample=env[sample] end -- auto string lookup
-	if type(sample)=="function" then sample=sample() end -- auto call
-	if type(sample)=="number" then
-		env.stream_sample=sample -- remember last sample
-		return sample
-	end
-	return 0
+	env.time=env.time+(1/bitsynth.samplerate)
+	env.sample=env.get_sample()
+	return env.sample
 end
 
 bitsynth.tracker_init=function(env)
@@ -455,7 +374,8 @@ PRINT("START STREAM")
 	-- advance the current stream and send data if it is time
 	local update_stream=function()
 	
-		if stream.packet_time <= wire.time() then -- send new packet
+		local update_time=wire.time()
+		if stream.packet_time <= update_time then -- send new packet
 
 			local floats={}
 			for i=1,stream.packet_length do
@@ -473,6 +393,11 @@ PRINT("START STREAM")
 				},
 			}):send()
 			
+			update_time=wire.time()-update_time
+			local tpacket=math.floor(update_time*bitsynth.samplerate)
+--			if tpacket>=stream.packet_length then
+				PRINT("bitsynth took "..tpacket.." to make "..stream.packet_length)
+--			end
 		end
 	end
 

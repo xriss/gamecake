@@ -90,12 +90,11 @@ genes.gene_delay=function(tlen,fout)
 end
 
 -- utility and wave/gene functions
--- gene functions create and return a wave function
--- wave functions take (time) and return a wave (probably)
+-- gene functions create and return a wave function usually of the requested note
+-- wave functions take (time,note) and return a "wave"
 -- time must not be negative. it starts at 0 and advances.
--- the wavelength is nominally 1
--- time may be scaled to get the wave length we want out
--- and then we scale by integers to produce wave harmonics
+-- if note is provided then the wave will be adjusted to this new length
+-- whilst maintaining the current phase
 
 
 -- create a wave duty function, this squishes a waves time
@@ -174,13 +173,6 @@ genes.gene_decay=function(dt)
 	end
 end
 
--- combine attack and release together to get a full adsr signal
-genes.gene_ladsr=function(sv,at,dt,st,rt)
-	local a=genes.gene_attack(sv,at,dt)
-	local b=genes.gene_release(st,rt)
-	return function(t) return a(t)*b(t) end , st+rt
-end
-
 -- create a simple rnd function, no input just next in sequence out
 genes.gene_randomise=function(seed)
 	local n=seed -- set the seed
@@ -205,12 +197,36 @@ do
 	end
 end
 
--- cache a bit chunk of random and index it
 
-genes.gene_whitenoise=function(steps,seed) -- steps is the number of values in a white noise wave cycle
+--[[
+
+	    *        *
+	   *  *    * *
+	*  *  *   * * *
+	*  *  *   *   *
+	 *  * * * *   *
+	 *    *  *     *
+	      * 
+
+ cache a bit chunk of random and index it
+
+]]
+genes.gene_whitenoise=function(note,steps,seed) -- steps is the number of values in a white noise wave cycle
 	steps=steps or 2 -- two gives a square wave cycle for the given frequency
 	seed=seed or 0
-	return function(t)
+	note=note or bitsynth.note_1hz
+	local phase=0
+	local freq=bitsynth.note_to_freq(note)
+	return function(t,n)
+		if n and n~=note then -- new note, lock phase at time t
+			local new_freq=bitsynth.note_to_freq(n)
+			local old_phase=(t*freq+phase)%1 -- current phase
+			local new_phase=(t*new_freq)%1 -- new base phase
+			phase=(1+old_phase-new_phase)%1 -- fix phase
+			freq=new_freq -- new wavelength
+			note=n  -- new note
+		end
+		t=t*freq+phase
 		local idx=1+(math.floor((t*steps)+seed)%65536)
 		return (genes.rnds[idx]*2)-1
 	end
@@ -228,10 +244,20 @@ end
 			   ***
 
 ]]
-genes.gene_sine=function(s)
-	s=s or 1
-	return function(t)
-		t=t*s
+genes.gene_sine=function(note)
+	note=note or bitsynth.note_1hz
+	local phase=0
+	local freq=bitsynth.note_to_freq(note)
+	return function(t,n)
+		if n and n~=note then -- new note, lock phase at time t
+			local new_freq=bitsynth.note_to_freq(n)
+			local old_phase=(t*freq+phase)%1 -- current phase
+			local new_phase=(t*new_freq)%1 -- new base phase
+			phase=(1+old_phase-new_phase)%1 -- fix phase
+			freq=new_freq -- new wavelength
+			note=n  -- new note
+		end
+		t=t*freq+phase
 		return math.sin( (t%1) * tau  )
 	end
 end
@@ -247,10 +273,20 @@ end
 			   * *
 	            *
 ]]
-genes.gene_triangle=function(s)
-	s=s or 1
-	return function(t)
-		t=t*s
+genes.gene_triangle=function(note)
+	note=note or bitsynth.note_1hz
+	local phase=0
+	local freq=bitsynth.note_to_freq(note)
+	return function(t,n)
+		if n and n~=note then -- new note, lock phase at time t
+			local new_freq=bitsynth.note_to_freq(n)
+			local old_phase=(t*freq+phase)%1 -- current phase
+			local new_phase=(t*new_freq)%1 -- new base phase
+			phase=(1+old_phase-new_phase)%1 -- fix phase
+			freq=new_freq -- new wavelength
+			note=n  -- new note
+		end
+		t=t*freq+phase
 		t=t%1
 		if     t<0.25 then return t*4
 		elseif t<0.50 then return 1-((t-0.25)*4)
@@ -271,10 +307,20 @@ end
 			***
 
 ]]
-genes.gene_sawtooth=function(s)
-	s=s or 1
-	return function(t)
-		t=t*s
+genes.gene_sawtooth=function(note)
+	note=note or bitsynth.note_1hz
+	local phase=0
+	local freq=bitsynth.note_to_freq(note)
+	return function(t,n)
+		if n and n~=note then -- new note, lock phase at time t
+			local new_freq=bitsynth.note_to_freq(n)
+			local old_phase=(t*freq+phase)%1 -- current phase
+			local new_phase=(t*new_freq)%1 -- new base phase
+			phase=(1+old_phase-new_phase)%1 -- fix phase
+			freq=new_freq -- new wavelength
+			note=n  -- new note
+		end
+		t=t*freq+phase
 		return (((t+0.5)%1)*2)-1
 	end
 end
@@ -290,10 +336,20 @@ end
 				  ***
 
 ]]
-genes.gene_toothsaw=function(s)
-	s=s or 1
-	return function(t)
-		t=t*s
+genes.gene_toothsaw=function(note)
+	note=note or bitsynth.note_1hz
+	local phase=0
+	local freq=bitsynth.note_to_freq(note)
+	return function(t,n)
+		if n and n~=note then -- new note, lock phase at time t
+			local new_freq=bitsynth.note_to_freq(n)
+			local old_phase=(t*freq+phase)%1 -- current phase
+			local new_phase=(t*new_freq)%1 -- new base phase
+			phase=(1+old_phase-new_phase)%1 -- fix phase
+			freq=new_freq -- new wavelength
+			note=n  -- new note
+		end
+		t=t*freq+phase
 		return ((t%1)*-2)+1
 	end
 end
@@ -309,13 +365,52 @@ end
 			*********
 
 ]]
-genes.gene_square=function(s)
-	s=s or 1
-	return function(t)
-		t=t*s
+genes.gene_square=function(note)
+	note=note or bitsynth.note_1hz
+	local phase=0
+	local freq=bitsynth.note_to_freq(note)
+	return function(t,n)
+		if n and n~=note then -- new note, lock phase at time t
+			local new_freq=bitsynth.note_to_freq(n)
+			local old_phase=(t*freq+phase)%1 -- current phase
+			local new_phase=(t*new_freq)%1 -- new base phase
+			phase=(1+old_phase-new_phase)%1 -- fix phase
+			freq=new_freq -- new wavelength
+			note=n  -- new note
+		end
+		t=t*freq+phase
 		if (t%1)>=0.5 then return -1 end 
 		return 1
 	end
 end
 
 
+--[[
+
+	               ******
+	          ******
+	     ******
+	******
+	
+	
+	
+	
+	
+]]
+genes.gene_phase=function(note)
+	note=note or bitsynth.note_1hz
+	local phase=0
+	local freq=bitsynth.note_to_freq(note)
+	return function(t,n)
+		if n and n~=note then -- new note, lock phase at time t
+			local new_freq=bitsynth.note_to_freq(n)
+			local old_phase=(t*freq+phase)%1 -- current phase
+			local new_phase=(t*new_freq)%1 -- new base phase
+			phase=(1+old_phase-new_phase)%1 -- fix phase
+			freq=new_freq -- new wavelength
+			note=n  -- new note
+		end
+		t=t*freq+phase
+		return t%1
+	end
+end

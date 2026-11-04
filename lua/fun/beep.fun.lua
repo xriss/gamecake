@@ -430,28 +430,21 @@ decay=gene_decay( 10 )
 
 note = note or 48
 
-sine=gene_sine()
-square=gene_square()
-triangle=gene_triangle()
-sawtooth=gene_sawtooth()
-toothsaw=gene_toothsaw()
-whitenoise=gene_whitenoise(256)
+sine=gene_sine(note)
+square=gene_square(note)
+triangle=gene_triangle(note)
+sawtooth=gene_sawtooth(note)
+toothsaw=gene_toothsaw(note)
+whitenoise=gene_whitenoise(note,256)
 
-wave_vib  = function() return sine(cycles[1])*3 end
-wave_base = function() return (sine(cycles[2])+square(cycles[2]))/2 end
-wave_base = function() return whitenoise(cycles[2]) end
+wave_base = function() return whitenoise(time,sine(time,vib_note_sweep(12,-36,1))*3) end
 
 vib_note_sweep= function( a , b , len )
 	return b + ( (a-b) * (gene_release( 0 , len ))(time) )
 end
 
-notes = {
-	function() return vib_note_sweep(12,-36,1) end,
-	function() return note+wave_vib() end,
-}
-
 time=0
-sound_next = function()
+get_sample = function()
 
 	local ret = 0.5 * attack(time) * decay(time) * release(time) *
 		(
@@ -483,41 +476,87 @@ decay=gene_decay( 10 )
 
 note = note or 72
 
-sine=gene_sine()
-square=gene_square()
-triangle=gene_triangle()
-sawtooth=gene_sawtooth()
-toothsaw=gene_toothsaw()
-whitenoise=gene_whitenoise(256)
+sine=gene_sine(note)
+square=gene_square(note)
+triangle=gene_triangle(note)
+sawtooth=gene_sawtooth(note)
+toothsaw=gene_toothsaw(note)
+whitenoise=gene_whitenoise(note,256)
 
 wave_decay=gene_decay(1)
-wave_base = function(s)
+wave_base = function(n,s)
 	return wave_decay( time*s ) *
 	(
 		(
-			sine( cycles[1]*s )
+			sine( time , n+note+gene_decay(0.125)(time)*2 )
 		) * 1
 	) 
 end
 
-notes = {
-	function() return note+gene_decay(0.125)(time)*2 end,
-}
-
-
 time=0
-sound_next = function()
+get_sample = function()
 
 	local ret = 0.5 * attack(time) * decay(time) * release(time) *
 		(
-			wave_base(1) +
-			wave_base(2) +
-			wave_base(3) +
-			wave_base(4) +
-			wave_base(5)
+			wave_base(  0 , 1 ) +
+			wave_base( 12 , 2 ) +
+			wave_base( 19 , 3 ) +
+			wave_base( 24 , 4 ) +
+			wave_base( 28 , 5 )
 		)
 	
 	return delay(ret)
+
+end
+
+	]=],
+}
+
+beeps["3"]={
+
+	lua=[=[
+
+sustain_length=2
+release_length=0.1
+release=env_release(env)
+
+delay_length=0.001
+delay=gene_delay( delay_length , function(get,box)
+	return	(box(delay_length)+get(0))/2
+end)
+
+attack=gene_attack( 0.5 )
+decay=gene_decay( 10 )
+
+note = note or 72
+
+sine=gene_sine(note)
+square=gene_square(note)
+triangle=gene_triangle(note)
+sawtooth=gene_sawtooth(note)
+toothsaw=gene_toothsaw(note)
+whitenoise=gene_whitenoise(note,256)
+
+wave_decay=gene_decay(1)
+wave_base = function(s)
+	return wave_decay( time*(2^(s/12)) ) *
+	(
+		(
+			sine( time , s+note+gene_decay(0.125)(time)*2 )
+		) * 1
+	) 
+end
+
+
+time=0
+get_sample = function()
+
+	local ret = 0.5 * attack(time) * decay(time) * release(time) *
+		(
+			wave_base(0)
+		)
+	
+	return ret
 
 end
 

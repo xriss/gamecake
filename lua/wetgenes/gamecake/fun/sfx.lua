@@ -33,12 +33,12 @@ sfx.setup=function()
 		lua=[=[
 
 time=0
-stream_next = function()
+get_sample = function()
 
 	local a=0
 
 	for n,sound in pairs(sounds or {}) do
-		a=a+sound.sound_sample
+		a=a+(sound.sample or 0)
 	end
 
 	return a
