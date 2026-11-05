@@ -156,17 +156,19 @@ genes.gene_release=function(st,rt)
 end
 
 -- use dynamic env value for release, sustain can be controlled with a noteoff
-genes.env_release=function(env,sn,rn)
+genes.env_release=function(env,sn,rn,dn,tn)
 	sn=sn or "sustain_length"
 	rn=rn or "release_length"
+	dn=dn or "delay_length"
+	tn=tn or "total_length"
+	env[tn]=env[sn]+env[rn]+env[dn]
 	return function(t)
 		return (genes.gene_release(	env[sn] , env[rn] ))(t)
+	end ,
+	function(t)
+		env[sn]=env.time
+		env[tn]=env[sn]+env[rn]+env[dn]
 	end
-end
--- set sustain time to now, IE a midi noteoff
-genes.env_noteoff=function(env,sn)
-	sn=sn or "sustain_length"
-	env[sn]=env.time
 end
 
 -- dt is decay time to half amplitude, call with time to get a decay 

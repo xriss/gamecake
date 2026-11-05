@@ -414,24 +414,21 @@ beeps["1"]={
 
 	lua=[=[
 
+note = NOTE or 48
 sustain_length=SUSTAIN or 2
 release_length=RELEASE or 0.1
-release=env_release(env)
+delay_length=DELAY or 0.25
 
-delay_length=0.25
+release,sustain_off=env_release(env)
+
+attack=gene_attack( ATTACK or 0.5 )
+decay=gene_decay( DECAY or 10 )
+
 delay=gene_delay( delay_length , function(get,box)
 	return	( get( 0                    ) * 1.0  ) +
 			( get( 0.5   * delay_length ) * 0.5  ) +
 			( get( 1.0   * delay_length ) * 0.25 )
 end)
-
--- must be set if we want to render
-total_length=sustain_length+release_length+delay_length
-
-attack=gene_attack( ATTACK or 0.5 )
-decay=gene_decay( DECAY or 10 )
-
-note = NOTE or 48
 
 sine=gene_sine(note)
 square=gene_square(note)
@@ -446,7 +443,6 @@ vib_note_sweep= function( a , b , len )
 	return b + ( (a-b) * (gene_release( 0 , len ))(time) )
 end
 
-time=0
 get_sample = function()
 
 	local ret = 0.5 * attack(time) * decay(time) * release(time) *
@@ -465,22 +461,19 @@ beeps["2"]={
 
 	lua=[=[
 
+note = NOTE or 72
 sustain_length=SUSTAIN or 2
 release_length=RELEASE or 0.1
-release=env_release(env)
+delay_length=DECAY or 0.001
 
-delay_length=0.001
+release,sustain_off=env_release(env)
+
+attack=gene_attack( ATTACK or 0.5 )
+decay=gene_decay( DECAY or 10 )
+
 delay=gene_delay( delay_length , function(get,box)
 	return	(box(delay_length)+get(0))/2
 end)
-
--- must be set if we want to render
-total_length=sustain_length+release_length+delay_length
-
-attack=gene_attack( 0.5 )
-decay=gene_decay( 10 )
-
-note = NOTE or 72
 
 sine=gene_sine(note)
 square=gene_square(note)
@@ -525,15 +518,17 @@ beeps["3"]={
 
 	lua=[=[
 
+note = NOTE or 32
 sustain_length=SUSTAIN or 2
 release_length=RELEASE or 0.2
+delay_length=DECAY or 0.25
 
-release=env_release(env)
+release,sustain_off=env_release(env)
+
 attack=gene_attack( 0.2 )
 decay=gene_decay( 10 )
 adsr=function(t) return attack(t) * decay(t) * release(t) end
 
-delay_length=0.25
 delay=gene_delay( delay_length , function(get,box)
 	return	( get( 0                    ) * 1.0  ) +
 			( get( 0.5   * delay_length ) * 0.5  ) +
@@ -542,8 +537,6 @@ end)
 
 -- must be set if we want to render
 total_length=sustain_length+release_length+delay_length
-
-note = NOTE or 32
 
 sine=gene_sine(note)
 square=gene_square(note)
@@ -566,8 +559,6 @@ wave_base = function()
 --	+ wave_decay( time*16 ) * square( time*16 , note )
 end
 
-
-time=0
 get_sample = function()
 	return ( 0.5 * adsr(time) * wave_base() )
 end
