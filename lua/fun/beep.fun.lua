@@ -412,6 +412,8 @@ beeps={}
 
 beeps["1"]={
 
+	monophonic=1,
+
 	lua=[=[
 
 note = NOTE or 48
@@ -458,6 +460,8 @@ end
 }
 
 beeps["2"]={
+
+	monophonic=1,
 
 	lua=[=[
 
@@ -515,6 +519,8 @@ end
 }
 
 beeps["3"]={
+
+	monophonic=1,
 
 	lua=[=[
 

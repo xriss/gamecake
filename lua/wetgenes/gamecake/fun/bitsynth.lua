@@ -146,73 +146,90 @@ end
 -- dupe static env input and fill with junk 
 bitsynth.sound_init=function(...)
 
-	local env=bitsynth.env_init(...) -- dupe and basic init
+	local sound=bitsynth.env_init(...) -- dupe and basic init
 	
-	return env
+	return sound
 end
 
 
-bitsynth.sound_next=function(env)
+bitsynth.sound_next=function(sound)
 
 	-- get next sample
-	env.time=env.time+(1/bitsynth.samplerate)
-	env.sample=env.get_sample()
-	return env.sample
+	sound.time=sound.time+(1/bitsynth.samplerate)
+	sound.sample=sound.get_sample()
+	return sound.sample
 end
 
-bitsynth.sound_render=function(env)
+bitsynth.sound_render=function(sound)
 	-- render to array of numbers with smooth_clip applied
 	-- keep wave under 0.5 to prevent distortion
-	env.time=0
-	local length=env.total_length or 0
+	sound.time=0
+	local length=sound.total_length or 0
 	local dat={}
 	for i=1,math.ceil(length*bitsynth.samplerate) do
 		-- get next sample and
-		-- auto apply smooth_clip ( env may alter smooth_clip )
-		dat[i]=env.smooth_clip( bitsynth.sound_next(env) )
+		-- auto apply smooth_clip ( sound may alter smooth_clip )
+		dat[i]=sound.smooth_clip( bitsynth.sound_next(sound) )
 	end
 	return dat
 end
 
 bitsynth.stream_init=function(...)
 
-	local env=bitsynth.env_init(...) -- dupe and basic init
+	local stream=bitsynth.env_init(...) -- dupe and basic init
 	
 	-- stream buffer packet size
-	env.packet_length=env.packet_length or 2048
+	stream.packet_length=stream.packet_length or 2048
 
 	-- lists of active sounds etc keyed by ID
-	env.sounds=env.sounds or {}
-	env.lines=env.lines or {}
+	stream.sounds=stream.sounds or {}
+	stream.lines=stream.lines or {}
 
-	return env
+	return stream
 end
 
-bitsynth.stream_next=function(env)
+bitsynth.stream_next=function(stream)
 
 	-- advance playing sounds
-	for n,sound in pairs(env.sounds or {}) do
+	for n,sound in pairs(stream.sounds or {}) do
 		bitsynth.sound_next(sound)
 		local length=sound.total_length or math.huge
 		if sound.time > length then
-			env.sounds[n]=nil -- finished
+			stream.sounds[n]=nil -- finished
 		end
 	end
 
 	-- get next sample
-	env.time=env.time+(1/bitsynth.samplerate)
-	env.sample=env.smooth_clip(env.get_sample())
-	return env.sample
+	stream.time=stream.time+(1/bitsynth.samplerate)
+	stream.sample=stream.smooth_clip(stream.get_sample())
+	return stream.sample
+end
+
+bitsynth.stream_play_sound=function(stream,...)
+
+	local sound=bitsynth.sound_init(...)
+	
+	if sound.monophonic then -- there may be only one
+		for id,it in pairs( stream.sounds ) do
+			if it.monophonic == sound.monophonic then
+				stream.sounds[id]=nil -- remove
+			end
+		end
+	end
+	
+	stream.sounds[sound.ID]=sound
+
+	return sound
 end
 
 bitsynth.tracker_init=function(...)
 
-	local env=bitsynth.env_init(...) -- dupe and basic init
+	local tracker=bitsynth.env_init(...) -- dupe and basic init
 
-	return env
+	return tracker
 end
 
-bitsynth.tracker_next=function(env)
+bitsynth.tracker_next=function(tracker)
 
 end
 
@@ -262,11 +279,11 @@ bitsynth.render_code=function()
 		
 		if data.action=="render" then
 			
-			local env=bitsynth.sound_init(data.env)
-			local floats=bitsynth.sound_render(env)
+			local stream=bitsynth.sound_init(unpack(data.envs))
+			local floats=bitsynth.sound_render(stream)
 			local ints=bitsynth.float_to_16bit(floats)
 			local words=fats.table_to_int16s(ints)
-			result.buf=words -- return 16bit data string from bitsynth
+			result.words=words -- return 16bit data string from bitsynth
 
 		end
 	
@@ -331,18 +348,15 @@ PRINT("START STREAM")
 				stream.packet_time=wire.time()
 			end
 
-		elseif data.action=="line"    then -- control lines
-
 		elseif data.action=="sound"   then -- control sounds
 
 			if not stream then return result end
 
 			local sound
-			if data.env then -- new sound
-				sound=bitsynth.sound_init(data.env)
+			if data.envs then -- new sound
+				sound=bitsynth.stream_play_sound(stream,unpack(data.envs))
 			end
 			if sound then
-				stream.sounds[sound.ID]=sound
 				result.sound_id=sound.ID
 			end
 

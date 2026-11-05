@@ -69,12 +69,12 @@ sfx.create=function(it,opts)
 
 	it.bitsynth=bitsynth
 
-	it.render=function(env) -- render a bitsynth sound
+	it.render=function(...) -- render a bitsynth sound
 		local memo = wire.memo({
 			fifo=wire.fifo("bitrender"),
 			data={
 				action="render",
-				env=env, -- bitsynth options table
+				envs={...}, -- bitsynth options table
 			},
 		}):send()
 		local result=function()
@@ -102,12 +102,12 @@ sfx.create=function(it,opts)
 		d.pitch,d.gain=op,og
 	end
 	
-	it.stream_sound=function(env)
+	it.stream_sound=function(...)
 		local memo = wire.memo({
 			fifo=wire.fifo("bitstream"),
 			data={
 				action="sound",
-				env=env,
+				envs={...},
 			},
 		}):send()
 	end
