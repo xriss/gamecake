@@ -417,19 +417,18 @@ beeps["1"]={
 	lua=[=[
 
 note = NOTE or 48
+attack_length=ATTACK or 0.5
+decay_length=DECAY or 10
 sustain_length=SUSTAIN or 2
 release_length=RELEASE or 0.1
-delay_length=DELAY or 0.25
+filter_length=FILTER or 0.001
 
-release,sustain_off=env_release(env)
+adsr,sustain_off=env_adsr(env)
 
-attack=gene_attack( ATTACK or 0.5 )
-decay=gene_decay( DECAY or 10 )
-
-delay=gene_delay( delay_length , function(get,box)
+filter=gene_filter( filter_length , function(get,box)
 	return	( get( 0                    ) * 1.0  ) +
-			( get( 0.5   * delay_length ) * 0.5  ) +
-			( get( 1.0   * delay_length ) * 0.25 )
+			( get( 0.5   * filter_length ) * 0.5  ) +
+			( get( 1.0   * filter_length ) * 0.25 )
 end)
 
 sine=gene_sine(note)
@@ -445,14 +444,16 @@ vib_note_sweep= function( a , b , len )
 	return b + ( (a-b) * (gene_release( 0 , len ))(time) )
 end
 
-get_sample = function()
+time=0 -- reset time
+sample_next = function()
+	time=time+sample_time
 
-	local ret = 0.5 * attack(time) * decay(time) * release(time) *
+	local ret = 0.5 * adsr(time) *
 		(
 			( wave_base() * 1.0 )
 		)
 	
-	return delay(ret)
+	return filter(ret)
 
 end
 
@@ -466,17 +467,16 @@ beeps["2"]={
 	lua=[=[
 
 note = NOTE or 72
+attack_length=ATTACK or 0.5
+decay_length=DECAY or 10
 sustain_length=SUSTAIN or 2
 release_length=RELEASE or 0.1
-delay_length=DECAY or 0.001
+filter_length=FILTER or 0.001
 
-release,sustain_off=env_release(env)
+adsr,sustain_off=env_adsr(env)
 
-attack=gene_attack( ATTACK or 0.5 )
-decay=gene_decay( DECAY or 10 )
-
-delay=gene_delay( delay_length , function(get,box)
-	return	(box(delay_length)+get(0))/2
+filter=gene_filter( filter_length , function(get,box)
+	return	(box(filter_length)+get(0))/2
 end)
 
 sine=gene_sine(note)
@@ -496,10 +496,11 @@ wave_base = function(n,s)
 	) 
 end
 
-time=0
-get_sample = function()
+time=0 -- reset time
+sample_next = function()
+	time=time+sample_time
 
-	local ret = 0.5 * attack(time) * decay(time) * release(time) *
+	local ret = 0.5 * adsr(time) *
 		(
 			  wave_base(  0 , 1 )
 --			+ wave_base( 12 , 2 )
@@ -511,7 +512,7 @@ get_sample = function()
 --			+ wave_base( 36 , 8 )
 		)
 	
-	return delay(ret)
+	return filter(ret)
 
 end
 
@@ -524,25 +525,20 @@ beeps["3"]={
 
 	lua=[=[
 
-note = NOTE or 32
+note = NOTE or 48
+attack_length=ATTACK or 0.1
+decay_length=DECAY or 10
 sustain_length=SUSTAIN or 2
 release_length=RELEASE or 0.2
-delay_length=DECAY or 0.25
+filter_length=FILTER or 0.25
 
-release,sustain_off=env_release(env)
+adsr,sustain_off=env_adsr(env)
 
-attack=gene_attack( 0.2 )
-decay=gene_decay( 10 )
-adsr=function(t) return attack(t) * decay(t) * release(t) end
-
-delay=gene_delay( delay_length , function(get,box)
-	return	( get( 0                    ) * 1.0  ) +
-			( get( 0.5   * delay_length ) * 0.5  ) +
-			( get( 1.0   * delay_length ) * 0.25 )
+filter=gene_filter( filter_length , function(get,box)
+	return	( get( 0                     ) * 1.0  ) +
+			( get( 0.5   * filter_length ) * 0.5  ) +
+			( get( 1.0   * filter_length ) * 0.25 )
 end)
-
--- must be set if we want to render
-total_length=sustain_length+release_length+delay_length
 
 sine=gene_sine(note)
 square=gene_square(note)
@@ -565,7 +561,9 @@ wave_base = function()
 --	+ wave_decay( time*16 ) * square( time*16 , note )
 end
 
-get_sample = function()
+time=0 -- reset time
+sample_next = function()
+	time=time+sample_time
 	return ( 0.5 * adsr(time) * wave_base() )
 end
 

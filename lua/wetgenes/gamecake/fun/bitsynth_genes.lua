@@ -45,15 +45,15 @@ end
 -- create a delay filter, tlen is size of delay buffer
 -- fout is function that samples the buffer and produces an output
 -- read is function that samples the buffer at given time
-genes.gene_delay=function(tlen,fout)
+genes.gene_filter=function(tlen,fout)
 	local buf={}
-	local len=math.ceil(tlen*bitsynth.samplerate)
+	local len=math.ceil(tlen*bitsynth.sample_rate)
 	if len<1 then len=1 end
 	for i=1,len do buf[i]=0 end -- empty
 	local base=0
 	-- single sample with tween
 	local get=function(t) -- t is time from now into the past
-		local f=t*bitsynth.samplerate
+		local f=t*bitsynth.sample_rate
 		local i=math.floor(f)
 		f=f-i
 		if i<0 then i=0 end
@@ -68,8 +68,8 @@ genes.gene_delay=function(tlen,fout)
 	-- box sample
 	local box=function(l,s) -- s box start, l length of box
 		if not s then s=0 end
-		local s=math.floor(s*bitsynth.samplerate)
-		local l=math.ceil(l*bitsynth.samplerate)
+		local s=math.floor(s*bitsynth.sample_rate)
+		local l=math.ceil(l*bitsynth.sample_rate)
 		if s<0 then l=l+s s=0 end
 		if s>(len-1) then s=(len-1) end
 		if l<1 then l=1 end
@@ -156,18 +156,17 @@ genes.gene_release=function(st,rt)
 end
 
 -- use dynamic env value for release, sustain can be controlled with a noteoff
-genes.env_release=function(env,sn,rn,dn,tn)
-	sn=sn or "sustain_length"
-	rn=rn or "release_length"
-	dn=dn or "delay_length"
-	tn=tn or "total_length"
-	env[tn]=env[sn]+env[rn]+env[dn]
-	return function(t)
-		return (genes.gene_release(	env[sn] , env[rn] ))(t)
-	end ,
+genes.env_adsr=function(env)
+	env.total_length=env.sustain_length+env.release_length+env.filter_length
+	local attack=genes.gene_attack( env.attack_length )
+	local decay=genes.gene_decay( env.decay_length )
+	local release=function(t)
+		return (genes.gene_release(	env.sustain_length , env.release_length ))(t)
+	end
+	return function(t) return attack(t) * decay(t) * release(t) end ,
 	function(t)
-		env[sn]=env.time
-		env[tn]=env[sn]+env[rn]+env[dn]
+		env.sustain_length=env.time
+		env.total_length=env.sustain_length+env.release_length+env.filter_length
 	end
 end
 

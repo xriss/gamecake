@@ -13,7 +13,9 @@ local M={ modname=(...) } ; package.loaded[M.modname]=M
 local bitsynth=M
 M.old=require("wetgenes.gamecake.fun.bitsynth_old") -- the bad old ways
 
-bitsynth.samplerate=48000
+bitsynth.sample_rate=48000
+bitsynth.sample_time=1/bitsynth.sample_rate
+bitsynth.packet_size=2048
 
 bitsynth.genes=require("wetgenes.gamecake.fun.bitsynth_genes")
 local genes=bitsynth.genes
@@ -122,7 +124,9 @@ bitsynth.env_init=function(...)
 		end
 	end
 	-- and copy some bitsynth basics 
-	env.samplerate   = bitsynth.samplerate
+	env.sample_rate  = bitsynth.sample_rate
+	env.sample_time  = bitsynth.sample_time
+	env.packet_size  = bitsynth.packet_size
 	env.note_1hz     = bitsynth.note_1hz
 	env.note_to_freq = bitsynth.note_to_freq
 	env.freq_to_note = bitsynth.freq_to_note
@@ -151,25 +155,16 @@ bitsynth.sound_init=function(...)
 	return sound
 end
 
-
-bitsynth.sound_next=function(sound)
-
-	-- get next sample
-	sound.time=sound.time+(1/bitsynth.samplerate)
-	sound.sample=sound.get_sample()
-	return sound.sample
-end
-
 bitsynth.sound_render=function(sound)
 	-- render to array of numbers with smooth_clip applied
 	-- keep wave under 0.5 to prevent distortion
 	sound.time=0
 	local length=sound.total_length or 0
 	local dat={}
-	for i=1,math.ceil(length*bitsynth.samplerate) do
+	for i=1,math.ceil(length*bitsynth.sample_rate) do
 		-- get next sample and
 		-- auto apply smooth_clip ( sound may alter smooth_clip )
-		dat[i]=sound.smooth_clip( bitsynth.sound_next(sound) )
+		dat[i]=sound.smooth_clip( sound.sample_next() )
 	end
 	return dat
 end
@@ -178,48 +173,7 @@ bitsynth.stream_init=function(...)
 
 	local stream=bitsynth.env_init(...) -- dupe and basic init
 	
-	-- stream buffer packet size
-	stream.packet_length=stream.packet_length or 2048
-
-	-- lists of active sounds etc keyed by ID
-	stream.sounds=stream.sounds or {}
-	stream.lines=stream.lines or {}
-
 	return stream
-end
-
-bitsynth.stream_next=function(stream)
-
-	-- advance playing sounds
-	for n,sound in pairs(stream.sounds or {}) do
-		bitsynth.sound_next(sound)
-		local length=sound.total_length or math.huge
-		if sound.time > length then
-			stream.sounds[n]=nil -- finished
-		end
-	end
-
-	-- get next sample
-	stream.time=stream.time+(1/bitsynth.samplerate)
-	stream.sample=stream.smooth_clip(stream.get_sample())
-	return stream.sample
-end
-
-bitsynth.stream_play_sound=function(stream,...)
-
-	local sound=bitsynth.sound_init(...)
-	
-	if sound.monophonic then -- there may be only one
-		for id,it in pairs( stream.sounds ) do
-			if it.monophonic == sound.monophonic then
-				stream.sounds[id]=nil -- remove
-			end
-		end
-	end
-	
-	stream.sounds[sound.ID]=sound
-
-	return sound
 end
 
 bitsynth.tracker_init=function(...)
@@ -227,10 +181,6 @@ bitsynth.tracker_init=function(...)
 	local tracker=bitsynth.env_init(...) -- dupe and basic init
 
 	return tracker
-end
-
-bitsynth.tracker_next=function(tracker)
-
 end
 
 
@@ -345,7 +295,7 @@ bitsynth.stream_code=function()
 			if data.env then
 PRINT("START STREAM")
 				stream=bitsynth.stream_init(data.env)
-				stream.packet_time=wire.time()
+				stream.time=wire.time()
 			end
 
 		elseif data.action=="sound"   then -- control sounds
@@ -354,7 +304,8 @@ PRINT("START STREAM")
 
 			local sound
 			if data.envs then -- new sound
-				sound=bitsynth.stream_play_sound(stream,unpack(data.envs))
+				sound=bitsynth.sound_init(unpack(data.envs))
+				sound=stream.play_sound(sound)
 			end
 			if sound then
 				result.sound_id=sound.ID
@@ -369,14 +320,9 @@ PRINT("START STREAM")
 	local update_stream=function()
 	
 		local update_time=wire.time()
-		if stream.packet_time <= update_time then -- send new packet
+		if stream.time <= update_time then -- send new packet
 
-			local floats={}
-			for i=1,stream.packet_length do
-				floats[i]=bitsynth.stream_next(stream)
-			end
-			stream.packet_time=stream.packet_time+(stream.packet_length/bitsynth.samplerate)
-			
+			local floats=stream.sample_packet()			
 			local ints=bitsynth.float_to_16bit(floats)
 			local words=fats.table_to_int16s(ints)
 			local memo = wire.memo({
@@ -388,9 +334,9 @@ PRINT("START STREAM")
 			}):send()
 			
 			update_time=wire.time()-update_time
-			local tpacket=math.floor(update_time*bitsynth.samplerate)
---			if tpacket>=stream.packet_length then
-				PRINT("bitsynth took "..tpacket.." to make "..stream.packet_length)
+			local tpacket=math.floor(update_time*bitsynth.sample_rate)
+--			if tpacket>=stream.packet_size then
+				PRINT("bitsynth took "..tpacket.." to make "..stream.packet_size)
 --			end
 		end
 	end

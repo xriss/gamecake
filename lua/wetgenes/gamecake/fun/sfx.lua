@@ -32,17 +32,46 @@ sfx.setup=function()
 		fifo_name="fun_bitsynth",
 		lua=[=[
 
-time=0
-get_sample = function()
+sounds={}
 
-	local a=0
+time=0 -- reset time this will be set to a realtime
+sample_packet = function()
 
-	for n,sound in pairs(sounds or {}) do
-		a=a+(sound.sample or 0)
+	local packet={}
+	for i=1,packet_size do
+		packet[i]=0
 	end
 
-	return a
+	for n,sound in pairs(sounds or {}) do
+local a=1+sound.total_length
+		if sound.total_length < sound.time then -- finished with
+			sounds[n]=nil
+		else
+			for i=1,packet_size do
+				packet[i]=packet[i] + sound.sample_next()
+			end
+		end
+	end
 
+	time=time+packet_size*sample_time
+
+	return packet
+
+end
+
+play_sound = function(sound)
+
+	if sound.monophonic then -- there may be only one
+		for id,it in pairs( sounds ) do
+			if it.monophonic == sound.monophonic then
+				sounds[id]=nil -- remove
+			end
+		end
+	end
+	
+	sounds[sound.ID]=sound
+	
+	return sound
 end
 
 ]=],
