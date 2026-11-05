@@ -414,8 +414,8 @@ beeps["1"]={
 
 	lua=[=[
 
-sustain_length=2
-release_length=0.1
+sustain_length=SUSTAIN or 2
+release_length=RELEASE or 0.1
 release=env_release(env)
 
 delay_length=0.25
@@ -425,10 +425,13 @@ delay=gene_delay( delay_length , function(get,box)
 			( get( 1.0   * delay_length ) * 0.25 )
 end)
 
-attack=gene_attack( 0.5 )
-decay=gene_decay( 10 )
+-- must be set if we want to render
+total_length=sustain_length+release_length+delay_length
 
-note = note or 48
+attack=gene_attack( ATTACK or 0.5 )
+decay=gene_decay( DECAY or 10 )
+
+note = NOTE or 48
 
 sine=gene_sine(note)
 square=gene_square(note)
@@ -462,8 +465,8 @@ beeps["2"]={
 
 	lua=[=[
 
-sustain_length=2
-release_length=0.1
+sustain_length=SUSTAIN or 2
+release_length=RELEASE or 0.1
 release=env_release(env)
 
 delay_length=0.001
@@ -471,10 +474,13 @@ delay=gene_delay( delay_length , function(get,box)
 	return	(box(delay_length)+get(0))/2
 end)
 
+-- must be set if we want to render
+total_length=sustain_length+release_length+delay_length
+
 attack=gene_attack( 0.5 )
 decay=gene_decay( 10 )
 
-note = note or 72
+note = NOTE or 72
 
 sine=gene_sine(note)
 square=gene_square(note)
@@ -519,8 +525,8 @@ beeps["3"]={
 
 	lua=[=[
 
-sustain_length=2
-release_length=0.2
+sustain_length=SUSTAIN or 2
+release_length=RELEASE or 0.2
 
 release=env_release(env)
 attack=gene_attack( 0.2 )
@@ -534,7 +540,10 @@ delay=gene_delay( delay_length , function(get,box)
 			( get( 1.0   * delay_length ) * 0.25 )
 end)
 
-note = note or 48
+-- must be set if we want to render
+total_length=sustain_length+release_length+delay_length
+
+note = NOTE or 32
 
 sine=gene_sine(note)
 square=gene_square(note)
@@ -543,7 +552,7 @@ sawtooth=gene_sawtooth(note)
 toothsaw=gene_toothsaw(note)
 whitenoise=gene_whitenoise(note,256)
 
-wave_decay=gene_decay(0.5)
+wave_decay=gene_decay(1.0)
 wave_base = function()
 	return
 	  wave_decay( time*1 ) * sine( time*1 , note )
@@ -554,13 +563,13 @@ wave_base = function()
 	+ wave_decay( time*6 ) * sine( time*6 , note )
 	+ wave_decay( time*7 ) * sine( time*7 , note )
 	+ wave_decay( time*8 ) * sine( time*8 , note )
-	+ wave_decay( time*16 ) * square( time*16 , 64 )
+--	+ wave_decay( time*16 ) * square( time*16 , note )
 end
 
 
 time=0
 get_sample = function()
-	return delay( 0.5 * adsr(time) * wave_base() )
+	return ( 0.5 * adsr(time) * wave_base() )
 end
 
 	]=],

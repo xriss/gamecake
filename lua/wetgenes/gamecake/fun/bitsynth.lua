@@ -105,10 +105,11 @@ bitsynth.next_id=function()
 	return bitsynth.base_id
 end
 
-bitsynth.env_init=function(env)
+bitsynth.env_init=function(...)
 
 	-- a clean new env, copied from input
-	env=dupe(env)
+	local env={}
+	for _,it in pairs{...} do dupe(it,env) end -- right replaces left
 	env.env=env -- self access from out of scope functions
 	
 	-- asign an ID
@@ -126,11 +127,12 @@ bitsynth.env_init=function(env)
 	env.note_to_freq = bitsynth.note_to_freq
 	env.freq_to_note = bitsynth.freq_to_note
 
-	-- current time in seconds
+	-- current time in seconds, will be set by controlling code
 	env.time = 0
 
 	-- env.lua is a string to init code with inside env
 	-- when called this must reset the sound so the env can be reused
+	-- arguments may be passed in via uppercase vars in the env
 	if env.lua then
 		-- code is mildly sandboxed, may crash if it wants too
 		-- but probably cant escape significantly
@@ -142,19 +144,9 @@ end
 
 
 -- dupe static env input and fill with junk 
-bitsynth.sound_init=function(env)
+bitsynth.sound_init=function(...)
 
-	env=bitsynth.env_init(env) -- dupe and basic init
-
-	-- length of output in seconds
-	env.sustain_length = env.sustain_length or 1	-- may be dynamic 
-	env.release_length = env.release_length or 0	-- note off release time
-	env.delay_length   = env.delay_length   or 0	-- optional delay filter
-	-- if a sound is dynamically held then sustain_length will start as math.huge
-	-- and change to the current time when released
-
-	-- base note, dynamic input, for this sound
-	env.note   = env.note   or 60
+	local env=bitsynth.env_init(...) -- dupe and basic init
 	
 	return env
 end
@@ -172,7 +164,7 @@ bitsynth.sound_render=function(env)
 	-- render to array of numbers with smooth_clip applied
 	-- keep wave under 0.5 to prevent distortion
 	env.time=0
-	local length=env.sustain_length + env.release_length + env.delay_length
+	local length=env.total_length or 0
 	local dat={}
 	for i=1,math.ceil(length*bitsynth.samplerate) do
 		-- get next sample and
@@ -182,21 +174,9 @@ bitsynth.sound_render=function(env)
 	return dat
 end
 
-bitsynth.line_init=function(env)
+bitsynth.stream_init=function(...)
 
-	env=bitsynth.env_init(env) -- dupe and basic init
-
-	return env
-end
-
-bitsynth.line_next=function(env)
-
-	return 0
-end
-
-bitsynth.stream_init=function(env)
-
-	env=bitsynth.env_init(env) -- dupe and basic init
+	local env=bitsynth.env_init(...) -- dupe and basic init
 	
 	-- stream buffer packet size
 	env.packet_length=env.packet_length or 2048
@@ -213,7 +193,7 @@ bitsynth.stream_next=function(env)
 	-- advance playing sounds
 	for n,sound in pairs(env.sounds or {}) do
 		bitsynth.sound_next(sound)
-		local length=sound.sustain_length + sound.release_length + sound.delay_length
+		local length=sound.total_length or math.huge
 		if sound.time > length then
 			env.sounds[n]=nil -- finished
 		end
@@ -221,13 +201,13 @@ bitsynth.stream_next=function(env)
 
 	-- get next sample
 	env.time=env.time+(1/bitsynth.samplerate)
-	env.sample=env.get_sample()
+	env.sample=env.smooth_clip(env.get_sample())
 	return env.sample
 end
 
-bitsynth.tracker_init=function(env)
+bitsynth.tracker_init=function(...)
 
-	env=bitsynth.env_init(env) -- dupe and basic init
+	local env=bitsynth.env_init(...) -- dupe and basic init
 
 	return env
 end
