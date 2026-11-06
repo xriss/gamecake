@@ -24,6 +24,7 @@ genes.smooth_clip=function(n)
 		return  n*n/(n*n+0.25) -- squish
 	end
 end
+local smooth_clip=genes.smooth_clip
 
 -- blend between a and b by w clamped.
 -- w is a wave so -1 is a and +1 is b
@@ -33,6 +34,7 @@ genes.blend=function(a,b,w)
 	if f>1 then f=1 end
 	return a*(1-f) + b*f
 end
+local blend=genes.blend
 
 -- mix between a and b by f clamped.
 -- f is a fraction so 0 is a and 1 is b
@@ -41,6 +43,7 @@ genes.mix=function(a,b,f)
 	if f>1 then f=1 end
 	return a*(1-f) + b*f
 end
+local mix=genes.mix
 
 -- create a delay filter, tlen is size of delay buffer
 -- fout is function that samples the buffer and produces an output
@@ -88,6 +91,7 @@ genes.gene_filter=function(tlen,fout)
 		return fout(get,box) -- get output
 	end
 end
+local gene_filter=genes.gene_filter
 
 -- utility and wave/gene functions
 -- gene functions create and return a wave function usually of the requested note
@@ -101,22 +105,40 @@ end
 -- default values are all 0.5 and can be dragged left to 0 or right to 1
 -- first number is middle of wave ( main duty )
 -- second (optional) number is middle of left part of wave
--- second (optional) number is middle of right part of wave
+-- third (optional) number is middle of right part of wave
 genes.gene_duty=function(b,a,c)
 	-- defaults to middle of each section, half on half off
 	if not b then b=0.5 end
 	if not a then a=0.5 end
 	if not c then c=0.5 end
-	-- convert into wave time
-	local ta=b*a
-	local tb=b
-	local tc=1-((1-b)*c)
-	-- clamp
-	if ta<0 then ta=0 end ; if ta>1 then ta=1 end
-	if tb<0 then tb=0 end ; if tb>1 then tb=1 end
-	if tc<0 then tc=0 end ; if tc>1 then tc=1 end
+	local recalc=function()
+		-- convert into wave time
+		local ta=b*a
+		local tb=b
+		local tc=1-((1-b)*c)
+		-- clamp
+		if ta<0 then ta=0 end ; if ta>1 then ta=1 end
+		if tb<0 then tb=0 end ; if tb>1 then tb=1 end
+		if tc<0 then tc=0 end ; if tc>1 then tc=1 end
+	end
+	recalc()
+	return function(t,na,nb,nc)
+	
+		-- adjust duty
+		if na and na~=a then
+			a=na
+			if nb and nb~=b then b=nb end
+			if nc and nc~=c then c=nb end
+			recalc()
+		elseif nb and nb~=b then
+			b=nb
+			if nc and nc~=c then c=nb end
+			recalc()
+		elseif nc and nc~=c then
+			c=nb
+			recalc()
+		end
 
-	local f=function(t)
 		t=t%1
 		if t==0 then return 0 end -- catch 0 and 1 prevents possible divide by 0
 		if     t<=ta then -- ta cant be 0
@@ -130,8 +152,41 @@ genes.gene_duty=function(b,a,c)
 		end
 		return 1 -- catch 1
 	end
-	return f
 end
+local gene_duty=genes.gene_duty
+
+-- turn time into a ramp that increments at the given note
+-- so 1hz would be unchanged, 2hz twice as fast etc
+-- dynamic changes to the ramp frequency will maintain phase only
+genes.gene_note=function(note)
+	note=note or bitsynth.note_1hz
+	local phase=0
+	local freq=bitsynth.note_to_freq(note)
+	return function(t,n)
+		if n and n~=note then -- new note, lock phase at time t
+			local new_freq=bitsynth.note_to_freq(n)
+			local old_phase=(t*freq+phase)%1 -- current phase
+			local new_phase=(t*new_freq)%1 -- new base phase
+			phase=(1+old_phase-new_phase)%1 -- fix phase
+			freq=new_freq -- new wavelength
+			note=n  -- new note
+		end
+		t=t*freq+phase
+		return t
+	end
+end
+local gene_note=genes.gene_note
+
+-- combine note and duty returning a 0-1 phase only
+genes.gene_note_duty=function(note,gb,ga,gc)
+	local ramp=gene_note(note)
+	local duty=gene_duty(gb,ga,gc)
+	return function(t,note,gb,ga,gc)
+		return duty( ramp(t,note) , gb,ga,gc )
+	end
+end
+local gene_note_duty=genes.gene_note_duty
+
 
 -- at (attack)  is time to reach 1
 genes.gene_attack=function(at)
@@ -142,6 +197,7 @@ genes.gene_attack=function(at)
 		return 1
 	end
 end
+local gene_attack=genes.gene_attack
 
 
 -- st (sustain) is time to stay at 1
@@ -154,20 +210,7 @@ genes.gene_release=function(st,rt)
 		return 0
 	end
 end
-
--- use env vars to build adsr and provide a sustain_off function
-genes.env_adsr=function(env)
-	env.total_length=env.sustain_length+env.release_length+env.filter_length
-	local attack=genes.gene_attack( env.attack_length )
-	local decay=genes.gene_decay( env.decay_length )
-	local release=genes.gene_release( env.sustain_length , env.release_length )
-	return function(t) return attack(t) * decay(t) * release(t) end ,
-	function(t)
-		env.sustain_length=env.time
-		env.total_length=env.sustain_length+env.release_length+env.filter_length
-		release=genes.gene_release( env.sustain_length , env.release_length )
-	end
-end
+local gene_release=genes.gene_release
 
 -- dt is decay time to half amplitude, call with time to get a decay 
 -- 0 or less removes decay
@@ -177,6 +220,27 @@ genes.gene_decay=function(dt)
 		return 1 / (2^(t/(dt)))
 	end
 end
+local gene_decay=genes.gene_decay
+
+-- use env vars to build adsr and provide a sustain_off function
+genes.env_adsr=function(env)
+	env.total_length=env.sustain_length+env.release_length+env.filter_length
+	local attack=gene_attack( env.attack_length )
+	local decay=gene_decay( env.decay_length )
+	local sustain_length=env.sustain_length
+	local release=gene_release( sustain_length , env.release_length )
+	return function(t) return attack(t) * decay(t) * release(t) end ,
+	function(t)
+		env.sustain_length=env.time
+		env.total_length=env.sustain_length+env.release_length+env.filter_length
+		if sustain_length~=env.sustain_length then
+			sustain_length=env.sustain_length
+			release=gene_release( sustain_length , env.release_length )
+		end
+	end
+end
+local env_adsr=genes.env_adsr
+
 
 -- create a simple rnd function, no input just next in sequence out
 genes.gene_randomise=function(seed)
@@ -186,6 +250,7 @@ genes.gene_randomise=function(seed)
 		return (n-1)/65535
 	end
 end
+local gene_randomise=genes.gene_randomise
 
 
 genes.gene_rez=function(rez) -- reduce resolution of input to 2*rez+1 values
@@ -193,6 +258,7 @@ genes.gene_rez=function(rez) -- reduce resolution of input to 2*rez+1 values
 		return math.floor( (t*rez) + 0.5 )/rez
 	end
 end
+local gene_rez=genes.gene_rez
 
 genes.rnds={} -- cache
 do
@@ -213,27 +279,20 @@ end
 	 *    *  *     *
 	      * 
 
- cache a bit chunk of random and index it
+ cache a big chunk of random and index it
 
 ]]
-genes.gene_whitenoise=function(note,steps,seed) -- steps is the number of values in a white noise wave cycle
-	steps=steps or 2 -- two gives a square wave cycle for the given frequency
-	seed=seed or 0
-	note=note or bitsynth.note_1hz
-	local phase=0
-	local freq=bitsynth.note_to_freq(note)
-	return function(t,n)
-		if n and n~=note then -- new note, lock phase at time t
-			local new_freq=bitsynth.note_to_freq(n)
-			local old_phase=(t*freq+phase)%1 -- current phase
-			local new_phase=(t*new_freq)%1 -- new base phase
-			phase=(1+old_phase-new_phase)%1 -- fix phase
-			freq=new_freq -- new wavelength
-			note=n  -- new note
-		end
-		t=t*freq+phase
-		local idx=1+(math.floor((t*steps)+seed)%65536)
-		return (genes.rnds[idx]*2)-1
+ -- steps is the number of values in a white noise wave cycle
+genes.note_whitenoise=function(t,steps,seed)
+	local idx=1+(math.floor((t*(steps or 2))+(seed or 0))%65536)
+	return (genes.rnds[idx]*2)-1
+end
+local note_whitenoise=genes.note_whitenoise
+
+genes.gene_whitenoise=function(note,steps,seed)
+	local ramp=gene_note(note)
+	return function(t,note)
+		return note_whitenoise( ramp(t,note) ,steps,seed )
 	end
 end
 
@@ -249,21 +308,15 @@ end
 			   ***
 
 ]]
+genes.note_sine=function(t)
+	return math.sin( t*tau  )
+end
+local note_sine=genes.note_sine
+
 genes.gene_sine=function(note)
-	note=note or bitsynth.note_1hz
-	local phase=0
-	local freq=bitsynth.note_to_freq(note)
-	return function(t,n)
-		if n and n~=note then -- new note, lock phase at time t
-			local new_freq=bitsynth.note_to_freq(n)
-			local old_phase=(t*freq+phase)%1 -- current phase
-			local new_phase=(t*new_freq)%1 -- new base phase
-			phase=(1+old_phase-new_phase)%1 -- fix phase
-			freq=new_freq -- new wavelength
-			note=n  -- new note
-		end
-		t=t*freq+phase
-		return math.sin( (t%1) * tau  )
+	local ramp=gene_note(note)
+	return function(t,note)
+		return note_sine( ramp(t,note) )
 	end
 end
 
@@ -278,26 +331,20 @@ end
 			   * *
 	            *
 ]]
+genes.note_triangle=function(t)
+	t=t%1
+	if     t<0.25 then return t*4
+	elseif t<0.50 then return 1-((t-0.25)*4)
+	elseif t<0.75 then return (t-0.5)*-4
+	else               return ((t-0.75)*4)-1
+	end
+end
+local note_triangle=genes.note_triangle
+
 genes.gene_triangle=function(note)
-	note=note or bitsynth.note_1hz
-	local phase=0
-	local freq=bitsynth.note_to_freq(note)
-	return function(t,n)
-		if n and n~=note then -- new note, lock phase at time t
-			local new_freq=bitsynth.note_to_freq(n)
-			local old_phase=(t*freq+phase)%1 -- current phase
-			local new_phase=(t*new_freq)%1 -- new base phase
-			phase=(1+old_phase-new_phase)%1 -- fix phase
-			freq=new_freq -- new wavelength
-			note=n  -- new note
-		end
-		t=t*freq+phase
-		t=t%1
-		if     t<0.25 then return t*4
-		elseif t<0.50 then return 1-((t-0.25)*4)
-		elseif t<0.75 then return (t-0.5)*-4
-		else               return ((t-0.75)*4)-1
-		end
+	local ramp=gene_note(note)
+	return function(t,note)
+		return note_triangle( ramp(t,note) )
 	end
 end
 
@@ -312,21 +359,15 @@ end
 			***
 
 ]]
+genes.note_sawtooth=function(t)
+	return (((t+0.5)%1)*2)-1
+end
+local note_sawtooth=genes.note_sawtooth
+
 genes.gene_sawtooth=function(note)
-	note=note or bitsynth.note_1hz
-	local phase=0
-	local freq=bitsynth.note_to_freq(note)
-	return function(t,n)
-		if n and n~=note then -- new note, lock phase at time t
-			local new_freq=bitsynth.note_to_freq(n)
-			local old_phase=(t*freq+phase)%1 -- current phase
-			local new_phase=(t*new_freq)%1 -- new base phase
-			phase=(1+old_phase-new_phase)%1 -- fix phase
-			freq=new_freq -- new wavelength
-			note=n  -- new note
-		end
-		t=t*freq+phase
-		return (((t+0.5)%1)*2)-1
+	local ramp=gene_note(note)
+	return function(t,note)
+		return note_sawtooth( ramp(t,note) )
 	end
 end
 
@@ -341,21 +382,15 @@ end
 				  ***
 
 ]]
+genes.note_toothsaw=function(t)
+	return ((t%1)*-2)+1
+end
+local note_toothsaw=genes.note_toothsaw
+
 genes.gene_toothsaw=function(note)
-	note=note or bitsynth.note_1hz
-	local phase=0
-	local freq=bitsynth.note_to_freq(note)
-	return function(t,n)
-		if n and n~=note then -- new note, lock phase at time t
-			local new_freq=bitsynth.note_to_freq(n)
-			local old_phase=(t*freq+phase)%1 -- current phase
-			local new_phase=(t*new_freq)%1 -- new base phase
-			phase=(1+old_phase-new_phase)%1 -- fix phase
-			freq=new_freq -- new wavelength
-			note=n  -- new note
-		end
-		t=t*freq+phase
-		return ((t%1)*-2)+1
+	local ramp=gene_note(note)
+	return function(t,note)
+		return note_toothsaw( ramp(t,note) )
 	end
 end
 
@@ -370,52 +405,18 @@ end
 			*********
 
 ]]
+genes.note_square=function(t)
+	if (t%1)>=0.5 then return -1 end 
+	return 1
+end
+local note_square=genes.note_square
+
 genes.gene_square=function(note)
-	note=note or bitsynth.note_1hz
-	local phase=0
-	local freq=bitsynth.note_to_freq(note)
-	return function(t,n)
-		if n and n~=note then -- new note, lock phase at time t
-			local new_freq=bitsynth.note_to_freq(n)
-			local old_phase=(t*freq+phase)%1 -- current phase
-			local new_phase=(t*new_freq)%1 -- new base phase
-			phase=(1+old_phase-new_phase)%1 -- fix phase
-			freq=new_freq -- new wavelength
-			note=n  -- new note
-		end
-		t=t*freq+phase
-		if (t%1)>=0.5 then return -1 end 
-		return 1
+	local ramp=gene_note(note)
+	return function(t,note)
+		return note_square( ramp(t,note) )
 	end
 end
 
 
---[[
 
-	               ******
-	          ******
-	     ******
-	******
-	
-	
-	
-	
-	
-]]
-genes.gene_phase=function(note)
-	note=note or bitsynth.note_1hz
-	local phase=0
-	local freq=bitsynth.note_to_freq(note)
-	return function(t,n)
-		if n and n~=note then -- new note, lock phase at time t
-			local new_freq=bitsynth.note_to_freq(n)
-			local old_phase=(t*freq+phase)%1 -- current phase
-			local new_phase=(t*new_freq)%1 -- new base phase
-			phase=(1+old_phase-new_phase)%1 -- fix phase
-			freq=new_freq -- new wavelength
-			note=n  -- new note
-		end
-		t=t*freq+phase
-		return t%1
-	end
-end
