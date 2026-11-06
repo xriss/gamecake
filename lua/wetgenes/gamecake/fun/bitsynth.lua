@@ -213,6 +213,22 @@ bitsynth.float_to_8bit=function(t,scale)
 end
 
 
+-- old code hacks
+bitsynth.prepare=function(ot)
+	local it={ot=ot}
+DUMP(it)
+	it.name=ot.name -- remember our name
+	return ot
+end
+bitsynth.render=function(it)
+	local floats={0,0,0,0}
+	return floats
+end
+bitsynth.note2freq=function(n,o)
+	local m=bitsynth.to_note(n,o)
+	return bitsynth.note_to_freq(m)
+end
+
 --[[#lua.wetgenes.gamecake.fun.bitsynth.task_code
 
 task function for handling bitsynth rendering.

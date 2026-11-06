@@ -116,7 +116,7 @@ sfx.create=function(it,opts)
 				return memo.result.buf
 			end
 		end
-		return sounds.lazyload_wavtab( result, env.name , bitsynth.frequency )
+		return sounds.lazyload_wavtab( result, (...).name , bitsynth.frequency )
 	end
 
 	it.get=function(name)

@@ -420,13 +420,13 @@ note = NOTE or 48
 attack_length=ATTACK or 0.5
 decay_length=DECAY or 10
 sustain_length=SUSTAIN or 2
-release_length=RELEASE or 0.1
-filter_length=FILTER or 0.001
+release_length=RELEASE or 0.5
+filter_length=FILTER or 0.01
 
 adsr,sustain_off=env_adsr(env)
 
 filter=gene_filter( filter_length , function(get,box)
-	return	( get( 0                    ) * 1.0  ) +
+	return	( get( 0                     ) * 1.0  ) +
 			( get( 0.5   * filter_length ) * 0.5  ) +
 			( get( 1.0   * filter_length ) * 0.25 )
 end)

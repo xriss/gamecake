@@ -155,18 +155,17 @@ genes.gene_release=function(st,rt)
 	end
 end
 
--- use dynamic env value for release, sustain can be controlled with a noteoff
+-- use env vars to build adsr and provide a sustain_off function
 genes.env_adsr=function(env)
 	env.total_length=env.sustain_length+env.release_length+env.filter_length
 	local attack=genes.gene_attack( env.attack_length )
 	local decay=genes.gene_decay( env.decay_length )
-	local release=function(t)
-		return (genes.gene_release(	env.sustain_length , env.release_length ))(t)
-	end
+	local release=genes.gene_release( env.sustain_length , env.release_length )
 	return function(t) return attack(t) * decay(t) * release(t) end ,
 	function(t)
 		env.sustain_length=env.time
 		env.total_length=env.sustain_length+env.release_length+env.filter_length
+		release=genes.gene_release( env.sustain_length , env.release_length )
 	end
 end
 
