@@ -283,16 +283,25 @@ end
 
 ]]
  -- steps is the number of values in a white noise wave cycle
-genes.note_whitenoise=function(t,steps,seed)
+genes.wave_whitenoise=function(t,steps,seed)
 	local idx=1+(math.floor((t*(steps or 2))+(seed or 0))%65536)
 	return (genes.rnds[idx]*2)-1
 end
-local note_whitenoise=genes.note_whitenoise
+local wave_whitenoise=genes.wave_whitenoise
 
 genes.gene_whitenoise=function(note,steps,seed)
 	local ramp=gene_note(note)
 	return function(t,note)
-		return note_whitenoise( ramp(t,note) ,steps,seed )
+		return wave_whitenoise( ramp(t,note) ,steps,seed )
+	end
+end
+
+genes.gene_duty_whitenoise=function(note,steps,seed,b,a,c)
+	local ramp=gene_note(note)
+	local duty=gene_duty(b,a,c)
+	return function(t,note,b,a,c)
+		local r=ramp(t,note)
+		return wave_whitenoise( math.floor(r) + duty( r , b,a,c) , steps,seed )
 	end
 end
 
@@ -308,15 +317,23 @@ end
 			   ***
 
 ]]
-genes.note_sine=function(t)
+genes.wave_sine=function(t)
 	return math.sin( t*tau  )
 end
-local note_sine=genes.note_sine
+local wave_sine=genes.wave_sine
 
 genes.gene_sine=function(note)
 	local ramp=gene_note(note)
 	return function(t,note)
-		return note_sine( ramp(t,note) )
+		return wave_sine( ramp(t,note) )
+	end
+end
+
+genes.gene_duty_sine=function(note,b,a,c)
+	local ramp=gene_note(note)
+	local duty=gene_duty(b,a,c)
+	return function(t,note)
+		return wave_sine( duty( ramp(t,note) , b,a,c) )
 	end
 end
 
@@ -331,7 +348,7 @@ end
 			   * *
 	            *
 ]]
-genes.note_triangle=function(t)
+genes.wave_triangle=function(t)
 	t=t%1
 	if     t<0.25 then return t*4
 	elseif t<0.50 then return 1-((t-0.25)*4)
@@ -339,12 +356,20 @@ genes.note_triangle=function(t)
 	else               return ((t-0.75)*4)-1
 	end
 end
-local note_triangle=genes.note_triangle
+local wave_triangle=genes.wave_triangle
 
 genes.gene_triangle=function(note)
 	local ramp=gene_note(note)
 	return function(t,note)
-		return note_triangle( ramp(t,note) )
+		return wave_triangle( ramp(t,note) )
+	end
+end
+
+genes.gene_duty_triangle=function(note,b,a,c)
+	local ramp=gene_note(note)
+	local duty=gene_duty(b,a,c)
+	return function(t,note)
+		return wave_triangle( duty( ramp(t,note) , b,a,c) )
 	end
 end
 
@@ -359,15 +384,23 @@ end
 			***
 
 ]]
-genes.note_sawtooth=function(t)
+genes.wave_sawtooth=function(t)
 	return (((t+0.5)%1)*2)-1
 end
-local note_sawtooth=genes.note_sawtooth
+local wave_sawtooth=genes.wave_sawtooth
 
 genes.gene_sawtooth=function(note)
 	local ramp=gene_note(note)
 	return function(t,note)
-		return note_sawtooth( ramp(t,note) )
+		return wave_sawtooth( ramp(t,note) )
+	end
+end
+
+genes.gene_duty_sawtooth=function(note,b,a,c)
+	local ramp=gene_note(note)
+	local duty=gene_duty(b,a,c)
+	return function(t,note)
+		return wave_sawtooth( duty( ramp(t,note) , b,a,c) )
 	end
 end
 
@@ -382,15 +415,23 @@ end
 				  ***
 
 ]]
-genes.note_toothsaw=function(t)
+genes.wave_toothsaw=function(t)
 	return ((t%1)*-2)+1
 end
-local note_toothsaw=genes.note_toothsaw
+local wave_toothsaw=genes.wave_toothsaw
 
 genes.gene_toothsaw=function(note)
 	local ramp=gene_note(note)
 	return function(t,note)
-		return note_toothsaw( ramp(t,note) )
+		return wave_toothsaw( ramp(t,note) )
+	end
+end
+
+genes.gene_duty_toothsaw=function(note,b,a,c)
+	local ramp=gene_note(note)
+	local duty=gene_duty(b,a,c)
+	return function(t,note)
+		return wave_toothsaw( duty( ramp(t,note) , b,a,c) )
 	end
 end
 
@@ -405,18 +446,23 @@ end
 			*********
 
 ]]
-genes.note_square=function(t)
+genes.wave_square=function(t)
 	if (t%1)>=0.5 then return -1 end 
 	return 1
 end
-local note_square=genes.note_square
+local wave_square=genes.wave_square
 
 genes.gene_square=function(note)
 	local ramp=gene_note(note)
 	return function(t,note)
-		return note_square( ramp(t,note) )
+		return wave_square( ramp(t,note) )
 	end
 end
 
-
-
+genes.gene_duty_square=function(note,b,a,c)
+	local ramp=gene_note(note)
+	local duty=gene_duty(b,a,c)
+	return function(t,note)
+		return wave_square( duty( ramp(t,note) , b,a,c) )
+	end
+end
