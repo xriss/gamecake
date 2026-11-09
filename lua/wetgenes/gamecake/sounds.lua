@@ -177,8 +177,10 @@ sounds.load_wavtab=function(tab,id,freq)
 	if t.buff then al.DeleteBuffer(t.buff) end -- free old buffer
 	t.buff=al.GenBuffer()
 
-	local dat,len=wpack.save_array(tab,"s16")
-	al.BufferData(t.buff,al.FORMAT_MONO16,dat,len,freq or 48000) -- C4 hopefully?
+	if #tab>0 then
+		local dat,len=wpack.save_array(tab,"s16")
+		al.BufferData(t.buff,al.FORMAT_MONO16,dat,len,freq or 48000) -- C4 hopefully?
+	end
 	
 	sounds.set(t,id) -- remember
 

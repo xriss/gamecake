@@ -1563,6 +1563,7 @@ function wtexteditor.setup(widget,def)
 --		widget.gutter=#(" 01   ")
 --	end
 
+	if def.data then widget.data=def.data end
 	if widget.data then -- set starting text
 		widget.txt.set_text( widget.data:value() )
 	end

@@ -431,14 +431,14 @@ filter=gene_filter( filter_length , function(get,box)
 			( get( 1.0   * filter_length ) * 0.25 )
 end)
 
-sine=gene_sine(note)
+sin=gene_sin(note)
 square=gene_square(note)
 triangle=gene_triangle(note)
 sawtooth=gene_sawtooth(note)
 toothsaw=gene_toothsaw(note)
 whitenoise=gene_whitenoise(note,256)
 
-wave_base = function() return whitenoise(time,sine(time,vib_note_sweep(12,-36,1))*3) end
+wave_base = function() return whitenoise(time,sin(time,vib_note_sweep(12,-36,1))*3) end
 
 vib_note_sweep= function( a , b , len )
 	return b + ( (a-b) * (gene_release( 0 , len ))(time) )
@@ -479,7 +479,7 @@ filter=gene_filter( filter_length , function(get,box)
 	return	(box(filter_length)+get(0))/2
 end)
 
-sine=gene_sine(note)
+sin=gene_sin(note)
 square=gene_square(note)
 triangle=gene_triangle(note)
 sawtooth=gene_sawtooth(note)
@@ -491,7 +491,7 @@ wave_base = function(n,s)
 	return wave_decay( time*s ) *
 	(
 		(
-			sine( time , n+note+gene_decay(0.125)(time)*4 )
+			sin( time , n+note+gene_decay(0.125)(time)*4 )
 		) * 1
 	) 
 end
@@ -540,7 +540,7 @@ filter=gene_filter( filter_length , function(get,box)
 			( get( 1.0   * filter_length ) * 0.25 )
 end)
 
-sine=gene_sine(note)
+sin=gene_sin(note)
 square=gene_square(note)
 triangle=gene_triangle(note)
 sawtooth=gene_sawtooth(note)
@@ -550,14 +550,14 @@ whitenoise=gene_whitenoise(note,256)
 wave_decay=gene_decay(1.0)
 wave_base = function()
 	return
-	  wave_decay( time*1 ) * sine( time*1 , note )
-	+ wave_decay( time*2 ) * sine( time*2 , note )
-	+ wave_decay( time*3 ) * sine( time*3 , note )
-	+ wave_decay( time*4 ) * sine( time*4 , note )
-	+ wave_decay( time*5 ) * sine( time*5 , note )
-	+ wave_decay( time*6 ) * sine( time*6 , note )
-	+ wave_decay( time*7 ) * sine( time*7 , note )
-	+ wave_decay( time*8 ) * sine( time*8 , note )
+	  wave_decay( time*1 ) * sin( time*1 , note )
+	+ wave_decay( time*2 ) * sin( time*2 , note )
+	+ wave_decay( time*3 ) * sin( time*3 , note )
+	+ wave_decay( time*4 ) * sin( time*4 , note )
+	+ wave_decay( time*5 ) * sin( time*5 , note )
+	+ wave_decay( time*6 ) * sin( time*6 , note )
+	+ wave_decay( time*7 ) * sin( time*7 , note )
+	+ wave_decay( time*8 ) * sin( time*8 , note )
 --	+ wave_decay( time*16 ) * square( time*16 , note )
 end
 

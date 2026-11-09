@@ -231,7 +231,7 @@ genes.env_adsr=function(env)
 	local release=gene_release( sustain_length , env.release_length )
 	return function(t) return attack(t) * decay(t) * release(t) end ,
 	function(t)
-		env.sustain_length=env.time
+		env.sustain_length=t or env.time
 		env.total_length=env.sustain_length+env.release_length+env.filter_length
 		if sustain_length~=env.sustain_length then
 			sustain_length=env.sustain_length
@@ -317,23 +317,43 @@ end
 			   ***
 
 ]]
-genes.wave_sine=function(t)
+genes.wave_sin=function(t)
 	return math.sin( t*tau  )
 end
-local wave_sine=genes.wave_sine
+local wave_sin=genes.wave_sin
 
-genes.gene_sine=function(note)
+genes.gene_sin=function(note)
 	local ramp=gene_note(note)
 	return function(t,note)
-		return wave_sine( ramp(t,note) )
+		return wave_sin( ramp(t,note) )
 	end
 end
 
-genes.gene_duty_sine=function(note,b,a,c)
+genes.gene_duty_sin=function(note,b,a,c)
 	local ramp=gene_note(note)
 	local duty=gene_duty(b,a,c)
 	return function(t,note)
-		return wave_sine( duty( ramp(t,note) , b,a,c) )
+		return wave_sin( duty( ramp(t,note) , b,a,c) )
+	end
+end
+
+genes.wave_cos=function(t)
+	return math.cos( t*tau  )
+end
+local wave_cos=genes.wave_cos
+
+genes.gene_cos=function(note)
+	local ramp=gene_note(note)
+	return function(t,note)
+		return wave_cos( ramp(t,note) )
+	end
+end
+
+genes.gene_duty_cos=function(note,b,a,c)
+	local ramp=gene_note(note)
+	local duty=gene_duty(b,a,c)
+	return function(t,note)
+		return wave_cos( duty( ramp(t,note) , b,a,c) )
 	end
 end
 

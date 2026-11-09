@@ -161,10 +161,12 @@ bitsynth.sound_render=function(sound)
 	sound.time=0
 	local length=sound.total_length or 0
 	local dat={}
+PRINT("RENDER",sound.total_length)
 	for i=1,math.ceil(length*bitsynth.sample_rate) do
 		-- get next sample and
 		-- auto apply smooth_clip ( sound may alter smooth_clip )
-		dat[i]=sound.smooth_clip( sound.sample_next() )
+--		dat[i]=sound.smooth_clip( sound.sample_next() )
+		dat[i]=sound.sample_next()
 	end
 	return dat
 end
@@ -245,8 +247,8 @@ bitsynth.render_code=function()
 		
 		if data.action=="render" then
 			
-			local stream=bitsynth.sound_init(unpack(data.envs))
-			local floats=bitsynth.sound_render(stream)
+			local sound=bitsynth.sound_init(unpack(data.envs))
+			local floats=bitsynth.sound_render(sound)
 			local ints=bitsynth.float_to_16bit(floats)
 			local words=fats.table_to_int16s(ints)
 			result.words=words -- return 16bit data string from bitsynth
@@ -351,9 +353,9 @@ PRINT("START STREAM")
 			
 			update_time=wire.time()-update_time
 			local tpacket=math.floor(update_time*bitsynth.sample_rate)
---			if tpacket>=stream.packet_size then
+			if tpacket>=stream.packet_size then
 				PRINT("bitsynth took "..tpacket.." to make "..stream.packet_size)
---			end
+			end
 		end
 	end
 
