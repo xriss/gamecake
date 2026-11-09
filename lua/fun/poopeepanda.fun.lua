@@ -1098,13 +1098,13 @@ players.item.update=function(player)
 	local ry=( up:axis("ry") ) or 0
 	local lx=( up:axis("lx") ) or 0
 	local ly=( up:axis("ly") ) or 0
-	local ba_now=( up:get("a") or up:get("a_set") ) or false
-	local ba_set=( up:get("a_set") ) or false
-	local ba_clr=( up:get("a_clr") ) or false
+	local ba_now=( up:get("a") or up:get("a_set") or up:get("l1") or up:get("l1_set") ) or false
+	local ba_set=( up:get("a_set") or up:get("l1_set") ) or false
+	local ba_clr=( up:get("a_clr") or up:get("l1_clr") ) or false
 
-	local bb_now=( up:get("b") or up:get("b_set") ) or false
-	local bb_set=( up:get("b_set") ) or false
-	local bb_clr=( up:get("b_clr") ) or false
+	local bb_now=( up:get("b") or up:get("b_set") or up:get("r1") or up:get("r1_set") ) or false
+	local bb_set=( up:get("b_set") or up:get("r1_set") ) or false
+	local bb_clr=( up:get("b_clr") or up:get("r1_clr") ) or false
 
 	local grav=level:get_gravity(player.pos,player.vel)
 
