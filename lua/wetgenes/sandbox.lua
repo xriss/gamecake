@@ -254,6 +254,16 @@ sandbox.save_lson = function(o,opts)
 			
 		elseif t == "string" then
 		
+			if o:find("\n") then -- long string
+				for i=0,100 do
+					local bopen="["..string.rep("-",i).."[\n"
+					local bclose="]"..string.rep("-",i).."]"
+					if not o:find(bclose) then -- safe to use this
+						return fout(bopen,o,bclose)
+					end
+				end
+			end
+		
 			return fout(string.format("%q", o))
 			
 		elseif t == "table" then
