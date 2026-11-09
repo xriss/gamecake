@@ -106,7 +106,8 @@ local gene_filter=genes.gene_filter
 -- first number is middle of wave ( main duty )
 -- second (optional) number is middle of left part of wave
 -- third (optional) number is middle of right part of wave
-genes.gene_duty=function(b,a,c)
+genes.gene_duty=function(b,a,c,p)
+	if not p then p=0 end -- adjust phase eg 0.25 makes sin become cos
 	-- defaults to middle of each section, half on half off
 	if not b then b=0.5 end
 	if not a then a=0.5 end
@@ -142,15 +143,15 @@ genes.gene_duty=function(b,a,c)
 		t=t%1
 		if t==0 then return 0 end -- catch 0 and 1 prevents possible divide by 0
 		if     t<=ta then -- ta cant be 0
-			return (((t)/(ta))*0.25)
+			return ((((t)/(ta))*0.25)+p)%1
 		elseif t<=tb then -- tb cant be ta
-			return (((t-ta)/(tb-ta))*0.25)+0.25
+			return ((((t-ta)/(tb-ta))*0.25)+0.25+p)%1
 		elseif t<=tc then -- tc cant be tb
-			return (((t-tb)/(tc-tb))*0.25)+0.5
+			return ((((t-tb)/(tc-tb))*0.25)+0.5+p)%1
 		elseif t<1  then -- tc cant be 1
-			return (((t-tc)/(1 -tc))*0.25)+0.75
+			return ((((t-tc)/(1 -tc))*0.25)+0.75+p)%1
 		end
-		return 1 -- catch 1
+		return (1+p)%1 -- catch 1
 	end
 end
 local gene_duty=genes.gene_duty
@@ -296,9 +297,9 @@ genes.gene_whitenoise=function(note,steps,seed)
 	end
 end
 
-genes.gene_duty_whitenoise=function(note,steps,seed,b,a,c)
+genes.gene_duty_whitenoise=function(note,steps,seed,b,a,c,p)
 	local ramp=gene_note(note)
-	local duty=gene_duty(b,a,c)
+	local duty=gene_duty(b,a,c,p)
 	return function(t,note,b,a,c)
 		local r=ramp(t,note)
 		return wave_whitenoise( math.floor(r) + duty( r , b,a,c) , steps,seed )
@@ -329,33 +330,14 @@ genes.gene_sin=function(note)
 	end
 end
 
-genes.gene_duty_sin=function(note,b,a,c)
+genes.gene_duty_sin=function(note,b,a,c,p)
 	local ramp=gene_note(note)
-	local duty=gene_duty(b,a,c)
+	local duty=gene_duty(b,a,c,p)
 	return function(t,note)
 		return wave_sin( duty( ramp(t,note) , b,a,c) )
 	end
 end
 
-genes.wave_cos=function(t)
-	return math.cos( t*tau  )
-end
-local wave_cos=genes.wave_cos
-
-genes.gene_cos=function(note)
-	local ramp=gene_note(note)
-	return function(t,note)
-		return wave_cos( ramp(t,note) )
-	end
-end
-
-genes.gene_duty_cos=function(note,b,a,c)
-	local ramp=gene_note(note)
-	local duty=gene_duty(b,a,c)
-	return function(t,note)
-		return wave_cos( duty( ramp(t,note) , b,a,c) )
-	end
-end
 
 --[[
 	    *
@@ -385,9 +367,9 @@ genes.gene_triangle=function(note)
 	end
 end
 
-genes.gene_duty_triangle=function(note,b,a,c)
+genes.gene_duty_triangle=function(note,b,a,c,p)
 	local ramp=gene_note(note)
-	local duty=gene_duty(b,a,c)
+	local duty=gene_duty(b,a,c,p)
 	return function(t,note)
 		return wave_triangle( duty( ramp(t,note) , b,a,c) )
 	end
@@ -416,9 +398,9 @@ genes.gene_sawtooth=function(note)
 	end
 end
 
-genes.gene_duty_sawtooth=function(note,b,a,c)
+genes.gene_duty_sawtooth=function(note,b,a,c,p)
 	local ramp=gene_note(note)
-	local duty=gene_duty(b,a,c)
+	local duty=gene_duty(b,a,c,p)
 	return function(t,note)
 		return wave_sawtooth( duty( ramp(t,note) , b,a,c) )
 	end
@@ -447,9 +429,9 @@ genes.gene_toothsaw=function(note)
 	end
 end
 
-genes.gene_duty_toothsaw=function(note,b,a,c)
+genes.gene_duty_toothsaw=function(note,b,a,c,p)
 	local ramp=gene_note(note)
-	local duty=gene_duty(b,a,c)
+	local duty=gene_duty(b,a,c,p)
 	return function(t,note)
 		return wave_toothsaw( duty( ramp(t,note) , b,a,c) )
 	end
@@ -479,9 +461,9 @@ genes.gene_square=function(note)
 	end
 end
 
-genes.gene_duty_square=function(note,b,a,c)
+genes.gene_duty_square=function(note,b,a,c,p)
 	local ramp=gene_note(note)
-	local duty=gene_duty(b,a,c)
+	local duty=gene_duty(b,a,c,p)
 	return function(t,note)
 		return wave_square( duty( ramp(t,note) , b,a,c) )
 	end
