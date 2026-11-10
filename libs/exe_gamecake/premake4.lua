@@ -30,7 +30,8 @@ elseif ANDROID then
 --	linkoptions { "-Wl,-z,defs" }
 
 --	linkoptions { "-u JNI_OnLoad" } -- force exporting of JNI functions, without this it wont link
---	linkoptions { "-u android_main" } -- we really need an android_main as well
+--	linkoptions { "-u main_update" } -- we really need an android_main as well
+	linkoptions { "-u lua_preloadlibs" }
 
 -- these must be dynamic
 	links { "GLESv2" , "EGL" , "android" , "jnigraphics" , "OpenSLES" , "log"  }

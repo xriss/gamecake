@@ -391,7 +391,7 @@ int l=0;
   lua_pop(L,narg);
 
 // run lua code to do everything
-  dolibrary(L,"lua"); // always run lua/lua.lua (technically assets/lua/lua.lua)
+  dolibrary(L,"gamecake"); // always run lua/lua.lua (technically assets/lua/lua.lua)
 
   return 0;
 }

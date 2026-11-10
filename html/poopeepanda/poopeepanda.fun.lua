@@ -78,24 +78,85 @@ sysopts={
 --#sounds
 
 -- render some sounds ( the editor saves djon so cutnpaste here )
-sound_data=djon.load([[
-
+sound_data=
 {
- sounds = [
-  {
-   adsr = [ 1 0 0 0 0.2 ]
-   duty = 0.5
-   fm = { duty=0.5 ffreq=[ `freq_range` 261.630000000001 293.66 329.630000000001 1024 ] frequency=16 fwav=`sine` }
-   frequency = D4
-   fwav = square
-   name = jump
-   name_idx = 1
-   volume = 0.5
-  }
- ]
-}
+ {
+  name = "jump",
+  lua=[=[
 
-]])
+note = NOTE or 62
+attack_length = ATTACK or 0.01
+decay_length = DECAY or 0
+sustain_length = SUSTAIN or 0.0
+release_length = RELEASE or 0.2
+filter_length = 0
+
+adsr,sustain_off=env_adsr(env)
+
+sin=gene_sin(note_1hz)
+square=gene_square(note_1hz)
+
+wave_base = gene_square(note)
+wave_decay=gene_decay(1.2)
+wave_noteup=gene_attack(0.4)
+
+time=0 -- reset time
+sample_next = function()
+	time=time+sample_time
+	return (adsr(time) *0.5*
+		(
+			wave_base( time , 
+				note
+				+wave_noteup(time)*12
+				+sin(time,6)*2
+--				+sin(time,24)*36*(1-wave_noteup(time))
+			)
+		)
+	)
+end
+
+]=],
+
+ },
+ {
+  name = "ting",
+  lua=[=[
+
+note = NOTE or 84
+attack_length = ATTACK or 0.01
+decay_length = DECAY or 0.1
+sustain_length = SUSTAIN or 0.4
+release_length = RELEASE or 0.1
+filter_length = 0
+
+adsr,sustain_off=env_adsr(env)
+
+sin=gene_sin(note)
+
+wave_base = gene_sin(note)
+wave_decay=gene_decay(0.125)
+wave_harmonics=function(l,h)
+	local f=0
+	for v=l,h do
+		f=f+( wave_base( time*v )*wave_decay( time*v ) )
+	end
+	return f
+end
+
+time=0 -- reset time
+sample_next = function()
+	time=time+sample_time
+	return (adsr(time) *0.5*
+		(
+			wave_base(time,note+wave_decay(time)*0.25)
+			+ wave_harmonics(5,8)
+		)
+	)
+end
+]=],
+
+ },
+}
 
 
 hardware,main=system.configurator(sysopts)
@@ -171,7 +232,7 @@ end
 
 local main_setup=function()
 
-	for _,snd in ipairs(sound_data.sounds) do
+	for _,snd in ipairs(sound_data) do
 		if snd.name then
 			system.components.sfx.render(snd)
 		end
@@ -1037,13 +1098,13 @@ players.item.update=function(player)
 	local ry=( up:axis("ry") ) or 0
 	local lx=( up:axis("lx") ) or 0
 	local ly=( up:axis("ly") ) or 0
-	local ba_now=( up:get("a") or up:get("a_set") ) or false
-	local ba_set=( up:get("a_set") ) or false
-	local ba_clr=( up:get("a_clr") ) or false
+	local ba_now=( up:get("a") or up:get("a_set") or up:get("l1") or up:get("l1_set") ) or false
+	local ba_set=( up:get("a_set") or up:get("l1_set") ) or false
+	local ba_clr=( up:get("a_clr") or up:get("l1_clr") ) or false
 
-	local bb_now=( up:get("b") or up:get("b_set") ) or false
-	local bb_set=( up:get("b_set") ) or false
-	local bb_clr=( up:get("b_clr") ) or false
+	local bb_now=( up:get("b") or up:get("b_set") or up:get("r1") or up:get("r1_set") ) or false
+	local bb_set=( up:get("b_set") or up:get("r1_set") ) or false
+	local bb_clr=( up:get("b_clr") or up:get("r1_clr") ) or false
 
 	local grav=level:get_gravity(player.pos,player.vel)
 
@@ -2576,6 +2637,7 @@ fruits.item.update=function(fruit)
 		if touch and touch.caste=="player" then -- pickup
 			if fruit.age>=16 then
 				if fruit:mark_deleted() then
+					system.components.sfx.play("ting",1,0.5)
 					local score=touch:get_value("score")
 					touch:set_value("score",score+fruit.score)
 					local boots={
