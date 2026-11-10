@@ -1,0 +1,13 @@
+
+SRCDIR=`dirname $0`
+
+if [ -z "$DESTDIR" ] ; then
+	DESTDIR="/usr/local"
+fi
+
+echo
+echo " Uninstalling ${DESTDIR}/bin/gamecake "
+rm ${DESTDIR}/bin/gamecake
+rm ${DESTDIR}/bin/gamecake.grd
+rm ${DESTDIR}/bin/gamecake.midi
+echo
