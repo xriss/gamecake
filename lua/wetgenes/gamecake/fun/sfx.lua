@@ -43,12 +43,12 @@ sample_packet = function()
 	end
 
 	for n,sound in pairs(sounds or {}) do
-local a=1+sound.total_length
 		if sound.total_length < sound.time then -- finished with
 			sounds[n]=nil
 		else
 			for i=1,packet_size do
 				packet[i]=packet[i] + sound.sample_next()
+				sound.time=sound.time+sound.sample_time
 			end
 		end
 	end
@@ -63,13 +63,14 @@ play_sound = function(sound)
 
 	if sound.monophonic then -- there may be only one
 		for id,it in pairs( sounds ) do
-			if it.monophonic == sound.monophonic then
+			if it.monophonic == sound.monophonic then -- matching
 				sounds[id]=nil -- remove
 			end
 		end
 	end
 	
 	sounds[sound.ID]=sound
+	sound.time=0
 	
 	return sound
 end

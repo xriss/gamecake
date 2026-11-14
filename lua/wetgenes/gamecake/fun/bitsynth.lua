@@ -1,7 +1,6 @@
 --
--- (C) 2016 Kriss@XIXs.com
+-- (C) 2026 Kriss@XIXs.com
 --
---local coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,Gload,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require=coroutine,package,string,table,math,io,os,debug,assert,dofile,error,_G,getfenv,getmetatable,ipairs,load,loadfile,loadstring,next,pairs,pcall,print,rawequal,rawget,rawset,select,setfenv,setmetatable,tonumber,tostring,type,unpack,_VERSION,xpcall,module,require
 
 local sbox=require("wetgenes.sandbox")
 
@@ -158,15 +157,14 @@ end
 bitsynth.sound_render=function(sound)
 	-- render to array of numbers with smooth_clip applied
 	-- keep wave under 0.5 to prevent distortion
-	sound.time=0
 	local length=sound.total_length or 0
 	local dat={}
 PRINT("RENDER",sound.total_length)
-	for i=1,math.ceil(length*bitsynth.sample_rate) do
-		-- get next sample and
-		-- auto apply smooth_clip ( sound may alter smooth_clip )
---		dat[i]=sound.smooth_clip( sound.sample_next() )
+	sound.time=0
+	for i=1,math.ceil(length*sound.sample_rate) do
+		-- get next sample ( we control time )
 		dat[i]=sound.sample_next()
+		sound.time=sound.time+sound.sample_time
 	end
 	return dat
 end
