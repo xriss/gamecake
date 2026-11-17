@@ -1,0 +1,24 @@
+SRCDIR=`dirname $0`
+SRCDIR=`readlink -f ${SRCDIR}`
+
+if [ -z "$DESTDIR" ] ; then
+	DESTDIR="/usr/local"
+fi
+
+mkdir -p ${DESTDIR}/bin/
+
+
+echo
+echo " Installing ${SRCDIR}/gamecake to ${DESTDIR}/bin/gamecake "
+echo "${SRCDIR}/gamecake \"\$@\"" >${DESTDIR}/bin/gamecake
+chmod +x ${DESTDIR}/bin/gamecake
+cp ${SRCDIR}/gamecake.grd ${DESTDIR}/bin/gamecake.grd
+chmod +x ${DESTDIR}/bin/gamecake.grd
+cp ${SRCDIR}/gamecake.midi ${DESTDIR}/bin/gamecake.midi
+chmod +x ${DESTDIR}/bin/gamecake.midi
+cp ${SRCDIR}/gamecake.http ${DESTDIR}/bin/gamecake.http
+chmod +x ${DESTDIR}/bin/gamecake.http
+
+cp ${SRCDIR}/gamecake.swed ${DESTDIR}/bin/swed
+chmod +x ${DESTDIR}/bin/swed
+echo
