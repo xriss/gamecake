@@ -9,7 +9,7 @@ BASENAME=` basename $ANDROID_APP_BASEDIR `
 rm -rf build
 rm -rf gamecake/build
 
-./copyfiles
+./copyfiles $@
 
 ./gradlew build
 

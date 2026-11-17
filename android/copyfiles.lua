@@ -32,7 +32,7 @@ preopts={
 preopts.commandline=[[ "]]..preopts.fun_file..[[" , "--" , "--logs" , "--show=full" ]]
 
 print(basedir)
-local info=wgfun.get_info(basedir)
+local info=wgfun.get_info(basedir) or {}
 print(info)
 preopts.name=info.android_class or "fun"
 preopts.title=info.title or "fun"

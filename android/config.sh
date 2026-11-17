@@ -1,4 +1,4 @@
 
-export ANDROID_APP_BASEDIR=../lua/fun/poopeepanda.fun.lua
-export ANDROID_APP_SMELL=fun
+export ANDROID_APP_BASEDIR=/home/kriss/devcake/gamecakejam/dmazed
+export ANDROID_APP_SMELL=cake
 

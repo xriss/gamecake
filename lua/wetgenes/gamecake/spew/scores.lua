@@ -146,8 +146,8 @@ log("oven","Saving "..scores.filename)
 		
 			local view=cake.views.get()
 
-			local xh=view.hx
-			local yh=view.hy
+			local xh=view.vx
+			local yh=view.vy
 			local fy=math.floor(yh/32)
 
 			canvas.font.set(cake.fonts.get(1))
