@@ -301,9 +301,9 @@ sandbox.save_lson = function(o,opts)
 						then -- nekkid
 							fout(indent2,k,"=")
 						else
-								fout(indent2,"[")
-								serialize(k,indent2)
-								fout("]=")
+							fout(indent2,"[")
+							serialize(k,indent2)
+							fout("]=")
 						end
 						serialize(v,indent2)
 						fout(",",newline)
