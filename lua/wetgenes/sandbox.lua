@@ -295,7 +295,7 @@ sandbox.save_lson = function(o,opts)
 					 -- skip numbers we already dumped
 					local tk=type(k)
 					if (tk~="number") or (k<1) or (k>maxi) or (math.floor(k)~=k) then
-						if  ( type(tk)=="string"                    ) -- must be string
+						if  ( tk=="string"                          ) -- must be string
 						and ( not string.match ( k , "[^%a_%d]" )   ) -- must only contain alphanumeric or underscore
 						and ( string.match ( k:sub(1,1) , "[%a_]" ) ) -- must start with letter or underscore
 						then -- nekkid
